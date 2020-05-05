@@ -66,7 +66,7 @@
       <environment>
        <os>linux</os>
        <ws>gtk</ws>
-       <arch>ppcle64</arch>
+       <arch>ppc64le</arch>
       </environment>
       <environment>
        <os>win32</os>
