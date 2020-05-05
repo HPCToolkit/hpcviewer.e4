@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Hpcdata
+Bundle-SymbolicName: edu.rice.cs.hpcdata
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Rice University
+Automatic-Module-Name: edu.rice.cs.hpcdata
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: com.graphbuilder,
+ org.apache.xerces

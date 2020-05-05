@@ -12,6 +12,8 @@
  </parent>
 
  <modules>
+  <module>externals</module>
+  <module>edu.rice.cs.hpcdata</module>
   <module>edu.rice.cs.hpcviewer.ui</module>
   <module>edu.rice.cs.hpcviewer.feature</module>
   <module>edu.rice.cs.hpcviewer.product</module>
