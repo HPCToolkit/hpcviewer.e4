@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         id="product"
+         point="org.eclipse.core.runtime.products">
+      <product
+            application="org.eclipse.e4.ui.workbench.swt.E4Application"
+            name="edu.rice.cs.hpcviewer.ui">
+         <property
+               name="applicationCSS"
+               value="platform:/plugin/edu.rice.cs.hpcviewer.ui/css/default.css">
+         </property>
+      </product>
+   </extension>
+   <extension
+         id="hpcviewer"
+         point="org.eclipse.core.runtime.products">
+      <product
+            application="org.eclipse.e4.ui.workbench.swt.E4Application"
+            name="hpcviewer">
+         <property
+               name="appName"
+               value="hpcviewer">
+         </property>
+      </product>
+   </extension>
+
+</plugin>
