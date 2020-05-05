@@ -1,10 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<application:Application xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:application="http://www.eclipse.org/ui/2010/UIModel/application" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmi:id="_c3AF0MjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.application" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ">
-  <children xsi:type="basic:TrimmedWindow" xmi:id="_c3AF0cjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.window.main" label="Empty E4 Application" width="500" height="400"/>
+<application:Application xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:application="http://www.eclipse.org/ui/2010/UIModel/application" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmi:id="_c3AF0MjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.application" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ">
+  <children xsi:type="basic:TrimmedWindow" xmi:id="_c3AF0cjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.window.main" label="Empty E4 Application" width="800" height="600">
+    <children xsi:type="basic:PartSashContainer" xmi:id="_60CmoI68EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.partsashcontainer.main">
+      <children xsi:type="basic:PartStack" xmi:id="_Bd0-EI69EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.partstack.upper"/>
+      <children xsi:type="basic:PartStack" xmi:id="_DIZCcI69EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.partstack.lower">
+        <children xsi:type="basic:Part" xmi:id="_HXUhAI69EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.part.topdown" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.TopDownPart" label="Top-down" tooltip="Top-down view">
+          <menus xsi:type="menu:PopupMenu" xmi:id="_Sqj2YI7qEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.popupmenu.zoom" label="Zoom" mnemonics="Z">
+            <children xsi:type="menu:HandledMenuItem" xmi:id="_XL6hsI7qEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.zoomin" label="Zoom-in" tooltip="Set the selected node as the new tree root and hide the ancestors." mnemonics="i"/>
+            <children xsi:type="menu:HandledMenuItem" xmi:id="_ljMJQI7qEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.zoomout" label="Zoom-out" tooltip="Return to the previous tree root before zoom in." enabled="false" mnemonics="o"/>
+          </menus>
+        </children>
+        <children xsi:type="basic:Part" xmi:id="_LZFtUI69EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.part.bottomup" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.BottomUpPart" label="Buttom-up" tooltip="Buttom-up view (callers view)"/>
+        <children xsi:type="basic:Part" xmi:id="_SUJa8I69EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.part.flat" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.FlatPart" label="Flat view" tooltip="Flat view"/>
+      </children>
+    </children>
+    <mainMenu xmi:id="_7ohBoI7qEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.menu.main">
+      <children xsi:type="menu:Menu" xmi:id="_9ABnII7qEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.menu.file" label="File" mnemonics="F">
+        <children xsi:type="menu:HandledMenuItem" xmi:id="__N2JkI7qEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.open" label="Open a database" tooltip="Open a database. If the application has already opened a database, it will add a new one." mnemonics="O" command="_U14sMI7vEeqBPbXbG7_Dzw"/>
+        <children xsi:type="menu:HandledMenuItem" xmi:id="_Hel3wI7rEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.reopen" label="Close and open a database" tooltip="Close the current database and open a new one" enabled="false" mnemonics="d" command="_cPW0II7vEeqBPbXbG7_Dzw"/>
+        <children xsi:type="menu:HandledMenuItem" xmi:id="_QfhswI7rEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.close" label="Close a database" tooltip="Close the current opened database(s)" enabled="false" mnemonics="C" command="_m5VqkI7vEeqBPbXbG7_Dzw"/>
+        <children xsi:type="menu:MenuSeparator" xmi:id="_VTVaAI7rEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.menuseparator.1"/>
+        <children xsi:type="menu:HandledMenuItem" xmi:id="_LbRy8I7vEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.exit" label="Exit" tooltip="Exit the application" mnemonics="x" command="_wGhBQI7uEeqBPbXbG7_Dzw"/>
+      </children>
+    </mainMenu>
+  </children>
+  <handlers xmi:id="_zXCPcI7xEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handler.open" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.handlers.FileOpenDatabase" command="_U14sMI7vEeqBPbXbG7_Dzw"/>
+  <handlers xmi:id="_DYwKII7zEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handler.reopen" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.handlers.FileReopenDatabase" command="_cPW0II7vEeqBPbXbG7_Dzw"/>
+  <handlers xmi:id="_SvylkI7zEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handler.exit" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.handlers.FileExit" command="_wGhBQI7uEeqBPbXbG7_Dzw"/>
+  <handlers xmi:id="_jDx8AI70EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handler.close" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.handlers.FileCloseDatabase" command="_m5VqkI7vEeqBPbXbG7_Dzw"/>
   <rootContext xmi:id="_c3AF2cjYEeSyMNYR5xypkQ" elementId="org.eclipse.ui.contexts.dialogAndWindow" name="In Dialog and Windows">
     <children xmi:id="_c3AF2sjYEeSyMNYR5xypkQ" elementId="org.eclipse.ui.contexts.window" name="In Windows"/>
     <children xmi:id="_c3AF28jYEeSyMNYR5xypkQ" elementId="org.eclipse.ui.contexts.dialog" name="In Dialogs"/>
   </rootContext>
+  <menuContributions xmi:id="_RiJ2II7lEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.menucontribution.main">
+    <children xsi:type="menu:Menu" xmi:id="_aZJsAI7lEeqBPbXbG7_Dzw" elementId="menu.file" label="File" mnemonics="F">
+      <children xsi:type="menu:HandledMenuItem" xmi:id="_dK5a4I7lEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.open" label="Open" tooltip="Open a database. " mnemonics="O"/>
+      <children xsi:type="menu:HandledMenuItem" xmi:id="_lYbdAI7lEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.reopen" label="Reopen" tooltip="Close the current database, and open a new one." enabled="false" mnemonics="R"/>
+      <children xsi:type="menu:MenuSeparator" xmi:id="_vgbnwI7lEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.menuseparator.0"/>
+      <children xsi:type="menu:DirectMenuItem" xmi:id="_yS3TII7lEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.directmenuitem.exit" label="Exit" tooltip="Exit the application" mnemonics="x"/>
+    </children>
+  </menuContributions>
+  <commands xmi:id="_wGhBQI7uEeqBPbXbG7_Dzw" elementId="org.eclipse.ui.file.exit" commandName="Exit" description="Exit the application"/>
+  <commands xmi:id="_U14sMI7vEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.command.open" commandName="Open" description="Open a database"/>
+  <commands xmi:id="_cPW0II7vEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.command.reopen" commandName="Reopen" description="Close the current database and open a new database"/>
+  <commands xmi:id="_m5VqkI7vEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.command.close" commandName="Close" description="Close the current database(s)"/>
   <addons xmi:id="_c3AF0sjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.core.commands.service" contributionURI="bundleclass://org.eclipse.e4.core.commands/org.eclipse.e4.core.commands.CommandServiceAddon"/>
   <addons xmi:id="_c3AF08jYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.contexts.service" contributionURI="bundleclass://org.eclipse.e4.ui.services/org.eclipse.e4.ui.services.ContextServiceAddon"/>
   <addons xmi:id="_c3AF1MjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.bindings.service" contributionURI="bundleclass://org.eclipse.e4.ui.bindings/org.eclipse.e4.ui.bindings.BindingServiceAddon"/>
