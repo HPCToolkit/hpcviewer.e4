@@ -1,10 +1,11 @@
 # hpcviewer.e4
+
 This is a pilot project of hpcviewer based on Eclipse 4, writing from scratch.
 Once stable, we'll merge to HPCToolkit repository.
 
-This project is a pilot project of hpcviewer with the following criteria:
+The goals:
 
-* Can work the latest version of Eclipse
+* Can work the latest version of Eclipse and newer version of Java (9 or newer).
 * Can work with 4 platforms: Win32, Mac, Linux x86_64 and Linux ppcle64
 * Can be built easily with a command line (Maven) from Linux, Mac and Windows.
 
@@ -13,7 +14,7 @@ This project is a pilot project of hpcviewer with the following criteria:
 ### Via command line (Maven)
 
 * Download and install Maven (if not available on the systems) at https://maven.apache.org/
-* Recommended: Maven 1.8.x
+* Recommended: Maven 3.6.x
 * type `mvn clean package`
 * Unzip the file at `edu.rice.cs.hpcviewer.product/target/products/`
 
