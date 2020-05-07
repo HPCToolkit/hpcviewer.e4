@@ -3,6 +3,7 @@ package edu.rice.cs.hpc.data.experiment.scope;
 import java.util.LinkedList;
 
 import edu.rice.cs.hpc.data.experiment.metric.AbstractCombineMetric;
+import edu.rice.cs.hpc.data.experiment.scope.ProcedureScope.ProcedureType;
 import edu.rice.cs.hpc.data.experiment.scope.filters.MetricValuePropagationFilter;
 
 public class CallerScopeBuilder {
@@ -41,7 +42,6 @@ public class CallerScopeBuilder {
 		CallSiteScopeCallerView prev_scope = null;
 		while ( (next != null) && !(next instanceof RootScope) && (numKids<MAX_DESC) )
 		{
-			// Laksono 2009.01.14: we only deal with call site OR pure procedure scope (no alien)
 			if ( isCallSiteCandidate(next, innerCS)) {
 
 				Scope enclosingCS = null;
@@ -135,7 +135,13 @@ public class CallerScopeBuilder {
 			// we check if the scope is identical with the existing scope in the path
 			// if it is the case, we should merge them
 			//------------------------------------------------------------------------
-			if (first.getProcedureScope().getFlatIndex() == existingCaller.getProcedureScope().getFlatIndex()) {
+			final ProcedureScope firstProc  = first.getProcedureScope();
+			final ProcedureScope callerProc = existingCaller.getProcedureScope();
+			
+			String firstID  = String.valueOf(firstProc.getFlatIndex());
+			String callerID = String.valueOf(callerProc.getFlatIndex());
+						
+			if (firstID.equals(callerID)) {
 
 				//------------------------------------------------------------------------
 				// combine metric values for first to those of existingCaller.
@@ -185,6 +191,8 @@ public class CallerScopeBuilder {
 	
 	
 	/******
+	 * Return if a scope is either a callsite or a procedure scope.
+	 * The inner scope cannot be empty
 	 * 
 	 * @param scope
 	 * @param innerCS

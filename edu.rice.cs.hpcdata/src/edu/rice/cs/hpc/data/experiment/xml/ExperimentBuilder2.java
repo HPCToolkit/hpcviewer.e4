@@ -11,6 +11,7 @@ package edu.rice.cs.hpc.data.experiment.xml;
 import edu.rice.cs.hpc.data.experiment.*;
 import edu.rice.cs.hpc.data.experiment.metric.*;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric.AnnotationType;
+import edu.rice.cs.hpc.data.experiment.metric.BaseMetric.VisibilityType;
 import edu.rice.cs.hpc.data.experiment.scope.*;
 import edu.rice.cs.hpc.data.experiment.xml.Token2.TokenXML;
 import edu.rice.cs.hpc.data.util.IUserData;
@@ -187,6 +188,35 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 		}
 	}
 
+	static private final char FORMULA_TYPE 		 = 't';
+	static private final char FORMULA_EXPRESSION = 'f';
+	static private final char FORMULA_FOR_VIEWER = 'v';
+	
+	/***
+	 * create a derived metric from a base metric
+	 * @param metric
+	 * @param formula
+	 * @return
+	 */
+	private DerivedMetric createDerivedMetric(BaseMetric metric, String formula)
+	{
+		
+		DerivedMetric dm = new DerivedMetric(metric.getDisplayName(), metric.getShortName(), 
+				metric.getIndex(), metric.getAnnotationType(),
+				metric.getMetricType());
+
+		dm.setDescription  (DerivedMetric.DESCRIPTION + ": " + metric.getDescription());
+		dm.setExpression   (formula);
+		dm.setOrder        (metric.getOrder());
+		dm.setDisplayFormat(metric.getDisplayFormat());
+		dm.setDisplayed	   (metric.getVisibility()); // fix issue #63
+		dm.setPartner	   (metric.getPartner());
+
+		listOfDerivedMetrics.add(dm);
+		
+		return dm;
+	}
+
 	/*************************************************************************
 	 *	Processes a METRICFORMULA element.
 	 *     <!-- MetricFormula represents derived metrics: (t)ype; (frm): formula -->
@@ -201,13 +231,31 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 		int nbMetrics= this.metricList.size();
 		
 		for (int i=0; i<attributes.length; i++) {
-			if (attributes[i].charAt(0) == 't') {
-				// type of formala
+			if (attributes[i].charAt(0) == FORMULA_TYPE) {
+				// type of formula
 				formula_type = values[i].charAt(0);
-			} else if (attributes[i].charAt(0) == 'f') {
+				
+			} else if (attributes[i].charAt(0) == FORMULA_EXPRESSION) {
 				// formula
 				assert (formula_type != '\0');
 				BaseMetric objMetric = this.metricList.get(nbMetrics-1);
+				
+				// corner case: hpcrun derived metric
+				if (formula_type == FORMULA_FOR_VIEWER) {
+					
+					DerivedMetric dm = createDerivedMetric(objMetric, values[i]);
+					
+					// replace the current metric with the new derived metric
+					metricList.set(nbMetrics-1, dm);
+					
+					if (objMetric instanceof Metric && nbMetrics>1) {
+						// raw metric requires a partner. Let's make the derived metric of the partner
+						objMetric = metricList.get(nbMetrics - 2);
+						
+						dm = createDerivedMetric(objMetric, values[i]);
+						metricList.set(nbMetrics - 2, dm);
+					}
+				}
 				
 				if (objMetric instanceof AggregateMetric) {
 					( (AggregateMetric)objMetric).setFormula(formula_type, values[i]);
@@ -263,7 +311,7 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 		MetricType objType = MetricType.UNKNOWN;
 
 		boolean needPartner = isCallingContextTree();
-		boolean toShow = true;
+		BaseMetric.VisibilityType visibility = VisibilityType.SHOW;
 		
 		MetricValueDesc mDesc = MetricValueDesc.Raw; // by default is a raw metric
 		String format = null;
@@ -320,7 +368,8 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 				}
 			} else if (attributes[i].charAt(0) == ATTRIBUTE_SHOW) {
 				// show or not ? 1=yes, 0=no
-				toShow = (values[i].charAt(0) == '1');
+				int visVal = Integer.valueOf(values[i]);
+				visibility = BaseMetric.convertToVisibilityType(visVal);
 			} else if (attributes[i].charAt(0) == ATTRIBUTE_PARTNER) {
 				// partner
 				partner = Integer.valueOf( values[i] );
@@ -345,27 +394,28 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 			sDisplayName = sNativeName;
 		}
 		
-		if (sDescription == null) sDescription = sDisplayName;
-		
 		// set the metric
 		BaseMetric metricInc;
 		switch (mDesc) {
 			case Final:
 				metricInc = new FinalMetric(
-						String.valueOf(iSelf),			// short name
-						sDescription,			// native name
-						sDisplayName, 	// display name
-						toShow, format, percent, 			// displayed ? percent ?
-						"",						// period (not defined at the moment)
+						String.valueOf(iSelf),		 // short name
+						sDescription,				 // native name
+						sDisplayName, 				 // display name
+						visibility, format, percent, // displayed ? percent ?
+						"",							 // period (not defined at the moment)
 						nbMetrics, objType, partner);
 				break;
 			case Derived_Incr:
 				metricInc = new AggregateMetric(sID, sDisplayName, sDescription,
-									toShow, format, percent, nbMetrics, partner, objType);
+									visibility, format, percent, nbMetrics, partner, objType);
 				((AggregateMetric) metricInc).init( (BaseExperimentWithMetrics) this.experiment );
 				break;
 			case Derived:
 				metricInc = new DerivedMetric(sDisplayName, sID, nbMetrics, percent, objType);
+				
+				metricInc.setPartner(partner);
+				metricInc.setOrder  (order);
 				
 				listOfDerivedMetrics.add( (DerivedMetric) metricInc);
 				break;
@@ -375,7 +425,7 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 						String.valueOf(iSelf),			// short name
 						sNativeName,			// native name
 						sDisplayName, 	// display name
-						toShow, format, percent, 			// displayed ? percent ?
+						visibility, format, percent, 			// displayed ? percent ?
 						"",						// period (not defined at the moment)
 						nbMetrics, objType, partner);
 				break;
@@ -399,7 +449,7 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 					sSelfName,			// short name
 					sDescription,		// metric description
 					sSelfDisplayName, 	// display name
-					toShow, format, AnnotationType.PERCENT, 		// displayed ? percent ?
+					visibility, format, AnnotationType.PERCENT, 		// displayed ? percent ?
 					"",					// period (not defined at the moment)
 					nbMetrics+1, MetricType.EXCLUSIVE, nbMetrics);
 			this.metricList.add(metricExc);

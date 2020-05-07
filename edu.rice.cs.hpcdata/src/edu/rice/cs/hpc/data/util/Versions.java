@@ -14,9 +14,6 @@
 
 package edu.rice.cs.hpc.data.util;
 
-
-
-
 //////////////////////////////////////////////////////////////////////////
 //	CLASS VERSIONS														//
 //////////////////////////////////////////////////////////////////////////
@@ -31,11 +28,23 @@ public class Versions
 {
 
 
-public static final String HPCVIEWER = "1.1";
+	public static final String HPCVIEWER = "2020.05";
 
 
+	//////////////////////////////////////////////////////////////
+	///
+	/// Public methods
+	///
+	//////////////////////////////////////////////////////////////
 
-
+	/**
+	 * return this viewer version.
+	 * @return
+	 */
+	public String getVersion() {
+		return HPCVIEWER;
+	}
+	
 }	// end class Versions
 
 

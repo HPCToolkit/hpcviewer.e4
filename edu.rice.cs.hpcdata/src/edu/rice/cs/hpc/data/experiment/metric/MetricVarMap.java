@@ -103,6 +103,36 @@ public class MetricVarMap extends VarMap {
 				if(MetricValue.isAvailable(value))
 					return value.getValue();
 			}
+		} else if (firstLetter == '#') {
+			String sIndex = varName.substring(1);
+			Integer index = Integer.valueOf(sIndex);
+			BaseMetric bm = metricManager.getMetricFromOrder(index);
+			
+			if (bm != null) {
+				
+				final IMetricScope currentScope = (firstLetter == '@' ? root : scope);
+				MetricValue value = MetricValue.NONE;
+				
+				if (metric != null && metric.getMetricType() == MetricType.EXCLUSIVE) {
+					// for exclusive metric, we have to compute the exclusive metric of the source
+					// not the inclusive one
+
+					String sPartner = String.valueOf(bm.getPartner());
+					BaseMetric pm   = metricManager.getMetric(sPartner);
+					
+					if (pm != null)
+						value = pm.getValue(currentScope);
+				} else {
+					
+					// avoid recursive computation
+					// if we are trying to get our own value, we return zero
+					if (metric != bm)
+						value = bm.getValue(currentScope);
+				}
+				
+				if (value != MetricValue.NONE)
+					return bm.getValue(currentScope).value;
+			}
 		} else
 			//---------------------------------------------------------
 			// get directly the value of the variable

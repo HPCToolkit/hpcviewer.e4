@@ -23,6 +23,7 @@ import edu.rice.cs.hpc.data.filter.IFilterData;
 import edu.rice.cs.hpc.data.util.IUserData;
 
 import java.io.File;
+import java.util.ArrayList;
 
 //////////////////////////////////////////////////////////////////////////
 //	CLASS EXPERIMENT													//
@@ -225,14 +226,21 @@ public class Experiment extends BaseExperimentWithMetrics
 	}
 
 	protected void copyMetricsToPartner(Scope scope, MetricType sourceType, MetricValuePropagationFilter filter) {
+		ArrayList<BaseMetric> listDerivedMetrics = new ArrayList<>();
+		
 		for (int i = 0; i< this.getMetricCount(); i++) {
 			BaseMetric metric = this.getMetric(i);
 			// Laksono 2009.12.11: aggregate metric doesn't have partner
 			if (metric instanceof Metric) {
 				if (metric.getMetricType() == sourceType) {
 					// get the partner index (if the metric exclusive, its partner is inclusive)
-					int partner = metric.getPartner(); 
-					copyMetric(scope, scope, i, partner, filter);
+					
+					int partner 			 = metric.getPartner(); 	 // get the partner ID
+					String partnerName 		 = String.valueOf(partner);  // convert partner ID to shortID
+					BaseMetric partnerMetric = getMetric(partnerName);   // get the partner metric
+					int partnerIndex		 = partnerMetric.getIndex(); // get the index of partner metric
+					
+					copyMetric(scope, scope, i, partnerIndex, filter);
 				}
 			} else if (metric instanceof AggregateMetric) {
 				if (metric.getMetricType() == MetricType.EXCLUSIVE ) {
@@ -245,7 +253,23 @@ public class Experiment extends BaseExperimentWithMetrics
 						scope.setMetricValue( i, partner_value);
 					}
 				}
+			} else if (metric instanceof DerivedMetric) {
+				listDerivedMetrics.add(metric);
 			}
+		}
+
+		// compute the root value of derived metric at the end
+		// some times, hpcrun derived metrics require the value of "future" metrics. 
+		// This causes the value of derived metrics to be empty.
+		// If we compute derived metrics at the end, we are more guaranteed that the value
+		// is not empty.
+		// FIXME: unless a derived metric requires a value of "future" derived metric. 
+		//        In this case, we are doomed.
+		
+		for (BaseMetric metric: listDerivedMetrics) {
+			// compute the metric value
+			MetricValue mv = metric.getValue(scope);
+			scope.setMetricValue(metric.getIndex(), mv);
 		}
 	}
 
@@ -337,8 +361,10 @@ public class Experiment extends BaseExperimentWithMetrics
 		
 		// hide columns if the metric has no value
 		for(BaseMetric metric: metrics) {
-			if (metric.getValue(firstSubTree) == MetricValue.NONE) {
-				metric.setDisplayed(false);
+			if (!metric.isInvisible() &&
+				metric.getValue(firstSubTree) == MetricValue.NONE) {
+				
+				metric.setDisplayed(BaseMetric.VisibilityType.HIDE);
 			}
 		}
 	}
@@ -353,7 +379,9 @@ public class Experiment extends BaseExperimentWithMetrics
 		boolean isNeeded = false;
 		for (int i=0; !isNeeded && i<this.getMetricCount(); i++) {
 			BaseMetric m = getMetric(i);
-			isNeeded = !( (m instanceof FinalMetric) || (m instanceof AggregateMetric) );
+			isNeeded = !(   (m instanceof FinalMetric) 
+					     || (m instanceof AggregateMetric) 
+					     || (m instanceof DerivedMetric) );
 		}
 		return isNeeded;
 	}
