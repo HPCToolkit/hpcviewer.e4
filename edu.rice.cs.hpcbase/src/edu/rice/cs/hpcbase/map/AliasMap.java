@@ -9,7 +9,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
 
-//import edu.rice.cs.hpc.data.util.IUserData;
+import edu.rice.cs.hpcdata.util.IUserData;
 
 /***
  * 
@@ -17,7 +17,7 @@ import java.util.HashMap;
  * This is useful when we want to change a name of a procedure X to Y (for display only) 
  *
  */
-public abstract class AliasMap<K,V> //implements IUserData<K, V> 
+public abstract class AliasMap<K,V> implements IUserData<K, V> 
 {
 	
 	protected HashMap<K, V> data;

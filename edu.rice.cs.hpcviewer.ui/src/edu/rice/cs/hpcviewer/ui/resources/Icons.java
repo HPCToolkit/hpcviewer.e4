@@ -66,47 +66,49 @@ public class Icons  extends BaseIconManager
 	
 	/*************
 	 * initialize images. The method only needs to be called once for the whole
-	 * window lifespan. Athough calling this multiple times is theoretically
+	 * window life span. Although calling this multiple times is theoretically
 	 * harmless (never tried).
 	 * 
 	 * @param registry
 	 *************/
 	public void init(ImageRegistry registry) {
 		
-		if (isInitialized.compareAndSet(false,
-				true)) {/*
-						 * registerImage(registry, getClass(), Image_CallFrom); registerImage(registry,
-						 * getClass(), Image_CallTo); registerImage(registry, getClass(),
-						 * Image_CallFromDisabled); registerImage(registry, getClass(),
-						 * Image_CallToDisabled);
-						 * 
-						 * registerImage(registry, getClass(), Image_InlineFrom);
-						 * registerImage(registry, getClass(), Image_InlineTo); registerImage(registry,
-						 * getClass(), Image_InlineFromDisabled); registerImage(registry, getClass(),
-						 * Image_InlineToDisabled);
-						 * 
-						 * registerImage(registry, getClass(), Image_MetricAggregate);
-						 * 
-						 * registerImage(registry, getClass(), Image_ZoomIn); registerImage(registry,
-						 * getClass(), Image_ZoomOut); registerImage(registry, getClass(),
-						 * Image_Flatten); registerImage(registry, getClass(), Image_Unflatten);
-						 * 
-						 * registerImage(registry, getClass(), Image_CheckColumns);
-						 * registerImage(registry, getClass(), Image_FlameIcon);
-						 * 
-						 * registerImage(registry, getClass(), Image_FnMetric); registerImage(registry,
-						 * getClass(), Image_FontBigger); registerImage(registry, getClass(),
-						 * Image_FontSmaller); registerImage(registry, getClass(), Image_SaveCSV);
-						 * registerImage(registry, getClass(), Image_Graph); registerImage(registry,
-						 * getClass(), Image_ThreadView); registerImage(registry, getClass(),
-						 * Image_ThreadMap);
-						 */
+		if (isInitialized.compareAndSet(false,true)) {
+			registerImage(registry, getClass(), Image_CallFrom); 
+			registerImage(registry, getClass(), Image_CallTo); 
+			registerImage(registry, getClass(), Image_CallFromDisabled); 
+			registerImage(registry, getClass(), Image_CallToDisabled);
+
+			registerImage(registry, getClass(), Image_InlineFrom);
+			registerImage(registry, getClass(), Image_InlineTo); 
+			registerImage(registry, getClass(), Image_InlineFromDisabled); 
+			registerImage(registry, getClass(), Image_InlineToDisabled);
+
+			registerImage(registry, getClass(), Image_MetricAggregate);
+
+			registerImage(registry, getClass(), Image_ZoomIn); 
+			registerImage(registry, getClass(), Image_ZoomOut); 
+			registerImage(registry, getClass(), Image_Flatten); 
+			registerImage(registry, getClass(), Image_Unflatten);
+
+			registerImage(registry, getClass(), Image_CheckColumns);
+			registerImage(registry, getClass(), Image_FlameIcon);
+
+			registerImage(registry, getClass(), Image_FnMetric); 
+			registerImage(registry, getClass(), Image_FontBigger); 
+			registerImage(registry, getClass(), Image_FontSmaller); 
+			registerImage(registry, getClass(), Image_SaveCSV);
+			registerImage(registry, getClass(), Image_Graph); 
+			registerImage(registry, getClass(), Image_ThreadView); 
+			registerImage(registry, getClass(), Image_ThreadMap);
 		}
 	}
 	
 	
-	/*
-	 * static public Image getImage(final String desc) { AbstractUIPlugin plugin =
-	 * Activator.getDefault(); return getImage(plugin, desc); }
-	 */
+	
+	static public Image getImage(final String desc) { 
+		  AbstractUIPlugin plugin =	 Activator.getDefault(); 
+		  return getImage(plugin, desc); 
+	}
+	 
 }
