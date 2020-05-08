@@ -6,7 +6,7 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
-//import edu.rice.cs.hpcbase.ui.BaseIconManager;
+import edu.rice.cs.hpcbase.ui.BaseIconManager;
 import edu.rice.cs.hpcviewer.ui.Activator;
 
 /**
@@ -14,7 +14,7 @@ import edu.rice.cs.hpcviewer.ui.Activator;
  * @author laksono
  *
  */
-public class Icons  //extends BaseIconManager
+public class Icons  extends BaseIconManager
 {
 	final static public String Image_CallFrom = "CallFrom.gif";
 	final static public String Image_CallTo = "CallTo.gif";
