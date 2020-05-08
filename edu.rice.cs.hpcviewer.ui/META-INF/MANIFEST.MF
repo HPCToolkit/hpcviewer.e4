@@ -21,7 +21,9 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.e4.core.di.extensions,
  org.eclipse.passage.lic.equinox;bundle-version="0.0.0",
  org.eclipse.passage.lic.e4.ui;bundle-version="0.0.0",
- org.eclipse.e4.ui.workbench.swt
+ org.eclipse.e4.ui.workbench.swt,
+ edu.rice.cs.hpcbase,
+ edu.rice.cs.hpcdata
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Provide-Capability: licensing.feature;licensing.feature="edu.rice.cs.hpcviewer.ui.product"
 Automatic-Module-Name: edu.rice.cs.hpcviewer.ui
