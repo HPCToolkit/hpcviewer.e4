@@ -2,8 +2,9 @@ package edu.rice.cs.hpcbase.ui;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.plugin.AbstractUIPlugin;
+
 
 /********************************************
  * 
@@ -18,8 +19,8 @@ public abstract class BaseIconManager
 	 * @param desc
 	 * @return Image if the key matches, null otherwise
 	 */
-	static public Image getImage(AbstractUIPlugin plugin, final String desc) {
-		final ImageRegistry registry = getRegistry(plugin);
+	static public Image getImage(final String desc) {
+		final ImageRegistry registry = getRegistry();
 		
 		return registry.get(desc);
 	}
@@ -30,17 +31,15 @@ public abstract class BaseIconManager
 	 * @param desc : the key descriptor
 	 * @return ImageRegistry if the key matches, null otherwise
 	 */
-	static public ImageDescriptor getDescriptor(AbstractUIPlugin plugin, final String desc) {
-		final ImageRegistry registry = getRegistry(plugin);
+	static public ImageDescriptor getDescriptor(final String desc) {
+		final ImageRegistry registry = getRegistry();
 		
 		return registry.getDescriptor(desc);
 	}
 
-	static protected ImageRegistry getRegistry(AbstractUIPlugin plugin) {
-    	// prepare the icon
-		ImageRegistry imageRegistry = plugin.getImageRegistry();
+	static protected ImageRegistry getRegistry() {
 		
-		return imageRegistry;
+		return JFaceResources.getImageRegistry();
 	}
 	
 	protected void registerImage(ImageRegistry registry, Class<?> location, String key) {

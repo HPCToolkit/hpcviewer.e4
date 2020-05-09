@@ -4,10 +4,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.plugin.AbstractUIPlugin;
-
 import edu.rice.cs.hpcbase.ui.BaseIconManager;
-import edu.rice.cs.hpcviewer.ui.Activator;
 
 /**
  * Singleton class containing global variables for icons 
@@ -107,8 +104,8 @@ public class Icons  extends BaseIconManager
 	
 	
 	static public Image getImage(final String desc) { 
-		  AbstractUIPlugin plugin =	 Activator.getDefault(); 
-		  return getImage(plugin, desc); 
+		
+		return getImage(desc); 
 	}
 	 
 }
