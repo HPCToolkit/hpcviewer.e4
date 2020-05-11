@@ -2,7 +2,9 @@
 <application:Application xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:application="http://www.eclipse.org/ui/2010/UIModel/application" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmi:id="_c3AF0MjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.application" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ">
   <children xsi:type="basic:TrimmedWindow" xmi:id="_c3AF0cjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.window.main" label="Empty E4 Application" width="800" height="600">
     <children xsi:type="basic:PartSashContainer" xmi:id="_60CmoI68EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.partsashcontainer.main">
-      <children xsi:type="basic:PartStack" xmi:id="_Bd0-EI69EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.partstack.upper"/>
+      <children xsi:type="basic:PartStack" xmi:id="_Bd0-EI69EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.partstack.upper">
+        <children xsi:type="basic:Part" xmi:id="_h19JAJJMEeq3lfezHIkHUw" elementId="edu.rice.cs.hpcviewer.ui.part.editor" toBeRendered="false" visible="false" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.editor.Editor" label="Source code" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpc-16x16.png" closeable="true"/>
+      </children>
       <children xsi:type="basic:PartStack" xmi:id="_DIZCcI69EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.partstack.lower">
         <children xsi:type="basic:Part" xmi:id="_HXUhAI69EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.part.topdown" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.TopDownPart" label="Top-down" tooltip="Top-down view">
           <menus xsi:type="menu:PopupMenu" xmi:id="_Sqj2YI7qEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.popupmenu.zoom" label="Zoom" mnemonics="Z">

@@ -1,0 +1,50 @@
+<project default="hpcdata">
+	<!--
+	This ant script contains these targets;
+	    compile     - compiles java source
+	    jar         - build hpcviewer.jar (depends on compile)
+	    buildviewer - (default) does all targets
+	-->	
+	<property name="classbase" location="edu/rice/cs/hpc/data"/>
+
+  	<target name="compile" >
+	    <mkdir dir="bin" />
+    	<javac srcdir="../src/edu/rice/cs/hpc/data;../externals/com/graphbuilder" 
+           	   destdir="bin" >
+			<classpath>
+				<fileset dir="../external-jars" includes="**/*.jar" />
+			</classpath>
+    	</javac>
+  	</target>
+  
+  	<target name="jar" depends="compile">
+  		<delete file="hpcdata.jar" />
+    	<jar destfile="hpcdata.jar" >
+       	     <fileset dir="bin" includes="**/*.class" />
+             <manifest>
+                <attribute name="Main-Class" value="edu.rice.cs.hpc.data.framework.Application"/>
+                <attribute name="Class-Path" value="lib/org.apache.xerces_2.9.0.v201005080400.jar"/>
+             </manifest>
+        </jar>
+  		<delete dir="bin" />
+  	</target>
+  
+	<target name="hpcdata" depends="compile,jar" >
+		<mkdir dir="lib"/>
+		<copy todir="lib">
+			<fileset dir="../external-jars" >
+				<include name="**/org.apache*.jar" />
+			</fileset>
+		</copy>
+		<move file="hpcdata.jar" todir="lib/" />
+		<chmod perm="ugo+x" file="hpcdata.sh" />
+		<zip destfile="hpcdata.zip">
+			<zipfileset dir="lib" prefix="lib"/>
+			<fileset dir="." includes="hpcdata.sh"/>
+			<fileset dir="../src/edu/rice/cs/hpc/data/experiment/xml/" includes="experiment.dtd" />
+		</zip>
+  		<delete dir="lib" />
+	</target>
+
+
+</project>

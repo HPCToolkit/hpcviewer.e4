@@ -13,6 +13,7 @@
 
  <modules>
   <module>externals</module>
+  <module>edu.rice.cs.hpc.data</module>
   <module>edu.rice.cs.hpcdata</module>
   <module>edu.rice.cs.hpcbase</module>
   <module>edu.rice.cs.hpcviewer.ui</module>

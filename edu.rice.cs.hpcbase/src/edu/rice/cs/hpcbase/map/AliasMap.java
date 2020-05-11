@@ -9,7 +9,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
 
-import edu.rice.cs.hpcdata.util.IUserData;
+import edu.rice.cs.hpc.data.util.IUserData;
 
 /***
  * 
