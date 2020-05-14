@@ -3,6 +3,7 @@ package edu.rice.cs.hpcviewer.ui.resources;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.graphics.Image;
 import edu.rice.cs.hpcbase.ui.BaseIconManager;
 
@@ -68,9 +69,11 @@ public class Icons  extends BaseIconManager
 	 * 
 	 * @param registry
 	 *************/
-	public void init(ImageRegistry registry) {
+	public void init() {
 		
 		if (isInitialized.compareAndSet(false,true)) {
+			ImageRegistry registry = JFaceResources.getImageRegistry();
+			
 			registerImage(registry, getClass(), Image_CallFrom); 
 			registerImage(registry, getClass(), Image_CallTo); 
 			registerImage(registry, getClass(), Image_CallFromDisabled); 
@@ -103,9 +106,10 @@ public class Icons  extends BaseIconManager
 	
 	
 	
-	static public Image getImage(final String desc) { 
-		
-		return getImage(desc); 
+	public Image getImage(final String desc) { 
+		ImageRegistry registry = JFaceResources.getImageRegistry();
+
+		return registry.get(desc); 
 	}
 	 
 }

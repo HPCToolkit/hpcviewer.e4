@@ -19,7 +19,7 @@ public abstract class BaseIconManager
 	 * @param desc
 	 * @return Image if the key matches, null otherwise
 	 */
-	static public Image getImage(final String desc) {
+	public Image getImage(final String desc) {
 		final ImageRegistry registry = getRegistry();
 		
 		return registry.get(desc);

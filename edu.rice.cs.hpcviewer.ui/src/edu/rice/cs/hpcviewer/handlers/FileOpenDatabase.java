@@ -6,7 +6,6 @@ import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.workbench.IWorkbench;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
@@ -31,9 +30,6 @@ public class FileOpenDatabase
 			return;
 		
 		if (broker.post(ExperimentAddOn.EVENT_HPC_NEW_DATABASE, experiment)) {
-			MessageDialog.openConfirm(shell, "Good !", "Done !");
-		} else {
-			MessageDialog.openWarning(shell, "Warning", "Cannot send message");
 		}
 	}
 }
