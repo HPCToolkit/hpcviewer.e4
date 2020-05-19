@@ -27,9 +27,9 @@ import edu.rice.cs.hpc.data.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpc.data.util.OSValidator;
-import edu.rice.cs.hpcviewer.preferences.FontManager;
 import edu.rice.cs.hpcviewer.ui.resources.ColorManager;
-import edu.rice.cs.hpcviewer.ui.resources.Icons;
+import edu.rice.cs.hpcviewer.ui.resources.FontManager;
+import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 
 
 /**
@@ -49,7 +49,7 @@ public class Utilities
 		public void applyStyles(TextStyle textStyle) {
 			ColorRegistry colorRegistry = JFaceResources.getColorRegistry();
 			textStyle.foreground = colorRegistry.get(JFacePreferences.ACTIVE_HYPERLINK_COLOR);
-			textStyle.font 		 = FontManager.getFont(FontManager.FontID.FONT_GENERIC);
+			textStyle.font 		 = FontManager.getFontGeneric();
 		}
 		
 	};
@@ -58,7 +58,7 @@ public class Utilities
 		
 		@Override
 		public void applyStyles(TextStyle textStyle) {
-			textStyle.font = FontManager.getFont(FontManager.FontID.FONT_GENERIC);;
+			textStyle.font = FontManager.getFontGeneric();;
 		}
 	};
 	
@@ -69,7 +69,7 @@ public class Utilities
 		public void applyStyles(TextStyle textStyle) {
 			ColorRegistry colorRegistry = JFaceResources.getColorRegistry();
 			textStyle.foreground = colorRegistry.get(JFacePreferences.COUNTER_COLOR);
-			textStyle.font = FontManager.getFont(FontManager.FontID.FONT_GENERIC);;
+			textStyle.font = FontManager.getFontGeneric();
 		}
 	};
 	
@@ -80,7 +80,7 @@ public class Utilities
 		public void applyStyles(TextStyle textStyle) {
 			ColorRegistry colorRegistry = JFaceResources.getColorRegistry();
 			textStyle.foreground = colorRegistry.get(JFacePreferences.DECORATIONS_COLOR);
-			textStyle.font = FontManager.getFont(FontManager.FontID.FONT_GENERIC);;
+			textStyle.font = FontManager.getFontGeneric();
 		}
 	};
 
@@ -200,8 +200,8 @@ public class Utilities
     	// Laksono 2009.03.09: add background for the top row to distinguish with other scopes
     	item.setBackground(ColorManager.getColorTopRow());
     	// make monospace font for all metric columns
-    	item.setFont(FontManager.getFont(FontManager.FontID.FONT_METRIC));
-    	item.setFont(0, FontManager.getFont(FontManager.FontID.FONT_GENERIC)); // The tree has the original font
+    	item.setFont(FontManager.getMetricFont());
+    	item.setFont(0, FontManager.getFontGeneric()); // The tree has the original font
     	// put the text on the table
     	item.setText(arrText);
     	// set the array of text as the item data 
@@ -242,24 +242,24 @@ public class Utilities
 	 * @return
 	 */
 	static public Image getScopeNavButton(Object scope) {
-		Icons iconManager = Icons.getInstance();
+		IconManager iconManager = IconManager.getInstance();
 		
 		if (scope instanceof RootScope)
-			return iconManager.getImage(Icons.Image_MetricAggregate);
+			return iconManager.getImage(IconManager.Image_MetricAggregate);
 		
 		if (scope instanceof CallSiteScope) {
 			CallSiteScope scopeCall = (CallSiteScope) scope;
         	LineScope lineScope = (scopeCall).getLineScope();
 			if (((CallSiteScope) scope).getType() == CallSiteScopeType.CALL_TO_PROCEDURE) {
 				if(Utilities.isFileReadable(lineScope))
-					return iconManager.getImage(Icons.Image_CallTo);
+					return iconManager.getImage(IconManager.Image_CallTo);
 				else
-					return iconManager.getImage(Icons.Image_CallToDisabled);
+					return iconManager.getImage(IconManager.Image_CallToDisabled);
 			} else {
 				if(Utilities.isFileReadable(lineScope))
-					return iconManager.getImage(Icons.Image_CallFrom);
+					return iconManager.getImage(IconManager.Image_CallFrom);
 				else
-					return iconManager.getImage(Icons.Image_CallFromDisabled);
+					return iconManager.getImage(IconManager.Image_CallFromDisabled);
 			}
 		}
 		return null;
@@ -268,13 +268,13 @@ public class Utilities
 	static public Image getInlineNavButton(ProcedureScope proc)
 	{
 		if (proc.isAlien()) {
-			Icons iconManager = Icons.getInstance();
+			IconManager iconManager = IconManager.getInstance();
 			boolean readable = Utilities.isFileReadable(proc);
 			
 			if (readable) {
-				return iconManager.getImage(Icons.Image_InlineTo);
+				return iconManager.getImage(IconManager.Image_InlineTo);
 			} else {
-				return iconManager.getImage(Icons.Image_InlineToDisabled);
+				return iconManager.getImage(IconManager.Image_InlineToDisabled);
 			}
 		}
 		return null;

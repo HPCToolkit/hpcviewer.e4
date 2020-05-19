@@ -3,7 +3,8 @@ package edu.rice.cs.hpcviewer.ui;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
-import edu.rice.cs.hpcviewer.ui.resources.Icons;
+import edu.rice.cs.hpcviewer.ui.resources.FontManager;
+import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 
 
 /**
@@ -23,7 +24,8 @@ public class Activator implements BundleActivator {
 
 	public void start(BundleContext bundleContext) throws Exception {
 		Activator.context = bundleContext;
-		Icons.getInstance().init();
+		IconManager.getInstance().init();
+		FontManager.init();
 	}
 
 	public void stop(BundleContext bundleContext) throws Exception {

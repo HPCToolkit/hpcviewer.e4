@@ -19,7 +19,7 @@ import edu.rice.cs.hpc.data.experiment.metric.MetricValue;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpcviewer.ui.parts.IContentViewer;
-import edu.rice.cs.hpcviewer.ui.resources.Icons;
+import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
 public class BaseContentViewer implements IContentViewer 
@@ -44,20 +44,20 @@ public class BaseContentViewer implements IContentViewer
 		
 		ToolBar toolBar = new ToolBar(coolBar, SWT.FLAT | SWT.RIGHT);
 		
-		createToolItem(toolBar, Icons.Image_ZoomIn,  "Zoom-in the selected node");
-		createToolItem(toolBar, Icons.Image_ZoomOut, "Zoom-out the selected node");
-		createToolItem(toolBar, Icons.Image_FlameIcon, "Expand the hot path below the selected node");
+		createToolItem(toolBar, IconManager.Image_ZoomIn,  "Zoom-in the selected node");
+		createToolItem(toolBar, IconManager.Image_ZoomOut, "Zoom-out the selected node");
+		createToolItem(toolBar, IconManager.Image_FlameIcon, "Expand the hot path below the selected node");
 
 		createCoolItem(coolBar, toolBar);
 
 		ToolBar toolBar_addon = new ToolBar(coolBar, SWT.FLAT | SWT.RIGHT);
 
-		createToolItem(toolBar_addon, Icons.Image_FnMetric,     "Add a new derived metric");
-		createToolItem(toolBar_addon, Icons.Image_CheckColumns, "Hide/show columns");
-		createToolItem(toolBar_addon, Icons.Image_SaveCSV,  	"Export the current view into a comma separated value file");
+		createToolItem(toolBar_addon, IconManager.Image_FnMetric,     "Add a new derived metric");
+		createToolItem(toolBar_addon, IconManager.Image_CheckColumns, "Hide/show columns");
+		createToolItem(toolBar_addon, IconManager.Image_SaveCSV,  	"Export the current view into a comma separated value file");
 
-		createToolItem(toolBar_addon, Icons.Image_FontBigger,  	"Increase font size");
-		createToolItem(toolBar_addon, Icons.Image_FontSmaller,  "Decrease font size");
+		createToolItem(toolBar_addon, IconManager.Image_FontBigger,  	"Increase font size");
+		createToolItem(toolBar_addon, IconManager.Image_FontSmaller,  "Decrease font size");
 
 		createCoolItem(coolBar, toolBar_addon);
 
@@ -122,7 +122,7 @@ public class BaseContentViewer implements IContentViewer
 	
 	private ToolItem createToolItem(ToolBar toolbar, String name, String tooltip) {
 		
-		Icons iconManager = Icons.getInstance();
+		IconManager iconManager = IconManager.getInstance();
 		ToolItem toolitem = new ToolItem(toolbar, SWT.NONE);
 		
 		toolitem.setImage(iconManager.getImage(name));

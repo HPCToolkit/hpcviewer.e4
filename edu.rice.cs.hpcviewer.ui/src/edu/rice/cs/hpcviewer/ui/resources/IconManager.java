@@ -12,7 +12,7 @@ import edu.rice.cs.hpcbase.ui.BaseIconManager;
  * @author laksono
  *
  */
-public class Icons  extends BaseIconManager
+public class IconManager  extends BaseIconManager
 {
 	final static public String Image_CallFrom = "CallFrom.gif";
 	final static public String Image_CallTo = "CallTo.gif";
@@ -42,7 +42,7 @@ public class Icons  extends BaseIconManager
 	final static public String Image_ThreadView = "cct-thread.png";
 	final static public String Image_ThreadMap = "cct-thread-map.png";
 	
-	static private Icons __singleton=null;
+	static private IconManager __singleton=null;
 	static private final AtomicBoolean isInitialized = new AtomicBoolean(false);
 	
 	/********
@@ -55,11 +55,11 @@ public class Icons  extends BaseIconManager
 	 * 
 	 * @return
 	 ********/
-	static public Icons getInstance() {
-		if (Icons.__singleton == null) {
-			Icons.__singleton = new Icons();
+	static public IconManager getInstance() {
+		if (IconManager.__singleton == null) {
+			IconManager.__singleton = new IconManager();
 		}
-		return Icons.__singleton;
+		return IconManager.__singleton;
 	}	
 	
 	/*************

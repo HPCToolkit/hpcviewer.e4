@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.preferences;
+package edu.rice.cs.hpcviewer.ui.resources;
 
 import java.awt.GraphicsEnvironment;
 
@@ -8,10 +8,11 @@ import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.resource.FontRegistry;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.widgets.Display;
+
+import edu.rice.cs.hpcviewer.preferences.PreferenceConstants;
 
 public class FontManager 
 {
@@ -19,81 +20,66 @@ public class FontManager
 	// the order is important: if the font in first element is available, then we'll use this one.
 	static public enum FontID {FONT_GENERIC, FONT_METRIC};
 	
-	static private final String []LIST_METRIC_FONTS = { "Monospaced", "Courier", "Courier New"};
+	static private final String []LIST_METRIC_FONTS = { "Courier", "Monospaced", "Courier New"};
 	
 
+	/****
+	 * Initialize the font.
+	 * The application has to call this method early at the start-up 
+	 */
 	static public void init() {
 		String fontName = LIST_METRIC_FONTS[0];
 		
 		IEclipsePreferences prefViewer = InstanceScope.INSTANCE.getNode(PreferenceConstants.P_HPCVIEWER);
 		if (prefViewer != null) {
-			fontName = prefViewer.get(PreferenceConstants.P_FONT_GENERIC, LIST_METRIC_FONTS[0]);
+			fontName = prefViewer.get(PreferenceConstants.P_FONT_GENERIC, null);
 			if (fontName  != null) {
-				
+				FontRegistry registry = JFaceResources.getFontRegistry();
+				registry.put(PreferenceConstants.P_FONT_GENERIC, null);
 			}
 		}
-		FontRegistry registry = JFaceResources.getFontRegistry();
-		registry.put(PreferenceConstants.P_FONT_GENERIC, null);
 	}
 	
 	
 	/***
-	 * Get the current font
-	 * 
-	 * @param fontID Type of font. See FontID.FONT_GENERIC or FontID.FONT_METRIC
-	 * 
-	 * @return font
+	 * get the font for generic text
+	 * @return
 	 */
-	static public Font getFont(FontID fontID) {
-		String fontPrefName = null;
-		
-		switch (fontID) {
-		case FONT_GENERIC:
-			fontPrefName = PreferenceConstants.P_FONT_GENERIC;
-			break;
-		case FONT_METRIC:
-			fontPrefName = PreferenceConstants.P_FONT_METRIC;
-			break;
-		default:
-			fontPrefName = PreferenceConstants.P_FONT_GENERIC;
-			break;
-		}
-		// check the font registry. If the font exists, we return whatever in the registry
-		// otherwise we check in the preference
-		
+	static public Font getFontGeneric() {
 		FontRegistry registry = JFaceResources.getFontRegistry();
-		Font font = registry.get(fontPrefName);
-		if (font != null)
-			return font;
-		
-		// check the name of the font in the preference
-		FontData fdata[] = getFontDataPreference(fontPrefName);
-		if (fdata != null) {
-			FontDescriptor desc = FontDescriptor.createFrom(fdata);
-			registry.put(fontPrefName, fdata);
-			
-			Device device = Display.getDefault();
-			font = desc.createFont(device);
-
-			return font;
-		}
-		// no font preference, try to set the font with the default font
-		
-		if (fontID == FontID.FONT_METRIC) {
-			String fontName = getMetricFont();
-			font  = registry.defaultFont();
-			fdata = font.getFontData();
-			fdata[0].setName(fontName);
-			
-			registry.put(fontPrefName, fdata);
-			
-			FontDescriptor desc = FontDescriptor.createFrom(fdata);
-			return desc.createFont(Display.getDefault());
-		}
-		return registry.defaultFont();
+		Font font    = registry.get(PreferenceConstants.P_FONT_GENERIC);
+		return font;
 	}
-
 	
+	/***
+	 * get the fixed font for metrics
+	 * @return
+	 */
+	static public Font getMetricFont() {
+		FontRegistry registry = JFaceResources.getFontRegistry();
+		Font defFont = registry.defaultFont();
+		Font font    = registry.get(PreferenceConstants.P_FONT_METRIC);
+		
+		if (font != defFont)
+			return font;
+
+		FontData fdata[] = FontDescriptor.copy(defFont.getFontData());
+		
+		fdata[0].setName(getMetricNameFont());
+		
+		FontDescriptor desc = FontDescriptor.createFrom(fdata);
+		
+		registry.put(PreferenceConstants.P_FONT_METRIC, fdata);
+		
+		return desc.createFont(Display.getDefault());
+	}
+	
+	
+	/***
+	 * get the name of the preference
+	 * @param fontID
+	 * @return
+	 */
 	static private String getPreferenceName(FontID fontID) {
 		String fontPrefName = null;
 		
@@ -111,7 +97,11 @@ public class FontManager
 		return fontPrefName;
 	}
 
-	
+	/***
+	 * get the font data based on the user's preference ID
+	 * @param fontID {@code FontID}
+	 * @return
+	 */
 	static public FontData[] getFontDataPreference(FontID fontID) {
 		String name = getPreferenceName(fontID);
 		return getFontDataPreference(name);
@@ -142,7 +132,7 @@ public class FontManager
      * 
      * @return fixed font
      */
-    static private String getMetricFont() {
+    static private String getMetricNameFont() {
 		String []availableFonts = getAvailableFonts();
 		
 		for (String font : LIST_METRIC_FONTS) {

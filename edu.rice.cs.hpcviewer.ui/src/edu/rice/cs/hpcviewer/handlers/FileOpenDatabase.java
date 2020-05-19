@@ -2,9 +2,13 @@ package edu.rice.cs.hpcviewer.handlers;
 
 import javax.inject.Inject;
 
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.e4.ui.model.application.MApplication;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.workbench.IWorkbench;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
 import org.eclipse.swt.widgets.Shell;
@@ -22,6 +26,8 @@ public class FileOpenDatabase
 	
 	@Inject EPartService partService;
 	@Inject IEventBroker broker;
+	@Inject MApplication application;
+	@Inject EModelService modelService;
 
 	@Execute
 	public void execute(IWorkbench workbench, Shell shell) {
@@ -33,12 +39,13 @@ public class FileOpenDatabase
 		if (experiment == null)
 			return;
 		
-		partService.showPart(FlatPart.ID, PartState.CREATE);
-		partService.showPart(BottomUpPart.ID, PartState.CREATE);
-		partService.showPart(TopDownPart.ID, PartState.VISIBLE);
-		partService.showPart(TopDownPart.ID, PartState.ACTIVATE);
+		IEclipseContext context = application.getContext();
+		context.get(ExperimentAddOn.EVENT_HPC_NEW_DATABASE);
+		context.set(ExperimentAddOn.EVENT_HPC_NEW_DATABASE, experiment);
 		
 		if (broker.post(ExperimentAddOn.EVENT_HPC_NEW_DATABASE, experiment)) {
+			MWindow window = (MWindow) modelService.find("edu.rice.cs.hpcviewer.window.main", application);
+			window.setLabel("hpcviewer - " + experiment.getDefaultDirectory().getPath());
 		}
 	}
 }

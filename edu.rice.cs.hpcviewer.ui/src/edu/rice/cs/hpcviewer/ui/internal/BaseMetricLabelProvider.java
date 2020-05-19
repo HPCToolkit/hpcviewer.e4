@@ -5,8 +5,8 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
-import edu.rice.cs.hpcviewer.preferences.FontManager;
-import edu.rice.cs.hpcviewer.preferences.FontManager.FontID;
+import edu.rice.cs.hpcviewer.ui.resources.FontManager;
+import edu.rice.cs.hpcviewer.ui.resources.FontManager.FontID;
 
 
 /****
@@ -58,7 +58,7 @@ public class BaseMetricLabelProvider extends ColumnLabelProvider implements IMet
 	 * @see org.eclipse.jface.viewers.ColumnLabelProvider#getFont(java.lang.Object)
 	 */
 	public Font getFont(Object element) {
-		return FontManager.getFont(FontID.FONT_METRIC);
+		return FontManager.getMetricFont();
 	}
 
 	/*
