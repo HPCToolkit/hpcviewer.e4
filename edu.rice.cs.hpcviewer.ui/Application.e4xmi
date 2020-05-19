@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <application:Application xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:application="http://www.eclipse.org/ui/2010/UIModel/application" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmi:id="_c3AF0MjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.application" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ">
-  <children xsi:type="basic:TrimmedWindow" xmi:id="_c3AF0cjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.window.main" label="hpcviewer" width="800" height="600">
+  <children xsi:type="basic:TrimmedWindow" xmi:id="_c3AF0cjYEeSyMNYR5xypkQ" elementId="edu.rice.cs.hpcviewer.window.main" label="hpcviewer" width="800" height="600">
     <children xsi:type="basic:PartSashContainer" xmi:id="_60CmoI68EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.partsashcontainer.main">
       <children xsi:type="basic:PartStack" xmi:id="_Bd0-EI69EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.partstack.upper">
         <children xsi:type="basic:Part" xmi:id="_h19JAJJMEeq3lfezHIkHUw" elementId="edu.rice.cs.hpcviewer.ui.part.editor" toBeRendered="false" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.editor.Editor" label="Source code" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpc-16x16.png" closeable="true"/>
@@ -19,7 +19,7 @@
     <mainMenu xmi:id="_7ohBoI7qEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.menu.main">
       <children xsi:type="menu:Menu" xmi:id="_9ABnII7qEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.menu.file" label="File" mnemonics="F">
         <children xsi:type="menu:HandledMenuItem" xmi:id="__N2JkI7qEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.open" label="Open a database" tooltip="Open a database. If the application has already opened a database, it will add a new one." mnemonics="O" command="_U14sMI7vEeqBPbXbG7_Dzw"/>
-        <children xsi:type="menu:HandledMenuItem" xmi:id="_Hel3wI7rEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.reopen" label="Close and open a database" tooltip="Close the current database and open a new one" enabled="false" mnemonics="d" command="_cPW0II7vEeqBPbXbG7_Dzw"/>
+        <children xsi:type="menu:HandledMenuItem" xmi:id="_Hel3wI7rEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.reopen" label="Open another database" tooltip="Open another database" enabled="false" mnemonics="a" command="_cPW0II7vEeqBPbXbG7_Dzw"/>
         <children xsi:type="menu:HandledMenuItem" xmi:id="_QfhswI7rEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.close" label="Close a database" tooltip="Close the current opened database(s)" enabled="false" mnemonics="C" command="_m5VqkI7vEeqBPbXbG7_Dzw"/>
         <children xsi:type="menu:MenuSeparator" xmi:id="_VTVaAI7rEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.menuseparator.1"/>
         <children xsi:type="menu:HandledMenuItem" xmi:id="_LbRy8I7vEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.exit" label="Exit" tooltip="Exit the application" mnemonics="x" command="_wGhBQI7uEeqBPbXbG7_Dzw"/>
@@ -44,7 +44,7 @@
   </menuContributions>
   <commands xmi:id="_wGhBQI7uEeqBPbXbG7_Dzw" elementId="org.eclipse.ui.file.exit" commandName="Exit" description="Exit the application"/>
   <commands xmi:id="_U14sMI7vEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.command.open" commandName="Open" description="Open a database"/>
-  <commands xmi:id="_cPW0II7vEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.command.reopen" commandName="Reopen" description="Close the current database and open a new database"/>
+  <commands xmi:id="_cPW0II7vEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.command.reopen" commandName="Add database" description="Open another database"/>
   <commands xmi:id="_m5VqkI7vEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.command.close" commandName="Close" description="Close the current database(s)"/>
   <addons xmi:id="_c3AF0sjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.core.commands.service" contributionURI="bundleclass://org.eclipse.e4.core.commands/org.eclipse.e4.core.commands.CommandServiceAddon"/>
   <addons xmi:id="_c3AF08jYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.contexts.service" contributionURI="bundleclass://org.eclipse.e4.ui.services/org.eclipse.e4.ui.services.ContextServiceAddon"/>
