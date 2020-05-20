@@ -15,7 +15,7 @@ import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcviewer.experiment.ExperimentAddOn;
-import edu.rice.cs.hpcviewer.ui.internal.BaseContentViewer;
+import edu.rice.cs.hpcviewer.ui.internal.BottomUpContentViewer;
 import edu.rice.cs.hpcviewer.ui.parts.editor.ViewEventHandler;
 
 public class BottomUpPart implements IBaseView, IPartListener
@@ -43,7 +43,7 @@ public class BottomUpPart implements IBaseView, IPartListener
 		
 		eventHandler = new ViewEventHandler(this, broker, partService);
 
-		contentViewer = new BaseContentViewer();
+		contentViewer = new BottomUpContentViewer();
     	contentViewer.createContent(parent);
     	
 		//partService.addPartListener(this);

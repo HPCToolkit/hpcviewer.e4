@@ -1,5 +1,7 @@
 package edu.rice.cs.hpcviewer.ui.internal;
 
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
@@ -22,7 +24,7 @@ import edu.rice.cs.hpcviewer.ui.parts.IContentViewer;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
-public class BaseContentViewer implements IContentViewer 
+public abstract class BaseContentViewer implements IContentViewer 
 {
 	final int TREE_COLUMN_WIDTH  = 200;
 	
@@ -36,30 +38,39 @@ public class BaseContentViewer implements IContentViewer
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout(1, false));
 		GridData gd_composite = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
-		gd_composite.widthHint = 406;
+		gd_composite.widthHint = 506;
 		composite.setLayoutData(gd_composite);
-		
+				
 		CoolBar coolBar = new CoolBar(composite, SWT.FLAT);
-		coolBar.setSize(150, 30);
-		
+
 		ToolBar toolBar = new ToolBar(coolBar, SWT.FLAT | SWT.RIGHT);
+
+		// add the beginning toolbar
+		beginToolbar(coolBar, toolBar);
 		
-		createToolItem(toolBar, IconManager.Image_ZoomIn,  "Zoom-in the selected node");
-		createToolItem(toolBar, IconManager.Image_ZoomOut, "Zoom-out the selected node");
+		createToolItem(toolBar, IconManager.Image_ZoomIn,    "Zoom-in the selected node");
+		createToolItem(toolBar, IconManager.Image_ZoomOut,   "Zoom-out the selected node");
 		createToolItem(toolBar, IconManager.Image_FlameIcon, "Expand the hot path below the selected node");
 
+		createToolItem(toolBar, IconManager.Image_FnMetric,     "Add a new derived metric");
+		createToolItem(toolBar, IconManager.Image_CheckColumns, "Hide/show columns");
+		createToolItem(toolBar, IconManager.Image_SaveCSV,  	"Export the current view into a comma separated value file");
+
+		createToolItem(toolBar, IconManager.Image_FontBigger,  "Increase font size");
+		createToolItem(toolBar, IconManager.Image_FontSmaller, "Decrease font size");
+
+		// add the end toolbar
+		endToolbar(coolBar, toolBar);
+
 		createCoolItem(coolBar, toolBar);
-
-		ToolBar toolBar_addon = new ToolBar(coolBar, SWT.FLAT | SWT.RIGHT);
-
-		createToolItem(toolBar_addon, IconManager.Image_FnMetric,     "Add a new derived metric");
-		createToolItem(toolBar_addon, IconManager.Image_CheckColumns, "Hide/show columns");
-		createToolItem(toolBar_addon, IconManager.Image_SaveCSV,  	  "Export the current view into a comma separated value file");
-
-		createToolItem(toolBar_addon, IconManager.Image_FontBigger,  "Increase font size");
-		createToolItem(toolBar_addon, IconManager.Image_FontSmaller, "Decrease font size");
-
-		createCoolItem(coolBar, toolBar_addon);
+		
+		Point p = coolBar.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+		p.x += 20;
+		
+		coolBar.setSize(p);
+		
+		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(coolBar);
+		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(coolBar);
 
 		treeViewer = new ScopeTreeViewer(parent, SWT.BORDER);
 		Tree tree = treeViewer.getTree();
@@ -120,10 +131,10 @@ public class BaseContentViewer implements IContentViewer
 		return nodeTopParent;
 	}
 	
-	private ToolItem createToolItem(ToolBar toolbar, String name, String tooltip) {
+	protected ToolItem createToolItem(ToolBar toolbar, int toolbarStyle, String name, String tooltip) {
 		
 		IconManager iconManager = IconManager.getInstance();
-		ToolItem toolitem = new ToolItem(toolbar, SWT.NONE);
+		ToolItem toolitem = new ToolItem(toolbar, toolbarStyle);
 		
 		toolitem.setImage(iconManager.getImage(name));
 		toolitem.setToolTipText(tooltip);
@@ -131,6 +142,31 @@ public class BaseContentViewer implements IContentViewer
 		
 		return toolitem;
 	}
+	
+	protected ToolItem createToolItem(ToolBar toolbar, String name, String tooltip) {
+				
+		return createToolItem(toolbar, SWT.PUSH, name, tooltip);
+	}
+
+    protected abstract void beginToolbar(CoolBar coolbar, ToolBar toolbar);
+    protected abstract void endToolbar(CoolBar coolbar, ToolBar toolbar);
+	
+    /***
+     * create cool item based on given toolbar
+     * 
+     * @param coolBar parent cool bar
+     * @param toolBar toolbar to be added in the cool item
+     */
+	protected void createCoolItem(CoolBar coolBar, ToolBar toolBar) {
+
+		CoolItem coolItem = new CoolItem(coolBar, SWT.NONE);
+		coolItem.setControl(toolBar);
+		Point size = toolBar.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+		size.x += 20;
+		coolItem.setSize(size);
+    	
+    }
+	
 	
     /**
      * Inserting a "node header" on the top of the table to display
@@ -164,16 +200,5 @@ public class BaseContentViewer implements IContentViewer
     	// draw the root node item
     	Utilities.insertTopRow(treeViewer, Utilities.getScopeNavButton(scope), sText);
     	this.nodeTopParent = nodeParent;
-    }
-
-	
-
-	private void createCoolItem(CoolBar coolBar, ToolBar toolBar) {
-
-		CoolItem coolItem = new CoolItem(coolBar, SWT.NONE);
-		coolItem.setControl(toolBar);
-		Point size = toolBar.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-		coolItem.setSize(size);
-    	
     }
 }

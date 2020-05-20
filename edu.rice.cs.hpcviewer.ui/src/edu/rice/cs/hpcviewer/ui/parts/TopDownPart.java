@@ -12,7 +12,7 @@ import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcviewer.experiment.ExperimentAddOn;
-import edu.rice.cs.hpcviewer.ui.internal.BaseContentViewer;
+import edu.rice.cs.hpcviewer.ui.internal.TopDownContentViewer;
 import edu.rice.cs.hpcviewer.ui.parts.editor.ViewEventHandler;
 
 public class TopDownPart implements IBaseView
@@ -33,7 +33,7 @@ public class TopDownPart implements IBaseView
     public void createControls(Composite parent) {
 		eventHandler = new ViewEventHandler(this, broker, partService);
 		
-    	contentViewer = new BaseContentViewer();
+    	contentViewer = new TopDownContentViewer();
     	contentViewer.createContent(parent);
 		
 		if (!databaseAddOn.isEmpty()) {

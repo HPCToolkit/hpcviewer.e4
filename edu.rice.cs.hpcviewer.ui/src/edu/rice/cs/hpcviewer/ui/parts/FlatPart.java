@@ -15,7 +15,7 @@ import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcviewer.experiment.ExperimentAddOn;
-import edu.rice.cs.hpcviewer.ui.internal.BaseContentViewer;
+import edu.rice.cs.hpcviewer.ui.internal.FlatContentViewer;
 import edu.rice.cs.hpcviewer.ui.parts.editor.ViewEventHandler;
 
 public class FlatPart implements IBaseView, IPartListener
@@ -42,7 +42,7 @@ public class FlatPart implements IBaseView, IPartListener
     public void createControls(Composite parent) {
 		eventHandler = new ViewEventHandler(this, broker, partService);
 		
-    	contentViewer = new BaseContentViewer();
+    	contentViewer = new FlatContentViewer();
     	contentViewer.createContent(parent);
     	
 		partService.addPartListener(this);
