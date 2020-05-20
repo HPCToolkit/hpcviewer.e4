@@ -46,7 +46,7 @@ public class BottomUpPart implements IBaseView, IPartListener
 		contentViewer = new BaseContentViewer();
     	contentViewer.createContent(parent);
     	
-		partService.addPartListener(this);
+		//partService.addPartListener(this);
 		
 		if (!databaseAddOn.isEmpty()) {
 			setExperiment(databaseAddOn.getLast());
@@ -61,8 +61,15 @@ public class BottomUpPart implements IBaseView, IPartListener
 
 	@Override
 	public void setExperiment(BaseExperiment experiment) {
-		root = null;
+
 		this.experiment = (Experiment) experiment;
+		
+		RootScope rootCCT  = experiment.getRootScope(RootScopeType.CallingContextTree);
+		RootScope rootCall = experiment.getRootScope(RootScopeType.CallerTree);
+		
+		root = this.experiment.createCallersView(rootCCT, rootCall);
+		
+		contentViewer.setData(root);
 	}
 
 	@Override
@@ -89,20 +96,6 @@ public class BottomUpPart implements IBaseView, IPartListener
 	public void partHidden(MPart part) {}
 
 	@Override
-	public void partVisible(MPart part) {
-		if (!part.getElementId().equals(ID))
-			return;
-		
-		if (experiment == null) return;
-		
-		if (root != null) return;
-		
-		RootScope rootCCT  = experiment.getRootScope(RootScopeType.CallingContextTree);
-		RootScope rootCall = experiment.getRootScope(RootScopeType.CallerTree);
-		
-		root = experiment.createCallersView(rootCCT, rootCall);
-		
-		contentViewer.setData(root);
-	}
+	public void partVisible(MPart part) {}
 
 }

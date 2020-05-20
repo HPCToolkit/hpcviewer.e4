@@ -60,8 +60,15 @@ public class FlatPart implements IBaseView, IPartListener
 
 	@Override
 	public void setExperiment(BaseExperiment experiment) {
-		root = null;
+
 		this.experiment = (Experiment) experiment;
+		
+		RootScope rootCCT  = experiment.getRootScope(RootScopeType.CallingContextTree);
+		RootScope rootFlat = experiment.getRootScope(RootScopeType.Flat);
+		
+		root = this.experiment.createFlatView(rootCCT, rootFlat);
+		
+		contentViewer.setData(root);
 	}
 
 	@Override
@@ -87,20 +94,6 @@ public class FlatPart implements IBaseView, IPartListener
 	public void partHidden(MPart part) {}
 
 	@Override
-	public void partVisible(MPart part) {
-		if (!part.getElementId().equals(ID))
-			return;
-				
-		if (experiment == null) return;
-		
-		if (root != null) return;
-		
-		RootScope rootCCT  = experiment.getRootScope(RootScopeType.CallingContextTree);
-		RootScope rootFlat = experiment.getRootScope(RootScopeType.Flat);
-		
-		root = experiment.createFlatView(rootCCT, rootFlat);
-		
-		contentViewer.setData(root);
-	}
+	public void partVisible(MPart part) {}
 
 }

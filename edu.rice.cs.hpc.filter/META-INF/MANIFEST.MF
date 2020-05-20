@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: hpcfilter
+Bundle-SymbolicName: edu.rice.cs.hpc.filter;singleton:=true
+Bundle-Version: 5.5.1.qualifier
+Bundle-Activator: edu.rice.cs.hpc.filter.Activator
+Bundle-Vendor: Rice University
+Require-Bundle: org.eclipse.core.runtime,
+ edu.rice.cs.hpcbase,
+ org.eclipse.jface
+Bundle-ActivationPolicy: lazy
+Export-Package: edu.rice.cs.hpc.filter,
+ edu.rice.cs.hpc.filter.service,
+ edu.rice.cs.hpc.filter.view
+Import-Package: edu.rice.cs.hpc.data.experiment,
+ edu.rice.cs.hpc.data.experiment.metric,
+ edu.rice.cs.hpc.data.experiment.scope,
+ edu.rice.cs.hpc.data.experiment.scope.filters,
+ edu.rice.cs.hpc.data.experiment.scope.visitors,
+ edu.rice.cs.hpc.data.filter,
+ edu.rice.cs.hpc.data.util
+Automatic-Module-Name: edu.rice.cs.hpc.filter
