@@ -3,18 +3,6 @@
 <plugin>
 
    <extension
-         id="product"
-         point="org.eclipse.core.runtime.products">
-      <product
-            application="org.eclipse.e4.ui.workbench.swt.E4Application"
-            name="edu.rice.cs.hpcviewer.ui">
-         <property
-               name="applicationCSS"
-               value="platform:/plugin/edu.rice.cs.hpcviewer.ui/css/default.css">
-         </property>
-      </product>
-   </extension>
-   <extension
          id="hpcviewer"
          point="org.eclipse.core.runtime.products">
       <product
@@ -43,6 +31,10 @@
          <property
                name="applicationCSS"
                value="platform:/plugin/edu.rice.cs.hpcviewer.ui/css/default.css">
+         </property>
+         <property
+               name="lifeCycleURI"
+               value="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.handlers.LifeCycle">
          </property>
          <property
                name="preferenceCustomization"

@@ -54,10 +54,10 @@ public class BaseContentViewer implements IContentViewer
 
 		createToolItem(toolBar_addon, IconManager.Image_FnMetric,     "Add a new derived metric");
 		createToolItem(toolBar_addon, IconManager.Image_CheckColumns, "Hide/show columns");
-		createToolItem(toolBar_addon, IconManager.Image_SaveCSV,  	"Export the current view into a comma separated value file");
+		createToolItem(toolBar_addon, IconManager.Image_SaveCSV,  	  "Export the current view into a comma separated value file");
 
-		createToolItem(toolBar_addon, IconManager.Image_FontBigger,  	"Increase font size");
-		createToolItem(toolBar_addon, IconManager.Image_FontSmaller,  "Decrease font size");
+		createToolItem(toolBar_addon, IconManager.Image_FontBigger,  "Increase font size");
+		createToolItem(toolBar_addon, IconManager.Image_FontSmaller, "Decrease font size");
 
 		createCoolItem(coolBar, toolBar_addon);
 

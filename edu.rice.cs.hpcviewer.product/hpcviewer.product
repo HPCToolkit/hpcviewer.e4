@@ -30,8 +30,13 @@ Release 2020.05  (C) Copyright 2020, Rice University.
       location="edu.rice.cs.hpcviewer.ui"
       startupProgressRect="5,275,445,15" />
    <launcher name="hpcviewer">
+      <linux icon="/edu.rice.cs.hpcviewer.ui/resources/hpcviewer-icon-32x32-32bit.xpm"/>
+      <macosx icon="/edu.rice.cs.hpcviewer.ui/resources/hpcviewer.icns"/>
       <win useIco="false">
-         <bmp/>
+         <bmp
+            winSmallHigh="/edu.rice.cs.hpcviewer.ui/resources/hpcviewer-icon-16x16-32bit.bmp"
+            winMediumHigh="/edu.rice.cs.hpcviewer.ui/resources/hpcviewer-icon-32x32-32bit.bmp"
+            winLargeHigh="/edu.rice.cs.hpcviewer.ui/resources/hpcviewer-icon-48x48-32bit.bmp"/>
       </win>
    </launcher>
 

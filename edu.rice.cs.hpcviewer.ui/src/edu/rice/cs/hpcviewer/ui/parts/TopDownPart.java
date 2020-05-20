@@ -11,6 +11,7 @@ import org.eclipse.swt.widgets.Composite;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
+import edu.rice.cs.hpcviewer.experiment.ExperimentAddOn;
 import edu.rice.cs.hpcviewer.ui.internal.BaseContentViewer;
 import edu.rice.cs.hpcviewer.ui.parts.editor.ViewEventHandler;
 
@@ -20,6 +21,7 @@ public class TopDownPart implements IBaseView
 
 	@Inject EPartService partService;
 	@Inject IEventBroker broker;
+	@Inject ExperimentAddOn databaseAddOn;
 
 	private ViewEventHandler eventHandler;
 	private IContentViewer   contentViewer;
@@ -33,6 +35,10 @@ public class TopDownPart implements IBaseView
 		
     	contentViewer = new BaseContentViewer();
     	contentViewer.createContent(parent);
+		
+		if (!databaseAddOn.isEmpty()) {
+			setExperiment(databaseAddOn.getLast());
+		}
     }
     
 	@PreDestroy
