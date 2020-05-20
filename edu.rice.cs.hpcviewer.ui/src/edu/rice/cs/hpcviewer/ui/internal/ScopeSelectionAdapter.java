@@ -10,6 +10,8 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
 
+import edu.rice.cs.hpcviewer.ui.util.Utilities;
+
 
 /*********************************************************
  * 
@@ -42,9 +44,9 @@ public class ScopeSelectionAdapter extends SelectionAdapter
 		if (tree.getItemCount()==0)
 			return; // no items: no need to sort
 		
-		TreeItem item = tree.getItem(0);
-		Image imgItem = item.getImage(0);
-		String []sText = null; //Utilities.getTopRowItems(viewer);
+		TreeItem item  = tree.getItem(0);
+		Image imgItem  = item.getImage(0);
+		String []sText = Utilities.getTopRowItems(viewer);
 		
 		// ----------------
 		// sorting 
@@ -64,9 +66,9 @@ public class ScopeSelectionAdapter extends SelectionAdapter
 		// ----------------
 		// post-sorting 
 		// ----------------
-		if(sText != null) {
-			//Utilities.insertTopRow(viewer, imgItem, sText);
-		}
+		
+		Utilities.insertTopRow(viewer, imgItem, sText);
+		
 		// if there is no selection, we scroll to the top
 		// see issue #28
 		// https://github.com/HPCToolkit/hpcviewer/issues/28
