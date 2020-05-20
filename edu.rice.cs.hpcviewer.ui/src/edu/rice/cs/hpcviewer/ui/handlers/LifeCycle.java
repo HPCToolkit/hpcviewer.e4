@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.handlers;
+package edu.rice.cs.hpcviewer.ui.handlers;
 
 import javax.inject.Inject;
 

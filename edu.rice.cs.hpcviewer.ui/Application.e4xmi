@@ -26,10 +26,10 @@
       </children>
     </mainMenu>
   </children>
-  <handlers xmi:id="_zXCPcI7xEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handler.open" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.handlers.FileOpenDatabase" command="_U14sMI7vEeqBPbXbG7_Dzw"/>
-  <handlers xmi:id="_DYwKII7zEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handler.reopen" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.handlers.FileReopenDatabase" command="_cPW0II7vEeqBPbXbG7_Dzw"/>
-  <handlers xmi:id="_SvylkI7zEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handler.exit" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.handlers.FileExit" command="_wGhBQI7uEeqBPbXbG7_Dzw"/>
-  <handlers xmi:id="_jDx8AI70EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handler.close" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.handlers.FileCloseDatabase" command="_m5VqkI7vEeqBPbXbG7_Dzw"/>
+  <handlers xmi:id="_zXCPcI7xEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handler.open" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.FileOpenDatabase" command="_U14sMI7vEeqBPbXbG7_Dzw"/>
+  <handlers xmi:id="_DYwKII7zEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handler.reopen" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.FileReopenDatabase" command="_cPW0II7vEeqBPbXbG7_Dzw"/>
+  <handlers xmi:id="_SvylkI7zEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handler.exit" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.FileExit" command="_wGhBQI7uEeqBPbXbG7_Dzw"/>
+  <handlers xmi:id="_jDx8AI70EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handler.close" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.FileCloseDatabase" command="_m5VqkI7vEeqBPbXbG7_Dzw"/>
   <rootContext xmi:id="_c3AF2cjYEeSyMNYR5xypkQ" elementId="org.eclipse.ui.contexts.dialogAndWindow" name="In Dialog and Windows">
     <children xmi:id="_c3AF2sjYEeSyMNYR5xypkQ" elementId="org.eclipse.ui.contexts.window" name="In Windows"/>
     <children xmi:id="_c3AF28jYEeSyMNYR5xypkQ" elementId="org.eclipse.ui.contexts.dialog" name="In Dialogs"/>

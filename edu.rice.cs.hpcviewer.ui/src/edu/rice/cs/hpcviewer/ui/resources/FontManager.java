@@ -12,7 +12,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.widgets.Display;
 
-import edu.rice.cs.hpcviewer.preferences.PreferenceConstants;
+import edu.rice.cs.hpcviewer.ui.preferences.PreferenceConstants;
 
 public class FontManager 
 {

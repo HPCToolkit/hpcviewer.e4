@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.handlers;
+package edu.rice.cs.hpcviewer.ui.handlers;
 
 import org.eclipse.e4.core.di.annotations.Execute;
 

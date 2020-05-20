@@ -11,7 +11,7 @@ import org.eclipse.swt.widgets.Composite;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
-import edu.rice.cs.hpcviewer.experiment.ExperimentAddOn;
+import edu.rice.cs.hpcviewer.ui.experiment.ExperimentAddOn;
 import edu.rice.cs.hpcviewer.ui.internal.TopDownContentViewer;
 import edu.rice.cs.hpcviewer.ui.parts.editor.ViewEventHandler;
 

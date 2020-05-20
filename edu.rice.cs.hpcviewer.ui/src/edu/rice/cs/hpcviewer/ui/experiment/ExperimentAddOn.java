@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.experiment;
+package edu.rice.cs.hpcviewer.ui.experiment;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 

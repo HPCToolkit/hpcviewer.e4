@@ -9,7 +9,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
-import edu.rice.cs.hpcviewer.experiment.ExperimentAddOn;
+import edu.rice.cs.hpcviewer.ui.experiment.ExperimentAddOn;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.layout.GridDataFactory;

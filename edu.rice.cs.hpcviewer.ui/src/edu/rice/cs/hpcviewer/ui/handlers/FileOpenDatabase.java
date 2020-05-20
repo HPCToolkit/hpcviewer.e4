@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.handlers;
+package edu.rice.cs.hpcviewer.ui.handlers;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -15,8 +15,8 @@ import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
-import edu.rice.cs.hpcviewer.experiment.ExperimentAddOn;
-import edu.rice.cs.hpcviewer.experiment.ExperimentManager;
+import edu.rice.cs.hpcviewer.ui.experiment.ExperimentAddOn;
+import edu.rice.cs.hpcviewer.ui.experiment.ExperimentManager;
 
 public class FileOpenDatabase 
 {

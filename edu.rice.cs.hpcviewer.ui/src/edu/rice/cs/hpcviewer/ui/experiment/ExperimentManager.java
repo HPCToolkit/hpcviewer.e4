@@ -1,7 +1,7 @@
 /**
  * Experiment File to manage the database: open, edit, fusion, ...
  */
-package edu.rice.cs.hpcviewer.experiment;
+package edu.rice.cs.hpcviewer.ui.experiment;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.DirectoryDialog;
@@ -14,7 +14,7 @@ import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.InvalExperimentException;
 import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.data.util.Util.FileXMLFilter;
-import edu.rice.cs.hpcviewer.preferences.PreferenceManager;
+import edu.rice.cs.hpcviewer.ui.preferences.PreferenceManager;
 
 
 /**

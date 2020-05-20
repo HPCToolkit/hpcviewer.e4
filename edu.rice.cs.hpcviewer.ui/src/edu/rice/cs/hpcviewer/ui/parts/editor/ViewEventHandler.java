@@ -8,7 +8,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
 import edu.rice.cs.hpc.data.experiment.Experiment;
-import edu.rice.cs.hpcviewer.experiment.ExperimentAddOn;
+import edu.rice.cs.hpcviewer.ui.experiment.ExperimentAddOn;
 import edu.rice.cs.hpcviewer.ui.parts.IBaseView;
 
 public class ViewEventHandler implements EventHandler 
