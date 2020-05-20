@@ -78,16 +78,7 @@ public abstract class BaseContentViewer implements IContentViewer
         tree.setHeaderVisible(true);
         tree.setLinesVisible(true);
 
-		treeViewer.setContentProvider(new AbstractContentProvider(treeViewer) {
-			
-			@Override
-			public Object[] getChildren(Object node) {
-				if (node instanceof Scope) {
-					return ((Scope)node).getChildren();
-				}
-				return null;
-			}
-		});
+		treeViewer.setContentProvider( getContentProvider(treeViewer));
 		
 		TreeViewerColumn colViewer =  new TreeViewerColumn(treeViewer, SWT.LEFT);
 		colViewer.getColumn().setWidth(TREE_COLUMN_WIDTH);
@@ -150,6 +141,7 @@ public abstract class BaseContentViewer implements IContentViewer
 
     protected abstract void beginToolbar(CoolBar coolbar, ToolBar toolbar);
     protected abstract void endToolbar(CoolBar coolbar, ToolBar toolbar);
+    protected abstract AbstractContentProvider getContentProvider(ScopeTreeViewer treeViewer);
 	
     /***
      * create cool item based on given toolbar
