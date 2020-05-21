@@ -14,7 +14,7 @@ import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
-import edu.rice.cs.hpcviewer.ui.experiment.ExperimentAddOn;
+import edu.rice.cs.hpcviewer.ui.experiment.DatabaseManager;
 import edu.rice.cs.hpcviewer.ui.experiment.ExperimentManager;
 
 public class FileOpenDatabase 
@@ -26,7 +26,7 @@ public class FileOpenDatabase
 	@Inject MApplication application;
 	@Inject EModelService modelService;
 	
-	@Inject ExperimentAddOn experimentManager;
+	@Inject DatabaseManager experimentManager;
 
 	@Execute
 	public void execute(IWorkbench workbench, IEclipseContext context, @Named(IServiceConstants.ACTIVE_SHELL) Shell shell) {

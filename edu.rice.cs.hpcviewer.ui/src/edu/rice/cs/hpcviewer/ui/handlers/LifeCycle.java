@@ -26,7 +26,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
-import edu.rice.cs.hpcviewer.ui.experiment.ExperimentAddOn;
+import edu.rice.cs.hpcviewer.ui.experiment.DatabaseManager;
 import edu.rice.cs.hpcviewer.ui.experiment.ExperimentManager;
 
 public class LifeCycle 
@@ -35,7 +35,7 @@ public class LifeCycle
 	@Inject IEventBroker broker;
 	@Inject EModelService modelService;
 
-	@Inject ExperimentAddOn expApplication;
+	@Inject DatabaseManager expApplication;
 
 
 	@PostContextCreate

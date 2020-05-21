@@ -14,7 +14,7 @@ import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
-import edu.rice.cs.hpcviewer.ui.experiment.ExperimentAddOn;
+import edu.rice.cs.hpcviewer.ui.experiment.DatabaseManager;
 import edu.rice.cs.hpcviewer.ui.internal.BottomUpContentViewer;
 import edu.rice.cs.hpcviewer.ui.parts.editor.ViewEventHandler;
 
@@ -24,7 +24,7 @@ public class BottomUpPart implements IBaseView, IPartListener
 
 	@Inject EPartService partService;
 	@Inject IEventBroker broker;
-	@Inject ExperimentAddOn databaseAddOn;
+	@Inject DatabaseManager databaseAddOn;
 
 	private ViewEventHandler eventHandler;
 	private IContentViewer   contentViewer;
