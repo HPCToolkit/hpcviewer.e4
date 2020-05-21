@@ -5,7 +5,9 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.IPartListener;
 import org.eclipse.swt.widgets.Composite;
@@ -23,6 +25,9 @@ public class BottomUpPart implements IBaseView, IPartListener
 	static public final String ID = "edu.rice.cs.hpcviewer.ui.part.bottomup";
 
 	@Inject EPartService partService;
+	@Inject EModelService modelService;
+	@Inject MApplication  app;
+
 	@Inject IEventBroker broker;
 	@Inject DatabaseManager databaseAddOn;
 
@@ -43,7 +48,7 @@ public class BottomUpPart implements IBaseView, IPartListener
 		
 		eventHandler = new ViewEventHandler(this, broker, partService);
 
-		contentViewer = new BottomUpContentViewer();
+		contentViewer = new BottomUpContentViewer(partService, modelService, app);
     	contentViewer.createContent(parent);
     	
 		//partService.addPartListener(this);

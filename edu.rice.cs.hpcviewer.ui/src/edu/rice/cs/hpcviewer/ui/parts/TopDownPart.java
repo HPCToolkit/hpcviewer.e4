@@ -5,6 +5,8 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.e4.ui.model.application.MApplication;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.widgets.Composite;
 
@@ -20,6 +22,9 @@ public class TopDownPart implements IBaseView
 	static final public String ID = "edu.rice.cs.hpcviewer.ui.part.topdown";
 
 	@Inject EPartService partService;
+	@Inject EModelService modelService;
+	@Inject MApplication  app;
+
 	@Inject IEventBroker broker;
 	@Inject DatabaseManager databaseAddOn;
 
@@ -33,7 +38,7 @@ public class TopDownPart implements IBaseView
     public void createControls(Composite parent) {
 		eventHandler = new ViewEventHandler(this, broker, partService);
 		
-    	contentViewer = new TopDownContentViewer();
+    	contentViewer = new TopDownContentViewer(partService, modelService, app);
     	contentViewer.createContent(parent);
 		
 		if (!databaseAddOn.isEmpty()) {
@@ -44,6 +49,7 @@ public class TopDownPart implements IBaseView
 	@PreDestroy
 	public void preDestroy() {
 		eventHandler.dispose();
+		contentViewer.dispose();
 	}
 
 	@Override

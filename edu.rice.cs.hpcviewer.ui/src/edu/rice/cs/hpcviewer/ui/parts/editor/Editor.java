@@ -6,10 +6,10 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.eclipse.swt.widgets.Composite;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
 
-import edu.rice.cs.hpcviewer.ui.experiment.DatabaseManager;
+import edu.rice.cs.hpc.data.experiment.scope.Scope;
+import edu.rice.cs.hpc.data.experiment.source.FileSystemSourceFile;
+import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -20,10 +20,11 @@ import org.eclipse.swt.SWT;
 
 
 
-public class Editor 
+public class Editor implements ICodeEditor
 {
+	static final public String ID = "edu.rice.cs.hpcviewer.ui.part.editor";
+	
 	private TextViewer textViewer;
-	private PartEventHandler eventHandler;
 	
 	@Inject IEventBroker broker;
 
@@ -42,41 +43,36 @@ public class Editor
 		
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(parent);
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(parent);
-		
-		eventHandler = new PartEventHandler(textViewer);
-		
-		broker.subscribe(DatabaseManager.EVENT_HPC_NEW_DATABASE, eventHandler);
 	}
 	
 	@PreDestroy
 	public void preDestroy() {
-		broker.unsubscribe(eventHandler);
 	}
 
-	static private class PartEventHandler implements EventHandler
-	{
-		final private TextViewer textViewer;
+	@Override
+	public void setData(Object obj) {
+		if (obj != null && obj instanceof Scope) {
+			Scope scope = (Scope) obj;
 
-		PartEventHandler(TextViewer textViewer) {
-			this.textViewer = textViewer;
-		}
-		
-		@Override
-		public void handleEvent(Event event) {
-			
-			String []names = event.getPropertyNames();
-			if (names == null)
+			if (!Utilities.isFileReadable(scope))
 				return;
 			
-			StringBuffer buff = new StringBuffer();
-			for (String name : names) {
-				buff.append(name);
-				buff.append("\n");
-			}
+			FileSystemSourceFile file = (FileSystemSourceFile) scope.getSourceFile();
 			
-			StyledText styledText = textViewer.getTextWidget();
-			styledText.setText(buff.toString());
+			String filename = file.getCompleteFilename();
+			int lineNumber  = scope.getFirstLineNumber();
 		}
+	}
+
+	@Override
+	public void setTitle(String title) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setMarker(int lineNumber) {
+		// TODO Auto-generated method stub
 		
 	}
 }

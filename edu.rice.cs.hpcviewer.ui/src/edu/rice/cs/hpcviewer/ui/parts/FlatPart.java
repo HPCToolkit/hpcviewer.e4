@@ -5,7 +5,9 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.IPartListener;
 import org.eclipse.swt.widgets.Composite;
@@ -23,6 +25,9 @@ public class FlatPart implements IBaseView, IPartListener
 	static final public String ID = "edu.rice.cs.hpcviewer.ui.part.flat";
 
 	@Inject EPartService partService;
+	@Inject EModelService modelService;
+	@Inject MApplication  app;
+
 	@Inject IEventBroker broker;
 	@Inject DatabaseManager databaseAddOn;
 
@@ -42,7 +47,7 @@ public class FlatPart implements IBaseView, IPartListener
     public void createControls(Composite parent) {
 		eventHandler = new ViewEventHandler(this, broker, partService);
 		
-    	contentViewer = new FlatContentViewer();
+    	contentViewer = new FlatContentViewer(partService, modelService, app);
     	contentViewer.createContent(parent);
     	
 		partService.addPartListener(this);

@@ -8,4 +8,5 @@ public interface IContentViewer
 {
 	public void createContent(Composite parent);
 	public void setData(RootScope root);
+	public void dispose();
 }

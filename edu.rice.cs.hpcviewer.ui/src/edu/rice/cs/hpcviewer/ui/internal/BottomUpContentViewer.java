@@ -1,5 +1,9 @@
 package edu.rice.cs.hpcviewer.ui.internal;
 
+import org.eclipse.e4.ui.model.application.MApplication;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.CoolBar;
 import org.eclipse.swt.widgets.ToolBar;
 
@@ -9,7 +13,12 @@ import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 public class BottomUpContentViewer extends BaseContentViewer 
 {
 	private CallerViewContentProvider contentProvider = null;
-			
+
+	public BottomUpContentViewer(EPartService partService, EModelService modelService, MApplication app) {
+		super(partService, modelService, app);
+		// TODO Auto-generated constructor stub
+	}
+
 	@Override
 	protected void beginToolbar(CoolBar coolbar, ToolBar toolbar) {}
 
@@ -35,4 +44,7 @@ public class BottomUpContentViewer extends BaseContentViewer
 		
 		super.setData(root);
 	}
+
+	@Override
+	protected void selectionChanged(IStructuredSelection selection) {}
 }
