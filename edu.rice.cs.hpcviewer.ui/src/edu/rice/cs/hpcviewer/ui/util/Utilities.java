@@ -5,14 +5,11 @@ package edu.rice.cs.hpcviewer.ui.util;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.FontData;
-
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
-import org.eclipse.jface.preference.JFacePreferences;
-import org.eclipse.jface.resource.ColorRegistry;
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.StyledString.Styler;
@@ -47,8 +44,7 @@ public class Utilities
 
 		@Override
 		public void applyStyles(TextStyle textStyle) {
-			ColorRegistry colorRegistry = JFaceResources.getColorRegistry();
-			textStyle.foreground = colorRegistry.get(JFacePreferences.ACTIVE_HYPERLINK_COLOR);
+			textStyle.foreground = Display.getDefault().getSystemColor(SWT.COLOR_BLUE);
 			textStyle.font 		 = FontManager.getFontGeneric();
 		}
 		
@@ -67,8 +63,7 @@ public class Utilities
 		
 		@Override
 		public void applyStyles(TextStyle textStyle) {
-			ColorRegistry colorRegistry = JFaceResources.getColorRegistry();
-			textStyle.foreground = colorRegistry.get(JFacePreferences.COUNTER_COLOR);
+			textStyle.foreground = Display.getDefault().getSystemColor(SWT.COLOR_DARK_CYAN);
 			textStyle.font = FontManager.getFontGeneric();
 		}
 	};
@@ -78,8 +73,7 @@ public class Utilities
 		
 		@Override
 		public void applyStyles(TextStyle textStyle) {
-			ColorRegistry colorRegistry = JFaceResources.getColorRegistry();
-			textStyle.foreground = colorRegistry.get(JFacePreferences.DECORATIONS_COLOR);
+			textStyle.foreground = Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
 			textStyle.font = FontManager.getFontGeneric();
 		}
 	};
