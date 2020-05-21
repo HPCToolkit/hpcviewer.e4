@@ -147,7 +147,7 @@ public class ExperimentManager
 	}
 	
 
-	private BaseExperiment loadExperiment(Shell shell, String sFilename) {
+	public BaseExperiment loadExperiment(Shell shell, String sFilename) {
 		Experiment experiment = null;
 		try
 		{
