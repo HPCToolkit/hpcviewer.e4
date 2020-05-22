@@ -14,7 +14,8 @@ import edu.rice.cs.hpcviewer.ui.util.Utilities;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.text.TextViewer;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.SWT;
 
@@ -24,7 +25,7 @@ public class Editor implements ICodeEditor
 {
 	static final public String ID = "edu.rice.cs.hpcviewer.ui.part.editor";
 	
-	private TextViewer textViewer;
+	private SourceViewer textViewer;
 	
 	@Inject IEventBroker broker;
 
@@ -36,9 +37,11 @@ public class Editor implements ICodeEditor
 	@PostConstruct
 	public void postConstruct(Composite parent) {
 
-		textViewer = new TextViewer(parent, SWT.BORDER);
+		textViewer = new SourceViewer(parent, null, SWT.BORDER| SWT.MULTI | SWT.V_SCROLL);
 		
 		StyledText styledText = textViewer.getTextWidget();		
+		styledText.setFont(JFaceResources.getTextFont());
+		
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(styledText);
 		
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(parent);

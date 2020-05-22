@@ -24,7 +24,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.CoolBar;
 import org.eclipse.swt.widgets.CoolItem;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
@@ -52,11 +51,12 @@ public abstract class BaseContentViewer implements IContentViewer, ISelectionCha
 	private ScopeTreeViewer treeViewer = null;
 	private Scope nodeTopParent = null;
 	
-	private ToolItem toolItem[];
-	private Label    lblMessage;
+	private ToolItem     toolItem[];
+	private LabelMessage lblMessage;
 	
 	private Listener mouseDownListener = null;
-
+	private StyledScopeLabelProvider labelProvider;
+	
 	
 	public BaseContentViewer(
 			EPartService  partService, 
@@ -121,9 +121,12 @@ public abstract class BaseContentViewer implements IContentViewer, ISelectionCha
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).grab(false, false).applyTo(coolBar);
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(coolBar);
 
-		lblMessage = new Label(composite, SWT.NONE);
-		
-		GridDataFactory.fillDefaults().grab(true, false).applyTo(lblMessage);
+		// -------------------------------------------
+		// message label
+		// -------------------------------------------
+
+		lblMessage = new LabelMessage(composite, SWT.NONE);
+
 		
 		// -------------------------------------------
 		// table creation
@@ -136,11 +139,7 @@ public abstract class BaseContentViewer implements IContentViewer, ISelectionCha
         tree.setLinesVisible(true);
 
 		treeViewer.setContentProvider( getContentProvider(treeViewer));
-		
-		TreeViewerColumn colViewer =  new TreeViewerColumn(treeViewer, SWT.LEFT);
-		colViewer.getColumn().setText ("Scope");
-		colViewer.setLabelProvider    (new StyledScopeLabelProvider());
-		colViewer.getColumn().setWidth(TREE_COLUMN_WIDTH);
+		createScopeColumn(treeViewer);
 		
 		mouseDownListener = new ScopeMouseListener(treeViewer, partService, modelService, app);
 		treeViewer.getTree().addListener(SWT.MouseDown, mouseDownListener);
@@ -156,6 +155,11 @@ public abstract class BaseContentViewer implements IContentViewer, ISelectionCha
 	
 	@Override
 	public void setData(RootScope root) {
+		
+		removeColumns();
+		
+		createScopeColumn(getViewer());
+		
 		Experiment experiment = (Experiment) root.getExperiment();
 		
 		// add metric columns only if the metric is not empty
@@ -194,6 +198,38 @@ public abstract class BaseContentViewer implements IContentViewer, ISelectionCha
 		if (selection != null) {
 			if (selection.getFirstElement() instanceof Scope)
 				enableAll();
+		}
+	}
+	
+	
+    
+    /***
+     * generic method to create column scope tree
+     * Called by children to have uniform way to create a scope tree.
+     * 
+     * @param treeViewer
+     * @return
+     */
+    protected TreeViewerColumn createScopeColumn(ScopeTreeViewer treeViewer) {
+
+        //----------------- create the column tree
+        final TreeViewerColumn colTree = new TreeViewerColumn(treeViewer,SWT.LEFT, 0);
+        colTree.getColumn().setText("Scope");
+        colTree.getColumn().setWidth(TREE_COLUMN_WIDTH);
+        
+        if (labelProvider == null) {
+        	labelProvider = new StyledScopeLabelProvider();
+        }
+        colTree.setLabelProvider( labelProvider ); 
+
+		return colTree;
+    }
+
+	
+	private void removeColumns() {
+		TreeColumn columns[] = treeViewer.getTree().getColumns();
+		for (TreeColumn col : columns) {
+			col.dispose();
 		}
 	}
 	
@@ -302,11 +338,8 @@ public abstract class BaseContentViewer implements IContentViewer, ISelectionCha
     	Utilities.insertTopRow(treeViewer, Utilities.getScopeNavButton(scope), sText);
     	this.nodeTopParent = nodeParent;
     }
+
     
-    protected void showErrorMessage(String str) {
-    	lblMessage.setText(str);
-    }
-	
 	/**
 	 * show the hot path below the selected node in the tree
 	 */
@@ -321,7 +354,7 @@ public abstract class BaseContentViewer implements IContentViewer, ISelectionCha
 		// get the node
 		Object o = objSel.getFirstElement();
 		if (!(o instanceof Scope)) {
-			showErrorMessage("Please select a scope node.");
+			lblMessage.showErrorMessage("Please select a scope node.");
 			return;
 		}
 		Scope current = (Scope) o;
@@ -331,7 +364,7 @@ public abstract class BaseContentViewer implements IContentViewer, ISelectionCha
 		TreeColumn colSelected = this.treeViewer.getTree().getSortColumn();
 		if((colSelected == null) || colSelected.getWidth() == 0) {
 			// the column is hidden or there is no column sorted
-			showErrorMessage("Please select a column to sort before using this feature.");
+			lblMessage.showErrorMessage("Please select a column to sort before using this feature.");
 			return;
 		}
 		// get the metric data
@@ -351,7 +384,7 @@ public abstract class BaseContentViewer implements IContentViewer, ISelectionCha
 			treeViewer.setSelection(new StructuredSelection(objHotPath.path), true);
 
 			if(!is_found) {
-				showErrorMessage("No hot child.");
+				lblMessage.showErrorMessage("No hot child.");
 			}
 		} else {
 			// It is almost impossible for the jvm to reach this part of branch.
@@ -359,7 +392,7 @@ public abstract class BaseContentViewer implements IContentViewer, ISelectionCha
 			if(data !=null )
 				System.err.println("SVA BUG: data="+data.getClass()+" item= " + (item==null? 0 : item.getItemCount()));
 			else
-				showErrorMessage("Please select a metric column !");
+				lblMessage.showErrorMessage("Please select a metric column !");
 		}
 	}
 

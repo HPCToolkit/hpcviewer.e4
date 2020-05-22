@@ -36,7 +36,8 @@ public class FileOpenDatabase
 		
 		if (experiment == null)
 			return;
-				
+		
+		experimentManager.removeAll();
 		experimentManager.addDatabase(experiment, application, context, broker, modelService);
 	}
 }

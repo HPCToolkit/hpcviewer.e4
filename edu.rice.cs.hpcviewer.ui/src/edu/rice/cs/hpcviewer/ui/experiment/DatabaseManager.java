@@ -73,4 +73,15 @@ public class DatabaseManager
 	public BaseExperiment getLast() {
 		return queueExperiment.element();
 	}
+	
+	public BaseExperiment removeLast() {
+		return queueExperiment.remove();
+	}
+	
+	public int removeAll() {
+		int size = queueExperiment.size();
+		queueExperiment.clear();
+
+		return size;
+	}
 }

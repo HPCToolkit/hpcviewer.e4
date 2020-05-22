@@ -1,7 +1,5 @@
 package edu.rice.cs.hpcviewer.ui.internal;
 
-import javax.inject.Inject;
-
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
@@ -152,5 +150,7 @@ public class ScopeMouseListener implements Listener
 		editorStack.getChildren().add(part);
 
 		partService.showPart(part, PartState.ACTIVATE);
+		
+		System.out.println("displaysourcecode: " + scope.getSourceFile().getName() + " line " + scope.getFirstLineNumber());
 	}
 }
