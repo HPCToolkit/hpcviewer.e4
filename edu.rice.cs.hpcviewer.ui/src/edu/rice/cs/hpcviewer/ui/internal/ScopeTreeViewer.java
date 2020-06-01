@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.TreeItem;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
+import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
 
@@ -30,6 +31,8 @@ public class ScopeTreeViewer extends TreeViewer
 {
 	final static public String COLUMN_DATA_WIDTH = "w"; 
 	final static public int COLUMN_DEFAULT_WIDTH = 120;
+
+	private Scope nodeTopParent = null;
 
 	/**
 	 * @param parent
@@ -231,6 +234,44 @@ public class ScopeTreeViewer extends TreeViewer
     {
     	super.internalRefresh(element, updateLabels);
     }
+    
+    
+	
+    /**
+     * Inserting a "node header" on the top of the table to display
+     * either aggregate metrics or "parent" node (due to zoom-in)
+     * TODO: we need to shift to the left a little bit
+     * @param nodeParent
+     */
+    public void insertParentNode(Scope nodeParent) {
+    	Scope scope = nodeParent;
+    	
+    	// Bug fix: avoid using list of columns from the experiment
+    	// formerly: .. = this.myExperiment.getMetricCount() + 1;
+    	TreeColumn []columns = getTree().getColumns();
+    	int nbColumns = columns.length; 	// columns in base metrics
+    	String []sText = new String[nbColumns];
+    	sText[0] = new String(scope.getName());
+    	
+    	// --- prepare text for base metrics
+    	// get the metrics for all columns
+    	for (int i=1; i< nbColumns; i++) {
+    		// we assume the column is not null
+    		Object o = columns[i].getData();
+    		if(o instanceof BaseMetric) {
+    			BaseMetric metric = (BaseMetric) o;
+    			// ask the metric for the value of this scope
+    			// if it's a thread-level metric, we will read metric-db file
+    			sText[i] = metric.getMetricTextValue(scope);
+    		}
+    	}
+    	
+    	// draw the root node item
+    	Utilities.insertTopRow(this, Utilities.getScopeNavButton(scope), sText);
+    	this.nodeTopParent = nodeParent;
+    }
+
+
     
 	/**
 	 * Returns the viewer cell at the given widget-relative coordinates, or

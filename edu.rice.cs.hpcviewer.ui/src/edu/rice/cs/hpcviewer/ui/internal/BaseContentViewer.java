@@ -38,8 +38,18 @@ import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpcviewer.ui.parts.IContentViewer;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
-import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
+
+/****
+ * 
+ * Base class to manage the content of the view part
+ * 
+ * A part has to call {@link IContentViewer.createContent} to create the content of the view
+ * (like toolbar and table tree).
+ * 
+ * For further customization, the caller (or part) has to subclass this class and implement
+ * {@link beginToolbar} and {@link endToolbar}
+ */
 public abstract class BaseContentViewer implements IContentViewer, ISelectionChangedListener
 {
 	final int TREE_COLUMN_WIDTH  = 250;
@@ -49,7 +59,6 @@ public abstract class BaseContentViewer implements IContentViewer, ISelectionCha
 	final private MApplication  app;
 	
 	private ScopeTreeViewer treeViewer = null;
-	private Scope nodeTopParent = null;
 	
 	private ToolItem     toolItem[];
 	private LabelMessage lblMessage;
@@ -94,7 +103,7 @@ public abstract class BaseContentViewer implements IContentViewer, ISelectionCha
 		toolItem = new ToolItem[8];
 		
 		toolItem[ActionType.ZOOM_IN.getValue()]  = createToolItem(toolBar, IconManager.Image_ZoomIn,    "Zoom-in the selected node");
-		toolItem[ActionType.ZOOM_OUT.getValue()] = createToolItem(toolBar, IconManager.Image_ZoomOut,   "Zoom-out the selected node");
+		toolItem[ActionType.ZOOM_OUT.getValue()] = createToolItem(toolBar, IconManager.Image_ZoomOut,   "Zoom-out from the current root");
 		toolItem[ActionType.HOTPATH.getValue()]  = createToolItem(toolBar, IconManager.Image_FlameIcon, "Expand the hot path below the selected node");
 
 		toolItem[ActionType.DERIVED_METRIC.getValue()] = createToolItem(toolBar, IconManager.Image_FnMetric,     "Add a new derived metric");
@@ -179,7 +188,7 @@ public abstract class BaseContentViewer implements IContentViewer, ISelectionCha
 		treeViewer.setInput(root);
 		
 		// insert the first row (header)
-		insertParentNode(root);
+		treeViewer.insertParentNode(root);
 		
 		// resize the width of metric columns
 		TreeColumn columns[] = treeViewer.getTree().getColumns();
@@ -233,9 +242,6 @@ public abstract class BaseContentViewer implements IContentViewer, ISelectionCha
 		}
 	}
 	
-	protected Scope getFirstRowNode() {
-		return nodeTopParent;
-	}
 	
 	/**
 	 * finalize tool item and add it to the current toolbar
@@ -305,39 +311,6 @@ public abstract class BaseContentViewer implements IContentViewer, ISelectionCha
 		return treeViewer;
 	}
 	
-    /**
-     * Inserting a "node header" on the top of the table to display
-     * either aggregate metrics or "parent" node (due to zoom-in)
-     * TODO: we need to shift to the left a little bit
-     * @param nodeParent
-     */
-    private void insertParentNode(Scope nodeParent) {
-    	Scope scope = nodeParent;
-    	
-    	// Bug fix: avoid using list of columns from the experiment
-    	// formerly: .. = this.myExperiment.getMetricCount() + 1;
-    	TreeColumn []columns = treeViewer.getTree().getColumns();
-    	int nbColumns = columns.length; 	// columns in base metrics
-    	String []sText = new String[nbColumns];
-    	sText[0] = new String(scope.getName());
-    	
-    	// --- prepare text for base metrics
-    	// get the metrics for all columns
-    	for (int i=1; i< nbColumns; i++) {
-    		// we assume the column is not null
-    		Object o = columns[i].getData();
-    		if(o instanceof BaseMetric) {
-    			BaseMetric metric = (BaseMetric) o;
-    			// ask the metric for the value of this scope
-    			// if it's a thread-level metric, we will read metric-db file
-    			sText[i] = metric.getMetricTextValue(scope);
-    		}
-    	}
-    	
-    	// draw the root node item
-    	Utilities.insertTopRow(treeViewer, Utilities.getScopeNavButton(scope), sText);
-    	this.nodeTopParent = nodeParent;
-    }
 
     
 	/**

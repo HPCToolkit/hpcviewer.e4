@@ -150,6 +150,7 @@ public class ScopeMouseListener implements Listener
 		editorStack.getChildren().add(part);
 
 		partService.showPart(part, PartState.ACTIVATE);
+		part.setVisible(true);
 		
 		System.out.println("displaysourcecode: " + scope.getSourceFile().getName() + " line " + scope.getFirstLineNumber());
 	}

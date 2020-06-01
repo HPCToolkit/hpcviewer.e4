@@ -30,17 +30,12 @@ import java.util.ArrayList;
 public class ExperimentBuilder2 extends BaseExperimentBuilder
 {
 	/** The parsed metric objects. */
-	protected List<BaseMetric> metricList;
-	protected List<MetricRaw> metricRawList;
-
-
-	/** Number of metrics provided by the experiment file.
-    For each metric we will define one inclusive and one exclusive metric.*/
-	protected int numberOfPrimaryMetrics; 
+	private List<BaseMetric> metricList;
+	private List<MetricRaw> metricRawList;
 
 	/** Maximum number of metrics provided by the experiment file.
     We use the maxNumberOfMetrics value to generate short names for the self metrics*/
-	final protected int maxNumberOfMetrics = 10000;
+	final private int maxNumberOfMetrics = 10000;
 
 	final private ArrayList<DerivedMetric> listOfDerivedMetrics;
 	/**
@@ -56,8 +51,9 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 		super(experiment, defaultName, userData);
 		this.metricList = new ArrayList<BaseMetric>();
 		
-		numberOfPrimaryMetrics = 0;
 		listOfDerivedMetrics   = new ArrayList<DerivedMetric>(2);
+		
+		setRemoveInvisibleProcedure(true);
 	}
 
 
@@ -589,8 +585,6 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 						iState = InfoState.FLAG;
 					else if ( values[i].charAt(0) == 'a' || values[i].charAt(0) == 'c') // aggregate
 						iState = InfoState.AGGREGATE;
-					else
-						throw new RuntimeException("Unrecognize name info tag: "+values[i]);
 					
 				} else if ( attributes[i].charAt(0) == 'v' ) {
 					
