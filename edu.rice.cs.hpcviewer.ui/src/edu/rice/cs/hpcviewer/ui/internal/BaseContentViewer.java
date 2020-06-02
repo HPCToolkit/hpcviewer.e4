@@ -66,6 +66,7 @@ public abstract class BaseContentViewer implements IContentViewer, ISelectionCha
 	private Listener mouseDownListener = null;
 	private StyledScopeLabelProvider labelProvider;
 	
+	private ScopeZoom zoomAction = null;
 	
 	public BaseContentViewer(
 			EPartService  partService, 
@@ -112,8 +113,6 @@ public abstract class BaseContentViewer implements IContentViewer, ISelectionCha
 
 		toolItem[ActionType.FONT_BIGGER.getValue()]  = createToolItem(toolBar, IconManager.Image_FontBigger,  "Increase font size");
 		toolItem[ActionType.FONT_SMALLER.getValue()] = createToolItem(toolBar, IconManager.Image_FontSmaller, "Decrease font size");
-
-		setToolItemHandlers();
 		
 		// -------------------------------------------
 		// add the end of toolbar
@@ -153,6 +152,10 @@ public abstract class BaseContentViewer implements IContentViewer, ISelectionCha
 		mouseDownListener = new ScopeMouseListener(treeViewer, partService, modelService, app);
 		treeViewer.getTree().addListener(SWT.MouseDown, mouseDownListener);
 		treeViewer.addSelectionChangedListener(this);
+
+		// initialize tool item handler at the end
+		// because we need access to tree viewer :-( 
+		setToolItemHandlers();
 	}
 
 	@PreDestroy
@@ -201,13 +204,7 @@ public abstract class BaseContentViewer implements IContentViewer, ISelectionCha
 	
 	@Override
     public void selectionChanged(SelectionChangedEvent event) {
-		IStructuredSelection selection = treeViewer.getStructuredSelection();
-		selectionChanged(selection);
-		
-		if (selection != null) {
-			if (selection.getFirstElement() instanceof Scope)
-				enableAll();
-		}
+		updateToolItemStatus();
 	}
 	
 	
@@ -297,10 +294,31 @@ public abstract class BaseContentViewer implements IContentViewer, ISelectionCha
 	/**
 	 * Enable all tool items
 	 */
-	protected void enableAll() {
-    	for(ToolItem item : toolItem) {
-    		item.setEnabled(true);
-    	}
+	protected void updateToolItemStatus() {
+
+		IStructuredSelection selection = treeViewer.getStructuredSelection();
+		selectionChanged(selection);
+		
+		if (selection != null) {
+			Object item = selection.getFirstElement();
+			if (item instanceof Scope) {
+				
+				Scope node = (Scope) item;
+				boolean enabled = zoomAction.canZoomIn((Scope) node);
+				toolItem[ActionType.ZOOM_IN.getValue()].setEnabled(enabled);
+				toolItem[ActionType.HOTPATH.getValue()].setEnabled(true);
+			} else {
+				toolItem[ActionType.ZOOM_IN.getValue()].setEnabled(false);
+				toolItem[ActionType.HOTPATH.getValue()].setEnabled(false);
+			}
+			
+		} else {
+			// no selection: disable some
+			toolItem[ActionType.ZOOM_IN.getValue()].setEnabled(false);
+			toolItem[ActionType.HOTPATH.getValue()].setEnabled(false);
+		}
+		boolean enableZoomout = zoomAction.canZoomOut();
+		toolItem[ActionType.ZOOM_OUT.getValue()].setEnabled(enableZoomout);
     }
 	
 	/***
@@ -439,6 +457,46 @@ public abstract class BaseContentViewer implements IContentViewer, ISelectionCha
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				showHotCallPath();
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {}
+		});
+		
+		zoomAction = new ScopeZoom(getViewer());
+
+		toolItem[ActionType.ZOOM_IN.getValue()].addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+
+				ScopeTreeViewer viewer = getViewer();
+				ISelection selection   = viewer.getSelection();
+				
+				if (selection == null)
+					return;
+				
+				IStructuredSelection structSelect = (IStructuredSelection) selection;
+				Object data = structSelect.getFirstElement();
+				if (data != null && data instanceof Scope) {
+					zoomAction.zoomIn((Scope) data);
+					
+					updateToolItemStatus();
+				}
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {}
+		});
+		
+		toolItem[ActionType.ZOOM_OUT.getValue()].addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+
+				zoomAction.zoomOut();
+				
+				updateToolItemStatus();
 			}
 			
 			@Override

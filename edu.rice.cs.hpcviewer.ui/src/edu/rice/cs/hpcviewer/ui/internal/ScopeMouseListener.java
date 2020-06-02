@@ -23,6 +23,15 @@ import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpcviewer.ui.parts.editor.Editor;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
+
+/*****************************************************
+ * 
+ * A class to listen to mouse events inside a tree viewer
+ * <p>
+ * If there is a "click" event on a tree item, it detects we can display the source code or not.
+ *  
+ *
+ *****************************************************/
 public class ScopeMouseListener implements Listener 
 {
 	static final private String STACK_ID = "edu.rice.cs.hpcviewer.ui.partstack.upper";
@@ -36,7 +45,10 @@ public class ScopeMouseListener implements Listener
 	
 	/**
 	 * initialization with the gc of the tree
-	 * @param gc of the tree
+	 * @param TreeViewer the tree viewer. It cannot be null
+	 * @param EPartService part service to activate an editor
+	 * @param EModelService to find existing editor
+	 * @param MApplication the application
 	 */
 	public ScopeMouseListener(TreeViewer treeViewer, 
 			EPartService  partService, EModelService modelService,
@@ -59,10 +71,8 @@ public class ScopeMouseListener implements Listener
 	 * (non-Javadoc)
 	 * @see org.eclipse.swt.widgets.Listener#handleEvent(org.eclipse.swt.widgets.Event)
 	 */
+	@Override
 	public void handleEvent(Event event) {
-
-		// tell the children to handle the mouse click
-		//view.mouseDownEvent(event);
 
 		if(event.button != 1) {
 			// yes, we only allow the first button
