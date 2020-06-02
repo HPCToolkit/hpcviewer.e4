@@ -149,9 +149,9 @@ public class ScopeMouseListener implements Listener
 		MPartStack editorStack = (MPartStack)modelService.find("edu.rice.cs.hpcviewer.ui.partstack.upper", app);
 		editorStack.getChildren().add(part);
 
-		partService.showPart(part, PartState.ACTIVATE);
+		part.setObject(scope);
+		partService.showPart(part, PartState.ACTIVATE);		
 		part.setVisible(true);
-		
-		System.out.println("displaysourcecode: " + scope.getSourceFile().getName() + " line " + scope.getFirstLineNumber());
+		part.setLabel(scope.getSourceFile().getName());
 	}
 }
