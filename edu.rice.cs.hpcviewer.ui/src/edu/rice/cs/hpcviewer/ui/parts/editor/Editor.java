@@ -30,6 +30,7 @@ import org.eclipse.jface.text.source.CompositeRuler;
 import org.eclipse.jface.text.source.LineNumberRulerColumn;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.SWT;
 
 
@@ -51,18 +52,23 @@ public class Editor implements ICodeEditor
 	
 	@PostConstruct
 	public void postConstruct(Composite parent) {
-
-		textViewer = new SourceViewer(parent, null, SWT.BORDER| SWT.MULTI | SWT.V_SCROLL);
-		textViewer.setEditable(false);
 		
+		// add line number column to the source viewer
 		CompositeRuler ruler 	   = new CompositeRuler();
 		LineNumberRulerColumn lnrc = new LineNumberRulerColumn();
 		ruler.addDecorator(0,lnrc);
+
+		textViewer = new SourceViewer(parent, ruler, SWT.BORDER| SWT.MULTI | SWT.V_SCROLL);
+		textViewer.setEditable(false);
 		
 		StyledText styledText = textViewer.getTextWidget();		
 		styledText.setFont(JFaceResources.getTextFont());
 		
-		GridDataFactory.fillDefaults().grab(true, true).applyTo(styledText);
+		// make sure to set fill alignment and grab both horizontal and vertical space
+		// without this, the source viewer will display only small fraction of composite
+		
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+		textViewer.getControl().setLayoutData(gd);
 		
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(parent);
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(parent);
