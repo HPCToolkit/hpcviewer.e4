@@ -156,7 +156,7 @@ public class ScopeMouseListener implements Listener
 		Collection<MPart> listParts = partService.getParts();
 		for(MPart mp : listParts) {
 			if (mp.getElementId().equals(filename)) {
-				partService.activate(mp, true);
+				partService.showPart(mp, PartState.VISIBLE);
 				return;
 			}
 		}
@@ -166,11 +166,12 @@ public class ScopeMouseListener implements Listener
 		part.setObject(scope);		
 		part.setLabel(filename);
 		part.setElementId(filename);
-		
-		partService.showPart(part, PartState.ACTIVATE);
-		partService.activate(part, true);
+
 		editorStack.getChildren().add(part);
 		
-		System.out.println("file: " + filename);
+		partService.showPart(part, PartState.VISIBLE);
+		
+		// keep focus to the viewer 
+		treeViewer.getTree().setFocus();
 	}
 }

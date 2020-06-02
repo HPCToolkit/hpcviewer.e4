@@ -96,7 +96,7 @@ public class Editor implements ICodeEditor
 			document.set(text);
 			
 			textViewer.setDocument(document);
-			textViewer.getControl().setFocus();
+
 			try {
 				int offset = document.getLineOffset(lineNumber);
 				textViewer.setMark(offset);
