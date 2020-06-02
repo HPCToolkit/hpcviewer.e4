@@ -26,6 +26,10 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.TextSelection;
+import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.AnnotationModel;
 import org.eclipse.jface.text.source.CompositeRuler;
 import org.eclipse.jface.text.source.LineNumberRulerColumn;
 import org.eclipse.jface.text.source.SourceViewer;
@@ -80,6 +84,7 @@ public class Editor implements ICodeEditor
 	
 	@PreDestroy
 	public void preDestroy() {
+		System.out.println(part.getElementId() + " destroyed");
 	}
 
 	@Override
@@ -97,19 +102,30 @@ public class Editor implements ICodeEditor
 
 			IDocument document = new Document();
 			
-			String text = readLineByLineJava8(filename);
+			AnnotationModel annModel = new AnnotationModel();
+			annModel.connect(document);
 			
+			String text = readLineByLineJava8(filename);
 			document.set(text);
 			
-			textViewer.setDocument(document);
-
 			try {
 				int offset = document.getLineOffset(lineNumber);
-				textViewer.setMark(offset);
+				int nextOffset = document.getLineOffset(lineNumber+1);
+				int length = Math.max(1, nextOffset - offset);
+				
+				document.addPosition(new Position(offset));
+				
+				TextSelection selection = new TextSelection(document, offset, length);
+				
+				textViewer.setDocument(document, annModel);
+				textViewer.setSelection(selection, true);
+				
 			} catch (BadLocationException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			textViewer.getTextWidget().setFocus();
+
+			Annotation annotation = new Annotation(true);
 		}
 	}
 	
