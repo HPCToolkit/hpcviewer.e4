@@ -1,5 +1,7 @@
 package edu.rice.cs.hpcviewer.ui.internal;
 
+import java.util.Collection;
+
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
@@ -23,6 +25,8 @@ import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
 public class ScopeMouseListener implements Listener 
 {
+	static final private String STACK_ID = "edu.rice.cs.hpcviewer.ui.partstack.upper";
+	
 	final private EPartService  partService;
 	final private EModelService modelService;
 	final private MApplication  app;
@@ -145,13 +149,28 @@ public class ScopeMouseListener implements Listener
 		if (scope == null || !Utilities.isFileReadable(scope))
 			return;
 		
-		final MPart part = partService.findPart(Editor.ID);
-		MPartStack editorStack = (MPartStack)modelService.find("edu.rice.cs.hpcviewer.ui.partstack.upper", app);
-		editorStack.getChildren().add(part);
+		MPartStack editorStack = (MPartStack)modelService.find(STACK_ID, app);
+		
+		final String filename = scope.getSourceFile().getName(); 
 
-		part.setObject(scope);
-		partService.showPart(part, PartState.ACTIVATE);		
-		part.setVisible(true);
-		part.setLabel(scope.getSourceFile().getName());
+		Collection<MPart> listParts = partService.getParts();
+		for(MPart mp : listParts) {
+			if (mp.getElementId().equals(filename)) {
+				partService.activate(mp, true);
+				return;
+			}
+		}
+
+		final MPart part = partService.createPart(Editor.ID_DESC);
+
+		part.setObject(scope);		
+		part.setLabel(filename);
+		part.setElementId(filename);
+		
+		partService.showPart(part, PartState.ACTIVATE);
+		partService.activate(part, true);
+		editorStack.getChildren().add(part);
+		
+		System.out.println("file: " + filename);
 	}
 }

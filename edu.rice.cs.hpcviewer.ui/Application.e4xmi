@@ -34,7 +34,7 @@
     <children xmi:id="_c3AF2sjYEeSyMNYR5xypkQ" elementId="org.eclipse.ui.contexts.window" name="In Windows"/>
     <children xmi:id="_c3AF28jYEeSyMNYR5xypkQ" elementId="org.eclipse.ui.contexts.dialog" name="In Dialogs"/>
   </rootContext>
-  <descriptors xmi:id="_zu96cJ9cEeqnUtVVp3UlCA" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.editor" label="Source code" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpc-16x16.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" category="Editor" closeable="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.editor.CodeViewer"/>
+  <descriptors xmi:id="_zu96cJ9cEeqnUtVVp3UlCA" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.editor" label="Source code" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpc-16x16.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" category="Editor" closeable="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.editor.Editor"/>
   <menuContributions xmi:id="_RiJ2II7lEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.menucontribution.main">
     <children xsi:type="menu:Menu" xmi:id="_aZJsAI7lEeqBPbXbG7_Dzw" elementId="menu.file" label="File" mnemonics="F">
       <children xsi:type="menu:HandledMenuItem" xmi:id="_dK5a4I7lEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.open" label="Open" tooltip="Open a database. " mnemonics="O"/>

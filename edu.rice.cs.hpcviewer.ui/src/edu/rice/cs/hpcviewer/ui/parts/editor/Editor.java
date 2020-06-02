@@ -37,6 +37,7 @@ import org.eclipse.swt.SWT;
 public class Editor implements ICodeEditor
 {
 	static final public String ID = "edu.rice.cs.hpcviewer.ui.part.editor";
+	static final public String ID_DESC = "edu.rice.cs.hpcviewer.ui.partdescriptor.editor";
 	
 	private SourceViewer textViewer;
 	
@@ -102,6 +103,7 @@ public class Editor implements ICodeEditor
 			} catch (BadLocationException e) {
 				e.printStackTrace();
 			}
+			textViewer.getTextWidget().setFocus();
 		}
 	}
 	
