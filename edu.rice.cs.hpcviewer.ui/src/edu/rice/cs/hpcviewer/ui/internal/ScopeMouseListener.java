@@ -156,20 +156,40 @@ public class ScopeMouseListener implements Listener
 		Collection<MPart> listParts = partService.getParts();
 		for(MPart mp : listParts) {
 			if (mp.getElementId().equals(filename)) {
+				if (mp.getObject() == null) {
+					partService.showPart(mp, PartState.CREATE);
+				}
 				partService.showPart(mp, PartState.VISIBLE);
+				setData(mp, scope);
+
 				return;
 			}
 		}
 
 		final MPart part = partService.createPart(Editor.ID_DESC);
 
-		part.setObject(scope);		
 		part.setLabel(filename);
 		part.setElementId(filename);
 
 		editorStack.getChildren().add(part);
-		
+
 		partService.showPart(part, PartState.VISIBLE);
+
+		setData(part, scope);
+	}
+	
+	/**
+	 * Force the editor part to display a specific file for a specific line
+	 * of a given scope node
+	 * 
+	 * @param part the editor part. Cannot be null
+	 * @param scope: tree scope node
+	 */
+	private void setData(MPart part, Scope scope) {
+		Object obj = part.getObject();
+		if (obj instanceof Editor) {
+			((Editor)obj).setData(scope);
+		}
 		
 		// keep focus to the viewer 
 		treeViewer.getTree().setFocus();

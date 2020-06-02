@@ -76,15 +76,10 @@ public class Editor implements ICodeEditor
 		
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(parent);
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(parent);
-		
-		Object obj = part.getObject();
-		if (obj != null)
-			setData(obj);
 	}
 	
 	@PreDestroy
 	public void preDestroy() {
-		System.out.println(part.getElementId() + " destroyed");
 	}
 
 	@Override
