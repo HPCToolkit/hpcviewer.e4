@@ -7,8 +7,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 
+import edu.rice.cs.hpcviewer.ui.actions.IUserMessage;
 
-public class LabelMessage 
+
+public class LabelMessage implements IUserMessage
 {
 	static final private int MESSAGE_TIMEOUT = 8000; // time out when showing a message
 	

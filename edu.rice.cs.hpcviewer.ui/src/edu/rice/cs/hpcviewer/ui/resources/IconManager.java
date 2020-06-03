@@ -42,6 +42,19 @@ public class IconManager  extends BaseIconManager
 	final static public String Image_ThreadView = "cct-thread.png";
 	final static public String Image_ThreadMap = "cct-thread-map.png";
 	
+	final static public String Image_Viewer_256 = "platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpcviewerEclipse256.gif";
+	final static public String Image_Viewer_128 = "platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpcviewerEclipse128.gif";
+	final static public String Image_Viewer_64  = "platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpcviewerEclipse64.gif";
+	final static public String Image_Viewer_48  = "platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpcviewerEclipse48.gif";
+	final static public String Image_Viewer_32  = "platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpcviewerEclipse32.gif";
+	final static public String Image_Viewer_16  = "platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpcviewerEclipse16.gif";
+	
+	final static public String []Image_Viewer = {
+			Image_Viewer_16,  Image_Viewer_32,
+			Image_Viewer_48,  Image_Viewer_64,
+			Image_Viewer_128, Image_Viewer_256
+	};
+	
 	static private IconManager __singleton=null;
 	static private final AtomicBoolean isInitialized = new AtomicBoolean(false);
 	

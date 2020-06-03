@@ -102,17 +102,21 @@ public class Editor implements ICodeEditor
 			
 			String text = readLineByLineJava8(filename);
 			document.set(text);
+
+			textViewer.setDocument(document, annModel);
 			
 			try {
-				int offset = document.getLineOffset(lineNumber);
-				int nextOffset = document.getLineOffset(lineNumber+1);
-				int length = Math.max(1, nextOffset - offset);
+				int maxLines = document.getNumberOfLines();
+				
+				lineNumber     = Math.max(0, Math.min(lineNumber, maxLines));
+				int offset     = document.getLineOffset(lineNumber);
+				int nextLine   = Math.min(lineNumber+1, maxLines);
+				int nextOffset = document.getLineOffset(nextLine);
+				int length     = Math.max(1, nextOffset - offset);
 				
 				document.addPosition(new Position(offset));
 				
 				TextSelection selection = new TextSelection(document, offset, length);
-				
-				textViewer.setDocument(document, annModel);
 				textViewer.setSelection(selection, true);
 				
 			} catch (BadLocationException e) {

@@ -1,8 +1,10 @@
 package edu.rice.cs.hpcviewer.ui.handlers;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -10,11 +12,13 @@ import javax.inject.Named;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileInfo;
 import org.eclipse.core.filesystem.IFileStore;
+import org.eclipse.core.filesystem.URIUtil;
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.e4.ui.workbench.lifecycle.PostContextCreate;
 import org.eclipse.e4.ui.workbench.lifecycle.PreSave;
@@ -22,12 +26,16 @@ import org.eclipse.e4.ui.workbench.lifecycle.ProcessAdditions;
 import org.eclipse.e4.ui.workbench.lifecycle.ProcessRemovals;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseManager;
 import edu.rice.cs.hpcviewer.ui.experiment.ExperimentManager;
+import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 
 public class LifeCycle 
 {
@@ -35,15 +43,37 @@ public class LifeCycle
 	@Inject IEventBroker broker;
 	@Inject EModelService modelService;
 
-	@Inject DatabaseManager expApplication;
+	@Inject DatabaseManager databaseCollection;
 
 
 	@PostContextCreate
 	public void startup(IEclipseContext context, @Named(IServiceConstants.ACTIVE_SHELL) Shell shell) {
 		
+		// setup a list of images 
+		// Note: this is for Windows. On mac, we don't need this.
+		
+		Display display = Display.getDefault();
+		
+		Image listImages[] = new Image[IconManager.Image_Viewer.length];
+		int i = 0;
+		
+		for (String imageName : IconManager.Image_Viewer) {
+			try {
+				URL url = FileLocator.toFileURL(new URL(imageName));
+				listImages[i] = new Image(display, url.getFile());
+				i++;
+			} catch (IOException e) {
+			}
+		}
+		Window.setDefaultImages(listImages);
+		
+		// handling the command line arguments:
+		// if one of the arguments specify a file or a directory,
+		// try to find the experiment.xml and load it.
+		
 		String args[] = Platform.getApplicationArgs();
 		
-		Shell myShell = shell;
+		Shell myShell = display.getActiveShell();
 		if (myShell == null) {
 			myShell = new Shell(SWT.TOOL | SWT.NO_TRIM);
 		}
@@ -64,7 +94,7 @@ public class LifeCycle
 		if (experiment == null)
 			return;
 		
-		expApplication.addDatabase(experiment, null, context, broker, modelService);
+		databaseCollection.addDatabase(experiment, null, context, broker, modelService);
 	}
 	
 

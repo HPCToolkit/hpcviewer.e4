@@ -1,5 +1,6 @@
 package edu.rice.cs.hpcviewer.ui.experiment;
 
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.inject.Singleton;
@@ -60,6 +61,10 @@ public class DatabaseManager
 				window.setLabel("hpcviewer - " + experiment.getDefaultDirectory().getPath());
 			}
 		}
+	}
+	
+	public Iterator<BaseExperiment> getIterator() {
+		return queueExperiment.iterator();
 	}
 	
 	public int getNumDatabase() {

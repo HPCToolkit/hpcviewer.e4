@@ -26,7 +26,7 @@ public class FileOpenDatabase
 	@Inject MApplication application;
 	@Inject EModelService modelService;
 	
-	@Inject DatabaseManager experimentManager;
+	@Inject DatabaseManager databaseCollection;
 
 	@Execute
 	public void execute(IWorkbench workbench, IEclipseContext context, @Named(IServiceConstants.ACTIVE_SHELL) Shell shell) {
@@ -37,7 +37,7 @@ public class FileOpenDatabase
 		if (experiment == null)
 			return;
 		
-		experimentManager.removeAll();
-		experimentManager.addDatabase(experiment, application, context, broker, modelService);
+		databaseCollection.removeAll();
+		databaseCollection.addDatabase(experiment, application, context, broker, modelService);
 	}
 }
