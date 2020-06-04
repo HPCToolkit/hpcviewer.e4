@@ -14,59 +14,50 @@ import org.eclipse.swt.widgets.TreeColumn;
 
 import java.util.List;
 
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.layout.TreeColumnLayout;
 import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.swt.widgets.TreeItem;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 
+import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
-import edu.rice.cs.hpc.data.util.OSValidator;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
 
 /**
  * we set lazy virtual bit in this viewer
  */
-public class ScopeTreeViewer extends TreeViewer 
+public class ScopeTreeViewer extends TreeViewer implements EventHandler 
 {
 	final static public String COLUMN_DATA_WIDTH = "w"; 
 	final static public int COLUMN_DEFAULT_WIDTH = 120;
 
-	private Scope nodeTopParent = null;
-
-	/**
-	 * @param parent
-	 */
-	public ScopeTreeViewer(Composite parent) {
-		super(parent, SWT.VIRTUAL);
-		init();
-	}
-
-	/**
-	 * @param tree
-	 */
-	public ScopeTreeViewer(Tree tree) {
-		super(tree, SWT.VIRTUAL);
-		init();
-	}
+	private IEventBroker eventBroker;
+	
 
 	/**
 	 * @param parent
 	 * @param style
 	 */
-	public ScopeTreeViewer(Composite parent, int style) {
+	public ScopeTreeViewer(Composite parent, int style, IEventBroker eventBroker) {
 		super(parent, SWT.VIRTUAL | style);
-		init();
+		init(eventBroker);
 	}
 
-	private void init() 
+	private void init(IEventBroker eventBroker) 
 	{
 		setUseHashlookup(true);
 		getTree().setLinesVisible(true);
+		
+		this.eventBroker = eventBroker;
+		eventBroker.subscribe(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN, this);
 	}
 	
 	/**
@@ -79,6 +70,22 @@ public class ScopeTreeViewer extends TreeViewer
 	}
 
 
+	public BaseExperiment getExperiment() {
+		Object input = getInput();
+		
+		if (input == null)
+			return null;
+		
+		if (input instanceof RootScope) {
+			return ((RootScope)input).getExperiment();
+		}
+		
+		if (input instanceof Scope) {
+			RootScope root = ((Scope)input).getRootScope();
+			return root.getExperiment();
+		}
+		return null;
+	}
     
 	/**
 	 * Return the canocalized text from the list of elements 
@@ -272,7 +279,6 @@ public class ScopeTreeViewer extends TreeViewer
     	
     	// draw the root node item
     	Utilities.insertTopRow(this, Utilities.getScopeNavButton(scope), sText);
-    	this.nodeTopParent = nodeParent;
     }
 
     /**
@@ -301,18 +307,10 @@ public class ScopeTreeViewer extends TreeViewer
 		Object obj = getInput();
 		if (obj == null) return;
 		
-		IMetricManager metricMgr = null;
-		
-		if (obj instanceof RootScope) {
-			metricMgr = (IMetricManager) ((RootScope)obj).getExperiment();
-		} else if (obj instanceof Scope) {
-			RootScope root = ((Scope)obj).getRootScope();
-			metricMgr = (IMetricManager) ((RootScope)root).getExperiment();
-		} else {
-			// nothing we can do
+		IMetricManager metricMgr = (IMetricManager) getExperiment();
+		if (metricMgr == null)
 			return;
-		}
-		
+				
 		List<BaseMetric> metrics = metricMgr.getVisibleMetrics();
 		int numMetrics = metrics.size();
 		
@@ -330,7 +328,6 @@ public class ScopeTreeViewer extends TreeViewer
 				numColumn++;
 			}
 		}
-		TreeColumnLayout layout = (TreeColumnLayout) getTree().getParent().getLayout();
 		
 		int i = -1; // index of the column
 		
@@ -359,7 +356,6 @@ public class ScopeTreeViewer extends TreeViewer
 				// Specific fix for Linux+gtk+ppcle64: need to set the layout here
 				// to avoid SWT/GTK to remove the last column
 				
-				layout.setColumnData(column, new ColumnPixelData(iWidth, true));
 			} else {
 				// hide column					
 				if (column.getWidth() <= 0) 
@@ -367,14 +363,9 @@ public class ScopeTreeViewer extends TreeViewer
 				
 	   			Integer objWidth = Integer.valueOf( column.getWidth() );
 	   			
-	   			// Laks: bug no 131: we need to have special key for storing the column width
+	   			// bug no 131: we need to have special key for storing the column width
 	   			column.setData(ScopeTreeViewer.COLUMN_DATA_WIDTH, objWidth);
 	   			
-				// need a special treatment for Linux/GTK platform:
-				// Explicitly set column pixel into zero due to SWT/GTK implementation that
-				// inhibit changes for the last column
-				if (OSValidator.isUnix())
-					layout.setColumnData(column, new ColumnPixelData(0, false));
 			}
 			// for other OS other than Linux, we need to set the width explicitly
 			// the layout will not take affect until users move or resize columns in the table
@@ -384,6 +375,25 @@ public class ScopeTreeViewer extends TreeViewer
 		}
 		getTree().setRedraw(true);
     }
+
+	@Override
+	public void handleEvent(Event event) {
+		String topic = event.getTopic();
+		
+		if (topic.equals(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN)) {
+			Object obj = event.getProperty(IEventBroker.DATA);
+			if (obj == null)
+				return;
+			if (!(obj instanceof ViewerDataEvent)) 
+				return;
+			
+			ViewerDataEvent eventInfo = (ViewerDataEvent) obj;
+			if (getExperiment() != eventInfo.experiment) 
+				return;
+			
+			setColumnsStatus((boolean[]) eventInfo.data);
+		}
+	}
     
     
 	/**

@@ -38,7 +38,7 @@ public class TopDownPart implements IBaseView
     public void createControls(Composite parent) {
 		eventHandler = new ViewEventHandler(this, broker, partService);
 		
-    	contentViewer = new TopDownContentViewer(partService, modelService, app);
+    	contentViewer = new TopDownContentViewer(partService, modelService, app, broker);
     	contentViewer.createContent(parent);
 		
 		if (!databaseAddOn.isEmpty()) {

@@ -13,6 +13,7 @@ import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
+import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
 
 /***
  * <b>
@@ -30,11 +31,6 @@ import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 @Singleton
 public class DatabaseManager 
 {
-	/** Event when a new database has arrived. */
-	static final public String EVENT_HPC_NEW_DATABASE = "hpcviewer/database_add";
-
-	/** Event when a database has to be removed from the application */
-	static final public String EVENT_HPC_REMOVE_DATABASE = "hpcviewer/database_remove";
 	
 	private ConcurrentLinkedQueue<BaseExperiment> queueExperiment;
 	
@@ -43,19 +39,19 @@ public class DatabaseManager
 	}
 	
 	public void addDatabase(BaseExperiment experiment, 
-			MApplication application, 
+			MApplication 	application, 
 			IEclipseContext context,
-			IEventBroker broker,
-			EModelService modelService) {
+			IEventBroker 	broker,
+			EModelService 	modelService) {
 		
 		queueExperiment.add(experiment);
 		
 		if (context == null)
 			return;
 		
-		context.set(DatabaseManager.EVENT_HPC_NEW_DATABASE, experiment);
+		//context.set(ViewerDataEvent.TOPIC_HPC_NEW_DATABASE, experiment);
 		
-		if (broker.post(DatabaseManager.EVENT_HPC_NEW_DATABASE, experiment)) {
+		if (broker.post(ViewerDataEvent.TOPIC_HPC_NEW_DATABASE, experiment)) {
 			if (application != null && modelService != null) {
 				MWindow window = (MWindow) modelService.find("edu.rice.cs.hpcviewer.window.main", application);
 				window.setLabel("hpcviewer - " + experiment.getDefaultDirectory().getPath());

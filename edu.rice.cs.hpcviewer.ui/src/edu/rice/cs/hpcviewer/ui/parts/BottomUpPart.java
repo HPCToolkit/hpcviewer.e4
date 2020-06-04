@@ -48,7 +48,7 @@ public class BottomUpPart implements IBaseView, IPartListener
 		
 		eventHandler = new ViewEventHandler(this, broker, partService);
 
-		contentViewer = new BottomUpContentViewer(partService, modelService, app);
+		contentViewer = new BottomUpContentViewer(partService, modelService, app, broker);
     	contentViewer.createContent(parent);
     	
 		//partService.addPartListener(this);

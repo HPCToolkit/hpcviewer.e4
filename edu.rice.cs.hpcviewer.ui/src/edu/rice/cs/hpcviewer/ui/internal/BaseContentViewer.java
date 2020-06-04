@@ -1,7 +1,7 @@
 package edu.rice.cs.hpcviewer.ui.internal;
 
 import javax.annotation.PreDestroy;
-
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
@@ -26,12 +26,16 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
+
+import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
+import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
 import edu.rice.cs.hpc.data.experiment.metric.MetricValue;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpcviewer.ui.actions.HotCallPath;
+import edu.rice.cs.hpcviewer.ui.actions.MetricColumnHideShowAction;
 import edu.rice.cs.hpcviewer.ui.parts.IContentViewer;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 
@@ -53,6 +57,7 @@ public abstract class BaseContentViewer implements IContentViewer, ISelectionCha
 	final private EPartService  partService;
 	final private EModelService modelService;
 	final private MApplication  app;
+	final private IEventBroker  eventBroker;
 	
 	private ScopeTreeViewer treeViewer = null;
 	
@@ -64,15 +69,17 @@ public abstract class BaseContentViewer implements IContentViewer, ISelectionCha
 	
 	private ScopeZoom zoomAction = null;
 	private HotCallPath hotPathAction = null;
-	
+	private MetricColumnHideShowAction metricAction = null;
 	
 	public BaseContentViewer(
 			EPartService  partService, 
 			EModelService modelService,
-			MApplication  app) {
+			MApplication  app,
+			IEventBroker  eventBroker) {
 		
 		this.partService  = partService;
 		this.modelService = modelService;
+		this.eventBroker  = eventBroker;
 		
 		this.app = app;
 	}
@@ -138,7 +145,7 @@ public abstract class BaseContentViewer implements IContentViewer, ISelectionCha
 		// table creation
 		// -------------------------------------------
 		
-		treeViewer = new ScopeTreeViewer(parent, SWT.BORDER | SWT.MULTI);
+		treeViewer = new ScopeTreeViewer(parent, SWT.BORDER | SWT.MULTI, eventBroker);
 		Tree tree = treeViewer.getTree();
 		tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
         tree.setHeaderVisible(true);
@@ -198,6 +205,7 @@ public abstract class BaseContentViewer implements IContentViewer, ISelectionCha
 				col.pack();
 			}
 		}
+		updateToolItemStatus();
 	}
 	
 	@Override
@@ -294,6 +302,20 @@ public abstract class BaseContentViewer implements IContentViewer, ISelectionCha
 	 */
 	protected void updateToolItemStatus() {
 
+		BaseExperiment exp = treeViewer.getExperiment();
+		if (exp == null) {
+			// disable everything
+			for(ToolItem ti : toolItem) {
+				ti.setEnabled(false);
+			}
+			return;
+		}
+		toolItem[ActionType.FONT_BIGGER.getValue()] .setEnabled(true);
+		toolItem[ActionType.FONT_SMALLER.getValue()].setEnabled(true);
+		
+		IMetricManager mgr = (IMetricManager) exp;
+		toolItem[ActionType.COLUMN_HIDE.getValue()].setEnabled(mgr.getMetricCount() > 0);
+		
 		IStructuredSelection selection = treeViewer.getStructuredSelection();
 		selectionChanged(selection);
 		
@@ -315,8 +337,7 @@ public abstract class BaseContentViewer implements IContentViewer, ISelectionCha
 			toolItem[ActionType.ZOOM_IN.getValue()].setEnabled(false);
 			toolItem[ActionType.HOTPATH.getValue()].setEnabled(false);
 		}
-		boolean enableZoomout = zoomAction.canZoomOut();
-		toolItem[ActionType.ZOOM_OUT.getValue()].setEnabled(enableZoomout);
+		toolItem[ActionType.ZOOM_OUT.getValue()].setEnabled(zoomAction.canZoomOut());
     }
 	
 	/***
@@ -387,6 +408,20 @@ public abstract class BaseContentViewer implements IContentViewer, ISelectionCha
 				zoomAction.zoomOut();
 				
 				updateToolItemStatus();
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {}
+		});
+		
+		toolItem[ActionType.COLUMN_HIDE.getValue()].addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (metricAction == null)
+					metricAction = new MetricColumnHideShowAction(eventBroker, true);
+				
+				metricAction.showColumnsProperties(treeViewer);
 			}
 			
 			@Override

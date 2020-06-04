@@ -1,5 +1,6 @@
 package edu.rice.cs.hpcviewer.ui.internal;
 
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
@@ -19,9 +20,12 @@ public class FlatContentViewer extends BaseContentViewer
 	static final private int ITEM_UNFLAT = 1;
 	private ToolItem[] items;
 
-	public FlatContentViewer(EPartService partService, EModelService modelService, MApplication app) {
-		super(partService, modelService, app);
-		// TODO Auto-generated constructor stub
+	public FlatContentViewer(EPartService  partService, 
+							 EModelService modelService, 
+							 MApplication  app,
+							 IEventBroker  broker) {
+		
+		super(partService, modelService, app, broker);
 	}
 
 	@Override

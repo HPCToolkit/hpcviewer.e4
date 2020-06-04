@@ -5,7 +5,6 @@ import java.util.Iterator;
 
 import javax.inject.Inject;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.InputDialog;

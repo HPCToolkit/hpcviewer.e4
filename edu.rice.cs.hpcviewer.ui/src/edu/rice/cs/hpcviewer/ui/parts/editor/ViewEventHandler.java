@@ -8,7 +8,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
 import edu.rice.cs.hpc.data.experiment.Experiment;
-import edu.rice.cs.hpcviewer.ui.experiment.DatabaseManager;
+import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
 import edu.rice.cs.hpcviewer.ui.parts.IBaseView;
 
 public class ViewEventHandler implements EventHandler 
@@ -23,11 +23,22 @@ public class ViewEventHandler implements EventHandler
 		this.broker = broker;
 		this.partService = partService;
 		
-		broker.subscribe(DatabaseManager.EVENT_HPC_NEW_DATABASE, this);
+		broker.subscribe(ViewerDataEvent.TOPIC_HPC_NEW_DATABASE, this);
 	}
 	
 	@Override
 	public void handleEvent(Event event) {
+		String topic = event.getTopic();
+		if (topic.equals(ViewerDataEvent.TOPIC_HPC_NEW_DATABASE)) {
+			newDatabase(event);
+		}
+	}
+	
+	public void dispose() {
+		broker.unsubscribe(this);
+	}
+	
+	private void newDatabase(Event event) {
 		Object obj = event.getProperty(IEventBroker.DATA);
 		
 		if (obj instanceof Experiment) {
@@ -37,9 +48,5 @@ public class ViewEventHandler implements EventHandler
 				view.setExperiment((Experiment) obj);
 			}
 		}
-	}
-	
-	public void dispose() {
-		broker.unsubscribe(this);
 	}
 }

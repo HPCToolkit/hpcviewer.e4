@@ -47,7 +47,7 @@ public class FlatPart implements IBaseView, IPartListener
     public void createControls(Composite parent) {
 		eventHandler = new ViewEventHandler(this, broker, partService);
 		
-    	contentViewer = new FlatContentViewer(partService, modelService, app);
+    	contentViewer = new FlatContentViewer(partService, modelService, app, broker);
     	contentViewer.createContent(parent);
     	
 		partService.addPartListener(this);
