@@ -11,9 +11,10 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
+import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 
-public class TopDownContentViewer extends BaseContentViewer 
+public class TopDownContentViewer extends AbstractContentViewer 
 {
 
 	final static private int ITEM_GRAPH = 0;
@@ -26,9 +27,10 @@ public class TopDownContentViewer extends BaseContentViewer
 			EPartService partService, 
 			EModelService modelService, 
 			MApplication app,
-			IEventBroker broker) {
+			IEventBroker broker,
+			DatabaseCollection database) {
 		
-		super(partService, modelService, app, broker);
+		super(partService, modelService, app, broker, database);
 	}
 
 	@Override

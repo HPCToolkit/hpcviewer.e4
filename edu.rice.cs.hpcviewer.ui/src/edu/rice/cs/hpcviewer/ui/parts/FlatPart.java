@@ -16,7 +16,7 @@ import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
-import edu.rice.cs.hpcviewer.ui.experiment.DatabaseManager;
+import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.internal.FlatContentViewer;
 import edu.rice.cs.hpcviewer.ui.parts.editor.ViewEventHandler;
 
@@ -29,7 +29,7 @@ public class FlatPart implements IBaseView, IPartListener
 	@Inject MApplication  app;
 
 	@Inject IEventBroker broker;
-	@Inject DatabaseManager databaseAddOn;
+	@Inject DatabaseCollection databaseAddOn;
 
 	private ViewEventHandler eventHandler;
 	private IContentViewer   contentViewer;
@@ -47,7 +47,7 @@ public class FlatPart implements IBaseView, IPartListener
     public void createControls(Composite parent) {
 		eventHandler = new ViewEventHandler(this, broker, partService);
 		
-    	contentViewer = new FlatContentViewer(partService, modelService, app, broker);
+    	contentViewer = new FlatContentViewer(partService, modelService, app, broker, databaseAddOn);
     	contentViewer.createContent(parent);
     	
 		partService.addPartListener(this);

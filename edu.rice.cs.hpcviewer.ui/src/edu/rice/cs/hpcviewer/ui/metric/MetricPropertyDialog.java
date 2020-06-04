@@ -46,7 +46,7 @@ import edu.rice.cs.hpc.data.experiment.metric.MetricType;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric.VisibilityType;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.util.string.StringUtil;
-import edu.rice.cs.hpcviewer.ui.experiment.DatabaseManager;
+import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 
 
 
@@ -62,7 +62,7 @@ public class MetricPropertyDialog extends TitleAreaDialog
 
 	private Experiment experiment;
 
-	@Inject DatabaseManager databaseCollection;
+	@Inject DatabaseCollection databaseCollection;
 
 	/***
 	 * Default constructor: 
@@ -159,7 +159,7 @@ public class MetricPropertyDialog extends TitleAreaDialog
 	 * 
 	 * @param composite
 	 */
-	private void initTableViewer(Composite composite, DatabaseManager dbCollection) {
+	private void initTableViewer(Composite composite, DatabaseCollection dbCollection) {
 		
 		boolean singleExperiment = true;
 		
@@ -287,7 +287,7 @@ public class MetricPropertyDialog extends TitleAreaDialog
 	 * 
 	 * @param component : parent composite
 	 */
-	private void updateContent(Composite component, final DatabaseManager dbCollection) {
+	private void updateContent(Composite component, final DatabaseCollection dbCollection) {
 		
 		// -------------------------------------
 		// case of having more than 1 databases: create a list of databases to select

@@ -31,7 +31,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
-import edu.rice.cs.hpcviewer.ui.experiment.DatabaseManager;
+import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.experiment.ExperimentManager;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 
@@ -41,7 +41,7 @@ public class LifeCycle
 	@Inject IEventBroker broker;
 	@Inject EModelService modelService;
 
-	@Inject DatabaseManager databaseCollection;
+	@Inject DatabaseCollection databaseCollection;
 
 
 	@PostContextCreate
@@ -92,7 +92,7 @@ public class LifeCycle
 		if (experiment == null)
 			return;
 		
-		databaseCollection.addDatabase(experiment, null, context, broker, modelService);
+		databaseCollection.addDatabase(experiment, null, partService, broker, modelService);
 	}
 	
 
@@ -107,6 +107,15 @@ public class LifeCycle
 	@ProcessRemovals
 	void processRemovals(IEclipseContext workbenchContext) {}
 
+	
+	/****
+	 * Find a database for a given path
+	 * 
+	 * @param shell the active shell
+	 * @param expManager the experiment manager
+	 * @param sPath path to the database
+	 * @return
+	 */
 	private BaseExperiment openDatabase(Shell shell, ExperimentManager expManager, String sPath) {
     	IFileStore fileStore;
 

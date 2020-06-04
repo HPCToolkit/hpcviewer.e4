@@ -1,16 +1,17 @@
 package edu.rice.cs.hpcviewer.ui.experiment;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.inject.Singleton;
 
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Creatable;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
@@ -29,34 +30,36 @@ import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
  */
 @Creatable
 @Singleton
-public class DatabaseManager 
+public class DatabaseCollection 
 {
+	static final private String MAIN_WINDOW = "edu.rice.cs.hpcviewer.window.main";
 	
 	private ConcurrentLinkedQueue<BaseExperiment> queueExperiment;
+	private HashMap<BaseExperiment, ViewerDataEvent> mapColumnStatus;
 	
-	public DatabaseManager() {
+	
+	public DatabaseCollection() {
 		queueExperiment = new ConcurrentLinkedQueue<>();
+		mapColumnStatus = new HashMap<BaseExperiment, ViewerDataEvent>();
 	}
 	
 	public void addDatabase(BaseExperiment experiment, 
 			MApplication 	application, 
-			IEclipseContext context,
+			EPartService    service,
 			IEventBroker 	broker,
 			EModelService 	modelService) {
 		
 		queueExperiment.add(experiment);
 		
-		if (context == null)
-			return;
-		
-		//context.set(ViewerDataEvent.TOPIC_HPC_NEW_DATABASE, experiment);
-		
 		if (broker.post(ViewerDataEvent.TOPIC_HPC_NEW_DATABASE, experiment)) {
 			if (application != null && modelService != null) {
-				MWindow window = (MWindow) modelService.find("edu.rice.cs.hpcviewer.window.main", application);
+				MWindow window = (MWindow) modelService.find(MAIN_WINDOW, application);
 				window.setLabel("hpcviewer - " + experiment.getDefaultDirectory().getPath());
 			}
 		}
+		
+		if (service == null)
+			return;		
 	}
 	
 	public Iterator<BaseExperiment> getIterator() {
@@ -83,6 +86,16 @@ public class DatabaseManager
 		int size = queueExperiment.size();
 		queueExperiment.clear();
 
+		mapColumnStatus.clear();
+		
 		return size;
+	}
+	
+	public void addColumnStatus(BaseExperiment experiment, ViewerDataEvent data) {
+		mapColumnStatus.put(experiment, data);
+	}
+	
+	public ViewerDataEvent getColumnStatus(BaseExperiment experiment) {
+		return mapColumnStatus.get(experiment);
 	}
 }

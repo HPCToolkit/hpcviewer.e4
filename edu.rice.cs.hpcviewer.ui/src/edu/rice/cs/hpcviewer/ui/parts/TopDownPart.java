@@ -13,7 +13,7 @@ import org.eclipse.swt.widgets.Composite;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
-import edu.rice.cs.hpcviewer.ui.experiment.DatabaseManager;
+import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.internal.TopDownContentViewer;
 import edu.rice.cs.hpcviewer.ui.parts.editor.ViewEventHandler;
 
@@ -26,7 +26,7 @@ public class TopDownPart implements IBaseView
 	@Inject MApplication  app;
 
 	@Inject IEventBroker broker;
-	@Inject DatabaseManager databaseAddOn;
+	@Inject DatabaseCollection databaseAddOn;
 
 	private ViewEventHandler eventHandler;
 	private IContentViewer   contentViewer;
@@ -38,7 +38,7 @@ public class TopDownPart implements IBaseView
     public void createControls(Composite parent) {
 		eventHandler = new ViewEventHandler(this, broker, partService);
 		
-    	contentViewer = new TopDownContentViewer(partService, modelService, app, broker);
+    	contentViewer = new TopDownContentViewer(partService, modelService, app, broker, databaseAddOn);
     	contentViewer.createContent(parent);
 		
 		if (!databaseAddOn.isEmpty()) {

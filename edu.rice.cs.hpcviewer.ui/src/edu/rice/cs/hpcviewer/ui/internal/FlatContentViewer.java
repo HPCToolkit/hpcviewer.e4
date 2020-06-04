@@ -11,9 +11,10 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
+import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 
-public class FlatContentViewer extends BaseContentViewer 
+public class FlatContentViewer extends AbstractContentViewer 
 {
 
 	static final private int ITEM_FLAT = 0;
@@ -23,9 +24,10 @@ public class FlatContentViewer extends BaseContentViewer
 	public FlatContentViewer(EPartService  partService, 
 							 EModelService modelService, 
 							 MApplication  app,
-							 IEventBroker  broker) {
+							 IEventBroker  broker,
+							 DatabaseCollection database) {
 		
-		super(partService, modelService, app, broker);
+		super(partService, modelService, app, broker, database);
 	}
 
 	@Override

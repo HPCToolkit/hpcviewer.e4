@@ -6,30 +6,28 @@ import javax.inject.Inject;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.MApplication;
-import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
-import org.eclipse.e4.ui.workbench.modeling.IPartListener;
 import org.eclipse.swt.widgets.Composite;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
-import edu.rice.cs.hpcviewer.ui.experiment.DatabaseManager;
+import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.internal.BottomUpContentViewer;
 import edu.rice.cs.hpcviewer.ui.parts.editor.ViewEventHandler;
 
-public class BottomUpPart implements IBaseView, IPartListener
+public class BottomUpPart implements IBaseView
 {
 	static public final String ID = "edu.rice.cs.hpcviewer.ui.part.bottomup";
 
-	@Inject EPartService partService;
+	@Inject EPartService  partService;
 	@Inject EModelService modelService;
 	@Inject MApplication  app;
-
-	@Inject IEventBroker broker;
-	@Inject DatabaseManager databaseAddOn;
+	@Inject IEventBroker  broker;
+	
+	@Inject DatabaseCollection databaseAddOn;
 
 	private ViewEventHandler eventHandler;
 	private IContentViewer   contentViewer;
@@ -48,10 +46,8 @@ public class BottomUpPart implements IBaseView, IPartListener
 		
 		eventHandler = new ViewEventHandler(this, broker, partService);
 
-		contentViewer = new BottomUpContentViewer(partService, modelService, app, broker);
+		contentViewer = new BottomUpContentViewer(partService, modelService, app, broker, databaseAddOn);
     	contentViewer.createContent(parent);
-    	
-		//partService.addPartListener(this);
 		
 		if (!databaseAddOn.isEmpty()) {
 			setExperiment(databaseAddOn.getLast());
@@ -61,7 +57,6 @@ public class BottomUpPart implements IBaseView, IPartListener
 	@PreDestroy
 	public void preDestroy() {
 		eventHandler.dispose();
-		partService.removePartListener(this);
 	}
 
 	@Override
@@ -86,21 +81,4 @@ public class BottomUpPart implements IBaseView, IPartListener
 	public String getID() {
 		return ID;
 	}
-	
-
-	@Override
-	public void partActivated(MPart part) {}
-
-	@Override
-	public void partBroughtToTop(MPart part) {}
-
-	@Override
-	public void partDeactivated(MPart part) {}
-
-	@Override
-	public void partHidden(MPart part) {}
-
-	@Override
-	public void partVisible(MPart part) {}
-
 }

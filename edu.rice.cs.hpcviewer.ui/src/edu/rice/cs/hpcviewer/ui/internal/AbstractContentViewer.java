@@ -36,6 +36,7 @@ import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpcviewer.ui.actions.HotCallPath;
 import edu.rice.cs.hpcviewer.ui.actions.MetricColumnHideShowAction;
+import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.parts.IContentViewer;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 
@@ -50,7 +51,7 @@ import edu.rice.cs.hpcviewer.ui.resources.IconManager;
  * For further customization, the caller (or part) has to subclass this class and implement
  * {@link beginToolbar} and {@link endToolbar}
  */
-public abstract class BaseContentViewer implements IContentViewer, ISelectionChangedListener
+public abstract class AbstractContentViewer implements IContentViewer, ISelectionChangedListener
 {
 	final int TREE_COLUMN_WIDTH  = 250;
 
@@ -58,6 +59,8 @@ public abstract class BaseContentViewer implements IContentViewer, ISelectionCha
 	final private EModelService modelService;
 	final private MApplication  app;
 	final private IEventBroker  eventBroker;
+	
+	final private DatabaseCollection database;
 	
 	private ScopeTreeViewer treeViewer = null;
 	
@@ -71,15 +74,17 @@ public abstract class BaseContentViewer implements IContentViewer, ISelectionCha
 	private HotCallPath hotPathAction = null;
 	private MetricColumnHideShowAction metricAction = null;
 	
-	public BaseContentViewer(
+	public AbstractContentViewer(
 			EPartService  partService, 
 			EModelService modelService,
 			MApplication  app,
-			IEventBroker  eventBroker) {
+			IEventBroker  eventBroker,
+			DatabaseCollection database) {
 		
 		this.partService  = partService;
 		this.modelService = modelService;
 		this.eventBroker  = eventBroker;
+		this.database     = database;
 		
 		this.app = app;
 	}
@@ -206,6 +211,16 @@ public abstract class BaseContentViewer implements IContentViewer, ISelectionCha
 			}
 		}
 		updateToolItemStatus();
+		
+		ViewerDataEvent dataEvent = database.getColumnStatus(experiment);
+		
+		if (dataEvent == null) 
+			return;
+		if (dataEvent.data == null)
+			return;
+		
+		boolean []status = (boolean[]) dataEvent.data;
+		treeViewer.setColumnsStatus(status);
 	}
 	
 	@Override
@@ -421,7 +436,7 @@ public abstract class BaseContentViewer implements IContentViewer, ISelectionCha
 				if (metricAction == null)
 					metricAction = new MetricColumnHideShowAction(eventBroker, true);
 				
-				metricAction.showColumnsProperties(treeViewer);
+				metricAction.showColumnsProperties(treeViewer, database);
 			}
 			
 			@Override

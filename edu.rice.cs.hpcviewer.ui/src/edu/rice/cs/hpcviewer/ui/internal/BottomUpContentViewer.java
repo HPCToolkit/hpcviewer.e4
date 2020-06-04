@@ -10,17 +10,19 @@ import org.eclipse.swt.widgets.ToolBar;
 
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
+import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 
-public class BottomUpContentViewer extends BaseContentViewer 
+public class BottomUpContentViewer extends AbstractContentViewer 
 {
 	private CallerViewContentProvider contentProvider = null;
 
 	public BottomUpContentViewer(EPartService  partService, 
 								 EModelService modelService, 
 								 MApplication  app,
-								 IEventBroker  broker) {
+								 IEventBroker  broker,
+								 DatabaseCollection database) {
 		
-		super(partService, modelService, app, broker);
+		super(partService, modelService, app, broker, database);
 	}
 
 	@Override

@@ -8,16 +8,18 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TreeColumn;
 
+import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
+import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
 import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
 import edu.rice.cs.hpcviewer.ui.metric.MetricColumnDialog;
 import edu.rice.cs.hpcviewer.ui.util.FilterDataItem;
 
 public class MetricColumnHideShowAction 
-{
+{	
 	final private boolean affectOtherViews;
 	final private IEventBroker eventBroker;
 	
@@ -29,7 +31,7 @@ public class MetricColumnHideShowAction
 	/**
      * Show column properties (hidden, visible ...)
      */
-    public void showColumnsProperties(ScopeTreeViewer treeViewer) {
+    public void showColumnsProperties(ScopeTreeViewer treeViewer, DatabaseCollection databaseCollection) {
 
     	IMetricManager metricMgr = (IMetricManager) treeViewer.getExperiment();
     	
@@ -71,6 +73,7 @@ public class MetricColumnHideShowAction
 		
     	MetricColumnDialog dialog = new MetricColumnDialog(shell, arrayOfItems);
     	dialog.enableAllViewOption(affectOtherViews);
+    	
     	if (dialog.open() == Dialog.OK) {
     		boolean isAppliedToAllViews = dialog.isAppliedToAllViews();
     		arrayOfItems = dialog.getResult();
@@ -92,6 +95,7 @@ public class MetricColumnHideShowAction
     			
     			eventBroker.post(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN, data);
     			
+    			databaseCollection.addColumnStatus((BaseExperiment) metricMgr, data);
     		} else {
     			treeViewer.setColumnsStatus(checked);
     		}
