@@ -4,7 +4,6 @@ Bundle-Name: hpcdata
 Bundle-SymbolicName: edu.rice.cs.hpc.data
 Bundle-Version: 5.5.1.qualifier
 Bundle-Vendor: Rice University
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: org.apache.xerces.parsers
 Export-Package: edu.rice.cs.hpc.data.db,
  edu.rice.cs.hpc.data.experiment,

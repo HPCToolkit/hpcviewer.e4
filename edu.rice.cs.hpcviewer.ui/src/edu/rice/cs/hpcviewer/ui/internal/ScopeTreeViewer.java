@@ -9,7 +9,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Layout;
-import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 
 import java.util.List;
@@ -39,9 +38,6 @@ public class ScopeTreeViewer extends TreeViewer implements EventHandler
 	final static public String COLUMN_DATA_WIDTH = "w"; 
 	final static public int COLUMN_DEFAULT_WIDTH = 120;
 
-	private IEventBroker eventBroker;
-	
-
 	/**
 	 * @param parent
 	 * @param style
@@ -56,7 +52,6 @@ public class ScopeTreeViewer extends TreeViewer implements EventHandler
 		setUseHashlookup(true);
 		getTree().setLinesVisible(true);
 		
-		this.eventBroker = eventBroker;
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN, this);
 	}
 	
