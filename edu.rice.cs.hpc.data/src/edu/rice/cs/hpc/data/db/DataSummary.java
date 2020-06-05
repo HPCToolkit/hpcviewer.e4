@@ -244,6 +244,7 @@ public class DataSummary extends DataCommon
 				offset += Constants.SIZEOF_FLOAT;
 			}
 		}
+		file.close();
 	}
 	
 	

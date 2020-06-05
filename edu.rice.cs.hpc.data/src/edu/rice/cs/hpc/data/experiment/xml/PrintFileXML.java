@@ -2,7 +2,6 @@ package edu.rice.cs.hpc.data.experiment.xml;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -130,8 +129,12 @@ public class PrintFileXML {
 		case PERCENT:
 			printAttribute(objPrint, "show-percent", "1" );
 			break;
+		
 		case PROCESS:
 			printAttribute(objPrint, "show-process", "1" );
+			break;
+			
+		case NONE:
 			break;
 		}
 	}
@@ -192,10 +195,17 @@ public class PrintFileXML {
 		File file = new File(hpc_dir + DTD_FILE_NAME);
 		try {
 			objFile = new FileInputStream(file);
-		} catch (FileNotFoundException e) {
+	        
+			readDTD(objPrint, objFile);
+	        
+	        objFile.close();
+		} catch (IOException e) {
 			// we don't need DTD. let's exit silently
 			return;
 		}
+	}
+	
+	private void readDTD(PrintStream objPrint, InputStream objFile) {
 
 	    byte[] buf=new byte[MAX_BUFFER];
 	    
@@ -220,9 +230,6 @@ public class PrintFileXML {
 	    //---------------------------------------------------------
         // DTD has been printed, we need a new line to make nice format 
 	    //---------------------------------------------------------
-        objPrint.println();
-
+        objPrint.println();		
 	}
-	
-
 }

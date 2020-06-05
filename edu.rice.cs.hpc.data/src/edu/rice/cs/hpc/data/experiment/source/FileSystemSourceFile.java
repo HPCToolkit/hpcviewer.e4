@@ -194,6 +194,11 @@ protected void computeLineCount()
 	}
 
 	this.lineCount = 1 + reader.getLineNumber();
+	try {
+		reader.close();
+	} catch (IOException e) {
+		e.printStackTrace();
+	}
 }
 
 

@@ -28,7 +28,6 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TextSelection;
-import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.AnnotationModel;
 import org.eclipse.jface.text.source.CompositeRuler;
 import org.eclipse.jface.text.source.LineNumberRulerColumn;
@@ -123,8 +122,6 @@ public class Editor implements ICodeEditor
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-
-			Annotation annotation = new Annotation(true);
 		}
 	}
 	

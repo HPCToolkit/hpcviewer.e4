@@ -6,7 +6,6 @@ import org.eclipse.swt.graphics.Font;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpcviewer.ui.resources.FontManager;
-import edu.rice.cs.hpcviewer.ui.resources.FontManager.FontID;
 
 
 /****
