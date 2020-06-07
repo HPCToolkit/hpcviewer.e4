@@ -9,6 +9,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Layout;
+import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 
 import java.util.List;
@@ -53,6 +54,7 @@ public class ScopeTreeViewer extends TreeViewer implements EventHandler
 		getTree().setLinesVisible(true);
 		
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN, this);
+		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC, this);
 	}
 	
 	/**
@@ -66,18 +68,23 @@ public class ScopeTreeViewer extends TreeViewer implements EventHandler
 
 
 	public BaseExperiment getExperiment() {
+
+		RootScope root = getRootScope();
+		if (root != null)
+			return root.getExperiment();
+		
+		return null;
+	}
+	
+	public RootScope getRootScope() {
+		
 		Object input = getInput();
-		
-		if (input == null)
-			return null;
-		
 		if (input instanceof RootScope) {
-			return ((RootScope)input).getExperiment();
+			return ((RootScope)input);
 		}
 		
 		if (input instanceof Scope) {
-			RootScope root = ((Scope)input).getRootScope();
-			return root.getExperiment();
+			return ((Scope)input).getRootScope();
 		}
 		return null;
 	}
@@ -373,20 +380,45 @@ public class ScopeTreeViewer extends TreeViewer implements EventHandler
 
 	@Override
 	public void handleEvent(Event event) {
-		String topic = event.getTopic();
 		
+		if (getTree().isDisposed())
+			return;
+
+		Object obj = event.getProperty(IEventBroker.DATA);
+		if (obj == null)
+			return;
+		
+		if (!(obj instanceof ViewerDataEvent)) 
+			return;
+		
+		ViewerDataEvent eventInfo = (ViewerDataEvent) obj;
+		if (getExperiment() != eventInfo.experiment) 
+			return;
+		
+		String topic = event.getTopic();
+
 		if (topic.equals(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN)) {
-			Object obj = event.getProperty(IEventBroker.DATA);
-			if (obj == null)
-				return;
-			if (!(obj instanceof ViewerDataEvent)) 
-				return;
-			
-			ViewerDataEvent eventInfo = (ViewerDataEvent) obj;
-			if (getExperiment() != eventInfo.experiment) 
-				return;
 			
 			setColumnsStatus((boolean[]) eventInfo.data);
+
+		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC)) {
+			
+			Tree tree = getTree();
+			
+			tree.setRedraw(false);
+			
+			TreeViewerColumn col = addTreeColumn((BaseMetric) eventInfo.data, false);
+			col.getColumn().pack();
+			
+			refresh();
+			
+			// important: After the refresh, insert the top row manually for all metrics
+			// if we put this before the refresh, somehow it doesn't work
+			
+			Object root = getInput();
+			insertParentNode((Scope) root);
+			
+			tree.setRedraw(true);
 		}
 	}
     

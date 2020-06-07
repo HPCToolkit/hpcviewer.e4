@@ -36,6 +36,7 @@ import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpcviewer.ui.actions.HotCallPath;
 import edu.rice.cs.hpcviewer.ui.actions.MetricColumnHideShowAction;
+import edu.rice.cs.hpcviewer.ui.actions.UserDerivedMetric;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.parts.IContentViewer;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
@@ -70,9 +71,10 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 	private Listener mouseDownListener = null;
 	private StyledScopeLabelProvider labelProvider;
 	
-	private ScopeZoom zoomAction = null;
+	private ScopeZoom zoomAction     = null;
 	private HotCallPath hotPathAction = null;
 	private MetricColumnHideShowAction metricAction = null;
+	private UserDerivedMetric derivedMetricAction   = null;
 	
 	public AbstractContentViewer(
 			EPartService  partService, 
@@ -212,6 +214,10 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 		}
 		updateToolItemStatus();
 		
+		// synchronize hide/show columns with other views that already visible
+		// since this view is just created, we need to ensure the columns hide/show
+		// are the same.
+		
 		ViewerDataEvent dataEvent = database.getColumnStatus(experiment);
 		
 		if (dataEvent == null) 
@@ -327,9 +333,14 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 		}
 		toolItem[ActionType.FONT_BIGGER.getValue()] .setEnabled(true);
 		toolItem[ActionType.FONT_SMALLER.getValue()].setEnabled(true);
+		toolItem[ActionType.DERIVED_METRIC.getValue()].setEnabled(true);
 		
 		IMetricManager mgr = (IMetricManager) exp;
 		toolItem[ActionType.COLUMN_HIDE.getValue()].setEnabled(mgr.getMetricCount() > 0);
+		
+		// --------------------------------------------------------------------------
+		// tool items that depend once the selected node item
+		// --------------------------------------------------------------------------
 		
 		IStructuredSelection selection = treeViewer.getStructuredSelection();
 		selectionChanged(selection);
@@ -441,6 +452,21 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {}
+		});
+		
+		toolItem[ActionType.DERIVED_METRIC.getValue()].addSelectionListener(new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (derivedMetricAction == null) {
+					derivedMetricAction = new UserDerivedMetric(getViewer().getRootScope(), eventBroker);
+				}
+				derivedMetricAction.addNewMeric();
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {}
+			
 		});
 	}
     
