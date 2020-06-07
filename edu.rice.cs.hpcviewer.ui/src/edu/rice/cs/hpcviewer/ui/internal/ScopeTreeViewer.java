@@ -325,13 +325,22 @@ public class ScopeTreeViewer extends TreeViewer implements EventHandler
 			int i=0;			
 			for (i=0; i<numMetrics && !metrics.get(i).equalIndex((BaseMetric)metric); i++);
 			
+			// it is possible that we hide columns and then create a new derived metric
+			// in this case, the number of columns status is less than the number of metrics
+			if (i >= status.length) {
+				for (; numColumn<toShow.length; numColumn++) {
+					toShow[numColumn] = true;
+				}
+				break;
+			}
+			
 			if (i<numMetrics && metrics.get(i).equalIndex((BaseMetric) metric)) {
 				toShow[numColumn] = status[i];
 				numColumn++;
 			}
 		}
 		
-		int i = -1; // index of the column
+		int i = -1; // reset the column index
 		
 		for (TreeColumn column : columns) {
 			

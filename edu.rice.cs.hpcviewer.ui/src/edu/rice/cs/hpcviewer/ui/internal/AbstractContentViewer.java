@@ -1,5 +1,7 @@
 package edu.rice.cs.hpcviewer.ui.internal;
 
+import java.util.List;
+
 import javax.annotation.PreDestroy;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.MApplication;
@@ -188,7 +190,7 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 		
 		// add metric columns only if the metric is not empty
 		boolean bSorted = true;
-		BaseMetric metrics[] = experiment.getMetrics();
+		List<BaseMetric> metrics = experiment.getVisibleMetrics();
 		
 		for(BaseMetric metric : metrics) {
 			if (root.getMetricValue(metric) == MetricValue.NONE)
