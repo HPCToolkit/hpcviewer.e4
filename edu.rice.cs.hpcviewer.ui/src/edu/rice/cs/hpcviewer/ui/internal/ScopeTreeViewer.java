@@ -364,8 +364,6 @@ public class ScopeTreeViewer extends TreeViewer implements EventHandler
 		        		iWidth = ScopeTreeViewer.COLUMN_DEFAULT_WIDTH;
 	       			}
 				}
-				// Specific fix for Linux+gtk+ppcle64: need to set the layout here
-				// to avoid SWT/GTK to remove the last column
 				
 			} else {
 				// hide column					

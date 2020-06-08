@@ -56,8 +56,29 @@ import edu.rice.cs.hpcviewer.ui.resources.IconManager;
  */
 public abstract class AbstractContentViewer implements IContentViewer, ISelectionChangedListener
 {
-	final int TREE_COLUMN_WIDTH  = 250;
+	final private int TREE_COLUMN_WIDTH  = 250;
 
+	final private int ACTION_ZOOM_IN      = 0;
+	final private int ACTION_ZOOM_OUT     = 1;
+	final private int ACTION_HOTPATH      = 2;
+	final private int ACTION_ADD_METRIC   = 3;
+	final private int ACTION_EXPORT_DATA  = 4;
+	final private int ACTION_COLUMN_HIDE  = 5; 
+	final private int ACTION_FONT_BIGGER  = 6;
+	final private int ACTION_FONT_SMALLER = 7;
+
+	final private ActionType []actionTypes = {
+			new ActionType(IconManager.Image_ZoomIn ,      "Zoom-in the selected node"),
+			new ActionType(IconManager.Image_ZoomOut,      "Zoom-out from the current scope"),
+			new ActionType(IconManager.Image_FlameIcon,    "Expand the hot path below the selected node"),
+			new ActionType(IconManager.Image_FnMetric,     "Add a new derived metric"),
+			new ActionType(IconManager.Image_SaveCSV,      "Export displayed data into a CSV format file"),
+			new ActionType(IconManager.Image_CheckColumns, "Hide/show columns"),
+			new ActionType(IconManager.Image_SaveCSV,  	   "Export the current view into a comma separated value file"),
+			new ActionType(IconManager.Image_FontBigger,   "Increase font size"),
+			new ActionType(IconManager.Image_FontSmaller,  "Decrease font size")
+	};
+	
 	final private EPartService  partService;
 	final private EModelService modelService;
 	final private MApplication  app;
@@ -78,6 +99,18 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 	private MetricColumnHideShowAction metricAction = null;
 	private UserDerivedMetric derivedMetricAction   = null;
 	
+	
+	/***
+	 * Constructor for abstract content viewer
+	 * <p>Initialize the class to get the app service like EPartService and EModelService
+	 * since we don't have access to this injected variables</p>
+	 * 
+	 * @param partService
+	 * @param modelService
+	 * @param app
+	 * @param eventBroker
+	 * @param database
+	 */
 	public AbstractContentViewer(
 			EPartService  partService, 
 			EModelService modelService,
@@ -115,18 +148,11 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 		// -------------------------------------------
 		// default tool bar
 		// -------------------------------------------
-		toolItem = new ToolItem[8];
+		toolItem = new ToolItem[actionTypes.length];
 		
-		toolItem[ActionType.ZOOM_IN.getValue()]  = createToolItem(toolBar, IconManager.Image_ZoomIn,    "Zoom-in the selected node");
-		toolItem[ActionType.ZOOM_OUT.getValue()] = createToolItem(toolBar, IconManager.Image_ZoomOut,   "Zoom-out from the current root");
-		toolItem[ActionType.HOTPATH.getValue()]  = createToolItem(toolBar, IconManager.Image_FlameIcon, "Expand the hot path below the selected node");
-
-		toolItem[ActionType.DERIVED_METRIC.getValue()] = createToolItem(toolBar, IconManager.Image_FnMetric,     "Add a new derived metric");
-		toolItem[ActionType.COLUMN_HIDE.getValue()]    = createToolItem(toolBar, IconManager.Image_CheckColumns, "Hide/show columns");
-		toolItem[ActionType.EXPORT_DATA.getValue()]    = createToolItem(toolBar, IconManager.Image_SaveCSV,  	"Export the current view into a comma separated value file");
-
-		toolItem[ActionType.FONT_BIGGER.getValue()]  = createToolItem(toolBar, IconManager.Image_FontBigger,  "Increase font size");
-		toolItem[ActionType.FONT_SMALLER.getValue()] = createToolItem(toolBar, IconManager.Image_FontSmaller, "Decrease font size");
+		for(int i=0; i<actionTypes.length; i++) {
+			toolItem[i] = createToolItem(toolBar, actionTypes[i].imageFileName, actionTypes[i].tooltip);
+		}
 		
 		// -------------------------------------------
 		// add the end of toolbar
@@ -333,12 +359,12 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 			}
 			return;
 		}
-		toolItem[ActionType.FONT_BIGGER.getValue()] .setEnabled(true);
-		toolItem[ActionType.FONT_SMALLER.getValue()].setEnabled(true);
-		toolItem[ActionType.DERIVED_METRIC.getValue()].setEnabled(true);
+		toolItem[ACTION_FONT_BIGGER] .setEnabled(true);
+		toolItem[ACTION_FONT_SMALLER].setEnabled(true);
+		toolItem[ACTION_ADD_METRIC]  .setEnabled(true);
 		
 		IMetricManager mgr = (IMetricManager) exp;
-		toolItem[ActionType.COLUMN_HIDE.getValue()].setEnabled(mgr.getMetricCount() > 0);
+		toolItem[ACTION_COLUMN_HIDE].setEnabled(mgr.getMetricCount() > 0);
 		
 		// --------------------------------------------------------------------------
 		// tool items that depend once the selected node item
@@ -353,19 +379,19 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 				
 				Scope node = (Scope) item;
 				boolean enabled = zoomAction.canZoomIn((Scope) node);
-				toolItem[ActionType.ZOOM_IN.getValue()].setEnabled(enabled);
-				toolItem[ActionType.HOTPATH.getValue()].setEnabled(true);
+				toolItem[ACTION_ZOOM_IN].setEnabled(enabled);
+				toolItem[ACTION_HOTPATH].setEnabled(true);
 			} else {
-				toolItem[ActionType.ZOOM_IN.getValue()].setEnabled(false);
-				toolItem[ActionType.HOTPATH.getValue()].setEnabled(false);
+				toolItem[ACTION_ZOOM_IN].setEnabled(false);
+				toolItem[ACTION_HOTPATH].setEnabled(false);
 			}
 			
 		} else {
 			// no selection: disable some
-			toolItem[ActionType.ZOOM_IN.getValue()].setEnabled(false);
-			toolItem[ActionType.HOTPATH.getValue()].setEnabled(false);
+			toolItem[ACTION_ZOOM_IN].setEnabled(false);
+			toolItem[ACTION_HOTPATH].setEnabled(false);
 		}
-		toolItem[ActionType.ZOOM_OUT.getValue()].setEnabled(zoomAction.canZoomOut());
+		toolItem[ACTION_ZOOM_OUT].setEnabled(zoomAction.canZoomOut());
     }
 	
 	/***
@@ -391,7 +417,7 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
     
 
 	private void setToolItemHandlers() {
-		toolItem[ActionType.HOTPATH.getValue()].addSelectionListener(new SelectionListener() {
+		toolItem[ACTION_HOTPATH].addSelectionListener(new SelectionListener() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -404,7 +430,7 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 		
 		zoomAction = new ScopeZoom(getViewer());
 
-		toolItem[ActionType.ZOOM_IN.getValue()].addSelectionListener(new SelectionListener() {
+		toolItem[ACTION_ZOOM_IN].addSelectionListener(new SelectionListener() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -428,7 +454,7 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
 		
-		toolItem[ActionType.ZOOM_OUT.getValue()].addSelectionListener(new SelectionListener() {
+		toolItem[ACTION_ZOOM_OUT].addSelectionListener(new SelectionListener() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -442,7 +468,7 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
 		
-		toolItem[ActionType.COLUMN_HIDE.getValue()].addSelectionListener(new SelectionListener() {
+		toolItem[ACTION_COLUMN_HIDE].addSelectionListener(new SelectionListener() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -456,7 +482,7 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
 		
-		toolItem[ActionType.DERIVED_METRIC.getValue()].addSelectionListener(new SelectionListener() {
+		toolItem[ACTION_ADD_METRIC].addSelectionListener(new SelectionListener() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -469,6 +495,28 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {}
 			
+		});
+		
+		toolItem[ACTION_FONT_BIGGER].addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				treeViewer.getTree().getFont();
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {}
+		});
+		
+		toolItem[ACTION_FONT_SMALLER].addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
 	}
     
@@ -490,21 +538,14 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
     ///
     /////////////////////////////////////////////////////////
     
-
-    static protected enum ActionType 
+    static protected class ActionType
     {
-    	ZOOM_IN(0), 		ZOOM_OUT(1), 	HOTPATH(2), 
-    	DERIVED_METRIC(3), 	EXPORT_DATA(4), COLUMN_HIDE(5),
-    	FONT_BIGGER(6), 	FONT_SMALLER(7); 
+    	public String   imageFileName;
+    	public String   tooltip;
     	
-    	int ord;
-    	
-    	ActionType(int ord) {
-    		this.ord = ord;
-    	}
-    	
-    	int getValue() {
-    		return ord;
+    	ActionType(String imageFileName, String tooltip) {
+    		this.imageFileName = imageFileName;
+    		this.tooltip = tooltip;
     	}
     }
 }

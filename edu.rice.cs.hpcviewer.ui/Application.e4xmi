@@ -58,4 +58,5 @@
   <addons xmi:id="_c3AF2MjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.workbench.bindings.model" contributionURI="bundleclass://org.eclipse.e4.ui.workbench.swt/org.eclipse.e4.ui.workbench.swt.util.BindingProcessingAddon"/>
   <addons xmi:id="_HHRYIGDYEemg7cSpH3T_tg" elementId="org.eclipse.passage.lic.e4.ui.licensing" contributionURI="bundleclass://org.eclipse.passage.lic.e4.ui/org.eclipse.passage.lic.e4.ui.addons.LicensingAddon"/>
   <addons xmi:id="_KxIFQKVBEeqxVMw0_Hqotg" elementId="edu.rice.cs.hpcviewer.ui.addon.database" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection"/>
+  <addons xmi:id="_CubQcKkuEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.addon.FontManager" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.resources.FontManager"/>
 </application:Application>
