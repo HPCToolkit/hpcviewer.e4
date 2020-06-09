@@ -74,7 +74,6 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 			new ActionType(IconManager.Image_FnMetric,     "Add a new derived metric"),
 			new ActionType(IconManager.Image_SaveCSV,      "Export displayed data into a CSV format file"),
 			new ActionType(IconManager.Image_CheckColumns, "Hide/show columns"),
-			new ActionType(IconManager.Image_SaveCSV,  	   "Export the current view into a comma separated value file"),
 			new ActionType(IconManager.Image_FontBigger,   "Increase font size"),
 			new ActionType(IconManager.Image_FontSmaller,  "Decrease font size")
 	};
