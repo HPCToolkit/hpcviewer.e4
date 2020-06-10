@@ -1,15 +1,16 @@
 /**
  * 
  */
-package edu.rice.cs.hpcviewer.ui.internal;
+package edu.rice.cs.hpcviewer.ui.actions;
 
 import edu.rice.cs.hpc.data.experiment.scope.CallSiteScopeCallerView;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
+import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
 
 /**
  * Class to manage zoom-in and zoom out of a scope
  */
-public class ScopeZoom {
+public class ZoomAction {
 	// --------------------------------------------------------------------
 	//	ATTRIBUTES
 	// --------------------------------------------------------------------
@@ -25,7 +26,7 @@ public class ScopeZoom {
 	 * @param treeViewer
 	 * @param objGUI
 	 */
-	public ScopeZoom ( ScopeTreeViewer treeViewer) {
+	public ZoomAction ( ScopeTreeViewer treeViewer) {
 		this.viewer = treeViewer;
 		stackRootTree = new java.util.Stack<Scope>();
 	}

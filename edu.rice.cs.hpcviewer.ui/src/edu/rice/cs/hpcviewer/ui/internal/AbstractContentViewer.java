@@ -5,6 +5,7 @@ import java.util.List;
 import javax.annotation.PreDestroy;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.MApplication;
+import org.eclipse.e4.ui.services.EMenuService;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -38,6 +39,7 @@ import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpcviewer.ui.actions.HotCallPath;
 import edu.rice.cs.hpcviewer.ui.actions.MetricColumnHideShowAction;
+import edu.rice.cs.hpcviewer.ui.actions.ZoomAction;
 import edu.rice.cs.hpcviewer.ui.actions.UserDerivedMetric;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.parts.IContentViewer;
@@ -93,7 +95,7 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 	private Listener mouseDownListener = null;
 	private StyledScopeLabelProvider labelProvider;
 	
-	private ScopeZoom zoomAction     = null;
+	private ZoomAction zoomAction     = null;
 	private HotCallPath hotPathAction = null;
 	private MetricColumnHideShowAction metricAction = null;
 	private UserDerivedMetric derivedMetricAction   = null;
@@ -126,7 +128,8 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 	}
 	
 	@Override
-	public void createContent(Composite parent) {
+	public void createContent(Composite parent, EMenuService menuService) {
+		
 		parent.setLayout(new GridLayout(1, false));
 		
 		Composite composite = new Composite(parent, SWT.NONE);
@@ -195,6 +198,9 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 		// initialize tool item handler at the end
 		// because we need access to tree viewer :-( 
 		setToolItemHandlers();
+		
+		menuService.registerContextMenu(treeViewer.getControl(), 
+				"edu.rice.cs.hpcviewer.ui.popupmenu.table");
 	}
 
 	@PreDestroy
@@ -427,7 +433,7 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
 		
-		zoomAction = new ScopeZoom(getViewer());
+		zoomAction = new ZoomAction(getViewer());
 
 		toolItem[ACTION_ZOOM_IN].addSelectionListener(new SelectionListener() {
 			

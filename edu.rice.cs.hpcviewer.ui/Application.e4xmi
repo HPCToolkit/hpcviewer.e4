@@ -7,9 +7,13 @@
       </children>
       <children xsi:type="basic:PartStack" xmi:id="_DIZCcI69EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.partstack.lower">
         <children xsi:type="basic:Part" xmi:id="_HXUhAI69EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.part.topdown" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.TopDownPart" label="Top-down" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/cct.png" tooltip="Top-down view">
-          <menus xsi:type="menu:PopupMenu" xmi:id="_Sqj2YI7qEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.popupmenu.zoom" label="Zoom" mnemonics="Z">
-            <children xsi:type="menu:HandledMenuItem" xmi:id="_XL6hsI7qEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.zoomin" label="Zoom-in" tooltip="Set the selected node as the new tree root and hide the ancestors." mnemonics="i"/>
-            <children xsi:type="menu:HandledMenuItem" xmi:id="_ljMJQI7qEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.zoomout" label="Zoom-out" tooltip="Return to the previous tree root before zoom in." enabled="false" mnemonics="o"/>
+          <menus xsi:type="menu:PopupMenu" xmi:id="_Sqj2YI7qEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.popupmenu.table" label="Zoom" mnemonics="Z">
+            <children xsi:type="menu:HandledMenuItem" xmi:id="_XL6hsI7qEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.zoomin" label="Zoom-in" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/src/edu/rice/cs/hpcviewer/ui/resources/ZoomIn.gif" tooltip="Set the selected node as the new tree root and hide the ancestors." mnemonics="i" command="_p3oI8KqAEeq2aaPo7yBcWg">
+              <parameters xmi:id="_PwfgoKqDEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.parameter.zoomIn" name="edu.rice.cs.hpcviewer.ui.commandparameter.zoom" value="ZoomIn"/>
+            </children>
+            <children xsi:type="menu:HandledMenuItem" xmi:id="_ljMJQI7qEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.zoomout" label="Zoom-out" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/src/edu/rice/cs/hpcviewer/ui/resources/ZoomOut.gif" tooltip="Return to the previous tree root before zoom in." enabled="false" mnemonics="o" command="_p3oI8KqAEeq2aaPo7yBcWg">
+              <parameters xmi:id="_cXkV4KqDEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.parameter.zoomOut" name="edu.rice.cs.hpcviewer.ui.commandparameter.zoom" value="ZoomOut"/>
+            </children>
           </menus>
         </children>
         <children xsi:type="basic:Part" xmi:id="_LZFtUI69EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.part.bottomup" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.BottomUpPart" label="Buttom-up" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/caller.png" tooltip="Buttom-up view (callers view)"/>
@@ -30,6 +34,10 @@
   <handlers xmi:id="_DYwKII7zEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handler.reopen" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.FileReopenDatabase" command="_cPW0II7vEeqBPbXbG7_Dzw"/>
   <handlers xmi:id="_SvylkI7zEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handler.exit" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.FileExit" command="_wGhBQI7uEeqBPbXbG7_Dzw"/>
   <handlers xmi:id="_jDx8AI70EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handler.close" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.FileCloseDatabase" command="_m5VqkI7vEeqBPbXbG7_Dzw"/>
+  <handlers xmi:id="_u40K4KqAEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.handler.zoom" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.ZoomHandler" command="_p3oI8KqAEeq2aaPo7yBcWg"/>
+  <bindingTables xmi:id="_7fwrAKqFEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.bindingtable.file" bindingContext="_c3AF2cjYEeSyMNYR5xypkQ">
+    <bindings xmi:id="_-3xvsKqFEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.keybinding.open" keySequence="M1+O" command="_U14sMI7vEeqBPbXbG7_Dzw"/>
+  </bindingTables>
   <rootContext xmi:id="_c3AF2cjYEeSyMNYR5xypkQ" elementId="org.eclipse.ui.contexts.dialogAndWindow" name="In Dialog and Windows">
     <children xmi:id="_c3AF2sjYEeSyMNYR5xypkQ" elementId="org.eclipse.ui.contexts.window" name="In Windows"/>
     <children xmi:id="_c3AF28jYEeSyMNYR5xypkQ" elementId="org.eclipse.ui.contexts.dialog" name="In Dialogs"/>
@@ -49,6 +57,9 @@
   <commands xmi:id="_U14sMI7vEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.command.open" commandName="Open" description="Open a database"/>
   <commands xmi:id="_cPW0II7vEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.command.reopen" commandName="Add database" description="Open another database"/>
   <commands xmi:id="_m5VqkI7vEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.command.close" commandName="Close" description="Close the current database(s)"/>
+  <commands xmi:id="_p3oI8KqAEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.command.zoom" commandName="Zoom" description="Zoom in/out the selected node">
+    <parameters xmi:id="_8d7q0KqCEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.commandparameter.zoom" name="zoom_type" optional="false"/>
+  </commands>
   <addons xmi:id="_c3AF0sjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.core.commands.service" contributionURI="bundleclass://org.eclipse.e4.core.commands/org.eclipse.e4.core.commands.CommandServiceAddon"/>
   <addons xmi:id="_c3AF08jYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.contexts.service" contributionURI="bundleclass://org.eclipse.e4.ui.services/org.eclipse.e4.ui.services.ContextServiceAddon"/>
   <addons xmi:id="_c3AF1MjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.bindings.service" contributionURI="bundleclass://org.eclipse.e4.ui.bindings/org.eclipse.e4.ui.bindings.BindingServiceAddon"/>
