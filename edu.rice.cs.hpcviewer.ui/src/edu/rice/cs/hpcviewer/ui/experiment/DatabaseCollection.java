@@ -98,7 +98,7 @@ public class DatabaseCollection
 		if (path == null || path.length() < 1) {
 			experiment    = expManager.openFileExperiment(myShell);
 		} else {
-			experiment = openDatabase(myShell, expManager, args[0]);
+			experiment = openDatabase(myShell, expManager, path);
 		}
 		if (experiment == null)
 			return;

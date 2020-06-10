@@ -31,14 +31,7 @@
   <descriptors xmi:id="_tevAsKUpEeqxVMw0_Hqotg" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.topdown" label="Top down" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/cct.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.TopDownPart"/>
   <descriptors xmi:id="_5ts38KUpEeqxVMw0_Hqotg" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.bottomup" label="Bottom-up" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/caller.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.BottomUpPart"/>
   <descriptors xmi:id="_TfML4KrDEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.flat" label="Flat view" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/flat.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.FlatPart"/>
-  <menuContributions xmi:id="_RiJ2II7lEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.menucontribution.main">
-    <children xsi:type="menu:Menu" xmi:id="_aZJsAI7lEeqBPbXbG7_Dzw" elementId="menu.file" label="File" mnemonics="F">
-      <children xsi:type="menu:HandledMenuItem" xmi:id="_dK5a4I7lEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.open" label="Open" tooltip="Open a database. " mnemonics="O"/>
-      <children xsi:type="menu:HandledMenuItem" xmi:id="_lYbdAI7lEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.reopen" label="Reopen" tooltip="Close the current database, and open a new one." enabled="false" mnemonics="R"/>
-      <children xsi:type="menu:MenuSeparator" xmi:id="_vgbnwI7lEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.menuseparator.0"/>
-      <children xsi:type="menu:DirectMenuItem" xmi:id="_yS3TII7lEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.directmenuitem.exit" label="Exit" tooltip="Exit the application" mnemonics="x"/>
-    </children>
-  </menuContributions>
+  <menuContributions xmi:id="_RiJ2II7lEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.menucontribution.main"/>
   <commands xmi:id="_wGhBQI7uEeqBPbXbG7_Dzw" elementId="org.eclipse.ui.file.exit" commandName="Exit" description="Exit the application"/>
   <commands xmi:id="_U14sMI7vEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.command.open" commandName="Open" description="Open a database"/>
   <commands xmi:id="_cPW0II7vEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.command.reopen" commandName="Add database" description="Open another database"/>
