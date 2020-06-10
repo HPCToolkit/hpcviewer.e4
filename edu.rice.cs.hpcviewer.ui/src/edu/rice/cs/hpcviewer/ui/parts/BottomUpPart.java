@@ -22,6 +22,7 @@ import edu.rice.cs.hpcviewer.ui.parts.editor.ViewEventHandler;
 public class BottomUpPart implements IBaseView
 {
 	static public final String ID = "edu.rice.cs.hpcviewer.ui.part.bottomup";
+	static final public String IDdesc = "edu.rice.cs.hpcviewer.ui.partdescriptor.bottomup";
 
 	@Inject EPartService  partService;
 	@Inject EModelService modelService;

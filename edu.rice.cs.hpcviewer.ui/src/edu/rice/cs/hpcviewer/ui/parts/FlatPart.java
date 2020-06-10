@@ -24,6 +24,7 @@ import edu.rice.cs.hpcviewer.ui.parts.editor.ViewEventHandler;
 public class FlatPart implements IBaseView, IPartListener
 {
 	static final public String ID = "edu.rice.cs.hpcviewer.ui.part.flat";
+	static final public String IDdesc = "edu.rice.cs.hpcviewer.ui.partdescriptor.flat";
 
 	@Inject EPartService partService;
 	@Inject EModelService modelService;

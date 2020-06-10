@@ -4,17 +4,28 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.eclipse.e4.core.di.annotations.Creatable;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.MApplication;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
+import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
+import edu.rice.cs.hpcviewer.ui.parts.BaseViewPart;
+import edu.rice.cs.hpcviewer.ui.parts.BottomUpPart;
+import edu.rice.cs.hpcviewer.ui.parts.FlatPart;
+import edu.rice.cs.hpcviewer.ui.parts.IBaseView;
+import edu.rice.cs.hpcviewer.ui.parts.TopDownPart;
+import edu.rice.cs.hpcviewer.ui.parts.editor.Editor;
 
 /***
  * <b>
@@ -37,6 +48,7 @@ public class DatabaseCollection
 	private ConcurrentLinkedQueue<BaseExperiment> queueExperiment;
 	private HashMap<BaseExperiment, ViewerDataEvent> mapColumnStatus;
 	
+	@Inject EPartService partService;
 	
 	public DatabaseCollection() {
 		queueExperiment = new ConcurrentLinkedQueue<>();
@@ -51,15 +63,46 @@ public class DatabaseCollection
 		
 		queueExperiment.add(experiment);
 		
+		/*
 		if (broker.post(ViewerDataEvent.TOPIC_HPC_NEW_DATABASE, experiment)) {
 			if (application != null && modelService != null) {
 				MWindow window = (MWindow) modelService.find(MAIN_WINDOW, application);
 				window.setLabel("hpcviewer - " + experiment.getDefaultDirectory().getPath());
 			}
-		}
+		} */
 		
-		if (service == null)
-			return;		
+		if (service == null) {
+			System.out.println("Error: service is not available");
+			return;
+		}
+		MPartStack stack = (MPartStack)modelService.find("edu.rice.cs.hpcviewer.ui.partstack.lower", application);
+		
+		final String []partIds = {
+				TopDownPart.IDdesc,
+				BottomUpPart.IDdesc,
+				FlatPart.IDdesc
+		};
+		
+		Object []children = experiment.getRootScopeChildren();
+		
+		for (int i=0; i<children.length; i++) {
+
+			RootScope root = (RootScope) children[i];
+			
+			final MPart part = partService.createPart(partIds[i]);
+			
+			stack.getChildren().add(part);
+
+			part.setLabel(root.getRootName());
+			part.setElementId(experiment.getDefaultDirectory().getAbsolutePath() + ":" + root.getRootName());
+			
+			if (i==0) {
+				partService.showPart(part, PartState.VISIBLE);
+				
+				IBaseView view = (IBaseView) part.getObject();			
+				view.setExperiment(experiment);
+			}
+		}
 	}
 	
 	public Iterator<BaseExperiment> getIterator() {

@@ -21,6 +21,7 @@ import edu.rice.cs.hpcviewer.ui.parts.editor.ViewEventHandler;
 public class TopDownPart implements IBaseView
 {
 	static final public String ID = "edu.rice.cs.hpcviewer.ui.part.topdown";
+	static final public String IDdesc = "edu.rice.cs.hpcviewer.ui.partdescriptor.topdown";
 
 	@Inject EPartService partService;
 	@Inject EModelService modelService;

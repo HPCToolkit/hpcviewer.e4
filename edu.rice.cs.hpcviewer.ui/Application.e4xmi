@@ -5,20 +5,7 @@
       <children xsi:type="basic:PartStack" xmi:id="_Bd0-EI69EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.partstack.upper">
         <children xsi:type="basic:Part" xmi:id="_h19JAJJMEeq3lfezHIkHUw" elementId="edu.rice.cs.hpcviewer.ui.part.editor" visible="false" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.editor.Editor" label="Source code" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpc-16x16.png" closeable="true"/>
       </children>
-      <children xsi:type="basic:PartStack" xmi:id="_DIZCcI69EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.partstack.lower">
-        <children xsi:type="basic:Part" xmi:id="_HXUhAI69EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.part.topdown" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.TopDownPart" label="Top-down" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/cct.png" tooltip="Top-down view">
-          <menus xsi:type="menu:PopupMenu" xmi:id="_Sqj2YI7qEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.popupmenu.table" label="Zoom" mnemonics="Z">
-            <children xsi:type="menu:HandledMenuItem" xmi:id="_XL6hsI7qEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.zoomin" label="Zoom-in" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/src/edu/rice/cs/hpcviewer/ui/resources/ZoomIn.gif" tooltip="Set the selected node as the new tree root and hide the ancestors." mnemonics="i" command="_p3oI8KqAEeq2aaPo7yBcWg">
-              <parameters xmi:id="_PwfgoKqDEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.parameter.zoomIn" name="edu.rice.cs.hpcviewer.ui.commandparameter.zoom" value="ZoomIn"/>
-            </children>
-            <children xsi:type="menu:HandledMenuItem" xmi:id="_ljMJQI7qEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.zoomout" label="Zoom-out" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/src/edu/rice/cs/hpcviewer/ui/resources/ZoomOut.gif" tooltip="Return to the previous tree root before zoom in." enabled="false" mnemonics="o" command="_p3oI8KqAEeq2aaPo7yBcWg">
-              <parameters xmi:id="_cXkV4KqDEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.parameter.zoomOut" name="edu.rice.cs.hpcviewer.ui.commandparameter.zoom" value="ZoomOut"/>
-            </children>
-          </menus>
-        </children>
-        <children xsi:type="basic:Part" xmi:id="_LZFtUI69EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.part.bottomup" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.BottomUpPart" label="Buttom-up" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/caller.png" tooltip="Buttom-up view (callers view)"/>
-        <children xsi:type="basic:Part" xmi:id="_SUJa8I69EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.part.flat" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.FlatPart" label="Flat view" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/flat.png" tooltip="Flat view"/>
-      </children>
+      <children xsi:type="basic:PartStack" xmi:id="_DIZCcI69EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.partstack.lower"/>
     </children>
     <mainMenu xmi:id="_7ohBoI7qEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.menu.main">
       <children xsi:type="menu:Menu" xmi:id="_9ABnII7qEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.menu.file" label="File" mnemonics="F">
@@ -45,6 +32,7 @@
   <descriptors xmi:id="_zu96cJ9cEeqnUtVVp3UlCA" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.editor" label="Source code" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpc-16x16.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" category="Editor" closeable="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.editor.Editor"/>
   <descriptors xmi:id="_tevAsKUpEeqxVMw0_Hqotg" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.topdown" label="Top down" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/cct.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.TopDownPart"/>
   <descriptors xmi:id="_5ts38KUpEeqxVMw0_Hqotg" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.bottomup" label="Bottom-up" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/caller.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.BottomUpPart"/>
+  <descriptors xmi:id="_TfML4KrDEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.flat" label="Flat view" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/flat.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.FlatPart"/>
   <menuContributions xmi:id="_RiJ2II7lEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.menucontribution.main">
     <children xsi:type="menu:Menu" xmi:id="_aZJsAI7lEeqBPbXbG7_Dzw" elementId="menu.file" label="File" mnemonics="F">
       <children xsi:type="menu:HandledMenuItem" xmi:id="_dK5a4I7lEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.open" label="Open" tooltip="Open a database. " mnemonics="O"/>
