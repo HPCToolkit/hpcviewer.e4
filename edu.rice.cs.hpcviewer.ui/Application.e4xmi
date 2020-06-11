@@ -3,7 +3,10 @@
   <children xsi:type="basic:TrimmedWindow" xmi:id="_c3AF0cjYEeSyMNYR5xypkQ" elementId="edu.rice.cs.hpcviewer.window.main" label="hpcviewer" iconURI="" width="1000" height="800">
     <children xsi:type="basic:PartSashContainer" xmi:id="_60CmoI68EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.partsashcontainer.main">
       <children xsi:type="basic:PartStack" xmi:id="_Bd0-EI69EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.partstack.upper"/>
-      <children xsi:type="basic:PartStack" xmi:id="_DIZCcI69EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.partstack.lower"/>
+      <children xsi:type="basic:PartSashContainer" xmi:id="_3NDgAKuTEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.partsashcontainer.0" horizontal="true">
+        <children xsi:type="basic:PartStack" xmi:id="_DIZCcI69EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.partstack.lower"/>
+        <children xsi:type="basic:PartStack" xmi:id="_622RMKuTEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.partstack.lower2" visible="false"/>
+      </children>
     </children>
     <mainMenu xmi:id="_7ohBoI7qEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.menu.main">
       <children xsi:type="menu:Menu" xmi:id="_9ABnII7qEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.menu.file" label="File" mnemonics="F">
@@ -26,6 +29,7 @@
   <handlers xmi:id="_u40K4KqAEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.handler.zoom" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.ZoomHandler" command="_p3oI8KqAEeq2aaPo7yBcWg"/>
   <bindingTables xmi:id="_7fwrAKqFEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.bindingtable.file" bindingContext="_c3AF2cjYEeSyMNYR5xypkQ">
     <bindings xmi:id="_-3xvsKqFEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.keybinding.open" keySequence="M1+O" command="_U14sMI7vEeqBPbXbG7_Dzw"/>
+    <bindings xmi:id="_k4-EoKuTEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.keybinding.add" keySequence="M1+A" command="_cPW0II7vEeqBPbXbG7_Dzw"/>
   </bindingTables>
   <rootContext xmi:id="_c3AF2cjYEeSyMNYR5xypkQ" elementId="org.eclipse.ui.contexts.dialogAndWindow" name="In Dialog and Windows">
     <children xmi:id="_c3AF2sjYEeSyMNYR5xypkQ" elementId="org.eclipse.ui.contexts.window" name="In Windows"/>

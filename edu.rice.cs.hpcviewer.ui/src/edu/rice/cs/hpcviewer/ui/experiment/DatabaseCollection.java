@@ -23,6 +23,7 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.model.application.ui.basic.MPartSashContainer;
 import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
 import org.eclipse.e4.ui.model.application.ui.basic.MStackElement;
 import org.eclipse.e4.ui.workbench.IWorkbench;
@@ -134,7 +135,12 @@ public class DatabaseCollection
 			System.out.println("Error: service is not available");
 			return;
 		}
-		MPartStack stack = (MPartStack)modelService.find("edu.rice.cs.hpcviewer.ui.partstack.lower", application);
+		MPartStack stack;
+		if (queueExperiment.size()==1) {
+			stack = (MPartStack)modelService.find("edu.rice.cs.hpcviewer.ui.partstack.lower" , application);
+		} else {
+			stack = (MPartStack)modelService.find("edu.rice.cs.hpcviewer.ui.partstack.lower2", application);
+		}
 		
 		if (stack == null) {
 			System.out.println("stack cannot be found");
@@ -142,9 +148,9 @@ public class DatabaseCollection
 			stack = modelService.createModelElement(MPartStack.class);
 			stack.setElementId("edu.rice.cs.hpcviewer.ui.partstack.lower");
 			stack.setToBeRendered(true);
-			stack.setOnTop(true);
-			stack.setVisible(true);
 		}
+		stack.setVisible(true);
+		stack.setOnTop(true);
 
 		List<MStackElement> list = stack.getChildren(); 
 		if (list == null) {

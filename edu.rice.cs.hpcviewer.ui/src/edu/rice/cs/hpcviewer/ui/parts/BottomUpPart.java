@@ -1,12 +1,6 @@
 package edu.rice.cs.hpcviewer.ui.parts;
 
-import javax.inject.Inject;
-
-import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.services.EMenuService;
-import org.eclipse.e4.ui.workbench.modeling.EModelService;
-import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.widgets.Composite;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
@@ -20,10 +14,6 @@ public class BottomUpPart extends BaseViewPart
 	static public final String ID = "edu.rice.cs.hpcviewer.ui.part.bottomup";
 	static final public String IDdesc = "edu.rice.cs.hpcviewer.ui.partdescriptor.bottomup";
 
-	@Inject EPartService  partService;
-	@Inject EModelService modelService;
-	@Inject MApplication  app;
-	@Inject IEventBroker  broker;
 	
 	public BottomUpPart() {
 	}
