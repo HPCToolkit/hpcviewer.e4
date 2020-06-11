@@ -247,7 +247,7 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 				col.pack();
 			}
 		}
-		updateToolItemStatus();
+		updateStatus();
 		
 		// synchronize hide/show columns with other views that already visible
 		// since this view is just created, we need to ensure the columns hide/show
@@ -272,7 +272,7 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 	
 	@Override
     public void selectionChanged(SelectionChangedEvent event) {
-		updateToolItemStatus();
+		updateStatus();
 	}
 	
 	
@@ -360,9 +360,10 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
     }
 	
 	/**
-	 * Enable all tool items
+	 * Enable/disable tool items.
+	 * Subclasses must call this method once an operation is executed. 
 	 */
-	protected void updateToolItemStatus() {
+	protected void updateStatus() {
 
 		BaseExperiment exp = treeViewer.getExperiment();
 		if (exp == null) {
@@ -384,6 +385,8 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 		// --------------------------------------------------------------------------
 		
 		IStructuredSelection selection = treeViewer.getStructuredSelection();
+		
+		// notify subclasses to update the status
 		selectionChanged(selection);
 		
 		if (selection != null) {
@@ -459,7 +462,7 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 				if (data != null && data instanceof Scope) {
 					zoomAction.zoomIn((Scope) data);
 					
-					updateToolItemStatus();
+					updateStatus();
 				}
 			}
 			
@@ -474,7 +477,7 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 
 				zoomAction.zoomOut();
 				
-				updateToolItemStatus();
+				updateStatus();
 			}
 			
 			@Override
