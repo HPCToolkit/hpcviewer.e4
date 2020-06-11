@@ -55,6 +55,8 @@ public class FlatContentViewer extends AbstractContentViewer
 			public void widgetSelected(SelectionEvent e) {
 
 				action.flatten();
+				stackActions.push(action);
+				
 				updateStatus();
 			}
 			
@@ -67,6 +69,11 @@ public class FlatContentViewer extends AbstractContentViewer
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				action.unflatten();
+				Object obj = stackActions.pop();
+				if (obj != action) {
+					System.err.println("Error unflaten: ilegal undo: " + obj);
+				}
+				
 				updateStatus();
 			}
 			
@@ -99,7 +106,19 @@ public class FlatContentViewer extends AbstractContentViewer
 		if (action == null)
 			action = new FlatScopeAction(getViewer());
 
-		items[ITEM_UNFLAT].setEnabled(action.canUnflatten());
+		// we can enable unflatten button if:
+		// - it has been previously flatten; and
+		// - the last action is flatten()
+		
+		boolean canUnflat = action.canUnflatten() && 
+				(!stackActions.isEmpty() && stackActions.peek()==action);
+		items[ITEM_UNFLAT].setEnabled(canUnflat);
+		
+		// we can enable flatten button iff:
+		// - the tree has at least one child and 
+		// - one of the children has at least a child
+		//
+		// in other word: the tree has at least a grand-child
 		
 		Object obj = getViewer().getInput();
 		if (obj != null) {

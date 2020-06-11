@@ -1,6 +1,7 @@
 package edu.rice.cs.hpcviewer.ui.internal;
 
 import java.util.List;
+import java.util.Stack;
 
 import javax.annotation.PreDestroy;
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -100,6 +101,7 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 	private MetricColumnHideShowAction metricAction = null;
 	private UserDerivedMetric derivedMetricAction   = null;
 	
+	protected Stack<Object> stackActions; 
 	
 	/***
 	 * Constructor for abstract content viewer
@@ -125,6 +127,8 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 		this.database     = database;
 		
 		this.app = app;
+		
+		stackActions = new Stack<Object>();
 	}
 	
 	@Override
@@ -407,7 +411,10 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 			toolItem[ACTION_ZOOM_IN].setEnabled(false);
 			toolItem[ACTION_HOTPATH].setEnabled(false);
 		}
-		toolItem[ACTION_ZOOM_OUT].setEnabled(zoomAction.canZoomOut());
+		boolean canZoomOut = zoomAction.canZoomOut() && 
+				(!stackActions.isEmpty() && stackActions.peek()==zoomAction);
+		
+		toolItem[ACTION_ZOOM_OUT].setEnabled(canZoomOut);
     }
 	
 	/***
@@ -461,6 +468,7 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 				Object data = structSelect.getFirstElement();
 				if (data != null && data instanceof Scope) {
 					zoomAction.zoomIn((Scope) data);
+					stackActions.push(zoomAction);
 					
 					updateStatus();
 				}
@@ -476,6 +484,11 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 			public void widgetSelected(SelectionEvent e) {
 
 				zoomAction.zoomOut();
+				Object obj = stackActions.pop();
+				
+				if (obj != zoomAction) {
+					System.err.println("Invalid undoed action: " + obj);
+				}
 				
 				updateStatus();
 			}
