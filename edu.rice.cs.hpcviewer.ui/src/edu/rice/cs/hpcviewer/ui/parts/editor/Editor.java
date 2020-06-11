@@ -14,6 +14,7 @@ import javax.annotation.PreDestroy;
 
 import org.eclipse.swt.widgets.Composite;
 
+import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpc.data.experiment.source.FileSystemSourceFile;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;
@@ -42,6 +43,8 @@ public class Editor implements ICodeEditor
 {
 	static final public String ID = "edu.rice.cs.hpcviewer.ui.part.editor";
 	static final public String ID_DESC = "edu.rice.cs.hpcviewer.ui.partdescriptor.editor";
+	
+	static final private String PROPERTY_DATA = "hpceditor.data";
 	
 	private SourceViewer textViewer;
 	
@@ -103,6 +106,7 @@ public class Editor implements ICodeEditor
 			document.set(text);
 
 			textViewer.setDocument(document, annModel);
+			textViewer.setData(PROPERTY_DATA, scope);
 			
 			try {
 				int maxLines = document.getNumberOfLines();
@@ -123,6 +127,15 @@ public class Editor implements ICodeEditor
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public BaseExperiment getExperiment() {
+		Scope scope = (Scope) textViewer.getData(PROPERTY_DATA);
+		
+		if (scope != null)
+			return scope.getExperiment();
+		
+		return null;
 	}
 	
 	private static String readLineByLineJava8(String filePath) 

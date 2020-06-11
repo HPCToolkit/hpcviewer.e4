@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<application:Application xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:application="http://www.eclipse.org/ui/2010/UIModel/application" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmi:id="_c3AF0MjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.application" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ">
+<application:Application xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:application="http://www.eclipse.org/ui/2010/UIModel/application" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmlns:ui="http://www.eclipse.org/ui/2010/UIModel/application/ui" xmi:id="_c3AF0MjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.application" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ">
   <children xsi:type="basic:TrimmedWindow" xmi:id="_c3AF0cjYEeSyMNYR5xypkQ" elementId="edu.rice.cs.hpcviewer.window.main" label="hpcviewer" iconURI="" width="1000" height="800">
     <children xsi:type="basic:PartSashContainer" xmi:id="_60CmoI68EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.partsashcontainer.main">
       <children xsi:type="basic:PartStack" xmi:id="_Bd0-EI69EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.partstack.upper"/>
@@ -8,15 +8,19 @@
     <mainMenu xmi:id="_7ohBoI7qEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.menu.main">
       <children xsi:type="menu:Menu" xmi:id="_9ABnII7qEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.menu.file" label="File" mnemonics="F">
         <children xsi:type="menu:HandledMenuItem" xmi:id="__N2JkI7qEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.open" label="Open a database" tooltip="Open a database. If the application has already opened databases, it will replace them with the new one" mnemonics="O" command="_U14sMI7vEeqBPbXbG7_Dzw"/>
-        <children xsi:type="menu:HandledMenuItem" xmi:id="_Hel3wI7rEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.reopen" label="Open another database" tooltip="Open another database on top of existing ones" enabled="false" mnemonics="a" command="_cPW0II7vEeqBPbXbG7_Dzw"/>
-        <children xsi:type="menu:HandledMenuItem" xmi:id="_QfhswI7rEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.close" label="Close a database" tooltip="Close the last opened database(s)" enabled="false" mnemonics="C" command="_m5VqkI7vEeqBPbXbG7_Dzw"/>
+        <children xsi:type="menu:HandledMenuItem" xmi:id="_Hel3wI7rEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.reopen" label="Open another database" tooltip="Open another database on top of existing ones" enabled="false" mnemonics="a" command="_cPW0II7vEeqBPbXbG7_Dzw">
+          <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_XmHysKuMEeq2aaPo7yBcWg" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseExistence"/>
+        </children>
+        <children xsi:type="menu:HandledMenuItem" xmi:id="_QfhswI7rEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.close" label="Close a database" tooltip="Close the last opened database(s)" enabled="false" mnemonics="C" command="_m5VqkI7vEeqBPbXbG7_Dzw">
+          <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_jS14gKuMEeq2aaPo7yBcWg" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseCloseDefinition"/>
+        </children>
         <children xsi:type="menu:MenuSeparator" xmi:id="_VTVaAI7rEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.menuseparator.1"/>
         <children xsi:type="menu:HandledMenuItem" xmi:id="_LbRy8I7vEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.exit" label="Exit" tooltip="Exit the application" mnemonics="x" command="_wGhBQI7uEeqBPbXbG7_Dzw"/>
       </children>
     </mainMenu>
   </children>
   <handlers xmi:id="_zXCPcI7xEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handler.open" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.FileOpenDatabase" command="_U14sMI7vEeqBPbXbG7_Dzw"/>
-  <handlers xmi:id="_DYwKII7zEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handler.reopen" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.FileReopenDatabase" command="_cPW0II7vEeqBPbXbG7_Dzw"/>
+  <handlers xmi:id="_DYwKII7zEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handler.reopen" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.FileAddDatabase" command="_cPW0II7vEeqBPbXbG7_Dzw"/>
   <handlers xmi:id="_SvylkI7zEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handler.exit" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.FileExit" command="_wGhBQI7uEeqBPbXbG7_Dzw"/>
   <handlers xmi:id="_jDx8AI70EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handler.close" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.FileCloseDatabase" command="_m5VqkI7vEeqBPbXbG7_Dzw"/>
   <handlers xmi:id="_u40K4KqAEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.handler.zoom" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.ZoomHandler" command="_p3oI8KqAEeq2aaPo7yBcWg"/>
@@ -31,7 +35,6 @@
   <descriptors xmi:id="_tevAsKUpEeqxVMw0_Hqotg" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.topdown" label="Top down" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/cct.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.TopDownPart"/>
   <descriptors xmi:id="_5ts38KUpEeqxVMw0_Hqotg" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.bottomup" label="Bottom-up" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/caller.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.BottomUpPart"/>
   <descriptors xmi:id="_TfML4KrDEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.flat" label="Flat view" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/flat.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.FlatPart"/>
-  <menuContributions xmi:id="_RiJ2II7lEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.menucontribution.main"/>
   <commands xmi:id="_wGhBQI7uEeqBPbXbG7_Dzw" elementId="org.eclipse.ui.file.exit" commandName="Exit" description="Exit the application"/>
   <commands xmi:id="_U14sMI7vEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.command.open" commandName="Open" description="Open a database"/>
   <commands xmi:id="_cPW0II7vEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.command.reopen" commandName="Add database" description="Open another database"/>

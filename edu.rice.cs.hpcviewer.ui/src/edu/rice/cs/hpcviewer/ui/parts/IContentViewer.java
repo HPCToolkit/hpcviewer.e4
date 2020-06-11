@@ -10,4 +10,5 @@ public interface IContentViewer
 	public void createContent(Composite parent, EMenuService menuService);
 	public void setData(RootScope root);
 	public void dispose();
+	public RootScope getData();
 }

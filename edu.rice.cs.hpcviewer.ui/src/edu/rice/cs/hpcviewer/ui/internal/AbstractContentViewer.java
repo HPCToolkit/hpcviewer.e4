@@ -263,6 +263,12 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 	}
 	
 	@Override
+	public RootScope getData() {
+		return treeViewer.getRootScope();
+	}
+
+	
+	@Override
     public void selectionChanged(SelectionChangedEvent event) {
 		updateToolItemStatus();
 	}
@@ -524,6 +530,7 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
 	}
+	
     
     /////////////////////////////////////////////////////////
     ///

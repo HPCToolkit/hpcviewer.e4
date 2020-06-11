@@ -52,10 +52,16 @@
                   ifEmpty="false"
                   operator="or">
                <instanceof
-                     value="edu.rice.cs.hpcviewer.ui.Object1">
+                     value="edu.rice.cs.hpc.data.experiment.scope.Scope">
                </instanceof>
             </iterate>
          </with>
+      </definition>
+      <definition
+            id="edu.rice.cs.hpcviewer.ui.definition.databaseExist">
+      </definition>
+      <definition
+            id="edu.rice.cs.hpcviewer.ui.definition.closeDatabase">
       </definition>
    </extension>
 

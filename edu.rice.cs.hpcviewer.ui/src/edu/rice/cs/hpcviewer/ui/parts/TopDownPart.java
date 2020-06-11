@@ -1,7 +1,5 @@
 package edu.rice.cs.hpcviewer.ui.parts;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -13,12 +11,12 @@ import org.eclipse.swt.widgets.Composite;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
+import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.internal.TopDownContentViewer;
-import edu.rice.cs.hpcviewer.ui.parts.editor.ViewEventHandler;
 
-public class TopDownPart implements IBaseView
+public class TopDownPart extends BaseViewPart
 {
 	static final public String ID = "edu.rice.cs.hpcviewer.ui.part.topdown";
 	static final public String IDdesc = "edu.rice.cs.hpcviewer.ui.partdescriptor.topdown";
@@ -30,34 +28,7 @@ public class TopDownPart implements IBaseView
 	@Inject IEventBroker broker;
 	@Inject DatabaseCollection databaseAddOn;
 
-	private ViewEventHandler eventHandler;
-	private IContentViewer   contentViewer;
-
-	public TopDownPart() {
-	}
-
-    @PostConstruct
-    public void createControls(Composite parent, EMenuService menuService) {
-		eventHandler = new ViewEventHandler(this, broker, partService);
-		
-    	contentViewer = new TopDownContentViewer(partService, modelService, app, broker, databaseAddOn);
-    	contentViewer.createContent(parent, menuService);
-		
-		if (!databaseAddOn.isEmpty()) {
-			setExperiment(databaseAddOn.getLast());
-		}
-    }
-    
-	@PreDestroy
-	public void preDestroy() {
-		eventHandler.dispose();
-		contentViewer.dispose();
-	}
-
-	@Override
-	public void setExperiment(BaseExperiment experiment) {
-		contentViewer.setData(experiment.getRootScope(RootScopeType.CallingContextTree));
-	}
+	public TopDownPart() {}
 
 	@Override
 	public String getViewType() {
@@ -67,5 +38,26 @@ public class TopDownPart implements IBaseView
 	@Override
 	public String getID() {
 		return ID;
+	}
+
+	@Override
+	protected IContentViewer setContentViewer(Composite parent, EMenuService menuService) {
+		IContentViewer contentViewer = new TopDownContentViewer(partService, modelService, app, broker, databaseAddOn);
+    	contentViewer.createContent(parent, menuService);
+		return contentViewer;
+	}
+
+	@Override
+	protected RootScopeType getRootType() {
+		return RootScopeType.CallingContextTree;
+	}
+
+	@Override
+	protected RootScope createRoot(BaseExperiment experiment) {
+
+		// for top-down tree, we don't need to create the tree
+		// the tree is already in experiment.xml. 
+		
+		return experiment.getRootScope(RootScopeType.CallingContextTree);
 	}
 }

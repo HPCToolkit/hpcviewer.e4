@@ -1,6 +1,8 @@
 package edu.rice.cs.hpcviewer.ui.parts.editor;
 
-public interface ICodeEditor 
+import edu.rice.cs.hpcviewer.ui.parts.IBasePart;
+
+public interface ICodeEditor extends IBasePart 
 {
 	public void setData  (Object obj);
 	public void setTitle (String title);

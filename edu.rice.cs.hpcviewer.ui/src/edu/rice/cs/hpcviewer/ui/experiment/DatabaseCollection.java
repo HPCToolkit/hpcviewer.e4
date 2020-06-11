@@ -3,8 +3,10 @@ package edu.rice.cs.hpcviewer.ui.experiment;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.inject.Inject;
@@ -22,6 +24,7 @@ import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
+import org.eclipse.e4.ui.model.application.ui.basic.MStackElement;
 import org.eclipse.e4.ui.workbench.IWorkbench;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
@@ -58,6 +61,7 @@ public class DatabaseCollection
 	private ConcurrentLinkedQueue<BaseExperiment> queueExperiment;
 	private HashMap<BaseExperiment, ViewerDataEvent> mapColumnStatus;
 	
+	private EPartService partService;
 	
 	public DatabaseCollection() {
 		queueExperiment = new ConcurrentLinkedQueue<>();
@@ -73,6 +77,7 @@ public class DatabaseCollection
 			final EModelService modelService,
 			final IWorkbench workbench) {
 		
+		this.partService = partService;
 		
 		// handling the command line arguments:
 		// if one of the arguments specify a file or a directory,
@@ -131,6 +136,21 @@ public class DatabaseCollection
 		}
 		MPartStack stack = (MPartStack)modelService.find("edu.rice.cs.hpcviewer.ui.partstack.lower", application);
 		
+		if (stack == null) {
+			System.out.println("stack cannot be found");
+			
+			stack = modelService.createModelElement(MPartStack.class);
+			stack.setElementId("edu.rice.cs.hpcviewer.ui.partstack.lower");
+			stack.setToBeRendered(true);
+			stack.setOnTop(true);
+			stack.setVisible(true);
+		}
+
+		List<MStackElement> list = stack.getChildren(); 
+		if (list == null) {
+			System.out.println("stack children not found");
+		} 
+		
 		final String []partIds = {
 				TopDownPart .IDdesc,
 				BottomUpPart.IDdesc,
@@ -145,17 +165,23 @@ public class DatabaseCollection
 			
 			final MPart part = service.createPart(partIds[i]);
 			
-			stack.getChildren().add(part);
+			list.add(part);
 
 			part.setLabel(root.getRootName());
-			part.setElementId(experiment.getDefaultDirectory().getAbsolutePath() + ":" + root.getRootName());
-			
+			String elementID = experiment.getXMLExperimentFile().getAbsolutePath() + 
+					":" + root.getRootName();
+			part.setElementId(elementID);
+
 			if (i==0) {
+				
 				service.showPart(part, PartState.VISIBLE);
 				
 				IBaseView view = (IBaseView) part.getObject();			
 				view.setExperiment(experiment);
-			}
+			} else {
+				
+				service.showPart(part, PartState.CREATE);
+			}			
 		}
 	}
 	
@@ -176,11 +202,24 @@ public class DatabaseCollection
 	}
 	
 	public BaseExperiment removeLast() {
-		return queueExperiment.remove();
+		
+		final BaseExperiment experiment  = queueExperiment.remove();
+		removeDatabase(experiment);
+		
+		mapColumnStatus.remove(experiment);
+		
+		return experiment;
 	}
 	
 	public int removeAll() {
 		int size = queueExperiment.size();
+		
+		Iterator<BaseExperiment> iterator = queueExperiment.iterator();
+		while(iterator.hasNext()) {
+			BaseExperiment exp = iterator.next();
+			removeDatabase(exp);
+		}
+		
 		queueExperiment.clear();
 
 		mapColumnStatus.clear();
@@ -196,6 +235,20 @@ public class DatabaseCollection
 		return mapColumnStatus.get(experiment);
 	}
 	
+	public void removeDatabase(final BaseExperiment experiment) {
+		
+		final Collection<MPart> listParts = partService.getParts();
+		String elementID = experiment.getDefaultDirectory().getAbsolutePath();
+		
+		for(MPart part: listParts) {
+			
+			if (part.getElementId().startsWith(elementID)) {
+				partService.hidePart(part, true);
+			}
+		}
+		queueExperiment.remove(experiment);
+		mapColumnStatus.remove(experiment);
+	}
 	
 	/****
 	 * Find a database for a given path
