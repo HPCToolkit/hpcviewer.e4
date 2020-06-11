@@ -218,6 +218,8 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 		createScopeColumn(getViewer());
 		
 		Experiment experiment = (Experiment) root.getExperiment();
+
+		System.out.println("setting data for " + experiment.getName() + ", root: " + root.getType());
 		
 		// add metric columns only if the metric is not empty
 		boolean bSorted = true;

@@ -44,7 +44,8 @@ public class BottomUpPart extends BaseViewPart
 
 	@Override
 	protected RootScope createRoot(BaseExperiment experiment) {
-
+		System.out.println(getClass().getSimpleName() + " create root " );
+		
 		RootScope rootCCT  = experiment.getRootScope(RootScopeType.CallingContextTree);
 		RootScope rootCall = experiment.getRootScope(RootScopeType.CallerTree);
 		

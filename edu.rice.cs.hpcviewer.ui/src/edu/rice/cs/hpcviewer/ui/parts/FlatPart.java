@@ -11,7 +11,6 @@ import edu.rice.cs.hpcviewer.ui.internal.FlatContentViewer;
 
 public class FlatPart extends BaseViewPart
 {
-	static final public String ID = "edu.rice.cs.hpcviewer.ui.part.flat";
 	static final public String IDdesc = "edu.rice.cs.hpcviewer.ui.partdescriptor.flat";
 
 
@@ -25,12 +24,13 @@ public class FlatPart extends BaseViewPart
 
 	@Override
 	public String getID() {
-		return ID;
+		return IDdesc;
 	}
 
 	@Override
 	protected RootScope createRoot(BaseExperiment experiment) {
-		
+		System.out.println(getClass().getSimpleName() + " create root " );
+
 		RootScope rootCCT  = experiment.getRootScope(RootScopeType.CallingContextTree);
 		RootScope rootFlat = experiment.getRootScope(RootScopeType.Flat);
 		

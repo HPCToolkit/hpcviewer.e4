@@ -23,7 +23,6 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
-import org.eclipse.e4.ui.model.application.ui.basic.MPartSashContainer;
 import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
 import org.eclipse.e4.ui.model.application.ui.basic.MStackElement;
 import org.eclipse.e4.ui.workbench.IWorkbench;
@@ -174,20 +173,24 @@ public class DatabaseCollection
 			list.add(part);
 
 			part.setLabel(root.getRootName());
-			String elementID = experiment.getXMLExperimentFile().getAbsolutePath() + 
-					":" + root.getRootName();
-			part.setElementId(elementID);
 
 			if (i==0) {
 				
 				service.showPart(part, PartState.VISIBLE);
-				
-				IBaseView view = (IBaseView) part.getObject();			
-				view.setExperiment(experiment);
 			} else {
 				
 				service.showPart(part, PartState.CREATE);
 			}			
+			IBaseView view = (IBaseView) part.getObject();
+			
+			// has to set the element Id before populating the view
+			String elementID = experiment.getXMLExperimentFile().getAbsolutePath() + 
+					":" + root.getRootName();
+			part.setElementId(elementID);
+
+			view.setExperiment(experiment, part);
+			
+			System.out.println("create " + elementID + " obj: " + view);
 		}
 	}
 	

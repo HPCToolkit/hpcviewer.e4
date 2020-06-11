@@ -16,13 +16,14 @@ import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.model.application.MApplication;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.services.EMenuService;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.e4.ui.workbench.modeling.IPartListener;
 
-public abstract class BaseViewPart implements IBaseView, EventHandler
+public abstract class BaseViewPart implements IBaseView, EventHandler, IPartListener
 {
-	static final public String ID = "edu.rice.cs.hpcviewer.ui.partdescriptor.basePart";
 
 	@Inject EPartService partService;
 	@Inject EModelService modelService;
@@ -31,7 +32,17 @@ public abstract class BaseViewPart implements IBaseView, EventHandler
 	@Inject IEventBroker broker;
 	@Inject DatabaseCollection databaseAddOn;
 
-	private IContentViewer   contentViewer;
+	private IContentViewer  contentViewer;
+	
+	/** Each view needs to store the experiment database.
+	 * In case it needs to populate the table, we know which database 
+	 * to be loaded. */
+	private BaseExperiment  experiment;
+	
+	/** This variable is a flag whether a table is already populated or not.
+	 * If the root is null, it isn't populated
+	 */
+	private RootScope       root;
 
 	@Inject
 	public BaseViewPart() {
@@ -42,9 +53,7 @@ public abstract class BaseViewPart implements IBaseView, EventHandler
 
 		contentViewer = setContentViewer(parent, menuService);
 		
-		if (!databaseAddOn.isEmpty()) {
-			setExperiment(databaseAddOn.getLast());
-		}
+		partService.addPartListener(this);
 	}
 	
 	@PreDestroy
@@ -56,10 +65,16 @@ public abstract class BaseViewPart implements IBaseView, EventHandler
 
 
 	@Override
-	public void setExperiment(BaseExperiment experiment) {
+	public void setExperiment(BaseExperiment experiment, MPart part) {
 		
-		RootScope root = createRoot(experiment);
-		contentViewer.setData(root);
+		if (partService.isPartVisible(part)) {
+			
+			root = createRoot(experiment);
+			contentViewer.setData(root);
+		}
+		// important: needs to store the experiment database for further usage
+		// when the view is becoming visible
+		this.experiment = experiment;
 	}
 
 	@Override
@@ -79,6 +94,37 @@ public abstract class BaseViewPart implements IBaseView, EventHandler
 	
 	@Focus
 	public void onFocus() {		
+	}
+
+	public String getElementId(BaseExperiment experiment) {
+		String filename = experiment.getXMLExperimentFile().getAbsolutePath();
+		RootScope root  = experiment.getRootScope(getRootType());
+		
+		return filename + ":" + root.getRootName();
+		
+	}
+	
+	@Override
+	public void partActivated(MPart part) {}
+
+	@Override
+	public void partBroughtToTop(MPart part) {}
+
+	@Override
+	public void partDeactivated(MPart part) {}
+
+	@Override
+	public void partHidden(MPart part) {}
+
+	@Override
+	public void partVisible(MPart part) {
+		if (part.getObject() != this)
+			return;
+		
+		if (experiment != null && root == null) {
+			root = createRoot(experiment);
+			contentViewer.setData(root);
+		}
 	}
 
 
