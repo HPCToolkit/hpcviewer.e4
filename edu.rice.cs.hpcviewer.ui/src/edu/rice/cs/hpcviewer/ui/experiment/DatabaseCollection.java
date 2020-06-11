@@ -36,8 +36,10 @@ import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
+import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
 import edu.rice.cs.hpcviewer.ui.parts.BottomUpPart;
+import edu.rice.cs.hpcviewer.ui.parts.Datacentric;
 import edu.rice.cs.hpcviewer.ui.parts.FlatPart;
 import edu.rice.cs.hpcviewer.ui.parts.IBaseView;
 import edu.rice.cs.hpcviewer.ui.parts.TopDownPart;
@@ -61,14 +63,22 @@ public class DatabaseCollection
 	static private final String STACK_ID_BASE = "edu.rice.cs.hpcviewer.ui.partstack.lower.";
 	static private final int MAX_STACKS_AVAIL = 3;
 	
-	private ConcurrentLinkedQueue<BaseExperiment> queueExperiment;
-	private HashMap<BaseExperiment, ViewerDataEvent> mapColumnStatus;
+	final private ConcurrentLinkedQueue<BaseExperiment>    queueExperiment;
+	final private HashMap<BaseExperiment, ViewerDataEvent> mapColumnStatus;
+	final private HashMap<RootScopeType, String> 		   mapRoottypeToPartId;
 	
 	private EPartService partService;
 	
 	public DatabaseCollection() {
 		queueExperiment = new ConcurrentLinkedQueue<>();
 		mapColumnStatus = new HashMap<BaseExperiment, ViewerDataEvent>();
+
+		mapRoottypeToPartId = new HashMap<RootScopeType, String>();
+
+		mapRoottypeToPartId.put(RootScopeType.CallingContextTree, TopDownPart.IDdesc);
+		mapRoottypeToPartId.put(RootScopeType.CallerTree, 	 	  BottomUpPart.IDdesc);
+		mapRoottypeToPartId.put(RootScopeType.Flat, 		   	  FlatPart.IDdesc);
+		mapRoottypeToPartId.put(RootScopeType.DatacentricTree, 	  Datacentric.IDdesc);
 	}
 	
 	@Inject
@@ -178,12 +188,6 @@ public class DatabaseCollection
 		//----------------------------------------------------------------
 		stack.setVisible(true);
 		stack.setOnTop(true);
-
-		final String []partIds = {
-				TopDownPart .IDdesc,
-				BottomUpPart.IDdesc,
-				FlatPart    .IDdesc
-		};
 		
 		Object []children = experiment.getRootScopeChildren();
 		
@@ -191,7 +195,11 @@ public class DatabaseCollection
 
 			RootScope root = (RootScope) children[i];
 			
-			final MPart part = service.createPart(partIds[i]);
+			String partId = mapRoottypeToPartId.get(root.getType());
+			if (partId == null)
+				continue; 	// TODO: should display error message
+			
+			final MPart part = service.createPart(partId);
 			
 			list.add(part);
 
