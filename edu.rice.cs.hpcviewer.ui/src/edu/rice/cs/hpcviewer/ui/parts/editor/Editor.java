@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
@@ -20,7 +21,12 @@ import edu.rice.cs.hpc.data.experiment.source.FileSystemSourceFile;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.resource.JFaceResources;
@@ -38,11 +44,23 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.SWT;
 
 
-
+/**********************************************
+ * 
+ * Class to display the content of a file .
+ * <p>
+ * The main method to display the file is by using
+ * {@link Editor.display()} <br/>
+ * 
+ * This method will try to find if the object to display
+ * is already there or not. If yes, then it activates the
+ * file viewer. Otherwise, it will create a new viewer.
+ *
+ **********************************************/
 public class Editor implements ICodeEditor
 {
-	static final public String ID = "edu.rice.cs.hpcviewer.ui.part.editor";
-	static final public String ID_DESC = "edu.rice.cs.hpcviewer.ui.partdescriptor.editor";
+	static final public String STACK_ID = "edu.rice.cs.hpcviewer.ui.partstack.upper";
+	static final public String ID 		= "edu.rice.cs.hpcviewer.ui.part.editor";
+	static final public String ID_DESC  = "edu.rice.cs.hpcviewer.ui.partdescriptor.editor";
 	
 	static final private String PROPERTY_DATA = "hpceditor.data";
 	
@@ -53,7 +71,6 @@ public class Editor implements ICodeEditor
 
 	@Inject
 	public Editor() {
-		
 	}
 	
 	@PostConstruct
@@ -84,11 +101,71 @@ public class Editor implements ICodeEditor
 	public void preDestroy() {
 	}
 
-	@Override
-	public void setData(Object obj) {
-		if (obj != null && obj instanceof Scope) {
-			Scope scope = (Scope) obj;
+	/****
+	 * Main method to display the file.
+	 * 
+	 * @param modelService
+	 * @param partService
+	 * @param app
+	 * @param obj The object to display (either a scope or a database)
+	 */
+	static public void display(EModelService modelService, 
+			EPartService partService, 
+			MApplication  app,
+			Object obj) {
+		
+		if (obj == null)
+			return;
+		
+		String filename = null;
+		
+		if (obj instanceof Scope) {
+			filename = ((Scope)obj).getSourceFile().getName(); 
+		} else if (obj instanceof BaseExperiment) {
+			filename = ((BaseExperiment)obj).getXMLExperimentFile().getAbsolutePath();
+		}
+		
+		Collection<MPart> listParts = partService.getParts();
+		for(MPart mp : listParts) {
+			if (mp.getElementId().equals(filename)) {
+				
+				if (mp.getObject() == null) {
+					partService.showPart(mp, PartState.CREATE);
+				}
+				MPart shownPart = partService.showPart(mp, PartState.VISIBLE);
 
+				Editor editor = (Editor) shownPart.getObject();
+				editor.displayFile(obj);
+				
+				return;
+			}
+		}
+
+		final MPart part = partService.createPart(Editor.ID_DESC);
+
+		part.setLabel(filename);
+		part.setElementId(filename);
+
+		MPartStack editorStack = (MPartStack)modelService.find(STACK_ID, app);
+		editorStack.getChildren().add(part);
+
+		MPart shownPart = partService.showPart(part, PartState.VISIBLE);
+		Editor editor = (Editor) shownPart.getObject();
+		editor.displayFile(obj);
+	}
+
+	/***
+	 * Display the file of the object. 
+	 * If the object is a scope, it will display the source code.
+	 * If the object is an experiment database, it will display the XML file
+	 * 
+	 * @param obj
+	 */
+	public void displayFile(Object obj) {
+		
+		if (obj instanceof Scope) {
+			Scope scope = (Scope) obj;
+			
 			if (!Utilities.isFileReadable(scope))
 				return;
 			
@@ -97,43 +174,72 @@ public class Editor implements ICodeEditor
 			String filename = file.getCompleteFilename();
 			int lineNumber  = scope.getFirstLineNumber();
 
-			IDocument document = new Document();
+			displayFile(scope, filename, lineNumber);
 			
-			AnnotationModel annModel = new AnnotationModel();
-			annModel.connect(document);
+		} else if (obj instanceof BaseExperiment) {
 			
-			String text = readLineByLineJava8(filename);
-			document.set(text);
+			BaseExperiment experiment = (BaseExperiment) obj;
+			String filename = experiment.getXMLExperimentFile().getAbsolutePath();
+			
+			displayFile(experiment, filename, 0);
+		}
+		// add more condition for different type of objects here
+		// we should make this more flexible...
+	}
+	
 
-			textViewer.setDocument(document, annModel);
-			textViewer.setData(PROPERTY_DATA, scope);
+	/***
+	 * Display the content of a file, and highligjt a specified line number (generic version).
+	 * 
+	 * @param obj the object that identified this editor. It has to be either a scope or an experiment
+	 * @param filename the complete path of the file name
+	 * @param lineNumber the line number to be revealed
+	 */
+	public void displayFile(Object obj, String filename, int lineNumber) {
+		IDocument document = new Document();
+		
+		AnnotationModel annModel = new AnnotationModel();
+		annModel.connect(document);
+		
+		String text = readLineByLineJava8(filename);
+		document.set(text);
+
+		textViewer.setDocument(document, annModel);
+		textViewer.setData(PROPERTY_DATA, obj);
+		
+		try {
+			int maxLines = document.getNumberOfLines();
 			
-			try {
-				int maxLines = document.getNumberOfLines();
-				
-				lineNumber     = Math.max(0, Math.min(lineNumber, maxLines));
-				int offset     = document.getLineOffset(lineNumber);
-				int nextLine   = Math.min(lineNumber+1, maxLines);
-				int nextOffset = document.getLineOffset(nextLine);
-				int length     = Math.max(1, nextOffset - offset);
-				
-				document.addPosition(new Position(offset));
-				
-				TextSelection selection = new TextSelection(document, offset, length);
-				textViewer.setSelection(selection, true);
-				
-			} catch (BadLocationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			lineNumber     = Math.max(0, Math.min(lineNumber, maxLines));
+			int offset     = document.getLineOffset(lineNumber);
+			int nextLine   = Math.min(lineNumber+1, maxLines);
+			int nextOffset = document.getLineOffset(nextLine);
+			int length     = Math.max(1, nextOffset - offset);
+			
+			document.addPosition(new Position(offset));
+			
+			TextSelection selection = new TextSelection(document, offset, length);
+			textViewer.setSelection(selection, true);
+			
+		} catch (BadLocationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	
+	@Override
 	public BaseExperiment getExperiment() {
-		Scope scope = (Scope) textViewer.getData(PROPERTY_DATA);
+		Object obj = textViewer.getData(PROPERTY_DATA);
 		
-		if (scope != null)
+		if (obj == null)
+			return null;
+		
+		if (obj instanceof Scope) {
+			Scope scope = (Scope) obj;
 			return scope.getExperiment();
+		}
+		if (obj instanceof BaseExperiment)
+			return (BaseExperiment) obj;
 		
 		return null;
 	}

@@ -58,6 +58,9 @@ import edu.rice.cs.hpcviewer.ui.parts.TopDownPart;
 @Singleton
 public class DatabaseCollection 
 {
+	static private final String STACK_ID_BASE = "edu.rice.cs.hpcviewer.ui.partstack.lower.";
+	static private final int MAX_STACKS_AVAIL = 3;
+	
 	private ConcurrentLinkedQueue<BaseExperiment> queueExperiment;
 	private HashMap<BaseExperiment, ViewerDataEvent> mapColumnStatus;
 	
@@ -134,28 +137,48 @@ public class DatabaseCollection
 			System.out.println("Error: service is not available");
 			return;
 		}
-		MPartStack stack;
-		if (queueExperiment.size()==1) {
-			stack = (MPartStack)modelService.find("edu.rice.cs.hpcviewer.ui.partstack.lower" , application);
-		} else {
-			stack = (MPartStack)modelService.find("edu.rice.cs.hpcviewer.ui.partstack.lower2", application);
+		//----------------------------------------------------------------
+		// find an empty slot in the part stack
+		// If no slot is available, we will try to create a new one.
+		// However,creating a new part stack is tricky, and it's up to the
+		// system where to locate the part stack.
+		//----------------------------------------------------------------
+		
+		MPartStack stack = null;
+		List<MStackElement> list = null;
+		
+		for(int i=1; i<=MAX_STACKS_AVAIL; i++) {
+			final String stackId = STACK_ID_BASE + String.valueOf(i) ;
+			stack  = (MPartStack)modelService.find(stackId , application);
+			
+			if (stack == null)
+				System.err.println("list of parts is null");
+			else
+				list = stack.getChildren();
+			if (list != null && list.size()==0)
+				// we found empty an stack
+				break; 
 		}
 		
+		//----------------------------------------------------------------
+		// create a new part stack if necessary
+		// We don't want this, since it makes the layout weird.
+		//----------------------------------------------------------------
 		if (stack == null) {
-			System.out.println("stack cannot be found");
+			System.out.println("create a new part stack");
 			
 			stack = modelService.createModelElement(MPartStack.class);
 			stack.setElementId("edu.rice.cs.hpcviewer.ui.partstack.lower");
 			stack.setToBeRendered(true);
 		}
+		
+		//----------------------------------------------------------------
+		// part stack is ready, now we create all view parts and add it to the part stack
+		// TODO: We assume adding to the part stack is always successful
+		//----------------------------------------------------------------
 		stack.setVisible(true);
 		stack.setOnTop(true);
 
-		List<MStackElement> list = stack.getChildren(); 
-		if (list == null) {
-			System.out.println("stack children not found");
-		} 
-		
 		final String []partIds = {
 				TopDownPart .IDdesc,
 				BottomUpPart.IDdesc,
@@ -174,6 +197,11 @@ public class DatabaseCollection
 
 			part.setLabel(root.getRootName());
 
+			//----------------------------------------------------------------
+			// We only make the top-down (the first part) to be visible
+			// the other parts will be created, but not activated.
+			// Let users to activate the other parts by themselves.
+			//----------------------------------------------------------------
 			if (i==0) {
 				
 				service.showPart(part, PartState.VISIBLE);
@@ -189,37 +217,46 @@ public class DatabaseCollection
 			part.setElementId(elementID);
 
 			view.setExperiment(experiment, part);
-			
-			System.out.println("create " + elementID + " obj: " + view);
 		}
 	}
 	
+	/***
+	 * Retrieve the iterator of the database collection
+	 * 
+	 * @return Iterator for the list
+	 */
 	public Iterator<BaseExperiment> getIterator() {
 		return queueExperiment.iterator();
 	}
 	
+	/***
+	 * Retrieve the current registered databases
+	 * @return
+	 */
 	public int getNumDatabase() {
 		return queueExperiment.size();
 	}
 	
+	/***
+	 * Check if the database is empty or not
+	 * @return true if the database is empty
+	 */
 	public boolean isEmpty() {
 		return queueExperiment.isEmpty();
 	}
 	
+	/***
+	 * Remove the last registered database
+	 * @return
+	 */
 	public BaseExperiment getLast() {
 		return queueExperiment.element();
 	}
 	
-	public BaseExperiment removeLast() {
-		
-		final BaseExperiment experiment  = queueExperiment.remove();
-		removeDatabase(experiment);
-		
-		mapColumnStatus.remove(experiment);
-		
-		return experiment;
-	}
-	
+	/****
+	 * Remove all databases
+	 * @return
+	 */
 	public int removeAll() {
 		int size = queueExperiment.size();
 		

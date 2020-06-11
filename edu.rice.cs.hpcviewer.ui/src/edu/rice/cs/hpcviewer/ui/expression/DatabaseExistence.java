@@ -13,6 +13,6 @@ public class DatabaseExistence
 	
 	@Evaluate
 	public boolean evaluate() {
-		return database.getNumDatabase()==1;
+		return database.getNumDatabase()>0;
 	}
 }

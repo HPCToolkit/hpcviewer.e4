@@ -1,13 +1,8 @@
 package edu.rice.cs.hpcviewer.ui.internal;
 
-import java.util.Collection;
-
 import org.eclipse.e4.ui.model.application.MApplication;
-import org.eclipse.e4.ui.model.application.ui.basic.MPart;
-import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
-import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.graphics.GC;
@@ -34,8 +29,6 @@ import edu.rice.cs.hpcviewer.ui.util.Utilities;
  *****************************************************/
 public class ScopeMouseListener implements Listener 
 {
-	static final private String STACK_ID = "edu.rice.cs.hpcviewer.ui.partstack.upper";
-	
 	final private EPartService  partService;
 	final private EModelService modelService;
 	final private MApplication  app;
@@ -158,50 +151,10 @@ public class ScopeMouseListener implements Listener
 		
 		if (scope == null || !Utilities.isFileReadable(scope))
 			return;
-		
-		MPartStack editorStack = (MPartStack)modelService.find(STACK_ID, app);
-		
-		final String filename = scope.getSourceFile().getName(); 
 
-		Collection<MPart> listParts = partService.getParts();
-		for(MPart mp : listParts) {
-			if (mp.getElementId().equals(filename)) {
-				if (mp.getObject() == null) {
-					partService.showPart(mp, PartState.CREATE);
-				}
-				partService.showPart(mp, PartState.VISIBLE);
-				setData(mp, scope);
-
-				return;
-			}
-		}
-
-		final MPart part = partService.createPart(Editor.ID_DESC);
-
-		part.setLabel(filename);
-		part.setElementId(filename);
-
-		editorStack.getChildren().add(part);
-
-		partService.showPart(part, PartState.VISIBLE);
-
-		setData(part, scope);
-	}
-	
-	/**
-	 * Force the editor part to display a specific file for a specific line
-	 * of a given scope node
-	 * 
-	 * @param part the editor part. Cannot be null
-	 * @param scope: tree scope node
-	 */
-	private void setData(MPart part, Scope scope) {
-		Object obj = part.getObject();
-		if (obj instanceof Editor) {
-			((Editor)obj).setData(scope);
-		}
+		Editor.display(modelService, partService, app, scope);
 		
 		// keep focus to the viewer 
 		treeViewer.getTree().setFocus();
-	}
+	}	
 }

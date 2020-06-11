@@ -4,7 +4,6 @@ import edu.rice.cs.hpcviewer.ui.parts.IBasePart;
 
 public interface ICodeEditor extends IBasePart 
 {
-	public void setData  (Object obj);
 	public void setTitle (String title);
 	public void setMarker(int lineNumber);
 }

@@ -182,7 +182,7 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 		// table creation
 		// -------------------------------------------
 		
-		treeViewer = new ScopeTreeViewer(parent, SWT.BORDER | SWT.MULTI, eventBroker);
+		treeViewer = new ScopeTreeViewer(parent, SWT.NONE, eventBroker);
 		Tree tree = treeViewer.getTree();
 		tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
         tree.setHeaderVisible(true);
