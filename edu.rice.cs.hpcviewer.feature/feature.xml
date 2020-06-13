@@ -251,7 +251,7 @@
          unpack="false"/>
 
    <plugin
-         id="edu.rice.cs.hpc.threaddata"
+         id="edu.rice.cs.hpcdata.tld"
          download-size="0"
          install-size="0"
          version="0.0.0"

@@ -1,4 +1,4 @@
-package edu.rice.cs.hpc.threaddata.collection;
+package edu.rice.cs.hpcdata.tld.collection;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;

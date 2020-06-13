@@ -22,9 +22,7 @@ public class PartFactory
 	@Inject EPartService partService;
 	@Inject MApplication  app;
 
-	public PartFactory() {
-		System.out.println("PartFactory ms: " + modelService + ", ps: " + partService +", app: " + app);
-	}
+	public PartFactory() {}
 	
 	/****
 	 * Main method to display the file.

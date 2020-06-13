@@ -1,4 +1,4 @@
-package edu.rice.cs.hpc.threaddata.collection;
+package edu.rice.cs.hpcdata.tld.collection;
 
 
 import java.io.File;
@@ -8,8 +8,8 @@ import edu.rice.cs.hpc.data.db.DataThread;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment.Db_File_Type;
 import edu.rice.cs.hpc.data.experiment.extdata.AbstractThreadDataCollection;
-import edu.rice.cs.hpc.threaddata.plot.DataPlot;
-import edu.rice.cs.hpc.threaddata.plot.DataPlotEntry;
+import edu.rice.cs.hpcdata.tld.plot.DataPlot;
+import edu.rice.cs.hpcdata.tld.plot.DataPlotEntry;
 
 /*******************************************************************
  * 
