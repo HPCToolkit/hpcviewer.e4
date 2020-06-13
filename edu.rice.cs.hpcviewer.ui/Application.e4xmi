@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<application:Application xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:application="http://www.eclipse.org/ui/2010/UIModel/application" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmlns:ui="http://www.eclipse.org/ui/2010/UIModel/application/ui" xmi:id="_c3AF0MjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.application" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ">
+<application:Application xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:advanced="http://www.eclipse.org/ui/2010/UIModel/application/ui/advanced" xmlns:application="http://www.eclipse.org/ui/2010/UIModel/application" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmlns:ui="http://www.eclipse.org/ui/2010/UIModel/application/ui" xmi:id="_c3AF0MjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.application" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ">
   <children xsi:type="basic:TrimmedWindow" xmi:id="_c3AF0cjYEeSyMNYR5xypkQ" elementId="edu.rice.cs.hpcviewer.window.main" label="hpcviewer" iconURI="" width="1000" height="800">
-    <children xsi:type="basic:PartSashContainer" xmi:id="_60CmoI68EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.partsashcontainer.main">
-      <children xsi:type="basic:PartStack" xmi:id="_Bd0-EI69EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.partstack.upper"/>
-      <children xsi:type="basic:PartSashContainer" xmi:id="_3NDgAKuTEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.partsashcontainer.0" horizontal="true">
-        <children xsi:type="basic:PartStack" xmi:id="_DIZCcI69EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.partstack.lower.1"/>
-        <children xsi:type="basic:PartStack" xmi:id="_622RMKuTEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.partstack.lower.2" visible="false"/>
-        <children xsi:type="basic:PartStack" xmi:id="_FYkYUKvoEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.partstack.lower.3" visible="false"/>
+    <children xsi:type="advanced:PerspectiveStack" xmi:id="_medwgK28EeqAHZLWafP1YQ" elementId="edu.rice.cs.hpcviewer.ui.perspectivestack.main">
+      <children xsi:type="advanced:Perspective" xmi:id="_n9vx8K28EeqAHZLWafP1YQ" elementId="edu.rice.cs.hpcviewer.ui.perspective.main" label="hpcviewer profile" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/cct-thread-map.png">
+        <children xsi:type="basic:PartSashContainer" xmi:id="_60CmoI68EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.partsashcontainer.main">
+          <children xsi:type="basic:PartStack" xmi:id="_Bd0-EI69EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.partstack.upper"/>
+          <children xsi:type="basic:PartSashContainer" xmi:id="_3NDgAKuTEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.partsashcontainer.0" horizontal="true">
+            <children xsi:type="basic:PartStack" xmi:id="_DIZCcI69EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.partstack.lower.1"/>
+            <children xsi:type="basic:PartStack" xmi:id="_622RMKuTEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.partstack.lower.2" visible="false"/>
+            <children xsi:type="basic:PartStack" xmi:id="_FYkYUKvoEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.partstack.lower.3" visible="false"/>
+          </children>
+        </children>
       </children>
     </children>
     <mainMenu xmi:id="_7ohBoI7qEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.menu.main">
@@ -27,6 +31,9 @@
           <children xsi:type="menu:HandledMenuItem" xmi:id="_OUj-8KwUEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.viewXML" label="View experiment.xml file" tooltip="View the current experiment.xml file" mnemonics="x" command="_rAwA8KvwEeq2aaPo7yBcWg"/>
         </children>
       </children>
+      <children xsi:type="menu:Menu" xmi:id="_AHiwkK3KEeqAHZLWafP1YQ" elementId="edu.rice.cs.hpcviewer.ui.menu.window" label="Window" mnemonics="W">
+        <children xsi:type="menu:HandledMenuItem" xmi:id="_EsDdkK3KEeqAHZLWafP1YQ" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.resetLayout" label="Reset layout" tooltip="Reset the current window's layout" mnemonics="R" command="_QRDKwK3KEeqAHZLWafP1YQ"/>
+      </children>
     </mainMenu>
   </children>
   <handlers xmi:id="_zXCPcI7xEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handler.open" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.FileOpenDatabase" command="_U14sMI7vEeqBPbXbG7_Dzw"/>
@@ -36,6 +43,7 @@
   <handlers xmi:id="_u40K4KqAEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.handler.zoom" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.ZoomHandler" command="_p3oI8KqAEeq2aaPo7yBcWg"/>
   <handlers xmi:id="_zeIc8KvwEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.handler.viewXML" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.ViewXML" command="_rAwA8KvwEeq2aaPo7yBcWg"/>
   <handlers xmi:id="_fC4SMKwbEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.handler.about" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.About" command="_lIBrgKwbEeq2aaPo7yBcWg"/>
+  <handlers xmi:id="_NJztAK3KEeqAHZLWafP1YQ" elementId="edu.rice.cs.hpcviewer.ui.handler.reset" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.ResetLayout" command="_QRDKwK3KEeqAHZLWafP1YQ"/>
   <bindingTables xmi:id="_7fwrAKqFEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.bindingtable.file" bindingContext="_c3AF2cjYEeSyMNYR5xypkQ">
     <bindings xmi:id="_-3xvsKqFEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.keybinding.open" keySequence="M1+O" command="_U14sMI7vEeqBPbXbG7_Dzw"/>
     <bindings xmi:id="_k4-EoKuTEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.keybinding.add" keySequence="M1+A" command="_cPW0II7vEeqBPbXbG7_Dzw"/>
@@ -61,6 +69,7 @@
   </commands>
   <commands xmi:id="_rAwA8KvwEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.command.viewXML" commandName="View XML" description="Display the XML file of the current database"/>
   <commands xmi:id="_lIBrgKwbEeq2aaPo7yBcWg" elementId="org.eclipse.ui.help.aboutAction" commandName="About" description="About the application"/>
+  <commands xmi:id="_QRDKwK3KEeqAHZLWafP1YQ" elementId="edu.rice.cs.hpcviewer.ui.command.resetLayout" commandName="Reset layout"/>
   <addons xmi:id="_c3AF0sjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.core.commands.service" contributionURI="bundleclass://org.eclipse.e4.core.commands/org.eclipse.e4.core.commands.CommandServiceAddon"/>
   <addons xmi:id="_c3AF08jYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.contexts.service" contributionURI="bundleclass://org.eclipse.e4.ui.services/org.eclipse.e4.ui.services.ContextServiceAddon"/>
   <addons xmi:id="_c3AF1MjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.bindings.service" contributionURI="bundleclass://org.eclipse.e4.ui.bindings/org.eclipse.e4.ui.bindings.BindingServiceAddon"/>
