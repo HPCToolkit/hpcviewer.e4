@@ -42,7 +42,7 @@ public class FlatPart extends BaseViewPart
 	@Override
 	protected IContentViewer setContentViewer(Composite parent, EMenuService menuService) {
 
-		IContentViewer contentViewer = new FlatContentViewer(partService, modelService, app, broker, databaseAddOn);
+		IContentViewer contentViewer = new FlatContentViewer(partService, modelService, app, broker, databaseAddOn, partFactory);
     	contentViewer.createContent(parent, menuService);
 		return contentViewer;
 	}

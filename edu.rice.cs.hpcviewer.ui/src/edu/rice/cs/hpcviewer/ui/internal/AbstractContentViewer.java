@@ -44,6 +44,7 @@ import edu.rice.cs.hpcviewer.ui.actions.ZoomAction;
 import edu.rice.cs.hpcviewer.ui.actions.UserDerivedMetric;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.parts.IContentViewer;
+import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 
 
@@ -85,6 +86,7 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 	final private EModelService modelService;
 	final private MApplication  app;
 	final private IEventBroker  eventBroker;
+	final private PartFactory   partFactory;
 	
 	final private DatabaseCollection database;
 	
@@ -119,12 +121,14 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 			EModelService modelService,
 			MApplication  app,
 			IEventBroker  eventBroker,
-			DatabaseCollection database) {
+			DatabaseCollection database,
+			PartFactory   partFactory) {
 		
 		this.partService  = partService;
 		this.modelService = modelService;
 		this.eventBroker  = eventBroker;
 		this.database     = database;
+		this.partFactory  = partFactory;
 		
 		this.app = app;
 		
@@ -195,7 +199,7 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 		treeViewer.setContentProvider( getContentProvider(treeViewer));
 		createScopeColumn(treeViewer);
 		
-		mouseDownListener = new ScopeMouseListener(treeViewer, partService, modelService, app);
+		mouseDownListener = new ScopeMouseListener(treeViewer, partService, modelService, app, partFactory);
 		treeViewer.getTree().addListener(SWT.MouseDown, mouseDownListener);
 		treeViewer.addSelectionChangedListener(this);
 

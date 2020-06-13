@@ -11,6 +11,7 @@ import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.parts.IBasePart;
 import edu.rice.cs.hpcviewer.ui.parts.editor.Editor;
+import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 
 import javax.inject.Inject;
 
@@ -24,6 +25,8 @@ public class ViewXML
 	@Inject MApplication 	   application;
 	@Inject EModelService 	   modelService;
 
+	@Inject PartFactory        partFactory;
+	
 	@Execute
 	public void execute(@Active MPart part) {
 		if (part != null) {
@@ -31,7 +34,8 @@ public class ViewXML
 			
 			if (obj instanceof IBasePart) {
 				BaseExperiment experiment = ((IBasePart)obj).getExperiment();
-				Editor.display(modelService, partService, application, experiment);
+				String elementId = Editor.getTitle(experiment);
+				partFactory.display(Editor.STACK_ID, Editor.ID_DESC, elementId, experiment);
 			}
 		}
 	}

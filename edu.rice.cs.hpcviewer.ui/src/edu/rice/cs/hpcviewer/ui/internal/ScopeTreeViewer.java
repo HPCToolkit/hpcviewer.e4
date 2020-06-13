@@ -17,7 +17,9 @@ import java.util.List;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.layout.TreeColumnLayout;
 import org.eclipse.jface.viewers.ColumnPixelData;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.TreePath;
+import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.swt.widgets.TreeItem;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
@@ -248,7 +250,22 @@ public class ScopeTreeViewer extends TreeViewer implements EventHandler
     	super.internalRefresh(element, updateLabels);
     }
     
-    
+	/**
+	 * Retrieve the selected node
+	 * @return null if there is no selected node
+	 */
+	public Scope getSelectedNode() {
+		ISelection sel = getSelection();
+		if (!(sel instanceof TreeSelection))
+			return null;
+		
+		Object o = ((TreeSelection)sel).getFirstElement();
+		if (!(o instanceof Scope)) {
+			return null;
+		}
+		return (Scope) o;
+	}
+
 	
     /**
      * Inserting a "node header" on the top of the table to display

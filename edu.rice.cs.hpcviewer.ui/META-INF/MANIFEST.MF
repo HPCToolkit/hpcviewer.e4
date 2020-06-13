@@ -29,7 +29,10 @@ Require-Bundle: org.eclipse.core.runtime,
  com.graphbuilder,
  org.eclipse.core.expressions,
  org.eclipse.e4.ui.workbench.swt,
- org.eclipse.e4.ui.model.workbench
+ org.eclipse.e4.ui.model.workbench,
+ org.swtchart,
+ org.swtchart.ext,
+ edu.rice.cs.hpc.threaddata
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Provide-Capability: licensing.feature;licensing.feature="edu.rice.cs.hpcviewer.ui.product"

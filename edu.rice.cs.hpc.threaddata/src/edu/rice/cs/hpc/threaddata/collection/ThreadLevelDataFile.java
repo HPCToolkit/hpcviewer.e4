@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.metric;
+package edu.rice.cs.hpc.threaddata.collection;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;
@@ -6,7 +6,6 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.eclipse.jface.action.IStatusLineManager;
 
 import edu.rice.cs.hpc.data.experiment.extdata.FileDB2;
 import edu.rice.cs.hpc.data.util.Constants;
@@ -27,8 +26,7 @@ public class ThreadLevelDataFile extends FileDB2
 	private ExecutorService threadExecutor;
 	private int num_threads;
 	
-	public ThreadLevelDataFile(IStatusLineManager statusMgr)
-	{
+	public ThreadLevelDataFile() {
 	}
 	
 	public void open(String filename) throws IOException

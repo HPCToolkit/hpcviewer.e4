@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Collection;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
@@ -21,12 +20,7 @@ import edu.rice.cs.hpc.data.experiment.source.FileSystemSourceFile;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
-import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
-import org.eclipse.e4.ui.workbench.modeling.EModelService;
-import org.eclipse.e4.ui.workbench.modeling.EPartService;
-import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.resource.JFaceResources;
@@ -56,7 +50,7 @@ import org.eclipse.swt.SWT;
  * file viewer. Otherwise, it will create a new viewer.
  *
  **********************************************/
-public class Editor implements ICodeEditor
+public class Editor implements IUpperPart
 {
 	static final public String STACK_ID = "edu.rice.cs.hpcviewer.ui.partstack.upper";
 	static final public String ID 		= "edu.rice.cs.hpcviewer.ui.part.editor";
@@ -65,6 +59,7 @@ public class Editor implements ICodeEditor
 	static final private String PROPERTY_DATA = "hpceditor.data";
 	
 	private SourceViewer textViewer;
+	private Object input;
 	
 	@Inject IEventBroker broker;
 	@Inject MPart part;
@@ -101,91 +96,6 @@ public class Editor implements ICodeEditor
 	public void preDestroy() {
 	}
 
-	/****
-	 * Main method to display the file.
-	 * 
-	 * @param modelService
-	 * @param partService
-	 * @param app
-	 * @param obj The object to display (either a scope or a database)
-	 */
-	static public void display(EModelService modelService, 
-			EPartService partService, 
-			MApplication  app,
-			Object obj) {
-		
-		if (obj == null)
-			return;
-		
-		String filename = null;
-		
-		if (obj instanceof Scope) {
-			filename = ((Scope)obj).getSourceFile().getName(); 
-		} else if (obj instanceof BaseExperiment) {
-			filename = ((BaseExperiment)obj).getXMLExperimentFile().getAbsolutePath();
-		}
-		
-		Collection<MPart> listParts = partService.getParts();
-		for(MPart mp : listParts) {
-			if (mp.getElementId().equals(filename)) {
-				
-				if (mp.getObject() == null) {
-					partService.showPart(mp, PartState.CREATE);
-				}
-				MPart shownPart = partService.showPart(mp, PartState.VISIBLE);
-
-				Editor editor = (Editor) shownPart.getObject();
-				editor.displayFile(obj);
-				
-				return;
-			}
-		}
-
-		final MPart part = partService.createPart(Editor.ID_DESC);
-
-		part.setLabel(filename);
-		part.setElementId(filename);
-
-		MPartStack editorStack = (MPartStack)modelService.find(STACK_ID, app);
-		editorStack.getChildren().add(part);
-
-		MPart shownPart = partService.showPart(part, PartState.VISIBLE);
-		Editor editor = (Editor) shownPart.getObject();
-		editor.displayFile(obj);
-	}
-
-	/***
-	 * Display the file of the object. 
-	 * If the object is a scope, it will display the source code.
-	 * If the object is an experiment database, it will display the XML file
-	 * 
-	 * @param obj
-	 */
-	public void displayFile(Object obj) {
-		
-		if (obj instanceof Scope) {
-			Scope scope = (Scope) obj;
-			
-			if (!Utilities.isFileReadable(scope))
-				return;
-			
-			FileSystemSourceFile file = (FileSystemSourceFile) scope.getSourceFile();
-			
-			String filename = file.getCompleteFilename();
-			int lineNumber  = scope.getFirstLineNumber();
-
-			displayFile(scope, filename, lineNumber);
-			
-		} else if (obj instanceof BaseExperiment) {
-			
-			BaseExperiment experiment = (BaseExperiment) obj;
-			String filename = experiment.getXMLExperimentFile().getAbsolutePath();
-			
-			displayFile(experiment, filename, 0);
-		}
-		// add more condition for different type of objects here
-		// we should make this more flexible...
-	}
 	
 
 	/***
@@ -206,6 +116,8 @@ public class Editor implements ICodeEditor
 
 		textViewer.setDocument(document, annModel);
 		textViewer.setData(PROPERTY_DATA, obj);
+		
+		part.setLabel(filename);
 		
 		try {
 			int maxLines = document.getNumberOfLines();
@@ -258,9 +170,57 @@ public class Editor implements ICodeEditor
 	    return contentBuilder.toString();
 	}
 
-	@Override
-	public void setTitle(String title) {}
 
 	@Override
 	public void setMarker(int lineNumber) {}
+
+	@Override
+	public String getTitle() {
+		return Editor.getTitle(input);
+	}
+	
+	public static String getTitle(Object input) {
+		String filename = null;
+		
+		if (input instanceof Scope) {
+			filename = ((Scope)input).getSourceFile().getName(); 
+		} else if (input instanceof BaseExperiment) {
+			filename = ((BaseExperiment)input).getXMLExperimentFile().getAbsolutePath();
+		}
+		return filename;
+	}
+
+	@Override
+	public String getPartDescriptorId() {
+		return ID_DESC;
+	}
+
+	@Override
+	public void display(Object obj) {
+		
+		input = obj;
+		
+		if (obj instanceof Scope) {
+			Scope scope = (Scope) obj;
+			
+			if (!Utilities.isFileReadable(scope))
+				return;
+			
+			FileSystemSourceFile file = (FileSystemSourceFile) scope.getSourceFile();
+			
+			String filename = file.getCompleteFilename();
+			int lineNumber  = scope.getFirstLineNumber();
+
+			displayFile(scope, filename, lineNumber);
+			
+		} else if (obj instanceof BaseExperiment) {
+			
+			BaseExperiment experiment = (BaseExperiment) obj;
+			String filename = experiment.getXMLExperimentFile().getAbsolutePath();
+			
+			displayFile(experiment, filename, 0);
+		}
+		// add more condition for different type of objects here
+		// we should make this more flexible...
+	}
 }

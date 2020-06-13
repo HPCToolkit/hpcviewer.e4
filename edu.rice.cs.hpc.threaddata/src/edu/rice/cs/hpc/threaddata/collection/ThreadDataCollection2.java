@@ -1,12 +1,8 @@
-package edu.rice.cs.hpcviewer.ui.metric;
+package edu.rice.cs.hpc.threaddata.collection;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-
-import org.eclipse.jface.action.IStatusLineManager;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.widgets.Display;
 
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.extdata.AbstractThreadDataCollection;
@@ -139,7 +135,7 @@ public class ThreadDataCollection2 extends AbstractThreadDataCollection
 		String file = ThreadLevelDataCompatibility.getMergedFile(experiment, directory, metricIndex);
 		if (file != null)
 		{
-			data_file[metricIndex] = new ThreadLevelDataFile(null);
+			data_file[metricIndex] = new ThreadLevelDataFile();
 			data_file[metricIndex].open(file);
 		}
 	}
@@ -197,7 +193,7 @@ public class ThreadDataCollection2 extends AbstractThreadDataCollection
 				// check with the old version of thread level data
 				checkOldVersionOfData(directory);
 				
-				final ProgressReport progress= new ProgressReport( null );
+				final ProgressReport progress= new ProgressReport(  );
 				
 				// ------------------------------------------------------------------------------------
 				// the compact method will return the name of the compacted files.
@@ -231,9 +227,6 @@ public class ThreadDataCollection2 extends AbstractThreadDataCollection
 			
 			if (file.canRead()) {
 				// old file already exist, needs to warn the user
-				MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Warning ! Old version of metric data file",
-						"hpcviewer has detected the presence of an old version of metric data file:\n 'experiment.mdb'\n in the directory:\n "
-						+ directory.getPath() + "\nIt is highly suggested to remove the file and replace it with the original *.metric-db files from hpcprof-mpi.");
 			}
 		}
 	}
@@ -246,30 +239,18 @@ public class ThreadDataCollection2 extends AbstractThreadDataCollection
 	 */
 	static private class ProgressReport implements IProgressReport 
 	{
-		final private IStatusLineManager statusLine;
 
-		public ProgressReport(IStatusLineManager statusMgr)
+		public ProgressReport()
 		{
-			statusLine = statusMgr;
 		}
 		
 		public void begin(String title, int num_tasks) {
-			if (statusLine != null) {
-				statusLine.setMessage(title);
-				statusLine.getProgressMonitor().beginTask(title, num_tasks);
-			}
 		}
 
 		public void advance() {
-			if (statusLine != null) 
-				statusLine.getProgressMonitor().worked(1);
 		}
 
 		public void end() {
-			if (statusLine != null) {
-				statusLine.getProgressMonitor().done();
-				statusLine.setMessage("");
-			}
 		}
 	}
 }

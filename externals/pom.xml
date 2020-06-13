@@ -14,5 +14,7 @@
 
  <modules>
   <module>graphbuilder</module>
+  <module>org.swtchart</module>
+  <module>org.swtchart.ext</module>
  </modules>
 </project>

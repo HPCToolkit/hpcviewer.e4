@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.metric;
+package edu.rice.cs.hpc.threaddata.plot;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

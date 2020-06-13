@@ -15,6 +15,7 @@ import org.eclipse.swt.widgets.ToolItem;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpcviewer.ui.actions.FlatScopeAction;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
+import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 
 public class FlatContentViewer extends AbstractContentViewer 
@@ -30,9 +31,10 @@ public class FlatContentViewer extends AbstractContentViewer
 							 EModelService modelService, 
 							 MApplication  app,
 							 IEventBroker  broker,
-							 DatabaseCollection database) {
+							 DatabaseCollection database,
+							 PartFactory   partFactory) {
 		
-		super(partService, modelService, app, broker, database);
+		super(partService, modelService, app, broker, database, partFactory);
 
 	}
 

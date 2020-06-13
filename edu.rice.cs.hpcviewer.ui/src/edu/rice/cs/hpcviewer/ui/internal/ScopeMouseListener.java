@@ -1,5 +1,7 @@
 package edu.rice.cs.hpcviewer.ui.internal;
 
+import javax.inject.Inject;
+
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
@@ -16,6 +18,7 @@ import edu.rice.cs.hpc.data.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpc.data.experiment.scope.LineScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpcviewer.ui.parts.editor.Editor;
+import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
 
@@ -36,6 +39,8 @@ public class ScopeMouseListener implements Listener
 	final private GC gc;
 	final private TreeViewer treeViewer;
 	
+	final private PartFactory partFactory;
+	
 	/**
 	 * initialization with the gc of the tree
 	 * @param TreeViewer the tree viewer. It cannot be null
@@ -45,11 +50,12 @@ public class ScopeMouseListener implements Listener
 	 */
 	public ScopeMouseListener(TreeViewer treeViewer, 
 			EPartService  partService, EModelService modelService,
-			MApplication  app) {
+			MApplication  app, PartFactory partFactory) {
 		
 		this.treeViewer   = treeViewer;
 		this.partService  = partService;
 		this.modelService = modelService;
+		this.partFactory  = partFactory;
 		
 		this.app = app;
 		this.gc  = new GC(treeViewer.getTree().getDisplay());
@@ -152,7 +158,7 @@ public class ScopeMouseListener implements Listener
 		if (scope == null || !Utilities.isFileReadable(scope))
 			return;
 
-		Editor.display(modelService, partService, app, scope);
+		partFactory.display(Editor.STACK_ID, Editor.ID_DESC, Editor.getTitle(scope), scope);
 		
 		// keep focus to the viewer 
 		treeViewer.getTree().setFocus();

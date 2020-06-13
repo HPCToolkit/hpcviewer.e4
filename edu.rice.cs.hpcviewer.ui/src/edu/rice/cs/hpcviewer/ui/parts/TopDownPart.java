@@ -14,7 +14,6 @@ public class TopDownPart extends BaseViewPart
 	static final public String ID = "edu.rice.cs.hpcviewer.ui.part.topdown";
 	static final public String IDdesc = "edu.rice.cs.hpcviewer.ui.partdescriptor.topdown";
 
-
 	public TopDownPart() {}
 
 	@Override
@@ -29,7 +28,7 @@ public class TopDownPart extends BaseViewPart
 
 	@Override
 	protected IContentViewer setContentViewer(Composite parent, EMenuService menuService) {
-		IContentViewer contentViewer = new TopDownContentViewer(partService, modelService, app, broker, databaseAddOn);
+		IContentViewer contentViewer = new TopDownContentViewer(partService, modelService, app, broker, databaseAddOn, partFactory);
     	contentViewer.createContent(parent, menuService);
 		return contentViewer;
 	}

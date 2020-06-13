@@ -1,36 +1,59 @@
 package edu.rice.cs.hpcviewer.ui.internal;
 
+import java.io.IOException;
+
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.CoolBar;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
+import edu.rice.cs.hpc.data.experiment.BaseExperiment;
+import edu.rice.cs.hpc.data.experiment.Experiment;
+import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
+import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
+import edu.rice.cs.hpc.data.experiment.metric.MetricRaw;
+import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
+import edu.rice.cs.hpc.threaddata.collection.ThreadDataCollectionFactory;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
+import edu.rice.cs.hpcviewer.ui.graph.GraphMenu;
+import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 
 public class TopDownContentViewer extends AbstractContentViewer 
-{
-
+{	
 	final static private int ITEM_GRAPH = 0;
 	final static private int ITEM_THREAD = 1;
 	
 	private ToolItem []items;
-
+	final private PartFactory partFactory;
+	
+	/* thread data collection is used to display graph or 
+	 * to display a thread view. We need to instantiate this variable
+	 * once we got the database experiment. */
+	private IThreadDataCollection threadData;
 	
 	public TopDownContentViewer(
 			EPartService partService, 
 			EModelService modelService, 
 			MApplication app,
 			IEventBroker broker,
-			DatabaseCollection database) {
+			DatabaseCollection database,
+			PartFactory   partFactory) {
 		
-		super(partService, modelService, app, broker, database);
+		super(partService, modelService, app, broker, database, partFactory);
+		this.partFactory = partFactory;
 	}
 
 	@Override
@@ -42,10 +65,44 @@ public class TopDownContentViewer extends AbstractContentViewer
 		items = new ToolItem[2];
 		
 		createToolItem(toolbar, SWT.SEPARATOR, "", "");
+		
 		items[ITEM_GRAPH] = createToolItem(toolbar, SWT.DROP_DOWN, IconManager.Image_Graph, 
 				"Show the graph of metric values of the selected CCT node for all processes/threads");
 		items[ITEM_THREAD] = createToolItem(toolbar, IconManager.Image_ThreadView, 
 				"Show the metric(s) of a group of threads");
+		
+		items[ITEM_GRAPH].addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (e.detail == SWT.ARROW || e.detail == 0 || e.detail == SWT.PUSH) {
+					
+					Rectangle rect = items[ITEM_GRAPH].getBounds();
+					Point pt = new Point(rect.x, rect.y + rect.height);
+					pt = toolbar.toDisplay(pt);
+
+					final MenuManager mgr = new MenuManager("graph");
+					
+					mgr.removeAll();
+					mgr.createContextMenu(toolbar);
+					
+					ScopeTreeViewer treeViewer = getViewer();
+					BaseExperiment exp = treeViewer.getExperiment();
+					Scope scope = treeViewer.getSelectedNode();
+					
+					// create the context menu of graphs
+					GraphMenu.createAdditionalContextMenu(partFactory, mgr, (Experiment) exp, threadData, scope);
+					
+					// make the context menu appears next to tool item
+					final Menu menu = mgr.getMenu();
+					menu.setLocation(pt);
+					menu.setVisible(true);
+				}
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {}
+		});
 	}
 
 	@Override
@@ -65,6 +122,35 @@ public class TopDownContentViewer extends AbstractContentViewer
 	@Override
 	protected void selectionChanged(IStructuredSelection selection) {
 		
+		Object obj = selection.getFirstElement();
+		if (obj == null || !(obj instanceof Scope))
+			return;
+		
+		if (threadData == null)
+			return;
+		
+		boolean available = threadData.isAvailable();
+		
+		items[ITEM_GRAPH] .setEnabled(available);
+		items[ITEM_THREAD].setEnabled(available);
 	}
 
+	@Override
+	public void setData(RootScope root) {
+		Experiment experiment = (Experiment) root.getExperiment();
+		try {
+			threadData = ThreadDataCollectionFactory.build(experiment);
+
+			BaseMetric[]metrics = experiment.getMetricRaw();
+			
+			for (BaseMetric metric: metrics)
+			{
+				if (metric instanceof MetricRaw)
+					((MetricRaw)metric).setThreadData(threadData);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		super.setData(root);
+	}
 }

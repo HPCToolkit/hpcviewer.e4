@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Ext
+Bundle-SymbolicName: org.swtchart.ext
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: org.swtchart
+Automatic-Module-Name: org.swtchart.ext
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: org.swtchart,
+ org.eclipse.swt,
+ org.eclipse.jface
+Export-Package: org.swtchart.ext

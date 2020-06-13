@@ -39,7 +39,7 @@ public class Datacentric  extends BaseViewPart
 	@Override
 	protected IContentViewer setContentViewer(Composite parent, EMenuService menuService) {
 
-		IContentViewer contentViewer = new TopDownContentViewer(partService, modelService, app, broker, databaseAddOn);
+		IContentViewer contentViewer = new TopDownContentViewer(partService, modelService, app, broker, databaseAddOn, partFactory);
     	contentViewer.createContent(parent, menuService);
 
     	return contentViewer;

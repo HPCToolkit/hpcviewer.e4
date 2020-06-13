@@ -11,6 +11,7 @@ import org.eclipse.swt.widgets.ToolBar;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
+import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 
 public class BottomUpContentViewer extends AbstractContentViewer 
 {
@@ -20,9 +21,10 @@ public class BottomUpContentViewer extends AbstractContentViewer
 								 EModelService modelService, 
 								 MApplication  app,
 								 IEventBroker  broker,
-								 DatabaseCollection database) {
+								 DatabaseCollection database,
+								 PartFactory   partFactory) {
 		
-		super(partService, modelService, app, broker, database);
+		super(partService, modelService, app, broker, database, partFactory);
 	}
 
 	@Override

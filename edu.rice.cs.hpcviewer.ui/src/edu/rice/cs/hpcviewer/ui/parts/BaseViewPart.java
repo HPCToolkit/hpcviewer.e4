@@ -13,6 +13,8 @@ import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
+import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
+
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.model.application.MApplication;
@@ -31,6 +33,8 @@ public abstract class BaseViewPart implements IBaseView, EventHandler, IPartList
 
 	@Inject IEventBroker broker;
 	@Inject DatabaseCollection databaseAddOn;
+
+	@Inject PartFactory partFactory;
 
 	private IContentViewer  contentViewer;
 	
