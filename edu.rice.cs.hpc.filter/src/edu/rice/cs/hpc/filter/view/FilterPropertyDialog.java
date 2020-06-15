@@ -320,7 +320,7 @@ public class FilterPropertyDialog extends TitleAreaDialog
 		public boolean isChecked(Object element) {
 			if (element instanceof Entry<?,?>) 
 			{
-				FilterAttribute value = (FilterAttribute) ((Entry<String, FilterAttribute>)element).getValue();
+				FilterAttribute value = ((Entry<String, FilterAttribute>)element).getValue();
 				return value.enable.booleanValue();
 			}
 			return false;
@@ -479,7 +479,7 @@ public class FilterPropertyDialog extends TitleAreaDialog
 				}
 				if (message != null) {
 					if (MessageDialog.openConfirm(shell, "Deleting a pattern", message)) {
-						//final FilterMap filterMap = FilterMap.getInstance();
+
 						Iterator<Entry<String, FilterAttribute>> iterator = select.iterator();
 						while(iterator.hasNext()) {
 							Entry<String, FilterAttribute> item = iterator.next();

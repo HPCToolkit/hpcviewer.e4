@@ -30,8 +30,6 @@ public class ZoomHandler
 		Object obj = part.getObject();
 		if (!(obj instanceof IBaseView))
 			return;
-		
-		IBaseView view = (IBaseView) obj;
 	}
 	
 	

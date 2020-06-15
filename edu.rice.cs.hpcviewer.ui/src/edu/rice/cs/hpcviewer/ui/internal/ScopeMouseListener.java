@@ -1,7 +1,5 @@
 package edu.rice.cs.hpcviewer.ui.internal;
 
-import javax.inject.Inject;
-
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
@@ -33,9 +31,6 @@ import edu.rice.cs.hpcviewer.ui.util.Utilities;
 public class ScopeMouseListener implements Listener 
 {
 	final private EPartService  partService;
-	final private EModelService modelService;
-	final private MApplication  app;
-	
 	final private GC gc;
 	final private TreeViewer treeViewer;
 	
@@ -54,10 +49,8 @@ public class ScopeMouseListener implements Listener
 		
 		this.treeViewer   = treeViewer;
 		this.partService  = partService;
-		this.modelService = modelService;
 		this.partFactory  = partFactory;
 		
-		this.app = app;
 		this.gc  = new GC(treeViewer.getTree().getDisplay());
 	}
 	
