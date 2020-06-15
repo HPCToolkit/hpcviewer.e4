@@ -39,22 +39,23 @@ public class GraphMenu
 			
 			mgr.add( new Separator() );
 			
-			final int num_metrics = metrics.length;
-			for (int i=0; i<num_metrics; i++) {
+			for (BaseMetric metric: metrics) {
 				
 				// do not display empty metric 
 				// this is important to keep consistency with the table
 				// which doesn't display empty metrics
 				
 				RootScope root = scope.getRootScope();
-				MetricValue mv = root.getMetricValue(metrics[i]);
+				MetricValue mv = root.getMetricValue(metric);
 				if (mv == MetricValue.NONE)
 					continue;
 				
+	        	GraphEditorInput objInput = new GraphEditorInput(threadData, scope, metric);
+
 				// display the menu
 				
-				MenuManager subMenu = new MenuManager("Graph "+ metrics[i].getDisplayName() );
-				createGraphMenus(threadData, partFactory, subMenu, scope, metrics[i]);
+				MenuManager subMenu = new MenuManager("Graph "+ metric.getDisplayName() );
+				createGraphMenus(objInput, partFactory, subMenu);
 				mgr.add(subMenu);
 			}
 		}		
@@ -68,14 +69,18 @@ public class GraphMenu
 	 * @param index
 	 */
 	static private void createGraphMenus(
-			IThreadDataCollection threadData, 
+			GraphEditorInput input, 
 			PartFactory partFactory, 
-			IMenuManager menu, 
-			Scope scope, 
-			BaseMetric m) {
-		menu.add( createGraphMenu(threadData, partFactory, scope, m, GraphPlotRegularViewer.ID) );
-		menu.add( createGraphMenu(threadData, partFactory, scope, m, GraphPlotSortViewer.ID) );
-		menu.add( createGraphMenu(threadData, partFactory, scope, m, GraphHistoViewer.ID) );
+			IMenuManager menu) {
+		
+		menu.add( createGraphMenu(input, partFactory, 
+				  GraphPlotRegularViewer.LABEL, GraphPlotRegularViewer.ID) );
+		
+		menu.add( createGraphMenu(input, partFactory, 
+				  GraphPlotSortViewer.LABEL, GraphPlotSortViewer.ID) );
+		
+		menu.add( createGraphMenu(input, partFactory, 
+				  GraphHistoViewer.LABEL, GraphHistoViewer.ID) );
 	}
 	
 	/***
@@ -87,14 +92,12 @@ public class GraphMenu
 	 * @return
 	 */
 	static private ScopeGraphAction createGraphMenu(
-			IThreadDataCollection threadData, 
+			GraphEditorInput input, 
 			PartFactory partFactory, 
-			Scope scope, 
-			BaseMetric m, 
-			String t) {
+			String      partLabel,
+			String      descriptorId) {
 		
-		final String sTitle = GraphViewer.getTypeLabel(t);
-		return new ScopeGraphAction( threadData, partFactory, sTitle, scope, m, t);
+		return new ScopeGraphAction( input, partFactory, partLabel, descriptorId);
 	}
 	
 
@@ -103,36 +106,28 @@ public class GraphMenu
      ********************************************************************************/
     static private class ScopeGraphAction extends Action 
     {
-    	final private IThreadDataCollection threadData;
-    	
     	final private String descriptorId;
-    	final private BaseMetric metric;	
-    	final private Scope scope;
     	final private PartFactory partFactory;
-    	
+		final private GraphEditorInput input;
+
 		public ScopeGraphAction(
-				IThreadDataCollection threadData,
+				GraphEditorInput input, 
 				PartFactory partFactory, 
-				String sTitle, 
-				Scope scopeCurrent, 
-				BaseMetric m, 
+				String label, 
 				String descriptorId) {
 			
-			super(sTitle);
+			super(label);
 			
-			this.threadData  = threadData;
+			this.input  	  = input;
 			this.partFactory  = partFactory;
-			this.metric 	  = m;
 			this.descriptorId = descriptorId;
-			this.scope 		  = scopeCurrent;
 		}
     	
 		public void run() {
 			
-        	GraphEditorInput objInput = new GraphEditorInput(threadData, scope, metric);
-        	String elementId = GraphViewer.getID(descriptorId, scope, metric);
+        	String elementId = GraphViewer.getID(descriptorId, input.getScope(), input.getMetric());
         	
-        	partFactory.display(Editor.STACK_ID, descriptorId, elementId, objInput);
+        	partFactory.display(Editor.STACK_ID, descriptorId, elementId, input);
 		}
     }
 }

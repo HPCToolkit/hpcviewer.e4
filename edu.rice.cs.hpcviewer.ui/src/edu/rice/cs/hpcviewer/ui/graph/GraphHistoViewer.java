@@ -19,7 +19,8 @@ import edu.rice.cs.hpc.data.experiment.scope.Scope;
 
 public class GraphHistoViewer extends GraphViewer 
 {
-	static public final String ID = "edu.rice.cs.hpcviewer.ui.partdescriptor.graph.histo"; 
+	static public final String ID    = "edu.rice.cs.hpcviewer.ui.partdescriptor.graph.histo"; 
+	static public final String LABEL = "Histogram grah";
 
 	@Override
 	protected int plotData(GraphEditorInput input) {
@@ -78,6 +79,11 @@ public class GraphHistoViewer extends GraphViewer
 	@Override
 	public String getPartDescriptorId() {
 		return ID;
+	}
+
+	@Override
+	protected String getGraphTypeLabel() {
+		return LABEL;
 	}
 
 }

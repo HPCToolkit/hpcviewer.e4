@@ -24,11 +24,15 @@ import org.eclipse.e4.ui.di.Focus;
 
 public abstract class GraphViewer implements IUpperPart
 {
+	static public final int PLOT_OK          = 0;
+	static public final int PLOT_ERR_IO 	 = -1;
+	static public final int PLOT_ERR_UNKNOWN = -2;
+	
 	static public final int MAX_TITLE_CHARS = 100; // maximum charaters for a title
 	
     private Chart chart;
     private GraphEditorInput input;
-    
+    private Composite parent;
 
 	@Inject
 	public GraphViewer() {		
@@ -37,23 +41,7 @@ public abstract class GraphViewer implements IUpperPart
 	@PostConstruct
 	public void postConstruct(Composite parent) {
 		
-		// set the window title with a possible db number
-
-		//----------------------------------------------
-		// chart creation
-		//----------------------------------------------
-		chart = new GraphChart(parent, SWT.NONE);
-
-
-		//----------------------------------------------
-		// formatting axis
-		//----------------------------------------------
-		IAxisSet axisSet = chart.getAxisSet();
-		IAxisTick yTick = axisSet.getYAxis(0).getTick();
-		yTick.setFormat(new DecimalFormat("0.0##E0##"));
-
-		// turn off the legend
-		chart.getLegend().setVisible(false);		
+		this.parent = parent;
 	}
 	
 	
@@ -72,10 +60,6 @@ public abstract class GraphViewer implements IUpperPart
 		return input.getScope().getExperiment();
 	}
 
-	@Override
-	public String getTitle() {
-		return getTitle(getPartDescriptorId(), input.getScope(), input.getMetric());
-	}
 
 
 	@Override
@@ -86,57 +70,67 @@ public abstract class GraphViewer implements IUpperPart
 	public void display(Object obj) {
 
 		if (obj == null) return;
+
+		// Important: need to set the value of input here 
+		// subclasses may need the input value for setting the title
 		
 		input = (GraphEditorInput) obj;
-		
-		chart.getTitle().setText(getTitle());
-		
+				
+		//----------------------------------------------
+		// chart creation
+		//----------------------------------------------
+		chart = new GraphChart(parent, SWT.NONE);
+
 		//----------------------------------------------
 		// formatting axis
 		//----------------------------------------------
 		IAxisSet axisSet = chart.getAxisSet();
 		IAxisTick yTick = axisSet.getYAxis(0).getTick();
 		yTick.setFormat(new DecimalFormat("0.0##E0##"));
+		
+		//----------------------------------------------
+		// tidy-up the chart
+		//----------------------------------------------
 
-		// turn off the legend
-		chart.getLegend().setVisible(false);
+		chart.getLegend().setVisible(false);				
+		chart.getTitle().setText(getTitle());
 		
 		//----------------------------------------------
 		// main part: ask the subclass to plot the graph
 		//----------------------------------------------
 
 		plotData(input);
+		
+		// -----------------------------------------------------------------
+		// Due to SWT Chart bug, we need to adjust the range once the create-part-control
+		// 	finishes its layout.
+		// -----------------------------------------------------------------
+
+		chart.getAxisSet().adjustRange();
 	}
 	
 	protected GraphEditorInput getInput() {
 		return input;
 	}
 	
-	static public String getTitle(String descID, Scope scope, BaseMetric metric) {
+	
+	@Override
+	public String getTitle() {
+		
+		Scope scope = input.getScope();
+		BaseMetric metric = input.getMetric();
 		
 		String scopeName = scope.getName();
 		if (scopeName.length() > MAX_TITLE_CHARS) {
 			scopeName = scope.getName().substring(0, MAX_TITLE_CHARS) + "...";
 		}
-		String type  = getTypeLabel(descID);
+		String type  = getGraphTypeLabel();
 		String title = "[" + type + "] " + scopeName +": " + metric.getDisplayName();
 		
 		return title;
 	}
 	
-	static public String getTypeLabel(String descID) {
-		
-		String type = null;
-		if (descID.equals(GraphPlotRegularViewer.ID)) {
-			type = "Plot graph";
-		} else if (descID.equals(GraphPlotSortViewer.ID)) {
-			type = "Sorted plot graph";
-		} else if (descID.equals(GraphHistoViewer.ID)) {
-			type = "Histogram graph";
-		}
-		return type;
-	}
-	
+
 	static public String getID(String descID, Scope scope, BaseMetric metric) {
 		
 		int dbId     = scope.getExperiment().hashCode();
@@ -159,6 +153,8 @@ public abstract class GraphViewer implements IUpperPart
 	 * 
 	 * @param scope: the scope to plot
 	 * @param metric: the raw metric to plot
+	 * 
+	 * @return PLOT_OK if everything works fine. Negative integer otherwise 
 	 */
 	protected abstract int plotData(GraphEditorInput input);
 	
@@ -174,5 +170,6 @@ public abstract class GraphViewer implements IUpperPart
 	 */
 	protected abstract ArrayList<Integer> translateUserSelection(ArrayList<Integer> selections); 
 
-	
+
+	protected abstract String getGraphTypeLabel();
 }

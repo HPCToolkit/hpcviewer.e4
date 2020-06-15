@@ -13,7 +13,8 @@ import edu.rice.cs.hpc.data.experiment.scope.Scope;
 
 public class GraphPlotRegularViewer extends GraphPlotViewer 
 {
-	static public final String ID = "edu.rice.cs.hpcviewer.ui.partdescriptor.graph.plot";
+	static public final String ID    = "edu.rice.cs.hpcviewer.ui.partdescriptor.graph.plot";
+	static public final String LABEL = "Plot grah";
 
 	@Override
 	protected String getXAxisTitle() {
@@ -61,4 +62,10 @@ public class GraphPlotRegularViewer extends GraphPlotViewer
 	public String getPartDescriptorId() {
 		return ID;
 	}
+
+	@Override
+	protected String getGraphTypeLabel() {
+		return LABEL;
+	}
+	
 }

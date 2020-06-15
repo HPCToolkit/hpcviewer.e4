@@ -9,8 +9,9 @@ import edu.rice.cs.hpc.data.experiment.scope.Scope;
 
 public class GraphPlotSortViewer extends GraphPlotViewer 
 {
-	static public final String ID = "edu.rice.cs.hpcviewer.ui.partdescriptor.graph.sort";
-	
+	static public final String ID    = "edu.rice.cs.hpcviewer.ui.partdescriptor.graph.sort";
+	static public final String LABEL = "Sorted plot grah";
+
     private PairThreadIndex []pairThreadIndex;
 
 	@Override
@@ -91,5 +92,10 @@ public class GraphPlotSortViewer extends GraphPlotViewer
 			return list;
 		}
 		return null;
+	}
+
+	@Override
+	protected String getGraphTypeLabel() {
+		return LABEL;
 	}
 }

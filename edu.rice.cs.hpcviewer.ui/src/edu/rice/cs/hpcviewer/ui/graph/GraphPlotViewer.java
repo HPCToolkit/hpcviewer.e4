@@ -20,7 +20,6 @@ import edu.rice.cs.hpc.data.experiment.scope.Scope;
 
 public abstract class GraphPlotViewer extends GraphViewer 
 {
-
 	static private final int DEFAULT_DIAMETER = 3;
 
 	@Inject EPartService partService;
@@ -35,77 +34,75 @@ public abstract class GraphPlotViewer extends GraphViewer
 		Scope scope = input.getScope();
 		MetricRaw metric = (MetricRaw) input.getMetric();
 		
-		double y_values[];
+
+		// -----------------------------------------------------------------
+		// gather x and y values
+		// -----------------------------------------------------------------
+		
+		double []y_values = null;
+		double []x_values = null;
+
 		try {
 			y_values = getValuesY(scope, metric);
 			
-			double []x_values;
-
 			x_values = getValuesX(scope, metric);
-
-			Chart chart = getChart();
-
-			// -----------------------------------------------------------------
-			// create scatter series
-			// -----------------------------------------------------------------
-			ILineSeries scatterSeries = (ILineSeries) chart.getSeriesSet()
-					.createSeries(SeriesType.LINE, metric.getDisplayName() );
-			
-			scatterSeries.setLineStyle( LineStyle.NONE);
-			scatterSeries.setSymbolSize(DEFAULT_DIAMETER);
-			
-			// -----------------------------------------------------------------
-			// set the values x and y to the plot
-			// -----------------------------------------------------------------
-			scatterSeries.setXSeries(x_values);
-			scatterSeries.setYSeries(y_values);
-			
-			String axis_x = this.getXAxisTitle( );
-			chart.getAxisSet().getXAxis(0).getTitle().setText( axis_x );
-			chart.getAxisSet().getYAxis(0).getTitle().setText( "Metric Value" );
-			
-			final IAxisTick xTick = chart.getAxisSet().getXAxis(0).getTick();
-			xTick.setFormat(new DecimalFormat("#############"));
-			
-			// adjust the axis range
-			editorFinalize();
 
 		} catch (IOException e) {
 			Display display = Display.getDefault();
 			
 			MessageDialog.openError(display.getActiveShell(), "Fail to open the file", 
 					"Error while openging the file: " + e.getMessage());
-			return -2;
+			return PLOT_ERR_IO;
 			
 		} catch (Exception e) {
 			Display display = Display.getDefault();
 			MessageDialog.openError(display.getActiveShell(), "Fail to display the graph", 
 					 "Error while opening thread level data metric file.\n"+ e.getMessage());
 			
-			return -1;
+			return PLOT_ERR_UNKNOWN;
 		}
-		return 0;
-	}
 
-	
-	/******
-	 * Do finalization of the editor
-	 * 
-	 * Due to SWT Chart bug, we need to adjust the range once the create-part-control
-	 * 	finishes its layout.
-	 */
-	private void editorFinalize() {
-		IAxisSet axisSet = this.getChart().getAxisSet();
-		axisSet.adjustRange();
+		Chart chart = getChart();
+
+		// -----------------------------------------------------------------
+		// create scatter series
+		// -----------------------------------------------------------------
+		ILineSeries scatterSeries = (ILineSeries) chart.getSeriesSet()
+				.createSeries(SeriesType.LINE, metric.getDisplayName() );
+		
+		scatterSeries.setLineStyle( LineStyle.NONE);
+		scatterSeries.setSymbolSize(DEFAULT_DIAMETER);
+		
+		// -----------------------------------------------------------------
+		// set x-axis
+		// -----------------------------------------------------------------
+
+		String axis_x = this.getXAxisTitle( );
+		chart.getAxisSet().getXAxis(0).getTitle().setText( axis_x );
+		chart.getAxisSet().getYAxis(0).getTitle().setText( "Metric Value" );
+		
+		IAxisSet axisSet = chart.getAxisSet();
+		final IAxisTick xTick = axisSet.getXAxis(0).getTick();
+		xTick.setFormat(new DecimalFormat("#############"));
+		
+		// -----------------------------------------------------------------
+		// set the values x and y to the plot
+		// -----------------------------------------------------------------
+		scatterSeries.setXSeries(x_values);
+		scatterSeries.setYSeries(y_values);
 
 		// set the lower range to be zero so that we can see if there is load imbalance or not
+		
 		Range range = axisSet.getAxes()[1].getRange();
 		if (range.lower > 0) {
 			range.lower = 0;
 			axisSet.getAxes()[1].setRange(range);
 		}
+		
+		return PLOT_OK;
 	}
 
+	
 
 	/***
 	 * retrieve the title of the X axis
