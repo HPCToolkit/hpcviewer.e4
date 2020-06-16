@@ -5,7 +5,7 @@ import org.eclipse.swt.widgets.Composite;
 
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 
-public interface IContentViewer 
+public interface IViewBuilder 
 {
 	public void createContent(Composite parent, EMenuService menuService);
 	public void setData(RootScope root);

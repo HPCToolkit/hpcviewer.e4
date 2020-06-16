@@ -15,8 +15,8 @@ public class TopDownPart extends BaseViewPart
 	public TopDownPart() {}
 
 	@Override
-	protected IContentViewer setContentViewer(Composite parent, EMenuService menuService) {
-		IContentViewer contentViewer = new TopDownContentViewer(partService, modelService, app, broker, databaseAddOn, partFactory);
+	protected IViewBuilder setContentViewer(Composite parent, EMenuService menuService) {
+		IViewBuilder contentViewer = new TopDownContentViewer(partService, modelService, app, broker, databaseAddOn, partFactory);
     	contentViewer.createContent(parent, menuService);
 		return contentViewer;
 	}

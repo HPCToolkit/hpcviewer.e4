@@ -17,15 +17,20 @@ import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadContentViewer;
 import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadViewInput;
 
+/*************************************************************
+ * 
+ * View part to display CCT and metrics for a specific set of threads 
+ *
+ *************************************************************/
 public class ThreadView  implements IViewPart
 {
 	static public final String IDdesc = "edu.rice.cs.hpcviewer.ui.partdescriptor.thread";
 
-	@Inject EPartService partService;
+	@Inject EPartService  partService;
 	@Inject EModelService modelService;
 	@Inject MApplication  app;
-
-	@Inject IEventBroker broker;
+	@Inject IEventBroker  broker;
+	
 	@Inject DatabaseCollection databaseAddOn;
 
 	@Inject PartFactory partFactory;
@@ -51,7 +56,6 @@ public class ThreadView  implements IViewPart
 
 	@Override
 	public void setInput(MPart part, Object input) {
-
 		
 		// important: needs to store the experiment database for further usage
 		// when the view is becoming visible

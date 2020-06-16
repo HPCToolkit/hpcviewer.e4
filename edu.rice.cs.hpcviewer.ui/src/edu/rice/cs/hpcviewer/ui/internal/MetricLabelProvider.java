@@ -60,10 +60,8 @@ public class MetricLabelProvider extends BaseMetricLabelProvider {
 		}		
 	}
 	
-	/*
-	 * (non-Javadoc)
-	 * @see edu.rice.cs.hpc.viewer.metric.BaseMetricLabelProvider#getFont(java.lang.Object)
-	 */
+	
+	@Override
 	public Font getFont(Object element) {
 
         if (!(element instanceof Scope)) {
@@ -78,10 +76,8 @@ public class MetricLabelProvider extends BaseMetricLabelProvider {
         return super.getFont(element);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see edu.rice.cs.hpc.viewer.metric.BaseMetricLabelProvider#getText(java.lang.Object)
-	 */
+
+	@Override
 	public String getText(Object element) {
 
 		if (!(element instanceof Scope)) {

@@ -33,6 +33,11 @@ import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadViewFactory;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 
+/*************************************************************
+ * 
+ * Top down content builder
+ *
+ *************************************************************/
 public class TopDownContentViewer extends AbstractContentViewer 
 {	
 	final static private int ITEM_GRAPH = 0;

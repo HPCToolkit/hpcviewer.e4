@@ -43,7 +43,7 @@ import edu.rice.cs.hpcviewer.ui.actions.MetricColumnHideShowAction;
 import edu.rice.cs.hpcviewer.ui.actions.ZoomAction;
 import edu.rice.cs.hpcviewer.ui.actions.UserDerivedMetric;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
-import edu.rice.cs.hpcviewer.ui.parts.IContentViewer;
+import edu.rice.cs.hpcviewer.ui.parts.IViewBuilder;
 import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 
@@ -52,13 +52,13 @@ import edu.rice.cs.hpcviewer.ui.resources.IconManager;
  * 
  * Base class to manage the content of the view part
  * 
- * A part has to call {@link IContentViewer.createContent} to create the content of the view
+ * A part has to call {@link IViewBuilder.createContent} to create the content of the view
  * (like toolbar and table tree).
  * 
  * For further customization, the caller (or part) has to subclass this class and implement
  * {@link beginToolbar} and {@link endToolbar}
  */
-public abstract class AbstractContentViewer implements IContentViewer, ISelectionChangedListener
+public abstract class AbstractContentViewer implements IViewBuilder, ISelectionChangedListener
 {
 	final private int TREE_COLUMN_WIDTH  = 250;
 

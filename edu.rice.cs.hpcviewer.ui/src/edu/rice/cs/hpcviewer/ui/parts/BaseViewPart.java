@@ -35,7 +35,7 @@ public abstract class BaseViewPart implements IViewPart, EventHandler, IPartList
 
 	@Inject PartFactory partFactory;
 
-	private IContentViewer  contentViewer;
+	private IViewBuilder  contentViewer;
 	
 	/** Each view needs to store the experiment database.
 	 * In case it needs to populate the table, we know which database 
@@ -123,12 +123,12 @@ public abstract class BaseViewPart implements IViewPart, EventHandler, IPartList
 		}
 	}
 
-	protected IContentViewer getContentViewer() {
+	protected IViewBuilder getContentViewer() {
 		return contentViewer;
 	}
 
 	protected abstract RootScope      createRoot(BaseExperiment experiment);
-	protected abstract IContentViewer setContentViewer(Composite parent, EMenuService menuService);
+	protected abstract IViewBuilder setContentViewer(Composite parent, EMenuService menuService);
 	protected abstract RootScopeType  getRootType();
 	
 }
