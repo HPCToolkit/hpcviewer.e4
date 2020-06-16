@@ -97,48 +97,6 @@ public class Editor implements IUpperPart
 	}
 
 	
-
-	/***
-	 * Display the content of a file, and highligjt a specified line number (generic version).
-	 * 
-	 * @param obj the object that identified this editor. It has to be either a scope or an experiment
-	 * @param filename the complete path of the file name
-	 * @param lineNumber the line number to be revealed
-	 */
-	public void displayFile(Object obj, String filename, int lineNumber) {
-		IDocument document = new Document();
-		
-		AnnotationModel annModel = new AnnotationModel();
-		annModel.connect(document);
-		
-		String text = readLineByLineJava8(filename);
-		document.set(text);
-
-		textViewer.setDocument(document, annModel);
-		textViewer.setData(PROPERTY_DATA, obj);
-		
-		part.setLabel(filename);
-		
-		try {
-			int maxLines = document.getNumberOfLines();
-			
-			lineNumber     = Math.max(0, Math.min(lineNumber, maxLines));
-			int offset     = document.getLineOffset(lineNumber);
-			int nextLine   = Math.min(lineNumber+1, maxLines);
-			int nextOffset = document.getLineOffset(nextLine);
-			int length     = Math.max(1, nextOffset - offset);
-			
-			document.addPosition(new Position(offset));
-			
-			TextSelection selection = new TextSelection(document, offset, length);
-			textViewer.setSelection(selection, true);
-			
-		} catch (BadLocationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
 	@Override
 	public BaseExperiment getExperiment() {
 		Object obj = textViewer.getData(PROPERTY_DATA);
@@ -185,7 +143,7 @@ public class Editor implements IUpperPart
 		if (input instanceof Scope) {
 			filename = ((Scope)input).getSourceFile().getName(); 
 		} else if (input instanceof BaseExperiment) {
-			filename = ((BaseExperiment)input).getXMLExperimentFile().getAbsolutePath();
+			filename = ((BaseExperiment)input).getXMLExperimentFile().getName();
 		}
 		return filename;
 	}
@@ -196,12 +154,13 @@ public class Editor implements IUpperPart
 	}
 
 	@Override
-	public void display(Object obj) {
+	public void setInput(MPart part, Object input) {
 		
-		input = obj;
+		this.input = input;
+		part.setLabel(getTitle());
 		
-		if (obj instanceof Scope) {
-			Scope scope = (Scope) obj;
+		if (input instanceof Scope) {
+			Scope scope = (Scope) input;
 			
 			if (!Utilities.isFileReadable(scope))
 				return;
@@ -213,14 +172,58 @@ public class Editor implements IUpperPart
 
 			displayFile(scope, filename, lineNumber);
 			
-		} else if (obj instanceof BaseExperiment) {
+			part.setTooltip(filename);
 			
-			BaseExperiment experiment = (BaseExperiment) obj;
+		} else if (input instanceof BaseExperiment) {
+			
+			BaseExperiment experiment = (BaseExperiment) input;
 			String filename = experiment.getXMLExperimentFile().getAbsolutePath();
 			
 			displayFile(experiment, filename, 0);
+			
+			part.setTooltip(filename);
 		}
 		// add more condition for different type of objects here
 		// we should make this more flexible...
+	}
+
+	
+	/***
+	 * Display the content of a file, and highligjt a specified line number (generic version).
+	 * 
+	 * @param obj the object that identified this editor. It has to be either a scope or an experiment
+	 * @param filename the complete path of the file name
+	 * @param lineNumber the line number to be revealed
+	 */
+	private void displayFile(Object obj, String filename, int lineNumber) {
+		IDocument document = new Document();
+		
+		AnnotationModel annModel = new AnnotationModel();
+		annModel.connect(document);
+		
+		String text = readLineByLineJava8(filename);
+		document.set(text);
+
+		textViewer.setDocument(document, annModel);
+		textViewer.setData(PROPERTY_DATA, obj);
+				
+		try {
+			int maxLines = document.getNumberOfLines();
+			
+			lineNumber     = Math.max(0, Math.min(lineNumber, maxLines));
+			int offset     = document.getLineOffset(lineNumber);
+			int nextLine   = Math.min(lineNumber+1, maxLines);
+			int nextOffset = document.getLineOffset(nextLine);
+			int length     = Math.max(1, nextOffset - offset);
+			
+			document.addPosition(new Position(offset));
+			
+			TextSelection selection = new TextSelection(document, offset, length);
+			textViewer.setSelection(selection, true);
+			
+		} catch (BadLocationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

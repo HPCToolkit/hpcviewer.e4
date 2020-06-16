@@ -8,5 +8,4 @@ public interface IUpperPart extends IBasePart
 	public String getPartDescriptorId();
 	
 	public void setMarker(int lineNumber);
-	public void display(Object obj);
 }

@@ -13,6 +13,8 @@ import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
 
+import edu.rice.cs.hpcviewer.ui.parts.IBasePart;
+
 
 @Creatable
 @Singleton
@@ -27,17 +29,17 @@ public class PartFactory
 	/****
 	 * Main method to display the file.
 	 * 
-	 * @param modelService
-	 * @param partService
-	 * @param app
-	 * @param obj The object to display (either a scope or a database)
+	 * @param stackId the parent of the part
+	 * @param partDescriptorId the ID of the descriptor part
+	 * @param elementId unique Id of the part
+	 * @param input The object to display (either a scope or a database or others)
 	 */
 	public void display(String stackId,
 						String partDescriptorId, 
 						String elementId, 
-						Object obj) {
+						Object input) {
 		
-		if (obj == null || elementId == null || partDescriptorId == null)
+		if (input == null || elementId == null || partDescriptorId == null)
 			return;
 		
 		// ----------------------------------------------------------
@@ -55,8 +57,8 @@ public class PartFactory
 				}
 				MPart shownPart = partService.showPart(mp, PartState.VISIBLE);
 
-				IUpperPart editor = (IUpperPart) shownPart.getObject();
-				editor.display(obj);
+				IBasePart objectPart = (IBasePart) shownPart.getObject();
+				objectPart.setInput(shownPart, input);
 				
 				return;
 			}
@@ -79,8 +81,11 @@ public class PartFactory
 
 		MPart shownPart = partService.showPart(part, PartState.VISIBLE);
 		
-		IUpperPart editor = (IUpperPart) shownPart.getObject();
-		editor.display(obj);
-		part.setLabel(editor.getTitle());
+		IBasePart objectPart = (IBasePart) shownPart.getObject();
+		objectPart.setInput(shownPart, input);
+		
+		// show the label if needed
+		if (shownPart.getLabel() == null)
+			shownPart.setLabel(input.toString());
 	}
 }

@@ -224,7 +224,7 @@ public class DatabaseCollection
 					":" + root.getRootName();
 			part.setElementId(elementID);
 
-			view.setExperiment(experiment, part);
+			view.setInput(part, experiment);
 		}
 	}
 	

@@ -16,7 +16,6 @@ import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.services.EMenuService;
@@ -66,19 +65,20 @@ public abstract class BaseViewPart implements IBaseView, EventHandler, IPartList
 		if (contentViewer != null)
 			contentViewer.dispose();
 	}
-
+	
 
 	@Override
-	public void setExperiment(BaseExperiment experiment, MPart part) {
+	public void setInput(MPart part, Object input) {
+		
+		// important: needs to store the experiment database for further usage
+		// when the view is becoming visible
+		this.experiment = (BaseExperiment) input;
 		
 		if (partService.isPartVisible(part)) {
 			
 			root = createRoot(experiment);
 			contentViewer.setData(root);
 		}
-		// important: needs to store the experiment database for further usage
-		// when the view is becoming visible
-		this.experiment = experiment;
 	}
 
 	@Override
@@ -95,18 +95,7 @@ public abstract class BaseViewPart implements IBaseView, EventHandler, IPartList
 		String topic = event.getTopic();
 		System.out.println("event: " + topic);
 	}
-	
-	@Focus
-	public void onFocus() {		
-	}
 
-	public String getElementId(BaseExperiment experiment) {
-		String filename = experiment.getXMLExperimentFile().getAbsolutePath();
-		RootScope root  = experiment.getRootScope(getRootType());
-		
-		return filename + ":" + root.getRootName();
-		
-	}
 	
 	@Override
 	public void partActivated(MPart part) {}

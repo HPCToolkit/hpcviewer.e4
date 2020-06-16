@@ -6,14 +6,6 @@ import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 
 public interface IBaseView extends IBasePart
 {
-	/**
-	 * tell the view its database.
-	 * The view has to be smart enough whether to populate the table or not.
-	 *  
-	 * @param experiment database experiment
-	 * @param part the object of this view part
-	 */
-	public void setExperiment(BaseExperiment experiment, MPart part);
 		
 	/**
 	 * View types, see Experiment.TITLE_* 

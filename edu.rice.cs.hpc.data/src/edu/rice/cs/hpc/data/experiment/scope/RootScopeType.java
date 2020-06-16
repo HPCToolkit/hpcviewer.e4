@@ -22,8 +22,9 @@ public class RootScopeType
 	public final static RootScopeType CallingContextTree = new RootScopeType("CallingContextTree");
 	public final static RootScopeType CallerTree = new RootScopeType("CallerTree");
 	public final static RootScopeType Invisible = new RootScopeType("Invisible");
-	public final static RootScopeType DatacentricTree= new RootScopeType("Datacentric");
-
+	public final static RootScopeType DatacentricTree = new RootScopeType("Datacentric");
+	public final static RootScopeType Unknown         = new RootScopeType("Unknown");
+	
 	public String toString() { return value; }
 	
 	private String value;

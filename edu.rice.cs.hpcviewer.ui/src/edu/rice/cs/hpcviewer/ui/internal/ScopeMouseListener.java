@@ -17,6 +17,7 @@ import edu.rice.cs.hpc.data.experiment.scope.LineScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpcviewer.ui.parts.editor.Editor;
 import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
+import edu.rice.cs.hpcviewer.ui.resources.FontManager;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
 
@@ -51,7 +52,8 @@ public class ScopeMouseListener implements Listener
 		this.partService  = partService;
 		this.partFactory  = partFactory;
 		
-		this.gc  = new GC(treeViewer.getTree().getDisplay());
+		gc  = new GC(treeViewer.getTree().getDisplay());
+		gc.setFont(FontManager.getFontGeneric());
 	}
 	
 

@@ -13,6 +13,8 @@ public class GraphEditorInput
 	private final BaseMetric metric;
 	
 	private final IThreadDataCollection threadData;
+	
+	private GraphType graphType;
 
 	/***
 	 * Create a new editor input for a give scope, metric, plot type and database
@@ -41,5 +43,27 @@ public class GraphEditorInput
 	
 	public IThreadDataCollection getThreadData() {
 		return threadData;
+	}
+	
+	public String toString() {
+		
+		String scopeName = scope.getName();
+		if (scopeName.length() > MAX_TITLE_CHARS) {
+			scopeName = scope.getName().substring(0, MAX_TITLE_CHARS) + "...";
+		}
+		String type  = (graphType != null? graphType.toString() : "graph");
+		String title = "[" + type + "] " + scopeName +": " + metric.getDisplayName();
+
+		return title;
+	}
+
+
+	public GraphType getGraphType() {
+		return graphType;
+	}
+
+
+	public void setGraphType(GraphType graphType) {
+		this.graphType = graphType;
 	}
 }

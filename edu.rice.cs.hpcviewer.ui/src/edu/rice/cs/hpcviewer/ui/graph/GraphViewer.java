@@ -21,6 +21,7 @@ import edu.rice.cs.hpcviewer.ui.parts.editor.IUpperPart;
 
 import javax.annotation.PreDestroy;
 import org.eclipse.e4.ui.di.Focus;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 
 public abstract class GraphViewer implements IUpperPart
 {
@@ -67,15 +68,17 @@ public abstract class GraphViewer implements IUpperPart
 	}
 
 	@Override
-	public void display(Object obj) {
+	public void setInput(MPart part, Object obj) {
 
 		if (obj == null) return;
 
-		// Important: need to set the value of input here 
+		// Important: First thing: we need to set the value of input here 
 		// subclasses may need the input value for setting the title
 		
 		input = (GraphEditorInput) obj;
-				
+		
+		part.setTooltip(getTitle());
+		
 		//----------------------------------------------
 		// chart creation
 		//----------------------------------------------
