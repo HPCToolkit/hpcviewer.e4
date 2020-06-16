@@ -34,13 +34,13 @@ public class PartFactory
 	 * @param elementId unique Id of the part
 	 * @param input The object to display (either a scope or a database or others)
 	 */
-	public void display(String stackId,
+	public MPart display(String stackId,
 						String partDescriptorId, 
 						String elementId, 
 						Object input) {
 		
 		if (input == null || elementId == null || partDescriptorId == null)
-			return;
+			return null;
 		
 		// ----------------------------------------------------------
 		// check if the editor (or part) is already created.
@@ -60,7 +60,7 @@ public class PartFactory
 				IBasePart objectPart = (IBasePart) shownPart.getObject();
 				objectPart.setInput(shownPart, input);
 				
-				return;
+				return shownPart;
 			}
 		}
 
@@ -87,5 +87,7 @@ public class PartFactory
 		// show the label if needed
 		if (shownPart.getLabel() == null)
 			shownPart.setLabel(input.toString());
+		
+		return shownPart;
 	}
 }

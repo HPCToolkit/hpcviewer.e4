@@ -551,6 +551,13 @@ public abstract class AbstractContentViewer implements IContentViewer, ISelectio
 		});
 	}
 	
+	/***
+	 * retrieve the current part service.
+	 * @return
+	 */
+	protected EPartService getPartService() {
+		return partService;
+	}
     
     /////////////////////////////////////////////////////////
     ///

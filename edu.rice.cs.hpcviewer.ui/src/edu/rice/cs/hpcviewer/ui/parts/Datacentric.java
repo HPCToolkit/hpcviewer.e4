@@ -6,7 +6,6 @@ import org.eclipse.e4.ui.services.EMenuService;
 import org.eclipse.swt.widgets.Composite;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
-import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcviewer.ui.internal.TopDownContentViewer;
@@ -19,16 +18,6 @@ public class Datacentric  extends BaseViewPart
 	public Datacentric() {
 	}
 	
-
-	@Override
-	public String getViewType() {
-		return Experiment.TITLE_DATACENTRIC_VIEW;
-	}
-
-	@Override
-	public String getID() {
-		return IDdesc;
-	}
 
 	@Override
 	protected RootScope createRoot(BaseExperiment experiment) {
@@ -50,8 +39,4 @@ public class Datacentric  extends BaseViewPart
 
 		return RootScopeType.DatacentricTree;
 	}
-	
-	
-	
-	
 }

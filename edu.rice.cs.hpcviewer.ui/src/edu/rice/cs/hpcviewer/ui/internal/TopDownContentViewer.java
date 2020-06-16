@@ -15,6 +15,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.CoolBar;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
@@ -29,6 +30,7 @@ import edu.rice.cs.hpcdata.tld.collection.ThreadDataCollectionFactory;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.graph.GraphMenu;
 import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
+import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadViewFactory;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 
 public class TopDownContentViewer extends AbstractContentViewer 
@@ -43,6 +45,8 @@ public class TopDownContentViewer extends AbstractContentViewer
 	 * to display a thread view. We need to instantiate this variable
 	 * once we got the database experiment. */
 	private IThreadDataCollection threadData;
+	
+	private AbstractContentProvider contentProvider = null;
 	
 	public TopDownContentViewer(
 			EPartService partService, 
@@ -103,11 +107,30 @@ public class TopDownContentViewer extends AbstractContentViewer
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
+		
+		items[ITEM_THREAD].addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+
+				ScopeTreeViewer treeViewer = getViewer();				
+				final Shell shell = treeViewer.getTree().getShell();
+				
+				ThreadViewFactory.build(partFactory, shell, getData(), threadData);
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {}
+		});
 	}
 
 	@Override
 	protected AbstractContentProvider getContentProvider(ScopeTreeViewer treeViewer) {
-		return new AbstractContentProvider(treeViewer) {
+		
+		if (contentProvider != null)
+			return contentProvider;
+		
+		contentProvider = new AbstractContentProvider(treeViewer) {
 			
 			@Override
 			public Object[] getChildren(Object node) {
@@ -117,6 +140,7 @@ public class TopDownContentViewer extends AbstractContentViewer
 				return null;
 			}
 		};
+		return contentProvider;
 	}
 
 	@Override

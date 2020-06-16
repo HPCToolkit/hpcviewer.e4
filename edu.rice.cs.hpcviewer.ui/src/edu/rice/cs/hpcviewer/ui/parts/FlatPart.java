@@ -18,16 +18,6 @@ public class FlatPart extends BaseViewPart
 
 
 	@Override
-	public String getViewType() {
-		return Experiment.TITLE_FLAT_VIEW;
-	}
-
-	@Override
-	public String getID() {
-		return IDdesc;
-	}
-
-	@Override
 	protected RootScope createRoot(BaseExperiment experiment) {
 		System.out.println(getClass().getSimpleName() + " create root " );
 

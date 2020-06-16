@@ -23,7 +23,7 @@ import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.IPartListener;
 
-public abstract class BaseViewPart implements IBaseView, EventHandler, IPartListener
+public abstract class BaseViewPart implements IViewPart, EventHandler, IPartListener
 {
 
 	@Inject EPartService partService;
@@ -70,6 +70,9 @@ public abstract class BaseViewPart implements IBaseView, EventHandler, IPartList
 	@Override
 	public void setInput(MPart part, Object input) {
 		
+		if (!(input instanceof BaseExperiment))
+			return;
+					
 		// important: needs to store the experiment database for further usage
 		// when the view is becoming visible
 		this.experiment = (BaseExperiment) input;
@@ -120,6 +123,9 @@ public abstract class BaseViewPart implements IBaseView, EventHandler, IPartList
 		}
 	}
 
+	protected IContentViewer getContentViewer() {
+		return contentViewer;
+	}
 
 	protected abstract RootScope      createRoot(BaseExperiment experiment);
 	protected abstract IContentViewer setContentViewer(Composite parent, EMenuService menuService);

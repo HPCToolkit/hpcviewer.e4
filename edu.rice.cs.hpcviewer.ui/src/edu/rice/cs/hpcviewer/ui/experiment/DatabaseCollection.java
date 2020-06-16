@@ -41,7 +41,7 @@ import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
 import edu.rice.cs.hpcviewer.ui.parts.BottomUpPart;
 import edu.rice.cs.hpcviewer.ui.parts.Datacentric;
 import edu.rice.cs.hpcviewer.ui.parts.FlatPart;
-import edu.rice.cs.hpcviewer.ui.parts.IBaseView;
+import edu.rice.cs.hpcviewer.ui.parts.IViewPart;
 import edu.rice.cs.hpcviewer.ui.parts.TopDownPart;
 
 /***
@@ -98,7 +98,7 @@ public class DatabaseCollection
 		
 		String args[] = Platform.getApplicationArgs();
 		
-		Display display = Display.getDefault();
+		Display display = Display.getCurrent();
 		Shell myShell   = display.getActiveShell();
 		
 		if (myShell == null) {
@@ -217,7 +217,7 @@ public class DatabaseCollection
 				
 				service.showPart(part, PartState.CREATE);
 			}			
-			IBaseView view = (IBaseView) part.getObject();
+			IViewPart view = (IViewPart) part.getObject();
 			
 			// has to set the element Id before populating the view
 			String elementID = experiment.getXMLExperimentFile().getAbsolutePath() + 

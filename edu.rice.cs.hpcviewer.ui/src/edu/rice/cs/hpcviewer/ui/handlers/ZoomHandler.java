@@ -7,7 +7,7 @@ import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 
-import edu.rice.cs.hpcviewer.ui.parts.IBaseView;
+import edu.rice.cs.hpcviewer.ui.parts.IViewPart;
 
 import javax.inject.Named;
 
@@ -28,7 +28,7 @@ public class ZoomHandler
 			return;
 
 		Object obj = part.getObject();
-		if (!(obj instanceof IBaseView))
+		if (!(obj instanceof IViewPart))
 			return;
 	}
 	

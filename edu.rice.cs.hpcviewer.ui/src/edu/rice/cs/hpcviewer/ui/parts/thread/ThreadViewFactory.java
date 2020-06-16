@@ -4,9 +4,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.e4.core.contexts.EclipseContextFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
@@ -59,24 +66,35 @@ public class ThreadViewFactory
 	 */
 	static public void build(PartFactory partFactory, Shell shell, RootScope rootScope, IThreadDataCollection threadData, List<Integer> threads) 
 	{
+		List<Integer> listOfThreads = threads;
 		try {
-			if (threads == null) {
+			if (listOfThreads == null) {
 				// ask users to select which threads to be displayed
-				threads = getThreads(shell, threadData);
+				listOfThreads = getThreads(shell, threadData);
 				// if users click cancel, we return immediately
-				if (threads == null)
+				if (listOfThreads == null)
 					return;
 			}
-			ThreadViewInput input  = new ThreadViewInput(rootScope, threadData, threads);
-			final String elementId = getThreadViewKey(rootScope);
-			
-			partFactory.display("edu.rice.cs.hpcviewer.ui.partsashcontainer.0", ThreadView.IDdesc, elementId, input);
-			
 		} catch (Exception e) {
 			e.printStackTrace();
 			String msg = e.getMessage() == null ? e.getClass().getCanonicalName() : e.getMessage();
 			MessageDialog.openError(shell, "Error", msg);
 		}
+		
+		final Bundle bundle = FrameworkUtil.getBundle(EPartService.class);
+		
+		BundleContext bundleContext = bundle.getBundleContext();
+		IEclipseContext eclipseCtx  = EclipseContextFactory.getServiceContext(bundleContext);
+		EPartService  partService   = (EPartService) eclipseCtx.get(EPartService.class.getName());
+		
+		MPart part      = partService.getActivePart();
+		String parentId = part.getParent().getElementId();
+		
+		ThreadViewInput input  = new ThreadViewInput(rootScope, threadData, listOfThreads);
+
+		final String elementId = getThreadViewKey(rootScope);
+		
+		partFactory.display(parentId, ThreadView.IDdesc, elementId, input);
 	}
 	
 	

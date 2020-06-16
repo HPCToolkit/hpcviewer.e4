@@ -11,20 +11,32 @@ import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.viewers.TreeViewerColumn;
+import org.eclipse.swt.widgets.TreeColumn;
+
+import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
+import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
 import edu.rice.cs.hpc.data.experiment.metric.MetricRaw;
+import edu.rice.cs.hpc.data.experiment.scope.RootScope;
+import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
+import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractContentProvider;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeSelectionAdapter;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
 import edu.rice.cs.hpcviewer.ui.internal.TopDownContentViewer;
+import edu.rice.cs.hpcviewer.ui.metric.MetricRawManager;
 import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 
 public class ThreadContentViewer extends TopDownContentViewer 
 {
 	static final private int MAX_THREAD_INDEX = 2;
+	
+	/** the metric manager of the view. DO NOT access this variable directly.
+	 *  Instead, we need to query to getMetricManager() */
+	private IMetricManager metricManager = null;
 
 	public ThreadContentViewer(EPartService partService, EModelService modelService, MApplication app,
 			IEventBroker eventBroker, DatabaseCollection database, PartFactory partFactory) {
@@ -32,10 +44,10 @@ public class ThreadContentViewer extends TopDownContentViewer
 		super(partService, modelService, app, eventBroker, database, partFactory);
 	}
 
-
+	
 	public void setData(ThreadViewInput input) {
 
-		final Experiment metricMgr = (Experiment) input.getRootScope().getExperiment();
+		final IMetricManager metricMgr = getMetricManager();
 		List<BaseMetric > metrics = metricMgr.getVisibleMetrics();
 		
 		// 1. check if the threads already exist in the view
@@ -63,11 +75,27 @@ public class ThreadContentViewer extends TopDownContentViewer
 			return;
 
 		// 3. add the new metrics into the table
-		final Experiment experiment = (Experiment) metricMgr;
+		final Experiment experiment = (Experiment) input.getRootScope().getExperiment();
 		initTableColumns(input, experiment.getMetricRaw());
 
 		// 4. update the table content, including the aggregate experiment
+		RootScope root = createRoot(experiment);
+		ScopeTreeViewer treeViewer = getViewer();
+		treeViewer.setInput(root);
+		
+		// insert the first row (header)
+		treeViewer.insertParentNode(root);
 
+		// pack the columns, either to fit the title of the header, or 
+		// the item in the column
+		
+		final TreeColumn []columns = treeViewer.getTree().getColumns();
+		
+		for (final TreeColumn col : columns) {
+			if (col.getData() != null) {
+				col.pack();
+			}
+		}
 	}
 	
 
@@ -164,5 +192,31 @@ public class ThreadContentViewer extends TopDownContentViewer
 			e.printStackTrace();
 		}
 	}
+	
+	private IMetricManager getMetricManager() 
+	{
+		if (metricManager != null)
+			return metricManager;
+		
+		// create a new metric manager for this view
+		metricManager = new MetricRawManager(getViewer());
+		return metricManager;
+	}
 
+
+	protected RootScope createRoot(BaseExperiment experiment) {
+
+		// create and duplicate the configuration
+		RootScope rootCCT    = experiment.getRootScope(RootScopeType.CallingContextTree);
+		RootScope rootThread = (RootScope) rootCCT.duplicate();
+		rootThread.setRootName("Thread View");
+		
+		// duplicate the children
+		for(int i=0; i<rootCCT.getChildCount(); i++)
+		{
+			Scope scope = (Scope) rootCCT.getChildAt(i);
+			rootThread.addSubscope(scope);
+		}
+		return rootThread;
+	}
 }

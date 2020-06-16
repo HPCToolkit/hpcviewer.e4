@@ -11,21 +11,10 @@ import edu.rice.cs.hpcviewer.ui.internal.BottomUpContentViewer;
 
 public class BottomUpPart extends BaseViewPart
 {
-	static public final String ID = "edu.rice.cs.hpcviewer.ui.part.bottomup";
 	static final public String IDdesc = "edu.rice.cs.hpcviewer.ui.partdescriptor.bottomup";
 
 	
 	public BottomUpPart() {
-	}
-
-	@Override
-	public String getViewType() {
-		return Experiment.TITLE_BOTTOM_UP_VIEW;
-	}
-
-	@Override
-	public String getID() {
-		return ID;
 	}
 
 	@Override
