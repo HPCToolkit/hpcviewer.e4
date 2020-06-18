@@ -5,7 +5,10 @@ Bundle-SymbolicName: edu.rice.cs.hpcviewer.ui;singleton:=true
 Bundle-Version: 6.0.0.qualifier
 Bundle-Activator: edu.rice.cs.hpcviewer.ui.Activator
 Bundle-Vendor: Rice University
-Require-Bundle: org.eclipse.core.runtime,
+Require-Bundle: edu.rice.cs.hpc.data,
+ edu.rice.cs.hpcdata.tld,
+ edu.rice.cs.hpcbase,
+ org.eclipse.core.runtime,
  javax.inject;bundle-version="0.0.0",
  javax.annotation,
  org.eclipse.core.runtime;bundle-version="0.0.0",
@@ -22,8 +25,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.passage.lic.equinox;bundle-version="0.0.0",
  org.eclipse.passage.lic.e4.ui;bundle-version="0.0.0",
  org.eclipse.e4.ui.workbench.swt,
- edu.rice.cs.hpcbase,
- edu.rice.cs.hpc.data,
  org.eclipse.e4.core.services,
  org.eclipse.core.filesystem,
  com.graphbuilder,
@@ -31,8 +32,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.e4.ui.workbench.swt,
  org.eclipse.e4.ui.model.workbench,
  org.swtchart,
- org.swtchart.ext,
- edu.rice.cs.hpcdata.tld
+ org.swtchart.ext
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Provide-Capability: licensing.feature;licensing.feature="edu.rice.cs.hpcviewer.ui.product"
