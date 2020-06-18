@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: UI
+Bundle-Name: hpcviewer.ui
 Bundle-SymbolicName: edu.rice.cs.hpcviewer.ui;singleton:=true
 Bundle-Version: 6.0.0.qualifier
 Bundle-Activator: edu.rice.cs.hpcviewer.ui.Activator

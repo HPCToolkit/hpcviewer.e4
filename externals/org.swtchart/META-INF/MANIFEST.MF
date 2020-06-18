@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Swtchart
+Bundle-Name: org.swtchart
 Bundle-SymbolicName: org.swtchart
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: org.swtchart

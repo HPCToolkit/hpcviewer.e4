@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Threaddata
+Bundle-Name: hpcdata.tld
 Bundle-SymbolicName: edu.rice.cs.hpcdata.tld
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: Rice University
