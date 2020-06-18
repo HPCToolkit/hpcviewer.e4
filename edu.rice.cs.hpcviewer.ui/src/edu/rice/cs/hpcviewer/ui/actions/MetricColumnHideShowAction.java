@@ -20,7 +20,7 @@ import edu.rice.cs.hpcviewer.ui.util.FilterDataItem;
 
 public class MetricColumnHideShowAction 
 {	
-	final private boolean 	     affectOtherViews;
+	private boolean 	     affectOtherViews;
 	final private IEventBroker 	 eventBroker;
 	final private IMetricManager metricMgr;
 	
@@ -28,6 +28,16 @@ public class MetricColumnHideShowAction
 		this.affectOtherViews = affectOtherViews;
 		this.eventBroker      = eventBroker;
 		this.metricMgr		  = metricMgr;
+	}
+	
+	
+	/**
+	 * Set the flag to specify if we want the change of status affect other views or not.
+	 * 
+	 * @param enabled true if the change affects other views. false if the change just affect this view.
+	 */
+	public void setAffectOtherViews(boolean enabled) {
+		this.affectOtherViews = enabled;
 	}
 	
 	/**
@@ -85,7 +95,7 @@ public class MetricColumnHideShowAction
 				i++;
     		}
     		
-    		if (isAppliedToAllViews) {
+    		if (isAppliedToAllViews && metricMgr instanceof Experiment) {
     			
     			// send message to all registered views, that there is a change of column properties
     			// we don't verify if there's a change or not. Let the view decides what they want to do

@@ -146,4 +146,9 @@ public class FlatContentViewer extends AbstractContentViewer
 	protected IMetricManager getMetricManager() {
 		return (IMetricManager) getViewer().getExperiment();
 	}
+
+	@Override
+	protected ViewerType getViewerType() {
+		return ViewerType.COLLECTIVE;
+	}
 }

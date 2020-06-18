@@ -60,6 +60,13 @@ import edu.rice.cs.hpcviewer.ui.resources.IconManager;
  */
 public abstract class AbstractContentViewer implements IViewBuilder, ISelectionChangedListener
 {
+	static protected enum ViewerType {
+		/** the viewer is independent to others. No need to update the status from others. */
+		INDIVIDUAL,  
+		/** the viewer depends the actions of others. Required status updates from others.*/
+		COLLECTIVE   
+	};
+	
 	final private int TREE_COLUMN_WIDTH  = 250;
 
 	final private int ACTION_ZOOM_IN      = 0;
@@ -503,8 +510,10 @@ public abstract class AbstractContentViewer implements IViewBuilder, ISelectionC
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (metricAction == null)
-					metricAction = new MetricColumnHideShowAction(eventBroker, getMetricManager(), true);
+				if (metricAction == null) {
+					boolean affectOthers = getViewerType() == ViewerType.COLLECTIVE;
+					metricAction = new MetricColumnHideShowAction(eventBroker, getMetricManager(), affectOthers);
+				}
 				
 				metricAction.showColumnsProperties(treeViewer, database);
 			}
@@ -571,6 +580,7 @@ public abstract class AbstractContentViewer implements IViewBuilder, ISelectionC
     
     protected abstract AbstractContentProvider getContentProvider(ScopeTreeViewer treeViewer);
     protected abstract IMetricManager 		   getMetricManager();
+    protected abstract ViewerType              getViewerType();
     
     /////////////////////////////////////////////////////////
     ///

@@ -26,6 +26,7 @@ import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractContentProvider;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeSelectionAdapter;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
+
 import edu.rice.cs.hpcviewer.ui.metric.MetricRawManager;
 import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownContentViewer;
@@ -96,6 +97,7 @@ public class ThreadContentViewer extends TopDownContentViewer
 				col.pack();
 			}
 		}
+		updateStatus();
 	}
 	
 
@@ -221,5 +223,10 @@ public class ThreadContentViewer extends TopDownContentViewer
 			rootThread.addSubscope(scope);
 		}
 		return rootThread;
+	}
+	
+	@Override
+	protected ViewerType getViewerType() {
+		return ViewerType.INDIVIDUAL;
 	}
 }

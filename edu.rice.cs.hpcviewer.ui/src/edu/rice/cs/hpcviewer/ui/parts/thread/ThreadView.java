@@ -75,8 +75,8 @@ public class ThreadView  implements IViewPart
 			Display display = Display.getDefault();
 			try {
 				List<Integer> threads = getThreads(display.getActiveShell(), viewInput.getThreadData());
-				//if (threads == null)
-				//	return;
+				if (threads == null)
+					return;
 				
 				viewInput.setThread(threads);
 				
