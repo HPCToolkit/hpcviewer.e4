@@ -1,12 +1,16 @@
 package edu.rice.cs.hpcviewer.ui.internal;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.MApplication;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -29,8 +33,10 @@ import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.tld.collection.ThreadDataCollectionFactory;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.graph.GraphMenu;
+import edu.rice.cs.hpcviewer.ui.parts.ThreadView;
 import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadViewFactory;
+import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadViewInput;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 
 /*************************************************************
@@ -118,10 +124,14 @@ public class TopDownContentViewer extends AbstractContentViewer
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 
-				ScopeTreeViewer treeViewer = getViewer();				
-				final Shell shell = treeViewer.getTree().getShell();
+				ScopeTreeViewer treeViewer = getViewer();
 				
-				ThreadViewFactory.build(partFactory, shell, getData(), threadData);
+				ThreadViewInput input = new ThreadViewInput(treeViewer.getRootScope(), threadData, null);
+
+				MPart activePart = getPartService().getActivePart();
+				String parentId  = activePart.getParent().getElementId();
+				
+				partFactory.display(parentId, ThreadView.IDdesc, input.toString(), input);
 			}
 			
 			@Override

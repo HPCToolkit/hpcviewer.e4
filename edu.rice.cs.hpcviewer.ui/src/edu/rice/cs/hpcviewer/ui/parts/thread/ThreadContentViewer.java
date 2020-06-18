@@ -52,7 +52,7 @@ public class ThreadContentViewer extends TopDownContentViewer
 		
 		// 1. check if the threads already exist in the view
 		boolean col_exist = false;
-		if (metrics != null) {
+		if (metrics != null && input.getThreads() != null) {
 			for (BaseMetric metric : metrics) {
 				if (metric instanceof MetricRaw) {
 					List<Integer> lt = ((MetricRaw)metric).getThread();
@@ -128,6 +128,8 @@ public class ThreadContentViewer extends TopDownContentViewer
 		}
 
 		List<Integer> threads = input.getThreads();
+		if (threads == null)
+			return;
 		
 		try {
 			labels = threadData.getRankStringLabels();
