@@ -17,6 +17,7 @@ import org.eclipse.core.filesystem.IFileInfo;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Creatable;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -30,6 +31,7 @@ import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -141,12 +143,19 @@ public class DatabaseCollection
 			IEventBroker 	broker,
 			EModelService 	modelService) {
 		
-		queueExperiment.add(experiment);
-		
 		if (service == null) {
 			System.out.println("Error: service is not available");
 			return;
 		}
+		IEclipseContext activeWindowContext = application.getContext().getActiveChild();
+		if (activeWindowContext == null) {
+			Display display = Display.getCurrent();
+			MessageDialog.openError(display.getActiveShell(), "Error", 
+					"Cannot find an active window with this platform.\n" +
+					"Please open a database from the File-Open menu.");
+			return;
+		}
+
 		//----------------------------------------------------------------
 		// find an empty slot in the part stack
 		// If no slot is available, we will try to create a new one.
@@ -217,8 +226,21 @@ public class DatabaseCollection
 				
 				service.showPart(part, PartState.CREATE);
 			}			
-			IViewPart view = (IViewPart) part.getObject();
+			IViewPart view = null;
+			int maxAttempt = 10;
 			
+			while(maxAttempt>0) {
+				view = (IViewPart) part.getObject();
+				if (view != null)
+					break;
+				
+				try {
+					Thread.sleep(300);					
+				} catch (Exception e) {
+					System.out.println("thread is interrupted");
+				}
+				maxAttempt--;
+			}
 			// has to set the element Id before populating the view
 			String elementID = experiment.getXMLExperimentFile().getAbsolutePath() + 
 					":" + root.getRootName();
@@ -226,6 +248,8 @@ public class DatabaseCollection
 
 			view.setInput(part, experiment);
 		}
+		
+		queueExperiment.add(experiment);
 	}
 	
 	/***
