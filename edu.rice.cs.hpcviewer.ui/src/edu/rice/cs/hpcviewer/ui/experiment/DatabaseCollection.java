@@ -40,11 +40,11 @@ import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
-import edu.rice.cs.hpcviewer.ui.parts.BottomUpPart;
 import edu.rice.cs.hpcviewer.ui.parts.Datacentric;
-import edu.rice.cs.hpcviewer.ui.parts.FlatPart;
 import edu.rice.cs.hpcviewer.ui.parts.IViewPart;
-import edu.rice.cs.hpcviewer.ui.parts.TopDownPart;
+import edu.rice.cs.hpcviewer.ui.parts.bottomup.BottomUpPart;
+import edu.rice.cs.hpcviewer.ui.parts.flat.FlatPart;
+import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownPart;
 import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
 
 /***

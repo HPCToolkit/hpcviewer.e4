@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.internal;
+package edu.rice.cs.hpcviewer.ui.parts.bottomup;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.MApplication;
@@ -11,6 +11,9 @@ import org.eclipse.swt.widgets.ToolBar;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
+import edu.rice.cs.hpcviewer.ui.internal.AbstractContentProvider;
+import edu.rice.cs.hpcviewer.ui.internal.AbstractContentViewer;
+import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
 import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 
 public class BottomUpContentViewer extends AbstractContentViewer 

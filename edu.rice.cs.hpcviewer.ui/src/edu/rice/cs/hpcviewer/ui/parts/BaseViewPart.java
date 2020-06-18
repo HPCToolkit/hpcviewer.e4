@@ -26,14 +26,14 @@ import org.eclipse.e4.ui.workbench.modeling.IPartListener;
 public abstract class BaseViewPart implements IViewPart, EventHandler, IPartListener
 {
 
-	@Inject EPartService partService;
-	@Inject EModelService modelService;
-	@Inject MApplication  app;
+	@Inject	protected EPartService partService;
+	@Inject protected EModelService modelService;
+	@Inject protected MApplication  app;
 
-	@Inject IEventBroker broker;
-	@Inject DatabaseCollection databaseAddOn;
+	@Inject protected IEventBroker broker;
+	@Inject protected DatabaseCollection databaseAddOn;
 
-	@Inject PartFactory partFactory;
+	@Inject protected PartFactory partFactory;
 
 	private IViewBuilder  contentViewer;
 	

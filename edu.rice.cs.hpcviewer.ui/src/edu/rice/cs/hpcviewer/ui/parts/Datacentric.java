@@ -8,7 +8,7 @@ import org.eclipse.swt.widgets.Composite;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
-import edu.rice.cs.hpcviewer.ui.internal.TopDownContentViewer;
+import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownContentViewer;
 
 public class Datacentric  extends BaseViewPart
 {

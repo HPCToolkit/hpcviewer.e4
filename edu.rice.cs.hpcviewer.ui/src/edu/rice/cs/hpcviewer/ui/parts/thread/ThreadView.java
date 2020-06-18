@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.parts;
+package edu.rice.cs.hpcviewer.ui.parts.thread;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,10 +21,8 @@ import org.eclipse.swt.widgets.Shell;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
+import edu.rice.cs.hpcviewer.ui.parts.IViewPart;
 import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
-import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadContentViewer;
-import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadFilterDialog;
-import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadViewInput;
 import edu.rice.cs.hpcviewer.ui.util.FilterDataItem;
 
 /*************************************************************

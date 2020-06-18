@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.parts;
+package edu.rice.cs.hpcviewer.ui.parts.topdown;
 
 import org.eclipse.e4.ui.services.EMenuService;
 import org.eclipse.swt.widgets.Composite;
@@ -6,7 +6,8 @@ import org.eclipse.swt.widgets.Composite;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
-import edu.rice.cs.hpcviewer.ui.internal.TopDownContentViewer;
+import edu.rice.cs.hpcviewer.ui.parts.BaseViewPart;
+import edu.rice.cs.hpcviewer.ui.parts.IViewBuilder;
 
 public class TopDownPart extends BaseViewPart
 {
