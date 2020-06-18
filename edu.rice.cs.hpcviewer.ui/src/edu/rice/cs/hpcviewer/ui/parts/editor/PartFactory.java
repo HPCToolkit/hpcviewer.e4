@@ -76,7 +76,10 @@ public class PartFactory
 
 		if (stackId != null) {
 			MPartStack editorStack = (MPartStack)modelService.find(stackId, app);
-			editorStack.getChildren().add(part);
+		
+			if (editorStack != null) {
+				editorStack.getChildren().add(part);
+			}
 		}
 
 		MPart shownPart = partService.showPart(part, PartState.VISIBLE);
