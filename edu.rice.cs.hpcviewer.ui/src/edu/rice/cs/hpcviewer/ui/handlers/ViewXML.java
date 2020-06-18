@@ -12,6 +12,7 @@ import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.parts.IBasePart;
 import edu.rice.cs.hpcviewer.ui.parts.editor.Editor;
 import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
+import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
 
 import javax.inject.Inject;
 
@@ -34,7 +35,7 @@ public class ViewXML
 			
 			if (obj instanceof IBasePart) {
 				BaseExperiment experiment = ((IBasePart)obj).getExperiment();
-				String elementId = Editor.getTitle(experiment);
+				String elementId = ElementIdManager.getElementId(experiment);
 				partFactory.display(Editor.STACK_ID, Editor.ID_DESC, elementId, experiment);
 			}
 		}

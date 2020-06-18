@@ -45,6 +45,7 @@ import edu.rice.cs.hpcviewer.ui.parts.Datacentric;
 import edu.rice.cs.hpcviewer.ui.parts.FlatPart;
 import edu.rice.cs.hpcviewer.ui.parts.IViewPart;
 import edu.rice.cs.hpcviewer.ui.parts.TopDownPart;
+import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
 
 /***
  * <b>
@@ -62,7 +63,8 @@ import edu.rice.cs.hpcviewer.ui.parts.TopDownPart;
 @Singleton
 public class DatabaseCollection 
 {
-	static private final String STACK_ID_BASE = "edu.rice.cs.hpcviewer.ui.partstack.lower.";
+	static private final String STACK_ID_BASE 	  = "edu.rice.cs.hpcviewer.ui.partstack.lower.";
+	
 	static private final int MAX_STACKS_AVAIL = 3;
 	
 	final private ConcurrentLinkedQueue<BaseExperiment>    queueExperiment;
@@ -187,7 +189,7 @@ public class DatabaseCollection
 			System.out.println("create a new part stack");
 			
 			stack = modelService.createModelElement(MPartStack.class);
-			stack.setElementId("edu.rice.cs.hpcviewer.ui.partstack.lower");
+			stack.setElementId(STACK_ID_BASE  + "1");
 			stack.setToBeRendered(true);
 		}
 		
@@ -242,8 +244,7 @@ public class DatabaseCollection
 				maxAttempt--;
 			}
 			// has to set the element Id before populating the view
-			String elementID = experiment.getXMLExperimentFile().getAbsolutePath() + 
-					":" + root.getRootName();
+			String elementID = ElementIdManager.getElementId(root);
 			part.setElementId(elementID);
 
 			view.setInput(part, experiment);
@@ -295,6 +296,8 @@ public class DatabaseCollection
 		Iterator<BaseExperiment> iterator = queueExperiment.iterator();
 		while(iterator.hasNext()) {
 			BaseExperiment exp = iterator.next();
+			
+			
 			removeDatabase(exp);
 		}
 		
@@ -316,7 +319,10 @@ public class DatabaseCollection
 	public void removeDatabase(final BaseExperiment experiment) {
 		
 		final Collection<MPart> listParts = partService.getParts();
-		String elementID = experiment.getDefaultDirectory().getAbsolutePath();
+		if (listParts == null)
+			return;
+		
+		String elementID = ElementIdManager.getElementId(experiment);
 		
 		for(MPart part: listParts) {
 			

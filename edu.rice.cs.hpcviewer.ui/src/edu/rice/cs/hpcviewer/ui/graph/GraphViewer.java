@@ -18,6 +18,7 @@ import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpcviewer.ui.parts.editor.IUpperPart;
+import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
 
 import javax.annotation.PreDestroy;
 import org.eclipse.e4.ui.di.Focus;
@@ -136,14 +137,14 @@ public abstract class GraphViewer implements IUpperPart
 
 	static public String getID(String descID, Scope scope, BaseMetric metric) {
 		
-		int dbId     = scope.getExperiment().hashCode();
+		String dbId  = ElementIdManager.getElementId(scope.getExperiment());
 		int scopeId  = scope.getCCTIndex();
 		int metricId = metric.getIndex();
 		int graphId  = descID.hashCode();
 		
-		return String.valueOf(dbId) 	+ ":" + 
-			   String.valueOf(scopeId)  + ":" +
-			   String.valueOf(metricId) + ":" +
+		return dbId 					+ ElementIdManager.ELEMENT_SEPARATOR + 
+			   String.valueOf(scopeId)  + ElementIdManager.ELEMENT_SEPARATOR +
+			   String.valueOf(metricId) + ElementIdManager.ELEMENT_SEPARATOR +
 			   String.valueOf(graphId);
 	}
 	
