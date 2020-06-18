@@ -73,6 +73,9 @@ public abstract class AbstractGraphViewer implements IUpperPart
 
 		if (obj == null) return;
 
+		// we shouldn't create another plot if we already have plotted
+		if (this.input != null) return;
+		
 		// Important: First thing: we need to set the value of input here 
 		// subclasses may need the input value for setting the title
 		
