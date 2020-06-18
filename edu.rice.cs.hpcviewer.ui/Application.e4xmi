@@ -4,7 +4,9 @@
     <children xsi:type="advanced:PerspectiveStack" xmi:id="_medwgK28EeqAHZLWafP1YQ" elementId="edu.rice.cs.hpcviewer.ui.perspectivestack.main">
       <children xsi:type="advanced:Perspective" xmi:id="_n9vx8K28EeqAHZLWafP1YQ" elementId="edu.rice.cs.hpcviewer.ui.perspective.main" label="hpcviewer profile" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/cct-thread-map.png">
         <children xsi:type="basic:PartSashContainer" xmi:id="_60CmoI68EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.partsashcontainer.main">
-          <children xsi:type="basic:PartStack" xmi:id="_Bd0-EI69EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.partstack.upper"/>
+          <children xsi:type="basic:PartStack" xmi:id="_Bd0-EI69EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.partstack.upper">
+            <tags>NoAutoCollapse</tags>
+          </children>
           <children xsi:type="basic:PartSashContainer" xmi:id="_3NDgAKuTEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.partsashcontainer.0" horizontal="true">
             <children xsi:type="basic:PartStack" xmi:id="_DIZCcI69EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.partstack.lower.1"/>
             <children xsi:type="basic:PartStack" xmi:id="_622RMKuTEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.partstack.lower.2" visible="false"/>
