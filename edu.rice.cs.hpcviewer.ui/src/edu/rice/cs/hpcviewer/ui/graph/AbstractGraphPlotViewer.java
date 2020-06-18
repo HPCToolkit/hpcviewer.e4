@@ -18,13 +18,13 @@ import org.swtchart.Range;
 import edu.rice.cs.hpc.data.experiment.metric.MetricRaw;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 
-public abstract class GraphPlotViewer extends GraphViewer 
+public abstract class AbstractGraphPlotViewer extends AbstractGraphViewer 
 {
 	static private final int DEFAULT_DIAMETER = 3;
 
 	@Inject EPartService partService;
 	
-	public GraphPlotViewer() {
+	public AbstractGraphPlotViewer() {
 		super();
 	}
 

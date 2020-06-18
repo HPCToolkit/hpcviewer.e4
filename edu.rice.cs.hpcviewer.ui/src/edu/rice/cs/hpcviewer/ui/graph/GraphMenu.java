@@ -125,7 +125,7 @@ public class GraphMenu
     	
 		public void run() {
 			
-        	String elementId = GraphViewer.getID(descriptorId, input.getScope(), input.getMetric());
+        	String elementId = AbstractGraphViewer.getID(descriptorId, input.getScope(), input.getMetric());
         	
         	partFactory.display(Editor.STACK_ID, descriptorId, elementId, input);
 		}

@@ -11,7 +11,7 @@ import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpc.data.experiment.metric.MetricRaw;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 
-public class GraphPlotRegularViewer extends GraphPlotViewer 
+public class GraphPlotRegularViewer extends AbstractGraphPlotViewer 
 {
 	static public final String ID    = "edu.rice.cs.hpcviewer.ui.partdescriptor.graph.plot";
 	static public final String LABEL = "Plot grah";

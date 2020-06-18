@@ -17,7 +17,7 @@ import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpc.data.experiment.metric.MetricRaw;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 
-public class GraphHistoViewer extends GraphViewer 
+public class GraphHistoViewer extends AbstractGraphViewer 
 {
 	static public final String ID    = "edu.rice.cs.hpcviewer.ui.partdescriptor.graph.histo"; 
 	static public final String LABEL = "Histogram grah";

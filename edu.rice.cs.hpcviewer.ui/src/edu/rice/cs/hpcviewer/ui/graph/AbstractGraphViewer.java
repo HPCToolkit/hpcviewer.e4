@@ -24,7 +24,7 @@ import javax.annotation.PreDestroy;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 
-public abstract class GraphViewer implements IUpperPart
+public abstract class AbstractGraphViewer implements IUpperPart
 {
 	static public final int PLOT_OK          = 0;
 	static public final int PLOT_ERR_IO 	 = -1;
@@ -37,7 +37,7 @@ public abstract class GraphViewer implements IUpperPart
     private Composite parent;
 
 	@Inject
-	public GraphViewer() {		
+	public AbstractGraphViewer() {		
 	}
 	
 	@PostConstruct
@@ -96,8 +96,13 @@ public abstract class GraphViewer implements IUpperPart
 		// tidy-up the chart
 		//----------------------------------------------
 
-		chart.getLegend().setVisible(false);				
-		chart.getTitle().setText(getTitle());
+		chart.getLegend().setVisible(false);
+		
+		final String title = getTitle();
+		chart.getTitle().setText(title);
+		
+		part.setLabel(title);
+		part.setTooltip(title);
 		
 		//----------------------------------------------
 		// main part: ask the subclass to plot the graph

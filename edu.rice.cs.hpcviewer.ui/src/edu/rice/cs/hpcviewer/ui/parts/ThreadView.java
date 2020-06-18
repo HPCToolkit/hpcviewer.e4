@@ -61,7 +61,10 @@ public class ThreadView  implements IViewPart
 
 	@Override
 	public BaseExperiment getExperiment() {
-		return null;
+		if (viewInput == null)
+			return null;
+		
+		return viewInput.getRootScope().getExperiment();
 	}
 
 	@Override
