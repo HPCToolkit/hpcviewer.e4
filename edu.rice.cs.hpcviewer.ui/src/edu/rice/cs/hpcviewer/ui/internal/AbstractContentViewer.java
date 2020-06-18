@@ -504,7 +504,7 @@ public abstract class AbstractContentViewer implements IViewBuilder, ISelectionC
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (metricAction == null)
-					metricAction = new MetricColumnHideShowAction(eventBroker, true);
+					metricAction = new MetricColumnHideShowAction(eventBroker, getMetricManager(), true);
 				
 				metricAction.showColumnsProperties(treeViewer, database);
 			}
@@ -566,10 +566,11 @@ public abstract class AbstractContentViewer implements IViewBuilder, ISelectionC
     /////////////////////////////////////////////////////////
     
     protected abstract void beginToolbar(CoolBar coolbar, ToolBar toolbar);
-    protected abstract void endToolbar(CoolBar coolbar, ToolBar toolbar);
-    protected abstract AbstractContentProvider getContentProvider(ScopeTreeViewer treeViewer);
+    protected abstract void endToolbar  (CoolBar coolbar, ToolBar toolbar);
     protected abstract void selectionChanged(IStructuredSelection selection);
-
+    
+    protected abstract AbstractContentProvider getContentProvider(ScopeTreeViewer treeViewer);
+    protected abstract IMetricManager 		   getMetricManager();
     
     /////////////////////////////////////////////////////////
     ///

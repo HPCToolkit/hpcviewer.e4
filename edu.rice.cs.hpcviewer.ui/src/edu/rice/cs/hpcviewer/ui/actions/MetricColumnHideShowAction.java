@@ -20,20 +20,20 @@ import edu.rice.cs.hpcviewer.ui.util.FilterDataItem;
 
 public class MetricColumnHideShowAction 
 {	
-	final private boolean affectOtherViews;
-	final private IEventBroker eventBroker;
+	final private boolean 	     affectOtherViews;
+	final private IEventBroker 	 eventBroker;
+	final private IMetricManager metricMgr;
 	
-	public MetricColumnHideShowAction(IEventBroker eventBroker, boolean affectOtherViews) {
+	public MetricColumnHideShowAction(IEventBroker eventBroker, IMetricManager metricMgr, boolean affectOtherViews) {
 		this.affectOtherViews = affectOtherViews;
 		this.eventBroker      = eventBroker;
+		this.metricMgr		  = metricMgr;
 	}
 	
 	/**
      * Show column properties (hidden, visible ...)
      */
     public void showColumnsProperties(ScopeTreeViewer treeViewer, DatabaseCollection databaseCollection) {
-
-    	IMetricManager metricMgr = (IMetricManager) treeViewer.getExperiment();
     	
     	if (metricMgr == null)
     		return;

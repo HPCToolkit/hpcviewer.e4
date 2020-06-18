@@ -22,6 +22,7 @@ import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
+import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
 import edu.rice.cs.hpc.data.experiment.metric.MetricRaw;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
@@ -172,7 +173,6 @@ public class TopDownContentViewer extends AbstractContentViewer
 		boolean available = threadData.isAvailable();
 		
 		items[ITEM_GRAPH] .setEnabled(available);
-		items[ITEM_THREAD].setEnabled(available);
 	}
 
 	@Override
@@ -180,21 +180,29 @@ public class TopDownContentViewer extends AbstractContentViewer
 		Experiment experiment = (Experiment) root.getExperiment();
 		try {
 			threadData = ThreadDataCollectionFactory.build(experiment);
-
-			BaseMetric[]metrics = experiment.getMetricRaw();
-			
-			if (threadData != null && metrics != null) {
-				// thread level data exists
-				// we need to tell all metric raws of thread data
-				for (BaseMetric metric: metrics)
-				{
-					if (metric instanceof MetricRaw)
-						((MetricRaw)metric).setThreadData(threadData);
-				}
-			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
+		BaseMetric[]metrics = experiment.getMetricRaw();
+		
+		if (threadData != null && metrics != null) {
+			// thread level data exists
+			// we need to tell all metric raws of thread data
+			for (BaseMetric metric: metrics)
+			{
+				if (metric instanceof MetricRaw)
+					((MetricRaw)metric).setThreadData(threadData);
+			}
+		}
 		super.setData(root);
+
+		boolean available = threadData.isAvailable();
+		items[ITEM_THREAD].setEnabled(available);
+	}
+
+	@Override
+	protected IMetricManager getMetricManager() {
+		return (IMetricManager) getViewer().getExperiment();
 	}
 }

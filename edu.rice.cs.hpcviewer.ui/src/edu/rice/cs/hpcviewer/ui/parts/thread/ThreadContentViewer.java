@@ -195,7 +195,8 @@ public class ThreadContentViewer extends TopDownContentViewer
 		}
 	}
 	
-	private IMetricManager getMetricManager() 
+	@Override
+	public IMetricManager getMetricManager() 
 	{
 		if (metricManager != null)
 			return metricManager;
