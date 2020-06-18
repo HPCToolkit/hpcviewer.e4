@@ -66,7 +66,7 @@ public abstract class AbstractContentViewer implements IViewBuilder, ISelectionC
 	final private int ACTION_ZOOM_OUT     = 1;
 	final private int ACTION_HOTPATH      = 2;
 	final private int ACTION_ADD_METRIC   = 3;
-	final private int ACTION_EXPORT_DATA  = 4;
+	//final private int ACTION_EXPORT_DATA  = 4;
 	final private int ACTION_COLUMN_HIDE  = 5; 
 	final private int ACTION_FONT_BIGGER  = 6;
 	final private int ACTION_FONT_SMALLER = 7;
@@ -240,7 +240,7 @@ public abstract class AbstractContentViewer implements IViewBuilder, ISelectionC
 			// only the first visible column is sorted
 			bSorted = false;
 		}
-		// populate the table
+		// TOOO: populate the table: this can take really long time !
 		treeViewer.setInput(root);
 		
 		// insert the first row (header)

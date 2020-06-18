@@ -79,6 +79,7 @@ public abstract class BaseViewPart implements IViewPart, EventHandler, IPartList
 		
 		if (partService.isPartVisible(part)) {
 			
+			// TODO: this process takes time
 			root = createRoot(experiment);
 			contentViewer.setData(root);
 		}
@@ -118,6 +119,7 @@ public abstract class BaseViewPart implements IViewPart, EventHandler, IPartList
 			return;
 		
 		if (experiment != null && root == null) {
+			// TODO: this process takes time
 			root = createRoot(experiment);
 			contentViewer.setData(root);
 		}

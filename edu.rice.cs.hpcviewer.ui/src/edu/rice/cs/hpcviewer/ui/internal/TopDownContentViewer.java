@@ -172,10 +172,14 @@ public class TopDownContentViewer extends AbstractContentViewer
 
 			BaseMetric[]metrics = experiment.getMetricRaw();
 			
-			for (BaseMetric metric: metrics)
-			{
-				if (metric instanceof MetricRaw)
-					((MetricRaw)metric).setThreadData(threadData);
+			if (threadData != null && metrics != null) {
+				// thread level data exists
+				// we need to tell all metric raws of thread data
+				for (BaseMetric metric: metrics)
+				{
+					if (metric instanceof MetricRaw)
+						((MetricRaw)metric).setThreadData(threadData);
+				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

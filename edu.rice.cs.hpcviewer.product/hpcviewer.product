@@ -20,6 +20,8 @@ Release 2020.05  (C) Copyright 2020, Rice University.
    <launcherArgs>
       <programArgs>-clearPersistedState
       </programArgs>
+      <vmArgs>-Xmx2G
+      </vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts
       </vmArgsMac>
    </launcherArgs>
@@ -39,7 +41,6 @@ Release 2020.05  (C) Copyright 2020, Rice University.
             winLargeHigh="/edu.rice.cs.hpcviewer.ui/resources/hpcviewer-icon-48x48-32bit.bmp"/>
       </win>
    </launcher>
-
 
    <vm>
    </vm>
