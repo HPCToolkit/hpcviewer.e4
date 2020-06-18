@@ -288,6 +288,10 @@ public abstract class AbstractContentViewer implements IViewBuilder, ISelectionC
 		updateStatus();
 	}
 	
+	@Override
+	public ScopeTreeViewer getTreeViewer() {
+		return treeViewer;
+	}
 	
     
     /***

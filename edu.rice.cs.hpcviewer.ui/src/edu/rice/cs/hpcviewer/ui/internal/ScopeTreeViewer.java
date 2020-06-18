@@ -21,9 +21,6 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.swt.widgets.TreeItem;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
-
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.DerivedMetric;
@@ -36,7 +33,7 @@ import edu.rice.cs.hpcviewer.ui.util.Utilities;
 /**
  * we set lazy virtual bit in this viewer
  */
-public class ScopeTreeViewer extends TreeViewer implements EventHandler 
+public class ScopeTreeViewer extends TreeViewer 
 {
 	final static public String COLUMN_DATA_WIDTH = "w"; 
 	final static public int COLUMN_DEFAULT_WIDTH = 120;
@@ -54,9 +51,6 @@ public class ScopeTreeViewer extends TreeViewer implements EventHandler
 	{
 		setUseHashlookup(true);
 		getTree().setLinesVisible(true);
-		
-		eventBroker.subscribe(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN, this);
-		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC, this);
 	}
 	
 	/**
@@ -402,50 +396,30 @@ public class ScopeTreeViewer extends TreeViewer implements EventHandler
 		getTree().setRedraw(true);
     }
 
-	@Override
-	public void handleEvent(Event event) {
-		
-		if (getTree().isDisposed())
-			return;
 
-		Object obj = event.getProperty(IEventBroker.DATA);
-		if (obj == null)
-			return;
+    /****
+     * Add user derived metric into tree column
+     * @param metric
+     */
+	public void addUserMetricColumn(BaseMetric metric) {
 		
-		if (!(obj instanceof ViewerDataEvent)) 
-			return;
+		Tree tree = getTree();
 		
-		ViewerDataEvent eventInfo = (ViewerDataEvent) obj;
-		if (getExperiment() != eventInfo.experiment) 
-			return;
+		tree.setRedraw(false);
 		
-		String topic = event.getTopic();
-
-		if (topic.equals(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN)) {
-			
-			setColumnsStatus((boolean[]) eventInfo.data);
-
-		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC)) {
-			
-			Tree tree = getTree();
-			
-			tree.setRedraw(false);
-			
-			TreeViewerColumn col = addTreeColumn((BaseMetric) eventInfo.data, false);
-			col.getColumn().pack();
-			
-			refresh();
-			
-			// important: After the refresh, insert the top row manually for all metrics
-			// if we put this before the refresh, somehow it doesn't work
-			
-			Object root = getInput();
-			insertParentNode((Scope) root);
-			
-			tree.setRedraw(true);
-		}
+		TreeViewerColumn col = addTreeColumn(metric, false);
+		col.getColumn().pack();
+		
+		refresh();
+		
+		// important: After the refresh, insert the top row manually for all metrics
+		// if we put this before the refresh, somehow it doesn't work
+		
+		Object root = getInput();
+		insertParentNode((Scope) root);
+		
+		tree.setRedraw(true);
 	}
-    
     
 	/**
 	 * Returns the viewer cell at the given widget-relative coordinates, or

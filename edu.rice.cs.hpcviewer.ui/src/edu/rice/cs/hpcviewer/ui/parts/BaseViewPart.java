@@ -10,9 +10,12 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
+import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
+import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
+import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
 import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -26,11 +29,11 @@ import org.eclipse.e4.ui.workbench.modeling.IPartListener;
 public abstract class BaseViewPart implements IViewPart, EventHandler, IPartListener
 {
 
-	@Inject	protected EPartService partService;
+	@Inject	protected EPartService  partService;
 	@Inject protected EModelService modelService;
 	@Inject protected MApplication  app;
-
-	@Inject protected IEventBroker broker;
+	@Inject protected IEventBroker  eventBroker;
+	
 	@Inject protected DatabaseCollection databaseAddOn;
 
 	@Inject protected PartFactory partFactory;
@@ -56,7 +59,12 @@ public abstract class BaseViewPart implements IViewPart, EventHandler, IPartList
 
 		contentViewer = setContentViewer(parent, menuService);
 		
-		partService.addPartListener(this);
+		// listen to part events: visible, activate, hide, ...
+		partService.addPartListener(this);		
+		
+		// subscribe to user action events
+		eventBroker.subscribe(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN, this);
+		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC, this);
 	}
 	
 	@PreDestroy
@@ -96,8 +104,28 @@ public abstract class BaseViewPart implements IViewPart, EventHandler, IPartList
 	
 	@Override
 	public void handleEvent(Event event) {
+		ScopeTreeViewer treeViewer = contentViewer.getTreeViewer();
+		if (treeViewer.getTree().isDisposed())
+			return;
+
+		Object obj = event.getProperty(IEventBroker.DATA);
+		if (obj == null)
+			return;
+		
+		if (!(obj instanceof ViewerDataEvent)) 
+			return;
+		
+		ViewerDataEvent eventInfo = (ViewerDataEvent) obj;
+		if (getExperiment() != eventInfo.experiment) 
+			return;
+		
 		String topic = event.getTopic();
-		System.out.println("event: " + topic);
+		if (topic.equals(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN)) {
+			treeViewer.setColumnsStatus((boolean[]) eventInfo.data);
+			
+		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC)) {
+			treeViewer.addUserMetricColumn((BaseMetric) eventInfo.data);
+		}
 	}
 
 	
