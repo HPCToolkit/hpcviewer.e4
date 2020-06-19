@@ -184,7 +184,8 @@ public class TopDownContentViewer extends AbstractContentViewer
 			e.printStackTrace();
 		}
 
-		BaseMetric[]metrics = experiment.getMetricRaw();
+		BaseMetric[]metrics  = experiment.getMetricRaw();
+		boolean tldAvailable = false;
 		
 		if (threadData != null && metrics != null) {
 			// thread level data exists
@@ -194,11 +195,11 @@ public class TopDownContentViewer extends AbstractContentViewer
 				if (metric instanceof MetricRaw)
 					((MetricRaw)metric).setThreadData(threadData);
 			}
+			tldAvailable = threadData.isAvailable();
 		}
 		super.setData(root);
 
-		boolean available = threadData.isAvailable();
-		items[ITEM_THREAD].setEnabled(available);
+		items[ITEM_THREAD].setEnabled(tldAvailable);
 	}
 
 	@Override

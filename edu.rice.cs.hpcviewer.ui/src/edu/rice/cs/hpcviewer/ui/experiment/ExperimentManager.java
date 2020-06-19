@@ -123,7 +123,7 @@ public class ExperimentManager
 			return null;
 		}
 		MessageDialog.openError(shell, "Failed to open a database", 
-			"Either the selected directory is not a database or the max number of databases allowed per window are already opened.\n"+
+			"Either the selected directory is not a database or the file is corrupted.\n"+
 			"A database directory must contain at least one XML file which contains profiling information.");
 		return null;
 	}

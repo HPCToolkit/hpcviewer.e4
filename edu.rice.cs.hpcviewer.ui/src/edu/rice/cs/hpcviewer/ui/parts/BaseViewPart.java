@@ -70,6 +70,9 @@ public abstract class BaseViewPart implements IViewPart, EventHandler, IPartList
 	@PreDestroy
 	public void preDestroy() {
 		
+		partService.removePartListener(this);
+		eventBroker.unsubscribe(this);
+		
 		if (contentViewer != null)
 			contentViewer.dispose();
 	}
