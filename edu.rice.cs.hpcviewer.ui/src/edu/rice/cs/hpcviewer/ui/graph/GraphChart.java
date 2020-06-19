@@ -2,13 +2,17 @@ package edu.rice.cs.hpcviewer.ui.graph;
 
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.swtchart.IAxis;
 import org.swtchart.ILineSeries;
 import org.swtchart.ISeries;
 import org.swtchart.IAxis.Direction;
 import org.swtchart.ISeries.SeriesType;
 import org.swtchart.ext.InteractiveChart;
+import org.swtchart.LineStyle;
 
 /********************************************************************************
  * 
@@ -137,5 +141,44 @@ public class GraphChart extends InteractiveChart
     	result.valueX = x_values[index];
     	result.serie = serie;
     	return result;
+    }
+    
+    /***
+     * Unit test
+     * @param args
+     */
+    public static void main(String []args) {
+    	Display display = new Display();
+    	Shell shell = new Shell(display);
+    	shell.setText("Test chart graph");
+    	shell.setSize(500, 400);
+    	shell.setLayout(new FillLayout());
+    	
+    	GraphChart chart = new GraphChart(shell, 0);
+    	chart.getTitle().setText("Test GraphChart class");
+	    chart.getAxisSet().getXAxis(0).getTitle().setText("Time");   
+	    chart.getAxisSet().getYAxis(0).getTitle().setText("Depth");    
+
+	    // create scatter series
+	    final double[] xSeries = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
+	    final double[] ySeries = { 0, -1.3, -2.0, -3.9, -5.6, -4.1, -5.3, -7.0, -3.9, -3.6, -1.1, 0 };
+	    
+        ILineSeries series = (ILineSeries) chart.getSeriesSet().createSeries(SeriesType.LINE, "series");    
+        series.setLineStyle(LineStyle.SOLID);
+        
+        series.enableArea(true);
+        series.setXSeries(xSeries);
+        series.setYSeries(ySeries);
+
+        // adjust the axis range
+        chart.getAxisSet().adjustRange();
+    	
+    	shell.open();
+    	while(!shell.isDisposed()) {
+    		if (!display.readAndDispatch()) {
+    			display.sleep();
+    		}
+    	}
+    	display.dispose();
     }
 }

@@ -46,7 +46,7 @@ public class GraphHistoViewer extends AbstractGraphViewer
 		double max = histo.max();
 		double single = 0.1 * (max-min)/bins;
 
-		Chart chart = this.getChart();
+		Chart chart = getChart();
 		
 		IAxisSet axisSet = chart.getAxisSet();
 		IAxisTick xTick  = axisSet.getXAxis(0).getTick();
