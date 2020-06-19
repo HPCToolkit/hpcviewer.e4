@@ -8,6 +8,7 @@ Bundle-Vendor: Rice University
 Require-Bundle: edu.rice.cs.hpc.data,
  edu.rice.cs.hpcdata.tld,
  edu.rice.cs.hpcbase,
+ edu.rice.cs.hpc.filter,
  org.eclipse.core.runtime,
  javax.inject;bundle-version="0.0.0",
  javax.annotation,

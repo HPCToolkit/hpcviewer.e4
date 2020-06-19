@@ -24,6 +24,10 @@
         <children xsi:type="menu:HandledMenuItem" xmi:id="_QfhswI7rEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.close" label="Close a database" tooltip="Close the last opened database(s)" enabled="false" mnemonics="C" command="_m5VqkI7vEeqBPbXbG7_Dzw">
           <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_jS14gKuMEeq2aaPo7yBcWg" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseCloseDefinition"/>
         </children>
+        <children xsi:type="menu:HandledMenuItem" xmi:id="_vYBpcLJiEeqfDrDyyKphUQ" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.merge" label="Merge top-down views" tooltip="Merge two databses top-down " mnemonics="M" command="_sRvw0LJpEeqfDrDyyKphUQ">
+          <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_rmmw0LJjEeqfDrDyyKphUQ" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseMergeExpression"/>
+          <parameters xmi:id="_oMnHcLJpEeqfDrDyyKphUQ" elementId="edu.rice.cs.hpcviewer.ui.parameter.topdown" name="edu.rice.cs.hpcviewer.ui.commandparameter.merge" value="topdown"/>
+        </children>
         <children xsi:type="menu:MenuSeparator" xmi:id="_VTVaAI7rEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.menuseparator.1"/>
         <children xsi:type="menu:HandledMenuItem" xmi:id="_LbRy8I7vEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.exit" label="Exit" tooltip="Exit the application" mnemonics="x" command="_wGhBQI7uEeqBPbXbG7_Dzw"/>
       </children>
@@ -46,6 +50,7 @@
   <handlers xmi:id="_zeIc8KvwEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.handler.viewXML" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.ViewXML" command="_rAwA8KvwEeq2aaPo7yBcWg"/>
   <handlers xmi:id="_fC4SMKwbEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.handler.about" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.About" command="_lIBrgKwbEeq2aaPo7yBcWg"/>
   <handlers xmi:id="_NJztAK3KEeqAHZLWafP1YQ" elementId="edu.rice.cs.hpcviewer.ui.handler.reset" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.ResetLayout" command="_QRDKwK3KEeqAHZLWafP1YQ"/>
+  <handlers xmi:id="_NHqd8LJqEeqfDrDyyKphUQ" elementId="edu.rice.cs.hpcviewer.ui.handler.merge" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.MergeDatabase" command="_sRvw0LJpEeqfDrDyyKphUQ"/>
   <bindingTables xmi:id="_7fwrAKqFEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.bindingtable.file" bindingContext="_c3AF2cjYEeSyMNYR5xypkQ">
     <bindings xmi:id="_-3xvsKqFEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.keybinding.open" keySequence="M1+O" command="_U14sMI7vEeqBPbXbG7_Dzw"/>
     <bindings xmi:id="_k4-EoKuTEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.keybinding.add" keySequence="M1+A" command="_cPW0II7vEeqBPbXbG7_Dzw"/>
@@ -73,6 +78,9 @@
   <commands xmi:id="_rAwA8KvwEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.command.viewXML" commandName="View XML" description="Display the XML file of the current database"/>
   <commands xmi:id="_lIBrgKwbEeq2aaPo7yBcWg" elementId="org.eclipse.ui.help.aboutAction" commandName="About" description="About the application"/>
   <commands xmi:id="_QRDKwK3KEeqAHZLWafP1YQ" elementId="edu.rice.cs.hpcviewer.ui.command.resetLayout" commandName="Reset layout"/>
+  <commands xmi:id="_sRvw0LJpEeqfDrDyyKphUQ" elementId="edu.rice.cs.hpcviewer.ui.command.merge" commandName="Merge top-down databases">
+    <parameters xmi:id="_uw_acLJpEeqfDrDyyKphUQ" elementId="edu.rice.cs.hpcviewer.ui.commandparameter.merge" name="MergeDatabase"/>
+  </commands>
   <addons xmi:id="_c3AF0sjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.core.commands.service" contributionURI="bundleclass://org.eclipse.e4.core.commands/org.eclipse.e4.core.commands.CommandServiceAddon"/>
   <addons xmi:id="_c3AF08jYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.contexts.service" contributionURI="bundleclass://org.eclipse.e4.ui.services/org.eclipse.e4.ui.services.ContextServiceAddon"/>
   <addons xmi:id="_c3AF1MjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.bindings.service" contributionURI="bundleclass://org.eclipse.e4.ui.bindings/org.eclipse.e4.ui.bindings.BindingServiceAddon"/>

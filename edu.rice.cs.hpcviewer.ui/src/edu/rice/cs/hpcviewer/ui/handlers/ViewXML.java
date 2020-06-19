@@ -15,6 +15,8 @@ import edu.rice.cs.hpcviewer.ui.parts.editor.Editor;
 import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
 
+import java.io.File;
+
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.Active;
@@ -30,15 +32,30 @@ public class ViewXML
 	@Inject PartFactory        partFactory;
 	
 	@Execute
-	public void execute(@Active MPart part) {
+	public void execute(@Optional @Active MPart part) {
 		if (part != null) {
 			Object obj = part.getObject();
 			
+			BaseExperiment experiment;
+			
+			// how to find "the" database:
+			// - get the database of the current active view/editor
+			// - or get the last opened database
+			
 			if (obj instanceof IBasePart) {
-				BaseExperiment experiment = ((IBasePart)obj).getExperiment();
-				String elementId = ElementIdManager.getElementId(experiment);
-				partFactory.display(Editor.STACK_ID, Editor.ID_DESC, elementId, experiment);
+				experiment = ((IBasePart)obj).getExperiment();
+			} else {
+				experiment = database.getLast();
 			}
+			File file = experiment.getXMLExperimentFile();
+			
+			// sanity check: the file must exist
+			
+			if (file == null || !file.canRead())
+				return;
+			
+			String elementId = ElementIdManager.getElementId(experiment);
+			partFactory.display(Editor.STACK_ID, Editor.ID_DESC, elementId, experiment);
 		}
 	}
 	
@@ -47,7 +64,16 @@ public class ViewXML
 	public boolean canExecute(@Optional @Active MPart part) {
 		if (part != null) {
 			Object obj = part.getObject();
-			return (obj instanceof IBasePart);
+			if (obj instanceof IBasePart) {
+				BaseExperiment experiment = ((IBasePart)obj).getExperiment();
+				File file = experiment.getXMLExperimentFile();
+				
+				// we need to make sure the XML file really exist
+				// for a merged database, we have a fake xml file. Hence, we shouldn't 
+				// enable the menu if the current part is merged database.
+				
+				return (file != null && file.canRead());
+			}
 		}
 		return !database.isEmpty();
 	}
