@@ -68,22 +68,30 @@ public class ExperimentManager
 	 */
 	public BaseExperiment openDatabaseFromDirectory(Shell shell, String sPath) {
 		File []fileXML = this.getListOfXMLFiles(sPath);
-		if(fileXML != null)
-			return openFileExperimentFromFiles(shell, fileXML);
+		if(fileXML != null) {
+			String filename = getFileExperimentFromListOfFiles(shell, fileXML);
+			if (filename != null) {
+				return loadExperiment(shell, filename);
+			}
+		}
 		return null;
 	}
+	
+	
 	/**
 	 * Attempt to open an experiment database if valid then
 	 * open the scope view  
 	 * @return true if everything is OK. false otherwise
 	 */
-	public BaseExperiment openFileExperiment(Shell shell) {
+	public String openFileExperiment(Shell shell) {
 		File []fileXML = getDatabaseFileList(shell, 
 				"Select a directory containing a profiling database.");
-		if(fileXML != null)
-			return openFileExperimentFromFiles(shell, fileXML);
+		if(fileXML != null) {
+			return getFileExperimentFromListOfFiles(shell, fileXML);
+		}
 		return null;
 	}
+	
 
 	//==================================================================
 	// ---------- PRIVATE PART-----------------------------------------
@@ -93,7 +101,7 @@ public class ExperimentManager
 	 * @param filesXML: list of files
 	 * @return true if the opening is successful
 	 */
-	private BaseExperiment openFileExperimentFromFiles(Shell shell, File []filesXML) {
+	private String getFileExperimentFromListOfFiles(Shell shell, File []filesXML) {
 		if((filesXML != null) && (filesXML.length>0)) {
 			boolean bContinue = true;
 			// let's make it complicated: assuming there are more than 1 XML file in this directory,
@@ -102,22 +110,14 @@ public class ExperimentManager
 			for(int i=0;i<(filesXML.length) && (bContinue);i++) 
 			{
 				File objFile = filesXML[i];
-				String sFile=objFile.getAbsolutePath();
 
 				// Since rel 5.x, the name of database is experiment.xml
 				// there is no need to maintain compatibility with hpctoolkit prior 5.x 
 				// 	where the name of database is config.xml
 				if(objFile.getName().startsWith(Constants.DATABASE_FILENAME))  
 				{
-					// ------------------------------------------------------------------
-					// we will continue to verify the content of the list of XML files
-					// until we fine the good one.
-					// ------------------------------------------------------------------
-
-					// check if we can open the database successfully
-					BaseExperiment exp = loadExperiment(shell, sFile);
-					if (exp != null)
-						return exp;
+					if (objFile.canRead())
+						return objFile.getAbsolutePath();
 				}
 			}
 			return null;

@@ -72,6 +72,7 @@ public class DatabaseCollection
 	final private HashMap<RootScopeType, String> 		   mapRoottypeToPartId;
 	
 	private EPartService partService;
+	private ExperimentManager experimentManager;
 	
 	public DatabaseCollection() {
 		queueExperiment = new ConcurrentLinkedQueue<>();
@@ -83,6 +84,8 @@ public class DatabaseCollection
 		mapRoottypeToPartId.put(RootScopeType.CallerTree, 	 	  BottomUpPart.IDdesc);
 		mapRoottypeToPartId.put(RootScopeType.Flat, 		   	  FlatPart.IDdesc);
 		mapRoottypeToPartId.put(RootScopeType.DatacentricTree, 	  Datacentric.IDdesc);
+		
+		experimentManager = new ExperimentManager();
 	}
 	
 	@Inject
@@ -109,7 +112,6 @@ public class DatabaseCollection
 			myShell = new Shell(SWT.TOOL | SWT.NO_TRIM);
 		}
 		BaseExperiment experiment    = null;
-		ExperimentManager expManager = new ExperimentManager();
 		
 		String path = null;
 		
@@ -117,16 +119,86 @@ public class DatabaseCollection
 			if (arg.charAt(0) != '-')
 				path = arg;
 		}
+		// if the user doesn't specify the database path, we need to display
+		// a window to get the filename
+		
 		if (path == null || path.length() < 1) {
-			experiment    = expManager.openFileExperiment(myShell);
-		} else {
-			experiment = openDatabase(myShell, expManager, path);
+			path = experimentManager.openFileExperiment(myShell);
+			if (path == null)
+				return; 
 		}
+		experiment = openDatabase(myShell, path);
 		if (experiment == null)
 			return;
 		
-		addDatabase(experiment, application, partService, broker, modelService);
+		createViewsAndAddDatabase(experiment, application, partService, modelService, null);
 	}
+	
+
+	/****
+	 * One-stop API to open and add a database. 
+	 * This method shows a dialog box to pick a directory, check if the database already exists or not,
+	 * create views and add to the list of the database collection.
+	 * 
+	 * @param shell the current shell
+	 * @param application MApplication
+	 * @param service EPartService
+	 * @param modelService EModelService
+	 * @param parentId the id of the part stack to contain the views. If the value is null, then
+	 *   it searches any available slot if possible.
+	 */
+	public void addDatabase(Shell shell, 
+			MApplication 	application, 
+			EPartService    service,
+			EModelService 	modelService,
+			String          parentId) {
+		
+		String filename = experimentManager.openFileExperiment(shell);
+		if (filename == null)
+			return;
+
+		if (isAlreadyExist(shell, filename))
+			return;
+		
+		BaseExperiment experiment = experimentManager.loadExperiment(shell, filename);
+		
+		createViewsAndAddDatabase(experiment, application, service, modelService, parentId);
+	}
+	
+	
+	/****
+	 * One-stop API to open a database. 
+	 * This method shows a dialog box to pick a directory, check if the database already exists or not,
+	 * create views and remove the existing databases before adding it to the list of the database collection.
+	 * The removal is important to make sure there is only one database exist.
+	 * 
+	 * @param shell the current shell
+	 * @param application MApplication
+	 * @param service EPartService
+	 * @param modelService EModelService
+	 * @param parentId the id of the part stack to contain the views. If the value is null, then
+	 *   it searches any available slot if possible.
+	 */
+	public void openDatabase(Shell shell, 
+			MApplication 	application, 
+			EPartService    service,
+			EModelService 	modelService,
+			String          parentId) {
+		
+		String filename = experimentManager.openFileExperiment(shell);
+		if (filename == null)
+			return;
+
+		if (isAlreadyExist(shell, filename))
+			return;
+		
+		BaseExperiment experiment = experimentManager.loadExperiment(shell, filename);
+		
+		removeAll();
+		
+		createViewsAndAddDatabase(experiment, application, service, modelService, parentId);
+	}
+
 	
 	/****
 	 * Add a new database into the collection.
@@ -139,11 +211,11 @@ public class DatabaseCollection
 	 * @param broker
 	 * @param modelService
 	 */
-	public void addDatabase(BaseExperiment experiment, 
+	public void createViewsAndAddDatabase(BaseExperiment experiment, 
 			MApplication 	application, 
 			EPartService    service,
-			IEventBroker 	broker,
-			EModelService 	modelService) {
+			EModelService 	modelService,
+			String          parentId) {
 		
 		if (service == null) {
 			System.out.println("Error: service is not available");
@@ -168,17 +240,23 @@ public class DatabaseCollection
 		MPartStack stack = null;
 		List<MStackElement> list = null;
 		
-		for(int i=1; i<=MAX_STACKS_AVAIL; i++) {
-			final String stackId = STACK_ID_BASE + String.valueOf(i) ;
-			stack  = (MPartStack)modelService.find(stackId , application);
-			
-			if (stack == null)
-				System.err.println("list of parts is null");
-			else
+		if (parentId == null) {
+			for(int i=1; i<=MAX_STACKS_AVAIL; i++) {
+				final String stackId = STACK_ID_BASE + String.valueOf(i) ;
+				stack  = (MPartStack)modelService.find(stackId , application);
+				
+				if (stack == null)
+					System.err.println("list of parts is null");
+				else
+					list = stack.getChildren();
+				if (list != null && list.size()==0)
+					// we found empty an stack
+					break; 
+			}			
+		} else {
+			stack  = (MPartStack)modelService.find(parentId , application);
+			if (stack != null)
 				list = stack.getChildren();
-			if (list != null && list.size()==0)
-				// we found empty an stack
-				break; 
 		}
 		
 		//----------------------------------------------------------------
@@ -308,13 +386,16 @@ public class DatabaseCollection
 		return size;
 	}
 	
+	
 	public void addColumnStatus(BaseExperiment experiment, ViewerDataEvent data) {
 		mapColumnStatus.put(experiment, data);
 	}
 	
+	
 	public ViewerDataEvent getColumnStatus(BaseExperiment experiment) {
 		return mapColumnStatus.get(experiment);
 	}
+	
 	
 	public void removeDatabase(final BaseExperiment experiment) {
 		
@@ -332,7 +413,27 @@ public class DatabaseCollection
 		}
 		queueExperiment.remove(experiment);
 		mapColumnStatus.remove(experiment);
+	}	
+	
+	
+	public boolean isAlreadyExist(Shell shell, String pathXML) {
+		
+		if (queueExperiment.isEmpty())
+			return false;
+		
+		for (BaseExperiment exp: queueExperiment) {
+			String file = exp.getXMLExperimentFile().getAbsolutePath();
+			if (file.equals(pathXML)) {
+				// we cannot have two exactly the same database in one window
+				MessageDialog.openError(shell, "Error", file +": the database is already opened." );
+
+				return true;
+			}
+		}
+		return false;
 	}
+	
+	
 	
 	/****
 	 * Find a database for a given path
@@ -342,7 +443,7 @@ public class DatabaseCollection
 	 * @param sPath path to the database
 	 * @return
 	 */
-	private BaseExperiment openDatabase(Shell shell, ExperimentManager expManager, String sPath) {
+	private BaseExperiment openDatabase(Shell shell, String sPath) {
     	IFileStore fileStore;
 
 		try {
@@ -361,10 +462,10 @@ public class DatabaseCollection
     	BaseExperiment experiment = null;
     	
     	if (objFileInfo.isDirectory()) {
-    		experiment = expManager.openDatabaseFromDirectory(shell, sPath);
+    		experiment = experimentManager.openDatabaseFromDirectory(shell, sPath);
     	} else {
 			EFS.getLocalFileSystem().fromLocalFile(new File(sPath));
-			experiment = expManager.loadExperiment(shell, sPath);
+			experiment = experimentManager.loadExperiment(shell, sPath);
     	}
     	return experiment;
 	}
