@@ -53,11 +53,13 @@ public class About
 	 */
 	static class AboutDialog extends IconAndMessageDialog
 	{
+		private final String title;
+		
 		public AboutDialog(Shell parentShell, String title, String message) {
 			super(parentShell);
 			
-			parentShell.setText(title);
 			this.message = message;
+			this.title   = title;
 		}
 
 		@Override
@@ -103,5 +105,15 @@ public class About
 
 			return composite;
 		}
+		
+
+		@Override
+		protected void configureShell(Shell shell) {
+			super.configureShell(shell);
+			if (title != null) {
+				shell.setText(title);
+			}
+		}
+
 	}
 }
