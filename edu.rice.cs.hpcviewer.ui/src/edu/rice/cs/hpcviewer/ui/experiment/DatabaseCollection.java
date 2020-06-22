@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
+import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
@@ -71,7 +72,8 @@ public class DatabaseCollection
 	final private HashMap<BaseExperiment, ViewerDataEvent> mapColumnStatus;
 	final private HashMap<RootScopeType, String> 		   mapRoottypeToPartId;
 	
-	private EPartService partService;
+	private EPartService      partService;
+	private IEventBroker      eventBroker;
 	private ExperimentManager experimentManager;
 	
 	public DatabaseCollection() {
@@ -98,6 +100,7 @@ public class DatabaseCollection
 			final IWorkbench workbench) {
 		
 		this.partService = partService;
+		this.eventBroker = broker;
 		
 		// handling the command line arguments:
 		// if one of the arguments specify a file or a directory,
@@ -157,7 +160,7 @@ public class DatabaseCollection
 		if (filename == null)
 			return;
 
-		if (isAlreadyExist(shell, filename))
+		if (isExist(shell, filename))
 			return;
 		
 		BaseExperiment experiment = experimentManager.loadExperiment(shell, filename);
@@ -189,7 +192,7 @@ public class DatabaseCollection
 		if (filename == null)
 			return;
 
-		if (isAlreadyExist(shell, filename))
+		if (isExist(shell, filename))
 			return;
 		
 		BaseExperiment experiment = experimentManager.loadExperiment(shell, filename);
@@ -331,6 +334,7 @@ public class DatabaseCollection
 		queueExperiment.add(experiment);
 	}
 	
+	
 	/***
 	 * Retrieve the iterator of the database collection
 	 * 
@@ -340,6 +344,7 @@ public class DatabaseCollection
 		return queueExperiment.iterator();
 	}
 	
+	
 	/***
 	 * Retrieve the current registered databases
 	 * @return
@@ -347,6 +352,7 @@ public class DatabaseCollection
 	public int getNumDatabase() {
 		return queueExperiment.size();
 	}
+	
 	
 	/***
 	 * Check if the database is empty or not
@@ -356,6 +362,7 @@ public class DatabaseCollection
 		return queueExperiment.isEmpty();
 	}
 	
+	
 	/***
 	 * Remove the last registered database
 	 * @return
@@ -363,6 +370,41 @@ public class DatabaseCollection
 	public BaseExperiment getLast() {
 		return queueExperiment.element();
 	}
+	
+	
+	/***
+	 * Check if an experiment already exist in the collection
+	 * @param experiment
+	 * @return true if the experiment already exists. False otherwise.
+	 */
+	public boolean IsExist(BaseExperiment experiment) {
+		return queueExperiment.contains(experiment);
+	}
+	
+	
+	/***
+	 * Check if a database path already exist in the collection
+	 * @param shell
+	 * @param pathXML the absolute path to XML file
+	 * @return true of the XML file already exist. False otherwise
+	 */
+	public boolean isExist(Shell shell, String pathXML) {
+		
+		if (queueExperiment.isEmpty())
+			return false;
+		
+		for (BaseExperiment exp: queueExperiment) {
+			String file = exp.getXMLExperimentFile().getAbsolutePath();
+			if (file.equals(pathXML)) {
+				// we cannot have two exactly the same database in one window
+				MessageDialog.openError(shell, "Error", file +": the database is already opened." );
+
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	
 	/****
 	 * Remove all databases
@@ -399,11 +441,26 @@ public class DatabaseCollection
 	
 	public void removeDatabase(final BaseExperiment experiment) {
 		
+		// remove any database associated with this experiment
+		// some parts may need to check the database if the experiment really exits or not.
+		// If not, they will consider the experiment will be removed.
+		
+		queueExperiment.remove(experiment);
+		mapColumnStatus.remove(experiment);
+		
 		final Collection<MPart> listParts = partService.getParts();
 		if (listParts == null)
 			return;
+
+		// first, notify all the parts that have experiment that they will be destroyed.
 		
+		ViewerDataEvent data = new ViewerDataEvent((Experiment) experiment, null);
+		eventBroker.post(ViewerDataEvent.TOPIC_HPC_REMOVE_DATABASE, data);
+
 		String elementID = ElementIdManager.getElementId(experiment);
+		
+		// destroy all the views and editors that belong to experiment
+		// since Eclipse doesn't have "destroy" method, we hide them.
 		
 		for(MPart part: listParts) {
 			
@@ -411,27 +468,8 @@ public class DatabaseCollection
 				partService.hidePart(part, true);
 			}
 		}
-		queueExperiment.remove(experiment);
-		mapColumnStatus.remove(experiment);
 	}	
 	
-	
-	public boolean isAlreadyExist(Shell shell, String pathXML) {
-		
-		if (queueExperiment.isEmpty())
-			return false;
-		
-		for (BaseExperiment exp: queueExperiment) {
-			String file = exp.getXMLExperimentFile().getAbsolutePath();
-			if (file.equals(pathXML)) {
-				// we cannot have two exactly the same database in one window
-				MessageDialog.openError(shell, "Error", file +": the database is already opened." );
-
-				return true;
-			}
-		}
-		return false;
-	}
 	
 	
 	

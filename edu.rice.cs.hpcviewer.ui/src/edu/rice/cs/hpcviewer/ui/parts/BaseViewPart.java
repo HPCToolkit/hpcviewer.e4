@@ -63,8 +63,9 @@ public abstract class BaseViewPart implements IViewPart, EventHandler, IPartList
 		partService.addPartListener(this);		
 		
 		// subscribe to user action events
-		eventBroker.subscribe(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN, this);
-		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC, this);
+		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_REMOVE_DATABASE, this);
+		eventBroker.subscribe(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN,    this);
+		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC,  this);
 	}
 	
 	@PreDestroy
@@ -98,11 +99,7 @@ public abstract class BaseViewPart implements IViewPart, EventHandler, IPartList
 
 	@Override
 	public BaseExperiment getExperiment() {
-		RootScope root = contentViewer.getData();
-		if (root != null)
-			return root.getExperiment();
-		
-		return null;
+		return experiment;
 	}
 	
 	@Override
@@ -128,6 +125,10 @@ public abstract class BaseViewPart implements IViewPart, EventHandler, IPartList
 			
 		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC)) {
 			treeViewer.addUserMetricColumn((BaseMetric) eventInfo.data);
+
+		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_REMOVE_DATABASE)) {
+			// mark that this part will be destroyed
+			experiment = null;
 		}
 	}
 
@@ -150,6 +151,13 @@ public abstract class BaseViewPart implements IViewPart, EventHandler, IPartList
 			return;
 		
 		if (experiment != null && root == null) {
+			
+			// if the database doesn't exist anymore, it means we are
+			// exiting...
+			
+			if (!databaseAddOn.IsExist(experiment))
+				return;
+			
 			// TODO: this process takes time
 			root = createRoot(experiment);
 			contentViewer.setData(root);
@@ -161,7 +169,7 @@ public abstract class BaseViewPart implements IViewPart, EventHandler, IPartList
 	}
 
 	protected abstract RootScope      createRoot(BaseExperiment experiment);
-	protected abstract IViewBuilder setContentViewer(Composite parent, EMenuService menuService);
+	protected abstract IViewBuilder   setContentViewer(Composite parent, EMenuService menuService);
 	protected abstract RootScopeType  getRootType();
 	
 }
