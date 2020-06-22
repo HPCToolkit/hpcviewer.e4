@@ -3,6 +3,7 @@ package edu.rice.cs.hpcviewer.ui.handlers;
 import java.io.IOException;
 import java.net.URL;
 
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -32,6 +33,7 @@ public class LifeCycle
 
 	@Inject DatabaseCollection databaseCollection;
 
+	private Image listImages[];
 
 	@PostContextCreate
 	public void startup(IEclipseContext context, @Named(IServiceConstants.ACTIVE_SHELL) Shell shell) {
@@ -41,7 +43,7 @@ public class LifeCycle
 		
 		Display display = Display.getDefault();
 		
-		Image listImages[] = new Image[IconManager.Image_Viewer.length];
+		listImages = new Image[IconManager.Image_Viewer.length];
 		int i = 0;
 		
 		for (String imageName : IconManager.Image_Viewer) {
@@ -55,6 +57,15 @@ public class LifeCycle
 		Window.setDefaultImages(listImages);
 	}
 	
+	@PreDestroy
+	void preDestro() {
+		if (listImages != null) {
+			for(Image image: listImages) {
+				if (!image.isDisposed())
+					image.dispose();
+			}
+		}
+	}
 
 	@PreSave
 	void preSave(IEclipseContext workbenchContext) {
