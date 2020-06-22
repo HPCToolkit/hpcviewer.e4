@@ -20,12 +20,12 @@ import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
  * other views
  *
  ************************************************************************/
-public class CallerViewContentProvider extends AbstractContentProvider 
+public class BottomUpContentProvider extends AbstractContentProvider 
 {
 	private ExclusiveOnlyMetricPropagationFilter exclusiveOnly;
 	private InclusiveOnlyMetricPropagationFilter inclusiveOnly;
 	
-	public CallerViewContentProvider(ScopeTreeViewer viewer) {
+	public BottomUpContentProvider(ScopeTreeViewer viewer) {
 		super(viewer);
 	}
 	

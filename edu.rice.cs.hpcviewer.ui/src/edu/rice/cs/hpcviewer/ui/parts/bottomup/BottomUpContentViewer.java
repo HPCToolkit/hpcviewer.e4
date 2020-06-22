@@ -19,7 +19,7 @@ import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 
 public class BottomUpContentViewer extends AbstractContentViewer 
 {
-	private CallerViewContentProvider contentProvider = null;
+	private BottomUpContentProvider contentProvider = null;
 
 	public BottomUpContentViewer(EPartService  partService, 
 								 EModelService modelService, 
@@ -41,7 +41,7 @@ public class BottomUpContentViewer extends AbstractContentViewer
 	protected AbstractContentProvider getContentProvider(ScopeTreeViewer treeViewer) {
 
 		if (contentProvider == null)
-			contentProvider = new CallerViewContentProvider(treeViewer);
+			contentProvider = new BottomUpContentProvider(treeViewer);
 		
 		return contentProvider;
 	}
