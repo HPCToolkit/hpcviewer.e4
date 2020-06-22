@@ -43,6 +43,9 @@
       <children xsi:type="menu:Menu" xmi:id="_AHiwkK3KEeqAHZLWafP1YQ" elementId="edu.rice.cs.hpcviewer.ui.menu.window" label="Window" mnemonics="W">
         <children xsi:type="menu:HandledMenuItem" xmi:id="_EsDdkK3KEeqAHZLWafP1YQ" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.resetLayout" label="Reset layout" tooltip="Reset the current window's layout" mnemonics="R" command="_QRDKwK3KEeqAHZLWafP1YQ"/>
       </children>
+      <children xsi:type="menu:Menu" xmi:id="_VCyzMLS0EeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.menu.help" label="Help" mnemonics="H">
+        <children xsi:type="menu:HandledMenuItem" xmi:id="_XRffYLS0EeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.about" label="About" tooltip="About the application" mnemonics="A" command="_lIBrgKwbEeq2aaPo7yBcWg"/>
+      </children>
     </mainMenu>
   </children>
   <handlers xmi:id="_zXCPcI7xEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handler.open" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.FileOpenDatabase" command="_U14sMI7vEeqBPbXbG7_Dzw"/>
@@ -71,6 +74,7 @@
   <descriptors xmi:id="_zJUf8KyzEeqIbpeoA8x7Ag" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.graph.histo" label="Histogram graph" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/src/edu/rice/cs/hpcviewer/ui/resources/Graph.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" closeable="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.graph.GraphHistoViewer"/>
   <descriptors xmi:id="_rdzbwK0hEeqX1ux1mZi76A" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.graph.plot" label="Plot graph" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpcviewer-icon-editor-plot.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" closeable="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.graph.GraphPlotRegularViewer"/>
   <descriptors xmi:id="_4LP-wK0hEeqX1ux1mZi76A" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.graph.sort" label="Sorted plot graph" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpcviewer-icon-editor-plotsort.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" closeable="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.graph.GraphPlotSortViewer"/>
+  <toolBarContributions xmi:id="_2KzLULSzEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.toolbarcontribution.0"/>
   <commands xmi:id="_wGhBQI7uEeqBPbXbG7_Dzw" elementId="org.eclipse.ui.file.exit" commandName="Exit" description="Exit the application"/>
   <commands xmi:id="_U14sMI7vEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.command.open" commandName="Open" description="Open a database"/>
   <commands xmi:id="_cPW0II7vEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.command.reopen" commandName="Add database" description="Open another database"/>

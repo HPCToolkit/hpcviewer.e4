@@ -20,7 +20,7 @@ import edu.rice.cs.hpc.data.experiment.scope.Scope;
 public class GraphHistoViewer extends AbstractGraphViewer 
 {
 	static public final String ID    = "edu.rice.cs.hpcviewer.ui.partdescriptor.graph.histo"; 
-	static public final String LABEL = "Histogram grah";
+	static public final String LABEL = "Histogram graph";
 
 	@Override
 	protected int plotData(GraphEditorInput input) {

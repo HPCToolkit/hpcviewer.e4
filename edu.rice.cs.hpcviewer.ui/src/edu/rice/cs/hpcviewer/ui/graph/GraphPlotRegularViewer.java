@@ -14,7 +14,7 @@ import edu.rice.cs.hpc.data.experiment.scope.Scope;
 public class GraphPlotRegularViewer extends AbstractGraphPlotViewer 
 {
 	static public final String ID    = "edu.rice.cs.hpcviewer.ui.partdescriptor.graph.plot";
-	static public final String LABEL = "Plot grah";
+	static public final String LABEL = "Plot graph";
 
 	@Override
 	protected String getXAxisTitle() {

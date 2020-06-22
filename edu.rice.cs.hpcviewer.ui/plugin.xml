@@ -7,10 +7,10 @@
          point="org.eclipse.core.runtime.products">
       <product
             application="org.eclipse.e4.ui.workbench.swt.E4Application"
-            name="hpcviewer.product">
+            name="hpcviewer">
          <property
                name="appName"
-               value="hpcviewer.product">
+               value="hpcviewer">
          </property>
          <property
                name="aboutImage"

@@ -10,7 +10,7 @@ import edu.rice.cs.hpc.data.experiment.scope.Scope;
 public class GraphPlotSortViewer extends AbstractGraphPlotViewer 
 {
 	static public final String ID    = "edu.rice.cs.hpcviewer.ui.partdescriptor.graph.sort";
-	static public final String LABEL = "Sorted plot grah";
+	static public final String LABEL = "Sorted plot graph";
 
     private PairThreadIndex []pairThreadIndex;
 
