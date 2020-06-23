@@ -257,7 +257,7 @@ public class DatabaseCollection
 		if (parentId == null) {
 			for(int i=1; i<=MAX_STACKS_AVAIL; i++) {
 				final String stackId = STACK_ID_BASE + String.valueOf(i) ;
-				stack  = (MPartStack)modelService.find(stackId , application);
+				stack  = (MPartStack)modelService.find(stackId , application.getSelectedElement());
 				
 				if (stack != null)
 					list = stack.getChildren();
@@ -267,7 +267,7 @@ public class DatabaseCollection
 					break; 
 			}			
 		} else {
-			stack  = (MPartStack)modelService.find(parentId , application);
+			stack  = (MPartStack)modelService.find(parentId , application.getSelectedElement());
 			if (stack != null)
 				list = stack.getChildren();
 		}

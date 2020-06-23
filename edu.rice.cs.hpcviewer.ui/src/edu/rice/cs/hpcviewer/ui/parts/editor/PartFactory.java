@@ -1,6 +1,6 @@
 package edu.rice.cs.hpcviewer.ui.parts.editor;
 
-import java.util.Collection;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -9,6 +9,7 @@ import org.eclipse.e4.core.di.annotations.Creatable;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
@@ -48,19 +49,17 @@ public class PartFactory
 		// otherwise, we create a new one
 		// ----------------------------------------------------------
 		
-		Collection<MPart> listParts = partService.getParts();
-		for(MPart mp : listParts) {
-			if (mp.getElementId().equals(elementId)) {
+		MWindow window = app.getSelectedElement();
+		
+		List<MPart> list = modelService.findElements(window, elementId, MPart.class);
+		
+		if (list != null && list.size()>0) {
+			for(MPart part: list) {
+				partService.showPart(part, PartState.VISIBLE);
+				IBasePart obj = (IBasePart) part.getObject();
+				obj.setInput(part, input);
 				
-				if (mp.getObject() == null) {
-					partService.showPart(mp, PartState.CREATE);
-				}
-				MPart shownPart = partService.showPart(mp, PartState.VISIBLE);
-
-				IBasePart objectPart = (IBasePart) shownPart.getObject();
-				objectPart.setInput(shownPart, input);
-				
-				return shownPart;
+				return part;
 			}
 		}
 
@@ -75,7 +74,7 @@ public class PartFactory
 		part.setElementId(elementId);
 
 		if (stackId != null) {
-			MPartStack editorStack = (MPartStack)modelService.find(stackId, app);
+			MPartStack editorStack = (MPartStack)modelService.find(stackId, window);
 		
 			if (editorStack != null) {
 				editorStack.getChildren().add(part);

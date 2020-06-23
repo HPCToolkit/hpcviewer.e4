@@ -64,20 +64,39 @@
   <bindingTables xmi:id="_7fwrAKqFEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.bindingtable.file" bindingContext="_c3AF2cjYEeSyMNYR5xypkQ">
     <bindings xmi:id="_-3xvsKqFEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.keybinding.open" keySequence="M1+O" command="_U14sMI7vEeqBPbXbG7_Dzw"/>
     <bindings xmi:id="_k4-EoKuTEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.keybinding.add" keySequence="M1+A" command="_cPW0II7vEeqBPbXbG7_Dzw"/>
+    <bindings xmi:id="_lyW3ALWUEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.keybinding.new" keySequence="M1+N" command="_FHXw4LV7EeqkhNpo_ZhE2A"/>
   </bindingTables>
   <rootContext xmi:id="_c3AF2cjYEeSyMNYR5xypkQ" elementId="org.eclipse.ui.contexts.dialogAndWindow" name="In Dialog and Windows">
     <children xmi:id="_c3AF2sjYEeSyMNYR5xypkQ" elementId="org.eclipse.ui.contexts.window" name="In Windows"/>
     <children xmi:id="_c3AF28jYEeSyMNYR5xypkQ" elementId="org.eclipse.ui.contexts.dialog" name="In Dialogs"/>
   </rootContext>
-  <descriptors xmi:id="_zu96cJ9cEeqnUtVVp3UlCA" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.editor" label="Source code" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpc-16x16.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" category="Editor" closeable="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.editor.Editor"/>
-  <descriptors xmi:id="_tevAsKUpEeqxVMw0_Hqotg" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.topdown" label="Top down" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/cct.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" category="view" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownPart"/>
-  <descriptors xmi:id="_5ts38KUpEeqxVMw0_Hqotg" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.bottomup" label="Bottom-up" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/caller.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" category="view" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.bottomup.BottomUpPart"/>
-  <descriptors xmi:id="_TfML4KrDEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.flat" label="Flat view" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/flat.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" category="view" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.flat.FlatPart"/>
-  <descriptors xmi:id="_lvdt4Kw6Eeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.datacentric" label="Data-centric" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/datacentric.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" category="view" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.Datacentric"/>
-  <descriptors xmi:id="_5crdIK9gEeqAwJUq5kYEGQ" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.thread" label="Thread View" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/cct-thread.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" category="view" closeable="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.thread.ThreadView"/>
-  <descriptors xmi:id="_zJUf8KyzEeqIbpeoA8x7Ag" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.graph.histo" label="Histogram graph" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/src/edu/rice/cs/hpcviewer/ui/resources/Graph.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" category="editor" closeable="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.graph.GraphHistoViewer"/>
-  <descriptors xmi:id="_rdzbwK0hEeqX1ux1mZi76A" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.graph.plot" label="Plot graph" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpcviewer-icon-editor-plot.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" category="editor" closeable="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.graph.GraphPlotRegularViewer"/>
-  <descriptors xmi:id="_4LP-wK0hEeqX1ux1mZi76A" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.graph.sort" label="Sorted plot graph" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpcviewer-icon-editor-plotsort.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" category="editor" closeable="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.graph.GraphPlotSortViewer"/>
+  <descriptors xmi:id="_zu96cJ9cEeqnUtVVp3UlCA" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.editor" label="Source code" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpc-16x16.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" category="Editor" closeable="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.editor.Editor">
+    <tags>categoryTag:hpcview</tags>
+  </descriptors>
+  <descriptors xmi:id="_tevAsKUpEeqxVMw0_Hqotg" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.topdown" label="Top down" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/cct.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" category="view" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownPart">
+    <tags>categoryTag:hpcview</tags>
+  </descriptors>
+  <descriptors xmi:id="_5ts38KUpEeqxVMw0_Hqotg" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.bottomup" label="Bottom-up" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/caller.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" category="view" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.bottomup.BottomUpPart">
+    <tags>categoryTag:hpcview</tags>
+  </descriptors>
+  <descriptors xmi:id="_TfML4KrDEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.flat" label="Flat view" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/flat.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" category="view" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.flat.FlatPart">
+    <tags>categoryTag:hpcview</tags>
+  </descriptors>
+  <descriptors xmi:id="_lvdt4Kw6Eeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.datacentric" label="Data-centric" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/datacentric.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" category="view" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.Datacentric">
+    <tags>categoryTag:hpcview</tags>
+  </descriptors>
+  <descriptors xmi:id="_5crdIK9gEeqAwJUq5kYEGQ" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.thread" label="Thread View" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/cct-thread.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" category="view" closeable="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.thread.ThreadView">
+    <tags>categoryTag:hpcview</tags>
+  </descriptors>
+  <descriptors xmi:id="_zJUf8KyzEeqIbpeoA8x7Ag" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.graph.histo" label="Histogram graph" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/src/edu/rice/cs/hpcviewer/ui/resources/Graph.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" category="editor" closeable="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.graph.GraphHistoViewer">
+    <tags>categoryTag:hpcview</tags>
+  </descriptors>
+  <descriptors xmi:id="_rdzbwK0hEeqX1ux1mZi76A" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.graph.plot" label="Plot graph" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpcviewer-icon-editor-plot.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" category="editor" closeable="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.graph.GraphPlotRegularViewer">
+    <tags>categoryTag:hpcview</tags>
+  </descriptors>
+  <descriptors xmi:id="_4LP-wK0hEeqX1ux1mZi76A" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.graph.sort" label="Sorted plot graph" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpcviewer-icon-editor-plotsort.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" category="editor" closeable="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.graph.GraphPlotSortViewer">
+    <tags>categoryTag:hpcview</tags>
+  </descriptors>
   <snippets xsi:type="basic:TrimmedWindow" xmi:id="_E-KEILVzEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.trimmedwindow.snippet" label="hpcviewer" width="1000" height="800">
     <children xsi:type="advanced:PerspectiveStack" xmi:id="_EE7A8LVxEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.perspectivestack.snippet">
       <children xsi:type="advanced:Perspective" xmi:id="_G4i_ILVxEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.perspective.snippet" label="hpcviewer perspective" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpc-merged-16x16.png">

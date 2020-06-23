@@ -1,10 +1,12 @@
  
 package edu.rice.cs.hpcviewer.ui.handlers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.model.application.MApplication;
+import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
@@ -42,17 +44,13 @@ public class NewWindow
 		System.out.println("new window : " + elementId +",  old window: " + otw.getElementId());
 		
 		ms.bringToTop(ntw);	
+        List<String> tags = new ArrayList<>();
+        tags.add("categoryTag:hpcview");
+        List<MUIElement> elementsWithTags = ms.findElements(ntw, null, null, tags);
 		
-		for(String id: Constants.ID_PARTS) {
-			List<MPart> listOfParts = ms.findElements(ntw, id, null);
-			
-			if (listOfParts == null)
-				continue;
-			
-			for(MPart part: listOfParts) {
-				part.setVisible(false);
-			}
-		}
-		
-	}
+        for(MUIElement element: elementsWithTags) {
+        	System.out.println("element: " + element.getElementId());
+        	element.setVisible(false);
+        }
+    }
 }
