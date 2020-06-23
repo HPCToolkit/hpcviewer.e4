@@ -67,7 +67,7 @@ public abstract class AbstractContentViewer implements IViewBuilder, ISelectionC
 		COLLECTIVE   
 	};
 	
-	final private int TREE_COLUMN_WIDTH  = 250;
+	final private int TREE_COLUMN_WIDTH  = 350;
 
 	final private int ACTION_ZOOM_IN      = 0;
 	final private int ACTION_ZOOM_OUT     = 1;
