@@ -10,10 +10,10 @@ import org.swtchart.IAxisTick;
 import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpc.data.experiment.metric.MetricRaw;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
+import edu.rice.cs.hpcviewer.ui.util.Constants;
 
 public class GraphPlotRegularViewer extends AbstractGraphPlotViewer 
 {
-	static public final String ID    = "edu.rice.cs.hpcviewer.ui.partdescriptor.graph.plot";
 	static public final String LABEL = "Plot graph";
 
 	@Override
@@ -60,7 +60,7 @@ public class GraphPlotRegularViewer extends AbstractGraphPlotViewer
 	
 	@Override
 	public String getPartDescriptorId() {
-		return ID;
+		return Constants.ID_GRAPH_PLOT;
 	}
 
 	@Override

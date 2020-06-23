@@ -6,10 +6,10 @@ import java.util.ArrayList;
 import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpc.data.experiment.metric.MetricRaw;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
+import edu.rice.cs.hpcviewer.ui.util.Constants;
 
 public class GraphPlotSortViewer extends AbstractGraphPlotViewer 
 {
-	static public final String ID    = "edu.rice.cs.hpcviewer.ui.partdescriptor.graph.sort";
 	static public final String LABEL = "Sorted plot graph";
 
     private PairThreadIndex []pairThreadIndex;
@@ -52,7 +52,7 @@ public class GraphPlotSortViewer extends AbstractGraphPlotViewer
 
 	@Override
 	public String getPartDescriptorId() {
-		return ID;
+		return Constants.ID_GRAPH_SORT;
 	}
 	
 	/*************

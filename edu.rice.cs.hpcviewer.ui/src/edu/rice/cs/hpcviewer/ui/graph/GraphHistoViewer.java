@@ -16,10 +16,10 @@ import org.swtchart.ISeries.SeriesType;
 import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpc.data.experiment.metric.MetricRaw;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
+import edu.rice.cs.hpcviewer.ui.util.Constants;
 
 public class GraphHistoViewer extends AbstractGraphViewer 
 {
-	static public final String ID    = "edu.rice.cs.hpcviewer.ui.partdescriptor.graph.histo"; 
 	static public final String LABEL = "Histogram graph";
 
 	@Override
@@ -78,7 +78,7 @@ public class GraphHistoViewer extends AbstractGraphViewer
 	
 	@Override
 	public String getPartDescriptorId() {
-		return ID;
+		return Constants.ID_GRAPH_HISTO;
 	}
 
 	@Override

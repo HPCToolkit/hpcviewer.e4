@@ -5,10 +5,8 @@ import java.util.List;
 
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.model.application.MApplication;
-import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
-import org.eclipse.e4.ui.model.application.ui.menu.MMenu;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 
 import edu.rice.cs.hpcviewer.ui.util.Constants;
@@ -56,6 +54,5 @@ public class NewWindow
 			}
 		}
 		
-		MMenu mainMenu = ntw.getMainMenu();
 	}
 }

@@ -74,13 +74,13 @@ public class GraphMenu
 			IMenuManager menu) {
 		
 		menu.add( createGraphMenu(input, partFactory, 
-				  GraphPlotRegularViewer.LABEL, GraphPlotRegularViewer.ID) );
+				  GraphPlotRegularViewer.LABEL, Constants.ID_GRAPH_PLOT) );
 		
 		menu.add( createGraphMenu(input, partFactory, 
-				  GraphPlotSortViewer.LABEL, GraphPlotSortViewer.ID) );
+				  GraphPlotSortViewer.LABEL, Constants.ID_GRAPH_SORT) );
 		
 		menu.add( createGraphMenu(input, partFactory, 
-				  GraphHistoViewer.LABEL, GraphHistoViewer.ID) );
+				  GraphHistoViewer.LABEL, Constants.ID_GRAPH_HISTO) );
 	}
 	
 	/***
