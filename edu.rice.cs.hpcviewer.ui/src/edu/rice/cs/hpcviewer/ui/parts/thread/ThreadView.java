@@ -32,8 +32,6 @@ import edu.rice.cs.hpcviewer.ui.util.FilterDataItem;
  *************************************************************/
 public class ThreadView  implements IViewPart
 {
-	static public final String IDdesc = "edu.rice.cs.hpcviewer.ui.partdescriptor.thread";
-
 	@Inject EPartService  partService;
 	@Inject EModelService modelService;
 	@Inject MApplication  app;

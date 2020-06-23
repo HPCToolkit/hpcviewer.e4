@@ -28,7 +28,6 @@ import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
 import org.eclipse.e4.ui.model.application.ui.basic.MStackElement;
-import org.eclipse.e4.ui.workbench.IWorkbench;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
@@ -43,11 +42,8 @@ import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
-import edu.rice.cs.hpcviewer.ui.parts.Datacentric;
 import edu.rice.cs.hpcviewer.ui.parts.IViewPart;
-import edu.rice.cs.hpcviewer.ui.parts.bottomup.BottomUpPart;
-import edu.rice.cs.hpcviewer.ui.parts.flat.FlatPart;
-import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownPart;
+import edu.rice.cs.hpcviewer.ui.util.Constants;
 import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
 
 /***
@@ -86,10 +82,10 @@ public class DatabaseCollection
 
 		mapRoottypeToPartId = new HashMap<RootScopeType, String>();
 
-		mapRoottypeToPartId.put(RootScopeType.CallingContextTree, TopDownPart.IDdesc);
-		mapRoottypeToPartId.put(RootScopeType.CallerTree, 	 	  BottomUpPart.IDdesc);
-		mapRoottypeToPartId.put(RootScopeType.Flat, 		   	  FlatPart.IDdesc);
-		mapRoottypeToPartId.put(RootScopeType.DatacentricTree, 	  Datacentric.IDdesc);
+		mapRoottypeToPartId.put(RootScopeType.CallingContextTree, Constants.ID_VIEW_TOPDOWN);
+		mapRoottypeToPartId.put(RootScopeType.CallerTree, 	 	  Constants.ID_VIEW_BOTTOMUP);
+		mapRoottypeToPartId.put(RootScopeType.Flat, 		   	  Constants.ID_VIEW_FLAT);
+		mapRoottypeToPartId.put(RootScopeType.DatacentricTree, 	  Constants.ID_VIEW_DATA);
 		
 		experimentManager = new ExperimentManager();
 	}
@@ -446,6 +442,9 @@ public class DatabaseCollection
 	
 	
 	public void removeDatabase(final BaseExperiment experiment) {
+		
+		if (experiment == null)
+			return;
 		
 		// remove any database associated with this experiment
 		// some parts may need to check the database if the experiment really exits or not.

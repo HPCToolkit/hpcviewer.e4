@@ -12,8 +12,6 @@ import edu.rice.cs.hpcviewer.ui.parts.IViewBuilder;
 
 public class BottomUpPart extends BaseViewPart
 {
-	static final public String IDdesc = "edu.rice.cs.hpcviewer.ui.partdescriptor.bottomup";
-
 	
 	public BottomUpPart() {
 	}

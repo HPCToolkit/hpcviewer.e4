@@ -17,6 +17,7 @@ import org.eclipse.swt.widgets.Composite;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpc.data.experiment.source.FileSystemSourceFile;
+import edu.rice.cs.hpcviewer.ui.util.Constants;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -52,11 +53,9 @@ import org.eclipse.swt.SWT;
  **********************************************/
 public class Editor implements IUpperPart
 {
-	static final public String STACK_ID = "edu.rice.cs.hpcviewer.ui.partstack.upper";
-	static final public String ID 		= "edu.rice.cs.hpcviewer.ui.part.editor";
-	static final public String ID_DESC  = "edu.rice.cs.hpcviewer.ui.partdescriptor.editor";
 	
 	static final private String PROPERTY_DATA = "hpceditor.data";
+
 	
 	private SourceViewer textViewer;
 	private Object input;
@@ -150,7 +149,7 @@ public class Editor implements IUpperPart
 
 	@Override
 	public String getPartDescriptorId() {
-		return ID_DESC;
+		return Constants.ID_VIEW_EDITOR;
 	}
 
 	@Override

@@ -17,6 +17,8 @@ import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 
+import edu.rice.cs.hpcviewer.ui.handlers.NewWindow;
+
 
 @Creatable
 @Singleton
@@ -32,7 +34,7 @@ public class Perspective
 			final MApplication application,
 			final EModelService modelService) {
 		
-		MWindow window = (MWindow) modelService.find("edu.rice.cs.hpcviewer.window.main", application);
+		MWindow window = (MWindow) modelService.find(NewWindow.ID_WINDOW, application);
 
 		 MPerspective activePerspective = modelService.getActivePerspective(window);
 		 if (activePerspective == null)

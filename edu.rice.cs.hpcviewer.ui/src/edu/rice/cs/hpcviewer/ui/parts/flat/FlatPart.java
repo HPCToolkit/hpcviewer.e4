@@ -12,9 +12,6 @@ import edu.rice.cs.hpcviewer.ui.parts.IViewBuilder;
 
 public class FlatPart extends BaseViewPart
 {
-	static final public String IDdesc = "edu.rice.cs.hpcviewer.ui.partdescriptor.flat";
-
-
 	public FlatPart() {	}
 
 

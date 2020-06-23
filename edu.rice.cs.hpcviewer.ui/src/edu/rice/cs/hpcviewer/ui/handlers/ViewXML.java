@@ -11,8 +11,8 @@ import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.parts.IBasePart;
-import edu.rice.cs.hpcviewer.ui.parts.editor.Editor;
 import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
+import edu.rice.cs.hpcviewer.ui.util.Constants;
 import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
 
 import java.io.File;
@@ -55,7 +55,8 @@ public class ViewXML
 				return;
 			
 			String elementId = ElementIdManager.getElementId(experiment);
-			partFactory.display(Editor.STACK_ID, Editor.ID_DESC, elementId, experiment);
+			
+			partFactory.display(Constants.ID_STACK_UPPER, Constants.ID_VIEW_EDITOR, elementId, experiment);
 		}
 	}
 	

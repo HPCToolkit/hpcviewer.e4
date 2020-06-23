@@ -11,8 +11,8 @@ import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.MetricValue;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
-import edu.rice.cs.hpcviewer.ui.parts.editor.Editor;
 import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
+import edu.rice.cs.hpcviewer.ui.util.Constants;
 
 
 /****
@@ -127,7 +127,7 @@ public class GraphMenu
 			
         	String elementId = AbstractGraphViewer.getID(descriptorId, input.getScope(), input.getMetric());
         	
-        	partFactory.display(Editor.STACK_ID, descriptorId, elementId, input);
+        	partFactory.display(Constants.ID_STACK_UPPER, descriptorId, elementId, input);
 		}
     }
 }

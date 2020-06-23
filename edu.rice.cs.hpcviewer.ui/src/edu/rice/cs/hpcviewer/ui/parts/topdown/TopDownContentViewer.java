@@ -33,9 +33,9 @@ import edu.rice.cs.hpcviewer.ui.internal.AbstractContentProvider;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractContentViewer;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
 import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
-import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadView;
 import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadViewInput;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
+import edu.rice.cs.hpcviewer.ui.util.Constants;
 import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
 
 /*************************************************************
@@ -131,9 +131,9 @@ public class TopDownContentViewer extends AbstractContentViewer
 				String parentId  = activePart.getParent().getElementId();
 				
 				String elementId = ElementIdManager.getElementId(input.getRootScope().getExperiment()) + 
-								   ElementIdManager.ELEMENT_SEPARATOR + ThreadView.IDdesc;
+								   ElementIdManager.ELEMENT_SEPARATOR + Constants.ID_VIEW_THREAD;
 				
-				partFactory.display(parentId, ThreadView.IDdesc, elementId, input);
+				partFactory.display(parentId, Constants.ID_VIEW_THREAD, elementId, input);
 			}
 			
 			@Override

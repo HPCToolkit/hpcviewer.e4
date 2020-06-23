@@ -18,6 +18,7 @@ import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpcviewer.ui.parts.editor.Editor;
 import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 import edu.rice.cs.hpcviewer.ui.resources.FontManager;
+import edu.rice.cs.hpcviewer.ui.util.Constants;
 import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
@@ -157,7 +158,7 @@ public class ScopeMouseListener implements Listener
 		String elementId = ElementIdManager.getElementId(scope.getExperiment()) + 
 						   ElementIdManager.ELEMENT_SEPARATOR + Editor.getTitle(scope);
 		
-		partFactory.display(Editor.STACK_ID, Editor.ID_DESC, elementId, scope);
+		partFactory.display(Constants.ID_STACK_UPPER, Constants.ID_VIEW_EDITOR, elementId, scope);
 		
 		// keep focus to the viewer 
 		treeViewer.getTree().setFocus();
