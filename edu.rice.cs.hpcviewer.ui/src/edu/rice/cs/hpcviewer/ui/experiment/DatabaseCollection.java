@@ -3,12 +3,11 @@ package edu.rice.cs.hpcviewer.ui.experiment;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -28,6 +27,7 @@ import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
 import org.eclipse.e4.ui.model.application.ui.basic.MStackElement;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
@@ -66,18 +66,19 @@ public class DatabaseCollection
 	
 	static private final int MAX_STACKS_AVAIL = 3;
 	
-	final private ConcurrentLinkedQueue<BaseExperiment>    queueExperiment;
+	final private HashMap<MWindow, List<BaseExperiment>>   mapWindowToExperiments;
 	final private HashMap<BaseExperiment, ViewerDataEvent> mapColumnStatus;
 	final private HashMap<RootScopeType, String> 		   mapRoottypeToPartId;
 	
 	private EPartService      partService;
 	private IEventBroker      eventBroker;
     private ExperimentManager experimentManager;
+    private MApplication      application;
 	
 	private StatusReporter    statusReporter;
 	
 	public DatabaseCollection() {
-		queueExperiment = new ConcurrentLinkedQueue<>();
+
 		mapColumnStatus = new HashMap<BaseExperiment, ViewerDataEvent>();
 
 		mapRoottypeToPartId = new HashMap<RootScopeType, String>();
@@ -88,6 +89,8 @@ public class DatabaseCollection
 		mapRoottypeToPartId.put(RootScopeType.DatacentricTree, 	  Constants.ID_VIEW_DATA);
 		
 		experimentManager = new ExperimentManager();
+		
+		mapWindowToExperiments = new HashMap<MWindow, List<BaseExperiment>>(1);
 	}
 	
 	@Inject
@@ -103,6 +106,7 @@ public class DatabaseCollection
 		this.partService    = partService;
 		this.eventBroker    = broker;
 		this.statusReporter = statusReporter;
+		this.application    = application;
 		
 		// handling the command line arguments:
 		// if one of the arguments specify a file or a directory,
@@ -339,7 +343,10 @@ public class DatabaseCollection
 		
 		statusReport(IStatus.INFO, "Open " + experiment.getDefaultDirectory().getAbsolutePath(), null);
 		
-		queueExperiment.add(experiment);
+		List<BaseExperiment> listExperiments = getActiveListExperiments();
+		if (listExperiments != null) {
+			listExperiments.add(experiment);
+		}
 	}
 	
 	
@@ -349,7 +356,8 @@ public class DatabaseCollection
 	 * @return Iterator for the list
 	 */
 	public Iterator<BaseExperiment> getIterator() {
-		return queueExperiment.iterator();
+		List<BaseExperiment> list = getActiveListExperiments();
+		return list.iterator();
 	}
 	
 	
@@ -358,7 +366,10 @@ public class DatabaseCollection
 	 * @return
 	 */
 	public int getNumDatabase() {
-		return queueExperiment.size();
+		List<BaseExperiment> list = getActiveListExperiments();
+		if (list == null)
+			return 0;
+		return list.size();
 	}
 	
 	
@@ -367,7 +378,8 @@ public class DatabaseCollection
 	 * @return true if the database is empty
 	 */
 	public boolean isEmpty() {
-		return queueExperiment.isEmpty();
+		List<BaseExperiment> list = getActiveListExperiments();
+		return list.isEmpty();
 	}
 	
 	
@@ -376,7 +388,8 @@ public class DatabaseCollection
 	 * @return
 	 */
 	public BaseExperiment getLast() {
-		return queueExperiment.element();
+		List<BaseExperiment> list = getActiveListExperiments();
+		return list.get(list.size()-1);
 	}
 	
 	
@@ -386,7 +399,8 @@ public class DatabaseCollection
 	 * @return true if the experiment already exists. False otherwise.
 	 */
 	public boolean IsExist(BaseExperiment experiment) {
-		return queueExperiment.contains(experiment);
+		List<BaseExperiment> list = getActiveListExperiments();
+		return list.contains(experiment);
 	}
 	
 	
@@ -397,11 +411,12 @@ public class DatabaseCollection
 	 * @return true of the XML file already exist. False otherwise
 	 */
 	public boolean isExist(Shell shell, String pathXML) {
+		List<BaseExperiment> list = getActiveListExperiments();
 		
-		if (queueExperiment.isEmpty())
+		if (list.isEmpty())
 			return false;
 		
-		for (BaseExperiment exp: queueExperiment) {
+		for (BaseExperiment exp: list) {
 			String file = exp.getXMLExperimentFile().getAbsolutePath();
 			if (file.equals(pathXML)) {
 				// we cannot have two exactly the same database in one window
@@ -419,16 +434,22 @@ public class DatabaseCollection
 	 * @return
 	 */
 	public int removeAll() {
-		int size = queueExperiment.size();
+		List<BaseExperiment> list = getActiveListExperiments();
 		
-		Iterator<BaseExperiment> iterator = queueExperiment.iterator();
-		while(iterator.hasNext()) {
-			BaseExperiment exp = iterator.next();
-			
+		int size = list.size();
+		
+		// TODO: ugly solution to avoid concurrency (java will not allow to remove a list while iterating).
+		// we need to copy the list to an array, and then remove the list
+		
+		BaseExperiment arrayExp[] = new BaseExperiment[size];
+		list.toArray(arrayExp);
+		
+		for(BaseExperiment exp: arrayExp) {
+			// inside this method, we remove the database AND hide the view parts
 			removeDatabase(exp);
 		}
 		
-		queueExperiment.clear();
+		list.clear();
 
 		mapColumnStatus.clear();
 		
@@ -454,8 +475,9 @@ public class DatabaseCollection
 		// remove any database associated with this experiment
 		// some parts may need to check the database if the experiment really exits or not.
 		// If not, they will consider the experiment will be removed.
-		
-		queueExperiment.remove(experiment);
+		List<BaseExperiment> list = getActiveListExperiments();
+		list.remove(experiment);
+
 		mapColumnStatus.remove(experiment);
 		
 		statusReport(IStatus.INFO, "Remove " + experiment.getDefaultDirectory().getAbsolutePath(), null);
@@ -495,6 +517,28 @@ public class DatabaseCollection
 		statusReporter.report(objStatus, StatusReporter.LOG);
 	}
 	
+	
+	/***
+	 * Retrieve the list of experiments of the current window.
+	 * If Eclipse reports there is no active window, the list is null.
+	 * 
+	 * @return the list of experiments (if there's an active window). null otherwise.
+	 * 
+	 */
+	private List<BaseExperiment> getActiveListExperiments() {
+		MWindow window = application.getSelectedElement();
+		if (window == null) {
+			statusReport(IStatus.ERROR, "no active window", null);
+			return null;
+		}
+		List<BaseExperiment> list = mapWindowToExperiments.get(window);
+		
+		if (list == null) {
+			list = new ArrayList<BaseExperiment>();
+			mapWindowToExperiments.put(window, list);
+		}
+		return list;
+	}
 	
 	/****
 	 * Find a database for a given path
