@@ -4,16 +4,18 @@
 package edu.rice.cs.hpcviewer.ui.experiment;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import java.io.File;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
-import edu.rice.cs.hpc.data.experiment.InvalExperimentException;
 import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.data.util.Util.FileXMLFilter;
+import edu.rice.cs.hpcbase.map.ProcedureAliasMap;
 import edu.rice.cs.hpcviewer.ui.preferences.PreferenceManager;
 
 
@@ -147,44 +149,41 @@ public class ExperimentManager
 	}
 	
 
-	public BaseExperiment loadExperiment(Shell shell, String sFilename) {
-		Experiment experiment = null;
-		try
-		{
+	public BaseExperiment loadExperiment(final Shell shell, final String sFilename) {
+		
+		Display display = shell.getDisplay();
+		LoadExperimentThread thread = new LoadExperimentThread(shell, sFilename);
+		BusyIndicator.showWhile(display, thread);
+		
+		return thread.experiment;
+	}
+	
+	
+	/****
+	 * 
+	 * class to block UI while reading the database
+	 *
+	 */
+	static private class LoadExperimentThread implements Runnable 
+	{
+		final Shell shell;
+		final String filename;
+		
+		Experiment experiment;
+		
+		public LoadExperimentThread(Shell shell, String filename) {
+			this.filename = filename;
+			this.shell    = shell;
+		}
+		
+		@Override
+		public void run() {
 			experiment = new Experiment();
-			experiment.open( new java.io.File(sFilename), new edu.rice.cs.hpcbase.map.ProcedureAliasMap(), true );
-
-		} catch(java.io.FileNotFoundException fnf)
-		{
-			System.err.println("File not found:" + sFilename + "\tException:"+fnf.getMessage());
-			MessageDialog.openError(shell, "Error:File not found", "Cannot find the file "+sFilename);
-			experiment = null;
+			try {
+				experiment.open( new File(filename), new ProcedureAliasMap(), true );
+			} catch (Exception e) {
+				MessageDialog.openError(shell, "Error: Fail to open the database", "Error: " + e.getMessage());
+			};
 		}
-		catch(java.io.IOException io)
-		{
-			System.err.println("IO error:" +  sFilename + "\tIO msg: " + io.getMessage());
-			MessageDialog.openError(shell, "Error: Unable to read", "Cannot read the file "+sFilename);
-			experiment = null;
-		}
-		catch(InvalExperimentException ex)
-		{
-			String where = sFilename + " " + " " + ex.getLineNumber();
-			System.err.println("$" +  where);
-			MessageDialog.openError(shell, "Incorrect Experiment File", "File "+sFilename 
-					+ " has incorrect tag at line:"+ex.getLineNumber());
-			experiment = null;
-		} 
-		catch(NullPointerException npe)
-		{
-			System.err.println("$" + npe.getMessage() + sFilename);
-			MessageDialog.openError(shell, "File is invalid", "File has null pointer:"
-					+sFilename + ":"+npe.getMessage());
-			experiment = null;
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return experiment;
-
 	}
 }

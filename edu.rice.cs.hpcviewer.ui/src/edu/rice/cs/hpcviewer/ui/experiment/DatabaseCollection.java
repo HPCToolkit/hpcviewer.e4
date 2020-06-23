@@ -220,6 +220,11 @@ public class DatabaseCollection
 			EModelService 	modelService,
 			String          parentId) {
 		
+		if (experiment == null) {
+			System.err.println("null experiment");
+			return;
+		}
+		
 		if (service == null) {
 			System.out.println("Error: service is not available");
 			return;
