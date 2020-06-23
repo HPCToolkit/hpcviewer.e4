@@ -15,12 +15,14 @@ import javax.inject.Singleton;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileInfo;
 import org.eclipse.core.filesystem.IFileStore;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Creatable;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.e4.core.services.statusreporter.StatusReporter;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
@@ -74,7 +76,9 @@ public class DatabaseCollection
 	
 	private EPartService      partService;
 	private IEventBroker      eventBroker;
-	private ExperimentManager experimentManager;
+    private ExperimentManager experimentManager;
+	
+	private StatusReporter    statusReporter;
 	
 	public DatabaseCollection() {
 		queueExperiment = new ConcurrentLinkedQueue<>();
@@ -93,14 +97,16 @@ public class DatabaseCollection
 	@Inject
 	@Optional
 	private void subscribeApplicationCompleted(
-			@UIEventTopic(UIEvents.UILifeCycle.APP_STARTUP_COMPLETE) final MApplication application,
-			final EPartService partService,
-			final IEventBroker broker,
-			final EModelService modelService,
-			final IWorkbench workbench) {
+			@UIEventTopic(UIEvents.UILifeCycle.APP_STARTUP_COMPLETE) 
+			final MApplication   application,
+			final EPartService   partService,
+			final IEventBroker   broker,
+			final EModelService  modelService,
+			final StatusReporter statusReporter) {
 		
-		this.partService = partService;
-		this.eventBroker = broker;
+		this.partService    = partService;
+		this.eventBroker    = broker;
+		this.statusReporter = statusReporter;
 		
 		// handling the command line arguments:
 		// if one of the arguments specify a file or a directory,
@@ -248,10 +254,9 @@ public class DatabaseCollection
 				final String stackId = STACK_ID_BASE + String.valueOf(i) ;
 				stack  = (MPartStack)modelService.find(stackId , application);
 				
-				if (stack == null)
-					System.err.println("list of parts is null");
-				else
+				if (stack != null)
 					list = stack.getChildren();
+
 				if (list != null && list.size()==0)
 					// we found empty an stack
 					break; 
@@ -320,7 +325,7 @@ public class DatabaseCollection
 				try {
 					Thread.sleep(300);					
 				} catch (Exception e) {
-					System.out.println("thread is interrupted");
+					
 				}
 				maxAttempt--;
 			}
@@ -330,6 +335,8 @@ public class DatabaseCollection
 
 			view.setInput(part, experiment);
 		}
+		
+		statusReport(IStatus.INFO, "Open " + experiment.getDefaultDirectory().getAbsolutePath(), null);
 		
 		queueExperiment.add(experiment);
 	}
@@ -417,7 +424,6 @@ public class DatabaseCollection
 		while(iterator.hasNext()) {
 			BaseExperiment exp = iterator.next();
 			
-			
 			removeDatabase(exp);
 		}
 		
@@ -448,6 +454,8 @@ public class DatabaseCollection
 		queueExperiment.remove(experiment);
 		mapColumnStatus.remove(experiment);
 		
+		statusReport(IStatus.INFO, "Remove " + experiment.getDefaultDirectory().getAbsolutePath(), null);
+		
 		final Collection<MPart> listParts = partService.getParts();
 		if (listParts == null)
 			return;
@@ -471,6 +479,17 @@ public class DatabaseCollection
 	}	
 	
 	
+	/***
+	 * Log status to the Eclipse log service
+	 * @param status type of status {@link IStatus}
+	 * @param message 
+	 * @param e any exception
+	 */
+	public void statusReport(int status, String message, Exception e) {
+
+		IStatus objStatus = statusReporter.newStatus(status, message, e);
+		statusReporter.report(objStatus, StatusReporter.LOG);
+	}
 	
 	
 	/****
@@ -486,11 +505,13 @@ public class DatabaseCollection
 
 		try {
 			fileStore = EFS.getLocalFileSystem().getStore(new URI(sPath));
+			
 		} catch (URISyntaxException e) {
 			// somehow, URI may throw an exception for certain schemes. 
 			// in this case, let's do it traditional way
 			fileStore = EFS.getLocalFileSystem().getStore(new Path(sPath));
-			e.printStackTrace();
+
+			statusReport(IStatus.ERROR, "Locating " + sPath, e);
 		}
     	IFileInfo objFileInfo = fileStore.fetchInfo();
 
