@@ -30,8 +30,8 @@ public class FileCloseDatabase
 		if (menu == null)
 			return;
 
-		String label    = menu.getLabel();
-		String filePath = label + File.separator + Constants.DATABASE_FILENAME;
+		String element  = menu.getElementId();
+		String filePath = element + File.separator + Constants.DATABASE_FILENAME;
 		
 		BaseExperiment exp = database.getExperiment(filePath);
 		if (exp == null) {

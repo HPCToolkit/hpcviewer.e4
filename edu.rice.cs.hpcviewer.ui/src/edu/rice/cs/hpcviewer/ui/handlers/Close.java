@@ -11,6 +11,7 @@ import org.eclipse.e4.ui.model.application.ui.menu.MMenuElement;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
+import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 
 public class Close 
@@ -27,11 +28,18 @@ public class Close
 		Iterator<BaseExperiment> iterator = database.getIterator(window);
 
 		while(iterator.hasNext()) {
-			BaseExperiment exp = iterator.next();
+			Experiment exp = (Experiment) iterator.next();
 			
+			String path    = exp.getDefaultDirectory().getAbsolutePath();
+			String label   = path;
+			
+			if (exp.isMergedDatabase()) {
+				label = "[Merged] " + label;
+			}
 			MDirectMenuItem menu = modelService.createModelElement(MDirectMenuItem.class);
 			
-			menu.setLabel(exp.getDefaultDirectory().getAbsolutePath());
+			menu.setElementId(path);
+			menu.setLabel(label);
 			menu.setContributionURI(ID_MENU_URI);
 			
 			// never ever set object or setContributorURI to the menu class
