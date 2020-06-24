@@ -22,7 +22,7 @@ public class ElementIdManager
 	}
 	
 	static public String getElementId(RootScope root) {
-		String elementId = getElementId(root.getExperiment()) + ELEMENT_SEPARATOR + root.getName();
+		String elementId = getElementId(root.getExperiment()) + ELEMENT_SEPARATOR + root.getType().toString();
 		
 		return elementId;
 	}

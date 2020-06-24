@@ -24,6 +24,8 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.core.services.statusreporter.StatusReporter;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.MApplication;
+import org.eclipse.e4.ui.model.application.ui.MElementContainer;
+import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
 import org.eclipse.e4.ui.model.application.ui.basic.MStackElement;
@@ -214,17 +216,17 @@ public class DatabaseCollection
 	 * This database can be remove later on by calling {@code removeLast}
 	 * or {@code removeAll}.
 	 * 
-	 * @param experiment
-	 * @param application
-	 * @param service
-	 * @param broker
+	 * @param experiment cannot be null
+	 * @param application the main application
+	 * @param service EPartService to create parts
 	 * @param modelService
+	 * @param parentId the parent EPartStack of the parts. If it's null, the new parts will be assigned to the current active
 	 */
 	public void createViewsAndAddDatabase(BaseExperiment experiment, 
-			MApplication 	application, 
-			EPartService    service,
-			EModelService 	modelService,
-			String          parentId) {
+										  MApplication 	 application, 
+										  EPartService   service,
+										  EModelService  modelService,
+										  String         parentId) {
 		
 		if (experiment == null) {
 			System.err.println("null experiment");
@@ -253,11 +255,12 @@ public class DatabaseCollection
 		
 		MPartStack stack = null;
 		List<MStackElement> list = null;
+		MWindow  window = application.getSelectedElement();
 		
 		if (parentId == null) {
 			for(int i=1; i<=MAX_STACKS_AVAIL; i++) {
 				final String stackId = STACK_ID_BASE + String.valueOf(i) ;
-				stack  = (MPartStack)modelService.find(stackId , application.getSelectedElement());
+				stack  = (MPartStack)modelService.find(stackId, window);
 				
 				if (stack != null)
 					list = stack.getChildren();
@@ -267,7 +270,7 @@ public class DatabaseCollection
 					break; 
 			}			
 		} else {
-			stack  = (MPartStack)modelService.find(parentId , application.getSelectedElement());
+			stack  = (MPartStack)modelService.find(parentId, window);
 			if (stack != null)
 				list = stack.getChildren();
 		}
@@ -499,7 +502,11 @@ public class DatabaseCollection
 		for(MPart part: listParts) {
 			
 			if (part.getElementId().startsWith(elementID)) {
+				MElementContainer<MUIElement> parent = part.getParent();
+				
 				partService.hidePart(part, true);
+				
+				parent.getChildren().remove(part);
 			}
 		}
 	}	
