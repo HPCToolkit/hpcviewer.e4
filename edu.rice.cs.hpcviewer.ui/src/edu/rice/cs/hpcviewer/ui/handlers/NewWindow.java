@@ -49,8 +49,10 @@ public class NewWindow
 		ntw.setY(y+100);
 		
 		// show it to the user
-		String elementId = ntw.getElementId() + "." + application.getChildren().size();
+		int numWindows = application.getChildren().size();
+		String elementId = ntw.getElementId() + "." + numWindows;
 		ntw.setElementId(elementId);
+		ntw.setLabel("hpcviewer-" + numWindows);
 		
 		ms.bringToTop(ntw);
 		application.setSelectedElement(ntw);

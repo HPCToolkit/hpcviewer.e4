@@ -78,6 +78,8 @@ public class PartFactory
 		
 			if (editorStack != null) {
 				editorStack.getChildren().add(part);
+				editorStack.setOnTop(true);
+				editorStack.setVisible(true);
 			}
 		}
 
