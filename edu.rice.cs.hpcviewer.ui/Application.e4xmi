@@ -8,9 +8,15 @@
             <tags>NoAutoCollapse</tags>
           </children>
           <children xsi:type="basic:PartSashContainer" xmi:id="_3NDgAKuTEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.partsashcontainer.0" horizontal="true">
-            <children xsi:type="basic:PartStack" xmi:id="_DIZCcI69EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.partstack.lower.1"/>
-            <children xsi:type="basic:PartStack" xmi:id="_622RMKuTEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.partstack.lower.2" visible="false"/>
-            <children xsi:type="basic:PartStack" xmi:id="_FYkYUKvoEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.partstack.lower.3" visible="false"/>
+            <children xsi:type="basic:PartStack" xmi:id="_DIZCcI69EeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.partstack.lower.1">
+              <tags>NoAutoCollapse</tags>
+            </children>
+            <children xsi:type="basic:PartStack" xmi:id="_622RMKuTEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.partstack.lower.2" visible="false">
+              <tags>NoAutoCollapse</tags>
+            </children>
+            <children xsi:type="basic:PartStack" xmi:id="_FYkYUKvoEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.partstack.lower.3" visible="false">
+              <tags>NoAutoCollapse</tags>
+            </children>
           </children>
         </children>
       </children>
