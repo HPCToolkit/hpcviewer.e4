@@ -420,25 +420,41 @@ public class DatabaseCollection
 	
 	
 	/***
+	 * Retrieve the experiment object given a XML file path
+	 * 
+	 * @param pathXML the absolute path of the experiment XNK file path
+	 * @return BaseExperiment object if the database exist, null otherwise.
+	 */
+	public BaseExperiment getExperiment(String pathXML) {
+		List<BaseExperiment> list = getActiveListExperiments();
+		
+		if (list.isEmpty())
+			return null;
+		
+		for (BaseExperiment exp: list) {
+			String directory = exp.getXMLExperimentFile().getAbsolutePath();
+			if (directory.equals(pathXML)) {
+
+				return exp;
+			}
+		}
+		return null;
+	}
+	
+	/***
 	 * Check if a database path already exist in the collection
 	 * @param shell
 	 * @param pathXML the absolute path to XML file
 	 * @return true of the XML file already exist. False otherwise
 	 */
 	public boolean isExist(Shell shell, String pathXML) {
-		List<BaseExperiment> list = getActiveListExperiments();
 		
-		if (list.isEmpty())
-			return false;
-		
-		for (BaseExperiment exp: list) {
-			String file = exp.getXMLExperimentFile().getAbsolutePath();
-			if (file.equals(pathXML)) {
-				// we cannot have two exactly the same database in one window
-				MessageDialog.openError(shell, "Error", file +": the database is already opened." );
+		BaseExperiment exp = getExperiment(pathXML);
+		if (exp != null) {
+			// we cannot have two exactly the same database in one window
+			MessageDialog.openError(shell, "Error", pathXML +": the database is already opened." );
 
-				return true;
-			}
+			return true;
 		}
 		return false;
 	}
