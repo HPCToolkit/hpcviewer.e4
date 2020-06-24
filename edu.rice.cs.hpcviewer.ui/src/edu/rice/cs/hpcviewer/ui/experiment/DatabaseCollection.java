@@ -365,6 +365,18 @@ public class DatabaseCollection
 	
 	
 	/***
+	 * Retrieve the iterator of the database collection from a given windo
+	 * 
+	 * @param window 
+	 * @return Iterator for the list of the given window
+	 */
+	public Iterator<BaseExperiment> getIterator(MWindow window) {
+		List<BaseExperiment> list = mapWindowToExperiments.get(window);
+		return list.iterator();
+	}
+	
+		
+	/***
 	 * Retrieve the current registered databases
 	 * @return
 	 */
