@@ -76,6 +76,7 @@ public class DatabaseCollection
 	private IEventBroker      eventBroker;
     private ExperimentManager experimentManager;
     private MApplication      application;
+    private EModelService     modelService;
 	
 	private StatusReporter    statusReporter;
 	
@@ -109,6 +110,7 @@ public class DatabaseCollection
 		this.eventBroker    = broker;
 		this.statusReporter = statusReporter;
 		this.application    = application;
+		this.modelService   = modelService;
 		
 		// handling the command line arguments:
 		// if one of the arguments specify a file or a directory,
@@ -513,7 +515,10 @@ public class DatabaseCollection
 		
 		statusReport(IStatus.INFO, "Remove " + experiment.getDefaultDirectory().getAbsolutePath(), null);
 		
-		final Collection<MPart> listParts = partService.getParts();
+		MWindow window = application.getSelectedElement();
+		List<MPart> listParts = modelService.findElements(window, null, MPart.class);
+		
+		//final Collection<MPart> listParts = partService.getParts();
 		if (listParts == null)
 			return;
 
