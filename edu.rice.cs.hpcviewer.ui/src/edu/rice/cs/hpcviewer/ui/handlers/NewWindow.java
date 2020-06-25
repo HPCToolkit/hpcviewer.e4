@@ -9,6 +9,7 @@ import javax.inject.Named;
 
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.model.application.MApplication;
+import org.eclipse.e4.ui.model.application.ui.MElementContainer;
 import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
@@ -65,6 +66,13 @@ public class NewWindow
 
         	element.setVisible(false);
         	ps.hidePart((MPart) element, true);
+        	
+        	// remove the child from the parent's list of children manually
+        	// Reason: sometimes Eclipse cannot remove it automatically after hiding it. Not sure why.
+        	// It's harmless to hide twice.
+        	
+        	MElementContainer<MUIElement> parent = element.getParent();
+        	parent.getChildren().remove(element);
         }
         //Shell newShell = (Shell) ntw.getWidget();
         
