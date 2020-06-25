@@ -5,7 +5,9 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.eclipse.core.runtime.AssertionFailedException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import edu.rice.cs.hpcbase.map.AliasMap;
 import edu.rice.cs.hpc.data.filter.FilterAttribute;
@@ -74,7 +76,13 @@ implements IFilterData
 	@Override
 	public String getFilename() {
 		
-		IPath path = Platform.getLocation().makeAbsolute();
+		IPath path = null;
+		try {
+			path = Platform.getLocation().makeAbsolute();
+		} catch (AssertionFailedException e) {
+			String home = System.getProperty("user.dir");
+			path = new Path(home);
+		}
 		return path.append(FILE_NAME).makeAbsolute().toString();
 	}
 

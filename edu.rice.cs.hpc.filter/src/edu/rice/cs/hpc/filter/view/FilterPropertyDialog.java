@@ -8,6 +8,7 @@ import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -49,13 +50,16 @@ import org.eclipse.jface.window.Window;
  * Window for displaying the filters' property
  *
  *********************************************************/
-public class FilterPropertyDialog extends TitleAreaDialog 
+public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClickListener
 {
 	private Table table;
 	private Button btnEdit, btnDelete;
+	private CheckboxTableViewer checkboxTableViewer;
 	
 	private final FilterMap filterMap;
+	
 	private FilterStateProvider serviceProvider;
+	
 	
 	/**
 	 * Create the dialog.
@@ -82,7 +86,7 @@ public class FilterPropertyDialog extends TitleAreaDialog
 		container.setLayout(new GridLayout(2, false));
 		container.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
-		CheckboxTableViewer checkboxTableViewer = CheckboxTableViewer.newCheckList(container, 
+		checkboxTableViewer = CheckboxTableViewer.newCheckList(container, 
 				SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
 		ColumnViewerToolTipSupport.enableFor(checkboxTableViewer, ToolTip.NO_RECREATE);
 		
@@ -109,7 +113,7 @@ public class FilterPropertyDialog extends TitleAreaDialog
 		checkboxTableViewer.setCheckStateProvider(new CheckStateProvider());
 		checkboxTableViewer.setComparator(new PatternViewerComparator());
 		checkboxTableViewer.addCheckStateListener(new CheckStateListener(filterMap));
-		checkboxTableViewer.addDoubleClickListener(new DoubleClickListener(getShell(), filterMap));
+		checkboxTableViewer.addDoubleClickListener(this);
 		
 		Group grpActions = new Group(container, SWT.NONE);
 		grpActions.setLayout(new FillLayout(SWT.VERTICAL));
@@ -118,34 +122,58 @@ public class FilterPropertyDialog extends TitleAreaDialog
 		Button btnAdd = new Button(grpActions, SWT.NONE);
 		btnAdd.setToolTipText("Add a new pattern filter");
 		btnAdd.setText("Add");
-		btnAdd.addSelectionListener(new ButtonSelectionListener(filterMap, checkboxTableViewer, 
-											ButtonSelectionListener.ButtonType.Add));
+		btnAdd.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				add();
+			}
+		});;
 		
 		btnEdit = new Button(grpActions, SWT.NONE);
 		btnEdit.setText("Edit");
 		btnEdit.setEnabled(false);
-		btnEdit.addSelectionListener(new ButtonSelectionListener(filterMap, checkboxTableViewer, 
-											ButtonSelectionListener.ButtonType.Edit));
+		btnEdit.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				edit();
+			}
+		});
 		
 		btnDelete = new Button(grpActions, SWT.NONE);
 		btnDelete.setText("Delete");
 		btnDelete.setEnabled(false);
-		btnDelete.addSelectionListener(new ButtonSelectionListener(filterMap, checkboxTableViewer, 
-											ButtonSelectionListener.ButtonType.Delete));
+		btnDelete.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				delete();
+			}
+		});
 		
 		Button []buttons = new Button[] {btnEdit, btnDelete};
 		checkboxTableViewer.addSelectionChangedListener(new SelectionChangedListener(buttons));
 
 		// set the input of the table
-	    setInput(checkboxTableViewer, filterMap);
+	    setInput(filterMap);
 
 		getShell().setText("Filter");
 
 		return area;
 	}
 
-	static void setInput(CheckboxTableViewer viewer, FilterMap map) {
-		viewer.setInput(map.getEntrySet());
+	void setInput(FilterMap map) {
+		checkboxTableViewer.setInput(map.getEntrySet());
 	}
 	
 	@Override
@@ -199,15 +227,18 @@ public class FilterPropertyDialog extends TitleAreaDialog
 	 * @param pattern : the pattern to be modified
 	 * @param attribute : attribute
 	 */
-	static private void edit(Shell shell, CheckboxTableViewer viewer, FilterMap filterMap, 
-							 String pattern, FilterAttribute attribute) {
+	private void edit(FilterMap 	  filterMap, 
+					  String 		  pattern, 
+					  FilterAttribute attribute) {
+		
+		Shell shell = checkboxTableViewer.getControl().getShell();
 		final FilterInputDialog dialog = new FilterInputDialog(shell, "Editing a filter", pattern, attribute);
 		if (dialog.open() == Window.OK)
 		{
 			FilterAttribute newattribute = dialog.getAttribute();
 			if (filterMap.update(pattern, dialog.getValue(), newattribute))
 			{
-				FilterPropertyDialog.setInput(viewer, filterMap);
+				setInput(filterMap);
 			} else {
 				MessageDialog.openWarning(shell, "Unable to update", "Failed to update the pattern.");
 			}
@@ -250,33 +281,108 @@ public class FilterPropertyDialog extends TitleAreaDialog
 		}
 	}
 	
-	/******************************************************************
-	 * 
-	 * action class for double click
-	 *
-	 *******************************************************************/
-	static private class DoubleClickListener implements IDoubleClickListener
-	{	
-		final private Shell shell;
-		final private FilterMap filterMap;
+	
+	@Override
+	public void doubleClick(DoubleClickEvent event) {
+		final ISelection selection = event.getSelection();
+		final StructuredSelection select = (StructuredSelection) selection;
 		
-		public DoubleClickListener( Shell shell, FilterMap filterMap ) {
-			this.shell = shell;
-			this.filterMap = filterMap;
-		}
-		
-		@Override
-		public void doubleClick(DoubleClickEvent event) {
-			final ISelection selection = event.getSelection();
-			final StructuredSelection select = (StructuredSelection) selection;
-			if (select != null && !select.isEmpty()) {
-				final Entry<String, FilterAttribute> item = (Entry<String, FilterAttribute>) select.getFirstElement();
-				if (item != null) {
-					FilterPropertyDialog.edit( shell, (CheckboxTableViewer) event.getViewer(), filterMap, item.getKey(), item.getValue());
-				}
+		if (select != null && !select.isEmpty()) {
+			final Entry<String, FilterAttribute> item = (Entry<String, FilterAttribute>) select.getFirstElement();
+			
+			if (item != null) {
+				edit(filterMap, item.getKey(), item.getValue());
 			}
 		}
 	}
+	
+	
+	private boolean add() {
+		
+		final Shell shell = checkboxTableViewer.getControl().getShell(); 
+		final FilterInputDialog dialog = new FilterInputDialog(shell, "Add a pattern", "", null);
+		
+		if (dialog.open() == IDialogConstants.OK_ID) {
+			FilterAttribute attribute = dialog.getAttribute();
+			final String key = dialog.getValue();
+			
+			if (filterMap.get(key) == null) {
+				// save the new pattern to the registry
+				filterMap.put(key, attribute);
+				updateView(filterMap);
+				return true;
+			} else {
+				MessageDialog.openError(shell, "Unable to add a new filter", 
+						"The pattern already exists: " + key);
+			}
+		}
+		return false;
+	}
+
+	
+	private boolean edit() {
+		ISelection selection = checkboxTableViewer.getSelection();
+		if (selection != null) {
+			final StructuredSelection select = (StructuredSelection) selection;
+			final Entry<String, FilterAttribute> item= (Entry<String, FilterAttribute>) select.getFirstElement();
+			if (item == null)
+				return false;
+
+			final Shell shell = checkboxTableViewer.getControl().getShell();
+			final FilterInputDialog dialog = new FilterInputDialog(shell, "Editing a filter", item.getKey(), item.getValue());
+			
+			if (dialog.open() == Window.OK)
+			{
+				//final FilterMap filterMap = FilterMap.getInstance();
+				FilterAttribute attribute = dialog.getAttribute();
+				if (filterMap.update(item.getKey(), dialog.getValue(), attribute))
+				{
+					updateView(filterMap);
+					return true;
+				} else {
+					MessageDialog.openWarning(shell, "Unable to update", "Failed to update the pattern.");
+				}
+			}
+		}
+		return false;
+	}
+
+	
+	private boolean delete() {
+		ISelection selection = checkboxTableViewer.getSelection();
+		if (selection != null) {
+			final StructuredSelection select = (StructuredSelection) selection;
+			int size = select.size();
+			String message = null;
+			if (size == 1) {
+				final Entry<String, FilterAttribute> item= (Entry<String, FilterAttribute>) select.getFirstElement();
+				message = "Are you sure to delete '" + item.getKey() + "' pattern?";
+			} else if (size > 1) {
+				message = "Are you sure to delete " + size + " pattern?" ;
+			}
+			if (message != null) {
+				
+				final Shell shell = checkboxTableViewer.getControl().getShell();
+				if (MessageDialog.openConfirm(shell, "Deleting a pattern", message)) {
+
+					Iterator<Entry<String, FilterAttribute>> iterator = select.iterator();
+					while(iterator.hasNext()) {
+						Entry<String, FilterAttribute> item = iterator.next();
+						filterMap.remove(item.getKey());
+					}
+					updateView(filterMap);
+				}
+			}
+		}
+		return false;
+	}
+	
+
+	
+	private void updateView(final FilterMap filterMap) {
+		setInput(filterMap);
+	}
+
 	
 	/******************************************************************
 	 * 
@@ -391,109 +497,18 @@ public class FilterPropertyDialog extends TitleAreaDialog
 		}	
 	}
 	
-	/********************************************************************
-	 * 
-	 * class for buttons' action (add, delete and edit)
-	 *
-	 ********************************************************************/
-	private static class ButtonSelectionListener extends SelectionAdapter
-	{
-		static enum ButtonType {Add, Delete, Edit};
-		private final CheckboxTableViewer viewer;
-		private final ButtonType type;
-		private final FilterMap filterMap;
-		
-		public ButtonSelectionListener( FilterMap filterMap, CheckboxTableViewer viewer, ButtonType type) {
-			this.viewer = viewer;
-			this.type   = type;
-			this.filterMap = filterMap;
-		}
-		public void widgetSelected(SelectionEvent e) {
-			final Shell shell = viewer.getTable().getShell();
-			switch (type) {
-			case Add: 
-				add(shell); 	break;
-			case Edit:
-				edit(shell); 	break;
-			case Delete:
-				delete(shell);	break;
-			}
-		}
-		
-		private boolean add(final Shell shell) {
-			final FilterInputDialog dialog = new FilterInputDialog(shell, "Add a pattern", "", null);
-			
-			if (dialog.open() == IDialogConstants.OK_ID) {
-				FilterAttribute attribute = dialog.getAttribute();
-				final String key = dialog.getValue();
-				
-				if (filterMap.get(key) == null) {
-					// save the new pattern to the registry
-					filterMap.put(key, attribute);
-					updateView(filterMap);
-					return true;
-				} else {
-					MessageDialog.openError(shell, "Unable to add a new filter", 
-							"The pattern already exists: " + key);
-				}
-			}
-			return false;
-		}
-		
-		private boolean edit(final Shell shell) {
-			ISelection selection = viewer.getSelection();
-			if (selection != null) {
-				final StructuredSelection select = (StructuredSelection) selection;
-				final Entry<String, FilterAttribute> item= (Entry<String, FilterAttribute>) select.getFirstElement();
-				if (item == null)
-					return false;
 
-				final FilterInputDialog dialog = new FilterInputDialog(shell, "Editing a filter", item.getKey(), item.getValue());
-				if (dialog.open() == Window.OK)
-				{
-					//final FilterMap filterMap = FilterMap.getInstance();
-					FilterAttribute attribute = dialog.getAttribute();
-					if (filterMap.update(item.getKey(), dialog.getValue(), attribute))
-					{
-						updateView(filterMap);
-						return true;
-					} else {
-						MessageDialog.openWarning(shell, "Unable to update", "Failed to update the pattern.");
-					}
-				}
-			}
-			return false;
-		}
+	
+	////////////////////////////////////////////////////////////////////////////////////////////////
+	// 
+	// unit test
+	//
+	////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	static public void main(String []argv) {
 		
-		private boolean delete(final Shell shell) {
-			ISelection selection = viewer.getSelection();
-			if (selection != null) {
-				final StructuredSelection select = (StructuredSelection) selection;
-				int size = select.size();
-				String message = null;
-				if (size == 1) {
-					final Entry<String, FilterAttribute> item= (Entry<String, FilterAttribute>) select.getFirstElement();
-					message = "Are you sure to delete '" + item.getKey() + "' pattern?";
-				} else if (size > 1) {
-					message = "Are you sure to delete " + size + " pattern?" ;
-				}
-				if (message != null) {
-					if (MessageDialog.openConfirm(shell, "Deleting a pattern", message)) {
-
-						Iterator<Entry<String, FilterAttribute>> iterator = select.iterator();
-						while(iterator.hasNext()) {
-							Entry<String, FilterAttribute> item = iterator.next();
-							filterMap.remove(item.getKey());
-						}
-						updateView(filterMap);
-					}
-				}
-			}
-			return false;
-		}
-		
-		private void updateView(final FilterMap filterMap) {
-			FilterPropertyDialog.setInput(viewer, filterMap);
-		}
+		final Shell shell = new Shell();
+		FilterPropertyDialog dlg = new FilterPropertyDialog(shell);
+		dlg.open();
 	}
 }
