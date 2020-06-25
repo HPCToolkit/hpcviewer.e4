@@ -17,14 +17,17 @@ public class FlatPart extends BaseViewPart
 
 	@Override
 	protected RootScope createRoot(BaseExperiment experiment) {
-		System.out.println(getClass().getSimpleName() + " create root " );
 
 		RootScope rootCCT  = experiment.getRootScope(RootScopeType.CallingContextTree);
 		RootScope rootFlat = experiment.getRootScope(RootScopeType.Flat);
 		
-		RootScope root = ((Experiment) experiment).createFlatView(rootCCT, rootFlat);
+		if (rootCCT != null && rootFlat != null)
+			return ((Experiment) experiment).createFlatView(rootCCT, rootFlat);
 
-		return root;
+		if (rootFlat != null && rootFlat.hasChildren())
+			return rootFlat;
+		
+		return null;
 	}
 
 	@Override

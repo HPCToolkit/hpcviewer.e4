@@ -23,6 +23,7 @@ import java.util.Iterator;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.e4.core.contexts.Active;
 import org.eclipse.e4.core.di.annotations.CanExecute;
 
@@ -38,8 +39,6 @@ public class MergeDatabase
 			EPartService service,
 			IEventBroker broker,
 			EModelService modelService) {
-		
-		System.out.println("merge database: " + param);
 		
 		final Experiment []db = new Experiment[2];
 
@@ -63,7 +62,7 @@ public class MergeDatabase
 		} else if (param.equals("flat")) {
 			mergeType = RootScopeType.Flat;
 		} else {
-			System.err.println("unknown merge type");
+			database.statusReport(IStatus.ERROR, "Error: merge param unknown: " + param, null);
 			return;
 		}
 		
@@ -78,7 +77,7 @@ public class MergeDatabase
 					
 				} catch (Exception e) {
 					MessageDialog.openError(shell, "Error merging database",
-							e.getMessage());
+							e.getClass().getName() + ": \n" + e.getMessage());
 				}
 				
 			}

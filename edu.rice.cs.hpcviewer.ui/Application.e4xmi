@@ -29,9 +29,13 @@
           <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_XmHysKuMEeq2aaPo7yBcWg" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseExistence"/>
         </children>
         <children xsi:type="menu:Menu" xmi:id="_cySXMLJ_EeqbOrxjpZSIwg" elementId="edu.rice.cs.hpcviewer.ui.menu.fileMerge" label="Merge databases" tooltip="Merge two opened databases. " mnemonics="M">
+          <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_5ij8ILaGEeqkhNpo_ZhE2A" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseMergeExpression"/>
           <children xsi:type="menu:HandledMenuItem" xmi:id="_vYBpcLJiEeqfDrDyyKphUQ" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.merge" label="Merge top-down views" tooltip="Merge two top-down databases " mnemonics="M" command="_sRvw0LJpEeqfDrDyyKphUQ">
             <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_rmmw0LJjEeqfDrDyyKphUQ" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseMergeExpression"/>
             <parameters xmi:id="_oMnHcLJpEeqfDrDyyKphUQ" elementId="edu.rice.cs.hpcviewer.ui.parameter.topdown" name="edu.rice.cs.hpcviewer.ui.commandparameter.merge" value="topdown"/>
+          </children>
+          <children xsi:type="menu:HandledMenuItem" xmi:id="_ri25ULaBEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.mergeFlat" label="Merge flat views" tooltip="Merge two flat trees" mnemonics="f" command="_sRvw0LJpEeqfDrDyyKphUQ">
+            <parameters xmi:id="_23_lkLaBEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.parameter.flat" name="edu.rice.cs.hpcviewer.ui.commandparameter.merge" value="flat"/>
           </children>
         </children>
         <children xsi:type="menu:Menu" xmi:id="_hdjbsLYdEeqhffqM1zV0iA" elementId="edu.rice.cs.hpcviewer.ui.menu.close" label="Close" mnemonics="C">
@@ -141,9 +145,10 @@
   <commands xmi:id="_FHXw4LV7EeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.command.new" commandName="New window"/>
   <commands xmi:id="_U14sMI7vEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.command.open" commandName="Open" description="Open a database"/>
   <commands xmi:id="_cPW0II7vEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.command.reopen" commandName="Add database" description="Open another database"/>
-  <commands xmi:id="_sRvw0LJpEeqfDrDyyKphUQ" elementId="edu.rice.cs.hpcviewer.ui.command.merge" commandName="Merge top-down databases">
+  <commands xmi:id="_sRvw0LJpEeqfDrDyyKphUQ" elementId="edu.rice.cs.hpcviewer.ui.command.merge" commandName="Merge databases">
     <parameters xmi:id="_uw_acLJpEeqfDrDyyKphUQ" elementId="edu.rice.cs.hpcviewer.ui.commandparameter.merge" name="MergeDatabase"/>
   </commands>
+  <commands xmi:id="_KMpikLaBEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.command.mergeFlat" commandName="Merge flat trees"/>
   <commands xmi:id="_m5VqkI7vEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.command.close" commandName="Close" description="Close the current database(s)"/>
   <commands xmi:id="_wGhBQI7uEeqBPbXbG7_Dzw" elementId="org.eclipse.ui.file.exit" commandName="Exit" description="Exit the application"/>
   <commands xmi:id="_p3oI8KqAEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.command.zoom" commandName="Zoom" description="Zoom in/out the selected node">
