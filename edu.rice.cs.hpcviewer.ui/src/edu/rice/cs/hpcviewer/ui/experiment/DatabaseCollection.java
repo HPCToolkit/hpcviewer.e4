@@ -462,44 +462,11 @@ public class DatabaseCollection
 	}
 	
 	
-	/****
-	 * Remove all databases
-	 * @return
+	/***
+	 * Remove a database and all parts (views and editors) associated with it
+	 * 
+	 * @param experiment
 	 */
-	public int removeAll() {
-		List<BaseExperiment> list = getActiveListExperiments();
-		
-		int size = list.size();
-		
-		// TODO: ugly solution to avoid concurrency (java will not allow to remove a list while iterating).
-		// we need to copy the list to an array, and then remove the list
-		
-		BaseExperiment arrayExp[] = new BaseExperiment[size];
-		list.toArray(arrayExp);
-		
-		for(BaseExperiment exp: arrayExp) {
-			// inside this method, we remove the database AND hide the view parts
-			removeDatabase(exp);
-		}
-		
-		list.clear();
-
-		mapColumnStatus.clear();
-		
-		return size;
-	}
-	
-	
-	public void addColumnStatus(BaseExperiment experiment, ViewerDataEvent data) {
-		mapColumnStatus.put(experiment, data);
-	}
-	
-	
-	public ViewerDataEvent getColumnStatus(BaseExperiment experiment) {
-		return mapColumnStatus.get(experiment);
-	}
-	
-	
 	public void removeDatabase(final BaseExperiment experiment) {
 		
 		if (experiment == null)
@@ -539,10 +506,57 @@ public class DatabaseCollection
 				
 				partService.hidePart(part, true);
 				
-				parent.getChildren().remove(part);
+				List<MUIElement> listChildren = parent.getChildren();
+				
+				listChildren.remove(part);
+				
+				if (listChildren.size() == 0 && !parent.getElementId().equals(Constants.ID_STACK_UPPER)) {
+					// last child has been moved. The part stack is empty now
+					parent.setVisible(false);
+				}
 			}
 		}
 	}	
+	
+	
+	/****
+	 * Remove all databases
+	 * @return
+	 */
+	public int removeAll() {
+		List<BaseExperiment> list = getActiveListExperiments();
+		
+		int size = list.size();
+		
+		// TODO: ugly solution to avoid concurrency (java will not allow to remove a list while iterating).
+		// we need to copy the list to an array, and then remove the list
+		
+		BaseExperiment arrayExp[] = new BaseExperiment[size];
+		list.toArray(arrayExp);
+		
+		for(BaseExperiment exp: arrayExp) {
+			// inside this method, we remove the database AND hide the view parts
+			removeDatabase(exp);
+		}
+		
+		list.clear();
+
+		mapColumnStatus.clear();
+		
+		return size;
+	}
+	
+	
+	public void addColumnStatus(BaseExperiment experiment, ViewerDataEvent data) {
+		mapColumnStatus.put(experiment, data);
+	}
+	
+	
+	public ViewerDataEvent getColumnStatus(BaseExperiment experiment) {
+		return mapColumnStatus.get(experiment);
+	}
+	
+
 	
 	
 	/***
