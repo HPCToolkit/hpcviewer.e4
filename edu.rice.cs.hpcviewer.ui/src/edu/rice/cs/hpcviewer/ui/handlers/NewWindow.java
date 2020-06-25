@@ -3,6 +3,7 @@ package edu.rice.cs.hpcviewer.ui.handlers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -46,8 +47,11 @@ public class NewWindow
 		int x = otw.getX();
 		int y = otw.getY();
 		
-		ntw.setX(x+100);
-		ntw.setY(y+100);
+		Random r = new Random();
+		int delta = r.nextInt(100);
+		
+		ntw.setX(x+100 + delta);
+		ntw.setY(y+100 + delta);
 		
 		// show it to the user
 		int numWindows = application.getChildren().size();
