@@ -17,11 +17,6 @@ public class FileCloseDatabase
 	@Inject DatabaseCollection database;
 	
 	@Execute
-	/**
-	public void execute() {
-		System.out.println("huhhh");
-	}
-	*/
 	public void execute(MDirectMenuItem menu) {
 
 		if (database == null || database.isEmpty())

@@ -31,7 +31,6 @@
         <children xsi:type="menu:Menu" xmi:id="_cySXMLJ_EeqbOrxjpZSIwg" elementId="edu.rice.cs.hpcviewer.ui.menu.fileMerge" label="Merge databases" tooltip="Merge two opened databases. " mnemonics="M">
           <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_5ij8ILaGEeqkhNpo_ZhE2A" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseMergeExpression"/>
           <children xsi:type="menu:HandledMenuItem" xmi:id="_vYBpcLJiEeqfDrDyyKphUQ" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.merge" label="Merge top-down views" tooltip="Merge two top-down databases " mnemonics="M" command="_sRvw0LJpEeqfDrDyyKphUQ">
-            <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_rmmw0LJjEeqfDrDyyKphUQ" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseMergeExpression"/>
             <parameters xmi:id="_oMnHcLJpEeqfDrDyyKphUQ" elementId="edu.rice.cs.hpcviewer.ui.parameter.topdown" name="edu.rice.cs.hpcviewer.ui.commandparameter.merge" value="topdown"/>
           </children>
           <children xsi:type="menu:HandledMenuItem" xmi:id="_ri25ULaBEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.mergeFlat" label="Merge flat views" tooltip="Merge two flat trees" mnemonics="f" command="_sRvw0LJpEeqfDrDyyKphUQ">
@@ -39,7 +38,7 @@
           </children>
         </children>
         <children xsi:type="menu:Menu" xmi:id="_hdjbsLYdEeqhffqM1zV0iA" elementId="edu.rice.cs.hpcviewer.ui.menu.close" label="Close" mnemonics="C">
-          <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_wPIZoLYdEeqhffqM1zV0iA" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseExistence"/>
+          <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_wPIZoLYdEeqhffqM1zV0iA" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseCloseExpression"/>
           <children xsi:type="menu:DynamicMenuContribution" xmi:id="_kPFvMLYdEeqhffqM1zV0iA" elementId="edu.rice.cs.hpcviewer.ui.dynamicmenucontribution.0" label="Close" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.Close"/>
         </children>
         <children xsi:type="menu:MenuSeparator" xmi:id="_VTVaAI7rEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.menuseparator.1"/>

@@ -14,6 +14,7 @@ import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.merge.ExperimentMerger;
+import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.util.Constants;
@@ -31,6 +32,9 @@ public class MergeDatabase
 {
 	static final private String PARAM_ID = "edu.rice.cs.hpcviewer.ui.commandparameter.merge";
 	
+	static final private String PARAM_VALUE_TOPDOWN = "topdown";
+	static final private String PARAM_VALUE_FLAT    = "flat";
+	
 	@Inject DatabaseCollection database;
 	
 	@Execute
@@ -40,27 +44,37 @@ public class MergeDatabase
 			IEventBroker broker,
 			EModelService modelService) {
 		
+		// ---------------------------------------------------------------
+		// gather 2 databases to be merged.
+		// we don't want to merge an already merged database. Skip it.
+		// ---------------------------------------------------------------
 		final Experiment []db = new Experiment[2];
-
-		if (database.getNumDatabase()==2) {
-			Iterator<BaseExperiment> iterator = database.getIterator();
-			int i = 0;
-			while(iterator.hasNext()) {
-				db[i] = (Experiment) iterator.next();
-				i++;
+		
+		Iterator<BaseExperiment> iterator = database.getIterator();
+		int numDb = 0;
+		while(iterator.hasNext()) {
+			Experiment exp = (Experiment) iterator.next();
+			if (!exp.isMergedDatabase()) {
+				db[numDb] = exp;
+				numDb++;
 			}
-		} else {
+		}
+
+		if (numDb!=2) {
 			String msg = "hpcviewer currently does not support merging more than two databases";
-			System.out.println(msg);
+			
+			database.statusReport(IStatus.ERROR, msg, null);
 			MessageDialog.openError(shell, "Unsupported action", msg);
 			return;
 		}
 		
 		final RootScopeType mergeType;
-		if (param.equals("topdown")) {
+		if (param.equals(PARAM_VALUE_TOPDOWN)) {
 			mergeType = RootScopeType.CallingContextTree;
-		} else if (param.equals("flat")) {
+			
+		} else if (param.equals(PARAM_VALUE_FLAT)) {
 			mergeType = RootScopeType.Flat;
+			
 		} else {
 			database.statusReport(IStatus.ERROR, "Error: merge param unknown: " + param, null);
 			return;
@@ -86,10 +100,38 @@ public class MergeDatabase
 	
 	
 	@CanExecute
-	public boolean canExecute() {
+	public boolean canExecute( @Optional @Named(PARAM_ID) String param) {
 		
-		// temporarily, we don't supportt merging more than 2 databases
-		return database.getNumDatabase()==2;
+		// temporarily, we don't support merging more than 2 databases
+		
+		Iterator<BaseExperiment> iterator = database.getIterator();
+		
+		int numDb = 0;
+		
+		while(iterator.hasNext()) {
+			Experiment exp = (Experiment) iterator.next();
+			if (exp.isMergedDatabase()) {
+				
+				// if we already merge the topdowns, we should disable topdown merge
+				// similarly, if the merged flat exists, we disable the flat merge
+				
+				Object []roots = exp.getRootScopeChildren();
+				if (roots == null) continue;
+				
+				RootScope root = (RootScope) roots[0];
+				
+				if (root.getType()== RootScopeType.CallingContextTree && param.equals(PARAM_VALUE_TOPDOWN)) {
+					return false;
+				}
+				if (root.getType()== RootScopeType.Flat && param.equals(PARAM_VALUE_FLAT)) {
+					return false;
+				}
+			} else {
+				numDb++;
+			}
+		}
+		
+		return numDb==2;
 	}
 		
 }
