@@ -36,7 +36,7 @@ import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
 import edu.rice.cs.hpc.data.experiment.metric.MetricValue;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
-import edu.rice.cs.hpcviewer.ui.actions.ExportCSV;
+import edu.rice.cs.hpcviewer.ui.actions.ExporTable;
 import edu.rice.cs.hpcviewer.ui.actions.HotCallPath;
 import edu.rice.cs.hpcviewer.ui.actions.MetricColumnHideShowAction;
 import edu.rice.cs.hpcviewer.ui.actions.ZoomAction;
@@ -104,7 +104,7 @@ public abstract class AbstractContentViewer implements IViewBuilder, ISelectionC
 	
 	private ZoomAction  zoomAction    = null;
 	private HotCallPath hotPathAction = null;
-	private ExportCSV   exportCSV     = null;
+	private ExporTable   exportCSV     = null;
 	
 	private MetricColumnHideShowAction metricAction = null;
 	private UserDerivedMetric derivedMetricAction   = null;
@@ -542,7 +542,7 @@ public abstract class AbstractContentViewer implements IViewBuilder, ISelectionC
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (exportCSV == null) {
-					exportCSV = new ExportCSV(treeViewer, lblMessage);
+					exportCSV = new ExporTable(treeViewer, lblMessage);
 				}
 				exportCSV.export();
 			}

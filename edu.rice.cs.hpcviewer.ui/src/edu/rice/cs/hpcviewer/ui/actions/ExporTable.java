@@ -21,18 +21,18 @@ import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
-public class ExportCSV 
+public class ExporTable 
 {
     
     /**
-     * Constant comma separator
+     * Constant comma separator. Should be configurable somewhere instead of a constant
      */
     final private String COMMA_SEPARATOR = ",";
 
 	final private ScopeTreeViewer treeViewer;
 	final private IUserMessage    message;
 	
-	public ExportCSV(ScopeTreeViewer viewer, IUserMessage message) {
+	public ExporTable(ScopeTreeViewer viewer, IUserMessage message) {
 		
 		this.treeViewer = viewer;
 		this.message    = message;
@@ -134,7 +134,7 @@ public class ExportCSV
 	 * @param sSeparator (separator)
 	 * @return String: content of the table
 	 */
-	public String getContent(TreeItem []items, String sSeparator) {
+	private String getContent(TreeItem []items, String sSeparator) {
     	StringBuffer sbText = new StringBuffer();
     	
     	// get all selected items
