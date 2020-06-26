@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="ASCII"?>
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:commands="http://www.eclipse.org/ui/2010/UIModel/application/commands" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmi:id="_3NYY4LgEEeqKXeCFC-fF9Q">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_E1AFILgFEeqKXeCFC-fF9Q" featurename="handlers" parentElementId="xpath:/">
+    <elements xsi:type="commands:Handler" xmi:id="_U973kLgFEeqKXeCFC-fF9Q" elementId="edu.rice.cs.hpc.filter.handler.show" contributionURI="bundleclass://edu.rice.cs.hpc.filter/edu.rice.cs.hpc.filter.action.ShowFilterView" command="_efcDALgFEeqKXeCFC-fF9Q"/>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_bF57YLgFEeqKXeCFC-fF9Q" featurename="commands" parentElementId="xpath:/">
+    <elements xsi:type="commands:Command" xmi:id="_efcDALgFEeqKXeCFC-fF9Q" elementId="edu.rice.cs.hpc.filter.command.show" commandName="Show filter"/>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_ZhxkQLgHEeqKXeCFC-fF9Q" featurename="menuContributions" parentElementId="org.eclipse.e4.application">
+    <elements xsi:type="menu:MenuContribution" xmi:id="_eeUWwLgHEeqKXeCFC-fF9Q" elementId="edu.rice.cs.hpc.filter.menucontribution.filter" parentId="edu.rice.cs.hpcviewer.ui.menu.filter">
+      <children xsi:type="menu:HandledMenuItem" xmi:id="_mpscwLgHEeqKXeCFC-fF9Q" elementId="edu.rice.cs.hpc.filter.menu.show" label="Show filter" tooltip="Show list of filters" mnemonics="h" command="_efcDALgFEeqKXeCFC-fF9Q"/>
+    </elements>
+  </fragments>
+</fragment:ModelFragments>

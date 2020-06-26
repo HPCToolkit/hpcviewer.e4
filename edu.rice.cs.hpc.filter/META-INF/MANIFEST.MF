@@ -5,14 +5,21 @@ Bundle-SymbolicName: edu.rice.cs.hpc.filter;singleton:=true
 Bundle-Version: 5.5.1.qualifier
 Bundle-Activator: edu.rice.cs.hpc.filter.Activator
 Bundle-Vendor: Rice University
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Require-Bundle: org.eclipse.core.runtime,
- edu.rice.cs.hpcbase,
- org.eclipse.jface
-Bundle-ActivationPolicy: lazy
 Export-Package: edu.rice.cs.hpc.filter,
  edu.rice.cs.hpc.filter.service,
  edu.rice.cs.hpc.filter.view
+Require-Bundle: org.eclipse.core.runtime,
+ edu.rice.cs.hpcbase,
+ org.eclipse.jface,
+ javax.inject,
+ org.eclipse.e4.ui.services,
+ org.eclipse.e4.core.services,
+ org.eclipse.e4.core.di,
+ org.eclipse.e4.ui.workbench,
+ org.eclipse.e4.ui.di,
+ org.eclipse.e4.ui.model.workbench;bundle-version="2.1.700.v20200113-1422"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ActivationPolicy: lazy
 Import-Package: edu.rice.cs.hpc.data.experiment,
  edu.rice.cs.hpc.data.experiment.metric,
  edu.rice.cs.hpc.data.experiment.scope,
