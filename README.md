@@ -1,6 +1,6 @@
 # hpcviewer.e4
 
-This is a pilot project of hpcviewer based on Eclipse 4, writing from scratch.
+This is a pilot project of hpcviewer based on Eclipse 4, rewriting mostly from scratch. Some parts are portable without modification (like **hpcdata** plugin), many are heavily modified.
 Once stable, we'll merge to HPCToolkit repository.
 
 The goals:
@@ -20,7 +20,7 @@ The goals:
 
 ### Via Eclipse
 
-* Recommended: Eclipse 2020.03. May not work with older version.
+* Recommended: [Eclipse 2020.03](https://www.eclipse.org/downloads/packages/release/2020-03/r/eclipse-ide-rcp-and-rap-developers). May not work with older version.
 * Open product configuration `hpcviewer.product` at `edu.rice.cs.hpcviewer.product`
 * To run: Click `Launch an Eclipse application`
 * To export: Click `Eclipse product export wizard`
