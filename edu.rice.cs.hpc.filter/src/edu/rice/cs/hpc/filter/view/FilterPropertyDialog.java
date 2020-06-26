@@ -6,7 +6,6 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
@@ -125,13 +124,13 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 		btnAdd.addSelectionListener(new SelectionListener() {
 			
 			@Override
-			public void widgetSelected(SelectionEvent e) {}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
+			public void widgetSelected(SelectionEvent e) {
 				add();
 			}
-		});;
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {}
+		});
 		
 		btnEdit = new Button(grpActions, SWT.NONE);
 		btnEdit.setText("Edit");
@@ -139,12 +138,12 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 		btnEdit.addSelectionListener(new SelectionListener() {
 			
 			@Override
-			public void widgetSelected(SelectionEvent e) {}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
+			public void widgetSelected(SelectionEvent e) {
 				edit();
 			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
 		
 		btnDelete = new Button(grpActions, SWT.NONE);
@@ -153,12 +152,12 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 		btnDelete.addSelectionListener(new SelectionListener() {
 			
 			@Override
-			public void widgetSelected(SelectionEvent e) {}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
+			public void widgetSelected(SelectionEvent e) {
 				delete();
 			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
 		
 		Button []buttons = new Button[] {btnEdit, btnDelete};
@@ -258,6 +257,7 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 	{
 		@Override
 		public void update(ViewerCell cell) {
+			@SuppressWarnings("unchecked")
 			Entry<String, FilterAttribute> item = (Entry<String, FilterAttribute>) cell.getElement();
 			cell.setText(item.getKey());
 		}
@@ -265,6 +265,7 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 		@Override
 		public String getToolTipText(Object element) {
 			if (element != null && element instanceof Entry<?, ?>) {
+				@SuppressWarnings("unchecked")
 				Entry<String, FilterAttribute> item = (Entry<String, FilterAttribute>) element;
 				FilterAttribute attr = item.getValue();
 				String enable = attr.enable ? " enabled " : " disabled ";
@@ -288,6 +289,7 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 		final StructuredSelection select = (StructuredSelection) selection;
 		
 		if (select != null && !select.isEmpty()) {
+			@SuppressWarnings("unchecked")
 			final Entry<String, FilterAttribute> item = (Entry<String, FilterAttribute>) select.getFirstElement();
 			
 			if (item != null) {
@@ -297,6 +299,10 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 	}
 	
 	
+	/***
+	 * Add a new filter item
+	 * @return
+	 */
 	private boolean add() {
 		
 		final Shell shell = checkboxTableViewer.getControl().getShell(); 
@@ -320,10 +326,15 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 	}
 
 	
+	/****
+	 * Edit the selection item in the viewer
+	 * @return
+	 */
 	private boolean edit() {
 		ISelection selection = checkboxTableViewer.getSelection();
 		if (selection != null) {
 			final StructuredSelection select = (StructuredSelection) selection;
+			@SuppressWarnings("unchecked")
 			final Entry<String, FilterAttribute> item= (Entry<String, FilterAttribute>) select.getFirstElement();
 			if (item == null)
 				return false;
@@ -348,6 +359,10 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 	}
 
 	
+	/***
+	 * Delete the selected item in the viewer
+	 * @return
+	 */
 	private boolean delete() {
 		ISelection selection = checkboxTableViewer.getSelection();
 		if (selection != null) {
@@ -355,6 +370,7 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 			int size = select.size();
 			String message = null;
 			if (size == 1) {
+				@SuppressWarnings("unchecked")
 				final Entry<String, FilterAttribute> item= (Entry<String, FilterAttribute>) select.getFirstElement();
 				message = "Are you sure to delete '" + item.getKey() + "' pattern?";
 			} else if (size > 1) {
@@ -378,7 +394,11 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 	}
 	
 
-	
+	/****
+	 * Update the checkbox viewer
+	 * 
+	 * @param filterMap
+	 */
 	private void updateView(final FilterMap filterMap) {
 		setInput(filterMap);
 	}
