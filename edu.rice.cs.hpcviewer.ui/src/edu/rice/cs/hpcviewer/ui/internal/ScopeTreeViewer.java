@@ -14,7 +14,6 @@ import org.eclipse.swt.widgets.TreeColumn;
 
 import java.util.List;
 
-import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.layout.TreeColumnLayout;
 import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ISelection;
@@ -42,12 +41,12 @@ public class ScopeTreeViewer extends TreeViewer
 	 * @param parent
 	 * @param style
 	 */
-	public ScopeTreeViewer(Composite parent, int style, IEventBroker eventBroker) {
+	public ScopeTreeViewer(Composite parent, int style) {
 		super(parent, SWT.VIRTUAL | style);
-		init(eventBroker);
+		init();
 	}
 
-	private void init(IEventBroker eventBroker) 
+	private void init() 
 	{
 		setUseHashlookup(true);
 		getTree().setLinesVisible(true);

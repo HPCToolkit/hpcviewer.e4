@@ -1,8 +1,5 @@
 package edu.rice.cs.hpcviewer.ui.internal;
 
-import org.eclipse.e4.ui.model.application.MApplication;
-import org.eclipse.e4.ui.workbench.modeling.EModelService;
-import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.graphics.GC;
@@ -33,7 +30,6 @@ import edu.rice.cs.hpcviewer.ui.util.Utilities;
  *****************************************************/
 public class ScopeMouseListener implements Listener 
 {
-	final private EPartService  partService;
 	final private GC gc;
 	final private TreeViewer treeViewer;
 	
@@ -46,12 +42,10 @@ public class ScopeMouseListener implements Listener
 	 * @param EModelService to find existing editor
 	 * @param MApplication the application
 	 */
-	public ScopeMouseListener(TreeViewer treeViewer, 
-			EPartService  partService, EModelService modelService,
-			MApplication  app, PartFactory partFactory) {
+	public ScopeMouseListener( TreeViewer treeViewer, 
+							   PartFactory partFactory) {
 		
 		this.treeViewer   = treeViewer;
-		this.partService  = partService;
 		this.partFactory  = partFactory;
 		
 		gc  = new GC(treeViewer.getTree().getDisplay());
@@ -148,9 +142,6 @@ public class ScopeMouseListener implements Listener
 	 * @param scope
 	 */
 	private void displaySourceCode( Scope scope ) {
-		// display the source code if the view is not maximized
-		if (partService == null)
-			return;
 		
 		if (scope == null || !Utilities.isFileReadable(scope))
 			return;

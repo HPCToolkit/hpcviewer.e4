@@ -1,8 +1,6 @@
 package edu.rice.cs.hpcviewer.ui.parts.bottomup;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.e4.ui.model.application.MApplication;
-import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.CoolBar;
@@ -22,13 +20,11 @@ public class BottomUpContentViewer extends AbstractContentViewer
 	private BottomUpContentProvider contentProvider = null;
 
 	public BottomUpContentViewer(EPartService  partService, 
-								 EModelService modelService, 
-								 MApplication  app,
 								 IEventBroker  broker,
 								 DatabaseCollection database,
 								 PartFactory   partFactory) {
 		
-		super(partService, modelService, app, broker, database, partFactory);
+		super(partService, broker, database, partFactory);
 	}
 
 	@Override

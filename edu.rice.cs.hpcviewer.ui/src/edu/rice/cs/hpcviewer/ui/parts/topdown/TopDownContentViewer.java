@@ -2,9 +2,7 @@ package edu.rice.cs.hpcviewer.ui.parts.topdown;
 
 import java.io.IOException;
 import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
-import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -60,13 +58,11 @@ public class TopDownContentViewer extends AbstractContentViewer
 	
 	public TopDownContentViewer(
 			EPartService partService, 
-			EModelService modelService, 
-			MApplication app,
 			IEventBroker broker,
 			DatabaseCollection database,
 			PartFactory   partFactory) {
 		
-		super(partService, modelService, app, broker, database, partFactory);
+		super(partService, broker, database, partFactory);
 		this.partFactory = partFactory;
 	}
 

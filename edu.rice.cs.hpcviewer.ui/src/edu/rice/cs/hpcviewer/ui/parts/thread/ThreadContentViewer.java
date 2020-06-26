@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.e4.ui.model.application.MApplication;
-import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.swt.widgets.TreeColumn;
@@ -39,10 +37,12 @@ public class ThreadContentViewer extends TopDownContentViewer
 	 *  Instead, we need to query to getMetricManager() */
 	private IMetricManager metricManager = null;
 
-	public ThreadContentViewer(EPartService partService, EModelService modelService, MApplication app,
-			IEventBroker eventBroker, DatabaseCollection database, PartFactory partFactory) {
+	public ThreadContentViewer( EPartService partService, 
+								IEventBroker eventBroker, 
+								DatabaseCollection database, 
+								PartFactory partFactory) {
 
-		super(partService, modelService, app, eventBroker, database, partFactory);
+		super(partService, eventBroker, database, partFactory);
 	}
 
 	

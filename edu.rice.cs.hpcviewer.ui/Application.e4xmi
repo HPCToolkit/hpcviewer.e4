@@ -25,7 +25,7 @@
       <children xsi:type="menu:Menu" xmi:id="_9ABnII7qEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.menu.file" label="File" mnemonics="F">
         <children xsi:type="menu:HandledMenuItem" xmi:id="_DKiisLV5EeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.new" label="New window" tooltip="Open a new window" mnemonics="N" command="_FHXw4LV7EeqkhNpo_ZhE2A"/>
         <children xsi:type="menu:HandledMenuItem" xmi:id="__N2JkI7qEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.open" label="Open a database" tooltip="Open a database. If the application has already opened databases, it will replace them with the new one" mnemonics="O" command="_U14sMI7vEeqBPbXbG7_Dzw"/>
-        <children xsi:type="menu:HandledMenuItem" xmi:id="_Hel3wI7rEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.reopen" label="Add a database" tooltip="Open another database to be merged with the existing one" enabled="false" mnemonics="A" command="_cPW0II7vEeqBPbXbG7_Dzw">
+        <children xsi:type="menu:HandledMenuItem" xmi:id="_Hel3wI7rEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.reopen" label="Add a database" tooltip="Open another database side-by-side. " enabled="false" mnemonics="A" command="_cPW0II7vEeqBPbXbG7_Dzw">
           <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_XmHysKuMEeq2aaPo7yBcWg" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseExistence"/>
         </children>
         <children xsi:type="menu:Menu" xmi:id="_cySXMLJ_EeqbOrxjpZSIwg" elementId="edu.rice.cs.hpcviewer.ui.menu.fileMerge" label="Merge databases" tooltip="Merge two opened databases. " mnemonics="M">

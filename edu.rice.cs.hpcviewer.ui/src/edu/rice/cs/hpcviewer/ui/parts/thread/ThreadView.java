@@ -8,10 +8,8 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.services.EMenuService;
-import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Composite;
@@ -33,8 +31,6 @@ import edu.rice.cs.hpcviewer.ui.util.FilterDataItem;
 public class ThreadView  implements IViewPart
 {
 	@Inject EPartService  partService;
-	@Inject EModelService modelService;
-	@Inject MApplication  app;
 	@Inject IEventBroker  broker;
 	
 	@Inject DatabaseCollection databaseAddOn;
@@ -50,7 +46,7 @@ public class ThreadView  implements IViewPart
 	@PostConstruct
 	public void postConstruct(Composite parent, EMenuService menuService) {
 
-		contentViewer = new ThreadContentViewer(partService, modelService, app, broker, databaseAddOn, partFactory);
+		contentViewer = new ThreadContentViewer(partService, broker, databaseAddOn, partFactory);
 		contentViewer.createContent(parent, menuService);
 	}
 
