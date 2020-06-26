@@ -5,9 +5,7 @@ import java.util.Stack;
 
 import javax.annotation.PreDestroy;
 import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.services.EMenuService;
-import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -38,6 +36,7 @@ import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
 import edu.rice.cs.hpc.data.experiment.metric.MetricValue;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
+import edu.rice.cs.hpcviewer.ui.actions.ExporTable;
 import edu.rice.cs.hpcviewer.ui.actions.HotCallPath;
 import edu.rice.cs.hpcviewer.ui.actions.MetricColumnHideShowAction;
 import edu.rice.cs.hpcviewer.ui.actions.ZoomAction;
@@ -73,7 +72,7 @@ public abstract class AbstractContentViewer implements IViewBuilder, ISelectionC
 	final private int ACTION_ZOOM_OUT     = 1;
 	final private int ACTION_HOTPATH      = 2;
 	final private int ACTION_ADD_METRIC   = 3;
-	//final private int ACTION_EXPORT_DATA  = 4;
+	final private int ACTION_EXPORT_DATA  = 4;
 	final private int ACTION_COLUMN_HIDE  = 5; 
 	final private int ACTION_FONT_BIGGER  = 6;
 	final private int ACTION_FONT_SMALLER = 7;
@@ -90,8 +89,6 @@ public abstract class AbstractContentViewer implements IViewBuilder, ISelectionC
 	};
 	
 	final private EPartService  partService;
-	final private EModelService modelService;
-	final private MApplication  app;
 	final private IEventBroker  eventBroker;
 	final private PartFactory   partFactory;
 	
@@ -105,8 +102,10 @@ public abstract class AbstractContentViewer implements IViewBuilder, ISelectionC
 	private Listener mouseDownListener = null;
 	private StyledScopeLabelProvider labelProvider;
 	
-	private ZoomAction zoomAction     = null;
+	private ZoomAction  zoomAction    = null;
 	private HotCallPath hotPathAction = null;
+	private ExporTable   exportCSV     = null;
+	
 	private MetricColumnHideShowAction metricAction = null;
 	private UserDerivedMetric derivedMetricAction   = null;
 	
@@ -125,19 +124,14 @@ public abstract class AbstractContentViewer implements IViewBuilder, ISelectionC
 	 */
 	public AbstractContentViewer(
 			EPartService  partService, 
-			EModelService modelService,
-			MApplication  app,
 			IEventBroker  eventBroker,
 			DatabaseCollection database,
 			PartFactory   partFactory) {
 		
 		this.partService  = partService;
-		this.modelService = modelService;
 		this.eventBroker  = eventBroker;
 		this.database     = database;
 		this.partFactory  = partFactory;
-		
-		this.app = app;
 		
 		stackActions = new Stack<Object>();
 	}
@@ -197,7 +191,7 @@ public abstract class AbstractContentViewer implements IViewBuilder, ISelectionC
 		// table creation
 		// -------------------------------------------
 		
-		treeViewer = new ScopeTreeViewer(parent, SWT.NONE, eventBroker);
+		treeViewer = new ScopeTreeViewer(parent, SWT.NONE);
 		Tree tree = treeViewer.getTree();
 		tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
         tree.setHeaderVisible(true);
@@ -206,7 +200,7 @@ public abstract class AbstractContentViewer implements IViewBuilder, ISelectionC
 		treeViewer.setContentProvider( getContentProvider(treeViewer));
 		createScopeColumn(treeViewer);
 		
-		mouseDownListener = new ScopeMouseListener(treeViewer, partService, modelService, app, partFactory);
+		mouseDownListener = new ScopeMouseListener(treeViewer, partFactory);
 		treeViewer.getTree().addListener(SWT.MouseDown, mouseDownListener);
 		treeViewer.addSelectionChangedListener(this);
 
@@ -218,6 +212,7 @@ public abstract class AbstractContentViewer implements IViewBuilder, ISelectionC
 				"edu.rice.cs.hpcviewer.ui.popupmenu.table");
 	}
 
+	
 	@PreDestroy
 	public void dispose() {
 		treeViewer.removeSelectionChangedListener(this);
@@ -393,6 +388,7 @@ public abstract class AbstractContentViewer implements IViewBuilder, ISelectionC
 		toolItem[ACTION_FONT_BIGGER] .setEnabled(true);
 		toolItem[ACTION_FONT_SMALLER].setEnabled(true);
 		toolItem[ACTION_ADD_METRIC]  .setEnabled(true);
+		toolItem[ACTION_EXPORT_DATA] .setEnabled(true);
 		
 		IMetricManager mgr = (IMetricManager) exp;
 		toolItem[ACTION_COLUMN_HIDE].setEnabled(mgr.getMetricCount() > 0);
@@ -539,6 +535,20 @@ public abstract class AbstractContentViewer implements IViewBuilder, ISelectionC
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {}
 			
+		});
+		
+		toolItem[ACTION_EXPORT_DATA].addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (exportCSV == null) {
+					exportCSV = new ExporTable(treeViewer, lblMessage);
+				}
+				exportCSV.export();
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
 		
 		toolItem[ACTION_FONT_BIGGER].addSelectionListener(new SelectionListener() {
