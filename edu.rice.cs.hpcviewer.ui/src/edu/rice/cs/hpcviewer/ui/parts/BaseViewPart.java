@@ -10,9 +10,11 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
+import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
+import edu.rice.cs.hpc.filter.service.FilterStateProvider;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
 import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
@@ -66,6 +68,9 @@ public abstract class BaseViewPart implements IViewPart, EventHandler, IPartList
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_REMOVE_DATABASE, this);
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN,    this);
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC,  this);
+		
+		// subscribe to filter events
+		eventBroker.subscribe(FilterStateProvider.FILTER_REFRESH_PROVIDER, this);
 	}
 	
 	@PreDestroy
@@ -112,8 +117,17 @@ public abstract class BaseViewPart implements IViewPart, EventHandler, IPartList
 		if (obj == null)
 			return;
 		
-		if (!(obj instanceof ViewerDataEvent)) 
+		if (!(obj instanceof ViewerDataEvent)) {
+
+			if (event.getTopic().equals(FilterStateProvider.FILTER_REFRESH_PROVIDER)) {
+				FilterStateProvider.filterExperiment((Experiment) experiment);
+				
+				// TODO: this process takes time
+				root = createRoot(experiment);
+				contentViewer.setData(root);
+			}
 			return;
+		}
 		
 		ViewerDataEvent eventInfo = (ViewerDataEvent) obj;
 		if (getExperiment() != eventInfo.experiment) 

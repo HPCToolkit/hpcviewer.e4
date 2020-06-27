@@ -145,8 +145,10 @@ implements IFilterData
 		// --------------------------------------------------------------------------------
 		for (Object entry : entries)
 		{
+			@SuppressWarnings("unchecked")
 			Entry<String, FilterAttribute> pattern = (Entry<String, FilterAttribute>) entry;
 			FilterAttribute toFilter = pattern.getValue();
+			
 			if (toFilter.enable)
 			{
 				// convert glob into regular expression

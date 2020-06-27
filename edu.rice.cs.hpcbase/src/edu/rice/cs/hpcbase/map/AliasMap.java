@@ -139,6 +139,7 @@ public abstract class AliasMap<K,V> implements IUserData<K, V>
 	 * @throws IOException
 	 * @throws ClassNotFoundException
 	 */
+	@SuppressWarnings("unchecked")
 	private boolean readData(String filename) {
 		boolean result = false;
 		ObjectInputStream in;

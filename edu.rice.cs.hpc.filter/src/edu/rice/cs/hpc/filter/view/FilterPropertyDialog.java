@@ -38,26 +38,26 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 
 import edu.rice.cs.hpc.data.filter.FilterAttribute;
 import edu.rice.cs.hpc.filter.service.FilterMap;
-import edu.rice.cs.hpc.filter.service.FilterStateProvider;
-
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.jface.window.Window;
 
 /*********************************************************
  * 
- * Window for displaying the filters' property
- *
+ * Window for displaying the filters' property (FilterMap  object) to users,
+ *  and modify them (edit or delete).
+ *  <p> 
+ *  By default, the window searches for filter map in workspace directory or user home directory.
+ * However, caller can provide its own FilterMap object by calling {@code setInput()} method
+ * after the initialization and before calling {@code open()} method.
  *********************************************************/
-public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClickListener
+public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClickListener, ICheckStateListener
 {
 	private Table table;
 	private Button btnEdit, btnDelete;
 	private CheckboxTableViewer checkboxTableViewer;
 	
-	private final FilterMap filterMap;
-	
-	private FilterStateProvider serviceProvider;
+	private FilterMap filterMap;
 	
 	
 	/**
@@ -67,7 +67,6 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 	public FilterPropertyDialog(Shell parentShell) {
 		super(parentShell);
 		filterMap = new FilterMap();
-		serviceProvider = new FilterStateProvider();
 	}
 
 	
@@ -86,7 +85,7 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 		container.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		checkboxTableViewer = CheckboxTableViewer.newCheckList(container, 
-				SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
+															   SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
 		ColumnViewerToolTipSupport.enableFor(checkboxTableViewer, ToolTip.NO_RECREATE);
 		
 		table = checkboxTableViewer.getTable();
@@ -108,10 +107,11 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 		tblclmnType.setWidth(100);
 		tblclmnType.setText("Type");
 		
-		checkboxTableViewer.setContentProvider(new ArrayContentProvider());
+		checkboxTableViewer.setContentProvider	 (new ArrayContentProvider());
 		checkboxTableViewer.setCheckStateProvider(new CheckStateProvider());
-		checkboxTableViewer.setComparator(new PatternViewerComparator());
-		checkboxTableViewer.addCheckStateListener(new CheckStateListener(filterMap));
+		checkboxTableViewer.setComparator		 (new PatternViewerComparator());
+		
+		checkboxTableViewer.addCheckStateListener (this);
 		checkboxTableViewer.addDoubleClickListener(this);
 		
 		Group grpActions = new Group(container, SWT.NONE);
@@ -171,9 +171,26 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 		return area;
 	}
 
-	void setInput(FilterMap map) {
+	
+	/***
+	 * Change the input data of the table
+	 * 
+	 * @param map the new filter map
+	 */
+	public void setInput(FilterMap map) {
+		this.filterMap = map;
 		checkboxTableViewer.setInput(map.getEntrySet());
 	}
+	
+	
+	/***
+	 * Retrieve the input data 
+	 * @return FilterMap the input data
+	 */
+	public FilterMap getInput() {
+		return filterMap;
+	}
+	
 	
 	@Override
 	protected void okPressed() {
@@ -190,10 +207,11 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 		
 		if (!same) {
 			filterMap.save();
-			serviceProvider.broadcast();
 		}
 		super.okPressed();
 	}
+	
+	
 	
 	/**
 	 * Create contents of the button bar.
@@ -201,12 +219,11 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 	 */
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL,
-				true);
-		createButton(parent, IDialogConstants.CANCEL_ID,
-				IDialogConstants.CANCEL_LABEL, false);
+		createButton(parent, IDialogConstants.OK_ID,     IDialogConstants.OK_LABEL,     true);
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 	}
 
+	
 	/**
 	 * Return the initial size of the dialog.
 	 */
@@ -214,14 +231,11 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 	protected Point getInitialSize() {
 		return new Point(450, 300);
 	}
-	
-	
+		
 	
 	/***
 	 * edit the current selected row
 	 * 
-	 * @param shell : the current dialog shell
-	 * @param viewer : the table
 	 * @param filterMap : filter map
 	 * @param pattern : the pattern to be modified
 	 * @param attribute : attribute
@@ -230,7 +244,7 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 					  String 		  pattern, 
 					  FilterAttribute attribute) {
 		
-		Shell shell = checkboxTableViewer.getControl().getShell();
+		Shell shell = getShell();
 		final FilterInputDialog dialog = new FilterInputDialog(shell, "Editing a filter", pattern, attribute);
 		if (dialog.open() == Window.OK)
 		{
@@ -241,44 +255,6 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 			} else {
 				MessageDialog.openWarning(shell, "Unable to update", "Failed to update the pattern.");
 			}
-		}
-	}
-	
-	///////////////////////////////////////////////////////////////////////
-	// Helper classes
-	///////////////////////////////////////////////////////////////////////
-	
-	/**
-	 * 
-	 * Label for pattern column
-	 *
-	 */
-	static private class PatternLabelProvider extends CellLabelProvider
-	{
-		@Override
-		public void update(ViewerCell cell) {
-			@SuppressWarnings("unchecked")
-			Entry<String, FilterAttribute> item = (Entry<String, FilterAttribute>) cell.getElement();
-			cell.setText(item.getKey());
-		}
-		
-		@Override
-		public String getToolTipText(Object element) {
-			if (element != null && element instanceof Entry<?, ?>) {
-				@SuppressWarnings("unchecked")
-				Entry<String, FilterAttribute> item = (Entry<String, FilterAttribute>) element;
-				FilterAttribute attr = item.getValue();
-				String enable = attr.enable ? " enabled " : " disabled ";
-				StringBuffer sb = new StringBuffer();
-				sb.append("Filter '");
-				sb.append(item.getKey());
-				sb.append("' is ");
-				sb.append(enable);
-				return sb.toString();
-				
-			}
-			
-			return element.toString();
 		}
 	}
 	
@@ -305,7 +281,7 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 	 */
 	private boolean add() {
 		
-		final Shell shell = checkboxTableViewer.getControl().getShell(); 
+		final Shell shell = getShell(); 
 		final FilterInputDialog dialog = new FilterInputDialog(shell, "Add a pattern", "", null);
 		
 		if (dialog.open() == IDialogConstants.OK_ID) {
@@ -339,7 +315,7 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 			if (item == null)
 				return false;
 
-			final Shell shell = checkboxTableViewer.getControl().getShell();
+			final Shell shell = getShell();
 			final FilterInputDialog dialog = new FilterInputDialog(shell, "Editing a filter", item.getKey(), item.getValue());
 			
 			if (dialog.open() == Window.OK)
@@ -378,9 +354,10 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 			}
 			if (message != null) {
 				
-				final Shell shell = checkboxTableViewer.getControl().getShell();
+				final Shell shell = getShell();
 				if (MessageDialog.openConfirm(shell, "Deleting a pattern", message)) {
 
+					@SuppressWarnings("unchecked")
 					Iterator<Entry<String, FilterAttribute>> iterator = select.iterator();
 					while(iterator.hasNext()) {
 						Entry<String, FilterAttribute> item = iterator.next();
@@ -393,6 +370,22 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 		return false;
 	}
 	
+	
+	@Override
+	public void checkStateChanged(CheckStateChangedEvent event) {
+		@SuppressWarnings("unchecked")
+		final Entry<String, FilterAttribute> element = (Entry<String, FilterAttribute>) event.getElement();
+		final String key = element.getKey();
+		
+		// get the original attribute to be modified
+		FilterAttribute attribute = element.getValue();
+		attribute.enable = event.getChecked();
+		
+		// change the filter.
+		// now, it's up to caller to save to the registry
+		filterMap.put(key, attribute);
+	}	    	
+
 
 	/****
 	 * Update the checkbox viewer
@@ -401,6 +394,45 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 	 */
 	private void updateView(final FilterMap filterMap) {
 		setInput(filterMap);
+	}
+
+	
+	///////////////////////////////////////////////////////////////////////
+	// Helper classes
+	///////////////////////////////////////////////////////////////////////
+	
+	/**
+	 * 
+	 * Label for pattern column
+	 *
+	 */
+	static private class PatternLabelProvider extends CellLabelProvider
+	{
+		@Override
+		public void update(ViewerCell cell) {
+			@SuppressWarnings("unchecked")
+			Entry<String, FilterAttribute> item = (Entry<String, FilterAttribute>) cell.getElement();
+			cell.setText(item.getKey());
+		}
+		
+		@Override
+		public String getToolTipText(Object element) {
+			if (element != null && element instanceof Entry<?, ?>) {
+				@SuppressWarnings("unchecked")
+				Entry<String, FilterAttribute> item = (Entry<String, FilterAttribute>) element;
+				FilterAttribute attr = item.getValue();
+				String enable = attr.enable ? " enabled " : " disabled ";
+				StringBuffer sb = new StringBuffer();
+				sb.append("Filter '");
+				sb.append(item.getKey());
+				sb.append("' is ");
+				sb.append(enable);
+				return sb.toString();
+				
+			}
+			
+			return element.toString();
+		}
 	}
 
 	
@@ -413,6 +445,7 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 	{
 		@Override
 		public void update(ViewerCell cell) {
+			@SuppressWarnings("unchecked")
 			Entry<String, FilterAttribute> item = (Entry<String, FilterAttribute>) cell.getElement();
 			cell.setText(item.getValue().getFilterType());
 		}
@@ -420,6 +453,7 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 		@Override
 		public String getToolTipText(Object element) {
 			if (element != null && element instanceof Entry<?, ?>) {
+				@SuppressWarnings("unchecked")
 				final Entry<String, FilterAttribute> item = (Entry<String, FilterAttribute>) element;
 				final FilterAttribute attr = item.getValue();
 				final String text = attr.getDescription();
@@ -428,6 +462,7 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 			return element.toString();
 		}
 	}
+	
 	
 	/******************************************************************
 	 * 
@@ -446,6 +481,7 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 		public boolean isChecked(Object element) {
 			if (element instanceof Entry<?,?>) 
 			{
+				@SuppressWarnings("unchecked")
 				FilterAttribute value = ((Entry<String, FilterAttribute>)element).getValue();
 				return value.enable.booleanValue();
 			}
@@ -453,31 +489,7 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 		}
 	}
 	
-	/*******************************************************************
-	 * 
-	 * class for event when a check box state is updated
-	 *
-	 ********************************************************************/
-	static private class CheckStateListener implements ICheckStateListener
-	{
-		final private FilterMap filterMap;
-		public CheckStateListener(FilterMap filterMap) {
-			this.filterMap = filterMap;
-		}
-		@Override
-		public void checkStateChanged(CheckStateChangedEvent event) {
-			final Entry<String, FilterAttribute> element = (Entry<String, FilterAttribute>) event.getElement();
-			final String key = element.getKey();
-			
-			// get the original attribute to be modified
-			FilterAttribute attribute = element.getValue();
-			attribute.enable = event.getChecked();
-			
-			// change the filter.
-			// now, it's up to caller to save to the registry
-			filterMap.put(key, attribute);
-		}	    	
-	}
+
 	
 	/*******************************************************************
 	 * 
@@ -486,10 +498,11 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 	 ********************************************************************/
 	static private class PatternViewerComparator extends ViewerComparator
 	{
-    	@Override
+    	@SuppressWarnings("unchecked")
+		@Override
     	public int compare(Viewer viewer, Object e1, Object e2) 
     	{
-    		Entry<String, FilterAttribute> item1 = (Entry<String, FilterAttribute>) e1;
+			Entry<String, FilterAttribute> item1 = (Entry<String, FilterAttribute>) e1;
     		Entry<String, FilterAttribute> item2 = (Entry<String, FilterAttribute>) e2;
     		return (item1.getKey().compareTo(item2.getKey()));
     	}
@@ -528,7 +541,15 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 	static public void main(String []argv) {
 		
 		final Shell shell = new Shell();
+		
 		FilterPropertyDialog dlg = new FilterPropertyDialog(shell);
 		dlg.open();
+		FilterMap map = dlg.getInput();
+		
+		Iterator<Entry<String, FilterAttribute>> iterator = map.iterator();
+		while(iterator.hasNext()) {
+			Entry<String, FilterAttribute> entry = iterator.next();
+			System.out.println(entry.getKey() + " : " + entry.getValue());
+		}
 	}
 }

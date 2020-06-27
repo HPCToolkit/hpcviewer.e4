@@ -8,10 +8,10 @@ Bundle-Vendor: Rice University
 Export-Package: edu.rice.cs.hpc.filter,
  edu.rice.cs.hpc.filter.service,
  edu.rice.cs.hpc.filter.view
-Require-Bundle: org.eclipse.core.runtime,
- edu.rice.cs.hpcbase,
- org.eclipse.jface,
+Require-Bundle: edu.rice.cs.hpcbase,
  javax.inject,
+ org.eclipse.core.runtime,
+ org.eclipse.jface,
  org.eclipse.e4.ui.services,
  org.eclipse.e4.core.services,
  org.eclipse.e4.core.di,

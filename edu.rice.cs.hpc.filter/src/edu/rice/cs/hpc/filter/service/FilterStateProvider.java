@@ -1,5 +1,17 @@
 package edu.rice.cs.hpc.filter.service;
 
+import java.util.ArrayList;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.eclipse.e4.core.di.annotations.Creatable;
+import org.eclipse.e4.core.services.events.IEventBroker;
+
+import edu.rice.cs.hpc.data.experiment.Experiment;
+import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
+import edu.rice.cs.hpc.data.experiment.metric.DerivedMetric;
+import edu.rice.cs.hpc.data.experiment.metric.MetricType;
 
 /**************************************************************
  * 
@@ -7,25 +19,79 @@ package edu.rice.cs.hpc.filter.service;
  * or there's a filter selection in the view
  *
  **************************************************************/
+
+@Creatable
+@Singleton
 public class FilterStateProvider 
 {
-	final static public String FILTER_REFRESH_PROVIDER = "edu.rice.cs.hpc.filter.update";
-	final static public String FILTER_ENABLE_PROVIDER = "edu.rice.cs.hpc.filter.enable";
+	final static public String FILTER_REFRESH_PROVIDER = "hpcfilter/update";
+	final static public String FILTER_ENABLE_PROVIDER  = "hpcfilter/enable";
 	
-	final static public String TOGGLE_COMMAND = "org.eclipse.ui.commands.toggleState";
-	final static public String SELECTED_STATE = "SELECTED";
+	@Inject IEventBroker eventBroker;
 	
 	public FilterStateProvider() {
-		// TODO Auto-generated constructor stub
 	}
 
+	
+	public String getTopic() {
+		return FILTER_REFRESH_PROVIDER;
+	}
 	
 	
 	/*****
 	 * refresh the table as the filter pattern may change
 	 * Usually called by FilterAdd and FilterDelete 
 	 */
-	public void broadcast()
+	public void broadcast(FilterMap filterMap)
 	{
+		if (eventBroker != null)
+			eventBroker.post(FILTER_REFRESH_PROVIDER, filterMap);
+	}
+	
+	
+	/***
+	 * filter an experiment database
+	 * 
+	 * @param experiment
+	 * @return Experiment itself (if changed)
+	 */
+	static public Experiment filterExperiment(Experiment experiment) {
+		// filter the experiment if it is not null and it is in original form
+		// (it isn't a merged database)
+		if (experiment != null && !experiment.isMergedDatabase()) 
+		{
+			try {
+				// ---------------------------------------
+				// conserve the added metrics
+				// ---------------------------------------
+				ArrayList<DerivedMetric> metrics = new ArrayList<DerivedMetric>(1);
+				for (BaseMetric metric : experiment.getMetrics()) {
+					if (metric instanceof DerivedMetric && 
+						metric.getMetricType()==MetricType.UNKNOWN) {
+						
+						// only add user derived metrics, not all derived metrics
+						//  provided by hpcprof
+						
+						metrics.add((DerivedMetric) metric);
+					}
+				}
+				// ---------------------------------------
+				// filtering 
+				// ---------------------------------------
+				experiment.reopen();
+				experiment.filter(FilterMap.getInstance());
+				
+				// ---------------------------------------
+				// put the derived metrics back
+				// ---------------------------------------
+				for (DerivedMetric metric: metrics) {
+					experiment.addDerivedMetric(metric);
+				}
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return experiment;
 	}
 }

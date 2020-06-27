@@ -308,6 +308,12 @@ public abstract class AbstractContentViewer implements IViewBuilder, ISelectionC
         }
         colTree.setLabelProvider( labelProvider ); 
 
+        // set sorting facility for this column
+        // it is not common for users to sort based on scope, but it may happen :-(
+        
+        ScopeSelectionAdapter selectionAdapter = new ScopeSelectionAdapter(treeViewer, colTree);
+		colTree.getColumn().addSelectionListener(selectionAdapter);
+		
 		return colTree;
     }
 
