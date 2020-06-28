@@ -26,6 +26,7 @@ import edu.rice.cs.hpc.data.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
+import edu.rice.cs.hpc.data.util.ScopeComparator;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
 
@@ -221,7 +222,7 @@ public class ScopeTreeViewer extends TreeViewer
 		col.addSelectionListener(selectionAdapter);
 		
 		if(bSorted) {
-			selectionAdapter.setSorter(ScopeSelectionAdapter.SORT_DESCENDING);
+			selectionAdapter.setSorter(ScopeComparator.SORT_DESCENDING);
 		}
 		Layout layout = getTree().getParent().getLayout();
 		if (layout instanceof TreeColumnLayout) {

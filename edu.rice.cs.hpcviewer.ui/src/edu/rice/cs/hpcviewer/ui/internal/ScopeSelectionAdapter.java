@@ -10,6 +10,7 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
 
+import edu.rice.cs.hpc.data.util.ScopeComparator;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
 
@@ -22,10 +23,8 @@ public class ScopeSelectionAdapter extends SelectionAdapter
 {
 	final private TreeViewer viewer;
 	final private TreeViewerColumn column;
-	
-	final static public int SORT_DESCENDING = 1;  // from high value to lower value
-	final static public int SORT_ASCENDING  = -1; // from low value to higher value
 
+	
     public ScopeSelectionAdapter(TreeViewer viewer, TreeViewerColumn column) {
 		this.viewer 	= viewer;
 		this.column     = column;
@@ -51,7 +50,7 @@ public class ScopeSelectionAdapter extends SelectionAdapter
 		// ----------------
 		// sorting 
 		// ----------------
-		int sort_direction  = SORT_DESCENDING;
+		int sort_direction  = ScopeComparator.SORT_DESCENDING;
 		TreeColumn oldColumnSort = column.getColumn().getParent().getSortColumn();
 
 		if (oldColumnSort == column.getColumn()) {
@@ -59,7 +58,7 @@ public class ScopeSelectionAdapter extends SelectionAdapter
 			int swt_direction = column.getColumn().getParent().getSortDirection();
 
 			if (swt_direction == SWT.DOWN)
-				sort_direction = SORT_ASCENDING;
+				sort_direction = ScopeComparator.SORT_ASCENDING;
 		}
 		setSorter(sort_direction);
 		
@@ -91,9 +90,9 @@ public class ScopeSelectionAdapter extends SelectionAdapter
 		
 		int swt_direction = SWT.NONE;
 		
-		if( direction == SORT_DESCENDING ) {
+		if( direction == ScopeComparator.SORT_DESCENDING ) {
 			swt_direction = SWT.DOWN;
-		} else if( direction == SORT_ASCENDING ) {
+		} else if( direction == ScopeComparator.SORT_ASCENDING ) {
 			swt_direction = SWT.UP;
 		} else {
 			// incorrect value. Let's try to be permissive instead of throwing exception

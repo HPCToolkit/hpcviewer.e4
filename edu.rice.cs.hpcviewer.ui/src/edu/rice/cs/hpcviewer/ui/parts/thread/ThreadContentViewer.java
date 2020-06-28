@@ -20,6 +20,7 @@ import edu.rice.cs.hpc.data.experiment.metric.MetricRaw;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
+import edu.rice.cs.hpc.data.util.ScopeComparator;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractContentProvider;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeSelectionAdapter;
@@ -126,7 +127,7 @@ public class ThreadContentViewer extends TopDownContentViewer
 			ScopeSelectionAdapter selectionAdapter = new ScopeSelectionAdapter(treeViewer, colTree);
 			colTree.getColumn().addSelectionListener(selectionAdapter);
 			
-			contentProvider.sort_column(colTree, ScopeSelectionAdapter.SORT_ASCENDING);
+			contentProvider.sort_column(colTree, ScopeComparator.SORT_ASCENDING);
 		}
 
 		List<Integer> threads = input.getThreads();
