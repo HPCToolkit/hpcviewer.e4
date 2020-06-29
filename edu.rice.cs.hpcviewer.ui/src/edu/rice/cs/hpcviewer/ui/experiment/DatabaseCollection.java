@@ -20,7 +20,7 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Creatable;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.e4.core.services.statusreporter.StatusReporter;
+
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.MElementContainer;
@@ -37,6 +37,9 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
@@ -77,7 +80,7 @@ public class DatabaseCollection
     private MApplication      application;
     private EModelService     modelService;
 	
-	private StatusReporter    statusReporter;
+	private Logger    statusReporter;
 	
 	public DatabaseCollection() {
 
@@ -102,15 +105,15 @@ public class DatabaseCollection
 			final MApplication   application,
 			final EPartService   partService,
 			final IEventBroker   broker,
-			final EModelService  modelService,
-			final StatusReporter statusReporter) {
+			final EModelService  modelService) {
 		
 		this.partService    = partService;
 		this.eventBroker    = broker;
-		this.statusReporter = statusReporter;
 		this.application    = application;
 		this.modelService   = modelService;
-		
+
+		this.statusReporter = LoggerFactory.getLogger(getClass());
+
 		// handling the command line arguments:
 		// if one of the arguments specify a file or a directory,
 		// try to find the experiment.xml and load it.
@@ -565,9 +568,24 @@ public class DatabaseCollection
 	 * @param e any exception
 	 */
 	public void statusReport(int status, String message, Exception e) {
-
-		IStatus objStatus = statusReporter.newStatus(status, message, e);
-		statusReporter.report(objStatus, StatusReporter.LOG);
+		switch(status) {
+		case IStatus.INFO:
+			if (e == null)
+				statusReporter.info(message);
+			
+			else 
+				statusReporter.debug(message, e);
+			
+			break;
+			
+		case IStatus.ERROR:
+			if (e == null)
+				statusReporter.debug(message);
+			else
+				statusReporter.error(message, e);
+			break;
+			
+		}
 	}
 	
 	

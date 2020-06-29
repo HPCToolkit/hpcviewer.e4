@@ -7,10 +7,12 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.services.EMenuService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -74,9 +76,11 @@ public class ThreadView  implements IViewPart
 				
 				viewInput.setThread(threads);
 				
-			} catch (NumberFormatException | IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} catch (Exception e) {
+				final String label = "Error while opening thread-level data";
+				MessageDialog.openError(contentViewer.getTreeViewer().getTree().getShell(), label, e.getClass().getName());
+				
+				databaseAddOn.statusReport(IStatus.ERROR, label, e);
 				return;
 			}
 		}
