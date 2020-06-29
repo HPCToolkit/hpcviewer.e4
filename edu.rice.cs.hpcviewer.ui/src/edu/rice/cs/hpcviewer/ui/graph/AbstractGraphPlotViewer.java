@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import javax.inject.Inject;
 
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
@@ -17,12 +18,14 @@ import org.swtchart.Range;
 
 import edu.rice.cs.hpc.data.experiment.metric.MetricRaw;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
+import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 
 public abstract class AbstractGraphPlotViewer extends AbstractGraphViewer 
 {
 	static private final int DEFAULT_DIAMETER = 3;
 
 	@Inject EPartService partService;
+	@Inject DatabaseCollection database;
 	
 	public AbstractGraphPlotViewer() {
 		super();
@@ -46,18 +49,15 @@ public abstract class AbstractGraphPlotViewer extends AbstractGraphViewer
 			y_values = getValuesY(scope, metric);
 			
 			x_values = getValuesX(scope, metric);
-
-		} catch (IOException e) {
-			Display display = Display.getDefault();
-			
-			MessageDialog.openError(display.getActiveShell(), "Fail to open the file", 
-					"Error while openging the file: " + e.getMessage());
-			return PLOT_ERR_IO;
 			
 		} catch (Exception e) {
+			String label = "Error while opening thread level data metric file";
+			database.statusReport(IStatus.ERROR, label, e);
+			
 			Display display = Display.getDefault();
-			MessageDialog.openError(display.getActiveShell(), "Fail to display the graph", 
-					 "Error while opening thread level data metric file.\n"+ e.getMessage());
+			MessageDialog.openError(display.getActiveShell(), label, 
+					 "Error while opening thread level data metric file.\n"+ 
+					 e.getClass().getName() + ": " + e.getMessage());
 			
 			return PLOT_ERR_UNKNOWN;
 		}
