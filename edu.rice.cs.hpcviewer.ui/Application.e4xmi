@@ -42,6 +42,7 @@
           <children xsi:type="menu:DynamicMenuContribution" xmi:id="_kPFvMLYdEeqhffqM1zV0iA" elementId="edu.rice.cs.hpcviewer.ui.dynamicmenucontribution.0" label="Close" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.Close"/>
         </children>
         <children xsi:type="menu:MenuSeparator" xmi:id="_VTVaAI7rEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.menuseparator.1"/>
+        <children xsi:type="menu:HandledMenuItem" xmi:id="_Mbk6ILpkEeqjBNbAJCPSRg" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.preferences" label="Preferences" tooltip="Show the preferences of the application" mnemonics="P" command="_svnesLpjEeqjBNbAJCPSRg"/>
         <children xsi:type="menu:HandledMenuItem" xmi:id="_LbRy8I7vEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.exit" label="Exit" tooltip="Exit the application" mnemonics="x" command="_wGhBQI7uEeqBPbXbG7_Dzw"/>
       </children>
       <children xsi:type="menu:Menu" xmi:id="_E9WX8KwUEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.menu.view" label="View" mnemonics="V">
@@ -72,6 +73,7 @@
   <handlers xmi:id="_zeIc8KvwEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.handler.viewXML" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.ViewXML" command="_rAwA8KvwEeq2aaPo7yBcWg"/>
   <handlers xmi:id="_fC4SMKwbEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.handler.about" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.About" command="_lIBrgKwbEeq2aaPo7yBcWg"/>
   <handlers xmi:id="_NJztAK3KEeqAHZLWafP1YQ" elementId="edu.rice.cs.hpcviewer.ui.handler.reset" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.ResetLayout" command="_QRDKwK3KEeqAHZLWafP1YQ"/>
+  <handlers xmi:id="_AChSwLpkEeqjBNbAJCPSRg" elementId="edu.rice.cs.hpcviewer.ui.handler.preference" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.ShowPreferences" command="_svnesLpjEeqjBNbAJCPSRg"/>
   <bindingTables xmi:id="_7fwrAKqFEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.bindingtable.file" bindingContext="_c3AF2cjYEeSyMNYR5xypkQ">
     <bindings xmi:id="_-3xvsKqFEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.keybinding.open" keySequence="M1+O" command="_U14sMI7vEeqBPbXbG7_Dzw"/>
     <bindings xmi:id="_k4-EoKuTEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.keybinding.add" keySequence="M1+A" command="_cPW0II7vEeqBPbXbG7_Dzw"/>
@@ -142,6 +144,7 @@
       <children xsi:type="menu:ToolControl" xmi:id="_6ih9ULVzEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.toolcontrol.bottom" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.trimbar.ToolControl"/>
     </trimBars>
   </snippets>
+  <commands xmi:id="_lIBrgKwbEeq2aaPo7yBcWg" elementId="org.eclipse.ui.help.aboutAction" commandName="About" description="About the application"/>
   <commands xmi:id="_FHXw4LV7EeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.command.new" commandName="New window"/>
   <commands xmi:id="_U14sMI7vEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.command.open" commandName="Open" description="Open a database"/>
   <commands xmi:id="_cPW0II7vEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.command.reopen" commandName="Add database" description="Open another database"/>
@@ -155,9 +158,9 @@
     <parameters xmi:id="_8d7q0KqCEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.commandparameter.zoom" name="zoom_type" optional="false"/>
   </commands>
   <commands xmi:id="_rAwA8KvwEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.command.viewXML" commandName="View XML" description="Display the XML file of the current database"/>
-  <commands xmi:id="_lIBrgKwbEeq2aaPo7yBcWg" elementId="org.eclipse.ui.help.aboutAction" commandName="About" description="About the application"/>
   <commands xmi:id="_QRDKwK3KEeqAHZLWafP1YQ" elementId="edu.rice.cs.hpcviewer.ui.command.resetLayout" commandName="Reset layout"/>
-  <commands xmi:id="_hDG4MLYZEeqhffqM1zV0iA" elementId="edu.rice.cs.hpcviewer.ui.command.close" commandName="Close"/>
+  <commands xmi:id="_hDG4MLYZEeqhffqM1zV0iA" elementId="edu.rice.cs.hpcviewer.ui.command.close" commandName="Close database"/>
+  <commands xmi:id="_svnesLpjEeqjBNbAJCPSRg" elementId="org.eclipse.ui.window.preferences" commandName="Preferences" description="Show the preferences"/>
   <addons xmi:id="_c3AF0sjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.core.commands.service" contributionURI="bundleclass://org.eclipse.e4.core.commands/org.eclipse.e4.core.commands.CommandServiceAddon"/>
   <addons xmi:id="_c3AF08jYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.contexts.service" contributionURI="bundleclass://org.eclipse.e4.ui.services/org.eclipse.e4.ui.services.ContextServiceAddon"/>
   <addons xmi:id="_c3AF1MjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.bindings.service" contributionURI="bundleclass://org.eclipse.e4.ui.bindings/org.eclipse.e4.ui.bindings.BindingServiceAddon"/>
