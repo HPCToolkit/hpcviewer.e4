@@ -24,6 +24,7 @@ import edu.rice.cs.hpc.data.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpc.data.util.OSValidator;
+import edu.rice.cs.hpcviewer.ui.preferences.PreferenceConstants;
 import edu.rice.cs.hpcviewer.ui.resources.ColorManager;
 import edu.rice.cs.hpcviewer.ui.resources.FontManager;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
@@ -148,12 +149,12 @@ public class Utilities
 		Listener measurementListener = new Listener() {
 			public void handleEvent(Event event) {
 
-				FontData fData[] = FontManager.getFontDataPreference(FontManager.FontID.FONT_METRIC);
-				
 				// get font height (from preferences) for each font
+
+				FontData fData[] = FontManager.getFontDataPreference(PreferenceConstants.ID_FONT_METRIC);
 				int objFontMetricHeight  = fData[0].getHeight();
 				
-				fData = FontManager.getFontDataPreference(FontManager.FontID.FONT_GENERIC);
+				fData = FontManager.getFontDataPreference(PreferenceConstants.ID_FONT_GENERIC);
 				int objFontGenericHeight = fData[0].getHeight();
 				
 				event.height = Math.min(objFontMetricHeight, objFontGenericHeight) + MARGIN_FONT;

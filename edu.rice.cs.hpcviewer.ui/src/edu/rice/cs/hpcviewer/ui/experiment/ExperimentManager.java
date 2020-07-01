@@ -16,7 +16,7 @@ import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.data.util.Util.FileXMLFilter;
 import edu.rice.cs.hpcbase.map.ProcedureAliasMap;
-import edu.rice.cs.hpcviewer.ui.preferences.PreferenceManager;
+import edu.rice.cs.hpcviewer.ui.preferences.ViewerPreferenceManager;
 
 
 /**
@@ -51,7 +51,7 @@ public class ExperimentManager
 		Shell objShell = shell;
 		DirectoryDialog dirDlg = new DirectoryDialog(objShell);
 		dirDlg.setText("hpcviewer");
-		dirDlg.setFilterPath(PreferenceManager.getLastPath());		// recover the last opened path
+		dirDlg.setFilterPath(ViewerPreferenceManager.getLastPath());		// recover the last opened path
 		dirDlg.setMessage(sTitle);
 		String sDir = dirDlg.open();	// ask the user to select a directory
 		if(sDir != null){
@@ -143,7 +143,7 @@ public class ExperimentManager
 		File filesXML[] = files.listFiles(new FileXMLFilter());
 
 		// store the current path in the preference
-		PreferenceManager.setLastPath(sPath);
+		ViewerPreferenceManager.setLastPath(sPath);
 		
 		return filesXML;
 	}

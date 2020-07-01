@@ -167,11 +167,7 @@ public abstract class AbstractPage extends PreferencePage
         return spinner;
     }
 	
-    protected FontFieldEditor createFontControl(Composite parent, String id, String label) {
-    	FontFieldEditor editor = new FontFieldEditor(id, label, null, parent);
-    	
-    	return editor;
-    }
+
 
     /**
      * Apply the values specified on controls.
