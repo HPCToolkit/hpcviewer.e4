@@ -1,24 +1,20 @@
 package edu.rice.cs.hpcviewer.ui.preferences;
 
-import org.eclipse.jface.preference.FontFieldEditor;
+import java.io.IOException;
+
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.preference.PreferenceStore;
-import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.resource.StringConverter;
-import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MainProfilePage extends AbstractPage 
 {	
-	private ViewerFontFieldEditor fontGenericEditor;
-	private ViewerFontFieldEditor fontMetricEditor;
-	private ViewerFontFieldEditor fontSourceEditor;
-	
+	Button debugMode;
 	
 	public MainProfilePage(PropertiesResources resources, String title) {
 		super(resources, title);
@@ -33,32 +29,28 @@ public class MainProfilePage extends AbstractPage
 	
 	@Override
 	public void apply() {
-		fontMetricEditor .store();
-		fontGenericEditor.store();
-		fontSourceEditor .store();
+		PreferenceStore prefDebug = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
+		boolean debug = debugMode.getSelection();
+		
+		prefDebug.setValue(PreferenceConstants.ID_MODE_DEBUG, debug);
+		
+		try {
+			prefDebug.save();
+		} catch (IOException e) {
+			Logger logger = LoggerFactory.getLogger(getClass());
+			logger.error("Unable to save preferences", e);
+		}
 	}
 
 	@Override
 	protected Control createContents(Composite parent) {
 
-		Group groupFont = createGroupControl(parent, "Fonts", false);
+		Group groupFont = createGroupControl(parent, "General settings", false);
 		groupFont.setLayout(new GridLayout(1, false));
         
-        fontGenericEditor = createFontEditor(groupFont, PreferenceConstants.ID_FONT_GENERIC, "Tree column font");        
-        fontMetricEditor  = createFontEditor(groupFont, PreferenceConstants.ID_FONT_METRIC,  "Metric column font");
-        fontSourceEditor  = createFontEditor(groupFont, PreferenceConstants.ID_FONT_TEXT,    "Text editor font");
+		debugMode = createCheckBoxControl(groupFont, "Debug mode");
         
 		return parent;
-	}
-
-	
-	private ViewerFontFieldEditor createFontEditor(Composite parent, String id, String label) {
-        
-		ViewerFontFieldEditor editor = new ViewerFontFieldEditor(id, label, parent);
-		editor.setPreferenceStore(getPreferenceStore());
-		editor.load();
-        
-        return editor;
 	}
 	
 	
@@ -70,40 +62,7 @@ public class MainProfilePage extends AbstractPage
 	
 	@Override
 	protected void performDefaults() {
-		System.out.println("restore default");
-		Font fontGeneric = JFaceResources.getDefaultFont();
-
-		PreferenceStore store = (PreferenceStore) getPreferenceStore();
-		PreferenceConverter.setValue(store, PreferenceConstants.ID_FONT_GENERIC, fontGeneric.getFontData());
-
-		fontGenericEditor.setFontLabel(fontGeneric);
-		
-		Font fontFixed = JFaceResources.getTextFont();
-
-		PreferenceConverter.setValue(store, PreferenceConstants.ID_FONT_METRIC, fontGeneric.getFontData());
-
-		fontMetricEditor.setFontLabel(fontFixed);
-		fontSourceEditor.setFontLabel(fontFixed);
 	}
 	
-	static class ViewerFontFieldEditor extends FontFieldEditor
-	{
-		private final Composite groupFont;
-		
-		public ViewerFontFieldEditor(String id, String label, Composite parent) {
-			super(id, label, parent);
-			
-			this.groupFont = parent;
-		}
-
-		
-		public void setFontLabel(Font font) {
-			Label label = getValueControl(groupFont);
-			if (label == null)
-				return;
-			
-			String fontLabel = StringConverter.asString(font.getFontData());
-			label.setText(fontLabel);
-		}
-	}
+	
 }

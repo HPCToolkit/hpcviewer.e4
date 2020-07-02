@@ -1,5 +1,7 @@
 package edu.rice.cs.hpcviewer.ui.resources;
 
+import java.io.IOException;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.preference.PreferenceStore;
@@ -86,11 +88,11 @@ public class FontManager
 	}
     
 	
-	static public void setFontPreference(String fontPreferenceID, FontData[] fontData) {
+	static public void setFontPreference(String fontPreferenceID, FontData[] fontData) throws IOException {
 
-		IPreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
+		PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
 		
 		PreferenceConverter.setValue(pref, fontPreferenceID, fontData);
-
+		pref.save();
 	}
 }
