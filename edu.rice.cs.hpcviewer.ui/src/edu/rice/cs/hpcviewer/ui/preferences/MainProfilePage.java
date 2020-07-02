@@ -13,8 +13,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 
-import edu.rice.cs.hpcviewer.ui.resources.FontManager;
-
 public class MainProfilePage extends AbstractPage 
 {	
 	private ViewerFontFieldEditor fontGenericEditor;

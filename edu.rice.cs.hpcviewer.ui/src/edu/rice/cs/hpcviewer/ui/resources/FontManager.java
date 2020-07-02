@@ -1,65 +1,52 @@
 package edu.rice.cs.hpcviewer.ui.resources;
 
-import javax.inject.Singleton;
-
-import org.eclipse.e4.core.di.annotations.Creatable;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
-import org.eclipse.jface.resource.FontRegistry;
+import org.eclipse.jface.preference.PreferenceStore;
+import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.resource.LocalResourceManager;
+import org.eclipse.jface.resource.ResourceManager;
+import org.eclipse.jface.resource.StringConverter;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 
 import edu.rice.cs.hpcviewer.ui.preferences.PreferenceConstants;
 import edu.rice.cs.hpcviewer.ui.preferences.ViewerPreferenceManager;
 
-@Creatable
-@Singleton
+
+/*************************************************************
+ * 
+ * Class to manage fonts and its default fonts.
+ * It allocates and de-allocate automatically fonts.
+ * Need to access this class to get the prefered fonts.
+ *
+ *************************************************************/
 public class FontManager 
 {
+	public final static FontManager INSTANCE = new FontManager();
 	
-	/****
-	 * Initialize the font.
-	 * The application has to call this method early at the start-up 
-	 */
+	private final ResourceManager resource;
+	
 	public FontManager() {
-		
-		Font fontDefault = JFaceResources.getDefaultFont();
-		initFont(PreferenceConstants.ID_FONT_GENERIC, fontDefault, 0);
-		
-		// special case for text fonts:
-		// On some platforms, the default text size is a bit bigger.
-		// we need to make it smaller to fit the table row :-(
-		
-		fontDefault = JFaceResources.getTextFont();
-		initFont(PreferenceConstants.ID_FONT_METRIC, fontDefault, 0);
-		
-		initFont(PreferenceConstants.ID_FONT_TEXT, fontDefault, 0);
+		resource = new LocalResourceManager(JFaceResources.getResources());
 	}
 
-	private void initFont(String name, Font defaultFont, int deltaHeight) {
-
-		FontData []fd = getFontDataPreference(name);
-		if (fd == null || fd.length == 0) {
-			fd = defaultFont.getFontData();
-			setFontPreference(name, fd);
-		}
-		if (deltaHeight != 0) {
-			int height = fd[0].getHeight() + deltaHeight;
-			fd[0].setHeight(height);
-		}
+	public Font getPreferenceFont(String id) {
+		ViewerPreferenceManager prefManager = ViewerPreferenceManager.INSTANCE;
+		PreferenceStore preferenceStore = prefManager.getPreferenceStore();
 		
-		FontRegistry registry = JFaceResources.getFontRegistry();
-		registry.put(name, fd);
+		FontData []data = PreferenceConverter.getFontDataArray(preferenceStore, id);
+		return resource.createFont(FontDescriptor.createFrom(data));
 	}
+
 	
 	/***
 	 * get the font for generic text
 	 * @return
 	 */
 	static public Font getFontGeneric() {
-		FontRegistry registry = JFaceResources.getFontRegistry();
-		return registry.get(PreferenceConstants.ID_FONT_GENERIC);
+		return INSTANCE.getPreferenceFont(PreferenceConstants.ID_FONT_GENERIC);
 	}
 	
 	
@@ -68,8 +55,7 @@ public class FontManager
 	 * @return
 	 */
 	static public Font getMetricFont() {
-		FontRegistry registry = JFaceResources.getFontRegistry();
-		return registry.get(PreferenceConstants.ID_FONT_METRIC);
+		return INSTANCE.getPreferenceFont(PreferenceConstants.ID_FONT_METRIC);
 	}	
 	
 	
@@ -78,8 +64,7 @@ public class FontManager
 	 * @return
 	 */
 	static public Font getTextEditorFont() {
-		FontRegistry registry = JFaceResources.getFontRegistry();
-		return registry.get(PreferenceConstants.ID_FONT_TEXT);
+		return INSTANCE.getPreferenceFont(PreferenceConstants.ID_FONT_TEXT);
 	}	
 	
 
@@ -96,7 +81,7 @@ public class FontManager
 		IPreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
 		
 		FontData []fd = PreferenceConverter.getFontDataArray(pref, fontPreferenceID);
-		
+		System.out.println(fontPreferenceID + ": " + StringConverter.asString(fd));
 		return fd;
 	}
     

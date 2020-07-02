@@ -15,6 +15,17 @@ import org.eclipse.osgi.service.datalocation.Location;
 
 @Creatable
 @Singleton
+/**************************************
+ * 
+ * The center of hpcviewer preferences.
+ * This class manages preferences load, set and location.
+ * There are two type of supported preference storage:
+ * <ul>
+ * <li>IEclipsePreference for hierarchical storage
+ * <li>IPreferenceStore to store fonts and primitive types
+ * </ul>
+ * 
+ **************************************/
 public class ViewerPreferenceManager 
 {
 	public final static String  PREF_FILENAME       = "hpcviewer.prefs";
@@ -22,7 +33,6 @@ public class ViewerPreferenceManager
 	public final static ViewerPreferenceManager INSTANCE = new ViewerPreferenceManager();
 	
 	private PreferenceStore preferenceStore;
-	
 
 	static public IEclipsePreferences getPreference() {
 		return InstanceScope.INSTANCE.getNode(PreferenceConstants.P_HPCVIEWER);
@@ -40,6 +50,10 @@ public class ViewerPreferenceManager
 				
 				preferenceStore = new PreferenceStore(path);
 				
+				// It is highly important to load the preference store as early as possible
+				// before we use it to get the preference values
+				// If the store is not loaded, we'll end up to get the default value all the time
+
 				File file = new File(path);
 				if (file.canRead())
 					preferenceStore.load();
