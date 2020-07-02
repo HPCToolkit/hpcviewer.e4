@@ -10,7 +10,6 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 
-import edu.rice.cs.hpc.data.util.OSValidator;
 import edu.rice.cs.hpcviewer.ui.preferences.PreferenceConstants;
 import edu.rice.cs.hpcviewer.ui.preferences.ViewerPreferenceManager;
 
@@ -32,12 +31,8 @@ public class FontManager
 		// On some platforms, the default text size is a bit bigger.
 		// we need to make it smaller to fit the table row :-(
 		
-		int fontHeightDecrease = 0;
-		if (OSValidator.isUnix())
-			fontHeightDecrease = -1;
-		
 		fontDefault = JFaceResources.getTextFont();
-		initFont(PreferenceConstants.ID_FONT_METRIC, fontDefault, fontHeightDecrease);
+		initFont(PreferenceConstants.ID_FONT_METRIC, fontDefault, 0);
 		
 		initFont(PreferenceConstants.ID_FONT_TEXT, fontDefault, 0);
 	}

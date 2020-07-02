@@ -1,5 +1,6 @@
 package edu.rice.cs.hpcviewer.ui.preferences;
 
+import java.io.File;
 import java.net.URL;
 
 import javax.inject.Singleton;
@@ -39,7 +40,9 @@ public class ViewerPreferenceManager
 				
 				preferenceStore = new PreferenceStore(path);
 				
-				preferenceStore.load();
+				File file = new File(path);
+				if (file.canRead())
+					preferenceStore.load();
 				
 			} catch (Exception e) {
 
