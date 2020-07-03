@@ -23,7 +23,9 @@ public class PreferenceConstants
 	public final static String ID_FONT_METRIC      = "hpcviewer.font.metric";
 	public final static String ID_FONT_TEXT        = "hpcviewer.font.source";
 	
-	public final static String ID_MODE_DEBUG	   = "hpcviewer.mode.debug";
+	public final static String ID_DEBUG_MODE	   = "hpcviewer.debug.mode";
+	public final static String ID_DEBUG_CCT_ID	   = "hpcviewer.debug.cct";
+	public final static String ID_DEBUG_FLAT_ID	   = "hpcviewer.debug.flat";
 	
 	public final static String PREF_FILENAME       = "hpcviewer.prefs";
 	

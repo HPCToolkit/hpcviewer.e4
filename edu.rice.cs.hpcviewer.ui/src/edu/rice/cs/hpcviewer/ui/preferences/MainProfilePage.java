@@ -4,6 +4,8 @@ import java.io.IOException;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceStore;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -33,7 +35,7 @@ public class MainProfilePage extends AbstractPage
 		PreferenceStore prefDebug = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
 		boolean debug = debugMode.getSelection();
 		
-		prefDebug.setValue(PreferenceConstants.ID_MODE_DEBUG, debug);
+		prefDebug.setValue(PreferenceConstants.ID_DEBUG_MODE, debug);
 		
 		try {
 			prefDebug.save();
@@ -50,10 +52,38 @@ public class MainProfilePage extends AbstractPage
 		groupFont.setLayout(new GridLayout(1, false));
         
 		debugMode = createCheckBoxControl(groupFont, "Enable debug mode");
+		debugMode.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				setDebugMode(debugMode.getSelection());
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {}
+		});
         cctId  = createCheckBoxControl(groupFont, "Show calling-context (CCT) Id");
         flatId = createCheckBoxControl(groupFont, "Show structure (flat) Id");
 		
+        // initialize the debugging mode
+        
+        PreferenceStore pref = (PreferenceStore) getPreferenceStore();
+        boolean debugMode = pref.getBoolean(PreferenceConstants.ID_DEBUG_MODE);
+        setDebugMode(debugMode);
+        
+        boolean debugCCT = pref.getBoolean(PreferenceConstants.ID_DEBUG_CCT_ID);
+        cctId.setSelection(debugCCT);
+        
+        boolean debugFlat = pref.getBoolean(PreferenceConstants.ID_DEBUG_FLAT_ID);
+        flatId.setSelection(debugFlat);
+        
 		return parent;
+	}
+	
+	private void setDebugMode(boolean enabled) {
+		debugMode.setSelection(enabled);
+		cctId.setEnabled(enabled);
+		flatId.setEnabled(enabled);
 	}
 	
 	
@@ -66,6 +96,4 @@ public class MainProfilePage extends AbstractPage
 	@Override
 	protected void performDefaults() {
 	}
-	
-	
 }

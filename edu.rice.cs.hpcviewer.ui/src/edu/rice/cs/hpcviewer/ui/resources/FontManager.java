@@ -9,7 +9,6 @@ import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.resource.LocalResourceManager;
 import org.eclipse.jface.resource.ResourceManager;
-import org.eclipse.jface.resource.StringConverter;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 
@@ -34,11 +33,14 @@ public class FontManager
 		resource = new LocalResourceManager(JFaceResources.getResources());
 	}
 
-	public Font getPreferenceFont(String id) {
+	public Font getPreferenceFont(String id, Font defaultFont) {
 		ViewerPreferenceManager prefManager = ViewerPreferenceManager.INSTANCE;
 		PreferenceStore preferenceStore = prefManager.getPreferenceStore();
 		
 		FontData []data = PreferenceConverter.getFontDataArray(preferenceStore, id);
+		if (data == PreferenceConverter.getFontDataArrayDefaultDefault())
+			return defaultFont;
+		
 		return resource.createFont(FontDescriptor.createFrom(data));
 	}
 
@@ -48,7 +50,8 @@ public class FontManager
 	 * @return
 	 */
 	static public Font getFontGeneric() {
-		return INSTANCE.getPreferenceFont(PreferenceConstants.ID_FONT_GENERIC);
+		Font defaultFont = JFaceResources.getDefaultFont();
+		return INSTANCE.getPreferenceFont(PreferenceConstants.ID_FONT_GENERIC, defaultFont);
 	}
 	
 	
@@ -57,7 +60,8 @@ public class FontManager
 	 * @return
 	 */
 	static public Font getMetricFont() {
-		return INSTANCE.getPreferenceFont(PreferenceConstants.ID_FONT_METRIC);
+		Font defaultFont = JFaceResources.getTextFont();
+		return INSTANCE.getPreferenceFont(PreferenceConstants.ID_FONT_METRIC, defaultFont);
 	}	
 	
 	
@@ -66,7 +70,8 @@ public class FontManager
 	 * @return
 	 */
 	static public Font getTextEditorFont() {
-		return INSTANCE.getPreferenceFont(PreferenceConstants.ID_FONT_TEXT);
+		Font defaultFont = JFaceResources.getTextFont();
+		return INSTANCE.getPreferenceFont(PreferenceConstants.ID_FONT_TEXT, defaultFont);
 	}	
 	
 
