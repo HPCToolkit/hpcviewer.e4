@@ -83,7 +83,6 @@ public class FontManager
 		IPreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
 		
 		FontData []fd = PreferenceConverter.getFontDataArray(pref, fontPreferenceID);
-		System.out.println(fontPreferenceID + ": " + StringConverter.asString(fd));
 		return fd;
 	}
     

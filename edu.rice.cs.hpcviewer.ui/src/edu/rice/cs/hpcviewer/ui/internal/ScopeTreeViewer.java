@@ -439,7 +439,9 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		
 		if (need_to_refresh) {
 			refresh(false);
-			System.out.println(getClass().getName() +": refresh " + property);
+			Scope root = (Scope) getInput();
+			if (root != null)
+				insertParentNode(root);
 		}
 	}
     
