@@ -137,6 +137,8 @@ public class ThreadDataCollection2 extends AbstractThreadDataCollection
 		{
 			data_file[metricIndex] = new ThreadLevelDataFile();
 			data_file[metricIndex].open(file);
+		} else {
+			throw new IOException("No thread-level data in " + directory.getAbsolutePath());
 		}
 	}
 	

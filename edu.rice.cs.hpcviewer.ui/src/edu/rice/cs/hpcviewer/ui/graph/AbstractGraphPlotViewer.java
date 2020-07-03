@@ -4,10 +4,11 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import javax.inject.Inject;
 
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.swtchart.Chart;
 import org.swtchart.IAxisSet;
 import org.swtchart.IAxisTick;
@@ -52,11 +53,12 @@ public abstract class AbstractGraphPlotViewer extends AbstractGraphViewer
 			
 		} catch (Exception e) {
 			String label = "Error while opening thread level data metric file";
-			database.statusReport(IStatus.ERROR, label, e);
+
+			Logger logger = LoggerFactory.getLogger(getClass());
+			logger.error(label, e);
 			
 			Display display = Display.getDefault();
 			MessageDialog.openError(display.getActiveShell(), label, 
-					 "Error while opening thread level data metric file.\n"+ 
 					 e.getClass().getName() + ": " + e.getMessage());
 			
 			return PLOT_ERR_UNKNOWN;

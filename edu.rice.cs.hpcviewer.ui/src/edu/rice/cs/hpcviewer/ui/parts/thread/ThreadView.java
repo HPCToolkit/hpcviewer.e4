@@ -7,7 +7,6 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.services.EMenuService;
@@ -17,6 +16,8 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
@@ -78,9 +79,11 @@ public class ThreadView  implements IViewPart
 				
 			} catch (Exception e) {
 				final String label = "Error while opening thread-level data";
-				MessageDialog.openError(contentViewer.getTreeViewer().getTree().getShell(), label, e.getClass().getName());
+				Logger logger = LoggerFactory.getLogger(getClass());
+				logger.error(label, e);
 				
-				databaseAddOn.statusReport(IStatus.ERROR, label, e);
+				Shell shell = contentViewer.getTreeViewer().getTree().getShell();
+				MessageDialog.openError(shell, label, e.getClass().getName() + ":" + e.getMessage());
 				return;
 			}
 		}
