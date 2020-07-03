@@ -7,13 +7,12 @@ import org.eclipse.e4.core.di.annotations.Evaluate;
 
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 
-public class DatabaseCloseExpression 
+public class DatabaseExist 
 {
 	@Inject DatabaseCollection database;
-
+	
 	@Evaluate
 	public boolean evaluate() {
-		
 		return database.getNumDatabase()>0;
 	}
 }

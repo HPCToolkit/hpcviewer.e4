@@ -3,8 +3,6 @@ package edu.rice.cs.hpcviewer.ui.metric;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import javax.inject.Inject;
-
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.InputDialog;
@@ -60,9 +58,12 @@ public class MetricPropertyDialog extends TitleAreaDialog
 	private TableViewer viewer;
 	private Button btnEdit;
 
-	private Experiment experiment;
-
-	@Inject DatabaseCollection databaseCollection;
+	/** a set of experiments. Cannot be null.
+	 ** it has to be initialized by {@link setDatabase}*/
+	private DatabaseCollection dbCollection;
+	
+	/** The selected experiment **/
+	private Experiment experiment; 
 
 	/***
 	 * Default constructor: 
@@ -108,7 +109,7 @@ public class MetricPropertyDialog extends TitleAreaDialog
 	protected Control createDialogArea(Composite aParent) {
 		
 		// initialize table viewer in the derived class
-		initTableViewer(aParent, databaseCollection);
+		initTableViewer(aParent);
 		
 		return aParent;
 	}
@@ -159,7 +160,7 @@ public class MetricPropertyDialog extends TitleAreaDialog
 	 * 
 	 * @param composite
 	 */
-	private void initTableViewer(Composite composite, DatabaseCollection dbCollection) {
+	private void initTableViewer(Composite composite) {
 		
 		boolean singleExperiment = true;
 		
@@ -167,25 +168,25 @@ public class MetricPropertyDialog extends TitleAreaDialog
 		// database table
 		// -----------------
 		
-		if (databaseCollection != null) {
+		if (dbCollection != null) {
 			// variable window is null only when the class is in unit test mode
 			// in app mode, the value of window will never be null
 			
 			
-			final int numDB = databaseCollection.getNumDatabase();
+			final int numDB = dbCollection.getNumDatabase();
 			singleExperiment = (numDB == 1);
 			
 			if (singleExperiment)  {
 				// -------------------------------------
 				// case of having only 1 database
 				// -------------------------------------
-				experiment = (Experiment) databaseCollection.getLast();
+				experiment = (Experiment) dbCollection.getLast();
 				
 			} else {
 				// -------------------------------------
 				// case of having more than 1 databases, show the list of databases
 				// -------------------------------------
-				updateContent(composite, dbCollection) ;
+				updateContent(composite) ;
 			}
 		}
 		
@@ -282,12 +283,25 @@ public class MetricPropertyDialog extends TitleAreaDialog
 	}
 
 
+	/*****
+	 * set the database.
+	 * Caller need to call this method to set which database will be displayed.
+	 * The dialog box has no knowledge of the database.
+	 * 
+	 * @param dbCollection
+	 */
+	public void setDatabase(DatabaseCollection dbCollection) {
+		this.dbCollection = dbCollection;
+	}
+	
+
+
 	/**
 	 * Populate the content of the database table if we have more than 1 databases
 	 * 
 	 * @param component : parent composite
 	 */
-	private void updateContent(Composite component, final DatabaseCollection dbCollection) {
+	private void updateContent(Composite component) {
 		
 		// -------------------------------------
 		// case of having more than 1 databases: create a list of databases to select
@@ -366,7 +380,9 @@ public class MetricPropertyDialog extends TitleAreaDialog
 	 * @param exp
 	 */
 	private void setElements(Experiment exp) {
+
 		this.experiment = exp;
+		
 		final ArrayList<PropertiesModel> arrElements = createInput(exp);
 		viewer.setInput(arrElements);
 		
@@ -381,13 +397,9 @@ public class MetricPropertyDialog extends TitleAreaDialog
 		for (TableColumn col : columns) {
 			col.pack();
 		}
-		//viewer.refresh();
 	}
 	
-	private void setExperiment(Experiment exp) {
-		this.experiment = exp;
-	}
-	
+
 	/***
 	 * retrieve the selected object in the table
 	 * 
@@ -509,8 +521,8 @@ public class MetricPropertyDialog extends TitleAreaDialog
 					"M" + id, VisibilityType.SHOW, null, null, null, i, MetricType.INCLUSIVE, i) );
 		}
 		exp.setMetrics(list);
-		dialog.setExperiment(exp);
 		
+		dialog.setElements(exp);
 		dialog.open();
 	}
 
