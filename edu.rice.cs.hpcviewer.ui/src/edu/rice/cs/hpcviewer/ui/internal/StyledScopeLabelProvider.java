@@ -6,9 +6,11 @@ import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Image;
 
 import edu.rice.cs.hpc.data.experiment.scope.CallSiteScope;
+import edu.rice.cs.hpc.data.experiment.scope.CallSiteScopeCallerView;
 import edu.rice.cs.hpc.data.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpc.data.util.string.StringUtil;
+import edu.rice.cs.hpcviewer.ui.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
 
@@ -116,8 +118,9 @@ public class StyledScopeLabelProvider extends DelegatingStyledCellLabelProvider
 		private String getText(Scope node) 
 		{
 			String text = "";
-				/*
-			if (viewerWindow.showCCTLabel())  
+			ViewerPreferenceManager pref = ViewerPreferenceManager.INSTANCE;
+			
+			if (pref.getDebugCCT())  
 			{
 				//---------------------------------------------------------------
 				// label for debugging purpose
@@ -139,14 +142,15 @@ public class StyledScopeLabelProvider extends DelegatingStyledCellLabelProvider
 				} else
 					text = "[c:" + node.getCCTIndex() + "] ";
 			} 
-			if (viewerWindow.showFlatLabel()) {
+			if (pref.getDebugFlat()) {
 				text += "[f: " + node.getFlatIndex() ;
 				if (node instanceof CallSiteScope) {
 					ProcedureScope proc = ((CallSiteScope)node).getProcedureScope();
 					text += "/" + proc.getFlatIndex();
 				}
 				text += "] ";
-			} */
+			} 
+			
 			text += node.getName();
 			// add the name of the load module if the node is not readable
 			// see issue #79: https://github.com/HPCToolkit/hpcviewer/issues/79
@@ -168,21 +172,21 @@ public class StyledScopeLabelProvider extends DelegatingStyledCellLabelProvider
 					text += " [" + lm.substring(lastDot) + "]";
 				}
 			}
-			
 			return text;
 		}
 	}
-        static private boolean needToAddLoadModuleSuffix(Scope node) {
-                        if (node instanceof CallSiteScope ||
-                           (node instanceof ProcedureScope && ((ProcedureScope)node).isAlien())) {
+	
+	static private boolean needToAddLoadModuleSuffix(Scope node) {
+		if (node instanceof CallSiteScope ||
+				(node instanceof ProcedureScope && ((ProcedureScope)node).isAlien())) {
 
-                                // we only add the load module suffix if:
-                                // - the file is NOT readable; and
-                                // - doesn't have load module suffix
+			// we only add the load module suffix if:
+			// - the file is NOT readable; and
+			// - doesn't have load module suffix
 
-                                return (!Utilities.isFileReadable(node) && node.getName().lastIndexOf(']')<0);
+			return (!Utilities.isFileReadable(node) && node.getName().lastIndexOf(']')<0);
 
-                        }
-                        return false;
-        }
+		}
+		return false;
+	}
 }

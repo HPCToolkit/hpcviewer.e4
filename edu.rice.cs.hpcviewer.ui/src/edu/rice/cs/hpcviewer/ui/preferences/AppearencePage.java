@@ -45,9 +45,6 @@ public class AppearencePage extends AbstractPage
 	
 	@Override
 	public void apply() {
-		fontMetricEditor .store();
-		fontGenericEditor.store();
-		fontSourceEditor .store();
 		
 		saveFont(fontMetricEditor , PreferenceConstants.ID_FONT_METRIC);
 		saveFont(fontGenericEditor, PreferenceConstants.ID_FONT_GENERIC);
@@ -69,6 +66,10 @@ public class AppearencePage extends AbstractPage
 
 	
 	private void saveFont(ViewerFontFieldEditor editor, String id) {
+		if (editor == null)
+			return;
+		
+		editor.store();
 		Font font = editor.getChosenFont();
 
 		if (font != null) {

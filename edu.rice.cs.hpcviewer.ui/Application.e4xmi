@@ -48,6 +48,7 @@
       <children xsi:type="menu:Menu" xmi:id="_E9WX8KwUEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.menu.view" label="View" mnemonics="V">
         <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_ewJnoKwUEeq2aaPo7yBcWg" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseExistence"/>
         <children xsi:type="menu:Menu" xmi:id="_L0cLkKwUEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.menu.view.debug" label="Debug" mnemonics="D">
+          <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_LrongL1wEeqIaLNodVh-xg" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DebugMode"/>
           <children xsi:type="menu:HandledMenuItem" xmi:id="_OUj-8KwUEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.viewXML" label="View experiment.xml file" tooltip="View the current experiment.xml file" mnemonics="x" command="_rAwA8KvwEeq2aaPo7yBcWg"/>
         </children>
       </children>

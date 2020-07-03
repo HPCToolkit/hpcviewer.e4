@@ -33,13 +33,14 @@ public class FontManager
 		resource = new LocalResourceManager(JFaceResources.getResources());
 	}
 
-	public Font getPreferenceFont(String id, Font defaultFont) {
+	public Font getPreferenceFont(String id) {
 		ViewerPreferenceManager prefManager = ViewerPreferenceManager.INSTANCE;
 		PreferenceStore preferenceStore = prefManager.getPreferenceStore();
 		
 		FontData []data = PreferenceConverter.getFontDataArray(preferenceStore, id);
-		if (data == PreferenceConverter.getFontDataArrayDefaultDefault())
-			return defaultFont;
+		if (data == PreferenceConverter.getFontDataArrayDefaultDefault()) {
+			return (Font) ViewerPreferenceManager.INSTANCE.getDefault(id);
+		}
 		
 		return resource.createFont(FontDescriptor.createFrom(data));
 	}
@@ -50,8 +51,7 @@ public class FontManager
 	 * @return
 	 */
 	static public Font getFontGeneric() {
-		Font defaultFont = JFaceResources.getDefaultFont();
-		return INSTANCE.getPreferenceFont(PreferenceConstants.ID_FONT_GENERIC, defaultFont);
+		return INSTANCE.getPreferenceFont(PreferenceConstants.ID_FONT_GENERIC);
 	}
 	
 	
@@ -60,8 +60,7 @@ public class FontManager
 	 * @return
 	 */
 	static public Font getMetricFont() {
-		Font defaultFont = JFaceResources.getTextFont();
-		return INSTANCE.getPreferenceFont(PreferenceConstants.ID_FONT_METRIC, defaultFont);
+		return INSTANCE.getPreferenceFont(PreferenceConstants.ID_FONT_METRIC);
 	}	
 	
 	
@@ -70,8 +69,7 @@ public class FontManager
 	 * @return
 	 */
 	static public Font getTextEditorFont() {
-		Font defaultFont = JFaceResources.getTextFont();
-		return INSTANCE.getPreferenceFont(PreferenceConstants.ID_FONT_TEXT, defaultFont);
+		return INSTANCE.getPreferenceFont(PreferenceConstants.ID_FONT_TEXT);
 	}	
 	
 
@@ -92,6 +90,15 @@ public class FontManager
 	}
     
 	
+	/*****
+	 * Set and save the font preference
+	 * @see PreferenceConstants.ID_FONT_GENERIC
+	 * @see PreferenceConstants.ID_FONT_METRICT
+	 *   
+	 * @param fontPreferenceID the preference ID
+	 * @param fontData the new font data
+	 * @throws IOException
+	 */
 	static public void setFontPreference(String fontPreferenceID, FontData[] fontData) throws IOException {
 
 		PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();

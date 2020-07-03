@@ -1,5 +1,6 @@
 package edu.rice.cs.hpcviewer.ui.preferences;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -16,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 public class MainProfilePage extends AbstractPage 
 {	
-	Button debugMode;
+	Button debugMode, removeFile;
 	Button cctId, flatId;
 	
 	public MainProfilePage(PropertiesResources resources, String title) {
@@ -33,10 +34,25 @@ public class MainProfilePage extends AbstractPage
 	@Override
 	public void apply() {
 		PreferenceStore prefDebug = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
-		boolean debug = debugMode.getSelection();
 		
+		boolean debug = debugMode.getSelection();		
 		prefDebug.setValue(PreferenceConstants.ID_DEBUG_MODE, debug);
 		
+		boolean debugCCT = cctId.getSelection();
+		prefDebug.setValue(PreferenceConstants.ID_DEBUG_CCT_ID, debugCCT);
+		
+		boolean debugFlat = cctId.getSelection();
+		prefDebug.setValue(PreferenceConstants.ID_DEBUG_FLAT_ID, debugFlat);
+		
+		if (removeFile.getSelection()) {
+			String filename = ViewerPreferenceManager.INSTANCE.getPreferenceStoreLocation();
+			File file = new File(filename);
+			if (file.canWrite()) {
+				file.delete();
+			}
+		}
+		
+		// save the preference in this page
 		try {
 			prefDebug.save();
 		} catch (IOException e) {
@@ -48,10 +64,21 @@ public class MainProfilePage extends AbstractPage
 	@Override
 	protected Control createContents(Composite parent) {
 
-		Group groupFont = createGroupControl(parent, "Debug", false);
-		groupFont.setLayout(new GridLayout(1, false));
+        createDebugPanel(parent);
         
-		debugMode = createCheckBoxControl(groupFont, "Enable debug mode");
+        String location = ViewerPreferenceManager.INSTANCE.getPreferenceStoreLocation();
+        removeFile = createCheckBoxControl(parent, "Reset preference: " + location);      
+        
+		return parent;
+	}
+	
+	
+	private void createDebugPanel(Composite parent) {
+		
+		Group groupDebug = createGroupControl(parent, "Debug", false);
+		groupDebug.setLayout(new GridLayout(1, false));
+        
+		debugMode = createCheckBoxControl(groupDebug, "Enable debug mode");
 		debugMode.addSelectionListener(new SelectionListener() {
 			
 			@Override
@@ -62,8 +89,8 @@ public class MainProfilePage extends AbstractPage
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
-        cctId  = createCheckBoxControl(groupFont, "Show calling-context (CCT) Id");
-        flatId = createCheckBoxControl(groupFont, "Show structure (flat) Id");
+        cctId  = createCheckBoxControl(groupDebug, "Show calling-context (CCT) Id");
+        flatId = createCheckBoxControl(groupDebug, "Show structure (flat) Id");
 		
         // initialize the debugging mode
         
@@ -76,8 +103,6 @@ public class MainProfilePage extends AbstractPage
         
         boolean debugFlat = pref.getBoolean(PreferenceConstants.ID_DEBUG_FLAT_ID);
         flatId.setSelection(debugFlat);
-        
-		return parent;
 	}
 	
 	private void setDebugMode(boolean enabled) {
