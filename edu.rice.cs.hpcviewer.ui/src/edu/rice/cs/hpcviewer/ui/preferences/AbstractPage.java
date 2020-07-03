@@ -1,7 +1,6 @@
 package edu.rice.cs.hpcviewer.ui.preferences;
 
 import org.eclipse.jface.preference.ColorSelector;
-import org.eclipse.jface.preference.FontFieldEditor;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -15,7 +14,11 @@ import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 
 
-
+/*******************************************************
+ * 
+ * Abstract preference page
+ *
+ *******************************************************/
 public abstract class AbstractPage extends PreferencePage 
 {
 

@@ -15,6 +15,9 @@ import org.eclipse.swt.widgets.TreeColumn;
 import java.util.List;
 
 import org.eclipse.jface.layout.TreeColumnLayout;
+import org.eclipse.jface.preference.PreferenceStore;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.TreePath;
@@ -27,13 +30,15 @@ import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpc.data.util.ScopeComparator;
+import edu.rice.cs.hpcviewer.ui.preferences.PreferenceConstants;
+import edu.rice.cs.hpcviewer.ui.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
 
 /**
  * we set lazy virtual bit in this viewer
  */
-public class ScopeTreeViewer extends TreeViewer 
+public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListener
 {
 	final static public String COLUMN_DATA_WIDTH = "w"; 
 	final static public int COLUMN_DEFAULT_WIDTH = 120;
@@ -51,6 +56,9 @@ public class ScopeTreeViewer extends TreeViewer
 	{
 		setUseHashlookup(true);
 		getTree().setLinesVisible(true);
+		
+		PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
+		pref.addPropertyChangeListener((IPropertyChangeListener) this);
 	}
 	
 	/**
@@ -419,6 +427,20 @@ public class ScopeTreeViewer extends TreeViewer
 		insertParentNode((Scope) root);
 		
 		tree.setRedraw(true);
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent event) {
+
+		final String property = event.getProperty();
+		
+		boolean need_to_refresh = (property.equals(PreferenceConstants.ID_FONT_GENERIC)) || 
+								  (property.equals(PreferenceConstants.ID_FONT_METRIC)); 
+		
+		if (need_to_refresh) {
+			refresh(false);
+			System.out.println(getClass().getName() +": refresh " + property);
+		}
 	}
     
 	/**

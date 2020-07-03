@@ -19,7 +19,11 @@ import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcviewer.ui.resources.FontManager;
 
-
+/***********************************************************
+ * 
+ * Setting for the appearances (fonts, colors, ...)
+ *
+ ***********************************************************/
 public class AppearencePage extends AbstractPage 
 {
 	private ViewerFontFieldEditor fontGenericEditor;

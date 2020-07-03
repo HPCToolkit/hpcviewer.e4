@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 public class MainProfilePage extends AbstractPage 
 {	
 	Button debugMode;
+	Button cctId, flatId;
 	
 	public MainProfilePage(PropertiesResources resources, String title) {
 		super(resources, title);
@@ -45,11 +46,13 @@ public class MainProfilePage extends AbstractPage
 	@Override
 	protected Control createContents(Composite parent) {
 
-		Group groupFont = createGroupControl(parent, "General settings", false);
+		Group groupFont = createGroupControl(parent, "Debug", false);
 		groupFont.setLayout(new GridLayout(1, false));
         
-		debugMode = createCheckBoxControl(groupFont, "Debug mode");
-        
+		debugMode = createCheckBoxControl(groupFont, "Enable debug mode");
+        cctId  = createCheckBoxControl(groupFont, "Show calling-context (CCT) Id");
+        flatId = createCheckBoxControl(groupFont, "Show structure (flat) Id");
+		
 		return parent;
 	}
 	
