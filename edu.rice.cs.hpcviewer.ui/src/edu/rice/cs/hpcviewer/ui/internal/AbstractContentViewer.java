@@ -1,5 +1,6 @@
 package edu.rice.cs.hpcviewer.ui.internal;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Stack;
 
@@ -17,6 +18,7 @@ import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -44,6 +46,8 @@ import edu.rice.cs.hpcviewer.ui.actions.UserDerivedMetric;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.parts.IViewBuilder;
 import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
+import edu.rice.cs.hpcviewer.ui.preferences.PreferenceConstants;
+import edu.rice.cs.hpcviewer.ui.resources.FontManager;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 
 
@@ -117,10 +121,9 @@ public abstract class AbstractContentViewer implements IViewBuilder, ISelectionC
 	 * since we don't have access to this injected variables</p>
 	 * 
 	 * @param partService
-	 * @param modelService
-	 * @param app
 	 * @param eventBroker
 	 * @param database
+	 * @param partFactory
 	 */
 	public AbstractContentViewer(
 			EPartService  partService, 
@@ -561,7 +564,8 @@ public abstract class AbstractContentViewer implements IViewBuilder, ISelectionC
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				treeViewer.getTree().getFont();
+				changeFontHeight(PreferenceConstants.ID_FONT_GENERIC, 1);
+				changeFontHeight(PreferenceConstants.ID_FONT_METRIC, 1);
 			}
 			
 			@Override
@@ -572,13 +576,33 @@ public abstract class AbstractContentViewer implements IViewBuilder, ISelectionC
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				
+				changeFontHeight(PreferenceConstants.ID_FONT_GENERIC, -1);
+				changeFontHeight(PreferenceConstants.ID_FONT_METRIC, -1);
 			}
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
 	}
+	
+	
+	/****
+	 * Change the height of the font for a given font id from the {@link PreferenceConstants}
+	 * @param id the font id from {@link PreferenceConstants}
+	 * @param deltaHeight the number of increase/decrease
+	 */
+	private void changeFontHeight(String id, int deltaHeight) {
+		FontData[]fd = FontManager.getFontDataPreference(id);
+		int height = fd[0].getHeight();
+		fd[0].setHeight(height+deltaHeight);
+		try {
+			FontManager.setFontPreference(id, fd);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	}
+	
 	
 	/***
 	 * retrieve the current part service.
