@@ -41,7 +41,7 @@ public class MainProfilePage extends AbstractPage
 		boolean debugCCT = cctId.getSelection();
 		prefDebug.setValue(PreferenceConstants.ID_DEBUG_CCT_ID, debugCCT);
 		
-		boolean debugFlat = cctId.getSelection();
+		boolean debugFlat = flatId.getSelection();
 		prefDebug.setValue(PreferenceConstants.ID_DEBUG_FLAT_ID, debugFlat);
 		
 		if (removeFile.getSelection()) {

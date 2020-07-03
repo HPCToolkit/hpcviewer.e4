@@ -80,6 +80,16 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		return null;
 	}
 	
+	
+	/****
+	 * Retrieve the root of the database in this table regardless
+	 * whether the tree is zoomed or flattened.
+	 * <p>
+	 * For a Top-down view, the root will be the CCT root.
+	 * For a bottom-up view, the root will be the caller root
+	 * For a flat view, the root will be the flat root. 
+	 * @return the root scope
+	 */
 	public RootScope getRootScope() {
 		
 		Object input = getInput();
@@ -434,8 +444,10 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 
 		final String property = event.getProperty();
 		
-		boolean need_to_refresh = (property.equals(PreferenceConstants.ID_FONT_GENERIC)) || 
-								  (property.equals(PreferenceConstants.ID_FONT_METRIC)); 
+		boolean need_to_refresh = (property.equals(PreferenceConstants.ID_FONT_GENERIC) || 
+								   property.equals(PreferenceConstants.ID_FONT_METRIC)  ||
+								   property.equals(PreferenceConstants.ID_DEBUG_CCT_ID) ||
+								   property.equals(PreferenceConstants.ID_DEBUG_FLAT_ID) ); 
 		
 		if (need_to_refresh) {
 			refresh(false);
