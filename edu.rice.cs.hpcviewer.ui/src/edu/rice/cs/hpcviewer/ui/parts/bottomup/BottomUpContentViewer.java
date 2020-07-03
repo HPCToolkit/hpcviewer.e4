@@ -11,11 +11,11 @@ import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractContentProvider;
-import edu.rice.cs.hpcviewer.ui.internal.AbstractContentViewer;
+import edu.rice.cs.hpcviewer.ui.internal.AbstractViewBuilder;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
 import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 
-public class BottomUpContentViewer extends AbstractContentViewer 
+public class BottomUpContentViewer extends AbstractViewBuilder 
 {
 	private BottomUpContentProvider contentProvider = null;
 

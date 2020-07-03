@@ -15,12 +15,12 @@ import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpcviewer.ui.actions.FlatScopeAction;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractContentProvider;
-import edu.rice.cs.hpcviewer.ui.internal.AbstractContentViewer;
+import edu.rice.cs.hpcviewer.ui.internal.AbstractViewBuilder;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
 import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 
-public class FlatContentViewer extends AbstractContentViewer 
+public class FlatContentViewer extends AbstractViewBuilder 
 {
 
 	static final private int ITEM_FLAT = 0;

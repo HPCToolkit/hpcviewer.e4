@@ -28,7 +28,7 @@ import edu.rice.cs.hpcdata.tld.collection.ThreadDataCollectionFactory;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.graph.GraphMenu;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractContentProvider;
-import edu.rice.cs.hpcviewer.ui.internal.AbstractContentViewer;
+import edu.rice.cs.hpcviewer.ui.internal.AbstractViewBuilder;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
 import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadViewInput;
@@ -41,7 +41,7 @@ import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
  * Top down content builder
  *
  *************************************************************/
-public class TopDownContentViewer extends AbstractContentViewer 
+public class TopDownContentViewer extends AbstractViewBuilder 
 {	
 	final static private int ITEM_GRAPH = 0;
 	final static private int ITEM_THREAD = 1;

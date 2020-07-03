@@ -61,7 +61,7 @@ import edu.rice.cs.hpcviewer.ui.resources.IconManager;
  * For further customization, the caller (or part) has to subclass this class and implement
  * {@link beginToolbar} and {@link endToolbar}
  */
-public abstract class AbstractContentViewer implements IViewBuilder, ISelectionChangedListener
+public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionChangedListener
 {
 	static protected enum ViewerType {
 		/** the viewer is independent to others. No need to update the status from others. */
@@ -125,7 +125,7 @@ public abstract class AbstractContentViewer implements IViewBuilder, ISelectionC
 	 * @param database
 	 * @param partFactory
 	 */
-	public AbstractContentViewer(
+	public AbstractViewBuilder(
 			EPartService  partService, 
 			IEventBroker  eventBroker,
 			DatabaseCollection database,
