@@ -1,8 +1,6 @@
 package edu.rice.cs.hpcviewer.ui.metric;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.InputDialog;
@@ -29,13 +27,10 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
-import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.DerivedMetric;
@@ -44,7 +39,6 @@ import edu.rice.cs.hpc.data.experiment.metric.MetricType;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric.VisibilityType;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.util.string.StringUtil;
-import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 
 
 
@@ -58,12 +52,8 @@ public class MetricPropertyDialog extends TitleAreaDialog
 	private TableViewer viewer;
 	private Button btnEdit;
 
-	/** a set of experiments. Cannot be null.
-	 ** it has to be initialized by {@link setDatabase}*/
-	private DatabaseCollection dbCollection;
-	
 	/** The selected experiment **/
-	private Experiment experiment; 
+	private final Experiment experiment; 
 
 	/***
 	 * Default constructor: 
@@ -77,8 +67,9 @@ public class MetricPropertyDialog extends TitleAreaDialog
 	 *  if the value of window is null, then users have to use the
 	 *  method setELements() to setup the list of metrics to modify
 	 */
-	public MetricPropertyDialog(Shell parentShell) {
+	public MetricPropertyDialog(Shell parentShell, Experiment experiment) {
 		super(parentShell);
+		this.experiment = experiment;
 	}
 
 	
@@ -124,12 +115,6 @@ public class MetricPropertyDialog extends TitleAreaDialog
 		
 		Control ctrl = super.createButtonBar(parent);
 
-		final Button btnOk = getButton(IDialogConstants.OK_ID);
-		btnOk.setText("Quit");
-		
-		final Button btnCancel = getButton(IDialogConstants.CANCEL_ID);
-		btnCancel.setVisible(false);
-		
 		// -----------------
 		// edit button: use the default "details" button ID
 		// -----------------
@@ -162,34 +147,7 @@ public class MetricPropertyDialog extends TitleAreaDialog
 	 */
 	private void initTableViewer(Composite composite) {
 		
-		boolean singleExperiment = true;
-		
-		// -----------------
-		// database table
-		// -----------------
-		
-		if (dbCollection != null) {
-			// variable window is null only when the class is in unit test mode
-			// in app mode, the value of window will never be null
-			
-			
-			final int numDB = dbCollection.getNumDatabase();
-			singleExperiment = (numDB == 1);
-			
-			if (singleExperiment)  {
-				// -------------------------------------
-				// case of having only 1 database
-				// -------------------------------------
-				experiment = (Experiment) dbCollection.getLast();
 				
-			} else {
-				// -------------------------------------
-				// case of having more than 1 databases, show the list of databases
-				// -------------------------------------
-				updateContent(composite) ;
-			}
-		}
-		
 		// -----------------
 		// metrics table 
 		// -----------------
@@ -273,80 +231,9 @@ public class MetricPropertyDialog extends TitleAreaDialog
 		GridDataFactory.defaultsFor(table).hint(600, 300).grab(true, true).applyTo(table);
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(table);
 		
-		// -------------------------------------
-		// initialize metric table if necessary
-		// -------------------------------------
-		if (singleExperiment)
-		{
-			setElements(experiment);
-		}
+		setElements();
 	}
 
-
-	/*****
-	 * set the database.
-	 * Caller need to call this method to set which database will be displayed.
-	 * The dialog box has no knowledge of the database.
-	 * 
-	 * @param dbCollection
-	 */
-	public void setDatabase(DatabaseCollection dbCollection) {
-		this.dbCollection = dbCollection;
-	}
-	
-
-
-	/**
-	 * Populate the content of the database table if we have more than 1 databases
-	 * 
-	 * @param component : parent composite
-	 */
-	private void updateContent(Composite component) {
-		
-		// -------------------------------------
-		// case of having more than 1 databases: create a list of databases to select
-		// -------------------------------------
-
-		Group group = new Group(component, SWT.SHADOW_IN);
-		group.setText("Select a database");
-		
-		GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).grab(true, true).applyTo(group);
-		GridLayoutFactory.swtDefaults().numColumns(1).applyTo(group);
-		
-		final List list = new List(group, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);		
-		
-		Iterator<BaseExperiment> iterator = dbCollection.getIterator();
-				
-		while (iterator.hasNext()) {
-			// add the database path to the list
-			BaseExperiment exp = iterator.next();
-			list.add( exp.getDefaultDirectory().getAbsolutePath() );
-		}
-		GridDataFactory.swtDefaults().hint(600, 100).align(SWT.CENTER, SWT.CENTER).
-			grab(true, true).applyTo(list);
-		
-		list.addSelectionListener( new SelectionListener() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-
-				String []selections = list.getSelection();
-				Iterator<BaseExperiment> iterator = dbCollection.getIterator();
-				
-				while(iterator.hasNext()) {
-					BaseExperiment exp = iterator.next();
-					if (selections[0].equals(exp.getDefaultDirectory().getAbsolutePath())) {
-						setElements((Experiment) exp);
-						
-						return;
-					}
-				}
-			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {}
-		} );
-	}
 
 	
 	/***********
@@ -354,11 +241,11 @@ public class MetricPropertyDialog extends TitleAreaDialog
 	 * 
 	 * @param exp : experiment database 
 	 */
-	private ArrayList<PropertiesModel> createInput(Experiment exp) {
+	private ArrayList<PropertiesModel> createInput() {
 		
 		final ArrayList<PropertiesModel> arrElements = new ArrayList<PropertiesModel>();
 		
-		for(BaseMetric metric: exp.getVisibleMetrics()) {
+		for(BaseMetric metric: experiment.getVisibleMetrics()) {
 			
 			// we don't want to show empty metric (if exist) and 
 			// metric with invisible type
@@ -379,11 +266,12 @@ public class MetricPropertyDialog extends TitleAreaDialog
 	 * 
 	 * @param exp
 	 */
-	private void setElements(Experiment exp) {
-
-		this.experiment = exp;
+	private void setElements() {
 		
-		final ArrayList<PropertiesModel> arrElements = createInput(exp);
+		if (experiment == null)
+			return;
+		
+		final ArrayList<PropertiesModel> arrElements = createInput();
 		viewer.setInput(arrElements);
 		
 		// adjust the width of the columns
@@ -507,10 +395,7 @@ public class MetricPropertyDialog extends TitleAreaDialog
 		Shell shell = new Shell(display);
 		shell.setLayout(new FillLayout());
 		
-		// first step: create the dialog, and implement all the abstract interfaces
-		MetricPropertyDialog dialog = new MetricPropertyDialog(shell);
-		
-		// second step: initialize the column, make sure they have all the data to 
+		// first step: initialize the column, make sure they have all the data to 
 		//	distinguish with user custom column
 		Experiment exp = new Experiment();
 		java.util.List<BaseMetric> list = new java.util.ArrayList<BaseMetric>(10);
@@ -522,7 +407,9 @@ public class MetricPropertyDialog extends TitleAreaDialog
 		}
 		exp.setMetrics(list);
 		
-		dialog.setElements(exp);
+		// second step: create the dialog, and implement all the abstract interfaces
+		MetricPropertyDialog dialog = new MetricPropertyDialog(shell, exp);
+		
 		dialog.open();
 	}
 

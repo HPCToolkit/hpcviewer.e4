@@ -156,7 +156,7 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 			return;
 		
 		TreeColumn columns[] = this.getTree().getColumns();
-		boolean need_to_refresh = false;
+		boolean need_to_update = false;
 		
 		for( int i=0; i<columns.length; i++ ) {
 			
@@ -173,7 +173,7 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 				// this solution is not optimal, but it works
 				// -----------------------------------------------------------------
 				boolean is_derived = (obj instanceof DerivedMetric);
-				need_to_refresh |= is_derived;
+				need_to_update |= is_derived;
 				if (is_derived) {
 					Object objInp = getInput();
 					if (objInp instanceof RootScope) {
@@ -186,18 +186,15 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 				}
 			}
 		}
-		if (need_to_refresh) {
-			// -----------------------------------------------------------------
-			// refresh the table, and insert the top row back to the table
-			//	with the new value of the derived metric
-			// -----------------------------------------------------------------
-			TreeItem item = getTree().getItem(0);
-			Image imgItem = item.getImage(0);
-			
-			refresh();
-			
-			Utilities.insertTopRow(this, imgItem, sText);
-		}
+		refresh(need_to_update);
+		
+		// -----------------------------------------------------------------
+		// refresh the table, and insert the top row back to the table
+		//	with the new value of the derived metric
+		// -----------------------------------------------------------------
+		TreeItem item = getTree().getItem(0);
+		Image imgItem = item.getImage(0);
+		Utilities.insertTopRow(this, imgItem, sText);
 	}
 	
     /**

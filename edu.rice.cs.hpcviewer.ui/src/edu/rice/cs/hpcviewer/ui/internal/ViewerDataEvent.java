@@ -25,6 +25,7 @@ public class ViewerDataEvent
 	/** Event when a database has to be removed from the application */
 	static final public String TOPIC_HPC_ADD_NEW_METRIC  = "hpcviewer/metric_add";
 
+	static final public String TOPIC_HPC_METRIC_UPDATE   = "hpcviewer/metric_update";
 
 	public Experiment experiment;
 	public Object 	  data;
