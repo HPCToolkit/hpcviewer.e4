@@ -55,7 +55,16 @@ public class FlatScopeAction
 			if(node.getChildCount()>0) {
 				
 				// this node has children, add the children
-				addChildren(node, objFlattenedNode);
+				for (Object child: node.getChildren()) {
+					Scope childNode = (Scope) child;
+					if (!(childNode instanceof CallSiteScope)) {
+						objFlattenedNode.add(childNode);
+						if (childNode.getName().length()==0) {
+							System.out.println("no name: " + childNode.getClass().getName()+" fid: " + childNode.getFlatIndex());
+						}
+					}
+				}
+				//addChildren(node, objFlattenedNode);
 				hasKids = true;
 			} else {
 				// no children: add the node itself !
@@ -81,6 +90,7 @@ public class FlatScopeAction
 		}
 	}
 
+	
 	/**
 	 * Unflatten flattened tree (tree has to be flattened before)
 	 */
