@@ -47,7 +47,10 @@
       </children>
       <children xsi:type="menu:Menu" xmi:id="_E9WX8KwUEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.menu.view" label="View" mnemonics="V">
         <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_ewJnoKwUEeq2aaPo7yBcWg" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseExist"/>
-        <children xsi:type="menu:HandledMenuItem" xmi:id="_OxpVML17EeqIaLNodVh-xg" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.showMetric" label="Show metric properties" tooltip="Show the list of metrics and their properties" mnemonics="S" command="_XIwxIL17EeqIaLNodVh-xg"/>
+        <children xsi:type="menu:Menu" xmi:id="_tHMS4L4hEeq6DcyNjzONBw" elementId="edu.rice.cs.hpcviewer.ui.menu.showMetrics" label="Show metrics" mnemonics="S">
+          <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_z7wToL-lEeq6DcyNjzONBw" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseExist"/>
+          <children xsi:type="menu:DynamicMenuContribution" xmi:id="_JlLBUL4gEeq6DcyNjzONBw" elementId="edu.rice.cs.hpcviewer.ui.dynamicmenucontribution.showMetric" label="Show metrics" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.ShowMetrics"/>
+        </children>
         <children xsi:type="menu:Menu" xmi:id="_L0cLkKwUEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.menu.view.debug" label="Debug" mnemonics="D">
           <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_LrongL1wEeqIaLNodVh-xg" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DebugMode"/>
           <children xsi:type="menu:HandledMenuItem" xmi:id="_OUj-8KwUEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.viewXML" label="View experiment.xml file" tooltip="View the current experiment.xml file" mnemonics="x" command="_rAwA8KvwEeq2aaPo7yBcWg"/>

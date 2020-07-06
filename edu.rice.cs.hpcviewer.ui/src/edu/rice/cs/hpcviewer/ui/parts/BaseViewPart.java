@@ -68,6 +68,7 @@ public abstract class BaseViewPart implements IViewPart, EventHandler, IPartList
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_REMOVE_DATABASE, this);
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN,    this);
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC,  this);
+		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE,   this);
 		
 		// subscribe to filter events
 		eventBroker.subscribe(FilterStateProvider.FILTER_REFRESH_PROVIDER, this);
@@ -143,6 +144,9 @@ public abstract class BaseViewPart implements IViewPart, EventHandler, IPartList
 		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_REMOVE_DATABASE)) {
 			// mark that this part will be destroyed
 			experiment = null;
+
+		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE)) {
+			treeViewer.refreshColumnTitle();
 		}
 	}
 
