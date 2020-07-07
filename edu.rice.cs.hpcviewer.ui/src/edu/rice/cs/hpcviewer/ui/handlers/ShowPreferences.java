@@ -7,6 +7,8 @@ import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.jface.preference.PreferenceNode;
 import org.eclipse.swt.widgets.Shell;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcviewer.ui.preferences.AppearencePage;
 import edu.rice.cs.hpcviewer.ui.preferences.MainProfilePage;
@@ -35,7 +37,12 @@ public class ShowPreferences
 		dlg.getShell().setText("Preferences");
 		dlg.getTreeViewer().expandAll();
 		
-		dlg.open();
+		try {
+			dlg.open();
+		} catch (Exception e) {
+			Logger logger = LoggerFactory.getLogger(getClass());
+			logger.error("Error in the preference dialog", e);
+		}
 	}
 		
 }

@@ -45,6 +45,8 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 	final static public String COLUMN_DATA_WIDTH = "w"; 
 	final static public int COLUMN_DEFAULT_WIDTH = 120;
 
+	private DisposeListener disposeListener;
+	
 	/**
 	 * @param parent
 	 * @param style
@@ -62,17 +64,21 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
 		pref.addPropertyChangeListener((IPropertyChangeListener) this);
 		
-		getTree().addDisposeListener(new DisposeListener() {
+		disposeListener = new DisposeListener() {
 			
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
 				dispose();
 			}
-		});
+		};
+		
+		getTree().addDisposeListener(disposeListener);
 	}
 	
 	
 	public void dispose() {
+		getTree().removeDisposeListener(disposeListener);
+
 		PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
 		pref.removePropertyChangeListener(this);
 	}

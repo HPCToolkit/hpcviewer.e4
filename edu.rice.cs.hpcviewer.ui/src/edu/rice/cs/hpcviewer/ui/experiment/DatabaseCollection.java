@@ -180,9 +180,23 @@ public class DatabaseCollection
 		if (isExist(shell, filename))
 			return;
 		
-		BaseExperiment experiment = experimentManager.loadExperiment(shell, filename);
-		
-		createViewsAndAddDatabase(experiment, application, service, modelService, parentId);
+		Job job = Job.create("Add a database", (ICoreRunnable) monitor -> {
+
+			BaseExperiment experiment;
+			try {
+				experiment = experimentManager.loadExperiment(filename);
+				
+				sync.syncExec(()-> {
+
+					createViewsAndAddDatabase(experiment, application, service, modelService, parentId);
+				});
+			} catch (Exception e) {
+				MessageDialog.openError(shell, "Error: Fail to add the database", filename + ": " + e.getMessage());
+				e.printStackTrace();
+			}			
+		});
+		job.schedule();
+
 	}
 	
 	
@@ -212,7 +226,7 @@ public class DatabaseCollection
 		if (isExist(shell, filename))
 			return;
 		
-		Job job = Job.create("Add a database", (ICoreRunnable) monitor -> {
+		Job job = Job.create("Open a database", (ICoreRunnable) monitor -> {
 
 			BaseExperiment experiment;
 			try {
