@@ -10,6 +10,7 @@ import org.eclipse.e4.ui.services.EMenuService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -592,11 +593,12 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 	 * @param deltaHeight the number of increase/decrease
 	 */
 	private void changeFontHeight(String id, int deltaHeight) {
-		FontData[]fd = FontManager.getFontDataPreference(id);
-		int height = fd[0].getHeight();
-		fd[0].setHeight(height+deltaHeight);
+		FontData []oldfd = FontManager.getFontDataPreference(id);
+		FontData []newFd = FontDescriptor.copy(oldfd);
+		int height = newFd[0].getHeight();
+		newFd[0].setHeight(height+deltaHeight);
 		try {
-			FontManager.setFontPreference(id, fd);
+			FontManager.setFontPreference(id, newFd);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

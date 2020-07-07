@@ -137,20 +137,5 @@ public class FlatScopeAction
 	private void popElementStates() {
 		Object []arrNodes = stackExpandedNodes.pop();
 		this.treeViewer.setExpandedElements(arrNodes);
-	}
-	
-	
-	private void addChildren(Scope node, Scope arrNodes) {
-		int nbChildren = node.getChildCount();
-		for(int i=0;i<nbChildren;i++) {
-			// Laksono 2009.03.04: do not add call site !
-			Scope nodeKid = ((Scope) node.getChildAt(i));
-
-			if (!(nodeKid instanceof CallSiteScope)) {
-				// the kid is a callsite: do nothing
-				// otherwise add the kid into the list of scopes to display
-				arrNodes.add(nodeKid);
-			}
-		}
-	}
+	}	
 }
