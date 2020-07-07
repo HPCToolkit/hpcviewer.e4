@@ -6,6 +6,8 @@ package edu.rice.cs.hpcviewer.ui.internal;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Layout;
@@ -59,6 +61,20 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		
 		PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
 		pref.addPropertyChangeListener((IPropertyChangeListener) this);
+		
+		getTree().addDisposeListener(new DisposeListener() {
+			
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				dispose();
+			}
+		});
+	}
+	
+	
+	public void dispose() {
+		PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
+		pref.removePropertyChangeListener(this);
 	}
 	
 	/**
