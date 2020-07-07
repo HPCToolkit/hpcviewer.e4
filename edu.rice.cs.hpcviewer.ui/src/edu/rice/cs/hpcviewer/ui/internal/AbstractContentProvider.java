@@ -6,6 +6,9 @@ import java.util.HashMap;
 import org.eclipse.jface.viewers.ILazyTreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpc.data.util.ScopeComparator;
@@ -69,8 +72,12 @@ public abstract class AbstractContentProvider
 		if (element instanceof Scope) {
 			Object []children = getSortedChildren((Scope)element);
 			int length = (children == null ? 0 : children.length);
-			
-			viewer.setChildCount(element, length);
+			try {
+				viewer.setChildCount(element, length);
+			} catch (Exception e) {
+				Logger logger = LoggerFactory.getLogger(getClass());
+				logger.error("Cannot update the child count " + element.getClass() + ": "+ element.toString(), e);
+			}
 		}
 	}
 

@@ -151,7 +151,7 @@ public final class MetricValue
 	public static boolean isAvailable(MetricValue m)
 	{
 		return ( (m != MetricValue.NONE) && getAvailable(m) && 
-				Float.compare(m.value, 0)!=0 );
+				!Float.isNaN(m.value)    && Float.compare(m.value, 0)!=0 );
 	}
 
 
