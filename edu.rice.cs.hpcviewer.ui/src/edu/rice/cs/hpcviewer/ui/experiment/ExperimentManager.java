@@ -159,6 +159,13 @@ public class ExperimentManager
 	}
 	
 	
+	public BaseExperiment loadExperiment(final String sFilename) throws Exception {
+		Experiment experiment = new Experiment();
+		experiment.open( new File(sFilename), new ProcedureAliasMap(), true );
+
+		return experiment;
+	}
+	
 	/****
 	 * 
 	 * class to block UI while reading the database

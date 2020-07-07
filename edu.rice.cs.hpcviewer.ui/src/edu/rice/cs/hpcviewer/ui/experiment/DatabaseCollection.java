@@ -13,15 +13,18 @@ import javax.inject.Singleton;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileInfo;
 import org.eclipse.core.filesystem.IFileStore;
+import org.eclipse.core.runtime.ICoreRunnable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Creatable;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.core.services.events.IEventBroker;
 
 import org.eclipse.e4.ui.di.UIEventTopic;
+import org.eclipse.e4.ui.di.UISynchronize;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.MElementContainer;
 import org.eclipse.e4.ui.model.application.ui.MUIElement;
@@ -81,6 +84,8 @@ public class DatabaseCollection
     private EModelService     modelService;
 	
 	private Logger    statusReporter;
+	
+	@Inject UISynchronize sync;
 	
 	public DatabaseCollection() {
 
@@ -200,18 +205,29 @@ public class DatabaseCollection
 			EModelService 	modelService,
 			String          parentId) {
 		
-		String filename = experimentManager.openFileExperiment(shell);
+		final String filename = experimentManager.openFileExperiment(shell);
 		if (filename == null)
 			return;
 
 		if (isExist(shell, filename))
 			return;
 		
-		BaseExperiment experiment = experimentManager.loadExperiment(shell, filename);
-		
-		removeAll();
-		
-		createViewsAndAddDatabase(experiment, application, service, modelService, parentId);
+		Job job = Job.create("Add a database", (ICoreRunnable) monitor -> {
+
+			BaseExperiment experiment;
+			try {
+				experiment = experimentManager.loadExperiment(filename);
+				
+				sync.syncExec(()-> {
+					removeAll();
+					createViewsAndAddDatabase(experiment, application, service, modelService, parentId);
+				});
+			} catch (Exception e) {
+				MessageDialog.openError(shell, "Error: Fail to open the database", filename + ": " + e.getMessage());
+				e.printStackTrace();
+			}			
+		});
+		job.schedule();
 	}
 
 	
@@ -327,7 +343,7 @@ public class DatabaseCollection
 				service.showPart(part, PartState.CREATE);
 			}			
 			IViewPart view = null;
-			int maxAttempt = 10;
+			int maxAttempt = 50;
 			
 			while(maxAttempt>0) {
 				view = (IViewPart) part.getObject();
@@ -344,8 +360,8 @@ public class DatabaseCollection
 			// has to set the element Id before populating the view
 			String elementID = ElementIdManager.getElementId(root);
 			part.setElementId(elementID);
-
-			view.setInput(part, experiment);
+			if (view != null)
+				view.setInput(part, experiment);
 		}
 		
 		statusReport(IStatus.INFO, "Open " + experiment.getDefaultDirectory().getAbsolutePath(), null);
