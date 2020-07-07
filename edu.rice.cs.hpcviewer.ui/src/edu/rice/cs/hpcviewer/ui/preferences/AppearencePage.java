@@ -56,10 +56,10 @@ public class AppearencePage extends AbstractPage
 
 		Group groupFont = createGroupControl(parent, "Fonts", false);
 		groupFont.setLayout(new GridLayout(1, false));
-        
-        fontGenericEditor = createFontEditor(groupFont, PreferenceConstants.ID_FONT_GENERIC, "Tree column font");        
-        fontMetricEditor  = createFontEditor(groupFont, PreferenceConstants.ID_FONT_METRIC,  "Metric column font");
-        fontSourceEditor  = createFontEditor(groupFont, PreferenceConstants.ID_FONT_TEXT,    "Text editor font");
+		
+        fontGenericEditor = createFontEditor(groupFont, PreferenceConstants.ID_FONT_GENERIC, "Tree column font",   FontManager.getFontGeneric());        
+        fontMetricEditor  = createFontEditor(groupFont, PreferenceConstants.ID_FONT_METRIC,  "Metric column font", FontManager.getMetricFont());
+        fontSourceEditor  = createFontEditor(groupFont, PreferenceConstants.ID_FONT_TEXT,    "Text editor font"  , FontManager.getTextEditorFont());
         
 		return parent;
 	}
@@ -84,9 +84,9 @@ public class AppearencePage extends AbstractPage
 
 	}
 	
-	private ViewerFontFieldEditor createFontEditor(Composite parent, String id, String label) {
+	private ViewerFontFieldEditor createFontEditor(Composite parent, String id, String label, Font fontDefault) {
         
-		ViewerFontFieldEditor editor = new ViewerFontFieldEditor(id, label, parent);
+		ViewerFontFieldEditor editor = new ViewerFontFieldEditor(parent, id, label, fontDefault);
 		editor.setPreferenceStore(getPreferenceStore());
 		editor.load();
         
@@ -130,11 +130,12 @@ public class AppearencePage extends AbstractPage
 		private final Composite groupFont;
 		private Font chosenFont;
 		
-		public ViewerFontFieldEditor(String id, String label, Composite parent) {
+		public ViewerFontFieldEditor(Composite parent, String id, String label, Font defaultFont) {
 			super(id, label, parent);
 			
 			this.groupFont = parent;
-			chosenFont = null;
+			chosenFont = defaultFont;
+			setFontLabel(defaultFont);
 		}
 
 		/***

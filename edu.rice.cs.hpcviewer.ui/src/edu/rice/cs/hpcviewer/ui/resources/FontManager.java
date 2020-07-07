@@ -38,9 +38,6 @@ public class FontManager
 		PreferenceStore preferenceStore = prefManager.getPreferenceStore();
 		
 		FontData []data = PreferenceConverter.getFontDataArray(preferenceStore, id);
-		if (data == PreferenceConverter.getFontDataArrayDefaultDefault()) {
-			return (Font) ViewerPreferenceManager.INSTANCE.getDefault(id);
-		}
 		
 		return resource.createFont(FontDescriptor.createFrom(data));
 	}

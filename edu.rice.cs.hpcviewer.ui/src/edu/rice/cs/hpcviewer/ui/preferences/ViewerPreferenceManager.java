@@ -1,9 +1,8 @@
 package edu.rice.cs.hpcviewer.ui.preferences;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
-
 import javax.inject.Singleton;
 
 import org.eclipse.core.runtime.IPath;
@@ -11,6 +10,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.e4.core.di.annotations.Creatable;
+import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.osgi.service.datalocation.Location;
@@ -36,8 +36,7 @@ public class ViewerPreferenceManager
 	public final static ViewerPreferenceManager INSTANCE = new ViewerPreferenceManager();
 	
 	private PreferenceStore preferenceStore;
-
-	private HashMap<String, Object> defaultPreferences;
+	
 	
 	/****
 	 * Retrieve the default preference based on {@link IEclipsePreferences}
@@ -64,6 +63,8 @@ public class ViewerPreferenceManager
 				
 				preferenceStore = new PreferenceStore(path);
 				
+				setDefaults();
+				
 				// It is highly important to load the preference store as early as possible
 				// before we use it to get the preference values
 				// If the store is not loaded, we'll end up to get the default value all the time
@@ -88,38 +89,26 @@ public class ViewerPreferenceManager
 		return directory + IPath.SEPARATOR + PREF_FILENAME;
 	}
 
-	
-	/****
-	 * get the default preference of a give preference Id.
-	 * @param id see {@link PreferenceConstants} class
-	 * @return Object 
-	 */
-	public Object getDefault(String id) {
-		initDefaults();
 		
-		return defaultPreferences.get(id);
-	}
-	
 	
 	/****
 	 * Initialize the default preferences.
+	 * @throws IOException 
 	 */
-	private void initDefaults() {
-		if (defaultPreferences != null)
-			return;
+	public void setDefaults() throws IOException {
 		
-		defaultPreferences = new HashMap<String, Object>();
+		PreferenceStore store = getPreferenceStore();
+		store.setDefault(PreferenceConstants.ID_DEBUG_MODE,    Boolean.FALSE);
+		store.setDefault(PreferenceConstants.ID_DEBUG_CCT_ID,  Boolean.FALSE);
+		store.setDefault(PreferenceConstants.ID_DEBUG_FLAT_ID, Boolean.FALSE);
 		
-		defaultPreferences.put(PreferenceConstants.ID_DEBUG_MODE,    Boolean.FALSE);
-		defaultPreferences.put(PreferenceConstants.ID_DEBUG_CCT_ID,  Boolean.FALSE);
-		defaultPreferences.put(PreferenceConstants.ID_DEBUG_FLAT_ID, Boolean.FALSE);
+		PreferenceConverter.setDefault(getPreferenceStore(), 
+				PreferenceConstants.ID_FONT_GENERIC, JFaceResources.getDefaultFont().getFontData());
+		PreferenceConverter.setDefault(getPreferenceStore(), 
+				PreferenceConstants.ID_FONT_METRIC, JFaceResources.getTextFont().getFontData());
+		PreferenceConverter.setDefault(getPreferenceStore(), 
+				PreferenceConstants.ID_FONT_TEXT, JFaceResources.getTextFont().getFontData());
 		
-		defaultPreferences.put(PreferenceConstants.ID_FONT_GENERIC, 
-							   	JFaceResources.getDefaultFont());
-		defaultPreferences.put(PreferenceConstants.ID_FONT_METRIC, 
-				   				JFaceResources.getTextFont());
-		defaultPreferences.put(PreferenceConstants.ID_FONT_TEXT, 
-   								JFaceResources.getTextFont());
 	}
 	
 	
