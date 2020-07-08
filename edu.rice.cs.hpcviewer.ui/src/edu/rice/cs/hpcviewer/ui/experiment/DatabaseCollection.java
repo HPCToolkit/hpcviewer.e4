@@ -262,17 +262,33 @@ public class DatabaseCollection
 										  EModelService  modelService,
 										  String         parentId) {
 		
-		if (experiment == null) {
-			System.err.println("null experiment");
+		if (experiment == null || service == null) {
 			return;
 		}
 		
-		if (service == null) {
-			System.out.println("Error: service is not available");
-			return;
+		int maxAttempt = 20;		
+		IEclipseContext activeWindowContext = null;
+		
+		// Corner case for TWM window manager: sometimes the processing is faster
+		// than the UI, and thus Eclipse doesn't provide any context or any child
+		// at this stage. We need to wait until it's ready.
+		
+		while(maxAttempt>0) {
+			activeWindowContext = application.getContext().getActiveChild();
+			if (activeWindowContext != null) {
+				break;
+			}
+			try {
+				Thread.yield();
+				Thread.sleep(300);	
+			} catch (Exception e) {
+				
+			}
+			maxAttempt--;
 		}
-		IEclipseContext activeWindowContext = application.getContext().getActiveChild();
 		if (activeWindowContext == null) {
+			// we give up. There's still no active window yet.
+			
 			Display display = Display.getCurrent();
 			MessageDialog.openError(display.getActiveShell(), "Error", 
 					"Cannot find an active window with this platform.\n" +
@@ -357,7 +373,7 @@ public class DatabaseCollection
 				service.showPart(part, PartState.CREATE);
 			}			
 			IViewPart view = null;
-			int maxAttempt = 50;
+			maxAttempt = 20;
 			
 			while(maxAttempt>0) {
 				view = (IViewPart) part.getObject();
