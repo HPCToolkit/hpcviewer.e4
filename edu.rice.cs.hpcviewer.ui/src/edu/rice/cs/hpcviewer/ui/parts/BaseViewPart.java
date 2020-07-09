@@ -115,7 +115,7 @@ public abstract class BaseViewPart implements IViewPart, EventHandler, IPartList
 			return;
 
 		Object obj = event.getProperty(IEventBroker.DATA);
-		if (obj == null)
+		if (obj == null || getExperiment() == null || root == null)
 			return;
 		
 		if (!(obj instanceof ViewerDataEvent)) {
