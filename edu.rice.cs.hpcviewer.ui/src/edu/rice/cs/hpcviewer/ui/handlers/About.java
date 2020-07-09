@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.net.URL;
 
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IProduct;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.e4.core.contexts.Active;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -35,12 +37,7 @@ public class About
 	@Execute
 	public void execute(@Active Shell shell) {
 		
-		AboutDialog dialog = new AboutDialog(shell, "About hpcviewer", 
-				"hpcviewer is a user interface for analyzing a database of performance metrics in conjunction with an application's source code.\n" + 
-				"\n" + 
-				"hpcviewer is part of Rice University's HPCToolkit project. Development of HPCToolkit is principally funded by the Department of Energy's Office of Science, Lawrence Livermore National Laboratory and National Science Foundation.\n" + 
-				"\n" + 
-				"Release 2020.06  (C) Copyright 2020, Rice University.");
+		AboutDialog dialog = new AboutDialog(shell);
 		
 		dialog.open();
 	}
@@ -53,13 +50,19 @@ public class About
 	 */
 	static class AboutDialog extends IconAndMessageDialog
 	{
-		private final String title;
+		// constants copied from org.eclipse.ui.branding.IProductConstants.java
+		// we cannot directly import this interface because they are part of 
+		// org.eclipse.ui bundle which will force us to use compatibility layer. 
 		
-		public AboutDialog(Shell parentShell, String title, String message) {
+		private static final String APP_NAME   = "appName";   //$NON-NLS-1$
+		private static final String ABOUT_TEXT = "aboutText"; //$NON-NLS-1$
+		
+		
+		public AboutDialog(Shell parentShell) {
 			super(parentShell);
-			
-			this.message = message;
-			this.title   = title;
+
+			IProduct product = Platform.getProduct();
+			this.message     = product.getProperty(ABOUT_TEXT);
 		}
 
 		@Override
@@ -110,6 +113,10 @@ public class About
 		@Override
 		protected void configureShell(Shell shell) {
 			super.configureShell(shell);
+
+			IProduct product = Platform.getProduct();
+			String title     = product.getProperty(APP_NAME);
+
 			if (title != null) {
 				shell.setText(title);
 			}
