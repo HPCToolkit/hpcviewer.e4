@@ -266,26 +266,12 @@ public class DatabaseCollection
 			return;
 		}
 		
-		int maxAttempt = 20;		
-		IEclipseContext activeWindowContext = null;
+		IEclipseContext activeWindowContext = application.getContext().getActiveChild();;
 		
 		// Corner case for TWM window manager: sometimes the processing is faster
 		// than the UI, and thus Eclipse doesn't provide any context or any child
-		// at this stage. We need to wait until it's ready.
+		// at this stage. Maybe we should wait until it's ready?
 		
-		while(maxAttempt>0) {
-			activeWindowContext = application.getContext().getActiveChild();
-			if (activeWindowContext != null) {
-				break;
-			}
-			try {
-				Thread.yield();
-				Thread.sleep(300);	
-			} catch (Exception e) {
-				
-			}
-			maxAttempt--;
-		}
 		if (activeWindowContext == null) {
 			// we give up. There's still no active window yet.
 			
@@ -373,8 +359,8 @@ public class DatabaseCollection
 				service.showPart(part, PartState.CREATE);
 			}			
 			IViewPart view = null;
-			maxAttempt = 20;
-			
+
+			int maxAttempt = 20;		
 			while(maxAttempt>0) {
 				view = (IViewPart) part.getObject();
 				if (view != null)
