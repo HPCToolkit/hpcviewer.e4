@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008-2014 SWTChart project. All rights reserved.
+ * Copyright (c) 2008-2016 SWTChart project. All rights reserved.
  *
  * This code is distributed under the terms of the Eclipse Public License v1.0
  * which is available at http://www.eclipse.org/legal/epl-v10.html
@@ -179,7 +179,10 @@ public class Legend extends Composite implements ILegend, PaintListener {
      * @see ILegend#getBounds(String)
      */
     public Rectangle getBounds(String seriesId) {
-        return cellBounds.get(seriesId);
+        if (seriesId == null) {
+            SWT.error(SWT.ERROR_INVALID_ARGUMENT);
+        }
+        return cellBounds.get(seriesId.trim());
     }
 
     /*
@@ -294,7 +297,7 @@ public class Legend extends Composite implements ILegend, PaintListener {
         Rectangle r = chart.getClientArea();
         Rectangle titleBounds = ((Title) chart.getTitle()).getBounds();
         int titleHeight = titleBounds.y + titleBounds.height;
-        int cellHeight = Util.getExtentInGC(getFont(), "dummy").y;
+        int cellHeight = Util.getExtentInGC(getFont(), null).y;
 
         if (position == SWT.RIGHT || position == SWT.LEFT) {
             int columns = 1;

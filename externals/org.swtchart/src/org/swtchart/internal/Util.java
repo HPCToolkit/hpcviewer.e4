@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008-2014 SWTChart project. All rights reserved. 
+ * Copyright (c) 2008-2016 SWTChart project. All rights reserved. 
  * 
  * This code is distributed under the terms of the Eclipse Public License v1.0
  * which is available at http://www.eclipse.org/legal/epl-v10.html
@@ -20,7 +20,7 @@ import org.swtchart.LineStyle;
 public final class Util {
 
     /**
-     * Gets the text extent with given font in GC. If the given text or font is
+     * Gets the text extent with given font in GC. If the given font is
      * <code>null</code> or already disposed, point containing size zero will be
      * returned.
      * 
@@ -32,7 +32,7 @@ public final class Util {
      */
     public static Point getExtentInGC(Font font, String text) {
 
-        if (text == null || font == null || font.isDisposed()) {
+        if (font == null || font.isDisposed()) {
             return new Point(0, 0);
         }
 
@@ -45,7 +45,12 @@ public final class Util {
 
         // get extent of text with given font
         gc.setFont(font);
-        Point p = gc.textExtent(text);
+        Point p;
+        if (text == null || "".equals(text.trim())) {
+            p = new Point(0, gc.getFontMetrics().getHeight());
+        } else {
+            p = gc.textExtent(text);
+        }
 
         // dispose resources
         image.dispose();

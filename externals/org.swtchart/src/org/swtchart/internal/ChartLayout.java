@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008-2014 SWTChart project. All rights reserved. 
+ * Copyright (c) 2008-2016 SWTChart project. All rights reserved. 
  * 
  * This code is distributed under the terms of the Eclipse Public License v1.0
  * which is available at http://www.eclipse.org/legal/epl-v10.html
@@ -285,18 +285,34 @@ public class ChartLayout extends Layout {
 
         // compute axis width
         for (IAxis axis : verticalAxes) {
-            int tickLabelMaxLength = ((Axis) axis).getTick()
-                    .getAxisTickLabels().getTickLabelMaxLength();
+            int tickAreaWidth = Axis.MARGIN;
+            if (axis.getTick().isVisible()) {
+                tickAreaWidth = ((Axis) axis).getTick().getAxisTickLabels()
+                        .getTickLabelMaxLength();
+            }
 
             AxisLayoutData axisLayout = axisLayoutDataMap.get(axis);
-            axisLayout.tickLabelsLayoutdata.widthHint += tickLabelMaxLength;
+            axisLayout.tickLabelsLayoutdata.widthHint += tickAreaWidth;
             if (axis.getPosition() == Position.Primary) {
-                leftAxisWidth += tickLabelMaxLength;
+                leftAxisWidth += tickAreaWidth;
             } else {
-                rightAxisWidth += tickLabelMaxLength;
+                rightAxisWidth += tickAreaWidth;
             }
         }
 
+        // compute axis height
+        for (IAxis axis : horizontalAxes) {
+            if (axis.getTick().isVisible()) {
+                continue;
+            }
+            
+            if (axis.getPosition() == Position.Primary) {
+                bottomAxisHeight += Axis.MARGIN;
+            } else {
+                topAxisHeight += Axis.MARGIN;
+            }
+        }
+        
         // update plot area width
         computePlotAreaSize(r);
 
@@ -313,7 +329,7 @@ public class ChartLayout extends Layout {
     private void adjustForRotatedTickLabels(Rectangle r) {
         for (IAxis axis : horizontalAxes) {
             double angle = axis.getTick().getTickLabelAngle();
-            if (angle == 0) {
+            if (angle == 0 || !axis.getTick().isVisible()) {
                 continue;
             }
 
@@ -325,7 +341,7 @@ public class ChartLayout extends Layout {
                     + (int) (tickLabelMaxLength
                             * Math.sin(Math.toRadians(angle)) + Util
                             .getExtentInGC(layoutData.axisTickLabels.getFont(),
-                                    "dummy").y
+                                    null).y
                             * Math.cos(Math.toRadians(angle)));
             int delta = height - layoutData.tickLabelsLayoutdata.heightHint;
             layoutData.tickLabelsLayoutdata.heightHint = height;
@@ -356,6 +372,10 @@ public class ChartLayout extends Layout {
         int rightAxisMarginHint = 0;
         int leftAxisMarginHint = 0;
         for (IAxis axis : horizontalAxes) {
+            if (!axis.getTick().isVisible()) {
+                continue;
+            }
+
             rightAxisMarginHint = Math.max(rightAxisMarginHint,
                     ((Axis) axis).getTick().getAxisTickLabels()
                             .getRightMarginHint(plotAreaWidth));

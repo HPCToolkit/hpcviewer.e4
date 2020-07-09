@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008-2014 SWTChart project. All rights reserved.
+ * Copyright (c) 2008-2016 SWTChart project. All rights reserved.
  *
  * This code is distributed under the terms of the Eclipse Public License v1.0
  * which is available at http://www.eclipse.org/legal/epl-v10.html
@@ -162,12 +162,12 @@ public class BarSeries extends Series implements IBarSeries {
         double[] comporessedXSeries = compressor.getCompressedXSeries();
         int cnt = 0;
         for (int i = 0; i < xSeries.length; i++) {
-            if (cnt < comporessedXSeries.length
-                    && comporessedXSeries[cnt] == xSeries[i]
-                    && compressedBounds[cnt].width != 0
-                    && compressedBounds[cnt].height != 0) {
-                rs[i] = compressedBounds[cnt++];
-            }
+			if (cnt < comporessedXSeries.length && comporessedXSeries[cnt] == xSeries[i]) {
+				if (compressedBounds[cnt].width != 0 && compressedBounds[cnt].height != 0) {
+					rs[i] = compressedBounds[cnt];
+				}
+				cnt++;
+			}
         }
         return rs;
     }
@@ -456,10 +456,18 @@ public class BarSeries extends Series implements IBarSeries {
 
                 int h, v;
                 if (xAxis.isHorizontalAxis()) {
-                    h = xAxis.getPixelCoordinate(xSeries[indexes[i]]);
+                    if (xAxis.isCategoryEnabled()) {
+                        h = rs[i].x + rs[i].width / 2;
+                    } else {
+                        h = xAxis.getPixelCoordinate(xSeries[indexes[i]]);
+                    }
                     v = yAxis.getPixelCoordinate(ySeries[indexes[i]]);
                 } else {
-                    v = xAxis.getPixelCoordinate(xSeries[indexes[i]]);
+                    if (xAxis.isCategoryEnabled()) {
+                        v = rs[i].y + rs[i].height / 2;
+                    } else {
+                        v = xAxis.getPixelCoordinate(xSeries[indexes[i]]);
+                    }
                     h = yAxis.getPixelCoordinate(ySeries[indexes[i]]);
                 }
                 xErrorBar.draw(gc, h, v, xAxis, indexes[i]);

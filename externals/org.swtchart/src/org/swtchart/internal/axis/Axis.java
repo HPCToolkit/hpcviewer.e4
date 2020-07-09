@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008-2014 SWTChart project. All rights reserved. 
+ * Copyright (c) 2008-2016 SWTChart project. All rights reserved. 
  * 
  * This code is distributed under the terms of the Eclipse Public License v1.0
  * which is available at http://www.eclipse.org/legal/epl-v10.html
@@ -379,14 +379,10 @@ public class Axis implements IAxis {
             // get min and max value of series
             Range range = ((Series) series).getAdjustedRange(this, length);
             if (Double.isNaN(minimum) || range.lower < minimum) {
-            	if (!Double.isInfinite(range.lower)) {
-                    minimum = range.lower;
-            	}
+                minimum = range.lower;
             }
             if (Double.isNaN(maximum) || range.upper > maximum) {
-            	if (!Double.isInfinite(range.upper)) {
-                    maximum = range.upper;
-            	}
+                maximum = range.upper;
             }
         }
 

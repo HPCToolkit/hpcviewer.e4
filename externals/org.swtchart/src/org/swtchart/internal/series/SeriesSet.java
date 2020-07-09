@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008-2014 SWTChart project. All rights reserved.
+ * Copyright (c) 2008-2016 SWTChart project. All rights reserved.
  *
  * This code is distributed under the terms of the Eclipse Public License v1.0
  * which is available at http://www.eclipse.org/legal/epl-v10.html
@@ -56,23 +56,23 @@ public class SeriesSet implements ISeriesSet {
             return null; // to suppress warning...
         }
 
-        String identifier = id.trim();
+        String trimmedId = id.trim();
 
-        if ("".equals(identifier)) {
+        if ("".equals(trimmedId)) {
             SWT.error(SWT.ERROR_INVALID_ARGUMENT);
         }
 
         Series series = null;
         if (type == SeriesType.BAR) {
-            series = new BarSeries(chart, identifier);
+            series = new BarSeries(chart, trimmedId);
         } else if (type == SeriesType.LINE) {
-            series = new LineSeries(chart, identifier);
+            series = new LineSeries(chart, trimmedId);
         } else {
             SWT.error(SWT.ERROR_INVALID_ARGUMENT);
             return null; // to suppress warning...
         }
 
-        Series oldSeries = seriesMap.get(identifier);
+        Series oldSeries = seriesMap.get(trimmedId);
         if (oldSeries != null) {
             oldSeries.dispose();
         }
@@ -82,7 +82,7 @@ public class SeriesSet implements ISeriesSet {
         series.setXAxisId(xAxisIds[0]);
         series.setYAxisId(yAxisIds[0]);
 
-        seriesMap.put(identifier, series);
+        seriesMap.put(trimmedId, series);
 
         Axis axis = (Axis) chart.getAxisSet().getXAxis(xAxisIds[0]);
         if (axis != null) {
@@ -103,7 +103,8 @@ public class SeriesSet implements ISeriesSet {
             SWT.error(SWT.ERROR_NULL_ARGUMENT);
         }
 
-        return seriesMap.get(id);
+        String trimmedId = id.trim();
+        return seriesMap.get(trimmedId);
     }
 
     /*
@@ -123,10 +124,10 @@ public class SeriesSet implements ISeriesSet {
      * @see ISeriesSet#deleteSeries(String)
      */
     public void deleteSeries(String id) {
-        validateSeriesId(id);
+    	String trimmedId = validateSeriesId(id);
 
-        seriesMap.get(id).dispose();
-        seriesMap.remove(id);
+        seriesMap.get(trimmedId).dispose();
+        seriesMap.remove(trimmedId);
 
         updateStackAndRiserData();
 
@@ -138,14 +139,14 @@ public class SeriesSet implements ISeriesSet {
      * @see ISeriesSet#bringForward(String)
      */
     public void bringForward(String id) {
-        validateSeriesId(id);
+    	String trimmedId = validateSeriesId(id);
 
         String seriesId = null;
         LinkedHashMap<String, Series> newSeriesMap = new LinkedHashMap<String, Series>();
         for (Entry<String, Series> entry : seriesMap.entrySet()) {
 
-            if (entry.getKey().equals(id)) {
-                seriesId = id;
+            if (entry.getKey().equals(trimmedId)) {
+                seriesId = trimmedId;
                 continue;
             }
 
@@ -169,10 +170,10 @@ public class SeriesSet implements ISeriesSet {
      * @see ISeriesSet#bringToFront(String)
      */
     public void bringToFront(String id) {
-        validateSeriesId(id);
+    	String trimmedId = validateSeriesId(id);
 
-        Series series = seriesMap.get(id);
-        seriesMap.remove(id);
+        Series series = seriesMap.get(trimmedId);
+        seriesMap.remove(trimmedId);
         seriesMap.put(series.getId(), series);
 
         updateStackAndRiserData();
@@ -183,13 +184,13 @@ public class SeriesSet implements ISeriesSet {
      * @see ISeriesSet#sendBackward(String)
      */
     public void sendBackward(String id) {
-        validateSeriesId(id);
+    	String trimmedId = validateSeriesId(id);
 
         String seriesId = null;
         LinkedHashMap<String, Series> newSeriesMap = new LinkedHashMap<String, Series>();
         for (Entry<String, Series> entry : seriesMap.entrySet()) {
 
-            if (!entry.getKey().equals(id) || seriesId == null) {
+            if (!entry.getKey().equals(trimmedId) || seriesId == null) {
                 newSeriesMap.put(entry.getKey(), entry.getValue());
                 seriesId = entry.getKey();
                 continue;
@@ -209,12 +210,12 @@ public class SeriesSet implements ISeriesSet {
      * @see ISeriesSet#sendToBack(String)
      */
     public void sendToBack(String id) {
-        validateSeriesId(id);
+    	String trimmedId = validateSeriesId(id);
 
         LinkedHashMap<String, Series> newSeriesMap = new LinkedHashMap<String, Series>();
-        newSeriesMap.put(id, seriesMap.get(id));
+        newSeriesMap.put(trimmedId, seriesMap.get(trimmedId));
         for (Entry<String, Series> entry : seriesMap.entrySet()) {
-            if (!entry.getKey().equals(id)) {
+            if (!entry.getKey().equals(trimmedId)) {
                 newSeriesMap.put(entry.getKey(), entry.getValue());
             }
         }
@@ -238,14 +239,19 @@ public class SeriesSet implements ISeriesSet {
      * 
      * @param id
      *            the series id.
+     * @return the valid series id
      */
-    private void validateSeriesId(String id) {
+    private String validateSeriesId(String id) {
         if (id == null) {
             SWT.error(SWT.ERROR_NULL_ARGUMENT);
         }
-        if (seriesMap.get(id) == null) {
+
+        String trimmedId = id.trim();
+        if (seriesMap.get(trimmedId) == null) {
             throw new IllegalArgumentException("Given series id doesn't exist");
         }
+
+        return trimmedId;
     }
 
     /**

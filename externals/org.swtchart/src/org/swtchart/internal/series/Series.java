@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008-2014 SWTChart project. All rights reserved.
+ * Copyright (c) 2008-2016 SWTChart project. All rights reserved.
  *
  * This code is distributed under the terms of the Eclipse Public License v1.0
  * which is available at http://www.eclipse.org/legal/epl-v10.html
@@ -264,11 +264,9 @@ abstract public class Series implements ISeries {
         }
 
         // find the min and max value of y series
-        minY = Double.MAX_VALUE;
-        maxY = Double.MIN_VALUE;
-        for (int i = 0; i < ySeries.length; i++) {
-        	if (isInvalidSeries(ySeries[i]))
-        		continue;
+        minY = ySeries[0];
+        maxY = ySeries[0];
+        for (int i = 1; i < ySeries.length; i++) {
             if (minY > ySeries[i]) {
                 minY = ySeries[i];
             }
@@ -671,18 +669,6 @@ abstract public class Series implements ISeries {
         }
 
         draw(gc, width, height, xAxis, yAxis);
-    }
-    
-    /**
-     * Returns if the value is invalid or not.
-     * Temporarily, we set any NaN value is invalid. In the future, it should
-     * be customizable by the user.
-     * 
-     * @param value : value to check
-     * @return true if it's invalid, false otherwise
-     */
-    static protected boolean isInvalidSeries(double value) {
-    	return Double.isNaN(value);
     }
 
     /**
