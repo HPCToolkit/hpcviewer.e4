@@ -208,15 +208,19 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 				}
 			}
 		}
-		refresh(need_to_update);
 		
 		// -----------------------------------------------------------------
 		// refresh the table, and insert the top row back to the table
 		//	with the new value of the derived metric
 		// -----------------------------------------------------------------
-		TreeItem item = getTree().getItem(0);
-		Image imgItem = item.getImage(0);
-		Utilities.insertTopRow(this, imgItem, sText);
+		if (need_to_update) {
+			TreeItem item = getTree().getItem(0);
+			Image imgItem = item.getImage(0);
+
+			refresh();
+			
+			Utilities.insertTopRow(this, imgItem, sText);
+		}
 	}
 	
     /**
@@ -341,8 +345,6 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
     	if (getTree().isDisposed())
     		return;
 		
-		getTree().setRedraw(false);
-    	
 		TreeColumn []columns = getTree().getColumns();
 
 		boolean []toShow = new boolean[columns.length];
@@ -430,7 +432,6 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 			
 			column.setWidth(iWidth);
 		}
-		getTree().setRedraw(true);
     }
 
 
@@ -469,6 +470,7 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 								   property.equals(PreferenceConstants.ID_DEBUG_FLAT_ID) ); 
 		
 		if (need_to_refresh) {
+			// refresh the table, but we don't change the content
 			refresh(false);
 			Scope root = (Scope) getInput();
 			if (root != null)
