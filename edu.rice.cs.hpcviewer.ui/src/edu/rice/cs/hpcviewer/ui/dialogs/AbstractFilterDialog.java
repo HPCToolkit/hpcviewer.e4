@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.util;
+package edu.rice.cs.hpcviewer.ui.dialogs;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -32,6 +32,9 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+
+import edu.rice.cs.hpcviewer.ui.util.FilterDataItem;
+import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
 
 public abstract class AbstractFilterDialog extends TitleAreaDialog 

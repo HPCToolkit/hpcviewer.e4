@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.metric;
+package edu.rice.cs.hpcviewer.ui.dialogs;
 
 import java.util.ArrayList;
 import org.eclipse.jface.dialogs.Dialog;

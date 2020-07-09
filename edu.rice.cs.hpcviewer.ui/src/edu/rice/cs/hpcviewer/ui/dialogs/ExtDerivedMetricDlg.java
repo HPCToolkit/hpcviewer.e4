@@ -1,7 +1,7 @@
 /**
  * 
  */
-package edu.rice.cs.hpcviewer.ui.metric;
+package edu.rice.cs.hpcviewer.ui.dialogs;
 
 // jface
 import java.util.Formatter;

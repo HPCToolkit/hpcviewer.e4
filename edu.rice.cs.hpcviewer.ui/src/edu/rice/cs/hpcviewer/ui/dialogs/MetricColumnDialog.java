@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.metric;
+package edu.rice.cs.hpcviewer.ui.dialogs;
 
 import java.util.List;
 
@@ -10,7 +10,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.osgi.service.prefs.Preferences;
 
 import edu.rice.cs.hpcbase.map.UserInputHistory;
-import edu.rice.cs.hpcviewer.ui.util.AbstractFilterDialog;
 import edu.rice.cs.hpcviewer.ui.util.FilterDataItem;
 
 /*************************************************************

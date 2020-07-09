@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.parts.thread;
+package edu.rice.cs.hpcviewer.ui.dialogs;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,7 +7,6 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
-import edu.rice.cs.hpcviewer.ui.util.AbstractFilterDialog;
 import edu.rice.cs.hpcviewer.ui.util.FilterDataItem;
 
 public class ThreadFilterDialog extends AbstractFilterDialog {

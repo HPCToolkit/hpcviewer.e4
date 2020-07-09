@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
+import edu.rice.cs.hpcviewer.ui.dialogs.ThreadFilterDialog;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.parts.IViewPart;
 import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;

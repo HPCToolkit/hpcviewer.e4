@@ -18,9 +18,9 @@ import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.util.Constants;
+import edu.rice.cs.hpcviewer.ui.dialogs.MetricPropertyDialog;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
-import edu.rice.cs.hpcviewer.ui.metric.MetricPropertyDialog;
 
 import java.io.File;
 import java.util.ArrayList;
