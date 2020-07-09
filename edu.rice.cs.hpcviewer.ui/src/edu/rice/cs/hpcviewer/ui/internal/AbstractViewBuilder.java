@@ -8,6 +8,8 @@ import javax.annotation.PreDestroy;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.services.EMenuService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.resource.FontDescriptor;
@@ -17,6 +19,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.FontData;
@@ -211,9 +215,31 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 		// initialize tool item handler at the end
 		// because we need access to tree viewer :-( 
 		setToolItemHandlers();
-		
-		menuService.registerContextMenu(treeViewer.getControl(), 
-				"edu.rice.cs.hpcviewer.ui.popupmenu.table");
+
+		final ExporTable export = new ExporTable(treeViewer, lblMessage);
+		final Action a = new Action("Copy") {
+			@Override
+			public void run() {
+				StringBuffer sb = export.getSelectedRows();
+				
+				Clipboard clipboard = new Clipboard(treeViewer.getTree().getDisplay());
+			    TextTransfer [] textTransfer = {TextTransfer.getInstance()};
+			    clipboard.setContents(new Object [] {sb.toString()}, textTransfer);
+			    clipboard.dispose();
+			}
+        };
+        
+        final MenuManager mgr = new MenuManager();
+        mgr.setRemoveAllWhenShown(true);
+
+        mgr.addMenuListener(manager -> {
+                IStructuredSelection selection = treeViewer.getStructuredSelection();
+                if (!selection.isEmpty()) {
+                        a.setText("Copy to clipboard");
+                        mgr.add(a);
+                }
+        });
+        treeViewer.getControl().setMenu(mgr.createContextMenu(treeViewer.getControl()));
 	}
 
 	

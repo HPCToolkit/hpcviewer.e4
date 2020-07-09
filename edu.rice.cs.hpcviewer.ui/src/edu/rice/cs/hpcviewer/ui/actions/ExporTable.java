@@ -5,9 +5,11 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
@@ -28,6 +30,7 @@ public class ExporTable
      * Constant comma separator. Should be configurable somewhere instead of a constant
      */
     final private String COMMA_SEPARATOR = ",";
+    final private String SPACE_SEPARATOR = "  ";
 
 	final private ScopeTreeViewer treeViewer;
 	final private IUserMessage    message;
@@ -161,6 +164,30 @@ public class ExporTable
     	return sbText.toString();
 	}
 	
+	
+	/****
+	 * Return the selected items in a table.
+	 * It supports multi-line selections.
+	 * @return StringBuffer of the selected items
+	 */
+	public StringBuffer getSelectedRows() {
+		ITreeSelection selection = treeViewer.getStructuredSelection();
+		
+		@SuppressWarnings("unchecked")
+		Iterator<Object> iterator = selection.iterator();
+		
+		StringBuffer sb = new StringBuffer();
+		
+		while(iterator.hasNext()) {
+			Object o = iterator.next();
+			if (o instanceof Scope) {
+				saveContentIntoBuffer(sb, (Scope) o, SPACE_SEPARATOR);
+			} else {
+				saveContentIntoBuffer(sb, (Scope) treeViewer.getInput(), SPACE_SEPARATOR);
+			}
+		}
+		return sb;
+	}
 	
 	/**
 	 * private function to copy a scope node into a buffer string
