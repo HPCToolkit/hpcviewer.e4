@@ -285,8 +285,9 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 				col.pack();
 			}
 		}
-		updateStatus();
 		
+		updateStatus();
+
 		// synchronize hide/show columns with other views that already visible
 		// since this view is just created, we need to ensure the columns hide/show
 		// are the same.
@@ -348,11 +349,16 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
     }
 
 	
-	private void removeColumns() {
+    /****
+     * Dispose all the columns (it doesn't really remove it)
+     * @return
+     */
+	private int removeColumns() {
 		TreeColumn columns[] = treeViewer.getTree().getColumns();
 		for (TreeColumn col : columns) {
 			col.dispose();
 		}
+		return columns.length;
 	}
 	
 	
