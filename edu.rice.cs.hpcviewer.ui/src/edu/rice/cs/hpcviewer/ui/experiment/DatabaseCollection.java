@@ -131,7 +131,6 @@ public class DatabaseCollection
 		if (myShell == null) {
 			myShell = new Shell(SWT.TOOL | SWT.NO_TRIM);
 		}
-		BaseExperiment experiment    = null;
 		
 		String path = null;
 		
@@ -147,11 +146,17 @@ public class DatabaseCollection
 			if (path == null)
 				return; 
 		}
-		experiment = openDatabase(myShell, path);
+		final BaseExperiment experiment = openDatabase(myShell, path);
 		if (experiment == null)
 			return;
 		
-		createViewsAndAddDatabase(experiment, application, partService, modelService, null);
+		display.asyncExec(new Runnable() {
+			
+			@Override
+			public void run() {
+				createViewsAndAddDatabase(experiment, application, partService, modelService, null);
+			}
+		});
 	}
 	
 
