@@ -10,6 +10,7 @@ import javax.annotation.PostConstruct;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.swtchart.Chart;
 import org.swtchart.IAxisSet;
 import org.swtchart.IAxisTick;
@@ -118,7 +119,16 @@ public abstract class AbstractGraphViewer implements IUpperPart
 		// 	finishes its layout.
 		// -----------------------------------------------------------------
 
-		chart.getAxisSet().adjustRange();
+		// have to adjust the range separately on E4.
+		
+		Display display = Display.getDefault();
+		display.asyncExec(new Runnable() {
+			
+			@Override
+			public void run() {
+				chart.getAxisSet().adjustRange();
+			}
+		});
 	}
 	
 	protected GraphEditorInput getInput() {
