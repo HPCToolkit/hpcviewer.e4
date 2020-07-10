@@ -454,6 +454,9 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		// if we put this before the refresh, somehow it doesn't work
 		
 		Object root = getInput();
+		if (root == null)
+			return;
+		
 		insertParentNode((Scope) root);
 		
 		tree.setRedraw(true);
