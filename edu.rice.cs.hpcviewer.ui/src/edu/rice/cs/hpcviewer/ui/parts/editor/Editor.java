@@ -27,7 +27,9 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.FindReplaceDocumentAdapter;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.source.AnnotationModel;
@@ -59,6 +61,9 @@ public class Editor implements IUpperPart
 	
 	private SourceViewer textViewer;
 	private Object input;
+	private int    searchOffset;
+	private FindReplaceDocumentAdapter finder;
+	
 	
 	@Inject IEventBroker broker;
 	@Inject MPart part;
@@ -127,10 +132,62 @@ public class Editor implements IUpperPart
 	    return contentBuilder.toString();
 	}
 
+	
+	public boolean search(String text) {
+
+		IRegion ir;
+		
+		try {
+			if ((ir = finder.find(searchOffset, text, true, false, false, false)) != null) {
+				
+				setMarker(ir);
+				searchOffset = ir.getOffset() + ir.getLength();
+				return true;
+			}
+		} catch (BadLocationException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
 
 	@Override
-	public void setMarker(int lineNumber) {}
+	public void setMarker(int lineNumber) {
+		
+		IDocument document = textViewer.getDocument();
+		
+		int maxLines = document.getNumberOfLines();
+		lineNumber     = Math.max(0, Math.min(lineNumber, maxLines));
 
+		try {
+			int offset     = document.getLineOffset(lineNumber);
+			int nextLine   = Math.min(lineNumber+1, maxLines);
+			int nextOffset = document.getLineOffset(nextLine);
+			int length     = Math.max(1, nextOffset - offset);
+			
+			document.addPosition(new Position(offset));
+			
+			TextSelection selection = new TextSelection(document, offset, length);
+			textViewer.setSelection(selection, true);
+			
+		} catch (BadLocationException e) {
+			e.printStackTrace();
+		}
+	}
+
+	
+	public void setMarker(IRegion region) {
+		IDocument document = textViewer.getDocument();
+		try {
+			document.addPosition(new Position(region.getOffset()));
+		} catch (BadLocationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		TextSelection selection = new TextSelection(document, region.getOffset(), region.getLength());
+		textViewer.setSelection(selection, true);
+	}
+	
 	@Override
 	public String getTitle() {
 		return Editor.getTitle(input);
@@ -187,6 +244,7 @@ public class Editor implements IUpperPart
 	}
 
 	
+	
 	/***
 	 * Display the content of a file, and highligjt a specified line number (generic version).
 	 * 
@@ -205,24 +263,9 @@ public class Editor implements IUpperPart
 
 		textViewer.setDocument(document, annModel);
 		textViewer.setData(PROPERTY_DATA, obj);
-				
-		try {
-			int maxLines = document.getNumberOfLines();
-			
-			lineNumber     = Math.max(0, Math.min(lineNumber, maxLines));
-			int offset     = document.getLineOffset(lineNumber);
-			int nextLine   = Math.min(lineNumber+1, maxLines);
-			int nextOffset = document.getLineOffset(nextLine);
-			int length     = Math.max(1, nextOffset - offset);
-			
-			document.addPosition(new Position(offset));
-			
-			TextSelection selection = new TextSelection(document, offset, length);
-			textViewer.setSelection(selection, true);
-			
-		} catch (BadLocationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
+		finder = new FindReplaceDocumentAdapter(document);
+
+		setMarker(lineNumber);
 	}
 }
