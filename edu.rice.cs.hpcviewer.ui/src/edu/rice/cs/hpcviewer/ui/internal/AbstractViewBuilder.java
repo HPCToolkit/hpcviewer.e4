@@ -43,7 +43,7 @@ import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
 import edu.rice.cs.hpc.data.experiment.metric.MetricValue;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
-import edu.rice.cs.hpcviewer.ui.actions.ExporTable;
+import edu.rice.cs.hpcviewer.ui.actions.ExportTable;
 import edu.rice.cs.hpcviewer.ui.actions.HotCallPath;
 import edu.rice.cs.hpcviewer.ui.actions.MetricColumnHideShowAction;
 import edu.rice.cs.hpcviewer.ui.actions.ZoomAction;
@@ -113,7 +113,7 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 	
 	private ZoomAction  zoomAction    = null;
 	private HotCallPath hotPathAction = null;
-	private ExporTable   exportCSV     = null;
+	private ExportTable   exportCSV     = null;
 	
 	private MetricColumnHideShowAction metricAction = null;
 	private UserDerivedMetric derivedMetricAction   = null;
@@ -216,7 +216,7 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 		// because we need access to tree viewer :-( 
 		setToolItemHandlers();
 
-		final ExporTable export = new ExporTable(treeViewer, lblMessage);
+		final ExportTable export = new ExportTable(treeViewer, lblMessage);
 		final Action a = new Action("Copy") {
 			@Override
 			public void run() {
@@ -584,7 +584,7 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (exportCSV == null) {
-					exportCSV = new ExporTable(treeViewer, lblMessage);
+					exportCSV = new ExportTable(treeViewer, lblMessage);
 				}
 				exportCSV.export();
 			}

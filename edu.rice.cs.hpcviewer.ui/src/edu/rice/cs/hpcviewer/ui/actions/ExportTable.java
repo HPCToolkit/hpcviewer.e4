@@ -23,7 +23,7 @@ import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
-public class ExporTable 
+public class ExportTable 
 {
     
     /**
@@ -35,7 +35,7 @@ public class ExporTable
 	final private ScopeTreeViewer treeViewer;
 	final private IUserMessage    message;
 	
-	public ExporTable(ScopeTreeViewer viewer, IUserMessage message) {
+	public ExportTable(ScopeTreeViewer viewer, IUserMessage message) {
 		
 		this.treeViewer = viewer;
 		this.message    = message;
