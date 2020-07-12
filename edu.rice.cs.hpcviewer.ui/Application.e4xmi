@@ -81,11 +81,13 @@
   <handlers xmi:id="_AChSwLpkEeqjBNbAJCPSRg" elementId="edu.rice.cs.hpcviewer.ui.handler.preference" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.ShowPreferences" command="_svnesLpjEeqjBNbAJCPSRg"/>
   <handlers xmi:id="_ZlWvYL17EeqIaLNodVh-xg" elementId="edu.rice.cs.hpcviewer.ui.handler.showMetric" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.ShowMetrics" command="_XIwxIL17EeqIaLNodVh-xg"/>
   <handlers xmi:id="_SsIPYMH9Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpcviewer.ui.handler.0" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.Find" command="_JcLG8MH9Eeqcdd3a7pzIFA"/>
+  <handlers xmi:id="_HASFAMP6Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpcviewer.ui.handler.copy" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.Copy" command="_Cqsk0MP6Eeqcdd3a7pzIFA"/>
   <bindingTables xmi:id="_7fwrAKqFEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.bindingtable.file" bindingContext="_c3AF2cjYEeSyMNYR5xypkQ">
     <bindings xmi:id="_-3xvsKqFEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.keybinding.open" keySequence="M1+O" command="_U14sMI7vEeqBPbXbG7_Dzw"/>
     <bindings xmi:id="_k4-EoKuTEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.keybinding.add" keySequence="M1+A" command="_cPW0II7vEeqBPbXbG7_Dzw"/>
     <bindings xmi:id="_lyW3ALWUEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.keybinding.new" keySequence="M1+N" command="_FHXw4LV7EeqkhNpo_ZhE2A"/>
     <bindings xmi:id="_L2SY8MH9Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpcviewer.ui.keybinding.find" keySequence="M1+F" command="_JcLG8MH9Eeqcdd3a7pzIFA"/>
+    <bindings xmi:id="_-xKHcMP5Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpcviewer.ui.keybinding.copy" keySequence="M1+C" command="_Cqsk0MP6Eeqcdd3a7pzIFA"/>
   </bindingTables>
   <rootContext xmi:id="_c3AF2cjYEeSyMNYR5xypkQ" elementId="org.eclipse.ui.contexts.dialogAndWindow" name="In Dialog and Windows">
     <children xmi:id="_c3AF2sjYEeSyMNYR5xypkQ" elementId="org.eclipse.ui.contexts.window" name="In Windows"/>
@@ -171,6 +173,7 @@
   <commands xmi:id="_svnesLpjEeqjBNbAJCPSRg" elementId="org.eclipse.ui.window.preferences" commandName="Preferences" description="Show the preferences"/>
   <commands xmi:id="_XIwxIL17EeqIaLNodVh-xg" elementId="edu.rice.cs.hpcviewer.ui.command.showMetric" commandName="Show metrics"/>
   <commands xmi:id="_JcLG8MH9Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpcviewer.ui.command.find" commandName="Find" description="Find a text"/>
+  <commands xmi:id="_Cqsk0MP6Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpcviewer.ui.command.copy" commandName="Copy"/>
   <addons xmi:id="_c3AF0sjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.core.commands.service" contributionURI="bundleclass://org.eclipse.e4.core.commands/org.eclipse.e4.core.commands.CommandServiceAddon"/>
   <addons xmi:id="_c3AF08jYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.contexts.service" contributionURI="bundleclass://org.eclipse.e4.ui.services/org.eclipse.e4.ui.services.ContextServiceAddon"/>
   <addons xmi:id="_c3AF1MjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.bindings.service" contributionURI="bundleclass://org.eclipse.e4.ui.bindings/org.eclipse.e4.ui.bindings.BindingServiceAddon"/>
