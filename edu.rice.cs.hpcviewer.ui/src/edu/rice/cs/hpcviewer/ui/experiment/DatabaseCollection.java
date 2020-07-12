@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.eclipse.core.filesystem.EFS;
@@ -32,6 +33,7 @@ import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
 import org.eclipse.e4.ui.model.application.ui.basic.MStackElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
+import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
@@ -110,7 +112,7 @@ public class DatabaseCollection
 			final MApplication   application,
 			final EPartService   partService,
 			final IEventBroker   broker,
-			final EModelService  modelService) {
+			final EModelService  modelService, @Named(IServiceConstants.ACTIVE_SHELL) Shell myShell) {
 		
 		this.partService    = partService;
 		this.eventBroker    = broker;
@@ -126,7 +128,7 @@ public class DatabaseCollection
 		String args[] = Platform.getApplicationArgs();
 		
 		Display display = Display.getCurrent();
-		Shell myShell   = display.getActiveShell();
+		//Shell myShell   = display.getActiveShell();
 		
 		if (myShell == null) {
 			myShell = new Shell(SWT.TOOL | SWT.NO_TRIM);
