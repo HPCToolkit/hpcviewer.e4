@@ -10,6 +10,7 @@ import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpc.data.experiment.scope.visitors.DisposeResourcesVisitor;
 import edu.rice.cs.hpc.data.experiment.scope.visitors.FilterScopeVisitor;
 import edu.rice.cs.hpc.data.filter.IFilterData;
+import edu.rice.cs.hpc.data.trace.TraceAttribute;
 import edu.rice.cs.hpc.data.util.IUserData;
 
 
@@ -45,7 +46,9 @@ public abstract class BaseExperiment implements IExperiment
 	private int min_cctid, max_cctid;
 	private int filterNumScopes = 0, filterStatus;
 	
-	
+	/***** attributes of the traces ***/
+	private TraceAttribute attribute;
+
 	/***
 	 * the root scope of the experiment
 	 * 
@@ -331,6 +334,27 @@ public abstract class BaseExperiment implements IExperiment
 		return max_cctid;
 	}
 	
+	
+	/******
+	 * set the trace attributes (if the tracefile exist)
+	 * @param _attribute
+	 */
+	public void setTraceAttribute(TraceAttribute _attribute) {
+		this.attribute = _attribute;
+	}
+
+
+	/*****
+	 * get the trace attributes. If the database has no traces,
+	 * it return null
+	 * 
+	 * @return trace attributes
+	 */
+	public TraceAttribute getTraceAttribute() {
+		return this.attribute;
+	}
+
+
 	/************************************************************************
 	 * In case the experiment has a CCT, continue to create callers tree and
 	 * flat tree for the finalization.

@@ -43,23 +43,6 @@ public class ExperimentWithoutMetrics extends BaseExperiment
 		return this.attribute;
 	}
 
-	/******
-	 * hack : check the existence of tracefile by looking at the attribute
-	 * (case for format 2.0) or the trace filename (case for format 3.0)
-	 * @return
-	 */
-	public boolean tracefileExist() {
-		boolean result = false;
-		if (version.charAt(0) == '2') {
-			// version 2.0
-			result = (attribute != null);
-		} else if (version.charAt(0) == '3') {
-			// version 3.0
-			result = getDbFilename(Db_File_Type.DB_TRACE) != null;
-		}
-		return result;
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * @see edu.rice.cs.hpc.data.experiment.IExperiment#duplicate()

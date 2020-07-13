@@ -11,7 +11,6 @@ import java.util.Stack;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.ExperimentConfiguration;
-import edu.rice.cs.hpc.data.experiment.ExperimentWithoutMetrics;
 import edu.rice.cs.hpc.data.experiment.scope.AlienScope;
 import edu.rice.cs.hpc.data.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpc.data.experiment.scope.CallSiteScopeType;
@@ -1047,9 +1046,6 @@ public class BaseExperimentBuilder extends Builder {
 		// the database contains trace data. If the caller is hpcviewer, we don't need
 		// this xml tags, and we should skip it.
 		
-		if (!(experiment instanceof ExperimentWithoutMetrics))
-			return;
-		
 		TraceAttribute attribute = new TraceAttribute();
 		
 		attribute.dbUnitTime = TraceAttribute.PER_NANO_SECOND;
@@ -1079,7 +1075,7 @@ public class BaseExperimentBuilder extends Builder {
 				attribute.dbHeaderSize = Integer.parseInt(values[i]);
 			}
 		}
-		((ExperimentWithoutMetrics)experiment).setTraceAttribute(attribute);
+		experiment.setTraceAttribute(attribute);
 	}
 
 

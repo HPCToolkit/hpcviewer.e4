@@ -4,6 +4,7 @@ package edu.rice.cs.hpcviewer.ui.handlers;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.advanced.MPerspective;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
@@ -15,12 +16,15 @@ import org.eclipse.e4.core.di.annotations.CanExecute;
 
 import javax.inject.Named;
 
+import edu.rice.cs.hpc.data.experiment.BaseExperiment;
+import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpctraceviewer.ui.main.HPCTraceView;
+import edu.rice.cs.hpcviewer.ui.parts.IBasePart;
 
 public class ShowTrace 
 {
 	@Execute
-	public void execute(EModelService ms, 
+	public void execute( 
 			MApplication  application, 
 			MWindow       window,
 			EPartService  partService,
@@ -70,9 +74,14 @@ public class ShowTrace
 	
 	
 	@CanExecute
-	public boolean canExecute() {
+	public boolean canExecute(@Named(IServiceConstants.ACTIVE_PART) MPart part) {
+		if (part == null || (part.getObject() == null))
+			return false;
 		
-		return true;
+		IBasePart objPart = (IBasePart) part.getObject();
+		BaseExperiment experiment = objPart.getExperiment();
+		
+		return (experiment.getTraceAttribute() != null);
 	}
 		
 }
