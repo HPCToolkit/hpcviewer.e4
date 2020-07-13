@@ -55,6 +55,7 @@
           <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_LrongL1wEeqIaLNodVh-xg" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DebugMode"/>
           <children xsi:type="menu:HandledMenuItem" xmi:id="_OUj-8KwUEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.viewXML" label="View experiment.xml file" tooltip="View the current experiment.xml file" mnemonics="x" command="_rAwA8KvwEeq2aaPo7yBcWg"/>
         </children>
+        <children xsi:type="menu:HandledMenuItem" xmi:id="_mEUykMP_Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.trace" label="Show traces" tooltip="Show the traces of the application (if available)" mnemonics="t" command="_tEHPMMP_Eeqcdd3a7pzIFA"/>
       </children>
       <children xsi:type="menu:Menu" xmi:id="_mNeQQLgGEeqKXeCFC-fF9Q" elementId="edu.rice.cs.hpcviewer.ui.menu.filter" label="Filter" mnemonics="i"/>
       <children xsi:type="menu:Menu" xmi:id="_AHiwkK3KEeqAHZLWafP1YQ" elementId="edu.rice.cs.hpcviewer.ui.menu.window" label="Window" mnemonics="W">
@@ -82,6 +83,7 @@
   <handlers xmi:id="_ZlWvYL17EeqIaLNodVh-xg" elementId="edu.rice.cs.hpcviewer.ui.handler.showMetric" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.ShowMetrics" command="_XIwxIL17EeqIaLNodVh-xg"/>
   <handlers xmi:id="_SsIPYMH9Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpcviewer.ui.handler.0" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.Find" command="_JcLG8MH9Eeqcdd3a7pzIFA"/>
   <handlers xmi:id="_HASFAMP6Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpcviewer.ui.handler.copy" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.Copy" command="_Cqsk0MP6Eeqcdd3a7pzIFA"/>
+  <handlers xmi:id="_vX1lUMP_Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpcviewer.ui.handler.showTrace" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.ShowTrace" command="_tEHPMMP_Eeqcdd3a7pzIFA"/>
   <bindingTables xmi:id="_7fwrAKqFEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.bindingtable.file" bindingContext="_c3AF2cjYEeSyMNYR5xypkQ">
     <bindings xmi:id="_-3xvsKqFEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.keybinding.open" keySequence="M1+O" command="_U14sMI7vEeqBPbXbG7_Dzw"/>
     <bindings xmi:id="_k4-EoKuTEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.keybinding.add" keySequence="M1+A" command="_cPW0II7vEeqBPbXbG7_Dzw"/>
@@ -174,6 +176,7 @@
   <commands xmi:id="_XIwxIL17EeqIaLNodVh-xg" elementId="edu.rice.cs.hpcviewer.ui.command.showMetric" commandName="Show metrics"/>
   <commands xmi:id="_JcLG8MH9Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpcviewer.ui.command.find" commandName="Find" description="Find a text"/>
   <commands xmi:id="_Cqsk0MP6Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpcviewer.ui.command.copy" commandName="Copy"/>
+  <commands xmi:id="_tEHPMMP_Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpcviewer.ui.command.showTrace" commandName="Show traces"/>
   <addons xmi:id="_c3AF0sjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.core.commands.service" contributionURI="bundleclass://org.eclipse.e4.core.commands/org.eclipse.e4.core.commands.CommandServiceAddon"/>
   <addons xmi:id="_c3AF08jYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.contexts.service" contributionURI="bundleclass://org.eclipse.e4.ui.services/org.eclipse.e4.ui.services.ContextServiceAddon"/>
   <addons xmi:id="_c3AF1MjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.bindings.service" contributionURI="bundleclass://org.eclipse.e4.ui.bindings/org.eclipse.e4.ui.bindings.BindingServiceAddon"/>

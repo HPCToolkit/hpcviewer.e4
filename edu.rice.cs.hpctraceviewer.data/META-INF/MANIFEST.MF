@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: hpctraceviewer.data
+Bundle-SymbolicName: edu.rice.cs.hpctraceviewer.data
+Bundle-Version: 6.0.0.qualifier
+Bundle-Vendor: Rice University
+Automatic-Module-Name: edu.rice.cs.hpctraceviewer.data
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: edu.rice.cs.hpc.data,
+ edu.rice.cs.hpcbase,
+ org.eclipse.core.runtime,
+ org.eclipse.swt
+Export-Package: edu.rice.cs.hpctraceviewer.data,
+ edu.rice.cs.hpctraceviewer.data.timeline,
+ edu.rice.cs.hpctraceviewer.data.util

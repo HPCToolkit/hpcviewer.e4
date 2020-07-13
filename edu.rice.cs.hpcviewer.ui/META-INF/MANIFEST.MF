@@ -34,7 +34,8 @@ Require-Bundle: edu.rice.cs.hpc.data,
  org.eclipse.e4.ui.model.workbench,
  org.swtchart,
  org.swtchart.ext,
- org.slf4j.api;bundle-version="1.7.30"
+ org.slf4j.api;bundle-version="1.7.30",
+ edu.rice.cs.hpctraceviewer.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Provide-Capability: licensing.feature;licensing.feature="edu.rice.cs.hpcviewer.ui.product"
