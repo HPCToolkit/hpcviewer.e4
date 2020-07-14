@@ -10,5 +10,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jface,
  edu.rice.cs.hpc.data,
  edu.rice.cs.hpctraceviewer.data
-Import-Package: com.jcraft.jsch
+Import-Package: com.jcraft.jsch,
+ org.eclipse.e4.core.contexts;version="1.7.0"
 Export-Package: edu.rice.cs.hpc.remote.data
