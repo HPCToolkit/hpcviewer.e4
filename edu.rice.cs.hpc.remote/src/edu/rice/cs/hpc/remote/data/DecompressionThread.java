@@ -148,7 +148,7 @@ public class DecompressionThread extends Thread {
 		// TODO: need to check
 		
 		ProcessTimeline ptl = new ProcessTimeline(dataAsTraceDBR, scopeMap, lineNumber, 
-				attributes.numPixelsH, attributes.getTimeInterval(), attributes.getTimeBegin());
+				attributes.getPixelHorizontal(), attributes.getTimeInterval(), attributes.getTimeBegin());
 		
 		//timelineServ.setProcessTimeline(lineNumber, ptl);
 		timelinesAvailableForRendering.add(lineNumber);

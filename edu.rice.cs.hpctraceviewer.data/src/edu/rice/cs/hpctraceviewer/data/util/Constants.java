@@ -27,4 +27,5 @@ public class Constants {
 	public static final int DATABASE_NOT_FOUND = 0x4E4F4442;
 	public static final int DB_OK = 0x44424F4B;
 
+	public static final String CONTEXT_TIMELINE = "hpctraceviewer.timeline";
 }

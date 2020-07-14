@@ -4,6 +4,7 @@ import org.eclipse.core.commands.operations.AbstractOperation;
 import org.eclipse.core.commands.operations.IOperationHistory;
 import org.eclipse.core.commands.operations.IUndoContext;
 import org.eclipse.core.commands.operations.IUndoableOperation;
+import org.eclipse.core.commands.operations.OperationHistoryFactory;
 
 import edu.rice.cs.hpctraceviewer.data.Frame;
 
@@ -36,7 +37,7 @@ public abstract class TraceOperation extends AbstractOperation
 	}
 	
 	static public IOperationHistory getOperationHistory() {
-		return null;
+		return OperationHistoryFactory.getOperationHistory();
 	}
 	
 	public static IUndoableOperation[] getUndoHistory()

@@ -16,6 +16,7 @@ import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
+import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 import edu.rice.cs.hpctraceviewer.ui.painter.ITraceCanvas;
 import edu.rice.cs.hpctraceviewer.ui.painter.ITraceCanvas.MouseState;
 
@@ -36,16 +37,19 @@ public class ThreadAxisCanvas extends AbstractAxisCanvas
 	private final Color ColorLightMagenta;
 	
 	final private Color bgColor;
-	
+
+	private final ProcessTimelineService timeLine;
+
 	/** Relates to the condition that the mouse is in.*/
 	private ITraceCanvas.MouseState mouseState;
 	
 	private AxisToolTip tooltip = null;
 
-	public ThreadAxisCanvas(Composite parent, int style) {
+	public ThreadAxisCanvas(ProcessTimelineService timeLine, Composite parent, int style) {
 		super(parent, style);
 		
 		bgColor = parent.getBackground();
+		this.timeLine = timeLine;
 		
 		ColorLightBlue    = new Color(getDisplay(), 173, 216, 250);
 		ColorLightMagenta = new Color(getDisplay(), 255, 128, 255);
@@ -218,12 +222,12 @@ public class ThreadAxisCanvas extends AbstractAxisCanvas
 	
 	
 	protected int getNumProcessTimeline() {
-		return 0;
+		return timeLine.getNumProcessTimeline();
 	}
 	
 	
-	protected ProcessTimeline getProcessTimeline( int i) {
-		return null;
+	protected ProcessTimeline getProcessTimeline(int i) {
+		return timeLine.getProcessTimeline(i);
 	}
 
 	

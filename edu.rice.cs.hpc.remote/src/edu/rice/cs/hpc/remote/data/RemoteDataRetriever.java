@@ -109,8 +109,8 @@ public class RemoteDataRetriever {
 		int Pn = attributes.getProcessEnd();
 		long t0 = attributes.getTimeBegin();
 		long tn = attributes.getTimeEnd();
-		int vertRes = attributes.numPixelsV;
-		int horizRes = attributes.numPixelsH;
+		int vertRes = attributes.getPixelVertical();
+		int horizRes = attributes.getPixelHorizontal();
 		
 		requestData(P0, Pn, t0, tn, vertRes, horizRes);
 		

@@ -64,7 +64,7 @@ public abstract class BaseTimelineThread implements Callable<Integer> {
 	public Integer call() throws Exception {
 
 		ProcessTimeline trace = getNextTrace(currentLine);
-		final double pixelLength = (attributes.getTimeInterval())/(double)attributes.numPixelsH;
+		final double pixelLength = (attributes.getTimeInterval())/(double)attributes.getPixelHorizontal();
 		final long timeBegin = attributes.getTimeBegin();
 		int num_invalid_samples = 0;
 		

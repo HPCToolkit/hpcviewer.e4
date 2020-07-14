@@ -145,7 +145,7 @@ public class TimeAxisCanvas extends AbstractAxisCanvas
 			}
 		}
 		
-		// find rounded delta_time
+		// find rounded delta_time to log 10:
 		// if delta_time is 12 --> rounded to 10
 		// 					3  --> rounded to 1
 		// 					32 --> rounded to 10
@@ -246,7 +246,7 @@ public class TimeAxisCanvas extends AbstractAxisCanvas
 	{
 		// define pixel : (time - TimeBegin) x number_of_pixel_per_time 
 		//				  (time - TimeBegin) x (numPixelsH/timeInterval)
-		double dT = (double)attribute.numPixelsH / displayUnit.convert(attribute.getTimeInterval(), dbUnit);
+		double dT = (double)attribute.getPixelHorizontal() / displayUnit.convert(attribute.getTimeInterval(), dbUnit);
 		long dTime = time-displayUnit.convert(attribute.getTimeBegin(),dbUnit);
 		int pixel = (int) (dT * dTime);
 		

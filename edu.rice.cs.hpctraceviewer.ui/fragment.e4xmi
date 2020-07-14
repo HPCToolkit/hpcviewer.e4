@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="ASCII"?>
 <fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:advanced="http://www.eclipse.org/ui/2010/UIModel/application/ui/advanced" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmi:id="_ffh4gMSyEeqcdd3a7pzIFA">
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_kjRfMMSyEeqcdd3a7pzIFA" featurename="children" parentElementId="xpath:/">
-    <elements xsi:type="basic:TrimmedWindow" xmi:id="_OPdv0MS7Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpctraceviewer.ui.trimmedwindow.hpctraceviewer" visible="false" label="hpctraceviewer" width="1000" height="800">
+    <elements xsi:type="basic:TrimmedWindow" xmi:id="_OPdv0MS7Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpctraceviewer.ui.trimmedwindow.hpctraceviewer" visible="false" label="hpctraceviewer" iconURI="" width="1000" height="800">
       <children xsi:type="advanced:PerspectiveStack" xmi:id="_RclMEMS7Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpctraceviewer.ui.perspectivestack.main">
         <children xsi:type="advanced:Perspective" xmi:id="_9dnc4MSyEeqcdd3a7pzIFA" elementId="edu.rice.cs.hpctraceviewer.ui.perspective.main" label="hpcviewer trace">
           <children xsi:type="basic:PartSashContainer" xmi:id="_ME2zEMSzEeqcdd3a7pzIFA" elementId="edu.rice.cs.hpctraceviewer.ui.partsashcontainer.main" horizontal="true">
             <children xsi:type="basic:PartSashContainer" xmi:id="_W2eikMSzEeqcdd3a7pzIFA" elementId="edu.rice.cs.hpctraceviewer.ui.partsashcontainer.left" containerData="7000">
               <children xsi:type="basic:PartStack" xmi:id="_vNC7oMTxEeqcdd3a7pzIFA" elementId="edu.rice.cs.hpctraceviewer.ui.partstack.top" containerData="7000">
-                <children xsi:type="basic:Part" xmi:id="_idx84MSzEeqcdd3a7pzIFA" elementId="edu.rice.cs.hpctraceviewer.ui.part.main" containerData="7000" contributionURI="bundleclass://edu.rice.cs.hpctraceviewer.ui/edu.rice.cs.hpctraceviewer.ui.main.HPCTraceView" label="Traces" tooltip="Traces over time">
+                <children xsi:type="basic:Part" xmi:id="_idx84MSzEeqcdd3a7pzIFA" elementId="edu.rice.cs.hpctraceviewer.ui.part.main" containerData="7000" contributionURI="bundleclass://edu.rice.cs.hpctraceviewer.ui/edu.rice.cs.hpctraceviewer.ui.main.HPCTraceView" label="Trace view" iconURI="platform:/plugin/edu.rice.cs.hpctraceviewer.ui/resources/trace-detail.png" tooltip="Traces over time">
                   <toolbar xmi:id="_lZ3TgMSzEeqcdd3a7pzIFA" elementId="edu.rice.cs.hpctraceviewer.ui.toolbar.0"/>
                 </children>
               </children>
               <children xsi:type="basic:PartStack" xmi:id="_nEH14MSzEeqcdd3a7pzIFA" elementId="edu.rice.cs.hpctraceviewer.ui.partstack.bottom" containerData="3000">
-                <children xsi:type="basic:Part" xmi:id="_oeuLoMSzEeqcdd3a7pzIFA" elementId="edu.rice.cs.hpctraceviewer.ui.part.depth" label="Depth view" tooltip="Call stack over time"/>
-                <children xsi:type="basic:Part" xmi:id="_tDkP0MSzEeqcdd3a7pzIFA" elementId="edu.rice.cs.hpctraceviewer.ui.part.summary" label="Summary view" tooltip="Representation of routines over time"/>
+                <children xsi:type="basic:Part" xmi:id="_oeuLoMSzEeqcdd3a7pzIFA" elementId="edu.rice.cs.hpctraceviewer.ui.part.depth" label="Depth view" iconURI="platform:/plugin/edu.rice.cs.hpctraceviewer.ui/resources/trace-depth.png" tooltip="Call stack over time"/>
+                <children xsi:type="basic:Part" xmi:id="_tDkP0MSzEeqcdd3a7pzIFA" elementId="edu.rice.cs.hpctraceviewer.ui.part.summary" label="Summary view" iconURI="platform:/plugin/edu.rice.cs.hpctraceviewer.ui/resources/trace-summary.png" tooltip="Representation of routines over time"/>
               </children>
             </children>
             <children xsi:type="basic:PartStack" xmi:id="_dluo0MSzEeqcdd3a7pzIFA" elementId="edu.rice.cs.hpctraceviewer.ui.partstack.right" containerData="3000">
-              <children xsi:type="basic:Part" xmi:id="_0NzB4MSzEeqcdd3a7pzIFA" elementId="edu.rice.cs.hpctraceviewer.ui.part.callstack" label="Call stack"/>
-              <children xsi:type="basic:Part" xmi:id="_3xWBIMSzEeqcdd3a7pzIFA" elementId="edu.rice.cs.hpctraceviewer.ui.part.stat" label="Statistics"/>
+              <children xsi:type="basic:Part" xmi:id="_0NzB4MSzEeqcdd3a7pzIFA" elementId="edu.rice.cs.hpctraceviewer.ui.part.callstack" label="Call stack" iconURI="platform:/plugin/edu.rice.cs.hpctraceviewer.ui/resources/trace-callpath.png"/>
+              <children xsi:type="basic:Part" xmi:id="_3xWBIMSzEeqcdd3a7pzIFA" elementId="edu.rice.cs.hpctraceviewer.ui.part.stat" label="Statistics" iconURI="platform:/plugin/edu.rice.cs.hpctraceviewer.ui/resources/trace-stat.png"/>
             </children>
           </children>
         </children>
       </children>
-      <mainMenu xmi:id="_nF-WYMS7Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpctraceviewer.ui.menu.0"/>
+      <mainMenu xmi:id="_nF-WYMS7Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpctraceviewer.ui.menu.main"/>
     </elements>
   </fragments>
 </fragment:ModelFragments>

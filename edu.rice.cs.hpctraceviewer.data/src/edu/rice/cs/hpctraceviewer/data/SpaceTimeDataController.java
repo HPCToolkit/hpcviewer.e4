@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.swt.widgets.Display;
 import edu.rice.cs.hpcbase.map.ProcedureAliasMap;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
@@ -17,6 +18,8 @@ import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
 import edu.rice.cs.hpc.data.trace.TraceAttribute;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
+import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
+import edu.rice.cs.hpctraceviewer.data.util.Constants;
 
 
 /*******************************************************************************************
@@ -35,6 +38,8 @@ import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
  *******************************************************************************************/
 public abstract class SpaceTimeDataController 
 {
+	final protected BaseExperiment  exp;
+
 	protected ImageTraceAttributes attributes;
 	/**
 	 * The minimum beginning and maximum ending time stamp across all traces (in
@@ -42,9 +47,6 @@ public abstract class SpaceTimeDataController
 	 */
 	protected long maxEndTime, minBegTime;
 
-
-
-	
 	/** The map between the nodes and the cpid's. */
 	private HashMap<Integer, CallPath> scopeMap = null;
 		
@@ -56,7 +58,9 @@ public abstract class SpaceTimeDataController
 	
 	protected IBaseData dataTrace = null;
 	
-	final protected ExperimentWithoutMetrics exp;
+	protected IEclipseContext context;
+	
+	protected ProcessTimelineService timelineService;
 	
 	// nathan's data index variable
 	// TODO: we need to remove this and delegate to the inherited class instead !
@@ -69,15 +73,15 @@ public abstract class SpaceTimeDataController
 	 * @param _window : SWT window
 	 * @param expFile : experiment file (XML format)
 	 */
-	public SpaceTimeDataController(File expFile) 
+	public SpaceTimeDataController(IEclipseContext context, File expFile) 
 			throws InvalExperimentException, Exception 
 	{			
 		exp = new ExperimentWithoutMetrics();
 
 		// possible java.lang.OutOfMemoryError exception here
-		exp.open(expFile, new ProcedureAliasMap());
+		exp.open(expFile, new ProcedureAliasMap(), false);
 
-		init();
+		init(context);
 	}
 	
 	/*****
@@ -88,7 +92,7 @@ public abstract class SpaceTimeDataController
 	 * @param Name : the name of the file on the remote server
 	 * @throws InvalExperimentException 
 	 *****/
-	public SpaceTimeDataController(InputStream expStream, String Name) 
+	public SpaceTimeDataController(IEclipseContext context, InputStream expStream, String Name) 
 			throws InvalExperimentException, Exception 
 	{	
 		exp = new ExperimentWithoutMetrics();
@@ -96,9 +100,23 @@ public abstract class SpaceTimeDataController
 		// Without metrics, so param 3 is false
 		exp.open(expStream, new ProcedureAliasMap(), Name);
 		
-		init();
+		init(context);
+	}
+	
+	
+	public SpaceTimeDataController(IEclipseContext context, BaseExperiment experiment) 			
+			throws InvalExperimentException, Exception 
+	{
+		this.exp = experiment;
+		init(context);
 	}
 
+	
+	public ProcessTimelineService getProcessTimelineService() {
+		ProcessTimelineService ptlService = (ProcessTimelineService) context.get(Constants.CONTEXT_TIMELINE);
+		return ptlService;
+	}
+	
 	public void setDataIndex(int dataIndex) 
 	{
 		currentDataIdx = dataIndex;
@@ -121,9 +139,12 @@ public abstract class SpaceTimeDataController
 	 * @param _window
 	 * @throws Exception 
 	 ******/
-	private void init() 
+	private void init(IEclipseContext context) 
 			throws InvalExperimentException 
 	{	
+		this.context = context;
+		timelineService = (ProcessTimelineService) context.get(Constants.CONTEXT_TIMELINE);
+		
 		final Display display = Display.getDefault();
 		display.syncExec(new Runnable() {
 
@@ -175,7 +196,7 @@ public abstract class SpaceTimeDataController
 	 * endProcess-1  -> numTracesShown-1
 	 */
 	public int computeScaledProcess() {
-		int numTracesShown = Math.min(attributes.getProcessInterval(), attributes.numPixelsV);
+		int numTracesShown = Math.min(attributes.getProcessInterval(), attributes.getPixelVertical());
 		int selectedProc = getCurrentlySelectedProcess();
 		
 		double scaledDTProcess = (((double) numTracesShown -1 )
@@ -193,7 +214,7 @@ public abstract class SpaceTimeDataController
 	public ProcessTimeline getCurrentDepthTrace() {
 		int scaledDTProcess = computeScaledProcess();
 		// TODO
-		return  null;
+		return  timelineService.getProcessTimeline(scaledDTProcess);
 	}
 	
 
@@ -220,7 +241,7 @@ public abstract class SpaceTimeDataController
 	 ******************************************************************************/
 	
 	public int getPixelHorizontal() {
-		return attributes.numPixelsH;
+		return attributes.getPixelHorizontal();
 	}
 	
 	public BaseExperiment getExperiment() {
@@ -327,8 +348,7 @@ public abstract class SpaceTimeDataController
 	}
 
 	public boolean isTimelineFilled() {
-		// TODO
-		return (false);
+		return timelineService.isFilled();
 	}
 	
 	

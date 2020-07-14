@@ -14,8 +14,9 @@ import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TimelineDataSet;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
+import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 import edu.rice.cs.hpctraceviewer.ui.timeline.BaseTimelineThread;
-import edu.rice.cs.hpctraceviewer.ui.timeline.ProcessTimelineService;
+
 
 public class TimelineThread 
 	extends BaseTimelineThread
@@ -37,7 +38,7 @@ public class TimelineThread
 	{
 		super(stData, attributes, _scaleY, queue, currentLine, stData.isEnableMidpoint(), monitor);
 		changedBounds = _changedBounds;		
-		this.traceService = traceService;
+		this.traceService = stData.getProcessTimelineService();
 		this.totalLines	  = totalLines;
 	}
 	
@@ -69,7 +70,7 @@ public class TimelineThread
 		if (changedBounds) {
 			ProcessTimeline currentTimeline = new ProcessTimeline(currentLineNum, stData.getScopeMap(),
 					stData.getBaseData(), lineToPaint(currentLineNum, attributes),
-					attributes.numPixelsH, attributes.getTimeInterval(), 
+					attributes.getPixelHorizontal(), attributes.getTimeInterval(), 
 					stData.getMinBegTime() + attributes.getTimeBegin());
 			
 			if (traceService.setProcessTimeline(currentLineNum, currentTimeline)) {
@@ -122,9 +123,9 @@ public class TimelineThread
 	private int lineToPaint(int line, ImageTraceAttributes attributes) {
 
 		int numTimelinesToPaint = attributes.getProcessInterval();
-		if (numTimelinesToPaint > attributes.numPixelsV)
+		if (numTimelinesToPaint > attributes.getPixelVertical())
 			return attributes.getProcessBegin() + (line * numTimelinesToPaint)
-					/ (attributes.numPixelsV);
+					/ (attributes.getPixelVertical());
 		else
 			return attributes.getProcessBegin() + line;
 	}}

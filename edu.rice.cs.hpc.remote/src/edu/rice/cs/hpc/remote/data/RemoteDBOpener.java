@@ -15,6 +15,7 @@ import java.net.UnknownHostException;
 import java.util.zip.GZIPInputStream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 
 import com.jcraft.jsch.JSchException;
 
@@ -63,6 +64,7 @@ public class RemoteDBOpener extends AbstractDBOpener
 	// -----------------
 	
 	private final DatabaseAccessInfo connectionInfo;
+	private final IEclipseContext    context;
 
 	private DataOutputStream sender;
 	private DataInputStream receiver;
@@ -73,7 +75,8 @@ public class RemoteDBOpener extends AbstractDBOpener
 	 * 
 	 * @param connectionInfo
 	 */
-	public RemoteDBOpener(DatabaseAccessInfo connectionInfo) {
+	public RemoteDBOpener(IEclipseContext context, DatabaseAccessInfo connectionInfo) {
+		this.context = context;
 		this.connectionInfo = connectionInfo;
 	}
 
@@ -188,7 +191,7 @@ public class RemoteDBOpener extends AbstractDBOpener
 		RemoteDataRetriever dataRetriever = new RemoteDataRetriever(serverConnection,
 				 null, compressionType);
 		
-		SpaceTimeDataControllerRemote stData = new SpaceTimeDataControllerRemote(dataRetriever, null, 
+		SpaceTimeDataControllerRemote stData = new SpaceTimeDataControllerRemote(context, dataRetriever, null, 
 				connectionInfo.getDatabasePath() + " on " + host, traceCount, valuesX, sender);
 
 		sendInfoPacket(sender, stData);

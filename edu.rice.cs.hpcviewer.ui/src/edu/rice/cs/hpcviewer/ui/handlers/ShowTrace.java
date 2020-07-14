@@ -10,14 +10,16 @@ import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.IWindowCloseHandler;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.CanExecute;
 
+import java.util.List;
+
 import javax.inject.Named;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
-import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpctraceviewer.ui.main.HPCTraceView;
 import edu.rice.cs.hpcviewer.ui.parts.IBasePart;
 
@@ -27,8 +29,8 @@ public class ShowTrace
 	public void execute( 
 			MApplication  application, 
 			MWindow       window,
-			EPartService  partService,
 			EModelService modelService,
+			@Named(IServiceConstants.ACTIVE_PART) MPart part,
 			@Named(IServiceConstants.ACTIVE_SHELL) Shell shell) {
 
 		MWindow winTrace = (MWindow) modelService.find(HPCTraceView.ID_WINDOW, application);
@@ -39,6 +41,10 @@ public class ShowTrace
 
 			return;
 		}
+		
+		IEclipseContext context = winTrace.getContext();
+		if (context == null)
+			return;
 		
 	 	if (!winTrace.isVisible()) {
 			int height = window.getHeight();
@@ -55,10 +61,6 @@ public class ShowTrace
 		}
 		winTrace.setOnTop(true);
 		
-		IEclipseContext context = winTrace.getContext();
-		if (context == null)
-			return;
-		
 		IWindowCloseHandler closeHandler = context.get(IWindowCloseHandler.class);
 		
 		closeHandler = new IWindowCloseHandler() {
@@ -70,6 +72,23 @@ public class ShowTrace
 			}
 		};
 		context.set(IWindowCloseHandler.class, closeHandler);
+		
+		IBasePart objPart = (IBasePart) part.getObject();
+		BaseExperiment experiment = objPart.getExperiment();
+
+		context.set(HPCTraceView.ID_DATA, experiment);
+		
+		List<MPart> list = modelService.findElements(winTrace, HPCTraceView.ID_PART, MPart.class);
+		if (list == null || list.size()==0)
+			return;
+		HPCTraceView traceView = (HPCTraceView) list.get(0).getObject();
+		try {
+			traceView.setInput(experiment);
+		} catch (Exception e) {
+			MessageDialog.openError(shell, "Error opening database",
+					experiment.getDefaultDirectory().getAbsolutePath() + ": " + e.getMessage());
+			e.printStackTrace();
+		}
 	}
 	
 	

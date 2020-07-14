@@ -163,7 +163,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	 * set new database and refresh the screen
 	 * @param dataTraces
 	 *****/
-	public void updateView(SpaceTimeDataController _stData) {
+	public void updateView(SpaceTimeDataController stData) {
 
 		super.init();
 
@@ -176,20 +176,24 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		// reinitialize the selection rectangle
 		initSelectionRectangle();
 
-		this.stData = _stData;
+		this.stData = stData;
 
 		// init configuration
 		Position p = new Position(-1, -1);
-		stData.getAttributes().setPosition(p);
-		stData.getAttributes().setDepth(0);
+		this.stData.getAttributes().setPosition(p);
+		this.stData.getAttributes().setDepth(0);
 		
 		// initialize the depth
 		// we don't know which depth is the best to viewed, but heuristically
 		// the first third is a better one.
-		Frame frame = new Frame(stData.getAttributes().getFrame());
-		frame.depth = _stData.getMaxDepth() / 3;
-		this.home(frame);
+		Frame frame = new Frame(this.stData.getAttributes().getFrame());
+		frame.depth = this.stData.getMaxDepth() / 3;
+		
+		home(frame);
 
+		if (saveButton == null)
+			return;
+		
 		this.saveButton.setEnabled(true);
 		this.openButton.setEnabled(true);
 	}
@@ -509,7 +513,8 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	@Override
 	public double getScalePixelsPerTime()
 	{
-		return (double)stData.getAttributes().numPixelsH / (double)this.getNumTimeUnitDisplayed();
+		ImageTraceAttributes attributes = stData.getAttributes();
+		return (double) attributes.getPixelHorizontal() / (double)this.getNumTimeUnitDisplayed();
 	}
 	
 	/**************************************************************************
@@ -711,6 +716,8 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
     private void updateButtonStates() 
     {
     	final ImageTraceAttributes attributes = stData.getAttributes();
+    	if (tZoomInButton == null)
+    		return;
     	
 		this.tZoomInButton.setEnabled( this.getNumTimeUnitDisplayed() > Constants.MIN_TIME_UNITS_DISP );
 		this.tZoomOutButton.setEnabled(attributes.getTimeBegin()>0 || attributes.getTimeEnd()<stData.getTimeWidth() );
@@ -917,9 +924,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		
 		final Rectangle view = getClientArea();
 		final ImageTraceAttributes attributes = stData.getAttributes();
-		
-		attributes.numPixelsH = view.width;
-		attributes.numPixelsV = view.height;
+
+		attributes.setPixelHorizontal(view.width);
+		attributes.setPixelVertical(view.height);
 				
 		final Image imageFinal = new Image(getDisplay(), view.width, view.height);
 		final GC bufferGC = new GC(imageFinal);

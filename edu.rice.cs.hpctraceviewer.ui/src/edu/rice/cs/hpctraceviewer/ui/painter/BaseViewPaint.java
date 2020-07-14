@@ -107,7 +107,7 @@ public abstract class BaseViewPaint extends Job
 		// hack fix: if the number of horizontal pixels is less than 1 we
 		// return immediately, otherwise it throws an exception
 		// -------------------------------------------------------------------
-		if (attributes.numPixelsH <= 0)
+		if (attributes.getPixelHorizontal() <= 0)
 			return false;
 		
 		// -------------------------------------------------------------------
@@ -224,7 +224,7 @@ public abstract class BaseViewPaint extends Job
 		for (int threadNum=0; threadNum < num_paint_threads; threadNum++) 
 		{
 			final BasePaintThread thread = getPaintThread(queue, linesToPaint,
-					device, attributes.numPixelsH, monitor);
+					device, attributes.getPixelHorizontal(), monitor);
 			if (thread != null) {
 				final Future<List<ImagePosition>> submit = threadExecutor.submit( thread );
 				threadsPaint.add(submit);

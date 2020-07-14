@@ -21,8 +21,8 @@ public class ImageTraceAttributes
 	final private Map<Integer, TimeUnit> mapIntegerToUnit;
 	final private Map<TimeUnit, String>  mapUnitToString;
 	
-	public int numPixelsH, numPixelsV;
-	public int numPixelsDepthV;
+	private int numPixelsH, numPixelsV;
+	private int numPixelsDepthV;
 
 	private Frame frame;
 
@@ -245,6 +245,23 @@ public class ImageTraceAttributes
 	public Position getPosition()
 	{
 		return frame.position;
+	}
+	
+	
+	public int getPixelHorizontal() {
+		return numPixelsH;
+	}
+	
+	public void setPixelHorizontal(int numPixelsH) {
+		this.numPixelsH = numPixelsH;
+	}
+	
+	public int getPixelVertical() {
+		return numPixelsV;
+	}
+	
+	public void setPixelVertical(int numPixelsV) {
+		this.numPixelsV = numPixelsV;
 	}
 	
 	public double getScalePixelsPerRank()

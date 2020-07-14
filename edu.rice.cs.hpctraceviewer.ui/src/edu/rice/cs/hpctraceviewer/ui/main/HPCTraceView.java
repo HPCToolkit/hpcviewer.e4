@@ -2,33 +2,63 @@
 package edu.rice.cs.hpctraceviewer.ui.main;
 
 import javax.inject.Inject;
-import javax.annotation.PostConstruct;
 
+import java.io.IOException;
+
+import javax.annotation.PostConstruct;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
+
+import edu.rice.cs.hpc.data.experiment.BaseExperiment;
+import edu.rice.cs.hpc.data.experiment.LocalDatabaseRepresentation;
+import edu.rice.cs.hpc.data.experiment.extdata.IFilteredData;
+import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
+import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
+import edu.rice.cs.hpctraceviewer.data.local.LocalDBOpener;
+import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
+import edu.rice.cs.hpctraceviewer.data.util.Constants;
+
 import javax.annotation.PreDestroy;
 
 public class HPCTraceView 
 {
 	public static final String ID_WINDOW      = "edu.rice.cs.hpctraceviewer.ui.trimmedwindow.hpctraceviewer";
 	public static final String ID_PERSPECTIVE = "edu.rice.cs.hpctraceviewer.ui.perspective.main";
+	public static final String ID_PART        = "edu.rice.cs.hpctraceviewer.ui.part.main";
 	
-	/**The ID needed to create this view (used in plugin.xml).*/
-	public static final String ID = "hpctraceview.view";
+	public static final String ID_DATA = "hpctraceviewer.data";
 	
 	public static final int Y_AXIS_WIDTH  = 13;
 	public static final int X_AXIS_HEIGHT = 20;
+	
+	private final ProcessTimelineService timelineService;
+	
+	/** Stores/Creates all of the data that is used in the view.*/
+	private SpaceTimeDataController stData = null;
+	
+	private TimeAxisCanvas axisArea = null;
+	private ThreadAxisCanvas processCanvas = null;
+	
+	/** Paints and displays the detail view.*/
+	private SpaceTimeDetailCanvas detailCanvas;
+	
+	private IEclipseContext context;
 
 	@Inject
 	public HPCTraceView() {
-		
+		timelineService = new ProcessTimelineService();
 	}
 	
 	@PostConstruct
-	public void postConstruct(Composite parent) {
+	public void postConstruct(Composite parent, MWindow window) {
+		
+		context = window.getContext();
+		context.set(Constants.CONTEXT_TIMELINE, timelineService);
 		
 		/**************************************************************************
          * Process and Time dimension labels
@@ -52,10 +82,33 @@ public class HPCTraceView
 
 		Composite plotArea = new Composite(parent, SWT.NONE);
 		
+		processCanvas = new ThreadAxisCanvas(timelineService, plotArea, SWT.NONE);
+		GridDataFactory.fillDefaults().grab(false, true).
+						hint(Y_AXIS_WIDTH, 500).applyTo(processCanvas);
+
+		
+		detailCanvas = new SpaceTimeDetailCanvas(plotArea); 
+
+		detailCanvas.setLabels(labelGroup);
+		
+		GridDataFactory.fillDefaults().grab(true, true).
+						hint(500, 500).applyTo(detailCanvas);
+		
+		detailCanvas.setVisible(false);
+		
+		
+		/*************************************************************************
+		 * Horizontal axis label 
+		 *************************************************************************/
 
 		Canvas footerCanvas = new Canvas(plotArea, SWT.NONE);
 		GridDataFactory.fillDefaults().grab(false, false).
 						hint(Y_AXIS_WIDTH, X_AXIS_HEIGHT).applyTo(footerCanvas);
+
+
+		axisArea = new TimeAxisCanvas(plotArea, SWT.NO_BACKGROUND);
+		GridDataFactory.fillDefaults().grab(true, false).
+						hint(500, X_AXIS_HEIGHT).applyTo(axisArea);
 
 		GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(plotArea);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(plotArea);
@@ -70,10 +123,16 @@ public class HPCTraceView
 	
 	
 	@PreDestroy
-	public void preDestroy() {
-		
+	public void preDestroy() {		
 	}
 	
-	
+	public void setInput(BaseExperiment experiment) throws Exception {
+		AbstractDBOpener dbOpener = new LocalDBOpener(context, experiment);
+		SpaceTimeDataController stdc = dbOpener.openDBAndCreateSTDC(null);
+		
+		detailCanvas.updateView(stdc);
+		axisArea.setData(stdc);
+		processCanvas.setData(stdc);
+	}
 	
 }

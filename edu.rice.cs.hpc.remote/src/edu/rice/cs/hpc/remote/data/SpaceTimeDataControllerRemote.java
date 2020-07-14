@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 
 import edu.rice.cs.hpc.data.experiment.ExperimentConfiguration;
 import edu.rice.cs.hpc.data.experiment.InvalExperimentException;
@@ -17,6 +18,8 @@ import edu.rice.cs.hpc.remote.data.RemoteFilteredBaseData;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
+import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
+import edu.rice.cs.hpctraceviewer.data.util.Constants;
 
 
 
@@ -35,11 +38,11 @@ public class SpaceTimeDataControllerRemote extends SpaceTimeDataController
 	
 	private ConcurrentLinkedQueue<Integer> timelineToRender;
 
-	public SpaceTimeDataControllerRemote(RemoteDataRetriever _dataRet, 
+	public SpaceTimeDataControllerRemote(IEclipseContext context, RemoteDataRetriever _dataRet, 
 			InputStream expStream, String Name, int _numTraces, TraceName[] valuesX, DataOutputStream connectionToServer) 
 					throws InvalExperimentException, Exception 
 	{
-		super(expStream, Name);
+		super(context, expStream, Name);
 		dataRetriever = _dataRet;
 
 		this.valuesX = valuesX;
@@ -65,10 +68,11 @@ public class SpaceTimeDataControllerRemote extends SpaceTimeDataController
 		if (changedBounds) {
 			
 			DecompressionThread[] workThreads = new DecompressionThread[numThreadsToLaunch];
-			final int ranksExpected = Math.min(attributes.getProcessInterval(), attributes.numPixelsV);
+			final int ranksExpected = Math.min(attributes.getProcessInterval(), attributes.getPixelVertical());
 			
 			final AtomicInteger ranksRemainingToDecompress = new AtomicInteger(ranksExpected);
-			//ptlService.setProcessTimeline(new ProcessTimeline[ranksExpected]);
+			ProcessTimelineService ptlService = (ProcessTimelineService) context.get(Constants.CONTEXT_TIMELINE);
+			ptlService.setProcessTimeline(new ProcessTimeline[ranksExpected]);
 			
 			// The variable workToDo needs to be accessible across different objects:
 			// RemoteDataRetriever: producer
