@@ -3,8 +3,6 @@ package edu.rice.cs.hpctraceviewer.ui.main;
 
 import javax.inject.Inject;
 
-import java.io.IOException;
-
 import javax.annotation.PostConstruct;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
@@ -15,8 +13,6 @@ import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
-import edu.rice.cs.hpc.data.experiment.LocalDatabaseRepresentation;
-import edu.rice.cs.hpc.data.experiment.extdata.IFilteredData;
 import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.local.LocalDBOpener;
@@ -37,9 +33,6 @@ public class HPCTraceView
 	public static final int X_AXIS_HEIGHT = 20;
 	
 	private final ProcessTimelineService timelineService;
-	
-	/** Stores/Creates all of the data that is used in the view.*/
-	private SpaceTimeDataController stData = null;
 	
 	private TimeAxisCanvas axisArea = null;
 	private ThreadAxisCanvas processCanvas = null;
@@ -87,7 +80,7 @@ public class HPCTraceView
 						hint(Y_AXIS_WIDTH, 500).applyTo(processCanvas);
 
 		
-		detailCanvas = new SpaceTimeDetailCanvas(plotArea); 
+		detailCanvas = new SpaceTimeDetailCanvas(context, plotArea); 
 
 		detailCanvas.setLabels(labelGroup);
 		

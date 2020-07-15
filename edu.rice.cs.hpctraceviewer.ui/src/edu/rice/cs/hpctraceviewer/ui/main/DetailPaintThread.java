@@ -9,8 +9,6 @@ import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.Display;
-
 import edu.rice.cs.hpctraceviewer.data.BaseDataVisualization;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TimelineDataSet;
@@ -31,8 +29,9 @@ public class DetailPaintThread
 {
 	final private boolean debugMode;
 
-	final private Point maxTextSize;
-
+	final private Point  maxTextSize;
+	final private Device device;
+	
 	private Image lineFinal;
 	private Image lineOriginal;
 	private GC gcFinal;
@@ -52,14 +51,15 @@ public class DetailPaintThread
 	 * @param maxTextSize : the maximum size of a letter for a given device
 	 * @param debugMode : flag whether we need to show text information
 	 */
-	public DetailPaintThread( SpaceTimeDataController stData, Queue<TimelineDataSet> list, int numLines,
-			AtomicInteger numDataCollected, AtomicInteger paintDone, Device device, int width, 
+	public DetailPaintThread(Device device, SpaceTimeDataController stData, Queue<TimelineDataSet> list, int numLines,
+			AtomicInteger numDataCollected, AtomicInteger paintDone, int width, 
 			Point maxTextSize, boolean debugMode,
 			IProgressMonitor monitor) {
 		
-		super(stData, list, numLines, numDataCollected, paintDone, device, width, monitor);
+		super(stData, list, numLines, numDataCollected, paintDone, width, monitor);
+		this.device      = device;
 		this.maxTextSize = maxTextSize;
-		this.debugMode = debugMode;
+		this.debugMode   = debugMode;
 	}
 	
 	private void paintText(GC gc, int odInitPixel, int odFinalPixel, int box_height, 
@@ -99,7 +99,7 @@ public class DetailPaintThread
 
 	@Override
 	protected void initPaint(/*Device device, */int width, int height) {
-		Display device = Display.getDefault();
+
 		lineFinal = new Image(device, width, height);
 		lineOriginal = new Image(device, width, 1);
 		

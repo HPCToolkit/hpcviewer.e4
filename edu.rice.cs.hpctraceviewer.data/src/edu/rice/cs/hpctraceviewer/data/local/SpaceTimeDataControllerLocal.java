@@ -11,9 +11,11 @@ import edu.rice.cs.hpc.data.experiment.extdata.IFileDB;
 import edu.rice.cs.hpc.data.experiment.extdata.IFilteredData;
 import edu.rice.cs.hpc.data.trace.TraceAttribute;
 import edu.rice.cs.hpc.data.util.Constants;
+import edu.rice.cs.hpc.data.util.IProgressReport;
 import edu.rice.cs.hpc.data.util.MergeDataFiles;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TraceDataByRank;
+import edu.rice.cs.hpctraceviewer.data.util.TraceProgressReport;
 import edu.rice.cs.hpctraceviewer.data.version2.BaseData;
 import edu.rice.cs.hpctraceviewer.data.version2.FilteredBaseData;
 import edu.rice.cs.hpctraceviewer.data.version3.FileDB3;
@@ -97,14 +99,13 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 	 *********************/
 	static private String getTraceFile(String directory, final IProgressMonitor statusMgr)
 	{
+		final ProgressReport traceReport = new ProgressReport();
+		final String outputFile = directory + File.separatorChar + "experiment.mt";
+		
 		try {
-			//final TraceProgressReport traceReport = new TraceProgressReport(statusMgr);
-			final String outputFile = directory
-					+ File.separatorChar + "experiment.mt";
-			
 			File dirFile = new File(directory);
 			final MergeDataFiles.MergeDataAttribute att = MergeDataFiles
-														 .merge(dirFile, "*.hpctrace", outputFile, null);
+														 .merge(dirFile, "*.hpctrace", outputFile, traceReport);
 			
 			if (att != MergeDataFiles.MergeDataAttribute.FAIL_NO_DATA) {
 				File fileTrace = new File(outputFile);
@@ -167,4 +168,30 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 	public String getName() {
 		return exp.getDefaultDirectory().getPath();
 	}
+	
+	
+	/*******************
+	 * Progress bar
+	 *
+	 */
+	static private class ProgressReport implements IProgressReport 
+	{
+
+		public ProgressReport()
+		{
+		}
+		
+		public void begin(String title, int num_tasks) {
+			System.out.println(title + " " + num_tasks);
+		}
+
+		public void advance() {
+			System.out.print(".");
+		}
+
+		public void end() {
+			System.out.println();
+		}
+	}
+
 }

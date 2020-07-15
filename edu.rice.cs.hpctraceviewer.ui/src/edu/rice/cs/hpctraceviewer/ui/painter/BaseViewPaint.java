@@ -14,9 +14,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.swt.graphics.Device;
-import org.eclipse.swt.widgets.Display;
-
 import edu.rice.cs.hpc.data.util.OSValidator;
 import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
@@ -174,27 +171,27 @@ public abstract class BaseViewPaint extends Job
 		// -------------------------------------------------------------------
 
 		// -------------------------------------------------------------------
+		// painting to the buffer "concurrently" if numPaintThreads > 1
+		// -------------------------------------------------------------------
+
+		// -------------------------------------------------------------------
 		// hack: On Linux, gtk is not threads-safe, and SWT-gtk implementation
 		//		 uses lock everytime it calls gtk functions. This greatly impact
 		//		 performance degradation, and we don't have the solution until now.
 		//	At the moment we don't see any reason to use multi-threading to render
 		//	 	 the canvas
 		// -------------------------------------------------------------------
+
+		int paint_threads = launch_threads;
 		
 		if (OSValidator.isUnix()) 
 		{
 			// -------------------------------------------------------------------
 			// sequential painting for Unix/Linux platform
 			// -------------------------------------------------------------------
-			executePaint(ecs, launch_threads, 1, queue, linesToPaint, monitor);
-		} else
-		{
-			// -------------------------------------------------------------------
-			// painting to the buffer "concurrently" if numPaintThreads > 1
-			// -------------------------------------------------------------------
-			executePaint(ecs, launch_threads, launch_threads, 
-					queue, linesToPaint, monitor);
+			paint_threads = 1;
 		}		
+		executePaint(ecs, launch_threads, paint_threads, queue, linesToPaint, monitor);
 
 		monitor.done();
 		changedBounds = false;
@@ -218,13 +215,12 @@ public abstract class BaseViewPaint extends Job
 			int linesToPaint, IProgressMonitor monitor) 
 	{
 		final List<Future<List<ImagePosition>>> threadsPaint = new ArrayList<Future<List<ImagePosition>>>();
-		Device device = Display.getCurrent();
 		
 		// for threads as many as the number of paint threads (specified by the caller)
 		for (int threadNum=0; threadNum < num_paint_threads; threadNum++) 
 		{
 			final BasePaintThread thread = getPaintThread(queue, linesToPaint,
-					device, attributes.getPixelHorizontal(), monitor);
+					attributes.getPixelHorizontal(), monitor);
 			if (thread != null) {
 				final Future<List<ImagePosition>> submit = threadExecutor.submit( thread );
 				threadsPaint.add(submit);
@@ -433,5 +429,5 @@ public abstract class BaseViewPaint extends Job
 	 * @return
 	 */
 	abstract protected BasePaintThread getPaintThread( Queue<TimelineDataSet> queue, int numLines, 
-			Device device, int width, IProgressMonitor monitor);
+													   int width, IProgressMonitor monitor);
 }

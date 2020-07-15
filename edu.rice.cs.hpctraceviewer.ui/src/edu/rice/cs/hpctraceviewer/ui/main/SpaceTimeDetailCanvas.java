@@ -14,6 +14,7 @@ import org.eclipse.core.commands.operations.OperationHistoryFactory;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -52,7 +53,7 @@ import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
 import edu.rice.cs.hpctraceviewer.data.Position;
 import edu.rice.cs.hpctraceviewer.data.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
-
+import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 import edu.rice.cs.hpctraceviewer.ui.util.MessageLabelManager;
 import edu.rice.cs.hpctraceviewer.ui.util.Utility;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
@@ -68,6 +69,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	implements IOperationHistoryListener, ISpaceTimeCanvas
 {	
 	final long PER_MICRO_SECOND = 1000000;
+	
+	/**The min number of process units you can zoom in.*/
+    private final static int MIN_PROC_DISP = 1;
 	
 	/**The SpaceTimeData corresponding to this canvas.*/
 	protected SpaceTimeDataController stData;
@@ -97,7 +101,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		
 	/** The top-left and bottom-right point that you selected.*/
 	final private Point selectionTopLeft, selectionBottomRight;
-		
+	
+	private final IEclipseContext context;
+	
 	/**The Group containing the labels. labelGroup.redraw() is called from the Detail Canvas.*/
 	private Composite labelGroup;
    
@@ -116,9 +122,6 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	/** thread to remove message */
 	MessageLabelManager restoreMessage;
 	
-	/**The min number of process units you can zoom in.*/
-    private final static int MIN_PROC_DISP = 1;
-	
 	final private ImageTraceAttributes oldAttributes;
 
 
@@ -128,9 +131,11 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 
 	
     /**Creates a SpaceTimeDetailCanvas with the given parameters*/
-	public SpaceTimeDetailCanvas(Composite _composite)
+	public SpaceTimeDetailCanvas(IEclipseContext context, Composite _composite)
 	{
 		super(_composite, SWT.NO_BACKGROUND, RegionType.Rectangle );
+		
+		this.context  = context;
 		oldAttributes = new ImageTraceAttributes();
 
 		selectionTopLeft     = new Point(0,0);
@@ -957,7 +962,8 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		oldAttributes.copy(attributes);
 		if (changedBounds) {
 			ProcessTimeline []traces = new ProcessTimeline[ numLines ];
-			//ptlService.setProcessTimeline(traces);
+			ProcessTimelineService ptlService = (ProcessTimelineService) context.get(Constants.CONTEXT_TIMELINE);
+			ptlService.setProcessTimeline(traces);
 		}
 
 		/*************************************************************************
@@ -965,7 +971,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		 *	on the SpaceTimeCanvas using the SpaceTimeSamplePainter given. Also paints
 		 *	the sample's max depth before becoming overDepth on samples that have gone over depth.
 		 *************************************************************************/
-		final DetailViewPaint detailPaint = new DetailViewPaint(bufferGC, origGC, stData, 
+		final DetailViewPaint detailPaint = new DetailViewPaint(getDisplay(), bufferGC, origGC, stData, 
 					attributes, numLines, changedBounds, this, threadExecutor); 
 
 		//detailPaint.setUser(true);
@@ -987,8 +993,8 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 				}
 			}
 		}
-		
-		detailPaint.schedule();
+
+		//detailPaint.schedule();
 		queue.add(detailPaint);
 	}
 
@@ -1280,8 +1286,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 				Frame frame = ((ZoomOperation)operation).getFrame();
 				final ImageTraceAttributes attributes = stData.getAttributes();
 				
-				//stData.getAttributes().setPosition(frame.position);
-				stData.getAttributes().setFrame(frame);
+				attributes.setFrame(frame);
 				zoom(frame.begTime, frame.begProcess, frame.endTime, frame.endProcess);
 			}
 			// change of cursor position ?

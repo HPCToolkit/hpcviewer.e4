@@ -10,12 +10,9 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
-
 import edu.rice.cs.hpctraceviewer.data.BaseDataVisualization;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TimelineDataSet;
-
-import org.eclipse.swt.graphics.Device;
 
 
 
@@ -27,9 +24,8 @@ import org.eclipse.swt.graphics.Device;
  * The class has a future variable List<ImagePosition> which is
  *
  *****************************************************************/
-public abstract class BasePaintThread implements Callable<List<ImagePosition>> {
-
-	//final protected Device device;
+public abstract class BasePaintThread implements Callable<List<ImagePosition>> 
+{
 	final protected int width;
 	final private IProgressMonitor monitor;
 
@@ -55,7 +51,7 @@ public abstract class BasePaintThread implements Callable<List<ImagePosition>> {
 	 */
 	public BasePaintThread( SpaceTimeDataController stData, Queue<TimelineDataSet> list, 
 			int numberOfTotalLines, AtomicInteger dataCollected, AtomicInteger currentPaint,
-			Device device, int width, IProgressMonitor monitor) {
+			int width, IProgressMonitor monitor) {
 		
 		Assert.isNotNull(list);
 		
@@ -91,7 +87,7 @@ public abstract class BasePaintThread implements Callable<List<ImagePosition>> {
 			//	their work yet. It's better to wait and sleep a bit 
 			// ------------------------------------------------------------------
 
-			TimelineDataSet setDataToPaint = list.poll();
+			final TimelineDataSet setDataToPaint = list.poll();
 			if (setDataToPaint == null) {
 				Thread.sleep(40);
 				continue;
@@ -131,7 +127,7 @@ public abstract class BasePaintThread implements Callable<List<ImagePosition>> {
 			
 			listOfImages.add(imgPos);
 			currentPaint.incrementAndGet();
-			//System.out.println("    bpt "+cp+" / " + numberOfTotalLines + "  col data: " + numDataCollected);
+
 		}
 
 		return listOfImages;

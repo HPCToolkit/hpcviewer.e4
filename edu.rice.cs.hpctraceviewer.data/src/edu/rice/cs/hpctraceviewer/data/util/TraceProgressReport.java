@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctraceviewer.ui.util;
+package edu.rice.cs.hpctraceviewer.data.util;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import edu.rice.cs.hpc.data.util.IProgressReport;
