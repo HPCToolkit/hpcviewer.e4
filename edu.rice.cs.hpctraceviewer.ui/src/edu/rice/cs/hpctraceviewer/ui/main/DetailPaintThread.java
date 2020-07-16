@@ -126,11 +126,11 @@ public class DetailPaintThread
 
 	@Override
 	protected ImagePosition finalizePaint(int linenum) {
+		
+		final ImagePosition imgPos = new DetailImagePosition(linenum, lineFinal, lineOriginal);
 
 		gcOriginal.dispose();
 		gcFinal.dispose();
-		
-		final ImagePosition imgPos = new DetailImagePosition(linenum, lineFinal, lineOriginal);
 
 		return imgPos;
 	}

@@ -11,6 +11,7 @@ import org.eclipse.core.commands.operations.IOperationHistoryListener;
 import org.eclipse.core.commands.operations.IUndoableOperation;
 import org.eclipse.core.commands.operations.OperationHistoryEvent;
 import org.eclipse.core.commands.operations.OperationHistoryFactory;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
@@ -144,7 +145,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	 * set new database and refresh the screen
 	 * @param dataTraces
 	 *****/
-	public void updateView(SpaceTimeDataController stData) {
+	public void setData(SpaceTimeDataController stData) {
 
 		super.init();
 
@@ -314,7 +315,10 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		frame.begTime = 0;
 		frame.endTime = stData.getTimeWidth();
 		
-		notifyChanges(ZoomOperation.ActionHome, frame);
+		stData.getAttributes().setFrame(frame);
+		
+		refresh(true);
+		//notifyChanges(ZoomOperation.ActionHome, frame);
 	}
 	
 	/**************************************************************************
@@ -896,15 +900,14 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		 *	the sample's max depth before becoming overDepth on samples that have gone over depth.
 		 *************************************************************************/
 		final DetailViewPaint detailPaint = new DetailViewPaint(getDisplay(), bufferGC, origGC, stData, 
-					attributes, numLines, changedBounds, this, threadExecutor); 
+																numLines, changedBounds, this); 
 
-		//detailPaint.setUser(true);
-		detailPaint.addJobChangeListener(new DetailPaintJobListener(
+		/*detailPaint.addJobChangeListener(new DetailPaintJobListener(
 											imageOrig, imageFinal, 
 											bufferGC, origGC, 
 											detailPaint, queue, 
 											changedBounds));
-		
+		*/
 /*		this part of the code causes deadlock on VirtualBox Ubuntu
  *      since we don't clear the queue
  */
@@ -917,9 +920,58 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 				}
 			}
 		}
+  		boolean result = detailPaint.paint(new IProgressMonitor() {
+			
+			@Override
+			public void worked(int work) {
+				System.out.println("work " + work);
+			}
+			
+			@Override
+			public void subTask(String name) {}
+			
+			@Override
+			public void setTaskName(String name) {}
+			
+			@Override
+			public void setCanceled(boolean value) {}
+			
+			@Override
+			public boolean isCanceled() {
+				return false;
+			}
+			
+			@Override
+			public void internalWorked(double work) {}
+			
+			@Override
+			public void done() {
+				System.out.println("done");
+			}
+			
+			@Override
+			public void beginTask(String name, int totalWork) {
+				System.out.println("start");
+			}
+		});
+		if (result)
+		{
+			SpaceTimeDetailCanvas.this.donePainting(imageOrig, imageFinal, changedBounds);
+		} else
+		{
+			// we don't need this "new image" since the paint fails
+			imageFinal.dispose();	
+			asyncRedraw();
+		}
+		// free resources 
+		bufferGC.dispose();
+		origGC.dispose();
+		imageOrig.dispose();
+		
+		//queue.remove(detailPaint);
 
 		//detailPaint.schedule();
-		queue.add(detailPaint);
+		//queue.add(detailPaint);
 	}
 
 	

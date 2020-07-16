@@ -38,11 +38,9 @@ public abstract class BaseTimelineThread implements Callable<Integer> {
 	final private Queue<TimelineDataSet> queue;
 	final private AtomicInteger currentLine;
 	final protected IProgressMonitor monitor;
-	protected final ImageTraceAttributes attributes;
 	
 
 	public BaseTimelineThread(SpaceTimeDataController stData,
-			ImageTraceAttributes attributes,
 			double scaleY, Queue<TimelineDataSet> queue, 
 			AtomicInteger currentLine, 
 			boolean usingMidpoint, IProgressMonitor monitor)
@@ -53,7 +51,6 @@ public abstract class BaseTimelineThread implements Callable<Integer> {
 		this.queue 		   = queue;
 		this.currentLine   = currentLine;
 		this.monitor 	   = monitor;
-		this.attributes	   = attributes;
 	}
 	
 	@Override
@@ -64,6 +61,8 @@ public abstract class BaseTimelineThread implements Callable<Integer> {
 	public Integer call() throws Exception {
 
 		ProcessTimeline trace = getNextTrace(currentLine);
+		ImageTraceAttributes attributes = stData.getAttributes();
+		
 		final double pixelLength = (attributes.getTimeInterval())/(double)attributes.getPixelHorizontal();
 		final long timeBegin = attributes.getTimeBegin();
 		int num_invalid_samples = 0;

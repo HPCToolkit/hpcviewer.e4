@@ -22,7 +22,6 @@ public class TimelineThread
 	extends BaseTimelineThread
 {
 	final private int totalLines;
-	final private ProcessTimelineService traceService;
 
 	/**Stores whether or not the bounds have been changed*/
 	private boolean changedBounds;
@@ -31,14 +30,12 @@ public class TimelineThread
 	 * Creates a TimelineThread with SpaceTimeData _stData; the rest of the parameters are things for drawing
 	 * @param changedBounds - whether or not the thread needs to go get the data for its ProcessTimelines.
 	 ***********************************************************************************************************/
-	public TimelineThread(SpaceTimeDataController stData, ImageTraceAttributes attributes,
-			ProcessTimelineService traceService,
+	public TimelineThread(SpaceTimeDataController stData, 
 			boolean _changedBounds, double _scaleY, Queue<TimelineDataSet> queue, 
 			AtomicInteger currentLine, int totalLines, IProgressMonitor monitor)
 	{
-		super(stData, attributes, _scaleY, queue, currentLine, stData.isEnableMidpoint(), monitor);
+		super(stData, _scaleY, queue, currentLine, stData.isEnableMidpoint(), monitor);
 		changedBounds = _changedBounds;		
-		this.traceService = stData.getProcessTimelineService();
 		this.totalLines	  = totalLines;
 	}
 	
@@ -49,8 +46,8 @@ public class TimelineThread
 		// case 1: remote database
 		
 		if (stData instanceof SpaceTimeDataControllerRemote) {
-			return ((SpaceTimeDataControllerRemote)stData).getNextTrace(currentLine, 
-					totalLines, attributes, changedBounds, monitor);
+			return ((SpaceTimeDataControllerRemote)stData).getNextTrace(currentLine, totalLines, 
+																		changedBounds, monitor);
 		}
 		
 		// case 2: local database
@@ -64,10 +61,13 @@ public class TimelineThread
 		if (currentLineNum >= totalLines)
 			return null;
 		
+		ProcessTimelineService traceService = stData.getProcessTimelineService();
+
 		if (traceService.getNumProcessTimeline() == 0)
 			traceService.setProcessTimeline(new ProcessTimeline[totalLines]);
 		
 		if (changedBounds) {
+			ImageTraceAttributes attributes = stData.getAttributes();
 			ProcessTimeline currentTimeline = new ProcessTimeline(currentLineNum, stData.getScopeMap(),
 					stData.getBaseData(), lineToPaint(currentLineNum, attributes),
 					attributes.getPixelHorizontal(), attributes.getTimeInterval(), 
@@ -94,6 +94,8 @@ public class TimelineThread
 			if (trace.isEmpty()) {
 				
 				trace.readInData();
+
+				ProcessTimelineService traceService = stData.getProcessTimelineService();
 				if (!traceService.setProcessTimeline(trace.line(), trace)) {
 					// something wrong happens, perhaps data races ?
 					monitor.setCanceled(true);

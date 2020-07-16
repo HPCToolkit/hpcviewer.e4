@@ -128,8 +128,8 @@ public class HPCTraceView
 		AbstractDBOpener dbOpener = new LocalDBOpener(context, experiment);
 		SpaceTimeDataController stdc = dbOpener.openDBAndCreateSTDC(null);
 		
-		detailCanvas.updateView(stdc);
-		axisArea.setData(stdc);
+		detailCanvas. setData(stdc);
+		axisArea.     setData(stdc);
 		processCanvas.setData(stdc);
 	}
 	

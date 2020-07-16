@@ -11,7 +11,6 @@ import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 
 
-import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TimelineDataSet;
 import edu.rice.cs.hpctraceviewer.ui.painter.BasePaintThread;
@@ -43,11 +42,24 @@ public class DetailViewPaint extends BaseViewPaint {
 
 	private boolean debug;
 	
+	
+	/***
+	 * Create a job to paint the main canvas view
+	 * @param device
+	 * @param masterGC
+	 * @param origGC
+	 * @param data
+	 * @param attributes
+	 * @param numLines
+	 * @param changeBound
+	 * @param canvas
+	 * @param threadExecutor
+	 */
 	public DetailViewPaint(final Device device, final GC masterGC, final GC origGC, SpaceTimeDataController data,
-			ImageTraceAttributes attributes, int numLines, boolean changeBound,
-			ISpaceTimeCanvas canvas, ExecutorService threadExecutor) 
+			int numLines, boolean changeBound,
+			ISpaceTimeCanvas canvas) 
 	{
-		super("Main trace view", data, attributes, changeBound, canvas, threadExecutor);
+		super("Main trace view", data, changeBound, canvas);
 		this.masterGC = masterGC;
 		this.origGC   = origGC;
 		this.numLines = numLines;
@@ -77,7 +89,7 @@ public class DetailViewPaint extends BaseViewPaint {
 	protected BaseTimelineThread getTimelineThread(ISpaceTimeCanvas canvas, double xscale,
 			double yscale, Queue<TimelineDataSet> queue, IProgressMonitor monitor) {
 
-		return new TimelineThread(controller, attributes, null, changedBounds,   
+		return new TimelineThread(controller, changedBounds,   
 				yscale, queue, numDataCollected, numLines, monitor);
 	}
 
@@ -105,21 +117,15 @@ public class DetailViewPaint extends BaseViewPaint {
 		double yscale = Math.max(canvas.getScalePixelsPerRank(), 1);
 
 		int yposition = (int) Math.round(imgDetailLine.position * yscale);
-		
-		System.out.println("dvp master-draw " + imagePosition.position);
 
 		// put the image onto the canvas
 		masterGC.drawImage(imgDetailLine.image, 0, yposition);
 		
-		System.out.println("dvp orig draw " + imagePosition.position);
-		
 		origGC.drawImage(imgDetailLine.imageOriginal, 0, imgDetailLine.position);
-				
-		System.out.print("dvp dispose " + imagePosition.position + ": ");
+
 		imgDetailLine.image.dispose();
 		imgDetailLine.imageOriginal.dispose();
-		
-		System.out.println("ok");
+
 	}
 
 	@Override
