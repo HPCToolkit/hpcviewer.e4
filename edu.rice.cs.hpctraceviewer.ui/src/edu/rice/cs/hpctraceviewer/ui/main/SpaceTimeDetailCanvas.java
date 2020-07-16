@@ -15,7 +15,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
@@ -75,29 +74,6 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	
 	/**The SpaceTimeData corresponding to this canvas.*/
 	protected SpaceTimeDataController stData;
-
-	/**Triggers zoom back to beginning view screen.*/
-	private Action homeButton;
-	
-	/**Triggers open function to open previously saved frame.*/
-	private Action openButton;
-	
-	/**Triggers save function to save current frame to file.*/
-	private Action saveButton;
-	
-	/** Triggers zoom-in on the time axis.*/
-	private Action tZoomInButton;
-	
-	/** Triggers zoom-out on the time axis.*/
-	private Action tZoomOutButton;
-	
-	/** Triggers zoom-in on the process axis.*/
-	private Action pZoomInButton;
-	
-	/** Triggers zoom-out on the process axis.*/
-	private Action pZoomOutButton;
-
-	private Action goEastButton, goNorthButton, goWestButton, goSouthButton;
 		
 	/** The top-left and bottom-right point that you selected.*/
 	final private Point selectionTopLeft, selectionBottomRight;
@@ -195,12 +171,6 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		frame.depth = this.stData.getMaxDepth() / 3;
 		
 		home(frame);
-
-		if (saveButton == null)
-			return;
-		
-		this.saveButton.setEnabled(true);
-		this.openButton.setEnabled(true);
 	}
 	
 	/***
@@ -320,24 +290,6 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		event.gc.fillRectangle(topPixelCrossHairX+8,topPixelCrossHairY,4,20);
 	}
 
-	/**************************************************************************
-	 * Initializes the buttons above the detail canvas.
-	 **************************************************************************/
-	public void setButtons(Action[] toolItems)
-	{
-		homeButton = toolItems[0];
-		openButton = toolItems[1];
-		saveButton = toolItems[2];
-		tZoomInButton = toolItems[5];
-		tZoomOutButton = toolItems[6];
-		pZoomInButton = toolItems[7];
-		pZoomOutButton = toolItems[8];
-		
-		goEastButton = toolItems[9];
-		goNorthButton = toolItems[10];
-		goSouthButton = toolItems[11];
-		goWestButton = toolItems[12];
-	}
 	
 	/**************************************************************************
 	 * The action that gets performed when the 'home' button is pressed - 
@@ -706,28 +658,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
     private boolean canGoSouth() {
     	return (stData.getAttributes().getProcessEnd()<this.stData.getTotalTraceCount());
     }
-    /**********
-     * check the status of all buttons
-     */
-    private void updateButtonStates() 
-    {
-    	final ImageTraceAttributes attributes = stData.getAttributes();
-    	if (tZoomInButton == null)
-    		return;
+
+    private void updateButtonStates() {
     	
-		this.tZoomInButton.setEnabled( this.getNumTimeUnitDisplayed() > Constants.MIN_TIME_UNITS_DISP );
-		this.tZoomOutButton.setEnabled(attributes.getTimeBegin()>0 || attributes.getTimeEnd()<stData.getTimeWidth() );
-		
-		this.pZoomInButton.setEnabled( getNumProcessesDisplayed() > MIN_PROC_DISP );
-		this.pZoomOutButton.setEnabled( attributes.getProcessBegin()>0 || attributes.getProcessEnd()<stData.getTotalTraceCount());
-		
-		this.goEastButton.setEnabled( canGoEast() );
-		this.goWestButton.setEnabled( canGoWest() );
-		this.goNorthButton.setEnabled( canGoNorth() );
-		this.goSouthButton.setEnabled( canGoSouth() );
-		
-		homeButton.setEnabled( attributes.getTimeBegin()>0 || attributes.getTimeEnd()<stData.getTimeWidth()
-				|| attributes.getProcessBegin()>0 || attributes.getProcessEnd()<stData.getTotalTraceCount() );
     }
     
 	final static private double SCALE_MOVE = 0.20;
