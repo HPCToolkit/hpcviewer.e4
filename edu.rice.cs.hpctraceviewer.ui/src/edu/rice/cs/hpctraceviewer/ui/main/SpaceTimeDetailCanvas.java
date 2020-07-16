@@ -66,7 +66,7 @@ import edu.rice.cs.hpctraceviewer.data.util.Constants;
  *
  ************************************************************************/
 public class SpaceTimeDetailCanvas extends AbstractTimeCanvas 
-	implements IOperationHistoryListener, ISpaceTimeCanvas
+	implements IOperationHistoryListener, ISpaceTimeCanvas, ITraceViewAction
 {	
 	final long PER_MICRO_SECOND = 1000000;
 	
@@ -344,6 +344,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	 * the bounds are reset so that the viewer is zoomed all the way out on the
 	 * image.
 	 **************************************************************************/
+	@Override
 	public void home()
 	{
 		//if this is the first time painting,
@@ -371,16 +372,6 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	public void open(Frame toBeOpened)
 	{
 		notifyChanges("Frame", toBeOpened);	
-	}
-	
-	/**************************************************************************
-	 * The action that gets performed when the 'save' button is pressed - 
-	 * it stores all the relevant data to this current configuration to a new 
-	 * Frame.
-	 **************************************************************************/
-	public Frame save()
-	{
-		return stData.getAttributes().getFrame();
 	}
 	
 	
@@ -1342,5 +1333,19 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	@Override
 	protected ColorTable getColorTable() {
 		return stData.getColorTable();
+	}
+
+
+	@Override
+	public void save() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void open() {
+		// TODO Auto-generated method stub
+		
 	}
 }

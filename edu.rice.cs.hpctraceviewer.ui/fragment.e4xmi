@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ASCII"?>
-<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:advanced="http://www.eclipse.org/ui/2010/UIModel/application/ui/advanced" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmi:id="_ffh4gMSyEeqcdd3a7pzIFA">
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:advanced="http://www.eclipse.org/ui/2010/UIModel/application/ui/advanced" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:commands="http://www.eclipse.org/ui/2010/UIModel/application/commands" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmi:id="_ffh4gMSyEeqcdd3a7pzIFA">
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_kjRfMMSyEeqcdd3a7pzIFA" featurename="children" parentElementId="xpath:/">
     <elements xsi:type="basic:TrimmedWindow" xmi:id="_OPdv0MS7Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpctraceviewer.ui.trimmedwindow.hpctraceviewer" visible="false" label="hpctraceviewer" iconURI="" width="1000" height="800">
       <children xsi:type="advanced:PerspectiveStack" xmi:id="_RclMEMS7Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpctraceviewer.ui.perspectivestack.main">
@@ -8,7 +8,10 @@
             <children xsi:type="basic:PartSashContainer" xmi:id="_W2eikMSzEeqcdd3a7pzIFA" elementId="edu.rice.cs.hpctraceviewer.ui.partsashcontainer.left" containerData="7000">
               <children xsi:type="basic:PartStack" xmi:id="_vNC7oMTxEeqcdd3a7pzIFA" elementId="edu.rice.cs.hpctraceviewer.ui.partstack.top" containerData="7000">
                 <children xsi:type="basic:Part" xmi:id="_idx84MSzEeqcdd3a7pzIFA" elementId="edu.rice.cs.hpctraceviewer.ui.part.main" containerData="7000" contributionURI="bundleclass://edu.rice.cs.hpctraceviewer.ui/edu.rice.cs.hpctraceviewer.ui.main.HPCTraceView" label="Trace view" iconURI="platform:/plugin/edu.rice.cs.hpctraceviewer.ui/resources/trace-detail.png" tooltip="Traces over time">
-                  <toolbar xmi:id="_lZ3TgMSzEeqcdd3a7pzIFA" elementId="edu.rice.cs.hpctraceviewer.ui.toolbar.0"/>
+                  <handlers xmi:id="_3v0TwMb7EeqOfJ3pUwSuCg" elementId="edu.rice.cs.hpctraceviewer.ui.handler.home" contributionURI="bundleclass://edu.rice.cs.hpctraceviewer.ui/edu.rice.cs.hpctraceviewer.ui.handlers.Home" command="_gVae0Mb7EeqOfJ3pUwSuCg"/>
+                  <toolbar xmi:id="_lZ3TgMSzEeqcdd3a7pzIFA" elementId="edu.rice.cs.hpctraceviewer.ui.toolbar.traceview">
+                    <children xsi:type="menu:HandledToolItem" xmi:id="_9VdjEMb6EeqOfJ3pUwSuCg" elementId="edu.rice.cs.hpctraceviewer.ui.handledtoolitem." label="" iconURI="platform:/plugin/edu.rice.cs.hpctraceviewer.ui/src/edu/rice/cs/hpctraceviewer/ui/resources/home-screen.png" tooltip="Reset the view to display the whole trace" command="_gVae0Mb7EeqOfJ3pUwSuCg"/>
+                  </toolbar>
                 </children>
               </children>
               <children xsi:type="basic:PartStack" xmi:id="_nEH14MSzEeqcdd3a7pzIFA" elementId="edu.rice.cs.hpctraceviewer.ui.partstack.bottom" containerData="3000">
@@ -25,5 +28,8 @@
       </children>
       <mainMenu xmi:id="_nF-WYMS7Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpctraceviewer.ui.menu.main"/>
     </elements>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_dKTNsMb7EeqOfJ3pUwSuCg" featurename="commands" parentElementId="xpath:/">
+    <elements xsi:type="commands:Command" xmi:id="_gVae0Mb7EeqOfJ3pUwSuCg" elementId="edu.rice.cs.hpctraceviewer.ui.command.home" commandName="Home"/>
   </fragments>
 </fragment:ModelFragments>

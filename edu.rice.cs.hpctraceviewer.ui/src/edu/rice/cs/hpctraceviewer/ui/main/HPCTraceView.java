@@ -115,6 +115,11 @@ public class HPCTraceView
 	}
 	
 	
+	public ITraceViewAction getActions() {
+		return detailCanvas;
+	}
+	
+	
 	@PreDestroy
 	public void preDestroy() {		
 	}

@@ -8,7 +8,6 @@ import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
-import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.IWindowCloseHandler;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
@@ -60,19 +59,6 @@ public class ShowTrace
 			winTrace.setVisible(true);
 		}
 		winTrace.setOnTop(true);
-		
-		IWindowCloseHandler closeHandler = context.get(IWindowCloseHandler.class);
-		
-		closeHandler = new IWindowCloseHandler() {
-			
-			@Override
-			public boolean close(MWindow window) {
-				window.setVisible(false);
-				return false;
-			}
-		};
-		context.set(IWindowCloseHandler.class, closeHandler);
-		
 		IBasePart objPart = (IBasePart) part.getObject();
 		BaseExperiment experiment = objPart.getExperiment();
 
