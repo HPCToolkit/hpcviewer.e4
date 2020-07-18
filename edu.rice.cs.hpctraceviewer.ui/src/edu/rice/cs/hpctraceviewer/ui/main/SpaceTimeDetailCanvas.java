@@ -1,9 +1,6 @@
 package edu.rice.cs.hpctraceviewer.ui.main;
 
 import java.text.DecimalFormat;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.commands.ExecutionException;
@@ -12,15 +9,10 @@ import org.eclipse.core.commands.operations.IUndoableOperation;
 import org.eclipse.core.commands.operations.OperationHistoryEvent;
 import org.eclipse.core.commands.operations.OperationHistoryFactory;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.PaintEvent;
@@ -43,7 +35,6 @@ import edu.rice.cs.hpctraceviewer.ui.operation.TraceOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.WindowResizeOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.ZoomOperation;
 import edu.rice.cs.hpctraceviewer.ui.painter.AbstractTimeCanvas;
-import edu.rice.cs.hpctraceviewer.ui.painter.BaseViewPaint;
 import edu.rice.cs.hpctraceviewer.ui.painter.BufferPaint;
 import edu.rice.cs.hpctraceviewer.ui.painter.ISpaceTimeCanvas;
 import edu.rice.cs.hpctraceviewer.ui.painter.ResizeListener;
@@ -55,7 +46,6 @@ import edu.rice.cs.hpctraceviewer.data.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 import edu.rice.cs.hpctraceviewer.ui.util.MessageLabelManager;
-import edu.rice.cs.hpctraceviewer.ui.util.Utility;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
 
 
@@ -67,9 +57,7 @@ import edu.rice.cs.hpctraceviewer.data.util.Constants;
  ************************************************************************/
 public class SpaceTimeDetailCanvas extends AbstractTimeCanvas 
 	implements IOperationHistoryListener, ISpaceTimeCanvas, ITraceViewAction
-{	
-	final long PER_MICRO_SECOND = 1000000;
-	
+{		
 	/**The min number of process units you can zoom in.*/
     private final static int MIN_PROC_DISP = 1;
 	
@@ -100,9 +88,6 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	MessageLabelManager restoreMessage;
 	
 	final private ImageTraceAttributes oldAttributes;
-
-
-	final private ExecutorService threadExecutor;
 	
 	final private DecimalFormat formatTime;
 
@@ -121,18 +106,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		
 		initMouseSelection();
 		
-		// set the number of maximum threads in the pool to the number of hardware threads
-		threadExecutor = Executors.newFixedThreadPool( Utility.getNumThreads(0) ); 
 		formatTime = new DecimalFormat("###,###,###.##");
-		
-		addDisposeListener( new DisposeListener() {
-			
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				// TODO Auto-generated method stub
-				dispose();
-			}
-		});
 	}
 
 
@@ -317,8 +291,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		
 		stData.getAttributes().setFrame(frame);
 		
-		refresh(true);
-		//notifyChanges(ZoomOperation.ActionHome, frame);
+		notifyChanges(ZoomOperation.ActionHome, frame);
 	}
 	
 	/**************************************************************************
@@ -828,9 +801,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		return (stData.getAttributes().getProcessInterval());
 	}
 	
-	// remove queue of jobs because it causes deadlock 
-	// 
-	final private ConcurrentLinkedQueue<BaseViewPaint> queue = new ConcurrentLinkedQueue<>();
+
 	
 	/*********************************************************************************
 	 * Refresh the content of the canvas with new input data or boundary or parameters
@@ -902,30 +873,10 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		final DetailViewPaint detailPaint = new DetailViewPaint(getDisplay(), bufferGC, origGC, stData, 
 																numLines, changedBounds, this); 
 
-		/*detailPaint.addJobChangeListener(new DetailPaintJobListener(
-											imageOrig, imageFinal, 
-											bufferGC, origGC, 
-											detailPaint, queue, 
-											changedBounds));
-		*/
-/*		this part of the code causes deadlock on VirtualBox Ubuntu
- *      since we don't clear the queue
- */
-  		if (!queue.isEmpty()) {
-			for (BaseViewPaint job : queue) {
-				if (!job.cancel()) {
-					// a job cannot be cancel
-					// this is fine, we should wait until it terminates or
-					// response that it will cancel in the future
-				}
-			}
-		}
   		boolean result = detailPaint.paint(new IProgressMonitor() {
 			
 			@Override
-			public void worked(int work) {
-				System.out.println("work " + work);
-			}
+			public void worked(int work) {}
 			
 			@Override
 			public void subTask(String name) {}
@@ -956,22 +907,21 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		});
 		if (result)
 		{
-			SpaceTimeDetailCanvas.this.donePainting(imageOrig, imageFinal, changedBounds);
+			donePainting(imageOrig, imageFinal, changedBounds);
+			System.out.println("success");
 		} else
 		{
 			// we don't need this "new image" since the paint fails
 			imageFinal.dispose();	
-			asyncRedraw();
+			System.out.println("fail");
+			//asyncRedraw();
 		}
+		redraw();
+		
 		// free resources 
 		bufferGC.dispose();
 		origGC.dispose();
 		imageOrig.dispose();
-		
-		//queue.remove(detailPaint);
-
-		//detailPaint.schedule();
-		//queue.add(detailPaint);
 	}
 
 	
@@ -1003,7 +953,8 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 				notifyChangePosition(new_p);
 			}
 		}
-		asyncRedraw();
+		//redraw();
+		//asyncRedraw();
 
 		// -----------------------------------------------------------------------
 		// notify to all other views that a new image has been created,
@@ -1019,8 +970,8 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	 * (non-Javadoc)
 	 * @see org.eclipse.swt.widgets.Widget#dispose()
 	 */
+	@Override
 	public void dispose () { 
-		threadExecutor.shutdown();
 		super.dispose();
 	}
 
@@ -1149,76 +1100,6 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	//-----------------------------------------------------------------------------------------
 	
 
-	/******
-	 * 
-	 * private class to listen to the job status.
-	 * once a job is done, we need to free resources and remove the job
-	 * from the queue.
-	 *
-	 ******/
-	private class DetailPaintJobListener implements IJobChangeListener
-	{
-		final Image imageOrig, imageFinal;
-		final GC	bufferGC, origGC;
-		final BaseViewPaint detailPaint;
-		
-		final ConcurrentLinkedQueue<BaseViewPaint> queue;
-
-		final boolean changedBounds;
-		
-		public DetailPaintJobListener(Image imageOrig, Image imageFinal,
-							  GC	bufferGC,  GC    origGC,
-							  BaseViewPaint detailPaint,
-							  ConcurrentLinkedQueue<BaseViewPaint> queue,
-							  boolean 		changedBounds)	 {
-
-			this.imageFinal = imageFinal;
-			this.imageOrig  = imageOrig;
-			this.bufferGC   = bufferGC;
-			this.origGC     = origGC;
-			this.detailPaint = detailPaint;
-			
-			this.queue		= queue;
-			
-			this.changedBounds = changedBounds;
-		}
-		
-		@Override
-		public void sleeping(IJobChangeEvent event) {}
-		
-		@Override
-		public void scheduled(IJobChangeEvent event) {}
-		
-		@Override
-		public void running(IJobChangeEvent event) {}
-		
-		@Override
-		public void done(IJobChangeEvent event) {
-			if (event.getResult() == Status.OK_STATUS)
-			{
-				SpaceTimeDetailCanvas.this.donePainting(imageOrig, imageFinal, changedBounds);
-			} else
-			{
-				// we don't need this "new image" since the paint fails
-				imageFinal.dispose();	
-				asyncRedraw();
-			}
-			// free resources 
-			bufferGC.dispose();
-			origGC.dispose();
-			imageOrig.dispose();
-			
-			queue.remove(detailPaint);
-		}
-		
-		@Override
-		public void awake(IJobChangeEvent event) {}
-		
-		@Override
-		public void aboutToRun(IJobChangeEvent event) {}
-	}
-
-	
 	/*************************************************************************
 	 * 
 	 * Resizing thread by listening to the event if a user has finished
