@@ -206,7 +206,7 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
         tree.setLinesVisible(true);
 
 		treeViewer.setContentProvider( getContentProvider(treeViewer));
-		createScopeColumn(treeViewer);
+		//createScopeColumn(treeViewer);
 		
 		mouseDownListener = new ScopeMouseListener(treeViewer, partFactory);
 		treeViewer.getTree().addListener(SWT.MouseDown, mouseDownListener);

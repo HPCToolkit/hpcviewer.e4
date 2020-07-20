@@ -52,19 +52,17 @@ public abstract class AbstractViewItem extends CTabItem implements EventHandler
 		super(parent, style);
 	}
 
-	public AbstractViewItem(CTabFolder parent, int style, int index) {
-		super(parent, style, index);
-	}
-
 	public void setService(EPartService partService, 
 			IEventBroker broker,
 			DatabaseCollection database,
-			PartFactory   partFactory) {
+			PartFactory   partFactory,
+			EMenuService  menuService) {
 		
 		this.partService = partService;
 		this.eventBroker = broker;
 		this.databaseAddOn = database;
 		this.partFactory = partFactory;
+		this.menuService = menuService;
 	}
 	
 	
@@ -100,6 +98,7 @@ public abstract class AbstractViewItem extends CTabItem implements EventHandler
 		// TODO: this process takes time
 		root = createRoot(experiment);
 		contentViewer.setData(root);
+		System.out.println("create input " + getText());
 	}
 
 	

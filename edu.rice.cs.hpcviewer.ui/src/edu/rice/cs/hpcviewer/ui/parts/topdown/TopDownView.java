@@ -9,12 +9,13 @@ import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcviewer.ui.parts.AbstractViewItem;
 import edu.rice.cs.hpcviewer.ui.parts.IViewBuilder;
 
-public class TopDownItem extends AbstractViewItem
+public class TopDownView extends AbstractViewItem
 {
 
-	public TopDownItem(CTabFolder parent, int style) {
+	public TopDownView(CTabFolder parent, int style) {
 		super(parent, style);
-		setText("Top-down");
+		setText("Top-down view");
+		setToolTipText("A view to display the calling context tree (CCT) of the profile data");
 	}
 
 	
