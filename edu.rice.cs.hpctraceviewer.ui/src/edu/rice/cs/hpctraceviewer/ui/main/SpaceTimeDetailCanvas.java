@@ -925,18 +925,6 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	}
 
 	
-	private void asyncRedraw() 
-	{
-		Display display = Display.getDefault();
-		display.asyncExec(new Runnable() {
-			
-			@Override
-			public void run() {
-				redraw();
-			}
-		});
-	}
-
 	private void donePainting(Image imageOrig, Image imageFinal, boolean refreshData)
 	{		
 		initBuffer();

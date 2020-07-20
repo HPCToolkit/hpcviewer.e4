@@ -10,6 +10,7 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.swt.widgets.Display;
 import edu.rice.cs.hpcbase.map.ProcedureAliasMap;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
+import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.ExperimentWithoutMetrics;
 import edu.rice.cs.hpc.data.experiment.InvalExperimentException;
 import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
@@ -290,8 +291,7 @@ public abstract class SpaceTimeDataController
 			// - if the measurement is from old hpcrun: microsecond
 			// - if the measurement is from new hpcrun: nanosecond
 			
-			BaseExperiment be = getExperiment();
-			ExperimentWithoutMetrics exp = (ExperimentWithoutMetrics) be;
+			Experiment exp = (Experiment) getExperiment();
 			if (exp.getTraceAttribute().dbUnitTime == TraceAttribute.PER_NANO_SECOND) {
 				return TimeUnit.NANOSECONDS;
 			}

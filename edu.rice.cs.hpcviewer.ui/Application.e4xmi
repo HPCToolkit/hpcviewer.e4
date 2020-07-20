@@ -122,6 +122,12 @@
   <descriptors xmi:id="_4LP-wK0hEeqX1ux1mZi76A" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.graph.sort" label="Sorted plot graph" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpcviewer-icon-editor-plotsort.png" bindingContexts="_c3AF2cjYEeSyMNYR5xypkQ" allowMultiple="true" category="editor" closeable="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.graph.GraphPlotSortViewer">
     <tags>categoryTag:hpcview</tags>
   </descriptors>
+  <descriptors xmi:id="_uSUdoMizEeq3_poNktUMtQ" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.profile" label="Profile" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpcviewerEclipse32.gif" tooltip="Profile view" allowMultiple="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.ProfilePart">
+    <toolbar xmi:id="_1e6AIMizEeq3_poNktUMtQ" elementId="edu.rice.cs.hpcviewer.ui.toolbar.0"/>
+  </descriptors>
+  <descriptors xmi:id="_0egRoMk4Eeq3_poNktUMtQ" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.trace" label="Trace" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpc-merged-16x16.png" allowMultiple="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.TracePart">
+    <toolbar xmi:id="_4ENNAMk4Eeq3_poNktUMtQ" elementId="edu.rice.cs.hpcviewer.ui.toolbar.1"/>
+  </descriptors>
   <snippets xsi:type="basic:TrimmedWindow" xmi:id="_E-KEILVzEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.trimmedwindow.snippet" label="hpcviewer" width="1000" height="800">
     <children xsi:type="advanced:PerspectiveStack" xmi:id="_EE7A8LVxEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.perspectivestack.snippet">
       <children xsi:type="advanced:Perspective" xmi:id="_G4i_ILVxEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.perspective.snippet" label="hpcviewer perspective" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpc-merged-16x16.png">

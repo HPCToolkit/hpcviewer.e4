@@ -361,6 +361,12 @@ public class DatabaseCollection
 			if (i==0) {
 				
 				service.showPart(part, PartState.VISIBLE);
+				
+				// profile part
+				MPart tdPart = service.createPart("edu.rice.cs.hpcviewer.ui.partdescriptor.profile");
+				list.add(tdPart);
+				service.showPart(tdPart, PartState.VISIBLE);
+				
 			} else {
 				
 				service.showPart(part, PartState.CREATE);
