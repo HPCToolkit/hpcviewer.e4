@@ -9,31 +9,25 @@ import javax.annotation.PreDestroy;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.model.application.MApplication;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.custom.CTabItem;
-import org.eclipse.swt.widgets.ToolBar;
-import org.eclipse.swt.widgets.ToolItem;
-import org.eclipse.swt.widgets.Tree;
-
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
-import edu.rice.cs.hpc.data.experiment.scope.RootScope;
+import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownItem;
 
-import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.custom.StyledText;
 
-public class ProfilePart 
+public class ProfilePart implements IViewPart
 {
 
 	@Inject	protected EPartService  partService;
@@ -52,10 +46,7 @@ public class ProfilePart
 	 * to be loaded. */
 	private BaseExperiment  experiment;
 	
-	/** This variable is a flag whether a table is already populated or not.
-	 * If the root is null, it isn't populated
-	 */
-
+	private TopDownItem tbtmTopDown;
 
 	@Inject
 	public ProfilePart() {
@@ -80,7 +71,7 @@ public class ProfilePart
 		CTabFolder tabFolderBottom = new CTabFolder(sashForm, SWT.BORDER);
 		tabFolderBottom.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
 		
-		TopDownItem tbtmTopDown = new TopDownItem(tabFolderBottom, SWT.NONE);
+		tbtmTopDown = new TopDownItem(tabFolderBottom, SWT.NONE);
 		tbtmTopDown.setText("Top-down");
 		
 		Composite composite = new Composite(tabFolderBottom, SWT.NONE);
@@ -113,14 +104,26 @@ public class ProfilePart
 	}
 	
 	
+	public void setInput(Experiment experiment) {
+		tbtmTopDown.setInput(experiment);
+	}
+	
 	@PreDestroy
 	public void preDestroy() {
-		
 	}
 	
 	
 	@Focus
 	public void onFocus() {
-		
+	}
+
+	@Override
+	public BaseExperiment getExperiment() {
+		return experiment;
+	}
+
+	@Override
+	public void setInput(MPart part, Object input) {
+		tbtmTopDown.setInput(input);		
 	}
 }

@@ -71,7 +71,7 @@ import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
 @Singleton
 public class DatabaseCollection 
 {
-	static private final String STACK_ID_BASE 	  = "edu.rice.cs.hpcviewer.ui.partstack.lower.";
+	static private final String STACK_ID_BASE 	  = "edu.rice.cs.hpcviewer.ui.partstack.integrated";
 	
 	static private final int MAX_STACKS_AVAIL = 3;
 	
@@ -301,17 +301,12 @@ public class DatabaseCollection
 		MWindow  window = application.getSelectedElement();
 		
 		if (parentId == null) {
-			for(int i=1; i<=MAX_STACKS_AVAIL; i++) {
-				final String stackId = STACK_ID_BASE + String.valueOf(i) ;
-				stack  = (MPartStack)modelService.find(stackId, window);
-				
-				if (stack != null)
-					list = stack.getChildren();
+			final String stackId = STACK_ID_BASE; // + String.valueOf(i) ;
+			stack  = (MPartStack)modelService.find(stackId, window);
+			
+			if (stack != null)
+				list = stack.getChildren();
 
-				if (list != null && list.size()==0)
-					// we found empty an stack
-					break; 
-			}			
 		} else {
 			stack  = (MPartStack)modelService.find(parentId, window);
 			if (stack != null)
@@ -326,72 +321,45 @@ public class DatabaseCollection
 			System.out.println("create a new part stack");
 			
 			stack = modelService.createModelElement(MPartStack.class);
-			stack.setElementId(STACK_ID_BASE  + "1");
+			stack.setElementId(STACK_ID_BASE);
 			stack.setToBeRendered(true);
 		}
 		
+		final MPart part = service.createPart("edu.rice.cs.hpcviewer.ui.partdescriptor.profile");
+		if (list != null)
+			list.add(part);
+		service.showPart(part, PartState.VISIBLE);
+		IViewPart view = null;
+
+		int maxAttempt = 20;		
+		while(maxAttempt>0) {
+			view = (IViewPart) part.getObject();
+			if (view != null)
+				break;
+			
+			try {
+				Thread.sleep(300);					
+			} catch (Exception e) {
+				
+			}
+			maxAttempt--;
+		}
+		if (view == null) {
+			MessageDialog.openError(Display.getDefault().getActiveShell(), "Fail to get the view", "hpcviewer is unable to retrieve the view. Please try again");
+			return;
+		}
+		
+		// has to set the element Id before populating the view
+		String elementID = ElementIdManager.getElementId(experiment);
+		part.setElementId(elementID);
+		view.setInput(part, experiment);
+
 		//----------------------------------------------------------------
 		// part stack is ready, now we create all view parts and add it to the part stack
 		// TODO: We assume adding to the part stack is always successful
 		//----------------------------------------------------------------
 		stack.setVisible(true);
 		stack.setOnTop(true);
-		
-		Object []children = experiment.getRootScopeChildren();
-		
-		for (int i=0; i<children.length; i++) {
-
-			RootScope root = (RootScope) children[i];
-			
-			String partId = mapRoottypeToPartId.get(root.getType());
-			if (partId == null)
-				continue; 	// TODO: should display error message
-			
-			final MPart part = service.createPart(partId);
-			
-			list.add(part);
-
-			part.setLabel(root.getRootName());
-
-			//----------------------------------------------------------------
-			// We only make the top-down (the first part) to be visible
-			// the other parts will be created, but not activated.
-			// Let users to activate the other parts by themselves.
-			//----------------------------------------------------------------
-			if (i==0) {
-				
-				service.showPart(part, PartState.VISIBLE);
-				
-				// profile part
-				MPart tdPart = service.createPart("edu.rice.cs.hpcviewer.ui.partdescriptor.profile");
-				list.add(tdPart);
-				service.showPart(tdPart, PartState.VISIBLE);
-				
-			} else {
-				
-				service.showPart(part, PartState.CREATE);
-			}			
-			IViewPart view = null;
-
-			int maxAttempt = 20;		
-			while(maxAttempt>0) {
-				view = (IViewPart) part.getObject();
-				if (view != null)
-					break;
-				
-				try {
-					Thread.sleep(300);					
-				} catch (Exception e) {
-					
-				}
-				maxAttempt--;
-			}
-			// has to set the element Id before populating the view
-			String elementID = ElementIdManager.getElementId(root);
-			part.setElementId(elementID);
-			if (view != null)
-				view.setInput(part, experiment);
-		}
 		
 		statusReport(IStatus.INFO, "Open " + experiment.getDefaultDirectory().getAbsolutePath(), null);
 		
