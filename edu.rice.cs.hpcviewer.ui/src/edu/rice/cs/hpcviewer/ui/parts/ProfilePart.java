@@ -39,8 +39,6 @@ public class ProfilePart implements IViewPart
 
 	@Inject protected PartFactory partFactory;
 
-	private IViewBuilder  contentViewer;
-	
 	/** Each view needs to store the experiment database.
 	 * In case it needs to populate the table, we know which database 
 	 * to be loaded. */
@@ -62,18 +60,19 @@ public class ProfilePart implements IViewPart
 		CTabFolder tabFolderTop = new CTabFolder(sashForm, SWT.BORDER);
 		tabFolderTop.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
 		
-		CTabItem tbtmNewItem = new CTabItem(tabFolderTop, SWT.NONE);
+/*		CTabItem tbtmNewItem = new CTabItem(tabFolderTop, SWT.NONE);
 		tbtmNewItem.setText("Code viewer");
 		
 		StyledText styledText = new StyledText(tabFolderTop, SWT.BORDER);
 		tbtmNewItem.setControl(styledText);
-		
+*/		
 		CTabFolder tabFolderBottom = new CTabFolder(sashForm, SWT.BORDER);
 		tabFolderBottom.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
 		
 		tbtmTopDown = new TopDownItem(tabFolderBottom, SWT.NONE);
 		tbtmTopDown.setText("Top-down");
-		
+		tbtmTopDown.setToolTipText("Calling context view of the profile data");
+
 		Composite composite = new Composite(tabFolderBottom, SWT.NONE);
 		tbtmTopDown.setControl(composite);
 		composite.setLayout(new GridLayout(1, false));
@@ -81,26 +80,15 @@ public class ProfilePart implements IViewPart
 		tbtmTopDown.setService(partService, eventBroker, databaseAddOn, partFactory);
 		tbtmTopDown.createContent(composite);
 		
-		/*
-		ToolBar toolBar = new ToolBar(composite, SWT.FLAT | SWT.RIGHT);
-		toolBar.setBounds(0, 0, 104, 31);
-		
-		ToolItem tltmNewItem = new ToolItem(toolBar, SWT.NONE);
-		tltmNewItem.setText("New Item");
-		
-		ToolItem tltmNewItem_1 = new ToolItem(toolBar, SWT.NONE);
-		tltmNewItem_1.setText("New Item");
-		
-		TreeViewer treeViewer = new TreeViewer(composite, SWT.BORDER);
-		Tree tree = treeViewer.getTree();
-		tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-*/		
 		CTabItem tbtmBottomUp = new CTabItem(tabFolderBottom, SWT.NONE);
 		tbtmBottomUp.setText("Bottom-up");
 		
 		CTabItem tbtmFlat = new CTabItem(tabFolderBottom, SWT.NONE);
 		tbtmFlat.setText("Flat");
 		sashForm.setWeights(new int[] {1, 1});
+		
+		tabFolderBottom.setSelection(tbtmTopDown);
+		tabFolderBottom.setFocus();
 	}
 	
 	
