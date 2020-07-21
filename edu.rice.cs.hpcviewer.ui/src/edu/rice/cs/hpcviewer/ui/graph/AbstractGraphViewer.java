@@ -80,8 +80,9 @@ public abstract class AbstractGraphViewer extends CTabItem implements IUpperPart
 		
 		GraphEditorInput inputNew = (GraphEditorInput) input;
 		
-		return inputNew.getScope()  == this.input.getScope() && 
-			   inputNew.getMetric() == this.input.getMetric();
+		return inputNew.getScope()     == this.input.getScope()     && 
+			   inputNew.getGraphType() == this.input.getGraphType() &&
+			   inputNew.getMetric()    == this.input.getMetric();
 	}
 
 	@Override
