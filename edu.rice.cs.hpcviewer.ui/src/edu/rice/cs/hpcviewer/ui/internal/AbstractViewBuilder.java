@@ -102,6 +102,7 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 	final private EPartService  partService;
 	final private IEventBroker  eventBroker;
 	final private DatabaseCollection database;
+	private EMenuService menuService;
 	
 	private ScopeTreeViewer treeViewer = null;
 	
@@ -145,6 +146,8 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 	@Override
 	public void createContent(Composite parent, EMenuService menuService) {
 		
+		this.menuService = menuService;
+				
 		parent.setLayout(new GridLayout(1, false));
 		
 		Composite composite = new Composite(parent, SWT.NONE);
@@ -646,6 +649,14 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 		return partService;
 	}
     
+	protected DatabaseCollection getDatabaseCollection() {
+		return database;
+	}
+	
+	protected EMenuService getMenuService() {
+		return menuService;
+	}
+	
     /////////////////////////////////////////////////////////
     ///
     ///  Abstract methods

@@ -1,11 +1,16 @@
 package edu.rice.cs.hpcviewer.ui.parts.topdown;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -13,8 +18,11 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.CoolBar;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
@@ -25,17 +33,18 @@ import edu.rice.cs.hpc.data.experiment.metric.MetricRaw;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.tld.collection.ThreadDataCollectionFactory;
+import edu.rice.cs.hpcviewer.ui.dialogs.ThreadFilterDialog;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.graph.GraphMenu;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractContentProvider;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractViewBuilder;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
 import edu.rice.cs.hpcviewer.ui.parts.ProfilePart;
-import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadViewInput;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 import edu.rice.cs.hpcviewer.ui.util.Constants;
 import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
+import edu.rice.cs.hpcviewer.ui.util.FilterDataItem;
 
 /*************************************************************
  * 
@@ -120,17 +129,7 @@ public class TopDownContentViewer extends AbstractViewBuilder
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 
-				ScopeTreeViewer treeViewer = getViewer();
-				
-				ThreadViewInput input = new ThreadViewInput(treeViewer.getRootScope(), threadData, null);
-
-				MPart activePart = getPartService().getActivePart();
-				String parentId  = activePart.getParent().getElementId();
-				
-				String elementId = ElementIdManager.getElementId(input.getRootScope().getExperiment()) + 
-								   ElementIdManager.ELEMENT_SEPARATOR + Constants.ID_VIEW_THREAD;
-				
-				//partFactory.display(parentId, Constants.ID_VIEW_THREAD, elementId, input);
+				showThreadView(e.widget.getDisplay().getActiveShell());
 			}
 			
 			@Override
@@ -138,6 +137,45 @@ public class TopDownContentViewer extends AbstractViewBuilder
 		});
 	}
 
+	
+	private void showThreadView(Shell shell) {
+		String[] labels = null;
+		try {
+			labels = threadData.getRankStringLabels();
+		} catch (IOException e) {
+			MessageDialog.openError(shell, "Error", e.getMessage());
+			Logger logger = LoggerFactory.getLogger(getClass());
+			logger.error("Error opening thread data", e);
+			return;
+		}
+		List<FilterDataItem> items =  new ArrayList<FilterDataItem>(labels.length);
+		
+		for (int i=0; i<labels.length; i++) {
+			FilterDataItem obj = new FilterDataItem(labels[i], false, true);
+			items.add(obj);
+		}
+
+		ThreadFilterDialog dialog = new ThreadFilterDialog(shell, items);
+		if (dialog.open() == Window.OK) {
+			items = dialog.getResult();
+			if (items != null) {
+				List<Integer> threads = new ArrayList<Integer>();
+				for(int i=0; i<items.size(); i++) {
+					if (items.get(i).checked) {
+						threads.add(i);
+					}
+				}
+				if (threads.size()>0) {
+					ScopeTreeViewer treeViewer = getViewer();
+					
+					ThreadViewInput input = new ThreadViewInput(treeViewer.getRootScope(), threadData, threads);
+
+					profilePart.addEditor(input);
+				}
+			}
+		}
+	}
+	
 	@Override
 	protected AbstractContentProvider getContentProvider(ScopeTreeViewer treeViewer) {
 		

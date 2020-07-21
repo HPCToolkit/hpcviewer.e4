@@ -3,6 +3,11 @@ package edu.rice.cs.hpcviewer.ui.parts;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.PostConstruct;
 import org.eclipse.swt.widgets.Composite;
 import javax.annotation.PreDestroy;
@@ -15,6 +20,7 @@ import org.eclipse.e4.ui.services.EMenuService;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.SWT;
@@ -24,11 +30,15 @@ import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
+import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
+import edu.rice.cs.hpcdata.tld.collection.ThreadDataCollectionFactory;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.graph.AbstractGraphViewer;
 import edu.rice.cs.hpcviewer.ui.graph.GraphEditorInput;
@@ -40,7 +50,10 @@ import edu.rice.cs.hpcviewer.ui.parts.editor.Editor;
 import edu.rice.cs.hpcviewer.ui.parts.editor.IUpperPart;
 import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 import edu.rice.cs.hpcviewer.ui.parts.flat.FlatView;
+import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadView;
+import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadViewInput;
 import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownView;
+import edu.rice.cs.hpcviewer.ui.tabItems.AbstractViewItem;
 import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
 
 
@@ -137,6 +150,20 @@ public class ProfilePart implements IViewPart
 			((AbstractGraphViewer)viewer).postConstruct(parent);
 			viewer.setControl(parent);
 			((AbstractGraphViewer)viewer).setInput(null, graphInput);
+		
+		} else if (input instanceof ThreadViewInput) {
+			ThreadView threadView = new ThreadView(tabFolderBottom, SWT.NONE);
+			threadView.setService(partService, eventBroker, databaseAddOn, this, menuService);
+			
+			Composite parent = new Composite(tabFolderBottom, SWT.NONE);
+			threadView.setControl(parent);
+			parent.setLayout(new GridLayout(1, false));
+			
+			threadView.postConstruct(parent, menuService);
+			
+			threadView.setInput(null, input);
+			tabFolderBottom.setSelection(threadView);
+			return;
 			
 		} else {
 			

@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.parts;
+package edu.rice.cs.hpcviewer.ui.tabItems;
 
 import javax.annotation.PostConstruct;
 
@@ -22,7 +22,9 @@ import edu.rice.cs.hpc.filter.service.FilterStateProvider;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
 import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
-import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
+import edu.rice.cs.hpcviewer.ui.parts.IViewBuilder;
+import edu.rice.cs.hpcviewer.ui.parts.ProfilePart;
+
 
 public abstract class AbstractViewItem extends CTabItem implements EventHandler
 {

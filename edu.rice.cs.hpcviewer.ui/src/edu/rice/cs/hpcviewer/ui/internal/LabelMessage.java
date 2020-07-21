@@ -14,7 +14,7 @@ public class LabelMessage implements IUserMessage
 {
 	static final private int MESSAGE_TIMEOUT = 8000; // time out when showing a message
 	
-	final private Color colorYellow, colorGreen, colorRed, colorNormal, colorWhite;
+	final private Color colorYellow, colorGreen, colorRed, colorNormal, colorWhite, colorBlack;
 	final private Label lblMessage;
 
 	public LabelMessage(Composite parent, int style) {
@@ -24,6 +24,7 @@ public class LabelMessage implements IUserMessage
 		colorRed    = display.getSystemColor(SWT.COLOR_RED);
 		colorGreen  = display.getSystemColor(SWT.COLOR_GREEN);
 		colorWhite  = display.getSystemColor(SWT.COLOR_WHITE);
+		colorBlack  = display.getSystemColor(SWT.COLOR_BLACK);
 		
 		lblMessage  = new Label(parent, SWT.FLAT | SWT.LEFT);
 		colorNormal = lblMessage.getBackground();
@@ -42,10 +43,12 @@ public class LabelMessage implements IUserMessage
     }
     
     public void showInfo(String message) {
+    	lblMessage.setForeground(colorBlack);
     	showMessage(message, colorGreen);
     }
     
     public void showWarning(String message) {
+    	lblMessage.setForeground(colorBlack);
     	showMessage(message, colorYellow);
     }
 	
