@@ -18,6 +18,8 @@ public class Datacentric extends AbstractViewItem
 	@Inject
 	public Datacentric(CTabFolder parent, int style) {
 		super(parent, style);
+		setText("Datacentric view");
+		setToolTipText("A view to display callinng context tree from a data-centric view");
 	}
 	
 
@@ -31,8 +33,6 @@ public class Datacentric extends AbstractViewItem
 	protected IViewBuilder setContentViewer(Composite parent, EMenuService menuService) {
 
 		IViewBuilder contentViewer = new TopDownContentViewer(partService, eventBroker, databaseAddOn, null);
-    	contentViewer.createContent(parent, menuService);
-
     	return contentViewer;
 	}
 
