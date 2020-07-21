@@ -439,7 +439,7 @@ public class BaseExperimentBuilder extends Builder {
 		String sValue = values[1];
 		String sID = values[0];
 		try {
-			Integer objID = new Integer(sID);
+			Integer objID = Integer.valueOf(sID);
 			LoadModuleScope lmScope = new LoadModuleScope(viewRootScope, sValue, null, objID.intValue());
 			this.hashLoadModuleTable.put(objID, lmScope);
 		} catch (java.lang.NumberFormatException e) {

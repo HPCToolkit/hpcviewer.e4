@@ -14,7 +14,6 @@ import edu.rice.cs.hpcviewer.ui.internal.AbstractContentProvider;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractViewBuilder;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
 import edu.rice.cs.hpcviewer.ui.parts.ProfilePart;
-import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 
 public class BottomUpContentViewer extends AbstractViewBuilder 
 {

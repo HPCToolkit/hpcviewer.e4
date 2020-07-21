@@ -227,6 +227,7 @@ public class ProfilePart implements IViewPart
 		
 		part.setLabel("Profile: " + experiment.getName());
 		part.setElementId(ElementIdManager.getElementId(experiment));
+		part.setTooltip(experiment.getDefaultDirectory().getAbsolutePath());
 		
 		Object []roots = experiment.getRootScopeChildren();
 		views = new AbstractViewItem[roots.length];		

@@ -13,11 +13,7 @@ import edu.rice.cs.hpc.data.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpc.data.experiment.scope.LineScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpcviewer.ui.parts.ProfilePart;
-import edu.rice.cs.hpcviewer.ui.parts.editor.Editor;
-import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 import edu.rice.cs.hpcviewer.ui.resources.FontManager;
-import edu.rice.cs.hpcviewer.ui.util.Constants;
-import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
 
