@@ -10,7 +10,6 @@ import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.custom.CTabFolder;
-import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -30,6 +29,7 @@ import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
 import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
 import edu.rice.cs.hpcviewer.ui.parts.ProfilePart;
+import edu.rice.cs.hpcviewer.ui.tabItems.AbstractBaseViewItem;
 import edu.rice.cs.hpcviewer.ui.tabItems.IViewItem;
 import edu.rice.cs.hpcviewer.ui.util.FilterDataItem;
 
@@ -38,7 +38,7 @@ import edu.rice.cs.hpcviewer.ui.util.FilterDataItem;
  * View part to display CCT and metrics for a specific set of threads 
  *
  *************************************************************/
-public class ThreadView extends CTabItem implements IViewItem, EventHandler
+public class ThreadView extends AbstractBaseViewItem implements IViewItem, EventHandler
 {
 	private EPartService  partService;	
 	private IEventBroker  eventBroker;
@@ -169,5 +169,4 @@ public class ThreadView extends CTabItem implements IViewItem, EventHandler
 		}
 		
 	}
-
 }

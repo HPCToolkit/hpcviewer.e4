@@ -4,10 +4,6 @@ package edu.rice.cs.hpcviewer.ui.parts;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.annotation.PostConstruct;
 import org.eclipse.swt.widgets.Composite;
 import javax.annotation.PreDestroy;
@@ -20,7 +16,6 @@ import org.eclipse.e4.ui.services.EMenuService;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.SWT;
@@ -30,15 +25,10 @@ import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
-import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
-import edu.rice.cs.hpcdata.tld.collection.ThreadDataCollectionFactory;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.graph.AbstractGraphViewer;
 import edu.rice.cs.hpcviewer.ui.graph.GraphEditorInput;
@@ -51,8 +41,8 @@ import edu.rice.cs.hpcviewer.ui.parts.editor.IUpperPart;
 import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 import edu.rice.cs.hpcviewer.ui.parts.flat.FlatView;
 import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadView;
-import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadViewInput;
 import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownView;
+import edu.rice.cs.hpcviewer.ui.tabItems.AbstractBaseViewItem;
 import edu.rice.cs.hpcviewer.ui.tabItems.AbstractViewItem;
 import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
 
@@ -151,20 +141,6 @@ public class ProfilePart implements IViewPart
 			viewer.setControl(parent);
 			((AbstractGraphViewer)viewer).setInput(null, graphInput);
 		
-		} else if (input instanceof ThreadViewInput) {
-			ThreadView threadView = new ThreadView(tabFolderBottom, SWT.NONE);
-			threadView.setService(partService, eventBroker, databaseAddOn, this, menuService);
-			
-			Composite parent = new Composite(tabFolderBottom, SWT.NONE);
-			threadView.setControl(parent);
-			parent.setLayout(new GridLayout(1, false));
-			
-			threadView.createContent(parent);
-			
-			threadView.setInput(input);
-			tabFolderBottom.setSelection(threadView);
-			return;
-			
 		} else {
 			
 			viewer = new Editor(tabFolderTop, SWT.NONE);
@@ -184,6 +160,16 @@ public class ProfilePart implements IViewPart
 	}
 	
 	
+	/*****
+	 * Specifically adding a new thread view
+	 * 
+	 * @param input
+	 */
+	public void addThreadView(Object input) {
+		ThreadView threadView = new ThreadView(tabFolderBottom, SWT.NONE);
+		addView(threadView, input, true);
+	}
+	
 	/****
 	 * Add a view tab item (at the lower folder) to the profile part
 	 * 
@@ -191,7 +177,7 @@ public class ProfilePart implements IViewPart
 	 * @param input the view's input
 	 * @param sync boolean whether the display has to be synchronous or not
 	 */
-	public void addView(AbstractViewItem view, Object input, boolean sync) {
+	public void addView(AbstractBaseViewItem view, Object input, boolean sync) {
 		
 		// TODO: make sure this statement is called early.
 		// The content builder will need many services. So we have to make they are initialized
@@ -207,6 +193,8 @@ public class ProfilePart implements IViewPart
 		if (sync) {
 			BusyIndicator.showWhile(display, createView);
 			tabFolderBottom.setSelection(view);
+			tabFolderBottom.setFocus();
+			
 		} else {
 			// background renderer
 			display.asyncExec(createView);
@@ -261,20 +249,22 @@ public class ProfilePart implements IViewPart
 			}
 			addView(views[numViews], input, numViews==0);
 		}
-		tabFolderBottom.setSelection(views[0]);
-		tabFolderBottom.setFocus();
 	}
 	
 	
 	
-	
+	/**********
+	 * 
+	 * Thread to render a view using background task
+	 *
+	 */
 	static private class RunViewCreation implements Runnable 
 	{
-		final private AbstractViewItem view;
+		final private AbstractBaseViewItem view;
 		final private Composite parent;
 		final private Object input;
 		
-		RunViewCreation(AbstractViewItem view, Composite parent, Object input) {
+		RunViewCreation(AbstractBaseViewItem view, Composite parent, Object input) {
 			this.view   = view;
 			this.parent = parent;
 			this.input  = input;

@@ -170,7 +170,7 @@ public class TopDownContentViewer extends AbstractViewBuilder
 					
 					ThreadViewInput input = new ThreadViewInput(treeViewer.getRootScope(), threadData, threads);
 
-					profilePart.addEditor(input);
+					profilePart.addThreadView(input);
 				}
 			}
 		}

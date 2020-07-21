@@ -6,7 +6,6 @@ import org.eclipse.e4.ui.services.EMenuService;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.custom.CTabFolder;
-import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.widgets.Composite;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
@@ -24,7 +23,7 @@ import edu.rice.cs.hpcviewer.ui.parts.IViewBuilder;
 import edu.rice.cs.hpcviewer.ui.parts.ProfilePart;
 
 
-public abstract class AbstractViewItem extends CTabItem implements EventHandler, IViewItem
+public abstract class AbstractViewItem extends AbstractBaseViewItem implements EventHandler, IViewItem
 {
 
 	protected EPartService  partService;
