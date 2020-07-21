@@ -188,7 +188,7 @@ public class Editor extends CTabItem implements IUpperPart
 		
 		IDocument document = textViewer.getDocument();
 		
-		int maxLines = document.getNumberOfLines();
+		int maxLines = document.getNumberOfLines()-1;
 		lineNumber     = Math.max(0, Math.min(lineNumber, maxLines));
 
 		try {

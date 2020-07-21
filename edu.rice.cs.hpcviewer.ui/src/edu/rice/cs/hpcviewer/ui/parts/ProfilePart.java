@@ -244,6 +244,10 @@ public class ProfilePart implements IViewPart
 			} else if (root.getType() == RootScopeType.Flat) {
 				
 				views[numViews] = new FlatView(tabFolderBottom, SWT.NONE);
+			
+			} else if (root.getType() == RootScopeType.DatacentricTree) {
+				
+				views[numViews] = new Datacentric(tabFolderBottom, SWT.NONE);
 			} else {
 				System.err.println("Not supported root: " + root.getType());
 				break;
