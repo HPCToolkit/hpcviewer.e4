@@ -8,6 +8,7 @@ import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpcviewer.ui.dialogs.FindDialog;
+import edu.rice.cs.hpcviewer.ui.parts.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.parts.editor.Editor;
 
 import javax.inject.Named;
@@ -28,12 +29,6 @@ public class Find
 	public void execute(@Named(IServiceConstants.ACTIVE_PART) MPart part,
 						@Named(IServiceConstants.ACTIVE_SHELL) Shell shell,
 						EPartService partService) {
-		if (part == null)
-			return;
-		
-		Object obj = part.getObject();
-		if (!(obj instanceof Editor))
-			return;
 		
 		if (findDialog == null) {
 			findDialog = new FindDialog(shell, partService);
@@ -48,10 +43,8 @@ public class Find
 			return false;
 		
 		Object obj = part.getObject();
-		if (!(obj instanceof Editor))
-			return false;
 		
-		return true;
+		return (obj instanceof ProfilePart);
 	}
 		
 }

@@ -160,6 +160,17 @@ public class ProfilePart implements IViewPart
 	}
 	
 	
+	public Editor getActiveEditor() {
+		if (tabFolderTop == null) return null;
+		
+		CTabItem item = tabFolderTop.getSelection();
+		if (item instanceof Editor) {
+			return (Editor) item;
+		}
+		return null;
+	}
+	
+	
 	/*****
 	 * Specifically adding a new thread view
 	 * 

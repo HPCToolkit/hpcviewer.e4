@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import edu.rice.cs.hpcviewer.ui.parts.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.parts.editor.Editor;
 
 public class FindDialog extends Dialog 
@@ -35,17 +36,16 @@ public class FindDialog extends Dialog
     @Override
     protected Control createDialogArea(Composite parent) {
         Composite container = (Composite) super.createDialogArea(parent);
-        GridLayout layout = new GridLayout(2, false);
-        layout.marginRight = 5;
-        layout.marginLeft = 10;
+        GridLayout layout   = new GridLayout(2, false);
+        layout.marginRight  = 5;
+        layout.marginLeft   = 10;
         container.setLayout(layout);
 
         Label lblSearch = new Label(container, SWT.NONE);
         lblSearch.setText("Find:");
 
         txtSearch = new Text(container, SWT.BORDER);
-        txtSearch.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false,
-                1, 1));
+        txtSearch.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
         txtSearch.setText("");
 
 		/*
@@ -70,17 +70,20 @@ public class FindDialog extends Dialog
         		if (part == null)
         			return;
         		
-        		if (!(part.getObject() instanceof Editor))
+        		if (!(part.getObject() instanceof ProfilePart))
         			return;
         		
-        		Editor editor = (Editor) part.getObject();
+        		ProfilePart profilePart = (ProfilePart) part.getObject();
+        		Editor editor = profilePart.getActiveEditor();
+        		if (editor == null) 
+        			return;
+        		
         		if (!editor.search(txtSearch.getText())) {
         			lblMessage.setText("Text not found");
         			lblMessage.setVisible(true);
         		}
         	}
 		});
-        
         
         txtSearch.setFocus();
         getShell().setDefaultButton(btnSearch);
