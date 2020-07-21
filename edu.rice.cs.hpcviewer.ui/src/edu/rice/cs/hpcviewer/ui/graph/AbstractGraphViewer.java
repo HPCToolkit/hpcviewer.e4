@@ -26,6 +26,8 @@ import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
 import javax.annotation.PreDestroy;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 
 public abstract class AbstractGraphViewer extends CTabItem implements IUpperPart
 {
@@ -42,12 +44,16 @@ public abstract class AbstractGraphViewer extends CTabItem implements IUpperPart
 	@Inject
 	public AbstractGraphViewer(CTabFolder tabFolder, int style) {
 		super(tabFolder, style);
+		setShowClose(true);
 	}
 	
 	@PostConstruct
 	public void postConstruct(Composite parent) {
 		
 		this.parent = parent;
+		
+		GridDataFactory.fillDefaults().grab(true, true).applyTo(parent);
+		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(parent);
 	}
 	
 	
@@ -100,6 +106,8 @@ public abstract class AbstractGraphViewer extends CTabItem implements IUpperPart
 		//----------------------------------------------
 		chart = new GraphChart(parent, SWT.NONE);
 
+		GridDataFactory.fillDefaults().grab(true, true).applyTo(chart);
+		
 		//----------------------------------------------
 		// formatting axis
 		//----------------------------------------------
