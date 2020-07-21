@@ -52,6 +52,7 @@ import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
 import edu.rice.cs.hpcviewer.ui.parts.IViewPart;
+import edu.rice.cs.hpcviewer.ui.parts.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.util.Constants;
 import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
 
@@ -127,9 +128,6 @@ public class DatabaseCollection
 		
 		String args[] = Platform.getApplicationArgs();
 		
-		Display display = Display.getCurrent();
-		//Shell myShell   = display.getActiveShell();
-		
 		if (myShell == null) {
 			myShell = new Shell(SWT.TOOL | SWT.NO_TRIM);
 		}
@@ -152,6 +150,7 @@ public class DatabaseCollection
 		if (experiment == null)
 			return;
 		
+		Display display = Display.getCurrent();
 		display.asyncExec(new Runnable() {
 			
 			@Override
@@ -299,19 +298,14 @@ public class DatabaseCollection
 		MPartStack stack = null;
 		List<MStackElement> list = null;
 		MWindow  window = application.getSelectedElement();
+		String stackId = parentId;
 		
 		if (parentId == null) {
-			final String stackId = STACK_ID_BASE; // + String.valueOf(i) ;
-			stack  = (MPartStack)modelService.find(stackId, window);
-			
-			if (stack != null)
-				list = stack.getChildren();
-
-		} else {
-			stack  = (MPartStack)modelService.find(parentId, window);
-			if (stack != null)
-				list = stack.getChildren();
+			stackId = STACK_ID_BASE; 
 		}
+		stack  = (MPartStack)modelService.find(stackId, window);
+		if (stack != null)
+			list = stack.getChildren();
 		
 		//----------------------------------------------------------------
 		// create a new part stack if necessary
@@ -325,7 +319,7 @@ public class DatabaseCollection
 			stack.setToBeRendered(true);
 		}
 		
-		final MPart part = service.createPart("edu.rice.cs.hpcviewer.ui.partdescriptor.profile");
+		final MPart part = service.createPart(ProfilePart.ID);
 		if (list != null)
 			list.add(part);
 		service.showPart(part, PartState.VISIBLE);
