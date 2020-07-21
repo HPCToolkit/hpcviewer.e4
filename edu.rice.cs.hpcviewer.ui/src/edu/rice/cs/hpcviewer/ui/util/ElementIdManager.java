@@ -15,15 +15,11 @@ public class ElementIdManager
 	static public String getElementId(BaseExperiment experiment) {
 		// has to set the element Id before populating the view
 		String path = experiment.getXMLExperimentFile().getAbsolutePath();
-		int pathId  = path.hashCode();
-		String elementId = String.valueOf(pathId);
-		
-		return elementId;
+		return path;
 	}
 	
 	static public String getElementId(RootScope root) {
 		String elementId = getElementId(root.getExperiment()) + ELEMENT_SEPARATOR + root.getType().toString();
-		
 		return elementId;
 	}
 

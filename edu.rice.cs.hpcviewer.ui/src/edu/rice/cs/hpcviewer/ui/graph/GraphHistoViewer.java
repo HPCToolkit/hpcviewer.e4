@@ -5,6 +5,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.Display;
 import org.swtchart.Chart;
 import org.swtchart.IAxis;
@@ -20,6 +21,10 @@ import edu.rice.cs.hpcviewer.ui.util.Constants;
 
 public class GraphHistoViewer extends AbstractGraphViewer 
 {
+	public GraphHistoViewer(CTabFolder tabFolder, int style) {
+		super(tabFolder, style);
+	}
+
 	static public final String LABEL = "Histogram graph";
 
 	@Override

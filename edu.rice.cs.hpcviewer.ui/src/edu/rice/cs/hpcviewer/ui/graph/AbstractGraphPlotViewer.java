@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,8 +29,8 @@ public abstract class AbstractGraphPlotViewer extends AbstractGraphViewer
 	@Inject EPartService partService;
 	@Inject DatabaseCollection database;
 	
-	public AbstractGraphPlotViewer() {
-		super();
+	public AbstractGraphPlotViewer(CTabFolder tabFolder, int style) {
+		super(tabFolder, style);
 	}
 
 	@Override

@@ -19,7 +19,7 @@ public class BottomUpPart extends BaseViewPart
 	@Override
 	protected IViewBuilder setContentViewer(Composite parent, EMenuService menuService) {
 
-		IViewBuilder contentViewer = new BottomUpContentViewer(partService, eventBroker, databaseAddOn, partFactory);
+		IViewBuilder contentViewer = new BottomUpContentViewer(partService, eventBroker, databaseAddOn, null);
     	contentViewer.createContent(parent, menuService);
 		return contentViewer;
 	}

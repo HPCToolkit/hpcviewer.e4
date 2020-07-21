@@ -37,7 +37,7 @@ public class FlatView extends AbstractViewItem {
 	@Override
 	protected IViewBuilder setContentViewer(Composite parent, EMenuService menuService) {
 
-		return new FlatContentViewer(partService, eventBroker, databaseAddOn, partFactory);
+		return new FlatContentViewer(partService, eventBroker, databaseAddOn, profilePart);
 	}
 
 	@Override

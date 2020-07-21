@@ -30,6 +30,7 @@ import edu.rice.cs.hpcviewer.ui.graph.GraphMenu;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractContentProvider;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractViewBuilder;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
+import edu.rice.cs.hpcviewer.ui.parts.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadViewInput;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
@@ -47,7 +48,7 @@ public class TopDownContentViewer extends AbstractViewBuilder
 	final static private int ITEM_THREAD = 1;
 	
 	private ToolItem []items;
-	final private PartFactory partFactory;
+	final private ProfilePart   profilePart;
 	
 	/* thread data collection is used to display graph or 
 	 * to display a thread view. We need to instantiate this variable
@@ -60,10 +61,10 @@ public class TopDownContentViewer extends AbstractViewBuilder
 			EPartService partService, 
 			IEventBroker broker,
 			DatabaseCollection database,
-			PartFactory   partFactory) {
+			ProfilePart   profilePart) {
 		
-		super(partService, broker, database, partFactory);
-		this.partFactory = partFactory;
+		super(partService, broker, database, profilePart);
+		this.profilePart = profilePart;
 	}
 
 	@Override
@@ -101,7 +102,7 @@ public class TopDownContentViewer extends AbstractViewBuilder
 					Scope scope = treeViewer.getSelectedNode();
 					
 					// create the context menu of graphs
-					GraphMenu.createAdditionalContextMenu(partFactory, mgr, (Experiment) exp, threadData, scope);
+					GraphMenu.createAdditionalContextMenu(profilePart,  mgr, (Experiment) exp, threadData, scope);
 					
 					// make the context menu appears next to tool item
 					final Menu menu = mgr.getMenu();
@@ -129,7 +130,7 @@ public class TopDownContentViewer extends AbstractViewBuilder
 				String elementId = ElementIdManager.getElementId(input.getRootScope().getExperiment()) + 
 								   ElementIdManager.ELEMENT_SEPARATOR + Constants.ID_VIEW_THREAD;
 				
-				partFactory.display(parentId, Constants.ID_VIEW_THREAD, elementId, input);
+				//partFactory.display(parentId, Constants.ID_VIEW_THREAD, elementId, input);
 			}
 			
 			@Override

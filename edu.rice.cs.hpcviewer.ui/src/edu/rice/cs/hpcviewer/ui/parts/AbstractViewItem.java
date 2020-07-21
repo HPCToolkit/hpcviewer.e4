@@ -34,7 +34,7 @@ public abstract class AbstractViewItem extends CTabItem implements EventHandler
 	protected EMenuService  menuService;
 	
 	protected DatabaseCollection databaseAddOn;
-	protected PartFactory partFactory;
+	protected ProfilePart   profilePart;
 
 	private IViewBuilder contentViewer;
 	
@@ -55,13 +55,13 @@ public abstract class AbstractViewItem extends CTabItem implements EventHandler
 	public void setService(EPartService partService, 
 			IEventBroker broker,
 			DatabaseCollection database,
-			PartFactory   partFactory,
+			ProfilePart   profilePart,
 			EMenuService  menuService) {
 		
 		this.partService = partService;
 		this.eventBroker = broker;
 		this.databaseAddOn = database;
-		this.partFactory = partFactory;
+		this.profilePart = profilePart;
 		this.menuService = menuService;
 	}
 	

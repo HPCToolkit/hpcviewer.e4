@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import javax.annotation.PostConstruct;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.swtchart.Chart;
@@ -25,7 +27,7 @@ import javax.annotation.PreDestroy;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 
-public abstract class AbstractGraphViewer implements IUpperPart
+public abstract class AbstractGraphViewer extends CTabItem implements IUpperPart
 {
 	static public final int PLOT_OK          = 0;
 	static public final int PLOT_ERR_IO 	 = -1;
@@ -38,7 +40,8 @@ public abstract class AbstractGraphViewer implements IUpperPart
     private Composite parent;
 
 	@Inject
-	public AbstractGraphViewer() {		
+	public AbstractGraphViewer(CTabFolder tabFolder, int style) {
+		super(tabFolder, style);
 	}
 	
 	@PostConstruct
@@ -63,7 +66,17 @@ public abstract class AbstractGraphViewer implements IUpperPart
 		return input.getScope().getExperiment();
 	}
 
-
+	
+	@Override
+	public boolean hasEqualInput(Object input) {
+		if (input == null) return false;
+		if (!(input instanceof GraphEditorInput)) return false;
+		
+		GraphEditorInput inputNew = (GraphEditorInput) input;
+		
+		return inputNew.getScope()  == this.input.getScope() && 
+			   inputNew.getMetric() == this.input.getMetric();
+	}
 
 	@Override
 	public void setMarker(int lineNumber) {
@@ -81,9 +94,7 @@ public abstract class AbstractGraphViewer implements IUpperPart
 		// subclasses may need the input value for setting the title
 		
 		input = (GraphEditorInput) obj;
-		
-		part.setTooltip(getTitle());
-		
+				
 		//----------------------------------------------
 		// chart creation
 		//----------------------------------------------
@@ -105,8 +116,8 @@ public abstract class AbstractGraphViewer implements IUpperPart
 		final String title = getTitle();
 		chart.getTitle().setText(title);
 		
-		part.setLabel(title);
-		part.setTooltip(title);
+		setToolTipText(title);
+		setText(title);
 		
 		//----------------------------------------------
 		// main part: ask the subclass to plot the graph

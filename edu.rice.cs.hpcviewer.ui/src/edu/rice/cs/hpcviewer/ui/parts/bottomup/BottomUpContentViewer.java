@@ -13,6 +13,7 @@ import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractContentProvider;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractViewBuilder;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
+import edu.rice.cs.hpcviewer.ui.parts.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 
 public class BottomUpContentViewer extends AbstractViewBuilder 
@@ -22,9 +23,9 @@ public class BottomUpContentViewer extends AbstractViewBuilder
 	public BottomUpContentViewer(EPartService  partService, 
 								 IEventBroker  broker,
 								 DatabaseCollection database,
-								 PartFactory   partFactory) {
+								 ProfilePart   profilePart) {
 		
-		super(partService, broker, database, partFactory);
+		super(partService, broker, database, profilePart);
 	}
 
 	@Override

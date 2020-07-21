@@ -32,7 +32,7 @@ public class BottomUpView extends AbstractViewItem {
 	@Override
 	protected IViewBuilder setContentViewer(Composite parent, EMenuService menuService) {
 
-		return new BottomUpContentViewer(partService, eventBroker, databaseAddOn, partFactory);
+		return new BottomUpContentViewer(partService, eventBroker, databaseAddOn, profilePart);
 	}
 
 	@Override

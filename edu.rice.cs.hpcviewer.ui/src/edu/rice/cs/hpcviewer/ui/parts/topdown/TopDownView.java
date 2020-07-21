@@ -18,11 +18,8 @@ public class TopDownView extends AbstractViewItem
 		setToolTipText("A view to display the calling context tree (CCT) of the profile data");
 	}
 
-	
-
 
 	protected RootScope createRoot(BaseExperiment experiment) {
-
 		// for top-down tree, we don't need to create the tree
 		// the tree is already in experiment.xml. 
 		
@@ -31,7 +28,7 @@ public class TopDownView extends AbstractViewItem
 
 	@Override
 	protected IViewBuilder setContentViewer(Composite parent, EMenuService menuService) {
-		return new TopDownContentViewer(partService, eventBroker, databaseAddOn, partFactory);
+		return new TopDownContentViewer(partService, eventBroker, databaseAddOn, profilePart);
 	}
 
 	@Override

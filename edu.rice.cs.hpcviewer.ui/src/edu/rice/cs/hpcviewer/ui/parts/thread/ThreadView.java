@@ -50,7 +50,7 @@ public class ThreadView  implements IViewPart
 	@PostConstruct
 	public void postConstruct(Composite parent, EMenuService menuService) {
 
-		contentViewer = new ThreadContentViewer(partService, broker, databaseAddOn, partFactory);
+		contentViewer = new ThreadContentViewer(partService, broker, databaseAddOn, null);
 		contentViewer.createContent(parent, menuService);
 	}
 

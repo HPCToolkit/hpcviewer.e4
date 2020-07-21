@@ -11,8 +11,7 @@ import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.MetricValue;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
-import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
-import edu.rice.cs.hpcviewer.ui.util.Constants;
+import edu.rice.cs.hpcviewer.ui.parts.ProfilePart;
 
 
 /****
@@ -23,7 +22,7 @@ import edu.rice.cs.hpcviewer.ui.util.Constants;
 public class GraphMenu 
 {
 	static public void createAdditionalContextMenu(
-			PartFactory partFactory,
+			ProfilePart profilePart,
 			IMenuManager mgr, Experiment experiment, 
 			IThreadDataCollection threadData, Scope scope) {
 		
@@ -39,6 +38,10 @@ public class GraphMenu
 			
 			mgr.add( new Separator() );
 			
+			final String graphTypes[] = { GraphPlotRegularViewer.LABEL,
+										  GraphPlotSortViewer.LABEL,
+										  GraphHistoViewer.LABEL };
+			
 			for (BaseMetric metric: metrics) {
 				
 				// do not display empty metric 
@@ -49,56 +52,23 @@ public class GraphMenu
 				MetricValue mv = root.getMetricValue(metric);
 				if (mv == MetricValue.NONE)
 					continue;
-				
-	        	GraphEditorInput objInput = new GraphEditorInput(threadData, scope, metric);
 
-				// display the menu
-				
 				MenuManager subMenu = new MenuManager("Graph "+ metric.getDisplayName() );
-				createGraphMenus(objInput, partFactory, subMenu);
-				mgr.add(subMenu);
+
+				for (String type: graphTypes) {
+		        	GraphEditorInput objInput = new GraphEditorInput(threadData, scope, metric, type);
+
+					// display the menu
+					
+					Action action = new ScopeGraphAction(objInput, profilePart);
+					subMenu.add( action );
+
+					mgr.add(subMenu);
+				}
 			}
 		}		
 	} 
-
-	/***
-	 * Create 3 submenus for plotting graph: plot, sorted and histo
-	 * @param menu
-	 * @param scope
-	 * @param m
-	 * @param index
-	 */
-	static private void createGraphMenus(
-			GraphEditorInput input, 
-			PartFactory partFactory, 
-			IMenuManager menu) {
-		
-		menu.add( createGraphMenu(input, partFactory, 
-				  GraphPlotRegularViewer.LABEL, Constants.ID_GRAPH_PLOT) );
-		
-		menu.add( createGraphMenu(input, partFactory, 
-				  GraphPlotSortViewer.LABEL, Constants.ID_GRAPH_SORT) );
-		
-		menu.add( createGraphMenu(input, partFactory, 
-				  GraphHistoViewer.LABEL, Constants.ID_GRAPH_HISTO) );
-	}
 	
-	/***
-	 * Create a menu action for graph
-	 * @param scope
-	 * @param m
-	 * @param index
-	 * @param t
-	 * @return
-	 */
-	static private ScopeGraphAction createGraphMenu(
-			GraphEditorInput input, 
-			PartFactory partFactory, 
-			String      partLabel,
-			String      descriptorId) {
-		
-		return new ScopeGraphAction( input, partFactory, partLabel, descriptorId);
-	}
 	
 
     /********************************************************************************
@@ -106,28 +76,21 @@ public class GraphMenu
      ********************************************************************************/
     static private class ScopeGraphAction extends Action 
     {
-    	final private String descriptorId;
-    	final private PartFactory partFactory;
 		final private GraphEditorInput input;
-
+		final private ProfilePart profilePart;
+		
 		public ScopeGraphAction(
 				GraphEditorInput input, 
-				PartFactory partFactory, 
-				String label, 
-				String descriptorId) {
+				ProfilePart profilePart) {
 			
-			super(label);
+			super(input.getGraphType());
 			
 			this.input  	  = input;
-			this.partFactory  = partFactory;
-			this.descriptorId = descriptorId;
+			this.profilePart  = profilePart;
 		}
     	
 		public void run() {
-			
-        	String elementId = AbstractGraphViewer.getID(descriptorId, input.getScope(), input.getMetric());
-        	
-        	partFactory.display(Constants.ID_STACK_UPPER, descriptorId, elementId, input);
+			profilePart.addEditor(input);
 		}
     }
 }
