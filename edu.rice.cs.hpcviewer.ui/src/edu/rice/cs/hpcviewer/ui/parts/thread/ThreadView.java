@@ -4,14 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-
 import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.e4.ui.model.application.MApplication;
-import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.services.EMenuService;
-import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
@@ -35,10 +29,8 @@ import edu.rice.cs.hpcviewer.ui.dialogs.ThreadFilterDialog;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
 import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
-import edu.rice.cs.hpcviewer.ui.parts.IViewBuilder;
-import edu.rice.cs.hpcviewer.ui.parts.IViewPart;
 import edu.rice.cs.hpcviewer.ui.parts.ProfilePart;
-import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
+import edu.rice.cs.hpcviewer.ui.tabItems.IViewItem;
 import edu.rice.cs.hpcviewer.ui.util.FilterDataItem;
 
 /*************************************************************
@@ -46,7 +38,7 @@ import edu.rice.cs.hpcviewer.ui.util.FilterDataItem;
  * View part to display CCT and metrics for a specific set of threads 
  *
  *************************************************************/
-public class ThreadView extends CTabItem implements IViewPart, EventHandler
+public class ThreadView extends CTabItem implements IViewItem, EventHandler
 {
 	private EPartService  partService;	
 	private IEventBroker  eventBroker;
@@ -67,8 +59,8 @@ public class ThreadView extends CTabItem implements IViewPart, EventHandler
 	}
 
 	
-	@PostConstruct
-	public void postConstruct(Composite parent, EMenuService menuService) {
+	@Override
+	public void createContent(Composite parent) {
 
 		contentViewer = new ThreadContentViewer(partService, eventBroker, databaseAddOn, profilePart);
 		contentViewer.createContent(parent, menuService);
@@ -92,15 +84,10 @@ public class ThreadView extends CTabItem implements IViewPart, EventHandler
 
 
 	@Override
-	public BaseExperiment getExperiment() {
-		if (viewInput == null)
-			return null;
+	public void setInput(Object input) {
 		
-		return viewInput.getRootScope().getExperiment();
-	}
-
-	@Override
-	public void setInput(MPart part, Object input) {
+		if (input == null || (!(input instanceof ThreadViewInput)))
+			return;
 		
 		// important: needs to store the experiment database for further usage
 		// when the view is becoming visible
@@ -165,13 +152,13 @@ public class ThreadView extends CTabItem implements IViewPart, EventHandler
 			return;
 
 		Object obj = event.getProperty(IEventBroker.DATA);
-		if (obj == null || getExperiment() == null)
+		if (obj == null || profilePart.getExperiment() == null)
 			return;
 		
 		if (!(obj instanceof ViewerDataEvent)) {
 
 			if (event.getTopic().equals(FilterStateProvider.FILTER_REFRESH_PROVIDER)) {
-				BaseExperiment experiment = getExperiment();
+				BaseExperiment experiment = profilePart.getExperiment();
 				FilterStateProvider.filterExperiment((Experiment) experiment);
 				
 				// TODO: this process takes time

@@ -159,9 +159,9 @@ public class ProfilePart implements IViewPart
 			threadView.setControl(parent);
 			parent.setLayout(new GridLayout(1, false));
 			
-			threadView.postConstruct(parent, menuService);
+			threadView.createContent(parent);
 			
-			threadView.setInput(null, input);
+			threadView.setInput(input);
 			tabFolderBottom.setSelection(threadView);
 			return;
 			
@@ -182,6 +182,38 @@ public class ProfilePart implements IViewPart
 		
 		tabFolderTop.setSelection(viewer);
 	}
+	
+	
+	/****
+	 * Add a view tab item (at the lower folder) to the profile part
+	 * 
+	 * @param view the view item
+	 * @param input the view's input
+	 * @param sync boolean whether the display has to be synchronous or not
+	 */
+	public void addView(AbstractViewItem view, Object input, boolean sync) {
+		
+		// TODO: make sure this statement is called early.
+		// The content builder will need many services. So we have to make they are initialized
+		view.setService(partService, eventBroker, databaseAddOn, this, menuService);
+
+		Composite composite = new Composite(tabFolderBottom, SWT.NONE);
+		view.setControl(composite);
+		composite.setLayout(new GridLayout(1, false));
+
+		RunViewCreation createView = new RunViewCreation(view, composite, input);
+		Display display = shell.getDisplay();
+
+		if (sync) {
+			BusyIndicator.showWhile(display, createView);
+			tabFolderBottom.setSelection(view);
+		} else {
+			// background renderer
+			display.asyncExec(createView);
+		}
+	}
+	
+	
 		
 	@PreDestroy
 	public void preDestroy() {
@@ -227,45 +259,32 @@ public class ProfilePart implements IViewPart
 				System.err.println("Not supported root: " + root.getType());
 				break;
 			}
-			// TODO: make sure this statement is called early.
-			// The content builder will need many services. So we have to make they are initialized
-			views[numViews].setService(partService, eventBroker, databaseAddOn, this, menuService);
-
-			Composite composite = new Composite(tabFolderBottom, SWT.NONE);
-			views[numViews].setControl(composite);
-			composite.setLayout(new GridLayout(1, false));
-
-			RunViewCreation createView = new RunViewCreation(views[numViews], composite, experiment);
-			Display display = shell.getDisplay();
-
-			if (numViews == 0) {
-				BusyIndicator.showWhile(display, createView);
-			} else {
-				display.asyncExec(createView);
-			}
+			addView(views[numViews], input, numViews==0);
 		}
-		
 		tabFolderBottom.setSelection(views[0]);
 		tabFolderBottom.setFocus();
 	}
+	
+	
+	
 	
 	static private class RunViewCreation implements Runnable 
 	{
 		final private AbstractViewItem view;
 		final private Composite parent;
-		final private Experiment experiment;
+		final private Object input;
 		
-		RunViewCreation(AbstractViewItem view, Composite parent, Experiment experiment) {
-			this.view = view;
+		RunViewCreation(AbstractViewItem view, Composite parent, Object input) {
+			this.view   = view;
 			this.parent = parent;
-			this.experiment = experiment;
+			this.input  = input;
 			
 		}
 		
 		@Override
 		public void run() {
 			view.createContent(parent);
-			view.setInput(experiment);
+			view.setInput(input);
 		}
 	}
 }

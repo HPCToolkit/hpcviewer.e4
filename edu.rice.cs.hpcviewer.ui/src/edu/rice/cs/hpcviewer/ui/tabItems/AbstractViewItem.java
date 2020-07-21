@@ -1,7 +1,5 @@
 package edu.rice.cs.hpcviewer.ui.tabItems;
 
-import javax.annotation.PostConstruct;
-
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.services.EMenuService;
@@ -26,7 +24,7 @@ import edu.rice.cs.hpcviewer.ui.parts.IViewBuilder;
 import edu.rice.cs.hpcviewer.ui.parts.ProfilePart;
 
 
-public abstract class AbstractViewItem extends CTabItem implements EventHandler
+public abstract class AbstractViewItem extends CTabItem implements EventHandler, IViewItem
 {
 
 	protected EPartService  partService;
@@ -54,6 +52,8 @@ public abstract class AbstractViewItem extends CTabItem implements EventHandler
 		super(parent, style);
 	}
 
+	
+	@Override
 	public void setService(EPartService partService, 
 			IEventBroker broker,
 			DatabaseCollection database,
@@ -68,7 +68,7 @@ public abstract class AbstractViewItem extends CTabItem implements EventHandler
 	}
 	
 	
-	@PostConstruct
+	@Override
 	public void createContent(Composite parent) {
 		contentViewer = setContentViewer(parent, menuService);
     	contentViewer.createContent(parent, menuService);
@@ -84,10 +84,7 @@ public abstract class AbstractViewItem extends CTabItem implements EventHandler
 		eventBroker.subscribe(FilterStateProvider.FILTER_REFRESH_PROVIDER, this);
 	}
 	
-	public BaseExperiment getExperiment() {
-		return experiment;
-	}
-	
+	@Override
 	public void setInput(Object input) {
 		
 		if (!(input instanceof BaseExperiment))
@@ -111,7 +108,7 @@ public abstract class AbstractViewItem extends CTabItem implements EventHandler
 			return;
 
 		Object obj = event.getProperty(IEventBroker.DATA);
-		if (obj == null || getExperiment() == null || root == null)
+		if (obj == null || experiment == null || root == null)
 			return;
 		
 		if (!(obj instanceof ViewerDataEvent)) {
@@ -127,7 +124,7 @@ public abstract class AbstractViewItem extends CTabItem implements EventHandler
 		}
 		
 		ViewerDataEvent eventInfo = (ViewerDataEvent) obj;
-		if (getExperiment() != eventInfo.experiment) 
+		if (experiment != eventInfo.experiment) 
 			return;
 		
 		String topic = event.getTopic();
