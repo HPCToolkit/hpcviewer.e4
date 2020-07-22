@@ -2,9 +2,6 @@ package edu.rice.cs.hpcviewer.ui.util;
 
 public class Constants 
 {
-	static public final String ID_STACK_UPPER   = "edu.rice.cs.hpcviewer.ui.partstack.upper"; 
-	static public final String ID_STACK_LOWER   = "edu.rice.cs.hpcviewer.ui.partstack.lower"; 
-	
 	static public final String ID_GRAPH_SORT    = "edu.rice.cs.hpcviewer.ui.partdescriptor.graph.sort";
 	static public final String ID_GRAPH_PLOT    = "edu.rice.cs.hpcviewer.ui.partdescriptor.graph.plot";
 	static public final String ID_GRAPH_HISTO   = "edu.rice.cs.hpcviewer.ui.partdescriptor.graph.histo";

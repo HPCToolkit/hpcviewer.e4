@@ -4,9 +4,7 @@
 package edu.rice.cs.hpcviewer.ui.experiment;
 
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.widgets.DirectoryDialog;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import java.io.File;
@@ -67,13 +65,14 @@ public class ExperimentManager
 	 * @param flag : whether to show callers view or not
 	 * 
 	 * @return true if the database has been successfully opened
+	 * @throws Exception 
 	 */
-	public BaseExperiment openDatabaseFromDirectory(Shell shell, String sPath) {
+	public BaseExperiment openDatabaseFromDirectory(Shell shell, String sPath) throws Exception {
 		File []fileXML = this.getListOfXMLFiles(sPath);
 		if(fileXML != null) {
 			String filename = getFileExperimentFromListOfFiles(shell, fileXML);
 			if (filename != null) {
-				return loadExperiment(shell, filename);
+				return loadExperiment(filename);
 			}
 		}
 		return null;
@@ -149,48 +148,17 @@ public class ExperimentManager
 	}
 	
 
-	public BaseExperiment loadExperiment(final Shell shell, final String sFilename) {
-		
-		Display display = shell.getDisplay();
-		LoadExperimentThread thread = new LoadExperimentThread(shell, sFilename);
-		BusyIndicator.showWhile(display, thread);
-		
-		return thread.experiment;
-	}
-	
-	
+	/****
+	 * Open and load the experiment.xml file, then return an instance of experiment object 
+	 * @param shell
+	 * @param sFilename
+	 * @return
+	 * @throws Exception
+	 */
 	public BaseExperiment loadExperiment(final String sFilename) throws Exception {
 		Experiment experiment = new Experiment();
 		experiment.open( new File(sFilename), new ProcedureAliasMap(), true );
 
 		return experiment;
-	}
-	
-	/****
-	 * 
-	 * class to block UI while reading the database
-	 *
-	 */
-	static private class LoadExperimentThread implements Runnable 
-	{
-		final Shell shell;
-		final String filename;
-		
-		Experiment experiment;
-		
-		public LoadExperimentThread(Shell shell, String filename) {
-			this.filename = filename;
-			this.shell    = shell;
-		}
-		
-		@Override
-		public void run() {
-			experiment = new Experiment();
-			try {
-				experiment.open( new File(filename), new ProcedureAliasMap(), true );
-			} catch (Exception e) {
-				MessageDialog.openError(shell, "Error: Fail to open the database", "Error: " + e.getMessage());
-			};
-		}
 	}
 }

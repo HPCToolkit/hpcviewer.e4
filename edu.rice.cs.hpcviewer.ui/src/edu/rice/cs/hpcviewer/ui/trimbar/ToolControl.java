@@ -12,8 +12,11 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.core.runtime.jobs.ProgressProvider;
 import org.eclipse.e4.ui.di.UISynchronize;
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ProgressBar;
 
 
@@ -28,6 +31,7 @@ public class ToolControl
 
 	private ProgressBar progressBar;
 	private GobalProgressMonitor monitor;
+	private Label lblMessage;
 
 	@Inject
 	public ToolControl(UISynchronize sync) {
@@ -36,9 +40,17 @@ public class ToolControl
 
 	@PostConstruct
 	public void createControls(Composite parent){
+		
+		GridDataFactory.fillDefaults().grab(true, false).applyTo(parent);
+		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(parent);
+
 		progressBar = new ProgressBar(parent, SWT.SMOOTH);
 		progressBar.setBounds(100, 10, 200, 20);
 
+		lblMessage = new Label(parent, SWT.NONE);
+
+		GridDataFactory.fillDefaults().grab(true, false).applyTo(lblMessage);
+		
 		monitor = new GobalProgressMonitor();
 
 		Job.getJobManager().setProgressProvider(new ProgressProvider() {
@@ -57,10 +69,13 @@ public class ToolControl
 
 		@Override
 		public void beginTask(final String name, final int totalWork) {
+			
 			sync.syncExec(new Runnable() {
 
 				@Override
 				public void run() {
+					lblMessage.setText(name);
+
 					if( runningTasks <= 0 ) {
 						// --- no task is running at the moment ---
 						progressBar.setSelection(0);
@@ -89,6 +104,14 @@ public class ToolControl
 			});
 		}
 
+		@Override
+		public void done() {
+			sync.asyncExec(() -> {
+				progressBar.setSelection(0);
+				lblMessage.setText("");
+			});
+		}
+		
 		public IProgressMonitor addJob(Job job){
 			if( job != null ){
 				job.addJobChangeListener(new JobChangeAdapter() {

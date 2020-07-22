@@ -3,7 +3,9 @@
   <children xsi:type="basic:TrimmedWindow" xmi:id="_c3AF0cjYEeSyMNYR5xypkQ" elementId="edu.rice.cs.hpcviewer.window.main" label="hpcviewer" iconURI="" width="1000" height="800">
     <children xsi:type="advanced:PerspectiveStack" xmi:id="_medwgK28EeqAHZLWafP1YQ" elementId="edu.rice.cs.hpcviewer.ui.perspectivestack.main">
       <children xsi:type="advanced:Perspective" xmi:id="_DPDrQMo-Eeq3_poNktUMtQ" elementId="edu.rice.cs.hpcviewer.ui.perspective.integrate" label="Integrated perspective" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/datacentric.png">
-        <children xsi:type="basic:PartStack" xmi:id="_QP-j4Mo-Eeq3_poNktUMtQ" elementId="edu.rice.cs.hpcviewer.ui.partstack.integrated"/>
+        <children xsi:type="basic:PartStack" xmi:id="_QP-j4Mo-Eeq3_poNktUMtQ" elementId="edu.rice.cs.hpcviewer.ui.partstack.integrated">
+          <tags>NoAutoCollapse</tags>
+        </children>
       </children>
     </children>
     <mainMenu xmi:id="_7ohBoI7qEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.menu.main">
@@ -85,40 +87,6 @@
   <descriptors xmi:id="_0egRoMk4Eeq3_poNktUMtQ" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.trace" label="Trace" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpc-merged-16x16.png" allowMultiple="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.TracePart">
     <toolbar xmi:id="_4ENNAMk4Eeq3_poNktUMtQ" elementId="edu.rice.cs.hpcviewer.ui.toolbar.1"/>
   </descriptors>
-  <snippets xsi:type="basic:TrimmedWindow" xmi:id="_E-KEILVzEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.trimmedwindow.snippet" label="hpcviewer" width="1000" height="800">
-    <children xsi:type="advanced:PerspectiveStack" xmi:id="_EE7A8LVxEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.perspectivestack.snippet">
-      <children xsi:type="advanced:Perspective" xmi:id="_G4i_ILVxEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.perspective.snippet" label="hpcviewer perspective" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpc-merged-16x16.png">
-        <children xsi:type="basic:PartSashContainer" xmi:id="_RG8s0LVxEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.partsashcontainer.main">
-          <children xsi:type="basic:PartStack" xmi:id="_VOWnELVxEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.partstack.upper"/>
-          <children xsi:type="basic:PartSashContainer" xmi:id="_WS_68LVxEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.partsashcontainer.0">
-            <children xsi:type="basic:PartStack" xmi:id="_dwPvoLVxEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.partstack.lower.1"/>
-            <children xsi:type="basic:PartStack" xmi:id="_gCjJcLVxEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.partstack.lower.2" visible="false"/>
-            <children xsi:type="basic:PartStack" xmi:id="_ixbxkLVxEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.partstack.lower.3" visible="false"/>
-          </children>
-        </children>
-      </children>
-    </children>
-    <mainMenu xmi:id="_GRt9wLVzEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.menu.main">
-      <children xsi:type="menu:Menu" xmi:id="_LfqM0LV0EeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.menu.file" label="File" mnemonics="F">
-        <children xsi:type="menu:HandledMenuItem" xmi:id="_vbgeMLV2EeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.open" label="Open" tooltip="Open a database" mnemonics="O" command="_U14sMI7vEeqBPbXbG7_Dzw"/>
-        <children xsi:type="menu:HandledMenuItem" xmi:id="_33XQMLV2EeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.reopen" label="New window" tooltip="Open another database on different window" mnemonics="N" command="_cPW0II7vEeqBPbXbG7_Dzw">
-          <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_BJ2vQLV3EeqkhNpo_ZhE2A"/>
-        </children>
-        <children xsi:type="menu:Menu" xmi:id="_SPokcLV3EeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.menu.close" label="Close" mnemonics="C">
-          <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_WG_QgLV3EeqkhNpo_ZhE2A" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseCloseDefinition"/>
-        </children>
-        <children xsi:type="menu:Menu" xmi:id="_bzxNILV3EeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.menu.merge" label="Merge" mnemonics="M">
-          <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_e__4kLV3EeqkhNpo_ZhE2A" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseMergeExpression"/>
-          <children xsi:type="menu:HandledMenuItem" xmi:id="_f50cgLV3EeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.merge.topdown" label="Merge top-down" tooltip="Merge two top-down databases " mnemonics="t" command="_sRvw0LJpEeqfDrDyyKphUQ"/>
-        </children>
-        <children xsi:type="menu:MenuSeparator" xmi:id="_ryEc4LV3EeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.menuseparator.0"/>
-        <children xsi:type="menu:HandledMenuItem" xmi:id="_wD3CMLV3EeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.exit" label="Exit" tooltip="Close the window" mnemonics="x" command="_wGhBQI7uEeqBPbXbG7_Dzw"/>
-      </children>
-    </mainMenu>
-    <trimBars xmi:id="_1otusLVzEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.trimbar.bottom" side="Bottom">
-      <children xsi:type="menu:ToolControl" xmi:id="_6ih9ULVzEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.toolcontrol.bottom" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.trimbar.ToolControl"/>
-    </trimBars>
-  </snippets>
   <commands xmi:id="_lIBrgKwbEeq2aaPo7yBcWg" elementId="org.eclipse.ui.help.aboutAction" commandName="About" description="About the application"/>
   <commands xmi:id="_FHXw4LV7EeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.command.new" commandName="New window"/>
   <commands xmi:id="_U14sMI7vEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.command.open" commandName="Open" description="Open a database"/>
