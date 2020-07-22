@@ -1,5 +1,5 @@
 package edu.rice.cs.hpcviewer.ui.parts;
 
-public interface IViewPart extends IBasePart
+public interface IMainPart extends IBasePart
 {
 }

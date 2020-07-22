@@ -58,6 +58,8 @@ public class ViewXML
 				((ProfilePart)obj).addEditor(experiment);
 				return;
 			}
+			// find the corresponding profile part to display the XML file
+			
 			MUIElement element = modelService.find(ProfilePart.ID, window);
 			if (element == null)
 				return;

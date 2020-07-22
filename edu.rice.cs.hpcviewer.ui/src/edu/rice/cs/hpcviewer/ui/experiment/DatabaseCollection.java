@@ -50,7 +50,7 @@ import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
-import edu.rice.cs.hpcviewer.ui.parts.IViewPart;
+import edu.rice.cs.hpcviewer.ui.parts.IMainPart;
 import edu.rice.cs.hpcviewer.ui.parts.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.util.Constants;
 import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
@@ -320,11 +320,11 @@ public class DatabaseCollection
 		if (list != null)
 			list.add(part);
 		service.showPart(part, PartState.VISIBLE);
-		IViewPart view = null;
+		IMainPart view = null;
 
 		int maxAttempt = 20;		
 		while(maxAttempt>0) {
-			view = (IViewPart) part.getObject();
+			view = (IMainPart) part.getObject();
 			if (view != null)
 				break;
 			

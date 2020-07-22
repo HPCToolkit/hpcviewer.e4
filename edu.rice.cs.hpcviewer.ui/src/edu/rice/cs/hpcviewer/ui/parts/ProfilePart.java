@@ -48,7 +48,7 @@ import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
 
 
 
-public class ProfilePart implements IViewPart
+public class ProfilePart implements IMainPart
 {
 	public static final String ID = "edu.rice.cs.hpcviewer.ui.partdescriptor.profile";
 	
@@ -113,7 +113,7 @@ public class ProfilePart implements IViewPart
 			if (item instanceof IUpperPart) {
 				IUpperPart editor = (IUpperPart) item;
 				if (editor.hasEqualInput(input)) {
-					editor.setInput(null, input);
+					editor.setInput(input);
 					
 					tabFolderTop.setSelection((CTabItem) editor);
 					
@@ -139,7 +139,7 @@ public class ProfilePart implements IViewPart
 			Composite parent = new Composite(tabFolderTop, SWT.NONE);
 			((AbstractGraphViewer)viewer).postConstruct(parent);
 			viewer.setControl(parent);
-			((AbstractGraphViewer)viewer).setInput(null, graphInput);
+			((AbstractGraphViewer)viewer).setInput(graphInput);
 		
 		} else {
 			
@@ -150,7 +150,7 @@ public class ProfilePart implements IViewPart
 			Composite parent = new Composite(tabFolderTop, SWT.NONE);
 			viewer.setControl(parent);
 			((Editor) viewer).postConstruct(parent);
-			((Editor) viewer).setInput(null, input);
+			((Editor) viewer).setInput(input);
 		}
 		
 		// need to select the input to refresh the viewer

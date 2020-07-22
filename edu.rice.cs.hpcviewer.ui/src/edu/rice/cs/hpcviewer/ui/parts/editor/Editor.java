@@ -111,22 +111,6 @@ public class Editor extends CTabItem implements IUpperPart
 	}
 
 	
-	@Override
-	public BaseExperiment getExperiment() {
-		Object obj = textViewer.getData(PROPERTY_DATA);
-		
-		if (obj == null)
-			return null;
-		
-		if (obj instanceof Scope) {
-			Scope scope = (Scope) obj;
-			return scope.getExperiment();
-		}
-		if (obj instanceof BaseExperiment)
-			return (BaseExperiment) obj;
-		
-		return null;
-	}
 	
 	public boolean hasEqualInput(Object input) {
 		if (input == null) return false;
@@ -245,7 +229,7 @@ public class Editor extends CTabItem implements IUpperPart
 	}
 
 	@Override
-	public void setInput(MPart part, Object input) {
+	public void setInput(Object input) {
 		
 		this.input = input;
 		setText(getTitle());

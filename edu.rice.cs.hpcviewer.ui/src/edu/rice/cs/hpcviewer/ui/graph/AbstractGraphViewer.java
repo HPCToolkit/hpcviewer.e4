@@ -17,7 +17,6 @@ import org.swtchart.Chart;
 import org.swtchart.IAxisSet;
 import org.swtchart.IAxisTick;
 
-import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpcviewer.ui.parts.editor.IUpperPart;
@@ -25,7 +24,6 @@ import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
 
 import javax.annotation.PreDestroy;
 import org.eclipse.e4.ui.di.Focus;
-import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 
@@ -67,10 +65,7 @@ public abstract class AbstractGraphViewer extends CTabItem implements IUpperPart
 		chart.setFocus();
 	}
 
-	@Override
-	public BaseExperiment getExperiment() {
-		return input.getScope().getExperiment();
-	}
+
 
 	
 	@Override
@@ -90,7 +85,7 @@ public abstract class AbstractGraphViewer extends CTabItem implements IUpperPart
 	}
 
 	@Override
-	public void setInput(MPart part, Object obj) {
+	public void setInput(Object obj) {
 
 		if (obj == null) return;
 
