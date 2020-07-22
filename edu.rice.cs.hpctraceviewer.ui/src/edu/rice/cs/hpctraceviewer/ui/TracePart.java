@@ -76,7 +76,7 @@ public class TracePart  implements IMainPart, IPartListener
 		
 		CTabItem tbtmCallStack = new CTabItem(tabFolderRight, SWT.NONE);
 		tbtmCallStack.setText("Call stack");
-		sashFormMain.setWeights(new int[] {700, 300});
+		sashFormMain.setWeights(new int[] {800, 200});
 		
 		tabFolderBottomLeft.setSelection(tbtmDepthView);
 		tabFolderRight.setSelection(tbtmCallStack);
@@ -105,6 +105,8 @@ public class TracePart  implements IMainPart, IPartListener
 	@Override
 	public void setInput(MPart part, Object input) {
 		this.experiment = (BaseExperiment) input;
+		part.setLabel("Trace: " + experiment.getName());
+		part.setTooltip("Traces from " + experiment.getDefaultDirectory().getAbsolutePath());
 	}
 
 	@Override

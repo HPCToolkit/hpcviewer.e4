@@ -62,7 +62,6 @@
   <handlers xmi:id="_u40K4KqAEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.handler.zoom" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.ZoomHandler" command="_p3oI8KqAEeq2aaPo7yBcWg"/>
   <handlers xmi:id="_zeIc8KvwEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.handler.viewXML" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.ViewXML" command="_rAwA8KvwEeq2aaPo7yBcWg"/>
   <handlers xmi:id="_fC4SMKwbEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.handler.about" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.About" command="_lIBrgKwbEeq2aaPo7yBcWg"/>
-  <handlers xmi:id="_NJztAK3KEeqAHZLWafP1YQ" elementId="edu.rice.cs.hpcviewer.ui.handler.reset" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.ResetLayout" command="_QRDKwK3KEeqAHZLWafP1YQ"/>
   <handlers xmi:id="_AChSwLpkEeqjBNbAJCPSRg" elementId="edu.rice.cs.hpcviewer.ui.handler.preference" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.ShowPreferences" command="_svnesLpjEeqjBNbAJCPSRg"/>
   <handlers xmi:id="_ZlWvYL17EeqIaLNodVh-xg" elementId="edu.rice.cs.hpcviewer.ui.handler.showMetric" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.ShowMetrics" command="_XIwxIL17EeqIaLNodVh-xg"/>
   <handlers xmi:id="_SsIPYMH9Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpcviewer.ui.handler.0" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.Find" command="_JcLG8MH9Eeqcdd3a7pzIFA"/>
@@ -95,7 +94,6 @@
     <parameters xmi:id="_8d7q0KqCEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.commandparameter.zoom" name="zoom_type" optional="false"/>
   </commands>
   <commands xmi:id="_rAwA8KvwEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.command.viewXML" commandName="View XML" description="Display the XML file of the current database"/>
-  <commands xmi:id="_QRDKwK3KEeqAHZLWafP1YQ" elementId="edu.rice.cs.hpcviewer.ui.command.resetLayout" commandName="Reset layout"/>
   <commands xmi:id="_hDG4MLYZEeqhffqM1zV0iA" elementId="edu.rice.cs.hpcviewer.ui.command.close" commandName="Close database"/>
   <commands xmi:id="_svnesLpjEeqjBNbAJCPSRg" elementId="org.eclipse.ui.window.preferences" commandName="Preferences" description="Show the preferences"/>
   <commands xmi:id="_XIwxIL17EeqIaLNodVh-xg" elementId="edu.rice.cs.hpcviewer.ui.command.showMetric" commandName="Show metrics"/>

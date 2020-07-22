@@ -87,9 +87,10 @@ public class HPCTraceView extends AbstractBaseItem
 		
 		GridDataFactory.fillDefaults().grab(true, true).
 						hint(500, 500).applyTo(detailCanvas);
-		
+		GridLayoutFactory.fillDefaults().numColumns(1).generateLayout(plotArea);
+
 		detailCanvas.setVisible(false);
-		
+		detailCanvas.redraw();
 		
 		/*************************************************************************
 		 * Horizontal axis label 

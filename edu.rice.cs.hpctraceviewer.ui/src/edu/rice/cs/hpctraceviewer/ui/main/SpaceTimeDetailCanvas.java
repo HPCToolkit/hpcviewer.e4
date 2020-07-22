@@ -245,7 +245,12 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	 * OR when redraw() is called).
 	 ******************************************************************************/
 	public void paintControl(PaintEvent event)
-	{		
+	{	
+		event.gc.setForeground(getDisplay().getSystemColor(SWT.COLOR_BLUE));
+		event.gc.setBackground(getDisplay().getSystemColor(SWT.COLOR_CYAN));
+		event.gc.fillRectangle(0, 0, 200, 300);
+		System.out.println("client size: " + getClientArea());
+		System.out.println("size: " + getSize());
 		if (this.stData == null)
 			return;
 
