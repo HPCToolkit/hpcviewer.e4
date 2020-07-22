@@ -19,10 +19,10 @@ import org.slf4j.LoggerFactory;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
+import edu.rice.cs.hpcbase.ui.IBasePart;
 import edu.rice.cs.hpcviewer.ui.dialogs.MetricPropertyDialog;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
-import edu.rice.cs.hpcviewer.ui.parts.IBasePart;
 
 import java.util.ArrayList;
 import java.util.Iterator;

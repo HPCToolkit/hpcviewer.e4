@@ -7,7 +7,7 @@ import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 
-import edu.rice.cs.hpcviewer.ui.parts.IMainPart;
+import edu.rice.cs.hpcbase.ui.IMainPart;
 
 import javax.inject.Named;
 

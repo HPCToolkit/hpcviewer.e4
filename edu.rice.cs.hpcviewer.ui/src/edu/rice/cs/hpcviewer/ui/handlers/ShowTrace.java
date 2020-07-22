@@ -18,13 +18,22 @@ import java.util.List;
 import javax.inject.Named;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
+import edu.rice.cs.hpcbase.ui.IBasePart;
 import edu.rice.cs.hpctraceviewer.ui.main.HPCTraceView;
-import edu.rice.cs.hpcviewer.ui.parts.IBasePart;
 
 public class ShowTrace 
 {
 	@Execute
-	public void execute( 
+	public void execute(
+			MWindow       window,
+			EModelService modelService,
+			@Named(IServiceConstants.ACTIVE_PART)  MPart part,
+			@Named(IServiceConstants.ACTIVE_SHELL) Shell shell) {
+		
+	}
+	
+	
+	public void executeWithNewWindow( 
 			MApplication  application, 
 			MWindow       window,
 			EModelService modelService,

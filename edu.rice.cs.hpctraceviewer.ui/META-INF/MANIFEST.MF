@@ -4,7 +4,8 @@ Bundle-Name: hpctraceviewer
 Bundle-SymbolicName: edu.rice.cs.hpctraceviewer.ui;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: Rice University
-Export-Package: edu.rice.cs.hpctraceviewer.ui.main
+Export-Package: edu.rice.cs.hpctraceviewer.ui,
+ edu.rice.cs.hpctraceviewer.ui.main
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.e4.ui.model.workbench;bundle-version="2.1.700.v20200113-1422",
  org.eclipse.jface,
@@ -13,7 +14,9 @@ Require-Bundle: org.eclipse.core.runtime,
  edu.rice.cs.hpctraceviewer.data,
  edu.rice.cs.hpc.remote,
  org.eclipse.e4.core.di,
- org.eclipse.e4.ui.workbench
+ org.eclipse.e4.ui.workbench,
+ org.eclipse.e4.ui.di,
+ org.eclipse.e4.ui.services
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: edu.rice.cs.hpctraceviewer.ui
 Import-Package: edu.rice.cs.hpctraceviewer.data,

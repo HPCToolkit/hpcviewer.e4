@@ -84,9 +84,6 @@
   <descriptors xmi:id="_uSUdoMizEeq3_poNktUMtQ" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.profile" label="Profile view" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpcviewerEclipse16.gif" tooltip="Profile view" allowMultiple="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.ProfilePart">
     <toolbar xmi:id="_1e6AIMizEeq3_poNktUMtQ" elementId="edu.rice.cs.hpcviewer.ui.toolbar.0"/>
   </descriptors>
-  <descriptors xmi:id="_0egRoMk4Eeq3_poNktUMtQ" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.trace" label="Trace" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpc-merged-16x16.png" allowMultiple="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.TracePart">
-    <toolbar xmi:id="_4ENNAMk4Eeq3_poNktUMtQ" elementId="edu.rice.cs.hpcviewer.ui.toolbar.1"/>
-  </descriptors>
   <commands xmi:id="_lIBrgKwbEeq2aaPo7yBcWg" elementId="org.eclipse.ui.help.aboutAction" commandName="About" description="About the application"/>
   <commands xmi:id="_FHXw4LV7EeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.command.new" commandName="New window"/>
   <commands xmi:id="_U14sMI7vEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.command.open" commandName="Open" description="Open a database"/>

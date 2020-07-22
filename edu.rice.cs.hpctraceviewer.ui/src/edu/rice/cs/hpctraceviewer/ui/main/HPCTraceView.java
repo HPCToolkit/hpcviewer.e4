@@ -3,25 +3,26 @@ package edu.rice.cs.hpctraceviewer.ui.main;
 
 import javax.inject.Inject;
 
-import javax.annotation.PostConstruct;
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
+import edu.rice.cs.hpcbase.ui.IMainPart;
 import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.local.LocalDBOpener;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
+import edu.rice.cs.hpctraceviewer.ui.AbstractBaseItem;
 
 import javax.annotation.PreDestroy;
 
-public class HPCTraceView 
+public class HPCTraceView extends AbstractBaseItem
 {
 	public static final String ID_WINDOW      = "edu.rice.cs.hpctraceviewer.ui.trimmedwindow.hpctraceviewer";
 	public static final String ID_PERSPECTIVE = "edu.rice.cs.hpctraceviewer.ui.perspective.main";
@@ -43,14 +44,14 @@ public class HPCTraceView
 	private IEclipseContext context;
 
 	@Inject
-	public HPCTraceView() {
+	public HPCTraceView(CTabFolder parent, int style) {
+		super(parent, style);
 		timelineService = new ProcessTimelineService();
 	}
 	
-	@PostConstruct
-	public void postConstruct(Composite parent, MWindow window) {
-		
-		context = window.getContext();
+	@Override
+	public void createContent(IMainPart parentPart, IEclipseContext context, Composite parent) {
+		this.context = context;
 		context.set(Constants.CONTEXT_TIMELINE, timelineService);
 		
 		/**************************************************************************

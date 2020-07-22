@@ -48,8 +48,9 @@ import org.slf4j.LoggerFactory;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
+import edu.rice.cs.hpcbase.ui.IMainPart;
+import edu.rice.cs.hpctraceviewer.ui.TracePart;
 import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
-import edu.rice.cs.hpcviewer.ui.parts.IMainPart;
 import edu.rice.cs.hpcviewer.ui.parts.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.util.Constants;
 import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
@@ -314,6 +315,19 @@ public class DatabaseCollection
 		List<BaseExperiment> listExperiments = getActiveListExperiments();
 		if (listExperiments != null) {
 			listExperiments.add(experiment);
+		}
+		if (experiment.getTraceAttribute() != null) {
+			MPart tracePart = service.createPart(TracePart.ID);
+			MPart createPart = service.showPart(tracePart, PartState.CREATE);
+			
+			if (createPart != null) {
+				list.add(createPart);
+				
+				Object objTracePart = createPart.getObject();
+				if (objTracePart != null) {
+					((TracePart)objTracePart).setInput(createPart, experiment);
+				}
+			}
 		}
 	}
 	
@@ -623,10 +637,11 @@ public class DatabaseCollection
 						createViewsAndAddDatabase(experiment, application, partService, modelService, null);
 					});
 				} catch (Exception e) {
+					final String msg = "Error opening the database";
 					sync.asyncExec(()->{
-						MessageDialog.openError(shell, "Error opening the database", e.getClass().getName() + ": " +e.getMessage());
+						MessageDialog.openError(shell, msg, e.getClass().getName() + ": " +e.getMessage());
 					});
-					statusReport(IStatus.ERROR, "Cannot open the database", e);
+					statusReport(IStatus.ERROR, msg, e);
 					
 					return Status.CANCEL_STATUS;
 				}

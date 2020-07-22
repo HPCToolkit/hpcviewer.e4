@@ -11,8 +11,8 @@ import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
+import edu.rice.cs.hpcbase.ui.IBasePart;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
-import edu.rice.cs.hpcviewer.ui.parts.IBasePart;
 import edu.rice.cs.hpcviewer.ui.parts.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 import java.io.File;

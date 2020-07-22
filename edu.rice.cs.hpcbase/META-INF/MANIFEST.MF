@@ -8,6 +8,8 @@ Automatic-Module-Name: edu.rice.cs.hpcbase
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.eclipse.jface,
  org.eclipse.core.runtime,
- edu.rice.cs.hpc.data
+ edu.rice.cs.hpc.data,
+ org.eclipse.e4.ui.model.workbench,
+ org.eclipse.e4.core.contexts
 Export-Package: edu.rice.cs.hpcbase.map,
  edu.rice.cs.hpcbase.ui
