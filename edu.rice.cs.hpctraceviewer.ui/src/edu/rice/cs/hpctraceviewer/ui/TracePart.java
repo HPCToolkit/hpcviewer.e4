@@ -31,8 +31,6 @@ public class TracePart  implements IMainPart, IPartListener
 {
 	public static final String ID = "edu.rice.cs.hpctraceviewer.ui.partdescriptor.trace";
 
-	private MPart part;
-	
 	private BaseExperiment experiment;
 	private HPCTraceView tbtmTraceView;
 	
@@ -47,12 +45,10 @@ public class TracePart  implements IMainPart, IPartListener
 							  EPartService partService, 
 							  @Named(IServiceConstants.ACTIVE_PART) MPart part) {
 		
-		this.part = part;
+		SashForm sashFormMain = new SashForm(parent, SWT.NONE);
+		SashForm sashFormLeft = new SashForm(sashFormMain, SWT.VERTICAL);
 		
-		SashForm sashForm_1 = new SashForm(parent, SWT.NONE);
-		SashForm sashForm_2 = new SashForm(sashForm_1, SWT.VERTICAL);
-		
-		CTabFolder tabFolderTopLeft = new CTabFolder(sashForm_2, SWT.BORDER);
+		CTabFolder tabFolderTopLeft = new CTabFolder(sashFormLeft, SWT.BORDER);
 		tabFolderTopLeft.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
 		
 		IEclipseContext context = window.getContext();
@@ -68,19 +64,19 @@ public class TracePart  implements IMainPart, IPartListener
 		tbtmTraceView.createContent(this, context, composite);
 		tbtmTraceView.setControl(composite);
 		
-		CTabFolder tabFolderBottomLeft = new CTabFolder(sashForm_2, SWT.BORDER | SWT.CLOSE);
+		CTabFolder tabFolderBottomLeft = new CTabFolder(sashFormLeft, SWT.BORDER | SWT.CLOSE);
 		tabFolderBottomLeft.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
 		
 		CTabItem tbtmDepthView = new CTabItem(tabFolderBottomLeft, SWT.NONE);
 		tbtmDepthView.setText("Depth view");
-		sashForm_2.setWeights(new int[] {1, 1});
+		sashFormLeft.setWeights(new int[] {800, 200});
 		
-		CTabFolder tabFolderRight = new CTabFolder(sashForm_1, SWT.BORDER);
+		CTabFolder tabFolderRight = new CTabFolder(sashFormMain, SWT.BORDER);
 		tabFolderRight.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
 		
 		CTabItem tbtmCallStack = new CTabItem(tabFolderRight, SWT.NONE);
 		tbtmCallStack.setText("Call stack");
-		sashForm_1.setWeights(new int[] {1, 1});
+		sashFormMain.setWeights(new int[] {700, 300});
 		
 		tabFolderBottomLeft.setSelection(tbtmDepthView);
 		tabFolderRight.setSelection(tbtmCallStack);
