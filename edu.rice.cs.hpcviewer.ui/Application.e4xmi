@@ -32,15 +32,14 @@
       </children>
       <children xsi:type="menu:Menu" xmi:id="_E9WX8KwUEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.menu.view" label="View" mnemonics="V">
         <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_ewJnoKwUEeq2aaPo7yBcWg" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseExist"/>
-        <children xsi:type="menu:Menu" xmi:id="_tHMS4L4hEeq6DcyNjzONBw" elementId="edu.rice.cs.hpcviewer.ui.menu.showMetrics" label="Show metrics" mnemonics="S">
-          <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_z7wToL-lEeq6DcyNjzONBw" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseExist"/>
-          <children xsi:type="menu:DynamicMenuContribution" xmi:id="_JlLBUL4gEeq6DcyNjzONBw" elementId="edu.rice.cs.hpcviewer.ui.dynamicmenucontribution.showMetric" label="Show metrics" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.ShowMetrics"/>
+        <children xsi:type="menu:HandledMenuItem" xmi:id="_8RRzgMwvEeqnLcCrkreYSw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.showMetric" label="Show metrics" tooltip="Show the list of metrics and update its property (rename or change the formula)." mnemonics="S" command="_XIwxIL17EeqIaLNodVh-xg">
+          <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_FsaRMMwwEeqnLcCrkreYSw" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseExist"/>
         </children>
+        <children xsi:type="menu:HandledMenuItem" xmi:id="_mEUykMP_Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.trace" label="Show traces" tooltip="Show the traces of the application (if available)" mnemonics="t" command="_tEHPMMP_Eeqcdd3a7pzIFA"/>
         <children xsi:type="menu:Menu" xmi:id="_L0cLkKwUEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.menu.view.debug" label="Debug" mnemonics="D">
           <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_LrongL1wEeqIaLNodVh-xg" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DebugMode"/>
           <children xsi:type="menu:HandledMenuItem" xmi:id="_OUj-8KwUEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.viewXML" label="View experiment.xml file" tooltip="View the current experiment.xml file" mnemonics="x" command="_rAwA8KvwEeq2aaPo7yBcWg"/>
         </children>
-        <children xsi:type="menu:HandledMenuItem" xmi:id="_mEUykMP_Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.trace" label="Show traces" tooltip="Show the traces of the application (if available)" mnemonics="t" command="_tEHPMMP_Eeqcdd3a7pzIFA"/>
       </children>
       <children xsi:type="menu:Menu" xmi:id="_mNeQQLgGEeqKXeCFC-fF9Q" elementId="edu.rice.cs.hpcviewer.ui.menu.filter" label="Filter" mnemonics="i"/>
       <children xsi:type="menu:Menu" xmi:id="_AHiwkK3KEeqAHZLWafP1YQ" elementId="edu.rice.cs.hpcviewer.ui.menu.window" label="Window" mnemonics="W">
