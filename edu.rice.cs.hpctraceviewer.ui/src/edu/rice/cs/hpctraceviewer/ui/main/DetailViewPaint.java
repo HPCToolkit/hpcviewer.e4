@@ -23,8 +23,8 @@ import edu.rice.cs.hpctraceviewer.ui.timeline.BaseTimelineThread;
  * Painting class for detail view (space-time view)
  *
  ******************************************************/
-public class DetailViewPaint extends BaseViewPaint {
-		
+public class DetailViewPaint extends BaseViewPaint 
+{		
 	/** maximum number of records to display **/
 	static public final int MAX_RECORDS_DISPLAY = 99;
 	/** text when we reach the maximum of records to display **/

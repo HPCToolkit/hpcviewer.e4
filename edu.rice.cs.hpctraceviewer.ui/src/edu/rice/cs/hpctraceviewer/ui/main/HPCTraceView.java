@@ -11,11 +11,8 @@ import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 
-import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpcbase.ui.IMainPart;
-import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
-import edu.rice.cs.hpctraceviewer.data.local.LocalDBOpener;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
 import edu.rice.cs.hpctraceviewer.ui.AbstractBaseItem;
@@ -41,8 +38,6 @@ public class HPCTraceView extends AbstractBaseItem
 	/** Paints and displays the detail view.*/
 	private SpaceTimeDetailCanvas detailCanvas;
 	
-	private IEclipseContext context;
-
 	@Inject
 	public HPCTraceView(CTabFolder parent, int style) {
 		super(parent, style);
@@ -51,7 +46,6 @@ public class HPCTraceView extends AbstractBaseItem
 	
 	@Override
 	public void createContent(IMainPart parentPart, IEclipseContext context, Composite parent) {
-		this.context = context;
 		context.set(Constants.CONTEXT_TIMELINE, timelineService);
 		
 		/**************************************************************************
@@ -88,7 +82,6 @@ public class HPCTraceView extends AbstractBaseItem
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(detailCanvas);
 
 		detailCanvas.setVisible(true);
-		detailCanvas.redraw();
 		
 		/*************************************************************************
 		 * Horizontal axis label 
@@ -124,13 +117,13 @@ public class HPCTraceView extends AbstractBaseItem
 	public void preDestroy() {		
 	}
 	
-	public void setInput(BaseExperiment experiment) throws Exception {
-		AbstractDBOpener dbOpener = new LocalDBOpener(context, experiment);
-		SpaceTimeDataController stdc = dbOpener.openDBAndCreateSTDC(null);
+
+	@Override
+	public void setInput(Object input) {
+		SpaceTimeDataController stdc = (SpaceTimeDataController) input;
 		
 		detailCanvas. setData(stdc);
 		axisArea.     setData(stdc);
 		processCanvas.setData(stdc);
-	}
-	
+	}	
 }

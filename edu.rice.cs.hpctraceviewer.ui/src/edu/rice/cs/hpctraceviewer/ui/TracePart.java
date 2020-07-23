@@ -15,6 +15,10 @@ import org.eclipse.swt.widgets.Display;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpcbase.ui.IMainPart;
+import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
+import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
+import edu.rice.cs.hpctraceviewer.data.local.LocalDBOpener;
+import edu.rice.cs.hpctraceviewer.ui.depth.HPCDepthView;
 import edu.rice.cs.hpctraceviewer.ui.main.HPCTraceView;
 
 import javax.annotation.PreDestroy;
@@ -33,10 +37,14 @@ public class TracePart  implements IMainPart, IPartListener
 
 	private BaseExperiment experiment;
 	private HPCTraceView tbtmTraceView;
+	private HPCDepthView tbtmDepthView;
 	
+	private IEclipseContext context;
+	private AbstractDBOpener dbOpener;
 	
 	@Inject
 	public TracePart() {
+		dbOpener = null;
 	}
 	
 	@PostConstruct
@@ -48,35 +56,64 @@ public class TracePart  implements IMainPart, IPartListener
 		SashForm sashFormMain = new SashForm(parent, SWT.NONE);
 		SashForm sashFormLeft = new SashForm(sashFormMain, SWT.VERTICAL);
 		
+		context = window.getContext();
+		
+		// ---------------
+		// main view
+		// ---------------
+		
 		CTabFolder tabFolderTopLeft = new CTabFolder(sashFormLeft, SWT.BORDER);
 		tabFolderTopLeft.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
-		
-		IEclipseContext context = window.getContext();
 		
 		tbtmTraceView = new HPCTraceView(tabFolderTopLeft, SWT.NONE);
 		tbtmTraceView.setText("Trace view");
 		
-		Composite composite = new Composite(tabFolderTopLeft, SWT.NONE);
+		Composite mainArea = new Composite(tabFolderTopLeft, SWT.NONE);
 		FillLayout fillLayout = new FillLayout();
 		fillLayout.type = SWT.VERTICAL;
-		composite.setLayout(fillLayout);
+		mainArea.setLayout(fillLayout);
 		
-		tbtmTraceView.createContent(this, context, composite);
-		tbtmTraceView.setControl(composite);
+		tbtmTraceView.createContent(this, context, mainArea);
+		tbtmTraceView.setControl(mainArea);
+		
+		// ---------------
+		// depth view
+		// ---------------
 		
 		CTabFolder tabFolderBottomLeft = new CTabFolder(sashFormLeft, SWT.BORDER | SWT.CLOSE);
 		tabFolderBottomLeft.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
 		
-		CTabItem tbtmDepthView = new CTabItem(tabFolderBottomLeft, SWT.NONE);
+		tbtmDepthView = new HPCDepthView(tabFolderBottomLeft, SWT.NONE);
 		tbtmDepthView.setText("Depth view");
-		sashFormLeft.setWeights(new int[] {800, 200});
+
+		Composite depthArea = new Composite(tabFolderBottomLeft, SWT.NONE);
+		FillLayout depthfillLayout = new FillLayout();
+		depthfillLayout.type = SWT.VERTICAL;
+		depthArea.setLayout(depthfillLayout);
+
+		tbtmDepthView.createContent(this, context, depthArea);
+		tbtmDepthView.setControl(depthArea);
+		
+		// ---------------
+		// call stack
+		// ---------------
 		
 		CTabFolder tabFolderRight = new CTabFolder(sashFormMain, SWT.BORDER);
 		tabFolderRight.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
 		
 		CTabItem tbtmCallStack = new CTabItem(tabFolderRight, SWT.NONE);
 		tbtmCallStack.setText("Call stack");
+		
+		// ---------------
+		// sash 
+		// ---------------
+		
+		sashFormLeft.setWeights(new int[] {800, 200});		
 		sashFormMain.setWeights(new int[] {800, 200});
+
+		// ---------------
+		// finalization
+		// ---------------
 		
 		tabFolderBottomLeft.setSelection(tbtmDepthView);
 		tabFolderRight.setSelection(tbtmCallStack);
@@ -129,8 +166,18 @@ public class TracePart  implements IMainPart, IPartListener
 	public void partVisible(MPart part) {
 		if (part.getObject() != this)
 			return;
+		
+		// if we already create the database and the views, we don't need to recreate again
+		if (dbOpener != null)
+			return;
+		
 		try {
-			tbtmTraceView.setInput(experiment);
+			dbOpener = new LocalDBOpener(context, experiment);
+			SpaceTimeDataController stdc = dbOpener.openDBAndCreateSTDC(null);
+
+			tbtmTraceView.setInput(stdc);
+			tbtmDepthView.setInput(stdc);
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -247,6 +247,13 @@ public class ImageTraceAttributes
 		return frame.position;
 	}
 	
+	public int getDepthPixelVertical() {
+		return numPixelsDepthV;
+	}
+	
+	public void setDepthPixelVertical(int pixels) {
+		numPixelsDepthV = pixels;
+	}
 	
 	public int getPixelHorizontal() {
 		return numPixelsH;
