@@ -85,11 +85,9 @@ public class HPCTraceView extends AbstractBaseItem
 
 		detailCanvas.setLabels(labelGroup);
 		
-		GridDataFactory.fillDefaults().grab(true, true).
-						hint(500, 500).applyTo(detailCanvas);
-		GridLayoutFactory.fillDefaults().numColumns(1).generateLayout(plotArea);
+		GridDataFactory.fillDefaults().grab(true, true).applyTo(detailCanvas);
 
-		detailCanvas.setVisible(false);
+		detailCanvas.setVisible(true);
 		detailCanvas.redraw();
 		
 		/*************************************************************************

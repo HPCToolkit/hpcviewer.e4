@@ -95,7 +95,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
     /**Creates a SpaceTimeDetailCanvas with the given parameters*/
 	public SpaceTimeDetailCanvas(IEclipseContext context, Composite _composite)
 	{
-		super(_composite, SWT.NO_BACKGROUND, RegionType.Rectangle );
+		super(_composite, SWT.NO_BACKGROUND | SWT.BORDER_DASH, RegionType.Rectangle );
 		
 		this.context  = context;
 		oldAttributes = new ImageTraceAttributes();
@@ -246,11 +246,6 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	 ******************************************************************************/
 	public void paintControl(PaintEvent event)
 	{	
-		event.gc.setForeground(getDisplay().getSystemColor(SWT.COLOR_BLUE));
-		event.gc.setBackground(getDisplay().getSystemColor(SWT.COLOR_CYAN));
-		event.gc.fillRectangle(0, 0, 200, 300);
-		System.out.println("client size: " + getClientArea());
-		System.out.println("size: " + getSize());
 		if (this.stData == null)
 			return;
 
