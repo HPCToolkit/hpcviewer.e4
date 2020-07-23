@@ -9,13 +9,14 @@ import java.util.ArrayList;
 import javax.annotation.PostConstruct;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.swtchart.Chart;
 import org.swtchart.IAxisSet;
 import org.swtchart.IAxisTick;
 
-import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpcviewer.ui.parts.editor.IUpperPart;
@@ -23,9 +24,10 @@ import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
 
 import javax.annotation.PreDestroy;
 import org.eclipse.e4.ui.di.Focus;
-import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 
-public abstract class AbstractGraphViewer implements IUpperPart
+public abstract class AbstractGraphViewer extends CTabItem implements IUpperPart
 {
 	static public final int PLOT_OK          = 0;
 	static public final int PLOT_ERR_IO 	 = -1;
@@ -38,13 +40,18 @@ public abstract class AbstractGraphViewer implements IUpperPart
     private Composite parent;
 
 	@Inject
-	public AbstractGraphViewer() {		
+	public AbstractGraphViewer(CTabFolder tabFolder, int style) {
+		super(tabFolder, style);
+		setShowClose(true);
 	}
 	
 	@PostConstruct
 	public void postConstruct(Composite parent) {
 		
 		this.parent = parent;
+		
+		GridDataFactory.fillDefaults().grab(true, true).applyTo(parent);
+		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(parent);
 	}
 	
 	
@@ -58,19 +65,27 @@ public abstract class AbstractGraphViewer implements IUpperPart
 		chart.setFocus();
 	}
 
+
+
+	
 	@Override
-	public BaseExperiment getExperiment() {
-		return input.getScope().getExperiment();
+	public boolean hasEqualInput(Object input) {
+		if (input == null) return false;
+		if (!(input instanceof GraphEditorInput)) return false;
+		
+		GraphEditorInput inputNew = (GraphEditorInput) input;
+		
+		return inputNew.getScope()     == this.input.getScope()     && 
+			   inputNew.getGraphType() == this.input.getGraphType() &&
+			   inputNew.getMetric()    == this.input.getMetric();
 	}
-
-
 
 	@Override
 	public void setMarker(int lineNumber) {
 	}
 
 	@Override
-	public void setInput(MPart part, Object obj) {
+	public void setInput(Object obj) {
 
 		if (obj == null) return;
 
@@ -81,14 +96,14 @@ public abstract class AbstractGraphViewer implements IUpperPart
 		// subclasses may need the input value for setting the title
 		
 		input = (GraphEditorInput) obj;
-		
-		part.setTooltip(getTitle());
-		
+				
 		//----------------------------------------------
 		// chart creation
 		//----------------------------------------------
 		chart = new GraphChart(parent, SWT.NONE);
 
+		GridDataFactory.fillDefaults().grab(true, true).applyTo(chart);
+		
 		//----------------------------------------------
 		// formatting axis
 		//----------------------------------------------
@@ -105,8 +120,8 @@ public abstract class AbstractGraphViewer implements IUpperPart
 		final String title = getTitle();
 		chart.getTitle().setText(title);
 		
-		part.setLabel(title);
-		part.setTooltip(title);
+		setToolTipText(title);
+		setText(title);
 		
 		//----------------------------------------------
 		// main part: ask the subclass to plot the graph

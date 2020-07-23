@@ -95,7 +95,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
     /**Creates a SpaceTimeDetailCanvas with the given parameters*/
 	public SpaceTimeDetailCanvas(IEclipseContext context, Composite _composite)
 	{
-		super(_composite, SWT.NO_BACKGROUND, RegionType.Rectangle );
+		super(_composite, SWT.NO_BACKGROUND | SWT.BORDER_DASH, RegionType.Rectangle );
 		
 		this.context  = context;
 		oldAttributes = new ImageTraceAttributes();
@@ -245,7 +245,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	 * OR when redraw() is called).
 	 ******************************************************************************/
 	public void paintControl(PaintEvent event)
-	{		
+	{	
 		if (this.stData == null)
 			return;
 
@@ -925,18 +925,6 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	}
 
 	
-	private void asyncRedraw() 
-	{
-		Display display = Display.getDefault();
-		display.asyncExec(new Runnable() {
-			
-			@Override
-			public void run() {
-				redraw();
-			}
-		});
-	}
-
 	private void donePainting(Image imageOrig, Image imageFinal, boolean refreshData)
 	{		
 		initBuffer();

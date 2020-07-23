@@ -2,7 +2,6 @@ package edu.rice.cs.hpctraceviewer.ui.main;
 
 import java.io.IOException;
 import java.util.Queue;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.runtime.IProgressMonitor;

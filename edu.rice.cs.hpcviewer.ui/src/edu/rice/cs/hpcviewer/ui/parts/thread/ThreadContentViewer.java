@@ -27,7 +27,7 @@ import edu.rice.cs.hpcviewer.ui.internal.ScopeSelectionAdapter;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
 
 import edu.rice.cs.hpcviewer.ui.metric.MetricRawManager;
-import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
+import edu.rice.cs.hpcviewer.ui.parts.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownContentViewer;
 
 public class ThreadContentViewer extends TopDownContentViewer 
@@ -41,9 +41,9 @@ public class ThreadContentViewer extends TopDownContentViewer
 	public ThreadContentViewer( EPartService partService, 
 								IEventBroker eventBroker, 
 								DatabaseCollection database, 
-								PartFactory partFactory) {
+								ProfilePart   profilePart) {
 
-		super(partService, eventBroker, database, partFactory);
+		super(partService, eventBroker, database, profilePart);
 	}
 
 	

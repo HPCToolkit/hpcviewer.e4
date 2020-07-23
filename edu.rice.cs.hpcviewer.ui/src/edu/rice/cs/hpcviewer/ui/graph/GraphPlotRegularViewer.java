@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
+import org.eclipse.swt.custom.CTabFolder;
 import org.swtchart.IAxisSet;
 import org.swtchart.IAxisTick;
 
@@ -14,6 +15,11 @@ import edu.rice.cs.hpcviewer.ui.util.Constants;
 
 public class GraphPlotRegularViewer extends AbstractGraphPlotViewer 
 {
+	public GraphPlotRegularViewer(CTabFolder tabFolder, int style) {
+		super(tabFolder, style);
+		// TODO Auto-generated constructor stub
+	}
+
 	static public final String LABEL = "Plot graph";
 
 	@Override

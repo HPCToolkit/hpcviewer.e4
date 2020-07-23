@@ -1,8 +1,7 @@
  
 package edu.rice.cs.hpcviewer.ui.parts.editor;
 
-import javax.inject.Inject;
-
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -17,6 +16,7 @@ import org.eclipse.swt.widgets.Composite;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpc.data.experiment.source.FileSystemSourceFile;
+import edu.rice.cs.hpcviewer.ui.graph.GraphEditorInput;
 import edu.rice.cs.hpcviewer.ui.util.Constants;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
@@ -36,6 +36,8 @@ import org.eclipse.jface.text.source.AnnotationModel;
 import org.eclipse.jface.text.source.CompositeRuler;
 import org.eclipse.jface.text.source.LineNumberRulerColumn;
 import org.eclipse.jface.text.source.SourceViewer;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.SWT;
@@ -53,7 +55,7 @@ import org.eclipse.swt.SWT;
  * file viewer. Otherwise, it will create a new viewer.
  *
  **********************************************/
-public class Editor implements IUpperPart
+public class Editor extends CTabItem implements IUpperPart
 {
 	
 	static final private String PROPERTY_DATA = "hpceditor.data";
@@ -65,12 +67,20 @@ public class Editor implements IUpperPart
 	private FindReplaceDocumentAdapter finder;
 	
 	
-	@Inject IEventBroker broker;
-	@Inject MPart part;
+	IEventBroker broker;
+	MPart part;
 
-	@Inject
-	public Editor() {
+	public Editor(CTabFolder parent, int style) {
+		super(parent, style);
+		setShowClose(true);
 	}
+	
+	
+	public void setService(IEventBroker broker, MPart part) {
+		this.broker = broker;
+		this.part   = part;
+	}
+	
 	
 	@PostConstruct
 	public void postConstruct(Composite parent) {
@@ -101,21 +111,28 @@ public class Editor implements IUpperPart
 	}
 
 	
-	@Override
-	public BaseExperiment getExperiment() {
-		Object obj = textViewer.getData(PROPERTY_DATA);
+	
+	public boolean hasEqualInput(Object input) {
+		if (input == null) return false;
 		
-		if (obj == null)
-			return null;
+		File fileNew = getFileFromInput(input);
+		File fileOld = getFileFromInput(textViewer.getData(PROPERTY_DATA));
 		
-		if (obj instanceof Scope) {
-			Scope scope = (Scope) obj;
-			return scope.getExperiment();
+		return fileNew == fileOld;
+	}
+	
+	
+	private File getFileFromInput(Object input) {
+		if (input == null) return null;
+		
+		File file = null;
+		
+		if (input instanceof Scope) {
+			file = ((Scope)input).getSourceFile().getFilename();
+		} else if (input instanceof BaseExperiment) {
+			file = ((BaseExperiment)input).getXMLExperimentFile();
 		}
-		if (obj instanceof BaseExperiment)
-			return (BaseExperiment) obj;
-		
-		return null;
+		return file;
 	}
 	
 	private static String readLineByLineJava8(String filePath) 
@@ -155,7 +172,7 @@ public class Editor implements IUpperPart
 		
 		IDocument document = textViewer.getDocument();
 		
-		int maxLines = document.getNumberOfLines();
+		int maxLines = document.getNumberOfLines()-1;
 		lineNumber     = Math.max(0, Math.min(lineNumber, maxLines));
 
 		try {
@@ -200,6 +217,8 @@ public class Editor implements IUpperPart
 			filename = ((Scope)input).getSourceFile().getName(); 
 		} else if (input instanceof BaseExperiment) {
 			filename = ((BaseExperiment)input).getXMLExperimentFile().getName();
+		} else if (input instanceof GraphEditorInput) {
+			filename = ((GraphEditorInput)input).toString();
 		}
 		return filename;
 	}
@@ -210,10 +229,10 @@ public class Editor implements IUpperPart
 	}
 
 	@Override
-	public void setInput(MPart part, Object input) {
+	public void setInput(Object input) {
 		
 		this.input = input;
-		part.setLabel(getTitle());
+		setText(getTitle());
 		
 		if (input instanceof Scope) {
 			Scope scope = (Scope) input;
@@ -228,7 +247,7 @@ public class Editor implements IUpperPart
 
 			displayFile(scope, filename, lineNumber);
 			
-			part.setTooltip(filename);
+			setToolTipText(filename);
 			
 		} else if (input instanceof BaseExperiment) {
 			
@@ -237,7 +256,7 @@ public class Editor implements IUpperPart
 			
 			displayFile(experiment, filename, 0);
 			
-			part.setTooltip(filename);
+			setToolTipText(filename);
 		}
 		// add more condition for different type of objects here
 		// we should make this more flexible...

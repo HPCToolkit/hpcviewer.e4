@@ -35,6 +35,9 @@ public class MainProfilePage extends AbstractPage
 	public void apply() {
 		PreferenceStore prefDebug = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
 		
+		if (debugMode == null)
+			return;
+		
 		boolean debug = debugMode.getSelection();		
 		prefDebug.setValue(PreferenceConstants.ID_DEBUG_MODE, debug);
 		

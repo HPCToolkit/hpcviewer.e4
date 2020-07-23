@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.parts;
+package edu.rice.cs.hpcbase.ui;
 
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 

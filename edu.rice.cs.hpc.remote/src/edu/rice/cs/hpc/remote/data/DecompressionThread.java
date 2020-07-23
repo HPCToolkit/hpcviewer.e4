@@ -138,8 +138,8 @@ public class DecompressionThread extends Thread {
 
 	private void decompress(DecompressionItemToDo toDecomp) throws IOException
 	{
-		DataRecord[] ranksData = readTimeCPIDArray(toDecomp.packet, toDecomp.itemCount, toDecomp.startTime, toDecomp.endTime, toDecomp.compressed);
-		TraceDataByRank dataAsTraceDBR = new TraceDataByRank(ranksData);
+		//	DataRecord[] ranksData = readTimeCPIDArray(toDecomp.packet, toDecomp.itemCount, toDecomp.startTime, toDecomp.endTime, toDecomp.compressed);
+		//TraceDataByRank dataAsTraceDBR = new TraceDataByRank(ranksData);
 
 		int lineNumber = toDecomp.rankNumber;
 
@@ -147,8 +147,8 @@ public class DecompressionThread extends Thread {
 		// the number of horizontal pixels in the 4th parameter instead of number of processors
 		// TODO: need to check
 		
-		ProcessTimeline ptl = new ProcessTimeline(dataAsTraceDBR, scopeMap, lineNumber, 
-				attributes.getPixelHorizontal(), attributes.getTimeInterval(), attributes.getTimeBegin());
+		//ProcessTimeline ptl = new ProcessTimeline(dataAsTraceDBR, scopeMap, lineNumber, 
+		//		attributes.getPixelHorizontal(), attributes.getTimeInterval(), attributes.getTimeBegin());
 		
 		//timelineServ.setProcessTimeline(lineNumber, ptl);
 		timelinesAvailableForRendering.add(lineNumber);

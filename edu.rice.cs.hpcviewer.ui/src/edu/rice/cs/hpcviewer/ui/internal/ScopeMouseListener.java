@@ -12,11 +12,8 @@ import org.eclipse.swt.widgets.TreeItem;
 import edu.rice.cs.hpc.data.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpc.data.experiment.scope.LineScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
-import edu.rice.cs.hpcviewer.ui.parts.editor.Editor;
-import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
+import edu.rice.cs.hpcviewer.ui.parts.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.resources.FontManager;
-import edu.rice.cs.hpcviewer.ui.util.Constants;
-import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
 
@@ -33,7 +30,7 @@ public class ScopeMouseListener implements Listener
 	final private GC gc;
 	final private TreeViewer treeViewer;
 	
-	final private PartFactory partFactory;
+	final private ProfilePart profilePart;
 	
 	/**
 	 * initialization with the gc of the tree
@@ -43,10 +40,10 @@ public class ScopeMouseListener implements Listener
 	 * @param MApplication the application
 	 */
 	public ScopeMouseListener( TreeViewer treeViewer, 
-							   PartFactory partFactory) {
+							   ProfilePart profilePart) {
 		
 		this.treeViewer   = treeViewer;
-		this.partFactory  = partFactory;
+		this.profilePart  = profilePart;
 		
 		gc  = new GC(treeViewer.getTree().getDisplay());
 		gc.setFont(FontManager.getFontGeneric());
@@ -145,11 +142,8 @@ public class ScopeMouseListener implements Listener
 		
 		if (scope == null || !Utilities.isFileReadable(scope))
 			return;
-
-		String elementId = ElementIdManager.getElementId(scope.getExperiment()) + 
-						   ElementIdManager.ELEMENT_SEPARATOR + Editor.getTitle(scope);
 		
-		partFactory.display(Constants.ID_STACK_UPPER, Constants.ID_VIEW_EDITOR, elementId, scope);
+		profilePart.addEditor(scope);
 		
 		// keep focus to the viewer 
 		treeViewer.getTree().setFocus();

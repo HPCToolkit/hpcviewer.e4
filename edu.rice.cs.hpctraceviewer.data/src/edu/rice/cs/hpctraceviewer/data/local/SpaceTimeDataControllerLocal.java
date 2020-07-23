@@ -15,7 +15,6 @@ import edu.rice.cs.hpc.data.util.IProgressReport;
 import edu.rice.cs.hpc.data.util.MergeDataFiles;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TraceDataByRank;
-import edu.rice.cs.hpctraceviewer.data.util.TraceProgressReport;
 import edu.rice.cs.hpctraceviewer.data.version2.BaseData;
 import edu.rice.cs.hpctraceviewer.data.version2.FilteredBaseData;
 import edu.rice.cs.hpctraceviewer.data.version3.FileDB3;

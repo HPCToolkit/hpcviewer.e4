@@ -18,7 +18,6 @@ Require-Bundle: edu.rice.cs.hpcbase,
  org.eclipse.e4.ui.workbench,
  org.eclipse.e4.ui.di,
  org.eclipse.e4.ui.model.workbench;bundle-version="2.1.700.v20200113-1422"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Import-Package: edu.rice.cs.hpc.data.experiment,
  edu.rice.cs.hpc.data.experiment.metric,

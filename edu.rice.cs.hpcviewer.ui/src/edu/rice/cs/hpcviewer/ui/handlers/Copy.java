@@ -6,8 +6,8 @@ import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.services.IServiceConstants;
 
-import edu.rice.cs.hpcviewer.ui.parts.IBasePart;
-import edu.rice.cs.hpcviewer.ui.parts.IViewPart;
+import edu.rice.cs.hpcbase.ui.IBasePart;
+import edu.rice.cs.hpcbase.ui.IMainPart;
 
 import javax.inject.Named;
 
@@ -25,7 +25,7 @@ public class Copy {
 		if (part == null) return false;
 		if (!(part instanceof IBasePart)) return false;
 		
-		if (part instanceof IViewPart) {
+		if (part instanceof IMainPart) {
 			
 		}
 		

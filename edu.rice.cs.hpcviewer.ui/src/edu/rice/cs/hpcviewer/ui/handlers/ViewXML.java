@@ -4,17 +4,17 @@ package edu.rice.cs.hpcviewer.ui.handlers;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.model.application.MApplication;
+import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
+import edu.rice.cs.hpcbase.ui.IBasePart;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
-import edu.rice.cs.hpcviewer.ui.parts.IBasePart;
+import edu.rice.cs.hpcviewer.ui.parts.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
-import edu.rice.cs.hpcviewer.ui.util.Constants;
-import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
-
 import java.io.File;
 
 import javax.inject.Inject;
@@ -32,7 +32,7 @@ public class ViewXML
 	@Inject PartFactory        partFactory;
 	
 	@Execute
-	public void execute(@Optional @Active MPart part) {
+	public void execute(@Optional @Active MPart part, MWindow window) {
 		if (part != null) {
 			Object obj = part.getObject();
 			
@@ -54,9 +54,20 @@ public class ViewXML
 			if (file == null || !file.canRead())
 				return;
 			
-			String elementId = ElementIdManager.getElementId(experiment);
+			if (obj instanceof ProfilePart) {
+				((ProfilePart)obj).addEditor(experiment);
+				return;
+			}
+			// find the corresponding profile part to display the XML file
 			
-			partFactory.display(Constants.ID_STACK_UPPER, Constants.ID_VIEW_EDITOR, elementId, experiment);
+			MUIElement element = modelService.find(ProfilePart.ID, window);
+			if (element == null)
+				return;
+			if (!(element instanceof MPart))
+				return;
+			
+			ProfilePart profilePart = (ProfilePart) ((MPart)element).getObject();
+			profilePart.addEditor(experiment);
 		}
 	}
 	

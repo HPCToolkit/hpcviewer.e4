@@ -14,10 +14,11 @@ import javax.inject.Singleton;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileInfo;
 import org.eclipse.core.filesystem.IFileStore;
-import org.eclipse.core.runtime.ICoreRunnable;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Creatable;
@@ -27,8 +28,6 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.di.UISynchronize;
 import org.eclipse.e4.ui.model.application.MApplication;
-import org.eclipse.e4.ui.model.application.ui.MElementContainer;
-import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
 import org.eclipse.e4.ui.model.application.ui.basic.MStackElement;
@@ -48,10 +47,11 @@ import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
-import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
+import edu.rice.cs.hpcbase.ui.IMainPart;
+import edu.rice.cs.hpctraceviewer.ui.TracePart;
 import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
-import edu.rice.cs.hpcviewer.ui.parts.IViewPart;
+import edu.rice.cs.hpcviewer.ui.parts.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.util.Constants;
 import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
 
@@ -71,9 +71,7 @@ import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
 @Singleton
 public class DatabaseCollection 
 {
-	static private final String STACK_ID_BASE 	  = "edu.rice.cs.hpcviewer.ui.partstack.lower.";
-	
-	static private final int MAX_STACKS_AVAIL = 3;
+	static private final String STACK_ID_BASE 	  = "edu.rice.cs.hpcviewer.ui.partstack.integrated";
 	
 	final private HashMap<MWindow, List<BaseExperiment>>   mapWindowToExperiments;
 	final private HashMap<BaseExperiment, ViewerDataEvent> mapColumnStatus;
@@ -127,12 +125,10 @@ public class DatabaseCollection
 		
 		String args[] = Platform.getApplicationArgs();
 		
-		Display display = Display.getCurrent();
-		//Shell myShell   = display.getActiveShell();
-		
 		if (myShell == null) {
 			myShell = new Shell(SWT.TOOL | SWT.NO_TRIM);
 		}
+		final Shell shell = myShell;
 		
 		String path = null;
 		
@@ -140,25 +136,13 @@ public class DatabaseCollection
 			if (arg.charAt(0) != '-')
 				path = arg;
 		}
-		// if the user doesn't specify the database path, we need to display
-		// a window to get the filename
-		
 		if (path == null || path.length() < 1) {
-			path = experimentManager.openFileExperiment(myShell);
+			path = experimentManager.openFileExperiment(shell);
 			if (path == null)
 				return; 
 		}
-		final BaseExperiment experiment = openDatabase(myShell, path);
-		if (experiment == null)
-			return;
-		
-		display.asyncExec(new Runnable() {
-			
-			@Override
-			public void run() {
-				createViewsAndAddDatabase(experiment, application, partService, modelService, null);
-			}
-		});
+
+		openDatabaseAndCreateViews(shell, path, "Open a database");
 	}
 	
 
@@ -186,24 +170,8 @@ public class DatabaseCollection
 
 		if (isExist(shell, filename))
 			return;
-		
-		Job job = Job.create("Add a database", (ICoreRunnable) monitor -> {
 
-			BaseExperiment experiment;
-			try {
-				experiment = experimentManager.loadExperiment(filename);
-				
-				sync.syncExec(()-> {
-
-					createViewsAndAddDatabase(experiment, application, service, modelService, parentId);
-				});
-			} catch (Exception e) {
-				MessageDialog.openError(shell, "Error: Fail to add the database", filename + ": " + e.getMessage());
-				e.printStackTrace();
-			}			
-		});
-		job.schedule();
-
+		openDatabaseAndCreateViews(shell, filename, "Add a database");
 	}
 	
 	
@@ -232,23 +200,9 @@ public class DatabaseCollection
 
 		if (isExist(shell, filename))
 			return;
-		
-		Job job = Job.create("Open a database", (ICoreRunnable) monitor -> {
 
-			BaseExperiment experiment;
-			try {
-				experiment = experimentManager.loadExperiment(filename);
-				
-				sync.syncExec(()-> {
-					removeAll();
-					createViewsAndAddDatabase(experiment, application, service, modelService, parentId);
-				});
-			} catch (Exception e) {
-				MessageDialog.openError(shell, "Error: Fail to open the database", filename + ": " + e.getMessage());
-				e.printStackTrace();
-			}			
-		});
-		job.schedule();
+		removeAll();
+		openDatabaseAndCreateViews(shell, filename, "Open a database");
 	}
 
 	
@@ -299,24 +253,14 @@ public class DatabaseCollection
 		MPartStack stack = null;
 		List<MStackElement> list = null;
 		MWindow  window = application.getSelectedElement();
+		String stackId = parentId;
 		
 		if (parentId == null) {
-			for(int i=1; i<=MAX_STACKS_AVAIL; i++) {
-				final String stackId = STACK_ID_BASE + String.valueOf(i) ;
-				stack  = (MPartStack)modelService.find(stackId, window);
-				
-				if (stack != null)
-					list = stack.getChildren();
-
-				if (list != null && list.size()==0)
-					// we found empty an stack
-					break; 
-			}			
-		} else {
-			stack  = (MPartStack)modelService.find(parentId, window);
-			if (stack != null)
-				list = stack.getChildren();
+			stackId = STACK_ID_BASE; 
 		}
+		stack  = (MPartStack)modelService.find(stackId, window);
+		if (stack != null)
+			list = stack.getChildren();
 		
 		//----------------------------------------------------------------
 		// create a new part stack if necessary
@@ -326,10 +270,39 @@ public class DatabaseCollection
 			System.out.println("create a new part stack");
 			
 			stack = modelService.createModelElement(MPartStack.class);
-			stack.setElementId(STACK_ID_BASE  + "1");
+			stack.setElementId(STACK_ID_BASE);
 			stack.setToBeRendered(true);
 		}
 		
+		final MPart part = service.createPart(ProfilePart.ID);
+		if (list != null)
+			list.add(part);
+		service.showPart(part, PartState.VISIBLE);
+		IMainPart view = null;
+
+		int maxAttempt = 20;		
+		while(maxAttempt>0) {
+			view = (IMainPart) part.getObject();
+			if (view != null)
+				break;
+			
+			try {
+				Thread.sleep(300);					
+			} catch (Exception e) {
+				
+			}
+			maxAttempt--;
+		}
+		if (view == null) {
+			MessageDialog.openError(Display.getDefault().getActiveShell(), "Fail to get the view", "hpcviewer is unable to retrieve the view. Please try again");
+			return;
+		}
+		
+		// has to set the element Id before populating the view
+		String elementID = ElementIdManager.getElementId(experiment);
+		part.setElementId(elementID);
+		view.setInput(part, experiment);
+
 		//----------------------------------------------------------------
 		// part stack is ready, now we create all view parts and add it to the part stack
 		// TODO: We assume adding to the part stack is always successful
@@ -337,61 +310,24 @@ public class DatabaseCollection
 		stack.setVisible(true);
 		stack.setOnTop(true);
 		
-		Object []children = experiment.getRootScopeChildren();
-		
-		for (int i=0; i<children.length; i++) {
-
-			RootScope root = (RootScope) children[i];
-			
-			String partId = mapRoottypeToPartId.get(root.getType());
-			if (partId == null)
-				continue; 	// TODO: should display error message
-			
-			final MPart part = service.createPart(partId);
-			
-			list.add(part);
-
-			part.setLabel(root.getRootName());
-
-			//----------------------------------------------------------------
-			// We only make the top-down (the first part) to be visible
-			// the other parts will be created, but not activated.
-			// Let users to activate the other parts by themselves.
-			//----------------------------------------------------------------
-			if (i==0) {
-				
-				service.showPart(part, PartState.VISIBLE);
-			} else {
-				
-				service.showPart(part, PartState.CREATE);
-			}			
-			IViewPart view = null;
-
-			int maxAttempt = 20;		
-			while(maxAttempt>0) {
-				view = (IViewPart) part.getObject();
-				if (view != null)
-					break;
-				
-				try {
-					Thread.sleep(300);					
-				} catch (Exception e) {
-					
-				}
-				maxAttempt--;
-			}
-			// has to set the element Id before populating the view
-			String elementID = ElementIdManager.getElementId(root);
-			part.setElementId(elementID);
-			if (view != null)
-				view.setInput(part, experiment);
-		}
-		
 		statusReport(IStatus.INFO, "Open " + experiment.getDefaultDirectory().getAbsolutePath(), null);
 		
 		List<BaseExperiment> listExperiments = getActiveListExperiments();
 		if (listExperiments != null) {
 			listExperiments.add(experiment);
+		}
+		if (experiment.getTraceAttribute() != null) {
+			MPart tracePart = service.createPart(TracePart.ID);
+			MPart createPart = service.showPart(tracePart, PartState.CREATE);
+			
+			if (createPart != null) {
+				list.add(createPart);
+				
+				Object objTracePart = createPart.getObject();
+				if (objTracePart != null) {
+					((TracePart)objTracePart).setInput(createPart, experiment);
+				}
+			}
 		}
 	}
 	
@@ -543,18 +479,7 @@ public class DatabaseCollection
 		for(MPart part: listParts) {
 			
 			if (part.getElementId().startsWith(elementID)) {
-				MElementContainer<MUIElement> parent = part.getParent();
-				
 				partService.hidePart(part, true);
-				
-				List<MUIElement> listChildren = parent.getChildren();
-				
-				listChildren.remove(part);
-				
-				if (listChildren.size() == 0 && !parent.getElementId().equals(Constants.ID_STACK_UPPER)) {
-					// last child has been moved. The part stack is empty now
-					parent.setVisible(false);
-				}
 			}
 		}
 	}	
@@ -657,8 +582,9 @@ public class DatabaseCollection
 	 * @param expManager the experiment manager
 	 * @param sPath path to the database
 	 * @return
+	 * @throws Exception 
 	 */
-	private BaseExperiment openDatabase(Shell shell, String sPath) {
+	private BaseExperiment openDatabase(Shell shell, String sPath) throws Exception {
     	IFileStore fileStore;
 
 		try {
@@ -682,8 +608,49 @@ public class DatabaseCollection
     		experiment = experimentManager.openDatabaseFromDirectory(shell, sPath);
     	} else {
 			EFS.getLocalFileSystem().fromLocalFile(new File(sPath));
-			experiment = experimentManager.loadExperiment(shell, sPath);
+			experiment = experimentManager.loadExperiment(sPath);
     	}
     	return experiment;
 	}
+	
+
+	/****
+	 * Open a database using background job, and then create views using UI thread
+	 * 
+	 * @param shell
+	 * @param database
+	 * @param message
+	 */
+	private void openDatabaseAndCreateViews(final Shell shell, final String database, final String message) {
+		Job jobOpenDb = new Job(message) {
+			
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				
+				monitor.beginTask(message + " ...", 2);
+				monitor.worked(1);
+
+				try {
+					final BaseExperiment experiment = openDatabase(shell, database);
+					
+					sync.asyncExec(()-> {
+						createViewsAndAddDatabase(experiment, application, partService, modelService, null);
+					});
+				} catch (Exception e) {
+					final String msg = "Error opening the database";
+					sync.asyncExec(()->{
+						MessageDialog.openError(shell, msg, e.getClass().getName() + ": " +e.getMessage());
+					});
+					statusReport(IStatus.ERROR, msg, e);
+					
+					return Status.CANCEL_STATUS;
+				}
+				monitor.worked(1);
+				monitor.done();
+				return Status.OK_STATUS;
+			}
+		};
+		jobOpenDb.schedule();
+	}
+
 }

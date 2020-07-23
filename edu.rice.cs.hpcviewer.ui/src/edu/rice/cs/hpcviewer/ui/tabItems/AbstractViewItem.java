@@ -1,10 +1,11 @@
- 
-package edu.rice.cs.hpcviewer.ui.parts;
+package edu.rice.cs.hpcviewer.ui.tabItems;
 
-import javax.inject.Inject;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
+import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.e4.ui.model.application.MApplication;
+import org.eclipse.e4.ui.services.EMenuService;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.Composite;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
@@ -18,29 +19,23 @@ import edu.rice.cs.hpc.filter.service.FilterStateProvider;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
 import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
-import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
+import edu.rice.cs.hpcviewer.ui.parts.IViewBuilder;
+import edu.rice.cs.hpcviewer.ui.parts.ProfilePart;
 
-import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.e4.ui.model.application.MApplication;
-import org.eclipse.e4.ui.model.application.ui.basic.MPart;
-import org.eclipse.e4.ui.services.EMenuService;
-import org.eclipse.e4.ui.workbench.modeling.EModelService;
-import org.eclipse.e4.ui.workbench.modeling.EPartService;
-import org.eclipse.e4.ui.workbench.modeling.IPartListener;
 
-public abstract class BaseViewPart implements IViewPart, EventHandler, IPartListener
+public abstract class AbstractViewItem extends AbstractBaseViewItem implements EventHandler, IViewItem
 {
 
-	@Inject	protected EPartService  partService;
-	@Inject protected EModelService modelService;
-	@Inject protected MApplication  app;
-	@Inject protected IEventBroker  eventBroker;
+	protected EPartService  partService;
+	protected EModelService modelService;
+	protected MApplication  app;
+	protected IEventBroker  eventBroker;
+	protected EMenuService  menuService;
 	
-	@Inject protected DatabaseCollection databaseAddOn;
+	protected DatabaseCollection databaseAddOn;
+	protected ProfilePart   profilePart;
 
-	@Inject protected PartFactory partFactory;
-
-	private IViewBuilder  contentViewer;
+	private IViewBuilder contentViewer;
 	
 	/** Each view needs to store the experiment database.
 	 * In case it needs to populate the table, we know which database 
@@ -52,17 +47,31 @@ public abstract class BaseViewPart implements IViewPart, EventHandler, IPartList
 	 */
 	private RootScope       root;
 
-	@Inject
-	public BaseViewPart() {
+	public AbstractViewItem(CTabFolder parent, int style) {
+		super(parent, style);
+	}
+
+	
+	@Override
+	public void setService(EPartService partService, 
+			IEventBroker broker,
+			DatabaseCollection database,
+			ProfilePart   profilePart,
+			EMenuService  menuService) {
+		
+		this.partService = partService;
+		this.eventBroker = broker;
+		this.databaseAddOn = database;
+		this.profilePart = profilePart;
+		this.menuService = menuService;
 	}
 	
-	@PostConstruct
-	public void postConstruct(Composite parent, EMenuService menuService) {
-
+	
+	@Override
+	public void createContent(Composite parent) {
 		contentViewer = setContentViewer(parent, menuService);
-		
-		// listen to part events: visible, activate, hide, ...
-		partService.addPartListener(this);		
+    	contentViewer.createContent(parent, menuService);
+
 		
 		// subscribe to user action events
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_REMOVE_DATABASE, this);
@@ -74,19 +83,8 @@ public abstract class BaseViewPart implements IViewPart, EventHandler, IPartList
 		eventBroker.subscribe(FilterStateProvider.FILTER_REFRESH_PROVIDER, this);
 	}
 	
-	@PreDestroy
-	public void preDestroy() {
-		
-		partService.removePartListener(this);
-		eventBroker.unsubscribe(this);
-		
-		if (contentViewer != null)
-			contentViewer.dispose();
-	}
-	
-
 	@Override
-	public void setInput(MPart part, Object input) {
+	public void setInput(Object input) {
 		
 		if (!(input instanceof BaseExperiment))
 			return;
@@ -94,19 +92,13 @@ public abstract class BaseViewPart implements IViewPart, EventHandler, IPartList
 		// important: needs to store the experiment database for further usage
 		// when the view is becoming visible
 		this.experiment = (BaseExperiment) input;
-		
-		if (partService.isPartVisible(part)) {
-			
-			// TODO: this process takes time
-			root = createRoot(experiment);
-			contentViewer.setData(root);
-		}
+				
+		// TODO: this process takes time
+		root = createRoot(experiment);
+		contentViewer.setData(root);
+		System.out.println("create input " + getText());
 	}
 
-	@Override
-	public BaseExperiment getExperiment() {
-		return experiment;
-	}
 	
 	@Override
 	public void handleEvent(Event event) {
@@ -115,7 +107,7 @@ public abstract class BaseViewPart implements IViewPart, EventHandler, IPartList
 			return;
 
 		Object obj = event.getProperty(IEventBroker.DATA);
-		if (obj == null || getExperiment() == null || root == null)
+		if (obj == null || experiment == null || root == null)
 			return;
 		
 		if (!(obj instanceof ViewerDataEvent)) {
@@ -131,7 +123,7 @@ public abstract class BaseViewPart implements IViewPart, EventHandler, IPartList
 		}
 		
 		ViewerDataEvent eventInfo = (ViewerDataEvent) obj;
-		if (getExperiment() != eventInfo.experiment) 
+		if (experiment != eventInfo.experiment) 
 			return;
 		
 		String topic = event.getTopic();
@@ -150,44 +142,8 @@ public abstract class BaseViewPart implements IViewPart, EventHandler, IPartList
 		}
 	}
 
-	
-	@Override
-	public void partActivated(MPart part) {}
-
-	@Override
-	public void partBroughtToTop(MPart part) {}
-
-	@Override
-	public void partDeactivated(MPart part) {}
-
-	@Override
-	public void partHidden(MPart part) {}
-
-	@Override
-	public void partVisible(MPart part) {
-		if (part.getObject() != this)
-			return;
-		
-		if (experiment != null && root == null) {
-			
-			// if the database doesn't exist anymore, it means we are
-			// exiting...
-			
-			if (!databaseAddOn.IsExist(experiment))
-				return;
-			
-			// TODO: this process takes time
-			root = createRoot(experiment);
-			contentViewer.setData(root);
-		}
-	}
-
-	protected IViewBuilder getContentViewer() {
-		return contentViewer;
-	}
-
-	protected abstract RootScope      createRoot(BaseExperiment experiment);
+	protected abstract RootScope 	  createRoot(BaseExperiment experiment);
 	protected abstract IViewBuilder   setContentViewer(Composite parent, EMenuService menuService);
 	protected abstract RootScopeType  getRootType();
-	
+
 }

@@ -6,6 +6,7 @@ import java.util.Stack;
 
 import javax.annotation.PreDestroy;
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.services.EMenuService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.action.Action;
@@ -50,7 +51,7 @@ import edu.rice.cs.hpcviewer.ui.actions.ZoomAction;
 import edu.rice.cs.hpcviewer.ui.actions.UserDerivedMetric;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.parts.IViewBuilder;
-import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
+import edu.rice.cs.hpcviewer.ui.parts.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.preferences.PreferenceConstants;
 import edu.rice.cs.hpcviewer.ui.resources.FontManager;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
@@ -99,9 +100,8 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 	
 	final private EPartService  partService;
 	final private IEventBroker  eventBroker;
-	final private PartFactory   partFactory;
-	
 	final private DatabaseCollection database;
+	private EMenuService menuService;
 	
 	private ScopeTreeViewer treeViewer = null;
 	
@@ -134,19 +134,19 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 			EPartService  partService, 
 			IEventBroker  eventBroker,
 			DatabaseCollection database,
-			PartFactory   partFactory) {
+			ProfilePart   profilePart) {
 		
 		this.partService  = partService;
 		this.eventBroker  = eventBroker;
 		this.database     = database;
-		this.partFactory  = partFactory;
-		
 		stackActions = new Stack<Object>();
 	}
 	
 	@Override
 	public void createContent(Composite parent, EMenuService menuService) {
 		
+		this.menuService = menuService;
+				
 		parent.setLayout(new GridLayout(1, false));
 		
 		Composite composite = new Composite(parent, SWT.NONE);
@@ -206,9 +206,11 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
         tree.setLinesVisible(true);
 
 		treeViewer.setContentProvider( getContentProvider(treeViewer));
-		createScopeColumn(treeViewer);
+		//createScopeColumn(treeViewer);
 		
-		mouseDownListener = new ScopeMouseListener(treeViewer, partFactory);
+		MPart part = partService.getActivePart();
+		
+		mouseDownListener = new ScopeMouseListener(treeViewer, (ProfilePart) part.getObject());
 		treeViewer.getTree().addListener(SWT.MouseDown, mouseDownListener);
 		treeViewer.addSelectionChangedListener(this);
 
@@ -646,6 +648,14 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 		return partService;
 	}
     
+	protected DatabaseCollection getDatabaseCollection() {
+		return database;
+	}
+	
+	protected EMenuService getMenuService() {
+		return menuService;
+	}
+	
     /////////////////////////////////////////////////////////
     ///
     ///  Abstract methods

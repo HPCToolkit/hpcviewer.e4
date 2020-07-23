@@ -17,7 +17,6 @@ import edu.rice.cs.hpc.data.experiment.merge.ExperimentMerger;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
-import edu.rice.cs.hpcviewer.ui.util.Constants;
 
 import java.util.Iterator;
 
@@ -87,7 +86,7 @@ public class MergeDatabase
 			public void run() {
 				try {
 					Experiment mergedExp = ExperimentMerger.merge(db[0], db[1], mergeType);
-					database.createViewsAndAddDatabase(mergedExp, application, service, modelService, Constants.ID_STACK_UPPER);
+					database.createViewsAndAddDatabase(mergedExp, application, service, modelService, null);
 					
 				} catch (Exception e) {
 					MessageDialog.openError(shell, "Error merging database",

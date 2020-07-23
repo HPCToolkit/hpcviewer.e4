@@ -4,9 +4,11 @@ package edu.rice.cs.hpcviewer.ui.handlers;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.di.AboutToShow;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.model.application.ui.menu.MDirectMenuItem;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenuElement;
+import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.Dialog;
@@ -17,17 +19,17 @@ import org.slf4j.LoggerFactory;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
-import edu.rice.cs.hpc.data.util.Constants;
+import edu.rice.cs.hpcbase.ui.IBasePart;
 import edu.rice.cs.hpcviewer.ui.dialogs.MetricPropertyDialog;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.eclipse.e4.core.contexts.Active;
 import org.eclipse.e4.core.di.annotations.CanExecute;
@@ -71,21 +73,23 @@ public class ShowMetrics
 	
 	
 	@Execute
-	public void execute(MDirectMenuItem menu, @Active Shell shell, IEventBroker eventBroker) {
+	public void execute(@Named(IServiceConstants.ACTIVE_PART) MPart part, @Active Shell shell, IEventBroker eventBroker) {
 
 		if (database == null || database.isEmpty())
 			return;
 			
-		if (menu == null)
+		if (part == null)
 			return;
 
-		String element  = menu.getElementId();
-		String filePath = element + File.separator + Constants.DATABASE_FILENAME;
+		Object obj = part.getObject();
+		if (obj == null || (!(obj instanceof IBasePart)))
+			return;
 
-		Experiment exp = (Experiment) database.getExperiment(filePath);
+		IBasePart basePart = (IBasePart) obj;
+		Experiment exp = (Experiment) basePart.getExperiment();
 		if (exp == null) {
 			Logger logger = LoggerFactory.getLogger(getClass());
-			logger.debug("Database not found: " + filePath);
+			logger.debug("Database not found");
 			return;
 		}
 		
