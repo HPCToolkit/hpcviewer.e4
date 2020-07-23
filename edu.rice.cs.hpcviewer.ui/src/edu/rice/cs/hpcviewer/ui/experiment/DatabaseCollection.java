@@ -462,7 +462,6 @@ public class DatabaseCollection
 		MWindow window = application.getSelectedElement();
 		List<MPart> listParts = modelService.findElements(window, null, MPart.class);
 		
-		//final Collection<MPart> listParts = partService.getParts();
 		if (listParts == null)
 			return;
 
@@ -470,16 +469,17 @@ public class DatabaseCollection
 		
 		ViewerDataEvent data = new ViewerDataEvent((Experiment) experiment, null);
 		eventBroker.post(ViewerDataEvent.TOPIC_HPC_REMOVE_DATABASE, data);
-
-		String elementID = ElementIdManager.getElementId(experiment);
 		
 		// destroy all the views and editors that belong to experiment
 		// since Eclipse doesn't have "destroy" method, we hide them.
 		
 		for(MPart part: listParts) {
-			
-			if (part.getElementId().startsWith(elementID)) {
-				partService.hidePart(part, true);
+			Object obj = part.getObject();
+			if (obj instanceof IMainPart) {
+				IMainPart mpart = (IMainPart) obj;
+				if (mpart.getExperiment() == experiment) {
+					partService.hidePart(part, true);
+				}
 			}
 		}
 	}	

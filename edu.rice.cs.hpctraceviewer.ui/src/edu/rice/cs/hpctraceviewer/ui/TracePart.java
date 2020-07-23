@@ -31,7 +31,7 @@ import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.IPartListener;
 
-public class TracePart  implements IMainPart, IPartListener
+public class TracePart implements IMainPart, IPartListener
 {
 	public static final String ID = "edu.rice.cs.hpctraceviewer.ui.partdescriptor.trace";
 
@@ -126,7 +126,6 @@ public class TracePart  implements IMainPart, IPartListener
 	
 	@PreDestroy
 	public void preDestroy() {
-		
 	}
 	
 	

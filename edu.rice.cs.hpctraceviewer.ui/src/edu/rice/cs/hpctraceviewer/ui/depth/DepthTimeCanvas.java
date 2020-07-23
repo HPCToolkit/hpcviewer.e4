@@ -11,7 +11,6 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
@@ -59,13 +58,6 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 		super(composite, SWT.NONE);
 		
 		threadExecutor = Executors.newFixedThreadPool( Utility.getNumThreads(0) ); 
-		addDisposeListener( new DisposeListener() {
-			
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				dispose();				
-			}
-		});
 	}
 	
 	/****
@@ -82,6 +74,16 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 			TraceOperation.getOperationHistory().addOperationHistoryListener(this);
 		}
 		this.stData = stData; 		
+	}
+	
+	@Override
+	public void widgetDisposed(DisposeEvent e) {
+		System.out.println("YES-dISPOSED " + getClass().getName() + " -> " + this);
+		removeDisposeListener(this);
+		TraceOperation.getOperationHistory().removeOperationHistoryListener(this);
+		super.widgetDisposed(e);
+
+		threadExecutor.shutdown();
 	}
 	
 	/*
@@ -243,15 +245,6 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 		});
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.swt.widgets.Widget#dispose()
-	 */
-	public void dispose()
-	{
-		threadExecutor.shutdown();
-		super.dispose();
-	}
 
 
 	@Override

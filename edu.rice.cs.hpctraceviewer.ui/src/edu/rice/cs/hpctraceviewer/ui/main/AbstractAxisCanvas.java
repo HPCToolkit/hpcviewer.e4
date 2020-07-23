@@ -4,6 +4,8 @@ import org.eclipse.core.commands.operations.IOperationHistoryListener;
 import org.eclipse.core.commands.operations.IUndoableOperation;
 import org.eclipse.core.commands.operations.OperationHistoryEvent;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
@@ -13,13 +15,14 @@ import edu.rice.cs.hpctraceviewer.ui.operation.BufferRefreshOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.TraceOperation;
 
 abstract public class AbstractAxisCanvas extends Canvas 
-				implements PaintListener, IOperationHistoryListener
+				implements PaintListener, IOperationHistoryListener, DisposeListener
 {
 
 	public AbstractAxisCanvas(Composite parent, int style) {
 		super(parent, SWT.NO_BACKGROUND | style);
 
 		addPaintListener(this);
+		addDisposeListener(this);
 	}
 
 	
@@ -37,6 +40,14 @@ abstract public class AbstractAxisCanvas extends Canvas
 		syncRedraw();
 	}
 
+	
+	@Override
+	public void widgetDisposed(DisposeEvent e) {
+		TraceOperation.getOperationHistory().removeOperationHistoryListener(this);
+		System.out.println("YES-dISPOSED " + getClass().getName() + " -> " + this);
+	}
+
+		
 	/***
 	 * Just like normal redraw, but this method uses UI thread
 	 * and wait until the thread is available

@@ -35,6 +35,8 @@ public abstract class OperationHistoryAction extends Action
 			menu.dispose();
 			menu = null;
 		}
+		TraceOperation.getOperationHistory().removeOperationHistoryListener(this);
+		System.out.println("YES-dISPOSED " + getClass().getName() + " -> " + this);
 	}
 
 

@@ -13,6 +13,8 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.PaintEvent;
@@ -56,7 +58,7 @@ import edu.rice.cs.hpctraceviewer.data.util.Constants;
  *
  ************************************************************************/
 public class SpaceTimeDetailCanvas extends AbstractTimeCanvas 
-	implements IOperationHistoryListener, ISpaceTimeCanvas, ITraceViewAction
+	implements IOperationHistoryListener, ISpaceTimeCanvas, ITraceViewAction, DisposeListener
 {		
 	/**The min number of process units you can zoom in.*/
     private final static int MIN_PROC_DISP = 1;
@@ -127,6 +129,8 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		{
 			addCanvasListener();
 			OperationHistoryFactory.getOperationHistory().addOperationHistoryListener(this);
+			System.out.println("add operation listener at " + getClass().getName() + " " + this);
+			//addDisposeListener(this);
 		}
 
 		// reinitialize the selection rectangle
@@ -825,8 +829,10 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		// the size of the final image is the same of the size of the canvas
 		// -----------------------------------------------------------------------
 
-		
 		final Rectangle view = getClientArea();
+		if (view.width <= 0 || view.height <= 0) 
+			return;
+		
 		final ImageTraceAttributes attributes = stData.getAttributes();
 
 		attributes.setPixelHorizontal(view.width);
@@ -954,15 +960,14 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	}
 	
 	
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.swt.widgets.Widget#dispose()
-	 */
 	@Override
-	public void dispose () { 
-		super.dispose();
+	public void widgetDisposed(DisposeEvent e) {
+		OperationHistoryFactory.getOperationHistory().removeOperationHistoryListener(this);
+		super.widgetDisposed(e);
+		//super.dispose();
+		System.out.println("YES-dISPOSED " + getClass().getName() + " -> " + this);
 	}
-
+	
 	//-----------------------------------------------------------------------------------------
 	// Part for notifying changes to other views
 	//-----------------------------------------------------------------------------------------
