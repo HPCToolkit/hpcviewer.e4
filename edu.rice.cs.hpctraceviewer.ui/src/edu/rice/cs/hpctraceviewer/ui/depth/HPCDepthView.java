@@ -21,16 +21,18 @@ import edu.rice.cs.hpctraceviewer.ui.main.HPCTraceView;
  *****************************************************/
 public class HPCDepthView extends AbstractBaseItem
 {
-	public HPCDepthView(CTabFolder parent, int style) {
-		super(parent, style);
-	}
-
 	public static final String ID = "hpcdepthview.view";
 
 	private static final int VIEW_HEIGHT_HINT = 40;
 	
 	/** Paints and displays the detail view. */
-	DepthTimeCanvas depthCanvas;
+	private DepthTimeCanvas depthCanvas;
+
+	
+	public HPCDepthView(CTabFolder parent, int style) {
+		super(parent, style);
+	}
+
 		
 	@Override
 	public void createContent(IMainPart parentPart, 

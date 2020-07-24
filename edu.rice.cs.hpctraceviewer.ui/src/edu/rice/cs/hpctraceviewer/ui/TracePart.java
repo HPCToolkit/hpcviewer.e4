@@ -20,6 +20,7 @@ import edu.rice.cs.hpctraceviewer.ui.depth.HPCDepthView;
 import edu.rice.cs.hpctraceviewer.ui.main.HPCTraceView;
 import edu.rice.cs.hpctraceviewer.ui.main.ITraceViewAction;
 import edu.rice.cs.hpctraceviewer.ui.minimap.MiniMap;
+import edu.rice.cs.hpctraceviewer.ui.summary.HPCSummaryView;
 
 import javax.annotation.PreDestroy;
 
@@ -39,9 +40,13 @@ public class TracePart implements IMainPart, IPartListener
 	private BaseExperiment experiment;
 	
 	private CTabFolder tabFolderTopLeft;
-	private HPCTraceView tbtmTraceView;
-	private HPCDepthView tbtmDepthView;
+	
+	private HPCTraceView     tbtmTraceView;
+	private HPCDepthView     tbtmDepthView;
 	private HPCCallStackView tbtmCallStack;
+	private HPCSummaryView   tbtmSummaryView;
+	private MiniMap tbtmMinimap;
+	
 	
 	private IEclipseContext context;
 	private AbstractDBOpener dbOpener;
@@ -82,6 +87,9 @@ public class TracePart implements IMainPart, IPartListener
 		tbtmDepthView = new HPCDepthView(tabFolderBottomLeft, SWT.NONE);
 		createTabItem(tbtmDepthView, "Depth view", tabFolderBottomLeft, eventBroker);
 		
+		tbtmSummaryView = new HPCSummaryView(tabFolderBottomLeft, SWT.NONE);
+		createTabItem(tbtmSummaryView, "Summary view", tabFolderBottomLeft, eventBroker);
+		
 		// ---------------
 		// call stack
 		// ---------------
@@ -91,11 +99,11 @@ public class TracePart implements IMainPart, IPartListener
 		createTabItem(tbtmCallStack, "Call stack", tabFolderRight, eventBroker);
 		
 		// ---------------
-		// call stack
+		// mini map
 		// ---------------
 
-		CTabFolder tabFolderBottomRight = new CTabFolder(sashFormRight, SWT.BORDER);		
-		MiniMap tbtmMinimap = new MiniMap(tabFolderBottomRight, SWT.NONE);
+		CTabFolder tabFolderBottomRight = new CTabFolder(sashFormRight, SWT.BORDER);
+		tbtmMinimap = new MiniMap(tabFolderBottomRight, SWT.NONE);
 		createTabItem(tbtmMinimap, "Mini map", tabFolderBottomRight, eventBroker);
 
 		// ---------------
@@ -103,7 +111,7 @@ public class TracePart implements IMainPart, IPartListener
 		// ---------------
 		
 		sashFormLeft .setWeights(new int[] {800, 200});		
-		sashFormRight.setWeights(new int[] {700, 300});		
+		sashFormRight.setWeights(new int[] {800, 200});		
 		sashFormMain .setWeights(new int[] {800, 200});
 
 		// ---------------
@@ -190,6 +198,12 @@ public class TracePart implements IMainPart, IPartListener
 			// TODO: make sure all the tabs other than trace view has the stdc first
 			tbtmDepthView.setInput(stdc);
 			tbtmCallStack.setInput(stdc);
+			tbtmMinimap  .setInput(stdc);
+			
+			tbtmSummaryView.setInput(stdc);
+
+			// this has to be the last tab item to be set
+			// start reading the database and draw it
 			tbtmTraceView.setInput(stdc);
 			
 		} catch (Exception e) {

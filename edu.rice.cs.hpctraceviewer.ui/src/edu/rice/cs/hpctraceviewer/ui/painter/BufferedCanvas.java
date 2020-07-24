@@ -61,7 +61,7 @@ public abstract class BufferedCanvas extends Canvas
 			try {
 				// Stretch or shrink the image automatically
 				e.gc.drawImage(imageBuffer, 0, 0, rect.width, rect.height, 
-						0, 0, area.width, area.height);
+											0, 0, area.width, area.height);
 			}
 			catch (Exception ex)
 			{

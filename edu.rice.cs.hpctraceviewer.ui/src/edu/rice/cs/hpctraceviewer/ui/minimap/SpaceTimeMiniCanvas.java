@@ -101,6 +101,7 @@ public class SpaceTimeMiniCanvas extends SpaceTimeCanvas
 			}
 		} ;
 		addControlListener(controlAdapter );
+		OperationHistoryFactory.getOperationHistory().addOperationHistoryListener(this);
 	}
 
 
@@ -156,7 +157,7 @@ public class SpaceTimeMiniCanvas extends SpaceTimeCanvas
 			addMouseListener(this);
 			addMouseMoveListener(this);
 			addPaintListener(this);
-			
+			setVisible(true);
 			OperationHistoryFactory.getOperationHistory().addOperationHistoryListener(this);
 		}
 		Rectangle r = this.getClientArea();
@@ -195,6 +196,7 @@ public class SpaceTimeMiniCanvas extends SpaceTimeCanvas
 	}
 	
 	/**The painting of the miniMap.*/
+	@Override
 	public void paintControl(PaintEvent event)
 	{
 		if (this.stData == null)
@@ -259,6 +261,14 @@ public class SpaceTimeMiniCanvas extends SpaceTimeCanvas
 	}
 	
 	
+	@Override
+	public Point computeSize (int widthHint, int heightHint, boolean changed) {
+		Point initialSize = super.computeSize (widthHint, heightHint, changed);
+		initialSize.x = 100;
+		initialSize.y = 140;
+		return initialSize;
+	}
+	
     /**The painting of the miniMap.
      * this is the original paintControl with Rectangles and labels
      * 
@@ -315,6 +325,8 @@ public class SpaceTimeMiniCanvas extends SpaceTimeCanvas
 	{
 		if (this.stData == null)
 			return;
+
+		System.out.println("area: " + getClientArea() + ", vis: " + isVisible() + ", frame: " + frame);
 		final Display display = Display.getDefault();
 		display.asyncExec( new Runnable() {
 			
@@ -583,6 +595,7 @@ public class SpaceTimeMiniCanvas extends SpaceTimeCanvas
 		final IUndoableOperation operation = event.getOperation();
 
 		if (operation.hasContext(BufferRefreshOperation.context)) {
+
 			final Frame frame = stData.getAttributes().getFrame();
 			setBox(frame);
 		}
