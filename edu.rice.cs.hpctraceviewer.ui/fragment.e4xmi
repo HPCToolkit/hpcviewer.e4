@@ -53,7 +53,11 @@
           <parameters xmi:id="_ZfHCIM1NEeqj2OdGrGxV1w" elementId="edu.rice.cs.hpctraceviewer.ui.parameter.down" name="edu.rice.cs.hpctraceviewer.ui.commandparameter.go" value="down"/>
         </children>
         <children xsi:type="menu:ToolBarSeparator" xmi:id="_LChP4MdyEeq0rOsC4NG4eQ" elementId="edu.rice.cs.hpctraceviewer.ui.toolbarseparator.2"/>
-        <children xsi:type="menu:HandledToolItem" xmi:id="_agUaoMdyEeq0rOsC4NG4eQ" elementId="edu.rice.cs.hpctraceviewer.ui.handledtoolitem.undo" iconURI="platform:/plugin/edu.rice.cs.hpctraceviewer.ui/resources/undo.png" tooltip="Undo the last action" command="_nX628M1LEeqj2OdGrGxV1w"/>
+        <children xsi:type="menu:HandledToolItem" xmi:id="_agUaoMdyEeq0rOsC4NG4eQ" elementId="edu.rice.cs.hpctraceviewer.ui.handledtoolitem.undo" iconURI="platform:/plugin/edu.rice.cs.hpctraceviewer.ui/resources/undo.png" tooltip="Undo the last action" command="_nX628M1LEeqj2OdGrGxV1w">
+          <menu xmi:id="_93C48M1XEeqj2OdGrGxV1w" elementId="edu.rice.cs.hpctraceviewer.ui.menu.undo" label="Undo" mnemonics="U">
+            <children xsi:type="menu:DynamicMenuContribution" xmi:id="_ETq-IM1YEeqj2OdGrGxV1w" elementId="edu.rice.cs.hpctraceviewer.ui.dynamicmenucontribution.0" label="Undo operation" contributionURI="bundleclass://edu.rice.cs.hpctraceviewer.ui/edu.rice.cs.hpctraceviewer.ui.handlers.MenuOperationUndo"/>
+          </menu>
+        </children>
         <children xsi:type="menu:HandledToolItem" xmi:id="_lx7RwMdyEeq0rOsC4NG4eQ" elementId="edu.rice.cs.hpctraceviewer.ui.handledtoolitem.redo" iconURI="platform:/plugin/edu.rice.cs.hpctraceviewer.ui/resources/redo.png" tooltip="Redo the last undo" command="_pow4MM1LEeqj2OdGrGxV1w"/>
         <children xsi:type="menu:ToolBarSeparator" xmi:id="_1nxJEMdyEeq0rOsC4NG4eQ" elementId="edu.rice.cs.hpctraceviewer.ui.toolbarseparator.3"/>
         <children xsi:type="menu:HandledToolItem" xmi:id="_vO3GQMdyEeq0rOsC4NG4eQ" elementId="edu.rice.cs.hpctraceviewer.ui.handledtoolitem.save" iconURI="platform:/plugin/edu.rice.cs.hpctraceviewer.ui/resources/save.png" tooltip="Save the current view configuration to a file" command="_45DToMdyEeq0rOsC4NG4eQ"/>

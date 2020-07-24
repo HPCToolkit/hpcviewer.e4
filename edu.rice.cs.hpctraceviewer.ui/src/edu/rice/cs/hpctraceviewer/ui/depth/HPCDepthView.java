@@ -23,6 +23,7 @@ public class HPCDepthView extends AbstractBaseItem
 {
 	public HPCDepthView(CTabFolder parent, int style) {
 		super(parent, style);
+		setShowClose(false);
 	}
 
 	public static final String ID = "hpcdepthview.view";

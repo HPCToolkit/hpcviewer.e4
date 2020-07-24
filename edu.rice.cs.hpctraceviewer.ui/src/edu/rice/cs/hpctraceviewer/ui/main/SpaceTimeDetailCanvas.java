@@ -1,5 +1,11 @@
 package edu.rice.cs.hpctraceviewer.ui.main;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.text.DecimalFormat;
 import java.util.concurrent.TimeUnit;
 
@@ -12,6 +18,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.workbench.UIEvents;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
@@ -28,6 +35,7 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 
 
@@ -817,6 +825,108 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		this.updateButtonStates();
     }
     
+	
+    @Override
+	public void saveConfiguration() {
+		FileDialog saveDialog;
+		saveDialog = new FileDialog(getShell(), SWT.SAVE);
+		saveDialog.setText("Save View Configuration");
+		String fileName = "";
+		boolean validSaveFileFound = false;
+		while(!validSaveFileFound)
+		{
+			Frame toSave = stData.getAttributes().getFrame();
+			saveDialog.setFileName( (int)toSave.begTime      + "-"  + 
+									(int)toSave.endTime      + ", " +
+									(int)toSave.begProcess   + "-"  +
+									(int)toSave.endProcess   + ".bin");
+			fileName = saveDialog.open();
+			
+			if (fileName == null)
+				return;
+			else
+			{
+				if (!new File(fileName).exists())
+					validSaveFileFound = true;
+				else
+				{
+					//open message box confirming whether or not they want to overwrite saved file
+					//if they select yes, validSaveFileFound = true;
+					//if they select no, validSaveFileFound = false;
+
+					validSaveFileFound = MessageDialog.openConfirm(getShell(), "File exists", "This file path already exists.\nDo you want to overwrite this save file?");
+				}
+			}
+		}
+		
+		try
+		{
+			ObjectOutputStream out = null;
+			try
+			{
+				out = new ObjectOutputStream(new FileOutputStream(fileName));
+				out.writeObject(stData.getAttributes().getFrame());
+			}
+			finally
+			{
+				out.close();
+			}
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+
+	}
+
+	@Override
+	public void openConfiguration() {
+		FileDialog openDialog;
+		openDialog = new FileDialog(getShell(), SWT.OPEN);
+		openDialog.setText("Open View Configuration");
+		String fileName = "";
+		boolean validFrameFound = false;
+		while(!validFrameFound)
+		{
+			fileName = openDialog.open();
+			
+			if (fileName == null) return;
+			File binFile = new File(fileName);
+			
+			if (binFile.exists())
+			{
+				ObjectInputStream in = null;
+				try
+				{
+					in = new ObjectInputStream(new FileInputStream(fileName));
+					Frame current = (Frame)in.readObject();
+					notifyChanges("Frame", current);
+					validFrameFound = true;
+				}
+				catch (IOException e)
+				{
+					validFrameFound = false;
+					MessageDialog.openError(getShell(), "Error reading the file",
+							"Fail to read the file: " + fileName );
+				}
+				catch (ClassNotFoundException e)
+				{
+					validFrameFound = false;
+					MessageDialog.openError(getShell(), "Error reading the file", 
+							"File format is not recognized. Either the file is corrupted or it's an old format");
+				}
+				if (in != null) {
+					try {
+						in.close();
+					} catch (IOException e) {
+						MessageDialog.openWarning(getShell(), "Error closing the file", 
+								"Unable to close the file: " + fileName);
+					}
+				}
+			}
+		}
+	}
+    
     /***
      * set a new range for Y-axis
      * @param pBegin: the top position
@@ -1247,19 +1357,5 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	@Override
 	protected ColorTable getColorTable() {
 		return stData.getColorTable();
-	}
-
-
-	@Override
-	public void save() {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-	@Override
-	public void open() {
-		// TODO Auto-generated method stub
-		
 	}
 }

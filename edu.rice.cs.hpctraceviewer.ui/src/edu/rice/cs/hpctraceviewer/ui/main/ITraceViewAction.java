@@ -10,8 +10,8 @@ public interface ITraceViewAction {
 	public void processZoomIn();
 	public void processZoomOut();
 
-	public void save();
-	public void open();
+	public void saveConfiguration();
+	public void openConfiguration();
 	
 	public void goUp();
 	public void goDown();
