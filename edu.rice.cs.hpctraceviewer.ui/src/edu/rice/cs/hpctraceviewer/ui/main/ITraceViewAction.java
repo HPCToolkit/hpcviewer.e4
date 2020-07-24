@@ -18,4 +18,9 @@ public interface ITraceViewAction {
 	public void goEast();
 	public void goWest();
 	
+	public boolean canProcessZoomIn();
+	public boolean canProcessZoomOut();
+
+	public boolean canTimeZoomIn();
+	public boolean canTimeZoomOut();
 }

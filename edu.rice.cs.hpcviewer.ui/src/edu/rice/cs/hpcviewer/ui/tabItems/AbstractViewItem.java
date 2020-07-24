@@ -96,7 +96,6 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 		// TODO: this process takes time
 		root = createRoot(experiment);
 		contentViewer.setData(root);
-		System.out.println("create input " + getText());
 	}
 
 	

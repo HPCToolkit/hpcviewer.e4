@@ -4,6 +4,7 @@ package edu.rice.cs.hpctraceviewer.ui.main;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
@@ -45,7 +46,10 @@ public class HPCTraceView extends AbstractBaseItem
 	}
 	
 	@Override
-	public void createContent(IMainPart parentPart, IEclipseContext context, Composite parent) {
+	public void createContent(IMainPart parentPart, 
+							  IEclipseContext context,
+							  IEventBroker eventBroker,
+							  Composite parent) {
 		context.set(Constants.CONTEXT_TIMELINE, timelineService);
 		
 		/**************************************************************************
@@ -75,7 +79,7 @@ public class HPCTraceView extends AbstractBaseItem
 						hint(Y_AXIS_WIDTH, 500).applyTo(processCanvas);
 
 		
-		detailCanvas = new SpaceTimeDetailCanvas(context, plotArea); 
+		detailCanvas = new SpaceTimeDetailCanvas(context, eventBroker, plotArea); 
 
 		detailCanvas.setLabels(labelGroup);
 		

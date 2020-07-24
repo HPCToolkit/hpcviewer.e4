@@ -1,6 +1,7 @@
 package edu.rice.cs.hpctraceviewer.ui.depth;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
@@ -32,7 +33,10 @@ public class HPCDepthView extends AbstractBaseItem
 	DepthTimeCanvas depthCanvas;
 		
 	@Override
-	public void createContent(IMainPart parentPart, IEclipseContext context, Composite master) 
+	public void createContent(IMainPart parentPart, 
+							  IEclipseContext context,
+							  IEventBroker broker,
+							  Composite master) 
 	{		
 		final Composite plotArea = new Composite(master, SWT.NONE);
 		

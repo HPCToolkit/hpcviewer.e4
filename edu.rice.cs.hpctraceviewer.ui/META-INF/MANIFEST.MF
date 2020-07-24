@@ -16,7 +16,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.e4.core.di,
  org.eclipse.e4.ui.workbench,
  org.eclipse.e4.ui.di,
- org.eclipse.e4.ui.services
+ org.eclipse.e4.ui.services,
+ org.eclipse.e4.core.services
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: edu.rice.cs.hpctraceviewer.ui
 Import-Package: edu.rice.cs.hpctraceviewer.data,

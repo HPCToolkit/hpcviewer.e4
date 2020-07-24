@@ -10,6 +10,8 @@ import org.eclipse.core.commands.operations.OperationHistoryEvent;
 import org.eclipse.core.commands.operations.OperationHistoryFactory;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
@@ -63,6 +65,8 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	/**The min number of process units you can zoom in.*/
     private final static int MIN_PROC_DISP = 1;
 	
+	private final IEventBroker eventBroker;
+
 	/**The SpaceTimeData corresponding to this canvas.*/
 	protected SpaceTimeDataController stData;
 		
@@ -95,10 +99,11 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 
 	
     /**Creates a SpaceTimeDetailCanvas with the given parameters*/
-	public SpaceTimeDetailCanvas(IEclipseContext context, Composite _composite)
+	public SpaceTimeDetailCanvas(IEclipseContext context, IEventBroker eventBroker, Composite _composite)
 	{
 		super(_composite, SWT.NO_BACKGROUND | SWT.BORDER_DASH, RegionType.Rectangle );
 		
+		this.eventBroker = eventBroker;
 		this.context  = context;
 		oldAttributes = new ImageTraceAttributes();
 
@@ -129,8 +134,6 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		{
 			addCanvasListener();
 			OperationHistoryFactory.getOperationHistory().addOperationHistoryListener(this);
-			System.out.println("add operation listener at " + getClass().getName() + " " + this);
-			//addDisposeListener(this);
 		}
 
 		// reinitialize the selection rectangle
@@ -313,6 +316,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	 * The action that gets performed when the 'process zoom in' button is pressed - 
 	 * zooms in processwise with a scale of .4.
 	 **************************************************************************/
+	@Override
 	public void processZoomIn()
 	{
 		final double SCALE = .4;
@@ -343,11 +347,30 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 
 		notifyChanges("Zoom-in ranks", frame);
 	}
+	
+	
+	@Override
+	public boolean canProcessZoomIn() {
+		if (stData == null)
+			return false;
+		return getNumProcessesDisplayed() > MIN_PROC_DISP; 
+	}
+	
+	
+	@Override
+	public boolean canProcessZoomOut() {
+		if (stData == null)
+			return false;
+		ImageTraceAttributes attributes = stData.getAttributes();
+		return attributes.getProcessBegin()>0 || attributes.getProcessEnd()<stData.getTotalTraceCount(); 
+	}
+	
 
 	/**************************************************************************
 	 * The action that gets performed when the 'process zoom out' button is pressed - 
 	 * zooms out processwise with a scale of .625.
 	 **************************************************************************/
+	@Override
 	public void processZoomOut()
 	{
 		final double SCALE = .625;
@@ -385,6 +408,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	 * The action that gets performed when the 'time zoom in' button is pressed - 
 	 * zooms in timewise with a scale of .4.
 	 **************************************************************************/
+	@Override
 	public void timeZoomIn()
 	{
 		final double SCALE = .4;
@@ -410,10 +434,12 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		notifyChanges("Zoom-in time", frame);
 	}
 
+	
 	/**************************************************************************
 	 * The action that gets performed when the 'time zoom out' button is pressed - 
 	 * zooms out timewise with a scale of .625.
 	 **************************************************************************/
+	@Override
 	public void timeZoomOut()
 	{
 		final double SCALE = 0.65;
@@ -435,6 +461,23 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		
 		notifyChanges("Zoom-out time", frame);
 	}
+	
+	
+	@Override
+	public boolean canTimeZoomIn() {
+		if (stData == null)
+			return false;
+		return getNumTimeUnitDisplayed() > Constants.MIN_TIME_UNITS_DISP;
+	}
+	
+	@Override
+	public boolean canTimeZoomOut() {
+		if (stData == null)
+			return false;
+		final ImageTraceAttributes attributes = stData.getAttributes();
+		return attributes.getTimeBegin()>0 || attributes.getTimeEnd()<stData.getTimeWidth();
+	}
+
 	
 	/**************************************************************************
 	 * Gets the scale along the x-axis (pixels per time unit).
@@ -641,7 +684,8 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
     }
 
     private void updateButtonStates() {
-    	
+    	eventBroker.send(UIEvents.REQUEST_ENABLEMENT_UPDATE_TOPIC,
+    			UIEvents.ALL_ELEMENT_ID);	
     }
     
 	final static private double SCALE_MOVE = 0.20;

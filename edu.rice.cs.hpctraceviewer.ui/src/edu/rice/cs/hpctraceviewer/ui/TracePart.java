@@ -20,10 +20,12 @@ import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.local.LocalDBOpener;
 import edu.rice.cs.hpctraceviewer.ui.depth.HPCDepthView;
 import edu.rice.cs.hpctraceviewer.ui.main.HPCTraceView;
+import edu.rice.cs.hpctraceviewer.ui.main.ITraceViewAction;
 
 import javax.annotation.PreDestroy;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
@@ -36,6 +38,8 @@ public class TracePart implements IMainPart, IPartListener
 	public static final String ID = "edu.rice.cs.hpctraceviewer.ui.partdescriptor.trace";
 
 	private BaseExperiment experiment;
+	
+	private CTabFolder tabFolderTopLeft;
 	private HPCTraceView tbtmTraceView;
 	private HPCDepthView tbtmDepthView;
 	
@@ -51,6 +55,7 @@ public class TracePart implements IMainPart, IPartListener
 	public void postConstruct(Composite parent, 
 							  MWindow window, 
 							  EPartService partService, 
+							  IEventBroker eventBroker,
 							  @Named(IServiceConstants.ACTIVE_PART) MPart part) {
 		
 		SashForm sashFormMain = new SashForm(parent, SWT.NONE);
@@ -62,7 +67,7 @@ public class TracePart implements IMainPart, IPartListener
 		// main view
 		// ---------------
 		
-		CTabFolder tabFolderTopLeft = new CTabFolder(sashFormLeft, SWT.BORDER);
+		tabFolderTopLeft = new CTabFolder(sashFormLeft, SWT.BORDER);
 		tabFolderTopLeft.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
 		
 		tbtmTraceView = new HPCTraceView(tabFolderTopLeft, SWT.NONE);
@@ -73,7 +78,7 @@ public class TracePart implements IMainPart, IPartListener
 		fillLayout.type = SWT.VERTICAL;
 		mainArea.setLayout(fillLayout);
 		
-		tbtmTraceView.createContent(this, context, mainArea);
+		tbtmTraceView.createContent(this, context, eventBroker, mainArea);
 		tbtmTraceView.setControl(mainArea);
 		
 		// ---------------
@@ -91,7 +96,7 @@ public class TracePart implements IMainPart, IPartListener
 		depthfillLayout.type = SWT.VERTICAL;
 		depthArea.setLayout(depthfillLayout);
 
-		tbtmDepthView.createContent(this, context, depthArea);
+		tbtmDepthView.createContent(this, context, eventBroker, depthArea);
 		tbtmDepthView.setControl(depthArea);
 		
 		// ---------------
@@ -124,17 +129,24 @@ public class TracePart implements IMainPart, IPartListener
 	}
 	
 	
+	public ITraceViewAction getActions() {
+		return tbtmTraceView.getActions();
+	}
+	
+	
 	@PreDestroy
 	public void preDestroy() {
 	}
 	
 	
 	@Focus
-	public void onFocus() {}
+	public void onFocus() {
+		tabFolderTopLeft.setFocus();
+	}
 
+	
 	@Override
 	public BaseExperiment getExperiment() {
-
 		return experiment;
 	}
 
