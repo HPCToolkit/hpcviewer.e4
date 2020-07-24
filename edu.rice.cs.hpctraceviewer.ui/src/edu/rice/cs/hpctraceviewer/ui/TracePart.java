@@ -7,12 +7,9 @@ import javax.annotation.PostConstruct;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
-import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
-
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpcbase.ui.IMainPart;
 import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
@@ -22,6 +19,7 @@ import edu.rice.cs.hpctraceviewer.ui.callstack.HPCCallStackView;
 import edu.rice.cs.hpctraceviewer.ui.depth.HPCDepthView;
 import edu.rice.cs.hpctraceviewer.ui.main.HPCTraceView;
 import edu.rice.cs.hpctraceviewer.ui.main.ITraceViewAction;
+import edu.rice.cs.hpctraceviewer.ui.minimap.MiniMap;
 
 import javax.annotation.PreDestroy;
 
@@ -73,15 +71,7 @@ public class TracePart implements IMainPart, IPartListener
 		tabFolderTopLeft = new CTabFolder(sashFormLeft, SWT.BORDER);
 		
 		tbtmTraceView = new HPCTraceView(tabFolderTopLeft, SWT.NONE);
-		tbtmTraceView.setText("Trace view");
-		
-		Composite mainArea = new Composite(tabFolderTopLeft, SWT.NONE);
-		FillLayout fillLayout = new FillLayout();
-		fillLayout.type = SWT.VERTICAL;
-		mainArea.setLayout(fillLayout);
-		
-		tbtmTraceView.createContent(this, context, eventBroker, mainArea);
-		tbtmTraceView.setControl(mainArea);
+		createTabItem(tbtmTraceView, "Trace view", tabFolderTopLeft, eventBroker);
 		
 		// ---------------
 		// depth view
@@ -90,40 +80,31 @@ public class TracePart implements IMainPart, IPartListener
 		CTabFolder tabFolderBottomLeft = new CTabFolder(sashFormLeft, SWT.BORDER);
 		
 		tbtmDepthView = new HPCDepthView(tabFolderBottomLeft, SWT.NONE);
-		tbtmDepthView.setText("Depth view");
-
-		Composite depthArea = new Composite(tabFolderBottomLeft, SWT.NONE);
-		FillLayout depthfillLayout = new FillLayout();
-		depthfillLayout.type = SWT.VERTICAL;
-		depthArea.setLayout(depthfillLayout);
-
-		tbtmDepthView.createContent(this, context, eventBroker, depthArea);
-		tbtmDepthView.setControl(depthArea);
+		createTabItem(tbtmDepthView, "Depth view", tabFolderBottomLeft, eventBroker);
 		
 		// ---------------
 		// call stack
 		// ---------------
 
-		CTabFolder tabFolderRight = new CTabFolder(sashFormRight, SWT.BORDER);
-		
+		CTabFolder tabFolderRight = new CTabFolder(sashFormRight, SWT.BORDER);		
 		tbtmCallStack = new HPCCallStackView(tabFolderRight, SWT.NONE);
-		tbtmCallStack.setText("Call stack");
-
-		Composite callstackArea = new Composite(tabFolderRight, SWT.NONE);
-		FillLayout callstackLayout = new FillLayout();
-		callstackLayout.type = SWT.VERTICAL;
-		callstackArea.setLayout(callstackLayout);
+		createTabItem(tbtmCallStack, "Call stack", tabFolderRight, eventBroker);
 		
-		tbtmCallStack.createContent(this, context, eventBroker, callstackArea);
-		tbtmCallStack.setControl(callstackArea);
+		// ---------------
+		// call stack
+		// ---------------
+
+		CTabFolder tabFolderBottomRight = new CTabFolder(sashFormRight, SWT.BORDER);		
+		MiniMap tbtmMinimap = new MiniMap(tabFolderBottomRight, SWT.NONE);
+		createTabItem(tbtmMinimap, "Mini map", tabFolderBottomRight, eventBroker);
 
 		// ---------------
-		// sash 
+		// sash settings
 		// ---------------
 		
-		sashFormLeft.setWeights(new int[] {800, 200});		
-		//sashFormRight.setWeights(new int[] {800, 200});		
-		sashFormMain.setWeights(new int[] {800, 200});
+		sashFormLeft .setWeights(new int[] {800, 200});		
+		sashFormRight.setWeights(new int[] {700, 300});		
+		sashFormMain .setWeights(new int[] {800, 200});
 
 		// ---------------
 		// finalization
@@ -137,6 +118,17 @@ public class TracePart implements IMainPart, IPartListener
 		partService.addPartListener(this);
 	}
 	
+	private void createTabItem(AbstractBaseItem item, String title, CTabFolder parent, IEventBroker eventBroker) {
+		item.setText(title);
+
+		Composite tabArea = new Composite(parent, SWT.NONE);
+		FillLayout tabLayout = new FillLayout();
+		tabLayout.type = SWT.VERTICAL;
+		tabArea.setLayout(tabLayout);
+		
+		item.createContent(this, context, eventBroker, tabArea);
+		item.setControl(tabArea);
+	}
 	
 	public ITraceViewAction getActions() {
 		return tbtmTraceView.getActions();

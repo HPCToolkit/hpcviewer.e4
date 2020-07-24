@@ -16,6 +16,8 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -46,7 +48,7 @@ import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
  * A viewer for CallStackSamples.
  *************************************************/
 public class CallStackViewer extends TableViewer
-	implements IOperationHistoryListener
+	implements IOperationHistoryListener, DisposeListener
 {
 	private final TableViewerColumn viewerColumn;
 	
@@ -148,6 +150,8 @@ public class CallStackViewer extends TableViewer
 		ColumnViewerToolTipSupport.enableFor(csviewer, ToolTip.NO_RECREATE);
 		
 		TraceOperation.getOperationHistory().addOperationHistoryListener(this);
+		
+		getTable().addDisposeListener(this);
 	}
 	
 	/***
@@ -262,6 +266,12 @@ public class CallStackViewer extends TableViewer
 		notifyChange(_depth);
 	}
 	
+	
+	@Override
+	public void widgetDisposed(DisposeEvent e) {
+		TraceOperation.getOperationHistory().removeOperationHistoryListener(this);
+	}
+
 	
 	/*****
 	 * Select a specified depth in the call path

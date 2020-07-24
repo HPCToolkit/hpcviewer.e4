@@ -1,7 +1,5 @@
 package edu.rice.cs.hpctraceviewer.ui.callstack;
 
-import java.util.Map;
-
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.MessageDialog;
