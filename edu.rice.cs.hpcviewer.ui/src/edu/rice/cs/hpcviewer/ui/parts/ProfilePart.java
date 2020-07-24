@@ -88,10 +88,8 @@ public class ProfilePart implements IMainPart
 		SashForm sashForm = new SashForm(parent, SWT.VERTICAL);
 		
 		tabFolderTop = new CTabFolder(sashForm, SWT.BORDER);
-		tabFolderTop.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
 		
 		tabFolderBottom = new CTabFolder(sashForm, SWT.BORDER);
-		tabFolderBottom.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
 		
 		sashForm.setWeights(new int[] {1, 1});
 

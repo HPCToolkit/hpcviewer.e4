@@ -23,7 +23,6 @@ public class HPCDepthView extends AbstractBaseItem
 {
 	public HPCDepthView(CTabFolder parent, int style) {
 		super(parent, style);
-		setShowClose(false);
 	}
 
 	public static final String ID = "hpcdepthview.view";
@@ -57,8 +56,6 @@ public class HPCDepthView extends AbstractBaseItem
 		GridDataFactory.fillDefaults().grab(true, true).
 						hint(500, VIEW_HEIGHT_HINT).applyTo(depthCanvas);
 
-		depthCanvas.setVisible(true);		
-
 		/*************************************************************************
 		 * Master Composite
 		 *************************************************************************/
@@ -74,7 +71,6 @@ public class HPCDepthView extends AbstractBaseItem
 	@Override
 	public void setInput(Object input) {
 		depthCanvas.updateView((SpaceTimeDataController) input);
-		depthCanvas.setVisible(true);
 		depthCanvas.refresh();
 	}
 }

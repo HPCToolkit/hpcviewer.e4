@@ -68,7 +68,6 @@ public class TracePart implements IMainPart, IPartListener
 		// ---------------
 		
 		tabFolderTopLeft = new CTabFolder(sashFormLeft, SWT.BORDER);
-		tabFolderTopLeft.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
 		
 		tbtmTraceView = new HPCTraceView(tabFolderTopLeft, SWT.NONE);
 		tbtmTraceView.setText("Trace view");
@@ -85,8 +84,7 @@ public class TracePart implements IMainPart, IPartListener
 		// depth view
 		// ---------------
 		
-		CTabFolder tabFolderBottomLeft = new CTabFolder(sashFormLeft, SWT.BORDER | SWT.CLOSE);
-		tabFolderBottomLeft.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
+		CTabFolder tabFolderBottomLeft = new CTabFolder(sashFormLeft, SWT.BORDER);
 		
 		tbtmDepthView = new HPCDepthView(tabFolderBottomLeft, SWT.NONE);
 		tbtmDepthView.setText("Depth view");
