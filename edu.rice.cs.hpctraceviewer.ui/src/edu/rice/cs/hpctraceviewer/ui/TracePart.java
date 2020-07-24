@@ -18,6 +18,7 @@ import edu.rice.cs.hpcbase.ui.IMainPart;
 import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.local.LocalDBOpener;
+import edu.rice.cs.hpctraceviewer.ui.callstack.HPCCallStackView;
 import edu.rice.cs.hpctraceviewer.ui.depth.HPCDepthView;
 import edu.rice.cs.hpctraceviewer.ui.main.HPCTraceView;
 import edu.rice.cs.hpctraceviewer.ui.main.ITraceViewAction;
@@ -42,6 +43,7 @@ public class TracePart implements IMainPart, IPartListener
 	private CTabFolder tabFolderTopLeft;
 	private HPCTraceView tbtmTraceView;
 	private HPCDepthView tbtmDepthView;
+	private HPCCallStackView tbtmCallStack;
 	
 	private IEclipseContext context;
 	private AbstractDBOpener dbOpener;
@@ -58,9 +60,10 @@ public class TracePart implements IMainPart, IPartListener
 							  IEventBroker eventBroker,
 							  @Named(IServiceConstants.ACTIVE_PART) MPart part) {
 		
-		SashForm sashFormMain = new SashForm(parent, SWT.NONE);
-		SashForm sashFormLeft = new SashForm(sashFormMain, SWT.VERTICAL);
-		
+		SashForm sashFormMain  = new SashForm(parent, SWT.NONE);
+		SashForm sashFormLeft  = new SashForm(sashFormMain, SWT.VERTICAL);
+		SashForm sashFormRight = new SashForm(sashFormMain, SWT.VERTICAL);
+
 		context = window.getContext();
 		
 		// ---------------
@@ -100,18 +103,26 @@ public class TracePart implements IMainPart, IPartListener
 		// ---------------
 		// call stack
 		// ---------------
+
+		CTabFolder tabFolderRight = new CTabFolder(sashFormRight, SWT.BORDER);
 		
-		CTabFolder tabFolderRight = new CTabFolder(sashFormMain, SWT.BORDER);
-		tabFolderRight.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
-		
-		CTabItem tbtmCallStack = new CTabItem(tabFolderRight, SWT.NONE);
+		tbtmCallStack = new HPCCallStackView(tabFolderRight, SWT.NONE);
 		tbtmCallStack.setText("Call stack");
+
+		Composite callstackArea = new Composite(tabFolderRight, SWT.NONE);
+		FillLayout callstackLayout = new FillLayout();
+		callstackLayout.type = SWT.VERTICAL;
+		callstackArea.setLayout(callstackLayout);
 		
+		tbtmCallStack.createContent(this, context, eventBroker, callstackArea);
+		tbtmCallStack.setControl(callstackArea);
+
 		// ---------------
 		// sash 
 		// ---------------
 		
 		sashFormLeft.setWeights(new int[] {800, 200});		
+		//sashFormRight.setWeights(new int[] {800, 200});		
 		sashFormMain.setWeights(new int[] {800, 200});
 
 		// ---------------
@@ -184,8 +195,10 @@ public class TracePart implements IMainPart, IPartListener
 			dbOpener = new LocalDBOpener(context, experiment);
 			SpaceTimeDataController stdc = dbOpener.openDBAndCreateSTDC(null);
 
-			tbtmTraceView.setInput(stdc);
+			// TODO: make sure all the tabs other than trace view has the stdc first
 			tbtmDepthView.setInput(stdc);
+			tbtmCallStack.setInput(stdc);
+			tbtmTraceView.setInput(stdc);
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

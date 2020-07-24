@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration>
+<configuration debug="false">
 
     <appender name="STDOUT"
         class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{15} -
+            <pattern>hpcviewer --> %d{HH:mm:ss.SSS} [%thread] %-5level %logger{15} -
                 %msg%n
             </pattern>
         </encoder>
