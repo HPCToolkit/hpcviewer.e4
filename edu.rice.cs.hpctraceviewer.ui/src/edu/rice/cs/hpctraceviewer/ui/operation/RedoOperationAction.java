@@ -3,16 +3,14 @@ package edu.rice.cs.hpctraceviewer.ui.operation;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.operations.IUndoableOperation;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.e4.core.di.annotations.CanExecute;
+import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
 
 public class RedoOperationAction extends OperationHistoryAction {
-
-	public RedoOperationAction(ImageDescriptor img) {
-		super(img);
-	}
 
 
 	@Override
@@ -44,7 +42,7 @@ public class RedoOperationAction extends OperationHistoryAction {
 	}
 
 	
-	@Override
+	@Execute
 	protected void execute() {
 
 		IUndoableOperation[] undos = TraceOperation.getUndoHistory();
@@ -64,6 +62,12 @@ public class RedoOperationAction extends OperationHistoryAction {
 		doRedo();
 	}
 
+	@CanExecute
+	protected boolean canExecute() {
+		final IUndoableOperation []ops = getHistory(); 
+		return ops.length>0;
+	}
+	
 	/****
 	 * helper method to perform the default redo
 	 */

@@ -3,6 +3,8 @@ package edu.rice.cs.hpctraceviewer.ui.operation;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.operations.IUndoableOperation;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.e4.core.di.annotations.CanExecute;
+import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Control;
@@ -18,17 +20,13 @@ import org.eclipse.swt.widgets.Menu;
  ***********************************************************************/
 public class UndoOperationAction extends OperationHistoryAction {
 
-	
-	public UndoOperationAction(ImageDescriptor img) {
-		super(img);
-	}
 
 	@Override
 	protected IUndoableOperation[] getHistory() {
 		return TraceOperation.getUndoHistory();
 	}
 
-	@Override
+	@Execute
 	protected void execute() {
 		IUndoableOperation[] operations = getHistory();
 		final int len = operations.length;
@@ -49,6 +47,14 @@ public class UndoOperationAction extends OperationHistoryAction {
 			}
 		}
 		doUndo();
+	}
+	
+	
+	@CanExecute
+	protected boolean canExecute() {
+		final IUndoableOperation []ops = getHistory(); 
+		boolean status = (ops != null) && (ops.length>0);
+		return status;
 	}
 
 	/***

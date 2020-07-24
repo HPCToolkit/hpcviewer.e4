@@ -13,14 +13,19 @@ public interface ITraceViewAction {
 	public void save();
 	public void open();
 	
-	public void goNorth();
-	public void goSouth();
-	public void goEast();
-	public void goWest();
+	public void goUp();
+	public void goDown();
+	public void goRight();
+	public void goLeft();
 	
 	public boolean canProcessZoomIn();
 	public boolean canProcessZoomOut();
 
 	public boolean canTimeZoomIn();
 	public boolean canTimeZoomOut();
+	
+    public boolean canGoRight();    
+    public boolean canGoLeft();
+    public boolean canGoUp();
+    public boolean canGoDown();
 }

@@ -14,6 +14,8 @@
     </elements>
     <elements xsi:type="commands:Command" xmi:id="_45DToMdyEeq0rOsC4NG4eQ" elementId="edu.rice.cs.hpctraceviewer.ui.command.save" commandName="Save configuration"/>
     <elements xsi:type="commands:Command" xmi:id="_H18JsMdzEeq0rOsC4NG4eQ" elementId="edu.rice.cs.hpctraceviewer.ui.command.loadConfiguration" commandName="Load configuration"/>
+    <elements xsi:type="commands:Command" xmi:id="_nX628M1LEeqj2OdGrGxV1w" elementId="edu.rice.cs.hpctraceviewer.ui.command.undo" commandName="Undo operation"/>
+    <elements xsi:type="commands:Command" xmi:id="_pow4MM1LEeqj2OdGrGxV1w" elementId="edu.rice.cs.hpctraceviewer.ui.command.redo" commandName="Redo operation"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_kGpPEM0tEeqj2OdGrGxV1w" featurename="handlers" parentElementId="xpath:/">
     <elements xsi:type="commands:Handler" xmi:id="_opJJ4M0tEeqj2OdGrGxV1w" elementId="edu.rice.cs.hpctraceviewer.ui.handler.home" contributionURI="bundleclass://edu.rice.cs.hpctraceviewer.ui/edu.rice.cs.hpctraceviewer.ui.handlers.Home" command="_gVae0Mb7EeqOfJ3pUwSuCg"/>
@@ -25,6 +27,8 @@
     <elements xsi:type="commands:Handler" xmi:id="_C7YuoM0uEeqj2OdGrGxV1w" elementId="edu.rice.cs.hpctraceviewer.ui.handler.undoRedo" contributionURI="bundleclass://edu.rice.cs.hpctraceviewer.ui/edu.rice.cs.hpctraceviewer.ui.handlers.UndoRedo" command="_NwaZgMdyEeq0rOsC4NG4eQ"/>
     <elements xsi:type="commands:Handler" xmi:id="_GokLAM0uEeqj2OdGrGxV1w" elementId="edu.rice.cs.hpctraceviewer.ui.handler.saveConfig" contributionURI="bundleclass://edu.rice.cs.hpctraceviewer.ui/edu.rice.cs.hpctraceviewer.ui.handlers.SaveConfiguration" command="_45DToMdyEeq0rOsC4NG4eQ"/>
     <elements xsi:type="commands:Handler" xmi:id="_Jy1uoM0uEeqj2OdGrGxV1w" elementId="edu.rice.cs.hpctraceviewer.ui.handler.loadConfig" contributionURI="bundleclass://edu.rice.cs.hpctraceviewer.ui/edu.rice.cs.hpctraceviewer.ui.handlers.LoadConfiguration" command="_H18JsMdzEeq0rOsC4NG4eQ"/>
+    <elements xsi:type="commands:Handler" xmi:id="_sy4DwM1LEeqj2OdGrGxV1w" elementId="edu.rice.cs.hpctraceviewer.ui.handler.undo" contributionURI="bundleclass://edu.rice.cs.hpctraceviewer.ui/edu.rice.cs.hpctraceviewer.ui.operation.UndoOperationAction" command="_nX628M1LEeqj2OdGrGxV1w"/>
+    <elements xsi:type="commands:Handler" xmi:id="_xe68IM1LEeqj2OdGrGxV1w" elementId="edu.rice.cs.hpctraceviewer.ui.handler.redo" contributionURI="bundleclass://edu.rice.cs.hpctraceviewer.ui/edu.rice.cs.hpctraceviewer.ui.operation.RedoOperationAction" command="_pow4MM1LEeqj2OdGrGxV1w"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_JSls4MxgEeqnLcCrkreYSw" featurename="descriptors" parentElementId="xpath:/">
     <elements xsi:type="basic:PartDescriptor" xmi:id="_TGczoMxgEeqnLcCrkreYSw" elementId="edu.rice.cs.hpctraceviewer.ui.partdescriptor.trace" label="Trace data" iconURI="platform:/plugin/edu.rice.cs.hpctraceviewer.ui/resources/hpctraceviewer016.png" allowMultiple="true" contributionURI="bundleclass://edu.rice.cs.hpctraceviewer.ui/edu.rice.cs.hpctraceviewer.ui.TracePart">
@@ -43,18 +47,14 @@
           <parameters xmi:id="_phvn4MdxEeq0rOsC4NG4eQ" elementId="edu.rice.cs.hpctraceviewer.ui.parameter.goRight" name="edu.rice.cs.hpctraceviewer.ui.commandparameter.go" value="right"/>
         </children>
         <children xsi:type="menu:HandledToolItem" xmi:id="_wJszUMdxEeq0rOsC4NG4eQ" elementId="edu.rice.cs.hpctraceviewer.ui.handledtoolitem.goUp" iconURI="platform:/plugin/edu.rice.cs.hpctraceviewer.ui/resources/go-north.png" tooltip="Scroll up one step along the process axis" command="_AOZbcMdxEeq0rOsC4NG4eQ">
-          <parameters xmi:id="_3WDsUMdxEeq0rOsC4NG4eQ" elementId="edu.rice.cs.hpctraceviewer.ui.parameter.goUp" name="edu.rice.cs.hpctraceviewer.ui.commandparameter.go" value="up"/>
+          <parameters xmi:id="_d5_5EM1NEeqj2OdGrGxV1w" elementId="edu.rice.cs.hpctraceviewer.ui.parameter.goUp" name="edu.rice.cs.hpctraceviewer.ui.commandparameter.go" value="up"/>
         </children>
         <children xsi:type="menu:HandledToolItem" xmi:id="_7WCv8MdxEeq0rOsC4NG4eQ" elementId="edu.rice.cs.hpctraceviewer.ui.handledtoolitem.goDown" iconURI="platform:/plugin/edu.rice.cs.hpctraceviewer.ui/resources/go-south.png" tooltip="Scroll down one step along the process axis" command="_AOZbcMdxEeq0rOsC4NG4eQ">
-          <parameters xmi:id="_AUJosMdyEeq0rOsC4NG4eQ" elementId="edu.rice.cs.hpctraceviewer.ui.parameter.goDown" name="edu.rice.cs.hpctraceviewer.ui.commandparameter.go" value="down"/>
+          <parameters xmi:id="_ZfHCIM1NEeqj2OdGrGxV1w" elementId="edu.rice.cs.hpctraceviewer.ui.parameter.down" name="edu.rice.cs.hpctraceviewer.ui.commandparameter.go" value="down"/>
         </children>
         <children xsi:type="menu:ToolBarSeparator" xmi:id="_LChP4MdyEeq0rOsC4NG4eQ" elementId="edu.rice.cs.hpctraceviewer.ui.toolbarseparator.2"/>
-        <children xsi:type="menu:HandledToolItem" xmi:id="_agUaoMdyEeq0rOsC4NG4eQ" elementId="edu.rice.cs.hpctraceviewer.ui.handledtoolitem.undo" iconURI="platform:/plugin/edu.rice.cs.hpctraceviewer.ui/resources/undo.png" tooltip="Undo the last action" command="_NwaZgMdyEeq0rOsC4NG4eQ">
-          <parameters xmi:id="_euoOIMdyEeq0rOsC4NG4eQ" elementId="edu.rice.cs.hpctraceviewer.ui.parameter.undo" name="edu.rice.cs.hpctraceviewer.ui.commandparameter.undoRedo" value="undo"/>
-        </children>
-        <children xsi:type="menu:HandledToolItem" xmi:id="_lx7RwMdyEeq0rOsC4NG4eQ" elementId="edu.rice.cs.hpctraceviewer.ui.handledtoolitem.redo" iconURI="platform:/plugin/edu.rice.cs.hpctraceviewer.ui/resources/redo.png" tooltip="Redo the last undo" command="_NwaZgMdyEeq0rOsC4NG4eQ">
-          <parameters xmi:id="_rbIV8MdyEeq0rOsC4NG4eQ" elementId="edu.rice.cs.hpctraceviewer.ui.parameter.redo" name="edu.rice.cs.hpctraceviewer.ui.commandparameter.undoRedo" value="redo"/>
-        </children>
+        <children xsi:type="menu:HandledToolItem" xmi:id="_agUaoMdyEeq0rOsC4NG4eQ" elementId="edu.rice.cs.hpctraceviewer.ui.handledtoolitem.undo" iconURI="platform:/plugin/edu.rice.cs.hpctraceviewer.ui/resources/undo.png" tooltip="Undo the last action" command="_nX628M1LEeqj2OdGrGxV1w"/>
+        <children xsi:type="menu:HandledToolItem" xmi:id="_lx7RwMdyEeq0rOsC4NG4eQ" elementId="edu.rice.cs.hpctraceviewer.ui.handledtoolitem.redo" iconURI="platform:/plugin/edu.rice.cs.hpctraceviewer.ui/resources/redo.png" tooltip="Redo the last undo" command="_pow4MM1LEeqj2OdGrGxV1w"/>
         <children xsi:type="menu:ToolBarSeparator" xmi:id="_1nxJEMdyEeq0rOsC4NG4eQ" elementId="edu.rice.cs.hpctraceviewer.ui.toolbarseparator.3"/>
         <children xsi:type="menu:HandledToolItem" xmi:id="_vO3GQMdyEeq0rOsC4NG4eQ" elementId="edu.rice.cs.hpctraceviewer.ui.handledtoolitem.save" iconURI="platform:/plugin/edu.rice.cs.hpctraceviewer.ui/resources/save.png" tooltip="Save the current view configuration to a file" command="_45DToMdyEeq0rOsC4NG4eQ"/>
         <children xsi:type="menu:HandledToolItem" xmi:id="_Si4NgMdzEeq0rOsC4NG4eQ" elementId="edu.rice.cs.hpctraceviewer.ui.handledtoolitem.loadConfiguration" iconURI="platform:/plugin/edu.rice.cs.hpctraceviewer.ui/resources/open.png" tooltip="Load a saved view configuration" command="_H18JsMdzEeq0rOsC4NG4eQ"/>

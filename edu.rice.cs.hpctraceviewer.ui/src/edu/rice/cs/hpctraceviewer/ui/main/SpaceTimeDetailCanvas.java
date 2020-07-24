@@ -170,16 +170,16 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 				switch (e.keyCode) {
 				
 				case SWT.ARROW_DOWN:
-					goSouth();
+					goDown();
 					break;
 				case SWT.ARROW_UP:
-					goNorth();
+					goUp();
 					break;
 				case SWT.ARROW_LEFT:
-					goEast();
+					goRight();
 					break;
 				case SWT.ARROW_RIGHT:
-					goWest();
+					goLeft();
 					break;				
 				}
 			}			
@@ -667,22 +667,29 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
     }
     
   
-    private boolean canGoEast() {
+    @Override
+    public boolean canGoRight() {
     	return (stData.getAttributes().getTimeBegin() > 0);
     }
+
     
-    private boolean canGoWest() {
+    @Override
+    public boolean canGoLeft() {
     	return (stData.getAttributes().getTimeEnd()< this.stData.getTimeWidth());
     }
+
     
-    private boolean canGoNorth() {
+    @Override
+    public boolean canGoUp() {
     	return (stData.getAttributes().getProcessBegin()>0);
     }
     
-    private boolean canGoSouth() {
+    @Override
+    public boolean canGoDown() {
     	return (stData.getAttributes().getProcessEnd()<this.stData.getTotalTraceCount());
     }
 
+    
     private void updateButtonStates() {
     	eventBroker.send(UIEvents.REQUEST_ENABLEMENT_UPDATE_TOPIC,
     			UIEvents.ALL_ELEMENT_ID);	
@@ -693,9 +700,10 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	/***
 	 * go to the left one step
 	 */
-    public void goEast()
+    @Override
+    public void goRight()
     {
-    	if (!canGoEast())
+    	if (!canGoRight())
     		return;
     	
     	final ImageTraceAttributes attributes = stData.getAttributes();
@@ -720,9 +728,10 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
     /***
      * go to the right one step
      */
-    public void goWest()
+    @Override
+    public void goLeft()
     {
-    	if (!canGoWest())
+    	if (!canGoLeft())
     		return;
     	
     	final ImageTraceAttributes attributes = stData.getAttributes();
@@ -761,8 +770,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
     /*******
      * go north one step
      */
-    public void goNorth() {
-    	if (!canGoNorth())
+    @Override
+    public void goUp() {
+    	if (!canGoUp())
     		return;
     	
     	final ImageTraceAttributes attributes = stData.getAttributes();
@@ -785,8 +795,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
     /*******
      * go south one step
      */
-    public void goSouth() {
-    	if (!canGoSouth())
+    @Override
+    public void goDown() {
+    	if (!canGoDown())
     		return;
     	
     	final ImageTraceAttributes attributes = stData.getAttributes();

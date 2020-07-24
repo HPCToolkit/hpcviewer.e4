@@ -22,9 +22,7 @@ public abstract class OperationHistoryAction extends Action
 	private Menu menu;
 	private IUndoableOperation []operations;
 	
-	public OperationHistoryAction(ImageDescriptor img) {
-		super(null, Action.AS_DROP_DOWN_MENU);
-		setImageDescriptor(img);
+	public OperationHistoryAction() {
 		setMenuCreator(this);
 		TraceOperation.getOperationHistory().addOperationHistoryListener(this);
 	}
