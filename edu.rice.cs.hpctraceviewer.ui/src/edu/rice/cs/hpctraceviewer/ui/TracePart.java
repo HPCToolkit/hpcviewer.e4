@@ -20,6 +20,7 @@ import edu.rice.cs.hpctraceviewer.ui.depth.HPCDepthView;
 import edu.rice.cs.hpctraceviewer.ui.main.HPCTraceView;
 import edu.rice.cs.hpctraceviewer.ui.main.ITraceViewAction;
 import edu.rice.cs.hpctraceviewer.ui.minimap.MiniMap;
+import edu.rice.cs.hpctraceviewer.ui.statistic.HPCStatView;
 import edu.rice.cs.hpctraceviewer.ui.summary.HPCSummaryView;
 
 import javax.annotation.PreDestroy;
@@ -45,8 +46,9 @@ public class TracePart implements IMainPart, IPartListener
 	private HPCDepthView     tbtmDepthView;
 	private HPCCallStackView tbtmCallStack;
 	private HPCSummaryView   tbtmSummaryView;
-	private MiniMap tbtmMinimap;
 	
+	private MiniMap 	tbtmMinimap;
+	private HPCStatView tbtmStatView;
 	
 	private IEclipseContext context;
 	private AbstractDBOpener dbOpener;
@@ -95,8 +97,12 @@ public class TracePart implements IMainPart, IPartListener
 		// ---------------
 
 		CTabFolder tabFolderRight = new CTabFolder(sashFormRight, SWT.BORDER);		
+
 		tbtmCallStack = new HPCCallStackView(tabFolderRight, SWT.NONE);
 		createTabItem(tbtmCallStack, "Call stack", tabFolderRight, eventBroker);
+
+		tbtmStatView = new HPCStatView(tabFolderRight, SWT.NONE);
+		createTabItem(tbtmStatView, "Statistics", tabFolderRight, eventBroker);
 		
 		// ---------------
 		// mini map
@@ -126,6 +132,7 @@ public class TracePart implements IMainPart, IPartListener
 		partService.addPartListener(this);
 	}
 	
+	
 	private void createTabItem(AbstractBaseItem item, String title, CTabFolder parent, IEventBroker eventBroker) {
 		item.setText(title);
 
@@ -137,6 +144,7 @@ public class TracePart implements IMainPart, IPartListener
 		item.createContent(this, context, eventBroker, tabArea);
 		item.setControl(tabArea);
 	}
+	
 	
 	public ITraceViewAction getActions() {
 		return tbtmTraceView.getActions();
@@ -199,7 +207,10 @@ public class TracePart implements IMainPart, IPartListener
 			tbtmDepthView.setInput(stdc);
 			tbtmCallStack.setInput(stdc);
 			tbtmMinimap  .setInput(stdc);
+			tbtmStatView .setInput(stdc);
 			
+			// TODO: summary view has to be set AFTER the stat view 
+			//       since the stat view requires info from summary view 
 			tbtmSummaryView.setInput(stdc);
 
 			// this has to be the last tab item to be set

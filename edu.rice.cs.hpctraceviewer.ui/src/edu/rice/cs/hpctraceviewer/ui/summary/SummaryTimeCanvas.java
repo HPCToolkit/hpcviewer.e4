@@ -8,6 +8,7 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.operations.IOperationHistoryListener;
 import org.eclipse.core.commands.operations.OperationHistoryEvent;
 import org.eclipse.core.commands.operations.OperationHistoryFactory;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.graphics.Color;
@@ -24,6 +25,7 @@ import edu.rice.cs.hpctraceviewer.ui.operation.BufferRefreshOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.TraceOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.ZoomOperation;
 import edu.rice.cs.hpctraceviewer.ui.painter.AbstractTimeCanvas;
+import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.Frame;
 import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
@@ -40,6 +42,7 @@ import edu.rice.cs.hpctraceviewer.data.util.Constants;
 public class SummaryTimeCanvas extends AbstractTimeCanvas 
 implements IOperationHistoryListener
 {	
+	private final IEventBroker eventBroker;
 	private SpaceTimeDataController dataTraces = null;
 	private TreeMap<Integer /* pixel*/, Integer /* percent*/> mapPixelToPercent;
 	private int totPixels;
@@ -50,10 +53,11 @@ implements IOperationHistoryListener
 	 * 
 	 * @param composite
 	 **********************************/
-	public SummaryTimeCanvas(Composite composite)
+	public SummaryTimeCanvas(Composite composite, IEventBroker eventBroker)
     {
 		super(composite, SWT.NO_BACKGROUND);
 		
+		this.eventBroker = eventBroker;
 		OperationHistoryFactory.getOperationHistory().addOperationHistoryListener(this);
 	}
 	
@@ -261,6 +265,8 @@ implements IOperationHistoryListener
 			PaletteData palette,
 			int totalPixels) {
 		
+		SummaryData data = new SummaryData(palette, mapPixelToPercent, getColorTable(), totalPixels);
+		eventBroker.post(IConstants.TOPIC_STATISTICS, data);
 	}
 	
 	//---------------------------------------------------------------------------------------

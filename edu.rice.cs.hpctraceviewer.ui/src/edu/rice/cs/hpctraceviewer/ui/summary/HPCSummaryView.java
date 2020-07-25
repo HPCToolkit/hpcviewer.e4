@@ -54,7 +54,7 @@ public class HPCSummaryView extends AbstractBaseItem
 		 * Summary View Canvas
 		 *************************************************************************/
 		
-		summaryCanvas = new SummaryTimeCanvas(plotArea);
+		summaryCanvas = new SummaryTimeCanvas(plotArea, broker);
 		summaryCanvas.setLayout(new GridLayout());
 		summaryCanvas.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		summaryCanvas.setVisible(false);
@@ -70,20 +70,9 @@ public class HPCSummaryView extends AbstractBaseItem
 		 * Add listeners
 		 *************************************************************************/
 		
-		//setListener();
-		
 		setToolTipText("The view to show for the whole time range dislayed, the proportion of each subroutine in a certain time.");
 	}
 	
-	private void setListener() {
-		
-		// if data is updated
-		summaryCanvas.redraw();
-
-		// if data is requested:
-		summaryCanvas.broadcast();
-	}
-
 
 	@Override
 	public void setInput(Object input) {
