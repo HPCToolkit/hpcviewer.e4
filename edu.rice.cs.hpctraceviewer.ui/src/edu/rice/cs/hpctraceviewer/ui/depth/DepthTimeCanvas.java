@@ -171,6 +171,16 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
     
 	public double getScalePixelsPerTime()
 	{
+		if (bound == null) {
+			final Display display = Display.getDefault();
+			display.syncExec(new Runnable() {
+				
+				@Override
+				public void run() {
+					bound = getClientArea();
+				}
+			});
+		}
 		final int viewWidth = bound.width;
 
 		return (double)viewWidth / (double)getNumTimeDisplayed();
