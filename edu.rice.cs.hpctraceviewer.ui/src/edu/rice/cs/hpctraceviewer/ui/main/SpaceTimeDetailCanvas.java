@@ -184,10 +184,10 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 					goUp();
 					break;
 				case SWT.ARROW_LEFT:
-					goRight();
+					goLeft();
 					break;
 				case SWT.ARROW_RIGHT:
-					goLeft();
+					goRight();
 					break;				
 				}
 			}			
@@ -676,14 +676,14 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
     
   
     @Override
-    public boolean canGoRight() {
+    public boolean canGoLeft() {
     	if (stData == null) return false;
     	return (stData.getAttributes().getTimeBegin() > 0);
     }
 
     
     @Override
-    public boolean canGoLeft() {
+    public boolean canGoRight() {
     	if (stData == null) return false;
     	return (stData.getAttributes().getTimeEnd()< this.stData.getTimeWidth());
     }
@@ -713,9 +713,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	 * go to the left one step
 	 */
     @Override
-    public void goRight()
+    public void goLeft()
     {
-    	if (!canGoRight())
+    	if (!canGoLeft())
     		return;
     	
     	final ImageTraceAttributes attributes = stData.getAttributes();
@@ -741,9 +741,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
      * go to the right one step
      */
     @Override
-    public void goLeft()
+    public void goRight()
     {
-    	if (!canGoLeft())
+    	if (!canGoRight())
     		return;
     	
     	final ImageTraceAttributes attributes = stData.getAttributes();

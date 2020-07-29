@@ -115,7 +115,7 @@ public class TracePart implements ITracePart, IPartListener
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				System.out.println("select: " + e.item);
+
 				if (e.item == tbtmStatView) {
 					int numItems = tbtmStatView.getItemCount();
 					if (numItems < 1) {
