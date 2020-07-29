@@ -24,6 +24,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
@@ -31,9 +32,9 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
 import edu.rice.cs.hpc.data.util.string.StringUtil;
-import edu.rice.cs.hpcbase.ui.IMainPart;
 import edu.rice.cs.hpctraceviewer.data.ColorTable;
 import edu.rice.cs.hpctraceviewer.ui.AbstractBaseItem;
+import edu.rice.cs.hpctraceviewer.ui.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.summary.SummaryData;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 
@@ -42,7 +43,7 @@ import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
  * A view to show the statistics of the current region selection
  *
  *************************************************************************/
-public class HPCStatView extends AbstractBaseItem implements EventHandler 
+public class HPCStatView extends AbstractBaseItem implements EventHandler, Listener
 {
 	public static final String ID = "hpcstat.view";
 		
@@ -63,7 +64,7 @@ public class HPCStatView extends AbstractBaseItem implements EventHandler
 
 
 	@Override
-	public void createContent(IMainPart parentPart, IEclipseContext context, IEventBroker broker,
+	public void createContent(ITracePart parentPart, IEclipseContext context, IEventBroker broker,
 			Composite parent) {
 		
 		final Composite tableComposite = new Composite(parent, SWT.NONE);
@@ -109,6 +110,7 @@ public class HPCStatView extends AbstractBaseItem implements EventHandler
 		ColumnViewerToolTipSupport.enableFor(tableViewer, ToolTip.NO_RECREATE);
 		
 		this.broker = broker;
+		addListener(SWT.Show, this);
 	}
 	
 	
@@ -168,6 +170,37 @@ public class HPCStatView extends AbstractBaseItem implements EventHandler
 		}
 		tableViewer.setInput(listItems);
 		tableViewer.refresh();
+	}
+	
+
+	@Override
+	public void setInput(Object input) {
+		broker.subscribe(IConstants.TOPIC_STATISTICS, this);		
+	}	
+
+
+	@Override
+	public void handleEvent(Event event) {
+		if (event.getTopic().equals(IConstants.TOPIC_STATISTICS)) {
+			Object obj = event.getProperty(IEventBroker.DATA);
+			if (obj == null || (!(obj instanceof SummaryData)))
+				return;
+			
+			SummaryData data = (SummaryData) obj;
+			refresh(data.palette, data.mapPixelToCount, data.colorTable, data.totalPixels);
+		}
+	}
+
+
+	/**
+	 * TODO: hack version to get the current number of items.
+	 * Used by the parent to check if the table has been initialized or not.
+	 * 
+	 * @return number of items
+	 */
+	public int getItemCount() {
+		if (tableViewer == null) return 0;
+		return tableViewer.getTable().getItemCount();
 	}
 
 	/*************************************************************
@@ -240,25 +273,6 @@ public class HPCStatView extends AbstractBaseItem implements EventHandler
 		}
 	}
 
-
-	@Override
-	public void setInput(Object input) {
-		broker.subscribe(IConstants.TOPIC_STATISTICS, this);		
-	}	
-
-
-	@Override
-	public void handleEvent(Event event) {
-		if (event.getTopic().equals(IConstants.TOPIC_STATISTICS)) {
-			Object obj = event.getProperty(IEventBroker.DATA);
-			if (obj == null || (!(obj instanceof SummaryData)))
-				return;
-			
-			SummaryData data = (SummaryData) obj;
-			refresh(data.palette, data.mapPixelToCount, data.colorTable, data.totalPixels);
-		}
-	}
-
 	
 	private class ColumnStatLabelProvider extends ColumnLabelProvider
 	{
@@ -270,6 +284,15 @@ public class HPCStatView extends AbstractBaseItem implements EventHandler
 			
 			StatisticItem item = (StatisticItem) element;
 			return String.format("%.2f %%", item.percent);
+		}
+	}
+
+
+	@Override
+	public void handleEvent(org.eclipse.swt.widgets.Event event) {
+		System.out.println(getClass().getName() + " show-idx: "  + event.index + ", show-w: " + event.widget);
+		if (tableViewer == null) return;
+		if (tableViewer.getTable().getItemCount() < 1) {
 		}
 	}
 }

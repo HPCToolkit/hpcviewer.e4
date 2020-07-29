@@ -8,10 +8,11 @@ import javax.annotation.PostConstruct;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
-import edu.rice.cs.hpcbase.ui.IMainPart;
 import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.local.LocalDBOpener;
@@ -34,13 +35,14 @@ import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.IPartListener;
 
-public class TracePart implements IMainPart, IPartListener
+public class TracePart implements ITracePart, IPartListener
 {
 	public static final String ID = "edu.rice.cs.hpctraceviewer.ui.partdescriptor.trace";
 
 	private BaseExperiment experiment;
 	
 	private CTabFolder tabFolderTopLeft;
+	private CTabFolder tabFolderBottomLeft;
 	
 	private HPCTraceView     tbtmTraceView;
 	private HPCDepthView     tbtmDepthView;
@@ -84,7 +86,7 @@ public class TracePart implements IMainPart, IPartListener
 		// depth view
 		// ---------------
 		
-		CTabFolder tabFolderBottomLeft = new CTabFolder(sashFormLeft, SWT.BORDER);
+		tabFolderBottomLeft = new CTabFolder(sashFormLeft, SWT.BORDER);
 		
 		tbtmDepthView = new HPCDepthView(tabFolderBottomLeft, SWT.NONE);
 		createTabItem(tbtmDepthView, "Depth view", tabFolderBottomLeft, eventBroker);
@@ -103,6 +105,23 @@ public class TracePart implements IMainPart, IPartListener
 
 		tbtmStatView = new HPCStatView(tabFolderRight, SWT.NONE);
 		createTabItem(tbtmStatView, "Statistics", tabFolderRight, eventBroker);
+		
+		tabFolderRight.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				System.out.println("select: " + e.item);
+				if (e.item == tbtmStatView) {
+					int numItems = tbtmStatView.getItemCount();
+					if (numItems < 1) {
+						activateStatisticItem();
+					}
+				}
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {}
+		});
 		
 		// ---------------
 		// mini map
@@ -221,5 +240,10 @@ public class TracePart implements IMainPart, IPartListener
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public void activateStatisticItem() {
+		tabFolderBottomLeft.setSelection(tbtmSummaryView);
 	}
 }

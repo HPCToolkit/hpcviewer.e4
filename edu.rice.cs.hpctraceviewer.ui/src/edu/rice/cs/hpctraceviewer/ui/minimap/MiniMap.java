@@ -11,9 +11,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
-import edu.rice.cs.hpcbase.ui.IMainPart;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.ui.AbstractBaseItem;
+import edu.rice.cs.hpctraceviewer.ui.ITracePart;
 
 public class MiniMap extends AbstractBaseItem 
 {
@@ -24,7 +24,7 @@ public class MiniMap extends AbstractBaseItem
 	}
 
 	@Override
-	public void createContent(IMainPart parentPart, IEclipseContext context, IEventBroker broker,
+	public void createContent(ITracePart parentPart, IEclipseContext context, IEventBroker broker,
 			Composite master) {
 		
 		final Composite miniArea = new Composite(master, SWT.BORDER_DASH);

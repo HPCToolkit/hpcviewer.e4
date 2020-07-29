@@ -20,11 +20,11 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Spinner;
 
-import edu.rice.cs.hpcbase.ui.IMainPart;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
 import edu.rice.cs.hpctraceviewer.ui.AbstractBaseItem;
+import edu.rice.cs.hpctraceviewer.ui.ITracePart;
 
 
 /**A view for displaying the call path viewer and minimap.*/
@@ -45,7 +45,7 @@ public class HPCCallStackView extends AbstractBaseItem
 	}
 
 	@Override
-	public void createContent(IMainPart parentPart, 
+	public void createContent(ITracePart parentPart, 
 							  IEclipseContext context, 
 							  IEventBroker broker,
 							  Composite master) {

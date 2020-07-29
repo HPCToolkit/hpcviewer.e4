@@ -9,9 +9,9 @@ import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 
-import edu.rice.cs.hpcbase.ui.IMainPart;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.ui.AbstractBaseItem;
+import edu.rice.cs.hpctraceviewer.ui.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.main.HPCTraceView;
 
 /*****************************************************
@@ -35,7 +35,7 @@ public class HPCDepthView extends AbstractBaseItem
 
 		
 	@Override
-	public void createContent(IMainPart parentPart, 
+	public void createContent(ITracePart parentPart, 
 							  IEclipseContext context,
 							  IEventBroker broker,
 							  Composite master) 
