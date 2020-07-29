@@ -677,23 +677,27 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
   
     @Override
     public boolean canGoRight() {
+    	if (stData == null) return false;
     	return (stData.getAttributes().getTimeBegin() > 0);
     }
 
     
     @Override
     public boolean canGoLeft() {
+    	if (stData == null) return false;
     	return (stData.getAttributes().getTimeEnd()< this.stData.getTimeWidth());
     }
 
     
     @Override
     public boolean canGoUp() {
+    	if (stData == null) return false;
     	return (stData.getAttributes().getProcessBegin()>0);
     }
     
     @Override
     public boolean canGoDown() {
+    	if (stData == null) return false;
     	return (stData.getAttributes().getProcessEnd()<this.stData.getTotalTraceCount());
     }
 

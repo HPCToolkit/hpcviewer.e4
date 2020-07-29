@@ -261,14 +261,6 @@ public class SpaceTimeMiniCanvas extends SpaceTimeCanvas
 	}
 	
 	
-	@Override
-	public Point computeSize (int widthHint, int heightHint, boolean changed) {
-		Point initialSize = super.computeSize (widthHint, heightHint, changed);
-		initialSize.x = 100;
-		initialSize.y = 140;
-		return initialSize;
-	}
-	
     /**The painting of the miniMap.
      * this is the original paintControl with Rectangles and labels
      * 
@@ -326,7 +318,6 @@ public class SpaceTimeMiniCanvas extends SpaceTimeCanvas
 		if (this.stData == null)
 			return;
 
-		System.out.println("area: " + getClientArea() + ", vis: " + isVisible() + ", frame: " + frame);
 		final Display display = Display.getDefault();
 		display.asyncExec( new Runnable() {
 			

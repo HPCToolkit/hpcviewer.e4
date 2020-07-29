@@ -12,6 +12,8 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
@@ -20,7 +22,7 @@ import edu.rice.cs.hpctraceviewer.ui.callstack.HPCCallStackView;
 import edu.rice.cs.hpctraceviewer.ui.depth.HPCDepthView;
 import edu.rice.cs.hpctraceviewer.ui.main.HPCTraceView;
 import edu.rice.cs.hpctraceviewer.ui.main.ITraceViewAction;
-import edu.rice.cs.hpctraceviewer.ui.minimap.MiniMap;
+import edu.rice.cs.hpctraceviewer.ui.minimap.SpaceTimeMiniCanvas;
 import edu.rice.cs.hpctraceviewer.ui.statistic.HPCStatView;
 import edu.rice.cs.hpctraceviewer.ui.summary.HPCSummaryView;
 
@@ -34,6 +36,8 @@ import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.IPartListener;
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 
 public class TracePart implements ITracePart, IPartListener
 {
@@ -49,8 +53,9 @@ public class TracePart implements ITracePart, IPartListener
 	private HPCCallStackView tbtmCallStack;
 	private HPCSummaryView   tbtmSummaryView;
 	
-	private MiniMap 	tbtmMinimap;
 	private HPCStatView tbtmStatView;
+	
+	private SpaceTimeMiniCanvas miniCanvas;
 	
 	private IEclipseContext context;
 	private AbstractDBOpener dbOpener;
@@ -126,11 +131,29 @@ public class TracePart implements ITracePart, IPartListener
 		// ---------------
 		// mini map
 		// ---------------
-
+		/*
 		CTabFolder tabFolderBottomRight = new CTabFolder(sashFormRight, SWT.BORDER);
 		tbtmMinimap = new MiniMap(tabFolderBottomRight, SWT.NONE);
 		createTabItem(tbtmMinimap, "Mini map", tabFolderBottomRight, eventBroker);
+		*/
+		
+		final Composite miniArea = new Composite(sashFormRight, SWT.BORDER_DASH);
+		
+		GridDataFactory.fillDefaults().grab(true, true).applyTo(miniArea);
+		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(miniArea);
 
+		Label lblMiniMap = new Label(miniArea, SWT.BORDER);
+		lblMiniMap.setText("Mini map");
+		lblMiniMap.setToolTipText("The view to show the portion of the execution shown by the Trace View," +
+				  				  "relative to process/time dimensions");
+		
+		GridDataFactory.fillDefaults().indent(5, 4).align(SWT.LEFT, SWT.TOP).grab(true, false).applyTo(lblMiniMap);
+		
+		miniCanvas = new SpaceTimeMiniCanvas(miniArea);
+
+		GridLayoutFactory.swtDefaults().numColumns(1).applyTo(miniCanvas);
+		GridDataFactory.swtDefaults().grab(true, true).align(SWT.CENTER, SWT.CENTER).hint(160, 100).applyTo(miniCanvas);
+		
 		// ---------------
 		// sash settings
 		// ---------------
@@ -225,7 +248,7 @@ public class TracePart implements ITracePart, IPartListener
 			// TODO: make sure all the tabs other than trace view has the stdc first
 			tbtmDepthView.setInput(stdc);
 			tbtmCallStack.setInput(stdc);
-			tbtmMinimap  .setInput(stdc);
+			miniCanvas.   updateView(stdc);
 			tbtmStatView .setInput(stdc);
 			
 			// TODO: summary view has to be set AFTER the stat view 
