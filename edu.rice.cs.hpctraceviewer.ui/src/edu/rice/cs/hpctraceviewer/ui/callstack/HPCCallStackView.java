@@ -19,17 +19,21 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Spinner;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
 import edu.rice.cs.hpctraceviewer.ui.AbstractBaseItem;
 import edu.rice.cs.hpctraceviewer.ui.ITracePart;
+import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
+import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 
 
 /**A view for displaying the call path viewer and minimap.*/
 //all the GUI setup for the call path and minimap are here//
-public class HPCCallStackView extends AbstractBaseItem
+public class HPCCallStackView extends AbstractBaseItem implements EventHandler
 {
 	private CallStackViewer csViewer;
 	
@@ -38,6 +42,8 @@ public class HPCCallStackView extends AbstractBaseItem
 	private Button maxDepthButton;
 	
 	private boolean enableAction = false;
+	private SpaceTimeDataController data;
+	private IEventBroker broker;
 
 	
 	public HPCCallStackView(CTabFolder parent, int style) {
@@ -49,6 +55,8 @@ public class HPCCallStackView extends AbstractBaseItem
 							  IEclipseContext context, 
 							  IEventBroker broker,
 							  Composite master) {
+		
+		this.broker = broker;
 		setEnableAction(false);
 		ProcessTimelineService ptlService = (ProcessTimelineService) context.get(Constants.CONTEXT_TIMELINE);
 		setupEverything(master, ptlService);
@@ -107,10 +115,7 @@ public class HPCCallStackView extends AbstractBaseItem
 			}
 			
 			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
+			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
 		
 		depthEditor.addModifyListener(new ModifyListener() {
@@ -171,33 +176,16 @@ public class HPCCallStackView extends AbstractBaseItem
 		/*************************************************************************
 		 * CallStackViewer
 		 ************************************************************************/
-		csViewer = new CallStackViewer(master, this, ptlService);
+		csViewer = new CallStackViewer(master, this, ptlService, broker);
 		
 		setToolTipText("The view to show the depth and the actual call path for the point selected by the Trace View's crosshair");
-		
-		/*************************************************************************
-		 * MiniMap
-		 ************************************************************************/
-		/*
-		Label l = new Label(master, SWT.SINGLE);
-		l.setText("Mini Map");
-		miniCanvas = new SpaceTimeMiniCanvas(master);
-		miniCanvas.setLayout(new GridLayout());
-		GridData miniCanvasData = new GridData(SWT.CENTER, SWT.BOTTOM, true, false);
-		miniCanvasData.heightHint = 100;
-		miniCanvasData.widthHint = 140;
-		miniCanvas.setLayoutData(miniCanvasData);
-		
-		miniCanvas.setVisible(false);
-		
-		miniCanvas.setToolTipText("The view to show the portion of the execution shown by the Trace View," +
-								  "relative to process/time dimensions");
-		*/
 	}
 		
 	
 	public void updateView(SpaceTimeDataController _stData) 
 	{
+		this.data = _stData;
+		
 		// guard : no action has to be taken at the moment;
 		setEnableAction(false);
 				
@@ -207,8 +195,7 @@ public class HPCCallStackView extends AbstractBaseItem
 		depthEditor.setVisible(true);
 		depthEditor.setToolTipText("Change the current depth.\nMax depth is " + maxDepth);
 		
-		int depth = _stData.getAttributes().getFrame().depth;
-		depthEditor.setSelection(depth);
+		depthEditor.setSelection(data.getDefaultDepth());
 
 		maxDepthButton.setToolTipText("Set to max depth: " + maxDepth);
 		maxDepthButton.setData(Integer.valueOf(maxDepth));
@@ -218,13 +205,11 @@ public class HPCCallStackView extends AbstractBaseItem
 		// visible, and let other event to trigger the update content.
 		// at this point, a data may not be ready to be processed
 		csViewer.getTable().setVisible(true);
-		/*
-		this.miniCanvas.updateView(_stData);
-		
-		miniCanvas.setVisible(true);
-		*/
+
 		// enable action
 		setEnableAction(true);
+		
+		broker.subscribe(IConstants.TOPIC_DEPTH_UPDATE, this);
 	}
 
 	private void setEnableAction(boolean enabled) {
@@ -240,5 +225,24 @@ public class HPCCallStackView extends AbstractBaseItem
 	public void setInput(Object input) {
 		csViewer.setInput((SpaceTimeDataController)input);
 		updateView((SpaceTimeDataController) input);
+	}
+
+	@Override
+	public void handleEvent(Event event) {
+
+		Object obj = event.getProperty(IEventBroker.DATA);
+		if (obj == null) return;
+		
+		TraceEventData eventData = (TraceEventData) obj;
+		if (eventData.source == this || eventData.data != this.data)
+			return;
+		
+		if (event.getTopic().equals(IConstants.TOPIC_DEPTH_UPDATE)) {
+			Integer depth = (Integer) eventData.value;
+			
+			setEnableAction(false);
+			depthEditor.setSelection(depth.intValue());
+			setEnableAction(true);
+		}
 	}
 }

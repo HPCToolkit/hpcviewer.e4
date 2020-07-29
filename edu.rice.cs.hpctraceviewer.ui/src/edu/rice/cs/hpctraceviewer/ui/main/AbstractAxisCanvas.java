@@ -44,7 +44,6 @@ abstract public class AbstractAxisCanvas extends Canvas
 	@Override
 	public void widgetDisposed(DisposeEvent e) {
 		TraceOperation.getOperationHistory().removeOperationHistoryListener(this);
-		System.out.println("YES-dISPOSED " + getClass().getName() + " -> " + this);
 	}
 
 		

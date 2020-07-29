@@ -184,6 +184,11 @@ public abstract class SpaceTimeDataController
 	}
 	
 	
+	public int getDefaultDepth() {
+		return maxDepth/3;
+	}
+	
+	
 	private int getCurrentlySelectedProcess()
 	{
 		return attributes.getPosition().process;

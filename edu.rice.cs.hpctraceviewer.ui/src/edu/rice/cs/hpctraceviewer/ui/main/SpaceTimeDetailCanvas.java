@@ -37,15 +37,16 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
-
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 
 import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
 import edu.rice.cs.hpctraceviewer.ui.internal.AbstractTimeCanvas;
 import edu.rice.cs.hpctraceviewer.ui.internal.BufferPaint;
 import edu.rice.cs.hpctraceviewer.ui.internal.ISpaceTimeCanvas;
 import edu.rice.cs.hpctraceviewer.ui.internal.ResizeListener;
+import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
 import edu.rice.cs.hpctraceviewer.ui.operation.BufferRefreshOperation;
-import edu.rice.cs.hpctraceviewer.ui.operation.DepthOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.PositionOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.TraceOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.WindowResizeOperation;
@@ -57,6 +58,7 @@ import edu.rice.cs.hpctraceviewer.data.Position;
 import edu.rice.cs.hpctraceviewer.data.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
+import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 import edu.rice.cs.hpctraceviewer.ui.util.MessageLabelManager;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
 
@@ -68,7 +70,11 @@ import edu.rice.cs.hpctraceviewer.data.util.Constants;
  *
  ************************************************************************/
 public class SpaceTimeDetailCanvas extends AbstractTimeCanvas 
-	implements IOperationHistoryListener, ISpaceTimeCanvas, ITraceViewAction, DisposeListener
+	implements IOperationHistoryListener, 
+			   ISpaceTimeCanvas, 
+			   ITraceViewAction, 
+			   DisposeListener,
+			   EventHandler
 {		
 	/**The min number of process units you can zoom in.*/
     private final static int MIN_PROC_DISP = 1;
@@ -105,6 +111,8 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	
 	final private DecimalFormat formatTime;
 
+	private ResizeListener resizeListener;
+	private KeyListener keyListener;
 	
     /**Creates a SpaceTimeDetailCanvas with the given parameters*/
 	public SpaceTimeDetailCanvas(IEclipseContext context, IEventBroker eventBroker, Composite _composite)
@@ -142,6 +150,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		{
 			addCanvasListener();
 			OperationHistoryFactory.getOperationHistory().addOperationHistoryListener(this);
+			eventBroker.subscribe(IConstants.TOPIC_DEPTH_UPDATE, this);
 		}
 
 		// reinitialize the selection rectangle
@@ -158,7 +167,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		// we don't know which depth is the best to viewed, but heuristically
 		// the first third is a better one.
 		Frame frame = new Frame(this.stData.getAttributes().getFrame());
-		frame.depth = this.stData.getMaxDepth() / 3;
+		frame.depth = stData.getDefaultDepth();
 		
 		home(frame);
 	}
@@ -171,7 +180,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 
 		addPaintListener(this);
 		
-		addKeyListener( new KeyListener(){
+		keyListener = new KeyListener(){
 			public void keyPressed(KeyEvent e) {}
 
 			public void keyReleased(KeyEvent e) {
@@ -191,7 +200,8 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 					break;				
 				}
 			}			
-		});
+		};
+		addKeyListener( keyListener );
 				
 		// ------------------------------------------------------------------------------------
 		// A listener for resizing the the window.
@@ -199,10 +209,11 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		//  resize event is invoked "long" enough to the first resize event.
 		// If this is the case, then run rebuffering, otherwise just no-op.
 		// ------------------------------------------------------------------------------------
-		final ResizeListener listener = new ResizeListener( new DetailBufferPaint() ); 
-		addControlListener(listener);
-		getDisplay().addFilter(SWT.MouseDown, listener);
-		getDisplay().addFilter(SWT.MouseUp, listener);
+		resizeListener = new ResizeListener( new DetailBufferPaint() ); 
+		addControlListener(resizeListener);
+		
+		getDisplay().addFilter(SWT.MouseDown, resizeListener);
+		getDisplay().addFilter(SWT.MouseUp, resizeListener);
 	}
 	
 	
@@ -1131,10 +1142,15 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	
 	@Override
 	public void widgetDisposed(DisposeEvent e) {
+		eventBroker.unsubscribe(this);
+		
+		removePaintListener(this);
+		removeKeyListener(keyListener);
+		removeControlListener(resizeListener);
+				
 		OperationHistoryFactory.getOperationHistory().removeOperationHistoryListener(this);
+		
 		super.widgetDisposed(e);
-		//super.dispose();
-		System.out.println("YES-dISPOSED " + getClass().getName() + " -> " + this);
 	}
 	
 	//-----------------------------------------------------------------------------------------
@@ -1316,11 +1332,6 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 				// just change the position, doesn't need to fully refresh
 				redraw();
 			} 
-			else if (operation instanceof DepthOperation) {
-				int depth = ((DepthOperation)operation).getDepth();
-				setDepth(depth);
-			}
-			//adjustLabels();
 		}
 	}
 
@@ -1361,5 +1372,22 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	@Override
 	protected ColorTable getColorTable() {
 		return stData.getColorTable();
+	}
+
+
+	@Override
+	public void handleEvent(Event event) {
+
+		Object obj = event.getProperty(IEventBroker.DATA);
+		if (obj == null) return;
+		
+		TraceEventData eventData = (TraceEventData) obj;
+		if (eventData.source == this || eventData.data != this.stData)
+			return;
+		
+		if (event.getTopic().equals(IConstants.TOPIC_DEPTH_UPDATE)) {
+			Integer depth = (Integer) eventData.value;
+			setDepth(depth.intValue());
+		}
 	}
 }

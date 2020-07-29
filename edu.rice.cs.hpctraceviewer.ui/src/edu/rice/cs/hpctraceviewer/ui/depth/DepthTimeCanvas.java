@@ -77,7 +77,7 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 	
 	@Override
 	public void widgetDisposed(DisposeEvent e) {
-		System.out.println("YES-dISPOSED " + getClass().getName() + " -> " + this);
+
 		removeDisposeListener(this);
 		TraceOperation.getOperationHistory().removeOperationHistoryListener(this);
 		super.widgetDisposed(e);
