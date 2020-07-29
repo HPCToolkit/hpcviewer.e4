@@ -1,13 +1,12 @@
-package edu.rice.cs.hpctraceviewer.ui.operation;
+package edu.rice.cs.hpctraceviewer.ui.handlers;
 
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.operations.IUndoableOperation;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.e4.core.di.annotations.CanExecute;
 import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.jface.action.Action;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Menu;
+
+import edu.rice.cs.hpctraceviewer.ui.operation.TraceOperation;
 
 /***********************************************************************
  * 
@@ -17,10 +16,8 @@ import org.eclipse.swt.widgets.Menu;
  * $Id: UndoOperationAction.java 1556 2013-01-02 21:11:12Z laksono $
  *
  ***********************************************************************/
-public class UndoOperationAction extends OperationHistoryAction {
-
-
-	@Override
+public class UndoOperationAction
+{
 	protected IUndoableOperation[] getHistory() {
 		return TraceOperation.getUndoHistory();
 	}
@@ -53,6 +50,7 @@ public class UndoOperationAction extends OperationHistoryAction {
 	protected boolean canExecute() {
 		final IUndoableOperation []ops = getHistory(); 
 		boolean status = (ops != null) && (ops.length>0);
+		System.out.println("can undo: " + status +" , "  + ops);
 		return status;
 	}
 
@@ -71,45 +69,12 @@ public class UndoOperationAction extends OperationHistoryAction {
 		}
 	}
 	
-	@Override
+
 	protected void execute(IUndoableOperation operation) {
 		try {
 			TraceOperation.getOperationHistory().undoOperation(operation, null, null);
 		} catch (ExecutionException e) {
 			e.printStackTrace();
 		}
-	}
-
-	@Override
-	public Menu getMenu(Control parent) {
-		Menu menu = getMenu();
-		if (menu != null) 
-			menu.dispose();
-		
-		menu = new Menu(parent);
-		
-		IUndoableOperation[] operations = getHistory();
-		
-		// create a list of menus of undoable operations
-		for (int i=operations.length-1; i>=0; i--) {
-			final IUndoableOperation op = operations[i];
-			Action action = new Action(op.getLabel()) {
-				public void run() {
-					execute(op);
-				}
-			};
-			addActionToMenu(menu, action);
-		} 
-		return menu;
-	}
-
-	@Override
-	protected IUndoableOperation[] setStatus() {
-		final IUndoableOperation []ops = getHistory(); 
-		//debug("undo", ops);
-		
-		boolean status = (ops != null) && (ops.length>0);
-		setEnabled(status);
-		return ops;
 	}
 }
