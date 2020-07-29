@@ -131,11 +131,6 @@ public class TracePart implements ITracePart, IPartListener
 		// ---------------
 		// mini map
 		// ---------------
-		/*
-		CTabFolder tabFolderBottomRight = new CTabFolder(sashFormRight, SWT.BORDER);
-		tbtmMinimap = new MiniMap(tabFolderBottomRight, SWT.NONE);
-		createTabItem(tbtmMinimap, "Mini map", tabFolderBottomRight, eventBroker);
-		*/
 		
 		final Composite miniArea = new Composite(sashFormRight, SWT.BORDER_DASH);
 		

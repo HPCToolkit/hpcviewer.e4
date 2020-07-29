@@ -91,14 +91,14 @@ public class CallStackViewer extends TableViewer
         });
         
         stack.setVisible(false);
-        final CallStackViewer csviewer = this;
+        //final CallStackViewer csviewer = this;
 		stack.addListener(SWT.Selection, new Listener(){
 			public void handleEvent(Event event)
 			{
 				int depth = stack.getSelectionIndex(); 
 
 				// ask the depth editor to update the depth and launch the updateDepth event
-				csview.depthEditor.setSelection(depth);
+				//csview.depthEditor.setSelection(depth);
 				notifyChange(depth);
 			}
 		});
@@ -147,7 +147,7 @@ public class CallStackViewer extends TableViewer
 		viewerColumn.getColumn().setWidth(100);
 		getTable().setVisible(true);
 
-		ColumnViewerToolTipSupport.enableFor(csviewer, ToolTip.NO_RECREATE);
+		ColumnViewerToolTipSupport.enableFor(this, ToolTip.NO_RECREATE);
 		
 		TraceOperation.getOperationHistory().addOperationHistoryListener(this);
 		
