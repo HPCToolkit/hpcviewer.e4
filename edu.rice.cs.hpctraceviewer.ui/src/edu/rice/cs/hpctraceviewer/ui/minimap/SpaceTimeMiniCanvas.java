@@ -26,7 +26,7 @@ import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.Frame;
 import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
-import edu.rice.cs.hpctraceviewer.ui.internal.ITraceCanvas;
+import edu.rice.cs.hpctraceviewer.ui.base.ITraceCanvas;
 import edu.rice.cs.hpctraceviewer.ui.internal.SpaceTimeCanvas;
 import edu.rice.cs.hpctraceviewer.ui.operation.BufferRefreshOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.TraceOperation;

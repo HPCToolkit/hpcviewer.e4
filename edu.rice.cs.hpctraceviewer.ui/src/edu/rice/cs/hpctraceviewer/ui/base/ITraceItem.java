@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctraceviewer.ui;
+package edu.rice.cs.hpctraceviewer.ui.base;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;

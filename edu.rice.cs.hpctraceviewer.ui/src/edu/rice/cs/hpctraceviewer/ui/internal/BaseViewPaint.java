@@ -13,6 +13,7 @@ import org.eclipse.swt.widgets.Display;
 
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TimelineDataSet;
+import edu.rice.cs.hpctraceviewer.ui.base.ISpaceTimeCanvas;
 
 
 

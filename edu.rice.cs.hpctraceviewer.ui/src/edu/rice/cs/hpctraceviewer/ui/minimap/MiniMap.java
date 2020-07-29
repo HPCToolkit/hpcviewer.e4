@@ -12,8 +12,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
-import edu.rice.cs.hpctraceviewer.ui.AbstractBaseItem;
-import edu.rice.cs.hpctraceviewer.ui.ITracePart;
+import edu.rice.cs.hpctraceviewer.ui.base.AbstractBaseItem;
+import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 
 public class MiniMap extends AbstractBaseItem 
 {

@@ -15,8 +15,9 @@ import org.eclipse.swt.widgets.Composite;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
-import edu.rice.cs.hpctraceviewer.ui.AbstractBaseItem;
-import edu.rice.cs.hpctraceviewer.ui.ITracePart;
+import edu.rice.cs.hpctraceviewer.ui.base.AbstractBaseItem;
+import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
+import edu.rice.cs.hpctraceviewer.ui.base.ITraceViewAction;
 
 import javax.annotation.PreDestroy;
 

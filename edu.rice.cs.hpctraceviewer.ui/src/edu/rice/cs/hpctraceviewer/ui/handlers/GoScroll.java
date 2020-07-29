@@ -6,7 +6,7 @@ import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 
 import edu.rice.cs.hpctraceviewer.ui.TracePart;
-import edu.rice.cs.hpctraceviewer.ui.main.ITraceViewAction;
+import edu.rice.cs.hpctraceviewer.ui.base.ITraceViewAction;
 
 import javax.inject.Named;
 

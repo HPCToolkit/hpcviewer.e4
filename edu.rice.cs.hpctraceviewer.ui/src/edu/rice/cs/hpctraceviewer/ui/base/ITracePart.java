@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctraceviewer.ui;
+package edu.rice.cs.hpctraceviewer.ui.base;
 
 import edu.rice.cs.hpcbase.ui.IMainPart;
 

@@ -17,8 +17,8 @@ import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
-import edu.rice.cs.hpctraceviewer.ui.internal.ITraceCanvas;
-import edu.rice.cs.hpctraceviewer.ui.internal.ITraceCanvas.MouseState;
+import edu.rice.cs.hpctraceviewer.ui.base.ITraceCanvas;
+import edu.rice.cs.hpctraceviewer.ui.base.ITraceCanvas.MouseState;
 
 
 /*********************

@@ -33,8 +33,8 @@ import org.osgi.service.event.EventHandler;
 
 import edu.rice.cs.hpc.data.util.string.StringUtil;
 import edu.rice.cs.hpctraceviewer.data.ColorTable;
-import edu.rice.cs.hpctraceviewer.ui.AbstractBaseItem;
-import edu.rice.cs.hpctraceviewer.ui.ITracePart;
+import edu.rice.cs.hpctraceviewer.ui.base.AbstractBaseItem;
+import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.summary.SummaryData;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 

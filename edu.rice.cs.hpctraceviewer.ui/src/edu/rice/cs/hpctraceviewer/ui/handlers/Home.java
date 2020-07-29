@@ -9,7 +9,7 @@ import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 
 import edu.rice.cs.hpctraceviewer.ui.TracePart;
-import edu.rice.cs.hpctraceviewer.ui.main.ITraceViewAction;
+import edu.rice.cs.hpctraceviewer.ui.base.ITraceViewAction;
 
 public class Home 
 {

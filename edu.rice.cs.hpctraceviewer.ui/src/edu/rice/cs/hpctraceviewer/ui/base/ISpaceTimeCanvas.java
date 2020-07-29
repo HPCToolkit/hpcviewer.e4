@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctraceviewer.ui.internal;
+package edu.rice.cs.hpctraceviewer.ui.base;
 
 
 public interface ISpaceTimeCanvas {

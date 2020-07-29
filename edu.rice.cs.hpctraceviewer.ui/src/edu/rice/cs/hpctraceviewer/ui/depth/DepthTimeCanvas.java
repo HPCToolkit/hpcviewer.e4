@@ -20,9 +20,9 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
+import edu.rice.cs.hpctraceviewer.ui.base.ISpaceTimeCanvas;
 import edu.rice.cs.hpctraceviewer.ui.internal.AbstractTimeCanvas;
 import edu.rice.cs.hpctraceviewer.ui.internal.BaseViewPaint;
-import edu.rice.cs.hpctraceviewer.ui.internal.ISpaceTimeCanvas;
 import edu.rice.cs.hpctraceviewer.ui.operation.BufferRefreshOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.PositionOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.TraceOperation;

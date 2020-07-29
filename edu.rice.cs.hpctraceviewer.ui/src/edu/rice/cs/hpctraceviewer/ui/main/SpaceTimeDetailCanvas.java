@@ -41,9 +41,10 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
 import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
+import edu.rice.cs.hpctraceviewer.ui.base.ISpaceTimeCanvas;
+import edu.rice.cs.hpctraceviewer.ui.base.ITraceViewAction;
 import edu.rice.cs.hpctraceviewer.ui.internal.AbstractTimeCanvas;
 import edu.rice.cs.hpctraceviewer.ui.internal.BufferPaint;
-import edu.rice.cs.hpctraceviewer.ui.internal.ISpaceTimeCanvas;
 import edu.rice.cs.hpctraceviewer.ui.internal.ResizeListener;
 import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
 import edu.rice.cs.hpctraceviewer.ui.operation.BufferRefreshOperation;

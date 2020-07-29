@@ -19,6 +19,7 @@ import edu.rice.cs.hpc.data.util.OSValidator;
 import edu.rice.cs.hpc.data.util.string.StringUtil;
 import edu.rice.cs.hpctraceviewer.data.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
+import edu.rice.cs.hpctraceviewer.ui.base.ITraceCanvas;
 
 
 
