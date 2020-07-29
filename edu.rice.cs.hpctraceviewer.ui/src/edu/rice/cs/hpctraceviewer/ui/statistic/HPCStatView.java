@@ -169,6 +169,7 @@ public class HPCStatView extends AbstractBaseItem implements EventHandler, Liste
 			listItems.add(new StatisticItem(proc, (float)100.0 * count/totalPixels));
 		}
 		tableViewer.setInput(listItems);
+		tableViewer.getTable().getColumn(1).pack();
 		tableViewer.refresh();
 	}
 	

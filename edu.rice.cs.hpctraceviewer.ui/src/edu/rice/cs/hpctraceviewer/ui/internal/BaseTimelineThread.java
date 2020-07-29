@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctraceviewer.ui.timeline;
+package edu.rice.cs.hpctraceviewer.ui.internal;
 
 import java.io.IOException;
 import java.util.Queue;
