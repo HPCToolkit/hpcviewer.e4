@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctraceviewer.ui.painter;
+package edu.rice.cs.hpctraceviewer.ui.internal;
 
 
 import java.io.IOException;

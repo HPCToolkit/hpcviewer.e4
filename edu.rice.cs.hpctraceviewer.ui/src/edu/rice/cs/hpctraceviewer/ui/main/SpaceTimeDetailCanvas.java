@@ -40,16 +40,16 @@ import org.eclipse.swt.widgets.Label;
 
 
 import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
+import edu.rice.cs.hpctraceviewer.ui.internal.AbstractTimeCanvas;
+import edu.rice.cs.hpctraceviewer.ui.internal.BufferPaint;
+import edu.rice.cs.hpctraceviewer.ui.internal.ISpaceTimeCanvas;
+import edu.rice.cs.hpctraceviewer.ui.internal.ResizeListener;
 import edu.rice.cs.hpctraceviewer.ui.operation.BufferRefreshOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.DepthOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.PositionOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.TraceOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.WindowResizeOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.ZoomOperation;
-import edu.rice.cs.hpctraceviewer.ui.painter.AbstractTimeCanvas;
-import edu.rice.cs.hpctraceviewer.ui.painter.BufferPaint;
-import edu.rice.cs.hpctraceviewer.ui.painter.ISpaceTimeCanvas;
-import edu.rice.cs.hpctraceviewer.ui.painter.ResizeListener;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.Frame;
 import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;

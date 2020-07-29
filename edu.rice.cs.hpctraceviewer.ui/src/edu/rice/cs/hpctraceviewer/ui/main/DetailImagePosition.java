@@ -2,7 +2,7 @@ package edu.rice.cs.hpctraceviewer.ui.main;
 
 import org.eclipse.swt.graphics.Image;
 
-import edu.rice.cs.hpctraceviewer.ui.painter.ImagePosition;
+import edu.rice.cs.hpctraceviewer.ui.internal.ImagePosition;
 
 public class DetailImagePosition extends ImagePosition {
 

@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctraceviewer.ui.painter;
+package edu.rice.cs.hpctraceviewer.ui.internal;
 
 import java.util.ArrayList;
 import java.util.List;

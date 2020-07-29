@@ -20,14 +20,13 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
+import edu.rice.cs.hpctraceviewer.ui.internal.AbstractTimeCanvas;
+import edu.rice.cs.hpctraceviewer.ui.internal.BaseViewPaint;
+import edu.rice.cs.hpctraceviewer.ui.internal.ISpaceTimeCanvas;
 import edu.rice.cs.hpctraceviewer.ui.operation.BufferRefreshOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.PositionOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.TraceOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.ZoomOperation;
-import edu.rice.cs.hpctraceviewer.ui.painter.AbstractTimeCanvas;
-import edu.rice.cs.hpctraceviewer.ui.painter.BaseViewPaint;
-import edu.rice.cs.hpctraceviewer.ui.painter.ISpaceTimeCanvas;
-
 import edu.rice.cs.hpctraceviewer.ui.util.Utility;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.Frame;

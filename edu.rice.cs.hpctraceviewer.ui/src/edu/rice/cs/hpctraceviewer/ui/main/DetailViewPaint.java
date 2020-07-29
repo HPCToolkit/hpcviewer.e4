@@ -12,10 +12,10 @@ import org.eclipse.swt.graphics.Point;
 
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TimelineDataSet;
-import edu.rice.cs.hpctraceviewer.ui.painter.BasePaintThread;
-import edu.rice.cs.hpctraceviewer.ui.painter.BaseViewPaint;
-import edu.rice.cs.hpctraceviewer.ui.painter.ISpaceTimeCanvas;
-import edu.rice.cs.hpctraceviewer.ui.painter.ImagePosition;
+import edu.rice.cs.hpctraceviewer.ui.internal.BasePaintThread;
+import edu.rice.cs.hpctraceviewer.ui.internal.BaseViewPaint;
+import edu.rice.cs.hpctraceviewer.ui.internal.ISpaceTimeCanvas;
+import edu.rice.cs.hpctraceviewer.ui.internal.ImagePosition;
 import edu.rice.cs.hpctraceviewer.ui.timeline.BaseTimelineThread;
 
 /******************************************************

@@ -13,8 +13,8 @@ import edu.rice.cs.hpctraceviewer.data.BaseDataVisualization;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TimelineDataSet;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
-import edu.rice.cs.hpctraceviewer.ui.painter.BasePaintThread;
-import edu.rice.cs.hpctraceviewer.ui.painter.ImagePosition;
+import edu.rice.cs.hpctraceviewer.ui.internal.BasePaintThread;
+import edu.rice.cs.hpctraceviewer.ui.internal.ImagePosition;
 
 
 /*****************************************************************
