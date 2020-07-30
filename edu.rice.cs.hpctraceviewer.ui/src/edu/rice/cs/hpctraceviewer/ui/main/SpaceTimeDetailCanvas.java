@@ -1147,8 +1147,12 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		eventBroker.unsubscribe(this);
 		
 		removePaintListener(this);
-		removeKeyListener(keyListener);
-		removeControlListener(resizeListener);
+		
+		if (keyListener != null)
+			removeKeyListener(keyListener);
+		
+		if (resizeListener != null)
+			removeControlListener(resizeListener);
 				
 		OperationHistoryFactory.getOperationHistory().removeOperationHistoryListener(this);
 		

@@ -74,7 +74,7 @@ public class HotCallPath
 			
 			treeViewer.setSelection(new StructuredSelection(objHotPath.path), true);
 
-			if(!is_found) {
+			if(!is_found && objHotPath.node.hasChildren()) {
 				lblMessage.showErrorMessage("No hot child.");
 			}
 		} else {
