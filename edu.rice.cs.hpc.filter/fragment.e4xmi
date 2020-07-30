@@ -8,7 +8,7 @@
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_ZhxkQLgHEeqKXeCFC-fF9Q" featurename="menuContributions" parentElementId="org.eclipse.e4.application">
     <elements xsi:type="menu:MenuContribution" xmi:id="_eeUWwLgHEeqKXeCFC-fF9Q" elementId="edu.rice.cs.hpc.filter.menucontribution.filter" parentId="edu.rice.cs.hpcviewer.ui.menu.filter">
-      <children xsi:type="menu:HandledMenuItem" xmi:id="_mpscwLgHEeqKXeCFC-fF9Q" elementId="edu.rice.cs.hpc.filter.menu.show" label="Show filter" tooltip="Show list of filters" mnemonics="h" command="_efcDALgFEeqKXeCFC-fF9Q"/>
+      <children xsi:type="menu:HandledMenuItem" xmi:id="_mpscwLgHEeqKXeCFC-fF9Q" elementId="edu.rice.cs.hpc.filter.menu.show" label="Filter CCT nodes" tooltip="Show list of filters" mnemonics="h" command="_efcDALgFEeqKXeCFC-fF9Q"/>
     </elements>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_1eTSMLhXEeqKXeCFC-fF9Q" featurename="addons" parentElementId="xpath:/">

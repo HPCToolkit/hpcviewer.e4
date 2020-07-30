@@ -4,15 +4,21 @@ package edu.rice.cs.hpcviewer.ui.expression;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.di.annotations.Evaluate;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
+import edu.rice.cs.hpcviewer.ui.parts.IProfilePart;
 
 public class DatabaseExist 
 {
 	@Inject DatabaseCollection database;
 	
 	@Evaluate
-	public boolean evaluate() {
-		return database.getNumDatabase()>0;
+	public boolean evaluate(EPartService partService) {
+		
+		if (database.getNumDatabase()>0) {
+			return (partService.getActivePart().getObject() instanceof IProfilePart);
+		}
+		return false;
 	}
 }

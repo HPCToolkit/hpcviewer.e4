@@ -44,7 +44,9 @@
           <children xsi:type="menu:HandledMenuItem" xmi:id="_OUj-8KwUEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.viewXML" label="View experiment.xml file" tooltip="View the current experiment.xml file" mnemonics="x" command="_rAwA8KvwEeq2aaPo7yBcWg"/>
         </children>
       </children>
-      <children xsi:type="menu:Menu" xmi:id="_mNeQQLgGEeqKXeCFC-fF9Q" elementId="edu.rice.cs.hpcviewer.ui.menu.filter" label="Filter" mnemonics="i"/>
+      <children xsi:type="menu:Menu" xmi:id="_mNeQQLgGEeqKXeCFC-fF9Q" elementId="edu.rice.cs.hpcviewer.ui.menu.filter" label="Filter" mnemonics="i">
+        <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_tN5q4NKFEeqGK5z0zGQmCQ" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseExist"/>
+      </children>
       <children xsi:type="menu:Menu" xmi:id="_VCyzMLS0EeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.menu.help" label="Help" mnemonics="H">
         <children xsi:type="menu:HandledMenuItem" xmi:id="_XRffYLS0EeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.about" label="About" tooltip="About the application" mnemonics="A" command="_lIBrgKwbEeq2aaPo7yBcWg"/>
       </children>

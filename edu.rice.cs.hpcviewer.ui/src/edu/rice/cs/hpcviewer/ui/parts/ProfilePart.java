@@ -29,7 +29,6 @@ import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
-import edu.rice.cs.hpcbase.ui.IMainPart;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.graph.AbstractGraphViewer;
 import edu.rice.cs.hpcviewer.ui.graph.GraphEditorInput;
@@ -49,7 +48,7 @@ import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
 
 
 
-public class ProfilePart implements IMainPart
+public class ProfilePart implements IProfilePart
 {
 	public static final String ID = "edu.rice.cs.hpcviewer.ui.partdescriptor.profile";
 	
