@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Display;
 import edu.rice.cs.hpctraceviewer.ui.base.ISpaceTimeCanvas;
 import edu.rice.cs.hpctraceviewer.ui.internal.AbstractTimeCanvas;
 import edu.rice.cs.hpctraceviewer.ui.internal.BaseViewPaint;
+import edu.rice.cs.hpctraceviewer.ui.operation.AbstractTraceOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.BufferRefreshOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.PositionOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.TraceOperation;
@@ -266,6 +267,12 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 		if (event.getEventType() == OperationHistoryEvent.DONE) 
 		{
 			final IUndoableOperation operation = event.getOperation();
+			if (!(operation instanceof AbstractTraceOperation)) {
+				return;
+			}
+			AbstractTraceOperation op = (AbstractTraceOperation) operation;
+			if (op.getData() != stData) 
+				return;
 
 			if (operation.hasContext(BufferRefreshOperation.context)) {
 				// this event includes if there's a change of colors definition, so everyone needs
@@ -357,12 +364,6 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 				@Override
 				public void run() {
 					redraw();
-/*					final Image image = getBuffer();
-					System.out.println("dispose: " + image.isDisposed() + ", type: " + image.type 
-							+ ", bounds: " + image.getBounds() );
-					if (image.isDisposed()) {
-						System.err.println("image is disposed");
-					}*/
 				}
 			} );
 		}

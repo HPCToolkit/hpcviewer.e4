@@ -47,6 +47,7 @@ import edu.rice.cs.hpctraceviewer.ui.internal.AbstractTimeCanvas;
 import edu.rice.cs.hpctraceviewer.ui.internal.BufferPaint;
 import edu.rice.cs.hpctraceviewer.ui.internal.ResizeListener;
 import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
+import edu.rice.cs.hpctraceviewer.ui.operation.AbstractTraceOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.BufferRefreshOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.PositionOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.TraceOperation;
@@ -1229,6 +1230,13 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	@Override
 	public void historyNotification(final OperationHistoryEvent event) {
 		final IUndoableOperation operation = event.getOperation();
+		
+		if (!(operation instanceof AbstractTraceOperation)) {
+			return;
+		}
+		AbstractTraceOperation op = (AbstractTraceOperation) operation;
+		if (op.getData() != stData) 
+			return;
 
 		// handling the operations
 		if (operation.hasContext(TraceOperation.traceContext) ||

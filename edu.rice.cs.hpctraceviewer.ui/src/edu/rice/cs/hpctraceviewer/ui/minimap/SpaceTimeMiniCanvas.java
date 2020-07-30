@@ -28,6 +28,7 @@ import edu.rice.cs.hpctraceviewer.data.Frame;
 import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
 import edu.rice.cs.hpctraceviewer.ui.base.ITraceCanvas;
 import edu.rice.cs.hpctraceviewer.ui.internal.SpaceTimeCanvas;
+import edu.rice.cs.hpctraceviewer.ui.operation.AbstractTraceOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.BufferRefreshOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.TraceOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.ZoomOperation;
@@ -583,6 +584,13 @@ public class SpaceTimeMiniCanvas extends SpaceTimeCanvas
 	 */
 	public void historyNotification(final OperationHistoryEvent event) {
 		final IUndoableOperation operation = event.getOperation();
+		
+		if (!(operation instanceof AbstractTraceOperation)) {
+			return;
+		}
+		AbstractTraceOperation op = (AbstractTraceOperation) operation;
+		if (op.getData() != stData) 
+			return;
 
 		if (operation.hasContext(BufferRefreshOperation.context)) {
 

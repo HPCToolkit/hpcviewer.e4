@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.data.util.string.StringUtil;
 import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
+import edu.rice.cs.hpctraceviewer.ui.operation.AbstractTraceOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.BufferRefreshOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.PositionOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.TraceOperation;
@@ -301,6 +302,13 @@ public class CallStackViewer extends TableViewer
 	@Override
 	public void historyNotification(final OperationHistoryEvent event) {
 		final IUndoableOperation operation = event.getOperation();
+
+		if (!(operation instanceof AbstractTraceOperation)) {
+			return;
+		}
+		AbstractTraceOperation op = (AbstractTraceOperation) operation;
+		if (op.getData() != stData) 
+			return;
 
 		if (operation.hasContext(BufferRefreshOperation.context) ||
 				operation.hasContext(PositionOperation.context)) {
