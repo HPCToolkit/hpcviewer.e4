@@ -6,6 +6,7 @@ import java.util.TreeMap;
 
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.operations.IOperationHistoryListener;
+import org.eclipse.core.commands.operations.IUndoableOperation;
 import org.eclipse.core.commands.operations.OperationHistoryEvent;
 import org.eclipse.core.commands.operations.OperationHistoryFactory;
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -22,6 +23,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 
 import edu.rice.cs.hpctraceviewer.ui.internal.AbstractTimeCanvas;
+import edu.rice.cs.hpctraceviewer.ui.operation.AbstractTraceOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.BufferRefreshOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.TraceOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.ZoomOperation;
@@ -281,7 +283,15 @@ implements IOperationHistoryListener
 			if (event.getEventType() == OperationHistoryEvent.DONE) {
 
 				if (isDisposed()) return;
-					
+				
+				final IUndoableOperation operation = event.getOperation();
+				if (!(operation instanceof AbstractTraceOperation)) {
+					return;
+				}
+				AbstractTraceOperation op = (AbstractTraceOperation) operation;
+				if (op.getData() != dataTraces) 
+					return;
+
 				getDisplay().syncExec(new Runnable() {
 					@Override
 					public void run() {

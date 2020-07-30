@@ -13,6 +13,7 @@ import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.MElementContainer;
 import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.model.application.ui.basic.MTrimmedWindow;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
@@ -28,6 +29,12 @@ public class NewWindow
 	@Inject DatabaseCollection database;
 	
 	@Execute
+	public void createWindow(EModelService modelService, MApplication app) {
+		  MTrimmedWindow newWin = (MTrimmedWindow)modelService.cloneSnippet(app, "edu.rice.cs.hpcviewer.ui.trimmedwindow.main", null);
+
+		  app.getChildren().add(newWin);
+	}
+	
 	public void execute(EModelService ms, 
 						MApplication  application, 
 						EPartService  ps,
