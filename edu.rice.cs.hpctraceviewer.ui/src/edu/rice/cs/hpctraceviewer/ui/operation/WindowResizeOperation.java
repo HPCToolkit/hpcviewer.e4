@@ -8,6 +8,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import edu.rice.cs.hpctraceviewer.data.Frame;
+import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 
 public class WindowResizeOperation extends ZoomOperation 
 {
@@ -26,8 +27,8 @@ public class WindowResizeOperation extends ZoomOperation
 		}
 	};
 
-	public WindowResizeOperation(Frame frame) {
-		super("Resize", frame);
+	public WindowResizeOperation(SpaceTimeDataController data, Frame frame) {
+		super(data, "Resize", frame);
 		
 		// we don't want this operation in undo list
 		removeContext(undoableContext);

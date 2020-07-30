@@ -1,7 +1,6 @@
 package edu.rice.cs.hpctraceviewer.ui.operation;
 
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.commands.operations.AbstractOperation;
 import org.eclipse.core.commands.operations.IUndoContext;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -9,14 +8,16 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.graphics.ImageData;
 
-public class BufferRefreshOperation extends AbstractOperation {
+import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
+
+public class BufferRefreshOperation extends AbstractTraceOperation {
 
 	/**image data that describes current image in detail canvas*/
 	final private ImageData detailData;
 	static final public IUndoContext context = new BufferOperationContext();
 
-	public BufferRefreshOperation(String label, ImageData detailData) {
-		super(label);
+	public BufferRefreshOperation(SpaceTimeDataController data, String label, ImageData detailData) {
+		super(data, label);
 		addContext(context);
 		this.detailData = detailData;
 	}

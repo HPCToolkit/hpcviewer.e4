@@ -301,7 +301,7 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
     		
     	try {
 			TraceOperation.getOperationHistory().execute(
-					new PositionOperation(newPosition), 
+					new PositionOperation(stData, newPosition), 
 					null, null);
 		} catch (ExecutionException e) {
 			e.printStackTrace();
@@ -329,7 +329,7 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 				attributes.getDepth(), position.time, position.process);
 		try {
 			TraceOperation.getOperationHistory().execute(
-					new ZoomOperation("Time zoom out", frame), 
+					new ZoomOperation(stData, "Time zoom out", frame), 
 					null, null);
 		} catch (ExecutionException e) {
 			e.printStackTrace();

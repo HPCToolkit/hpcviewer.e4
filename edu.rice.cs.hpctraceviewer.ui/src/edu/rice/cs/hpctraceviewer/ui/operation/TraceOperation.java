@@ -1,12 +1,13 @@
 package edu.rice.cs.hpctraceviewer.ui.operation;
 
-import org.eclipse.core.commands.operations.AbstractOperation;
+
 import org.eclipse.core.commands.operations.IOperationHistory;
 import org.eclipse.core.commands.operations.IUndoContext;
 import org.eclipse.core.commands.operations.IUndoableOperation;
 import org.eclipse.core.commands.operations.OperationHistoryFactory;
 
 import edu.rice.cs.hpctraceviewer.data.Frame;
+import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 
 
 /********************************************
@@ -14,7 +15,7 @@ import edu.rice.cs.hpctraceviewer.data.Frame;
  * generic trace operation
  *
  ********************************************/
-public abstract class TraceOperation extends AbstractOperation 
+public abstract class TraceOperation extends AbstractTraceOperation 
 {
 	
 	final static public IUndoContext traceContext = new TraceOperationContext();
@@ -22,12 +23,12 @@ public abstract class TraceOperation extends AbstractOperation
 
 	protected Frame frame;
 	
-	public TraceOperation(String label) {
-		this(label,null);
+	public TraceOperation(SpaceTimeDataController data, String label) {
+		this(data, label,null);
 	}
 	
-	public TraceOperation(String label, Frame frame) {
-		super(label + " " + frame);
+	public TraceOperation(SpaceTimeDataController data, String label, Frame frame) {
+		super(data, label + " " + frame);
 		addContext(traceContext);
 		this.frame = frame;
 	}

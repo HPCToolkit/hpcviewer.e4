@@ -318,7 +318,7 @@ implements IOperationHistoryListener
 				attributes.getDepth(), position.time, position.process );
 		try {
 			TraceOperation.getOperationHistory().execute(
-					new ZoomOperation("Time zoom in", frame), 
+					new ZoomOperation(dataTraces, "Time zoom in", frame), 
 					null, null);
 		} catch (ExecutionException e) {
 			e.printStackTrace();

@@ -1175,7 +1175,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		try {
 			// notify change of ROI
 			TraceOperation.getOperationHistory().execute(
-					new ZoomOperation(sLabel, frame), 
+					new ZoomOperation(stData, sLabel, frame), 
 					null, null);
 			
 		} catch (ExecutionException e) {
@@ -1193,7 +1193,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	{
 		try {
 			TraceOperation.getOperationHistory().execute(
-					new PositionOperation(position), 
+					new PositionOperation(stData, position), 
 					null, null);
 		} catch (ExecutionException e) {
 			e.printStackTrace();
@@ -1213,7 +1213,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		//	and it needs to refresh the view
 		// -----------------------------------------------------------------------
 
-		BufferRefreshOperation brOp = new BufferRefreshOperation("refresh", imageData);
+		BufferRefreshOperation brOp = new BufferRefreshOperation(stData, "refresh", imageData);
 		try {
 			TraceOperation.getOperationHistory().execute(brOp, null, null);
 		} catch (ExecutionException e) {
@@ -1294,7 +1294,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 			final ImageTraceAttributes attr = stData.getAttributes();
 			try {
 				TraceOperation.getOperationHistory().execute(
-						new WindowResizeOperation(attr.getFrame()), null, null);
+						new WindowResizeOperation(stData, attr.getFrame()), null, null);
 			} catch (ExecutionException e) {
 				e.printStackTrace();
 			}

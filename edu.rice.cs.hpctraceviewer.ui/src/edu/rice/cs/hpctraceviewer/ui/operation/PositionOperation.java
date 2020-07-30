@@ -1,7 +1,6 @@
 package edu.rice.cs.hpctraceviewer.ui.operation;
 
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.commands.operations.AbstractOperation;
 import org.eclipse.core.commands.operations.IUndoContext;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -9,6 +8,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import edu.rice.cs.hpctraceviewer.data.Position;
+import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 
 
 /**********************************
@@ -17,14 +17,14 @@ import edu.rice.cs.hpctraceviewer.data.Position;
  * @see getPosition 
  * 	method to retrieve the current position
  **********************************/
-public class PositionOperation extends AbstractOperation 
+public class PositionOperation extends AbstractTraceOperation 
 {
 	final static public IUndoContext context = new PositionOperationContext();
 	final private Position position;
 	
-	public PositionOperation(Position position)
+	public PositionOperation(SpaceTimeDataController data, Position position)
 	{
-		super(PositionOperationContext.label);
+		super(data, PositionOperationContext.label);
 		addContext(context);
 		
 		this.position = position;

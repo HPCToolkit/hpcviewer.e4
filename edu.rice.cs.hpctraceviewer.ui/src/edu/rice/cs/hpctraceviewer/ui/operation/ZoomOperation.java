@@ -7,6 +7,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import edu.rice.cs.hpctraceviewer.data.Frame;
+import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 
 
 /********************************************
@@ -18,8 +19,8 @@ public class ZoomOperation extends TraceOperation {
 	
 	static final public String ActionHome = "Home";
 	
-	public ZoomOperation(String label, Frame frame) {
-		super(label, frame);
+	public ZoomOperation(SpaceTimeDataController data, String label, Frame frame) {
+		super(data, label, frame);
 		addContext(undoableContext);
 	}
 

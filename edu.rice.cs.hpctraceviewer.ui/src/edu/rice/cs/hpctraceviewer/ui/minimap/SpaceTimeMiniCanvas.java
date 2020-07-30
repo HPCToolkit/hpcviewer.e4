@@ -411,7 +411,7 @@ public class SpaceTimeMiniCanvas extends SpaceTimeCanvas
 	{
 		try {
 			TraceOperation.getOperationHistory().execute(
-					new ZoomOperation("Change region", frame),
+					new ZoomOperation(stData, "Change region", frame),
 					null, null);
 		} catch (ExecutionException e) 
 		{
