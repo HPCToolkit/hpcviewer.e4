@@ -7,7 +7,7 @@ Bundle-Vendor: Rice University
 Export-Package: edu.rice.cs.hpctraceviewer.ui,
  edu.rice.cs.hpctraceviewer.ui.main
 Require-Bundle: org.eclipse.core.runtime,
- org.eclipse.e4.ui.model.workbench;bundle-version="2.1.700.v20200113-1422",
+ org.eclipse.e4.ui.model.workbench,
  org.eclipse.jface,
  edu.rice.cs.hpc.data,
  edu.rice.cs.hpcbase,
