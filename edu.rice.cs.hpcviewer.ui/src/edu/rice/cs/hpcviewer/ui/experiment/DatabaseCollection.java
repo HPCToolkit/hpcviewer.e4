@@ -224,6 +224,9 @@ public class DatabaseCollection
 										  String         parentId) {
 		
 		if (experiment == null || service == null) {
+			MessageDialog.openError( Display.getDefault().getActiveShell(), 
+									 "Error in opening the file", 
+									 "Database not found: " + experiment.getDefaultDirectory().getAbsolutePath());
 			return;
 		}
 		
