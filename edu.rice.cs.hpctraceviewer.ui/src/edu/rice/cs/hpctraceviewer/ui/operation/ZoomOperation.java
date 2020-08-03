@@ -1,6 +1,7 @@
 package edu.rice.cs.hpctraceviewer.ui.operation;
 
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.commands.operations.IUndoContext;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -19,9 +20,9 @@ public class ZoomOperation extends TraceOperation {
 	
 	static final public String ActionHome = "Home";
 	
-	public ZoomOperation(SpaceTimeDataController data, String label, Frame frame) {
-		super(data, label, frame);
-		addContext(undoableContext);
+	public ZoomOperation(SpaceTimeDataController data, String label, Frame frame, IUndoContext context) {
+		super(data, label, frame, context);
+		addContext(context);
 	}
 
 	@Override

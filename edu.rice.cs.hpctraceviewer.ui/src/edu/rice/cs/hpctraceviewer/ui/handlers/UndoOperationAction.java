@@ -1,12 +1,17 @@
 package edu.rice.cs.hpctraceviewer.ui.handlers;
 
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.commands.operations.IOperationHistory;
+import org.eclipse.core.commands.operations.IUndoContext;
 import org.eclipse.core.commands.operations.IUndoableOperation;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.e4.core.di.annotations.CanExecute;
 import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 
-import edu.rice.cs.hpctraceviewer.ui.operation.TraceOperation;
+import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
+import edu.rice.cs.hpctraceviewer.ui.context.BaseTraceContext;
+
 
 /***********************************************************************
  * 
@@ -18,18 +23,18 @@ import edu.rice.cs.hpctraceviewer.ui.operation.TraceOperation;
  ***********************************************************************/
 public class UndoOperationAction
 {
-	protected IUndoableOperation[] getHistory() {
-		return TraceOperation.getUndoHistory();
-	}
 
 	@Execute
-	protected void execute() {
-		IUndoableOperation[] operations = getHistory();
+	protected void execute(MPart part) {
+
+		ITracePart tracePart = (ITracePart) part.getObject();
+		IUndoContext context = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_TRACE);
+		IUndoableOperation[] operations = tracePart.getOperationHistory().getUndoHistory(context);
 		final int len = operations.length;
 		if (len<1)
 			return;
 		
-		IUndoableOperation[] redos = TraceOperation.getRedoHistory();
+		IUndoableOperation[] redos = tracePart.getOperationHistory().getRedoHistory(context);
 		
 		if (redos.length == 0) {
 			// hack: when there's no redo, we need to remove the current
@@ -38,17 +43,19 @@ public class UndoOperationAction
 
 			//doUndo();
 			if (len-2>=0) {
-				execute(operations[len-2]);
+				execute(tracePart.getOperationHistory(), operations[len-2]);
 				return;
 			}
 		}
-		doUndo();
+		doUndo(tracePart.getOperationHistory(), context);
 	}
 	
 	
 	@CanExecute
-	protected boolean canExecute() {
-		final IUndoableOperation []ops = getHistory(); 
+	protected boolean canExecute(MPart part) {
+		ITracePart tracePart = (ITracePart) part.getObject();
+		IUndoContext context = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_TRACE);
+		final IUndoableOperation []ops = tracePart.getOperationHistory().getUndoHistory(context);
 		boolean status = (ops != null) && (ops.length>0);
 		System.out.println("can undo: " + status +" , "  + ops);
 		return status;
@@ -57,10 +64,10 @@ public class UndoOperationAction
 	/***
 	 * helper method to perform the default undo
 	 */
-	private void doUndo() {
+	private void doUndo(IOperationHistory opHistory, IUndoContext context ) {
+
 		try {
-			IStatus status = TraceOperation.getOperationHistory().
-					undo(TraceOperation.undoableContext, null, null);
+			IStatus status = opHistory.undo(context, null, null);
 			if (!status.isOK()) {
 				System.err.println("Cannot undo: " + status.getMessage());
 			}
@@ -70,9 +77,9 @@ public class UndoOperationAction
 	}
 	
 
-	protected void execute(IUndoableOperation operation) {
+	protected void execute(IOperationHistory opHistory, IUndoableOperation operation) {
 		try {
-			TraceOperation.getOperationHistory().undoOperation(operation, null, null);
+			opHistory.undoOperation(operation, null, null);
 		} catch (ExecutionException e) {
 			e.printStackTrace();
 		}

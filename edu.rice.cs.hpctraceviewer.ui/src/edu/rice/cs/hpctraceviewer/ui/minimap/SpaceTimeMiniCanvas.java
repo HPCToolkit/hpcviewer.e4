@@ -2,9 +2,10 @@ package edu.rice.cs.hpctraceviewer.ui.minimap;
 
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.operations.IOperationHistoryListener;
+import org.eclipse.core.commands.operations.IUndoContext;
 import org.eclipse.core.commands.operations.IUndoableOperation;
 import org.eclipse.core.commands.operations.OperationHistoryEvent;
-import org.eclipse.core.commands.operations.OperationHistoryFactory;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.events.ControlAdapter;
@@ -27,10 +28,10 @@ import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.Frame;
 import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
 import edu.rice.cs.hpctraceviewer.ui.base.ITraceCanvas;
+import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
+import edu.rice.cs.hpctraceviewer.ui.context.BaseTraceContext;
 import edu.rice.cs.hpctraceviewer.ui.internal.SpaceTimeCanvas;
 import edu.rice.cs.hpctraceviewer.ui.operation.AbstractTraceOperation;
-import edu.rice.cs.hpctraceviewer.ui.operation.BufferRefreshOperation;
-import edu.rice.cs.hpctraceviewer.ui.operation.TraceOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.ZoomOperation;
 
 
@@ -69,13 +70,18 @@ public class SpaceTimeMiniCanvas extends SpaceTimeCanvas
      * region aren't shown because of filtering
      */
     private final Pattern PARTIALLY_FILTERED_PATTERN; 
-    
     private final ControlAdapter controlAdapter;
+    private final ITracePart tracePart;
+    
+    
+    
 
 	/**Creates a SpaceTimeMiniCanvas with the given parameters.*/
-	public SpaceTimeMiniCanvas(Composite _composite)
+	public SpaceTimeMiniCanvas(ITracePart tracePart, Composite _composite)
 	{	
 		super(_composite);
+		
+		this.tracePart = tracePart;
 		
 		mouseState = MouseState.ST_MOUSE_INIT;
 		insideBox = true;
@@ -101,14 +107,14 @@ public class SpaceTimeMiniCanvas extends SpaceTimeCanvas
 			}
 		} ;
 		addControlListener(controlAdapter );
-		OperationHistoryFactory.getOperationHistory().addOperationHistoryListener(this);
+		tracePart.getOperationHistory().addOperationHistoryListener(this);
 	}
 
 
 	@Override
 	public void widgetDisposed(DisposeEvent e) {
     	
-		OperationHistoryFactory.getOperationHistory().removeOperationHistoryListener(this);
+		tracePart.getOperationHistory().removeOperationHistoryListener(this);
     	removeControlListener(controlAdapter);
     	removeMouseListener(this);
     	removeMouseMoveListener(this);
@@ -158,7 +164,7 @@ public class SpaceTimeMiniCanvas extends SpaceTimeCanvas
 			addMouseMoveListener(this);
 			addPaintListener(this);
 			setVisible(true);
-			OperationHistoryFactory.getOperationHistory().addOperationHistoryListener(this);
+			tracePart.getOperationHistory().addOperationHistoryListener(this);
 		}
 		Rectangle r = this.getClientArea();
 		view.x = 0;
@@ -410,9 +416,10 @@ public class SpaceTimeMiniCanvas extends SpaceTimeCanvas
 	 */
 	private void notifyRegionChangeOperation( Frame frame )
 	{
+		IUndoContext context = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_TRACE);
 		try {
-			TraceOperation.getOperationHistory().execute(
-					new ZoomOperation(stData, "Change region", frame),
+			tracePart.getOperationHistory().execute(
+					new ZoomOperation(stData, "Change region", frame, context),
 					null, null);
 		} catch (ExecutionException e) 
 		{
@@ -592,7 +599,8 @@ public class SpaceTimeMiniCanvas extends SpaceTimeCanvas
 		if (op.getData() != stData) 
 			return;
 
-		if (operation.hasContext(BufferRefreshOperation.context)) {
+		IUndoContext context = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_BUFFER);
+		if (operation.hasContext(context)) {
 
 			final Frame frame = stData.getAttributes().getFrame();
 			setBox(frame);

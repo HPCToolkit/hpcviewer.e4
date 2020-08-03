@@ -6,11 +6,13 @@ import java.util.TreeMap;
 
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.operations.IOperationHistoryListener;
+import org.eclipse.core.commands.operations.IUndoContext;
 import org.eclipse.core.commands.operations.IUndoableOperation;
 import org.eclipse.core.commands.operations.OperationHistoryEvent;
 import org.eclipse.core.commands.operations.OperationHistoryFactory;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
@@ -22,10 +24,11 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 
+import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
+import edu.rice.cs.hpctraceviewer.ui.context.BaseTraceContext;
 import edu.rice.cs.hpctraceviewer.ui.internal.AbstractTimeCanvas;
 import edu.rice.cs.hpctraceviewer.ui.operation.AbstractTraceOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.BufferRefreshOperation;
-import edu.rice.cs.hpctraceviewer.ui.operation.TraceOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.ZoomOperation;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
@@ -45,6 +48,8 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas
 implements IOperationHistoryListener
 {	
 	private final IEventBroker eventBroker;
+	private final ITracePart   tracePart;
+	
 	private SpaceTimeDataController dataTraces = null;
 	private TreeMap<Integer /* pixel*/, Integer /* percent*/> mapPixelToPercent;
 	private int totPixels;
@@ -55,12 +60,13 @@ implements IOperationHistoryListener
 	 * 
 	 * @param composite
 	 **********************************/
-	public SummaryTimeCanvas(Composite composite, IEventBroker eventBroker)
+	public SummaryTimeCanvas(ITracePart tracePart, Composite composite, IEventBroker eventBroker)
     {
 		super(composite, SWT.NO_BACKGROUND);
 		
 		this.eventBroker = eventBroker;
-		OperationHistoryFactory.getOperationHistory().addOperationHistoryListener(this);
+		this.tracePart   = tracePart;
+		tracePart.getOperationHistory().addOperationHistoryListener(this);
 	}
 	
 	@Override
@@ -72,7 +78,19 @@ implements IOperationHistoryListener
 		super.paintControl(event);
 		refreshWithCondition();
 	}
+
 	
+
+	@Override
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
+	 */
+	public void widgetDisposed(DisposeEvent e)
+	{
+		tracePart.getOperationHistory().removeOperationHistoryListener(this);
+	}
+
 
 	private void refreshWithCondition()
 	{
@@ -279,7 +297,9 @@ implements IOperationHistoryListener
 	@Override
 	public void historyNotification(final OperationHistoryEvent event) {
 		// we are not interested with other operation
-		if (event.getOperation().hasContext(BufferRefreshOperation.context)) {
+		IUndoContext context = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_BUFFER);
+		
+		if (event.getOperation().hasContext(context)) {
 			if (event.getEventType() == OperationHistoryEvent.DONE) {
 
 				if (isDisposed()) return;
@@ -326,9 +346,11 @@ implements IOperationHistoryListener
 		final Frame frame = new Frame(topLeftTime, bottomRightTime,
 				attributes.getProcessBegin(), attributes.getProcessEnd(),
 				attributes.getDepth(), position.time, position.process );
+		
+		IUndoContext context = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_TRACE);
 		try {
-			TraceOperation.getOperationHistory().execute(
-					new ZoomOperation(dataTraces, "Time zoom in", frame), 
+			tracePart.getOperationHistory().execute(
+					new ZoomOperation(dataTraces, "Time zoom in", frame, context), 
 					null, null);
 		} catch (ExecutionException e) {
 			e.printStackTrace();

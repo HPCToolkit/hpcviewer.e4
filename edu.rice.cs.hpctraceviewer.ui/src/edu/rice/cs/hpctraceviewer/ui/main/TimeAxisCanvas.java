@@ -14,6 +14,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
+import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
 
 
@@ -47,8 +48,8 @@ public class TimeAxisCanvas extends AbstractAxisCanvas
 	 * @param parent
 	 * @param style
 	 */
-	public TimeAxisCanvas(Composite parent, int style) {
-		super(parent, SWT.NO_BACKGROUND | style);
+	public TimeAxisCanvas(ITracePart tracePart, Composite parent, int style) {
+		super(tracePart, parent, SWT.NO_BACKGROUND | style);
 		
 		bgColor = parent.getBackground();
 		

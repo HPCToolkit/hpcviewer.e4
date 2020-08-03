@@ -54,7 +54,7 @@ public class HPCDepthView extends AbstractBaseItem
 		 * Depth View Canvas
 		 *************************************************************************/
 		
-		depthCanvas = new DepthTimeCanvas(plotArea);
+		depthCanvas = new DepthTimeCanvas(parentPart, plotArea);
 		GridDataFactory.fillDefaults().grab(true, true).
 						hint(500, VIEW_HEIGHT_HINT).applyTo(depthCanvas);
 

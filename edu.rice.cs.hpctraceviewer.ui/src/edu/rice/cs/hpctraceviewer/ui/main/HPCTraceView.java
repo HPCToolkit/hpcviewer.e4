@@ -75,12 +75,12 @@ public class HPCTraceView extends AbstractBaseItem
 
 		Composite plotArea = new Composite(parent, SWT.NONE);
 		
-		processCanvas = new ThreadAxisCanvas(timelineService, plotArea, SWT.NONE);
+		processCanvas = new ThreadAxisCanvas(parentPart, timelineService, plotArea, SWT.NONE);
 		GridDataFactory.fillDefaults().grab(false, true).
 						hint(Y_AXIS_WIDTH, 500).applyTo(processCanvas);
 
 		
-		detailCanvas = new SpaceTimeDetailCanvas(context, eventBroker, plotArea); 
+		detailCanvas = new SpaceTimeDetailCanvas(parentPart, context, eventBroker, plotArea); 
 
 		detailCanvas.setLabels(labelGroup);
 		
@@ -97,7 +97,7 @@ public class HPCTraceView extends AbstractBaseItem
 						hint(Y_AXIS_WIDTH, X_AXIS_HEIGHT).applyTo(footerCanvas);
 
 
-		axisArea = new TimeAxisCanvas(plotArea, SWT.NO_BACKGROUND);
+		axisArea = new TimeAxisCanvas(parentPart, plotArea, SWT.NO_BACKGROUND);
 		GridDataFactory.fillDefaults().grab(true, false).
 						hint(500, X_AXIS_HEIGHT).applyTo(axisArea);
 

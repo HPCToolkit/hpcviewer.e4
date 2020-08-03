@@ -5,6 +5,7 @@ import java.util.concurrent.Executors;
 
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.operations.IOperationHistoryListener;
+import org.eclipse.core.commands.operations.IUndoContext;
 import org.eclipse.core.commands.operations.IUndoableOperation;
 import org.eclipse.core.commands.operations.OperationHistoryEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
@@ -20,7 +21,10 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
+import edu.rice.cs.hpctraceviewer.ui.TracePart;
 import edu.rice.cs.hpctraceviewer.ui.base.ISpaceTimeCanvas;
+import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
+import edu.rice.cs.hpctraceviewer.ui.context.BaseTraceContext;
 import edu.rice.cs.hpctraceviewer.ui.internal.AbstractTimeCanvas;
 import edu.rice.cs.hpctraceviewer.ui.internal.BaseViewPaint;
 import edu.rice.cs.hpctraceviewer.ui.operation.AbstractTraceOperation;
@@ -42,6 +46,7 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 	implements IOperationHistoryListener, ISpaceTimeCanvas
 {	
 	final private ExecutorService threadExecutor;
+	final private ITracePart tracePart;
 
 	private SpaceTimeDataController stData;
 	private int currentProcess = Integer.MIN_VALUE;
@@ -53,10 +58,11 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 	 * 
 	 * @param composite : the parent composite
 	 */
-	public DepthTimeCanvas(Composite composite)
+	public DepthTimeCanvas(ITracePart tracePart, Composite composite)
     {
 		super(composite, SWT.NONE);
 		
+		this.tracePart = tracePart;
 		threadExecutor = Executors.newFixedThreadPool( Utility.getNumThreads(0) ); 
 	}
 	
@@ -71,7 +77,7 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 		
 		if (this.stData == null) {
 			// just initialize once
-			TraceOperation.getOperationHistory().addOperationHistoryListener(this);
+			tracePart.getOperationHistory().addOperationHistoryListener(this);
 		}
 		this.stData = stData; 		
 	}
@@ -80,7 +86,7 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 	public void widgetDisposed(DisposeEvent e) {
 
 		removeDisposeListener(this);
-		TraceOperation.getOperationHistory().removeOperationHistoryListener(this);
+		tracePart.getOperationHistory().removeOperationHistoryListener(this);
 		super.widgetDisposed(e);
 
 		threadExecutor.shutdown();
@@ -274,7 +280,10 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 			if (op.getData() != stData) 
 				return;
 
-			if (operation.hasContext(BufferRefreshOperation.context)) {
+			IUndoContext bufferContext = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_BUFFER);
+			IUndoContext positionContext = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_POSITION);
+			
+			if (operation.hasContext(bufferContext)) {
 				// this event includes if there's a change of colors definition, so everyone needs
 				// to refresh the content
 				try {
@@ -284,7 +293,7 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 					// ignore exception when there's (possibly) multiple thread access  
 				}
 				
-			} else if (operation.hasContext(PositionOperation.context)) {
+			} else if (operation.hasContext(positionContext)) {
 				PositionOperation opPos = (PositionOperation) operation;
 				Position position = opPos.getPosition();
 				if (position.process == currentProcess)
@@ -305,10 +314,11 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
     	
     	Position currentPosition = stData.getAttributes().getPosition();
     	Position newPosition = new Position(closeTime, currentPosition.process);
+    	IUndoContext context = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_POSITION);
     		
     	try {
-			TraceOperation.getOperationHistory().execute(
-					new PositionOperation(stData, newPosition), 
+			tracePart.getOperationHistory().execute(
+					new PositionOperation(stData, newPosition, context), 
 					null, null);
 		} catch (ExecutionException e) {
 			e.printStackTrace();
@@ -328,6 +338,8 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 			// should send error message that the length is too small
 			return;
 		}
+		IUndoContext context = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_TRACE);
+		
 		final Frame oldFrame 	= attributes.getFrame();
 		final Position position = oldFrame.position;
 		
@@ -335,8 +347,8 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 				attributes.getProcessBegin(), attributes.getProcessEnd(),
 				attributes.getDepth(), position.time, position.process);
 		try {
-			TraceOperation.getOperationHistory().execute(
-					new ZoomOperation(stData, "Time zoom out", frame), 
+			tracePart.getOperationHistory().execute(
+					new ZoomOperation(stData, "Time zoom out", frame, context), 
 					null, null);
 		} catch (ExecutionException e) {
 			e.printStackTrace();

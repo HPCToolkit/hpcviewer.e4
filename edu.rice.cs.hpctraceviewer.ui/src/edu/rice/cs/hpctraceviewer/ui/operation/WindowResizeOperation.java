@@ -12,28 +12,11 @@ import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 
 public class WindowResizeOperation extends ZoomOperation 
 {
-	final static private IUndoContext context = new IUndoContext() {
-		
-		private final static String label = "WindoResizeOperation";
-		
-		@Override
-		public boolean matches(IUndoContext context) {
-			return context.getLabel() == label;
-		}
-		
-		@Override
-		public String getLabel() {
-			return label;
-		}
-	};
 
-	public WindowResizeOperation(SpaceTimeDataController data, Frame frame) {
-		super(data, "Resize", frame);
+	public WindowResizeOperation(SpaceTimeDataController data, Frame frame, IUndoContext context) {
+		super(data, "Resize", frame, context);
 		
 		// we don't want this operation in undo list
-		removeContext(undoableContext);
-		
-		addContext(context);
 	}
 
 	@Override

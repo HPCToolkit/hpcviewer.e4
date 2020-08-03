@@ -18,6 +18,7 @@ import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 import edu.rice.cs.hpctraceviewer.ui.base.ITraceCanvas;
+import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.base.ITraceCanvas.MouseState;
 
 
@@ -45,8 +46,8 @@ public class ThreadAxisCanvas extends AbstractAxisCanvas
 	
 	private AxisToolTip tooltip = null;
 
-	public ThreadAxisCanvas(ProcessTimelineService timeLine, Composite parent, int style) {
-		super(parent, style);
+	public ThreadAxisCanvas(ITracePart tracePart, ProcessTimelineService timeLine, Composite parent, int style) {
+		super(tracePart, parent, style);
 		
 		bgColor = parent.getBackground();
 		this.timeLine = timeLine;

@@ -11,9 +11,7 @@ import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 
 public class RefreshOperation extends AbstractTraceOperation {
 	
-	static final public IUndoContext context = new RefreshOperationContext();
-
-	public RefreshOperation(SpaceTimeDataController data, String label) {
+	public RefreshOperation(SpaceTimeDataController data, String label, IUndoContext context ) {
 		super(data, label);
 		addContext(context);
 	}

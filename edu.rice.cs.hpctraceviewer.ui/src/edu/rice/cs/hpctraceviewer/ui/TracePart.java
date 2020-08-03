@@ -3,6 +3,9 @@ package edu.rice.cs.hpctraceviewer.ui;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+
+import java.util.HashMap;
+
 import javax.annotation.PostConstruct;
 
 import org.eclipse.swt.SWT;
@@ -22,6 +25,7 @@ import edu.rice.cs.hpctraceviewer.ui.base.AbstractBaseItem;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.base.ITraceViewAction;
 import edu.rice.cs.hpctraceviewer.ui.callstack.HPCCallStackView;
+import edu.rice.cs.hpctraceviewer.ui.context.BaseTraceContext;
 import edu.rice.cs.hpctraceviewer.ui.depth.HPCDepthView;
 import edu.rice.cs.hpctraceviewer.ui.main.HPCTraceView;
 import edu.rice.cs.hpctraceviewer.ui.minimap.SpaceTimeMiniCanvas;
@@ -30,6 +34,9 @@ import edu.rice.cs.hpctraceviewer.ui.summary.HPCSummaryView;
 
 import javax.annotation.PreDestroy;
 
+import org.eclipse.core.commands.operations.IOperationHistory;
+import org.eclipse.core.commands.operations.IUndoContext;
+import org.eclipse.core.commands.operations.OperationHistoryFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.di.Focus;
@@ -41,10 +48,18 @@ import org.eclipse.e4.ui.workbench.modeling.IPartListener;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 
+
+/***************************************************************
+ * 
+ * The main class for trace viewer
+ *
+ ***************************************************************/
 public class TracePart implements ITracePart, IPartListener
 {
 	public static final String ID = "edu.rice.cs.hpctraceviewer.ui.partdescriptor.trace";
 
+	private final HashMap<String, IUndoContext> mapLabelToContext;
+	
 	private BaseExperiment experiment;
 	
 	private CTabFolder tabFolderTopLeft;
@@ -60,11 +75,13 @@ public class TracePart implements ITracePart, IPartListener
 	private SpaceTimeMiniCanvas miniCanvas;
 	
 	private IEclipseContext context;
-	private AbstractDBOpener dbOpener;
+	private MWindow window;
+	
+	private SpaceTimeDataController stdc;
 	
 	@Inject
 	public TracePart() {
-		dbOpener = null;
+		mapLabelToContext = new HashMap<String, IUndoContext>(8);
 	}
 	
 	@PostConstruct
@@ -146,7 +163,7 @@ public class TracePart implements ITracePart, IPartListener
 		
 		GridDataFactory.fillDefaults().indent(5, 4).align(SWT.LEFT, SWT.TOP).grab(true, false).applyTo(lblMiniMap);
 		
-		miniCanvas = new SpaceTimeMiniCanvas(miniArea);
+		miniCanvas = new SpaceTimeMiniCanvas(this, miniArea);
 
 		GridLayoutFactory.swtDefaults().numColumns(1).applyTo(miniCanvas);
 		GridDataFactory.swtDefaults().grab(true, true).align(SWT.CENTER, SWT.CENTER).hint(160, 100).applyTo(miniCanvas);
@@ -235,12 +252,12 @@ public class TracePart implements ITracePart, IPartListener
 			return;
 		
 		// if we already create the database and the views, we don't need to recreate again
-		if (dbOpener != null)
+		if (stdc != null)
 			return;
 		
 		try {
-			dbOpener = new LocalDBOpener(context, experiment);
-			SpaceTimeDataController stdc = dbOpener.openDBAndCreateSTDC(null);
+			AbstractDBOpener dbOpener = new LocalDBOpener(context, experiment);
+			stdc = dbOpener.openDBAndCreateSTDC(null);
 
 			// TODO: make sure all the tabs other than trace view has the stdc first
 			tbtmDepthView.setInput(stdc);
@@ -265,5 +282,32 @@ public class TracePart implements ITracePart, IPartListener
 	@Override
 	public void activateStatisticItem() {
 		tabFolderBottomLeft.setSelection(tbtmSummaryView);
+	}
+
+	@Override
+	public IUndoContext getContext(final String label) {
+		IUndoContext context = mapLabelToContext.get(label);
+		if (context != null)
+			return context;
+
+		context = new TraceOperationContext(label);
+		
+		mapLabelToContext.put(label, context);
+		
+		return context;
+	}
+	
+	
+	@Override
+	public IOperationHistory getOperationHistory() {
+		return OperationHistoryFactory.getOperationHistory();
+	}
+
+	
+	static private class TraceOperationContext extends BaseTraceContext 
+	{
+		public TraceOperationContext(final String label) {
+			super(label);
+		}
 	}
 }

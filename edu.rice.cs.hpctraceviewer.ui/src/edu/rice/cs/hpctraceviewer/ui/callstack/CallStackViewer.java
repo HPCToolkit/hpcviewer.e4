@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Vector;
 
 import org.eclipse.core.commands.operations.IOperationHistoryListener;
+import org.eclipse.core.commands.operations.IUndoContext;
 import org.eclipse.core.commands.operations.IUndoableOperation;
 import org.eclipse.core.commands.operations.OperationHistoryEvent;
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -29,11 +30,10 @@ import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.data.util.string.StringUtil;
+import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
+import edu.rice.cs.hpctraceviewer.ui.context.BaseTraceContext;
 import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
 import edu.rice.cs.hpctraceviewer.ui.operation.AbstractTraceOperation;
-import edu.rice.cs.hpctraceviewer.ui.operation.BufferRefreshOperation;
-import edu.rice.cs.hpctraceviewer.ui.operation.PositionOperation;
-import edu.rice.cs.hpctraceviewer.ui.operation.TraceOperation;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
@@ -54,19 +54,24 @@ public class CallStackViewer extends TableViewer
 	
 	private final ProcessTimelineService ptlService;
 	private final IEventBroker eventBroker;
+	private final ITracePart   tracePart;
 	private final TableViewerColumn viewerColumn;
 	
 	private SpaceTimeDataController stData ;
 	private Listener selectionListener;
 	
-    /**Creates a CallStackViewer with Composite parent, SpaceTimeDataController _stData, and HPCTraceView _view.*/
-	public CallStackViewer(final Composite parent, 
+    /**
+     * Creates a CallStackViewer with Composite parent, SpaceTimeDataController _stData, and HPCTraceView _view.
+     * */
+	public CallStackViewer(final ITracePart   tracePart,
+						   final Composite    parent, 
 						   final HPCCallStackView csview, 
 						   final ProcessTimelineService ptlService,
 						   final IEventBroker eventBroker)
 	{
 		super(parent, SWT.SINGLE | SWT.READ_ONLY );
 		
+		this.tracePart   = tracePart;
 		this.ptlService  = ptlService;
 		this.eventBroker = eventBroker;
 		
@@ -148,7 +153,7 @@ public class CallStackViewer extends TableViewer
 
 		ColumnViewerToolTipSupport.enableFor(this, ToolTip.NO_RECREATE);
 		
-		TraceOperation.getOperationHistory().addOperationHistoryListener(this);
+		tracePart.getOperationHistory().addOperationHistoryListener(this);
 		
 		getTable().addDisposeListener(this);
 	}
@@ -270,7 +275,7 @@ public class CallStackViewer extends TableViewer
 	
 	@Override
 	public void widgetDisposed(DisposeEvent e) {
-		TraceOperation.getOperationHistory().removeOperationHistoryListener(this);
+		tracePart.getOperationHistory().removeOperationHistoryListener(this);
 		getTable().removeDisposeListener(this);
 		getTable().removeListener(SWT.Selection, selectionListener);
 	}
@@ -310,8 +315,11 @@ public class CallStackViewer extends TableViewer
 		if (op.getData() != stData) 
 			return;
 
-		if (operation.hasContext(BufferRefreshOperation.context) ||
-				operation.hasContext(PositionOperation.context)) {
+		IUndoContext bufferCtx   = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_BUFFER);
+		IUndoContext positionCtx = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_POSITION);
+		
+		if (operation.hasContext(bufferCtx) ||
+				operation.hasContext(positionCtx)) {
 			if (event.getEventType() == OperationHistoryEvent.DONE) {
 				//updateView();
 				setSample(stData.getAttributes().getPosition(), stData.getAttributes().getDepth());			}

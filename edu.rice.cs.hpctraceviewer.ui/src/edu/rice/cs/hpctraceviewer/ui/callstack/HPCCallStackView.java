@@ -59,11 +59,7 @@ public class HPCCallStackView extends AbstractBaseItem implements EventHandler
 		this.broker = broker;
 		setEnableAction(false);
 		ProcessTimelineService ptlService = (ProcessTimelineService) context.get(Constants.CONTEXT_TIMELINE);
-		setupEverything(master, ptlService);
-	}
-	
-	private void setupEverything(Composite master, ProcessTimelineService ptlService)
-	{
+
 		/*************************************************************************
 		 * Master Composite
 		 ************************************************************************/
@@ -176,7 +172,7 @@ public class HPCCallStackView extends AbstractBaseItem implements EventHandler
 		/*************************************************************************
 		 * CallStackViewer
 		 ************************************************************************/
-		csViewer = new CallStackViewer(master, this, ptlService, broker);
+		csViewer = new CallStackViewer(parentPart, master, this, ptlService, broker);
 		
 		setToolTipText("The view to show the depth and the actual call path for the point selected by the Trace View's crosshair");
 	}

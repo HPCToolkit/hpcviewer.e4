@@ -1,6 +1,7 @@
 package edu.rice.cs.hpctraceviewer.ui.main;
 
 import org.eclipse.core.commands.operations.IOperationHistoryListener;
+import org.eclipse.core.commands.operations.IUndoContext;
 import org.eclipse.core.commands.operations.IUndoableOperation;
 import org.eclipse.core.commands.operations.OperationHistoryEvent;
 import org.eclipse.swt.SWT;
@@ -11,15 +12,18 @@ import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
-import edu.rice.cs.hpctraceviewer.ui.operation.BufferRefreshOperation;
-import edu.rice.cs.hpctraceviewer.ui.operation.TraceOperation;
+import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
+import edu.rice.cs.hpctraceviewer.ui.context.BaseTraceContext;
 
 abstract public class AbstractAxisCanvas extends Canvas 
 				implements PaintListener, IOperationHistoryListener, DisposeListener
 {
-
-	public AbstractAxisCanvas(Composite parent, int style) {
+	final ITracePart tracePart;
+	
+	public AbstractAxisCanvas(ITracePart tracePart, Composite parent, int style) {
 		super(parent, SWT.NO_BACKGROUND | style);
+		
+		this.tracePart = tracePart;
 
 		addPaintListener(this);
 		addDisposeListener(this);
@@ -32,7 +36,7 @@ abstract public class AbstractAxisCanvas extends Canvas
 		
 		if (getData() == null) {
 			// just initialize once
-			TraceOperation.getOperationHistory().addOperationHistoryListener(this);
+			tracePart.getOperationHistory().addOperationHistoryListener(this);
 		}
 
 		super.setData(data);
@@ -43,7 +47,7 @@ abstract public class AbstractAxisCanvas extends Canvas
 	
 	@Override
 	public void widgetDisposed(DisposeEvent e) {
-		TraceOperation.getOperationHistory().removeOperationHistoryListener(this);
+		tracePart.getOperationHistory().removeOperationHistoryListener(this);
 	}
 
 		
@@ -72,8 +76,10 @@ abstract public class AbstractAxisCanvas extends Canvas
 
 		if (event.getEventType() == OperationHistoryEvent.DONE) {
 			final IUndoableOperation operation = event.getOperation();
+			
+			IUndoContext context = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_BUFFER);
 
-			if (operation.hasContext(BufferRefreshOperation.context)) {
+			if (operation.hasContext(context)) {
 				syncRedraw();
 			}
 		}

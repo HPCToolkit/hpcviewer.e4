@@ -14,10 +14,11 @@ public class BufferRefreshOperation extends AbstractTraceOperation {
 
 	/**image data that describes current image in detail canvas*/
 	final private ImageData detailData;
-	static final public IUndoContext context = new BufferOperationContext();
 
-	public BufferRefreshOperation(SpaceTimeDataController data, String label, ImageData detailData) {
-		super(data, label);
+	public BufferRefreshOperation(SpaceTimeDataController data, 
+								  ImageData detailData,
+								  IUndoContext context ) {
+		super(data, "refresh");
 		addContext(context);
 		this.detailData = detailData;
 	}

@@ -35,7 +35,7 @@ public class MiniMap extends AbstractBaseItem
 		Label lbl = new Label(miniArea, SWT.BORDER);
 		lbl.setText("Mini map");
 		
-		miniCanvas = new SpaceTimeMiniCanvas(miniArea);
+		miniCanvas = new SpaceTimeMiniCanvas(parentPart, miniArea);
 		miniCanvas.setLayout(new GridLayout());
 		GridData miniCanvasData = new GridData(SWT.CENTER, SWT.BOTTOM, true, false);
 		miniCanvasData.heightHint = 100;

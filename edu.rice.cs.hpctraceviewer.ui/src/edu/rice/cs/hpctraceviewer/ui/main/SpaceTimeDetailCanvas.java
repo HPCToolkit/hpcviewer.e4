@@ -11,9 +11,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.operations.IOperationHistoryListener;
+import org.eclipse.core.commands.operations.IUndoContext;
 import org.eclipse.core.commands.operations.IUndoableOperation;
 import org.eclipse.core.commands.operations.OperationHistoryEvent;
-import org.eclipse.core.commands.operations.OperationHistoryFactory;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -42,7 +42,9 @@ import org.osgi.service.event.EventHandler;
 
 import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
 import edu.rice.cs.hpctraceviewer.ui.base.ISpaceTimeCanvas;
+import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.base.ITraceViewAction;
+import edu.rice.cs.hpctraceviewer.ui.context.BaseTraceContext;
 import edu.rice.cs.hpctraceviewer.ui.internal.AbstractTimeCanvas;
 import edu.rice.cs.hpctraceviewer.ui.internal.BufferPaint;
 import edu.rice.cs.hpctraceviewer.ui.internal.ResizeListener;
@@ -50,7 +52,6 @@ import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
 import edu.rice.cs.hpctraceviewer.ui.operation.AbstractTraceOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.BufferRefreshOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.PositionOperation;
-import edu.rice.cs.hpctraceviewer.ui.operation.TraceOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.WindowResizeOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.ZoomOperation;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
@@ -90,6 +91,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	final private Point selectionTopLeft, selectionBottomRight;
 	
 	private final IEclipseContext context;
+	private final ITracePart 	  tracePart;
 	
 	/**The Group containing the labels. labelGroup.redraw() is called from the Detail Canvas.*/
 	private Composite labelGroup;
@@ -117,13 +119,14 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	private KeyListener keyListener;
 	
     /**Creates a SpaceTimeDetailCanvas with the given parameters*/
-	public SpaceTimeDetailCanvas(IEclipseContext context, IEventBroker eventBroker, Composite _composite)
+	public SpaceTimeDetailCanvas(ITracePart tracePart, IEclipseContext context, IEventBroker eventBroker, Composite _composite)
 	{
 		super(_composite, SWT.NO_BACKGROUND | SWT.BORDER_DASH, RegionType.Rectangle );
 		
+		this.tracePart   = tracePart;
 		this.eventBroker = eventBroker;
-		this.context  = context;
-		oldAttributes = new ImageTraceAttributes();
+		this.context     = context;
+		oldAttributes    = new ImageTraceAttributes();
 
 		selectionTopLeft     = new Point(0,0);
 		selectionBottomRight = new Point(0,0);
@@ -151,7 +154,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		if (this.stData == null) 
 		{
 			addCanvasListener();
-			OperationHistoryFactory.getOperationHistory().addOperationHistoryListener(this);
+			tracePart.getOperationHistory().addOperationHistoryListener(this);
 			eventBroker.subscribe(IConstants.TOPIC_DEPTH_UPDATE, this);
 		}
 
@@ -1154,7 +1157,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		if (resizeListener != null)
 			removeControlListener(resizeListener);
 				
-		OperationHistoryFactory.getOperationHistory().removeOperationHistoryListener(this);
+		tracePart.getOperationHistory().removeOperationHistoryListener(this);
 		
 		super.widgetDisposed(e);
 	}
@@ -1175,12 +1178,13 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	private void notifyChanges(String label, Frame frame) 
 	{
 		String sLabel = (label == null ? "Set region" : label);
+		IUndoContext context = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_TRACE);
 
 		// forces all other views to refresh with the new region
 		try {
 			// notify change of ROI
-			TraceOperation.getOperationHistory().execute(
-					new ZoomOperation(stData, sLabel, frame), 
+			tracePart.getOperationHistory().execute(
+					new ZoomOperation(stData, sLabel, frame, context), 
 					null, null);
 			
 		} catch (ExecutionException e) {
@@ -1196,9 +1200,10 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	 ***********************************************************************************/
 	private void notifyChangePosition(Position position) 
 	{
+		IUndoContext context = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_POSITION);
 		try {
-			TraceOperation.getOperationHistory().execute(
-					new PositionOperation(stData, position), 
+			tracePart.getOperationHistory().execute(
+					new PositionOperation(stData, position, context), 
 					null, null);
 		} catch (ExecutionException e) {
 			e.printStackTrace();
@@ -1217,10 +1222,10 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		// notify to SummaryView that a new image has been created,
 		//	and it needs to refresh the view
 		// -----------------------------------------------------------------------
-
-		BufferRefreshOperation brOp = new BufferRefreshOperation(stData, "refresh", imageData);
+		IUndoContext context = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_BUFFER);
+		BufferRefreshOperation brOp = new BufferRefreshOperation(stData, imageData, context);
 		try {
-			TraceOperation.getOperationHistory().execute(brOp, null, null);
+			tracePart.getOperationHistory().execute(brOp, null, null);
 		} catch (ExecutionException e) {
 			e.printStackTrace();
 		}
@@ -1243,8 +1248,8 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 			return;
 
 		// handling the operations
-		if (operation.hasContext(TraceOperation.traceContext) ||
-				operation.hasContext(PositionOperation.context)) 
+		if (operation.hasContext(tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_TRACE)) ||
+				operation.hasContext(tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_POSITION))) 
 		{
 			int type = event.getEventType();
 			// warning: hack solution
@@ -1271,7 +1276,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 				}
 				break;
 			}
-		} else if (operation.hasContext(BufferRefreshOperation.context)) {
+		} else if (operation.hasContext(tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_BUFFER))) {
 			if (event.getEventType() == OperationHistoryEvent.DONE) {
 				// this event is triggered by non ui-thread
 				// we need to ask ui thread to execute it
@@ -1304,9 +1309,11 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		public void rebuffering() {
 			// force the paint to refresh the data			
 			final ImageTraceAttributes attr = stData.getAttributes();
+			IUndoContext context = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_RESIZE);
+			
 			try {
-				TraceOperation.getOperationHistory().execute(
-						new WindowResizeOperation(stData, attr.getFrame()), null, null);
+				tracePart.getOperationHistory().execute(
+						new WindowResizeOperation(stData, attr.getFrame(), context), null, null);
 			} catch (ExecutionException e) {
 				e.printStackTrace();
 			}

@@ -19,12 +19,13 @@ import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
  **********************************/
 public class PositionOperation extends AbstractTraceOperation 
 {
-	final static public IUndoContext context = new PositionOperationContext();
+	private final static String label = "PositionOperationContext";
+
 	final private Position position;
 	
-	public PositionOperation(SpaceTimeDataController data, Position position)
+	public PositionOperation(SpaceTimeDataController data, Position position, IUndoContext context)
 	{
-		super(data, PositionOperationContext.label);
+		super(data, label);
 		addContext(context);
 		
 		this.position = position;
@@ -51,27 +52,5 @@ public class PositionOperation extends AbstractTraceOperation
 	public IStatus undo(IProgressMonitor monitor, IAdaptable info)
 			throws ExecutionException {
 		return Status.OK_STATUS;
-	}
-	
-	
-	/**********
-	 * 
-	 * private inner class for the context of this operation
-	 *
-	 **********/
-	static private class PositionOperationContext implements IUndoContext
-	{
-		private final static String label = "PositionOperationContext";
-
-		@Override
-		public String getLabel() {
-			return label;
-		}
-
-		@Override
-		public boolean matches(IUndoContext context) {
-			return context.getLabel() == label;
-		}
-		
 	}
 }
