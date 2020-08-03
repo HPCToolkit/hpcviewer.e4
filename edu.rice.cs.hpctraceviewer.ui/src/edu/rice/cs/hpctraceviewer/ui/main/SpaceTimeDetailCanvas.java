@@ -156,6 +156,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 			addCanvasListener();
 			tracePart.getOperationHistory().addOperationHistoryListener(this);
 			eventBroker.subscribe(IConstants.TOPIC_DEPTH_UPDATE, this);
+			eventBroker.subscribe(IConstants.TOPIC_FILTER_RANKS, this);
 		}
 
 		// reinitialize the selection rectangle
@@ -1408,6 +1409,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		if (event.getTopic().equals(IConstants.TOPIC_DEPTH_UPDATE)) {
 			Integer depth = (Integer) eventData.value;
 			setDepth(depth.intValue());
+			
+		} else if (event.getTopic().equals(IConstants.TOPIC_FILTER_RANKS)) {
+			refresh(true);
 		}
 	}
 }

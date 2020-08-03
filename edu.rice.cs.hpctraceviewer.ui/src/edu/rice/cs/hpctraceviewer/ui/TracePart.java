@@ -288,7 +288,7 @@ public class TracePart implements ITracePart, IPartListener
 		if (context != null)
 			return context;
 
-		context = new TraceOperationContext(label);
+		context = new BaseTraceContext(label);
 		
 		mapLabelToContext.put(label, context);
 		
@@ -301,11 +301,9 @@ public class TracePart implements ITracePart, IPartListener
 		return OperationHistoryFactory.getOperationHistory();
 	}
 
-	
-	static private class TraceOperationContext extends BaseTraceContext 
-	{
-		public TraceOperationContext(final String label) {
-			super(label);
-		}
+
+	@Override
+	public Object getInput() {
+		return stdc;
 	}
 }

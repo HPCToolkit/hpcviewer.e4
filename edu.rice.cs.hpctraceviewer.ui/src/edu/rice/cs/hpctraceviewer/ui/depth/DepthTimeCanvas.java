@@ -277,7 +277,7 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 			if (op.getData() != stData) 
 				return;
 
-			IUndoContext bufferContext = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_BUFFER);
+			IUndoContext bufferContext   = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_BUFFER);
 			IUndoContext positionContext = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_POSITION);
 			
 			if (operation.hasContext(bufferContext)) {
