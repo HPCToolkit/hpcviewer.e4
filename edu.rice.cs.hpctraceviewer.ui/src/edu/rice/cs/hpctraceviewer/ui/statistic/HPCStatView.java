@@ -214,6 +214,7 @@ public class HPCStatView extends AbstractBaseItem implements EventHandler, Liste
 	{
 		StatisticContentProvider() {}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public Object[] getElements(Object inputElement) {
 			if (inputElement == null)

@@ -117,6 +117,10 @@ public class MiniCanvasRectangle {
 			case VERTICAL_RESOLUTION:
 				sb.append(" because the current vertical resolution is too small "
 						+ "to show all selected traces");
+			case NONE:
+				break;
+			default:
+				break;
 			}
 			if (reasons.size() > 1){
 				if (i < reasons.size() - 2)

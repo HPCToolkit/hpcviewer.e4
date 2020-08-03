@@ -75,8 +75,6 @@ public class TracePart implements ITracePart, IPartListener
 	private SpaceTimeMiniCanvas miniCanvas;
 	
 	private IEclipseContext context;
-	private MWindow window;
-	
 	private SpaceTimeDataController stdc;
 	
 	@Inject
