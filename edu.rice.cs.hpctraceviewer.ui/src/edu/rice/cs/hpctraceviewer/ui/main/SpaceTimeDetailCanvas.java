@@ -155,8 +155,10 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		{
 			addCanvasListener();
 			tracePart.getOperationHistory().addOperationHistoryListener(this);
-			eventBroker.subscribe(IConstants.TOPIC_DEPTH_UPDATE, this);
-			eventBroker.subscribe(IConstants.TOPIC_FILTER_RANKS, this);
+			
+			eventBroker.subscribe(IConstants.TOPIC_DEPTH_UPDATE,  this);
+			eventBroker.subscribe(IConstants.TOPIC_FILTER_RANKS,  this);
+			eventBroker.subscribe(IConstants.TOPIC_COLOR_MAPPING, this);
 		}
 
 		// reinitialize the selection rectangle
@@ -1180,16 +1182,14 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	{
 		String sLabel = (label == null ? "Set region" : label);
 		IUndoContext context = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_TRACE);
+		ZoomOperation opZoom = new ZoomOperation(stData, sLabel, frame, context);
 
 		// forces all other views to refresh with the new region
 		try {
 			// notify change of ROI
-			tracePart.getOperationHistory().execute(
-					new ZoomOperation(stData, sLabel, frame, context), 
-					null, null);
+			tracePart.getOperationHistory().execute(opZoom, null, null);
 			
 		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -1202,10 +1202,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	private void notifyChangePosition(Position position) 
 	{
 		IUndoContext context = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_POSITION);
+		PositionOperation op = new PositionOperation(stData, position, context);
 		try {
-			tracePart.getOperationHistory().execute(
-					new PositionOperation(stData, position, context), 
-					null, null);
+			tracePart.getOperationHistory().execute( op, null, null);
 		} catch (ExecutionException e) {
 			e.printStackTrace();
 		}
@@ -1249,8 +1248,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 			return;
 
 		// handling the operations
-		if (operation.hasContext(tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_TRACE)) ||
-				operation.hasContext(tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_POSITION))) 
+		if ( operation.hasContext(tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_TRACE))    ||
+			 operation.hasContext(tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_POSITION)) ||
+			 operation.hasContext(tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_RESIZE))   ) 
 		{
 			int type = event.getEventType();
 			// warning: hack solution
@@ -1291,70 +1291,6 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		}
 	}
 	
-	
-	//-----------------------------------------------------------------------------------------
-	// PRIVATE CLASSES
-	//-----------------------------------------------------------------------------------------
-	
-
-	/*************************************************************************
-	 * 
-	 * Resizing thread by listening to the event if a user has finished
-	 * 	the resizing or not
-	 *
-	 *************************************************************************/
-	private class DetailBufferPaint implements BufferPaint
-	{
-
-		@Override
-		public void rebuffering() {
-			// force the paint to refresh the data			
-			final ImageTraceAttributes attr = stData.getAttributes();
-			IUndoContext context = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_RESIZE);
-			
-			try {
-				tracePart.getOperationHistory().execute(
-						new WindowResizeOperation(stData, attr.getFrame(), context), null, null);
-			} catch (ExecutionException e) {
-				e.printStackTrace();
-			}
-			//notifyChanges("Resize", attr.getFrame() );
-		}
-	}
-
-	/*****
-	 * 
-	 * Thread-centric operation to perform undoable operations asynchronously
-	 *
-	 *****/
-	private class HistoryOperation implements Runnable
-	{
-		private IUndoableOperation operation;
-		
-		public void setOperation(IUndoableOperation operation) {
-			this.operation = operation;
-		}
-		
-		@Override
-		public void run() {
-			// zoom in/out or change of ROI ?
-			if (operation instanceof ZoomOperation) {
-				Frame frame = ((ZoomOperation)operation).getFrame();
-				final ImageTraceAttributes attributes = stData.getAttributes();
-				
-				attributes.setFrame(frame);
-				zoom(frame.begTime, frame.begProcess, frame.endTime, frame.endProcess);
-			}
-			// change of cursor position ?
-			else if (operation instanceof PositionOperation) {
-				Position p = ((PositionOperation)operation).getPosition();
-				stData.getAttributes().setPosition(p);
-
-				// just change the position, doesn't need to fully refresh
-				redraw();
-			} 
-		}
-	}
 
 	@Override
 	protected void changePosition(Point point) 
@@ -1412,6 +1348,74 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 			
 		} else if (event.getTopic().equals(IConstants.TOPIC_FILTER_RANKS)) {
 			refresh(true);
+			
+		} else if (event.getTopic().equals(IConstants.TOPIC_COLOR_MAPPING)) {
+			refresh(false);
+		}
+	}
+
+	
+	//-----------------------------------------------------------------------------------------
+	// PRIVATE CLASSES
+	//-----------------------------------------------------------------------------------------
+	
+
+	/*************************************************************************
+	 * 
+	 * Resizing thread by listening to the event if a user has finished
+	 * 	the resizing or not
+	 *
+	 *************************************************************************/
+	private class DetailBufferPaint implements BufferPaint
+	{
+
+		@Override
+		public void rebuffering() {
+			// force the paint to refresh the data			
+			final ImageTraceAttributes attr = stData.getAttributes();
+			IUndoContext context = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_RESIZE);
+			
+			try {
+				tracePart.getOperationHistory().execute(
+						new WindowResizeOperation(stData, attr.getFrame(), context), null, null);
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+			}
+			//notifyChanges("Resize", attr.getFrame() );
+		}
+	}
+
+	/*****
+	 * 
+	 * Thread-centric operation to perform undoable operations asynchronously
+	 *
+	 *****/
+	private class HistoryOperation implements Runnable
+	{
+		private IUndoableOperation operation;
+		
+		public void setOperation(IUndoableOperation operation) {
+			this.operation = operation;
+		}
+		
+		@Override
+		public void run() {
+			// zoom in/out or change of ROI ?
+			if (operation instanceof ZoomOperation || operation instanceof WindowResizeOperation) {
+				Frame frame = ((ZoomOperation)operation).getFrame();
+				final ImageTraceAttributes attributes = stData.getAttributes();
+				
+				attributes.setFrame(frame);
+				zoom(frame.begTime, frame.begProcess, frame.endTime, frame.endProcess);
+			}
+			// change of cursor position ?
+			else if (operation instanceof PositionOperation) {
+				Position p = ((PositionOperation)operation).getPosition();
+				stData.getAttributes().setPosition(p);
+
+				// just change the position, doesn't need to fully refresh
+				redraw();
+			} 
 		}
 	}
 }

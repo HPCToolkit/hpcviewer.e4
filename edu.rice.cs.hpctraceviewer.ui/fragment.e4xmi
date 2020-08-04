@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ASCII"?>
-<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/descriptor/basic" xmlns:commands="http://www.eclipse.org/ui/2010/UIModel/application/commands" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmi:id="_ffh4gMSyEeqcdd3a7pzIFA">
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/descriptor/basic" xmlns:commands="http://www.eclipse.org/ui/2010/UIModel/application/commands" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmlns:ui="http://www.eclipse.org/ui/2010/UIModel/application/ui" xmi:id="_ffh4gMSyEeqcdd3a7pzIFA">
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_dKTNsMb7EeqOfJ3pUwSuCg" featurename="commands" parentElementId="xpath:/">
     <elements xsi:type="commands:Command" xmi:id="_gVae0Mb7EeqOfJ3pUwSuCg" elementId="edu.rice.cs.hpctraceviewer.ui.command.home" commandName="Home"/>
     <elements xsi:type="commands:Command" xmi:id="_ntnUoMdtEeq0rOsC4NG4eQ" elementId="edu.rice.cs.hpctraceviewer.ui.command.timeZoomIn" commandName="Time zoom-in" description="Zoom in in X-axis"/>
@@ -17,6 +17,7 @@
     <elements xsi:type="commands:Command" xmi:id="_nX628M1LEeqj2OdGrGxV1w" elementId="edu.rice.cs.hpctraceviewer.ui.command.undo" commandName="Undo operation"/>
     <elements xsi:type="commands:Command" xmi:id="_pow4MM1LEeqj2OdGrGxV1w" elementId="edu.rice.cs.hpctraceviewer.ui.command.redo" commandName="Redo operation"/>
     <elements xsi:type="commands:Command" xmi:id="_eM3AoNXSEeqsK-PEIuqpJw" elementId="edu.rice.cs.hpctraceviewer.ui.command.filter" commandName="Filter ranks"/>
+    <elements xsi:type="commands:Command" xmi:id="_79jFkNX7EeqsK-PEIuqpJw" elementId="edu.rice.cs.hpctraceviewer.ui.command.colorMap" commandName="Procedure-color Map"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_kGpPEM0tEeqj2OdGrGxV1w" featurename="handlers" parentElementId="xpath:/">
     <elements xsi:type="commands:Handler" xmi:id="_opJJ4M0tEeqj2OdGrGxV1w" elementId="edu.rice.cs.hpctraceviewer.ui.handler.home" contributionURI="bundleclass://edu.rice.cs.hpctraceviewer.ui/edu.rice.cs.hpctraceviewer.ui.handlers.Home" command="_gVae0Mb7EeqOfJ3pUwSuCg"/>
@@ -30,6 +31,7 @@
     <elements xsi:type="commands:Handler" xmi:id="_sy4DwM1LEeqj2OdGrGxV1w" elementId="edu.rice.cs.hpctraceviewer.ui.handler.undo" contributionURI="bundleclass://edu.rice.cs.hpctraceviewer.ui/edu.rice.cs.hpctraceviewer.ui.handlers.UndoOperationAction" command="_nX628M1LEeqj2OdGrGxV1w"/>
     <elements xsi:type="commands:Handler" xmi:id="_xe68IM1LEeqj2OdGrGxV1w" elementId="edu.rice.cs.hpctraceviewer.ui.handler.redo" contributionURI="bundleclass://edu.rice.cs.hpctraceviewer.ui/edu.rice.cs.hpctraceviewer.ui.handlers.RedoOperationAction" command="_pow4MM1LEeqj2OdGrGxV1w"/>
     <elements xsi:type="commands:Handler" xmi:id="_g55OoNXSEeqsK-PEIuqpJw" elementId="edu.rice.cs.hpctraceviewer.ui.handler.filter" contributionURI="bundleclass://edu.rice.cs.hpctraceviewer.ui/edu.rice.cs.hpctraceviewer.ui.handlers.FilterRanks" command="_eM3AoNXSEeqsK-PEIuqpJw"/>
+    <elements xsi:type="commands:Handler" xmi:id="_ACHHMNX8EeqsK-PEIuqpJw" elementId="edu.rice.cs.hpctraceviewer.ui.handler.colorMap" contributionURI="bundleclass://edu.rice.cs.hpctraceviewer.ui/edu.rice.cs.hpctraceviewer.ui.handlers.ProcedureColorMap" command="_79jFkNX7EeqsK-PEIuqpJw"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_JSls4MxgEeqnLcCrkreYSw" featurename="descriptors" parentElementId="xpath:/">
     <elements xsi:type="basic:PartDescriptor" xmi:id="_TGczoMxgEeqnLcCrkreYSw" elementId="edu.rice.cs.hpctraceviewer.ui.partdescriptor.trace" label="Trace data" iconURI="platform:/plugin/edu.rice.cs.hpctraceviewer.ui/resources/hpctraceviewer016.png" allowMultiple="true" contributionURI="bundleclass://edu.rice.cs.hpctraceviewer.ui/edu.rice.cs.hpctraceviewer.ui.TracePart">
@@ -72,7 +74,14 @@
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_KYLVMNXSEeqsK-PEIuqpJw" featurename="menuContributions" parentElementId="xpath:/">
     <elements xsi:type="menu:MenuContribution" xmi:id="_NFFAUNXSEeqsK-PEIuqpJw" elementId="edu.rice.cs.hpctraceviewer.ui.menucontribution.view" parentId="edu.rice.cs.hpcviewer.ui.menu.filter">
-      <children xsi:type="menu:HandledMenuItem" xmi:id="_SZjKoNXSEeqsK-PEIuqpJw" elementId="edu.rice.cs.hpctraceviewer.menu.filter" label="Filter ranks or threads" tooltip="Exclude or exclusively include some ranks or threads." mnemonics="F" command="_eM3AoNXSEeqsK-PEIuqpJw"/>
+      <children xsi:type="menu:HandledMenuItem" xmi:id="_SZjKoNXSEeqsK-PEIuqpJw" elementId="edu.rice.cs.hpctraceviewer.menu.filter" label="Filter ranks or threads" tooltip="Exclude or exclusively include some ranks or threads." mnemonics="F" command="_eM3AoNXSEeqsK-PEIuqpJw">
+        <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_g7afgNX8EeqsK-PEIuqpJw" contributionURI="bundleclass://edu.rice.cs.hpctraceviewer.ui/edu.rice.cs.hpctraceviewer.ui.handlers.TraceDataExist"/>
+      </children>
+    </elements>
+    <elements xsi:type="menu:MenuContribution" xmi:id="_lK07sNX7EeqsK-PEIuqpJw" elementId="edu.rice.cs.hpctraceviewer.ui.menucontribution.colorMap" parentId="edu.rice.cs.hpcviewer.ui.menu.view">
+      <children xsi:type="menu:HandledMenuItem" xmi:id="_s-ynQNX7EeqsK-PEIuqpJw" elementId="edu.rice.cs.hpctraceviewer.menu.colorMap" label="Procedure-color map" tooltip="Customize the mapping between the procedure and the color" mnemonics="P" command="_79jFkNX7EeqsK-PEIuqpJw">
+        <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_OaF5YNX8EeqsK-PEIuqpJw" contributionURI="bundleclass://edu.rice.cs.hpctraceviewer.ui/edu.rice.cs.hpctraceviewer.ui.handlers.TraceDataExist"/>
+      </children>
     </elements>
   </fragments>
 </fragment:ModelFragments>
