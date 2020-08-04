@@ -1,10 +1,15 @@
 package edu.rice.cs.hpctraceviewer.ui.callstack;
 
+import java.io.IOException;
+import java.net.URL;
+
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.events.ModifyEvent;
@@ -12,6 +17,7 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -21,6 +27,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Spinner;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
@@ -88,9 +96,21 @@ public class HPCCallStackView extends AbstractBaseItem implements EventHandler
 		depthEditor.setLayoutData(depthData);
 		depthEditor.setVisible(false);
 		
-		maxDepthButton = new Button(depthArea, 0);
-		maxDepthButton.setText("Max depth");
+		maxDepthButton = new Button(depthArea, 0);		
 		maxDepthButton.setEnabled(false);
+		
+		final String MAX_DEPTH_FILE =  "platform:/plugin/edu.rice.cs.hpctraceviewer.ui/resources/max-depth16.png";
+		try {
+			URL url = FileLocator.toFileURL(new URL(MAX_DEPTH_FILE));
+			Image imgMaxDepth = new Image(getDisplay(), url.getFile());
+			JFaceResources.getImageRegistry().put("IconMaxDepth", imgMaxDepth);
+
+			maxDepthButton.setImage(imgMaxDepth);
+
+		} catch (IOException e1) {
+			Logger logger = LoggerFactory.getLogger(getClass());
+			logger.error("Unable to get the icon file", e1);
+		}
 		GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).applyTo(maxDepthButton);
 		
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(depthArea);
