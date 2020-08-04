@@ -98,6 +98,10 @@ public class ThreadAxisCanvas extends AbstractAxisCanvas
 		final ImageTraceAttributes attribute = data.getAttributes();
 		
         final String processes[] = traceData.getListOfRanks();
+        
+        if (processes == null || processes.length==0)
+        	return;
+        
         boolean isHybridProgram  = traceData.isHybridRank();
 		
 		// --------------------------------------------------------------------------
