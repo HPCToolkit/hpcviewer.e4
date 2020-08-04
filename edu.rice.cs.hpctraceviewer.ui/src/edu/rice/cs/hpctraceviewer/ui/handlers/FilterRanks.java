@@ -19,6 +19,12 @@ import javax.inject.Named;
 
 import org.eclipse.e4.core.di.annotations.CanExecute;
 
+/*****
+ * 
+ * Filter ranks or threads.
+ * This include excluding and including some ranks or filters
+ *
+ */
 public class FilterRanks 
 {
 	@Execute
@@ -38,7 +44,7 @@ public class FilterRanks
 		 * call to set it redundant). If it's not, we wait to replace the
 		 * current filter with the new filter until we know we have to.
 		 */
-        IFilteredData filteredBaseData = data.createFilteredBaseData();
+        IFilteredData filteredBaseData = data.getFilteredBaseData();
         if (filteredBaseData == null) {
         	filteredBaseData = data.createFilteredBaseData();
         }

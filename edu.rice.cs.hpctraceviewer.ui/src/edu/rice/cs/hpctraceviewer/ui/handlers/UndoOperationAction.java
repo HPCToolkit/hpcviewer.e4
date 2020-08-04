@@ -57,7 +57,7 @@ public class UndoOperationAction
 		IUndoContext context = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_TRACE);
 		final IUndoableOperation []ops = tracePart.getOperationHistory().getUndoHistory(context);
 		boolean status = (ops != null) && (ops.length>0);
-		System.out.println("can undo: " + status +" , "  + ops);
+
 		return status;
 	}
 

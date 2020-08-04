@@ -48,7 +48,7 @@ public class RedoOperationAction
 
 		final IUndoableOperation []ops = tracePart.getOperationHistory().getRedoHistory(context); 
 		boolean status = ops.length > 0;
-		System.out.println("can redo: " + status +" , "  + ops);
+
 		return status;
 	}
 	
