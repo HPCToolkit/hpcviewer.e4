@@ -170,9 +170,9 @@ public class TracePart implements ITracePart, IPartListener
 		// sash settings
 		// ---------------
 		
-		sashFormLeft .setWeights(new int[] {800, 200});		
-		sashFormRight.setWeights(new int[] {800, 200});		
-		sashFormMain .setWeights(new int[] {800, 200});
+		sashFormLeft .setWeights(new int[] {8000, 2000});		
+		sashFormRight.setWeights(new int[] {8000, 2000});		
+		sashFormMain .setWeights(new int[] {8000, 2000});
 
 		// ---------------
 		// finalization

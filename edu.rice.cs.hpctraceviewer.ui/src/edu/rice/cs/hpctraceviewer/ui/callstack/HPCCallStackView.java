@@ -109,7 +109,7 @@ public class HPCCallStackView extends AbstractBaseItem implements EventHandler
 
 		} catch (IOException e1) {
 			Logger logger = LoggerFactory.getLogger(getClass());
-			logger.error("Unable to get the icon file", e1);
+			logger.error("Unable to get the icon file: " + MAX_DEPTH_FILE, e1);
 		}
 		GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).applyTo(maxDepthButton);
 		
