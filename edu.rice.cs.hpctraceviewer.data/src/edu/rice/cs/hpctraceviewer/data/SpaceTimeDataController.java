@@ -55,8 +55,6 @@ public abstract class SpaceTimeDataController
 	protected int maxDepth = 0;
 	
 	protected ColorTable colorTable = null;
-	private boolean enableMidpoint  = true;
-	
 	protected IBaseData dataTrace = null;
 	
 	protected IEclipseContext context;
@@ -318,13 +316,6 @@ public abstract class SpaceTimeDataController
 		colorTable.dispose();
 	}
 
-	public void setEnableMidpoint(boolean enable) {
-		this.enableMidpoint = enable;
-	}
-
-	public boolean isEnableMidpoint() {
-		return enableMidpoint;
-	}
 
 	//see the note where this is called in FilterRanks
 	public IFilteredData getFilteredBaseData() {

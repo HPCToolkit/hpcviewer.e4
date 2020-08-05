@@ -17,6 +17,7 @@ import edu.rice.cs.hpctraceviewer.ui.internal.BaseTimelineThread;
 import edu.rice.cs.hpctraceviewer.ui.internal.BaseViewPaint;
 import edu.rice.cs.hpctraceviewer.ui.internal.ImagePosition;
 
+
 /******************************************************
  * 
  * Painting class for depth view
@@ -71,8 +72,9 @@ public class DepthViewPaint extends BaseViewPaint {
 			Queue<TimelineDataSet> queue, IProgressMonitor monitor) {
 		
 		ImageTraceAttributes attributes = controller.getAttributes();
+		
 		return new TimelineDepthThread( controller, attributes, yscale, queue, numDataCollected,
-				controller.isEnableMidpoint(), monitor);
+										monitor);
 	}
 
 	@Override

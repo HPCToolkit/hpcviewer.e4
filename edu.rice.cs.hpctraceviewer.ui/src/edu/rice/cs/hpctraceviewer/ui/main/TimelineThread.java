@@ -30,11 +30,11 @@ public class TimelineThread
 	 * Creates a TimelineThread with SpaceTimeData _stData; the rest of the parameters are things for drawing
 	 * @param changedBounds - whether or not the thread needs to go get the data for its ProcessTimelines.
 	 ***********************************************************************************************************/
-	public TimelineThread(SpaceTimeDataController stData, 
-			boolean _changedBounds, double _scaleY, Queue<TimelineDataSet> queue, 
-			AtomicInteger currentLine, int totalLines, IProgressMonitor monitor)
+	public TimelineThread( SpaceTimeDataController stData, 
+						   boolean _changedBounds, double _scaleY, Queue<TimelineDataSet> queue, 
+						   AtomicInteger currentLine, int totalLines, IProgressMonitor monitor)
 	{
-		super(stData, _scaleY, queue, currentLine, stData.isEnableMidpoint(), monitor);
+		super(stData, _scaleY, queue, currentLine, monitor);
 		changedBounds = _changedBounds;		
 		this.totalLines	  = totalLines;
 	}

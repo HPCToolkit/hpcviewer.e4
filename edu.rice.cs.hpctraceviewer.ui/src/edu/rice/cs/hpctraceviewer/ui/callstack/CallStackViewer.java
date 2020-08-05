@@ -34,6 +34,7 @@ import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.context.BaseTraceContext;
 import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
 import edu.rice.cs.hpctraceviewer.ui.operation.AbstractTraceOperation;
+import edu.rice.cs.hpctraceviewer.ui.preferences.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
@@ -199,56 +200,65 @@ public class CallStackViewer extends TableViewer
     	estimatedProcess = Math.min(estimatedProcess, numDisplayedProcess-1);
 
 		ProcessTimeline ptl = ptlService.getProcessTimeline(estimatedProcess);
-		if (ptl != null) {
-			int sample = 0;
+		
+		// it's very unlikely if a timeline process cannot be found of a given process
+		// If this really happens, possible scenarios:
+		// - data is corrupted
+		// - bug in computing the estimated process
+		// - empty trace
+		
+		if (ptl == null)
+			return;
+		
+		int sample = 0;
+		boolean isMidpointEnabled = TracePreferenceManager.isMidpointEnabled();
+		
+		try {
+			sample = ptl.findMidpointBefore(position.time, isMidpointEnabled);				
+		} catch (Exception e) {
+			// Error: data has changed (resize, zoom-in/out, ...) but we are not notified yet.
+			// let the new thread finish the job
+			Logger logger = LoggerFactory.getLogger(getClass());
+			logger.error("CSV: Fail to get sample for time " + position.time, e);
 			
-			try {
-				sample = ptl.findMidpointBefore(position.time, stData.isEnableMidpoint());				
-			} catch (Exception e) {
-				// Error: data has changed (resize, zoom-in/out, ...) but we are not notified yet.
-				// let the new thread finish the job
-				Logger logger = LoggerFactory.getLogger(getClass());
-				logger.error("CSV: Fail to get sample for time " + position.time, e);
-				
-				return;
-			}
-			final Vector<String> sampleVector;
-			if (sample>=0) {
-				final CallPath cp = ptl.getCallPath(sample, depth);
-				if (cp != null)
-					sampleVector = ptl.getCallPath(sample, depth).getFunctionNames();
-				else
-					// empty array of string
-					sampleVector = new Vector<String>();
-
-				if (sampleVector != null && sampleVector.size()<=depth)
-				{
-					//-----------------------------------
-					// case of over depth
-					//-----------------------------------
-					final int numOverDepth = depth-sampleVector.size()+1;
-					for(int l = 0; l<numOverDepth; l++)
-						sampleVector.add(EMPTY_FUNCTION);
-				}
-			} else {
+			return;
+		}
+		final Vector<String> sampleVector;
+		if (sample>=0) {
+			final CallPath cp = ptl.getCallPath(sample, depth);
+			if (cp != null)
+				sampleVector = ptl.getCallPath(sample, depth).getFunctionNames();
+			else
 				// empty array of string
 				sampleVector = new Vector<String>();
-				
-				for(int l = 0; l<=depth; l++)
+
+			if (sampleVector != null && sampleVector.size()<=depth)
+			{
+				//-----------------------------------
+				// case of over depth
+				//-----------------------------------
+				final int numOverDepth = depth-sampleVector.size()+1;
+				for(int l = 0; l<numOverDepth; l++)
 					sampleVector.add(EMPTY_FUNCTION);
 			}
-			// fill the call stack and select the current depth
-			final Display display = Display.getDefault();
-			display.asyncExec( new Runnable() {
-				
-				@Override
-				public void run() {
-					setInput(new ArrayList<String>(sampleVector));
-					selectDepth(depth);
-					viewerColumn.getColumn().pack();
-				}
-			} );
+		} else {
+			// empty array of string
+			sampleVector = new Vector<String>();
+			
+			for(int l = 0; l<=depth; l++)
+				sampleVector.add(EMPTY_FUNCTION);
 		}
+		// fill the call stack and select the current depth
+		final Display display = Display.getDefault();
+		display.asyncExec( new Runnable() {
+			
+			@Override
+			public void run() {
+				setInput(new ArrayList<String>(sampleVector));
+				selectDepth(depth);
+				viewerColumn.getColumn().pack();
+			}
+		} );
 	}
 	
 	

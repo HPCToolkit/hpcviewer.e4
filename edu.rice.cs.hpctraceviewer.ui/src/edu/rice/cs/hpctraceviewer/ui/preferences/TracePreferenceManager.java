@@ -18,5 +18,18 @@ public class TracePreferenceManager extends AbstractPreferenceManager
 		store.setDefault(TracePreferenceConstants.PREF_RENDER_OPTION, TracePreferenceConstants.RENDERING_MIDPOINT);
 		store.setDefault(TracePreferenceConstants.PREF_TOOLTIP_DELAY, TracePreferenceConstants.TOOLTIP_DELAY_DEFAULT);
 	}
-
+	
+	
+	/****
+	 * check if midpoint painting is enabled
+	 * @return true if midpoint painting is enabled. False otherwise.
+	 */
+	public static boolean isMidpointEnabled() {
+		int renderOption = getRenderOption();
+		return renderOption == TracePreferenceConstants.RENDERING_MIDPOINT;
+	}
+	
+	private static int getRenderOption() {
+		return INSTANCE.getPreferenceStore().getInt(TracePreferenceConstants.PREF_RENDER_OPTION);
+	}
 }

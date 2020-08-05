@@ -32,13 +32,13 @@ public class TimelineDepthThread
 	 * @param scaleY : The scale in the y-direction of max depth
 	 * @param width  : the width
 	 */
-	public TimelineDepthThread(SpaceTimeDataController data, 
-			ImageTraceAttributes attributes,
-			double scaleY, Queue<TimelineDataSet> queue, 
-			AtomicInteger timelineDone, 
-			boolean usingMidpoint, IProgressMonitor monitor)
+	public TimelineDepthThread( SpaceTimeDataController data, 
+								ImageTraceAttributes attributes,
+								double scaleY, Queue<TimelineDataSet> queue, 
+								AtomicInteger timelineDone, 
+								IProgressMonitor monitor)
 	{
-		super(data, scaleY, queue, timelineDone,  usingMidpoint, monitor);
+		super(data, scaleY, queue, timelineDone, monitor);
 	}
 
 

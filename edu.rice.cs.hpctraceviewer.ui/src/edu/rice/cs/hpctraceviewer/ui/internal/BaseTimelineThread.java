@@ -6,15 +6,12 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.preference.PreferenceStore;
-
 import edu.rice.cs.hpctraceviewer.data.DataLinePainting;
 import edu.rice.cs.hpctraceviewer.data.DataPreparation;
 import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TimelineDataSet;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
-import edu.rice.cs.hpctraceviewer.ui.preferences.TracePreferenceConstants;
 import edu.rice.cs.hpctraceviewer.ui.preferences.TracePreferenceManager;
 
 
@@ -37,26 +34,22 @@ public abstract class BaseTimelineThread implements Callable<Integer> {
 	
 	/**The scale in the y-direction of pixels to processors (for the drawing of the images).*/
 	final private double scaleY;	
-	final protected boolean usingMidpoint;
 	final private Queue<TimelineDataSet> queue;
 	final private AtomicInteger currentLine;
 	final protected IProgressMonitor monitor;
 	
 
-	public BaseTimelineThread(SpaceTimeDataController stData,
-			double scaleY, Queue<TimelineDataSet> queue, 
-			AtomicInteger currentLine, 
-			boolean usingMidpoint, IProgressMonitor monitor)
+	public BaseTimelineThread( SpaceTimeDataController stData,
+							   double scaleY, 
+							   Queue<TimelineDataSet> queue, 
+							   AtomicInteger currentLine, 
+							   IProgressMonitor monitor)
 	{
 		this.stData 	   = stData;
 		this.scaleY 	   = scaleY;
 		this.queue 		   = queue;
 		this.currentLine   = currentLine;
 		this.monitor 	   = monitor;
-		
-		PreferenceStore pref = TracePreferenceManager.INSTANCE.getPreferenceStore();
-		int renderOption     = pref.getInt(TracePreferenceConstants.PREF_RENDER_OPTION);
-		this.usingMidpoint   = renderOption == TracePreferenceConstants.RENDERING_MIDPOINT;
 	}
 	
 	@Override
@@ -76,7 +69,7 @@ public abstract class BaseTimelineThread implements Callable<Integer> {
 		DataLinePainting data = new DataLinePainting();
 		
 		data.colorTable    = stData.getColorTable();
-		data.usingMidpoint = usingMidpoint;
+		data.usingMidpoint = TracePreferenceManager.isMidpointEnabled();
 		data.pixelLength   = pixelLength;
 		data.begTime       = timeBegin;
 		data.depth		   = stData.getAttributes().getDepth();
