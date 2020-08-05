@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: hpcsetting
+Bundle-SymbolicName: edu.rice.cs.hpcsetting
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Rice University
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.swt,
+ org.eclipse.jface
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Automatic-Module-Name: edu.rice.cs.hpcsetting
+Bundle-ActivationPolicy: lazy
+Export-Package: edu.rice.cs.hpcsetting.preferences
