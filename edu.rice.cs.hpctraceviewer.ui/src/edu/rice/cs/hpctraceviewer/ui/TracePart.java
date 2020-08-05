@@ -27,10 +27,13 @@ import edu.rice.cs.hpctraceviewer.ui.base.ITraceViewAction;
 import edu.rice.cs.hpctraceviewer.ui.callstack.HPCCallStackView;
 import edu.rice.cs.hpctraceviewer.ui.context.BaseTraceContext;
 import edu.rice.cs.hpctraceviewer.ui.depth.HPCDepthView;
+import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
 import edu.rice.cs.hpctraceviewer.ui.main.HPCTraceView;
 import edu.rice.cs.hpctraceviewer.ui.minimap.SpaceTimeMiniCanvas;
+import edu.rice.cs.hpctraceviewer.ui.preferences.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.ui.statistic.HPCStatView;
 import edu.rice.cs.hpctraceviewer.ui.summary.HPCSummaryView;
+import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 
 import javax.annotation.PreDestroy;
 
@@ -47,6 +50,8 @@ import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.IPartListener;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 
 
 /***************************************************************
@@ -54,7 +59,7 @@ import org.eclipse.jface.layout.GridLayoutFactory;
  * The main class for trace viewer
  *
  ***************************************************************/
-public class TracePart implements ITracePart, IPartListener
+public class TracePart implements ITracePart, IPartListener, IPropertyChangeListener
 {
 	public static final String ID = "edu.rice.cs.hpctraceviewer.ui.partdescriptor.trace";
 
@@ -76,6 +81,8 @@ public class TracePart implements ITracePart, IPartListener
 	
 	private IEclipseContext context;
 	private SpaceTimeDataController stdc;
+	private EPartService partService;
+	private IEventBroker eventBroker;
 	
 	@Inject
 	public TracePart() {
@@ -88,6 +95,9 @@ public class TracePart implements ITracePart, IPartListener
 							  EPartService partService, 
 							  IEventBroker eventBroker,
 							  @Named(IServiceConstants.ACTIVE_PART) MPart part) {
+		
+		this.partService = partService;
+		this.eventBroker = eventBroker;
 		
 		SashForm sashFormMain  = new SashForm(parent, SWT.NONE);
 		SashForm sashFormLeft  = new SashForm(sashFormMain, SWT.VERTICAL);
@@ -184,6 +194,7 @@ public class TracePart implements ITracePart, IPartListener
 		tabFolderTopLeft.setFocus();
 		
 		partService.addPartListener(this);
+		TracePreferenceManager.INSTANCE.getPreferenceStore().addPropertyChangeListener(this);
 	}
 	
 	
@@ -207,6 +218,8 @@ public class TracePart implements ITracePart, IPartListener
 	
 	@PreDestroy
 	public void preDestroy() {
+		partService.removePartListener(this);
+		TracePreferenceManager.INSTANCE.getPreferenceStore().removePropertyChangeListener(this);
 	}
 	
 	
@@ -305,5 +318,11 @@ public class TracePart implements ITracePart, IPartListener
 	@Override
 	public Object getInput() {
 		return stdc;
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent event) {
+		TraceEventData data = new TraceEventData(stdc, this, stdc);
+		eventBroker.post(IConstants.TOPIC_COLOR_MAPPING, data);
 	}
 }

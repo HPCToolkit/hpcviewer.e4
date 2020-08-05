@@ -17,6 +17,7 @@ import org.eclipse.swt.widgets.Label;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.rice.cs.hpcsetting.preferences.AbstractPage;
 import edu.rice.cs.hpcviewer.ui.resources.FontManager;
 
 /***********************************************************
@@ -31,8 +32,8 @@ public class AppearencePage extends AbstractPage
 	private ViewerFontFieldEditor fontSourceEditor;
 	
 
-	public AppearencePage(PropertiesResources resources, String title) {
-		super(resources, title);
+	public AppearencePage(String title) {
+		super(title);
 	}
 
 	

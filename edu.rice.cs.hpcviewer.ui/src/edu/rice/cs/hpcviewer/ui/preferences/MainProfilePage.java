@@ -15,13 +15,15 @@ import org.eclipse.swt.widgets.Group;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.rice.cs.hpcsetting.preferences.AbstractPage;
+
 public class MainProfilePage extends AbstractPage 
 {	
 	Button debugMode, removeFile;
 	Button cctId, flatId;
 	
-	public MainProfilePage(PropertiesResources resources, String title) {
-		super(resources, title);
+	public MainProfilePage(String title) {
+		super(title);
 	}
 	
 	
@@ -35,7 +37,7 @@ public class MainProfilePage extends AbstractPage
 	public void apply() {
 		PreferenceStore prefDebug = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
 		
-		if (debugMode == null)
+		if (debugMode == null || removeFile == null || cctId == null || flatId == null)
 			return;
 		
 		boolean debug = debugMode.getSelection();		
@@ -66,11 +68,11 @@ public class MainProfilePage extends AbstractPage
 
 	@Override
 	protected Control createContents(Composite parent) {
-
-        createDebugPanel(parent);
         
         String location = ViewerPreferenceManager.INSTANCE.getPreferenceStoreLocation();
-        removeFile = createCheckBoxControl(parent, "Reset preference: " + location);      
+        createLabelControl(parent, "Preference file: " + location);      
+
+        createDebugPanel(parent);
         
 		return parent;
 	}

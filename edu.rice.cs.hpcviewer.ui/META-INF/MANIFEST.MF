@@ -36,7 +36,8 @@ Require-Bundle: edu.rice.cs.hpc.data,
  edu.rice.cs.hpctraceviewer.ui,
  org.eclipse.emf.common,
  org.eclipse.emf.ecore,
- org.eclipse.osgi.services
+ org.eclipse.osgi.services,
+ edu.rice.cs.hpcsetting
 Import-Package: javax.annotation;version="1.0.0";resolution:=optional,
  javax.inject;version="1.0.0"
 Automatic-Module-Name: edu.rice.cs.hpcviewer.ui

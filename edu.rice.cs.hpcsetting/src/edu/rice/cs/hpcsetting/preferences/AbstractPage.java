@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.preferences;
+package edu.rice.cs.hpcsetting.preferences;
 
 import org.eclipse.jface.preference.ColorSelector;
 import org.eclipse.jface.preference.PreferencePage;
@@ -14,6 +14,7 @@ import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 
 
+
 /*******************************************************
  * 
  * Abstract preference page
@@ -22,11 +23,7 @@ import org.eclipse.swt.widgets.Text;
 public abstract class AbstractPage extends PreferencePage 
 {
 
-    /** the properties resources */
-    protected PropertiesResources resources;
-
-    public AbstractPage(PropertiesResources resources, String title) {
-    	this.resources = resources;
+    public AbstractPage(String title) {
     	setTitle(title);
     }
     
@@ -85,6 +82,68 @@ public abstract class AbstractPage extends PreferencePage
     }
 
     /**
+     * Creates a generic button. User needs to specify a style
+     * @see SWT.CHECK SWT.RADIO
+     * 
+     * @param parent
+     *            the parent to create the check box
+     * @param label
+     *            the label text
+     * @param style
+     * 			  the style of the button           
+     *            
+     * @return {@link Button} control
+     */
+    protected Button createButtonControl(Composite parent, String label, int style) {
+        Composite composite = new Composite(parent, SWT.NULL);
+        GridData gridData = new GridData();
+        gridData.horizontalSpan = 2;
+        composite.setLayoutData(gridData);
+        composite.setLayout(new GridLayout(2, false));
+
+        Button button = new Button(composite, style);
+        GridData gridData1 = new GridData();
+        gridData1.horizontalSpan = 1;
+        button.setLayoutData(gridData1);
+
+        createLabelControl(composite, label);
+
+        return button;
+    }
+
+    /**
+     * Creates the check box.
+     * 
+     * @param parent
+     *            the parent to create the box
+     * @param label
+     *            the label text
+     * @return {@link Button} control
+     */
+    protected Button[] createRadioButtonControl(Composite parent, String []labels) {
+        Composite composite = new Composite(parent, SWT.NULL);
+        GridData gridData = new GridData();
+        gridData.horizontalSpan = 2;
+        composite.setLayoutData(gridData);
+        composite.setLayout(new GridLayout(2, false));
+    	
+    	Button []buttons = new Button[labels.length];
+    	
+    	for(int i=0; i<labels.length; i++) {
+    		String label = labels[i];
+    		
+            buttons[i] = new Button(composite, SWT.RADIO);
+            GridData gridData1 = new GridData();
+            gridData1.horizontalSpan = 1;
+            buttons[i].setLayoutData(gridData1);
+
+            createLabelControl(composite, label);
+    	}
+    	return buttons;
+    }
+
+
+    /**
      * Creates the check box.
      * 
      * @param parent
@@ -94,20 +153,7 @@ public abstract class AbstractPage extends PreferencePage
      * @return {@link Button} control
      */
     protected Button createCheckBoxControl(Composite parent, String label) {
-        Composite composite = new Composite(parent, SWT.NULL);
-        GridData gridData = new GridData();
-        gridData.horizontalSpan = 2;
-        composite.setLayoutData(gridData);
-        composite.setLayout(new GridLayout(2, false));
-
-        Button button = new Button(composite, SWT.CHECK);
-        GridData gridData1 = new GridData();
-        gridData1.horizontalSpan = 1;
-        button.setLayoutData(gridData1);
-
-        createLabelControl(composite, label);
-
-        return button;
+        return createButtonControl(parent, label, SWT.CHECK);
     }
 
     /**

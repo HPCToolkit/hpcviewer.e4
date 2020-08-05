@@ -6,6 +6,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.preference.PreferenceStore;
 
 import edu.rice.cs.hpctraceviewer.data.DataLinePainting;
 import edu.rice.cs.hpctraceviewer.data.DataPreparation;
@@ -13,6 +14,8 @@ import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TimelineDataSet;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
+import edu.rice.cs.hpctraceviewer.ui.preferences.TracePreferenceConstants;
+import edu.rice.cs.hpctraceviewer.ui.preferences.TracePreferenceManager;
 
 
 /*****************************************************************************
@@ -47,10 +50,13 @@ public abstract class BaseTimelineThread implements Callable<Integer> {
 	{
 		this.stData 	   = stData;
 		this.scaleY 	   = scaleY;
-		this.usingMidpoint = usingMidpoint;
 		this.queue 		   = queue;
 		this.currentLine   = currentLine;
 		this.monitor 	   = monitor;
+		
+		PreferenceStore pref = TracePreferenceManager.INSTANCE.getPreferenceStore();
+		int renderOption     = pref.getInt(TracePreferenceConstants.PREF_RENDER_OPTION);
+		this.usingMidpoint   = renderOption == TracePreferenceConstants.RENDERING_MIDPOINT;
 	}
 	
 	@Override
