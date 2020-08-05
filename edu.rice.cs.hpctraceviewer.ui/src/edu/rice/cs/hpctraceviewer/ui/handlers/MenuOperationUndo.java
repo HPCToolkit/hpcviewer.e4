@@ -37,7 +37,6 @@ public class MenuOperationUndo
 			menu.setElementId(ID_BASE_ELEMENT + "." + i);
 			menu.setLabel(history.getLabel());
 			menu.setContributorURI(ID_MENU_URI);
-			System.out.println("menu-undo " + i + ": " + ID_MENU_URI);
 			items.add(menu);
 		}
 	}

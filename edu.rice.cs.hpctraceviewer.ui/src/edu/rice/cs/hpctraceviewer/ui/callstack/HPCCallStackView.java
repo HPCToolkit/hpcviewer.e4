@@ -43,9 +43,12 @@ import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 //all the GUI setup for the call path and minimap are here//
 public class HPCCallStackView extends AbstractBaseItem implements EventHandler
 {
+	private final static String ICON_MAX_DEPTH = "IconMaxDepth";
+	private final static String MAX_DEPTH_FILE =  "platform:/plugin/edu.rice.cs.hpctraceviewer.ui/resources/max-depth16.png";
+
 	private CallStackViewer csViewer;
 	
-	Spinner depthEditor;
+	private Spinner depthEditor;
 	
 	private Button maxDepthButton;
 	
@@ -54,6 +57,11 @@ public class HPCCallStackView extends AbstractBaseItem implements EventHandler
 	private IEventBroker broker;
 
 	
+	/***
+	 * Constructor to initialize the tab item
+	 * @param parent parent which is a CTabFolder
+	 * @param style
+	 */
 	public HPCCallStackView(CTabFolder parent, int style) {
 		super(parent, style);
 	}
@@ -99,18 +107,9 @@ public class HPCCallStackView extends AbstractBaseItem implements EventHandler
 		maxDepthButton = new Button(depthArea, 0);		
 		maxDepthButton.setEnabled(false);
 		
-		final String MAX_DEPTH_FILE =  "platform:/plugin/edu.rice.cs.hpctraceviewer.ui/resources/max-depth16.png";
-		try {
-			URL url = FileLocator.toFileURL(new URL(MAX_DEPTH_FILE));
-			Image imgMaxDepth = new Image(getDisplay(), url.getFile());
-			JFaceResources.getImageRegistry().put("IconMaxDepth", imgMaxDepth);
+		Image image = getImage(MAX_DEPTH_FILE, ICON_MAX_DEPTH);
+		maxDepthButton.setImage(image);
 
-			maxDepthButton.setImage(imgMaxDepth);
-
-		} catch (IOException e1) {
-			Logger logger = LoggerFactory.getLogger(getClass());
-			logger.error("Unable to get the icon file: " + MAX_DEPTH_FILE, e1);
-		}
 		GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).applyTo(maxDepthButton);
 		
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(depthArea);
@@ -198,6 +197,10 @@ public class HPCCallStackView extends AbstractBaseItem implements EventHandler
 	}
 		
 	
+	/***
+	 * Update the current view with the new database
+	 * @param _stData the new database
+	 */
 	public void updateView(SpaceTimeDataController _stData) 
 	{
 		this.data = _stData;
@@ -236,6 +239,33 @@ public class HPCCallStackView extends AbstractBaseItem implements EventHandler
 		return enableAction;
 	}
 	
+	
+	/****
+	 * Retrieve an image based on the registry label, or if the image
+	 * is not in the registry, load it from file URL
+	 * 
+	 * @param fileURL the URL
+	 * @param label the registry label
+	 * 
+	 * @return image, null if the file doesn't exist
+	 */
+	private Image getImage(String fileURL, String label) {
+		
+		Image image = JFaceResources.getImageRegistry().get(label);
+		if (image != null)
+			return image;
+		
+		try {
+			URL url = FileLocator.toFileURL(new URL(fileURL));
+			image = new Image(getDisplay(), url.getFile());
+			JFaceResources.getImageRegistry().put(ICON_MAX_DEPTH, image);
+
+		} catch (IOException e1) {
+			Logger logger = LoggerFactory.getLogger(getClass());
+			logger.error("Unable to get the icon file: " + fileURL, e1);
+		}
+		return image;
+	}
 
 	@Override
 	public void setInput(Object input) {
