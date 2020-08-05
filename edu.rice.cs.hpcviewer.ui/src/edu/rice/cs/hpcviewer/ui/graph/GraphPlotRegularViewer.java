@@ -11,7 +11,7 @@ import org.swtchart.IAxisTick;
 import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpc.data.experiment.metric.MetricRaw;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
-import edu.rice.cs.hpcviewer.ui.util.Constants;
+
 
 public class GraphPlotRegularViewer extends AbstractGraphPlotViewer 
 {
@@ -64,10 +64,7 @@ public class GraphPlotRegularViewer extends AbstractGraphPlotViewer
 		return selections;
 	}
 	
-	@Override
-	public String getPartDescriptorId() {
-		return Constants.ID_GRAPH_PLOT;
-	}
+
 
 	@Override
 	protected String getGraphTypeLabel() {

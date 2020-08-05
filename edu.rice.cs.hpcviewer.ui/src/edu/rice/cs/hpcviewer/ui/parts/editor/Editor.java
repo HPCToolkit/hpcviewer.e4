@@ -9,7 +9,6 @@ import java.nio.file.Paths;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 
 import org.eclipse.swt.widgets.Composite;
 
@@ -17,7 +16,6 @@ import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpc.data.experiment.source.FileSystemSourceFile;
 import edu.rice.cs.hpcviewer.ui.graph.GraphEditorInput;
-import edu.rice.cs.hpcviewer.ui.util.Constants;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -106,9 +104,7 @@ public class Editor extends CTabItem implements IUpperPart
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(parent);
 	}
 	
-	@PreDestroy
-	public void preDestroy() {
-	}
+
 
 	
 	
@@ -205,10 +201,12 @@ public class Editor extends CTabItem implements IUpperPart
 		textViewer.setSelection(selection, true);
 	}
 	
+	
 	@Override
 	public String getTitle() {
 		return Editor.getTitle(input);
 	}
+	
 	
 	public static String getTitle(Object input) {
 		String filename = null;
@@ -223,10 +221,6 @@ public class Editor extends CTabItem implements IUpperPart
 		return filename;
 	}
 
-	@Override
-	public String getPartDescriptorId() {
-		return Constants.ID_VIEW_EDITOR;
-	}
 
 	@Override
 	public void setInput(Object input) {

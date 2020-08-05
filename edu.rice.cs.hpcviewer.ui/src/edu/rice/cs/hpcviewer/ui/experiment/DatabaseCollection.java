@@ -47,12 +47,10 @@ import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
-import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcbase.ui.IMainPart;
 import edu.rice.cs.hpctraceviewer.ui.TracePart;
 import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
 import edu.rice.cs.hpcviewer.ui.parts.ProfilePart;
-import edu.rice.cs.hpcviewer.ui.util.Constants;
 import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
 
 /***
@@ -75,7 +73,6 @@ public class DatabaseCollection
 	
 	final private HashMap<MWindow, List<BaseExperiment>>   mapWindowToExperiments;
 	final private HashMap<BaseExperiment, ViewerDataEvent> mapColumnStatus;
-	final private HashMap<RootScopeType, String> 		   mapRoottypeToPartId;
 	
 	private EPartService      partService;
 	private IEventBroker      eventBroker;
@@ -89,15 +86,7 @@ public class DatabaseCollection
 	
 	public DatabaseCollection() {
 
-		mapColumnStatus = new HashMap<BaseExperiment, ViewerDataEvent>();
-
-		mapRoottypeToPartId = new HashMap<RootScopeType, String>();
-
-		mapRoottypeToPartId.put(RootScopeType.CallingContextTree, Constants.ID_VIEW_TOPDOWN);
-		mapRoottypeToPartId.put(RootScopeType.CallerTree, 	 	  Constants.ID_VIEW_BOTTOMUP);
-		mapRoottypeToPartId.put(RootScopeType.Flat, 		   	  Constants.ID_VIEW_FLAT);
-		mapRoottypeToPartId.put(RootScopeType.DatacentricTree, 	  Constants.ID_VIEW_DATA);
-		
+		mapColumnStatus = new HashMap<BaseExperiment, ViewerDataEvent>();		
 		experimentManager = new ExperimentManager();
 		
 		mapWindowToExperiments = new HashMap<MWindow, List<BaseExperiment>>(1);

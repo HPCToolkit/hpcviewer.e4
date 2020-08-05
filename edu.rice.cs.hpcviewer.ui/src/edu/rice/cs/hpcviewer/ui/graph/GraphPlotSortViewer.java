@@ -8,7 +8,7 @@ import org.eclipse.swt.custom.CTabFolder;
 import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpc.data.experiment.metric.MetricRaw;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
-import edu.rice.cs.hpcviewer.ui.util.Constants;
+
 
 public class GraphPlotSortViewer extends AbstractGraphPlotViewer 
 {
@@ -56,10 +56,7 @@ public class GraphPlotSortViewer extends AbstractGraphPlotViewer
 		return y_values;
 	}
 
-	@Override
-	public String getPartDescriptorId() {
-		return Constants.ID_GRAPH_SORT;
-	}
+
 	
 	/*************
 	 * 

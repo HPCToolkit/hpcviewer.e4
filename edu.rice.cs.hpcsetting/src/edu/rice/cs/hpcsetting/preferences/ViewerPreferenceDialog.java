@@ -12,7 +12,6 @@ public class ViewerPreferenceDialog extends PreferenceDialog
 	public ViewerPreferenceDialog(Shell parentShell) {
 		super(parentShell, new PreferenceManager());
 		
-		parentShell.setText("Preferences");
 	}
 
 	
@@ -33,6 +32,9 @@ public class ViewerPreferenceDialog extends PreferenceDialog
 	@Override
 	public int open() {
 		super.create();
+		
+		getShell().setText("Preferences");
+
 		getTreeViewer().expandAll();
 		
 		return super.open();
