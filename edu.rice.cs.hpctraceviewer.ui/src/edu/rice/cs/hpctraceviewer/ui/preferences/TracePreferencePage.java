@@ -25,6 +25,8 @@ import edu.rice.cs.hpcsetting.preferences.AbstractPage;
  ********************************************************/
 public class TracePreferencePage extends AbstractPage 
 {
+	private final static int TOOLTIP_DELAY_MAX_MS = 10000;
+	private final static int TOOLTIP_DELAY_INCREMENT_MS = 1000;
 	
 	private Button []btnRenders;
 	private Spinner tooltipDelay;
@@ -70,6 +72,8 @@ public class TracePreferencePage extends AbstractPage
 
 	@Override
 	protected Control createContents(Composite parent) {
+		
+		TracePreferenceManager.INSTANCE.setDefaults();
 
 		Group groupFont = createGroupControl(parent, "Rendering mode", false);
 		groupFont.setLayout(new GridLayout(2, false));
@@ -87,8 +91,10 @@ public class TracePreferencePage extends AbstractPage
 		
 		int tooltipDelayValue = pref.getInt(TracePreferenceConstants.PREF_TOOLTIP_DELAY);
 		
-		createLabelControl(group, "Tooltip delay appearance (in seconds)");
-		tooltipDelay = createSpinnerControl(group, 0, 100);
+		createLabelControl(group, "Tooltip's delay in trace views (in miliseconds)");
+		tooltipDelay = createSpinnerControl(group, 0, TOOLTIP_DELAY_MAX_MS);
+		tooltipDelay.setPageIncrement(TOOLTIP_DELAY_INCREMENT_MS);
+		tooltipDelay.setToolTipText("Set the delay of the tooltip appearence (in ms) on top of the system's delay");
 		tooltipDelay.setSelection(tooltipDelayValue);
 		
 		return null;

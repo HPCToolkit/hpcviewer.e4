@@ -12,6 +12,6 @@ public class TracePreferenceConstants
 	
 	public final static String PREF_TOOLTIP_DELAY = "trace/tooltip";
 
-	public final static int TOOLTIP_DELAY_DEFAULT = 2;
+	public final static int TOOLTIP_DELAY_DEFAULT = 2000;
 
 }

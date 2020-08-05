@@ -1,5 +1,6 @@
 package edu.rice.cs.hpctraceviewer.ui.internal;
 
+import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.jface.window.DefaultToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusAdapter;
@@ -20,6 +21,8 @@ import edu.rice.cs.hpc.data.util.string.StringUtil;
 import edu.rice.cs.hpctraceviewer.data.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
 import edu.rice.cs.hpctraceviewer.ui.base.ITraceCanvas;
+import edu.rice.cs.hpctraceviewer.ui.preferences.TracePreferenceConstants;
+import edu.rice.cs.hpctraceviewer.ui.preferences.TracePreferenceManager;
 
 
 
@@ -217,8 +220,10 @@ implements ITraceCanvas, PaintListener
 			super(canvas);
 			
 			// delay the popup in millisecond
+			PreferenceStore pref = TracePreferenceManager.INSTANCE.getPreferenceStore();
+			int delay = pref.getInt(TracePreferenceConstants.PREF_TOOLTIP_DELAY);
 			
-			super.setPopupDelay(edu.rice.cs.hpc.data.util.Constants.TOOLTIP_DELAY_MS);
+			super.setPopupDelay(delay);
 			this.canvas = canvas;
 		}
 		
