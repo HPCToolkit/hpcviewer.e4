@@ -1,6 +1,5 @@
 package edu.rice.cs.hpcviewer.ui.preferences;
 
-import java.io.File;
 import java.io.IOException;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -19,7 +18,7 @@ import edu.rice.cs.hpcsetting.preferences.AbstractPage;
 
 public class MainProfilePage extends AbstractPage 
 {	
-	Button debugMode, removeFile;
+	Button debugMode;
 	Button cctId, flatId;
 	
 	public MainProfilePage(String title) {
@@ -37,7 +36,7 @@ public class MainProfilePage extends AbstractPage
 	public void apply() {
 		PreferenceStore prefDebug = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
 		
-		if (debugMode == null || removeFile == null || cctId == null || flatId == null)
+		if (debugMode == null || cctId == null || flatId == null)
 			return;
 		
 		boolean debug = debugMode.getSelection();		
@@ -48,14 +47,6 @@ public class MainProfilePage extends AbstractPage
 		
 		boolean debugFlat = flatId.getSelection();
 		prefDebug.setValue(PreferenceConstants.ID_DEBUG_FLAT_ID, debugFlat);
-		
-		if (removeFile.getSelection()) {
-			String filename = ViewerPreferenceManager.INSTANCE.getPreferenceStoreLocation();
-			File file = new File(filename);
-			if (file.canWrite()) {
-				file.delete();
-			}
-		}
 		
 		// save the preference in this page
 		try {

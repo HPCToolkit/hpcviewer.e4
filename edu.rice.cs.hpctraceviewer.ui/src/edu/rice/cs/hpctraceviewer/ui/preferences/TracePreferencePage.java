@@ -18,6 +18,11 @@ import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcsetting.preferences.AbstractPage;
 
+/********************************************************
+ * 
+ * Main preference page for hpctraceviewer
+ *
+ ********************************************************/
 public class TracePreferencePage extends AbstractPage 
 {
 	
@@ -37,11 +42,10 @@ public class TracePreferencePage extends AbstractPage
 
 	@Override
 	public void apply() {
-		if (btnRenders == null) 
+		if (btnRenders == null || tooltipDelay == null) 
 			return;
 		
-		PreferenceStore pref = TracePreferenceManager.INSTANCE.getPreferenceStore();
-		
+		PreferenceStore pref = TracePreferenceManager.INSTANCE.getPreferenceStore();		
 		int renderOld = pref.getInt(TracePreferenceConstants.PREF_RENDER_OPTION);
 		
 		for (int i=0; i<btnRenders.length; i++) {
@@ -72,11 +76,20 @@ public class TracePreferencePage extends AbstractPage
 
 		btnRenders = createRadioButtonControl(groupFont, TracePreferenceConstants.renderingOptions);
 		
+		PreferenceStore pref = TracePreferenceManager.INSTANCE.getPreferenceStore();		
+		int renderOld = pref.getInt(TracePreferenceConstants.PREF_RENDER_OPTION);
+
+		btnRenders[renderOld].setSelection(true);
+		
 		Composite group = new Composite(parent, SWT.NONE);
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(group);
 		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(group);
+		
+		int tooltipDelayValue = pref.getInt(TracePreferenceConstants.PREF_TOOLTIP_DELAY);
+		
 		createLabelControl(group, "Tooltip delay appearance (in seconds)");
 		tooltipDelay = createSpinnerControl(group, 0, 100);
+		tooltipDelay.setSelection(tooltipDelayValue);
 		
 		return null;
 	}
