@@ -17,6 +17,7 @@
   <module>edu.rice.cs.hpc.filter</module>
   <module>edu.rice.cs.hpcdata.tld</module>
   <module>edu.rice.cs.hpcbase</module>
+  <module>edu.rice.cs.hpclog</module>
   <module>edu.rice.cs.hpcsetting</module>
   <module>edu.rice.cs.hpc.remote</module>
   <module>edu.rice.cs.hpctraceviewer.data</module>
