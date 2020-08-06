@@ -3,6 +3,7 @@ package edu.rice.cs.hpc.data.util.string;
 import java.text.DecimalFormat;
 import org.apache.commons.text.WordUtils;
 
+
 import edu.rice.cs.hpc.data.util.Dialogs;
 
 public class StringUtil 
