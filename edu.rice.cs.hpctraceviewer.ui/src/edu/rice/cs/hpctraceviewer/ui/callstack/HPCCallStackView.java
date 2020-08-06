@@ -263,6 +263,7 @@ public class HPCCallStackView extends AbstractBaseItem implements EventHandler
 		} catch (IOException e1) {
 			Logger logger = LoggerFactory.getLogger(getClass());
 			logger.error("Unable to get the icon file: " + fileURL, e1);
+			e1.printStackTrace();
 		}
 		return image;
 	}

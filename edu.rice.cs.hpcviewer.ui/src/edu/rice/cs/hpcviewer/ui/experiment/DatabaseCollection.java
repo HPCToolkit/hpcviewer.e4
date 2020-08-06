@@ -302,8 +302,6 @@ public class DatabaseCollection
 		stack.setVisible(true);
 		stack.setOnTop(true);
 		
-		statusReport(IStatus.INFO, "Open " + experiment.getDefaultDirectory().getAbsolutePath(), null);
-		
 		List<BaseExperiment> listExperiments = getActiveListExperiments();
 		if (listExperiments != null) {
 			listExperiments.add(experiment);
@@ -449,8 +447,6 @@ public class DatabaseCollection
 
 		mapColumnStatus.remove(experiment);
 		
-		statusReport(IStatus.INFO, "Remove " + experiment.getDefaultDirectory().getAbsolutePath(), null);
-		
 		MWindow window = application.getSelectedElement();
 		List<MPart> listParts = modelService.findElements(window, null, MPart.class);
 		
@@ -542,6 +538,8 @@ public class DatabaseCollection
 			break;
 			
 		}
+		if (e != null)
+			e.printStackTrace();
 	}
 	
 	
@@ -630,9 +628,6 @@ public class DatabaseCollection
 					});
 				} catch (Exception e) {
 					final String msg = "Error opening the database";
-					sync.asyncExec(()->{
-						MessageDialog.openError(shell, msg, e.getClass().getName() + ": " +e.getMessage());
-					});
 					statusReport(IStatus.ERROR, msg, e);
 					
 					return Status.CANCEL_STATUS;

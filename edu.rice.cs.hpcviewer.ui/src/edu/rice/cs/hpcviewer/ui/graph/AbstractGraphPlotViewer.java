@@ -5,9 +5,7 @@ import java.text.DecimalFormat;
 import javax.inject.Inject;
 
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.custom.CTabFolder;
-import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.swtchart.Chart;
@@ -53,14 +51,11 @@ public abstract class AbstractGraphPlotViewer extends AbstractGraphViewer
 			x_values = getValuesX(scope, metric);
 			
 		} catch (Exception e) {
+			e.printStackTrace();
+			
 			String label = "Error while opening thread level data metric file";
-
 			Logger logger = LoggerFactory.getLogger(getClass());
 			logger.error(label, e);
-			
-			Display display = Display.getDefault();
-			MessageDialog.openError(display.getActiveShell(), label, 
-					 e.getClass().getName() + ": " + e.getMessage());
 			
 			return PLOT_ERR_UNKNOWN;
 		}

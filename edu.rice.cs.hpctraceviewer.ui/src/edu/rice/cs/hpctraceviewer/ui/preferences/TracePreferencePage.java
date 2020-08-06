@@ -65,6 +65,7 @@ public class TracePreferencePage extends AbstractPage
 		try {
 			pref.save();
 		} catch (IOException e) {
+			e.printStackTrace();
 			Logger logger = LoggerFactory.getLogger(getClass());
 			logger.error("Unable to save the settings", e);
 		}

@@ -7,7 +7,6 @@ import java.util.List;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.services.EMenuService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.Composite;
@@ -102,12 +101,11 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 				viewInput.setThread(threads);
 				
 			} catch (Exception e) {
+				e.printStackTrace();
+				
 				final String label = "Error while opening thread-level data";
 				Logger logger = LoggerFactory.getLogger(getClass());
 				logger.error(label, e);
-				
-				Shell shell = contentViewer.getTreeViewer().getTree().getShell();
-				MessageDialog.openError(shell, label, e.getClass().getName() + ":" + e.getMessage());
 				return;
 			}
 		}

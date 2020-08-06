@@ -52,6 +52,8 @@ public class MainProfilePage extends AbstractPage
 		try {
 			prefDebug.save();
 		} catch (IOException e) {
+			e.printStackTrace();
+			
 			Logger logger = LoggerFactory.getLogger(getClass());
 			logger.error("Unable to save preferences", e);
 		}

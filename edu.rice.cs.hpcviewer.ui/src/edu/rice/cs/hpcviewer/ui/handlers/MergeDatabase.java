@@ -7,6 +7,8 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
@@ -23,7 +25,6 @@ import java.util.Iterator;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.e4.core.contexts.Active;
 import org.eclipse.e4.core.di.annotations.CanExecute;
 
@@ -61,8 +62,6 @@ public class MergeDatabase
 
 		if (numDb!=2) {
 			String msg = "hpcviewer currently does not support merging more than two databases";
-			
-			database.statusReport(IStatus.ERROR, msg, null);
 			MessageDialog.openError(shell, "Unsupported action", msg);
 			return;
 		}
@@ -75,7 +74,9 @@ public class MergeDatabase
 			mergeType = RootScopeType.Flat;
 			
 		} else {
-			database.statusReport(IStatus.ERROR, "Error: merge param unknown: " + param, null);
+			Logger logger = LoggerFactory.getLogger(getClass());
+			logger.error("Error: merge param unknown: " + param);
+
 			return;
 		}
 		
