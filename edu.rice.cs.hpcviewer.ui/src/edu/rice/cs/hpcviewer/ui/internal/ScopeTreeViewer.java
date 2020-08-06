@@ -245,7 +245,7 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
     	final String description = objMetric.getDescription();
     	
     	if (description != null)
-    		col.setToolTipText(display_name + ": " + objMetric.getDescription());
+    		col.setToolTipText(display_name.trim() + " - " + objMetric.getDescription());
     	else
     		col.setToolTipText(display_name);
     	

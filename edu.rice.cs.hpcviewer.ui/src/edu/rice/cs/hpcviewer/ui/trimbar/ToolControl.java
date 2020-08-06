@@ -3,6 +3,7 @@ package edu.rice.cs.hpcviewer.ui.trimbar;
 import java.util.Objects;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -60,6 +61,11 @@ public class ToolControl
 			}
 		});
 	}
+	
+	@PreDestroy
+	public void PreDestroy() {
+		Job.getJobManager().setProgressProvider(null);
+	}
 
 	private final class GobalProgressMonitor extends NullProgressMonitor {
 
@@ -74,6 +80,8 @@ public class ToolControl
 
 				@Override
 				public void run() {
+					if (progressBar.isDisposed()) return;
+					
 					lblMessage.setText(name);
 
 					if( runningTasks <= 0 ) {
@@ -99,6 +107,8 @@ public class ToolControl
 
 				@Override
 				public void run() {
+					if (progressBar.isDisposed()) return;
+					
 					progressBar.setSelection(progressBar.getSelection() + work);
 				}
 			});
@@ -106,6 +116,7 @@ public class ToolControl
 
 		@Override
 		public void done() {
+			
 			sync.asyncExec(() -> {
 				progressBar.setSelection(0);
 				lblMessage.setText("");
@@ -113,7 +124,7 @@ public class ToolControl
 		}
 		
 		public IProgressMonitor addJob(Job job){
-			if( job != null ){
+			if( job != null && progressBar != null && !progressBar.isDisposed()) {
 				job.addJobChangeListener(new JobChangeAdapter() {
 					@Override
 					public void done(IJobChangeEvent event) {
