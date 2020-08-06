@@ -38,6 +38,10 @@ public class Activator implements BundleActivator
 
 		// this assumes that the logback.xml file is in the root of the bundle.
 		URL logbackConfigFileUrl = FileLocator.find(bundle, new Path("logback.xml"),null);
+		if (logbackConfigFileUrl == null) {
+			System.err.println("file logback.xml does not exist");
+			return;
+		}
 		jc.doConfigure(logbackConfigFileUrl.openStream());
 	}
 }
