@@ -113,13 +113,11 @@ public class SpaceTimeDataControllerRemote extends SpaceTimeDataController
 
 	public ProcessTimeline getNextTrace(AtomicInteger lineNum, int totalLines, 
 										boolean changedBounds, IProgressMonitor monitor) {
-		Integer nextIndex;
-
 		if (changedBounds) {
 			int i = 0;
 			
 			// TODO: Should this be implemented with real locking?
-			while ((nextIndex = timelineToRender.poll()) == null) {
+			while ((timelineToRender.poll()) == null) {
 				if (monitor.isCanceled())
 					return null;
 				
@@ -144,7 +142,6 @@ public class SpaceTimeDataControllerRemote extends SpaceTimeDataController
 			lineNum.getAndIncrement();
 		}
 		else{
-			nextIndex = lineNum.getAndIncrement();
 			//if (nextIndex >= ptlService.getNumProcessTimeline())
 				return null;
 		}

@@ -44,7 +44,6 @@ import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 
 
-
 /**************************************************
  * A viewer for CallStackSamples.
  *************************************************/
@@ -139,6 +138,7 @@ public class CallStackViewer extends TableViewer
         	public String getToolTipText(Object element)
         	{
         		final String originalText = getText(element);
+        		
         		return StringUtil.wrapScopeName(originalText, 100);
         	}
         	

@@ -3,7 +3,6 @@
  <modelVersion>4.0.0</modelVersion>
  <groupId>edu.rice.hpcviewer</groupId>
  <artifactId>externals</artifactId>
- <version>1.0.0-SNAPSHOT</version>
  <packaging>pom</packaging>
  <parent>
    <groupId>edu.rice.hpcviewer</groupId>
@@ -14,6 +13,7 @@
 
  <modules>
   <module>graphbuilder</module>
+  <module>org.apache.commons.text</module>
   <module>org.swtchart</module>
   <module>org.swtchart.ext</module>
  </modules>
