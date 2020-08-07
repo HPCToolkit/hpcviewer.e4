@@ -14,7 +14,9 @@ import org.eclipse.core.commands.operations.IOperationHistoryListener;
 import org.eclipse.core.commands.operations.IUndoContext;
 import org.eclipse.core.commands.operations.IUndoableOperation;
 import org.eclipse.core.commands.operations.OperationHistoryEvent;
-import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.workbench.UIEvents;
@@ -1066,7 +1068,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		 *************************************************************************/
 		final DetailViewPaint detailPaint = new DetailViewPaint(getDisplay(), bufferGC, origGC, stData, 
 																numLines, changedBounds, this); 
-
+		/*
   		boolean result = detailPaint.paint(new IProgressMonitor() {
 			
 			@Override
@@ -1098,7 +1100,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 			public void beginTask(String name, int totalWork) {
 				System.out.println("start");
 			}
-		});
+		}); 
 		if (result)
 		{
 			donePainting(imageOrig, imageFinal, changedBounds);
@@ -1109,13 +1111,54 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 			imageFinal.dispose();	
 			System.out.println("fail");
 			//asyncRedraw();
-		}
+		} */
+		detailPaint.addJobChangeListener(new IJobChangeListener() {
+			
+			@Override
+			public void sleeping(IJobChangeEvent event) {}
+			
+			@Override
+			public void scheduled(IJobChangeEvent event) {}
+			
+			@Override
+			public void running(IJobChangeEvent event) {}
+			
+			@Override
+			public void done(IJobChangeEvent event) {
+				System.out.println("status: " + event.getResult());
+				Display.getDefault().syncExec(() -> {
+					if (event.getResult() == Status.OK_STATUS) {
+						donePainting(imageOrig, imageFinal, changedBounds);
+						
+					} else if (event.getResult() == Status.CANCEL_STATUS) {
+						// we don't need this "new image" since the paint fails
+						imageFinal.dispose();	
+					}
+
+					redraw();
+					
+					// free resources 
+					bufferGC.dispose();
+					origGC.dispose();
+					imageOrig.dispose();
+				});
+			}
+			
+			@Override
+			public void awake(IJobChangeEvent event) {}
+			
+			@Override
+			public void aboutToRun(IJobChangeEvent event) {}
+		});
+		detailPaint.schedule();
+		/*
 		redraw();
 		
 		// free resources 
 		bufferGC.dispose();
 		origGC.dispose();
 		imageOrig.dispose();
+		*/
 	}
 
 	

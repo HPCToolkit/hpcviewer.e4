@@ -64,7 +64,11 @@ public abstract class BaseViewPaint extends Job
 	public IStatus run(IProgressMonitor monitor) {
 		IStatus status = Status.OK_STATUS;
 		
-		//BusyIndicator.showWhile(getDisplay(), getThread());
+		// TODO: this is a hack. Somehow, the value of monitor is canceled, and we cannot paint anything
+		//       this happens on Mac. So to make sure we can paint, we have to set manually the cancel to true
+		
+		monitor.setCanceled(false);
+		
 		if (!paint( monitor))
 		{
 			status = Status.CANCEL_STATUS;
