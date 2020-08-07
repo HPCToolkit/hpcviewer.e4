@@ -20,6 +20,7 @@
   <module>edu.rice.cs.hpclog</module>
   <module>edu.rice.cs.hpcsetting</module>
   <module>edu.rice.cs.hpc.remote</module>
+  <module>edu.rice.cs.hpctoolcontrol</module>
   <module>edu.rice.cs.hpctraceviewer.data</module>
   <module>edu.rice.cs.hpctraceviewer.ui</module>
   <module>edu.rice.cs.hpcviewer.ui</module>
