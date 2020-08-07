@@ -1074,29 +1074,8 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		final DetailViewPaint detailPaint = new DetailViewPaint(getDisplay(), bufferGC, origGC, stData, 
 																numLines, changedBounds, this); 
 
-		detailPaint.addJobChangeListener(new JobChangeAdapter() {
-			
-			@Override
-			public void done(IJobChangeEvent event) {
-
-				Display.getDefault().syncExec(() -> {
-					if (event.getResult() == Status.OK_STATUS) {
-						donePainting(imageOrig, imageFinal, changedBounds);
-						
-					} else if (event.getResult() == Status.CANCEL_STATUS) {
-						// we don't need this "new image" since the paint fails
-						imageFinal.dispose();	
-					}
-
-					redraw();
-					
-					// free resources 
-					bufferGC.dispose();
-					origGC.dispose();
-					imageOrig.dispose();
-				});
-			}
-		});
+		DetailPaintJobChangeListener listener = new DetailPaintJobChangeListener(detailPaint, imageOrig, imageFinal, bufferGC, origGC, changedBounds);
+		detailPaint.addJobChangeListener(listener);
 
 		
 /*		this part of the code causes deadlock on VirtualBox Ubuntu
@@ -1118,6 +1097,49 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		queue.add(detailPaint);
 	}
 
+	private class DetailPaintJobChangeListener extends JobChangeAdapter
+	{
+		private final DetailViewPaint detailPaint;
+		private final Image imageOrig, imageFinal;
+		private final boolean changedBounds;
+		private final GC bufferGC, origGC;
+		
+		public DetailPaintJobChangeListener(DetailViewPaint detailPaint, 
+											Image imageOrig, Image imageFinal,
+											GC bufferGC, GC origGC, boolean changedBounds) {
+
+			this.detailPaint = detailPaint;
+			this.imageOrig = imageOrig;
+			this.imageFinal = imageFinal;
+			this.bufferGC = bufferGC;
+			this.origGC   = origGC;
+			this.changedBounds = changedBounds;
+		}
+		
+		@Override
+		public void done(IJobChangeEvent event) {
+
+			Display.getDefault().syncExec(() -> {
+				queue.remove(detailPaint);
+				
+				if (event.getResult() == Status.OK_STATUS) {
+					donePainting(imageOrig, imageFinal, changedBounds);
+					
+				} else if (event.getResult() == Status.CANCEL_STATUS) {
+					// we don't need this "new image" since the paint fails
+					imageFinal.dispose();	
+				}
+
+				redraw();
+				
+				// free resources 
+				bufferGC.dispose();
+				origGC.dispose();
+				imageOrig.dispose();
+			});
+		}
+		
+	}
 	
 	private void donePainting(Image imageOrig, Image imageFinal, boolean refreshData)
 	{		
