@@ -17,7 +17,7 @@ import org.eclipse.core.commands.operations.IUndoableOperation;
 import org.eclipse.core.commands.operations.OperationHistoryEvent;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.IJobChangeListener;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.workbench.UIEvents;
@@ -1074,16 +1074,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		final DetailViewPaint detailPaint = new DetailViewPaint(getDisplay(), bufferGC, origGC, stData, 
 																numLines, changedBounds, this); 
 
-		detailPaint.addJobChangeListener(new IJobChangeListener() {
-			
-			@Override
-			public void sleeping(IJobChangeEvent event) {}
-			
-			@Override
-			public void scheduled(IJobChangeEvent event) {}
-			
-			@Override
-			public void running(IJobChangeEvent event) {}
+		detailPaint.addJobChangeListener(new JobChangeAdapter() {
 			
 			@Override
 			public void done(IJobChangeEvent event) {
@@ -1105,12 +1096,6 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 					imageOrig.dispose();
 				});
 			}
-			
-			@Override
-			public void awake(IJobChangeEvent event) {}
-			
-			@Override
-			public void aboutToRun(IJobChangeEvent event) {}
 		});
 
 		
@@ -1118,6 +1103,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
  *      since we don't clear the queue
  */
   		if (!queue.isEmpty()) {
+  			System.out.println("STDC emptying " + queue.size());
 			for (BaseViewPaint job : queue) {
 				if (!job.cancel()) {
 					// a job cannot be terminated.
