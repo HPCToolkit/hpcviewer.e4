@@ -103,7 +103,7 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 		SashForm sashFormLeft  = new SashForm(sashFormMain, SWT.VERTICAL);
 		SashForm sashFormRight = new SashForm(sashFormMain, SWT.VERTICAL);
 
-		context = window.getContext();
+		context = part.getContext();
 		
 		// ---------------
 		// main view

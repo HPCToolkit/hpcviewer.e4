@@ -1087,7 +1087,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 			
 			@Override
 			public void done(IJobChangeEvent event) {
-				System.out.println("status: " + event.getResult());
+
 				Display.getDefault().syncExec(() -> {
 					if (event.getResult() == Status.OK_STATUS) {
 						donePainting(imageOrig, imageFinal, changedBounds);
