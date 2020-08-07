@@ -17,13 +17,23 @@ import org.eclipse.emf.common.notify.impl.AdapterImpl;
 import org.eclipse.emf.ecore.EObject;
 import org.osgi.service.event.Event;
 
-import edu.rice.cs.hpctraceviewer.ui.main.HPCTraceView;
+/***
+ * 
+ * This class is a modified version of WindowCloseListenerAddon from fixpro78 application
+ * 
+ * See the original code at:
+ * 
+ * https://github.com/fipro78/e4translationexample/blob/master/org.fipro.e4.translation/src/org/fipro/e4/translation/WindowCloseListenerAddon.java
+ *
+ */
 
 // @PostConstruct will not work as workbench gets instantiated after the processing of the add-ons
 // hence this approach uses method injection
 
 @SuppressWarnings("restriction")
-public class WindowCloseListenerAddon {
+public class WindowCloseListenerAddon 
+{
+	public static final String ID_WINDOW_EXTRA = "edu.rice.cs.hpcviewer.ui.trimmedwindow.main";
 
 	@Inject
 	MApplication application;
@@ -76,7 +86,7 @@ public class WindowCloseListenerAddon {
 				@Override
 				public boolean close(MWindow window) {
 					boolean close = true;
-					if (window.getElementId().equals(HPCTraceView.ID_WINDOW)) {
+					if (window.getElementId().equals(ID_WINDOW_EXTRA)) {
 						window.setVisible(false);
 						close = false;
 					}

@@ -23,7 +23,6 @@ import javax.annotation.PreDestroy;
 
 public class HPCTraceView extends AbstractBaseItem
 {
-	public static final String ID_WINDOW      = "edu.rice.cs.hpctraceviewer.ui.trimmedwindow.hpctraceviewer";
 	public static final String ID_PERSPECTIVE = "edu.rice.cs.hpctraceviewer.ui.perspective.main";
 	public static final String ID_PART        = "edu.rice.cs.hpctraceviewer.ui.part.main";
 	
