@@ -17,7 +17,7 @@ import org.eclipse.core.commands.operations.IUndoableOperation;
 import org.eclipse.core.commands.operations.OperationHistoryEvent;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.IJobChangeListener;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.workbench.UIEvents;
@@ -1074,50 +1074,15 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		final DetailViewPaint detailPaint = new DetailViewPaint(getDisplay(), bufferGC, origGC, stData, 
 																numLines, changedBounds, this); 
 
-		detailPaint.addJobChangeListener(new IJobChangeListener() {
-			
-			@Override
-			public void sleeping(IJobChangeEvent event) {}
-			
-			@Override
-			public void scheduled(IJobChangeEvent event) {}
-			
-			@Override
-			public void running(IJobChangeEvent event) {}
-			
-			@Override
-			public void done(IJobChangeEvent event) {
-
-				Display.getDefault().syncExec(() -> {
-					if (event.getResult() == Status.OK_STATUS) {
-						donePainting(imageOrig, imageFinal, changedBounds);
-						
-					} else if (event.getResult() == Status.CANCEL_STATUS) {
-						// we don't need this "new image" since the paint fails
-						imageFinal.dispose();	
-					}
-
-					redraw();
-					
-					// free resources 
-					bufferGC.dispose();
-					origGC.dispose();
-					imageOrig.dispose();
-				});
-			}
-			
-			@Override
-			public void awake(IJobChangeEvent event) {}
-			
-			@Override
-			public void aboutToRun(IJobChangeEvent event) {}
-		});
+		DetailPaintJobChangeListener listener = new DetailPaintJobChangeListener(detailPaint, imageOrig, imageFinal, bufferGC, origGC, changedBounds);
+		detailPaint.addJobChangeListener(listener);
 
 		
 /*		this part of the code causes deadlock on VirtualBox Ubuntu
  *      since we don't clear the queue
  */
   		if (!queue.isEmpty()) {
+  			System.out.println("STDC emptying " + queue.size());
 			for (BaseViewPaint job : queue) {
 				if (!job.cancel()) {
 					// a job cannot be terminated.
@@ -1132,6 +1097,49 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		queue.add(detailPaint);
 	}
 
+	private class DetailPaintJobChangeListener extends JobChangeAdapter
+	{
+		private final DetailViewPaint detailPaint;
+		private final Image imageOrig, imageFinal;
+		private final boolean changedBounds;
+		private final GC bufferGC, origGC;
+		
+		public DetailPaintJobChangeListener(DetailViewPaint detailPaint, 
+											Image imageOrig, Image imageFinal,
+											GC bufferGC, GC origGC, boolean changedBounds) {
+
+			this.detailPaint = detailPaint;
+			this.imageOrig = imageOrig;
+			this.imageFinal = imageFinal;
+			this.bufferGC = bufferGC;
+			this.origGC   = origGC;
+			this.changedBounds = changedBounds;
+		}
+		
+		@Override
+		public void done(IJobChangeEvent event) {
+
+			Display.getDefault().syncExec(() -> {
+				queue.remove(detailPaint);
+				
+				if (event.getResult() == Status.OK_STATUS) {
+					donePainting(imageOrig, imageFinal, changedBounds);
+					
+				} else if (event.getResult() == Status.CANCEL_STATUS) {
+					// we don't need this "new image" since the paint fails
+					imageFinal.dispose();	
+				}
+
+				redraw();
+				
+				// free resources 
+				bufferGC.dispose();
+				origGC.dispose();
+				imageOrig.dispose();
+			});
+		}
+		
+	}
 	
 	private void donePainting(Image imageOrig, Image imageFinal, boolean refreshData)
 	{		

@@ -8,6 +8,7 @@ Require-Bundle: org.eclipse.e4.ui.model.workbench,
  javax.inject,
  org.eclipse.core.runtime,
  org.eclipse.e4.ui.di,
- org.eclipse.jface
+ org.eclipse.jface,
+ javax.annotation
 Automatic-Module-Name: edu.rice.cs.hpctoolcontrol
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
