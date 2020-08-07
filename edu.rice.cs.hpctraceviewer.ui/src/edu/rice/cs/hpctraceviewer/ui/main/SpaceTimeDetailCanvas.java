@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.text.DecimalFormat;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.commands.ExecutionException;
@@ -48,6 +49,7 @@ import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.base.ITraceViewAction;
 import edu.rice.cs.hpctraceviewer.ui.context.BaseTraceContext;
 import edu.rice.cs.hpctraceviewer.ui.internal.AbstractTimeCanvas;
+import edu.rice.cs.hpctraceviewer.ui.internal.BaseViewPaint;
 import edu.rice.cs.hpctraceviewer.ui.internal.BufferPaint;
 import edu.rice.cs.hpctraceviewer.ui.internal.ResizeListener;
 import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
@@ -996,6 +998,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	}
 	
 
+	// remove queue of jobs because it causes deadlock 
+	// 
+	final private ConcurrentLinkedQueue<BaseViewPaint> queue = new ConcurrentLinkedQueue<>();
 	
 	/*********************************************************************************
 	 * Refresh the content of the canvas with new input data or boundary or parameters
@@ -1068,50 +1073,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		 *************************************************************************/
 		final DetailViewPaint detailPaint = new DetailViewPaint(getDisplay(), bufferGC, origGC, stData, 
 																numLines, changedBounds, this); 
-		/*
-  		boolean result = detailPaint.paint(new IProgressMonitor() {
-			
-			@Override
-			public void worked(int work) {}
-			
-			@Override
-			public void subTask(String name) {}
-			
-			@Override
-			public void setTaskName(String name) {}
-			
-			@Override
-			public void setCanceled(boolean value) {}
-			
-			@Override
-			public boolean isCanceled() {
-				return false;
-			}
-			
-			@Override
-			public void internalWorked(double work) {}
-			
-			@Override
-			public void done() {
-				System.out.println("done");
-			}
-			
-			@Override
-			public void beginTask(String name, int totalWork) {
-				System.out.println("start");
-			}
-		}); 
-		if (result)
-		{
-			donePainting(imageOrig, imageFinal, changedBounds);
-			System.out.println("success");
-		} else
-		{
-			// we don't need this "new image" since the paint fails
-			imageFinal.dispose();	
-			System.out.println("fail");
-			//asyncRedraw();
-		} */
+
 		detailPaint.addJobChangeListener(new IJobChangeListener() {
 			
 			@Override
@@ -1150,15 +1112,24 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 			@Override
 			public void aboutToRun(IJobChangeEvent event) {}
 		});
-		detailPaint.schedule();
-		/*
-		redraw();
+
 		
-		// free resources 
-		bufferGC.dispose();
-		origGC.dispose();
-		imageOrig.dispose();
-		*/
+/*		this part of the code causes deadlock on VirtualBox Ubuntu
+ *      since we don't clear the queue
+ */
+  		if (!queue.isEmpty()) {
+			for (BaseViewPaint job : queue) {
+				if (!job.cancel()) {
+					// a job cannot be terminated.
+					// this is fine, we should wait until it terminates or
+					// response that it will cancel in the future
+				}
+			}
+		}
+  		
+		detailPaint.schedule();
+		
+		queue.add(detailPaint);
 	}
 
 	
