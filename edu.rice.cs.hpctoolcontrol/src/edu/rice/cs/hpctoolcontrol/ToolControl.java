@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.trimbar;
+package edu.rice.cs.hpctoolcontrol;
 
 import java.util.Objects;
 
@@ -45,10 +45,10 @@ public class ToolControl
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(parent);
 		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(parent);
 
+		lblMessage = new Label(parent, SWT.NONE);
+
 		progressBar = new ProgressBar(parent, SWT.SMOOTH);
 		progressBar.setBounds(100, 10, 200, 20);
-
-		lblMessage = new Label(parent, SWT.NONE);
 
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(lblMessage);
 		
@@ -82,7 +82,7 @@ public class ToolControl
 				public void run() {
 					if (progressBar.isDisposed()) return;
 					
-					lblMessage.setText(name);
+					lblMessage.setText("[" + runningTasks + "] Runing: " + name);
 
 					if( runningTasks <= 0 ) {
 						// --- no task is running at the moment ---

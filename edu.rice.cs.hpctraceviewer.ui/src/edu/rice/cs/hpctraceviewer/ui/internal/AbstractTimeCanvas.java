@@ -234,7 +234,7 @@ implements ITraceCanvas, PaintListener
 		 */
 		protected String getText(Event event) {
 			final Image image = canvas.getBuffer();
-			if (image == null)
+			if (image == null || image.isDisposed())
 				return null;
 			
 			final ImageData imgData = image.getImageData();

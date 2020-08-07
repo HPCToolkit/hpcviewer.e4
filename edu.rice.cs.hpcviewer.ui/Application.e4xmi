@@ -51,9 +51,7 @@
         <children xsi:type="menu:HandledMenuItem" xmi:id="_XRffYLS0EeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.about" label="About" tooltip="About the application" mnemonics="A" command="_lIBrgKwbEeq2aaPo7yBcWg"/>
       </children>
     </mainMenu>
-    <trimBars xmi:id="_ByrtQLTcEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.trimbar.bottom" side="Bottom">
-      <children xsi:type="menu:ToolControl" xmi:id="_Ln10gLTcEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.toolcontrol.top" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.trimbar.ToolControl"/>
-    </trimBars>
+    <trimBars xmi:id="_ByrtQLTcEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.trimbar.bottom" side="Bottom"/>
   </children>
   <handlers xmi:id="_QlX6sLV6EeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.handler.new" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.NewWindow" command="_FHXw4LV7EeqkhNpo_ZhE2A"/>
   <handlers xmi:id="_zXCPcI7xEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handler.open" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.FileOpenDatabase" command="_U14sMI7vEeqBPbXbG7_Dzw"/>

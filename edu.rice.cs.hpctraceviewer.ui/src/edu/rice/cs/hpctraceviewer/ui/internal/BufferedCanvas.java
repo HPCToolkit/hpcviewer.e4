@@ -53,7 +53,7 @@ public abstract class BufferedCanvas extends Canvas
 	 */
 	public void paintControl(PaintEvent e) 
 	{
-		if (imageBuffer != null) 
+		if (imageBuffer != null && !imageBuffer.isDisposed()) 
 		{
 			final Rectangle area = getClientArea();
 			final Rectangle rect = imageBuffer.getBounds();

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="ASCII"?>
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmi:id="_0OnSQNjgEeqW6JmRwmJpGQ">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_X9UKYNjhEeqW6JmRwmJpGQ" featurename="trimContributions" parentElementId="xpath:/">
+    <elements xsi:type="menu:TrimContribution" xmi:id="_zhw2gNjkEeqW6JmRwmJpGQ" elementId="edu.rice.cs.hpctoolcontrol.trimcontribution.jobControl" parentId="edu.rice.cs.hpcviewer.ui.trimbar.bottom">
+      <children xsi:type="menu:ToolControl" xmi:id="_61uMUNjkEeqW6JmRwmJpGQ" elementId="edu.rice.cs.hpctoolcontrol.toolcontrol.jobControl" contributionURI="bundleclass://edu.rice.cs.hpctoolcontrol/edu.rice.cs.hpctoolcontrol.ToolControl"/>
+    </elements>
+  </fragments>
+</fragment:ModelFragments>
