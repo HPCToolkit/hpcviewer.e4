@@ -2,18 +2,24 @@ package edu.rice.cs.hpctraceviewer.ui.internal;
 
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.swt.widgets.Display;
-
+import edu.rice.cs.hpc.data.util.OSValidator;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TimelineDataSet;
 import edu.rice.cs.hpctraceviewer.ui.base.ISpaceTimeCanvas;
+import edu.rice.cs.hpctraceviewer.ui.util.Utility;
 
 
 
@@ -98,11 +104,13 @@ public abstract class BaseViewPaint extends Job
 		if (controller.getPixelHorizontal() <= 0)
 			return false;
 		
+		int num_threads = Utility.getNumThreads(10);
+		
 		// -------------------------------------------------------------------
 		// initialize the painting (to be implemented by the instance)
 		// -------------------------------------------------------------------
 
-		if (!startPainting(linesToPaint, 1, changedBounds))
+		if (!startPainting(linesToPaint, num_threads, changedBounds))
 			return false;
 
 		monitor.beginTask(getName(), linesToPaint);
@@ -115,7 +123,7 @@ public abstract class BaseViewPaint extends Job
 		// It looks like there's no major performance effect though
 
 		try {
-			launchDataGettingThreads(changedBounds, 1);
+			launchDataGettingThreads(changedBounds, num_threads);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -139,56 +147,179 @@ public abstract class BaseViewPaint extends Job
 		final double xscale = canvas.getScalePixelsPerTime();
 		final double yscale = Math.max(canvas.getScalePixelsPerRank(), 1);
 		
-		
-		final BaseTimelineThread thread = getTimelineThread(canvas, xscale, yscale, queue, monitor);
-		
-		try {
-			thread.call();
+		ExecutorService threadExecutor = Executors.newCachedThreadPool();
+		ExecutorCompletionService<Integer> ecs = new ExecutorCompletionService<Integer>(threadExecutor);
+						
+		for (int i=0; i< num_threads; i++ ) {
+			final BaseTimelineThread thread = getTimelineThread(canvas, xscale, yscale, queue, monitor);
 			
-		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
-		}
+			try {
+				// when hpctraceviewer exits while a job is still running,
+				// there will be a sporadic of error messages.
+				// we should just warning the user instead of scaring them with
+				// error message and backtrace
 
-		final BasePaintThread paintThread = getPaintThread(queue, linesToPaint,
-				controller.getPixelHorizontal(), monitor);
-
-		Display.getDefault().syncExec(new Runnable() {
+				ecs.submit(thread);
 			
-			@Override
-			public void run() {
-				List<ImagePosition> listImages;
-				try {
-					listImages = paintThread.call();
-
-					for (ImagePosition image : listImages) 
-					{
-						if (!monitor.isCanceled())
-							drawPainting(canvas, image);
-						else
-							break;
-					}				
-
-					// notify user that we have finished painting
-					endPainting(monitor.isCanceled());
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				return false;
 			}
-		});
+		}
 		
 		// -------------------------------------------------------------------
 		// draw to the canvas
 		// -------------------------------------------------------------------
 		
+		int num_paint_threads = OSValidator.isUnix() ? 1 : num_threads;
+		executePaint( ecs, 
+					  num_threads, 
+					  num_paint_threads, 
+					  queue, 
+					  linesToPaint, 
+					  monitor, 
+					  threadExecutor);
+		
 		monitor.done();
+		threadExecutor.shutdown();
+		
 		changedBounds = false;
 
 		return !monitor.isCanceled();
 	}
 	
 	
+	/****
+	 * run jobs for collecting data and painting the image
+	 * 
+	 * @param ecs : completion service from data collection job
+	 * @param num_threads : number of threads for collecting data (see ecs)
+	 * @param num_paint_threads : number of threads for paiting
+	 * @param queue : the data to be collected
+	 * @param linesToPaint : number of lines to paint
+	 * @param timelineDone : atomic integer for number of lines collected
+	 * @param monitor : UI progress monitor 
+	 */
+	private void executePaint(ExecutorCompletionService<Integer> ecs,
+			int num_threads, int num_paint_threads, Queue<TimelineDataSet> queue, 
+			int linesToPaint, IProgressMonitor monitor, ExecutorService threadExecutor) 
+	{
+		final List<Future<List<ImagePosition>>> threadsPaint = new ArrayList<Future<List<ImagePosition>>>();
+		
+		// for threads as many as the number of paint threads (specified by the caller)
+		for (int threadNum=0; threadNum < num_paint_threads; threadNum++) 
+		{
+
+			final BasePaintThread paintThread = getPaintThread(queue, linesToPaint,
+					controller.getPixelHorizontal(), monitor);
+
+			if (paintThread != null) {
+				final Future<List<ImagePosition>> submit = threadExecutor.submit( paintThread );
+				threadsPaint.add(submit);
+			}
+		}
+		// -------------------------------------------------------------------
+		// Finalize the painting (to be implemented by the instance)
+		// -------------------------------------------------------------------
+		ArrayList<Integer> result = new ArrayList<Integer>();
+		if (waitDataPreparationThreads(ecs, result, num_threads, monitor))
+		{
+			endPainting(threadsPaint, monitor);
+		} else {
+			
+			// threads to collect data are shutdown, perhaps due to cancellation
+			// it is very important to cancel threads to paint the canvas
+			// without this cancellation, in some platforms,  the painter threads 
+			// are NOT notified, and still thinking that the progress monitor is still
+			// valid and continue to wait data from data collector threads
+			// 
+			// Due to bug in Eclipse' ProgressMonitor, the monitor's isCanceled() method
+			// always returns true if the parent exits.
+			
+			for(Future<List<ImagePosition>> p: threadsPaint) {
+				p.cancel(true);
+			}
+			
+			monitor.setCanceled(true);
+			// whatever the result, we need to clear the 
+			monitor.setTaskName("");
+		}
+	}
+	
+	/******
+	 * Wait for any thread who finishes first, and then add the result to the list
+	 * 
+	 * @param ecs : executor service
+	 * @param result : the list of the result
+	 * @param launch_threads : number of launched threads
+	 */
+	private boolean waitDataPreparationThreads(ExecutorCompletionService<Integer> ecs, 
+			ArrayList<Integer> result, int launch_threads, IProgressMonitor monitor)
+	{
+		int num_invalid_samples = 0;
+		for (int i=0; i<launch_threads; i++)
+		{
+			if (monitor.isCanceled())
+				return false;
+			
+			try {
+				Integer linenum = ecs.take().get();
+				if (linenum == null)
+					return false;
+				num_invalid_samples += linenum.intValue();
+				
+				result.add(linenum);
+
+			} catch (Exception e) {
+				// we don't need to show exception message everywhere unless if we are in develop mode
+
+				return false;
+			}
+		}
+		if (num_invalid_samples > 0) {
+			final String message = "Warning: " + num_invalid_samples + 
+					" sample(s) have invalid call-path ID.";
+			canvas.setMessage(message);
+		}
+		return true;
+	}
+
+	/******
+	 * finalize the data collection, and put all images into a canvas
+	 * 
+	 * @param canvas
+	 * @param listOfImageThreads
+	 */
+	private boolean endPainting(List<Future<List<ImagePosition>>> listOfImageThreads,
+			IProgressMonitor monitor)
+	{
+		for( Future<List<ImagePosition>> listFutures : listOfImageThreads ) 
+		{
+			if (monitor.isCanceled())
+				return false;
+			
+			try {
+				List<ImagePosition> listImages = listFutures.get();
+				if (listImages == null)
+					return false;
+				for (ImagePosition image : listImages) 
+				{
+					if (!monitor.isCanceled())
+						drawPainting(canvas, image);
+					else
+						return false;
+				}				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		// notify user that we have finished painting
+		endPainting(monitor.isCanceled());
+		
+		return true;
+	}
+		
+
 	//------------------------------------------------------------------------------------------------
 	// abstract methods 
 	//------------------------------------------------------------------------------------------------

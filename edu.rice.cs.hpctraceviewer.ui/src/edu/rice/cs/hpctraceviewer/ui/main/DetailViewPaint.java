@@ -8,7 +8,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
-
+import org.eclipse.swt.widgets.Display;
 
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TimelineDataSet;
@@ -112,19 +112,23 @@ public class DetailViewPaint extends BaseViewPaint
 	protected void drawPainting(ISpaceTimeCanvas canvas,
 			ImagePosition imagePosition) {
 
-		DetailImagePosition imgDetailLine = (DetailImagePosition)imagePosition;
-		double yscale = Math.max(canvas.getScalePixelsPerRank(), 1);
-
-		int yposition = (int) Math.round(imgDetailLine.position * yscale);
-
-		// put the image onto the canvas
-		masterGC.drawImage(imgDetailLine.image, 0, yposition);
+		final double pixelsPerRank = canvas.getScalePixelsPerRank();
 		
-		origGC.drawImage(imgDetailLine.imageOriginal, 0, imgDetailLine.position);
+		Display.getDefault().asyncExec(()-> {
+			DetailImagePosition imgDetailLine = (DetailImagePosition)imagePosition;
+			double yscale = Math.max(pixelsPerRank, 1);
 
-		imgDetailLine.image.dispose();
-		imgDetailLine.imageOriginal.dispose();
+			int yposition = (int) Math.round(imgDetailLine.position * yscale);
 
+			// put the image onto the canvas
+			masterGC.drawImage(imgDetailLine.image, 0, yposition);
+			
+			origGC.drawImage(imgDetailLine.imageOriginal, 0, imgDetailLine.position);
+
+			imgDetailLine.image.dispose();
+			imgDetailLine.imageOriginal.dispose();
+
+		});
 	}
 
 	@Override
