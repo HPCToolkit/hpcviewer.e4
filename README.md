@@ -1,13 +1,15 @@
 # hpcviewer.e4
 
 This is a pilot project of hpcviewer based on Eclipse 4, rewriting mostly from scratch. Some parts are portable without modification (like **hpcdata** plugin), many are heavily modified.
-Once stable, we'll merge to HPCToolkit repository.
+Once stable, we may integrate into HPCToolkit spack build system.
 
 The goals:
 
-* Can work the latest version of Eclipse and newer version of Java (9 or newer).
-* Can work with 4 platforms: Win32, Mac, Linux x86_64 and Linux ppcle64
-* Can be built easily with a command line (Maven) from Linux, Mac and Windows.
+* Can work the latest version of Eclipse and newer version of Java (11 or newer). **done**
+* Can work with 4 platforms: Win32, Mac, Linux x86_64 and Linux ppcle64. **done**
+* Can be built easily with a command line (Maven) from Linux, Mac and Windows. **partially done**
+* Can integrate smoothly between `hpcviewer` and `hpctraceviewer`. **partially done**
+* Can be automatically tested.
 
 ## How to build and run via command line (Maven)
 
@@ -22,7 +24,7 @@ The goals:
 
 Requirements:
 
-* Recommended: [Eclipse 2020.03](https://www.eclipse.org/downloads/packages/release/2020-03/r/eclipse-ide-rcp-and-rap-developers). May not work with older version.
+* Recommended: [Eclipse 2019.03](https://www.eclipse.org/downloads/packages/release/2019-03/r/eclipse-ide-rcp-and-rap-developers). May not work with older versions. For the newer versions (2019.06 and newer), hpcviewer still works but due to high-definition pixels support, the mapping between pixel and procedure names do not work properly (especially on Mac OS with retina display)
 
 To import the source code into Eclipse IDE:
 
