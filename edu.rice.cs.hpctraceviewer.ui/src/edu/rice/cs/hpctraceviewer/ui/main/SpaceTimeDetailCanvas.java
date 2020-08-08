@@ -1107,7 +1107,8 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		
 		private long start;
 		
-		public DetailPaintJobChangeListener(DetailViewPaint detailPaint, 
+
+public DetailPaintJobChangeListener(DetailViewPaint detailPaint, 
 											Image imageOrig, Image imageFinal,
 											GC bufferGC, GC origGC, boolean changedBounds) {
 
@@ -1138,7 +1139,8 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 					// we don't need this "new image" since the paint fails
 					imageFinal.dispose();	
 				}
-				long done1 = Instant.now().toEpochMilli() - start;
+
+        long done1 = Instant.now().toEpochMilli() - start;
 				
 				redraw();
 				
