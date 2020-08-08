@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.text.DecimalFormat;
+import java.time.Instant;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -1104,6 +1105,8 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		private final boolean changedBounds;
 		private final GC bufferGC, origGC;
 		
+		private long start;
+		
 		public DetailPaintJobChangeListener(DetailViewPaint detailPaint, 
 											Image imageOrig, Image imageFinal,
 											GC bufferGC, GC origGC, boolean changedBounds) {
@@ -1115,6 +1118,12 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 			this.origGC   = origGC;
 			this.changedBounds = changedBounds;
 		}
+		
+		@Override
+		public void aboutToRun(IJobChangeEvent event) {
+			start = Instant.now().toEpochMilli();
+		}
+
 		
 		@Override
 		public void done(IJobChangeEvent event) {
@@ -1129,8 +1138,12 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 					// we don't need this "new image" since the paint fails
 					imageFinal.dispose();	
 				}
-
+				long done1 = Instant.now().toEpochMilli() - start;
+				
 				redraw();
+				
+				System.out.println("Status: " + event.getResult().getCode() + 
+									", time: " +  done1);
 				
 				// free resources 
 				bufferGC.dispose();

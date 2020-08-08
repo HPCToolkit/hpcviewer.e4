@@ -15,6 +15,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.swt.widgets.Display;
+
 import edu.rice.cs.hpc.data.util.OSValidator;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TimelineDataSet;
@@ -301,14 +303,17 @@ public abstract class BaseViewPaint extends Job
 			try {
 				List<ImagePosition> listImages = listFutures.get();
 				if (listImages == null)
-					return false;
-				for (ImagePosition image : listImages) 
-				{
-					if (!monitor.isCanceled())
-						drawPainting(canvas, image);
-					else
-						return false;
-				}				
+					continue;
+
+				Display.getDefault().syncExec(() -> {
+					for (ImagePosition image : listImages) 
+					{
+						if (!monitor.isCanceled())
+							drawPainting(canvas, image);
+						else
+							return;
+					}				
+				});
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

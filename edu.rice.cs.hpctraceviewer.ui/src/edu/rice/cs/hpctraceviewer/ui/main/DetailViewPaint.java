@@ -8,8 +8,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.Display;
-
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TimelineDataSet;
 import edu.rice.cs.hpctraceviewer.ui.base.ISpaceTimeCanvas;
@@ -114,21 +112,18 @@ public class DetailViewPaint extends BaseViewPaint
 
 		final double pixelsPerRank = canvas.getScalePixelsPerRank();
 		
-		Display.getDefault().asyncExec(()-> {
-			DetailImagePosition imgDetailLine = (DetailImagePosition)imagePosition;
-			double yscale = Math.max(pixelsPerRank, 1);
+		DetailImagePosition imgDetailLine = (DetailImagePosition)imagePosition;
+		double yscale = Math.max(pixelsPerRank, 1);
 
-			int yposition = (int) Math.round(imgDetailLine.position * yscale);
+		int yposition = (int) Math.round(imgDetailLine.position * yscale);
 
-			// put the image onto the canvas
-			masterGC.drawImage(imgDetailLine.image, 0, yposition);
-			
-			origGC.drawImage(imgDetailLine.imageOriginal, 0, imgDetailLine.position);
+		// put the image onto the canvas
+		masterGC.drawImage(imgDetailLine.image, 0, yposition);
+		
+		origGC.drawImage(imgDetailLine.imageOriginal, 0, imgDetailLine.position);
 
-			imgDetailLine.image.dispose();
-			imgDetailLine.imageOriginal.dispose();
-
-		});
+		imgDetailLine.image.dispose();
+		imgDetailLine.imageOriginal.dispose();
 	}
 
 	@Override

@@ -6,8 +6,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.widgets.Display;
-
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
 import edu.rice.cs.hpctraceviewer.data.TimelineDataSet;
@@ -96,18 +94,16 @@ public class DepthViewPaint extends BaseViewPaint {
 	protected void drawPainting(ISpaceTimeCanvas canvas, ImagePosition img) {
 		if (masterGC != null && !masterGC.isDisposed() && img != null && img.image != null)
 		{
-			Display.getDefault().syncExec(()-> {
-				try {
-					masterGC.drawImage(	img.image,  // source image
-										0, 0, 		// source X and Y
-										img.image.getBounds().width, img.image.getBounds().height,  	// Source width and height
-										0, Math.round(img.position * numPixels), 						// target x and y
-										img.image.getBounds().width, img.image.getBounds().height);		// target width and height
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				img.image.dispose();
-			});
+			try {
+				masterGC.drawImage(	img.image,  // source image
+									0, 0, 		// source X and Y
+									img.image.getBounds().width, img.image.getBounds().height,  	// Source width and height
+									0, Math.round(img.position * numPixels), 						// target x and y
+									img.image.getBounds().width, img.image.getBounds().height);		// target width and height
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			img.image.dispose();
 		}
 	}
 
