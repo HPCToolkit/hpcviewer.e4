@@ -77,7 +77,7 @@
     <children xmi:id="_c3AF2sjYEeSyMNYR5xypkQ" elementId="org.eclipse.ui.contexts.window" name="In Windows"/>
     <children xmi:id="_c3AF28jYEeSyMNYR5xypkQ" elementId="org.eclipse.ui.contexts.dialog" name="In Dialogs"/>
   </rootContext>
-  <descriptors xmi:id="_uSUdoMizEeq3_poNktUMtQ" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.profile" label="Profile view" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpcviewerEclipse16.gif" tooltip="Profile view" allowMultiple="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.ProfilePart">
+  <descriptors xmi:id="_uSUdoMizEeq3_poNktUMtQ" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.profile" label="Profile view" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpcviewerEclipse16.gif" tooltip="Profile view" allowMultiple="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.ProfilePart">
     <toolbar xmi:id="_1e6AIMizEeq3_poNktUMtQ" elementId="edu.rice.cs.hpcviewer.ui.toolbar.0"/>
   </descriptors>
   <snippets xsi:type="basic:TrimmedWindow" xmi:id="_Z3ujwNKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.trimmedwindow.main" label="hpcviewer" x="100" y="100" width="1000" height="800">

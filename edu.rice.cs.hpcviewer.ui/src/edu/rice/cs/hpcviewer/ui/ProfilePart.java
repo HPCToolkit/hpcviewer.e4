@@ -1,5 +1,5 @@
  
-package edu.rice.cs.hpcviewer.ui.parts;
+package edu.rice.cs.hpcviewer.ui;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -35,6 +35,8 @@ import edu.rice.cs.hpcviewer.ui.graph.GraphEditorInput;
 import edu.rice.cs.hpcviewer.ui.graph.GraphHistoViewer;
 import edu.rice.cs.hpcviewer.ui.graph.GraphPlotRegularViewer;
 import edu.rice.cs.hpcviewer.ui.graph.GraphPlotSortViewer;
+import edu.rice.cs.hpcviewer.ui.parts.Datacentric;
+import edu.rice.cs.hpcviewer.ui.parts.IProfilePart;
 import edu.rice.cs.hpcviewer.ui.parts.bottomup.BottomUpView;
 import edu.rice.cs.hpcviewer.ui.parts.editor.Editor;
 import edu.rice.cs.hpcviewer.ui.parts.editor.IUpperPart;
