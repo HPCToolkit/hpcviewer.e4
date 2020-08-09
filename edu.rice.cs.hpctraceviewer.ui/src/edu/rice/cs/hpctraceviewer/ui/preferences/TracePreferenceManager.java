@@ -16,7 +16,8 @@ public class TracePreferenceManager extends AbstractPreferenceManager
 		PreferenceStore store = getPreferenceStore();
 
 		store.setDefault(TracePreferenceConstants.PREF_RENDER_OPTION, TracePreferenceConstants.RENDERING_MIDPOINT);
-		store.setDefault(TracePreferenceConstants.PREF_TOOLTIP_DELAY, TracePreferenceConstants.TOOLTIP_DELAY_DEFAULT);
+		store.setDefault(TracePreferenceConstants.PREF_TOOLTIP_DELAY, TracePreferenceConstants.DEFAULT_TOOLTIP_DELAY);
+		store.setDefault(TracePreferenceConstants.PREF_MAX_THREADS,   TracePreferenceConstants.DEFAULT_MAX_THREADS);
 	}
 	
 	
@@ -31,5 +32,9 @@ public class TracePreferenceManager extends AbstractPreferenceManager
 	
 	private static int getRenderOption() {
 		return INSTANCE.getPreferenceStore().getInt(TracePreferenceConstants.PREF_RENDER_OPTION);
+	}
+	
+	public static int getMaxThreads() {
+		return INSTANCE.getPreferenceStore().getInt(TracePreferenceConstants.PREF_MAX_THREADS);
 	}
 }

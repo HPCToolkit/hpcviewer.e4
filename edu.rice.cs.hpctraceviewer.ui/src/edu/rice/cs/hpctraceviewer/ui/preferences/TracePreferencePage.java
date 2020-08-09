@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcsetting.preferences.AbstractPage;
+import edu.rice.cs.hpctraceviewer.ui.util.Utility;
 
 /********************************************************
  * 
@@ -30,6 +31,7 @@ public class TracePreferencePage extends AbstractPage
 	
 	private Button []btnRenders;
 	private Spinner tooltipDelay;
+	private Spinner spMaxThreads;
 
 	public TracePreferencePage(String title) {
 		super(title);
@@ -59,6 +61,9 @@ public class TracePreferencePage extends AbstractPage
 			}
 		}
 		
+		int max_threads = spMaxThreads.getSelection();
+		pref.setValue(TracePreferenceConstants.PREF_MAX_THREADS, max_threads);
+		
 		int delay = tooltipDelay.getSelection();
 		pref.setValue(TracePreferenceConstants.PREF_TOOLTIP_DELAY, delay);
 		
@@ -76,6 +81,10 @@ public class TracePreferencePage extends AbstractPage
 		
 		TracePreferenceManager.INSTANCE.setDefaults();
 
+		// ------------------------------------------------------------------------
+		// Rendering mode
+		// ------------------------------------------------------------------------
+		
 		Group groupFont = createGroupControl(parent, "Rendering mode", false);
 		groupFont.setLayout(new GridLayout(2, false));
 
@@ -85,6 +94,26 @@ public class TracePreferencePage extends AbstractPage
 		int renderOld = pref.getInt(TracePreferenceConstants.PREF_RENDER_OPTION);
 
 		btnRenders[renderOld].setSelection(true);
+
+		// ------------------------------------------------------------------------
+		// maximum threads
+		// ------------------------------------------------------------------------
+		
+		Composite groupThreads = new Composite(parent, SWT.NONE);
+		GridDataFactory.fillDefaults().grab(true, false).applyTo(groupThreads);
+		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(groupThreads);
+		
+		int maxThreads = pref.getInt(TracePreferenceConstants.PREF_MAX_THREADS);
+		
+		createLabelControl(groupThreads, "Max number of painting threads: ");
+		spMaxThreads = createSpinnerControl(groupThreads, 0, Utility.getNumThreads(0));
+		spMaxThreads.setPageIncrement(1);
+		spMaxThreads.setToolTipText("Maximum number of threads to paint the traces.");
+		spMaxThreads.setSelection( Math.min(Utility.getNumThreads(0), maxThreads) );
+
+		// ------------------------------------------------------------------------
+		// tooltip delay
+		// ------------------------------------------------------------------------
 		
 		Composite group = new Composite(parent, SWT.NONE);
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(group);
@@ -116,8 +145,10 @@ public class TracePreferencePage extends AbstractPage
 		for(int i=1; i<btnRenders.length; i++) {
 			btnRenders[i].setSelection(false);
 		}
+		int maxThreads = Math.min(Utility.getNumThreads(0), TracePreferenceConstants.DEFAULT_MAX_THREADS);
+		spMaxThreads.setSelection(maxThreads);
 		
-		tooltipDelay.setSelection(TracePreferenceConstants.TOOLTIP_DELAY_DEFAULT);
+		tooltipDelay.setSelection(TracePreferenceConstants.DEFAULT_TOOLTIP_DELAY);
 		
 		TracePreferenceManager.INSTANCE.setDefaults();
 		
