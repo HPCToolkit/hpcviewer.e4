@@ -7,10 +7,10 @@ import java.util.Set;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.jface.layout.GridDataFactory;
-import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -68,14 +68,10 @@ public class HPCStatView extends AbstractBaseItem implements EventHandler, Liste
 			Composite parent) {
 		
 		final Composite tableComposite = new Composite(parent, SWT.NONE);
+		TableColumnLayout layout = new TableColumnLayout();
+		tableComposite.setLayout(layout);
 		
 		tableViewer = new TableViewer(tableComposite, SWT.BORDER|SWT.VIRTUAL | SWT.SINGLE | SWT.READ_ONLY);
-		
-		GridDataFactory.fillDefaults().grab(true, true).applyTo(tableComposite);
-		GridDataFactory.fillDefaults().grab(true, true).applyTo(tableViewer.getTable());
-		
-		GridLayoutFactory.fillDefaults().applyTo(tableComposite);
-		GridLayoutFactory.fillDefaults().applyTo(tableViewer.getTable());
 		
 		final Table table = tableViewer.getTable();
 		table.setHeaderVisible(true);
@@ -87,7 +83,7 @@ public class HPCStatView extends AbstractBaseItem implements EventHandler, Liste
 		
 		TableColumn column = colProc.getColumn();
 		column.setText("Procedure");
-		column.setWidth(120);
+		layout.setColumnData(column, new ColumnWeightData(800, 80, true));
 		column.addSelectionListener(getSelectionAdapter(column, 0));
 		
 		// column for the percentage
@@ -95,9 +91,9 @@ public class HPCStatView extends AbstractBaseItem implements EventHandler, Liste
 		colCount.setLabelProvider(new ColumnStatLabelProvider());
 		
 		column = colCount.getColumn();
+		layout.setColumnData(column, new ColumnWeightData(200, 30, true));
 		
 		column.setText("Percent");
-		column.setWidth(80);
 		column.setAlignment(SWT.RIGHT);
 		column.addSelectionListener(getSelectionAdapter(column, 1));
 
