@@ -1092,69 +1092,11 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 				}
 			}
 		}
-  		
 		detailPaint.schedule();
 		
 		queue.add(detailPaint);
 	}
 
-	private class DetailPaintJobChangeListener extends JobChangeAdapter
-	{
-		private final DetailViewPaint detailPaint;
-		private final Image imageOrig, imageFinal;
-		private final boolean changedBounds;
-		private final GC bufferGC, origGC;
-		
-		private long start;
-		
-
-public DetailPaintJobChangeListener(DetailViewPaint detailPaint, 
-											Image imageOrig, Image imageFinal,
-											GC bufferGC, GC origGC, boolean changedBounds) {
-
-			this.detailPaint = detailPaint;
-			this.imageOrig = imageOrig;
-			this.imageFinal = imageFinal;
-			this.bufferGC = bufferGC;
-			this.origGC   = origGC;
-			this.changedBounds = changedBounds;
-		}
-		
-		@Override
-		public void aboutToRun(IJobChangeEvent event) {
-			start = Instant.now().toEpochMilli();
-		}
-
-		
-		@Override
-		public void done(IJobChangeEvent event) {
-
-			Display.getDefault().syncExec(() -> {
-				queue.remove(detailPaint);
-				
-				if (event.getResult() == Status.OK_STATUS) {
-					donePainting(imageOrig, imageFinal, changedBounds);
-					
-				} else if (event.getResult() == Status.CANCEL_STATUS) {
-					// we don't need this "new image" since the paint fails
-					imageFinal.dispose();	
-				}
-
-        long done1 = Instant.now().toEpochMilli() - start;
-				
-				redraw();
-				
-				System.out.println("Status: " + event.getResult().getCode() + 
-									", time: " +  done1);
-				
-				// free resources 
-				bufferGC.dispose();
-				origGC.dispose();
-				imageOrig.dispose();
-			});
-		}
-		
-	}
 	
 	private void donePainting(Image imageOrig, Image imageFinal, boolean refreshData)
 	{		
@@ -1172,8 +1114,6 @@ public DetailPaintJobChangeListener(DetailViewPaint detailPaint,
 				notifyChangePosition(new_p);
 			}
 		}
-		//redraw();
-		//asyncRedraw();
 
 		// -----------------------------------------------------------------------
 		// notify to all other views that a new image has been created,
@@ -1395,6 +1335,68 @@ public DetailPaintJobChangeListener(DetailViewPaint detailPaint,
 	//-----------------------------------------------------------------------------------------
 	// PRIVATE CLASSES
 	//-----------------------------------------------------------------------------------------
+	
+	/****************************************
+	 * 
+	 * Class to listen the status of a background job
+	 *
+	 ****************************************/
+	private class DetailPaintJobChangeListener extends JobChangeAdapter
+	{
+		private final DetailViewPaint detailPaint;
+		private final Image imageOrig, imageFinal;
+		private final boolean changedBounds;
+		private final GC bufferGC, origGC;
+		
+		private long start;
+		
+
+		public DetailPaintJobChangeListener( DetailViewPaint detailPaint, 
+									 Image imageOrig, Image imageFinal,
+									 GC bufferGC, GC origGC, boolean changedBounds) {
+
+			this.detailPaint = detailPaint;
+			this.imageOrig   = imageOrig;
+			this.imageFinal  = imageFinal;
+			this.bufferGC    = bufferGC;
+			this.origGC      = origGC;
+			this.changedBounds = changedBounds;
+		}
+		
+		@Override
+		public void aboutToRun(IJobChangeEvent event) {
+			start = Instant.now().toEpochMilli();
+		}
+
+		
+		@Override
+		public void done(IJobChangeEvent event) {
+
+			Display.getDefault().syncExec(() -> {
+				queue.remove(detailPaint);
+				
+				if (event.getResult() == Status.OK_STATUS) {
+					donePainting(imageOrig, imageFinal, changedBounds);
+					
+				} else if (event.getResult() == Status.CANCEL_STATUS) {
+					// we don't need this "new image" since the paint fails
+					imageFinal.dispose();	
+				}
+
+				long done1 = Instant.now().toEpochMilli() - start;
+				
+				redraw();
+				
+				System.out.println( "Status: " + event.getResult().getCode() + 
+									", time: " +  done1);
+				
+				// free resources 
+				bufferGC.dispose();
+				origGC.dispose();
+				imageOrig.dispose();
+			});
+		}		
+	}
 	
 
 	/*************************************************************************
