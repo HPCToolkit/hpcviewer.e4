@@ -441,7 +441,7 @@ public class BaseExperimentBuilder extends Builder {
 		try {
 			Integer objID = Integer.valueOf(sID);
 			LoadModuleScope lmScope = new LoadModuleScope(viewRootScope, sValue, null, objID.intValue());
-			this.hashLoadModuleTable.put(objID, lmScope);
+			hashLoadModuleTable.put(objID, lmScope);
 		} catch (java.lang.NumberFormatException e) {
 			System.err.println("Incorrect load module ID: "+sID);
 		} catch (java.lang.NullPointerException e) {
@@ -499,6 +499,7 @@ public class BaseExperimentBuilder extends Builder {
 		}
 	}
 	
+	
 	/*************************************************************************
 	 *	Begins processing an F (file) element.
 	 *      <!ATTLIST F
@@ -506,7 +507,6 @@ public class BaseExperimentBuilder extends Builder {
                 n CDATA #REQUIRED>
 	 ************************************************************************/
 	private void begin_F(String[] attributes, String[] values)
-
 	{
 		// F n="filename"
 		String inode = getAttributeByName(ATTRIBUTE_ID, attributes, values);
