@@ -18,6 +18,8 @@ import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.custom.BusyIndicator;
@@ -92,8 +94,18 @@ public class ProfilePart implements IProfilePart
 		
 		tabFolderBottom = new CTabFolder(sashForm, SWT.BORDER);
 		
-		sashForm.setWeights(new int[] {1, 1});
+		sashForm.setWeights(new int[] {1000, 1000});
 
+		tabFolderBottom.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				for (AbstractViewItem view: views) {
+					if (e.item == view) {
+						view.setInput(experiment);
+					}
+				}
+			}
+		});
 		tabFolderBottom.setFocus();
 	}
 	
@@ -198,17 +210,18 @@ public class ProfilePart implements IProfilePart
 		view.setControl(composite);
 		composite.setLayout(new GridLayout(1, false));
 
-		RunViewCreation createView = new RunViewCreation(view, composite, input);
-		Display display = shell.getDisplay();
-
 		if (sync) {
+
+			RunViewCreation createView = new RunViewCreation(view, composite, input);
+			Display display = shell.getDisplay();
 			BusyIndicator.showWhile(display, createView);
+			
 			tabFolderBottom.setSelection(view);
 			tabFolderBottom.setFocus();
 			
 		} else {
 			// background renderer
-			display.asyncExec(createView);
+			view.createContent(composite);
 		}
 	}
 	
