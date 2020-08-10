@@ -7,7 +7,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 
-import edu.rice.cs.hpcviewer.ui.actions.IUserMessage;
+import edu.rice.cs.hpcviewer.ui.base.IUserMessage;
 
 
 public class LabelMessage implements IUserMessage

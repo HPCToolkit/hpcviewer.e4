@@ -19,7 +19,7 @@ import org.swtchart.IAxisTick;
 
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
-import edu.rice.cs.hpcviewer.ui.parts.editor.IUpperPart;
+import edu.rice.cs.hpcviewer.ui.base.IUpperPart;
 import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
 
 import javax.annotation.PreDestroy;

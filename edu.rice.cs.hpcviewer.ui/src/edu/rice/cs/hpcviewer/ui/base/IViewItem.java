@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.tabItems;
+package edu.rice.cs.hpcviewer.ui.base;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.services.EMenuService;

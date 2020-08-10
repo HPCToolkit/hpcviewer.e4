@@ -11,6 +11,7 @@ import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
 
 import edu.rice.cs.hpc.data.util.ScopeComparator;
+import edu.rice.cs.hpcviewer.ui.base.ISortContentProvider;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
 
