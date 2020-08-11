@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.actions;
+package edu.rice.cs.hpcviewer.ui.base;
 
 public interface IUserMessage 
 {

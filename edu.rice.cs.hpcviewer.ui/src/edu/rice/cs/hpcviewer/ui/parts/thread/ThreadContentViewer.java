@@ -21,13 +21,13 @@ import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpc.data.util.ScopeComparator;
+import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractContentProvider;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeSelectionAdapter;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
 
 import edu.rice.cs.hpcviewer.ui.metric.MetricRawManager;
-import edu.rice.cs.hpcviewer.ui.parts.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownContentViewer;
 
 public class ThreadContentViewer extends TopDownContentViewer 

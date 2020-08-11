@@ -7,6 +7,7 @@ import java.util.List;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -15,6 +16,7 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.CoolBar;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolBar;
@@ -31,13 +33,13 @@ import edu.rice.cs.hpc.data.experiment.metric.MetricRaw;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.tld.collection.ThreadDataCollectionFactory;
+import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.dialogs.ThreadFilterDialog;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.graph.GraphMenu;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractContentProvider;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractViewBuilder;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
-import edu.rice.cs.hpcviewer.ui.parts.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadViewInput;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 import edu.rice.cs.hpcviewer.ui.util.FilterDataItem;
@@ -59,6 +61,7 @@ public class TopDownContentViewer extends AbstractViewBuilder
 	 * to display a thread view. We need to instantiate this variable
 	 * once we got the database experiment. */
 	private IThreadDataCollection threadData;
+	private boolean threadDataAvailable = false;
 	
 	private AbstractContentProvider contentProvider = null;
 	
@@ -195,6 +198,8 @@ public class TopDownContentViewer extends AbstractViewBuilder
 
 	@Override
 	protected void selectionChanged(IStructuredSelection selection) {
+		if (!threadDataAvailable)
+			return;
 		
 		Object obj = selection.getFirstElement();
 		if (obj == null || !(obj instanceof Scope))
@@ -218,7 +223,7 @@ public class TopDownContentViewer extends AbstractViewBuilder
 		}
 
 		BaseMetric[]metrics  = experiment.getMetricRaw();
-		boolean tldAvailable = false;
+		threadDataAvailable = false;
 		
 		if (threadData != null && metrics != null) {
 			// thread level data exists
@@ -228,11 +233,21 @@ public class TopDownContentViewer extends AbstractViewBuilder
 				if (metric instanceof MetricRaw)
 					((MetricRaw)metric).setThreadData(threadData);
 			}
-			tldAvailable = threadData.isAvailable();
+			threadDataAvailable = threadData.isAvailable();
 		}
 		super.setData(root);
+		
+		if (threadDataAvailable) {
+			// check the validity
+			try {
+				threadData.getParallelismLevel();
+			} catch (IOException e) {
+				threadDataAvailable = false;
+				items[ITEM_GRAPH] .setEnabled(threadDataAvailable);
+			}
+		}
 
-		items[ITEM_THREAD].setEnabled(tldAvailable);
+		items[ITEM_THREAD].setEnabled(threadDataAvailable);
 	}
 
 	@Override

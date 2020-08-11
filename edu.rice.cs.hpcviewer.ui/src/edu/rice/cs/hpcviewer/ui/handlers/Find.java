@@ -7,8 +7,9 @@ import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.widgets.Shell;
 
+import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.dialogs.FindDialog;
-import edu.rice.cs.hpcviewer.ui.parts.ProfilePart;
+
 import javax.inject.Named;
 
 import org.eclipse.e4.core.di.annotations.CanExecute;

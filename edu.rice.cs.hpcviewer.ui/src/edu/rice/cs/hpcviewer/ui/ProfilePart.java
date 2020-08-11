@@ -1,5 +1,5 @@
  
-package edu.rice.cs.hpcviewer.ui.parts;
+package edu.rice.cs.hpcviewer.ui;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -18,6 +18,8 @@ import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.custom.BusyIndicator;
@@ -29,6 +31,8 @@ import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
+import edu.rice.cs.hpcviewer.ui.base.IProfilePart;
+import edu.rice.cs.hpcviewer.ui.base.IUpperPart;
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.graph.AbstractGraphViewer;
 import edu.rice.cs.hpcviewer.ui.graph.GraphEditorInput;
@@ -36,8 +40,8 @@ import edu.rice.cs.hpcviewer.ui.graph.GraphHistoViewer;
 import edu.rice.cs.hpcviewer.ui.graph.GraphPlotRegularViewer;
 import edu.rice.cs.hpcviewer.ui.graph.GraphPlotSortViewer;
 import edu.rice.cs.hpcviewer.ui.parts.bottomup.BottomUpView;
+import edu.rice.cs.hpcviewer.ui.parts.datacentric.Datacentric;
 import edu.rice.cs.hpcviewer.ui.parts.editor.Editor;
-import edu.rice.cs.hpcviewer.ui.parts.editor.IUpperPart;
 import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 import edu.rice.cs.hpcviewer.ui.parts.flat.FlatView;
 import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadView;
@@ -90,8 +94,18 @@ public class ProfilePart implements IProfilePart
 		
 		tabFolderBottom = new CTabFolder(sashForm, SWT.BORDER);
 		
-		sashForm.setWeights(new int[] {1, 1});
+		sashForm.setWeights(new int[] {1000, 1000});
 
+		tabFolderBottom.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				for (AbstractViewItem view: views) {
+					if (e.item == view) {
+						view.setInput(experiment);
+					}
+				}
+			}
+		});
 		tabFolderBottom.setFocus();
 	}
 	
@@ -196,17 +210,18 @@ public class ProfilePart implements IProfilePart
 		view.setControl(composite);
 		composite.setLayout(new GridLayout(1, false));
 
-		RunViewCreation createView = new RunViewCreation(view, composite, input);
-		Display display = shell.getDisplay();
-
 		if (sync) {
+
+			RunViewCreation createView = new RunViewCreation(view, composite, input);
+			Display display = shell.getDisplay();
 			BusyIndicator.showWhile(display, createView);
+			
 			tabFolderBottom.setSelection(view);
 			tabFolderBottom.setFocus();
 			
 		} else {
 			// background renderer
-			display.asyncExec(createView);
+			view.createContent(composite);
 		}
 	}
 	

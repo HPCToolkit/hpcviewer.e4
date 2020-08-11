@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.parts.editor;
+package edu.rice.cs.hpcviewer.ui.base;
 
 public interface IUpperPart 
 {

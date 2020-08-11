@@ -5,6 +5,7 @@ import java.text.DecimalFormat;
 import javax.inject.Inject;
 
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.custom.CTabFolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +55,9 @@ public abstract class AbstractGraphPlotViewer extends AbstractGraphViewer
 			e.printStackTrace();
 			
 			String label = "Error while opening thread level data metric file";
+			
+			MessageDialog.openError(getChart().getShell(), label, e.getMessage());
+			
 			Logger logger = LoggerFactory.getLogger(getClass());
 			logger.error(label, e);
 			

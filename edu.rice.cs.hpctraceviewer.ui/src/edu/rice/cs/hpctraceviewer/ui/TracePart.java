@@ -15,7 +15,9 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
@@ -48,6 +50,7 @@ import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.IPartListener;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -285,7 +288,8 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 			tbtmTraceView.setInput(stdc);
 			
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			Shell shell = Display.getDefault().getActiveShell();
+			MessageDialog.openError(shell, "Error in opening the database", e.getClass() + ":" + e.getMessage());
 			e.printStackTrace();
 		}
 	}

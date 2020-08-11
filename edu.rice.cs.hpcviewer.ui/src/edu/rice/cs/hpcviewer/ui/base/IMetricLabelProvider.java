@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.internal;
+package edu.rice.cs.hpcviewer.ui.base;
 
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;

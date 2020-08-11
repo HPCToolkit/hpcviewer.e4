@@ -21,6 +21,7 @@ import edu.rice.cs.hpc.data.util.OSValidator;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TimelineDataSet;
 import edu.rice.cs.hpctraceviewer.ui.base.ISpaceTimeCanvas;
+import edu.rice.cs.hpctraceviewer.ui.preferences.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.ui.util.Utility;
 
 
@@ -74,7 +75,7 @@ public abstract class BaseViewPaint extends Job
 		
 		// TODO: this is a hack. Somehow, the value of monitor is canceled, and we cannot paint anything
 		//       this happens on Mac. So to make sure we can paint, we have to set manually the cancel to true
-		
+
 		monitor.setCanceled(false);
 		
 		if (!paint( monitor))
@@ -106,7 +107,8 @@ public abstract class BaseViewPaint extends Job
 		if (controller.getPixelHorizontal() <= 0)
 			return false;
 		
-		int num_threads = Utility.getNumThreads(10);
+		final int max_threads = TracePreferenceManager.getMaxThreads();
+		int num_threads = Utility.getNumThreads(max_threads);
 		
 		// -------------------------------------------------------------------
 		// initialize the painting (to be implemented by the instance)
