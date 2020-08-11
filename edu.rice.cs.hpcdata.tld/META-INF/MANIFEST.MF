@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: hpcdata.tld
 Bundle-SymbolicName: edu.rice.cs.hpcdata.tld
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Rice University
 Automatic-Module-Name: edu.rice.cs.hpc.threaddata
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
