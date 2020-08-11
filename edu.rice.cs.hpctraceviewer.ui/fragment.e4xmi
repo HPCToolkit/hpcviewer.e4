@@ -9,9 +9,6 @@
     <elements xsi:type="commands:Command" xmi:id="_AOZbcMdxEeq0rOsC4NG4eQ" elementId="edu.rice.cs.hpctraceviewer.ui.command.go" commandName="Go">
       <parameters xmi:id="_B1y3EMdxEeq0rOsC4NG4eQ" elementId="edu.rice.cs.hpctraceviewer.ui.commandparameter.go" name="Target" optional="false"/>
     </elements>
-    <elements xsi:type="commands:Command" xmi:id="_NwaZgMdyEeq0rOsC4NG4eQ" elementId="edu.rice.cs.hpctraceviewer.ui.command.undoRedo" commandName="UndoRedo">
-      <parameters xmi:id="_P_bOwMdyEeq0rOsC4NG4eQ" elementId="edu.rice.cs.hpctraceviewer.ui.commandparameter.undoRedo" name="action"/>
-    </elements>
     <elements xsi:type="commands:Command" xmi:id="_45DToMdyEeq0rOsC4NG4eQ" elementId="edu.rice.cs.hpctraceviewer.ui.command.save" commandName="Save configuration"/>
     <elements xsi:type="commands:Command" xmi:id="_H18JsMdzEeq0rOsC4NG4eQ" elementId="edu.rice.cs.hpctraceviewer.ui.command.loadConfiguration" commandName="Load configuration"/>
     <elements xsi:type="commands:Command" xmi:id="_nX628M1LEeqj2OdGrGxV1w" elementId="edu.rice.cs.hpctraceviewer.ui.command.undo" commandName="Undo operation"/>
