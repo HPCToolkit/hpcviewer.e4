@@ -9,8 +9,6 @@
          hpcviewer is a user interface for analyzing a database of performance metrics in conjunction with an application&apos;s source code.
 
 hpcviewer is part of Rice University&apos;s HPCToolkit project. Development of HPCToolkit is principally funded by the Department of Energy&apos;s Office of Science, Lawrence Livermore National Laboratory and National Science Foundation.
-
-Release 2020.05  (C) Copyright 2020, Rice University.
       </text>
    </aboutInfo>
 
@@ -41,6 +39,7 @@ Release 2020.05  (C) Copyright 2020, Rice University.
             winLargeHigh="/edu.rice.cs.hpcviewer.ui/resources/hpcviewer-icon-48x48-32bit.bmp"/>
       </win>
    </launcher>
+
 
    <vm>
    </vm>
