@@ -101,7 +101,8 @@ public class ProfilePart implements IProfilePart
 			public void widgetSelected(SelectionEvent e) {
 				for (AbstractViewItem view: views) {
 					if (e.item == view) {
-						view.setInput(experiment);
+						if (view.getInput() == null)
+							view.setInput(experiment);
 					}
 				}
 			}

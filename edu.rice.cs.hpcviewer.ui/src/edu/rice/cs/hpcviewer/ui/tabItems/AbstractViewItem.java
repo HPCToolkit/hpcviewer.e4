@@ -100,6 +100,16 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 	}
 
 	
+	/****
+	 * Retrieve the current input of this view
+	 * @return
+	 */
+	@Override
+	public Object getInput() {
+		return experiment;
+	}
+	
+	
 	@Override
 	public void handleEvent(Event event) {
 		ScopeTreeViewer treeViewer = contentViewer.getTreeViewer();

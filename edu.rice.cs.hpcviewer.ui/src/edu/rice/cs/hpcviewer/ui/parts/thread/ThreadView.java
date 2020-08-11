@@ -167,4 +167,10 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 		}
 		
 	}
+
+
+	@Override
+	public Object getInput() {
+		return viewInput;
+	}
 }
