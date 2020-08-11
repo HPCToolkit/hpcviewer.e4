@@ -108,7 +108,7 @@
         </children>
         <children xsi:type="menu:Menu" xmi:id="_je9jy9KuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.menu.close" label="Close" mnemonics="C">
           <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_je9jzNKuEeqGK5z0zGQmCQ" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseCloseDefinition"/>
-          <children xsi:type="menu:DynamicMenuContribution" xmi:id="_je9jzdKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.dynamicmenucontribution.0" label="Close" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.Close"/>
+          <children xsi:type="menu:DynamicMenuContribution" xmi:id="_je9jzdKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.dynamicmenucontribution.0" label="Close" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.FileCloseDatabase"/>
         </children>
         <children xsi:type="menu:MenuSeparator" xmi:id="_je9jztKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.menuseparator.1"/>
         <children xsi:type="menu:HandledMenuItem" xmi:id="_je9jz9KuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.preferences" label="Preferences" tooltip="Show the preferences of the application" mnemonics="P" command="_svnesLpjEeqjBNbAJCPSRg"/>
@@ -131,9 +131,7 @@
         <children xsi:type="menu:HandledMenuItem" xmi:id="_jfCcQdKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.about" label="About" tooltip="About the application" mnemonics="A" command="_lIBrgKwbEeq2aaPo7yBcWg"/>
       </children>
     </mainMenu>
-    <trimBars xmi:id="_ox1LkNKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.trimbar.bottom" side="Bottom">
-      <children xsi:type="menu:ToolControl" xmi:id="_ox1LkdKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.toolcontrol.top" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.trimbar.ToolControl"/>
-    </trimBars>
+    <trimBars xmi:id="_ox1LkNKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.trimbar.bottom" side="Bottom"/>
   </snippets>
   <commands xmi:id="_lIBrgKwbEeq2aaPo7yBcWg" elementId="org.eclipse.ui.help.aboutAction" commandName="About" description="About the application"/>
   <commands xmi:id="_FHXw4LV7EeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.command.new" commandName="New window"/>
