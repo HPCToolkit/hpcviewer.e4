@@ -9,7 +9,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.InflaterInputStream;
 
 import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
-import edu.rice.cs.hpctraceviewer.data.TraceDataByRank;
 import edu.rice.cs.hpctraceviewer.data.DataRecord;
 
 import edu.rice.cs.hpctraceviewer.data.CallPath;

@@ -93,7 +93,7 @@ public class HPCStatView extends AbstractBaseItem implements EventHandler, Liste
 		column = colCount.getColumn();
 		layout.setColumnData(column, new ColumnWeightData(200, 30, true));
 		
-		column.setText("Percent");
+		column.setText("Percentage");
 		column.setAlignment(SWT.RIGHT);
 		column.addSelectionListener(getSelectionAdapter(column, 1));
 

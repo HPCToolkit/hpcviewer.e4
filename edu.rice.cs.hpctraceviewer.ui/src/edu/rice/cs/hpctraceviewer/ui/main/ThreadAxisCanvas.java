@@ -130,6 +130,11 @@ public class ThreadAxisCanvas extends AbstractAxisCanvas
 				continue;
 			
 			final int procNumber  = procTimeline.getProcessNum();
+			if (procNumber >= processes.length)
+				// inconsistency between the list of processes and the current timeline
+				// probably hpctraceviewer is in the middle of rebuffering
+				return;
+			
 			final String procName = processes[procNumber]; 
 			final int position    = attribute.convertRankToPixel(procNumber);
 	
