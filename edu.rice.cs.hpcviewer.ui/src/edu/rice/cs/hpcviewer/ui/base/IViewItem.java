@@ -19,4 +19,6 @@ public interface IViewItem
 	public void createContent(Composite parent);
 	
 	public void setInput(Object input);
+	
+	public Object getInput();
 }

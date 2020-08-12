@@ -59,6 +59,7 @@ public class TopDownContentViewer extends AbstractViewBuilder
 	 * to display a thread view. We need to instantiate this variable
 	 * once we got the database experiment. */
 	private IThreadDataCollection threadData;
+	private boolean threadDataAvailable = false;
 	
 	private AbstractContentProvider contentProvider = null;
 	
@@ -195,6 +196,8 @@ public class TopDownContentViewer extends AbstractViewBuilder
 
 	@Override
 	protected void selectionChanged(IStructuredSelection selection) {
+		if (!threadDataAvailable)
+			return;
 		
 		Object obj = selection.getFirstElement();
 		if (obj == null || !(obj instanceof Scope))
@@ -218,7 +221,7 @@ public class TopDownContentViewer extends AbstractViewBuilder
 		}
 
 		BaseMetric[]metrics  = experiment.getMetricRaw();
-		boolean tldAvailable = false;
+		threadDataAvailable = false;
 		
 		if (threadData != null && metrics != null) {
 			// thread level data exists
@@ -228,11 +231,21 @@ public class TopDownContentViewer extends AbstractViewBuilder
 				if (metric instanceof MetricRaw)
 					((MetricRaw)metric).setThreadData(threadData);
 			}
-			tldAvailable = threadData.isAvailable();
+			threadDataAvailable = threadData.isAvailable();
 		}
 		super.setData(root);
+		
+		if (threadDataAvailable) {
+			// check the validity
+			try {
+				threadData.getParallelismLevel();
+			} catch (IOException e) {
+				threadDataAvailable = false;
+				items[ITEM_GRAPH] .setEnabled(threadDataAvailable);
+			}
+		}
 
-		items[ITEM_THREAD].setEnabled(tldAvailable);
+		items[ITEM_THREAD].setEnabled(threadDataAvailable);
 	}
 
 	@Override

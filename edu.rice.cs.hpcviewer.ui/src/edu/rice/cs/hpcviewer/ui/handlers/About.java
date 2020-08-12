@@ -1,6 +1,8 @@
  
 package edu.rice.cs.hpcviewer.ui.handlers;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 
@@ -11,6 +13,7 @@ import org.eclipse.e4.core.contexts.Active;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IconAndMessageDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
@@ -56,6 +59,8 @@ public class About
 		
 		private static final String APP_NAME   = "appName";   //$NON-NLS-1$
 		private static final String ABOUT_TEXT = "aboutText"; //$NON-NLS-1$
+		private static final String FILE_VERSION = "platform:/plugin/edu.rice.cs.hpcviewer.ui/release.txt";
+		private static final String FILE_LICENSE = "platform:/plugin/edu.rice.cs.hpcviewer.ui/License.txt";
 		
 		
 		public AboutDialog(Shell parentShell) {
@@ -63,6 +68,23 @@ public class About
 
 			IProduct product = Platform.getProduct();
 			this.message     = product.getProperty(ABOUT_TEXT);
+			
+			try {
+				URL url = FileLocator.toFileURL(new URL(FILE_VERSION));
+				String filePath = url.getFile();
+				File file = new File(filePath);
+				FileInputStream fis = new FileInputStream(file);
+				byte[] data = new byte[(int) file.length()];
+				fis.read(data);
+				
+				this.message += "\n\nRelease: " + new String(data, "UTF-8");
+				
+				fis.close();
+				
+			} catch (IOException e) {
+
+				e.printStackTrace();
+			}
 		}
 
 		@Override
@@ -90,6 +112,16 @@ public class About
 		@Override
 		protected void createButtonsForButtonBar(Composite parent) {
 			createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
+			createButton(parent, IDialogConstants.DETAILS_ID, "License", false);
+		}
+		
+		
+		@Override
+		protected void buttonPressed(int buttonId) {
+			if (buttonId == IDialogConstants.DETAILS_ID) {
+				showLicense();
+			}
+			super.buttonPressed(buttonId);
 		}
 		
 		@Override
@@ -122,5 +154,26 @@ public class About
 			}
 		}
 
+		private void showLicense() {
+			
+			try {
+				URL url = FileLocator.toFileURL(new URL(FILE_LICENSE));
+				String filePath = url.getFile();
+				File file = new File(filePath);
+				FileInputStream fis = new FileInputStream(file);
+				byte[] data = new byte[(int) file.length()];
+				fis.read(data);
+				
+				String license = new String(data, "UTF-8");				
+				fis.close();
+				
+				MessageDialog.openInformation(getShell(), "License", license);
+
+				
+			} catch (IOException e) {
+
+				e.printStackTrace();
+			}
+		}
 	}
 }

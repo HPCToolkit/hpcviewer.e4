@@ -7,7 +7,6 @@ public class FileExit
 {
 	@Execute
 	public void execute(IWorkbench workbench) {
-		System.out.println("Closing...");
 		workbench.close();
 	}
 }
