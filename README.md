@@ -15,8 +15,9 @@ The goals:
 
 * Download and install Maven (if not available on the systems) at https://maven.apache.org/
 * Recommended: Maven 3.6.x
+* Recommended: install Maven via spack: `spack install maven`
 * type `mvn clean package`
-* This will compile and create hpcviewer packages for 4 platforms: Linux x86_64 and ppcle64, Windows and Mac. Example output:
+* This will compile and create hpcviewer packages for 4 platforms: Linux x86_64 and ppcle64, Windows and Mac. Example of the output:
 ```
 ...
 [INFO] --- tycho-p2-director-plugin:1.6.0:archive-products (archive-prodcuts) @ edu.rice.cs.hpcviewer ---
@@ -26,7 +27,7 @@ The goals:
 [INFO] Building zip: <hpcviewer.e4>/edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-macosx.cocoa.x86_64.zip
 [INFO] ------------------------------------------------------------------------
 ```
-* Unzip the file at `edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-...` based on the platform.
+* Unzip (or untar) the product file at `edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-...` according to the platform.
 
 ## How to build and run via Eclipse IDE
 
