@@ -115,8 +115,8 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 		//draws cross hairs
 		//--------------------
 		
-		event.gc.setBackground(Constants.COLOR_WHITE);
-		event.gc.setAlpha(240);
+		event.gc.setForeground(Constants.COLOR_WHITE);
+		//event.gc.setAlpha(240);
 		
 		long selectedTime = stData.getAttributes().getFrame().position.time;
 		

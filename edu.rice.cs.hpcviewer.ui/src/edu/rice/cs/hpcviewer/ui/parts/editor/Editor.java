@@ -11,19 +11,20 @@ import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpc.data.experiment.source.FileSystemSourceFile;
 import edu.rice.cs.hpcviewer.ui.base.IUpperPart;
 import edu.rice.cs.hpcviewer.ui.graph.GraphEditorInput;
+import edu.rice.cs.hpcviewer.ui.resources.FontManager;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.FindReplaceDocumentAdapter;
@@ -38,6 +39,7 @@ import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.SWT;
 
@@ -87,13 +89,18 @@ public class Editor extends CTabItem implements IUpperPart
 		// add line number column to the source viewer
 		CompositeRuler ruler 	   = new CompositeRuler();
 		LineNumberRulerColumn lnrc = new LineNumberRulerColumn();
+
+		Font font = FontManager.getTextEditorFont();
+
+		lnrc.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY));
+		lnrc.setFont(font);
 		ruler.addDecorator(0,lnrc);
 
 		textViewer = new SourceViewer(parent, ruler, SWT.BORDER| SWT.MULTI | SWT.V_SCROLL);
 		textViewer.setEditable(false);
 		
-		StyledText styledText = textViewer.getTextWidget();		
-		styledText.setFont(JFaceResources.getTextFont());
+		StyledText styledText = textViewer.getTextWidget();
+		styledText.setFont(font);
 		
 		// make sure to set fill alignment and grab both horizontal and vertical space
 		// without this, the source viewer will display only small fraction of composite
@@ -104,9 +111,6 @@ public class Editor extends CTabItem implements IUpperPart
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(parent);
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(parent);
 	}
-	
-
-
 	
 	
 	public boolean hasEqualInput(Object input) {
@@ -131,6 +135,7 @@ public class Editor extends CTabItem implements IUpperPart
 		}
 		return file;
 	}
+	
 	
 	private static String readLineByLineJava8(String filePath) 
 	{

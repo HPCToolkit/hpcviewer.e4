@@ -418,11 +418,13 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 			case Raw:
 			default:
 				metricInc = new Metric(
-						String.valueOf(iSelf),			// short name
-						sNativeName,			// native name
-						sDisplayName, 	// display name
-						visibility, format, percent, 			// displayed ? percent ?
-						"",						// period (not defined at the moment)
+						String.valueOf(iSelf),		// short name
+						sNativeName,				// native name
+						sDisplayName, 				// display name
+						visibility, 
+						format, 
+						percent, 					// display percent ?
+						"",							// period (not defined at the moment)
 						nbMetrics, objType, partner);
 				break;
 		}
