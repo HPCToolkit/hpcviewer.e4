@@ -1,18 +1,15 @@
-package edu.rice.cs.hpcviewer.ui.preferences;
+package edu.rice.cs.hpcsetting.preferences;
 
 import java.io.IOException;
-import javax.inject.Singleton;
+
 
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.e4.core.di.annotations.Creatable;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
-import edu.rice.cs.hpcsetting.preferences.AbstractPreferenceManager;
 
 
-@Creatable
-@Singleton
+
 /**************************************
  * 
  * The center of hpcviewer preferences.

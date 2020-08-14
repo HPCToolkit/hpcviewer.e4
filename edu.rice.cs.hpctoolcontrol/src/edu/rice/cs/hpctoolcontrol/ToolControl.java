@@ -76,7 +76,7 @@ public class ToolControl
 		@Override
 		public void beginTask(final String name, final int totalWork) {
 			
-			sync.syncExec(new Runnable() {
+			sync.asyncExec(new Runnable() {
 
 				@Override
 				public void run() {
@@ -103,7 +103,7 @@ public class ToolControl
 
 		@Override
 		public void worked(final int work) {
-			sync.syncExec(new Runnable() {
+			sync.asyncExec(new Runnable() {
 
 				@Override
 				public void run() {

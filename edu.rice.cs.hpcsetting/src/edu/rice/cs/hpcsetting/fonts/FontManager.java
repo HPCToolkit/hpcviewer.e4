@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.resources;
+package edu.rice.cs.hpcsetting.fonts;
 
 import java.io.IOException;
 
@@ -12,8 +12,8 @@ import org.eclipse.jface.resource.ResourceManager;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 
-import edu.rice.cs.hpcviewer.ui.preferences.PreferenceConstants;
-import edu.rice.cs.hpcviewer.ui.preferences.ViewerPreferenceManager;
+import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
+import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 
 
 /*************************************************************

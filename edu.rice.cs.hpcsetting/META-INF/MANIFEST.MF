@@ -6,8 +6,10 @@ Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Rice University
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.swt,
- org.eclipse.jface
+ org.eclipse.jface,
+ org.slf4j.api
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: edu.rice.cs.hpcsetting
 Bundle-ActivationPolicy: lazy
-Export-Package: edu.rice.cs.hpcsetting.preferences
+Export-Package: edu.rice.cs.hpcsetting.fonts,
+ edu.rice.cs.hpcsetting.preferences

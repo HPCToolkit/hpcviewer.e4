@@ -14,7 +14,7 @@ import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.data.util.Util.FileXMLFilter;
 import edu.rice.cs.hpcbase.map.ProcedureAliasMap;
-import edu.rice.cs.hpcviewer.ui.preferences.ViewerPreferenceManager;
+import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 
 
 /**

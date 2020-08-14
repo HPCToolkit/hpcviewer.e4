@@ -16,9 +16,9 @@ import org.eclipse.swt.widgets.Display;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpc.data.experiment.source.FileSystemSourceFile;
+import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcviewer.ui.base.IUpperPart;
 import edu.rice.cs.hpcviewer.ui.graph.GraphEditorInput;
-import edu.rice.cs.hpcviewer.ui.resources.FontManager;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
 import org.eclipse.e4.core.services.events.IEventBroker;

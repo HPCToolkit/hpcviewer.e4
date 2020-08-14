@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.preferences;
+package edu.rice.cs.hpcsetting.preferences;
 
 import java.io.IOException;
 
@@ -13,8 +13,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import edu.rice.cs.hpcsetting.preferences.AbstractPage;
 
 public class MainProfilePage extends AbstractPage 
 {	
