@@ -1,7 +1,7 @@
 package edu.rice.cs.hpcsetting.preferences;
 
 import java.io.IOException;
-import javax.inject.Singleton;
+
 
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.jface.preference.PreferenceConverter;
@@ -9,7 +9,7 @@ import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
 
 
-@Singleton
+
 /**************************************
  * 
  * The center of hpcviewer preferences.
