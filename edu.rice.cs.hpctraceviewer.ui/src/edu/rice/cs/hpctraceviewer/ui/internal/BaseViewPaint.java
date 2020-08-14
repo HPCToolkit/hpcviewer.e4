@@ -176,14 +176,26 @@ public abstract class BaseViewPaint extends Job
 		// -------------------------------------------------------------------
 		
 		int num_paint_threads = OSValidator.isUnix() ? 1 : num_threads;
-		executePaint( ecs, 
-					  num_threads, 
-					  num_paint_threads, 
-					  queue, 
-					  linesToPaint, 
-					  monitor, 
-					  threadExecutor);
-		
+		if (OSValidator.isUnix()) {
+			// linux need UI thread to paint
+			Display.getDefault().syncExec(() -> {
+				executePaint( ecs, 
+						  	  num_threads, 
+						  	  num_paint_threads, 
+						  	  queue, 
+						  	  linesToPaint, 
+						  	  monitor, 
+						  	  threadExecutor);
+			});
+		} else {
+			executePaint( ecs, 
+					  	  num_threads, 
+					  	  num_paint_threads, 
+					  	  queue, 
+					  	  linesToPaint, 
+					  	  monitor, 
+					  	  threadExecutor);
+		}
 		monitor.done();
 		threadExecutor.shutdown();
 		
@@ -307,15 +319,13 @@ public abstract class BaseViewPaint extends Job
 				if (listImages == null)
 					continue;
 
-				Display.getDefault().syncExec(() -> {
-					for (ImagePosition image : listImages) 
-					{
-						if (!monitor.isCanceled())
-							drawPainting(canvas, image);
-						else
-							return;
-					}				
-				});
+				for (ImagePosition image : listImages) 
+				{
+					if (!monitor.isCanceled())
+						drawPainting(canvas, image);
+					else
+						return false;
+				}				
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

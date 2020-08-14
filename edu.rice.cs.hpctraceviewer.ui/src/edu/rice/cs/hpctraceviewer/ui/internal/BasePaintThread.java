@@ -10,8 +10,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.widgets.Display;
-
 import edu.rice.cs.hpctraceviewer.data.BaseDataVisualization;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TimelineDataSet;
@@ -105,9 +103,7 @@ public abstract class BasePaintThread implements Callable<List<ImagePosition>>
 			// ------------------------------------------------------------------
 			// initialize the painting, the derived class has to create image ready
 			// ------------------------------------------------------------------
-			Display.getDefault().syncExec(()-> {
-				initPaint(/*device,*/ width, height);
-			});
+			initPaint(/*device,*/ width, height);
 
 			// ------------------------------------------------------------------
 			// a line can contains many trace data (one trace data equals one rectangle)
@@ -122,9 +118,7 @@ public abstract class BasePaintThread implements Callable<List<ImagePosition>>
 				// ------------------------------------------------------------------
 				// paint the image
 				// ------------------------------------------------------------------
-				Display.getDefault().syncExec(()-> {
-					paint(position, data, height);
-				});
+				paint(position, data, height);
 			}
 			// ------------------------------------------------------------------
 			// finalize phase
