@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.preferences;
+package edu.rice.cs.hpcsetting.preferences;
 
 import java.io.IOException;
 
@@ -17,8 +17,7 @@ import org.eclipse.swt.widgets.Label;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.rice.cs.hpcsetting.preferences.AbstractPage;
-import edu.rice.cs.hpcviewer.ui.resources.FontManager;
+import edu.rice.cs.hpcsetting.fonts.FontManager;
 
 /***********************************************************
  * 
@@ -58,7 +57,7 @@ public class AppearencePage extends AbstractPage
 		Group groupFont = createGroupControl(parent, "Fonts", false);
 		groupFont.setLayout(new GridLayout(1, false));
 		
-        fontGenericEditor = createFontEditor(groupFont, PreferenceConstants.ID_FONT_GENERIC, "Tree column font",   FontManager.getFontGeneric());        
+        fontGenericEditor = createFontEditor(groupFont, PreferenceConstants.ID_FONT_GENERIC, "Default column font",   FontManager.getFontGeneric());        
         fontMetricEditor  = createFontEditor(groupFont, PreferenceConstants.ID_FONT_METRIC,  "Metric column font", FontManager.getMetricFont());
         fontSourceEditor  = createFontEditor(groupFont, PreferenceConstants.ID_FONT_TEXT,    "Text editor font"  , FontManager.getTextEditorFont());
         

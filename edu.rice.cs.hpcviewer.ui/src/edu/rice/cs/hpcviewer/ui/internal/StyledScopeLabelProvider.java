@@ -10,7 +10,7 @@ import edu.rice.cs.hpc.data.experiment.scope.CallSiteScopeCallerView;
 import edu.rice.cs.hpc.data.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpc.data.util.string.StringUtil;
-import edu.rice.cs.hpcviewer.ui.preferences.ViewerPreferenceManager;
+import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
 

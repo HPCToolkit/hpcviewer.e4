@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.preferences;
+package edu.rice.cs.hpcsetting.preferences;
 
 /**
  * Constant definitions for plug-in preferences

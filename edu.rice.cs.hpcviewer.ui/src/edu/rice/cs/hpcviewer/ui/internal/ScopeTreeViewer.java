@@ -32,8 +32,8 @@ import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpc.data.util.ScopeComparator;
-import edu.rice.cs.hpcviewer.ui.preferences.PreferenceConstants;
-import edu.rice.cs.hpcviewer.ui.preferences.ViewerPreferenceManager;
+import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
+import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
 

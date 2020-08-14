@@ -7,10 +7,10 @@ import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.rice.cs.hpcsetting.preferences.AppearencePage;
+import edu.rice.cs.hpcsetting.preferences.MainProfilePage;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceDialog;
 import edu.rice.cs.hpctraceviewer.ui.preferences.TracePreferencePage;
-import edu.rice.cs.hpcviewer.ui.preferences.AppearencePage;
-import edu.rice.cs.hpcviewer.ui.preferences.MainProfilePage;
 
 
 public class ShowPreferences 

@@ -24,9 +24,9 @@ import edu.rice.cs.hpc.data.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpc.data.util.OSValidator;
-import edu.rice.cs.hpcviewer.ui.preferences.PreferenceConstants;
+import edu.rice.cs.hpcsetting.fonts.FontManager;
+import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcviewer.ui.resources.ColorManager;
-import edu.rice.cs.hpcviewer.ui.resources.FontManager;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 
 
