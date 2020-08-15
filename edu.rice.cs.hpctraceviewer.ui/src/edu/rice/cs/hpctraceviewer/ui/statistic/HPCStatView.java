@@ -8,6 +8,8 @@ import java.util.Set;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.layout.TableColumnLayout;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ColumnWeightData;
@@ -18,8 +20,11 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.RGB;
@@ -32,6 +37,9 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
 import edu.rice.cs.hpc.data.util.string.StringUtil;
+import edu.rice.cs.hpcsetting.fonts.FontManager;
+import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
+import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.ColorTable;
 import edu.rice.cs.hpctraceviewer.ui.base.AbstractBaseItem;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
@@ -43,7 +51,8 @@ import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
  * A view to show the statistics of the current region selection
  *
  *************************************************************************/
-public class HPCStatView extends AbstractBaseItem implements EventHandler, Listener
+public class HPCStatView extends    AbstractBaseItem 
+						 implements EventHandler, Listener, IPropertyChangeListener, DisposeListener
 {
 	public static final String ID = "hpcstat.view";
 		
@@ -172,8 +181,20 @@ public class HPCStatView extends AbstractBaseItem implements EventHandler, Liste
 
 	@Override
 	public void setInput(Object input) {
-		broker.subscribe(IConstants.TOPIC_STATISTICS, this);		
+		broker.subscribe(IConstants.TOPIC_STATISTICS, this);
+		ViewerPreferenceManager.INSTANCE.getPreferenceStore().addPropertyChangeListener(this);
+		
+		addDisposeListener(this);
 	}	
+
+
+	@Override
+	public void widgetDisposed(DisposeEvent e) {
+
+		broker.unsubscribe(this);
+		ViewerPreferenceManager.INSTANCE.getPreferenceStore().removePropertyChangeListener(this);
+		removeDisposeListener(this);
+	}
 
 
 	@Override
@@ -238,6 +259,7 @@ public class HPCStatView extends AbstractBaseItem implements EventHandler, Liste
 	 *************************************************************/
 	private class ColumnProcedureLabelProvider extends ColumnLabelProvider
 	{
+		
 		@Override
 		public Image getImage(Object element) {
 			if (element != null && element instanceof StatisticItem) {
@@ -249,6 +271,12 @@ public class HPCStatView extends AbstractBaseItem implements EventHandler, Liste
 			}
 			return null;
 		}
+
+		@Override
+		public Font getFont(Object element) {
+			return FontManager.getFontGeneric();
+		}
+
 		
 		@Override
 		public String getText(Object element) {
@@ -274,7 +302,12 @@ public class HPCStatView extends AbstractBaseItem implements EventHandler, Liste
 	
 	private class ColumnStatLabelProvider extends ColumnLabelProvider
 	{
-		
+
+		@Override
+		public Font getFont(Object element) {
+			return FontManager.getMetricFont();
+		}
+
 		@Override
 		public String getText(Object element) {
 			if (element == null || !(element instanceof StatisticItem))
@@ -291,6 +324,17 @@ public class HPCStatView extends AbstractBaseItem implements EventHandler, Liste
 		System.out.println(getClass().getName() + " show-idx: "  + event.index + ", show-w: " + event.widget);
 		if (tableViewer == null) return;
 		if (tableViewer.getTable().getItemCount() < 1) {
+		}
+	}
+
+
+	@Override
+	public void propertyChange(PropertyChangeEvent event) {
+		final String property = event.getProperty();
+		if (property.equals(PreferenceConstants.ID_FONT_GENERIC) || 
+			property.equals(PreferenceConstants.ID_FONT_METRIC)) {
+			
+			tableViewer.refresh();
 		}
 	}
 }
