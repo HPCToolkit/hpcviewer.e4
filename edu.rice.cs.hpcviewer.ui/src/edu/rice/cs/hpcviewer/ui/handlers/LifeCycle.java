@@ -1,5 +1,6 @@
 package edu.rice.cs.hpcviewer.ui.handlers;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
@@ -8,6 +9,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.services.IServiceConstants;
@@ -18,9 +21,12 @@ import org.eclipse.e4.ui.workbench.lifecycle.ProcessRemovals;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.window.Window;
+import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
@@ -55,6 +61,32 @@ public class LifeCycle
 			}
 		}
 		Window.setDefaultImages(listImages);
+		
+		// set the default location
+		Location location = Platform.getInstanceLocation();
+		
+		// stop if location is set
+		if (location.isSet())
+			return;
+		
+		final String arch = System.getProperty("os.arch");
+
+		final String subDir = ".hpctoolkit" + File.separator + 
+							  "hpcviewer"   + File.separator +
+							  arch;
+		
+		final String file = System.getProperty("user.home") + File.separator + subDir;
+		final File newLoc = new File(file);
+		
+		try {
+			URL url  = newLoc.toURI().toURL(); 
+			Logger logger = LoggerFactory.getLogger(getClass());
+			logger.info("Set workspace to: " + url.getFile());
+			location.set(url, false);
+			
+		} catch (IllegalStateException | IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@PreDestroy

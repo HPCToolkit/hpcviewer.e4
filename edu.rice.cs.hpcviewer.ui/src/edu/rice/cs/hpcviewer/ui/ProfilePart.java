@@ -42,7 +42,6 @@ import edu.rice.cs.hpcviewer.ui.graph.GraphPlotSortViewer;
 import edu.rice.cs.hpcviewer.ui.parts.bottomup.BottomUpView;
 import edu.rice.cs.hpcviewer.ui.parts.datacentric.Datacentric;
 import edu.rice.cs.hpcviewer.ui.parts.editor.Editor;
-import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 import edu.rice.cs.hpcviewer.ui.parts.flat.FlatView;
 import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadView;
 import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownView;
@@ -63,7 +62,6 @@ public class ProfilePart implements IProfilePart
 	
 	@Inject protected DatabaseCollection databaseAddOn;
 
-	@Inject protected PartFactory partFactory;
 
 	/** Each view needs to store the experiment database.
 	 * In case it needs to populate the table, we know which database 

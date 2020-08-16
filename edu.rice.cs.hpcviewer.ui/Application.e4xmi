@@ -159,8 +159,7 @@
   <addons xmi:id="_c3AF1sjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.workbench.handler.model" contributionURI="bundleclass://org.eclipse.e4.ui.workbench/org.eclipse.e4.ui.internal.workbench.addons.HandlerProcessingAddon"/>
   <addons xmi:id="_c3AF18jYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.workbench.contexts.model" contributionURI="bundleclass://org.eclipse.e4.ui.workbench/org.eclipse.e4.ui.internal.workbench.addons.ContextProcessingAddon"/>
   <addons xmi:id="_c3AF2MjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.workbench.bindings.model" contributionURI="bundleclass://org.eclipse.e4.ui.workbench.swt/org.eclipse.e4.ui.workbench.swt.util.BindingProcessingAddon"/>
-  <addons xmi:id="_HHRYIGDYEemg7cSpH3T_tg" elementId="org.eclipse.passage.lic.e4.ui.licensing" contributionURI="bundleclass://org.eclipse.passage.lic.e4.ui/org.eclipse.passage.lic.e4.ui.addons.LicensingAddon"/>
-  <addons xmi:id="_KxIFQKVBEeqxVMw0_Hqotg" elementId="edu.rice.cs.hpcviewer.ui.addon.database" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection"/>
-  <addons xmi:id="_uZa4IKz8EeqX1ux1mZi76A" elementId="edu.rice.cs.hpcviewer.ui.addon.partFactory" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory"/>
   <addons xmi:id="_TrVSsMcYEeq0rOsC4NG4eQ" elementId="edu.rice.cs.hpcviewer.ui.addon.closeListener" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.WindowCloseListenerAddon"/>
+  <addons xmi:id="_h3h_UOAJEeqsmOAkZNeqjw" elementId="edu.rice.cs.hpcviewer.ui.addon.lifeCycle" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.LifeCycle"/>
+  <addons xmi:id="_KxIFQKVBEeqxVMw0_Hqotg" elementId="edu.rice.cs.hpcviewer.ui.addon.database" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection"/>
 </application:Application>
