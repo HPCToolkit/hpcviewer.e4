@@ -48,7 +48,6 @@ import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadView;
 import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownView;
 import edu.rice.cs.hpcviewer.ui.tabItems.AbstractBaseViewItem;
 import edu.rice.cs.hpcviewer.ui.tabItems.AbstractViewItem;
-import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
 
 
 
@@ -251,7 +250,7 @@ public class ProfilePart implements IProfilePart
 		this.experiment = experiment;
 		
 		part.setLabel("Profile: " + experiment.getName());
-		part.setElementId(ElementIdManager.getElementId(experiment));
+		//part.setElementId(ElementIdManager.getElementId(experiment));
 		part.setTooltip(experiment.getDefaultDirectory().getAbsolutePath());
 		
 		Object []roots = experiment.getRootScopeChildren();

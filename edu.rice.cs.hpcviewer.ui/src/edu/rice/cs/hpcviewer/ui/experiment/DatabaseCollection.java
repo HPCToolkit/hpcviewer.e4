@@ -323,8 +323,8 @@ public class DatabaseCollection
 		}
 		
 		// has to set the element Id before populating the view
-		String elementID = ElementIdManager.getElementId(experiment);
-		part.setElementId(elementID);
+		//String elementID = ElementIdManager.getElementId(experiment);
+		//part.setElementId(elementID);
 		view.setInput(part, experiment);
 
 		//----------------------------------------------------------------

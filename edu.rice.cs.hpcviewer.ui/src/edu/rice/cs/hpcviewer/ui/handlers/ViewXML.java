@@ -3,19 +3,14 @@ package edu.rice.cs.hpcviewer.ui.handlers;
 
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
-import org.eclipse.e4.ui.model.application.MApplication;
-import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
-import org.eclipse.e4.ui.workbench.modeling.EPartService;
-
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpcbase.ui.IBasePart;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
-import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
-import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 import java.io.File;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -24,12 +19,8 @@ import org.eclipse.e4.core.di.annotations.CanExecute;
 
 public class ViewXML 
 {
-	@Inject DatabaseCollection database;
-	@Inject EPartService       partService;
-	@Inject MApplication 	   application;
 	@Inject EModelService 	   modelService;
 
-	@Inject PartFactory        partFactory;
 	
 	@Execute
 	public void execute(@Optional @Active MPart part, MWindow window) {
@@ -42,11 +33,10 @@ public class ViewXML
 			// - get the database of the current active view/editor
 			// - or get the last opened database
 			
-			if (obj instanceof IBasePart) {
-				experiment = ((IBasePart)obj).getExperiment();
-			} else {
-				experiment = database.getLast();
+			if (!(obj instanceof IBasePart)) {
+				return;
 			}
+			experiment = ((IBasePart)obj).getExperiment();
 			File file = experiment.getXMLExperimentFile();
 			
 			// sanity check: the file must exist
@@ -58,16 +48,26 @@ public class ViewXML
 				((ProfilePart)obj).addEditor(experiment);
 				return;
 			}
+			// The current active element is trace view. 
 			// find the corresponding profile part to display the XML file
 			
-			MUIElement element = modelService.find(ProfilePart.ID, window);
-			if (element == null)
-				return;
-			if (!(element instanceof MPart))
-				return;
-			
-			ProfilePart profilePart = (ProfilePart) ((MPart)element).getObject();
-			profilePart.addEditor(experiment);
+			List<MPart> elements = modelService.findElements(part.getParent(), ProfilePart.ID, MPart.class); 
+			for (MPart element: elements) {				
+
+				ProfilePart profilePart = (ProfilePart) element.getObject();
+				
+				if (profilePart.getExperiment() == experiment) {
+					profilePart.addEditor(experiment);
+					
+					// sanity check: make sure the profile part is visible
+					element.setVisible(true);
+					
+					// activate the part
+					part.getParent().setSelectedElement(element);
+					
+					return;
+				}
+			}
 		}
 	}
 	
@@ -87,7 +87,7 @@ public class ViewXML
 				return (file != null && file.canRead());
 			}
 		}
-		return !database.isEmpty();
+		return false;
 	}
 		
 }
