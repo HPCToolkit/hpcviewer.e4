@@ -121,6 +121,7 @@
         <children xsi:type="menu:HandledMenuItem" xmi:id="_je_Y8tKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.showMetric" label="Show metrics" tooltip="Show the list of metrics and update its property (rename or change the formula)." mnemonics="S" command="_XIwxIL17EeqIaLNodVh-xg">
           <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_je_Y89KuEeqGK5z0zGQmCQ" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseExist"/>
         </children>
+        <children xsi:type="menu:HandledMenuItem" xmi:id="_xKqgcOAwEeq2dLsiFYp2dg" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.splitWindow" label="Split window" tooltip="Split a window into two parts vertically" mnemonics="S" command="_ocHSYOAkEeqsmOAkZNeqjw"/>
         <children xsi:type="menu:Menu" xmi:id="_je_Y9NKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.menu.view.debug" label="Debug" mnemonics="D">
           <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_je_Y9dKuEeqGK5z0zGQmCQ" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DebugMode"/>
           <children xsi:type="menu:HandledMenuItem" xmi:id="_je_Y9tKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.viewXML" label="View experiment.xml file" tooltip="View the current experiment.xml file" mnemonics="x" command="_rAwA8KvwEeq2aaPo7yBcWg"/>
