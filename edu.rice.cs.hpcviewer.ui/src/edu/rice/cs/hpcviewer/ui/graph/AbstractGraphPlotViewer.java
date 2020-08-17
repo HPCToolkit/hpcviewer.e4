@@ -19,7 +19,7 @@ import org.swtchart.Range;
 
 import edu.rice.cs.hpc.data.experiment.metric.MetricRaw;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
-import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
+import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 
 public abstract class AbstractGraphPlotViewer extends AbstractGraphViewer 
 {

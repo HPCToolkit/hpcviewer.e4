@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.handlers;
+package edu.rice.cs.hpcviewer.ui.addon;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,7 +27,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 
 public class LifeCycle 

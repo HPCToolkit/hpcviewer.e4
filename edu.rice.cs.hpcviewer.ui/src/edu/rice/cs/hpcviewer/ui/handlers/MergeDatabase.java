@@ -18,7 +18,7 @@ import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.merge.ExperimentMerger;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
-import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
+import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 
 import java.util.Iterator;
 
