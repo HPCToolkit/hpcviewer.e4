@@ -77,7 +77,7 @@ public class TraceDataVisitor implements IScopeVisitor
 	 * get the maximum depth from the tree traversal based on the scope
 	 * where this visitor is used.
 	 * 
-	 * @return the maximum depth of a given scope 
+	 * @return the maximum depth of the tree, which includes the call site+procedure scope
 	 */
 	public int getMaxDepth()
 	{

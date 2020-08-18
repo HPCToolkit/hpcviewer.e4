@@ -207,8 +207,14 @@ public class HPCCallStackView extends AbstractBaseItem implements EventHandler
 		
 		// guard : no action has to be taken at the moment;
 		setEnableAction(false);
-				
-		final int maxDepth = _stData.getMaxDepth();
+		
+		// Fix bug #14: extra depth https://github.com/HPCToolkit/hpcviewer.e4/issues/14
+		// By default hpcdata computes the depth based on the line scope, not procedure scope.
+		// TODO: Ideally we need correct the max depth inside hpcdata, but unfortunately other classes
+		//  like many in depth views, depend on the definition that max_depth = max_call_path + 1
+		// Hence, it's simpler to correct the max depth here.
+		
+		final int maxDepth = _stData.getMaxDepth()-1;
 		depthEditor.setSelection(0);
 		depthEditor.setMaximum(maxDepth);		
 		depthEditor.setVisible(true);
