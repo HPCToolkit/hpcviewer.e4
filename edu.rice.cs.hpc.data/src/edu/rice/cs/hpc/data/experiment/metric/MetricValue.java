@@ -200,11 +200,14 @@ public final class MetricValue
 
 	public static float getAnnotationValue(MetricValue m)
 	{
-		return m.annotation;
+		return m.getAnnotationValue();
 	}
 
 
-
+	public float getAnnotationValue() 
+	{
+		return annotation;
+	}
 
 	/*************************************************************************
 	 *	Makes the given annotation value available.
