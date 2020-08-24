@@ -445,11 +445,11 @@ public abstract class BaseMetric {
 		
 		IMetricValueFormat displayFormat;
 		if (annotationType == AnnotationType.PERCENT) {
-			displayFormat = new SimpleMetricValueFormat(); //MetricValueFormatFactory.createFormatPercent();
+			displayFormat = SimpleMetricValueFormat.getInstance(); //MetricValueFormatFactory.createFormatPercent();
 		} else if (annotationType == AnnotationType.PROCESS) {
 			displayFormat = MetricValueFormatFactory.createFormatProcess(); 
 		} else {
-			displayFormat = new SimpleMetricValueFormat(); //.createFormatDefault(); 
+			displayFormat = SimpleMetricValueFormat.getInstance(); //.createFormatDefault(); 
 		}
 		return displayFormat;
 	}
