@@ -24,9 +24,6 @@ import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 
 public class LifeCycle 
@@ -78,8 +75,6 @@ public class LifeCycle
 		
 		try {
 			URL url  = newLoc.toURI().toURL(); 
-			Logger logger = LoggerFactory.getLogger(getClass());
-			logger.info("Set workspace to: " + url.getFile());
 			location.set(url, false);
 			
 		} catch (IllegalStateException | IOException e) {
