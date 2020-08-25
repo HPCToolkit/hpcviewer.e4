@@ -643,32 +643,14 @@ public class DatabaseCollection
 	 * @param message
 	 */
 	private void openDatabaseAndCreateViews(final Shell shell, final String database, final String message) {
-		Job jobOpenDb = new Job(message) {
-			
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				
-				monitor.beginTask(message + " ...", 2);
-				monitor.worked(1);
 
-				try {
-					final BaseExperiment experiment = openDatabase(shell, database);
-					
-					sync.asyncExec(()-> {
-						createViewsAndAddDatabase(experiment, application, partService, modelService, null);
-					});
-				} catch (Exception e) {
-					final String msg = "Error opening the database";
-					statusReport(IStatus.ERROR, msg, e);
-					
-					return Status.CANCEL_STATUS;
-				}
-				monitor.worked(1);
-				monitor.done();
-				return Status.OK_STATUS;
-			}
-		};
-		jobOpenDb.schedule();
+		try {
+			final BaseExperiment experiment = openDatabase(shell, database);
+			createViewsAndAddDatabase(experiment, application, partService, modelService, null);
+		} catch (Exception e) {
+			final String msg = "Error opening the database";
+			statusReport(IStatus.ERROR, msg, e);
+		}
 	}
 
 }
