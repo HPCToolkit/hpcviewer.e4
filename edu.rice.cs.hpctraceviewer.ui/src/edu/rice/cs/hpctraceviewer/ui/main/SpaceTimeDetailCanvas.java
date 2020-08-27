@@ -1083,7 +1083,6 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
  *      since we don't clear the queue
  */
   		if (!queue.isEmpty()) {
-  			System.out.println("STDC emptying " + queue.size());
 			for (BaseViewPaint job : queue) {
 				if (!job.cancel()) {
 					// a job cannot be terminated.
