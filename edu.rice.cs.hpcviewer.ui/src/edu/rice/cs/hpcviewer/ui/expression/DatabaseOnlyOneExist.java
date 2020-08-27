@@ -5,7 +5,7 @@ import javax.inject.Inject;
 
 import org.eclipse.e4.core.di.annotations.Evaluate;
 
-import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
+import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 
 public class DatabaseOnlyOneExist 
 {

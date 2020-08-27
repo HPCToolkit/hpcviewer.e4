@@ -1083,7 +1083,6 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
  *      since we don't clear the queue
  */
   		if (!queue.isEmpty()) {
-  			System.out.println("STDC emptying " + queue.size());
 			for (BaseViewPaint job : queue) {
 				if (!job.cancel()) {
 					// a job cannot be terminated.
@@ -1348,9 +1347,6 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		private final boolean changedBounds;
 		private final GC bufferGC, origGC;
 		
-		private long start;
-		
-
 		public DetailPaintJobChangeListener( DetailViewPaint detailPaint, 
 									 Image imageOrig, Image imageFinal,
 									 GC bufferGC, GC origGC, boolean changedBounds) {
@@ -1365,7 +1361,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		
 		@Override
 		public void aboutToRun(IJobChangeEvent event) {
-			start = Instant.now().toEpochMilli();
+			Instant.now().toEpochMilli();
 		}
 
 		
@@ -1383,12 +1379,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 					imageFinal.dispose();	
 				}
 
-				long done1 = Instant.now().toEpochMilli() - start;
-				
 				redraw();
-				
-				System.out.println( "Status: " + event.getResult().getCode() + 
-									", time: " +  done1);
 				
 				// free resources 
 				bufferGC.dispose();

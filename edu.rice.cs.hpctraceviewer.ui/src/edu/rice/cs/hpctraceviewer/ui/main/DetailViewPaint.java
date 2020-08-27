@@ -5,9 +5,13 @@ import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
+
+import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
+import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TimelineDataSet;
 import edu.rice.cs.hpctraceviewer.ui.base.ISpaceTimeCanvas;
@@ -70,6 +74,9 @@ public class DetailViewPaint extends BaseViewPaint
 		
 		currentLine = new AtomicInteger(0);
 		numDataCollected = new AtomicInteger(0);
+		
+		PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
+		debug = pref.getBoolean(PreferenceConstants.ID_DEBUG_MODE);
 	}
 
 	@Override

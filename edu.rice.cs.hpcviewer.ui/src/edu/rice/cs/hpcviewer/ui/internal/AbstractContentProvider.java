@@ -58,7 +58,8 @@ public abstract class AbstractContentProvider
 		if (parent == viewer.getInput()) {
 			// if the parent is a root, the first row is a header
 			// this header row is not counted as a child 
-			child_position = index - 1;
+			// issue #11: force the index to be 0. We cannot allow negative index.
+			child_position = Math.max(0, index-1);
 		}
 		
 		Object element = getSortedChild( (Scope)parent, child_position);

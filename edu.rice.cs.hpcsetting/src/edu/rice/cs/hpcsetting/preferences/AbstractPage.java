@@ -60,7 +60,7 @@ public abstract class AbstractPage extends PreferencePage
      * @return the label
      */
     protected Label createLabelControl(Composite parent, String text) {
-        Label label = new Label(parent, SWT.NULL);
+        Label label = new Label(parent, SWT.WRAP);
         label.setText(text);
 
         GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
@@ -164,7 +164,7 @@ public abstract class AbstractPage extends PreferencePage
      * @return the text
      */
     protected Text createTextControl(Composite parent) {
-        Text text = new Text(parent, SWT.BORDER | SWT.SINGLE);
+        Text text = new Text(parent, SWT.BORDER | SWT.SINGLE | SWT.WRAP);
 
         GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
         gridData.horizontalSpan = 1;

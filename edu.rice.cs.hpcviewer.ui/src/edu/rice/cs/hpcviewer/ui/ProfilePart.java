@@ -31,9 +31,9 @@ import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
+import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.base.IProfilePart;
 import edu.rice.cs.hpcviewer.ui.base.IUpperPart;
-import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.graph.AbstractGraphViewer;
 import edu.rice.cs.hpcviewer.ui.graph.GraphEditorInput;
 import edu.rice.cs.hpcviewer.ui.graph.GraphHistoViewer;
@@ -42,13 +42,11 @@ import edu.rice.cs.hpcviewer.ui.graph.GraphPlotSortViewer;
 import edu.rice.cs.hpcviewer.ui.parts.bottomup.BottomUpView;
 import edu.rice.cs.hpcviewer.ui.parts.datacentric.Datacentric;
 import edu.rice.cs.hpcviewer.ui.parts.editor.Editor;
-import edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory;
 import edu.rice.cs.hpcviewer.ui.parts.flat.FlatView;
 import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadView;
 import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownView;
 import edu.rice.cs.hpcviewer.ui.tabItems.AbstractBaseViewItem;
 import edu.rice.cs.hpcviewer.ui.tabItems.AbstractViewItem;
-import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
 
 
 
@@ -64,7 +62,6 @@ public class ProfilePart implements IProfilePart
 	
 	@Inject protected DatabaseCollection databaseAddOn;
 
-	@Inject protected PartFactory partFactory;
 
 	/** Each view needs to store the experiment database.
 	 * In case it needs to populate the table, we know which database 
@@ -251,7 +248,7 @@ public class ProfilePart implements IProfilePart
 		this.experiment = experiment;
 		
 		part.setLabel("Profile: " + experiment.getName());
-		part.setElementId(ElementIdManager.getElementId(experiment));
+		//part.setElementId(ElementIdManager.getElementId(experiment));
 		part.setTooltip(experiment.getDefaultDirectory().getAbsolutePath());
 		
 		Object []roots = experiment.getRootScopeChildren();

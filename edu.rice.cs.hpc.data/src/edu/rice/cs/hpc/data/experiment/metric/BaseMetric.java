@@ -6,6 +6,7 @@ package edu.rice.cs.hpc.data.experiment.metric;
 import edu.rice.cs.hpc.data.experiment.metric.format.IMetricValueFormat;
 import edu.rice.cs.hpc.data.experiment.metric.format.MetricValueFormatFactory;
 import edu.rice.cs.hpc.data.experiment.metric.format.MetricValuePredefinedFormat;
+import edu.rice.cs.hpc.data.experiment.metric.format.SimpleMetricValueFormat;
 import edu.rice.cs.hpc.data.experiment.scope.IMetricScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 
@@ -444,11 +445,11 @@ public abstract class BaseMetric {
 		
 		IMetricValueFormat displayFormat;
 		if (annotationType == AnnotationType.PERCENT) {
-			displayFormat = MetricValueFormatFactory.createFormatPercent();
+			displayFormat = SimpleMetricValueFormat.getInstance(); //MetricValueFormatFactory.createFormatPercent();
 		} else if (annotationType == AnnotationType.PROCESS) {
 			displayFormat = MetricValueFormatFactory.createFormatProcess(); 
 		} else {
-			displayFormat = MetricValueFormatFactory.createFormatDefault(); 
+			displayFormat = SimpleMetricValueFormat.getInstance(); //.createFormatDefault(); 
 		}
 		return displayFormat;
 	}

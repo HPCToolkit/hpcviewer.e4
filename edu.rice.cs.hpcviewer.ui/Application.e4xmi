@@ -39,6 +39,7 @@
         <children xsi:type="menu:HandledMenuItem" xmi:id="_8RRzgMwvEeqnLcCrkreYSw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.showMetric" label="Show metrics" tooltip="Show the list of metrics and update its property (rename or change the formula)." mnemonics="S" command="_XIwxIL17EeqIaLNodVh-xg">
           <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_FsaRMMwwEeqnLcCrkreYSw" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseExist"/>
         </children>
+        <children xsi:type="menu:HandledMenuItem" xmi:id="_1tqrMOAoEeqsmOAkZNeqjw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.splitWindow" label="Split window" tooltip="Split a window into two parts vertically" mnemonics="S" command="_ocHSYOAkEeqsmOAkZNeqjw"/>
         <children xsi:type="menu:Menu" xmi:id="_L0cLkKwUEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.menu.view.debug" label="Debug" mnemonics="D">
           <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_LrongL1wEeqIaLNodVh-xg" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DebugMode"/>
           <children xsi:type="menu:HandledMenuItem" xmi:id="_OUj-8KwUEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.viewXML" label="View experiment.xml file" tooltip="View the current experiment.xml file" mnemonics="x" command="_rAwA8KvwEeq2aaPo7yBcWg"/>
@@ -66,6 +67,7 @@
   <handlers xmi:id="_ZlWvYL17EeqIaLNodVh-xg" elementId="edu.rice.cs.hpcviewer.ui.handler.showMetric" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.ShowMetrics" command="_XIwxIL17EeqIaLNodVh-xg"/>
   <handlers xmi:id="_SsIPYMH9Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpcviewer.ui.handler.0" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.Find" command="_JcLG8MH9Eeqcdd3a7pzIFA"/>
   <handlers xmi:id="_HASFAMP6Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpcviewer.ui.handler.copy" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.Copy" command="_Cqsk0MP6Eeqcdd3a7pzIFA"/>
+  <handlers xmi:id="_rqxmwOAkEeqsmOAkZNeqjw" elementId="edu.rice.cs.hpcviewer.ui.handler.splitWindow" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.SplitWindow" command="_ocHSYOAkEeqsmOAkZNeqjw"/>
   <bindingTables xmi:id="_7fwrAKqFEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.bindingtable.file" bindingContext="_c3AF2cjYEeSyMNYR5xypkQ">
     <bindings xmi:id="_-3xvsKqFEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.keybinding.open" keySequence="M1+O" command="_U14sMI7vEeqBPbXbG7_Dzw"/>
     <bindings xmi:id="_k4-EoKuTEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.keybinding.add" keySequence="M1+A" command="_cPW0II7vEeqBPbXbG7_Dzw"/>
@@ -119,6 +121,7 @@
         <children xsi:type="menu:HandledMenuItem" xmi:id="_je_Y8tKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.showMetric" label="Show metrics" tooltip="Show the list of metrics and update its property (rename or change the formula)." mnemonics="S" command="_XIwxIL17EeqIaLNodVh-xg">
           <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_je_Y89KuEeqGK5z0zGQmCQ" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseExist"/>
         </children>
+        <children xsi:type="menu:HandledMenuItem" xmi:id="_xKqgcOAwEeq2dLsiFYp2dg" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.splitWindow" label="Split window" tooltip="Split a window into two parts vertically" mnemonics="S" command="_ocHSYOAkEeqsmOAkZNeqjw"/>
         <children xsi:type="menu:Menu" xmi:id="_je_Y9NKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.menu.view.debug" label="Debug" mnemonics="D">
           <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_je_Y9dKuEeqGK5z0zGQmCQ" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DebugMode"/>
           <children xsi:type="menu:HandledMenuItem" xmi:id="_je_Y9tKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.viewXML" label="View experiment.xml file" tooltip="View the current experiment.xml file" mnemonics="x" command="_rAwA8KvwEeq2aaPo7yBcWg"/>
@@ -152,6 +155,7 @@
   <commands xmi:id="_XIwxIL17EeqIaLNodVh-xg" elementId="edu.rice.cs.hpcviewer.ui.command.showMetric" commandName="Show metrics"/>
   <commands xmi:id="_JcLG8MH9Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpcviewer.ui.command.find" commandName="Find" description="Find a text"/>
   <commands xmi:id="_Cqsk0MP6Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpcviewer.ui.command.copy" commandName="Copy"/>
+  <commands xmi:id="_ocHSYOAkEeqsmOAkZNeqjw" elementId="edu.rice.cs.hpcviewer.ui.command.splitWindow" commandName="Split window"/>
   <addons xmi:id="_c3AF0sjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.core.commands.service" contributionURI="bundleclass://org.eclipse.e4.core.commands/org.eclipse.e4.core.commands.CommandServiceAddon"/>
   <addons xmi:id="_c3AF08jYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.contexts.service" contributionURI="bundleclass://org.eclipse.e4.ui.services/org.eclipse.e4.ui.services.ContextServiceAddon"/>
   <addons xmi:id="_c3AF1MjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.bindings.service" contributionURI="bundleclass://org.eclipse.e4.ui.bindings/org.eclipse.e4.ui.bindings.BindingServiceAddon"/>
@@ -159,8 +163,7 @@
   <addons xmi:id="_c3AF1sjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.workbench.handler.model" contributionURI="bundleclass://org.eclipse.e4.ui.workbench/org.eclipse.e4.ui.internal.workbench.addons.HandlerProcessingAddon"/>
   <addons xmi:id="_c3AF18jYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.workbench.contexts.model" contributionURI="bundleclass://org.eclipse.e4.ui.workbench/org.eclipse.e4.ui.internal.workbench.addons.ContextProcessingAddon"/>
   <addons xmi:id="_c3AF2MjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.workbench.bindings.model" contributionURI="bundleclass://org.eclipse.e4.ui.workbench.swt/org.eclipse.e4.ui.workbench.swt.util.BindingProcessingAddon"/>
-  <addons xmi:id="_HHRYIGDYEemg7cSpH3T_tg" elementId="org.eclipse.passage.lic.e4.ui.licensing" contributionURI="bundleclass://org.eclipse.passage.lic.e4.ui/org.eclipse.passage.lic.e4.ui.addons.LicensingAddon"/>
-  <addons xmi:id="_KxIFQKVBEeqxVMw0_Hqotg" elementId="edu.rice.cs.hpcviewer.ui.addon.database" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection"/>
-  <addons xmi:id="_uZa4IKz8EeqX1ux1mZi76A" elementId="edu.rice.cs.hpcviewer.ui.addon.partFactory" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.parts.editor.PartFactory"/>
-  <addons xmi:id="_TrVSsMcYEeq0rOsC4NG4eQ" elementId="edu.rice.cs.hpcviewer.ui.addon.closeListener" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.WindowCloseListenerAddon"/>
+  <addons xmi:id="_UjClQOAbEeqsmOAkZNeqjw" elementId="edu.rice.cs.hpcviewer.ui.addon.LifeCycle" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.addon.LifeCycle"/>
+  <addons xmi:id="_KAZs8OAbEeqsmOAkZNeqjw" elementId="edu.rice.cs.hpcviewer.ui.addon.WindowCloseListenerAddon" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.addon.WindowCloseListenerAddon"/>
+  <addons xmi:id="__urlgOAaEeqsmOAkZNeqjw" elementId="edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection"/>
 </application:Application>

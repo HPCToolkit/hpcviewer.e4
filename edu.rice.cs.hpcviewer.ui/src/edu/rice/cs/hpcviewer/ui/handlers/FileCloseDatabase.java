@@ -14,7 +14,7 @@ import org.eclipse.e4.ui.workbench.modeling.EModelService;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
-import edu.rice.cs.hpcviewer.ui.experiment.DatabaseCollection;
+import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 
 public class FileCloseDatabase 
 {

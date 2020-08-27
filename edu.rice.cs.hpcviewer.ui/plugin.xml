@@ -34,7 +34,7 @@
          </property>
          <property
                name="lifeCycleURI"
-               value="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.LifeCycle">
+               value="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.addon.LifeCycle">
          </property>
          <property
                name="preferenceCustomization"

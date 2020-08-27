@@ -82,7 +82,7 @@ public class ToolControl
 				public void run() {
 					if (progressBar.isDisposed()) return;
 					
-					lblMessage.setText("Runing: " + name);
+					lblMessage.setText(name);
 
 					if( runningTasks <= 0 ) {
 						// --- no task is running at the moment ---
