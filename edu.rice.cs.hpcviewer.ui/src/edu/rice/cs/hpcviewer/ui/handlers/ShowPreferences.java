@@ -24,7 +24,7 @@ public class ShowPreferences
 		final String appearenceId = "Appearence";
 
 		vprefDialog.addPage(profileId, new MainProfilePage(profileId));
-		vprefDialog.addPage(profileId, appearenceId, new AppearencePage(appearenceId));
+		vprefDialog.addPage(appearenceId, new AppearencePage(appearenceId));
 		
 		final String traceId = "Traces";
 		
