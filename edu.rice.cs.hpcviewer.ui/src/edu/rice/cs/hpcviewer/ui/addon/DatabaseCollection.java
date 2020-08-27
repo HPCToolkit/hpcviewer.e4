@@ -216,7 +216,7 @@ public class DatabaseCollection
 		if (experiment == null || service == null) {
 			MessageDialog.openError( Display.getDefault().getActiveShell(), 
 									 "Error in opening the file", 
-									 "Database not found: " + experiment.getDefaultDirectory().getAbsolutePath());
+									 "Database not found. " );
 			return;
 		}
 		
@@ -643,11 +643,12 @@ public class DatabaseCollection
 
 		try {
 			final BaseExperiment experiment = openDatabase(shell, database);
-			createViewsAndAddDatabase(experiment, application, partService, modelService, null);
+			if (experiment != null)
+				createViewsAndAddDatabase(experiment, application, partService, modelService, null);
 		} catch (Exception e) {
-			final String msg = "Error opening the database";
+			final String msg = "Error opening the database: " + database;
 			statusReport(IStatus.ERROR, msg, e);
+			MessageDialog.openError(shell, "Error", msg);
 		}
 	}
-
 }
