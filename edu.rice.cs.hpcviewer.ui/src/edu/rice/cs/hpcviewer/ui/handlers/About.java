@@ -1,8 +1,6 @@
  
 package edu.rice.cs.hpcviewer.ui.handlers;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 
@@ -26,6 +24,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
+import edu.rice.cs.hpcviewer.ui.util.ApplicationProperty;
 
 
 /****
@@ -59,8 +58,6 @@ public class About
 		
 		private static final String APP_NAME   = "appName";   //$NON-NLS-1$
 		private static final String ABOUT_TEXT = "aboutText"; //$NON-NLS-1$
-		private static final String FILE_VERSION = "platform:/plugin/edu.rice.cs.hpcviewer.ui/release.txt";
-		private static final String FILE_LICENSE = "platform:/plugin/edu.rice.cs.hpcviewer.ui/License.txt";
 		
 		
 		public AboutDialog(Shell parentShell) {
@@ -70,17 +67,7 @@ public class About
 			this.message     = product.getProperty(ABOUT_TEXT);
 			
 			try {
-				URL url = FileLocator.toFileURL(new URL(FILE_VERSION));
-				String filePath = url.getFile();
-				File file = new File(filePath);
-				FileInputStream fis = new FileInputStream(file);
-				byte[] data = new byte[(int) file.length()];
-				fis.read(data);
-				
-				this.message += "\n\nRelease: " + new String(data, "UTF-8");
-				
-				fis.close();
-				
+				this.message += "\n\nRelease: " + ApplicationProperty.getVersion();
 			} catch (IOException e) {
 
 				e.printStackTrace();
@@ -155,21 +142,9 @@ public class About
 		}
 
 		private void showLicense() {
-			
-			try {
-				URL url = FileLocator.toFileURL(new URL(FILE_LICENSE));
-				String filePath = url.getFile();
-				File file = new File(filePath);
-				FileInputStream fis = new FileInputStream(file);
-				byte[] data = new byte[(int) file.length()];
-				fis.read(data);
-				
-				String license = new String(data, "UTF-8");				
-				fis.close();
-				
+			try {				
+				String license = ApplicationProperty.getLicense();								
 				MessageDialog.openInformation(getShell(), "License", license);
-
-				
 			} catch (IOException e) {
 
 				e.printStackTrace();
