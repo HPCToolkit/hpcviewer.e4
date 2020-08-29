@@ -45,7 +45,24 @@ public abstract class DataPreparation
 		int succSampleMidpoint = (int) Math.max(0, (data.ptl.getTime(0)-data.begTime)/data.pixelLength);
 
 		CallPath cp = data.ptl.getCallPath(0, data.depth);
-		if (cp==null)
+
+		// issue #15: Trace view doesn't render GPU trace line
+		// This happens when the first sample to render has a bad cpid which causes this method to exit prematurely.
+		// We shouldn't exit. Instead, we should search for the next available callpath, unless we are at 
+		// the end of the data trace line
+		
+		if (cp==null && data.ptl.size()==0)
+			return 0;
+		
+		// issue #15: Trace view doesn't render GPU trace line
+		// find the next first available data
+		// If there's no data available, we exit
+		
+		int i=1;
+		for(;i<data.ptl.size() && cp == null; i++) {
+			cp = data.ptl.getCallPath(i, data.depth);
+		}
+		if (cp == null)
 			return 0;
 		
 		String succFunction = cp.getScopeAt(data.depth).getName(); 
