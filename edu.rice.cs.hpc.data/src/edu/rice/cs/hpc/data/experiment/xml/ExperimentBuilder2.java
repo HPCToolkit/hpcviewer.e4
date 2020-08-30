@@ -53,7 +53,13 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 		
 		listOfDerivedMetrics   = new ArrayList<DerivedMetric>(2);
 		
-		setRemoveInvisibleProcedure(true);
+		// issue #15: Trace view doesn't render GPU trace line
+		// If we elide "special" procedures, we'll have problems 
+		//   rendering the traces.
+		// Temporarily we should let these procedures (like <no activity>
+		//   to be visible
+		
+		setRemoveInvisibleProcedure(false);
 	}
 
 
