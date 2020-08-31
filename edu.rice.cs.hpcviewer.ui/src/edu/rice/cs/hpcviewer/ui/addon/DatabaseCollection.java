@@ -48,6 +48,7 @@ import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
+import edu.rice.cs.hpc.filter.service.FilterMap;
 import edu.rice.cs.hpcbase.ui.IMainPart;
 import edu.rice.cs.hpctraceviewer.ui.TracePart;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
@@ -643,12 +644,24 @@ public class DatabaseCollection
 
 		try {
 			final BaseExperiment experiment = openDatabase(shell, database);
-			if (experiment != null)
-				createViewsAndAddDatabase(experiment, application, partService, modelService, null);
+			if (experiment == null)
+				return;
+			
+			// filter the tree if user has defined at least a filter
+			
+			FilterMap filterMap = FilterMap.getInstance();
+			if (filterMap.isFilterEnabled()) {
+				experiment.filter(filterMap);
+			}
+			
+			// create views
+			
+			createViewsAndAddDatabase(experiment, application, partService, modelService, null);
+			
 		} catch (Exception e) {
 			final String msg = "Error opening the database: " + database;
 			statusReport(IStatus.ERROR, msg, e);
-			MessageDialog.openError(shell, "Error", msg);
+			MessageDialog.openError(shell, "Error " + e.getClass(), msg);
 		}
 	}
 }
