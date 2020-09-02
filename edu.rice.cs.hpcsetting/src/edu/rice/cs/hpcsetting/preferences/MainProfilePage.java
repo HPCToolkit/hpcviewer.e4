@@ -2,7 +2,6 @@ package edu.rice.cs.hpcsetting.preferences;
 
 import java.io.IOException;
 
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.swt.events.SelectionEvent;
@@ -12,7 +11,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,44 +59,12 @@ public class MainProfilePage extends AbstractPage
 
 	@Override
 	protected Control createContents(Composite parent) {
-
-		// group of file settings
-		createFilePanel(parent);
-
         // group of debug flags
         createDebugPanel(parent);
         
 		return parent;
 	}
 	
-	private void createFilePanel(Composite parent) {
-		
-		Group groupFile = createGroupControl(parent, "Files", false);
-		groupFile.setLayout(new GridLayout(2, false));
-        
-		String location = ViewerPreferenceManager.INSTANCE.getPreferenceStoreLocation();
-        createFileSetting(groupFile, "Preference file", location);
-
-		String locInstall = Platform.getInstallLocation().getURL().getFile();
-        createFileSetting(groupFile, "Install location", locInstall);
-
-		String locInstance = Platform.getInstanceLocation().getURL().getFile();
-        createFileSetting(groupFile, "Instance location", locInstance);
-        
-		String locUser = Platform.getLogFileLocation().toOSString(); //.getUserLocation().getURL().getFile();
-        createFileSetting(groupFile, "Log location", locUser);
-	}
-	
-	private Text createFileSetting(Composite parent, String label, String value) {
-        
-        createLabelControl(parent, label);
-        
-        Text txtFile = createTextControl(parent);
-        txtFile.setText(value);
-        txtFile.setEditable(false);
-        
-        return txtFile;
-	}
 	
 	private void createDebugPanel(Composite parent) {
 		

@@ -276,7 +276,11 @@ public abstract class BaseExperiment implements IExperiment
 	{
 		DisposeResourcesVisitor visitor = new DisposeResourcesVisitor();
 		rootScope.dfsVisitScopeTree(visitor);
-		this.rootScope = null;
+		rootScope = null;
+		
+		datacentricRootScope = null;
+		
+		databaseRepresentation = null;
 	}
 
 
