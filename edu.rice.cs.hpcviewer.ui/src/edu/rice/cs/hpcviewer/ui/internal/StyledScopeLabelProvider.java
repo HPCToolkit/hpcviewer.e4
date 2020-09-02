@@ -68,8 +68,6 @@ public class StyledScopeLabelProvider extends DelegatingStyledCellLabelProvider
 
 		@Override
 		public StyledString getStyledText(Object element) {
-			Scope node = (Scope) element;
-			final String text = getText(node);
 			
 			StyledString styledString= new StyledString();
 			
@@ -93,6 +91,10 @@ public class StyledScopeLabelProvider extends DelegatingStyledCellLabelProvider
 						styledString.append(String.valueOf(line)+": ", Utilities.STYLE_DECORATIONS);
 				}
 			}
+			
+			Scope node = (Scope) element;
+			final String text = getText(node);
+
 			if(Utilities.isFileReadable(node)) {
 				styledString.append( text, Utilities.STYLE_ACTIVE_LINK );
 			} else {
