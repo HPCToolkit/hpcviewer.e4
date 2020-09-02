@@ -185,7 +185,7 @@ public class DataTrace extends DataCommon
 	 */
 	public int getNumberOfRanks()
 	{
-		return (int) num_threads;
+		return (int) numItems;
 	}
 	
 	public long []getOffsets()

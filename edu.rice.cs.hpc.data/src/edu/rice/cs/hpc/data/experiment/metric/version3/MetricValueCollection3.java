@@ -1,6 +1,8 @@
 package edu.rice.cs.hpc.data.experiment.metric.version3;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
 
 import edu.rice.cs.hpc.data.db.DataSummary;
 import edu.rice.cs.hpc.data.experiment.BaseExperimentWithMetrics;
@@ -8,6 +10,7 @@ import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpc.data.experiment.metric.IMetricValueCollection;
 import edu.rice.cs.hpc.data.experiment.metric.MetricValue;
+import edu.rice.cs.hpc.data.experiment.metric.MetricValueSparse;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 
@@ -28,53 +31,61 @@ import edu.rice.cs.hpc.data.experiment.scope.Scope;
 public class MetricValueCollection3 implements IMetricValueCollection 
 {
 	final private RootScope root;
-	private MetricValue []values;
+	
+	private Scope currentScope;
+	private List<MetricValueSparse> sparseValues;
+	private HashMap<Integer, MetricValue> values;
 	
 	public MetricValueCollection3(RootScope root, Scope scope) throws IOException
 	{
 		this.root	 = root;
+		this.currentScope = scope;
 	}
 	
 	@Override
 	public MetricValue getValue(Scope scope, int index) 
 	{
-		if (values == null)
+		if (values == null || currentScope != scope)
 		{
+			currentScope = scope;
+			
 			// create and initialize the first metric values instance
-			BaseExperimentWithMetrics exp = (BaseExperimentWithMetrics) root.getExperiment();
-			int metric_size = exp.getMetricCount();
 			final DataSummary data = root.getDataSummary();
 			// initialize
 			try {
-				values = data.getMetrics(scope.getCCTIndex(), exp);
-				if (values != null && values.length>0)
-				{
-					// compute the percent annotation
-					for(int i=0; i<metric_size; i++)
-					{
-						if (values[i] != MetricValue.NONE)
-						{
-							float annotationValue = 1.0f;
-							if (!(scope instanceof RootScope)) {
-								MetricValue mv = root.getMetricValue(i);
-								if (mv != MetricValue.NONE)
-								{
-									annotationValue = values[i].getValue()/mv.getValue();
-								}
-							}
-							MetricValue.setAnnotationValue(values[i], annotationValue);
-						}
-					}
-					return values[index];
-				}
+				sparseValues = data.getMetrics(scope.getCCTIndex());
 			} catch (IOException e1) {
 				e1.printStackTrace();
+				return MetricValue.NONE;
 			}
+			if (sparseValues != null && sparseValues.size()>0)
+			{
+				for (MetricValueSparse mvs: sparseValues) {
+					float value = mvs.getValue();
+					float annotationValue = 1.0f;
+					
+					// compute the percent annotation
+					if (!(scope instanceof RootScope)) {
+						MetricValue mv = root.getMetricValue(mvs.getIndex());
+						if (mv != MetricValue.NONE)
+						{
+							annotationValue = value/mv.getValue();
+						}
+					}
+					MetricValue mv = new MetricValue(value, annotationValue);
+					values.put(mvs.getIndex(), mv);
+				}
+				MetricValue mv = values.get(index);
+				if (mv == null)
+					return MetricValue.NONE;
+			}
+
 		} else 
 		{
 			// metric values already exist
-			if (index < values.length) {
-				return values[index];
+			MetricValue mv = values.get(index);
+			if (mv != null) {
+				return mv;
 			} else {
 				// metric values already exist, but the index is bigger than the standard values
 				// this must be a derived metric
@@ -91,8 +102,11 @@ public class MetricValueCollection3 implements IMetricValueCollection
 
 	@Override
 	public float getAnnotation(int index) {
-		MetricValue mv = values[index];
-		return MetricValue.getAnnotationValue(mv);
+		MetricValue mv = values.get(index);
+		if (mv != null)
+			return MetricValue.getAnnotationValue(mv);
+		
+		return 0.0f;
 	}
 
 	@Override
@@ -100,16 +114,16 @@ public class MetricValueCollection3 implements IMetricValueCollection
 		if (values != null) {
 			// If the index is out of array bound, it means we want to add a new derived metric.
 			// We will compute the derived value on the fly instead of storing it.
-			if (index < values.length) {
-				values[index]  = value;
-			}
+
+			values.put(index, value);
 		}
 	}
 
 	@Override
 	public void setAnnotation(int index, float ann) {
-		MetricValue value = values[index];
-		MetricValue.setAnnotationValue(value, ann);
+		MetricValue value = values.get(index);
+		if (value != null)
+			MetricValue.setAnnotationValue(value, ann);
 	}
 
 
@@ -130,11 +144,7 @@ public class MetricValueCollection3 implements IMetricValueCollection
 		getValue(scope, 0);
 		if (values != null)
 		{
-			for(MetricValue value : values)
-			{
-				if (value != MetricValue.NONE)
-					return true;
-			}
+			return values.size()>0;
 		}
 		return false;
 	}
