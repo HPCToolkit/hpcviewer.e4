@@ -19,7 +19,7 @@ import java.nio.channels.FileChannel;
  ***************************************************/
 abstract public class DataCommon 
 {
-	private final static int HEADER_COMMON_SIZE = 23;
+	public  final static int HEADER_COMMON_SIZE = 23;
 	private final static int MESSAGE_SIZE 		= 18;
 	
 	protected long numItems;

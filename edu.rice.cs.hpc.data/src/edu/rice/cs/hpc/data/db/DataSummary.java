@@ -28,6 +28,10 @@ public class DataSummary extends DataCommon
 	private static final int    METRIC_VALUE_SIZE = 8 + 2;
 	private static final int    CCT_RECORD_SIZE   = 4 + 8;
 	
+	private static final int    TUPLE_LENGTH_SIZE = 2;
+	private static final int    TUPLE_KIND_SIZE   = 2;
+	private static final int    TUPLE_INDEX_SIZE  = 4; // should be 8
+	
 	// --------------------------------------------------------------------
 	// object variable
 	// --------------------------------------------------------------------
@@ -226,7 +230,7 @@ public class DataSummary extends DataCommon
 		tuple = new ArrayList<DataSummary.Tuple>((int) numItems);
 		
 		for (int i=0; i<numItems; i++) {
-			ByteBuffer buffer = ByteBuffer.allocate(2);
+			ByteBuffer buffer = ByteBuffer.allocate(TUPLE_LENGTH_SIZE);
 			int numBytes      = input.read(buffer);
 			assert (numBytes > 0);
 
@@ -239,7 +243,9 @@ public class DataSummary extends DataCommon
 			buffer.flip();
 			item.length = buffer.getShort();
 			
-			int lengthTuple = item.length * (2+8);			
+			assert(item.length>0);
+			
+			int lengthTuple = item.length * (TUPLE_KIND_SIZE+TUPLE_INDEX_SIZE);			
 			buffer = ByteBuffer.allocate(lengthTuple);
 
 			numBytes = input.read(buffer);
@@ -252,7 +258,7 @@ public class DataSummary extends DataCommon
 			
 			for (int j=0; j<item.length; j++) {
 				item.kind[j]  = buffer.getShort();
-				item.index[j] = buffer.getLong();
+				item.index[j] = buffer.getInt();
 			}
 			tuple.add(item);
 		}
@@ -293,6 +299,10 @@ public class DataSummary extends DataCommon
 		public long num_vals;
 		public int  num_nz_contexts;
 		public long offset;
+		
+		public String toString() {
+			return "tuple_ptr: " + id_tuple_ptr + ", ccts: " + num_nz_contexts + ", offs: " + offset;
+		}
 	}
 
 	/***************************
@@ -302,7 +312,7 @@ public class DataSummary extends DataCommon
 	 ***************************/
 	public static void main(String []argv)
 	{
-		final String DEFAULT_FILE = "/home/la5/data/sparse/fib/thread_major_sparse.db";
+		final String DEFAULT_FILE = "/home/la5/data/sparse/hpcstruct-db/thread_major_sparse.db";
 		final String filename;
 		if (argv != null && argv.length>0)
 			filename = argv[0];
