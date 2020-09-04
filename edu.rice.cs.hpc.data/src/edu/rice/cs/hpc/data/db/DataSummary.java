@@ -39,7 +39,8 @@ public class DataSummary extends DataCommon
 	private RandomAccessFile file;
 	private MappedByteBuffer mappedBuffer;
 	
-	private List<Tuple> tuple;
+	private List<Tuple>    listTuple;
+	private List<ProfInfo> listProfInfo;
 	
 	private long position_profInfo;
 	
@@ -85,33 +86,14 @@ public class DataSummary extends DataCommon
 			printMetrics(out, cct);
 		}
 	}
-	
-	/*******
-	 * print a list of metrics for a given CCT index
-	 * 
-	 * @param out : the outpur stream
-	 * @param cct : CCT index
-	 */
-	private void printMetrics(PrintStream out, int cct)
-	{
-		try {
-			List<MetricValueSparse> values = getMetrics(cct);
-			for(MetricValueSparse value: values) {
-				System.out.print(value.getIndex() + ": " + value.getValue() + " , ");
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			out.println();
-		}
-	}
 
+	
 	/***
 	 * Retrieve the list of tuple IDs.
 	 * @return List of Tuple
 	 */
 	public List<Tuple> getTuple() {
-		return tuple;
+		return listTuple;
 	}
 	
 	
@@ -227,7 +209,25 @@ public class DataSummary extends DataCommon
 	protected boolean readNextHeader(FileChannel input) 
 			throws IOException
 	{
-		tuple = new ArrayList<DataSummary.Tuple>((int) numItems);
+		readIdTuple(input);
+		readProfInfo(input);
+		
+		return true;
+	}
+	
+	// --------------------------------------------------------------------
+	// Private methods
+	// --------------------------------------------------------------------
+
+	/***
+	 * read the list of id tuple
+	 * @param input FileChannel
+	 * @throws IOException
+	 */
+	private void readIdTuple(FileChannel input) 
+			throws IOException
+	{
+		listTuple = new ArrayList<DataSummary.Tuple>((int) numItems);
 		
 		for (int i=0; i<numItems; i++) {
 			ByteBuffer buffer = ByteBuffer.allocate(TUPLE_LENGTH_SIZE);
@@ -260,19 +260,66 @@ public class DataSummary extends DataCommon
 				item.kind[j]  = buffer.getShort();
 				item.index[j] = buffer.getInt();
 			}
-			tuple.add(item);
+			listTuple.add(item);
 		}
+	}
+
+	/*****
+	 * read the list of Prof Info
+	 * @param input FileChannel
+	 * @throws IOException
+	 */
+	private void readProfInfo(FileChannel input) throws IOException {
+		listProfInfo = new ArrayList<DataSummary.ProfInfo>((int) numItems);
 
 		position_profInfo = input.position();
 		mappedBuffer = input.map(MapMode.READ_ONLY, position_profInfo, numItems * ProfInfo.SIZE);
-		
-		return true;
+
+		for(int i=0; i<numItems; i++) {
+			ProfInfo info = new ProfInfo();
+			info.id_tuple_ptr = mappedBuffer.getLong();
+			info.metadata_ptr = mappedBuffer.getLong();
+			mappedBuffer.getLong(); // spare 1
+			mappedBuffer.getLong(); // spare 2
+			info.num_vals = mappedBuffer.getLong();
+			info.num_nz_contexts = mappedBuffer.getInt();
+			info.offset = mappedBuffer.getLong();
+			
+			listProfInfo.add(info);
+		}
+	}
+	
+	
+	/*******
+	 * print a list of metrics for a given CCT index
+	 * 
+	 * @param out : the outpur stream
+	 * @param cct : CCT index
+	 */
+	private void printMetrics(PrintStream out, int cct)
+	{
+		try {
+			List<MetricValueSparse> values = getMetrics(cct);
+			for(MetricValueSparse value: values) {
+				System.out.print(value.getIndex() + ": " + value.getValue() + " , ");
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			out.println();
+		}
 	}
 
-	// --------------------------------------------------------------------
-	// Private methods
-	// --------------------------------------------------------------------
 	
+	// --------------------------------------------------------------------
+	// Internal Classes
+	// --------------------------------------------------------------------
+
+	/******
+	 * 
+	 * Id tuple data structure
+	 *
+	 */
 	protected static class Tuple
 	{
 		public int length;
@@ -289,6 +336,12 @@ public class DataSummary extends DataCommon
 		}
 	}
 	
+	
+	/*****
+	 * 
+	 * Prof info data structure
+	 *
+	 */
 	protected static class ProfInfo
 	{
 		/** the size of the record in bytes  */
@@ -301,7 +354,10 @@ public class DataSummary extends DataCommon
 		public long offset;
 		
 		public String toString() {
-			return "tuple_ptr: " + id_tuple_ptr + ", ccts: " + num_nz_contexts + ", offs: " + offset;
+			return "tuple_ptr: " + id_tuple_ptr    + 
+				   ", vals: " 	 + num_vals 	   + 
+				   ", ccts: "	 + num_nz_contexts + 
+				   ", offs: " 	 + offset;
 		}
 	}
 
