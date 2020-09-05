@@ -65,22 +65,53 @@ public class DataSummary extends DataCommon
 	public void printInfo( PrintStream out)
 	{
 		super.printInfo(out);
-		
-		out.println("\n");
-		int cct = 1;
-		out.format("[%5d] ", cct);
-		printMetrics(out, cct);
 
+		ListCCTAndIndex list = null;
+		
+		try {
+			list = getCCTIndex();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return;
+		}
+		System.out.println("number of cct: " + list.listOfdIndex.length);
+		System.out.println("cct: " + list);
+		
 		// print random metrics
 		for (int i=0; i<15; i++)
 		{
 			Random r = new Random();
-			cct  = r.nextInt((int) numItems);
-			out.format("[%5d] ", cct);
-			printMetrics(out, cct);
+			int cct  = r.nextInt((int) list.listOfId.length);
+			out.format("[%5d] ", list.listOfId[cct]);
+			printMetrics(out, list.listOfId[cct]);
 		}
 	}
 
+	public ListCCTAndIndex getCCTIndex() 
+			throws IOException {
+		ProfInfo info = listProfInfo.get(0);
+		
+		// -------------------------------------------
+		// read the cct context
+		// -------------------------------------------
+		
+		long positionCCT = info.offset   + 
+				   		   info.num_vals * METRIC_VALUE_SIZE;
+		int numBytesCCT  = info.num_nz_contexts * CCT_RECORD_SIZE;
+		
+		ListCCTAndIndex list = new ListCCTAndIndex();
+		list.listOfdIndex = new long[info.num_nz_contexts];
+		list.listOfId = new int[info.num_nz_contexts];
+		
+		MappedByteBuffer buffer = file.getChannel().map(MapMode.READ_ONLY, positionCCT, numBytesCCT);
+		
+		for(int i=0; i<info.num_nz_contexts; i++) {
+			list.listOfId[i] = buffer.getInt();
+			list.listOfdIndex[i] = buffer.getLong();
+		}
+		return list;
+	}
+	
 	
 	/***
 	 * Retrieve the list of tuple IDs.
@@ -160,37 +191,6 @@ public class DataSummary extends DataCommon
 		}
 		
 		return values;
-	}
-	
-	
-	private long[] binarySearch(int index, int first, int last, ByteBuffer buffer) {
-		int begin = first;
-		int end   = last;
-		int mid   = (begin+end)/2;
-		
-		while (begin <= end) {
-			buffer.position(mid * CCT_RECORD_SIZE);
-			int cctidx  = buffer.getInt();
-			long offset = buffer.getLong();
-			
-			if (cctidx < index) {
-				begin = mid+1;
-			} else if(cctidx == index) {
-				long nextIndex = offset;
-				
-				if (mid+1<last) {
-					buffer.position(CCT_RECORD_SIZE * (mid+1));
-					buffer.getInt();
-					nextIndex = buffer.getLong();
-				}
-				return new long[] {offset, nextIndex};
-			} else {
-				end = mid-1;
-			}
-			mid = (begin+end)/2;
-		}
-		// not found
-		return null;
 	}
 	
 	
@@ -304,6 +304,46 @@ public class DataSummary extends DataCommon
 	}
 	
 	
+	/***
+	 * Binary earch the cct index 
+	 * 
+	 * @param index the cct index
+	 * @param first the beginning of the relative index
+	 * @param last  the last of the relative index
+	 * @param buffer ByteBuffer of the file
+	 * @return 2-length array of indexes: the index of the found cct, and its next index
+	 */
+	private long[] binarySearch(int index, int first, int last, ByteBuffer buffer) {
+		int begin = first;
+		int end   = last;
+		int mid   = (begin+end)/2;
+		
+		while (begin <= end) {
+			buffer.position(mid * CCT_RECORD_SIZE);
+			int cctidx  = buffer.getInt();
+			long offset = buffer.getLong();
+			
+			if (cctidx < index) {
+				begin = mid+1;
+			} else if(cctidx == index) {
+				long nextIndex = offset;
+				
+				if (mid+1<last) {
+					buffer.position(CCT_RECORD_SIZE * (mid+1));
+					buffer.getInt();
+					nextIndex = buffer.getLong();
+				}
+				return new long[] {offset, nextIndex};
+			} else {
+				end = mid-1;
+			}
+			mid = (begin+end)/2;
+		}
+		// not found
+		return null;
+	}
+	
+
 	/*******
 	 * print a list of metrics for a given CCT index
 	 * 
@@ -332,7 +372,22 @@ public class DataSummary extends DataCommon
 	// Internal Classes
 	// --------------------------------------------------------------------
 
-	
+	public static class ListCCTAndIndex
+	{
+		public int  []listOfId;
+		public long []listOfdIndex;
+		
+		public String toString() {
+			String buffer = "";
+			if (listOfId != null) {
+				buffer += "id: [" + listOfId[0] + ".." + listOfId[listOfId.length-1] + "] ";
+			}
+			if (listOfdIndex != null) {
+				buffer += "idx; [" + listOfdIndex[0] + ".." + listOfdIndex[listOfdIndex.length-1] + "]";
+			}
+			return buffer;
+		}
+	}
 	
 	/*****
 	 * 
