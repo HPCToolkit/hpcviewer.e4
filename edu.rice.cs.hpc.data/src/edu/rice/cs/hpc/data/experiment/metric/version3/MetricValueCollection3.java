@@ -60,6 +60,8 @@ public class MetricValueCollection3 implements IMetricValueCollection
 			}
 			if (sparseValues != null && sparseValues.size()>0)
 			{
+				values = new HashMap<Integer, MetricValue>();
+				
 				for (MetricValueSparse mvs: sparseValues) {
 					float value = mvs.getValue();
 					float annotationValue = 1.0f;

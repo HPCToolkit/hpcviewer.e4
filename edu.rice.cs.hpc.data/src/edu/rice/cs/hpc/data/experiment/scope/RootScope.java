@@ -91,7 +91,7 @@ public IMetricValueCollection getMetricValueCollection(Scope scope) throws IOExc
 	final int metric_size = ((BaseExperimentWithMetrics)experiment).getMetricCount();
 	final int version  	  = experiment.getMajorVersion();
 	
-	if (version == 3 && rootScopeType == RootScopeType.CallingContextTree) 
+	if (version == 4 && rootScopeType == RootScopeType.CallingContextTree) 
 	{
 		if (dataSummary == null)
 		{

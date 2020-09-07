@@ -22,12 +22,17 @@ import edu.rice.cs.hpc.data.util.IUserData;
  */
 public abstract class BaseExperiment implements IExperiment 
 {
+	static public final int DB_SUMMARY_INDEX = 0;
+	static public final int DB_SUMMARY_TRACE = 1;
+	static public final int DB_SUMMARY_PLOT = 2;
+	static public final int DB_SUMMARY_THREAD = 3;
+	
 	/*****
 	 *  Enumeration for database file type
 	 */
 	static public enum Db_File_Type {DB_SUMMARY, DB_TRACE, DB_PLOT, DB_THREADS};
 	
-	static final private String []DefaultDbFilename = {"summary.db", "trace.db", "plot.db", "threads.db"};
+	static final private String []DefaultDbFilename = {"thread.db", "trace.db", "cct.db", "thread.db"};
 	
 	/** The experiment's configuration. */
 	protected ExperimentConfiguration configuration;
@@ -103,11 +108,15 @@ public abstract class BaseExperiment implements IExperiment
 	 */
 	public String getDbFilename(Db_File_Type file_index)
 	{
-		if (db_filenames != null)
+		if (db_filenames == null)
 		{
-			return db_filenames.get(file_index);
+			db_filenames = new EnumMap<BaseExperiment.Db_File_Type, String>(Db_File_Type.class);
+			db_filenames.put(Db_File_Type.DB_SUMMARY, "thread.db");
+			db_filenames.put(Db_File_Type.DB_TRACE, "trace.db");
+			db_filenames.put(Db_File_Type.DB_PLOT, "cct.db");
+			db_filenames.put(Db_File_Type.DB_THREADS, "thread.db");
 		}
-		return null;
+		return db_filenames.get(file_index);
 	}
 	
 	public int getMajorVersion()
