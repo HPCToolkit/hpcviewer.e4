@@ -251,7 +251,12 @@ public class Experiment extends BaseExperimentWithMetrics
 					// case for old database: no partner information
 					if (partner_metric != null) {
 						MetricValue partner_value = scope.getMetricValue( partner_metric );
-						scope.setMetricValue( i, partner_value);
+						
+						int index = i;
+						if (getMajorVersion()==4) {
+							index = Integer.valueOf(metric.getShortName());
+						}
+						scope.setMetricValue( index, partner_value);
 					}
 				}
 			} else if (metric instanceof DerivedMetric) {

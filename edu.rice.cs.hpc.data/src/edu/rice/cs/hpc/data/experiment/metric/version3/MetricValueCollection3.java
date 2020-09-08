@@ -78,8 +78,8 @@ public class MetricValueCollection3 implements IMetricValueCollection
 					values.put(mvs.getIndex(), mv);
 				}
 				MetricValue mv = values.get(index);
-				if (mv == null)
-					return MetricValue.NONE;
+				if (mv != null)
+					return mv;
 			}
 
 		} else 

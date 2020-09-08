@@ -176,7 +176,17 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 			for (int i=0; i<nbMetrics; i++) 
 			{
 				Metric objMetric = (Metric) this.metricList.get(i);
-				objMetric.setIndex(i);
+
+				int index = i;
+				
+				// for sparse metric, the index is random, we cannot rely on the order of metric.
+				// Instead, we can realy on the short name
+				
+				if (experiment.getMajorVersion() == 4) {
+					index = Integer.valueOf( objMetric.getShortName() );
+				}
+				
+				objMetric.setIndex(index);
 				
 				// reset the short name. short name is the key used by formula
 				objMetric.setShortName(String.valueOf(i));
@@ -384,6 +394,10 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 				//  es: number of total samples
 			}
 		}
+		int index = nbMetrics;
+		if (experiment.getMajorVersion() == 4) {
+			index = iSelf;
+		}
 		
 		// Laks 2009.01.14: if the database is call path database, then we need
 		//	to distinguish between exclusive and inclusive
@@ -406,15 +420,15 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 						sDisplayName, 				 // display name
 						visibility, format, percent, // displayed ? percent ?
 						"",							 // period (not defined at the moment)
-						nbMetrics, objType, partner);
+						index, objType, partner);
 				break;
 			case Derived_Incr:
 				metricInc = new AggregateMetric(sID, sDisplayName, sDescription,
-									visibility, format, percent, nbMetrics, partner, objType);
+									visibility, format, percent, index, partner, objType);
 				((AggregateMetric) metricInc).init( (BaseExperimentWithMetrics) this.experiment );
 				break;
 			case Derived:
-				metricInc = new DerivedMetric(sDisplayName, sID, nbMetrics, percent, objType);
+				metricInc = new DerivedMetric(sDisplayName, sID, index, percent, objType);
 				
 				metricInc.setPartner(partner);
 				metricInc.setOrder  (order);
@@ -431,7 +445,7 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 						format, 
 						percent, 					// display percent ?
 						"",							// period (not defined at the moment)
-						nbMetrics, objType, partner);
+						index, objType, partner);
 				break;
 		}
 		metricInc.setDescription(sDescription);

@@ -156,7 +156,7 @@ public class DataSummary extends DataCommon
 		
 		long positionCCT = info.offset   + 
 				   		   info.num_vals * METRIC_VALUE_SIZE;
-		int numBytesCCT  = info.num_nz_contexts * CCT_RECORD_SIZE;
+		int numBytesCCT  = (info.num_nz_contexts+1) * CCT_RECORD_SIZE;
 		
 		MappedByteBuffer buffer = file.getChannel().map(MapMode.READ_ONLY, positionCCT, numBytesCCT);
 		long []indexes = binarySearch(cct_id, 0, info.num_nz_contexts, buffer);
