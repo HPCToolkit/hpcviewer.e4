@@ -9,8 +9,6 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
-
 import edu.rice.cs.hpc.data.experiment.metric.MetricValueSparse;
 
 /*********************************************
@@ -74,16 +72,13 @@ public class DataSummary extends DataCommon
 			e.printStackTrace();
 			return;
 		}
-		System.out.println("number of cct: " + list.listOfdIndex.length);
-		System.out.println("cct: " + list);
 		
 		// print random metrics
-		for (int i=0; i<15; i++)
+		for (int i=0; i<list.listOfId.length; i++)
 		{
-			Random r = new Random();
-			int cct  = r.nextInt((int) list.listOfId.length);
-			out.format("[%5d] ", list.listOfId[cct]);
-			printMetrics(out, list.listOfId[cct]);
+			int cct = list.listOfId[i];
+			out.format("[%5d] ", cct);
+			printMetrics(out, cct);
 		}
 	}
 
@@ -159,7 +154,7 @@ public class DataSummary extends DataCommon
 		int numBytesCCT  = (info.num_nz_contexts+1) * CCT_RECORD_SIZE;
 		
 		MappedByteBuffer buffer = file.getChannel().map(MapMode.READ_ONLY, positionCCT, numBytesCCT);
-		long []indexes = binarySearch(cct_id, 0, info.num_nz_contexts, buffer);
+		long []indexes = binarySearch(cct_id, 0, 1+info.num_nz_contexts, buffer);
 		
 		if (indexes == null)
 			return null;

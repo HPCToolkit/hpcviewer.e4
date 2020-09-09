@@ -3,13 +3,13 @@ package edu.rice.cs.hpcdata.tld.plot;
 public class DataPlotEntry 
 {
 	public int tid;		// thread (or rank) id
-	public float metval;	// metric value
+	public double metval;	// metric value
 	
 	public DataPlotEntry()
 	{
-		this(0,0);
+		this(0, 0.0d);
 	}
-	public DataPlotEntry(int tid, int metval)
+	public DataPlotEntry(int tid, double metval)
 	{
 		this.tid = tid;
 		this.metval = metval;

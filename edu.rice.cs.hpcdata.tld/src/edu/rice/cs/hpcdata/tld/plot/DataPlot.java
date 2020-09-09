@@ -1,20 +1,16 @@
 package edu.rice.cs.hpcdata.tld.plot;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Random;
+
 
 import edu.rice.cs.hpc.data.db.DataCommon;
-import edu.rice.cs.hpc.data.util.Constants;
 
 /*******************************************************************************************
  * 
@@ -101,9 +97,30 @@ public class DataPlot extends DataCommon
 		super.printInfo(out);
 		
 		// reading some parts of the indexes
-		Random r = new Random();
-		for(int i=0; i<10; i++)
+		for(int j=0; j<listContexts.size(); j++)
 		{
+			ContextInfo ctxInfo = listContexts.get(j);
+			short numMetrics = ctxInfo.numNonZeroMetrics;
+
+			out.format("%5d [cct %5d] ", j, ctxInfo.id);
+			System.out.println(ctxInfo);
+			
+			for(short i=0; i<numMetrics; i++) {
+				System.out.print("\t m: " + i);
+				try {
+					DataPlotEntry []entries = getPlotEntry(ctxInfo, i);
+					if (entries != null) {
+						for (DataPlotEntry entry: entries) {
+							out.print(" " + entry);
+						}
+					}
+					System.out.println();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	
+			}
 		}
 	}
 	
@@ -112,6 +129,13 @@ public class DataPlot extends DataCommon
 	// public methods
 	//////////////////////////////////////////////////////////////////////////
 
+	
+	public DataPlotEntry []getPlotEntry(int cct, int metric) throws IOException
+	{
+		ContextInfo info = listContexts.get(cct);
+		return getPlotEntry(info.id, metric);
+	}
+	
 	/******
 	 * Retrieve a list of plot data of a given cct index and metric raw index
 	 *  
@@ -122,32 +146,30 @@ public class DataPlot extends DataCommon
 	 * 
 	 * @throws IOException
 	 */
-	public DataPlotEntry []getPlotEntry(int cct, int metric) throws IOException
+	public DataPlotEntry []getPlotEntry(ContextInfo info, int metric) throws IOException
 	{
 		if (file == null)
 			return null;
 		
-		int index = (cct-1) / 2;
-		ContextInfo info = listContexts.get(index);
 		if (info == null)
 			return null;
 
 		long metricPosition = info.offset + info.numValues * 12;
-		long size = info.numNonZeroMetrics + 1;
+		long size = (info.numNonZeroMetrics + 1) * 10;
 		ByteBuffer buffer = file.getChannel().map(MapMode.READ_ONLY, metricPosition, size);
-		long []indexes = binarySearch((short) metric, 0, info.numNonZeroMetrics, buffer);
+		long []indexes = binarySearch((short) metric, 0, info.numNonZeroMetrics+1, buffer);
 
 		if (indexes == null)
 			return null;
 		
-		file.seek(indexes[0]);
+		file.seek(info.offset +  12 * indexes[0]);
 		int numMetrics = (int) (indexes[1] - indexes[0]);
 		DataPlotEntry []entries = new DataPlotEntry[numMetrics];
 		
 		for (int i=0; i<numMetrics; i++) {
 			DataPlotEntry entry = new DataPlotEntry();
-			entry.metval = file.readFloat();
-			entry.tid    = file.read();
+			entry.metval = file.readDouble();
+			entry.tid    = file.readInt();
 			
 			entries[i] = entry;
 		}
@@ -226,36 +248,6 @@ public class DataPlot extends DataCommon
 		}
 	}
 
-	private static class PlotIndexKey
-	{
-		int cct_index, metric_id;
-		
-		public PlotIndexKey(int cct_index, int metric_id)
-		{
-			this.cct_index = cct_index;
-			this.metric_id = metric_id;
-		}
-		
-		@Override
-		public int hashCode()
-		{
-			return (metric_id << 24 + cct_index);
-		}
-		
-		@Override
-		public boolean equals(Object o) 
-		{
-			if (this == o) return true;
-			if (!(o instanceof PlotIndexKey)) return false;
-			PlotIndexKey key = (PlotIndexKey) o;
-			return cct_index == key.cct_index && metric_id == key.metric_id;
-		}
-	}
-	private static class PlotIndexValue
-	{
-		public long offset;
-		public int count;
-	}
 	
 	
 	/////////////////////////////////////////////////////////////////////////////
@@ -268,7 +260,7 @@ public class DataPlot extends DataCommon
 		if (argv != null && argv.length>0) {
 			filename = argv[0];
 		} else {
-			filename = "/Users/la5/data/sparse/hpctoolkit-fib-database/cct.db"; 
+			filename = "/Users/la5/data/sparse/hpctoolkit-fib-sparse-database/cct.db"; 
 		}
 		try {
 			data.open(filename);
