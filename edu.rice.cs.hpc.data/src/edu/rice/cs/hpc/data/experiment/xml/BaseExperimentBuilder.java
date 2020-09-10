@@ -669,7 +669,9 @@ public class BaseExperimentBuilder extends Builder {
 					return;
 				}
 			}
-							
+			if (objLoadModule == null) {
+				objLoadModule = LoadModuleScope.build(rootStack.peek(), "unknown", srcFile);
+			}
 			
 			ProcedureScope procScope  = new ProcedureScope(rootStack.peek(), objLoadModule, srcFile, 
 					firstLn-1, lastLn-1, 

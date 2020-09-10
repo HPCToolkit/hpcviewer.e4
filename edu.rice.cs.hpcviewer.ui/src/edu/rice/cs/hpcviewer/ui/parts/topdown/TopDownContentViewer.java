@@ -218,8 +218,8 @@ public class TopDownContentViewer extends AbstractViewBuilder
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-		BaseMetric[]metrics  = threadData.getMetrics();
+		Experiment experiment = (Experiment) root.getExperiment();
+		BaseMetric[]metrics  = experiment.getMetricRaw();
 		threadDataAvailable = false;
 		
 		if (threadData != null && metrics != null) {

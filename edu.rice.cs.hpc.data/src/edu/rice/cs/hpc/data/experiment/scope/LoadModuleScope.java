@@ -34,7 +34,8 @@ import edu.rice.cs.hpc.data.experiment.source.SourceFile;
 
 public class LoadModuleScope extends Scope
 {
-
+	
+private static int id = Integer.MAX_VALUE;
 
 /** The name of the load module. */
 protected String loadModuleName;
@@ -63,6 +64,21 @@ public LoadModuleScope(RootScope root, String lmname, SourceFile file, int id)
 
 public Scope duplicate() {
     return new LoadModuleScope(this.root, this.loadModuleName, this.sourceFile, this.flat_node_index);
+}
+
+
+/*****
+ * Create a new load module with pre-build id
+ * 
+ * @param root
+ * @param name
+ * @param file
+ * @return
+ */
+static public LoadModuleScope build(RootScope root, String name, SourceFile file) {
+	id--;
+	
+	return new LoadModuleScope(root, name, file, id);
 }
 
 /*

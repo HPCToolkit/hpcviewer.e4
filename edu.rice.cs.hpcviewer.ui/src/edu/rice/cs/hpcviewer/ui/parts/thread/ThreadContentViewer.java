@@ -78,7 +78,7 @@ public class ThreadContentViewer extends TopDownContentViewer
 
 		// 3. add the new metrics into the table
 		final Experiment experiment = (Experiment) input.getRootScope().getExperiment();
-		initTableColumns(input, input.getThreadData().getMetrics());
+		initTableColumns(input, experiment.getMetricRaw());
 
 		// 4. update the table content, including the aggregate experiment
 		RootScope root = createRoot(experiment);

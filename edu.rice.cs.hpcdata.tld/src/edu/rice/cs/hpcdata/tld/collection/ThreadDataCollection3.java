@@ -134,16 +134,6 @@ public class ThreadDataCollection3 extends AbstractThreadDataCollection
 			return null;
 		
 		Experiment exp = (Experiment) experiment;
-		BaseMetric []metrics = exp.getMetrics();
-		
-		MetricRaw []rawMetrics = new MetricRaw[metrics.length];
-		
-		for(int i=0; i<metrics.length; i++) {
-			BaseMetric m = metrics[i];
-			rawMetrics[i] = new MetricRaw(m.getIndex(), m.getDisplayName(), m.getDescription(), 
-										  null, i, m.getPartner(), m.getMetricType(), 
-										  metrics.length);
-		}
-		return rawMetrics;
+		return exp.getMetrics();
 	}
 }
