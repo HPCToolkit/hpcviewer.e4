@@ -45,6 +45,8 @@ public class DataPlot extends DataCommon
 	
 	@Override
 	public void dispose() {
+		listContexts = null;
+		
 		try {
 			if (file != null)
 				file.close();
@@ -64,6 +66,7 @@ public class DataPlot extends DataCommon
 		return header.equals(HEADER);
 	}
 
+	
 	@Override
 	protected boolean readNextHeader(FileChannel input) throws IOException {
 		if (numItems == 0)
@@ -91,6 +94,7 @@ public class DataPlot extends DataCommon
 		return true;
 	}
 
+	
 	@Override
 	public void printInfo( PrintStream out)
 	{
@@ -130,6 +134,15 @@ public class DataPlot extends DataCommon
 	//////////////////////////////////////////////////////////////////////////
 
 	
+	/***
+	 * Retrieve a plot entry given a cct id
+	 * 
+	 * @param cct the CCT id
+	 * @param metric the metric id
+	 * @return array of plot data entry if exists, null otherwise.
+	 * 
+	 * @throws IOException
+	 */
 	public DataPlotEntry []getPlotEntry(int cct, int metric) throws IOException
 	{
 		ContextInfo info = listContexts.get(cct);
@@ -142,7 +155,7 @@ public class DataPlot extends DataCommon
 	 * @param cct : cct index
 	 * @param metric : the index of the raw metric
 	 * 
-	 * @return an array of plot data
+	 * @return an array of plot data entry containing the value if exist. Null otherwise.
 	 * 
 	 * @throws IOException
 	 */
@@ -154,27 +167,30 @@ public class DataPlot extends DataCommon
 		if (info == null)
 			return null;
 
-		long metricPosition = info.offset + info.numValues * 12;
-		long size = (info.numNonZeroMetrics + 1) * 10;
+		long metricPosition = info.offset + info.numValues * DataPlotEntry.SIZE;
+		long size = (info.numNonZeroMetrics + 1) * RECORD_SIZE;
+		
 		ByteBuffer buffer = file.getChannel().map(MapMode.READ_ONLY, metricPosition, size);
+		
 		long []indexes = binarySearch((short) metric, 0, info.numNonZeroMetrics+1, buffer);
 
 		if (indexes == null)
 			return null;
 		
-		file.seek(info.offset +  12 * indexes[0]);
+		file.seek(info.offset +  DataPlotEntry.SIZE * indexes[0]);
 		int numMetrics = (int) (indexes[1] - indexes[0]);
-		DataPlotEntry []entries = new DataPlotEntry[numMetrics];
+		DataPlotEntry []values = new DataPlotEntry[numMetrics];
 		
 		for (int i=0; i<numMetrics; i++) {
 			DataPlotEntry entry = new DataPlotEntry();
+			
 			entry.metval = file.readDouble();
 			entry.tid    = file.readInt();
 			
-			entries[i] = entry;
+			values[i] = entry;
 		}
 		
-		return entries;
+		return values;
 	}
 	
 	

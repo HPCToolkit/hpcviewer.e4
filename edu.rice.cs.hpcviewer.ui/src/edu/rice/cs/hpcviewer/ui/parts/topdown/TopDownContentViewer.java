@@ -213,14 +213,13 @@ public class TopDownContentViewer extends AbstractViewBuilder
 
 	@Override
 	public void setData(RootScope root) {
-		Experiment experiment = (Experiment) root.getExperiment();
 		try {
-			threadData = ThreadDataCollectionFactory.build(experiment);
+			threadData = ThreadDataCollectionFactory.build(root);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		BaseMetric[]metrics  = experiment.getMetricRaw();
+		BaseMetric[]metrics  = threadData.getMetrics();
 		threadDataAvailable = false;
 		
 		if (threadData != null && metrics != null) {

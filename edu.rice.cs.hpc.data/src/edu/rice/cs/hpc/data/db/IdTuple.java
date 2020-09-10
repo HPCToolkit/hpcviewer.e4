@@ -51,12 +51,29 @@ public class IdTuple
 	 * @return String
 	 */
 	public String toString() {
-		String buff = "len: " + length;
+		String buff = "";
 		if (kind != null && index != null)
+			buff += toLabel() + " ";
 			for(int i=0; i<kind.length; i++) {
-				buff += " (" + kindStr(kind[i]) + " " + index[i] + ")";
+				buff += "(" + kindStr(kind[i]) + " " + index[i] + ") ";
 			}
 		return buff;
 	}
 
+	public double toLabel() {
+		double label = 0.0d;
+		
+		if (kind != null && index != null) {
+			String str = "";
+			for(int i=0; i<kind.length; i++) {
+				if (i==1) {
+					str += ".";
+				}
+				str += index[i];
+			}
+			label = Double.valueOf(str);
+		}
+			
+		return label;
+	}
 }

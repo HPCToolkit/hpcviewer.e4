@@ -6,7 +6,9 @@ import java.util.HashMap;
 
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.extdata.AbstractThreadDataCollection;
+import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.MetricRaw;
+import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.util.IProgressReport;
 import edu.rice.cs.hpc.data.util.MergeDataFiles;
 
@@ -31,7 +33,7 @@ public class ThreadDataCollection2 extends AbstractThreadDataCollection
 	}
 	
 	@Override
-	public void open(String directory) throws IOException {
+	public void open(RootScope root, String directory) throws IOException {
 		File dir = new File(directory);
 		if (dir.isFile())
 			this.directory = dir.getParentFile();
@@ -119,6 +121,13 @@ public class ThreadDataCollection2 extends AbstractThreadDataCollection
 					df.dispose();
 			}
 		}
+	}
+
+
+
+	@Override
+	public BaseMetric[] getMetrics() {
+		return experiment.getMetricRaw();
 	}
 
 	
@@ -255,4 +264,5 @@ public class ThreadDataCollection2 extends AbstractThreadDataCollection
 		public void end() {
 		}
 	}
+
 }

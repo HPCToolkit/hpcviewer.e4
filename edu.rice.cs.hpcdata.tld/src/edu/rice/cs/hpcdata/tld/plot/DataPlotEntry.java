@@ -1,7 +1,19 @@
 package edu.rice.cs.hpcdata.tld.plot;
 
+
+/*****
+ * 
+ * Class containing a plot data entry
+ * <ul>
+ * <li>a thread id (int)
+ * <li>a metric value (double)
+ * </ul>
+ *
+ */
 public class DataPlotEntry 
 {
+	public static final int SIZE = 4 + 8; 
+			
 	public int tid;		// thread (or rank) id
 	public double metval;	// metric value
 	

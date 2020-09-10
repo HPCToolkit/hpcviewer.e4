@@ -31,7 +31,7 @@ public class DataSummary extends DataCommon
 	
 	private RandomAccessFile file;
 	
-	private List<IdTuple>    listTuple;
+	private List<IdTuple>  listTuple;
 	private List<ProfInfo> listProfInfo;
 	
 	private long position_profInfo;
