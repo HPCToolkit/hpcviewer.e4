@@ -33,8 +33,8 @@ public class HPCTraceView extends AbstractBaseItem
 	
 	private final ProcessTimelineService timelineService;
 	
-	private TimeAxisCanvas axisArea = null;
-	private ThreadAxisCanvas processCanvas = null;
+	private CanvasAxisX axisArea = null;
+	private CanvasAxisY processCanvas = null;
 	
 	/** Paints and displays the detail view.*/
 	private SpaceTimeDetailCanvas detailCanvas;
@@ -74,7 +74,7 @@ public class HPCTraceView extends AbstractBaseItem
 
 		Composite plotArea = new Composite(parent, SWT.NONE);
 		
-		processCanvas = new ThreadAxisCanvas(parentPart, timelineService, plotArea, SWT.NONE);
+		processCanvas = new CanvasAxisY(parentPart, timelineService, plotArea, SWT.NONE);
 		GridDataFactory.fillDefaults().grab(false, true).
 						hint(Y_AXIS_WIDTH, 500).applyTo(processCanvas);
 
@@ -96,7 +96,7 @@ public class HPCTraceView extends AbstractBaseItem
 						hint(Y_AXIS_WIDTH, X_AXIS_HEIGHT).applyTo(footerCanvas);
 
 
-		axisArea = new TimeAxisCanvas(parentPart, plotArea, SWT.NO_BACKGROUND);
+		axisArea = new CanvasAxisX(parentPart, plotArea, SWT.NO_BACKGROUND);
 		GridDataFactory.fillDefaults().grab(true, false).
 						hint(500, X_AXIS_HEIGHT).applyTo(axisArea);
 
