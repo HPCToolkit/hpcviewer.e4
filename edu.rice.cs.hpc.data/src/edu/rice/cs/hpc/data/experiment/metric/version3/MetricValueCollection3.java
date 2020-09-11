@@ -6,6 +6,7 @@ import java.util.List;
 
 import edu.rice.cs.hpc.data.db.DataSummary;
 import edu.rice.cs.hpc.data.experiment.BaseExperimentWithMetrics;
+import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpc.data.experiment.metric.IMetricValueCollection;
@@ -33,7 +34,7 @@ public class MetricValueCollection3 implements IMetricValueCollection
 	final private RootScope root;
 	
 	private Scope currentScope;
-	private List<MetricValueSparse> sparseValues;
+
 	private HashMap<Integer, MetricValue> values;
 	
 	public MetricValueCollection3(RootScope root, Scope scope) throws IOException
@@ -45,19 +46,35 @@ public class MetricValueCollection3 implements IMetricValueCollection
 	@Override
 	public MetricValue getValue(Scope scope, int index) 
 	{
+		// convert from index to metric Id
+		Experiment experiment = (Experiment) root.getExperiment();
+		BaseMetric metric = experiment.getMetric(index);
+		int id = Integer.valueOf(metric.getShortName());
+
 		if (values == null || currentScope != scope)
 		{
 			currentScope = scope;
+			values = null;
 			
 			// create and initialize the first metric values instance
 			final DataSummary data = root.getDataSummary();
-			// initialize
+			
+			List<MetricValueSparse> sparseValues;
+			
+			// read the sparse metrics from the file (thread.db)
+			// if the read is successful, we cache all the metrics into values
+			// so that the next time we ask for another metric from the same scope,
+			//  just need to look at the cache, instead of reading the file again.
+			
 			try {
 				sparseValues = data.getMetrics(scope.getCCTIndex());
 			} catch (IOException e1) {
 				e1.printStackTrace();
 				return MetricValue.NONE;
 			}
+			// the reading is successful
+			// fill up the cache containing metrics of this scope for the next usage
+			
 			if (sparseValues != null && sparseValues.size()>0)
 			{
 				values = new HashMap<Integer, MetricValue>();
@@ -77,7 +94,8 @@ public class MetricValueCollection3 implements IMetricValueCollection
 					MetricValue mv = new MetricValue(value, annotationValue);
 					values.put(mvs.getIndex(), mv);
 				}
-				MetricValue mv = values.get(index);
+				
+				MetricValue mv = values.get(id);
 				if (mv != null)
 					return mv;
 			}
@@ -89,10 +107,9 @@ public class MetricValueCollection3 implements IMetricValueCollection
 			if (mv != null) {
 				return mv;
 			} else {
-				// metric values already exist, but the index is bigger than the standard values
-				// this must be a derived metric
-				BaseExperimentWithMetrics exp = (BaseExperimentWithMetrics) root.getExperiment();
-				BaseMetric metric = exp.getMetric(index);
+				// the cache of metric values already exist, but we cannot find the value of this metric
+				// either the value is empty, or it's a derived metric which have to be computed here
+				
 				if (metric instanceof DerivedMetric)
 				{
 					return ((DerivedMetric)metric).getValue(scope);
@@ -137,7 +154,11 @@ public class MetricValueCollection3 implements IMetricValueCollection
 
 	@Override
 	public void dispose() {
-
+		// old jvm may need to clear the variables to perform GC
+		// we don't need this for newer jvm (AFAIK).
+		
+		values.clear();
+		values = null;
 	}
 
 	@Override

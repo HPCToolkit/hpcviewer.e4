@@ -42,5 +42,7 @@ public class MetricValueSparse
 		this.value = value;
 	}
 
-	
+	public String toString() {
+		return index + ": " + value;
+	}
 }
