@@ -6,6 +6,7 @@ import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
+import edu.rice.cs.hpc.data.util.Constants;
 
 /*************************************************
  * 
@@ -42,7 +43,8 @@ public final class ThreadDataCollectionFactory
 				data_file.open(root, directory);
 			}
 			break;
-		case 4:
+			
+		case Constants.EXPERIMENT_SPARSE_VERSION:
 			data_file = new ThreadDataCollection3();
 			String directory = experiment.getDefaultDirectory().getAbsolutePath();
 			((ThreadDataCollection3)data_file).open(root, directory);

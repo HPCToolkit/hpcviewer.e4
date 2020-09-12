@@ -59,7 +59,7 @@ public class IdTuple
 	
 	
 	/***
-	 * Returns the string representatin of this object.
+	 * Returns the string representation of this object.
 	 * @return String
 	 */
 	public String toString() {
@@ -67,16 +67,29 @@ public class IdTuple
 		if (kind != null && index != null)
 			buff += toLabel() + " ";
 			for(int i=0; i<kind.length; i++) {
-				buff += "(" + kindStr(kind[i]) + " " + index[i] + ") ";
+				if (i>0)
+					buff += " ";
+				
+				buff += kindStr(kind[i]) + " " + index[i];
 			}
 		return buff;
 	}
 
+	
+	/****
+	 * get the number representation of the id tuple.
+	 * If the id tuple has length 2, its label will be X.Y
+	 * 
+	 * @return the number representation of id tuple
+	 */
 	public double toLabel() {
 		double label = 0.0d;
 		
 		if (kind != null && index != null) {
 			String str = "";
+			
+			// TODO: need to make sure the length is 2
+			
 			for(int i=0; i<kind.length; i++) {
 				if (i==1) {
 					str += ".";

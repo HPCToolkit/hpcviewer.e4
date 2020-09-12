@@ -26,6 +26,7 @@ import edu.rice.cs.hpc.data.experiment.metric.version2.MetricValueCollection2;
 import edu.rice.cs.hpc.data.experiment.metric.version3.MetricValueCollection3;
 
 import edu.rice.cs.hpc.data.experiment.scope.visitors.IScopeVisitor;
+import edu.rice.cs.hpc.data.util.Constants;
 
 
 
@@ -91,7 +92,9 @@ public IMetricValueCollection getMetricValueCollection(Scope scope) throws IOExc
 	final int metric_size = ((BaseExperimentWithMetrics)experiment).getMetricCount();
 	final int version  	  = experiment.getMajorVersion();
 	
-	if (version == 4 && rootScopeType == RootScopeType.CallingContextTree) 
+	// TODO: this is a hack
+	
+	if (version == Constants.EXPERIMENT_SPARSE_VERSION && rootScopeType == RootScopeType.CallingContextTree) 
 	{
 		if (dataSummary == null)
 		{
