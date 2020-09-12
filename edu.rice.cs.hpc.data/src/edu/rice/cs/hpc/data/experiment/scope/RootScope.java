@@ -67,7 +67,7 @@ private DataSummary dataSummary;
 public RootScope(BaseExperiment experiment, String name, RootScopeType rst)
 {
 	// we assume the root scope CCT and Flat ID is 1
-	super(null, null, Scope.NO_LINE_NUMBER, Scope.NO_LINE_NUMBER, 1,1);	
+	super(null, null, Scope.NO_LINE_NUMBER, Scope.NO_LINE_NUMBER, 0,0);	
 	this.rootScopeName 	= name;
 	this.experiment 	= experiment;
 	this.rootScopeType 	= rst;

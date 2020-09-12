@@ -15,13 +15,25 @@ public class IdTuple
 	public final static int KIND_RANK    = 1;
 	public final static int KIND_THREAD  = 2;
 	
+	// see https://github.com/HPCToolkit/hpctoolkit/blob/prof2/src/lib/prof-lean/id-tuple.h#L81
+	// for list of kinds in id tuple
+	
 	public final static String KIND_LABEL_SUMMARY = "Summary";
+	public final static String KIND_LABEL_NODE    = "Node";
 	public final static String KIND_LABEL_RANK    = "Rank";
 	public final static String KIND_LABEL_THREAD  = "Thread";
 	
+	public final static String KIND_LABEL_GPU_DEVICE = "Device";
+	public final static String KIND_LABEL_GPU_STREAM = "Stream";
+	public final static String KIND_LABEL_GPU_CTXT   = "Context";
+	
 	private final static String[] arrayLabel = {KIND_LABEL_SUMMARY, 
+											    KIND_LABEL_NODE,
 												KIND_LABEL_RANK,
-												KIND_LABEL_THREAD};
+												KIND_LABEL_THREAD,
+												KIND_LABEL_GPU_DEVICE,
+												KIND_LABEL_GPU_STREAM,
+												KIND_LABEL_GPU_CTXT};
 
 	// -------------------------------------------
 	// variables
