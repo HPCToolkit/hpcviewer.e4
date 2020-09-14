@@ -39,9 +39,9 @@ public class IdTuple
 	// variables
 	// -------------------------------------------
 
-	public int length;
-	short []kind;
-	long  []index;
+	public int   length;
+	public short []kind;
+	public long  []index;
 	
 	
 	/***

@@ -21,6 +21,7 @@ import edu.rice.cs.hpc.data.experiment.scope.*;
 import edu.rice.cs.hpc.data.experiment.scope.filters.*;
 import edu.rice.cs.hpc.data.experiment.scope.visitors.*;
 import edu.rice.cs.hpc.data.filter.IFilterData;
+import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.data.util.IUserData;
 
 import java.io.File;
@@ -392,7 +393,12 @@ public class Experiment extends BaseExperimentWithMetrics
 
 
 	public BaseMetric[] getMetricRaw() {
-		return this.metrics_raw;
+		BaseMetric[] metrics = metrics_raw;
+		
+		if (getMajorVersion() == Constants.EXPERIMENT_SPARSE_VERSION) {
+			metrics = getMetrics(); 
+		}
+		return metrics;
 	}
 
 

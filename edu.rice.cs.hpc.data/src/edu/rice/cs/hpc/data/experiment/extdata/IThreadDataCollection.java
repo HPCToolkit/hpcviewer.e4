@@ -7,7 +7,7 @@ import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 
 /********************************************************************************
  * 
- * Interface to collect data needed for plot graph
+ * Interface to collect data needed for plot graph and thread view
  *
  ********************************************************************************/
 public interface IThreadDataCollection 

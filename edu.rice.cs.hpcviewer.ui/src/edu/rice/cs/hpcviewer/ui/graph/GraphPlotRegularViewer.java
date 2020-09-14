@@ -9,6 +9,7 @@ import org.swtchart.IAxisSet;
 import org.swtchart.IAxisTick;
 
 import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
+import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.MetricRaw;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 
@@ -46,15 +47,24 @@ public class GraphPlotRegularViewer extends AbstractGraphPlotViewer
 	}
 
 	@Override
-	protected double[] getValuesX(Scope scope, MetricRaw metric) throws NumberFormatException, IOException {
+	protected double[] getValuesX(Scope scope, BaseMetric metric) throws NumberFormatException, IOException {
 		IThreadDataCollection threadData = getInput().getThreadData();
 		return threadData.getEvenlySparseRankLabels();
 	}
 
 	@Override
-	protected double[] getValuesY(Scope scope, MetricRaw metric) throws IOException {
+	protected double[] getValuesY(Scope scope, BaseMetric metric) throws IOException {
+		
+		int id = metric.getIndex();
+		int size = 0;
+		
+		// in case of old databae, the metric is from MetricRaw
+		if (metric instanceof MetricRaw) {
+			id = ((MetricRaw) metric).getRawID();
+			size = ((MetricRaw)metric).getSize();
+		}
 		IThreadDataCollection threadData = getInput().getThreadData();
-		double []y_values = threadData.getMetrics(scope.getCCTIndex(), metric.getRawID(), metric.getSize());
+		double []y_values = threadData.getMetrics(scope.getCCTIndex(), id, size);
 		return y_values;
 	}
 

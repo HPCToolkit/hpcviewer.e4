@@ -21,6 +21,7 @@ import java.io.IOException;
 import edu.rice.cs.hpc.data.db.DataSummary;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.BaseExperimentWithMetrics;
+import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpc.data.experiment.metric.IMetricValueCollection;
 import edu.rice.cs.hpc.data.experiment.metric.version2.MetricValueCollection2;
 import edu.rice.cs.hpc.data.experiment.metric.version3.MetricValueCollection3;
@@ -52,7 +53,10 @@ protected RootScopeType rootScopeType;
 private BaseExperiment experiment;
 private String name;
 
-private DataSummary dataSummary;
+private IThreadDataCollection threadData;
+
+private DataSummary dataSummary; // specific to version 4
+
 
 //////////////////////////////////////////////////////////////////////////
 //	INITIALIZATION														//
@@ -115,6 +119,26 @@ public DataSummary getDataSummary()
 	return dataSummary;
 }
 
+
+/****
+ * set the IThreadDataCollection object to this root
+ * 
+ * @param threadData
+ */
+public void setThreadData(IThreadDataCollection threadData)
+{
+	this.threadData = threadData;
+}
+
+
+/***
+ * Return the IThreadDataCollection of this root if exists.
+ * 
+ * @return
+ */
+public IThreadDataCollection getThreadData() {
+	return threadData;
+}
 
 //////////////////////////////////////////////////////////////////////////
 //	SCOPE DISPLAY														//

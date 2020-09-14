@@ -146,7 +146,7 @@ public class DataPlot extends DataCommon
 	public DataPlotEntry []getPlotEntry(int cct, int metric) throws IOException
 	{
 		ContextInfo info = listContexts.get(cct);
-		return getPlotEntry(info.id, metric);
+		return getPlotEntry(info, metric);
 	}
 	
 	/******
