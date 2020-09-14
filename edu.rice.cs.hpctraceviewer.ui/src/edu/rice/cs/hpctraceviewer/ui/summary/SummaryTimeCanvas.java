@@ -51,7 +51,7 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 	private TreeMap<Integer /* callstack */, TreeMap<Integer /* pixel */, Float /* percent */ >> mapKernelToBlame;
 	private int totPixels;
 	private ImageData detailData;
-
+	
 	/**********************************
 	 * Construct a summary canvas without background nor scrollbar
 	 * 
@@ -170,6 +170,8 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 		}
 
 		Integer lastPixel = 0;
+		int whitePixel = detailData.palette.getPixel(new RGB(255,255,255));
+
 
 		// ---------------------------------------------------------------------------
 		// needs to be optimized:
@@ -190,8 +192,8 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 				int pixelValue = detailData.getPixel(x, y);
 
 				Integer count = mapPixelToCount.get(pixelValue);
-
-				if (pixelValue != 16777215) {
+								
+				if (pixelValue != whitePixel) {
 					if (process == 0) {
 						cpu_active = true;
 					} else {

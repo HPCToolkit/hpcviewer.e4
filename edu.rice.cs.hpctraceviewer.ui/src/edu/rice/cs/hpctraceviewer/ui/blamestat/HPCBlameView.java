@@ -103,7 +103,7 @@ public class HPCBlameView extends    AbstractBaseItem
 		column = colCount.getColumn();
 		layout.setColumnData(column, new ColumnWeightData(200, 30, true));
 		
-		column.setText("Percentage");
+		column.setText("%");
 		column.setAlignment(SWT.RIGHT);
 		column.addSelectionListener(getSelectionAdapter(column, 1));
 
@@ -172,7 +172,7 @@ public class HPCBlameView extends    AbstractBaseItem
 			if (proc == null) {
 				proc = ColorTable.UNKNOWN_PROCNAME;
 			}
-			listItems.add(new StatisticItem(proc, count / totalPixels));
+			listItems.add(new StatisticItem(proc, (float)100.0 * count / totalPixels));
 		}
 		tableViewer.setInput(listItems);
 		tableViewer.refresh();
