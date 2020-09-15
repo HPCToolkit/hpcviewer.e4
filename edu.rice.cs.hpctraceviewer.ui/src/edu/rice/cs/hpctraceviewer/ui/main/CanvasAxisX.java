@@ -28,7 +28,7 @@ import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
  *   If the range changes, it will change the axis automatically.
  *
  *******************************************************/
-public class TimeAxisCanvas extends AbstractAxisCanvas 
+public class CanvasAxisX extends AbstractAxisCanvas 
 	implements PaintListener, IOperationHistoryListener
 {		
 	static private final int TICK_X_PIXEL = 110;
@@ -48,7 +48,7 @@ public class TimeAxisCanvas extends AbstractAxisCanvas
 	 * @param parent
 	 * @param style
 	 */
-	public TimeAxisCanvas(ITracePart tracePart, Composite parent, int style) {
+	public CanvasAxisX(ITracePart tracePart, Composite parent, int style) {
 		super(tracePart, parent, SWT.NO_BACKGROUND | style);
 		
 		bgColor = parent.getBackground();

@@ -14,6 +14,7 @@ import edu.rice.cs.hpc.data.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric.VisibilityType;
 import edu.rice.cs.hpc.data.experiment.scope.*;
 import edu.rice.cs.hpc.data.experiment.xml.Token2.TokenXML;
+import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.data.util.IUserData;
 
 import java.util.List;
@@ -182,7 +183,7 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 				// for sparse metric, the index is random, we cannot rely on the order of metric.
 				// Instead, we can realy on the short name
 				
-				if (experiment.getMajorVersion() == 4) {
+				if (experiment.getMajorVersion() == Constants.EXPERIMENT_SPARSE_VERSION) {
 					index = Integer.valueOf( objMetric.getShortName() );
 				}
 				
@@ -395,7 +396,7 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 			}
 		}
 		int index = nbMetrics;
-		if (experiment.getMajorVersion() == 4) {
+		if (experiment.getMajorVersion() == Constants.EXPERIMENT_SPARSE_VERSION) {
 			index = iSelf;
 		}
 		
@@ -451,7 +452,7 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 		metricInc.setDescription(sDescription);
 		metricInc.setOrder(order);
 		
-		this.metricList.add(metricInc);
+		metricList.add(metricInc);
 
 		// ----------------------------------------------------------------------------
 		// if the XML file only provides one type of metric (i.e. exclusive metric),

@@ -146,7 +146,7 @@ public class ThreadContentViewer extends TopDownContentViewer
 			
 			for(int j=0; j<mr.length; j++)
 			{
-				MetricRaw mdup = (MetricRaw) mr[j].duplicate();
+				MetricRaw mdup = MetricRaw.create(mr[j]);
 				mdup.setThread(threads);
 				
 				StringBuffer buffer = new StringBuffer();

@@ -21,11 +21,13 @@ import java.io.IOException;
 import edu.rice.cs.hpc.data.db.DataSummary;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.BaseExperimentWithMetrics;
+import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpc.data.experiment.metric.IMetricValueCollection;
 import edu.rice.cs.hpc.data.experiment.metric.version2.MetricValueCollection2;
 import edu.rice.cs.hpc.data.experiment.metric.version3.MetricValueCollection3;
 
 import edu.rice.cs.hpc.data.experiment.scope.visitors.IScopeVisitor;
+import edu.rice.cs.hpc.data.util.Constants;
 
 
 
@@ -51,7 +53,10 @@ protected RootScopeType rootScopeType;
 private BaseExperiment experiment;
 private String name;
 
-private DataSummary dataSummary;
+private IThreadDataCollection threadData;
+
+private DataSummary dataSummary; // specific to version 4
+
 
 //////////////////////////////////////////////////////////////////////////
 //	INITIALIZATION														//
@@ -67,7 +72,7 @@ private DataSummary dataSummary;
 public RootScope(BaseExperiment experiment, String name, RootScopeType rst)
 {
 	// we assume the root scope CCT and Flat ID is 1
-	super(null, null, Scope.NO_LINE_NUMBER, Scope.NO_LINE_NUMBER, 1,1);	
+	super(null, null, Scope.NO_LINE_NUMBER, Scope.NO_LINE_NUMBER, 0,0);	
 	this.rootScopeName 	= name;
 	this.experiment 	= experiment;
 	this.rootScopeType 	= rst;
@@ -91,7 +96,9 @@ public IMetricValueCollection getMetricValueCollection(Scope scope) throws IOExc
 	final int metric_size = ((BaseExperimentWithMetrics)experiment).getMetricCount();
 	final int version  	  = experiment.getMajorVersion();
 	
-	if (version == 4 && rootScopeType == RootScopeType.CallingContextTree) 
+	// TODO: this is a hack
+	
+	if (version == Constants.EXPERIMENT_SPARSE_VERSION && rootScopeType == RootScopeType.CallingContextTree) 
 	{
 		if (dataSummary == null)
 		{
@@ -112,6 +119,26 @@ public DataSummary getDataSummary()
 	return dataSummary;
 }
 
+
+/****
+ * set the IThreadDataCollection object to this root
+ * 
+ * @param threadData
+ */
+public void setThreadData(IThreadDataCollection threadData)
+{
+	this.threadData = threadData;
+}
+
+
+/***
+ * Return the IThreadDataCollection of this root if exists.
+ * 
+ * @return
+ */
+public IThreadDataCollection getThreadData() {
+	return threadData;
+}
 
 //////////////////////////////////////////////////////////////////////////
 //	SCOPE DISPLAY														//

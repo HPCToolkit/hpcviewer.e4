@@ -6,7 +6,6 @@ import java.util.HashMap;
 
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.extdata.AbstractThreadDataCollection;
-import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.MetricRaw;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.util.IProgressReport;
@@ -124,11 +123,6 @@ public class ThreadDataCollection2 extends AbstractThreadDataCollection
 	}
 
 
-
-	@Override
-	public BaseMetric[] getMetrics() {
-		return experiment.getMetricRaw();
-	}
 
 	
 	private void ensureDataFile(int metricIndex) throws IOException

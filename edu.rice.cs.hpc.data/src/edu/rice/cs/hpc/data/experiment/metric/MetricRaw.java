@@ -19,7 +19,6 @@ public class MetricRaw  extends BaseMetric
 	private int db_id;		 // sequential index of the metric in the XML. Is has to be between 0 to the number of metrics
 	private int num_metrics; // number of metrics
 	
-	private IThreadDataCollection threadData;
 	
 	/*** list of threads that its metric values have to be computed.<br/> 
 	 *   each MetricRaw may have different threads. **/
@@ -54,10 +53,28 @@ public class MetricRaw  extends BaseMetric
 		this.num_metrics = metrics;
 	}
 	
-	public void setThreadData(IThreadDataCollection threadData)
-	{
-		this.threadData = threadData;
+	
+	/**** 
+	 * Create a metric raw based on from another metric
+	 * @param metric
+	 * @return
+	 */
+	public static MetricRaw create(BaseMetric metric) {
+		int numMetrics = 1;
+		if (metric instanceof MetricRaw) {
+			numMetrics = ((MetricRaw)metric).num_metrics;
+		}
+		MetricRaw mr = new MetricRaw(metric.index, 
+									 metric.getDisplayName(), 
+									 metric.getDescription(), 
+									 null, 
+									 metric.index, 
+									 metric.getPartner(), 
+									 metric.getMetricType(), 
+									 numMetrics);
+		return mr;
 	}
+	
 	
 	public void setThread(List<Integer> threads)
 	{
@@ -126,6 +143,11 @@ public class MetricRaw  extends BaseMetric
 	
 	@Override
 	public MetricValue getValue(IMetricScope s) {
+		if (s == null) return null;
+		
+		RootScope root = ((Scope)s).getRootScope();
+		IThreadDataCollection threadData = root.getThreadData();
+		
 		MetricValue value = MetricValue.NONE;
 		if (threadData != null)
 		{
@@ -147,7 +169,6 @@ public class MetricRaw  extends BaseMetric
 						else if (partner != null)
 							rootValue = partner.getValue((RootScope)s, threads);
 					} else {
-						RootScope root = ((Scope)s).getRootScope();
 						rootValue = getValue(root);//s.getRootMetricValue(this);
 					}
 
@@ -169,8 +190,6 @@ public class MetricRaw  extends BaseMetric
 	public BaseMetric duplicate() {
 		MetricRaw dup = new MetricRaw(ID, displayName, description, db_glob, db_id, 
 				partner_index, metricType, num_metrics);
-		// TODO: hack to duplicate also the thread data
-		dup.threadData = threadData;
 		return dup;
 	}
 	
@@ -221,6 +240,10 @@ public class MetricRaw  extends BaseMetric
 	private MetricValue getSumValue(IMetricScope s, List<Integer> threads) throws IOException
 	{
 		double val_sum = 0.0;
+
+		RootScope root = ((Scope)s).getRootScope();
+		IThreadDataCollection threadData = root.getThreadData();
+		
 		double []values = threadData.getMetrics(((Scope)s).getCCTIndex(), getIndex(), num_metrics);
 		for(Integer thread : threads)
 		{
@@ -241,14 +264,16 @@ public class MetricRaw  extends BaseMetric
 	 */
 	private MetricValue getSpecificValue(IMetricScope s, int thread_id) throws IOException
 	{
-		checkValues(thread_id);
 		MetricValue mv = MetricValue.NONE;
 		Scope scope = (Scope)s;
 		if (thread_values != null) {
 			mv = setValue(thread_values[scope.getCCTIndex()-1]);
 		} else {
-			// there is no API implementation for reading the whold CCT metrics
+			// there is no API implementation for reading the whole CCT metrics
 			// TODO: using the old get metric for the new database
+			RootScope root = ((Scope)s).getRootScope();
+			IThreadDataCollection threadData = root.getThreadData();
+
 			double []values = threadData.getMetrics(scope.getCCTIndex(), getIndex(), num_metrics);
 			double value    = values[thread_id];
 			mv  = setValue(value);
@@ -263,11 +288,5 @@ public class MetricRaw  extends BaseMetric
 		if (Double.compare(value, 0) != 0)
 			mv = new MetricValue(value);
 		return mv;
-	}
-	
-	private void checkValues(int thread_id) throws IOException
-	{
-		if (thread_values == null)
-			thread_values = threadData.getScopeMetrics(thread_id, ID, num_metrics);
 	}
 }

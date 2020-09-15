@@ -21,6 +21,7 @@ import edu.rice.cs.hpc.data.experiment.scope.*;
 import edu.rice.cs.hpc.data.experiment.scope.filters.*;
 import edu.rice.cs.hpc.data.experiment.scope.visitors.*;
 import edu.rice.cs.hpc.data.filter.IFilterData;
+import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.data.util.IUserData;
 
 import java.io.File;
@@ -248,15 +249,11 @@ public class Experiment extends BaseExperimentWithMetrics
 					int partner = ((AggregateMetric)metric).getPartner();
 					String partner_id = String.valueOf(partner);
 					BaseMetric partner_metric = this.getMetric( partner_id );
+
 					// case for old database: no partner information
 					if (partner_metric != null) {
 						MetricValue partner_value = scope.getMetricValue( partner_metric );
-						
-						int index = i;
-						if (getMajorVersion()==4) {
-							index = Integer.valueOf(metric.getShortName());
-						}
-						scope.setMetricValue( index, partner_value);
+						scope.setMetricValue(i, partner_value);
 					}
 				}
 			} else if (metric instanceof DerivedMetric) {
@@ -396,7 +393,12 @@ public class Experiment extends BaseExperimentWithMetrics
 
 
 	public BaseMetric[] getMetricRaw() {
-		return this.metrics_raw;
+		BaseMetric[] metrics = metrics_raw;
+		
+		if (getMajorVersion() == Constants.EXPERIMENT_SPARSE_VERSION) {
+			metrics = getMetrics(); 
+		}
+		return metrics;
 	}
 
 

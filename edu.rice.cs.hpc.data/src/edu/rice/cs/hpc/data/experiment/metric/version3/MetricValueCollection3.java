@@ -46,11 +46,6 @@ public class MetricValueCollection3 implements IMetricValueCollection
 	@Override
 	public MetricValue getValue(Scope scope, int index) 
 	{
-		// convert from index to metric Id
-		Experiment experiment = (Experiment) root.getExperiment();
-		BaseMetric metric = experiment.getMetric(index);
-		int id = Integer.valueOf(metric.getShortName());
-
 		if (values == null || currentScope != scope)
 		{
 			currentScope = scope;
@@ -95,7 +90,7 @@ public class MetricValueCollection3 implements IMetricValueCollection
 					values.put(mvs.getIndex(), mv);
 				}
 				
-				MetricValue mv = values.get(id);
+				MetricValue mv = values.get(index);
 				if (mv != null)
 					return mv;
 			}
@@ -109,6 +104,8 @@ public class MetricValueCollection3 implements IMetricValueCollection
 			} else {
 				// the cache of metric values already exist, but we cannot find the value of this metric
 				// either the value is empty, or it's a derived metric which have to be computed here
+				Experiment experiment = (Experiment) root.getExperiment();
+				BaseMetric metric = experiment.getMetric(index);
 				
 				if (metric instanceof DerivedMetric)
 				{

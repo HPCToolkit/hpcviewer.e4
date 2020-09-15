@@ -17,7 +17,7 @@ import org.swtchart.ISeries.SeriesType;
 import org.swtchart.LineStyle;
 import org.swtchart.Range;
 
-import edu.rice.cs.hpc.data.experiment.metric.MetricRaw;
+import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 
@@ -36,7 +36,7 @@ public abstract class AbstractGraphPlotViewer extends AbstractGraphViewer
 	protected int plotData(GraphEditorInput input) {
 		
 		Scope scope = input.getScope();
-		MetricRaw metric = (MetricRaw) input.getMetric();
+		BaseMetric metric = input.getMetric();
 		
 
 		// -----------------------------------------------------------------
@@ -122,7 +122,7 @@ public abstract class AbstractGraphPlotViewer extends AbstractGraphViewer
 	 * @throws IOException 
 	 * @throws NumberFormatException 
 	 */
-	protected abstract double[] getValuesX(Scope scope, MetricRaw metric) throws NumberFormatException, IOException;
+	protected abstract double[] getValuesX(Scope scope, BaseMetric metric) throws NumberFormatException, IOException;
 	
 	/*****
 	 * retrieve the value of Y
@@ -131,7 +131,7 @@ public abstract class AbstractGraphPlotViewer extends AbstractGraphViewer
 	 * @param metric
 	 * @return
 	 */
-	protected abstract double[] getValuesY(Scope scope, MetricRaw metric)
+	protected abstract double[] getValuesY(Scope scope, BaseMetric metric)
 			 throws IOException;
 
 

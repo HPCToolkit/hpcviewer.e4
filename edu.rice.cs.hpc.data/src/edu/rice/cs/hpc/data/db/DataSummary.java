@@ -34,8 +34,6 @@ public class DataSummary extends DataCommon
 	private List<IdTuple>  listTuple;
 	private List<ProfInfo> listProfInfo;
 	
-	private long position_profInfo;
-	
 	
 	// --------------------------------------------------------------------
 	// Public methods
@@ -143,7 +141,7 @@ public class DataSummary extends DataCommon
 	public List<MetricValueSparse> getMetrics(int profileNum, int cct_id) 
 			throws IOException 
 	{	
-		ProfInfo info = listProfInfo.get(0);
+		ProfInfo info = listProfInfo.get(profileNum);
 		
 		// -------------------------------------------
 		// read the cct context
@@ -188,7 +186,7 @@ public class DataSummary extends DataCommon
 		return values;
 	}
 	
-	
+		
 	/*
 	 * (non-Javadoc)
 	 * @see edu.rice.cs.hpc.data.db.DataCommon#dispose()
@@ -218,8 +216,8 @@ public class DataSummary extends DataCommon
 	protected boolean readNextHeader(FileChannel input) 
 			throws IOException
 	{
-		readIdTuple(input);
 		readProfInfo(input);
+		readIdTuple(input);
 		
 		return true;
 	}
@@ -236,34 +234,35 @@ public class DataSummary extends DataCommon
 	private void readIdTuple(FileChannel input) 
 			throws IOException
 	{
+		byte []buff = new byte[8];
+		ByteBuffer buffTupleSize = ByteBuffer.wrap(buff);
+		input.read(buffTupleSize);
+		buffTupleSize.flip();
+		
+		long idTupleSize = buffTupleSize.getLong();
+		
 		listTuple = new ArrayList<IdTuple>((int) numItems);
 		
+		ByteBuffer buffer = ByteBuffer.allocate((int) idTupleSize);
+		
+		int numBytes      = input.read(buffer);
+		assert (numBytes > 0);
+
+		buffer.flip();
+		
 		for (int i=0; i<numItems; i++) {
-			ByteBuffer buffer = ByteBuffer.allocate(IdTuple.TUPLE_LENGTH_SIZE);
-			int numBytes      = input.read(buffer);
-			assert (numBytes > 0);
 
 			// -----------------------------------------
 			// read the tuple section
 			// -----------------------------------------
 
 			IdTuple item = new IdTuple();
-			
-			buffer.flip();
-			item.length = buffer.getShort();
-			
-			assert(item.length>0);
-			
-			int lengthTuple = item.length * (IdTuple.TUPLE_KIND_SIZE + IdTuple.TUPLE_INDEX_SIZE);			
-			buffer = ByteBuffer.allocate(lengthTuple);
 
-			numBytes = input.read(buffer);
-			assert (numBytes > 0);
+			item.length = buffer.getShort();			
+			assert(item.length>0);
 			
 			item.kind  = new short[item.length];
 			item.index = new long[item.length];
-			
-			buffer.rewind();
 			
 			for (int j=0; j<item.length; j++) {
 				item.kind[j]  = buffer.getShort();
@@ -281,8 +280,10 @@ public class DataSummary extends DataCommon
 	private void readProfInfo(FileChannel input) throws IOException {
 		listProfInfo = new ArrayList<DataSummary.ProfInfo>((int) numItems);
 
-		position_profInfo = input.position();
-		MappedByteBuffer mappedBuffer = input.map(MapMode.READ_ONLY, position_profInfo, numItems * ProfInfo.SIZE);
+		long position_profInfo = input.position();
+		long profInfoSize = numItems * ProfInfo.SIZE;
+		
+		MappedByteBuffer mappedBuffer = input.map(MapMode.READ_ONLY, position_profInfo, profInfoSize);
 
 		for(int i=0; i<numItems; i++) {
 			ProfInfo info = new ProfInfo();
@@ -296,6 +297,10 @@ public class DataSummary extends DataCommon
 			
 			listProfInfo.add(info);
 		}
+		// make sure the next reader have pointer to the last read position
+		
+		position_profInfo += profInfoSize;
+		input.position(position_profInfo);
 	}
 	
 	
