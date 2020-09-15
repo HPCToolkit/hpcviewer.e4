@@ -2,7 +2,6 @@ package edu.rice.cs.hpc.data.experiment.extdata;
 
 import java.io.IOException;
 
-import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 
 /********************************************************************************
@@ -71,11 +70,10 @@ public interface IThreadDataCollection
 	 */
 	public String   getRankTitle() throws IOException;
 	
-	
-	public BaseMetric[] getMetrics();
-	
+		
 	/*****
 	 * Get an array of metrics of a specified node and metrics
+	 * It returns the array of metric values indexed from its thread or profile or rank number
 	 * 
 	 * @param nodeIndex
 	 * @param metricIndex

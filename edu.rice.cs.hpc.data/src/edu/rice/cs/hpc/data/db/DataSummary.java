@@ -141,7 +141,7 @@ public class DataSummary extends DataCommon
 	public List<MetricValueSparse> getMetrics(int profileNum, int cct_id) 
 			throws IOException 
 	{	
-		ProfInfo info = listProfInfo.get(0);
+		ProfInfo info = listProfInfo.get(profileNum);
 		
 		// -------------------------------------------
 		// read the cct context
@@ -186,7 +186,7 @@ public class DataSummary extends DataCommon
 		return values;
 	}
 	
-	
+		
 	/*
 	 * (non-Javadoc)
 	 * @see edu.rice.cs.hpc.data.db.DataCommon#dispose()

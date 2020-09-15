@@ -488,6 +488,9 @@ public class DatabaseCollection
 		ViewerDataEvent data = new ViewerDataEvent((Experiment) experiment, null);
 		eventBroker.post(BaseConstants.TOPIC_HPC_REMOVE_DATABASE, data);
 		
+		// make sure the experiment's resources are disposed
+		experiment.dispose();
+		
 		// destroy all the views and editors that belong to experiment
 		// since Eclipse doesn't have "destroy" method, we hide them.
 		

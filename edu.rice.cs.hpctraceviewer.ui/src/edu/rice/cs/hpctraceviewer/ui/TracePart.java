@@ -227,6 +227,8 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 	@PreDestroy
 	public void preDestroy() {
 		partService.removePartListener(this);
+		eventBroker.unsubscribe(this);
+		
 		TracePreferenceManager.INSTANCE.getPreferenceStore().removePropertyChangeListener(this);
 	}
 	
@@ -273,6 +275,9 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 
 		// if we need to close the part, we shouldn't continue
 		if (eventBroker == null || partService == null)
+			return;
+		
+		if (experiment.getRootScope() == null)
 			return;
 		
 		try {

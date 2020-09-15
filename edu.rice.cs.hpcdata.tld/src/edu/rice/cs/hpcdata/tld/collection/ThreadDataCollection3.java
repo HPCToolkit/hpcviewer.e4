@@ -10,9 +10,7 @@ import edu.rice.cs.hpc.data.db.DataSummary;
 import edu.rice.cs.hpc.data.db.IdTuple;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment.Db_File_Type;
-import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.extdata.AbstractThreadDataCollection;
-import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.tld.plot.DataPlot;
 import edu.rice.cs.hpcdata.tld.plot.DataPlotEntry;
@@ -26,8 +24,6 @@ public class ThreadDataCollection3 extends AbstractThreadDataCollection
 {
 	private DataPlot    data_plot;
 	private DataSummary data_summary;
-	private BaseExperiment experiment;
-	
 	/** Number of parallelism level or number of levels in hierarchy */
 	private int numLevels;
 	private double[] labels;
@@ -40,7 +36,7 @@ public class ThreadDataCollection3 extends AbstractThreadDataCollection
 				BaseExperiment.getDefaultDatabaseName(Db_File_Type.DB_PLOT));
 		data_summary = root.getDataSummary();
 		
-		experiment = root.getExperiment();
+		root.getExperiment();
 	}
 
 	@Override
@@ -108,17 +104,13 @@ public class ThreadDataCollection3 extends AbstractThreadDataCollection
 	public double[] getScopeMetrics(int thread_id, int MetricIndex,
 			int numMetrics) throws IOException {
 
+		if (data_summary == null)
+			return null;
+		
+		data_summary.getMetrics(thread_id, MetricIndex);
 		return null;
 	}
 
-	@Override
-	public BaseMetric[] getMetrics() {
-		if (experiment == null)
-			return null;
-		
-		Experiment exp = (Experiment) experiment;
-		return exp.getMetrics();
-	}
 	
 	
 	private void initTuples() {
