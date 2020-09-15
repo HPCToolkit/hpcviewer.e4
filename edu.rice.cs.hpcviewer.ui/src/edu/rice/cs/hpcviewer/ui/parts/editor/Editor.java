@@ -17,6 +17,8 @@ import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpc.data.experiment.source.FileSystemSourceFile;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
+import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
+import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpcviewer.ui.base.IUpperPart;
 import edu.rice.cs.hpcviewer.ui.graph.GraphEditorInput;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;
@@ -36,6 +38,8 @@ import org.eclipse.jface.text.source.AnnotationModel;
 import org.eclipse.jface.text.source.CompositeRuler;
 import org.eclipse.jface.text.source.LineNumberRulerColumn;
 import org.eclipse.jface.text.source.SourceViewer;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.StyledText;
@@ -56,7 +60,7 @@ import org.eclipse.swt.SWT;
  * file viewer. Otherwise, it will create a new viewer.
  *
  **********************************************/
-public class Editor extends CTabItem implements IUpperPart
+public class Editor extends CTabItem implements IUpperPart, IPropertyChangeListener
 {
 	
 	static final private String PROPERTY_DATA = "hpceditor.data";
@@ -110,6 +114,8 @@ public class Editor extends CTabItem implements IUpperPart
 		
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(parent);
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(parent);
+		
+		ViewerPreferenceManager.INSTANCE.getPreferenceStore().addPropertyChangeListener(this);
 	}
 	
 	
@@ -286,5 +292,20 @@ public class Editor extends CTabItem implements IUpperPart
 		finder = new FindReplaceDocumentAdapter(document);
 
 		setMarker(lineNumber);
+	}
+
+
+	@Override
+	public void propertyChange(PropertyChangeEvent event) {
+		final String property = event.getProperty();
+
+		if (property.equals(PreferenceConstants.ID_FONT_TEXT)) {
+			StyledText text = textViewer.getTextWidget();
+
+			Font font = FontManager.getTextEditorFont();
+			text.setFont(font);
+			
+			textViewer.refresh();
+		}
 	}
 }
