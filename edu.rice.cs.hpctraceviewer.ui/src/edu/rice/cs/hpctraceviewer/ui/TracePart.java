@@ -18,8 +18,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
+import edu.rice.cs.hpcbase.BaseConstants;
 import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.local.LocalDBOpener;
@@ -62,7 +65,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
  * The main class for trace viewer
  *
  ***************************************************************/
-public class TracePart implements ITracePart, IPartListener, IPropertyChangeListener
+public class TracePart implements ITracePart, IPartListener, IPropertyChangeListener, EventHandler
 {
 	public static final String ID = "edu.rice.cs.hpctraceviewer.ui.partdescriptor.trace";
 
@@ -198,6 +201,8 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 		
 		partService.addPartListener(this);
 		TracePreferenceManager.INSTANCE.getPreferenceStore().addPropertyChangeListener(this);
+		
+		eventBroker.subscribe(BaseConstants.TOPIC_HPC_REMOVE_DATABASE, this);
 	}
 	
 	
@@ -262,11 +267,12 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 
 	@Override
 	public void partVisible(MPart part) {
-		if (part.getObject() != this)
-			return;
-		
 		// if we already create the database and the views, we don't need to recreate again
-		if (stdc != null)
+		if (part.getObject() != this || stdc != null)
+			return;
+
+		// if we need to close the part, we shouldn't continue
+		if (eventBroker == null || partService == null)
 			return;
 		
 		try {
@@ -328,5 +334,14 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 	public void propertyChange(PropertyChangeEvent event) {
 		TraceEventData data = new TraceEventData(stdc, this, stdc);
 		eventBroker.post(IConstants.TOPIC_COLOR_MAPPING, data);
+	}
+
+	@Override
+	public void handleEvent(Event event) {
+		if (event.getTopic().equals(BaseConstants.TOPIC_HPC_REMOVE_DATABASE)) {
+			// mark that this part will be close soon. Do not do any tasks
+			partService = null;
+			eventBroker = null;
+		}
 	}
 }

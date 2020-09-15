@@ -49,6 +49,7 @@ import org.slf4j.LoggerFactory;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.filter.service.FilterMap;
+import edu.rice.cs.hpcbase.BaseConstants;
 import edu.rice.cs.hpcbase.ui.IMainPart;
 import edu.rice.cs.hpctraceviewer.ui.TracePart;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
@@ -485,7 +486,7 @@ public class DatabaseCollection
 		// first, notify all the parts that have experiment that they will be destroyed.
 		
 		ViewerDataEvent data = new ViewerDataEvent((Experiment) experiment, null);
-		eventBroker.post(ViewerDataEvent.TOPIC_HPC_REMOVE_DATABASE, data);
+		eventBroker.post(BaseConstants.TOPIC_HPC_REMOVE_DATABASE, data);
 		
 		// destroy all the views and editors that belong to experiment
 		// since Eclipse doesn't have "destroy" method, we hide them.

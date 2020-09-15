@@ -16,6 +16,7 @@ import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
 import edu.rice.cs.hpc.filter.service.FilterStateProvider;
+import edu.rice.cs.hpcbase.BaseConstants;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.base.IViewBuilder;
@@ -75,7 +76,7 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 
 		
 		// subscribe to user action events
-		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_REMOVE_DATABASE, this);
+		eventBroker.subscribe(BaseConstants.TOPIC_HPC_REMOVE_DATABASE, this);
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN,    this);
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC,  this);
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE,   this);
@@ -143,7 +144,7 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC)) {
 			treeViewer.addUserMetricColumn((BaseMetric) eventInfo.data);
 
-		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_REMOVE_DATABASE)) {
+		} else if (topic.equals(BaseConstants.TOPIC_HPC_REMOVE_DATABASE)) {
 			// mark that this part will be destroyed
 			experiment = null;
 
