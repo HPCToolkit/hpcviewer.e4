@@ -193,14 +193,14 @@ public class TopDownContentViewer extends AbstractViewBuilder
 
 	@Override
 	protected void selectionChanged(IStructuredSelection selection) {
+		if (threadData == null)
+			return;
+
 		if (!threadData.isAvailable())
 			return;
 		
 		Object obj = selection.getFirstElement();
 		if (obj == null || !(obj instanceof Scope))
-			return;
-		
-		if (threadData == null)
 			return;
 		
 		boolean available = threadData.isAvailable();
@@ -210,13 +210,18 @@ public class TopDownContentViewer extends AbstractViewBuilder
 
 	@Override
 	public void setData(RootScope root) {
+		super.setData(root);
+		
 		try {
 			threadData = ThreadDataCollectionFactory.build(root);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		super.setData(root);
+		if (threadData == null) {
+			items[ITEM_THREAD].setEnabled(false);
+			return;
+		}
 		
 		if (threadData.isAvailable()) {
 			// check the validity
