@@ -1103,7 +1103,7 @@ public class BaseExperimentBuilder extends Builder {
 	protected void begin_SecData(String[] attributes, String[] values) 
 	{
 		// make the root scope
-		rootScope = new RootScope(this.experiment, "Invisible Outer Root Scope", RootScopeType.Invisible, 1000000,1 );
+		rootScope = new RootScope(this.experiment, "Invisible Outer Root Scope", RootScopeType.Invisible, Integer.MAX_VALUE, 1 );
 		
 		scopeStack.push(this.rootScope);	// don't use 'beginScope'
 
