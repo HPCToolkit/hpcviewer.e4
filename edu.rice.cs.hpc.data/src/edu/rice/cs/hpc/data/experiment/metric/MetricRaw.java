@@ -24,9 +24,6 @@ public class MetricRaw  extends BaseMetric
 	 *   each MetricRaw may have different threads. **/
 	private List<Integer> threads = null;
 	
-	/*** list of scope metric values of a certain threads. The length of the array is the number of cct nodes*/
-	private double []thread_values = null;
-	
 	/*** similar to partner index, but this partner refers directly to the metric partner.**/
 	private MetricRaw partner;
 	
@@ -264,21 +261,16 @@ public class MetricRaw  extends BaseMetric
 	 */
 	private MetricValue getSpecificValue(IMetricScope s, int thread_id) throws IOException
 	{
-		MetricValue mv = MetricValue.NONE;
 		Scope scope = (Scope)s;
-		if (thread_values != null) {
-			mv = setValue(thread_values[scope.getCCTIndex()-1]);
-		} else {
-			// there is no API implementation for reading the whole CCT metrics
-			// TODO: using the old get metric for the new database
-			RootScope root = ((Scope)s).getRootScope();
-			IThreadDataCollection threadData = root.getThreadData();
 
-			double []values = threadData.getMetrics(scope.getCCTIndex(), getIndex(), num_metrics);
-			double value    = values[thread_id];
-			mv  = setValue(value);
-		}
-		return mv;
+		// there is no API implementation for reading the whole CCT metrics
+		// TODO: using the old get metric for the new database
+		RootScope root = ((Scope)s).getRootScope();
+		IThreadDataCollection threadData = root.getThreadData();
+
+		double []values = threadData.getMetrics(scope.getCCTIndex(), getIndex(), num_metrics);
+		
+		return setValue(values[thread_id]);
 	}
 	
 	

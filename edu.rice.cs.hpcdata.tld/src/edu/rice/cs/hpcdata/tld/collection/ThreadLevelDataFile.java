@@ -177,9 +177,9 @@ public class ThreadLevelDataFile extends FileDB2
 				final long pos_absolute = offsets[i] + pos_relative;
 				try {
 					_metrics[i] = data.getDouble(pos_absolute);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				} catch (Exception e) {
+					System.err.println( e.getClass() + ": " + e.getMessage() + "\n" + 
+										"Error reading at position: " + pos_absolute);
 					break;
 				}
 			}
