@@ -321,10 +321,10 @@ public abstract class BaseViewPaint extends Job
 
 				for (ImagePosition image : listImages) 
 				{
-					if (!monitor.isCanceled())
-						drawPainting(canvas, image);
-					else
+					if (monitor.isCanceled())
 						return false;
+
+					drawPainting(canvas, image);
 				}				
 			} catch (Exception e) {
 				e.printStackTrace();

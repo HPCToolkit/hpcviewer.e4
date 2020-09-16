@@ -28,6 +28,7 @@ public class FlatContentViewer extends AbstractViewBuilder
 	
 	private ToolItem[] items;
 	private FlatScopeAction action;
+	private AbstractContentProvider contentProvider;
 
 	public FlatContentViewer(EPartService  partService, 
 							 IEventBroker  broker,
@@ -35,7 +36,7 @@ public class FlatContentViewer extends AbstractViewBuilder
 							 ProfilePart   profilePart) {
 		
 		super(partService, broker, database, profilePart);
-
+		
 	}
 
 	@Override
@@ -90,16 +91,19 @@ public class FlatContentViewer extends AbstractViewBuilder
 
 	@Override
 	protected AbstractContentProvider getContentProvider(ScopeTreeViewer treeViewer) {
-		return new AbstractContentProvider(treeViewer) {
-			
-			@Override
-			public Object[] getChildren(Object node) {
-				if (node instanceof Scope) {
-					return ((Scope)node).getChildren();
+		if (contentProvider == null) {
+			contentProvider = new AbstractContentProvider(treeViewer) {
+				
+				@Override
+				public Object[] getChildren(Object node) {
+					if (node instanceof Scope) {
+						return ((Scope)node).getChildren();
+					}
+					return null;
 				}
-				return null;
-			}
-		};
+			};
+		}
+		return contentProvider;
 	}
 
 	@Override

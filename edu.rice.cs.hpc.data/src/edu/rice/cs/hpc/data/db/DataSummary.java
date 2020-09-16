@@ -4,16 +4,12 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.nio.LongBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
-import java.util.Random;
-
-import edu.rice.cs.hpc.data.util.Constants;
-import edu.rice.cs.hpc.data.experiment.BaseExperimentWithMetrics;
-import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
-import edu.rice.cs.hpc.data.experiment.metric.MetricValue;
+import java.util.ArrayList;
+import java.util.List;
+import edu.rice.cs.hpc.data.experiment.metric.MetricValueSparse;
 
 /*********************************************
  * 
@@ -25,26 +21,19 @@ public class DataSummary extends DataCommon
 	// --------------------------------------------------------------------
 	// constants
 	// --------------------------------------------------------------------
-	
-	//private final static String SUMMARY_NAME = "hpctoolkit summary metrics";
-	static final private int METRIC_ENTRY_SIZE = Constants.SIZEOF_FLOAT + Constants.SIZEOF_INT;
-	static final public float DEFAULT_METRIC  = 0.0f;
+	private final static String HEADER_MAGIC_STR  = "HPCPROF-tmsdb_____";
+	private static final int    METRIC_VALUE_SIZE = 8 + 2;
+	private static final int    CCT_RECORD_SIZE   = 4 + 8;
 	
 	// --------------------------------------------------------------------
 	// object variable
 	// --------------------------------------------------------------------
 	
-	private long offset_start;
-	private long offset_size;
-	private long metric_start;
-	private long metric_size;
+	private RandomAccessFile file;
 	
-	private int size_offset;
-	private int size_metid;
-	private int size_metval;
-
-	private int   [][]metric_id;
-	private float [][]metric_val;
+	private List<IdTuple>  listTuple;
+	private List<ProfInfo> listProfInfo;
+	
 	
 	// --------------------------------------------------------------------
 	// Public methods
@@ -56,12 +45,11 @@ public class DataSummary extends DataCommon
 	 * @see edu.rice.cs.hpc.data.db.DataCommon#open(java.lang.String)
 	 */
 	@Override
-	public void open(final String file)
+	public void open(final String filename)
 			throws IOException
 	{
-		super.open(file);
-		
-		fillOffsetTable(file);
+		super.open(filename);
+		file = new RandomAccessFile(filename, "r");
 	}
 	
 
@@ -73,46 +61,57 @@ public class DataSummary extends DataCommon
 	public void printInfo( PrintStream out)
 	{
 		super.printInfo(out);
-		out.println("Offset start: " + offset_start);
-		out.println("Offset size: "  + offset_size);
-		
-		out.println("metric start: " + metric_start);
-		out.println("metric size: "  + metric_size);
-		
-		out.println("size offset: "  + size_offset);
-		out.println("size met id: "  + size_metid);
-		out.println("size met val: " + size_metval);
-		
-		out.println("\n");
-		int cct = 1;
-		out.format("[%5d] ", cct);
-		printMetrics(out, cct);
 
+		ListCCTAndIndex list = null;
+		
+		try {
+			list = getCCTIndex();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return;
+		}
+		
 		// print random metrics
-		for (int i=0; i<15; i++)
+		for (int i=0; i<list.listOfId.length; i++)
 		{
-			Random r = new Random();
-			cct  = r.nextInt((int) num_cctid);
+			int cct = list.listOfId[i];
 			out.format("[%5d] ", cct);
 			printMetrics(out, cct);
 		}
+	}
 
+	public ListCCTAndIndex getCCTIndex() 
+			throws IOException {
+		ProfInfo info = listProfInfo.get(0);
+		
+		// -------------------------------------------
+		// read the cct context
+		// -------------------------------------------
+		
+		long positionCCT = info.offset   + 
+				   		   info.num_vals * METRIC_VALUE_SIZE;
+		int numBytesCCT  = info.num_nz_contexts * CCT_RECORD_SIZE;
+		
+		ListCCTAndIndex list = new ListCCTAndIndex();
+		list.listOfdIndex = new long[info.num_nz_contexts];
+		list.listOfId = new int[info.num_nz_contexts];
+		
+		MappedByteBuffer buffer = file.getChannel().map(MapMode.READ_ONLY, positionCCT, numBytesCCT);
+		
+		for(int i=0; i<info.num_nz_contexts; i++) {
+			list.listOfId[i] = buffer.getInt();
+			list.listOfdIndex[i] = buffer.getLong();
+		}
+		return list;
 	}
 	
-	/*******
-	 * print a list of metrics for a given CCT index
-	 * 
-	 * @param out : the outpur stream
-	 * @param cct : CCT index
+	
+	/***
+	 * Retrieve the list of tuple IDs.
+	 * @return List of Tuple
 	 */
-	private void printMetrics(PrintStream out, int cct)
-	{
-		int []metrics = metric_id[cct];
-		for(int i=0; i<metrics.length; i++)
-		{
-			out.format("(%d, %1.2e)\t", metric_id[cct][i], metric_val[cct][i]);
-		}
-		out.println();
+	public List<IdTuple> getTuple() {
+		return listTuple;
 	}
 	
 	
@@ -122,39 +121,80 @@ public class DataSummary extends DataCommon
 	 * responsible to handle mutual exclusion.
 	 * 
 	 * @param cct_id
-	 * @return
+	 * @return List of MetricValueSparse
 	 * @throws IOException
 	 */
-	public MetricValue[] getMetrics(int cct_id, BaseExperimentWithMetrics experiment) 
+	public List<MetricValueSparse> getMetrics(int cct_id) 
 			throws IOException
-	{
-		MetricValue []values = new MetricValue[experiment.getMetricCount()];
-		
-		for(int i=0; i<values.length; i++)
-		{
-			values[i] = MetricValue.NONE;
-		}
-		
-		int []metrics = metric_id[cct_id];
-		for (int i=0; i<metrics.length; i++)
-		{
-			int id = metrics[i];
-			BaseMetric metric = experiment.getMetric(String.valueOf(id));
-			int index = metric.getIndex();
-			values[index] = new MetricValue(metric_val[cct_id][i]);
-		}
+	{		
+		return getMetrics(0, cct_id);
+	}
 	
+	
+	/****
+	 * Retrieve the list of metrics for a certain profile number and a given cct id
+	 * @param profileNum The profile number. For summary profile, the number must be zero
+	 * @param cct_id the cct id
+	 * @return List of MetricValueSparse
+	 * @throws IOException
+	 */
+	public List<MetricValueSparse> getMetrics(int profileNum, int cct_id) 
+			throws IOException 
+	{	
+		ProfInfo info = listProfInfo.get(profileNum);
+		
+		// -------------------------------------------
+		// read the cct context
+		// -------------------------------------------
+		
+		long positionCCT = info.offset   + 
+				   		   info.num_vals * METRIC_VALUE_SIZE;
+		int numBytesCCT  = (info.num_nz_contexts+1) * CCT_RECORD_SIZE;
+		
+		MappedByteBuffer buffer = file.getChannel().map(MapMode.READ_ONLY, positionCCT, numBytesCCT);
+		long []indexes = binarySearch(cct_id, 0, 1+info.num_nz_contexts, buffer);
+		
+		if (indexes == null)
+			return null;
+		// -------------------------------------------
+		// initialize the metrics
+		// -------------------------------------------
+
+		int numMetrics   = (int) (indexes[1]-indexes[0]);
+		int numBytes     = (int) numMetrics * METRIC_VALUE_SIZE;
+		
+		ArrayList<MetricValueSparse> values = new ArrayList<MetricValueSparse>(numMetrics);
+		
+		// -------------------------------------------
+		// read the metrics
+		// -------------------------------------------
+		long positionMetrics = info.offset + indexes[0] * METRIC_VALUE_SIZE;
+		file.seek(positionMetrics);
+		
+		byte []metricBuffer = new byte[numBytes];
+		file.readFully(metricBuffer);
+		ByteBuffer byteBuffer = ByteBuffer.wrap(metricBuffer);
+
+		for(int i=0; i<numMetrics; i++) {
+			double value = byteBuffer.getDouble();
+			short metricId = byteBuffer.getShort();
+			
+			MetricValueSparse mvs = new MetricValueSparse(metricId, (float) value);
+			values.add(mvs);
+		}
+		
 		return values;
 	}
 	
+		
 	/*
 	 * (non-Javadoc)
 	 * @see edu.rice.cs.hpc.data.db.DataCommon#dispose()
 	 */
 	public void dispose() throws IOException
 	{
-		metric_id = null;
-		metric_val = null;
+		file.close();
+		super.dispose();
 	}
 	
 
@@ -169,85 +209,209 @@ public class DataSummary extends DataCommon
 
 	@Override
 	protected boolean isFileHeaderCorrect(String header) {
-		// suggestion from Mark: ignore the header file name
-		return true; //header.startsWith(SUMMARY_NAME);
+		return header.equals(HEADER_MAGIC_STR);
 	}
 
 	@Override
 	protected boolean readNextHeader(FileChannel input) 
 			throws IOException
 	{
-		ByteBuffer buffer = ByteBuffer.allocate(256);
-		int numBytes      = input.read(buffer);
-		if (numBytes > 0) 
-		{
-			buffer.flip();
-			
-			offset_start = buffer.getLong();
-			offset_size  = buffer.getLong();
-			metric_start = buffer.getLong();
-			metric_size  = buffer.getLong();
-			
-			size_offset  = buffer.getInt();
-			size_metid   = buffer.getInt();
-			size_metval  = buffer.getInt();
-		}		
-		return false;
+		readProfInfo(input);
+		readIdTuple(input);
+		
+		return true;
 	}
-
+	
 	// --------------------------------------------------------------------
 	// Private methods
 	// --------------------------------------------------------------------
-	
-	private void fillOffsetTable(final String filename)
+
+	/***
+	 * read the list of id tuple
+	 * @param input FileChannel
+	 * @throws IOException
+	 */
+	private void readIdTuple(FileChannel input) 
 			throws IOException
 	{
-		final RandomAccessFile file = new RandomAccessFile(filename, "r");
-		final FileChannel channel	= file.getChannel();
-		// map all the table into memory. 
-		// This statement can be problematic if the offset_size is huge
+		byte []buff = new byte[8];
+		ByteBuffer buffTupleSize = ByteBuffer.wrap(buff);
+		input.read(buffTupleSize);
+		buffTupleSize.flip();
 		
-		MappedByteBuffer mappedBuffer = channel.map(MapMode.READ_ONLY, offset_start, offset_size);
-		LongBuffer longBuffer = mappedBuffer.asLongBuffer();
+		long idTupleSize = buffTupleSize.getLong();
 		
-		final int []cct_table = new int[(int) num_cctid+1];
+		listTuple = new ArrayList<IdTuple>((int) numItems);
 		
-		for (int i=0; i<=num_cctid; i++)
-		{
-			cct_table[i] = (int) longBuffer.get(i);
-		}
+		ByteBuffer buffer = ByteBuffer.allocate((int) idTupleSize);
 		
-		metric_id 	  = new int  [(int)num_cctid][];
-		metric_val 	  = new float[(int)num_cctid][];
-		byte []buffer = new byte [(int) metric_size];
+		int numBytes      = input.read(buffer);
+		assert (numBytes > 0);
+
+		buffer.flip();
 		
-		file.seek(metric_start);
-		file.readFully(buffer);
-		
-		int offset = 0;
-		for (int i=0; i<num_cctid; i++)
-		{
-			int offset_size  = (cct_table[i+1] - cct_table[i]);
-			int num_metrics  = offset_size / METRIC_ENTRY_SIZE;
+		for (int i=0; i<numItems; i++) {
+
+			// -----------------------------------------
+			// read the tuple section
+			// -----------------------------------------
+
+			IdTuple item = new IdTuple();
+
+			item.length = buffer.getShort();			
+			assert(item.length>0);
 			
-			metric_id[i] 	 = new int  [num_metrics]; 
-			metric_val[i] 	 = new float[num_metrics]; 
+			item.kind  = new short[item.length];
+			item.index = new long[item.length];
 			
-			for (int j=0; j<num_metrics; j++)
-			{
-				ByteBuffer bb = ByteBuffer.wrap(buffer, offset, Constants.SIZEOF_INT);
-				metric_id[i][j] = bb.getInt();
-				offset += Constants.SIZEOF_INT;
-				
-				bb = ByteBuffer.wrap(buffer, offset, Constants.SIZEOF_FLOAT);
-				metric_val[i][j] = bb.getFloat();
-				offset += Constants.SIZEOF_FLOAT;
+			for (int j=0; j<item.length; j++) {
+				item.kind[j]  = buffer.getShort();
+				item.index[j] = buffer.getLong();
 			}
+			listTuple.add(item);
 		}
-		file.close();
+	}
+
+	/*****
+	 * read the list of Prof Info
+	 * @param input FileChannel
+	 * @throws IOException
+	 */
+	private void readProfInfo(FileChannel input) throws IOException {
+		listProfInfo = new ArrayList<DataSummary.ProfInfo>((int) numItems);
+
+		long position_profInfo = input.position();
+		long profInfoSize = numItems * ProfInfo.SIZE;
+		
+		MappedByteBuffer mappedBuffer = input.map(MapMode.READ_ONLY, position_profInfo, profInfoSize);
+
+		for(int i=0; i<numItems; i++) {
+			ProfInfo info = new ProfInfo();
+			info.id_tuple_ptr = mappedBuffer.getLong();
+			info.metadata_ptr = mappedBuffer.getLong();
+			mappedBuffer.getLong(); // spare 1
+			mappedBuffer.getLong(); // spare 2
+			info.num_vals = mappedBuffer.getLong();
+			info.num_nz_contexts = mappedBuffer.getInt();
+			info.offset = mappedBuffer.getLong();
+			
+			listProfInfo.add(info);
+		}
+		// make sure the next reader have pointer to the last read position
+		
+		position_profInfo += profInfoSize;
+		input.position(position_profInfo);
 	}
 	
 	
+	/***
+	 * Binary earch the cct index 
+	 * 
+	 * @param index the cct index
+	 * @param first the beginning of the relative index
+	 * @param last  the last of the relative index
+	 * @param buffer ByteBuffer of the file
+	 * @return 2-length array of indexes: the index of the found cct, and its next index
+	 */
+	private long[] binarySearch(int index, int first, int last, ByteBuffer buffer) {
+		int begin = first;
+		int end   = last;
+		int mid   = (begin+end)/2;
+		
+		while (begin <= end) {
+			buffer.position(mid * CCT_RECORD_SIZE);
+			int cctidx  = buffer.getInt();
+			long offset = buffer.getLong();
+			
+			if (cctidx < index) {
+				begin = mid+1;
+			} else if(cctidx == index) {
+				long nextIndex = offset;
+				
+				if (mid+1<last) {
+					buffer.position(CCT_RECORD_SIZE * (mid+1));
+					buffer.getInt();
+					nextIndex = buffer.getLong();
+				}
+				return new long[] {offset, nextIndex};
+			} else {
+				end = mid-1;
+			}
+			mid = (begin+end)/2;
+		}
+		// not found
+		return null;
+	}
+	
+
+	/*******
+	 * print a list of metrics for a given CCT index
+	 * 
+	 * @param out : the outpur stream
+	 * @param cct : CCT index
+	 */
+	private void printMetrics(PrintStream out, int cct)
+	{
+		try {
+			List<MetricValueSparse> values = getMetrics(cct);
+			if (values == null)
+				return;
+			
+			for(MetricValueSparse value: values) {
+				System.out.print(value.getIndex() + ": " + value.getValue() + " , ");
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			out.println();
+		}
+	}
+
+	
+	// --------------------------------------------------------------------
+	// Internal Classes
+	// --------------------------------------------------------------------
+
+	public static class ListCCTAndIndex
+	{
+		public int  []listOfId;
+		public long []listOfdIndex;
+		
+		public String toString() {
+			String buffer = "";
+			if (listOfId != null) {
+				buffer += "id: [" + listOfId[0] + ".." + listOfId[listOfId.length-1] + "] ";
+			}
+			if (listOfdIndex != null) {
+				buffer += "idx; [" + listOfdIndex[0] + ".." + listOfdIndex[listOfdIndex.length-1] + "]";
+			}
+			return buffer;
+		}
+	}
+	
+	/*****
+	 * 
+	 * Prof info data structure
+	 *
+	 */
+	protected static class ProfInfo
+	{
+		/** the size of the record in bytes  */
+		public static final int SIZE = 8 + 8 + 8 + 8 + 8 + 4 + 8;
+		
+		public long id_tuple_ptr;
+		public long metadata_ptr;
+		public long num_vals;
+		public int  num_nz_contexts;
+		public long offset;
+		
+		public String toString() {
+			return "tuple_ptr: " + id_tuple_ptr    + 
+				   ", vals: " 	 + num_vals 	   + 
+				   ", ccts: "	 + num_nz_contexts + 
+				   ", offs: " 	 + offset;
+		}
+	}
 
 	/***************************
 	 * unit test 
@@ -256,7 +420,7 @@ public class DataSummary extends DataCommon
 	 ***************************/
 	public static void main(String []argv)
 	{
-		final String DEFAULT_FILE = "/home/la5/data/new-database/db-lulesh-new/summary.db";
+		final String DEFAULT_FILE = "/home/la5/git/hpctoolkit/BUILD-prof2/hpctoolkit-hpcstruct-bin-database/thread.db";
 		final String filename;
 		if (argv != null && argv.length>0)
 			filename = argv[0];

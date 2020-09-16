@@ -25,9 +25,7 @@ import org.slf4j.LoggerFactory;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
-import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
-import edu.rice.cs.hpc.data.experiment.metric.MetricRaw;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.tld.collection.ThreadDataCollectionFactory;
@@ -59,7 +57,6 @@ public class TopDownContentViewer extends AbstractViewBuilder
 	 * to display a thread view. We need to instantiate this variable
 	 * once we got the database experiment. */
 	private IThreadDataCollection threadData;
-	private boolean threadDataAvailable = false;
 	
 	private AbstractContentProvider contentProvider = null;
 	
@@ -196,14 +193,14 @@ public class TopDownContentViewer extends AbstractViewBuilder
 
 	@Override
 	protected void selectionChanged(IStructuredSelection selection) {
-		if (!threadDataAvailable)
+		if (threadData == null)
+			return;
+
+		if (!threadData.isAvailable())
 			return;
 		
 		Object obj = selection.getFirstElement();
 		if (obj == null || !(obj instanceof Scope))
-			return;
-		
-		if (threadData == null)
 			return;
 		
 		boolean available = threadData.isAvailable();
@@ -213,39 +210,29 @@ public class TopDownContentViewer extends AbstractViewBuilder
 
 	@Override
 	public void setData(RootScope root) {
-		Experiment experiment = (Experiment) root.getExperiment();
+		super.setData(root);
+		
 		try {
-			threadData = ThreadDataCollectionFactory.build(experiment);
+			threadData = ThreadDataCollectionFactory.build(root);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		BaseMetric[]metrics  = experiment.getMetricRaw();
-		threadDataAvailable = false;
-		
-		if (threadData != null && metrics != null) {
-			// thread level data exists
-			// we need to tell all metric raws of thread data
-			for (BaseMetric metric: metrics)
-			{
-				if (metric instanceof MetricRaw)
-					((MetricRaw)metric).setThreadData(threadData);
-			}
-			threadDataAvailable = threadData.isAvailable();
+		if (threadData == null) {
+			items[ITEM_THREAD].setEnabled(false);
+			return;
 		}
-		super.setData(root);
 		
-		if (threadDataAvailable) {
+		if (threadData.isAvailable()) {
 			// check the validity
 			try {
 				threadData.getParallelismLevel();
 			} catch (IOException e) {
-				threadDataAvailable = false;
-				items[ITEM_GRAPH] .setEnabled(threadDataAvailable);
+				items[ITEM_GRAPH] .setEnabled(false);
+				return;
 			}
 		}
-
-		items[ITEM_THREAD].setEnabled(threadDataAvailable);
+		items[ITEM_THREAD].setEnabled(threadData.isAvailable());
 	}
 
 	@Override

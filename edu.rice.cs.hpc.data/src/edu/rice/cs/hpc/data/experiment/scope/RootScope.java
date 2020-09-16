@@ -21,11 +21,13 @@ import java.io.IOException;
 import edu.rice.cs.hpc.data.db.DataSummary;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.BaseExperimentWithMetrics;
+import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpc.data.experiment.metric.IMetricValueCollection;
 import edu.rice.cs.hpc.data.experiment.metric.version2.MetricValueCollection2;
 import edu.rice.cs.hpc.data.experiment.metric.version3.MetricValueCollection3;
 
 import edu.rice.cs.hpc.data.experiment.scope.visitors.IScopeVisitor;
+import edu.rice.cs.hpc.data.util.Constants;
 
 
 
@@ -45,12 +47,16 @@ public class RootScope extends Scope
 {
 static final private String NAME = "Experiment Aggregate Metrics";
 
+static final public int DEFAULT_CCT_ID  = 0;
+static final public int DEFAULT_FLAT_ID = 0;
+
 /** The name of the experiment's program. */
 protected String rootScopeName;
 protected RootScopeType rootScopeType;
 private BaseExperiment experiment;
 private String name;
 
+private IThreadDataCollection threadData;
 private DataSummary dataSummary;
 
 //////////////////////////////////////////////////////////////////////////
@@ -63,16 +69,21 @@ private DataSummary dataSummary;
 /*************************************************************************
  *	Creates a RootScope.
  ************************************************************************/
-	
+
 public RootScope(BaseExperiment experiment, String name, RootScopeType rst)
 {
-	// we assume the root scope CCT and Flat ID is 1
-	super(null, null, Scope.NO_LINE_NUMBER, Scope.NO_LINE_NUMBER, 1,1);	
+	this(experiment, name, rst, DEFAULT_CCT_ID, DEFAULT_FLAT_ID);
+}
+
+public RootScope(BaseExperiment experiment, String name, RootScopeType rst, int cctId, int flatId)
+{
+	super(null, null, Scope.NO_LINE_NUMBER, Scope.NO_LINE_NUMBER, cctId, flatId);	
 	this.rootScopeName 	= name;
 	this.experiment 	= experiment;
 	this.rootScopeType 	= rst;
 	root = this;
 }
+
 
 @Override
 public Scope duplicate() {
@@ -91,27 +102,45 @@ public IMetricValueCollection getMetricValueCollection(Scope scope) throws IOExc
 	final int metric_size = ((BaseExperimentWithMetrics)experiment).getMetricCount();
 	final int version  	  = experiment.getMajorVersion();
 	
-	if (version == 3 && rootScopeType == RootScopeType.CallingContextTree) 
+	// TODO: this is a hack
+	
+	if (version == Constants.EXPERIMENT_SPARSE_VERSION && rootScopeType == RootScopeType.CallingContextTree) 
 	{
-		if (dataSummary == null)
-		{
+		if (dataSummary == null) {
 			dataSummary = new DataSummary();
+			
 			String filename = experiment.getDefaultDirectory().getAbsolutePath() + File.separatorChar
 					+ experiment.getDbFilename(BaseExperiment.Db_File_Type.DB_SUMMARY);
+			
 			dataSummary.open(filename);
 		}
-		MetricValueCollection3 col = new MetricValueCollection3(this, scope);
-		return col;
+		return new MetricValueCollection3(dataSummary, scope);
 	} else {
 		return new MetricValueCollection2(metric_size);		
 	}
 }
 
-public DataSummary getDataSummary()
+
+
+/****
+ * set the IThreadDataCollection object to this root
+ * 
+ * @param threadData
+ */
+public void setThreadData(IThreadDataCollection threadData)
 {
-	return dataSummary;
+	this.threadData = threadData;
 }
 
+
+/***
+ * Return the IThreadDataCollection of this root if exists.
+ * 
+ * @return
+ */
+public IThreadDataCollection getThreadData() {
+	return threadData;
+}
 
 //////////////////////////////////////////////////////////////////////////
 //	SCOPE DISPLAY														//

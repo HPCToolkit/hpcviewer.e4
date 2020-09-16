@@ -33,4 +33,12 @@ public class TimelineDataSet
 	public int getLineNumber() {
 		return linenum;
 	}
+	
+	public String toString() {
+		StringBuffer buffer = new StringBuffer();
+		for(BaseDataVisualization dv: list) {
+			buffer.append("(" + dv.x_start + "-" + dv.x_end + ", " + dv.color + ") ");
+		}
+		return buffer.toString();
+	}
 }

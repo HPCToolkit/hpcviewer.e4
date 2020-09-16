@@ -669,7 +669,9 @@ public class BaseExperimentBuilder extends Builder {
 					return;
 				}
 			}
-							
+			if (objLoadModule == null) {
+				objLoadModule = LoadModuleScope.build(rootStack.peek(), "unknown", srcFile);
+			}
 			
 			ProcedureScope procScope  = new ProcedureScope(rootStack.peek(), objLoadModule, srcFile, 
 					firstLn-1, lastLn-1, 
@@ -767,12 +769,24 @@ public class BaseExperimentBuilder extends Builder {
 
 	
 	/*************************************************************************
+	 * Handling the {@code Procedure} tag in the procedure dictionary table
+	 * <pre>
+              i CDATA #REQUIRED
+              n CDATA #REQUIRED
+              f CDATA> 
+       </pre>
+       The value of f is determined by hpctoolkit/src/lib/prof/NameMapping.cpp :
+       <pre>
+       	const int  TYPE_NORMAL_PROC  = 0;  // nothing special. Default value
+		const int  TYPE_PLACEHOLDER  = 1;  // the proc is just a a place holder
+		const int  TYPE_ROOT         = 2;  // the proc is a root tyoe, shown in a separate view in hpcviewer
+		const int  TYPE_ELIDED       = 3;  // the proc shouldn't be shown in hpcviewer at all
+		const int  TYPE_TOPDOWN_PLACEHOLDER  = 4;  // special place holder for top-down tree only.
+		</pre>
 	 * 
 	 * @param attributes
 	 * @param values
-	 * <!ATTLIST Procedure
-              i CDATA #REQUIRED
-              n CDATA #REQUIRED>
+	 * 
 	 *************************************************************************/
 	private void do_Procedure(String[] attributes, String[] values) {
 		if(values.length < 2)
@@ -791,8 +805,7 @@ public class BaseExperimentBuilder extends Builder {
 				sData = values[i];
 			} else if (attributes[i].equals("f")) {
 				statusProc  = Integer.parseInt(values[i]);
-			}
-			
+			}			
 		}
 		try {
 			Integer objID = Integer.parseInt(sID);
@@ -1090,8 +1103,9 @@ public class BaseExperimentBuilder extends Builder {
 	protected void begin_SecData(String[] attributes, String[] values) 
 	{
 		// make the root scope
-		this.rootScope = new RootScope(this.experiment, "Invisible Outer Root Scope", RootScopeType.Invisible);
-		this.scopeStack.push(this.rootScope);	// don't use 'beginScope'
+		rootScope = new RootScope(this.experiment, "Invisible Outer Root Scope", RootScopeType.Invisible, 1000000,1 );
+		
+		scopeStack.push(this.rootScope);	// don't use 'beginScope'
 
 		final String title;
 		final RootScopeType rootType;

@@ -71,6 +71,7 @@ public class LocalDBOpener extends AbstractDBOpener
 			fileDB = new FileDB2();
 			break;
 		case 3:
+		case 4:
 			fileDB = new FileDB3();
 			break;
 		default:

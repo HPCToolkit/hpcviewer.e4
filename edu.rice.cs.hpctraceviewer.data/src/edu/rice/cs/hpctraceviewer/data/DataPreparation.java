@@ -1,5 +1,7 @@
 package edu.rice.cs.hpctraceviewer.data;
 
+import java.util.HashMap;
+
 import org.eclipse.swt.graphics.Color;
 
 
@@ -15,22 +17,16 @@ import org.eclipse.swt.graphics.Color;
 public abstract class DataPreparation
 {
 	final protected DataLinePainting data;
+	final private HashMap<Integer, Integer>mapInvalidData;
 		
 	/****
 	 * Abstract class constructor to paint a line (whether it's detail view or depth view) 
-	 * 
-	 * @param _colorTable : color table
-	 * @param _ptl : the time line manager of a process
-	 * @param _spp : the painter
-	 * @param _begTime : time start of the current view
-	 * @param _depth : the current depth
-	 * @param _height : the height (in pixel) of the line to paint
-	 * @param _pixelLength : the length (in pixel)
-	 * @param usingMidpoint : flag whether we should use midpoint or not
+	 * @param data a DataLinePainting object
 	 */
 	public DataPreparation(DataLinePainting data)
 	{
 		this.data = data;
+		mapInvalidData = new HashMap<Integer, Integer>();
 	}
 	
 	/**Painting action
@@ -45,7 +41,24 @@ public abstract class DataPreparation
 		int succSampleMidpoint = (int) Math.max(0, (data.ptl.getTime(0)-data.begTime)/data.pixelLength);
 
 		CallPath cp = data.ptl.getCallPath(0, data.depth);
-		if (cp==null)
+
+		// issue #15: Trace view doesn't render GPU trace line
+		// This happens when the first sample to render has a bad cpid which causes this method to exit prematurely.
+		// We shouldn't exit. Instead, we should search for the next available callpath, unless we are at 
+		// the end of the data trace line
+		
+		if (cp==null && data.ptl.size()==0)
+			return 0;
+		
+		// issue #15: Trace view doesn't render GPU trace line
+		// find the next first available data
+		// If there's no data available, we exit
+		
+		int i=1;
+		for(;i<data.ptl.size() && cp == null; i++) {
+			cp = data.ptl.getCallPath(i, data.depth);
+		}
+		if (cp == null)
 			return 0;
 		
 		String succFunction = cp.getScopeAt(data.depth).getName(); 
@@ -92,6 +105,15 @@ public abstract class DataPreparation
 					if (still_the_same)
 						end = indexSucc;
 				} else {
+					int cpid = data.ptl.getCpid(indexSucc);
+					Integer num = mapInvalidData.get(cpid);
+					if (num != null) {
+						num++;
+					} else {
+						num = 1;
+					}
+					mapInvalidData.put(cpid, num);
+					
 					num_invalid_cp++;
 				}
 			}
@@ -128,6 +150,12 @@ public abstract class DataPreparation
 		}
 		return num_invalid_cp;
 	}
+	
+	
+	public HashMap<Integer, Integer> getInvalidData() {
+		return mapInvalidData;
+	}
+	
 	 //This is potentially vulnerable to overflows but I think we are safe for now.
 	/**Returns the midpoint between x1 and x2*/
 	private static long midpoint(long x1, long x2)

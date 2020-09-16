@@ -13,7 +13,6 @@ import org.eclipse.swt.widgets.TreeColumn;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
-import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
 import edu.rice.cs.hpc.data.experiment.metric.MetricRaw;
@@ -32,8 +31,6 @@ import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownContentViewer;
 
 public class ThreadContentViewer extends TopDownContentViewer 
 {
-	static final private int MAX_THREAD_INDEX = 2;
-	
 	/** the metric manager of the view. DO NOT access this variable directly.
 	 *  Instead, we need to query to getMetricManager() */
 	private IMetricManager metricManager = null;
@@ -108,17 +105,12 @@ public class ThreadContentViewer extends TopDownContentViewer
 	 * @throws IOException 
 	 */
 	private void initTableColumns(ThreadViewInput input, BaseMetric []mr)  {
-		if (mr == null)
-		{
+		if (mr == null) {
 			// error
 			return;
 		}
-
-		IThreadDataCollection threadData = input.getThreadData();
 		ScopeTreeViewer treeViewer = getViewer();
 		AbstractContentProvider contentProvider = getContentProvider(treeViewer);
-		
-		String[] labels;
 		
 		if (treeViewer.getTree().getColumnCount() == 0) {
 	        TreeViewerColumn colTree = createScopeColumn(treeViewer);
@@ -134,67 +126,38 @@ public class ThreadContentViewer extends TopDownContentViewer
 		if (threads == null)
 			return;
 		
-		try {
-			labels = threadData.getRankStringLabels();
+		// duplicate "raw metrics" before setting them into the column. The reason for duplication is: 
+		// Although metric A in column X is the same as metric A in column Y (they are both metric A),
+		// but column X is for displaying the values for threads P while column Y is for displaying
+		// for threads Q. 
+		boolean sort = true;
+		HashMap<Integer, BaseMetric> listOfDuplicates = new HashMap<Integer, BaseMetric>(mr.length);
+		
+		for(int j=0; j<mr.length; j++)
+		{
+			MetricRaw mdup = MetricRaw.create(mr[j]);
+			mdup.setThread(threads);
+			mdup.setDisplayName(mdup.getDisplayName());
 			
-			// duplicate "raw metrics" before setting them into the column. The reason for duplication is: 
-			// Although metric A in column X is the same as metric A in column Y (they are both metric A),
-			// but column X is for displaying the values for threads P while column Y is for displaying
-			// for threads Q. 
-			boolean sort = true;
-			HashMap<Integer, BaseMetric> listOfDuplicates = new HashMap<Integer, BaseMetric>(mr.length);
+			final String metricID = String.valueOf(treeViewer.getTree().getColumnCount());
+			mdup.setShortName(metricID);
+			listOfDuplicates.put(mr[j].getIndex(), mdup);
 			
-			for(int j=0; j<mr.length; j++)
-			{
-				MetricRaw mdup = (MetricRaw) mr[j].duplicate();
-				mdup.setThread(threads);
-				
-				StringBuffer buffer = new StringBuffer();
-				buffer.append('[');
-				int size = threads.size();
-				
-				// for the column title: only list the first MAX_THREAD_INDEX of the set of threads
-				for(int i=0; i<size && i<=MAX_THREAD_INDEX; i++) {
-					final int index;
-					if (i<MAX_THREAD_INDEX) {
-						index = threads.get(i);
-					} else {
-						// show the last thread index
-						if (size > MAX_THREAD_INDEX+1)
-							buffer.append("..");
-						index = threads.get(size-1);
-					}
-					buffer.append(labels[index]);
-					if (i < MAX_THREAD_INDEX && i<size-1)
-						buffer.append(',');
-				}
-				buffer.append("]-");
-				buffer.append(mdup.getDisplayName());
-
-				mdup.setDisplayName(buffer.toString());
-				final String metricID = String.valueOf(treeViewer.getTree().getColumnCount());
-				mdup.setShortName(metricID);
-				listOfDuplicates.put(mr[j].getIndex(), mdup);
-				
-				treeViewer.addTreeColumn(mdup, sort);
-				
-				// sort initially the first column metric
-				sort = false;
+			treeViewer.addTreeColumn(mdup, sort);
+			
+			// sort initially the first column metric
+			sort = false;
+		}
+		
+		Iterator<Entry<Integer, BaseMetric>> iterator = listOfDuplicates.entrySet().iterator();
+		while(iterator.hasNext()) {
+			Entry<Integer, BaseMetric> entry = iterator.next();
+			BaseMetric metric = entry.getValue();
+			int partner 	  = metric.getPartner();
+			if (partner >= 0) {
+				BaseMetric metricPartner = listOfDuplicates.get(partner);
+				((MetricRaw)metric).setMetricPartner((MetricRaw) metricPartner);
 			}
-			
-			Iterator<Entry<Integer, BaseMetric>> iterator = listOfDuplicates.entrySet().iterator();
-			while(iterator.hasNext()) {
-				Entry<Integer, BaseMetric> entry = iterator.next();
-				BaseMetric metric = entry.getValue();
-				int partner 	  = metric.getPartner();
-				if (partner >= 0) {
-					BaseMetric metricPartner = listOfDuplicates.get(partner);
-					((MetricRaw)metric).setMetricPartner((MetricRaw) metricPartner);
-				}
-			}
-			
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
 	
@@ -210,6 +173,11 @@ public class ThreadContentViewer extends TopDownContentViewer
 	}
 
 
+	/****
+	 * 
+	 * @param experiment
+	 * @return
+	 */
 	protected RootScope createRoot(BaseExperiment experiment) {
 
 		// create and duplicate the configuration
@@ -229,5 +197,5 @@ public class ThreadContentViewer extends TopDownContentViewer
 	@Override
 	protected ViewerType getViewerType() {
 		return ViewerType.INDIVIDUAL;
-	}
+	}	
 }

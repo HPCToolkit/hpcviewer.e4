@@ -2,12 +2,14 @@ package edu.rice.cs.hpc.data.experiment;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
 import edu.rice.cs.hpc.data.experiment.metric.MetricType;
+import edu.rice.cs.hpc.data.util.Constants;
 
 
 /****************************************************************************
@@ -19,6 +21,7 @@ import edu.rice.cs.hpc.data.experiment.metric.MetricType;
 public abstract class BaseExperimentWithMetrics extends BaseExperiment 
 implements IMetricManager
 {
+	
 	/***** A list of metric descriptor   */
 	protected List<BaseMetric> metrics;
 	protected ArrayList<BaseMetric> metricsWithOrder;
@@ -45,6 +48,15 @@ implements IMetricManager
 			if (metric.getOrder() >= 0) {
 				metricsWithOrder.add(metric);
 			}
+		}
+		if (getMajorVersion() >= Constants.EXPERIMENT_SPARSE_VERSION) {
+			// reorder the metric since hpcprof2 will output not in order fashion
+			BaseMetric []orderedList = new BaseMetric[metrics.size()];
+			
+			for(BaseMetric metric: metrics) {
+				orderedList[metric.getIndex()] = metric;
+			}
+			metrics = Arrays.asList(orderedList);
 		}
 	}
 

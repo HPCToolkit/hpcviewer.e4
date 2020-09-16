@@ -1,18 +1,16 @@
 package edu.rice.cs.hpcdata.tld.plot;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
-import java.util.HashMap;
-import java.util.Random;
+import java.util.ArrayList;
+import java.util.List;
+
 
 import edu.rice.cs.hpc.data.db.DataCommon;
-import edu.rice.cs.hpc.data.util.Constants;
 
 /*******************************************************************************************
  * 
@@ -22,30 +20,33 @@ import edu.rice.cs.hpc.data.util.Constants;
  *******************************************************************************************/
 public class DataPlot extends DataCommon 
 {
-	final private static int PLOT_ENTRY_SIZE = Constants.SIZEOF_INT + Constants.SIZEOF_INT;
-	private long index_start;
-	private long index_length;
-	private long plot_start;
-	private long plot_length;
-	private int  size_cctid;
-	private int  size_metid;
-	private int  size_offset;
-	private int  size_count;
-	private int  size_tid;
-	private int  size_metval;
+	private static final String HEADER = "HPCPROF-cmsdb_____";
 	
+	/*** list of cct. In the future we may need to implement with concurrent list.
+	 *** Right now it's just a simple array or list. Please use it carefully   
+	 ***/
+	
+	private List<ContextInfo> listContexts;
+		
 	private RandomAccessFile file;
-	
-	private HashMap<PlotIndexKey, PlotIndexValue> table_index;
 	
 	
 	//////////////////////////////////////////////////////////////////////////
 	// Override methods from DataCommon
 	//////////////////////////////////////////////////////////////////////////
 
+	@Override
+	public void open(final String filename)
+			throws IOException
+	{
+		super.open(filename);
+		file = new RandomAccessFile(filename, "r");
+	}
 	
 	@Override
 	public void dispose() {
+		listContexts = null;
+		
 		try {
 			if (file != null)
 				file.close();
@@ -62,73 +63,67 @@ public class DataPlot extends DataCommon
 
 	@Override
 	protected boolean isFileHeaderCorrect(String header) {
-		return true;
+		return header.equals(HEADER);
 	}
 
+	
 	@Override
 	protected boolean readNextHeader(FileChannel input) throws IOException {
-		ByteBuffer buffer = ByteBuffer.allocate(256);
-		int numBytes      = input.read(buffer);
+		if (numItems == 0)
+			return false;
+		
+		listContexts = new ArrayList<DataPlot.ContextInfo>((int) numItems);
+		
+		ByteBuffer buffer = ByteBuffer.allocate((int) (numItems * ContextInfo.SIZE));
+		
+		int numBytes = input.read(buffer);
 		if (numBytes > 0) 
 		{
 			buffer.flip();
-			index_start  = buffer.getLong();
-			index_length = buffer.getLong();
-			plot_start	 = buffer.getLong();
-			plot_length	 = buffer.getLong();
-			
-			size_cctid 	 = buffer.getInt();
-			size_metid 	 = buffer.getInt();
-			size_offset  = buffer.getInt();
-			size_count 	 = buffer.getInt();
-			size_tid 	 = buffer.getInt();
-			size_metval  = buffer.getInt();
+			for(int i=0; i<numItems; i++) {
+				ContextInfo info = new ContextInfo();
+				
+				info.id = buffer.getInt();
+				info.numValues = buffer.getLong();
+				info.numNonZeroMetrics = buffer.getShort();
+				info.offset = buffer.getLong();
+				
+				listContexts.add(info);
+			}
 		}
 		return true;
 	}
 
+	
 	@Override
 	public void printInfo( PrintStream out)
 	{
 		super.printInfo(out);
-		out.format("index start: %d\n index length: %d\n plot start: %d\n plot length: %d\n", 
-				index_start, index_length, plot_start, plot_length);
-		out.format("\n size cct id: %d\n size met id: %d\n size offset: %d\n size  count: %d\n", 
-				size_cctid, size_metid, size_offset, size_count);
-		out.format(" size tid: %d\n size met val: %d\n", size_tid, size_metval);
-		
-		try {
-			checkData();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-			return;
-		}
 		
 		// reading some parts of the indexes
-		Random r = new Random();
-		for(int i=0; i<10; i++)
+		for(int j=0; j<listContexts.size(); j++)
 		{
-			int index  = r.nextInt(table_index.size() - 1);
-			int metric = r.nextInt(2);
-			PlotIndexValue pi = table_index.get(new PlotIndexKey(index, metric));
-			if (pi != null)
-			{
-				out.format("[%d]\t met-id:%d, offset: %d, count: %d\n", 
-						index, metric, pi.offset, pi.count);
+			ContextInfo ctxInfo = listContexts.get(j);
+			short numMetrics = ctxInfo.numNonZeroMetrics;
+
+			out.format("%5d [cct %5d] ", j, ctxInfo.id);
+			System.out.println(ctxInfo);
+			
+			for(short i=0; i<numMetrics; i++) {
+				System.out.print("\t m: " + i);
 				try {
-					DataPlotEntry []entry = getPlotEntry(index, 0);
-					if (entry != null) 
-					{
-						for (int j=0; j<pi.count; j++)
-						{
-							out.format("\t%s", entry[j]);
+					DataPlotEntry []entries = getPlotEntry(ctxInfo, i);
+					if (entries != null) {
+						for (DataPlotEntry entry: entries) {
+							out.print(" " + entry);
 						}
-						out.println();
 					}
+					System.out.println();
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+	
 			}
 		}
 	}
@@ -138,37 +133,64 @@ public class DataPlot extends DataCommon
 	// public methods
 	//////////////////////////////////////////////////////////////////////////
 
+	
+	/***
+	 * Retrieve a plot entry given a cct id
+	 * 
+	 * @param cct the CCT id
+	 * @param metric the metric id
+	 * @return array of plot data entry if exists, null otherwise.
+	 * 
+	 * @throws IOException
+	 */
+	public DataPlotEntry []getPlotEntry(int cct, int metric) throws IOException
+	{
+		ContextInfo info = listContexts.get(cct);
+		return getPlotEntry(info, metric);
+	}
+	
 	/******
 	 * Retrieve a list of plot data of a given cct index and metric raw index
 	 *  
 	 * @param cct : cct index
 	 * @param metric : the index of the raw metric
 	 * 
-	 * @return an array of plot data
+	 * @return an array of plot data entry containing the value if exist. Null otherwise.
 	 * 
 	 * @throws IOException
 	 */
-	public DataPlotEntry []getPlotEntry(int cct, int metric) throws IOException
+	public DataPlotEntry []getPlotEntry(ContextInfo info, int metric) throws IOException
 	{
-		checkData();
-		
-		PlotIndexValue pi = table_index.get(new PlotIndexKey(cct, metric));
-		if (pi == null)
-			// there is no data for the given cct and metric
+		if (file == null)
 			return null;
-		file.seek(pi.offset);
-		byte []buffer = new byte[PLOT_ENTRY_SIZE * pi.count];
-		file.readFully(buffer);
-		ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
-		DataPlotEntry []entry = new DataPlotEntry[pi.count];
-		for (int i=0; i<pi.count; i++)
-		{
+		
+		if (info == null)
+			return null;
+
+		long metricPosition = info.offset + info.numValues * DataPlotEntry.SIZE;
+		long size = (info.numNonZeroMetrics + 1) * RECORD_SIZE;
+		
+		ByteBuffer buffer = file.getChannel().map(MapMode.READ_ONLY, metricPosition, size);
+		
+		long []indexes = binarySearch((short) metric, 0, info.numNonZeroMetrics+1, buffer);
+
+		if (indexes == null)
+			return null;
+		
+		file.seek(info.offset +  DataPlotEntry.SIZE * indexes[0]);
+		int numMetrics = (int) (indexes[1] - indexes[0]);
+		DataPlotEntry []values = new DataPlotEntry[numMetrics];
+		
+		for (int i=0; i<numMetrics; i++) {
+			DataPlotEntry entry = new DataPlotEntry();
 			
-			entry[i] 	    = new DataPlotEntry();
-			entry[i].tid 	= byteBuffer.getInt();
-			entry[i].metval = byteBuffer.getFloat();
+			entry.metval = file.readDouble();
+			entry.tid    = file.readInt();
+			
+			values[i] = entry;
 		}
-		return entry;
+		
+		return values;
 	}
 	
 	
@@ -176,81 +198,72 @@ public class DataPlot extends DataCommon
 	// Private methods
 	//////////////////////////////////////////////////////////////////////////
 
-	private RandomAccessFile internal_open(String filename) throws FileNotFoundException
-	{
-		RandomAccessFile file = new RandomAccessFile(filename, "r");
-		return file;
-
+	private static final int RECORD_SIZE = 2 + 8;
+	
+	/***
+	 * Binary earch the cct index 
+	 * 
+	 * @param index the cct index
+	 * @param first the beginning of the relative index
+	 * @param last  the last of the relative index
+	 * @param buffer ByteBuffer of the file
+	 * @return 2-length array of indexes: the index of the found cct, and its next index
+	 */
+	private long[] binarySearch(short index, int first, int last, ByteBuffer buffer) {
+		int begin = first;
+		int end   = last;
+		int mid   = (begin+end)/2;
+		
+		while (begin <= end) {
+			buffer.position(mid * RECORD_SIZE);
+			
+			short metric = buffer.getShort();
+			long offset  = buffer.getLong();
+			
+			if (metric < index) {
+				begin = mid+1;
+			} else if(metric == index) {
+				long nextIndex = offset;
+				
+				if (mid+1<last) {
+					buffer.position(RECORD_SIZE * (mid+1));
+					buffer.getShort();
+					nextIndex = buffer.getLong();
+				}
+				return new long[] {offset, nextIndex};
+			} else {
+				end = mid-1;
+			}
+			mid = (begin+end)/2;
+		}
+		// not found
+		return null;
 	}
 	
-	private void checkData() throws IOException
-	{
-		if (table_index == null) 
-		{
-			fillOffsetTable(filename);
-			file = internal_open(filename);
-		}
-	}
+
 	
-	private void fillOffsetTable(String filename) throws IOException
+	
+	//////////////////////////////////////////////////////////////////////////
+	// Private classes
+	//////////////////////////////////////////////////////////////////////////
+
+	private static class ContextInfo
 	{
-		final RandomAccessFile file = new RandomAccessFile(filename, "r");
-		final FileChannel channel = file.getChannel();
-		final MappedByteBuffer mappedBuffer = channel.map(MapMode.READ_ONLY, index_start, index_length);
-		final ByteBuffer byteBuffer = mappedBuffer.asReadOnlyBuffer();
+		public static final int SIZE = 4 + 8 + 2 + 8;
 		
-		final int INDEX_PLOT_SIZE = Constants.SIZEOF_INT  + Constants.SIZEOF_INT +
-								 	Constants.SIZEOF_LONG + Constants.SIZEOF_LONG; 
-		final int num_index = (int) (index_length/INDEX_PLOT_SIZE);
+		public int   id;
+		public long  numValues;
+		public short numNonZeroMetrics;
+		public long  offset;
 		
-		table_index  = new HashMap<PlotIndexKey, PlotIndexValue>(num_index); 
-		
-		for (int i=0; i<num_index; i++)
-		{
-			int cct_id 	     = byteBuffer.getInt();
-			int metric_id    = byteBuffer.getInt();
-			PlotIndexKey idx = new PlotIndexKey(cct_id, metric_id);
-			
-			PlotIndexValue val = new PlotIndexValue();
-			val.offset 	  = byteBuffer.getLong();
-			val.count	  = (int) byteBuffer.getLong();
-			
-			table_index.put(idx, val);
+		public String toString() {
+			return  "id: "   + id + 
+					", nv: " + numValues +
+					", nm: " + numNonZeroMetrics +
+					", of: " + offset;
 		}
-		channel.close();
-		file.close();
 	}
 
-	private static class PlotIndexKey
-	{
-		int cct_index, metric_id;
-		
-		public PlotIndexKey(int cct_index, int metric_id)
-		{
-			this.cct_index = cct_index;
-			this.metric_id = metric_id;
-		}
-		
-		@Override
-		public int hashCode()
-		{
-			return (metric_id << 24 + cct_index);
-		}
-		
-		@Override
-		public boolean equals(Object o) 
-		{
-			if (this == o) return true;
-			if (!(o instanceof PlotIndexKey)) return false;
-			PlotIndexKey key = (PlotIndexKey) o;
-			return cct_index == key.cct_index && metric_id == key.metric_id;
-		}
-	}
-	private static class PlotIndexValue
-	{
-		public long offset;
-		public int count;
-	}
 	
 	
 	/////////////////////////////////////////////////////////////////////////////
@@ -263,7 +276,7 @@ public class DataPlot extends DataCommon
 		if (argv != null && argv.length>0) {
 			filename = argv[0];
 		} else {
-			filename = "/home/la5/data/new-database/db-lulesh-new/plot.db"; 
+			filename = "/Users/la5/data/sparse/hpctoolkit-fib-sparse-database/cct.db"; 
 		}
 		try {
 			data.open(filename);

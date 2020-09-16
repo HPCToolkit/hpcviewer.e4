@@ -61,13 +61,11 @@ public class AggregateMetric extends BaseMetric {
 	 * @param type
 	 * @param sFormula
 	 *******/
-	public void setFormula(char type, String sFormula) {
-		assert (type == FORMULA_COMBINE || type == FORMULA_FINALIZE);
-		
+	public void setFormula(char type, String sFormula) {		
 		try {
 			if (type == FORMULA_COMBINE) {
 				formulaCombine = ExpressionTree.parse(sFormula);				
-			} else {
+			} else if (type == FORMULA_FINALIZE) {
 				formulaFinalize = ExpressionTree.parse(sFormula);
 			}
 		} catch (ExpressionParseException e) {

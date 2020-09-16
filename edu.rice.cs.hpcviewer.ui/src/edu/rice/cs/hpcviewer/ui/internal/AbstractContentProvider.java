@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
+import edu.rice.cs.hpc.data.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpc.data.util.ScopeComparator;
 import edu.rice.cs.hpcviewer.ui.base.ISortContentProvider;
@@ -124,6 +125,11 @@ public abstract class AbstractContentProvider
      */
     public Object[] getSortedChildren(Scope parent) {
 		
+    	if (parent instanceof ProcedureScope) {
+    		ProcedureScope proc = (ProcedureScope) parent;
+    		if (proc.toBeElided())
+    			return null;
+    	}
 		int hash = System.identityHashCode(parent);
     	Object [] children = sort_scopes.get(hash);
     	
