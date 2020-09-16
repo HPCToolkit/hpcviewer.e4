@@ -1,10 +1,12 @@
 package edu.rice.cs.hpc.data.experiment.metric.version3;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
 import edu.rice.cs.hpc.data.db.DataSummary;
+import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.BaseExperimentWithMetrics;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
@@ -33,6 +35,8 @@ public class MetricValueCollection3 implements IMetricValueCollection
 {
 	final private RootScope root;
 	
+	private DataSummary dataSummary;
+	
 	private Scope currentScope;
 
 	private HashMap<Integer, MetricValue> values;
@@ -41,6 +45,16 @@ public class MetricValueCollection3 implements IMetricValueCollection
 	{
 		this.root	 = root;
 		this.currentScope = scope;
+		
+		// create and initialize the access to thread major sparse database
+		
+		dataSummary = new DataSummary();
+		Experiment experiment = (Experiment) root.getExperiment();
+		
+		String filename = experiment.getDefaultDirectory().getAbsolutePath() + File.separatorChar
+				+ experiment.getDbFilename(BaseExperiment.Db_File_Type.DB_SUMMARY);
+		
+		dataSummary.open(filename);
 	}
 	
 	@Override
@@ -51,9 +65,6 @@ public class MetricValueCollection3 implements IMetricValueCollection
 			currentScope = scope;
 			values = null;
 			
-			// create and initialize the first metric values instance
-			final DataSummary data = root.getDataSummary();
-			
 			List<MetricValueSparse> sparseValues;
 			
 			// read the sparse metrics from the file (thread.db)
@@ -62,7 +73,7 @@ public class MetricValueCollection3 implements IMetricValueCollection
 			//  just need to look at the cache, instead of reading the file again.
 			
 			try {
-				sparseValues = data.getMetrics(scope.getCCTIndex());
+				sparseValues = dataSummary.getMetrics(scope.getCCTIndex());
 			} catch (IOException e1) {
 				e1.printStackTrace();
 				return MetricValue.NONE;
@@ -169,4 +180,12 @@ public class MetricValueCollection3 implements IMetricValueCollection
 		return false;
 	}
 
+	
+	/***
+	 * Retrieve the object to access to thread-major sparse database
+	 * @return
+	 */
+	public DataSummary getDataSummary() {
+		return dataSummary;
+	}
 }

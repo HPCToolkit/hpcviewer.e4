@@ -15,10 +15,8 @@
 package edu.rice.cs.hpc.data.experiment.scope;
 
 
-import java.io.File;
 import java.io.IOException;
 
-import edu.rice.cs.hpc.data.db.DataSummary;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.BaseExperimentWithMetrics;
 import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
@@ -54,9 +52,7 @@ private BaseExperiment experiment;
 private String name;
 
 private IThreadDataCollection threadData;
-
-private DataSummary dataSummary; // specific to version 4
-
+private MetricValueCollection3 metricSparseCollection;
 
 //////////////////////////////////////////////////////////////////////////
 //	INITIALIZATION														//
@@ -100,24 +96,15 @@ public IMetricValueCollection getMetricValueCollection(Scope scope) throws IOExc
 	
 	if (version == Constants.EXPERIMENT_SPARSE_VERSION && rootScopeType == RootScopeType.CallingContextTree) 
 	{
-		if (dataSummary == null)
-		{
-			dataSummary = new DataSummary();
-			String filename = experiment.getDefaultDirectory().getAbsolutePath() + File.separatorChar
-					+ experiment.getDbFilename(BaseExperiment.Db_File_Type.DB_SUMMARY);
-			dataSummary.open(filename);
+		if (metricSparseCollection == null) {
+			metricSparseCollection = new MetricValueCollection3(this, scope);
 		}
-		MetricValueCollection3 col = new MetricValueCollection3(this, scope);
-		return col;
+		return metricSparseCollection;
 	} else {
 		return new MetricValueCollection2(metric_size);		
 	}
 }
 
-public DataSummary getDataSummary()
-{
-	return dataSummary;
-}
 
 
 /****

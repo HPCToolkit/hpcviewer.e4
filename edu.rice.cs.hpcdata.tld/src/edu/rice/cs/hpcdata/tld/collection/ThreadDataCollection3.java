@@ -11,6 +11,7 @@ import edu.rice.cs.hpc.data.db.IdTuple;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment.Db_File_Type;
 import edu.rice.cs.hpc.data.experiment.extdata.AbstractThreadDataCollection;
+import edu.rice.cs.hpc.data.experiment.metric.version3.MetricValueCollection3;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.tld.plot.DataPlot;
 import edu.rice.cs.hpcdata.tld.plot.DataPlotEntry;
@@ -34,9 +35,9 @@ public class ThreadDataCollection3 extends AbstractThreadDataCollection
 		data_plot = new DataPlot();
 		data_plot.open(directory + File.separatorChar + 
 				BaseExperiment.getDefaultDatabaseName(Db_File_Type.DB_PLOT));
-		data_summary = root.getDataSummary();
 		
-		root.getExperiment();
+		MetricValueCollection3 col = (MetricValueCollection3) root.getMetricValueCollection(root);
+		data_summary = col.getDataSummary();
 	}
 
 	@Override
