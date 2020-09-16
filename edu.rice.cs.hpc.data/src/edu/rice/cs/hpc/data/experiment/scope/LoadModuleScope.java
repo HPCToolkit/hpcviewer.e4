@@ -34,8 +34,6 @@ import edu.rice.cs.hpc.data.experiment.source.SourceFile;
 
 public class LoadModuleScope extends Scope
 {
-	
-private static int id = Integer.MAX_VALUE;
 
 /** The name of the load module. */
 protected String loadModuleName;

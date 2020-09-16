@@ -15,8 +15,10 @@
 package edu.rice.cs.hpc.data.experiment.scope;
 
 
+import java.io.File;
 import java.io.IOException;
 
+import edu.rice.cs.hpc.data.db.DataSummary;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.BaseExperimentWithMetrics;
 import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
@@ -45,6 +47,9 @@ public class RootScope extends Scope
 {
 static final private String NAME = "Experiment Aggregate Metrics";
 
+static final public int DEFAULT_CCT_ID  = 0;
+static final public int DEFAULT_FLAT_ID = 0;
+
 /** The name of the experiment's program. */
 protected String rootScopeName;
 protected RootScopeType rootScopeType;
@@ -52,7 +57,7 @@ private BaseExperiment experiment;
 private String name;
 
 private IThreadDataCollection threadData;
-private MetricValueCollection3 metricSparseCollection;
+private DataSummary dataSummary;
 
 //////////////////////////////////////////////////////////////////////////
 //	INITIALIZATION														//
@@ -64,16 +69,21 @@ private MetricValueCollection3 metricSparseCollection;
 /*************************************************************************
  *	Creates a RootScope.
  ************************************************************************/
-	
+
 public RootScope(BaseExperiment experiment, String name, RootScopeType rst)
 {
-	// we assume the root scope CCT and Flat ID is 1
-	super(null, null, Scope.NO_LINE_NUMBER, Scope.NO_LINE_NUMBER, 0, 0);	
+	this(experiment, name, rst, DEFAULT_CCT_ID, DEFAULT_FLAT_ID);
+}
+
+public RootScope(BaseExperiment experiment, String name, RootScopeType rst, int cctId, int flatId)
+{
+	super(null, null, Scope.NO_LINE_NUMBER, Scope.NO_LINE_NUMBER, cctId, flatId);	
 	this.rootScopeName 	= name;
 	this.experiment 	= experiment;
 	this.rootScopeType 	= rst;
 	root = this;
 }
+
 
 @Override
 public Scope duplicate() {
@@ -96,10 +106,15 @@ public IMetricValueCollection getMetricValueCollection(Scope scope) throws IOExc
 	
 	if (version == Constants.EXPERIMENT_SPARSE_VERSION && rootScopeType == RootScopeType.CallingContextTree) 
 	{
-		if (metricSparseCollection == null) {
-			metricSparseCollection = new MetricValueCollection3(this, scope);
+		if (dataSummary == null) {
+			dataSummary = new DataSummary();
+			
+			String filename = experiment.getDefaultDirectory().getAbsolutePath() + File.separatorChar
+					+ experiment.getDbFilename(BaseExperiment.Db_File_Type.DB_SUMMARY);
+			
+			dataSummary.open(filename);
 		}
-		return metricSparseCollection;
+		return new MetricValueCollection3(dataSummary, scope);
 	} else {
 		return new MetricValueCollection2(metric_size);		
 	}
