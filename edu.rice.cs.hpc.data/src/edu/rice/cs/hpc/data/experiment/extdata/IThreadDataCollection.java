@@ -2,9 +2,11 @@ package edu.rice.cs.hpc.data.experiment.extdata;
 
 import java.io.IOException;
 
+import edu.rice.cs.hpc.data.experiment.scope.RootScope;
+
 /********************************************************************************
  * 
- * Interface to collect data needed for plot graph
+ * Interface to collect data needed for plot graph and thread view
  *
  ********************************************************************************/
 public interface IThreadDataCollection 
@@ -17,7 +19,7 @@ public interface IThreadDataCollection
 	 * 
 	 * @throws IOException
 	 */
-	public void 	open(String directory) throws IOException;
+	public void 	open(RootScope root, String directory) throws IOException;
 	
 	/****
 	 * Check if the opened directory has a plot data or not
@@ -68,8 +70,10 @@ public interface IThreadDataCollection
 	 */
 	public String   getRankTitle() throws IOException;
 	
+		
 	/*****
 	 * Get an array of metrics of a specified node and metrics
+	 * It returns the array of metric values indexed from its thread or profile or rank number
 	 * 
 	 * @param nodeIndex
 	 * @param metricIndex

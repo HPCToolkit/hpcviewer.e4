@@ -81,6 +81,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 		add(scope,vt, true, false); 
 	}
 	public void visit(ProcedureScope scope, ScopeVisitType vt) 		{
+		
 		if (scope.isTopDownProcedure())
 			return;
 		add(scope,vt, true, false); 
@@ -263,8 +264,12 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 	 *****************************************************************/
 	private String getUniqueFileID(SourceFile file, LoadModuleScope lm)
 	{
-		String separator = String.valueOf(SEPARATOR_ID);
-		return lm.getFlatIndex() + separator + file.getFileID();
+		final String separator = String.valueOf(SEPARATOR_ID);
+		
+		int lmId   = lm != null   ? lm.getFlatIndex() : 0;
+		int fileId = file != null ? file.getFileID()  : 0;
+		
+		return lmId + separator + fileId;
 	}
 	
 	

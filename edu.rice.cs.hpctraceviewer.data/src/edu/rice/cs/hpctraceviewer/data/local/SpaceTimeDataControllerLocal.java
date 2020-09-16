@@ -76,7 +76,7 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 			traceFilePath = getTraceFile(exp.getDefaultDirectory().getAbsolutePath(), statusMgr);
 			fileDB.open(traceFilePath, trAttribute.dbHeaderSize, RECORD_SIZE);
 			
-		} else if (version == 3) 
+		} else if (version == Constants.EXPERIMENT_SPARSE_VERSION) 
 		{
 			// new format
 			String databaseDirectory = exp.getDefaultDirectory().getAbsolutePath(); 

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import org.eclipse.swt.custom.CTabFolder;
 
 import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
+import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.MetricRaw;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 
@@ -26,7 +27,7 @@ public class GraphPlotSortViewer extends AbstractGraphPlotViewer
 	}
 
 	@Override
-	protected double[] getValuesX(Scope scope, MetricRaw metric) throws NumberFormatException, IOException {
+	protected double[] getValuesX(Scope scope, BaseMetric metric) throws NumberFormatException, IOException {
 		IThreadDataCollection threadData = getInput().getThreadData();
 		double x_values[] = threadData.getRankLabels();
 		double sequence_x[] = new double[x_values.length];
@@ -37,11 +38,19 @@ public class GraphPlotSortViewer extends AbstractGraphPlotViewer
 	}
 
 	@Override
-	protected double[] getValuesY(Scope scope, MetricRaw metric) throws IOException {
+	protected double[] getValuesY(Scope scope, BaseMetric metric) throws IOException {
 
+		int id = metric.getIndex();
+		int size = 0;
+		
+		if (metric instanceof MetricRaw) {
+			id = ((MetricRaw) metric).getRawID();
+			size = ((MetricRaw) metric).getSize();
+		}
+		
 		IThreadDataCollection threadData = getInput().getThreadData();
 		double y_values[] = null;
-		y_values = threadData.getMetrics(scope.getCCTIndex(),metric.getRawID(), metric.getSize());
+		y_values = threadData.getMetrics(scope.getCCTIndex(), id, size);
 		pairThreadIndex = new PairThreadIndex[y_values.length];
 
 		for(int i=0; i<y_values.length; i++)

@@ -5,6 +5,8 @@ import java.io.IOException;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
+import edu.rice.cs.hpc.data.experiment.scope.RootScope;
+import edu.rice.cs.hpc.data.util.Constants;
 
 /*************************************************
  * 
@@ -24,41 +26,35 @@ public final class ThreadDataCollectionFactory
 	 * 
 	 * @throws IOException
 	 *******/
-	static public IThreadDataCollection build(Experiment experiment) throws IOException
+	static public IThreadDataCollection build(RootScope root) throws IOException
 	{
-		final BaseMetric []metrics = experiment.getMetricRaw();
 		IThreadDataCollection data_file = null;
-		if (metrics!=null) {
-			int version = experiment.getMajorVersion();
-			String directory = experiment.getDefaultDirectory().getAbsolutePath();
-			switch(version)
-			{
-			case 1:
-			case 2:
+
+		Experiment experiment = (Experiment) root.getExperiment();
+		int version = experiment.getMajorVersion();
+		switch(version)
+		{
+		case 1:
+		case 2:
+			final BaseMetric []metrics = experiment.getMetricRaw();
+			if (metrics!=null) {
 				data_file = new ThreadDataCollection2(experiment);
-				data_file.open(directory);
-				break;
-			case 3:
-				data_file = new ThreadDataCollection3();
-				data_file.open(directory);
-				break;
-			default:
-				data_file = null;
-				break;
+				String directory = experiment.getDefaultDirectory().getAbsolutePath();
+				data_file.open(root, directory);
 			}
+			break;
+			
+		case Constants.EXPERIMENT_SPARSE_VERSION:
+			data_file = new ThreadDataCollection3();
+			String directory = experiment.getDefaultDirectory().getAbsolutePath();
+			((ThreadDataCollection3)data_file).open(root, directory);
+			break;
+		default:
+			data_file = null;
+			break;
 		}
+		root.setThreadData(data_file);
+		
 		return data_file;
-	}
-	
-	/***************
-	 * Check if the thread-level data is available.
-	 * 
-	 * @param experiment : experiment database
-	 * @return true if the data exists, false otherwise
-	 ***************/
-	static public boolean isThreadDataAvailable(Experiment experiment) 
-	{
-		final BaseMetric []metrics = experiment.getMetricRaw();
-		return (metrics != null); 
 	}
 }

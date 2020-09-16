@@ -14,6 +14,7 @@ import edu.rice.cs.hpc.data.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric.VisibilityType;
 import edu.rice.cs.hpc.data.experiment.scope.*;
 import edu.rice.cs.hpc.data.experiment.xml.Token2.TokenXML;
+import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.data.util.IUserData;
 
 import java.util.List;
@@ -53,7 +54,13 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 		
 		listOfDerivedMetrics   = new ArrayList<DerivedMetric>(2);
 		
-		setRemoveInvisibleProcedure(true);
+		// issue #15: Trace view doesn't render GPU trace line
+		// If we elide "special" procedures, we'll have problems 
+		//   rendering the traces.
+		// Temporarily we should let these procedures (like <no activity>
+		//   to be visible
+		
+		setRemoveInvisibleProcedure(false);
 	}
 
 
@@ -170,7 +177,17 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 			for (int i=0; i<nbMetrics; i++) 
 			{
 				Metric objMetric = (Metric) this.metricList.get(i);
-				objMetric.setIndex(i);
+
+				int index = i;
+				
+				// for sparse metric, the index is random, we cannot rely on the order of metric.
+				// Instead, we can realy on the short name
+				
+				if (experiment.getMajorVersion() == Constants.EXPERIMENT_SPARSE_VERSION) {
+					index = Integer.valueOf( objMetric.getShortName() );
+				}
+				
+				objMetric.setIndex(index);
 				
 				// reset the short name. short name is the key used by formula
 				objMetric.setShortName(String.valueOf(i));
@@ -378,6 +395,10 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 				//  es: number of total samples
 			}
 		}
+		int index = nbMetrics;
+		if (experiment.getMajorVersion() == Constants.EXPERIMENT_SPARSE_VERSION) {
+			index = iSelf;
+		}
 		
 		// Laks 2009.01.14: if the database is call path database, then we need
 		//	to distinguish between exclusive and inclusive
@@ -400,15 +421,15 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 						sDisplayName, 				 // display name
 						visibility, format, percent, // displayed ? percent ?
 						"",							 // period (not defined at the moment)
-						nbMetrics, objType, partner);
+						index, objType, partner);
 				break;
 			case Derived_Incr:
 				metricInc = new AggregateMetric(sID, sDisplayName, sDescription,
-									visibility, format, percent, nbMetrics, partner, objType);
+									visibility, format, percent, index, partner, objType);
 				((AggregateMetric) metricInc).init( (BaseExperimentWithMetrics) this.experiment );
 				break;
 			case Derived:
-				metricInc = new DerivedMetric(sDisplayName, sID, nbMetrics, percent, objType);
+				metricInc = new DerivedMetric(sDisplayName, sID, index, percent, objType);
 				
 				metricInc.setPartner(partner);
 				metricInc.setOrder  (order);
@@ -425,13 +446,13 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 						format, 
 						percent, 					// display percent ?
 						"",							// period (not defined at the moment)
-						nbMetrics, objType, partner);
+						index, objType, partner);
 				break;
 		}
 		metricInc.setDescription(sDescription);
 		metricInc.setOrder(order);
 		
-		this.metricList.add(metricInc);
+		metricList.add(metricInc);
 
 		// ----------------------------------------------------------------------------
 		// if the XML file only provides one type of metric (i.e. exclusive metric),

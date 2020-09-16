@@ -1,13 +1,17 @@
 package edu.rice.cs.hpc.data.experiment.metric.version3;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
 
 import edu.rice.cs.hpc.data.db.DataSummary;
 import edu.rice.cs.hpc.data.experiment.BaseExperimentWithMetrics;
+import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpc.data.experiment.metric.IMetricValueCollection;
 import edu.rice.cs.hpc.data.experiment.metric.MetricValue;
+import edu.rice.cs.hpc.data.experiment.metric.MetricValueSparse;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 
@@ -27,12 +31,16 @@ import edu.rice.cs.hpc.data.experiment.scope.Scope;
  ******************************************************************/
 public class MetricValueCollection3 implements IMetricValueCollection 
 {
-	final private RootScope root;
-	private MetricValue []values;
+	private DataSummary dataSummary;
 	
-	public MetricValueCollection3(RootScope root, Scope scope) throws IOException
+	private Scope scope;
+
+	private HashMap<Integer, MetricValue> values;
+	
+	public MetricValueCollection3(DataSummary dataSummary, Scope scope) throws IOException
 	{
-		this.root	 = root;
+		this.scope = scope;		
+		this.dataSummary = dataSummary;
 	}
 	
 	@Override
@@ -40,46 +48,62 @@ public class MetricValueCollection3 implements IMetricValueCollection
 	{
 		if (values == null)
 		{
-			// create and initialize the first metric values instance
-			BaseExperimentWithMetrics exp = (BaseExperimentWithMetrics) root.getExperiment();
-			int metric_size = exp.getMetricCount();
-			final DataSummary data = root.getDataSummary();
-			// initialize
+			List<MetricValueSparse> sparseValues;
+			
+			// read the sparse metrics from the file (thread.db)
+			// if the read is successful, we cache all the metrics into values
+			// so that the next time we ask for another metric from the same scope,
+			//  just need to look at the cache, instead of reading the file again.
+			
 			try {
-				values = data.getMetrics(scope.getCCTIndex(), exp);
-				if (values != null && values.length>0)
-				{
-					// compute the percent annotation
-					for(int i=0; i<metric_size; i++)
-					{
-						if (values[i] != MetricValue.NONE)
-						{
-							float annotationValue = 1.0f;
-							if (!(scope instanceof RootScope)) {
-								MetricValue mv = root.getMetricValue(i);
-								if (mv != MetricValue.NONE)
-								{
-									annotationValue = values[i].getValue()/mv.getValue();
-								}
-							}
-							MetricValue.setAnnotationValue(values[i], annotationValue);
-						}
-					}
-					return values[index];
-				}
+				sparseValues = dataSummary.getMetrics(scope.getCCTIndex());
 			} catch (IOException e1) {
 				e1.printStackTrace();
+				return MetricValue.NONE;
 			}
+			// the reading is successful
+			// fill up the cache containing metrics of this scope for the next usage
+			
+			if (sparseValues != null && sparseValues.size()>0)
+			{
+				values = new HashMap<Integer, MetricValue>();
+				
+				for (MetricValueSparse mvs: sparseValues) {
+					float value = mvs.getValue();
+					float annotationValue = 1.0f;
+					
+					// compute the percent annotation
+					if (!(scope instanceof RootScope)) {
+						RootScope root = scope.getRootScope();
+						MetricValue mv = root.getMetricValue(mvs.getIndex());
+						if (mv != MetricValue.NONE)
+						{
+							annotationValue = value/mv.getValue();
+						}
+					}
+					MetricValue mv = new MetricValue(value, annotationValue);
+					values.put(mvs.getIndex(), mv);
+				}
+				
+				MetricValue mv = values.get(index);
+				if (mv != null)
+					return mv;
+			}
+
 		} else 
 		{
 			// metric values already exist
-			if (index < values.length) {
-				return values[index];
+			MetricValue mv = values.get(index);
+			if (mv != null) {
+				return mv;
 			} else {
-				// metric values already exist, but the index is bigger than the standard values
-				// this must be a derived metric
-				BaseExperimentWithMetrics exp = (BaseExperimentWithMetrics) root.getExperiment();
-				BaseMetric metric = exp.getMetric(index);
+				// the cache of metric values already exist, but we cannot find the value of this metric
+				// either the value is empty, or it's a derived metric which have to be computed here
+
+				RootScope root = scope.getRootScope();
+				Experiment experiment = (Experiment) root.getExperiment();
+				BaseMetric metric = experiment.getMetric(index);
+				
 				if (metric instanceof DerivedMetric)
 				{
 					return ((DerivedMetric)metric).getValue(scope);
@@ -91,8 +115,11 @@ public class MetricValueCollection3 implements IMetricValueCollection
 
 	@Override
 	public float getAnnotation(int index) {
-		MetricValue mv = values[index];
-		return MetricValue.getAnnotationValue(mv);
+		MetricValue mv = values.get(index);
+		if (mv != null)
+			return MetricValue.getAnnotationValue(mv);
+		
+		return 0.0f;
 	}
 
 	@Override
@@ -100,28 +127,33 @@ public class MetricValueCollection3 implements IMetricValueCollection
 		if (values != null) {
 			// If the index is out of array bound, it means we want to add a new derived metric.
 			// We will compute the derived value on the fly instead of storing it.
-			if (index < values.length) {
-				values[index]  = value;
-			}
+
+			values.put(index, value);
 		}
 	}
 
 	@Override
 	public void setAnnotation(int index, float ann) {
-		MetricValue value = values[index];
-		MetricValue.setAnnotationValue(value, ann);
+		MetricValue value = values.get(index);
+		if (value != null)
+			MetricValue.setAnnotationValue(value, ann);
 	}
 
 
 	@Override
 	public int size() {
+		RootScope root = scope.getRootScope();
 		BaseExperimentWithMetrics exp = (BaseExperimentWithMetrics) root.getExperiment();
 		return exp.getMetricCount();
 	}
 
 	@Override
 	public void dispose() {
-
+		// old jvm may need to clear the variables to perform GC
+		// we don't need this for newer jvm (AFAIK).
+		
+		values.clear();
+		values = null;
 	}
 
 	@Override
@@ -130,13 +162,17 @@ public class MetricValueCollection3 implements IMetricValueCollection
 		getValue(scope, 0);
 		if (values != null)
 		{
-			for(MetricValue value : values)
-			{
-				if (value != MetricValue.NONE)
-					return true;
-			}
+			return values.size()>0;
 		}
 		return false;
 	}
 
+	
+	/***
+	 * Retrieve the object to access to thread-major sparse database
+	 * @return
+	 */
+	public DataSummary getDataSummary() {
+		return dataSummary;
+	}
 }

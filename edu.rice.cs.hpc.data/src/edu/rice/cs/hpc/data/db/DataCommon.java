@@ -11,26 +11,23 @@ import java.nio.channels.FileChannel;
  * Class to read and store common header of a database
  * This class only works with hpcprof format version 3.0 
  *
+ * Header format:
+ * - 18 bytes magic 
+ * - 1  byte  version
+ * - 4  bytes number of items
+ * 
  ***************************************************/
 abstract public class DataCommon 
 {
-	private final static int HEADER_COMMON_SIZE = 256;
-	private final static int MESSAGE_SIZE 		= 32;
-	private final static int MAGIC 				= 0x06870630;
+	public  final static int HEADER_COMMON_SIZE = 23;
+	private final static int MESSAGE_SIZE 		= 18;
 	
-	protected long format;
-	protected long num_threads;
-	protected long num_cctid;
-	
-	/**** The maximun size of the metrics according to summary.db
-	 *    This number may not be the same as the number of metrics in experiment.xml
-	 *    since summary.db will include all hidden metrics. The best way to know
-	 *    the number of metrics is to query through experiment class, not this number.
-	 *    In fact, I don't think this variable is useful ***/
-	@Deprecated
-	protected long num_metric;
-	
+	protected long numItems;
+	protected int  version;
 	protected String filename;
+	
+	private FileInputStream fis;
+	private FileChannel channel;
 	
 	/*******
 	 * Open a file and read the first HEADER_COMMON_SIZE bytes
@@ -43,8 +40,8 @@ abstract public class DataCommon
 	{
 		filename = file;
 		
-		final FileInputStream fis = new FileInputStream(filename);
-		final FileChannel channel  = fis.getChannel();
+		fis = new FileInputStream(filename);
+		channel  = fis.getChannel();
 		
 		ByteBuffer buffer = ByteBuffer.allocate(HEADER_COMMON_SIZE);
 		int numBytes      = channel.read(buffer);
@@ -53,6 +50,7 @@ abstract public class DataCommon
 			// read the common header
 			readHeader(file, fis, buffer);
 			
+			channel.position(HEADER_COMMON_SIZE);
 			// -------------------------------------------------------------
 			// Read the next header (implemented by derived class)
 			// -------------------------------------------------------------
@@ -61,9 +59,6 @@ abstract public class DataCommon
 				// the implementer can perform other operations
 			}
 		}
-
-		channel.close();
-		fis.close();
 	}
 	
 	/******
@@ -72,11 +67,9 @@ abstract public class DataCommon
 	 */
 	public void printInfo( PrintStream out)
 	{
-		out.println("Filename: "	+ filename);
-		out.println("Format: "      + format);
-		out.println("Num threads: " + num_threads);
-		out.println("Num cctid: "   + num_cctid);
-		out.println("Num metric: "  + num_metric);
+		out.println("Filename: "  + filename);
+		out.println("Version: "   + version);
+		out.println("Num items: " + numItems);
 	}
 	
 	/***
@@ -85,7 +78,13 @@ abstract public class DataCommon
 	 */
 	public void dispose() throws IOException
 	{
-		// to be implemented
+		channel.close();
+		fis.close();
+	}
+	
+	
+	protected FileChannel getChannel() {
+		return channel;
 	}
 	
 	/******
@@ -104,77 +103,26 @@ abstract public class DataCommon
 		// get the message header file
 		// -------------------------------------------------------------
 		final byte []bytes = new byte[MESSAGE_SIZE]; 
-		buffer.flip();
+		buffer.rewind();
 		buffer.get(bytes, 0, MESSAGE_SIZE);
+		String header = new String(bytes);
+		if (!isFileHeaderCorrect(header)) {
+			String msg = "Incorrect header: " + header;
+			throw new IOException(msg);
+		}
+		
+		// -------------------------------------------------------------
+		// read the version
+		// -------------------------------------------------------------
+		version = buffer.get();
 
 		// -------------------------------------------------------------
-		// get the magic number
+		// read the number of items
 		// -------------------------------------------------------------
-		long magic_number = buffer.getLong();
-		if (magic_number != MAGIC)
-		{
-			throw_exception(fis, "Magic number is incorrect: " + magic_number);
-		}
-		
-		// -------------------------------------------------------------
-		// check the version
-		// -------------------------------------------------------------
-		final long version = buffer.getLong();
-		if (version < 3)
-		{
-			throw_exception(fis, "Incorrect file version: " + version);
-		}
-
-		// -------------------------------------------------------------
-		// check the type
-		// -------------------------------------------------------------
-		final long type = buffer.getLong();			
-		if (!isTypeFormatCorrect(type))
-		{
-			throw_exception(fis, file + " has inconsistent type " + type);
-		}
-		
-		// -------------------------------------------------------------
-		// check the format
-		// -------------------------------------------------------------
-		// to be ignored at the moment
-		format = buffer.getLong();
-		
-		// -------------------------------------------------------------
-		// read number of cct
-		// -------------------------------------------------------------
-		num_cctid = buffer.getLong();
-		
-		// -------------------------------------------------------------
-		// read number of metrics
-		// -------------------------------------------------------------
-		num_metric = buffer.getLong();
-		
-		// -------------------------------------------------------------
-		// read number of threads
-		// -------------------------------------------------------------
-		num_threads = buffer.getLong();
-		
-		if (num_threads <= 0 || num_cctid <= 0 || num_metric <=0) 
-		{
-			// warning: empty database.
-			// this doesn't mean the file is invalid, but just anomaly
-		}
-	}
-	
-	/*******
-	 * function to close the input stream and thrown an  IO exception
-	 * 
-	 * @param input : the io to be closed
-	 * @param message : message to be thrown
-	 * 
-	 * @throws IOException
-	 */
-	private void throw_exception(FileInputStream input, String message)
-			throws IOException
-	{
-		input.close();
-		throw new IOException(message);
+		final byte []itemBytes = new byte[4];
+		buffer.get(itemBytes, 0, 4);
+		ByteBuffer byteBuffer = ByteBuffer.wrap(itemBytes);
+		numItems = byteBuffer.getInt();
 	}
 	
 	protected abstract boolean isTypeFormatCorrect(long type);

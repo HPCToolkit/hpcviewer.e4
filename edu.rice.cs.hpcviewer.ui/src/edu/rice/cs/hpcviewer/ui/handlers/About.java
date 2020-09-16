@@ -15,7 +15,9 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -23,6 +25,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 import edu.rice.cs.hpcviewer.ui.util.ApplicationProperty;
 
@@ -100,6 +103,7 @@ public class About
 		protected void createButtonsForButtonBar(Composite parent) {
 			createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
 			createButton(parent, IDialogConstants.DETAILS_ID, "License", false);
+			createButton(parent, IDialogConstants.HELP_ID, "Info", false);
 		}
 		
 		
@@ -107,6 +111,14 @@ public class About
 		protected void buttonPressed(int buttonId) {
 			if (buttonId == IDialogConstants.DETAILS_ID) {
 				showLicense();
+			} else if (buttonId == IDialogConstants.HELP_ID) {
+				Shell shell = new Shell(getShell());
+				shell.setText("Info");
+				shell.setLayout(new FillLayout());
+				
+				Browser text = new Browser(shell, SWT.MULTI);
+				text.setText(getText());
+				shell.open();
 			}
 			super.buttonPressed(buttonId);
 		}
@@ -139,6 +151,28 @@ public class About
 			if (title != null) {
 				shell.setText(title);
 			}
+		}
+
+		
+		private String getText() {
+			String message = "<pre>no info</pre>";
+			try {
+				String location = ViewerPreferenceManager.INSTANCE.getPreferenceStoreLocation();
+				String locInstall = Platform.getInstallLocation().getURL().getFile();
+				String locInstance = Platform.getInstanceLocation().getURL().getFile();
+				String locUser = Platform.getLogFileLocation().toOSString(); //.getUserLocation().getURL().getFile();
+				
+				message = "<pre>" +
+								 "Preference file: "    + location    + "\n" +
+								 "Install directory: "  + locInstall  + "\n" +
+								 "Instance directory: " + locInstance + "\n" +
+								 "Log file location: "  + locUser     + "\n" +
+								 "</pre>";
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+
+			return message;
 		}
 
 		private void showLicense() {

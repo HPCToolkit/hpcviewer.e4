@@ -27,7 +27,7 @@ import edu.rice.cs.hpctraceviewer.ui.base.ITraceCanvas.MouseState;
  * Canvas to draw vertical axis of the main view
  *
  *********************/
-public class ThreadAxisCanvas extends AbstractAxisCanvas 
+public class CanvasAxisY extends AbstractAxisCanvas 
 {
 	static final private int COLUMN_WIDTH = 5;
 	
@@ -46,7 +46,7 @@ public class ThreadAxisCanvas extends AbstractAxisCanvas
 	
 	private AxisToolTip tooltip = null;
 
-	public ThreadAxisCanvas(ITracePart tracePart, ProcessTimelineService timeLine, Composite parent, int style) {
+	public CanvasAxisY(ITracePart tracePart, ProcessTimelineService timeLine, Composite parent, int style) {
 		super(tracePart, parent, style);
 		
 		bgColor = parent.getBackground();

@@ -39,6 +39,8 @@ import edu.rice.cs.hpcviewer.ui.util.FilterDataItem;
  *************************************************************/
 public class ThreadView extends AbstractBaseViewItem implements IViewItem, EventHandler
 {
+	static final private int MAX_THREAD_INDEX = 2;
+	
 	private EPartService  partService;	
 	private IEventBroker  eventBroker;
 	private EMenuService  menuService;
@@ -52,7 +54,6 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 
 	public ThreadView(CTabFolder parent, int style) {
 		super(parent, style);
-		setText("Thread view");
 		setToolTipText("A view to display metrics of a certain threads or processes");
 		setShowClose(true);
 	}
@@ -110,38 +111,21 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 			}
 		}
 		contentViewer.setData(viewInput);
+		String label = "";
+		
+		try {
+			StringBuffer sb = getLabel(viewInput);
+			if (sb != null) {
+				label = sb.toString();
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		setText("Thread view " + label );
 	}	
 	
-	
-	static public List<Integer> getThreads(Shell shell, IThreadDataCollection threadData) 
-			throws NumberFormatException, IOException 
-	{
-		String []labels = threadData.getRankStringLabels();
-		List<FilterDataItem> items =  new ArrayList<FilterDataItem>(labels.length);
-		
-		for (int i=0; i<labels.length; i++) {
-			FilterDataItem obj = new FilterDataItem(labels[i], false, true);
-			items.add(obj);
-		}
-
-		ThreadFilterDialog dialog = new ThreadFilterDialog(shell, items);
-		if (dialog.open() == Window.OK) {
-			items = dialog.getResult();
-			if (items != null) {
-				List<Integer> threads = new ArrayList<Integer>();
-				for(int i=0; i<items.size(); i++) {
-					if (items.get(i).checked) {
-						threads.add(i);
-					}
-				}
-				if (threads.size()>0)
-					return threads;
-			}
-			
-		}
-		return null;
-	}
-
 
 	@Override
 	public void handleEvent(Event event) {
@@ -172,5 +156,85 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 	@Override
 	public Object getInput() {
 		return viewInput;
+	}
+	
+	
+	/***
+	 * Static method to create a label based on the list of thread
+	 * 
+	 * @param input ThreadViewInput 
+	 * @return StringBuffer
+	 * @throws IOException
+	 */
+	public static StringBuffer getLabel(ThreadViewInput input) throws IOException {
+		
+		StringBuffer buffer = new StringBuffer();
+		buffer.append('[');
+		
+		IThreadDataCollection threadData = input.getThreadData();
+		String[] labels = threadData.getRankStringLabels();
+
+		List<Integer> threads = input.getThreads();
+		int size = threads.size();
+		
+		// for the column title: only list the first MAX_THREAD_INDEX of the set of threads
+		for(int i=0; i<size && i<=MAX_THREAD_INDEX; i++) {
+			final int index;
+			if (i<MAX_THREAD_INDEX) {
+				index = threads.get(i);
+			} else {
+				// show the last thread index
+				if (size > MAX_THREAD_INDEX+1)
+					buffer.append("..");
+				index = threads.get(size-1);
+			}
+			buffer.append(labels[index]);
+			if (i < MAX_THREAD_INDEX && i<size-1)
+				buffer.append(',');
+		}
+		buffer.append("]");
+		return buffer;
+	}
+	
+	
+	/***
+	 * Get the list of threads to view in a thread view.
+	 * This method will display a dialog box asking users to choose threads to view.
+	 * If the users cancel, then it returns null.
+	 * 
+	 * @param shell Shell
+	 * @param threadData IThreadDataCollection
+	 * @return List<Integer>
+	 * 
+	 * @throws NumberFormatException
+	 * @throws IOException
+	 */
+	static public List<Integer> getThreads(Shell shell, IThreadDataCollection threadData) 
+			throws NumberFormatException, IOException 
+	{
+		String []labels = threadData.getRankStringLabels();
+		List<FilterDataItem> items =  new ArrayList<FilterDataItem>(labels.length);
+		
+		for (int i=0; i<labels.length; i++) {
+			FilterDataItem obj = new FilterDataItem(labels[i], false, true);
+			items.add(obj);
+		}
+
+		ThreadFilterDialog dialog = new ThreadFilterDialog(shell, items);
+		
+		if (dialog.open() == Window.OK) {
+			items = dialog.getResult();
+			if (items != null) {
+				List<Integer> threads = new ArrayList<Integer>();
+				for(int i=0; i<items.size(); i++) {
+					if (items.get(i).checked) {
+						threads.add(i);
+					}
+				}
+				if (threads.size()>0)
+					return threads;
+			}
+		}
+		return null;
 	}
 }

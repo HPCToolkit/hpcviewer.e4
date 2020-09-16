@@ -12,5 +12,6 @@ Require-Bundle: org.eclipse.jface,
  org.eclipse.e4.ui.model.workbench,
  org.eclipse.e4.core.contexts,
  org.eclipse.e4.core.services
-Export-Package: edu.rice.cs.hpcbase.map,
+Export-Package: edu.rice.cs.hpcbase,
+ edu.rice.cs.hpcbase.map,
  edu.rice.cs.hpcbase.ui

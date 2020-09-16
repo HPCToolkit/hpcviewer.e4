@@ -110,7 +110,7 @@ public class ProcessTimeline {
 	}
 
 	/** Gets the cpid that corresponds to the index sample in timeLine. */
-	private int getCpid(int sample) {
+	public int getCpid(int sample) {
 		return data.getCpid(sample);
 	}
 
