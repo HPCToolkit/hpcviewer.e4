@@ -44,6 +44,7 @@ import edu.rice.cs.hpcviewer.ui.parts.datacentric.Datacentric;
 import edu.rice.cs.hpcviewer.ui.parts.editor.Editor;
 import edu.rice.cs.hpcviewer.ui.parts.flat.FlatView;
 import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadView;
+import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadViewInput;
 import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownView;
 import edu.rice.cs.hpcviewer.ui.tabItems.AbstractBaseViewItem;
 import edu.rice.cs.hpcviewer.ui.tabItems.AbstractViewItem;
@@ -186,7 +187,19 @@ public class ProfilePart implements IProfilePart
 	 * 
 	 * @param input
 	 */
-	public void addThreadView(Object input) {
+	public void addThreadView(ThreadViewInput input) {
+		CTabItem []items = tabFolderBottom.getItems();
+		for(CTabItem item: items) {
+			if (item instanceof ThreadView) {
+				ThreadView tv = (ThreadView) item;
+				ThreadViewInput tvinput = (ThreadViewInput) tv.getInput();
+				
+				if (input.getThreads().equals(tvinput.getThreads())) {
+					tabFolderBottom.setSelection(tv);
+					return;
+				}
+			}
+		}
 		ThreadView threadView = new ThreadView(tabFolderBottom, SWT.NONE);
 		addView(threadView, input, true);
 	}
