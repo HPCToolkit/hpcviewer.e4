@@ -291,9 +291,6 @@ public String toString()
 }
 
 
-public int hashCode() {
-	return System.identityHashCode(this);
-}
 
 
 

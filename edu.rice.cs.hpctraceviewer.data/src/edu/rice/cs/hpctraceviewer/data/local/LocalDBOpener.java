@@ -10,6 +10,7 @@ import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.InvalExperimentException;
 import edu.rice.cs.hpc.data.experiment.extdata.FileDB2;
 import edu.rice.cs.hpc.data.experiment.extdata.IFileDB;
+import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.data.util.Util;
 import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
 import edu.rice.cs.hpctraceviewer.data.DatabaseAccessInfo;
@@ -43,6 +44,7 @@ public class LocalDBOpener extends AbstractDBOpener
 	public LocalDBOpener(IEclipseContext context, BaseExperiment experiment) throws Exception {
 		this(context, experiment.getDefaultDirectory().getAbsolutePath());
 		this.experiment = experiment;
+		version = experiment.getMajorVersion();
 	}
 	
 	
@@ -71,7 +73,7 @@ public class LocalDBOpener extends AbstractDBOpener
 			fileDB = new FileDB2();
 			break;
 		case 3:
-		case 4:
+		case Constants.EXPERIMENT_SPARSE_VERSION:
 			fileDB = new FileDB3();
 			break;
 		default:
@@ -124,11 +126,11 @@ public class LocalDBOpener extends AbstractDBOpener
 		} else {
 			database_directory = directory;
 		}
-		// checking for version 3.0
+		// checking for version 4.0
 		String file_path = database_directory + File.separatorChar + "trace.db";
 		File tmp_file 	 = new File(file_path);
 		if (tmp_file.canRead()) {
-			return 3;
+			return Constants.EXPERIMENT_SPARSE_VERSION;
 		}
 		
 		// checking for version 2.0
