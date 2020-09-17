@@ -46,8 +46,8 @@ public class RootScope extends Scope
 {
 static final private String NAME = "Experiment Aggregate Metrics";
 
-static final public int DEFAULT_CCT_ID  = 1;
-static final public int DEFAULT_FLAT_ID = 1;
+static final public int DEFAULT_CCT_ID  = 0;
+static final public int DEFAULT_FLAT_ID = 0;
 
 /** The name of the experiment's program. */
 protected String rootScopeName;

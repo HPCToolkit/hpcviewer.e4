@@ -168,7 +168,7 @@ public class Experiment extends BaseExperimentWithMetrics
 	 */
 	private RootScope prepareFlatView(Scope cctRootScope) 
 	{
-		RootScope flatRootScope = new RootScope(this, Experiment.TITLE_FLAT_VIEW, RootScopeType.Flat);
+		RootScope flatRootScope = new RootScope(this, Experiment.TITLE_FLAT_VIEW, RootScopeType.Flat, 1, 1);
 		beginScope(flatRootScope);
 
 		// bug fix 2008.10.21 : we don't need to recompute the aggregate metrics here. Just copy it from the CCT

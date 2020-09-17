@@ -1117,7 +1117,11 @@ public class BaseExperimentBuilder extends Builder {
 			title = Experiment.TITLE_FLAT_VIEW;
 			rootType = RootScopeType.Flat;
 		}
-		this.viewRootScope  = new RootScope(this.experiment, title, rootType);
+		int cct_id = 0;
+		if (experiment.getMajorVersion() <= 2)
+			cct_id = 1;
+		
+		this.viewRootScope  = new RootScope(this.experiment, title, rootType, cct_id, 0);
 		beginScope(this.viewRootScope);
 	}
 

@@ -69,7 +69,7 @@ public class LocalDBOpener extends AbstractDBOpener
 		switch (version)
 		{
 		case 1:
-		case 2:
+		case Constants.EXPERIMENT_DENSED_VERSION:
 			fileDB = new FileDB2();
 			break;
 		case 3:
@@ -137,7 +137,7 @@ public class LocalDBOpener extends AbstractDBOpener
 		file_path = database_directory + File.separatorChar + "experiment.mt";
 		tmp_file  = new File(file_path);
 		if (tmp_file.canRead()) {
-			return 2;
+			return Constants.EXPERIMENT_DENSED_VERSION;
 		}
 		
 		// checking for version 2.0 with old format files
