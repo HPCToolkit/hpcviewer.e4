@@ -3,7 +3,7 @@ package edu.rice.cs.hpctraceviewer.data.version3;
 import java.io.File;
 import java.io.IOException;
 
-import edu.rice.cs.hpc.data.db.DataThread;
+import edu.rice.cs.hpc.data.db.version3.DataThread;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.extdata.FileDB2;
 import edu.rice.cs.hpc.data.experiment.extdata.IFileDB;

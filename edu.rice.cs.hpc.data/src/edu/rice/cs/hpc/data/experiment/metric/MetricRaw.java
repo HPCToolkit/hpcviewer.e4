@@ -27,6 +27,8 @@ public class MetricRaw  extends BaseMetric
 	/*** similar to partner index, but this partner refers directly to the metric partner.**/
 	private MetricRaw partner;
 	
+	/*** list of scope metric values of a certain threads. The length of the array is the number of cct nodes*/
+	private double []thread_values = null;
 
 	/******
 	 * creation of a new raw metric
@@ -246,7 +248,7 @@ public class MetricRaw  extends BaseMetric
 		{
 			val_sum += (values[thread]);
 		}
-		MetricValue value = setValue(val_sum); 
+		MetricValue value = createMetricValue(val_sum); 
 		return value;
 	}
 	
@@ -268,17 +270,43 @@ public class MetricRaw  extends BaseMetric
 		RootScope root = ((Scope)s).getRootScope();
 		IThreadDataCollection threadData = root.getThreadData();
 
-		double []values = threadData.getMetrics(scope.getCCTIndex(), getIndex(), num_metrics);
+		checkValues(threadData, thread_id);
 		
-		return setValue(values[thread_id]);
+		if (thread_values != null) {
+			double val = thread_values[scope.getCCTIndex()-1];
+			return createMetricValue(val);
+		}
+		return MetricValue.NONE;
 	}
 	
 	
-	private MetricValue setValue(double value)
+	/****
+	 * Create a metric value object based on the real value.
+	 * If the real value is around zero, it returns {@code MetricValue.NONE}.
+	 * 
+	 * @param value
+	 * @return {@code MetricValue}
+	 */
+	private MetricValue createMetricValue(double value)
 	{
 		MetricValue mv = MetricValue.NONE;
 		if (Double.compare(value, 0) != 0)
 			mv = new MetricValue(value);
 		return mv;
 	}
+	
+	
+	/***
+	 * Store in cache the list of metric values in case we need it in the future.
+	 * 
+	 * @param threadData
+	 * @param thread_id
+	 * @throws IOException
+	 */
+	private void checkValues(IThreadDataCollection threadData, int thread_id) throws IOException
+	{
+		if (thread_values == null) {
+			thread_values = threadData.getScopeMetrics(thread_id, ID, num_metrics);
+		}
+	} 
 }

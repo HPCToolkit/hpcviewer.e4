@@ -10,10 +10,9 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.Random;
 
+import edu.rice.cs.hpc.data.db.version3.DataCommon;
 import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.data.util.LargeByteBuffer;
-import edu.rice.cs.hpc.data.db.DataCommon;
-
 import edu.rice.cs.hpctraceviewer.data.DataRecord;
 
 /*******************************************************************************

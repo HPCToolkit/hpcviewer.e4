@@ -1,5 +1,5 @@
 
-package edu.rice.cs.hpc.data.db;
+package edu.rice.cs.hpc.data.db.version3;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.RandomAccessFile;
@@ -9,6 +9,8 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.ArrayList;
 import java.util.List;
+
+import edu.rice.cs.hpc.data.db.IdTuple;
 import edu.rice.cs.hpc.data.experiment.metric.MetricValueSparse;
 
 /*********************************************
@@ -42,7 +44,7 @@ public class DataSummary extends DataCommon
 	/***
 	 *  <p>Opening for data summary metric file</p>
 	 * (non-Javadoc)
-	 * @see edu.rice.cs.hpc.data.db.DataCommon#open(java.lang.String)
+	 * @see edu.rice.cs.hpc.data.db.version3.DataCommon#open(java.lang.String)
 	 */
 	@Override
 	public void open(final String filename)

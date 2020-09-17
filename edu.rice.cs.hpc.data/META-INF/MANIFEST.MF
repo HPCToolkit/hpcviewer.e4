@@ -6,12 +6,12 @@ Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Rice University
 Import-Package: org.apache.xerces.parsers
 Export-Package: edu.rice.cs.hpc.data.db,
+ edu.rice.cs.hpc.data.db.version3,
  edu.rice.cs.hpc.data.experiment,
  edu.rice.cs.hpc.data.experiment.extdata,
  edu.rice.cs.hpc.data.experiment.merge,
  edu.rice.cs.hpc.data.experiment.metric,
  edu.rice.cs.hpc.data.experiment.metric.format,
- edu.rice.cs.hpc.data.experiment.metric.version3,
  edu.rice.cs.hpc.data.experiment.scope,
  edu.rice.cs.hpc.data.experiment.scope.filters,
  edu.rice.cs.hpc.data.experiment.scope.visitors,

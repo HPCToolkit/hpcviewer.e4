@@ -18,14 +18,13 @@ package edu.rice.cs.hpc.data.experiment.scope;
 import java.io.File;
 import java.io.IOException;
 
-import edu.rice.cs.hpc.data.db.DataSummary;
+import edu.rice.cs.hpc.data.db.version2.MetricValueCollection2;
+import edu.rice.cs.hpc.data.db.version3.DataSummary;
+import edu.rice.cs.hpc.data.db.version3.MetricValueCollection3;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.BaseExperimentWithMetrics;
 import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpc.data.experiment.metric.IMetricValueCollection;
-import edu.rice.cs.hpc.data.experiment.metric.version2.MetricValueCollection2;
-import edu.rice.cs.hpc.data.experiment.metric.version3.MetricValueCollection3;
-
 import edu.rice.cs.hpc.data.experiment.scope.visitors.IScopeVisitor;
 import edu.rice.cs.hpc.data.util.Constants;
 

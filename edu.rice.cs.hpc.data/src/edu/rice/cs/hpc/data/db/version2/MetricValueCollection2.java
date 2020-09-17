@@ -1,4 +1,4 @@
-package edu.rice.cs.hpc.data.experiment.metric.version2;
+package edu.rice.cs.hpc.data.db.version2;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperimentWithMetrics;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;

@@ -6,12 +6,13 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import edu.rice.cs.hpc.data.db.DataSummary;
+
 import edu.rice.cs.hpc.data.db.IdTuple;
+import edu.rice.cs.hpc.data.db.version3.DataSummary;
+import edu.rice.cs.hpc.data.db.version3.MetricValueCollection3;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment.Db_File_Type;
 import edu.rice.cs.hpc.data.experiment.extdata.AbstractThreadDataCollection;
-import edu.rice.cs.hpc.data.experiment.metric.version3.MetricValueCollection3;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.tld.plot.DataPlot;
 import edu.rice.cs.hpcdata.tld.plot.DataPlotEntry;
