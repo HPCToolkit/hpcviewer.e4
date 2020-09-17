@@ -44,6 +44,12 @@ public abstract class AbstractBaseData implements IBaseData
 		return baseDataFile.getParallelismLevel() > 1;
 	}
 
+	@Override
+	public int getNumLevels() {
+		return baseDataFile.getParallelismLevel();
+	}
+
+	
 	/*
 	 * (non-Javadoc)
 	 * @see edu.rice.cs.hpc.data.experiment.extdata.IBaseData#dispose()

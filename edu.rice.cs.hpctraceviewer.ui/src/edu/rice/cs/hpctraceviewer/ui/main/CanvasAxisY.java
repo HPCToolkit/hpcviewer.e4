@@ -31,14 +31,14 @@ public class CanvasAxisY extends AbstractAxisCanvas
 {
 	static final private int COLUMN_WIDTH = 5;
 	
-	private final Color COLOR_PROC[];
-	private final Color COLOR_THREAD[];
-
-	private final Color ColorLightBlue;
-	private final Color ColorLightMagenta;
-	
-	final private Color bgColor;
-
+	private final int []listColorSWT = {
+											SWT.COLOR_CYAN,   SWT.COLOR_DARK_BLUE,
+											SWT.COLOR_YELLOW, SWT.COLOR_DARK_MAGENTA,
+											SWT.COLOR_GRAY,   SWT.COLOR_DARK_GREEN,
+											SWT.COLOR_WHITE,  SWT.COLOR_DARK_RED
+										};
+	private final Color []listColorObjects;
+	private final Color bgColor;
 	private final ProcessTimelineService timeLine;
 
 	/** Relates to the condition that the mouse is in.*/
@@ -46,42 +46,43 @@ public class CanvasAxisY extends AbstractAxisCanvas
 	
 	private AxisToolTip tooltip = null;
 
+	
+	/****
+	 * Constructor CanvasAxisY
+	 * 
+	 * @param tracePart ITracePart the parent of the view
+	 * @param timeLine ProcessTimelineService
+	 * @param parent Composite
+	 * @param style int (see {@code SWT} constants for canvas)
+	 */
 	public CanvasAxisY(ITracePart tracePart, ProcessTimelineService timeLine, Composite parent, int style) {
 		super(tracePart, parent, style);
 		
 		bgColor = parent.getBackground();
 		this.timeLine = timeLine;
 		
-		ColorLightBlue    = new Color(getDisplay(), 173, 216, 250);
-		ColorLightMagenta = new Color(getDisplay(), 255, 128, 255);
-		
-		COLOR_PROC = new Color[2];
-		COLOR_PROC[0] = ColorLightBlue;
-		COLOR_PROC[1] = getDisplay().getSystemColor(SWT.COLOR_DARK_BLUE);
-		
-		COLOR_THREAD = new Color[2];
-		COLOR_THREAD[0] = ColorLightMagenta;
-		COLOR_THREAD[1] = getDisplay().getSystemColor(SWT.COLOR_DARK_MAGENTA);
+		listColorObjects = new Color[listColorSWT.length];
+		for(int i=0; i<listColorSWT.length; i++) {
+			listColorObjects[i] = getDisplay().getSystemColor(listColorSWT[i]);
+		}
 		
 		mouseState = MouseState.ST_MOUSE_INIT;
-	}
-
-	public void init(SpaceTimeDataController data) {
-		if (mouseState == MouseState.ST_MOUSE_INIT) {
-			
-			tooltip = new AxisToolTip(this);
-			
-			mouseState = MouseState.ST_MOUSE_NONE;
-		}
-		tooltip.setData(data);
 	}
 	
 	@Override
 	public void setData(Object data) {
 		super.setData(data);
 		
-		init( (SpaceTimeDataController)data);
+		if (mouseState == MouseState.ST_MOUSE_INIT) {
+			
+			tooltip = new AxisToolTip(this);
+			
+			mouseState = MouseState.ST_MOUSE_NONE;
+		}
+		tooltip.setData((SpaceTimeDataController) data);
 	}
+	
+
 	
 	@Override
 	public void paintControl(PaintEvent e) {
@@ -102,7 +103,8 @@ public class CanvasAxisY extends AbstractAxisCanvas
         if (processes == null || processes.length==0)
         	return;
         
-        boolean isHybridProgram  = traceData.isHybridRank();
+        int numLevels = traceData.getNumLevels();
+        boolean isHybridProgram  = numLevels > 1;
 		
 		// --------------------------------------------------------------------------
         // Manually fill the client area with the default background color
@@ -181,17 +183,18 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		// draw MPI column
 		// -----------------------------------------------------
 		int currentColor = 0;
+		int limitColor   = 1;
 		int x_end = isHybridProgram ? COLUMN_WIDTH : COLUMN_WIDTH * 2;
 		
 		for (int i=0; i<listProcPosition.size()-1; i++) {
-			e.gc.setBackground(COLOR_PROC[currentColor]);
+			currentColor = limitColor - ((i+1) % 2);
+
+			e.gc.setBackground(listColorObjects[currentColor]);
 			
 			Integer procPosition = listProcPosition.get(i);
 			Integer nextPosition = listProcPosition.get(i+1);
 			
 			e.gc.fillRectangle(0, procPosition, x_end, nextPosition);
-			
-			currentColor = 1 - currentColor;
 		}
 		if (!isHybridProgram)
 			return;
@@ -200,17 +203,19 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		// draw thread column
 		// only for hybrid application
 		// -----------------------------------------------------
+		
+		limitColor += 2;
 		int xEnd = 2 * COLUMN_WIDTH;
 		
 		for (int i=0; i<listThreadPosition.size()-1; i++) {
-			e.gc.setBackground(COLOR_THREAD[currentColor]);
+			
+			currentColor = limitColor - ((i+1) % 2);
+			e.gc.setBackground(listColorObjects[currentColor]);
 			
 			Integer threadPosition = listThreadPosition.get(i);
 			Integer nextPosition   = listThreadPosition.get(i+1);
 			
 			e.gc.fillRectangle(COLUMN_WIDTH+1, threadPosition, xEnd, nextPosition);
-			
-			currentColor   = 1 - currentColor;
 		}
 	}
 	
@@ -221,11 +226,6 @@ public class CanvasAxisY extends AbstractAxisCanvas
 			tooltip.deactivate();
 			tooltip = null;
 		}
-		if (ColorLightBlue != null && !ColorLightBlue.isDisposed()) {
-			ColorLightBlue.dispose();
-		}
-		if (ColorLightMagenta != null && !ColorLightMagenta.isDisposed())
-			ColorLightMagenta.dispose();
 		
 		super.dispose();
 	}

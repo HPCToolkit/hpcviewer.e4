@@ -116,6 +116,14 @@ public class RemoteFilteredBaseData implements IFilteredData {
 	public boolean isHybridRank() {
 		return allNames[0].toString().contains(".");
 	}
+	
+	@Override
+	public int getNumLevels() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	
 	@Override
 	public long getLong(long position) {
 		// TODO Auto-generated method stub

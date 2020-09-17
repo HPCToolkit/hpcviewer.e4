@@ -41,6 +41,16 @@ public interface IBaseData
 	 *  False otherwise
 	 *  @return boolean **/
 	public boolean isHybridRank();
+	
+	
+	/***
+	 * Generalized version of {@code isHybridRank}.
+	 * This method returns the number of parallelism level of the profiled applications.
+	 * For pure MPI, it returns 1, for hybrid MPI+OpenMP it returns 2, ...
+	 * @return int
+	 */
+	public int getNumLevels();
+	
 	/****
 	 * Disposing native resources, to be called by the caller
 	 */
