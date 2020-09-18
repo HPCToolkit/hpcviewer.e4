@@ -74,7 +74,7 @@ public class LocalDBOpener extends AbstractDBOpener
 			break;
 		case 3:
 		case Constants.EXPERIMENT_SPARSE_VERSION:
-			fileDB = new FileDB3();
+			fileDB = new FileDB2();
 			break;
 		default:
 			throw new InvalExperimentException("Trace data version is not unknown: " + version);

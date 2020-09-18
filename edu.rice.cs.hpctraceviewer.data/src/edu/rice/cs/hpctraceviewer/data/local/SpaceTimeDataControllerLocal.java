@@ -80,9 +80,14 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 		} else if (version == Constants.EXPERIMENT_SPARSE_VERSION) 
 		{
 			// new format
+			traceFilePath = getTraceFile(exp.getDefaultDirectory().getAbsolutePath(), statusMgr);
+			fileDB.open(traceFilePath, trAttribute.dbHeaderSize, RECORD_SIZE);
+			
+			/*
 			String databaseDirectory = exp.getDefaultDirectory().getAbsolutePath(); 
 			traceFilePath = databaseDirectory + File.separator + exp.getDbFilename(BaseExperiment.Db_File_Type.DB_TRACE);
 			((FileDB3)fileDB).open(databaseDirectory);
+			*/
 		}
 		this.fileDB = fileDB;
 		dataTrace 	= new BaseData(fileDB);
