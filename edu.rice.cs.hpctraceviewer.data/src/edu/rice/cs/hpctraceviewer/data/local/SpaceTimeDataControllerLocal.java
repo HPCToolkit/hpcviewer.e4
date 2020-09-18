@@ -17,7 +17,6 @@ import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TraceDataByRank;
 import edu.rice.cs.hpctraceviewer.data.version2.BaseData;
 import edu.rice.cs.hpctraceviewer.data.version2.FilteredBaseData;
-import edu.rice.cs.hpctraceviewer.data.version3.FileDB3;
 
 
 /**
@@ -37,8 +36,10 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 	/************************
 	 * Constructor to setup local database
 	 * 
-	 * @param _window : the current active window
+	 * @param context IEclipseContext
+	 * @param statusMgr  IProgressMonitor
 	 * @param databaseDirectory : database directory
+	 * @param fileDB IFileDB 
 	 * 
 	 * @throws InvalExperimentException
 	 * @throws Exception
@@ -55,10 +56,20 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 	}
 	
 	
+	/***
+	 * Constructor to setup local database
+	 * 
+	 * @param context IEclipseContext
+	 * @param statusMgr IProgressMonitor
+	 * @param experiment BaseExperiment
+	 * @param fileDB IFileDB
+	 * @throws InvalExperimentException
+	 * @throws Exception
+	 */
 	public SpaceTimeDataControllerLocal(
 			IEclipseContext context, 
-			BaseExperiment experiment, 
 			IProgressMonitor statusMgr, 
+			BaseExperiment experiment, 
 			IFileDB fileDB)
 			throws InvalExperimentException, Exception {
 		
@@ -67,6 +78,14 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 	}
 	
 	
+	/****
+	 * Initialize the trace view by opening the trace file according to the version of the database
+	 * 
+	 * @param statusMgr IProgressMonitor
+	 * @param fileDB IFileDB
+	 * 
+	 * @throws IOException
+	 */
 	private void init(IProgressMonitor statusMgr, IFileDB fileDB) throws IOException {
 		
 		final TraceAttribute trAttribute = exp.getTraceAttribute();		

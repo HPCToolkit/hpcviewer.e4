@@ -86,7 +86,7 @@ public abstract class SpaceTimeDataController
 	/*****
 	 * Constructor to create a data based on input stream, which is convenient for remote database
 	 * 
-	 * @param _window : SWT window
+	 * @param context : IEclipseContext
 	 * @param expStream : input stream
 	 * @param Name : the name of the file on the remote server
 	 * @throws InvalExperimentException 
@@ -102,7 +102,16 @@ public abstract class SpaceTimeDataController
 		init(context);
 	}
 	
-	
+	/*****
+	 * This constructor is used when an Experiment database is already opened, and we just
+	 * want to transfer the database to this trace data.
+	 * 
+	 * @param context IEclipseContext
+	 * @param experiment BaseExperiment
+
+	 * @throws InvalExperimentException
+	 * @throws Exception
+	 */
 	public SpaceTimeDataController(IEclipseContext context, BaseExperiment experiment) 			
 			throws InvalExperimentException, Exception 
 	{

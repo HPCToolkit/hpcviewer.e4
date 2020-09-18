@@ -15,8 +15,13 @@ import edu.rice.cs.hpc.data.util.Util;
 import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
 import edu.rice.cs.hpctraceviewer.data.DatabaseAccessInfo;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
-import edu.rice.cs.hpctraceviewer.data.version3.FileDB3;
 
+
+/****************************************************
+ * 
+ * Class to open local trace database
+ *
+ ****************************************************/
 public class LocalDBOpener extends AbstractDBOpener 
 {
 	private String directory;
@@ -27,7 +32,9 @@ public class LocalDBOpener extends AbstractDBOpener
 	/*******
 	 * prepare opening a database 
 	 * 
-	 * @param directory : the directory of the database
+	 * @param IEclipseContext context
+	 * @param DatabaseAccessInfo info
+	 * 
 	 * @throws Exception 
 	 */
 	public LocalDBOpener(IEclipseContext context, DatabaseAccessInfo info) throws Exception
@@ -38,6 +45,7 @@ public class LocalDBOpener extends AbstractDBOpener
 	
 	/*****
 	 * Prepare opening a database
+	 * @param IEclipseContext context
 	 * @param experiment
 	 * @throws Exception 
 	 */
@@ -49,7 +57,8 @@ public class LocalDBOpener extends AbstractDBOpener
 	
 	
 	/*****
-	 * Prepare opening a database
+	 * Prepare opening a database.
+	 * @param IEclipseContext context
 	 * @param directory absolute path to the directory
 	 */
 	public LocalDBOpener(IEclipseContext context, String directory)  throws Exception {
@@ -64,6 +73,11 @@ public class LocalDBOpener extends AbstractDBOpener
 	}
 
 	
+	/****
+	 * Create an instance of {@code IFileDB} depending on the database version 
+	 * @return IFileDB
+	 * @throws InvalExperimentException
+	 */
 	private IFileDB getFileDB() throws InvalExperimentException {
 		IFileDB fileDB = null;
 		switch (version)
@@ -82,6 +96,7 @@ public class LocalDBOpener extends AbstractDBOpener
 		return fileDB;
 	}
 	
+	
 	@Override
 	public SpaceTimeDataController openDBAndCreateSTDC(IProgressMonitor statusMgr)
 			throws IOException, InvalExperimentException, Exception {
@@ -98,14 +113,12 @@ public class LocalDBOpener extends AbstractDBOpener
 		if (experiment == null)
 			return new SpaceTimeDataControllerLocal(context, statusMgr, directory, fileDB);
 		else 
-			return new SpaceTimeDataControllerLocal(context, experiment, statusMgr, fileDB);
+			return new SpaceTimeDataControllerLocal(context, statusMgr, experiment, fileDB);
 	}
 
+	
 	@Override
-	public void end() {
-		// TODO Auto-generated method stub
-
-	}
+	public void end() {}
 
 
 	/**********************
@@ -148,5 +161,4 @@ public class LocalDBOpener extends AbstractDBOpener
 		}
 		return -1;
 	}
-
 }
