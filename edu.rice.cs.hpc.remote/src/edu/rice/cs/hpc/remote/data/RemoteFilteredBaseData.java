@@ -75,15 +75,7 @@ public class RemoteFilteredBaseData implements IFilteredData {
 	}
 
 
-	@Override
-	public String[] getListOfRanks() {
-		//This is already an O(n) operation so it's okay that we are recomputing the strings.
-		String[] list = new String[getNumberOfRanks()];
-		for (int i = 0; i < list.length; i++) {
-			list[i] = allNames[indexes[i]].toString();
-		}
-		return list;
-	}
+
 
 	@Override
 	public int getNumberOfRanks() {

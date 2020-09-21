@@ -23,7 +23,6 @@ import edu.rice.cs.hpc.data.trace.FilterSet;
 public class FilteredBaseData extends AbstractBaseData implements IFilteredData {
 
 	private FilterSet filter;
-	private String []filteredRanks;
 	private int []indexes;
 	private List<IdTuple> filteredIdTuples;
 
@@ -50,7 +49,6 @@ public class FilteredBaseData extends AbstractBaseData implements IFilteredData 
 		
 		String data[] = baseDataFile.getRankLabels();
 
-		filteredRanks = null;
 		filteredIdTuples = null;
 
 		ArrayList<Integer> lindexes = new ArrayList<Integer>();
@@ -76,7 +74,7 @@ public class FilteredBaseData extends AbstractBaseData implements IFilteredData 
 	}
 	
 	/****
-	 * set oatterns to filter ranks
+	 * set patterns to filter ranks
 	 * @param filters
 	 */
 	public void setFilter(FilterSet filter) {
@@ -88,23 +86,7 @@ public class FilteredBaseData extends AbstractBaseData implements IFilteredData 
 	public FilterSet getFilter() {
 		return filter;
 	}
-	
 
-	/*
-	 * (non-Javadoc)
-	 * @see edu.rice.cs.hpc.data.experiment.extdata.IBaseData#getListOfRanks()
-	 */
-	public String[] getListOfRanks() {
-		if (filteredRanks == null) {
-			filteredRanks = new String[indexes.length];
-			final String ranks[] = baseDataFile.getRankLabels();
-			
-			for(int i=0; i<indexes.length; i++) {
-				filteredRanks[i] = ranks[indexes[i]];
-			}
-		}
-		return filteredRanks;
-	}
 	
 	@Override
 	public List<IdTuple> getListOfIdTuples() {

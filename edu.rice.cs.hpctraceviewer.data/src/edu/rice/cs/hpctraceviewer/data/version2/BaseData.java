@@ -15,18 +15,8 @@ public class BaseData extends AbstractBaseData {
 		super(baseDataFile);
 	}
 	
-	/*
-	 * (non-Javadoc)
-	 * @see edu.rice.cs.hpc.data.experiment.extdata.IBaseData#getListOfRanks()
-	 */
-	public String[] getListOfRanks() {
-		return baseDataFile.getRankLabels();
-	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see edu.rice.cs.hpc.data.experiment.extdata.IBaseData#getNumberOfRanks()
-	 */
+	@Override
 	public int getNumberOfRanks() {
 		return baseDataFile.getNumberOfRanks();
 	}

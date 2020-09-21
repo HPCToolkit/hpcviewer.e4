@@ -14,13 +14,6 @@ import edu.rice.cs.hpc.data.db.IdTuple;
 public interface IBaseData 
 {	
 	/***
-	 * retrieve the list of rank names ( usual format: process.thread )
-	 * @return
-	 */
-	public String []getListOfRanks();
-	
-	
-	/***
 	 * Retrieve the list of id tuples of this database.
 	 * @return {@code List<IdTuple>}
 	 */
