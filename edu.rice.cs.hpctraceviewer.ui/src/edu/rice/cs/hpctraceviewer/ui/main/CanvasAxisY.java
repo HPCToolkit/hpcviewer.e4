@@ -1,6 +1,5 @@
 package edu.rice.cs.hpctraceviewer.ui.main;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.window.DefaultToolTip;
@@ -12,6 +11,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 
+import edu.rice.cs.hpc.data.db.IdTuple;
 import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
@@ -29,14 +29,14 @@ import edu.rice.cs.hpctraceviewer.ui.base.ITraceCanvas.MouseState;
  *********************/
 public class CanvasAxisY extends AbstractAxisCanvas 
 {
-	static final private int COLUMN_WIDTH = 5;
-	
 	private final int []listColorSWT = {
 											SWT.COLOR_CYAN,   SWT.COLOR_DARK_BLUE,
 											SWT.COLOR_YELLOW, SWT.COLOR_DARK_MAGENTA,
 											SWT.COLOR_GRAY,   SWT.COLOR_DARK_GREEN,
 											SWT.COLOR_WHITE,  SWT.COLOR_DARK_RED
 										};
+	private int columnWidth = HPCTraceView.Y_AXIS_WIDTH/4;
+	
 	private final Color []listColorObjects;
 	private final Color bgColor;
 	private final ProcessTimelineService timeLine;
@@ -73,13 +73,18 @@ public class CanvasAxisY extends AbstractAxisCanvas
 	public void setData(Object data) {
 		super.setData(data);
 		
+		SpaceTimeDataController stdc = (SpaceTimeDataController) data;
+		
 		if (mouseState == MouseState.ST_MOUSE_INIT) {
 			
 			tooltip = new AxisToolTip(this);
 			
 			mouseState = MouseState.ST_MOUSE_NONE;
 		}
-		tooltip.setData((SpaceTimeDataController) data);
+        final IBaseData traceData = stdc.getBaseData();
+		columnWidth = HPCTraceView.Y_AXIS_WIDTH / traceData.getNumLevels();
+
+		tooltip.setData(stdc, columnWidth);
 	}
 	
 
@@ -98,13 +103,10 @@ public class CanvasAxisY extends AbstractAxisCanvas
 
 		final ImageTraceAttributes attribute = data.getAttributes();
 		
-        final String processes[] = traceData.getListOfRanks();
+		List<IdTuple> listIdTuples = traceData.getListOfIdTuples();
+		if (listIdTuples == null || listIdTuples.size() == 0)
+			return;
         
-        if (processes == null || processes.length==0)
-        	return;
-        
-        int numLevels = traceData.getNumLevels();
-        boolean isHybridProgram  = numLevels > 1;
 		
 		// --------------------------------------------------------------------------
         // Manually fill the client area with the default background color
@@ -117,14 +119,8 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		// -----------------------------------------------------
 		// collect the position and the length of each process
 		// -----------------------------------------------------
-		List<Integer> listProcPosition   = new ArrayList<Integer>();
-		List<Integer> listThreadPosition = new ArrayList<Integer>();
-
-		listProcPosition.  add(0);
-		listThreadPosition.add(0);
-		
-		int oldRank   = 0;
-		int oldThread = 0;
+		IdTuple idtupleOld  = null;
+		int []oldColorIndex = new int[traceData.getNumLevels()];
 		
 		for (int i=0; i<getNumProcessTimeline(); i++) {
 			ProcessTimeline procTimeline = getProcessTimeline(i);
@@ -132,90 +128,49 @@ public class CanvasAxisY extends AbstractAxisCanvas
 				continue;
 			
 			final int procNumber  = procTimeline.getProcessNum();
-			if (procNumber >= processes.length)
+			if (procNumber >= listIdTuples.size())
 				// inconsistency between the list of processes and the current timeline
 				// probably hpctraceviewer is in the middle of rebuffering
 				return;
 			
-			final String procName = processes[procNumber]; 
-			final int position    = attribute.convertRankToPixel(procNumber);
-	
-			int rank = 0;
-			int thread = 0;
+			final int y_curr = attribute.convertRankToPixel(procNumber);
+			final int y_next = attribute.convertRankToPixel(procNumber+1);
+			
+			IdTuple idtuple  = listIdTuples.get(procNumber);
 
-			if (!isHybridProgram) {
+			for(int j=0; j<idtuple.length; j++) {
 				
-				// either pure MPI or pure OpenMP threads
+				// in this level, we have a different index, so different color
+				// limit color has to be 1, 3, 5, ...
+				int limitColor   = 1+(j*2);
 				
-				rank = Integer.valueOf(procName);
+				// current color has to be:
+				// i=0:  0, 2, 4, ...
+				// i=1:  1, 3, 5, ...
+				// i=2:  0, 2, 4, ...
+				// i=3:  1, 3, 5, ...
+
+				int idx = (int) idtuple.index[j];
+				int currentColor = limitColor - ((idx+1) % 2);
 				
-				if (oldRank != rank) {
-					listProcPosition.add(position);
-					oldRank = rank;
+				if (idtupleOld != null && idtuple.index[j]!= idtupleOld.index[j]) {
+					// make sure the current color is different than the previous one
+					currentColor = limitColor - ((limitColor-oldColorIndex[j])+1)%2;
 				}
-				continue;
-			}
-			
-			// hybrid application
-			
-			int dotIndex = procName.indexOf('.');
-			if (dotIndex >= 0) {
-				String strRank   = procName.substring(0, dotIndex);
-				String strThread = procName.substring(dotIndex+1);
 				
-				rank   = Integer.valueOf(strRank);
-				thread = Integer.valueOf(strThread);
-			}
-			
-			if (oldRank != rank) {
-				listProcPosition.add(position);
-				oldRank = rank;
-			}
-			if (oldThread != thread) {
-				listThreadPosition.add(position);
-				oldThread = thread;
-			}
-		}
-		listProcPosition.  add(getClientArea().height);
-		listThreadPosition.add(getClientArea().height);
-		
-		// -----------------------------------------------------
-		// draw MPI column
-		// -----------------------------------------------------
-		int currentColor = 0;
-		int limitColor   = 1;
-		int x_end = isHybridProgram ? COLUMN_WIDTH : COLUMN_WIDTH * 2;
-		
-		for (int i=0; i<listProcPosition.size()-1; i++) {
-			currentColor = limitColor - ((i+1) % 2);
+				// -----------------------------------------------------
+				// draw the column for each id tuple
+				// -----------------------------------------------------
 
-			e.gc.setBackground(listColorObjects[currentColor]);
-			
-			Integer procPosition = listProcPosition.get(i);
-			Integer nextPosition = listProcPosition.get(i+1);
-			
-			e.gc.fillRectangle(0, procPosition, x_end, nextPosition);
-		}
-		if (!isHybridProgram)
-			return;
-		
-		// -----------------------------------------------------
-		// draw thread column
-		// only for hybrid application
-		// -----------------------------------------------------
-		
-		limitColor += 2;
-		int xEnd = 2 * COLUMN_WIDTH;
-		
-		for (int i=0; i<listThreadPosition.size()-1; i++) {
-			
-			currentColor = limitColor - ((i+1) % 2);
-			e.gc.setBackground(listColorObjects[currentColor]);
-			
-			Integer threadPosition = listThreadPosition.get(i);
-			Integer nextPosition   = listThreadPosition.get(i+1);
-			
-			e.gc.fillRectangle(COLUMN_WIDTH+1, threadPosition, xEnd, nextPosition);
+				int x_start = j * columnWidth;
+				int x_end   = x_start + columnWidth - 1;
+
+				e.gc.setBackground(listColorObjects[currentColor]);
+				e.gc.fillRectangle(x_start, y_curr, x_end, y_next);
+				
+				oldColorIndex[j] = currentColor;
+			}
+			idtupleOld = idtuple;
 		}
 	}
 	
@@ -252,13 +207,15 @@ public class CanvasAxisY extends AbstractAxisCanvas
 	static private class AxisToolTip extends DefaultToolTip
 	{
 		private SpaceTimeDataController data;
+		private int columnWidth;
 
 		public AxisToolTip(Control control) {
 			super(control);
 		}
 		
-		void setData(SpaceTimeDataController data) {
+		void setData(SpaceTimeDataController data, int columnWidth) {
 			this.data = data;
+			this.columnWidth = columnWidth;
 		}
 	
 		@Override
@@ -276,29 +233,17 @@ public class CanvasAxisY extends AbstractAxisCanvas
 			final ImageTraceAttributes attribute = data.getAttributes();
 			int process = attribute.convertPixelToRank(event.y);
 			
-			String procNames[] = traceData.getListOfRanks();
-			
-			if (process < 0 && process >= procNames.length)
+			List<IdTuple> listTuples = traceData.getListOfIdTuples();
+						
+			if (process < 0 && process >= listTuples.size())
 				return null;
 			
-	        String text = procNames[process];
-	        
-	        if (traceData.isHybridRank()) {
-	        	int indexDot = text.indexOf('.');
-	        	String rank = text.substring(0, indexDot);
-	        	
-	        	if (event.x <= COLUMN_WIDTH) {
-	        		text = "Rank " + rank;
-	        	} else {
-		        	text = text + " (rank: " + rank + ", thread: " + text.substring(indexDot+1) + ")";
-	        	}
-	        	return text;
-	        } else {
-	        	text = "Rank " + text;
-	        }
+			IdTuple id  = listTuples.get(process); 
+			int level   = Math.min(event.x / columnWidth, id.length-1);
 			
-			return text;
+			return id.toString(level);
 		}
+		
 		
 		@Override
 		/*

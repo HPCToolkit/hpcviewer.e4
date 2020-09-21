@@ -2,7 +2,9 @@ package edu.rice.cs.hpctraceviewer.data.version3;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
+import edu.rice.cs.hpc.data.db.IdTuple;
 import edu.rice.cs.hpc.data.db.version3.DataThread;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.extdata.FileDB2;
@@ -135,6 +137,12 @@ public class FileDB3 implements IFileDB
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public List<IdTuple> getIdTuple() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

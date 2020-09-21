@@ -3,9 +3,13 @@ package edu.rice.cs.hpc.data.experiment.extdata;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
+import java.util.List;
 
+import edu.rice.cs.hpc.data.db.IdTuple;
 import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.data.util.LargeByteBuffer;
+import edu.rice.cs.hpc.data.util.Util;
 
 /***************************************
  * 
@@ -30,6 +34,8 @@ public class FileDB2 implements IFileDB
 	private int headerSize;
 	
 	private RandomAccessFile file; 
+	
+	private List<IdTuple> listIdTuples;
 
 	@Override
 	public void open(String filename, int headerSize, int recordSz)  throws IOException 
@@ -40,11 +46,6 @@ public class FileDB2 implements IFileDB
 		}
 	}
 	
-	/***
-	 * retrieve the array of process IDs
-	 * 
-	 * @return
-	 */
 	@Override
 	public String []getRankLabels() {
 		return valuesX;
@@ -60,6 +61,11 @@ public class FileDB2 implements IFileDB
 	public long[] getOffsets() 
 	{
 		return this.offsets;
+	}
+	
+	@Override
+	public List<IdTuple> getIdTuple() {
+		return listIdTuples;
 	}
 	
 	
@@ -84,6 +90,7 @@ public class FileDB2 implements IFileDB
 		
 		valuesX = new String[numFiles];
 		offsets = new long[numFiles];
+		listIdTuples = new ArrayList<IdTuple>(numFiles);
 		
 		long current_pos = Constants.SIZEOF_INT * 2;
 		
@@ -98,6 +105,8 @@ public class FileDB2 implements IFileDB
 			offsets[i] = masterBuff.getLong(current_pos);
 			current_pos += Constants.SIZEOF_LONG;
 			
+			IdTuple tuple = new IdTuple(getParallelismLevel());
+			
 			//--------------------------------------------------------------------
 			// adding list of x-axis 
 			//--------------------------------------------------------------------			
@@ -106,26 +115,43 @@ public class FileDB2 implements IFileDB
 			if (this.isHybrid()) 
 			{
 				x_val = String.valueOf(proc_id) + "." + String.valueOf(thread_id);
+				
+				tuple.kind[0]  = IdTuple.KIND_RANK;
+				tuple.index[0] = proc_id;
+				
+				tuple.kind[1]  = IdTuple.KIND_THREAD;
+				tuple.index[1] = thread_id;
+				
 			} else if (isMultiProcess()) 
 			{
 				x_val = String.valueOf(proc_id);					
+				
+				tuple.kind[0]  = IdTuple.KIND_RANK;
+				tuple.index[0] = proc_id;
 			} else if (isMultiThreading()) 
 			{
 				x_val = String.valueOf(thread_id);
+				
+				tuple.kind[0]  = IdTuple.KIND_THREAD;
+				tuple.index[0] = thread_id;
 			} else {
 				// temporary fix: if the application is neither hybrid nor multiproc nor multithreads,
 				// we just print whatever the order of file name alphabetically
 				// this is not the ideal solution, but we cannot trust the value of proc_id and thread_id
 				x_val = String.valueOf(i);
+				
+				tuple.kind[0]  = IdTuple.KIND_RANK;
+				tuple.index[0] = i;
 			}
 			valuesX[i] = x_val;
+			listIdTuples.add(tuple);
 		}
 	}
 
 	@Override
 	public int 	getParallelismLevel()
 	{
-		return (isHybrid()? 2 : 1);
+		return Util.countSetBits(type);
 	}
 
 	/**

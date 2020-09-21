@@ -12,8 +12,9 @@ public class IdTuple
 	
 	
 	public final static int KIND_SUMMARY = 0;
-	public final static int KIND_RANK    = 1;
-	public final static int KIND_THREAD  = 2;
+	public final static int KIND_NODE    = 1;
+	public final static int KIND_RANK    = 2;
+	public final static int KIND_THREAD  = 3;
 	
 	// see https://github.com/HPCToolkit/hpctoolkit/blob/prof2/src/lib/prof-lean/id-tuple.h#L81
 	// for list of kinds in id tuple
@@ -43,6 +44,30 @@ public class IdTuple
 	public short []kind;
 	public long  []index;
 	
+
+	// -------------------------------------------
+	// Constructors
+	// -------------------------------------------
+	
+	/****
+	 * 
+	 * @param length
+	 */
+	public IdTuple(int length) {
+		this.length = length;
+		
+		kind  = new short[length];
+		index = new long[length];
+	}
+	
+	public IdTuple() {
+		length = 0;
+	}
+	
+
+	// -------------------------------------------
+	// Methods
+	// -------------------------------------------
 	
 	/***
 	 * Conversion from a tuple kind to label string
@@ -63,10 +88,17 @@ public class IdTuple
 	 * @return String
 	 */
 	public String toString() {
+		return toString(kind.length-1);
+	}
+	
+	/***
+	 * Returns the string representation of this object.
+	 * @return String
+	 */
+	public String toString(int level) {
 		String buff = "";
 		if (kind != null && index != null)
-			buff += toLabel() + " ";
-			for(int i=0; i<kind.length; i++) {
+			for(int i=0; i<=level; i++) {
 				if (i>0)
 					buff += " ";
 				
@@ -75,6 +107,7 @@ public class IdTuple
 		return buff;
 	}
 
+
 	
 	/****
 	 * get the number representation of the id tuple.
@@ -82,23 +115,48 @@ public class IdTuple
 	 * 
 	 * @return the number representation of id tuple
 	 */
-	public double toLabel() {
-		double label = 0.0d;
+	public double toNumber() {
+		Double number = 0.0;
 		
-		if (kind != null && index != null) {
+		String str = toLabel();
+		try {
+			number = Double.valueOf(str);
+		} catch (NumberFormatException e) {
+			// Can't convert to number. The length must be bigger than 2
+		}
+		return number;
+	}
+	
+	
+	/****
+	 * Retrieve the string label of the id tuple for all levels.
+	 * @return String
+	 */
+	public String toLabel() {
+		return toLabel(length-1);
+	}
+	
+	
+	/****
+	 * Retrieve the string label of the id tuple for a certain level.
+	 * If the id tuple has 4 levels, and user specifies 2, then it returns the first 2 levels.
+	 * 
+	 * @param level int
+	 * @return
+	 */
+	public String toLabel(int level) {
+		
+		if (kind != null && index != null && level>=0 && level<length) {
 			String str = "";
 			
-			// TODO: need to make sure the length is 2
-			
-			for(int i=0; i<kind.length; i++) {
+			for(int i=0; i<=level; i++) {
 				if (i==1) {
 					str += ".";
 				}
 				str += index[i];
 			}
-			label = Double.valueOf(str);
+			return str;
 		}
-			
-		return label;
+		return null;
 	}
 }

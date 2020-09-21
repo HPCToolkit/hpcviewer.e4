@@ -3,7 +3,9 @@ package edu.rice.cs.hpc.remote.data;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
+import edu.rice.cs.hpc.data.db.IdTuple;
 import edu.rice.cs.hpc.data.experiment.extdata.IFilteredData;
 import edu.rice.cs.hpc.data.trace.Filter;
 import edu.rice.cs.hpc.data.trace.FilterSet;
@@ -148,5 +150,10 @@ public class RemoteFilteredBaseData implements IFilteredData {
 	public long getMaxLoc(int rank) {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+	@Override
+	public List<IdTuple> getListOfIdTuples() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

@@ -63,7 +63,7 @@ public abstract class SpaceTimeDataController
 	
 	// nathan's data index variable
 	// TODO: we need to remove this and delegate to the inherited class instead !
-	private int currentDataIdx;
+	//private int currentDataIdx;
 
 	/***
 	 * Constructor to create a data based on File. This constructor is more suitable
@@ -125,16 +125,6 @@ public abstract class SpaceTimeDataController
 		return ptlService;
 	}
 	
-	public void setDataIndex(int dataIndex) 
-	{
-		currentDataIdx = dataIndex;
-	}
-	
-	
-	public int getDataIndex()
-	{
-		return currentDataIdx;
-	}
 	
 	public void resetPredefinedColor()
 	{
@@ -325,13 +315,6 @@ public abstract class SpaceTimeDataController
 		colorTable.dispose();
 	}
 
-
-	//see the note where this is called in FilterRanks
-	public IFilteredData getFilteredBaseData() {
-		if (dataTrace instanceof IFilteredData)
-			return (IFilteredData) dataTrace;
-		return null;
-	}
 	/**
 	 * changing the trace data, caller needs to make sure to refresh the views
 	 * @param filteredBaseData

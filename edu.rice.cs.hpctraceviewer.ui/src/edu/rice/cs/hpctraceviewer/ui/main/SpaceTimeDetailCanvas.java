@@ -44,6 +44,7 @@ import org.eclipse.swt.widgets.Label;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
+import edu.rice.cs.hpc.data.db.IdTuple;
 import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
 import edu.rice.cs.hpctraceviewer.ui.base.ISpaceTimeCanvas;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
@@ -636,10 +637,11 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
     		
     		final int selectedProc  = ptl.getProcessNum();
     		
-    		if ( selectedProc >= 0 && selectedProc < processes.length ) {  
+    		if ( selectedProc >= 0 && selectedProc < processes.length ) {
+    			IdTuple idtuple = stData.getBaseData().getListOfIdTuples().get(selectedProc);
     	        final String buffer = "(" + formatTime.format(selectedTime) + 
     	        						timeUnit + ", " + 
-    	        						processes[selectedProc] + ")";
+    	        						idtuple.toString() + ")";
 
     	        crossHairLabel.setText("Cross Hair: " + buffer);
 
