@@ -137,7 +137,7 @@ throws
 	{
 		// turn these into parse errors
 		this.builder.error(this.getLineNumber());
-		return;
+		throw e;
 	}
 	catch( IOException e )
 	{
