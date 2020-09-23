@@ -283,9 +283,10 @@ public abstract class SpaceTimeDataController
 	 * @return {@link ImageTraceAttributes.TimeUnit}
 	 *****/
 	public TimeUnit getTimeUnit() {
+		int version = exp.getMajorVersion();
 		
-		if (getExperiment().getMajorVersion() == 2) {
-			if (getExperiment().getMinorVersion() < 2) {
+		if (version == 2) {
+			if (exp.getMinorVersion() < 2) {
 				// old version of database: always microsecond
 				return TimeUnit.MICROSECONDS;
 			}
@@ -293,11 +294,14 @@ public abstract class SpaceTimeDataController
 			// - if the measurement is from old hpcrun: microsecond
 			// - if the measurement is from new hpcrun: nanosecond
 			
-			Experiment exp = (Experiment) getExperiment();
 			if (exp.getTraceAttribute().dbUnitTime == TraceAttribute.PER_NANO_SECOND) {
 				return TimeUnit.NANOSECONDS;
 			}
-			return TimeUnit.MICROSECONDS;
+
+		} else if (version == 4) {
+			// newer database: sparse database always uses nanoseconds
+			
+			return TimeUnit.NANOSECONDS;
 		}
 		// we have no idea what kind of database is this.
 		// this must be an error. Should we raise an exception?
