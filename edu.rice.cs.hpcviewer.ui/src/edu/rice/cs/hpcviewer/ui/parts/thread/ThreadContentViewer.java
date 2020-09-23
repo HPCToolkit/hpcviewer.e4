@@ -90,10 +90,9 @@ public class ThreadContentViewer extends TopDownContentViewer
 		
 		final TreeColumn []columns = treeViewer.getTree().getColumns();
 		
-		for (final TreeColumn col : columns) {
-			if (col.getData() != null) {
-				col.pack();
-			}
+		for (int i=columns.length-1; i>0; i--) {
+			final TreeColumn col = columns[i];
+			col.pack();
 		}
 		updateStatus();
 	}
@@ -114,7 +113,7 @@ public class ThreadContentViewer extends TopDownContentViewer
 		
 		if (treeViewer.getTree().getColumnCount() == 0) {
 	        TreeViewerColumn colTree = createScopeColumn(treeViewer);
-	        colTree.getColumn().setWidth(ScopeTreeViewer.COLUMN_DEFAULT_WIDTH);
+	        colTree.getColumn().setWidth(ScopeTreeViewer.COLUMN_DEFAULT_WIDTH*2);
 	        
 			ScopeSelectionAdapter selectionAdapter = new ScopeSelectionAdapter(treeViewer, colTree);
 			colTree.getColumn().addSelectionListener(selectionAdapter);

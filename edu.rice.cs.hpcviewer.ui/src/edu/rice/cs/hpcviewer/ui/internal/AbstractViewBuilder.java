@@ -302,7 +302,7 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 			return;
 		
 		boolean []status = (boolean[]) dataEvent.data;
-		treeViewer.setColumnsStatus(status);
+		treeViewer.setColumnsStatus(getMetricManager(), status);
 	}
 	
 	@Override
