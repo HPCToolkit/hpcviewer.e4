@@ -78,7 +78,7 @@ public class ThreadContentViewer extends TopDownContentViewer
 		initTableColumns(input, experiment.getMetricRaw());
 
 		// 4. update the table content, including the aggregate experiment
-		RootScope root = createRoot(experiment);
+		RootScope root = createRoot(experiment, input.getThreads());
 		ScopeTreeViewer treeViewer = getViewer();
 		treeViewer.setInput(root);
 		
@@ -173,11 +173,13 @@ public class ThreadContentViewer extends TopDownContentViewer
 
 
 	/****
+	 * Create a thread view root based from cct root. 
+	 * The value of the root will be initialized.
 	 * 
 	 * @param experiment
 	 * @return
 	 */
-	protected RootScope createRoot(BaseExperiment experiment) {
+	private RootScope createRoot(BaseExperiment experiment, List<Integer> threads) {
 
 		// create and duplicate the configuration
 		RootScope rootCCT    = experiment.getRootScope(RootScopeType.CallingContextTree);
@@ -190,6 +192,7 @@ public class ThreadContentViewer extends TopDownContentViewer
 			Scope scope = (Scope) rootCCT.getChildAt(i);
 			rootThread.addSubscope(scope);
 		}
+		rootThread.setThreadData(rootCCT.getThreadData());
 		return rootThread;
 	}
 	

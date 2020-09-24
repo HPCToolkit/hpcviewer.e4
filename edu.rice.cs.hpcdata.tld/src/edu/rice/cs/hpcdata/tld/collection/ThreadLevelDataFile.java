@@ -34,7 +34,7 @@ public class ThreadLevelDataFile extends FileDB2
 		super.open(filename, HEADER_LONG, recordSz);
 		final int numWork = getNumberOfRanks();
 		num_threads = Math.min(numWork, Runtime.getRuntime().availableProcessors());
-		threadExecutor = Executors.newFixedThreadPool( num_threads ); 
+		threadExecutor = Executors.newCachedThreadPool(); 
 	}
 	/**
 	 * return all metric values of a specified node and metric index
@@ -81,6 +81,23 @@ public class ThreadLevelDataFile extends FileDB2
 		return metrics;
 	}
 
+	/***
+	 * get a specific metric value for a certain node, metric and profile id.
+	 * 
+	 * @param nodeIndex
+	 * @param metricIndex
+	 * @param profileId
+	 * @param numMetrics
+	 * @return
+	 * @throws IOException
+	 */
+	public double getMetric(long nodeIndex, int metricIndex, int profileId, int numMetrics) throws IOException
+	{
+		long offset = getOffsets()[profileId];
+		long position = getFilePosition(nodeIndex, metricIndex, numMetrics);
+		
+		return getDouble(offset + position);
+	}
 
 	public double[] getScopeMetrics(int thread_index, int metricIndex, int num_metrics) throws IOException
 	{

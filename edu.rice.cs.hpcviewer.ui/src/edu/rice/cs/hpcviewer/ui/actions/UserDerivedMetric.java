@@ -2,6 +2,7 @@ package edu.rice.cs.hpcviewer.ui.actions;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.swt.widgets.Display;
 
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.metric.DerivedMetric;
@@ -40,8 +41,9 @@ public class UserDerivedMetric
 	 * IF a user click the cancel button, there is no metric is added.
 	 */
 	public void addNewMeric() {
+		final Display display = Display.getDefault();
 		
-		ExtDerivedMetricDlg dialog = new ExtDerivedMetricDlg(null, metricMgr, root);
+		ExtDerivedMetricDlg dialog = new ExtDerivedMetricDlg(display.getActiveShell(), metricMgr, root);
 	
 		if (dialog.open() == Dialog.OK) {
 			

@@ -70,7 +70,21 @@ public interface IThreadDataCollection
 	 */
 	public String   getRankTitle() throws IOException;
 	
-		
+	
+	/****
+	 * Get a metric value for a specific node, with a specific metric and 
+	 * a specific profile (or thread) id.
+	 * 
+	 * @param nodeIndex long
+	 * @param metricIndex int
+	 * @param profileId int
+	 * @param numMetrics int
+	 * 
+	 * @return double
+	 */
+	public double   getMetric(long nodeIndex, int metricIndex, int profileId, int numMetrics)
+			throws IOException ;
+	
 	/*****
 	 * Get an array of metrics of a specified node and metric.
 	 * It returns the array of metric values indexed from its thread or profile or rank number.

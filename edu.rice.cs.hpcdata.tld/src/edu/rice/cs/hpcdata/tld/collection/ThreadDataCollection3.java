@@ -77,6 +77,15 @@ public class ThreadDataCollection3 extends AbstractThreadDataCollection
 	}
 
 	@Override
+	public double getMetric(long nodeIndex, int metricIndex, int profileId, int numMetrics) throws IOException {
+
+		if (data_summary == null)
+			return 0.0d;
+
+		return data_summary.getMetric(profileId, (int) nodeIndex, metricIndex);
+	}
+
+	@Override
 	public double[] getMetrics(long nodeIndex, int metricIndex, int numMetrics)
 			throws IOException 
 			{
@@ -108,10 +117,7 @@ public class ThreadDataCollection3 extends AbstractThreadDataCollection
 	public double[] getScopeMetrics(int thread_id, int MetricIndex,
 			int numMetrics) throws IOException {
 
-		if (data_summary == null)
-			return null;
-		
-		data_summary.getMetrics(thread_id, MetricIndex);
+		// TODO: not implemented
 		return null;
 	}
 
