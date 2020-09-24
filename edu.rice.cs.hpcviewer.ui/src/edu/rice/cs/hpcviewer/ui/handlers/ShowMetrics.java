@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
+import edu.rice.cs.hpc.data.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcbase.ui.IBasePart;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.dialogs.MetricPropertyDialog;
@@ -105,13 +106,30 @@ public class ShowMetrics
 		}
 		
 		MetricPropertyDialog dialog = new MetricPropertyDialog(shell, (Experiment) exp);
+		
 		int ret = dialog.open();
+		
 		if (ret == Dialog.OK) {
 			ViewerDataEvent data = new ViewerDataEvent(exp, exp.getMetrics());
 			eventBroker.post(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE, data);
+			
 		} else {
 			// in case there is modification, we need to restore the metrics back
-			exp.setMetrics(copyMetrics);
+			for(int i=0; i<exp.getMetricCount(); i++) {
+				BaseMetric metric  = exp.getMetric(i);
+				BaseMetric oMetric = copyMetrics.get(i);
+				
+				metric.setDisplayName(oMetric.getDisplayName());
+				
+				if (metric instanceof DerivedMetric) {
+					DerivedMetric dm = (DerivedMetric) metric;
+					DerivedMetric om = (DerivedMetric) oMetric;
+					
+					dm.setAnnotationType(om.getAnnotationType());
+					dm.setDisplayFormat(om.getDisplayFormat());
+					dm.setExpression(om.getFormula());
+				}
+			}
 		}
 	}
 	
