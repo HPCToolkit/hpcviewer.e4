@@ -117,6 +117,34 @@ public class DataSummary extends DataCommon
 	}
 	
 	
+	/****
+	 * Get the value of a specific profile with specific cct and metric id
+	 * 
+	 * @param profileNum
+	 * @param cctId
+	 * @param metricId
+	 * @return
+	 * @throws IOException
+	 */
+	public double getMetric(int profileNum, int cctId, int metricId) 
+			throws IOException
+	{
+		List<MetricValueSparse> listValues = getMetrics(profileNum, cctId);
+		
+		if (listValues != null) {
+			
+			// TODO ugly temporary code
+			// We need to grab a value directly from the memory instead of searching O(n)
+			
+			for (MetricValueSparse mvs: listValues) {
+				if (mvs.getIndex() == metricId) {
+					return mvs.getValue();
+				}
+			}
+		}
+		return 0.0d;
+	}
+	
 	/**********
 	 * Reading a set of metrics from the file for a given CCT 
 	 * This method does not support concurrency. The caller is

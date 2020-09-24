@@ -107,7 +107,7 @@ public class MetricColumnHideShowAction
     			
     			databaseCollection.addColumnStatus((BaseExperiment) metricMgr, data);
     		} else {
-    			treeViewer.setColumnsStatus(checked);
+    			treeViewer.setColumnsStatus(metricMgr, checked);
     		}
     	}
     }

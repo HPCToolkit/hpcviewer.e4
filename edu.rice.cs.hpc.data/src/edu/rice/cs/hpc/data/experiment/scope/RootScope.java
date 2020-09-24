@@ -86,7 +86,10 @@ public RootScope(BaseExperiment experiment, String name, RootScopeType rst, int 
 
 @Override
 public Scope duplicate() {
-    return new RootScope(experiment,  this.rootScopeName, this.rootScopeType);
+	int cctId  = getCCTIndex();
+	int flatId = getFlatIndex();
+	
+    return new RootScope(experiment,  this.rootScopeName, this.rootScopeType, cctId, flatId);
 }
 
 /******

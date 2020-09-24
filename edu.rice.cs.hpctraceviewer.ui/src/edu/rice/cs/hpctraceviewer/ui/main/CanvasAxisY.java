@@ -74,15 +74,27 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		super.setData(data);
 		
 		SpaceTimeDataController stdc = (SpaceTimeDataController) data;
-		
+        final IBaseData traceData = stdc.getBaseData();
+        
+        List<IdTuple> list   = traceData.getListOfIdTuples();
+        boolean isSequential = list==null || list.size()==0;
+        
+        if (isSequential) {
+        	// it's a sequential code. No need to display the y-axis
+        	return;
+        }
+        
 		if (mouseState == MouseState.ST_MOUSE_INIT) {
 			
 			tooltip = new AxisToolTip(this);
 			
 			mouseState = MouseState.ST_MOUSE_NONE;
 		}
-        final IBaseData traceData = stdc.getBaseData();
-		columnWidth = HPCTraceView.Y_AXIS_WIDTH / traceData.getNumLevels();
+        
+        // for sequential code, we assume the number of parallelism is 1
+        // (just to avoid the zero division)
+        int partition = Math.max(traceData.getNumLevels(), 1);
+		columnWidth = HPCTraceView.Y_AXIS_WIDTH / partition;
 
 		tooltip.setData(stdc, columnWidth);
 	}
@@ -94,7 +106,11 @@ public class CanvasAxisY extends AbstractAxisCanvas
 
 		if (getData() == null)
 			return;
-				
+		
+		if (mouseState == MouseState.ST_MOUSE_INIT)
+			// not initialized yet (or it's a sequential program)
+			return;
+		
 		final SpaceTimeDataController data   = (SpaceTimeDataController) getData();
         final IBaseData traceData 		     = data.getBaseData();
 
@@ -226,9 +242,6 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		protected String getText(Event event) {
 			
 	        final IBaseData traceData = data.getBaseData();
-
-	        if (traceData == null)
-	        	return null;
 
 			final ImageTraceAttributes attribute = data.getAttributes();
 			int process = attribute.convertPixelToRank(event.y);

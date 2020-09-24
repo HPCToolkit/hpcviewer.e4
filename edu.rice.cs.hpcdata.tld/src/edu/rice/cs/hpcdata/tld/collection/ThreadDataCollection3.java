@@ -31,6 +31,8 @@ public class ThreadDataCollection3 extends AbstractThreadDataCollection
 	private double[] labels;
 	private String[] strLabels;
 	
+	protected boolean optimized = false;
+	
 	@Override
 	public void open(RootScope root, String directory) throws IOException {
 		data_plot = new DataPlot();
@@ -48,8 +50,8 @@ public class ThreadDataCollection3 extends AbstractThreadDataCollection
 
 	@Override
 	public double[] getRankLabels() {		
-		if (strLabels == null) 
-			initTuples();
+		if (labels == null) 
+			initIdTuples();
 		
 		return labels;
 	}
@@ -58,7 +60,7 @@ public class ThreadDataCollection3 extends AbstractThreadDataCollection
 	@Override
 	public String[] getRankStringLabels() throws IOException {		
 		if (strLabels == null) 
-			initTuples();
+			initIdTuples();
 		
 		return strLabels;
 	}
@@ -72,6 +74,15 @@ public class ThreadDataCollection3 extends AbstractThreadDataCollection
 	@Override
 	public String getRankTitle() {
 		return "Rank";
+	}
+
+	@Override
+	public double getMetric(long nodeIndex, int metricIndex, int profileId, int numMetrics) throws IOException {
+
+		if (data_summary == null)
+			return 0.0d;
+
+		return data_summary.getMetric(profileId, (int) nodeIndex, metricIndex);
 	}
 
 	@Override
@@ -106,17 +117,31 @@ public class ThreadDataCollection3 extends AbstractThreadDataCollection
 	public double[] getScopeMetrics(int thread_id, int MetricIndex,
 			int numMetrics) throws IOException {
 
-		if (data_summary == null)
-			return null;
-		
-		data_summary.getMetrics(thread_id, MetricIndex);
+		// TODO: not implemented
 		return null;
 	}
 
 	
 	
-	private void initTuples() {
+	private void initIdTuples() {
 		List<IdTuple> listTuple = data_summary.getTuple();
+		
+		if (!optimized) {
+			int maxLevels = 0;
+			labels    = new double[listTuple.size()-1];
+			strLabels = new String[listTuple.size()-1];
+
+			for (int i=1; i<listTuple.size(); i++) {
+				IdTuple idt = listTuple.get(i);
+				labels[i-1] = Double.valueOf(idt.toLabel());
+				strLabels[i-1] = idt.toString();
+				
+				maxLevels = Math.max(maxLevels, idt.length);
+			}
+			numLevels = maxLevels;
+			
+			return;
+		}
 		
 		// 1. first try to compute the number of parallelism levels
 		//    A level is part of label if its kind is not invariant
@@ -188,6 +213,9 @@ public class ThreadDataCollection3 extends AbstractThreadDataCollection
 
 				Long ix = index[j];
 				label += String.valueOf(ix);				
+			}
+			if (label.length()==0) {
+				label = tuple.toString();
 			}
 			strLabels[idx] = label;
 			labels[idx] = Double.valueOf(label);

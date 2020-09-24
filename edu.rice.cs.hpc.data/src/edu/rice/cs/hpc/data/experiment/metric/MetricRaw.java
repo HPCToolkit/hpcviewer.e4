@@ -27,9 +27,7 @@ public class MetricRaw  extends BaseMetric
 	/*** similar to partner index, but this partner refers directly to the metric partner.**/
 	private MetricRaw partner;
 	
-	/*** list of scope metric values of a certain threads. The length of the array is the number of cct nodes*/
-	private double []thread_values = null;
-
+	
 	/******
 	 * creation of a new raw metric
 	 * @param id
@@ -240,13 +238,16 @@ public class MetricRaw  extends BaseMetric
 	{
 		double val_sum = 0.0;
 
-		RootScope root = ((Scope)s).getRootScope();
+		Scope scope    = (Scope) s;
+		RootScope root = scope.getRootScope();
+		
 		IThreadDataCollection threadData = root.getThreadData();
 		
-		double []values = threadData.getMetrics(((Scope)s).getCCTIndex(), getIndex(), num_metrics);
+		long nodeIndex = scope.getCCTIndex();
+		
 		for(Integer thread : threads)
 		{
-			val_sum += (values[thread]);
+			val_sum += threadData.getMetric(nodeIndex, ID, thread, num_metrics);
 		}
 		MetricValue value = createMetricValue(val_sum); 
 		return value;
@@ -267,16 +268,17 @@ public class MetricRaw  extends BaseMetric
 
 		// there is no API implementation for reading the whole CCT metrics
 		// TODO: using the old get metric for the new database
-		RootScope root = ((Scope)s).getRootScope();
+		RootScope root = scope.getRootScope();
 		IThreadDataCollection threadData = root.getThreadData();
 
-		checkValues(threadData, thread_id);
+		if (threadData == null)
+			// this shouldn't happen, unless hpcprof doesn't generate data properly
+			return MetricValue.NONE;
 		
-		if (thread_values != null) {
-			double val = thread_values[scope.getCCTIndex()-1];
-			return createMetricValue(val);
-		}
-		return MetricValue.NONE;
+		int cctIndex = scope.getCCTIndex();
+		
+		double value = threadData.getMetric(cctIndex, ID, thread_id, num_metrics);
+		return createMetricValue(value);
 	}
 	
 	
@@ -294,19 +296,4 @@ public class MetricRaw  extends BaseMetric
 			mv = new MetricValue(value);
 		return mv;
 	}
-	
-	
-	/***
-	 * Store in cache the list of metric values in case we need it in the future.
-	 * 
-	 * @param threadData
-	 * @param thread_id
-	 * @throws IOException
-	 */
-	private void checkValues(IThreadDataCollection threadData, int thread_id) throws IOException
-	{
-		if (thread_values == null) {
-			thread_values = threadData.getScopeMetrics(thread_id, ID, num_metrics);
-		}
-	} 
 }

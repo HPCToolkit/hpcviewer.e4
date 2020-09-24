@@ -107,6 +107,11 @@ public class FileDB2 implements IFileDB
 			
 			IdTuple tuple = new IdTuple(getParallelismLevel());
 			
+			if (getParallelismLevel() == 0) {
+				// sequential program
+				listIdTuples.add(tuple);
+				continue;
+			}
 			//--------------------------------------------------------------------
 			// adding list of x-axis 
 			//--------------------------------------------------------------------			
