@@ -82,7 +82,11 @@ public class CanvasAxisY extends AbstractAxisCanvas
 			mouseState = MouseState.ST_MOUSE_NONE;
 		}
         final IBaseData traceData = stdc.getBaseData();
-		columnWidth = HPCTraceView.Y_AXIS_WIDTH / traceData.getNumLevels();
+        
+        // for sequential code, we assume the number of parallelism is 1
+        // (just to avoid the zero division)
+        int partition = Math.max(traceData.getNumLevels(), 1);
+		columnWidth = HPCTraceView.Y_AXIS_WIDTH / partition;
 
 		tooltip.setData(stdc, columnWidth);
 	}
