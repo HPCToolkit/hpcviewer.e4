@@ -29,6 +29,12 @@ public class ThreadLevelDataFile extends FileDB2
 	public ThreadLevelDataFile() {
 	}
 	
+	
+	/***
+	 * Open a metric database (metric-db) file
+	 * @param filename
+	 * @throws IOException
+	 */
 	public void open(String filename) throws IOException
 	{
 		super.open(filename, HEADER_LONG, recordSz);
@@ -36,6 +42,8 @@ public class ThreadLevelDataFile extends FileDB2
 		num_threads = Math.min(numWork, Runtime.getRuntime().availableProcessors());
 		threadExecutor = Executors.newCachedThreadPool(); 
 	}
+	
+	
 	/**
 	 * return all metric values of a specified node and metric index
 	 * 
