@@ -509,10 +509,13 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 				num_metrics = Integer.valueOf(values[i]);
 			}
 		}
-		
+		if (experiment.getMajorVersion() == Constants.EXPERIMENT_SPARSE_VERSION) {
+			// TODO ugly hack. The index of the metric will be the ID itself 
+			db_id = ID;
+		}
 		MetricRaw metric = new MetricRaw(ID, title, title, db_glob, db_id, 
 				partner_index, type, num_metrics);
-		this.metricRawList.add(db_id, metric);
+		this.metricRawList.add(metric);
 	}
 	
 

@@ -180,7 +180,15 @@ public final class MetricValue
 	}
 
 
+	/*************************************************************************
+	 *	Makes the given actual value available.
+	 ************************************************************************/
 
+	public void setValue(double value) 
+	{
+		setAvailable(this, true);
+		this.value = (float) value;
+	}
 
 	/*************************************************************************
 	 *	Returns whether the annotation value is available.
@@ -224,6 +232,13 @@ public final class MetricValue
 	{
 		setAnnotationAvailable(m, true);
 		m.annotation = annotation;
+	}
+
+
+	public void setAnnotationValue(float annotation)
+	{
+		setAnnotationAvailable(this, true);
+		this.annotation = annotation;
 	}
 
 

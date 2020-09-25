@@ -16,8 +16,11 @@ package edu.rice.cs.hpc.data.experiment.scope;
 
 
 import java.io.IOException;
+import java.util.List;
+
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.BaseExperimentWithMetrics;
+import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.metric.AggregateMetric;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric.AnnotationType;
@@ -536,12 +539,17 @@ private boolean hasMetrics()
  * @return true if the scope has at least a non-zero metric value
  ***************************************************************************/
 public boolean hasNonzeroMetrics() {
-	if (this.hasMetrics())
-		for (int i = 0; i< metrics.size(); i++) {
-			MetricValue m = this.getMetricValue(i);
-			if (!MetricValue.isZero(m))
-				return true;
-		}
+	if (!this.hasMetrics())
+		return false;
+	
+	Experiment experiment = (Experiment) root.getExperiment();
+	List<BaseMetric> list = experiment.getMetricList();
+	
+	for (BaseMetric metric: list) {
+		MetricValue m = getMetricValue(metric);
+		if (!MetricValue.isZero(m))
+			return true;
+	}
 	return false;
 }
 
@@ -604,8 +612,11 @@ public void setMetricValue(int index, MetricValue value)
  *	Add the metric cost from a source with a certain filter for all metrics
  ************************************************************************/
 public void accumulateMetrics(Scope source, MetricValuePropagationFilter filter, int nMetrics) {
-	for (int i = 0; i< nMetrics; i++) {
-		this.accumulateMetric(source, i, i, filter);
+	Experiment experiment = (Experiment) root.getExperiment();
+	List<BaseMetric> metrics  = experiment.getMetricList();
+	
+	for (BaseMetric m: metrics) {
+		this.accumulateMetric(source, m.getIndex(), m.getIndex(), filter);
 	}
 }
 
@@ -629,8 +640,6 @@ public void accumulateMetric(Scope source, int src_i, int targ_i, MetricValuePro
 private void accumulateMetricValue(int index, double value)
 {
 	ensureMetricStorage();
-	if (index >= metrics.size()) 
-		return;
 
 	MetricValue m = metrics.getValue(this, index);
 	if (m == MetricValue.NONE) {
@@ -675,19 +684,20 @@ public void combine(Scope source, MetricValuePropagationFilter filter) {
 	
 	final BaseExperimentWithMetrics _exp = (BaseExperimentWithMetrics) getExperiment();
 
-	int nMetrics = _exp.getMetricCount();
-	for (int i=0; i<nMetrics; i++) {
-		BaseMetric metric = _exp.getMetric(i);
+	List<BaseMetric> list = _exp.getMetricList();
+	
+	for (BaseMetric metric: list) {
+
 		if (metric instanceof AggregateMetric) {
 			//--------------------------------------------------------------------
 			// aggregate metric need special treatment when combining two metrics
 			//--------------------------------------------------------------------
 			AggregateMetric aggMetric = (AggregateMetric) metric;
-			if (filter.doPropagation(source, this, i, i)) {
+			if (filter.doPropagation(source, this, metric.getIndex(), metric.getIndex())) {
 				aggMetric.combine(source, this);
 			}
 		} else {
-			this.accumulateMetric(source, i, i, filter);
+			this.accumulateMetric(source, metric.getIndex(), metric.getIndex(), filter);
 		}
 	}
 }
@@ -736,14 +746,17 @@ public void copyMetrics(Scope targetScope, int offset) {
 		return;
 	
 	targetScope.ensureMetricStorage();
-	for (int k=0; k<metrics.size() && k<targetScope.metrics.size(); k++) {
+	Experiment experiment = (Experiment) targetScope.getRootScope().getExperiment();
+	List<BaseMetric> listMetricDesc = experiment.getMetricList();
+	
+	for (BaseMetric metricDesc: listMetricDesc) {
 		MetricValue mine = null;
-		MetricValue crtMetric = metrics.getValue(this, k);
+		MetricValue crtMetric = metrics.getValue(this, metricDesc.getIndex());
 
 		if ( MetricValue.isAvailable(crtMetric) && 
 				Float.compare(MetricValue.getValue(crtMetric), 0.0f) != 0) { // there is something to copy
-			mine = new MetricValue();
-			MetricValue.setValue(mine, MetricValue.getValue(crtMetric));
+
+			mine = new MetricValue(crtMetric.getValue());
 
 			if (MetricValue.isAnnotationAvailable(crtMetric)) {
 				MetricValue.setAnnotationValue(mine, MetricValue.getAnnotationValue(crtMetric));
@@ -751,7 +764,7 @@ public void copyMetrics(Scope targetScope, int offset) {
 		} else {
 			mine = MetricValue.NONE;
 		}
-		targetScope.metrics.setValue(k+offset, mine);
+		targetScope.metrics.setValue(metricDesc.getIndex()+offset, mine);
 	}
 }
 

@@ -61,11 +61,20 @@ implements IMetricManager
 	 * 
 	 * @return
 	 */
+	@Deprecated
 	public BaseMetric[] getMetrics()
 	{
 		return 	metrics.toArray(new BaseMetric[metrics.size()]);
 	}
 
+	/***
+	 * Retrieve the list of metrics
+	 * @return {@code List<BaseMetric>}
+	 */
+	public List<BaseMetric> getMetricList() 
+	{
+		return metrics;
+	}
 	
 	/*****
 	 * Return the list of "visible" metrics. <br/>
@@ -122,6 +131,7 @@ implements IMetricManager
 				if (metric.getIndex() == index)
 					return metric;
 			}
+			throw new RuntimeException("Invalid metric index: " + index);
 		}
 		BaseMetric metric = null;
 		try {

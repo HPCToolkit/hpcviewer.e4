@@ -21,6 +21,7 @@ import java.io.IOException;
 import edu.rice.cs.hpc.data.db.version2.MetricValueCollection2;
 import edu.rice.cs.hpc.data.db.version3.DataSummary;
 import edu.rice.cs.hpc.data.db.version3.MetricValueCollection3;
+import edu.rice.cs.hpc.data.db.version3.MetricValueCollectionWithStorage;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.BaseExperimentWithMetrics;
 import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
@@ -106,20 +107,25 @@ public IMetricValueCollection getMetricValueCollection(Scope scope) throws IOExc
 	
 	// TODO: this is a hack
 	
-	if (version == Constants.EXPERIMENT_SPARSE_VERSION && rootScopeType == RootScopeType.CallingContextTree) 
+	if (version == Constants.EXPERIMENT_SPARSE_VERSION) 
 	{
-		if (dataSummary == null) {
-			dataSummary = new DataSummary();
-			
-			String filename = experiment.getDefaultDirectory().getAbsolutePath() + File.separatorChar
-					+ experiment.getDbFilename(BaseExperiment.Db_File_Type.DB_SUMMARY);
-			
-			dataSummary.open(filename);
+		if (rootScopeType == RootScopeType.CallingContextTree) {
+			if (dataSummary == null) {
+				dataSummary = new DataSummary();
+				
+				String filename = experiment.getDefaultDirectory().getAbsolutePath() + File.separatorChar
+						+ experiment.getDbFilename(BaseExperiment.Db_File_Type.DB_SUMMARY);
+				
+				dataSummary.open(filename);
+			}
+			return new MetricValueCollection3(dataSummary, scope);
+		} else if (rootScopeType == RootScopeType.CallerTree || 
+				   rootScopeType == RootScopeType.Flat) {
+
+			return new MetricValueCollectionWithStorage();
 		}
-		return new MetricValueCollection3(dataSummary, scope);
-	} else {
-		return new MetricValueCollection2(metric_size);		
 	}
+	return new MetricValueCollection2(metric_size);		
 }
 
 

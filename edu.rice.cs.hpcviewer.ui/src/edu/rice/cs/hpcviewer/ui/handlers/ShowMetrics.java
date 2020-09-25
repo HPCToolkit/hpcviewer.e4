@@ -98,8 +98,8 @@ public class ShowMetrics
 		// we don't know if the user will confirm the modification or not, so it's better to save them first.
 		// if the user decides to cancel the modification, we can restore the metrics back.
 		
-		BaseMetric[] metrics = exp.getMetrics();
-		List<BaseMetric> copyMetrics = new ArrayList<BaseMetric>(metrics.length);
+		List<BaseMetric> metrics = exp.getMetricList();
+		List<BaseMetric> copyMetrics = new ArrayList<BaseMetric>(metrics.size());
 		
 		for(BaseMetric metric: metrics) {
 			copyMetrics.add(metric.duplicate());
@@ -110,13 +110,13 @@ public class ShowMetrics
 		int ret = dialog.open();
 		
 		if (ret == Dialog.OK) {
-			ViewerDataEvent data = new ViewerDataEvent(exp, exp.getMetrics());
+			ViewerDataEvent data = new ViewerDataEvent(exp, metrics);
 			eventBroker.post(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE, data);
 			
 		} else {
 			// in case there is modification, we need to restore the metrics back
-			for(int i=0; i<exp.getMetricCount(); i++) {
-				BaseMetric metric  = exp.getMetric(i);
+			for(int i=0; i<metrics.size(); i++) {
+				BaseMetric metric  = metrics.get(i);
 				BaseMetric oMetric = copyMetrics.get(i);
 				
 				metric.setDisplayName(oMetric.getDisplayName());
