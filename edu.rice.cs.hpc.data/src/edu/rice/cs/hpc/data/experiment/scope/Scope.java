@@ -746,7 +746,7 @@ public void copyMetrics(Scope targetScope, int offset) {
 		return;
 	
 	targetScope.ensureMetricStorage();
-	Experiment experiment = (Experiment) targetScope.getRootScope().getExperiment();
+	Experiment experiment = (Experiment) getRootScope().getExperiment();
 	List<BaseMetric> listMetricDesc = experiment.getMetricList();
 	
 	for (BaseMetric metricDesc: listMetricDesc) {
