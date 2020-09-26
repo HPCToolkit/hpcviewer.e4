@@ -15,6 +15,7 @@ import edu.rice.cs.hpc.data.util.Util;
 import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
 import edu.rice.cs.hpctraceviewer.data.DatabaseAccessInfo;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
+import edu.rice.cs.hpctraceviewer.data.version3.FileDB3;
 
 
 /****************************************************
@@ -88,7 +89,7 @@ public class LocalDBOpener extends AbstractDBOpener
 			break;
 		case 3:
 		case Constants.EXPERIMENT_SPARSE_VERSION:
-			fileDB = new FileDB2();
+			fileDB = new FileDB3();
 			break;
 		default:
 			throw new InvalExperimentException("Trace data version is not unknown: " + version);

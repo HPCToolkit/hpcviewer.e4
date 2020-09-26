@@ -93,7 +93,8 @@ public class FileDB3 implements IFileDB
 
 	@Override
 	public long[] getOffsets() {
-		return dataTrace.getOffsets();
+		System.out.println("ERROR, shouldn't be called!");
+		return null;
 	}
 
 	@Override
@@ -119,13 +120,12 @@ public class FileDB3 implements IFileDB
 
 	@Override
 	public long getMinLoc(int rank) {
-		long []offsets = dataTrace.getOffsets();
-		return offsets[rank];
+		return dataTrace.getOffset(rank);
 	}
 
 	@Override
 	public long getMaxLoc(int rank) {
-		return getMinLoc(rank) + dataTrace.getLength(rank) - DataTrace.RECORD_ENTRY_SIZE;
+		return dataTrace.getOffset(rank) + dataTrace.getLength(rank);
 	}
 
 	@Override
