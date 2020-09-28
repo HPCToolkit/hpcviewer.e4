@@ -5,10 +5,13 @@ import java.io.IOException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 
+import edu.rice.cs.hpc.data.db.version3.DataSummary;
+import edu.rice.cs.hpc.data.db.version3.MetricValueCollection3;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.InvalExperimentException;
 import edu.rice.cs.hpc.data.experiment.extdata.IFileDB;
 import edu.rice.cs.hpc.data.experiment.extdata.IFilteredData;
+import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.trace.TraceAttribute;
 import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.data.util.IProgressReport;
@@ -17,6 +20,7 @@ import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TraceDataByRank;
 import edu.rice.cs.hpctraceviewer.data.version2.BaseData;
 import edu.rice.cs.hpctraceviewer.data.version2.FilteredBaseData;
+import edu.rice.cs.hpctraceviewer.data.version3.FileDB3;
 
 
 /**
@@ -99,14 +103,13 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 		} else if (version == Constants.EXPERIMENT_SPARSE_VERSION) 
 		{
 			// new format
-			traceFilePath = getTraceFile(exp.getDefaultDirectory().getAbsolutePath(), statusMgr);
-			fileDB.open(traceFilePath, trAttribute.dbHeaderSize, RECORD_SIZE);
-			
-			/*
 			String databaseDirectory = exp.getDefaultDirectory().getAbsolutePath(); 
 			traceFilePath = databaseDirectory + File.separator + exp.getDbFilename(BaseExperiment.Db_File_Type.DB_TRACE);
-			((FileDB3)fileDB).open(databaseDirectory);
-			*/
+			
+			RootScope root = (RootScope) exp.getRootScope();
+			DataSummary ds = root.getDataSummary();
+			
+			((FileDB3)fileDB).open(ds, databaseDirectory);
 		}
 		this.fileDB = fileDB;
 		dataTrace 	= new BaseData(fileDB);

@@ -93,6 +93,27 @@ public Scope duplicate() {
     return new RootScope(experiment,  this.rootScopeName, this.rootScopeType, cctId, flatId);
 }
 
+
+/****
+ * For database version 4.0 only: retrieve the DataSummary object for this root scope.
+ * 
+ * 
+ * @return DataSummary
+ * @throws IOException
+ */
+public DataSummary getDataSummary() throws IOException {
+	if (dataSummary == null) {
+		dataSummary = new DataSummary();
+		
+		String filename = experiment.getDefaultDirectory().getAbsolutePath() + File.separatorChar
+				+ experiment.getDbFilename(BaseExperiment.Db_File_Type.DB_SUMMARY);
+		
+		dataSummary.open(filename);
+	}
+	return dataSummary;
+}
+
+
 /******
  * Retrieve (and create) the metric collection based on the version of the database.
  *  
@@ -110,15 +131,9 @@ public IMetricValueCollection getMetricValueCollection(Scope scope) throws IOExc
 	if (version == Constants.EXPERIMENT_SPARSE_VERSION) 
 	{
 		if (rootScopeType == RootScopeType.CallingContextTree) {
-			if (dataSummary == null) {
-				dataSummary = new DataSummary();
-				
-				String filename = experiment.getDefaultDirectory().getAbsolutePath() + File.separatorChar
-						+ experiment.getDbFilename(BaseExperiment.Db_File_Type.DB_SUMMARY);
-				
-				dataSummary.open(filename);
-			}
-			return new MetricValueCollection3(dataSummary, scope);
+			DataSummary data = getDataSummary();
+			return new MetricValueCollection3(data, scope);
+			
 		} else if (rootScopeType == RootScopeType.CallerTree || 
 				   rootScopeType == RootScopeType.Flat) {
 

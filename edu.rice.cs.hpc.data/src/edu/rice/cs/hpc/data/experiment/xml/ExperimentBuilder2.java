@@ -704,8 +704,13 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 			for (MetricRaw m : metricRawList) {
 				int partner_index = m.getPartner();
 				if (partner_index >= 0) {
-					MetricRaw partner = metricRawList.get(partner_index);
-					m.setMetricPartner(partner);
+					// find the metric partner
+					for(MetricRaw mr: metricRawList) {
+						if (mr.getIndex() == partner_index) {
+							m.setMetricPartner(mr);
+							break;
+						}
+					}
 				}
 			}
 			MetricRaw[] metrics = new MetricRaw[metricRawList.size()];

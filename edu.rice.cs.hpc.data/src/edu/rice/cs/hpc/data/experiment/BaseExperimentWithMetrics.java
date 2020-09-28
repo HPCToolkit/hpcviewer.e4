@@ -127,21 +127,27 @@ implements IMetricManager
 	public BaseMetric getMetric(int index)
 	{		
 		if (getMajorVersion() == Constants.EXPERIMENT_SPARSE_VERSION) {
-			for(BaseMetric metric: metrics) {
-				if (metric.getIndex() == index)
-					return metric;
-			}
-			throw new RuntimeException("Invalid metric index: " + index);
+			return findMetric(index);
 		}
 		BaseMetric metric = null;
 		try {
-			metric = this.metrics.get(index);
+			metric = findMetric(index);
 		} catch (Exception e) {
 			System.err.print(e.getLocalizedMessage());
 		}
 		return metric;
 	}
 
+	private BaseMetric findMetric(int index) {
+		for(BaseMetric metric: metrics) {
+			if (metric.getIndex() == index)
+				return metric;
+		}
+		// not found
+		throw new RuntimeException("Invalid metric index: " + index);
+
+	}
+	
 	/*************************************************************************
 	 *	Returns the metric with a given internal name.
 	 ************************************************************************/

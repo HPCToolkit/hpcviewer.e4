@@ -90,13 +90,16 @@ public class DataTrace extends DataCommon
 		for(int i=0; i<numItems; i++) {
 			TraceHeader header = new TraceHeader();
 			
-			int profIndex     = buffer.getInt();
+			// this database starts the profile number with number 1
+			// the old database starts with number 0
+			
+			header.profIndex  = buffer.getInt()-1;
 			header.traceIndex = buffer.getShort();
 			
 			header.start = buffer.getLong();
 			header.end   = buffer.getLong();
 			
-			mapProfToTrace.put(profIndex, header);
+			mapProfToTrace.put(header.profIndex, header);
 		}
 		buffer.clear();
 		
@@ -115,7 +118,11 @@ public class DataTrace extends DataCommon
 	 */
 	public DataRecord getSampledData(int rank, long index) throws IOException
 	{
-		TraceHeader th = mapProfToTrace.get(rank);
+		if (rank == 0)
+			System.out.println();
+		
+		int profileNum = rank;
+		TraceHeader th = mapProfToTrace.get(profileNum);
 		if (th == null)
 			return null;
 		
@@ -159,7 +166,7 @@ public class DataTrace extends DataCommon
 	{
 		TraceHeader th = mapProfToTrace.get(rank);
 		if (th != null) {
-			return th.end - th.start;
+			return th.end - th.start - TRACE_RECORD_SIZE;
 		}
 		return 0;
 	}
@@ -287,9 +294,14 @@ public class DataTrace extends DataCommon
 	 */
 	static class TraceHeader
 	{
-		short traceIndex;
-		long start;
-		long end;
+		int   profIndex;   // profile number 		
+		short traceIndex;  // style: 0-> cct-style, 1->metric-style
+		long start;		   // start of the offset of this profile
+		long end;		   // end of the offset for this profile
+		
+		public String toString() {
+			return profIndex + ": " + start +"-" + end;
+		}
 	}
 
 	/***************************
