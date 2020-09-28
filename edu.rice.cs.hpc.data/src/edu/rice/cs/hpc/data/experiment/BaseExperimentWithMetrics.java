@@ -133,7 +133,7 @@ implements IMetricManager
 		try {
 			metric = findMetric(index);
 		} catch (Exception e) {
-			System.err.print(e.getLocalizedMessage());
+			System.err.println(e.getLocalizedMessage());
 		}
 		return metric;
 	}

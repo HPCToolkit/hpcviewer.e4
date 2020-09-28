@@ -29,6 +29,7 @@ public class DataSummary extends DataCommon
 	private static final int    METRIC_VALUE_SIZE = 8 + 2;
 	private static final int    CCT_RECORD_SIZE   = 4 + 8;
 	private static final int    SUMMARY_PROFILE_INDEX = 0;
+	private static final int    MAX_LEVELS = 8;
 	
 	// --------------------------------------------------------------------
 	// object variable
@@ -36,13 +37,15 @@ public class DataSummary extends DataCommon
 	
 	private RandomAccessFile file;
 	
-	private List<IdTuple>  listIdTuple;
+	private List<IdTuple>  listIdTuple, listIdTupleShort;
 	private List<ProfInfo> listProfInfo;
 		
-	protected boolean optimized = false;
+	protected boolean optimized = true;
 
 	/** Number of parallelism level or number of levels in hierarchy */
 	private int numLevels;
+	private int numShortLevels;
+	
 	private double[] labels;
 	private String[] strLabels;
 
@@ -72,6 +75,12 @@ public class DataSummary extends DataCommon
 	public void printInfo( PrintStream out)
 	{
 		super.printInfo(out);
+		
+		// print list of id tuples
+		for(IdTuple idt: listIdTuple) {
+			System.out.println(idt);
+		}
+		System.out.println();
 
 		ListCCTAndIndex list = null;
 		
@@ -83,7 +92,9 @@ public class DataSummary extends DataCommon
 		}
 		
 		// print random metrics
-		for (int i=0; i<list.listOfId.length; i++)
+		int len = Math.min(100, list.listOfId.length);
+		
+		for (int i=0; i<len; i++)
 		{
 			int cct = list.listOfId[i];
 			out.format("[%5d] ", cct);
@@ -120,10 +131,28 @@ public class DataSummary extends DataCommon
 	
 	/***
 	 * Retrieve the list of tuple IDs.
-	 * @return List of Tuple
+	 * @return {@code List<IdTuple>} List of Tuple
 	 */
 	public List<IdTuple> getIdTuple() {
-		return listIdTuple;
+		if (optimized)
+			return getIdTuple(true);
+		
+		return getIdTuple(false);
+	}
+	
+	
+	/****
+	 * Retrieve the list of id tuples
+	 * 
+	 * @param shortVersion: true if we want to the short version of the list
+	 * 
+	 * @return {@code List<IdTuple>}
+	 */
+	public List<IdTuple> getIdTuple(boolean shortVersion) {
+		if (shortVersion)
+			return listIdTupleShort;
+		else
+			return listIdTuple;
 	}
 	
 	
@@ -232,8 +261,6 @@ public class DataSummary extends DataCommon
 	 * @return String[]
 	 */
 	public String[] getStringLabelIdTuples() {
-		if (strLabels == null)
-			initIdTuples();
 		return strLabels;
 	}
 	
@@ -245,9 +272,6 @@ public class DataSummary extends DataCommon
 	 * @return double[]
 	 */
 	public double[] getDoubleLableIdTuples() {
-		if (labels == null)
-			initIdTuples();
-
 		return labels;
 	}
 	
@@ -259,8 +283,8 @@ public class DataSummary extends DataCommon
 	 * @return int
 	 */
 	public int getMaxLevels() {
-		if (numLevels == 0)
-			initIdTuples();
+		if (optimized)
+			return numShortLevels;
 		
 		return numLevels;
 	}
@@ -306,105 +330,6 @@ public class DataSummary extends DataCommon
 	// --------------------------------------------------------------------
 
 	
-	private void initIdTuples() {
-		
-		if (!optimized) {
-			int maxLevels = 0;
-			labels    = new double[listIdTuple.size()];
-			strLabels = new String[listIdTuple.size()];
-
-			for (int i=0; i<listIdTuple.size(); i++) {
-				IdTuple idt = listIdTuple.get(i);
-				labels[i] = Double.valueOf(idt.toLabel());
-				strLabels[i] = idt.toString();
-				
-				maxLevels = Math.max(maxLevels, idt.length);
-			}
-			numLevels = maxLevels;
-			
-			return;
-		}
-		
-		// 1. first try to compute the number of parallelism levels
-		//    A level is part of label if its kind is not invariant
-		//    For instance: if we have 0.0, 0.1, 0.2, ... 0.N then
-		//                  the first is invariant, the second number will be part of label
-		//                  it should become: 0, 1, 2, ... N
-		//
-		//
-		Map<Short, Map<Long, Integer>> mapKindToMapIndex = new HashMap<Short, Map<Long,Integer>>();
-		Map<Short, Boolean> mapKindToVariant = new HashMap<Short, Boolean>();
-		
-		numLevels = 0;
-
-		for(int i=0; i<listIdTuple.size(); i++) {
-			IdTuple tuple = listIdTuple.get(i);
-			
-			for (int j=0; j<tuple.length; j++) {
-				Short kind = tuple.kind[j];
-				Long index = tuple.index[j];
-				
-				Map<Long, Integer> map = mapKindToMapIndex.get(kind);
-				
-				if (map == null) {
-					map = new HashMap<Long, Integer>();
-					map.put(index, 1);
-					mapKindToMapIndex.put(kind, map);
-					
-				} else {
-					// this kind is not an invariant
-					// the next step should keep track of this kind
-					Integer count = map.get(index);
-					if (count == null) {
-						// this kind is a variant !
-						mapKindToVariant.put(kind, Boolean.TRUE);
-						numLevels++;
-						
-					} else {
-						count++;
-						map.put(index, count);
-					}
-				}
-			}
-		}
-
-		// 2. next, store the number of parallelism levels
-		// we remove the invariants from the list of labels
-		
-		labels    = new double[listIdTuple.size()-1];
-		strLabels = new String[listIdTuple.size()-1];
-		int idx=0;
-		
-		for(int i=0; i<listIdTuple.size(); i++) {
-			IdTuple tuple = listIdTuple.get(i);
-			
-			short []kind = tuple.kind;
-			long []index = tuple.index;
-			
-			String label = "";
-			
-			for(int j=0; j<kind.length; j++) {
-				Short k = kind[j];
-				
-				Boolean variant = mapKindToVariant.get(k);
-				if (variant == null)
-					continue;
-				
-				if (label.length()>0)
-					label += ".";
-
-				Long ix = index[j];
-				label += String.valueOf(ix);				
-			}
-			if (label.length()==0) {
-				label = tuple.toString();
-			}
-			strLabels[idx] = label;
-			labels[idx] = Double.valueOf(label);
-			idx++;
-		}
-	}
-	
 	/***
 	 * read the list of id tuple
 	 * @param input FileChannel
@@ -420,7 +345,8 @@ public class DataSummary extends DataCommon
 		
 		long idTupleSize = buffTupleSize.getLong();
 		
-		listIdTuple = new ArrayList<IdTuple>((int) numItems);
+		listIdTuple = new ArrayList<IdTuple>((int) numItems-1);
+		listIdTupleShort = new ArrayList<IdTuple>((int) numItems-1);
 		
 		ByteBuffer buffer = ByteBuffer.allocate((int) idTupleSize);
 		
@@ -428,6 +354,9 @@ public class DataSummary extends DataCommon
 		assert (numBytes > 0);
 
 		buffer.flip();
+		
+		numLevels = 0;
+		Map<Long, Integer> []mapLevelToHash = new HashMap[MAX_LEVELS];
 		
 		for (int i=0; i<numItems; i++) {
 
@@ -439,13 +368,30 @@ public class DataSummary extends DataCommon
 
 			item.length = buffer.getShort();			
 			assert(item.length>0);
-			
+
+			numLevels = Math.max(numLevels, item.length);
+
 			item.kind  = new short[item.length];
 			item.index = new long[item.length];
 			
 			for (int j=0; j<item.length; j++) {
 				item.kind[j]  = buffer.getShort();
 				item.index[j] = buffer.getLong();
+				
+				if (i==0)
+					continue;
+				// we don't care with summary profile
+				
+				if (mapLevelToHash[j] == null)
+					mapLevelToHash[j] = new HashMap<Long, Integer>();
+				
+				Long hash = convertIdTupleToHash(j, item.kind[j], item.index[j]);
+				Integer count = mapLevelToHash[j].get(hash);
+				if (count == null) {
+					count = Integer.valueOf(0);
+				}
+				count++;
+				mapLevelToHash[j].put(hash, count);
 			}
 			if (i == 0) {
 				// special treatment for id-tuple = 0: it's a summary profile
@@ -453,8 +399,47 @@ public class DataSummary extends DataCommon
 				listIdTuple.add(item);
 			}
 		}
+		
+		List<Integer> levels = new ArrayList<Integer>();
+		
+		for(int i=0; i<mapLevelToHash.length; i++) {
+			if (mapLevelToHash[i] == null || mapLevelToHash[i].size()==1)
+				continue;
+			levels.add(i);
+		}
+		
+		labels    = new double[listIdTuple.size()];
+		strLabels = new String[listIdTuple.size()];
+		
+		for(int i=0; i<listIdTuple.size(); i++) {
+			IdTuple idt = listIdTuple.get(i);
+			IdTuple shortVersion = new IdTuple(levels.size());
+			shortVersion.length  = levels.size();
+
+			int totLevels = Math.min(idt.length, levels.size());
+			
+			for(int j=0; j<totLevels; j++) {
+				int level = levels.get(j);
+				shortVersion.kind[j] = idt.kind[level];
+				shortVersion.index[j] = idt.index[level];
+			}
+			listIdTupleShort.add(shortVersion);
+			
+			labels[i]    = Double.valueOf(idt.toLabel());
+			strLabels[i] = idt.toString();
+			
+			numLevels = Math.max(numLevels, idt.length);
+			numShortLevels = Math.max(numShortLevels, totLevels);
+		}
 	}
 
+	
+	private long convertIdTupleToHash(int level, int kind, long index) {
+		long k = (kind << 20);
+		long t = k + index;
+		return t;
+	}
+	
 	/*****
 	 * read the list of Prof Info
 	 * @param input FileChannel

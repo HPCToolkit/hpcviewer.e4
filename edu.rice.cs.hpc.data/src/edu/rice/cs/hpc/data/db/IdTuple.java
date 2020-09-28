@@ -10,6 +10,9 @@ public class IdTuple
 	public final static int TUPLE_KIND_SIZE   = 2;
 	public final static int TUPLE_INDEX_SIZE  = 8;
 	
+	// use for backward compatibility
+	// we will convert old database process.thread format
+	// to id-tuples
 	
 	public final static int KIND_SUMMARY = 0;
 	public final static int KIND_NODE    = 1;
@@ -28,13 +31,17 @@ public class IdTuple
 	public final static String KIND_LABEL_GPU_STREAM = "Stream";
 	public final static String KIND_LABEL_GPU_CTXT   = "Context";
 	
+	public final static String KIND_LABEL_CORE       = "Core";
+
+
 	private final static String[] arrayLabel = {KIND_LABEL_SUMMARY, 
 											    KIND_LABEL_NODE,
 												KIND_LABEL_RANK,
 												KIND_LABEL_THREAD,
 												KIND_LABEL_GPU_DEVICE,
 												KIND_LABEL_GPU_STREAM,
-												KIND_LABEL_GPU_CTXT};
+												KIND_LABEL_GPU_CTXT,
+												KIND_LABEL_CORE};
 
 	// -------------------------------------------
 	// variables

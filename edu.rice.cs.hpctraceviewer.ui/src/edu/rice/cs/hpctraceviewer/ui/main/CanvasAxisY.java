@@ -30,10 +30,11 @@ import edu.rice.cs.hpctraceviewer.ui.base.ITraceCanvas.MouseState;
 public class CanvasAxisY extends AbstractAxisCanvas 
 {
 	private final int []listColorSWT = {
-											SWT.COLOR_CYAN,   SWT.COLOR_DARK_BLUE,
-											SWT.COLOR_YELLOW, SWT.COLOR_DARK_MAGENTA,
-											SWT.COLOR_GRAY,   SWT.COLOR_DARK_GREEN,
-											SWT.COLOR_WHITE,  SWT.COLOR_DARK_RED
+											SWT.COLOR_CYAN,    SWT.COLOR_DARK_BLUE,
+											SWT.COLOR_YELLOW,  SWT.COLOR_DARK_MAGENTA,
+											SWT.COLOR_GRAY,    SWT.COLOR_DARK_GREEN,
+											SWT.COLOR_WHITE,   SWT.COLOR_DARK_RED,
+											SWT.COLOR_MAGENTA, SWT.COLOR_DARK_YELLOW
 										};
 	private int columnWidth = HPCTraceView.Y_AXIS_WIDTH/4;
 	
@@ -64,10 +65,10 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		listColorObjects = new Color[listColorSWT.length];
 		for(int i=0; i<listColorSWT.length; i++) {
 			listColorObjects[i] = getDisplay().getSystemColor(listColorSWT[i]);
-		}
-		
+		}	
 		mouseState = MouseState.ST_MOUSE_INIT;
 	}
+	
 	
 	@Override
 	public void setData(Object data) {
@@ -122,7 +123,6 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		List<IdTuple> listIdTuples = traceData.getListOfIdTuples();
 		if (listIdTuples == null || listIdTuples.size() == 0)
 			return;
-        
 		
 		// --------------------------------------------------------------------------
         // Manually fill the client area with the default background color
@@ -181,7 +181,10 @@ public class CanvasAxisY extends AbstractAxisCanvas
 				int x_start = j * columnWidth;
 				int x_end   = x_start + columnWidth - 1;
 
-				e.gc.setBackground(listColorObjects[currentColor]);
+				// make sure the color is circular, i.e. if we need more color than we reserve,
+				// we should go back to the first color
+				Color color = listColorObjects[currentColor % listColorObjects.length];
+				e.gc.setBackground(color);
 				e.gc.fillRectangle(x_start, y_curr, x_end, y_next);
 				
 				oldColorIndex[j] = currentColor;
@@ -197,7 +200,6 @@ public class CanvasAxisY extends AbstractAxisCanvas
 			tooltip.deactivate();
 			tooltip = null;
 		}
-		
 		super.dispose();
 	}
 	

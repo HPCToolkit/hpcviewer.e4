@@ -232,6 +232,8 @@ public class DatabaseCollection
 		if (activeWindowContext == null) {
 			// we give up. There's still no active window yet.
 			MWindow window = application.getSelectedElement();
+			if (window == null)
+				return;
 			
 			((EObject) window).eAdapters().add(new AdapterImpl() {
 				
