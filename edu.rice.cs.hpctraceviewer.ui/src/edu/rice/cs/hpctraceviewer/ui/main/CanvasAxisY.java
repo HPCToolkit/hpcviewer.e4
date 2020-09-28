@@ -169,7 +169,7 @@ public class CanvasAxisY extends AbstractAxisCanvas
 				int idx = (int) idtuple.index[j];
 				int currentColor = limitColor - ((idx+1) % 2);
 				
-				if (idtupleOld != null && idtuple.index[j]!= idtupleOld.index[j]) {
+				if (idtupleOld != null && idtupleOld.index.length>j && idtuple.index[j]!= idtupleOld.index[j]) {
 					// make sure the current color is different than the previous one
 					currentColor = limitColor - ((limitColor-oldColorIndex[j])+1)%2;
 				}
