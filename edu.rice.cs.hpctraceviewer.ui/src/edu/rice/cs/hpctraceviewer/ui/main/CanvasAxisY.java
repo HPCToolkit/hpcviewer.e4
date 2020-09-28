@@ -172,6 +172,8 @@ public class CanvasAxisY extends AbstractAxisCanvas
 				if (idtupleOld != null && idtupleOld.index.length>j && idtuple.index[j]!= idtupleOld.index[j]) {
 					// make sure the current color is different than the previous one
 					currentColor = limitColor - ((limitColor-oldColorIndex[j])+1)%2;
+				} else if (i>0) {
+					currentColor = oldColorIndex[j];
 				}
 				
 				// -----------------------------------------------------
@@ -183,7 +185,9 @@ public class CanvasAxisY extends AbstractAxisCanvas
 
 				// make sure the color is circular, i.e. if we need more color than we reserve,
 				// we should go back to the first color
-				Color color = listColorObjects[currentColor % listColorObjects.length];
+				int colorInt = currentColor % listColorObjects.length;
+				Color color  = listColorObjects[colorInt];
+				
 				e.gc.setBackground(color);
 				e.gc.fillRectangle(x_start, y_curr, x_end, y_next);
 				
