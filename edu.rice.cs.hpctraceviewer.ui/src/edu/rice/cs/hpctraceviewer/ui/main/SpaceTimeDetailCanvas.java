@@ -47,6 +47,7 @@ import org.osgi.service.event.EventHandler;
 
 import edu.rice.cs.hpc.data.db.IdTuple;
 import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
+import edu.rice.cs.hpc.data.experiment.extdata.IFileDB.IdTupleOption;
 import edu.rice.cs.hpctraceviewer.ui.base.ISpaceTimeCanvas;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.base.ITraceViewAction;
@@ -628,7 +629,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
         }
         stData.getAttributes().assertProcessBounds(traceData.getNumberOfRanks());
 
-        final List<IdTuple> listIdTuples = traceData.getListOfIdTuples();
+        final List<IdTuple> listIdTuples = traceData.getListOfIdTuples(IdTupleOption.BRIEF);
         if (listIdTuples == null || listIdTuples.size() <= 1)
         	// sequential program. No process range display is needed
         	return;
@@ -679,7 +680,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		final int selectedProc  = ptl.getProcessNum();
 
         final IBaseData traceData = stData.getBaseData();
-        final List<IdTuple> listIdTuples = traceData.getListOfIdTuples();
+        final List<IdTuple> listIdTuples = traceData.getListOfIdTuples(IdTupleOption.BRIEF);
 
 		String timeUnit = attributes.getTimeUnitName(displayTimeUnit);
 		
@@ -1151,7 +1152,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		
 		// in case of filter, we may need to change the cursor position
 		if (refreshData) {
-			final List<IdTuple> list = stData.getBaseData().getListOfIdTuples();
+			final List<IdTuple> list = stData.getBaseData().getListOfIdTuples(IdTupleOption.BRIEF);
 			final Position p = stData.getAttributes().getPosition();
 			
 			if (p.process > list.size()-1) {

@@ -6,6 +6,7 @@ import java.util.List;
 import edu.rice.cs.hpc.data.db.IdTuple;
 import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
 import edu.rice.cs.hpc.data.experiment.extdata.IFileDB;
+import edu.rice.cs.hpc.data.experiment.extdata.IFileDB.IdTupleOption;
 import edu.rice.cs.hpc.data.util.Constants;
 
 /*********************************************************
@@ -24,8 +25,8 @@ public abstract class AbstractBaseData implements IBaseData
 	
 	
 	@Override
-	public List<IdTuple> getListOfIdTuples() {
-		return baseDataFile.getIdTuple();
+	public List<IdTuple> getListOfIdTuples(IdTupleOption option) {
+		return baseDataFile.getIdTuple(option);
 	}
 	
 	/*

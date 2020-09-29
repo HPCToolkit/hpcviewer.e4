@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import edu.rice.cs.hpc.data.db.IdTuple;
+import edu.rice.cs.hpc.data.experiment.extdata.IFileDB.IdTupleOption;
 
 /*************************************************************************
  * 
@@ -17,7 +18,7 @@ public interface IBaseData
 	 * Retrieve the list of id tuples of this database.
 	 * @return {@code List<IdTuple>}
 	 */
-	public List<IdTuple> getListOfIdTuples();
+	public List<IdTuple> getListOfIdTuples(IdTupleOption option);
 	
 	/****
 	 * retrieve the number of ranks 

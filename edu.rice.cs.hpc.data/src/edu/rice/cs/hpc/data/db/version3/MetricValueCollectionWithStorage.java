@@ -11,13 +11,28 @@ import edu.rice.cs.hpc.data.experiment.metric.MetricValue;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 
+
+/*******************************************
+ * 
+ * Special simple class to store sparse metrics in database 4.0
+ * <p>This class is designed to be used when the top-down view
+ * has MetricValueCollection3 object, and the bottom-up and
+ * flat views will have this class to store sparse metric values.
+ *
+ *******************************************/
 public class MetricValueCollectionWithStorage implements IMetricValueCollection 
 {
 	private final float VALUE_ZERO = 0.0f;
 	
+	/** Sparse storage of metric values.
+	 *  The key is the metric index, the value is a 
+	 *  {@code MetricValue} object. Usually not {@code NONE} **/
 	private AbstractMap<Integer, MetricValue> values;
 	
 	
+	/***
+	 * Constructor of the class. No parameter is needed.
+	 */
 	public MetricValueCollectionWithStorage() {
 		values = new HashMap<Integer, MetricValue>();
 	}
@@ -61,9 +76,13 @@ public class MetricValueCollectionWithStorage implements IMetricValueCollection
 		MetricValue mv = values.get(index);
 		
 		if (mv != null && value != MetricValue.NONE) {
+			// replace the existing value
+			
 			mv.setValue(value.getValue());
 			mv.setAnnotationValue(value.getAnnotationValue());
 		} else {
+			// add a new metric index
+			
 			values.put(index, value);
 		}
 	}

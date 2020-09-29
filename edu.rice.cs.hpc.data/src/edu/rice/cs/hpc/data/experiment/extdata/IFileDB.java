@@ -13,6 +13,11 @@ import edu.rice.cs.hpc.data.db.IdTuple;
  *************************************************/
 public interface IFileDB 
 {
+	public enum IdTupleOption {
+		COMPLETE,
+		BRIEF
+	};
+	
 	/***
 	 * Open a database containing the information of processes or threads.
 	 * Users need to call this method first, before calling other methods.
@@ -56,7 +61,7 @@ public interface IFileDB
 	 */
 	public long[]	getOffsets();
 	
-	public List<IdTuple> getIdTuple();
+	public List<IdTuple> getIdTuple(IdTupleOption option);
 	
 	public long 	getLong  (long position) throws IOException;
 	public int  	getInt   (long position) throws IOException;

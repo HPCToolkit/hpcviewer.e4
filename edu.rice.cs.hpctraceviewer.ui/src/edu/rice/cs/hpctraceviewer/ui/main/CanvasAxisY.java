@@ -13,6 +13,7 @@ import org.eclipse.swt.widgets.Event;
 
 import edu.rice.cs.hpc.data.db.IdTuple;
 import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
+import edu.rice.cs.hpc.data.experiment.extdata.IFileDB.IdTupleOption;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
@@ -77,7 +78,7 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		SpaceTimeDataController stdc = (SpaceTimeDataController) data;
         final IBaseData traceData = stdc.getBaseData();
         
-        List<IdTuple> list   = traceData.getListOfIdTuples();
+        List<IdTuple> list   = traceData.getListOfIdTuples(IdTupleOption.BRIEF);
         boolean isSequential = list==null || list.size()==0;
         
         if (isSequential) {
@@ -120,7 +121,7 @@ public class CanvasAxisY extends AbstractAxisCanvas
 
 		final ImageTraceAttributes attribute = data.getAttributes();
 		
-		List<IdTuple> listIdTuples = traceData.getListOfIdTuples();
+		List<IdTuple> listIdTuples = traceData.getListOfIdTuples(IdTupleOption.BRIEF);
 		if (listIdTuples == null || listIdTuples.size() == 0)
 			return;
 		
@@ -252,7 +253,7 @@ public class CanvasAxisY extends AbstractAxisCanvas
 			final ImageTraceAttributes attribute = data.getAttributes();
 			int process = attribute.convertPixelToRank(event.y);
 			
-			List<IdTuple> listTuples = traceData.getListOfIdTuples();
+			List<IdTuple> listTuples = traceData.getListOfIdTuples(IdTupleOption.BRIEF);
 						
 			if (process < 0 && process >= listTuples.size())
 				return null;

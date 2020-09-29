@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.rice.cs.hpc.data.db.IdTuple;
+import edu.rice.cs.hpc.data.experiment.extdata.IFileDB.IdTupleOption;
 import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.data.util.LargeByteBuffer;
 import edu.rice.cs.hpc.data.util.Util;
@@ -64,7 +65,7 @@ public class FileDB2 implements IFileDB
 	}
 	
 	@Override
-	public List<IdTuple> getIdTuple() {
+	public List<IdTuple> getIdTuple(IdTupleOption option) {
 		return listIdTuples;
 	}
 	

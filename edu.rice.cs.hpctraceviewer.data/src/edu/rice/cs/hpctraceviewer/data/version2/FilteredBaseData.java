@@ -9,6 +9,7 @@ import edu.rice.cs.hpc.data.experiment.extdata.FileDB2;
 import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
 import edu.rice.cs.hpc.data.experiment.extdata.IFileDB;
 import edu.rice.cs.hpc.data.experiment.extdata.IFilteredData;
+import edu.rice.cs.hpc.data.experiment.extdata.IFileDB.IdTupleOption;
 import edu.rice.cs.hpc.data.trace.FilterSet;
 
 
@@ -89,10 +90,10 @@ public class FilteredBaseData extends AbstractBaseData implements IFilteredData 
 
 	
 	@Override
-	public List<IdTuple> getListOfIdTuples() {
+	public List<IdTuple> getListOfIdTuples(IdTupleOption option) {
 		if (filteredIdTuples == null) {
 			filteredIdTuples = new ArrayList<IdTuple>(indexes.length);
-			List<IdTuple> listDensedIdTuples = baseDataFile.getIdTuple();
+			List<IdTuple> listDensedIdTuples = baseDataFile.getIdTuple(option);
 			
 			for(int i=0; i<indexes.length; i++) {
 				IdTuple tuple = listDensedIdTuples.get(indexes[i]);

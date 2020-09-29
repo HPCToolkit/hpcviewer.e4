@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 
 import edu.rice.cs.hpc.data.db.IdTuple;
+import edu.rice.cs.hpc.data.experiment.extdata.IFileDB;
+import edu.rice.cs.hpc.data.experiment.extdata.IFileDB.IdTupleOption;
 import edu.rice.cs.hpc.data.experiment.metric.MetricValueSparse;
 
 /*********************************************
@@ -135,9 +137,9 @@ public class DataSummary extends DataCommon
 	 */
 	public List<IdTuple> getIdTuple() {
 		if (optimized)
-			return getIdTuple(true);
+			return getIdTuple(IFileDB.IdTupleOption.BRIEF);
 		
-		return getIdTuple(false);
+		return getIdTuple(IFileDB.IdTupleOption.COMPLETE);
 	}
 	
 	
@@ -148,11 +150,15 @@ public class DataSummary extends DataCommon
 	 * 
 	 * @return {@code List<IdTuple>}
 	 */
-	public List<IdTuple> getIdTuple(boolean shortVersion) {
-		if (shortVersion)
-			return listIdTupleShort;
-		else
+	public List<IdTuple> getIdTuple(IdTupleOption option) {
+		switch(option) {
+		case COMPLETE: 
 			return listIdTuple;
+
+		case BRIEF:
+		default:
+			return listIdTupleShort;
+		}
 	}
 	
 	

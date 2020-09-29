@@ -7,6 +7,7 @@ import java.util.List;
 
 import edu.rice.cs.hpc.data.db.IdTuple;
 import edu.rice.cs.hpc.data.experiment.extdata.IFilteredData;
+import edu.rice.cs.hpc.data.experiment.extdata.IFileDB.IdTupleOption;
 import edu.rice.cs.hpc.data.trace.Filter;
 import edu.rice.cs.hpc.data.trace.FilterSet;
 import edu.rice.cs.hpc.data.trace.TraceName;
@@ -144,7 +145,7 @@ public class RemoteFilteredBaseData implements IFilteredData {
 		return 0;
 	}
 	@Override
-	public List<IdTuple> getListOfIdTuples() {
+	public List<IdTuple> getListOfIdTuples(IdTupleOption option) {
 		// TODO Auto-generated method stub
 		return null;
 	}

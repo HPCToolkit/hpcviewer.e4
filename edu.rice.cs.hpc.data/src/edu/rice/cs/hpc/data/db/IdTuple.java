@@ -22,16 +22,16 @@ public class IdTuple
 	// see https://github.com/HPCToolkit/hpctoolkit/blob/prof2/src/lib/prof-lean/id-tuple.h#L81
 	// for list of kinds in id tuple
 	
-	public final static String KIND_LABEL_SUMMARY = "Summary";
-	public final static String KIND_LABEL_NODE    = "Node";
-	public final static String KIND_LABEL_RANK    = "Rank";
-	public final static String KIND_LABEL_THREAD  = "Thread";
+	private final static String KIND_LABEL_SUMMARY = "Summary";
+	private final static String KIND_LABEL_NODE    = "Node";
+	private final static String KIND_LABEL_RANK    = "Rank";
+	private final static String KIND_LABEL_THREAD  = "Thread";
 	
-	public final static String KIND_LABEL_GPU_DEVICE = "Device";
-	public final static String KIND_LABEL_GPU_STREAM = "Stream";
-	public final static String KIND_LABEL_GPU_CTXT   = "Context";
+	private final static String KIND_LABEL_GPU_DEVICE = "Device";
+	private final static String KIND_LABEL_GPU_STREAM = "Stream";
+	private final static String KIND_LABEL_GPU_CTXT   = "Context";
 	
-	public final static String KIND_LABEL_CORE       = "Core";
+	private final static String KIND_LABEL_CORE       = "Core";
 
 
 	private final static String[] arrayLabel = {KIND_LABEL_SUMMARY, 

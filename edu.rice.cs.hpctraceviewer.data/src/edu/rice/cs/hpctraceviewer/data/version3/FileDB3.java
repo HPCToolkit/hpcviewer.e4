@@ -10,6 +10,7 @@ import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.extdata.FileDB2;
 import edu.rice.cs.hpc.data.experiment.extdata.IFileDB;
 
+
 /********************************************************************
  * 
  * Class to manage access to extended database file
@@ -112,7 +113,7 @@ public class FileDB3 implements IFileDB
 	}
 
 	@Override
-	public List<IdTuple> getIdTuple() {
+	public List<IdTuple> getIdTuple(IdTupleOption option) {
 		return dataSummary.getIdTuple();
 	}
 
