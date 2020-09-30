@@ -73,17 +73,20 @@ public class MetricValueCollectionWithStorage implements IMetricValueCollection
 
 	@Override
 	public void setValue(int index, MetricValue value) {
+		
+		if (value == MetricValue.NONE)
+			return;
+		
 		MetricValue mv = values.get(index);
 		
-		if (mv != null && value != MetricValue.NONE) {
+		if (mv != null) {
 			// replace the existing value
 			
 			mv.setValue(value.getValue());
 			mv.setAnnotationValue(value.getAnnotationValue());
 		} else {
 			// add a new metric index
-			
-			values.put(index, value);
+			values.put(index, value.duplicate());
 		}
 	}
 

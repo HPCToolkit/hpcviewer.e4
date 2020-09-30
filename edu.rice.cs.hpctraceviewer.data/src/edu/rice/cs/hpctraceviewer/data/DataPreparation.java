@@ -3,6 +3,8 @@ package edu.rice.cs.hpctraceviewer.data;
 import java.util.HashMap;
 
 import org.eclipse.swt.graphics.Color;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /***********************************************************************
@@ -61,6 +63,8 @@ public abstract class DataPreparation
 		if (cp == null)
 			return 0;
 		
+		Logger logger = LoggerFactory.getLogger(getClass());
+		
 		String succFunction = cp.getScopeAt(data.depth).getName(); 
 		Color succColor = data.colorTable.getColor(succFunction);
 		int last_ptl_index = data.ptl.size() - 1;
@@ -69,9 +73,12 @@ public abstract class DataPreparation
 		for (int index = 0; index < data.ptl.size(); index++)
 		{
 			// in case of bad cpid, we just quit painting the view
-			if (cp==null)
+			if (cp==null) {
+				logger.warn("No cpid for index " + index);
+				
 				return num_invalid_cp;		// throwing an exception is more preferable, but it will make
-							// more complexity to handle inside a running thread
+				// more complexity to handle inside a running thread
+			}
 
 			final int currDepth = cp.getMaxDepth(); 
 			int currSampleMidpoint = succSampleMidpoint;
@@ -111,6 +118,7 @@ public abstract class DataPreparation
 						num++;
 					} else {
 						num = 1;
+						logger.warn("Invalid cpid: " + cpid);
 					}
 					mapInvalidData.put(cpid, num);
 					

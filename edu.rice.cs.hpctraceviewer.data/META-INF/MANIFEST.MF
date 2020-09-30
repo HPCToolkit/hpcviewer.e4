@@ -10,7 +10,8 @@ Require-Bundle: edu.rice.cs.hpc.data,
  edu.rice.cs.hpcbase,
  org.eclipse.core.runtime,
  org.eclipse.swt,
- org.eclipse.e4.core.contexts
+ org.eclipse.e4.core.contexts,
+ org.slf4j.api
 Export-Package: edu.rice.cs.hpctraceviewer.data,
  edu.rice.cs.hpctraceviewer.data.local,
  edu.rice.cs.hpctraceviewer.data.timeline,
