@@ -118,7 +118,7 @@ public abstract class DataPreparation
 						num++;
 					} else {
 						num = 1;
-						logger.warn("Invalid cpid: " + cpid);
+						logger.debug("Invalid cpid: " + cpid);
 					}
 					mapInvalidData.put(cpid, num);
 					
