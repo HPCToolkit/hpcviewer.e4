@@ -97,6 +97,17 @@ public class FlatContentViewer extends AbstractViewBuilder
 				@Override
 				public Object[] getChildren(Object node) {
 					if (node instanceof Scope) {
+						/*
+						 * debug to display the tree
+						 * 
+						String tab = "";
+						Scope scope = (Scope) node;
+						while(scope.getParent()!=null) {
+							scope = scope.getParentScope();
+							tab += "  ";
+						}
+						System.out.println(tab + ((Scope)node).getCCTIndex() + ": " + node);
+						*/
 						return ((Scope)node).getChildren();
 					}
 					return null;
