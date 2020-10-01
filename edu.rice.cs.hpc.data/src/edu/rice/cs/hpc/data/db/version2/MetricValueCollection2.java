@@ -13,6 +13,7 @@ import edu.rice.cs.hpc.data.experiment.scope.Scope;
  * version 2 format (uncompact format)
  *
  *********************************************************************/
+@Deprecated
 public class MetricValueCollection2 implements IMetricValueCollection 
 {
 	final private MetricValue []values;

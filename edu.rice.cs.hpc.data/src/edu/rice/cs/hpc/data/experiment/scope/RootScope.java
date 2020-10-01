@@ -140,7 +140,7 @@ public IMetricValueCollection getMetricValueCollection(Scope scope) throws IOExc
 			return new MetricValueCollectionWithStorage();
 		}
 	}
-	return new MetricValueCollection2(metric_size);		
+	return new MetricValueCollectionWithStorage();		
 }
 
 

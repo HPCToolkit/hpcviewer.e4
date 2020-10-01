@@ -162,7 +162,12 @@ public class MetricValueCollection3 implements IMetricValueCollection
 		List<BaseMetric> list = exp.getMetricList();
 	
 		// TODO: hack -- grab the first metric for initialization purpose
-		getValue(scope, list.get(0).getIndex());
+		// just to make sure we already initialized :-(
+		
+		if (values == null) {
+			getValue(scope, list.get(0).getIndex());
+		}
+
 		if (values != null)
 		{
 			return values.size()>0;

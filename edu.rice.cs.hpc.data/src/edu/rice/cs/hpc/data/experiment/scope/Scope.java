@@ -524,33 +524,14 @@ public RootScope getRootScope()
 //ACCESS TO METRICS													//
 //////////////////////////////////////////////////////////////////////////
 
-/***************************************************************************
- * Check whether the scope has at least a metric value
- * @return
- ***************************************************************************/
-private boolean hasMetrics() 
-{
-	ensureMetricStorage();
-	return metrics.hasMetrics(this);
-}
 
 /***************************************************************************
  * check whether the scope has at least a non-zero metric value
  * @return true if the scope has at least a non-zero metric value
  ***************************************************************************/
 public boolean hasNonzeroMetrics() {
-	if (!this.hasMetrics())
-		return false;
-	
-	Experiment experiment = (Experiment) root.getExperiment();
-	List<BaseMetric> list = experiment.getMetricList();
-	
-	for (BaseMetric metric: list) {
-		MetricValue m = getMetricValue(metric);
-		if (!MetricValue.isZero(m))
-			return true;
-	}
-	return false;
+	ensureMetricStorage();
+	return metrics.hasMetrics(this);
 }
 
 
@@ -742,7 +723,7 @@ protected void ensureMetricStorage()
 
 public void copyMetrics(Scope targetScope, int offset) {
 
-	if (!this.hasMetrics())
+	if (!hasNonzeroMetrics())
 		return;
 	
 	targetScope.ensureMetricStorage();
