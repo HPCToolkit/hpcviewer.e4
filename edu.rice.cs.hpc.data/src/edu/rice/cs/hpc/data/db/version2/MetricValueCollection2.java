@@ -11,7 +11,9 @@ import edu.rice.cs.hpc.data.experiment.scope.Scope;
  * 
  * The implementation of {@link IMetricValueCollection} for database
  * version 2 format (uncompact format)
- *
+ * <p>This class is deprecated. Please use {@code MetricValueCollectionWithStorage} instead.
+ * </p>
+ * 
  *********************************************************************/
 @Deprecated
 public class MetricValueCollection2 implements IMetricValueCollection 

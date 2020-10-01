@@ -1,5 +1,12 @@
 package edu.rice.cs.hpc.data.db;
 
+/*******************************************
+ * 
+ * Id Tuple class to store the length, kind and index of the id tuple.
+ * <p>Id tuple contains the information of a measurement profile. 
+ * The later is equal to *.hpcrun file, plus *.hpctrace file.
+ *
+ *******************************************/
 public class IdTuple 
 {
 	// -------------------------------------------
@@ -19,6 +26,14 @@ public class IdTuple
 	public final static int KIND_RANK    = 2;
 	public final static int KIND_THREAD  = 3;
 	
+	public final static int KIND_GPU_DEVICE  = 4;
+	public final static int KIND_GPU_STREAM  = 5;
+	public final static int KIND_GPU_CONTEXT = 6;
+	public final static int KIND_CORE        = 7;
+	
+	public final static int KIND_MAX         = 8;
+	
+	
 	// see https://github.com/HPCToolkit/hpctoolkit/blob/prof2/src/lib/prof-lean/id-tuple.h#L81
 	// for list of kinds in id tuple
 	
@@ -32,7 +47,6 @@ public class IdTuple
 	private final static String KIND_LABEL_GPU_CTXT   = "Context";
 	
 	private final static String KIND_LABEL_CORE       = "Core";
-
 
 	private final static String[] arrayLabel = {KIND_LABEL_SUMMARY, 
 											    KIND_LABEL_NODE,
@@ -73,8 +87,25 @@ public class IdTuple
 	
 
 	// -------------------------------------------
-	// Methods
+	// API Methods
 	// -------------------------------------------
+	
+	/***
+	 * Check if this tuple has a specific kind.
+	 * @see KIND_NODE
+	 * @see KIND_THREAD
+	 * @see KIND_GPU_CONTEXT
+	 * 
+	 * @param kindType short
+	 * @return boolean true if the tuple has the kind type, false otherwise
+	 */
+	public boolean hasKind(short kindType) {
+		for(short i=0; i<kind.length; i++) {
+			if (kind[i] == kindType)
+				return true;
+		}
+		return false;
+	}
 	
 	/***
 	 * Conversion from a tuple kind to label string
