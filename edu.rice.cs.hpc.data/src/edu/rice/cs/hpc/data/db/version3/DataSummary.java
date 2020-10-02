@@ -406,28 +406,41 @@ public class DataSummary extends DataCommon
 			}
 		}
 		
-		List<Integer> levels = new ArrayList<Integer>();
+		Map<Integer, Integer> mapLevelToSkip = new HashMap<Integer, Integer>();
 		
 		for(int i=0; i<mapLevelToHash.length; i++) {
-			if (mapLevelToHash[i] == null || mapLevelToHash[i].size()==1)
-				continue;
-			levels.add(i);
+			if (mapLevelToHash[i] != null && mapLevelToHash[i].size()==1) {
+				mapLevelToSkip.put(i, 1);
+			}
 		}
 		
 		labels    = new double[listIdTuple.size()];
 		strLabels = new String[listIdTuple.size()];
 		
+		// compute the brief short version of id tuples
+		
 		for(int i=0; i<listIdTuple.size(); i++) {
 			IdTuple idt = listIdTuple.get(i);
-			IdTuple shortVersion = new IdTuple(levels.size());
-			shortVersion.length  = levels.size();
-
-			int totLevels = Math.min(idt.length, levels.size());
+			int totLevels = 0;
 			
-			for(int j=0; j<totLevels; j++) {
-				int level = levels.get(j);
-				shortVersion.kind[j] = idt.kind[level];
-				shortVersion.index[j] = idt.index[level];
+			// find how many levels we can keep for this id tuple
+			for (int j=0; j<idt.length; j++) {
+				if (mapLevelToSkip.get(j) == null) {
+					totLevels++;
+				}
+			}
+			IdTuple shortVersion = new IdTuple(totLevels);
+			int level = 0;
+			
+			// copy not-skipped id tuples to the short version
+			// leave the skipped ones for the full complete id tuple
+			for(int j=0; j<idt.length; j++) {
+				if (mapLevelToSkip.get(j) == null) {
+					// we should keep this level
+					shortVersion.kind[level]  = idt.kind[j];
+					shortVersion.index[level] = idt.index[j];
+					level++;
+				}
 			}
 			listIdTupleShort.add(shortVersion);
 			
