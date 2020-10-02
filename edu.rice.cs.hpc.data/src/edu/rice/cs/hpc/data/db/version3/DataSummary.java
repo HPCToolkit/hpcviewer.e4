@@ -411,6 +411,16 @@ public class DataSummary extends DataCommon
 		for(int i=0; i<mapLevelToHash.length; i++) {
 			if (mapLevelToHash[i] != null && mapLevelToHash[i].size()==1) {
 				mapLevelToSkip.put(i, 1);
+				
+			} else if (mapLevelToSkip.size()>0) {
+				// if we find that this level is not invariant, we just stop here.
+				// there is no need to continue to look for invariant.
+				// for instance if we have:
+				//   rank 0 thread 0
+				//   rank 0 thread 1
+				//   rank 0 stream 1 context 0
+				// we just stop at level rank (rank 0), we don't need to skip level 2 (context 0)
+				break;
 			}
 		}
 		
@@ -597,32 +607,6 @@ public class DataSummary extends DataCommon
 				   ", vals: " 	 + num_vals 	   + 
 				   ", ccts: "	 + num_nz_contexts + 
 				   ", offs: " 	 + offset;
-		}
-	}
-
-	/***************************
-	 * unit test 
-	 * 
-	 * @param argv
-	 ***************************/
-	public static void main(String []argv)
-	{
-		final String DEFAULT_FILE = "/home/la5/git/hpctoolkit/BUILD-prof2/hpctoolkit-hpcstruct-bin-database/thread.db";
-		final String filename;
-		if (argv != null && argv.length>0)
-			filename = argv[0];
-		else
-			filename = DEFAULT_FILE;
-		
-		final DataSummary summary_data = new DataSummary();
-		try {
-			summary_data.open(filename);			
-			summary_data.printInfo(System.out);
-			summary_data.dispose();	
-			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	}
 }
