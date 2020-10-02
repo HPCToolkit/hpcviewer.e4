@@ -2,11 +2,14 @@ package edu.rice.cs.hpctraceviewer.data.version3;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
-import edu.rice.cs.hpc.data.db.DataThread;
+import edu.rice.cs.hpc.data.db.IdTuple;
+import edu.rice.cs.hpc.data.db.version3.DataSummary;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.extdata.FileDB2;
 import edu.rice.cs.hpc.data.experiment.extdata.IFileDB;
+
 
 /********************************************************************
  * 
@@ -19,7 +22,7 @@ import edu.rice.cs.hpc.data.experiment.extdata.IFileDB;
 public class FileDB3 implements IFileDB 
 {
 	private DataTrace dataTrace;
-	private DataThread dataThread;
+	private DataSummary dataSummary;
 	
 	
 	/****
@@ -34,9 +37,6 @@ public class FileDB3 implements IFileDB
 	public void open(String filename, int headerSize, int recordSize)
 			throws IOException 
 	{
-		File file  = new File(filename);
-		String dir = file.getParent();
-		open(dir);
 	}
 	
 	/***
@@ -45,16 +45,13 @@ public class FileDB3 implements IFileDB
 	 * @param directory
 	 * @throws IOException
 	 */
-	public void open(String directory) throws IOException
+	public void open(DataSummary dataSummary, String directory) throws IOException
 	{
+		this.dataSummary = dataSummary;
+
 		String filename = directory + File.separatorChar + BaseExperiment.getDefaultDbTraceFilename();
 		dataTrace = new DataTrace();
 		dataTrace.open(filename);
-		
-		filename = directory + File.separatorChar + 
-				BaseExperiment.getDefaultDatabaseName(BaseExperiment.Db_File_Type.DB_THREADS);
-		dataThread = new DataThread();
-		dataThread.open(filename);
 	}
 
 	@Override
@@ -64,34 +61,13 @@ public class FileDB3 implements IFileDB
 
 	@Override
 	public String[] getRankLabels() {
-		int numLevels = dataThread.getParallelismLevel();
-		int []ranks   = dataThread.getParallelismRank();
-		int num_ranks  = ranks.length / numLevels;
-		String []rank_label = new String[num_ranks]; 
-
-		StringBuffer sbRank = new StringBuffer();
-		for (int i=0; i<num_ranks; i++)
-		{
-			sbRank.setLength(0);
-			for(int j=0; j<numLevels; j++)
-			{
-				int k = i*numLevels + j;
-				sbRank.append( String.valueOf(ranks[k]) );
-				if (j == numLevels-1)
-				{
-					rank_label[i] = sbRank.toString();
-				} else
-				{
-					sbRank.append(".");
-				}
-			}
-		}
-		return rank_label;
+		return dataSummary.getStringLabelIdTuples();
 	}
 
 	@Override
 	public long[] getOffsets() {
-		return dataTrace.getOffsets();
+		System.out.println("ERROR, shouldn't be called!");
+		return null;
 	}
 
 	@Override
@@ -112,29 +88,33 @@ public class FileDB3 implements IFileDB
 
 	@Override
 	public int getParallelismLevel() {
-		return dataThread.getParallelismLevel();
+		return dataSummary.getMaxLevels();
 	}
 
 	@Override
 	public long getMinLoc(int rank) {
-		long []offsets = dataTrace.getOffsets();
-		return offsets[rank];
+		return dataTrace.getOffset(rank);
 	}
 
 	@Override
 	public long getMaxLoc(int rank) {
-		return getMinLoc(rank) + dataTrace.getLength(rank) - DataTrace.RECORD_ENTRY_SIZE;
+		return dataTrace.getOffset(rank) + dataTrace.getLength(rank);
 	}
 
 	@Override
 	public void dispose() {
 		try {
 			dataTrace.dispose();
-			dataThread.dispose();
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public List<IdTuple> getIdTuple(IdTupleOption option) {
+		return dataSummary.getIdTuple();
 	}
 
 }

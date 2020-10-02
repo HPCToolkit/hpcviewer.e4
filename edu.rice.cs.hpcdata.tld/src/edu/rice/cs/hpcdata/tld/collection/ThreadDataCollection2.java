@@ -39,7 +39,18 @@ public class ThreadDataCollection2 extends AbstractThreadDataCollection
 		else
 			this.directory = dir;
 	}
+	
 
+	@Override
+	public double getMetric(long nodeIndex, int metricIndex, int profileId, int numMetrics) 
+			throws IOException {
+		// check if the data already exists or not
+		ensureDataFile(metricIndex);
+		
+		return data_file[metricIndex].getMetric(nodeIndex, metricIndex, profileId, numMetrics);
+	}
+
+	
 	@Override
 	public double[] getMetrics(long nodeIndex, int metricIndex, int numMetrics) 
 			throws IOException {
@@ -258,5 +269,4 @@ public class ThreadDataCollection2 extends AbstractThreadDataCollection
 		public void end() {
 		}
 	}
-
 }

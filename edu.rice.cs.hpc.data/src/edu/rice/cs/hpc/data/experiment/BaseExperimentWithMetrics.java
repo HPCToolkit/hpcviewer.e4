@@ -2,12 +2,13 @@ package edu.rice.cs.hpc.data.experiment;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
+import edu.rice.cs.hpc.data.experiment.metric.MetricComparator;
 import edu.rice.cs.hpc.data.experiment.metric.MetricType;
 import edu.rice.cs.hpc.data.util.Constants;
 
@@ -51,12 +52,7 @@ implements IMetricManager
 		}
 		if (getMajorVersion() >= Constants.EXPERIMENT_SPARSE_VERSION) {
 			// reorder the metric since hpcprof2 will output not in order fashion
-			BaseMetric []orderedList = new BaseMetric[metrics.size()];
-			
-			for(BaseMetric metric: metrics) {
-				orderedList[metric.getIndex()] = metric;
-			}
-			metrics = Arrays.asList(orderedList);
+			Collections.sort(metrics, new MetricComparator());
 		}
 	}
 
@@ -65,11 +61,20 @@ implements IMetricManager
 	 * 
 	 * @return
 	 */
+	@Deprecated
 	public BaseMetric[] getMetrics()
 	{
 		return 	metrics.toArray(new BaseMetric[metrics.size()]);
 	}
 
+	/***
+	 * Retrieve the list of metrics
+	 * @return {@code List<BaseMetric>}
+	 */
+	public List<BaseMetric> getMetricList() 
+	{
+		return metrics;
+	}
 	
 	/*****
 	 * Return the list of "visible" metrics. <br/>
@@ -120,18 +125,29 @@ implements IMetricManager
 	 *	Returns the metric with a given index.
 	 ************************************************************************/
 	public BaseMetric getMetric(int index)
-	{
-		BaseMetric metric;
-		// laks 2010.03.03: bug fix when the database contains no metrics
+	{		
+		if (getMajorVersion() == Constants.EXPERIMENT_SPARSE_VERSION) {
+			return findMetric(index);
+		}
+		BaseMetric metric = null;
 		try {
-			metric = this.metrics.get(index);
+			metric = findMetric(index);
 		} catch (Exception e) {
-			// if the metric doesn't exist or the index is out of range, return null
-			metric = null;
+			System.err.println(e.getLocalizedMessage());
 		}
 		return metric;
 	}
 
+	private BaseMetric findMetric(int index) {
+		for(BaseMetric metric: metrics) {
+			if (metric.getIndex() == index)
+				return metric;
+		}
+		// not found
+		throw new RuntimeException("Invalid metric index: " + index);
+
+	}
+	
 	/*************************************************************************
 	 *	Returns the metric with a given internal name.
 	 ************************************************************************/

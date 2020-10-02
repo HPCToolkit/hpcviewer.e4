@@ -8,8 +8,6 @@ import org.eclipse.jface.action.Separator;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
-import edu.rice.cs.hpc.data.experiment.metric.MetricValue;
-import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 
@@ -47,11 +45,12 @@ public class GraphMenu
 				// do not display empty metric 
 				// this is important to keep consistency with the table
 				// which doesn't display empty metrics
-				
+				/*
 				RootScope root = scope.getRootScope();
 				MetricValue mv = root.getMetricValue(metric);
 				if (mv == MetricValue.NONE)
 					continue;
+				*/
 
 				MenuManager subMenu = new MenuManager("Graph "+ metric.getDisplayName() );
 

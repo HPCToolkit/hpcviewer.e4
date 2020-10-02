@@ -341,7 +341,7 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
      *  The number of items in status has to be the same as the number of metrics<br>
      * 	true means the column is shown, hidden otherwise.
      */
-    public void setColumnsStatus(boolean []status) {
+    public void setColumnsStatus(IMetricManager metricMgr, boolean []status) {
     	if (getTree().isDisposed())
     		return;
 		
@@ -359,7 +359,6 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		Object obj = getInput();
 		if (obj == null) return;
 		
-		IMetricManager metricMgr = (IMetricManager) getExperiment();
 		if (metricMgr == null)
 			return;
 				

@@ -63,7 +63,7 @@ public abstract class SpaceTimeDataController
 	
 	// nathan's data index variable
 	// TODO: we need to remove this and delegate to the inherited class instead !
-	private int currentDataIdx;
+	//private int currentDataIdx;
 
 	/***
 	 * Constructor to create a data based on File. This constructor is more suitable
@@ -86,7 +86,7 @@ public abstract class SpaceTimeDataController
 	/*****
 	 * Constructor to create a data based on input stream, which is convenient for remote database
 	 * 
-	 * @param _window : SWT window
+	 * @param context : IEclipseContext
 	 * @param expStream : input stream
 	 * @param Name : the name of the file on the remote server
 	 * @throws InvalExperimentException 
@@ -102,7 +102,16 @@ public abstract class SpaceTimeDataController
 		init(context);
 	}
 	
-	
+	/*****
+	 * This constructor is used when an Experiment database is already opened, and we just
+	 * want to transfer the database to this trace data.
+	 * 
+	 * @param context IEclipseContext
+	 * @param experiment BaseExperiment
+
+	 * @throws InvalExperimentException
+	 * @throws Exception
+	 */
 	public SpaceTimeDataController(IEclipseContext context, BaseExperiment experiment) 			
 			throws InvalExperimentException, Exception 
 	{
@@ -116,16 +125,6 @@ public abstract class SpaceTimeDataController
 		return ptlService;
 	}
 	
-	public void setDataIndex(int dataIndex) 
-	{
-		currentDataIdx = dataIndex;
-	}
-	
-	
-	public int getDataIndex()
-	{
-		return currentDataIdx;
-	}
 	
 	public void resetPredefinedColor()
 	{
@@ -284,9 +283,10 @@ public abstract class SpaceTimeDataController
 	 * @return {@link ImageTraceAttributes.TimeUnit}
 	 *****/
 	public TimeUnit getTimeUnit() {
+		int version = exp.getMajorVersion();
 		
-		if (getExperiment().getMajorVersion() == 2) {
-			if (getExperiment().getMinorVersion() < 2) {
+		if (version == 2) {
+			if (exp.getMinorVersion() < 2) {
 				// old version of database: always microsecond
 				return TimeUnit.MICROSECONDS;
 			}
@@ -294,11 +294,14 @@ public abstract class SpaceTimeDataController
 			// - if the measurement is from old hpcrun: microsecond
 			// - if the measurement is from new hpcrun: nanosecond
 			
-			Experiment exp = (Experiment) getExperiment();
 			if (exp.getTraceAttribute().dbUnitTime == TraceAttribute.PER_NANO_SECOND) {
 				return TimeUnit.NANOSECONDS;
 			}
-			return TimeUnit.MICROSECONDS;
+
+		} else if (version == 4) {
+			// newer database: sparse database always uses nanoseconds
+			
+			return TimeUnit.NANOSECONDS;
 		}
 		// we have no idea what kind of database is this.
 		// this must be an error. Should we raise an exception?
@@ -316,13 +319,6 @@ public abstract class SpaceTimeDataController
 		colorTable.dispose();
 	}
 
-
-	//see the note where this is called in FilterRanks
-	public IFilteredData getFilteredBaseData() {
-		if (dataTrace instanceof IFilteredData)
-			return (IFilteredData) dataTrace;
-		return null;
-	}
 	/**
 	 * changing the trace data, caller needs to make sure to refresh the views
 	 * @param filteredBaseData

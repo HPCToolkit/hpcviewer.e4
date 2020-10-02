@@ -28,6 +28,7 @@ import edu.rice.cs.hpc.data.experiment.source.FileSystemSourceFile;
 import edu.rice.cs.hpc.data.experiment.source.SourceFile;
 import edu.rice.cs.hpc.data.experiment.xml.Token2.TokenXML;
 import edu.rice.cs.hpc.data.trace.TraceAttribute;
+import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.data.util.Dialogs;
 import edu.rice.cs.hpc.data.util.IUserData;
 
@@ -1117,7 +1118,11 @@ public class BaseExperimentBuilder extends Builder {
 			title = Experiment.TITLE_FLAT_VIEW;
 			rootType = RootScopeType.Flat;
 		}
-		this.viewRootScope  = new RootScope(this.experiment, title, rootType);
+		int cct_id = 0;
+		if (experiment.getMajorVersion() <= Constants.EXPERIMENT_DENSED_VERSION)
+			cct_id = 1;
+		
+		this.viewRootScope  = new RootScope(this.experiment, title, rootType, cct_id, 0);
 		beginScope(this.viewRootScope);
 	}
 

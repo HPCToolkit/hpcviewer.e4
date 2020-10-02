@@ -10,12 +10,19 @@ import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.InvalExperimentException;
 import edu.rice.cs.hpc.data.experiment.extdata.FileDB2;
 import edu.rice.cs.hpc.data.experiment.extdata.IFileDB;
+import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.data.util.Util;
 import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
 import edu.rice.cs.hpctraceviewer.data.DatabaseAccessInfo;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.version3.FileDB3;
 
+
+/****************************************************
+ * 
+ * Class to open local trace database
+ *
+ ****************************************************/
 public class LocalDBOpener extends AbstractDBOpener 
 {
 	private String directory;
@@ -26,7 +33,9 @@ public class LocalDBOpener extends AbstractDBOpener
 	/*******
 	 * prepare opening a database 
 	 * 
-	 * @param directory : the directory of the database
+	 * @param IEclipseContext context
+	 * @param DatabaseAccessInfo info
+	 * 
 	 * @throws Exception 
 	 */
 	public LocalDBOpener(IEclipseContext context, DatabaseAccessInfo info) throws Exception
@@ -37,17 +46,20 @@ public class LocalDBOpener extends AbstractDBOpener
 	
 	/*****
 	 * Prepare opening a database
+	 * @param IEclipseContext context
 	 * @param experiment
 	 * @throws Exception 
 	 */
 	public LocalDBOpener(IEclipseContext context, BaseExperiment experiment) throws Exception {
 		this(context, experiment.getDefaultDirectory().getAbsolutePath());
 		this.experiment = experiment;
+		version = experiment.getMajorVersion();
 	}
 	
 	
 	/*****
-	 * Prepare opening a database
+	 * Prepare opening a database.
+	 * @param IEclipseContext context
 	 * @param directory absolute path to the directory
 	 */
 	public LocalDBOpener(IEclipseContext context, String directory)  throws Exception {
@@ -62,16 +74,21 @@ public class LocalDBOpener extends AbstractDBOpener
 	}
 
 	
+	/****
+	 * Create an instance of {@code IFileDB} depending on the database version 
+	 * @return IFileDB
+	 * @throws InvalExperimentException
+	 */
 	private IFileDB getFileDB() throws InvalExperimentException {
 		IFileDB fileDB = null;
 		switch (version)
 		{
 		case 1:
-		case 2:
+		case Constants.EXPERIMENT_DENSED_VERSION:
 			fileDB = new FileDB2();
 			break;
 		case 3:
-		case 4:
+		case Constants.EXPERIMENT_SPARSE_VERSION:
 			fileDB = new FileDB3();
 			break;
 		default:
@@ -79,6 +96,7 @@ public class LocalDBOpener extends AbstractDBOpener
 		}
 		return fileDB;
 	}
+	
 	
 	@Override
 	public SpaceTimeDataController openDBAndCreateSTDC(IProgressMonitor statusMgr)
@@ -96,14 +114,12 @@ public class LocalDBOpener extends AbstractDBOpener
 		if (experiment == null)
 			return new SpaceTimeDataControllerLocal(context, statusMgr, directory, fileDB);
 		else 
-			return new SpaceTimeDataControllerLocal(context, experiment, statusMgr, fileDB);
+			return new SpaceTimeDataControllerLocal(context, statusMgr, experiment, fileDB);
 	}
 
+	
 	@Override
-	public void end() {
-		// TODO Auto-generated method stub
-
-	}
+	public void end() {}
 
 
 	/**********************
@@ -124,18 +140,18 @@ public class LocalDBOpener extends AbstractDBOpener
 		} else {
 			database_directory = directory;
 		}
-		// checking for version 3.0
+		// checking for version 4.0
 		String file_path = database_directory + File.separatorChar + "trace.db";
 		File tmp_file 	 = new File(file_path);
 		if (tmp_file.canRead()) {
-			return 3;
+			return Constants.EXPERIMENT_SPARSE_VERSION;
 		}
 		
 		// checking for version 2.0
 		file_path = database_directory + File.separatorChar + "experiment.mt";
 		tmp_file  = new File(file_path);
 		if (tmp_file.canRead()) {
-			return 2;
+			return Constants.EXPERIMENT_DENSED_VERSION;
 		}
 		
 		// checking for version 2.0 with old format files
@@ -146,5 +162,4 @@ public class LocalDBOpener extends AbstractDBOpener
 		}
 		return -1;
 	}
-
 }

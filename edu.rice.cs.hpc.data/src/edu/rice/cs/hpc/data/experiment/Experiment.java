@@ -21,7 +21,6 @@ import edu.rice.cs.hpc.data.experiment.scope.*;
 import edu.rice.cs.hpc.data.experiment.scope.filters.*;
 import edu.rice.cs.hpc.data.experiment.scope.visitors.*;
 import edu.rice.cs.hpc.data.filter.IFilterData;
-import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.data.util.IUserData;
 
 import java.io.File;
@@ -151,8 +150,7 @@ public class Experiment extends BaseExperimentWithMetrics
 	{
 		EmptyMetricValuePropagationFilter filter = new EmptyMetricValuePropagationFilter();
 
-		CallersViewScopeVisitor csv = new CallersViewScopeVisitor(this, callersViewRootScope, 
-					getMetricCount(), false, filter);
+		CallersViewScopeVisitor csv = new CallersViewScopeVisitor(this, callersViewRootScope, filter);
 		callingContextViewRootScope.dfsVisitScopeTree(csv);
 		
 		return callersViewRootScope;
@@ -168,7 +166,12 @@ public class Experiment extends BaseExperimentWithMetrics
 	 */
 	private RootScope prepareFlatView(Scope cctRootScope) 
 	{
-		RootScope flatRootScope = new RootScope(this, Experiment.TITLE_FLAT_VIEW, RootScopeType.Flat);
+		final int RANDOM_NUMBER = 12345;
+		RootScope flatRootScope = new RootScope(this, 
+												Experiment.TITLE_FLAT_VIEW, 
+												RootScopeType.Flat, 
+												Integer.MAX_VALUE-RANDOM_NUMBER, 
+												Integer.MAX_VALUE-RANDOM_NUMBER);
 		beginScope(flatRootScope);
 
 		// bug fix 2008.10.21 : we don't need to recompute the aggregate metrics here. Just copy it from the CCT
@@ -230,9 +233,7 @@ public class Experiment extends BaseExperimentWithMetrics
 	protected void copyMetricsToPartner(Scope scope, MetricType sourceType, MetricValuePropagationFilter filter) {
 		ArrayList<BaseMetric> listDerivedMetrics = new ArrayList<>();
 		
-		for (int i = 0; i< this.getMetricCount(); i++) {
-			BaseMetric metric = this.getMetric(i);
-			// Laksono 2009.12.11: aggregate metric doesn't have partner
+		for(BaseMetric metric: metrics) {
 			if (metric instanceof Metric) {
 				if (metric.getMetricType() == sourceType) {
 					// get the partner index (if the metric exclusive, its partner is inclusive)
@@ -242,18 +243,18 @@ public class Experiment extends BaseExperimentWithMetrics
 					BaseMetric partnerMetric = getMetric(partnerName);   // get the partner metric
 					int partnerIndex		 = partnerMetric.getIndex(); // get the index of partner metric
 					
-					copyMetric(scope, scope, i, partnerIndex, filter);
+					copyMetric(scope, scope, metric.getIndex(), partnerIndex, filter);
 				}
 			} else if (metric instanceof AggregateMetric) {
 				if (metric.getMetricType() == MetricType.EXCLUSIVE ) {
 					int partner = ((AggregateMetric)metric).getPartner();
 					String partner_id = String.valueOf(partner);
-					BaseMetric partner_metric = this.getMetric( partner_id );
+					BaseMetric partner_metric = getMetric( partner_id );
 
 					// case for old database: no partner information
 					if (partner_metric != null) {
 						MetricValue partner_value = scope.getMetricValue( partner_metric );
-						scope.setMetricValue(i, partner_value);
+						scope.setMetricValue(metric.getIndex(), partner_value);
 					}
 				}
 			} else if (metric instanceof DerivedMetric) {
@@ -364,8 +365,8 @@ public class Experiment extends BaseExperimentWithMetrics
 	 */
 	private boolean inclusiveNeeded() {
 		boolean isNeeded = false;
-		for (int i=0; !isNeeded && i<this.getMetricCount(); i++) {
-			BaseMetric m = getMetric(i);
+		
+		for (BaseMetric m: metrics) {
 			isNeeded = !(   (m instanceof FinalMetric) 
 					     || (m instanceof AggregateMetric) 
 					     || (m instanceof DerivedMetric) );
@@ -383,22 +384,33 @@ public class Experiment extends BaseExperimentWithMetrics
 	}
 
 
+	/****
+	 * Set the XML file
+	 * 
+	 * @param file
+	 */
 	public void setXMLExperimentFile(File file) {
 		databaseRepresentation.setFile(file);
 	}
 
+	/***
+	 * Set the list of metric raw.
+	 * 
+	 * @param metrics MetricRaw []
+	 */
 	public void setMetricRaw(MetricRaw []metrics) {
 		this.metrics_raw = metrics;
 	}
 
 
-	public BaseMetric[] getMetricRaw() {
-		BaseMetric[] metrics = metrics_raw;
-		
-		if (getMajorVersion() == Constants.EXPERIMENT_SPARSE_VERSION) {
-			metrics = getMetrics(); 
-		}
-		return metrics;
+	/*****
+	 * Retrieve the array of raw metrics.
+	 * Raw metrics are used to get the value of metric-db (or thread-level metrics).
+	 * 
+	 * @return BaseMetric[]
+	 */
+	public BaseMetric[] getMetricRaw() {		
+		return metrics_raw;
 	}
 
 

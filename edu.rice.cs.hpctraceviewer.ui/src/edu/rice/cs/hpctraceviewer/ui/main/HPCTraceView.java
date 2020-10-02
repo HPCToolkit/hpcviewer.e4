@@ -28,7 +28,7 @@ public class HPCTraceView extends AbstractBaseItem
 	
 	public static final String ID_DATA = "hpctraceviewer.data";
 	
-	public static final int Y_AXIS_WIDTH  = 13;
+	public static final int Y_AXIS_WIDTH  = 12;
 	public static final int X_AXIS_HEIGHT = 20;
 	
 	private final ProcessTimelineService timelineService;

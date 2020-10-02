@@ -1,4 +1,4 @@
-package edu.rice.cs.hpc.data.experiment.metric.version2;
+package edu.rice.cs.hpc.data.db.version2;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperimentWithMetrics;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
@@ -11,8 +11,11 @@ import edu.rice.cs.hpc.data.experiment.scope.Scope;
  * 
  * The implementation of {@link IMetricValueCollection} for database
  * version 2 format (uncompact format)
- *
+ * <p>This class is deprecated. Please use {@code MetricValueCollectionWithStorage} instead.
+ * </p>
+ * 
  *********************************************************************/
+@Deprecated
 public class MetricValueCollection2 implements IMetricValueCollection 
 {
 	final private MetricValue []values;

@@ -35,7 +35,7 @@ public final class ThreadDataCollectionFactory
 		switch(version)
 		{
 		case 1:
-		case 2:
+		case Constants.EXPERIMENT_DENSED_VERSION:
 			final BaseMetric []metrics = experiment.getMetricRaw();
 			if (metrics!=null) {
 				data_file = new ThreadDataCollection2(experiment);

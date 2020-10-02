@@ -161,12 +161,14 @@ public class About
 				String locInstall = Platform.getInstallLocation().getURL().getFile();
 				String locInstance = Platform.getInstanceLocation().getURL().getFile();
 				String locUser = Platform.getLogFileLocation().toOSString(); //.getUserLocation().getURL().getFile();
-				
+				//String logUser = System.getProperty("log.name");
+
 				message = "<pre>" +
 								 "Preference file: "    + location    + "\n" +
 								 "Install directory: "  + locInstall  + "\n" +
 								 "Instance directory: " + locInstance + "\n" +
-								 "Log file location: "  + locUser     + "\n" +
+				//				 "User log file: "      + logUser     + "\n" +
+								 "Eclipse Log file: "   + locUser     + "\n" +
 								 "</pre>";
 			} catch(Exception e) {
 				e.printStackTrace();

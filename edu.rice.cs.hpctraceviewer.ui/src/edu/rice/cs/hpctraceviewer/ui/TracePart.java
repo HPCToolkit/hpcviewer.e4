@@ -56,6 +56,7 @@ import org.eclipse.e4.ui.workbench.modeling.IPartListener;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
@@ -226,10 +227,15 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 	
 	@PreDestroy
 	public void preDestroy() {
-		partService.removePartListener(this);
-		eventBroker.unsubscribe(this);
+		if (partService != null)
+			partService.removePartListener(this);
 		
-		TracePreferenceManager.INSTANCE.getPreferenceStore().removePropertyChangeListener(this);
+		if (eventBroker != null)
+			eventBroker.unsubscribe(this);
+		
+		PreferenceStore pref = TracePreferenceManager.INSTANCE.getPreferenceStore();
+		if (pref != null)
+			pref.removePropertyChangeListener(this);
 	}
 	
 	

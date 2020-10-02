@@ -13,6 +13,7 @@ import org.osgi.service.event.EventHandler;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
+import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
 import edu.rice.cs.hpc.filter.service.FilterStateProvider;
@@ -73,7 +74,6 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 	public void createContent(Composite parent) {
 		contentViewer = setContentViewer(parent, menuService);
     	contentViewer.createContent(parent, menuService);
-
 		
 		// subscribe to user action events
 		eventBroker.subscribe(BaseConstants.TOPIC_HPC_REMOVE_DATABASE, this);
@@ -139,7 +139,8 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 		
 		String topic = event.getTopic();
 		if (topic.equals(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN)) {
-			treeViewer.setColumnsStatus((boolean[]) eventInfo.data);
+			IMetricManager mgr = eventInfo.experiment;
+			treeViewer.setColumnsStatus(mgr, (boolean[]) eventInfo.data);
 			
 		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC)) {
 			treeViewer.addUserMetricColumn((BaseMetric) eventInfo.data);

@@ -2,11 +2,14 @@ package edu.rice.cs.hpctraceviewer.data.version2;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
+import edu.rice.cs.hpc.data.db.IdTuple;
 import edu.rice.cs.hpc.data.experiment.extdata.FileDB2;
 import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
 import edu.rice.cs.hpc.data.experiment.extdata.IFileDB;
 import edu.rice.cs.hpc.data.experiment.extdata.IFilteredData;
+import edu.rice.cs.hpc.data.experiment.extdata.IFileDB.IdTupleOption;
 import edu.rice.cs.hpc.data.trace.FilterSet;
 
 
@@ -21,8 +24,8 @@ import edu.rice.cs.hpc.data.trace.FilterSet;
 public class FilteredBaseData extends AbstractBaseData implements IFilteredData {
 
 	private FilterSet filter;
-	private String []filteredRanks;
 	private int []indexes;
+	private List<IdTuple> filteredIdTuples;
 
 	/*****
 	 * construct a filtered data
@@ -47,7 +50,7 @@ public class FilteredBaseData extends AbstractBaseData implements IFilteredData 
 		
 		String data[] = baseDataFile.getRankLabels();
 
-		filteredRanks = null;
+		filteredIdTuples = null;
 
 		ArrayList<Integer> lindexes = new ArrayList<Integer>();
 
@@ -72,7 +75,7 @@ public class FilteredBaseData extends AbstractBaseData implements IFilteredData 
 	}
 	
 	/****
-	 * set oatterns to filter ranks
+	 * set patterns to filter ranks
 	 * @param filters
 	 */
 	public void setFilter(FilterSet filter) {
@@ -84,23 +87,22 @@ public class FilteredBaseData extends AbstractBaseData implements IFilteredData 
 	public FilterSet getFilter() {
 		return filter;
 	}
-	
 
-	/*
-	 * (non-Javadoc)
-	 * @see edu.rice.cs.hpc.data.experiment.extdata.IBaseData#getListOfRanks()
-	 */
-	public String[] getListOfRanks() {
-		if (filteredRanks == null) {
-			filteredRanks = new String[indexes.length];
-			final String ranks[] = baseDataFile.getRankLabels();
+	
+	@Override
+	public List<IdTuple> getListOfIdTuples(IdTupleOption option) {
+		if (filteredIdTuples == null) {
+			filteredIdTuples = new ArrayList<IdTuple>(indexes.length);
+			List<IdTuple> listDensedIdTuples = baseDataFile.getIdTuple(option);
 			
 			for(int i=0; i<indexes.length; i++) {
-				filteredRanks[i] = ranks[indexes[i]];
+				IdTuple tuple = listDensedIdTuples.get(indexes[i]);
+				filteredIdTuples.add(tuple);
 			}
 		}
-		return filteredRanks;
+		return filteredIdTuples;
 	}
+
 
 	/*
 	 * (non-Javadoc)

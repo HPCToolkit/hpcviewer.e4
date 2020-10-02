@@ -70,15 +70,31 @@ public interface IThreadDataCollection
 	 */
 	public String   getRankTitle() throws IOException;
 	
-		
+	
+	/****
+	 * Get a metric value for a specific node, with a specific metric and 
+	 * a specific profile (or thread) id.
+	 * 
+	 * @param nodeIndex long
+	 * @param metricIndex int
+	 * @param profileId int
+	 * @param numMetrics int
+	 * 
+	 * @return double
+	 */
+	public double   getMetric(long nodeIndex, int metricIndex, int profileId, int numMetrics)
+			throws IOException ;
+	
 	/*****
-	 * Get an array of metrics of a specified node and metrics
-	 * It returns the array of metric values indexed from its thread or profile or rank number
+	 * Get an array of metrics of a specified node and metric.
+	 * It returns the array of metric values indexed from its thread or profile or rank number.
+	 * This method is useful to plot metric values.
 	 * 
 	 * @param nodeIndex
 	 * @param metricIndex
 	 * @param numMetrics
-	 * @return
+	 * 
+	 * @return double[]
 	 * @throws IOException
 	 */
 	public double[] getMetrics(long nodeIndex, int metricIndex, int numMetrics) 
@@ -86,11 +102,13 @@ public interface IThreadDataCollection
 
 	/****
 	 * get the array of metric values for all CCT of a specified metric and
-	 * thread ID
+	 * thread ID.
+	 * This method is useful to list ccts and its metric value.
 	 * 
 	 * @param thread_id : thread ID
 	 * @param MetricIndex : metric index
 	 * @param numMetrics : num metrics
+	 * 
 	 * @return array of metric values for each CCT 
 	 */
 	public double[] getScopeMetrics(int thread_id, int MetricIndex, int numMetrics)

@@ -41,16 +41,15 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 	
 	private RootScope callersViewRootScope;
 	
-	/****--------------------------------------------------------------------------------****
+	/****
+	 * Constructor to create a dynamic bottom-up tree
 	 * 
 	 * @param experiment
 	 * @param cvrs
-	 * @param nMetrics
-	 * @param dodebug
 	 * @param filter
-	 ****--------------------------------------------------------------------------------****/
+	 ****/
 	public CallersViewScopeVisitor(Experiment experiment, RootScope cvrs, 
-			int nMetrics, boolean dodebug, MetricValuePropagationFilter filter) {
+								   MetricValuePropagationFilter filter) {
 		this.callersViewRootScope = cvrs;
 		exclusiveOnly = new ExclusiveOnlyMetricPropagationFilter(experiment);
 		inclusiveOnly = new InclusiveOnlyMetricPropagationFilter(experiment);

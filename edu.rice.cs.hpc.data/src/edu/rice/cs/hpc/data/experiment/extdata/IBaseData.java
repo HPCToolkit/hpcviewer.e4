@@ -1,6 +1,10 @@
 package edu.rice.cs.hpc.data.experiment.extdata;
 
 import java.io.IOException;
+import java.util.List;
+
+import edu.rice.cs.hpc.data.db.IdTuple;
+import edu.rice.cs.hpc.data.experiment.extdata.IFileDB.IdTupleOption;
 
 /*************************************************************************
  * 
@@ -11,10 +15,10 @@ import java.io.IOException;
 public interface IBaseData 
 {	
 	/***
-	 * retrieve the list of rank names ( usual format: process.thread )
-	 * @return
+	 * Retrieve the list of id tuples of this database.
+	 * @return {@code List<IdTuple>}
 	 */
-	public String []getListOfRanks();
+	public List<IdTuple> getListOfIdTuples(IdTupleOption option);
 	
 	/****
 	 * retrieve the number of ranks 
@@ -41,6 +45,16 @@ public interface IBaseData
 	 *  False otherwise
 	 *  @return boolean **/
 	public boolean isHybridRank();
+	
+	
+	/***
+	 * Generalized version of {@code isHybridRank}.
+	 * This method returns the number of parallelism level of the profiled applications.
+	 * For pure MPI, it returns 1, for hybrid MPI+OpenMP it returns 2, ...
+	 * @return int
+	 */
+	public int getNumLevels();
+	
 	/****
 	 * Disposing native resources, to be called by the caller
 	 */

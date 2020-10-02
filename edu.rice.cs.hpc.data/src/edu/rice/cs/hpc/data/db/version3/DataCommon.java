@@ -1,4 +1,4 @@
-package edu.rice.cs.hpc.data.db;
+package edu.rice.cs.hpc.data.db.version3;
 
 import java.io.FileInputStream;
 import java.io.IOException;

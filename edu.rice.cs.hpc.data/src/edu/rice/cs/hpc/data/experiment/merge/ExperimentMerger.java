@@ -102,7 +102,7 @@ public class ExperimentMerger
 		merged.setXMLExperimentFile( fileMerged );
 
 		// -----------------------------------------------
-		// step 4: create the root for the 
+		// step 4: create a new root by duplicating the tree of experiment 1
 		// -----------------------------------------------		
 		
 		RootScope root1 = exp1.getRootScope(type);

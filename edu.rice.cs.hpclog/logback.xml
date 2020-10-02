@@ -1,21 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>hpcviewer.log</file>
         <layout class="ch.qos.logback.classic.PatternLayout">
             <Pattern>
-               %d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n  %caller{3}
+               %d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n  %caller{1}
             </Pattern>
         </layout>
     </appender>
 
-    <logger name="edu.rice.cs.hpclogger" level="debug"
-        additivity="false">
-        <appender-ref ref="STDOUT" />
-    </logger>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>
+               %d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n  %caller{2}
+            </Pattern>
+        </layout>
+    </appender>
 
     <root level="debug">
         <appender-ref ref="STDOUT" />
+    </root>
+
+    <root level="error">
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="FILE" />
     </root>
 
 </configuration>

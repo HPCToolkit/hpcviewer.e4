@@ -27,7 +27,7 @@ public class MetricRaw  extends BaseMetric
 	/*** similar to partner index, but this partner refers directly to the metric partner.**/
 	private MetricRaw partner;
 	
-
+	
 	/******
 	 * creation of a new raw metric
 	 * @param id
@@ -238,15 +238,18 @@ public class MetricRaw  extends BaseMetric
 	{
 		double val_sum = 0.0;
 
-		RootScope root = ((Scope)s).getRootScope();
+		Scope scope    = (Scope) s;
+		RootScope root = scope.getRootScope();
+		
 		IThreadDataCollection threadData = root.getThreadData();
 		
-		double []values = threadData.getMetrics(((Scope)s).getCCTIndex(), getIndex(), num_metrics);
+		long nodeIndex = scope.getCCTIndex();
+		
 		for(Integer thread : threads)
 		{
-			val_sum += (values[thread]);
+			val_sum += threadData.getMetric(nodeIndex, ID, thread, num_metrics);
 		}
-		MetricValue value = setValue(val_sum); 
+		MetricValue value = createMetricValue(val_sum); 
 		return value;
 	}
 	
@@ -265,16 +268,28 @@ public class MetricRaw  extends BaseMetric
 
 		// there is no API implementation for reading the whole CCT metrics
 		// TODO: using the old get metric for the new database
-		RootScope root = ((Scope)s).getRootScope();
+		RootScope root = scope.getRootScope();
 		IThreadDataCollection threadData = root.getThreadData();
 
-		double []values = threadData.getMetrics(scope.getCCTIndex(), getIndex(), num_metrics);
+		if (threadData == null)
+			// this shouldn't happen, unless hpcprof doesn't generate data properly
+			return MetricValue.NONE;
 		
-		return setValue(values[thread_id]);
+		int cctIndex = scope.getCCTIndex();
+		
+		double value = threadData.getMetric(cctIndex, ID, thread_id, num_metrics);
+		return createMetricValue(value);
 	}
 	
 	
-	private MetricValue setValue(double value)
+	/****
+	 * Create a metric value object based on the real value.
+	 * If the real value is around zero, it returns {@code MetricValue.NONE}.
+	 * 
+	 * @param value
+	 * @return {@code MetricValue}
+	 */
+	private MetricValue createMetricValue(double value)
 	{
 		MetricValue mv = MetricValue.NONE;
 		if (Double.compare(value, 0) != 0)

@@ -8,6 +8,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.text.DecimalFormat;
 import java.time.Instant;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -44,7 +45,9 @@ import org.eclipse.swt.widgets.Label;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
+import edu.rice.cs.hpc.data.db.IdTuple;
 import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
+import edu.rice.cs.hpc.data.experiment.extdata.IFileDB.IdTupleOption;
 import edu.rice.cs.hpctraceviewer.ui.base.ISpaceTimeCanvas;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.base.ITraceViewAction;
@@ -563,6 +566,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	 * (non-Javadoc)
 	 * @see edu.rice.cs.hpc.traceviewer.painter.ISpaceTimeCanvas#setMessage(java.lang.String)
 	 */
+	@Override
 	public void setMessage(String message)
 	{
 		if (restoreMessage == null)
@@ -578,6 +582,20 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	private void adjustLabels()
     {
 		final ImageTraceAttributes attributes = stData.getAttributes();
+        
+		showTimeRange(attributes);
+        showProcessRange(attributes);
+        showCrossHair(attributes);
+        
+        // resize the composite to make sure all texts are visible
+        labelGroup.setSize(labelGroup.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+    }
+	
+	/**************************************************************************
+	 * Display the time range label
+	 * @param attributes ImageTraceAttributes
+	 **************************************************************************/
+	private void showTimeRange(final ImageTraceAttributes attributes) {
 		
 		final TimeUnit dbTimeUnit = stData.getTimeUnit();
 		final TimeUnit displayTimeUnit = attributes.getDisplayTimeUnit(stData);
@@ -592,7 +610,16 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		
 		timeLabel.setText("Time Range: [" + timeStart + timeUnit + ", " + timeEnd + timeUnit + "]");
         timeLabel.setSize(timeLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-        
+
+	}
+	
+	/**************************************************************************
+	 * Show the process range if necessary. If the program is a sequential, no 
+	 * display is needed.
+	 * 
+	 * @param attributes ImageTraceAttributes
+	 **************************************************************************/
+	private void showProcessRange(final ImageTraceAttributes attributes) {
 
         final IBaseData traceData = stData.getBaseData();
         if (traceData == null) {
@@ -602,10 +629,13 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
         }
         stData.getAttributes().assertProcessBounds(traceData.getNumberOfRanks());
 
-        final String processes[] = traceData.getListOfRanks();
+        final List<IdTuple> listIdTuples = traceData.getListOfIdTuples(IdTupleOption.BRIEF);
+        if (listIdTuples == null || listIdTuples.size() <= 1)
+        	// sequential program. No process range display is needed
+        	return;
 
         int proc_start = attributes.getProcessBegin();
-        if (proc_start < 0 || proc_start >= processes.length)
+        if (proc_start < 0 || proc_start >= listIdTuples.size())
         	proc_start = 0;
         
         // -------------------------------------------------------------------------------------------------
@@ -618,41 +648,59 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
         //		 headache to maintain
         // -------------------------------------------------------------------------------------------------
         int proc_end   = attributes.getProcessEnd() - 1;
-        if (proc_end>=processes.length)
-        	proc_end = processes.length-1;
+        if (proc_end>=listIdTuples.size())
+        	proc_end = listIdTuples.size()-1;
         
-        processLabel.setText("Rank Range: [" + processes[proc_start] + ", " + processes[proc_end]+"]");
+        processLabel.setText("Rank Range: [" + listIdTuples.get(proc_start).toString() + ", " + listIdTuples.get(proc_end).toString() +"]");
         processLabel.setSize(processLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-        
-        if(stData == null)
-            crossHairLabel.setText("Select Sample For Cross Hair");
-        else
-        {
-    		ProcessTimeline ptl     = stData.getCurrentDepthTrace();
-    		if (ptl == null) return;
-    		
-        	final Position position = stData.getAttributes().getPosition();
-    		final long selectedTime = displayTimeUnit.convert(position.time, dbTimeUnit);
-    		
-    		final int selectedProc  = ptl.getProcessNum();
-    		
-    		if ( selectedProc >= 0 && selectedProc < processes.length ) {  
-    	        final String buffer = "(" + formatTime.format(selectedTime) + 
-    	        						timeUnit + ", " + 
-    	        						processes[selectedProc] + ")";
 
-    	        crossHairLabel.setText("Cross Hair: " + buffer);
-
-    		} else {
-    			long time = displayTimeUnit.convert(selectedTime, dbTimeUnit);
-    			// in case of incorrect filtering where user may have empty ranks or incorrect filters, we don't display the rank
-    			crossHairLabel.setText("Cross Hair: (" + time + timeUnit + ", ?)");
-    		}
-        }
-        
-        labelGroup.setSize(labelGroup.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-    }
+	}
 	
+	/**************************************************************************
+	 * Show the cross hair (time x process).
+	 * For sequential program, we just need to show the time only.
+	 * 
+	 * @param attributes
+	 **************************************************************************/
+	private void showCrossHair(final ImageTraceAttributes attributes) {
+        
+        if(stData == null) {        	
+            crossHairLabel.setText("Select Sample For Cross Hair");
+            return;
+        }
+		ProcessTimeline ptl     = stData.getCurrentDepthTrace();
+		if (ptl == null) return;
+		
+    	final Position position = stData.getAttributes().getPosition();
+    			
+		final TimeUnit dbTimeUnit = stData.getTimeUnit();
+		final TimeUnit displayTimeUnit = attributes.getDisplayTimeUnit(stData);
+		final long selectedTime = displayTimeUnit.convert(position.time, dbTimeUnit);
+		
+		final int selectedProc  = ptl.getProcessNum();
+
+        final IBaseData traceData = stData.getBaseData();
+        final List<IdTuple> listIdTuples = traceData.getListOfIdTuples(IdTupleOption.BRIEF);
+
+		String timeUnit = attributes.getTimeUnitName(displayTimeUnit);
+		
+		String label = "Cross Hair: ";
+
+		if ( selectedProc >= 0 && selectedProc < listIdTuples.size() && listIdTuples.size()>1 ) {
+			
+			IdTuple idtuple = listIdTuples.get(selectedProc);
+	        final String buffer = label + "(" + 
+	        							  formatTime.format(selectedTime) + timeUnit + ", " + 
+	        							  idtuple.toString() + 
+	        							  ")";
+
+	        crossHairLabel.setText(buffer);
+
+		} else {
+			// in case of incorrect filtering where user may have empty ranks or incorrect filters, we don't display the rank
+			crossHairLabel.setText(label + formatTime.format(selectedTime) + timeUnit );
+		}
+	}
 	
     /**************************************************************************
 	 * Updates what the position of the selected box is.
@@ -1104,12 +1152,12 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		
 		// in case of filter, we may need to change the cursor position
 		if (refreshData) {
-			final String []ranks = stData.getBaseData().getListOfRanks();
+			final List<IdTuple> list = stData.getBaseData().getListOfIdTuples(IdTupleOption.BRIEF);
 			final Position p = stData.getAttributes().getPosition();
 			
-			if (p.process > ranks.length-1) {
+			if (p.process > list.size()-1) {
 				// out of range: need to change the cursor position
-				Position new_p = new Position( p.time, ranks.length >> 1 );
+				Position new_p = new Position( p.time, list.size() >> 1 );
 				notifyChangePosition(new_p);
 			}
 		}
