@@ -40,6 +40,13 @@ public class DataSummary extends DataCommon
 	
 	private RandomAccessFile file;
 	
+	/*** cache variables so that we don't need to read again and again  ***/
+	/*** cache the content of the file for a particular profile number  ***/
+	private ByteBuffer byteBufferCache;
+	
+	/*** Current cached data of a certain profile ***/
+	private int profileNumberCache;
+	
 	private List<IdTuple>  listIdTuple, listIdTupleShort;
 	private List<ProfInfo> listProfInfo;
 		
@@ -219,19 +226,32 @@ public class DataSummary extends DataCommon
 	{	
 		ProfInfo info = listProfInfo.get(profileNum);
 		
-		// -------------------------------------------
-		// read the cct context
-		// -------------------------------------------
-		
-		long positionCCT = info.offset   + 
-				   		   info.num_vals * METRIC_VALUE_SIZE;
-		int numBytesCCT  = (info.num_nz_contexts+1) * CCT_RECORD_SIZE;
-		
-		MappedByteBuffer buffer = file.getChannel().map(MapMode.READ_ONLY, positionCCT, numBytesCCT);
-		long []indexes = binarySearch(cct_id, 0, 1+info.num_nz_contexts, buffer);
+		if (profileNumberCache != profileNum || byteBufferCache == null) {
+			// -------------------------------------------
+			// read the cct context
+			// -------------------------------------------
+			
+			long positionCCT = info.offset   + 
+					   		   info.num_vals * METRIC_VALUE_SIZE;
+			int numBytesCCT  = (info.num_nz_contexts+1) * CCT_RECORD_SIZE;
+			
+			FileChannel channel = file.getChannel();
+			byte []arrayBytes   = new byte[numBytesCCT];
+			
+			byteBufferCache = ByteBuffer.wrap(arrayBytes);
+			
+			channel.position(positionCCT);
+			channel.read(byteBufferCache);
+			
+			profileNumberCache = profileNum;
+		}
+
+		long []indexes = binarySearch(cct_id, 0, 1+info.num_nz_contexts, byteBufferCache);
 		
 		if (indexes == null)
+			// the cct id is not found or the cct has no metrics. Should we return null or empty list?
 			return null;
+		
 		// -------------------------------------------
 		// initialize the metrics
 		// -------------------------------------------
