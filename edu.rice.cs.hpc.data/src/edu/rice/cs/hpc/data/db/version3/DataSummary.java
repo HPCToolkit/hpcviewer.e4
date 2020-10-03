@@ -8,6 +8,7 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -363,6 +364,8 @@ public class DataSummary extends DataCommon
 		
 		numLevels = 0;
 		Map<Long, Integer> []mapLevelToHash = new HashMap[MAX_LEVELS];
+		long []minIndex = new long[MAX_LEVELS];
+		long []maxIndex = new long[MAX_LEVELS];
 		
 		for (int i=0; i<numItems; i++) {
 
@@ -370,15 +373,11 @@ public class DataSummary extends DataCommon
 			// read the tuple section
 			// -----------------------------------------
 
-			IdTuple item = new IdTuple();
+			short length = buffer.getShort();			
+			assert(length>0);
 
-			item.length = buffer.getShort();			
-			assert(item.length>0);
-
+			IdTuple item = new IdTuple(i, length);
 			numLevels = Math.max(numLevels, item.length);
-
-			item.kind  = new short[item.length];
-			item.index = new long[item.length];
 			
 			for (int j=0; j<item.length; j++) {
 				item.kind[j]  = buffer.getShort();
@@ -398,6 +397,9 @@ public class DataSummary extends DataCommon
 				}
 				count++;
 				mapLevelToHash[j].put(hash, count);
+				
+				minIndex[j] = Math.min(minIndex[j], item.index[j]);
+				maxIndex[j] = Math.min(maxIndex[j], item.index[j]);
 			}
 			if (i == 0) {
 				// special treatment for id-tuple = 0: it's a summary profile
@@ -423,6 +425,14 @@ public class DataSummary extends DataCommon
 				break;
 			}
 		}
+		// sort the id tuple
+		listIdTuple.sort(new Comparator<IdTuple>() {
+
+			@Override
+			public int compare(IdTuple o1, IdTuple o2) {
+				return o1.compareTo(o2);
+			}
+		});
 		
 		labels    = new double[listIdTuple.size()];
 		strLabels = new String[listIdTuple.size()];
@@ -439,7 +449,8 @@ public class DataSummary extends DataCommon
 					totLevels++;
 				}
 			}
-			IdTuple shortVersion = new IdTuple(totLevels);
+			// the profileNum is +1 because the index 0 is for summary
+			IdTuple shortVersion = new IdTuple(idt.profileNum, totLevels);
 			int level = 0;
 			
 			// copy not-skipped id tuples to the short version

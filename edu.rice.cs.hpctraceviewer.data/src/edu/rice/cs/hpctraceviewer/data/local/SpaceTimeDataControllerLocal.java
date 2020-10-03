@@ -12,6 +12,7 @@ import edu.rice.cs.hpc.data.experiment.InvalExperimentException;
 import edu.rice.cs.hpc.data.experiment.extdata.IFileDB;
 import edu.rice.cs.hpc.data.experiment.extdata.IFilteredData;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
+import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
 import edu.rice.cs.hpc.data.trace.TraceAttribute;
 import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.data.util.IProgressReport;
@@ -106,7 +107,7 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 			String databaseDirectory = exp.getDefaultDirectory().getAbsolutePath(); 
 			traceFilePath = databaseDirectory + File.separator + exp.getDbFilename(BaseExperiment.Db_File_Type.DB_TRACE);
 			
-			RootScope root = (RootScope) exp.getRootScope();
+			RootScope root = (RootScope) exp.getRootScope(RootScopeType.CallingContextTree);
 			DataSummary ds = root.getDataSummary();
 			
 			((FileDB3)fileDB).open(ds, databaseDirectory);

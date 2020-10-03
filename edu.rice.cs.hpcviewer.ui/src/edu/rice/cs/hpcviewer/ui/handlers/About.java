@@ -70,7 +70,7 @@ public class About
 			this.message     = product.getProperty(ABOUT_TEXT);
 			
 			try {
-				this.message += "\n\nRelease: " + ApplicationProperty.getVersion();
+				this.message += "\n\n" + ApplicationProperty.getVersion();
 			} catch (IOException e) {
 
 				e.printStackTrace();
@@ -164,12 +164,11 @@ public class About
 				//String logUser = System.getProperty("log.name");
 
 				message = "<pre>" +
-								 "Preference file: "    + location    + "\n" +
-								 "Install directory: "  + locInstall  + "\n" +
-								 "Instance directory: " + locInstance + "\n" +
-				//				 "User log file: "      + logUser     + "\n" +
-								 "Eclipse Log file: "   + locUser     + "\n" +
-								 "</pre>";
+						 "Install directory: "  + locInstall  + "\n" +
+						 "Instance directory: " + locInstance + "\n" +
+						 "Preference file: "    + location    + "\n" +
+						 "Eclipse Log file: "   + locUser     + "\n" +
+						 "</pre>";
 			} catch(Exception e) {
 				e.printStackTrace();
 			}

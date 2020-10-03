@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.rice.cs.hpc.data.db.IdTuple;
-import edu.rice.cs.hpc.data.experiment.extdata.IFileDB.IdTupleOption;
+import edu.rice.cs.hpc.data.db.IdTupleType;
 import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.data.util.LargeByteBuffer;
 import edu.rice.cs.hpc.data.util.Util;
@@ -106,7 +106,7 @@ public class FileDB2 implements IFileDB
 			offsets[i] = masterBuff.getLong(current_pos);
 			current_pos += Constants.SIZEOF_LONG;
 			
-			IdTuple tuple = new IdTuple(getParallelismLevel());
+			IdTuple tuple = new IdTuple(i, getParallelismLevel());
 			
 			if (getParallelismLevel() == 0) {
 				// sequential program
@@ -122,23 +122,23 @@ public class FileDB2 implements IFileDB
 			{
 				x_val = String.valueOf(proc_id) + "." + String.valueOf(thread_id);
 				
-				tuple.kind[0]  = IdTuple.KIND_RANK;
+				tuple.kind[0]  = IdTupleType.KIND_RANK;
 				tuple.index[0] = proc_id;
 				
-				tuple.kind[1]  = IdTuple.KIND_THREAD;
+				tuple.kind[1]  = IdTupleType.KIND_THREAD;
 				tuple.index[1] = thread_id;
 				
 			} else if (isMultiProcess()) 
 			{
 				x_val = String.valueOf(proc_id);					
 				
-				tuple.kind[0]  = IdTuple.KIND_RANK;
+				tuple.kind[0]  = IdTupleType.KIND_RANK;
 				tuple.index[0] = proc_id;
 			} else if (isMultiThreading()) 
 			{
 				x_val = String.valueOf(thread_id);
 				
-				tuple.kind[0]  = IdTuple.KIND_THREAD;
+				tuple.kind[0]  = IdTupleType.KIND_THREAD;
 				tuple.index[0] = thread_id;
 			} else {
 				// temporary fix: if the application is neither hybrid nor multiproc nor multithreads,
@@ -146,7 +146,7 @@ public class FileDB2 implements IFileDB
 				// this is not the ideal solution, but we cannot trust the value of proc_id and thread_id
 				x_val = String.valueOf(i);
 				
-				tuple.kind[0]  = IdTuple.KIND_RANK;
+				tuple.kind[0]  = IdTupleType.KIND_RANK;
 				tuple.index[0] = i;
 			}
 			valuesX[i] = x_val;

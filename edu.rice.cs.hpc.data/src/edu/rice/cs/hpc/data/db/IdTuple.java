@@ -17,51 +17,14 @@ public class IdTuple
 	public final static int TUPLE_KIND_SIZE   = 2;
 	public final static int TUPLE_INDEX_SIZE  = 8;
 	
-	// use for backward compatibility
-	// we will convert old database process.thread format
-	// to id-tuples
-	
-	public final static int KIND_SUMMARY = 0;
-	public final static int KIND_NODE    = 1;
-	public final static int KIND_RANK    = 2;
-	public final static int KIND_THREAD  = 3;
-	
-	public final static int KIND_GPU_DEVICE  = 4;
-	public final static int KIND_GPU_STREAM  = 5;
-	public final static int KIND_GPU_CONTEXT = 6;
-	public final static int KIND_CORE        = 7;
-	
-	public final static int KIND_MAX         = 8;
-	
-	
-	// see https://github.com/HPCToolkit/hpctoolkit/blob/prof2/src/lib/prof-lean/id-tuple.h#L81
-	// for list of kinds in id tuple
-	
-	private final static String KIND_LABEL_SUMMARY = "Summary";
-	private final static String KIND_LABEL_NODE    = "Node";
-	private final static String KIND_LABEL_RANK    = "Rank";
-	private final static String KIND_LABEL_THREAD  = "Thread";
-	
-	private final static String KIND_LABEL_GPU_DEVICE = "Device";
-	private final static String KIND_LABEL_GPU_STREAM = "Stream";
-	private final static String KIND_LABEL_GPU_CTXT   = "Context";
-	
-	private final static String KIND_LABEL_CORE       = "Core";
-
-	private final static String[] arrayLabel = {KIND_LABEL_SUMMARY, 
-											    KIND_LABEL_NODE,
-												KIND_LABEL_RANK,
-												KIND_LABEL_THREAD,
-												KIND_LABEL_GPU_DEVICE,
-												KIND_LABEL_GPU_STREAM,
-												KIND_LABEL_GPU_CTXT,
-												KIND_LABEL_CORE};
 
 	// -------------------------------------------
 	// variables
 	// -------------------------------------------
 
+	public int   profileNum;
 	public int   length;
+	
 	public short []kind;
 	public long  []index;
 	
@@ -71,24 +34,52 @@ public class IdTuple
 	// -------------------------------------------
 	
 	/****
-	 * 
-	 * @param length
+	 * Constructor
+	 * Caller needs to set {@code kind} and {@code index} variables
+	 * @param profileNum int the profile index
+	 * @param length the int the length (or level) of this id tuple
 	 */
-	public IdTuple(int length) {
-		this.length = length;
+	public IdTuple(int profileNum, int length) {
+		this.length     = length;
+		this.profileNum = profileNum;
 		
 		kind  = new short[length];
 		index = new long[length];
 	}
 	
+	/***
+	 * Empty constructor.
+	 * Caller needs to set {@code profileNum}, {@code length}, {@code kind} and {@code index} variables
+	 */
 	public IdTuple() {
 		length = 0;
+		profileNum = 0;
 	}
 	
 
 	// -------------------------------------------
 	// API Methods
 	// -------------------------------------------
+
+	
+	public int compareTo(IdTuple another) {
+		int minLength = Math.min(length, another.length);
+		
+		for(int i=0; i<minLength; i++) {
+			// compare the differences in kind. 
+			// If they are different, we stop here
+			// another we compare the difference in index
+			
+			int diff = kind[i] - another.kind[i];
+			if (diff != 0)
+				return diff;
+			
+			diff = (int) (index[i] - another.index[i]);
+			if (diff != 0)
+				return diff;
+		}
+		return length-another.length;
+	}
 	
 	/***
 	 * Check if this tuple has a specific kind.
@@ -105,19 +96,6 @@ public class IdTuple
 				return true;
 		}
 		return false;
-	}
-	
-	/***
-	 * Conversion from a tuple kind to label string
-	 * @param kind
-	 * @return String label of a kind 
-	 * @exception java.lang.ArrayIndexOutOfBoundsException if the kind is invalid
-	 */
-	public String kindStr(short kind)
-	{
-		assert(kind>=0 && kind<arrayLabel.length);
-		
-		return arrayLabel[kind];
 	}
 	
 	
@@ -140,7 +118,7 @@ public class IdTuple
 				if (i>0)
 					buff += " ";
 				
-				buff += kindStr(kind[i]) + " " + index[i];
+				buff += IdTupleType.kindStr(kind[i]) + " " + index[i];
 			}
 		return buff;
 	}
