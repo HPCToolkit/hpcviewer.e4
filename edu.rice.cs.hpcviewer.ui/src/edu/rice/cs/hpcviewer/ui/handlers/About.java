@@ -3,6 +3,7 @@ package edu.rice.cs.hpcviewer.ui.handlers;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProduct;
@@ -25,6 +26,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import edu.rice.cs.hpclog.LogProperty;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 import edu.rice.cs.hpcviewer.ui.util.ApplicationProperty;
@@ -161,12 +163,13 @@ public class About
 				String locInstall = Platform.getInstallLocation().getURL().getFile();
 				String locInstance = Platform.getInstanceLocation().getURL().getFile();
 				String locUser = Platform.getLogFileLocation().toOSString(); //.getUserLocation().getURL().getFile();
-				//String logUser = System.getProperty("log.name");
+				List<String> logUser = LogProperty.getLogFile();
 
 				message = "<pre>" +
 						 "Install directory: "  + locInstall  + "\n" +
 						 "Instance directory: " + locInstance + "\n" +
 						 "Preference file: "    + location    + "\n" +
+						 "User log files: "     + logUser     + "\n" +
 						 "Eclipse Log file: "   + locUser     + "\n" +
 						 "</pre>";
 			} catch(Exception e) {

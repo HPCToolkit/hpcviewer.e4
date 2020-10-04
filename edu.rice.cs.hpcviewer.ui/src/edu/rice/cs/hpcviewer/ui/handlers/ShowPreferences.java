@@ -33,7 +33,6 @@ public class ShowPreferences
 		try {
 			vprefDialog.open();
 		} catch (Exception e) {
-			e.printStackTrace();
 			Logger logger = LoggerFactory.getLogger(getClass());
 			logger.error("Error in the preference dialog", e);
 		}

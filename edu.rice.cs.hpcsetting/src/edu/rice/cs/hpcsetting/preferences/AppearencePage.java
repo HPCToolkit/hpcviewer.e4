@@ -77,8 +77,6 @@ public class AppearencePage extends AbstractPage
 				FontManager.setFontPreference(id, font.getFontData());
 
 			} catch (IOException e) {
-				e.printStackTrace();
-				
 				Logger logger = LoggerFactory.getLogger(getClass());
 				logger.error("Unable to store the preference " + id, e);
 			}
