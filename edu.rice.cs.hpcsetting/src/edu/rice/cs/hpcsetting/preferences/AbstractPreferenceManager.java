@@ -12,10 +12,6 @@ import org.eclipse.osgi.service.datalocation.Location;
 
 public abstract class AbstractPreferenceManager 
 {
-
-	public final static String PREF_FILENAME = "hpcviewer.prefs";
-	public static final String P_HPCVIEWER   = "edu.rice.cs.hpcsetting";
-	
 	private PreferenceStore preferenceStore;
 	
 	
@@ -24,7 +20,7 @@ public abstract class AbstractPreferenceManager
 	 * @return IEclipsePreferences
 	 */
 	static public IEclipsePreferences getPreference() {
-		return InstanceScope.INSTANCE.getNode(P_HPCVIEWER);
+		return InstanceScope.INSTANCE.getNode(PreferenceConstants.P_HPCVIEWER);
 	}
 	
 	
@@ -67,7 +63,7 @@ public abstract class AbstractPreferenceManager
 		Location location = Platform.getInstanceLocation();
 		
 		String directory = location.getURL().getFile();
-		return directory + PREF_FILENAME;
+		return directory + PreferenceConstants.PREF_FILENAME;
 	}
 
 	abstract public void setDefaults();
