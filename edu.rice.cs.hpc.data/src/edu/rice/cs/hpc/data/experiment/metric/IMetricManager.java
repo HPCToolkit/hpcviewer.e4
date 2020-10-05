@@ -38,7 +38,7 @@ public interface IMetricManager
 	public int 		    getMetricCount();
 	
 	/** get all metrics associated with this database*/
-	public BaseMetric[] getMetrics();
+	public List<BaseMetric> getMetricList();
 	
 	/** get metrics that are NOT invisible (can be hidden, but not invisible) */
 	public List<BaseMetric> getVisibleMetrics();

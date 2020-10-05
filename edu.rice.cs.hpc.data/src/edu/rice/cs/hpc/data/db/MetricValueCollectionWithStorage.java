@@ -1,4 +1,4 @@
-package edu.rice.cs.hpc.data.db.version3;
+package edu.rice.cs.hpc.data.db;
 
 import java.util.AbstractMap;
 import java.util.HashMap;
@@ -115,6 +115,19 @@ public class MetricValueCollectionWithStorage implements IMetricValueCollection
 	@Override
 	public void dispose() {
 		values = null;
+	}
+
+	@Override
+	public void appendMetrics(IMetricValueCollection mvCollection) {
+		AbstractMap<Integer, MetricValue> source = mvCollection.getValues();
+		if (values == null)
+			values = new HashMap<Integer, MetricValue>(source.size());
+		values.putAll(source);
+	}
+
+	@Override
+	public AbstractMap<Integer, MetricValue> getValues() {
+		return values;
 	}
 
 }

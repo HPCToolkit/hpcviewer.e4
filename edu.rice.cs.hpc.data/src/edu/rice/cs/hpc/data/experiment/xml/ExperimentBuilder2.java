@@ -395,10 +395,6 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 				//  es: number of total samples
 			}
 		}
-		int index = nbMetrics;
-		if (experiment.getMajorVersion() == Constants.EXPERIMENT_SPARSE_VERSION) {
-			index = iSelf;
-		}
 		
 		// Laks 2009.01.14: if the database is call path database, then we need
 		//	to distinguish between exclusive and inclusive
@@ -421,15 +417,15 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 						sDisplayName, 				 // display name
 						visibility, format, percent, // displayed ? percent ?
 						"",							 // period (not defined at the moment)
-						index, objType, partner);
+						iSelf, objType, partner);
 				break;
 			case Derived_Incr:
 				metricInc = new AggregateMetric(sID, sDisplayName, sDescription,
-									visibility, format, percent, index, partner, objType);
+									visibility, format, percent, iSelf, partner, objType);
 				((AggregateMetric) metricInc).init( (BaseExperimentWithMetrics) this.experiment );
 				break;
 			case Derived:
-				metricInc = new DerivedMetric(sDisplayName, sID, index, percent, objType);
+				metricInc = new DerivedMetric(sDisplayName, sID, iSelf, percent, objType);
 				
 				metricInc.setPartner(partner);
 				metricInc.setOrder  (order);
@@ -446,7 +442,7 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 						format, 
 						percent, 					// display percent ?
 						"",							// period (not defined at the moment)
-						index, objType, partner);
+						iSelf, objType, partner);
 				break;
 		}
 		metricInc.setDescription(sDescription);
@@ -571,12 +567,10 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 			// Final metric (inherited from Metric) doesn't need partner. It is final.
 			//----------------------------------------------------------------------------
 			if (!(metric instanceof FinalMetric) && metric instanceof Metric) {
+				
 				int partner = ( (Metric) metric).getPartner();
-				String selfShortName = String.valueOf(partner);
-
-				BaseMetric selfMetric = exp.getMetric(selfShortName); 
 				MetricValue selfMetricValue = new MetricValue(actualValue);
-				objCurrentScope.setMetricValue(selfMetric.getIndex(), selfMetricValue);  
+				objCurrentScope.setMetricValue(partner, selfMetricValue);  
 			}
 		}
 	}

@@ -57,13 +57,9 @@ public class MetricRawManager implements IMetricManager
 	}
 
 	@Override
-	public BaseMetric[] getMetrics() {
-		List<BaseMetric> listMetrics = getVisibleMetrics();
-		if (listMetrics != null && listMetrics.size()>0) {
-			BaseMetric []metrics = new BaseMetric[listMetrics.size()];
-			return listMetrics.toArray(metrics);
-		}		
-		return null;
+	public List<BaseMetric> getMetricList() {
+
+		return getVisibleMetrics();
 	}
 
 	@Override

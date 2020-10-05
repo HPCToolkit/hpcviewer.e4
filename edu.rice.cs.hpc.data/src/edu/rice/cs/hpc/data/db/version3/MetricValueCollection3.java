@@ -1,10 +1,10 @@
 package edu.rice.cs.hpc.data.db.version3;
 
 import java.io.IOException;
+import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.List;
 
-import edu.rice.cs.hpc.data.experiment.BaseExperimentWithMetrics;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.DerivedMetric;
@@ -31,14 +31,11 @@ import edu.rice.cs.hpc.data.experiment.scope.Scope;
 public class MetricValueCollection3 implements IMetricValueCollection 
 {
 	private DataSummary dataSummary;
-	
-	private Scope scope;
 
 	private HashMap<Integer, MetricValue> values;
 	
 	public MetricValueCollection3(DataSummary dataSummary, Scope scope) throws IOException
 	{
-		this.scope = scope;		
 		this.dataSummary = dataSummary;
 	}
 	
@@ -141,9 +138,7 @@ public class MetricValueCollection3 implements IMetricValueCollection
 
 	@Override
 	public int size() {
-		RootScope root = scope.getRootScope();
-		BaseExperimentWithMetrics exp = (BaseExperimentWithMetrics) root.getExperiment();
-		return exp.getMetricCount();
+		return values.size();
 	}
 
 	@Override
@@ -182,5 +177,18 @@ public class MetricValueCollection3 implements IMetricValueCollection
 	 */
 	public DataSummary getDataSummary() {
 		return dataSummary;
+	}
+
+	@Override
+	public void appendMetrics(IMetricValueCollection mvCollection) {
+		AbstractMap<Integer, MetricValue> source = mvCollection.getValues();
+		if (values == null)
+			values = new HashMap<Integer, MetricValue>(source.size());
+		values.putAll(source);
+	}
+
+	@Override
+	public AbstractMap<Integer, MetricValue> getValues() {
+		return values;
 	}
 }

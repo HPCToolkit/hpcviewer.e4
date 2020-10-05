@@ -12,7 +12,8 @@ package edu.rice.cs.hpc.data.experiment.merge;
 
 import java.io.File;
 import java.util.*;
-	
+import java.util.stream.Collectors;
+
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.ExperimentConfiguration;
 import edu.rice.cs.hpc.data.experiment.metric.*;
@@ -85,7 +86,7 @@ public class ExperimentMerger
 		// -----------------------------------------------
 		// step 2: combine all metrics
 		// -----------------------------------------------
-		List<BaseMetric> metrics = buildMetricList(merged, exp1.getMetrics(), exp2.getMetrics());
+		List<BaseMetric> metrics = buildMetricList(merged, exp1.getMetricList(), exp2.getMetricList());
 		merged.setMetrics(metrics);
 		
 		if (with_raw_metrics)
@@ -181,39 +182,38 @@ public class ExperimentMerger
 	}
 	
 	/***
-	 * combine metrics from exp 1 and exp 2
+	 * combine metrics from list m1 and m2 to experiment exp
 	 * 
-	 * @param exp
-	 * @param m1
-	 * @param m2
-	 * @return
+	 * @param exp target experiment
+	 * @param m1 first metric list
+	 * @param m2 second metric list
+	 * @return the new metric list that has been set to experiment exp
 	 */
-	private static ArrayList<BaseMetric> buildMetricList(Experiment exp, BaseMetric[] m1, BaseMetric[] m2) 
+	private static List<BaseMetric> buildMetricList(Experiment exp, List<BaseMetric> m1, List<BaseMetric> m2) 
 	{
-		final ArrayList<BaseMetric> metricList = new ArrayList<BaseMetric>( m1.length + m2.length );
-		
 		// ----------------------------------------------------------------
 		// step 1: add the first metrics into the merged experiment
 		// ----------------------------------------------------------------
-		for (int i=0; i<m1.length; i++) {
-			// add metric into the merged list
-			BaseMetric mm = m1[i].duplicate();
-			addMetric(mm, i, exp, 1, metricList);
-		}
+		final List<BaseMetric> metricList = m1.stream().
+											   map(metric -> metric.duplicate()).
+											   collect(Collectors.toList());
+		metricList.forEach(metric -> {
+			metric.setDisplayName("1-" + metric.getDisplayName());
+		});
 		
 		// attention: hpcprof doesn't guarantee the ID of metric starts with zero
 		//	we should make sure that the next ID for the second group of metrics is not
 		//	overlapped with the ID from the first group of metrics
-		final int m1_last = m1.length - 1;
-		final int m1_last_shortname = Integer.valueOf(m1[m1_last].getShortName());
-		int m1_last_index = Math.max(m1_last_shortname, m1[m1_last].getIndex()) + 1;
+		final int m1_last = m1.size() - 1;
+		final int m1_last_shortname = Integer.valueOf(m1.get(m1_last).getShortName());
+		int m1_last_index = Math.max(m1_last_shortname, m1.get(m1_last).getIndex()) + 1;
 		
 		// ----------------------------------------------------------------
 		// step 2: append the second metrics, and reset the index and the key
 		// ----------------------------------------------------------------
 		
-		for (int i=0; i<m2.length; i++) {
-			final BaseMetric m = m2[i].duplicate();
+		for (int i=0; i<m2.size(); i++) {
+			final BaseMetric m = m2.get(i).duplicate();
 			
 			if (!(m instanceof DerivedMetric)) {
 				// general metric only, no derived metrics allowed
@@ -223,8 +223,11 @@ public class ExperimentMerger
 				final int index_new = m1_last_index + m.getIndex();
 				final String new_id = String.valueOf(index_new); 
 				m.setShortName( new_id );
+				//m.setIndex(index_new);
 				
-				addMetric(m, m1_last + i +1, exp, 2, metricList);
+				m.setDisplayName( 2 + "-" + m.getDisplayName() );
+				
+				metricList.add(m);
 			}
 		}
 		
@@ -237,32 +240,6 @@ public class ExperimentMerger
 	}
 
 
-	/*********
-	 * Add a new metric into a metric list
-	 * 
-	 * @param source : metric to duplicate
-	 * @param metric_index  : the new index
-	 * @param exp    : experiment to which the metric is hosted
-	 * @param metricList : the list of metrics
-	 */
-	private static BaseMetric addMetric(BaseMetric source, int metric_index, 
-			Experiment exp, int experiment_index, List<BaseMetric> metricList)
-	{
-		// add metric into the merged list
-		BaseMetric mm = source.duplicate();
-		mm.setIndex(metric_index);
-		// update the derived metric's experiment
-		if (mm instanceof DerivedMetric)
-		{
-			((DerivedMetric)mm).setExperiment(exp);
-		}
-		
-		setMetricCombinedName(experiment_index, mm);
-		metricList.add(mm);
-		return mm;
-	}
-	
-	
 	/***
 	 * merge two metric raws
 	 * 
