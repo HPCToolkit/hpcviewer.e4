@@ -70,7 +70,7 @@ public abstract class AbstractGraphPlotViewer extends AbstractGraphViewer
 		// create scatter series
 		// -----------------------------------------------------------------
 		ILineSeries scatterSeries = (ILineSeries) chart.getSeriesSet()
-				.createSeries(SeriesType.LINE, metric.getDisplayName() );
+				.createSeries(SeriesType.LINE, input.toString() );
 		
 		scatterSeries.setLineStyle( LineStyle.NONE);
 		scatterSeries.setSymbolSize(DEFAULT_DIAMETER);

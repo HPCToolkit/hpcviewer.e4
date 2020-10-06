@@ -288,6 +288,14 @@ public class DataSummary extends DataCommon
 	 * @return String[]
 	 */
 	public String[] getStringLabelIdTuples() {
+		if (strLabels == null) {
+			strLabels = new String[listIdTuple.size()];
+			
+			for(int i=0; i<listIdTuple.size(); i++) {
+				IdTuple idt  = listIdTuple.get(i);
+				strLabels[i] = idt.toString();
+			}		
+		}
 		return strLabels;
 	}
 	
@@ -299,6 +307,14 @@ public class DataSummary extends DataCommon
 	 * @return double[]
 	 */
 	public double[] getDoubleLableIdTuples() {
+		if (labels == null) {
+			labels    = new double[listIdTupleShort.size()];
+			
+			for(int i=0; i<listIdTupleShort.size(); i++) {
+				IdTuple idt = listIdTupleShort.get(i);
+				labels[i]   = Double.valueOf(idt.toLabel());
+			}		
+		}
 		return labels;
 	}
 	
@@ -356,7 +372,7 @@ public class DataSummary extends DataCommon
 	// Private methods
 	// --------------------------------------------------------------------
 
-	
+		
 	/***
 	 * read the list of id tuple
 	 * @param input FileChannel
@@ -382,10 +398,13 @@ public class DataSummary extends DataCommon
 
 		buffer.flip();
 		
-		numLevels = 0;
+		@SuppressWarnings("unchecked")
 		Map<Long, Integer> []mapLevelToHash = new HashMap[MAX_LEVELS];
+		
 		long []minIndex = new long[MAX_LEVELS];
 		long []maxIndex = new long[MAX_LEVELS];
+		
+		numLevels = 0;
 		
 		for (int i=0; i<numItems; i++) {
 
@@ -454,9 +473,6 @@ public class DataSummary extends DataCommon
 			}
 		});
 		
-		labels    = new double[listIdTuple.size()];
-		strLabels = new String[listIdTuple.size()];
-		
 		// compute the brief short version of id tuples
 		
 		for(int i=0; i<listIdTuple.size(); i++) {
@@ -484,9 +500,6 @@ public class DataSummary extends DataCommon
 				}
 			}
 			listIdTupleShort.add(shortVersion);
-			
-			labels[i]    = Double.valueOf(idt.toLabel());
-			strLabels[i] = idt.toString();
 			
 			numLevels = Math.max(numLevels, idt.length);
 			numShortLevels = Math.max(numShortLevels, totLevels);

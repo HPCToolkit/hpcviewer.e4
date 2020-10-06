@@ -166,10 +166,13 @@ public class IdTuple
 			String str = "";
 			
 			for(int i=0; i<=level; i++) {
+				long lblIndex = index[i]; 
 				if (i==1) {
 					str += ".";
+				} else if (i>1) {
+					lblIndex = (long) (Math.pow(10, level-i) * index[i]);
 				}
-				str += index[i];
+				str += lblIndex;
 			}
 			return str;
 		}
