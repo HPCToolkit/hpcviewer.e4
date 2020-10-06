@@ -41,6 +41,8 @@ public class TreeSimilarity
 	
 	private BaseMetric[] metricToCompare;
 	
+	private final int metricOffset;
+	
 	/********
 	 * construct similarity class
 	 * 
@@ -52,6 +54,8 @@ public class TreeSimilarity
 	 */
 	public TreeSimilarity(int offset, RootScope target, RootScope source)
 	{
+		metricOffset = offset;
+		
 		metricToCompare = getMetricsToCompare(target, source);
 		
 		// reset counter
@@ -59,7 +63,7 @@ public class TreeSimilarity
 		source.dfsVisitScopeTree(visitor);
 				
 		// merge the root scope
-		source.copyMetrics(target);
+		source.copyMetrics(target, offset);
 		
 		// merge the children of the root (tree)
 		mergeTree(target, source);
@@ -88,9 +92,6 @@ public class TreeSimilarity
 		List<BaseMetric> metricSource = expSource.getMetricList();
 		List<BaseMetric> metricTarget = expTarget.getMetricList();
 		
-		BaseMetric metricSourceCompare = metricSource.get(0);
-		BaseMetric metricTargetCompare = metricTarget.get(0);
-		
 		BaseMetric []metrics = new BaseMetric[2];
 		
 		for(BaseMetric m1: metricSource) {
@@ -107,6 +108,22 @@ public class TreeSimilarity
 		}
 		// no metric matches by name. 
 		// let's use the first metric. Hopefully it works :-(
+		
+		BaseMetric metricSourceCompare = metricSource.get(0);
+		for (BaseMetric m: metricSource) {
+			if (m.getMetricType() == MetricType.INCLUSIVE) {
+				metricSourceCompare = m;
+				break;
+			}
+		}
+		
+		BaseMetric metricTargetCompare = metricTarget.get(0);
+		for (BaseMetric m: metricTarget) {
+			if (m.getMetricType() == MetricType.INCLUSIVE) {
+				metricTargetCompare = m;
+				break;
+			}
+		}
 		
 		metrics[METRIC_TARGET] = metricTargetCompare;
 		metrics[METRIC_SOURCE] = metricSourceCompare;
@@ -381,7 +398,7 @@ public class TreeSimilarity
 		
 		if (similar.type == SimilarityType.SAME)
 		{
-			setMergedNodes(scope1, scope2);
+			setMergedNodes(scope1, scope2, metricOffset);
 			
 			return new CoupleNodes(scope1, scope2, similar);
 			
@@ -410,7 +427,7 @@ public class TreeSimilarity
 					Similarity result = checkNodesSimilarity(scope1, sibling, metric1, metric2);
 					if (result.type == SimilarityType.SAME)
 					{
-						setMergedNodes(scope1, sibling);
+						setMergedNodes(scope1, sibling, metricOffset);
 						
 						return new CoupleNodes(scope1, sibling, result);
 						
@@ -427,14 +444,14 @@ public class TreeSimilarity
 				}
 			}
 			numSiblingMatches++;
-			setMergedNodes(scope1, candidate);
+			setMergedNodes(scope1, candidate, metricOffset);
 			
 			return new CoupleNodes(scope1, candidate, similar);
 		}
 		return null;
 	}
 	
-	private void setMergedNodes(Scope target, Scope source)
+	private void setMergedNodes(Scope target, Scope source, int offset)
 	{
 		assert target.isCounterZero() : "target counter is not zero: " + target ;
 		assert source.isCounterZero() : "source counter is not zero: " + source ;
@@ -442,7 +459,7 @@ public class TreeSimilarity
 		// -------------------------------------------------------------
 		// Found strong similarity in the sibling: merge the metric
 		// -------------------------------------------------------------
-		source.copyMetrics(target);
+		source.copyMetrics(target, offset);
 		
 		// mark the nodes have been merged
 		source.incrementCounter();
@@ -746,7 +763,7 @@ public class TreeSimilarity
 	 */
 	private void addSubTree(Scope parent, Scope node)
 	{
-		DuplicateScopeTreesVisitor visitor = new DuplicateScopeTreesVisitor(parent);
+		DuplicateScopeTreesVisitor visitor = new DuplicateScopeTreesVisitor(parent, metricOffset);
 		node.dfsVisitScopeTree(visitor);
 	}
 	

@@ -9,8 +9,8 @@ public class DuplicateScopeTreesVisitor extends BaseDuplicateScopeTreesVisitor {
 	 * 
 	 * @param newRoot
 	 */
-	public DuplicateScopeTreesVisitor(Scope newRoot) {
-		super(newRoot);
+	public DuplicateScopeTreesVisitor(Scope newRoot, int metricOffset) {
+		super(newRoot, metricOffset);
 	}
 
 	

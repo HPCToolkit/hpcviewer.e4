@@ -86,7 +86,7 @@ public class ExperimentMerger
 		// -----------------------------------------------
 		// step 2: combine all metrics
 		// -----------------------------------------------
-		List<BaseMetric> metrics = buildMetricList(merged, exp1.getMetricList(), exp2.getMetricList());
+		ListMergedMetrics metrics = buildMetricList(merged, exp1.getMetricList(), exp2.getMetricList());
 		merged.setMetrics(metrics);
 		
 		if (with_raw_metrics)
@@ -112,7 +112,7 @@ public class ExperimentMerger
 		}
 		createFlatTree(exp1, type, root1);
 		
-		root1.dfsVisitScopeTree(new DuplicateScopeTreesVisitor(rootScope));
+		root1.dfsVisitScopeTree(new DuplicateScopeTreesVisitor(rootScope, 0));
 		
 		RootScope rootMerged = (RootScope) merged.getRootScopeChildren()[0];	
 
@@ -126,8 +126,7 @@ public class ExperimentMerger
 		}
 		createFlatTree(exp2, type, root2);
 
-		final int metricCount = exp1.getMetricCount();
-		new TreeSimilarity(metricCount, rootMerged, root2);
+		new TreeSimilarity(metrics.getOffset(), rootMerged, root2);
 		
 		merged.setMergedDatabase(true);
 		
@@ -189,7 +188,7 @@ public class ExperimentMerger
 	 * @param m2 second metric list
 	 * @return the new metric list that has been set to experiment exp
 	 */
-	private static List<BaseMetric> buildMetricList(Experiment exp, List<BaseMetric> m1, List<BaseMetric> m2) 
+	private static ListMergedMetrics buildMetricList(Experiment exp, List<BaseMetric> m1, List<BaseMetric> m2) 
 	{
 		// ----------------------------------------------------------------
 		// step 1: add the first metrics into the merged experiment
@@ -208,6 +207,10 @@ public class ExperimentMerger
 		final int m1_last_shortname = Integer.valueOf(m1.get(m1_last).getShortName());
 		int m1_last_index = Math.max(m1_last_shortname, m1.get(m1_last).getIndex()) + 1;
 		
+		ListMergedMetrics metricsMerged = new ListMergedMetrics(metricList);
+		
+		metricsMerged.setOffset(m1_last_index);
+		
 		// ----------------------------------------------------------------
 		// step 2: append the second metrics, and reset the index and the key
 		// ----------------------------------------------------------------
@@ -220,23 +223,24 @@ public class ExperimentMerger
 
 				// change the short name (or ID) of the metric since the old ID is already
 				// taken by previous experiment
-				final int index_new = m1_last_index + m.getIndex();
+				final int index_old = m.getIndex();
+				final int index_new = m1_last_index + index_old;
 				final String new_id = String.valueOf(index_new); 
 				m.setShortName( new_id );
-				//m.setIndex(index_new);
+				m.setIndex(index_new);
 				
 				m.setDisplayName( 2 + "-" + m.getDisplayName() );
 				
-				metricList.add(m);
+				metricsMerged.add(m);
 			}
 		}
 		
 		// ----------------------------------------------------------------
 		// step 3: set the list of metric into the experiment
 		// ----------------------------------------------------------------
-		exp.setMetrics(metricList);
+		exp.setMetrics(metricsMerged);
 		
-		return metricList;
+		return metricsMerged;
 	}
 
 

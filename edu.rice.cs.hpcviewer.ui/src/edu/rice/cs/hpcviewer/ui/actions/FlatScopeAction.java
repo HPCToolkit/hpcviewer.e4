@@ -45,7 +45,7 @@ public class FlatScopeAction
 		// -------------------------------------------------------------------
 		Scope objFlattenedNode = (objParentNode.duplicate());
 
-		objParentNode.copyMetrics(objFlattenedNode);
+		objParentNode.copyMetrics(objFlattenedNode, 0);
 		
 		boolean hasKids = false;
 

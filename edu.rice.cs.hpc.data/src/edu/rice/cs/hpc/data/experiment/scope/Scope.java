@@ -721,14 +721,15 @@ protected void ensureMetricStorage()
  * Used to implement duplicate() in subclasses of Scope  
  ************************************************************************/
 
-public void copyMetrics(Scope targetScope) {
+public void copyMetrics(Scope targetScope, int offset) {
 
 	if (!hasNonzeroMetrics())
 		return;
 	
 	targetScope.ensureMetricStorage();
+	
 	IMetricValueCollection targetMetrics = targetScope.getMetricValues();
-	targetMetrics.appendMetrics(getMetricValues());
+	targetMetrics.appendMetrics(getMetricValues(), offset);
 }
 
 

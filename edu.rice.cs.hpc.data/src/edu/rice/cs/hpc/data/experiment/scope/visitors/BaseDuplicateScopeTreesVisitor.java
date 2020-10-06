@@ -17,10 +17,12 @@ import edu.rice.cs.hpc.data.experiment.scope.StatementRangeScope;
 
 public abstract class BaseDuplicateScopeTreesVisitor implements IScopeVisitor {
 	protected Stack<Scope> scopeStack;
+	private final int metricOffset;
 	
-	public BaseDuplicateScopeTreesVisitor(Scope newRoot) {
+	public BaseDuplicateScopeTreesVisitor(Scope newRoot, int metricOffset) {
 		scopeStack = new Stack<Scope>();
 		scopeStack.push(newRoot);
+		this.metricOffset = metricOffset;
 	}
 
 	
@@ -99,7 +101,7 @@ public abstract class BaseDuplicateScopeTreesVisitor implements IScopeVisitor {
 	
 	protected void accumulateMetrics(Scope target, Scope source) {
 				
-		source.copyMetrics(target);
+		source.copyMetrics(target, metricOffset);
 	}
 
 	/****

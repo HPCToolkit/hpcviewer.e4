@@ -180,11 +180,17 @@ public class MetricValueCollection3 implements IMetricValueCollection
 	}
 
 	@Override
-	public void appendMetrics(IMetricValueCollection mvCollection) {
+	public void appendMetrics(IMetricValueCollection mvCollection, int offset) {
 		AbstractMap<Integer, MetricValue> source = mvCollection.getValues();
-		if (values == null)
+		if (values == null) {
 			values = new HashMap<Integer, MetricValue>(source.size());
-		values.putAll(source);
+		}
+		// tricky part: append the metric values and shift the index by an offset
+		
+		AbstractMap<Integer, MetricValue> mapSource = mvCollection.getValues();
+		mapSource.forEach( (index, mv) -> {
+			values.put(index + offset, mv);
+		});
 	}
 
 	@Override

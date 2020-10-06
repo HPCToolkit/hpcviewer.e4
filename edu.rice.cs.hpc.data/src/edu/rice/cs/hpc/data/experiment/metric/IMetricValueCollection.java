@@ -1,7 +1,6 @@
 package edu.rice.cs.hpc.data.experiment.metric;
 
 import java.util.AbstractMap;
-
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 
 /***********************************************************
@@ -15,9 +14,10 @@ public interface IMetricValueCollection
 {
 	/****
 	 * copy metric values from a source {@code IMetricValueCollection} to this collection
+	 * @param listMetric {@code List} list of metric descriptors of the values
 	 * @param mvCollection {@code IMetricValueCollection} source
 	 */
-	public void appendMetrics(IMetricValueCollection mvCollection);
+	public void appendMetrics(IMetricValueCollection mvCollection, int offset);
 	
 	/****
 	 * get a metric value of a given metric index. To keep compatibility, this index
