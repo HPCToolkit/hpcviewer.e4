@@ -17,6 +17,7 @@ public class IdTuple
 	public final static int TUPLE_KIND_SIZE   = 2;
 	public final static int TUPLE_INDEX_SIZE  = 8;
 	
+	private final static String STRING_EMPTY = null;
 
 	// -------------------------------------------
 	// variables
@@ -176,6 +177,6 @@ public class IdTuple
 			}
 			return str;
 		}
-		return null;
+		return STRING_EMPTY;
 	}
 }
