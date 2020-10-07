@@ -1,1 +1,1 @@
-Release 30.09.2020. Commit 162c275
+Release 2020.10.06. Commit 2726ec7
