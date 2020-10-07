@@ -276,6 +276,12 @@ public class ImageTraceAttributes
 		return (double)numPixelsV / getProcessInterval();
 	}
 
+	
+	public int convertTraceLineToRank(int traceLineY) 
+	{
+		return getProcessBegin()+ traceLineY;    	
+	}
+	
 	public int convertPixelToRank(int pixelY) 
 	{
 		int process = 0;
