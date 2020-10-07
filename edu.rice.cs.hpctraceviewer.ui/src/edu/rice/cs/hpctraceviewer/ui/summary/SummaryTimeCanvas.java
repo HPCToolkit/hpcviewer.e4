@@ -60,11 +60,11 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 	private TreeMap<Integer /* pixel */, Integer /* percent */> mapPixelToPercent;
 	
 	
-	private TreeMap<Integer /* callstack_level */, TreeMap<Integer /* pixel */, Float /* percent */ >> cpuBlameMap;
-	private TreeMap<Integer /* callstack_level */, TreeMap<Integer /* pixel */, Float /* percent */ >> gpuBlameMap;
+	private TreeMap<Integer /* pixel */, Float /* percent */ > cpuBlameMap;
+	private TreeMap<Integer /* pixel */, Float /* percent */ > gpuBlameMap;
 	
-	private TreeMap<Integer /* callstack_level */, Float> cpuTotalBlame;
-	private TreeMap<Integer /* callstack_level */, Float> gpuTotalBlame;
+	private float cpuTotalBlame;
+	private float gpuTotalBlame;
 	
 	private int totPixels;
 	private ImageData detailData;
@@ -81,10 +81,10 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 		this.eventBroker = eventBroker;
 		this.tracePart = tracePart;
 		tracePart.getOperationHistory().addOperationHistoryListener(this);
-		this.cpuBlameMap = new TreeMap<Integer, TreeMap<Integer, Float>>();
-		this.gpuBlameMap = new TreeMap<Integer, TreeMap<Integer, Float>>();
-		this.cpuTotalBlame = new TreeMap<Integer, Float>();
-		this.gpuTotalBlame = new TreeMap<Integer, Float>();
+		this.cpuBlameMap = new TreeMap<Integer, Float>();
+		this.gpuBlameMap = new TreeMap<Integer, Float>();
+		this.cpuTotalBlame = 0;
+		this.gpuTotalBlame = 0;
 		
 //		this.whitePixel = detailData.palette.getPixel(new RGB(255,255,255));
 	}
@@ -133,33 +133,25 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 		}
 	}
 
-	private void putBlameCpu(Integer depth, Integer pixel, Float blame) {
+	private void putBlameCpu(Integer pixel, Float blame) {
 
-		if (cpuBlameMap.containsKey(depth)) {
-			TreeMap<Integer, Float> cur_map = cpuBlameMap.get(depth);
-
-			cpuTotalBlame.put(depth, cpuTotalBlame.get(depth) + blame);
-			
-			if (cur_map.containsKey(pixel)) {
-				cur_map.put(pixel, cur_map.get(pixel) + blame);
-			} else {
-				cur_map.put(pixel, blame);
-			}
+		cpuTotalBlame = cpuTotalBlame + blame;
+		
+		if (cpuBlameMap.containsKey(pixel)) {
+			cpuBlameMap.put(pixel, cpuBlameMap.get(pixel) + blame);
+		} else {
+			cpuBlameMap.put(pixel, blame);
 		}
+		
 	}
 
-	private void putBlameGpu(Integer depth, Integer pixel, Float blame) {
-
-		if (gpuBlameMap.containsKey(depth)) {
-			TreeMap<Integer, Float> cur_map = gpuBlameMap.get(depth);
-
-			gpuTotalBlame.put(depth, gpuTotalBlame.get(depth) + blame);
-			
-			if (cur_map.containsKey(pixel)) {
-				cur_map.put(pixel, cur_map.get(pixel) + blame);
-			} else {
-				cur_map.put(pixel, blame);
-			}
+	private void putBlameGpu(Integer pixel, Float blame) {
+		gpuTotalBlame = gpuTotalBlame + blame;
+		
+		if (gpuBlameMap.containsKey(pixel)) {
+			gpuBlameMap.put(pixel, gpuBlameMap.get(pixel) + blame);
+		} else {
+			gpuBlameMap.put(pixel, blame);
 		}
 	}
 	
@@ -218,19 +210,12 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 		List<IdTuple> listTuples = traceData.getListOfIdTuples(IdTupleOption.BRIEF);
 		
 		
-		if (cpuBlameMap.containsKey(cs_depth) == false ) {//&& dataTraces.isHomeView() == true) {
-			cpuBlameMap.put(cs_depth, new TreeMap<Integer, Float>());
-			gpuBlameMap.put(cs_depth, new TreeMap<Integer, Float>());
-			
-			cpuTotalBlame.put(cs_depth, (float) 0);
-			gpuTotalBlame.put(cs_depth, (float) 0);
-		}else {
-			cpuBlameMap.get(cs_depth).clear();
-			gpuBlameMap.get(cs_depth).clear();
-			
-			cpuTotalBlame.put(cs_depth, (float) 0);
-			gpuTotalBlame.put(cs_depth, (float) 0);
-		}
+		cpuBlameMap.clear();
+		gpuBlameMap.clear();
+		
+		cpuTotalBlame = (float) 0;
+		gpuTotalBlame = (float) 0;
+		
 
 
 		// ---------------------------------------------------------------------------
@@ -254,15 +239,13 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 			for (int y = 0; y < detailData.height; ++y) { // One iter per trace line
 								
 				// get the profile of the current pixel
-				int process = attributes.convertTraceLineToRank(y);
-				
+				int process = attributes.convertTraceLineToRank(y);				
 				int pixelValue = detailData.getPixel(x, y);
-				
-				
+								
 				// get the profile's id tuple
 				IdTuple tag = listTuples.get(process);
-				// check if the profile is a thread
 				boolean isCpuThread = tag.hasKind(IdTupleType.KIND_THREAD);
+				
 				RGB rgb = detailData.palette.getRGB(pixelValue);
 				String proc_name = getColorTable().getProcedureNameByColorHash(rgb.hashCode());
 							
@@ -293,13 +276,13 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 			if (cpu_active_count > 0 && gpu_active_count == 0 && gpu_idle_count != 0) {
 				// Blame CPU
 				for(Map.Entry<Integer,Integer> entry : cpuPixelCount.entrySet()) {					
-					putBlameCpu(cs_depth, entry.getKey(), (float) entry.getValue() / cpu_active_count);					
+					putBlameCpu(entry.getKey(), (float) entry.getValue() / cpu_active_count);					
 				}
 									
 			} else if (gpu_active_count > 0 && cpu_active_count == 0 && cpu_idle_count != 0) {
-				// Blame GPU
+//				// Blame GPU
 //				for(Map.Entry<Integer,Integer> entry : gpuPixelCount.entrySet()) {					
-//					putBlameGpu(cs_depth, entry.getKey(), (float) entry.getValue() / gpu_active_count);						
+//					putBlameGpu(entry.getKey(), (float) entry.getValue() / gpu_active_count);						
 //				}
 			}
 
@@ -422,12 +405,11 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 		eventBroker.post(IConstants.TOPIC_STATISTICS, data);
 
 		
-		if (cpuBlameMap.get(cs_depth) != null) {
-			data = new SummaryData(	detailData.palette, getColorTable(), 
-									cpuBlameMap.get(cs_depth), cpuTotalBlame.get(cs_depth),
-									gpuBlameMap.get(cs_depth), gpuTotalBlame.get(cs_depth));
-			eventBroker.post(IConstants.TOPIC_BLAME, data);				
-		}
+		data = new SummaryData(	detailData.palette, getColorTable(), 
+								cpuBlameMap, cpuTotalBlame,
+								gpuBlameMap, gpuTotalBlame);
+		eventBroker.post(IConstants.TOPIC_BLAME, data);				
+		
 	}
 
 	// ---------------------------------------------------------------------------------------
