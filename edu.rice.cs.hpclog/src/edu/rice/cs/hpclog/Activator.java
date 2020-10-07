@@ -2,6 +2,8 @@ package edu.rice.cs.hpclog;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
@@ -31,6 +33,10 @@ public class Activator implements BundleActivator
 	}
 
 	private void configureLogbackInBundle(Bundle bundle) throws JoranException, IOException {
+		
+		final String workDir = getWorkspaceDirectory();
+		System.setProperty("log.dir", workDir);
+		
 		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 		JoranConfigurator jc = new JoranConfigurator();
 		jc.setContext(context);
@@ -44,4 +50,24 @@ public class Activator implements BundleActivator
 		}
 		jc.doConfigure(logbackConfigFileUrl.openStream());
 	}
+    
+    
+    /****
+     * get the default workspace directory. 
+     * A workspace directory is the location where Eclipse will store caches (plugin, libraries),
+     * preferences, logs, file locks, etc.
+     * We may need to store all user setting there too.
+     * 
+     * @return {@code String}
+     */
+    public static String getWorkspaceDirectory() {
+		
+		final String arch = System.getProperty("os.arch");
+
+		final String subDir = ".hpctoolkit" + File.separator + 
+							  "hpcviewer"   + File.separator +
+							  arch;
+		
+		return System.getProperty("user.home") + File.separator + subDir;
+    }
 }

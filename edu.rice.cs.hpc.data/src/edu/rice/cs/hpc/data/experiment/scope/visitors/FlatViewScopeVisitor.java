@@ -36,7 +36,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 	private Hashtable<Integer, LoadModuleScope> htFlatLoadModuleScope;
 	private Hashtable<String, FileScope> htFlatFileScope;
 	private HashMap<String, FlatScopeInfo> htFlatScope;
-	private HashMap<String, Scope[]> htFlatCostAdded;
+	private HashMap<String, List<Scope>> htFlatCostAdded;
 	
 	private RootScope root_ft;
 	
@@ -54,7 +54,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 		this.htFlatLoadModuleScope = new Hashtable<Integer, LoadModuleScope>();
 		this.htFlatFileScope = new Hashtable<String, FileScope>();
 		this.htFlatScope     = new HashMap<String, FlatScopeInfo>();
-		this.htFlatCostAdded = new HashMap<String, Scope[]>();
+		this.htFlatCostAdded = new HashMap<String, List<Scope>>();
 		
 		this.root_ft = root;
 		
@@ -103,7 +103,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 			//--------------------------------------------------------------------------
 			// Pre-visit
 			//--------------------------------------------------------------------------
-			Scope flat_info[] = this.htFlatCostAdded.get( id );
+			List<Scope> flat_info = this.htFlatCostAdded.get( id );
 			if (flat_info != null) {
 				this.htFlatCostAdded.remove(id);
 			}
@@ -132,12 +132,10 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 			//--------------------------------------------------------------------------
 			// Post visit
 			//--------------------------------------------------------------------------
-			Scope flat_info[] = this.htFlatCostAdded.get( id );
+			List<Scope> flat_info = this.htFlatCostAdded.get( id );
 			if (flat_info != null)
-				for (int i=0; i<flat_info.length; i++) {
-					if (flat_info[i] != null) {
-						flat_info[i].decrementCounter();
-					}
+				for (Scope node: flat_info) {
+					node.decrementCounter();
 				}
 		}
 	}
@@ -585,18 +583,14 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 		//-----------------------------------------------------------------------
 		// store the flat scopes that have been updated  
 		//-----------------------------------------------------------------------
-		Scope arr_new_scopes[]; 
-		Scope scope_added[] = htFlatCostAdded.get( objCode );
-		if (scope_added != null) {
-			int nb_scopes = scope_added.length;
-			arr_new_scopes = new Scope[nb_scopes+1];
-			System.arraycopy(scope_added, 0, arr_new_scopes, 0, nb_scopes);
-			arr_new_scopes[nb_scopes] = flat_s;
-		} else {
-			arr_new_scopes = new Scope[1];
-			arr_new_scopes[0] = flat_s;
+
+		List<Scope> scope_added = htFlatCostAdded.get( objCode );
+		if (scope_added == null) {
+			scope_added = new ArrayList<Scope>();
 		}
-		htFlatCostAdded.put(objCode, arr_new_scopes);
+		scope_added.add(flat_s);
+
+		htFlatCostAdded.put(objCode, scope_added);
 	}
 
 	
@@ -605,7 +599,6 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 	 * - load module
 	 * - file
 	 * - procedure
-	 * @author laksonoadhianto
 	 *************************************************************************/
 	private class FlatScopeInfo {
 		LoadModuleScope flat_lm;

@@ -6,6 +6,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
+import java.util.List;
+
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.MetricValue;
@@ -141,7 +143,6 @@ public class PrintData
 		//------------------------------------------------------------------------------------
 		// print the summary
 		//------------------------------------------------------------------------------------
-		BaseMetric []metrics = experiment.getMetrics();
 		
 		Object []roots = experiment.getRootScopeChildren();
 		
@@ -152,12 +153,12 @@ public class PrintData
 			objPrint.println("Summary of " + aRoot.getType());
 			
 			// print root CCT metrics
-			printScopeAndChildren(objPrint, aRoot, metrics);
+			printScopeAndChildren(objPrint, aRoot, experiment.getMetricList());
 		}
 	}
 
 	
-	static private void printScopeAndChildren(PrintStream objPrint, Scope scope, BaseMetric []metrics) {
+	static private void printScopeAndChildren(PrintStream objPrint, Scope scope, List<BaseMetric> metrics) {
 		
 		// print root CCT metrics
 		printMetrics(objPrint, scope, metrics, "");
@@ -170,7 +171,7 @@ public class PrintData
 		Object []children = scope.getChildren();
 		
 		ScopeComparator comparator = new ScopeComparator();
-		comparator.setMetric(metrics[0]);
+		comparator.setMetric(metrics.get(0));
 		comparator.setDirection(ScopeComparator.SORT_DESCENDING);
 		
 		Arrays.sort(children, comparator);
@@ -192,7 +193,7 @@ public class PrintData
 	 * @param metrics list of metrics
 	 * @param indent output indentation
 	 */
-	static private void printMetrics(PrintStream objPrint, Scope scope, BaseMetric []metrics, String indent) {
+	static private void printMetrics(PrintStream objPrint, Scope scope, List<BaseMetric> metrics, String indent) {
 		
 		objPrint.println(indent + "- " + scope.getName());
 		

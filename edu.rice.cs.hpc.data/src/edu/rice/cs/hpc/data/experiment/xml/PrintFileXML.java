@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.List;
 
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
@@ -84,9 +85,8 @@ public class PrintFileXML {
 	 **--------------------------------------------------------------------------------**/
 	private void printMetricTable(PrintStream objPrint, Experiment experiment) {
 		objPrint.println(" <MetricTable>");
-		BaseMetric metrics[] = experiment.getMetrics();
-		for(int i=0; i<metrics.length; i++) {
-			BaseMetric m = metrics[i];
+		List<BaseMetric> metrics = experiment.getMetricList();
+		for(BaseMetric m: metrics) {
 			objPrint.print("    <Metric"); 
 			{
 				printAttribute(objPrint, "i", m.getIndex());				

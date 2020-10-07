@@ -1,8 +1,7 @@
-package edu.rice.cs.hpc.data.db.version3;
+package edu.rice.cs.hpc.data.db;
 
 import java.util.AbstractMap;
 import java.util.HashMap;
-
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.DerivedMetric;
@@ -115,6 +114,25 @@ public class MetricValueCollectionWithStorage implements IMetricValueCollection
 	@Override
 	public void dispose() {
 		values = null;
+	}
+
+	@Override
+	public void appendMetrics(IMetricValueCollection mvCollection, int offset) {
+		AbstractMap<Integer, MetricValue> source = mvCollection.getValues();
+		if (values == null) {
+			values = new HashMap<Integer, MetricValue>(source.size());
+		}
+		// tricky part: append the metric values and shift the index by an offset
+		
+		AbstractMap<Integer, MetricValue> mapSource = mvCollection.getValues();
+		mapSource.forEach( (index, mv) -> {
+			values.put(index + offset, mv);
+		});
+	}
+
+	@Override
+	public AbstractMap<Integer, MetricValue> getValues() {
+		return values;
 	}
 
 }

@@ -220,7 +220,6 @@ public class CallStackViewer extends TableViewer
 			// let the new thread finish the job
 			Logger logger = LoggerFactory.getLogger(getClass());
 			logger.error("CSV: Fail to get sample for time " + position.time, e);
-			e.printStackTrace();
 			
 			return;
 		}

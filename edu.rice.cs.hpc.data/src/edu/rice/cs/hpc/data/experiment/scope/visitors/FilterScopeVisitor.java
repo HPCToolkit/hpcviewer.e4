@@ -1,5 +1,7 @@
 package edu.rice.cs.hpc.data.experiment.scope.visitors;
 
+import java.util.List;
+
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
@@ -43,7 +45,7 @@ public class FilterScopeVisitor implements IScopeVisitor
 	private final BaseExperiment experiment;
 	private final RootScope rootOriginalCCT;
 	
-	private BaseMetric []metrics = null;
+	private List<BaseMetric> metrics = null;
 	
 	/**** flag to allow the dfs to continue to go deeper or not.  
 	      For inclusive filter, we should stop going deeper      *****/
@@ -69,7 +71,7 @@ public class FilterScopeVisitor implements IScopeVisitor
 		experiment = rootOriginalCCT.getExperiment();
 		if (experiment instanceof Experiment)
 		{
-			metrics = ((Experiment)experiment).getMetrics();
+			metrics = ((Experiment)experiment).getMetricList();
 		}
 	}
 	
@@ -252,9 +254,9 @@ public class FilterScopeVisitor implements IScopeVisitor
 		}
 		// we need to merge the metric values
 		IMetricValueCollection values = child.getMetricValues();
-		for (int i=0; i<metrics.length; i++)
+		for (BaseMetric metric: metrics)
 		{
-			MetricValue childValue = values.getValue(child, i);
+			MetricValue childValue = values.getValue(child, metric.getIndex());
 			if (childValue == MetricValue.NONE) {
 				// in the original hpcview (2002), we assign the -1 value as the "none existence value"
 				// this is not proper. we should assign as null for the non-existence
@@ -262,25 +264,21 @@ public class FilterScopeVisitor implements IScopeVisitor
 				//  merging to the parent since x - 1 is not the same as x - 0
 				continue;
 			}
-			if (exclusive_filter && metrics[i].getMetricType() == MetricType.EXCLUSIVE)
+			if (exclusive_filter && metric.getMetricType() == MetricType.EXCLUSIVE)
 			{
-				MetricValue value = parent.getMetricValue(i);
+				MetricValue value = parent.getMetricValue(metric);
 				if (value != MetricValue.NONE)
 				  value = value.duplicate();
-				parent.setMetricValue(i, value);
+				parent.setMetricValue(metric.getIndex(), value);
 				
 				// exclusive filter: merge the exclusive metrics to the parent's exclusive
-				mergeMetricToParent(parent, i, childValue);
+				mergeMetricToParent(parent, metric.getIndex(), childValue);
 				
-			} else if (!exclusive_filter && metrics[i].getMetricType() == MetricType.INCLUSIVE)
+			} else if (!exclusive_filter && metric.getMetricType() == MetricType.INCLUSIVE)
 			{
 				// inclusive filter: merge the inclusive metrics to the parent's exclusive
-				int index_exclusive_metric = metrics[i].getPartner();
-
-				// this is tricky: the original index of the metric is the same as the short name
-				// however, when we ask getMetric(), it requires the metric index in the array (which is 0..n)
-				// we can cheat this by converting the index into "short name" and get the metric.
-				BaseMetric metric_exc = ((Experiment)experiment).getMetric(String.valueOf(index_exclusive_metric));
+				int index_exclusive_metric = metric.getPartner();
+				BaseMetric metric_exc = ((Experiment)experiment).getMetric(index_exclusive_metric);
 				mergeMetricToParent(parent, metric_exc.getIndex(), childValue);
 			}
 		}

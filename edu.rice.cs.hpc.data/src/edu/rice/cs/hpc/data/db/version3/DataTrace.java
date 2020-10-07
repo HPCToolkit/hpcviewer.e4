@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctraceviewer.data.version3;
+package edu.rice.cs.hpc.data.db.version3;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -9,9 +9,7 @@ import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Random;
 
-import edu.rice.cs.hpc.data.db.version3.DataCommon;
 import edu.rice.cs.hpc.data.util.LargeByteBuffer;
-import edu.rice.cs.hpctraceviewer.data.DataRecord;
 
 /*******************************************************************************
  * 
@@ -93,7 +91,7 @@ public class DataTrace extends DataCommon
 			// this database starts the profile number with number 1
 			// the old database starts with number 0
 			
-			header.profIndex  = buffer.getInt()-1;
+			header.profIndex  = buffer.getInt();
 			header.traceIndex = buffer.getShort();
 			
 			header.start = buffer.getLong();
@@ -168,7 +166,7 @@ public class DataTrace extends DataCommon
 		if (th != null) {
 			return th.end - th.start - TRACE_RECORD_SIZE;
 		}
-		return 0;
+		throw new RuntimeException("Invalid rank: " + rank);
 	}
 	
 	
@@ -178,7 +176,7 @@ public class DataTrace extends DataCommon
 		if (th != null) {
 			return th.start;
 		}
-		return 0;
+		throw new RuntimeException("Invalid rank: " + rank);
 	}
 	
 	@Override

@@ -99,7 +99,7 @@ public class FlatContentViewer extends AbstractViewBuilder
 					if (node instanceof Scope) {
 						/*
 						 * debug to display the tree
-						 * 
+						 *
 						String tab = "";
 						Scope scope = (Scope) node;
 						while(scope.getParent()!=null) {

@@ -81,7 +81,7 @@ public class MetricVarMap extends VarMap {
 
 			// Metric variable
 			String sIndex = varName.substring(1);
-			BaseMetric metricToQuery = metricManager.getMetric(sIndex);
+			BaseMetric metricToQuery = metricManager.getMetric(Integer.valueOf(sIndex));
 			if (metricToQuery == null) 
 				throw new RuntimeException("metric ID unknown: " + sIndex);
 			
@@ -117,8 +117,7 @@ public class MetricVarMap extends VarMap {
 					// for exclusive metric, we have to compute the exclusive metric of the source
 					// not the inclusive one
 
-					String sPartner = String.valueOf(bm.getPartner());
-					BaseMetric pm   = metricManager.getMetric(sPartner);
+					BaseMetric pm   = metricManager.getMetric(bm.getPartner());
 					
 					if (pm != null)
 						value = pm.getValue(currentScope);

@@ -717,7 +717,7 @@ protected void ensureMetricStorage()
 
 
 /*************************************************************************
- * Copies defensively the metric array into a target scope
+ * Copies defensively the metric array into a target scope.
  * Used to implement duplicate() in subclasses of Scope  
  ************************************************************************/
 
@@ -727,26 +727,9 @@ public void copyMetrics(Scope targetScope, int offset) {
 		return;
 	
 	targetScope.ensureMetricStorage();
-	Experiment experiment = (Experiment) getRootScope().getExperiment();
-	List<BaseMetric> listMetricDesc = experiment.getMetricList();
 	
-	for (BaseMetric metricDesc: listMetricDesc) {
-		MetricValue mine = null;
-		MetricValue crtMetric = metrics.getValue(this, metricDesc.getIndex());
-
-		if ( MetricValue.isAvailable(crtMetric) && 
-				Float.compare(MetricValue.getValue(crtMetric), 0.0f) != 0) { // there is something to copy
-
-			mine = new MetricValue(crtMetric.getValue());
-
-			if (MetricValue.isAnnotationAvailable(crtMetric)) {
-				MetricValue.setAnnotationValue(mine, MetricValue.getAnnotationValue(crtMetric));
-			} 
-		} else {
-			mine = MetricValue.NONE;
-		}
-		targetScope.metrics.setValue(metricDesc.getIndex()+offset, mine);
-	}
+	IMetricValueCollection targetMetrics = targetScope.getMetricValues();
+	targetMetrics.appendMetrics(getMetricValues(), offset);
 }
 
 

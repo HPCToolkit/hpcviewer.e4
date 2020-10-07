@@ -127,7 +127,7 @@ eval set -- "$PARAMS"
 # UBUNTU's unity menu is broken and only displays hpcviewer's
 # file menu. Address this by disabling UBUNTU's unity menus.
 # This setting is harmless on non-UBUNTU platforms.
-export UBUNTU_MENUPROXY=0
+# export UBUNTU_MENUPROXY=0
 
 # Eclipse Mars has many issues with GTK3, used by default
 # to go back to GTK2, we need to set variable environment before
@@ -137,7 +137,7 @@ export UBUNTU_MENUPROXY=0
 #  https://bugs.eclipse.org/bugs/show_bug.cgi?id=470994
 #  https://bugs.eclipse.org/bugs/show_bug.cgi?id=478962
 #  https://bugs.eclipse.org/bugs/show_bug.cgi?id=470994
-export SWT_GTK3=0
+# export SWT_GTK3=0
 
 #------------------------------------------------------------
 # Launch the viewer.

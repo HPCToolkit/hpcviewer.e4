@@ -239,8 +239,7 @@ public class Experiment extends BaseExperimentWithMetrics
 					// get the partner index (if the metric exclusive, its partner is inclusive)
 					
 					int partner 			 = metric.getPartner(); 	 // get the partner ID
-					String partnerName 		 = String.valueOf(partner);  // convert partner ID to shortID
-					BaseMetric partnerMetric = getMetric(partnerName);   // get the partner metric
+					BaseMetric partnerMetric = getMetric(partner);   // get the partner metric
 					int partnerIndex		 = partnerMetric.getIndex(); // get the index of partner metric
 					
 					copyMetric(scope, scope, metric.getIndex(), partnerIndex, filter);
@@ -279,7 +278,7 @@ public class Experiment extends BaseExperimentWithMetrics
 
 	protected void addPercents(Scope scope, RootScope totalScope)
 	{	
-		PercentScopeVisitor psv = new PercentScopeVisitor(this.getMetricCount(), totalScope);
+		PercentScopeVisitor psv = new PercentScopeVisitor(totalScope);
 		scope.dfsVisitScopeTree(psv);
 	}
 

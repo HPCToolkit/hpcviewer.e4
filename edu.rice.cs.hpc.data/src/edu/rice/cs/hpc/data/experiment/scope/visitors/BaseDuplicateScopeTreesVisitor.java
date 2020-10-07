@@ -17,12 +17,12 @@ import edu.rice.cs.hpc.data.experiment.scope.StatementRangeScope;
 
 public abstract class BaseDuplicateScopeTreesVisitor implements IScopeVisitor {
 	protected Stack<Scope> scopeStack;
-	protected int offsetMetric;
+	private final int metricOffset;
 	
-	public BaseDuplicateScopeTreesVisitor(Scope newRoot, int offset) {
+	public BaseDuplicateScopeTreesVisitor(Scope newRoot, int metricOffset) {
 		scopeStack = new Stack<Scope>();
 		scopeStack.push(newRoot);
-		offsetMetric = offset;
+		this.metricOffset = metricOffset;
 	}
 
 	
@@ -89,19 +89,19 @@ public abstract class BaseDuplicateScopeTreesVisitor implements IScopeVisitor {
 			}
 		} // else match! just copy source's metrics over to target
 		
-		accumulateMetrics(target, source, offsetMetric);
+		accumulateMetrics(target, source);
 
 		if (source instanceof CallSiteScope && target instanceof CallSiteScope) {
 			accumulateMetrics(	((CallSiteScope)target).getLineScope(),
-								((CallSiteScope)source).getLineScope(), offsetMetric);
+								((CallSiteScope)source).getLineScope());
 		}
 		
 		return target;
 	}
 	
-	protected void accumulateMetrics(Scope target, Scope source, int offset) {
+	protected void accumulateMetrics(Scope target, Scope source) {
 				
-		source.copyMetrics(target, offset);
+		source.copyMetrics(target, metricOffset);
 	}
 
 	/****

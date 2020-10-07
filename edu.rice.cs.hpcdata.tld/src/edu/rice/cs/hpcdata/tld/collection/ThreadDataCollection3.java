@@ -81,13 +81,16 @@ public class ThreadDataCollection3 extends AbstractThreadDataCollection
 		// if there is no plot data in the database, we return an array of zeros
 		// (assuming Java will initialize metrics[] with zeros)
 		if (entry != null)
-		{			
+		{	int i = 0;		
 			for(DataPlotEntry e : entry)
 			{
+				int profile = data_summary.getProfileIndexFromOrderIndex(e.tid);
+				
 				// minus 1 because the index is based on profile number.
 				// unfortunately, the profile number starts with number 1 instead of 0
 				// the profile 0 is reserved for summary profile. sigh
-				metrics[e.tid-1] = e.metval;
+				metrics[profile] = e.metval;
+				i++;
 			}
 		}
 		return metrics;

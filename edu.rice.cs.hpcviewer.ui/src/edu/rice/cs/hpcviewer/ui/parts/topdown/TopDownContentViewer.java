@@ -7,6 +7,7 @@ import java.util.List;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -137,11 +138,11 @@ public class TopDownContentViewer extends AbstractViewBuilder
 		try {
 			labels = threadData.getRankStringLabels();
 		} catch (IOException e) {
-
-			e.printStackTrace();
-			
+			String msg = "Error opening thread data";
 			Logger logger = LoggerFactory.getLogger(getClass());
-			logger.error("Error opening thread data", e);
+			logger.error(msg, e);
+			
+			MessageDialog.openError(shell, msg, e.getClass().getName() + ": " + e.getLocalizedMessage());
 			return;
 		}
 		List<FilterDataItem> items =  new ArrayList<FilterDataItem>(labels.length);

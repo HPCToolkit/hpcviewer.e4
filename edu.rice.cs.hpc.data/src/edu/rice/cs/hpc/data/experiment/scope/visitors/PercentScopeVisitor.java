@@ -1,5 +1,9 @@
 package edu.rice.cs.hpc.data.experiment.scope.visitors;
 
+import java.util.List;
+
+import edu.rice.cs.hpc.data.experiment.Experiment;
+import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.MetricValue;
 import edu.rice.cs.hpc.data.experiment.scope.AlienScope;
 import edu.rice.cs.hpc.data.experiment.scope.CallSiteScope;
@@ -16,19 +20,14 @@ import edu.rice.cs.hpc.data.experiment.scope.StatementRangeScope;
 
 public class PercentScopeVisitor implements IScopeVisitor {
 	RootScope root;
-	int metricCount;
-	int metricOffset;
-
-	public PercentScopeVisitor(int metricCount, RootScope r) {
-		this.metricCount = metricCount;
-		metricOffset = 0;
-		root = r;
-	}
+	List<BaseMetric> listMetrics;
 	
-	public PercentScopeVisitor(int metricOffset, int metricCount, RootScope r) {
-		this.metricCount = metricCount;
-		this.metricOffset = metricOffset;
+
+	
+	public PercentScopeVisitor(RootScope r) {
 		root = r;
+		Experiment exp = (Experiment) r.getExperiment();
+		listMetrics = exp.getMetricList();
 	}
 	
 	//----------------------------------------------------
@@ -65,16 +64,16 @@ public class PercentScopeVisitor implements IScopeVisitor {
 	 * @param num_metrics: number of metrics
 	 */
 	protected void setPercentValue(Scope scope) {
-		for (int i = metricOffset; i < metricCount; i++) {
-			MetricValue m = scope.getMetricValue(i);
-			MetricValue root_value = root.getMetricValue(i);
+		for (BaseMetric metric: listMetrics) {
+			
+			MetricValue m = scope.getMetricValue(metric);
+			MetricValue root_value = root.getMetricValue(metric);
 			if (m != MetricValue.NONE && root_value != MetricValue.NONE) {
 				double myValue = MetricValue.getValue(m);
 				double total = MetricValue.getValue(root_value);
 				if (Double.compare(total, 0)!=0) 
 					MetricValue.setAnnotationValue(m, myValue/total);
 			}
-
 		}
 	}
 }

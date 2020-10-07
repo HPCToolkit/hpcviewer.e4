@@ -8,6 +8,7 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,8 +31,10 @@ public class DataSummary extends DataCommon
 	private final static String HEADER_MAGIC_STR  = "HPCPROF-tmsdb_____";
 	private static final int    METRIC_VALUE_SIZE = 8 + 2;
 	private static final int    CCT_RECORD_SIZE   = 4 + 8;
-	private static final int    SUMMARY_PROFILE_INDEX = 0;
-	private static final int    MAX_LEVELS = 8;
+	private static final int    MAX_LEVELS        = 8;
+	
+	private static final int    PROFILE_SUMMARY_INDEX = 0;
+	public static final int     PROFILE_SUMMARY       = -1;
 	
 	// --------------------------------------------------------------------
 	// object variable
@@ -39,8 +42,18 @@ public class DataSummary extends DataCommon
 	
 	private RandomAccessFile file;
 	
+	/*** cache variables so that we don't need to read again and again  ***/
+	/*** cache the content of the file for a particular profile number  ***/
+	private ByteBuffer byteBufferCache;
+	
+	/*** Current cached data of a certain profile ***/
+	private int profileNumberCache;
+	
 	private List<IdTuple>  listIdTuple, listIdTupleShort;
 	private List<ProfInfo> listProfInfo;
+	
+	/*** mapping from profile number to the sorted order*/
+	private Map<Integer, Integer> mapProfileToOrder;
 		
 	protected boolean optimized = true;
 
@@ -107,7 +120,7 @@ public class DataSummary extends DataCommon
 	public ListCCTAndIndex getCCTIndex() 
 			throws IOException {
 		
-		ProfInfo info = listProfInfo.get(SUMMARY_PROFILE_INDEX);
+		ProfInfo info = listProfInfo.get(PROFILE_SUMMARY_INDEX);
 		
 		// -------------------------------------------
 		// read the cct context
@@ -202,13 +215,14 @@ public class DataSummary extends DataCommon
 	public List<MetricValueSparse> getMetrics(int cct_id) 
 			throws IOException
 	{		
-		return getMetrics(0, cct_id);
+		return getMetrics(PROFILE_SUMMARY, cct_id);
 	}
 	
 	
 	/****
 	 * Retrieve the list of metrics for a certain profile number and a given cct id
-	 * @param profileNum The profile number. For summary profile, the number must be zero
+	 * 
+	 * @param profileNum The profile number. For summary profile, it equals to {@code PROFILE_SUMMARY}
 	 * @param cct_id the cct id
 	 * @return List of MetricValueSparse
 	 * @throws IOException
@@ -216,21 +230,40 @@ public class DataSummary extends DataCommon
 	public List<MetricValueSparse> getMetrics(int profileNum, int cct_id) 
 			throws IOException 
 	{	
-		ProfInfo info = listProfInfo.get(profileNum);
+		ProfInfo info ;
+		if (profileNum == PROFILE_SUMMARY) {
+			info =listProfInfo.get(PROFILE_SUMMARY_INDEX);
+		} else {
+			IdTuple idt = listIdTuple.get(profileNum);
+			info = listProfInfo.get(idt.profileNum);
+		}
 		
-		// -------------------------------------------
-		// read the cct context
-		// -------------------------------------------
-		
-		long positionCCT = info.offset   + 
-				   		   info.num_vals * METRIC_VALUE_SIZE;
-		int numBytesCCT  = (info.num_nz_contexts+1) * CCT_RECORD_SIZE;
-		
-		MappedByteBuffer buffer = file.getChannel().map(MapMode.READ_ONLY, positionCCT, numBytesCCT);
-		long []indexes = binarySearch(cct_id, 0, 1+info.num_nz_contexts, buffer);
+		if (profileNumberCache != profileNum || byteBufferCache == null) {
+			// -------------------------------------------
+			// read the cct context
+			// -------------------------------------------
+			
+			long positionCCT = info.offset   + 
+					   		   info.num_vals * METRIC_VALUE_SIZE;
+			int numBytesCCT  = (info.num_nz_contexts+1) * CCT_RECORD_SIZE;
+			
+			FileChannel channel = file.getChannel();
+			byte []arrayBytes   = new byte[numBytesCCT];
+			
+			byteBufferCache = ByteBuffer.wrap(arrayBytes);
+			
+			channel.position(positionCCT);
+			channel.read(byteBufferCache);
+			
+			profileNumberCache = profileNum;
+		}
+
+		long []indexes = binarySearch(cct_id, 0, 1+info.num_nz_contexts, byteBufferCache);
 		
 		if (indexes == null)
+			// the cct id is not found or the cct has no metrics. Should we return null or empty list?
 			return null;
+		
 		// -------------------------------------------
 		// initialize the metrics
 		// -------------------------------------------
@@ -267,6 +300,14 @@ public class DataSummary extends DataCommon
 	 * @return String[]
 	 */
 	public String[] getStringLabelIdTuples() {
+		if (strLabels == null) {
+			strLabels = new String[listIdTuple.size()];
+			
+			for(int i=0; i<listIdTuple.size(); i++) {
+				IdTuple idt  = listIdTuple.get(i);
+				strLabels[i] = idt.toString();
+			}		
+		}
 		return strLabels;
 	}
 	
@@ -278,6 +319,15 @@ public class DataSummary extends DataCommon
 	 * @return double[]
 	 */
 	public double[] getDoubleLableIdTuples() {
+		if (labels == null) {
+			labels    = new double[listIdTupleShort.size()];
+			
+			for(int i=0; i<listIdTupleShort.size(); i++) {
+				IdTuple idt  = listIdTupleShort.get(i);
+				String label = idt.toLabel();
+				labels[i]    = label == null? 0 : Double.valueOf(label);
+			}		
+		}
 		return labels;
 	}
 	
@@ -305,7 +355,18 @@ public class DataSummary extends DataCommon
 		file.close();
 		super.dispose();
 	}
-	
+
+	/***
+	 * Get the profile id based from the rank "order".
+	 * As the data is not sorted based on id tuple, this method will return
+	 * the profile index given the index of sorted id tuples.
+	 * 
+	 * @param orderNumber {@code int} the index
+	 * @return {@code int} the profile index, used fro accessing the database
+	 */
+	public int getProfileIndexFromOrderIndex(int orderNumber) {
+		return mapProfileToOrder.get(orderNumber);
+	}
 
 	// --------------------------------------------------------------------
 	// Protected methods
@@ -335,15 +396,21 @@ public class DataSummary extends DataCommon
 	// Private methods
 	// --------------------------------------------------------------------
 
-	
+		
 	/***
-	 * read the list of id tuple
+	 * read the list of id tuple, sort based on the rank and level, then compute
+	 * the abbreviation version of id tuples.
+	 * 
 	 * @param input FileChannel
 	 * @throws IOException
 	 */
 	private void readIdTuple(FileChannel input) 
 			throws IOException
 	{
+		// -----------------------------------------
+		// 1. Read the id tuples section from the thread.db
+		// -----------------------------------------
+		
 		byte []buff = new byte[8];
 		ByteBuffer buffTupleSize = ByteBuffer.wrap(buff);
 		input.read(buffTupleSize);
@@ -361,8 +428,13 @@ public class DataSummary extends DataCommon
 
 		buffer.flip();
 		
-		numLevels = 0;
+		@SuppressWarnings("unchecked")
 		Map<Long, Integer> []mapLevelToHash = new HashMap[MAX_LEVELS];
+		
+		long []minIndex = new long[MAX_LEVELS];
+		long []maxIndex = new long[MAX_LEVELS];
+		
+		numLevels = 0;
 		
 		for (int i=0; i<numItems; i++) {
 
@@ -370,15 +442,11 @@ public class DataSummary extends DataCommon
 			// read the tuple section
 			// -----------------------------------------
 
-			IdTuple item = new IdTuple();
+			short length = buffer.getShort();			
+			assert(length>0);
 
-			item.length = buffer.getShort();			
-			assert(item.length>0);
-
+			IdTuple item = new IdTuple(i, length);
 			numLevels = Math.max(numLevels, item.length);
-
-			item.kind  = new short[item.length];
-			item.index = new long[item.length];
 			
 			for (int j=0; j<item.length; j++) {
 				item.kind[j]  = buffer.getShort();
@@ -398,6 +466,9 @@ public class DataSummary extends DataCommon
 				}
 				count++;
 				mapLevelToHash[j].put(hash, count);
+				
+				minIndex[j] = Math.min(minIndex[j], item.index[j]);
+				maxIndex[j] = Math.min(maxIndex[j], item.index[j]);
 			}
 			if (i == 0) {
 				// special treatment for id-tuple = 0: it's a summary profile
@@ -406,18 +477,49 @@ public class DataSummary extends DataCommon
 			}
 		}
 		
+		// -----------------------------------------
+		// 2. Check for the invariants in id tuple.
+		//    This is to know which the first levels we can skip
+		// -----------------------------------------
+		
 		Map<Integer, Integer> mapLevelToSkip = new HashMap<Integer, Integer>();
 		
 		for(int i=0; i<mapLevelToHash.length; i++) {
 			if (mapLevelToHash[i] != null && mapLevelToHash[i].size()==1) {
+				// this level only has one variant.
+				// we can skip it.
 				mapLevelToSkip.put(i, 1);
+				
+			} else if (mapLevelToSkip.size()>0) {
+				// if we find that this level is not invariant, we just stop here.
+				// there is no need to continue to look for invariant.
+				// for instance if we have:
+				//   rank 0 thread 0
+				//   rank 0 thread 1
+				//   rank 0 stream 1 context 0
+				// we just stop at level rank (rank 0), we don't need to skip level 2 (context 0)
+				break;
 			}
 		}
+
+		// -----------------------------------------
+		// 2. sort the id tuple
+		// -----------------------------------------
 		
-		labels    = new double[listIdTuple.size()];
-		strLabels = new String[listIdTuple.size()];
+		listIdTuple.sort(new Comparator<IdTuple>() {
+
+			@Override
+			public int compare(IdTuple o1, IdTuple o2) {
+				return o1.compareTo(o2);
+			}
+		});
 		
-		// compute the brief short version of id tuples
+		mapProfileToOrder = new HashMap<Integer, Integer>(listIdTuple.size());
+		
+		// -----------------------------------------
+		// 3. a. compute the brief short version of id tuples
+		//    b. store the order of sorted id tuple into a map
+		// -----------------------------------------
 		
 		for(int i=0; i<listIdTuple.size(); i++) {
 			IdTuple idt = listIdTuple.get(i);
@@ -429,7 +531,14 @@ public class DataSummary extends DataCommon
 					totLevels++;
 				}
 			}
-			IdTuple shortVersion = new IdTuple(totLevels);
+			// the profileNum is +1 because the index 0 is for summary
+			IdTuple shortVersion = new IdTuple(idt.profileNum, totLevels);
+			
+			// this is a hack since hpcprof2-mpi doesn't generate sorted id tuple:
+			// store the map from the profile index to the order index
+			
+			mapProfileToOrder.put(idt.profileNum, i);
+			
 			int level = 0;
 			
 			// copy not-skipped id tuples to the short version
@@ -444,20 +553,28 @@ public class DataSummary extends DataCommon
 			}
 			listIdTupleShort.add(shortVersion);
 			
-			labels[i]    = Double.valueOf(idt.toLabel());
-			strLabels[i] = idt.toString();
-			
 			numLevels = Math.max(numLevels, idt.length);
 			numShortLevels = Math.max(numShortLevels, totLevels);
 		}
 	}
 
 	
+	/***
+	 * Serialize id tuple into one long number.
+	 * TODO: This is not a perfect serialization (max is 64 bits), 
+	 * but it works for small number of profiles
+	 * 
+	 * @param level
+	 * @param kind
+	 * @param index
+	 * @return
+	 */
 	private long convertIdTupleToHash(int level, int kind, long index) {
 		long k = (kind << 20);
 		long t = k + index;
 		return t;
 	}
+	
 	
 	/*****
 	 * read the list of Prof Info
@@ -597,32 +714,6 @@ public class DataSummary extends DataCommon
 				   ", vals: " 	 + num_vals 	   + 
 				   ", ccts: "	 + num_nz_contexts + 
 				   ", offs: " 	 + offset;
-		}
-	}
-
-	/***************************
-	 * unit test 
-	 * 
-	 * @param argv
-	 ***************************/
-	public static void main(String []argv)
-	{
-		final String DEFAULT_FILE = "/home/la5/git/hpctoolkit/BUILD-prof2/hpctoolkit-hpcstruct-bin-database/thread.db";
-		final String filename;
-		if (argv != null && argv.length>0)
-			filename = argv[0];
-		else
-			filename = DEFAULT_FILE;
-		
-		final DataSummary summary_data = new DataSummary();
-		try {
-			summary_data.open(filename);			
-			summary_data.printInfo(System.out);
-			summary_data.dispose();	
-			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	}
 }

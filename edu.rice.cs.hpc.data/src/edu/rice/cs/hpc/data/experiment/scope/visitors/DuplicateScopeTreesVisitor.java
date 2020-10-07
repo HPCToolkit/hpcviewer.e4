@@ -9,16 +9,12 @@ public class DuplicateScopeTreesVisitor extends BaseDuplicateScopeTreesVisitor {
 	 * 
 	 * @param newRoot
 	 */
-	public DuplicateScopeTreesVisitor(Scope newRoot) {
-		super(newRoot, 0);
+	public DuplicateScopeTreesVisitor(Scope newRoot, int metricOffset) {
+		super(newRoot, metricOffset);
 	}
 
 	
-	public DuplicateScopeTreesVisitor(Scope newRoot, int offset) {
-		super( newRoot, offset );
-	}
-	
-	//@Override
+	@Override
 	protected Scope findMatch(Scope parent, Scope toMatch) {
 		// for duplication, everything matches
 		return null;

@@ -6,6 +6,7 @@ import java.util.List;
 
 import edu.rice.cs.hpc.data.db.IdTuple;
 import edu.rice.cs.hpc.data.db.version3.DataSummary;
+import edu.rice.cs.hpc.data.db.version3.DataTrace;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.extdata.FileDB2;
 import edu.rice.cs.hpc.data.experiment.extdata.IFileDB;
@@ -93,12 +94,22 @@ public class FileDB3 implements IFileDB
 
 	@Override
 	public long getMinLoc(int rank) {
-		return dataTrace.getOffset(rank);
+		// another redirection: look at id tuple to get the profile number
+		// then, search the offset of this profile number
+		
+		List<IdTuple> listId = dataSummary.getIdTuple();
+		int profileNum = listId.get(rank).profileNum;
+		return dataTrace.getOffset(profileNum);
 	}
 
 	@Override
 	public long getMaxLoc(int rank) {
-		return dataTrace.getOffset(rank) + dataTrace.getLength(rank);
+		// another redirection: look at id tuple to get the profile number
+		// then, search the offset of this profile number, and its length
+		
+		List<IdTuple> listId = dataSummary.getIdTuple();
+		int profileNum = listId.get(rank).profileNum;
+		return dataTrace.getOffset(profileNum) + dataTrace.getLength(profileNum);
 	}
 
 	@Override
@@ -114,7 +125,7 @@ public class FileDB3 implements IFileDB
 
 	@Override
 	public List<IdTuple> getIdTuple(IdTupleOption option) {
-		return dataSummary.getIdTuple();
+		return dataSummary.getIdTuple(option);
 	}
 
 }

@@ -65,7 +65,7 @@ public class FilterStateProvider
 				// conserve the added metrics
 				// ---------------------------------------
 				ArrayList<DerivedMetric> metrics = new ArrayList<DerivedMetric>(1);
-				for (BaseMetric metric : experiment.getMetrics()) {
+				for (BaseMetric metric : experiment.getMetricList()) {
 					if (metric instanceof DerivedMetric && 
 						metric.getMetricType()==MetricType.UNKNOWN) {
 						

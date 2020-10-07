@@ -74,7 +74,7 @@ public abstract class DataPreparation
 		{
 			// in case of bad cpid, we just quit painting the view
 			if (cp==null) {
-				logger.warn("No cpid for index " + index);
+				logger.debug("No cpid for index " + index);
 				
 				return num_invalid_cp;		// throwing an exception is more preferable, but it will make
 				// more complexity to handle inside a running thread

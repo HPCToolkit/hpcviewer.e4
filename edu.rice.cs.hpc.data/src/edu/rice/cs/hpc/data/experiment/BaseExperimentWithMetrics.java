@@ -56,16 +56,6 @@ implements IMetricManager
 		}
 	}
 
-	/*****
-	 * Retrieve the list of metric descriptors
-	 * 
-	 * @return
-	 */
-	@Deprecated
-	public BaseMetric[] getMetrics()
-	{
-		return 	metrics.toArray(new BaseMetric[metrics.size()]);
-	}
 
 	/***
 	 * Retrieve the list of metrics
@@ -126,19 +116,6 @@ implements IMetricManager
 	 ************************************************************************/
 	public BaseMetric getMetric(int index)
 	{		
-		if (getMajorVersion() == Constants.EXPERIMENT_SPARSE_VERSION) {
-			return findMetric(index);
-		}
-		BaseMetric metric = null;
-		try {
-			metric = findMetric(index);
-		} catch (Exception e) {
-			System.err.println(e.getLocalizedMessage());
-		}
-		return metric;
-	}
-
-	private BaseMetric findMetric(int index) {
 		for(BaseMetric metric: metrics) {
 			if (metric.getIndex() == index)
 				return metric;

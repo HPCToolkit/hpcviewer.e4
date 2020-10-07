@@ -5,6 +5,8 @@ package edu.rice.cs.hpcsetting.preferences;
  */
 public class PreferenceConstants 
 {
+	public static final String P_HPCVIEWER          = "edu.rice.cs.hpcsetting";
+	
 	public static final String P_CALLER_VIEW 		= "callerViewPreference";
 	
 	public static final String P_PATH 				= "pathPreference";

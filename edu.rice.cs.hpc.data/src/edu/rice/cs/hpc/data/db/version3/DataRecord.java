@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctraceviewer.data;
+package edu.rice.cs.hpc.data.db.version3;
 
 /***
  * struct trace record

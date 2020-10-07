@@ -25,7 +25,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 import edu.rice.cs.hpcviewer.ui.util.ApplicationProperty;
-
+import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
 @Creatable
 @Singleton
@@ -68,15 +68,10 @@ public class LifeCycle
 			setUserLog();
 			return;
 		}
-		
-		final String arch = System.getProperty("os.arch");
 
-		final String subDir = ".hpctoolkit" + File.separator + 
-							  "hpcviewer"   + File.separator +
-							  arch;
+		final String workDir = Utilities.getWorkspaceDirectory();
 		
-		final String file = System.getProperty("user.home") + File.separator + subDir;
-		final File newLoc = new File(file);
+		final File newLoc = new File(workDir);
 		
 		try {
 			URL url  = newLoc.toURI().toURL(); 
