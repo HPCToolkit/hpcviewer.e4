@@ -1,5 +1,5 @@
 
-package edu.rice.cs.hpc.data.db;
+package edu.rice.cs.hpc.data.db.version3;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.RandomAccessFile;
@@ -8,7 +8,13 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import edu.rice.cs.hpc.data.db.IdTuple;
+import edu.rice.cs.hpc.data.experiment.extdata.IFileDB;
+import edu.rice.cs.hpc.data.experiment.extdata.IFileDB.IdTupleOption;
 import edu.rice.cs.hpc.data.experiment.metric.MetricValueSparse;
 
 /*********************************************
@@ -24,6 +30,8 @@ public class DataSummary extends DataCommon
 	private final static String HEADER_MAGIC_STR  = "HPCPROF-tmsdb_____";
 	private static final int    METRIC_VALUE_SIZE = 8 + 2;
 	private static final int    CCT_RECORD_SIZE   = 4 + 8;
+	private static final int    SUMMARY_PROFILE_INDEX = 0;
+	private static final int    MAX_LEVELS = 8;
 	
 	// --------------------------------------------------------------------
 	// object variable
@@ -31,10 +39,18 @@ public class DataSummary extends DataCommon
 	
 	private RandomAccessFile file;
 	
-	private List<IdTuple>  listTuple;
+	private List<IdTuple>  listIdTuple, listIdTupleShort;
 	private List<ProfInfo> listProfInfo;
+		
+	protected boolean optimized = true;
+
+	/** Number of parallelism level or number of levels in hierarchy */
+	private int numLevels;
+	private int numShortLevels;
 	
-	
+	private double[] labels;
+	private String[] strLabels;
+
 	// --------------------------------------------------------------------
 	// Public methods
 	// --------------------------------------------------------------------
@@ -42,7 +58,7 @@ public class DataSummary extends DataCommon
 	/***
 	 *  <p>Opening for data summary metric file</p>
 	 * (non-Javadoc)
-	 * @see edu.rice.cs.hpc.data.db.DataCommon#open(java.lang.String)
+	 * @see edu.rice.cs.hpc.data.db.version3.DataCommon#open(java.lang.String)
 	 */
 	@Override
 	public void open(final String filename)
@@ -61,6 +77,12 @@ public class DataSummary extends DataCommon
 	public void printInfo( PrintStream out)
 	{
 		super.printInfo(out);
+		
+		// print list of id tuples
+		for(IdTuple idt: listIdTuple) {
+			System.out.println(idt);
+		}
+		System.out.println();
 
 		ListCCTAndIndex list = null;
 		
@@ -72,7 +94,9 @@ public class DataSummary extends DataCommon
 		}
 		
 		// print random metrics
-		for (int i=0; i<list.listOfId.length; i++)
+		int len = Math.min(100, list.listOfId.length);
+		
+		for (int i=0; i<len; i++)
 		{
 			int cct = list.listOfId[i];
 			out.format("[%5d] ", cct);
@@ -82,7 +106,8 @@ public class DataSummary extends DataCommon
 
 	public ListCCTAndIndex getCCTIndex() 
 			throws IOException {
-		ProfInfo info = listProfInfo.get(0);
+		
+		ProfInfo info = listProfInfo.get(SUMMARY_PROFILE_INDEX);
 		
 		// -------------------------------------------
 		// read the cct context
@@ -108,12 +133,62 @@ public class DataSummary extends DataCommon
 	
 	/***
 	 * Retrieve the list of tuple IDs.
-	 * @return List of Tuple
+	 * @return {@code List<IdTuple>} List of Tuple
 	 */
-	public List<IdTuple> getTuple() {
-		return listTuple;
+	public List<IdTuple> getIdTuple() {
+		if (optimized)
+			return getIdTuple(IFileDB.IdTupleOption.BRIEF);
+		
+		return getIdTuple(IFileDB.IdTupleOption.COMPLETE);
 	}
 	
+	
+	/****
+	 * Retrieve the list of id tuples
+	 * 
+	 * @param shortVersion: true if we want to the short version of the list
+	 * 
+	 * @return {@code List<IdTuple>}
+	 */
+	public List<IdTuple> getIdTuple(IdTupleOption option) {
+		switch(option) {
+		case COMPLETE: 
+			return listIdTuple;
+
+		case BRIEF:
+		default:
+			return listIdTupleShort;
+		}
+	}
+	
+	
+	/****
+	 * Get the value of a specific profile with specific cct and metric id
+	 * 
+	 * @param profileNum
+	 * @param cctId
+	 * @param metricId
+	 * @return
+	 * @throws IOException
+	 */
+	public double getMetric(int profileNum, int cctId, int metricId) 
+			throws IOException
+	{
+		List<MetricValueSparse> listValues = getMetrics(profileNum, cctId);
+		
+		if (listValues != null) {
+			
+			// TODO ugly temporary code
+			// We need to grab a value directly from the memory instead of searching O(n)
+			
+			for (MetricValueSparse mvs: listValues) {
+				if (mvs.getIndex() == metricId) {
+					return mvs.getValue();
+				}
+			}
+		}
+		return 0.0d;
+	}
 	
 	/**********
 	 * Reading a set of metrics from the file for a given CCT 
@@ -186,11 +261,45 @@ public class DataSummary extends DataCommon
 		return values;
 	}
 	
+	
+	/****
+	 * Retrieve the list of id tuple label in string
+	 * @return String[]
+	 */
+	public String[] getStringLabelIdTuples() {
+		return strLabels;
+	}
+	
+	
+	/****
+	 * Retrieve the list of id tuple representation in double.
+	 * For OpenMP programs, it returns the list of 1, 2, 3,...
+	 * For MPI+OpenMP programs, it returns the list of 1.0, 1.1, 1.2, 2.0, 2.1, ... 
+	 * @return double[]
+	 */
+	public double[] getDoubleLableIdTuples() {
+		return labels;
+	}
+	
+	
+	/***
+	 * Retrieve the number maximum of parallelism.
+	 * If the application has MPI+OpenMP, then it returns 2.
+	 * If the application has MPI+OpenMP+CUDA, it may return 2 depending if the kernel is launched under MPI rank or not.
+	 * @return int
+	 */
+	public int getMaxLevels() {
+		if (optimized)
+			return numShortLevels;
 		
+		return numLevels;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * @see edu.rice.cs.hpc.data.db.DataCommon#dispose()
 	 */
+	@Override
 	public void dispose() throws IOException
 	{
 		file.close();
@@ -226,6 +335,7 @@ public class DataSummary extends DataCommon
 	// Private methods
 	// --------------------------------------------------------------------
 
+	
 	/***
 	 * read the list of id tuple
 	 * @param input FileChannel
@@ -241,7 +351,8 @@ public class DataSummary extends DataCommon
 		
 		long idTupleSize = buffTupleSize.getLong();
 		
-		listTuple = new ArrayList<IdTuple>((int) numItems);
+		listIdTuple = new ArrayList<IdTuple>((int) numItems-1);
+		listIdTupleShort = new ArrayList<IdTuple>((int) numItems-1);
 		
 		ByteBuffer buffer = ByteBuffer.allocate((int) idTupleSize);
 		
@@ -249,6 +360,9 @@ public class DataSummary extends DataCommon
 		assert (numBytes > 0);
 
 		buffer.flip();
+		
+		numLevels = 0;
+		Map<Long, Integer> []mapLevelToHash = new HashMap[MAX_LEVELS];
 		
 		for (int i=0; i<numItems; i++) {
 
@@ -260,18 +374,91 @@ public class DataSummary extends DataCommon
 
 			item.length = buffer.getShort();			
 			assert(item.length>0);
-			
+
+			numLevels = Math.max(numLevels, item.length);
+
 			item.kind  = new short[item.length];
 			item.index = new long[item.length];
 			
 			for (int j=0; j<item.length; j++) {
 				item.kind[j]  = buffer.getShort();
 				item.index[j] = buffer.getLong();
+				
+				if (i==0)
+					continue;
+				// we don't care with summary profile
+				
+				if (mapLevelToHash[j] == null)
+					mapLevelToHash[j] = new HashMap<Long, Integer>();
+				
+				Long hash = convertIdTupleToHash(j, item.kind[j], item.index[j]);
+				Integer count = mapLevelToHash[j].get(hash);
+				if (count == null) {
+					count = Integer.valueOf(0);
+				}
+				count++;
+				mapLevelToHash[j].put(hash, count);
 			}
-			listTuple.add(item);
+			if (i == 0) {
+				// special treatment for id-tuple = 0: it's a summary profile
+			} else {
+				listIdTuple.add(item);
+			}
+		}
+		
+		Map<Integer, Integer> mapLevelToSkip = new HashMap<Integer, Integer>();
+		
+		for(int i=0; i<mapLevelToHash.length; i++) {
+			if (mapLevelToHash[i] != null && mapLevelToHash[i].size()==1) {
+				mapLevelToSkip.put(i, 1);
+			}
+		}
+		
+		labels    = new double[listIdTuple.size()];
+		strLabels = new String[listIdTuple.size()];
+		
+		// compute the brief short version of id tuples
+		
+		for(int i=0; i<listIdTuple.size(); i++) {
+			IdTuple idt = listIdTuple.get(i);
+			int totLevels = 0;
+			
+			// find how many levels we can keep for this id tuple
+			for (int j=0; j<idt.length; j++) {
+				if (mapLevelToSkip.get(j) == null) {
+					totLevels++;
+				}
+			}
+			IdTuple shortVersion = new IdTuple(totLevels);
+			int level = 0;
+			
+			// copy not-skipped id tuples to the short version
+			// leave the skipped ones for the full complete id tuple
+			for(int j=0; j<idt.length; j++) {
+				if (mapLevelToSkip.get(j) == null) {
+					// we should keep this level
+					shortVersion.kind[level]  = idt.kind[j];
+					shortVersion.index[level] = idt.index[j];
+					level++;
+				}
+			}
+			listIdTupleShort.add(shortVersion);
+			
+			labels[i]    = Double.valueOf(idt.toLabel());
+			strLabels[i] = idt.toString();
+			
+			numLevels = Math.max(numLevels, idt.length);
+			numShortLevels = Math.max(numShortLevels, totLevels);
 		}
 	}
 
+	
+	private long convertIdTupleToHash(int level, int kind, long index) {
+		long k = (kind << 20);
+		long t = k + index;
+		return t;
+	}
+	
 	/*****
 	 * read the list of Prof Info
 	 * @param input FileChannel

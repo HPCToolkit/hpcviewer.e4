@@ -111,29 +111,6 @@ public class Utilities
 		return isChanged;
 	}
 	
-
-	
-	static public void resetView ( TreeViewer tree )
-	{
-		TreeItemManager objItem = new TreeItemManager();
-		resetView(objItem, tree);
-	}
-	
-	/**
-	 * refresh a particular view
-	 * To save memory allocation, we ask an instance of TreeItemManager
-	 * @param objItemManager
-	 * @param tree
-	 */
-	static private void resetView ( TreeItemManager objItemManager, TreeViewer tree) {
-		//resetViewRowHeight(tree);
-		// save the context first
-		objItemManager.saveContext(tree);
-		// refresh
-		tree.refresh();
-		// restore the context
-		objItemManager.restoreContext(tree);
-	}
 	
 	/**
 	 * activate a listener to reset Row Height for Windows only
@@ -165,6 +142,7 @@ public class Utilities
 		return measurementListener;
 	}
 	
+	
 	/**
 	 * refresh size of rows for a particular view - non Windows
 	 * @param tree
@@ -176,7 +154,6 @@ public class Utilities
 			tree.getTree().getColumn(0).setWidth(saveWidth);
 		}
 	}
-	
 
 
 	/**	
@@ -230,6 +207,8 @@ public class Utilities
 		}
 		return sText;
 	}
+	
+	
 	/**
 	 * Return an image depending on the scope of the node.
 	 * The criteria is based on ScopeTreeCellRenderer.getScopeNavButton()
@@ -260,6 +239,12 @@ public class Utilities
 		return null;
 	}
 	
+	
+	/***
+	 * Retrieve the inline navigation icon of a procedure node 
+	 * @param proc ProcedureScope
+	 * @return Image
+	 */
 	static public Image getInlineNavButton(ProcedureScope proc)
 	{
 		if (proc.isAlien()) {

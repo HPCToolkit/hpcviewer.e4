@@ -48,6 +48,7 @@ import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
+import edu.rice.cs.hpc.data.experiment.InvalExperimentException;
 import edu.rice.cs.hpc.filter.service.FilterMap;
 import edu.rice.cs.hpcbase.BaseConstants;
 import edu.rice.cs.hpcbase.ui.IMainPart;
@@ -231,6 +232,8 @@ public class DatabaseCollection
 		if (activeWindowContext == null) {
 			// we give up. There's still no active window yet.
 			MWindow window = application.getSelectedElement();
+			if (window == null)
+				return;
 			
 			((EObject) window).eAdapters().add(new AdapterImpl() {
 				
@@ -658,12 +661,16 @@ public class DatabaseCollection
 				experiment.filter(filterMap);
 			}
 			
-			// create views
-			
+			// Everything works just fine: create views
 			createViewsAndAddDatabase(experiment, application, partService, modelService, null);
+
+		} catch (InvalExperimentException ei) {
+			final String msg = "Invalid database " + database + "\nError at line " + ei.getLineNumber();
+			statusReport(IStatus.ERROR, msg, ei);
+			MessageDialog.openError(shell, "Error " + ei.getClass(), msg);
 			
 		} catch (Exception e) {
-			final String msg = "Error opening the database: " + database;
+			final String msg = "Error opening the database " + database + ":\n  " + e.getMessage();
 			statusReport(IStatus.ERROR, msg, e);
 			MessageDialog.openError(shell, "Error " + e.getClass(), msg);
 		}

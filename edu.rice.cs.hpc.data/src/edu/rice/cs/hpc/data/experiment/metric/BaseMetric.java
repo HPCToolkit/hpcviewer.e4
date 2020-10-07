@@ -378,6 +378,10 @@ public abstract class BaseMetric {
 		return this.sampleperiod;
 	}
 
+	public String toString() {
+		return index + ". " + shortName + ": " + displayName;
+	}
+	
 	/*************************************************************************
 	 * Convert hpcrun visibility type to Java enum
 	 * 

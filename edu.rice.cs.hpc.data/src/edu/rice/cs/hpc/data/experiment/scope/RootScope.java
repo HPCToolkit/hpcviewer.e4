@@ -18,14 +18,14 @@ package edu.rice.cs.hpc.data.experiment.scope;
 import java.io.File;
 import java.io.IOException;
 
-import edu.rice.cs.hpc.data.db.DataSummary;
+import edu.rice.cs.hpc.data.db.version2.MetricValueCollection2;
+import edu.rice.cs.hpc.data.db.version3.DataSummary;
+import edu.rice.cs.hpc.data.db.version3.MetricValueCollection3;
+import edu.rice.cs.hpc.data.db.version3.MetricValueCollectionWithStorage;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.BaseExperimentWithMetrics;
 import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpc.data.experiment.metric.IMetricValueCollection;
-import edu.rice.cs.hpc.data.experiment.metric.version2.MetricValueCollection2;
-import edu.rice.cs.hpc.data.experiment.metric.version3.MetricValueCollection3;
-
 import edu.rice.cs.hpc.data.experiment.scope.visitors.IScopeVisitor;
 import edu.rice.cs.hpc.data.util.Constants;
 
@@ -47,8 +47,8 @@ public class RootScope extends Scope
 {
 static final private String NAME = "Experiment Aggregate Metrics";
 
-static final public int DEFAULT_CCT_ID  = 1;
-static final public int DEFAULT_FLAT_ID = 1;
+static final public int DEFAULT_CCT_ID  = 0;
+static final public int DEFAULT_FLAT_ID = 0;
 
 /** The name of the experiment's program. */
 protected String rootScopeName;
@@ -87,8 +87,32 @@ public RootScope(BaseExperiment experiment, String name, RootScopeType rst, int 
 
 @Override
 public Scope duplicate() {
-    return new RootScope(experiment,  this.rootScopeName, this.rootScopeType);
+	int cctId  = getCCTIndex();
+	int flatId = getFlatIndex();
+	
+    return new RootScope(experiment,  this.rootScopeName, this.rootScopeType, cctId, flatId);
 }
+
+
+/****
+ * For database version 4.0 only: retrieve the DataSummary object for this root scope.
+ * 
+ * 
+ * @return DataSummary
+ * @throws IOException
+ */
+public DataSummary getDataSummary() throws IOException {
+	if (dataSummary == null) {
+		dataSummary = new DataSummary();
+		
+		String filename = experiment.getDefaultDirectory().getAbsolutePath() + File.separatorChar
+				+ experiment.getDbFilename(BaseExperiment.Db_File_Type.DB_SUMMARY);
+		
+		dataSummary.open(filename);
+	}
+	return dataSummary;
+}
+
 
 /******
  * Retrieve (and create) the metric collection based on the version of the database.
@@ -104,20 +128,19 @@ public IMetricValueCollection getMetricValueCollection(Scope scope) throws IOExc
 	
 	// TODO: this is a hack
 	
-	if (version == Constants.EXPERIMENT_SPARSE_VERSION && rootScopeType == RootScopeType.CallingContextTree) 
+	if (version == Constants.EXPERIMENT_SPARSE_VERSION) 
 	{
-		if (dataSummary == null) {
-			dataSummary = new DataSummary();
+		if (rootScopeType == RootScopeType.CallingContextTree) {
+			DataSummary data = getDataSummary();
+			return new MetricValueCollection3(data, scope);
 			
-			String filename = experiment.getDefaultDirectory().getAbsolutePath() + File.separatorChar
-					+ experiment.getDbFilename(BaseExperiment.Db_File_Type.DB_SUMMARY);
-			
-			dataSummary.open(filename);
+		} else if (rootScopeType == RootScopeType.CallerTree || 
+				   rootScopeType == RootScopeType.Flat) {
+
+			return new MetricValueCollectionWithStorage();
 		}
-		return new MetricValueCollection3(dataSummary, scope);
-	} else {
-		return new MetricValueCollection2(metric_size);		
 	}
+	return new MetricValueCollectionWithStorage();		
 }
 
 

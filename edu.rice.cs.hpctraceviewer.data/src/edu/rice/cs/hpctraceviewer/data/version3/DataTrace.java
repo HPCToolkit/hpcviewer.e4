@@ -4,16 +4,13 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.nio.LongBuffer;
-import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.channels.FileChannel.MapMode;
+import java.util.AbstractMap;
+import java.util.HashMap;
 import java.util.Random;
 
-import edu.rice.cs.hpc.data.util.Constants;
+import edu.rice.cs.hpc.data.db.version3.DataCommon;
 import edu.rice.cs.hpc.data.util.LargeByteBuffer;
-import edu.rice.cs.hpc.data.db.DataCommon;
-
 import edu.rice.cs.hpctraceviewer.data.DataRecord;
 
 /*******************************************************************************
@@ -25,29 +22,15 @@ import edu.rice.cs.hpctraceviewer.data.DataRecord;
  *******************************************************************************/
 public class DataTrace extends DataCommon 
 {
-	final static private String TRACE_NAME = "hpctoolkit trace metrics";
-	final static private int RECORD_INDEX_SIZE = Constants.SIZEOF_LONG + 
-										Constants.SIZEOF_LONG + Constants.SIZEOF_LONG;
-	final static public int RECORD_ENTRY_SIZE = Constants.SIZEOF_LONG + Constants.SIZEOF_INT;
-	final static private int TRACE_HEADER_SIZE = 256;
-	
-	long index_start, index_length;
-	long trace_start, trace_length;
-	long min_time,	  max_time;
-
-	int  size_offset, size_length;
-	int  size_gtid,	  size_time;
-	int  size_cctid;
+	private final static String HEADER = "HPCPROF-tracedb___";
+	private final static int TRACE_HDR_RECORD_SIZE = 22;
+	private final static int TRACE_RECORD_SIZE = 8 + 4;
 	
 	private RandomAccessFile file;
 	private FileChannel channel;
 	private LargeByteBuffer lbBuffer;
 
-	private long []table_offset;
-	private long []table_length;
-	private long []table_global_tid;
-	
-
+	private AbstractMap<Integer, TraceHeader> mapProfToTrace;
 
 	@Override
 	/*
@@ -60,19 +43,9 @@ public class DataTrace extends DataCommon
 		super.open(file);
 		
 		open_internal(file);
-		// fill the cct offset table
-		fillOffsetTable(file);
 	}
 	
-	/***
-	 * Return the lowest begin time of all ranks
-	 * 
-	 * @return the minimum time
-	 */
-	public long getMinTime()
-	{
-		return min_time;
-	}
+
 
 	@Override
 	/*
@@ -89,7 +62,7 @@ public class DataTrace extends DataCommon
 	 * @see edu.rice.cs.hpc.data.db.DataCommon#isFileHeaderCorrect(java.lang.String)
 	 */
 	protected boolean isFileHeaderCorrect(String header) {
-		return header.compareTo(TRACE_NAME) >= 0;
+		return header.equals(HEADER);
 	}
 
 	@Override
@@ -103,33 +76,32 @@ public class DataTrace extends DataCommon
 		// -------------------------------------------------
 		// reading the next 256 byte header
 		// -------------------------------------------------
-		ByteBuffer buffer = ByteBuffer.allocate(TRACE_HEADER_SIZE);
+		long trace_hdr_size = TRACE_HDR_RECORD_SIZE * numItems;
+		ByteBuffer buffer = ByteBuffer.allocate((int) trace_hdr_size);
+		
 		int numBytes      = input.read(buffer);
-		if (numBytes > 0) 
-		{
-			buffer.flip();
+		if (numBytes <= 0) 
+			return false;
+		
+		buffer.flip();
+		
+		mapProfToTrace = new HashMap<Integer, DataTrace.TraceHeader>((int) numItems);
+		
+		for(int i=0; i<numItems; i++) {
+			TraceHeader header = new TraceHeader();
 			
-			index_start  = buffer.getLong();
-			index_length = buffer.getLong();
+			// this database starts the profile number with number 1
+			// the old database starts with number 0
 			
-			trace_start  = buffer.getLong();
-			trace_length = buffer.getLong();
+			header.profIndex  = buffer.getInt()-1;
+			header.traceIndex = buffer.getShort();
 			
-			min_time = buffer.getLong();
-			max_time = buffer.getLong();
+			header.start = buffer.getLong();
+			header.end   = buffer.getLong();
 			
-			size_offset = buffer.getInt();
-			size_length = buffer.getInt();
-			size_gtid   = buffer.getInt();
-			size_time   = buffer.getInt();
-			size_cctid  = buffer.getInt();
-			
-			// FIXME: At the moment we cannot afford if the size of cct is not integer
-			if (size_cctid != 4)
-			{
-				throw new IOException("The size of CCT is not supported: " + size_cctid);
-			} 
+			mapProfToTrace.put(header.profIndex, header);
 		}
+		buffer.clear();
 		
 		return true;
 	}
@@ -146,24 +118,20 @@ public class DataTrace extends DataCommon
 	 */
 	public DataRecord getSampledData(int rank, long index) throws IOException
 	{
-		if (table_offset[rank] <=0)
+		if (rank == 0)
+			System.out.println();
+		
+		int profileNum = rank;
+		TraceHeader th = mapProfToTrace.get(profileNum);
+		if (th == null)
 			return null;
 		
-		long file_size = file.length();
-		long offset = table_offset[rank] + (index * RECORD_ENTRY_SIZE);
+		long position = th.start + TRACE_RECORD_SIZE * index;
+		long time = lbBuffer.getLong(position);
+		int  cpid = lbBuffer.getInt(position + 8);
+		DataRecord data = new DataRecord(time, cpid, 0);
 		
-		if (file_size > offset)
-		{
-			file.seek(offset);
-			byte []buffer_byte = new byte[RECORD_ENTRY_SIZE];
-			file.readFully(buffer_byte);
-			ByteBuffer buffer  = ByteBuffer.wrap(buffer_byte);
-			
-			long time = buffer.getLong();
-			int cct   = buffer.getInt();
-			return new DataRecord(time, cct, 0);
-		}
-		return null;
+		return data;
 	}
 	
 	/***
@@ -174,7 +142,12 @@ public class DataTrace extends DataCommon
 	 */
 	public int getNumberOfSamples(int rank)
 	{
-		return (int) (table_length[rank] / RECORD_ENTRY_SIZE);
+		TraceHeader th = mapProfToTrace.get(rank);
+		if (th == null)
+			return 0;
+		
+		long numBytes = th.end - th.start;
+		return (int) (numBytes / TRACE_RECORD_SIZE);
 	}
 	
 	/****
@@ -188,19 +161,24 @@ public class DataTrace extends DataCommon
 		return (int) numItems;
 	}
 	
-	public long []getOffsets()
-	{
-		return table_offset;
-	}
 	
 	public long getLength(int rank)
 	{
-		return table_length[rank];
+		TraceHeader th = mapProfToTrace.get(rank);
+		if (th != null) {
+			return th.end - th.start - TRACE_RECORD_SIZE;
+		}
+		return 0;
 	}
+	
 	
 	public long getOffset(int rank)
 	{
-		return table_offset[rank];
+		TraceHeader th = mapProfToTrace.get(rank);
+		if (th != null) {
+			return th.start;
+		}
+		return 0;
 	}
 	
 	@Override
@@ -210,31 +188,13 @@ public class DataTrace extends DataCommon
 	 */
 	public void printInfo( PrintStream out)
 	{
-		super.printInfo(out);
-		out.println("Min time: " + min_time);
-		out.println("Max time: " + max_time);
-		
-		out.println("index start: " + index_start);
-		out.println("index length: " + index_length);
-		
-		out.println(" trace start: " + trace_start + "\n trace length: " + trace_length);
-		
-		out.println("size offset: " + size_offset);
-		out.println("size length: " + size_length);
-		out.println("size time: " + size_time);
-		out.println("size cctid: " + size_cctid + "\n size gtid: " + size_gtid);
-		
-		// print the table index
-		for(int i=0; i<table_offset.length; i++)
-		{
-			out.format(" %d. %05x : %04x\n", table_global_tid[i], table_offset[i], table_length[i]);
-		}
+
 		Random r = new Random();
 		int nranks = getNumberOfRanks();
 		
 		for(int i=0; i< 10; i++)
 		{
-			int rank = (nranks>1 ? r.nextInt(nranks-1) : 0);
+			int rank = (nranks>1 ? r.nextInt(nranks-1) : 1);
 			int numsamples = getNumberOfSamples(rank);
 			int sample = r.nextInt(numsamples);
 			try {
@@ -323,34 +283,26 @@ public class DataTrace extends DataCommon
 	{
 		file 	= new RandomAccessFile(filename, "r");
 		channel = file.getChannel();
-		lbBuffer = new LargeByteBuffer(channel, RECORD_ENTRY_SIZE, RECORD_ENTRY_SIZE);
+		lbBuffer = new LargeByteBuffer(channel, 2, TRACE_RECORD_SIZE);
 	}
 
 
-	private void fillOffsetTable(final String filename)
-			throws IOException
+	/****
+	 * 
+	 * Class to store the header of trace database
+	 *
+	 */
+	static class TraceHeader
 	{
-		// map all the table into memory. 
-		// This statement can be problematic if the offset_size is huge
+		int   profIndex;   // profile number 		
+		short traceIndex;  // style: 0-> cct-style, 1->metric-style
+		long start;		   // start of the offset of this profile
+		long end;		   // end of the offset for this profile
 		
-		MappedByteBuffer mappedBuffer = channel.map(MapMode.READ_ONLY, index_start, index_length);
-		LongBuffer longBuffer = mappedBuffer.asLongBuffer();
-		
-		final int num_pos = (int) (index_length /  RECORD_INDEX_SIZE);
-		
-		table_offset 	 = new long[(int) num_pos];
-		table_length 	 = new long[(int) num_pos];
-		table_global_tid = new long[(int) num_pos];
-		
-		for (int i=0; i<num_pos; i++)
-		{
-			int index		    = 3 * i; 
-			table_offset[i] 	= longBuffer.get(index);
-			table_length[i] 	= longBuffer.get(index+1);
-			table_global_tid[i] = longBuffer.get(index+2);
+		public String toString() {
+			return profIndex + ": " + start +"-" + end;
 		}
 	}
-	
 
 	/***************************
 	 * unit test 
@@ -365,7 +317,7 @@ public class DataTrace extends DataCommon
 		{
 			filename = argv[0];
 		} else {
-			filename = "/home/la5/data/new-database/db-lulesh-new/trace.db";
+			filename = "/Users/la5/data/sparse/gpu/hpctoolkit-tower-one-sparse-database/trace.db";
 		}
 		try {
 			trace_data.open(filename);			

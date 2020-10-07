@@ -5,10 +5,13 @@ import java.io.IOException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 
+import edu.rice.cs.hpc.data.db.version3.DataSummary;
+import edu.rice.cs.hpc.data.db.version3.MetricValueCollection3;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.InvalExperimentException;
 import edu.rice.cs.hpc.data.experiment.extdata.IFileDB;
 import edu.rice.cs.hpc.data.experiment.extdata.IFilteredData;
+import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.trace.TraceAttribute;
 import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.data.util.IProgressReport;
@@ -37,8 +40,10 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 	/************************
 	 * Constructor to setup local database
 	 * 
-	 * @param _window : the current active window
+	 * @param context IEclipseContext
+	 * @param statusMgr  IProgressMonitor
 	 * @param databaseDirectory : database directory
+	 * @param fileDB IFileDB 
 	 * 
 	 * @throws InvalExperimentException
 	 * @throws Exception
@@ -55,10 +60,20 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 	}
 	
 	
+	/***
+	 * Constructor to setup local database
+	 * 
+	 * @param context IEclipseContext
+	 * @param statusMgr IProgressMonitor
+	 * @param experiment BaseExperiment
+	 * @param fileDB IFileDB
+	 * @throws InvalExperimentException
+	 * @throws Exception
+	 */
 	public SpaceTimeDataControllerLocal(
 			IEclipseContext context, 
-			BaseExperiment experiment, 
 			IProgressMonitor statusMgr, 
+			BaseExperiment experiment, 
 			IFileDB fileDB)
 			throws InvalExperimentException, Exception {
 		
@@ -67,11 +82,20 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 	}
 	
 	
+	/****
+	 * Initialize the trace view by opening the trace file according to the version of the database
+	 * 
+	 * @param statusMgr IProgressMonitor
+	 * @param fileDB IFileDB
+	 * 
+	 * @throws IOException
+	 */
 	private void init(IProgressMonitor statusMgr, IFileDB fileDB) throws IOException {
 		
 		final TraceAttribute trAttribute = exp.getTraceAttribute();		
 		final int version = exp.getMajorVersion();
-		if (version == 1 || version == 2)
+		
+		if (version == 1 || version == Constants.EXPERIMENT_DENSED_VERSION)
 		{	// original format
 			traceFilePath = getTraceFile(exp.getDefaultDirectory().getAbsolutePath(), statusMgr);
 			fileDB.open(traceFilePath, trAttribute.dbHeaderSize, RECORD_SIZE);
@@ -81,7 +105,11 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 			// new format
 			String databaseDirectory = exp.getDefaultDirectory().getAbsolutePath(); 
 			traceFilePath = databaseDirectory + File.separator + exp.getDbFilename(BaseExperiment.Db_File_Type.DB_TRACE);
-			((FileDB3)fileDB).open(databaseDirectory);
+			
+			RootScope root = (RootScope) exp.getRootScope();
+			DataSummary ds = root.getDataSummary();
+			
+			((FileDB3)fileDB).open(ds, databaseDirectory);
 		}
 		this.fileDB = fileDB;
 		dataTrace 	= new BaseData(fileDB);

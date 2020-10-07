@@ -9,8 +9,7 @@ import java.nio.channels.FileChannel.MapMode;
 import java.util.ArrayList;
 import java.util.List;
 
-
-import edu.rice.cs.hpc.data.db.DataCommon;
+import edu.rice.cs.hpc.data.db.version3.DataCommon;
 
 /*******************************************************************************************
  * 
@@ -276,7 +275,7 @@ public class DataPlot extends DataCommon
 		if (argv != null && argv.length>0) {
 			filename = argv[0];
 		} else {
-			filename = "/Users/la5/data/sparse/hpctoolkit-fib-sparse-database/cct.db"; 
+			filename = "/Users/la5/data/sparse/gpu/hpctoolkit-fib-sparse-database/cct.db"; 
 		}
 		try {
 			data.open(filename);

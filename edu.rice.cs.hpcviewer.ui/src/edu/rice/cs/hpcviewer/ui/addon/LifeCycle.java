@@ -6,13 +6,13 @@ import java.net.URL;
 
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
-import javax.inject.Named;
+import javax.inject.Singleton;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Creatable;
 import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.e4.ui.workbench.lifecycle.PostContextCreate;
 import org.eclipse.e4.ui.workbench.lifecycle.PreSave;
 import org.eclipse.e4.ui.workbench.lifecycle.ProcessAdditions;
@@ -23,9 +23,12 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
+import edu.rice.cs.hpcviewer.ui.util.ApplicationProperty;
 
+
+@Creatable
+@Singleton
 public class LifeCycle 
 {
 	@Inject EPartService partService;
@@ -37,7 +40,7 @@ public class LifeCycle
 	private Image listImages[];
 
 	@PostContextCreate
-	public void startup(IEclipseContext context, @Named(IServiceConstants.ACTIVE_SHELL) Shell shell) {
+	public void startup() {
 		
 		// setup a list of images 
 		// Note: this is for Windows. On mac, we don't need this.
@@ -61,8 +64,10 @@ public class LifeCycle
 		Location location = Platform.getInstanceLocation();
 		
 		// stop if location is set
-		if (location.isSet())
+		if (location.isSet()) {
+			setUserLog();
 			return;
+		}
 		
 		final String arch = System.getProperty("os.arch");
 
@@ -80,7 +85,10 @@ public class LifeCycle
 		} catch (IllegalStateException | IOException e) {
 			e.printStackTrace();
 		}
+		setUserLog();
 	}
+	
+	
 	
 	@PreDestroy
 	void preDestro() {
@@ -103,4 +111,9 @@ public class LifeCycle
 	@ProcessRemovals
 	void processRemovals(IEclipseContext workbenchContext) {}
 
+	
+	private void setUserLog() {
+		String logFile = ApplicationProperty.getFileLogLocation();
+		System.setProperty("log.name", logFile);
+	}
 }

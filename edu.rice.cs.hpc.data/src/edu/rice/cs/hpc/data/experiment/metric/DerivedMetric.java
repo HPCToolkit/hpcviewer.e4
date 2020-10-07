@@ -223,7 +223,10 @@ public class DerivedMetric extends BaseMetric {
 		if (Double.compare(0.0, rootVal) == 0) {
 			return MetricValue.NONE;
 		}
-		double rootAnn = 1.0d;
-		return new MetricValue(rootVal, rootAnn);
+		if (annotationType != AnnotationType.NONE) {
+			double rootAnn = 1.0d;
+			return new MetricValue(rootVal, rootAnn);
+		}
+		return new MetricValue(rootVal);
 	}
 }

@@ -115,9 +115,6 @@ public class TreeNode {
 		return children != null && children.size() > 0;
 	}
 	
-	public int hashCode() {
-		return TreeNode.hashCode(value);
-	}
 
 	/***
 	 * Add a new child

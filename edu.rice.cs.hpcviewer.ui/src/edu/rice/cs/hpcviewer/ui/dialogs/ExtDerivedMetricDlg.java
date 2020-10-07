@@ -68,8 +68,8 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 	private Button btnDefaultFormat;
 	
 	// ------------ Metric and math variables
-	private String []arrStrMetrics;
 	private String expFormula;
+	private List<BaseMetric> listOfMetrics;
 	
 	private final ExtFuncMap fctMap;
 	private final MetricVarMap varMap;
@@ -222,8 +222,16 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 	    	
 	    	// combo box that lists the metrics
 	    	final Combo cbMetric = new Combo(grpInsertion, SWT.READ_ONLY);
-	    	cbMetric.setItems(this.arrStrMetrics);
-	    	cbMetric.setText(this.arrStrMetrics[0]);
+	    	
+			  int nbMetrics = listOfMetrics.size();
+			  String []arrStrMetrics = new String[nbMetrics];
+			  for(int i=0;i<nbMetrics;i++) {
+				  BaseMetric metric = listOfMetrics.get(i);
+				  arrStrMetrics[i] = metric.getShortName() + ": "+ metric.getDisplayName();
+			  }
+
+	    	cbMetric.setItems(arrStrMetrics);
+	    	cbMetric.setText(arrStrMetrics[0]);
 
 	    	//---------------------------------------------------------------
 	    	// button to insert the metric code into the expression field
@@ -427,7 +435,7 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 		  StringBuffer sBuff = new StringBuffer(sText);
 
 		  // insert the metric variable ( i.e.: $ + metric index)
-		  final String sMetricIndex = signToPrepend + metricManager.getMetric(selection_index).getShortName() ; 
+		  final String sMetricIndex = signToPrepend + listOfMetrics.get(selection_index).getShortName() ; 
 		  sBuff.insert(iSelIndex, sMetricIndex );
 		  cbExpression.setText(sBuff.toString());
 
@@ -570,13 +578,8 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 	   * @param listOfMetrics
 	   */
 	  private void setMetrics(List<BaseMetric> listOfMetrics) {
-		  int nbMetrics = listOfMetrics.size();
-		  this.arrStrMetrics = new String[nbMetrics];
-		  for(int i=0;i<nbMetrics;i++) {
-			  BaseMetric metric = listOfMetrics.get(i);
-			  // laksono 2009.12.15: we need to use the shortname instead of the index
-			  this.arrStrMetrics[i] = metric.getShortName() + ": "+ metric.getDisplayName();
-		  }
+		  this.listOfMetrics = listOfMetrics;
+		  
 	  }
 	  
 	  /***

@@ -1,10 +1,9 @@
-package edu.rice.cs.hpc.data.experiment.metric.version3;
+package edu.rice.cs.hpc.data.db.version3;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
-import edu.rice.cs.hpc.data.db.DataSummary;
 import edu.rice.cs.hpc.data.experiment.BaseExperimentWithMetrics;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
@@ -159,7 +158,16 @@ public class MetricValueCollection3 implements IMetricValueCollection
 	@Override
 	public boolean hasMetrics(Scope scope) {
 		// trigger initialization
-		getValue(scope, 0);
+		Experiment exp = (Experiment) scope.getRootScope().getExperiment();
+		List<BaseMetric> list = exp.getMetricList();
+	
+		// TODO: hack -- grab the first metric for initialization purpose
+		// just to make sure we already initialized :-(
+		
+		if (values == null) {
+			getValue(scope, list.get(0).getIndex());
+		}
+
 		if (values != null)
 		{
 			return values.size()>0;

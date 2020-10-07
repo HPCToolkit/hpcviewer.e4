@@ -9,6 +9,7 @@ import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.widgets.Shell;
 
+import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
 import edu.rice.cs.hpc.data.experiment.extdata.IFilteredData;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
@@ -46,15 +47,15 @@ public class FilterRanks
 		 * call to set it redundant). If it's not, we wait to replace the
 		 * current filter with the new filter until we know we have to.
 		 */
-        IFilteredData filteredBaseData = data.getFilteredBaseData();
-        if (filteredBaseData == null) {
+        IBaseData filteredBaseData = data.getBaseData();
+        if (filteredBaseData == null || !(filteredBaseData instanceof IFilteredData)) {
         	filteredBaseData = data.createFilteredBaseData();
         }
         
-        FilterDialog dlgFilter = new FilterDialog(shell, filteredBaseData);
+        FilterDialog dlgFilter = new FilterDialog(shell, (IFilteredData) filteredBaseData);
 		
 		if (dlgFilter.open() == Dialog.OK){
-			data.setBaseData(filteredBaseData);
+			data.setBaseData((IFilteredData) filteredBaseData);
 			TraceEventData eventData = new TraceEventData(data, tracePart, filteredBaseData);
 			eventBroker.post(IConstants.TOPIC_FILTER_RANKS, eventData);
 		}

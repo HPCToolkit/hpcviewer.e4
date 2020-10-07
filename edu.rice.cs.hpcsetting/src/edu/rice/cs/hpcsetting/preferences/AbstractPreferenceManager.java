@@ -3,7 +3,6 @@ package edu.rice.cs.hpcsetting.preferences;
 import java.io.File;
 import java.net.URL;
 
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -68,7 +67,7 @@ public abstract class AbstractPreferenceManager
 		Location location = Platform.getInstanceLocation();
 		
 		String directory = location.getURL().getFile();
-		return directory + IPath.SEPARATOR + PREF_FILENAME;
+		return directory + PREF_FILENAME;
 	}
 
 	abstract public void setDefaults();

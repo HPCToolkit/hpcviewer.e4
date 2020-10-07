@@ -1,9 +1,12 @@
 package edu.rice.cs.hpctraceviewer.data.version2;
 
 import java.io.IOException;
+import java.util.List;
 
+import edu.rice.cs.hpc.data.db.IdTuple;
 import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
 import edu.rice.cs.hpc.data.experiment.extdata.IFileDB;
+import edu.rice.cs.hpc.data.experiment.extdata.IFileDB.IdTupleOption;
 import edu.rice.cs.hpc.data.util.Constants;
 
 /*********************************************************
@@ -18,6 +21,12 @@ public abstract class AbstractBaseData implements IBaseData
 
 	public AbstractBaseData(IFileDB baseDataFile){
 		this.baseDataFile = baseDataFile;
+	}
+	
+	
+	@Override
+	public List<IdTuple> getListOfIdTuples(IdTupleOption option) {
+		return baseDataFile.getIdTuple(option);
 	}
 	
 	/*
@@ -44,6 +53,12 @@ public abstract class AbstractBaseData implements IBaseData
 		return baseDataFile.getParallelismLevel() > 1;
 	}
 
+	@Override
+	public int getNumLevels() {
+		return baseDataFile.getParallelismLevel();
+	}
+
+	
 	/*
 	 * (non-Javadoc)
 	 * @see edu.rice.cs.hpc.data.experiment.extdata.IBaseData#dispose()

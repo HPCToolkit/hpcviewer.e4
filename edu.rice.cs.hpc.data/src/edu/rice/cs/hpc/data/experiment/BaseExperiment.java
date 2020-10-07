@@ -42,7 +42,7 @@ public abstract class BaseExperiment implements IExperiment
 	protected RootScope datacentricRootScope;
 	
 	/** version of the database **/
-	protected String version;
+	private short versionMajor, versionMinor;
 
 	protected IDatabaseRepresentation databaseRepresentation;
 	
@@ -121,18 +121,12 @@ public abstract class BaseExperiment implements IExperiment
 	
 	public int getMajorVersion()
 	{
-		if (this.version == null)
-			return 1;
-		int ip = this.version.indexOf('.');
-		return Integer.parseInt(this.version.substring(0, ip));
+		return versionMajor;
 	}
 
 	public int getMinorVersion() 
 	{
-		if (version == null) return 1;
-		
-		int ip = version.indexOf('.');
-		return Integer.parseInt(version.substring(ip+1));
+		return versionMinor;
 	}
 	
 
@@ -227,9 +221,19 @@ public abstract class BaseExperiment implements IExperiment
 	 * 
 	 * @param v : version of the database
 	 */
-	public void setVersion (String v) 
+	public void setVersion (String version) 
 	{
-		this.version = v;
+		if (version == null) {
+			// very old database
+			versionMajor = 1;
+			versionMinor = 0;
+		}
+		
+		int ip = version.indexOf('.');
+		if (ip>0) {
+			versionMajor = Short.parseShort(version.substring(0, ip));
+			versionMinor = Short.parseShort(version.substring(ip+1));
+		}
 	}
 
 

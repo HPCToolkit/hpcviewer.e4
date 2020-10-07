@@ -3,8 +3,11 @@ package edu.rice.cs.hpc.remote.data;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
+import edu.rice.cs.hpc.data.db.IdTuple;
 import edu.rice.cs.hpc.data.experiment.extdata.IFilteredData;
+import edu.rice.cs.hpc.data.experiment.extdata.IFileDB.IdTupleOption;
 import edu.rice.cs.hpc.data.trace.Filter;
 import edu.rice.cs.hpc.data.trace.FilterSet;
 import edu.rice.cs.hpc.data.trace.TraceName;
@@ -73,15 +76,7 @@ public class RemoteFilteredBaseData implements IFilteredData {
 	}
 
 
-	@Override
-	public String[] getListOfRanks() {
-		//This is already an O(n) operation so it's okay that we are recomputing the strings.
-		String[] list = new String[getNumberOfRanks()];
-		for (int i = 0; i < list.length; i++) {
-			list[i] = allNames[indexes[i]].toString();
-		}
-		return list;
-	}
+
 
 	@Override
 	public int getNumberOfRanks() {
@@ -116,6 +111,14 @@ public class RemoteFilteredBaseData implements IFilteredData {
 	public boolean isHybridRank() {
 		return allNames[0].toString().contains(".");
 	}
+	
+	@Override
+	public int getNumLevels() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	
 	@Override
 	public long getLong(long position) {
 		// TODO Auto-generated method stub
@@ -140,5 +143,10 @@ public class RemoteFilteredBaseData implements IFilteredData {
 	public long getMaxLoc(int rank) {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+	@Override
+	public List<IdTuple> getListOfIdTuples(IdTupleOption option) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

@@ -16,6 +16,7 @@ import org.eclipse.e4.ui.di.UISynchronize;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ProgressBar;
@@ -30,6 +31,7 @@ public class ToolControl
 {
 	private final UISynchronize sync;
 
+	private Canvas memory;
 	private ProgressBar progressBar;
 	private GobalProgressMonitor monitor;
 	private Label lblMessage;
@@ -43,13 +45,16 @@ public class ToolControl
 	public void createControls(Composite parent){
 		
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(parent);
-		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(parent);
+		GridLayoutFactory.fillDefaults().numColumns(3).applyTo(parent);
 
 		lblMessage = new Label(parent, SWT.NONE);
 
 		progressBar = new ProgressBar(parent, SWT.SMOOTH);
 		progressBar.setBounds(100, 10, 200, 20);
 
+		//memory = new Canvas(parent, 0);
+		//memory.setBounds(100, 10, 200, 20);
+		
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(lblMessage);
 		
 		monitor = new GobalProgressMonitor();

@@ -302,7 +302,7 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 			return;
 		
 		boolean []status = (boolean[]) dataEvent.data;
-		treeViewer.setColumnsStatus(status);
+		treeViewer.setColumnsStatus(getMetricManager(), status);
 	}
 	
 	@Override
@@ -571,7 +571,7 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (derivedMetricAction == null) {
-					derivedMetricAction = new UserDerivedMetric(getViewer().getRootScope(), eventBroker);
+					derivedMetricAction = new UserDerivedMetric(getViewer().getRootScope(), getMetricManager(), eventBroker);
 				}
 				derivedMetricAction.addNewMeric();
 			}
