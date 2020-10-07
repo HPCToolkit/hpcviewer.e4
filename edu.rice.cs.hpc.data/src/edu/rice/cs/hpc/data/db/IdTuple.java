@@ -17,6 +17,7 @@ public class IdTuple
 	public final static int TUPLE_KIND_SIZE   = 2;
 	public final static int TUPLE_INDEX_SIZE  = 8;
 	
+	private final static String STRING_EMPTY = null;
 
 	// -------------------------------------------
 	// variables
@@ -166,13 +167,16 @@ public class IdTuple
 			String str = "";
 			
 			for(int i=0; i<=level; i++) {
+				long lblIndex = index[i]; 
 				if (i==1) {
 					str += ".";
+				} else if (i>1) {
+					lblIndex = (long) (Math.pow(10, level-i) * index[i]);
 				}
-				str += index[i];
+				str += lblIndex;
 			}
 			return str;
 		}
-		return null;
+		return STRING_EMPTY;
 	}
 }
