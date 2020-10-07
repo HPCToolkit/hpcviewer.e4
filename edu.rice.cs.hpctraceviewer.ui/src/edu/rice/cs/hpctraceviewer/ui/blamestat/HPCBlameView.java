@@ -143,6 +143,31 @@ public class HPCBlameView extends    AbstractBaseItem
 		return adapter;
 	}
 	
+	
+	
+	private void listItemsAttributeBlame(
+			PaletteData palette, 
+			ColorTable colorTable,
+			TreeMap<Integer, Float> blameMap, 		
+			float totalBlame) {
+		
+		Set<Integer> set = blameMap.keySet();		
+		
+		for(Iterator<Integer> it = set.iterator(); it.hasNext(); ) {
+			final Integer pixel = it.next();
+			final Float count = blameMap.get(pixel);
+			final RGB rgb	 	= palette.getRGB(pixel);
+			
+			String proc = colorTable.getProcedureNameByColorHash(rgb.hashCode());
+			if (proc == null) {
+				proc = ColorTable.UNKNOWN_PROCNAME;
+			}
+			
+			listItems.add(new StatisticItem(proc, (float) 100.0 * count / totalBlame));
+		}
+	}
+	
+	
 	/**
 	 * Refresh the content of the viewer and reinitialize the content
 	 *  with the new data
@@ -153,27 +178,24 @@ public class HPCBlameView extends    AbstractBaseItem
 	 * @param totalPixels
 	 */
 	private void refresh(
-			PaletteData palette,
-			TreeMap<Integer, Float> mapKernelToBlame, 
-			ColorTable colorTable, 
-			int totalPixels) {
+			PaletteData palette, 
+			ColorTable colorTable,
+			TreeMap<Integer, Float> cpuBlameMap, 
+			float totalCpuBlame,
+			TreeMap<Integer, Float> gpuBlameMap, 
+			float totalGpuBlame) {
 		
 		this.colorTable = colorTable;
 		this.listItems  = new ArrayList<>();
+				
 		
-		Set<Integer> set = mapKernelToBlame.keySet();
+		listItems.add(new StatisticItem("CPU_BLAME", (float) 100));
+		listItemsAttributeBlame(palette, colorTable, cpuBlameMap, totalCpuBlame);
 		
-		for(Iterator<Integer> it = set.iterator(); it.hasNext(); ) {
-			final Integer pixel = it.next();
-			final Float count = mapKernelToBlame.get(pixel);
-			final RGB rgb	 	= palette.getRGB(pixel);
-			
-			String proc = colorTable.getProcedureNameByColorHash(rgb.hashCode());
-			if (proc == null) {
-				proc = ColorTable.UNKNOWN_PROCNAME;
-			}
-			listItems.add(new StatisticItem(proc, (float)100.0 * count / totalPixels));
-		}
+//		listItems.add(new StatisticItem("GPU_BLAME", (float) 100));
+//		listItemsAttributeBlame(palette, colorTable, gpuBlameMap, totalGpuBlame);
+		
+		
 		tableViewer.setInput(listItems);
 		tableViewer.refresh();
 		tableViewer.getTable().getColumn(1).pack();
@@ -206,7 +228,9 @@ public class HPCBlameView extends    AbstractBaseItem
 				return;
 			
 			SummaryData data = (SummaryData) obj;
-			refresh(data.palette, data.mapKernelToBlame, data.colorTable, data.totalPixels);
+			refresh(data.palette, data.colorTable, 
+					data.cpuBlameMap,  data.totalCpuBlame,
+					data.gpuBlameMap,  data.totalGpuBlame);
 		}
 	}
 

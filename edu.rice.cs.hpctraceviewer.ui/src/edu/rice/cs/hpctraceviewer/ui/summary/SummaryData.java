@@ -11,9 +11,15 @@ public class SummaryData
 {
 	public PaletteData palette;
 	public AbstractMap<Integer, Integer> mapPixelToCount;
-	public TreeMap<Integer, Float> mapKernelToBlame;
+	
 	public ColorTable colorTable;
 	public int totalPixels;
+	
+	public TreeMap<Integer, Float> cpuBlameMap;
+	public TreeMap<Integer, Float> gpuBlameMap;
+	
+	public float totalCpuBlame;
+	public float totalGpuBlame;
 	
 	
 	public SummaryData(
@@ -30,12 +36,20 @@ public class SummaryData
 
 	public SummaryData(
 			PaletteData palette, 
-			TreeMap<Integer, Float> mapKernelToBlame, 
 			ColorTable colorTable,
-			Integer totalPixels) {
+			TreeMap<Integer, Float> cpuBlameMap, 
+			float totalCpuBlame,
+			TreeMap<Integer, Float> gpuBlameMap, 
+			float totalGpuBlame) {
 		
 		this.palette = palette;
-		this.mapKernelToBlame = mapKernelToBlame;
 		this.colorTable = colorTable;
-		this.totalPixels = totalPixels;	}
+
+		this.cpuBlameMap = cpuBlameMap;
+		this.totalCpuBlame = totalCpuBlame;
+		
+		this.gpuBlameMap = gpuBlameMap;
+		this.totalGpuBlame = totalGpuBlame;
+
+		}
 }

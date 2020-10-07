@@ -1,8 +1,11 @@
 package edu.rice.cs.hpctraceviewer.ui.summary;
 
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+
 
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.operations.IOperationHistoryListener;
@@ -22,6 +25,12 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
+
+
+import edu.rice.cs.hpc.data.db.IdTuple;
+import edu.rice.cs.hpc.data.db.IdTupleType;
+import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
+import edu.rice.cs.hpc.data.experiment.extdata.IFileDB.IdTupleOption;
 
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.context.BaseTraceContext;
@@ -43,14 +52,23 @@ import edu.rice.cs.hpctraceviewer.data.util.Constants;
  *
  ******************************************************************/
 public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationHistoryListener {
+	private static final boolean True = false;
 	private final IEventBroker eventBroker;
 	private final ITracePart tracePart;
 
 	private SpaceTimeDataController dataTraces = null;
 	private TreeMap<Integer /* pixel */, Integer /* percent */> mapPixelToPercent;
-	private TreeMap<Integer /* callstack */, TreeMap<Integer /* pixel */, Float /* percent */ >> mapKernelToBlame;
+	
+	
+	private TreeMap<Integer /* callstack_level */, TreeMap<Integer /* pixel */, Float /* percent */ >> cpuBlameMap;
+	private TreeMap<Integer /* callstack_level */, TreeMap<Integer /* pixel */, Float /* percent */ >> gpuBlameMap;
+	
+	private TreeMap<Integer /* callstack_level */, Float> cpuTotalBlame;
+	private TreeMap<Integer /* callstack_level */, Float> gpuTotalBlame;
+	
 	private int totPixels;
 	private ImageData detailData;
+//	private final int whitePixel;
 	
 	/**********************************
 	 * Construct a summary canvas without background nor scrollbar
@@ -63,7 +81,12 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 		this.eventBroker = eventBroker;
 		this.tracePart = tracePart;
 		tracePart.getOperationHistory().addOperationHistoryListener(this);
-		this.mapKernelToBlame = new TreeMap<Integer, TreeMap<Integer, Float>>();
+		this.cpuBlameMap = new TreeMap<Integer, TreeMap<Integer, Float>>();
+		this.gpuBlameMap = new TreeMap<Integer, TreeMap<Integer, Float>>();
+		this.cpuTotalBlame = new TreeMap<Integer, Float>();
+		this.gpuTotalBlame = new TreeMap<Integer, Float>();
+		
+//		this.whitePixel = detailData.palette.getPixel(new RGB(255,255,255));
 	}
 
 	@Override
@@ -110,11 +133,13 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 		}
 	}
 
-	private void putBlame(Integer depth, Integer pixel, Float blame) {
+	private void putBlameCpu(Integer depth, Integer pixel, Float blame) {
 
-		if (mapKernelToBlame.containsKey(depth)) {
-			TreeMap<Integer, Float> cur_map = mapKernelToBlame.get(depth);
+		if (cpuBlameMap.containsKey(depth)) {
+			TreeMap<Integer, Float> cur_map = cpuBlameMap.get(depth);
 
+			cpuTotalBlame.put(depth, cpuTotalBlame.get(depth) + blame);
+			
 			if (cur_map.containsKey(pixel)) {
 				cur_map.put(pixel, cur_map.get(pixel) + blame);
 			} else {
@@ -123,6 +148,29 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 		}
 	}
 
+	private void putBlameGpu(Integer depth, Integer pixel, Float blame) {
+
+		if (gpuBlameMap.containsKey(depth)) {
+			TreeMap<Integer, Float> cur_map = gpuBlameMap.get(depth);
+
+			gpuTotalBlame.put(depth, gpuTotalBlame.get(depth) + blame);
+			
+			if (cur_map.containsKey(pixel)) {
+				cur_map.put(pixel, cur_map.get(pixel) + blame);
+			} else {
+				cur_map.put(pixel, blame);
+			}
+		}
+	}
+	
+	private void incrementPixelCount(TreeMap<Integer, Integer> mapPixelToCount, Integer pixelValue) {
+		Integer count = mapPixelToCount.get(pixelValue);
+		if (count != null)
+			mapPixelToCount.put(pixelValue, count + 1);
+		else
+			mapPixelToCount.put(pixelValue, 1);
+	}
+	
 	/*****
 	 * rebuffers the data in the summary time canvas and then asks receiver to paint
 	 * it again
@@ -160,17 +208,29 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 
 		mapPixelToPercent = new TreeMap<Integer, Integer>();
 
+		// Blame-Shift init table for the current callstack level
 		final ImageTraceAttributes attributes = dataTraces.getAttributes();
 		Integer cs_depth = attributes.getDepth();
-		Boolean first_time = false;
-
-		if (mapKernelToBlame.containsKey(cs_depth) == false && dataTraces.isHomeView() == true) {
-			first_time = true;
-			mapKernelToBlame.put(cs_depth, new TreeMap<Integer, Float>());
+		
+        final IBaseData traceData = dataTraces.getBaseData();
+        
+        // get the list of id tuples
+		List<IdTuple> listTuples = traceData.getListOfIdTuples(IdTupleOption.BRIEF);
+		
+		
+		if (cpuBlameMap.containsKey(cs_depth) == false ) {//&& dataTraces.isHomeView() == true) {
+			cpuBlameMap.put(cs_depth, new TreeMap<Integer, Float>());
+			gpuBlameMap.put(cs_depth, new TreeMap<Integer, Float>());
+			
+			cpuTotalBlame.put(cs_depth, (float) 0);
+			gpuTotalBlame.put(cs_depth, (float) 0);
+		}else {
+			cpuBlameMap.get(cs_depth).clear();
+			gpuBlameMap.get(cs_depth).clear();
+			
+			cpuTotalBlame.put(cs_depth, (float) 0);
+			gpuTotalBlame.put(cs_depth, (float) 0);
 		}
-
-		Integer lastPixel = 0;
-		int whitePixel = detailData.palette.getPixel(new RGB(255,255,255));
 
 
 		// ---------------------------------------------------------------------------
@@ -183,61 +243,83 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 			// use tree map to sort the key of color map
 			// without sort, it can be confusing
 			// ---------------------------------------------------------------------------
-			TreeMap<Integer, Integer> mapPixelToCount = new TreeMap<Integer, Integer>();
-			Boolean cpu_active = false;
-			Boolean gpu_active = false;
-
-			for (int y = 0; y < detailData.height; ++y) {
-				int process = attributes.convertPixelToRank(y);
-				int pixelValue = detailData.getPixel(x, y);
-
-				Integer count = mapPixelToCount.get(pixelValue);
+			TreeMap<Integer, Integer> cpuPixelCount = new TreeMap<Integer, Integer>();
+			TreeMap<Integer, Integer> gpuPixelCount = new TreeMap<Integer, Integer>();
+			
+			Integer cpu_active_count = 0;
+			Integer gpu_active_count = 0;
+			Integer gpu_idle_count = 0;
+			Integer cpu_idle_count = 0;
+						
+			for (int y = 0; y < detailData.height; ++y) { // One iter per trace line
 								
-				if (pixelValue != whitePixel) {
-					if (process == 0) {
-						cpu_active = true;
-					} else {
-						gpu_active = true;
+				// get the profile of the current pixel
+				int process = attributes.convertTraceLineToRank(y);
+				
+				int pixelValue = detailData.getPixel(x, y);
+				
+				
+				// get the profile's id tuple
+				IdTuple tag = listTuples.get(process);
+				// check if the profile is a thread
+				boolean isCpuThread = tag.hasKind(IdTupleType.KIND_THREAD);
+				RGB rgb = detailData.palette.getRGB(pixelValue);
+				String proc_name = getColorTable().getProcedureNameByColorHash(rgb.hashCode());
+							
+				
+				if (isCpuThread) { // cpu thread
+					if (proc_name.equals("[No activity]") || proc_name.equals("<no activity>")) {
+						cpu_idle_count = cpu_idle_count + 1;
+					}else {
+						cpu_active_count = cpu_active_count + 1;
+						incrementPixelCount(cpuPixelCount, pixelValue);
 					}
-					lastPixel = pixelValue;
-				}
-
-				if (count != null)
-					mapPixelToCount.put(pixelValue, count + 1);
-				else
-					mapPixelToCount.put(pixelValue, 1);
+					
+				} else {		// gpu thread
+					if (proc_name.equals("[No activity]") || proc_name.equals("<no activity>")) {
+						gpu_idle_count = gpu_idle_count + 1;
+					}else if(proc_name.equals("<gpu sync>")){
+						gpu_idle_count = gpu_idle_count + 1;
+						incrementPixelCount(gpuPixelCount, pixelValue);
+					}else {
+						gpu_active_count = gpu_active_count + 1;
+						incrementPixelCount(gpuPixelCount, pixelValue);
+					}
+				}	
+				
 			}
-
-			Set<Integer> set = mapPixelToCount.keySet();
-			int yOffset = viewHeight;
-			int h = 0;
-
+			
 			// Blame analysis
-			if (first_time) {
-				if (cpu_active == true && gpu_active == false) {
-					// Blame CPU
-					putBlame(cs_depth, lastPixel, (float) 1);
-
-				} else if (cpu_active == false && gpu_active == true) {
-					// Blame GPU
-					for (Iterator<Integer> it = set.iterator(); it.hasNext();) {
-						final Integer pixel = it.next();
-						putBlame(cs_depth, pixel, (float) (1 / mapPixelToCount.size()));
-					}
+			if (cpu_active_count > 0 && gpu_active_count == 0 && gpu_idle_count != 0) {
+				// Blame CPU
+				for(Map.Entry<Integer,Integer> entry : cpuPixelCount.entrySet()) {					
+					putBlameCpu(cs_depth, entry.getKey(), (float) entry.getValue() / cpu_active_count);					
 				}
+									
+			} else if (gpu_active_count > 0 && cpu_active_count == 0 && cpu_idle_count != 0) {
+				// Blame GPU
+//				for(Map.Entry<Integer,Integer> entry : gpuPixelCount.entrySet()) {					
+//					putBlameGpu(cs_depth, entry.getKey(), (float) entry.getValue() / gpu_active_count);						
+//				}
 			}
 
+			
 			// ---------------------------------------------------------------------------
 			// draw the line of a specific color with a specific length from bottom to the
 			// top
 			// note: the coordinates 0,0 starts from the top-left corner !
 			// ---------------------------------------------------------------------------
+			cpuPixelCount.putAll(gpuPixelCount);
+			Set<Integer> set = cpuPixelCount.keySet();
+			int yOffset = viewHeight;
+			int h = 0;
+			
 			for (Iterator<Integer> it = set.iterator(); it.hasNext();) {
 				final Integer pixel = it.next();
 				final RGB rgb = detailData.palette.getRGB(pixel);
 
 				final Color c = new Color(getDisplay(), rgb);
-				final Integer numCounts = mapPixelToCount.get(pixel);
+				final Integer numCounts = cpuPixelCount.get(pixel);
 
 				final int height = (int) Math.ceil(numCounts * yScale);
 
@@ -340,9 +422,11 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 		eventBroker.post(IConstants.TOPIC_STATISTICS, data);
 
 		
-		if (mapKernelToBlame.get(cs_depth) != null) {
-			data = new SummaryData(detailData.palette, mapKernelToBlame.get(cs_depth), getColorTable(), detailData.width);
-			eventBroker.post(IConstants.TOPIC_BLAME, data);	
+		if (cpuBlameMap.get(cs_depth) != null) {
+			data = new SummaryData(	detailData.palette, getColorTable(), 
+									cpuBlameMap.get(cs_depth), cpuTotalBlame.get(cs_depth),
+									gpuBlameMap.get(cs_depth), gpuTotalBlame.get(cs_depth));
+			eventBroker.post(IConstants.TOPIC_BLAME, data);				
 		}
 	}
 
