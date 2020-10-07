@@ -2,6 +2,9 @@ package edu.rice.cs.hpc.data.trace;
 
 import java.util.ArrayList;
 
+import edu.rice.cs.hpc.data.db.IdTuple;
+import edu.rice.cs.hpc.data.db.IdTupleType;
+
 public class FilterSet {
 	private ArrayList<Filter> patterns;
 	private boolean excludeMatched; //i.e. do we hide traces that match the pattern
@@ -26,13 +29,11 @@ public class FilterSet {
 		return !excludeMatched;
 	}
 	//TODO: We should probably use TraceName instead
-	public boolean includes(String name){
-		String[] split = name.split("\\.");
-		int process = Integer.parseInt(split[0]);
-		int thread = 0;
-		if (split.length > 1) {
-			thread = Integer.parseInt(split[1]);
-		}
+	public boolean includes(IdTuple idTuple){
+
+		int process = (int) idTuple.getIndex(IdTupleType.KIND_RANK);
+		int thread  = (int) idTuple.getIndex(IdTupleType.KIND_THREAD);
+
 		return include(new TraceName(process, thread));
 	}
 	

@@ -48,27 +48,28 @@ public class FilteredBaseData extends AbstractBaseData implements IFilteredData 
 		if (baseDataFile == null)
 			throw new RuntimeException("Fatal error: cannot find data.");
 		
-		String data[] = baseDataFile.getRankLabels();
+		List<IdTuple> listIdTuples = baseDataFile.getIdTuple(IdTupleOption.BRIEF);
 
 		filteredIdTuples = null;
 
 		ArrayList<Integer> lindexes = new ArrayList<Integer>();
 
 		if (filter.hasAnyFilters()) {
-			for (int i = 0; i < data.length; i++) {
-				if (filter.includes(data[i]))
+			for (int i = 0; i < listIdTuples.size(); i++) {
+				if (filter.includes(listIdTuples.get(i)))
 					lindexes.add(i);
 			}
 			//Convert ArrayList to array
 			indexes = new int[lindexes.size()];
+
 			for (int i = 0; i < indexes.length; i++) {
 				indexes[i] = lindexes.get(i);
 			}
 		} else {
 			// no glob pattern to filter
 			// warning: not optimized code
-			indexes = new int[data.length];
-			for(int i=0; i<data.length; i++) {
+			indexes = new int[listIdTuples.size()];
+			for(int i=0; i<listIdTuples.size(); i++) {
 				indexes[i] = i;
 			}
 		}

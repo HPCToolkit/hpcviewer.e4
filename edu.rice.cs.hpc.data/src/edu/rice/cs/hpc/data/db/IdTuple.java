@@ -62,6 +62,25 @@ public class IdTuple
 	// API Methods
 	// -------------------------------------------
 
+	/****
+	 * Get the index in this id tuple for a certain type.
+	 * Example: If id tuple is (rank 0, thread 1), and calling:
+	 * <pre>
+	 * getIndex(IdTupleType.KIND_RANK) will return 0
+	 * getIndex(IdTupleType.KIND_THREAD) returns 1
+	 * </pre>
+	 * @param type {@code short} the type of id tuple. Must be one of IdTupleType.KIND_*
+	 * 
+	 * @return {@code long} the index of the id tuple. Zero if no type is found.
+	 */
+	public long getIndex(short type) {
+		for (int i=0; i<length; i++) {
+			if (kind[i] == type) {
+				return index[i];
+			}
+		}
+		return 0;
+	}
 	
 	public int compareTo(IdTuple another) {
 		int minLength = Math.min(length, another.length);
