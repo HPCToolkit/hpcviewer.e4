@@ -56,7 +56,7 @@ public class FilteredBaseData extends AbstractBaseData implements IFilteredData 
 
 		if (filter.hasAnyFilters()) {
 			for (int i = 0; i < listIdTuples.size(); i++) {
-				if (filter.includes(listIdTuples.get(i)))
+				if (filter.include(listIdTuples.get(i)))
 					lindexes.add(i);
 			}
 			//Convert ArrayList to array

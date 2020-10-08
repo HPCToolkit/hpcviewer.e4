@@ -20,6 +20,13 @@ public interface IBaseData
 	 */
 	public List<IdTuple> getListOfIdTuples(IdTupleOption option);
 	
+
+	/**
+	 * Retrieve the list of types of id tuples
+	 * @return
+	 */
+	public List<Short>   getIdTupleTypes();
+
 	/****
 	 * retrieve the number of ranks 
 	 * @return

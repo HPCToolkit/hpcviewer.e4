@@ -2,98 +2,95 @@ package edu.rice.cs.hpc.data.trace;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import edu.rice.cs.hpc.data.db.IdTuple;
 
 
 public class Filter {
-	public static final String PROCESS_THREAD_SEPARATOR = ",";
-	private final Range process;
-	private final Range thread;
-	
-	public Filter(String strForm){
-		String[] pieces = formattedSplit(strForm);
-		process = new Range (pieces[0]);
-		thread = new Range(pieces[1]);
 
-	}
+	private final List<Short> listTypes;
+	private final Range []ranks;
 	
-	/**
-	 * Yeah, this is kind of obnoxious, but it's mostly because Java doesn't include
-	 * blank strings in the split, even though they should be there.. So we replace blank segments with x
-	 */
-	private String[] formattedSplit(String strForm) {
-		String fixing = strForm;
+	public Filter(List<Short> listTypes, String[] patterns){
+		assert(listTypes.size() == patterns.length);
 		
-		//Turns something like ,12 into x,12 (which becomes everything,12)
-		if (fixing.startsWith(PROCESS_THREAD_SEPARATOR)) 
-			fixing = "x" + fixing;
-		//Turns something like 12 into 12$...
-		if (!fixing.contains(PROCESS_THREAD_SEPARATOR))
-			fixing = fixing + PROCESS_THREAD_SEPARATOR;
-		//...which becomes 12$x and later 12$everything 
-		if (fixing.endsWith(PROCESS_THREAD_SEPARATOR))
-			fixing = fixing + "x";
-		
-		String[] pieces = fixing.split(Pattern.quote(PROCESS_THREAD_SEPARATOR));
-		assert pieces.length == 2;
-		for (int i = 0; i < pieces.length; i++) {
-			//Turns something like :10 into x:10 (which becomes start:10) or
-			if (pieces[i].charAt(0)==':')
-				pieces[i] = "x" + pieces[i];
+		this.listTypes = listTypes;
+		ranks = new Range[patterns.length];
+		for (int i=0; i<patterns.length; i++) {
+			String pattern = patterns[i].trim();
+			if (pattern == null || pattern.length()==0)
+				pattern = "x";
 			
-			//Turns something like 20: into 20:x which becomes 20:end
-			if (pieces[i].endsWith(":"))
-				pieces[i] = pieces[i] + "x";
+			ranks[i] = new Range(patterns[i]);
 		}
-				
-		return pieces;
 	}
 
-	Filter(Range process, Range thread){
-		this.process = process;
-		this.thread = thread;
-	}
-	boolean matches(TraceName name){
-		return matches(name.process, name.thread);
-	}
-	boolean matches (int processNum, int threadNum){
-		return process.matches(processNum) && thread.matches(threadNum);
+	/****
+	 * Check if an id tuple match the filter or not
+	 * @param idTuple
+	 * @return
+	 */
+	boolean matches (IdTuple idTuple) {
+		boolean match = true;
+		
+		// for each kind in id tuple, we need to check if there is filter that match
+		for(int i=0; i<idTuple.length; i++) {
+			
+			for (int j=0; j<listTypes.size(); j++) {
+				if (idTuple.kind[i] == listTypes.get(j)) {
+					match = match && ranks[j].matches(idTuple.index[i]);
+					if (!match)
+						return false;
+				}
+			}
+		}
+		return match;
 	}
 	@Override
 	public String toString() {
-		return process + PROCESS_THREAD_SEPARATOR + thread;
+		return Arrays.toString(ranks);
 	}
+	
 	//Unit test:
 	public static void main(String[] args){
 		String[] patterns = {"3:7:2,", ",1" ,"1::2,2:4:2", "1:100", ":100", "100:,4"};
-String[] messages = {"should match all threads of ranks 3, 5, and 7.",
-		"will match thread 1 of all processes.",
-		"will match 1.2, 1.4, 3.2, 3.4, 5.2 ...",
-		"will match all threads of ranks 1 to 100",
-		"will match all threads of ranks <=100",
+		String[] messages = {"should match all threads of ranks 3, 5, and 7.",
+				"will match thread 1 of all processes.",
+				"will match 1.2, 1.4, 3.2, 3.4, 5.2 ...",
+				"will match all threads of ranks 1 to 100",
+				"will match all threads of ranks <=100",
 		"will match thread 4 of ranks >= 100"};
-TraceName[][] tests = {
-		{ new TraceName(2,1), new TraceName(3,2), new TraceName(4,7), new TraceName(10,10)},
-		{ new TraceName(0,1), new TraceName(10,2), new TraceName(999,1), new TraceName(1,7)},
-		{ new TraceName(5,2), new TraceName(3,4), new TraceName(1,1), new TraceName(2,2)},
-		{ new TraceName(0,2), new TraceName(101,4), new TraceName(100,1), new TraceName(201,2)},
-		{ new TraceName(0,2), new TraceName(101,4), new TraceName(100,1), new TraceName(201,2)},
-		{ new TraceName(0,4), new TraceName(101,4), new TraceName(100,1), new TraceName(201,2)}
+
+		TraceName[][] tests = {
+				{ new TraceName(2,1), new TraceName(3,2), new TraceName(4,7), new TraceName(10,10)},
+				{ new TraceName(0,1), new TraceName(10,2), new TraceName(999,1), new TraceName(1,7)},
+				{ new TraceName(5,2), new TraceName(3,4), new TraceName(1,1), new TraceName(2,2)},
+				{ new TraceName(0,2), new TraceName(101,4), new TraceName(100,1), new TraceName(201,2)},
+				{ new TraceName(0,2), new TraceName(101,4), new TraceName(100,1), new TraceName(201,2)},
+				{ new TraceName(0,4), new TraceName(101,4), new TraceName(100,1), new TraceName(201,2)}
 		};
-	for (int i = 0; i < patterns.length; i++) {
-		Filter f = new Filter(patterns[i]);
-		System.out.println(patterns[i] + " decoded to " + f.toString() + " in full form");
-		System.out.println(messages[i]);
-		TraceName[] theseTests = tests[i];
-		for (int j = 0; j < theseTests.length; j++) {
-			System.out.println(theseTests[j] + (f.matches(theseTests[j])? ": matches" : ": does not match."));
+		
+		List<Short> listTypes = new ArrayList<>();
+		listTypes.add((short) 1);
+		listTypes.add((short) 2);
+		
+		for (int i = 0; i < patterns.length; i++) {
+			Filter f = new Filter(listTypes, patterns);
+			System.out.println(patterns[i] + " decoded to " + f.toString() + " in full form");
+			System.out.println(messages[i]);
+			TraceName[] theseTests = tests[i];
+			for (int j = 0; j < theseTests.length; j++) {
+				//System.out.println(theseTests[j] + (f.matches(theseTests[j])? ": matches" : ": does not match."));
+			}
 		}
-	}
 	}
 
 	public void serializeSelfToStream(DataOutputStream stream) throws IOException {
-		process.serializeSelfToStream(stream);
-		thread.serializeSelfToStream(stream);
+		assert(false);
+		//process.serializeSelfToStream(stream);
+		//thread.serializeSelfToStream(stream);
 	}
 }
 
@@ -148,10 +145,10 @@ class Range{
 		}
 
 	}
-	boolean matches (int i){
-		if (i < min) return false;
-		if (i > max) return false;
-		return ((i - min) % stride) == 0;
+	boolean matches (long index){
+		if (index < min) return false;
+		if (index > max) return false;
+		return ((index - min) % stride) == 0;
 	}
 	@Override
 	public String toString() {

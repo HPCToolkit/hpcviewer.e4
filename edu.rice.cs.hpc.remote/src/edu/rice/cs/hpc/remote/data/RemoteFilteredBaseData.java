@@ -42,11 +42,11 @@ public class RemoteFilteredBaseData implements IFilteredData {
 	private void applyFilter() {
 		ArrayList<Integer> lindexes = new ArrayList<Integer>();
 
-	
+		/*
 		for (int i = 0; i < allNames.length; i++) {
 			if (filter.include(allNames[i]))
 				lindexes.add(i);
-		}
+		}*/
 
 		indexes = new int[lindexes.size()];
 		for (int i = 0; i < indexes.length; i++) {
@@ -146,6 +146,11 @@ public class RemoteFilteredBaseData implements IFilteredData {
 	}
 	@Override
 	public List<IdTuple> getListOfIdTuples(IdTupleOption option) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public List<Short> getIdTupleTypes() {
 		// TODO Auto-generated method stub
 		return null;
 	}

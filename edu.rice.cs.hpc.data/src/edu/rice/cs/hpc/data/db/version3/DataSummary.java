@@ -59,10 +59,10 @@ public class DataSummary extends DataCommon
 
 	/** Number of parallelism level or number of levels in hierarchy */
 	private int numLevels;
-	private int numShortLevels;
 	
 	private double[] labels;
 	private String[] strLabels;
+	private List<Short> idTupleTypes;
 
 	// --------------------------------------------------------------------
 	// Public methods
@@ -172,6 +172,15 @@ public class DataSummary extends DataCommon
 		default:
 			return listIdTupleShort;
 		}
+	}
+	
+	
+	/****
+	 * retrieve the list of id tuples types in this database
+	 * @return {@code List} of id tuple types (Short)
+	 */
+	public List<Short> getIdTupleTypes() {
+		return idTupleTypes;
 	}
 	
 	
@@ -340,7 +349,7 @@ public class DataSummary extends DataCommon
 	 */
 	public int getMaxLevels() {
 		if (optimized)
-			return numShortLevels;
+			return idTupleTypes.size();
 		
 		return numLevels;
 	}
@@ -515,6 +524,7 @@ public class DataSummary extends DataCommon
 		});
 		
 		mapProfileToOrder = new HashMap<Integer, Integer>(listIdTuple.size());
+		idTupleTypes = new ArrayList<>();
 		
 		// -----------------------------------------
 		// 3. a. compute the brief short version of id tuples
@@ -546,15 +556,18 @@ public class DataSummary extends DataCommon
 			for(int j=0; j<idt.length; j++) {
 				if (mapLevelToSkip.get(j) == null) {
 					// we should keep this level
-					shortVersion.kind[level]  = idt.kind[j];
+					short kind = idt.kind[j];
+					shortVersion.kind[level]  = kind;
 					shortVersion.index[level] = idt.index[j];
 					level++;
+					
+					if (!idTupleTypes.contains(kind))
+						idTupleTypes.add(kind);
 				}
 			}
 			listIdTupleShort.add(shortVersion);
 			
 			numLevels = Math.max(numLevels, idt.length);
-			numShortLevels = Math.max(numShortLevels, totLevels);
 		}
 	}
 

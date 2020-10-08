@@ -29,6 +29,11 @@ public abstract class AbstractBaseData implements IBaseData
 		return baseDataFile.getIdTuple(option);
 	}
 	
+	@Override
+	public List<Short>   getIdTupleTypes() {
+		return baseDataFile.getIdTupleTypes();
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * @see edu.rice.cs.hpc.data.experiment.extdata.IBaseData#getLong(long)

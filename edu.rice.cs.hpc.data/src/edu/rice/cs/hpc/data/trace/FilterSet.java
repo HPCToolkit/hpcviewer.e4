@@ -3,7 +3,6 @@ package edu.rice.cs.hpc.data.trace;
 import java.util.ArrayList;
 
 import edu.rice.cs.hpc.data.db.IdTuple;
-import edu.rice.cs.hpc.data.db.IdTupleType;
 
 public class FilterSet {
 	private ArrayList<Filter> patterns;
@@ -28,20 +27,13 @@ public class FilterSet {
 	public boolean isShownMode() {
 		return !excludeMatched;
 	}
-	//TODO: We should probably use TraceName instead
-	public boolean includes(IdTuple idTuple){
 
-		int process = (int) idTuple.getIndex(IdTupleType.KIND_RANK);
-		int thread  = (int) idTuple.getIndex(IdTupleType.KIND_THREAD);
-
-		return include(new TraceName(process, thread));
-	}
-	
 	public ArrayList<Filter> getPatterns()
 	{
 		return patterns;
 	}
-	public boolean include(TraceName traceName) {
+	
+	public boolean include(IdTuple idTuple) {
 		
 		if (excludeMatched) {
 			boolean matchedSoFar = true;
@@ -54,7 +46,7 @@ public class FilterSet {
 			 * excludeMatched
 			 */
 			for (Filter filter : patterns) {
-				matchedSoFar &= (filter.matches(traceName.process, traceName.thread)^excludeMatched);
+				matchedSoFar &= (filter.matches(idTuple)^excludeMatched);
 			}
 			return matchedSoFar;
 		}
@@ -62,7 +54,7 @@ public class FilterSet {
 		
 		boolean matchedSoFar = false;
 		for (Filter filter : patterns) {
-			matchedSoFar |= (filter.matches(traceName.process, traceName.thread));
+			matchedSoFar |= (filter.matches(idTuple));
 		}
 		return matchedSoFar;
 	}
