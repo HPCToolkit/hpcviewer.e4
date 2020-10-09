@@ -43,6 +43,8 @@ public class Filter {
 					match = match && ranks[j].matches(idTuple.index[i]);
 					if (!match)
 						return false;
+					else 
+						break;
 				}
 			}
 		}
@@ -139,7 +141,7 @@ class Range{
 	private static int specialParse(String string, int defaultValue) {
 		if (string.length()==0) return defaultValue;
 		try{
-			return Integer.parseInt(string);
+			return Integer.parseInt(string.trim());
 		} catch (NumberFormatException e){
 			return defaultValue;
 		}

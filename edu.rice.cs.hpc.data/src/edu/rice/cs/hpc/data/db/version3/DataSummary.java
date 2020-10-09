@@ -310,10 +310,10 @@ public class DataSummary extends DataCommon
 	 */
 	public String[] getStringLabelIdTuples() {
 		if (strLabels == null) {
-			strLabels = new String[listIdTuple.size()];
+			strLabels = new String[listIdTupleShort.size()];
 			
-			for(int i=0; i<listIdTuple.size(); i++) {
-				IdTuple idt  = listIdTuple.get(i);
+			for(int i=0; i<listIdTupleShort.size(); i++) {
+				IdTuple idt  = listIdTupleShort.get(i);
 				strLabels[i] = idt.toString();
 			}		
 		}

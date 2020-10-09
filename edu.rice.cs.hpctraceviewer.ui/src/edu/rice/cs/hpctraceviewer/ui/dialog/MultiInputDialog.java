@@ -65,10 +65,12 @@ public class MultiInputDialog extends Dialog
 		Label lblMessage = new Label(composite, SWT.NONE);
 		lblMessage.setText(message);
 		
+		// -------------------------------------------------------------------
+		// entry area
+		// -------------------------------------------------------------------
+		
 		Group fieldArea = new Group(composite, SWT.SHADOW_IN);
-		
 		entries = new Combo[prompts.length];
-		
 		for(int i=0; i<prompts.length; i++) {
 			
 			String text = prompts[i];
