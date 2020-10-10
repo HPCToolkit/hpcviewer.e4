@@ -1,14 +1,11 @@
 package edu.rice.cs.hpc.remote.data;
 
 import java.io.DataOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import edu.rice.cs.hpc.data.db.IdTuple;
 import edu.rice.cs.hpc.data.experiment.extdata.IFilteredData;
 import edu.rice.cs.hpc.data.experiment.extdata.IFileDB.IdTupleOption;
-import edu.rice.cs.hpc.data.trace.Filter;
 import edu.rice.cs.hpc.data.trace.FilterSet;
 import edu.rice.cs.hpc.data.trace.TraceName;
 
@@ -17,65 +14,18 @@ import edu.rice.cs.hpc.data.trace.TraceName;
 
 public class RemoteFilteredBaseData implements IFilteredData {
 
-	private static final int FILTER = 0x464C5452;
 	private final TraceName[] allNames;
 	private int[] indexes;
-	private final DataOutputStream server;
 	FilterSet filter;
 	
 	public RemoteFilteredBaseData(TraceName[] names, int _headerSz, DataOutputStream server) {
 		allNames = names;
-		this.server = server;
 		filter = new FilterSet();
 		indexes = new int[names.length];
 		for (int i = 0; i < indexes.length; i++) {
 			indexes[i] = i;
 		}
 	}
-	@Override
-	public void setFilter(FilterSet filter) {
-		this.filter = filter;
-		applyFilter();
-	}
-
-
-	private void applyFilter() {
-		ArrayList<Integer> lindexes = new ArrayList<Integer>();
-
-		/*
-		for (int i = 0; i < allNames.length; i++) {
-			if (filter.include(allNames[i]))
-				lindexes.add(i);
-		}*/
-
-		indexes = new int[lindexes.size()];
-		for (int i = 0; i < indexes.length; i++) {
-			indexes[i] = lindexes.get(i);
-		}
-
-		try {
-			server.writeInt(FILTER);
-			ArrayList<Filter> pat = filter.getPatterns();
-			server.write(0);
-			server.write(filter.isShownMode()? 0 : 1);
-			server.writeShort(pat.size());
-			for (Filter filter : pat) {
-				filter.serializeSelfToStream(server);
-			}
-			server.flush();
-
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-	}
-	@Override
-	public FilterSet getFilter() {
-		return filter;
-	}
-
-
 
 
 	@Override
@@ -151,6 +101,25 @@ public class RemoteFilteredBaseData implements IFilteredData {
 	}
 	@Override
 	public List<Short> getIdTupleTypes() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public void setListOfIdTuples(List<IdTuple> listIdTuples) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void setIncludeIndex(List<Integer> listOfIncludedIndex) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public List<IdTuple> getDenseListIdTuple(IdTupleOption option) {
 		// TODO Auto-generated method stub
 		return null;
 	}

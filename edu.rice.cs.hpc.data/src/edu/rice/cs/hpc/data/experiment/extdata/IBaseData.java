@@ -19,7 +19,17 @@ public interface IBaseData
 	 * @return {@code List<IdTuple>}
 	 */
 	public List<IdTuple> getListOfIdTuples(IdTupleOption option);
-	
+
+	/***
+	 * Set new list of id tuples to replace the existing one.
+	 * This method is useful to filter a list of id tuples and
+	 * replace the existing one.
+	 * <p>
+	 * TODO: Should be moved to IFilteredData interface
+	 * @param listIdTuples {@code List<IdTuple>}
+	 */
+	void setListOfIdTuples(List<IdTuple> listIdTuples);
+
 
 	/**
 	 * Retrieve the list of types of id tuples

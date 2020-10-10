@@ -6,16 +6,21 @@ import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.services.IServiceConstants;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.widgets.Shell;
 
+import edu.rice.cs.hpc.data.db.IdTuple;
 import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
+import edu.rice.cs.hpc.data.experiment.extdata.IFileDB.IdTupleOption;
 import edu.rice.cs.hpc.data.experiment.extdata.IFilteredData;
+import edu.rice.cs.hpc.filter.dialog.FilterDataItem;
+import edu.rice.cs.hpc.filter.dialog.ThreadFilterDialog;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
-import edu.rice.cs.hpctraceviewer.ui.dialog.FilterDialog;
 import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -51,10 +56,41 @@ public class FilterRanks
         if (filteredBaseData == null || !(filteredBaseData instanceof IFilteredData)) {
         	filteredBaseData = data.createFilteredBaseData();
         }
+        List<IdTuple> listDenseIds = ((IFilteredData)filteredBaseData).getDenseListIdTuple(IdTupleOption.BRIEF);
+        List<IdTuple> listIds = filteredBaseData.getListOfIdTuples(IdTupleOption.BRIEF);
         
-        FilterDialog dlgFilter = new FilterDialog(shell, (IFilteredData) filteredBaseData);
+        String []items    = new String[listDenseIds.size()];
+        boolean []checked = new boolean[listDenseIds.size()];
+        
+        // initialize the ranks to be displayed in the dialog box
+        // to know which ranks are already shown, we need to compare with the filtered ranks.
+        // if the id tuple in the original list is the same as the one in filtered list, 
+        // them the rank is already displayed.
+        // This list needs to be optimized.
+        
+        for(int i=0, j=0; i<listDenseIds.size(); i++) {
+        	items[i] = listDenseIds.get(i).toString();
+        	if (listDenseIds.get(i) == listIds.get(j)) {
+        		checked[i] = true;
+        		j++;
+        	} else {
+        		checked[i] = false;
+        	}
+        }
+        
+        List<FilterDataItem> list = ThreadFilterDialog.filter(shell, items, checked);
 		
-		if (dlgFilter.open() == Dialog.OK){
+		if (list != null){
+			List<Integer> listChecked = new ArrayList<Integer>();
+			for(int i=0; i<list.size(); i++) {
+				if (list.get(i).checked) {
+					listChecked.add(i);
+				}
+			}
+			// update the data and broadcast to everyone that we probably have new filtered ranks
+			// TODO: we need to check if the new one is the same with the old one or not.
+			
+			((IFilteredData)filteredBaseData).setIncludeIndex(listChecked);
 			data.setBaseData((IFilteredData) filteredBaseData);
 			TraceEventData eventData = new TraceEventData(data, tracePart, filteredBaseData);
 			eventBroker.post(IConstants.TOPIC_FILTER_RANKS, eventData);

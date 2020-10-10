@@ -10,7 +10,6 @@ import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
 import edu.rice.cs.hpc.data.experiment.extdata.IFileDB;
 import edu.rice.cs.hpc.data.experiment.extdata.IFilteredData;
 import edu.rice.cs.hpc.data.experiment.extdata.IFileDB.IdTupleOption;
-import edu.rice.cs.hpc.data.trace.FilterSet;
 
 
 /******************************************************************
@@ -23,9 +22,8 @@ import edu.rice.cs.hpc.data.trace.FilterSet;
  *******************************************************************/
 public class FilteredBaseData extends AbstractBaseData implements IFilteredData {
 
-	private FilterSet filter;
-	private int []indexes;
-	private List<IdTuple> filteredIdTuples;
+	private List<Integer> indexes;
+	private List<IdTuple> listIdTuples;
 
 	/*****
 	 * construct a filtered data
@@ -38,70 +36,33 @@ public class FilteredBaseData extends AbstractBaseData implements IFilteredData 
 	public FilteredBaseData(IFileDB baseDataFile, int headerSize, int recordSz) throws IOException 
 	{
 		super( baseDataFile);
-		filter = new FilterSet();
 	}
 
-	/****
-	 * start to filter the ranks
-	 */
-	private void applyFilter() {
-		if (baseDataFile == null)
-			throw new RuntimeException("Fatal error: cannot find data.");
-		
-		List<IdTuple> listIdTuples = baseDataFile.getIdTuple(IdTupleOption.BRIEF);
-
-		filteredIdTuples = null;
-
-		ArrayList<Integer> lindexes = new ArrayList<Integer>();
-
-		if (filter.hasAnyFilters()) {
-			for (int i = 0; i < listIdTuples.size(); i++) {
-				if (filter.include(listIdTuples.get(i)))
-					lindexes.add(i);
-			}
-			//Convert ArrayList to array
-			indexes = new int[lindexes.size()];
-
-			for (int i = 0; i < indexes.length; i++) {
-				indexes[i] = lindexes.get(i);
-			}
-		} else {
-			// no glob pattern to filter
-			// warning: not optimized code
-			indexes = new int[listIdTuples.size()];
-			for(int i=0; i<listIdTuples.size(); i++) {
-				indexes[i] = i;
-			}
-		}
-	}
 	
-	/****
-	 * set patterns to filter ranks
-	 * @param filters
-	 */
-	public void setFilter(FilterSet filter) {
-		this.filter = filter;
-		applyFilter();
-	}
-	
-	
-	public FilterSet getFilter() {
-		return filter;
-	}
-
 	
 	@Override
 	public List<IdTuple> getListOfIdTuples(IdTupleOption option) {
-		if (filteredIdTuples == null) {
-			filteredIdTuples = new ArrayList<IdTuple>(indexes.length);
-			List<IdTuple> listDensedIdTuples = baseDataFile.getIdTuple(option);
-			
-			for(int i=0; i<indexes.length; i++) {
-				IdTuple tuple = listDensedIdTuples.get(indexes[i]);
-				filteredIdTuples.add(tuple);
-			}
+		if (indexes == null) {
+			// this can happen when we remove the filter and go back to the densed one.
+			// the best way is to go back to IBaseData instead of IFilteredData
+			return super.getListOfIdTuples(option);
 		}
-		return filteredIdTuples;
+		if (listIdTuples != null) {
+			return listIdTuples;
+		}
+		listIdTuples = new ArrayList<IdTuple>();
+		List<IdTuple> listDensed   = super.getListOfIdTuples(IdTupleOption.BRIEF);
+		
+		for (int i=0; i<indexes.size(); i++) {
+			Integer index = indexes.get(i);
+			IdTuple idTuple = listDensed.get(index);
+			listIdTuples.add(idTuple);
+		}
+		return listIdTuples;
+	}
+	
+	@Override
+	public void setListOfIdTuples(List<IdTuple> listIdTuples) {
 	}
 
 
@@ -110,7 +71,7 @@ public class FilteredBaseData extends AbstractBaseData implements IFilteredData 
 	 * @see edu.rice.cs.hpc.data.experiment.extdata.IBaseData#getNumberOfRanks()
 	 */
 	public int getNumberOfRanks() {
-		return indexes.length;
+		return indexes.size();
 	}
 	
 
@@ -119,10 +80,8 @@ public class FilteredBaseData extends AbstractBaseData implements IFilteredData 
 	 * @see edu.rice.cs.hpc.data.experiment.extdata.IBaseData#getMinLoc(int)
 	 */
 	public long getMinLoc(int rank) {
-		int filteredRank = indexes[rank];
+		int filteredRank = indexes.get(rank);
 		return baseDataFile.getMinLoc(filteredRank);
-/*		final long offsets[] = baseDataFile.getOffsets();
-		return offsets[filteredRank] + headerSize;*/
 	}
 
 	/*
@@ -130,13 +89,8 @@ public class FilteredBaseData extends AbstractBaseData implements IFilteredData 
 	 * @see edu.rice.cs.hpc.data.experiment.extdata.IBaseData#getMaxLoc(int)
 	 */
 	public long getMaxLoc(int rank) {
-		int filteredRank = indexes[rank];
+		int filteredRank = indexes.get(rank);
 		return baseDataFile.getMaxLoc(filteredRank);
-/*		final long offsets[] = baseDataFile.getOffsets();
-		long maxloc = ( (filteredRank+1<baseDataFile.getNumberOfRanks())? 
-				offsets[filteredRank+1] : baseDataFile.getMasterBuffer().size()-SIZE_OF_END_OF_FILE_MARKER )
-				- getRecordSize();
-		return maxloc;*/
 	}
 
 	@Override
@@ -146,26 +100,40 @@ public class FilteredBaseData extends AbstractBaseData implements IFilteredData 
 
 	@Override
 	public int getFirstIncluded() {
-		if (indexes == null || indexes.length==0)
+		if (indexes == null || indexes.size()==0)
 			return 0;
 		
-		return indexes[0];
+		return indexes.get(0);
 	}
 
 	@Override
 	public int getLastIncluded() {
-		if (indexes == null || indexes.length==0)
+		if (indexes == null || indexes.size()==0)
 			return 0;
 		
-		return indexes[indexes.length-1];
+		return indexes.get(indexes.size()-1);
 	}
 
 	@Override
 	public boolean isDenseBetweenFirstAndLast() {
-		if (indexes == null || indexes.length==0)
+		if (indexes == null || indexes.size()==0)
 			return true;
 		
-		return indexes[indexes.length-1]-indexes[0] == indexes.length-1;
+		int size = indexes.size();
+		return indexes.get(size-1)-indexes.get(0) == size-1;
 	}
 
+
+
+	@Override
+	public void setIncludeIndex(List<Integer> listOfIncludedIndex) {
+		indexes = listOfIncludedIndex;
+		listIdTuples = null;
+	}
+
+
+	@Override
+	public List<IdTuple> getDenseListIdTuple(IdTupleOption option) {
+		return super.getListOfIdTuples(option);
+	}
 }
