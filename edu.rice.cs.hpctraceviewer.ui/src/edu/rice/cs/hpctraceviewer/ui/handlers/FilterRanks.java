@@ -70,7 +70,7 @@ public class FilterRanks
         
         for(int i=0, j=0; i<listDenseIds.size(); i++) {
         	items[i] = listDenseIds.get(i).toString();
-        	if (listDenseIds.get(i) == listIds.get(j)) {
+        	if (j<listIds.size() && listDenseIds.get(i) == listIds.get(j)) {
         		checked[i] = true;
         		j++;
         	} else {
