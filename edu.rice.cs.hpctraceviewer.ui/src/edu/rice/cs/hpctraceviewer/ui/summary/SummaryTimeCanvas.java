@@ -20,7 +20,6 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
-import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
@@ -52,7 +51,6 @@ import edu.rice.cs.hpctraceviewer.data.util.Constants;
  *
  ******************************************************************/
 public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationHistoryListener {
-	private static final boolean True = false;
 	private final IEventBroker eventBroker;
 	private final ITracePart tracePart;
 
@@ -145,6 +143,7 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 		
 	}
 
+	/*
 	private void putBlameGpu(Integer pixel, Float blame) {
 		gpuTotalBlame = gpuTotalBlame + blame;
 		
@@ -153,7 +152,7 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 		} else {
 			gpuBlameMap.put(pixel, blame);
 		}
-	}
+	}*/
 	
 	private void incrementPixelCount(TreeMap<Integer, Integer> mapPixelToCount, Integer pixelValue) {
 		Integer count = mapPixelToCount.get(pixelValue);
@@ -202,7 +201,7 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 
 		// Blame-Shift init table for the current callstack level
 		final ImageTraceAttributes attributes = dataTraces.getAttributes();
-		Integer cs_depth = attributes.getDepth();
+		attributes.getDepth();
 		
         final IBaseData traceData = dataTraces.getBaseData();
         
@@ -244,14 +243,14 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 								
 				// get the profile's id tuple
 				IdTuple tag = listTuples.get(process);
-				boolean isCpuThread = tag.hasKind(IdTupleType.KIND_THREAD);
+				boolean isCpuThread = !tag.hasKind(IdTupleType.KIND_GPU_CONTEXT);
 				
 				RGB rgb = detailData.palette.getRGB(pixelValue);
 				String proc_name = getColorTable().getProcedureNameByColorHash(rgb.hashCode());
 							
 				
 				if (isCpuThread) { // cpu thread
-					if (proc_name.equals("[No activity]") || proc_name.equals("<no activity>")) {
+					if (proc_name.equals(ColorTable.UNKNOWN_PROCNAME)) {
 						cpu_idle_count = cpu_idle_count + 1;
 					}else {
 						cpu_active_count = cpu_active_count + 1;
@@ -259,12 +258,12 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 					}
 					
 				} else {		// gpu thread
-					if (proc_name.equals("[No activity]") || proc_name.equals("<no activity>")) {
+					if (proc_name.equals(ColorTable.UNKNOWN_PROCNAME)) {
 						gpu_idle_count = gpu_idle_count + 1;
-					}else if(proc_name.equals("<gpu sync>")){
+					} else if(proc_name.equals("<gpu sync>")){
 						gpu_idle_count = gpu_idle_count + 1;
 						incrementPixelCount(gpuPixelCount, pixelValue);
-					}else {
+					} else {
 						gpu_active_count = gpu_active_count + 1;
 						incrementPixelCount(gpuPixelCount, pixelValue);
 					}
@@ -397,19 +396,15 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 
 	private void broadcast(ImageData detailData) { // PaletteData palette, int totalPixels) {
 
-		final ImageTraceAttributes attributes = dataTraces.getAttributes();
-		Integer cs_depth = attributes.getDepth();
-
 		Integer totalPixels = detailData.height * detailData.width;
 		SummaryData data = new SummaryData(detailData.palette, mapPixelToPercent, getColorTable(), totalPixels);
 		eventBroker.post(IConstants.TOPIC_STATISTICS, data);
 
-		
 		data = new SummaryData(	detailData.palette, getColorTable(), 
 								cpuBlameMap, cpuTotalBlame,
 								gpuBlameMap, gpuTotalBlame);
-		eventBroker.post(IConstants.TOPIC_BLAME, data);				
 		
+		eventBroker.post(IConstants.TOPIC_BLAME, data);				
 	}
 
 	// ---------------------------------------------------------------------------------------

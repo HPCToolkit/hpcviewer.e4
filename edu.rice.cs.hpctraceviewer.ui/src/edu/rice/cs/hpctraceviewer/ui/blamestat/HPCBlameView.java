@@ -1,6 +1,5 @@
 package edu.rice.cs.hpctraceviewer.ui.blamestat;
 
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
@@ -155,7 +154,7 @@ public class HPCBlameView extends    AbstractBaseItem
 		
 		for(Iterator<Integer> it = set.iterator(); it.hasNext(); ) {
 			final Integer pixel = it.next();
-			final Float count = blameMap.get(pixel);
+			final Float count   = blameMap.get(pixel);
 			final RGB rgb	 	= palette.getRGB(pixel);
 			
 			String proc = colorTable.getProcedureNameByColorHash(rgb.hashCode());
@@ -189,7 +188,7 @@ public class HPCBlameView extends    AbstractBaseItem
 		this.listItems  = new ArrayList<>();
 				
 		
-		listItems.add(new StatisticItem("CPU_BLAME", (float) 100));
+//		listItems.add(new StatisticItem("CPU_BLAME", (float) 100));
 		listItemsAttributeBlame(palette, colorTable, cpuBlameMap, totalCpuBlame);
 		
 //		listItems.add(new StatisticItem("GPU_BLAME", (float) 100));

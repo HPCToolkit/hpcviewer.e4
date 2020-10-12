@@ -10,6 +10,7 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 import edu.rice.cs.hpcbase.map.AliasMap;
 import edu.rice.cs.hpcbase.map.ProcedureClassData;
+import edu.rice.cs.hpctraceviewer.data.ColorTable;
 import edu.rice.cs.hpc.data.util.Util;
 
 
@@ -57,8 +58,8 @@ public class ProcedureClassMap extends AliasMap<String,ProcedureClassData> {
 
 		clear();
 		
-		put("<no thread>", 	 CLASS_IDLE, COLOR_WHITE); // backward compatibility
-		put("<no activity>", CLASS_IDLE, COLOR_WHITE);
+		put("<no thread>", 	CLASS_IDLE, COLOR_WHITE); // backward compatibility
+		put(ColorTable.UNKNOWN_PROCNAME, CLASS_IDLE, COLOR_WHITE);
 	}
 	
 	public Object[] getEntrySet() {
