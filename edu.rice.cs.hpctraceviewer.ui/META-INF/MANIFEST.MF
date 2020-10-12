@@ -24,7 +24,8 @@ Require-Bundle: org.eclipse.core.runtime,
  edu.rice.cs.hpcsetting
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: edu.rice.cs.hpctraceviewer.ui
-Import-Package: edu.rice.cs.hpctraceviewer.data,
+Import-Package: edu.rice.cs.hpc.filter.dialog,
+ edu.rice.cs.hpctraceviewer.data,
  javax.annotation;resolution:=optional,
  javax.inject,
  org.eclipse.e4.core.contexts

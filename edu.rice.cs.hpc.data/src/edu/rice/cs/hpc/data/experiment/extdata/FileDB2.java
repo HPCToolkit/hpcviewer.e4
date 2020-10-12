@@ -37,6 +37,7 @@ public class FileDB2 implements IFileDB
 	private RandomAccessFile file; 
 	
 	private List<IdTuple> listIdTuples;
+	private List<Short>   listIdTupleTypes;
 
 	@Override
 	public void open(String filename, int headerSize, int recordSz)  throws IOException 
@@ -91,6 +92,7 @@ public class FileDB2 implements IFileDB
 		
 		valuesX = new String[numFiles];
 		offsets = new long[numFiles];
+		
 		listIdTuples = new ArrayList<IdTuple>(numFiles);
 		
 		long current_pos = Constants.SIZEOF_INT * 2;
@@ -243,5 +245,21 @@ public class FileDB2 implements IFileDB
 				offsets[rank+1] : masterBuff.size()-1 )
 				- recordSz;
 		return maxloc;
+	}
+
+	@Override
+	public List<Short> getIdTupleTypes() {
+		if (listIdTupleTypes != null)
+			return listIdTupleTypes;
+		
+		listIdTupleTypes = new ArrayList<>();
+
+		if (isMultiProcess()) {
+			listIdTupleTypes.add(IdTupleType.KIND_RANK);
+		}
+		if (isMultiThreading()) {
+			listIdTupleTypes.add(IdTupleType.KIND_THREAD);
+		}
+		return listIdTupleTypes;
 	}
 }

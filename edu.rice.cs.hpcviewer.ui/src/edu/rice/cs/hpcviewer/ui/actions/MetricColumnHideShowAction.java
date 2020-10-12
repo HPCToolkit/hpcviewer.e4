@@ -12,11 +12,11 @@ import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
+import edu.rice.cs.hpc.filter.dialog.FilterDataItem;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.dialogs.MetricColumnDialog;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
 import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
-import edu.rice.cs.hpcviewer.ui.util.FilterDataItem;
 
 public class MetricColumnHideShowAction 
 {	

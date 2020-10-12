@@ -30,16 +30,16 @@ import edu.rice.cs.hpctraceviewer.ui.base.ITraceCanvas.MouseState;
  *********************/
 public class CanvasAxisY extends AbstractAxisCanvas 
 {
-	private final int []listColorSWT = {
-											SWT.COLOR_CYAN,    SWT.COLOR_DARK_BLUE,
-											SWT.COLOR_YELLOW,  SWT.COLOR_DARK_MAGENTA,
-											SWT.COLOR_GRAY,    SWT.COLOR_DARK_GREEN,
-											SWT.COLOR_WHITE,   SWT.COLOR_DARK_RED,
-											SWT.COLOR_MAGENTA, SWT.COLOR_DARK_YELLOW
+	private final int [][]listColorSWT = {
+											{ SWT.COLOR_CYAN,    SWT.COLOR_DARK_BLUE    },
+											{ SWT.COLOR_YELLOW,  SWT.COLOR_DARK_MAGENTA },
+											{ SWT.COLOR_GRAY,    SWT.COLOR_DARK_GREEN   },
+											{ SWT.COLOR_WHITE,   SWT.COLOR_DARK_RED     },
+											{ SWT.COLOR_MAGENTA, SWT.COLOR_DARK_YELLOW  }
 										};
 	private int columnWidth = HPCTraceView.Y_AXIS_WIDTH/4;
 	
-	private final Color []listColorObjects;
+	private final Color [][]listColorObjects;
 	private final Color bgColor;
 	private final ProcessTimelineService timeLine;
 
@@ -63,9 +63,11 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		bgColor = parent.getBackground();
 		this.timeLine = timeLine;
 		
-		listColorObjects = new Color[listColorSWT.length];
-		for(int i=0; i<listColorSWT.length; i++) {
-			listColorObjects[i] = getDisplay().getSystemColor(listColorSWT[i]);
+		listColorObjects = new Color[5][2];
+		for(int i=0; i<5; i++) {
+			for (int j=0; j<2; j++) {
+				listColorObjects[i][j] = getDisplay().getSystemColor(listColorSWT[i][j]);				
+			}
 		}	
 		mouseState = MouseState.ST_MOUSE_INIT;
 	}
@@ -156,24 +158,13 @@ public class CanvasAxisY extends AbstractAxisCanvas
 			IdTuple idtuple  = listIdTuples.get(procNumber);
 
 			for(int j=0; j<idtuple.length; j++) {
-				
-				// in this level, we have a different index, so different color
-				// limit color has to be 1, 3, 5, ...
-				int limitColor   = 1+(j*2);
-				
-				// current color has to be:
-				// i=0:  0, 2, 4, ...
-				// i=1:  1, 3, 5, ...
-				// i=2:  0, 2, 4, ...
-				// i=3:  1, 3, 5, ...
 
-				int idx = (int) idtuple.index[j];
-				int currentColor = limitColor - ((idx+1) % 2);
+				int currentColor;
 				
 				if (idtupleOld != null && idtupleOld.index.length>j && idtuple.index[j]!= idtupleOld.index[j]) {
 					// make sure the current color is different than the previous one
-					currentColor = limitColor - ((limitColor-oldColorIndex[j])+1)%2;
-				} else if (i>0) {
+					currentColor = 1-oldColorIndex[j];
+				} else {
 					currentColor = oldColorIndex[j];
 				}
 				
@@ -184,11 +175,8 @@ public class CanvasAxisY extends AbstractAxisCanvas
 				int x_start = j * columnWidth;
 				int x_end   = x_start + columnWidth - 1;
 
-				// make sure the color is circular, i.e. if we need more color than we reserve,
-				// we should go back to the first color
-				int colorInt = currentColor % listColorObjects.length;
-				Color color  = listColorObjects[colorInt];
-				
+				Color color  = listColorObjects[j%5][currentColor];
+
 				e.gc.setBackground(color);
 				e.gc.fillRectangle(x_start, y_curr, x_end, y_next);
 				

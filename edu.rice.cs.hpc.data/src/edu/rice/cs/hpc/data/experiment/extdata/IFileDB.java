@@ -62,6 +62,7 @@ public interface IFileDB
 	public long[]	getOffsets();
 	
 	public List<IdTuple> getIdTuple(IdTupleOption option);
+	public List<Short>   getIdTupleTypes();
 	
 	public long 	getLong  (long position) throws IOException;
 	public int  	getInt   (long position) throws IOException;

@@ -9,8 +9,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.osgi.service.prefs.Preferences;
 
+import edu.rice.cs.hpc.filter.dialog.AbstractFilterDialog;
+import edu.rice.cs.hpc.filter.dialog.FilterDataItem;
 import edu.rice.cs.hpcbase.map.UserInputHistory;
-import edu.rice.cs.hpcviewer.ui.util.FilterDataItem;
 
 /*************************************************************
  * 
