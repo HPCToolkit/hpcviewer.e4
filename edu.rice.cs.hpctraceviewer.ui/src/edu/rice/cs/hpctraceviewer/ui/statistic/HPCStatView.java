@@ -175,7 +175,7 @@ public class HPCStatView extends    AbstractBaseItem
 		}
 		tableViewer.setInput(listItems);
 		tableViewer.refresh();
-		tableViewer.getTable().getColumn(1).pack();
+		//tableViewer.getTable().getColumn(1).pack();
 	}
 	
 
