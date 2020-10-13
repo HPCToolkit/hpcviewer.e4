@@ -386,31 +386,32 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 
 	@Override
 	public void historyNotification(final OperationHistoryEvent event) {
-		// we are not interested with other operation
+
+		if (isDisposed())
+			return;
+
+		// we are not interested with other operation contexts
 		IUndoContext context = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_BUFFER);
+		if (!event.getOperation().hasContext(context)) 
+			return;
+		
+		if (event.getEventType() == OperationHistoryEvent.DONE) {
 
-		if (event.getOperation().hasContext(context)) {
-			if (event.getEventType() == OperationHistoryEvent.DONE) {
-
-				if (isDisposed())
-					return;
-
-				final IUndoableOperation operation = event.getOperation();
-				if (!(operation instanceof AbstractTraceOperation)) {
-					return;
-				}
-				AbstractTraceOperation op = (AbstractTraceOperation) operation;
-				if (op.getData() != dataTraces)
-					return;
-
-				getDisplay().syncExec(new Runnable() {
-					@Override
-					public void run() {
-						BufferRefreshOperation operation = (BufferRefreshOperation) event.getOperation();
-						refresh(operation.getImageData());
-					}
-				});
+			final IUndoableOperation operation = event.getOperation();
+			if (!(operation instanceof AbstractTraceOperation)) {
+				return;
 			}
+			final AbstractTraceOperation op = (AbstractTraceOperation) operation;
+			if (op.getData() != dataTraces)
+				return;
+
+			getDisplay().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					BufferRefreshOperation operation = (BufferRefreshOperation) op;
+					refresh(operation.getImageData());
+				}
+			});
 		}
 	}
 
@@ -423,10 +424,10 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 		final ImageTraceAttributes attributes = dataTraces.getAttributes();
 
 		long timeBegin = attributes.getTimeBegin();
-		int left = region.x;
+		int left  = region.x;
 		int right = region.width + region.x;
 
-		long topLeftTime = timeBegin + (long) (left / getScalePixelsPerTime());
+		long topLeftTime     = timeBegin + (long) (left  / getScalePixelsPerTime());
 		long bottomRightTime = timeBegin + (long) (right / getScalePixelsPerTime());
 
 		final Position position = attributes.getPosition();
