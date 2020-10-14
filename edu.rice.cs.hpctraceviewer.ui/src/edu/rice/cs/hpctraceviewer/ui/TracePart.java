@@ -300,7 +300,7 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 			tbtmCallStack.setInput(stdc);
 			miniCanvas.   updateView(stdc);
 			tbtmStatView .setInput(stdc);
-			tbtmBlameView  .setInput(stdc);
+			tbtmBlameView.setInput(stdc);
 			
 			// TODO: summary view has to be set AFTER the stat view 
 			//       since the stat view requires info from summary view 

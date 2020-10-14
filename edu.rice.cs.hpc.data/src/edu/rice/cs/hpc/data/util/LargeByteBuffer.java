@@ -1,6 +1,7 @@
 package edu.rice.cs.hpc.data.util;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 
@@ -97,29 +98,86 @@ public class LargeByteBuffer
 	{
 		int page = (int) (position / pageSize);
 		int loc = (int) (position % pageSize);
-		return getBuffer(page).getInt(loc);
+		long remainder = pageSize - loc;
+
+		if (remainder >= Integer.BYTES) {
+			return getBuffer(page).getInt(loc);
+		}
+		ByteBuffer bb = combineBytes(page, loc, Integer.BYTES);
+		return bb.getInt();
 	}
 	
 	public long getLong(long position) throws IOException
 	{
 		int page = (int) (position / pageSize);
 		int loc = (int) (position % pageSize);
-		if (loc < pageSize - 4) {
+
+		long remainder = pageSize - loc;
+		if (remainder >= Long.BYTES) {
 			return getBuffer(page).getLong(loc);
-		} else {
-			return (((long) getBuffer(page).getInt(loc)) << 32) + getBuffer(page+1).getInt(0);
 		}
+		ByteBuffer bb = combineBytes(page, loc, Long.BYTES);
+		long result = bb.getLong();
+		
+		return result;
 	}
+	
+	
+	/****
+	 * This method combines last bytes of the "first" page and the first bytes of the "second" page.
+	 * In some cases, we need to read more bytes than the allocated bytes of a page. 
+	 * For example the number of bytes in a page is 1024, and at location 1022 we want to read 
+	 * 8 bytes. This causes we need to read 2 bytes in the current page, and another 6 bytes in the next
+	 * page.
+	 * 
+	 * @param page int the current page
+	 * @param loc long the current location
+	 * @param numBytes int the number of bytes we need to read
+	 * @return {@code ByteBuffer} byte buffer of the read bytes. The size is equal to numBytes.
+	 * @throws IOException
+	 */
+	private ByteBuffer combineBytes(int page, int loc, int numBytes) throws IOException {
+		long remainder = pageSize - loc;
+
+		// graph the higher bytes
+		byte []byteLeft = new byte[(int) remainder];
+		for (int i=0; i<remainder; i++) {
+			byteLeft[i] = getBuffer(page).get(loc+i);
+		}
+
+		// grab the lower bytes
+		int remRight = (int) (numBytes - remainder);
+		byte []byteRight = new byte[remRight];
+		getBuffer(page+1).get(byteRight);
+
+		// combine the higher and lower bytes, convert them to a long
+		
+		assert(byteLeft.length + byteRight.length == numBytes);
+		
+		byte []resultByte = new byte[Long.BYTES];
+		for (int i=0; i<byteLeft.length; i++) {
+			resultByte[i] = byteLeft[i];
+		}
+		for (int i=0; i<byteRight.length; i++) {
+			resultByte[i+byteLeft.length] = byteRight[i];
+		}
+		
+		return ByteBuffer.wrap(resultByte);
+	}
+	
 	
 	public double getDouble(long position) throws IOException
 	{
 		int page = (int) (position / pageSize);
 		int loc = (int) (position % pageSize);
-		if (loc < pageSize - 4) {
+
+		long remainder = pageSize - loc; 
+		if (remainder >= Double.BYTES) {
 			return getBuffer(page).getDouble(loc);
-		} else {
-			return (double)(((long) getBuffer(page).getInt(loc)) << 32) + (long) getBuffer(page+1).getInt(0);
 		}
+		ByteBuffer bb = combineBytes(page, loc, Double.BYTES);
+		double result = bb.getDouble();
+		return result;
 	}
 	
 	public char getChar(long position) throws IOException
@@ -143,14 +201,28 @@ public class LargeByteBuffer
 	{
 		int page = (int) (position / pageSize);
 		int loc = (int) (position % pageSize);
-		return getBuffer(page).getFloat(loc);
+		
+		long remainder = pageSize - loc; 
+		if (remainder >= Float.BYTES) {
+			return getBuffer(page).getFloat(loc);
+		}
+		ByteBuffer bb = combineBytes(page, loc, Float.BYTES);
+		float result = bb.getFloat();
+		return result;
 	}
 	
 	public short getShort(long position) throws IOException
 	{
 		int page = (int) (position / pageSize);
 		int loc = (int) (position % pageSize);
-		return getBuffer(page).getShort(loc);
+		
+		long remainder = pageSize - loc; 
+		if (remainder >= Short.BYTES) {
+			return getBuffer(page).getShort(loc);
+		}
+		ByteBuffer bb = combineBytes(page, loc, Float.BYTES);
+		short result = bb.getShort();
+		return result;
 	}
 	
 	public long size()

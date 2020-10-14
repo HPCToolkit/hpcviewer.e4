@@ -43,6 +43,7 @@ import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.ColorTable;
 import edu.rice.cs.hpctraceviewer.ui.base.AbstractBaseItem;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
+import edu.rice.cs.hpctraceviewer.ui.preferences.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.ui.summary.SummaryData;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 
@@ -175,7 +176,7 @@ public class HPCStatView extends    AbstractBaseItem
 		}
 		tableViewer.setInput(listItems);
 		tableViewer.refresh();
-		tableViewer.getTable().getColumn(1).pack();
+		//tableViewer.getTable().getColumn(1).pack();
 	}
 	
 
@@ -295,7 +296,7 @@ public class HPCStatView extends    AbstractBaseItem
 		
 		@Override
 		public int getToolTipDisplayDelayTime(Object object) {
-    		return IConstants.TOOLTIP_DELAY_MS;
+    		return TracePreferenceManager.getTooltipDelay();
 		}
 	}
 

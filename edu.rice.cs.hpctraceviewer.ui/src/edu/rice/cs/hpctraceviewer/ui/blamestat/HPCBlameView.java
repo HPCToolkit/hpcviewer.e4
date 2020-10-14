@@ -1,7 +1,8 @@
 package edu.rice.cs.hpctraceviewer.ui.blamestat;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -43,6 +44,7 @@ import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.ColorTable;
 import edu.rice.cs.hpctraceviewer.ui.base.AbstractBaseItem;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
+import edu.rice.cs.hpctraceviewer.ui.preferences.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.ui.summary.SummaryData;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 
@@ -143,30 +145,6 @@ public class HPCBlameView extends    AbstractBaseItem
 	}
 	
 	
-	
-	private void listItemsAttributeBlame(
-			PaletteData palette, 
-			ColorTable colorTable,
-			TreeMap<Integer, Float> blameMap, 		
-			float totalBlame) {
-		
-		Set<Integer> set = blameMap.keySet();		
-		
-		for(Iterator<Integer> it = set.iterator(); it.hasNext(); ) {
-			final Integer pixel = it.next();
-			final Float count   = blameMap.get(pixel);
-			final RGB rgb	 	= palette.getRGB(pixel);
-			
-			String proc = colorTable.getProcedureNameByColorHash(rgb.hashCode());
-			if (proc == null) {
-				proc = ColorTable.UNKNOWN_PROCNAME;
-			}
-			
-			listItems.add(new StatisticItem(proc, (float) 100.0 * count / totalBlame));
-		}
-	}
-	
-	
 	/**
 	 * Refresh the content of the viewer and reinitialize the content
 	 *  with the new data
@@ -186,18 +164,24 @@ public class HPCBlameView extends    AbstractBaseItem
 		
 		this.colorTable = colorTable;
 		this.listItems  = new ArrayList<>();
-				
 		
-//		listItems.add(new StatisticItem("CPU_BLAME", (float) 100));
-		listItemsAttributeBlame(palette, colorTable, cpuBlameMap, totalCpuBlame);
+		Set<Entry<Integer, Float>> entries = cpuBlameMap.entrySet();
 		
-//		listItems.add(new StatisticItem("GPU_BLAME", (float) 100));
-//		listItemsAttributeBlame(palette, colorTable, gpuBlameMap, totalGpuBlame);
-		
-		
+		for(Map.Entry<Integer, Float> entry: entries ) {
+			final Integer pixel = entry.getKey();
+			final Float count   = entry.getValue();
+			final RGB rgb	 	= palette.getRGB(pixel);
+			
+			String proc = colorTable.getProcedureNameByColorHash(rgb.hashCode());
+			if (proc == null) {
+				proc = ColorTable.UNKNOWN_PROCNAME;
+			}			
+			listItems.add(new StatisticItem(proc, (float) 100.0 * count / totalCpuBlame));
+		}
+
 		tableViewer.setInput(listItems);
 		tableViewer.refresh();
-		tableViewer.getTable().getColumn(1).pack();
+		//tableViewer.getTable().getColumn(1).pack();
 	}
 	
 
@@ -319,7 +303,7 @@ public class HPCBlameView extends    AbstractBaseItem
 		
 		@Override
 		public int getToolTipDisplayDelayTime(Object object) {
-    		return IConstants.TOOLTIP_DELAY_MS;
+    		return TracePreferenceManager.getTooltipDelay();
 		}
 	}
 
@@ -344,12 +328,7 @@ public class HPCBlameView extends    AbstractBaseItem
 
 
 	@Override
-	public void handleEvent(org.eclipse.swt.widgets.Event event) {
-		System.out.println(getClass().getName() + " show-idx: "  + event.index + ", show-w: " + event.widget);
-		if (tableViewer == null) return;
-		if (tableViewer.getTable().getItemCount() < 1) {
-		}
-	}
+	public void handleEvent(org.eclipse.swt.widgets.Event event) {}
 
 
 	@Override
