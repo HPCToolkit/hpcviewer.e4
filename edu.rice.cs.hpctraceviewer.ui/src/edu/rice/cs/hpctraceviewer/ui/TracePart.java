@@ -5,6 +5,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import java.util.HashMap;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 
@@ -21,7 +22,9 @@ import org.eclipse.swt.widgets.Shell;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
+import edu.rice.cs.hpc.data.db.IdTupleType;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
+import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
 import edu.rice.cs.hpcbase.BaseConstants;
 import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
@@ -300,7 +303,6 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 			tbtmCallStack.setInput(stdc);
 			miniCanvas.   updateView(stdc);
 			tbtmStatView .setInput(stdc);
-			tbtmBlameView.setInput(stdc);
 			
 			// TODO: summary view has to be set AFTER the stat view 
 			//       since the stat view requires info from summary view 
@@ -309,6 +311,23 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 			// this has to be the last tab item to be set
 			// start reading the database and draw it
 			tbtmTraceView.setInput(stdc);
+			
+			IBaseData data = stdc.getBaseData();
+			List<Short> listIdTupleTypes = data.getIdTupleTypes();
+			boolean hasGPU = false; 
+			
+			// check whether this database has gpu profile or not
+			for (Short type: listIdTupleTypes) {
+				if (IdTupleType.KIND_GPU_CONTEXT == type) {
+					tbtmBlameView.setInput(stdc);
+					hasGPU = true;
+					
+					break;
+				}
+			}
+			if (!hasGPU) {
+				tbtmBlameView.dispose();
+			}
 			
 		} catch (Exception e) {
 			Shell shell = Display.getDefault().getActiveShell();

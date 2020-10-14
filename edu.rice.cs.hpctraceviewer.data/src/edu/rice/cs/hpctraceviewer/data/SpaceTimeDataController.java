@@ -10,7 +10,6 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.swt.widgets.Display;
 import edu.rice.cs.hpcbase.map.ProcedureAliasMap;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
-import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.ExperimentWithoutMetrics;
 import edu.rice.cs.hpc.data.experiment.InvalExperimentException;
 import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
@@ -183,8 +182,8 @@ public abstract class SpaceTimeDataController
 			return true;
 		}
 		return false;
-		
 	}
+
 	
 	public int getMaxDepth() 
 	{
