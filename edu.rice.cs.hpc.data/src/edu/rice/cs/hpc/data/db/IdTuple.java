@@ -137,8 +137,12 @@ public class IdTuple
 			for(int i=0; i<=level; i++) {
 				if (i>0)
 					buff += " ";
+				String strIndex = String.valueOf(index[i]);
 				
-				buff += IdTupleType.kindStr(kind[i]) + " " + index[i];
+				if (kind[i] == IdTupleType.KIND_NODE) {
+					strIndex = Long.toHexString(index[i]);
+				}
+				buff += IdTupleType.kindStr(kind[i]) + " " + strIndex;
 			}
 		return buff;
 	}
