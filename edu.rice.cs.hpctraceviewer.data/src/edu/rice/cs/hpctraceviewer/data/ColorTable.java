@@ -34,7 +34,7 @@ public class ColorTable
 	static private final long RANDOM_SEED = 612543231L;
 	
 	static final private String SEPARATOR_PROCNAME = "\n";
-	static final public String  UNKNOWN_PROCNAME   = "[No activity]";
+	static final public String  UNKNOWN_PROCNAME   = "<No activity>";
 	
 	/**The display this ColorTable uses to generate the random colors.*/
 	final private Display display;
@@ -103,7 +103,9 @@ public class ColorTable
 		
 		Object []entries = classMap.getEntrySet();
 		for (Object obj:entries) {
+			@SuppressWarnings("unchecked")
 			Entry<String, ProcedureClassData> entry = (Entry<String, ProcedureClassData>) obj;
+			
 			ProcedureClassData data = entry.getValue();
 			final RGB rgb = data.getRGB();
 			String proc = entry.getKey();

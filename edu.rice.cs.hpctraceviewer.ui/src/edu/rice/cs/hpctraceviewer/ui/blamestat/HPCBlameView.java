@@ -1,9 +1,10 @@
-package edu.rice.cs.hpctraceviewer.ui.statistic;
+package edu.rice.cs.hpctraceviewer.ui.blamestat;
 
-import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -52,7 +53,7 @@ import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
  * A view to show the statistics of the current region selection
  *
  *************************************************************************/
-public class HPCStatView extends    AbstractBaseItem 
+public class HPCBlameView extends    AbstractBaseItem 
 						 implements EventHandler, Listener, IPropertyChangeListener, DisposeListener
 {
 	public static final String ID = "hpcstat.view";
@@ -65,7 +66,7 @@ public class HPCStatView extends    AbstractBaseItem
 
 	private IEventBroker broker;
 	
-	public HPCStatView(CTabFolder parent, int style) {
+	public HPCBlameView(CTabFolder parent, int style) {
 		super(parent, style);
 		
 		listItems   = null;
@@ -143,6 +144,7 @@ public class HPCStatView extends    AbstractBaseItem
 		return adapter;
 	}
 	
+	
 	/**
 	 * Refresh the content of the viewer and reinitialize the content
 	 *  with the new data
@@ -153,27 +155,30 @@ public class HPCStatView extends    AbstractBaseItem
 	 * @param totalPixels
 	 */
 	private void refresh(
-			PaletteData palette,
-			AbstractMap<Integer, Integer> mapPixelToCount, 
-			ColorTable colorTable, 
-			int totalPixels) {
+			PaletteData palette, 
+			ColorTable colorTable,
+			TreeMap<Integer, Float> cpuBlameMap, 
+			float totalCpuBlame,
+			TreeMap<Integer, Float> gpuBlameMap, 
+			float totalGpuBlame) {
 		
 		this.colorTable = colorTable;
 		this.listItems  = new ArrayList<>();
 		
-		Set<Integer> set = mapPixelToCount.keySet();
+		Set<Entry<Integer, Float>> entries = cpuBlameMap.entrySet();
 		
-		for(Iterator<Integer> it = set.iterator(); it.hasNext(); ) {
-			final Integer pixel = it.next();
-			final Integer count = mapPixelToCount.get(pixel);
+		for(Map.Entry<Integer, Float> entry: entries ) {
+			final Integer pixel = entry.getKey();
+			final Float count   = entry.getValue();
 			final RGB rgb	 	= palette.getRGB(pixel);
 			
 			String proc = colorTable.getProcedureNameByColorHash(rgb.hashCode());
 			if (proc == null) {
 				proc = ColorTable.UNKNOWN_PROCNAME;
-			}
-			listItems.add(new StatisticItem(proc, (float)100.0 * count/totalPixels));
+			}			
+			listItems.add(new StatisticItem(proc, (float) 100.0 * count / totalCpuBlame));
 		}
+
 		tableViewer.setInput(listItems);
 		tableViewer.refresh();
 		//tableViewer.getTable().getColumn(1).pack();
@@ -182,7 +187,7 @@ public class HPCStatView extends    AbstractBaseItem
 
 	@Override
 	public void setInput(Object input) {
-		broker.subscribe(IConstants.TOPIC_STATISTICS, this);
+		broker.subscribe(IConstants.TOPIC_BLAME, this);
 		ViewerPreferenceManager.INSTANCE.getPreferenceStore().addPropertyChangeListener(this);
 		
 		addDisposeListener(this);
@@ -200,13 +205,15 @@ public class HPCStatView extends    AbstractBaseItem
 
 	@Override
 	public void handleEvent(Event event) {
-		if (event.getTopic().equals(IConstants.TOPIC_STATISTICS)) {
+		if (event.getTopic().equals(IConstants.TOPIC_BLAME)) {
 			Object obj = event.getProperty(IEventBroker.DATA);
 			if (obj == null || (!(obj instanceof SummaryData)))
 				return;
 			
 			SummaryData data = (SummaryData) obj;
-			refresh(data.palette, data.mapPixelToCount, data.colorTable, data.totalPixels);
+			refresh(data.palette, data.colorTable, 
+					data.cpuBlameMap,  data.totalCpuBlame,
+					data.gpuBlameMap,  data.totalGpuBlame);
 		}
 	}
 
@@ -268,7 +275,7 @@ public class HPCStatView extends    AbstractBaseItem
 				if (item.procedureName == ColorTable.UNKNOWN_PROCNAME)
 					return null;
 				
-				return HPCStatView.this.colorTable.getImage(((StatisticItem)element).procedureName);
+				return HPCBlameView.this.colorTable.getImage(((StatisticItem)element).procedureName);
 			}
 			return null;
 		}
@@ -321,12 +328,7 @@ public class HPCStatView extends    AbstractBaseItem
 
 
 	@Override
-	public void handleEvent(org.eclipse.swt.widgets.Event event) {
-		System.out.println(getClass().getName() + " show-idx: "  + event.index + ", show-w: " + event.widget);
-		if (tableViewer == null) return;
-		if (tableViewer.getTable().getItemCount() < 1) {
-		}
-	}
+	public void handleEvent(org.eclipse.swt.widgets.Event event) {}
 
 
 	@Override

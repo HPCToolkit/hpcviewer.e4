@@ -97,7 +97,7 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 	{
 		bound = getClientArea();
 
-		if (stData == null || !stData.isTimelineFilled())
+		if (stData == null )
 			return;
 		
 		if (needToRedraw) {

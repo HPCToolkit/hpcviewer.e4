@@ -1,14 +1,13 @@
 package edu.rice.cs.hpc.data.experiment.extdata;
 
-import edu.rice.cs.hpc.data.trace.FilterSet;
+import java.util.List;
 
-public interface IFilteredData extends IBaseData{
+import edu.rice.cs.hpc.data.db.IdTuple;
+import edu.rice.cs.hpc.data.experiment.extdata.IFileDB.IdTupleOption;
 
-	//filter() shouldn't be public but by specifying it here, we would force it to be.
-	//void filter();
-	public void setFilter(FilterSet filter) ;
-	public FilterSet getFilter() ;
-	public boolean isGoodFilter();
-
-	
+public interface IFilteredData extends IBaseData
+{
+	public boolean isGoodFilter();	
+	public void    setIncludeIndex(List<Integer> listOfIncludedIndex);
+	public List<IdTuple> getDenseListIdTuple(IdTupleOption option);
 }

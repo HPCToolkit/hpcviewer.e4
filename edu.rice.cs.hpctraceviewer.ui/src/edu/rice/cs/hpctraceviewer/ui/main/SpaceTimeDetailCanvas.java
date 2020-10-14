@@ -66,6 +66,7 @@ import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.Frame;
 import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
 import edu.rice.cs.hpctraceviewer.data.Position;
+//import edu.rice.cs.hpctraceviewer.data.Bolean;
 import edu.rice.cs.hpctraceviewer.data.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
@@ -336,6 +337,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		notifyChanges(ZoomOperation.ActionHome, frame);
 	}
 	
+
 	/**************************************************************************
 	 * The action that gets performed when the 'open' button is pressed - 
 	 * sets everything to the data stored in the Frame toBeOpened.

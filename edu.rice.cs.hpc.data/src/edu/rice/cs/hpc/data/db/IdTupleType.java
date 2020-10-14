@@ -7,17 +7,17 @@ public class IdTupleType
 	// we will convert old database process.thread format
 	// to id-tuples
 	
-	public final static int KIND_SUMMARY = 0;
-	public final static int KIND_NODE    = 1;
-	public final static int KIND_RANK    = 2;
-	public final static int KIND_THREAD  = 3;
+	public final static short KIND_SUMMARY = 0;
+	public final static short KIND_NODE    = 1;
+	public final static short KIND_RANK    = 2;
+	public final static short KIND_THREAD  = 3;
 	
-	public final static int KIND_GPU_DEVICE  = 4;
-	public final static int KIND_GPU_STREAM  = 5;
-	public final static int KIND_GPU_CONTEXT = 6;
-	public final static int KIND_CORE        = 7;
+	public final static short KIND_GPU_DEVICE  = 4;
+	public final static short KIND_GPU_STREAM  = 5;
+	public final static short KIND_GPU_CONTEXT = 6;
+	public final static short KIND_CORE        = 7;
 	
-	public final static int KIND_MAX         = 8;
+	public final static short KIND_MAX         = 8;
 
 	
 	// see https://github.com/HPCToolkit/hpctoolkit/blob/prof2/src/lib/prof-lean/id-tuple.h#L81

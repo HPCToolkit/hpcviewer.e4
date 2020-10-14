@@ -28,6 +28,20 @@ public abstract class AbstractBaseData implements IBaseData
 	public List<IdTuple> getListOfIdTuples(IdTupleOption option) {
 		return baseDataFile.getIdTuple(option);
 	}
+
+
+	@Override
+	public void setListOfIdTuples(List<IdTuple> listIdTuples) {
+		// Should we update the list of id tuples here?
+		// this method is designed tp replace the existing id tuples
+		// which doesn't make any sense for the database to be
+		// modified.
+	}
+
+	@Override
+	public List<Short>   getIdTupleTypes() {
+		return baseDataFile.getIdTupleTypes();
+	}
 	
 	/*
 	 * (non-Javadoc)

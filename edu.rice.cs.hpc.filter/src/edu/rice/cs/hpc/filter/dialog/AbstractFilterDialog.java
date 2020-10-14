@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.dialogs;
+package edu.rice.cs.hpc.filter.dialog;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -17,31 +17,42 @@ import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
+import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
-import edu.rice.cs.hpcviewer.ui.util.FilterDataItem;
-import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
 
 public abstract class AbstractFilterDialog extends TitleAreaDialog 
 {
-	final private List<FilterDataItem> items;
 	
+	/** font style for unclickable line number in a callsite */
+	static final private Styler STYLE_DISABLED = new StyledString.Styler() {
+		
+		@Override
+		public void applyStyles(TextStyle textStyle) {
+			textStyle.foreground = Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
+		}
+	};
+
+	final private List<FilterDataItem> items;
 	final private String title, message;
+	
 	protected ColumnCheckTableViewer objCheckBoxTable ;
 	protected Text objSearchText;
 
@@ -163,14 +174,14 @@ public abstract class AbstractFilterDialog extends TitleAreaDialog
 			// status has been changed. we need to reset the global variable too !
 			public void checkStateChanged(CheckStateChangedEvent event) {
 				PropertiesModel objItem = (PropertiesModel) event.getElement();
-				objItem.isVisible = event.getChecked();
+				objItem.isChecked = event.getChecked();
 				
 				if (!objItem.isEditable)
 					return;
 				
 				// check if the selected item is in the list
 				if (arrElements.get(objItem.iIndex) != objItem) {
-					arrElements.get(objItem.iIndex).isVisible = objItem.isVisible;
+					arrElements.get(objItem.iIndex).isChecked = objItem.isChecked;
 				}
 			}
 
@@ -232,7 +243,7 @@ public abstract class AbstractFilterDialog extends TitleAreaDialog
 			ArrayList<PropertiesModel> arrCheckedElements = new ArrayList<PropertiesModel>();
 
 			for (int i=0; i<nb; i++) {
-				if (arrElements.get(i).isVisible)
+				if (arrElements.get(i).isChecked)
 					arrCheckedElements.add(arrElements.get(i));
 			} 
 			result = arrCheckedElements.toArray();
@@ -246,7 +257,7 @@ public abstract class AbstractFilterDialog extends TitleAreaDialog
 	 */
 	protected void okPressed() {
 		for (int i=0; i<arrElements.size(); i++) {
-			 items.get(i).checked  = (this.arrElements.get(i).isVisible);
+			 items.get(i).checked  = (this.arrElements.get(i).isChecked);
 		} 
 		
 		super.okPressed();	// this will shut down the window
@@ -265,13 +276,13 @@ public abstract class AbstractFilterDialog extends TitleAreaDialog
 	 *
 	 */
 	protected class PropertiesModel {
-		public boolean isVisible;
+		public boolean isChecked;
 		public boolean isEditable;
 		public String sTitle;
 		public int iIndex;
 
 		public PropertiesModel(boolean b, boolean e, String s, int i) {
-			this.isVisible = b;
+			this.isChecked = b;
 			this.isEditable = e;
 			this.sTitle = s;
 			this.iIndex = i;
@@ -332,7 +343,7 @@ public abstract class AbstractFilterDialog extends TitleAreaDialog
 			for (int i=0; i<items.length; i++) {
 				TableItem objItem = items[i];
 				PropertiesModel objModel = (PropertiesModel) objItem.getData();
-				objModel.isVisible = state;
+				objModel.isChecked = state;
 			}
 		}
 		
@@ -377,7 +388,7 @@ public abstract class AbstractFilterDialog extends TitleAreaDialog
 			
 			PropertiesModel model = (PropertiesModel) element;
 			if (!model.isEditable) {
-				style.append(model.sTitle + " (empty)", Utilities.STYLE_DECORATIONS);
+				style.append(model.sTitle + " (empty)", STYLE_DISABLED);
 			} else {
 				style.append(model.sTitle);
 			}

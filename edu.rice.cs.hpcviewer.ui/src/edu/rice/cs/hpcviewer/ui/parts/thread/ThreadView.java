@@ -23,15 +23,15 @@ import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
+import edu.rice.cs.hpc.filter.dialog.FilterDataItem;
+import edu.rice.cs.hpc.filter.dialog.ThreadFilterDialog;
 import edu.rice.cs.hpc.filter.service.FilterStateProvider;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.base.IViewItem;
-import edu.rice.cs.hpcviewer.ui.dialogs.ThreadFilterDialog;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
 import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
 import edu.rice.cs.hpcviewer.ui.tabItems.AbstractBaseViewItem;
-import edu.rice.cs.hpcviewer.ui.util.FilterDataItem;
 
 /*************************************************************
  * 

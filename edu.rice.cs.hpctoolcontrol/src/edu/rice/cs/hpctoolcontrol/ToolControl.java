@@ -16,7 +16,6 @@ import org.eclipse.e4.ui.di.UISynchronize;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ProgressBar;
@@ -31,7 +30,6 @@ public class ToolControl
 {
 	private final UISynchronize sync;
 
-	private Canvas memory;
 	private ProgressBar progressBar;
 	private GobalProgressMonitor monitor;
 	private Label lblMessage;
@@ -155,6 +153,11 @@ public class ToolControl
 				});
 			}
 			return this;
+		}
+		
+		@Override
+		public void setTaskName(String name) {
+			lblMessage.setText(name);
 		}
 	}
 }

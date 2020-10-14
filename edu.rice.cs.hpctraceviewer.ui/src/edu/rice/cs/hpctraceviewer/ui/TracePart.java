@@ -29,6 +29,7 @@ import edu.rice.cs.hpctraceviewer.data.local.LocalDBOpener;
 import edu.rice.cs.hpctraceviewer.ui.base.AbstractBaseItem;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.base.ITraceViewAction;
+import edu.rice.cs.hpctraceviewer.ui.blamestat.HPCBlameView;
 import edu.rice.cs.hpctraceviewer.ui.callstack.HPCCallStackView;
 import edu.rice.cs.hpctraceviewer.ui.context.BaseTraceContext;
 import edu.rice.cs.hpctraceviewer.ui.depth.HPCDepthView;
@@ -83,6 +84,7 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 	private HPCSummaryView   tbtmSummaryView;
 	
 	private HPCStatView tbtmStatView;
+	private HPCBlameView tbtmBlameView;
 	
 	private SpaceTimeMiniCanvas miniCanvas;
 	
@@ -145,12 +147,15 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 		tbtmStatView = new HPCStatView(tabFolderRight, SWT.NONE);
 		createTabItem(tbtmStatView, "Statistics", tabFolderRight, eventBroker);
 		
+		tbtmBlameView = new HPCBlameView(tabFolderRight, SWT.NONE);
+		createTabItem(tbtmBlameView, "Serialization Analysis", tabFolderRight, eventBroker);
+		
 		tabFolderRight.addSelectionListener(new SelectionListener() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 
-				if (e.item == tbtmStatView) {
+				if (e.item == tbtmStatView || e.item == tbtmBlameView) {
 					int numItems = tbtmStatView.getItemCount();
 					if (numItems < 1) {
 						activateStatisticItem();
@@ -295,6 +300,7 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 			tbtmCallStack.setInput(stdc);
 			miniCanvas.   updateView(stdc);
 			tbtmStatView .setInput(stdc);
+			tbtmBlameView.setInput(stdc);
 			
 			// TODO: summary view has to be set AFTER the stat view 
 			//       since the stat view requires info from summary view 

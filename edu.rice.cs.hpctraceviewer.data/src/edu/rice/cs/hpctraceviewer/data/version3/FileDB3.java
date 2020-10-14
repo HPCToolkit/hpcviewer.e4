@@ -128,4 +128,9 @@ public class FileDB3 implements IFileDB
 		return dataSummary.getIdTuple(option);
 	}
 
+	@Override
+	public List<Short> getIdTupleTypes() {
+		return dataSummary.getIdTupleTypes();
+	}
+
 }

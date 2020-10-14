@@ -9,7 +9,6 @@ import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -29,17 +28,17 @@ import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
+import edu.rice.cs.hpc.filter.dialog.FilterDataItem;
+import edu.rice.cs.hpc.filter.dialog.ThreadFilterDialog;
 import edu.rice.cs.hpcdata.tld.collection.ThreadDataCollectionFactory;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
-import edu.rice.cs.hpcviewer.ui.dialogs.ThreadFilterDialog;
 import edu.rice.cs.hpcviewer.ui.graph.GraphMenu;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractContentProvider;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractViewBuilder;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
 import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadViewInput;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
-import edu.rice.cs.hpcviewer.ui.util.FilterDataItem;
 
 /*************************************************************
  * 
@@ -145,30 +144,20 @@ public class TopDownContentViewer extends AbstractViewBuilder
 			MessageDialog.openError(shell, msg, e.getClass().getName() + ": " + e.getLocalizedMessage());
 			return;
 		}
-		List<FilterDataItem> items =  new ArrayList<FilterDataItem>(labels.length);
+
+		List<FilterDataItem> items = ThreadFilterDialog.filter(shell, labels, null);
 		
-		for (int i=0; i<labels.length; i++) {
-			FilterDataItem obj = new FilterDataItem(labels[i], false, true);
-			items.add(obj);
-		}
-
-		ThreadFilterDialog dialog = new ThreadFilterDialog(shell, items);
-		if (dialog.open() == Window.OK) {
-			items = dialog.getResult();
-			if (items != null) {
-				List<Integer> threads = new ArrayList<Integer>();
-				for(int i=0; i<items.size(); i++) {
-					if (items.get(i).checked) {
-						threads.add(i);
-					}
+		if (items != null) {
+			List<Integer> threads = new ArrayList<Integer>();
+			for(int i=0; i<items.size(); i++) {
+				if (items.get(i).checked) {
+					threads.add(i);
 				}
-				if (threads.size()>0) {
-					ScopeTreeViewer treeViewer = getViewer();
-					
-					ThreadViewInput input = new ThreadViewInput(treeViewer.getRootScope(), threadData, threads);
-
-					profilePart.addThreadView(input);
-				}
+			}
+			if (threads.size()>0) {
+				ScopeTreeViewer treeViewer = getViewer();		
+				ThreadViewInput input = new ThreadViewInput(treeViewer.getRootScope(), threadData, threads);
+				profilePart.addThreadView(input);
 			}
 		}
 	}
