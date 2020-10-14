@@ -27,7 +27,7 @@ public class ThreadDataCollection2 extends AbstractThreadDataCollection
 	public ThreadDataCollection2(Experiment experiment)
 	{
 		this.experiment = experiment;
-		int num_metrics = experiment.getMetricRaw().length;
+		int num_metrics = experiment.getMetricRaw().size();
 		data_file		= new ThreadLevelDataFile[num_metrics];
 	}
 	
@@ -180,7 +180,7 @@ public class ThreadDataCollection2 extends AbstractThreadDataCollection
 		static public String getMergedFile(Experiment experiment, File directory, int metric_raw_id) throws IOException 
 		{
 			final HashMap<String, String> listOfFiles = new HashMap<String, String>();
-			final MetricRaw metric = (MetricRaw) experiment.getMetricRaw()[metric_raw_id];
+			final MetricRaw metric = (MetricRaw) experiment.getMetricRaw().get(metric_raw_id);// experiment.getMetricRaw()[metric_raw_id];
 			final String globInputFile = metric.getGlob();
 			
 			// assuming the number of merged experiments is less than 10

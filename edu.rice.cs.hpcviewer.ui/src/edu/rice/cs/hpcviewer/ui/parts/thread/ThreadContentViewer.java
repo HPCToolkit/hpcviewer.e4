@@ -103,8 +103,8 @@ public class ThreadContentViewer extends TopDownContentViewer
 	 * @param threads : list of threads
 	 * @throws IOException 
 	 */
-	private void initTableColumns(ThreadViewInput input, BaseMetric []mr)  {
-		if (mr == null) {
+	private void initTableColumns(ThreadViewInput input, List<MetricRaw> list)  {
+		if (list == null) {
 			// error
 			return;
 		}
@@ -130,17 +130,17 @@ public class ThreadContentViewer extends TopDownContentViewer
 		// but column X is for displaying the values for threads P while column Y is for displaying
 		// for threads Q. 
 		boolean sort = true;
-		HashMap<Integer, BaseMetric> listOfDuplicates = new HashMap<Integer, BaseMetric>(mr.length);
+		HashMap<Integer, BaseMetric> listOfDuplicates = new HashMap<Integer, BaseMetric>(list.size());
 		
-		for(int j=0; j<mr.length; j++)
+		for(MetricRaw metricOrig: list)
 		{
-			MetricRaw mdup = MetricRaw.create(mr[j]);
+			MetricRaw mdup = MetricRaw.create(metricOrig);
 			mdup.setThread(threads);
 			mdup.setDisplayName(mdup.getDisplayName());
 			
 			final String metricID = String.valueOf(treeViewer.getTree().getColumnCount());
 			mdup.setShortName(metricID);
-			listOfDuplicates.put(mr[j].getIndex(), mdup);
+			listOfDuplicates.put(metricOrig.getIndex(), mdup);
 			
 			treeViewer.addTreeColumn(mdup, sort);
 			

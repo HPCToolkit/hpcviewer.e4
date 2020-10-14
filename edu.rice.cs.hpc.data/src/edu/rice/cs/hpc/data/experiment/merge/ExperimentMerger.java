@@ -91,7 +91,7 @@ public class ExperimentMerger
 		
 		if (with_raw_metrics)
 		{
-			final MetricRaw metricRaw[] = buildMetricRaws( exp1.getMetricRaw(), exp2.getMetricRaw() );
+			final List<MetricRaw> metricRaw = buildMetricRaws( exp1.getMetricRaw(), exp2.getMetricRaw() );
 			merged.setMetricRaw(metricRaw);
 		}
 
@@ -251,34 +251,12 @@ public class ExperimentMerger
 	 * @param raws2
 	 * @return
 	 */
-	private static MetricRaw[] buildMetricRaws( BaseMetric raws1[], BaseMetric raws2[]) 
+	private static List<MetricRaw> buildMetricRaws( List<MetricRaw> raws1, List<MetricRaw> raws2) 
 	{
-		MetricRaw rawList[] = new MetricRaw[ raws1.length + raws2.length ];
-		
-		for (int i=0; i<raws1.length; i++)
-		{
-			rawList[i] = (MetricRaw) raws1[i].duplicate();
-			setMetricCombinedName(1, rawList[i]);
-		}
-		
-		for (int i=0; i<raws2.length; i++)
-		{
-			rawList[i + raws1.length] = (MetricRaw) raws2[i].duplicate();
-			setMetricCombinedName(2, rawList[i + raws1.length]);
-		}
+		List<MetricRaw> rawList = new ArrayList<>(raws1);
+		rawList.addAll(raws2);
 		
 		return rawList;
-	}
-
-	/***
-	 * create a new metric name based on the offset of the experiment and the metric
-	 * 
-	 * @param offset
-	 * @param m
-	 */
-	private static void setMetricCombinedName( int offset, BaseMetric m )
-	{
-		m.setDisplayName( offset + "-" + m.getDisplayName() );
 	}
 }
 
