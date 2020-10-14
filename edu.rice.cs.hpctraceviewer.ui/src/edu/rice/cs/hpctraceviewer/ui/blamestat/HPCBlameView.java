@@ -1,7 +1,6 @@
 package edu.rice.cs.hpctraceviewer.ui.blamestat;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -45,6 +44,7 @@ import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.ColorTable;
 import edu.rice.cs.hpctraceviewer.ui.base.AbstractBaseItem;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
+import edu.rice.cs.hpctraceviewer.ui.preferences.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.ui.summary.SummaryData;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 
@@ -102,7 +102,7 @@ public class HPCBlameView extends    AbstractBaseItem
 		colCount.setLabelProvider(new ColumnStatLabelProvider());
 		
 		column = colCount.getColumn();
-		layout.setColumnData(column, new ColumnWeightData(200, 40, true));
+		layout.setColumnData(column, new ColumnWeightData(200, 30, true));
 		
 		column.setText("%");
 		column.setAlignment(SWT.RIGHT);
@@ -181,7 +181,7 @@ public class HPCBlameView extends    AbstractBaseItem
 
 		tableViewer.setInput(listItems);
 		tableViewer.refresh();
-		tableViewer.getTable().getColumn(1).pack();
+		//tableViewer.getTable().getColumn(1).pack();
 	}
 	
 
@@ -303,7 +303,7 @@ public class HPCBlameView extends    AbstractBaseItem
 		
 		@Override
 		public int getToolTipDisplayDelayTime(Object object) {
-    		return IConstants.TOOLTIP_DELAY_MS;
+    		return TracePreferenceManager.getTooltipDelay();
 		}
 	}
 

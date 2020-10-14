@@ -152,7 +152,7 @@ public class LargeByteBuffer
 
 		// combine the higher and lower bytes, convert them to a long
 		
-		assert(byteLeft.length + byteLeft.length == numBytes);
+		assert(byteLeft.length + byteRight.length == numBytes);
 		
 		byte []resultByte = new byte[Long.BYTES];
 		for (int i=0; i<byteLeft.length; i++) {

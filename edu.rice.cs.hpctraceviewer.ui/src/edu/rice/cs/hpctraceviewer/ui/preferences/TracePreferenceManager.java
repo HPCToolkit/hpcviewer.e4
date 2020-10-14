@@ -30,11 +30,27 @@ public class TracePreferenceManager extends AbstractPreferenceManager
 		return renderOption == TracePreferenceConstants.RENDERING_MIDPOINT;
 	}
 	
-	private static int getRenderOption() {
-		return INSTANCE.getPreferenceStore().getInt(TracePreferenceConstants.PREF_RENDER_OPTION);
-	}
 	
+	/***
+	 * 
+	 * @return
+	 */
 	public static int getMaxThreads() {
 		return INSTANCE.getPreferenceStore().getInt(TracePreferenceConstants.PREF_MAX_THREADS);
+	}
+	
+	public static int getTooltipDelay() {
+		return INSTANCE.getPreferenceStore().getInt(TracePreferenceConstants.PREF_TOOLTIP_DELAY);
+	}
+
+	
+	////////////////////////////////////////
+	// 
+	// Private methods
+	//
+	////////////////////////////////////////
+
+	private static int getRenderOption() {
+		return INSTANCE.getPreferenceStore().getInt(TracePreferenceConstants.PREF_RENDER_OPTION);
 	}
 }
