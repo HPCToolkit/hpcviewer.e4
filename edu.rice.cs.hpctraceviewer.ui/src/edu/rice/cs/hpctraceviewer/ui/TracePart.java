@@ -151,7 +151,7 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 		createTabItem(tbtmStatView, "Statistics", tabFolderRight, eventBroker);
 		
 		tbtmBlameView = new HPCBlameView(tabFolderRight, SWT.NONE);
-		createTabItem(tbtmBlameView, "Serialization Analysis", tabFolderRight, eventBroker);
+		createTabItem(tbtmBlameView, "GPU Idleness Blame", tabFolderRight, eventBroker);
 		
 		tabFolderRight.addSelectionListener(new SelectionListener() {
 			
