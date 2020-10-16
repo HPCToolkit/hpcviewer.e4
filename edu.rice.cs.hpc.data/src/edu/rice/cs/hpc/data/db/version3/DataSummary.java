@@ -267,8 +267,9 @@ public class DataSummary extends DataCommon
 			profileNumberCache = profileNum;
 		}
 
-		long []indexes = binarySearch(cct_id, 0, 1+info.num_nz_contexts, byteBufferCache);
-		
+		long []indexes = newtonSearch(cct_id, 0, 1+info.num_nz_contexts, byteBufferCache);
+//		long []indexes = binarySearch(cct_id, 0, 1+info.num_nz_contexts, byteBufferCache);
+
 		if (indexes == null)
 			// the cct id is not found or the cct has no metrics. Should we return null or empty list?
 			return null;
@@ -622,7 +623,7 @@ public class DataSummary extends DataCommon
 	
 	
 	/***
-	 * Binary earch the cct index 
+	 * Binary search the cct index 
 	 * 
 	 * @param index the cct index
 	 * @param first the beginning of the relative index
@@ -634,7 +635,7 @@ public class DataSummary extends DataCommon
 		int begin = first;
 		int end   = last;
 		int mid   = (begin+end)/2;
-		
+
 		while (begin <= end) {
 			buffer.position(mid * CCT_RECORD_SIZE);
 			int cctidx  = buffer.getInt();
@@ -660,6 +661,93 @@ public class DataSummary extends DataCommon
 		return null;
 	}
 	
+	/***
+	 * Get the CCT index record from a given index position
+	 * @param buffer byte buffer
+	 * @param position int index of the cct
+	 * @return int
+	 */
+	private int getCCTIndex(ByteBuffer buffer, int position) {
+		buffer.position(position * CCT_RECORD_SIZE);
+		return buffer.getInt();
+	}
+	
+	/****
+	 * Get the file offset of a CCT. 
+	 * @param buffer ByteBuffer of the file
+	 * @param position int index of the cct
+	 * @return long
+	 */
+	private long getCCTOffset(ByteBuffer buffer, int position) {
+		buffer.position( (position * CCT_RECORD_SIZE) + Integer.BYTES);
+		return buffer.getLong();
+	}
+	
+	/***
+	 * Newton-style of Binary search the cct index 
+	 * 
+	 * @param cct the cct index
+	 * @param first the beginning of the relative index
+	 * @param last  the last of the relative index
+	 * @param buffer ByteBuffer of the file
+	 * @return 2-length array of indexes: the index of the found cct, and its next index
+	 */
+	private long[] newtonSearch(int cct, int first, int last, ByteBuffer buffer) {
+		int left_index  = first;
+		int right_index = last - CCT_RECORD_SIZE;
+		
+		int left_cct  = getCCTIndex(buffer, left_index);
+		int right_cct = getCCTIndex(buffer, right_index);
+		
+		while (right_index - left_index > 1) {
+			
+			int predicted_index;
+			final float cct_range = right_cct - left_cct;
+			final float rate = cct_range / (right_index - left_index);
+			final int mid_cct = (int) cct_range / 2;
+			
+			if (cct <= mid_cct) {
+				predicted_index = (int) Math.max( ((cct - left_cct)/rate) + left_index, left_index);
+			} else {
+				predicted_index = (int) Math.min(right_index - ((right_cct-cct)/rate), right_index);
+			}
+			
+			if (predicted_index <= left_cct) {
+				predicted_index = left_index + 1;
+			} 
+			if (predicted_index >= right_cct) {
+				predicted_index = right_index - 1;
+			}
+			
+			int current_cct = getCCTIndex(buffer, predicted_index);
+			
+			if (cct >= current_cct) {
+				left_index = predicted_index;
+				left_cct = current_cct;
+			} else {
+				right_index = predicted_index;
+				right_cct = current_cct;
+			}
+		}
+		
+		boolean found = cct == left_cct || cct == right_cct;
+		
+		if (found) {
+			int index = left_index;
+			if (cct == right_cct) 
+				// corrupt data: should throw exception 
+				index = right_index;
+			
+			long o1 = getCCTOffset(buffer, index);
+			long o2 = getCCTOffset(buffer, index + 1);
+
+			return new long[] {o1, o2};
+		}
+		// not found: the cct node has no metrics. 
+		// we may should return array of zeros instead of null
+		return null;
+	}
+	
 
 	/*******
 	 * print a list of metrics for a given CCT index
@@ -673,14 +761,14 @@ public class DataSummary extends DataCommon
 			List<MetricValueSparse> values = getMetrics(cct);
 			if (values == null)
 				return;
-			
+			/*
 			for(MetricValueSparse value: values) {
 				System.out.print(value.getIndex() + ": " + value.getValue() + " , ");
-			}
+			}*/
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
-			out.println();
+			//out.println();
 		}
 	}
 
@@ -729,4 +817,31 @@ public class DataSummary extends DataCommon
 				   ", offs: " 	 + offset;
 		}
 	}
+
+	/***************************
+	 * unit test 
+	 * 
+	 * @param argv
+	 ***************************/
+	public static void main(String []argv)
+	{
+		final String DEFAULT_FILE = "/Users/la5/data/sparse/hpctoolkit-database/thread.db";
+		final String filename;
+		if (argv != null && argv.length>0)
+			filename = argv[0];
+		else
+			filename = DEFAULT_FILE;
+		
+		final DataSummary summary_data = new DataSummary();
+		try {
+			summary_data.open(filename);			
+			summary_data.printInfo(System.out);
+			summary_data.dispose();	
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
 }
