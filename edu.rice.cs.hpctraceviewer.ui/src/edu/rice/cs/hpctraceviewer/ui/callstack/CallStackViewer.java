@@ -227,7 +227,7 @@ public class CallStackViewer extends TableViewer
 		if (sample>=0) {
 			final CallPath cp = ptl.getCallPath(sample, depth);
 			if (cp != null)
-				sampleVector = ptl.getCallPath(sample, depth).getFunctionNames();
+				sampleVector = cp.getFunctionNames();
 			else
 				// empty array of string
 				sampleVector = new Vector<String>();

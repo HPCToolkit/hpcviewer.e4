@@ -5,7 +5,7 @@ release=`date +"%Y.%m.%d"`
 
 echo "Release ${release}. Commit $GITC" > edu.rice.cs.hpcviewer.ui/release.txt
 
-#mvn clean package
+mvn clean package
 platform=`uname -m`
 prefix="linux.gtk"
 extension="tgz"
