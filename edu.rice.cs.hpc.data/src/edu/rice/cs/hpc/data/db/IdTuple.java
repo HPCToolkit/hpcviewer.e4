@@ -190,13 +190,19 @@ public class IdTuple
 			String str = "";
 			
 			for(int i=0; i<=level; i++) {
-				long lblIndex = index[i]; 
-				if (i==1) {
-					str += ".";
-				} else if (i>1) {
-					lblIndex = (long) (Math.pow(10, level-i) * index[i]);
+				if (kind[i] == IdTupleType.KIND_RANK   || 
+					kind[i] == IdTupleType.KIND_THREAD ||
+					kind[i] == IdTupleType.KIND_GPU_STREAM ||
+					kind[i] == IdTupleType.KIND_GPU_CONTEXT) {
+					
+					long lblIndex = index[i]; 
+					if (i==1) {
+						str += ".";
+					} else if (i>1) {
+						lblIndex = (long) (Math.pow(10, level-i) * index[i]);
+					}
+					str += lblIndex;
 				}
-				str += lblIndex;
 			}
 			return str;
 		}

@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import edu.rice.cs.hpc.data.db.IdTuple;
+import edu.rice.cs.hpc.data.db.IdTupleType;
 import edu.rice.cs.hpc.data.experiment.extdata.IFileDB;
 import edu.rice.cs.hpc.data.experiment.extdata.IFileDB.IdTupleOption;
 import edu.rice.cs.hpc.data.experiment.metric.MetricValueSparse;
@@ -51,6 +52,7 @@ public class DataSummary extends DataCommon
 	
 	private List<IdTuple>  listIdTuple, listIdTupleShort;
 	private List<ProfInfo> listProfInfo;
+	private int  []listNumKindVariants;
 	
 	/*** mapping from profile number to the sorted order*/
 	private Map<Integer, Integer> mapProfileToOrder;
@@ -378,6 +380,16 @@ public class DataSummary extends DataCommon
 		return mapProfileToOrder.get(orderNumber);
 	}
 
+	
+	/****
+	 * Return the number of counts for each kind
+	 * 
+	 * @return array of int
+	 */
+	public int []getNumOfKinds() {
+		return listNumKindVariants;
+	}
+	
 	// --------------------------------------------------------------------
 	// Protected methods
 	// --------------------------------------------------------------------
@@ -493,8 +505,11 @@ public class DataSummary extends DataCommon
 		// -----------------------------------------
 		
 		Map<Integer, Integer> mapLevelToSkip = new HashMap<Integer, Integer>();
+		listNumKindVariants = new int[IdTupleType.KIND_MAX];
 		
 		for(int i=0; i<mapLevelToHash.length; i++) {
+			
+			// find which levels we have to skip
 			if (mapLevelToHash[i] != null && mapLevelToHash[i].size()==1) {
 				// this level only has one variant.
 				// we can skip it.
@@ -564,6 +579,8 @@ public class DataSummary extends DataCommon
 					
 					if (!idTupleTypes.contains(kind))
 						idTupleTypes.add(kind);
+					
+					listNumKindVariants[kind]++;
 				}
 			}
 			listIdTupleShort.add(shortVersion);
