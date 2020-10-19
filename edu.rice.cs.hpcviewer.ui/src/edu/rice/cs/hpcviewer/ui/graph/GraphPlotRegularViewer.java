@@ -13,15 +13,17 @@ import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.MetricRaw;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.tld.collection.ThreadDataCollection2;
-import edu.rice.cs.hpcdata.tld.collection.ThreadDataCollection3;
 
 
+/********************************************************************
+ * 
+ * Class to plot a graph
+ *
+ *********************************************************************/
 public class GraphPlotRegularViewer extends AbstractGraphPlotViewer 
 {
 	public GraphPlotRegularViewer(CTabFolder tabFolder, int style) {
 		super(tabFolder, style);
-		// TODO Auto-generated constructor stub
 	}
 
 	static public final String LABEL = "Plot graph";
@@ -37,12 +39,6 @@ public class GraphPlotRegularViewer extends AbstractGraphPlotViewer
 		
 		try {
 			title = threadData.getRankTitle();
-			
-			if (threadData.getParallelismLevel()>1) 
-			{
-				xTick.setFormat(new DecimalFormat("######00.00##"));
-				return title;
-			}
 		} catch (IOException e) {			
 			e.printStackTrace();
 		}
@@ -58,9 +54,23 @@ public class GraphPlotRegularViewer extends AbstractGraphPlotViewer
 	
 	@Override
 	protected int setupXAxis(GraphEditorInput input, ILineSeries scatterSeries) {
-		IAxisSet axisSet = getChart().getAxisSet();
-		IThreadDataCollection threadData = input.getThreadData();
-		
+		//IAxisSet axisSet = getChart().getAxisSet();
+		try {
+			//final IAxisTick xTick = axisSet.getXAxis(0).getTick();
+			//xTick.setFormat(new DecimalFormat("#############"));
+
+			Scope scope = input.getScope();
+			BaseMetric metric = input.getMetric();
+
+			double [] x_values = getValuesX(scope, metric);
+			scatterSeries.setXSeries(x_values);
+			
+		} catch (NumberFormatException | IOException e) {
+			showErrorMessage(e);
+			return PLOT_ERR_UNKNOWN;
+		}
+/*		
+ 		IThreadDataCollection threadData = input.getThreadData();
 		if (threadData instanceof ThreadDataCollection2) {			
 			try {
 				final IAxisTick xTick = axisSet.getXAxis(0).getTick();
@@ -79,8 +89,15 @@ public class GraphPlotRegularViewer extends AbstractGraphPlotViewer
 		} else {
 			ThreadDataCollection3 data = (ThreadDataCollection3) threadData;
 			try {
+
+				Scope scope = input.getScope();
+				BaseMetric metric = input.getMetric();
 				
+				double []x_values = getValuesX(scope, metric);
+				scatterSeries.setXSeries(x_values);
+
 				String []labels = data.getRankStringLabels();
+				
 				axisSet.getXAxis(0).enableCategory(true);
 				axisSet.getXAxis(0).setCategorySeries(labels);
 				axisSet.getXAxis(0).getTick().setTickLabelAngle(45);
@@ -89,7 +106,7 @@ public class GraphPlotRegularViewer extends AbstractGraphPlotViewer
 				showErrorMessage(e);
 				return PLOT_ERR_UNKNOWN;
 			}
-		}
+		} */
 		return PLOT_OK;
 	}
 
