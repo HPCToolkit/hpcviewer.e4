@@ -7,11 +7,14 @@ import java.util.ArrayList;
 import org.eclipse.swt.custom.CTabFolder;
 import org.swtchart.IAxisSet;
 import org.swtchart.IAxisTick;
+import org.swtchart.ILineSeries;
 
 import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.MetricRaw;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.tld.collection.ThreadDataCollection2;
+import edu.rice.cs.hpcdata.tld.collection.ThreadDataCollection3;
 
 
 public class GraphPlotRegularViewer extends AbstractGraphPlotViewer 
@@ -50,6 +53,44 @@ public class GraphPlotRegularViewer extends AbstractGraphPlotViewer
 	protected double[] getValuesX(Scope scope, BaseMetric metric) throws NumberFormatException, IOException {
 		IThreadDataCollection threadData = getInput().getThreadData();
 		return threadData.getEvenlySparseRankLabels();
+	}
+	
+	
+	@Override
+	protected int setupXAxis(GraphEditorInput input, ILineSeries scatterSeries) {
+		IAxisSet axisSet = getChart().getAxisSet();
+		IThreadDataCollection threadData = input.getThreadData();
+		
+		if (threadData instanceof ThreadDataCollection2) {			
+			try {
+				final IAxisTick xTick = axisSet.getXAxis(0).getTick();
+				xTick.setFormat(new DecimalFormat("#############"));
+
+				Scope scope = input.getScope();
+				BaseMetric metric = input.getMetric();
+
+				double [] x_values = getValuesX(scope, metric);
+				scatterSeries.setXSeries(x_values);
+				
+			} catch (NumberFormatException | IOException e) {
+				showErrorMessage(e);
+				return PLOT_ERR_UNKNOWN;
+			}
+		} else {
+			ThreadDataCollection3 data = (ThreadDataCollection3) threadData;
+			try {
+				
+				String []labels = data.getRankStringLabels();
+				axisSet.getXAxis(0).enableCategory(true);
+				axisSet.getXAxis(0).setCategorySeries(labels);
+				axisSet.getXAxis(0).getTick().setTickLabelAngle(45);
+				
+			} catch (IOException e) {
+				showErrorMessage(e);
+				return PLOT_ERR_UNKNOWN;
+			}
+		}
+		return PLOT_OK;
 	}
 
 	@Override
