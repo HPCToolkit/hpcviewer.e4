@@ -529,12 +529,17 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 			  
 			  // create a new metric
 			  
-			  int metricLastIndex   = metricManager.getMetricCount() -1;
-			  BaseMetric metricLast = metricManager.getMetric(metricLastIndex);
+			  List<BaseMetric> list = metricManager.getMetricList();
+			  int maxIndex = 0;
+			  for (BaseMetric metric: list) {
+				  int index = metric.getIndex();
+				  maxIndex  = Math.max(maxIndex, index);
+			  }
+			  BaseMetric metricLast = metricManager.getMetric(maxIndex);
 			  
 			  String metricLastID = metricLast.getShortName();
-			  metricLastIndex = Integer.valueOf(metricLastID) + 1;
-			  metricLastID = String.valueOf(metricLastIndex);
+			  maxIndex = Integer.valueOf(metricLastID) + 1;
+			  metricLastID = String.valueOf(maxIndex);
 
 			  metric = new DerivedMetric(root, metricManager, expFormula, 
 					  cbName.getText(), metricLastID, metricManager.getMetricCount(), 
