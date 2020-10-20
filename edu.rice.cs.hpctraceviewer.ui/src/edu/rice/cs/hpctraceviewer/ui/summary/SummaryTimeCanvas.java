@@ -168,13 +168,15 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 		buffer.setBackground(Constants.COLOR_WHITE);
 		buffer.fillRectangle(0, 0, viewWidth, viewHeight);
 
-		float yScale = (float) viewHeight / (float) detailData.height;
-		float xScale = ((float) viewWidth / (float) detailData.width);
+		int width  = detailData.width / zoomFactor;
+		int height = detailData.height / zoomFactor;
+
+		float yScale = (float) viewHeight / (float) height;
+		float xScale = ((float) viewWidth / (float) width);
 		int xOffset = 0;
 
 		// Blame-Shift init table for the current callstack level
 		final ImageTraceAttributes attributes = dataTraces.getAttributes();
-		attributes.getDepth();
 		
         final IBaseData traceData = dataTraces.getBaseData();
         
@@ -190,7 +192,8 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 		// for every pixel along the width, check the pixel, group them based on color,
 		// count the amount of each group, and draw the pixel
 		// ---------------------------------------------------------------------------
-		for (int x = 0; x < detailData.width; ++x) {
+		
+		for (int x = 0; x < width; ++x) {
 			// ---------------------------------------------------------------------------
 			// use tree map to sort the key of color map
 			// without sort, it can be confusing
@@ -203,12 +206,12 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 			int gpu_idle_count = 0;
 			int cpu_idle_count = 0;
 						
-			for (int y = 0; y < detailData.height; ++y) { // One iter per trace line
+			for (int y = 0; y < height; ++y) { // One iter per trace line
 
-				int pixelValue = detailData.getPixel(x, y);
+				int pixelValue = detailData.getPixel(x*zoomFactor, y*zoomFactor);
 								
 				// get the profile of the current pixel
-				int process = attributes.convertTraceLineToRank(y / zoomFactor);				
+				int process = attributes.convertTraceLineToRank(y);				
 
 				boolean isCpuThread = true;
 				
@@ -272,7 +275,7 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 				final RGB rgb = detailData.palette.getRGB(pixel);
 				final Color c = new Color(getDisplay(), rgb);
 
-				final int height = (int) Math.ceil(count * yScale);
+				final int yLength = (int) Math.ceil(count * yScale);
 
 				buffer.setBackground(c);
 
@@ -281,12 +284,12 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 				// empty spaces if the number of colors are not a height's divisor.
 
 				if (i==size) {
-					buffer.fillRectangle(xOffset, yOffset - height, (int) Math.max(1, xScale), height);
+					buffer.fillRectangle(xOffset, yOffset - yLength, (int) Math.max(1, xScale), yLength);
 				} else {
 					buffer.fillRectangle(xOffset, 0, (int) Math.max(1, xScale), viewHeight - h);
 				}
 				i++;
-				yOffset -= height;
+				yOffset -= yLength;
 				c.dispose();
 
 				// accumulate the statistics of this pixel
@@ -315,7 +318,7 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 					}
 				}
 				
-				h += height;
+				h += yLength;
 			}
 			xOffset = Math.round(xOffset + xScale);
 		}
