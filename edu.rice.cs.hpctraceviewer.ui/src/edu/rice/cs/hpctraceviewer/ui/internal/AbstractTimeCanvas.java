@@ -217,6 +217,7 @@ implements ITraceCanvas, PaintListener
 	{
 		private final AbstractTimeCanvas canvas;
 		private final int deviceZoom;
+		private final int mulZoom; // multiple of zooms. Its value is deviceZoom / 100
 
 		public BufferedCanvasToolTip(AbstractTimeCanvas canvas) {
 			super(canvas);
@@ -227,6 +228,7 @@ implements ITraceCanvas, PaintListener
 			// will return incorrect pixel.
 			
 			deviceZoom	= DPIUtil.getDeviceZoom();
+			mulZoom     = deviceZoom / 100;
 
 			// delay the popup in millisecond
 			PreferenceStore pref = TracePreferenceManager.INSTANCE.getPreferenceStore();
@@ -254,7 +256,7 @@ implements ITraceCanvas, PaintListener
 				// corner case: when resizing is faster than rendering
 				return null;
 			
-			int pixel = imgData.getPixel(event.x, event.y);
+			int pixel = imgData.getPixel(event.x * mulZoom, event.y * mulZoom);
 			final RGB rgb = imgData.palette.getRGB(pixel);
 			
 			ColorTable colorTable = canvas.getColorTable();

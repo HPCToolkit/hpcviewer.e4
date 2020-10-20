@@ -21,6 +21,7 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.internal.DPIUtil;
 import org.eclipse.swt.widgets.Composite;
 
 
@@ -53,6 +54,8 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 	private final IEventBroker eventBroker;
 	private final ITracePart tracePart;
 
+	private final int zoomFactor;
+	
 	private SpaceTimeDataController dataTraces = null;
 	private TreeMap<Integer /* pixel */, Integer /* percent */> mapPixelToPercent;	
 	private TreeMap<Integer /* pixel */, Float /* percent */ >  cpuBlameMap;
@@ -78,6 +81,14 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 		cpuBlameMap = new TreeMap<Integer, Float>();
 		cpuTotalBlame = 0;
 		
+		// It is critical to reconstruct the image data according to Device zoom
+		// On Mac with retina display, the hardware pixel has 4x pixels than
+		// the swt level. Retrieving pixel without adapting with device zoom
+		// will return incorrect pixel.
+		
+		int deviceZoom = DPIUtil.getDeviceZoom();
+		zoomFactor     = deviceZoom / 100;
+
 		tracePart.getOperationHistory().addOperationHistoryListener(this);
 	}
 
@@ -197,11 +208,17 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 				int pixelValue = detailData.getPixel(x, y);
 								
 				// get the profile of the current pixel
-				int process = attributes.convertTraceLineToRank(y);				
+				int process = attributes.convertTraceLineToRank(y / zoomFactor);				
 
+				boolean isCpuThread = true;
+				
 				// get the profile's id tuple and verify if the later is a cpu thread
-				IdTuple tag = listTuples.get(process);
-				boolean isCpuThread = !tag.hasKind(IdTupleType.KIND_GPU_CONTEXT);
+				if (process < listTuples.size()) {
+					IdTuple tag = listTuples.get(process);
+					isCpuThread = !tag.hasKind(IdTupleType.KIND_GPU_CONTEXT);
+				} else {
+					System.err.println("bug detected: access to " + process + " out of " + listTuples.size());
+				}
 				
 				RGB rgb = detailData.palette.getRGB(pixelValue);
 				String proc_name = getColorTable().getProcedureNameByColorHash(rgb.hashCode());
@@ -354,17 +371,6 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 		return (dataTraces.getAttributes().getTimeInterval());
 	}
 
-	/****
-	 * <p>
-	 * broadcast the content of summary if it's already computed If the content is
-	 * not computed, do nothing.
-	 * </p>
-	 */
-	public void broadcast() {
-		if (this.detailData != null) {
-			broadcast(detailData);
-		}
-	}
 
 	private void broadcast(ImageData detailData) { // PaletteData palette, int totalPixels) {
 
