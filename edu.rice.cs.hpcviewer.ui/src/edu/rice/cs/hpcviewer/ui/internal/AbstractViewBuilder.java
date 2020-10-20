@@ -464,6 +464,9 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 			toolItem[ACTION_ZOOM_IN].setEnabled(false);
 			toolItem[ACTION_HOTPATH].setEnabled(false);
 		}
+		if (zoomAction == null)
+			return;
+		
 		boolean canZoomOut = zoomAction.canZoomOut() && 
 				(!stackActions.isEmpty() && stackActions.peek()==zoomAction);
 		

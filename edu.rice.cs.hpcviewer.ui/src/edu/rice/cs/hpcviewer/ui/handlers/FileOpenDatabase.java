@@ -19,7 +19,6 @@ public class FileOpenDatabase
 {
 	static public final String EDITOR_ID = "edu.rice.cs.hpcviewer.ui.part.editor";
 	
-	@Inject EPartService partService;
 	@Inject IEventBroker broker;
 	@Inject MApplication application;
 	@Inject EModelService modelService;
@@ -27,7 +26,10 @@ public class FileOpenDatabase
 	@Inject DatabaseCollection databaseCollection;
 
 	@Execute
-	public void execute(IWorkbench workbench, IEclipseContext context, @Named(IServiceConstants.ACTIVE_SHELL) Shell shell) {
+	public void execute(IWorkbench workbench, 
+						IEclipseContext context, 
+						EPartService partService,
+						@Named(IServiceConstants.ACTIVE_SHELL) Shell shell) {
 
 		databaseCollection.openDatabase(shell, application, partService, modelService, null);
 	}

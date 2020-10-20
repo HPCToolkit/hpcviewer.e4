@@ -29,15 +29,11 @@ import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
 import org.eclipse.e4.ui.model.application.ui.basic.MStackElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
-import org.eclipse.e4.ui.model.application.ui.basic.impl.BasicPackageImpl;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
-import org.eclipse.emf.common.notify.Notification;
-import org.eclipse.emf.common.notify.impl.AdapterImpl;
-import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
@@ -74,15 +70,17 @@ import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
 public class DatabaseCollection 
 {
 	static private final String STACK_ID_BASE 	  = "edu.rice.cs.hpcviewer.ui.partstack.integrated";
+
+	static public enum DatabaseExistance {
+		INEXIST, EXIST_REPLACE, EXIST_QUIT 
+	};
 	
+
 	final private HashMap<MWindow, List<BaseExperiment>>   mapWindowToExperiments;
 	final private HashMap<BaseExperiment, ViewerDataEvent> mapColumnStatus;
 	
-	private EPartService      partService;
 	private IEventBroker      eventBroker;
     private ExperimentManager experimentManager;
-    private MApplication      application;
-    private EModelService     modelService;
 	
 	private Logger    statusReporter;
 	
@@ -103,12 +101,10 @@ public class DatabaseCollection
 			final MApplication   application,
 			final EPartService   partService,
 			final IEventBroker   broker,
-			final EModelService  modelService, @Named(IServiceConstants.ACTIVE_SHELL) Shell myShell) {
+			final EModelService  modelService, 
+			@Named(IServiceConstants.ACTIVE_SHELL) Shell myShell) {
 		
-		this.partService    = partService;
 		this.eventBroker    = broker;
-		this.application    = application;
-		this.modelService   = modelService;
 
 		this.statusReporter = LoggerFactory.getLogger(getClass());
 
@@ -135,7 +131,7 @@ public class DatabaseCollection
 				return; 
 		}
 
-		openDatabaseAndCreateViews(shell, path, "Open a database");
+		openDatabaseAndCreateViews(application, modelService, partService, shell, path);
 	}
 	
 
@@ -161,10 +157,13 @@ public class DatabaseCollection
 		if (filename == null)
 			return;
 
-		if (isExist(shell, filename))
+		DatabaseExistance existance = checkExistance(application.getSelectedElement(), shell, filename);
+		if (existance == DatabaseExistance.EXIST_QUIT)
 			return;
-
-		openDatabaseAndCreateViews(shell, filename, "Add a database");
+		else if (existance == DatabaseExistance.EXIST_REPLACE)
+			removeAll(application, modelService, service);
+		
+		openDatabaseAndCreateViews(application, modelService, service, shell, filename);
 	}
 	
 	
@@ -191,11 +190,11 @@ public class DatabaseCollection
 		if (filename == null)
 			return;
 
-		if (isExist(shell, filename))
+		if (checkExistance(application.getSelectedElement(), shell, filename) == DatabaseExistance.EXIST_QUIT)
 			return;
 
-		removeAll();
-		openDatabaseAndCreateViews(shell, filename, "Open a database");
+		removeAll(application, modelService, service);
+		openDatabaseAndCreateViews(application, modelService, service, shell, filename);
 	}
 
 	
@@ -223,35 +222,21 @@ public class DatabaseCollection
 			return;
 		}
 		
-		IEclipseContext activeWindowContext = application.getContext().getActiveChild();;
-		
 		// Corner case for TWM window manager: sometimes the processing is faster
 		// than the UI, and thus Eclipse doesn't provide any context or any child
 		// at this stage. Maybe we should wait until it's ready?
-		
-		if (activeWindowContext == null) {
-			// we give up. There's still no active window yet.
-			MWindow window = application.getSelectedElement();
-			if (window == null)
-				return;
+
+		try {
+			showPart(experiment, application, modelService, service, parentId);
+		} catch (Exception e) {
+			String msg = "Cannot show a view: ";
 			
-			((EObject) window).eAdapters().add(new AdapterImpl() {
-				
-				@SuppressWarnings("restriction")
-				@Override
-				public void notifyChanged(Notification notification) {
-					if (notification.getFeatureID(MWindow.class) != BasicPackageImpl.WINDOW__CONTEXT) {
-						return;
-					}
-					IEclipseContext windowContext = (IEclipseContext) notification.getNewValue();
-					if (windowContext != null) {
-						showPart(experiment, application, service, parentId);
-					}
-				}
-			});
-			return;
+			IEclipseContext activeWindowContext = application.getContext().getActiveChild();;
+			if (activeWindowContext == null) {
+				msg += "No window context is active";
+			}
+			statusReport(0, msg, e);
 		}
-		showPart(experiment, application, service, parentId);
 	}
 	
 
@@ -264,7 +249,8 @@ public class DatabaseCollection
 	 * @param parentId
 	 */
 	private void showPart( BaseExperiment experiment, 
-						   MApplication application, 
+						   MApplication   application, 
+						   EModelService  modelService,
 						   EPartService   service,
 						   String parentId) {
 
@@ -335,7 +321,7 @@ public class DatabaseCollection
 		stack.setVisible(true);
 		stack.setOnTop(true);
 		
-		List<BaseExperiment> listExperiments = getActiveListExperiments();
+		List<BaseExperiment> listExperiments = getActiveListExperiments(application.getSelectedElement());
 		if (listExperiments != null) {
 			listExperiments.add(experiment);
 		}
@@ -352,18 +338,9 @@ public class DatabaseCollection
 				}
 			}
 		}
-
 	}
 	
-	/***
-	 * Retrieve the iterator of the database collection
-	 * 
-	 * @return Iterator for the list
-	 */
-	public Iterator<BaseExperiment> getIterator() {
-		List<BaseExperiment> list = getActiveListExperiments();
-		return list.iterator();
-	}
+	
 	
 	
 	/***
@@ -382,8 +359,8 @@ public class DatabaseCollection
 	 * Retrieve the current registered databases
 	 * @return
 	 */
-	public int getNumDatabase() {
-		List<BaseExperiment> list = getActiveListExperiments();
+	public int getNumDatabase(MWindow window) {
+		List<BaseExperiment> list = getActiveListExperiments(window);
 		if (list == null)
 			return 0;
 		return list.size();
@@ -394,8 +371,8 @@ public class DatabaseCollection
 	 * Check if the database is empty or not
 	 * @return true if the database is empty
 	 */
-	public boolean isEmpty() {
-		List<BaseExperiment> list = getActiveListExperiments();
+	public boolean isEmpty(MWindow window) {
+		List<BaseExperiment> list = getActiveListExperiments(window);
 		return list.isEmpty();
 	}
 	
@@ -404,21 +381,12 @@ public class DatabaseCollection
 	 * Remove the last registered database
 	 * @return
 	 */
-	public BaseExperiment getLast() {
-		List<BaseExperiment> list = getActiveListExperiments();
+	public BaseExperiment getLast(MWindow window) {
+		List<BaseExperiment> list = getActiveListExperiments(window);
 		return list.get(list.size()-1);
 	}
 	
 	
-	/***
-	 * Check if an experiment already exist in the collection
-	 * @param experiment
-	 * @return true if the experiment already exists. False otherwise.
-	 */
-	public boolean IsExist(BaseExperiment experiment) {
-		List<BaseExperiment> list = getActiveListExperiments();
-		return list.contains(experiment);
-	}
 	
 	
 	/***
@@ -427,8 +395,8 @@ public class DatabaseCollection
 	 * @param pathXML the absolute path of the experiment XNK file path
 	 * @return BaseExperiment object if the database exist, null otherwise.
 	 */
-	public BaseExperiment getExperiment(String pathXML) {
-		List<BaseExperiment> list = getActiveListExperiments();
+	public BaseExperiment getExperiment(MWindow window, String pathXML) {
+		List<BaseExperiment> list = getActiveListExperiments(window);
 		
 		if (list.isEmpty())
 			return null;
@@ -449,16 +417,19 @@ public class DatabaseCollection
 	 * @param pathXML the absolute path to XML file
 	 * @return true of the XML file already exist. False otherwise
 	 */
-	public boolean isExist(Shell shell, String pathXML) {
+	public DatabaseExistance checkExistance(MWindow window, Shell shell, String pathXML) {
 		
-		BaseExperiment exp = getExperiment(pathXML);
+		BaseExperiment exp = getExperiment(window, pathXML);
 		if (exp != null) {
 			// we cannot have two exactly the same database in one window
-			MessageDialog.openError(shell, "Error", pathXML +": the database is already opened." );
+			if (MessageDialog.openQuestion(shell, 
+									   "Warning: database already exists", 
+									   pathXML +": the database is already opened.\nDo you want to replace the existing one?" ) )
+				return DatabaseExistance.EXIST_REPLACE;
 
-			return true;
+			return DatabaseExistance.EXIST_QUIT;
 		}
-		return false;
+		return DatabaseExistance.INEXIST;
 	}
 	
 	
@@ -467,7 +438,10 @@ public class DatabaseCollection
 	 * 
 	 * @param experiment
 	 */
-	public void removeDatabase(final BaseExperiment experiment) {
+	public void removeDatabase(MApplication application, 
+							   EModelService modelService, 
+							   EPartService partService, 
+							   final BaseExperiment experiment) {
 		
 		if (experiment == null)
 			return;
@@ -475,7 +449,7 @@ public class DatabaseCollection
 		// remove any database associated with this experiment
 		// some parts may need to check the database if the experiment really exits or not.
 		// If not, they will consider the experiment will be removed.
-		List<BaseExperiment> list = getActiveListExperiments();
+		List<BaseExperiment> list = getActiveListExperiments(application.getSelectedElement());
 		list.remove(experiment);
 
 		mapColumnStatus.remove(experiment);
@@ -513,8 +487,8 @@ public class DatabaseCollection
 	 * Remove all databases
 	 * @return
 	 */
-	public int removeAll() {
-		List<BaseExperiment> list = getActiveListExperiments();
+	public int removeAll(MApplication application, EModelService modelService, EPartService partService) {
+		List<BaseExperiment> list = getActiveListExperiments(application.getSelectedElement());
 		
 		int size = list.size();
 		
@@ -526,7 +500,7 @@ public class DatabaseCollection
 		
 		for(BaseExperiment exp: arrayExp) {
 			// inside this method, we remove the database AND hide the view parts
-			removeDatabase(exp);
+			removeDatabase(application, modelService, partService, exp);
 		}
 		
 		list.clear();
@@ -586,8 +560,8 @@ public class DatabaseCollection
 	 * @return the list of experiments (if there's an active window). null otherwise.
 	 * 
 	 */
-	private List<BaseExperiment> getActiveListExperiments() {
-		MWindow window = application.getSelectedElement();
+	private List<BaseExperiment> getActiveListExperiments(MWindow window) {
+
 		if (window == null) {
 			statusReport(IStatus.ERROR, "no active window", null);
 			return null;
@@ -642,12 +616,16 @@ public class DatabaseCollection
 
 	/****
 	 * Open a database using background job, and then create views using UI thread
-	 * 
+	 *
+	 * @param partService
 	 * @param shell
 	 * @param database
-	 * @param message
 	 */
-	private void openDatabaseAndCreateViews(final Shell shell, final String database, final String message) {
+	private void openDatabaseAndCreateViews(final MApplication application,
+											final EModelService modelService,
+											final EPartService partService,
+											final Shell shell, 
+											final String database) {
 
 		try {
 			final BaseExperiment experiment = openDatabase(shell, database);

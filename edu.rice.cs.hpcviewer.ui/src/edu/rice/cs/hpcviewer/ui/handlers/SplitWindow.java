@@ -4,6 +4,7 @@ import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.model.application.ui.MElementContainer;
 import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
@@ -28,9 +29,11 @@ public class SplitWindow
 	
 	
 	@CanExecute
-	public boolean canExecute(DatabaseCollection database, @Named(IServiceConstants.ACTIVE_PART) MPart part) {
+	public boolean canExecute(DatabaseCollection database, 
+							  @Named(IServiceConstants.ACTIVE_PART) MPart part,
+							  MWindow window) {
 		
-		if (database.getNumDatabase()<2)
+		if (database.getNumDatabase(window)<2)
 			return false;
 		
 		MElementContainer<MUIElement> container = part.getParent();
