@@ -32,6 +32,7 @@ import edu.rice.cs.hpctraceviewer.data.local.LocalDBOpener;
 import edu.rice.cs.hpctraceviewer.ui.base.AbstractBaseItem;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.base.ITraceViewAction;
+import edu.rice.cs.hpctraceviewer.ui.blamestat.CpuBlameAnalysis;
 import edu.rice.cs.hpctraceviewer.ui.blamestat.HPCBlameView;
 import edu.rice.cs.hpctraceviewer.ui.callstack.HPCCallStackView;
 import edu.rice.cs.hpctraceviewer.ui.context.BaseTraceContext;
@@ -42,6 +43,7 @@ import edu.rice.cs.hpctraceviewer.ui.minimap.SpaceTimeMiniCanvas;
 import edu.rice.cs.hpctraceviewer.ui.preferences.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.ui.statistic.HPCStatView;
 import edu.rice.cs.hpctraceviewer.ui.summary.HPCSummaryView;
+import edu.rice.cs.hpctraceviewer.ui.summary.IPixelAnalysis;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 
 import javax.annotation.PreDestroy;
@@ -327,6 +329,9 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 			}
 			if (!hasGPU) {
 				tbtmBlameView.dispose();
+				tbtmSummaryView.setAnalysisTool(IPixelAnalysis.EMPTY);
+			} else {
+				tbtmSummaryView.setAnalysisTool(new CpuBlameAnalysis(eventBroker));
 			}
 			
 		} catch (Exception e) {

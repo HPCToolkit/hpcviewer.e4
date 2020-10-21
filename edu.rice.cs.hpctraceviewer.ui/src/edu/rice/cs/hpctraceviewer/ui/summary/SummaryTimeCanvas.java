@@ -1,6 +1,5 @@
 package edu.rice.cs.hpctraceviewer.ui.summary;
 
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
@@ -23,14 +22,6 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.DPIUtil;
 import org.eclipse.swt.widgets.Composite;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import edu.rice.cs.hpc.data.db.IdTuple;
-import edu.rice.cs.hpc.data.db.IdTupleType;
-import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
-import edu.rice.cs.hpc.data.experiment.extdata.IFileDB.IdTupleOption;
-
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.context.BaseTraceContext;
 import edu.rice.cs.hpctraceviewer.ui.internal.AbstractTimeCanvas;
@@ -59,13 +50,11 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 	
 	private SpaceTimeDataController dataTraces = null;
 	private TreeMap<Integer /* pixel */, Integer /* percent */> mapPixelToPercent;	
-	private TreeMap<Integer /* pixel */, Float /* percent */ >  cpuBlameMap;
-	
-	private float cpuTotalBlame;
 	
 	private int totPixels;
 	private ImageData detailData;
 
+	private IPixelAnalysis analysisTool;
 	
 	/**********************************
 	 * Construct a summary canvas without background nor scrollbar
@@ -76,11 +65,10 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 		super(composite, SWT.NO_BACKGROUND);
 
 		this.eventBroker = eventBroker;
-		this.tracePart = tracePart;
+		this.tracePart   = tracePart;
+		analysisTool     = IPixelAnalysis.EMPTY;
 		
 		mapPixelToPercent = new TreeMap<Integer, Integer>();		
-		cpuBlameMap = new TreeMap<Integer, Float>();
-		cpuTotalBlame = 0;
 		
 		// It is critical to reconstruct the image data according to Device zoom
 		// On Mac with retina display, the hardware pixel has 4x pixels than
@@ -93,6 +81,12 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 		tracePart.getOperationHistory().addOperationHistoryListener(this);
 	}
 
+	
+	public void setAnalysisTool(IPixelAnalysis analysisTool) {
+		this.analysisTool = analysisTool;
+	}
+	
+	
 	@Override
 	public void paintControl(PaintEvent event) {
 		if (dataTraces == null)
@@ -181,7 +175,7 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 		// ----------------------------------
 		// plugin initialization
 		// ----------------------------------
-		initAnalysis();
+		analysisTool.analysisInit(dataTraces, getColorTable());
 		
 		// ---------------------------------------------------------------------------
 		// needs to be optimized:
@@ -197,8 +191,9 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 			TreeMap<Integer, Integer> mapPixelToCount  = new TreeMap<Integer, Integer>();
 			
 			// ------------------------------------------------------------------------
+			// Analysis plugin				
 			// ------------------------------------------------------------------------
-			initPixelAnalysis(x);
+			analysisTool.analysisPixelInit(x);
 
 			for (int y = 0; y < height; ++y) { // One iter per trace line
 
@@ -215,7 +210,7 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 				// ------------------------------------------------------------------------
 				// Analysis plugin				
 				// ------------------------------------------------------------------------
-				analyzePixel(x, y, pixelValue);
+				analysisTool.analysisPixelXY(detailData, x, y, pixelValue);
 			}
 			
 			// ---------------------------------------------------------------------------
@@ -262,9 +257,8 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 
 				// ----------------------------------------------------------------------------
 				// Recap analysis plugin:
-				// If all gpu is idle, we compute the blame to cpu.
 				// ----------------------------------------------------------------------------
-				recapAnalysis(pixel);
+				analysisTool.analysisPixelFinal(pixel);
 			}
 			xOffset = Math.round(xOffset + xScale);
 		}
@@ -274,96 +268,16 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 
 		redraw();
 
-		broadcast(detailData);
-	}
-
-	private void initAnalysis() {
-		cpuBlameMap.clear();		
-		cpuTotalBlame = (float) 0;
-	}
-	
-	int cpu_active_count = 0;
-	int gpu_active_count = 0;
-	int gpu_idle_count = 0;
-	int cpu_idle_count = 0;
-	TreeMap<Integer, Integer> mapCpuPixelCount = new TreeMap<Integer, Integer>();
-
-	private void initPixelAnalysis(int x) {
-		cpu_active_count = 0;
-		gpu_active_count = 0;
-		gpu_idle_count = 0;
-		cpu_idle_count = 0;
-	}
-	
-	private void analyzePixel(int x, int y, int pixelValue) {
-
-		// Blame-Shift init table for the current callstack level
-		final ImageTraceAttributes attributes = dataTraces.getAttributes();
+		Integer totalPixels = detailData.height * detailData.width;
+		SummaryData data = new SummaryData(detailData.palette, mapPixelToPercent, getColorTable(), totalPixels);
+		eventBroker.post(IConstants.TOPIC_STATISTICS, data);
 		
-        final IBaseData traceData = dataTraces.getBaseData();
-        
-        // get the list of id tuples
-		List<IdTuple> listTuples = traceData.getListOfIdTuples(IdTupleOption.BRIEF);
-
-		// get the profile of the current pixel
-		int process = attributes.convertTraceLineToRank(y);				
-
-		boolean isCpuThread = true;
-
-		// get the profile's id tuple and verify if the later is a cpu thread
-		if (process < listTuples.size()) {
-			IdTuple tag = listTuples.get(process);
-			isCpuThread = !tag.hasKind(IdTupleType.KIND_GPU_CONTEXT);
-		} else {
-			Logger logger = LoggerFactory.getLogger(getClass());
-			logger.error("bug detected: access to " + process + " out of " + listTuples.size());
-		}
-
-		RGB rgb = detailData.palette.getRGB(pixelValue);
-		String proc_name = getColorTable().getProcedureNameByColorHash(rgb.hashCode());
-
-		if (isCpuThread) { // cpu thread
-			if (proc_name.equals(ColorTable.UNKNOWN_PROCNAME)) {
-				cpu_idle_count = cpu_idle_count + 1;
-			} else {
-				cpu_active_count = cpu_active_count + 1;
-				Integer count = mapCpuPixelCount.get(pixelValue);
-				if (count == null) {
-					mapCpuPixelCount.put(pixelValue, 1);
-				} else {
-					mapCpuPixelCount.put(pixelValue, count+1);
-				}
-			}
-
-		} else {		// gpu thread
-			if (proc_name.equals(ColorTable.UNKNOWN_PROCNAME) ||
-					proc_name.equals("<gpu sync>")) {
-
-				gpu_idle_count = gpu_idle_count + 1;
-			} else {
-				gpu_active_count = gpu_active_count + 1;
-			} 
-		}
+		// ----------------------------------------------------------------------------
+		// Finalize external plugin
+		// ----------------------------------------------------------------------------
+		analysisTool.analysisFinal(detailData);
 	}
-	
-	private void recapAnalysis(int pixel) {
-		
-		if (cpu_active_count > 0 && gpu_active_count == 0 && gpu_idle_count != 0 ) {
-			// Blame CPU
-			Integer blameCount = mapCpuPixelCount.get(pixel);
-			if (blameCount != null) {
-				
-				float blame = blameCount.floatValue() / cpu_active_count;
-				cpuTotalBlame = cpuTotalBlame + blame;
-				Float oldBlame = cpuBlameMap.get(pixel);
-				if (oldBlame != null) {
-					cpuBlameMap.put(pixel, oldBlame + blame);
-				} else {
-					cpuBlameMap.put(pixel, blame);
-				}
-			}
-		}
-	}
+
 	
 	
 	/****
@@ -408,20 +322,6 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 		return (dataTraces.getAttributes().getTimeInterval());
 	}
 
-
-	private void broadcast(ImageData detailData) { // PaletteData palette, int totalPixels) {
-
-		Integer totalPixels = detailData.height * detailData.width;
-		SummaryData data = new SummaryData(detailData.palette, mapPixelToPercent, getColorTable(), totalPixels);
-		eventBroker.post(IConstants.TOPIC_STATISTICS, data);
-
-		data = new SummaryData(	detailData.palette, getColorTable(), 
-								cpuBlameMap, cpuTotalBlame,
-								null, 0
-								/*gpuBlameMap, gpuTotalBlame*/);
-		
-		eventBroker.post(IConstants.TOPIC_BLAME, data);				
-	}
 
 	// ---------------------------------------------------------------------------------------
 	// Override methods
