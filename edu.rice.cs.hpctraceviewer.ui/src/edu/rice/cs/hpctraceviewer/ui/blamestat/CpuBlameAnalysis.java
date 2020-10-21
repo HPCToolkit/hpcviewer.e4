@@ -20,13 +20,18 @@ import edu.rice.cs.hpctraceviewer.ui.summary.IPixelAnalysis;
 import edu.rice.cs.hpctraceviewer.ui.summary.SummaryData;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 
+
+/************************************************************
+ * 
+ * CPU-GPU blame analysis
+ * 
+ ************************************************************/
 public class CpuBlameAnalysis implements IPixelAnalysis 
 {
 	private final static String GPU_SYNC = "<gpu sync>";
 	
 	private final TreeMap<Integer /* pixel */, Float /* percent */ >  cpuBlameMap;
 	private final TreeMap<Integer, Integer> mapCpuPixelCount;
-
 	private final IEventBroker eventBroker;
 	private float cpuTotalBlame;
 
@@ -38,11 +43,17 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 	private int gpu_idle_count = 0;
 	private int cpu_idle_count = 0;
 
+	
+	/****
+	 * Constructor of the class
+	 * @param eventBroker {@code IEventBroker}
+	 */
 	public CpuBlameAnalysis(IEventBroker eventBroker) {
 		this.eventBroker = eventBroker;
 		
-		cpuBlameMap = new TreeMap<Integer, Float>();
+		cpuBlameMap      = new TreeMap<Integer, Float>();
 		mapCpuPixelCount = new TreeMap<Integer, Integer>();
+		new TreeMap<Integer, Integer>();
 		
 		cpuTotalBlame = 0;
 	}
@@ -62,7 +73,9 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 		cpu_active_count = 0;
 		gpu_active_count = 0;
 		gpu_idle_count = 0;
-		cpu_idle_count = 0;		
+		cpu_idle_count = 0;
+		
+		mapCpuPixelCount.clear();
 	}
 
 	@Override
@@ -147,7 +160,5 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 								null, 0);
 		
 		eventBroker.post(IConstants.TOPIC_BLAME, data);				
-
 	}
-
 }
