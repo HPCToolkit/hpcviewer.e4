@@ -23,7 +23,8 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.DPIUtil;
 import org.eclipse.swt.widgets.Composite;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpc.data.db.IdTuple;
 import edu.rice.cs.hpc.data.db.IdTupleType;
@@ -174,19 +175,14 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 		float yScale = (float) viewHeight / (float) height;
 		float xScale = ((float) viewWidth / (float) width);
 		int xOffset = 0;
-
-		// Blame-Shift init table for the current callstack level
-		final ImageTraceAttributes attributes = dataTraces.getAttributes();
-		
-        final IBaseData traceData = dataTraces.getBaseData();
-        
-        // get the list of id tuples
-		List<IdTuple> listTuples = traceData.getListOfIdTuples(IdTupleOption.BRIEF);
 		
 		mapPixelToPercent.clear();
-		cpuBlameMap.clear();		
-		cpuTotalBlame = (float) 0;
 
+		// ----------------------------------
+		// plugin initialization
+		// ----------------------------------
+		initAnalysis();
+		
 		// ---------------------------------------------------------------------------
 		// needs to be optimized:
 		// for every pixel along the width, check the pixel, group them based on color,
@@ -198,56 +194,16 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 			// use tree map to sort the key of color map
 			// without sort, it can be confusing
 			// ---------------------------------------------------------------------------
-			TreeMap<Integer, Integer> mapCpuPixelCount = new TreeMap<Integer, Integer>();
 			TreeMap<Integer, Integer> mapPixelToCount  = new TreeMap<Integer, Integer>();
 			
-			int cpu_active_count = 0;
-			int gpu_active_count = 0;
-			int gpu_idle_count = 0;
-			int cpu_idle_count = 0;
-						
+			// ------------------------------------------------------------------------
+			// ------------------------------------------------------------------------
+			initPixelAnalysis(x);
+
 			for (int y = 0; y < height; ++y) { // One iter per trace line
 
 				int pixelValue = detailData.getPixel(x*zoomFactor, y*zoomFactor);
-								
-				// get the profile of the current pixel
-				int process = attributes.convertTraceLineToRank(y);				
-
-				boolean isCpuThread = true;
 				
-				// get the profile's id tuple and verify if the later is a cpu thread
-				if (process < listTuples.size()) {
-					IdTuple tag = listTuples.get(process);
-					isCpuThread = !tag.hasKind(IdTupleType.KIND_GPU_CONTEXT);
-				} else {
-					System.err.println("bug detected: access to " + process + " out of " + listTuples.size());
-				}
-				
-				RGB rgb = detailData.palette.getRGB(pixelValue);
-				String proc_name = getColorTable().getProcedureNameByColorHash(rgb.hashCode());
-				
-				if (isCpuThread) { // cpu thread
-					if (proc_name.equals(ColorTable.UNKNOWN_PROCNAME)) {
-						cpu_idle_count = cpu_idle_count + 1;
-					} else {
-						cpu_active_count = cpu_active_count + 1;
-						Integer count = mapCpuPixelCount.get(pixelValue);
-						if (count == null) {
-							mapCpuPixelCount.put(pixelValue, 1);
-						} else {
-							mapCpuPixelCount.put(pixelValue, count+1);
-						}
-					}
-					
-				} else {		// gpu thread
-					if (proc_name.equals(ColorTable.UNKNOWN_PROCNAME) ||
-						proc_name.equals("<gpu sync>")) {
-
-						gpu_idle_count = gpu_idle_count + 1;
-					} else {
-						gpu_active_count = gpu_active_count + 1;
-					} 
-				}
 				Integer old = mapPixelToCount.get(pixelValue);
 				if (old != null) {
 					old++;
@@ -255,6 +211,11 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 				} else {
 					mapPixelToCount.put(pixelValue, 1);
 				}
+				
+				// ------------------------------------------------------------------------
+				// Analysis plugin				
+				// ------------------------------------------------------------------------
+				analyzePixel(x, y, pixelValue);
 			}
 			
 			// ---------------------------------------------------------------------------
@@ -296,29 +257,14 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 				Integer val = mapPixelToPercent.get(pixel);
 				Integer acc = (val == null ? count : val + count);
 				mapPixelToPercent.put(pixel, acc);
-
-				// ----------------------------------------------------------------------------
-				// GPU Blame analysis:
-				// If all gpu is idle, we compute the blame to cpu.
-				// ----------------------------------------------------------------------------
-				
-				if (cpu_active_count > 0 && gpu_active_count == 0 && gpu_idle_count != 0 ) {
-					// Blame CPU
-					Integer blameCount = mapCpuPixelCount.get(pixel);
-					if (blameCount != null) {
-						
-						float blame = blameCount.floatValue() / cpu_active_count;
-						cpuTotalBlame = cpuTotalBlame + blame;
-						Float oldBlame = cpuBlameMap.get(pixel);
-						if (oldBlame != null) {
-							cpuBlameMap.put(pixel, oldBlame + blame);
-						} else {
-							cpuBlameMap.put(pixel, blame);
-						}
-					}
-				}
 				
 				h += yLength;
+
+				// ----------------------------------------------------------------------------
+				// Recap analysis plugin:
+				// If all gpu is idle, we compute the blame to cpu.
+				// ----------------------------------------------------------------------------
+				recapAnalysis(pixel);
 			}
 			xOffset = Math.round(xOffset + xScale);
 		}
@@ -331,6 +277,94 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 		broadcast(detailData);
 	}
 
+	private void initAnalysis() {
+		cpuBlameMap.clear();		
+		cpuTotalBlame = (float) 0;
+	}
+	
+	int cpu_active_count = 0;
+	int gpu_active_count = 0;
+	int gpu_idle_count = 0;
+	int cpu_idle_count = 0;
+	TreeMap<Integer, Integer> mapCpuPixelCount = new TreeMap<Integer, Integer>();
+
+	private void initPixelAnalysis(int x) {
+		cpu_active_count = 0;
+		gpu_active_count = 0;
+		gpu_idle_count = 0;
+		cpu_idle_count = 0;
+	}
+	
+	private void analyzePixel(int x, int y, int pixelValue) {
+
+		// Blame-Shift init table for the current callstack level
+		final ImageTraceAttributes attributes = dataTraces.getAttributes();
+		
+        final IBaseData traceData = dataTraces.getBaseData();
+        
+        // get the list of id tuples
+		List<IdTuple> listTuples = traceData.getListOfIdTuples(IdTupleOption.BRIEF);
+
+		// get the profile of the current pixel
+		int process = attributes.convertTraceLineToRank(y);				
+
+		boolean isCpuThread = true;
+
+		// get the profile's id tuple and verify if the later is a cpu thread
+		if (process < listTuples.size()) {
+			IdTuple tag = listTuples.get(process);
+			isCpuThread = !tag.hasKind(IdTupleType.KIND_GPU_CONTEXT);
+		} else {
+			Logger logger = LoggerFactory.getLogger(getClass());
+			logger.error("bug detected: access to " + process + " out of " + listTuples.size());
+		}
+
+		RGB rgb = detailData.palette.getRGB(pixelValue);
+		String proc_name = getColorTable().getProcedureNameByColorHash(rgb.hashCode());
+
+		if (isCpuThread) { // cpu thread
+			if (proc_name.equals(ColorTable.UNKNOWN_PROCNAME)) {
+				cpu_idle_count = cpu_idle_count + 1;
+			} else {
+				cpu_active_count = cpu_active_count + 1;
+				Integer count = mapCpuPixelCount.get(pixelValue);
+				if (count == null) {
+					mapCpuPixelCount.put(pixelValue, 1);
+				} else {
+					mapCpuPixelCount.put(pixelValue, count+1);
+				}
+			}
+
+		} else {		// gpu thread
+			if (proc_name.equals(ColorTable.UNKNOWN_PROCNAME) ||
+					proc_name.equals("<gpu sync>")) {
+
+				gpu_idle_count = gpu_idle_count + 1;
+			} else {
+				gpu_active_count = gpu_active_count + 1;
+			} 
+		}
+	}
+	
+	private void recapAnalysis(int pixel) {
+		
+		if (cpu_active_count > 0 && gpu_active_count == 0 && gpu_idle_count != 0 ) {
+			// Blame CPU
+			Integer blameCount = mapCpuPixelCount.get(pixel);
+			if (blameCount != null) {
+				
+				float blame = blameCount.floatValue() / cpu_active_count;
+				cpuTotalBlame = cpuTotalBlame + blame;
+				Float oldBlame = cpuBlameMap.get(pixel);
+				if (oldBlame != null) {
+					cpuBlameMap.put(pixel, oldBlame + blame);
+				} else {
+					cpuBlameMap.put(pixel, blame);
+				}
+			}
+		}
+	}
+	
 	
 	/****
 	 * main method to decide whether we want to create a new buffer or just to
