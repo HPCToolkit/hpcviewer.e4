@@ -4,6 +4,7 @@ import org.eclipse.swt.graphics.ImageData;
 
 import edu.rice.cs.hpctraceviewer.data.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
+import edu.rice.cs.hpctraceviewer.ui.base.IPixelAnalysis;
 
 public class PixelAnalysisDummy implements IPixelAnalysis 
 {

@@ -22,6 +22,8 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.internal.DPIUtil;
 import org.eclipse.swt.widgets.Composite;
+
+import edu.rice.cs.hpctraceviewer.ui.base.IPixelAnalysis;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.context.BaseTraceContext;
 import edu.rice.cs.hpctraceviewer.ui.internal.AbstractTimeCanvas;

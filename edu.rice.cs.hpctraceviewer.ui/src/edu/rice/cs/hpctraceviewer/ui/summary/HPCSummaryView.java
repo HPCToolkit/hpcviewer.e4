@@ -13,6 +13,7 @@ import org.eclipse.swt.widgets.Composite;
 
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.ui.base.AbstractBaseItem;
+import edu.rice.cs.hpctraceviewer.ui.base.IPixelAnalysis;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.main.HPCTraceView;
 

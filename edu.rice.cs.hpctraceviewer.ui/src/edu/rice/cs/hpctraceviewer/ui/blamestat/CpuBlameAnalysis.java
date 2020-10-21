@@ -16,7 +16,7 @@ import edu.rice.cs.hpc.data.experiment.extdata.IFileDB.IdTupleOption;
 import edu.rice.cs.hpctraceviewer.data.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
-import edu.rice.cs.hpctraceviewer.ui.summary.IPixelAnalysis;
+import edu.rice.cs.hpctraceviewer.ui.base.IPixelAnalysis;
 import edu.rice.cs.hpctraceviewer.ui.summary.SummaryData;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 

@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctraceviewer.ui.summary;
+package edu.rice.cs.hpctraceviewer.ui.base;
 
 import org.eclipse.swt.graphics.ImageData;
 

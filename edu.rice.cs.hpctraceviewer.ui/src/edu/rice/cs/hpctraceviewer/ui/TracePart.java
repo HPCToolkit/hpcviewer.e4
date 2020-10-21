@@ -30,6 +30,7 @@ import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.local.LocalDBOpener;
 import edu.rice.cs.hpctraceviewer.ui.base.AbstractBaseItem;
+import edu.rice.cs.hpctraceviewer.ui.base.IPixelAnalysis;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.base.ITraceViewAction;
 import edu.rice.cs.hpctraceviewer.ui.blamestat.CpuBlameAnalysis;
@@ -43,7 +44,6 @@ import edu.rice.cs.hpctraceviewer.ui.minimap.SpaceTimeMiniCanvas;
 import edu.rice.cs.hpctraceviewer.ui.preferences.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.ui.statistic.HPCStatView;
 import edu.rice.cs.hpctraceviewer.ui.summary.HPCSummaryView;
-import edu.rice.cs.hpctraceviewer.ui.summary.IPixelAnalysis;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 
 import javax.annotation.PreDestroy;
