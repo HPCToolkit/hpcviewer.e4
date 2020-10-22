@@ -13,8 +13,8 @@ public class IdTupleType
 	public final static short KIND_THREAD  = 3;
 	
 	public final static short KIND_GPU_DEVICE  = 4;
-	public final static short KIND_GPU_STREAM  = 5;
-	public final static short KIND_GPU_CONTEXT = 6;
+	public final static short KIND_GPU_CONTEXT = 5;
+	public final static short KIND_GPU_STREAM  = 6;
 	public final static short KIND_CORE        = 7;
 	
 	public final static short KIND_MAX         = 8;
