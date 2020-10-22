@@ -39,8 +39,8 @@ public class IdTupleType
 												KIND_LABEL_RANK,
 												KIND_LABEL_THREAD,
 												KIND_LABEL_GPU_DEVICE,
-												KIND_LABEL_GPU_STREAM,
 												KIND_LABEL_GPU_CTXT,
+												KIND_LABEL_GPU_STREAM,
 												KIND_LABEL_CORE};
 
 	
