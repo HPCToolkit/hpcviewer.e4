@@ -17,7 +17,7 @@ public class StringUtil
 	// whenever a tool tip line exceeds the specified target length, wrap it to a new
 	// line following the next embedded space.
 	static public String wrapScopeName(String s, int desiredLineLength) {
-		return WordUtils.wrap(s, desiredLineLength);
+		return WordUtils.wrap(s, desiredLineLength, "\n", true, "");
 	}
 	
 

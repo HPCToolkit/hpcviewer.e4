@@ -143,7 +143,7 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 	}
 	
 	@Override
-	public void createContent(Composite parent, EMenuService menuService) {
+	public void createContent(ProfilePart profilePart, Composite parent, EMenuService menuService) {
 		
 		this.menuService = menuService;
 				
@@ -206,11 +206,8 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
         tree.setLinesVisible(true);
 
 		treeViewer.setContentProvider( getContentProvider(treeViewer));
-		//createScopeColumn(treeViewer);
 		
-		MPart part = partService.getActivePart();
-		
-		mouseDownListener = new ScopeMouseListener(treeViewer, (ProfilePart) part.getObject());
+		mouseDownListener = new ScopeMouseListener(treeViewer, profilePart);
 		treeViewer.getTree().addListener(SWT.MouseDown, mouseDownListener);
 		treeViewer.addSelectionChangedListener(this);
 
@@ -464,6 +461,9 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 			toolItem[ACTION_ZOOM_IN].setEnabled(false);
 			toolItem[ACTION_HOTPATH].setEnabled(false);
 		}
+		if (zoomAction == null)
+			return;
+		
 		boolean canZoomOut = zoomAction.canZoomOut() && 
 				(!stackActions.isEmpty() && stackActions.peek()==zoomAction);
 		

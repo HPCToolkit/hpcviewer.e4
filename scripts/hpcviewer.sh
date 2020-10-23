@@ -144,7 +144,7 @@ eval set -- "$PARAMS"
 #------------------------------------------------------------
 
 if test -d "$HOME" ; then
-    stderr="$workspace"/hpcviewer.log
+    stderr="$workspace"/hpcviewer.err
     mkdir -p "$workspace"
     echo "Redirect standard error to $stderr"
     cmd="$viewer -data $workspace -configuration $workspace $PARAMS  $viewer_args  " 

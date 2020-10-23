@@ -1,6 +1,7 @@
 This package contains basic API and interfaces to be used by other classes.
 
 - AbstractBaseItem.java : basic class for tab item
+- IPixelAnalysis.java   : basic interface to analyze pixels within the SummaryTimeCanvas class
 - ISpaceTimeCanvas.java : basic interface for canvas using space and time dimension
 - ITraceCanvas.java     : basic interface for canvas with mouse listeners
 - ITraceItem.java       : basic interface for tab item

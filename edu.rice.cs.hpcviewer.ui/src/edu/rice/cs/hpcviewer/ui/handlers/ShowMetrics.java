@@ -48,7 +48,7 @@ public class ShowMetrics
 	public void aboutToShow( List<MMenuElement> items, 
 							 EModelService modelService, 
 							 MWindow window ) {
-		if (!canExecute())
+		if (!canExecute(window))
 			return;
 		
 		Iterator<BaseExperiment> iterator = database.getIterator(window);
@@ -74,9 +74,12 @@ public class ShowMetrics
 	
 	
 	@Execute
-	public void execute(@Named(IServiceConstants.ACTIVE_PART) MPart part, @Active Shell shell, IEventBroker eventBroker) {
+	public void execute(@Named(IServiceConstants.ACTIVE_PART) MPart part, 
+						@Active Shell shell, 
+						MWindow window,
+						IEventBroker eventBroker) {
 
-		if (database == null || database.isEmpty())
+		if (database == null || database.isEmpty(window))
 			return;
 			
 		if (part == null)
@@ -135,8 +138,8 @@ public class ShowMetrics
 	
 	
 	@CanExecute
-	public boolean canExecute() {		
-		return database.getNumDatabase()>0;
+	public boolean canExecute(MWindow window) {		
+		return database.getNumDatabase(window)>0;
 	}
 		
 }

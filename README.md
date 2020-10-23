@@ -11,6 +11,16 @@ The goals:
 * Can integrate smoothly between `hpcviewer` and `hpctraceviewer`. **partially done**
 * Can be automatically tested.
 
+## General Requirements
+
+* Java 8 or newer. Java's Oracle and OpenJDK should work fine.
+* Linux: GTK+ 3.20 or newer.
+To check installed GTK version:
+```
+rpm -q gtk3
+```
+
+
 ## How to build and run via command line (Maven)
 
 * Download and install Maven (if not available on the systems) at https://maven.apache.org/

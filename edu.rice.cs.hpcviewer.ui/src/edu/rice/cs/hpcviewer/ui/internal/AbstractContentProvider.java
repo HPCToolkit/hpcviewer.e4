@@ -68,7 +68,9 @@ public abstract class AbstractContentProvider
 		
 		Object element = getSortedChild( (Scope)parent, child_position);
 		if (element != null) {
+			viewer.getTree().setRedraw(false);
 			viewer.replace(parent, index, element);
+			viewer.getTree().setRedraw(true);
 			updateChildCount(element, -1);
 		}
 	} 

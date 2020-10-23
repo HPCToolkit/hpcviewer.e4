@@ -64,7 +64,7 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 	public void createContent(Composite parent) {
 
 		contentViewer = new ThreadContentViewer(partService, eventBroker, databaseAddOn, profilePart);
-		contentViewer.createContent(parent, menuService);
+		contentViewer.createContent(profilePart, parent, menuService);
 		
 		// subscribe to filter events
 		eventBroker.subscribe(FilterStateProvider.FILTER_REFRESH_PROVIDER, this);

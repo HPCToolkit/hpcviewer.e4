@@ -136,6 +136,8 @@ public abstract class BufferedCanvas extends Canvas
 			loader.save(filename, SWT.IMAGE_PNG);
 		}
 	}
+	
+	
 	/*************************************************************************
 	 * add context menus for the canvas
 	 *************************************************************************/

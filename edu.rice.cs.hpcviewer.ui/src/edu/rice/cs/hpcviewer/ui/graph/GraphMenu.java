@@ -1,5 +1,7 @@
 package edu.rice.cs.hpcviewer.ui.graph;
 
+import java.util.List;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
@@ -8,6 +10,7 @@ import org.eclipse.jface.action.Separator;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
+import edu.rice.cs.hpc.data.experiment.metric.MetricRaw;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 
@@ -30,7 +33,7 @@ public class GraphMenu
 				// no menus if there is no thread-level data
 				return;
 			
-			final BaseMetric []metrics = experiment.getMetricRaw();
+			final List<MetricRaw> metrics = experiment.getMetricRaw();
 			if (metrics == null)
 				return;
 			

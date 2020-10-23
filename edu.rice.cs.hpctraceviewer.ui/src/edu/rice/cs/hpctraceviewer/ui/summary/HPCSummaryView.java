@@ -13,6 +13,7 @@ import org.eclipse.swt.widgets.Composite;
 
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.ui.base.AbstractBaseItem;
+import edu.rice.cs.hpctraceviewer.ui.base.IPixelAnalysis;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.main.HPCTraceView;
 
@@ -76,6 +77,11 @@ public class HPCSummaryView extends AbstractBaseItem
 
 	@Override
 	public void setInput(Object input) {
-		summaryCanvas.updateData((SpaceTimeDataController) input);
+		SpaceTimeDataController stdc = (SpaceTimeDataController) input;
+		summaryCanvas.updateData(stdc);
+	}
+	
+	public void setAnalysisTool(IPixelAnalysis analysisTool) {
+		summaryCanvas.setAnalysisTool(analysisTool);
 	}
 }

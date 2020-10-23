@@ -1,7 +1,6 @@
 package edu.rice.cs.hpcviewer.ui.graph;
 
 import java.io.IOException;
-import java.text.DecimalFormat;
 import javax.inject.Inject;
 
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
@@ -11,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.swtchart.Chart;
 import org.swtchart.IAxisSet;
-import org.swtchart.IAxisTick;
 import org.swtchart.ILineSeries;
 import org.swtchart.ISeries.SeriesType;
 import org.swtchart.LineStyle;
@@ -38,29 +36,17 @@ public abstract class AbstractGraphPlotViewer extends AbstractGraphViewer
 		Scope scope = input.getScope();
 		BaseMetric metric = input.getMetric();
 		
-
 		// -----------------------------------------------------------------
 		// gather x and y values
 		// -----------------------------------------------------------------
 		
 		double []y_values = null;
-		double []x_values = null;
 
 		try {
 			y_values = getValuesY(scope, metric);
 			
-			x_values = getValuesX(scope, metric);
-			
 		} catch (Exception e) {
-			e.printStackTrace();
-			
-			String label = "Error while opening thread level data metric file";
-			
-			MessageDialog.openError(getChart().getShell(), label, e.getMessage());
-			
-			Logger logger = LoggerFactory.getLogger(getClass());
-			logger.error(label, e);
-			
+			showErrorMessage(e);
 			return PLOT_ERR_UNKNOWN;
 		}
 
@@ -84,13 +70,11 @@ public abstract class AbstractGraphPlotViewer extends AbstractGraphViewer
 		chart.getAxisSet().getYAxis(0).getTitle().setText( "Metric Value" );
 		
 		IAxisSet axisSet = chart.getAxisSet();
-		final IAxisTick xTick = axisSet.getXAxis(0).getTick();
-		xTick.setFormat(new DecimalFormat("#############"));
 		
 		// -----------------------------------------------------------------
 		// set the values x and y to the plot
 		// -----------------------------------------------------------------
-		scatterSeries.setXSeries(x_values);
+		setupXAxis(input, scatterSeries);
 		scatterSeries.setYSeries(y_values);
 
 		// set the lower range to be zero so that we can see if there is load imbalance or not
@@ -104,6 +88,20 @@ public abstract class AbstractGraphPlotViewer extends AbstractGraphViewer
 		return PLOT_OK;
 	}
 
+
+	/***
+	 * Generic error message
+	 * @param e Exception
+	 */
+	protected void showErrorMessage(Exception e) {
+		
+		String label = "Error while opening thread level data metric file";
+		
+		MessageDialog.openError(getChart().getShell(), label, e.getMessage());
+		
+		Logger logger = LoggerFactory.getLogger(getClass());
+		logger.error(label, e);
+	}
 	
 
 	/***
@@ -135,4 +133,11 @@ public abstract class AbstractGraphPlotViewer extends AbstractGraphViewer
 			 throws IOException;
 
 
+	/****
+	 * Set the x-axis
+	 * @param input
+	 * @param scatterSeries
+	 * @return
+	 */
+	protected abstract int setupXAxis(GraphEditorInput input, ILineSeries scatterSeries);
 }

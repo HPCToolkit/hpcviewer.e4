@@ -73,7 +73,7 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 	@Override
 	public void createContent(Composite parent) {
 		contentViewer = setContentViewer(parent, menuService);
-    	contentViewer.createContent(parent, menuService);
+    	contentViewer.createContent(profilePart, parent, menuService);
 		
 		// subscribe to user action events
 		eventBroker.subscribe(BaseConstants.TOPIC_HPC_REMOVE_DATABASE, this);

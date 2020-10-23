@@ -1,9 +1,13 @@
 package edu.rice.cs.hpcviewer.ui.graph;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import org.eclipse.swt.custom.CTabFolder;
+import org.swtchart.IAxisSet;
+import org.swtchart.IAxisTick;
+import org.swtchart.ILineSeries;
 
 import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
@@ -109,5 +113,28 @@ public class GraphPlotSortViewer extends AbstractGraphPlotViewer
 	@Override
 	protected String getGraphTypeLabel() {
 		return LABEL;
+	}
+
+	@Override
+	protected int setupXAxis(GraphEditorInput input, ILineSeries scatterSeries) {
+		IAxisSet axisSet = getChart().getAxisSet();
+
+		final IAxisTick xTick = axisSet.getXAxis(0).getTick();
+		xTick.setFormat(new DecimalFormat("#############"));
+
+		Scope scope = input.getScope();
+		BaseMetric metric = input.getMetric();
+
+		try {
+			double[] x_values = getValuesX(scope, metric);
+			scatterSeries.setXSeries(x_values);
+			
+		} catch (NumberFormatException | IOException e) {
+
+			showErrorMessage(e);
+			return PLOT_ERR_IO;
+		}
+
+		return PLOT_OK;
 	}
 }

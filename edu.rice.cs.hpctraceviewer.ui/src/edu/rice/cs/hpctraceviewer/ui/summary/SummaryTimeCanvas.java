@@ -1,6 +1,5 @@
 package edu.rice.cs.hpctraceviewer.ui.summary;
 
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
@@ -21,14 +20,10 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.internal.DPIUtil;
 import org.eclipse.swt.widgets.Composite;
 
-
-import edu.rice.cs.hpc.data.db.IdTuple;
-import edu.rice.cs.hpc.data.db.IdTupleType;
-import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
-import edu.rice.cs.hpc.data.experiment.extdata.IFileDB.IdTupleOption;
-
+import edu.rice.cs.hpctraceviewer.ui.base.IPixelAnalysis;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.context.BaseTraceContext;
 import edu.rice.cs.hpctraceviewer.ui.internal.AbstractTimeCanvas;
@@ -53,15 +48,15 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 	private final IEventBroker eventBroker;
 	private final ITracePart tracePart;
 
+	private final int zoomFactor;
+	
 	private SpaceTimeDataController dataTraces = null;
 	private TreeMap<Integer /* pixel */, Integer /* percent */> mapPixelToPercent;	
-	private TreeMap<Integer /* pixel */, Float /* percent */ >  cpuBlameMap;
-	
-	private float cpuTotalBlame;
 	
 	private int totPixels;
 	private ImageData detailData;
 
+	private IPixelAnalysis analysisTool;
 	
 	/**********************************
 	 * Construct a summary canvas without background nor scrollbar
@@ -72,15 +67,28 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 		super(composite, SWT.NO_BACKGROUND);
 
 		this.eventBroker = eventBroker;
-		this.tracePart = tracePart;
+		this.tracePart   = tracePart;
+		analysisTool     = IPixelAnalysis.EMPTY;
 		
 		mapPixelToPercent = new TreeMap<Integer, Integer>();		
-		cpuBlameMap = new TreeMap<Integer, Float>();
-		cpuTotalBlame = 0;
 		
+		// It is critical to reconstruct the image data according to Device zoom
+		// On Mac with retina display, the hardware pixel has 4x pixels than
+		// the swt level. Retrieving pixel without adapting with device zoom
+		// will return incorrect pixel.
+		
+		int deviceZoom = DPIUtil.getDeviceZoom();
+		zoomFactor     = deviceZoom / 100;
+
 		tracePart.getOperationHistory().addOperationHistoryListener(this);
 	}
 
+	
+	public void setAnalysisTool(IPixelAnalysis analysisTool) {
+		this.analysisTool = analysisTool;
+	}
+	
+	
 	@Override
 	public void paintControl(PaintEvent event) {
 		if (dataTraces == null)
@@ -157,77 +165,42 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 		buffer.setBackground(Constants.COLOR_WHITE);
 		buffer.fillRectangle(0, 0, viewWidth, viewHeight);
 
-		float yScale = (float) viewHeight / (float) detailData.height;
-		float xScale = ((float) viewWidth / (float) detailData.width);
-		int xOffset = 0;
+		int width  = detailData.width / zoomFactor;
+		int height = detailData.height / zoomFactor;
 
-		// Blame-Shift init table for the current callstack level
-		final ImageTraceAttributes attributes = dataTraces.getAttributes();
-		attributes.getDepth();
-		
-        final IBaseData traceData = dataTraces.getBaseData();
-        
-        // get the list of id tuples
-		List<IdTuple> listTuples = traceData.getListOfIdTuples(IdTupleOption.BRIEF);
+		float yScale = (float) viewHeight / (float) height;
+		float xScale = ((float) viewWidth / (float) width);
+		int xOffset = 0;
 		
 		mapPixelToPercent.clear();
-		cpuBlameMap.clear();		
-		cpuTotalBlame = (float) 0;
 
+		// ----------------------------------
+		// plugin initialization
+		// ----------------------------------
+		analysisTool.analysisInit(dataTraces, getColorTable());
+		
 		// ---------------------------------------------------------------------------
 		// needs to be optimized:
 		// for every pixel along the width, check the pixel, group them based on color,
 		// count the amount of each group, and draw the pixel
 		// ---------------------------------------------------------------------------
-		for (int x = 0; x < detailData.width; ++x) {
+		
+		for (int x = 0; x < width; ++x) {
 			// ---------------------------------------------------------------------------
 			// use tree map to sort the key of color map
 			// without sort, it can be confusing
 			// ---------------------------------------------------------------------------
-			TreeMap<Integer, Integer> mapCpuPixelCount = new TreeMap<Integer, Integer>();
 			TreeMap<Integer, Integer> mapPixelToCount  = new TreeMap<Integer, Integer>();
 			
-			int cpu_active_count = 0;
-			int gpu_active_count = 0;
-			int gpu_idle_count = 0;
-			int cpu_idle_count = 0;
-						
-			for (int y = 0; y < detailData.height; ++y) { // One iter per trace line
+			// ------------------------------------------------------------------------
+			// Analysis plugin				
+			// ------------------------------------------------------------------------
+			analysisTool.analysisPixelInit(x);
 
-				int pixelValue = detailData.getPixel(x, y);
-								
-				// get the profile of the current pixel
-				int process = attributes.convertTraceLineToRank(y);				
+			for (int y = 0; y < height; ++y) { // One iter per trace line
 
-				// get the profile's id tuple and verify if the later is a cpu thread
-				IdTuple tag = listTuples.get(process);
-				boolean isCpuThread = !tag.hasKind(IdTupleType.KIND_GPU_CONTEXT);
+				int pixelValue = detailData.getPixel(x*zoomFactor, y*zoomFactor);
 				
-				RGB rgb = detailData.palette.getRGB(pixelValue);
-				String proc_name = getColorTable().getProcedureNameByColorHash(rgb.hashCode());
-				
-				if (isCpuThread) { // cpu thread
-					if (proc_name.equals(ColorTable.UNKNOWN_PROCNAME)) {
-						cpu_idle_count = cpu_idle_count + 1;
-					} else {
-						cpu_active_count = cpu_active_count + 1;
-						Integer count = mapCpuPixelCount.get(pixelValue);
-						if (count == null) {
-							mapCpuPixelCount.put(pixelValue, 1);
-						} else {
-							mapCpuPixelCount.put(pixelValue, count+1);
-						}
-					}
-					
-				} else {		// gpu thread
-					if (proc_name.equals(ColorTable.UNKNOWN_PROCNAME) ||
-						proc_name.equals("<gpu sync>")) {
-
-						gpu_idle_count = gpu_idle_count + 1;
-					} else {
-						gpu_active_count = gpu_active_count + 1;
-					} 
-				}
 				Integer old = mapPixelToCount.get(pixelValue);
 				if (old != null) {
 					old++;
@@ -235,6 +208,11 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 				} else {
 					mapPixelToCount.put(pixelValue, 1);
 				}
+				
+				// ------------------------------------------------------------------------
+				// Analysis plugin				
+				// ------------------------------------------------------------------------
+				analysisTool.analysisPixelXY(detailData, x, y, pixelValue);
 			}
 			
 			// ---------------------------------------------------------------------------
@@ -255,7 +233,7 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 				final RGB rgb = detailData.palette.getRGB(pixel);
 				final Color c = new Color(getDisplay(), rgb);
 
-				final int height = (int) Math.ceil(count * yScale);
+				final int yLength = (int) Math.ceil(count * yScale);
 
 				buffer.setBackground(c);
 
@@ -264,41 +242,25 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 				// empty spaces if the number of colors are not a height's divisor.
 
 				if (i==size) {
-					buffer.fillRectangle(xOffset, yOffset - height, (int) Math.max(1, xScale), height);
+					buffer.fillRectangle(xOffset, yOffset - yLength, (int) Math.max(1, xScale), yLength);
 				} else {
 					buffer.fillRectangle(xOffset, 0, (int) Math.max(1, xScale), viewHeight - h);
 				}
 				i++;
-				yOffset -= height;
+				yOffset -= yLength;
 				c.dispose();
 
 				// accumulate the statistics of this pixel
 				Integer val = mapPixelToPercent.get(pixel);
 				Integer acc = (val == null ? count : val + count);
 				mapPixelToPercent.put(pixel, acc);
+				
+				h += yLength;
 
 				// ----------------------------------------------------------------------------
-				// GPU Blame analysis:
-				// If all gpu is idle, we compute the blame to cpu.
+				// Recap analysis plugin:
 				// ----------------------------------------------------------------------------
-				
-				if (cpu_active_count > 0 && gpu_active_count == 0 && gpu_idle_count != 0 ) {
-					// Blame CPU
-					Integer blameCount = mapCpuPixelCount.get(pixel);
-					if (blameCount != null) {
-						
-						float blame = blameCount.floatValue() / cpu_active_count;
-						cpuTotalBlame = cpuTotalBlame + blame;
-						Float oldBlame = cpuBlameMap.get(pixel);
-						if (oldBlame != null) {
-							cpuBlameMap.put(pixel, oldBlame + blame);
-						} else {
-							cpuBlameMap.put(pixel, blame);
-						}
-					}
-				}
-				
-				h += height;
+				analysisTool.analysisPixelFinal(pixel);
 			}
 			xOffset = Math.round(xOffset + xScale);
 		}
@@ -308,9 +270,17 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 
 		redraw();
 
-		broadcast(detailData);
+		Integer totalPixels = detailData.height * detailData.width;
+		SummaryData data = new SummaryData(detailData.palette, mapPixelToPercent, getColorTable(), totalPixels);
+		eventBroker.post(IConstants.TOPIC_STATISTICS, data);
+		
+		// ----------------------------------------------------------------------------
+		// Finalize external plugin
+		// ----------------------------------------------------------------------------
+		analysisTool.analysisFinal(detailData);
 	}
 
+	
 	
 	/****
 	 * main method to decide whether we want to create a new buffer or just to
@@ -354,31 +324,6 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 		return (dataTraces.getAttributes().getTimeInterval());
 	}
 
-	/****
-	 * <p>
-	 * broadcast the content of summary if it's already computed If the content is
-	 * not computed, do nothing.
-	 * </p>
-	 */
-	public void broadcast() {
-		if (this.detailData != null) {
-			broadcast(detailData);
-		}
-	}
-
-	private void broadcast(ImageData detailData) { // PaletteData palette, int totalPixels) {
-
-		Integer totalPixels = detailData.height * detailData.width;
-		SummaryData data = new SummaryData(detailData.palette, mapPixelToPercent, getColorTable(), totalPixels);
-		eventBroker.post(IConstants.TOPIC_STATISTICS, data);
-
-		data = new SummaryData(	detailData.palette, getColorTable(), 
-								cpuBlameMap, cpuTotalBlame,
-								null, 0
-								/*gpuBlameMap, gpuTotalBlame*/);
-		
-		eventBroker.post(IConstants.TOPIC_BLAME, data);				
-	}
 
 	// ---------------------------------------------------------------------------------------
 	// Override methods

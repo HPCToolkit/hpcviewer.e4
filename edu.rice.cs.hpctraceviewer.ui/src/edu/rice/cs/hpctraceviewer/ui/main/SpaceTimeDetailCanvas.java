@@ -38,6 +38,7 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.internal.DPIUtil;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
@@ -1168,7 +1169,8 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		// notify to all other views that a new image has been created,
 		//	and it needs to refresh the view
 		// -----------------------------------------------------------------------
-		notifyChangeBuffer(imageOrig.getImageData());
+		int deviceZoom = DPIUtil.getDeviceZoom();
+		notifyChangeBuffer(imageOrig.getImageData(deviceZoom));
 		
 		updateButtonStates();
 	}

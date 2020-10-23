@@ -707,9 +707,7 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 					}
 				}
 			}
-			MetricRaw[] metrics = new MetricRaw[metricRawList.size()];
-			metricRawList.toArray( metrics );
-			((Experiment) experiment).setMetricRaw( metrics );
+			((Experiment) experiment).setMetricRaw( metricRawList );
 		}
 	}
 }

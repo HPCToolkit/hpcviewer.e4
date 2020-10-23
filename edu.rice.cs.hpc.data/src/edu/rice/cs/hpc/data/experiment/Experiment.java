@@ -21,10 +21,13 @@ import edu.rice.cs.hpc.data.experiment.scope.*;
 import edu.rice.cs.hpc.data.experiment.scope.filters.*;
 import edu.rice.cs.hpc.data.experiment.scope.visitors.*;
 import edu.rice.cs.hpc.data.filter.IFilterData;
+import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.data.util.IUserData;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 //////////////////////////////////////////////////////////////////////////
 //	CLASS EXPERIMENT													//
@@ -47,7 +50,7 @@ public class Experiment extends BaseExperimentWithMetrics
 	static final public String TITLE_DATACENTRIC_VIEW = "Datacentric view";
 	
 	// thread level database
-	private MetricRaw[] metrics_raw;
+	private List<MetricRaw>  metrics_raw;
 	private boolean mergedDatabase = false;
 	private ExperimentOpenFlag flag;
 
@@ -395,10 +398,15 @@ public class Experiment extends BaseExperimentWithMetrics
 	/***
 	 * Set the list of metric raw.
 	 * 
-	 * @param metrics MetricRaw []
+	 * @param metricRawList MetricRaw []
 	 */
-	public void setMetricRaw(MetricRaw []metrics) {
-		this.metrics_raw = metrics;
+	public void setMetricRaw(List<MetricRaw> metricRawList) {
+		metrics_raw = metricRawList;
+
+		if (getMajorVersion() >= Constants.EXPERIMENT_SPARSE_VERSION) {
+			// reorder the metric since hpcprof2 will output not in order fashion
+			Collections.sort(metrics_raw, new MetricComparator());
+		}
 	}
 
 
@@ -408,7 +416,7 @@ public class Experiment extends BaseExperimentWithMetrics
 	 * 
 	 * @return BaseMetric[]
 	 */
-	public BaseMetric[] getMetricRaw() {		
+	public List<MetricRaw>  getMetricRaw() {		
 		return metrics_raw;
 	}
 

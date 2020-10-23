@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
-import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.util.Constants;
 
@@ -36,8 +35,8 @@ public final class ThreadDataCollectionFactory
 		{
 		case 1:
 		case Constants.EXPERIMENT_DENSED_VERSION:
-			final BaseMetric []metrics = experiment.getMetricRaw();
-			if (metrics!=null) {
+
+			if (experiment.getMetricRaw()!=null) {
 				data_file = new ThreadDataCollection2(experiment);
 				String directory = experiment.getDefaultDirectory().getAbsolutePath();
 				data_file.open(root, directory);

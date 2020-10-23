@@ -50,7 +50,7 @@ public class MergeDatabase
 		// ---------------------------------------------------------------
 		final Experiment []db = new Experiment[2];
 		
-		Iterator<BaseExperiment> iterator = database.getIterator();
+		Iterator<BaseExperiment> iterator = database.getIterator(application.getSelectedElement());
 		int numDb = 0;
 		while(iterator.hasNext()) {
 			Experiment exp = (Experiment) iterator.next();
@@ -100,11 +100,11 @@ public class MergeDatabase
 	
 	
 	@CanExecute
-	public boolean canExecute( @Optional @Named(PARAM_ID) String param) {
+	public boolean canExecute(MApplication application, @Optional @Named(PARAM_ID) String param) {
 		
 		// temporarily, we don't support merging more than 2 databases
 		
-		Iterator<BaseExperiment> iterator = database.getIterator();
+		Iterator<BaseExperiment> iterator = database.getIterator(application.getSelectedElement());
 		
 		int numDb = 0;
 		

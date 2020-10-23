@@ -63,13 +63,6 @@ public class TreeNode {
 		this.value = value;
 	}
 	
-	public boolean equals(final Object object) {
-		if (object instanceof TreeNode) {
-			return TreeNode.equals(this.value, ((TreeNode) object).value);
-		}
-
-		return false;
-	}
 
 	/**
 	 * Returns the child nodes. Empty arrays are converted to <code>null</code>

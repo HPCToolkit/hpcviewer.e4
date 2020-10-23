@@ -5,6 +5,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import java.util.HashMap;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 
@@ -21,14 +22,18 @@ import org.eclipse.swt.widgets.Shell;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
+import edu.rice.cs.hpc.data.db.IdTupleType;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
+import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
 import edu.rice.cs.hpcbase.BaseConstants;
 import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.local.LocalDBOpener;
 import edu.rice.cs.hpctraceviewer.ui.base.AbstractBaseItem;
+import edu.rice.cs.hpctraceviewer.ui.base.IPixelAnalysis;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.base.ITraceViewAction;
+import edu.rice.cs.hpctraceviewer.ui.blamestat.CpuBlameAnalysis;
 import edu.rice.cs.hpctraceviewer.ui.blamestat.HPCBlameView;
 import edu.rice.cs.hpctraceviewer.ui.callstack.HPCCallStackView;
 import edu.rice.cs.hpctraceviewer.ui.context.BaseTraceContext;
@@ -148,7 +153,7 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 		createTabItem(tbtmStatView, "Statistics", tabFolderRight, eventBroker);
 		
 		tbtmBlameView = new HPCBlameView(tabFolderRight, SWT.NONE);
-		createTabItem(tbtmBlameView, "Serialization Analysis", tabFolderRight, eventBroker);
+		createTabItem(tbtmBlameView, "GPU Idleness Blame", tabFolderRight, eventBroker);
 		
 		tabFolderRight.addSelectionListener(new SelectionListener() {
 			
@@ -300,7 +305,6 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 			tbtmCallStack.setInput(stdc);
 			miniCanvas.   updateView(stdc);
 			tbtmStatView .setInput(stdc);
-			tbtmBlameView.setInput(stdc);
 			
 			// TODO: summary view has to be set AFTER the stat view 
 			//       since the stat view requires info from summary view 
@@ -309,6 +313,26 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 			// this has to be the last tab item to be set
 			// start reading the database and draw it
 			tbtmTraceView.setInput(stdc);
+			
+			IBaseData data = stdc.getBaseData();
+			List<Short> listIdTupleTypes = data.getIdTupleTypes();
+			boolean hasGPU = false; 
+			
+			// check whether this database has gpu profile or not
+			for (Short type: listIdTupleTypes) {
+				if (IdTupleType.KIND_GPU_CONTEXT == type) {
+					tbtmBlameView.setInput(stdc);
+					hasGPU = true;
+					
+					break;
+				}
+			}
+			if (!hasGPU) {
+				tbtmBlameView.dispose();
+				tbtmSummaryView.setAnalysisTool(IPixelAnalysis.EMPTY);
+			} else {
+				tbtmSummaryView.setAnalysisTool(new CpuBlameAnalysis(eventBroker));
+			}
 			
 		} catch (Exception e) {
 			Shell shell = Display.getDefault().getActiveShell();

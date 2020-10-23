@@ -3,7 +3,9 @@ package edu.rice.cs.hpc.data.experiment;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.DerivedMetric;
@@ -23,9 +25,20 @@ public abstract class BaseExperimentWithMetrics extends BaseExperiment
 implements IMetricManager
 {
 	
-	/***** A list of metric descriptor   */
+	/** A list of metric descriptor   
+	 ** the list is sorted based on the metric ID */
 	protected List<BaseMetric> metrics;
+	
+	/** A list of metric descriptors sorted based on the hpcrun order
+	 ** 
+	 */
 	protected ArrayList<BaseMetric> metricsWithOrder;
+	
+	/**
+	 * map ID to the metric descriptor
+	 */
+	private Map<Integer, BaseMetric> mapIndexToMetric;
+	
 
 	//////////////////////////////////////////////////////////////////////////
 	//ACCESS TO METRICS													    //
@@ -43,13 +56,16 @@ implements IMetricManager
 	 */
 	public void setMetrics(List<BaseMetric> metricList) {
 		metrics = metricList;
+		mapIndexToMetric = new HashMap<Integer, BaseMetric>(metricList.size());
 		
 		metricsWithOrder = new ArrayList<BaseMetric>();
 		for(BaseMetric metric:metrics) {
 			if (metric.getOrder() >= 0) {
 				metricsWithOrder.add(metric);
 			}
+			mapIndexToMetric.put(metric.getIndex(), metric);
 		}
+		
 		if (getMajorVersion() >= Constants.EXPERIMENT_SPARSE_VERSION) {
 			// reorder the metric since hpcprof2 will output not in order fashion
 			Collections.sort(metrics, new MetricComparator());
@@ -116,17 +132,18 @@ implements IMetricManager
 	 ************************************************************************/
 	public BaseMetric getMetric(int index)
 	{		
-		for(BaseMetric metric: metrics) {
-			if (metric.getIndex() == index)
-				return metric;
-		}
+		BaseMetric metric = mapIndexToMetric.get(index);
+		if (metric != null)
+			return metric;
+
 		// not found
 		throw new RuntimeException("Invalid metric index: " + index);
-
 	}
 	
 	/*************************************************************************
 	 *	Returns the metric with a given internal name.
+	 *  If possible, do NOT call this method if the number of metrics is huge.
+	 *  Searching is O(n) unfortunately.
 	 ************************************************************************/
 	public BaseMetric getMetric(String name)
 	{
@@ -162,7 +179,8 @@ implements IMetricManager
 	@Override
 	public void addDerivedMetric(DerivedMetric objMetric) {
 
-		this.metrics.add(objMetric);
+		metrics.add(objMetric);
+		mapIndexToMetric.put(objMetric.getIndex(), objMetric);
 	}
 
 

@@ -13,6 +13,7 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.internal.DPIUtil;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 
@@ -214,11 +215,21 @@ implements ITraceCanvas, PaintListener
 	
 	static private class BufferedCanvasToolTip extends DefaultToolTip
 	{
-		final private AbstractTimeCanvas canvas;
+		private final AbstractTimeCanvas canvas;
+		private final int deviceZoom;
+		private final int mulZoom; // multiple of zooms. Its value is deviceZoom / 100
 
 		public BufferedCanvasToolTip(AbstractTimeCanvas canvas) {
 			super(canvas);
+
+			// It is critical to reconstruct the image data according to Device zoom
+			// On Mac with retina display, the hardware pixel has 4x pixels than
+			// the swt level. Retrieving pixel without adapting with device zoom
+			// will return incorrect pixel.
 			
+			deviceZoom	= DPIUtil.getDeviceZoom();
+			mulZoom     = deviceZoom / 100;
+
 			// delay the popup in millisecond
 			PreferenceStore pref = TracePreferenceManager.INSTANCE.getPreferenceStore();
 			int delay = pref.getInt(TracePreferenceConstants.PREF_TOOLTIP_DELAY);
@@ -237,7 +248,7 @@ implements ITraceCanvas, PaintListener
 			if (image == null || image.isDisposed())
 				return null;
 			
-			final ImageData imgData = image.getImageData();
+			final ImageData imgData = image.getImageData(deviceZoom);
 			if (imgData == null)
 				return null;
 			
@@ -245,7 +256,7 @@ implements ITraceCanvas, PaintListener
 				// corner case: when resizing is faster than rendering
 				return null;
 			
-			int pixel = imgData.getPixel(event.x, event.y);
+			int pixel = imgData.getPixel(event.x * mulZoom, event.y * mulZoom);
 			final RGB rgb = imgData.palette.getRGB(pixel);
 			
 			ColorTable colorTable = canvas.getColorTable();

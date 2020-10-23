@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctraceviewer.ui.blamestat;
+package edu.rice.cs.hpctraceviewer.ui.base;
 
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;

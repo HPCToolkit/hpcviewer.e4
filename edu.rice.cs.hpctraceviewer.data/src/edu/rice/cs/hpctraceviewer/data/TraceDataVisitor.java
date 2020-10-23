@@ -53,23 +53,22 @@ public class TraceDataVisitor implements IScopeVisitor
 	public void visit(GroupScope scope, ScopeVisitType vt) { }
 
 	public void visit(ProcedureScope scope, ScopeVisitType vt) { 
+		if (vt == ScopeVisitType.PreVisit) {
+			recordCpid(scope);
+		}
 		update(scope, vt);
 	}
 
 	public void visit(CallSiteScope scope, ScopeVisitType vt) { 
+		if (vt == ScopeVisitType.PreVisit) {
+			recordCpid(scope.getLineScope());
+		}
 		update(scope, vt);
 	}
 
 	public void visit(LineScope scope, ScopeVisitType vt) { 
 		if (vt == ScopeVisitType.PreVisit) {
-			int cpid = scope.getCpid();
-			if (cpid > 0)
-			{
-				this.map.put(cpid, new CallPath(scope, current_depth));
-				if (current_depth <= 0) {
-					System.err.println("Warning: depth cannot be less than 1: "  + current_depth);
-				}
-			}
+			recordCpid(scope);
 		}
 	}
 	
@@ -98,6 +97,18 @@ public class TraceDataVisitor implements IScopeVisitor
 		return map;
 	}
 	
+	private void recordCpid(Scope scope) {
+		int cpid = scope.getCpid();
+		if (cpid > 0)
+		{
+			this.map.put(cpid, new CallPath(scope, current_depth));
+			if (current_depth <= 0) {
+				System.err.println("Warning: depth cannot be less than 1: "  + current_depth);
+			}
+		}
+
+	}
+	
 	private void update(Scope scope, ScopeVisitType vt) {
 		if (vt == ScopeVisitType.PreVisit) {
 			current_depth++;
@@ -108,6 +119,5 @@ public class TraceDataVisitor implements IScopeVisitor
 		} else {
 			current_depth--;
 		}
-
 	}
 }
