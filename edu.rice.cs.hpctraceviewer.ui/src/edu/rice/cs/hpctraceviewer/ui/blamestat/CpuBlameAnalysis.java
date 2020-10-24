@@ -1,6 +1,7 @@
 package edu.rice.cs.hpctraceviewer.ui.blamestat;
 
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -31,18 +32,57 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 	private final static String GPU_SYNC = "<gpu sync>";
 	
 	private final TreeMap<Integer /* pixel */, Float /* percent */ >  cpuBlameMap;
-	private final TreeMap<Integer, Integer> mapCpuPixelCount;
 	private final IEventBroker eventBroker;
 	private float cpuTotalBlame;
 
 	private ColorTable colorTable;
 	private SpaceTimeDataController dataTraces; 
 	
-	private int cpu_active_count = 0;
-	private int gpu_active_count = 0;
-	private int gpu_idle_count = 0;
-	private int cpu_idle_count = 0;
+	private TreeMap<Integer, TreeMap<Integer, Integer>> cpu_active_routines; // foreach_rank: (pixel: active_count)
+	private TreeMap<Integer, Integer> cpu_active_count;
+	
+	private TreeMap<Integer, Integer> gpu_idle_count;
 
+	
+	
+	private void addDict(TreeMap<Integer, TreeMap<Integer, Integer>> dict, int key_rank, int key_pixel, int value) {
+		
+		if(dict.containsKey(key_rank)) {
+			TreeMap<Integer, Integer> entry = dict.get(key_rank);
+			
+			if(entry.containsKey(key_pixel))
+				entry.put(key_pixel, entry.get(key_pixel) + value);
+			else
+				entry.put(key_pixel, value);
+			
+		}else {
+			
+			TreeMap<Integer, Integer> entry = new TreeMap<Integer, Integer>();
+			entry.put(key_pixel, value);
+			dict.put(key_rank, entry);			
+		}
+	}
+	
+	
+	private void addDict(TreeMap<Integer, Integer> dict, int key, int value) {
+		
+		if(dict.containsKey(key)) {
+			dict.put(key, dict.get(key) + value);
+		}else {
+			dict.put(key, value);
+		}
+	}
+	
+	
+	private void addDict(TreeMap<Integer, Float> dict, int key, float value) {
+		
+		if(dict.containsKey(key)) {
+			dict.put(key, dict.get(key) + value);
+		}else {
+			dict.put(key, value);
+		}
+	}
+	
 	
 	/****
 	 * Constructor of the class
@@ -51,10 +91,7 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 	public CpuBlameAnalysis(IEventBroker eventBroker) {
 		this.eventBroker = eventBroker;
 		
-		cpuBlameMap      = new TreeMap<Integer, Float>();
-		mapCpuPixelCount = new TreeMap<Integer, Integer>();
-		new TreeMap<Integer, Integer>();
-		
+		cpuBlameMap = new TreeMap<Integer, Float>();
 		cpuTotalBlame = 0;
 	}
 	
@@ -63,21 +100,26 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 		this.colorTable = colorTable;
 		this.dataTraces = dataTraces;
 		
+				
+		cpu_active_routines = new TreeMap<Integer, TreeMap<Integer, Integer>>();
+		cpu_active_count = new TreeMap<Integer,Integer>();
+		
+		gpu_idle_count = new TreeMap<Integer,Integer>();
+		
 		cpuBlameMap.clear();		
 		cpuTotalBlame = (float) 0;
 
 	}
-
+	
+	
 	@Override
 	public void analysisPixelInit(int x) {
-		cpu_active_count = 0;
-		gpu_active_count = 0;
-		gpu_idle_count = 0;
-		cpu_idle_count = 0;
 		
-		mapCpuPixelCount.clear();
+		cpu_active_routines.clear();
+		cpu_active_count.clear();
+		gpu_idle_count.clear();		
 	}
-
+	
 	@Override
 	public void analysisPixelXY(ImageData detailData, int x, int y, int pixelValue) {
 
@@ -95,61 +137,54 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 		boolean isCpuThread = true;
 
 		// get the profile's id tuple and verify if the later is a cpu thread
-		if (process < listTuples.size()) {
-			IdTuple tag = listTuples.get(process);
-			isCpuThread = !tag.hasKind(IdTupleType.KIND_GPU_CONTEXT);
-		} else {
+		if (process >= listTuples.size()) {
 			Logger logger = LoggerFactory.getLogger(getClass());
 			logger.error("bug detected: access to " + process + " out of " + listTuples.size());
 		}
+		
+		IdTuple tag = listTuples.get(process);
+		int rank = (int) tag.getIndex(IdTupleType.KIND_RANK);
+				
+		isCpuThread = !tag.hasKind(IdTupleType.KIND_GPU_CONTEXT);
 
 		RGB rgb = detailData.palette.getRGB(pixelValue);
 		String proc_name = colorTable.getProcedureNameByColorHash(rgb.hashCode());
 
 		if (isCpuThread) { // cpu thread
-			if (proc_name.equals(ColorTable.UNKNOWN_PROCNAME)) {
-				cpu_idle_count = cpu_idle_count + 1;
-			} else {
-				cpu_active_count = cpu_active_count + 1;
-				Integer count = mapCpuPixelCount.get(pixelValue);
-				if (count == null) {
-					mapCpuPixelCount.put(pixelValue, 1);
-				} else {
-					mapCpuPixelCount.put(pixelValue, count+1);
-				}
+			if (!proc_name.equals(ColorTable.UNKNOWN_PROCNAME)) {	
+				
+				addDict(cpu_active_routines, rank, pixelValue, 1);
+				addDict(cpu_active_count, rank, 1);
 			}
 
 		} else {		// gpu thread
 			if (proc_name.equals(ColorTable.UNKNOWN_PROCNAME) ||
 					proc_name.equals(GPU_SYNC)) {
-
-				gpu_idle_count = gpu_idle_count + 1;
-			} else {
-				gpu_active_count = gpu_active_count + 1;
+								
+				addDict(gpu_idle_count, rank, 1);
 			} 
 		}
 	}
 
 	@Override
 	public void analysisPixelFinal(int pixel) {
-		
-		// If all gpu is idle, we compute the blame to cpu.
-		if (cpu_active_count > 0 && gpu_active_count == 0 && gpu_idle_count != 0 ) {
-			// Blame CPU
-			Integer blameCount = mapCpuPixelCount.get(pixel);
-			if (blameCount != null) {
 				
-				float blame = blameCount.floatValue() / cpu_active_count;
-				cpuTotalBlame = cpuTotalBlame + blame;
-				Float oldBlame = cpuBlameMap.get(pixel);
-				if (oldBlame != null) {
-					cpuBlameMap.put(pixel, oldBlame + blame);
-				} else {
-					cpuBlameMap.put(pixel, blame);
-				}
-			}
+		for (Entry<Integer, TreeMap<Integer, Integer>> rank_entry : cpu_active_routines.entrySet()) {
+						
+			// If any gpu is idle, put blame on current active cpu routine 
+			if ( gpu_idle_count.containsKey(rank_entry.getKey()) && rank_entry.getValue().containsKey(pixel)) {
+				// Blame CPU
+								
+				Integer idle_gpu_streams = gpu_idle_count.get(rank_entry.getKey());
+				Integer active_cpu_one = rank_entry.getValue().get(pixel);
+				Integer active_cpu_all = cpu_active_count.get(rank_entry.getKey());
+				
+				float blameCount = idle_gpu_streams * active_cpu_one / (float) active_cpu_all;								
+				cpuTotalBlame += blameCount;
+				
+				addDict(cpuBlameMap, pixel, blameCount);			
+			}	
 		}
-
 	}
 
 	@Override
