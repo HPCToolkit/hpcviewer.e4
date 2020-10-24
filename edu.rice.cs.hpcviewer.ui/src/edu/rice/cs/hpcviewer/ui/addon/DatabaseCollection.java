@@ -461,7 +461,8 @@ public class DatabaseCollection
 			// we cannot have two exactly the same database in one window
 			if (MessageDialog.openQuestion(shell, 
 									   "Warning: database already exists", 
-									   fileOrDirectory +": the database is already opened.\nDo you want to replace the existing one?" ) )
+									   exp.getDefaultDirectory().getAbsolutePath() +
+									   ": the database is already opened.\nDo you want to replace the existing one?" ) )
 			
 				// user decides to replace the database
 				return filename;
