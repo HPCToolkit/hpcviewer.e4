@@ -163,7 +163,11 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 			this.cbName = new Combo(nameArea, SWT.NONE);
 			this.cbName.setToolTipText("Name of the derived metric");
 			objHistoryName = new UserInputHistory( ExtDerivedMetricDlg.HISTORY_METRIC_NAME );
-			this.cbName.setItems( this.objHistoryName.getHistory() );
+			
+			List<String> nameHistory = objHistoryName.getHistory();
+			for(String name: nameHistory) {
+				cbName.add(name);
+			}
 			
 			if (metric != null) {
 				cbName.setText(metric.getDisplayName());
@@ -176,9 +180,13 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 	    	lblFormula.setText("Formula: ");
 	    	
 	    	this.cbExpression = new Combo(nameArea, SWT.NONE);
-	    	objHistoryFormula = new UserInputHistory(HISTORY_FORMULA);
-	    	this.cbExpression.setItems( objHistoryFormula.getHistory() );
 	    	cbExpression.setToolTipText("A spreadsheet-like formula using other metrics (variables), arithmetic operators, functions, and numerical constants");
+
+	    	objHistoryFormula = new UserInputHistory(HISTORY_FORMULA);
+	    	List<String> expressions = objHistoryFormula.getHistory();
+	    	for (String exp: expressions) {
+	    		cbExpression.add(exp);
+	    	}
 
 	    	if (metric != null) {
 				cbExpression.setText( metric.getFormula() );
