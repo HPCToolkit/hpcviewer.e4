@@ -261,15 +261,23 @@ public class DatabaseCollection
 		// system where to locate the part stack.
 		//----------------------------------------------------------------
 		
-		MPartStack stack = null;
-		List<MStackElement> list = null;
 		MWindow  window = application.getSelectedElement();
+		if (window == null) {
+			MessageDialog.openError(Display.getDefault().getActiveShell(), 
+									"Error", 
+									"Internal SWT: No active window");
+			return;
+		}
+		
 		String stackId = parentId;
 		
 		if (parentId == null) {
 			stackId = STACK_ID_BASE; 
 		}
-		stack  = (MPartStack)modelService.find(stackId, window);
+
+		List<MStackElement> list = null;
+
+		MPartStack stack  = (MPartStack)modelService.find(stackId, window);
 		if (stack != null)
 			list = stack.getChildren();
 		
@@ -305,7 +313,9 @@ public class DatabaseCollection
 			maxAttempt--;
 		}
 		if (view == null) {
-			MessageDialog.openError(Display.getDefault().getActiveShell(), "Fail to get the view", "hpcviewer is unable to retrieve the view. Please try again");
+			MessageDialog.openError(Display.getDefault().getActiveShell(), 
+									"Fail to get the view", 
+									"hpcviewer is unable to retrieve the view. Please try again");
 			return;
 		}
 		

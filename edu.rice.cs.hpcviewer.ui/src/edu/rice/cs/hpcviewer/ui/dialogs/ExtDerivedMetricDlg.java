@@ -550,7 +550,7 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 			  metricLastID = String.valueOf(maxIndex);
 
 			  metric = new DerivedMetric(root, metricManager, expFormula, 
-					  cbName.getText(), metricLastID, metricManager.getMetricCount(), 
+					  cbName.getText(), metricLastID, maxIndex, 
 					  annType, MetricType.UNKNOWN);
 			  
 		  } else {
