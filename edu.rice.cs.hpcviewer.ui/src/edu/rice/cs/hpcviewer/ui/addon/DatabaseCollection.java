@@ -73,10 +73,6 @@ import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
 public class DatabaseCollection 
 {
 	static private final String STACK_ID_BASE 	  = "edu.rice.cs.hpcviewer.ui.partstack.integrated";
-
-	static public enum DatabaseExistance {
-		OK, EXIST_REPLACE, QUIT 
-	};
 	
 
 	final private HashMap<MWindow, List<BaseExperiment>>   mapWindowToExperiments;
@@ -212,8 +208,7 @@ public class DatabaseCollection
 	public void createViewsAndAddDatabase(BaseExperiment experiment, 
 										  MApplication 	 application, 
 										  EPartService   service,
-										  EModelService  modelService,
-										  String         parentId) {
+										  EModelService  modelService) {
 		
 		if (experiment == null || service == null) {
 			MessageDialog.openError( Display.getDefault().getActiveShell(), 
@@ -227,7 +222,7 @@ public class DatabaseCollection
 		// at this stage. Maybe we should wait until it's ready?
 
 		try {
-			showPart(experiment, application, modelService, service, parentId);
+			showPart(experiment, application, modelService, service);
 		} catch (Exception e) {
 			String msg = "Cannot show a view: ";
 			
@@ -235,7 +230,7 @@ public class DatabaseCollection
 			if (activeWindowContext == null) {
 				msg += "No window context is active";
 			}
-			statusReport(0, msg, e);
+			statusReporter.error(msg, e);
 		}
 	}
 	
@@ -251,8 +246,7 @@ public class DatabaseCollection
 	private void showPart( BaseExperiment experiment, 
 						   MApplication   application, 
 						   EModelService  modelService,
-						   EPartService   service,
-						   String parentId) {
+						   EPartService   service) {
 
 		//----------------------------------------------------------------
 		// find an empty slot in the part stack
@@ -268,16 +262,10 @@ public class DatabaseCollection
 									"Internal SWT: No active window");
 			return;
 		}
-		
-		String stackId = parentId;
-		
-		if (parentId == null) {
-			stackId = STACK_ID_BASE; 
-		}
 
 		List<MStackElement> list = null;
 
-		MPartStack stack  = (MPartStack)modelService.find(stackId, window);
+		MPartStack stack  = (MPartStack)modelService.find(STACK_ID_BASE, window);
 		if (stack != null)
 			list = stack.getChildren();
 		
@@ -291,11 +279,14 @@ public class DatabaseCollection
 			stack = modelService.createModelElement(MPartStack.class);
 			stack.setElementId(STACK_ID_BASE);
 			stack.setToBeRendered(true);
+			
+			list = stack.getChildren();
 		}
 		
 		final MPart part = service.createPart(ProfilePart.ID);
 		if (list != null)
 			list.add(part);
+		
 		service.showPart(part, PartState.VISIBLE);
 		IMainPart view = null;
 
@@ -568,37 +559,6 @@ public class DatabaseCollection
 		return mapColumnStatus.get(experiment);
 	}
 	
-
-	
-	
-	/***
-	 * Log status to the Eclipse log service
-	 * @param status type of status {@link IStatus}
-	 * @param message 
-	 * @param e any exception
-	 */
-	public void statusReport(int status, String message, Exception e) {
-		switch(status) {
-		case IStatus.INFO:
-			if (e == null)
-				statusReporter.info(message);
-			
-			else 
-				statusReporter.debug(message, e);
-			
-			break;
-			
-		case IStatus.ERROR:
-			if (e == null)
-				statusReporter.debug(message);
-			else
-				statusReporter.error(message, e);
-			break;
-			
-		}
-		if (e != null)
-			e.printStackTrace();
-	}
 	
 	
 	/***
@@ -611,7 +571,7 @@ public class DatabaseCollection
 	private List<BaseExperiment> getActiveListExperiments(MWindow window) {
 
 		if (window == null) {
-			statusReport(IStatus.ERROR, "no active window", null);
+			statusReporter.error("No active window");
 			return null;
 		}
 		List<BaseExperiment> list = mapWindowToExperiments.get(window);
@@ -643,8 +603,7 @@ public class DatabaseCollection
 			// somehow, URI may throw an exception for certain schemes. 
 			// in this case, let's do it traditional way
 			fileStore = EFS.getLocalFileSystem().getStore(new Path(directoryOrXMLFile));
-
-			statusReport(IStatus.ERROR, "Locating " + directoryOrXMLFile, e);
+			statusReporter.warn("Unable to locate " + directoryOrXMLFile, e);
 		}
     	IFileInfo objFileInfo = fileStore.fetchInfo();
 
@@ -692,16 +651,17 @@ public class DatabaseCollection
 			}
 			
 			// Everything works just fine: create views
-			createViewsAndAddDatabase(experiment, application, partService, modelService, null);
+			createViewsAndAddDatabase(experiment, application, partService, modelService);
 
 		} catch (InvalExperimentException ei) {
 			final String msg = "Invalid database " + xmlFileOrDirectory + "\nError at line " + ei.getLineNumber();
-			statusReport(IStatus.ERROR, msg, ei);
+			statusReporter.error(msg, ei);
+
 			MessageDialog.openError(shell, "Error " + ei.getClass(), msg);
 			
 		} catch (Exception e) {
 			final String msg = "Error opening the database " + xmlFileOrDirectory + ":\n  " + e.getMessage();
-			statusReport(IStatus.ERROR, msg, e);
+			statusReporter.error(msg, e);
 			MessageDialog.openError(shell, "Error " + e.getClass(), msg);
 		}
 
