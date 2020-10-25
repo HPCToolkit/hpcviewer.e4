@@ -5,6 +5,7 @@ package edu.rice.cs.hpcviewer.ui.internal;
 
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
+import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -21,6 +22,7 @@ import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ColumnPixelData;
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeSelection;
@@ -73,6 +75,9 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		};
 		
 		getTree().addDisposeListener(disposeListener);
+
+		// Fix bug #25: tooltip is not wrapped on MacOS 
+		ColumnViewerToolTipSupport.enableFor(this, ToolTip.NO_RECREATE);
 	}
 	
 	
