@@ -41,6 +41,7 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 	private TreeMap<Integer, TreeMap<Integer, Integer>> cpu_active_routines; // foreach_rank: (pixel: active_count)
 	private TreeMap<Integer, Integer> cpu_active_count;
 	
+	private TreeMap<Integer, Integer> gpu_active_count;
 	private TreeMap<Integer, Integer> gpu_idle_count;
 
 	
@@ -104,6 +105,7 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 		cpu_active_routines = new TreeMap<Integer, TreeMap<Integer, Integer>>();
 		cpu_active_count = new TreeMap<Integer,Integer>();
 		
+		gpu_active_count = new TreeMap<Integer,Integer>();
 		gpu_idle_count = new TreeMap<Integer,Integer>();
 		
 		cpuBlameMap.clear();		
@@ -117,6 +119,7 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 		
 		cpu_active_routines.clear();
 		cpu_active_count.clear();
+		gpu_active_count.clear();				
 		gpu_idle_count.clear();		
 	}
 	
@@ -162,7 +165,9 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 					proc_name.equals(GPU_SYNC)) {
 								
 				addDict(gpu_idle_count, rank, 1);
-			} 
+			}else {				
+				addDict(gpu_active_count, rank, 1);
+			}
 		}
 	}
 
@@ -172,14 +177,12 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 		for (Entry<Integer, TreeMap<Integer, Integer>> rank_entry : cpu_active_routines.entrySet()) {
 						
 			// If any gpu is idle, put blame on current active cpu routine 
-			if ( gpu_idle_count.containsKey(rank_entry.getKey()) && rank_entry.getValue().containsKey(pixel)) {
+			if ( !gpu_active_count.containsKey(rank_entry.getKey()) && rank_entry.getValue().containsKey(pixel)) {
 				// Blame CPU
-								
-				Integer idle_gpu_streams = gpu_idle_count.get(rank_entry.getKey());
 				Integer active_cpu_one = rank_entry.getValue().get(pixel);
 				Integer active_cpu_all = cpu_active_count.get(rank_entry.getKey());
 				
-				float blameCount = idle_gpu_streams * active_cpu_one / (float) active_cpu_all;								
+				float blameCount = active_cpu_one / (float) active_cpu_all;								
 				cpuTotalBlame += blameCount;
 				
 				addDict(cpuBlameMap, pixel, blameCount);			
