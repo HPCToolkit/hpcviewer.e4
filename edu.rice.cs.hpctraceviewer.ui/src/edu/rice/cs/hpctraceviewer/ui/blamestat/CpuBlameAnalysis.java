@@ -15,7 +15,6 @@ import edu.rice.cs.hpc.data.db.IdTupleType;
 import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
 import edu.rice.cs.hpc.data.experiment.extdata.IFileDB.IdTupleOption;
 import edu.rice.cs.hpctraceviewer.data.ColorTable;
-import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 import edu.rice.cs.hpctraceviewer.ui.base.IPixelAnalysis;
@@ -129,8 +128,7 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 	@Override
 	public void analysisPixelXY(ImageData detailData, int x, int y, int pixelValue) {
 
-		// Blame-Shift init table for the current callstack level
-		final ImageTraceAttributes attributes = dataTraces.getAttributes();
+		dataTraces.getAttributes();
 		
         final IBaseData traceData = dataTraces.getBaseData();
         
