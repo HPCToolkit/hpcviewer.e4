@@ -54,8 +54,8 @@ public class UserInputHistory {
         return this.depth;
     }
     
-    public String []getHistory() {
-        return (String [])this.history.toArray(new String[this.history.size()]);
+    public List<String> getHistory() {
+        return history;
     }
     
     public void addLine(String line) {

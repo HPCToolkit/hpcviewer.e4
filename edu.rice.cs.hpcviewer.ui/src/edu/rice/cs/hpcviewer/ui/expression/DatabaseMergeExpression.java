@@ -20,6 +20,8 @@ public class DatabaseMergeExpression
 	public boolean evaluate(MWindow window) {
 		
 		Iterator<BaseExperiment> iterator = database.getIterator(window);
+		if (iterator == null)
+			return false;
 		
 		int numDb = 0;
 		

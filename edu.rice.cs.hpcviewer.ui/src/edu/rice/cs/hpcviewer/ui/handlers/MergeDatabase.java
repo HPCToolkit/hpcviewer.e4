@@ -87,7 +87,7 @@ public class MergeDatabase
 			public void run() {
 				try {
 					Experiment mergedExp = ExperimentMerger.merge(db[0], db[1], mergeType);
-					database.createViewsAndAddDatabase(mergedExp, application, service, modelService, null);
+					database.createViewsAndAddDatabase(mergedExp, application, service, modelService);
 					
 				} catch (Exception e) {
 					MessageDialog.openError(shell, "Error merging database",
