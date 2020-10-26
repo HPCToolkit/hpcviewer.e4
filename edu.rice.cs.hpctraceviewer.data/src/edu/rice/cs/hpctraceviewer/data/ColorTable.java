@@ -34,7 +34,7 @@ public class ColorTable
 	static private final long RANDOM_SEED = 612543231L;
 	
 	static final private String SEPARATOR_PROCNAME = "\n";
-	static final public String  UNKNOWN_PROCNAME   = "<No activity>";
+	static final public String  UNKNOWN_PROCNAME   = "<no activity>";
 	
 	/**The display this ColorTable uses to generate the random colors.*/
 	final private Display display;

@@ -9,6 +9,7 @@ import org.eclipse.core.commands.operations.IOperationHistoryListener;
 import org.eclipse.core.commands.operations.IUndoContext;
 import org.eclipse.core.commands.operations.IUndoableOperation;
 import org.eclipse.core.commands.operations.OperationHistoryEvent;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -32,6 +33,7 @@ import edu.rice.cs.hpctraceviewer.ui.operation.BufferRefreshOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.ZoomOperation;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
+import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 import edu.rice.cs.hpctraceviewer.data.Frame;
 import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
 import edu.rice.cs.hpctraceviewer.data.Position;
@@ -49,6 +51,7 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 	private final ITracePart tracePart;
 
 	private final int zoomFactor;
+	private final ProcessTimelineService ptlService;
 	
 	private SpaceTimeDataController dataTraces = null;
 	private TreeMap<Integer /* pixel */, Integer /* percent */> mapPixelToPercent;	
@@ -63,7 +66,10 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 	 * 
 	 * @param composite
 	 **********************************/
-	public SummaryTimeCanvas(ITracePart tracePart, Composite composite, IEventBroker eventBroker) {
+	public SummaryTimeCanvas(ITracePart tracePart, 
+							 Composite composite, 
+							 IEclipseContext context, 
+							 IEventBroker eventBroker) {
 		super(composite, SWT.NO_BACKGROUND);
 
 		this.eventBroker = eventBroker;
@@ -72,6 +78,8 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 		
 		mapPixelToPercent = new TreeMap<Integer, Integer>();		
 		
+		ptlService = (ProcessTimelineService) context.get(Constants.CONTEXT_TIMELINE);
+
 		// It is critical to reconstruct the image data according to Device zoom
 		// On Mac with retina display, the hardware pixel has 4x pixels than
 		// the swt level. Retrieving pixel without adapting with device zoom
@@ -177,7 +185,7 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 		// ----------------------------------
 		// plugin initialization
 		// ----------------------------------
-		analysisTool.analysisInit(dataTraces, getColorTable());
+		analysisTool.analysisInit(dataTraces, getColorTable(), ptlService);
 		
 		// ---------------------------------------------------------------------------
 		// needs to be optimized:

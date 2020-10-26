@@ -17,6 +17,7 @@ import edu.rice.cs.hpc.data.experiment.extdata.IFileDB.IdTupleOption;
 import edu.rice.cs.hpctraceviewer.data.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
+import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 import edu.rice.cs.hpctraceviewer.ui.base.IPixelAnalysis;
 import edu.rice.cs.hpctraceviewer.ui.summary.SummaryData;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
@@ -44,7 +45,7 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 	private TreeMap<Integer, Integer> gpu_active_count;
 	private TreeMap<Integer, Integer> gpu_idle_count;
 
-	
+	private ProcessTimelineService ptlService;
 	
 	private void addDict(TreeMap<Integer, TreeMap<Integer, Integer>> dict, int key_rank, int key_pixel, int value) {
 		
@@ -97,10 +98,12 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 	}
 	
 	@Override
-	public void analysisInit(SpaceTimeDataController dataTraces, ColorTable colorTable) {
+	public void analysisInit(SpaceTimeDataController dataTraces, 
+							 ColorTable colorTable, 
+							 ProcessTimelineService ptlService) {
 		this.colorTable = colorTable;
 		this.dataTraces = dataTraces;
-		
+		this.ptlService = ptlService;
 				
 		cpu_active_routines = new TreeMap<Integer, TreeMap<Integer, Integer>>();
 		cpu_active_count = new TreeMap<Integer,Integer>();
@@ -135,7 +138,7 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 		List<IdTuple> listTuples = traceData.getListOfIdTuples(IdTupleOption.BRIEF);
 
 		// get the profile of the current pixel
-		int process = attributes.convertTraceLineToRank(y);				
+		int process = ptlService.getProcessTimeline(y).getProcessNum(); //attributes.convertTraceLineToRank(y);				
 
 		boolean isCpuThread = true;
 
@@ -154,8 +157,7 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 		String proc_name = colorTable.getProcedureNameByColorHash(rgb.hashCode());
 
 		if (isCpuThread) { // cpu thread
-			if (!proc_name.equals(ColorTable.UNKNOWN_PROCNAME)) {	
-				
+			if (!proc_name.equals(ColorTable.UNKNOWN_PROCNAME)) {
 				addDict(cpu_active_routines, rank, pixelValue, 1);
 				addDict(cpu_active_count, rank, 1);
 			}

@@ -4,6 +4,7 @@ import org.eclipse.swt.graphics.ImageData;
 
 import edu.rice.cs.hpctraceviewer.data.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
+import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 
 
 /********************************************************
@@ -28,7 +29,7 @@ public interface IPixelAnalysis
 		public void analysisPixelFinal(int pixel) {}
 		
 		@Override
-		public void analysisInit(SpaceTimeDataController dataTraces, ColorTable colorTable) {}
+		public void analysisInit(SpaceTimeDataController dataTraces, ColorTable colorTable, ProcessTimelineService ptlService) {}
 		
 		@Override
 		public void analysisFinal(ImageData detailData) {}
@@ -39,8 +40,11 @@ public interface IPixelAnalysis
 	 * 
 	 * @param dataTraces {@code SpaceTimeDataController} data of the trace
 	 * @param colorTable {@code ColorTable} table of colors
+	 * @param ptlService ({@code ProcessTimelineService} a service to get the information of the process timeline
 	 */
-	public void analysisInit(SpaceTimeDataController dataTraces, ColorTable colorTable);
+	public void analysisInit(SpaceTimeDataController dataTraces, 
+							 ColorTable colorTable,
+							 ProcessTimelineService ptlService);
 	
 	/***
 	 * Initialization phase of the analysis for x-axis pixel
