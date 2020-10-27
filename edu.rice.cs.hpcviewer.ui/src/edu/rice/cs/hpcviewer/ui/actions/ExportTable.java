@@ -79,7 +79,8 @@ public class ExportTable
 		// -----------------------------------------------------------------------
 		// prepare the file
 		// -----------------------------------------------------------------------
-		message.showInfo( "Writing to file: "+sFilename);
+		if (message != null)
+			message.showInfo( "Writing to file: "+sFilename);
 		
 		try {
 			writeContentToFile(objFile);

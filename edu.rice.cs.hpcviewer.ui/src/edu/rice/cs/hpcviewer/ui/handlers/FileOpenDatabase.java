@@ -5,7 +5,6 @@ import javax.inject.Named;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.e4.ui.workbench.IWorkbench;
@@ -19,7 +18,6 @@ public class FileOpenDatabase
 {
 	static public final String EDITOR_ID = "edu.rice.cs.hpcviewer.ui.part.editor";
 	
-	@Inject IEventBroker broker;
 	@Inject MApplication application;
 	@Inject EModelService modelService;
 	

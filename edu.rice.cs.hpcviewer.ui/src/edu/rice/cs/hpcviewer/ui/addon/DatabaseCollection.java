@@ -45,12 +45,15 @@ import org.slf4j.LoggerFactory;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.InvalExperimentException;
+import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.filter.service.FilterMap;
 import edu.rice.cs.hpcbase.BaseConstants;
+import edu.rice.cs.hpcbase.map.UserInputHistory;
 import edu.rice.cs.hpcbase.ui.IMainPart;
 import edu.rice.cs.hpctraceviewer.ui.TracePart;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.experiment.ExperimentManager;
+import edu.rice.cs.hpcviewer.ui.handlers.RecentDatabase;
 import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
 
 /***
@@ -70,10 +73,6 @@ import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
 public class DatabaseCollection 
 {
 	static private final String STACK_ID_BASE 	  = "edu.rice.cs.hpcviewer.ui.partstack.integrated";
-
-	static public enum DatabaseExistance {
-		INEXIST, EXIST_REPLACE, EXIST_QUIT 
-	};
 	
 
 	final private HashMap<MWindow, List<BaseExperiment>>   mapWindowToExperiments;
@@ -126,9 +125,10 @@ public class DatabaseCollection
 				path = arg;
 		}
 		if (path == null || path.length() < 1) {
-			path = experimentManager.openFileExperiment(shell);
-			if (path == null)
+			String filename = checkExistance(application.getSelectedElement(), shell, null);
+			if (filename == null)
 				return; 
+			path = filename;
 		}
 
 		openDatabaseAndCreateViews(application, modelService, partService, shell, path);
@@ -144,28 +144,27 @@ public class DatabaseCollection
 	 * @param application MApplication
 	 * @param service EPartService
 	 * @param modelService EModelService
-	 * @param parentId the id of the part stack to contain the views. If the value is null, then
-	 *   it searches any available slot if possible.
+	 * @param database directory
 	 */
 	public void addDatabase(Shell shell, 
 			MApplication 	application, 
 			EPartService    service,
 			EModelService 	modelService,
-			String          parentId) {
+			String          database) {
 		
-		String filename = experimentManager.openFileExperiment(shell);
+		String filename = checkExistance(application.getSelectedElement(), shell, database);
 		if (filename == null)
 			return;
-
-		DatabaseExistance existance = checkExistance(application.getSelectedElement(), shell, filename);
-		if (existance == DatabaseExistance.EXIST_QUIT)
-			return;
-		else if (existance == DatabaseExistance.EXIST_REPLACE)
-			removeAll(application, modelService, service);
+		
+		BaseExperiment exp = getExperimentObject(application.getSelectedElement(), filename);
+		if (exp != null) {
+			removeDatabase(application, modelService, service, exp);
+		}
 		
 		openDatabaseAndCreateViews(application, modelService, service, shell, filename);
 	}
 	
+
 	
 	/****
 	 * One-stop API to open a database. 
@@ -177,23 +176,20 @@ public class DatabaseCollection
 	 * @param application MApplication
 	 * @param service EPartService
 	 * @param modelService EModelService
-	 * @param parentId the id of the part stack to contain the views. If the value is null, then
-	 *   it searches any available slot if possible.
+	 * @param database
 	 */
 	public void openDatabase(Shell shell, 
 			MApplication 	application, 
 			EPartService    service,
 			EModelService 	modelService,
-			String          parentId) {
+			String          database) {
 		
-		final String filename = experimentManager.openFileExperiment(shell);
+		String filename = checkExistance(application.getSelectedElement(), shell, database);
 		if (filename == null)
 			return;
 
-		if (checkExistance(application.getSelectedElement(), shell, filename) == DatabaseExistance.EXIST_QUIT)
-			return;
-
 		removeAll(application, modelService, service);
+		
 		openDatabaseAndCreateViews(application, modelService, service, shell, filename);
 	}
 
@@ -212,8 +208,7 @@ public class DatabaseCollection
 	public void createViewsAndAddDatabase(BaseExperiment experiment, 
 										  MApplication 	 application, 
 										  EPartService   service,
-										  EModelService  modelService,
-										  String         parentId) {
+										  EModelService  modelService) {
 		
 		if (experiment == null || service == null) {
 			MessageDialog.openError( Display.getDefault().getActiveShell(), 
@@ -227,7 +222,7 @@ public class DatabaseCollection
 		// at this stage. Maybe we should wait until it's ready?
 
 		try {
-			showPart(experiment, application, modelService, service, parentId);
+			showPart(experiment, application, modelService, service);
 		} catch (Exception e) {
 			String msg = "Cannot show a view: ";
 			
@@ -235,7 +230,7 @@ public class DatabaseCollection
 			if (activeWindowContext == null) {
 				msg += "No window context is active";
 			}
-			statusReport(0, msg, e);
+			statusReporter.error(msg, e);
 		}
 	}
 	
@@ -251,8 +246,7 @@ public class DatabaseCollection
 	private void showPart( BaseExperiment experiment, 
 						   MApplication   application, 
 						   EModelService  modelService,
-						   EPartService   service,
-						   String parentId) {
+						   EPartService   service) {
 
 		//----------------------------------------------------------------
 		// find an empty slot in the part stack
@@ -268,16 +262,10 @@ public class DatabaseCollection
 									"Internal SWT: No active window");
 			return;
 		}
-		
-		String stackId = parentId;
-		
-		if (parentId == null) {
-			stackId = STACK_ID_BASE; 
-		}
 
 		List<MStackElement> list = null;
 
-		MPartStack stack  = (MPartStack)modelService.find(stackId, window);
+		MPartStack stack  = (MPartStack)modelService.find(STACK_ID_BASE, window);
 		if (stack != null)
 			list = stack.getChildren();
 		
@@ -291,11 +279,14 @@ public class DatabaseCollection
 			stack = modelService.createModelElement(MPartStack.class);
 			stack.setElementId(STACK_ID_BASE);
 			stack.setToBeRendered(true);
+			
+			list = stack.getChildren();
 		}
 		
 		final MPart part = service.createPart(ProfilePart.ID);
 		if (list != null)
 			list.add(part);
+		
 		service.showPart(part, PartState.VISIBLE);
 		IMainPart view = null;
 
@@ -361,6 +352,8 @@ public class DatabaseCollection
 	 */
 	public Iterator<BaseExperiment> getIterator(MWindow window) {
 		List<BaseExperiment> list = mapWindowToExperiments.get(window);
+		if (list == null)
+			return null;
 		return list.iterator();
 	}
 	
@@ -405,7 +398,7 @@ public class DatabaseCollection
 	 * @param pathXML the absolute path of the experiment XNK file path
 	 * @return BaseExperiment object if the database exist, null otherwise.
 	 */
-	public BaseExperiment getExperiment(MWindow window, String pathXML) {
+	public BaseExperiment getExperimentObject(MWindow window, String pathXML) {
 		List<BaseExperiment> list = getActiveListExperiments(window);
 		
 		if (list.isEmpty())
@@ -422,24 +415,63 @@ public class DatabaseCollection
 	}
 	
 	/***
-	 * Check if a database path already exist in the collection
+	 * Check if a database is good or already exist in the collection.
+	 * <ul>
+	 * <li>If it's empty: show a window to pick a database
+	 * <li>If it's a directory, add the database filename
+	 * <li>If it's a file: check if exist or not.
+	 * </ul>
+
 	 * @param shell
 	 * @param pathXML the absolute path to XML file
-	 * @return true of the XML file already exist. False otherwise
+	 * @return {@code DatabaseExistance}
 	 */
-	public DatabaseExistance checkExistance(MWindow window, Shell shell, String pathXML) {
+	public String checkExistance(MWindow window, Shell shell, String fileOrDirectory) {
 		
-		BaseExperiment exp = getExperiment(window, pathXML);
+		// 1. convert the database path to experiment.xml file name
+		
+		String filename = fileOrDirectory;
+		if (filename == null) {
+			filename = experimentManager.openFileExperiment(shell);
+			if (filename == null)
+				return null;
+		}else {
+			int index = filename.lastIndexOf(Constants.DATABASE_FILENAME);
+			if (index<0) {
+				// it's a directory. Add the experiment.xml file
+				filename += File.separator + Constants.DATABASE_FILENAME; 
+			}
+		}
+
+		// 2. check if the file exists
+		
+		File file = new File(filename);
+		if (!file.exists()) {
+			MessageDialog.openError(shell, 
+					"Fail to open a database", 
+					filename + ": file not found");
+			return null;
+		}
+
+		// 3. check if the database already opened or not
+		
+		BaseExperiment exp = getExperimentObject(window, filename);
+		
 		if (exp != null) {
 			// we cannot have two exactly the same database in one window
 			if (MessageDialog.openQuestion(shell, 
 									   "Warning: database already exists", 
-									   pathXML +": the database is already opened.\nDo you want to replace the existing one?" ) )
-				return DatabaseExistance.EXIST_REPLACE;
+									   exp.getDefaultDirectory().getAbsolutePath() +
+									   ": the database is already opened.\nDo you want to replace the existing one?" ) )
+			
+				// user decides to replace the database
+				return filename;
 
-			return DatabaseExistance.EXIST_QUIT;
+			// we give up
+			return null;
 		}
-		return DatabaseExistance.INEXIST;
+		// database is valid, fresh and not already opened
+		return filename;
 	}
 	
 	
@@ -512,9 +544,7 @@ public class DatabaseCollection
 			// inside this method, we remove the database AND hide the view parts
 			removeDatabase(application, modelService, partService, exp);
 		}
-		
 		list.clear();
-
 		mapColumnStatus.clear();
 		
 		return size;
@@ -530,37 +560,6 @@ public class DatabaseCollection
 		return mapColumnStatus.get(experiment);
 	}
 	
-
-	
-	
-	/***
-	 * Log status to the Eclipse log service
-	 * @param status type of status {@link IStatus}
-	 * @param message 
-	 * @param e any exception
-	 */
-	public void statusReport(int status, String message, Exception e) {
-		switch(status) {
-		case IStatus.INFO:
-			if (e == null)
-				statusReporter.info(message);
-			
-			else 
-				statusReporter.debug(message, e);
-			
-			break;
-			
-		case IStatus.ERROR:
-			if (e == null)
-				statusReporter.debug(message);
-			else
-				statusReporter.error(message, e);
-			break;
-			
-		}
-		if (e != null)
-			e.printStackTrace();
-	}
 	
 	
 	/***
@@ -573,7 +572,7 @@ public class DatabaseCollection
 	private List<BaseExperiment> getActiveListExperiments(MWindow window) {
 
 		if (window == null) {
-			statusReport(IStatus.ERROR, "no active window", null);
+			statusReporter.error("No active window");
 			return null;
 		}
 		List<BaseExperiment> list = mapWindowToExperiments.get(window);
@@ -585,27 +584,27 @@ public class DatabaseCollection
 		return list;
 	}
 	
+	
 	/****
 	 * Find a database for a given path
 	 * 
 	 * @param shell the active shell
 	 * @param expManager the experiment manager
-	 * @param sPath path to the database
+	 * @param directoryOrXMLFile path to the database
 	 * @return
 	 * @throws Exception 
 	 */
-	private BaseExperiment openDatabase(Shell shell, String sPath) throws Exception {
+	private BaseExperiment openDatabase(Shell shell, String directoryOrXMLFile) throws Exception {
     	IFileStore fileStore;
 
 		try {
-			fileStore = EFS.getLocalFileSystem().getStore(new URI(sPath));
+			fileStore = EFS.getLocalFileSystem().getStore(new URI(directoryOrXMLFile));
 			
 		} catch (URISyntaxException e) {
 			// somehow, URI may throw an exception for certain schemes. 
 			// in this case, let's do it traditional way
-			fileStore = EFS.getLocalFileSystem().getStore(new Path(sPath));
-
-			statusReport(IStatus.ERROR, "Locating " + sPath, e);
+			fileStore = EFS.getLocalFileSystem().getStore(new Path(directoryOrXMLFile));
+			statusReporter.warn("Unable to locate " + directoryOrXMLFile, e);
 		}
     	IFileInfo objFileInfo = fileStore.fetchInfo();
 
@@ -615,10 +614,10 @@ public class DatabaseCollection
     	BaseExperiment experiment = null;
     	
     	if (objFileInfo.isDirectory()) {
-    		experiment = experimentManager.openDatabaseFromDirectory(shell, sPath);
+    		experiment = experimentManager.openDatabaseFromDirectory(shell, directoryOrXMLFile);
     	} else {
-			EFS.getLocalFileSystem().fromLocalFile(new File(sPath));
-			experiment = experimentManager.loadExperiment(sPath);
+			EFS.getLocalFileSystem().fromLocalFile(new File(directoryOrXMLFile));
+			experiment = experimentManager.loadExperiment(directoryOrXMLFile);
     	}
     	return experiment;
 	}
@@ -627,20 +626,23 @@ public class DatabaseCollection
 	/****
 	 * Open a database using background job, and then create views using UI thread
 	 *
+	 * @param application
+	 * @param modelService
 	 * @param partService
 	 * @param shell
-	 * @param database
+	 * @param xmlFileOrDirectory
 	 */
-	private void openDatabaseAndCreateViews(final MApplication application,
+	public void openDatabaseAndCreateViews(final MApplication application,
 											final EModelService modelService,
 											final EPartService partService,
 											final Shell shell, 
-											final String database) {
-
+											final String xmlFileOrDirectory) {
+		
 		try {
-			final BaseExperiment experiment = openDatabase(shell, database);
-			if (experiment == null)
+			final BaseExperiment experiment = openDatabase(shell, xmlFileOrDirectory);
+			if (experiment == null) {
 				return;
+			}
 			
 			// filter the tree if user has defined at least a filter
 			
@@ -650,17 +652,30 @@ public class DatabaseCollection
 			}
 			
 			// Everything works just fine: create views
-			createViewsAndAddDatabase(experiment, application, partService, modelService, null);
+			createViewsAndAddDatabase(experiment, application, partService, modelService);
 
 		} catch (InvalExperimentException ei) {
-			final String msg = "Invalid database " + database + "\nError at line " + ei.getLineNumber();
-			statusReport(IStatus.ERROR, msg, ei);
+			final String msg = "Invalid database " + xmlFileOrDirectory + "\nError at line " + ei.getLineNumber();
+			statusReporter.error(msg, ei);
+
 			MessageDialog.openError(shell, "Error " + ei.getClass(), msg);
 			
 		} catch (Exception e) {
-			final String msg = "Error opening the database " + database + ":\n  " + e.getMessage();
-			statusReport(IStatus.ERROR, msg, e);
+			final String msg = "Error opening the database " + xmlFileOrDirectory + ":\n  " + e.getMessage();
+			statusReporter.error(msg, e);
 			MessageDialog.openError(shell, "Error " + e.getClass(), msg);
 		}
+
+		// store the current loaded database to history
+		// we need to ensure we only store the directory, not the xml file
+		
+		String path = xmlFileOrDirectory;
+		int index = path.lastIndexOf(Constants.DATABASE_FILENAME);
+
+		if (index>0) {
+			path = path.substring(0, index-1);
+		}
+		UserInputHistory history = new UserInputHistory(RecentDatabase.HISTORY_DATABASE_RECENT);
+		history.addLine(path);
 	}
 }

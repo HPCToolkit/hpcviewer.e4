@@ -4,16 +4,20 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.swt.widgets.Display;
 import edu.rice.cs.hpcbase.map.ProcedureAliasMap;
+import edu.rice.cs.hpc.data.db.IdTuple;
+import edu.rice.cs.hpc.data.db.IdTupleType;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.ExperimentWithoutMetrics;
 import edu.rice.cs.hpc.data.experiment.InvalExperimentException;
 import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
 import edu.rice.cs.hpc.data.experiment.extdata.IFilteredData;
+import edu.rice.cs.hpc.data.experiment.extdata.IFileDB.IdTupleOption;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
 import edu.rice.cs.hpc.data.trace.TraceAttribute;
@@ -243,6 +247,21 @@ public abstract class SpaceTimeDataController
 		return dataTrace.getNumberOfRanks();
 		
 	}
+	
+	
+	/******************************************************************************
+	 * Returns number of MPI ranks
+	 * SpaceTimeData.
+	 ******************************************************************************/
+	public int getTotalMpiRanks() {		
+		
+		final List<IdTuple> listIdTuples = dataTrace.getListOfIdTuples(IdTupleOption.BRIEF);
+		
+		IdTuple last_traceline = listIdTuples.get(listIdTuples.size()-1);
+		
+		return (int) last_traceline.getIndex(IdTupleType.KIND_RANK) + 1;
+	}
+	
 	
 	public HashMap<Integer, CallPath> getScopeMap() {
 		return scopeMap;
