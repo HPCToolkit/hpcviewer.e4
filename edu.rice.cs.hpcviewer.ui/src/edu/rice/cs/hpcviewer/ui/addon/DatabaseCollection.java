@@ -508,7 +508,7 @@ public class DatabaseCollection
 		// first, notify all the parts that have experiment that they will be destroyed.
 		
 		ViewerDataEvent data = new ViewerDataEvent((Experiment) experiment, null);
-		eventBroker.post(BaseConstants.TOPIC_HPC_REMOVE_DATABASE, data);
+		eventBroker.send(BaseConstants.TOPIC_HPC_REMOVE_DATABASE, data);
 		
 		// make sure the experiment's resources are disposed
 		experiment.dispose();

@@ -147,6 +147,7 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 
 		} else if (topic.equals(BaseConstants.TOPIC_HPC_REMOVE_DATABASE)) {
 			// mark that this part will be destroyed
+			experiment.dispose();
 			experiment = null;
 
 		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE)) {

@@ -268,20 +268,16 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 	}
 
 	@Override
-	public void partActivated(MPart part) {
-	}
+	public void partActivated(MPart part) {}
 
 	@Override
-	public void partBroughtToTop(MPart part) {
-	}
+	public void partBroughtToTop(MPart part) {}
 
 	@Override
-	public void partDeactivated(MPart part) {
-	}
+	public void partDeactivated(MPart part) {}
 
 	@Override
-	public void partHidden(MPart part) {
-	}
+	public void partHidden(MPart part) {}
 
 	@Override
 	public void partVisible(MPart part) {
@@ -383,6 +379,10 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 			// mark that this part will be close soon. Do not do any tasks
 			partService = null;
 			eventBroker = null;
+			
+			// need to dispose resources
+			if (stdc != null)
+				stdc.dispose();
 		}
 	}
 }

@@ -1215,7 +1215,6 @@ public class BaseExperimentBuilder extends Builder {
 			current_depth++;
 			assert(current_depth >= 0);
 			max_depth = Math.max(max_depth, current_depth);
-			System.out.println(scope.getCCTIndex() + ". " + current_depth + ": " + scope.getName());
 		}
 	}
 
@@ -1232,7 +1231,6 @@ public class BaseExperimentBuilder extends Builder {
 			if (isScopeTrace(scope)) {
 				current_depth--;
 				assert(current_depth >= 0);
-				System.out.println("   "+ scope.getCCTIndex() + ". " + current_depth + ": " + scope.getName());
 			}
 
 			if (scope instanceof RootScope) {
