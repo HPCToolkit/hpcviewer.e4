@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.rice.cs.hpc.data.util.CallPath;
 import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.data.util.string.StringUtil;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
@@ -39,7 +40,6 @@ import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
 import edu.rice.cs.hpctraceviewer.data.Position;
-import edu.rice.cs.hpctraceviewer.data.CallPath;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 

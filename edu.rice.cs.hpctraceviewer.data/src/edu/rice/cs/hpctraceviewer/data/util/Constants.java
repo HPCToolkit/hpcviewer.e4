@@ -28,4 +28,8 @@ public class Constants {
 	public static final int DB_OK = 0x44424F4B;
 
 	public static final String CONTEXT_TIMELINE = "hpctraceviewer.timeline";
+	
+	
+	/**A null function*/
+	public static final String NULL_FUNCTION = "-Outside Timeline-";
 }

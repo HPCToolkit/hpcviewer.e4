@@ -3,8 +3,8 @@ package edu.rice.cs.hpctraceviewer.data;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
@@ -18,9 +18,8 @@ import edu.rice.cs.hpc.data.experiment.InvalExperimentException;
 import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
 import edu.rice.cs.hpc.data.experiment.extdata.IFilteredData;
 import edu.rice.cs.hpc.data.experiment.extdata.IFileDB.IdTupleOption;
-import edu.rice.cs.hpc.data.experiment.scope.RootScope;
-import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
 import edu.rice.cs.hpc.data.trace.TraceAttribute;
+import edu.rice.cs.hpc.data.util.CallPath;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
@@ -50,12 +49,6 @@ public abstract class SpaceTimeDataController
 	 * microseconds)).
 	 */
 	protected long maxEndTime, minBegTime;
-
-	/** The map between the nodes and the cpid's. */
-	private HashMap<Integer, CallPath> scopeMap = null;
-		
-	/** The maximum depth of any single CallStackSample in any trace. */
-	protected int maxDepth = 0;
 	
 	protected ColorTable colorTable = null;
 	protected IBaseData dataTrace = null;
@@ -83,7 +76,7 @@ public abstract class SpaceTimeDataController
 		// possible java.lang.OutOfMemoryError exception here
 		exp.open(expFile, new ProcedureAliasMap(), false);
 
-		init(context);
+		init(context, exp);
 	}
 	
 	/*****
@@ -102,7 +95,7 @@ public abstract class SpaceTimeDataController
 		// Without metrics, so param 3 is false
 		exp.open(expStream, new ProcedureAliasMap(), Name);
 		
-		init(context);
+		init(context, exp);
 	}
 	
 	/*****
@@ -118,8 +111,9 @@ public abstract class SpaceTimeDataController
 	public SpaceTimeDataController(IEclipseContext context, BaseExperiment experiment) 			
 			throws InvalExperimentException, Exception 
 	{
-		this.exp = experiment;
-		init(context);
+		exp = experiment;
+		
+		init(context, exp);
 	}
 
 	
@@ -140,7 +134,7 @@ public abstract class SpaceTimeDataController
 	 * @param _window
 	 * @throws Exception 
 	 ******/
-	private void init(IEclipseContext context) 
+	private void init(IEclipseContext context, BaseExperiment exp) 
 			throws InvalExperimentException 
 	{	
 		this.context = context;
@@ -155,14 +149,6 @@ public abstract class SpaceTimeDataController
 				// initialize color table
 				colorTable = new ColorTable();
 				
-				// tree traversal to get the list of cpid, procedures and max depth
-				TraceDataVisitor visitor = new TraceDataVisitor(colorTable);
-				RootScope root = exp.getRootScope(RootScopeType.CallingContextTree);
-				root.dfsVisitScopeTree(visitor);
-
-				maxDepth   = visitor.getMaxDepth();
-				scopeMap   = visitor.getMap();
-				
 				// attributes initialization
 				attributes 	 = new ImageTraceAttributes();
 
@@ -175,7 +161,6 @@ public abstract class SpaceTimeDataController
 		}
 		minBegTime = trAttribute.dbTimeMin;
 		maxEndTime = trAttribute.dbTimeMax;
-
 	}
 
 	
@@ -191,12 +176,12 @@ public abstract class SpaceTimeDataController
 	
 	public int getMaxDepth() 
 	{
-		return maxDepth;
+		return exp.getMaxDepth();
 	}
 	
 	
 	public int getDefaultDepth() {
-		return maxDepth/3;
+		return exp.getMaxDepth()/3;
 	}
 	
 	
@@ -263,8 +248,8 @@ public abstract class SpaceTimeDataController
 	}
 	
 	
-	public HashMap<Integer, CallPath> getScopeMap() {
-		return scopeMap;
+	public Map<Integer, CallPath> getScopeMap() {
+		return exp.getScopeMap();
 	}
 
 	/******************************************************************************
@@ -314,7 +299,7 @@ public abstract class SpaceTimeDataController
 	public TimeUnit getTimeUnit() {
 		int version = exp.getMajorVersion();
 		
-		if (version == 2) {
+		if (version == edu.rice.cs.hpc.data.util.Constants.EXPERIMENT_DENSED_VERSION) {
 			if (exp.getMinorVersion() < 2) {
 				// old version of database: always microsecond
 				return TimeUnit.MICROSECONDS;
@@ -327,7 +312,7 @@ public abstract class SpaceTimeDataController
 				return TimeUnit.NANOSECONDS;
 			}
 
-		} else if (version == 4) {
+		} else if (version == edu.rice.cs.hpc.data.util.Constants.EXPERIMENT_SPARSE_VERSION) {
 			// newer database: sparse database always uses nanoseconds
 			
 			return TimeUnit.NANOSECONDS;

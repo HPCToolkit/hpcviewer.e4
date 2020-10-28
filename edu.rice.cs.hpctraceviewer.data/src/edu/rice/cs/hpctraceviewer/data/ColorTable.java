@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.TreeSet;
-
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
@@ -14,10 +14,11 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcbase.map.ProcedureClassData;
-import edu.rice.cs.hpc.data.util.OSValidator;
+import edu.rice.cs.hpctraceviewer.data.util.Constants;
 import edu.rice.cs.hpctraceviewer.data.util.ProcedureClassMap;
 
 /**************************************************************
@@ -28,7 +29,7 @@ public class ColorTable
 {
 	static final public int COLOR_ICON_SIZE = 8;
 	
-	static private final int MAX_NUM_DIFFERENT_COLORS = 512;
+//	static private final int MAX_NUM_DIFFERENT_COLORS = 512;
 	static private final int COLOR_MIN = 16;
 	static private final int COLOR_MAX = 200 - COLOR_MIN;
 	static private final long RANDOM_SEED = 612543231L;
@@ -149,16 +150,6 @@ public class ColorTable
 	}
 
 
-	/************************************************************************
-	 * add a color to a procedure.
-	 * If the procedure is already assigned a color, do nothing.
-	 * 
-	 * @param proc name of the procedure
-	 ************************************************************************/
-	public void addProcedure(String proc) 
-	{
-		createColorImagePair(proc);
-	}
 	
 	/************************************************************************
 	 * Return the name of the procedure for a given RGB or Color hashcode.<br/>
@@ -221,7 +212,7 @@ public class ColorTable
 	
 	
 	
-	private ColorImagePair []listDefinedColorImagePair = null;
+	//private ColorImagePair []listDefinedColorImagePair = null;
 	
 	/************************************************************************
 	 * Main method to generate color if necessary <br/>
@@ -267,23 +258,9 @@ public class ColorTable
 		}
 		
 		// 3. generate a new color-image if we have enough handles
-		if (colorMatcher.size() < MAX_NUM_DIFFERENT_COLORS || !OSValidator.isWindows()) {
-			RGB rgb = getProcedureColor( procName, COLOR_MIN, COLOR_MAX, random_generator );
-			cip = createColorImagePair(procName, rgb);
-		} else {			
-			
-			// 4. Windows only: we have more procedures than the limit
-			// this may not work on some OS like Windows that limits the number of handles
-			// we need to reuse existing color randomly to this procedure to avoid system crash
+		RGB rgb = getProcedureColor( procName, COLOR_MIN, COLOR_MAX, random_generator );
+		cip = createColorImagePair(procName, rgb);
 
-			if (listDefinedColorImagePair == null) {
-				listDefinedColorImagePair = new ColorImagePair[colorMatcher.size()];
-				colorMatcher.values().toArray(listDefinedColorImagePair);
-			}
-			// get a random index within the range 1..MAX-1
-			int index = random_generator.nextInt(MAX_NUM_DIFFERENT_COLORS-2)+1;
-			cip = listDefinedColorImagePair[index];
-		}
 		// store in a hashmap the pair procdure and image-color
 		colorMatcher.put(procName, cip);
 		
@@ -315,7 +292,6 @@ public class ColorTable
 		}
 		setOfProcs.add(procName);
 		mapRGBtoProcedure.put(key, setOfProcs);
-
 	}
 	
 	/************************************************************************
@@ -327,11 +303,21 @@ public class ColorTable
 	 ************************************************************************/
 	private ColorImagePair createColorImagePair(String procName, RGB rgb) 
 	{
-		Color c = new Color(display, rgb);
-		Image i = createImage(display, rgb);
-		ColorImagePair cip = new ColorImagePair(c, i);
-		
-		return cip;
+		try {
+			Color c = new Color(display, rgb);
+			Image i = createImage(display, rgb);
+			ColorImagePair cip = new ColorImagePair(c, i);
+			
+			return cip;
+		} catch (Exception e) {
+			Logger logger = LoggerFactory.getLogger(getClass());
+			logger.error("Error resource creation", e);
+			
+			MessageDialog.openError(display.getActiveShell(), 
+									"Error " + e.getClass(), 
+									e.getLocalizedMessage());
+		}
+		return null;
 	}
 	
 	/***********************************************************************
@@ -370,7 +356,7 @@ public class ColorTable
 			
 			IMAGE_WHITE = new ColorImagePair(col_white, img_white );
 			
-			colorMatcher.put(CallPath.NULL_FUNCTION, IMAGE_WHITE);
+			colorMatcher.put(Constants.NULL_FUNCTION, IMAGE_WHITE);
 			
 			addReservedColor(UNKNOWN_PROCNAME, rgb_white);
 		}

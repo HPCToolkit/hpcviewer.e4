@@ -1,11 +1,13 @@
 package edu.rice.cs.hpctraceviewer.ui.depth;
 
+import java.util.HashMap;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
+import edu.rice.cs.hpc.data.util.CallPath;
 import edu.rice.cs.hpctraceviewer.data.DataLinePainting;
 import edu.rice.cs.hpctraceviewer.data.DataPreparation;
 import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
@@ -58,7 +60,7 @@ public class TimelineDepthThread
 			// a ProcessTimeline with data=null and then copy the actual data to
 			// it.
 			ProcessTimeline toDonate = new ProcessTimeline(currentDepthLineNum,
-					stData.getScopeMap(), stData.getBaseData(), 
+					(HashMap<Integer, CallPath>) stData.getScopeMap(), stData.getBaseData(), 
 					stData.computeScaledProcess(), attributes.getPixelHorizontal(),
 					attributes.getTimeInterval(), 
 					stData.getMinBegTime() + attributes.getTimeBegin());
