@@ -57,6 +57,9 @@ public abstract class AbstractContentProvider
 		int child_position = index;
 		
 		if (parent == viewer.getInput()) {
+			if (index == 0)
+ 				return;
+
 			// if the parent is a root, the first row is a header
 			// this header row is not counted as a child 
 			// issue #11: force the index to be 0. We cannot allow negative index.
