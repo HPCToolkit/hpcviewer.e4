@@ -15,6 +15,7 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
@@ -22,6 +23,7 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
@@ -46,6 +48,7 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 	
 	private TableViewer tableViewer;
 	private ColumnProcedureLabelProvider lblProcProvider;
+	private ColumnColorLabelProvider     lblColorProvider;
 	private TableStatComparator comparator;
 	
 	private IEventBroker broker;
@@ -69,8 +72,19 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 		
+		// column for colors
+		final TableViewerColumn colColor  = new TableViewerColumn(tableViewer, SWT.LEFT, 0);
+		lblColorProvider = new ColumnColorLabelProvider();
+		colColor.setLabelProvider(lblColorProvider);
+		
+		TableColumn col = colColor.getColumn();
+		col.setText(" ");
+		col.setWidth(5);
+		col.setResizable(false);
+		layout.setColumnData(col, new ColumnWeightData(10, false));
+		
 		// column for procedure name
-		final TableViewerColumn colProc  = new TableViewerColumn(tableViewer, SWT.LEFT, 0);
+		final TableViewerColumn colProc  = new TableViewerColumn(tableViewer, SWT.LEFT, 1);
 		lblProcProvider = new ColumnProcedureLabelProvider();
 		colProc.setLabelProvider(lblProcProvider);
 		
@@ -80,7 +94,7 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 		column.addSelectionListener(getSelectionAdapter(column, 0));
 		
 		// column for the percentage
-		final TableViewerColumn colCount = new TableViewerColumn(tableViewer, SWT.LEFT, 1);
+		final TableViewerColumn colCount = new TableViewerColumn(tableViewer, SWT.LEFT, 2);
 		colCount.setLabelProvider(new ColumnStatLabelProvider());
 		
 		column = colCount.getColumn();
@@ -155,9 +169,7 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 			
 			List<StatisticItem> list = getListItems(obj);
 			tableViewer.setInput(list);
-			lblProcProvider.colorTable = getColorTable();
-			
-			//tableViewer.getTable().getColumn(1).pack();
+			lblColorProvider.colorTable = getColorTable();
 		}
 	}
 
@@ -220,25 +232,38 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 	
 	/*************************************************************
 	 * 
+	 * Color of the procedure
+	 *
+	 *************************************************************/
+	static private class ColumnColorLabelProvider extends ColumnLabelProvider 
+	{
+		private final static String EMPTY = " ";
+		ColorTable colorTable;
+		
+		@Override
+		public String getText(Object element) {
+			return EMPTY;
+		}
+		
+		
+		@Override
+		public Color getBackground(Object element) {
+			if (element != null && element instanceof StatisticItem) {
+				StatisticItem item = (StatisticItem) element;
+				return colorTable.getColor(item.procedureName);
+			}
+			return null;
+		}
+
+	}
+	
+	/*************************************************************
+	 * 
 	 * Class to manage label of procedure name
 	 *
 	 *************************************************************/
 	static private class ColumnProcedureLabelProvider extends ColumnLabelProvider
 	{		
-		ColorTable colorTable;
-		
-		@Override
-		public Image getImage(Object element) {
-			if (element != null && element instanceof StatisticItem) {
-				final StatisticItem item = (StatisticItem) element;
-				if (item.procedureName == ColorTable.UNKNOWN_PROCNAME)
-					return null;
-				
-				if (colorTable != null)
-					return colorTable.getImage(((StatisticItem)element).procedureName);
-			}
-			return null;
-		}
 
 		@Override
 		public Font getFont(Object element) {

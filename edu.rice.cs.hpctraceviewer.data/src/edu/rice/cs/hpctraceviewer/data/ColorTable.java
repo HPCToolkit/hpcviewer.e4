@@ -260,10 +260,6 @@ public class ColorTable
 		return cip;
 	}
 	
-	@Override
-	public String toString() {
-		return "pc: " + predefinedColorMatcher.size() + ", cm: " + colorMatcher.size();
-	}
 	
 	/************************************************************************
 	 * Store a procedure name to the map from rgb to procedure name
@@ -356,6 +352,12 @@ public class ColorTable
 		}
 	}
 	
+	
+	@Override
+	public String toString() {
+		return "pc: " + predefinedColorMatcher.size() + ", cm: " + colorMatcher.size();
+	}
+
 	
 	/************************************************************************
 	 * class to pair color and image
