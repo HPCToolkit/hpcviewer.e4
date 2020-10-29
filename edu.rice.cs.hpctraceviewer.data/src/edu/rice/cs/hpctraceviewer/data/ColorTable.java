@@ -6,6 +6,9 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
@@ -48,10 +51,12 @@ public class ColorTable
 	// data members
 
 	private ColorImagePair IMAGE_WHITE;
-	private	HashMap<String, ColorImagePair> colorMatcher;
-	private	HashMap<String, ColorImagePair> predefinedColorMatcher;
-	private HashMap<Integer, AbstractCollection<String>>        mapRGBtoProcedure;
-	private HashMap<Integer, String>		mapReservedColor;
+	
+	private	ConcurrentMap<String, ColorImagePair> colorMatcher;
+	private	ConcurrentMap<String, ColorImagePair> predefinedColorMatcher;
+	
+	private HashMap<Integer, AbstractCollection<String>>  mapRGBtoProcedure;
+	private HashMap<Integer, String> mapReservedColor;
 
 	/**Creates a new ColorTable with Display _display.*/
 	public ColorTable()
@@ -64,11 +69,11 @@ public class ColorTable
 		// initialize the procedure-color map (user-defined color)
 		classMap = new ProcedureClassMap(display);
 		
-		colorMatcher 		   = new HashMap<String, ColorTable.ColorImagePair>();
+		colorMatcher 		   = new ConcurrentHashMap<String, ColorImagePair>();
 		
 		initializeWhiteColor();
 		
-		predefinedColorMatcher = new HashMap<String, ColorTable.ColorImagePair>();
+		predefinedColorMatcher = new ConcurrentHashMap<String, ColorImagePair>();
 		mapRGBtoProcedure	   = new HashMap<Integer, AbstractCollection<String>>();
 	}
 	
@@ -234,41 +239,30 @@ public class ColorTable
 		// 1. check if it matches predefined colors
 		Entry<String, ProcedureClassData> data = classMap.getEntry(procName);
 		if (data != null) {
-			
-			cip = predefinedColorMatcher.get(procName);
-			if (cip != null)
-				return cip;
-			
-			ProcedureClassData value = data.getValue();
-			
-			final RGB rgb = value.getRGB();
-			cip = createColorImagePair(procName, rgb);
-			predefinedColorMatcher.put(procName, cip);
-			
-			// store the key, not the procedure name
-			storeProcedureName(rgb, data.getKey());
-			
-			return cip;
+			return predefinedColorMatcher.
+					computeIfAbsent(procName, 
+									val -> createColorImagePair(procName, data.getValue().getRGB()));
 		}
 		
 		// 2. check duplicates
-		cip = colorMatcher.get(procName);
-		if (cip != null) {
-			return cip;
-		}
-		
-		// 3. generate a new color-image if we have enough handles
-		RGB rgb = getProcedureColor( procName, COLOR_MIN, COLOR_MAX, random_generator );
-		cip = createColorImagePair(procName, rgb);
 
-		// store in a hashmap the pair procdure and image-color
-		colorMatcher.put(procName, cip);
-		
+		cip = colorMatcher.computeIfAbsent(procName, 
+									 	   val -> createColorImagePair(procName, 
+											 	      getProcedureColor(procName, 
+											 	    		  			COLOR_MIN, 
+											 	    		  			COLOR_MAX, 
+											 	    		  			random_generator)));
+		  
 		// store in a hashmap the pair of RGB hashcode and procedure name
 		// if the hash is already stored, we concatenate the procedure name
 		storeProcedureName(cip.color.getRGB(), procName);
 		
 		return cip;
+	}
+	
+	@Override
+	public String toString() {
+		return "pc: " + predefinedColorMatcher.size() + ", cm: " + colorMatcher.size();
 	}
 	
 	/************************************************************************
