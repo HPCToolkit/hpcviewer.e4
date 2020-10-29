@@ -188,13 +188,13 @@ implements ITraceCanvas, PaintListener
 	
 	private void adjustPosition(Point p1, Point p2) 
 	{
-		selection.x = Math.min(p1.x, p2.x);
+		selection.x = Math.max(0, Math.min(p1.x, p2.x));
 		selection.width = Math.max(p1.x, p2.x) - selection.x;
 		final Rectangle area   = getClientArea();
 
 		switch(regionType) {
 		case Rectangle:
-			selection.y = Math.min(p1.y, p2.y);
+			selection.y = Math.max(0, Math.min(p1.y, p2.y));
 			selection.height = Math.max(p1.y, p2.y) - selection.y;
 			break;
 		case Vertical:
