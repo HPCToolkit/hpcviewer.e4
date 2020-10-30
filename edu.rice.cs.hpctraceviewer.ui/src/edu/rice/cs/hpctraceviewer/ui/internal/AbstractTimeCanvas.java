@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Event;
 import edu.rice.cs.hpc.data.util.OSValidator;
 import edu.rice.cs.hpc.data.util.string.StringUtil;
 import edu.rice.cs.hpctraceviewer.data.ColorTable;
+import edu.rice.cs.hpctraceviewer.data.ProcedureColor;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
 import edu.rice.cs.hpctraceviewer.ui.base.ITraceCanvas;
 import edu.rice.cs.hpctraceviewer.ui.preferences.TracePreferenceConstants;
@@ -263,10 +264,12 @@ implements ITraceCanvas, PaintListener
 			if (colorTable == null)
 				return null;
 			
-			String proc = canvas.getColorTable().getProcedureNameByColorHash( rgb.hashCode() );
-			if (proc != null) {
-				proc = StringUtil.wrapScopeName(proc, 80);
-			}
+			String proc = "";
+			ProcedureColor procColor = canvas.getColorTable().getProcedureNameByColorHash( rgb.hashCode() );
+			
+			assert(procColor != null);
+			
+			proc = StringUtil.wrapScopeName(procColor.getProcedure(), 80);
 			
 			String addText = canvas.tooltipText(pixel, rgb);
 			if (addText != null)

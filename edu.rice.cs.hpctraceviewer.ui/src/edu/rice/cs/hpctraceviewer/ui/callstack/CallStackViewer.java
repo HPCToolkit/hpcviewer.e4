@@ -33,7 +33,6 @@ import edu.rice.cs.hpc.data.util.CallPath;
 import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.data.util.string.StringUtil;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
-import edu.rice.cs.hpctraceviewer.ui.base.StatisticItem;
 import edu.rice.cs.hpctraceviewer.ui.context.BaseTraceContext;
 import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
 import edu.rice.cs.hpctraceviewer.ui.operation.AbstractTraceOperation;
@@ -351,7 +350,7 @@ public class CallStackViewer extends TableViewer
 	 *************************************************************/
 	static private class ColumnColorLabelProvider extends ColumnLabelProvider 
 	{
-		private final static String EMPTY = " ";
+		private final static String EMPTY = "";
 		ColorTable colorTable;
 		
 		@Override
@@ -362,9 +361,11 @@ public class CallStackViewer extends TableViewer
 		
 		@Override
 		public Color getBackground(Object element) {
-			if (element != null && element instanceof String) {
-				String proc = (String) element;
-				return colorTable.getColor(proc);
+			if (element != EMPTY_FUNCTION && 
+				element != null && 
+				element instanceof String) {
+				
+				return colorTable.getColor((String) element);
 			}
 			return null;
 		}

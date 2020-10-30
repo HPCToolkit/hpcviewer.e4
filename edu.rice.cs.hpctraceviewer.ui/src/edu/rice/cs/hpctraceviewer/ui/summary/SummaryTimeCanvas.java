@@ -272,14 +272,13 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 			}
 			xOffset = Math.round(xOffset + xScale);
 		}
-		totPixels = detailData.width * detailData.height;
+		totPixels = width * height;
 
 		buffer.dispose();
 
 		redraw();
 
-		Integer totalPixels = detailData.height * detailData.width;
-		SummaryData data = new SummaryData(detailData.palette, mapPixelToPercent, getColorTable(), totalPixels);
+		SummaryData data = new SummaryData(detailData.palette, mapPixelToPercent, getColorTable(), totPixels);
 		eventBroker.post(IConstants.TOPIC_STATISTICS, data);
 		
 		// ----------------------------------------------------------------------------

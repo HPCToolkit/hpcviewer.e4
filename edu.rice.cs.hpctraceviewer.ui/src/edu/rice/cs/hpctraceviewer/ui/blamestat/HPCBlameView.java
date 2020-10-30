@@ -8,6 +8,7 @@ import java.util.Set;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.graphics.RGB;
 import edu.rice.cs.hpctraceviewer.data.ColorTable;
+import edu.rice.cs.hpctraceviewer.data.ProcedureColor;
 import edu.rice.cs.hpctraceviewer.ui.base.AbstractItemViewWithTable;
 import edu.rice.cs.hpctraceviewer.ui.base.StatisticItem;
 import edu.rice.cs.hpctraceviewer.ui.summary.SummaryData;
@@ -54,11 +55,14 @@ public class HPCBlameView extends AbstractItemViewWithTable
 			final Float count   = entry.getValue();
 			final RGB rgb	 	= data.palette.getRGB(pixel);
 			
-			String proc = colorTable.getProcedureNameByColorHash(rgb.hashCode());
-			if (proc == null) {
+			String proc;
+			ProcedureColor procColor = colorTable.getProcedureNameByColorHash(rgb.hashCode());
+			if (procColor == null) {
 				proc = ColorTable.UNKNOWN_PROCNAME;
-			}			
-			listItems.add(new StatisticItem(proc, (float) 100.0 * count / data.totalCpuBlame));
+			} else {
+				proc = procColor.getProcedure();
+			}
+			listItems.add(new StatisticItem(proc, procColor.color, (float) 100.0 * count / data.totalCpuBlame));
 		}
 		return listItems;
 	}

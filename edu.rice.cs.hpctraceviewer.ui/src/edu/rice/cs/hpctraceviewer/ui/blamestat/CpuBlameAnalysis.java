@@ -17,6 +17,7 @@ import edu.rice.cs.hpc.data.db.IdTupleType;
 import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
 import edu.rice.cs.hpc.data.experiment.extdata.IFileDB.IdTupleOption;
 import edu.rice.cs.hpctraceviewer.data.ColorTable;
+import edu.rice.cs.hpctraceviewer.data.ProcedureColor;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 import edu.rice.cs.hpctraceviewer.ui.base.IPixelAnalysis;
@@ -154,10 +155,14 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 		isCpuThread = !tag.hasKind(IdTupleType.KIND_GPU_CONTEXT);
 
 		RGB rgb = detailData.palette.getRGB(pixelValue);
-		String proc_name = colorTable.getProcedureNameByColorHash(rgb.hashCode());
+		ProcedureColor procColor = colorTable.getProcedureNameByColorHash(rgb.hashCode());
+		
+		assert(procColor != null);
 
+		String proc_name = procColor.getProcedure();
+		
 		if (isCpuThread) { // cpu thread
-			if (!proc_name.equals(ColorTable.UNKNOWN_PROCNAME)) {
+			if (!procColor.getProcedure().equals(ColorTable.UNKNOWN_PROCNAME)) {
 				addDict(cpu_active_routines, rank, pixelValue, 1);
 				addDict(cpu_active_count, rank, 1);
 			}

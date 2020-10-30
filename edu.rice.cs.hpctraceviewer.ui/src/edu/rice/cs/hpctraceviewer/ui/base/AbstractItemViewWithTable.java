@@ -172,7 +172,6 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 			
 			List<StatisticItem> list = getListItems(obj);
 			tableViewer.setInput(list);
-			lblColorProvider.colorTable = getColorTable();
 		}
 	}
 
@@ -250,7 +249,6 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 	static private class ColumnColorLabelProvider extends ColumnLabelProvider 
 	{
 		private final static String EMPTY = " ";
-		ColorTable colorTable;
 		
 		@Override
 		public String getText(Object element) {
@@ -262,7 +260,7 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 		public Color getBackground(Object element) {
 			if (element != null && element instanceof StatisticItem) {
 				StatisticItem item = (StatisticItem) element;
-				return colorTable.getColor(item.procedureName);
+				return item.color;
 			}
 			return null;
 		}
