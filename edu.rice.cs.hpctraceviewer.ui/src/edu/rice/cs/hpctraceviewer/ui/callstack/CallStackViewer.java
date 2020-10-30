@@ -18,13 +18,14 @@ import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,12 +33,14 @@ import edu.rice.cs.hpc.data.util.CallPath;
 import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.data.util.string.StringUtil;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
+import edu.rice.cs.hpctraceviewer.ui.base.StatisticItem;
 import edu.rice.cs.hpctraceviewer.ui.context.BaseTraceContext;
 import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
 import edu.rice.cs.hpctraceviewer.ui.operation.AbstractTraceOperation;
 import edu.rice.cs.hpctraceviewer.ui.preferences.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
+import edu.rice.cs.hpctraceviewer.data.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
 import edu.rice.cs.hpctraceviewer.data.Position;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
@@ -56,6 +59,7 @@ public class CallStackViewer extends TableViewer
 	private final IEventBroker eventBroker;
 	private final ITracePart   tracePart;
 	private final TableViewerColumn viewerColumn;
+	private final ColumnColorLabelProvider colorLabelProvider ;
 	
 	private SpaceTimeDataController stData ;
 	private Listener selectionListener;
@@ -112,21 +116,22 @@ public class CallStackViewer extends TableViewer
 		stack.addListener(SWT.Selection, selectionListener);
 		
         //------------------------------------------------
+		// add color column
+        //------------------------------------------------
+		TableViewerColumn colorViewer = new TableViewerColumn(this, SWT.NONE);
+		colorLabelProvider = new ColumnColorLabelProvider();
+		colorViewer.setLabelProvider(colorLabelProvider);
+				
+		TableColumn col = colorViewer.getColumn();
+		col.setText(" ");
+		col.setWidth(14);
+		col.setResizable(false);
+
+        //------------------------------------------------
         // add label provider
         //------------------------------------------------
 
 		final ColumnLabelProvider myLableProvider = new ColumnLabelProvider() {
-        	public Image getImage(Object element) {
-        		if (element instanceof String) {
-        			if (element == EMPTY_FUNCTION)
-        				return null;
-        			
-        			if (stData != null) {
-        				return stData.getColorTable().getImage((String)element);
-        			}
-        		}
-				return null;        		
-        	}
         	
         	public String getText(Object element)
         	{
@@ -147,6 +152,7 @@ public class CallStackViewer extends TableViewer
         		return Constants.TOOLTIP_DELAY_MS;
         	}
 		};
+		
 		viewerColumn = new TableViewerColumn(this, SWT.NONE);
 		viewerColumn.setLabelProvider(myLableProvider);
 		viewerColumn.getColumn().setWidth(100);
@@ -166,6 +172,7 @@ public class CallStackViewer extends TableViewer
 	public void setInput(SpaceTimeDataController data)
 	{
 		this.stData = data;
+		colorLabelProvider.colorTable = data.getColorTable();
 	}
 
 	
@@ -335,4 +342,33 @@ public class CallStackViewer extends TableViewer
 				setSample(stData.getAttributes().getPosition(), stData.getAttributes().getDepth());			}
 		}
 	}
+	
+	
+	/*************************************************************
+	 * 
+	 * Label provider for Color of the procedure
+	 *
+	 *************************************************************/
+	static private class ColumnColorLabelProvider extends ColumnLabelProvider 
+	{
+		private final static String EMPTY = " ";
+		ColorTable colorTable;
+		
+		@Override
+		public String getText(Object element) {
+			return EMPTY;
+		}
+		
+		
+		@Override
+		public Color getBackground(Object element) {
+			if (element != null && element instanceof String) {
+				String proc = (String) element;
+				return colorTable.getColor(proc);
+			}
+			return null;
+		}
+
+	}
+
 }

@@ -1,5 +1,7 @@
 package edu.rice.cs.hpctraceviewer.ui.dialog;
 
+import java.util.regex.PatternSyntaxException;
+
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -8,7 +10,7 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Button;
@@ -20,20 +22,19 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import edu.rice.cs.hpctraceviewer.data.ColorTable;
-
 /****
  * 
  * display procedure and its class
  * can be used for either adding or editing the map
  *
  */
-public class ProcedureMapDetailDialog extends Dialog {
-
+public class ProcedureMapDetailDialog extends Dialog 
+{
 	final private String title;
 	private String proc;
 	private String description;
 	private RGB rgb;
+	private Color currentColor;
 	
 	private Text txtProc;
 	private Text txtClass;
@@ -86,8 +87,8 @@ public class ProcedureMapDetailDialog extends Dialog {
 		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(composite);
 		
 		final Label lblIntro = new Label(composite, SWT.LEFT);
-		lblIntro.setText("Please type the name of the procedure or the pattern of procedure name.\n"
-				+ "Symbol * matches all characters, while symbol ? matches only one character.");
+		lblIntro.setText("Please type the name of the procedure or the pattern of procedure name.\n" + 
+						 "Symbol * matches all characters, while symbol ? matches only one character.");
 		GridDataFactory.swtDefaults().span(2, 1).applyTo(lblIntro);
 		
 		final Label lblProc = new Label(composite, SWT.LEFT);
@@ -109,7 +110,7 @@ public class ProcedureMapDetailDialog extends Dialog {
 		final Label lblColor = new Label(composite, SWT.LEFT);
 		lblColor.setText("Color: ");
 		final Button btnColor = new Button(composite, SWT.PUSH | SWT.FLAT);
-		btnColor.computeSize(ColorTable.COLOR_ICON_SIZE, ColorTable.COLOR_ICON_SIZE);
+		btnColor.computeSize(5, 5);
 		if (rgb == null) {
 			rgb = getShell().getDisplay().getSystemColor(SWT.COLOR_BLACK).getRGB();
 		}
@@ -138,12 +139,11 @@ public class ProcedureMapDetailDialog extends Dialog {
 	 * @param color
 	 */
 	private void setButtonImage(Button button, RGB color) {
-		Image oldImage = button.getImage();
-		if (oldImage != null) {
-			oldImage.dispose();
+		if (currentColor != null && !currentColor.isDisposed()) {
+			currentColor.dispose();
 		}
-		Image image = ColorTable.createImage(getShell().getDisplay(), color);
-		button.setImage(image);
+		currentColor = new Color(button.getDisplay(), color);
+		button.setBackground(currentColor);
 	}
 	
     /*
@@ -180,9 +180,14 @@ public class ProcedureMapDetailDialog extends Dialog {
 				// the pattern looks valid, ready to close the dialog
 				
 				description = txtClass.getText();
+				
+				if (currentColor != null && !currentColor.isDisposed()) {
+					currentColor.dispose();
+				}
+
 				super.okPressed();
 				
-			} catch (java.util.regex.PatternSyntaxException e) {
+			} catch (PatternSyntaxException e) {
 				MessageDialog.openError(getShell(), "Error", "Pattern is not valid:\n" + e.getMessage());
 			}
 		}

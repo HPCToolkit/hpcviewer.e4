@@ -12,9 +12,6 @@ import java.util.concurrent.ConcurrentMap;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.ImageData;
-import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
@@ -29,10 +26,7 @@ import edu.rice.cs.hpctraceviewer.data.util.ProcedureClassMap;
  * needed for the actual drawing.
  **************************************************************/
 public class ColorTable 
-{
-	static final public int COLOR_ICON_SIZE = 8;
-	
-//	static private final int MAX_NUM_DIFFERENT_COLORS = 512;
+{	
 	static private final int COLOR_MIN = 16;
 	static private final int COLOR_MAX = 200 - COLOR_MIN;
 	static private final long RANDOM_SEED = 612543231L;
@@ -49,16 +43,16 @@ public class ColorTable
 	final private Random random_generator;
 
 	// data members
-
-	private ColorImagePair IMAGE_WHITE;
 	
-	private	ConcurrentMap<String, ColorImagePair> colorMatcher;
-	private	ConcurrentMap<String, ColorImagePair> predefinedColorMatcher;
+	private	ConcurrentMap<String, Color> colorMatcher;
+	private	ConcurrentMap<String, Color> predefinedColorMatcher;
 	
 	private HashMap<Integer, AbstractCollection<String>>  mapRGBtoProcedure;
 	private HashMap<Integer, String> mapReservedColor;
 
-	/**Creates a new ColorTable with Display _display.*/
+	/**
+	 * Constructor: Creates a new ColorTable with Display _display.
+	 * */
 	public ColorTable()
 	{
 		display = Display.getCurrent();
@@ -69,11 +63,11 @@ public class ColorTable
 		// initialize the procedure-color map (user-defined color)
 		classMap = new ProcedureClassMap(display);
 		
-		colorMatcher 		   = new ConcurrentHashMap<String, ColorImagePair>();
+		colorMatcher 		   = new ConcurrentHashMap<String, Color>();
 		
 		initializeWhiteColor();
 		
-		predefinedColorMatcher = new ConcurrentHashMap<String, ColorImagePair>();
+		predefinedColorMatcher = new ConcurrentHashMap<String, Color>();
 		mapRGBtoProcedure	   = new HashMap<Integer, AbstractCollection<String>>();
 	}
 	
@@ -81,14 +75,14 @@ public class ColorTable
 	 * Dispose the allocated resources
 	 */
 	public void dispose() {
-		for (ColorImagePair pair: colorMatcher.values()) {
-			if (pair != null) pair.dispose();
+		for (Color col: colorMatcher.values()) {
+			if (col != null) col.dispose();
 		}
 		
 		colorMatcher.clear();
 		
-		for (ColorImagePair pair: predefinedColorMatcher.values()) {
-			if (pair != null) pair.dispose();
+		for (Color col: predefinedColorMatcher.values()) {
+			if (col != null) col.dispose();
 		}
 		predefinedColorMatcher.clear();
 		
@@ -97,17 +91,23 @@ public class ColorTable
 		mapRGBtoProcedure.clear();
 	}
 	
+	
+	/***
+	 * Reset user defined color into the default one.
+	 */
 	public void resetPredefinedColor() 
 	{
-		for (ColorImagePair pair: predefinedColorMatcher.values()) {
-			if (pair != null) pair.dispose();
+		for (Color col: predefinedColorMatcher.values()) {
+			if (col != null) col.dispose();
 		}
 		predefinedColorMatcher.clear();
 		classMap.clear();
 		
+		// reset the default
 		classMap.refresh();
 		
 		Object []entries = classMap.getEntrySet();
+		
 		for (Object obj:entries) {
 			@SuppressWarnings("unchecked")
 			Entry<String, ProcedureClassData> entry = (Entry<String, ProcedureClassData>) obj;
@@ -115,7 +115,7 @@ public class ColorTable
 			ProcedureClassData data = entry.getValue();
 			final RGB rgb = data.getRGB();
 			String proc = entry.getKey();
-			ColorImagePair cip = createColorImagePair(proc, rgb);
+			Color cip = createColor(proc, rgb);
 			
 			predefinedColorMatcher.put(proc, cip);
 			
@@ -139,21 +139,8 @@ public class ColorTable
 	 */
 	public Color getColor(String name)
 	{		
-		ColorImagePair cip = createColorImagePair(name);
-		return cip.getColor();
+		return  createColorIfAbsent(name);
 	}
-	
-	/**
-	 * returns the image that corresponds to the name's class
-	 * @param name
-	 * @return
-	 */
-	public Image getImage(String name) 
-	{
-		ColorImagePair cip = createColorImagePair(name); 
-		return cip.getImage();
-	}
-
 
 	
 	/************************************************************************
@@ -199,22 +186,7 @@ public class ColorTable
 		}
 		mapReservedColor.put(rgb.hashCode(), procName);
 	}
-	
-	/***********************************************************************
-	 * create an image based on the color
-	 * the caller is responsible to free the image
-	 * 
-	 * @param display
-	 * @param color
-	 * @return an image (to be freed)
-	 ***********************************************************************/
-	static public Image createImage(Display display, RGB color) {
-		PaletteData palette = new PaletteData(new RGB[] {color} );
-		ImageData imgData = new ImageData(COLOR_ICON_SIZE, COLOR_ICON_SIZE, 1, palette);
-		Image image = new Image(display, imgData);
-		return image;
-	}
-	
+		
 	
 	
 	//private ColorImagePair []listDefinedColorImagePair = null;
@@ -232,22 +204,21 @@ public class ColorTable
 	 * 
 	 * @return ColorImagePair
 	 ************************************************************************/
-	private ColorImagePair createColorImagePair(String procName)
+	private Color createColorIfAbsent(String procName)
 	{
-		ColorImagePair cip;
 		
 		// 1. check if it matches predefined colors
 		Entry<String, ProcedureClassData> data = classMap.getEntry(procName);
 		if (data != null) {
 			return predefinedColorMatcher.
 					computeIfAbsent(procName, 
-									val -> createColorImagePair(procName, data.getValue().getRGB()));
+									val -> createColor(procName, data.getValue().getRGB()));
 		}
 		
 		// 2. check duplicates
 
-		cip = colorMatcher.computeIfAbsent(procName, 
-									 	   val -> createColorImagePair(procName, 
+		Color color = colorMatcher.computeIfAbsent(procName, 
+									 	   val -> createColor(procName, 
 											 	      getProcedureColor(procName, 
 											 	    		  			COLOR_MIN, 
 											 	    		  			COLOR_MAX, 
@@ -255,9 +226,9 @@ public class ColorTable
 		  
 		// store in a hashmap the pair of RGB hashcode and procedure name
 		// if the hash is already stored, we concatenate the procedure name
-		storeProcedureName(cip.color.getRGB(), procName);
+		storeProcedureName(color.getRGB(), procName);
 		
-		return cip;
+		return color;
 	}
 	
 	
@@ -285,29 +256,35 @@ public class ColorTable
 	}
 	
 	/************************************************************************
-	 * Create a pair color and image with a specified RGB
+	 * Create a pair color with a specified RGB.
+	 * If the OS limits the number of colors, and we exceeds the quota,
+	 * it will display an error message and throw a runtime exception.
 	 * 
 	 * @param procName
 	 * @param rgb
-	 * @return
+	 * @return Color
 	 ************************************************************************/
-	private ColorImagePair createColorImagePair(String procName, RGB rgb) 
+	private Color createColor(String procName, RGB rgb) 
 	{
 		try {
-			Color c = new Color(display, rgb);
-			Image i = createImage(display, rgb);
-			ColorImagePair cip = new ColorImagePair(c, i);
-			
-			return cip;
+			return new Color(display, rgb);
+
 		} catch (Exception e) {
+			// Windows only: in case we don't have enough GDI objects to ve
+			// created, we should notify users. They can then set the max
+			// GGI object to higher number
+			String msg = "The number of colors exceeds the quota from the OS.\n" +
+						 e.getLocalizedMessage();
 			Logger logger = LoggerFactory.getLogger(getClass());
-			logger.error("Error resource creation", e);
+			logger.error("Error resource creation: " + msg, e);
 			
 			MessageDialog.openError(display.getActiveShell(), 
 									"Error " + e.getClass(), 
-									e.getLocalizedMessage());
+									msg
+									);
+			
+			throw new RuntimeException(msg);
 		}
-		return null;
 	}
 	
 	/***********************************************************************
@@ -337,67 +314,19 @@ public class ColorTable
 	 * Otherwise, do nothing.
 	 ************************************************************************/
 	private void initializeWhiteColor() {
-		if (IMAGE_WHITE == null || IMAGE_WHITE.getImage().isDisposed()) {
-			// create our own white color so we can dispose later, instead of disposing
-			//	Eclipse's white color
-			final RGB rgb_white = display.getSystemColor(SWT.COLOR_WHITE).getRGB();
-			final Color col_white = new Color(display, rgb_white);
-			final Image img_white = createImage(display, rgb_white);
-			
-			IMAGE_WHITE = new ColorImagePair(col_white, img_white );
-			
-			colorMatcher.put(Constants.NULL_FUNCTION, IMAGE_WHITE);
-			
-			addReservedColor(UNKNOWN_PROCNAME, rgb_white);
-		}
+		// create our own white color so we can dispose later, instead of disposing
+		//	Eclipse's white color
+		final RGB rgb_white = display.getSystemColor(SWT.COLOR_WHITE).getRGB();
+		final Color col_white = new Color(display, rgb_white);
+		
+		colorMatcher.put(Constants.NULL_FUNCTION, col_white);
+		
+		addReservedColor(UNKNOWN_PROCNAME, rgb_white);
 	}
 	
 	
 	@Override
 	public String toString() {
 		return "pc: " + predefinedColorMatcher.size() + ", cm: " + colorMatcher.size();
-	}
-
-	
-	/************************************************************************
-	 * class to pair color and image
-	 * @author laksonoadhianto
-	 *
-	 ************************************************************************/
-	private class ColorImagePair {
-		private Color color;
-		private Image image;
-		
-		/****
-		 * create a color-image pair
-		 * @param Color color
-		 * @param Image image
-		 */
-		ColorImagePair(Color color, Image image) {
-			// create an empty image filled with color c
-			this.image = image;
-			this.color = color;
-		}
-		
-		/***
-		 * get the color 
-		 * @return Color
-		 */
-		public Color getColor() {
-			return this.color;
-		}
-		
-		/***
-		 * get the image
-		 * @return Image
-		 */
-		public Image getImage() {
-			return this.image;
-		}
-		
-		public void dispose() {
-			this.color.dispose();
-			this.image.dispose();
-		}
 	}
 }

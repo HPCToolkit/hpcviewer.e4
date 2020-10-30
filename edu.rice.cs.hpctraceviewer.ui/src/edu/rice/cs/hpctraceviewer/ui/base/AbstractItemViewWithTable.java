@@ -15,7 +15,6 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
@@ -24,8 +23,10 @@ import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Drawable;
 import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Table;
@@ -45,6 +46,7 @@ import edu.rice.cs.hpctraceviewer.ui.preferences.TracePreferenceManager;
 public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 		implements EventHandler, Listener, IPropertyChangeListener, DisposeListener 
 {
+	private static final int COLUMN_COLOR_WIDTH = 4;
 	
 	private TableViewer tableViewer;
 	private ColumnProcedureLabelProvider lblProcProvider;
@@ -79,7 +81,7 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 		
 		TableColumn col = colColor.getColumn();
 		col.setText(" ");
-		col.setWidth(5);
+		col.setWidth(COLUMN_COLOR_WIDTH);
 		col.setResizable(false);
 		layout.setColumnData(col, new ColumnWeightData(10, false));
 		
@@ -103,6 +105,7 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 		column.setText("%");
 		column.setAlignment(SWT.RIGHT);
 		column.addSelectionListener(getSelectionAdapter(column, 1));
+		setColumnWidth(column);
 
 		// setup the table viewer
 		tableViewer.setContentProvider(new StatisticContentProvider());		
@@ -199,6 +202,15 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 		return tableViewer.getTable().getItemCount();
 	}
 
+	
+	private void setColumnWidth(TableColumn column) {
+		Drawable parent = column.getDisplay();
+		GC gc = new GC(parent);
+		gc.setFont(FontManager.getMetricFont());
+		Point extent = gc.textExtent("888x88x%");
+		column.setWidth(extent.x);
+		gc.dispose();
+	}
 
 	/*************************************************************
 	 * 
