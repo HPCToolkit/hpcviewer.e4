@@ -52,11 +52,10 @@ public class HPCStatView extends AbstractItemViewWithTable
 			
 			String proc;
 			ProcedureColor procColor = colorTable.getProcedureNameByColorHash(rgb.hashCode());
-			if (procColor == null) {
-				proc = ColorTable.UNKNOWN_PROCNAME;
-			} else {
-				proc = procColor.getProcedure();
-			}
+			
+			assert(procColor != null);
+			
+			proc = procColor.getProcedure();
 			listItems.add(new StatisticItem(proc, procColor.color, (float)100.0 * count/data.totalPixels));
 		}
 

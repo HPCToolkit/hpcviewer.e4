@@ -20,6 +20,7 @@ import edu.rice.cs.hpctraceviewer.data.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.ProcedureColor;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
+import edu.rice.cs.hpctraceviewer.data.util.Constants;
 import edu.rice.cs.hpctraceviewer.ui.base.IPixelAnalysis;
 import edu.rice.cs.hpctraceviewer.ui.summary.SummaryData;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
@@ -162,13 +163,13 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 		String proc_name = procColor.getProcedure();
 		
 		if (isCpuThread) { // cpu thread
-			if (!procColor.getProcedure().equals(ColorTable.UNKNOWN_PROCNAME)) {
+			if (!procColor.getProcedure().equals(Constants.PROC_NO_ACTIVITY)) {
 				addDict(cpu_active_routines, rank, pixelValue, 1);
 				addDict(cpu_active_count, rank, 1);
 			}
 
 		} else {		// gpu thread
-			if (proc_name.equals(ColorTable.UNKNOWN_PROCNAME) ||
+			if (proc_name.equals(Constants.PROC_NO_ACTIVITY) ||
 					proc_name.equals(GPU_SYNC)) {
 								
 				addDict(gpu_idle_count, rank, 1);

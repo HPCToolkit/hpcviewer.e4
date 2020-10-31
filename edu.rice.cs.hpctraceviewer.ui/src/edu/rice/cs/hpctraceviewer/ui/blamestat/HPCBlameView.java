@@ -9,6 +9,7 @@ import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.graphics.RGB;
 import edu.rice.cs.hpctraceviewer.data.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.ProcedureColor;
+import edu.rice.cs.hpctraceviewer.data.util.Constants;
 import edu.rice.cs.hpctraceviewer.ui.base.AbstractItemViewWithTable;
 import edu.rice.cs.hpctraceviewer.ui.base.StatisticItem;
 import edu.rice.cs.hpctraceviewer.ui.summary.SummaryData;
@@ -58,7 +59,7 @@ public class HPCBlameView extends AbstractItemViewWithTable
 			String proc;
 			ProcedureColor procColor = colorTable.getProcedureNameByColorHash(rgb.hashCode());
 			if (procColor == null) {
-				proc = ColorTable.UNKNOWN_PROCNAME;
+				proc = Constants.PROC_NO_ACTIVITY;
 			} else {
 				proc = procColor.getProcedure();
 			}

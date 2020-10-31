@@ -29,7 +29,6 @@ public class ColorTable
 	static private final int COLOR_MAX = 200 - COLOR_MIN;
 	static private final long RANDOM_SEED = 612543231L;
 	
-	static final public String  UNKNOWN_PROCNAME   = "<no activity>";
 	
 	/**The display this ColorTable uses to generate the random colors.*/
 	final private Display display;
@@ -65,6 +64,7 @@ public class ColorTable
 		mapRGBtoProcedure	   = new HashMap<Integer, ProcedureColor>();
 		
 		initializeWhiteColor();
+		resetPredefinedColor();
 	}
 	
 	/**
@@ -300,7 +300,7 @@ public class ColorTable
 		
 		colorMatcher.put(Constants.NULL_FUNCTION, col_white);
 		
-		ProcedureColor pc = new ProcedureColor(UNKNOWN_PROCNAME, col_white);
+		ProcedureColor pc = new ProcedureColor(Constants.PROC_NO_ACTIVITY, col_white);
 		mapRGBtoProcedure.put(rgb_white.hashCode(), pc);
 	}
 	
