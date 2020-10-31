@@ -1378,7 +1378,6 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 			refresh(true);
 			
 		} else if (event.getTopic().equals(IConstants.TOPIC_COLOR_MAPPING)) {
-			getColorTable().dispose();
 			refresh(false);
 		}
 	}
