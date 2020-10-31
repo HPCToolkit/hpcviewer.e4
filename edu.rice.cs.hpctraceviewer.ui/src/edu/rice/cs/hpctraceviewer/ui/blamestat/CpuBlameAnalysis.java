@@ -22,6 +22,7 @@ import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
 import edu.rice.cs.hpctraceviewer.ui.base.IPixelAnalysis;
+import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
 import edu.rice.cs.hpctraceviewer.ui.summary.SummaryData;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 
@@ -163,14 +164,14 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 		String proc_name = procColor.getProcedure();
 		
 		if (isCpuThread) { // cpu thread
-			if (!procColor.getProcedure().equals(Constants.PROC_NO_ACTIVITY)) {
+			if (!procColor.getProcedure().contains(Constants.PROC_NO_ACTIVITY)) {
 				addDict(cpu_active_routines, rank, pixelValue, 1);
 				addDict(cpu_active_count, rank, 1);
 			}
 
 		} else {		// gpu thread
-			if (proc_name.equals(Constants.PROC_NO_ACTIVITY) ||
-					proc_name.equals(GPU_SYNC)) {
+			if (proc_name.contains(Constants.PROC_NO_ACTIVITY) ||
+					proc_name.contains(GPU_SYNC)) {
 								
 				addDict(gpu_idle_count, rank, 1);
 			}else {				
@@ -204,7 +205,9 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 		SummaryData data = new SummaryData(	detailData.palette, colorTable, 
 								cpuBlameMap, cpuTotalBlame,
 								null, 0);
-		
-		eventBroker.post(IConstants.TOPIC_BLAME, data);				
+
+		TraceEventData eventData = new TraceEventData(dataTraces, this, data);
+
+		eventBroker.post(IConstants.TOPIC_BLAME, eventData);				
 	}
 }

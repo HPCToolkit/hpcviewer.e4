@@ -39,6 +39,7 @@ import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.ColorTable;
+import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
 import edu.rice.cs.hpctraceviewer.ui.preferences.TracePreferenceManager;
 
 
@@ -52,6 +53,8 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 	private ColumnProcedureLabelProvider lblProcProvider;
 	private ColumnColorLabelProvider     lblColorProvider;
 	private TableStatComparator comparator;
+	
+	private Object input;
 	
 	private IEventBroker broker;
 	
@@ -146,6 +149,8 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 	
 	@Override
 	public void setInput(Object input) {
+		this.input = input;
+		
 		broker.subscribe(getTopicEvent(), this);
 		ViewerPreferenceManager.INSTANCE.getPreferenceStore().addPropertyChangeListener(this);
 		
@@ -170,7 +175,14 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 			if (obj == null)
 				return;
 			
-			List<StatisticItem> list = getListItems(obj);
+			assert(obj instanceof TraceEventData);
+			
+			TraceEventData eventData = (TraceEventData) obj;
+			
+			if (eventData.data != input)
+				return;
+			
+			List<StatisticItem> list = getListItems(eventData.value);
 			tableViewer.setInput(list);
 		}
 	}
