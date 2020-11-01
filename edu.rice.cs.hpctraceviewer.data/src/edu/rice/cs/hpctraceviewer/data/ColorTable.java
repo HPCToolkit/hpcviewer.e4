@@ -131,6 +131,7 @@ public class ColorTable
 			if (colProcs == null) {
 				colProcs = new ProcedureColor();
 				colProcs.procName.add(proc);
+				colProcs.color = color;
 			} else if (!colProcs.procName.contains(proc)){
 				colProcs.procName.add(proc);
 				
