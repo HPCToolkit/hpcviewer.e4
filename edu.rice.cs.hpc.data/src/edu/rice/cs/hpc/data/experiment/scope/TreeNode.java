@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.sun.source.tree.ParenthesizedTree;
+
 /*******************************************************************************
  * Copyright (c) 2005, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
@@ -208,10 +210,11 @@ public class TreeNode {
 	 * @return <code>object.hashCode</code> or <code>0</code> if
 	 *         <code>object</code> if <code>null</code>.
 	 */
-	public static final int hashCode(final Object object) {
-		return object != null ? object.hashCode() : 0;
+/*	public static final int hashCode(final Object object) {
+		int parentHash = object == null ? 0 : (int) ((TreeNode)object).value;
+		return object != null ? parentHash << 4 | object.hashCode() : 0;
 	}
-
+*/
 	/**
 	 * Checks whether the two objects are <code>null</code> -- allowing for
 	 * <code>null</code>.

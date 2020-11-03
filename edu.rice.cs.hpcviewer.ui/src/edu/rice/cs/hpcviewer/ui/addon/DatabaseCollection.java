@@ -404,7 +404,7 @@ public class DatabaseCollection
 	public BaseExperiment getExperimentObject(MWindow window, String pathXML) {
 		List<BaseExperiment> list = getActiveListExperiments(window);
 		
-		if (list.isEmpty())
+		if (list == null || list.isEmpty())
 			return null;
 		
 		for (BaseExperiment exp: list) {
