@@ -1,6 +1,8 @@
 package edu.rice.cs.hpctraceviewer.ui.blamestat;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
@@ -15,9 +17,12 @@ import edu.rice.cs.hpc.data.db.IdTupleType;
 import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
 import edu.rice.cs.hpc.data.experiment.extdata.IFileDB.IdTupleOption;
 import edu.rice.cs.hpctraceviewer.data.ColorTable;
+import edu.rice.cs.hpctraceviewer.data.ProcedureColor;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
+import edu.rice.cs.hpctraceviewer.data.util.Constants;
 import edu.rice.cs.hpctraceviewer.ui.base.IPixelAnalysis;
+import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
 import edu.rice.cs.hpctraceviewer.ui.summary.SummaryData;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 
@@ -38,18 +43,18 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 	private ColorTable colorTable;
 	private SpaceTimeDataController dataTraces; 
 	
-	private TreeMap<Integer, TreeMap<Integer, Integer>> cpu_active_routines; // foreach_rank: (pixel: active_count)
-	private TreeMap<Integer, Integer> cpu_active_count;
+	private Map<Integer, Map<Integer, Integer>> cpu_active_routines; // foreach_rank: (pixel: active_count)
+	private Map<Integer, Integer> cpu_active_count;
 	
-	private TreeMap<Integer, Integer> gpu_active_count;
-	private TreeMap<Integer, Integer> gpu_idle_count;
+	private Map<Integer, Integer> gpu_active_count;
+	private Map<Integer, Integer> gpu_idle_count;
 
 	private ProcessTimelineService ptlService;
 	
-	private void addDict(TreeMap<Integer, TreeMap<Integer, Integer>> dict, int key_rank, int key_pixel, int value) {
+	private void addDict(Map<Integer, Map<Integer, Integer>> dict, int key_rank, int key_pixel, int value) {
 		
 		if(dict.containsKey(key_rank)) {
-			TreeMap<Integer, Integer> entry = dict.get(key_rank);
+			Map<Integer, Integer> entry = dict.get(key_rank);
 			
 			if(entry.containsKey(key_pixel))
 				entry.put(key_pixel, entry.get(key_pixel) + value);
@@ -58,28 +63,28 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 			
 		}else {
 			
-			TreeMap<Integer, Integer> entry = new TreeMap<Integer, Integer>();
+			Map<Integer, Integer> entry = new HashMap<Integer, Integer>();
 			entry.put(key_pixel, value);
 			dict.put(key_rank, entry);			
 		}
 	}
 	
 	
-	private void addDict(TreeMap<Integer, Integer> dict, int key, int value) {
+	private void addDict(Map<Integer, Integer> dict, int key, int value) {
 		
 		if(dict.containsKey(key)) {
 			dict.put(key, dict.get(key) + value);
-		}else {
+		} else {
 			dict.put(key, value);
 		}
 	}
 	
 	
-	private void addDict(TreeMap<Integer, Float> dict, int key, float value) {
+	private void addDict(Map<Integer, Float> dict, int key, float value) {
 		
 		if(dict.containsKey(key)) {
 			dict.put(key, dict.get(key) + value);
-		}else {
+		} else {
 			dict.put(key, value);
 		}
 	}
@@ -104,11 +109,11 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 		this.dataTraces = dataTraces;
 		this.ptlService = ptlService;
 				
-		cpu_active_routines = new TreeMap<Integer, TreeMap<Integer, Integer>>();
-		cpu_active_count = new TreeMap<Integer,Integer>();
+		cpu_active_routines = new HashMap<Integer, Map<Integer, Integer>>();
+		cpu_active_count    = new HashMap<Integer,Integer>();
 		
-		gpu_active_count = new TreeMap<Integer,Integer>();
-		gpu_idle_count = new TreeMap<Integer,Integer>();
+		gpu_active_count = new HashMap<Integer,Integer>();
+		gpu_idle_count   = new HashMap<Integer,Integer>();
 		
 		cpuBlameMap.clear();		
 		cpuTotalBlame = (float) 0;
@@ -152,17 +157,21 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 		isCpuThread = !tag.hasKind(IdTupleType.KIND_GPU_CONTEXT);
 
 		RGB rgb = detailData.palette.getRGB(pixelValue);
-		String proc_name = colorTable.getProcedureNameByColorHash(rgb.hashCode());
+		ProcedureColor procColor = colorTable.getProcedureNameByColorHash(rgb.hashCode());
+		
+		assert(procColor != null);
 
+		String proc_name = procColor.getProcedure();
+		
 		if (isCpuThread) { // cpu thread
-			if (!proc_name.equals(ColorTable.UNKNOWN_PROCNAME)) {
+			if (!procColor.getProcedure().contains(Constants.PROC_NO_ACTIVITY)) {
 				addDict(cpu_active_routines, rank, pixelValue, 1);
 				addDict(cpu_active_count, rank, 1);
 			}
 
 		} else {		// gpu thread
-			if (proc_name.equals(ColorTable.UNKNOWN_PROCNAME) ||
-					proc_name.equals(GPU_SYNC)) {
+			if (proc_name.contains(Constants.PROC_NO_ACTIVITY) ||
+					proc_name.contains(GPU_SYNC)) {
 								
 				addDict(gpu_idle_count, rank, 1);
 			}else {				
@@ -174,7 +183,7 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 	@Override
 	public void analysisPixelFinal(int pixel) {
 				
-		for (Entry<Integer, TreeMap<Integer, Integer>> rank_entry : cpu_active_routines.entrySet()) {
+		for (Entry<Integer, Map<Integer, Integer>> rank_entry : cpu_active_routines.entrySet()) {
 						
 			// If any gpu is idle, put blame on current active cpu routine 
 			if ( !gpu_active_count.containsKey(rank_entry.getKey()) && rank_entry.getValue().containsKey(pixel)) {
@@ -196,7 +205,9 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 		SummaryData data = new SummaryData(	detailData.palette, colorTable, 
 								cpuBlameMap, cpuTotalBlame,
 								null, 0);
-		
-		eventBroker.post(IConstants.TOPIC_BLAME, data);				
+
+		TraceEventData eventData = new TraceEventData(dataTraces, this, data);
+
+		eventBroker.post(IConstants.TOPIC_BLAME, eventData);				
 	}
 }

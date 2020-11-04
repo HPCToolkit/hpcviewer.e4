@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctraceviewer.data;
+package edu.rice.cs.hpc.data.util;
 
 import java.util.Vector;
 
@@ -15,9 +15,7 @@ public class CallPath
 	
 	/**the depth of leafScope (where current cpid is)*/
 	private int maxDepth;
-	
-	/**A null function*/
-	public static final String NULL_FUNCTION = "-Outside Timeline-";
+
 	
 	public CallPath(Scope _leafScope, int _maxDepth, Scope _currentDepthScope, int _currentDepth)
 	{
@@ -61,19 +59,16 @@ public class CallPath
 	public Vector<String> getFunctionNames()
 	{
 		final Vector<String> functionNames = new Vector<String>();
-		if (functionNames.isEmpty())
+		Scope currentScope = leafScope;
+		int depth = maxDepth;
+		while(depth > 0)
 		{
-			Scope currentScope = leafScope;
-			int depth = maxDepth;
-			while(depth > 0)
+			if ((currentScope instanceof CallSiteScope) || (currentScope instanceof ProcedureScope))
 			{
-				if ((currentScope instanceof CallSiteScope) || (currentScope instanceof ProcedureScope))
-				{
-					functionNames.add(0, currentScope.getName());
-					depth--;
-				}
-				currentScope = currentScope.getParentScope();
+				functionNames.add(0, currentScope.getName());
+				depth--;
 			}
+			currentScope = currentScope.getParentScope();
 		}
 		return functionNames;
 	}
@@ -87,5 +82,11 @@ public class CallPath
 	public int getMaxDepth()
 	{
 		return maxDepth;
+	}
+	
+	
+	@Override
+	public String toString() {
+		return maxDepth + ": " + leafScope.getName();
 	}
 }

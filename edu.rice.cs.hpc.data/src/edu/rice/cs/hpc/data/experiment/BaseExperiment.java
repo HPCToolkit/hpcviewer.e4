@@ -3,6 +3,7 @@ package edu.rice.cs.hpc.data.experiment;
 import java.io.File;
 import java.io.InputStream;
 import java.util.EnumMap;
+import java.util.Map;
 
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
@@ -11,6 +12,7 @@ import edu.rice.cs.hpc.data.experiment.scope.visitors.DisposeResourcesVisitor;
 import edu.rice.cs.hpc.data.experiment.scope.visitors.FilterScopeVisitor;
 import edu.rice.cs.hpc.data.filter.IFilterData;
 import edu.rice.cs.hpc.data.trace.TraceAttribute;
+import edu.rice.cs.hpc.data.util.CallPath;
 import edu.rice.cs.hpc.data.util.IUserData;
 
 
@@ -53,6 +55,11 @@ public abstract class BaseExperiment implements IExperiment
 	
 	/***** attributes of the traces ***/
 	private TraceAttribute attribute;
+	
+	private int maxDepth;
+
+	private Map<Integer, CallPath> mapCpidToCallpath;
+	private Map<String, Object>    mapProcedure;
 
 	/***
 	 * the root scope of the experiment
@@ -129,6 +136,54 @@ public abstract class BaseExperiment implements IExperiment
 		return versionMinor;
 	}
 	
+
+	/**
+	 * @return the maxDepth
+	 */
+	public int getMaxDepth() {
+		return maxDepth;
+	}
+
+
+	/**
+	 * @param maxDepth the maxDepth to set
+	 */
+	public void setMaxDepth(int maxDepth) {
+		this.maxDepth = maxDepth;
+	}
+
+
+	/**
+	 * @return the scopeMap
+	 */
+	public Map<Integer, CallPath> getScopeMap() {
+		return mapCpidToCallpath;
+	}
+
+
+	/**
+	 * @param scopeMap the scopeMap to set
+	 */
+	public void setScopeMap(Map<Integer, CallPath> scopeMap) {
+		this.mapCpidToCallpath = scopeMap;
+	}
+
+
+	/**
+	 * @return the mapProcedure
+	 */
+	public Map<String, Object> getMapProcedure() {
+		return mapProcedure;
+	}
+
+
+	/**
+	 * @param mapProcedure the mapProcedure to set
+	 */
+	public void setMapProcedure(Map<String, Object> mapProcedure) {
+		this.mapProcedure = mapProcedure;
+	}
+
 
 	static public String getDefaultDatabaseName(Db_File_Type type)
 	{
@@ -287,12 +342,13 @@ public abstract class BaseExperiment implements IExperiment
 	 */
 	public void dispose()
 	{
-		DisposeResourcesVisitor visitor = new DisposeResourcesVisitor();
-		rootScope.dfsVisitScopeTree(visitor);
+		if (rootScope != null) {
+			DisposeResourcesVisitor visitor = new DisposeResourcesVisitor();
+			rootScope.dfsVisitScopeTree(visitor);
+		}
 		rootScope = null;
 		
-		datacentricRootScope = null;
-		
+		datacentricRootScope   = null;
 		databaseRepresentation = null;
 	}
 

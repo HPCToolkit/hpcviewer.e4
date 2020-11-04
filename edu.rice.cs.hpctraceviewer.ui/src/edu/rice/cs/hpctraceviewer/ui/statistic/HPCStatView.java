@@ -8,6 +8,7 @@ import java.util.Set;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.graphics.RGB;
 import edu.rice.cs.hpctraceviewer.data.ColorTable;
+import edu.rice.cs.hpctraceviewer.data.ProcedureColor;
 import edu.rice.cs.hpctraceviewer.ui.base.AbstractItemViewWithTable;
 import edu.rice.cs.hpctraceviewer.ui.base.StatisticItem;
 import edu.rice.cs.hpctraceviewer.ui.summary.SummaryData;
@@ -49,11 +50,13 @@ public class HPCStatView extends AbstractItemViewWithTable
 			final Integer count = data.mapPixelToCount.get(pixel);
 			final RGB rgb	 	= data.palette.getRGB(pixel);
 			
-			String proc = colorTable.getProcedureNameByColorHash(rgb.hashCode());
-			if (proc == null) {
-				proc = ColorTable.UNKNOWN_PROCNAME;
-			}
-			listItems.add(new StatisticItem(proc, (float)100.0 * count/data.totalPixels));
+			String proc;
+			ProcedureColor procColor = colorTable.getProcedureNameByColorHash(rgb.hashCode());
+			
+			assert(procColor != null);
+			
+			proc = procColor.getProcedure();
+			listItems.add(new StatisticItem(proc, procColor.color, (float)100.0 * count/data.totalPixels));
 		}
 
 		return listItems;

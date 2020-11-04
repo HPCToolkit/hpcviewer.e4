@@ -22,8 +22,11 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Drawable;
 import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Table;
@@ -36,6 +39,7 @@ import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.ColorTable;
+import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
 import edu.rice.cs.hpctraceviewer.ui.preferences.TracePreferenceManager;
 
 
@@ -43,10 +47,14 @@ import edu.rice.cs.hpctraceviewer.ui.preferences.TracePreferenceManager;
 public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 		implements EventHandler, Listener, IPropertyChangeListener, DisposeListener 
 {
+	private static final int COLUMN_COLOR_WIDTH = 4;
 	
 	private TableViewer tableViewer;
 	private ColumnProcedureLabelProvider lblProcProvider;
+	private ColumnColorLabelProvider     lblColorProvider;
 	private TableStatComparator comparator;
+	
+	private Object input;
 	
 	private IEventBroker broker;
 	
@@ -69,8 +77,19 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 		
+		// column for colors
+		final TableViewerColumn colColor  = new TableViewerColumn(tableViewer, SWT.LEFT, 0);
+		lblColorProvider = new ColumnColorLabelProvider();
+		colColor.setLabelProvider(lblColorProvider);
+		
+		TableColumn col = colColor.getColumn();
+		col.setText(" ");
+		col.setWidth(COLUMN_COLOR_WIDTH);
+		col.setResizable(false);
+		layout.setColumnData(col, new ColumnWeightData(10, false));
+		
 		// column for procedure name
-		final TableViewerColumn colProc  = new TableViewerColumn(tableViewer, SWT.LEFT, 0);
+		final TableViewerColumn colProc  = new TableViewerColumn(tableViewer, SWT.LEFT, 1);
 		lblProcProvider = new ColumnProcedureLabelProvider();
 		colProc.setLabelProvider(lblProcProvider);
 		
@@ -80,7 +99,7 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 		column.addSelectionListener(getSelectionAdapter(column, 0));
 		
 		// column for the percentage
-		final TableViewerColumn colCount = new TableViewerColumn(tableViewer, SWT.LEFT, 1);
+		final TableViewerColumn colCount = new TableViewerColumn(tableViewer, SWT.LEFT, 2);
 		colCount.setLabelProvider(new ColumnStatLabelProvider());
 		
 		column = colCount.getColumn();
@@ -89,6 +108,7 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 		column.setText("%");
 		column.setAlignment(SWT.RIGHT);
 		column.addSelectionListener(getSelectionAdapter(column, 1));
+		setColumnWidth(column);
 
 		// setup the table viewer
 		tableViewer.setContentProvider(new StatisticContentProvider());		
@@ -129,6 +149,8 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 	
 	@Override
 	public void setInput(Object input) {
+		this.input = input;
+		
 		broker.subscribe(getTopicEvent(), this);
 		ViewerPreferenceManager.INSTANCE.getPreferenceStore().addPropertyChangeListener(this);
 		
@@ -153,11 +175,15 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 			if (obj == null)
 				return;
 			
-			List<StatisticItem> list = getListItems(obj);
-			tableViewer.setInput(list);
-			lblProcProvider.colorTable = getColorTable();
+			assert(obj instanceof TraceEventData);
 			
-			//tableViewer.getTable().getColumn(1).pack();
+			TraceEventData eventData = (TraceEventData) obj;
+			
+			if (eventData.data != input)
+				return;
+			
+			List<StatisticItem> list = getListItems(eventData.value);
+			tableViewer.setInput(list);
 		}
 	}
 
@@ -187,6 +213,15 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 		return tableViewer.getTable().getItemCount();
 	}
 
+	
+	private void setColumnWidth(TableColumn column) {
+		Drawable parent = column.getDisplay();
+		GC gc = new GC(parent);
+		gc.setFont(FontManager.getMetricFont());
+		Point extent = gc.textExtent("888x88x%");
+		column.setWidth(extent.x);
+		gc.dispose();
+	}
 
 	/*************************************************************
 	 * 
@@ -220,25 +255,37 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 	
 	/*************************************************************
 	 * 
+	 * Color of the procedure
+	 *
+	 *************************************************************/
+	static private class ColumnColorLabelProvider extends ColumnLabelProvider 
+	{
+		private final static String EMPTY = " ";
+		
+		@Override
+		public String getText(Object element) {
+			return EMPTY;
+		}
+		
+		
+		@Override
+		public Color getBackground(Object element) {
+			if (element != null && element instanceof StatisticItem) {
+				StatisticItem item = (StatisticItem) element;
+				return item.color;
+			}
+			return null;
+		}
+
+	}
+	
+	/*************************************************************
+	 * 
 	 * Class to manage label of procedure name
 	 *
 	 *************************************************************/
 	static private class ColumnProcedureLabelProvider extends ColumnLabelProvider
 	{		
-		ColorTable colorTable;
-		
-		@Override
-		public Image getImage(Object element) {
-			if (element != null && element instanceof StatisticItem) {
-				final StatisticItem item = (StatisticItem) element;
-				if (item.procedureName == ColorTable.UNKNOWN_PROCNAME)
-					return null;
-				
-				if (colorTable != null)
-					return colorTable.getImage(((StatisticItem)element).procedureName);
-			}
-			return null;
-		}
 
 		@Override
 		public Font getFont(Object element) {

@@ -1,8 +1,7 @@
 package edu.rice.cs.hpctraceviewer.ui.dialog;
 
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -22,7 +21,7 @@ import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Button;
@@ -35,7 +34,6 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
 import edu.rice.cs.hpcbase.map.ProcedureClassData;
-import edu.rice.cs.hpctraceviewer.data.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.util.ProcedureClassMap;
 
 /*********************************
@@ -43,12 +41,15 @@ import edu.rice.cs.hpctraceviewer.data.util.ProcedureClassMap;
  * Dialog window to show the class and the procedure associated
  *
  */
-public class ProcedureClassDialog extends TitleAreaDialog {
+public class ProcedureClassDialog extends TitleAreaDialog 
+{
+	private final static String EMPTY = "\u2588";
+	private final static String UnknownData = "unknown";
 
-	final private String UnknownData = "unknown";
+	private final ProcedureClassMap data;
+	private final Map<Integer, Color> mapColor;
 	
 	private TableViewer tableViewer ;
-	final private ProcedureClassMap data;
 	
 	private Button btnRemove;
 	private Button btnEdit;
@@ -62,6 +63,8 @@ public class ProcedureClassDialog extends TitleAreaDialog {
 	public ProcedureClassDialog(Shell parentShell, ProcedureClassMap data ) {
 		super(parentShell);
 		this.data = data;
+		
+		mapColor = new HashMap<Integer, Color>();
 	}
 
 	/***
@@ -84,9 +87,6 @@ public class ProcedureClassDialog extends TitleAreaDialog {
 	private void updateData(String proc, String procClass, RGB rgb) {
 		// update the map
 		data.put(proc, procClass, rgb);
-		
-		// update the table of colors
-		cacheImages.put(proc, rgb);
 		
 		isModified = true;
 		tableViewer.setInput(data.getEntrySet());
@@ -115,15 +115,19 @@ public class ProcedureClassDialog extends TitleAreaDialog {
 
 			public void widgetSelected(SelectionEvent e) {
 				ProcedureMapDetailDialog dlg = new ProcedureMapDetailDialog(getShell(), 
-						"Add a new procedure-color map", "", "", null);
+													"Add a new procedure-color map", 
+													"", 
+													"", 
+													null);
+				
 				if (dlg.open() == Dialog.OK) {
 					// update the map and the table
-					ProcedureClassDialog.this.updateData(dlg.getProcedure(), dlg.getDescription(), dlg.getRGB());
+					updateData(dlg.getProcedure(), dlg.getDescription(), dlg.getRGB());
 				}
 			}
 		});
 		
-		btnRemove   = new Button(areaAction, SWT.PUSH| SWT.FLAT);
+		btnRemove = new Button(areaAction, SWT.PUSH| SWT.FLAT);
 		btnRemove.setText("Delete");
 		btnRemove.setToolTipText("Remove a selected procedure-color pair");
 		btnRemove.setEnabled(false);
@@ -134,7 +138,7 @@ public class ProcedureClassDialog extends TitleAreaDialog {
 			}
 		});
 		
-		btnEdit   = new Button(areaAction, SWT.PUSH| SWT.FLAT);
+		btnEdit = new Button(areaAction, SWT.PUSH| SWT.FLAT);
 		btnEdit.setText("Edit");
 		btnEdit.setToolTipText("Edit a selected procedure-color pair");
 		btnEdit.setEnabled(false);
@@ -144,6 +148,7 @@ public class ProcedureClassDialog extends TitleAreaDialog {
 			{
 				IStructuredSelection selection = (IStructuredSelection) tableViewer.getSelection();
 				Object item = selection.getFirstElement();
+				
 				if (item instanceof Entry<?,?>) {
 					final String proc = (String)((Entry<?, ?>) item).getKey();
 					final ProcedureClassData pclass = (ProcedureClassData) 
@@ -151,12 +156,13 @@ public class ProcedureClassDialog extends TitleAreaDialog {
 
 					ProcedureMapDetailDialog dlg = new ProcedureMapDetailDialog(getShell(), 
 							"Edit procedure-color map", proc, pclass.getProcedureClass(), pclass.getRGB());
+					
 					if (dlg.open() == Dialog.OK) {
 						// update: remove the old data, and then insert a new one
 						// Attention: these two actions have to be atomic !
-						ProcedureClassDialog.this.data.remove(proc);
+						data.remove(proc);
 						// update the map and the table
-						ProcedureClassDialog.this.updateData(dlg.getProcedure(), dlg.getDescription(), dlg.getRGB());
+						updateData(dlg.getProcedure(), dlg.getDescription(), dlg.getRGB());
 					}
 				}
 			}
@@ -182,15 +188,56 @@ public class ProcedureClassDialog extends TitleAreaDialog {
 		
 		tableViewer = new TableViewer(composite, SWT.MULTI | SWT.VIRTUAL);
 
+		// set color column
+		TableViewerColumn colColor = new TableViewerColumn(tableViewer, SWT.NONE);
+		colColor.setLabelProvider(new ColumnLabelProvider() {
+			
+			
+			@Override
+			public Color getForeground(Object element) {
+				String proc = getProcedureName(element);
+				if (proc != UnknownData) {
+					ProcedureClassData procData = data.get(proc);
+					if (procData != null) {
+						RGB rgb = procData.getRGB();
+						Color color = mapColor.get(rgb.hashCode());
+						if (color == null) {
+							color = new Color(getDialogArea().getDisplay(), rgb);
+							mapColor.put(rgb.hashCode(), color);
+						}
+						return color;
+					}
+				}
+				return null;
+			}
+			
+			@Override
+			public String getText(Object element) {
+				return EMPTY;
+			}
+		});
+		
+		TableColumn colC = colColor.getColumn();
+		colC.setText(" ");
+		colC.setToolTipText("Color of the procedure");
+		colC.setResizable(false);
+		colC.setWidth(24);
+		
 		// set procedure column
 		final TableViewerColumn colProcedure = new TableViewerColumn(tableViewer, SWT.LEFT);
 		TableColumn col = colProcedure.getColumn();
 		col.setText("Procedure");
+		col.setToolTipText("Procedure pattern");
 		col.setResizable(true);
 		col.setMoveable(true);
 		col.setWidth(220);
 		
-		colProcedure.setLabelProvider( new ClassColumnLabelProvider() );
+		colProcedure.setLabelProvider( new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				return getProcedureName(element);
+			}
+		});
 		new ColumnViewerSorter(tableViewer, colProcedure, COLUMN_ID.PROCEDURE);
 		
 		// set description column
@@ -235,8 +282,6 @@ public class ProcedureClassDialog extends TitleAreaDialog {
 		
 		sortColClass.setSorter(sortColClass, Direction.ASC);
 
-		table.pack();
-
 		setTitle("Procedure and color mapping");
 		setMessage("Add, remove or edit a procedure-color mapping");
 		getShell().setText("Procedure-color mapping");
@@ -248,10 +293,36 @@ public class ProcedureClassDialog extends TitleAreaDialog {
 	 * (non-Javadoc)
 	 * @see org.eclipse.jface.window.Window#setShellStyle(int)
 	 */
+	@Override
 	protected void setShellStyle(int newShellStyle) {
 
 		super.setShellStyle(newShellStyle | SWT.RESIZE );
 	} 
+	
+	@Override
+	protected void okPressed() {
+		dispose();
+		super.okPressed();
+	}
+	
+	
+	@Override
+	protected void cancelPressed() {
+		dispose();
+		super.cancelPressed();
+	}
+	
+	
+	/***
+	 * Deallocate resources
+	 */
+	private void dispose() {
+		for(Map.Entry<Integer, Color> entry: mapColor.entrySet()) {
+			Color clr = entry.getValue();
+			clr.dispose();
+		}
+		mapColor.clear();
+	}
 	
 	/***
 	 * check and set button status
@@ -272,6 +343,8 @@ public class ProcedureClassDialog extends TitleAreaDialog {
 		tableViewer.refresh();
 		checkButton();
 	}
+	
+	
 	/***
 	 * removing selected element in the table
 	 * @param event
@@ -348,11 +421,11 @@ public class ProcedureClassDialog extends TitleAreaDialog {
 	static private enum Direction {ASC, DESC};
 	static private enum COLUMN_ID {CLASS, PROCEDURE};
 	
-	/***
+	/******************************************************************************
 	 * 
-	 * Sorting a column
+	 * Class for Sorting a column
 	 *
-	 */
+	 *******************************************************************************/
 	private class ColumnViewerSorter extends ViewerComparator
 	{
 		private final TableViewerColumn column;
@@ -394,11 +467,11 @@ public class ProcedureClassDialog extends TitleAreaDialog {
 		 */
 		public int compare(Viewer viewer, Object e1, Object e2) {
 			final String elem1 = (colid == COLUMN_ID.CLASS ? 
-					ProcedureClassDialog.this.getClassName(e1) : 
-					ProcedureClassDialog.this.getProcedureName(e1));
+									getClassName(e1) : 
+									getProcedureName(e1));
 			final String elem2 = (colid == COLUMN_ID.CLASS ? 
-					ProcedureClassDialog.this.getClassName(e2) : 
-					ProcedureClassDialog.this.getProcedureName(e2));
+									getClassName(e2) : 
+									getProcedureName(e2));
 			
 			int k = (direction == Direction.ASC ? 1 : -1 );
 			int res = k * super.compare(viewer, elem1, elem2);
@@ -428,89 +501,8 @@ public class ProcedureClassDialog extends TitleAreaDialog {
 		}
 	}
 	
-	private ImageCache cacheImages;
 	
-	/**
-	 * 
-	 * Label provider for column class
-	 *
-	 */
-	private class ClassColumnLabelProvider extends ColumnLabelProvider 
-	{
-		
-		public ClassColumnLabelProvider() {
-			cacheImages = new ImageCache();
-		}
-		
-		/*
-		 * (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.ColumnLabelProvider#getText(java.lang.Object)
-		 */
-		public String getText(Object element) {
-			return ProcedureClassDialog.this.getProcedureName(element);
-		}
-		
-		/*
-		 * (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.ColumnLabelProvider#getImage(java.lang.Object)
-		 */
-		public Image getImage(Object element) {
-			String key = ProcedureClassDialog.this.getProcedureName(element);
-			if (key != UnknownData) {
-				// procedure exist
-				final ProcedureClassData val = ProcedureClassDialog.this.data.get(key);
-				if (val != null) {
-					Image image = cacheImages.get(key, val.getRGB());
-					return image;
-				}
-			}
-			return null;
-		}
-		
-		/*
-		 * (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.BaseLabelProvider#dispose()
-		 */
-		public void dispose() {
-			// dispose images before disposing the parent
-			if (cacheImages != null) {
-				cacheImages.dispose();
-			}
-			// now, dispose the parent
-			super.dispose();
-		} 
-	}
-	
-	private class ImageCache {
-		private HashMap<String,Image> images;
 
-		public ImageCache() {
-			images = new HashMap<String, Image>(10);
-		}
-		
-		public Image get(String name, RGB rgb) {
-			Image image = images.get(name);
-			if (image == null) {
-				image = put(name, rgb);
-			}
-			return image;
-		}
-		
-		public Image put(String name, RGB rgb) {
-			Image image = ColorTable.createImage(ProcedureClassDialog.this.getShell().getDisplay(), rgb);
-			images.put(name, image);
-			return image;
-		}
-		
-		public void dispose() {
-			Collection<Image> col = images.values();
-			Iterator<Image> iterator = col.iterator();
-			while(iterator.hasNext()) {
-				Image img = iterator.next();
-				img.dispose();
-			}
-		}
-	}
 	
 	/***
 	 * unit test
