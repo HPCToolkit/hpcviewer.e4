@@ -306,41 +306,6 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		return (Scope) o;
 	}
 
-	
-    /**
-     * Inserting a "node header" on the top of the table to display
-     * either aggregate metrics or "parent" node (due to zoom-in)
-     * TODO: we need to shift to the left a little bit
-     * @param nodeParent
-     */
-    public void insertParentNode(Scope nodeParent) {
-    	/*
-    	Scope scope = nodeParent;
-    	
-    	// Bug fix: avoid using list of columns from the experiment
-    	// formerly: .. = this.myExperiment.getMetricCount() + 1;
-    	TreeColumn []columns = getTree().getColumns();
-    	int nbColumns = columns.length; 	// columns in base metrics
-    	String []sText = new String[nbColumns];
-    	sText[0] = new String(scope.getName());
-    	
-    	// --- prepare text for base metrics
-    	// get the metrics for all columns
-    	for (int i=1; i< nbColumns; i++) {
-    		// we assume the column is not null
-    		Object o = columns[i].getData();
-    		if(o instanceof BaseMetric) {
-    			BaseMetric metric = (BaseMetric) o;
-    			// ask the metric for the value of this scope
-    			// if it's a thread-level metric, we will read metric-db file
-    			sText[i] = metric.getMetricTextValue(scope);
-    		}
-    	}
-    	
-    	// draw the root node item
-    	Utilities.insertTopRow(this, Utilities.getScopeNavButton(scope), sText);
-    	*/
-    }
 
     /**
      * Change the column status (hide/show) in this view only
@@ -463,8 +428,6 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		if (root == null)
 			return;
 		
-		insertParentNode((Scope) root);
-		
 		tree.setRedraw(true);
 	}
 
@@ -481,9 +444,6 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		if (need_to_refresh) {
 			// refresh the table, but we don't change the content
 			refresh(false);
-			Scope root = (Scope) getInput();
-			if (root != null)
-				insertParentNode(root);
 		}
 	}
     

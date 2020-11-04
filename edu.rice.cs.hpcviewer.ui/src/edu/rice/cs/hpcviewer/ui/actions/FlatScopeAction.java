@@ -88,8 +88,6 @@ public class FlatScopeAction
 				// expand the tree until reaching level 2
 				treeViewer.expandToLevel(2, true);
 
-				//treeViewer.insertParentNode(objFlattenedNode);
-
 				treeViewer.getTree().setRedraw(true);
 			}
 		}
@@ -106,8 +104,6 @@ public class FlatScopeAction
 		Scope objParentNode = stackFlatNodes.pop();
 		if(objParentNode != null) {
 			this.treeViewer.setInput(objParentNode);
-			
-			treeViewer.insertParentNode(objParentNode);
 			
 			popElementStates();
 			

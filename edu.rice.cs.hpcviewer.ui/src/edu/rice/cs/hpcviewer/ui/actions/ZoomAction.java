@@ -46,9 +46,12 @@ public class ZoomAction {
 		
 		stackRootTree.push(old); // save the node for future zoom-out
 		
-		viewer.setInput(current);
+		Scope root = old.duplicate();
+		root.addSubscope(current);
 		
-		viewer.expandToLevel(1, true);
+		viewer.setInput(root);
+		
+		viewer.expandToLevel(2, true);
 		
 		// we need to insert the selected node on the top of the table
 		// FIXME: this approach is not elegant, but we don't have any choice
@@ -96,6 +99,11 @@ public class ZoomAction {
 	public boolean canZoomIn ( Scope node ) {
 		if (node == null)
 			return false;
+		
+		Scope input = (Scope) viewer.getInput();
+		if (input.getChildAt(0) == node)
+			return false;
+		
 		if (node instanceof CallSiteScopeCallerView) {
 			// in caller view, we don't know exactly how many children a scope has
 			// the most reliable way is to retrieve the "mark" if the scope has a child or not
