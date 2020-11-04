@@ -45,12 +45,15 @@ public class ZoomAction {
 		Scope old = (Scope) viewer.getInput();
 		
 		stackRootTree.push(old); // save the node for future zoom-out
-
+		
 		viewer.setInput(current);
+		
+		viewer.expandToLevel(1, true);
+		
 		// we need to insert the selected node on the top of the table
 		// FIXME: this approach is not elegant, but we don't have any choice
 		// 			at the moment
-		viewer.insertParentNode(current);
+		//viewer.insertParentNode(root);
 	}
 	
 	/**
@@ -65,12 +68,12 @@ public class ZoomAction {
 			// case where the tree hasn't been zoomed
 			// FIXME: there must be a bug if the code comes to here !
 			parent = (Scope)viewer.getInput();
-			throw( new java.lang.RuntimeException("ScopeViewActions - illegal zoomout"+parent));
+			throw( new java.lang.RuntimeException("ScopeViewActions - illegal zoomout: "+parent));
 		}
 
 		viewer.setInput( parent );
 		// Bug fix: we need to insert the parent on the top of the table
-		viewer.insertParentNode(parent);
+		//viewer.insertParentNode(parent);
 	}
 	
 	/**

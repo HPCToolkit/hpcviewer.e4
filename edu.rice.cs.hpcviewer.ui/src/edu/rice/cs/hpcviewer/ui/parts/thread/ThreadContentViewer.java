@@ -82,8 +82,12 @@ public class ThreadContentViewer extends TopDownContentViewer
 		ScopeTreeViewer treeViewer = getViewer();
 		treeViewer.setInput(root);
 		
+		
+		treeViewer.expandToLevel(2, true);
+
+		
 		// insert the first row (header)
-		treeViewer.insertParentNode(root);
+		//treeViewer.insertParentNode(root);
 
 		// pack the columns, either to fit the title of the header, or 
 		// the item in the column

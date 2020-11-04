@@ -270,11 +270,18 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 			// only the first visible column is sorted
 			bSorted = false;
 		}
-		// TOOO: populate the table: this can take really long time !
-		treeViewer.setInput(root);
+		RootScope rootTable = (RootScope) root.duplicate();
+		rootTable.setParent(root.getParent());
+		rootTable.add(root);
+		root.setParentScope(rootTable);
 		
+		// TOOO: populate the table: this can take really long time !
+		treeViewer.setInput(rootTable);
+		
+		treeViewer.expandToLevel(2, true);
+
 		// insert the first row (header)
-		treeViewer.insertParentNode(root);
+		//treeViewer.insertParentNode(root);
 		
 		// resize the width of metric columns
 		TreeColumn columns[] = treeViewer.getTree().getColumns();

@@ -314,6 +314,7 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
      * @param nodeParent
      */
     public void insertParentNode(Scope nodeParent) {
+    	/*
     	Scope scope = nodeParent;
     	
     	// Bug fix: avoid using list of columns from the experiment
@@ -338,6 +339,7 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
     	
     	// draw the root node item
     	Utilities.insertTopRow(this, Utilities.getScopeNavButton(scope), sText);
+    	*/
     }
 
     /**

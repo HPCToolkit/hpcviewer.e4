@@ -173,6 +173,23 @@ public int hashCode() {
 	return System.identityHashCode(this);
 }
 
+/***
+ * Make this scope as a virtual root to be displayed on the table.
+ * 
+ * @return new root which is the duplicate of this scope.
+ */
+public Scope createRoot() {
+	Scope root = duplicate();
+	root.setParent(getParent());
+	root.addSubscope(this);
+	if (root instanceof CallSiteScopeCallerView) {
+		((CallSiteScopeCallerView)root).markScopeHasChildren();
+	}
+	copyMetrics(root, 0);
+
+	return root;
+}
+
 
 //////////////////////////////////////////////////////////////////////////
 // DUPLICATION														//

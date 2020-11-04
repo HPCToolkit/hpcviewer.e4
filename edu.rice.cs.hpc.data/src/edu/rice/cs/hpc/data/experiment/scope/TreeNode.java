@@ -1,10 +1,9 @@
 package edu.rice.cs.hpc.data.experiment.scope;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-
-import com.sun.source.tree.ParenthesizedTree;
 
 /*******************************************************************************
  * Copyright (c) 2005, 2007 IBM Corporation and others.
@@ -79,7 +78,33 @@ public class TreeNode {
 		}
 		return null;
 	}
+	
+	/****
+	 * Replace the current children with the new ones
+	 * @param children
+	 */
+	public void setChildren(TreeNode []children) {
+		this.children = Arrays.asList(children);
+	}
 
+	
+	/***
+	 * Return the list of children as a {@code List} object
+	 * @return
+	 */
+	public List<TreeNode> getListChildren() {
+		return children;
+	}
+	
+	
+	/****
+	 * Replace the children with the new list
+	 * @param children
+	 */
+	public void setListChildren(List<TreeNode> children) {
+		this.children = children;
+	}
+	
 	/**
 	 * Returns the parent node.
 	 * 
