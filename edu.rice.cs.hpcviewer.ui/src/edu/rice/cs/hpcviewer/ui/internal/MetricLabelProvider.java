@@ -5,6 +5,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 
@@ -32,8 +33,8 @@ public class MetricLabelProvider extends BaseMetricLabelProvider {
 	 * 
 	 * @param metricNew
 	 */
-	public MetricLabelProvider(BaseMetric metricNew) {
-		super(metricNew);
+	public MetricLabelProvider(TreeViewer treeViewer, BaseMetric metricNew) {
+		super(treeViewer, metricNew);
 		IConfigurationElement[] configs = Platform.getExtensionRegistry().getConfigurationElementsFor(METRIC_LABEL_PROVIDER_ID);
 		
 		if (configs != null && configs.length>0) {

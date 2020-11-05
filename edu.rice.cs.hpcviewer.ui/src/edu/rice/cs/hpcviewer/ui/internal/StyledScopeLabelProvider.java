@@ -3,6 +3,8 @@ package edu.rice.cs.hpcviewer.ui.internal;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 
 import edu.rice.cs.hpc.data.experiment.scope.CallSiteScope;
@@ -11,6 +13,7 @@ import edu.rice.cs.hpc.data.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpc.data.util.string.StringUtil;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
+import edu.rice.cs.hpcviewer.ui.resources.ColorManager;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
 
@@ -31,8 +34,8 @@ public class StyledScopeLabelProvider extends DelegatingStyledCellLabelProvider
 	 * 
 	 * @param window
 	 */
-	public StyledScopeLabelProvider() {
-		super( new ScopeLabelProvider());
+	public StyledScopeLabelProvider(TreeViewer treeViewer) {
+		super( new ScopeLabelProvider(treeViewer));
 	}
 	
 	
@@ -64,7 +67,19 @@ public class StyledScopeLabelProvider extends DelegatingStyledCellLabelProvider
 	 */
 	private static class ScopeLabelProvider extends ColumnLabelProvider implements IStyledLabelProvider
 	{
+		private final TreeViewer treeViewer;
 		
+		public ScopeLabelProvider(TreeViewer treeViewer) {
+			this.treeViewer = treeViewer;
+		}
+		
+		@Override
+		public Color getBackground(Object element) {
+			Scope input = (Scope) treeViewer.getInput();
+			if (input != null && input.getChildAt(0) == element)
+				return ColorManager.getColorTopRow();
+			return null;
+		}
 
 		@Override
 		public StyledString getStyledText(Object element) {

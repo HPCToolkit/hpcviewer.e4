@@ -340,7 +340,7 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
         colTree.getColumn().setWidth(TREE_COLUMN_WIDTH);
         
         if (labelProvider == null) {
-        	labelProvider = new StyledScopeLabelProvider();
+        	labelProvider = new StyledScopeLabelProvider(treeViewer);
         }
         colTree.setLabelProvider( labelProvider ); 
 

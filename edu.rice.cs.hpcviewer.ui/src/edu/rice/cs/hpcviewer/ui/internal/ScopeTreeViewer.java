@@ -9,7 +9,6 @@ import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Tree;
@@ -36,7 +35,6 @@ import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpc.data.util.ScopeComparator;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
-import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
 
 /**
@@ -176,12 +174,6 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 	 */
 	public void refreshColumnTitle() {
 		
-		String []sText = Utilities.getTopRowItems(this);
-		
-		// corner case; empty top row for initial state of dynamic views
-		if (sText == null)
-			return;
-		
 		TreeColumn columns[] = this.getTree().getColumns();
 		boolean need_to_update = false;
 		
@@ -201,30 +193,14 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 				// -----------------------------------------------------------------
 				boolean is_derived = (obj instanceof DerivedMetric);
 				need_to_update |= is_derived;
-				if (is_derived) {
-					Object objInp = getInput();
-					if (objInp instanceof RootScope) {
-						DerivedMetric dm = (DerivedMetric) obj;
-						String val = dm.getMetricTextValue((RootScope) objInp);
-
-						// change the current value on the top row with the new value
-						sText[i] = val;
-					}
-				}
 			}
 		}
 		
 		// -----------------------------------------------------------------
-		// refresh the table, and insert the top row back to the table
-		//	with the new value of the derived metric
+		// refresh the table if necessary
 		// -----------------------------------------------------------------
 		if (need_to_update) {
-			TreeItem item = getTree().getItem(0);
-			Image imgItem = item.getImage(0);
-
 			refresh();
-			
-			Utilities.insertTopRow(this, imgItem, sText);
 		}
 	}
 	
@@ -239,7 +215,7 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
     		boolean bSorted) {
     	
     	TreeViewerColumn colMetric = new TreeViewerColumn(this,SWT.RIGHT);	// add column
-		colMetric.setLabelProvider( new MetricLabelProvider(objMetric) );
+		colMetric.setLabelProvider( new MetricLabelProvider(this, objMetric) );
 
 		TreeColumn col = colMetric.getColumn();
 		
