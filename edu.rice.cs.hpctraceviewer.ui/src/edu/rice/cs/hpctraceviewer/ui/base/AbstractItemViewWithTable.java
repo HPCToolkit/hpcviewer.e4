@@ -74,7 +74,7 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 		tableViewer = new TableViewer(tableComposite, SWT.BORDER|SWT.VIRTUAL | SWT.SINGLE | SWT.READ_ONLY);
 		
 		final Table table = tableViewer.getTable();
-		table.setHeaderVisible(true);
+		table.setHeaderVisible(false);
 		table.setLinesVisible(true);
 		
 		// column for colors
