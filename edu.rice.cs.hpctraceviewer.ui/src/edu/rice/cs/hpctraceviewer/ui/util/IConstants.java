@@ -10,4 +10,6 @@ public interface IConstants
 
 	public static final String URI_CONTRIBUTOR     = "platform:/plugin/edu.rice.cs.hpctraceviewer.ui";
 	public static final String ID_DATA_OPERATION   = "trace/op/undo";
+	
+	public static final int COLUMN_COLOR_WIDTH_PIXELS = 14;
 }

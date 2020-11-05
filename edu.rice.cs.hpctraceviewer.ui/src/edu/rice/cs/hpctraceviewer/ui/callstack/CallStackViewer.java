@@ -123,7 +123,7 @@ public class CallStackViewer extends TableViewer
 				
 		TableColumn col = colorViewer.getColumn();
 		col.setText(" ");
-		col.setWidth(14);
+		col.setWidth(IConstants.COLUMN_COLOR_WIDTH_PIXELS);
 		col.setResizable(false);
 
         //------------------------------------------------
