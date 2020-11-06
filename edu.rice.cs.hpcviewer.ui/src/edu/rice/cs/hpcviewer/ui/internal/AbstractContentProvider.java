@@ -46,8 +46,8 @@ public abstract class AbstractContentProvider
     public Object getParent(Object element) {
     	if(element instanceof Scope)
             return ((Scope) element).getParent();
-    	else
-    		return null;
+    	
+    	return null;
     } 
 
 
@@ -55,7 +55,9 @@ public abstract class AbstractContentProvider
 	public void updateElement(Object parent, int index) {
 
 		int child_position = index;
-		
+		/*
+		 * this part will cause stack overflow on Java 11
+		 * 
 		if (parent == viewer.getInput()) {
 			if (index == 0)
  				return;
@@ -64,7 +66,7 @@ public abstract class AbstractContentProvider
 			// this header row is not counted as a child 
 			// issue #11: force the index to be 0. We cannot allow negative index.
 			child_position = Math.max(0, index-1);
-		}
+		}*/
 		
 		Object element = getSortedChild( (Scope)parent, child_position);
 		if (element != null) {
@@ -77,15 +79,15 @@ public abstract class AbstractContentProvider
 
 	@Override
 	public void updateChildCount(Object element, int currentChildCount) {
-		if (element instanceof Scope) {
-			Object []children = getSortedChildren((Scope)element);
-			int length = (children == null ? 0 : children.length);
-			try {
-				viewer.setChildCount(element, length);
-			} catch (Exception e) {
-				Logger logger = LoggerFactory.getLogger(getClass());
-				logger.error("Cannot update the child count " + element.getClass() + ": "+ element.toString(), e);
-			}
+		assert(element instanceof Scope); 
+
+		Object []children = getSortedChildren((Scope)element);
+		int length = (children == null ? 0 : children.length);
+		try {
+			viewer.setChildCount(element, length);
+		} catch (Exception e) {
+			Logger logger = LoggerFactory.getLogger(getClass());
+			logger.error("Cannot update the child count " + element.getClass() + ": "+ element.toString(), e);
 		}
 	}
 
@@ -104,6 +106,15 @@ public abstract class AbstractContentProvider
     	viewer.refresh();
     }
 
+    
+    /****
+     * get the current viewer
+     * @return TreeViewer
+     */
+    protected TreeViewer getViewer() {
+    	return viewer;
+    }
+    
     /**
      * Return an array of objects which is the children of the node (if exists)
      * to be implemented by derived class.

@@ -270,19 +270,15 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 			// only the first visible column is sorted
 			bSorted = false;
 		}
+		RootScope rootTable = (RootScope) root.duplicate();
+		rootTable.setParent(root.getParent());
+		rootTable.add(root);
+		root.setParentScope(rootTable);
+		
 		// TOOO: populate the table: this can take really long time !
-		treeViewer.setInput(root);
+		treeViewer.setInput(rootTable);
 		
-		// insert the first row (header)
-		treeViewer.insertParentNode(root);
-		
-		// resize the width of metric columns
-		TreeColumn columns[] = treeViewer.getTree().getColumns();
-		for(TreeColumn col:columns) {
-			if (col.getData() != null) {
-				col.pack();
-			}
-		}
+		treeViewer.expandToLevel(2, true);
 		
 		updateStatus();
 
@@ -333,7 +329,7 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
         colTree.getColumn().setWidth(TREE_COLUMN_WIDTH);
         
         if (labelProvider == null) {
-        	labelProvider = new StyledScopeLabelProvider();
+        	labelProvider = new StyledScopeLabelProvider(treeViewer);
         }
         colTree.setLabelProvider( labelProvider ); 
 

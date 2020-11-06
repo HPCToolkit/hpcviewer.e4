@@ -111,13 +111,6 @@ public class ExportTable
 			saveContentIntoBuffer(sb, (Scope)root, COMMA_SEPARATOR);
 			objBuffer.write(sb.toString());
 			objBuffer.write(Utilities.NEW_LINE);
-			
-		} else {
-			String sTopRow[] = Utilities.getTopRowItems(treeViewer);
-			// tricky: add '"' for uniting the text in the spreadsheet
-			sTopRow[0] = "\"" + sTopRow[0] + "\"";	
-			sTitle = treeViewer.getTextBasedOnColumnStatus(sTopRow, COMMA_SEPARATOR, 0, 0);
-			objBuffer.write(sTitle + Utilities.NEW_LINE);
 		}
 
 		// write the content text

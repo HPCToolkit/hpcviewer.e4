@@ -9,6 +9,7 @@ import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -41,6 +42,7 @@ import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.ColorTable;
 import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
 import edu.rice.cs.hpctraceviewer.ui.preferences.TracePreferenceManager;
+import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 
 
 
@@ -74,7 +76,7 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 		tableViewer = new TableViewer(tableComposite, SWT.BORDER|SWT.VIRTUAL | SWT.SINGLE | SWT.READ_ONLY);
 		
 		final Table table = tableViewer.getTable();
-		table.setHeaderVisible(true);
+		table.setHeaderVisible(false);
 		table.setLinesVisible(true);
 		
 		// column for colors
@@ -86,7 +88,7 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 		col.setText(" ");
 		col.setWidth(COLUMN_COLOR_WIDTH);
 		col.setResizable(false);
-		layout.setColumnData(col, new ColumnWeightData(10, false));
+		layout.setColumnData(col, new ColumnPixelData(IConstants.COLUMN_COLOR_WIDTH_PIXELS, false));
 		
 		// column for procedure name
 		final TableViewerColumn colProc  = new TableViewerColumn(tableViewer, SWT.LEFT, 1);

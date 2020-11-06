@@ -45,12 +45,18 @@ public class ZoomAction {
 		Scope old = (Scope) viewer.getInput();
 		
 		stackRootTree.push(old); // save the node for future zoom-out
-
-		viewer.setInput(current);
+		
+		Scope root = old.duplicate();
+		root.addSubscope(current);
+		
+		viewer.setInput(root);
+		
+		viewer.expandToLevel(2, true);
+		
 		// we need to insert the selected node on the top of the table
 		// FIXME: this approach is not elegant, but we don't have any choice
 		// 			at the moment
-		viewer.insertParentNode(current);
+		//viewer.insertParentNode(root);
 	}
 	
 	/**
@@ -65,12 +71,12 @@ public class ZoomAction {
 			// case where the tree hasn't been zoomed
 			// FIXME: there must be a bug if the code comes to here !
 			parent = (Scope)viewer.getInput();
-			throw( new java.lang.RuntimeException("ScopeViewActions - illegal zoomout"+parent));
+			throw( new java.lang.RuntimeException("ScopeViewActions - illegal zoomout: "+parent));
 		}
 
 		viewer.setInput( parent );
 		// Bug fix: we need to insert the parent on the top of the table
-		viewer.insertParentNode(parent);
+		//viewer.insertParentNode(parent);
 	}
 	
 	/**
@@ -93,6 +99,11 @@ public class ZoomAction {
 	public boolean canZoomIn ( Scope node ) {
 		if (node == null)
 			return false;
+		
+		Scope input = (Scope) viewer.getInput();
+		if (input.getChildAt(0) == node)
+			return false;
+		
 		if (node instanceof CallSiteScopeCallerView) {
 			// in caller view, we don't know exactly how many children a scope has
 			// the most reliable way is to retrieve the "mark" if the scope has a child or not
