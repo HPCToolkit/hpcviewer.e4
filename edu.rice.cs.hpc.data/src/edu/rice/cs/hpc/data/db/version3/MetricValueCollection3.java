@@ -62,7 +62,7 @@ public class MetricValueCollection3 implements IMetricValueCollection
 			
 			if (sparseValues != null && sparseValues.size()>0)
 			{
-				values = new HashMap<Integer, MetricValue>();
+				values = new HashMap<Integer, MetricValue>(sparseValues.size());
 				
 				for (MetricValueSparse mvs: sparseValues) {
 					float value = mvs.getValue();
@@ -84,6 +84,9 @@ public class MetricValueCollection3 implements IMetricValueCollection
 				MetricValue mv = values.get(index);
 				if (mv != null)
 					return mv;
+			} else {
+				// create empty cache value so that we avoid searching again for this cct
+				values = new HashMap<>(0);
 			}
 
 		} else 
