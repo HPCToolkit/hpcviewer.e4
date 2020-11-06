@@ -28,6 +28,7 @@ import edu.rice.cs.hpctraceviewer.ui.base.IPixelAnalysis;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.context.BaseTraceContext;
 import edu.rice.cs.hpctraceviewer.ui.internal.AbstractTimeCanvas;
+import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
 import edu.rice.cs.hpctraceviewer.ui.operation.AbstractTraceOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.BufferRefreshOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.ZoomOperation;
@@ -272,15 +273,16 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 			}
 			xOffset = Math.round(xOffset + xScale);
 		}
-		totPixels = detailData.width * detailData.height;
+		totPixels = width * height;
 
 		buffer.dispose();
 
 		redraw();
 
-		Integer totalPixels = detailData.height * detailData.width;
-		SummaryData data = new SummaryData(detailData.palette, mapPixelToPercent, getColorTable(), totalPixels);
-		eventBroker.post(IConstants.TOPIC_STATISTICS, data);
+		SummaryData data = new SummaryData(detailData.palette, mapPixelToPercent, getColorTable(), totPixels);
+		TraceEventData eventData = new TraceEventData(dataTraces, this, data);
+		
+		eventBroker.post(IConstants.TOPIC_STATISTICS, eventData);
 		
 		// ----------------------------------------------------------------------------
 		// Finalize external plugin

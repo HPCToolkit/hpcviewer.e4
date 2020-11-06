@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
@@ -28,6 +29,7 @@ import edu.rice.cs.hpc.data.experiment.source.FileSystemSourceFile;
 import edu.rice.cs.hpc.data.experiment.source.SourceFile;
 import edu.rice.cs.hpc.data.experiment.xml.Token2.TokenXML;
 import edu.rice.cs.hpc.data.trace.TraceAttribute;
+import edu.rice.cs.hpc.data.util.CallPath;
 import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.data.util.Dialogs;
 import edu.rice.cs.hpc.data.util.IUserData;
@@ -87,12 +89,18 @@ public class BaseExperimentBuilder extends Builder {
 	private HashMap<Integer, LoadModuleScope> 	hashLoadModuleTable;
 	private HashMap<Integer, SourceFile> 		hashSourceFileTable;
 	
-	private HashMap<Integer /*id*/, Integer /*status*/>			statusProcedureMap;
+	private HashMap<Integer /*id*/, Integer /*status*/>	  statusProcedureMap;
 
+	private final Map<String, Object>   mapProcNameToCount;
+	private final Map<Integer, CallPath> mapCpidToCallpath;
+	
+	private int max_depth = 0;
+	
 	private int min_cctid = Integer.MAX_VALUE;
 	private int max_cctid = Integer.MIN_VALUE;
 
-
+	private int current_depth = 0;
+	
 	private boolean removeInvisibleProcedure = false;
 	
 	//=============================================================
@@ -122,7 +130,10 @@ public class BaseExperimentBuilder extends Builder {
 		hashLoadModuleTable = new HashMap<Integer, LoadModuleScope>();
 		hashSourceFileTable = new HashMap<Integer, SourceFile>();
 		statusProcedureMap  = new HashMap<Integer, Integer>();
-
+		
+		mapProcNameToCount  = new HashMap<>();
+		mapCpidToCallpath   = new HashMap<>();
+		
 		// parse action data structures
 		this.scopeStack   = new Stack<Scope>();
 		this.rootStack    = new Stack<RootScope>();
@@ -552,12 +563,12 @@ public class BaseExperimentBuilder extends Builder {
 			
 			SourceFile srcFile 			  = null; // file location of this procedure
 			LoadModuleScope objLoadModule = null;
-			String procAttribute 		  = null;
+			String procName 		  = null;
 
 			for(int i=0; i<attributes.length; i++) {
 				if (attributes[i].equals("s")) { 
 					// new database format: s is the flat ID of the procedure
-					procAttribute = this.getProcedureName(values[i]);
+					procName = this.getProcedureName(values[i]);
 					flat_id = Integer.parseInt(values[i]);
 					if (!new_cct_format)
 						// old format: cct ID = flat ID
@@ -603,12 +614,14 @@ public class BaseExperimentBuilder extends Builder {
 					}
 				} else if (attributes[i].equals("p") ) {
 					// obsolete format: p is the name of the procedure
-					procAttribute = values[i];
+					procName = values[i];
 					
 				} else if(attributes[i].equals(ATTRIBUTE_NAME)) {
 					// new database format: n is the flat ID of the procedure
-					procAttribute = this.getProcedureName(values[i]);
+					procName = this.getProcedureName(values[i]);
 					
+					mapProcNameToCount.put(procName, null);
+
 				} else if(attributes[i].equals(ATTRIBUTE_LINE)) {
 					// line number (or range)
 					StatementRange objRange = new StatementRange(values[i]);
@@ -629,7 +642,7 @@ public class BaseExperimentBuilder extends Builder {
 			
 			if (isalien) {
 
-				if (procAttribute.isEmpty()) {
+				if (procName.isEmpty()) {
 					// this is a line scope
 					Scope scope;
 					if (firstLn == lastLn)
@@ -661,7 +674,7 @@ public class BaseExperimentBuilder extends Builder {
 			if (statusProc != null) {
 				feature = statusProc.intValue();
 				if (feature == ProcedureScope.FeatureRoot) {
-					RootScope datacentricRoot = new RootScope(experiment, procAttribute, RootScopeType.DatacentricTree);
+					RootScope datacentricRoot = new RootScope(experiment, procName, RootScopeType.DatacentricTree);
 					// push the new scope to the stack
 					scopeStack.push(datacentricRoot);
 					rootStack.push(datacentricRoot);
@@ -671,12 +684,12 @@ public class BaseExperimentBuilder extends Builder {
 				}
 			}
 			if (objLoadModule == null) {
-				objLoadModule = LoadModuleScope.build(rootStack.peek(), "unknown", srcFile);
+				objLoadModule = LoadModuleScope.build(rootStack.peek(), "<unknown>", srcFile);
 			}
 			
 			ProcedureScope procScope  = new ProcedureScope(rootStack.peek(), objLoadModule, srcFile, 
 					firstLn-1, lastLn-1, 
-					procAttribute, isalien, cct_id, flat_id, userData, feature);
+					procName, isalien, cct_id, flat_id, userData, feature);
 
 			if ( (this.scopeStack.size()>1) && ( this.scopeStack.peek() instanceof LineScope)  ) {
 
@@ -925,7 +938,6 @@ public class BaseExperimentBuilder extends Builder {
 			} else if(attributes[i].equals("it")) { //the cpid
 				cpid = Integer.parseInt(values[i]);
 			}
-
 		}
 
 		SourceFile srcFile = this.srcFileStack.peek();
@@ -939,6 +951,8 @@ public class BaseExperimentBuilder extends Builder {
 					firstLn-1, lastLn-1, cct_id, flat_id);
 
 		scope.setCpid(cpid);
+		mapCpidToCallpath.put(cpid, new CallPath(scope, current_depth));
+		
 		if (isCallSite) {
 			scopeStack.push(scope);
 		} else {
@@ -982,6 +996,9 @@ public class BaseExperimentBuilder extends Builder {
 	private void end_PGM()
 	{
 		this.endScope();
+		experiment.setMaxDepth(max_depth);
+		experiment.setScopeMap(mapCpidToCallpath);
+		experiment.setMapProcedure(mapProcNameToCount);
 	}
 
 
@@ -1194,6 +1211,11 @@ public class BaseExperimentBuilder extends Builder {
 		if (scope instanceof RootScope) {
 			rootStack.push((RootScope)scope);
 		}
+		if (isScopeTrace(scope)) {
+			current_depth++;
+			assert(current_depth >= 0);
+			max_depth = Math.max(max_depth, current_depth);
+		}
 	}
 
 	
@@ -1202,8 +1224,15 @@ public class BaseExperimentBuilder extends Builder {
 	 ************************************************************************/
 	protected void endScope()
 	{
+		
 		try {
 			Scope scope = this.scopeStack.pop();
+			
+			if (isScopeTrace(scope)) {
+				current_depth--;
+				assert(current_depth >= 0);
+			}
+
 			if (scope instanceof RootScope) {
 				rootStack.pop();
 			}
@@ -1211,6 +1240,18 @@ public class BaseExperimentBuilder extends Builder {
 		} catch (java.util.EmptyStackException e) {
 			System.out.println("End of stack:"+this.parser.getLineNumber());
 		}
+	}
+	
+	/***
+	 * Check if the scope is part of trace scope. 
+	 * A trace scope is either a procedure or a call-site scope.
+	 * 
+	 * @param scope
+	 * @return boolean true if it's a trace scope
+	 */
+	private boolean isScopeTrace(Scope scope) {
+		return (scope instanceof ProcedureScope || 
+				scope instanceof CallSiteScope);
 	}
 
 	/*************************************************************************

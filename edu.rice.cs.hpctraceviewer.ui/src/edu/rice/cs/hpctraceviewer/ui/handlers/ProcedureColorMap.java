@@ -35,7 +35,7 @@ public class ProcedureColorMap
 			classMap.save();
 			
 			SpaceTimeDataController data = (SpaceTimeDataController) tracePart.getInput();
-			data.resetPredefinedColor();
+			data.getColorTable().resetPredefinedColor();
 			
 			TraceEventData eventData = new TraceEventData(data, tracePart, data);
 			eventBroker.post(IConstants.TOPIC_COLOR_MAPPING, eventData);

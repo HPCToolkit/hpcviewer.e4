@@ -4,13 +4,14 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.InflaterInputStream;
 
 import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
 import edu.rice.cs.hpc.data.db.version3.DataRecord;
-import edu.rice.cs.hpctraceviewer.data.CallPath;
+import edu.rice.cs.hpc.data.util.CallPath;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
 
@@ -34,7 +35,7 @@ public class DecompressionThread extends Thread {
 
 	// Variables for decompression
 
-	final HashMap<Integer, CallPath> scopeMap;
+	final Map<Integer, CallPath> scopeMap;
 
 	final ImageTraceAttributes attributes;
 	
@@ -53,7 +54,7 @@ public class DecompressionThread extends Thread {
 	 * but mainly for accepting trace data. If the data is compressed, it will then
 	 * automatically decompress.
 	 *  
-	 * @param _scopeMap
+	 * @param map
 	 * @param attributes
 	 * @param queue work to do
 	 * @param timelinesAvailableForRendering
@@ -61,14 +62,14 @@ public class DecompressionThread extends Thread {
 	 * @param listener
 	 */
 	public DecompressionThread(
-			HashMap<Integer, CallPath> _scopeMap,
+			Map<Integer, CallPath> map,
 			ImageTraceAttributes attributes,
 			ConcurrentLinkedQueue<DecompressionItemToDo> workToDo, 
 			ConcurrentLinkedQueue<Integer> timelinesAvailableForRendering,
 			AtomicInteger ranksRemainingToDecompress,
 			IThreadListener listener) {
 
-		scopeMap 		= _scopeMap;
+		scopeMap 		= map;
 
 		this.attributes = attributes;
 		this.workToDo   = workToDo;

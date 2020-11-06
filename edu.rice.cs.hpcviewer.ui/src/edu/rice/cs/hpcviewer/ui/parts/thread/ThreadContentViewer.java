@@ -82,8 +82,12 @@ public class ThreadContentViewer extends TopDownContentViewer
 		ScopeTreeViewer treeViewer = getViewer();
 		treeViewer.setInput(root);
 		
+		
+		treeViewer.expandToLevel(2, true);
+
+		
 		// insert the first row (header)
-		treeViewer.insertParentNode(root);
+		//treeViewer.insertParentNode(root);
 
 		// pack the columns, either to fit the title of the header, or 
 		// the item in the column
@@ -113,7 +117,7 @@ public class ThreadContentViewer extends TopDownContentViewer
 		
 		if (treeViewer.getTree().getColumnCount() == 0) {
 	        TreeViewerColumn colTree = createScopeColumn(treeViewer);
-	        colTree.getColumn().setWidth(ScopeTreeViewer.COLUMN_DEFAULT_WIDTH*2);
+	        //colTree.getColumn().setWidth(ScopeTreeViewer.COLUMN_DEFAULT_WIDTH*2);
 	        
 			ScopeSelectionAdapter selectionAdapter = new ScopeSelectionAdapter(treeViewer, colTree);
 			colTree.getColumn().addSelectionListener(selectionAdapter);

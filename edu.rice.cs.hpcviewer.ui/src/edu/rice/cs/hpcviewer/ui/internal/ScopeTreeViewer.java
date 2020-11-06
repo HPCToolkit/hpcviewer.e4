@@ -9,7 +9,9 @@ import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Tree;
@@ -34,9 +36,9 @@ import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpc.data.util.ScopeComparator;
+import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
-import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
 
 /**
@@ -44,9 +46,10 @@ import edu.rice.cs.hpcviewer.ui.util.Utilities;
  */
 public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListener
 {
-	final static public String COLUMN_DATA_WIDTH = "w"; 
-	final static public int COLUMN_DEFAULT_WIDTH = 120;
-
+	public final static String COLUMN_DATA_WIDTH = "w"; 
+	private final static float FACTOR_BOLD_FONT  = 1.2f;
+	
+	private int metricColumnWidth;
 	private DisposeListener disposeListener;
 	
 	/**
@@ -78,6 +81,12 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 
 		// Fix bug #25: tooltip is not wrapped on MacOS 
 		ColumnViewerToolTipSupport.enableFor(this, ToolTip.NO_RECREATE);
+		
+		GC gc = new GC(getControl());
+		gc.setFont(FontManager.getMetricFont());
+		Point extent = gc.stringExtent("8x88+88xx888x8%");
+		metricColumnWidth = extent.x;
+		gc.dispose();
 	}
 	
 	
@@ -176,12 +185,6 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 	 */
 	public void refreshColumnTitle() {
 		
-		String []sText = Utilities.getTopRowItems(this);
-		
-		// corner case; empty top row for initial state of dynamic views
-		if (sText == null)
-			return;
-		
 		TreeColumn columns[] = this.getTree().getColumns();
 		boolean need_to_update = false;
 		
@@ -201,30 +204,14 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 				// -----------------------------------------------------------------
 				boolean is_derived = (obj instanceof DerivedMetric);
 				need_to_update |= is_derived;
-				if (is_derived) {
-					Object objInp = getInput();
-					if (objInp instanceof RootScope) {
-						DerivedMetric dm = (DerivedMetric) obj;
-						String val = dm.getMetricTextValue((RootScope) objInp);
-
-						// change the current value on the top row with the new value
-						sText[i] = val;
-					}
-				}
 			}
 		}
 		
 		// -----------------------------------------------------------------
-		// refresh the table, and insert the top row back to the table
-		//	with the new value of the derived metric
+		// refresh the table if necessary
 		// -----------------------------------------------------------------
 		if (need_to_update) {
-			TreeItem item = getTree().getItem(0);
-			Image imgItem = item.getImage(0);
-
 			refresh();
-			
-			Utilities.insertTopRow(this, imgItem, sText);
 		}
 	}
 	
@@ -239,7 +226,7 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
     		boolean bSorted) {
     	
     	TreeViewerColumn colMetric = new TreeViewerColumn(this,SWT.RIGHT);	// add column
-		colMetric.setLabelProvider( new MetricLabelProvider(objMetric) );
+		colMetric.setLabelProvider( new MetricLabelProvider(this, objMetric) );
 
 		TreeColumn col = colMetric.getColumn();
 		
@@ -256,9 +243,20 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
     	
 		// associate the data of this column to the metric since we
 		// allowed columns to move (col position is not enough !)
+    	
+    	Font font = col.getParent().getFont();
+    	GC gc = new GC(getControl());
+    	gc.setFont(font);
+    	Point extent = gc.textExtent(display_name);
+    	
+    	// the column header in Linux GTK is bold. Unfortunately we don't have this info
+    	// The hack is to multiply the width by a constant i.e. FACTOR_BOLD_FONT
+    	int colWidth = (int) Math.max(metricColumnWidth, extent.x * FACTOR_BOLD_FONT);
+    	gc.dispose();
+    	
     	col.setData (objMetric);
-    	col.setData (COLUMN_DATA_WIDTH, COLUMN_DEFAULT_WIDTH);
-    	col.setWidth(COLUMN_DEFAULT_WIDTH);
+    	col.setData (COLUMN_DATA_WIDTH, colWidth);
+    	col.setWidth(colWidth);
     	
 		col.setMoveable(true);
 
@@ -272,7 +270,7 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		}
 		Layout layout = getTree().getParent().getLayout();
 		if (layout instanceof TreeColumnLayout) {
-			final ColumnPixelData data = new ColumnPixelData(ScopeTreeViewer.COLUMN_DEFAULT_WIDTH, true, false);
+			final ColumnPixelData data = new ColumnPixelData(colWidth, true, false);
 			((TreeColumnLayout)layout).setColumnData(colMetric.getColumn(), data);
 		}
 
@@ -306,39 +304,6 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		return (Scope) o;
 	}
 
-	
-    /**
-     * Inserting a "node header" on the top of the table to display
-     * either aggregate metrics or "parent" node (due to zoom-in)
-     * TODO: we need to shift to the left a little bit
-     * @param nodeParent
-     */
-    public void insertParentNode(Scope nodeParent) {
-    	Scope scope = nodeParent;
-    	
-    	// Bug fix: avoid using list of columns from the experiment
-    	// formerly: .. = this.myExperiment.getMetricCount() + 1;
-    	TreeColumn []columns = getTree().getColumns();
-    	int nbColumns = columns.length; 	// columns in base metrics
-    	String []sText = new String[nbColumns];
-    	sText[0] = new String(scope.getName());
-    	
-    	// --- prepare text for base metrics
-    	// get the metrics for all columns
-    	for (int i=1; i< nbColumns; i++) {
-    		// we assume the column is not null
-    		Object o = columns[i].getData();
-    		if(o instanceof BaseMetric) {
-    			BaseMetric metric = (BaseMetric) o;
-    			// ask the metric for the value of this scope
-    			// if it's a thread-level metric, we will read metric-db file
-    			sText[i] = metric.getMetricTextValue(scope);
-    		}
-    	}
-    	
-    	// draw the root node item
-    	Utilities.insertTopRow(this, Utilities.getScopeNavButton(scope), sText);
-    }
 
     /**
      * Change the column status (hide/show) in this view only
@@ -415,7 +380,7 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 	       			if((o != null) && (o instanceof Integer) ) {
 	       				iWidth = ((Integer)o).intValue();
 	       			} else {
-		        		iWidth = ScopeTreeViewer.COLUMN_DEFAULT_WIDTH;
+		        		iWidth = 120;
 	       			}
 				}
 				
@@ -461,8 +426,6 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		if (root == null)
 			return;
 		
-		insertParentNode((Scope) root);
-		
 		tree.setRedraw(true);
 	}
 
@@ -479,9 +442,6 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		if (need_to_refresh) {
 			// refresh the table, but we don't change the content
 			refresh(false);
-			Scope root = (Scope) getInput();
-			if (root != null)
-				insertParentNode(root);
 		}
 	}
     

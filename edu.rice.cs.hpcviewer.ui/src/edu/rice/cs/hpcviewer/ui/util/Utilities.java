@@ -9,8 +9,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Tree;
-import org.eclipse.swt.widgets.TreeItem;
-
 import java.io.File;
 
 import org.eclipse.jface.viewers.StyledString;
@@ -29,7 +27,6 @@ import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpc.data.util.OSValidator;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
-import edu.rice.cs.hpcviewer.ui.resources.ColorManager;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 
 
@@ -159,57 +156,6 @@ public class Utilities
 	}
 
 
-	/**	
-	 * Insert an item on the top on the tree/table with additional image if not null
-	 * @param treeViewer : the tree viewer
-	 * @param imgScope : the icon for the tree node
-	 * @param arrText : the label of the items (started from  col 0..n-1)
-	 */
-	static public void insertTopRow(TreeViewer treeViewer, Image imgScope, String []arrText) {
-		if(arrText == null)
-			return;
-    	TreeItem item = new TreeItem(treeViewer.getTree(), SWT.BOLD, 0);
-    	if(imgScope != null)
-    		item.setImage(0,imgScope);
-
-    	// Laksono 2009.03.09: add background for the top row to distinguish with other scopes
-    	item.setBackground(ColorManager.getColorTopRow());
-    	// make monospace font for all metric columns
-    	item.setFont(FontManager.getMetricFont());
-    	item.setFont(0, FontManager.getFontGeneric()); // The tree has the original font
-    	// put the text on the table
-    	item.setText(arrText);
-    	// set the array of text as the item data 
-    	// we will use this information when the table is sorted (to restore the original top row)
-    	item.setData(arrText);
-	}
-
-	/**
-	 * Retrieve the top row items into a list of string
-	 * @param treeViewer
-	 * @return
-	 */
-	public static String[] getTopRowItems( TreeViewer treeViewer ) {
-		// for dynamic views, the table is initially empty
-		if (treeViewer.getTree().getItemCount() == 0)
-			return null;
-		
-		TreeItem item = treeViewer.getTree().getItem(0);
-		String []sText= null; // have to do this to avoid error in compilation;
-		if(item.getData() instanceof Scope) {
-			// the table has been zoomed-out
-		} else {
-			// the table is in original form or flattened or zoom-in
-			Object o = item.getData();
-			if(o != null) {
-				Object []arrObj = (Object []) o;
-				if(arrObj[0] instanceof String) {
-					sText = (String[]) item.getData(); 
-				}
-			}
-		}
-		return sText;
-	}
 	
 	
 	/**

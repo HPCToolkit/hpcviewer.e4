@@ -39,19 +39,21 @@ public class FlatScopeAction
 	public void flatten() {
 		// save the current root scope
 		Scope objParentNode = (Scope) treeViewer.getInput();
+		Scope objParentChildNode = (Scope) objParentNode.getChildAt(0);
 		
 		// -------------------------------------------------------------------
 		// copy the "root" of the current input
 		// -------------------------------------------------------------------
-		Scope objFlattenedNode = (objParentNode.duplicate());
+		Scope objFlattenedNode = (objParentChildNode.duplicate());
+		Scope root = objFlattenedNode.createRoot();
 
-		objParentNode.copyMetrics(objFlattenedNode, 0);
+		objParentChildNode.copyMetrics(objFlattenedNode, 0);
 		
 		boolean hasKids = false;
 
 		// create the list of flattened node
-		for (int i=0;i<objParentNode.getChildCount();i++) {
-			Scope node =  (Scope) objParentNode.getChildAt(i);
+		for (int i=0;i<objParentChildNode.getChildCount();i++) {
+			Scope node =  (Scope) objParentChildNode.getChildAt(i);
 			if(node.getChildCount()>0) {
 				
 				// this node has children, add the children
@@ -79,11 +81,12 @@ public class FlatScopeAction
 
 				treeViewer.getTree().setRedraw(false);
 				// we update the data of the table
-				treeViewer.setInput(objFlattenedNode);
+				treeViewer.setInput(root);
 				// refreshing the table to take into account a new data
 				treeViewer.refresh();
 				
-				treeViewer.insertParentNode(objFlattenedNode);
+				// expand the tree until reaching level 2
+				treeViewer.expandToLevel(2, true);
 
 				treeViewer.getTree().setRedraw(true);
 			}
@@ -101,8 +104,6 @@ public class FlatScopeAction
 		Scope objParentNode = stackFlatNodes.pop();
 		if(objParentNode != null) {
 			this.treeViewer.setInput(objParentNode);
-			
-			treeViewer.insertParentNode(objParentNode);
 			
 			popElementStates();
 			

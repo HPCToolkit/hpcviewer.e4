@@ -1,12 +1,14 @@
 package edu.rice.cs.hpcviewer.ui.internal;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcviewer.ui.base.IMetricLabelProvider;
+import edu.rice.cs.hpcviewer.ui.resources.ColorManager;
 
 
 /****
@@ -14,12 +16,15 @@ import edu.rice.cs.hpcviewer.ui.base.IMetricLabelProvider;
  * Class to provide basic label provider for metric columns
  *
  */
-public class BaseMetricLabelProvider extends ColumnLabelProvider implements IMetricLabelProvider {
+public class BaseMetricLabelProvider extends ColumnLabelProvider implements IMetricLabelProvider 
+{
+	private final TreeViewer treeViewer;
 	protected Scope scope = null;
 	protected BaseMetric metric = null;
 
 
-	public BaseMetricLabelProvider(BaseMetric metricNew) {
+	public BaseMetricLabelProvider(TreeViewer treeViewer, BaseMetric metricNew) {
+		this.treeViewer = treeViewer;
 		this.metric = metricNew;
 	}
 
@@ -80,6 +85,14 @@ public class BaseMetricLabelProvider extends ColumnLabelProvider implements IMet
 	 * @see org.eclipse.jface.viewers.ColumnLabelProvider#getBackground(java.lang.Object)
 	 */
 	public Color getBackground(final Object element) {
+		if (treeViewer != null) {
+			Object input = treeViewer.getInput();
+			if (input != null && input instanceof Scope) {
+				if (((Scope)input).getChildAt(0) == element) {
+					return ColorManager.getColorTopRow();
+				}
+			}
+		}
 		return null;
 	}
 
@@ -89,5 +102,9 @@ public class BaseMetricLabelProvider extends ColumnLabelProvider implements IMet
 	 */
 	public Color getForeground(final Object element) {
 		return null;
+	}
+	
+	protected TreeViewer getViewer() {
+		return treeViewer;
 	}
 }

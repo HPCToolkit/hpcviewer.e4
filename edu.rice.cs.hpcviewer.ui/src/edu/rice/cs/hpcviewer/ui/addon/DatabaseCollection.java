@@ -14,7 +14,6 @@ import javax.inject.Singleton;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileInfo;
 import org.eclipse.core.filesystem.IFileStore;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.e4.core.contexts.IEclipseContext;
@@ -83,7 +82,7 @@ public class DatabaseCollection
 	
 	private Logger    statusReporter;
 	
-	@Inject UISynchronize sync;
+	private @Inject UISynchronize sync;
 	
 	public DatabaseCollection() {
 
@@ -130,8 +129,12 @@ public class DatabaseCollection
 				return; 
 			path = filename;
 		}
-
-		openDatabaseAndCreateViews(application, modelService, partService, shell, path);
+		final String filePath = path;
+		
+		// On Linux TWM window manager, the window may not be ready yet.
+		sync.asyncExec(()-> {
+			openDatabaseAndCreateViews(application, modelService, partService, shell, filePath);
+		});
 	}
 	
 
@@ -401,7 +404,7 @@ public class DatabaseCollection
 	public BaseExperiment getExperimentObject(MWindow window, String pathXML) {
 		List<BaseExperiment> list = getActiveListExperiments(window);
 		
-		if (list.isEmpty())
+		if (list == null || list.isEmpty())
 			return null;
 		
 		for (BaseExperiment exp: list) {
@@ -505,7 +508,7 @@ public class DatabaseCollection
 		// first, notify all the parts that have experiment that they will be destroyed.
 		
 		ViewerDataEvent data = new ViewerDataEvent((Experiment) experiment, null);
-		eventBroker.post(BaseConstants.TOPIC_HPC_REMOVE_DATABASE, data);
+		eventBroker.send(BaseConstants.TOPIC_HPC_REMOVE_DATABASE, data);
 		
 		// make sure the experiment's resources are disposed
 		experiment.dispose();

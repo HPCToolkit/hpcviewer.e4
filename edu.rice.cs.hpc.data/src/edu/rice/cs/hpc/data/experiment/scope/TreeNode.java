@@ -1,6 +1,7 @@
 package edu.rice.cs.hpc.data.experiment.scope;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -77,7 +78,33 @@ public class TreeNode {
 		}
 		return null;
 	}
+	
+	/****
+	 * Replace the current children with the new ones
+	 * @param children
+	 */
+	public void setChildren(TreeNode []children) {
+		this.children = Arrays.asList(children);
+	}
 
+	
+	/***
+	 * Return the list of children as a {@code List} object
+	 * @return
+	 */
+	public List<TreeNode> getListChildren() {
+		return children;
+	}
+	
+	
+	/****
+	 * Replace the children with the new list
+	 * @param children
+	 */
+	public void setListChildren(List<TreeNode> children) {
+		this.children = children;
+	}
+	
 	/**
 	 * Returns the parent node.
 	 * 
@@ -208,10 +235,11 @@ public class TreeNode {
 	 * @return <code>object.hashCode</code> or <code>0</code> if
 	 *         <code>object</code> if <code>null</code>.
 	 */
-	public static final int hashCode(final Object object) {
-		return object != null ? object.hashCode() : 0;
+/*	public static final int hashCode(final Object object) {
+		int parentHash = object == null ? 0 : (int) ((TreeNode)object).value;
+		return object != null ? parentHash << 4 | object.hashCode() : 0;
 	}
-
+*/
 	/**
 	 * Checks whether the two objects are <code>null</code> -- allowing for
 	 * <code>null</code>.

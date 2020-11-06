@@ -7,7 +7,7 @@ import org.eclipse.core.runtime.Assert;
 
 import edu.rice.cs.hpc.data.db.version3.DataRecord;
 import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
-import edu.rice.cs.hpctraceviewer.data.CallPath;
+import edu.rice.cs.hpc.data.util.CallPath;
 import edu.rice.cs.hpctraceviewer.data.ITraceDataCollector;
 import edu.rice.cs.hpctraceviewer.data.TraceDataByRank;
 import edu.rice.cs.hpctraceviewer.data.version2.AbstractBaseData;
