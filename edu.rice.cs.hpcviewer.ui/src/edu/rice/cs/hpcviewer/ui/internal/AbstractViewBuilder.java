@@ -279,17 +279,6 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 		treeViewer.setInput(rootTable);
 		
 		treeViewer.expandToLevel(2, true);
-
-		// insert the first row (header)
-		//treeViewer.insertParentNode(root);
-		
-		// resize the width of metric columns
-		TreeColumn columns[] = treeViewer.getTree().getColumns();
-		for(TreeColumn col:columns) {
-			if (col.getData() != null) {
-				col.pack();
-			}
-		}
 		
 		updateStatus();
 

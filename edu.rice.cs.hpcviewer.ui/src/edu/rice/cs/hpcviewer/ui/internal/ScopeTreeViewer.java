@@ -9,6 +9,9 @@ import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Tree;
@@ -33,6 +36,7 @@ import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpc.data.util.ScopeComparator;
+import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 
@@ -42,9 +46,10 @@ import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
  */
 public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListener
 {
-	final static public String COLUMN_DATA_WIDTH = "w"; 
-	final static public int COLUMN_DEFAULT_WIDTH = 120;
-
+	public final static String COLUMN_DATA_WIDTH = "w"; 
+	private final static float FACTOR_BOLD_FONT  = 1.2f;
+	
+	private int metricColumnWidth;
 	private DisposeListener disposeListener;
 	
 	/**
@@ -76,6 +81,12 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 
 		// Fix bug #25: tooltip is not wrapped on MacOS 
 		ColumnViewerToolTipSupport.enableFor(this, ToolTip.NO_RECREATE);
+		
+		GC gc = new GC(getControl());
+		gc.setFont(FontManager.getMetricFont());
+		Point extent = gc.stringExtent("8x88+88xx888x8%");
+		metricColumnWidth = extent.x;
+		gc.dispose();
 	}
 	
 	
@@ -232,9 +243,20 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
     	
 		// associate the data of this column to the metric since we
 		// allowed columns to move (col position is not enough !)
+    	
+    	Font font = col.getParent().getFont();
+    	GC gc = new GC(getControl());
+    	gc.setFont(font);
+    	Point extent = gc.textExtent(display_name);
+    	
+    	// the column header in Linux GTK is bold. Unfortunately we don't have this info
+    	// The hack is to multiply the width by a constant i.e. FACTOR_BOLD_FONT
+    	int colWidth = (int) Math.max(metricColumnWidth, extent.x * FACTOR_BOLD_FONT);
+    	gc.dispose();
+    	
     	col.setData (objMetric);
-    	col.setData (COLUMN_DATA_WIDTH, COLUMN_DEFAULT_WIDTH);
-    	col.setWidth(COLUMN_DEFAULT_WIDTH);
+    	col.setData (COLUMN_DATA_WIDTH, colWidth);
+    	col.setWidth(colWidth);
     	
 		col.setMoveable(true);
 
@@ -248,7 +270,7 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		}
 		Layout layout = getTree().getParent().getLayout();
 		if (layout instanceof TreeColumnLayout) {
-			final ColumnPixelData data = new ColumnPixelData(ScopeTreeViewer.COLUMN_DEFAULT_WIDTH, true, false);
+			final ColumnPixelData data = new ColumnPixelData(colWidth, true, false);
 			((TreeColumnLayout)layout).setColumnData(colMetric.getColumn(), data);
 		}
 
@@ -358,7 +380,7 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 	       			if((o != null) && (o instanceof Integer) ) {
 	       				iWidth = ((Integer)o).intValue();
 	       			} else {
-		        		iWidth = ScopeTreeViewer.COLUMN_DEFAULT_WIDTH;
+		        		iWidth = 120;
 	       			}
 				}
 				
