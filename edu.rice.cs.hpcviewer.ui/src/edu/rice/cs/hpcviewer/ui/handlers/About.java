@@ -3,8 +3,6 @@ package edu.rice.cs.hpcviewer.ui.handlers;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.List;
-
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProduct;
 import org.eclipse.core.runtime.Platform;
@@ -16,9 +14,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -26,8 +22,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import edu.rice.cs.hpclog.LogProperty;
-import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
+import edu.rice.cs.hpcviewer.ui.dialogs.InfoDialog;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 import edu.rice.cs.hpcviewer.ui.util.ApplicationProperty;
 
@@ -114,13 +109,8 @@ public class About
 			if (buttonId == IDialogConstants.DETAILS_ID) {
 				showLicense();
 			} else if (buttonId == IDialogConstants.HELP_ID) {
-				Shell shell = new Shell(getShell());
-				shell.setText("Info");
-				shell.setLayout(new FillLayout());
-				
-				Browser text = new Browser(shell, SWT.MULTI);
-				text.setText(getText());
-				shell.open();
+				InfoDialog infoDlg = new InfoDialog(getShell());
+				infoDlg.open();
 			}
 			super.buttonPressed(buttonId);
 		}
@@ -155,29 +145,6 @@ public class About
 			}
 		}
 
-		
-		private String getText() {
-			String message = "<pre>no info</pre>";
-			try {
-				String location = ViewerPreferenceManager.INSTANCE.getPreferenceStoreLocation();
-				String locInstall = Platform.getInstallLocation().getURL().getFile();
-				String locInstance = Platform.getInstanceLocation().getURL().getFile();
-				String locUser = Platform.getLogFileLocation().toOSString(); //.getUserLocation().getURL().getFile();
-				List<String> logUser = LogProperty.getLogFile();
-
-				message = "<pre>" +
-						 "Install directory: "  + locInstall  + "\n" +
-						 "Instance directory: " + locInstance + "\n" +
-						 "Preference file: "    + location    + "\n" +
-						 "User log files: "     + logUser     + "\n" +
-						 "Eclipse Log file: "   + locUser     + "\n" +
-						 "</pre>";
-			} catch(Exception e) {
-				e.printStackTrace();
-			}
-
-			return message;
-		}
 
 		private void showLicense() {
 			try {				
