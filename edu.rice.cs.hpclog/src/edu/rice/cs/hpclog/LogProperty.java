@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.slf4j.ILoggerFactory;
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.Logger;
@@ -20,6 +21,12 @@ public class LogProperty
 	 */
 	public static List<String> getLogFile() {
 		List<String> files = new ArrayList<String>();
+		ILoggerFactory loggerFactory = LoggerFactory.getILoggerFactory();
+		
+		// check if there is no log file 
+		if (!(loggerFactory instanceof LoggerContext))
+			return List.of();
+		
 		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 		
 		for ( Logger logger: context.getLoggerList() ) {

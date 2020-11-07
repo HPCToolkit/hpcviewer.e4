@@ -1,7 +1,9 @@
 package edu.rice.cs.hpcviewer.ui.dialogs;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -18,6 +20,7 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -29,6 +32,7 @@ import org.eclipse.swt.widgets.TableItem;
 
 import edu.rice.cs.hpclog.LogProperty;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
+import edu.rice.cs.hpcviewer.ui.util.ApplicationProperty;
 
 
 /************************************************************************
@@ -124,35 +128,16 @@ public class InfoDialog extends Dialog
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
 		createButton(parent, IDialogConstants.HELP_ID, "Export", false);
+		createButton(parent, IDialogConstants.DETAILS_ID, "Show log files", false);
 		createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
 	}
 	
+	@Override
 	protected void buttonPressed(int buttonId) {
 		if (buttonId == IDialogConstants.HELP_ID) {
-			FileDialog fileDlg = new FileDialog(getShell(), SWT.SAVE);
-			fileDlg.setText("Export to file ...");
-			fileDlg.setFilterExtensions(new String[] {"*.txt", "*.csv"});
-			fileDlg.setFileName("settings.txt");
-			fileDlg.setOverwrite(true);
-			String filename = fileDlg.open();
-			
-			if (filename != null) {
-				File file = new File(filename);
-				try {
-					PrintWriter pw = new PrintWriter(file);
-					TableItem [] items = tableViewer.getTable().getItems();
-					for(TableItem item: items) {
-						String key = item.getText(0);
-						String val = item.getText(1);
-						pw.format("%s : \t%s\n", key, val == null? "" : val);
-					}
-					pw.close();
-					
-				} catch (FileNotFoundException e) {
-					MessageDialog.openError(getShell(), "Error", e.getMessage());
-					e.printStackTrace();
-				}
-			}
+			export();
+		} else if (buttonId == IDialogConstants.DETAILS_ID) {
+			showLogFile();
 		} else {
 			super.buttonPressed(buttonId);
 		}
@@ -171,11 +156,105 @@ public class InfoDialog extends Dialog
 	}
 	
 	
+	/***
+	 * export the content of the table to a file
+	 */
+	private void export() {
+		FileDialog fileDlg = new FileDialog(getShell(), SWT.SAVE);
+		fileDlg.setText("Export to file ...");
+		fileDlg.setFilterExtensions(new String[] {"*.txt", "*.csv"});
+		fileDlg.setFileName("settings.txt");
+		fileDlg.setOverwrite(true);
+		String filename = fileDlg.open();
+		
+		if (filename != null) {
+			File file = new File(filename);
+			try {
+				PrintWriter pw = new PrintWriter(file);
+				TableItem [] items = tableViewer.getTable().getItems();
+				for(TableItem item: items) {
+					String key = item.getText(0);
+					String val = item.getText(1);
+					pw.format("%s : \t%s\n", key, val == null? "" : val);
+				}
+				pw.close();
+				
+			} catch (FileNotFoundException e) {
+				MessageDialog.openError(getShell(), "Error", e.getMessage());
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	
+	/***
+	 * display the content of the log files
+	 */
+	private void showLogFile() {
+		Shell shell = new Shell(getShell(), SWT.RESIZE);
+		shell.setText("Log files");
+		shell.setLayout(new FillLayout());
+		
+		String text = "<pre>\n";
+
+		List<String> logUser = LogProperty.getLogFile();
+		for (String log: logUser) {
+			text += "File: " + log + "\n";
+			try {
+				text += getFileContent(log);
+			} catch (IOException e) {
+				// do nothing
+			}
+		}
+		text += "\n\n";
+		try {
+			String locUser = Platform.getLogFileLocation().toOSString(); 
+			text += "File: " + locUser + "\n";
+			text += getFileContent(locUser);				
+		} catch (IOException e) {
+			// do nothing
+		}
+		text += "</pre>";
+		
+		Browser browser = new Browser(shell, SWT.MULTI);
+		browser.setText(text);
+		shell.open();
+	}
+	
+	/***
+	 * Read the content of the file
+	 * @param filename
+	 * @return String
+	 * @throws IOException
+	 */
+	private String getFileContent(String filename) throws IOException {
+		File file = new File(filename);
+		if (!file.canRead())
+			return "";
+		
+		FileInputStream fis = new FileInputStream(file);
+		byte[] data = new byte[(int) file.length()];
+		fis.read(data);
+		
+		String content = new String(data, "UTF-8");				
+		fis.close();
+		
+		return content;
+	}
+	
+	
+	/***
+	 * Retrieve the list of infos
+	 * @return Map<String, String> info
+	 */
 	private Map<String, String> getInfo() {
 
 		Map<String, String>  mapTableItems = new LinkedHashMap<String, String>();
-		
+
 		try {
+			String version = ApplicationProperty.getVersion();
+			mapTableItems.put("Version: ", version.trim());
+
 			String location = ViewerPreferenceManager.INSTANCE.getPreferenceStoreLocation();
 			String locInstall = Platform.getInstallLocation().getURL().getFile();
 			String locInstance = Platform.getInstanceLocation().getURL().getFile();
@@ -192,21 +271,36 @@ public class InfoDialog extends Dialog
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	
+
+		int procs = Runtime.getRuntime().availableProcessors();
+		mapTableItems.put("Number of processors", String.valueOf(procs));
+
+		long memMax = Runtime.getRuntime().maxMemory();
+		long memFree = Runtime.getRuntime().freeMemory();
+		long memTot  = Runtime.getRuntime().totalMemory();
+		
+		mapTableItems.put("Max memory",   String.valueOf(memMax));
+		mapTableItems.put("Free memory",  String.valueOf(memFree));
+		mapTableItems.put("Total memory", String.valueOf(memTot));
+		
 		mapTableItems.put("Java Properties", null);
 		Properties properties = System.getProperties();
 		properties.forEach((key, val) -> {
 			mapTableItems.put(key.toString(), val.toString());
 		});
-
+		/*
 		mapTableItems.put("System Properties", null);
 		Map<String, String> mapSystem = System.getenv();
 		mapTableItems.putAll(mapSystem);
-		
+		*/
 		return mapTableItems;
 	}
 	
 	
+	/***
+	 * Unit test
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		Display display = new Display();
 		Shell shell = new Shell(display);
