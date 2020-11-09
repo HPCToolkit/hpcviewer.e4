@@ -17,7 +17,7 @@ public class LogProperty
 {
 	/****
 	 * Get the list of log files
-	 * @return {@code String}
+	 * @return {@code List<String>}
 	 */
 	public static List<String> getLogFile() {
 		List<String> files = new ArrayList<String>();
@@ -25,7 +25,7 @@ public class LogProperty
 		
 		// check if there is no log file 
 		if (!(loggerFactory instanceof LoggerContext))
-			return List.of();
+			return files;
 		
 		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 		
