@@ -49,7 +49,9 @@ import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 		implements EventHandler, Listener, IPropertyChangeListener, DisposeListener 
 {
-	private static final int COLUMN_COLOR_WIDTH = 4;
+	private static final int   COLUMN_PROC_WEIGHT    = 800;
+	private static final int   COLUMN_COLOR_WIDTH    = 4;
+	private static final int   COLUMN_PROC_MIN_WIDTH = 60;
 	
 	private TableViewer tableViewer;
 	private ColumnProcedureLabelProvider lblProcProvider;
@@ -73,10 +75,12 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 		TableColumnLayout layout = new TableColumnLayout();
 		tableComposite.setLayout(layout);
 		
-		tableViewer = new TableViewer(tableComposite, SWT.BORDER|SWT.VIRTUAL | SWT.SINGLE | SWT.READ_ONLY);
+		tableViewer = new TableViewer(tableComposite, SWT.BORDER   | SWT.VIRTUAL   | 
+													  SWT.RESIZE   | SWT.READ_ONLY |
+													  SWT.H_SCROLL | SWT.V_SCROLL);
 		
 		final Table table = tableViewer.getTable();
-		table.setHeaderVisible(false);
+		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 		
 		// column for colors
@@ -97,7 +101,7 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 		
 		TableColumn column = colProc.getColumn();
 		column.setText("Procedure");
-		layout.setColumnData(column, new ColumnWeightData(800, 80, true));
+		layout.setColumnData(column, new ColumnWeightData(COLUMN_PROC_WEIGHT, COLUMN_PROC_MIN_WIDTH, true));
 		column.addSelectionListener(getSelectionAdapter(column, 0));
 		
 		// column for the percentage
@@ -105,12 +109,11 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 		colCount.setLabelProvider(new ColumnStatLabelProvider());
 		
 		column = colCount.getColumn();
-		layout.setColumnData(column, new ColumnWeightData(200, 30, true));
 		
 		column.setText("%");
 		column.setAlignment(SWT.RIGHT);
 		column.addSelectionListener(getSelectionAdapter(column, 1));
-		setColumnWidth(column);
+		setColumnWidth(layout, column);
 
 		// setup the table viewer
 		tableViewer.setContentProvider(new StatisticContentProvider());		
@@ -216,12 +219,15 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 	}
 
 	
-	private void setColumnWidth(TableColumn column) {
+	private void setColumnWidth(TableColumnLayout layout, TableColumn column) {
 		Drawable parent = column.getDisplay();
 		GC gc = new GC(parent);
 		gc.setFont(FontManager.getMetricFont());
 		Point extent = gc.textExtent("888x88x%");
-		column.setWidth(extent.x);
+		int width = (int) (extent.x);
+		column.setWidth(width);
+		layout.setColumnData(column, new ColumnPixelData(width, true));
+
 		gc.dispose();
 	}
 
