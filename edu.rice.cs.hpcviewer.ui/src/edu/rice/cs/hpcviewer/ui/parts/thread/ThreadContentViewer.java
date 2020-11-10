@@ -78,9 +78,8 @@ public class ThreadContentViewer extends TopDownContentViewer
 		initTableColumns(input, experiment.getMetricRaw());
 
 		// 4. update the table content, including the aggregate experiment
-		RootScope root = createRoot(experiment, input.getThreads());
 		ScopeTreeViewer treeViewer = getViewer();
-		treeViewer.setInput(root);
+		treeViewer.setInput(input.getRootScope());
 		
 		
 		treeViewer.expandToLevel(2, true);
