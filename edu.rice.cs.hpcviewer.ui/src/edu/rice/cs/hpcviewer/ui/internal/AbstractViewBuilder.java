@@ -270,10 +270,7 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 			// only the first visible column is sorted
 			bSorted = false;
 		}
-		RootScope rootTable = (RootScope) root.duplicate();
-		rootTable.setParent(root.getParent());
-		rootTable.add(root);
-		root.setParentScope(rootTable);
+		Scope rootTable = root.createRoot();
 		
 		// TOOO: populate the table: this can take really long time !
 		treeViewer.setInput(rootTable);
@@ -288,19 +285,13 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 		
 		ViewerDataEvent dataEvent = database.getColumnStatus(experiment);
 		
-		if (dataEvent == null) 
-			return;
-		if (dataEvent.data == null)
+		if (dataEvent == null || dataEvent.data == null) 
 			return;
 		
 		boolean []status = (boolean[]) dataEvent.data;
 		treeViewer.setColumnsStatus(getMetricManager(), status);
 	}
 	
-	@Override
-	public RootScope getData() {
-		return treeViewer.getRootScope();
-	}
 
 	
 	@Override
