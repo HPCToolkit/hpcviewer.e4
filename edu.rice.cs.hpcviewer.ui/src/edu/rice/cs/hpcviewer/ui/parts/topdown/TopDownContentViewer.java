@@ -212,16 +212,7 @@ public class TopDownContentViewer extends AbstractViewBuilder
 			items[ITEM_THREAD].setEnabled(false);
 			return;
 		}
-		
-		if (threadData.isAvailable()) {
-			// check the validity
-			try {
-				threadData.getParallelismLevel();
-			} catch (IOException e) {
-				items[ITEM_GRAPH] .setEnabled(false);
-				return;
-			}
-		}
+
 		items[ITEM_THREAD].setEnabled(threadData.isAvailable());
 	}
 
