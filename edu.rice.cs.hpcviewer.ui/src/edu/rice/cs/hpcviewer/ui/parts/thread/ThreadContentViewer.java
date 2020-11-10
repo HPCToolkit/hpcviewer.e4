@@ -9,8 +9,6 @@ import java.util.Map.Entry;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.viewers.TreeViewerColumn;
-import org.eclipse.swt.widgets.TreeColumn;
-
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
@@ -80,23 +78,9 @@ public class ThreadContentViewer extends TopDownContentViewer
 		// 4. update the table content, including the aggregate experiment
 		ScopeTreeViewer treeViewer = getViewer();
 		treeViewer.setInput(input.getRootScope());
-		
-		
+				
 		treeViewer.expandToLevel(2, true);
 
-		
-		// insert the first row (header)
-		//treeViewer.insertParentNode(root);
-
-		// pack the columns, either to fit the title of the header, or 
-		// the item in the column
-		
-		final TreeColumn []columns = treeViewer.getTree().getColumns();
-		
-		for (int i=columns.length-1; i>0; i--) {
-			final TreeColumn col = columns[i];
-			col.pack();
-		}
 		updateStatus();
 	}
 	
@@ -116,7 +100,6 @@ public class ThreadContentViewer extends TopDownContentViewer
 		
 		if (treeViewer.getTree().getColumnCount() == 0) {
 	        TreeViewerColumn colTree = createScopeColumn(treeViewer);
-	        //colTree.getColumn().setWidth(ScopeTreeViewer.COLUMN_DEFAULT_WIDTH*2);
 	        
 			ScopeSelectionAdapter selectionAdapter = new ScopeSelectionAdapter(treeViewer, colTree);
 			colTree.getColumn().addSelectionListener(selectionAdapter);
