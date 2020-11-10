@@ -48,6 +48,7 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 {
 	public final static String COLUMN_DATA_WIDTH = "w"; 
 	private final static float FACTOR_BOLD_FONT  = 1.2f;
+	private final static String TEXT_METRIC_COLUMN = "8x88+88xx888x8%";
 	
 	private int metricColumnWidth;
 	private DisposeListener disposeListener;
@@ -84,7 +85,7 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		
 		GC gc = new GC(getControl());
 		gc.setFont(FontManager.getMetricFont());
-		Point extent = gc.stringExtent("8x88+88xx888x8%");
+		Point extent = gc.stringExtent(TEXT_METRIC_COLUMN);
 		metricColumnWidth = extent.x;
 		gc.dispose();
 	}
@@ -243,23 +244,13 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
     	
 		// associate the data of this column to the metric since we
 		// allowed columns to move (col position is not enough !)
-    	
-    	Font font = col.getParent().getFont();
-    	GC gc = new GC(getControl());
-    	gc.setFont(font);
-    	Point extent = gc.textExtent(display_name);
-    	
-    	// the column header in Linux GTK is bold. Unfortunately we don't have this info
-    	// The hack is to multiply the width by a constant i.e. FACTOR_BOLD_FONT
-    	int colWidth = (int) Math.max(metricColumnWidth, extent.x * FACTOR_BOLD_FONT);
-    	gc.dispose();
-    	
     	col.setData (objMetric);
-    	col.setData (COLUMN_DATA_WIDTH, colWidth);
-    	col.setWidth(colWidth);
-    	
-		col.setMoveable(true);
-
+       	
+    	col.setMoveable(true);
+   	
+		Layout layout = getTree().getParent().getLayout();
+    	setMetricColumnWidth(layout, col);
+ 
 		ScopeSelectionAdapter selectionAdapter = new ScopeSelectionAdapter(this, colMetric);
 		
 		// catch event when the user sort the column on the column header
@@ -268,13 +259,33 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		if(bSorted) {
 			selectionAdapter.setSorter(ScopeComparator.SORT_DESCENDING);
 		}
-		Layout layout = getTree().getParent().getLayout();
+		return colMetric;
+    }
+    
+    
+    /***
+     * set the width of a metric column based on the content and the text of the header
+     * @param layout
+     * @param col
+     */
+    private void setMetricColumnWidth(Layout layout, TreeColumn col) {
+    	Font font = col.getParent().getFont();
+    	GC gc = new GC(getControl());
+    	gc.setFont(font);
+    	Point extent = gc.textExtent(col.getText());
+    	
+    	// the column header in Linux GTK is bold. Unfortunately we don't have this info
+    	// The hack is to multiply the width by a constant i.e. FACTOR_BOLD_FONT
+    	int colWidth = (int) Math.max(metricColumnWidth, extent.x * FACTOR_BOLD_FONT);
+    	gc.dispose();
+    	
+    	col.setData (COLUMN_DATA_WIDTH, colWidth);
+    	col.setWidth(colWidth);
+    	
 		if (layout instanceof TreeColumnLayout) {
 			final ColumnPixelData data = new ColumnPixelData(colWidth, true, false);
-			((TreeColumnLayout)layout).setColumnData(colMetric.getColumn(), data);
+			((TreeColumnLayout)layout).setColumnData(col, data);
 		}
-
-		return colMetric;
     }
     
     /****
@@ -414,17 +425,9 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		
 		tree.setRedraw(false);
 		
-		TreeViewerColumn col = addTreeColumn(metric, false);
-		col.getColumn().pack();
+		addTreeColumn(metric, false);
 		
 		refresh();
-		
-		// important: After the refresh, insert the top row manually for all metrics
-		// if we put this before the refresh, somehow it doesn't work
-		
-		Object root = getInput();
-		if (root == null)
-			return;
 		
 		tree.setRedraw(true);
 	}
