@@ -1,7 +1,9 @@
 package edu.rice.cs.hpc.filter.dialog;
 
+import edu.rice.cs.hpc.data.db.IdTupleType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.window.Window;
@@ -17,6 +19,10 @@ import org.eclipse.swt.widgets.Shell;
 public class ThreadFilterDialog extends AbstractFilterDialog 
 {
 	public ThreadFilterDialog(Shell parentShell, List<FilterDataItem> items) {
+		this(parentShell, items, null);
+	}
+	
+	public ThreadFilterDialog(Shell parentShell, List<FilterDataItem> items, List<Short> listIdTupleKinds) {
 		super(parentShell, "Select threads to view", 
 				"Please check any threads to be viewed.\nYou can narrow the list by specifying partial name of the threads on the filter.", 
 				items);
@@ -46,6 +52,9 @@ public class ThreadFilterDialog extends AbstractFilterDialog
 		return null;
 	}
 
+	
+	@Override
+	protected void createAdditionalFilter(Composite parent) {}
 
 	@Override
 	protected void createAdditionalButton(Composite parent) {}
@@ -55,12 +64,24 @@ public class ThreadFilterDialog extends AbstractFilterDialog
 	static public void main(String argv[]) {
 		Shell shell = new Shell();
 		List<FilterDataItem> items = new ArrayList<FilterDataItem>();
+		Random random = new Random();
 		
-		for(int i=0; i<10; i++) {
-			FilterDataItem obj = new FilterDataItem("i="+i, i<6, i>3);
+		for(int i=0; i<20; i++) {
+
+			int rank = random.nextInt(10);
+			int thread = random.nextInt(100);
+			String label = IdTupleType.kindStr(IdTupleType.KIND_RANK) + " " + rank + " " +
+					   	   IdTupleType.kindStr(IdTupleType.KIND_THREAD) + " " + thread;
+			
+			FilterDataItem obj = new FilterDataItem(label, i<6, i>3);
 			items.add(obj);
 		}
-		ThreadFilterDialog dialog = new ThreadFilterDialog(shell, items);
+		
+		List<Short> listKinds = new ArrayList<Short>();
+		listKinds.add(IdTupleType.KIND_RANK);
+		listKinds.add(IdTupleType.KIND_THREAD);	
+		
+		ThreadFilterDialog dialog = new ThreadFilterDialog(shell, items, listKinds);
 		if (dialog.open() == Dialog.OK) {
 			System.out.println("result-ok: " + dialog.getReturnCode());
 			items = dialog.getResult();

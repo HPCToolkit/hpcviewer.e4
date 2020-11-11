@@ -9,14 +9,10 @@ import java.util.Map.Entry;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.viewers.TreeViewerColumn;
-import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
 import edu.rice.cs.hpc.data.experiment.metric.MetricRaw;
-import edu.rice.cs.hpc.data.experiment.scope.RootScope;
-import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
-import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpc.data.util.ScopeComparator;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
@@ -43,33 +39,6 @@ public class ThreadContentViewer extends TopDownContentViewer
 
 	
 	public void setData(ThreadViewInput input) {
-
-		final IMetricManager metricMgr = getMetricManager();
-		List<BaseMetric > metrics = metricMgr.getVisibleMetrics();
-		
-		// 1. check if the threads already exist in the view
-		boolean col_exist = false;
-		if (metrics != null && input.getThreads() != null) {
-			for (BaseMetric metric : metrics) {
-				if (metric instanceof MetricRaw) {
-					List<Integer> lt = ((MetricRaw)metric).getThread();
-					if (lt.size() == input.getThreads().size()) {
-						for(Integer i : input.getThreads()) {
-							col_exist = lt.contains(i);
-							if (!col_exist) {
-								break;
-							}
-						}
-					}
-				}
-				if (col_exist) 
-					break;
-			}
-		}
-		
-		// 2. if the column of this thread exist, exit.
-		if (col_exist)
-			return;
 
 		// 3. add the new metrics into the table
 		final Experiment experiment = (Experiment) input.getRootScope().getExperiment();
@@ -158,30 +127,6 @@ public class ThreadContentViewer extends TopDownContentViewer
 	}
 
 
-	/****
-	 * Create a thread view root based from cct root. 
-	 * The value of the root will be initialized.
-	 * 
-	 * @param experiment
-	 * @return
-	 */
-	private RootScope createRoot(BaseExperiment experiment, List<Integer> threads) {
-
-		// create and duplicate the configuration
-		RootScope rootCCT    = experiment.getRootScope(RootScopeType.CallingContextTree);
-		RootScope rootThread = (RootScope) rootCCT.duplicate();
-		rootThread.setRootName("Thread View");
-		
-		// duplicate the children
-		for(int i=0; i<rootCCT.getChildCount(); i++)
-		{
-			Scope scope = (Scope) rootCCT.getChildAt(i);
-			rootThread.addSubscope(scope);
-		}
-		rootThread.setThreadData(rootCCT.getThreadData());
-		return rootThread;
-	}
-	
 	@Override
 	protected ViewerType getViewerType() {
 		return ViewerType.INDIVIDUAL;

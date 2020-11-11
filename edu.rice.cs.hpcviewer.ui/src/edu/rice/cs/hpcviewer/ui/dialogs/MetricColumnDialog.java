@@ -61,13 +61,18 @@ public class MetricColumnDialog extends AbstractFilterDialog
 
 		btnApplyToAllViews = new Button(parent, SWT.CHECK);
 		btnApplyToAllViews.setText("Apply to all views");
-		btnApplyToAllViews.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
+		btnApplyToAllViews.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		btnApplyToAllViews.setEnabled(applyToAllViewOption);
 		if (applyToAllViewOption) {
 			// Laks 2009.01.26: by default, we apply for all views
 			btnApplyToAllViews.setSelection( getHistory() );
 		}
 	}
+	
+	
+	@Override
+	protected void createAdditionalFilter(Composite parent) {}
+
 	
 	@Override
 	protected void okPressed() {
