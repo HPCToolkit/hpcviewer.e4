@@ -1,9 +1,7 @@
 package edu.rice.cs.hpcviewer.ui.dialogs;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -20,7 +18,6 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -137,7 +134,9 @@ public class InfoDialog extends Dialog
 		if (buttonId == IDialogConstants.HELP_ID) {
 			export();
 		} else if (buttonId == IDialogConstants.DETAILS_ID) {
-			showLogFile();
+			InfoLogDialog logDialog = new InfoLogDialog(getShell());
+			logDialog.open();
+			
 		} else {
 			super.buttonPressed(buttonId);
 		}
@@ -186,61 +185,6 @@ public class InfoDialog extends Dialog
 		}
 	}
 	
-	
-	/***
-	 * display the content of the log files
-	 */
-	private void showLogFile() {
-		Shell shell = new Shell(getShell(), SWT.RESIZE);
-		shell.setText("Log files");
-		shell.setLayout(new FillLayout());
-		
-		String text = "<pre>\n";
-
-		List<String> logUser = LogProperty.getLogFile();
-		for (String log: logUser) {
-			text += "File: " + log + "\n";
-			try {
-				text += getFileContent(log);
-			} catch (IOException e) {
-				// do nothing
-			}
-		}
-		text += "\n\n";
-		try {
-			String locUser = Platform.getLogFileLocation().toOSString(); 
-			text += "File: " + locUser + "\n";
-			text += getFileContent(locUser);				
-		} catch (IOException e) {
-			// do nothing
-		}
-		text += "</pre>";
-		
-		Browser browser = new Browser(shell, SWT.MULTI);
-		browser.setText(text);
-		shell.open();
-	}
-	
-	/***
-	 * Read the content of the file
-	 * @param filename
-	 * @return String
-	 * @throws IOException
-	 */
-	private String getFileContent(String filename) throws IOException {
-		File file = new File(filename);
-		if (!file.canRead())
-			return "";
-		
-		FileInputStream fis = new FileInputStream(file);
-		byte[] data = new byte[(int) file.length()];
-		fis.read(data);
-		
-		String content = new String(data, "UTF-8");				
-		fis.close();
-		
-		return content;
-	}
 	
 	
 	/***
