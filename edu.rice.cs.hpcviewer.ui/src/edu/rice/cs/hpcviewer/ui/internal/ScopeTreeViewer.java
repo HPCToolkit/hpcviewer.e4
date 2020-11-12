@@ -16,7 +16,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
-
 import java.util.List;
 
 import org.eclipse.jface.layout.TreeColumnLayout;
@@ -26,9 +25,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeSelection;
-import org.eclipse.swt.widgets.TreeItem;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.DerivedMetric;
@@ -91,6 +88,10 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 	}
 	
 	
+	/****
+	 * Free allocated resources and unsubscribe events.
+	 * This method has to be called once the table is disposed.
+	 */
 	public void dispose() {
 		getTree().removeDisposeListener(disposeListener);
 
@@ -98,16 +99,11 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		pref.removePropertyChangeListener(this);
 	}
 	
-	/**
-	 * Finding the path based on the treeitem information
-	 * @param item
-	 * @return
+
+	/****
+	 * Retrieve the database of this table
+	 * @return BaseExperiment database
 	 */
-	public TreePath getTreePath(TreeItem item) {
-		return super.getTreePathFromItem(item);
-	}
-
-
 	public BaseExperiment getExperiment() {
 
 		RootScope root = getRootScope();
@@ -288,16 +284,6 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		}
     }
     
-    /****
-     * Refreshes the viewer starting at the given element
-     * 
-     * @param element
-     * @param updateLabels
-     */
-    public void refreshElement(Object element, boolean updateLabels)
-    {
-    	super.internalRefresh(element, updateLabels);
-    }
     
 	/**
 	 * Retrieve the selected node
@@ -424,12 +410,12 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		Tree tree = getTree();
 		
 		tree.setRedraw(false);
-		
-		addTreeColumn(metric, false);
-		
+		TreeViewerColumn colViewer = addTreeColumn(metric, false);			
 		refresh();
-		
 		tree.setRedraw(true);
+
+		// this doesn't work on Linux/GTK
+		tree.showColumn(colViewer.getColumn());
 	}
 
 	@Override
