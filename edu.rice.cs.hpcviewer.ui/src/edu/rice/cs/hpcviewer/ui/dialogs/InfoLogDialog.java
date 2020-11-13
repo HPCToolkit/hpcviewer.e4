@@ -10,13 +10,13 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 
 import edu.rice.cs.hpclog.LogProperty;
 
@@ -35,10 +35,13 @@ public class InfoLogDialog extends Dialog
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite content = (Composite) super.createDialogArea(parent);
-		
-		String text = "<pre>\n<h3>Log files used by hpcviewer</h3>";
+
+		// set the title
+		String text = "Log files used by hpcviewer\n";
 
 		List<String> logUser = LogProperty.getLogFile();
+
+		// get the content for each log files
 		for (String log: logUser) {
 			text += "File: " + log + "\n";
 			try {
@@ -48,21 +51,22 @@ public class InfoLogDialog extends Dialog
 			}
 		}
 		text += "\n\n";
+		
 		try {
 			Activator activator = Activator.getDefault();
 			if (activator != null) {
 				String locUser = Platform.getLogFileLocation().toOSString(); 
-				text += "<b>File: " + locUser + "</b>\n";
+				text += "File: " + locUser + "\n";
 				text += getFileContent(locUser);				
 			}
 		} catch (IOException e) {
 			// do nothing
 		}
-		text += "</pre>";
-		
-		Browser browser = new Browser(content, SWT.MULTI);
-		browser.setText(text);
+		text += "\n";
 
+		Text wText = new Text(content, SWT.MULTI | SWT.READ_ONLY | SWT.V_SCROLL | SWT.H_SCROLL);
+		wText.setText(text);
+		
 		content.setLayout(new FillLayout());
 
 		return content;
