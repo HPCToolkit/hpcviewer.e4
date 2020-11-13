@@ -32,6 +32,9 @@ public class BottomUpContentProvider extends AbstractContentProvider
      */
 	@Override
     public Object[] getChildren(Object parentElement) {
+		if (parentElement == null)
+			return null;
+		
     	Object []results = null;
     	
     	if(parentElement instanceof IMergedScope) {
