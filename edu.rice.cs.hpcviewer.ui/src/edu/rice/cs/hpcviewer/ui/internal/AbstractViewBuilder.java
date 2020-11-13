@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.swt.widgets.TreeItem;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
@@ -270,17 +271,20 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 			// only the first visible column is sorted
 			bSorted = false;
 		}
-		RootScope rootTable = (RootScope) root.duplicate();
-		rootTable.setParent(root.getParent());
-		rootTable.add(root);
-		root.setParentScope(rootTable);
+		Scope rootTable = root.createRoot();
 		
 		// TOOO: populate the table: this can take really long time !
 		treeViewer.setInput(rootTable);
 		
 		treeViewer.expandToLevel(2, true);
 		
-		updateStatus();
+		TreeItem topItem = treeViewer.getTree().getTopItem();
+		if (topItem != null) {
+			TreeItem []childItems = topItem.getItems();
+			if (childItems != null && childItems.length>0) {
+				treeViewer.getTree().setSelection(childItems[0]);
+			}
+		}
 
 		// synchronize hide/show columns with other views that already visible
 		// since this view is just created, we need to ensure the columns hide/show
@@ -288,19 +292,16 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 		
 		ViewerDataEvent dataEvent = database.getColumnStatus(experiment);
 		
-		if (dataEvent == null) 
-			return;
-		if (dataEvent.data == null)
-			return;
-		
-		boolean []status = (boolean[]) dataEvent.data;
-		treeViewer.setColumnsStatus(getMetricManager(), status);
+		if (dataEvent != null && dataEvent.data != null) {
+			boolean []status = (boolean[]) dataEvent.data;
+			treeViewer.setColumnsStatus(getMetricManager(), status);
+		}
+
+		// enable/disable action buttons
+		// this has to be in the last statement
+		updateStatus();
 	}
 	
-	@Override
-	public RootScope getData() {
-		return treeViewer.getRootScope();
-	}
 
 	
 	@Override
@@ -440,7 +441,7 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 		
 		if (selection != null) {
 			Object item = selection.getFirstElement();
-			if (item instanceof Scope) {
+			if (item instanceof Scope && ((Scope)item).hasChildren()) {
 				
 				Scope node = (Scope) item;
 				boolean enabled = zoomAction.canZoomIn((Scope) node);

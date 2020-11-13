@@ -16,7 +16,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
-
 import java.util.List;
 
 import org.eclipse.jface.layout.TreeColumnLayout;
@@ -26,9 +25,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeSelection;
-import org.eclipse.swt.widgets.TreeItem;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.DerivedMetric;
@@ -48,6 +45,7 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 {
 	public final static String COLUMN_DATA_WIDTH = "w"; 
 	private final static float FACTOR_BOLD_FONT  = 1.2f;
+	private final static String TEXT_METRIC_COLUMN = "8x88+88xx888x8%";
 	
 	private int metricColumnWidth;
 	private DisposeListener disposeListener;
@@ -84,12 +82,16 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		
 		GC gc = new GC(getControl());
 		gc.setFont(FontManager.getMetricFont());
-		Point extent = gc.stringExtent("8x88+88xx888x8%");
+		Point extent = gc.stringExtent(TEXT_METRIC_COLUMN);
 		metricColumnWidth = extent.x;
 		gc.dispose();
 	}
 	
 	
+	/****
+	 * Free allocated resources and unsubscribe events.
+	 * This method has to be called once the table is disposed.
+	 */
 	public void dispose() {
 		getTree().removeDisposeListener(disposeListener);
 
@@ -97,16 +99,11 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		pref.removePropertyChangeListener(this);
 	}
 	
-	/**
-	 * Finding the path based on the treeitem information
-	 * @param item
-	 * @return
+
+	/****
+	 * Retrieve the database of this table
+	 * @return BaseExperiment database
 	 */
-	public TreePath getTreePath(TreeItem item) {
-		return super.getTreePathFromItem(item);
-	}
-
-
 	public BaseExperiment getExperiment() {
 
 		RootScope root = getRootScope();
@@ -243,23 +240,13 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
     	
 		// associate the data of this column to the metric since we
 		// allowed columns to move (col position is not enough !)
-    	
-    	Font font = col.getParent().getFont();
-    	GC gc = new GC(getControl());
-    	gc.setFont(font);
-    	Point extent = gc.textExtent(display_name);
-    	
-    	// the column header in Linux GTK is bold. Unfortunately we don't have this info
-    	// The hack is to multiply the width by a constant i.e. FACTOR_BOLD_FONT
-    	int colWidth = (int) Math.max(metricColumnWidth, extent.x * FACTOR_BOLD_FONT);
-    	gc.dispose();
-    	
     	col.setData (objMetric);
-    	col.setData (COLUMN_DATA_WIDTH, colWidth);
-    	col.setWidth(colWidth);
-    	
-		col.setMoveable(true);
-
+       	
+    	col.setMoveable(true);
+   	
+		Layout layout = getTree().getParent().getLayout();
+    	setMetricColumnWidth(layout, col);
+ 
 		ScopeSelectionAdapter selectionAdapter = new ScopeSelectionAdapter(this, colMetric);
 		
 		// catch event when the user sort the column on the column header
@@ -268,25 +255,35 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		if(bSorted) {
 			selectionAdapter.setSorter(ScopeComparator.SORT_DESCENDING);
 		}
-		Layout layout = getTree().getParent().getLayout();
-		if (layout instanceof TreeColumnLayout) {
-			final ColumnPixelData data = new ColumnPixelData(colWidth, true, false);
-			((TreeColumnLayout)layout).setColumnData(colMetric.getColumn(), data);
-		}
-
 		return colMetric;
     }
     
-    /****
-     * Refreshes the viewer starting at the given element
-     * 
-     * @param element
-     * @param updateLabels
+    
+    /***
+     * set the width of a metric column based on the content and the text of the header
+     * @param layout
+     * @param col
      */
-    public void refreshElement(Object element, boolean updateLabels)
-    {
-    	super.internalRefresh(element, updateLabels);
+    private void setMetricColumnWidth(Layout layout, TreeColumn col) {
+    	Font font = col.getParent().getFont();
+    	GC gc = new GC(getControl());
+    	gc.setFont(font);
+    	Point extent = gc.textExtent(col.getText());
+    	
+    	// the column header in Linux GTK is bold. Unfortunately we don't have this info
+    	// The hack is to multiply the width by a constant i.e. FACTOR_BOLD_FONT
+    	int colWidth = (int) Math.max(metricColumnWidth, extent.x * FACTOR_BOLD_FONT);
+    	gc.dispose();
+    	
+    	col.setData (COLUMN_DATA_WIDTH, colWidth);
+    	col.setWidth(colWidth);
+    	
+		if (layout instanceof TreeColumnLayout) {
+			final ColumnPixelData data = new ColumnPixelData(colWidth, true, false);
+			((TreeColumnLayout)layout).setColumnData(col, data);
+		}
     }
+    
     
 	/**
 	 * Retrieve the selected node
@@ -413,20 +410,12 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		Tree tree = getTree();
 		
 		tree.setRedraw(false);
-		
-		TreeViewerColumn col = addTreeColumn(metric, false);
-		col.getColumn().pack();
-		
+		TreeViewerColumn colViewer = addTreeColumn(metric, false);			
 		refresh();
-		
-		// important: After the refresh, insert the top row manually for all metrics
-		// if we put this before the refresh, somehow it doesn't work
-		
-		Object root = getInput();
-		if (root == null)
-			return;
-		
 		tree.setRedraw(true);
+
+		// this doesn't work on Linux/GTK
+		tree.showColumn(colViewer.getColumn());
 	}
 
 	@Override

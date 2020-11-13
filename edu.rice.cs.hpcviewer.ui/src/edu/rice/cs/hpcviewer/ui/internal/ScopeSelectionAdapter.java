@@ -7,6 +7,8 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.swt.widgets.TreeItem;
+
 import edu.rice.cs.hpc.data.util.ScopeComparator;
 import edu.rice.cs.hpcviewer.ui.base.ISortContentProvider;
 
@@ -59,15 +61,9 @@ public class ScopeSelectionAdapter extends SelectionAdapter
 		// post-sorting 
 		// ----------------
 		
-		//Utilities.insertTopRow(viewer, imgItem, sText);
-		
-		// if there is no selection, we scroll to the top
-		// see issue #28
-		// https://github.com/HPCToolkit/hpcviewer/issues/28
-		
-		if (tree.getSelectionCount() == 0) {
-			tree.showItem(tree.getItem(0));
-		}
+		// scroll to the top. This works on mac, but doesn't work on Linux/GTK
+		TreeItem item = tree.getItem(0);
+		tree.showItem(item);
 	}
 	
 	/**

@@ -1,45 +1,99 @@
 #!/bin/bash
+#
+# Copyright (c) 2002-2020, Rice University.
+# See the file edu.rice.cs.hpcviewer.ui/License.txt for details.
+#
+# Build hpcviewer and generate tar or zip files
+# This script is only for Unix and X windows.
+#
 
+if ! command -v mvn &> /dev/null
+then
+	echo "Maven mvn command is not found"
+	echo "Please install Apache maven"
+	exit
+fi
+
+# 
+# Update the release file 
+#
 GITC=`git rev-parse --short HEAD`
 release=`date +"%Y.%m.%d"`
 
 echo "Release ${release}. Commit $GITC" > edu.rice.cs.hpcviewer.ui/release.txt
 
+#
+# build the viewer
+#
+echo "=================================="
+echo " Building the viewer"
+echo "=================================="
 mvn clean package
-platform=`uname -m`
-prefix="linux.gtk"
-extension="tgz"
 
-os=`uname`
+# The result should be:
+#
+# Building tar: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-linux.gtk.x86_64.tar.gz
+# Building tar: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-linux.gtk.ppc64le.tar.gz
+# Building zip: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-win32.win32.x86_64.zip
+# Building zip: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-macosx.cocoa.x86_64.zip
 
-if [ "$os" == "Darwin" ]; then
-  prefix="macosx.cocoa"
-  extension="zip"
-fi
+echo "=================================="
+echo " Repackaging the viewer"
+echo "=================================="
 
-package=`ls edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-${prefix}.${platform}*`
+# wrap the generated files into standard hpcviewer product
+#
 
-if [ -e "$package" ]; then
-  echo "package: $package"
-else
-  echo "package ${package} not found"
-  exit
-fi
+# repackage 
+repackage_linux(){
+	prefix=$1
+	platform=$2
+	package=`ls edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-${prefix}.${platform}*`
+	extension="tgz"
 
-mkdir -p tmp/hpcviewer
-cd tmp/hpcviewer
+	[[ -z $package ]] && { echo "$package doesn't exist"; exit 1;  }
 
-tar xzf  ../../$package
-cp ../../scripts/* .
+	mkdir -p tmp/hpcviewer
+	cd tmp/hpcviewer
 
-cd ..
+	tar xzf  ../../$package
+	cp ../../scripts/* .
 
-output="hpcviewer-${release}-${prefix}.${platform}.$extension"
+	cd ..
 
-tar czf ../$output hpcviewer/
+	output="hpcviewer-${release}-${prefix}.${platform}.$extension"
+	tar czf ../$output hpcviewer/
 
-cd ..
+	cd ..
+	ls -l $output
+	rm -rf tmp
+}
 
-ls -l $output
+repackage_nonLinux(){
+	input=$1
+	output=$2
 
-rm -rf tmp
+	[[ -z $input ]] && { echo "$input doesn't exist"; exit 1;  }
+
+	cp $input $output
+	ls -l $output
+}
+
+# repackage linux files
+repackage_linux linux.gtk x86_64
+repackage_linux linux.gtk ppc64le
+
+# copy and rename mac file
+output="hpcviewer-${release}-win32.win32.x86_64.zip"
+input=edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-win32.win32.x86_64.zip
+repackage_nonLinux $input $output
+
+# copy and rename windows file
+output="hpcviewer-${release}-macosx.cocoa.x86_64.zip"
+input=edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-macosx.cocoa.x86_64.zip 
+cp $input $output
+
+echo "=================================="
+echo " Done" 
+echo "=================================="
+

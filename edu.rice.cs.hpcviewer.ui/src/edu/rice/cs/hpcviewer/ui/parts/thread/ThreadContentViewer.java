@@ -9,16 +9,10 @@ import java.util.Map.Entry;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.viewers.TreeViewerColumn;
-import org.eclipse.swt.widgets.TreeColumn;
-
-import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
 import edu.rice.cs.hpc.data.experiment.metric.MetricRaw;
-import edu.rice.cs.hpc.data.experiment.scope.RootScope;
-import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
-import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpc.data.util.ScopeComparator;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
@@ -46,58 +40,16 @@ public class ThreadContentViewer extends TopDownContentViewer
 	
 	public void setData(ThreadViewInput input) {
 
-		final IMetricManager metricMgr = getMetricManager();
-		List<BaseMetric > metrics = metricMgr.getVisibleMetrics();
-		
-		// 1. check if the threads already exist in the view
-		boolean col_exist = false;
-		if (metrics != null && input.getThreads() != null) {
-			for (BaseMetric metric : metrics) {
-				if (metric instanceof MetricRaw) {
-					List<Integer> lt = ((MetricRaw)metric).getThread();
-					if (lt.size() == input.getThreads().size()) {
-						for(Integer i : input.getThreads()) {
-							col_exist = lt.contains(i);
-							if (!col_exist) {
-								break;
-							}
-						}
-					}
-				}
-				if (col_exist) 
-					break;
-			}
-		}
-		
-		// 2. if the column of this thread exist, exit.
-		if (col_exist)
-			return;
-
 		// 3. add the new metrics into the table
 		final Experiment experiment = (Experiment) input.getRootScope().getExperiment();
 		initTableColumns(input, experiment.getMetricRaw());
 
 		// 4. update the table content, including the aggregate experiment
-		RootScope root = createRoot(experiment, input.getThreads());
 		ScopeTreeViewer treeViewer = getViewer();
-		treeViewer.setInput(root);
-		
-		
+		treeViewer.setInput(input.getRootScope());
+				
 		treeViewer.expandToLevel(2, true);
 
-		
-		// insert the first row (header)
-		//treeViewer.insertParentNode(root);
-
-		// pack the columns, either to fit the title of the header, or 
-		// the item in the column
-		
-		final TreeColumn []columns = treeViewer.getTree().getColumns();
-		
-		for (int i=columns.length-1; i>0; i--) {
-			final TreeColumn col = columns[i];
-			col.pack();
-		}
 		updateStatus();
 	}
 	
@@ -117,7 +69,6 @@ public class ThreadContentViewer extends TopDownContentViewer
 		
 		if (treeViewer.getTree().getColumnCount() == 0) {
 	        TreeViewerColumn colTree = createScopeColumn(treeViewer);
-	        //colTree.getColumn().setWidth(ScopeTreeViewer.COLUMN_DEFAULT_WIDTH*2);
 	        
 			ScopeSelectionAdapter selectionAdapter = new ScopeSelectionAdapter(treeViewer, colTree);
 			colTree.getColumn().addSelectionListener(selectionAdapter);
@@ -176,30 +127,6 @@ public class ThreadContentViewer extends TopDownContentViewer
 	}
 
 
-	/****
-	 * Create a thread view root based from cct root. 
-	 * The value of the root will be initialized.
-	 * 
-	 * @param experiment
-	 * @return
-	 */
-	private RootScope createRoot(BaseExperiment experiment, List<Integer> threads) {
-
-		// create and duplicate the configuration
-		RootScope rootCCT    = experiment.getRootScope(RootScopeType.CallingContextTree);
-		RootScope rootThread = (RootScope) rootCCT.duplicate();
-		rootThread.setRootName("Thread View");
-		
-		// duplicate the children
-		for(int i=0; i<rootCCT.getChildCount(); i++)
-		{
-			Scope scope = (Scope) rootCCT.getChildAt(i);
-			rootThread.addSubscope(scope);
-		}
-		rootThread.setThreadData(rootCCT.getThreadData());
-		return rootThread;
-	}
-	
 	@Override
 	protected ViewerType getViewerType() {
 		return ViewerType.INDIVIDUAL;

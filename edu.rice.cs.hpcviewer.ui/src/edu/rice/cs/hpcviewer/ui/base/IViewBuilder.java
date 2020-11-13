@@ -13,6 +13,5 @@ public interface IViewBuilder
 	public void setData(RootScope root);
 	public void dispose();
 	
-	public RootScope 	   getData();
 	public ScopeTreeViewer getTreeViewer();
 }

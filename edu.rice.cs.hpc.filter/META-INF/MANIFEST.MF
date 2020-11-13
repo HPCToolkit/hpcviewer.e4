@@ -20,13 +20,8 @@ Require-Bundle: edu.rice.cs.hpcbase,
  org.eclipse.e4.ui.workbench,
  org.eclipse.e4.ui.di,
  org.eclipse.e4.ui.model.workbench,
- org.slf4j.api
+ org.slf4j.api,
+ org.eclipse.swt,
+ edu.rice.cs.hpc.data
 Bundle-ActivationPolicy: lazy
-Import-Package: edu.rice.cs.hpc.data.experiment,
- edu.rice.cs.hpc.data.experiment.metric,
- edu.rice.cs.hpc.data.experiment.scope,
- edu.rice.cs.hpc.data.experiment.scope.filters,
- edu.rice.cs.hpc.data.experiment.scope.visitors,
- edu.rice.cs.hpc.data.filter,
- edu.rice.cs.hpc.data.util
 Automatic-Module-Name: edu.rice.cs.hpc.filter

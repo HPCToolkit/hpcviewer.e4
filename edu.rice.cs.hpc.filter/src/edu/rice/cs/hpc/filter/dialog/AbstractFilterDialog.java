@@ -3,6 +3,7 @@ package edu.rice.cs.hpc.filter.dialog;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -120,7 +121,26 @@ public abstract class AbstractFilterDialog extends TitleAreaDialog
 			}
 		});
 		
-		createAdditionalButton(groupButtons);
+		final Button btnRegExpression = new Button(groupButtons, SWT.CHECK);
+		btnRegExpression.setText("Regular expression");
+		btnRegExpression.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		btnRegExpression.setSelection(false);
+		btnRegExpression.addSelectionListener( new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				ColumnFilter objFilter = (ColumnFilter) objCheckBoxTable.getFilters()[0];
+				objFilter.useRegularExpression = btnRegExpression.getSelection();
+				
+				// reset the filter
+				objFilter.setKey(objSearchText.getText());
+				objCheckBoxTable.refresh();
+				objCheckBoxTable.setCheckedElements(getCheckedItemsFromGlobalVariable());
+			}
+		} );
+		
+		// ----------------------------------------
+		// to be implemented by child class
+		// ----------------------------------------
+		createAdditionalButton(composite);
 		
 		
 		// set the layout for group filter
@@ -145,7 +165,11 @@ public abstract class AbstractFilterDialog extends TitleAreaDialog
 				objCheckBoxTable.setCheckedElements(getCheckedItemsFromGlobalVariable());
 			}
 		});
-		
+
+		// ----------------------------------------
+		// to be implemented by child class
+		// ----------------------------------------
+		createAdditionalFilter(composite);
 
 		// list of columns (we use table for practical purpose)
 		Table table = new Table(composite, SWT.CHECK | SWT.BORDER);
@@ -186,12 +210,12 @@ public abstract class AbstractFilterDialog extends TitleAreaDialog
 			}
 
 		});
-		this.objCheckBoxTable.setLabelProvider(new StyledFilterLabelProvider());
-		// laksono 2009.03.19: add the filter for this table
+		objCheckBoxTable.setLabelProvider(new StyledFilterLabelProvider());
+
 		ColumnFilter objFilter = new ColumnFilter();
-		this.objCheckBoxTable.addFilter(objFilter);
-		//
-		this.updateContent(); // fill the table
+		objCheckBoxTable.addFilter(objFilter);
+		
+		updateContent(); // fill the table
 		
 		getShell().setText(title);
 		
@@ -295,19 +319,30 @@ public abstract class AbstractFilterDialog extends TitleAreaDialog
 	protected class ColumnFilter extends ViewerFilter {
 		// the key to be matched
 		private String sKeyToMatch;
-		//@Override
+		
+		boolean useRegularExpression = false;
+		Pattern pattern;
+		
+		@Override
 		public boolean select(Viewer viewer, Object parentElement,
 				Object element) {
+			
+			boolean bSelect = true;
+
 			// check if the key exist
 			if ( (sKeyToMatch != null) && (sKeyToMatch.length()>0) ){
 				// check if the element is good
 				assert (element instanceof PropertiesModel);
 				PropertiesModel objProperty = (PropertiesModel) element;
-				// simple string matching between the key and the column name
-				boolean bSelect = objProperty.sTitle.toUpperCase().contains(sKeyToMatch);
-				return bSelect;
+				
+				if (useRegularExpression) {
+					bSelect = pattern.matcher(objProperty.sTitle).matches();
+				} else {
+					// simple string matching between the key and the column name
+					bSelect = objProperty.sTitle.toUpperCase().contains(sKeyToMatch);
+				}
 			}
-			return true;
+			return bSelect;
 		}
 
 		/**
@@ -315,7 +350,14 @@ public abstract class AbstractFilterDialog extends TitleAreaDialog
 		 * @param sKey
 		 */
 		public void setKey ( String sKey ) {
-			sKeyToMatch = sKey.toUpperCase();
+			if (useRegularExpression) {
+				try {
+					pattern = Pattern.compile(sKey, Pattern.CASE_INSENSITIVE);
+				} catch (Exception e) {
+				}
+			} else {
+				sKeyToMatch = sKey.toUpperCase();
+			}
 		}
 	}
 
@@ -323,8 +365,8 @@ public abstract class AbstractFilterDialog extends TitleAreaDialog
 	 * Class to mimic CheckboxTableViewer to accept the update of checked items
 	 *
 	 */
-	protected class ColumnCheckTableViewer extends CheckboxTableViewer {
-
+	protected class ColumnCheckTableViewer extends CheckboxTableViewer 
+	{		
 		/**
 		 * constructor: link to a table
 		 */
@@ -351,8 +393,10 @@ public abstract class AbstractFilterDialog extends TitleAreaDialog
 		 * (non-Javadoc)
 		 * @see org.eclipse.jface.viewers.CheckboxTableViewer#setCheckedElements(java.lang.Object[])
 		 */
+		@Override
 		public void setCheckedElements(Object[] elements) { 
 			assertElementsNotNull(elements);
+			
 			TableItem[] items = getTable().getItems();
 			// collect the items from the displayed table
 			Hashtable<Object, TableItem> set = new Hashtable<Object, TableItem>(items.length * 2 + 1);
@@ -398,4 +442,5 @@ public abstract class AbstractFilterDialog extends TitleAreaDialog
 	
 	
 	abstract protected void createAdditionalButton(Composite parent); 
+	abstract protected void createAdditionalFilter(Composite parent);
 }
