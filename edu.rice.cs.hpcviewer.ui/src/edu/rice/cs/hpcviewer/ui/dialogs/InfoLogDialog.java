@@ -1,7 +1,5 @@
 package edu.rice.cs.hpcviewer.ui.dialogs;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 
@@ -9,6 +7,7 @@ import org.eclipse.core.internal.runtime.Activator;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
@@ -19,9 +18,12 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import edu.rice.cs.hpclog.LogProperty;
+import edu.rice.cs.hpcviewer.ui.util.FileUtility;
 
 public class InfoLogDialog extends Dialog 
 {
+	private Text wText;
+	
 	public InfoLogDialog(Shell shell) {
 		super(shell);
 	}
@@ -36,36 +38,8 @@ public class InfoLogDialog extends Dialog
 	protected Control createDialogArea(Composite parent) {
 		Composite content = (Composite) super.createDialogArea(parent);
 
-		// set the title
-		String text = "Log files used by hpcviewer\n";
-
-		List<String> logUser = LogProperty.getLogFile();
-
-		// get the content for each log files
-		for (String log: logUser) {
-			text += "File: " + log + "\n";
-			try {
-				text += getFileContent(log);
-			} catch (IOException e) {
-				// do nothing
-			}
-		}
-		text += "\n\n";
-		
-		try {
-			Activator activator = Activator.getDefault();
-			if (activator != null) {
-				String locUser = Platform.getLogFileLocation().toOSString(); 
-				text += "File: " + locUser + "\n";
-				text += getFileContent(locUser);				
-			}
-		} catch (IOException e) {
-			// do nothing
-		}
-		text += "\n";
-
-		Text wText = new Text(content, SWT.MULTI | SWT.READ_ONLY | SWT.V_SCROLL | SWT.H_SCROLL);
-		wText.setText(text);
+		wText = new Text(content, SWT.MULTI | SWT.READ_ONLY | SWT.V_SCROLL | SWT.H_SCROLL);
+		fillText();
 		
 		content.setLayout(new FillLayout());
 
@@ -85,29 +59,74 @@ public class InfoLogDialog extends Dialog
 
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
+		createButton(parent, IDialogConstants.HELP_ID, "Clear logs", true);
 		createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
 	}
 	
-	/***
-	 * Read the content of the file
-	 * @param filename
-	 * @return String
-	 * @throws IOException
-	 */
-	private String getFileContent(String filename) throws IOException {
-		File file = new File(filename);
-		if (!file.canRead())
-			return "";
-		
-		FileInputStream fis = new FileInputStream(file);
-		byte[] data = new byte[(int) file.length()];
-		fis.read(data);
-		
-		String content = new String(data, "UTF-8");				
-		fis.close();
-		
-		return content;
+	
+	@Override
+	protected void buttonPressed(int buttonId) {
+		if (buttonId == IDialogConstants.HELP_ID) {
+			if (!MessageDialog.openConfirm(getShell(), "Removing log files", "Are you sure to clear log files?")) {
+				return;
+			}
+			List<String> logUser = LogProperty.getLogFile();
+
+			// get the content for each log files
+			for (String log: logUser) {
+				try {
+					FileUtility.clearFileContent(log);
+				} catch (IOException e) {
+				}
+			}
+			Activator activator = Activator.getDefault();
+			if (activator != null) {
+				String locUser = Platform.getLogFileLocation().toOSString(); 
+				try {
+					FileUtility.clearFileContent(locUser);
+				} catch (IOException e) {
+				}
+			}
+			fillText();
+			
+		} else {
+			super.buttonPressed(buttonId);
+		}
 	}
+	
+	private void fillText() {
+
+		// set the title
+		String text = "Log files used by hpcviewer\n";
+
+		List<String> logUser = LogProperty.getLogFile();
+
+		// get the content for each log files
+		for (String log: logUser) {
+			text += "File: " + log + "\n";
+			try {
+				text += FileUtility.getFileContent(log);
+			} catch (IOException e) {
+				// do nothing
+			}
+		}
+		text += "\n\n";
+		
+		try {
+			Activator activator = Activator.getDefault();
+			if (activator != null) {
+				String locUser = Platform.getLogFileLocation().toOSString(); 
+				text += "File: " + locUser + "\n";
+				text += FileUtility.getFileContent(locUser);				
+			}
+		} catch (IOException e) {
+			// do nothing
+		}
+		text += "\n";
+		wText.setText(text);
+
+	}
+	
 	
 	static public void main(String argv[]) {
 		Display d = new Display();
