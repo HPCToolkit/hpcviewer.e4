@@ -83,15 +83,15 @@ repackage_nonLinux(){
 repackage_linux linux.gtk x86_64
 repackage_linux linux.gtk ppc64le
 
-# copy and rename mac file
+# copy and rename windows package
 output="hpcviewer-${release}-win32.win32.x86_64.zip"
 input=edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-win32.win32.x86_64.zip
 repackage_nonLinux $input $output
 
-# copy and rename windows file
+# copy and rename mac package
 output="hpcviewer-${release}-macosx.cocoa.x86_64.zip"
 input=edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-macosx.cocoa.x86_64.zip 
-cp $input $output
+repackage_nonLinux $input $output
 
 echo "=================================="
 echo " Done" 

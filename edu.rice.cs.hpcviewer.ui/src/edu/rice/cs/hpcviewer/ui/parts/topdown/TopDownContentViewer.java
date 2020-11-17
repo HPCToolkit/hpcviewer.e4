@@ -26,6 +26,7 @@ import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
+import edu.rice.cs.hpc.data.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpc.filter.dialog.FilterDataItem;
@@ -172,10 +173,30 @@ public class TopDownContentViewer extends AbstractViewBuilder
 			
 			@Override
 			public Object[] getChildren(Object node) {
-				if (node instanceof Scope) {
-					return ((Scope)node).getChildren();
+				if (node == null || !(node instanceof Scope)) {
+					return null;
 				}
-				return null;
+				if (node instanceof RootScope) {
+					// TODO: hack to remove nodes that are not part of top-down view
+					// We'll return the children of the root except the "to-be-elided" flaq nodes
+					// We should handle this early during the parsing, but unfortunately it will
+					// cause problems with the trace view since we share the tree.
+					
+					Object []children = ((RootScope)node).getChildren();
+					ArrayList<Object> listChildren = new ArrayList<>(children.length);
+					
+					for(Object child: children) {
+						if (child instanceof ProcedureScope) {
+							if (((ProcedureScope)child).toBeElided()) {
+								// this node shouldn't appear in the top-down view
+								continue;
+							}
+						}
+						listChildren.add(child);
+					}
+					return listChildren.toArray();
+				}
+				return ((Scope)node).getChildren();
 			}
 		};
 		return contentProvider;
