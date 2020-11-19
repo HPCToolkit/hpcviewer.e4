@@ -254,9 +254,8 @@ public class DataSummary extends DataCommon
 			// read the cct context
 			// -------------------------------------------
 			
-			long positionCCT = info.offset   + 
-					   		   info.num_vals * METRIC_VALUE_SIZE;
-			int numBytesCCT  = (info.num_nz_contexts+1) * CCT_RECORD_SIZE;
+			long positionCCT = info.offset + info.num_vals * METRIC_VALUE_SIZE;
+			int numBytesCCT  = (info.num_nz_contexts+1)    * CCT_RECORD_SIZE;
 			
 			FileChannel channel = file.getChannel();
 			byte []arrayBytes   = new byte[numBytesCCT];
@@ -269,7 +268,7 @@ public class DataSummary extends DataCommon
 			profileNumberCache = profileNum;
 		}
 
-		long []indexes = newtonSearch(cct_id, 0, 1+info.num_nz_contexts, byteBufferCache);
+		long []indexes = newtonSearch(cct_id, 0, info.num_nz_contexts, byteBufferCache);
 
 		if (indexes == null)
 			// the cct id is not found or the cct has no metrics. Should we return null or empty list?
@@ -688,7 +687,8 @@ public class DataSummary extends DataCommon
 	 * @return int
 	 */
 	private int getCCTIndex(ByteBuffer buffer, int position) {
-		buffer.position(position * CCT_RECORD_SIZE);
+		final int adjustedPosition = position * CCT_RECORD_SIZE;
+		buffer.position(adjustedPosition);
 		return buffer.getInt();
 	}
 	
@@ -714,7 +714,7 @@ public class DataSummary extends DataCommon
 	 */
 	private long[] newtonSearch(int cct, int first, int last, ByteBuffer buffer) {
 		int left_index  = first;
-		int right_index = last - CCT_RECORD_SIZE;
+		int right_index = last - 1;
 		
 		int left_cct  = getCCTIndex(buffer, left_index);
 		int right_cct = getCCTIndex(buffer, right_index);
