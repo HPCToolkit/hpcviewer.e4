@@ -20,7 +20,7 @@ import edu.rice.cs.hpc.data.util.LargeByteBuffer;
  *******************************************************************************/
 public class DataTrace extends DataCommon 
 {
-	private final static String HEADER = "HPCPROF-tracedb___";
+	private final static String HEADER = "HPCPROF-tracedb_";
 	private final static int TRACE_HDR_RECORD_SIZE = 22;
 	private final static int TRACE_RECORD_SIZE = 8 + 4;
 	
@@ -68,9 +68,11 @@ public class DataTrace extends DataCommon
 	 * (non-Javadoc)
 	 * @see edu.rice.cs.hpc.data.db.DataCommon#readNextHeader(java.nio.channels.FileChannel)
 	 */
-	protected boolean readNextHeader(FileChannel input)
+	protected boolean readNextHeader(FileChannel input, DataSection []sections)
 			throws IOException
 	{
+		input.position(sections[0].offset);
+		
 		// -------------------------------------------------
 		// reading the next 256 byte header
 		// -------------------------------------------------
@@ -101,6 +103,9 @@ public class DataTrace extends DataCommon
 		}
 		buffer.clear();
 		
+		long nextPosition = sections[0].offset + getMultiplyOf8( sections[0].size);
+		input.position(nextPosition);
+
 		return true;
 	}
 

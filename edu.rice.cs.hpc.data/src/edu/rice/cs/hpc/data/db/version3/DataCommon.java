@@ -19,11 +19,17 @@ import java.nio.channels.FileChannel;
  ***************************************************/
 abstract public class DataCommon 
 {
-	public  final static int HEADER_COMMON_SIZE = 23;
-	private final static int MESSAGE_SIZE 		= 18;
+	public  final static int HEADER_COMMON_SIZE = 24;
+	private final static int MESSAGE_SIZE 		= 16;
 	
 	protected long numItems;
-	protected int  version;
+	protected short numSections;
+	
+	protected byte versionMajor;
+	protected byte versionMinor;
+	
+	protected DataSection []sections;
+	
 	protected String filename;
 	
 	private FileInputStream fis;
@@ -50,11 +56,24 @@ abstract public class DataCommon
 			// read the common header
 			readHeader(file, fis, buffer);
 			
-			channel.position(HEADER_COMMON_SIZE);
+			// read the section headers
+			numSections = (short) (numSections - 2);
+			buffer.clear();
+			buffer = ByteBuffer.allocate(numSections * 16);
+			numBytes = channel.read(buffer);
+			buffer.rewind();
+			
+			sections = new DataSection[numSections];
+			for(int i=0; i<numSections; i++) {
+				sections[i] = new DataSection();
+				sections[i].size   = buffer.getLong();
+				sections[i].offset = buffer.getLong();
+			}
+			
 			// -------------------------------------------------------------
 			// Read the next header (implemented by derived class)
 			// -------------------------------------------------------------
-			if ( readNextHeader(channel) ) 
+			if ( readNextHeader(channel, sections) ) 
 			{
 				// the implementer can perform other operations
 			}
@@ -68,7 +87,7 @@ abstract public class DataCommon
 	public void printInfo( PrintStream out)
 	{
 		out.println("Filename: "  + filename);
-		out.println("Version: "   + version);
+		out.println("Version: "   + versionMajor);
 		out.println("Num items: " + numItems);
 	}
 	
@@ -114,7 +133,8 @@ abstract public class DataCommon
 		// -------------------------------------------------------------
 		// read the version
 		// -------------------------------------------------------------
-		version = buffer.get();
+		versionMajor = buffer.get();
+		versionMinor = buffer.get();
 
 		// -------------------------------------------------------------
 		// read the number of items
@@ -123,9 +143,26 @@ abstract public class DataCommon
 		buffer.get(itemBytes, 0, 4);
 		ByteBuffer byteBuffer = ByteBuffer.wrap(itemBytes);
 		numItems = byteBuffer.getInt();
+		
+		// -------------------------------------------------------------
+		// read the number of sections
+		// -------------------------------------------------------------
+		final byte []sectionBytes = new byte[2];
+		buffer.get(sectionBytes);
+		ByteBuffer secBuffer = ByteBuffer.wrap(sectionBytes);
+		numSections = secBuffer.getShort();
 	}
+	
+	protected static long getMultiplyOf(long v, int mask) {
+		return (v + mask) & ~mask;
+	}
+	
+	protected static long getMultiplyOf8(long v) {
+		return getMultiplyOf(v, 7);
+	}
+	
 	
 	protected abstract boolean isTypeFormatCorrect(long type);
 	protected abstract boolean isFileHeaderCorrect(String header);
-	protected abstract boolean readNextHeader(FileChannel input) throws IOException;
+	protected abstract boolean readNextHeader(FileChannel input, DataSection []sections) throws IOException;
 }
