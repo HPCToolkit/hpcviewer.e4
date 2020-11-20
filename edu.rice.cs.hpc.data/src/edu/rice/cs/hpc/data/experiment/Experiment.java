@@ -134,12 +134,10 @@ public class Experiment extends BaseExperimentWithMetrics
 	{
 		RootScope callersViewRootScope = new RootScope(this, Experiment.TITLE_BOTTOM_UP_VIEW, RootScopeType.CallerTree);
 		beginScope(callersViewRootScope);
-		
-		EmptyMetricValuePropagationFilter filter = new EmptyMetricValuePropagationFilter();
 
 		// bug fix 2008.10.21 : we don't need to recompute the aggregate metrics here. Just copy it from the CCT
 		//	This will solve the problem where there is only nested loops in the programs
-		callersViewRootScope.accumulateMetrics(callingContextViewRootScope, filter, this.getMetricCount());
+		callersViewRootScope.copyMetrics(callingContextViewRootScope, 0);
 		
 		return callersViewRootScope;
 	}
@@ -179,9 +177,8 @@ public class Experiment extends BaseExperimentWithMetrics
 
 		// bug fix 2008.10.21 : we don't need to recompute the aggregate metrics here. Just copy it from the CCT
 		//	This will solve the problem where there is only nested loops in the programs
-		EmptyMetricValuePropagationFilter filter = new EmptyMetricValuePropagationFilter();
-		flatRootScope.accumulateMetrics(cctRootScope, filter, getMetricCount());
-
+		flatRootScope.copyMetrics(cctRootScope, 0);
+		
 		return flatRootScope;
 	}
 	
