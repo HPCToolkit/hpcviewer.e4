@@ -91,7 +91,6 @@ public class BaseExperimentBuilder extends Builder {
 	
 	private HashMap<Integer /*id*/, Integer /*status*/>	  statusProcedureMap;
 
-	private final Map<String, Object>   mapProcNameToCount;
 	private final Map<Integer, CallPath> mapCpidToCallpath;
 	
 	private int max_depth = 0;
@@ -131,7 +130,6 @@ public class BaseExperimentBuilder extends Builder {
 		hashSourceFileTable = new HashMap<Integer, SourceFile>();
 		statusProcedureMap  = new HashMap<Integer, Integer>();
 		
-		mapProcNameToCount  = new HashMap<>();
 		mapCpidToCallpath   = new HashMap<>();
 		
 		// parse action data structures
@@ -619,8 +617,6 @@ public class BaseExperimentBuilder extends Builder {
 				} else if(attributes[i].equals(ATTRIBUTE_NAME)) {
 					// new database format: n is the flat ID of the procedure
 					procName = this.getProcedureName(values[i]);
-					
-					mapProcNameToCount.put(procName, null);
 
 				} else if(attributes[i].equals(ATTRIBUTE_LINE)) {
 					// line number (or range)
@@ -998,7 +994,6 @@ public class BaseExperimentBuilder extends Builder {
 		this.endScope();
 		experiment.setMaxDepth(max_depth);
 		experiment.setScopeMap(mapCpidToCallpath);
-		experiment.setMapProcedure(mapProcNameToCount);
 	}
 
 

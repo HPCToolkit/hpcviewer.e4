@@ -92,7 +92,7 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 	 */
 	private void init(IProgressMonitor statusMgr, IFileDB fileDB) throws IOException {
 		
-		final TraceAttribute trAttribute = exp.getTraceAttribute();		
+		final TraceAttribute trAttribute = (TraceAttribute) exp.getTraceAttribute();		
 		final int version = exp.getMajorVersion();
 		
 		if (version == 1 || version == Constants.EXPERIMENT_DENSED_VERSION)
@@ -161,7 +161,8 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 	public IFilteredData createFilteredBaseData() {
 		try{
 			return new FilteredBaseData(fileDB, 
-					exp.getTraceAttribute().dbHeaderSize, TraceAttribute.DEFAULT_RECORD_SIZE);
+										((TraceAttribute)exp.getTraceAttribute()).dbHeaderSize, 
+										TraceAttribute.DEFAULT_RECORD_SIZE);
 		}
 		catch (Exception e){
 			e.printStackTrace();

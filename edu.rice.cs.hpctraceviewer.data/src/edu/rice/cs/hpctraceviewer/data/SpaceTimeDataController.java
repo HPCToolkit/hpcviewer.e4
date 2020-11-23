@@ -44,11 +44,6 @@ public abstract class SpaceTimeDataController
 	final protected BaseExperiment  exp;
 
 	protected ImageTraceAttributes attributes;
-	/**
-	 * The minimum beginning and maximum ending time stamp across all traces (in
-	 * microseconds)).
-	 */
-	protected long maxEndTime, minBegTime;
 	
 	protected ColorTable colorTable = null;
 	protected IBaseData dataTrace = null;
@@ -123,47 +118,45 @@ public abstract class SpaceTimeDataController
 	}
 	
 	
+	/*************************************************************************
+	 * Reser user-defined colors
+	 *************************************************************************/
 	public void resetPredefinedColor()
 	{
 		colorTable.resetPredefinedColor();
 	}
 	
-	/******
+	/*************************************************************************
 	 * Initialize the object
 	 * 
 	 * @param _window
 	 * @throws Exception 
-	 ******/
+	 *************************************************************************/
 	private void init(IEclipseContext context, BaseExperiment exp) 
 			throws InvalExperimentException 
 	{	
 		this.context = context;
 		timelineService = (ProcessTimelineService) context.get(Constants.CONTEXT_TIMELINE);
 		
-		final Display display = Display.getDefault();
-		display.syncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				
-				// initialize color table
-				colorTable = new ColorTable();
-				
-				// attributes initialization
-				attributes 	 = new ImageTraceAttributes();
-
-			}			
-		});
-		final TraceAttribute trAttribute = exp.getTraceAttribute();
+		// attributes initialization
+		attributes 	 = new ImageTraceAttributes();
 		
-		if (trAttribute == null) {
-			throw new InvalExperimentException("Database does not contain traces: " + exp.getDefaultDirectory());
-		}
-		minBegTime = trAttribute.dbTimeMin;
-		maxEndTime = trAttribute.dbTimeMax;
+		final Display display = Display.getDefault();
+		display.syncExec( ()-> {
+			
+			// initialize color table
+			// has to be inside UI thread since we create colors
+			colorTable = new ColorTable();
+		});
 	}
 
 	
+	/*************************************************************************
+	 * Check if the current configuration is the home area.
+	 * I don't know why we need this. Perhaps the author can describe better. 
+	 * 
+	 * @return true if it's home
+	 *************************************************************************/
 	public boolean isHomeView() {
 		
 		if (attributes.getProcessBegin() == 0 && attributes.getProcessEnd() == getTotalTraceCount() &&
@@ -173,30 +166,42 @@ public abstract class SpaceTimeDataController
 		return false;
 	}
 
-	
+
+	/*************************************************************************
+	 * Get the max depth of this traces
+	 * @return int
+	 *************************************************************************/
 	public int getMaxDepth() 
 	{
 		return exp.getMaxDepth();
 	}
 	
 	
+	/*************************************************************************
+	 * Get the default depth. Currently it's the max depth times .3
+	 * @return int
+	 *************************************************************************/
 	public int getDefaultDepth() {
 		return exp.getMaxDepth()/3;
 	}
 	
 	
+	/*************************************************************************
+	 * Get the position of the current selected process
+	 * @return int
+	 *************************************************************************/
 	private int getCurrentlySelectedProcess()
 	{
 		return attributes.getPosition().process;
 	}
 	
-	/**
+	/*************************************************************************
 	 * {@link getCurrentlySelectedProcess()} returns something on [begProcess,
 	 * endProcess-1]. We need to map that to something on [0, numTracesShown -
 	 * 1]. We use a simple linear mapping:
 	 * begProcess    -> 0,
 	 * endProcess-1  -> numTracesShown-1
-	 */
+	 *************************************************************************/
 	public int computeScaledProcess() {
 		int numTracesShown = Math.min(attributes.getProcessInterval(), attributes.getPixelVertical());
 		int selectedProc = getCurrentlySelectedProcess();
@@ -208,11 +213,11 @@ public abstract class SpaceTimeDataController
 	}
 
 
-	/******
+	/*************************************************************************
 	 * get the depth trace of the current "selected" process
 	 *  
 	 * @return ProcessTimeline
-	 */
+	 *************************************************************************/
 	public ProcessTimeline getCurrentDepthTrace() {
 		int scaledDTProcess = computeScaledProcess();
 		// TODO
@@ -220,6 +225,10 @@ public abstract class SpaceTimeDataController
 	}
 
 	
+	/*************************************************************************
+	 * Get the file base data of this trace
+	 * @return {@code IBaseData}
+	 *************************************************************************/
 	public IBaseData getBaseData(){
 		return dataTrace;
 	}
@@ -271,7 +280,7 @@ public abstract class SpaceTimeDataController
 
 
 	public int getHeaderSize() {
-		final int headerSize = exp.getTraceAttribute().dbHeaderSize;
+		final int headerSize = ((TraceAttribute)exp.getTraceAttribute()).dbHeaderSize;
 		return headerSize;
 	}
 
@@ -280,22 +289,30 @@ public abstract class SpaceTimeDataController
 	 * ProcessTimeline) of the longest ProcessTimeline.
 	 ************************************************************************/
 	public long getTimeWidth() {
-		return maxEndTime - minBegTime;
+		return getMaxEndTime() - getMinBegTime();
 	}
 
+	/*************************************************************************
+	 * Get the time end of the trace
+	 * @return long
+	 *************************************************************************/
 	public long getMaxEndTime() {
-		return maxEndTime;
+		return exp.getTraceAttribute().dbTimeMax;
 	}
 
+	/*************************************************************************
+	 * Get the start time of the trace
+	 * @return long
+	 *************************************************************************/
 	public long getMinBegTime() {
-		return minBegTime;
+		return exp.getTraceAttribute().dbTimeMin;
 	}
 
-	/*****
+	/*************************************************************************
 	 * return the unit of the current database
 	 * 
 	 * @return {@link ImageTraceAttributes.TimeUnit}
-	 *****/
+	 *************************************************************************/
 	public TimeUnit getTimeUnit() {
 		int version = exp.getMajorVersion();
 		
@@ -324,19 +341,27 @@ public abstract class SpaceTimeDataController
 	}
 	
 
-	
+	/*************************************************************************
+	 * get the color mapping table
+	 * @return
+	 *************************************************************************/
 	public ColorTable getColorTable() {
 		return colorTable;
 	}
 
+	
+	/*************************************************************************
+	 * Dispose allocated resoruces.
+	 * All callers HAS TO call this methid when the resource is not needed anymore
+	 *************************************************************************/
 	public void dispose() {
 		colorTable.dispose();
 	}
 
-	/**
+	/*************************************************************************
 	 * changing the trace data, caller needs to make sure to refresh the views
 	 * @param filteredBaseData
-	 */
+	 *************************************************************************/
 	public void setBaseData(IFilteredData filteredBaseData) {
 		dataTrace = filteredBaseData;
 
