@@ -137,7 +137,7 @@ public class Experiment extends BaseExperimentWithMetrics
 
 		// bug fix 2008.10.21 : we don't need to recompute the aggregate metrics here. Just copy it from the CCT
 		//	This will solve the problem where there is only nested loops in the programs
-		callersViewRootScope.copyMetrics(callingContextViewRootScope, 0);
+		callingContextViewRootScope.copyMetrics(callersViewRootScope, 0);
 		
 		return callersViewRootScope;
 	}
@@ -177,7 +177,7 @@ public class Experiment extends BaseExperimentWithMetrics
 
 		// bug fix 2008.10.21 : we don't need to recompute the aggregate metrics here. Just copy it from the CCT
 		//	This will solve the problem where there is only nested loops in the programs
-		flatRootScope.copyMetrics(cctRootScope, 0);
+		cctRootScope.copyMetrics(flatRootScope, 0);
 		
 		return flatRootScope;
 	}
