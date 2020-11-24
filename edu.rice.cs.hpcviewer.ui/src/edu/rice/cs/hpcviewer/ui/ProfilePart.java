@@ -2,18 +2,16 @@
 package edu.rice.cs.hpcviewer.ui;
 
 import javax.inject.Inject;
-import javax.inject.Named;
-
 import javax.annotation.PostConstruct;
 import org.eclipse.swt.widgets.Composite;
 import javax.annotation.PreDestroy;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.di.Focus;
+import org.eclipse.e4.ui.di.UISynchronize;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.services.EMenuService;
-import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.layout.GridLayout;
@@ -25,8 +23,6 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
@@ -54,11 +50,15 @@ import edu.rice.cs.hpcviewer.ui.tabItems.AbstractViewItem;
 public class ProfilePart implements IProfilePart
 {
 	public static final String ID = "edu.rice.cs.hpcviewer.ui.partdescriptor.profile";
+	private static final String PREFIX_TITLE = "Profile: ";
 	
 	@Inject	protected EPartService  partService;
 	@Inject protected EModelService modelService;
 	@Inject protected MApplication  app;
 	@Inject protected IEventBroker  eventBroker;
+	@Inject protected UISynchronize sync;
+
+	
 	protected EMenuService menuService;
 	
 	@Inject protected DatabaseCollection databaseAddOn;
@@ -72,17 +72,16 @@ public class ProfilePart implements IProfilePart
 	private AbstractViewItem []views;
 
 	private CTabFolder tabFolderTop, tabFolderBottom;
-	private Shell shell;
+
 	
 	@Inject
 	public ProfilePart() {
 	}
 	
 	@PostConstruct
-	public void postConstruct(Composite parent, EMenuService menuService, @Named(IServiceConstants.ACTIVE_SHELL) Shell shell) {
+	public void postConstruct(Composite parent, EMenuService menuService) {
 		
 		this.menuService = menuService;
-		this.shell = shell;
 		
 		parent.setLayout(new FillLayout(SWT.HORIZONTAL));
 
@@ -224,11 +223,7 @@ public class ProfilePart implements IProfilePart
 		if (sync) {
 
 			RunViewCreation createView = new RunViewCreation(view, composite, input);
-			Display display = shell.getDisplay();
-			BusyIndicator.showWhile(display, createView);
-			
-			tabFolderBottom.setSelection(view);
-			tabFolderBottom.setFocus();
+			BusyIndicator.showWhile(composite.getDisplay(), createView);
 			
 		} else {
 			// background renderer
@@ -245,6 +240,12 @@ public class ProfilePart implements IProfilePart
 	
 	@Focus
 	public void onFocus() {
+		// force the focus to the table tab
+		// On Mac and Linux, we need to use asyncExec to delay the focus since
+		// the UI thread may not be ready when the focus arrives.
+		sync.asyncExec(() -> {
+			tabFolderBottom.setFocus();
+		});
 	}
 
 	@Override
@@ -260,8 +261,7 @@ public class ProfilePart implements IProfilePart
 		Experiment experiment = (Experiment) input;
 		this.experiment = experiment;
 		
-		part.setLabel("Profile: " + experiment.getName());
-		//part.setElementId(ElementIdManager.getElementId(experiment));
+		part.setLabel(PREFIX_TITLE + experiment.getName());
 		part.setTooltip(experiment.getDefaultDirectory().getAbsolutePath());
 		
 		Object []roots = experiment.getRootScopeChildren();
@@ -293,11 +293,11 @@ public class ProfilePart implements IProfilePart
 	
 	
 	
-	/**********
+	/**********************************************
 	 * 
 	 * Thread to render a view using background task
 	 *
-	 */
+	 **********************************************/
 	static private class RunViewCreation implements Runnable 
 	{
 		final private AbstractBaseViewItem view;

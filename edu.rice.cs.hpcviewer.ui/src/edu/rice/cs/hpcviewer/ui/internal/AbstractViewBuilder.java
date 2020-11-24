@@ -35,7 +35,6 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
-import org.eclipse.swt.widgets.TreeItem;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
@@ -275,16 +274,6 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 		
 		// TOOO: populate the table: this can take really long time !
 		treeViewer.setInput(rootTable);
-		
-		treeViewer.expandToLevel(2, true);
-		
-		TreeItem topItem = treeViewer.getTree().getTopItem();
-		if (topItem != null) {
-			TreeItem []childItems = topItem.getItems();
-			if (childItems != null && childItems.length>0) {
-				treeViewer.getTree().setSelection(childItems[0]);
-			}
-		}
 
 		// synchronize hide/show columns with other views that already visible
 		// since this view is just created, we need to ensure the columns hide/show
@@ -296,6 +285,8 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 			boolean []status = (boolean[]) dataEvent.data;
 			treeViewer.setColumnsStatus(getMetricManager(), status);
 		}
+		
+		treeViewer.initSelection();
 
 		// enable/disable action buttons
 		// this has to be in the last statement

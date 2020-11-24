@@ -7,8 +7,6 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
-import org.eclipse.swt.widgets.TreeItem;
-
 import edu.rice.cs.hpc.data.util.ScopeComparator;
 import edu.rice.cs.hpcviewer.ui.base.ISortContentProvider;
 
@@ -60,10 +58,7 @@ public class ScopeSelectionAdapter extends SelectionAdapter
 		// ----------------
 		// post-sorting 
 		// ----------------
-		
-		// scroll to the top. This works on mac, but doesn't work on Linux/GTK
-		TreeItem item = tree.getItem(0);
-		tree.showItem(item);
+		((ScopeTreeViewer)viewer).initSelection();
 	}
 	
 	/**

@@ -16,6 +16,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.swt.widgets.TreeItem;
+
 import java.util.List;
 
 import org.eclipse.jface.layout.TreeColumnLayout;
@@ -282,6 +284,27 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 			final ColumnPixelData data = new ColumnPixelData(colWidth, true, false);
 			((TreeColumnLayout)layout).setColumnData(col, data);
 		}
+    }
+    
+    
+    /********
+     * Initialize the table selection by selecting the second row of the table, and
+     * set the focus to the table
+     */
+    public void initSelection() {
+		
+		// scroll to the top. This works on mac, but doesn't work on Linux/GTK
+		getTree().getDisplay().asyncExec(() -> {
+			expandToLevel(2);
+			
+			Tree tree = getTree();
+			try {
+				TreeItem item = tree.getTopItem().getItem(0);
+				tree.showItem(item);
+				tree.select(item);
+			} catch (Exception e) {
+			}
+		});
     }
     
     
