@@ -34,6 +34,7 @@ import edu.rice.cs.hpc.data.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
+import edu.rice.cs.hpc.data.util.OSValidator;
 import edu.rice.cs.hpc.data.util.ScopeComparator;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
@@ -83,9 +84,20 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		ColumnViewerToolTipSupport.enableFor(this, ToolTip.NO_RECREATE);
 		
 		GC gc = new GC(getControl());
+		
 		gc.setFont(FontManager.getMetricFont());
-		Point extent = gc.stringExtent(TEXT_METRIC_COLUMN);
+		String text = TEXT_METRIC_COLUMN;
+		if (OSValidator.isWindows()) {
+			
+			// FIXME: ugly hack to add some spaces for Windows
+			// Somehow, Windows 10 doesn't allow to squeeze the text inside the table
+			// we have to give them some spaces (2 spaces in my case).
+			// A temporary fix for issue #37
+			text += "xx";
+		}
+		Point extent = gc.stringExtent(text);
 		metricColumnWidth = extent.x;
+		
 		gc.dispose();
 	}
 	
