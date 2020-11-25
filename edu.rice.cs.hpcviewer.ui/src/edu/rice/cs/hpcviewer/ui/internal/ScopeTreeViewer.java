@@ -312,7 +312,10 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 			
 			// issue #36
 			// Linux/GTK only: if a user already select an item, we shouldn't expand it
-			if (tree.getSelectionCount() > 0) {
+			//
+			// issue #34 (macOS only): we need to refresh and expand the table after sorting
+			// otherwise the tree items are not visible
+			if (!OSValidator.isMac() && tree.getSelectionCount() > 0) {
 				return;
 			}
 			expandToLevel(2);
