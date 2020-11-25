@@ -61,7 +61,7 @@ public class CallPath
 		final Vector<String> functionNames = new Vector<String>();
 		Scope currentScope = leafScope;
 		int depth = maxDepth;
-		while(depth > 0)
+		while(depth > 0 && currentScope != null)
 		{
 			if ((currentScope instanceof CallSiteScope) || (currentScope instanceof ProcedureScope))
 			{

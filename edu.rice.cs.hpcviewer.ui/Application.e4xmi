@@ -11,53 +11,14 @@
       </children>
     </children>
     <mainMenu xmi:id="_7ohBoI7qEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.menu.main">
-      <children xsi:type="menu:Menu" xmi:id="_9ABnII7qEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.menu.file" label="File" mnemonics="F">
-        <children xsi:type="menu:HandledMenuItem" xmi:id="_DKiisLV5EeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.new" label="New window" tooltip="Open a new window" mnemonics="N" command="_FHXw4LV7EeqkhNpo_ZhE2A"/>
-        <children xsi:type="menu:Menu" xmi:id="_zi6FcBV-Eeu93quAGmdtiQ" elementId="edu.rice.cs.hpcviewer.ui.menu.openDatabase" label="Open database" mnemonics="O">
-          <children xsi:type="menu:HandledMenuItem" xmi:id="_DmbW8BWAEeu93quAGmdtiQ" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.openOther" label="Other..." tooltip="Open a database. If the application has already opened databases, it will replace them with the new one" mnemonics="O" command="_U14sMI7vEeqBPbXbG7_Dzw"/>
-          <children xsi:type="menu:MenuSeparator" xmi:id="_R4XLgBWAEeu93quAGmdtiQ" elementId="edu.rice.cs.hpcviewer.ui.menuseparator.0"/>
-          <children xsi:type="menu:DynamicMenuContribution" xmi:id="_7R6_kBV-Eeu93quAGmdtiQ" elementId="edu.rice.cs.hpcviewer.ui.dynamicmenucontribution.openRecent" label="Recent databases" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.FileOpenRecentDatabase"/>
-        </children>
-        <children xsi:type="menu:Menu" xmi:id="_gNCVkBWBEeu93quAGmdtiQ" elementId="edu.rice.cs.hpcviewer.ui.menu.addDatabase" label="Add database" mnemonics="A">
-          <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_nlvDoBWQEeu93quAGmdtiQ" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseOnlyOneExist"/>
-          <children xsi:type="menu:HandledMenuItem" xmi:id="_kedHcBWBEeu93quAGmdtiQ" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.addDatabase" label="Other..." tooltip="Open another database side-by-side. " mnemonics="O" command="_cPW0II7vEeqBPbXbG7_Dzw"/>
-          <children xsi:type="menu:MenuSeparator" xmi:id="_sdgBoBWBEeu93quAGmdtiQ" elementId="edu.rice.cs.hpcviewer.ui.menuseparator.2"/>
-          <children xsi:type="menu:DynamicMenuContribution" xmi:id="_tEkBoBWBEeu93quAGmdtiQ" elementId="edu.rice.cs.hpcviewer.ui.dynamicmenucontribution.addRecent" label="Recent databases" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.FileAddRecentDatabase"/>
-        </children>
-        <children xsi:type="menu:Menu" xmi:id="_cySXMLJ_EeqbOrxjpZSIwg" elementId="edu.rice.cs.hpcviewer.ui.menu.fileMerge" label="Merge databases" tooltip="Merge two opened databases. " mnemonics="M">
-          <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_5ij8ILaGEeqkhNpo_ZhE2A" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseMergeExpression"/>
-          <children xsi:type="menu:HandledMenuItem" xmi:id="_vYBpcLJiEeqfDrDyyKphUQ" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.merge" label="Merge top-down views" tooltip="Merge two top-down databases " mnemonics="M" command="_sRvw0LJpEeqfDrDyyKphUQ">
-            <parameters xmi:id="_oMnHcLJpEeqfDrDyyKphUQ" elementId="edu.rice.cs.hpcviewer.ui.parameter.topdown" name="edu.rice.cs.hpcviewer.ui.commandparameter.merge" value="topdown"/>
-          </children>
-          <children xsi:type="menu:HandledMenuItem" xmi:id="_ri25ULaBEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.mergeFlat" label="Merge flat views" tooltip="Merge two flat trees" mnemonics="f" command="_sRvw0LJpEeqfDrDyyKphUQ">
-            <parameters xmi:id="_23_lkLaBEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.parameter.flat" name="edu.rice.cs.hpcviewer.ui.commandparameter.merge" value="flat"/>
-          </children>
-        </children>
-        <children xsi:type="menu:Menu" xmi:id="_hdjbsLYdEeqhffqM1zV0iA" elementId="edu.rice.cs.hpcviewer.ui.menu.close" label="Close" mnemonics="C">
-          <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_wPIZoLYdEeqhffqM1zV0iA" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseCloseDefinition"/>
-          <children xsi:type="menu:DynamicMenuContribution" xmi:id="_kPFvMLYdEeqhffqM1zV0iA" elementId="edu.rice.cs.hpcviewer.ui.dynamicmenucontribution.0" label="Close" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.FileCloseDatabase"/>
-        </children>
-        <children xsi:type="menu:MenuSeparator" xmi:id="_VTVaAI7rEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.menuseparator.1"/>
-        <children xsi:type="menu:HandledMenuItem" xmi:id="_Mbk6ILpkEeqjBNbAJCPSRg" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.preferences" label="Preferences" tooltip="Show the preferences of the application" mnemonics="P" command="_svnesLpjEeqjBNbAJCPSRg"/>
-        <children xsi:type="menu:HandledMenuItem" xmi:id="_LbRy8I7vEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.exit" label="Exit" tooltip="Exit the application" mnemonics="x" command="_wGhBQI7uEeqBPbXbG7_Dzw"/>
-      </children>
+      <children xsi:type="menu:Menu" xmi:id="_9ABnII7qEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.menu.file" label="File" mnemonics="F"/>
       <children xsi:type="menu:Menu" xmi:id="_E9WX8KwUEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.menu.view" label="View" mnemonics="V">
-        <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_ewJnoKwUEeq2aaPo7yBcWg" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseExist"/>
-        <children xsi:type="menu:HandledMenuItem" xmi:id="_8RRzgMwvEeqnLcCrkreYSw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.showMetric" label="Show metrics" tooltip="Show the list of metrics and update its property (rename or change the formula)." mnemonics="S" command="_XIwxIL17EeqIaLNodVh-xg">
-          <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_FsaRMMwwEeqnLcCrkreYSw" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseExist"/>
-        </children>
-        <children xsi:type="menu:HandledMenuItem" xmi:id="_1tqrMOAoEeqsmOAkZNeqjw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.splitWindow" label="Split window" tooltip="Split a window into two parts vertically" mnemonics="S" command="_ocHSYOAkEeqsmOAkZNeqjw"/>
-        <children xsi:type="menu:Menu" xmi:id="_L0cLkKwUEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.menu.view.debug" label="Debug" mnemonics="D">
-          <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_LrongL1wEeqIaLNodVh-xg" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DebugMode"/>
-          <children xsi:type="menu:HandledMenuItem" xmi:id="_OUj-8KwUEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.viewXML" label="View experiment.xml file" tooltip="View the current experiment.xml file" mnemonics="x" command="_rAwA8KvwEeq2aaPo7yBcWg"/>
-        </children>
+        <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_8wo3sC6VEeuNguglr3209Q" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseExist"/>
       </children>
       <children xsi:type="menu:Menu" xmi:id="_mNeQQLgGEeqKXeCFC-fF9Q" elementId="edu.rice.cs.hpcviewer.ui.menu.filter" label="Filter" mnemonics="i">
         <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_tN5q4NKFEeqGK5z0zGQmCQ" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseExist"/>
       </children>
-      <children xsi:type="menu:Menu" xmi:id="_VCyzMLS0EeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.menu.help" label="Help" mnemonics="H">
-        <children xsi:type="menu:HandledMenuItem" xmi:id="_XRffYLS0EeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.about" label="About" tooltip="About the application" mnemonics="A" command="_lIBrgKwbEeq2aaPo7yBcWg"/>
-      </children>
+      <children xsi:type="menu:Menu" xmi:id="_VCyzMLS0EeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.menu.help" label="Help" mnemonics="H"/>
     </mainMenu>
     <trimBars xmi:id="_ByrtQLTcEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.trimbar.bottom" side="Bottom"/>
   </children>
@@ -87,6 +48,56 @@
   <descriptors xmi:id="_uSUdoMizEeq3_poNktUMtQ" elementId="edu.rice.cs.hpcviewer.ui.partdescriptor.profile" label="Profile view" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpcviewerEclipse16.gif" tooltip="Profile view" allowMultiple="true" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.ProfilePart">
     <toolbar xmi:id="_1e6AIMizEeq3_poNktUMtQ" elementId="edu.rice.cs.hpcviewer.ui.toolbar.0"/>
   </descriptors>
+  <menuContributions xmi:id="_mUa8kC6FEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.menucontribution.file" positionInParent="0" parentId="edu.rice.cs.hpcviewer.ui.menu.file">
+    <children xsi:type="menu:HandledMenuItem" xmi:id="_DKiisLV5EeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.new" label="New window" tooltip="Open a new window" mnemonics="N" command="_FHXw4LV7EeqkhNpo_ZhE2A"/>
+    <children xsi:type="menu:HandledMenuItem" xmi:id="_slhuQC6FEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.menu.database.open" label="Open a database" tooltip="Open a database" mnemonics="O" command="_U14sMI7vEeqBPbXbG7_Dzw">
+      <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_1Tp8AC6FEeuNguglr3209Q" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.RecentDatabaseInexist"/>
+    </children>
+    <children xsi:type="menu:Menu" xmi:id="_UGXJUC6IEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.menu.database.openRecent" label="Open database..." mnemonics="O">
+      <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_cf61QC6IEeuNguglr3209Q" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.RecentDatabaseExist"/>
+      <children xsi:type="menu:HandledMenuItem" xmi:id="__Q4SwC6IEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.openOther" label="Other..." tooltip="Open a database. If the application has already opened databases, it will replace them with the new one" mnemonics="O" command="_U14sMI7vEeqBPbXbG7_Dzw"/>
+      <children xsi:type="menu:MenuSeparator" xmi:id="_BI_D4C6JEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.menuseparator.3"/>
+      <children xsi:type="menu:DynamicMenuContribution" xmi:id="_wFKL8C6HEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.menu.database.dynamic.openRecent" label="Open recent database..." contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.FileOpenRecentDatabase"/>
+    </children>
+    <children xsi:type="menu:HandledMenuItem" xmi:id="_cD4kEC6JEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.menu.database.add" label="Add database" tooltip="Add an additional database into hpcviewer workspace. Users can then compare it with the other existing database." mnemonics="A" command="_cPW0II7vEeqBPbXbG7_Dzw">
+      <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_n04F4C6JEeuNguglr3209Q" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseOnlyOneExist"/>
+    </children>
+    <children xsi:type="menu:Menu" xmi:id="_r4V7UC6JEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.menu.database.addRecent" label="Add database..." mnemonics="A">
+      <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_r4V7US6JEeuNguglr3209Q" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.AddRecentDatabaseVisible"/>
+      <children xsi:type="menu:HandledMenuItem" xmi:id="_r4V7Ui6JEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.addDatabase" label="Other..." tooltip="Open another database side-by-side. " mnemonics="O" command="_cPW0II7vEeqBPbXbG7_Dzw"/>
+      <children xsi:type="menu:MenuSeparator" xmi:id="_r4V7Uy6JEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.menuseparator.2"/>
+      <children xsi:type="menu:DynamicMenuContribution" xmi:id="_r4V7VC6JEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.dynamicmenucontribution.addRecent" label="Recent databases" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.FileAddRecentDatabase"/>
+    </children>
+    <children xsi:type="menu:Menu" xmi:id="_cySXMLJ_EeqbOrxjpZSIwg" elementId="edu.rice.cs.hpcviewer.ui.menu.fileMerge" label="Merge databases" tooltip="Merge two opened databases. " mnemonics="M">
+      <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_5ij8ILaGEeqkhNpo_ZhE2A" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseMergeExpression"/>
+      <children xsi:type="menu:HandledMenuItem" xmi:id="_vYBpcLJiEeqfDrDyyKphUQ" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.merge" label="Merge top-down views" tooltip="Merge two top-down databases " mnemonics="M" command="_sRvw0LJpEeqfDrDyyKphUQ">
+        <parameters xmi:id="_oMnHcLJpEeqfDrDyyKphUQ" elementId="edu.rice.cs.hpcviewer.ui.parameter.topdown" name="edu.rice.cs.hpcviewer.ui.commandparameter.merge" value="topdown"/>
+      </children>
+      <children xsi:type="menu:HandledMenuItem" xmi:id="_ri25ULaBEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.mergeFlat" label="Merge flat views" tooltip="Merge two flat trees" mnemonics="f" command="_sRvw0LJpEeqfDrDyyKphUQ">
+        <parameters xmi:id="_23_lkLaBEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.parameter.flat" name="edu.rice.cs.hpcviewer.ui.commandparameter.merge" value="flat"/>
+      </children>
+    </children>
+    <children xsi:type="menu:Menu" xmi:id="_hdjbsLYdEeqhffqM1zV0iA" elementId="edu.rice.cs.hpcviewer.ui.menu.close" label="Close" mnemonics="C">
+      <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_wPIZoLYdEeqhffqM1zV0iA" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseCloseDefinition"/>
+      <children xsi:type="menu:DynamicMenuContribution" xmi:id="_kPFvMLYdEeqhffqM1zV0iA" elementId="edu.rice.cs.hpcviewer.ui.dynamicmenucontribution.0" label="Close" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.FileCloseDatabase"/>
+    </children>
+    <children xsi:type="menu:MenuSeparator" xmi:id="_VTVaAI7rEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.menuseparator.1"/>
+    <children xsi:type="menu:HandledMenuItem" xmi:id="_Mbk6ILpkEeqjBNbAJCPSRg" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.preferences" label="Preferences" tooltip="Show the preferences of the application" mnemonics="P" command="_svnesLpjEeqjBNbAJCPSRg"/>
+    <children xsi:type="menu:HandledMenuItem" xmi:id="_LbRy8I7vEeqBPbXbG7_Dzw" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.exit" label="Exit" tooltip="Exit the application" mnemonics="x" command="_wGhBQI7uEeqBPbXbG7_Dzw"/>
+  </menuContributions>
+  <menuContributions xmi:id="_o-CP4C6VEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.menucontribution.view" parentId="edu.rice.cs.hpcviewer.ui.menu.view">
+    <children xsi:type="menu:HandledMenuItem" xmi:id="_tmH1UC6VEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.showMetric" label="Show metrics" tooltip="Show the list of metrics and update its property (rename or change the formula)." mnemonics="S" command="_XIwxIL17EeqIaLNodVh-xg">
+      <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_tmH1US6VEeuNguglr3209Q" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseExist"/>
+    </children>
+    <children xsi:type="menu:HandledMenuItem" xmi:id="_tmJDcC6VEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.splitWindow" label="Split window" tooltip="Split a window into two parts vertically" mnemonics="S" command="_ocHSYOAkEeqsmOAkZNeqjw"/>
+    <children xsi:type="menu:Menu" xmi:id="_0kWywC6VEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.menu.view.debug" label="Debug" mnemonics="D">
+      <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_0kWywS6VEeuNguglr3209Q" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DebugMode"/>
+      <children xsi:type="menu:HandledMenuItem" xmi:id="_0kWywi6VEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.viewXML" label="View experiment.xml file" tooltip="View the current experiment.xml file" mnemonics="x" command="_rAwA8KvwEeq2aaPo7yBcWg"/>
+    </children>
+  </menuContributions>
+  <menuContributions xmi:id="_XogKoC6ZEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.menucontribution.help" parentId="edu.rice.cs.hpcviewer.ui.menu.help">
+    <children xsi:type="menu:HandledMenuItem" xmi:id="_acZ1oC6ZEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.about" label="About" tooltip="About the application" mnemonics="A" command="_lIBrgKwbEeq2aaPo7yBcWg"/>
+  </menuContributions>
   <snippets xsi:type="basic:TrimmedWindow" xmi:id="_Z3ujwNKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.trimmedwindow.main" label="hpcviewer" x="100" y="100" width="1000" height="800">
     <children xsi:type="advanced:PerspectiveStack" xmi:id="_nI--cNKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.perspectivestack.main">
       <children xsi:type="advanced:Perspective" xmi:id="_nI--cdKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.perspective.integrate" label="Integrated perspective" iconURI="platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/datacentric.png">
@@ -98,53 +109,12 @@
       </children>
     </children>
     <mainMenu xmi:id="_f4fzYNKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.menu.0">
-      <children xsi:type="menu:Menu" xmi:id="_je9jwNKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.menu.file" label="File" mnemonics="F">
-        <children xsi:type="menu:HandledMenuItem" xmi:id="_je9jwdKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.new" label="New window" tooltip="Open a new window" mnemonics="N" command="_FHXw4LV7EeqkhNpo_ZhE2A"/>
-        <children xsi:type="menu:Menu" xmi:id="_f4BBoBWeEeu93quAGmdtiQ" elementId="edu.rice.cs.hpcviewer.ui.menu.openDatabase" label="Open database" mnemonics="O">
-          <children xsi:type="menu:HandledMenuItem" xmi:id="_f4BBoRWeEeu93quAGmdtiQ" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.openOther" label="Other..." tooltip="Open a database. If the application has already opened databases, it will replace them with the new one" mnemonics="O" command="_U14sMI7vEeqBPbXbG7_Dzw"/>
-          <children xsi:type="menu:MenuSeparator" xmi:id="_f4BBohWeEeu93quAGmdtiQ" elementId="edu.rice.cs.hpcviewer.ui.menuseparator.0"/>
-          <children xsi:type="menu:DynamicMenuContribution" xmi:id="_f4BBoxWeEeu93quAGmdtiQ" elementId="edu.rice.cs.hpcviewer.ui.dynamicmenucontribution.openRecent" label="Recent databases" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.FileOpenRecentDatabase"/>
-        </children>
-        <children xsi:type="menu:Menu" xmi:id="_f4EsABWeEeu93quAGmdtiQ" elementId="edu.rice.cs.hpcviewer.ui.menu.addDatabase" label="Add database" mnemonics="A">
-          <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_f4EsARWeEeu93quAGmdtiQ" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseOnlyOneExist"/>
-          <children xsi:type="menu:HandledMenuItem" xmi:id="_f4EsAhWeEeu93quAGmdtiQ" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.addDatabase" label="Other..." tooltip="Open another database side-by-side. " mnemonics="O" command="_cPW0II7vEeqBPbXbG7_Dzw"/>
-          <children xsi:type="menu:MenuSeparator" xmi:id="_f4EsAxWeEeu93quAGmdtiQ" elementId="edu.rice.cs.hpcviewer.ui.menuseparator.2"/>
-          <children xsi:type="menu:DynamicMenuContribution" xmi:id="_f4EsBBWeEeu93quAGmdtiQ" elementId="edu.rice.cs.hpcviewer.ui.dynamicmenucontribution.addRecent" label="Recent databases" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.FileAddRecentDatabase"/>
-        </children>
-        <children xsi:type="menu:Menu" xmi:id="_je9jxdKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.menu.fileMerge" label="Merge databases" tooltip="Merge two opened databases. " mnemonics="M">
-          <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_je9jxtKuEeqGK5z0zGQmCQ" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseMergeExpression"/>
-          <children xsi:type="menu:HandledMenuItem" xmi:id="_je9jx9KuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.merge" label="Merge top-down views" tooltip="Merge two top-down databases " mnemonics="M" command="_sRvw0LJpEeqfDrDyyKphUQ">
-            <parameters xmi:id="_je9jyNKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.parameter.topdown" name="edu.rice.cs.hpcviewer.ui.commandparameter.merge" value="topdown"/>
-          </children>
-          <children xsi:type="menu:HandledMenuItem" xmi:id="_je9jydKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.mergeFlat" label="Merge flat views" tooltip="Merge two flat trees" mnemonics="f" command="_sRvw0LJpEeqfDrDyyKphUQ">
-            <parameters xmi:id="_je9jytKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.parameter.flat" name="edu.rice.cs.hpcviewer.ui.commandparameter.merge" value="flat"/>
-          </children>
-        </children>
-        <children xsi:type="menu:Menu" xmi:id="_je9jy9KuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.menu.close" label="Close" mnemonics="C">
-          <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_je9jzNKuEeqGK5z0zGQmCQ" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseCloseDefinition"/>
-          <children xsi:type="menu:DynamicMenuContribution" xmi:id="_je9jzdKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.dynamicmenucontribution.0" label="Close" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.FileCloseDatabase"/>
-        </children>
-        <children xsi:type="menu:MenuSeparator" xmi:id="_je9jztKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.menuseparator.1"/>
-        <children xsi:type="menu:HandledMenuItem" xmi:id="_je9jz9KuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.preferences" label="Preferences" tooltip="Show the preferences of the application" mnemonics="P" command="_svnesLpjEeqjBNbAJCPSRg"/>
-        <children xsi:type="menu:HandledMenuItem" xmi:id="_je9j0NKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.exit" label="Exit" tooltip="Exit the application" mnemonics="x" command="_wGhBQI7uEeqBPbXbG7_Dzw"/>
-      </children>
-      <children xsi:type="menu:Menu" xmi:id="_je_Y8NKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.menu.view" label="View" mnemonics="V">
-        <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_je_Y8dKuEeqGK5z0zGQmCQ" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseExist"/>
-        <children xsi:type="menu:HandledMenuItem" xmi:id="_je_Y8tKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.showMetric" label="Show metrics" tooltip="Show the list of metrics and update its property (rename or change the formula)." mnemonics="S" command="_XIwxIL17EeqIaLNodVh-xg">
-          <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_je_Y89KuEeqGK5z0zGQmCQ" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseExist"/>
-        </children>
-        <children xsi:type="menu:HandledMenuItem" xmi:id="_xKqgcOAwEeq2dLsiFYp2dg" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.splitWindow" label="Split window" tooltip="Split a window into two parts vertically" mnemonics="S" command="_ocHSYOAkEeqsmOAkZNeqjw"/>
-        <children xsi:type="menu:Menu" xmi:id="_je_Y9NKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.menu.view.debug" label="Debug" mnemonics="D">
-          <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_je_Y9dKuEeqGK5z0zGQmCQ" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DebugMode"/>
-          <children xsi:type="menu:HandledMenuItem" xmi:id="_je_Y9tKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.viewXML" label="View experiment.xml file" tooltip="View the current experiment.xml file" mnemonics="x" command="_rAwA8KvwEeq2aaPo7yBcWg"/>
-        </children>
-      </children>
+      <children xsi:type="menu:Menu" xmi:id="_je9jwNKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.menu.file" label="File" mnemonics="F"/>
+      <children xsi:type="menu:Menu" xmi:id="_je_Y8NKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.menu.view" label="View" mnemonics="V"/>
       <children xsi:type="menu:Menu" xmi:id="_jfBOINKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.menu.filter" label="Filter" mnemonics="i">
         <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_jfBOIdKuEeqGK5z0zGQmCQ" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseExist"/>
       </children>
-      <children xsi:type="menu:Menu" xmi:id="_jfCcQNKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.menu.help" label="Help" mnemonics="H">
-        <children xsi:type="menu:HandledMenuItem" xmi:id="_jfCcQdKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.about" label="About" tooltip="About the application" mnemonics="A" command="_lIBrgKwbEeq2aaPo7yBcWg"/>
-      </children>
+      <children xsi:type="menu:Menu" xmi:id="_jfCcQNKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.menu.help" label="Help" mnemonics="H"/>
     </mainMenu>
     <trimBars xmi:id="_ox1LkNKuEeqGK5z0zGQmCQ" elementId="edu.rice.cs.hpcviewer.ui.trimbar.bottom" side="Bottom"/>
   </snippets>

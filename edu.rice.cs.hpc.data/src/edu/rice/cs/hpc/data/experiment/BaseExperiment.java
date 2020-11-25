@@ -11,6 +11,7 @@ import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpc.data.experiment.scope.visitors.DisposeResourcesVisitor;
 import edu.rice.cs.hpc.data.experiment.scope.visitors.FilterScopeVisitor;
 import edu.rice.cs.hpc.data.filter.IFilterData;
+import edu.rice.cs.hpc.data.trace.BaseTraceAttribute;
 import edu.rice.cs.hpc.data.trace.TraceAttribute;
 import edu.rice.cs.hpc.data.util.CallPath;
 import edu.rice.cs.hpc.data.util.IUserData;
@@ -49,17 +50,9 @@ public abstract class BaseExperiment implements IExperiment
 	protected IDatabaseRepresentation databaseRepresentation;
 	
 	private EnumMap<Db_File_Type, String> db_filenames;
-	
-	private int min_cctid, max_cctid;
 	private int filterNumScopes = 0, filterStatus;
-	
-	/***** attributes of the traces ***/
-	private TraceAttribute attribute;
-	
-	private int maxDepth;
 
-	private Map<Integer, CallPath> mapCpidToCallpath;
-	private Map<String, Object>    mapProcedure;
+	private BaseTraceAttribute traceAttribute;
 
 	/***
 	 * the root scope of the experiment
@@ -141,7 +134,7 @@ public abstract class BaseExperiment implements IExperiment
 	 * @return the maxDepth
 	 */
 	public int getMaxDepth() {
-		return maxDepth;
+		return traceAttribute.maxDepth;
 	}
 
 
@@ -149,7 +142,7 @@ public abstract class BaseExperiment implements IExperiment
 	 * @param maxDepth the maxDepth to set
 	 */
 	public void setMaxDepth(int maxDepth) {
-		this.maxDepth = maxDepth;
+		traceAttribute.maxDepth = maxDepth;
 	}
 
 
@@ -157,7 +150,7 @@ public abstract class BaseExperiment implements IExperiment
 	 * @return the scopeMap
 	 */
 	public Map<Integer, CallPath> getScopeMap() {
-		return mapCpidToCallpath;
+		return traceAttribute.mapCpidToCallpath;
 	}
 
 
@@ -165,24 +158,10 @@ public abstract class BaseExperiment implements IExperiment
 	 * @param scopeMap the scopeMap to set
 	 */
 	public void setScopeMap(Map<Integer, CallPath> scopeMap) {
-		this.mapCpidToCallpath = scopeMap;
+		traceAttribute.mapCpidToCallpath = scopeMap;
 	}
 
 
-	/**
-	 * @return the mapProcedure
-	 */
-	public Map<String, Object> getMapProcedure() {
-		return mapProcedure;
-	}
-
-
-	/**
-	 * @param mapProcedure the mapProcedure to set
-	 */
-	public void setMapProcedure(Map<String, Object> mapProcedure) {
-		this.mapProcedure = mapProcedure;
-	}
 
 
 	static public String getDefaultDatabaseName(Db_File_Type type)
@@ -393,27 +372,27 @@ public abstract class BaseExperiment implements IExperiment
 	
 	public void setMinMaxCCTID(int min, int max)
 	{
-		this.min_cctid = min;
-		this.max_cctid = max;
+		traceAttribute.min_cctid = min;
+		traceAttribute.max_cctid = max;
 	}
 	
 	public int getMinCCTID()
 	{
-		return min_cctid;
+		return traceAttribute.min_cctid;
 	}
 	
 	public int getMaxCCTID()
 	{
-		return max_cctid;
+		return traceAttribute.max_cctid;
 	}
 	
 	
 	/******
 	 * set the trace attributes (if the tracefile exist)
-	 * @param _attribute
+	 * @param attribute
 	 */
-	public void setTraceAttribute(TraceAttribute _attribute) {
-		this.attribute = _attribute;
+	public void setTraceAttribute(TraceAttribute attribute) {
+		this.traceAttribute = attribute;
 	}
 
 
@@ -423,8 +402,8 @@ public abstract class BaseExperiment implements IExperiment
 	 * 
 	 * @return trace attributes
 	 */
-	public TraceAttribute getTraceAttribute() {
-		return this.attribute;
+	public BaseTraceAttribute getTraceAttribute() {
+		return traceAttribute;
 	}
 
 

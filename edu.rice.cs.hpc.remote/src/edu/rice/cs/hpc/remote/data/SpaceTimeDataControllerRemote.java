@@ -12,6 +12,7 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import edu.rice.cs.hpc.data.experiment.ExperimentConfiguration;
 import edu.rice.cs.hpc.data.experiment.InvalExperimentException;
 import edu.rice.cs.hpc.data.experiment.extdata.IFilteredData;
+import edu.rice.cs.hpc.data.trace.TraceAttribute;
 import edu.rice.cs.hpc.data.trace.TraceName;
 import edu.rice.cs.hpc.remote.data.DecompressionThread.DecompressionItemToDo;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
@@ -52,7 +53,7 @@ public class SpaceTimeDataControllerRemote extends SpaceTimeDataController
 	
 	@Override
 	public IFilteredData createFilteredBaseData() {
-		final int headerSize = exp.getTraceAttribute().dbHeaderSize;
+		final int headerSize = ((TraceAttribute)exp.getTraceAttribute()).dbHeaderSize;
 		return new RemoteFilteredBaseData(valuesX, headerSize, server);
 	}
 

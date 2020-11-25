@@ -16,6 +16,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.swt.widgets.TreeItem;
+
 import java.util.List;
 
 import org.eclipse.jface.layout.TreeColumnLayout;
@@ -32,6 +34,7 @@ import edu.rice.cs.hpc.data.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
+import edu.rice.cs.hpc.data.util.OSValidator;
 import edu.rice.cs.hpc.data.util.ScopeComparator;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
@@ -81,9 +84,20 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		ColumnViewerToolTipSupport.enableFor(this, ToolTip.NO_RECREATE);
 		
 		GC gc = new GC(getControl());
+		
 		gc.setFont(FontManager.getMetricFont());
-		Point extent = gc.stringExtent(TEXT_METRIC_COLUMN);
+		String text = TEXT_METRIC_COLUMN;
+		if (OSValidator.isWindows()) {
+			
+			// FIXME: ugly hack to add some spaces for Windows
+			// Somehow, Windows 10 doesn't allow to squeeze the text inside the table
+			// we have to give them some spaces (2 spaces in my case).
+			// A temporary fix for issue #37
+			text += "xx";
+		}
+		Point extent = gc.stringExtent(text);
 		metricColumnWidth = extent.x;
+		
 		gc.dispose();
 	}
 	
@@ -282,6 +296,37 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 			final ColumnPixelData data = new ColumnPixelData(colWidth, true, false);
 			((TreeColumnLayout)layout).setColumnData(col, data);
 		}
+    }
+    
+    
+    /********
+     * Initialize the table selection by selecting the second row of the table, and
+     * set the focus to the table
+     */
+    public void initSelection() {
+		
+		// scroll to the top. This works on mac, but doesn't work on Linux/GTK
+		getTree().getDisplay().asyncExec(() -> {
+			
+			Tree tree = getTree();
+			
+			// issue #36
+			// Linux/GTK only: if a user already select an item, we shouldn't expand it
+			//
+			// issue #34 (macOS only): we need to refresh and expand the table after sorting
+			// otherwise the tree items are not visible
+			if (!OSValidator.isMac() && tree.getSelectionCount() > 0) {
+				return;
+			}
+			expandToLevel(2);
+			
+			try {
+				TreeItem item = tree.getTopItem().getItem(0);
+				tree.showItem(item);
+				tree.select(item);
+			} catch (Exception e) {
+			}
+		});
     }
     
     

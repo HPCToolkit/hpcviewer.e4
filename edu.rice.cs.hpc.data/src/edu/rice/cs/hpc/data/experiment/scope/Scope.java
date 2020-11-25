@@ -746,10 +746,6 @@ protected void ensureMetricStorage()
  ************************************************************************/
 
 public void copyMetrics(Scope targetScope, int offset) {
-
-	if (!hasNonzeroMetrics())
-		return;
-	
 	targetScope.ensureMetricStorage();
 	
 	IMetricValueCollection targetMetrics = targetScope.getMetricValues();

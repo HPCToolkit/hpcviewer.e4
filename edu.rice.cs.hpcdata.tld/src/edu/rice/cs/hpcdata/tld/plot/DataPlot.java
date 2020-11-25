@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.rice.cs.hpc.data.db.version3.DataCommon;
+import edu.rice.cs.hpc.data.db.version3.DataSection;
 
 /*******************************************************************************************
  * 
@@ -19,7 +20,7 @@ import edu.rice.cs.hpc.data.db.version3.DataCommon;
  *******************************************************************************************/
 public class DataPlot extends DataCommon 
 {
-	private static final String HEADER = "HPCPROF-cmsdb_____";
+	private static final String HEADER = "HPCPROF-cmsdb___";
 	
 	/*** list of cct. In the future we may need to implement with concurrent list.
 	 *** Right now it's just a simple array or list. Please use it carefully   
@@ -67,9 +68,11 @@ public class DataPlot extends DataCommon
 
 	
 	@Override
-	protected boolean readNextHeader(FileChannel input) throws IOException {
+	protected boolean readNextHeader(FileChannel input, DataSection []sections) throws IOException {
 		if (numItems == 0)
 			return false;
+		
+		input.position(sections[0].offset);
 		
 		listContexts = new ArrayList<DataPlot.ContextInfo>((int) numItems);
 		
@@ -90,6 +93,10 @@ public class DataPlot extends DataCommon
 				listContexts.add(info);
 			}
 		}
+		
+		long nextPosition = sections[0].offset + getMultiplyOf8( sections[0].size);
+		input.position(nextPosition);
+
 		return true;
 	}
 
@@ -172,6 +179,7 @@ public class DataPlot extends DataCommon
 		ByteBuffer buffer = file.getChannel().map(MapMode.READ_ONLY, metricPosition, size);
 		
 		long []indexes = binarySearch((short) metric, 0, info.numNonZeroMetrics+1, buffer);
+		//long []indexes = newtonSearch((short) metric, 0, info.numNonZeroMetrics+1, buffer);
 
 		if (indexes == null)
 			return null;
@@ -238,8 +246,83 @@ public class DataPlot extends DataCommon
 		// not found
 		return null;
 	}
-	
 
+	
+	/***
+	 * Newton-style of Binary search the cct index 
+	 * 
+	 * @param metric_index the metric index
+	 * @param first the beginning of the relative index
+	 * @param last  the last of the relative index
+	 * @param buffer ByteBuffer of the file
+	 * @return 2-length array of indexes: the index of the found cct, and its next index
+	 */
+	private long[] newtonSearch(int metric_index, int first, int last, ByteBuffer buffer) {
+		int left_index  = first;
+		int right_index = last - 1;
+		
+		short left_metric  = getMetric(buffer, left_index);
+		short right_metric = getMetric(buffer, right_index);
+		
+		while (right_index - left_index > 1) {
+			
+			int predicted_index;
+			final float cct_range = right_metric - left_metric;
+			final float rate = cct_range / (right_index - left_index);
+			final int mid_cct = (int) cct_range / 2;
+			
+			if (metric_index <= mid_cct) {
+				predicted_index = (int) Math.max( ((metric_index - left_metric)/rate) + left_index, left_index);
+			} else {
+				predicted_index = (int) Math.min(right_index - ((right_metric-metric_index)/rate), right_index);
+			}
+			
+			if (predicted_index <= left_metric) {
+				predicted_index = left_index + 1;
+			} 
+			if (predicted_index >= right_metric) {
+				predicted_index = right_index - 1;
+			}
+			
+			short current_metric = getMetric(buffer, predicted_index);
+			
+			if (metric_index >= current_metric) {
+				left_index = predicted_index;
+				left_metric = current_metric;
+			} else {
+				right_index = predicted_index;
+				right_metric = current_metric;
+			}
+		}
+		
+		boolean found = metric_index == left_metric || metric_index == right_metric;
+		
+		if (found) {
+			int index = left_index;
+			if (metric_index == right_metric) 
+				// corrupt data: should throw exception 
+				index = right_index;
+			
+			long o1 = getOffset(buffer, index);
+			long o2 = getOffset(buffer, index + 1);
+
+			return new long[] {o1, o2};
+		}
+		// not found: the cct node has no metrics. 
+		// we may should return array of zeros instead of null
+		return null;
+	}
+
+	
+	private short getMetric(ByteBuffer buffer, int position) {
+		buffer.position(position * RECORD_SIZE);
+		return buffer.getShort();
+	}
+	
+	private long getOffset(ByteBuffer buffer, int position) {
+		buffer.position(position * RECORD_SIZE + Short.SIZE);
+		return buffer.getLong();
+	}
 	
 	
 	//////////////////////////////////////////////////////////////////////////
