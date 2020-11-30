@@ -39,7 +39,7 @@ apt-cache policy libgtk-3-0
 
 Requirements:
 
-* Recommended: [Eclipse 2019.03](https://www.eclipse.org/downloads/packages/release/2019-03/r/eclipse-ide-rcp-and-rap-developers). May not work with older versions. For the newer versions (2019.06 and newer), hpcviewer still works but due to high-definition pixels support, the mapping between pixel and procedure names do not work properly (especially on Mac OS with retina display)
+* Recommended: [Eclipse 2019.06](https://www.eclipse.org/downloads/packages/release/2019-06/r/eclipse-ide-rcp-and-rap-developers). May not work with older or newer versions. 
 
 To import the source code into Eclipse IDE:
 
