@@ -126,7 +126,7 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 		tabFolderTopLeft = new CTabFolder(sashFormLeft, SWT.BORDER);
 		
 		tbtmTraceView = new HPCTraceView(tabFolderTopLeft, SWT.NONE);
-		createTabItem(tbtmTraceView, "Trace view", tabFolderTopLeft, eventBroker);
+		createTabItem(tbtmTraceView, "Main view", tabFolderTopLeft, eventBroker);
 		
 		// ---------------
 		// depth view
