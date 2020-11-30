@@ -50,10 +50,10 @@
   </descriptors>
   <menuContributions xmi:id="_mUa8kC6FEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.menucontribution.file" positionInParent="0" parentId="edu.rice.cs.hpcviewer.ui.menu.file">
     <children xsi:type="menu:HandledMenuItem" xmi:id="_DKiisLV5EeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.new" label="New window" tooltip="Open a new window" mnemonics="N" command="_FHXw4LV7EeqkhNpo_ZhE2A"/>
-    <children xsi:type="menu:HandledMenuItem" xmi:id="_slhuQC6FEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.menu.database.open" label="Open a database" tooltip="Open a database" mnemonics="O" command="_U14sMI7vEeqBPbXbG7_Dzw">
+    <children xsi:type="menu:HandledMenuItem" xmi:id="_slhuQC6FEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.menu.database.open" label="Open database" tooltip="Open a database and replace the existing ones" mnemonics="O" command="_U14sMI7vEeqBPbXbG7_Dzw">
       <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_1Tp8AC6FEeuNguglr3209Q" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.RecentDatabaseInexist"/>
     </children>
-    <children xsi:type="menu:Menu" xmi:id="_UGXJUC6IEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.menu.database.openRecent" label="Open database..." mnemonics="O">
+    <children xsi:type="menu:Menu" xmi:id="_UGXJUC6IEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.menu.database.openRecent" label="Open database..." tooltip="Open a database. If the application has already opened databases, it will replace them with the new one" mnemonics="O">
       <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_cf61QC6IEeuNguglr3209Q" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.RecentDatabaseExist"/>
       <children xsi:type="menu:HandledMenuItem" xmi:id="__Q4SwC6IEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.openOther" label="Other..." tooltip="Open a database. If the application has already opened databases, it will replace them with the new one" mnemonics="O" command="_U14sMI7vEeqBPbXbG7_Dzw"/>
       <children xsi:type="menu:MenuSeparator" xmi:id="_BI_D4C6JEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.menuseparator.3"/>
@@ -62,9 +62,9 @@
     <children xsi:type="menu:HandledMenuItem" xmi:id="_cD4kEC6JEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.menu.database.add" label="Add database" tooltip="Add an additional database into hpcviewer workspace. Users can then compare it with the other existing database." mnemonics="A" command="_cPW0II7vEeqBPbXbG7_Dzw">
       <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_n04F4C6JEeuNguglr3209Q" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseOnlyOneExist"/>
     </children>
-    <children xsi:type="menu:Menu" xmi:id="_r4V7UC6JEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.menu.database.addRecent" label="Add database..." mnemonics="A">
+    <children xsi:type="menu:Menu" xmi:id="_r4V7UC6JEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.menu.database.addRecent" label="Add database..." tooltip="Open another database in addition to the existing one" mnemonics="A">
       <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_r4V7US6JEeuNguglr3209Q" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.AddRecentDatabaseVisible"/>
-      <children xsi:type="menu:HandledMenuItem" xmi:id="_r4V7Ui6JEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.addDatabase" label="Other..." tooltip="Open another database side-by-side. " mnemonics="O" command="_cPW0II7vEeqBPbXbG7_Dzw"/>
+      <children xsi:type="menu:HandledMenuItem" xmi:id="_r4V7Ui6JEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.handledmenuitem.addDatabase" label="Other..." tooltip="Open another database in addition to the existing one " mnemonics="O" command="_cPW0II7vEeqBPbXbG7_Dzw"/>
       <children xsi:type="menu:MenuSeparator" xmi:id="_r4V7Uy6JEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.menuseparator.2"/>
       <children xsi:type="menu:DynamicMenuContribution" xmi:id="_r4V7VC6JEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.dynamicmenucontribution.addRecent" label="Recent databases" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.FileAddRecentDatabase"/>
     </children>
@@ -77,7 +77,7 @@
         <parameters xmi:id="_23_lkLaBEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.parameter.flat" name="edu.rice.cs.hpcviewer.ui.commandparameter.merge" value="flat"/>
       </children>
     </children>
-    <children xsi:type="menu:Menu" xmi:id="_hdjbsLYdEeqhffqM1zV0iA" elementId="edu.rice.cs.hpcviewer.ui.menu.close" label="Close" mnemonics="C">
+    <children xsi:type="menu:Menu" xmi:id="_hdjbsLYdEeqhffqM1zV0iA" elementId="edu.rice.cs.hpcviewer.ui.menu.close" label="Close database" mnemonics="C">
       <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_wPIZoLYdEeqhffqM1zV0iA" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.DatabaseCloseDefinition"/>
       <children xsi:type="menu:DynamicMenuContribution" xmi:id="_kPFvMLYdEeqhffqM1zV0iA" elementId="edu.rice.cs.hpcviewer.ui.dynamicmenucontribution.0" label="Close" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.FileCloseDatabase"/>
     </children>

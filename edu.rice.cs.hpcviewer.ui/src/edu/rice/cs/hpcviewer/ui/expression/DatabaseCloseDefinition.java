@@ -14,6 +14,6 @@ public class DatabaseCloseDefinition
 	
 	@Evaluate
 	public boolean evaluate(MWindow window) {
-		return database.getNumDatabase(window)>1;
+		return database.getNumDatabase(window)>0;
 	}
 }

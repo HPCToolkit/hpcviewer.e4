@@ -264,7 +264,7 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 	public void setInput(MPart part, Object input) {
 		this.experiment = (BaseExperiment) input;
 		part.setLabel("Trace: " + experiment.getName());
-		part.setTooltip("Traces from " + experiment.getDefaultDirectory().getAbsolutePath());
+		part.setTooltip(experiment.getDefaultDirectory().getAbsolutePath());
 	}
 
 	@Override
