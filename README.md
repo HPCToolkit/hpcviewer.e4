@@ -1,25 +1,19 @@
 # hpcviewer.e4
 
-This is a pilot project of hpcviewer based on Eclipse 4, rewriting mostly from scratch. Some parts are portable without modification (like **hpcdata** plugin), many are heavily modified.
-Once stable, we may integrate into HPCToolkit spack build system.
-
-The goals:
-
-* Can work the latest version of Eclipse and newer version of Java (11 or newer). **done**
-* Can work with 4 platforms: Win32, Mac, Linux x86_64 and Linux ppcle64. **done**
-* Can be built easily with a command line (Maven) from Linux, Mac and Windows. **partially done**
-* Can integrate smoothly between `hpcviewer` and `hpctraceviewer`. **partially done**
-* Can be automatically tested.
 
 ## General Requirements
 
 * Java 8 or newer. Java's Oracle and OpenJDK should work fine.
 * Linux: GTK+ 3.20 or newer.
-To check installed GTK version:
+To check installed GTK version on Red Hat distributions:
 ```
 rpm -q gtk3
 ```
-
+On Debian-based distributions:
+```
+dpkg -l  libgtk-3-0
+apt-cache policy libgtk-3-0
+```
 
 ## How to build and run via command line (Maven)
 
