@@ -76,6 +76,10 @@ public abstract class AbstractFilterDialog extends TitleAreaDialog
 		return items;
 	}
 
+	@Override
+	protected boolean isResizable() {
+		return true;
+	}
 	
 	@Override
 	protected Control createContents(Composite parent) {
