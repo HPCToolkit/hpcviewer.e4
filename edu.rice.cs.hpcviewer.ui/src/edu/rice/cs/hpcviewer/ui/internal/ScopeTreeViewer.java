@@ -306,27 +306,25 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
     public void initSelection() {
 		
 		// scroll to the top. This works on mac, but doesn't work on Linux/GTK
-		getTree().getDisplay().asyncExec(() -> {
-			
-			Tree tree = getTree();
-			
-			// issue #36
-			// Linux/GTK only: if a user already select an item, we shouldn't expand it
-			//
-			// issue #34 (macOS only): we need to refresh and expand the table after sorting
-			// otherwise the tree items are not visible
-			if (!OSValidator.isMac() && tree.getSelectionCount() > 0) {
-				return;
-			}
-			expandToLevel(2);
-			
-			try {
-				TreeItem item = tree.getTopItem().getItem(0);
-				tree.showItem(item);
-				tree.select(item);
-			} catch (Exception e) {
-			}
-		});
+		
+		Tree tree = getTree();
+		
+		// issue #36
+		// Linux/GTK only: if a user already select an item, we shouldn't expand it
+		//
+		// issue #34 (macOS only): we need to refresh and expand the table after sorting
+		// otherwise the tree items are not visible
+		if (!OSValidator.isMac() && tree.getSelectionCount() > 0) {
+			return;
+		}
+		expandToLevel(2);
+		
+		try {
+			TreeItem item = tree.getTopItem().getItem(0);
+			tree.showItem(item);
+			tree.select(item);
+		} catch (Exception e) {
+		}
     }
     
     

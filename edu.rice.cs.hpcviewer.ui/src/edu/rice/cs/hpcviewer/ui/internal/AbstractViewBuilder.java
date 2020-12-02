@@ -290,7 +290,9 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 
 		// enable/disable action buttons
 		// this has to be in the last statement
-		updateStatus();
+		treeViewer.getTree().getDisplay().asyncExec(()-> {
+			updateStatus();
+		});
 	}
 	
 

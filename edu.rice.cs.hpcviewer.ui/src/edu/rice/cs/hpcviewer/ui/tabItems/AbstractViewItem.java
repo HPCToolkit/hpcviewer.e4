@@ -21,12 +21,22 @@ import edu.rice.cs.hpcbase.BaseConstants;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.base.IViewBuilder;
-import edu.rice.cs.hpcviewer.ui.base.IViewItem;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
 import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
 
 
-public abstract class AbstractViewItem extends AbstractBaseViewItem implements EventHandler, IViewItem
+/*******************************************************************************************
+ * 
+ * Abstract class to manage basic tab item such as:
+ * <ul>
+ * <li>Standard events</li>
+ * <li>Table viewer</li>
+ * <li>Standard actions</li>
+ * <li>and so on</li>
+ * </ul>
+ *
+ *******************************************************************************************/
+public abstract class AbstractViewItem extends AbstractBaseViewItem implements EventHandler
 {
 
 	protected EPartService  partService;
