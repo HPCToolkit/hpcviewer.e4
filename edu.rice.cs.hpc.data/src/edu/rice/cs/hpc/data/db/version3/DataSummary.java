@@ -29,7 +29,7 @@ public class DataSummary extends DataCommon
 	// --------------------------------------------------------------------
 	// constants
 	// --------------------------------------------------------------------
-	private final static String HEADER_MAGIC_STR  = "HPCPROF-tmsdb___";
+	private final static String HEADER_MAGIC_STR  = "HPCPROF-pmsdb___";
 	private static final int    METRIC_VALUE_SIZE = 8 + 2;
 	private static final int    CCT_RECORD_SIZE   = 4 + 8;
 	private static final int    MAX_LEVELS        = 8;
@@ -295,7 +295,7 @@ public class DataSummary extends DataCommon
 
 		for(int i=0; i<numMetrics; i++) {
 			double value = byteBuffer.getDouble();
-			short metricId = byteBuffer.getShort();
+			int metricId = (int) (0xffff & byteBuffer.getShort());
 			
 			MetricValueSparse mvs = new MetricValueSparse(metricId, (float) value);
 			values.add(mvs);

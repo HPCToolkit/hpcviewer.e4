@@ -35,7 +35,7 @@ public abstract class BaseExperiment implements IExperiment
 	 */
 	static public enum Db_File_Type {DB_SUMMARY, DB_TRACE, DB_PLOT, DB_THREADS};
 	
-	static final private String []DefaultDbFilename = {"thread.db", "trace.db", "cct.db", "thread.db"};
+	static final private String []DefaultDbFilename = {"profile.db", "trace.db", "cct.db", "profile.db"};
 	
 	/** The experiment's configuration. */
 	protected ExperimentConfiguration configuration;
@@ -111,10 +111,10 @@ public abstract class BaseExperiment implements IExperiment
 		if (db_filenames == null)
 		{
 			db_filenames = new EnumMap<BaseExperiment.Db_File_Type, String>(Db_File_Type.class);
-			db_filenames.put(Db_File_Type.DB_SUMMARY, "thread.db");
-			db_filenames.put(Db_File_Type.DB_TRACE, "trace.db");
-			db_filenames.put(Db_File_Type.DB_PLOT, "cct.db");
-			db_filenames.put(Db_File_Type.DB_THREADS, "thread.db");
+			db_filenames.put(Db_File_Type.DB_SUMMARY, DefaultDbFilename[DB_SUMMARY_INDEX]);
+			db_filenames.put(Db_File_Type.DB_TRACE,   DefaultDbFilename[DB_SUMMARY_TRACE]);
+			db_filenames.put(Db_File_Type.DB_PLOT,    DefaultDbFilename[DB_SUMMARY_PLOT]);
+			db_filenames.put(Db_File_Type.DB_THREADS, DefaultDbFilename[DB_SUMMARY_THREAD]);
 		}
 		return db_filenames.get(file_index);
 	}
