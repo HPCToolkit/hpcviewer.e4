@@ -267,7 +267,10 @@ implements ITraceCanvas, PaintListener
 			String proc = "";
 			ProcedureColor procColor = canvas.getColorTable().getProcedureNameByColorHash( rgb.hashCode() );
 			
-			assert(procColor != null);
+			if (procColor == null)
+				// issue #40: case for TWM: the value of procColor is null
+				// return immediately.
+				return null;
 			
 			proc = StringUtil.wrapScopeName(procColor.getProcedure(), 80);
 			
