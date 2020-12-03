@@ -52,7 +52,7 @@ public abstract class BaseExperiment implements IExperiment
 	private EnumMap<Db_File_Type, String> db_filenames;
 	private int filterNumScopes = 0, filterStatus;
 
-	private BaseTraceAttribute traceAttribute;
+	private BaseTraceAttribute traceAttribute = new TraceAttribute();
 
 	/***
 	 * the root scope of the experiment
