@@ -57,8 +57,8 @@ public class FlatContentViewer extends AbstractViewBuilder
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 
-				action.flatten();
-				stackActions.push(action);
+				if (action.flatten())
+					stackActions.push(action);
 				
 				updateStatus();
 			}
@@ -71,12 +71,10 @@ public class FlatContentViewer extends AbstractViewBuilder
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				action.unflatten();
-				Object obj = stackActions.pop();
-				if (obj != action) {
-					System.err.println("Error unflaten: ilegal undo: " + obj);
+				if (action.unflatten()) {
+	 				Object obj = stackActions.pop();
+					assert (obj == action);
 				}
-				
 				updateStatus();
 			}
 			
@@ -128,7 +126,7 @@ public class FlatContentViewer extends AbstractViewBuilder
 		// - the last action is flatten()
 		
 		boolean canUnflat = action.canUnflatten() && 
-				(!stackActions.isEmpty() && stackActions.peek()==action);
+							(!stackActions.isEmpty() && stackActions.peek()==action);
 		items[ITEM_UNFLAT].setEnabled(canUnflat);
 		
 		// we can enable flatten button iff:
