@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.InvalExperimentException;
+import edu.rice.cs.hpc.data.trace.BaseTraceAttribute;
 import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.filter.service.FilterMap;
 import edu.rice.cs.hpcbase.BaseConstants;
@@ -329,7 +330,8 @@ public class DatabaseCollection
 		if (listExperiments != null) {
 			listExperiments.add(experiment);
 		}
-		if (experiment.getTraceAttribute() != null) {
+		BaseTraceAttribute traceAtt = experiment.getTraceAttribute();
+		if (traceAtt != null && traceAtt.dbTimeMax > 0) {
 			MPart tracePart = service.createPart(TracePart.ID);
 			MPart createPart = service.showPart(tracePart, PartState.CREATE);
 			

@@ -35,8 +35,9 @@ public class FlatScopeAction
 
 	/**
 	 * Flatten the tree one level more
+	 * @return true if the action is successful, false otherwise
 	 */
-	public void flatten() {
+	public boolean flatten() {
 		// save the current root scope
 		Scope objParentNode = (Scope) treeViewer.getInput();
 		Scope objParentChildNode = (Scope) objParentNode.getChildAt(0);
@@ -61,9 +62,6 @@ public class FlatScopeAction
 					Scope childNode = (Scope) child;
 					if (!(childNode instanceof CallSiteScope)) {
 						objFlattenedNode.add(childNode);
-						if (childNode.getName().length()==0) {
-							System.out.println("no name: " + childNode.getClass().getName()+" fid: " + childNode.getFlatIndex());
-						}
 					}
 				}
 				//addChildren(node, objFlattenedNode);
@@ -91,15 +89,17 @@ public class FlatScopeAction
 				treeViewer.getTree().setRedraw(true);
 			}
 		}
+		return (hasKids && objFlattenedNode.hasChildren());
 	}
 
 	
 	/**
 	 * Unflatten flattened tree (tree has to be flattened before)
+	 * @return true if the action is successful, false otherwise
 	 */
-	public void unflatten() {
+	public boolean unflatten() {
 		if (stackFlatNodes.isEmpty())
-			return;
+			return false;
 		
 		Scope objParentNode = stackFlatNodes.pop();
 		if(objParentNode != null) {
@@ -109,6 +109,7 @@ public class FlatScopeAction
 			
 			objParentNode.setParent(null);
 		}
+		return true;
 	}
 
 	public boolean canUnflatten() {

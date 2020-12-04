@@ -49,14 +49,8 @@ public class ZoomAction {
 		Scope root = old.duplicate();
 		root.addSubscope(current);
 		
-		viewer.setInput(root);
-		
+		viewer.setInput(root);		
 		viewer.expandToLevel(2, true);
-		
-		// we need to insert the selected node on the top of the table
-		// FIXME: this approach is not elegant, but we don't have any choice
-		// 			at the moment
-		//viewer.insertParentNode(root);
 	}
 	
 	/**
@@ -74,9 +68,8 @@ public class ZoomAction {
 			throw( new java.lang.RuntimeException("ScopeViewActions - illegal zoomout: "+parent));
 		}
 
-		viewer.setInput( parent );
-		// Bug fix: we need to insert the parent on the top of the table
-		//viewer.insertParentNode(parent);
+		viewer.setInput( parent );		
+		viewer.expandToLevel(2, true);
 	}
 	
 	/**

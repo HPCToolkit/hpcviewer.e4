@@ -21,7 +21,7 @@ public class ShowPreferences
 		ViewerPreferenceDialog vprefDialog = new ViewerPreferenceDialog(shell);
 		
 		final String profileId    = "General";		
-		final String appearenceId = "Appearence";
+		final String appearenceId = "Appearance";
 
 		vprefDialog.addPage(profileId, new MainProfilePage(profileId));
 		vprefDialog.addPage(appearenceId, new AppearencePage(appearenceId));
