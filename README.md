@@ -18,8 +18,8 @@ apt-cache policy libgtk-3-0
 ## How to build and run via command line (Maven)
 
 * Download and install Maven (if not available on the systems) at https://maven.apache.org/
-* Recommended: Maven 3.6.x
-* Recommended: install Maven via spack: `spack install maven`
+* Recommended: install via spack
+  `spack install maven; spack load maven`
 * type `mvn clean package`
 * This will compile and create hpcviewer packages for 4 platforms: Linux x86_64 and ppcle64, Windows and Mac. Example of the output:
 ```
