@@ -14,6 +14,11 @@ On Debian-based distributions:
 dpkg -l  libgtk-3-0
 apt-cache policy libgtk-3-0
 ```
+If there is no GTK+ 3.20 or newer installed in the system, you may install it via `spack`:
+```
+spack install gtkplus
+spack load gtkplus
+```
 
 ## How to build and run via command line (Maven)
 
@@ -39,7 +44,8 @@ apt-cache policy libgtk-3-0
 
 Requirements:
 
-* Recommended: [Eclipse 2019.06](https://www.eclipse.org/downloads/packages/release/2019-06/r/eclipse-ide-rcp-and-rap-developers). May not work with older or newer versions. 
+* Recommended: [Eclipse 2020.06](https://www.eclipse.org/downloads/packages/release/2020-06/r/eclipse-ide-rcp-and-rap-developers). 
+* Warning: May not work properly with older or newer versions of Eclipse. 
 
 To import the source code into Eclipse IDE:
 
