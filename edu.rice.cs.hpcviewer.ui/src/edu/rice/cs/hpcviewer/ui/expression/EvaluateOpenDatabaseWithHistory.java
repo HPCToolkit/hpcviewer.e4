@@ -1,3 +1,4 @@
+ 
 package edu.rice.cs.hpcviewer.ui.expression;
 
 import javax.inject.Inject;
@@ -9,7 +10,7 @@ import edu.rice.cs.hpcbase.map.UserInputHistory;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.handlers.RecentDatabase;
 
-public class AddRecentDatabaseVisible 
+public class EvaluateOpenDatabaseWithHistory 
 {
 	@Inject DatabaseCollection database;
 	
@@ -18,7 +19,7 @@ public class AddRecentDatabaseVisible
 		UserInputHistory history = new UserInputHistory(RecentDatabase.HISTORY_DATABASE_RECENT, 
 														RecentDatabase.HISTORY_MAX);
 		if (history.getHistory().size() > 0) {
-			return database.getNumDatabase(window) == 1;
+			return database.getNumDatabase(window) <= 1;
 		}
 		return false;
 	}

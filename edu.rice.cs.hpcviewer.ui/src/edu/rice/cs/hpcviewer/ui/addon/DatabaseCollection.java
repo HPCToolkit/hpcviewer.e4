@@ -330,6 +330,10 @@ public class DatabaseCollection
 		if (listExperiments != null) {
 			listExperiments.add(experiment);
 		}
+
+		//----------------------------------------------------------------
+		// display the trace view if the information exists
+		//----------------------------------------------------------------
 		BaseTraceAttribute traceAtt = experiment.getTraceAttribute();
 		if (traceAtt != null && traceAtt.dbTimeMax > 0) {
 			MPart tracePart = service.createPart(TracePart.ID);
@@ -664,11 +668,13 @@ public class DatabaseCollection
 			statusReporter.error(msg, ei);
 
 			MessageDialog.openError(shell, "Error " + ei.getClass(), msg);
+			return;
 			
 		} catch (Exception e) {
 			final String msg = "Error opening the database " + xmlFileOrDirectory + ":\n  " + e.getMessage();
 			statusReporter.error(msg, e);
 			MessageDialog.openError(shell, "Error " + e.getClass(), msg);
+			return;
 		}
 
 		// store the current loaded database to history

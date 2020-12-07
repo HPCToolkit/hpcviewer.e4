@@ -16,8 +16,6 @@ import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 
 public class FileOpenDatabase 
 {
-	static public final String EDITOR_ID = "edu.rice.cs.hpcviewer.ui.part.editor";
-	
 	@Inject MApplication application;
 	@Inject EModelService modelService;
 	
@@ -29,6 +27,6 @@ public class FileOpenDatabase
 						EPartService partService,
 						@Named(IServiceConstants.ACTIVE_SHELL) Shell shell) {
 
-		databaseCollection.openDatabase(shell, application, partService, modelService, null);
+		databaseCollection.addDatabase(shell, application, partService, modelService, null);
 	}
 }

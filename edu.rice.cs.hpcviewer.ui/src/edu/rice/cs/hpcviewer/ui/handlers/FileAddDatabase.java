@@ -22,7 +22,7 @@ public class FileAddDatabase
 						EModelService modelService,
 						@Named(IServiceConstants.ACTIVE_SHELL) Shell shell) {
 		
-		databaseCollection.addDatabase(shell, application, partService, modelService, null);
+		databaseCollection.openDatabase(shell, application, partService, modelService, null);
 	}
 
 }

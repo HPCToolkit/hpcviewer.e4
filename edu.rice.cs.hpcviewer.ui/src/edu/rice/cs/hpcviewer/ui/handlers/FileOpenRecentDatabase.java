@@ -23,7 +23,7 @@ public class FileOpenRecentDatabase extends RecentDatabase
 							Shell shell,
 							String database) {
 		
-		databaseCollection.openDatabase(shell, application, partService, modelService, database);
+		databaseCollection.addDatabase(shell, application, partService, modelService, database);
 	}
 
 

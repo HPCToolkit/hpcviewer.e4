@@ -22,7 +22,7 @@ public class FileAddRecentDatabase extends RecentDatabase
 						   Shell shell,
 						   String database) {
 		
-		dbCollection.addDatabase(shell, application, partService, modelService, database);
+		dbCollection.openDatabase(shell, application, partService, modelService, database);
 	}
 
 	@Override
