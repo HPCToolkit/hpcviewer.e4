@@ -185,6 +185,9 @@ public class MetricValueCollection3 implements IMetricValueCollection
 	@Override
 	public void appendMetrics(IMetricValueCollection mvCollection, int offset) {
 		AbstractMap<Integer, MetricValue> source = mvCollection.getValues();
+		if (source == null)
+			return;
+		
 		if (values == null) {
 			values = new HashMap<Integer, MetricValue>(source.size());
 		}

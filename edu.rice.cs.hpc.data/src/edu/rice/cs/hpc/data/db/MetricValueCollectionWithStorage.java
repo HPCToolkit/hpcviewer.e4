@@ -125,6 +125,9 @@ public class MetricValueCollectionWithStorage implements IMetricValueCollection
 		// tricky part: append the metric values and shift the index by an offset
 		
 		AbstractMap<Integer, MetricValue> mapSource = mvCollection.getValues();
+		if (mapSource == null ) {
+			return;
+		}
 		mapSource.forEach( (index, mv) -> {
 			values.put(index + offset, mv);
 		});
