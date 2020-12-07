@@ -3,7 +3,7 @@
 
 ## General Requirements
 
-* Java 8 or newer. Java's Oracle and OpenJDK should work fine.
+* Java 8 to 14. Currently it does not work with Java 15. 
 * Linux: GTK+ 3.20 or newer.
 To check installed GTK version on Red Hat distributions:
 ```
