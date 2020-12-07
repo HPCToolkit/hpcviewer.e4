@@ -12,7 +12,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 
-public class FileAddDatabase 
+public class FileSwitchDatabase 
 {	
 	@Inject DatabaseCollection databaseCollection;
 	
@@ -22,7 +22,7 @@ public class FileAddDatabase
 						EModelService modelService,
 						@Named(IServiceConstants.ACTIVE_SHELL) Shell shell) {
 		
-		databaseCollection.openDatabase(shell, application, partService, modelService, null);
+		databaseCollection.switchDatabase(shell, application, partService, modelService, null);
 	}
 
 }

@@ -182,7 +182,7 @@ public class DatabaseCollection
 	 * @param modelService EModelService
 	 * @param database
 	 */
-	public void openDatabase(Shell shell, 
+	public void switchDatabase(Shell shell, 
 			MApplication 	application, 
 			EPartService    service,
 			EModelService 	modelService,
