@@ -14,12 +14,17 @@ On Debian-based distributions:
 dpkg -l  libgtk-3-0
 apt-cache policy libgtk-3-0
 ```
+If there is no GTK+ 3.20 or newer installed in the system, you may install it via `spack`:
+```
+spack install gtkplus
+spack load gtkplus
+```
 
 ## How to build and run via command line (Maven)
 
 * Download and install Maven (if not available on the systems) at https://maven.apache.org/
-* Recommended: Maven 3.6.x
-* Recommended: install Maven via spack: `spack install maven`
+* Recommended: install via spack
+  `spack install maven; spack load maven`
 * type `mvn clean package`
 * This will compile and create hpcviewer packages for 4 platforms: Linux x86_64 and ppcle64, Windows and Mac. Example of the output:
 ```
@@ -39,7 +44,8 @@ apt-cache policy libgtk-3-0
 
 Requirements:
 
-* Recommended: [Eclipse 2019.06](https://www.eclipse.org/downloads/packages/release/2019-06/r/eclipse-ide-rcp-and-rap-developers). May not work with older or newer versions. 
+* Recommended: [Eclipse 2020.06](https://www.eclipse.org/downloads/packages/release/2020-06/r/eclipse-ide-rcp-and-rap-developers). 
+* Warning: May not work properly with older or newer versions of Eclipse. 
 
 To import the source code into Eclipse IDE:
 
