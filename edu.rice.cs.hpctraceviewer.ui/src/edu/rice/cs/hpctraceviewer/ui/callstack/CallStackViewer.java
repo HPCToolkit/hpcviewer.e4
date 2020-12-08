@@ -72,7 +72,7 @@ public class CallStackViewer extends TableViewer
 						   final ProcessTimelineService ptlService,
 						   final IEventBroker eventBroker)
 	{
-		super(parent, SWT.SINGLE | SWT.READ_ONLY );
+		super(parent, SWT.SINGLE | SWT.READ_ONLY | SWT.FULL_SELECTION);
 		
 		this.tracePart   = tracePart;
 		this.ptlService  = ptlService;
