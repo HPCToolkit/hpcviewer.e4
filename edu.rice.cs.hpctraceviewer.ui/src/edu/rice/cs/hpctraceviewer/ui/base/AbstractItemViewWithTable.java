@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
+import edu.rice.cs.hpc.data.util.OSValidator;
 import edu.rice.cs.hpc.data.util.string.StringUtil;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
@@ -52,6 +53,7 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 	private static final int   COLUMN_PROC_WEIGHT    = 800;
 	private static final int   COLUMN_COLOR_WIDTH    = 4;
 	private static final int   COLUMN_PROC_MIN_WIDTH = 60;
+	private static final String TEXT_PERCENT_PATTERN = "888x88x%";
 	
 	private TableViewer tableViewer;
 	private ColumnProcedureLabelProvider lblProcProvider;
@@ -223,7 +225,18 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 		Drawable parent = column.getDisplay();
 		GC gc = new GC(parent);
 		gc.setFont(FontManager.getMetricFont());
-		Point extent = gc.textExtent("888x88x%");
+
+		String text = TEXT_PERCENT_PATTERN;
+		if (OSValidator.isWindows()) {
+			
+			// FIXME: ugly hack to add some spaces for Windows
+			// Somehow, Windows 10 doesn't allow to squeeze the text inside the table
+			// we have to give them some spaces (2 spaces in my case).
+			// A temporary fix for issue #37
+			text += "xx";
+		}
+
+		Point extent = gc.textExtent(text);
 		int width = (int) (extent.x);
 		column.setWidth(width);
 		layout.setColumnData(column, new ColumnPixelData(width, true));

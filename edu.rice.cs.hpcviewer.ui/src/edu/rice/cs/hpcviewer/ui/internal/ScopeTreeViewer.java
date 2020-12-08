@@ -58,7 +58,7 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 	 * @param style
 	 */
 	public ScopeTreeViewer(Composite parent, int style) {
-		super(parent, SWT.VIRTUAL | style);
+		super(parent, SWT.VIRTUAL | SWT.FULL_SELECTION | style);
 		init();
 	}
 
