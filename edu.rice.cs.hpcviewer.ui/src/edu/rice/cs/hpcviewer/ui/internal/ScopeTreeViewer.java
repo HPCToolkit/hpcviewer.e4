@@ -43,29 +43,29 @@ import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 
 
-/**
- * we set lazy virtual bit in this viewer
- */
+/*************************************************************************
+ * Main class for tree viewer by setting lazy virtual bit in this viewer
+ *************************************************************************/
 public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListener
 {
-	public final static String COLUMN_DATA_WIDTH = "w"; 
-	private final static float FACTOR_BOLD_FONT  = 1.2f;
+	public  final static String COLUMN_DATA_WIDTH  = "w"; 
+	private final static float  FACTOR_BOLD_FONT   = 1.2f;
 	private final static String TEXT_METRIC_COLUMN = "8x88+88xx888x8%";
 	
+	private final DisposeListener disposeListener;
+
 	private int metricColumnWidth;
-	private DisposeListener disposeListener;
+    private TableMeasureItemListener listenerMeasureItem;
 	
 	/**
 	 * @param parent
 	 * @param style
 	 */
 	public ScopeTreeViewer(Composite parent, int style) {
+		// hack: on Windows, we have to add SWT.FULL_SELECTION to allow users
+		//       to select a row in the table.
 		super(parent, SWT.VIRTUAL | SWT.FULL_SELECTION | style);
-		init();
-	}
 
-	private void init() 
-	{
 		setUseHashlookup(true);
 		getTree().setLinesVisible(true);
 		
@@ -114,14 +114,14 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
 		pref.removePropertyChangeListener(this);
 		
-    	if (listener != null) {
-    		getTree().removeListener(SWT.MeasureItem, listener);    		
+    	if (listenerMeasureItem != null) {
+    		getTree().removeListener(SWT.MeasureItem, listenerMeasureItem);    		
     	}
 	}
 	
 
 	/****
-	 * Retrieve the database of this table
+	 * Retrieve the database used of this table
 	 * @return BaseExperiment database
 	 */
 	public BaseExperiment getExperiment() {
@@ -138,9 +138,10 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 	 * Retrieve the root of the database in this table regardless
 	 * whether the tree is zoomed or flattened.
 	 * <p>
-	 * For a Top-down view, the root will be the CCT root.
-	 * For a bottom-up view, the root will be the caller root
-	 * For a flat view, the root will be the flat root. 
+	 * <ul>
+	 *  <li>For a Top-down view, the root will be the CCT root.
+	 *  <li>For a bottom-up view, the root will be the caller root
+	 *  <li>For a flat view, the root will be the flat root. 
 	 * @return the root scope
 	 */
 	public RootScope getRootScope() {
@@ -176,6 +177,7 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		return sBuf.toString();
 	}
 	
+	
 	/**
 	 * retrieve the title of the columns
 	 * @param iStartColIndex
@@ -192,6 +194,7 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		// then get the string based on the column status
 		return this.getTextBasedOnColumnStatus(sTitles, sSeparator, iStartColIndex, 0);
 	}
+	
 	
 	/****
 	 * refresh the title of all metric columns.
@@ -231,6 +234,7 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 			refresh();
 		}
 	}
+	
 	
     /**
      * Add new tree column for derived metric
@@ -363,6 +367,10 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 
     /**
      * Change the column status (hide/show) in this view only
+     * 
+     * @param metricMgr IMetricManager metric manager which handle the metric values. 
+     * 					It can be Experiment (for most parts) or special manager (for thread view)
+     * 
      * @param status : array of boolean column status based on metrics (not on column).
      *  The number of items in status has to be the same as the number of metrics<br>
      * 	true means the column is shown, hidden otherwise.
@@ -459,23 +467,6 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		}
     }
 
-    private TableMeasureItemListener listener;
-    private static class TableMeasureItemListener implements Listener
-    {
-    	private int height;
-    	public TableMeasureItemListener(int height) {
-    		this.height = height;
-    	}
-    	
-		@Override
-		public void handleEvent(Event event) {
-			event.height = height;
-		}
-		
-		public void setHeight(int height) {
-			this.height = height;
-		}
-    }
     
     /****
      * Temporary solution to resize the height of the table. 
@@ -496,13 +487,14 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
     	
     	int newHeight = heightPixel;
 
-    	if (listener == null) {
-    		listener = new TableMeasureItemListener(newHeight);
-    		getTree().addListener(SWT.MeasureItem, listener);
+    	if (listenerMeasureItem == null) {
+    		listenerMeasureItem = new TableMeasureItemListener(newHeight);
+    		getTree().addListener(SWT.MeasureItem, listenerMeasureItem);
     	} else {
-        	listener.setHeight(newHeight);
+        	listenerMeasureItem.setHeight(newHeight);
     	}
     }
+    
 
     /****
      * Add user derived metric into tree column
@@ -557,4 +549,30 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 
 		return null;
 	}*/
+	
+	/*****************************************
+	 * 
+	 * Special listener class to handle MeasureItem event.
+	 * 
+	 * Caller can set the height of the tree during the construction
+	 * or set it via setHeight()
+	 *
+	 *****************************************/
+    private static class TableMeasureItemListener implements Listener
+    {
+    	private int height;
+    	public TableMeasureItemListener(int height) {
+    		this.height = height;
+    	}
+    	
+		@Override
+		public void handleEvent(Event event) {
+			event.height = height;
+		}
+		
+		public void setHeight(int height) {
+			this.height = height;
+		}
+    }
+
 }

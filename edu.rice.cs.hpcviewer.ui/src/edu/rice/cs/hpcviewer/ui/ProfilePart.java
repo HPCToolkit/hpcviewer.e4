@@ -202,6 +202,9 @@ public class ProfilePart implements IProfilePart
 		}
 		ThreadView threadView = new ThreadView(tabFolderBottom, SWT.NONE);
 		addView(threadView, input, true);
+		
+		// make sure the new view is visible and get the focus
+		tabFolderBottom.setSelection(threadView);
 	}
 	
 	/****

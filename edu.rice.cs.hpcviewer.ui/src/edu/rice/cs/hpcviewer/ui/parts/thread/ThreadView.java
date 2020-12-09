@@ -23,6 +23,7 @@ import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
+import edu.rice.cs.hpc.data.util.string.StringUtil;
 import edu.rice.cs.hpc.filter.dialog.FilterDataItem;
 import edu.rice.cs.hpc.filter.dialog.ThreadFilterDialog;
 import edu.rice.cs.hpc.filter.service.FilterStateProvider;
@@ -41,6 +42,7 @@ import edu.rice.cs.hpcviewer.ui.tabItems.AbstractBaseViewItem;
 public class ThreadView extends AbstractBaseViewItem implements IViewItem, EventHandler
 {
 	static final private int MAX_THREAD_INDEX = 2;
+	static final private String TITLE_PREFIX  = "Thread view ";
 	
 	private EPartService  partService;	
 	private IEventBroker  eventBroker;
@@ -55,7 +57,6 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 
 	public ThreadView(CTabFolder parent, int style) {
 		super(parent, style);
-		setToolTipText("A view to display metrics of a certain threads or processes");
 		setShowClose(true);
 	}
 
@@ -107,23 +108,39 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 				Logger logger = LoggerFactory.getLogger(getClass());
 				logger.error(label, e);
 				MessageDialog.openError(display.getActiveShell(), label, e.getClass().getName() +": " + e.getLocalizedMessage());
-				return;
+				
+				throw new RuntimeException(e.getMessage());
 			}
 		}
 		contentViewer.setData(viewInput);
-		String label = "";
 		
+		//
+		// setup the title of the view
+		//
+		String label = "";
 		try {
 			StringBuffer sb = getLabel(viewInput);
 			if (sb != null) {
 				label = sb.toString();
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Logger logger = LoggerFactory.getLogger(getClass());
+			logger.error(e.getClass() + ": " + e.getMessage(), e);
+		}
+		setText(TITLE_PREFIX + label );
+		
+		//
+		// setup the tooltip of the view
+		//
+		try {
+			label = getTooltipText(viewInput);
+			setToolTipText(StringUtil.wrapScopeName(label, 120));
+		} catch (IOException e) {
 		}
 		
-		setText("Thread view " + label );
+		// set focus to the table
+		contentViewer.getTreeViewer().initSelection(0);
+		contentViewer.getTreeViewer().getTree().forceFocus();
 	}	
 	
 
@@ -194,6 +211,34 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 		}
 		buffer.append("]");
 		return buffer;
+	}
+	
+	
+	/*****
+	 * Construct tooltip for this view based on the list of threads
+	 * @param input ThreadViewInput
+	 * @return String for tooltip
+	 * @throws IOException
+	 */
+	private String getTooltipText(ThreadViewInput input) throws IOException {
+		final String TOOLTIP_PREFIX = "Top down view for thread(s): ";
+		
+		IThreadDataCollection threadData = input.getThreadData();
+		String[] labels = threadData.getRankStringLabels();
+
+		List<Integer> threads = input.getThreads();
+		int size = threads.size();
+
+		String label = TOOLTIP_PREFIX;
+		for(int i=0; i<size; i++) {
+			int index = threads.get(i);
+			label += labels[index];
+			
+			if (i+1 < size) {
+				label += ", ";
+			}
+		}
+		return label;
 	}
 	
 	
