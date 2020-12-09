@@ -10,10 +10,12 @@ import org.eclipse.swt.graphics.Image;
 import edu.rice.cs.hpc.data.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpc.data.experiment.scope.CallSiteScopeCallerView;
 import edu.rice.cs.hpc.data.experiment.scope.ProcedureScope;
+import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpc.data.util.string.StringUtil;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpcviewer.ui.resources.ColorManager;
+import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
 
@@ -125,6 +127,9 @@ public class StyledScopeLabelProvider extends DelegatingStyledCellLabelProvider
 				final Image image = Utilities.getScopeNavButton(node);
 				
 				return image;
+			} else if (element instanceof RootScope) {
+				IconManager iconManager = IconManager.getInstance();
+				return iconManager.getImage(IconManager.Image_MetricAggregate);
 			}
 			return null;
 		}

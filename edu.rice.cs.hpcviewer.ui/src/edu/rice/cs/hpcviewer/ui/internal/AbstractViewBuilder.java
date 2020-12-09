@@ -24,6 +24,7 @@ import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -286,7 +287,7 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 			treeViewer.setColumnsStatus(getMetricManager(), status);
 		}
 		
-		treeViewer.initSelection();
+		treeViewer.initSelection(0);
 
 		// enable/disable action buttons
 		// this has to be in the last statement
@@ -619,13 +620,34 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 		FontData []oldfd = FontManager.getFontDataPreference(id);
 		FontData []newFd = FontDescriptor.copy(oldfd);
 		int height = newFd[0].getHeight();
-		newFd[0].setHeight(height+deltaHeight);
+		int heightNew = height+deltaHeight;
+		newFd[0].setHeight(heightNew);
 		try {
 			FontManager.setFontPreference(id, newFd);
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
+			return;
 		}
+		Tree tree = treeViewer.getTree();
+		GC gc = new GC(tree);
+		final String text = "X|$]{";
+		
+		// check the metric font
+		gc.setFont(FontManager.getMetricFont());
+		Point extent = gc.stringExtent(text);
+		int metricFontHeight = extent.y;
+
+		// check the tree font
+		gc.setFont(FontManager.getFontGeneric());
+		extent = gc.stringExtent(text);
+		int genetricFontHeight = extent.y;
+		
+		// pick whichever has the highest value
+		int newHeight = Math.max(metricFontHeight, genetricFontHeight) + 2;
+		
+		gc.dispose();
+		treeViewer.setRowHeight(newHeight);
+		
 	}
 	
 	

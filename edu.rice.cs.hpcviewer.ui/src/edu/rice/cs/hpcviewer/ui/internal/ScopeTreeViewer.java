@@ -13,7 +13,9 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Layout;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
@@ -111,6 +113,10 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 
 		PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
 		pref.removePropertyChangeListener(this);
+		
+    	if (listener != null) {
+    		getTree().removeListener(SWT.MeasureItem, listener);    		
+    	}
 	}
 	
 
@@ -302,12 +308,15 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
     /********
      * Initialize the table selection by selecting the second row of the table, and
      * set the focus to the table
+     * 
+     * @param level the integer level to expand. If the level is negative, 
+     * 			the expansion is SWT default. 
      */
-    public void initSelection() {
+    public void initSelection(int level) {
 		
 		// scroll to the top. This works on mac, but doesn't work on Linux/GTK
 		
-		Tree tree = getTree();
+		final Tree tree = getTree();
 		
 		// issue #36
 		// Linux/GTK only: if a user already select an item, we shouldn't expand it
@@ -320,7 +329,14 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		expandToLevel(2);
 		
 		try {
-			TreeItem item = tree.getTopItem().getItem(0);
+			// hack on Mac: need to force to get the child getItem(0) so that the row height is adjusted
+			// if we just get the top of the item, the height of the row can be too small, 
+			//  and the text is cropped badly.
+			
+			TreeItem item = tree.getTopItem();
+			if (level >= 0)
+				item = item.getItem(level);
+			
 			tree.showItem(item);
 			tree.select(item);
 		} catch (Exception e) {
@@ -443,6 +459,50 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		}
     }
 
+    private TableMeasureItemListener listener;
+    private static class TableMeasureItemListener implements Listener
+    {
+    	private int height;
+    	public TableMeasureItemListener(int height) {
+    		this.height = height;
+    	}
+    	
+		@Override
+		public void handleEvent(Event event) {
+			event.height = height;
+		}
+		
+		public void setHeight(int height) {
+			this.height = height;
+		}
+    }
+    
+    /****
+     * Temporary solution to resize the height of the table. 
+     * <p>
+     * Due to Eclipse bug, we cannot decrease the height.
+     * See:
+     *  <ul>
+     *  <li>{@link https://bugs.eclipse.org/bugs/show_bug.cgi?id=148039}
+     *  <li>{@link https://bugs.eclipse.org/bugs/show_bug.cgi?id=154341}
+     * </ul>
+     * </p>
+     * It is not recommended to resize the row height of the table since it doesn't
+     * work properly on Linux.
+     * 
+     * @param heightPixel the difference height in pixels
+     */
+    public void setRowHeight(int heightPixel) {
+    	
+    	int newHeight = heightPixel;
+
+    	if (listener == null) {
+    		listener = new TableMeasureItemListener(newHeight);
+    		getTree().addListener(SWT.MeasureItem, listener);
+    	} else {
+        	listener.setHeight(newHeight);
+    	}
+    }
 
     /****
      * Add user derived metric into tree column

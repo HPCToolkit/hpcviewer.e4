@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.preferences.ConfigurationScope;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
 
@@ -28,7 +28,7 @@ public class UserInputHistory {
     //private static final Preferences CONFIGURATION = new ConfigurationScope().getNode("edu.rice.cs.hpc");
     final static String NODE_HPC = "edu.rice.cs.hpc";
     
-    private static final Preferences CONFIGURATION = ConfigurationScope.INSTANCE.getNode(NODE_HPC);
+    private static final Preferences CONFIGURATION = InstanceScope.INSTANCE.getNode(NODE_HPC);
     
     private String name;
     private int depth;
