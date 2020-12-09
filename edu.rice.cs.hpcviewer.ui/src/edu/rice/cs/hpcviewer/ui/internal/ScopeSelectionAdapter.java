@@ -61,7 +61,7 @@ public class ScopeSelectionAdapter extends SelectionAdapter
 		// ----------------
 		// post-sorting 
 		// ----------------
-		((ScopeTreeViewer)viewer).initSelection();
+		((ScopeTreeViewer)viewer).initSelection(-1);
 		
 		// Issue #34: mac requires to delay the selection after selection
 		
@@ -83,7 +83,7 @@ public class ScopeSelectionAdapter extends SelectionAdapter
 				// if we just get the top of the item, the height of the row can be too small, 
 				//  and the text is cropped badly.
 				
-				TreeItem item = tree.getTopItem().getItem(0);
+				TreeItem item = tree.getTopItem();
 				tree.showItem(item);
 				tree.select(item);
 			} catch (Exception exc) {

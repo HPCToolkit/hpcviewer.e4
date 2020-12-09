@@ -286,7 +286,7 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 			treeViewer.setColumnsStatus(getMetricManager(), status);
 		}
 		
-		treeViewer.initSelection();
+		treeViewer.initSelection(0);
 
 		// enable/disable action buttons
 		// this has to be in the last statement

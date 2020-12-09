@@ -308,8 +308,11 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
     /********
      * Initialize the table selection by selecting the second row of the table, and
      * set the focus to the table
+     * 
+     * @param level the integer level to expand. If the level is negative, 
+     * 			the expansion is SWT default. 
      */
-    public void initSelection() {
+    public void initSelection(int level) {
 		
 		// scroll to the top. This works on mac, but doesn't work on Linux/GTK
 		
@@ -330,7 +333,10 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 			// if we just get the top of the item, the height of the row can be too small, 
 			//  and the text is cropped badly.
 			
-			TreeItem item = tree.getTopItem().getItem(0);
+			TreeItem item = tree.getTopItem();
+			if (level >= 0)
+				item = item.getItem(level);
+			
 			tree.showItem(item);
 			tree.select(item);
 		} catch (Exception e) {
