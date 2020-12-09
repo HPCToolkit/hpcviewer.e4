@@ -490,14 +490,11 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
      * It is not recommended to resize the row height of the table since it doesn't
      * work properly on Linux.
      * 
-     * @param deltaHeight the difference height in pixels
+     * @param heightPixel the difference height in pixels
      */
-    public void setRowHeight(int deltaHeight) {
-    	// compute the new height
-    	// it would be the old height + delta + space
+    public void setRowHeight(int heightPixel) {
     	
-    	int height = getTree().getItemHeight();
-    	int newHeight = height + deltaHeight + 2;
+    	int newHeight = heightPixel;
 
     	if (listener == null) {
     		listener = new TableMeasureItemListener(newHeight);
