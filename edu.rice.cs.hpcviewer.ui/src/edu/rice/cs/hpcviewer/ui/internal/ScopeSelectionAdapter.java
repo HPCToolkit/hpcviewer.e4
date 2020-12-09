@@ -7,6 +7,9 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.swt.widgets.TreeItem;
+
+import edu.rice.cs.hpc.data.util.OSValidator;
 import edu.rice.cs.hpc.data.util.ScopeComparator;
 import edu.rice.cs.hpcviewer.ui.base.ISortContentProvider;
 
@@ -59,6 +62,34 @@ public class ScopeSelectionAdapter extends SelectionAdapter
 		// post-sorting 
 		// ----------------
 		((ScopeTreeViewer)viewer).initSelection();
+		
+		// Issue #34: mac requires to delay the selection after selection
+		
+		tree.getDisplay().asyncExec(() -> {
+			
+			// issue #36
+			// Linux/GTK only: if a user already select an item, we shouldn't expand it
+			//
+			// issue #34 (macOS only): we need to refresh and expand the table after sorting
+			// otherwise the tree items are not visible
+			if (!OSValidator.isMac() && tree.getSelectionCount() > 0) {
+				return;
+			}
+			
+			try {
+				viewer.expandToLevel(2);
+				
+				// hack on Mac: need to force to get the child getItem(0) so that the row height is adjusted
+				// if we just get the top of the item, the height of the row can be too small, 
+				//  and the text is cropped badly.
+				
+				TreeItem item = tree.getTopItem().getItem(0);
+				tree.showItem(item);
+				tree.select(item);
+			} catch (Exception exc) {
+			}
+		});
+
 	}
 	
 	/**

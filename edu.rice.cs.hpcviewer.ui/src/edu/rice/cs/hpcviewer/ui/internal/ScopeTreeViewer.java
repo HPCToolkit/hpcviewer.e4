@@ -315,27 +315,26 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		
 		final Tree tree = getTree();
 		
-		// Issue #34: mac requires to delay the selection after initialization
+		// issue #36
+		// Linux/GTK only: if a user already select an item, we shouldn't expand it
+		//
+		// issue #34 (macOS only): we need to refresh and expand the table after sorting
+		// otherwise the tree items are not visible
+		if (!OSValidator.isMac() && tree.getSelectionCount() > 0) {
+			return;
+		}
+		expandToLevel(2);
 		
-		tree.getDisplay().asyncExec(() -> {
+		try {
+			// hack on Mac: need to force to get the child getItem(0) so that the row height is adjusted
+			// if we just get the top of the item, the height of the row can be too small, 
+			//  and the text is cropped badly.
 			
-			// issue #36
-			// Linux/GTK only: if a user already select an item, we shouldn't expand it
-			//
-			// issue #34 (macOS only): we need to refresh and expand the table after sorting
-			// otherwise the tree items are not visible
-			if (!OSValidator.isMac() && tree.getSelectionCount() > 0) {
-				return;
-			}
-			expandToLevel(2);
-			
-			try {
-				TreeItem item = tree.getTopItem().getItem(0);
-				tree.showItem(item);
-				tree.select(item);
-			} catch (Exception e) {
-			}
-		});
+			TreeItem item = tree.getTopItem().getItem(0);
+			tree.showItem(item);
+			tree.select(item);
+		} catch (Exception e) {
+		}
     }
     
     
