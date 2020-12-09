@@ -91,6 +91,18 @@ if test "$java_vendor" = "gij"; then
 fi
 
 #------------------------------------------------------------
+# Check GTK version
+#------------------------------------------------------------
+
+if ! command -v gtk-launch &> /dev/null
+then
+    echo "It seems GTK-3 is not installed."
+    echo "$name requires GTK 3.20 or newer."
+    exit
+fi
+
+
+#------------------------------------------------------------
 # Look for arguments
 #------------------------------------------------------------
 

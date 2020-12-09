@@ -8,10 +8,10 @@ import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 
-public class FileAddRecentDatabase extends RecentDatabase 
+public class DatabaseSwitch extends RecentDatabase 
 {
 	private static final String ID_MENU_URI = "bundleclass://edu.rice.cs.hpcviewer.ui/" + 
-											   FileAddRecentDatabase.class.getName();
+											   DatabaseSwitch.class.getName();
 
 	@Inject DatabaseCollection dbCollection;
 	
