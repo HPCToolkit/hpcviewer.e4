@@ -619,13 +619,15 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 		FontData []oldfd = FontManager.getFontDataPreference(id);
 		FontData []newFd = FontDescriptor.copy(oldfd);
 		int height = newFd[0].getHeight();
-		newFd[0].setHeight(height+deltaHeight);
+		int heightNew = height+deltaHeight;
+		newFd[0].setHeight(heightNew);
 		try {
 			FontManager.setFontPreference(id, newFd);
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
+			return;
 		}
+		treeViewer.setRowHeight(deltaHeight);
 	}
 	
 	
