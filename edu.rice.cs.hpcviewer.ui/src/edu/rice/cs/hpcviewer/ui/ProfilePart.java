@@ -100,6 +100,7 @@ public class ProfilePart implements IProfilePart
 					if (e.item == view) {
 						if (view.getInput() == null)
 							view.setInput(experiment);
+						view.focus();
 					}
 				}
 			}

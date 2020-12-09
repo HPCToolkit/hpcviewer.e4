@@ -164,6 +164,11 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 			treeViewer.refreshColumnTitle();
 		}
 	}
+	
+	public boolean focus () {
+		ScopeTreeViewer viewer = contentViewer.getTreeViewer();
+		return viewer.getTree().forceFocus();
+	}
 
 	protected abstract RootScope 	  createRoot(BaseExperiment experiment);
 	protected abstract IViewBuilder   setContentViewer(Composite parent, EMenuService menuService);
