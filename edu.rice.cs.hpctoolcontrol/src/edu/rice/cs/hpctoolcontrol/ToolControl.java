@@ -157,7 +157,9 @@ public class ToolControl
 		
 		@Override
 		public void setTaskName(String name) {
-			lblMessage.setText(name);
+			sync.asyncExec(() -> {
+				lblMessage.setText(name);
+			});
 		}
 	}
 }
