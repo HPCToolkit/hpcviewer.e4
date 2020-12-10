@@ -46,16 +46,16 @@ import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 /*************************************************************************
  * Main class for tree viewer by setting lazy virtual bit in this viewer
  *************************************************************************/
-public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListener
+public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListener, Listener
 {
 	public  final static String COLUMN_DATA_WIDTH  = "w"; 
 	private final static float  FACTOR_BOLD_FONT   = 1.2f;
-	private final static String TEXT_METRIC_COLUMN = "8x88+88xx888x8%";
+	private final static String TEXT_METRIC_COLUMN = "|8x88+88xx888x8%";
 	
 	private final DisposeListener disposeListener;
 
 	private int metricColumnWidth;
-    private TableMeasureItemListener listenerMeasureItem;
+	private int tableRowHeight;
 	
 	/**
 	 * @param parent
@@ -85,22 +85,9 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		// Fix bug #25: tooltip is not wrapped on MacOS 
 		ColumnViewerToolTipSupport.enableFor(this, ToolTip.NO_RECREATE);
 		
-		GC gc = new GC(getControl());
+		computeIdealCellBound();
 		
-		gc.setFont(FontManager.getMetricFont());
-		String text = TEXT_METRIC_COLUMN;
-		if (OSValidator.isWindows()) {
-			
-			// FIXME: ugly hack to add some spaces for Windows
-			// Somehow, Windows 10 doesn't allow to squeeze the text inside the table
-			// we have to give them some spaces (2 spaces in my case).
-			// A temporary fix for issue #37
-			text += "xx";
-		}
-		Point extent = gc.stringExtent(text);
-		metricColumnWidth = extent.x;
-		
-		gc.dispose();
+		getTree().addListener(SWT.MeasureItem, this);
 	}
 	
 	
@@ -109,14 +96,12 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 	 * This method has to be called once the table is disposed.
 	 */
 	public void dispose() {
+		
+		getTree().removeListener(SWT.MeasureItem, this);    		
 		getTree().removeDisposeListener(disposeListener);
 
 		PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
 		pref.removePropertyChangeListener(this);
-		
-    	if (listenerMeasureItem != null) {
-    		getTree().removeListener(SWT.MeasureItem, listenerMeasureItem);    		
-    	}
 	}
 	
 
@@ -466,34 +451,6 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 			column.setWidth(iWidth);
 		}
     }
-
-    
-    /****
-     * Temporary solution to resize the height of the table. 
-     * <p>
-     * Due to Eclipse bug, we cannot decrease the height.
-     * See:
-     *  <ul>
-     *  <li>{@link https://bugs.eclipse.org/bugs/show_bug.cgi?id=148039}
-     *  <li>{@link https://bugs.eclipse.org/bugs/show_bug.cgi?id=154341}
-     * </ul>
-     * </p>
-     * It is not recommended to resize the row height of the table since it doesn't
-     * work properly on Linux.
-     * 
-     * @param heightPixel the difference height in pixels
-     */
-    public void setRowHeight(int heightPixel) {
-    	
-    	int newHeight = heightPixel;
-
-    	if (listenerMeasureItem == null) {
-    		listenerMeasureItem = new TableMeasureItemListener(newHeight);
-    		getTree().addListener(SWT.MeasureItem, listenerMeasureItem);
-    	} else {
-        	listenerMeasureItem.setHeight(newHeight);
-    	}
-    }
     
 
     /****
@@ -524,6 +481,8 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 								   property.equals(PreferenceConstants.ID_DEBUG_FLAT_ID) ); 
 		
 		if (need_to_refresh) {
+			computeIdealCellBound();
+			
 			// refresh the table, but we don't change the content
 			refresh(false);
 		}
@@ -550,29 +509,63 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		return null;
 	}*/
 	
-	/*****************************************
-	 * 
-	 * Special listener class to handle MeasureItem event.
-	 * 
-	 * Caller can set the height of the tree during the construction
-	 * or set it via setHeight()
-	 *
-	 *****************************************/
-    private static class TableMeasureItemListener implements Listener
-    {
-    	private int height;
-    	public TableMeasureItemListener(int height) {
-    		this.height = height;
-    	}
-    	
-		@Override
-		public void handleEvent(Event event) {
-			event.height = height;
-		}
-		
-		public void setHeight(int height) {
-			this.height = height;
-		}
-    }
 
+	@Override
+	public void handleEvent(Event event) {
+		switch (event.type) {
+		case SWT.MeasureItem:
+			if (tableRowHeight > event.height)
+				event.height = tableRowHeight;
+			break;
+		}
+	}
+
+	
+	/*****
+     * Temporary solution to resize the height of the table. 
+     * <p>
+     * Due to Eclipse bug, we cannot decrease the height.
+     * See:
+     *  <ul>
+     *  <li>{@link https://bugs.eclipse.org/bugs/show_bug.cgi?id=148039}
+     *  <li>{@link https://bugs.eclipse.org/bugs/show_bug.cgi?id=154341}
+     * </ul>
+     * </p>
+     * It is not recommended to resize the row height of the table since it doesn't
+     * work properly on Linux.
+     * <br/>
+	 * Compute the ideal bounds for a cell by: 
+	 * <ul>
+	 *  <li>Check with font metric and font general
+	 *  <li>Pick which ever has the highest value
+	 * </ul>
+	 * The x-bound is used for metric column, while the y-bound is used for all columns.
+	 */
+	public void computeIdealCellBound() {
+		
+		GC gc = new GC(getControl());
+		
+		gc.setFont(FontManager.getMetricFont());
+		String text = TEXT_METRIC_COLUMN;
+		if (OSValidator.isWindows()) {
+			
+			// FIXME: ugly hack to add some spaces for Windows
+			// Somehow, Windows 10 doesn't allow to squeeze the text inside the table
+			// we have to give them some spaces (2 spaces in my case).
+			// A temporary fix for issue #37
+			text += "xx";
+		}
+		Point extent = gc.stringExtent(text);
+		metricColumnWidth = extent.x;
+		tableRowHeight    = extent.y + 2;
+		
+		// check the height if we use generic font (tree column)
+		// if this font is higher, we should use this height as the standard.
+		
+		gc.setFont(FontManager.getFontGeneric());
+		extent = gc.stringExtent(text);
+		tableRowHeight = Math.max(tableRowHeight, extent.y);
+		
+		gc.dispose();
+	}
 }
