@@ -77,9 +77,15 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 		TableColumnLayout layout = new TableColumnLayout();
 		tableComposite.setLayout(layout);
 		
-		tableViewer = new TableViewer(tableComposite, SWT.BORDER   | SWT.VIRTUAL   | 
+		tableViewer = new AbstractBaseTableViewer(tableComposite, SWT.BORDER   | SWT.VIRTUAL   | 
 													  SWT.RESIZE   | SWT.READ_ONLY |
-													  SWT.H_SCROLL | SWT.V_SCROLL);
+													  SWT.H_SCROLL | SWT.V_SCROLL) {
+
+			@Override
+			protected Point computeCellBounds(GC gc, Point extent) {
+				return extent;
+			}
+		};
 		
 		final Table table = tableViewer.getTable();
 		table.setHeaderVisible(true);

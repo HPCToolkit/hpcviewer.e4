@@ -65,6 +65,8 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		// hack: on Windows, we have to add SWT.FULL_SELECTION to allow users
 		//       to select a row in the table.
 		super(parent, SWT.VIRTUAL | SWT.FULL_SELECTION | style);
+		
+		computeIdealCellBound();
 
 		setUseHashlookup(true);
 		getTree().setLinesVisible(true);
@@ -84,8 +86,6 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 
 		// Fix bug #25: tooltip is not wrapped on MacOS 
 		ColumnViewerToolTipSupport.enableFor(this, ToolTip.NO_RECREATE);
-		
-		computeIdealCellBound();
 		
 		getTree().addListener(SWT.MeasureItem, this);
 	}

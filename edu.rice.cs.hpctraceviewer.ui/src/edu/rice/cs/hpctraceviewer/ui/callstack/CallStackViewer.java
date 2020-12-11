@@ -8,6 +8,7 @@ import org.eclipse.core.commands.operations.IUndoContext;
 import org.eclipse.core.commands.operations.IUndoableOperation;
 import org.eclipse.core.commands.operations.OperationHistoryEvent;
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -19,6 +20,9 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -32,6 +36,8 @@ import org.slf4j.LoggerFactory;
 import edu.rice.cs.hpc.data.util.CallPath;
 import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.data.util.string.StringUtil;
+import edu.rice.cs.hpcsetting.fonts.FontManager;
+import edu.rice.cs.hpctraceviewer.ui.base.AbstractBaseTableViewer;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.context.BaseTraceContext;
 import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
@@ -49,7 +55,7 @@ import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 /**************************************************
  * A viewer for CallStackSamples.
  *************************************************/
-public class CallStackViewer extends TableViewer
+public class CallStackViewer extends AbstractBaseTableViewer
 	implements IOperationHistoryListener, DisposeListener
 {	
 	private final static String EMPTY_FUNCTION = "--------------";
@@ -132,6 +138,11 @@ public class CallStackViewer extends TableViewer
 
 		final ColumnLabelProvider myLableProvider = new ColumnLabelProvider() {
         	
+			@Override
+			public Font getFont(Object element) {
+				return FontManager.getFontGeneric();
+			}
+			
         	public String getText(Object element)
         	{
         		if (element instanceof String)
@@ -372,4 +383,15 @@ public class CallStackViewer extends TableViewer
 
 	}
 
+
+	@Override
+	public void propertyChange(PropertyChangeEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected Point computeCellBounds(GC gc, Point extent) {
+		return extent;
+	}
 }
