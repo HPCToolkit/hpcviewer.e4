@@ -63,7 +63,7 @@ repackage_linux(){
 
 	output="hpcviewer-${release}-${prefix}.${platform}.$extension"
 	tar czf ../$output hpcviewer/
-	chmod ugo+r ../$output
+	chmod ug+rw ../$output
 
 	cd ..
 	ls -l $output
@@ -77,7 +77,7 @@ repackage_nonLinux(){
 	[[ -z $input ]] && { echo "$input doesn't exist"; exit 1;  }
 
 	cp $input $output
-	chmod ugo+r $output
+	chmod ug+rw $output
 	ls -l $output
 }
 
