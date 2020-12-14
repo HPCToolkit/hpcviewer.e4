@@ -589,7 +589,8 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				changeFontHeight(PreferenceConstants.ID_FONT_GENERIC, 1);
-				changeFontHeight(PreferenceConstants.ID_FONT_METRIC, 1);
+				changeFontHeight(PreferenceConstants.ID_FONT_METRIC,  1);
+				changeFontHeight(PreferenceConstants.ID_FONT_TEXT,    1);
 			}
 			
 			@Override
@@ -601,7 +602,8 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				changeFontHeight(PreferenceConstants.ID_FONT_GENERIC, -1);
-				changeFontHeight(PreferenceConstants.ID_FONT_METRIC, -1);
+				changeFontHeight(PreferenceConstants.ID_FONT_METRIC,  -1);
+				changeFontHeight(PreferenceConstants.ID_FONT_TEXT,    -1);
 			}
 			
 			@Override

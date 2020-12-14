@@ -71,9 +71,6 @@ public class Editor extends CTabItem implements IUpperPart, IPropertyChangeListe
 	private int    searchOffset;
 	private FindReplaceDocumentAdapter finder;
 	
-	
-	IEventBroker broker;
-	MPart part;
 
 	public Editor(CTabFolder parent, int style) {
 		super(parent, style);
@@ -82,8 +79,6 @@ public class Editor extends CTabItem implements IUpperPart, IPropertyChangeListe
 	
 	
 	public void setService(IEventBroker broker, MPart part) {
-		this.broker = broker;
-		this.part   = part;
 	}
 	
 	
