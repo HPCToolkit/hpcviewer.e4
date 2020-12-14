@@ -8,11 +8,9 @@ import org.eclipse.core.commands.operations.IUndoContext;
 import org.eclipse.core.commands.operations.IUndoableOperation;
 import org.eclipse.core.commands.operations.OperationHistoryEvent;
 import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.ToolTip;
@@ -380,15 +378,8 @@ public class CallStackViewer extends AbstractBaseTableViewer
 			}
 			return null;
 		}
-
 	}
 
-
-	@Override
-	public void propertyChange(PropertyChangeEvent event) {
-		// TODO Auto-generated method stub
-		
-	}
 
 	@Override
 	protected Point computeCellBounds(GC gc, Point extent) {
