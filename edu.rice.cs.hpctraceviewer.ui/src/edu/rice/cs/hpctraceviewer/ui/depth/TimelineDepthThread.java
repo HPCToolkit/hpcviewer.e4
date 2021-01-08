@@ -24,6 +24,7 @@ import edu.rice.cs.hpctraceviewer.ui.internal.BaseTimelineThread;
 public class TimelineDepthThread 
 	extends BaseTimelineThread
 {
+	private final int visibleDepths;
 
 	/*****
 	 * Thread initialization
@@ -38,9 +39,11 @@ public class TimelineDepthThread
 								ImageTraceAttributes attributes,
 								double scaleY, Queue<TimelineDataSet> queue, 
 								AtomicInteger timelineDone, 
-								IProgressMonitor monitor)
+								IProgressMonitor monitor,
+								int visibleDepths)
 	{
 		super(data, scaleY, queue, timelineDone, monitor);
+		this.visibleDepths = visibleDepths;
 	}
 
 
@@ -54,7 +57,7 @@ public class TimelineDepthThread
 		}
 		final ImageTraceAttributes attributes = stData.getAttributes();
 		int currentDepthLineNum = currentLine.getAndIncrement();
-		if (currentDepthLineNum < Math.min(attributes.getDepthPixelVertical(), stData.getMaxDepth())) {
+		if (currentDepthLineNum < Math.min(attributes.getDepthPixelVertical(), visibleDepths)) {
 			
 			// I can't get the data from the ProcessTimeline directly, so create
 			// a ProcessTimeline with data=null and then copy the actual data to
