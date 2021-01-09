@@ -120,7 +120,10 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 		event.gc.fillRectangle(topPixelCrossHairX,0,4,viewHeight);
 		
 		final int depth    = stData.getAttributes().getDepth();
-		final int width    = depth*viewHeight/visibleDepths + viewHeight/(2*visibleDepths);
+		final int maxDepth = stData.getMaxDepth();
+		final int minDepth = TimelineDepthThread.getMinDepth(depth, visibleDepths, maxDepth);
+		final int cdepth   = Math.max(0, depth-minDepth);
+		final int width    = cdepth*viewHeight/visibleDepths + viewHeight/(2*visibleDepths);
 		event.gc.fillRectangle(topPixelCrossHairX-8,width-1,20,4);
 	}
 	

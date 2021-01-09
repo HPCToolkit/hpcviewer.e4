@@ -18,6 +18,8 @@ public class DepthDataPreparation extends DataPreparation {
 	 * list of data to be painted on the depth view
 	 */
 	final private TimelineDataSet dataset;
+	final private int minDepth;
+	final private int visibleDepths;
 	
 	/****
 	 * Constructor to prepare data
@@ -30,10 +32,12 @@ public class DepthDataPreparation extends DataPreparation {
 	 * @param _pixelLength
 	 * @param _usingMidpoint
 	 */
-	public DepthDataPreparation(DataLinePainting data) {
+	public DepthDataPreparation(DataLinePainting data, int minDepth, int visibleDepths) {
 		
 		super(data);
 		dataset = new TimelineDataSet(data.ptl.line(), data.ptl.size(), data.height);
+		this.minDepth = minDepth;
+		this.visibleDepths = visibleDepths;
 	}
 
 	@Override
@@ -54,6 +58,10 @@ public class DepthDataPreparation extends DataPreparation {
 	public TimelineDataSet getList() {
 		
 		return dataset;
+	}
+
+	public int getMinDepth() {
+		return minDepth;
 	}
 
 }

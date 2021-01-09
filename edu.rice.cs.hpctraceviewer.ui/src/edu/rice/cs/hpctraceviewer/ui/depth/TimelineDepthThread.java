@@ -77,7 +77,6 @@ public class TimelineDepthThread
 
 	@Override
 	protected boolean init(ProcessTimeline trace) {
-
 		return true;
 	}
 
@@ -87,11 +86,18 @@ public class TimelineDepthThread
 
 	@Override
 	protected DataPreparation getData( DataLinePainting data ) {
+		int selectedDepth = this.stData.getAttributes().getDepth();
+		int maxDepth = this.stData.getMaxDepth();
+		int minDepth = getMinDepth(selectedDepth, visibleDepths, maxDepth);
 		
-		// the current depth is the current line to be painted
-		
-		data.depth = data.ptl.line();
-		
-		return new DepthDataPreparation(data);
-	}	
+		// the current depth is the current line to be painted		
+		data.depth = minDepth + data.ptl.line();
+		return new DepthDataPreparation(data, minDepth, visibleDepths);
+	}
+	
+	static int getMinDepth(int currentDepth, int visibleDepths, int maxDepth) {
+		float mid = (float) (visibleDepths * 0.5);
+		int mx = (int) Math.min(maxDepth, currentDepth + mid);
+		return Math.max(0, mx-visibleDepths);
+	}
 }
