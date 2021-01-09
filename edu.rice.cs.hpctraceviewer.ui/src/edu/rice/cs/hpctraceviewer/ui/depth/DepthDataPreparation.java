@@ -19,8 +19,6 @@ public class DepthDataPreparation extends DataPreparation {
 	 */
 	final private TimelineDataSet dataset;
 	final private int minDepth;
-	final private int visibleDepths;
-	
 	/****
 	 * Constructor to prepare data
 	 * 
@@ -37,7 +35,6 @@ public class DepthDataPreparation extends DataPreparation {
 		super(data);
 		dataset = new TimelineDataSet(data.ptl.line(), data.ptl.size(), data.height);
 		this.minDepth = minDepth;
-		this.visibleDepths = visibleDepths;
 	}
 
 	@Override
