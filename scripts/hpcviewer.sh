@@ -159,7 +159,7 @@ if test -d "$HOME" ; then
     stderr="$workspace"/hpcviewer.err
     mkdir -p "$workspace"
     echo "Redirect standard error to $stderr"
-    cmd="$viewer -data $workspace -configuration $workspace $PARAMS  $viewer_args  " 
+    cmd="GTK_OVERLAY_SCROLLING=0 $viewer -data $workspace -configuration $workspace $PARAMS  $viewer_args  " 
     exec $cmd 2> $stderr
 else
     warn "HOME is not set, proceeding anyway"
