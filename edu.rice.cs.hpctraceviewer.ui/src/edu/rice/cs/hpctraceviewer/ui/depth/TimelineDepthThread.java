@@ -86,8 +86,8 @@ public class TimelineDepthThread
 
 	@Override
 	protected DataPreparation getData( DataLinePainting data ) {
-		int selectedDepth = this.stData.getAttributes().getDepth();
-		int maxDepth = this.stData.getMaxDepth();
+		int selectedDepth = stData.getAttributes().getDepth();
+		int maxDepth = stData.getMaxDepth();
 		int minDepth = getMinDepth(selectedDepth, visibleDepths, maxDepth);
 		
 		// the current depth is the current line to be painted		
@@ -95,9 +95,24 @@ public class TimelineDepthThread
 		return new DepthDataPreparation(data, minDepth, visibleDepths);
 	}
 	
+	
+	/***
+	 * Retrieve the first visible depth
+	 * 
+	 * @param currentDepth the current selected depth
+	 * @param visibleDepths number of visible depths
+	 * @param maxDepth maximum depths
+	 * @return the first visible depth
+	 */
 	static int getMinDepth(int currentDepth, int visibleDepths, int maxDepth) {
 		float mid = (float) (visibleDepths * 0.5);
-		int mx = (int) Math.min(maxDepth, currentDepth + mid);
-		return Math.max(0, mx-visibleDepths);
+		if (currentDepth>=0 && currentDepth<= mid)
+			return 0;
+		
+		if (currentDepth+mid >= maxDepth)
+			return (int) (maxDepth-visibleDepths);
+		
+		int mx = (int) (currentDepth + mid);
+		return mx-visibleDepths;
 	}
 }

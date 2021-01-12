@@ -165,8 +165,8 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				boolean activateDepth = (e.item == tbtmDepthView);
-				tiZoomIn.setEnabled(activateDepth);
-				tiZoomOut.setEnabled(activateDepth);
+				tiZoomIn.setEnabled (activateDepth && tbtmDepthView.canZoomIn());
+				tiZoomOut.setEnabled(activateDepth && tbtmDepthView.canZoomOut());
 			}
 			
 			@Override
@@ -278,7 +278,6 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 		Image image = Utility.getImage(icon, label);
 		toolitem.setImage(image);
 		toolitem.setToolTipText(tooltip);
-		toolitem.setEnabled(true);
 		
 		return toolitem;
 	}
@@ -403,6 +402,7 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 			} else {
 				tbtmSummaryView.setAnalysisTool(new CpuBlameAnalysis(eventBroker));
 			}
+			updateToolItem();
 			
 		} catch (Exception e) {
 			Shell shell = Display.getDefault().getActiveShell();
