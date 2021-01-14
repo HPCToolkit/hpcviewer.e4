@@ -6,6 +6,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.swt.custom.CTabItem;
 
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
@@ -92,7 +93,8 @@ public class GraphMenu
 		}
     	
 		public void run() {
-			profilePart.addEditor(input);
+			CTabItem editor = profilePart.addEditor(input);
+			editor.getParent().setFocus();
 		}
     }
 }
