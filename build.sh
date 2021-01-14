@@ -21,6 +21,7 @@ GITC=`git rev-parse --short HEAD`
 release=`date +"%Y.%m.%d"`
 
 echo "Release ${release}. Commit $GITC" > edu.rice.cs.hpcviewer.ui/release.txt
+rm -rf hpcviewer-${release}*
 
 #
 # build the viewer
@@ -33,6 +34,7 @@ mvn clean package
 # The result should be:
 #
 # Building tar: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-linux.gtk.x86_64.tar.gz
+# Building tar: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-linux.gtk.ppc64le.tar.gz
 # Building zip: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-win32.win32.x86_64.zip
 # Building zip: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-macosx.cocoa.x86_64.zip
 
@@ -85,29 +87,33 @@ repackage_nonLinux(){
 
 # repackage linux files
 repackage_linux linux.gtk x86_64
-repackage_linux linux.gtk aarch64
+repackage_linux linux.gtk ppc64le
 
 # copy and rename windows package
 output="hpcviewer-${release}-win32.win32.x86_64.zip"
 input=edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-win32.win32.x86_64.zip
 repackage_nonLinux $input $output
 
+###################################################################
+# Special build for mac and aarch64
+###################################################################
+
+cp releng/pom.xml releng/pom.4.16.xml
+cp releng/pom.4.18.xml releng/pom.xml
+mvn package
+
+cp releng/pom.4.16.xml releng/pom.xml 
+
+# The result should be:
+#
+# Building tar: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-linux.gtk.aarch64.tar.gz
+# Building zip: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-macosx.cocoa.x86_64.zip
+repackage_linux linux.gtk aarch64
+
 # copy and rename mac package
 output="hpcviewer-${release}-macosx.cocoa.x86_64.zip"
 input=edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-macosx.cocoa.x86_64.zip 
 repackage_nonLinux $input $output
-
-# special pom build for ppc64le
-cp releng/pom.xml releng/pom.all.xml
-cp releng/pom.ppc64le.xml releng/pom.xml
-mvn package
-
-cp releng/pom.all.xml releng/pom.xml 
-
-# The result should be:
-#
-# Building tar: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-linux.gtk.ppc64le.tar.gz
-repackage_linux linux.gtk ppc64le
 
 echo "=================================="
 echo " Done" 
