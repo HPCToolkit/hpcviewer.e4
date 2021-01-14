@@ -87,7 +87,7 @@ public class HPCCallStackView extends AbstractBaseItem implements EventHandler
 		final Label lblDepth = new Label(depthArea, SWT.LEFT);
 		lblDepth.setText("Depth: ");
 		
-		depthEditor = new Spinner(depthArea, SWT.EMBEDDED);
+		depthEditor = new Spinner(depthArea, SWT.BORDER);
 		depthEditor.setMinimum(0);
 		depthEditor.setPageIncrement(1);
 		
