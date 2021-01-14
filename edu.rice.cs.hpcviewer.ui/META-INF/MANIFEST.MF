@@ -39,7 +39,8 @@ Require-Bundle: edu.rice.cs.hpc.data,
  org.eclipse.osgi.services,
  edu.rice.cs.hpcsetting,
  edu.rice.cs.hpctoolcontrol,
- edu.rice.cs.hpclog
+ edu.rice.cs.hpclog,
+ edu.rice.cs.hpctraceviewer.data
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Provide-Capability: licensing.feature;licensing.feature="edu.rice.cs.hpcviewer.ui.product"

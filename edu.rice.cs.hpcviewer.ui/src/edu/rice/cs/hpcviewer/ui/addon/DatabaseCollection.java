@@ -50,6 +50,8 @@ import edu.rice.cs.hpc.filter.service.FilterMap;
 import edu.rice.cs.hpcbase.BaseConstants;
 import edu.rice.cs.hpcbase.map.UserInputHistory;
 import edu.rice.cs.hpcbase.ui.IMainPart;
+import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
+import edu.rice.cs.hpctraceviewer.data.local.LocalDBOpener;
 import edu.rice.cs.hpctraceviewer.ui.TracePart;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.experiment.ExperimentManager;
@@ -336,7 +338,16 @@ public class DatabaseCollection
 		//----------------------------------------------------------------
 		BaseTraceAttribute traceAtt = experiment.getTraceAttribute();
 		if (traceAtt != null && traceAtt.dbTimeMax > 0) {
-			MPart tracePart = service.createPart(TracePart.ID);
+			try {
+				AbstractDBOpener dbOpener = new LocalDBOpener(null, experiment);
+				if (dbOpener.getVersion()<=0) {
+					return;
+				}
+			} catch (Exception e) {
+				return;
+			}
+
+			MPart tracePart  = service.createPart(TracePart.ID);
 			MPart createPart = service.showPart(tracePart, PartState.CREATE);
 			
 			if (createPart != null) {

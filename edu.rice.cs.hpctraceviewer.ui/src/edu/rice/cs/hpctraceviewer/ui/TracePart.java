@@ -362,7 +362,7 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 		if (eventBroker == null || partService == null)
 			return;
 		
-		if (experiment.getRootScope() == null)
+		if (experiment == null || experiment.getRootScope() == null)
 			return;
 		
 		try {
@@ -407,7 +407,8 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 		} catch (Exception e) {
 			Shell shell = Display.getDefault().getActiveShell();
 			MessageDialog.openError(shell, "Error in opening the database", e.getClass() + ":" + e.getMessage());
-			e.printStackTrace();
+			preDestroy();
+			partService.hidePart(part, true);
 		}
 	}
 

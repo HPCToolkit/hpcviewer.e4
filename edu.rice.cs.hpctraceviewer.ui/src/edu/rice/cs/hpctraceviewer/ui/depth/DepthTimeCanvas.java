@@ -43,7 +43,7 @@ import edu.rice.cs.hpctraceviewer.data.util.Constants;
 public class DepthTimeCanvas extends AbstractTimeCanvas 
 	implements IOperationHistoryListener, ISpaceTimeCanvas
 {	
-	private final static float FRACTION_DEPTH = 0.14f;
+	private final static float FRACTION_ZOOM_DEPTH = 2.0f;
 	private final static int   DEPTH_MIN = 1;
 	
 	private final ITracePart tracePart;
@@ -165,8 +165,7 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 	 * Zoom out the depth: increase the depth so users can see more 
 	 */
 	public void zoomOut() {
-		float fraction = (float) (FRACTION_DEPTH * stData.getMaxDepth());
-		visibleDepths  = (int) Math.min(stData.getMaxDepth(), visibleDepths + fraction);
+		visibleDepths  = (int) Math.min(stData.getMaxDepth(), visibleDepths + FRACTION_ZOOM_DEPTH);
 		
 		rebuffer();
 	}
@@ -176,8 +175,7 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 	 * Zoom in the depth: decrease the depth so user can see more pixels
 	 */
 	public void zoomIn() {
-		float fraction = (float) (FRACTION_DEPTH * stData.getMaxDepth());
-		visibleDepths  = (int) Math.max(DEPTH_MIN, visibleDepths - fraction);
+		visibleDepths  = (int) Math.max(DEPTH_MIN, visibleDepths - FRACTION_ZOOM_DEPTH);
 		 
 		rebuffer();
 	}
