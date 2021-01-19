@@ -907,6 +907,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	
     @Override
 	public void saveConfiguration() {
+    	if (stData == null)
+    		return;
+    	
 		FileDialog saveDialog;
 		saveDialog = new FileDialog(getShell(), SWT.SAVE);
 		saveDialog.setText("Save View Configuration");
@@ -960,6 +963,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 
 	@Override
 	public void openConfiguration() {
+		if (stData == null)
+			return;
+		
 		FileDialog openDialog;
 		openDialog = new FileDialog(getShell(), SWT.OPEN);
 		openDialog.setText("Open View Configuration");
