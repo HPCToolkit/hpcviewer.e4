@@ -7,7 +7,6 @@ import javax.inject.Named;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
@@ -50,8 +49,6 @@ import edu.rice.cs.hpctraceviewer.ui.statistic.HPCStatView;
 import edu.rice.cs.hpctraceviewer.ui.summary.HPCSummaryView;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 import edu.rice.cs.hpctraceviewer.ui.util.Utility;
-
-import javax.annotation.PreDestroy;
 
 import org.eclipse.core.commands.operations.IOperationHistory;
 import org.eclipse.core.commands.operations.IUndoContext;
@@ -115,7 +112,7 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 		mapLabelToContext = new HashMap<String, IUndoContext>(8);
 	}
 	
-	@PostConstruct
+
 	public void postConstruct(Composite parent, 
 							  MWindow window, 
 							  EPartService partService, 
@@ -307,7 +304,6 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 	}
 	
 	
-	@PreDestroy
 	public void preDestroy() {
 		if (partService != null)
 			partService.removePartListener(this);
