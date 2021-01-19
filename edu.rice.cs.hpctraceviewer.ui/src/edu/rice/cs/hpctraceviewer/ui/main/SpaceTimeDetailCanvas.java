@@ -936,7 +936,10 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 					//if they select yes, validSaveFileFound = true;
 					//if they select no, validSaveFileFound = false;
 
-					validSaveFileFound = MessageDialog.openConfirm(getShell(), "File exists", "This file path already exists.\nDo you want to overwrite this save file?");
+					validSaveFileFound = MessageDialog.openConfirm(
+											getShell(), 
+											"File exists", 
+											"This file path already exists.\nDo you want to overwrite this save file?");
 				}
 			}
 		}
