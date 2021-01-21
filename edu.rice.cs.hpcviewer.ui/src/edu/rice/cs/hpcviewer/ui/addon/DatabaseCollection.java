@@ -230,18 +230,8 @@ public class DatabaseCollection
 		// using asyncExec we hope Eclipse will delay the processing until the UI 
 		// is ready. This doesn't guarantee anything, but works in most cases :-(
 
-		Display.getDefault().asyncExec(()-> {
-			try {
-				showPart(experiment, application, modelService, service);
-			} catch (Exception e) {
-				String msg = "Cannot show a view: ";
-				
-				IEclipseContext activeWindowContext = application.getContext().getActiveChild();;
-				if (activeWindowContext == null) {
-					msg += "No window context is active";
-				}
-				statusReporter.error(msg, e);
-			}
+		sync.asyncExec(()-> {
+			showPart(experiment, application, modelService, service);
 		});
 	}
 	
@@ -253,8 +243,10 @@ public class DatabaseCollection
 	 * @param application
 	 * @param service
 	 * @param parentId
+	 * 
+	 * @return int
 	 */
-	private void showPart( BaseExperiment experiment, 
+	private int showPart( BaseExperiment experiment, 
 						   MApplication   application, 
 						   EModelService  modelService,
 						   EPartService   service) {
@@ -268,10 +260,14 @@ public class DatabaseCollection
 		
 		MWindow  window = application.getSelectedElement();
 		if (window == null) {
-			MessageDialog.openError(Display.getDefault().getActiveShell(), 
-									"Error", 
-									"Internal SWT: No active window");
-			return;
+			// window is not active yet
+			
+			// using asyncExec we hope Eclipse will delay the processing until the UI 
+			// is ready. This doesn't guarantee anything, but works in most cases :-(
+			sync.asyncExec(()-> {
+				showPart(experiment, application, modelService, service);
+			});
+			return -1;
 		}
 
 		List<MStackElement> list = null;
@@ -318,7 +314,7 @@ public class DatabaseCollection
 			MessageDialog.openError(Display.getDefault().getActiveShell(), 
 									"Fail to get the view", 
 									"hpcviewer is unable to retrieve the view. Please try again");
-			return;
+			return 0;
 		}
 		
 		// has to set the element Id before populating the view
@@ -346,10 +342,10 @@ public class DatabaseCollection
 			try {
 				AbstractDBOpener dbOpener = new LocalDBOpener(null, experiment);
 				if (dbOpener.getVersion()<=0) {
-					return;
+					return 1;
 				}
 			} catch (Exception e) {
-				return;
+				return 0;
 			}
 
 			MPart tracePart  = service.createPart(TracePart.ID);
@@ -364,6 +360,7 @@ public class DatabaseCollection
 				}
 			}
 		}
+		return 1;
 	}
 	
 	
