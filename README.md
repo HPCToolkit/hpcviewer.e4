@@ -4,6 +4,9 @@
 ## General Requirements
 
 * Java 8 to 14. Currently it does not work with Java 15. 
+  Can be downloaded via Spack 
+  or from Oracle https://www.oracle.com/java/technologies/javase-downloads.html 
+  or AdoptJDK https://adoptopenjdk.net
 * Linux: GTK+ 3.20 or newer.
 To check installed GTK version on Red Hat distributions:
 ```
@@ -23,10 +26,20 @@ spack load gtkplus
 ## How to build and run via command line (Maven)
 
 * Download and install Maven (if not available on the systems) at https://maven.apache.org/
-* Recommended: install via spack
-  `spack install maven; spack load maven`
-* type `mvn clean package`
-* This will compile and create hpcviewer packages for 4 platforms: Linux x86_64 and ppcle64, Windows and Mac. Example of the output:
+  * Recommended: install via spack
+  	`spack install maven; spack load maven`  
+  	
+* On Posix-based platform with Bash shell (Linux and MacOS), type:
+    `./build.sh` 
+    This will generate 5 `hpcviewer-<release>-<platform>.[zip|tgz]` files:
+    Windows, Mac, Linux, x86_64, Linux ppcle64, and Linux Arm (experimental).
+  * `untar` or `unzip` the file based according to the platform. 
+  * For Linux platform: run `./install <directory>` to install the viewer. 
+  
+* On Windows type:
+   `mvn clean package`
+  This will compile and create hpcviewer packages for 4 platforms: Linux x86_64 and ppcle64, Windows and Mac. 
+  Example of the output:
 ```
 ...
 [INFO] --- tycho-p2-director-plugin:1.6.0:archive-products (archive-prodcuts) @ edu.rice.cs.hpcviewer ---
