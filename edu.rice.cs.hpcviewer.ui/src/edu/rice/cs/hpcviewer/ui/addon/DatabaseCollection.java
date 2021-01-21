@@ -226,18 +226,23 @@ public class DatabaseCollection
 		// Corner case for TWM window manager: sometimes the processing is faster
 		// than the UI, and thus Eclipse doesn't provide any context or any child
 		// at this stage. Maybe we should wait until it's ready?
+		// 
+		// using asyncExec we hope Eclipse will delay the processing until the UI 
+		// is ready. This doesn't guarantee anything, but works in most cases :-(
 
-		try {
-			showPart(experiment, application, modelService, service);
-		} catch (Exception e) {
-			String msg = "Cannot show a view: ";
-			
-			IEclipseContext activeWindowContext = application.getContext().getActiveChild();;
-			if (activeWindowContext == null) {
-				msg += "No window context is active";
+		Display.getDefault().asyncExec(()-> {
+			try {
+				showPart(experiment, application, modelService, service);
+			} catch (Exception e) {
+				String msg = "Cannot show a view: ";
+				
+				IEclipseContext activeWindowContext = application.getContext().getActiveChild();;
+				if (activeWindowContext == null) {
+					msg += "No window context is active";
+				}
+				statusReporter.error(msg, e);
 			}
-			statusReporter.error(msg, e);
-		}
+		});
 	}
 	
 
