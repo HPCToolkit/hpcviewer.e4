@@ -51,7 +51,8 @@ public class GraphMenu
 				// which doesn't display empty metrics
 				/*
 				RootScope root = scope.getRootScope();
-				MetricValue mv = root.getMetricValue(metric);
+				BaseMetric originalMetric = experiment.getMetric(metric.getShortName());
+				MetricValue mv = root.getMetricValue(originalMetric);
 				if (mv == MetricValue.NONE)
 					continue;
 				*/
