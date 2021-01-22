@@ -910,9 +910,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
     	if (stData == null)
     		return;
     	
-		FileDialog saveDialog;
-		saveDialog = new FileDialog(getShell(), SWT.SAVE);
+		FileDialog saveDialog = new FileDialog(getShell(), SWT.SAVE);
 		saveDialog.setText("Save View Configuration");
+		saveDialog.setFilterPath(stData.getExperiment().getDefaultDirectory().getAbsolutePath());
 		String fileName = "";
 		boolean validSaveFileFound = false;
 		while(!validSaveFileFound)
@@ -969,9 +969,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		if (stData == null)
 			return;
 		
-		FileDialog openDialog;
-		openDialog = new FileDialog(getShell(), SWT.OPEN);
+		FileDialog openDialog = new FileDialog(getShell(), SWT.OPEN);
 		openDialog.setText("Open View Configuration");
+		openDialog.setFilterPath(stData.getExperiment().getDefaultDirectory().getAbsolutePath());
 		String fileName = "";
 		boolean validFrameFound = false;
 		while(!validFrameFound)
