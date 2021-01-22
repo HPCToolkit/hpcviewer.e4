@@ -1,7 +1,6 @@
 package edu.rice.cs.hpcviewer.ui.internal;
 
 import java.util.Arrays;
-import java.util.HashMap;
 
 import org.eclipse.jface.viewers.ILazyTreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -25,7 +24,6 @@ public abstract class AbstractContentProvider
 	implements ILazyTreeContentProvider, ISortContentProvider 
 {
     final private TreeViewer viewer;
-	final private HashMap<Integer, Object[]> sort_scopes;
 	final private ScopeComparator comparator;
 	
 	private TreeViewerColumn sort_column = null;
@@ -33,7 +31,6 @@ public abstract class AbstractContentProvider
 
     public AbstractContentProvider(TreeViewer viewer) {
     	this.viewer = viewer;
-		sort_scopes = new HashMap<Integer, Object[]>();
 		comparator  = new ScopeComparator();
     }
 
@@ -53,22 +50,8 @@ public abstract class AbstractContentProvider
 
 	@Override
 	public void updateElement(Object parent, int index) {
-
-		int child_position = index;
-		/*
-		 * this part will cause stack overflow on Java 11
-		 * 
-		if (parent == viewer.getInput()) {
-			if (index == 0)
- 				return;
-
-			// if the parent is a root, the first row is a header
-			// this header row is not counted as a child 
-			// issue #11: force the index to be 0. We cannot allow negative index.
-			child_position = Math.max(0, index-1);
-		}*/
 		
-		Object element = getSortedChild( (Scope)parent, child_position);
+		Object element = getSortedChild( (Scope)parent, index);
 		if (element != null) {
 			viewer.getTree().setRedraw(false);
 			viewer.replace(parent, index, element);
@@ -97,8 +80,6 @@ public abstract class AbstractContentProvider
     	
     	this.sort_column    = sort_column;
     	this.sort_direction = direction;
-    	
-		sort_scopes.clear();
 
     	// perform the sort by refreshing the viewer
     	// this refresh method will force the table to recompute the children
@@ -143,22 +124,16 @@ public abstract class AbstractContentProvider
     		if (proc.toBeElided())
     			return null;
     	}
-		int hash = System.identityHashCode(parent);
-    	Object [] children = sort_scopes.get(hash);
+    	Object [] children = getChildren(parent);
+    	if (sort_column == null || children == null)
+    		return null;
     	
-    	if (children == null && sort_column != null) {
-    		children = getChildren(parent);
-    		if (children == null)
-    			return null;
-    		
-    		BaseMetric metric = (BaseMetric) sort_column.getColumn().getData();
-    		comparator.setMetric(metric);    		
-    		comparator.setDirection(sort_direction);
-    		
-    		Arrays.sort(children, comparator);
-    		
-    		sort_scopes.put(hash, children);
-    	}
+		BaseMetric metric = (BaseMetric) sort_column.getColumn().getData();
+		comparator.setMetric(metric);    		
+		comparator.setDirection(sort_direction);
+		
+		Arrays.sort(children, comparator);
+		
     	return children;
 	}
 	
