@@ -16,7 +16,6 @@ import org.eclipse.core.filesystem.IFileInfo;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Creatable;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -57,6 +56,7 @@ import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.experiment.ExperimentManager;
 import edu.rice.cs.hpcviewer.ui.handlers.RecentDatabase;
 import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
+import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
 
 /***
  * <b>
@@ -318,8 +318,13 @@ public class DatabaseCollection
 		}
 		
 		// has to set the element Id before populating the view
-		//String elementID = ElementIdManager.getElementId(experiment);
-		//part.setElementId(elementID);
+		// this is to avoid an issue where a stack cannot store parts of the same elementId
+		// If there are two parts have the same elementID, when one is moved to the same stack.
+		// it will remove the other part.
+		
+		String elementID = "P." + ElementIdManager.getElementId(experiment);
+		part.setElementId(elementID);
+
 		view.setInput(part, experiment);
 
 		//----------------------------------------------------------------
@@ -352,6 +357,11 @@ public class DatabaseCollection
 			MPart createPart = service.showPart(tracePart, PartState.CREATE);
 			
 			if (createPart != null) {
+				// need to set the element id to avoid the same issue with the profile view
+				// (see the comment at line 320-323)
+				elementID = "T." + ElementIdManager.getElementId(experiment);
+				createPart.setElementId(elementID);
+
 				list.add(createPart);
 				
 				Object objTracePart = createPart.getObject();
