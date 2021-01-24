@@ -70,7 +70,7 @@ repackage_linux(){
 	chmod ugo+r ../$output
 
 	cd ..
-	ls -l $output
+	#ls -l $output
 	rm -rf tmp
 }
 
@@ -82,7 +82,7 @@ repackage_nonLinux(){
 
 	cp $input $output
 	chmod ugo+r $output
-	ls -l $output
+	#ls -l $output
 }
 
 # repackage linux files
@@ -119,4 +119,4 @@ echo "=================================="
 echo " Done" 
 echo "=================================="
 
-ls -l hpcviewer-*
+ls -l hpcviewer-${release}-*
