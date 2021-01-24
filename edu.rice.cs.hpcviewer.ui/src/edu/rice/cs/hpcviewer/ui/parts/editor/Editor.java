@@ -71,9 +71,6 @@ public class Editor extends CTabItem implements IUpperPart, IPropertyChangeListe
 	private int    searchOffset;
 	private FindReplaceDocumentAdapter finder;
 	
-	
-	IEventBroker broker;
-	MPart part;
 
 	public Editor(CTabFolder parent, int style) {
 		super(parent, style);
@@ -82,8 +79,6 @@ public class Editor extends CTabItem implements IUpperPart, IPropertyChangeListe
 	
 	
 	public void setService(IEventBroker broker, MPart part) {
-		this.broker = broker;
-		this.part   = part;
 	}
 	
 	
@@ -118,6 +113,12 @@ public class Editor extends CTabItem implements IUpperPart, IPropertyChangeListe
 		ViewerPreferenceManager.INSTANCE.getPreferenceStore().addPropertyChangeListener(this);
 	}
 	
+	
+	@Override
+	public void dispose() {
+		ViewerPreferenceManager.INSTANCE.getPreferenceStore().removePropertyChangeListener(this);
+		super.dispose();
+	}
 	
 	public boolean hasEqualInput(Object input) {
 		if (input == null) return false;
@@ -301,7 +302,9 @@ public class Editor extends CTabItem implements IUpperPart, IPropertyChangeListe
 
 		if (property.equals(PreferenceConstants.ID_FONT_TEXT)) {
 			StyledText text = textViewer.getTextWidget();
-
+			if (text == null)
+				return;
+			
 			Font font = FontManager.getTextEditorFont();
 			text.setFont(font);
 			

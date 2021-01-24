@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2002-2020, Rice University.
+# Copyright (c) 2002-2021, Rice University.
 # See the file edu.rice.cs.hpcviewer.ui/License.txt for details.
 #
 # Build hpcviewer and generate tar or zip files
@@ -21,6 +21,7 @@ GITC=`git rev-parse --short HEAD`
 release=`date +"%Y.%m.%d"`
 
 echo "Release ${release}. Commit $GITC" > edu.rice.cs.hpcviewer.ui/release.txt
+rm -rf hpcviewer-${release}*
 
 #
 # build the viewer
@@ -36,6 +37,7 @@ mvn clean package
 # Building tar: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-linux.gtk.ppc64le.tar.gz
 # Building zip: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-win32.win32.x86_64.zip
 # Building zip: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-macosx.cocoa.x86_64.zip
+
 
 echo "=================================="
 echo " Repackaging the viewer"
@@ -57,7 +59,9 @@ repackage_linux(){
 	cd tmp/hpcviewer
 
 	tar xzf  ../../$package
-	cp ../../scripts/* .
+	cp ../../scripts/hpcviewer.sh .
+	cp ../../scripts/install .
+	cp ../../scripts/README .
 
 	cd ..
 
@@ -66,7 +70,7 @@ repackage_linux(){
 	chmod ug+rw ../$output
 
 	cd ..
-	ls -l $output
+	#ls -l $output
 	rm -rf tmp
 }
 
@@ -77,8 +81,8 @@ repackage_nonLinux(){
 	[[ -z $input ]] && { echo "$input doesn't exist"; exit 1;  }
 
 	cp $input $output
-	chmod ug+rw $output
-	ls -l $output
+	chmod ugo+r $output
+	#ls -l $output
 }
 
 # repackage linux files
@@ -90,6 +94,22 @@ output="hpcviewer-${release}-win32.win32.x86_64.zip"
 input=edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-win32.win32.x86_64.zip
 repackage_nonLinux $input $output
 
+###################################################################
+# Special build for mac and aarch64
+###################################################################
+
+cp releng/pom.xml releng/pom.4.16.xml
+cp releng/pom.4.18.xml releng/pom.xml
+mvn package
+
+cp releng/pom.4.16.xml releng/pom.xml 
+
+# The result should be:
+#
+# Building tar: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-linux.gtk.aarch64.tar.gz
+# Building zip: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-macosx.cocoa.x86_64.zip
+repackage_linux linux.gtk aarch64
+
 # copy and rename mac package
 output="hpcviewer-${release}-macosx.cocoa.x86_64.zip"
 input=edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-macosx.cocoa.x86_64.zip 
@@ -99,3 +119,4 @@ echo "=================================="
 echo " Done" 
 echo "=================================="
 
+ls -l hpcviewer-${release}-*

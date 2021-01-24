@@ -114,7 +114,7 @@ public class ProfilePart implements IProfilePart
 	 * 
 	 * @param input cannot be null
 	 */
-	public void addEditor(Object input) {
+	public CTabItem addEditor(Object input) {
 		// search if the input is already displayed 
 		// if this is the case, we reuse the existing item
 		
@@ -128,7 +128,7 @@ public class ProfilePart implements IProfilePart
 					
 					tabFolderTop.setSelection((CTabItem) editor);
 					
-					return;
+					return (CTabItem) editor;
 				}
 			}
 		}
@@ -168,6 +168,7 @@ public class ProfilePart implements IProfilePart
 		// otherwise it will display empty item
 		
 		tabFolderTop.setSelection(viewer);
+		return viewer;
 	}
 	
 	
