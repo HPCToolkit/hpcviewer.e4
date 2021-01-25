@@ -248,10 +248,13 @@ public class ProfilePart implements IProfilePart
 		// force the focus to the table tab
 		// On Mac and Linux, we need to use asyncExec to delay the focus since
 		// the UI thread may not be ready when the focus arrives.
-		sync.asyncExec(() -> {
-			if (!tabFolderBottom.isDisposed())
-				tabFolderBottom.setFocus();
-		});
+		/*
+		 * sync.asyncExec(() -> { if (!tabFolderBottom.isDisposed())
+		 * tabFolderBottom.setFocus(); });
+		 */
+		// Have to use synchronous focus to avoid flickering when we split window
+		// (by clicking the menu "View - Split window")
+		tabFolderBottom.setFocus();
 	}
 
 	@Override
