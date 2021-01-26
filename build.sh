@@ -60,7 +60,7 @@ repackage_linux(){
 
 	tar xzf  ../../$package
 	cp ../../scripts/hpcviewer.sh .
-	cp ../../scripts/install .
+	cp ../../scripts/install.sh .
 	cp ../../scripts/README .
 
 	cd ..
@@ -77,10 +77,29 @@ repackage_linux(){
 repackage_nonLinux(){
 	input=$1
 	output=$2
-
+    type=$3
+    
 	[[ -z $input ]] && { echo "$input doesn't exist"; exit 1;  }
-
-	cp $input $output
+  
+    if [ "$type" == "win" ]; then
+      # for windows, we need to create a special hpcviewer directory
+      if [ -e hpcviewer ]; then
+         echo "File or directory hpcviewer already exist. Do you want to remove it? (y/n) "
+         read tobecontinue
+         if [ $tobecontinue != "y" ]; then
+	    exit
+	 fi
+      fi
+      rm -rf hpcviewer
+      mkdir hpcviewer
+      cd hpcviewer
+      unzip ../$input
+      cd ..
+      zip -r $output hpcviewer/
+      rm -rf hpcviewer
+    else
+	  cp $input $output
+	fi
 	chmod 664 $output
 	#ls -l $output
 }
@@ -92,7 +111,7 @@ repackage_linux linux.gtk ppc64le
 # copy and rename windows package
 output="hpcviewer-${release}-win32.win32.x86_64.zip"
 input=edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-win32.win32.x86_64.zip
-repackage_nonLinux $input $output
+repackage_nonLinux $input $output win
 
 ###################################################################
 # Special build for mac and aarch64
