@@ -3,7 +3,9 @@ package edu.rice.cs.hpctraceviewer.ui.internal;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorCompletionService;
@@ -15,9 +17,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.swt.widgets.Display;
 
 import edu.rice.cs.hpc.data.util.OSValidator;
+import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
+import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TimelineDataSet;
 import edu.rice.cs.hpctraceviewer.ui.base.ISpaceTimeCanvas;
@@ -37,12 +42,13 @@ import edu.rice.cs.hpctraceviewer.ui.util.Utility;
  *******************************************************/
 public abstract class BaseViewPaint extends Job
 {
+
+	final private ISpaceTimeCanvas canvas;
+	private Map<Future<Integer>, BaseTimelineThread> mapFutureToTask;
+
 	protected boolean changedBounds;
 		
 	protected SpaceTimeDataController controller;
-
-	final private ISpaceTimeCanvas canvas;
-	
 
 	/**
 	 * Constructor to paint a view (trace and depth view)
@@ -151,6 +157,8 @@ public abstract class BaseViewPaint extends Job
 		final double xscale = canvas.getScalePixelsPerTime();
 		final double yscale = Math.max(canvas.getScalePixelsPerRank(), 1);
 		
+		mapFutureToTask = new HashMap<Future<Integer>, BaseTimelineThread>(num_threads);
+		
 		ExecutorService threadExecutor = Executors.newCachedThreadPool();
 		ExecutorCompletionService<Integer> ecs = new ExecutorCompletionService<Integer>(threadExecutor);
 						
@@ -163,7 +171,8 @@ public abstract class BaseViewPaint extends Job
 				// we should just warning the user instead of scaring them with
 				// error message and backtrace
 
-				ecs.submit(thread);
+				Future<Integer> f = ecs.submit(thread);
+				mapFutureToTask.put(f, thread);
 			
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -273,26 +282,43 @@ public abstract class BaseViewPaint extends Job
 			ArrayList<Integer> result, int launch_threads, IProgressMonitor monitor)
 	{
 		int num_invalid_samples = 0;
+		HashMap<Integer, Integer> mapInvalidSamples = new HashMap<Integer, Integer>();
+		
+		PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
+		boolean debug = pref.getBoolean(PreferenceConstants.ID_DEBUG_MODE);
+
 		for (int i=0; i<launch_threads; i++)
 		{
 			if (monitor.isCanceled())
 				return false;
 			
 			try {
-				Integer linenum = ecs.take().get();
+				Future<Integer> f = ecs.take();
+				Integer linenum = f.get();
 				if (linenum == null)
 					return false;
-				num_invalid_samples += linenum.intValue();
 				
+				num_invalid_samples += linenum.intValue();				
 				result.add(linenum);
+				
+				if (debug) {
+					BaseTimelineThread t = mapFutureToTask.get(f);
+					if (t != null) {
+						HashMap<Integer, Integer> m = t.getInvalidData();
+						mapInvalidSamples.putAll(m);
+					}
+				}
 
 			} catch (Exception e) {
 				// we don't need to show exception message everywhere unless if we are in develop mode
-
 				return false;
 			}
 		}
 		if (num_invalid_samples > 0) {
+			System.out.println("List of invalid cpid and its number of samples (approximately):");
+			mapInvalidSamples.forEach((k, v) -> {
+				System.out.println(k + " : " + v + " samples");
+			});
 			final String message = "Warning: " + num_invalid_samples + 
 					" sample(s) have invalid call-path ID.";
 			canvas.setMessage(message);
