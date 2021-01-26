@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.internal;
+package edu.rice.cs.hpcbase;
 
 import edu.rice.cs.hpc.data.experiment.Experiment;
 

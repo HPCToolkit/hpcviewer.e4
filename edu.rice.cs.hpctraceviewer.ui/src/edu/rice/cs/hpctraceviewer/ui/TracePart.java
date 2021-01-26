@@ -50,6 +50,7 @@ import edu.rice.cs.hpctraceviewer.ui.statistic.HPCStatView;
 import edu.rice.cs.hpctraceviewer.ui.summary.HPCSummaryView;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 import edu.rice.cs.hpctraceviewer.ui.util.Utility;
+import edu.rice.cs.hpcbase.ViewerDataEvent;
 
 import javax.annotation.PreDestroy;
 
@@ -450,7 +451,16 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 
 	@Override
 	public void handleEvent(Event event) {
+		Object obj = event.getProperty(IEventBroker.DATA);
+		if (obj == null || experiment == null)
+			return;
+
+		ViewerDataEvent eventInfo = (ViewerDataEvent) obj;
+		if (experiment != eventInfo.experiment) 
+			return;
+
 		if (event.getTopic().equals(BaseConstants.TOPIC_HPC_REMOVE_DATABASE)) {
+			
 			// mark that this part will be close soon. Do not do any tasks
 			partService = null;
 			eventBroker = null;

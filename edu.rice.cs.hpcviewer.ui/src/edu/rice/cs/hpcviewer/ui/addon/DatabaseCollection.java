@@ -47,6 +47,7 @@ import edu.rice.cs.hpc.data.trace.BaseTraceAttribute;
 import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.filter.service.FilterMap;
 import edu.rice.cs.hpcbase.BaseConstants;
+import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcbase.map.UserInputHistory;
 import edu.rice.cs.hpcbase.ui.IMainPart;
 import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
@@ -55,7 +56,6 @@ import edu.rice.cs.hpctraceviewer.ui.TracePart;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.experiment.ExperimentManager;
 import edu.rice.cs.hpcviewer.ui.handlers.RecentDatabase;
-import edu.rice.cs.hpcviewer.ui.internal.ViewerDataEvent;
 import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
 
 /***
