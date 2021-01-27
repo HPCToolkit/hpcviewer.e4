@@ -74,7 +74,7 @@ public abstract class AbstractContentProvider
 	public void updateChildCount(Object element, int currentChildCount) {
 		assert(element instanceof Scope); 
 
-		Object []children = getSortedChildren((Scope)element);
+		Object []children = getRawChildren((Scope)element);
 		int length = (children == null ? 0 : children.length);
 		try {
 			viewer.setChildCount(element, length);
@@ -135,12 +135,8 @@ public abstract class AbstractContentProvider
     	if (children != null)
     		return children;
     	
-    	if (parent instanceof ProcedureScope) {
-    		ProcedureScope proc = (ProcedureScope) parent;
-    		if (proc.toBeElided())
-    			return null;
-    	}
-    	children = getChildren(parent);
+    	children = getRawChildren(parent);
+
     	if (sort_column == null || children == null)
     		return null;
     	
@@ -157,6 +153,18 @@ public abstract class AbstractContentProvider
     	return children;
 	}
 	
+    
+    private Object[] getRawChildren(Scope parent) {
+    	
+    	if (parent instanceof ProcedureScope) {
+    		ProcedureScope proc = (ProcedureScope) parent;
+    		if (proc.toBeElided())
+    			return null;
+    	}
+    	return getChildren(parent);
+    }
+    
+    
     /***
      * Retrieve a child of a parent for a specific sorted index.
      * 
