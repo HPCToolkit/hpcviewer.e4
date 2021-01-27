@@ -1,6 +1,8 @@
 package edu.rice.cs.hpcviewer.ui.internal;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.jface.viewers.ILazyTreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -26,12 +28,20 @@ public abstract class AbstractContentProvider
     final private TreeViewer viewer;
 	final private ScopeComparator comparator;
 	
+	/** Cache to store the sorted children.
+	 *  Every time Jface table reconstruct a table item, it requires
+	 *  every item to check the children a lot and sometimes repeatedly.
+	 *  To avoid such re-sorting the children, we need to cache them 
+	 *  in a hash map here. It will require more memory but we save time.*/
+	final private Map<Scope, Object[]> sort_scopes;
+	
 	private TreeViewerColumn sort_column = null;
 	private int sort_direction 			 = 0;
 
     public AbstractContentProvider(TreeViewer viewer) {
     	this.viewer = viewer;
 		comparator  = new ScopeComparator();
+		sort_scopes = new HashMap<Scope, Object[]>();
     }
 
 
@@ -80,6 +90,7 @@ public abstract class AbstractContentProvider
     	
     	this.sort_column    = sort_column;
     	this.sort_direction = direction;
+    	sort_scopes.clear();
 
     	// perform the sort by refreshing the viewer
     	// this refresh method will force the table to recompute the children
@@ -118,13 +129,18 @@ public abstract class AbstractContentProvider
      * @return
      */
     public Object[] getSortedChildren(Scope parent) {
-		
+		// check if this parent has already sorted children or not
+    	// if yet, we look at the cache and return the children.
+    	Object [] children = sort_scopes.get(parent);
+    	if (children != null)
+    		return children;
+    	
     	if (parent instanceof ProcedureScope) {
     		ProcedureScope proc = (ProcedureScope) parent;
     		if (proc.toBeElided())
     			return null;
     	}
-    	Object [] children = getChildren(parent);
+    	children = getChildren(parent);
     	if (sort_column == null || children == null)
     		return null;
     	
@@ -133,6 +149,10 @@ public abstract class AbstractContentProvider
 		comparator.setDirection(sort_direction);
 		
 		Arrays.sort(children, comparator);
+		
+		// store to the cache
+		// for the sake of performance optimization, we sacrifice the memory
+		sort_scopes.put(parent, children);
 		
     	return children;
 	}
