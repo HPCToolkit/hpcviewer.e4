@@ -67,7 +67,7 @@ spack load gtkplus
 
 Requirements:
 
-* Recommended: [Eclipse 2020.12] (https://www.eclipse.org/downloads/packages/release/2020-12/r/eclipse-ide-rcp-and-rap-developers) for Mac
+* Recommended: [Eclipse 2020.12](https://www.eclipse.org/downloads/packages/release/2020-12/r/eclipse-ide-rcp-and-rap-developers) for Mac
   or [Eclipse 2020.06](https://www.eclipse.org/downloads/packages/release/2020-06/r/eclipse-ide-rcp-and-rap-developers) for Linux and Windows. 
 * Warning: May not work properly with older versions of Eclipse. 
 
