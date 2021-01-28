@@ -3,7 +3,7 @@
 
 ## General Requirements
 
-* Java 8 to 14. Currently it does not work with Java 15. 
+* Java 11. 
   Can be downloaded via Spack 
   or from Oracle https://www.oracle.com/java/technologies/javase-downloads.html 
   or AdoptJDK https://adoptopenjdk.net
@@ -30,15 +30,24 @@ spack load gtkplus
   	`spack install maven; spack load maven`  
   	
 * On Posix-based platform with Bash shell (Linux and MacOS), type:
-    `./build.sh` 
-    This will generate 5 `hpcviewer-<release>-<platform>.[zip|tgz]` files:
+    ```
+    ./build.sh
+    ``` 
+    This will build Linux x86_64, Linux ppc64le and Windows with Eclipse 4.16,
+    and Linux Arm (experimental) and MacOS with Eclipse 4.18.
+    The script generates five `hpcviewer-<release>-<platform>.[zip|tgz]` files:
     Windows, Mac, Linux, x86_64, Linux ppcle64, and Linux Arm (experimental).
   * `untar` or `unzip` the file based according to the platform. 
-  * For Linux platform: run `./install <directory>` to install the viewer. 
+  * For Linux platform: run 
+  ```./install.sh <directory>``` 
+  to install the viewer. 
   
 * On Windows type:
-   `mvn clean package`
-  This will compile and create hpcviewer packages for 4 platforms: Linux x86_64 and ppcle64, Windows and Mac. 
+   ```
+   mvn clean package
+   ```
+  This will compile and create hpcviewer packages for 4 platforms: Linux x86_64 and ppcle64, Windows and Mac
+  with Eclipse 4.16 (the default).
   Example of the output:
 ```
 ...
@@ -49,7 +58,8 @@ spack load gtkplus
 [INFO] Building zip: <hpcviewer.e4>/edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-macosx.cocoa.x86_64.zip
 [INFO] ------------------------------------------------------------------------
 ```
-* Unzip (or untar) the product file at `edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-...` according to the platform.
+  * Unzip `edu.rice.cs.hpcviewer-win32.win32.x86_64.zip` to another folder. 
+    It isn't recommended to overwrite the existing folder.
 
 ## How to build and run via Eclipse IDE
 
@@ -57,8 +67,9 @@ spack load gtkplus
 
 Requirements:
 
-* Recommended: [Eclipse 2020.06](https://www.eclipse.org/downloads/packages/release/2020-06/r/eclipse-ide-rcp-and-rap-developers). 
-* Warning: May not work properly with older or newer versions of Eclipse. 
+* Recommended: [Eclipse 2020.12] (https://www.eclipse.org/downloads/packages/release/2020-12/r/eclipse-ide-rcp-and-rap-developers) for Mac
+  or [Eclipse 2020.06](https://www.eclipse.org/downloads/packages/release/2020-06/r/eclipse-ide-rcp-and-rap-developers) for Linux and Windows. 
+* Warning: May not work properly with older versions of Eclipse. 
 
 To import the source code into Eclipse IDE:
 
