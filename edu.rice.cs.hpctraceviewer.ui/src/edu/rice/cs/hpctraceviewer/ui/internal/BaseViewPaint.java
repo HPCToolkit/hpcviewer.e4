@@ -314,7 +314,7 @@ public abstract class BaseViewPaint extends Job
 				return false;
 			}
 		}
-		if (num_invalid_samples > 0) {
+		if (debug && num_invalid_samples > 0) {
 			System.out.println("List of invalid cpid and its number of samples (approximately):");
 			mapInvalidSamples.forEach((k, v) -> {
 				System.out.println(k + " : " + v + " samples");
