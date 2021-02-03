@@ -18,7 +18,7 @@ fi
 # Update the release file 
 #
 GITC=`git rev-parse --short HEAD`
-release=`date +"%Y.%m.%d"`
+release=`date +"%Y.%m"`
 
 echo "Release ${release}. Commit $GITC" > edu.rice.cs.hpcviewer.ui/release.txt
 rm -rf hpcviewer-${release}*
