@@ -13,7 +13,6 @@ import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.OwnerDrawLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
@@ -29,9 +28,7 @@ import org.eclipse.swt.graphics.Drawable;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -288,37 +285,15 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 	 * Color of the procedure
 	 *
 	 *************************************************************/
-	static private class ColumnColorLabelProvider extends OwnerDrawLabelProvider 
+	static private class ColumnColorLabelProvider extends ColorColumnLabelProvider 
 	{
-
-		private Color getBackground(Display display, Object element) {
+		@Override
+		protected Color getColor(org.eclipse.swt.widgets.Event event, Object element) {
 			if (element != null && element instanceof StatisticItem) {
 				StatisticItem item = (StatisticItem) element;
 				return item.color;
 			}
-			return display.getSystemColor(SWT.COLOR_WHITE);
-		}
-
-
-		@Override
-		protected void measure(org.eclipse.swt.widgets.Event event, Object element) {}
-
-
-		@Override
-		protected void paint(org.eclipse.swt.widgets.Event event, Object element) {
-			switch(event.index) {
-			case 0:
-				Color color = getBackground(event.display, element);				
-				event.gc.setBackground(color);
-				
-				Rectangle bound = event.getBounds();
-				bound.width = IConstants.COLUMN_COLOR_WIDTH_PIXELS;
-				
-				event.gc.fillRectangle(bound);
-				break;
-			default:
-				break;
-			}
+			return event.display.getSystemColor(SWT.COLOR_WHITE);
 		}
 	}
 	

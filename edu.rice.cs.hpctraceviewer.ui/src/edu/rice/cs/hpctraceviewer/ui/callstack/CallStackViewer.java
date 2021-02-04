@@ -11,7 +11,6 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.OwnerDrawLabelProvider;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.ToolTip;
@@ -22,7 +21,6 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -38,6 +36,7 @@ import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.data.util.string.StringUtil;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpctraceviewer.ui.base.AbstractBaseTableViewer;
+import edu.rice.cs.hpctraceviewer.ui.base.ColorColumnLabelProvider;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.context.BaseTraceContext;
 import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
@@ -64,7 +63,7 @@ public class CallStackViewer extends AbstractBaseTableViewer
 	private final IEventBroker eventBroker;
 	private final ITracePart   tracePart;
 	private final TableViewerColumn viewerColumn;
-	private final ColumnColorLabelProvider colorLabelProvider ;
+	private final ColorLabelProvider colorLabelProvider ;
 	
 	private SpaceTimeDataController stData ;
 	private Listener selectionListener;
@@ -124,7 +123,7 @@ public class CallStackViewer extends AbstractBaseTableViewer
 		// add color column
         //------------------------------------------------
 		TableViewerColumn colorViewer = new TableViewerColumn(this, SWT.NONE);
-		colorLabelProvider = new ColumnColorLabelProvider();
+		colorLabelProvider = new ColorLabelProvider();
 		colorViewer.setLabelProvider(colorLabelProvider);
 				
 		TableColumn col = colorViewer.getColumn();
@@ -361,40 +360,19 @@ public class CallStackViewer extends AbstractBaseTableViewer
 	 * Label provider for Color of the procedure
 	 *
 	 *************************************************************/
-	static private class ColumnColorLabelProvider extends OwnerDrawLabelProvider 
+	static private class ColorLabelProvider extends ColorColumnLabelProvider 
 	{
 		ColorTable colorTable;
 		
-		private Color getBackground(Display display, Object element) {
+		@Override
+		protected Color getColor(Event event, Object element) {
 			if (element != EMPTY_FUNCTION && 
 				element != null && 
 				element instanceof String) {
 				
 				return colorTable.getColor((String) element);
 			}
-			return display.getSystemColor(SWT.COLOR_WHITE);
-		}
-
-
-		@Override
-		protected void measure(Event event, Object element) {}
-
-
-		@Override
-		protected void paint(Event event, Object element) {
-			switch(event.index) {
-			case 0:
-				Color color = getBackground(event.display, element);				
-				event.gc.setBackground(color);
-				
-				Rectangle bound = event.getBounds();
-				bound.width = IConstants.COLUMN_COLOR_WIDTH_PIXELS;
-				
-				event.gc.fillRectangle(bound);
-				break;
-			default:
-				break;
-			}
+			return event.display.getSystemColor(SWT.COLOR_WHITE);
 		}
 	}
 
