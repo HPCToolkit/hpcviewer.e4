@@ -113,4 +113,10 @@ public class DepthViewPaint extends BaseViewPaint {
 		if (masterGC != null && !masterGC.isDisposed())
 			masterGC.dispose();
 	}
+
+	@Override
+	protected void endPreparationThread(BaseTimelineThread thread, int result) {}
+
+	@Override
+	protected void endDataPreparation(int numInvalidData) {}
 }

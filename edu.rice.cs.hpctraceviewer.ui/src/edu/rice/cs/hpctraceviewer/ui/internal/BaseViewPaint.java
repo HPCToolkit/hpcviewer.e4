@@ -17,12 +17,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.swt.widgets.Display;
 
 import edu.rice.cs.hpc.data.util.OSValidator;
-import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
-import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TimelineDataSet;
 import edu.rice.cs.hpctraceviewer.ui.base.ISpaceTimeCanvas;
@@ -43,7 +40,7 @@ import edu.rice.cs.hpctraceviewer.ui.util.Utility;
 public abstract class BaseViewPaint extends Job
 {
 
-	final private ISpaceTimeCanvas canvas;
+	final protected ISpaceTimeCanvas canvas;
 	private Map<Future<Integer>, BaseTimelineThread> mapFutureToTask;
 
 	protected boolean changedBounds;
@@ -281,12 +278,8 @@ public abstract class BaseViewPaint extends Job
 	private boolean waitDataPreparationThreads(ExecutorCompletionService<Integer> ecs, 
 			ArrayList<Integer> result, int launch_threads, IProgressMonitor monitor)
 	{
-		int num_invalid_samples = 0;
-		HashMap<Integer, Integer> mapInvalidSamples = new HashMap<Integer, Integer>();
+		int num_invalid_samples = 0;		
 		
-		PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
-		boolean debug = pref.getBoolean(PreferenceConstants.ID_DEBUG_MODE);
-
 		for (int i=0; i<launch_threads; i++)
 		{
 			if (monitor.isCanceled())
@@ -300,29 +293,17 @@ public abstract class BaseViewPaint extends Job
 				
 				num_invalid_samples += linenum.intValue();				
 				result.add(linenum);
-				
-				if (debug) {
-					BaseTimelineThread t = mapFutureToTask.get(f);
-					if (t != null) {
-						HashMap<Integer, Integer> m = t.getInvalidData();
-						mapInvalidSamples.putAll(m);
-					}
-				}
 
+				BaseTimelineThread t = mapFutureToTask.get(f);
+
+				endPreparationThread(t, linenum.intValue());
+				
 			} catch (Exception e) {
 				// we don't need to show exception message everywhere unless if we are in develop mode
 				return false;
 			}
 		}
-		if (debug && num_invalid_samples > 0) {
-			System.out.println("List of invalid cpid and its number of samples (approximately):");
-			mapInvalidSamples.forEach((k, v) -> {
-				System.out.println(k + " : " + v + " samples");
-			});
-			final String message = "Warning: " + num_invalid_samples + 
-					" sample(s) have invalid call-path ID.";
-			canvas.setMessage(message);
-		}
+		endDataPreparation(num_invalid_samples);
 		return true;
 	}
 
@@ -433,4 +414,8 @@ public abstract class BaseViewPaint extends Job
 	 */
 	abstract protected BasePaintThread getPaintThread( Queue<TimelineDataSet> queue, int numLines, 
 													   int width, IProgressMonitor monitor);
+
+	abstract protected void endPreparationThread(BaseTimelineThread thread, int result);
+	
+	abstract protected void endDataPreparation(int numInvalidData);
 }
