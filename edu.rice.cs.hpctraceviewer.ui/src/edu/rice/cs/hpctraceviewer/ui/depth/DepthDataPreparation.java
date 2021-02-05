@@ -34,7 +34,7 @@ public class DepthDataPreparation extends DataPreparation {
 	}
 
 	@Override
-	public void finishLine(int currSampleMidpoint, int succSampleMidpoint,
+	public void finishLine(String proc, int currSampleMidpoint, int succSampleMidpoint,
 			int currDepth, Color color, int sampleCount) {
 		
 		if (dataset.getLineNumber() + minDepth < currDepth) {
