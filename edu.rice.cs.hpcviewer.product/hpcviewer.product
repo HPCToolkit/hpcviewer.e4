@@ -28,7 +28,9 @@ hpcviewer is part of Rice University&apos;s HPCToolkit project. Development of H
 
    <splash
       location="edu.rice.cs.hpcviewer.ui"
-      startupProgressRect="5,275,445,15" />
+      startupProgressRect="5,275,445,15"
+      startupMessageRect="7,252,445,20"
+      startupForegroundColor="CDAB8F" />
    <launcher name="hpcviewer">
       <linux icon="/edu.rice.cs.hpcviewer.ui/resources/hpcviewer-icon-32x32-32bit.xpm"/>
       <macosx icon="/edu.rice.cs.hpcviewer.ui/resources/hpcviewer.icns"/>
