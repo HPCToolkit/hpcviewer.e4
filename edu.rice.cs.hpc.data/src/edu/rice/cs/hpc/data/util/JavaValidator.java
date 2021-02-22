@@ -11,8 +11,8 @@ import java.util.Set;
 public class JavaValidator 
 {
 	// minimum Java supported
-	//private final static int JavaMinVersion = 5;
-	private final static int JavaVersionSupported = 8;
+	private final static int JAVA_8 = 8;
+	private final static int JAVA_11 = 11;
 	
 	static public void main(String []args) {
 		System.out.println();
@@ -24,7 +24,7 @@ public class JavaValidator
 				System.out.println("Valid JVM");
 			else
 				System.out.println("Invalid JVM: Needs to be higher or equal than " 
-						+ JavaVersionSupported);
+						+ JAVA_8);
 		}
 	}
 	
@@ -84,7 +84,7 @@ public class JavaValidator
 		if (!isCorrect) {
 			String message = "Error: Java " + 
 					System.getProperty("java.version") +
-					" is not supported.\nOnly Java 8 is supported.";
+					" is not supported.";
 
 			System.out.println(message);
 
@@ -109,16 +109,29 @@ public class JavaValidator
 		String majorVersion = verNumber[0];
 
 		try {
-			Integer major = Integer.valueOf(majorVersion);
+			Integer major  = Integer.valueOf(majorVersion);
+			int JVMversion = major.intValue();
 			if (major == 1) {
 				Integer minor = Integer.valueOf(verNumber[1]);
-				return minor == JavaVersionSupported;
+				JVMversion    = minor.intValue();
 			}
-			return major == JavaVersionSupported;
+			return isSupported(JVMversion);
 		} catch (Exception e) {
 			System.err.println("Unknown java version: " + version);
 		}
 		return false;
+	}
+	
+	static private boolean isSupported(int version) {
+		if (OSValidator.isMac()) {
+			return JAVA_11 <= version;
+		} else if (OSValidator.isUnix()) {
+			String arch = System.getProperty("os.arch");
+			if (arch.equals("aarch64")) {
+				return JAVA_11 <= version;
+			}
+		}
+		return JAVA_8 <= version;
 	}
 
 }
