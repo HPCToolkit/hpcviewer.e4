@@ -33,6 +33,7 @@ public class ToolControl
 	private ProgressBar progressBar;
 	private GobalProgressMonitor monitor;
 	private Label lblMessage;
+	private Composite container;
 
 	@Inject
 	public ToolControl(UISynchronize sync) {
@@ -41,19 +42,23 @@ public class ToolControl
 
 	@PostConstruct
 	public void createControls(Composite parent){
-		
+
+		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(parent);
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(parent);
-		GridLayoutFactory.fillDefaults().numColumns(3).applyTo(parent);
 
-		lblMessage = new Label(parent, SWT.NONE);
+		container = new Composite(parent, SWT.BORDER);
+		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(container);
 
-		progressBar = new ProgressBar(parent, SWT.SMOOTH);
+		lblMessage = new Label(container, SWT.RIGHT);
+
+		progressBar = new ProgressBar(container, SWT.SMOOTH);
 		progressBar.setBounds(100, 10, 200, 20);
 
 		//memory = new Canvas(parent, 0);
 		//memory.setBounds(100, 10, 200, 20);
 		
-		GridDataFactory.fillDefaults().grab(true, false).applyTo(lblMessage);
+		GridDataFactory.fillDefaults().grab(true, false).applyTo(lblMessage);		
+		GridDataFactory.fillDefaults().grab(true, false).applyTo(container);
 		
 		monitor = new GobalProgressMonitor();
 
