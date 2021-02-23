@@ -94,8 +94,12 @@ public abstract class AbstractContentProvider
 
     	// perform the sort by refreshing the viewer
     	// this refresh method will force the table to recompute the children
-    	
-    	viewer.refresh();
+    	try {
+        	viewer.getTree().setRedraw(false);
+        	viewer.refresh();
+    	} finally {
+    		viewer.getTree().setRedraw(true);
+    	}
     }
 
     
