@@ -473,7 +473,12 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		
 		tree.setRedraw(false);
 		TreeViewerColumn colViewer = addTreeColumn(metric, false);			
+		
+		// FIXME: this can take really long
+		// we need to spawn to another thread
 		refresh();
+		
+		expandToLevel(2);
 		tree.setRedraw(true);
 
 		// this doesn't work on Linux/GTK
