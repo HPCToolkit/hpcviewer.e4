@@ -10,8 +10,6 @@ public class FlatScopeAction
 {
 	
 	private Stack<Scope> 	   stackFlatNodes;
-	private Stack<Object[]>    stackExpandedNodes;
-	
 	final private ScopeTreeViewer   treeViewer;
 	
 	//-----------------------------------------------------------------------
@@ -64,7 +62,6 @@ public class FlatScopeAction
 						objFlattenedNode.add(childNode);
 					}
 				}
-				//addChildren(node, objFlattenedNode);
 				hasKids = true;
 			} else {
 				// no children: add the node itself !
@@ -73,20 +70,18 @@ public class FlatScopeAction
 		}
 		if(hasKids) {
 			if (objFlattenedNode.hasChildren()) {
-				//pushElementStates();
-				
 				stackFlatNodes.push(objParentNode);
-
-				treeViewer.getTree().setRedraw(false);
-				// we update the data of the table
-				treeViewer.setInput(root);
-				// refreshing the table to take into account a new data
-				treeViewer.refresh();
-				
-				// expand the tree until reaching level 2
-				treeViewer.expandToLevel(2, true);
-
-				treeViewer.getTree().setRedraw(true);
+				try {
+					treeViewer.getTree().setRedraw(false);
+					// we update the data of the table
+					treeViewer.setInput(root);
+					// refreshing the table to take into account a new data
+					treeViewer.refresh();					
+					// expand the tree until reaching level 2
+					treeViewer.expandToLevel(2, true);
+				} finally {
+					treeViewer.getTree().setRedraw(true);
+				}
 			}
 		}
 		return (hasKids && objFlattenedNode.hasChildren());
@@ -104,8 +99,8 @@ public class FlatScopeAction
 		Scope objParentNode = stackFlatNodes.pop();
 		if(objParentNode != null) {
 			this.treeViewer.setInput(objParentNode);
-			
-			//popElementStates();
+			// expand the tree until reaching level 2
+			treeViewer.expandToLevel(2, true);
 			
 			objParentNode.setParent(null);
 		}
@@ -115,29 +110,4 @@ public class FlatScopeAction
 	public boolean canUnflatten() {
 		return (!stackFlatNodes.isEmpty());
 	}
-	
-
-	
-	//-----------------------------------------------------------------------
-	// 					FLATTEN: PRIVATE METHODS
-	//-----------------------------------------------------------------------
-
-	/**
-	 * store the current expanded elements into a stack
-	 */
-	private void pushElementStates() {
-		Object []arrNodes = this.treeViewer.getExpandedElements();
-		if (stackExpandedNodes == null)
-			stackExpandedNodes = new java.util.Stack<Object[]>();
-
-		stackExpandedNodes.push(arrNodes);
-	}
-	
-	/**
-	 * recover the latest expanded element into stack
-	 */
-	private void popElementStates() {
-		Object []arrNodes = stackExpandedNodes.pop();
-		this.treeViewer.setExpandedElements(arrNodes);
-	}	
 }
