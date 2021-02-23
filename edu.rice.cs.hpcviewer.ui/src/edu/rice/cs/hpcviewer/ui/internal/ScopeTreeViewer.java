@@ -320,7 +320,12 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		if (!OSValidator.isMac() && tree.getSelectionCount() > 0) {
 			return;
 		}
-		expandToLevel(2);
+		try {
+			getTree().setRedraw(false);
+			expandToLevel(2);
+		} finally {
+			getTree().setRedraw(true);
+		}
 		
 		try {
 			// hack on Mac: need to force to get the child getItem(0) so that the row height is adjusted
