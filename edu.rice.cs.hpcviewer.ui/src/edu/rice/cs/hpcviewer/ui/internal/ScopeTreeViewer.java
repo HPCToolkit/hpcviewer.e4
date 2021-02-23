@@ -216,7 +216,12 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		// refresh the table if necessary
 		// -----------------------------------------------------------------
 		if (need_to_update) {
-			refresh();
+			try {
+				getTree().setRedraw(false);
+				refresh();
+			} finally {
+				getTree().setRedraw(true);
+			}
 		}
 	}
 	
