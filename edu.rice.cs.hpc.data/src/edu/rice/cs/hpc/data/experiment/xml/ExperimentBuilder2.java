@@ -18,7 +18,9 @@ import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.data.util.IUserData;
 
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  *
@@ -37,6 +39,7 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 	/** Maximum number of metrics provided by the experiment file.
     We use the maxNumberOfMetrics value to generate short names for the self metrics*/
 	final private int maxNumberOfMetrics = 10000;
+	private Map<Integer, Integer> mapOriginalIndex = null;
 
 	final private ArrayList<DerivedMetric> listOfDerivedMetrics;
 	/**
@@ -150,22 +153,22 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 	private void rearrangeMetrics()
 	{
 		boolean is_raw_metric_only = true;
-		final BaseExperimentWithMetrics exp = (BaseExperimentWithMetrics) experiment;
-
-		final int nbMetrics = this.metricList.size();
-		
+		final int nbMetrics = metricList.size();
+		 
 		// ----------------------------------------------------------------------------
 		// check if all metrics are metric raw.
 		// it is unlikely that hpcprof will mix between metric raw and other type of metric,
 		// but we cannot trust hpcprof to do properly
 		// ----------------------------------------------------------------------------
-		for (int i=0; i<nbMetrics; i++) {
-			BaseMetric objMetric = this.metricList.get(i);
+		for (int i=0; i<nbMetrics && is_raw_metric_only; i++) {
+			BaseMetric objMetric = metricList.get(i);
 			is_raw_metric_only &= (objMetric instanceof Metric);
 		}
 		
 		if (is_raw_metric_only)
 		{
+			mapOriginalIndex = new HashMap<>(nbMetrics);
+			
 			// ----------------------------------------------------------------------------	
 			// need to reorder the metrics: instead of 0, 10000, 1, 10001, ....
 			// 	it should be: 0, 1, 2, 3, ....
@@ -175,7 +178,7 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 			// ----------------------------------------------------------------------------	
 			for (int i=0; i<nbMetrics; i++) 
 			{
-				Metric objMetric = (Metric) this.metricList.get(i);
+				Metric objMetric = (Metric) metricList.get(i);
 
 				int index = i;
 				
@@ -185,6 +188,8 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 				if (experiment.getMajorVersion() == Constants.EXPERIMENT_SPARSE_VERSION) {
 					index = Integer.valueOf( objMetric.getShortName() );
 				}
+				int oldIndex = objMetric.getIndex();
+				mapOriginalIndex.put(oldIndex, index);
 				
 				objMetric.setIndex(index);
 				
@@ -195,8 +200,6 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 				final int partner = (objMetric.getMetricType() == MetricType.EXCLUSIVE) ? i-1: i+1;
 				objMetric.setPartner(partner);
 			}
-			// notify the experiment object that we have reordered metric index
-			exp.setMetrics(metricList);
 		}
 	}
 
@@ -548,6 +551,20 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 			dblValue = Double.NaN;
 		}
 		double actualValue  = dblValue.doubleValue();
+		
+		if (mapOriginalIndex != null) {
+			// case for raw metric, and we rearrange the metric index,
+			// we need to be careful to set the metric value
+			// don't use the original metric index as we have rearrange the metric.
+			
+			Integer oldIndex = Integer.valueOf(internalName);
+			Integer newIndex = mapOriginalIndex.get(oldIndex);
+			if (newIndex == null) {
+				System.err.println("something wrong");
+			} else {
+				internalName = String.valueOf(newIndex);
+			}
+		}
 		
 		BaseMetric metric = exp.getMetric(internalName);
 		// get the sample period
