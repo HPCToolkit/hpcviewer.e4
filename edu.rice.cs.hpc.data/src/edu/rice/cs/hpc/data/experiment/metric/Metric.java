@@ -86,7 +86,13 @@ public MetricValue getRawValue(IMetricScope s)
 	return getValue(s);
 }
 
-//@Override
+@Override
+public int getIndex() 
+{
+	return Integer.valueOf(shortName);
+}
+
+@Override
 public BaseMetric duplicate() {
 	return new Metric(shortName, description, displayName, visibility, null, annotationType, 
 			String.valueOf(sampleperiod), index, metricType, partner_index);
