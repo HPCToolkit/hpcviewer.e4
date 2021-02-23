@@ -16,7 +16,10 @@
 	   the source code of com.graph.builder.
 	-->	
 	<property name="classbase" location="edu/rice/cs/hpc/data"/>
-	<property name="externals" location="../externals"/>
+	<property name="externals" location="../../externals"/>
+	<property name="xerces"    location="external-jars/org.apache.xerces_2.9.0.v201005080400.jar" />
+	<property name="comm-lang" location="lib/commons-lang3-3.11.jar" />
+	<property name="comm-text" location="lib/commons-text-1.9.jar" />
 
   	<target name="compile" >
 	    <mkdir dir="bin" />
@@ -24,6 +27,7 @@
            	   destdir="bin" >
 			<classpath>
 				<fileset dir="../external-jars" includes="**/*.jar" />
+				<fileset dir="../lib" includes="**/*.jar" />
 			</classpath>
     	</javac>
   	</target>
@@ -34,7 +38,7 @@
        	     <fileset dir="bin" includes="**/*.class" />
              <manifest>
                 <attribute name="Main-Class" value="edu.rice.cs.hpc.data.framework.PrintData"/>
-                <attribute name="Class-Path" value="external-jars/org.apache.xerces_2.9.0.v201005080400.jar"/>
+                <attribute name="Class-Path" value="${xerces}:${comm-lang}:${comm-text}"/>
              </manifest>
         </jar>
   		<delete dir="bin" />
@@ -45,6 +49,9 @@
 		<copy todir="lib">
 			<fileset dir="../external-jars" >
 				<include name="**/org.apache*.jar" />
+			</fileset>
+			<fileset dir="../lib" >
+				<include name="**/*.jar" />
 			</fileset>
 		</copy>
 		<move file="hpcdata.jar" todir="lib/" />
