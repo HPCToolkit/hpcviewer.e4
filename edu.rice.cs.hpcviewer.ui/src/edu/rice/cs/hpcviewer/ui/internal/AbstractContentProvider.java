@@ -33,7 +33,7 @@ public abstract class AbstractContentProvider
 	 *  every item to check the children a lot and sometimes repeatedly.
 	 *  To avoid such re-sorting the children, we need to cache them 
 	 *  in a hash map here. It will require more memory but we save time.*/
-	final private Map<Scope, Object[]> sort_scopes;
+	//final private Map<Scope, Object[]> sort_scopes;
 	
 	private TreeViewerColumn sort_column = null;
 	private int sort_direction 			 = 0;
@@ -41,7 +41,7 @@ public abstract class AbstractContentProvider
     public AbstractContentProvider(TreeViewer viewer) {
     	this.viewer = viewer;
 		comparator  = new ScopeComparator();
-		sort_scopes = new HashMap<Scope, Object[]>();
+		//sort_scopes = new HashMap<Scope, Object[]>();
     }
 
 
@@ -90,7 +90,7 @@ public abstract class AbstractContentProvider
     	
     	this.sort_column    = sort_column;
     	this.sort_direction = direction;
-    	sort_scopes.clear();
+    	//sort_scopes.clear();
 
     	// perform the sort by refreshing the viewer
     	// this refresh method will force the table to recompute the children
@@ -135,11 +135,11 @@ public abstract class AbstractContentProvider
     public Object[] getSortedChildren(Scope parent) {
 		// check if this parent has already sorted children or not
     	// if yet, we look at the cache and return the children.
-    	Object [] children = sort_scopes.get(parent);
+    	/*Object [] children = sort_scopes.get(parent);
     	if (children != null)
     		return children;
-    	
-    	children = getRawChildren(parent);
+    	*/
+    	Object []children = getRawChildren(parent);
 
     	if (sort_column == null || children == null)
     		return null;
@@ -152,7 +152,7 @@ public abstract class AbstractContentProvider
 		
 		// store to the cache
 		// for the sake of performance optimization, we sacrifice the memory
-		sort_scopes.put(parent, children);
+		//sort_scopes.put(parent, children);
 		
     	return children;
 	}
