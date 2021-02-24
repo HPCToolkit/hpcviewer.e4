@@ -3,13 +3,13 @@ package edu.rice.cs.hpc.data.trace;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.AbstractMap;
 import java.util.Locale;
+import java.util.Map;
 
 import edu.rice.cs.hpc.data.experiment.ExperimentWithoutMetrics;
 import edu.rice.cs.hpc.data.experiment.extdata.FileDB2;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
-import edu.rice.cs.hpc.data.experiment.scope.visitors.TraceCallPathVisitor;
+import edu.rice.cs.hpc.data.util.CallPath;
 import edu.rice.cs.hpc.data.util.MergeDataFiles;
 
 /*****
@@ -86,9 +86,7 @@ public class TracePrinter
 		
 		final int MAX_NAME = 16;
 		
-		TraceCallPathVisitor visitor = new TraceCallPathVisitor();
-		experiment.getRootScope().dfsVisitScopeTree(visitor);
-		AbstractMap<Integer, Scope> map = visitor.getMap();
+		Map<Integer, CallPath> map = experiment.getScopeMap(); 
 		
 		TraceReader reader = new TraceReader(fileDB);
 		long numRecords = reader.getNumberOfRecords(rank);
@@ -101,15 +99,16 @@ public class TracePrinter
 			String name = String.valueOf(prevRecord.cpId);
 			
 			if (map != null) {
-				Scope scope = map.get(prevRecord.cpId);
-				if (scope != null) {
+				CallPath cp = map.get(prevRecord.cpId);
+				if (cp != null) {
+					Scope scope = cp.getScopeAt(cp.getMaxDepth());
 					name = scope.getName();
 					if (name.length() > MAX_NAME)
 						name = name.substring(0, MAX_NAME) + "...";
 				}
 			}
 
-			System.out.printf( "%-20s : %,d ns%n", name, delta);
+			System.out.printf( "%8d. %-20s : %,d ns%n", prevRecord.cpId, name, delta);
 
 			prevRecord = newRecord;
 		}
