@@ -9,6 +9,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.dialogs.FindDialog;
+import edu.rice.cs.hpcviewer.ui.parts.editor.Editor;
 
 import javax.inject.Named;
 
@@ -28,6 +29,17 @@ public class Find
 	public void execute(@Named(IServiceConstants.ACTIVE_PART) MPart part,
 						@Named(IServiceConstants.ACTIVE_SHELL) Shell shell,
 						EPartService partService) {
+		
+		if (part == null)
+			return;
+		
+		if (!(part.getObject() instanceof ProfilePart))
+			return;
+		
+		ProfilePart profilePart = (ProfilePart) part.getObject();
+		Editor editor = profilePart.getActiveEditor();
+		if (editor == null) 
+			return;
 		
 		if (findDialog == null) {
 			findDialog = new FindDialog(shell, partService);
