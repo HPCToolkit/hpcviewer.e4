@@ -76,11 +76,8 @@ public class JavaValidator
 	 * @return true if Java is supported. False otherwise.
 	 */
 	static public boolean isCorrectJavaVersion() {
-		String version = getJavaVersion();
 
-		System.out.println("java version: " + version);
-
-		boolean isCorrect = checkVersion(version);
+		boolean isCorrect = checkVersion();
 		if (!isCorrect) {
 			String message = "Error: Java " + 
 					System.getProperty("java.version") +
@@ -100,8 +97,8 @@ public class JavaValidator
 	//////////////////////////////////////////////////////////////
 	
 
-	static private boolean checkVersion(String version) {
-
+	static private boolean checkVersion() {
+		final String version = getJavaVersion();
 		if (version == null)
 			return false;
 
