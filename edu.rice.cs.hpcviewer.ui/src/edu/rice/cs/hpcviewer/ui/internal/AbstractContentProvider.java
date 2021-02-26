@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.scope.ProcedureScope;
+import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpc.data.util.ScopeComparator;
 import edu.rice.cs.hpcviewer.ui.base.ISortContentProvider;
@@ -33,7 +34,7 @@ public abstract class AbstractContentProvider
 	 *  every item to check the children a lot and sometimes repeatedly.
 	 *  To avoid such re-sorting the children, we need to cache them 
 	 *  in a hash map here. It will require more memory but we save time.*/
-	//final private Map<Scope, Object[]> sort_scopes;
+	final private Map<Scope, Object[]> sort_scopes;
 	
 	private TreeViewerColumn sort_column = null;
 	private int sort_direction 			 = 0;
@@ -41,7 +42,9 @@ public abstract class AbstractContentProvider
     public AbstractContentProvider(TreeViewer viewer) {
     	this.viewer = viewer;
 		comparator  = new ScopeComparator();
-		//sort_scopes = new HashMap<Scope, Object[]>();
+		// To save memory, we only store the root scope
+		// and only one root scope per table, unless it's zoomed
+		sort_scopes = new HashMap<Scope, Object[]>(1);
     }
 
 
@@ -135,10 +138,12 @@ public abstract class AbstractContentProvider
     public Object[] getSortedChildren(Scope parent) {
 		// check if this parent has already sorted children or not
     	// if yet, we look at the cache and return the children.
-    	/*Object [] children = sort_scopes.get(parent);
-    	if (children != null)
-    		return children;
-    	*/
+    	if (parent instanceof RootScope) {
+        	Object [] children = sort_scopes.get(parent);
+        	if (children != null)
+        		return children;
+    	}
+    	
     	Object []children = getRawChildren(parent);
 
     	if (sort_column == null || children == null)
@@ -152,7 +157,15 @@ public abstract class AbstractContentProvider
 		
 		// store to the cache
 		// for the sake of performance optimization, we sacrifice the memory
-		//sort_scopes.put(parent, children);
+		if (parent instanceof RootScope) {
+			// we only store the root scope to save memory. No need to store any parents.
+			// if there is a change of the root scope, we remove the old one and 
+			// replace with the one.
+			if (sort_scopes.size() > 0) {
+				sort_scopes.clear();
+			}
+			sort_scopes.put(parent, children);
+		}
 		
     	return children;
 	}
