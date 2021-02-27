@@ -11,8 +11,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.ColorDialog;
 import org.eclipse.swt.widgets.Composite;
@@ -30,6 +30,8 @@ import org.eclipse.swt.widgets.Text;
  */
 public class ProcedureMapDetailDialog extends Dialog 
 {
+	private final static String EMPTY = "\u2588\u2588\u2588";
+
 	final private String title;
 	private String proc;
 	private String description;
@@ -55,6 +57,10 @@ public class ProcedureMapDetailDialog extends Dialog
 		return description;
 	}
 	
+	/**
+	 * Retrieve the selected color (in RGB)
+	 * @return RGB
+	 */
 	public RGB getRGB() {
 		return rgb;
 	}
@@ -80,6 +86,7 @@ public class ProcedureMapDetailDialog extends Dialog
 	 * (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite composite = (Composite) super.createDialogArea(parent);
 
@@ -95,6 +102,7 @@ public class ProcedureMapDetailDialog extends Dialog
 		lblProc.setText("Procedure pattern: ");
 		txtProc = new Text(composite, SWT.LEFT | SWT.SINGLE);
 		txtProc.setText(proc);
+		
 		GridDataFactory.swtDefaults().hint(
 				this.convertHorizontalDLUsToPixels(IDialogConstants.MINIMUM_MESSAGE_AREA_WIDTH), SWT.DEFAULT)
 				.grab(true, false).applyTo(txtProc);
@@ -109,12 +117,16 @@ public class ProcedureMapDetailDialog extends Dialog
 		
 		final Label lblColor = new Label(composite, SWT.LEFT);
 		lblColor.setText("Color: ");
+		
 		final Button btnColor = new Button(composite, SWT.PUSH | SWT.FLAT);
-		btnColor.computeSize(5, 5);
+		btnColor.setText(EMPTY);
 		if (rgb == null) {
 			rgb = getShell().getDisplay().getSystemColor(SWT.COLOR_BLACK).getRGB();
 		}
 		setButtonImage(btnColor, rgb);
+
+		Point size = btnColor.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+		btnColor.setSize(size.x+10, size.y+10);
 		
 		btnColor.addSelectionListener( new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
@@ -144,6 +156,7 @@ public class ProcedureMapDetailDialog extends Dialog
 		}
 		currentColor = new Color(button.getDisplay(), color);
 		button.setBackground(currentColor);
+		button.setForeground(currentColor);
 	}
 	
     /*
@@ -199,24 +212,14 @@ public class ProcedureMapDetailDialog extends Dialog
 	 * @param argv
 	 */
 	static public void main(String argv[]) {
-		Display display = new Display ();
-		Shell shell = new Shell(display);
-		shell.setLayout(new FillLayout());
-		
-		shell.open();
+		Display display = Display.getDefault();
+		Shell shell = display.getActiveShell();
 		
 		ProcedureMapDetailDialog dlg = new ProcedureMapDetailDialog(shell, "edit", "procedure", "procedure-class", null);
 
 		dlg.open();
 		
-		System.out.println("proc: " + dlg.proc + ", class: " + dlg.description);
-		
-		while (!shell.isDisposed()) {
-			if (!display.readAndDispatch())
-				display.sleep();
-		}
-		
-		display.dispose();
+		System.out.println("proc: " + dlg.proc + ", class: " + dlg.description + ", color: " + dlg.getRGB());
 	}
 
 }

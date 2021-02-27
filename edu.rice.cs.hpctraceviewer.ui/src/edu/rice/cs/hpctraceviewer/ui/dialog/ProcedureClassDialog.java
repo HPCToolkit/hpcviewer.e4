@@ -6,7 +6,6 @@ import java.util.Map.Entry;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -22,8 +21,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -41,7 +40,7 @@ import edu.rice.cs.hpctraceviewer.data.util.ProcedureClassMap;
  * Dialog window to show the class and the procedure associated
  *
  */
-public class ProcedureClassDialog extends TitleAreaDialog 
+public class ProcedureClassDialog extends Dialog 
 {
 	private final static String EMPTY = "\u2588";
 	private final static String UnknownData = "unknown";
@@ -96,9 +95,8 @@ public class ProcedureClassDialog extends TitleAreaDialog
 	 * (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.TitleAreaDialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 	 */
-	protected Control createDialogArea(Composite parent) {
+	protected Control createDialogArea(Composite composite) {
 		
-		final Composite composite = new Composite(parent, SWT.BORDER);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(composite);
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(composite);
 		
@@ -107,7 +105,7 @@ public class ProcedureClassDialog extends TitleAreaDialog
 		//-----------------------------------------------------------------
 		
 		final Composite areaAction = new Composite( composite, SWT.NULL );
-		
+
 		final Button btnAdd   = new Button(areaAction, SWT.PUSH | SWT.FLAT);
 		btnAdd.setText("Add");
 		btnAdd.setToolTipText("Add a procedure-color pair");
@@ -180,7 +178,7 @@ public class ProcedureClassDialog extends TitleAreaDialog
 		});
 		
 		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).grab(true, false).applyTo(areaAction);
-		GridLayoutFactory.fillDefaults().numColumns(4).applyTo(areaAction);
+		GridLayoutFactory.fillDefaults().margins(10, 10).numColumns(4).applyTo(areaAction);
 		
 		//-----------------------------------------------------------------
 		// table area
@@ -190,8 +188,7 @@ public class ProcedureClassDialog extends TitleAreaDialog
 
 		// set color column
 		TableViewerColumn colColor = new TableViewerColumn(tableViewer, SWT.NONE);
-		colColor.setLabelProvider(new ColumnLabelProvider() {
-			
+		colColor.setLabelProvider(new ColumnLabelProvider() {			
 			
 			@Override
 			public Color getForeground(Object element) {
@@ -246,7 +243,7 @@ public class ProcedureClassDialog extends TitleAreaDialog
 		col.setText("Description");
 		col.setResizable(true);
 		col.setMoveable(true);
-		col.setWidth(150);
+		col.setWidth(250);
 		
 		colClass.setLabelProvider( new ColumnLabelProvider(){
 			public String getText(Object element) {
@@ -255,8 +252,7 @@ public class ProcedureClassDialog extends TitleAreaDialog
 		});
 		ColumnViewerSorter sortColClass = new ColumnViewerSorter(tableViewer, colClass, COLUMN_ID.CLASS);
 		
-		tableViewer.setUseHashlookup(true);
-		
+		tableViewer.setUseHashlookup(true);		
 		tableViewer.setContentProvider(new ArrayContentProvider());
 
 		final Table table = tableViewer.getTable();
@@ -264,7 +260,6 @@ public class ProcedureClassDialog extends TitleAreaDialog
 		table.setLinesVisible(true);
 		
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(table);
-		GridLayoutFactory.fillDefaults().numColumns(1).applyTo( table );
 		
 		tableViewer.setInput(data.getEntrySet());
 		tableViewer.getTable().addSelectionListener(new SelectionAdapter(){
@@ -282,8 +277,6 @@ public class ProcedureClassDialog extends TitleAreaDialog
 		
 		sortColClass.setSorter(sortColClass, Direction.ASC);
 
-		setTitle("Procedure and color mapping");
-		setMessage("Add, remove or edit a procedure-color mapping");
 		getShell().setText("Procedure-color mapping");
 		
 		return composite;
@@ -501,7 +494,10 @@ public class ProcedureClassDialog extends TitleAreaDialog
 		}
 	}
 	
-	
+    @Override
+    protected Point getInitialSize() {
+        return new Point(450, 300);
+    }
 
 	
 	/***
@@ -510,26 +506,15 @@ public class ProcedureClassDialog extends TitleAreaDialog
 	 * @param argv
 	 */
 	static public void main(String argv[]) {
-		Display display = new Display ();
-		Shell shell = new Shell(display);
-		shell.setLayout(new FillLayout());
-		
-		shell.open();
+		Display display = Display.getDefault();
 		
 		ProcedureClassMap pcMap = new ProcedureClassMap(display);
-		ProcedureClassDialog dlg = new ProcedureClassDialog(shell, pcMap );
+		ProcedureClassDialog dlg = new ProcedureClassDialog(display.getActiveShell(), pcMap );
 
 		if ( dlg.open() == Dialog.OK ) {
 			if (dlg.isModified()) {
 				pcMap.save();
 			}
 		}
-		
-		while (!shell.isDisposed()) {
-			if (!display.readAndDispatch())
-				display.sleep();
-		}
-		
-		display.dispose();
 	}
 }
