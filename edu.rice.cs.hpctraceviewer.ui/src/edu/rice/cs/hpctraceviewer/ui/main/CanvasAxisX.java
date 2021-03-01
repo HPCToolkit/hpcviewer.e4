@@ -95,6 +95,9 @@ public class CanvasAxisX extends AbstractAxisCanvas
 			// the font is too big
 
 			int fontHeight = fd[0].getHeight() - 1;
+			if (fontHeight < 0)
+				return;
+			
 			fd[0].setHeight(fontHeight);
 			if (fontX != null && !fontX.isDisposed()) {
 				fontX.dispose();
