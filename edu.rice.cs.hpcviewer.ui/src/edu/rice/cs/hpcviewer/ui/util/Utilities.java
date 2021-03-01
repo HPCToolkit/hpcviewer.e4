@@ -4,6 +4,7 @@
 package edu.rice.cs.hpcviewer.ui.util;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
@@ -80,7 +81,22 @@ public class Utilities
 	};
 
 
+	static private Color linkColor = null;
 	
+	/***
+	 * Retrieve the active link color
+	 *
+	 * @return
+	 */
+	static public  Color getLinkColor() {
+		Display display = Display.getDefault();
+		if (Display.isSystemDarkTheme()) {
+			linkColor = display.getSystemColor(SWT.COLOR_LINK_FOREGROUND);
+		} else {
+			linkColor = display.getSystemColor(SWT.COLOR_BLUE);
+		}
+		return linkColor;
+	}
 	
 	/*****
 	 * check if two font data are equal (name, height and style)
