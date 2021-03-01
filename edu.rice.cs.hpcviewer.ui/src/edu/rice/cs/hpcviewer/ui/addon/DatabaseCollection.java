@@ -57,7 +57,7 @@ import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.experiment.ExperimentManager;
 import edu.rice.cs.hpcviewer.ui.handlers.RecentDatabase;
 import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
-import sun.java2d.cmm.ProfileDataVerifier;
+
 
 /***
  * <b>
