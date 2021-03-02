@@ -145,7 +145,7 @@ public class DerivedMetric extends BaseMetric {
 		// corner case
 		// if the scope is a root scope, then we return the aggregate value
 		if(scope instanceof RootScope) {
-			if (rootValue == null) {
+			if (rootValue == null || rootValue == MetricValue.NONE) {
 				rootValue = setRootValue((RootScope)scope);
 			}
 			return rootValue;
@@ -177,6 +177,15 @@ public class DerivedMetric extends BaseMetric {
 	 */
 	public String getFormula() {
 		return expression.toString();
+	}
+	
+	
+	/***
+	 * Return the real formula expression (in math expression)
+	 * @return
+	 */
+	public Expression getFormulaExpression() {
+		return expression;
 	}
 
 	@Override
@@ -217,7 +226,9 @@ public class DerivedMetric extends BaseMetric {
 	private MetricValue setRootValue(RootScope rootScope) 
 	{
 		if (rootScope == null)
-			return MetricValue.NONE;
+			// we don't have root. 
+			// let assume we can compute this later
+			return null; 
 		
 		double rootVal = getDoubleValue(rootScope);
 		if (Double.compare(0.0, rootVal) == 0) {

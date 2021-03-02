@@ -19,6 +19,7 @@ import edu.rice.cs.hpc.data.util.IUserData;
 
 import java.util.List;
 import java.util.Map;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -202,6 +203,8 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 			}
 		}
 	}
+	
+
 
 	static private final char FORMULA_TYPE 		 = 't';
 	static private final char FORMULA_EXPRESSION = 'f';
@@ -221,11 +224,11 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 				metric.getMetricType());
 
 		dm.setDescription  (DerivedMetric.DESCRIPTION + ": " + metric.getDescription());
-		dm.setExpression   (formula);
 		dm.setOrder        (metric.getOrder());
 		dm.setDisplayFormat(metric.getDisplayFormat());
 		dm.setDisplayed	   (metric.getVisibility()); // fix issue #63
 		dm.setPartner	   (metric.getPartner());
+		dm.setExpression   (formula);
 
 		listOfDerivedMetrics.add(dm);
 		
@@ -559,11 +562,10 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 			
 			Integer oldIndex = Integer.valueOf(internalName);
 			Integer newIndex = mapOriginalIndex.get(oldIndex);
-			if (newIndex == null) {
-				System.err.println("something wrong");
-			} else {
-				internalName = String.valueOf(newIndex);
-			}
+			
+			assert newIndex != null : "Cannot find map for " + internalName;
+			
+			internalName = String.valueOf(newIndex);
 		}
 		
 		BaseMetric metric = exp.getMetric(internalName);
