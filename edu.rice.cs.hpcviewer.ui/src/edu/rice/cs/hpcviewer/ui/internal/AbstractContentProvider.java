@@ -147,7 +147,7 @@ public abstract class AbstractContentProvider
     	Object []children = getRawChildren(parent);
 
     	if (sort_column == null || children == null)
-    		return null;
+    		return children;
     	
 		BaseMetric metric = (BaseMetric) sort_column.getColumn().getData();
 		comparator.setMetric(metric);    		

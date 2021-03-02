@@ -363,14 +363,15 @@ public class Experiment extends BaseExperimentWithMetrics
 	 * @return true if inclusive computation is needed
 	 */
 	private boolean inclusiveNeeded() {
-		boolean isNeeded = false;
 		
 		for (BaseMetric m: metrics) {
-			isNeeded = !(   (m instanceof FinalMetric) 
+			boolean isNeeded = !(   (m instanceof FinalMetric) 
 					     || (m instanceof AggregateMetric) 
 					     || (m instanceof DerivedMetric) );
+			if (isNeeded)
+				return true;
 		}
-		return isNeeded;
+		return false;
 	}
 
 	public Experiment duplicate() {
