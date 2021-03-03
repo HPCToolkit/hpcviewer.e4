@@ -145,6 +145,11 @@ public class DerivedMetric extends BaseMetric {
 		// corner case
 		// if the scope is a root scope, then we return the aggregate value
 		if(scope instanceof RootScope) {
+			// if the root value is null, perhaps we haven't computed
+			// however, for the sake to fix bug with raw metrics thas has formula,
+			// we also need to check if the root value is none or not.
+			// For raw metrics with formula, the first time we create a derived metric,
+			// the value can be NONE
 			if (rootValue == null || rootValue == MetricValue.NONE) {
 				rootValue = setRootValue((RootScope)scope);
 			}
