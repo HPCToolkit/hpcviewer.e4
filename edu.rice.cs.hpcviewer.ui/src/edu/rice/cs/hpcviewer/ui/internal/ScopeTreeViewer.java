@@ -64,7 +64,12 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 	public ScopeTreeViewer(Composite parent, int style) {
 		// hack: on Windows, we have to add SWT.FULL_SELECTION to allow users
 		//       to select a row in the table.
-		super(parent, SWT.VIRTUAL | SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL | style);
+		// hack: We have to add SWT.MULTI to disable preserving selection. 
+		//       This preservation is very costly for large database, and there
+		//       is no official API to disable it, but SWT.MULTI did the job.
+		super(parent, SWT.VIRTUAL  | SWT.FULL_SELECTION | 
+					  SWT.H_SCROLL | SWT.V_SCROLL 	    | 
+					  SWT.MULTI    | style );
 		
 		computeIdealCellBound();
 
