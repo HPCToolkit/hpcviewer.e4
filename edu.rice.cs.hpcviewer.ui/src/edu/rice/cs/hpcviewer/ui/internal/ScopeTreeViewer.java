@@ -477,13 +477,13 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 	public void addUserMetricColumn(BaseMetric metric) {
 		
 		Tree tree = getTree();
-		
+
 		tree.setRedraw(false);
 		TreeViewerColumn colViewer = addTreeColumn(metric, false);			
 		
 		// FIXME: this can take really long
 		// we need to spawn to another thread
-		refresh();
+		refresh(false);
 		
 		expandToLevel(2);
 		tree.setRedraw(true);
