@@ -67,9 +67,11 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		// hack: We have to add SWT.MULTI to disable preserving selection. 
 		//       This preservation is very costly for large database, and there
 		//       is no official API to disable it, but SWT.MULTI did the job.
+		// hack2: SWT.MULTI will cause performance degradation when sort a column
+		//        we have to remove it !
 		super(parent, SWT.VIRTUAL  | SWT.FULL_SELECTION | 
 					  SWT.H_SCROLL | SWT.V_SCROLL 	    | 
-					  SWT.MULTI    | style );
+					  /*SWT.MULTI    |*/ style );
 		
 		computeIdealCellBound();
 
