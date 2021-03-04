@@ -58,6 +58,7 @@ import edu.rice.cs.hpcviewer.ui.experiment.ExperimentManager;
 import edu.rice.cs.hpcviewer.ui.handlers.RecentDatabase;
 import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
 
+
 /***
  * <b>
  * Class Database manager
@@ -370,6 +371,7 @@ public class DatabaseCollection
 				}
 			}
 		}
+		((ProfilePart) view).onFocus();
 		return 1;
 	}
 	

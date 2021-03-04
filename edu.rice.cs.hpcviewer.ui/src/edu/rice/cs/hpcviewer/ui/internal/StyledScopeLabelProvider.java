@@ -5,12 +5,9 @@ import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.StyledString.Styler;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.TextStyle;
-import org.eclipse.swt.widgets.Link;
-
 import edu.rice.cs.hpc.data.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpc.data.experiment.scope.CallSiteScopeCallerView;
 import edu.rice.cs.hpc.data.experiment.scope.ProcedureScope;
@@ -79,15 +76,12 @@ public class StyledScopeLabelProvider extends DelegatingStyledCellLabelProvider
 		
 		public ScopeLabelProvider(TreeViewer treeViewer) {
 			this.treeViewer = treeViewer;
-			
-			final Link link = new Link(treeViewer.getTree(), SWT.NONE);
-			final Color colorLinkActive = link.getLinkForeground();
-			
+						
 			STYLE_ACTIVE_LINK = new StyledString.Styler() {
 
 				@Override
 				public void applyStyles(TextStyle textStyle) {
-					textStyle.foreground = colorLinkActive;
+					textStyle.foreground = Utilities.getLinkColor();
 					textStyle.font 		 = FontManager.getFontGeneric();
 				}				
 			};

@@ -74,21 +74,39 @@ test -n "$DISPLAY" || die "DISPLAY variable is not set"
 #------------------------------------------------------------
 # Check the java version.
 #------------------------------------------------------------
+JAVA=`type -p java`
 
-java_version=`java -version 2>&1 | grep -i vers | head -1`
-if test "x$java_version" = x ; then
+if [ "$JAVA"x != "x" ]; then
+    JAVA=java
+elif [[ -n "$JAVA_HOME" ]] && [[ -x "$JAVA_HOME/bin/java" ]];  then
+    echo found java executable in JAVA_HOME     
+    JAVA="$JAVA_HOME/bin/java"
+else
     die "unable to find program 'java' on your PATH"
 fi
-minor=`expr "$java_version" : '[^.]*\.\([0-9]*\)'`
-test "$minor" -ge 7 >/dev/null 2>&1
-#if test $? -ne 0 ; then
-#    echo "$java_version is too old, use Java 1.7 or later"
-#fi
 
-java_vendor=`java -version | sed -n 2p  | awk '{print $1}'`
-if test "$java_vendor" = "gij"; then
-    echo "GNU JVM (gij) is not supported. Please use JVM from Oracle/SUN or IBM"
+JAVA_MAJOR_VERSION=`java -version 2>&1 \
+	  | head -1 \
+	  | cut -d'"' -f2 \
+	  | sed 's/^1\.//' \
+	  | cut -d'.' -f1`
+
+echo "Java version $JAVA_MAJOR_VERSION"
+
+# For x86 and ppc64le we need Java 8 at least
+# For aarch64 we need Java 11
+jvm_required=8
+
+machine=`uname -m`
+if [ ${machine} == "aarch64" ]; then
+    jvm_required=11
 fi
+
+if [ "$JAVA_MAJOR_VERSION" -lt "$jvm_required" ]; then
+	die "$name requires Java $jvm_required"
+fi
+
+
 
 #------------------------------------------------------------
 # Check GTK version

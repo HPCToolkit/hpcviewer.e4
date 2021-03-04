@@ -8,6 +8,7 @@ import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.swt.widgets.Display;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpcbase.ui.IBasePart;
@@ -43,7 +44,12 @@ public class WindowAction
 				}
 			}
 		}
-		partService.activate(part);
+		// have asynchronously activate the moved part
+		// - to ensure the content is refreshed
+		// - to avoid flickering (if done synchronously)
+		Display.getDefault().asyncExec(()->{
+			partService.activate(part);
+		});
 
 	}
 }

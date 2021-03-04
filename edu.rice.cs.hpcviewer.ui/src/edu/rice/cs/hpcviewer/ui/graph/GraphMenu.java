@@ -94,8 +94,11 @@ public class GraphMenu
 		}
     	
 		public void run() {
-			CTabItem editor = profilePart.addEditor(input);
-			editor.getParent().setFocus();
+			final CTabItem editor = profilePart.addEditor(input);
+			editor.getDisplay().asyncExec(() -> {
+				editor.getParent().setFocus();
+				profilePart.onFocus();
+			});
 		}
     }
 }

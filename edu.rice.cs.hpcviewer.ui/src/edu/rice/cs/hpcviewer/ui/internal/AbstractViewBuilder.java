@@ -205,7 +205,6 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 		Tree tree = treeViewer.getTree();
 		tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
         tree.setHeaderVisible(true);
-        tree.setLinesVisible(true);
 
 		treeViewer.setContentProvider( getContentProvider(treeViewer));
 		

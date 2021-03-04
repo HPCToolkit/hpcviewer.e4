@@ -16,6 +16,7 @@ package edu.rice.cs.hpc.data.experiment.scope;
 
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
@@ -23,6 +24,7 @@ import edu.rice.cs.hpc.data.experiment.BaseExperimentWithMetrics;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.metric.AggregateMetric;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
+import edu.rice.cs.hpc.data.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpc.data.experiment.metric.IMetricValueCollection;
 import edu.rice.cs.hpc.data.experiment.metric.MetricValue;
@@ -619,9 +621,20 @@ public void setMetricValue(int index, MetricValue value)
 public void accumulateMetrics(Scope source, MetricValuePropagationFilter filter, int nMetrics) {
 	Experiment experiment = (Experiment) root.getExperiment();
 	List<BaseMetric> metrics  = experiment.getMetricList();
+	List<DerivedMetric> listDerivedMetrics = new ArrayList<>();
 	
+	// compute metrics with predefined values first.
+	// we'll compute the derived metrics once all other metrics are initialized
 	for (BaseMetric m: metrics) {
-		this.accumulateMetric(source, m.getIndex(), m.getIndex(), filter);
+		if (m instanceof DerivedMetric) {
+			listDerivedMetrics.add((DerivedMetric) m);
+		} else {
+			accumulateMetric(source, m.getIndex(), m.getIndex(), filter);
+		}
+	}
+	// compute the derived metrics
+	for(DerivedMetric m: listDerivedMetrics) {
+		accumulateMetric(source, m.getIndex(), m.getIndex(), filter);
 	}
 }
 

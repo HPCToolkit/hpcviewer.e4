@@ -64,7 +64,14 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 	public ScopeTreeViewer(Composite parent, int style) {
 		// hack: on Windows, we have to add SWT.FULL_SELECTION to allow users
 		//       to select a row in the table.
-		super(parent, SWT.VIRTUAL | SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL | style);
+		// hack: We have to add SWT.MULTI to disable preserving selection. 
+		//       This preservation is very costly for large database, and there
+		//       is no official API to disable it, but SWT.MULTI did the job.
+		// hack2: SWT.MULTI will cause performance degradation when sort a column
+		//        we have to remove it !
+		super(parent, SWT.VIRTUAL  | SWT.FULL_SELECTION | 
+					  SWT.H_SCROLL | SWT.V_SCROLL 	    | 
+					  /*SWT.MULTI    |*/ style );
 		
 		computeIdealCellBound();
 
@@ -470,13 +477,14 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 	public void addUserMetricColumn(BaseMetric metric) {
 		
 		Tree tree = getTree();
-		
+
 		tree.setRedraw(false);
 		TreeViewerColumn colViewer = addTreeColumn(metric, false);			
 		
 		// FIXME: this can take really long
 		// we need to spawn to another thread
-		refresh();
+
+		refresh(false);
 		
 		expandToLevel(2);
 		tree.setRedraw(true);

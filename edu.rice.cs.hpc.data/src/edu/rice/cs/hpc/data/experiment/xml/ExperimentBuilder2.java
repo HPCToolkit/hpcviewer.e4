@@ -152,7 +152,7 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 	 ************************************************************************/
 	private void rearrangeMetrics()
 	{
-		boolean is_raw_metric_only = true;
+		boolean is_raw_metric_only = false;
 		final int nbMetrics = metricList.size();
 		 
 		// ----------------------------------------------------------------------------
@@ -160,9 +160,9 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 		// it is unlikely that hpcprof will mix between metric raw and other type of metric,
 		// but we cannot trust hpcprof to do properly
 		// ----------------------------------------------------------------------------
-		for (int i=0; i<nbMetrics && is_raw_metric_only; i++) {
+		for (int i=0; i<nbMetrics && !is_raw_metric_only; i++) {
 			BaseMetric objMetric = metricList.get(i);
-			is_raw_metric_only &= (objMetric instanceof Metric);
+			is_raw_metric_only |= (objMetric instanceof Metric);
 		}
 		
 		if (is_raw_metric_only)
@@ -178,7 +178,7 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 			// ----------------------------------------------------------------------------	
 			for (int i=0; i<nbMetrics; i++) 
 			{
-				Metric objMetric = (Metric) metricList.get(i);
+				BaseMetric objMetric = metricList.get(i);
 
 				int index = i;
 				
@@ -202,6 +202,8 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 			}
 		}
 	}
+	
+
 
 	static private final char FORMULA_TYPE 		 = 't';
 	static private final char FORMULA_EXPRESSION = 'f';
@@ -221,11 +223,11 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 				metric.getMetricType());
 
 		dm.setDescription  (DerivedMetric.DESCRIPTION + ": " + metric.getDescription());
-		dm.setExpression   (formula);
 		dm.setOrder        (metric.getOrder());
 		dm.setDisplayFormat(metric.getDisplayFormat());
 		dm.setDisplayed	   (metric.getVisibility()); // fix issue #63
 		dm.setPartner	   (metric.getPartner());
+		dm.setExpression   (formula);
 
 		listOfDerivedMetrics.add(dm);
 		
@@ -559,11 +561,10 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 			
 			Integer oldIndex = Integer.valueOf(internalName);
 			Integer newIndex = mapOriginalIndex.get(oldIndex);
-			if (newIndex == null) {
-				System.err.println("something wrong");
-			} else {
-				internalName = String.valueOf(newIndex);
-			}
+
+			assert newIndex != null : "Cannot find map for " + internalName;
+			
+			internalName = String.valueOf(newIndex);
 		}
 		
 		BaseMetric metric = exp.getMetric(internalName);

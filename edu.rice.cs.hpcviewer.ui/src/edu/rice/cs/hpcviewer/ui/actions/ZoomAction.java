@@ -67,9 +67,13 @@ public class ZoomAction {
 			parent = (Scope)viewer.getInput();
 			throw( new java.lang.RuntimeException("ScopeViewActions - illegal zoomout: "+parent));
 		}
-
-		viewer.setInput( parent );		
-		viewer.expandToLevel(2, true);
+		try {
+			viewer.getTree().setRedraw(false);
+			viewer.setInput( parent );		
+		} finally {
+			viewer.getTree().setRedraw(true);			
+			viewer.expandToLevel(2, true);
+		}
 	}
 	
 	/**

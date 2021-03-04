@@ -249,8 +249,14 @@ public class ProfilePart implements IProfilePart
 		// On Mac and Linux, we need to use asyncExec to delay the focus since
 		// the UI thread may not be ready when the focus arrives.
 		sync.asyncExec(() -> {
-			if (!tabFolderBottom.isDisposed())
+			if (!tabFolderBottom.isDisposed()) {
+				// setting the focus here will cause flickering when splitting the window
+				// if the part activation is done synchronously
+				// if it's done asynchronously, we're fine.
 				tabFolderBottom.setFocus();
+				int index = tabFolderBottom.getSelectionIndex();
+				tabFolderBottom.setSelection(index);
+			}
 		});
 	}
 
