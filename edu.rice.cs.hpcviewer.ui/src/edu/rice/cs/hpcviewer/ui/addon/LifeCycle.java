@@ -28,6 +28,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 import edu.rice.cs.hpcviewer.ui.util.ApplicationProperty;
+import edu.rice.cs.hpcviewer.ui.util.IConstants;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
 @Creatable
@@ -104,17 +105,20 @@ public class LifeCycle
 
 	@ProcessAdditions
 	void processAdditions(MApplication app, EModelService modelService) {
-		final String ID="edu.rice.cs.hpcviewer.window.main";
+		final String ID  = "edu.rice.cs.hpcviewer.window.main";
 		
 		// center the window
 	    MTrimmedWindow window = (MTrimmedWindow)modelService.find(ID, app);
 	    Rectangle rect = Display.getDefault().getPrimaryMonitor().getBounds();
-	    int w = window.getWidth();
-	    int h = window.getHeight();
+	    int w = Math.min(IConstants.WINDOW_WIDTH,  rect.width);
+	    int h = Math.min(IConstants.WINDOW_HEIGHT, rect.height);
 	    int x = (rect.width-w)  / 2;
 	    int y = (rect.height-h) / 2;
+	    
 	    window.setX(x);
 	    window.setY(y);
+	    window.setWidth(w);
+	    window.setHeight(h);
 	}
 
 	@ProcessRemovals

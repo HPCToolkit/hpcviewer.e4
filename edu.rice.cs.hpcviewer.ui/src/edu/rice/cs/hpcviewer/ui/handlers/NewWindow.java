@@ -12,8 +12,11 @@ import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.commands.MCommand;
 import org.eclipse.e4.ui.model.application.ui.basic.MTrimmedWindow;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Display;
 
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
+import edu.rice.cs.hpcviewer.ui.util.IConstants;
 
 public class NewWindow 
 {
@@ -24,16 +27,22 @@ public class NewWindow
 	
 	@Execute
 	public void createWindow(EModelService modelService, MApplication app) {
-		  MTrimmedWindow newWin = (MTrimmedWindow)modelService.cloneSnippet(app, "edu.rice.cs.hpcviewer.ui.trimmedwindow.main", null);
+		MTrimmedWindow newWin = (MTrimmedWindow)modelService.cloneSnippet(app, "edu.rice.cs.hpcviewer.ui.trimmedwindow.main", null);
 
-		  app.getChildren().add(newWin);
-		  
-		  ECommandService cs = newWin.getContext().get(ECommandService.class);
-		  EHandlerService hs = newWin.getContext().get(EHandlerService.class);
-		  
-		  Command cmdOpen = cs.getCommand(ID_OPEN_COMMAND);
-		  ParameterizedCommand pc = new ParameterizedCommand(cmdOpen, null);
-		  
-		  hs.executeHandler(pc);
+	    Rectangle rect = Display.getDefault().getPrimaryMonitor().getBounds();
+	    int w = Math.min(IConstants.WINDOW_WIDTH,  rect.width);
+		int h = Math.min(IConstants.WINDOW_HEIGHT, rect.height);
+		newWin.setWidth(w);
+		newWin.setHeight(h);
+		
+		app.getChildren().add(newWin);
+
+		ECommandService cs = newWin.getContext().get(ECommandService.class);
+		EHandlerService hs = newWin.getContext().get(EHandlerService.class);
+
+		Command cmdOpen = cs.getCommand(ID_OPEN_COMMAND);
+		ParameterizedCommand pc = new ParameterizedCommand(cmdOpen, null);
+
+		hs.executeHandler(pc);
 	}
 }
