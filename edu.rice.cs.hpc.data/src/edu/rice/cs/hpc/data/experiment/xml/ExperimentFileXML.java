@@ -85,8 +85,8 @@ public void parse(InputStream stream, String name,
 	}
 	// We assume it has already been GREP-ed by the server if it needs to be
 
-	Parser parser = new Parser(name, stream, builder);
-	parser.parse();
+	IParser parser = new Parser(name, stream, builder);
+	parser.parse(name);
 
 	if (builder.getParseOK() == Builder.PARSER_OK) {
 		// set the file the same as the name of the database
@@ -181,8 +181,8 @@ public File parse(File location, BaseExperiment experiment, boolean need_metrics
 		}
 	}
 	
-	Parser parser = new Parser(name, stream, builder);
-	parser.parse();
+	IParser parser = new Parser(name, stream, builder);
+	parser.parse(name);
 
 	if ( builder.getParseOK() != Builder.PARSER_OK ) {
 		throw new InvalExperimentException(builder.getParseErrorLineNumber());        	

@@ -55,7 +55,7 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 
 
-public class Parser extends Object
+public class Parser implements IParser
 {
 
 
@@ -180,6 +180,13 @@ throws
 
 
 
+@Override
+public void parse(String filename) throws Exception {
+	parse();
+}
+
+
+
 
 /*************************************************************************
  *	Returns the 1-based line number of the most recently read input line.
@@ -190,7 +197,7 @@ throws
  *	did this method should return <code>this.locator.getLineNumber()</code>.
  *
  ************************************************************************/
-	
+@Override	
 public int getLineNumber()
 {
 	return this.lineNumberReader.getLineNumber();
@@ -256,14 +263,7 @@ public int getLineNumber()
 	{
 		Parser.this.builder.endElement(localName);
 	}
-
-
-
-}
-
-
-
-
+	}
 }
 
 
