@@ -48,7 +48,7 @@ import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
  *************************************************************************/
 public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListener, Listener
 {
-	public  final static String COLUMN_DATA_WIDTH  = "w"; 
+	//public  final static String COLUMN_DATA_WIDTH  = "w"; 
 	private final static float  FACTOR_BOLD_FONT   = 1.2f;
 	private final static String TEXT_METRIC_COLUMN = "|8x88+88xx888x8%";
 	
@@ -296,10 +296,10 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
     	int colWidth = (int) Math.max(metricColumnWidth, extent.x * FACTOR_BOLD_FONT);
     	gc.dispose();
     	
-    	col.setData (COLUMN_DATA_WIDTH, colWidth);
+    	//col.setData (COLUMN_DATA_WIDTH, colWidth);
     	col.setWidth(colWidth);
     	
-		if (layout instanceof TreeColumnLayout) {
+		if (layout != null && layout instanceof TreeColumnLayout) {
 			final ColumnPixelData data = new ColumnPixelData(colWidth, true, false);
 			((TreeColumnLayout)layout).setColumnData(col, data);
 		}
@@ -381,25 +381,22 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
     	if (getTree().isDisposed())
     		return;
 		
-		TreeColumn []columns = getTree().getColumns();
-
-		boolean []toShow = new boolean[columns.length];
-		int numColumn = 0;
-		
 		// list of metrics and list of columns are not the same
 		// columns only has "enabled" metrics (i.e. metrics that are not null)
 		// hence the number of column is always <= number of metrics
 		//
 		// here we try to correspond between metrics to show and the columns
 		
-		Object obj = getInput();
-		if (obj == null) return;
+		if (getInput() == null) return;
 		
-		if (metricMgr == null)
-			return;
+		if (metricMgr == null)  return;
 				
 		List<BaseMetric> metrics = metricMgr.getVisibleMetrics();
 		int numMetrics = metrics.size();
+		
+		TreeColumn []columns = getTree().getColumns();
+		boolean []toShow = new boolean[columns.length];
+		int numColumn = 0;
 		
 		for (TreeColumn column: columns) {
 
@@ -418,7 +415,6 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 				}
 				break;
 			}
-			
 			if (i<numMetrics && metrics.get(i).equalIndex((BaseMetric) metric)) {
 				toShow[numColumn] = status[i];
 				numColumn++;
@@ -426,46 +422,24 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		}
 		
 		int i = -1; // reset the column index
-		
-		for (TreeColumn column : columns) {
-			
+		for (TreeColumn column : columns) {			
 			if (column.getData() == null) continue; // not a metric column 
 			
 			i++;
-
-			int iWidth = 0;
 			if (toShow[i]) {
 				// display column
 				// bug #78: we should keep the original width
 				if (column.getWidth() > 1)
 					continue; // it's already shown
 
-				if (iWidth <= 0) {
-	       			// Laks: bug no 131: we need to have special key for storing the column width
-	        		Object o = column.getData(ScopeTreeViewer.COLUMN_DATA_WIDTH);
-	       			if((o != null) && (o instanceof Integer) ) {
-	       				iWidth = ((Integer)o).intValue();
-	       			} else {
-		        		iWidth = 120;
-	       			}
-				}
-				
+				setMetricColumnWidth(null, column);
 			} else {
 				// hide column					
 				if (column.getWidth() <= 0) 
 					continue; // it's already hidden
 				
-	   			Integer objWidth = Integer.valueOf( column.getWidth() );
-	   			
-	   			// bug no 131: we need to have special key for storing the column width
-	   			column.setData(ScopeTreeViewer.COLUMN_DATA_WIDTH, objWidth);
-	   			
+				column.setWidth(0);
 			}
-			// for other OS other than Linux, we need to set the width explicitly
-			// the layout will not take affect until users move or resize columns in the table
-			// eclipse bug: forcing to refresh the table has no effect either
-			
-			column.setWidth(iWidth);
 		}
     }
     
@@ -506,6 +480,14 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		if (need_to_refresh) {
 			computeIdealCellBound();
 			
+			// make sure we resize the metric columns too (should we?)
+			for(TreeColumn column: getTree().getColumns()) {
+				// do not resize tree scope column 
+				if (column.getData() == null)
+					continue;
+				
+				setMetricColumnWidth(null, column);
+			}
 			// refresh the table, but we don't change the content
 			refresh(false);
 		}
