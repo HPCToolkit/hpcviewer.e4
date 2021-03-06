@@ -175,7 +175,8 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 	 * Zoom in the depth: decrease the depth so user can see more pixels
 	 */
 	public void zoomIn() {
-		visibleDepths  = (int) Math.max(DEPTH_MIN, visibleDepths - FRACTION_ZOOM_DEPTH);
+		float fraction = Math.max(FRACTION_ZOOM_DEPTH, visibleDepths * 0.1f); 
+		visibleDepths  = (int) Math.max(DEPTH_MIN, visibleDepths - fraction);
 		 
 		rebuffer();
 	}
