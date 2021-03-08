@@ -42,6 +42,7 @@ import edu.rice.cs.hpctraceviewer.ui.blamestat.HPCBlameView;
 import edu.rice.cs.hpctraceviewer.ui.callstack.HPCCallStackView;
 import edu.rice.cs.hpctraceviewer.ui.context.BaseTraceContext;
 import edu.rice.cs.hpctraceviewer.ui.depth.HPCDepthView;
+import edu.rice.cs.hpctraceviewer.ui.depthEditor.DepthEditor;
 import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
 import edu.rice.cs.hpctraceviewer.ui.main.HPCTraceView;
 import edu.rice.cs.hpctraceviewer.ui.minimap.SpaceTimeMiniCanvas;
@@ -99,6 +100,8 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 	private HPCCallStackView tbtmCallStack;
 	private HPCSummaryView   tbtmSummaryView;
 	
+	private DepthEditor     depthEditor;
+
 	private HPCStatView tbtmStatView;
 	private HPCBlameView tbtmBlameView;
 	
@@ -192,10 +195,23 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 		
 		
 		// ---------------
+		// Depth editor
+		// ---------------
+		
+		Composite stackArea = new Composite(sashFormRight, SWT.NONE);
+		
+		GridDataFactory.fillDefaults().grab(true, true).applyTo(stackArea);
+		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(stackArea);
+
+		depthEditor = new DepthEditor(stackArea, eventBroker);
+		depthEditor.setEnableAction(false);
+
+		// ---------------
 		// call stack
 		// ---------------
 
-		CTabFolder tabFolderRight = new CTabFolder(sashFormRight, SWT.BORDER);		
+		CTabFolder tabFolderRight = new CTabFolder(stackArea, SWT.BORDER);	
+		GridDataFactory.fillDefaults().grab(true, true).applyTo(tabFolderRight);
 
 		tbtmCallStack = new HPCCallStackView(tabFolderRight, SWT.NONE);
 		createTabItem(tbtmCallStack, "Call stack", tabFolderRight, eventBroker);
@@ -379,6 +395,9 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 			// TODO: summary view has to be set AFTER the stat view 
 			//       since the stat view requires info from summary view 
 			tbtmSummaryView.setInput(stdc);
+
+			// enable action
+			depthEditor.setInput(stdc);
 
 			// this has to be the last tab item to be set
 			// start reading the database and draw it
