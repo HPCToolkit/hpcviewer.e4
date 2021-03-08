@@ -100,6 +100,11 @@ public class MainProfilePage extends AbstractPage
 		debugMode.setSelection(enabled);
 		cctId.setEnabled(enabled);
 		flatId.setEnabled(enabled);
+		
+		if (!enabled) {
+			cctId.setSelection(false);
+			flatId.setSelection(false);
+		}
 	}
 	
 	
