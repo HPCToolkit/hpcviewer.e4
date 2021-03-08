@@ -26,6 +26,11 @@ import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 import edu.rice.cs.hpctraceviewer.ui.util.Utility;
 
+/*************************************************************
+ * 
+ * Class to manage changing the depth  
+ *
+ *************************************************************/
 public class DepthEditor implements EventHandler 
 {
 	private final static String ICON_MAX_DEPTH = "IconMaxDepth";
@@ -40,7 +45,10 @@ public class DepthEditor implements EventHandler
 
 	public DepthEditor(Composite parent, IEventBroker eventBroker) {
 		this.eventBroker = eventBroker;
-				
+
+		// do not accept any events until the data is ready
+		setEnableAction(false);
+
 		/*************************************************************************
 		 * Depth area. Consist of:
 		 * - Depth View Spinner (the thing with the text box and little arrow buttons)
@@ -170,6 +178,8 @@ public class DepthEditor implements EventHandler
 
 		maxDepthButton.setToolTipText("Set to max depth: " + maxDepth);
 		maxDepthButton.setData(Integer.valueOf(maxDepth));
+		
+		// has to set the enable flag to true to accept any events
 		maxDepthButton.setEnabled(true);
 	}
 
@@ -181,11 +191,11 @@ public class DepthEditor implements EventHandler
 
 	}
 	
-	public void setEnableAction(boolean enabled) {
+	private void setEnableAction(boolean enabled) {
 		enableAction = enabled;
 	}
 	
-	public boolean getEnableAction() {
+	private boolean getEnableAction() {
 		return enableAction;
 	}
 

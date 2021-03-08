@@ -204,7 +204,6 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(stackArea);
 
 		depthEditor = new DepthEditor(stackArea, eventBroker);
-		depthEditor.setEnableAction(false);
 
 		// ---------------
 		// call stack
@@ -331,6 +330,9 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 		
 		if (eventBroker != null)
 			eventBroker.unsubscribe(this);
+		
+		if (depthEditor != null)
+			depthEditor.dispose();
 		
 		PreferenceStore pref = TracePreferenceManager.INSTANCE.getPreferenceStore();
 		if (pref != null)
