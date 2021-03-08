@@ -380,8 +380,6 @@ public class CallStackViewer extends AbstractBaseTableViewer
 		final int itemCount = this.getTable().getItemCount();
 		final int depth = (Integer)eventData.value;
 		
-		System.out.println("CSV depth: " + depth);
-		
 		if (itemCount <= depth)
 		{
 			//-----------------------------------

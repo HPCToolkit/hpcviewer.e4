@@ -142,11 +142,11 @@ public class DepthEditor implements EventHandler
 		eventBroker.subscribe(IConstants.TOPIC_DEPTH_UPDATE, this);
 	}
 
-	public void reset(SpaceTimeDataController data) {
+	public void setInput(SpaceTimeDataController data) {
 		this.stData = data;
 		
 		// guard : no action has to be taken at the moment;
-		setEnableAction(false);
+		//setEnableAction(false);
 		
 		// Fix bug #14: extra depth https://github.com/HPCToolkit/hpcviewer.e4/issues/14
 		// By default hpcdata computes the depth based on the line scope, not procedure scope.
@@ -206,7 +206,6 @@ public class DepthEditor implements EventHandler
 			return;
 
 		final int depth = (Integer)eventData.value;
-		System.out.println("DE depth: " + depth);
 
 		setSelection(depth);
 	}
