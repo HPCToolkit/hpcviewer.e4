@@ -40,6 +40,12 @@ public class DepthEditor implements EventHandler
 
 	public DepthEditor(Composite parent, IEventBroker eventBroker) {
 		this.eventBroker = eventBroker;
+				
+		/*************************************************************************
+		 * Depth area. Consist of:
+		 * - Depth View Spinner (the thing with the text box and little arrow buttons)
+		 * - max depth (a shortcut to go to the maximum depth). See issue #64
+		 ************************************************************************/
 		
 		Composite depthArea = new Composite(parent, SWT.BORDER); 
 		

@@ -12,7 +12,6 @@ import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
 import edu.rice.cs.hpctraceviewer.ui.base.AbstractBaseItem;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
-import edu.rice.cs.hpctraceviewer.ui.depthEditor.DepthEditor;
 
 
 /**A view for displaying the call path viewer and minimap.*/
@@ -20,7 +19,6 @@ import edu.rice.cs.hpctraceviewer.ui.depthEditor.DepthEditor;
 public class HPCCallStackView extends AbstractBaseItem
 {
 	private CallStackViewer csViewer;
-	private DepthEditor     depthEditor;
 	
 	private SpaceTimeDataController data;
 	/***
@@ -48,19 +46,9 @@ public class HPCCallStackView extends AbstractBaseItem
 		master.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, true));
 		
 		/*************************************************************************
-		 * Depth area. Consist of:
-		 * - Depth View Spinner (the thing with the text box and little arrow buttons)
-		 * - max depth (a shortcut to go to the maximum depth). See issue #64
-		 ************************************************************************/
-		
-		
-		/*************************************************************************
 		 * CallStackViewer
 		 ************************************************************************/
 		csViewer = new CallStackViewer(parentPart, master, this, ptlService, broker);
-		
-		depthEditor = new DepthEditor(master, broker);
-		depthEditor.setEnableAction(false);
 
 		setToolTipText("The view to show the depth and the actual call path for the point selected by the Trace View's crosshair");
 	}
@@ -72,14 +60,10 @@ public class HPCCallStackView extends AbstractBaseItem
 		data = (SpaceTimeDataController)input;
 		
 		csViewer.setInput(data);
-		depthEditor.reset(data);
 		
 		// instead of updating the content of the view, we just make the table
 		// visible, and let other event to trigger the update content.
 		// at this point, a data may not be ready to be processed
 		csViewer.getTable().setVisible(true);
-
-		// enable action
-		depthEditor.setEnableAction(true);
 	}
 }
