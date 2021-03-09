@@ -335,7 +335,7 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 	
 	/*************************************************************
 	 * 
-	 * Class to manage label of statistic numnber
+	 * Class to manage label of statistic number
 	 *
 	 *************************************************************/
 	private class ColumnStatLabelProvider extends ColumnLabelProvider

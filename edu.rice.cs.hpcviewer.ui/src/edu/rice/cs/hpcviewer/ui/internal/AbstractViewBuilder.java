@@ -633,7 +633,6 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 			e1.printStackTrace();
 			return;
 		}
-		treeViewer.computeIdealCellBound();		
 	}
 	
 	
