@@ -33,9 +33,6 @@ import edu.rice.cs.hpctraceviewer.ui.util.Utility;
  *************************************************************/
 public class DepthEditor implements EventHandler 
 {
-	private final static String ICON_MAX_DEPTH = "IconMaxDepth";
-	private final static String MAX_DEPTH_FILE =  "platform:/plugin/edu.rice.cs.hpctraceviewer.ui/resources/max-depth16.png";
-
 	private final Spinner depthEditor;	
 	private final Button maxDepthButton;	
 	private final IEventBroker eventBroker;	
@@ -73,7 +70,7 @@ public class DepthEditor implements EventHandler
 		maxDepthButton = new Button(depthArea, 0);		
 		maxDepthButton.setEnabled(false);
 		
-		Image image = Utility.getImage(MAX_DEPTH_FILE, ICON_MAX_DEPTH);
+		Image image = Utility.getImage(IConstants.MAX_DEPTH_FILE, IConstants.MAX_DEPTH_LABEL);
 		maxDepthButton.setImage(image);
 
 		GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.CENTER).applyTo(maxDepthButton);
