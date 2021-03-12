@@ -42,9 +42,8 @@ public class ExperimentMerger
 	 * @param exp1 : first database 
 	 * @param exp2 : second database
 	 * @param type : root to merge (cct, bottom-up tree, or flat tree)
-	 * @param verbose : true if the verbose mode is on
 	 *  
-	 * @return
+	 * @return merged experiment database
 	 * @throws Exception 
 	 */
 	static public Experiment merge(Experiment exp1, Experiment exp2, RootScopeType type) throws Exception {
@@ -61,7 +60,6 @@ public class ExperimentMerger
 	 * @param exp2
 	 * @param type
 	 * @param parent_dir
-	 * @param verbose
 	 * @return the new merged database
 	 * @throws Exception 
 	 */
@@ -203,9 +201,10 @@ public class ExperimentMerger
 		// attention: hpcprof doesn't guarantee the ID of metric starts with zero
 		//	we should make sure that the next ID for the second group of metrics is not
 		//	overlapped with the ID from the first group of metrics
-		final int m1_last = m1.size() - 1;
-		final int m1_last_shortname = Integer.valueOf(m1.get(m1_last).getShortName());
-		int m1_last_index = Math.max(m1_last_shortname, m1.get(m1_last).getIndex()) + 1;
+		
+		final int m1_last = metricList.size() - 1;
+		final int m1_last_shortname = Integer.valueOf(metricList.get(m1_last).getShortName());
+		int m1_last_index = Math.max(m1_last_shortname, metricList.get(m1_last).getIndex()) + 1;
 		
 		ListMergedMetrics metricsMerged = new ListMergedMetrics(metricList);
 		
@@ -214,11 +213,15 @@ public class ExperimentMerger
 		// ----------------------------------------------------------------
 		// step 2: append the second metrics, and reset the index and the key
 		// ----------------------------------------------------------------
+		List<DerivedMetric> listDerivedMetrics = new ArrayList<>();
+		Map<Integer, Integer> mapOldIndex   = new HashMap<>();
 		
-		for (int i=0; i<m2.size(); i++) {
-			final BaseMetric m = m2.get(i).duplicate();
+		for(BaseMetric metric: m2) {
+			final BaseMetric m = metric.duplicate();
 			
-			if (!(m instanceof DerivedMetric)) {
+			if (m instanceof DerivedMetric) {
+				listDerivedMetrics.add((DerivedMetric) m);
+			} else {
 				// general metric only, no derived metrics allowed
 
 				// change the short name (or ID) of the metric since the old ID is already
@@ -231,6 +234,17 @@ public class ExperimentMerger
 				
 				m.setDisplayName( 2 + "-" + m.getDisplayName() );
 				
+				metricsMerged.add(m);
+				mapOldIndex.put(index_old, index_new);
+			}
+		}
+		
+		// ----------------------------------------------------------------
+		// step 2b: rename the formula in derived metrics
+		// ----------------------------------------------------------------
+		if (listDerivedMetrics.size()>0) {
+			for(DerivedMetric m: listDerivedMetrics) {
+				m.renameExpression(mapOldIndex);
 				metricsMerged.add(m);
 			}
 		}

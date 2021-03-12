@@ -607,71 +607,68 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 	 * @param values
 	 ************************************************************************/
 	private void do_NV(String[] attributes, String[] values) {
-		
-		if ( (this.elemInfoState == TokenXML.T_METRIC) || (this.elemInfoState == TokenXML.T_METRIC_FORMULA)){
-			InfoState iState = InfoState.NULL;
-			// previous state is metric. The attribute should be about periodicity or unit
-			for (int i=0; i<attributes.length; i++) {
+		assert this.elemInfoState == TokenXML.T_METRIC || this.elemInfoState == TokenXML.T_METRIC_FORMULA 
+				: "Warning: unknown NV from previous token: " + elemInfoState;
+
+		InfoState iState = InfoState.NULL;
+		// previous state is metric. The attribute should be about periodicity or unit
+		for (int i=0; i<attributes.length; i++) {
+			
+			if (attributes[i].charAt(0) == 'n') {
+				// name of the info
+				if ( values[i].charAt(0) == 'p' ) // period
+					iState = InfoState.PERIOD;
+				else if ( values[i].charAt(0) == 'u' ) // unit
+					iState = InfoState.UNIT;
+				else if ( values[i].charAt(0) == 'f' ) // flag
+					iState = InfoState.FLAG;
+				else if ( values[i].charAt(0) == 'a' || values[i].charAt(0) == 'c') // aggregate
+					iState = InfoState.AGGREGATE;
 				
-				if (attributes[i].charAt(0) == 'n') {
-					// name of the info
-					if ( values[i].charAt(0) == 'p' ) // period
-						iState = InfoState.PERIOD;
-					else if ( values[i].charAt(0) == 'u' ) // unit
-						iState = InfoState.UNIT;
-					else if ( values[i].charAt(0) == 'f' ) // flag
-						iState = InfoState.FLAG;
-					else if ( values[i].charAt(0) == 'a' || values[i].charAt(0) == 'c') // aggregate
-						iState = InfoState.AGGREGATE;
-					
-				} else if ( attributes[i].charAt(0) == 'v' ) {
-					
-					int nbMetrics= this.metricList.size();
-					// value of the info
-					switch (iState) {
-					case PERIOD:
-						String sPeriod = values[i];
-						if(nbMetrics > 1) {
-							// get the current metric (inc)
-							BaseMetric metric = this.metricList.get(nbMetrics-1);
-							metric.setSamplePeriod(sPeriod);
-							// get the current metric (exc)
-							metric = this.metricList.get(nbMetrics-2);
-							metric.setSamplePeriod(sPeriod);
-							
-						}
-						break;
+			} else if ( attributes[i].charAt(0) == 'v' ) {
+				
+				int nbMetrics= this.metricList.size();
+				// value of the info
+				switch (iState) {
+				case PERIOD:
+					String sPeriod = values[i];
+					if(nbMetrics > 1) {
+						// get the current metric (inc)
+						BaseMetric metric = this.metricList.get(nbMetrics-1);
+						metric.setSamplePeriod(sPeriod);
+						// get the current metric (exc)
+						metric = this.metricList.get(nbMetrics-2);
+						metric.setSamplePeriod(sPeriod);
 						
-					case UNIT:
-						if(nbMetrics > 0) {
-							// get the current metric (inc)
-							BaseMetric metric = this.metricList.get(nbMetrics-1);
-							metric.setUnit( values[i] );
-							if (!(metric instanceof AggregateMetric) && (nbMetrics>1)) {
-								// get partner metric if the current metric is not aggregate metric
-								metric = this.metricList.get(nbMetrics-2);
-								metric.setUnit(values[i]);
-							}
-						}
-						break;
-						
-					case AGGREGATE:
-					case FLAG:
-						// not used ?
-						break;
-					default:
-						System.err.println("Warning: unrecognize info value state: "+iState);
-						break;
 					}
-					// reinitialize the info state
-					iState = InfoState.NULL;
-				} else 
-					System.err.println("Warning: incorrect XML info format: " + attributes[i]+" "+ values[i]);
+					break;
+					
+				case UNIT:
+					if(nbMetrics > 0) {
+						// get the current metric (inc)
+						BaseMetric metric = this.metricList.get(nbMetrics-1);
+						metric.setUnit( values[i] );
+						if (!(metric instanceof AggregateMetric) && (nbMetrics>1)) {
+							// get partner metric if the current metric is not aggregate metric
+							metric = this.metricList.get(nbMetrics-2);
+							metric.setUnit(values[i]);
+						}
+					}
+					break;
+					
+				case AGGREGATE:
+				case FLAG:
+					// not used ?
+					break;
+				default:
+					System.err.println("Warning: unrecognize info value state: "+iState);
+					break;
+				}
+				// reinitialize the info state
+				iState = InfoState.NULL;
+			} else {
+				// unrecognized XML format
 			}
-		}
-		else
-		{
-			System.err.println("Warning: unknown NV from previous token: " + elemInfoState);
 		}
 	}
 	

@@ -62,6 +62,9 @@ implements IMetricManager
 		metricsWithOrder = new ArrayList<BaseMetric>();
 		
 		for(BaseMetric metric:metrics) {
+			assert mapIndexToMetric.get(metric.getIndex()) == null : 
+				   "Duplicate metric-id " + metric.getIndex();
+
 			if (metric.getOrder() >= 0) {
 				metricsWithOrder.add(metric);
 			}

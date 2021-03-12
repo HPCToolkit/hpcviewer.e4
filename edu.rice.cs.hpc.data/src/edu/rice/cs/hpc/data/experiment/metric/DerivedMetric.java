@@ -6,6 +6,8 @@ package edu.rice.cs.hpc.data.experiment.metric;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.scope.*;
 
+import java.util.Map;
+
 //math expression
 import com.graphbuilder.math.*;
 
@@ -183,14 +185,47 @@ public class DerivedMetric extends BaseMetric {
 	public String getFormula() {
 		return expression.toString();
 	}
-	
+
 	
 	/***
-	 * Return the real formula expression (in math expression)
-	 * @return
+	 * Rename metric index variable using map
+	 * 
+	 * @param mapOldIndex from old index to a new one
+	 * 
 	 */
-	public Expression getFormulaExpression() {
-		return expression;
+	public void renameExpression(Map<Integer, Integer> mapOldIndex) {
+		renameExpression(expression, mapOldIndex);
+	}
+	
+	private void renameExpression(OpNode node, Map<Integer, Integer> mapOldIndex) {
+		Expression left = node.getLeftChild();
+		Expression right = node.getRightChild();
+		
+		renameExpression(left,  mapOldIndex);
+		renameExpression(right, mapOldIndex);
+	}
+	
+	private void renameExpression(VarNode node, Map<Integer, Integer> mapOldIndex) {
+		String name = node.getName();
+		char prefix = name.charAt(0);
+		if (prefix == '$' || prefix == '@') {
+			String varIndex = name.substring(1);
+			Integer intIndex = Integer.valueOf(varIndex);
+			Integer newIndex = mapOldIndex.get(intIndex);
+			if (newIndex != null) {
+				String newStrIndex = prefix + String.valueOf(newIndex);
+				node.setName(newStrIndex);
+			}
+		}
+	}
+
+	
+	private void renameExpression(Expression node, Map<Integer, Integer> mapOldIndex) {
+		if (node instanceof OpNode) {
+			renameExpression((OpNode)node, mapOldIndex);
+		} else if (node instanceof VarNode) {
+			renameExpression((VarNode)node, mapOldIndex);
+		}
 	}
 
 	@Override
