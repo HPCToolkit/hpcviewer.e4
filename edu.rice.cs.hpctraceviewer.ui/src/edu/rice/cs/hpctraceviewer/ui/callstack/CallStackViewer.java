@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +56,9 @@ import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
  * A viewer for CallStackSamples.
  *************************************************/
 public class CallStackViewer extends AbstractBaseTableViewer
-	implements IOperationHistoryListener, DisposeListener
+	implements IOperationHistoryListener, 
+			   DisposeListener,
+			   EventHandler
 {	
 	private final static String EMPTY_FUNCTION = "--------------";
 	
@@ -182,6 +185,7 @@ public class CallStackViewer extends AbstractBaseTableViewer
 	{
 		this.stData = data;
 		colorLabelProvider.colorTable = data.getColorTable();
+		eventBroker.subscribe(IConstants.TOPIC_DEPTH_UPDATE,  this);
 	}
 
 	
@@ -278,26 +282,6 @@ public class CallStackViewer extends AbstractBaseTableViewer
 	}
 	
 	
-	/**Sets the viewer's depth to _depth.*/
-	public void setDepth(int _depth)
-	{
-		final int itemCount = this.getTable().getItemCount();
-		if (itemCount<=_depth)
-		{
-			//-----------------------------------
-			// case of over depth
-			//-----------------------------------
-			final int overDepth = _depth - itemCount + 1;
-			for (int i=0; i<overDepth; i++) 
-			{
-				this.add(EMPTY_FUNCTION);
-			}
-		}
-		selectDepth(_depth);
-		
-		notifyChange(_depth);
-	}
-	
 	
 	@Override
 	public void widgetDisposed(DisposeEvent e) {
@@ -380,5 +364,33 @@ public class CallStackViewer extends AbstractBaseTableViewer
 	@Override
 	protected Point computeCellBounds(GC gc, Point extent) {
 		return extent;
+	}
+
+
+	@Override
+	public void handleEvent(org.osgi.service.event.Event event) {
+
+		Object obj = event.getProperty(IEventBroker.DATA);
+		if (obj == null) return;
+		
+		TraceEventData eventData = (TraceEventData) obj;
+		if (eventData.source == this || eventData.data != this.stData)
+			return;
+
+		final int itemCount = this.getTable().getItemCount();
+		final int depth = (Integer)eventData.value;
+		
+		if (itemCount <= depth)
+		{
+			//-----------------------------------
+			// case of over depth
+			//-----------------------------------
+			final int overDepth = depth - itemCount + 1;
+			for (int i=0; i<overDepth; i++) 
+			{
+				this.add(EMPTY_FUNCTION);
+			}
+		}
+		selectDepth(depth);
 	}
 }

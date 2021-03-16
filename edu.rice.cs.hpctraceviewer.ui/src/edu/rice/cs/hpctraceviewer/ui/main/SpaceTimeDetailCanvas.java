@@ -1137,11 +1137,17 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 
 		DetailPaintJobChangeListener listener = new DetailPaintJobChangeListener(detailPaint, imageOrig, imageFinal, bufferGC, origGC, changedBounds);
 		detailPaint.addJobChangeListener(listener);
-
 		
 /*		this part of the code causes deadlock on VirtualBox Ubuntu
  *      since we don't clear the queue
  */
+		cancelJobs();
+		detailPaint.schedule();
+		
+		queue.add(detailPaint);
+	}
+
+	private void cancelJobs() {
   		if (!queue.isEmpty()) {
 			for (BaseViewPaint job : queue) {
 				if (!job.cancel()) {
@@ -1151,11 +1157,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 				}
 			}
 		}
-		detailPaint.schedule();
-		
-		queue.add(detailPaint);
 	}
-
 	
 	private void donePainting(Image imageOrig, Image imageFinal, boolean refreshData)
 	{		
@@ -1187,8 +1189,12 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	
 	@Override
 	public void widgetDisposed(DisposeEvent e) {
-		eventBroker.unsubscribe(this);
 		
+		// important: remove the existing jobs or Eclipse will
+		// complain of jobs still exist
+		cancelJobs();
+		
+		eventBroker.unsubscribe(this);
 		removePaintListener(this);
 		
 		if (keyListener != null)

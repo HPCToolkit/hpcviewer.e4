@@ -10,6 +10,9 @@ public interface IConstants
 
 	public static final String URI_CONTRIBUTOR     = "platform:/plugin/edu.rice.cs.hpctraceviewer.ui";
 	public static final String ID_DATA_OPERATION   = "trace/op/undo";
-	
+
+	public final static String MAX_DEPTH_LABEL = "IconMaxDepth";
+	public final static String MAX_DEPTH_FILE  =  "platform:/plugin/edu.rice.cs.hpctraceviewer.ui/resources/max-depth16.png";
+
 	public static final int COLUMN_COLOR_WIDTH_PIXELS = 14;
 }
