@@ -469,7 +469,7 @@ public class DatabaseCollection
 			filename = experimentManager.openFileExperiment(shell);
 			if (filename == null)
 				return null;
-		}else {
+		} else {
 			int index = filename.lastIndexOf(Constants.DATABASE_FILENAME);
 			if (index<0) {
 				// it's a directory. Add the experiment.xml file
@@ -490,22 +490,21 @@ public class DatabaseCollection
 		// 3. check if the database already opened or not
 		
 		BaseExperiment exp = getExperimentObject(window, filename);
+		if (exp == null)
+			// database is valid, fresh and not already opened
+			return filename;
 		
-		if (exp != null) {
-			// we cannot have two exactly the same database in one window
-			if (MessageDialog.openQuestion(shell, 
-									   "Warning: database already exists", 
-									   exp.getDefaultDirectory().getAbsolutePath() +
-									   ": the database is already opened.\nDo you want to replace the existing one?" ) )
-			
-				// user decides to replace the database
-				return filename;
+		// we cannot have two exactly the same database in one window
+		if (MessageDialog.openQuestion(shell, 
+								   "Warning: database already exists", 
+								   exp.getDefaultDirectory().getAbsolutePath() +
+								   ": the database is already opened.\nDo you want to replace the existing one?" ) )
+		
+			// user decides to replace the database
+			return filename;
 
-			// we give up
-			return null;
-		}
-		// database is valid, fresh and not already opened
-		return filename;
+		// we give up
+		return null;
 	}
 	
 	

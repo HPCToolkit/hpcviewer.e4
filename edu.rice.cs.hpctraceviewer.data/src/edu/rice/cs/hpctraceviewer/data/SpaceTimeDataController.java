@@ -106,12 +106,16 @@ public abstract class SpaceTimeDataController
 	public SpaceTimeDataController(IEclipseContext context, BaseExperiment experiment) 			
 			throws InvalExperimentException, Exception 
 	{
-		exp = experiment;
-		
+		exp = experiment;		
 		init(context, exp);
 	}
 
 	
+	/*************************************************************************
+	 * Returns the current database's process time line service.
+	 * This service is useful to get the next process time line
+	 * @return ProcessTimelineService
+	 *************************************************************************/
 	public ProcessTimelineService getProcessTimelineService() {
 		ProcessTimelineService ptlService = (ProcessTimelineService) context.get(Constants.CONTEXT_TIMELINE);
 		return ptlService;
@@ -244,19 +248,9 @@ public abstract class SpaceTimeDataController
 	
 	
 	/******************************************************************************
-	 * Returns number of MPI ranks
-	 * SpaceTimeData.
+	 * 	Returns the map between cpid and callpath
+	 * @return
 	 ******************************************************************************/
-	public int getTotalMpiRanks() {		
-		
-		final List<IdTuple> listIdTuples = dataTrace.getListOfIdTuples(IdTupleOption.BRIEF);
-		
-		IdTuple last_traceline = listIdTuples.get(listIdTuples.size()-1);
-		
-		return (int) last_traceline.getIndex(IdTupleType.KIND_RANK) + 1;
-	}
-	
-	
 	public Map<Integer, CallPath> getScopeMap() {
 		return exp.getScopeMap();
 	}
@@ -270,15 +264,29 @@ public abstract class SpaceTimeDataController
 		return attributes.getPixelHorizontal();
 	}
 	
+	
+	/**************************************************************************
+	 * Returns the experiment database
+	 * @return BaseExperiment
+	 **************************************************************************/
 	public BaseExperiment getExperiment() {
 		return exp;
 	}
 
+	
+	/*************************************************************************
+	 * Returns the image trace attribute
+	 * @return {@code ImageTraceAttributes}
+	 *************************************************************************/
 	public ImageTraceAttributes getAttributes() {
 		return attributes;
 	}
 
 
+	/*************************************************************************
+	 * Returns the size of the trace header file
+	 * @return int
+	 *************************************************************************/
 	public int getHeaderSize() {
 		final int headerSize = ((TraceAttribute)exp.getTraceAttribute()).dbHeaderSize;
 		return headerSize;
@@ -376,10 +384,6 @@ public abstract class SpaceTimeDataController
 			begProcess = 0;
 		
 		attributes.setProcess(begProcess, endProcess);
-	}
-
-	public boolean isTimelineFilled() {
-		return timelineService.isFilled();
 	}
 	
 	
