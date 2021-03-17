@@ -95,8 +95,8 @@ public class TreeSimilarity
 		BaseMetric []metrics = new BaseMetric[2];
 		
 		for(BaseMetric m1: metricSource) {
-			for(BaseMetric m2: metricTarget) {
-				if (m1.getMetricType() == MetricType.INCLUSIVE) {
+			if (m1.getMetricType() == MetricType.INCLUSIVE) {
+				for(BaseMetric m2: metricTarget) {
 					if (m1.getDisplayName().equals(m2.getDisplayName())) {
 						metrics[METRIC_TARGET] = m2;
 						metrics[METRIC_SOURCE] = m1;
