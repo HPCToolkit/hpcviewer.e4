@@ -690,8 +690,13 @@ public class DatabaseCollection
 		} catch (InvalExperimentException ei) {
 			final String msg = "Invalid database " + xmlFileOrDirectory + "\nError at line " + ei.getLineNumber();
 			statusReporter.error(msg, ei);
-
 			MessageDialog.openError(shell, "Error " + ei.getClass(), msg);
+			return;
+
+		} catch (NullPointerException enpe) {
+			final String msg = xmlFileOrDirectory + ": Empty or corrupt database";
+			statusReporter.error(msg, enpe);
+			MessageDialog.openError(shell, "Error " + enpe.getClass(), msg);
 			return;
 			
 		} catch (Exception e) {
