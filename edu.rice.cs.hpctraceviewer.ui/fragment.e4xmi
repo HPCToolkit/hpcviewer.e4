@@ -76,7 +76,7 @@
       </children>
     </elements>
     <elements xsi:type="menu:MenuContribution" xmi:id="_lK07sNX7EeqsK-PEIuqpJw" elementId="edu.rice.cs.hpctraceviewer.ui.menucontribution.colorMap" parentId="edu.rice.cs.hpcviewer.ui.menu.view">
-      <children xsi:type="menu:HandledMenuItem" xmi:id="_s-ynQNX7EeqsK-PEIuqpJw" elementId="edu.rice.cs.hpctraceviewer.menu.colorMap" label="Procedure-color map" tooltip="Customize the mapping between the procedure and the color" mnemonics="P" command="_79jFkNX7EeqsK-PEIuqpJw">
+      <children xsi:type="menu:HandledMenuItem" xmi:id="_s-ynQNX7EeqsK-PEIuqpJw" elementId="edu.rice.cs.hpctraceviewer.menu.colorMap" label="Color map" tooltip="Assign a specific color to a pattern of procedures" mnemonics="P" command="_79jFkNX7EeqsK-PEIuqpJw">
         <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_OaF5YNX8EeqsK-PEIuqpJw" contributionURI="bundleclass://edu.rice.cs.hpctraceviewer.ui/edu.rice.cs.hpctraceviewer.ui.handlers.TraceDataExist"/>
       </children>
     </elements>

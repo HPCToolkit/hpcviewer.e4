@@ -277,7 +277,7 @@ public class ProcedureClassDialog extends Dialog
 		
 		sortColClass.setSorter(sortColClass, Direction.ASC);
 
-		getShell().setText("Procedure-color mapping");
+		getShell().setText("Color mapping");
 		
 		return composite;
 	}

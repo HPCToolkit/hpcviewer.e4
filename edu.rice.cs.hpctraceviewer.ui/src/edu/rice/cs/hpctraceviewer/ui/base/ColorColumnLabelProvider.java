@@ -21,7 +21,10 @@ public abstract class ColorColumnLabelProvider extends OwnerDrawLabelProvider
 	protected void paint(Event event, Object element) {
 		switch(event.index) {
 		case 0:
-			Color color = getColor(event, element);				
+			Color color = getColor(event, element);
+			if (color == null)
+				return;
+			
 			event.gc.setBackground(color);
 			
 			Rectangle bound = event.getBounds();
