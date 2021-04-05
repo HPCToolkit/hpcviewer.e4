@@ -19,6 +19,12 @@ import edu.rice.cs.hpctraceviewer.ui.base.AbstractBaseItem;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.base.ITraceViewAction;
 
+/*****************************************************************
+ * 
+ * Main class for the trace view which manages the main view
+ * Every thing is done in the main view will affect other views
+ *
+ *****************************************************************/
 public class HPCTraceView extends AbstractBaseItem
 {
 	public static final String ID_PERSPECTIVE = "edu.rice.cs.hpctraceviewer.ui.perspective.main";
@@ -110,14 +116,22 @@ public class HPCTraceView extends AbstractBaseItem
 	}
 	
 	
+	/****
+	 * Get the {@code ITraceViewAction} of the trace view
+	 * @return
+	 */
 	public ITraceViewAction getActions() {
 		return detailCanvas;
 	}
 	
-	
-	public void preDestroy() {		
+
+	/***
+	 * Refresh the content of the main view and its derivatives 
+	 * (depth view, summary view, etc). 
+	 */
+	public void refresh() {
+		detailCanvas.refresh(true);
 	}
-	
 
 	@Override
 	public void setInput(Object input) {

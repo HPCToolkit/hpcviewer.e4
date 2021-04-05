@@ -23,7 +23,8 @@ Require-Bundle: javax.inject,
  org.eclipse.e4.core.services,
  org.slf4j.api,
  org.eclipse.osgi.services,
- edu.rice.cs.hpcsetting
+ edu.rice.cs.hpcsetting,
+ edu.rice.cs.hpc.filter
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: edu.rice.cs.hpctraceviewer.ui
 Import-Package: edu.rice.cs.hpc.filter.dialog,
