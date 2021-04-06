@@ -43,6 +43,7 @@ import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
 import edu.rice.cs.hpc.data.experiment.metric.MetricValue;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
+import edu.rice.cs.hpc.data.util.ScopeComparator;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
@@ -253,6 +254,13 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 	@Override
 	public void setData(RootScope root) {
 		
+		// by default only the first visible metric column is sorted
+		setData(root, 1, ScopeComparator.SORT_DESCENDING);
+	}
+	
+	@Override
+	public void setData(RootScope root, int sortColumnIndex, int sortDirection) {
+		
 		removeColumns();
 		
 		createScopeColumn(getViewer());
@@ -260,17 +268,15 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 		Experiment experiment = (Experiment) root.getExperiment();
 		
 		// add metric columns only if the metric is not empty
-		boolean bSorted = true;
+		int colIndex = 0;
 		List<BaseMetric> metrics = experiment.getVisibleMetrics();
 		
 		for(BaseMetric metric : metrics) {
 			if (root.getMetricValue(metric) == MetricValue.NONE)
 				continue;
 			
-			treeViewer.addTreeColumn(metric, bSorted);
-			
-			// only the first visible column is sorted
-			bSorted = false;
+			colIndex++;
+			treeViewer.addTreeColumn(metric, colIndex == sortColumnIndex, sortDirection);
 		}
 		Scope rootTable = root.createRoot();
 		

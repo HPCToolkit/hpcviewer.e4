@@ -30,6 +30,7 @@ import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.TreeSelection;
+
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.DerivedMetric;
@@ -233,15 +234,28 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 	}
 	
 	
+	/****
+	 * Add a tree metric column
+	 * @param objMetric base metric
+	 * @param bSorted whether the column has to be sorted or not
+	 * 
+	 * @return the created {@code TreeViewerColumn}
+	 */
+	public TreeViewerColumn addTreeColumn(BaseMetric objMetric,  
+    		boolean bSorted) {
+		return addTreeColumn(objMetric, bSorted, ScopeComparator.SORT_DESCENDING);
+	}
+	
     /**
      * Add new tree column for derived metric
      * @param objMetric metric associated with the column
      * @param bSorted flag indicating if the column will be sorted or not
+     * @param sortDirection possible values: {@code ScopeComparator.SORT_DESCENDING}, {@code ScopeComparator.SORT_ASCENDING}
      * 
-     * @return a column
+     * @return a column  {@code TreeViewerColumn}
      */
     public TreeViewerColumn addTreeColumn(BaseMetric objMetric,  
-    		boolean bSorted) {
+    		boolean bSorted, int sortDirection) {
     	
     	TreeViewerColumn colMetric = new TreeViewerColumn(this,SWT.RIGHT);	// add column
 		colMetric.setLabelProvider( new MetricLabelProvider(this, objMetric) );
@@ -274,7 +288,7 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		col.addSelectionListener(selectionAdapter);
 		
 		if(bSorted) {
-			selectionAdapter.setSorter(ScopeComparator.SORT_DESCENDING);
+			selectionAdapter.setSorter(sortDirection);
 		}
 		return colMetric;
     }

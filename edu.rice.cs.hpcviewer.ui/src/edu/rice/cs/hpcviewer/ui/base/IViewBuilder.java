@@ -11,6 +11,8 @@ public interface IViewBuilder
 {
 	public void createContent(ProfilePart profilePart, Composite parent, EMenuService menuService);
 	public void setData(RootScope root);
+	public void setData(RootScope root, int sortColumnIndex, int sortDirection);
+
 	public void dispose();
 	
 	public ScopeTreeViewer getTreeViewer();

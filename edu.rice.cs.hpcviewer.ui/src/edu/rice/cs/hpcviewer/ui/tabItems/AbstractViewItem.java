@@ -1,5 +1,8 @@
 package edu.rice.cs.hpcviewer.ui.tabItems;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.services.EMenuService;
@@ -7,6 +10,8 @@ import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeColumn;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
@@ -16,6 +21,7 @@ import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
+import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpc.filter.service.FilterStateProvider;
 import edu.rice.cs.hpcbase.BaseConstants;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
@@ -23,6 +29,7 @@ import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.base.IViewBuilder;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
+import edu.rice.cs.hpcviewer.ui.util.SortColumn;
 
 
 /*******************************************************************************************
@@ -110,6 +117,8 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 		contentViewer.setData(root);
 	}
 
+	private void expandTree(Scope childNode) {
+	}
 	
 	/****
 	 * Retrieve the current input of this view
@@ -136,9 +145,26 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 			if (event.getTopic().equals(FilterStateProvider.FILTER_REFRESH_PROVIDER)) {
 				FilterStateProvider.filterExperiment((Experiment) experiment);
 				
+				final Tree tree = treeViewer.getTree();
+				
+				// store the current selected node and sorted column 
+				Scope selectedNode    = treeViewer.getSelectedNode();
+				int sortDirection 	  = tree.getSortDirection();
+				TreeColumn sortColumn = tree.getSortColumn();
+				int sortColumnIndex   = getSortColumnIndex(sortColumn, tree);
+				
+				List<Scope> path = new ArrayList<Scope>();
+				if (selectedNode != null) {
+					Scope parent = selectedNode.getParentScope();
+					while(parent != null && !(parent instanceof RootScope)) {
+						path.add(parent);
+						parent = parent.getParentScope();
+					}
+				}
+
 				// TODO: this process takes time
 				root = createRoot(experiment);
-				contentViewer.setData(root);
+				contentViewer.setData(root, sortColumnIndex, SortColumn.getSortDirection(sortDirection));
 			}
 			return;
 		}
@@ -170,6 +196,16 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 		return viewer.getTree().forceFocus();
 	}
 
+	private int getSortColumnIndex(TreeColumn sortColumn, Tree tree) {
+		int sortColumnIndex = 0;
+		for(TreeColumn col : tree.getColumns()) {
+			if (col == sortColumn) 
+				break;
+			sortColumnIndex++;
+		}
+		return sortColumnIndex;
+	}
+	
 	protected abstract RootScope 	  createRoot(BaseExperiment experiment);
 	protected abstract IViewBuilder   setContentViewer(Composite parent, EMenuService menuService);
 	protected abstract RootScopeType  getRootType();
