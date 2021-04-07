@@ -427,8 +427,10 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 		}
 		toolItem[ACTION_FONT_BIGGER] .setEnabled(true);
 		toolItem[ACTION_FONT_SMALLER].setEnabled(true);
-		toolItem[ACTION_ADD_METRIC]  .setEnabled(true);
 		toolItem[ACTION_EXPORT_DATA] .setEnabled(true);
+		
+		// Fix bug issue $#80: no call path, no metrics
+		toolItem[ACTION_ADD_METRIC]  .setEnabled(((IMetricManager)exp).getMetricCount()>0);
 		
 		IMetricManager mgr = (IMetricManager) exp;
 		toolItem[ACTION_COLUMN_HIDE].setEnabled(mgr.getMetricCount() > 0);

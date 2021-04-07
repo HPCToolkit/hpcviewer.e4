@@ -183,6 +183,8 @@ public class TopDownContentViewer extends AbstractViewBuilder
 					// cause problems with the trace view since we share the tree.
 					
 					Object []children = ((RootScope)node).getChildren();
+					
+					// Fix bug issue $#80: no call path, no metrics
 					if (children == null)
 						return null;
 					
