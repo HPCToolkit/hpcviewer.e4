@@ -158,7 +158,7 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 		long t1 = System.currentTimeMillis();
 
 		if (debug) {
-			System.out.println(getClass()+ ". time to filter: " + (t1-t0) + " ms");
+			System.out.println(getClass().getSimpleName() + ". time to filter: " + (t1-t0) + " ms");
 		}
 		
 		TreeItem item = expand(treeViewer, tree.getTopItem(), path);
@@ -166,7 +166,7 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 		
 		long t2 = System.currentTimeMillis();
 		if (debug) {
-			System.out.println(getClass()+ ". time to expand: " + (t2-t1) + " ms");
+			System.out.println(getClass().getSimpleName() + ". time to expand: " + (t2-t1) + " ms");
 		}
 	}
 
@@ -190,7 +190,8 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 		// try to reveal the parent first.
 		// sometimes in virtual table, the parent item is not materialized yet
 		Scope oi = (Scope) item.getData();
-		treeViewer.reveal(oi);
+		if (oi != null)
+			treeViewer.reveal(oi);
 		
 		// materialize the children of the item
 		// this is important for virtual tree (or table)
