@@ -192,8 +192,10 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 		// try to reveal the parent first.
 		// sometimes in virtual table, the parent item is not materialized yet
 		Scope oi = (Scope) item.getData();
-		if (oi != null)
-			treeViewer.reveal(oi);
+		if (oi == null)
+			return item;
+
+		treeViewer.reveal(oi);
 		
 		// materialize the children of the item
 		// this is important for virtual tree (or table)
