@@ -183,7 +183,9 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 	 * @param path {@code List<Scope>} the list of path
 	 */
 	private TreeItem expand(TreeViewer treeViewer, TreeItem item, List<Scope> path) {
-		assert(item != null && path != null);
+		
+		if (item == null)
+			return null;
 
 		// try to reveal the parent first.
 		// sometimes in virtual table, the parent item is not materialized yet
@@ -195,6 +197,9 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 		// without materializing the item, the content is empty, and the
 		// node is named "{*virtual*}"
 		List<TreeNode> listChildren = oi.getListChildren();
+		if (listChildren == null) 
+			return item;
+		
 		listChildren.stream().forEach((c) -> {
 			treeViewer.reveal(c);
 		});
