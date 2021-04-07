@@ -1139,7 +1139,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		detailPaint.addJobChangeListener(listener);
 		
 /*		this part of the code causes deadlock on VirtualBox Ubuntu
- *      since we don't clear the queue
+ *      if we don't clear the queue
  */
 		cancelJobs();
 		detailPaint.schedule();
@@ -1149,13 +1149,12 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 
 	private void cancelJobs() {
   		if (!queue.isEmpty()) {
-			for (BaseViewPaint job : queue) {
-				if (!job.cancel()) {
-					// a job cannot be terminated.
-					// this is fine, we should wait until it terminates or
-					// response that it will cancel in the future
-				}
-			}
+  			queue.stream().forEach(job -> {
+				// a job cannot be terminated.
+				// this is fine, we should wait until it terminates or
+				// response that it will cancel in the future
+  				job.cancel();
+  			});
 		}
 	}
 	
