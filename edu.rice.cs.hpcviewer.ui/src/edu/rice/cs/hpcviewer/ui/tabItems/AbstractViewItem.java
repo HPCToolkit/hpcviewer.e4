@@ -162,7 +162,9 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 		}
 		
 		TreeItem item = expand(treeViewer, tree.getTopItem(), path);
-		tree.select(item);
+		if (item != null)
+			// Attention Linux GTK: this value can be null!
+			tree.select(item);
 		
 		long t2 = System.currentTimeMillis();
 		if (debug) {
