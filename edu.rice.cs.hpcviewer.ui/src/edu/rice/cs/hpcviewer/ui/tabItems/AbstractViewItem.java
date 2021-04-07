@@ -13,6 +13,7 @@ import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
@@ -155,21 +156,23 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 		root = createRoot(experiment);
 		contentViewer.setData(root, sortColumnIndex, SortColumn.getSortDirection(sortDirection));
 
-		long t1 = System.currentTimeMillis();
+		Display.getDefault().asyncExec(()-> {
+			long t1 = System.currentTimeMillis();
 
-		if (debug) {
-			System.out.println(getClass().getSimpleName() + ". time to filter: " + (t1-t0) + " ms");
-		}
-		
-		TreeItem item = expand(treeViewer, tree.getTopItem(), path);
-		if (item != null)
-			// Attention Linux GTK: this value can be null!
-			tree.select(item);
-		
-		long t2 = System.currentTimeMillis();
-		if (debug) {
-			System.out.println(getClass().getSimpleName() + ". time to expand: " + (t2-t1) + " ms");
-		}
+			if (debug) {
+				System.out.println(getClass().getSimpleName() + ". time to filter: " + (t1-t0) + " ms");
+			}
+			
+			TreeItem item = expand(treeViewer, tree.getTopItem(), path);
+			if (item != null)
+				// Attention Linux GTK: this value can be null!
+				tree.select(item);
+			
+			long t2 = System.currentTimeMillis();
+			if (debug) {
+				System.out.println(getClass().getSimpleName() + ". time to expand: " + (t2-t1) + " ms");
+			}
+		});
 	}
 
 	
@@ -191,6 +194,7 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 
 		// try to reveal the parent first.
 		// sometimes in virtual table, the parent item is not materialized yet
+		treeViewer.reveal(item);
 		Scope oi = (Scope) item.getData();
 		if (oi == null)
 			return item;
