@@ -9,7 +9,7 @@ import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.services.EMenuService;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
-import org.eclipse.jface.viewers.TreePath;
+
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.Composite;
@@ -227,6 +227,9 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 		if (!(obj instanceof ViewerDataEvent)) {
 			if (event.getTopic().equals(FilterStateProvider.FILTER_REFRESH_PROVIDER)) {
 				filter();
+				// notify trace viewer to update the call path
+				ViewerDataEvent data = new ViewerDataEvent((Experiment) experiment, obj);
+				eventBroker.post(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH, data);
 			}
 			return;
 		}

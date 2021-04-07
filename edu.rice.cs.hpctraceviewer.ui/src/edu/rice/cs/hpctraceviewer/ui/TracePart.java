@@ -29,8 +29,6 @@ import org.osgi.service.event.EventHandler;
 import edu.rice.cs.hpc.data.db.IdTupleType;
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
-import edu.rice.cs.hpc.filter.service.FilterMap;
-import edu.rice.cs.hpc.filter.service.FilterStateProvider;
 import edu.rice.cs.hpcbase.BaseConstants;
 import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
@@ -359,8 +357,6 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 		this.experiment = (BaseExperiment) input;
 		part.setLabel("Trace: " + experiment.getName());
 		part.setTooltip(experiment.getDefaultDirectory().getAbsolutePath());
-
-		eventBroker.subscribe(FilterStateProvider.FILTER_REFRESH_PROVIDER, this);
 	}
 
 	@Override
@@ -429,7 +425,9 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 				tbtmSummaryView.setAnalysisTool(new CpuBlameAnalysis(eventBroker));
 			}
 			updateToolItem();
-			
+
+			eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH, this);
+
 		} catch (Exception e) {
 			Shell shell = Display.getDefault().getActiveShell();
 			MessageDialog.openError(shell, "Error in opening the database", e.getClass() + ":" + e.getMessage());
@@ -480,14 +478,6 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 		if (obj == null || experiment == null)
 			return;
 		
-		// Check if the filter event is broadcasted
-		if (obj instanceof FilterMap) {
-			if (event.getTopic().equals(FilterStateProvider.FILTER_REFRESH_PROVIDER)) {
-				tbtmTraceView.refresh();
-			}
-			return;
-		}
-
 		// check if we have a generic event
 		ViewerDataEvent eventInfo = (ViewerDataEvent) obj;
 		if (experiment != eventInfo.experiment) 
@@ -502,6 +492,8 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 			// need to dispose resources
 			if (stdc != null)
 				stdc.dispose();
+		} else if (event.getTopic().equals(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH)) {
+			tbtmTraceView.refresh();
 		}
 	}
 }

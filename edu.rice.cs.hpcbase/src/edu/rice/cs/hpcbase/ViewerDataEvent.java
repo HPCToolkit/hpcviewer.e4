@@ -14,16 +14,20 @@ import edu.rice.cs.hpc.data.experiment.Experiment;
 public class ViewerDataEvent 
 {	
 	/** Event when metric columns have to be hidden or shown. See the data field. o*/
-	static public final String TOPIC_HIDE_SHOW_COLUMN    = "hpcviewer/column_hide";
+	static public final String TOPIC_HIDE_SHOW_COLUMN     = "hpcviewer/column_hide";
 	
 	/** Event when a new database has arrived. */
-	static final public String TOPIC_HPC_NEW_DATABASE    = "hpcviewer/database_add";
+	static final public String TOPIC_HPC_DATABASE_NEW     = "hpcviewer/database_add";
+
+	/** Event when a database (cct) has been changed such as filtered or name updates */
+	static final public String TOPIC_HPC_DATABASE_REFRESH = "hpcviewer/database_refresh";
 
 	/** Event when a database has to be removed from the application */
-	static final public String TOPIC_HPC_ADD_NEW_METRIC  = "hpcviewer/metric_add";
+	static final public String TOPIC_HPC_ADD_NEW_METRIC   = "hpcviewer/metric_add";
 
-	static final public String TOPIC_HPC_METRIC_UPDATE   = "hpcviewer/metric_update";
-
+	/** Event when a metric has been changed or modified by the user */
+	static final public String TOPIC_HPC_METRIC_UPDATE    = "hpcviewer/metric_update";
+	
 	public Experiment experiment;
 	public Object 	  data;
 	
