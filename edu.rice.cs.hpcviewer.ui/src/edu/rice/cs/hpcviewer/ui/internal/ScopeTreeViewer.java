@@ -36,6 +36,7 @@ import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
+import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpc.data.util.OSValidator;
 import edu.rice.cs.hpc.data.util.ScopeComparator;
@@ -293,6 +294,15 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		return colMetric;
     }
     
+    
+    /****
+     * API to clear the content of the table.
+     * Use this method to empty the table so it's fast to create a column
+     */
+    public void clearInput() {
+    	RootScope root = new RootScope(getExperiment(), "empty", RootScopeType.Invisible);
+    	setInput(root);
+    }
     
     /***
      * set the width of a metric column based on the content and the text of the header
