@@ -7,6 +7,7 @@ import java.util.List;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.LoggerFactory;
 
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -42,5 +43,17 @@ public class LogProperty
 		return files;
 	}
 
+	
+	/****
+	 * Enable or disable debug level
+	 * @param debug boolean true if we need to set to the debug level
+	 */
+	public static void setDebug(boolean debug) {
+		Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+		if (debug)
+			root.setLevel(Level.DEBUG);
+		else
+			root.setLevel(Level.ERROR);
 
+	}
 }

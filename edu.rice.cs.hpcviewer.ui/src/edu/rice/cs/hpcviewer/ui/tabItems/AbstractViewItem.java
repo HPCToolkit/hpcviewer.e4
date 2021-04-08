@@ -9,7 +9,6 @@ import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.services.EMenuService;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
-import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.Composite;
@@ -19,6 +18,7 @@ import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
@@ -31,8 +31,6 @@ import edu.rice.cs.hpc.data.experiment.scope.TreeNode;
 import edu.rice.cs.hpc.filter.service.FilterStateProvider;
 import edu.rice.cs.hpcbase.BaseConstants;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
-import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
-import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.base.IViewBuilder;
@@ -147,9 +145,6 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 			Collections.reverse(path);
 		}
 
-		PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
-		boolean debug = pref.getBoolean(PreferenceConstants.ID_DEBUG_MODE);
-
 		long t0 = System.currentTimeMillis();
 
 		// TODO: this process takes time
@@ -157,21 +152,20 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 		contentViewer.setData(root, sortColumnIndex, SortColumn.getSortDirection(sortDirection));
 
 		Display.getDefault().asyncExec(()-> {
-			long t1 = System.currentTimeMillis();
-
-			if (debug) {
-				System.out.println(getClass().getSimpleName() + ". time to filter: " + (t1-t0) + " ms");
-			}
 			
+			long t1 = System.currentTimeMillis();
+			LoggerFactory.getLogger(getClass()).debug("Time to filter: " + (t1-t0) + " ms");
+			
+			tree.setRedraw(false);
 			TreeItem item = expand(treeViewer, tree.getTopItem(), path);
 			if (item != null)
 				// Attention Linux GTK: this value can be null!
 				tree.select(item);
 			
+			tree.setRedraw(true);
+
 			long t2 = System.currentTimeMillis();
-			if (debug) {
-				System.out.println(getClass().getSimpleName() + ". time to expand: " + (t2-t1) + " ms");
-			}
+			LoggerFactory.getLogger(getClass()).debug("Time to expand: " + (t2-t1) + " ms");
 		});
 	}
 

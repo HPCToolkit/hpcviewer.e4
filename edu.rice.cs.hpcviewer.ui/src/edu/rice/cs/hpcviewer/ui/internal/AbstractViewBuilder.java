@@ -270,6 +270,7 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 		// add metric columns only if the metric is not empty
 		int colIndex = 0;
 		List<BaseMetric> metrics = experiment.getVisibleMetrics();
+		treeViewer.getTree().setRedraw(false);
 		
 		for(BaseMetric metric : metrics) {
 			if (root.getMetricValue(metric) == MetricValue.NONE)
@@ -282,6 +283,7 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
 		
 		// TOOO: populate the table: this can take really long time !
 		treeViewer.setInput(rootTable);
+		treeViewer.getTree().setRedraw(true);
 
 		// synchronize hide/show columns with other views that already visible
 		// since this view is just created, we need to ensure the columns hide/show

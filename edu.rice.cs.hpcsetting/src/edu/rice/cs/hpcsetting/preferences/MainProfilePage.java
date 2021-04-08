@@ -13,6 +13,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import edu.rice.cs.hpclog.LogProperty;
 
 public class MainProfilePage extends AbstractPage 
 {	
@@ -100,11 +101,7 @@ public class MainProfilePage extends AbstractPage
 		debugMode.setSelection(enabled);
 		cctId.setEnabled(enabled);
 		flatId.setEnabled(enabled);
-		
-		if (!enabled) {
-			cctId.setSelection(false);
-			flatId.setSelection(false);
-		}
+		LogProperty.setDebug(enabled);
 	}
 	
 	
