@@ -139,6 +139,7 @@ public class HotCallPath
 				// then we consider it as hot path node.
 				if(dChild < (0.5 * dParent)) {
 					objHotPath.node     = scopeChild;
+					objHotPath.path     = path.createChildPath(scopeChild);
 					
 					return true;
 				} else {
