@@ -134,6 +134,14 @@ output="hpcviewer-${release}-macosx.cocoa.x86_64.zip"
 input=edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-macosx.cocoa.x86_64.zip 
 repackage_nonLinux $input $output
 
+# special treatement for mac OS
+OS=`uname`
+if [[ "$OS" == "Darwin" ]]; then 
+	macos/notarize.sh $output
+	
+fi
+
+
 echo "=================================="
 echo " Done" 
 echo "=================================="

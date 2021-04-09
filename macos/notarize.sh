@@ -14,7 +14,11 @@ if [ ! -f $1 ]; then
 fi
 }
 
-FILE=`ls hpcviewer-*-macosx.cocoa.x86_64.zip`
+FILE=$1
+if [[ "$1" == ""  ]]; then
+	FILE=`ls hpcviewer-*-macosx.cocoa.x86_64.zip | tail -n 1`
+fi
+echo "File to be notarized: $FILE"
 check_file $FILE
 
 FILE_BASE="${FILE%.zip}"
@@ -61,6 +65,9 @@ EOF
 cp $FILE_PLIST  $DIR_PREP
 
 cd $DIR_PREP
-unzip ../$FILE
+unzip -q ../$FILE
 
 #gon $BASE_CONFIG
+
+cd ..
+echo "Notarized file: $DIR_PREP/${FILE_BASE}.dmg"
