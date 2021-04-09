@@ -9,6 +9,8 @@ import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.services.EMenuService;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.Composite;
@@ -157,10 +159,13 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 			LoggerFactory.getLogger(getClass()).debug("Time to filter: " + (t1-t0) + " ms");
 			
 			tree.setRedraw(false);
-			TreeItem item = expand(treeViewer, tree.getTopItem(), path);
-			if (item != null)
+			TreePath treePath = new TreePath(new Object[] {root});
+			TreePath newPath = expand(treeViewer, treePath, path);
+			if (newPath != null) {
+				treeViewer.reveal(newPath);
 				// Attention Linux GTK: this value can be null!
-				tree.select(item);
+				treeViewer.setSelection(new StructuredSelection(newPath), true);
+			}
 			
 			tree.setRedraw(true);
 
@@ -181,35 +186,17 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 	 * @param item the parent item
 	 * @param path {@code List<Scope>} the list of path
 	 */
-	private TreeItem expand(TreeViewer treeViewer, TreeItem item, List<Scope> path) {
+	private TreePath expand(TreeViewer treeViewer, TreePath treePath, List<Scope> path) {
 		
-		if (item == null)
-			return null;
+		if (treePath == null || path == null  || path.size()==0)
+			return treePath;
 
 		// try to reveal the parent first.
 		// sometimes in virtual table, the parent item is not materialized yet
-		treeViewer.reveal(item);
-		Scope oi = (Scope) item.getData();
-		if (oi == null)
-			return item;
-
-		treeViewer.reveal(oi);
+		Scope lastElement = (Scope) treePath.getLastSegment();
 		
-		// materialize the children of the item
-		// this is important for virtual tree (or table)
-		// without materializing the item, the content is empty, and the
-		// node is named "{*virtual*}"
-		List<TreeNode> listChildren = oi.getListChildren();
-		if (listChildren == null) 
-			return item;
-		
-		listChildren.stream().forEach((c) -> {
-			treeViewer.reveal(c);
-		});
-		
-		TreeItem []items = item.getItems();
-		if (items == null || path.size()==0)
-			return item;
+		if (lastElement == null)
+			return treePath;
 		
 		final Scope node = path.remove(0);
 		final int cctPath = node.getCCTIndex();
@@ -218,17 +205,22 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 		// - check if the child item has the same cct-id as the node in the path.
 		//   if they are the same, then recursively expand the child
 		// - if no child has the same cct-id as the one in the path, do nothing
-		for(TreeItem child: items) {
-			treeViewer.reveal(child);
-			Object o = child.getData();
-			if (o != null && (o instanceof Scope)) {
-				int cctItem = ((Scope)o).getCCTIndex();
+		treeViewer.reveal(lastElement);
+		Object []items = lastElement.getChildren();
+		if (items == null)
+			return treePath;
+		
+		for (Object item: items) {
+			if (item != null) {
+				Scope child = (Scope) item;
+				int cctItem = child.getCCTIndex();
 				if (cctItem == cctPath) {
-					return expand(treeViewer, child, path);
+					treePath = treePath.createChildPath(child);
+					return expand(treeViewer, treePath, path);
 				}
 			}
-		} 
-		return item;
+		}
+		return treePath;
 	}
 	
 	/****
