@@ -12,12 +12,12 @@ import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
-import org.eclipse.swt.widgets.TreeItem;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.LoggerFactory;
@@ -29,7 +29,6 @@ import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
-import edu.rice.cs.hpc.data.experiment.scope.TreeNode;
 import edu.rice.cs.hpc.filter.service.FilterStateProvider;
 import edu.rice.cs.hpcbase.BaseConstants;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
@@ -125,18 +124,24 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 		contentViewer.setData(root);
 	}
 
+	
+	/*****
+	 * Filter certain nodes based on the filter set patterns
+	 * See {@code edu.rice.cs.hpc.filter} plugin
+	 */
 	private void filter() {
 		FilterStateProvider.filterExperiment((Experiment) experiment);
 		
 		final ScopeTreeViewer treeViewer = contentViewer.getTreeViewer();
 		final Tree tree = treeViewer.getTree();
 		
-		// store the current selected node and sorted column 
+		// 1. store the path to the current selected node and the sorted column 
 		Scope selectedNode    = treeViewer.getSelectedNode();
 		int sortDirection 	  = tree.getSortDirection();
 		TreeColumn sortColumn = tree.getSortColumn();
 		int sortColumnIndex   = getSortColumnIndex(sortColumn, tree);
 		
+		// 2. reverse the path from bottom-up to the top-down
 		List<Scope> path = new ArrayList<Scope>();
 		if (selectedNode != null) {
 			Scope parent = selectedNode.getParentScope();
@@ -147,27 +152,42 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 			Collections.reverse(path);
 		}
 
+		// 3. store the column width
+		//    should we store all columns' width or just the tree? 
+		//    I argue just the tree is enough. Resizing columns width for GPU database
+		//    can be time consuming
 		long t0 = System.currentTimeMillis();
-
-		// TODO: this process takes time
+		int scopeWidth = tree.getColumn(0).getWidth();
+		
+		// 4. filter the data
 		root = createRoot(experiment);
 		contentViewer.setData(root, sortColumnIndex, SortColumn.getSortDirection(sortDirection));
+		
+		long t1 = System.currentTimeMillis();
+		LoggerFactory.getLogger(getClass()).debug("Time to filter: " + (t1-t0) + " ms");
 
+		// 5. restore stuffs:
+		//    - the path to the selected node, 
+		//    - the sorted column
+		//    - the column's width
+		//    On Linux GTK, this requires asynchronous UI thread because the widget may not
+		//    be ready to materialize tree items
+		
 		Display.getDefault().asyncExec(()-> {
 			
-			long t1 = System.currentTimeMillis();
-			LoggerFactory.getLogger(getClass()).debug("Time to filter: " + (t1-t0) + " ms");
-			
-			tree.setRedraw(false);
-			TreePath treePath = new TreePath(new Object[] {root});
-			TreePath newPath = expand(treeViewer, treePath, path);
-			if (newPath != null) {
-				treeViewer.reveal(newPath);
-				// Attention Linux GTK: this value can be null!
-				treeViewer.setSelection(new StructuredSelection(newPath), true);
+			try {
+				tree.setRedraw(false);
+				
+				TreePath treePath = new TreePath(new Object[] {root});
+				TreePath newPath = expand(treeViewer, treePath, path);
+				if (newPath != null) {
+					treeViewer.reveal(newPath);
+					treeViewer.setSelection(new StructuredSelection(newPath), true);
+				}
+				tree.getColumn(0).setWidth(scopeWidth);
+			} finally {
+				tree.setRedraw(true);
 			}
-			
-			tree.setRedraw(true);
 
 			long t2 = System.currentTimeMillis();
 			LoggerFactory.getLogger(getClass()).debug("Time to expand: " + (t2-t1) + " ms");
@@ -245,7 +265,13 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 		
 		if (!(obj instanceof ViewerDataEvent)) {
 			if (event.getTopic().equals(FilterStateProvider.FILTER_REFRESH_PROVIDER)) {
-				filter();
+				// the filtering stuff can take a lot of time !
+				// it's better to do it in the background, unfortunately Linux GTK
+				// requires UI thread to materialize virtual items
+				
+				BusyIndicator.showWhile(getDisplay(), ()-> {
+					filter();
+				});
 				// notify trace viewer to update the call path
 				ViewerDataEvent data = new ViewerDataEvent((Experiment) experiment, obj);
 				eventBroker.post(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH, data);
