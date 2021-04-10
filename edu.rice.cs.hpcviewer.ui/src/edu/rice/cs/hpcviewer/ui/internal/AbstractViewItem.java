@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.tabItems;
+package edu.rice.cs.hpcviewer.ui.internal;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,7 +34,6 @@ import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.base.IViewBuilder;
-import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
 
 
 /*******************************************************************************************

@@ -7,7 +7,7 @@ import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcviewer.ui.base.IViewBuilder;
-import edu.rice.cs.hpcviewer.ui.tabItems.AbstractViewItem;
+import edu.rice.cs.hpcviewer.ui.internal.AbstractViewItem;
 
 public class TopDownView extends AbstractViewItem
 {

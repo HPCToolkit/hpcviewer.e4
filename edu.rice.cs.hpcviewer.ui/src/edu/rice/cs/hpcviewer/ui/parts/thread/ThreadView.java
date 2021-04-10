@@ -31,8 +31,8 @@ import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.base.IViewItem;
+import edu.rice.cs.hpcviewer.ui.internal.AbstractBaseViewItem;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
-import edu.rice.cs.hpcviewer.ui.tabItems.AbstractBaseViewItem;
 
 /*************************************************************
  * 

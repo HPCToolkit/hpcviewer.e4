@@ -10,8 +10,8 @@ import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcviewer.ui.base.IViewBuilder;
+import edu.rice.cs.hpcviewer.ui.internal.AbstractViewItem;
 import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownContentViewer;
-import edu.rice.cs.hpcviewer.ui.tabItems.AbstractViewItem;
 
 public class Datacentric extends AbstractViewItem
 {
