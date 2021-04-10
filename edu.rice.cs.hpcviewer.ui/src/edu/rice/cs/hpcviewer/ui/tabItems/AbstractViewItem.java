@@ -17,7 +17,6 @@ import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Tree;
-import org.eclipse.swt.widgets.TreeColumn;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.LoggerFactory;
@@ -36,7 +35,6 @@ import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.base.IViewBuilder;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
-import edu.rice.cs.hpcviewer.ui.util.SortColumn;
 
 
 /*******************************************************************************************
@@ -179,7 +177,7 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 				TreePath treePath = new TreePath(new Object[] {root});
 				TreePath newPath = expand(treeViewer, treePath, path);
 				if (newPath != null) {
-					treeViewer.reveal(newPath);
+					//treeViewer.reveal(newPath);
 					treeViewer.setSelection(new StructuredSelection(newPath), true);
 				}
 				tree.getColumn(0).setWidth(scopeWidth);
@@ -223,7 +221,6 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 		// - check if the child item has the same cct-id as the node in the path.
 		//   if they are the same, then recursively expand the child
 		// - if no child has the same cct-id as the one in the path, do nothing
-		treeViewer.reveal(lastElement);
 		Object []items = lastElement.getChildren();
 		if (items == null)
 			return treePath;
@@ -234,6 +231,7 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 				int cctItem = child.getCCTIndex();
 				if (cctItem == cctPath) {
 					treePath = treePath.createChildPath(child);
+					treeViewer.setExpandedState(child, true);
 					return expand(treeViewer, treePath, path);
 				}
 			}
