@@ -137,9 +137,6 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 		
 		// 1. store the path to the current selected node and the sorted column 
 		Scope selectedNode    = treeViewer.getSelectedNode();
-		int sortDirection 	  = tree.getSortDirection();
-		TreeColumn sortColumn = tree.getSortColumn();
-		int sortColumnIndex   = getSortColumnIndex(sortColumn, tree);
 		
 		// 2. reverse the path from bottom-up to the top-down
 		List<Scope> path = new ArrayList<Scope>();
@@ -161,7 +158,8 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 		
 		// 4. filter the data
 		root = createRoot(experiment);
-		contentViewer.setData(root, sortColumnIndex, SortColumn.getSortDirection(sortDirection));
+		Scope rootTable = root.createRoot();
+		treeViewer.setInput(rootTable);
 		
 		long t1 = System.currentTimeMillis();
 		LoggerFactory.getLogger(getClass()).debug("Time to filter: " + (t1-t0) + " ms");
@@ -306,16 +304,6 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 		return viewer.getTree().forceFocus();
 	}
 
-	private int getSortColumnIndex(TreeColumn sortColumn, Tree tree) {
-		int sortColumnIndex = 0;
-		for(TreeColumn col : tree.getColumns()) {
-			if (col == sortColumn) 
-				break;
-			sortColumnIndex++;
-		}
-		return sortColumnIndex;
-	}
-	
 	protected abstract RootScope 	  createRoot(BaseExperiment experiment);
 	protected abstract IViewBuilder   setContentViewer(Composite parent, EMenuService menuService);
 	protected abstract RootScopeType  getRootType();
