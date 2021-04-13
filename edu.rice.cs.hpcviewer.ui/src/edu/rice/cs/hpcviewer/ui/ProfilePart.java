@@ -4,6 +4,9 @@ package edu.rice.cs.hpcviewer.ui;
 import javax.inject.Inject;
 import javax.annotation.PostConstruct;
 import org.eclipse.swt.widgets.Composite;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
+
 import javax.annotation.PreDestroy;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -27,6 +30,8 @@ import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
+import edu.rice.cs.hpc.filter.service.FilterStateProvider;
+import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.base.IProfilePart;
 import edu.rice.cs.hpcviewer.ui.base.IUpperPart;
@@ -47,7 +52,7 @@ import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownView;
 
 
 
-public class ProfilePart implements IProfilePart
+public class ProfilePart implements IProfilePart, EventHandler
 {
 	public static final String ID = "edu.rice.cs.hpcviewer.ui.partdescriptor.profile";
 	private static final String PREFIX_TITLE = "Profile: ";
@@ -301,9 +306,25 @@ public class ProfilePart implements IProfilePart
 			}
 			addView(views[numViews], input, numViews==0);
 		}
+		// subscribe to filter events
+		eventBroker.subscribe(FilterStateProvider.FILTER_REFRESH_PROVIDER, this);
 	}
 	
-	
+
+	@Override
+	public void handleEvent(Event event) {
+		if (event.getTopic().equals(FilterStateProvider.FILTER_REFRESH_PROVIDER)) {
+			// filter the current database
+			FilterStateProvider.filterExperiment((Experiment) experiment);
+			
+			// announce to all views to refresh the content.
+			// this may take time, and should be done asynchronously
+			// with a background task
+			Object obj = event.getProperty(IEventBroker.DATA);
+			ViewerDataEvent data = new ViewerDataEvent((Experiment) experiment, obj);
+			eventBroker.post(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH, data);
+		}
+	}
 	
 	/**********************************************
 	 * 

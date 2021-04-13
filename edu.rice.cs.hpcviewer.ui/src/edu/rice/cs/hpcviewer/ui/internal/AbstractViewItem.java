@@ -22,13 +22,11 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
-import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
-import edu.rice.cs.hpc.filter.service.FilterStateProvider;
 import edu.rice.cs.hpcbase.BaseConstants;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
@@ -59,17 +57,17 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 	protected DatabaseCollection databaseAddOn;
 	protected ProfilePart   profilePart;
 
-	private IViewBuilder contentViewer;
+	protected IViewBuilder contentViewer;
 	
 	/** Each view needs to store the experiment database.
 	 * In case it needs to populate the table, we know which database 
 	 * to be loaded. */
-	private BaseExperiment  experiment;
+	protected BaseExperiment  experiment;
 	
 	/** This variable is a flag whether a table is already populated or not.
 	 * If the root is null, it isn't populated
 	 */
-	private RootScope       root;
+	protected RootScope       root;
 
 	public AbstractViewItem(CTabFolder parent, int style) {
 		super(parent, style);
@@ -97,13 +95,12 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
     	contentViewer.createContent(profilePart, parent, menuService);
 
 		// subscribe to user action events
-		eventBroker.subscribe(BaseConstants.TOPIC_HPC_REMOVE_DATABASE, this);
-		eventBroker.subscribe(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN,    this);
-		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC,  this);
-		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE,   this);
-		
-		// subscribe to filter events
-		eventBroker.subscribe(FilterStateProvider.FILTER_REFRESH_PROVIDER, this);
+		eventBroker.subscribe(BaseConstants.TOPIC_HPC_REMOVE_DATABASE,  this);
+		eventBroker.subscribe(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN,   this);
+		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC, this);
+		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE,  this);
+
+		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH,  this);
 	}
 	
 	@Override
@@ -122,12 +119,64 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 	}
 
 	
-	/*****
-	 * Filter certain nodes based on the filter set patterns
-	 * See {@code edu.rice.cs.hpc.filter} plugin
+	
+	/****
+	 * Retrieve the current input of this view
+	 * @return
 	 */
-	private void filter() {
-		FilterStateProvider.filterExperiment((Experiment) experiment);
+	@Override
+	public Object getInput() {
+		return experiment;
+	}
+	
+	
+	@Override
+	public void handleEvent(Event event) {
+		ScopeTreeViewer treeViewer = contentViewer.getTreeViewer();
+		if (treeViewer.getTree().isDisposed())
+			return;
+
+		Object obj = event.getProperty(IEventBroker.DATA);
+		if (obj == null || experiment == null || root == null)
+			return;
+		
+		if (!(obj instanceof ViewerDataEvent)) 
+			return;
+		
+		ViewerDataEvent eventInfo = (ViewerDataEvent) obj;
+		if (experiment != eventInfo.experiment) 
+			return;
+		
+		String topic = event.getTopic();
+		if (topic.equals(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN)) {
+			IMetricManager mgr = eventInfo.experiment;
+			treeViewer.setColumnsStatus(mgr, (boolean[]) eventInfo.data);
+			
+		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC)) {
+			treeViewer.addUserMetricColumn((BaseMetric) eventInfo.data);
+
+		} else if (topic.equals(BaseConstants.TOPIC_HPC_REMOVE_DATABASE)) {
+			// mark that this part will be destroyed
+			experiment.dispose();
+			experiment = null;
+
+		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE)) {
+			treeViewer.refreshColumnTitle();
+			
+		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH)) {
+			BusyIndicator.showWhile(getDisplay(), ()-> {
+				refreshTree();
+			});
+		}
+	}
+	
+	
+	/****
+	 * Reset the content of the table.
+	 * Call this method if the tree has changed like after filtering
+	 * 
+	 */
+	protected void refreshTree() {
 		
 		final ScopeTreeViewer treeViewer = contentViewer.getTreeViewer();
 		final Tree tree = treeViewer.getTree();
@@ -153,13 +202,13 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 		long t0 = System.currentTimeMillis();
 		int scopeWidth = tree.getColumn(0).getWidth();
 		
-		// 4. filter the data
+		// 4. reset the data
 		root = createRoot(experiment);
 		Scope rootTable = root.createRoot();
 		treeViewer.setInput(rootTable);
 		
 		long t1 = System.currentTimeMillis();
-		LoggerFactory.getLogger(getClass()).debug("Time to filter: " + (t1-t0) + " ms");
+		LoggerFactory.getLogger(getClass()).debug("Time to reset: " + (t1-t0) + " ms");
 
 		// 5. restore stuffs:
 		//    - the path to the selected node, 
@@ -201,7 +250,7 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 	 * @param item the parent item
 	 * @param path {@code List<Scope>} the list of path
 	 */
-	private TreePath expand(TreeViewer treeViewer, TreePath treePath, List<Scope> path) {
+	protected TreePath expand(TreeViewer treeViewer, TreePath treePath, List<Scope> path) {
 		
 		if (treePath == null || path == null  || path.size()==0)
 			return treePath;
@@ -236,64 +285,6 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 			}
 		}
 		return treePath;
-	}
-	
-	/****
-	 * Retrieve the current input of this view
-	 * @return
-	 */
-	@Override
-	public Object getInput() {
-		return experiment;
-	}
-	
-	
-	@Override
-	public void handleEvent(Event event) {
-		ScopeTreeViewer treeViewer = contentViewer.getTreeViewer();
-		if (treeViewer.getTree().isDisposed())
-			return;
-
-		Object obj = event.getProperty(IEventBroker.DATA);
-		if (obj == null || experiment == null || root == null)
-			return;
-		
-		if (!(obj instanceof ViewerDataEvent)) {
-			if (event.getTopic().equals(FilterStateProvider.FILTER_REFRESH_PROVIDER)) {
-				// the filtering stuff can take a lot of time !
-				// it's better to do it in the background, unfortunately Linux GTK
-				// requires UI thread to materialize virtual items
-				
-				BusyIndicator.showWhile(getDisplay(), ()-> {
-					filter();
-				});
-				// notify trace viewer to update the call path
-				ViewerDataEvent data = new ViewerDataEvent((Experiment) experiment, obj);
-				eventBroker.post(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH, data);
-			}
-			return;
-		}
-		
-		ViewerDataEvent eventInfo = (ViewerDataEvent) obj;
-		if (experiment != eventInfo.experiment) 
-			return;
-		
-		String topic = event.getTopic();
-		if (topic.equals(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN)) {
-			IMetricManager mgr = eventInfo.experiment;
-			treeViewer.setColumnsStatus(mgr, (boolean[]) eventInfo.data);
-			
-		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC)) {
-			treeViewer.addUserMetricColumn((BaseMetric) eventInfo.data);
-
-		} else if (topic.equals(BaseConstants.TOPIC_HPC_REMOVE_DATABASE)) {
-			// mark that this part will be destroyed
-			experiment.dispose();
-			experiment = null;
-
-		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE)) {
-			treeViewer.refreshColumnTitle();
-		}
 	}
 	
 	public boolean focus () {

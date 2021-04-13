@@ -7,6 +7,7 @@ import javax.inject.Singleton;
 
 import org.eclipse.e4.core.di.annotations.Creatable;
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
@@ -60,6 +61,8 @@ public class FilterStateProvider
 		// (it isn't a merged database)
 		if (experiment != null && !experiment.isMergedDatabase()) 
 		{
+			long t0 = System.currentTimeMillis();
+
 			try {
 				// ---------------------------------------
 				// conserve the added metrics
@@ -91,6 +94,8 @@ public class FilterStateProvider
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			long t1 = System.currentTimeMillis();
+			LoggerFactory.getLogger(FilterStateProvider.class).debug("Time to filter: " + (t1-t0) + " ms");
 		}
 		return experiment;
 	}
