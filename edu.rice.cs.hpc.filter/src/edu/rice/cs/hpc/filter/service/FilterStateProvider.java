@@ -13,6 +13,9 @@ import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpc.data.experiment.metric.MetricType;
+import edu.rice.cs.hpc.data.experiment.scope.RootScope;
+import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
+import edu.rice.cs.hpcdata.tld.collection.ThreadDataCollectionFactory;
 
 /**************************************************************
  * 
@@ -90,6 +93,8 @@ public class FilterStateProvider
 				for (DerivedMetric metric: metrics) {
 					experiment.addDerivedMetric(metric);
 				}
+				RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
+				ThreadDataCollectionFactory.build(root);
 				
 			} catch (Exception e) {
 				e.printStackTrace();

@@ -9,6 +9,7 @@ import org.eclipse.e4.ui.services.EMenuService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -19,14 +20,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpc.data.experiment.BaseExperiment;
-import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
 import edu.rice.cs.hpc.data.util.string.StringUtil;
 import edu.rice.cs.hpc.filter.dialog.FilterDataItem;
 import edu.rice.cs.hpc.filter.dialog.ThreadFilterDialog;
-import edu.rice.cs.hpc.filter.service.FilterStateProvider;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
@@ -68,7 +67,7 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 		contentViewer.createContent(profilePart, parent, menuService);
 		
 		// subscribe to filter events
-		eventBroker.subscribe(FilterStateProvider.FILTER_REFRESH_PROVIDER, this);
+		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH, this);
 	}
 
 	public void setService(EPartService partService, 
@@ -154,15 +153,16 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 		if (obj == null || profilePart.getExperiment() == null)
 			return;
 		
-		if (!(obj instanceof ViewerDataEvent)) {
+		if (obj instanceof ViewerDataEvent) {
 
-			if (event.getTopic().equals(FilterStateProvider.FILTER_REFRESH_PROVIDER)) {
+			if (event.getTopic().equals(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH)) {
 				BaseExperiment experiment = profilePart.getExperiment();
-				FilterStateProvider.filterExperiment((Experiment) experiment);
 				
 				// TODO: this process takes time
-				RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
-				contentViewer.setData(root);
+				BusyIndicator.showWhile(getDisplay(), ()->{
+					RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
+					contentViewer.setData(root);
+				});
 			}
 			return;
 		}

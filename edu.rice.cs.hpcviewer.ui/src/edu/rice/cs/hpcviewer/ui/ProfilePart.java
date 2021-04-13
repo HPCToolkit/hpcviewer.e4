@@ -315,6 +315,8 @@ public class ProfilePart implements IProfilePart, EventHandler
 	public void handleEvent(Event event) {
 		if (event.getTopic().equals(FilterStateProvider.FILTER_REFRESH_PROVIDER)) {
 			// filter the current database
+			// warning: the filtering is not scalable. We should do this in the 
+			//          background job
 			FilterStateProvider.filterExperiment((Experiment) experiment);
 			
 			// announce to all views to refresh the content.
