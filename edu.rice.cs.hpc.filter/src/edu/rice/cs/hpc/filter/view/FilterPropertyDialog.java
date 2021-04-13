@@ -58,6 +58,8 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 	private static final int INITIAL_SIZE_X = 450;
 	private static final int INITIAL_SIZE_Y = 500;
 	
+	private static FilterPropertyDialog window = null;
+	
 	private final FilterStateProvider filterService;
 	
 	private Button btnEdit, btnDelete;
@@ -70,7 +72,7 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 	 * Create the dialog.
 	 * @param parentShell
 	 */
-	public FilterPropertyDialog(Shell parentShell, FilterStateProvider filterService) {
+	private FilterPropertyDialog(Shell parentShell, FilterStateProvider filterService) {
 		super(parentShell);
 
 		setShellStyle(SWT.TITLE | SWT.MODELESS | SWT.RESIZE);
@@ -573,6 +575,18 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 		}	
 	}
 	
+	/****
+	 * Static method to generate only one window of filter property dialog at a time
+	 * @param parentShell the parent shell
+	 * @param filterService the filter service
+	 * @return int the return code from window (usually IDialogConstants.OK_ID)
+	 */
+	static public int show(Shell parentShell, FilterStateProvider filterService) {
+		if (FilterPropertyDialog.window == null) {
+			FilterPropertyDialog.window = new FilterPropertyDialog(parentShell, filterService);
+		}
+		return FilterPropertyDialog.window.open();
+	}
 
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////
