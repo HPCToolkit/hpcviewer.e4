@@ -32,7 +32,7 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.rice.cs.hpc.data.util.CallPath;
+import edu.rice.cs.hpc.data.experiment.scope.ITraceScope;
 import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.data.util.string.StringUtil;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
@@ -245,7 +245,7 @@ public class CallStackViewer extends AbstractBaseTableViewer
 		}
 		final Vector<String> sampleVector;
 		if (sample>=0) {
-			final CallPath cp = ptl.getCallPath(sample, depth);
+			final ITraceScope cp = ptl.getCallPath(sample, depth);
 			if (cp != null)
 				sampleVector = cp.getFunctionNames();
 			else

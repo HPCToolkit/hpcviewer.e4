@@ -14,8 +14,8 @@ import edu.rice.cs.hpc.data.experiment.ExperimentWithoutMetrics;
 import edu.rice.cs.hpc.data.experiment.InvalExperimentException;
 import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
 import edu.rice.cs.hpc.data.experiment.extdata.IFilteredData;
+import edu.rice.cs.hpc.data.experiment.scope.ITraceScope;
 import edu.rice.cs.hpc.data.trace.TraceAttribute;
-import edu.rice.cs.hpc.data.util.CallPath;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
@@ -247,7 +247,7 @@ public abstract class SpaceTimeDataController
 	 * 	Returns the map between cpid and callpath
 	 * @return
 	 ******************************************************************************/
-	public Map<Integer, CallPath> getScopeMap() {
+	public Map<Integer, ITraceScope> getScopeMap() {
 		return exp.getScopeMap();
 	}
 

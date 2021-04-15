@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import edu.rice.cs.hpc.data.util.CallPath;
+import edu.rice.cs.hpc.data.experiment.scope.ITraceScope;
 import edu.rice.cs.hpc.remote.data.SpaceTimeDataControllerRemote;
 import edu.rice.cs.hpctraceviewer.data.DataLinePainting;
 import edu.rice.cs.hpctraceviewer.data.DataPreparation;
@@ -70,7 +70,7 @@ public class TimelineThread
 		
 		if (changedBounds) {
 			ImageTraceAttributes attributes = stData.getAttributes();
-			ProcessTimeline currentTimeline = new ProcessTimeline(currentLineNum, (HashMap<Integer, CallPath>) stData.getScopeMap(),
+			ProcessTimeline currentTimeline = new ProcessTimeline(currentLineNum, (HashMap<Integer, ITraceScope>) stData.getScopeMap(),
 					stData.getBaseData(), lineToPaint(currentLineNum, attributes),
 					attributes.getPixelHorizontal(), attributes.getTimeInterval(), 
 					stData.getMinBegTime() + attributes.getTimeBegin());

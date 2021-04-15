@@ -2,7 +2,7 @@ package edu.rice.cs.hpc.data.trace;
 
 import java.util.Map;
 
-import edu.rice.cs.hpc.data.util.CallPath;
+import edu.rice.cs.hpc.data.experiment.scope.ITraceScope;
 
 public class BaseTraceAttribute 
 {
@@ -17,7 +17,7 @@ public class BaseTraceAttribute
 	
 	public int maxDepth;
 
-	public Map<Integer, CallPath> mapCpidToCallpath;
+	public Map<Integer, ITraceScope> mapCpidToCallpath;
 
 	public BaseTraceAttribute() {
 		dbTimeMax = Integer.MIN_VALUE;

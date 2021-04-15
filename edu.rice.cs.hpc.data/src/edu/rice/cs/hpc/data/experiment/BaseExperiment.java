@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.EnumMap;
 import java.util.Map;
 
+import edu.rice.cs.hpc.data.experiment.scope.ITraceScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
@@ -13,7 +14,6 @@ import edu.rice.cs.hpc.data.experiment.scope.visitors.FilterScopeVisitor;
 import edu.rice.cs.hpc.data.filter.IFilterData;
 import edu.rice.cs.hpc.data.trace.BaseTraceAttribute;
 import edu.rice.cs.hpc.data.trace.TraceAttribute;
-import edu.rice.cs.hpc.data.util.CallPath;
 import edu.rice.cs.hpc.data.util.IUserData;
 
 
@@ -149,7 +149,7 @@ public abstract class BaseExperiment implements IExperiment
 	/**
 	 * @return the scopeMap
 	 */
-	public Map<Integer, CallPath> getScopeMap() {
+	public Map<Integer, ITraceScope> getScopeMap() {
 		return traceAttribute.mapCpidToCallpath;
 	}
 
@@ -157,7 +157,7 @@ public abstract class BaseExperiment implements IExperiment
 	/**
 	 * @param scopeMap the scopeMap to set
 	 */
-	public void setScopeMap(Map<Integer, CallPath> scopeMap) {
+	public void setScopeMap(Map<Integer, ITraceScope> scopeMap) {
 		traceAttribute.mapCpidToCallpath = scopeMap;
 	}
 

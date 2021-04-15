@@ -8,8 +8,8 @@ import java.util.Map;
 
 import edu.rice.cs.hpc.data.experiment.ExperimentWithoutMetrics;
 import edu.rice.cs.hpc.data.experiment.extdata.FileDB2;
+import edu.rice.cs.hpc.data.experiment.scope.ITraceScope;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
-import edu.rice.cs.hpc.data.util.CallPath;
 import edu.rice.cs.hpc.data.util.MergeDataFiles;
 
 /*****
@@ -86,7 +86,7 @@ public class TracePrinter
 		
 		final int MAX_NAME = 16;
 		
-		Map<Integer, CallPath> map = experiment.getScopeMap(); 
+		Map<Integer, ITraceScope> map = experiment.getScopeMap(); 
 		
 		TraceReader reader = new TraceReader(fileDB);
 		long numRecords = reader.getNumberOfRecords(rank);
@@ -99,9 +99,9 @@ public class TracePrinter
 			String name = String.valueOf(prevRecord.cpId);
 			
 			if (map != null) {
-				CallPath cp = map.get(prevRecord.cpId);
+				ITraceScope cp = map.get(prevRecord.cpId);
 				if (cp != null) {
-					Scope scope = cp.getScopeAt(cp.getMaxDepth());
+					Scope scope = cp.getScopeAt(cp.getDepth());
 					name = scope.getName();
 					if (name.length() > MAX_NAME)
 						name = name.substring(0, MAX_NAME) + "...";

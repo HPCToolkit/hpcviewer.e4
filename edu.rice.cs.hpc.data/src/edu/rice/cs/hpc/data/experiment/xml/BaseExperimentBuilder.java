@@ -16,6 +16,7 @@ import edu.rice.cs.hpc.data.experiment.scope.AlienScope;
 import edu.rice.cs.hpc.data.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpc.data.experiment.scope.CallSiteScopeType;
 import edu.rice.cs.hpc.data.experiment.scope.FileScope;
+import edu.rice.cs.hpc.data.experiment.scope.ITraceScope;
 import edu.rice.cs.hpc.data.experiment.scope.LineScope;
 import edu.rice.cs.hpc.data.experiment.scope.LoadModuleScope;
 import edu.rice.cs.hpc.data.experiment.scope.LoopScope;
@@ -29,7 +30,6 @@ import edu.rice.cs.hpc.data.experiment.source.FileSystemSourceFile;
 import edu.rice.cs.hpc.data.experiment.source.SourceFile;
 import edu.rice.cs.hpc.data.experiment.xml.Token2.TokenXML;
 import edu.rice.cs.hpc.data.trace.TraceAttribute;
-import edu.rice.cs.hpc.data.util.CallPath;
 import edu.rice.cs.hpc.data.util.Constants;
 import edu.rice.cs.hpc.data.util.Dialogs;
 import edu.rice.cs.hpc.data.util.IUserData;
@@ -96,7 +96,7 @@ public class BaseExperimentBuilder extends Builder
 	
 	private final HashMap<Integer /*id*/, Integer /*status*/>	  statusProcedureMap;
 
-	private final Map<Integer, CallPath> mapCpidToCallpath;
+	private final Map<Integer, ITraceScope> mapCpidToCallpath;
 	
 
 	//--------------------------------------------------------------------------------------
@@ -924,13 +924,11 @@ public class BaseExperimentBuilder extends Builder
 		int cct_id = 0, flat_id = 0;
 		// make a new statement-range scope object
 		int firstLn = 0;
-		int lastLn  = 0;
 		int cpid = 0;
 
 		for(int i=0; i<attributes.length; i++) {
 			if(attributes[i].equals(ATTRIBUTE_LINE)) {
 				firstLn = Integer.parseInt(values[i]);
-				lastLn = firstLn;
 				
 			} else if(attributes[i].equals("s"))  {
 				flat_id = Integer.parseInt(values[i]);
@@ -947,16 +945,11 @@ public class BaseExperimentBuilder extends Builder
 
 		SourceFile srcFile = this.srcFileStack.peek();
 
-
-		Scope scope;
-		if( firstLn == lastLn )
-			scope = new LineScope(rootStack.peek(), srcFile, firstLn-1, cct_id, flat_id);
-		else
-			scope = new StatementRangeScope(rootStack.peek(), srcFile, 
-					firstLn-1, lastLn-1, cct_id, flat_id);
-
+		LineScope scope = new LineScope(rootStack.peek(), srcFile, firstLn-1, cct_id, flat_id);
+		scope.setDepth(current_depth);
 		scope.setCpid(cpid);
-		mapCpidToCallpath.put(cpid, new CallPath(scope, current_depth));
+		
+		mapCpidToCallpath.put(cpid, scope);
 		
 		if (isCallSite) {
 			scopeStack.push(scope);

@@ -8,7 +8,7 @@ import org.eclipse.swt.graphics.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.rice.cs.hpc.data.util.CallPath;
+import edu.rice.cs.hpc.data.experiment.scope.ITraceScope;
 
 
 /***********************************************************************
@@ -48,7 +48,7 @@ public abstract class DataPreparation
 		
 		int succSampleMidpoint = (int) Math.max(0, (data.ptl.getTime(0)-data.begTime)/data.pixelLength);
 
-		CallPath cp = data.ptl.getCallPath(0, data.depth);
+		ITraceScope cp = data.ptl.getCallPath(0, data.depth);
 
 		// issue #15: Trace view doesn't render GPU trace line
 		// This happens when the first sample to render has a bad cpid which causes this method to exit prematurely.
@@ -86,7 +86,7 @@ public abstract class DataPreparation
 				// more complexity to handle inside a running thread
 			}
 
-			final int currDepth = cp.getMaxDepth(); 
+			final int currDepth = cp.getDepth(); 
 			int currSampleMidpoint = succSampleMidpoint;
 			
 			//-----------------------------------------------------------------------
@@ -115,7 +115,7 @@ public abstract class DataPreparation
 					//						   has the same depth. In depth view, we don't want to mix with
 					//							different depths
 					
-					still_the_same = (succColor.equals(currColor)) && currDepth == cp.getMaxDepth();
+					still_the_same = (succColor.equals(currColor)) && currDepth == cp.getDepth();
 					if (still_the_same)
 						end = indexSucc;
 				} else {

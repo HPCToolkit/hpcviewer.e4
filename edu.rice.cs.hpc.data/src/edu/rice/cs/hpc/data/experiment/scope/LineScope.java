@@ -14,6 +14,8 @@
 
 package edu.rice.cs.hpc.data.experiment.scope;
 
+import java.util.Vector;
+
 import edu.rice.cs.hpc.data.experiment.scope.visitors.IScopeVisitor;
 import edu.rice.cs.hpc.data.experiment.source.SourceFile;
 
@@ -31,17 +33,13 @@ import edu.rice.cs.hpc.data.experiment.source.SourceFile;
  */
 
 
-public class LineScope extends Scope
+public class LineScope extends Scope implements ITraceScope
 {
-
-
-
+private int depth;
 
 //////////////////////////////////////////////////////////////////////////
 //	INITIALIZATION														//
 //////////////////////////////////////////////////////////////////////////
-
-
 
 
 /*************************************************************************
@@ -51,24 +49,12 @@ public class LineScope extends Scope
 public LineScope(RootScope root, SourceFile sourceFile, int lineNumber, int cct_id, int flat_id)
 {
 	super(root, sourceFile, lineNumber, lineNumber, cct_id, flat_id);
-//	this.id = "LineScope";
 }
-
-/*
-public LineScope(Experiment experiment, SourceFile sourceFile, int lineNumber)
-{
-	super(experiment, sourceFile, lineNumber, lineNumber, Scope.idMax++);
-//	this.id = "LineScope";
-}*/
-
 
 
 //////////////////////////////////////////////////////////////////////////
 //	SCOPE DISPLAY														//
 //////////////////////////////////////////////////////////////////////////
-
-
-
 
 
 /*************************************************************************
@@ -116,8 +102,6 @@ public boolean isequal(LineScope ls)
 //////////////////////////////////////////////////////////////////////////
 
 
-
-
 /*************************************************************************
  *	Returns the line number of this line scope.
  ************************************************************************/
@@ -150,6 +134,61 @@ public Scope duplicate() {
 public void accept(IScopeVisitor visitor, ScopeVisitType vt) {
 	visitor.visit(this, vt);
 }
+
+@Override
+public void setDepth(int depth) {
+	this.depth = depth;
+}
+
+@Override
+public int getDepth() {
+	return depth;
+}
+
+@Override
+public Scope getScopeAt(int depth) {
+	if (depth < 0)
+		return null;
+	
+	// compute the depth
+	int cDepth = getDepth();		
+	Scope cDepthScope = this;
+
+	while(!(cDepthScope.getParentScope() instanceof RootScope) && 
+			(cDepth > depth || !isTraceScope(cDepthScope)))
+	{
+		cDepthScope = cDepthScope.getParentScope();
+		if((cDepthScope instanceof CallSiteScope) || (cDepthScope instanceof ProcedureScope))
+			cDepth--;
+	}
+	
+	assert (isTraceScope(cDepthScope));
+
+	return cDepthScope;
+}
+
+@Override
+public Vector<String> getFunctionNames() {
+	final Vector<String> functionNames = new Vector<String>();
+	Scope currentScope = this;
+	int depth = getDepth();
+	while(depth > 0 && currentScope != null)
+	{
+		if ((currentScope instanceof CallSiteScope) || (currentScope instanceof ProcedureScope))
+		{
+			functionNames.add(0, currentScope.getName());
+			depth--;
+		}
+		currentScope = currentScope.getParentScope();
+	}
+	return functionNames;
+}
+
+
+private boolean isTraceScope(Scope scope) {
+	return (scope instanceof CallSiteScope || scope instanceof ProcedureScope);
+}
+
 
 }
 
