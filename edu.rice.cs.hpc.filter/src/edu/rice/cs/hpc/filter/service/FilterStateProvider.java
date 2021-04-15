@@ -84,6 +84,8 @@ public class FilterStateProvider
 				// ---------------------------------------
 				// filtering 
 				// ---------------------------------------
+				// TODO: at the moment we need to reopen and parse again the xml file
+				// because we want to make sure the tree is really "fresh"
 				experiment.reopen();
 				experiment.filter(FilterMap.getInstance());
 				

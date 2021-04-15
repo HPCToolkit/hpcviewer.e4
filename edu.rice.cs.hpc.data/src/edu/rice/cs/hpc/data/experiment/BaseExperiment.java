@@ -11,6 +11,7 @@ import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
 import edu.rice.cs.hpc.data.experiment.scope.Scope;
 import edu.rice.cs.hpc.data.experiment.scope.visitors.DisposeResourcesVisitor;
 import edu.rice.cs.hpc.data.experiment.scope.visitors.FilterScopeVisitor;
+import edu.rice.cs.hpc.data.experiment.scope.visitors.TraceScopeVisitor;
 import edu.rice.cs.hpc.data.filter.IFilterData;
 import edu.rice.cs.hpc.data.trace.BaseTraceAttribute;
 import edu.rice.cs.hpc.data.trace.TraceAttribute;
@@ -353,6 +354,18 @@ public abstract class BaseExperiment implements IExperiment
 		filterNumScopes = visitor.numberOfFilteredScopes();
 		filterStatus	= visitor.getFilterStatus();
 		
+		BaseTraceAttribute traceAtt = getTraceAttribute();
+		// for database with trace files only: perhaps we need to update the max depth
+		
+		if (traceAtt != null && traceAtt.dbTimeMax > 0 && filterNumScopes > 0) {			
+			// If the filter removed some nodes, we need to recompute again the depth
+			// Unfortunately we have to perform tree traversal again 
+			
+			TraceScopeVisitor traceVisitor = new TraceScopeVisitor();
+			rootCCT.dfsVisitScopeTree(traceVisitor);
+			
+			traceAtt.maxDepth = traceVisitor.getMaxDepth();
+		}
 		return filterNumScopes;
 	}
 

@@ -11,7 +11,6 @@ import edu.rice.cs.hpc.data.experiment.metric.MetricValue;
 import edu.rice.cs.hpc.data.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpc.data.experiment.scope.FileScope;
 import edu.rice.cs.hpc.data.experiment.scope.GroupScope;
-import edu.rice.cs.hpc.data.experiment.scope.ITraceScope;
 import edu.rice.cs.hpc.data.experiment.scope.LineScope;
 import edu.rice.cs.hpc.data.experiment.scope.LoadModuleScope;
 import edu.rice.cs.hpc.data.experiment.scope.LoopScope;
@@ -24,7 +23,6 @@ import edu.rice.cs.hpc.data.experiment.scope.StatementRangeScope;
 import edu.rice.cs.hpc.data.experiment.scope.TreeNode;
 import edu.rice.cs.hpc.data.filter.FilterAttribute;
 import edu.rice.cs.hpc.data.filter.IFilterData;
-import edu.rice.cs.hpc.data.trace.BaseTraceAttribute;
 
 
 /******************************************************************
@@ -46,7 +44,6 @@ public class FilterScopeVisitor implements IScopeVisitor
 	private final IMetricValueCollection rootMetricValues;
 	private final BaseExperiment experiment;
 	private final RootScope rootOriginalCCT;
-	private final boolean   hasTraces;
 	
 	private List<BaseMetric> metrics = null;
 	
@@ -76,8 +73,6 @@ public class FilterScopeVisitor implements IScopeVisitor
 		{
 			metrics = ((Experiment)experiment).getMetricList();
 		}
-		BaseTraceAttribute traceAtt = experiment.getTraceAttribute();
-		hasTraces = (traceAtt != null && traceAtt.dbTimeMax > 0); 
 	}
 	
 	/**************
@@ -228,36 +223,9 @@ public class FilterScopeVisitor implements IScopeVisitor
 				Scope child_scope = (Scope) child;
 				parent.add(child_scope);
 				child_scope.setParent(parent);
-				
-				if (hasTraces) updateScopeDepth(child_scope);
 			}
 		}
 	}
-	
-	
-	/***
-	 * recursively traverse the tree to find ITraceScope
-	 * @param scope
-	 */
-	private void updateScopeDepth(Scope scope) {
-		if (scope == null)
-			return;
-		
-		if (scope instanceof ITraceScope) {
-			ITraceScope traceScope = (ITraceScope) scope;
-			int depth  = Math.max(1, traceScope.getDepth());
-			traceScope.setDepth(depth-1);
-			
-			return;
-		}
-		if (scope.getChildCount() == 0)
-			return;
-		
-		scope.getListChildren().stream().forEach((child) -> {
-			updateScopeDepth((Scope) child);
-		});
-	}
-	
 	
 	/******
 	 * Merging metrics
