@@ -213,14 +213,14 @@ public class ExperimentMerger
 		// ----------------------------------------------------------------
 		// step 2: append the second metrics, and reset the index and the key
 		// ----------------------------------------------------------------
-		List<DerivedMetric> listDerivedMetrics = new ArrayList<>();
+		List<IMetricMutable> listDerivedMetrics = new ArrayList<>();
 		Map<Integer, Integer> mapOldIndex   = new HashMap<>();
 		
 		for(BaseMetric metric: m2) {
 			final BaseMetric m = metric.duplicate();
 			
-			if (m instanceof DerivedMetric) {
-				listDerivedMetrics.add((DerivedMetric) m);
+			if (m instanceof IMetricMutable) {
+				listDerivedMetrics.add((IMetricMutable) m);
 			} else {
 				// general metric only, no derived metrics allowed
 
@@ -243,9 +243,9 @@ public class ExperimentMerger
 		// step 2b: rename the formula in derived metrics
 		// ----------------------------------------------------------------
 		if (listDerivedMetrics.size()>0) {
-			for(DerivedMetric m: listDerivedMetrics) {
+			for(IMetricMutable m: listDerivedMetrics) {
 				m.renameExpression(mapOldIndex);
-				metricsMerged.add(m);
+				metricsMerged.add((BaseMetric) m);
 			}
 		}
 		

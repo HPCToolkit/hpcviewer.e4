@@ -354,17 +354,16 @@ public abstract class BaseExperiment implements IExperiment
 		filterNumScopes = visitor.numberOfFilteredScopes();
 		filterStatus	= visitor.getFilterStatus();
 		
-		BaseTraceAttribute traceAtt = getTraceAttribute();
 		// for database with trace files only: perhaps we need to update the max depth
 		
-		if (traceAtt != null && traceAtt.dbTimeMax > 0 && filterNumScopes > 0) {			
+		if (traceAttribute != null && traceAttribute.dbTimeMax > 0 && filterNumScopes > 0) {			
 			// If the filter removed some nodes, we need to recompute again the depth
 			// Unfortunately we have to perform tree traversal again 
 			
 			TraceScopeVisitor traceVisitor = new TraceScopeVisitor();
 			rootCCT.dfsVisitScopeTree(traceVisitor);
 			
-			traceAtt.maxDepth = traceVisitor.getMaxDepth();
+			traceAttribute.maxDepth = traceVisitor.getMaxDepth();
 		}
 		return filterNumScopes;
 	}

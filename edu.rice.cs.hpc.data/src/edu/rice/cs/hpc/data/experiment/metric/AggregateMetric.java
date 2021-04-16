@@ -1,5 +1,7 @@
 package edu.rice.cs.hpc.data.experiment.metric;
 
+import java.util.Map;
+
 import com.graphbuilder.math.Expression;
 import com.graphbuilder.math.ExpressionParseException;
 import com.graphbuilder.math.ExpressionTree;
@@ -17,10 +19,10 @@ import com.graphbuilder.math.FuncMap;
  * 	combine formula: used for computing temporary value during caller and flat view creation
  *  finalize formula: used to finalizing value independent of the type of the view
  *  
- * @author laksonoadhianto
  *
  */
-public class AggregateMetric extends BaseMetric {
+public class AggregateMetric extends AbstractMetricWithFormula implements IMetricMutable
+{
  
 	static final public char FORMULA_COMBINE = 'c';
 	static final public char FORMULA_FINALIZE = 'f';
@@ -189,4 +191,12 @@ public class AggregateMetric extends BaseMetric {
 		return new AggregateMetric(shortName, displayName, description, visibility, 
 				null, annotationType, index, partner_index, metricType);
 	}
+
+
+	@Override
+	public void renameExpression(Map<Integer, Integer> mapOldIndex) {
+		renameExpression(formulaCombine, mapOldIndex);
+		renameExpression(formulaFinalize, mapOldIndex);
+	}
+	
 }
