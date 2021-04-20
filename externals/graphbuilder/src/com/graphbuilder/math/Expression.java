@@ -10,7 +10,7 @@ require a VarMap or FuncMap.  For Expressions that support children (OpNodes, Fu
 only be accepted provided it currently has no parent, a cyclic reference is not formed, and it is
 non-null.
 */
-public abstract class Expression {
+public abstract class Expression implements Cloneable {
 
 	protected Expression parent = null;
 
@@ -18,6 +18,8 @@ public abstract class Expression {
 	Returns the result of evaluating the expression tree rooted at this node.
 	*/
 	public abstract double eval(VarMap v, FuncMap f);
+	
+	public abstract Expression duplicate();
 
 	/**
 	Returns true if this node is a descendent of the specified node, false otherwise.  By this

@@ -82,7 +82,8 @@ public class AggregateMetric extends AbstractMetricWithFormula implements IMetri
 	 * @param type
 	 * @param exp
 	 *******/
-	public void init(BaseExperimentWithMetrics exp) {
+	@Override
+	public void setExperiment(BaseExperimentWithMetrics exp) {
 		this.finalizeVarMap.setMetricManager((Experiment)exp);
 		this.combineVarMap.setMetricManager((Experiment)exp);
 	}
@@ -188,8 +189,13 @@ public class AggregateMetric extends AbstractMetricWithFormula implements IMetri
 	 * @see edu.rice.cs.hpc.data.experiment.metric.BaseMetric#duplicate()
 	 */
 	public BaseMetric duplicate() {
-		return new AggregateMetric(shortName, displayName, description, visibility, 
+		AggregateMetric m = new AggregateMetric(shortName, displayName, description, visibility, 
 				null, annotationType, index, partner_index, metricType);
+
+		m.formulaCombine  = formulaCombine.duplicate();
+		m.formulaFinalize = formulaFinalize.duplicate();
+		
+		return m;
 	}
 
 

@@ -27,4 +27,9 @@ public class EqualNode extends OpNode {
 			return 1.0;
 	}
 
+	@Override
+	public Expression duplicate() {
+		return new EqualNode(leftChild.duplicate(), rightChild.duplicate());
+	}
+
 }

@@ -78,4 +78,13 @@ public class FuncNode extends TermNode {
 
 		return result;
 	}
+
+	@Override
+	public Expression duplicate() {
+		FuncNode f = new FuncNode(name, negate);
+		for (int i=0; i<numChildren(); i++ ) {
+			f.add(child(i).duplicate());
+		}	 
+		return f;
+	}
 }

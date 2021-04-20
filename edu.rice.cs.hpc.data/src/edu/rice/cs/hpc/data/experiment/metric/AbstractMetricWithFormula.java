@@ -3,6 +3,7 @@ package edu.rice.cs.hpc.data.experiment.metric;
 import java.util.Map;
 
 import com.graphbuilder.math.Expression;
+import com.graphbuilder.math.FuncNode;
 import com.graphbuilder.math.OpNode;
 import com.graphbuilder.math.VarNode;
 
@@ -25,6 +26,7 @@ public abstract class AbstractMetricWithFormula extends BaseMetric implements IM
 		renameExpression(right, mapOldIndex);
 	}
 	
+	
 	protected void renameExpression(VarNode node, Map<Integer, Integer> mapOldIndex) {
 		String name = node.getName();
 		char prefix = name.charAt(0);
@@ -38,6 +40,14 @@ public abstract class AbstractMetricWithFormula extends BaseMetric implements IM
 			}
 		}
 	}
+	
+	
+	protected void renameExpression(FuncNode node, Map<Integer, Integer> mapOldIndex) {
+		int n = node.numChildren();
+		for(int i=0; i<n; i++) {
+			renameExpression(node.child(i), mapOldIndex);
+		}
+	}
 
 	
 	protected void renameExpression(Expression node, Map<Integer, Integer> mapOldIndex) {
@@ -45,7 +55,8 @@ public abstract class AbstractMetricWithFormula extends BaseMetric implements IM
 			renameExpression((OpNode)node, mapOldIndex);
 		} else if (node instanceof VarNode) {
 			renameExpression((VarNode)node, mapOldIndex);
+		} else if (node instanceof FuncNode) {
+			renameExpression((FuncNode) node, mapOldIndex);
 		}
 	}
-
 }

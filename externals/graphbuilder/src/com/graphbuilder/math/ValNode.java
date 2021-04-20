@@ -25,4 +25,9 @@ public class ValNode extends Expression {
 	public void setValue(double d) {
 		val = d;
 	}
+
+	@Override
+	public Expression duplicate() {
+		return new ValNode(val);
+	}
 }

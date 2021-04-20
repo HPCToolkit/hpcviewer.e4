@@ -426,7 +426,7 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 			case Derived_Incr:
 				metricInc = new AggregateMetric(sID, sDisplayName, sDescription,
 									visibility, format, percent, iSelf, partner, objType);
-				((AggregateMetric) metricInc).init( (BaseExperimentWithMetrics) this.experiment );
+				((AggregateMetric) metricInc).setExperiment( (BaseExperimentWithMetrics) this.experiment );
 				break;
 			case Derived:
 				metricInc = new DerivedMetric(sDisplayName, sID, iSelf, percent, objType);

@@ -5,15 +5,13 @@
 //	ExperimentMerger -- class to merge two Experiments					//
 //	Created: May 7, 2007 												//
 //																		//
-//	(c) Copyright 2007-2012 Rice University. All rights reserved.		//
+//	(c) Copyright 2021 Rice University. All rights reserved.	   	    //
 //																		//
 //////////////////////////////////////////////////////////////////////////
 package edu.rice.cs.hpc.data.experiment.merge;
 
 import java.io.File;
 import java.util.*;
-import java.util.stream.Collectors;
-
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.ExperimentConfiguration;
 import edu.rice.cs.hpc.data.experiment.metric.*;
@@ -191,24 +189,27 @@ public class ExperimentMerger
 		// ----------------------------------------------------------------
 		// step 1: add the first metrics into the merged experiment
 		// ----------------------------------------------------------------
-		final List<BaseMetric> metricList = m1.stream().
-											   map(metric -> metric.duplicate()).
-											   collect(Collectors.toList());
-		metricList.forEach(metric -> {
-			metric.setDisplayName("1-" + metric.getDisplayName());
+		final List<BaseMetric> metricList = new ArrayList<>(m1.size() + m2.size());
+		
+		// add the first metric into the list
+		m1.stream().forEach((metric)-> {
+			BaseMetric m = metric.duplicate();
+			m.setDisplayName("1-" + metric.getDisplayName());
+			if (m instanceof IMetricMutable) {
+				((IMetricMutable)m).setExperiment(exp);
+			}
+			metricList.add(m);
 		});
 		
 		// attention: hpcprof doesn't guarantee the ID of metric starts with zero
 		//	we should make sure that the next ID for the second group of metrics is not
 		//	overlapped with the ID from the first group of metrics
 		
-		final int m1_last = metricList.size() - 1;
+		final int m1_last = m1.size() - 1;
 		final int m1_last_shortname = Integer.valueOf(metricList.get(m1_last).getShortName());
 		int m1_last_index = Math.max(m1_last_shortname, metricList.get(m1_last).getIndex()) + 1;
 		
-		ListMergedMetrics metricsMerged = new ListMergedMetrics(metricList);
-		
-		metricsMerged.setOffset(m1_last_index);
+		ListMergedMetrics metricsMerged = new ListMergedMetrics(m1_last_index, metricList);
 		
 		// ----------------------------------------------------------------
 		// step 2: append the second metrics, and reset the index and the key
@@ -220,23 +221,21 @@ public class ExperimentMerger
 			final BaseMetric m = metric.duplicate();
 			
 			if (m instanceof IMetricMutable) {
+				((IMetricMutable)m).setExperiment(exp);
 				listDerivedMetrics.add((IMetricMutable) m);
-			} else {
-				// general metric only, no derived metrics allowed
-
-				// change the short name (or ID) of the metric since the old ID is already
-				// taken by previous experiment
-				final int index_old = m.getIndex();
-				final int index_new = m1_last_index + index_old;
-				final String new_id = String.valueOf(index_new); 
-				m.setShortName( new_id );
-				m.setIndex(index_new);
-				
-				m.setDisplayName( 2 + "-" + m.getDisplayName() );
-				
-				metricsMerged.add(m);
-				mapOldIndex.put(index_old, index_new);
-			}
+			} 
+			// change the short name (or ID) of the metric since the old ID is already
+			// taken by previous experiment
+			final int index_old = m.getIndex();
+			final int index_new = m1_last_index + index_old;
+			final String new_id = String.valueOf(index_new); 
+			m.setShortName( new_id );
+			m.setIndex(index_new);
+			
+			m.setDisplayName( 2 + "-" + m.getDisplayName() );
+			
+			metricsMerged.add(m);
+			mapOldIndex.put(index_old, index_new);
 		}
 		
 		// ----------------------------------------------------------------
@@ -245,7 +244,6 @@ public class ExperimentMerger
 		if (listDerivedMetrics.size()>0) {
 			for(IMetricMutable m: listDerivedMetrics) {
 				m.renameExpression(mapOldIndex);
-				metricsMerged.add((BaseMetric) m);
 			}
 		}
 		
