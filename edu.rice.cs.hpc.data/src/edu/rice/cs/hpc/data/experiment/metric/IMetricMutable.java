@@ -6,6 +6,6 @@ import edu.rice.cs.hpc.data.experiment.BaseExperimentWithMetrics;
 
 public interface IMetricMutable 
 {
-	public void renameExpression(Map<Integer, Integer> mapOldIndex);
+	public void renameExpression(Map<Integer, Integer> mapOldIndex, Map<Integer, Integer> mapOldOrder);
 	public void setExperiment(BaseExperimentWithMetrics experiment);
 }

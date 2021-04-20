@@ -196,8 +196,8 @@ public class DerivedMetric extends AbstractMetricWithFormula implements IMetricM
 	 * 
 	 */
 	@Override
-	public void renameExpression(Map<Integer, Integer> mapOldIndex) {
-		renameExpression(expression, mapOldIndex);
+	public void renameExpression(Map<Integer, Integer> mapOldIndex, Map<Integer, Integer> mapOldOrder) {
+		renameExpression(expression, mapOldIndex, mapOldOrder);
 	}
 
 	
@@ -208,6 +208,8 @@ public class DerivedMetric extends AbstractMetricWithFormula implements IMetricM
 		
 		// TODO: hack, we need to conserve the format of the metric.
 		copy.displayFormat = displayFormat;
+		copy.order = order;
+		
 		return copy;
 	}
 	
