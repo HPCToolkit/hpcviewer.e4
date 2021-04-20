@@ -216,6 +216,7 @@ public class ExperimentMerger
 		// ----------------------------------------------------------------
 		List<IMetricMutable> listDerivedMetrics = new ArrayList<>();
 		Map<Integer, Integer> mapOldIndex   = new HashMap<>();
+		Map<Integer, Integer> mapOldOrder   = new HashMap<>();
 		
 		for(BaseMetric metric: m2) {
 			final BaseMetric m = metric.duplicate();
@@ -232,9 +233,17 @@ public class ExperimentMerger
 			m.setShortName( new_id );
 			m.setIndex(index_new);
 			
+			if (metric.getMetricType() == MetricType.INCLUSIVE) {
+				final int order_old = metric.getOrder();
+				final int order_new = m1_last_index + order_old;
+				m.setOrder(order_new);
+				mapOldOrder.put(order_old, order_new);
+			}
+			
 			m.setDisplayName( 2 + "-" + m.getDisplayName() );
 			
 			metricsMerged.add(m);
+			
 			mapOldIndex.put(index_old, index_new);
 		}
 		
@@ -243,7 +252,7 @@ public class ExperimentMerger
 		// ----------------------------------------------------------------
 		if (listDerivedMetrics.size()>0) {
 			for(IMetricMutable m: listDerivedMetrics) {
-				m.renameExpression(mapOldIndex);
+				m.renameExpression(mapOldIndex, mapOldOrder);
 			}
 		}
 		

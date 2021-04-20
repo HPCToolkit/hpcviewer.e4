@@ -194,15 +194,16 @@ public class AggregateMetric extends AbstractMetricWithFormula implements IMetri
 
 		m.formulaCombine  = formulaCombine.duplicate();
 		m.formulaFinalize = formulaFinalize.duplicate();
+		m.order           = order;
 		
 		return m;
 	}
 
 
 	@Override
-	public void renameExpression(Map<Integer, Integer> mapOldIndex) {
-		renameExpression(formulaCombine, mapOldIndex);
-		renameExpression(formulaFinalize, mapOldIndex);
+	public void renameExpression(Map<Integer, Integer> mapOldIndex, Map<Integer, Integer> mapOldOrder) {
+		renameExpression(formulaCombine, mapOldIndex, mapOldOrder);
+		renameExpression(formulaFinalize, mapOldIndex, mapOldOrder);
 	}
 	
 }

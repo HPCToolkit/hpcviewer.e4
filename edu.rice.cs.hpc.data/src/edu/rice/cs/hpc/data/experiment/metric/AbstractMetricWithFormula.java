@@ -18,22 +18,27 @@ public abstract class AbstractMetricWithFormula extends BaseMetric implements IM
 	}
 
 	
-	protected void renameExpression(OpNode node, Map<Integer, Integer> mapOldIndex) {
+	protected void renameExpression(OpNode node, Map<Integer, Integer> mapOldIndex, Map<Integer, Integer> mapOldOrder) {
 		Expression left = node.getLeftChild();
 		Expression right = node.getRightChild();
 		
-		renameExpression(left,  mapOldIndex);
-		renameExpression(right, mapOldIndex);
+		renameExpression(left,  mapOldIndex, mapOldOrder);
+		renameExpression(right, mapOldIndex, mapOldOrder);
 	}
 	
 	
-	protected void renameExpression(VarNode node, Map<Integer, Integer> mapOldIndex) {
+	protected void renameExpression(VarNode node, Map<Integer, Integer> mapOldIndex, Map<Integer, Integer> mapOldOrder) {
 		String name = node.getName();
 		char prefix = name.charAt(0);
-		if (prefix == '$' || prefix == '@') {
+		if (prefix == '$' || prefix == '@' || prefix == '#') {
 			String varIndex = name.substring(1);
 			Integer intIndex = Integer.valueOf(varIndex);
-			Integer newIndex = mapOldIndex.get(intIndex);
+			Integer newIndex = null;
+			if (prefix == '#') {
+				newIndex = mapOldOrder.get(intIndex);
+			} else {
+				newIndex = mapOldIndex.get(intIndex);
+			}
 			if (newIndex != null) {
 				String newStrIndex = prefix + String.valueOf(newIndex);
 				node.setName(newStrIndex);
@@ -42,21 +47,21 @@ public abstract class AbstractMetricWithFormula extends BaseMetric implements IM
 	}
 	
 	
-	protected void renameExpression(FuncNode node, Map<Integer, Integer> mapOldIndex) {
+	protected void renameExpression(FuncNode node, Map<Integer, Integer> mapOldIndex, Map<Integer, Integer> mapOldOrder) {
 		int n = node.numChildren();
 		for(int i=0; i<n; i++) {
-			renameExpression(node.child(i), mapOldIndex);
+			renameExpression(node.child(i), mapOldIndex, mapOldOrder);
 		}
 	}
 
 	
-	protected void renameExpression(Expression node, Map<Integer, Integer> mapOldIndex) {
+	protected void renameExpression(Expression node, Map<Integer, Integer> mapOldIndex, Map<Integer, Integer> mapOldOrder) {
 		if (node instanceof OpNode) {
-			renameExpression((OpNode)node, mapOldIndex);
+			renameExpression((OpNode)node, mapOldIndex, mapOldOrder);
 		} else if (node instanceof VarNode) {
-			renameExpression((VarNode)node, mapOldIndex);
+			renameExpression((VarNode)node, mapOldIndex, mapOldOrder);
 		} else if (node instanceof FuncNode) {
-			renameExpression((FuncNode) node, mapOldIndex);
+			renameExpression((FuncNode) node, mapOldIndex, mapOldOrder);
 		}
 	}
 }
