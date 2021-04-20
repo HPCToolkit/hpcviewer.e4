@@ -3,6 +3,7 @@
  */
 package edu.rice.cs.hpc.data.experiment.metric;
 
+import edu.rice.cs.hpc.data.experiment.BaseExperimentWithMetrics;
 import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpc.data.experiment.scope.*;
 
@@ -215,7 +216,7 @@ public class DerivedMetric extends AbstractMetricWithFormula implements IMetricM
 	 * 
 	 * @param experiment
 	 */
-	public void setExperiment(Experiment experiment)
+	public void setExperiment(BaseExperimentWithMetrics experiment)
 	{
 		this.experiment = experiment;
 		// updating as well the variable mapping to metrics

@@ -21,4 +21,9 @@ public class PowNode extends OpNode {
 	public String getSymbol() {
 		return "^";
 	}
+
+	@Override
+	public Expression duplicate() {
+		return new PowNode(leftChild.duplicate(), rightChild.duplicate());
+	}
 }

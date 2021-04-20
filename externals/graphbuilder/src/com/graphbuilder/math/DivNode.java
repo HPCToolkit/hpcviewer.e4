@@ -25,4 +25,9 @@ public class DivNode extends OpNode {
 	public String getSymbol() {
 		return "/";
 	}
+
+	@Override
+	public Expression duplicate() {
+		return new DivNode(leftChild.duplicate(), rightChild.duplicate());
+	}
 }
