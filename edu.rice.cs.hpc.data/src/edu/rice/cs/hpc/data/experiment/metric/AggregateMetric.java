@@ -191,8 +191,8 @@ public class AggregateMetric extends AbstractMetricWithFormula implements IMetri
 		AggregateMetric m = new AggregateMetric(shortName, displayName, description, visibility, 
 				null, annotationType, index, partner_index, metricType);
 
-		m.formulaCombine  = formulaCombine.duplicate();
-		m.formulaFinalize = formulaFinalize.duplicate();
+		m.formulaCombine  = formulaCombine  == null ? null : formulaCombine.duplicate();
+		m.formulaFinalize = formulaFinalize == null ? null : formulaFinalize.duplicate();
 		m.order           = order;
 		
 		return m;
