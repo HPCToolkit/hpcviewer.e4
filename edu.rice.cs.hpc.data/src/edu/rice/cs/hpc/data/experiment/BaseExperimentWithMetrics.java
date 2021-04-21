@@ -12,6 +12,7 @@ import edu.rice.cs.hpc.data.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
 import edu.rice.cs.hpc.data.experiment.metric.MetricComparator;
 import edu.rice.cs.hpc.data.experiment.metric.MetricType;
+import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.util.Constants;
 
 
@@ -164,6 +165,13 @@ implements IMetricManager
 		}
 		return null;
 	}
+	
+	
+	@Override
+	public RootScope getRootScope() {
+		return rootScope;
+	}
+
 	
 	//////////////////////////////////////////////////////////////////////////
 	//Compute Derived Metrics												//

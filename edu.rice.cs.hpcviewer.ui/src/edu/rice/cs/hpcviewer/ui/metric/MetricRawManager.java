@@ -8,6 +8,7 @@ import org.eclipse.swt.widgets.TreeColumn;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
 import edu.rice.cs.hpc.data.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
+import edu.rice.cs.hpc.data.experiment.scope.RootScope;
 import edu.rice.cs.hpc.data.experiment.metric.BaseMetric.VisibilityType;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
 
@@ -87,5 +88,11 @@ public class MetricRawManager implements IMetricManager
 			return listMetrics;
 		}
 		return null;
+	}
+
+	
+	@Override
+	public RootScope getRootScope() {
+		return treeViewer.getRootScope();
 	}
 }

@@ -125,6 +125,7 @@ public class ExperimentMerger
 		new TreeSimilarity(metrics.getOffset(), rootMerged, root2);
 		
 		merged.setMergedDatabase(true);
+		rootMerged.setExperiment(merged);
 		
 		return merged;
 	}
@@ -206,8 +207,19 @@ public class ExperimentMerger
 		//	overlapped with the ID from the first group of metrics
 		
 		final int m1_last = m1.size() - 1;
-		final int m1_last_shortname = Integer.valueOf(metricList.get(m1_last).getShortName());
-		int m1_last_index = Math.max(m1_last_shortname, metricList.get(m1_last).getIndex()) + 1;
+		BaseMetric m1_last_metric = metricList.get(m1_last);
+		final int m1_last_shortname = Integer.valueOf(m1_last_metric.getShortName());
+		int m1_last_index = Math.max(m1_last_shortname, m1_last_metric.getIndex()) + 1;
+		
+		// find the last metric with the highest order
+		int m1_last_order = m1_last;
+		for(int i=m1_last; i>=0; i--) {
+			BaseMetric metric = metricList.get(i);
+			if (metric.getMetricType() == MetricType.INCLUSIVE && metric.getOrder()>=0) {
+				m1_last_order = metric.getOrder();
+				break;
+			}
+		}
 		
 		ListMergedMetrics metricsMerged = new ListMergedMetrics(m1_last_index, metricList);
 		
@@ -232,14 +244,16 @@ public class ExperimentMerger
 			final String new_id = String.valueOf(index_new); 
 			m.setShortName( new_id );
 			m.setIndex(index_new);
-			
+			int partner_index = index_new + 1;
 			if (metric.getMetricType() == MetricType.INCLUSIVE) {
 				final int order_old = metric.getOrder();
-				final int order_new = m1_last_index + order_old;
-				m.setOrder(order_new);
-				mapOldOrder.put(order_old, order_new);
+				m1_last_order++;
+				m.setOrder(m1_last_order);
+				mapOldOrder.put(order_old, m1_last_order);
+			} else {
+				partner_index = index_new - 1;
 			}
-			
+			m.setPartner(partner_index);
 			m.setDisplayName( 2 + "-" + m.getDisplayName() );
 			
 			metricsMerged.add(m);

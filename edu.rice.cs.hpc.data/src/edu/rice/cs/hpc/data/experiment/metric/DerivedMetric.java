@@ -36,8 +36,7 @@ public class DerivedMetric extends AbstractMetricWithFormula implements IMetricM
 	private IMetricManager experiment;
 	
 	private MetricValue rootValue;
-	
-	private RootScope root;
+
 	
 	//===================================================================================
 	// CONSTRUCTORS
@@ -69,7 +68,6 @@ public class DerivedMetric extends AbstractMetricWithFormula implements IMetricM
 		
 		// set up the functions
 		this.fctMap = new ExtFuncMap();
-		this.root 	= root;		
 		this.fctMap.init();
 
 		// set up the variables
@@ -99,7 +97,6 @@ public class DerivedMetric extends AbstractMetricWithFormula implements IMetricM
 		super(sID, sName, DESCRIPTION, VisibilityType.SHOW, null, annotationType, index, index, objType);
 		
 		this.experiment = null; // to be defined later
-		this.root 		= null; // to be defined later
 		this.varMap		= null; // to be defined later
 		this.expression = null; // to be defined later
 		
@@ -115,7 +112,9 @@ public class DerivedMetric extends AbstractMetricWithFormula implements IMetricM
 	 */
 	public void setExpression( String expr ) {
 		expression = ExpressionTree.parse(expr);
-		rootValue  = setRootValue(root);
+		
+		if (experiment != null)
+			rootValue  = setRootValue(experiment.getRootScope());
 	}
 
 	static public boolean evaluateExpression(String expression, 
@@ -145,7 +144,6 @@ public class DerivedMetric extends AbstractMetricWithFormula implements IMetricM
 	 */
 	@Override
 	public MetricValue getValue(IMetricScope scope) {
-		double dVal;
 		// corner case
 		// if the scope is a root scope, then we return the aggregate value
 		if(scope instanceof RootScope) {
@@ -158,20 +156,19 @@ public class DerivedMetric extends AbstractMetricWithFormula implements IMetricM
 				rootValue = setRootValue((RootScope)scope);
 			}
 			return rootValue;
-		} else {
-			// otherwise, we need to recompute the value again via the equation
-			dVal = getDoubleValue(scope);
-			
-			// ugly test to check whether the value exist or not
-			if(Double.compare(dVal, 0.0d) == 0)
-				return MetricValue.NONE;	// the value is not available !
 		}
+		// otherwise, we need to recompute the value again via the equation
+		double dVal = getDoubleValue(scope);
+		
+		// ugly test to check whether the value exist or not
+		if(Double.compare(dVal, 0.0d) == 0)
+			return MetricValue.NONE;	// the value is not available !
+
 		if(this.getAnnotationType() == AnnotationType.PERCENT){
-			MetricValue myrootValue = getValue(root);
+			MetricValue myrootValue = getValue(experiment.getRootScope());
 			return new MetricValue(dVal, ((float) dVal/myrootValue.getValue()));
-		} else {
-			return new MetricValue(dVal);
 		}
+		return new MetricValue(dVal);
 	}
 	
 	public MetricValue getRawValue(IMetricScope s)
@@ -203,7 +200,9 @@ public class DerivedMetric extends AbstractMetricWithFormula implements IMetricM
 	
 	@Override
 	public BaseMetric duplicate() {
-		final DerivedMetric copy = new DerivedMetric(root, experiment, expression.toString(), displayName, 
+		RootScope root = (experiment != null ? experiment.getRootScope() : null);
+		final DerivedMetric copy = new DerivedMetric(root, experiment, 
+				expression.toString(), displayName, 
 				shortName, index, annotationType, metricType);
 		
 		// TODO: hack, we need to conserve the format of the metric.
@@ -228,7 +227,6 @@ public class DerivedMetric extends AbstractMetricWithFormula implements IMetricM
 	public void resetMetric(Experiment experiment, RootScope root)
 	{
 		this.experiment = experiment;
-		this.root 		= root;
 		
 		varMap = new MetricVarMap(root, experiment);
 		varMap.setMetric(this);
