@@ -29,7 +29,6 @@ public class AggregateMetric extends AbstractMetricWithFormula implements IMetri
 	
 	// formula expression
 	private Expression formulaCombine, formulaFinalize;
-	//private Expression formulaCurrent = null;
 	
 	// map function
 	private FuncMap fctMap;

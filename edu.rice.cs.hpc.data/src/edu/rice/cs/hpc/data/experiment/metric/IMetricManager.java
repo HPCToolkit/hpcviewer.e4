@@ -2,6 +2,8 @@ package edu.rice.cs.hpc.data.experiment.metric;
 
 import java.util.List;
 
+import edu.rice.cs.hpc.data.experiment.scope.RootScope;
+
 /******************************************************************
  * 
  * Interface to handle metric descriptors
@@ -48,4 +50,7 @@ public interface IMetricManager
 	 * @param objMetric {@code DerivedMetric} a new metric
 	 */
 	public void addDerivedMetric(DerivedMetric objMetric);
+	
+	
+	public RootScope getRootScope();
 }

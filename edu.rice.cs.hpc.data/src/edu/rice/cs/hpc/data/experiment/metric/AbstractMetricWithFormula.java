@@ -39,10 +39,9 @@ public abstract class AbstractMetricWithFormula extends BaseMetric implements IM
 			} else {
 				newIndex = mapOldIndex.get(intIndex);
 			}
-			if (newIndex != null) {
-				String newStrIndex = prefix + String.valueOf(newIndex);
-				node.setName(newStrIndex);
-			}
+			assert (newIndex != null);
+			String newStrIndex = prefix + String.valueOf(newIndex);
+			node.setName(newStrIndex);
 		}
 	}
 	
