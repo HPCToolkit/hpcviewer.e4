@@ -73,10 +73,12 @@ public class HotCallPath
 
 			// whether we find it or not, we should reveal the tree path to the last scope
 			
-			treeViewer.setSelection(new StructuredSelection(objHotPath.path), true);
+			//treeViewer.setSelection(new StructuredSelection(objHotPath.path), true);
 
 			if(!is_found && objHotPath.node.hasChildren()) {
 				lblMessage.showErrorMessage("No hot child.");
+			} else {
+				treeViewer.setSelection(new StructuredSelection(objHotPath.path), false);
 			}
 		} else {
 			// It is almost impossible for the jvm to reach this part of branch.
