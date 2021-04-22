@@ -99,8 +99,6 @@ private IMetricValueCollection metrics;
  */
 private int iCounter;
 
-//the cpid is removed in hpcviewer, but hpctraceview still requires it in order to dfs
-protected int cpid;
 
 public int iSourceCodeAvailability = Scope.SOURCE_CODE_UNKNOWN;
 
@@ -129,7 +127,6 @@ public Scope(RootScope root, SourceFile file, int first, int last, int cct_id, i
 
 //	this.srcCitation = null;
 	this.flat_node_index = flat_id;
-	this.cpid = -1;
 	this.iCounter  = 0;
 }
 
@@ -137,7 +134,6 @@ public Scope(RootScope root, SourceFile file, int first, int last, int cct_id, i
 public Scope(RootScope root, SourceFile file, int first, int last, int cct_id, int flat_id, int cpid)
 {
 	this(root, file, first, last, cct_id, flat_id);
-	this.cpid = cpid;
 }
 
 
@@ -273,24 +269,6 @@ public boolean isCounterZero() {
 	return (this.iCounter == 0);
 }
 
-/*************************************************************************
- * Returns which processor was active
- ************************************************************************/
-
-public int getCpid()
-{
-	return cpid;
-}
-
-
-/*************************************************************************
- *	Sets the value of the cpid
- ************************************************************************/
-
-public void setCpid(int _cpid)
-{
-	this.cpid = _cpid;
-}
 
 /*************************************************************************
  *	Returns the tool tip for this scope.
