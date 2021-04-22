@@ -655,7 +655,7 @@ public class BaseExperimentBuilder extends Builder
 					else
 						scope = new StatementRangeScope(rootStack.peek(), srcFile, 
 								firstLn-1, lastLn-1, cct_id, flat_id);
-					scope.setCpid(0);
+
 					scopeStack.push(scope);
 
 					srcFile.setIsText(istext);
@@ -923,8 +923,8 @@ public class BaseExperimentBuilder extends Builder
 	{
 		int cct_id = 0, flat_id = 0;
 		// make a new statement-range scope object
-		int firstLn = 0;
-		int cpid = 0;
+		int firstLn  = 0;
+		Integer cpid = null;
 
 		for(int i=0; i<attributes.length; i++) {
 			if(attributes[i].equals(ATTRIBUTE_LINE)) {
@@ -939,7 +939,7 @@ public class BaseExperimentBuilder extends Builder
 				cct_id = Integer.parseInt(values[i]);
 
 			} else if(attributes[i].equals("it")) { //the cpid
-				cpid = Integer.parseInt(values[i]);
+				cpid = Integer.valueOf(values[i]);
 			}
 		}
 
@@ -947,9 +947,10 @@ public class BaseExperimentBuilder extends Builder
 
 		LineScope scope = new LineScope(rootStack.peek(), srcFile, firstLn-1, cct_id, flat_id);
 		scope.setDepth(current_depth);
-		scope.setCpid(cpid);
 		
-		mapCpidToCallpath.put(cpid, scope);
+		if (cpid != null) {
+			mapCpidToCallpath.put(cpid, scope);
+		}
 		
 		if (isCallSite) {
 			scopeStack.push(scope);
