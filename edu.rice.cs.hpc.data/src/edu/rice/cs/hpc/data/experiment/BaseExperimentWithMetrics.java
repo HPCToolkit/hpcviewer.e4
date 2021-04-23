@@ -173,6 +173,20 @@ implements IMetricManager
 	}
 
 	
+	/****
+	 * remove resources to help GC to free memory
+	 * Not sure if this is useful
+	 */
+	@Override
+	public void dispose() {
+		metrics = null;
+		mapIndexToMetric = null;
+		mapIdToMetric    = null;
+		metricsWithOrder = null;
+
+		super.dispose();
+	}
+	
 	//////////////////////////////////////////////////////////////////////////
 	//Compute Derived Metrics												//
 	//////////////////////////////////////////////////////////////////////////

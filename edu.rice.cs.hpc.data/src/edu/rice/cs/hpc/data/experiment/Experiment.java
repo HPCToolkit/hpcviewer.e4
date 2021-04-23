@@ -462,4 +462,10 @@ public class Experiment extends BaseExperimentWithMetrics
 	protected void open_finalize() {
 		postprocess(flag == ExperimentOpenFlag.TREE_ALL);		
 	}
+	
+	@Override
+	public void dispose() {
+		metrics_raw = null;
+		super.dispose();
+	}
 }
