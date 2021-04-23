@@ -35,11 +35,13 @@
   <handlers xmi:id="_ZlWvYL17EeqIaLNodVh-xg" elementId="edu.rice.cs.hpcviewer.ui.handler.showMetric" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.ShowMetrics" command="_XIwxIL17EeqIaLNodVh-xg"/>
   <handlers xmi:id="_SsIPYMH9Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpcviewer.ui.handler.0" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.Find" command="_JcLG8MH9Eeqcdd3a7pzIFA"/>
   <handlers xmi:id="_rqxmwOAkEeqsmOAkZNeqjw" elementId="edu.rice.cs.hpcviewer.ui.handler.splitWindow" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.SplitWindow" command="_ocHSYOAkEeqsmOAkZNeqjw"/>
+  <handlers xmi:id="_P4JQ0KSGEeuSWoXTomb4gg" elementId="edu.rice.cs.hpcviewer.ui.handler.windowMinimize" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.WindowMinimize" command="_HkWOoKSGEeuSWoXTomb4gg"/>
   <bindingTables xmi:id="_7fwrAKqFEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.bindingtable.file" bindingContext="_c3AF2cjYEeSyMNYR5xypkQ">
     <bindings xmi:id="_-3xvsKqFEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.keybinding.open" keySequence="M1+O" command="_U14sMI7vEeqBPbXbG7_Dzw"/>
     <bindings xmi:id="_k4-EoKuTEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.keybinding.add" keySequence="M1+A" command="_cPW0II7vEeqBPbXbG7_Dzw"/>
     <bindings xmi:id="_lyW3ALWUEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.keybinding.new" keySequence="M1+N" command="_FHXw4LV7EeqkhNpo_ZhE2A"/>
     <bindings xmi:id="_L2SY8MH9Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpcviewer.ui.keybinding.find" keySequence="M1+F" command="_JcLG8MH9Eeqcdd3a7pzIFA"/>
+    <bindings xmi:id="_By4mUKSGEeuSWoXTomb4gg" elementId="edu.rice.cs.hpcviewer.ui.keybinding.minimize" keySequence="M1+M" command="_HkWOoKSGEeuSWoXTomb4gg"/>
   </bindingTables>
   <rootContext xmi:id="_c3AF2cjYEeSyMNYR5xypkQ" elementId="org.eclipse.ui.contexts.dialogAndWindow" name="In Dialog and Windows">
     <children xmi:id="_c3AF2sjYEeSyMNYR5xypkQ" elementId="org.eclipse.ui.contexts.window" name="In Windows"/>
@@ -136,6 +138,7 @@
   <commands xmi:id="_XIwxIL17EeqIaLNodVh-xg" elementId="edu.rice.cs.hpcviewer.ui.command.showMetric" commandName="Show metrics"/>
   <commands xmi:id="_JcLG8MH9Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpcviewer.ui.command.find" commandName="Find" description="Find a text"/>
   <commands xmi:id="_ocHSYOAkEeqsmOAkZNeqjw" elementId="edu.rice.cs.hpcviewer.ui.command.splitWindow" commandName="Split window"/>
+  <commands xmi:id="_HkWOoKSGEeuSWoXTomb4gg" elementId="edu.rice.cs.hpcviewer.ui.command.windowMinimize" commandName="Minimize window" description="Minimize window into an icon state"/>
   <addons xmi:id="_c3AF0sjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.core.commands.service" contributionURI="bundleclass://org.eclipse.e4.core.commands/org.eclipse.e4.core.commands.CommandServiceAddon"/>
   <addons xmi:id="_c3AF08jYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.contexts.service" contributionURI="bundleclass://org.eclipse.e4.ui.services/org.eclipse.e4.ui.services.ContextServiceAddon"/>
   <addons xmi:id="_c3AF1MjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.ui.bindings.service" contributionURI="bundleclass://org.eclipse.e4.ui.bindings/org.eclipse.e4.ui.bindings.BindingServiceAddon"/>
