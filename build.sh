@@ -74,14 +74,18 @@ repackage_linux(){
 	rm -rf tmp
 }
 
-repackage_nonLinux(){
-	input=$1
-	output=$2
-    type=$3
-    
-	[[ -z $input ]] && { echo "$input doesn't exist"; exit 1;  }
-  
-    if [ "$type" == "win" ]; then
+
+repackage_mac() {
+      input=$1
+      output=$2
+      cp $input $output
+      chmod 664 $output
+}
+
+
+repackage_windows() {
+      input=$1
+      output=$2
       # for windows, we need to create a special hpcviewer directory
       if [ -e hpcviewer ]; then
          echo "File or directory hpcviewer already exist. Do you want to remove it? (y/n) "
@@ -95,13 +99,10 @@ repackage_nonLinux(){
       cd hpcviewer
       unzip ../$input
       cd ..
-      zip -r $output hpcviewer/
+      zip -r -y $output hpcviewer/
       rm -rf hpcviewer
-    else
-	  cp $input $output
-	fi
-	chmod 664 $output
-	#ls -l $output
+      
+      chmod 664 $output
 }
 
 # repackage linux files
@@ -111,7 +112,7 @@ repackage_linux linux.gtk ppc64le
 # copy and rename windows package
 output="hpcviewer-${release}-win32.win32.x86_64.zip"
 input=edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-win32.win32.x86_64.zip
-repackage_nonLinux $input $output win
+repackage_windows$input $output 
 
 ###################################################################
 # Special build for mac and aarch64
@@ -132,7 +133,7 @@ repackage_linux linux.gtk aarch64
 # copy and rename mac package
 output="hpcviewer-${release}-macosx.cocoa.x86_64.zip"
 input=edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-macosx.cocoa.x86_64.zip 
-repackage_nonLinux $input $output
+repackage_mac $input $output
 
 # special treatement for mac OS
 OS=`uname`

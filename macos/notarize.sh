@@ -7,6 +7,9 @@ then
 	exit
 fi
 
+#
+# check if a file exists. If not, just quit
+#
 check_file() {
 if [ ! -f $1 ]; then
 	echo "hpcviewer mac file doesn't exist: $1"
@@ -36,6 +39,12 @@ if [[ -z "${AC_PASSWORD}" ]] ; then
 	exit 1
 fi
 
+##############################
+# 
+# Prepare the configuration script
+#
+##############################
+
 DIR_PREP="prepare_sign"
 
 rm -rf $DIR_PREP
@@ -60,6 +69,10 @@ dmg {
   volume_name = "hpcviewer"
 }
 
+zip {
+  output_path = "${FILE_BASE}.zip"
+}
+
 EOF
 
 cp $FILE_PLIST  $DIR_PREP
@@ -67,7 +80,38 @@ cp $FILE_PLIST  $DIR_PREP
 cd $DIR_PREP
 unzip -q ../$FILE
 
-#gon $BASE_CONFIG
+##############################
+#
+# Notarize the viewer
+#
+##############################
+#result=`gon $BASE_CONFIG`
+if [  "$result" -ne  "0"  ]; then
+     echo "Cannot notarize the app. Please check on Apple notarization server"
+     exit 1
+fi
+
+##############################
+# 
+# Hack: create the zip file for notarized file
+# Somehow, gon doesn't create hpcviewer.app directory 
+# inside the zip file
+#
+##############################
+
+mkdir -p tmp/hpcviewer.app
+cd tmp/hpcviewer.app
+unzip ../../"${FILE_BASE}.zip"
+cd ..
+zip -r "${FILE_BASE}.zip" hpcviewer.app
+cd ..
+mv "${FILE_BASE}.zip" .
+
+##############################
+#
+# END
+# 
+##############################
 
 cd ..
-echo "Notarized file: $DIR_PREP/${FILE_BASE}.dmg"
+ls -l "$DIR_PREP/${FILE_BASE}.*"
