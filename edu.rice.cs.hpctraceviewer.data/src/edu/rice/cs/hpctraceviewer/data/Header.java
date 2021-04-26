@@ -1,6 +1,6 @@
 package edu.rice.cs.hpctraceviewer.data;
 
-import edu.rice.cs.hpc.data.util.Constants;
+import edu.rice.cs.hpcdata.util.Constants;
 
 class Header 
 {

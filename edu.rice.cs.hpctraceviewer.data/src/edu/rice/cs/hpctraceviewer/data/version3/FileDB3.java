@@ -4,12 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import edu.rice.cs.hpc.data.db.IdTuple;
-import edu.rice.cs.hpc.data.db.version3.DataSummary;
-import edu.rice.cs.hpc.data.db.version3.DataTrace;
-import edu.rice.cs.hpc.data.experiment.BaseExperiment;
-import edu.rice.cs.hpc.data.experiment.extdata.FileDB2;
-import edu.rice.cs.hpc.data.experiment.extdata.IFileDB;
+import edu.rice.cs.hpcdata.db.IdTuple;
+import edu.rice.cs.hpcdata.db.version3.DataSummary;
+import edu.rice.cs.hpcdata.db.version3.DataTrace;
+import edu.rice.cs.hpcdata.experiment.BaseExperiment;
+import edu.rice.cs.hpcdata.experiment.extdata.FileDB2;
+import edu.rice.cs.hpcdata.experiment.extdata.IFileDB;
 
 
 /********************************************************************
@@ -32,7 +32,7 @@ public class FileDB3 implements IFileDB
 	 * the recent method : 
 	 * 
 	 * {@link open(String)}
-	 * @see edu.rice.cs.hpc.data.experiment.extdata.IFileDB#open(java.lang.String, int, int)
+	 * @see edu.rice.cs.hpcdata.experiment.extdata.IFileDB#open(java.lang.String, int, int)
 	 */
 	@Override
 	public void open(String filename, int headerSize, int recordSize)

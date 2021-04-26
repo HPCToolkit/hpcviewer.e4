@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import edu.rice.cs.hpc.data.db.version3.DataTrace;
+import edu.rice.cs.hpcdata.db.version3.DataTrace;
 
 class DataTraceTest 
 {

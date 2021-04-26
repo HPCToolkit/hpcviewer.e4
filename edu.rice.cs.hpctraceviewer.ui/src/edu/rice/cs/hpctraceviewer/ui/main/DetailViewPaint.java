@@ -12,9 +12,9 @@ import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 
-import edu.rice.cs.hpc.data.db.IdTuple;
-import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
-import edu.rice.cs.hpc.data.experiment.extdata.IFileDB.IdTupleOption;
+import edu.rice.cs.hpcdata.db.IdTuple;
+import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
+import edu.rice.cs.hpcdata.experiment.extdata.IFileDB.IdTupleOption;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;

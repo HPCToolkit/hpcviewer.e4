@@ -9,8 +9,8 @@ import java.nio.channels.FileChannel.MapMode;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.rice.cs.hpc.data.db.version3.DataCommon;
-import edu.rice.cs.hpc.data.db.version3.DataSection;
+import edu.rice.cs.hpcdata.db.version3.DataCommon;
+import edu.rice.cs.hpcdata.db.version3.DataSection;
 
 /*******************************************************************************************
  * 

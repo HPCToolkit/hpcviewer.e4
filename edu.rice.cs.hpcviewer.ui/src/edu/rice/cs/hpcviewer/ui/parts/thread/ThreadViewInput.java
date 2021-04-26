@@ -2,9 +2,9 @@ package edu.rice.cs.hpcviewer.ui.parts.thread;
 
 import java.util.List;
 
-import edu.rice.cs.hpc.data.experiment.BaseExperiment;
-import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
-import edu.rice.cs.hpc.data.experiment.scope.RootScope;
+import edu.rice.cs.hpcdata.experiment.BaseExperiment;
+import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
+import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 
 public class ThreadViewInput 
 {

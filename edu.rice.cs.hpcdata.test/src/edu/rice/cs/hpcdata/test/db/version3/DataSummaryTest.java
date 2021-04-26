@@ -2,7 +2,7 @@ package edu.rice.cs.hpcdata.test.db.version3;
 
 import java.io.IOException;
 
-import edu.rice.cs.hpc.data.db.version3.DataSummary;
+import edu.rice.cs.hpcdata.db.version3.DataSummary;
 
 public class DataSummaryTest 
 {

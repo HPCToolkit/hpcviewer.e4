@@ -9,13 +9,13 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.swt.widgets.Display;
 import edu.rice.cs.hpcbase.map.ProcedureAliasMap;
-import edu.rice.cs.hpc.data.experiment.BaseExperiment;
-import edu.rice.cs.hpc.data.experiment.ExperimentWithoutMetrics;
-import edu.rice.cs.hpc.data.experiment.InvalExperimentException;
-import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
-import edu.rice.cs.hpc.data.experiment.extdata.IFilteredData;
-import edu.rice.cs.hpc.data.trace.TraceAttribute;
-import edu.rice.cs.hpc.data.util.CallPath;
+import edu.rice.cs.hpcdata.experiment.BaseExperiment;
+import edu.rice.cs.hpcdata.experiment.ExperimentWithoutMetrics;
+import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
+import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
+import edu.rice.cs.hpcdata.experiment.extdata.IFilteredData;
+import edu.rice.cs.hpcdata.trace.TraceAttribute;
+import edu.rice.cs.hpcdata.util.CallPath;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
@@ -320,7 +320,7 @@ public abstract class SpaceTimeDataController
 	public TimeUnit getTimeUnit() {
 		int version = exp.getMajorVersion();
 		
-		if (version == edu.rice.cs.hpc.data.util.Constants.EXPERIMENT_DENSED_VERSION) {
+		if (version == edu.rice.cs.hpcdata.util.Constants.EXPERIMENT_DENSED_VERSION) {
 			if (exp.getMinorVersion() < 2) {
 				// old version of database: always microsecond
 				return TimeUnit.MICROSECONDS;
@@ -333,7 +333,7 @@ public abstract class SpaceTimeDataController
 				return TimeUnit.NANOSECONDS;
 			}
 
-		} else if (version == edu.rice.cs.hpc.data.util.Constants.EXPERIMENT_SPARSE_VERSION) {
+		} else if (version == edu.rice.cs.hpcdata.util.Constants.EXPERIMENT_SPARSE_VERSION) {
 			// newer database: sparse database always uses nanoseconds
 			
 			return TimeUnit.NANOSECONDS;

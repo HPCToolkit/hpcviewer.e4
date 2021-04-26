@@ -3,12 +3,12 @@ Bundle-ManifestVersion: 2
 Bundle-Name: hpcfilter
 Bundle-SymbolicName: edu.rice.cs.hpc.filter;singleton:=true
 Bundle-Version: 6.0.0.qualifier
-Bundle-Activator: edu.rice.cs.hpc.filter.Activator
+Bundle-Activator: edu.rice.cs.hpcfilter.Activator
 Bundle-Vendor: Rice University
-Export-Package: edu.rice.cs.hpc.filter,
- edu.rice.cs.hpc.filter.dialog,
- edu.rice.cs.hpc.filter.service,
- edu.rice.cs.hpc.filter.view
+Export-Package: edu.rice.cs.hpcfilter,
+ edu.rice.cs.hpcfilter.dialog,
+ edu.rice.cs.hpcfilter.service,
+ edu.rice.cs.hpcfilter.view
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: edu.rice.cs.hpc.data,
  edu.rice.cs.hpcbase,

@@ -4,12 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
-import edu.rice.cs.hpc.data.experiment.Experiment;
-import edu.rice.cs.hpc.data.experiment.extdata.AbstractThreadDataCollection;
-import edu.rice.cs.hpc.data.experiment.metric.MetricRaw;
-import edu.rice.cs.hpc.data.experiment.scope.RootScope;
-import edu.rice.cs.hpc.data.util.IProgressReport;
-import edu.rice.cs.hpc.data.util.MergeDataFiles;
+import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.extdata.AbstractThreadDataCollection;
+import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
+import edu.rice.cs.hpcdata.experiment.scope.RootScope;
+import edu.rice.cs.hpcdata.util.IProgressReport;
+import edu.rice.cs.hpcdata.util.MergeDataFiles;
 
 /******************************************************************
  * 

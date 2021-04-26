@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Vector;
 
-import edu.rice.cs.hpc.data.db.version3.DataRecord;
-import edu.rice.cs.hpc.data.util.Constants;
+import edu.rice.cs.hpcdata.db.version3.DataRecord;
+import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpctraceviewer.data.version2.AbstractBaseData;
 
 /***********************************************************

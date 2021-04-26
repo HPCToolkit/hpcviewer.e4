@@ -4,7 +4,7 @@ import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
-import edu.rice.cs.hpc.data.util.JavaValidator;
+import edu.rice.cs.hpcdata.util.JavaValidator;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 import edu.rice.cs.hpcviewer.ui.util.ApplicationProperty;
 

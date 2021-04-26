@@ -12,10 +12,10 @@ import org.eclipse.swt.graphics.RGB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.rice.cs.hpc.data.db.IdTuple;
-import edu.rice.cs.hpc.data.db.IdTupleType;
-import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
-import edu.rice.cs.hpc.data.experiment.extdata.IFileDB.IdTupleOption;
+import edu.rice.cs.hpcdata.db.IdTuple;
+import edu.rice.cs.hpcdata.db.IdTupleType;
+import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
+import edu.rice.cs.hpcdata.experiment.extdata.IFileDB.IdTupleOption;
 import edu.rice.cs.hpctraceviewer.data.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.ProcedureColor;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;

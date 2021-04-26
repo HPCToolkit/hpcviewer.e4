@@ -9,9 +9,9 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.TreeItem;
 
-import edu.rice.cs.hpc.data.experiment.scope.CallSiteScope;
-import edu.rice.cs.hpc.data.experiment.scope.LineScope;
-import edu.rice.cs.hpc.data.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
+import edu.rice.cs.hpcdata.experiment.scope.LineScope;
+import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;

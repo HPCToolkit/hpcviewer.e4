@@ -5,10 +5,10 @@ import java.util.List;
 
 import org.eclipse.swt.widgets.TreeColumn;
 
-import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
-import edu.rice.cs.hpc.data.experiment.metric.DerivedMetric;
-import edu.rice.cs.hpc.data.experiment.metric.IMetricManager;
-import edu.rice.cs.hpc.data.experiment.metric.BaseMetric.VisibilityType;
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
+import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
+import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
 
 /********************************************************

@@ -15,8 +15,8 @@ import org.swtchart.ISeries.SeriesType;
 import org.swtchart.LineStyle;
 import org.swtchart.Range;
 
-import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
-import edu.rice.cs.hpc.data.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
+import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 
 public abstract class AbstractGraphPlotViewer extends AbstractGraphViewer 

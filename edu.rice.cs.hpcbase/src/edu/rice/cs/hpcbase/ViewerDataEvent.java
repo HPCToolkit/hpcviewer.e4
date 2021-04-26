@@ -1,6 +1,6 @@
 package edu.rice.cs.hpcbase;
 
-import edu.rice.cs.hpc.data.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.Experiment;
 
 /***************************************************************
  * 

@@ -9,10 +9,10 @@ import org.swtchart.IAxisSet;
 import org.swtchart.IAxisTick;
 import org.swtchart.ILineSeries;
 
-import edu.rice.cs.hpc.data.experiment.extdata.IThreadDataCollection;
-import edu.rice.cs.hpc.data.experiment.metric.BaseMetric;
-import edu.rice.cs.hpc.data.experiment.metric.MetricRaw;
-import edu.rice.cs.hpc.data.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
+import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
+import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 
 public class GraphPlotSortViewer extends AbstractGraphPlotViewer 

@@ -6,9 +6,9 @@ import org.eclipse.e4.ui.services.EMenuService;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.Composite;
 
-import edu.rice.cs.hpc.data.experiment.BaseExperiment;
-import edu.rice.cs.hpc.data.experiment.scope.RootScope;
-import edu.rice.cs.hpc.data.experiment.scope.RootScopeType;
+import edu.rice.cs.hpcdata.experiment.BaseExperiment;
+import edu.rice.cs.hpcdata.experiment.scope.RootScope;
+import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcviewer.ui.base.IViewBuilder;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractViewItem;
 import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownContentViewer;

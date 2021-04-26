@@ -2,8 +2,8 @@ package edu.rice.cs.hpcviewer.ui.actions;
 
 import java.util.Stack;
 
-import edu.rice.cs.hpc.data.experiment.scope.CallSiteScope;
-import edu.rice.cs.hpc.data.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
+import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
 
 public class FlatScopeAction 

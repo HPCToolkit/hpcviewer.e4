@@ -1,7 +1,8 @@
 package edu.rice.cs.hpctraceviewer.data.util;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import edu.rice.cs.hpc.data.util.IProgressReport;
+
+import edu.rice.cs.hpcdata.util.IProgressReport;
 
 public class TraceProgressReport implements IProgressReport 
 {

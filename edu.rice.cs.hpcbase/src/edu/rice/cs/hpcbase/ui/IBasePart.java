@@ -2,7 +2,7 @@ package edu.rice.cs.hpcbase.ui;
 
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 
-import edu.rice.cs.hpc.data.experiment.BaseExperiment;
+import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 
 /****
  * 

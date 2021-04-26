@@ -10,8 +10,8 @@ import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.widgets.Display;
 
-import edu.rice.cs.hpc.data.experiment.BaseExperiment;
 import edu.rice.cs.hpcbase.ui.IBasePart;
+import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 
 public class WindowAction 
 {

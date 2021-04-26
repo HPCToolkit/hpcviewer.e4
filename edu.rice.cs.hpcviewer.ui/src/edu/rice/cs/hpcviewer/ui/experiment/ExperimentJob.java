@@ -7,8 +7,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
-import edu.rice.cs.hpc.data.experiment.Experiment;
 import edu.rice.cs.hpcbase.map.ProcedureAliasMap;
+import edu.rice.cs.hpcdata.experiment.Experiment;
 
 public class ExperimentJob extends Job 
 {

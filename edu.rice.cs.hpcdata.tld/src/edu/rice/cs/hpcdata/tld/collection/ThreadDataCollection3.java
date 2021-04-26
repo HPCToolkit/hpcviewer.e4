@@ -4,12 +4,13 @@ package edu.rice.cs.hpcdata.tld.collection;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import edu.rice.cs.hpc.data.db.IdTuple;
-import edu.rice.cs.hpc.data.db.version3.DataSummary;
-import edu.rice.cs.hpc.data.experiment.BaseExperiment;
-import edu.rice.cs.hpc.data.experiment.BaseExperiment.Db_File_Type;
-import edu.rice.cs.hpc.data.experiment.extdata.AbstractThreadDataCollection;
-import edu.rice.cs.hpc.data.experiment.scope.RootScope;
+
+import edu.rice.cs.hpcdata.db.IdTuple;
+import edu.rice.cs.hpcdata.db.version3.DataSummary;
+import edu.rice.cs.hpcdata.experiment.BaseExperiment;
+import edu.rice.cs.hpcdata.experiment.BaseExperiment.Db_File_Type;
+import edu.rice.cs.hpcdata.experiment.extdata.AbstractThreadDataCollection;
+import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.tld.plot.DataPlot;
 import edu.rice.cs.hpcdata.tld.plot.DataPlotEntry;
 
