@@ -139,7 +139,7 @@
          unpack="false"/>
 
    <plugin
-         id="edu.rice.cs.hpc.data"
+         id="edu.rice.cs.hpcdata"
          download-size="0"
          install-size="0"
          version="0.0.0"

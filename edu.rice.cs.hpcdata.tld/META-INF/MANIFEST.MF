@@ -6,5 +6,5 @@ Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Rice University
 Automatic-Module-Name: edu.rice.cs.hpc.threaddata
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Require-Bundle: edu.rice.cs.hpc.data
+Require-Bundle: edu.rice.cs.hpcdata
 Export-Package: edu.rice.cs.hpcdata.tld.collection

@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: hpcdata
-Bundle-SymbolicName: edu.rice.cs.hpc.data
+Bundle-SymbolicName: edu.rice.cs.hpcdata
 Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Rice University
 Import-Package: org.apache.xerces.parsers
@@ -22,9 +22,9 @@ Export-Package: edu.rice.cs.hpcdata.db,
  edu.rice.cs.hpcdata.trace,
  edu.rice.cs.hpcdata.util,
  edu.rice.cs.hpcdata.util.string
-Main-Class: edu.rice.cs.hpc.data.framework.Application
+Main-Class: edu.rice.cs.hpcdata.framework.Application
 Require-Bundle: com.graphbuilder
-Automatic-Module-Name: edu.rice.cs.hpc.data
+Automatic-Module-Name: edu.rice.cs.hpcdata
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .,
  lib/commons-lang3-3.11.jar,

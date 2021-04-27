@@ -15,7 +15,7 @@
 	   this command will use ../hpcviewer-externals/ directory to find
 	   the source code of com.graph.builder.
 	-->	
-	<property name="classbase" location="edu/rice/cs/hpc/data"/>
+	<property name="classbase" location="edu/rice/cs/hpcdata"/>
 	<property name="externals" location="../../externals"/>
 	<property name="xerces"    location="external-jars/org.apache.xerces_2.9.0.v201005080400.jar" />
 	<property name="comm-lang" location="lib/commons-lang3-3.11.jar" />
@@ -23,7 +23,7 @@
 
   	<target name="compile" >
 	    <mkdir dir="bin" />
-    	<javac srcdir="../src/edu/rice/cs/hpc/data;${externals}/graphbuilder" 
+    	<javac srcdir="../src/edu/rice/cs/hpcdata;${externals}/graphbuilder" 
            	   destdir="bin" >
 			<classpath>
 				<fileset dir="../external-jars" includes="**/*.jar" />
@@ -37,7 +37,7 @@
     	<jar destfile="hpcdata.jar" >
        	     <fileset dir="bin" includes="**/*.class" />
              <manifest>
-                <attribute name="Main-Class" value="edu.rice.cs.hpc.data.framework.PrintData"/>
+                <attribute name="Main-Class" value="edu.rice.cs.hpcdata.framework.PrintData"/>
                 <attribute name="Class-Path" value="${xerces}:${comm-lang}:${comm-text}"/>
              </manifest>
         </jar>
@@ -59,10 +59,8 @@
 		<zip destfile="hpcdata.zip">
 			<zipfileset dir="lib" prefix="lib"/>
 			<fileset dir="." includes="hpcdata.sh"/>
-			<fileset dir="../src/edu/rice/cs/hpc/data/experiment/xml/" includes="experiment.dtd" />
+			<fileset dir="../src/edu/rice/cs/hpcdata/experiment/xml/" includes="experiment.dtd" />
 		</zip>
   		<delete dir="lib" />
 	</target>
-
-
 </project>
