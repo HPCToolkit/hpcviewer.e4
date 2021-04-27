@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: hpcremote
+Bundle-SymbolicName: edu.rice.cs.hpc.remote
+Bundle-Version: 6.0.0.qualifier
+Bundle-Vendor: Rice University
+Automatic-Module-Name: edu.rice.cs.hpc.remote
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.jface,
+ edu.rice.cs.hpcdata,
+ edu.rice.cs.hpctraceviewer.data
+Import-Package: com.jcraft.jsch,
+ org.eclipse.e4.core.contexts;version="1.7.0"
+Export-Package: edu.rice.cs.hpcremote.data

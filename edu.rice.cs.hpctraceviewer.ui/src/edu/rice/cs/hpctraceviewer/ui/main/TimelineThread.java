@@ -8,8 +8,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import edu.rice.cs.hpc.data.util.CallPath;
-import edu.rice.cs.hpc.remote.data.SpaceTimeDataControllerRemote;
+import edu.rice.cs.hpcdata.util.CallPath;
+import edu.rice.cs.hpcremote.data.SpaceTimeDataControllerRemote;
 import edu.rice.cs.hpctraceviewer.data.DataLinePainting;
 import edu.rice.cs.hpctraceviewer.data.DataPreparation;
 import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;

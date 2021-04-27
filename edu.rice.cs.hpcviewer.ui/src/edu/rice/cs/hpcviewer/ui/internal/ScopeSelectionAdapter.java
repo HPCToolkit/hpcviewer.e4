@@ -9,8 +9,8 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
 
-import edu.rice.cs.hpc.data.util.OSValidator;
-import edu.rice.cs.hpc.data.util.ScopeComparator;
+import edu.rice.cs.hpcdata.util.OSValidator;
+import edu.rice.cs.hpcdata.util.ScopeComparator;
 import edu.rice.cs.hpcviewer.ui.base.ISortContentProvider;
 
 

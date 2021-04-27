@@ -6,9 +6,8 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-
-import edu.rice.cs.hpc.data.experiment.extdata.FileDB2;
-import edu.rice.cs.hpc.data.util.Constants;
+import edu.rice.cs.hpcdata.experiment.extdata.FileDB2;
+import edu.rice.cs.hpcdata.util.Constants;
 
 
 /*****************************************

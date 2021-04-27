@@ -37,12 +37,12 @@ import org.eclipse.swt.events.SelectionEvent;
 import com.graphbuilder.math.ExpressionParseException;
 // hpcviewer
 import edu.rice.cs.hpcbase.map.UserInputHistory;
-import edu.rice.cs.hpc.data.experiment.metric.*;
-import edu.rice.cs.hpc.data.experiment.metric.BaseMetric.AnnotationType;
-import edu.rice.cs.hpc.data.experiment.metric.format.IMetricValueFormat;
-import edu.rice.cs.hpc.data.experiment.metric.format.MetricValuePredefinedFormat;
-import edu.rice.cs.hpc.data.experiment.scope.RootScope;
-import edu.rice.cs.hpc.data.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.experiment.metric.*;
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
+import edu.rice.cs.hpcdata.experiment.metric.format.IMetricValueFormat;
+import edu.rice.cs.hpcdata.experiment.metric.format.MetricValuePredefinedFormat;
+import edu.rice.cs.hpcdata.experiment.scope.RootScope;
+import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 /**
  * @author la5

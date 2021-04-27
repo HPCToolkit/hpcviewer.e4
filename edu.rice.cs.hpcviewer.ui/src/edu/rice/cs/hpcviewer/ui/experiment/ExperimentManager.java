@@ -9,11 +9,11 @@ import org.eclipse.swt.widgets.Shell;
 
 import java.io.File;
 
-import edu.rice.cs.hpc.data.experiment.BaseExperiment;
-import edu.rice.cs.hpc.data.experiment.Experiment;
-import edu.rice.cs.hpc.data.util.Constants;
-import edu.rice.cs.hpc.data.util.Util.FileXMLFilter;
 import edu.rice.cs.hpcbase.map.ProcedureAliasMap;
+import edu.rice.cs.hpcdata.experiment.BaseExperiment;
+import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.util.Constants;
+import edu.rice.cs.hpcdata.util.Util.FileXMLFilter;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 
 

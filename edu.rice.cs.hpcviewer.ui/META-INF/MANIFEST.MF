@@ -5,7 +5,7 @@ Bundle-SymbolicName: edu.rice.cs.hpcviewer.ui;singleton:=true
 Bundle-Version: 6.0.0.qualifier
 Bundle-Activator: edu.rice.cs.hpcviewer.ui.Activator
 Bundle-Vendor: Rice University
-Require-Bundle: edu.rice.cs.hpc.data,
+Require-Bundle: edu.rice.cs.hpcdata,
  edu.rice.cs.hpcdata.tld,
  edu.rice.cs.hpcbase,
  edu.rice.cs.hpc.filter,

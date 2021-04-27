@@ -3,8 +3,8 @@
  */
 package edu.rice.cs.hpcviewer.ui.actions;
 
-import edu.rice.cs.hpc.data.experiment.scope.CallSiteScopeCallerView;
-import edu.rice.cs.hpc.data.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.experiment.scope.CallSiteScopeCallerView;
+import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
 
 /**

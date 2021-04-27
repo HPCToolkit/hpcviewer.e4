@@ -10,7 +10,7 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 import edu.rice.cs.hpcbase.map.AliasMap;
 import edu.rice.cs.hpcbase.map.ProcedureClassData;
-import edu.rice.cs.hpc.data.util.Util;
+import edu.rice.cs.hpcdata.util.Util;
 
 
 /***

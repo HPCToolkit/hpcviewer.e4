@@ -2,7 +2,7 @@ package edu.rice.cs.hpcviewer.ui.util;
 
 import org.eclipse.swt.SWT;
 
-import edu.rice.cs.hpc.data.util.ScopeComparator;
+import edu.rice.cs.hpcdata.util.ScopeComparator;
 
 public class SortColumn 
 {

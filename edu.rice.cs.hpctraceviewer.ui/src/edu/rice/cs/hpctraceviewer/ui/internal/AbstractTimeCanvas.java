@@ -17,8 +17,8 @@ import org.eclipse.swt.internal.DPIUtil;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 
-import edu.rice.cs.hpc.data.util.OSValidator;
-import edu.rice.cs.hpc.data.util.string.StringUtil;
+import edu.rice.cs.hpcdata.util.OSValidator;
+import edu.rice.cs.hpcdata.util.string.StringUtil;
 import edu.rice.cs.hpctraceviewer.data.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.ProcedureColor;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;

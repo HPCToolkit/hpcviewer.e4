@@ -6,8 +6,9 @@ import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
-import edu.rice.cs.hpc.data.experiment.BaseExperiment;
+
 import edu.rice.cs.hpcbase.ui.IBasePart;
+import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import java.io.File;
 import java.util.List;

@@ -1,0 +1,66 @@
+<project default="hpcdata">
+	<!--
+	This ant script contains these targets;
+	    compile     - compiles java source
+	    jar         - build hpcviewer.jar (depends on compile)
+	    buildviewer - (default) does all targets
+	    
+	This script requires com.graphbuilder plugin, which can be dowloaded at
+	  github.com/hpctoolkit/hpcviewer-externals
+	
+	Please specify the property "externals" to get the directory of com.graph.builder
+	Example:
+	   $ ant -Dexternals=../hpcviewer-externals/  -buildfile hpcdata.xml
+	   
+	   this command will use ../hpcviewer-externals/ directory to find
+	   the source code of com.graph.builder.
+	-->	
+	<property name="classbase" location="edu/rice/cs/hpcdata"/>
+	<property name="externals" location="../../externals"/>
+	<property name="xerces"    location="external-jars/org.apache.xerces_2.9.0.v201005080400.jar" />
+	<property name="comm-lang" location="lib/commons-lang3-3.11.jar" />
+	<property name="comm-text" location="lib/commons-text-1.9.jar" />
+
+  	<target name="compile" >
+	    <mkdir dir="bin" />
+    	<javac srcdir="../src/edu/rice/cs/hpcdata;${externals}/graphbuilder" 
+           	   destdir="bin" >
+			<classpath>
+				<fileset dir="../external-jars" includes="**/*.jar" />
+				<fileset dir="../lib" includes="**/*.jar" />
+			</classpath>
+    	</javac>
+  	</target>
+  
+  	<target name="jar" depends="compile">
+  		<delete file="hpcdata.jar" />
+    	<jar destfile="hpcdata.jar" >
+       	     <fileset dir="bin" includes="**/*.class" />
+             <manifest>
+                <attribute name="Main-Class" value="edu.rice.cs.hpcdata.framework.PrintData"/>
+                <attribute name="Class-Path" value="${xerces}:${comm-lang}:${comm-text}"/>
+             </manifest>
+        </jar>
+  		<delete dir="bin" />
+  	</target>
+  
+	<target name="hpcdata" depends="compile,jar" >
+		<mkdir dir="lib"/>
+		<copy todir="lib">
+			<fileset dir="../external-jars" >
+				<include name="**/org.apache*.jar" />
+			</fileset>
+			<fileset dir="../lib" >
+				<include name="**/*.jar" />
+			</fileset>
+		</copy>
+		<move file="hpcdata.jar" todir="lib/" />
+		<chmod perm="ugo+x" file="hpcdata.sh" />
+		<zip destfile="hpcdata.zip">
+			<zipfileset dir="lib" prefix="lib"/>
+			<fileset dir="." includes="hpcdata.sh"/>
+			<fileset dir="../src/edu/rice/cs/hpcdata/experiment/xml/" includes="experiment.dtd" />
+		</zip>
+  		<delete dir="lib" />
+	</target>
+</project>

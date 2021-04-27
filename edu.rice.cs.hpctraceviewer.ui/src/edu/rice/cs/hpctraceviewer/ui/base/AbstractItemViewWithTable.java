@@ -35,8 +35,8 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
-import edu.rice.cs.hpc.data.util.OSValidator;
-import edu.rice.cs.hpc.data.util.string.StringUtil;
+import edu.rice.cs.hpcdata.util.OSValidator;
+import edu.rice.cs.hpcdata.util.string.StringUtil;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;

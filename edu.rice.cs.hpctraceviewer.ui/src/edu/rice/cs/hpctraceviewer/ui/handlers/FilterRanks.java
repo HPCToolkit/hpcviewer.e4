@@ -8,12 +8,12 @@ import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.swt.widgets.Shell;
 
-import edu.rice.cs.hpc.data.db.IdTuple;
-import edu.rice.cs.hpc.data.experiment.extdata.IBaseData;
-import edu.rice.cs.hpc.data.experiment.extdata.IFileDB.IdTupleOption;
-import edu.rice.cs.hpc.data.experiment.extdata.IFilteredData;
-import edu.rice.cs.hpc.filter.dialog.FilterDataItem;
-import edu.rice.cs.hpc.filter.dialog.ThreadFilterDialog;
+import edu.rice.cs.hpcdata.db.IdTuple;
+import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
+import edu.rice.cs.hpcdata.experiment.extdata.IFilteredData;
+import edu.rice.cs.hpcdata.experiment.extdata.IFileDB.IdTupleOption;
+import edu.rice.cs.hpcfilter.dialog.FilterDataItem;
+import edu.rice.cs.hpcfilter.dialog.ThreadFilterDialog;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
