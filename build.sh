@@ -97,9 +97,9 @@ repackage_windows() {
       rm -rf hpcviewer
       mkdir hpcviewer
       cd hpcviewer
-      unzip ../$input
+      unzip -q ../$input
       cd ..
-      zip -r -y $output hpcviewer/
+      zip -q -r -y $output hpcviewer/
       rm -rf hpcviewer
       
       chmod 664 $output
@@ -112,7 +112,7 @@ repackage_linux linux.gtk ppc64le
 # copy and rename windows package
 output="hpcviewer-${release}-win32.win32.x86_64.zip"
 input=edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-win32.win32.x86_64.zip
-repackage_windows$input $output 
+repackage_windows $input $output 
 
 ###################################################################
 # Special build for mac and aarch64
