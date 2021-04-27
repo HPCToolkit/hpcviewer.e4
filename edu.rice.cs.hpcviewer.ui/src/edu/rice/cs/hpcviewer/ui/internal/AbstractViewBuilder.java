@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Stack;
 
-import javax.annotation.PreDestroy;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.services.EMenuService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
@@ -21,6 +20,8 @@ import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.FontData;
@@ -68,7 +69,8 @@ import edu.rice.cs.hpcviewer.ui.resources.IconManager;
  * For further customization, the caller (or part) has to subclass this class and implement
  * {@link beginToolbar} and {@link endToolbar}
  */
-public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionChangedListener
+public abstract class AbstractViewBuilder 
+implements IViewBuilder, ISelectionChangedListener, DisposeListener
 {
 	static protected enum ViewerType {
 		/** the viewer is independent to others. No need to update the status from others. */
@@ -241,12 +243,14 @@ public abstract class AbstractViewBuilder implements IViewBuilder, ISelectionCha
                 }
         });
         treeViewer.getControl().setMenu(mgr.createContextMenu(treeViewer.getControl()));
+        
+        treeViewer.getTree().addDisposeListener(this);
 	}
 
-	
-	@PreDestroy
-	public void dispose() {
+	@Override
+	public void widgetDisposed(DisposeEvent e) {
 		treeViewer.removeSelectionChangedListener(this);
+		treeViewer.getTree().removeDisposeListener(this);
 		((ScopeMouseListener) mouseDownListener).dispose();
 		
 	}

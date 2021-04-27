@@ -144,7 +144,10 @@ public class SpaceTimeMiniCanvas extends SpaceTimeCanvas
                     gc.drawLine(i-5, 20, 20, i-5);
             }
             gc.dispose();
-            return new Pattern(getDisplay(), image);
+            Pattern pattern = new Pattern(getDisplay(), image);
+            image.dispose();
+            
+            return pattern;
     }
 
 
