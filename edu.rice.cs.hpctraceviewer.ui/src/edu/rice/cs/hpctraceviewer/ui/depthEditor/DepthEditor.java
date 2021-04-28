@@ -56,6 +56,7 @@ public class DepthEditor implements EventHandler
 		
 		final Label lblDepth = new Label(depthArea, SWT.LEFT);
 		lblDepth.setText("Depth: ");
+		lblDepth.setToolTipText("Set the call-stack depth");
 		
 		depthEditor = new Spinner(depthArea, SWT.BORDER);
 		depthEditor.setMinimum(0);
@@ -169,11 +170,11 @@ public class DepthEditor implements EventHandler
 		depthEditor.setSelection(0);
 		depthEditor.setMaximum(maxDepth);		
 		depthEditor.setVisible(true);
-		depthEditor.setToolTipText("Change the current depth.\nMax depth is " + maxDepth);
+		depthEditor.setToolTipText("Change the current call-stack depth.\nMax depth is " + maxDepth);
 		
 		setSelection(data.getDefaultDepth());
 
-		maxDepthButton.setToolTipText("Set to max depth: " + maxDepth);
+		maxDepthButton.setToolTipText("Set to max call-stack depth: " + maxDepth);
 		maxDepthButton.setData(Integer.valueOf(maxDepth));
 		
 		// has to set the enable flag to true to accept any events

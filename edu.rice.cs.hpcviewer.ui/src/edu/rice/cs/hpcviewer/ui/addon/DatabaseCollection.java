@@ -670,9 +670,9 @@ public class DatabaseCollection
 											final EPartService partService,
 											final Shell shell, 
 											final String xmlFileOrDirectory) {
-		
+		final BaseExperiment experiment;
 		try {
-			final BaseExperiment experiment = openDatabase(shell, xmlFileOrDirectory);
+			experiment = openDatabase(shell, xmlFileOrDirectory);
 			if (experiment == null) {
 				return;
 			}
@@ -708,8 +708,9 @@ public class DatabaseCollection
 
 		// store the current loaded database to history
 		// we need to ensure we only store the directory, not the xml file
+		// minor fix: only store the absolute path, not the relative one.
 		
-		String path = xmlFileOrDirectory;
+		String path = experiment.getDefaultDirectory().getAbsolutePath();
 		int index = path.lastIndexOf(Constants.DATABASE_FILENAME);
 
 		if (index>0) {

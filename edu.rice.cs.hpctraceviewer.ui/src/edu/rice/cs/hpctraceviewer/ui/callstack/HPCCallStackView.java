@@ -50,7 +50,7 @@ public class HPCCallStackView extends AbstractBaseItem
 		 ************************************************************************/
 		csViewer = new CallStackViewer(parentPart, master, this, ptlService, broker);
 
-		setToolTipText("The view to show the depth and the actual call path for the point selected by the Trace View's crosshair");
+		setToolTipText("The view to show the call-stack depth and the actual call path for the point selected by the Main View's crosshair");
 	}
 		
 		
