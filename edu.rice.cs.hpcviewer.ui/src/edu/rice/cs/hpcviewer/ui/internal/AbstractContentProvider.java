@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.eclipse.jface.viewers.ILazyTreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.TreeViewerColumn;
+import org.eclipse.swt.widgets.TreeColumn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +16,7 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.util.ScopeComparator;
 import edu.rice.cs.hpcviewer.ui.base.ISortContentProvider;
+import edu.rice.cs.hpcviewer.ui.util.SortColumn;
 
 /********************************
  * 
@@ -35,9 +36,6 @@ public abstract class AbstractContentProvider
 	 *  To avoid such re-sorting the children, we need to cache them 
 	 *  in a hash map here. It will require more memory but we save time.*/
 	final private Map<Scope, Object[]> sort_scopes;
-	
-	private TreeViewerColumn sort_column = null;
-	private int sort_direction 			 = 0;
 
     public AbstractContentProvider(TreeViewer viewer) {
     	this.viewer = viewer;
@@ -93,12 +91,18 @@ public abstract class AbstractContentProvider
 	}
 
     
-    @Override
-    public void sort_column(TreeViewerColumn sort_column, int direction) {
-    	
-    	this.sort_column    = sort_column;
-    	this.sort_direction = direction;
-    	//sort_scopes.clear();
+    /*****
+     * Sort a column
+     * @param sort_column column to be sorted
+     * @param direction SWT sort direction. Use {@code SortColumn} class to convert to SWT direction
+     * 
+     * @see SWT.UP, SWT.DOWN
+     */
+	@Override
+    public void sort_column(TreeColumn sort_column, int direction) {
+
+    	sort_column.getParent().setSortDirection(direction);		
+    	sort_column.getParent().setSortColumn(sort_column);
 
     	// perform the sort by refreshing the viewer
     	// this refresh method will force the table to recompute the children
@@ -143,7 +147,9 @@ public abstract class AbstractContentProvider
     public Object[] getSortedChildren(Scope parent) {
 		// check if this parent has already sorted children or not
     	// if yet, we look at the cache and return the children.
-
+    	if (viewer == null)
+    		return null;
+    	
     	if (parent instanceof RootScope) {
         	Object [] children = sort_scopes.get(parent);
         	if (children != null)
@@ -151,12 +157,16 @@ public abstract class AbstractContentProvider
     	}
     	
     	Object []children = getRawChildren(parent);
-
+    	TreeColumn sort_column = viewer.getTree().getSortColumn();
+    	
     	if (sort_column == null || children == null)
     		return children;
     	
-		BaseMetric metric = (BaseMetric) sort_column.getColumn().getData();
-		comparator.setMetric(metric);    		
+		BaseMetric metric  = (BaseMetric) sort_column.getData();
+    	int swt_direction  = viewer.getTree().getSortDirection();
+    	int sort_direction = SortColumn.getSortDirection(swt_direction); 
+
+    	comparator.setMetric(metric);    		
 		comparator.setDirection(sort_direction);
 		
 		Arrays.sort(children, comparator);

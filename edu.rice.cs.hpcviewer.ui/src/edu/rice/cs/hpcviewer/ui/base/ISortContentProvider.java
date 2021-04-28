@@ -1,6 +1,6 @@
 package edu.rice.cs.hpcviewer.ui.base;
 
-import org.eclipse.jface.viewers.TreeViewerColumn;
+import org.eclipse.swt.widgets.TreeColumn;
 
 
 /**********************************
@@ -17,5 +17,12 @@ import org.eclipse.jface.viewers.TreeViewerColumn;
 public interface ISortContentProvider 
 {
 
-	public void sort_column(TreeViewerColumn sort_column, int direction);
+    /*****
+     * Sort a column
+     * @param sort_column column to be sorted
+     * @param direction SWT sort direction. Use {@code SortColumn} class to convert to SWT direction
+     * 
+     * @see SWT.UP, SWT.DOWN
+     */
+	public void sort_column(TreeColumn sort_column, int direction);
 }

@@ -54,9 +54,11 @@ import edu.rice.cs.hpcviewer.ui.actions.HotCallPath;
 import edu.rice.cs.hpcviewer.ui.actions.MetricColumnHideShowAction;
 import edu.rice.cs.hpcviewer.ui.actions.ZoomAction;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
+import edu.rice.cs.hpcviewer.ui.base.ISortContentProvider;
 import edu.rice.cs.hpcviewer.ui.base.IViewBuilder;
 import edu.rice.cs.hpcviewer.ui.actions.UserDerivedMetric;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
+import edu.rice.cs.hpcviewer.ui.util.SortColumn;
 
 
 /****
@@ -259,7 +261,7 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener
 	public void setData(RootScope root) {
 		
 		// by default only the first visible metric column is sorted
-		setData(root, 1, ScopeComparator.SORT_DESCENDING);
+		setData(root, -1, ScopeComparator.SORT_DESCENDING);
 	}
 	
 	@Override
@@ -279,14 +281,11 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener
 		
 		try {
 			treeViewer.getTree().setRedraw(false);
-			boolean sorted = false;
-			
 			for(BaseMetric metric : metrics) {
 				if (root.getMetricValue(metric) == MetricValue.NONE)
 					continue;
 
-				treeViewer.addTreeColumn(metric, !sorted, sortDirection);
-				sorted = true;
+				treeViewer.addTreeColumn(metric, false, sortDirection);
 			}
 			Scope rootTable = root.createRoot();
 			
@@ -307,6 +306,20 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener
 			treeViewer.setColumnsStatus(getMetricManager(), status);
 		}
 		
+		// sort the first visible column
+		TreeColumn []columns = treeViewer.getTree().getColumns();
+		for(TreeColumn col: columns) {
+			if (col.getData() != null && col.getWidth()>0) {
+				// first the visible metric column
+
+				ISortContentProvider sortProvider = (ISortContentProvider) treeViewer.getContentProvider();					
+				 // start sorting
+				int swtDirection = SortColumn.getSWTSortDirection(sortDirection);
+				sortProvider.sort_column(col, swtDirection);
+				break;
+			}
+		}
+
 		treeViewer.initSelection(0);
 
 		// enable/disable action buttons

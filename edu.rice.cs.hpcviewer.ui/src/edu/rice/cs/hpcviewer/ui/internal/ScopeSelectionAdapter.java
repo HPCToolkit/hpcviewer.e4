@@ -10,7 +10,6 @@ import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
 
 import edu.rice.cs.hpcdata.util.OSValidator;
-import edu.rice.cs.hpcdata.util.ScopeComparator;
 import edu.rice.cs.hpcviewer.ui.base.ISortContentProvider;
 
 
@@ -46,15 +45,13 @@ public class ScopeSelectionAdapter extends SelectionAdapter
 		// ----------------
 		// sorting 
 		// ----------------
-		int sort_direction  = ScopeComparator.SORT_DESCENDING;
+		int sort_direction  = SWT.DOWN;
 		TreeColumn oldColumnSort = column.getColumn().getParent().getSortColumn();
 
 		if (oldColumnSort == column.getColumn()) {
 			// we click the same column: want to change the sort direction
-			int swt_direction = column.getColumn().getParent().getSortDirection();
-
-			if (swt_direction == SWT.DOWN)
-				sort_direction = ScopeComparator.SORT_ASCENDING;
+			if (column.getColumn().getParent().getSortDirection() == SWT.DOWN)
+				sort_direction = SWT.UP;
 		}
 		setSorter(sort_direction);
 		
@@ -94,35 +91,22 @@ public class ScopeSelectionAdapter extends SelectionAdapter
 	
 	/**
 	 * Sort the column according to the direction
-	 * @param direction The value has to be either {@code SORT_DESCENDING} or {@code SORT_ASCENDING}
+	 * @param direction The value has to be either {@code SWT.UP} or {@code SWT.DOWN}
 	 */
-	public void setSorter(int direction) {
+	private void setSorter(int direction) {
 		// bug Eclipse no 199811 https://bugs.eclipse.org/bugs/show_bug.cgi?id=199811
 		// sorting can be very slow in mac OS
 		// we need to manually disable redraw before comparison and the refresh after the comparison 
 				
 		viewer.getTree().setRedraw(false);
 		
-		int swt_direction = SWT.NONE;
-		
-		if( direction == ScopeComparator.SORT_DESCENDING ) {
-			swt_direction = SWT.DOWN;
-		} else if( direction == ScopeComparator.SORT_ASCENDING ) {
-			swt_direction = SWT.UP;
-		} else {
-			// incorrect value. Let's try to be permissive instead of throwing exception
-			direction = 0;
-		}
-		
 		TreeColumn col = column.getColumn();
-		col.getParent().setSortDirection(swt_direction);		
-		col.getParent().setSortColumn(col);
 		
 		// prepare the sorting for this column with a specific direction
 		ISortContentProvider sortProvider = (ISortContentProvider) viewer.getContentProvider();
 		
 		 // start sorting
-		sortProvider.sort_column(column, direction);
+		sortProvider.sort_column(col, direction);
 
 		viewer.getTree().setRedraw(true);
 	}	

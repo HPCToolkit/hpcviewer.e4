@@ -32,7 +32,14 @@ public class ScopeComparator implements Comparator<Object>
 		this.metric = metric;
 	}
 	
+	
+	/***
+	 * Set the sort direction: {@code SORT_DESCENDING} or {@code SORT_ASCENDING}
+	 * @param direction
+	 */
 	public void setDirection(int direction) {
+		assert(direction == SORT_DESCENDING || direction == SORT_ASCENDING);
+		
 		this.direction = direction;
 	}
 

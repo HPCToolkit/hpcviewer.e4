@@ -270,14 +270,13 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
     	final String description = objMetric.getDescription();
     	
     	if (description != null)
-    		col.setToolTipText(display_name.trim() + " - " + objMetric.getDescription());
+    		col.setToolTipText(display_name.trim() + " - " + description);
     	else
     		col.setToolTipText(display_name);
     	
 		// associate the data of this column to the metric since we
 		// allowed columns to move (col position is not enough !)
     	col.setData (objMetric);
-       	
     	col.setMoveable(true);
    	
 		Layout layout = getTree().getParent().getLayout();
@@ -287,10 +286,7 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		
 		// catch event when the user sort the column on the column header
 		col.addSelectionListener(selectionAdapter);
-		
-		if(bSorted) {
-			selectionAdapter.setSorter(sortDirection);
-		}
+
 		return colMetric;
     }
     
@@ -364,10 +360,11 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 			//  and the text is cropped badly.
 			
 			TreeItem item = tree.getTopItem();
+			tree.showItem(item);
+
 			if (level >= 0 && item != null)
 				item = item.getItem(level);
 			
-			tree.showItem(item);
 			tree.select(item);
 		} catch (Exception e) {
 		}
