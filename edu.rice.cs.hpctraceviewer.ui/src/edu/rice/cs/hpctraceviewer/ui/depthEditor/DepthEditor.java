@@ -56,7 +56,8 @@ public class DepthEditor implements EventHandler
 		
 		final Label lblDepth = new Label(depthArea, SWT.LEFT);
 		lblDepth.setText("Depth: ");
-		lblDepth.setToolTipText("Set the call-stack depth");
+		lblDepth.setToolTipText("This pane shows the current selected call-stack depth. " +
+								"You can change the current depth by updating the depth number or selecting the depth in the call stack view.");
 		
 		depthEditor = new Spinner(depthArea, SWT.BORDER);
 		depthEditor.setMinimum(0);
