@@ -264,6 +264,8 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener
 	
 	@Override
 	public void setData(RootScope root, int sortColumnIndex, int sortDirection) {
+		// warning: sortColumnIndex is not used
+		
 		//long t1 = System.currentTimeMillis();
 		treeViewer.clearInput();
 		
@@ -273,19 +275,18 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener
 		
 		Experiment experiment = (Experiment) root.getExperiment();
 		
-		// add metric columns only if the metric is not empty
-		int colIndex = 0;
 		List<BaseMetric> metrics = experiment.getVisibleMetrics();
 		
 		try {
 			treeViewer.getTree().setRedraw(false);
+			boolean sorted = false;
 			
 			for(BaseMetric metric : metrics) {
 				if (root.getMetricValue(metric) == MetricValue.NONE)
 					continue;
-				
-				colIndex++;
-				treeViewer.addTreeColumn(metric, colIndex == sortColumnIndex, sortDirection);
+
+				treeViewer.addTreeColumn(metric, !sorted, sortDirection);
+				sorted = true;
 			}
 			Scope rootTable = root.createRoot();
 			
