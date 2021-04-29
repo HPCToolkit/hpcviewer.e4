@@ -2,6 +2,7 @@ package edu.rice.cs.hpcviewer.ui.handlers;
 
 import javax.inject.Inject;
 import org.eclipse.e4.ui.model.application.MApplication;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.widgets.Shell;
@@ -18,12 +19,13 @@ public class FileOpenRecentDatabase extends RecentDatabase
 
 	@Override
 	protected void execute(	MApplication application, 
+							MWindow      window,
 							EModelService modelService, 
 							EPartService partService, 
 							Shell shell,
 							String database) {
 		
-		databaseCollection.addDatabase(shell, application, partService, modelService, database);
+		databaseCollection.addDatabase(shell, application, window, partService, modelService, database);
 	}
 
 

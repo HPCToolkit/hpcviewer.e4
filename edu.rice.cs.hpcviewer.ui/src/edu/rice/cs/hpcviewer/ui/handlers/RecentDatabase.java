@@ -52,17 +52,19 @@ public abstract class RecentDatabase
 	@Execute
 	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell shell,
 						MApplication application, 
+						MWindow window,
 						MDirectMenuItem menu, 
 						EModelService modelService, 
 						EPartService partService) {
 	
 		String db = (String) menu.getTransientData().get(ID_DATA_ECP);
-		execute(application, modelService, partService, shell, db);
+		execute(application, window, modelService, partService, shell, db);
 	}
 	
 	protected abstract String getURI();
 	
 	protected abstract void execute(MApplication application, 
+								    MWindow      window,
 									EModelService modelService, 
 									EPartService partService, 
 									Shell shell, 

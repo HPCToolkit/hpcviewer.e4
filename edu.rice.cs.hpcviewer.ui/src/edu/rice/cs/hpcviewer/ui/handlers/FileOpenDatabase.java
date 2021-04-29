@@ -6,6 +6,7 @@ import javax.inject.Named;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.model.application.MApplication;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.e4.ui.workbench.IWorkbench;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
@@ -25,8 +26,9 @@ public class FileOpenDatabase
 	public void execute(IWorkbench workbench, 
 						IEclipseContext context, 
 						EPartService partService,
+						MWindow window,
 						@Named(IServiceConstants.ACTIVE_SHELL) Shell shell) {
 
-		databaseCollection.addDatabase(shell, application, partService, modelService, null);
+		databaseCollection.addDatabase(shell, application, window, partService, modelService, null);
 	}
 }

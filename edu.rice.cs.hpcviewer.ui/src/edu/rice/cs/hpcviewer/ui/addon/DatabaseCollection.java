@@ -155,15 +155,16 @@ public class DatabaseCollection
 	 */
 	public void addDatabase(Shell shell, 
 			MApplication 	application, 
+			MWindow         window,
 			EPartService    service,
 			EModelService 	modelService,
 			String          database) {
 		
-		String filename = checkExistance(application.getSelectedElement(), shell, database);
+		String filename = checkExistance(window, shell, database);
 		if (filename == null)
 			return;
 		
-		BaseExperiment exp = getExperimentObject(application.getSelectedElement(), filename);
+		BaseExperiment exp = getExperimentObject(window, filename);
 		if (exp != null) {
 			removeDatabase(application, modelService, service, exp);
 		}
