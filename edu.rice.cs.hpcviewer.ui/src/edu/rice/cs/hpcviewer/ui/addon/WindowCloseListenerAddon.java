@@ -41,6 +41,9 @@ public class WindowCloseListenerAddon
 	@Inject
 	EPartService partService;
 	
+	@Inject
+	DatabaseCollection database;
+	
 	// as the IWorkbench is not available at creation time, we need to annotate it with
 	// @Optional so it gets reinjected once it is created
 	
@@ -85,15 +88,9 @@ public class WindowCloseListenerAddon
 
 				@Override
 				public boolean close(MWindow window) {
-					boolean close = true;
-					if (window.getElementId().equals(ID_WINDOW_EXTRA)) {
-						window.setVisible(false);
-						close = false;
-					}
-					if (close) {
-						workbench.close();
-					}
-					return close;
+					database.removeWindowExperiment(window);
+					
+					return true;
 				}
 			};
 			

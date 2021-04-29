@@ -585,15 +585,35 @@ public class DatabaseCollection
 	}
 	
 	
+	/***
+	 * Store the column status of a given experiment
+	 * @param experiment
+	 * @param data
+	 */
 	public void addColumnStatus(BaseExperiment experiment, ViewerDataEvent data) {
 		mapColumnStatus.put(experiment, data);
 	}
 	
 	
+	/****
+	 * Get the column status of a given experiment
+	 * @param experiment
+	 * @return
+	 */
 	public ViewerDataEvent getColumnStatus(BaseExperiment experiment) {
 		return mapColumnStatus.get(experiment);
 	}
 	
+	
+	/****
+	 * Remove a window 
+	 * @param window
+	 * @return
+	 */
+	public List<BaseExperiment> removeWindowExperiment(MWindow window) {
+		List<BaseExperiment> list = mapWindowToExperiments.remove(window);
+		return list;
+	}
 	
 	
 	/***
