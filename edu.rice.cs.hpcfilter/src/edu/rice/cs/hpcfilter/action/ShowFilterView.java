@@ -34,7 +34,7 @@ public class ShowFilterView
 		
 		if (obj != null && (obj instanceof FilterPropertyDialog)) {
 			FilterPropertyDialog dlg = (FilterPropertyDialog) obj;
-			if (!dlg.getShell().isDisposed()) {
+			if (dlg.getShell() != null && !dlg.getShell().isDisposed()) {
 				dlg.getShell().setActive();
 				return null;
 			}
