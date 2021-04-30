@@ -1003,6 +1003,18 @@ public class BaseExperimentBuilder extends Builder
 		this.endScope();
 		experiment.setMaxDepth(max_depth);
 		experiment.setScopeMap(mapCpidToCallpath);
+		
+		// empty variables to allow garbage collection to clean up
+		
+		hashLoadModuleTable.clear();
+		hashProcedureTable.clear();
+		hashSourceFileTable.clear();
+		
+		rootStack.clear();
+		scopeStack.clear();
+		srcFileStack.clear();
+		
+		statusProcedureMap.clear();
 	}
 
 
