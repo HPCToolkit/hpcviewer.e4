@@ -919,18 +919,17 @@ public class BaseExperimentBuilder extends Builder
 		begin_S_internal( attributes,  values, false);
 	}
 	
+	
 	private void begin_S_internal(String[] attributes, String[] values, boolean isCallSite)
 	{
 		int cct_id = 0, flat_id = 0;
 		// make a new statement-range scope object
 		int firstLn = 0;
-		int lastLn  = 0;
-		int cpid = 0;
+		int cpid = -1;
 
 		for(int i=0; i<attributes.length; i++) {
 			if(attributes[i].equals(ATTRIBUTE_LINE)) {
 				firstLn = Integer.parseInt(values[i]);
-				lastLn = firstLn;
 				
 			} else if(attributes[i].equals("s"))  {
 				flat_id = Integer.parseInt(values[i]);
@@ -946,17 +945,14 @@ public class BaseExperimentBuilder extends Builder
 		}
 
 		SourceFile srcFile = this.srcFileStack.peek();
-
-
-		Scope scope;
-		if( firstLn == lastLn )
-			scope = new LineScope(rootStack.peek(), srcFile, firstLn-1, cct_id, flat_id);
-		else
-			scope = new StatementRangeScope(rootStack.peek(), srcFile, 
-					firstLn-1, lastLn-1, cct_id, flat_id);
-
-		scope.setCpid(cpid);
-		mapCpidToCallpath.put(cpid, new CallPath(scope, current_depth));
+		Scope scope = new LineScope(rootStack.peek(), srcFile, firstLn-1, cct_id, flat_id);
+		
+		// issue #68: do not record cpid for all line statement
+		// just record whenever the cpid is valid only
+		if (cpid >= 0) {
+			scope.setCpid(cpid);
+			mapCpidToCallpath.put(cpid, new CallPath(scope, current_depth));
+		}
 		
 		if (isCallSite) {
 			scopeStack.push(scope);
