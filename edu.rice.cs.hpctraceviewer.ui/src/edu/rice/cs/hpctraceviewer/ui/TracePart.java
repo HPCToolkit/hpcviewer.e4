@@ -52,6 +52,7 @@ import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
+import edu.rice.cs.hpcdata.util.OSValidator;
 
 import javax.annotation.PreDestroy;
 
@@ -342,6 +343,10 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 	
 	@Focus
 	public void onFocus() {
+		// bug on Windows: forcing the focus will cause flickering infinitly
+		if (OSValidator.isWindows())
+			return;
+		
 		if (tabFolderTopLeft != null && !tabFolderTopLeft.isDisposed())
 			tabFolderTopLeft.setFocus();
 	}

@@ -1124,6 +1124,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		if (changedBounds) {
 			ProcessTimeline []traces = new ProcessTimeline[ numLines ];
 			ProcessTimelineService ptlService = (ProcessTimelineService) context.get(Constants.CONTEXT_TIMELINE);
+
+			assert(ptlService != null);
+			
 			ptlService.setProcessTimeline(traces);
 		}
 
