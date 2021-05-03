@@ -34,7 +34,7 @@ public class MetricValueCollectionWithStorage implements IMetricValueCollection
 	 * Constructor of the class. No parameter is needed.
 	 */
 	public MetricValueCollectionWithStorage() {
-		values = new HashMap<Integer, MetricValue>();
+		values = new HashMap<Integer, MetricValue>(2);
 	}
 	
 	@Override
