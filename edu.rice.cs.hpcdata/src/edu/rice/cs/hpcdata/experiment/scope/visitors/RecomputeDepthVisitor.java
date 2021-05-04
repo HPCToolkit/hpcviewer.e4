@@ -1,6 +1,5 @@
 package edu.rice.cs.hpcdata.experiment.scope.visitors;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
@@ -29,13 +28,7 @@ public class RecomputeDepthVisitor implements IScopeVisitor
 	@Override
 	public void visit(LineScope scope, ScopeVisitType vt) {
 		if (vt == ScopeVisitType.PreVisit) {
-			int cpid = scope.getCpid();
-			if (scope.getCpid() >= 0) {
-				CallPath cp = mapCpid.get(cpid);
-				if (cp != null) {
-					cp.setMaxDepth(depth);
-				}
-			}
+			updateDepth(scope);
 		}
 	}
 
@@ -79,16 +72,13 @@ public class RecomputeDepthVisitor implements IScopeVisitor
 	public void visit(Scope scope, ScopeVisitType vt) {}
 
 	
-	/***
-	 * Check if the scope is part of trace scope. 
-	 * A trace scope is either a procedure or a call-site scope.
-	 * 
-	 * @param scope
-	 * @return boolean true if it's a trace scope
-	 */
-	public static boolean isTraceScope(Scope scope) {
-		return (scope instanceof ProcedureScope || 
-				scope instanceof CallSiteScope);
+	private void updateDepth(Scope scope) {
+		int cpid = scope.getCpid();
+		if (scope.getCpid() >= 0) {
+			CallPath cp = mapCpid.get(cpid);
+			if (cp != null) {
+				cp.setMaxDepth(depth);
+			}
+		}
 	}
-
 }
