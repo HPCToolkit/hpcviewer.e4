@@ -334,7 +334,7 @@ public abstract class BaseExperiment implements IExperiment
 
 	/*************************************************************************
 	 * Filter the cct 
-	 * <p>caller needs to call postprocess to ensure the callers tree and flat
+	 * <p>caller needs to call post-process to ensure the callers tree and flat
 	 * tree are also filtered </p>
 	 * @param filter
 	 *************************************************************************/
@@ -347,6 +347,12 @@ public abstract class BaseExperiment implements IExperiment
 		FilterScopeVisitor visitor = new FilterScopeVisitor(rootCCT, filter);
 		rootCCT.dfsVisitFilterScopeTree(visitor);
 
+		// if the tree has trace view, we should update the max depth of each leaf node
+		
+		
+		// finalize the filter: for hpcviewer, we need to prepare to create subtrees:
+		// bottom-up, flat and optionally data-centric tree
+		
 		if (rootCCT.getType() == RootScopeType.CallingContextTree) {
 			filter_finalize(rootCCT, filter);
 		}

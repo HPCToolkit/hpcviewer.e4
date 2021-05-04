@@ -119,14 +119,6 @@ public abstract class SpaceTimeDataController
 	
 	
 	/*************************************************************************
-	 * Reser user-defined colors
-	 *************************************************************************/
-	public void resetPredefinedColor()
-	{
-		colorTable.resetPredefinedColor();
-	}
-	
-	/*************************************************************************
 	 * Initialize the object
 	 * 
 	 * @param _window
