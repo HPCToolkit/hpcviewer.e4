@@ -999,18 +999,6 @@ public class BaseExperimentBuilder extends Builder
 		this.endScope();
 		experiment.setMaxDepth(max_depth);
 		experiment.setScopeMap(mapCpidToCallpath);
-		
-		// empty variables to allow garbage collection to clean up
-		
-		hashLoadModuleTable.clear();
-		hashProcedureTable.clear();
-		hashSourceFileTable.clear();
-		
-		rootStack.clear();
-		scopeStack.clear();
-		srcFileStack.clear();
-		
-		statusProcedureMap.clear();
 	}
 
 
@@ -1364,10 +1352,13 @@ public class BaseExperimentBuilder extends Builder
 	// Utilities
 	//--------------------------------------------------------------------------------
 
-	private void dispose() {
+	private void dispose() {		
+		// empty variables to allow garbage collection to clean up
 		hashLoadModuleTable.clear();
 		hashProcedureTable.clear();
 		hashSourceFileTable.clear();
+		
+		statusProcedureMap.clear();
 	}
 	
 	private String getProcedureName(String sProcIndex) {
