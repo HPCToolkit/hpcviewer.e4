@@ -497,11 +497,11 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 				  format.close();
 				  
 			  } catch (IllegalFormatException e) {
-				  sError = "Format is incorrect.";
+				  sError = "Format is incorrect: " + e.getMessage();
 				  bResult = false;
 			  } catch (FormatterClosedException e) {
 				  bResult = false;
-				  sError = "Illegal format.";
+				  sError = "Illegal format: " + e.getMessage();
 			  }
 		  }
 		  if (!bResult)
