@@ -85,6 +85,14 @@ public class CallPath
 	}
 	
 	
+	/*******************************
+	 * Update the maximum depth of this call path
+	 * @param maxDepth
+	 *******************************/
+	public void setMaxDepth(int maxDepth) {
+		this.maxDepth = maxDepth;
+	}
+	
 	@Override
 	public String toString() {
 		return maxDepth + ": " + leafScope.getName();
