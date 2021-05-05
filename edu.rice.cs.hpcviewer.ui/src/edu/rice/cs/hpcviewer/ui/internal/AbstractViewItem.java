@@ -223,7 +223,10 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 			try {
 				tree.setRedraw(false);
 				
+				// on Linux/GTK we need to preserve the sort direction of the column
+				// otherwise, it will disappear. This problem doesn't occur on other platforms
 				tree.setSortDirection(sortDirection);
+				
 				TreePath treePath = new TreePath(new Object[] {root});
 				TreePath newPath = expand(treeViewer, treePath, path);
 				if (newPath != null) {
