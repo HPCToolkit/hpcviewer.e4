@@ -352,6 +352,8 @@ public abstract class BaseExperiment implements IExperiment
 		RecomputeDepthVisitor rdVisitor = new RecomputeDepthVisitor(traceAttribute.mapCpidToCallpath);
 		rootCCT.dfsVisitScopeTree(rdVisitor);
 		
+		setMaxDepth(rdVisitor.getMaxDepth());
+		
 		// finalize the filter: for hpcviewer, we need to prepare to create subtrees:
 		// bottom-up, flat and optionally data-centric tree
 		

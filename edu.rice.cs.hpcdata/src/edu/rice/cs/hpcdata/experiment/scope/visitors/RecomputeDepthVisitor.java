@@ -24,6 +24,7 @@ import edu.rice.cs.hpcdata.util.CallPath;
 public class RecomputeDepthVisitor implements IScopeVisitor 
 {
 	private int depth = 0;
+	private int maxDepth = 0;
 	private Map<Integer, CallPath> mapCpid;
 
 	/****
@@ -38,6 +39,13 @@ public class RecomputeDepthVisitor implements IScopeVisitor
 		this.mapCpid.clear();
 	}
 	
+	/**
+	 * Retrieve the new max depth of the tree
+	 * @return int max depth
+	 */
+	public int getMaxDepth() {
+		return maxDepth;
+	}
 	
 	@Override
 	public void visit(LineScope scope, ScopeVisitType vt) {
@@ -82,6 +90,8 @@ public class RecomputeDepthVisitor implements IScopeVisitor
 	private void checkScope(Scope scope, ScopeVisitType vt) {
 		if (vt == ScopeVisitType.PreVisit) {
 			depth++;
+			maxDepth = Math.max(maxDepth, depth);
+			
 			updateDepth(scope);
 		} else if (vt == ScopeVisitType.PostVisit) {
 			depth--;

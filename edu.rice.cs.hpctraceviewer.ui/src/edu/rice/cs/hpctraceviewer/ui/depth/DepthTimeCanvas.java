@@ -288,7 +288,9 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 			
 			if (operation.hasContext(bufferContext)) {
 				// this event includes if there's a change of colors definition, so everyone needs
-				// to refresh the content
+				// to refresh the content.
+				// in case of filter, the max depth may change too, 
+				visibleDepths = stData.getMaxDepth();
 				try {
 					super.init();
 					rebuffer();
