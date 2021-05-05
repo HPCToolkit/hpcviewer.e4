@@ -201,6 +201,7 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 		//    can be time consuming
 		long t0 = System.currentTimeMillis();
 		int scopeWidth = tree.getColumn(0).getWidth();
+		int sortDirection = tree.getSortDirection();
 		
 		// 4. reset the data
 		root = createRoot(experiment);
@@ -222,6 +223,7 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 			try {
 				tree.setRedraw(false);
 				
+				tree.setSortDirection(sortDirection);
 				TreePath treePath = new TreePath(new Object[] {root});
 				TreePath newPath = expand(treeViewer, treePath, path);
 				if (newPath != null) {
