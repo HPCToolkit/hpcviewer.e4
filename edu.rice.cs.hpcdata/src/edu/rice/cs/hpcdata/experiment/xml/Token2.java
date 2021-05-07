@@ -113,8 +113,6 @@ public class Token2 {
         if(objToken == null) {
             return TokenXML.T_INVALID_ELEMENT_NAME;
         }
-        else {
-            return objToken;
-        }
+        return objToken;
     }
 }

@@ -16,12 +16,13 @@ package edu.rice.cs.hpcdata.experiment.xml;
 
 import java.io.*;
 
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
 import org.xml.sax.Attributes;
-import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
 
@@ -57,7 +58,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 public class Parser implements IParser
 {
-
+private static SAXParser saxParser = null;
 
 /** The name of the input to parse. */
 protected String inputName;
@@ -130,14 +131,15 @@ throws
 {
 	// initialize building
 	this.builder.begin();
-
 	// parse the file
 	try
 	{
-		XMLReader parser = new org.apache.xerces.parsers.SAXParser();
-		ContentHandler handler = new Handler();
-		parser.setContentHandler(handler);
-		parser.parse(new InputSource(this.lineNumberReader));
+		if (saxParser == null) {
+			SAXParserFactory spf = SAXParserFactory.newInstance();
+			spf.setValidating(false);
+			saxParser = spf.newSAXParser();
+		}
+		saxParser.parse(new InputSource(this.lineNumberReader), new Handler());
 	}
 	catch( SAXException e )
 	{
@@ -245,7 +247,7 @@ public int getLineNumber()
 			attributeValues[k] = attrs.getValue(k);
 		}
 
-		Parser.this.builder.beginElement(localName, attributeNames, attributeValues);
+		Parser.this.builder.beginElement(qualifiedName, attributeNames, attributeValues);
 	}
 
 
@@ -261,7 +263,7 @@ public int getLineNumber()
 	/** Tells the builder the current element is ending. */
 	public void endElement(String uri, String localName, String qualifiedName)
 	{
-		Parser.this.builder.endElement(localName);
+		Parser.this.builder.endElement(qualifiedName);
 	}
 	}
 }

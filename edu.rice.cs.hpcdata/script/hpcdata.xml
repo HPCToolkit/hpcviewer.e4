@@ -17,7 +17,6 @@
 	-->	
 	<property name="classbase" location="edu/rice/cs/hpcdata"/>
 	<property name="externals" location="../../externals"/>
-	<property name="xerces"    location="external-jars/org.apache.xerces_2.9.0.v201005080400.jar" />
 	<property name="comm-lang" location="lib/commons-lang3-3.11.jar" />
 	<property name="comm-text" location="lib/commons-text-1.9.jar" />
 
@@ -47,9 +46,6 @@
 	<target name="hpcdata" depends="compile,jar" >
 		<mkdir dir="lib"/>
 		<copy todir="lib">
-			<fileset dir="../external-jars" >
-				<include name="**/org.apache*.jar" />
-			</fileset>
 			<fileset dir="../lib" >
 				<include name="**/*.jar" />
 			</fileset>
