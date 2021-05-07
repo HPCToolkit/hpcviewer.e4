@@ -13,7 +13,6 @@ import edu.rice.cs.hpcdata.experiment.metric.*;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
 import edu.rice.cs.hpcdata.experiment.scope.*;
-import edu.rice.cs.hpcdata.experiment.xml.Token2.TokenXML;
 import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.IUserData;
 
@@ -74,38 +73,38 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 	 *************************************************************************/
 	public void beginElement(String element, String[] attributes, String[] values) {
 		
-		TokenXML current = Token2.map(element);
+		//TokenXML current = Token2.map(element);
 
-		switch(current)
+		switch(element)
 		{
-		case T_NAME_VALUE:
-			this.do_NV(attributes, values);
+		case "NV":
+			do_NV(attributes, values);
 			break;
 			
-		case T_METRIC_TABLE:
+		case "MetricTable":
 			break;
 			
-		case T_METRIC_DB_TABLE:
-			this.begin_MetricRawTable();
+		case "MetricDBTable":
+			begin_MetricRawTable();
 			break;
-		case T_METRIC_DB:
-			this.do_MetricRaw(attributes, values);
+		case "MetricDB":
+			do_MetricRaw(attributes, values);
 			break;
 
-		case T_METRIC_FORMULA:
-			this.do_MetricFormula(attributes, values);
+		case "MetricFormula":
+			do_MetricFormula(attributes, values);
 			break;
 			
-		case T_M:
+		case "M":
 			this.do_M     (attributes, values);	break;
 
-		case T_METRIC:
+		case "Metric":
 			this.do_METRIC(attributes, values);	break;
 			
 		default:
 			super.beginElement(element, attributes, values);
 		}
-		saveTokenContext(current);
+		//saveTokenContext(current);
 	}
 
 	/*************************************************************************
@@ -113,30 +112,30 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 	 ************************************************************************/
 	public void endElement(String element)
 	{
-		TokenXML current = Token2.map(element);
-		switch(current)
+		//TokenXML current = Token2.map(element);
+		switch(element)
 		{
 		// Data elements
-		case T_CALLPATH_PROFILE_DATA:	// @deprecated: semi old format. some data has this kind of tag
-		case T_SEC_FLAT_PROFILE_DATA:
-		case T_SEC_CALLPATH_PROFILE_DATA:
+		case "CallPathProfileData":	// @deprecated: semi old format. some data has this kind of tag
+		case "SecFlatProfileData":
+		case "SecCallPathProfileData":
 			// ok, this is ugly: we force the parent class to treat the end of this element
 			super.endElement(element);
 			break;
 			
-		case T_METRIC_TABLE:
+		case "MetricTable":
 			end_MetricTable();
 			break;
 
-		case T_METRIC_DB_TABLE:
-			this.end_MetricRawTable();
+		case "MetricDBTable":
+			end_MetricRawTable();
 			break;
 
 			// ignored elements
 			// trace database
-		case T_TRACE_DB:
-		case T_METRIC_DB:
-		case T_M:
+		case "TraceDB":
+		case "MetricDB":
+		case "M":
 			break;
 		default:
 			super.endElement(element);
@@ -607,8 +606,8 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 	 * @param values
 	 ************************************************************************/
 	private void do_NV(String[] attributes, String[] values) {
-		assert this.elemInfoState == TokenXML.T_METRIC || this.elemInfoState == TokenXML.T_METRIC_FORMULA 
-				: "Warning: unknown NV from previous token: " + elemInfoState;
+		//assert this.elemInfoState == TokenXML.T_METRIC || this.elemInfoState == TokenXML.T_METRIC_FORMULA 
+		//		: "Warning: unknown NV from previous token: " + elemInfoState;
 
 		InfoState iState = InfoState.NULL;
 		// previous state is metric. The attribute should be about periodicity or unit

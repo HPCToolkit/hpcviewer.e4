@@ -27,7 +27,6 @@ import edu.rice.cs.hpcdata.experiment.scope.StatementRangeScope;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope.ProcedureType;
 import edu.rice.cs.hpcdata.experiment.source.FileSystemSourceFile;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
-import edu.rice.cs.hpcdata.experiment.xml.Token2.TokenXML;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
 import edu.rice.cs.hpcdata.util.CallPath;
 import edu.rice.cs.hpcdata.util.Constants;
@@ -71,9 +70,6 @@ public class BaseExperimentBuilder extends Builder
 	private boolean csviewer;
 	
 	final private IUserData<String, String> userData;
-
-	protected Token2.TokenXML previousToken = TokenXML.T_INVALID_ELEMENT_NAME;
-	protected Token2.TokenXML elemInfoState = TokenXML.T_INVALID_ELEMENT_NAME;
 
 	//--------------------------------------------------------------------------------------
 	// stacks
@@ -180,103 +176,103 @@ public class BaseExperimentBuilder extends Builder
 
 	public void beginElement(String element, String[] attributes, String[] values) 
 	{
-		TokenXML current = Token2.map(element);
+		//TokenXML current = Token2.map(element);
 
-		switch(current)
+		switch(element)
 		{
-		case T_HPCTOOLKIT_EXPERIMENT:
+		case "HPCToolkitExperiment":
 			this.do_HPCTOOLKIT(attributes, values);
 			break;
-		case T_HEADER:
-			this.do_Header(attributes,values);	
+		case "Header":
+			do_Header(attributes,values);	
 			break;
-		case T_INFO:
+		case "Info":
 			this.do_Info();
 			break;
 
-		case T_SEC_CALLPATH_PROFILE:
+		case "SecCallPathProfile":
 			// we need to retrieve the profile name and the ID
-			this.csviewer = true;
-			this.do_TITLE(attributes, values);
+			csviewer = true;
+			do_TITLE(attributes, values);
 			break;
 
-		case T_SEC_FLAT_PROFILE:
-			this.csviewer = false;
-			this.do_TITLE(attributes, values);
+		case "SecFlatProfile":
+			csviewer = false;
+			do_TITLE(attributes, values);
 			break;
 
 			// PGM elements
-		case T_SEC_FLAT_PROFILE_DATA:
-		case T_CALLPATH_PROFILE_DATA:	// semi old format. some data has this kind of tag
-		case T_SEC_CALLPATH_PROFILE_DATA:
-			this.begin_SecData(attributes, values);	break;
+		case "SecFlatProfileData":
+		case "CallPathProfileData":	// semi old format. some data has this kind of tag
+		case "SecCallPathProfileData":
+			begin_SecData(attributes, values);	break;
 
 			// load module dictionary
-		case T_LOAD_MODULE:
-			this.do_LoadModule(attributes, values);
+		case "LoadModule":
+			do_LoadModule(attributes, values);
 			break;
 			// file dictionary
-		case T_FILE:
-			this.do_File(attributes, values); break;
+		case "File":
+			do_File(attributes, values); break;
 			
 			// flat profiles
-		case T_LM:
-			this.begin_LM (attributes, values);	break;
-		case T_F:
-			this.begin_F  (attributes, values);	break;
-		case T_P:
+		case "LM":
+			begin_LM (attributes, values);	break;
+		case "F":
+			begin_F  (attributes, values);	break;
+		case "P":
+		case "Pr":
+		case "PF":
+			begin_PF  (attributes, values);	break;
 			
-		case T_PR:
-		case T_PF:
-			this.begin_PF  (attributes, values);	break;
-		case T_A:
-			this.begin_A  (attributes, values);	break;
-		case T_L:
-			this.begin_L  (attributes, values);	break;
-		case T_S:
-			this.begin_S  (attributes, values);	break;
+		case "A":
+			begin_A  (attributes, values);	break;
+		case "L":
+			begin_L  (attributes, values);	break;
+		case "S":
+			begin_S  (attributes, values);	break;
 
 			// callstack elements
-		case T_C:
-			this.begin_CALLSITE(attributes,values); 
+		case "C":
+			begin_CALLSITE(attributes,values); 
 			break;
 			
-		case T_PROCEDURE:
-			this.do_Procedure(attributes, values); break;
+		case "Procedure":
+			do_Procedure(attributes, values); break;
 
 
 			// trace database
-		case T_TRACE_DB_TABLE:
+		case "TraceDBTable":
 			this.begin_TraceDBTable(attributes, values);
 			break;
 			
-		case T_TRACE_DB:
+		case "TraceDB":
 			this.do_TraceDB(attributes, values); break;
 
 		// ---------------------
 		// XML v. 3.0
 		// ---------------------
-		case T_SUMMARY_DB_FILE:
+		case "SummaryDBFile":
 			do_DBFile(BaseExperiment.Db_File_Type.DB_SUMMARY, attributes, values);
 			break;
 			
-		case T_TRACE_DB_FILE:
+		case "TraceDBFile":
 			do_DBFile(BaseExperiment.Db_File_Type.DB_TRACE, attributes, values);
 			break;
 			
-		case T_PLOT_DB_FILE:
+		case "PlotDBFile":
 			do_DBFile(BaseExperiment.Db_File_Type.DB_PLOT, attributes, values);
 			break;
 			
-		case T_THREAD_ID_FILE:
+		case "ThreadIDFile":
 			do_DBFile(BaseExperiment.Db_File_Type.DB_THREADS, attributes, values);
 			break;
 
 			// ---------------------
 			// old token from old XML
 			// ---------------------
-		case T_CSPROFILE:
-		case T_HPCVIEWER:
+		case "CSPROFILE":
+		case "HPCVIEWER":
 			throw new java.lang.RuntimeException(new OldXMLFormatException());
 			// unknown elements
 			
@@ -284,98 +280,88 @@ public class BaseExperimentBuilder extends Builder
 		// Tokens to be ignored 
 		// ---------------------
 			
-		case T_PROCEDURE_TABLE:
-		case T_FILE_TABLE:
-		case T_LOAD_MODULE_TABLE:
-		case T_SEC_HEADER:
+		case "ProcedureTable":
+		case "FileTable":
+		case "LoadModuleTable":
+		case "SecHeader":
 			break;
 		
 		default:
 			break;
 		} 
-		saveTokenContext(current);
 	}
 
 
-	/****
-	 * all children requires to register the current context
-	 * 
-	 * @param current
-	 */
-	protected void saveTokenContext(TokenXML current) 
-	{
-		// laks: preserve the state of the current token for the next parsing state
-		this.previousToken = current;
-	}
 	
 	/*************************************************************************
 	 *	Takes notice of the ending of an element.
 	 ************************************************************************/
 	public void endElement(String element)
 	{
-		TokenXML current = Token2.map(element);
-		switch(current)
+		//TokenXML current = Token2.map(element);
+		switch(element)
 		{
-		case T_SEC_FLAT_PROFILE:
-		case T_SEC_CALLPATH_PROFILE:
+		case "SecFlatProfile":
+		case "SecCallPathProfile":
 			break;
 
 		// Data elements
-		case T_CALLPATH_PROFILE_DATA:	// @deprecated: semi old format. some data has this kind of tag
-		case T_SEC_FLAT_PROFILE_DATA:
-		case T_SEC_CALLPATH_PROFILE_DATA:
-			this.end_PGM();
+		case "CallPathProfileData":	// @deprecated: semi old format. some data has this kind of tag
+		case "SecFlatProfileData":
+		case "SecCallPathProfileData":
+			end_PGM();
 			break;
-		case T_LM:
-			this.end_LM();
-			break;
-			
-		case T_P:
-		case T_PR:
-		case T_PF:
-			this.end_PF();
-			break;
-		case T_A:
-			this.end_A();
-			break;
-		case T_L:
-			this.end_L();
-			break;
-		case T_S:
-			this.end_S();
-			break;
-		case T_C: 		
-			this.end_CALLSITE();
-			break;
-		case T_F:
-			this.end_F();
+		case "LM":
+			end_LM();
 			break;
 			
-		case T_TRACE_DB_TABLE:
-			this.end_TraceDBTable();
+		case "P":
+		case "Pr":
+		case "PF":
+			end_PF();
+			break;
+		case "A":
+			end_A();
+			break;
+		case "L":
+			end_L();
+			break;
+		case "S":
+			end_S();
+			break;
+		case "C": 		
+			end_CALLSITE();
+			break;
+		case "F":
+			end_F();
 			break;
 			
-		case T_PROCEDURE_TABLE:
+		case "TraceDBTable":
+			end_TraceDBTable();
 			break;
 
 
 			// ignored elements
+			/*
+		case "ProcedureTable":
+			break;
 			// trace database
-		case T_TRACE_DB:
-		case T_METRIC_DB:
-		case T_M:
-		case T_HPCTOOLKIT_EXPERIMENT:
-		case T_NAME_VALUE:
-		case T_HEADER:
-		case T_INFO:
-		case T_METRIC_FORMULA:
-		case T_SEC_HEADER:
-		case T_METRIC:
-		case T_PROCEDURE:
-		case T_FILE_TABLE:
-		case T_FILE:
-		case T_LOAD_MODULE_TABLE:
-		case T_LOAD_MODULE:
+		case "TraceDB":
+		case "MetricDB":
+		case "M":
+		case "HPCToolkitExperiment":
+		case "NV":
+		case "Header":
+		case "Info":
+		case "MetricFormula":
+		case "SecHeader":
+		case "Metric":
+		case "Procedure":
+		case "FileTable":
+		case "File":
+		case "LoadModuleTable":
+		case "LoadModule":
+			 */
 		default:
 			break;
 		} 
@@ -420,7 +406,7 @@ public class BaseExperimentBuilder extends Builder
 	}
 
 	private void do_Info() {
-		this.elemInfoState = this.previousToken;
+		//this.elemInfoState = this.previousToken;
 	}
 
 	/*************************************************************************
