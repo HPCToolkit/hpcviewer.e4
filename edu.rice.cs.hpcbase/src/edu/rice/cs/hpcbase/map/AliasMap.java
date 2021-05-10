@@ -32,7 +32,7 @@ public abstract class AliasMap<K,V> implements IUserData<K, V>
 		
 	/*
 	 * (non-Javadoc)
-	 * @see edu.rice.cs.hpc.data.util.IUserData#get(java.lang.String)
+	 * @see edu.rice.cs.hpcdata.util.IUserData#get(java.lang.String)
 	 */
 	public V get(K key) {
 		
@@ -42,7 +42,7 @@ public abstract class AliasMap<K,V> implements IUserData<K, V>
 
 	/*
 	 * (non-Javadoc)
-	 * @see edu.rice.cs.hpc.data.util.IUserData#put(java.lang.String, java.lang.String)
+	 * @see edu.rice.cs.hpcdata.util.IUserData#put(java.lang.String, java.lang.String)
 	 */
 	public void put(K key, V val) {
 		

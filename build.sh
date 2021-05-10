@@ -137,7 +137,8 @@ repackage_mac $input $output
 
 # special treatement for mac OS
 OS=`uname`
-if [[ "$OS" == "Darwin" ]]; then 
+if [[ "$OS" == "Darwin" && "$1" == "-n" ]]; then 
+        echo "Notarize $output ..."
 	macos/notarize.sh $output
 	
 fi
