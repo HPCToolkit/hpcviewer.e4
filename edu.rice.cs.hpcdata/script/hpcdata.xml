@@ -22,10 +22,10 @@
 
   	<target name="compile" >
 	    <mkdir dir="bin" />
-    	<javac srcdir="../src/edu/rice/cs/hpcdata;${externals}/graphbuilder" 
+	    <javac includeantruntime="false"  
+		   srcdir="../src/edu/rice/cs/hpcdata;${externals}/graphbuilder" 
            	   destdir="bin" >
 			<classpath>
-				<fileset dir="../external-jars" includes="**/*.jar" />
 				<fileset dir="../lib" includes="**/*.jar" />
 			</classpath>
     	</javac>

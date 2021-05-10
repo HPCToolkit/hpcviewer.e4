@@ -260,6 +260,7 @@ public class DataTrace extends DataCommon
 		return lbBuffer.getInt(position);
 	}
 	
+	@Deprecated
 	/**
 	 * @deprecated method to get a 8 byte double from an absolute position
 	 * This method is to be replaced with {@link getSampledData}
