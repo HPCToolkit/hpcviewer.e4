@@ -17,7 +17,6 @@ import edu.rice.cs.hpcdata.util.Util;
  * 	output the result into XML file
  * Otherwise, output error message.
  * No user interaction is needed in this light version
- * @author laksonoadhianto
  *
  ******************************************************************************************/
 public class Application {

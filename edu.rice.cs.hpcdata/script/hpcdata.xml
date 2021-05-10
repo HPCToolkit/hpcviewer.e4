@@ -37,7 +37,7 @@
        	     <fileset dir="bin" includes="**/*.class" />
              <manifest>
                 <attribute name="Main-Class" value="edu.rice.cs.hpcdata.framework.PrintData"/>
-                <attribute name="Class-Path" value="${xerces}:${comm-lang}:${comm-text}"/>
+                <attribute name="Class-Path" value="${comm-lang}:${comm-text}"/>
              </manifest>
         </jar>
   		<delete dir="bin" />

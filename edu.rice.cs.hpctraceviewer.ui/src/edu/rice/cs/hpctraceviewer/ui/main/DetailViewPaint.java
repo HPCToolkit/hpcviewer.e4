@@ -134,7 +134,6 @@ public class DetailViewPaint extends BaseViewPaint
 
 		// put the image onto the canvas
 		masterGC.drawImage(imgDetailLine.image, 0, yposition);
-		
 		origGC.drawImage(imgDetailLine.imageOriginal, 0, imgDetailLine.position);
 
 		imgDetailLine.image.dispose();
