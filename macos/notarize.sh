@@ -85,11 +85,7 @@ unzip -q ../$FILE
 # Notarize the viewer
 #
 ##############################
-#result=`gon $BASE_CONFIG`
-if [  "$result" -ne  "0"  ]; then
-     echo "Cannot notarize the app. Please check on Apple notarization server"
-     exit 1
-fi
+gon $BASE_CONFIG
 
 ##############################
 # 
