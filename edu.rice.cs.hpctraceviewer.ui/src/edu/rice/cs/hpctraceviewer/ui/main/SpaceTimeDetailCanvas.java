@@ -1384,6 +1384,16 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		if (obj == null) return;
 		
 		TraceEventData eventData = (TraceEventData) obj;
+		
+		// Need to handle color mapping event here regardless the database
+		// the change should be persistent and across panes and windows
+		if (event.getTopic().equals(IConstants.TOPIC_COLOR_MAPPING)) {
+			// reset the color table mapping
+			stData.getColorTable().resetPredefinedColor();
+			
+			refresh(false);
+			return;
+		}
 		if (eventData.source == this || eventData.data != this.stData)
 			return;
 		
@@ -1393,9 +1403,6 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 			
 		} else if (event.getTopic().equals(IConstants.TOPIC_FILTER_RANKS)) {
 			refresh(true);
-			
-		} else if (event.getTopic().equals(IConstants.TOPIC_COLOR_MAPPING)) {
-			refresh(false);
 		}
 	}
 
