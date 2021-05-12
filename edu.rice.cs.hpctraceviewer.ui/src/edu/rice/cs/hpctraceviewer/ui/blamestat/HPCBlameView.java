@@ -7,8 +7,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.graphics.RGB;
-import edu.rice.cs.hpctraceviewer.data.ColorTable;
-import edu.rice.cs.hpctraceviewer.data.ProcedureColor;
+
+import edu.rice.cs.hpctraceviewer.data.color.ColorTable;
+import edu.rice.cs.hpctraceviewer.data.color.ProcedureColor;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
 import edu.rice.cs.hpctraceviewer.ui.base.AbstractItemViewWithTable;
 import edu.rice.cs.hpctraceviewer.ui.base.StatisticItem;

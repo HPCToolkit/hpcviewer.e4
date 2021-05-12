@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctraceviewer.data;
+package edu.rice.cs.hpctraceviewer.data.color;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +36,7 @@ public class ColorTable
 	/** user defined color */
 	private ProcedureClassMap classMap;
 	
-	final private Random random_generator;
+	private IColorGenerator colorGenerator;
 
 	// data members
 	
@@ -53,8 +53,7 @@ public class ColorTable
 	{
 		display = Display.getCurrent();
 		
-		// rework the color assignment to use a single random number stream
-		random_generator = new Random((long)RANDOM_SEED);
+		colorGenerator = new RandomColorGenerator();
 
 		// initialize the procedure-color map (user-defined color)
 		classMap = new ProcedureClassMap(display);
@@ -177,7 +176,7 @@ public class ColorTable
 	 * 
 	 * @param procName the name of the procedure
 	 * 
-	 * @return ColorImagePair
+	 * @return Color
 	 ************************************************************************/
 	private Color createColorIfAbsent(String procName)
 	{
@@ -190,15 +189,13 @@ public class ColorTable
 		if (data != null) {
 			name = data.getKey();
 			color = predefinedColorMatcher.
-					computeIfAbsent(name, val -> createColor(data.getValue().getRGB()));
-		} else {
-			
+					computeIfAbsent(name, val -> createColor(data.getValue().getRGB() )
+								    );
+		} else {			
 			// 2. check if it match the existing color
 			color = colorMatcher.computeIfAbsent(procName, 
-										 	     val -> createColor(
-												 	      createRandomRGB( COLOR_MIN, 
-												 	    		  		   COLOR_MAX, 
-												 	    		  		   random_generator)));
+										 	     val -> createColor( colorGenerator.createColor(procName) ) 
+										 	     );
 		}
 		  
 		// store in a hashmap the pair of RGB hashcode and procedure name
@@ -251,7 +248,7 @@ public class ColorTable
 			return new Color(display, rgb);
 
 		} catch (Exception e) {
-			// Windows only: in case we don't have enough GDI objects to ve
+			// Windows only: in case we don't have enough GDI objects to be
 			// created, we should notify users. They can then set the max
 			// GGI object to higher number
 			String msg = "The number of colors exceeds the quota from the OS.\n" +

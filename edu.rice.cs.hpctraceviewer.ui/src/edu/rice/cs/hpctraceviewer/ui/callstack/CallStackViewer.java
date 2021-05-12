@@ -45,7 +45,7 @@ import edu.rice.cs.hpctraceviewer.ui.operation.AbstractTraceOperation;
 import edu.rice.cs.hpctraceviewer.ui.preferences.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
-import edu.rice.cs.hpctraceviewer.data.ColorTable;
+import edu.rice.cs.hpctraceviewer.data.color.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
 import edu.rice.cs.hpctraceviewer.data.Position;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;

@@ -5,7 +5,7 @@ import java.util.TreeMap;
 
 import org.eclipse.swt.graphics.PaletteData;
 
-import edu.rice.cs.hpctraceviewer.data.ColorTable;
+import edu.rice.cs.hpctraceviewer.data.color.ColorTable;
 
 public class SummaryData 
 {
