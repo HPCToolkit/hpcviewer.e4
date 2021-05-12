@@ -5,7 +5,7 @@ import java.util.HashMap;
 
 import org.eclipse.core.runtime.Assert;
 
-import edu.rice.cs.hpcdata.db.version3.DataRecord;
+import edu.rice.cs.hpcdata.db.version4.DataRecord;
 import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
 import edu.rice.cs.hpcdata.util.CallPath;
 import edu.rice.cs.hpctraceviewer.data.ITraceDataCollector;

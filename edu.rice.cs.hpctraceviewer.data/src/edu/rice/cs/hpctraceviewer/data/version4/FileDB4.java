@@ -1,12 +1,12 @@
-package edu.rice.cs.hpctraceviewer.data.version3;
+package edu.rice.cs.hpctraceviewer.data.version4;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
-import edu.rice.cs.hpcdata.db.version3.DataSummary;
-import edu.rice.cs.hpcdata.db.version3.DataTrace;
+import edu.rice.cs.hpcdata.db.version4.DataSummary;
+import edu.rice.cs.hpcdata.db.version4.DataTrace;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.extdata.FileDB2;
 import edu.rice.cs.hpcdata.experiment.extdata.IFileDB;
@@ -20,7 +20,7 @@ import edu.rice.cs.hpcdata.experiment.extdata.IFileDB;
  * See {@link FileDB2} for accessing the older format
  *
  ********************************************************************/
-public class FileDB3 implements IFileDB 
+public class FileDB4 implements IFileDB 
 {
 	private DataTrace dataTrace;
 	private DataSummary dataSummary;

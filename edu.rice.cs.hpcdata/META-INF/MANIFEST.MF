@@ -5,7 +5,7 @@ Bundle-SymbolicName: edu.rice.cs.hpcdata
 Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Rice University
 Export-Package: edu.rice.cs.hpcdata.db,
- edu.rice.cs.hpcdata.db.version3,
+ edu.rice.cs.hpcdata.db.version4,
  edu.rice.cs.hpcdata.experiment,
  edu.rice.cs.hpcdata.experiment.extdata,
  edu.rice.cs.hpcdata.experiment.merge,

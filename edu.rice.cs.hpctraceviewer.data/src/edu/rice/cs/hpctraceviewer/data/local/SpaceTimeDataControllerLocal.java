@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 
-import edu.rice.cs.hpcdata.db.version3.DataSummary;
+import edu.rice.cs.hpcdata.db.version4.DataSummary;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 import edu.rice.cs.hpcdata.experiment.extdata.IFileDB;
@@ -20,7 +20,7 @@ import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TraceDataByRank;
 import edu.rice.cs.hpctraceviewer.data.version2.BaseData;
 import edu.rice.cs.hpctraceviewer.data.version2.FilteredBaseData;
-import edu.rice.cs.hpctraceviewer.data.version3.FileDB3;
+import edu.rice.cs.hpctraceviewer.data.version4.FileDB4;
 
 
 /**
@@ -109,7 +109,7 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 			RootScope root = (RootScope) exp.getRootScope(RootScopeType.CallingContextTree);
 			DataSummary ds = root.getDataSummary();
 			
-			((FileDB3)fileDB).open(ds, databaseDirectory);
+			((FileDB4)fileDB).open(ds, databaseDirectory);
 		}
 		this.fileDB = fileDB;
 		dataTrace 	= new BaseData(fileDB);

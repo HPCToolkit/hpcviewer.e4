@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.List;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
-import edu.rice.cs.hpcdata.db.version3.DataSummary;
+import edu.rice.cs.hpcdata.db.version4.DataSummary;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment.Db_File_Type;
 import edu.rice.cs.hpcdata.experiment.extdata.AbstractThreadDataCollection;
@@ -19,7 +19,7 @@ import edu.rice.cs.hpcdata.tld.plot.DataPlotEntry;
  * Class to manage a collection of metric plot data for database v.3
  *
  *******************************************************************/
-public class ThreadDataCollection3 extends AbstractThreadDataCollection
+public class ThreadDataCollection4 extends AbstractThreadDataCollection
 {
 	private DataPlot    data_plot;
 	private DataSummary data_summary;
