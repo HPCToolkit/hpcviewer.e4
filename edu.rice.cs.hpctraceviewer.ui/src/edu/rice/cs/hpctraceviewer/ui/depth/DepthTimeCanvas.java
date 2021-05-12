@@ -27,10 +27,10 @@ import edu.rice.cs.hpctraceviewer.ui.operation.AbstractTraceOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.PositionOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.ZoomOperation;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
+import edu.rice.cs.hpctraceviewer.data.color.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.Frame;
 import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
 import edu.rice.cs.hpctraceviewer.data.Position;
-import edu.rice.cs.hpctraceviewer.data.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
 
 

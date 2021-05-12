@@ -2,8 +2,8 @@ package edu.rice.cs.hpctraceviewer.ui.base;
 
 import org.eclipse.swt.graphics.ImageData;
 
-import edu.rice.cs.hpctraceviewer.data.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
+import edu.rice.cs.hpctraceviewer.data.color.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 
 

@@ -1,6 +1,7 @@
 package edu.rice.cs.hpctraceviewer.data;
 
 
+import edu.rice.cs.hpctraceviewer.data.color.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 
 /***

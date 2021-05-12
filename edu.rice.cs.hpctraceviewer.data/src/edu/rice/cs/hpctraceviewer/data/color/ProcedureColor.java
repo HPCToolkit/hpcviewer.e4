@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctraceviewer.data;
+package edu.rice.cs.hpctraceviewer.data.color;
 
 import java.util.AbstractCollection;
 import java.util.Iterator;

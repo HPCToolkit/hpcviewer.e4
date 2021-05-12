@@ -19,8 +19,8 @@ import org.eclipse.swt.widgets.Event;
 
 import edu.rice.cs.hpcdata.util.OSValidator;
 import edu.rice.cs.hpcdata.util.string.StringUtil;
-import edu.rice.cs.hpctraceviewer.data.ColorTable;
-import edu.rice.cs.hpctraceviewer.data.ProcedureColor;
+import edu.rice.cs.hpctraceviewer.data.color.ColorTable;
+import edu.rice.cs.hpctraceviewer.data.color.ProcedureColor;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
 import edu.rice.cs.hpctraceviewer.ui.base.ITraceCanvas;
 import edu.rice.cs.hpctraceviewer.ui.preferences.TracePreferenceConstants;
