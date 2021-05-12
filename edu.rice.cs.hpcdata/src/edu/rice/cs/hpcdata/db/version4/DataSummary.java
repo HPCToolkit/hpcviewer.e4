@@ -1,5 +1,5 @@
 
-package edu.rice.cs.hpcdata.db.version3;
+package edu.rice.cs.hpcdata.db.version4;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.RandomAccessFile;
@@ -73,7 +73,7 @@ public class DataSummary extends DataCommon
 	/***
 	 *  <p>Opening for data summary metric file</p>
 	 * (non-Javadoc)
-	 * @see edu.rice.cs.hpcdata.db.version3.DataCommon#open(java.lang.String)
+	 * @see edu.rice.cs.hpcdata.db.version4.DataCommon#open(java.lang.String)
 	 */
 	@Override
 	public void open(final String filename)

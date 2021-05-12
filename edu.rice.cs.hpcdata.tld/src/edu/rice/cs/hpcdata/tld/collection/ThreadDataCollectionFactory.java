@@ -44,9 +44,9 @@ public final class ThreadDataCollectionFactory
 			break;
 			
 		case Constants.EXPERIMENT_SPARSE_VERSION:
-			data_file = new ThreadDataCollection3();
+			data_file = new ThreadDataCollection4();
 			String directory = experiment.getDefaultDirectory().getAbsolutePath();
-			((ThreadDataCollection3)data_file).open(root, directory);
+			((ThreadDataCollection4)data_file).open(root, directory);
 			break;
 		default:
 			data_file = null;
