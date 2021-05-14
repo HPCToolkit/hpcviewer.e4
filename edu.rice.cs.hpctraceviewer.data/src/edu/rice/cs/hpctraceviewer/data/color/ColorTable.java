@@ -3,7 +3,6 @@ package edu.rice.cs.hpctraceviewer.data.color;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -16,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcbase.map.ProcedureClassData;
+import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
 import edu.rice.cs.hpctraceviewer.data.util.ProcedureClassMap;
 
@@ -23,16 +23,8 @@ import edu.rice.cs.hpctraceviewer.data.util.ProcedureClassMap;
  * A data structure designed to hold all the name-color pairs
  * needed for the actual drawing.
  **************************************************************/
-public class ColorTable 
+public class ColorTable
 {	
-	static private final int COLOR_MIN = 16;
-	static private final int COLOR_MAX = 200 - COLOR_MIN;
-	static private final long RANDOM_SEED = 612543231L;
-	
-	
-	/**The display this ColorTable uses to generate the random colors.*/
-	final private Display display;
-
 	/** user defined color */
 	private ProcedureClassMap classMap;
 	
@@ -46,50 +38,45 @@ public class ColorTable
 	private Map<Integer, ProcedureColor>  mapRGBtoProcedure;
 
 	
-	/**
+	/**********************************************************************
 	 * Constructor: Creates a new ColorTable with Display _display.
-	 * */
+	 **********************************************************************/
 	public ColorTable()
 	{
-		display = Display.getCurrent();
-		
-		colorGenerator = new RandomColorGenerator();
-
 		// initialize the procedure-color map (user-defined color)
+		Display display = Display.getCurrent();
 		classMap = new ProcedureClassMap(display);
 		
 		colorMatcher 		   = new ConcurrentHashMap<String, Color>();		
 		predefinedColorMatcher = new ConcurrentHashMap<String, Color>();
 		mapRGBtoProcedure	   = new HashMap<Integer, ProcedureColor>();
 		
+		setColorGenerator();
 		initializeWhiteColor();
 		resetPredefinedColor();
 	}
 	
-	/**
+	/**********************************************************************
 	 * Dispose the allocated resources
-	 */
+	 **********************************************************************/
 	public void dispose() {
 		for (Color col: colorMatcher.values()) {
 			if (col != null) col.dispose();
 		}
 		
-		colorMatcher.clear();
-		
 		for (Color col: predefinedColorMatcher.values()) {
 			if (col != null) col.dispose();
 		}
+		colorMatcher.clear();
 		predefinedColorMatcher.clear();
-		
-		classMap.dispose();
-		
 		mapRGBtoProcedure.clear();
+		classMap.dispose();
 	}
 	
 	
-	/***
+	/***********************************************************************
 	 * Reset user defined color into the default one.
-	 */
+	 ***********************************************************************/
 	public void resetPredefinedColor() 
 	{
 		for (Color col: predefinedColorMatcher.values()) {
@@ -139,11 +126,11 @@ public class ColorTable
 		}
 	}
 	
-	/**
+	/**********************************************************************
 	 * Returns the color in the colorMatcher that corresponds to the name's class
 	 * @param name
 	 * @return
-	 */
+	 **********************************************************************/
 	public Color getColor(String name)
 	{		
 		return  createColorIfAbsent(name);
@@ -165,6 +152,21 @@ public class ColorTable
 	}
 	
 	
+	/************************************************************************
+	 * Reset the policy to generate color.
+	 * The policy is defined in the viewer's preference. 
+	 * Can be either name-based color (default) or random.
+	 ************************************************************************/
+	public void setColorGenerator() {
+		// pick the color generator policy
+		if (TracePreferenceManager.useNameBasedColorPolicy()) {
+			colorGenerator = new NameBasedColorGenerator();
+		} else {
+			colorGenerator = new RandomColorGenerator();
+		}
+	}
+	
+
 	/************************************************************************
 	 * Main method to generate color if necessary <br/>
 	 * This creates a pair of color and image based on the procedure name.
@@ -244,6 +246,8 @@ public class ColorTable
 	 ************************************************************************/
 	private Color createColor(RGB rgb) 
 	{
+		Display display = Display.getCurrent();
+		
 		try {
 			return new Color(display, rgb);
 
@@ -264,24 +268,6 @@ public class ColorTable
 			throw new RuntimeException(msg);
 		}
 	}
-	
-	/***********************************************************************
-	 * retrieve color for a procedure. If the procedure has been assigned to
-	 * 	a color, we'll return the allocated color, otherwise, create a new one
-	 * 	randomly.
-	 * 
-	 * @param colorMin minimum integer value
-	 * @param colorMax maximum integer value
-	 * @param r random integer
-	 * 
-	 * @return RGB
-	 ***********************************************************************/
-	private RGB createRandomRGB(int colorMin, int colorMax, Random r ) {
-		
-		return new RGB(	colorMin + r.nextInt(colorMax), 
-				colorMin + r.nextInt(colorMax), 
-				colorMin + r.nextInt(colorMax));
-	}
 
 	
 	/************************************************************************
@@ -293,6 +279,7 @@ public class ColorTable
 	private void initializeWhiteColor() {
 		// create our own white color so we can dispose later, instead of disposing
 		//	Eclipse's white color
+		Display display = Display.getCurrent();
 		final RGB rgb_white = display.getSystemColor(SWT.COLOR_WHITE).getRGB();
 		final Color col_white = new Color(display, rgb_white);
 		
@@ -302,7 +289,7 @@ public class ColorTable
 		mapRGBtoProcedure.put(rgb_white.hashCode(), pc);
 	}
 	
-	
+		
 	@Override
 	public String toString() {
 		return "pc: " + predefinedColorMatcher.size() + ", cm: " + colorMatcher.size() + ", mr: " + mapRGBtoProcedure.size();

@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctraceviewer.ui.preferences;
+package edu.rice.cs.hpctraceviewer.config;
 
 import java.io.IOException;
 
@@ -7,21 +7,21 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.rice.cs.hpcdata.util.ThreadManager;
 import edu.rice.cs.hpcsetting.preferences.AbstractPage;
-import edu.rice.cs.hpctraceviewer.ui.util.Utility;
 
 /********************************************************
  * 
- * Main preference page for hpctraceviewer
+ * Main preference page for trace view part
  *
  ********************************************************/
 public class TracePreferencePage extends AbstractPage 
@@ -30,6 +30,8 @@ public class TracePreferencePage extends AbstractPage
 	private final static int TOOLTIP_DELAY_INCREMENT_MS = 1000;
 	
 	private Button []btnRenders;
+	private Button []colorPolicies;
+	
 	private Spinner tooltipDelay;
 	private Spinner spMaxThreads;
 
@@ -46,10 +48,21 @@ public class TracePreferencePage extends AbstractPage
 
 	@Override
 	public void apply() {
-		if (btnRenders == null || tooltipDelay == null) 
+		if (colorPolicies == null || btnRenders == null || tooltipDelay == null) 
 			return;
 		
-		PreferenceStore pref = TracePreferenceManager.INSTANCE.getPreferenceStore();		
+		PreferenceStore pref = TracePreferenceManager.INSTANCE.getPreferenceStore();	
+		
+		int colorOld = pref.getInt(TracePreferenceConstants.PREF_COLOR_OPTION);		
+		for (int i=0; i<colorPolicies.length; i++) {
+			Button btn = colorPolicies[i];
+			boolean isSelected = btn.getSelection();
+			if (isSelected && (i != colorOld)) {
+				pref.setValue(TracePreferenceConstants.PREF_COLOR_OPTION, i);
+				break;
+			}
+		}
+		
 		int renderOld = pref.getInt(TracePreferenceConstants.PREF_RENDER_OPTION);
 		
 		for (int i=0; i<btnRenders.length; i++) {
@@ -81,17 +94,29 @@ public class TracePreferencePage extends AbstractPage
 		TracePreferenceManager.INSTANCE.setDefaults();
 
 		// ------------------------------------------------------------------------
+		// Color generator
+		// ------------------------------------------------------------------------
+
+		Composite groupColor = createGroupControl(parent, "Color policy", false);
+		groupColor.setToolTipText("Change the policy to map the procedure's name to a color.\n" +
+								  "The change will take effect on the next session");
+
+		colorPolicies = createRadioButtonControl(groupColor, TracePreferenceConstants.colorOptions);
+		Label lbl = new Label(groupColor, SWT.NONE);
+		lbl.setText("The change will take effect on the next session");
+		
+		PreferenceStore pref = TracePreferenceManager.INSTANCE.getPreferenceStore();		
+		int colorSelected    = pref.getInt(TracePreferenceConstants.PREF_COLOR_OPTION);
+		colorPolicies[colorSelected].setSelection(true);
+		
+		// ------------------------------------------------------------------------
 		// Rendering mode
 		// ------------------------------------------------------------------------
 		
 		Group groupFont = createGroupControl(parent, "Rendering mode", false);
-		groupFont.setLayout(new GridLayout(2, false));
-
 		btnRenders = createRadioButtonControl(groupFont, TracePreferenceConstants.renderingOptions);
 		
-		PreferenceStore pref = TracePreferenceManager.INSTANCE.getPreferenceStore();		
 		int renderOld = pref.getInt(TracePreferenceConstants.PREF_RENDER_OPTION);
-
 		btnRenders[renderOld].setSelection(true);
 
 		// ------------------------------------------------------------------------
@@ -105,10 +130,10 @@ public class TracePreferencePage extends AbstractPage
 		int maxThreads = pref.getInt(TracePreferenceConstants.PREF_MAX_THREADS);
 		
 		createLabelControl(groupThreads, "Max number of painting threads: ");
-		spMaxThreads = createSpinnerControl(groupThreads, 0, Utility.getNumThreads(0));
+		spMaxThreads = createSpinnerControl(groupThreads, 0, ThreadManager.getNumThreads(0));
 		spMaxThreads.setPageIncrement(1);
 		spMaxThreads.setToolTipText("Maximum number of threads to paint the traces.");
-		spMaxThreads.setSelection( Math.min(Utility.getNumThreads(0), maxThreads) );
+		spMaxThreads.setSelection( Math.min(ThreadManager.getNumThreads(0), maxThreads) );
 
 		// ------------------------------------------------------------------------
 		// tooltip delay
@@ -144,7 +169,7 @@ public class TracePreferencePage extends AbstractPage
 		for(int i=1; i<btnRenders.length; i++) {
 			btnRenders[i].setSelection(false);
 		}
-		int maxThreads = Math.min(Utility.getNumThreads(0), TracePreferenceConstants.DEFAULT_MAX_THREADS);
+		int maxThreads = Math.min(ThreadManager.getNumThreads(0), TracePreferenceConstants.DEFAULT_MAX_THREADS);
 		spMaxThreads.setSelection(maxThreads);
 		
 		tooltipDelay.setSelection(TracePreferenceConstants.DEFAULT_TOOLTIP_DELAY);

@@ -27,6 +27,8 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
 import edu.rice.cs.hpcbase.BaseConstants;
+import edu.rice.cs.hpctraceviewer.config.TracePreferenceConstants;
+import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.local.LocalDBOpener;
@@ -43,7 +45,6 @@ import edu.rice.cs.hpctraceviewer.ui.depthEditor.DepthEditor;
 import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
 import edu.rice.cs.hpctraceviewer.ui.main.HPCTraceView;
 import edu.rice.cs.hpctraceviewer.ui.minimap.SpaceTimeMiniCanvas;
-import edu.rice.cs.hpctraceviewer.ui.preferences.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.ui.statistic.HPCStatView;
 import edu.rice.cs.hpctraceviewer.ui.summary.HPCSummaryView;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
@@ -473,8 +474,15 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 
 	@Override
 	public void propertyChange(PropertyChangeEvent event) {
-		TraceEventData data = new TraceEventData(stdc, this, stdc);
-		eventBroker.post(IConstants.TOPIC_COLOR_MAPPING, data);
+		TraceEventData data = new TraceEventData(stdc, this, stdc);			
+		
+		switch (event.getProperty()) {
+		
+		case TracePreferenceConstants.PREF_RENDER_OPTION:
+			// refresh the content
+			eventBroker.post(IConstants.TOPIC_COLOR_MAPPING, data);
+			break;
+		}
 	}
 
 	@Override
