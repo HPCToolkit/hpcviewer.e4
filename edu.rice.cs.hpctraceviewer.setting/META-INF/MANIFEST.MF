@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: hpctraceviewer.Setting
+Bundle-SymbolicName: edu.rice.cs.hpctraceviewer.config
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Rice University
+Automatic-Module-Name: edu.rice.cs.hpctraceviewer.setting
+Bundle-RequiredExecutionEnvironment: JavaSE-15
+Require-Bundle: edu.rice.cs.hpcdata,
+ edu.rice.cs.hpcsetting,
+ org.eclipse.jface,
+ org.slf4j.api
+Export-Package: edu.rice.cs.hpctraceviewer.config

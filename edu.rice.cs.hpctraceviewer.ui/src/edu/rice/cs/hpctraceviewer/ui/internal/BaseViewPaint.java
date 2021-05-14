@@ -20,11 +20,11 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
 
 import edu.rice.cs.hpcdata.util.OSValidator;
+import edu.rice.cs.hpcdata.util.ThreadManager;
+import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TimelineDataSet;
 import edu.rice.cs.hpctraceviewer.ui.base.ISpaceTimeCanvas;
-import edu.rice.cs.hpctraceviewer.ui.preferences.TracePreferenceManager;
-import edu.rice.cs.hpctraceviewer.ui.util.Utility;
 
 
 
@@ -111,7 +111,7 @@ public abstract class BaseViewPaint extends Job
 			return false;
 		
 		final int max_threads = TracePreferenceManager.getMaxThreads();
-		int num_threads = Utility.getNumThreads(max_threads);
+		int num_threads = ThreadManager.getNumThreads(max_threads);
 		
 		// -------------------------------------------------------------------
 		// initialize the painting (to be implemented by the instance)

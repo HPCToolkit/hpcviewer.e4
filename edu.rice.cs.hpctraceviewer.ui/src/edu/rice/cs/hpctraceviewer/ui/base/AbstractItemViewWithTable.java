@@ -40,9 +40,9 @@ import edu.rice.cs.hpcdata.util.string.StringUtil;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
+import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.color.ColorTable;
 import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
-import edu.rice.cs.hpctraceviewer.ui.preferences.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 
 
