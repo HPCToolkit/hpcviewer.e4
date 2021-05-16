@@ -14,7 +14,8 @@ Require-Bundle: edu.rice.cs.hpcdata,
  org.eclipse.swt,
  org.eclipse.e4.core.contexts,
  org.slf4j.api,
- org.eclipse.jface
+ org.eclipse.jface,
+ org.apache.commons.codec
 Export-Package: edu.rice.cs.hpctraceviewer.data,
  edu.rice.cs.hpctraceviewer.data.color,
  edu.rice.cs.hpctraceviewer.data.local,
