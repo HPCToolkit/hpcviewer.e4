@@ -23,9 +23,15 @@ public class NameBasedColorGenerator implements IColorGenerator
 		//int hash = procedureName.hashCode();
 		
 		// convert the lower 24 bits to color
-		int red  = (hash >> 16) & 0xFF;
-		int green = (hash >> 8) & 0xFF;
-		int blue  = hash & 0xFF;
+		// the highest 8 bits can be used by spreading into 3 parts
+		// into red (3 bits), green (3 bits) and blue (2 bits)
+		int overflow1 = (hash >> 29) & 0x7;
+		int overflow2 = (hash >> 26) & 0x7;
+		int overflow3 = (hash >> 24) & 0x3;
+		
+		int red  = (hash >> 16) & 0xFF | overflow1;
+		int green = (hash >> 8) & 0xFF | overflow2;
+		int blue  = hash & 0xFF        | overflow3; 
 		
 		RGB rgb = new RGB(red, green, blue);
 		return rgb;
