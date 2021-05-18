@@ -32,6 +32,7 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.FindReplaceDocumentAdapter;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.source.AnnotationModel;
@@ -68,7 +69,7 @@ public class Editor extends CTabItem implements IUpperPart, IPropertyChangeListe
 	
 	private SourceViewer textViewer;
 	private Object input;
-	private int    searchOffset;
+	private int    searchOffsetStart, searchOffsetEnd;
 	private FindReplaceDocumentAdapter finder;
 	
 
@@ -162,13 +163,35 @@ public class Editor extends CTabItem implements IUpperPart, IPropertyChangeListe
 	public boolean search(String text) {
 
 		IRegion ir;
+		int offset = searchOffsetEnd;
+		
+		// make sure we allow user cursor position
+		// if the cursor position is the same as the previous selected region, we should use
+		// the last cursor position to avoid searching in the same region
+		
+		ITextSelection selection = (ITextSelection) textViewer.getSelectionProvider().getSelection();
+		if (selection != null) {
+			int selOffset = selection.getOffset();
+			if (selOffset < searchOffsetStart || selOffset > searchOffsetEnd)
+				offset = selection.getOffset();
+		}
 		
 		try {
-			if ((ir = finder.find(searchOffset, text, true, false, false, false)) != null) {
+			if ((ir = finder.find(offset, text, true, false, false, false)) != null) {
 				
 				setMarker(ir);
-				searchOffset = ir.getOffset() + ir.getLength();
+				searchOffsetStart = ir.getOffset();
+				searchOffsetEnd = ir.getOffset() + ir.getLength();
 				return true;
+			} else {
+				// cannot find a region, try to search from the beginning
+				if ((ir = finder.find(0, text, true, false, false, false)) != null) {
+					
+					setMarker(ir);
+					searchOffsetStart = ir.getOffset();
+					searchOffsetEnd = ir.getOffset() + ir.getLength();
+					return true;
+				}
 			}
 		} catch (BadLocationException e) {
 			e.printStackTrace();
