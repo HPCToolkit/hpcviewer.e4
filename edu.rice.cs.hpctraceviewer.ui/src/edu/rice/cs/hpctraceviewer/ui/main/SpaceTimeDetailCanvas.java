@@ -1140,9 +1140,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		DetailPaintJobChangeListener listener = new DetailPaintJobChangeListener(detailPaint, imageOrig, imageFinal, bufferGC, origGC, changedBounds);
 		detailPaint.addJobChangeListener(listener);
 		
-/*		this part of the code causes deadlock on VirtualBox Ubuntu
- *      if we don't clear the queue
- */
+		// this part of the code causes deadlock on VirtualBox Ubuntu
+		// if we don't clear the queue
+
 		cancelJobs();
 		detailPaint.schedule();
 		

@@ -5,9 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.swt.graphics.Color;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import edu.rice.cs.hpcdata.util.CallPath;
 
 
@@ -69,8 +66,6 @@ public abstract class DataPreparation
 		if (cp == null)
 			return 0;
 		
-		Logger logger = LoggerFactory.getLogger(getClass());
-		
 		String succFunction = cp.getScopeAt(data.depth).getName(); 
 		Color succColor = data.colorTable.getColor(succFunction);
 		int last_ptl_index = data.ptl.size() - 1;
@@ -80,7 +75,6 @@ public abstract class DataPreparation
 		{
 			// in case of bad cpid, we just quit painting the view
 			if (cp==null) {
-				logger.debug("No cpid for index " + index);
 				
 				return num_invalid_cp;		// throwing an exception is more preferable, but it will make
 				// more complexity to handle inside a running thread
