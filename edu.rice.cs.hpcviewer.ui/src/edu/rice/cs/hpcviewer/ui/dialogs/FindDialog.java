@@ -4,6 +4,7 @@ import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.widgets.WidgetFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -36,30 +37,36 @@ public class FindDialog extends Dialog
     @Override
     protected Control createDialogArea(Composite parent) {
         Composite container = (Composite) super.createDialogArea(parent);
-        GridLayout layout   = new GridLayout(2, false);
-        layout.marginRight  = 5;
-        layout.marginLeft   = 10;
+        GridLayout layout = new GridLayout(2, false);
         container.setLayout(layout);
-
-        Label lblSearch = new Label(container, SWT.NONE);
+        
+        //
+        // 1st row: find label and text
+        //
+        Label lblSearch = WidgetFactory.label(SWT.NONE)
+        							   .layoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false))
+        							   .create(container);
         lblSearch.setText("Find:");
 
-        txtSearch = new Text(container, SWT.BORDER);
-        txtSearch.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+        txtSearch = WidgetFactory.text(SWT.BORDER)
+        						 .layoutData(new GridData(SWT.FILL, SWT.CENTER, true, false))
+        						 .create(container);
         txtSearch.setText("");
 
-		/*
-		 * txtSearch.addModifyListener(e -> { Text textWidget = (Text) e.getSource();
-		 * String userText = textWidget.getText(); });
-		 */
+        //
+        // 2nd row: search button and message text
+        //
         
-        Button btnSearch = new Button(container, SWT.PUSH);
+        Button btnSearch = WidgetFactory.button(SWT.PUSH)
+        								.layoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false))
+        								.create(container);
         btnSearch.setText("Search");
-        
-        final Label lblMessage = new Label(container, SWT.NONE);
-        lblMessage.setVisible(false);
+
+        final Label lblMessage = WidgetFactory.label(SWT.WRAP)
+        									  .layoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true))
+        									  .create(container);
         lblMessage.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_RED));
-        
+
         btnSearch.addSelectionListener(new SelectionAdapter() {
         	@Override
             public void widgetSelected(SelectionEvent e) {
@@ -84,8 +91,12 @@ public class FindDialog extends Dialog
         		}
         	}
 		});
-        
+ 
         txtSearch.setFocus();
+ 
+        Point size = container.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+        container.setSize(size);
+        
         getShell().setDefaultButton(btnSearch);
         getShell().setText("Find ");
         
@@ -106,7 +117,7 @@ public class FindDialog extends Dialog
     
     @Override
     protected Point getInitialSize() {
-        return new Point(350, 150);
+        return new Point(350, 200);
     }
     
     public static void main(String []args) {
