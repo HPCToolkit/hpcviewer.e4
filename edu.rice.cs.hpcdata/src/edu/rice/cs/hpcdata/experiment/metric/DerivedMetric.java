@@ -238,17 +238,6 @@ public class DerivedMetric extends BaseMetric {
 		return copy;
 	}
 	
-	/****
-	 * update the experiment of this derived metric
-	 * 
-	 * @param experiment
-	 */
-	public void setExperiment(Experiment experiment)
-	{
-		this.experiment = experiment;
-		// updating as well the variable mapping to metrics
-		varMap.setMetricManager(experiment);
-	}
 	
 	public void resetMetric(Experiment experiment, RootScope root)
 	{

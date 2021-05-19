@@ -11,17 +11,16 @@ import com.graphbuilder.math.func.Function;
 
 import edu.rice.cs.hpcdata.experiment.scope.IMetricScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
+import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 
 /**
  * @author la5
  *
  */
-public class MetricVarMap extends VarMap {
-
-	private IMetricManager 	metricManager;
-	private IMetricScope 	scope;
-	private IMetricScope 	root;
+public class MetricVarMap extends VarMap 
+{
+	private Scope 	scope;
 	private BaseMetric 		metric = null;
 
 	public MetricVarMap() {
@@ -34,9 +33,7 @@ public class MetricVarMap extends VarMap {
 	
 	public MetricVarMap(RootScope root, IMetricScope s, IMetricManager metricManager) {
 		super(false);
-		this.scope = s;
-		this.root  = root;
-		this.metricManager = metricManager;
+		this.scope = (Scope) s;
 	}
 	
 
@@ -44,7 +41,6 @@ public class MetricVarMap extends VarMap {
 	
 
 	public void setMetricManager(IMetricManager metricManager) {
-		this.metricManager = metricManager;
 	}
 	
 	public void setMetric(BaseMetric metric)
@@ -57,12 +53,11 @@ public class MetricVarMap extends VarMap {
 	 * @param s: the scope of node
 	 */
 	public void setScope(IMetricScope s) {
-		this.scope = s;
+		this.scope = (Scope) s;
 	}
 	
 	public void setRootScope(RootScope root)
 	{
-		this.root = root;
 	}
 	
 	/**
@@ -70,7 +65,7 @@ public class MetricVarMap extends VarMap {
 	 * If the variable is a normal variable, it will call the parent method.		
 	 */
 	public double getValue(String varName) {
-		assert(metricManager != null);
+		assert(varName != null);
 		
 		char firstLetter = varName.charAt(0);
 		if (firstLetter == '$' || firstLetter == '@') 
@@ -81,6 +76,9 @@ public class MetricVarMap extends VarMap {
 
 			// Metric variable
 			String sIndex = varName.substring(1);
+			RootScope root = scope.getRootScope();
+			IMetricManager metricManager = (IMetricManager) root.getExperiment();
+
 			BaseMetric metricToQuery = metricManager.getMetric(Integer.valueOf(sIndex));
 			if (metricToQuery == null) 
 				throw new RuntimeException("metric ID unknown: " + sIndex);
@@ -106,6 +104,10 @@ public class MetricVarMap extends VarMap {
 		} else if (firstLetter == '#') {
 			String sIndex = varName.substring(1);
 			Integer index = Integer.valueOf(sIndex);
+			
+			RootScope root = scope.getRootScope();
+			IMetricManager metricManager = (IMetricManager) root.getExperiment();
+
 			BaseMetric bm = metricManager.getMetricFromOrder(index);
 			
 			if (bm != null) {
