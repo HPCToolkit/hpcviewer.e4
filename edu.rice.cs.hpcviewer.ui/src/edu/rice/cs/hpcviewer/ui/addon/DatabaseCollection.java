@@ -699,10 +699,16 @@ public class DatabaseCollection
 			}
 			
 			// filter the tree if user has defined at least a filter
-			
+			// if we elide some nodes, we should notify the user
 			FilterMap filterMap = FilterMap.getInstance();
 			if (filterMap.isFilterEnabled()) {
-				experiment.filter(filterMap);
+				int numFilteredNodes = experiment.filter(filterMap);
+				if (numFilteredNodes > 0) {
+					String unit = numFilteredNodes == 1 ? " node has " : " nodes have ";
+					MessageDialog.openInformation(shell, "Filter is enabled", "CCT node Filter is enabled and at least " + 
+														 numFilteredNodes + unit + "been elided.");
+					
+				}
 			}
 			
 			// Everything works just fine: create views
