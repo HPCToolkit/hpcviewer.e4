@@ -262,11 +262,6 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 		// if they do, check the content
 		boolean same = newMap.equals(filterMap);
 		
-		if (same) {
-			// check the content
-			same = newMap.equals(filterMap);
-		}
-		
 		// 2. save the filter, and broadcast it
 		if (!same) {
 			filterMap.save();
