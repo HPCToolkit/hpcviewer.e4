@@ -33,8 +33,6 @@ mvn clean package
 
 # The result should be:
 #
-# Building tar: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-linux.gtk.ppc64le.tar.gz
-
 
 echo "=================================="
 echo " Repackaging the viewer"
@@ -102,25 +100,13 @@ repackage_windows() {
       chmod 664 $output
 }
 
-# repackage linux files
-repackage_linux linux.gtk ppc64le
-
-###################################################################
-# Special build for other than ppc64le mac and aarch64
-###################################################################
-
-cp releng/pom.xml releng/pom.4.16.xml
-cp releng/pom.4.18.xml releng/pom.xml
-mvn package
-
-cp releng/pom.4.16.xml releng/pom.xml 
-
 # The result should be:
 #
 # Building zip: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-win32.win32.x86_64.zip
 # Building zip: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-macosx.cocoa.x86_64.zip
 # Building tar: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-linux.gtk.aarch64.tar.gz
 # Building zip: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-macosx.cocoa.x86_64.zip
+
 repackage_linux linux.gtk x86_64
 repackage_linux linux.gtk aarch64
 
@@ -134,7 +120,26 @@ output="hpcviewer-${release}-macosx.cocoa.x86_64.zip"
 input=edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-macosx.cocoa.x86_64.zip 
 repackage_mac $input $output
 
+
+###################################################################
+# Special build for other than ppc64le mac and aarch64
+###################################################################
+
+cp releng/pom.xml releng/pom.4.18.xml
+cp releng/pom.4.16.xml releng/pom.xml
+mvn package
+
+# result:
+# Building tar: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-linux.gtk.ppc64le.tar.gz
+
+# repackage linux files
+repackage_linux linux.gtk ppc64le
+
+cp releng/pom.4.18.xml releng/pom.xml 
+
+###################################################################
 # special treatement for mac OS
+###################################################################
 OS=`uname`
 if [[ "$OS" == "Darwin" && "$1" == "-n" ]]; then 
         echo "Notarize $output ..."
