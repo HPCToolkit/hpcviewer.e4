@@ -33,10 +33,7 @@ mvn clean package
 
 # The result should be:
 #
-# Building tar: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-linux.gtk.x86_64.tar.gz
 # Building tar: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-linux.gtk.ppc64le.tar.gz
-# Building zip: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-win32.win32.x86_64.zip
-# Building zip: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-macosx.cocoa.x86_64.zip
 
 
 echo "=================================="
@@ -106,16 +103,10 @@ repackage_windows() {
 }
 
 # repackage linux files
-repackage_linux linux.gtk x86_64
 repackage_linux linux.gtk ppc64le
 
-# copy and rename windows package
-output="hpcviewer-${release}-win32.win32.x86_64.zip"
-input=edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-win32.win32.x86_64.zip
-repackage_windows $input $output 
-
 ###################################################################
-# Special build for mac and aarch64
+# Special build for other than ppc64le mac and aarch64
 ###################################################################
 
 cp releng/pom.xml releng/pom.4.16.xml
@@ -126,9 +117,17 @@ cp releng/pom.4.16.xml releng/pom.xml
 
 # The result should be:
 #
+# Building zip: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-win32.win32.x86_64.zip
+# Building zip: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-macosx.cocoa.x86_64.zip
 # Building tar: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-linux.gtk.aarch64.tar.gz
 # Building zip: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-macosx.cocoa.x86_64.zip
+repackage_linux linux.gtk x86_64
 repackage_linux linux.gtk aarch64
+
+# copy and rename windows package
+output="hpcviewer-${release}-win32.win32.x86_64.zip"
+input=edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-win32.win32.x86_64.zip
+repackage_windows $input $output 
 
 # copy and rename mac package
 output="hpcviewer-${release}-macosx.cocoa.x86_64.zip"
