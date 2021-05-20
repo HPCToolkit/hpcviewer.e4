@@ -202,9 +202,13 @@ public class ExperimentMerger
 		//	we should make sure that the next ID for the second group of metrics is not
 		//	overlapped with the ID from the first group of metrics
 		
-		final int m1_last = metricList.size() - 1;
-		final int m1_last_shortname = Integer.valueOf(metricList.get(m1_last).getShortName());
-		int m1_last_index = Math.max(m1_last_shortname, metricList.get(m1_last).getIndex()) + 1;
+		int m1_last_index = -1;
+		int m1_last_order = -1;
+		
+		for (BaseMetric m : m1) {
+			m1_last_index = Math.max(m1_last_index, m.getIndex());
+			m1_last_order = Math.max(m1_last_order, m.getOrder());
+		}
 		
 		ListMergedMetrics metricsMerged = new ListMergedMetrics(metricList);
 		
@@ -214,11 +218,14 @@ public class ExperimentMerger
 		// step 2: append the second metrics, and reset the index and the key
 		// ----------------------------------------------------------------
 		List<DerivedMetric> listDerivedMetrics = new ArrayList<>();
-		Map<Integer, Integer> mapOldIndex   = new HashMap<>();
+		Map<Integer, Integer> mapOldIndex = new HashMap<>();
+		Map<Integer, Integer> mapOldOrder = new HashMap<>();
+		int order = m1_last_order;
 		
 		for(BaseMetric metric: m2) {
 			final BaseMetric m = metric.duplicate();
-			
+			order++;
+
 			if (m instanceof DerivedMetric) {
 				listDerivedMetrics.add((DerivedMetric) m);
 			} else {
@@ -232,11 +239,20 @@ public class ExperimentMerger
 				m.setShortName( new_id );
 				m.setIndex(index_new);
 				
-				m.setDisplayName( 2 + "-" + m.getDisplayName() );
+				// set the partner index
+				int partner = m1_last_index + m.getPartner();
+				m.setPartner(partner);
+				
+				// set the new order
+				if (m.getOrder() >= 0) {
+					mapOldOrder.put(m.getOrder(), order);
+					m.setOrder(order);
+				}
 				
 				metricsMerged.add(m);
 				mapOldIndex.put(index_old, index_new);
-			}
+			}			
+			m.setDisplayName( 2 + "-" + m.getDisplayName() );
 		}
 		
 		// ----------------------------------------------------------------
@@ -244,7 +260,7 @@ public class ExperimentMerger
 		// ----------------------------------------------------------------
 		if (listDerivedMetrics.size()>0) {
 			for(DerivedMetric m: listDerivedMetrics) {
-				m.renameExpression(mapOldIndex);
+				m.renameExpression(mapOldIndex, mapOldOrder);
 				metricsMerged.add(m);
 			}
 		}

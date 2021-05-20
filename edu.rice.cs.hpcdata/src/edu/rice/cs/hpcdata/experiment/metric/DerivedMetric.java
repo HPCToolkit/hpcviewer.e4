@@ -30,8 +30,6 @@ public class DerivedMetric extends BaseMetric {
 	private ExtFuncMap fctMap;
 	// map variable 
 	private MetricVarMap varMap;
-
-	private IMetricManager experiment;
 	
 	private MetricValue rootValue;
 	
@@ -62,8 +60,6 @@ public class DerivedMetric extends BaseMetric {
 		// no root scope information is provided, we'll associate this metric to CCT root scope 
 		// the partner of this metric is itself (derived metric has no partner)
 		super(sID, sName, DESCRIPTION, VisibilityType.SHOW, null, annotationType, index, index, objType);
-		
-		this.experiment = experiment;
 		
 		// set up the functions
 		this.fctMap = new ExtFuncMap();
@@ -96,7 +92,6 @@ public class DerivedMetric extends BaseMetric {
 		
 		super(sID, sName, DESCRIPTION, VisibilityType.SHOW, null, annotationType, index, index, objType);
 		
-		this.experiment = null; // to be defined later
 		this.root 		= null; // to be defined later
 		this.varMap		= null; // to be defined later
 		this.expression = null; // to be defined later
@@ -193,45 +188,71 @@ public class DerivedMetric extends BaseMetric {
 	 * @param mapOldIndex from old index to a new one
 	 * 
 	 */
-	public void renameExpression(Map<Integer, Integer> mapOldIndex) {
-		renameExpression(expression, mapOldIndex);
+	public void renameExpression(Map<Integer, Integer> mapOldIndex, Map<Integer, Integer> mapOldOrder) {
+		renameExpression(expression, mapOldIndex, mapOldOrder);
 	}
 	
-	private void renameExpression(OpNode node, Map<Integer, Integer> mapOldIndex) {
+	private void renameExpression(OpNode node, Map<Integer, Integer> mapOldIndex, Map<Integer, Integer> mapOldOrder) {
 		Expression left = node.getLeftChild();
 		Expression right = node.getRightChild();
 		
-		renameExpression(left,  mapOldIndex);
-		renameExpression(right, mapOldIndex);
+		renameExpression(left,  mapOldIndex, mapOldOrder);
+		renameExpression(right, mapOldIndex, mapOldOrder);
 	}
 	
-	private void renameExpression(VarNode node, Map<Integer, Integer> mapOldIndex) {
+	private void renameExpression(VarNode node, Map<Integer, Integer> mapOldIndex, Map<Integer, Integer> mapOldOrder) {
 		String name = node.getName();
 		char prefix = name.charAt(0);
+		
 		if (prefix == '$' || prefix == '@') {
-			String varIndex = name.substring(1);
-			Integer intIndex = Integer.valueOf(varIndex);
-			Integer newIndex = mapOldIndex.get(intIndex);
-			if (newIndex != null) {
-				String newStrIndex = prefix + String.valueOf(newIndex);
-				node.setName(newStrIndex);
-			}
+			// index-based formula
+			changeName(node, prefix, mapOldIndex);
+		} else if (prefix == '#') {
+			// order-based formula
+			changeName(node, prefix, mapOldOrder);
 		}
+		//System.out.println("renameExpression " + name + " -> " + node.getName());
 	}
 
+	private void changeName(VarNode node, char prefix, Map<Integer, Integer> map) {
+		String name = node.getName();
+		String varIndex = name.substring(1);
+		Integer intIndex = Integer.valueOf(varIndex);
+		Integer newIndex = map.get(intIndex);
+		if (newIndex != null) {
+			String newStrIndex = prefix + String.valueOf(newIndex);
+			node.setName(newStrIndex);
+		}
+	}
 	
-	private void renameExpression(Expression node, Map<Integer, Integer> mapOldIndex) {
+	private void renameExpression(FuncNode node, Map<Integer, Integer> mapOldIndex, Map<Integer, Integer> mapOldOrder) {
+		int children = node.numChildren();
+		for(int i=0; i<children; i++) {
+			Expression e = node.child(i);
+			renameExpression(e, mapOldIndex, mapOldOrder);
+		}
+	}
+	
+	private void renameExpression(Expression node, Map<Integer, Integer> mapOldIndex, Map<Integer, Integer> mapOldOrder) {
 		if (node instanceof OpNode) {
-			renameExpression((OpNode)node, mapOldIndex);
+			renameExpression((OpNode)node, mapOldIndex, mapOldOrder);
 		} else if (node instanceof VarNode) {
-			renameExpression((VarNode)node, mapOldIndex);
+			renameExpression((VarNode)node, mapOldIndex, mapOldOrder);
+		} else if (node instanceof FuncNode) {
+			renameExpression((FuncNode) node, mapOldIndex, mapOldOrder);
 		}
 	}
 
 	@Override
 	public BaseMetric duplicate() {
-		final DerivedMetric copy = new DerivedMetric(root, experiment, expression.toString(), displayName, 
-				shortName, index, annotationType, metricType);
+		final DerivedMetric copy = new DerivedMetric(root, 
+													(IMetricManager) root.getExperiment(), 
+													expression.toString(),
+													displayName, 
+													shortName, 
+													index, 
+													annotationType, 
+													metricType);
 		
 		// TODO: hack, we need to conserve the format of the metric.
 		copy.displayFormat = displayFormat;
@@ -241,7 +262,6 @@ public class DerivedMetric extends BaseMetric {
 	
 	public void resetMetric(Experiment experiment, RootScope root)
 	{
-		this.experiment = experiment;
 		this.root 		= root;
 		
 		varMap = new MetricVarMap(root, experiment);

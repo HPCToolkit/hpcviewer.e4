@@ -707,7 +707,6 @@ public class DatabaseCollection
 					String unit = numFilteredNodes == 1 ? " node has " : " nodes have ";
 					MessageDialog.openInformation(shell, "Filter is enabled", "CCT node Filter is enabled and at least " + 
 														 numFilteredNodes + unit + "been elided.");
-					
 				}
 			}
 			

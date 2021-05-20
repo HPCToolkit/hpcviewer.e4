@@ -94,8 +94,11 @@ public int getIndex()
 
 @Override
 public BaseMetric duplicate() {
-	return new Metric(shortName, description, displayName, visibility, null, annotationType, 
+	BaseMetric m = new Metric(shortName, description, displayName, visibility, null, annotationType, 
 			String.valueOf(sampleperiod), index, metricType, partner_index);
+	m.setOrder(order);
+	
+	return m;
 }
 
 }
