@@ -21,4 +21,9 @@ public class PowNode extends OpNode {
 	public String getSymbol() {
 		return "^";
 	}
+	
+	public Expression duplicate() {
+		PowNode n = new PowNode(leftChild, rightChild);
+		return n;
+	}
 }

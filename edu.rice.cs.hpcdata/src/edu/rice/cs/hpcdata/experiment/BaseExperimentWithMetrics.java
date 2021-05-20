@@ -32,13 +32,12 @@ implements IMetricManager
 	/** A list of metric descriptors sorted based on the hpcrun order
 	 ** 
 	 */
-	protected ArrayList<BaseMetric> metricsWithOrder;
+	private Map<Integer, BaseMetric> metricsWithOrder;
 	
 	/**
 	 * map ID to the metric descriptor
 	 */
-	private Map<Integer, BaseMetric> mapIndexToMetric;
-	
+	private Map<Integer, BaseMetric> mapIndexToMetric;	
 	private Map<String, BaseMetric> mapIdToMetric;
 	
 	//////////////////////////////////////////////////////////////////////////
@@ -59,14 +58,14 @@ implements IMetricManager
 		metrics = metricList;
 		mapIndexToMetric = new HashMap<Integer, BaseMetric>(metricList.size());
 		mapIdToMetric    = new HashMap<>(metricList.size());
-		metricsWithOrder = new ArrayList<BaseMetric>();
+		metricsWithOrder = new HashMap<>(metricList.size()/2);
 		
 		for(BaseMetric metric:metrics) {
 			assert mapIndexToMetric.get(metric.getIndex()) == null : 
 				   "Duplicate metric-id " + metric.getIndex();
 
 			if (metric.getOrder() >= 0) {
-				metricsWithOrder.add(metric);
+				metricsWithOrder.put(metric.getOrder(), metric);
 			}
 			mapIndexToMetric.put(metric.getIndex(), metric);
 			mapIdToMetric.put(metric.getShortName(), metric);
@@ -159,10 +158,7 @@ implements IMetricManager
 	@Override
 	public BaseMetric getMetricFromOrder(int order)
 	{
-		if (order >=0 && metricsWithOrder != null && order < metricsWithOrder.size()) {
-			return metricsWithOrder.get(order);
-		}
-		return null;
+		return metricsWithOrder.get(order);
 	}
 	
 	//////////////////////////////////////////////////////////////////////////

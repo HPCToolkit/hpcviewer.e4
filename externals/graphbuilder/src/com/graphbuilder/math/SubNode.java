@@ -21,4 +21,9 @@ public class SubNode extends OpNode {
 	public String getSymbol() {
 		return "-";
 	}
+
+	public Expression duplicate() {
+		SubNode n = new SubNode(leftChild, rightChild);
+		return n;
+	}
 }

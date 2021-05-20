@@ -21,4 +21,9 @@ public class AddNode extends OpNode {
 	public String getSymbol() {
 		return "+";
 	}
+
+	public Expression duplicate() {
+		AddNode n = new AddNode(leftChild, rightChild);
+		return n;
+	}
 }
