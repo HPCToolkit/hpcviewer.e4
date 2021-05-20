@@ -19,4 +19,9 @@ public class VarNode extends TermNode {
 
 		return val;
 	}
+
+	public Expression duplicate() {
+		VarNode n = new VarNode(name, negate);
+		return n;
+	}
 }

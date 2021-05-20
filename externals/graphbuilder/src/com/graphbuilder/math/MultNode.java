@@ -21,4 +21,9 @@ public class MultNode extends OpNode {
 	public String getSymbol() {
 		return "*";
 	}
+	
+	public Expression duplicate() {
+		MultNode n = new MultNode(leftChild, rightChild);
+		return n;
+	}
 }

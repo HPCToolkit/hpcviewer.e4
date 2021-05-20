@@ -6,8 +6,6 @@ package edu.rice.cs.hpcdata.experiment.metric;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.scope.*;
 
-import java.util.Map;
-
 //math expression
 import com.graphbuilder.math.*;
 
@@ -15,7 +13,7 @@ import com.graphbuilder.math.*;
  * @author la5
  *
  */
-public class DerivedMetric extends BaseMetric {
+public class DerivedMetric extends AbstractMetricWithFormula {
 	//===================================================================================
 	// DATA
 	//===================================================================================
@@ -181,67 +179,6 @@ public class DerivedMetric extends BaseMetric {
 		return expression.toString();
 	}
 
-	
-	/***
-	 * Rename metric index variable using map
-	 * 
-	 * @param mapOldIndex from old index to a new one
-	 * 
-	 */
-	public void renameExpression(Map<Integer, Integer> mapOldIndex, Map<Integer, Integer> mapOldOrder) {
-		renameExpression(expression, mapOldIndex, mapOldOrder);
-	}
-	
-	private void renameExpression(OpNode node, Map<Integer, Integer> mapOldIndex, Map<Integer, Integer> mapOldOrder) {
-		Expression left = node.getLeftChild();
-		Expression right = node.getRightChild();
-		
-		renameExpression(left,  mapOldIndex, mapOldOrder);
-		renameExpression(right, mapOldIndex, mapOldOrder);
-	}
-	
-	private void renameExpression(VarNode node, Map<Integer, Integer> mapOldIndex, Map<Integer, Integer> mapOldOrder) {
-		String name = node.getName();
-		char prefix = name.charAt(0);
-		
-		if (prefix == '$' || prefix == '@') {
-			// index-based formula
-			changeName(node, prefix, mapOldIndex);
-		} else if (prefix == '#') {
-			// order-based formula
-			changeName(node, prefix, mapOldOrder);
-		}
-		//System.out.println("renameExpression " + name + " -> " + node.getName());
-	}
-
-	private void changeName(VarNode node, char prefix, Map<Integer, Integer> map) {
-		String name = node.getName();
-		String varIndex = name.substring(1);
-		Integer intIndex = Integer.valueOf(varIndex);
-		Integer newIndex = map.get(intIndex);
-		if (newIndex != null) {
-			String newStrIndex = prefix + String.valueOf(newIndex);
-			node.setName(newStrIndex);
-		}
-	}
-	
-	private void renameExpression(FuncNode node, Map<Integer, Integer> mapOldIndex, Map<Integer, Integer> mapOldOrder) {
-		int children = node.numChildren();
-		for(int i=0; i<children; i++) {
-			Expression e = node.child(i);
-			renameExpression(e, mapOldIndex, mapOldOrder);
-		}
-	}
-	
-	private void renameExpression(Expression node, Map<Integer, Integer> mapOldIndex, Map<Integer, Integer> mapOldOrder) {
-		if (node instanceof OpNode) {
-			renameExpression((OpNode)node, mapOldIndex, mapOldOrder);
-		} else if (node instanceof VarNode) {
-			renameExpression((VarNode)node, mapOldIndex, mapOldOrder);
-		} else if (node instanceof FuncNode) {
-			renameExpression((FuncNode) node, mapOldIndex, mapOldOrder);
-		}
-	}
 
 	@Override
 	public BaseMetric duplicate() {
@@ -289,4 +226,11 @@ public class DerivedMetric extends BaseMetric {
 		}
 		return new MetricValue(rootVal);
 	}
+
+
+	@Override
+	protected Expression[] getExpressions() {
+		return new Expression[] {expression};
+	}
+
 }

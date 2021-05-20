@@ -217,41 +217,40 @@ public class ExperimentMerger
 		// ----------------------------------------------------------------
 		// step 2: append the second metrics, and reset the index and the key
 		// ----------------------------------------------------------------
-		List<DerivedMetric> listDerivedMetrics = new ArrayList<>();
+		List<AbstractMetricWithFormula> listDerivedMetrics = new ArrayList<>();
 		Map<Integer, Integer> mapOldIndex = new HashMap<>();
 		Map<Integer, Integer> mapOldOrder = new HashMap<>();
 		int order = m1_last_order;
 		
 		for(BaseMetric metric: m2) {
 			final BaseMetric m = metric.duplicate();
-			order++;
 
-			if (m instanceof DerivedMetric) {
-				listDerivedMetrics.add((DerivedMetric) m);
+			if (m instanceof AbstractMetricWithFormula) {
+				listDerivedMetrics.add((AbstractMetricWithFormula) m);
 			} else {
 				// general metric only, no derived metrics allowed
-
-				// change the short name (or ID) of the metric since the old ID is already
-				// taken by previous experiment
-				final int index_old = m.getIndex();
-				final int index_new = m1_last_index + index_old;
-				final String new_id = String.valueOf(index_new); 
-				m.setShortName( new_id );
-				m.setIndex(index_new);
-				
-				// set the partner index
-				int partner = m1_last_index + m.getPartner();
-				m.setPartner(partner);
-				
-				// set the new order
-				if (m.getOrder() >= 0) {
-					mapOldOrder.put(m.getOrder(), order);
-					m.setOrder(order);
-				}
-				
 				metricsMerged.add(m);
-				mapOldIndex.put(index_old, index_new);
 			}			
+
+			// change the short name (or ID) of the metric since the old ID is already
+			// taken by previous experiment
+			final int index_old = m.getIndex();
+			final int index_new = m1_last_index + index_old;
+			final String new_id = String.valueOf(index_new); 
+			m.setShortName( new_id );
+			m.setIndex(index_new);
+			
+			// set the partner index
+			int partner = m1_last_index + m.getPartner();
+			m.setPartner(partner);
+			
+			// set the new order
+			if (m.getOrder() >= 0) {
+				order++;
+				mapOldOrder.put(m.getOrder(), order);
+				m.setOrder(order);
+			}			
+			mapOldIndex.put(index_old, index_new);
 			m.setDisplayName( 2 + "-" + m.getDisplayName() );
 		}
 		
@@ -259,7 +258,7 @@ public class ExperimentMerger
 		// step 2b: rename the formula in derived metrics
 		// ----------------------------------------------------------------
 		if (listDerivedMetrics.size()>0) {
-			for(DerivedMetric m: listDerivedMetrics) {
+			for(AbstractMetricWithFormula m: listDerivedMetrics) {
 				m.renameExpression(mapOldIndex, mapOldOrder);
 				metricsMerged.add(m);
 			}

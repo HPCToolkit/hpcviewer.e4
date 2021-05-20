@@ -18,7 +18,15 @@ public abstract class Expression {
 	Returns the result of evaluating the expression tree rooted at this node.
 	*/
 	public abstract double eval(VarMap v, FuncMap f);
+	
+	
+	/***
+	 * Return the cloned version of this expression
+	 * @return Expression
+	 */
+	public abstract Expression duplicate();
 
+	
 	/**
 	Returns true if this node is a descendent of the specified node, false otherwise.  By this
 	methods definition, a node is a descendent of itself.

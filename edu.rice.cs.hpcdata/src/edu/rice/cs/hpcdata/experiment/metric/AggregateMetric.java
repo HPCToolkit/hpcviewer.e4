@@ -18,17 +18,16 @@ import com.graphbuilder.math.FuncMap;
  * 	combine formula: used for computing temporary value during caller and flat view creation
  *  finalize formula: used to finalizing value independent of the type of the view
  *  
- * @author laksonoadhianto
  *
  */
-public class AggregateMetric extends BaseMetric {
+public class AggregateMetric extends AbstractMetricWithFormula 
+{
  
 	static final public char FORMULA_COMBINE = 'c';
 	static final public char FORMULA_FINALIZE = 'f';
 	
 	// formula expression
 	private Expression formulaCombine, formulaFinalize;
-	//private Expression formulaCurrent = null;
 	
 	// map function
 	private FuncMap fctMap;
@@ -190,7 +189,15 @@ public class AggregateMetric extends BaseMetric {
 		AggregateMetric m = new AggregateMetric(shortName, displayName, description, visibility, 
 				null, annotationType, index, partner_index, metricType);
 		m.setOrder(order);
+		m.formulaCombine  = formulaCombine.duplicate();
+		m.formulaFinalize = formulaFinalize.duplicate();
 		
 		return m;
+	}
+
+
+	@Override
+	protected Expression[] getExpressions() {
+		return new Expression[] {formulaCombine, formulaFinalize};
 	}
 }
