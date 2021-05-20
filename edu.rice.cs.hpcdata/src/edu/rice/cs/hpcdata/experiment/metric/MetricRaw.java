@@ -187,6 +187,8 @@ public class MetricRaw  extends BaseMetric
 	public BaseMetric duplicate() {
 		MetricRaw dup = new MetricRaw(ID, displayName, description, db_glob, db_id, 
 				partner_index, metricType, num_metrics);
+		dup.setOrder(order);
+		
 		return dup;
 	}
 	

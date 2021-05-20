@@ -187,7 +187,10 @@ public class AggregateMetric extends BaseMetric {
 	 * @see edu.rice.cs.hpc.data.experiment.metric.BaseMetric#duplicate()
 	 */
 	public BaseMetric duplicate() {
-		return new AggregateMetric(shortName, displayName, description, visibility, 
+		AggregateMetric m = new AggregateMetric(shortName, displayName, description, visibility, 
 				null, annotationType, index, partner_index, metricType);
+		m.setOrder(order);
+		
+		return m;
 	}
 }
