@@ -189,8 +189,10 @@ public class AggregateMetric extends AbstractMetricWithFormula
 		AggregateMetric m = new AggregateMetric(shortName, displayName, description, visibility, 
 				null, annotationType, index, partner_index, metricType);
 		m.setOrder(order);
-		m.formulaCombine  = formulaCombine.duplicate();
-		m.formulaFinalize = formulaFinalize.duplicate();
+		if (formulaCombine != null)
+			m.formulaCombine  = formulaCombine.duplicate();
+		if (formulaFinalize != null)
+			m.formulaFinalize = formulaFinalize.duplicate();
 		
 		return m;
 	}
