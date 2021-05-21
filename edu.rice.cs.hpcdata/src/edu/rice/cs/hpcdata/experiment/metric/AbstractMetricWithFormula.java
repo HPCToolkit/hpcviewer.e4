@@ -7,6 +7,12 @@ import com.graphbuilder.math.FuncNode;
 import com.graphbuilder.math.OpNode;
 import com.graphbuilder.math.VarNode;
 
+/********************************************************************
+ * 
+ * Base class for metrics with formula.
+ * This class allows to rename the formula.
+ *
+ ********************************************************************/
 public abstract class AbstractMetricWithFormula extends BaseMetric
 {
 	
@@ -27,6 +33,7 @@ public abstract class AbstractMetricWithFormula extends BaseMetric
 			renameExpression(expression, mapOldIndex, mapOldOrder);
 		}
 	}
+	
 	
 	private void renameExpression(OpNode node, Map<Integer, Integer> mapOldIndex, Map<Integer, Integer> mapOldOrder) {
 		Expression left = node.getLeftChild();
