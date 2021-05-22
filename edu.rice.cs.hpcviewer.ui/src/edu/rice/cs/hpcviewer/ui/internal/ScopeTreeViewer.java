@@ -509,8 +509,14 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 				
 				setMetricColumnWidth(null, column);
 			}
-			// refresh the table, but we don't change the content
-			refresh(false);
+			try {
+				getTree().setRedraw(false);
+				
+				// refresh the table, but we don't change the content
+				refresh(false);
+			} finally {
+				getTree().setRedraw(true);
+			}
 		}
 	}
     
