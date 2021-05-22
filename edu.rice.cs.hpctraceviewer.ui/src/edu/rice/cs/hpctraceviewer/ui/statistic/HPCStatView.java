@@ -22,8 +22,6 @@ import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
  *************************************************************************/
 public class HPCStatView extends AbstractItemViewWithTable
 {
-	private ColorTable colorTable;
-
 	public HPCStatView(CTabFolder parent, int style) {
 		super(parent, style);
 	}
@@ -40,7 +38,7 @@ public class HPCStatView extends AbstractItemViewWithTable
 
 		SummaryData data = (SummaryData) input;
 		
-		colorTable = data.colorTable;
+		ColorTable colorTable = data.colorTable;
 
 		List<StatisticItem> listItems  = new ArrayList<>();
 		
@@ -65,10 +63,4 @@ public class HPCStatView extends AbstractItemViewWithTable
 		return listItems;
 	}
 
-
-	@Override
-	protected ColorTable getColorTable() {
-
-		return colorTable;
-	}
 }
