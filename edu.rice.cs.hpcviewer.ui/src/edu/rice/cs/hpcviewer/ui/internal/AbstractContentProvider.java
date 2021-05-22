@@ -106,7 +106,7 @@ public abstract class AbstractContentProvider
     	// this refresh method will force the table to recompute the children
     	try {
         	viewer.getTree().setRedraw(false);
-        	viewer.refresh();
+        	viewer.refresh(false);
     	} finally {
     		viewer.getTree().setRedraw(true);
     	}
@@ -204,6 +204,11 @@ public abstract class AbstractContentProvider
 	}
 	
     
+    /****
+     * Get the unsorted children of a given parent node
+     * @param parent
+     * @return Object[] array of the children
+     */
     private Object[] getRawChildren(Scope parent) {
     	
     	if (parent instanceof ProcedureScope) {
@@ -233,6 +238,20 @@ public abstract class AbstractContentProvider
     	return null;
     }
 	
+	
+	/*****************
+	 * 
+	 * key pair to cache sorted children
+	 * The key consists of 3 attributes:
+	 * <ul>
+	 * <li> sort direction
+	 * <li> current sorted metric column
+	 * <li> parent tree node
+	 * </ul>
+	 * The value of the cache:
+	 * children of the parent node.
+	 * 
+	 *****************/
 	private static class SortNodeKey 
 	{
 		// key set:
@@ -257,8 +276,8 @@ public abstract class AbstractContentProvider
 		@Override
 		public int hashCode() {
 			int dir = direction & 0x2;
-			int met = (metric.getIndex() << 2) & 0xFFF;
-			int par = parent.hashCode() << 16;
+			int met = (metric.getIndex() & 0xFFF) << 2;
+			int par = (parent.hashCode() & 0xFFFF) << 12;
 			return dir | met | par;
 		}
 		
