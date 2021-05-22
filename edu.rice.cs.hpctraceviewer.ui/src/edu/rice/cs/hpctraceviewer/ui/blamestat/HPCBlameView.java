@@ -23,9 +23,6 @@ import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
  *************************************************************************/
 public class HPCBlameView extends AbstractItemViewWithTable 
 {
-
-	private ColorTable colorTable = null;
-
 	public HPCBlameView(CTabFolder parent, int style) {
 		super(parent, style);
 	}
@@ -38,17 +35,11 @@ public class HPCBlameView extends AbstractItemViewWithTable
 
 
 	@Override
-	protected ColorTable getColorTable() {
-		return colorTable;
-	}
-
-
-	@Override
 	protected List<StatisticItem> getListItems(Object input) {
 		List<StatisticItem>listItems  = new ArrayList<>();
 
 		SummaryData data = (SummaryData) input;
-		colorTable = data.colorTable;
+		ColorTable colorTable = getColorTable();
 		
 		Set<Entry<Integer, Float>> entries = data.cpuBlameMap.entrySet();
 		

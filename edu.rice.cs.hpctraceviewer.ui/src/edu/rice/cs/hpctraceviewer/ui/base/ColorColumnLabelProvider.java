@@ -22,7 +22,8 @@ public abstract class ColorColumnLabelProvider extends OwnerDrawLabelProvider
 		switch(event.index) {
 		case 0:
 			Color color = getColor(event, element);
-			if (color == null)
+			// for unknown case, the color can be disposed
+			if (color == null || color.isDisposed())
 				return;
 			
 			event.gc.setBackground(color);

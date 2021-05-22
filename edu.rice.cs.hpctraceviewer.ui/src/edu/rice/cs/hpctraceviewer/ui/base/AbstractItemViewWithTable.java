@@ -41,6 +41,7 @@ import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
+import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.color.ColorTable;
 import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
@@ -60,7 +61,7 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 	private ColumnColorLabelProvider     lblColorProvider;
 	private TableStatComparator comparator;
 	
-	private Object input;
+	private SpaceTimeDataController input;
 	
 	private IEventBroker broker;
 	
@@ -162,7 +163,7 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 	
 	@Override
 	public void setInput(Object input) {
-		this.input = input;
+		this.input = (SpaceTimeDataController) input;
 		
 		broker.subscribe(getTopicEvent(), this);
 		ViewerPreferenceManager.INSTANCE.getPreferenceStore().addPropertyChangeListener(this);
@@ -194,7 +195,7 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 			
 			if (eventData.data != input)
 				return;
-			
+
 			List<StatisticItem> list = getListItems(eventData.value);
 			tableViewer.setInput(list);
 		}
@@ -250,6 +251,16 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 		gc.dispose();
 	}
 
+	
+	/***
+	 * Get the color table mapping
+	 * @return
+	 */
+	protected ColorTable getColorTable() {
+		return input.getColorTable();
+	}
+
+
 	/*************************************************************
 	 * 
 	 * Content provider for the table in statistic view
@@ -285,13 +296,14 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 	 * Color of the procedure
 	 *
 	 *************************************************************/
-	static private class ColumnColorLabelProvider extends ColorColumnLabelProvider 
+	private class ColumnColorLabelProvider extends ColorColumnLabelProvider 
 	{
 		@Override
 		protected Color getColor(org.eclipse.swt.widgets.Event event, Object element) {
 			if (element != null && element instanceof StatisticItem) {
 				StatisticItem item = (StatisticItem) element;
-				return item.color;
+				Color color = getColorTable().getColor(item.procedureName);
+				return color;
 			}
 			return event.display.getSystemColor(SWT.COLOR_WHITE);
 		}
@@ -362,12 +374,6 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 	 * @return name of the event topic
 	 */
 	abstract protected String getTopicEvent();
-	
-	/***
-	 * Get the color table mapping
-	 * @return
-	 */
-	abstract protected ColorTable getColorTable();
 	
 	/***
 	 * Get the list of items to be displayed in the table based on input from summary view.
