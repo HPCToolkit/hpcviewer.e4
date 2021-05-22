@@ -195,11 +195,6 @@ public abstract class AbstractContentProvider
 		key.children = children;
 		cache_nodes.add(key);
 
-		System.out.println("add: " + String.format("0x%08X",  key.hashCode()) + ", num: " + cache_nodes.size() + " [");
-		cache_nodes.forEach(node -> {
-			System.out.print(String.format("0x%08X",  node.hashCode()) + " " + node.children.length + ", " );
-		});
-		System.out.println("]");
     	return children;
 	}
 	
