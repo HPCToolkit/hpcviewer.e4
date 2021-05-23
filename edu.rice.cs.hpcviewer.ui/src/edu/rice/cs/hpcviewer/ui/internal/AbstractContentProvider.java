@@ -195,6 +195,14 @@ public abstract class AbstractContentProvider
 		key.children = children;
 		cache_nodes.add(key);
 
+		/* debug mode
+		 * 
+		System.out.print("[");
+		cache_nodes.forEach(n -> {
+			System.out.print( n.hashCode() + ": " + n.children.length + " , ");
+		});
+		System.out.println("]");
+		*/
     	return children;
 	}
 	
@@ -270,9 +278,13 @@ public abstract class AbstractContentProvider
 		
 		@Override
 		public int hashCode() {
+			// Corner cases: 
+			// - if we sort based on the tree column, the metric can be null
+			// - if the tree is empty, the parent can be null
+			
 			int dir = direction & 0x2;
-			int met = (metric.getIndex() & 0xFFF) << 2;
-			int par = (parent.hashCode() & 0xFFFF) << 12;
+			int met = (metric == null ? 0xFFF   : (metric.getIndex() & 0xFFF)  )  << 2 ;
+			int par = (parent == null ? 0xFFFFF : (parent.hashCode() & 0xFFFF) ) << 12;
 			return dir | met | par;
 		}
 		

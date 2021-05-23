@@ -12,20 +12,20 @@ public class TableStatComparator extends ViewerComparator
     private int direction = DESCENDING;
     
     public TableStatComparator() {
-    	this.propertyIndex = 1;
+    	propertyIndex = 1;
     	direction = DESCENDING;
     }
     
     
     public int getDirection() {
-    	return direction == 1 ? SWT.DOWN : SWT.UP;
+    	return direction == DESCENDING ? SWT.DOWN : SWT.UP;
     }
     
     public void setColumn(int column) {
-    	if (column == this.propertyIndex) {
+    	if (column == propertyIndex) {
     		direction = 1 - direction;
     	} else  {
-    		this.propertyIndex = column;
+    		propertyIndex = column;
     		direction = DESCENDING; 
     	}
     }
