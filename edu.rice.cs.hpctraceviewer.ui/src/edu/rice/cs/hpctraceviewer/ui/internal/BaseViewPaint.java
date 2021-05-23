@@ -120,6 +120,9 @@ public abstract class BaseViewPaint extends Job
 		if (!startPainting(linesToPaint, num_threads, changedBounds))
 			return false;
 
+		if (monitor.isCanceled())
+			return false;
+		
 		monitor.beginTask(getName(), linesToPaint);
 
 		// -------------------------------------------------------------------
@@ -181,6 +184,9 @@ public abstract class BaseViewPaint extends Job
 		// draw to the canvas
 		// -------------------------------------------------------------------
 		
+		if (monitor.isCanceled())
+			return false;
+
 		int num_paint_threads = OSValidator.isUnix() ? 1 : num_threads;
 		if (OSValidator.isUnix()) {
 			// linux need UI thread to paint
