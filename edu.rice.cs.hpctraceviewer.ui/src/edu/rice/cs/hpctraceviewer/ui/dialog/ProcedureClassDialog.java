@@ -46,6 +46,10 @@ public class ProcedureClassDialog extends Dialog
 	private final static String UnknownData = "unknown";
 
 	private final ProcedureClassMap data;
+	
+	// a map from rgb to a color
+	// we need to cache the color for the same rgb to avoid creating 
+	// too many colors since Windows has limited number of handles
 	private final Map<Integer, Color> mapColor;
 	
 	private TableViewer tableViewer ;
@@ -199,7 +203,7 @@ public class ProcedureClassDialog extends Dialog
 						RGB rgb = procData.getRGB();
 						Color color = mapColor.get(rgb.hashCode());
 						if (color == null) {
-							color = new Color(getDialogArea().getDisplay(), rgb);
+							color = new Color(rgb);
 							mapColor.put(rgb.hashCode(), color);
 						}
 						return color;
@@ -348,12 +352,19 @@ public class ProcedureClassDialog extends Dialog
 		
 		boolean cont = false;
 		if (sels != null) {
+			String text = "";
+			for (Object o: sels) {
+				if (o instanceof Entry<?,?>) {
+					Entry<?,?> elem = (Entry<?,?>) o;
+					text += elem.getKey() + "\n"; 
+				}
+			}
 			if (sels.length>1) {
 				cont = MessageDialog.openQuestion(getShell(), "Removing " + sels.length+ " mappings", 
-						"Are you sure to remove " + sels.length + " mapping elements ?");
+						"Are you sure to remove " + sels.length + " mapping elements ?\n" + text);
 			} else {
 				cont = MessageDialog.openQuestion(getShell(), "Removing an element", 
-						"Are you sure to remove this mapping element ?" );
+						"Are you sure to remove this mapping element ?\n" + text );
 			}
 		}
 		if (!cont)
@@ -368,8 +379,6 @@ public class ProcedureClassDialog extends Dialog
 				isModified = true;
 			}
 		}
-		// remove the color table
-		
 		// refresh the table
 		refresh();
 	}

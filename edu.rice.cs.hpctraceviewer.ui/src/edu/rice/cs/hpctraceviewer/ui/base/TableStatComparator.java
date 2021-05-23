@@ -38,7 +38,9 @@ public class TableStatComparator extends ViewerComparator
     	
     	switch (propertyIndex) {
     	case 0:
-    		rc = item1.procedureName.compareTo(item2.procedureName);
+    		String proc1 = item1.procedure.getProcedure();
+    		String proc2 = item2.procedure.getProcedure();
+    		rc = proc1.compareTo(proc2);
     		break;
     		
     	case 1:

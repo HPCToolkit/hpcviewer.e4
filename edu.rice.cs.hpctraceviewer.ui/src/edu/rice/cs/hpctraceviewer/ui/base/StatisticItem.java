@@ -1,18 +1,18 @@
 package edu.rice.cs.hpctraceviewer.ui.base;
 
-import org.eclipse.swt.graphics.Color;
+import edu.rice.cs.hpctraceviewer.data.color.ProcedureColor;
 
 public class StatisticItem 
 {
-	public String procedureName;
+	public ProcedureColor procedure;
 	public float  percent;
 	
-	public StatisticItem(String procName, Color color, float percent) {
-		this.procedureName = procName;
-		this.percent 	   = percent;
+	public StatisticItem(ProcedureColor procedure, float percent) {
+		this.procedure = procedure;
+		this.percent   = percent;
 	}
 
 	public String toString() {
-		return procedureName + ": " + percent + "%";
+		return procedure + ": " + percent + "%";
 	}
 }

@@ -302,8 +302,7 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 		protected Color getColor(org.eclipse.swt.widgets.Event event, Object element) {
 			if (element != null && element instanceof StatisticItem) {
 				StatisticItem item = (StatisticItem) element;
-				Color color = getColorTable().getColor(item.procedureName);
-				return color;
+				return item.procedure.color;
 			}
 			return event.display.getSystemColor(SWT.COLOR_WHITE);
 		}
@@ -329,7 +328,7 @@ public abstract class AbstractItemViewWithTable extends AbstractBaseItem
 				return null;
 			
 			StatisticItem item = (StatisticItem) element;
-			return item.procedureName;
+			return item.procedure.getProcedure();
 		}
 		
 		@Override
