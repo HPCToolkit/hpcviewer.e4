@@ -49,15 +49,12 @@ public class HPCStatView extends AbstractItemViewWithTable
 			final Integer count = data.mapPixelToCount.get(pixel);
 			final RGB rgb	 	= data.palette.getRGB(pixel);
 			
-			String proc;
 			ProcedureColor procColor = colorTable.getProcedureNameByColorHash(rgb.hashCode());
 			
-			// if there is something wrong with the data, we should quit.
-			if (procColor == null)
-				return null;
-			
-			proc = procColor.getProcedure();
-			listItems.add(new StatisticItem(proc, procColor.color, (float)100.0 * count/data.totalPixels));
+			// TODO: if there is something wrong with the data, we should quit.
+			if (procColor != null) {				
+				listItems.add(new StatisticItem(procColor, (float)100.0 * count/data.totalPixels));
+			}
 		}
 
 		return listItems;
