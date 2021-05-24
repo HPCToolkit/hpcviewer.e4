@@ -61,30 +61,30 @@ public class HotCallPath
 		}
 		// get the metric data
 		Object data = colSelected.getData();
+		
 		if(data instanceof BaseMetric && item != null) {
 			BaseMetric metric = (BaseMetric) data;
 			// find the hot call path
 			int iLevel = 0;
-			TreePath []path = objSel.getPaths();
-			
+			TreePath []path  = objSel.getPaths();
+			boolean is_found = false;
 			CallPathItem objHotPath = new CallPathItem();
 			
-			boolean is_found = getHotCallPath(current, metric, iLevel, path[0], objHotPath);
+			try {
+				treeViewer.getTree().setRedraw(false);		
+				is_found = getHotCallPath(current, metric, iLevel, path[0], objHotPath);
+			} finally {
+				treeViewer.getTree().setRedraw(true);
+			}
 
 			// whether we find it or not, we should reveal the tree path to the last scope
-			
 			treeViewer.setSelection(new StructuredSelection(objHotPath.path), true);
 
 			if(!is_found && objHotPath.node.hasChildren()) {
 				lblMessage.showErrorMessage("No hot child.");
 			}
 		} else {
-			// It is almost impossible for the jvm to reach this part of branch.
-			// but if it is the case, it should be a BUG !!
-			if(data !=null )
-				System.err.println("SVA BUG: data="+data.getClass()+" item= " + (item==null? 0 : item.getItemCount()));
-			else
-				lblMessage.showErrorMessage("Please select a metric column !");
+			lblMessage.showErrorMessage("Please select a metric column !");
 		}
 	}
 
@@ -118,13 +118,11 @@ public class HotCallPath
 				Scope scopeChild = (Scope) o;
 				
 				// let's move deeper down the tree
-				// this cause java null pointer
+				// this may cause java null pointer
 				try {
-					treeViewer.expandToLevel(path, 1);					
-				} catch (Exception e) {
-					System.out.println("Cannot expand path " + path.getLastSegment() + ": " + e.getMessage());
-					e.printStackTrace();
-					return false;
+					treeViewer.reveal(path);
+					//treeViewer.expandToLevel(path, 1);					
+				} finally {
 				}
 
 				// compare the value of the parent and the child

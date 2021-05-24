@@ -97,17 +97,18 @@ public class ScopeSelectionAdapter extends SelectionAdapter
 		// bug Eclipse no 199811 https://bugs.eclipse.org/bugs/show_bug.cgi?id=199811
 		// sorting can be very slow in mac OS
 		// we need to manually disable redraw before comparison and the refresh after the comparison 
-				
-		viewer.getTree().setRedraw(false);
-		
-		TreeColumn col = column.getColumn();
-		
-		// prepare the sorting for this column with a specific direction
-		ISortContentProvider sortProvider = (ISortContentProvider) viewer.getContentProvider();
-		
-		 // start sorting
-		sortProvider.sort_column(col, direction);
-
-		viewer.getTree().setRedraw(true);
+		try {
+			viewer.getTree().setRedraw(false);
+			
+			TreeColumn col = column.getColumn();
+			
+			// prepare the sorting for this column with a specific direction
+			ISortContentProvider sortProvider = (ISortContentProvider) viewer.getContentProvider();
+			
+			 // start sorting
+			sortProvider.sort_column(col, direction);
+		} finally {
+			viewer.getTree().setRedraw(true);
+		}
 	}	
 }
