@@ -101,27 +101,32 @@ fi
 # are too small and we need to reset the java VM size.
 
 java_vmsize=
-java_version=
+java_version=`java -version 2>&1 \
+	  | head -1 \
+	  | cut -d'"' -f2 \
+	  | sed 's/^1\.//' \
+	  | cut -d'.' -f1`
 for size in 2048 1536 1024 512 256
 do
-    java_version=`java -Xmx${size}m -version 2>&1 | grep -i vers | head -1`
     if test -n "$java_version" ; then
 	java_vmsize="$size"
 	break
     fi
 done
 
-# Check that version is 1.7 or later.
+# Check that version is 11 or later.
+
+echo "Java version $java_version"
 
 if test "$force" = no ; then
     if test "x$java_version" = x ; then
 	  echo "unable to find program 'java' on your PATH"
     fi
-#    minor=`expr "$java_version" : '[^.]*\.\([0-9]*\)'`
-#    test "$minor" -ge 7 >/dev/null 2>&1
-#    if test $? -ne 0 ; then
-#	  echo "$java_version is too old, use Java 1.7 or later"
-#    fi
+    if test $java_version -lt 11 ; then
+	  echo "$java_version is too old, use Java 11 or later"
+	  echo "Enter to continue ..."
+	  read keysomething
+    fi
 fi
 
 #------------------------------------------------------------

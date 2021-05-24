@@ -93,14 +93,8 @@ JAVA_MAJOR_VERSION=`java -version 2>&1 \
 
 echo "Java version $JAVA_MAJOR_VERSION"
 
-# For x86 and ppc64le we need Java 8 at least
-# For aarch64 we need Java 11
-jvm_required=8
-
-machine=`uname -m`
-if [ ${machine} == "aarch64" ]; then
-    jvm_required=11
-fi
+# we need Java 11 at least
+jvm_required=11
 
 if [ "$JAVA_MAJOR_VERSION" -lt "$jvm_required" ]; then
 	die "$name requires Java $jvm_required"
@@ -116,7 +110,11 @@ if ! command -v gtk-launch &> /dev/null
 then
     echo "It seems GTK-3 is not installed."
     echo "$name requires GTK 3.20 or newer."
-    exit
+    echo "Do you want to continue ? [Y/n]"
+    read conti
+    if [ "$conti" != "Y"  ]; then
+       exit
+    fi
 fi
 
 
