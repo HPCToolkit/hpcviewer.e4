@@ -142,8 +142,9 @@ cp releng/pom.4.18.xml releng/pom.xml
 ###################################################################
 OS=`uname`
 if [[ "$OS" == "Darwin" && "$1" == "-n" ]]; then 
-        echo "Notarize $output ..."
-	macos/notarize.sh $output
+        macPkgs="hpcviewer-${release}-macosx.cocoa.x86_64.zip"
+        echo "Notarize $macPkgs ..."
+	macos/notarize.sh $macPkgs
 	
 fi
 
