@@ -39,7 +39,7 @@ spack load gtkplus
     ./build.sh
     ``` 
     This will build Linux x86_64, Linux ppc64le and Windows with Eclipse 4.16,
-    and Linux Arm (experimental) and MacOS with Eclipse 4.18.
+    and Linux Arm (beta version) and MacOS with Eclipse 4.19.
     The script generates five `hpcviewer-<release>-<platform>.[zip|tgz]` files:
     Windows, Mac, Linux, x86_64, Linux ppcle64, and Linux Arm (experimental).
   * `untar` or `unzip` the file based according to the platform. 
@@ -52,7 +52,7 @@ spack load gtkplus
    mvn clean package
    ```
   This will compile and create hpcviewer packages for 4 platforms: Linux x86_64 and ppcle64, Windows and Mac
-  with Eclipse 4.16 (the default).
+  with Eclipse 4.19 (the default).
   Example of the output:
 ```
 ...
@@ -72,8 +72,7 @@ spack load gtkplus
 
 Requirements:
 
-* Recommended: [Eclipse 2020.12](https://www.eclipse.org/downloads/packages/release/2020-12/r/eclipse-ide-rcp-and-rap-developers) for Mac
-  or [Eclipse 2020.06](https://www.eclipse.org/downloads/packages/release/2020-06/r/eclipse-ide-rcp-and-rap-developers) for Linux and Windows. 
+* Recommended: [Eclipse 2021.03](https://www.eclipse.org/downloads/packages/release/2021-03/r/eclipse-ide-rcp-and-rap-developers). 
 * Warning: May not work properly with older versions of Eclipse. 
 
 To import the source code into Eclipse IDE:
@@ -89,7 +88,6 @@ to run:
 
 * Open product configuration `hpcviewer.product` at `edu.rice.cs.hpcviewer.product`
 * To run: Click `Launch an Eclipse application`
-* To export: Click `Eclipse product export wizard`
 
 
 ## Coding style
