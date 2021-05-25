@@ -4,7 +4,9 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import org.eclipse.jface.viewers.ILazyTreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.swt.widgets.TreeItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,13 +104,20 @@ public abstract class AbstractContentProvider
     	sort_column.getParent().setSortDirection(direction);		
     	sort_column.getParent().setSortColumn(sort_column);
 
+    	// need to select the top of the tree to avoid refreshing the whole
+    	// tree in the table
+    	Tree tree    = viewer.getTree();
+    	TreeItem top = tree.getItem(0);
+    	tree.setSelection(top);
+    	
     	// perform the sort by refreshing the viewer
     	// this refresh method will force the table to recompute the children
     	try {
-        	viewer.getTree().setRedraw(false);
-        	viewer.refresh(false);
+    		tree.setRedraw(false);
+        	viewer.refresh(null, false);
+        	viewer.expandToLevel(2, false);
     	} finally {
-    		viewer.getTree().setRedraw(true);
+    		tree.setRedraw(true);
     	}
     }
 

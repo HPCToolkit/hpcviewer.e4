@@ -33,6 +33,7 @@ public class BaseMetricLabelProvider extends ColumnLabelProvider implements IMet
 	 * (non-Javadoc)
 	 * @see edu.rice.cs.hpc.viewer.metric.IMetricLabelProvider#isEnabled()
 	 */
+	@Override
 	public boolean isEnabled() {
 		return false;
 	}
@@ -41,6 +42,7 @@ public class BaseMetricLabelProvider extends ColumnLabelProvider implements IMet
 	 * (non-Javadoc)
 	 * @see edu.rice.cs.hpc.viewer.metric.IMetricLabelProvider#setScope(java.lang.Object)
 	 */
+	@Override
 	public void setScope(Object scope) {
 		if (scope instanceof Scope) {
 			this.scope = (Scope)scope;
@@ -52,6 +54,7 @@ public class BaseMetricLabelProvider extends ColumnLabelProvider implements IMet
 	 * (non-Javadoc)
 	 * @see edu.rice.cs.hpc.viewer.metric.IMetricLabelProvider#setMetric(java.lang.Object)
 	 */
+	@Override
 	public void setMetric(Object metric) {
 		if (metric instanceof BaseMetric) {
 			this.metric = (BaseMetric)metric;
@@ -63,6 +66,7 @@ public class BaseMetricLabelProvider extends ColumnLabelProvider implements IMet
 	 * (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.ColumnLabelProvider#getFont(java.lang.Object)
 	 */
+	@Override
 	public Font getFont(Object element) {
 		return FontManager.getMetricFont();
 	}
@@ -71,6 +75,7 @@ public class BaseMetricLabelProvider extends ColumnLabelProvider implements IMet
 	 * (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.ColumnLabelProvider#getText(java.lang.Object)
 	 */
+	@Override
 	public String getText(Object element) {
 		String text = null; 
 
@@ -85,6 +90,7 @@ public class BaseMetricLabelProvider extends ColumnLabelProvider implements IMet
 	 * (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.ColumnLabelProvider#getBackground(java.lang.Object)
 	 */
+	@Override
 	public Color getBackground(final Object element) {
 		if (treeViewer != null) {
 			Object input = treeViewer.getInput();
@@ -101,6 +107,7 @@ public class BaseMetricLabelProvider extends ColumnLabelProvider implements IMet
 	 * (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.ColumnLabelProvider#getForeground(java.lang.Object)
 	 */
+	@Override
 	public Color getForeground(final Object element) {
 		return null;
 	}
