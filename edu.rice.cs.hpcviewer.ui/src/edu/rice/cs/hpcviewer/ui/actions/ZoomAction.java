@@ -48,9 +48,14 @@ public class ZoomAction {
 		
 		Scope root = old.duplicate();
 		root.addSubscope(current);
-		
-		viewer.setInput(root);		
-		viewer.expandToLevel(2, true);
+		try {
+			viewer.getTree().setRedraw(false);
+			viewer.setInput(null); // clear the table to speed up the next set input
+			viewer.setInput(root);		
+			viewer.expandToLevel(2, true);
+		} finally {
+			viewer.getTree().setRedraw(true);
+		}
 	}
 	
 	/**
@@ -69,6 +74,7 @@ public class ZoomAction {
 		}
 		try {
 			viewer.getTree().setRedraw(false);
+			viewer.setInput(null); // clear the table to speed up the next set input
 			viewer.setInput( parent );		
 		} finally {
 			viewer.getTree().setRedraw(true);			
