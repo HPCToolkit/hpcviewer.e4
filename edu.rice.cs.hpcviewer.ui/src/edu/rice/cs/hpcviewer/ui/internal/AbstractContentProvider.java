@@ -67,7 +67,6 @@ public abstract class AbstractContentProvider
 		if (element != null) {
 			try {
 				viewer.getTree().setRedraw(false);
-
 				viewer.replace(parent, index, element);
 				updateChildCount(element, -1);
 			} finally {
@@ -104,18 +103,20 @@ public abstract class AbstractContentProvider
     	sort_column.getParent().setSortDirection(direction);		
     	sort_column.getParent().setSortColumn(sort_column);
 
-    	// need to select the top of the tree to avoid refreshing the whole
-    	// tree in the table
     	Tree tree    = viewer.getTree();
-    	TreeItem top = tree.getItem(0);
-    	tree.setSelection(top);
     	
     	// perform the sort by refreshing the viewer
     	// this refresh method will force the table to recompute the children
     	try {
     		tree.setRedraw(false);
+
+        	// need to select the top of the tree to avoid refreshing the whole
+        	// tree in the table
+        	TreeItem top = tree.getItem(0);
+        	tree.setSelection(top);
+        	
         	viewer.refresh(null, false);
-        	viewer.expandToLevel(2, false);
+        	viewer.expandToLevel(2, true);
     	} finally {
     		tree.setRedraw(true);
     	}

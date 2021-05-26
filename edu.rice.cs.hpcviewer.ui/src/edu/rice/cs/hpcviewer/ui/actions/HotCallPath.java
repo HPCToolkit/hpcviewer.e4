@@ -39,17 +39,15 @@ public class HotCallPath
 		// find the selected node
 		ISelection sel = treeViewer.getSelection();
 		if (!(sel instanceof TreeSelection)) {
-			System.err.println("SVA: not a TreeSelecton instance");
 			return;
 		}
 		TreeSelection objSel = (TreeSelection) sel;
 		// get the node
-		Object o = objSel.getFirstElement();
-		if (!(o instanceof Scope)) {
+		Object node = objSel.getFirstElement();
+		if (!(node instanceof Scope)) {
 			lblMessage.showErrorMessage("Please select a scope node.");
 			return;
 		}
-		Scope current = (Scope) o;
 		// get the item
 		TreeItem item = this.treeViewer.getTree().getSelection()[0];
 		// get the selected metric
@@ -65,20 +63,22 @@ public class HotCallPath
 		if(data instanceof BaseMetric && item != null) {
 			BaseMetric metric = (BaseMetric) data;
 			// find the hot call path
-			int iLevel = 0;
-			TreePath []path  = objSel.getPaths();
 			boolean is_found = false;
+			
 			CallPathItem objHotPath = new CallPathItem();
+			objHotPath.level = 0;
+			objHotPath.path  = objSel.getPaths()[0];
+			objHotPath.node  = (Scope) node;
 			
 			try {
 				treeViewer.getTree().setRedraw(false);		
-				is_found = getHotCallPath(current, metric, iLevel, path[0], objHotPath);
+				is_found = getHotCallPath((Scope) node, metric, objHotPath);
+
+				// whether we find it or not, we should reveal the tree path to the last scope
+				treeViewer.setSelection(new StructuredSelection(objHotPath.path), false);
 			} finally {
 				treeViewer.getTree().setRedraw(true);
 			}
-
-			// whether we find it or not, we should reveal the tree path to the last scope
-			treeViewer.setSelection(new StructuredSelection(objHotPath.path), true);
 
 			if(!is_found && objHotPath.node.hasChildren()) {
 				lblMessage.showErrorMessage("No hot child.");
@@ -97,7 +97,7 @@ public class HotCallPath
 	 * @param TreePath path
 	 * @param HotCallPath objHotPath (caller has to allocate it)
 	 */
-	private boolean getHotCallPath(Scope scope, BaseMetric metric, int iLevel, TreePath path, CallPathItem objHotPath) {
+	private boolean getHotCallPath(Scope scope, BaseMetric metric, CallPathItem objHotPath) {
 		if(scope == null || metric == null )
 			return false;
 
@@ -106,8 +106,7 @@ public class HotCallPath
 		
 		if (objHotPath == null) objHotPath = new CallPathItem();
 		
-		objHotPath.node = scope;
-		objHotPath.path = path;
+		objHotPath.level++;
 		
 		// singly depth first search
 		// bug fix: we only drill once !
@@ -116,14 +115,6 @@ public class HotCallPath
 			if(o instanceof Scope) {
 				// get the child node
 				Scope scopeChild = (Scope) o;
-				
-				// let's move deeper down the tree
-				// this may cause java null pointer
-				try {
-					treeViewer.reveal(path);
-					//treeViewer.expandToLevel(path, 1);					
-				} finally {
-				}
 
 				// compare the value of the parent and the child
 				// if the ratio is significant, we stop 
@@ -132,18 +123,24 @@ public class HotCallPath
 				
 				double dParent = MetricValue.getValue(mvParent);
 				double dChild  = MetricValue.getValue(mvChild);
-				
+
+				objHotPath.path = objHotPath.path.createChildPath(scopeChild);
+				objHotPath.node = scopeChild;
+
 				// simple comparison: if the child has "significant" difference compared to its parent
 				// then we consider it as hot path node.
 				if(dChild < (0.5 * dParent)) {
-					objHotPath.node     = scopeChild;
-					objHotPath.path     = path.createChildPath(scopeChild);
-					
+					try {
+						treeViewer.getTree().setRedraw(false);
+						treeViewer.reveal(objHotPath.path);
+					} finally {
+						treeViewer.getTree().setRedraw(true);
+					}
+
 					return true;
 				} else {
 
-					TreePath childPath = path.createChildPath(scopeChild);
-					return getHotCallPath(scopeChild, metric, iLevel+ 1, childPath, objHotPath);
+					return getHotCallPath(scopeChild, metric, objHotPath);
 				}
 			}
 		}
@@ -162,7 +159,7 @@ public class HotCallPath
     {
     	// last node iterated
     	Scope node = null;
-    	
+    	int level  = 0;
     	TreePath path = null;
     }
 

@@ -347,8 +347,13 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		if (!OSValidator.isMac() && tree.getSelectionCount() > 0) {
 			return;
 		}
-		expandToLevel(2, false);
+		try {
+			TreeItem item = tree.getItem(0);
+			tree.setSelection(item);
+		} finally {			
+		}
 		
+		/*
 		try {
 			// hack on Mac: need to force to get the child getItem(0) so that the row height is adjusted
 			// if we just get the top of the item, the height of the row can be too small, 
@@ -362,7 +367,7 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 			
 			tree.select(item);
 		} catch (Exception e) {
-		}
+		}*/
     }
     
     
@@ -468,19 +473,21 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		
 		Tree tree = getTree();
 
-		tree.setRedraw(false);
-		TreeViewerColumn colViewer = addTreeColumn(metric, false);			
-		
-		// FIXME: this can take really long
-		// we need to spawn to another thread
+		try {
+			tree.setRedraw(false);
+			TreeViewerColumn colViewer = addTreeColumn(metric, false);			
+			
+			// FIXME: this can take really long
+			// we need to spawn to another thread
 
-		refresh(false);
-		
-		expandToLevel(2);
-		tree.setRedraw(true);
+			refresh(false);
+			tree.showColumn(colViewer.getColumn());
+			expandToLevel(2);
+		} finally {
+			tree.setRedraw(true);
+		}
 
 		// this doesn't work on Linux/GTK
-		tree.showColumn(colViewer.getColumn());
 	}
 
 	@Override

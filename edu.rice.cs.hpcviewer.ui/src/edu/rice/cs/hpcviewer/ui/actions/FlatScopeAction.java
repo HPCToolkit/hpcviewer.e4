@@ -74,9 +74,8 @@ public class FlatScopeAction
 				try {
 					treeViewer.getTree().setRedraw(false);
 					// we update the data of the table
+					treeViewer.setInput(null);
 					treeViewer.setInput(root);
-					// refreshing the table to take into account a new data
-					treeViewer.refresh();					
 					// expand the tree until reaching level 2
 					treeViewer.expandToLevel(2, true);
 				} finally {
@@ -89,7 +88,7 @@ public class FlatScopeAction
 
 	
 	/**
-	 * Unflatten flattened tree (tree has to be flattened before)
+	 * Unflatten a flattened tree (tree has to be flattened before)
 	 * @return true if the action is successful, false otherwise
 	 */
 	public boolean unflatten() {
@@ -97,16 +96,28 @@ public class FlatScopeAction
 			return false;
 		
 		Scope objParentNode = stackFlatNodes.pop();
-		if(objParentNode != null) {
-			this.treeViewer.setInput(objParentNode);
-			// expand the tree until reaching level 2
+		if(objParentNode == null) 
+			return false;
+
+		try {
+			treeViewer.getTree().setRedraw(false);
+			treeViewer.setInput(null);
+			treeViewer.setInput(objParentNode);
 			treeViewer.expandToLevel(2, true);
-			
-			objParentNode.setParent(null);
+		} finally {
+			treeViewer.getTree().setRedraw(true);
 		}
+		
+		objParentNode.setParent(null);
 		return true;
 	}
 
+	/***
+	 * Check if the tree can be unflattened by verifying if
+	 * it's flattened previously or not.
+	 * 
+	 * @return true if it's possible to be unflatten
+	 */
 	public boolean canUnflatten() {
 		return (!stackFlatNodes.isEmpty());
 	}

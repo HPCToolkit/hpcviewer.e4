@@ -120,7 +120,7 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener
 	
 	private ZoomAction  zoomAction    = null;
 	private HotCallPath hotPathAction = null;
-	private ExportTable   exportCSV     = null;
+	private ExportTable exportCSV     = null;
 	
 	private MetricColumnHideShowAction metricAction = null;
 	private UserDerivedMetric derivedMetricAction   = null;
@@ -163,7 +163,6 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener
 		composite.setLayoutData(gd_composite);
 				
 		CoolBar coolBar = new CoolBar(composite, SWT.FLAT);
-
 		ToolBar toolBar = new ToolBar(coolBar, SWT.FLAT | SWT.RIGHT);
 
 		// -------------------------------------------
@@ -276,7 +275,6 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener
 		createScopeColumn(getViewer());
 		
 		Experiment experiment = (Experiment) root.getExperiment();
-		
 		List<BaseMetric> metrics = experiment.getVisibleMetrics();
 		
 		try {
@@ -305,23 +303,9 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener
 			boolean []status = (boolean[]) dataEvent.data;
 			treeViewer.setColumnsStatus(getMetricManager(), status);
 		}
+
+		sortFirstVisibleColumn();
 		
-		// sort the first visible column
-		TreeColumn []columns = treeViewer.getTree().getColumns();
-		for(TreeColumn col: columns) {
-			if (col.getData() != null && col.getWidth()>0) {
-				// first the visible metric column
-
-				ISortContentProvider sortProvider = (ISortContentProvider) treeViewer.getContentProvider();					
-				 // start sorting
-				int swtDirection = SortColumn.getSWTSortDirection(sortDirection);
-				sortProvider.sort_column(col, swtDirection);
-				break;
-			}
-		}
-
-		treeViewer.initSelection(0);
-
 		// enable/disable action buttons
 		// this has to be in the last statement
 		treeViewer.getTree().getDisplay().asyncExec(()-> {
@@ -343,6 +327,26 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener
 		return treeViewer;
 	}
 	
+	
+	/****
+	 * Sort the table based on the first visible metric column
+	 * If there is no metric column visible, it doesn't sort anything
+	 */
+	protected void sortFirstVisibleColumn() {
+		// sort the first visible column
+		TreeColumn []columns = treeViewer.getTree().getColumns();
+		for(TreeColumn col: columns) {
+			if (col.getData() != null && col.getWidth()>0) {
+				// first the visible metric column
+
+				ISortContentProvider sortProvider = (ISortContentProvider) treeViewer.getContentProvider();					
+				 // start sorting
+				int swtDirection = SortColumn.getSWTSortDirection(ScopeComparator.SORT_DESCENDING);
+				sortProvider.sort_column(col, swtDirection);
+				break;
+			}
+		}
+	}
     
     /***
      * generic method to create column scope tree
