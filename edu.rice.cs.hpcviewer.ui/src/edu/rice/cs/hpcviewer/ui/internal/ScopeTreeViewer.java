@@ -349,7 +349,7 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		}
 		try {
 			TreeItem item = tree.getItem(0);
-			tree.setSelection(item);
+			tree.select(item);
 		} finally {			
 		}
 		
