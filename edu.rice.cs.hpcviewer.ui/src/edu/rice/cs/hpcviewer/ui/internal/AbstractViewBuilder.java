@@ -309,11 +309,10 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener
 		// enable/disable action buttons
 		// this has to be in the last statement
 		treeViewer.getTree().getDisplay().asyncExec(()-> {
-			updateStatus();
 			sortFirstVisibleColumn();
-			
 			treeViewer.initSelection(0);
-			treeViewer.getTree().setFocus();
+			
+			updateStatus();
 		});
 	}
 	
