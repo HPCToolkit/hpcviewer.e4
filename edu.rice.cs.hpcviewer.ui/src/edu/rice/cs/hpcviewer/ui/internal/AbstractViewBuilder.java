@@ -266,17 +266,17 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener
 	
 	@Override
 	public void setData(RootScope root, int sortColumnIndex, int sortDirection) {
-		// warning: sortColumnIndex is not used
-		
-		//long t1 = System.currentTimeMillis();
 		treeViewer.clearInput();
 		
 		removeColumns();
 		
+		// create the first column (tree column)
 		createScopeColumn(getViewer());
 		
-		Experiment experiment = (Experiment) root.getExperiment();
-		
+		//
+		// create the metric columns
+		//
+		Experiment experiment = (Experiment) root.getExperiment();		
 		List<BaseMetric> metrics = experiment.getVisibleMetrics();
 		
 		try {
@@ -305,30 +305,16 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener
 			boolean []status = (boolean[]) dataEvent.data;
 			treeViewer.setColumnsStatus(getMetricManager(), status);
 		}
-		
-		// sort the first visible column
-		TreeColumn []columns = treeViewer.getTree().getColumns();
-		for(TreeColumn col: columns) {
-			if (col.getData() != null && col.getWidth()>0) {
-				// first the visible metric column
-
-				ISortContentProvider sortProvider = (ISortContentProvider) treeViewer.getContentProvider();					
-				 // start sorting
-				int swtDirection = SortColumn.getSWTSortDirection(sortDirection);
-				sortProvider.sort_column(col, swtDirection);
-				break;
-			}
-		}
-
-		treeViewer.initSelection(0);
 
 		// enable/disable action buttons
 		// this has to be in the last statement
 		treeViewer.getTree().getDisplay().asyncExec(()-> {
 			updateStatus();
+			sortFirstVisibleColumn();
+			
+			treeViewer.initSelection(0);
+			treeViewer.getTree().setFocus();
 		});
-		//long t2 = System.currentTimeMillis();
-		//System.out.println(getClass().getSimpleName() + ": " + (t2-t1));
 	}
 	
 
@@ -344,6 +330,24 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener
 	}
 	
     
+	/**
+	 * sort the first visible column
+	 */
+	protected void sortFirstVisibleColumn() {
+		TreeColumn []columns = treeViewer.getTree().getColumns();
+		for(TreeColumn col: columns) {
+			if (col.getData() != null && col.getWidth()>0) {
+				// first the visible metric column
+
+				ISortContentProvider sortProvider = (ISortContentProvider) treeViewer.getContentProvider();					
+				 // start sorting
+				int swtDirection = SortColumn.getSWTSortDirection(ScopeComparator.SORT_DESCENDING);
+				sortProvider.sort_column(col, swtDirection);
+				break;
+			}
+		}
+	}
+	
     /***
      * generic method to create column scope tree
      * Called by children to have uniform way to create a scope tree.

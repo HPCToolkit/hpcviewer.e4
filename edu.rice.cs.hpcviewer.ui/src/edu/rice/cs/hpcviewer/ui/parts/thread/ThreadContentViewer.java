@@ -9,22 +9,17 @@ import java.util.Map.Entry;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.viewers.TreeViewerColumn;
-import org.eclipse.swt.widgets.TreeColumn;
-
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
-import edu.rice.cs.hpcdata.util.ScopeComparator;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
-import edu.rice.cs.hpcviewer.ui.base.ISortContentProvider;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeSelectionAdapter;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
 
 import edu.rice.cs.hpcviewer.ui.metric.MetricRawManager;
 import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownContentViewer;
-import edu.rice.cs.hpcviewer.ui.util.SortColumn;
 
 public class ThreadContentViewer extends TopDownContentViewer 
 {
@@ -115,19 +110,8 @@ public class ThreadContentViewer extends TopDownContentViewer
 		}
 		
 		// sort the first visible column
-		TreeColumn []columns = treeViewer.getTree().getColumns();
-		for(TreeColumn col: columns) {
-			if (col.getData() != null && col.getWidth()>0) {
-				// first the visible metric column
-
-				ISortContentProvider sortProvider = (ISortContentProvider) treeViewer.getContentProvider();					
-				 // start sorting
-				int swtDirection = SortColumn.getSWTSortDirection(ScopeComparator.SORT_DESCENDING);
-				sortProvider.sort_column(col, swtDirection);
-				break;
-			}
-		}
-
+		sortFirstVisibleColumn();
+		
 		treeViewer.initSelection(0);
 	}
 	

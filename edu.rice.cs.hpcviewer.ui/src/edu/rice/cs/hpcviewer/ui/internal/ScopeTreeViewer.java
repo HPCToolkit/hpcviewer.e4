@@ -334,39 +334,22 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
      * 			the expansion is SWT default. 
      */
     public void initSelection(int level) {
-		
-		// scroll to the top. This works on mac, but doesn't work on Linux/GTK
-		
-		final Tree tree = getTree();
-		
-		// issue #36
-		// Linux/GTK only: if a user already select an item, we shouldn't expand it
-		//
-		// issue #34 (macOS only): we need to refresh and expand the table after sorting
-		// otherwise the tree items are not visible
-		if (!OSValidator.isMac() && tree.getSelectionCount() > 0) {
-			return;
-		}
+		Tree tree = getTree();
 		try {
-			getTree().setRedraw(false);
+			tree.setRedraw(false);
 			expandToLevel(2);
-		} finally {
-			getTree().setRedraw(true);
-		}
-		
-		try {
+			
 			// hack on Mac: need to force to get the child getItem(0) so that the row height is adjusted
 			// if we just get the top of the item, the height of the row can be too small, 
 			//  and the text is cropped badly.
 			
-			TreeItem item = tree.getTopItem();
-			tree.showItem(item);
-
-			if (level >= 0 && item != null)
-				item = item.getItem(level);
-			
+			int numItems  = tree.getItemCount();
+			int indexSel  = numItems > 2? 2: 0;
+			TreeItem item = tree.getItem(indexSel);
 			tree.select(item);
-		} catch (Exception e) {
+		} catch (Exception exc) {
+		} finally {
+			tree.setRedraw(true);
 		}
     }
     
