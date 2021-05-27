@@ -147,6 +147,9 @@ public abstract class AbstractContentProvider
     		return null;
     	
     	TreeColumn sort_column = viewer.getTree().getSortColumn();
+    	if (sort_column == null)
+    		// case for empty metric or empty tree: do not sort anything
+    		return parent.getChildren();
     	
 		BaseMetric metric  = (BaseMetric) sort_column.getData();
     	int swt_direction  = viewer.getTree().getSortDirection();
