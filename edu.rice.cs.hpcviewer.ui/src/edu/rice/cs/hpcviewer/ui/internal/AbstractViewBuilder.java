@@ -303,12 +303,13 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener
 			boolean []status = (boolean[]) dataEvent.data;
 			treeViewer.setColumnsStatus(getMetricManager(), status);
 		}
-
-		sortFirstVisibleColumn();
 		
 		// enable/disable action buttons
 		// this has to be in the last statement
 		treeViewer.getTree().getDisplay().asyncExec(()-> {
+
+			sortFirstVisibleColumn();
+			treeViewer.initSelection(1);
 			updateStatus();
 		});
 		//long t2 = System.currentTimeMillis();

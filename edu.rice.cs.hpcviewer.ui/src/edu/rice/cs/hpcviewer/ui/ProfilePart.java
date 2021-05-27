@@ -106,7 +106,10 @@ public class ProfilePart implements IProfilePart, EventHandler
 					if (e.item == view) {
 						if (view.getInput() == null)
 							view.setInput(experiment);
-						view.focus();
+						
+						sync.asyncExec(()->{
+							view.focus();
+						});
 					}
 				}
 			}
