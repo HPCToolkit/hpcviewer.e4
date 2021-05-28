@@ -97,7 +97,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 		
 		tabFolderBottom = new CTabFolder(sashForm, SWT.BORDER);
 		
-		sashForm.setWeights(new int[] {1000, 1000});
+		sashForm.setWeights(new int[] {1000, 1700});
 
 		tabFolderBottom.addSelectionListener(new SelectionAdapter() {
 			@Override
