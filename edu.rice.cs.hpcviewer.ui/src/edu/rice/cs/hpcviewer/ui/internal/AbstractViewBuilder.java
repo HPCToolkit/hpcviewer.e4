@@ -123,7 +123,6 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener
 	private ExportTable exportCSV     = null;
 	
 	private MetricColumnHideShowAction metricAction = null;
-	private UserDerivedMetric derivedMetricAction   = null;
 	
 	protected Stack<Object> stackActions; 
 	
@@ -601,6 +600,7 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener
 		});
 		
 		toolItem[ACTION_ADD_METRIC].addSelectionListener(new SelectionListener() {
+			private UserDerivedMetric derivedMetricAction = null;
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {

@@ -1,5 +1,6 @@
 package edu.rice.cs.hpcviewer.ui.internal;
 
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.swt.SWT;
@@ -73,13 +74,13 @@ public class ScopeSelectionAdapter extends SelectionAdapter
 			}
 			
 			try {
-				//viewer.expandToLevel(2);
+				// Hack: use the tree viewer set selection to fire selection event
+				// in jface so that the view can update the buttons (enabled/disabled)
+				// if we use tree's set selection, there's no selection event fired.
 				
-				// hack on Mac: need to force to get the child getItem(0) so that the row height is adjusted
-				// if we just get the top of the item, the height of the row can be too small, 
-				//  and the text is cropped badly.
-				
-				((ScopeTreeViewer)viewer).initSelection(-1);
+				//((ScopeTreeViewer)viewer).initSelection(-1);
+				TreeItem item = viewer.getTree().getItem(0);
+				((ScopeTreeViewer)viewer).setSelection(new StructuredSelection(item.getData()));
 			} catch (Exception exc) {
 			}
 		});

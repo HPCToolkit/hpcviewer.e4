@@ -472,16 +472,27 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 	public void addUserMetricColumn(BaseMetric metric) {
 		
 		Tree tree = getTree();
+		TreeColumn sortColumn = tree.getSortColumn();
+		int sortDirection = tree.getSortDirection();
+		TreeItem []selections = tree.getSelection();
 
 		try {
 			tree.setRedraw(false);
-			TreeViewerColumn colViewer = addTreeColumn(metric, false);			
+			addTreeColumn(metric, false);			
 			
 			// FIXME: this can take really long
 			// we need to spawn to another thread
 
 			refresh(false);
-			tree.showColumn(colViewer.getColumn());
+			
+			// restore the sort column and direction again
+			// after the refresh, it disappears somehow
+			
+			tree.setSortDirection(sortDirection);
+			tree.setSortColumn(sortColumn);
+			if (selections != null && selections.length>0)
+				tree.setSelection(selections[0]);
+			
 			expandToLevel(2);
 		} finally {
 			tree.setRedraw(true);
