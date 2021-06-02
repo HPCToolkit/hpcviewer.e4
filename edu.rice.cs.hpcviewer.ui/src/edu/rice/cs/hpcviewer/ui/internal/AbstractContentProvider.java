@@ -293,7 +293,7 @@ public abstract class AbstractContentProvider
 			// - if we sort based on the tree column, the metric can be null
 			// - if the tree is empty, the parent can be null
 			
-			int dir = direction & 0x2;
+			int dir = direction & 0x3;
 			int met = (metric == null ? 0xFF    : (metric.getIndex() & 0xFFF)  )  << 2 ;
 			int par = (parent == null ? 0xFFFFF :  parent.hashCode() ) << 10;
 			return dir | met | par;
