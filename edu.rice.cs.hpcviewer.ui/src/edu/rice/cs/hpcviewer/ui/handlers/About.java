@@ -143,7 +143,12 @@ public class About
 			Link link = new Link(parent, SWT.LEFT);
 			link.setText("See <a href=\"http://hpctoolkit.org\">http://hpctoolkit.org</a> for more information.");
 			link.addListener(SWT.Selection, event -> {
-				Program.launch("http://hpctoolkit.org");
+				boolean result = Program.launch("http://hpctoolkit.org");
+				if (!result) {
+					MessageDialog.openError(getShell(), 
+											"Cannot launch browser", 
+											"Unable to launch the system browser.");
+				}
 			});
 			return parent;
 		}

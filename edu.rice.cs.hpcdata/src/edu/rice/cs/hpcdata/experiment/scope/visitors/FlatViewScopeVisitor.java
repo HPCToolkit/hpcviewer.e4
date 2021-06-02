@@ -150,7 +150,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 	 * @param scopeCCT
 	 * @return
 	 ****************************************************************************/
-	private FlatScopeInfo getFlatScope( Scope cct_s, String cct_id ) {
+	private FlatScopeInfo getFlatScope( Scope cct_s ) {
 		//-----------------------------------------------------------------------------
 		// get the flat scope
 		//-----------------------------------------------------------------------------
@@ -355,16 +355,10 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 					// parent is a call site
 					// ----------------------------------------------
 					ProcedureScope proc_cct_s = ((CallSiteScope)cct_parent_s).getProcedureScope(); 
-					String parent_id = getID(proc_cct_s);
-					
-					flat_enc_info = this.getFlatScope(proc_cct_s, parent_id);
+					flat_enc_info = getFlatScope(proc_cct_s);
 
 				} else {					
-					// ----------------------------------------------
-					// parent is a line scope or loop scope or procedure scope
-					// ----------------------------------------------
-					String parent_id = getID(cct_parent_s);
-					flat_enc_info = this.getFlatScope(cct_parent_s, parent_id);
+					flat_enc_info = getFlatScope(cct_parent_s);
 				}
 				if (flat_enc_info != null)
 					flat_enc_s = flat_enc_info.flat_s;
@@ -372,7 +366,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 			}
 		}
 
-		FlatScopeInfo objFlat = this.getFlatScope(cct_s, id);
+		FlatScopeInfo objFlat = getFlatScope(cct_s);
 		if (objFlat == null)
 			return null;
 
