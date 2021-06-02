@@ -1,6 +1,5 @@
 package edu.rice.cs.hpcviewer.ui.internal;
 
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.swt.SWT;
@@ -8,9 +7,6 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
-import org.eclipse.swt.widgets.TreeItem;
-
-import edu.rice.cs.hpcdata.util.OSValidator;
 import edu.rice.cs.hpcviewer.ui.base.ISortContentProvider;
 
 
@@ -61,7 +57,7 @@ public class ScopeSelectionAdapter extends SelectionAdapter
 		// ----------------
 		
 		// Issue #34: mac requires to delay the selection after sort
-		
+		/*
 		tree.getDisplay().asyncExec(() -> {
 			
 			// issue #36
@@ -84,7 +80,7 @@ public class ScopeSelectionAdapter extends SelectionAdapter
 			} catch (Exception exc) {
 			}
 		});
-
+		*/
 	}
 	
 	/**
