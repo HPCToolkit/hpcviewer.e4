@@ -6,7 +6,6 @@ import org.eclipse.jface.viewers.ILazyTreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
-import org.eclipse.swt.widgets.TreeItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,8 +111,8 @@ public abstract class AbstractContentProvider
 
         	// need to select the top of the tree to avoid refreshing the whole
         	// tree in the table
-        	TreeItem top = tree.getItem(0);
-        	tree.setSelection(top);
+        	//TreeItem top = tree.getItem(0);
+        	//tree.setSelection(top);
         	
         	viewer.refresh(null, false);
         	viewer.expandToLevel(2, true);
@@ -295,8 +294,8 @@ public abstract class AbstractContentProvider
 			// - if the tree is empty, the parent can be null
 			
 			int dir = direction & 0x2;
-			int met = (metric == null ? 0xFFF   : (metric.getIndex() & 0xFFF)  )  << 2 ;
-			int par = (parent == null ? 0xFFFFF : (parent.hashCode() & 0xFFFF) ) << 12;
+			int met = (metric == null ? 0xFF    : (metric.getIndex() & 0xFFF)  )  << 2 ;
+			int par = (parent == null ? 0xFFFFF :  parent.hashCode() ) << 10;
 			return dir | met | par;
 		}
 		
