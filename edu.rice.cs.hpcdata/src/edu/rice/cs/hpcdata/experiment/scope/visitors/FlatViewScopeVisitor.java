@@ -195,7 +195,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 			//-----------------------------------------------------------------------------
 			// save the info into hashtable
 			//-----------------------------------------------------------------------------
-			this.htFlatScope.put( cct_id, flat_info_s);
+			this.htFlatScope.put( id, flat_info_s);
 
 			//-----------------------------------------------------------------------------
 			// for inline macro, we don't need to attach the file and load module
