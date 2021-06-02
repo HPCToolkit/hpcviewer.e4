@@ -17,9 +17,12 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpcviewer.ui.dialogs.InfoDialog;
@@ -132,6 +135,18 @@ public class About
 			return composite;
 		}
 		
+		@Override
+		protected Control createMessageArea(Composite composite) {
+			Composite parent = (Composite) super.createMessageArea(composite);
+			Label lbl = new Label(parent, SWT.NONE);
+			lbl.setText("");
+			Link link = new Link(parent, SWT.LEFT);
+			link.setText("See <a href=\"http://hpctoolkit.org\">http://hpctoolkit.org</a> for more information.");
+			link.addListener(SWT.Selection, event -> {
+				Program.launch("http://hpctoolkit.org");
+			});
+			return parent;
+		}
 
 		@Override
 		protected void configureShell(Shell shell) {
