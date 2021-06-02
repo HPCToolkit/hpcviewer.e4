@@ -103,12 +103,12 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 			//--------------------------------------------------------------------------
 			// Pre-visit
 			//--------------------------------------------------------------------------
-			List<Scope> flat_info = this.htFlatCostAdded.get( id );
+			List<Scope> flat_info = htFlatCostAdded.get( id );
 			if (flat_info != null) {
-				this.htFlatCostAdded.remove(id);
+				htFlatCostAdded.remove(id);
 			}
 
-			FlatScopeInfo objFlat = this.getFlatCounterPart(scope, scope, id);
+			FlatScopeInfo objFlat = getFlatCounterPart(scope, scope, id);
 			
 			//--------------------------------------------------------------------------
 			// Aggregating metrics to load module and flat scope
@@ -123,7 +123,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 				//--------------------------------------------------------------------------
 				if (scope instanceof CallSiteScope) {
 					ProcedureScope proc_cct_s = ((CallSiteScope) scope).getProcedureScope();
-					this.getFlatCounterPart(proc_cct_s, scope, id);
+					getFlatCounterPart(proc_cct_s, scope, id);
 				}
 			}
 
@@ -132,7 +132,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 			//--------------------------------------------------------------------------
 			// Post visit
 			//--------------------------------------------------------------------------
-			List<Scope> flat_info = this.htFlatCostAdded.get( id );
+			List<Scope> flat_info = htFlatCostAdded.get( id );
 			if (flat_info != null)
 				for (Scope node: flat_info) {
 					node.decrementCounter();
@@ -195,7 +195,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 			//-----------------------------------------------------------------------------
 			// save the info into hashtable
 			//-----------------------------------------------------------------------------
-			this.htFlatScope.put( id, flat_info_s);
+			this.htFlatScope.put( cct_id, flat_info_s);
 
 			//-----------------------------------------------------------------------------
 			// for inline macro, we don't need to attach the file and load module
@@ -456,7 +456,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 			if ( this.isTheSameScope(kid, child) )
 				return;
 		}		
-		this.addChild(parent, child);
+		addChild(parent, child);
 	}
 	
 	/*****************************************************************

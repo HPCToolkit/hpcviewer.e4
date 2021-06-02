@@ -139,7 +139,6 @@ public class HotCallPath
 
 					return true;
 				} else {
-
 					return getHotCallPath(scopeChild, metric, objHotPath);
 				}
 			}
