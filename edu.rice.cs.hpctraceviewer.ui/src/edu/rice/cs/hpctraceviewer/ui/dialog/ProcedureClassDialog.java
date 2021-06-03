@@ -203,7 +203,7 @@ public class ProcedureClassDialog extends Dialog
 						RGB rgb = procData.getRGB();
 						Color color = mapColor.get(rgb.hashCode());
 						if (color == null) {
-							color = new Color(rgb);
+							color = new Color(getShell().getDisplay(), rgb);
 							mapColor.put(rgb.hashCode(), color);
 						}
 						return color;
