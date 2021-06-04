@@ -134,37 +134,27 @@ repackage_windows() {
 # Building zip: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-win32.win32.x86_64.zip
 # Building zip: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-macosx.cocoa.x86_64.zip
 # Building tar: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-linux.gtk.aarch64.tar.gz
-# Building zip: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-macosx.cocoa.x86_64.zip
+# ...
 
 repackage_linux linux.gtk x86_64
 repackage_linux linux.gtk aarch64
+repackage_linux linux.gtk ppc64le 
 
 # copy and rename windows package
 output="hpcviewer-${RELEASE}-win32.win32.x86_64.zip"
 input=edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-win32.win32.x86_64.zip
 repackage_windows $input $output 
 
-# copy and rename mac package
+# copy and rename mac x86_64 package
 output="hpcviewer-${RELEASE}-macosx.cocoa.x86_64.zip"
 input=edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-macosx.cocoa.x86_64.zip 
 repackage_mac $input $output
 
+# copy and rename mac aarch64 package
+output="hpcviewer-${RELEASE}-macosx.cocoa.aarch64.zip"
+input=edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-macosx.cocoa.aarch64.zip 
+repackage_mac $input $output
 
-###################################################################
-# Special build for other than ppc64le mac and aarch64
-###################################################################
-
-cp releng/pom.xml releng/pom.4.18.xml
-cp releng/pom.4.16.xml releng/pom.xml
-mvn package
-
-# result:
-# Building tar: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-linux.gtk.ppc64le.tar.gz
-
-# repackage linux files
-repackage_linux linux.gtk ppc64le
-
-cp releng/pom.4.18.xml releng/pom.xml 
 
 ###################################################################
 # special treatement for mac OS
@@ -172,9 +162,10 @@ cp releng/pom.4.18.xml releng/pom.xml
 OS=`uname`
 if [[ "$OS" == "Darwin" && "$NOTARIZE" == "1" ]]; then 
         macPkgs="hpcviewer-${RELEASE}-macosx.cocoa.x86_64.zip"
-        echo "Notarize $macPkgs ..."
 	macos/notarize.sh $macPkgs
 	
+        macPkgs="hpcviewer-${RELEASE}-macosx.cocoa.aarch64.zip"
+	macos/notarize.sh $macPkgs
 fi
 
 

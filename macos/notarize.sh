@@ -21,7 +21,7 @@ FILE=$1
 if [[ "$1" == ""  ]]; then
 	FILE=`ls hpcviewer-*-macosx.cocoa.x86_64.zip | tail -n 1`
 fi
-echo "File to be notarized: $FILE"
+echo "Notarize: $FILE"
 check_file $FILE
 
 FILE_BASE="${FILE%.zip}"
@@ -101,7 +101,7 @@ unzip ../../"${FILE_BASE}.zip"
 cd ..
 zip -r "${FILE_BASE}.zip" hpcviewer.app
 cd ..
-mv "${FILE_BASE}.zip" .
+mv "${FILE_BASE}.zip" ..
 
 ##############################
 #
