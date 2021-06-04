@@ -14,14 +14,43 @@ then
 	exit
 fi
 
+NOTARIZE=0
+RELEASE=`date +"%Y.%m"`
+
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+key="$1"
+
+case $key in
+    -n|--notarize)
+    NOTARIZE=1
+    shift # past argument
+    ;;
+    -r|--release)
+    RELEASE="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    --default)
+    DEFAULT=YES
+    shift # past argument
+    ;;
+    *)    # unknown option
+    POSITIONAL+=("$1") # save it in an array for later
+    shift # past argument
+    ;;
+esac
+done
+set -- "${POSITIONAL[@]}" # restore positional parameters
+
 # 
 # Update the release file 
 #
 GITC=`git rev-parse --short HEAD`
-release=`date +"%Y.%m"`
 
-echo "Release ${release}. Commit $GITC" > edu.rice.cs.hpcviewer.ui/release.txt
-rm -rf hpcviewer-${release}*
+echo "Release ${RELEASE}. Commit $GITC" > edu.rice.cs.hpcviewer.ui/release.txt
+rm -rf hpcviewer-${RELEASE}*
 
 #
 # build the viewer
@@ -60,7 +89,7 @@ repackage_linux(){
 
 	cd ..
 
-	output="hpcviewer-${release}-${prefix}.${platform}.$extension"
+	output="hpcviewer-${RELEASE}-${prefix}.${platform}.$extension"
 	tar czf ../$output hpcviewer/
 	chmod 664 ../$output
 
@@ -111,12 +140,12 @@ repackage_linux linux.gtk x86_64
 repackage_linux linux.gtk aarch64
 
 # copy and rename windows package
-output="hpcviewer-${release}-win32.win32.x86_64.zip"
+output="hpcviewer-${RELEASE}-win32.win32.x86_64.zip"
 input=edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-win32.win32.x86_64.zip
 repackage_windows $input $output 
 
 # copy and rename mac package
-output="hpcviewer-${release}-macosx.cocoa.x86_64.zip"
+output="hpcviewer-${RELEASE}-macosx.cocoa.x86_64.zip"
 input=edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-macosx.cocoa.x86_64.zip 
 repackage_mac $input $output
 
@@ -141,8 +170,8 @@ cp releng/pom.4.18.xml releng/pom.xml
 # special treatement for mac OS
 ###################################################################
 OS=`uname`
-if [[ "$OS" == "Darwin" && "$1" == "-n" ]]; then 
-        macPkgs="hpcviewer-${release}-macosx.cocoa.x86_64.zip"
+if [[ "$OS" == "Darwin" && "$NOTARIZE" == "1" ]]; then 
+        macPkgs="hpcviewer-${RELEASE}-macosx.cocoa.x86_64.zip"
         echo "Notarize $macPkgs ..."
 	macos/notarize.sh $macPkgs
 	
@@ -153,4 +182,4 @@ echo "=================================="
 echo " Done" 
 echo "=================================="
 
-ls -l hpcviewer-${release}-*
+ls -l hpcviewer-${RELEASE}-*
