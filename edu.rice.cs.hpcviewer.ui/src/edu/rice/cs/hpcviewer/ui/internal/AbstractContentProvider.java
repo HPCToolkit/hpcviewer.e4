@@ -9,6 +9,8 @@ import org.eclipse.swt.widgets.TreeColumn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.rice.cs.hpcdata.experiment.BaseExperiment;
+import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -165,7 +167,10 @@ public abstract class AbstractContentProvider
 
 		// check if this parent has already sorted children or not
     	// if yes, we look at the cache and return the children.
-    	SortNodeKey key = new SortNodeKey(sort_direction, metric, parent);
+    	BaseExperiment exp = ((ScopeTreeViewer)viewer).getExperiment();
+    	int metIndexSimple = ((Experiment)exp).getMetricSimpleIndex(metric);
+    	
+    	SortNodeKey key = new SortNodeKey(sort_direction, metric, parent, metIndexSimple);
     	
     	if (cache_nodes.contains(key)) {
     		// the cache exist. 
@@ -268,35 +273,30 @@ public abstract class AbstractContentProvider
 	 *****************/
 	private static class SortNodeKey 
 	{
-		// key set:
-		int direction;
-		BaseMetric metric;
-		Scope parent;
+		final int   hashcode;
 		
 		// values:
 		Object []children;
 		
-		public SortNodeKey(int direction, BaseMetric metric, Scope parent) {
-			this.direction = direction;
-			this.metric = metric;
-			this.parent = parent;
-		}
-		
-		@Override
-		public String toString() {
-			return direction + ", " + metric.getDisplayName() + ", " + parent.getName();
-		}
-		
-		@Override
-		public int hashCode() {
+		public SortNodeKey(int direction, BaseMetric metric, Scope parent, int metIndexSimple) {
 			// Corner cases: 
 			// - if we sort based on the tree column, the metric can be null
 			// - if the tree is empty, the parent can be null
 			
 			int dir = direction & 0x3;
-			int met = (metric == null ? 0xFF    : (metric.getIndex() & 0xFFF)  )  << 2 ;
+			int met = (metIndexSimple & 0xFFF)  << 2 ;
 			int par = (parent == null ? 0xFFFFF :  parent.hashCode() ) << 10;
-			return dir | met | par;
+			hashcode = dir | met | par;
+		}
+		
+		@Override
+		public String toString() {
+			return "hash: " + hashcode;
+		}
+		
+		@Override
+		public int hashCode() {
+			return hashcode;
 		}
 		
 		@Override

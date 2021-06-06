@@ -38,7 +38,8 @@ implements IMetricManager
 	 * map ID to the metric descriptor
 	 */
 	private Map<Integer, BaseMetric> mapIndexToMetric;	
-	private Map<String, BaseMetric> mapIdToMetric;
+	private Map<String, BaseMetric>  mapIdToMetric;
+	private Map<BaseMetric, Integer> mapMetricToSimpleIndex;
 	
 	//////////////////////////////////////////////////////////////////////////
 	//ACCESS TO METRICS													    //
@@ -59,6 +60,9 @@ implements IMetricManager
 		mapIndexToMetric = new HashMap<Integer, BaseMetric>(metricList.size());
 		mapIdToMetric    = new HashMap<>(metricList.size());
 		metricsWithOrder = new HashMap<>(metricList.size()/2);
+		mapMetricToSimpleIndex = new HashMap<>(metricList.size());
+		
+		int index = 0;
 		
 		for(BaseMetric metric:metrics) {
 			assert mapIndexToMetric.get(metric.getIndex()) == null : 
@@ -69,6 +73,9 @@ implements IMetricManager
 			}
 			mapIndexToMetric.put(metric.getIndex(), metric);
 			mapIdToMetric.put(metric.getShortName(), metric);
+			mapMetricToSimpleIndex.put(metric, index);
+			
+			index++;
 		}
 		
 		if (getMajorVersion() >= Constants.EXPERIMENT_SPARSE_VERSION) {
@@ -161,6 +168,20 @@ implements IMetricManager
 		return metricsWithOrder.get(order);
 	}
 	
+	
+	/***
+	 * Return the simplified index of the metric.
+	 * If a metric has index 20456, but its order in the list is 2
+	 * then its simplified index is 2.
+	 * 
+	 * @param metric
+	 * @return int
+	 */
+	public int getMetricSimpleIndex(BaseMetric metric)
+	{
+		return mapMetricToSimpleIndex.get(metric);
+	}
+	
 	//////////////////////////////////////////////////////////////////////////
 	//Compute Derived Metrics												//
 	//////////////////////////////////////////////////////////////////////////
@@ -175,6 +196,7 @@ implements IMetricManager
 
 		metrics.add(objMetric);
 		mapIndexToMetric.put(objMetric.getIndex(), objMetric);
+		mapMetricToSimpleIndex.put(objMetric, metrics.size());
 	}
 
 
