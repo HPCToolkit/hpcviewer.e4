@@ -9,8 +9,6 @@ import org.eclipse.swt.widgets.TreeColumn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.rice.cs.hpcdata.experiment.BaseExperiment;
-import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -167,8 +165,17 @@ public abstract class AbstractContentProvider
 
 		// check if this parent has already sorted children or not
     	// if yes, we look at the cache and return the children.
-    	BaseExperiment exp = ((ScopeTreeViewer)viewer).getExperiment();
-    	int metIndexSimple = ((Experiment)exp).getMetricSimpleIndex(metric);
+    	int metIndexSimple = 0;
+    	if (metric != null) {
+        	TreeColumn []cols = viewer.getTree().getColumns();
+        	for (int index=1; index<cols.length; index++) {
+        		TreeColumn col = cols[index];
+        		if (col.getData() == metric) {
+        			metIndexSimple = index;
+        			break;
+        		}
+        	}
+    	}
     	
     	SortNodeKey key = new SortNodeKey(sort_direction, metric, parent, metIndexSimple);
     	
