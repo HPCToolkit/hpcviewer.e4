@@ -159,25 +159,22 @@ public abstract class AbstractContentProvider
     	if (sort_column == null)
     		return parent.getChildren();
     	
-		BaseMetric metric  = (BaseMetric) sort_column.getData();
     	int swt_direction  = viewer.getTree().getSortDirection();
     	int sort_direction = SortColumn.getSortDirection(swt_direction); 
-
+    	
 		// check if this parent has already sorted children or not
     	// if yes, we look at the cache and return the children.
-    	int metIndexSimple = 0;
-    	if (metric != null) {
-        	TreeColumn []cols = viewer.getTree().getColumns();
-        	for (int index=1; index<cols.length; index++) {
-        		TreeColumn col = cols[index];
-        		if (col.getData() == metric) {
-        			metIndexSimple = index;
-        			break;
-        		}
-        	}
+    	int indexColumn = 0;
+    	TreeColumn []cols = viewer.getTree().getColumns();
+    	for (int index=0; index<cols.length; index++) {
+    		TreeColumn col = cols[index];
+    		if (col == sort_column) {
+    			indexColumn = index;
+    			break;
+    		}
     	}
     	
-    	SortNodeKey key = new SortNodeKey(sort_direction, metric, parent, metIndexSimple);
+    	SortNodeKey key = new SortNodeKey(sort_direction, parent, indexColumn);
     	
     	if (cache_nodes.contains(key)) {
     		// the cache exist. 
@@ -203,6 +200,7 @@ public abstract class AbstractContentProvider
     	if (children == null || children.length == 1) 
     		return children;
     	
+		BaseMetric metric = (BaseMetric) sort_column.getData();
     	comparator.setMetric(metric);    		
 		comparator.setDirection(sort_direction);
 		
@@ -285,15 +283,15 @@ public abstract class AbstractContentProvider
 		// values:
 		Object []children;
 		
-		public SortNodeKey(int direction, BaseMetric metric, Scope parent, int metIndexSimple) {
+		public SortNodeKey(int direction, Scope parent, int columnIndex) {
 			// Corner cases: 
 			// - if we sort based on the tree column, the metric can be null
 			// - if the tree is empty, the parent can be null
 			
-			int dir = direction & 0x3;
-			int met = (metIndexSimple & 0xFFF)  << 2 ;
-			int par = (parent == null ? 0xFFFFF :  parent.hashCode() ) << 10;
-			hashcode = dir | met | par;
+			int dir  = direction & 0x3;
+			int idx  = (columnIndex & 0xFFF)  << 2 ;
+			int par  = (parent == null ? 0xFFFFF :  parent.hashCode() ) << 9;
+			hashcode = dir | idx | par;
 		}
 		
 		@Override
