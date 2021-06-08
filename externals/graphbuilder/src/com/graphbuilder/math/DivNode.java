@@ -27,7 +27,7 @@ public class DivNode extends OpNode {
 	}
 	
 	public Expression duplicate() {
-		DivNode n = new DivNode(leftChild, rightChild);
+		DivNode n = new DivNode(leftChild.duplicate(), rightChild.duplicate());
 		return n;
 	}
 }

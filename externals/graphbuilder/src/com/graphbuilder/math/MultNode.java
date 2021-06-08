@@ -23,7 +23,7 @@ public class MultNode extends OpNode {
 	}
 	
 	public Expression duplicate() {
-		MultNode n = new MultNode(leftChild, rightChild);
+		MultNode n = new MultNode(leftChild.duplicate(), rightChild.duplicate());
 		return n;
 	}
 }

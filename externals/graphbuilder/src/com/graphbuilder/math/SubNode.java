@@ -23,7 +23,7 @@ public class SubNode extends OpNode {
 	}
 
 	public Expression duplicate() {
-		SubNode n = new SubNode(leftChild, rightChild);
+		SubNode n = new SubNode(leftChild.duplicate(), rightChild.duplicate());
 		return n;
 	}
 }

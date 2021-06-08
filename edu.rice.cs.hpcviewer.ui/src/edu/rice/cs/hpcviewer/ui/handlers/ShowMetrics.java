@@ -105,7 +105,11 @@ public class ShowMetrics
 		List<BaseMetric> copyMetrics = new ArrayList<BaseMetric>(metrics.size());
 		
 		for(BaseMetric metric: metrics) {
-			copyMetrics.add(metric.duplicate());
+			try {
+				copyMetrics.add(metric.duplicate());
+			} finally {
+				
+			}
 		}
 		
 		MetricPropertyDialog dialog = new MetricPropertyDialog(shell, (Experiment) exp);
