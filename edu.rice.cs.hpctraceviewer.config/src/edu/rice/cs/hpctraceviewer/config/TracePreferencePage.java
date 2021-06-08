@@ -99,11 +99,11 @@ public class TracePreferencePage extends AbstractPage
 
 		Composite groupColor = createGroupControl(parent, "Color policy", false);
 		groupColor.setToolTipText("Change the policy to map the procedure's name to a color.\n" +
-								  "The change will take effect on the next session");
+								  "The change will take effect at the next session");
 
 		colorPolicies = createRadioButtonControl(groupColor, TracePreferenceConstants.colorOptions);
 		Label lbl = new Label(groupColor, SWT.NONE);
-		lbl.setText("The change will take effect on the next session");
+		lbl.setText("The change will take effect at the next session");
 		
 		PreferenceStore pref = TracePreferenceManager.INSTANCE.getPreferenceStore();		
 		int colorSelected    = pref.getInt(TracePreferenceConstants.PREF_COLOR_OPTION);
