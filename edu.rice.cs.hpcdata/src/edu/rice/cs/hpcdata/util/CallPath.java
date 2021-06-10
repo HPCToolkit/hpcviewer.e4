@@ -60,13 +60,12 @@ public class CallPath
 	{
 		final Vector<String> functionNames = new Vector<String>();
 		Scope currentScope = leafScope;
-		int depth = maxDepth;
-		while(depth > 0 && currentScope != null)
+		//int depth = maxDepth;
+		while(currentScope != null && !(currentScope instanceof RootScope))
 		{
 			if ((currentScope instanceof CallSiteScope) || (currentScope instanceof ProcedureScope))
 			{
 				functionNames.add(0, currentScope.getName());
-				depth--;
 			}
 			currentScope = currentScope.getParentScope();
 		}
@@ -93,6 +92,14 @@ public class CallPath
 		this.maxDepth = maxDepth;
 	}
 	
+	public Scope getLeafScope() {
+		return leafScope;
+	}
+
+	public void setLeafScope(Scope leafScope) {
+		this.leafScope = leafScope;
+	}
+
 	@Override
 	public String toString() {
 		return maxDepth + ": " + leafScope.getName();

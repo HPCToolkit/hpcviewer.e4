@@ -1,6 +1,7 @@
 package edu.rice.cs.hpcdata.experiment.scope.visitors;
 
 import java.util.List;
+import java.util.Map;
 
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
@@ -20,9 +21,9 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.ScopeVisitType;
 import edu.rice.cs.hpcdata.experiment.scope.StatementRangeScope;
-import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 import edu.rice.cs.hpcdata.filter.FilterAttribute;
 import edu.rice.cs.hpcdata.filter.IFilterData;
+import edu.rice.cs.hpcdata.util.CallPath;
 
 
 /******************************************************************
@@ -53,6 +54,8 @@ public class FilterScopeVisitor implements IScopeVisitor
 
 	private int num_scope_filtered = 0;
 	private int filterStatus 	   = STATUS_INIT;
+	private int current_depth;
+	private int max_depth;
 	
 	/***********
 	 * Constructor to filter a cct
@@ -67,6 +70,8 @@ public class FilterScopeVisitor implements IScopeVisitor
 		this.rootMetricValues = rootOriginalCCT.getMetricValues();
 		this.rootOriginalCCT  = rootOriginalCCT;
 		need_to_continue 	  = true;
+		current_depth = 0;
+		max_depth = 0;
 		
 		experiment = rootOriginalCCT.getExperiment();
 		if (experiment instanceof Experiment)
@@ -85,14 +90,34 @@ public class FilterScopeVisitor implements IScopeVisitor
 		return need_to_continue;
 	}
 	
+	
+	/****
+	 * Retrieve the minimum omitted scopes due to filtering
+	 * @return int
+	 */
 	public int numberOfFilteredScopes() 
 	{
 		return num_scope_filtered;
 	}
 	
+	
+	/***
+	 * Retrieve the current filter status
+	 * 
+	 * @return STATUS_INIT, STATUS_OK, STATUS_FAKE_PROCEDURE
+	 */
 	public int getFilterStatus() 
 	{
 		return filterStatus;
+	}
+	
+	
+	/****
+	 * Retrieve the possibly new maximum depth 
+	 * @return int
+	 */
+	public int getMaxDepth() {
+		return max_depth;
 	}
 	
 	//----------------------------------------------------
@@ -125,8 +150,11 @@ public class FilterScopeVisitor implements IScopeVisitor
 
 		if (vt == ScopeVisitType.PreVisit) {
 			// Previsit
-			Scope parent = scope.getParentScope();
-			
+			if (isScopeTrace(scope)) {
+				current_depth++;
+				max_depth = Math.max(max_depth, current_depth);
+				//System.out.println(current_depth + " / " + max_depth + " : " + scope.getName());
+			} 
 			FilterAttribute filterAttribute = filter.getFilterAttribute(scope.getName());
 			if (filterAttribute != null)
 			{
@@ -159,7 +187,7 @@ public class FilterScopeVisitor implements IScopeVisitor
 					//-------------------------------------------------------------------
 					for (Object child: scope.getChildren())
 					{
-						scope.remove((TreeNode) child);
+						removeNode((Scope) child, filterAttribute.filterType);
 					}
 				} else
 				{
@@ -172,6 +200,7 @@ public class FilterScopeVisitor implements IScopeVisitor
 						{
 							// no need to merge metric if the filtered child is a line statement.
 							// in this case, the parent (PF) already includes the exclusive value.
+							Scope parent = scope.getParentScope();
 							mergeMetrics(parent, scope, need_to_continue);
 						}
 					}
@@ -181,12 +210,21 @@ public class FilterScopeVisitor implements IScopeVisitor
 			{
 				// filter is not needed, we can surely continue to investigate the descendants
 				need_to_continue = true;
-			}			
+			}	
 		} else 
 		{ // PostVisit
+			if (isScopeTrace(scope)) {
+				current_depth--;
+			}
 		}
 		return need_to_continue;
 	}
+	
+	
+	private boolean isScopeTrace(Scope scope) {
+		return (scope instanceof ProcedureScope || scope instanceof CallSiteScope) ;
+	}
+	
 	
 	/********
 	 * Remove a child from its parent. if the filter type is SELF, we'll attach the grandchildren
@@ -198,8 +236,7 @@ public class FilterScopeVisitor implements IScopeVisitor
 	private void removeChild(Scope childToRemove, ScopeVisitType vt, FilterAttribute.Type filterType)
 	{
 		// skip to current scope
-		Scope parent = childToRemove.getParentScope();
-		parent.remove(childToRemove);
+		Scope parent = removeNode(childToRemove, filterType);
 		
 		// remove its children and glue it the parent
 		if (filterType == FilterAttribute.Type.Self_Only)
@@ -207,6 +244,38 @@ public class FilterScopeVisitor implements IScopeVisitor
 			addGrandChildren(parent, vt, childToRemove);
 		}
 	}
+	
+	
+	private Scope removeNode(Scope child, FilterAttribute.Type filterType) {
+		// 1. remove the child node
+		Scope parent = child.getParentScope();
+		parent.remove(child);
+
+		// 2. move the trace call-path id (if exist) to the parent
+		propagateTraceID(parent, child, filterType);
+
+		return parent;
+	}
+	
+	
+	private void propagateTraceID(Scope parent, Scope child, FilterAttribute.Type filterType) {
+		if (filterType == FilterAttribute.Type.Self_Only)
+			return;
+		
+		// children have been removed
+		// copy the cpid to the parent
+		CallPathTraceVisitor cptv = new CallPathTraceVisitor();
+		cptv.map = experiment.getScopeMap();
+		cptv.parent_scope = parent;
+		cptv.parent_depth = current_depth;
+		if (isScopeTrace(child))
+			cptv.parent_depth--;
+		
+		child.dfsVisitScopeTree(cptv);
+
+	}
+	
+	
 	
 	/*****
 	 * Add the grand children to the parent
@@ -313,5 +382,42 @@ public class FilterScopeVisitor implements IScopeVisitor
 		
 		MetricValue mv    = new MetricValue(value, annotation);
 		target.setMetricValue(metric_exclusive_index, mv);
+	}
+	
+	
+	private static class CallPathTraceVisitor implements IScopeVisitor
+	{
+		Scope parent_scope;
+		int parent_depth;
+		Map<Integer, CallPath> map;
+		
+		//----------------------------------------------------
+		// visitor pattern instantiations for each Scope type
+		//----------------------------------------------------
+		public void visit(RootScope scope, 				ScopeVisitType vt) { update(scope, vt); }
+		public void visit(LoadModuleScope scope, 		ScopeVisitType vt) { update(scope, vt); }
+		public void visit(FileScope scope, 				ScopeVisitType vt) { update(scope, vt); }
+		public void visit(GroupScope scope, 			ScopeVisitType vt) { update(scope, vt); }
+		public void visit(Scope scope, 					ScopeVisitType vt) { update(scope, vt); }
+		public void visit(CallSiteScope scope, 			ScopeVisitType vt) { update(scope, vt); }
+		public void visit(ProcedureScope scope, 		ScopeVisitType vt) { update(scope, vt); }
+		public void visit(LoopScope scope, 				ScopeVisitType vt) { update(scope, vt); }
+		public void visit(StatementRangeScope scope, 	ScopeVisitType vt) { update(scope, vt); }
+		public void visit(LineScope scope, 				ScopeVisitType vt) { update(scope, vt); }
+
+		private void update(Scope scope, ScopeVisitType vt) {
+			if (vt == ScopeVisitType.PreVisit) {
+				int cpid = scope.getCpid();
+				if (cpid >= 0) {
+					CallPath cp = map.get(cpid);
+					if (cp != null) {
+						System.out.print("\t" + cp);
+						cp.setLeafScope(parent_scope);
+						cp.setMaxDepth(parent_depth);
+						System.out.println(" -> " + cp);
+					}
+				}
+			}
+		}
 	}
 }

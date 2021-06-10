@@ -10,7 +10,6 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.DisposeResourcesVisitor;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.FilterScopeVisitor;
-import edu.rice.cs.hpcdata.experiment.scope.visitors.RecomputeDepthVisitor;
 import edu.rice.cs.hpcdata.filter.IFilterData;
 import edu.rice.cs.hpcdata.trace.BaseTraceAttribute;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
@@ -348,12 +347,6 @@ public abstract class BaseExperiment implements IExperiment
 		FilterScopeVisitor visitor = new FilterScopeVisitor(rootCCT, filter);
 		rootCCT.dfsVisitFilterScopeTree(visitor);
 
-		// if the tree has trace view, we should update the max depth of each leaf node
-		RecomputeDepthVisitor rdVisitor = new RecomputeDepthVisitor(traceAttribute.mapCpidToCallpath);
-		rootCCT.dfsVisitScopeTree(rdVisitor);
-		
-		setMaxDepth(rdVisitor.getMaxDepth());
-		
 		// finalize the filter: for hpcviewer, we need to prepare to create subtrees:
 		// bottom-up, flat and optionally data-centric tree
 		
@@ -362,6 +355,7 @@ public abstract class BaseExperiment implements IExperiment
 		}
 		filterNumScopes = visitor.numberOfFilteredScopes();
 		filterStatus	= visitor.getFilterStatus();
+		setMaxDepth(visitor.getMaxDepth());
 		
 		return filterNumScopes;
 	}
