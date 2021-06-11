@@ -153,7 +153,6 @@ public class FilterScopeVisitor implements IScopeVisitor
 			if (isScopeTrace(scope)) {
 				current_depth++;
 				max_depth = Math.max(max_depth, current_depth);
-				//System.out.println(current_depth + " / " + max_depth + " : " + scope.getName());
 			} 
 			FilterAttribute filterAttribute = filter.getFilterAttribute(scope.getName());
 			if (filterAttribute != null)
@@ -267,9 +266,7 @@ public class FilterScopeVisitor implements IScopeVisitor
 		CallPathTraceVisitor cptv = new CallPathTraceVisitor();
 		cptv.map = experiment.getScopeMap();
 		cptv.parent_scope = parent;
-		cptv.parent_depth = current_depth;
-		if (isScopeTrace(child))
-			cptv.parent_depth--;
+		cptv.parent_depth = current_depth-1;
 		
 		child.dfsVisitScopeTree(cptv);
 
@@ -411,10 +408,8 @@ public class FilterScopeVisitor implements IScopeVisitor
 				if (cpid >= 0) {
 					CallPath cp = map.get(cpid);
 					if (cp != null) {
-						System.out.print("\t" + cp);
 						cp.setLeafScope(parent_scope);
 						cp.setMaxDepth(parent_depth);
-						System.out.println(" -> " + cp);
 					}
 				}
 			}

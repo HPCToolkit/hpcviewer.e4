@@ -17,15 +17,25 @@ public class CallPath
 	private int maxDepth;
 
 	
-	public CallPath(Scope _leafScope, int _maxDepth, Scope _currentDepthScope, int _currentDepth)
+	/******
+	 * Constructor for call path class.
+	 * 
+	 * @param scope the scope of the trace. Doesn't have to be a leaf.
+	 * @param depth the depth of the scope.
+	 */
+	public CallPath(Scope scope, int depth)
 	{
-		leafScope = _leafScope;
-		maxDepth = _maxDepth;
+		leafScope = scope;
+		maxDepth = depth;
 	}
 	
-	public CallPath(Scope _leafScope, int _maxDepth)
-	{
-		this(_leafScope, _maxDepth, null, _maxDepth);
+	/*******
+	 * Return true if the scope is part of trace scope. False otherwise
+	 * @param scope
+	 * @return
+	 */
+	public static boolean isTraceScope(Scope scope) {
+		return (scope instanceof CallSiteScope || scope instanceof ProcedureScope);
 	}
 	
 	/**returns the scope at the given depth that's along the path between the root scope and the leafScope*/
@@ -36,19 +46,22 @@ public class CallPath
 		
 		int cDepth = maxDepth;
 		Scope cDepthScope = leafScope;
+		
+		if (isTraceScope(cDepthScope))
+			cDepth--;
 
 		while(!(cDepthScope.getParentScope() instanceof RootScope) && 
-				(cDepth > depth || !(cDepthScope instanceof CallSiteScope || cDepthScope instanceof ProcedureScope)))
+				(cDepth > depth || !isTraceScope(cDepthScope)))
 		{
 			cDepthScope = cDepthScope.getParentScope();
-			if((cDepthScope instanceof CallSiteScope) || (cDepthScope instanceof ProcedureScope))
+			if(isTraceScope(cDepthScope)) {
 				cDepth--;
+			}
 		}
 		
-		assert (cDepthScope instanceof CallSiteScope || cDepthScope instanceof ProcedureScope);
-
 		return cDepthScope;
 	}
+	
 	
 	
 	/*************************************
@@ -63,7 +76,7 @@ public class CallPath
 		//int depth = maxDepth;
 		while(currentScope != null && !(currentScope instanceof RootScope))
 		{
-			if ((currentScope instanceof CallSiteScope) || (currentScope instanceof ProcedureScope))
+			if (isTraceScope(currentScope))
 			{
 				functionNames.add(0, currentScope.getName());
 			}
