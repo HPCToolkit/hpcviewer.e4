@@ -47,6 +47,17 @@ public class CallPath
 		int cDepth = maxDepth;
 		Scope cDepthScope = leafScope;
 		
+		// this is a hack to solve issue #99 (filtering leaf nodes problem)
+		// If the leaf node is visible on the trace view, we have to decrement
+		// the current depth.
+		// The problem with the original code, we assume the leaf node is always
+		//  a line scope. Which is not correct for prof2 or filtered trees
+		//
+		// Example: a -> b -> c -> d where a, b, c, and d are all trace scope
+		//          1    2    3    4  depth stored (1-based)
+		//          0    1    2    3  depth visualized (0-based)
+		//
+		// if depth == 3, we should return d instead of c
 		if (isTraceScope(cDepthScope))
 			cDepth--;
 

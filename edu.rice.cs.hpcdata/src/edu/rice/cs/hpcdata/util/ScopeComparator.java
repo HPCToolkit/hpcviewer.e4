@@ -23,10 +23,10 @@ public class ScopeComparator implements Comparator<Object>
 {
 	
 	final static public int SORT_DESCENDING = 1;  // from high value to lower value
-	final static public int SORT_ASCENDING  = -1; // from low value to higher value
+	final static public int SORT_ASCENDING  = 0; // from low value to higher value
 
 	private BaseMetric metric = null;
-	private int direction = 1;
+	private int direction = SORT_DESCENDING;
 	
 	public void setMetric(BaseMetric metric) {
 		this.metric = metric;
@@ -48,18 +48,19 @@ public class ScopeComparator implements Comparator<Object>
 		
 		Scope node1 = (Scope) n1;
 		Scope node2 = (Scope) n2;
-
+		int multiplier = (this.direction == SORT_DESCENDING ? 1 : -1);
+		
 		// dirty solution: if the column position is 0 then we sort
 		// according to its element name
 		// otherwise, sort according to the metric
 		if(metric == null || n1 == null || n2 == null) {
-			return direction * this.doCompare(node1, node2);
+			return multiplier * this.doCompare(node1, node2);
 		}
 		
 		MetricValue mv1 = this.metric.getValue(node1); 
 		MetricValue mv2 = this.metric.getValue(node2);
 		
-		int iRet = direction * MetricValue.compareTo(mv2, mv1);
+		int iRet = multiplier * MetricValue.compareTo(mv2, mv1);
 		if(iRet != 0)
 			return iRet;
 

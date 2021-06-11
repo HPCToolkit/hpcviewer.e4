@@ -100,7 +100,7 @@ private IMetricValueCollection metrics;
 private int iCounter;
 
 //the cpid is removed in hpcviewer, but hpctraceview still requires it in order to dfs
-protected int cpid;
+private int cpid;
 
 public int iSourceCodeAvailability = Scope.SOURCE_CODE_UNKNOWN;
 

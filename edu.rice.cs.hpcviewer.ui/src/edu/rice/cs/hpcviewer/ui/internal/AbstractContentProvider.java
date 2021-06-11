@@ -174,7 +174,7 @@ public abstract class AbstractContentProvider
     		}
     	}
     	
-    	SortNodeKey key = new SortNodeKey(sort_direction, parent, indexColumn);
+    	SortNodeKey key = new SortNodeKey(sort_direction, parent, indexColumn, cols.length);
     	
     	if (cache_nodes.contains(key)) {
     		// the cache exist. 
@@ -278,20 +278,27 @@ public abstract class AbstractContentProvider
 	 *****************/
 	private static class SortNodeKey 
 	{
+		// key (to be defined here)
 		final int   hashcode;
 		
-		// values:
+		// values (to be set by the caller)
 		Object []children;
 		
-		public SortNodeKey(int direction, Scope parent, int columnIndex) {
-			// Corner cases: 
-			// - if we sort based on the tree column, the metric can be null
-			// - if the tree is empty, the parent can be null
-			
-			int dir  = direction & 0x3;
-			int idx  = (columnIndex & 0xFFF)  << 2 ;
-			int par  = (parent == null ? 0xFFFFF :  parent.hashCode() ) << 9;
-			hashcode = dir | idx | par;
+		/****
+		 * Constructor to create a key
+		 * 
+		 * @param direction: 0 or 1
+		 * @param parent: the parent scope
+		 * @param columnIndex: the column index
+		 * @param numColumns : number of columns
+		 */
+		public SortNodeKey(int direction, Scope parent, int columnIndex, int numColumns) {
+
+			int idx  = columnIndex  << 1 ;
+			int idxLimit = 33 - Integer.numberOfLeadingZeros(numColumns-1);
+			int par  = (parent == null ? 0xFFFFF :  parent.hashCode() ) << idxLimit;
+
+			hashcode = direction | idx | par;
 		}
 		
 		@Override
