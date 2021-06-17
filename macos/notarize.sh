@@ -19,7 +19,9 @@ fi
 
 FILE=$1
 if [[ "$1" == ""  ]]; then
-	FILE=`ls hpcviewer-*-macosx.cocoa.x86_64.zip | tail -n 1`
+#	FILE=`ls hpcviewer-*-macosx.cocoa.x86_64.zip | tail -n 1`
+ 	echo "Syntax: $0 <file_to_notarize>"
+	exit 1
 fi
 echo "Notarize: $FILE"
 check_file $FILE
@@ -45,7 +47,7 @@ fi
 #
 ##############################
 
-DIR_PREP="prepare_sign"
+DIR_PREP="prepare_sign-$FILE"
 
 rm -rf $DIR_PREP
 mkdir $DIR_PREP
