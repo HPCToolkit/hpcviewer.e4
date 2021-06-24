@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcfilter.pattern;
+package edu.rice.cs.hpcfilter.cct;
 
 import org.eclipse.jface.dialogs.IInputValidator;
 

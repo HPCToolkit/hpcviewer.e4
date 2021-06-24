@@ -16,7 +16,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpcdata.filter.FilterAttribute;
-import edu.rice.cs.hpcfilter.pattern.PatternValidator;
 
 /*********************************************************************
  * 
