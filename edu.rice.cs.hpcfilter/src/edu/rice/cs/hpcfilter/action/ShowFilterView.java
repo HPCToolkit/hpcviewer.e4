@@ -11,8 +11,8 @@ import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.swt.widgets.Shell;
 
+import edu.rice.cs.hpcfilter.cct.FilterPropertyDialog;
 import edu.rice.cs.hpcfilter.service.FilterStateProvider;
-import edu.rice.cs.hpcfilter.view.FilterPropertyDialog;
 
 public class ShowFilterView 
 {

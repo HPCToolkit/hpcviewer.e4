@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcfilter.view;
+package edu.rice.cs.hpcfilter.cct;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;

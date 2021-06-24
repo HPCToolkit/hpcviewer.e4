@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcfilter.view;
+package edu.rice.cs.hpcfilter.cct;
 
 import java.util.Iterator;
 import java.util.Map.Entry;
