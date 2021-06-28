@@ -15,10 +15,11 @@ import org.eclipse.nebula.widgets.nattable.config.CellConfigAttributes;
 import org.eclipse.nebula.widgets.nattable.config.ConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfiguration;
 import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
-import org.eclipse.nebula.widgets.nattable.data.IColumnPropertyAccessor;
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
+import org.eclipse.nebula.widgets.nattable.data.convert.DefaultBooleanDisplayConverter;
+import org.eclipse.nebula.widgets.nattable.edit.EditConfigAttributes;
+import org.eclipse.nebula.widgets.nattable.edit.editor.CheckBoxCellEditor;
 import org.eclipse.nebula.widgets.nattable.extension.glazedlists.GlazedListsEventLayer;
-import org.eclipse.nebula.widgets.nattable.extension.glazedlists.GlazedListsSortModel;
 import org.eclipse.nebula.widgets.nattable.grid.data.DefaultColumnHeaderDataProvider;
 import org.eclipse.nebula.widgets.nattable.grid.data.DefaultCornerDataProvider;
 import org.eclipse.nebula.widgets.nattable.grid.data.DefaultRowHeaderDataProvider;
@@ -32,8 +33,6 @@ import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.nebula.widgets.nattable.layer.cell.ColumnOverrideLabelAccumulator;
 import org.eclipse.nebula.widgets.nattable.layer.stack.DefaultBodyLayerStack;
 import org.eclipse.nebula.widgets.nattable.painter.cell.CheckBoxPainter;
-import org.eclipse.nebula.widgets.nattable.sort.SortHeaderLayer;
-import org.eclipse.nebula.widgets.nattable.sort.config.SingleClickSortConfiguration;
 import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
 import org.eclipse.nebula.widgets.nattable.ui.menu.HeaderMenuConfiguration;
 import org.eclipse.swt.SWT;
@@ -112,62 +111,37 @@ public abstract class AbstractFilterComposite<T> extends Composite
 
 		IDataProvider dataProvider = new FilterDataProvider(filterList);
 
+		// data layer
 		DataLayer dataLayer = new DataLayer(dataProvider);
 		GlazedListsEventLayer<Data> listEventLayer = new GlazedListsEventLayer<AbstractFilterComposite.Data>(dataLayer, eventList);
 		DefaultBodyLayerStack defaultLayerStack = new DefaultBodyLayerStack(listEventLayer);
 
-		ColumnOverrideLabelAccumulator columnLabelAccumulator = new ColumnOverrideLabelAccumulator(dataLayer);
-		dataLayer.setConfigLabelAccumulator(columnLabelAccumulator);
-		//columnLabelAccumulator.registerColumnOverrides(getStyle(), null);
-
+		// columns header
 		IDataProvider columnHeaderDataProvider = new DefaultColumnHeaderDataProvider(labels);
 		DataLayer columnDataLayer = new DefaultColumnHeaderDataLayer(columnHeaderDataProvider);
 		ColumnHeaderLayer colummnLayer = new ColumnHeaderLayer(columnDataLayer, dataLayer, defaultLayerStack.getSelectionLayer());
-		/*
-		IColumnPropertyAccessor<Data> columnAccessor = new IColumnPropertyAccessor<Data>() {
-
-			@Override
-			public Object getDataValue(Data rowObject, int columnIndex) {
-				return labels[columnIndex];
-			}
-
-			@Override
-			public void setDataValue(Data rowObject, int columnIndex, Object newValue) {				
-			}
-
-			@Override
-			public int getColumnCount() {
-				return labels.length;
-			}
-
-			@Override
-			public String getColumnProperty(int columnIndex) {
-				return labels[columnIndex];
-			}
-
-			@Override
-			public int getColumnIndex(String propertyName) {
-				for(int i=0; i<labels.length; i++) {
-					if (labels[i].equals(propertyName))
-						return i;
-				}
-				return 0;
-			}
-		};	*/
-		//SortHeaderLayer<Data> sortLayer = new SortHeaderLayer<>(colummnLayer, new GlazedListsSortModel<>(sortedList, columnAccessor, configRegistry, columnDataLayer), false);
-		//sortLayer.addConfiguration(new SingleClickSortConfiguration());
 		
+		// row header
 		DefaultRowHeaderDataProvider rowHeaderDataProvider = new DefaultRowHeaderDataProvider(dataProvider);
 		DefaultRowHeaderDataLayer rowHeaderDataLayer = new DefaultRowHeaderDataLayer(rowHeaderDataProvider);
 		RowHeaderLayer rowHeaderLayer = new RowHeaderLayer(rowHeaderDataLayer, defaultLayerStack, defaultLayerStack.getSelectionLayer());
 
+		// corner layer
 		DefaultCornerDataProvider cornerDataProvider = new DefaultCornerDataProvider(columnHeaderDataProvider, rowHeaderDataProvider);
 		DataLayer cornerDataLayer = new DataLayer(cornerDataProvider);
 		CornerLayer cornerLayer = new CornerLayer(cornerDataLayer, rowHeaderLayer, colummnLayer);
 		
+		// grid layer
 		GridLayer gridLayer = new GridLayer(defaultLayerStack, colummnLayer, rowHeaderLayer, cornerLayer);
 		
+		final ColumnOverrideLabelAccumulator columnLabelAccumulator = new ColumnOverrideLabelAccumulator(defaultLayerStack);
+		defaultLayerStack.setConfigLabelAccumulator(columnLabelAccumulator);
+		columnLabelAccumulator.registerColumnOverrides(0, labels[0]);
+	        
+		// the table
 		NatTable natTable = new NatTable(parentContainer, gridLayer, false); 
+		
+		// additional configuration
 		natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
 		natTable.addConfiguration(new HeaderMenuConfiguration(natTable));
 		natTable.addConfiguration(new FilterConfiguration(labels));
@@ -189,10 +163,14 @@ public abstract class AbstractFilterComposite<T> extends Composite
 		
 		@Override
 		public void configureRegistry(IConfigRegistry configRegistry) {
+
 			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_PAINTER, 
 												   new CheckBoxPainter(), 
 												   DisplayMode.NORMAL, 
 												   labels[0]);
+			
+			configRegistry.registerConfigAttribute(CellConfigAttributes.DISPLAY_CONVERTER, new DefaultBooleanDisplayConverter(), DisplayMode.NORMAL, labels[0]);
+			configRegistry.registerConfigAttribute(EditConfigAttributes.CELL_EDITOR, new CheckBoxCellEditor(), DisplayMode.NORMAL, labels[0]);
 		}
 	}
 	
