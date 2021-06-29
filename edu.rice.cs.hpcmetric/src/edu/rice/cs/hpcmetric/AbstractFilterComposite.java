@@ -4,6 +4,12 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.SortedList;
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
+import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
+import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
+import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
+import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 
 import java.util.List;
 
@@ -12,12 +18,12 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.config.AbstractRegistryConfiguration;
 import org.eclipse.nebula.widgets.nattable.config.CellConfigAttributes;
-import org.eclipse.nebula.widgets.nattable.config.ConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfiguration;
 import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.config.IEditableRule;
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
 import org.eclipse.nebula.widgets.nattable.data.convert.DefaultBooleanDisplayConverter;
+import org.eclipse.nebula.widgets.nattable.data.convert.DefaultIntegerDisplayConverter;
 import org.eclipse.nebula.widgets.nattable.edit.EditConfigAttributes;
 import org.eclipse.nebula.widgets.nattable.edit.editor.CheckBoxCellEditor;
 import org.eclipse.nebula.widgets.nattable.extension.glazedlists.GlazedListsEventLayer;
@@ -34,6 +40,7 @@ import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.nebula.widgets.nattable.layer.cell.ColumnLabelAccumulator;
 import org.eclipse.nebula.widgets.nattable.layer.stack.DefaultBodyLayerStack;
 import org.eclipse.nebula.widgets.nattable.painter.cell.CheckBoxPainter;
+import org.eclipse.nebula.widgets.nattable.painter.cell.TextPainter;
 import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
 import org.eclipse.nebula.widgets.nattable.ui.menu.HeaderMenuConfiguration;
 import org.eclipse.swt.SWT;
@@ -44,15 +51,49 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-public abstract class AbstractFilterComposite<T> extends Composite 
+
+/*********************************************************************
+ * 
+ * Class to display a composite to show metrics and its properties
+ * This class allows to change the properties of the metric.
+ * <p>
+ * This class shows:
+ * <ul>
+ * <li>show or hide</li>
+ * <li>displayed name</li>
+ * <li>root value (or empty)</li>
+ * <li>the description</li>
+ * </ul>
+ *
+ *********************************************************************/
+public abstract class AbstractFilterComposite extends Composite 
 {	
-	protected Text objSearchText;
-	private final Composite parentContainer;
+	private static final int INDEX_VISIBILITY  = 0;
+	private static final int INDEX_NAME        = 1;
+	private static final int INDEX_VALUE       = 2;
+	private static final int INDEX_DESCRIPTION = 3;
 	
-	public AbstractFilterComposite(Composite parent, int style, List<? extends Data> list, String []labels) {
+	private static final String []COLUMN_LABELS = {"Shown", "Name", "Root value", "Description"};
+	
+	private final IMetricManager metricManager;
+	private final RootScope root;
+	private final Composite parentContainer;
+
+	protected Text objSearchText;
+
+	/***
+	 * 
+	 * @param parent
+	 * @param style
+	 * @param metricManager
+	 * @param root
+	 */
+	public AbstractFilterComposite(Composite parent, int style, IMetricManager metricManager, RootScope root) {
 		super(parent, style);
 		
-		parentContainer = new Composite(parent, SWT.BORDER);
+		this.root = root;
+		this.metricManager   = metricManager;
+		this.parentContainer = new Composite(parent, SWT.BORDER);
 
 		GridLayout grid = new GridLayout();
 		grid.numColumns=1;
@@ -93,7 +134,7 @@ public abstract class AbstractFilterComposite<T> extends Composite
 		// expand the filter field as much as possible horizontally
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(objSearchText);
 
-		NatTable nattable = setLayer(list, labels);
+		NatTable nattable = setLayer(metricManager, root);
 
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(nattable);
 		
@@ -102,23 +143,31 @@ public abstract class AbstractFilterComposite<T> extends Composite
 	}
 
 	
-	protected NatTable setLayer(List<? extends Data> list, final String []labels) {
+	/****
+	 * Set the layers of the table
+	 * 
+	 * @param metricManager the experiment or metric manager
+	 * @param root the root scope
+	 * 
+	 * @return an instance of nat table
+	 */
+	protected NatTable setLayer(IMetricManager metricManager, RootScope root) {
 
 		//IConfigRegistry configRegistry = new ConfigRegistry();
+		List<BaseMetric> list = metricManager.getMetricList();
+		EventList<BaseMetric> eventList   = GlazedLists.eventList(list);
+		SortedList<BaseMetric> sortedList = new SortedList<BaseMetric>(eventList);
+		FilterList<BaseMetric> filterList = new FilterList<BaseMetric>(sortedList);
 
-		EventList<Data> eventList   = GlazedLists.eventList(list);
-		SortedList<Data> sortedList = new SortedList<Data>(eventList);
-		FilterList<Data> filterList = new FilterList<AbstractFilterComposite.Data>(sortedList);
-
-		IDataProvider dataProvider = new FilterDataProvider(filterList);
+		IDataProvider dataProvider = new FilterDataProvider(filterList, root);
 
 		// data layer
 		DataLayer dataLayer = new DataLayer(dataProvider);
-		GlazedListsEventLayer<Data> listEventLayer = new GlazedListsEventLayer<AbstractFilterComposite.Data>(dataLayer, eventList);
+		GlazedListsEventLayer<BaseMetric> listEventLayer = new GlazedListsEventLayer<BaseMetric>(dataLayer, eventList);
 		DefaultBodyLayerStack defaultLayerStack = new DefaultBodyLayerStack(listEventLayer);
 
 		// columns header
-		IDataProvider columnHeaderDataProvider = new DefaultColumnHeaderDataProvider(labels);
+		IDataProvider columnHeaderDataProvider = new DefaultColumnHeaderDataProvider(COLUMN_LABELS);
 		DataLayer columnDataLayer = new DefaultColumnHeaderDataLayer(columnHeaderDataProvider);
 		ColumnHeaderLayer colummnLayer = new ColumnHeaderLayer(columnDataLayer, dataLayer, defaultLayerStack.getSelectionLayer());
 		
@@ -145,7 +194,8 @@ public abstract class AbstractFilterComposite<T> extends Composite
 		// additional configuration
 		natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
 		natTable.addConfiguration(new HeaderMenuConfiguration(natTable));
-		natTable.addConfiguration(new FilterConfiguration());
+		natTable.addConfiguration(new CheckBoxConfiguration());
+		natTable.addConfiguration(new PainterConfiguration());
 		
 		//natTable.setConfigRegistry(configRegistry); 
 		natTable.configure();
@@ -153,8 +203,38 @@ public abstract class AbstractFilterComposite<T> extends Composite
 		return natTable;
 	}
 	
-		
-	private static class FilterConfiguration extends AbstractRegistryConfiguration
+	
+	/****
+	 * 
+	 * Configuration to paint or render a cell
+	 *
+	 */
+	private static class PainterConfiguration extends AbstractRegistryConfiguration
+	{
+
+		@Override
+		public void configureRegistry(IConfigRegistry configRegistry) {
+			TextPainter tp = new TextPainter(true, false, true);
+			
+			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_PAINTER, 
+												   tp, 
+												   DisplayMode.NORMAL, 
+												   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + INDEX_DESCRIPTION);	
+			
+			configRegistry.registerConfigAttribute(CellConfigAttributes.DISPLAY_CONVERTER, 
+												   new DefaultIntegerDisplayConverter(), 
+												   DisplayMode.NORMAL, 
+												   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + INDEX_DESCRIPTION);	
+		}
+	}
+	
+	
+	/********
+	 * 
+	 * Specific configuration for check box column
+	 *
+	 */
+	private static class CheckBoxConfiguration extends AbstractRegistryConfiguration
 	{
 		
 		@Override
@@ -165,65 +245,94 @@ public abstract class AbstractFilterComposite<T> extends Composite
 			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_PAINTER, 
 												   new CheckBoxPainter(), 
 												   DisplayMode.NORMAL, 
-												   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + 0);
+												   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + INDEX_VISIBILITY);
 			
 			configRegistry.registerConfigAttribute(CellConfigAttributes.DISPLAY_CONVERTER, 
 												   new DefaultBooleanDisplayConverter(), 
 												   DisplayMode.NORMAL, 
-												   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + 0);
+												   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + INDEX_VISIBILITY);
 			
 			configRegistry.registerConfigAttribute(EditConfigAttributes.CELL_EDITOR, 
 												   new CheckBoxCellEditor(), 
 												   DisplayMode.EDIT,
-												   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + 0);
+												   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + INDEX_VISIBILITY);
 		}
 	}
 	
-	
-	public static class Data implements Comparable<Data>{
-		public List<Object> values;
 
-		@Override
-		public int compareTo(Data o) {
-			String s1 = (String) values.get(1);
-			String s2 = (String) o.values.get(1);
-			return s1.compareTo(s2);
-		}
-	}
-
-	
+	/*******
+	 * 
+	 * Data provider 
+	 *
+	 */
 	public static class FilterDataProvider implements IDataProvider 
 	{
-		private final List<Data> list;
+		private static final String METRIC_DERIVED = "Derived metric"; //$NON-NLS-N$
+		private static final String METRIC_EMPTY   = "empty";
+		private final List<BaseMetric> list;
+		private final RootScope root;
 		
-		public FilterDataProvider(List<Data> list) {
+		public FilterDataProvider(List<BaseMetric> list, RootScope root) {
 			this.list = list;
+			this.root = root;
 		}
 
 		@Override
 		public Object getDataValue(int columnIndex, int rowIndex) {
-			return list.get(rowIndex).values.get(columnIndex);
+			BaseMetric metric = list.get(rowIndex);
+			switch (columnIndex) {
+			case INDEX_VISIBILITY: 	
+				return metric.getDisplayed(); 
+			case INDEX_NAME: 		
+				return metric.getDisplayName();
+			case INDEX_VALUE:
+				MetricValue mv = root.getMetricValue(metric);
+				if (mv == MetricValue.NONE)
+					return METRIC_EMPTY;
+				return metric.getMetricTextValue(mv);
+				
+			case INDEX_DESCRIPTION: 
+				if (metric instanceof DerivedMetric) {
+					return METRIC_DERIVED;
+				}
+				return metric.getDescription();
+			}
+			assert (false);
+			return null;
 		}
 
 		@Override
 		public void setDataValue(int columnIndex, int rowIndex, Object newValue) {
-			Data data = list.get(rowIndex);
-			data.values.set(columnIndex, newValue);
+			BaseMetric data = list.get(rowIndex);
+			if (data.isInvisible())
+				return;
+
+			switch(columnIndex) {
+			case INDEX_VISIBILITY:
+				VisibilityType visible = (Boolean)newValue ? VisibilityType.SHOW : VisibilityType.HIDE;
+				data.setDisplayed(visible);
+				break;
+			case INDEX_NAME:
+				data.setDisplayName((String) newValue);
+				break;
+			case INDEX_DESCRIPTION:
+				data.setDescription((String) newValue);
+				break;
+			default:
+				assert(false);
+			}
 		}
 
 		@Override
 		public int getColumnCount() {
-			return list.get(0).values.size();
+			return COLUMN_LABELS.length;
 		}
 
 		@Override
 		public int getRowCount() {
 			return list.size();
-		}
-		
+		}		
 	}
 	
-	
 	abstract protected void createAdditionalButton(Composite parent); 
-
 }
