@@ -15,6 +15,7 @@ import org.eclipse.nebula.widgets.nattable.config.CellConfigAttributes;
 import org.eclipse.nebula.widgets.nattable.config.ConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfiguration;
 import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
+import org.eclipse.nebula.widgets.nattable.config.IEditableRule;
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
 import org.eclipse.nebula.widgets.nattable.data.convert.DefaultBooleanDisplayConverter;
 import org.eclipse.nebula.widgets.nattable.edit.EditConfigAttributes;
@@ -30,7 +31,7 @@ import org.eclipse.nebula.widgets.nattable.grid.layer.DefaultRowHeaderDataLayer;
 import org.eclipse.nebula.widgets.nattable.grid.layer.GridLayer;
 import org.eclipse.nebula.widgets.nattable.grid.layer.RowHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
-import org.eclipse.nebula.widgets.nattable.layer.cell.ColumnOverrideLabelAccumulator;
+import org.eclipse.nebula.widgets.nattable.layer.cell.ColumnLabelAccumulator;
 import org.eclipse.nebula.widgets.nattable.layer.stack.DefaultBodyLayerStack;
 import org.eclipse.nebula.widgets.nattable.painter.cell.CheckBoxPainter;
 import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
@@ -44,8 +45,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 public abstract class AbstractFilterComposite<T> extends Composite 
-{
-	
+{	
 	protected Text objSearchText;
 	private final Composite parentContainer;
 	
@@ -94,6 +94,7 @@ public abstract class AbstractFilterComposite<T> extends Composite
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(objSearchText);
 
 		NatTable nattable = setLayer(list, labels);
+
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(nattable);
 		
 		parentContainer.setLayoutData(new GridData(GridData.FILL_BOTH));
@@ -103,7 +104,7 @@ public abstract class AbstractFilterComposite<T> extends Composite
 	
 	protected NatTable setLayer(List<? extends Data> list, final String []labels) {
 
-		IConfigRegistry configRegistry = new ConfigRegistry();
+		//IConfigRegistry configRegistry = new ConfigRegistry();
 
 		EventList<Data> eventList   = GlazedLists.eventList(list);
 		SortedList<Data> sortedList = new SortedList<Data>(eventList);
@@ -134,43 +135,47 @@ public abstract class AbstractFilterComposite<T> extends Composite
 		// grid layer
 		GridLayer gridLayer = new GridLayer(defaultLayerStack, colummnLayer, rowHeaderLayer, cornerLayer);
 		
-		final ColumnOverrideLabelAccumulator columnLabelAccumulator = new ColumnOverrideLabelAccumulator(defaultLayerStack);
+		// this override is essential to re-label the column to be matched in the configuration
+		ColumnLabelAccumulator columnLabelAccumulator = new ColumnLabelAccumulator(dataProvider);
 		defaultLayerStack.setConfigLabelAccumulator(columnLabelAccumulator);
-		columnLabelAccumulator.registerColumnOverrides(0, labels[0]);
-	        
+
 		// the table
 		NatTable natTable = new NatTable(parentContainer, gridLayer, false); 
-		
+
 		// additional configuration
 		natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
 		natTable.addConfiguration(new HeaderMenuConfiguration(natTable));
-		natTable.addConfiguration(new FilterConfiguration(labels));
+		natTable.addConfiguration(new FilterConfiguration());
 		
-		natTable.setConfigRegistry(configRegistry); 
+		//natTable.setConfigRegistry(configRegistry); 
 		natTable.configure();
 		
 		return natTable;
 	}
 	
-	
+		
 	private static class FilterConfiguration extends AbstractRegistryConfiguration
 	{
-		private final String []labels;
-		
-		public FilterConfiguration(String []labels) {
-			this.labels = labels;
-		}
 		
 		@Override
 		public void configureRegistry(IConfigRegistry configRegistry) {
+			configRegistry.registerConfigAttribute(EditConfigAttributes.CELL_EDITABLE_RULE, 
+												   IEditableRule.ALWAYS_EDITABLE);
 
 			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_PAINTER, 
 												   new CheckBoxPainter(), 
 												   DisplayMode.NORMAL, 
-												   labels[0]);
+												   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + 0);
 			
-			configRegistry.registerConfigAttribute(CellConfigAttributes.DISPLAY_CONVERTER, new DefaultBooleanDisplayConverter(), DisplayMode.NORMAL, labels[0]);
-			configRegistry.registerConfigAttribute(EditConfigAttributes.CELL_EDITOR, new CheckBoxCellEditor(), DisplayMode.NORMAL, labels[0]);
+			configRegistry.registerConfigAttribute(CellConfigAttributes.DISPLAY_CONVERTER, 
+												   new DefaultBooleanDisplayConverter(), 
+												   DisplayMode.NORMAL, 
+												   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + 0);
+			
+			configRegistry.registerConfigAttribute(EditConfigAttributes.CELL_EDITOR, 
+												   new CheckBoxCellEditor(), 
+												   DisplayMode.EDIT,
+												   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + 0);
 		}
 	}
 	
@@ -203,7 +208,7 @@ public abstract class AbstractFilterComposite<T> extends Composite
 		@Override
 		public void setDataValue(int columnIndex, int rowIndex, Object newValue) {
 			Data data = list.get(rowIndex);
-			data.values.set(columnIndex-1, newValue);
+			data.values.set(columnIndex, newValue);
 		}
 
 		@Override
