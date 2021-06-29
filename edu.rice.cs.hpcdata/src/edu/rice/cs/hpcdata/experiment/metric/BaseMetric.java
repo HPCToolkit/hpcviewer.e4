@@ -14,7 +14,7 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
  * Basic class for metric description
  *
  ********************************************************************/
-public abstract class BaseMetric {
+public abstract class BaseMetric implements Comparable<BaseMetric>{
 
 	//-------------------------------------------------------------------------------
 	// CONSTANTS
@@ -131,6 +131,19 @@ public abstract class BaseMetric {
 	//-------------------------------------------------------------------------------
 	// METHODS
 	//-------------------------------------------------------------------------------
+	
+
+	/*************************************************************************
+	 * return the comparison between this metric with other.
+	 * By default we compare with the metric index, but the child class
+	 * can override with other approach.
+	 *************************************************************************/
+	@Override
+	public int compareTo(BaseMetric o) {
+		return this.getIndex() - o.getIndex();
+	}
+	
+	
 	/*************************************************************************
 	 *	Sets the metric's index.
 	 ************************************************************************/
