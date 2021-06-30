@@ -12,6 +12,7 @@ import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.eclipse.jface.layout.GridDataFactory;
@@ -24,6 +25,9 @@ import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfigurat
 import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.config.IEditableRule;
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
+import org.eclipse.nebula.widgets.nattable.data.IRowDataProvider;
+import org.eclipse.nebula.widgets.nattable.data.IRowIdAccessor;
+import org.eclipse.nebula.widgets.nattable.data.ListDataProvider;
 import org.eclipse.nebula.widgets.nattable.data.convert.DefaultBooleanDisplayConverter;
 import org.eclipse.nebula.widgets.nattable.data.convert.DefaultIntegerDisplayConverter;
 import org.eclipse.nebula.widgets.nattable.edit.EditConfigAttributes;
@@ -43,6 +47,8 @@ import org.eclipse.nebula.widgets.nattable.layer.cell.ColumnLabelAccumulator;
 import org.eclipse.nebula.widgets.nattable.layer.stack.DefaultBodyLayerStack;
 import org.eclipse.nebula.widgets.nattable.painter.cell.CheckBoxPainter;
 import org.eclipse.nebula.widgets.nattable.painter.cell.TextPainter;
+import org.eclipse.nebula.widgets.nattable.selection.RowSelectionModel;
+import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
 import org.eclipse.nebula.widgets.nattable.style.CellStyleAttributes;
 import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
 import org.eclipse.nebula.widgets.nattable.style.Style;
@@ -163,7 +169,7 @@ public abstract class AbstractFilterComposite extends Composite
 		SortedList<BaseMetric> sortedList = new SortedList<BaseMetric>(eventList);
 		FilterList<BaseMetric> filterList = new FilterList<BaseMetric>(sortedList);
 
-		IDataProvider dataProvider = new FilterDataProvider(filterList, root);
+		IRowDataProvider<BaseMetric> dataProvider = new FilterDataProvider(filterList, root);
 
 		// data layer
 		DataLayer dataLayer = new DataLayer(dataProvider);
@@ -197,6 +203,15 @@ public abstract class AbstractFilterComposite extends Composite
 		ColumnLabelAccumulator columnLabelAccumulator = new ColumnLabelAccumulator(dataProvider);
 		defaultLayerStack.setConfigLabelAccumulator(columnLabelAccumulator);
 
+		final SelectionLayer selectionLayer = defaultLayerStack.getSelectionLayer();
+		selectionLayer.setSelectionModel(new RowSelectionModel<>(selectionLayer, dataProvider, new IRowIdAccessor<BaseMetric>() {
+
+			@Override
+			public Serializable getRowId(BaseMetric rowObject) {
+				return list.indexOf(rowObject);
+			}
+		}));;
+		
 		// the table
 		NatTable natTable = new NatTable(parentContainer, gridLayer, false); 
 
@@ -214,11 +229,12 @@ public abstract class AbstractFilterComposite extends Composite
 	}
 	
 	
-	/****
+	/****************************************************************************
 	 * 
-	 * Configuration to paint or render a cell
+	 * Configuration to paint or render a cell.
+	 * It wraps texts in description column
 	 *
-	 */
+	 *******************************************************************************/
 	private static class PainterConfiguration extends AbstractRegistryConfiguration
 	{
 
@@ -239,11 +255,11 @@ public abstract class AbstractFilterComposite extends Composite
 	}
 	
 	
-	/*******
+	/*******************************************************************************
 	 * 
 	 * Configuration for metric column
 	 *
-	 */
+	 *******************************************************************************/
 	private static class MetricConfiguration extends AbstractRegistryConfiguration 
 	{
 		
@@ -278,11 +294,11 @@ public abstract class AbstractFilterComposite extends Composite
 		}
 	}
 	
-	/********
+	/**************************************************
 	 * 
 	 * Specific configuration for check box column
 	 *
-	 */
+	 *************************************************/
 	private static class CheckBoxConfiguration extends AbstractRegistryConfiguration
 	{
 		
@@ -311,12 +327,12 @@ public abstract class AbstractFilterComposite extends Composite
 	}
 	
 
-	/*******
+	/*******************************
 	 * 
-	 * Data provider 
+	 *Basic metric data provider 
 	 *
-	 */
-	public static class FilterDataProvider implements IDataProvider 
+	 *******************************/
+	public static class FilterDataProvider implements IRowDataProvider<BaseMetric> 
 	{
 		private static final String METRIC_DERIVED = "Derived metric"; //$NON-NLS-N$
 		private static final String METRIC_EMPTY   = "empty";
@@ -382,6 +398,16 @@ public abstract class AbstractFilterComposite extends Composite
 		@Override
 		public int getRowCount() {
 			return list.size();
+		}
+
+		@Override
+		public BaseMetric getRowObject(int rowIndex) {
+			return list.get(rowIndex);
+		}
+
+		@Override
+		public int indexOfRowObject(BaseMetric rowObject) {
+			return list.indexOf(rowObject);
 		}		
 	}
 	
