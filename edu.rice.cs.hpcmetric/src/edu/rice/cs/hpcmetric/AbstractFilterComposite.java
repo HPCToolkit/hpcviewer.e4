@@ -10,11 +10,13 @@ import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
+import edu.rice.cs.hpcsetting.fonts.FontManager;
 
 import java.util.List;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.config.AbstractRegistryConfiguration;
 import org.eclipse.nebula.widgets.nattable.config.CellConfigAttributes;
@@ -41,9 +43,12 @@ import org.eclipse.nebula.widgets.nattable.layer.cell.ColumnLabelAccumulator;
 import org.eclipse.nebula.widgets.nattable.layer.stack.DefaultBodyLayerStack;
 import org.eclipse.nebula.widgets.nattable.painter.cell.CheckBoxPainter;
 import org.eclipse.nebula.widgets.nattable.painter.cell.TextPainter;
+import org.eclipse.nebula.widgets.nattable.style.CellStyleAttributes;
 import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
+import org.eclipse.nebula.widgets.nattable.style.Style;
 import org.eclipse.nebula.widgets.nattable.ui.menu.HeaderMenuConfiguration;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -75,8 +80,6 @@ public abstract class AbstractFilterComposite extends Composite
 	
 	private static final String []COLUMN_LABELS = {"Shown", "Name", "Root value", "Description"};
 	
-	private final IMetricManager metricManager;
-	private final RootScope root;
 	private final Composite parentContainer;
 
 	protected Text objSearchText;
@@ -91,8 +94,6 @@ public abstract class AbstractFilterComposite extends Composite
 	public AbstractFilterComposite(Composite parent, int style, IMetricManager metricManager, RootScope root) {
 		super(parent, style);
 		
-		this.root = root;
-		this.metricManager   = metricManager;
 		this.parentContainer = new Composite(parent, SWT.BORDER);
 
 		GridLayout grid = new GridLayout();
@@ -169,7 +170,7 @@ public abstract class AbstractFilterComposite extends Composite
 		// columns header
 		IDataProvider columnHeaderDataProvider = new DefaultColumnHeaderDataProvider(COLUMN_LABELS);
 		DataLayer columnDataLayer = new DefaultColumnHeaderDataLayer(columnHeaderDataProvider);
-		ColumnHeaderLayer colummnLayer = new ColumnHeaderLayer(columnDataLayer, dataLayer, defaultLayerStack.getSelectionLayer());
+		ColumnHeaderLayer colummnLayer = new ColumnHeaderLayer(columnDataLayer, defaultLayerStack, defaultLayerStack.getSelectionLayer());
 		
 		// row header
 		DefaultRowHeaderDataProvider rowHeaderDataProvider = new DefaultRowHeaderDataProvider(dataProvider);
@@ -196,6 +197,7 @@ public abstract class AbstractFilterComposite extends Composite
 		natTable.addConfiguration(new HeaderMenuConfiguration(natTable));
 		natTable.addConfiguration(new CheckBoxConfiguration());
 		natTable.addConfiguration(new PainterConfiguration());
+		natTable.addConfiguration(new MetricConfiguration());
 		
 		//natTable.setConfigRegistry(configRegistry); 
 		natTable.configure();
@@ -229,6 +231,27 @@ public abstract class AbstractFilterComposite extends Composite
 	}
 	
 	
+	private static class MetricConfiguration extends AbstractRegistryConfiguration 
+	{
+
+		@Override
+		public void configureRegistry(IConfigRegistry configRegistry) {
+			Font font ;
+			try {
+				font = FontManager.getMetricFont();
+			} catch (Exception e) {
+				font = JFaceResources.getTextFont();
+			}
+			Style style = new Style();
+			style.setAttributeValue(CellStyleAttributes.FONT, font);
+			
+			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
+												   style, 
+												   DisplayMode.NORMAL, 
+												   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + INDEX_VALUE);
+		}
+	}
+	
 	/********
 	 * 
 	 * Specific configuration for check box column
@@ -240,7 +263,9 @@ public abstract class AbstractFilterComposite extends Composite
 		@Override
 		public void configureRegistry(IConfigRegistry configRegistry) {
 			configRegistry.registerConfigAttribute(EditConfigAttributes.CELL_EDITABLE_RULE, 
-												   IEditableRule.ALWAYS_EDITABLE);
+												   IEditableRule.ALWAYS_EDITABLE,
+												   DisplayMode.NORMAL,
+												   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + INDEX_VISIBILITY);
 
 			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_PAINTER, 
 												   new CheckBoxPainter(), 

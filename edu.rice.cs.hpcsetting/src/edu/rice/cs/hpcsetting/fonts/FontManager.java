@@ -5,10 +5,7 @@ import java.io.IOException;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.preference.PreferenceStore;
-import org.eclipse.jface.resource.FontDescriptor;
-import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.resource.LocalResourceManager;
-import org.eclipse.jface.resource.ResourceManager;
+import org.eclipse.jface.resource.FontRegistry;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 
@@ -26,20 +23,23 @@ import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 public class FontManager 
 {
 	public final static FontManager INSTANCE = new FontManager();
-	
-	private final ResourceManager resource;
+	private final FontRegistry fontRegistry;
 	
 	public FontManager() {
-		resource = new LocalResourceManager(JFaceResources.getResources());
+		fontRegistry = new FontRegistry();
 	}
 
 	public Font getPreferenceFont(String id) {
+		Font font = fontRegistry.get(id);
+		if (font != fontRegistry.defaultFont())
+			return font;
+		
 		ViewerPreferenceManager prefManager = ViewerPreferenceManager.INSTANCE;
 		PreferenceStore preferenceStore = prefManager.getPreferenceStore();
 		
 		FontData []data = PreferenceConverter.getFontDataArray(preferenceStore, id);
-		
-		return resource.createFont(FontDescriptor.createFrom(data));
+		fontRegistry.put(id, data);
+		return fontRegistry.get(id);
 	}
 
 	
