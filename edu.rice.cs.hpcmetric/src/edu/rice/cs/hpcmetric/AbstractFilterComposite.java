@@ -4,6 +4,8 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.TextFilterator;
+import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
@@ -13,6 +15,7 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -51,6 +54,11 @@ import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
 import org.eclipse.nebula.widgets.nattable.style.Style;
 import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
@@ -89,7 +97,8 @@ public abstract class AbstractFilterComposite extends Composite
 	private static final String LABEL_ROW_GRAY = "row.gray";
 	
 	private final Composite parentContainer;
-
+	
+	private TextMatcherEditor<BaseMetric> textMatcher;
 	protected Text objSearchText;
 
 	/***
@@ -128,7 +137,7 @@ public abstract class AbstractFilterComposite extends Composite
 		final Button btnRegExpression = new Button(groupButtons, SWT.CHECK);
 		btnRegExpression.setText("Regular expression");
 		btnRegExpression.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-		btnRegExpression.setSelection(false);
+		btnRegExpression.setSelection(false);		
 
 		// set the layout for group filter
 		Composite groupFilter = new Composite(parentContainer, SWT.BORDER);
@@ -140,11 +149,51 @@ public abstract class AbstractFilterComposite extends Composite
 		lblFilter.setText("Filter:");
 		
 		objSearchText = new Text (groupFilter, SWT.BORDER);
-		// expand the filter field as much as possible horizontally
+
+		final NatTable nattable = setLayer(metricManager, root);
+		final Color defaultBgColor = objSearchText.getBackground();
+		
+		objSearchText.addModifyListener(new ModifyListener() {
+			
+			@Override
+			public void modifyText(ModifyEvent e) {
+				String text = objSearchText.getText();
+				if (text == null) {
+					textMatcher.setFilterText(new String [] {});
+				} else {
+					if (btnRegExpression.getSelection()) {
+						// check if the regular expression is correct
+						try {
+							Pattern.compile(text);
+						} catch(Exception err) {
+							Color c = e.display.getSystemColor(SWT.COLOR_YELLOW);
+							objSearchText.setBackground(c);
+							return;
+						}
+						objSearchText.setBackground(defaultBgColor);
+					}
+					textMatcher.setFilterText(new String [] {text});
+				}
+				nattable.refresh(false);
+			}
+		});
+
+		btnRegExpression.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				boolean regExp = btnRegExpression.getSelection();
+				if (regExp) {
+					textMatcher.setMode(TextMatcherEditor.REGULAR_EXPRESSION);
+				} else {
+					textMatcher.setMode(TextMatcherEditor.CONTAINS);
+				}
+				nattable.refresh(false);
+			}
+		});
+		
+		// expand as much as possible horizontally
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(objSearchText);
-
-		NatTable nattable = setLayer(metricManager, root);
-
+		// expand as much as possible both horizontally and vertically
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(nattable);
 		
 		parentContainer.setLayoutData(new GridData(GridData.FILL_BOTH));
@@ -211,7 +260,18 @@ public abstract class AbstractFilterComposite extends Composite
 		
 		//natTable.setConfigRegistry(configRegistry); 
 		natTable.configure();
-		
+
+		textMatcher = new TextMatcherEditor<>(new TextFilterator<BaseMetric>() {
+
+			@Override
+			public void getFilterStrings(List<String> baseList, BaseMetric element) {
+				baseList.add(element.getDisplayName());
+				baseList.add(element.getDescription());
+			}
+		});
+		textMatcher.setMode(TextMatcherEditor.CONTAINS);
+		filterList.setMatcherEditor(textMatcher);
+
 		return natTable;
 	}
 	
@@ -381,7 +441,7 @@ public abstract class AbstractFilterComposite extends Composite
 			case INDEX_VISIBILITY: 	
 				return metric.getDisplayed(); 
 			case INDEX_NAME: 		
-				return metric.getDisplayName();
+				return metric.getDisplayName().trim();
 			case INDEX_VALUE:
 				MetricValue mv = root.getMetricValue(metric);
 				if (mv == MetricValue.NONE)
