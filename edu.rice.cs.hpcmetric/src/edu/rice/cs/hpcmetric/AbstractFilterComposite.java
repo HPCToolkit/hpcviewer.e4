@@ -206,7 +206,7 @@ public abstract class AbstractFilterComposite extends Composite
 		// this override is essential to re-label the column to be matched in the configuration
 		//ColumnLabelAccumulator columnLabelAccumulator = new ColumnLabelAccumulator(dataProvider);
 		//defaultLayerStack.setConfigLabelAccumulator(columnLabelAccumulator);
-		defaultLayerStack.setConfigLabelAccumulator(new MetricConfigLabelAccumulator(defaultLayerStack, dataProvider));
+		defaultLayerStack.setConfigLabelAccumulator(new MetricConfigLabelAccumulator(defaultLayerStack, dataProvider, root));
 
 		final SelectionLayer selectionLayer = defaultLayerStack.getSelectionLayer();
 		selectionLayer.setSelectionModel(new RowSelectionModel<>(selectionLayer, dataProvider, new IRowIdAccessor<BaseMetric>() {
@@ -276,16 +276,19 @@ public abstract class AbstractFilterComposite extends Composite
 	{
 		private final ILayer bodyLayer;
 		private final IRowDataProvider<BaseMetric> dataProvider;
+		private RootScope root;
+		
 		/***
 		 * Constructor for metric label configuration
 		 * @param bodyLayer the body layer, used to convert row position to row index
 		 * @param dataProvider the data provider
 		 * @param listMetrics the list 
 		 */
-		public MetricConfigLabelAccumulator(ILayer bodyLayer, IRowDataProvider<BaseMetric> dataProvider) {
+		public MetricConfigLabelAccumulator(ILayer bodyLayer, IRowDataProvider<BaseMetric> dataProvider, RootScope root) {
 			super(dataProvider);
 			this.bodyLayer = bodyLayer;
 			this.dataProvider = dataProvider;
+			this.root = root;
 		}
 		
 		@Override
@@ -293,7 +296,7 @@ public abstract class AbstractFilterComposite extends Composite
 			
 			int rowIndex = bodyLayer.getRowIndexByPosition(rowPosition);
 			BaseMetric metric = dataProvider.getRowObject(rowIndex);
-			if (metric.isInvisible()) {
+			if (metric.isInvisible() || (root.getMetricValue(metric) == MetricValue.NONE)) {
 				configLabels.addLabel(LABEL_ROW_GRAY);
 			}
 			super.accumulateConfigLabels(configLabels, columnPosition, rowPosition);

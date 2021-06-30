@@ -58,7 +58,10 @@ public final class FilterCompositeTest {
 		exp.setMetrics(list);
 		RootScope root = new RootScope(exp, "root", RootScopeType.CallingContextTree);
 		
-		for (int i=0; i<30; i++) {
+		for (int i=0; i<90; i++) {
+			if (r.nextInt(10) == 0)
+				continue; // randomly, empty metric
+			
 			MetricValue mv = new MetricValue((i+1) * (1+i) * 100000);
 			root.setMetricValue(i, mv);
 		}
