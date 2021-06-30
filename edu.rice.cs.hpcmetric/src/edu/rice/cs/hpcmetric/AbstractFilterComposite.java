@@ -49,10 +49,13 @@ import org.eclipse.nebula.widgets.nattable.style.Style;
 import org.eclipse.nebula.widgets.nattable.ui.menu.HeaderMenuConfiguration;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
@@ -75,10 +78,10 @@ public abstract class AbstractFilterComposite extends Composite
 {	
 	private static final int INDEX_VISIBILITY  = 0;
 	private static final int INDEX_NAME        = 1;
-	private static final int INDEX_VALUE       = 2;
-	private static final int INDEX_DESCRIPTION = 3;
+	private static final int INDEX_DESCRIPTION = 2;
+	private static final int INDEX_VALUE       = 3;
 	
-	private static final String []COLUMN_LABELS = {"Shown", "Name", "Root value", "Description"};
+	private static final String []COLUMN_LABELS = {"Shown", "Name", "Description", "Aggregate value"};
 	
 	private final Composite parentContainer;
 
@@ -166,6 +169,11 @@ public abstract class AbstractFilterComposite extends Composite
 		DataLayer dataLayer = new DataLayer(dataProvider);
 		GlazedListsEventLayer<BaseMetric> listEventLayer = new GlazedListsEventLayer<BaseMetric>(dataLayer, eventList);
 		DefaultBodyLayerStack defaultLayerStack = new DefaultBodyLayerStack(listEventLayer);
+		
+		dataLayer.setColumnWidthPercentageByPosition(INDEX_NAME, 30);
+		dataLayer.setColumnWidthPercentageByPosition(INDEX_DESCRIPTION, 50);
+		dataLayer.setColumnWidthByPosition(INDEX_VISIBILITY, 20);
+		dataLayer.setColumnWidthByPosition(INDEX_VALUE, MetricConfiguration.getWidth().x);
 
 		// columns header
 		IDataProvider columnHeaderDataProvider = new DefaultColumnHeaderDataProvider(COLUMN_LABELS);
@@ -216,7 +224,7 @@ public abstract class AbstractFilterComposite extends Composite
 
 		@Override
 		public void configureRegistry(IConfigRegistry configRegistry) {
-			TextPainter tp = new TextPainter(true, false, true);
+			TextPainter tp = new TextPainter(true, true, true);
 			
 			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_PAINTER, 
 												   tp, 
@@ -231,17 +239,35 @@ public abstract class AbstractFilterComposite extends Composite
 	}
 	
 	
+	/*******
+	 * 
+	 * Configuration for metric column
+	 *
+	 */
 	private static class MetricConfiguration extends AbstractRegistryConfiguration 
 	{
-
-		@Override
-		public void configureRegistry(IConfigRegistry configRegistry) {
+		
+		public static Font getMetricFont() {
 			Font font ;
 			try {
 				font = FontManager.getMetricFont();
 			} catch (Exception e) {
 				font = JFaceResources.getTextFont();
 			}
+			return font;
+		}
+		
+		public static Point getWidth() {
+			Display display = Display.getCurrent();
+			GC gc = new GC(display);
+			gc.setFont(getMetricFont());
+			return gc.textExtent("-X.XX+eXX 99.9%-");
+		}
+
+		@Override
+		public void configureRegistry(IConfigRegistry configRegistry) {
+			Font font = getMetricFont();
+
 			Style style = new Style();
 			style.setAttributeValue(CellStyleAttributes.FONT, font);
 			

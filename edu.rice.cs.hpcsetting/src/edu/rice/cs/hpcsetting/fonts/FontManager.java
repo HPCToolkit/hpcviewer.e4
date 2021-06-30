@@ -17,7 +17,7 @@ import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
  * 
  * Class to manage fonts and its default fonts.
  * It allocates and de-allocate automatically fonts.
- * Need to access this class to get the prefered fonts.
+ * Need to access this class to get the preferred fonts.
  *
  *************************************************************/
 public class FontManager 
