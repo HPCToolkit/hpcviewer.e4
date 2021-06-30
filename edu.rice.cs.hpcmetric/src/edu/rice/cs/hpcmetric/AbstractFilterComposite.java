@@ -27,7 +27,6 @@ import org.eclipse.nebula.widgets.nattable.config.IEditableRule;
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
 import org.eclipse.nebula.widgets.nattable.data.IRowDataProvider;
 import org.eclipse.nebula.widgets.nattable.data.IRowIdAccessor;
-import org.eclipse.nebula.widgets.nattable.data.ListDataProvider;
 import org.eclipse.nebula.widgets.nattable.data.convert.DefaultBooleanDisplayConverter;
 import org.eclipse.nebula.widgets.nattable.data.convert.DefaultIntegerDisplayConverter;
 import org.eclipse.nebula.widgets.nattable.edit.EditConfigAttributes;
@@ -43,6 +42,8 @@ import org.eclipse.nebula.widgets.nattable.grid.layer.DefaultRowHeaderDataLayer;
 import org.eclipse.nebula.widgets.nattable.grid.layer.GridLayer;
 import org.eclipse.nebula.widgets.nattable.grid.layer.RowHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
+import org.eclipse.nebula.widgets.nattable.layer.ILayer;
+import org.eclipse.nebula.widgets.nattable.layer.LabelStack;
 import org.eclipse.nebula.widgets.nattable.layer.cell.ColumnLabelAccumulator;
 import org.eclipse.nebula.widgets.nattable.layer.stack.DefaultBodyLayerStack;
 import org.eclipse.nebula.widgets.nattable.painter.cell.CheckBoxPainter;
@@ -53,6 +54,7 @@ import org.eclipse.nebula.widgets.nattable.style.CellStyleAttributes;
 import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
 import org.eclipse.nebula.widgets.nattable.style.Style;
 import org.eclipse.nebula.widgets.nattable.ui.menu.HeaderMenuConfiguration;
+import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
@@ -88,6 +90,8 @@ public abstract class AbstractFilterComposite extends Composite
 	private static final int INDEX_VALUE       = 3;
 	
 	private static final String []COLUMN_LABELS = {"Shown", "Name", "Description", "Aggregate value"};
+	
+	private static final String LABEL_ROW_GRAY = "row.gray";
 	
 	private final Composite parentContainer;
 
@@ -200,8 +204,9 @@ public abstract class AbstractFilterComposite extends Composite
 		GridLayer gridLayer = new GridLayer(defaultLayerStack, colummnLayer, rowHeaderLayer, cornerLayer);
 		
 		// this override is essential to re-label the column to be matched in the configuration
-		ColumnLabelAccumulator columnLabelAccumulator = new ColumnLabelAccumulator(dataProvider);
-		defaultLayerStack.setConfigLabelAccumulator(columnLabelAccumulator);
+		//ColumnLabelAccumulator columnLabelAccumulator = new ColumnLabelAccumulator(dataProvider);
+		//defaultLayerStack.setConfigLabelAccumulator(columnLabelAccumulator);
+		defaultLayerStack.setConfigLabelAccumulator(new MetricConfigLabelAccumulator(defaultLayerStack, dataProvider));
 
 		final SelectionLayer selectionLayer = defaultLayerStack.getSelectionLayer();
 		selectionLayer.setSelectionModel(new RowSelectionModel<>(selectionLayer, dataProvider, new IRowIdAccessor<BaseMetric>() {
@@ -251,9 +256,49 @@ public abstract class AbstractFilterComposite extends Composite
 												   new DefaultIntegerDisplayConverter(), 
 												   DisplayMode.NORMAL, 
 												   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + INDEX_DESCRIPTION);	
+			
+			Style styleGray = new Style();
+			styleGray.setAttributeValue(CellStyleAttributes.FOREGROUND_COLOR, GUIHelper.COLOR_DARK_GRAY);
+			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
+												   styleGray, 
+												   DisplayMode.NORMAL, 
+												   LABEL_ROW_GRAY);
 		}
 	}
 	
+	
+	/***************************
+	 * 
+	 * Label configuration
+	 *
+	 ***************************/
+	private static class MetricConfigLabelAccumulator extends ColumnLabelAccumulator
+	{
+		private final ILayer bodyLayer;
+		private final IRowDataProvider<BaseMetric> dataProvider;
+		/***
+		 * Constructor for metric label configuration
+		 * @param bodyLayer the body layer, used to convert row position to row index
+		 * @param dataProvider the data provider
+		 * @param listMetrics the list 
+		 */
+		public MetricConfigLabelAccumulator(ILayer bodyLayer, IRowDataProvider<BaseMetric> dataProvider) {
+			super(dataProvider);
+			this.bodyLayer = bodyLayer;
+			this.dataProvider = dataProvider;
+		}
+		
+		@Override
+		public void accumulateConfigLabels(LabelStack configLabels, int columnPosition, int rowPosition) {
+			
+			int rowIndex = bodyLayer.getRowIndexByPosition(rowPosition);
+			BaseMetric metric = dataProvider.getRowObject(rowIndex);
+			if (metric.isInvisible()) {
+				configLabels.addLabel(LABEL_ROW_GRAY);
+			}
+			super.accumulateConfigLabels(configLabels, columnPosition, rowPosition);
+		} 
+	}
 	
 	/*******************************************************************************
 	 * 
