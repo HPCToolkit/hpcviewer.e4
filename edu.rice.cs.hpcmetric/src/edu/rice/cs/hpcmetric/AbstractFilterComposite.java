@@ -224,10 +224,11 @@ public abstract class AbstractFilterComposite extends Composite
 		GlazedListsEventLayer<BaseMetric> listEventLayer = new GlazedListsEventLayer<BaseMetric>(dataLayer, eventList);
 		DefaultBodyLayerStack defaultLayerStack = new DefaultBodyLayerStack(listEventLayer);
 		
+		dataLayer.setColumnWidthPercentageByPosition(INDEX_VISIBILITY, 10);
 		dataLayer.setColumnWidthPercentageByPosition(INDEX_NAME, 30);
-		dataLayer.setColumnWidthPercentageByPosition(INDEX_DESCRIPTION, 50);
-		dataLayer.setColumnWidthByPosition(INDEX_VISIBILITY, 20);
-		dataLayer.setColumnWidthByPosition(INDEX_VALUE, MetricConfiguration.getWidth().x);
+		dataLayer.setColumnWidthPercentageByPosition(INDEX_DESCRIPTION, 40);
+		dataLayer.setColumnWidthPercentageByPosition(INDEX_VALUE, 20);
+		dataLayer.setColumnsResizableByDefault(true);
 
 		// columns header
 		IDataProvider columnHeaderDataProvider = new DefaultColumnHeaderDataProvider(COLUMN_LABELS);
@@ -367,7 +368,7 @@ public abstract class AbstractFilterComposite extends Composite
 			Display display = Display.getCurrent();
 			GC gc = new GC(display);
 			gc.setFont(getMetricFont());
-			return gc.textExtent("-X.XX+eXX 99.9%-");
+			return gc.textExtent("__XXXXXXXX 99X9%__");
 		}
 
 		@Override
