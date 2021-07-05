@@ -66,7 +66,12 @@ public final class FilterCompositeTest {
 			root.setMetricValue(i, mv);
 		}
 		
-		AbstractFilterComposite c = new AbstractFilterComposite(shell, SWT.NONE, exp, root) {
+		MetricFilterInput input = new MetricFilterInput();
+		input.listItems = null;
+		input.metricManager = exp;
+		input.root = root;
+		
+		AbstractFilterComposite c = new AbstractFilterComposite(shell, SWT.NONE, input) {
 			
 			@Override
 			protected void createAdditionalButton(Composite parent) {}

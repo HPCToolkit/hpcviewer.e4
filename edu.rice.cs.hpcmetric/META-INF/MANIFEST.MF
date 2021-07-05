@@ -15,4 +15,9 @@ Require-Bundle: edu.rice.cs.hpcdata,
  org.eclipse.nebula.widgets.nattable.core,
  ca.odell.glazedlists,
  org.eclipse.nebula.widgets.nattable.extension.glazedlists,
- edu.rice.cs.hpcsetting
+ edu.rice.cs.hpcsetting,
+ edu.rice.cs.hpcbase,
+ com.graphbuilder,
+ edu.rice.cs.hpc.filter
+Export-Package: edu.rice.cs.hpcmetric,
+ edu.rice.cs.hpcmetric.dialog

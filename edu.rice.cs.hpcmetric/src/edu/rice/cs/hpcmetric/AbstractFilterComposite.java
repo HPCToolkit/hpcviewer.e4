@@ -97,10 +97,14 @@ public abstract class AbstractFilterComposite extends Composite
 	private static final String LABEL_ROW_GRAY = "row.gray";
 	
 	private final Composite parentContainer;
+	private final NatTable  nattable ;
 	
 	private TextMatcherEditor<BaseMetric> textMatcher;
-	protected Text objSearchText;
+	private FilterDataProvider dataProvider;
+	
+	private IMetricFilterEvent filterEvent;
 
+	
 	/***
 	 * 
 	 * @param parent
@@ -108,7 +112,7 @@ public abstract class AbstractFilterComposite extends Composite
 	 * @param metricManager
 	 * @param root
 	 */
-	public AbstractFilterComposite(Composite parent, int style, IMetricManager metricManager, RootScope root) {
+	public AbstractFilterComposite(Composite parent, int style, MetricFilterInput input) {
 		super(parent, style);
 		
 		this.parentContainer = new Composite(parent, SWT.BORDER);
@@ -127,11 +131,25 @@ public abstract class AbstractFilterComposite extends Composite
 		Button btnCheckAll = new Button(groupButtons, SWT.NONE);
 		btnCheckAll.setText("Check all"); 
 		btnCheckAll.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		btnCheckAll.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				dataProvider.checkAll();
+				nattable.refresh(false);
+			}
+		});
 
 		// uncheck button
 		Button btnUnCheckAll = new Button(groupButtons, SWT.NONE);
 		btnUnCheckAll.setText("Uncheck all");
 		btnUnCheckAll.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		btnUnCheckAll.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				dataProvider.uncheckAll();
+				nattable.refresh(false);
+			}
+		});
 
 		// regular expression option
 		final Button btnRegExpression = new Button(groupButtons, SWT.CHECK);
@@ -148,9 +166,9 @@ public abstract class AbstractFilterComposite extends Composite
 		Label lblFilter = new Label (groupFilter, SWT.FLAT);
 		lblFilter.setText("Filter:");
 		
-		objSearchText = new Text (groupFilter, SWT.BORDER);
+		Text objSearchText = new Text (groupFilter, SWT.BORDER);
 
-		final NatTable nattable = setLayer(metricManager, root);
+		nattable = setLayer(input.metricManager, input.root);
 		final Color defaultBgColor = objSearchText.getBackground();
 		
 		objSearchText.addModifyListener(new ModifyListener() {
@@ -202,6 +220,15 @@ public abstract class AbstractFilterComposite extends Composite
 
 	
 	/****
+	 * Set listener for every filter event
+	 * @param event IMetricFilterEvent, cannot be null
+	 */
+	public void setFilterEvent(IMetricFilterEvent event) {
+		this.filterEvent = event;
+	}
+	
+	
+	/****
 	 * Set the layers of the table
 	 * 
 	 * @param metricManager the experiment or metric manager
@@ -217,7 +244,7 @@ public abstract class AbstractFilterComposite extends Composite
 		SortedList<BaseMetric> sortedList = new SortedList<BaseMetric>(eventList);
 		FilterList<BaseMetric> filterList = new FilterList<BaseMetric>(sortedList);
 
-		IRowDataProvider<BaseMetric> dataProvider = new FilterDataProvider(filterList, root);
+		this.dataProvider = new FilterDataProvider(filterList, root);
 
 		// data layer
 		DataLayer dataLayer = new DataLayer(dataProvider);
@@ -435,6 +462,17 @@ public abstract class AbstractFilterComposite extends Composite
 			this.root = root;
 		}
 
+		public void checkAll() {
+			list.stream().filter(metric-> !metric.isInvisible() && root.getMetricValue(metric)==MetricValue.NONE)
+						 .forEach(metric->metric.setDisplayed(VisibilityType.SHOW));
+		}
+
+		public void uncheckAll() {
+			list.stream().filter(metric-> !metric.isInvisible() && root.getMetricValue(metric)==MetricValue.NONE)
+					     .forEach(metric->metric.setDisplayed(VisibilityType.HIDE));
+		}
+		
+		
 		@Override
 		public Object getDataValue(int columnIndex, int rowIndex) {
 			BaseMetric metric = list.get(rowIndex);

@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.dialogs;
+package edu.rice.cs.hpcmetric.dialog;
 
 import java.util.ArrayList;
 import org.eclipse.jface.dialogs.Dialog;
@@ -39,6 +39,7 @@ import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.util.string.StringUtil;
+
 
 
 
