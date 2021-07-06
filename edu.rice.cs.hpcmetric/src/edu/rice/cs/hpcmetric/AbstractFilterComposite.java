@@ -85,7 +85,7 @@ import org.eclipse.swt.widgets.Text;
  * </ul>
  *
  *********************************************************************/
-public abstract class AbstractFilterComposite extends Composite 
+public abstract class AbstractFilterComposite  
 {	
 	private static final int INDEX_VISIBILITY  = 0;
 	private static final int INDEX_NAME        = 1;
@@ -113,19 +113,15 @@ public abstract class AbstractFilterComposite extends Composite
 	 * @param root
 	 */
 	public AbstractFilterComposite(Composite parent, int style, MetricFilterInput input) {
-		super(parent, style);
 		
 		this.parentContainer = new Composite(parent, SWT.BORDER);
-
-		GridLayout grid = new GridLayout();
-		grid.numColumns=1;
+		GridDataFactory.fillDefaults().grab(true, true).applyTo(parentContainer);
+		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(parentContainer);
 
 		// prepare the buttons: check and uncheck
-		GridLayout gridButtons = new GridLayout();
-		gridButtons.numColumns=3;
+
 		Composite groupButtons = new Composite(parentContainer, SWT.BORDER);
-		groupButtons.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		groupButtons.setLayout(gridButtons);
+		GridDataFactory.fillDefaults().grab(true, false).applyTo(groupButtons);
 
 		// check button
 		Button btnCheckAll = new Button(groupButtons, SWT.NONE);
@@ -156,9 +152,13 @@ public abstract class AbstractFilterComposite extends Composite
 		btnRegExpression.setText("Regular expression");
 		btnRegExpression.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		btnRegExpression.setSelection(false);		
+		
+		createAdditionalButton(groupButtons);
+		
+		GridLayoutFactory.fillDefaults().numColumns(4).applyTo(groupButtons);
 
 		// set the layout for group filter
-		Composite groupFilter = new Composite(parentContainer, SWT.BORDER);
+		Composite groupFilter = new Composite(parentContainer, SWT.NONE);
 		groupFilter.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(groupFilter);
 		
@@ -167,6 +167,9 @@ public abstract class AbstractFilterComposite extends Composite
 		lblFilter.setText("Filter:");
 		
 		Text objSearchText = new Text (groupFilter, SWT.BORDER);
+		
+		// expand as much as possible horizontally
+		GridDataFactory.fillDefaults().grab(true, false).applyTo(objSearchText);
 
 		nattable = setLayer(input.metricManager, input.root);
 		final Color defaultBgColor = objSearchText.getBackground();
@@ -208,14 +211,8 @@ public abstract class AbstractFilterComposite extends Composite
 				nattable.refresh(false);
 			}
 		});
-		
-		// expand as much as possible horizontally
-		GridDataFactory.fillDefaults().grab(true, false).applyTo(objSearchText);
 		// expand as much as possible both horizontally and vertically
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(nattable);
-		
-		parentContainer.setLayoutData(new GridData(GridData.FILL_BOTH));
-		parentContainer.setLayout(grid);		
 	}
 
 	
@@ -463,12 +460,12 @@ public abstract class AbstractFilterComposite extends Composite
 		}
 
 		public void checkAll() {
-			list.stream().filter(metric-> !metric.isInvisible() && root.getMetricValue(metric)==MetricValue.NONE)
+			list.stream().filter(metric-> !metric.isInvisible() && root.getMetricValue(metric)!=MetricValue.NONE)
 						 .forEach(metric->metric.setDisplayed(VisibilityType.SHOW));
 		}
 
 		public void uncheckAll() {
-			list.stream().filter(metric-> !metric.isInvisible() && root.getMetricValue(metric)==MetricValue.NONE)
+			list.stream().filter(metric-> !metric.isInvisible() && root.getMetricValue(metric)!=MetricValue.NONE)
 					     .forEach(metric->metric.setDisplayed(VisibilityType.HIDE));
 		}
 		

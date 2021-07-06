@@ -33,6 +33,7 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcfilter.service.FilterStateProvider;
+import edu.rice.cs.hpcmetric.MetricFilterInput;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.base.IProfilePart;
 import edu.rice.cs.hpcviewer.ui.base.IUpperPart;
@@ -43,6 +44,7 @@ import edu.rice.cs.hpcviewer.ui.graph.GraphPlotRegularViewer;
 import edu.rice.cs.hpcviewer.ui.graph.GraphPlotSortViewer;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractBaseViewItem;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractViewItem;
+import edu.rice.cs.hpcviewer.ui.metric.MetricView;
 import edu.rice.cs.hpcviewer.ui.parts.bottomup.BottomUpView;
 import edu.rice.cs.hpcviewer.ui.parts.datacentric.Datacentric;
 import edu.rice.cs.hpcviewer.ui.parts.editor.Editor;
@@ -161,6 +163,11 @@ public class ProfilePart implements IProfilePart, EventHandler
 			viewer.setControl(parent);
 			((AbstractGraphViewer)viewer).setInput(graphInput);
 		
+		} else if (input instanceof MetricFilterInput) {
+			MetricFilterInput filterInput = (MetricFilterInput) input;
+			viewer = new MetricView(tabFolderTop, SWT.NONE);
+			((MetricView)viewer).setInput(filterInput);
+			
 		} else {
 			
 			viewer = new Editor(tabFolderTop, SWT.NONE);

@@ -217,7 +217,7 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener
 
 		// initialize tool item handler at the end
 		// because we need access to tree viewer :-( 
-		setToolItemHandlers();
+		setToolItemHandlers(profilePart);
 
 		final ExportTable export = new ExportTable(treeViewer, lblMessage);
 		final Action a = new Action("Copy") {
@@ -525,7 +525,7 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener
 
     
 
-	private void setToolItemHandlers() {
+	private void setToolItemHandlers(final ProfilePart profilePart) {
 		toolItem[ACTION_HOTPATH].addSelectionListener(new SelectionListener() {
 			
 			@Override
@@ -592,7 +592,7 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener
 					metricAction = new MetricColumnHideShowAction(eventBroker, getMetricManager(), affectOthers);
 				}
 				
-				metricAction.showColumnsProperties(treeViewer, database);
+				metricAction.showColumnsProperties(profilePart, treeViewer, database);
 			}
 			
 			@Override

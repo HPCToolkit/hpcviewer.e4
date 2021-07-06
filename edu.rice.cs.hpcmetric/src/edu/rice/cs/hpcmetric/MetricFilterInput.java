@@ -11,4 +11,5 @@ public class MetricFilterInput
 	public IMetricManager metricManager;
 	public RootScope root;
 	public List<FilterDataItem> listItems;
+	public boolean affectAll;
 }

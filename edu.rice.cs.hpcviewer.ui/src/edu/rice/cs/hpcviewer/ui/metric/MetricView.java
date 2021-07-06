@@ -14,7 +14,6 @@ import org.osgi.service.prefs.Preferences;
 
 import edu.rice.cs.hpcbase.map.UserInputHistory;
 import edu.rice.cs.hpcmetric.AbstractFilterComposite;
-import edu.rice.cs.hpcmetric.IMetricFilterEvent;
 import edu.rice.cs.hpcmetric.MetricFilterInput;
 import edu.rice.cs.hpcviewer.ui.base.IUpperPart;
 
@@ -24,18 +23,16 @@ public class MetricView extends CTabItem implements IUpperPart
 	private static final String HISTORY_APPLY_ALL = "apply-all";
 	public static final  String INPUT_DEFAULT = "edu.rice.cs.hpcviewer.ui.metric.MetricView";
 
-	private final Composite container ;
+	private final CTabFolder parent;
 	private Button btnApplyToAllViews;
 	private boolean applyToAllViewOption = true;
 	private AbstractFilterComposite filterPane;
 
 	public MetricView(CTabFolder parent, int style) {
 		super(parent, style);
+		this.parent = parent;
+		setText("Metric properties");
 		setShowClose(true);
-
-		container = new Composite(parent, style);
-		GridDataFactory.fillDefaults().grab(true, true).applyTo(container);
-		
 	}
 
 	
@@ -56,6 +53,10 @@ public class MetricView extends CTabItem implements IUpperPart
 		if (input == null || !(input instanceof MetricFilterInput))
 			return;
 		MetricFilterInput inputFilter = (MetricFilterInput) input;
+
+		Composite container = new Composite(parent, SWT.BORDER);
+		GridDataFactory.fillDefaults().grab(true, true).applyTo(container);
+		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(container);
 		
 		AbstractFilterComposite filterPane = new AbstractFilterComposite(container, SWT.NONE, inputFilter) {
 			
@@ -79,8 +80,6 @@ public class MetricView extends CTabItem implements IUpperPart
 				});
 			}
 		};
-		GridDataFactory.fillDefaults().grab(true, true).applyTo(filterPane);
-		GridLayoutFactory.fillDefaults().applyTo(container);
 		setControl(container);
 	}
 

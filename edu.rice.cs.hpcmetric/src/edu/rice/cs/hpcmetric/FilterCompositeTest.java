@@ -35,8 +35,10 @@ public final class FilterCompositeTest {
 		
 		final Display display = new Display();
 		final Shell   shell   = new Shell(display);
-		GridDataFactory.fillDefaults().grab(true, true).applyTo(shell);
-		
+
+		GridDataFactory.swtDefaults().grab(true, true).applyTo(shell);
+		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(shell);
+
 		List<BaseMetric> list = new ArrayList<BaseMetric>();
 		Random r = new Random();
 		for (int i=0; i<100; i++)  {
@@ -76,8 +78,7 @@ public final class FilterCompositeTest {
 			@Override
 			protected void createAdditionalButton(Composite parent) {}
 		};
-		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(shell);
-		
+
 		shell.open();
 		while (!shell.isDisposed()) {
 			if (!display.readAndDispatch())

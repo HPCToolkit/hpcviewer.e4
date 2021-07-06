@@ -4,18 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TreeColumn;
 
-import edu.rice.cs.hpcbase.ViewerDataEvent;
-import edu.rice.cs.hpcdata.experiment.BaseExperiment;
-import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcfilter.dialog.FilterDataItem;
+import edu.rice.cs.hpcmetric.MetricFilterInput;
+import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
-import edu.rice.cs.hpcviewer.ui.dialogs.MetricColumnDialog;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
 
 public class MetricColumnHideShowAction 
@@ -43,7 +39,7 @@ public class MetricColumnHideShowAction
 	/**
      * Show column properties (hidden, visible ...)
      */
-    public void showColumnsProperties(ScopeTreeViewer treeViewer, DatabaseCollection databaseCollection) {
+    public void showColumnsProperties(final ProfilePart profilePart, ScopeTreeViewer treeViewer, DatabaseCollection databaseCollection) {
     	
     	if (metricMgr == null)
     		return;
@@ -79,37 +75,14 @@ public class MetricColumnHideShowAction
 			}
 			arrayOfItems.add(item);
 		}
-		Shell shell = treeViewer.getTree().getShell();
-		
-    	MetricColumnDialog dialog = new MetricColumnDialog(shell, arrayOfItems);
-    	dialog.enableAllViewOption(affectOtherViews);
-    	
-    	if (dialog.open() == Dialog.OK) {
-    		boolean isAppliedToAllViews = dialog.isAppliedToAllViews();
-    		arrayOfItems = dialog.getResult();
-    		
-    		boolean []checked = new boolean[arrayOfItems.size()];
-    		int i = 0;
-    		for (FilterDataItem item : arrayOfItems) {
-				checked[i] = item.checked && item.enabled;
-				i++;
-    		}
-    		
-    		if (isAppliedToAllViews && metricMgr instanceof Experiment) {
-    			
-    			// send message to all registered views, that there is a change of column properties
-    			// we don't verify if there's a change or not. Let the view decides what they want to do
-    			ViewerDataEvent data = new ViewerDataEvent(
-    											(Experiment) metricMgr, 
-    											checked);
-    			
-    			eventBroker.post(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN, data);
-    			
-    			databaseCollection.addColumnStatus((BaseExperiment) metricMgr, data);
-    		} else {
-    			treeViewer.setColumnsStatus(metricMgr, checked);
-    		}
-    	}
+
+		MetricFilterInput input = new MetricFilterInput();
+		input.metricManager = this.metricMgr;
+		input.listItems = arrayOfItems;
+		input.affectAll = this.affectOtherViews;
+		input.root = treeViewer.getRootScope();
+
+		profilePart.addEditor(input);
     }
     
    
