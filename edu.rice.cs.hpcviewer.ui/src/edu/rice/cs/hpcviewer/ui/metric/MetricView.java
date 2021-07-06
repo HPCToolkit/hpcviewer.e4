@@ -13,7 +13,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.osgi.service.prefs.Preferences;
 
 import edu.rice.cs.hpcbase.map.UserInputHistory;
-import edu.rice.cs.hpcmetric.AbstractFilterComposite;
+import edu.rice.cs.hpcmetric.AbstractFilterPane;
 import edu.rice.cs.hpcmetric.MetricFilterInput;
 import edu.rice.cs.hpcviewer.ui.base.IUpperPart;
 
@@ -26,7 +26,6 @@ public class MetricView extends CTabItem implements IUpperPart
 	private final CTabFolder parent;
 	private Button btnApplyToAllViews;
 	private boolean applyToAllViewOption = true;
-	private AbstractFilterComposite filterPane;
 	private MetricFilterInput inputFilter;
 
 	public MetricView(CTabFolder parent, int style) {
@@ -59,7 +58,7 @@ public class MetricView extends CTabItem implements IUpperPart
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(container);
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(container);
 		
-		AbstractFilterComposite filterPane = new AbstractFilterComposite(container, SWT.NONE, inputFilter) {
+		new AbstractFilterPane(container, SWT.NONE, inputFilter) {
 			
 			@Override
 			protected void createAdditionalButton(Composite parent) {

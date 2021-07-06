@@ -84,7 +84,7 @@ public final class FilterCompositeTest {
 		input.setRoot(root);
 		input.setAffectAll(true);
 		
-		AbstractFilterComposite c = new AbstractFilterComposite(shell, SWT.NONE, input) {
+		AbstractFilterPane c = new AbstractFilterPane(shell, SWT.NONE, input) {
 			
 			@Override
 			protected void createAdditionalButton(Composite parent) {}

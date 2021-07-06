@@ -7,10 +7,7 @@ import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
-import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
-import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcfilter.dialog.FilterDataItem;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
@@ -64,13 +61,11 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.TreeColumn;
 
 
 /*********************************************************************
@@ -87,14 +82,14 @@ import org.eclipse.swt.widgets.TreeColumn;
  * </ul>
  *
  *********************************************************************/
-public abstract class AbstractFilterComposite  
+public abstract class AbstractFilterPane  
 {	
 	private static final int INDEX_VISIBILITY  = 0;
 	private static final int INDEX_NAME        = 1;
 	private static final int INDEX_DESCRIPTION = 2;
 	private static final int INDEX_VALUE       = 3;
 	
-	private static final String []COLUMN_LABELS = {"Shown", "Name", "Description", "Aggregate value"};
+	private static final String []COLUMN_LABELS = {"Visible", "Name", "Description", "Aggregate value"};
 	
 	private static final String LABEL_ROW_GRAY = "row.gray";
 	
@@ -104,9 +99,6 @@ public abstract class AbstractFilterComposite
 	private TextMatcherEditor<FilterDataItem> textMatcher;
 	private FilterDataProvider dataProvider;
 	
-	private IMetricFilterEvent filterEvent;
-
-	
 	/***
 	 * 
 	 * @param parent
@@ -114,7 +106,7 @@ public abstract class AbstractFilterComposite
 	 * @param metricManager
 	 * @param root
 	 */
-	public AbstractFilterComposite(Composite parent, int style, MetricFilterInput input) {
+	public AbstractFilterPane(Composite parent, int style, MetricFilterInput input) {
 		
 		this.parentContainer = new Composite(parent, SWT.BORDER);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(parentContainer);
@@ -223,7 +215,6 @@ public abstract class AbstractFilterComposite
 	 * @param event IMetricFilterEvent, cannot be null
 	 */
 	public void setFilterEvent(IMetricFilterEvent event) {
-		this.filterEvent = event;
 	}
 	
 	
@@ -347,8 +338,6 @@ public abstract class AbstractFilterComposite
 	{
 		private final ILayer bodyLayer;
 		private final IRowDataProvider<FilterDataItem> dataProvider;
-		private RootScope root;
-		
 		/***
 		 * Constructor for metric label configuration
 		 * @param bodyLayer the body layer, used to convert row position to row index
@@ -359,7 +348,6 @@ public abstract class AbstractFilterComposite
 			super(dataProvider);
 			this.bodyLayer = bodyLayer;
 			this.dataProvider = dataProvider;
-			this.root = root;
 		}
 		
 		@Override
