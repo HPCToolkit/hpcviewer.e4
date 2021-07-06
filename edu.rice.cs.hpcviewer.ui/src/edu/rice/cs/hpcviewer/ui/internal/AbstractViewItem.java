@@ -17,6 +17,7 @@ import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeColumn;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.LoggerFactory;
@@ -168,6 +169,11 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 				refreshTree();
 			});
 		}
+	}
+	
+	
+	public ScopeTreeViewer getScopeTreeViewer() {
+		return contentViewer.getTreeViewer();
 	}
 	
 	

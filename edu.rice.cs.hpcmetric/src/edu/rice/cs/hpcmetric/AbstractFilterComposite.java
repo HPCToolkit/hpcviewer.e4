@@ -171,7 +171,7 @@ public abstract class AbstractFilterComposite
 		// expand as much as possible horizontally
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(objSearchText);
 
-		nattable = setLayer(input.metricManager, input.root);
+		nattable = setLayer(input.getMetricManager(), input.getRoot());
 		final Color defaultBgColor = objSearchText.getBackground();
 		
 		objSearchText.addModifyListener(new ModifyListener() {
@@ -235,7 +235,6 @@ public abstract class AbstractFilterComposite
 	 */
 	protected NatTable setLayer(IMetricManager metricManager, RootScope root) {
 
-		//IConfigRegistry configRegistry = new ConfigRegistry();
 		List<BaseMetric> list = metricManager.getMetricList();
 		EventList<BaseMetric> eventList   = GlazedLists.eventList(list);
 		SortedList<BaseMetric> sortedList = new SortedList<BaseMetric>(eventList);

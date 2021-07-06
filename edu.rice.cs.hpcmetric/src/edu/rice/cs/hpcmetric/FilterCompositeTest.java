@@ -69,9 +69,9 @@ public final class FilterCompositeTest {
 		}
 		
 		MetricFilterInput input = new MetricFilterInput();
-		input.listItems = null;
-		input.metricManager = exp;
-		input.root = root;
+
+		input.setMetricManager(exp);
+		input.setRoot(root);
 		
 		AbstractFilterComposite c = new AbstractFilterComposite(shell, SWT.NONE, input) {
 			

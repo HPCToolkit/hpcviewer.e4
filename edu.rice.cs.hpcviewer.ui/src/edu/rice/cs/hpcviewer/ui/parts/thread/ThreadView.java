@@ -14,6 +14,7 @@ import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TreeColumn;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.util.string.StringUtil;
@@ -83,6 +85,21 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 		this.menuService = menuService;
 	}
 
+	public List<BaseMetric> getVisibleMetrics() {
+		
+		final List<BaseMetric> list = new ArrayList<BaseMetric>();
+		final ScopeTreeViewer treeViewer = contentViewer.getTreeViewer();
+		
+		for(TreeColumn column: treeViewer.getTree().getColumns()) {
+			if (column.getData() == null)
+				continue;
+			
+			if (column.getWidth()>0) {
+				list.add((BaseMetric) column.getData());
+			}
+		}
+		return list;
+	}
 
 	@Override
 	public void setInput(Object input) {
@@ -175,6 +192,11 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 		return viewInput;
 	}
 	
+	
+	public ScopeTreeViewer getScopeTreeViewer() {
+		return contentViewer.getTreeViewer();
+	}
+
 	
 	/***
 	 * Static method to create a label based on the list of thread

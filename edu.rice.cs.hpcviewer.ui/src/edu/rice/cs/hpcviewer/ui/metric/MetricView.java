@@ -27,6 +27,7 @@ public class MetricView extends CTabItem implements IUpperPart
 	private Button btnApplyToAllViews;
 	private boolean applyToAllViewOption = true;
 	private AbstractFilterComposite filterPane;
+	private MetricFilterInput inputFilter;
 
 	public MetricView(CTabFolder parent, int style) {
 		super(parent, style);
@@ -52,7 +53,7 @@ public class MetricView extends CTabItem implements IUpperPart
 	public void setInput(Object input) {
 		if (input == null || !(input instanceof MetricFilterInput))
 			return;
-		MetricFilterInput inputFilter = (MetricFilterInput) input;
+		inputFilter = (MetricFilterInput) input;
 
 		Composite container = new Composite(parent, SWT.BORDER);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(container);
@@ -83,14 +84,18 @@ public class MetricView extends CTabItem implements IUpperPart
 		setControl(container);
 	}
 
+	
 	@Override
 	public boolean hasEqualInput(Object input) {
-		if (input instanceof String) {
-			return INPUT_DEFAULT.compareTo((String) input) == 0;
+		if (input instanceof MetricFilterInput) {
+			MetricFilterInput metricInput = (MetricFilterInput) input;
+			return metricInput.getMetricManager() == this.inputFilter.getMetricManager();
 		}
 		return false;
 	}
 
+	
+	
 	@Override
 	public void setMarker(int lineNumber) {}
 

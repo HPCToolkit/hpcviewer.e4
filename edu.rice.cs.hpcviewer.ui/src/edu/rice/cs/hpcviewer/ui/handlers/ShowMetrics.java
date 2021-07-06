@@ -11,21 +11,19 @@ import org.eclipse.e4.ui.model.application.ui.menu.MMenuElement;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.rice.cs.hpcbase.ViewerDataEvent;
-import edu.rice.cs.hpcbase.ui.IBasePart;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
-import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
-import edu.rice.cs.hpcmetric.dialog.MetricPropertyDialog;
+import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
+import edu.rice.cs.hpcmetric.MetricFilterInput;
+import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
+import edu.rice.cs.hpcviewer.ui.internal.AbstractBaseViewItem;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -86,58 +84,26 @@ public class ShowMetrics
 			return;
 
 		Object obj = part.getObject();
-		if (obj == null || (!(obj instanceof IBasePart)))
+		if (obj == null || (!(obj instanceof ProfilePart)))
 			return;
 
-		IBasePart basePart = (IBasePart) obj;
-		Experiment exp = (Experiment) basePart.getExperiment();
-		if (exp == null) {
+		ProfilePart profilePart = (ProfilePart) obj;
+		Experiment experiment = (Experiment) profilePart.getExperiment();
+		if (experiment == null) {
 			Logger logger = LoggerFactory.getLogger(getClass());
 			logger.debug("Database not found");
 			return;
 		}
+		AbstractBaseViewItem item = profilePart.getActiveView();
+		List<BaseMetric> metrics = item.getVisibleMetrics();
 		
-		// duplicate metrics before sending to the dialog box.
-		// we don't know if the user will confirm the modification or not, so it's better to save them first.
-		// if the user decides to cancel the modification, we can restore the metrics back.
+		MetricFilterInput input = new MetricFilterInput();
+		input.setFilterList(metrics, item.getScopeTreeViewer().getTree().getColumns());
+		input.setAffectAll(true);
+		input.setMetricManager(experiment);
+		input.setRoot( experiment.getRootScope(RootScopeType.CallingContextTree));
 		
-		List<BaseMetric> metrics = exp.getMetricList();
-		List<BaseMetric> copyMetrics = new ArrayList<BaseMetric>(metrics.size());
-		
-		for(BaseMetric metric: metrics) {
-			try {
-				copyMetrics.add(metric.duplicate());
-			} finally {
-				
-			}
-		}
-		
-		MetricPropertyDialog dialog = new MetricPropertyDialog(shell, (Experiment) exp);
-		
-		int ret = dialog.open();
-		
-		if (ret == Dialog.OK) {
-			ViewerDataEvent data = new ViewerDataEvent(exp, metrics);
-			eventBroker.post(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE, data);
-			
-		} else {
-			// in case there is modification, we need to restore the metrics back
-			for(int i=0; i<metrics.size(); i++) {
-				BaseMetric metric  = metrics.get(i);
-				BaseMetric oMetric = copyMetrics.get(i);
-				
-				metric.setDisplayName(oMetric.getDisplayName());
-				
-				if (metric instanceof DerivedMetric) {
-					DerivedMetric dm = (DerivedMetric) metric;
-					DerivedMetric om = (DerivedMetric) oMetric;
-					
-					dm.setAnnotationType(om.getAnnotationType());
-					dm.setDisplayFormat(om.getDisplayFormat());
-					dm.setExpression(om.getFormula());
-				}
-			}
-		}
+		profilePart.addEditor(input);
 	}
 	
 	
