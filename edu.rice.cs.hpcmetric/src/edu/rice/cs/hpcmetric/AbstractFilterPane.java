@@ -49,6 +49,7 @@ import org.eclipse.nebula.widgets.nattable.painter.cell.CheckBoxPainter;
 import org.eclipse.nebula.widgets.nattable.painter.cell.TextPainter;
 import org.eclipse.nebula.widgets.nattable.style.CellStyleAttributes;
 import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
+import org.eclipse.nebula.widgets.nattable.style.HorizontalAlignmentEnum;
 import org.eclipse.nebula.widgets.nattable.style.Style;
 import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
 import org.eclipse.swt.SWT;
@@ -325,6 +326,17 @@ public abstract class AbstractFilterPane
 												   styleGray, 
 												   DisplayMode.NORMAL, 
 												   LABEL_ROW_GRAY);
+			
+			Style styleLeft = new Style();
+			styleLeft.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.LEFT);
+			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
+												   styleLeft, 
+												   DisplayMode.NORMAL, 
+												   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + INDEX_NAME);
+			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
+					   							   styleLeft, 
+					   							   DisplayMode.NORMAL, 
+					   							   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + INDEX_DESCRIPTION);
 		}
 	}
 	

@@ -14,6 +14,7 @@ public class FilterDataItem implements Comparable<FilterDataItem>
 	public String  label   = null;
 	public boolean checked = false;
 	public boolean enabled = true;
+	private int id;
 	
 	/** data associated with this item.
 	 *  it shouldn't be modified by any class except the owner (caller).
@@ -23,6 +24,11 @@ public class FilterDataItem implements Comparable<FilterDataItem>
 	public FilterDataItem() {}
 	
 	public FilterDataItem(String label, boolean checked, boolean enabled) {
+		this(0, label, checked, enabled);
+	}
+	
+	public FilterDataItem(int id, String label, boolean checked, boolean enabled) {
+		this.id      = id;
 		this.label   = label;
 		this.checked = checked;
 		this.enabled = enabled;
@@ -46,7 +52,7 @@ public class FilterDataItem implements Comparable<FilterDataItem>
 
 	@Override
 	public int compareTo(FilterDataItem o) {
-		return label.compareTo(o.label);
+		return id-o.id;
 	}
 	
 	

@@ -26,7 +26,7 @@ public class MetricFilterInput
 		
 		for(BaseMetric metric: metrics) {
 			
-			FilterDataItem item = new FilterDataItem(metric.getDisplayName(), false, false);
+			FilterDataItem item = new FilterDataItem(metric.getIndex(), metric.getDisplayName(), false, false);
 			item.setData(metric);
 			
 			// looking for associated metric in the column
