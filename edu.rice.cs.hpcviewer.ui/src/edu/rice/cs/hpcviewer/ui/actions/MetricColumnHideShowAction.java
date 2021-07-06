@@ -46,11 +46,7 @@ public class MetricColumnHideShowAction
 		
     	TreeColumn []columns = treeViewer.getTree().getColumns(); 
 
-		MetricFilterInput input = new MetricFilterInput();
-		input.setMetricManager(metricMgr);
-		input.setFilterList(metrics, columns);
-		input.setAffectAll(affectOtherViews);
-		input.setRoot(treeViewer.getRootScope());
+		MetricFilterInput input = new MetricFilterInput(treeViewer.getRootScope(), columns, affectOtherViews);
 
 		profilePart.addEditor(input);
     }

@@ -10,6 +10,7 @@ import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcfilter.dialog.FilterDataItem;
+import edu.rice.cs.hpcmetric.internal.MetricFilterDataItem;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 
 import java.util.List;
@@ -27,7 +28,6 @@ import org.eclipse.nebula.widgets.nattable.config.IEditableRule;
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
 import org.eclipse.nebula.widgets.nattable.data.IRowDataProvider;
 import org.eclipse.nebula.widgets.nattable.data.convert.DefaultBooleanDisplayConverter;
-import org.eclipse.nebula.widgets.nattable.data.convert.DefaultIntegerDisplayConverter;
 import org.eclipse.nebula.widgets.nattable.edit.EditConfigAttributes;
 import org.eclipse.nebula.widgets.nattable.edit.editor.CheckBoxCellEditor;
 import org.eclipse.nebula.widgets.nattable.extension.glazedlists.GlazedListsEventLayer;
@@ -59,12 +59,9 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
@@ -97,7 +94,7 @@ public abstract class AbstractFilterPane
 	private final Composite parentContainer;
 	private final NatTable  nattable ;
 	
-	private TextMatcherEditor<FilterDataItem> textMatcher;
+	private TextMatcherEditor<MetricFilterDataItem> textMatcher;
 	private FilterDataProvider dataProvider;
 	
 	/***
@@ -229,16 +226,16 @@ public abstract class AbstractFilterPane
 	 */
 	protected NatTable setLayer(MetricFilterInput input) {
 
-		List<FilterDataItem> list = input.getFilterList();
-		EventList<FilterDataItem> eventList   = GlazedLists.eventList(list);
-		SortedList<FilterDataItem> sortedList = new SortedList<FilterDataItem>(eventList);
-		FilterList<FilterDataItem> filterList = new FilterList<FilterDataItem>(sortedList);
+		List<MetricFilterDataItem> list = input.getFilterList();
+		EventList<MetricFilterDataItem> eventList   = GlazedLists.eventList(list);
+		SortedList<MetricFilterDataItem> sortedList = new SortedList<MetricFilterDataItem>(eventList);
+		FilterList<MetricFilterDataItem> filterList = new FilterList<MetricFilterDataItem>(sortedList);
 
 		this.dataProvider = new FilterDataProvider(filterList, input.getRoot());
 
 		// data layer
 		DataLayer dataLayer = new DataLayer(dataProvider);
-		GlazedListsEventLayer<FilterDataItem> listEventLayer = new GlazedListsEventLayer<FilterDataItem>(dataLayer, eventList);
+		GlazedListsEventLayer<MetricFilterDataItem> listEventLayer = new GlazedListsEventLayer<MetricFilterDataItem>(dataLayer, eventList);
 		DefaultBodyLayerStack defaultLayerStack = new DefaultBodyLayerStack(listEventLayer);
 		
 		dataLayer.setColumnWidthPercentageByPosition(INDEX_VISIBILITY, 10);
@@ -274,7 +271,6 @@ public abstract class AbstractFilterPane
 		natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
 		natTable.addConfiguration(new CheckBoxConfiguration());
 		natTable.addConfiguration(new PainterConfiguration());
-		natTable.addConfiguration(new MetricConfiguration());
 		
 		//natTable.setConfigRegistry(configRegistry); 
 		natTable.configure();
@@ -305,20 +301,28 @@ public abstract class AbstractFilterPane
 	 *******************************************************************************/
 	private static class PainterConfiguration extends AbstractRegistryConfiguration
 	{
+		public static Font getMetricFont() {
+			Font font ;
+			try {
+				font = FontManager.getMetricFont();
+			} catch (Exception e) {
+				font = JFaceResources.getTextFont();
+			}
+			return font;
+		}
 
 		@Override
 		public void configureRegistry(IConfigRegistry configRegistry) {
-			TextPainter tp = new TextPainter(true, true, true);
 			
+			// wrap long texts for description column
+			
+			TextPainter tp = new TextPainter(true, true, true);			
 			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_PAINTER, 
 												   tp, 
 												   DisplayMode.NORMAL, 
 												   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + INDEX_DESCRIPTION);	
 			
-			configRegistry.registerConfigAttribute(CellConfigAttributes.DISPLAY_CONVERTER, 
-												   new DefaultIntegerDisplayConverter(), 
-												   DisplayMode.NORMAL, 
-												   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + INDEX_DESCRIPTION);	
+			// gray colors for disabled metrics
 			
 			Style styleGray = new Style();
 			styleGray.setAttributeValue(CellStyleAttributes.FOREGROUND_COLOR, GUIHelper.COLOR_DARK_GRAY);
@@ -326,6 +330,8 @@ public abstract class AbstractFilterPane
 												   styleGray, 
 												   DisplayMode.NORMAL, 
 												   LABEL_ROW_GRAY);
+			
+			// left justified for label columns
 			
 			Style styleLeft = new Style();
 			styleLeft.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.LEFT);
@@ -337,6 +343,17 @@ public abstract class AbstractFilterPane
 					   							   styleLeft, 
 					   							   DisplayMode.NORMAL, 
 					   							   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + INDEX_DESCRIPTION);
+			
+			// right justify for metric columns
+			Font font = getMetricFont();
+
+			Style style = new Style();
+			style.setAttributeValue(CellStyleAttributes.FONT, font);
+			
+			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
+												   style, 
+												   DisplayMode.NORMAL, 
+												   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + INDEX_VALUE);
 		}
 	}
 	
@@ -349,14 +366,14 @@ public abstract class AbstractFilterPane
 	private static class MetricConfigLabelAccumulator extends ColumnLabelAccumulator
 	{
 		private final ILayer bodyLayer;
-		private final IRowDataProvider<FilterDataItem> dataProvider;
+		private final IRowDataProvider<MetricFilterDataItem> dataProvider;
 		/***
 		 * Constructor for metric label configuration
 		 * @param bodyLayer the body layer, used to convert row position to row index
 		 * @param dataProvider the data provider
 		 * @param listMetrics the list 
 		 */
-		public MetricConfigLabelAccumulator(ILayer bodyLayer, IRowDataProvider<FilterDataItem> dataProvider, RootScope root) {
+		public MetricConfigLabelAccumulator(ILayer bodyLayer, IRowDataProvider<MetricFilterDataItem> dataProvider, RootScope root) {
 			super(dataProvider);
 			this.bodyLayer = bodyLayer;
 			this.dataProvider = dataProvider;
@@ -374,44 +391,6 @@ public abstract class AbstractFilterPane
 		} 
 	}
 	
-	/*******************************************************************************
-	 * 
-	 * Configuration for metric column
-	 *
-	 *******************************************************************************/
-	private static class MetricConfiguration extends AbstractRegistryConfiguration 
-	{
-		
-		public static Font getMetricFont() {
-			Font font ;
-			try {
-				font = FontManager.getMetricFont();
-			} catch (Exception e) {
-				font = JFaceResources.getTextFont();
-			}
-			return font;
-		}
-		
-		public static Point getWidth() {
-			Display display = Display.getCurrent();
-			GC gc = new GC(display);
-			gc.setFont(getMetricFont());
-			return gc.textExtent("__XXXXXXXX 99X9%__");
-		}
-
-		@Override
-		public void configureRegistry(IConfigRegistry configRegistry) {
-			Font font = getMetricFont();
-
-			Style style = new Style();
-			style.setAttributeValue(CellStyleAttributes.FONT, font);
-			
-			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
-												   style, 
-												   DisplayMode.NORMAL, 
-												   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + INDEX_VALUE);
-		}
-	}
 	
 	/**************************************************
 	 * 
@@ -451,26 +430,32 @@ public abstract class AbstractFilterPane
 	 *Basic metric data provider 
 	 *
 	 *******************************/
-	public static class FilterDataProvider implements IRowDataProvider<FilterDataItem> 
+	public static class FilterDataProvider implements IRowDataProvider<MetricFilterDataItem> 
 	{
 		private static final String METRIC_DERIVED = "Derived metric"; //$NON-NLS-N$
 		private static final String METRIC_EMPTY   = "empty";
-		private final List<FilterDataItem> list;
+		private final List<MetricFilterDataItem> list;
 		private final RootScope root;
 		
-		public FilterDataProvider(List<FilterDataItem> list, RootScope root) {
+		public FilterDataProvider(List<MetricFilterDataItem> list, RootScope root) {
 			this.list = list;
 			this.root = root;
 		}
 
 		public void checkAll() {
 			list.stream().filter(item-> item.data != null && item.enabled)
-						 .forEach(item-> item.setChecked(true));
+						 .forEach(item-> {
+							 item.setChecked(true);
+			 		    	 System.out.println("\tNew value " + item.label +": " + true);
+						 });
 		}
 
 		public void uncheckAll() {
 			list.stream().filter(item-> item.data != null && item.enabled)
-			 		     .forEach(item-> item.setChecked(false));
+			 		     .forEach(item-> { 
+			 		    	 item.setChecked(false);
+			 		    	 System.out.println("\tNew value " + item.label +": " + false);
+			 		       });
 		}
 		
 		
@@ -517,7 +502,11 @@ public abstract class AbstractFilterPane
 
 			switch(columnIndex) {
 			case INDEX_VISIBILITY:
-				item.setChecked((boolean) newValue);
+				boolean newCheck = (boolean) newValue;
+				if (newCheck != item.checked) {
+					item.setChecked((boolean) newValue);
+					System.out.println("\tNew value " + item.label +": " + newValue);
+				}
 				break;
 				
 			case INDEX_NAME:
@@ -546,12 +535,12 @@ public abstract class AbstractFilterPane
 		}
 
 		@Override
-		public FilterDataItem getRowObject(int rowIndex) {
+		public MetricFilterDataItem getRowObject(int rowIndex) {
 			return list.get(rowIndex);
 		}
 
 		@Override
-		public int indexOfRowObject(FilterDataItem rowObject) {
+		public int indexOfRowObject(MetricFilterDataItem rowObject) {
 			return list.indexOf(rowObject);
 		}		
 	}

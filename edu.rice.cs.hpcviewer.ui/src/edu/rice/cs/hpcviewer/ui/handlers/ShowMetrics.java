@@ -12,12 +12,13 @@ import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TreeColumn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
+import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcmetric.MetricFilterInput;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
@@ -95,13 +96,10 @@ public class ShowMetrics
 			return;
 		}
 		AbstractBaseViewItem item = profilePart.getActiveView();
-		List<BaseMetric> metrics = item.getVisibleMetrics();
 		
-		MetricFilterInput input = new MetricFilterInput();
-		input.setFilterList(metrics, item.getScopeTreeViewer().getTree().getColumns());
-		input.setAffectAll(true);
-		input.setMetricManager(experiment);
-		input.setRoot( experiment.getRootScope(RootScopeType.CallingContextTree));
+		RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
+		TreeColumn []columns = item.getScopeTreeViewer().getTree().getColumns();
+		MetricFilterInput input = new MetricFilterInput(root, columns, true);
 		
 		profilePart.addEditor(input);
 	}

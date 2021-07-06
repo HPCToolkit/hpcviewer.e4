@@ -67,7 +67,7 @@ public class MetricView extends CTabItem implements IUpperPart
 				btnApplyToAllViews.setText("Apply to all views");
 				btnApplyToAllViews.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 				btnApplyToAllViews.setEnabled(applyToAllViewOption);
-				btnApplyToAllViews.setSelection( applyToAllViewOption && getHistory() );
+				btnApplyToAllViews.setSelection( applyToAllViewOption && inputFilter.isAffectAll() );
 				
 				btnApplyToAllViews.addSelectionListener(new SelectionAdapter() {
 					

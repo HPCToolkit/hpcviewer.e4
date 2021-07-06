@@ -5,28 +5,35 @@ import java.util.List;
 
 import org.eclipse.swt.widgets.TreeColumn;
 
+import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
-import edu.rice.cs.hpcfilter.dialog.FilterDataItem;
+import edu.rice.cs.hpcmetric.internal.MetricFilterDataItem;
 
 public class MetricFilterInput 
 {
-	private IMetricManager metricManager;
-	private RootScope root;
-	private List<FilterDataItem> listItems;
-	private boolean affectAll;
+	private final RootScope root;
+	private final List<MetricFilterDataItem> listItems;
+	private final boolean affectAll;
 	
-	public List<FilterDataItem> getFilterList() {
+	public MetricFilterInput(RootScope root, TreeColumn []columns, boolean affectAll) {		
+		Experiment experiment = (Experiment) root.getExperiment();
+		this.listItems = createFilterList(experiment.getVisibleMetrics(), columns);
+		this.root = root;
+		this.affectAll = affectAll;
+	}
+	
+	public List<MetricFilterDataItem> getFilterList() {
 		return listItems;
 	}
 	
-	public void setFilterList(List<BaseMetric> metrics, TreeColumn []columns) {
-		listItems = new ArrayList<FilterDataItem>(metrics.size());
+	public List<MetricFilterDataItem> createFilterList(List<BaseMetric> metrics, TreeColumn []columns) {
+		List<MetricFilterDataItem> listItems = new ArrayList<MetricFilterDataItem>(metrics.size());
 		
 		for(BaseMetric metric: metrics) {
 			
-			FilterDataItem item = new FilterDataItem(metric.getIndex(), metric.getDisplayName(), false, false);
+			MetricFilterDataItem item = new MetricFilterDataItem(metric.getIndex(), metric.getDisplayName(), false, false);
 			item.setData(metric);
 			
 			// looking for associated metric in the column
@@ -48,16 +55,12 @@ public class MetricFilterInput
 			}
 			listItems.add(item);
 		}
+		return listItems;
 	}
 
 
 	public IMetricManager getMetricManager() {
-		return metricManager;
-	}
-
-
-	public void setMetricManager(IMetricManager metricManager) {
-		this.metricManager = metricManager;
+		return (IMetricManager) root.getExperiment();
 	}
 
 
@@ -66,17 +69,7 @@ public class MetricFilterInput
 	}
 
 
-	public void setRoot(RootScope root) {
-		this.root = root;
-	}
-
-
 	public boolean isAffectAll() {
 		return affectAll;
-	}
-
-
-	public void setAffectAll(boolean affectAll) {
-		this.affectAll = affectAll;
 	}
 }
