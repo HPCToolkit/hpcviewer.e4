@@ -10,6 +10,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeColumn;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
@@ -40,7 +42,11 @@ public final class FilterCompositeTest {
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(shell);
 
 		List<BaseMetric> list = new ArrayList<BaseMetric>();
+		TreeColumn []columns  = new TreeColumn[100];
+		Tree tree = new Tree(shell, SWT.NONE);
+		
 		Random r = new Random();
+		
 		for (int i=0; i<100; i++)  {
 			MetricType mt = (i%2 == 0)? MetricType.INCLUSIVE : MetricType.EXCLUSIVE;
 			
@@ -55,6 +61,10 @@ public final class FilterCompositeTest {
 										 mt, 
 										 i+1);
 			list.add(data);
+			columns[i] = new TreeColumn(tree, SWT.NONE);
+			columns[i].setText("col " + i);
+			columns[i].setData(data);
+			columns[i].setWidth(r.nextInt(10) == 1 ? 0 : 100);
 		}
 		Experiment exp = new Experiment();
 		exp.setMetrics(list);
@@ -69,9 +79,10 @@ public final class FilterCompositeTest {
 		}
 		
 		MetricFilterInput input = new MetricFilterInput();
-
+		input.setFilterList(list, columns);
 		input.setMetricManager(exp);
 		input.setRoot(root);
+		input.setAffectAll(true);
 		
 		AbstractFilterComposite c = new AbstractFilterComposite(shell, SWT.NONE, input) {
 			

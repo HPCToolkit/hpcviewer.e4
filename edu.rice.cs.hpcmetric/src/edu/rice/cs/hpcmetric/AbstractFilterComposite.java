@@ -12,6 +12,7 @@ import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
+import edu.rice.cs.hpcfilter.dialog.FilterDataItem;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 
 import java.util.List;
@@ -69,6 +70,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.TreeColumn;
 
 
 /*********************************************************************
@@ -99,7 +101,7 @@ public abstract class AbstractFilterComposite
 	private final Composite parentContainer;
 	private final NatTable  nattable ;
 	
-	private TextMatcherEditor<BaseMetric> textMatcher;
+	private TextMatcherEditor<FilterDataItem> textMatcher;
 	private FilterDataProvider dataProvider;
 	
 	private IMetricFilterEvent filterEvent;
@@ -171,7 +173,7 @@ public abstract class AbstractFilterComposite
 		// expand as much as possible horizontally
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(objSearchText);
 
-		nattable = setLayer(input.getMetricManager(), input.getRoot());
+		nattable = setLayer(input);
 		final Color defaultBgColor = objSearchText.getBackground();
 		
 		objSearchText.addModifyListener(new ModifyListener() {
@@ -233,18 +235,18 @@ public abstract class AbstractFilterComposite
 	 * 
 	 * @return an instance of nat table
 	 */
-	protected NatTable setLayer(IMetricManager metricManager, RootScope root) {
+	protected NatTable setLayer(MetricFilterInput input) {
 
-		List<BaseMetric> list = metricManager.getMetricList();
-		EventList<BaseMetric> eventList   = GlazedLists.eventList(list);
-		SortedList<BaseMetric> sortedList = new SortedList<BaseMetric>(eventList);
-		FilterList<BaseMetric> filterList = new FilterList<BaseMetric>(sortedList);
+		List<FilterDataItem> list = input.getFilterList();
+		EventList<FilterDataItem> eventList   = GlazedLists.eventList(list);
+		SortedList<FilterDataItem> sortedList = new SortedList<FilterDataItem>(eventList);
+		FilterList<FilterDataItem> filterList = new FilterList<FilterDataItem>(sortedList);
 
-		this.dataProvider = new FilterDataProvider(filterList, root);
+		this.dataProvider = new FilterDataProvider(filterList, input.getRoot());
 
 		// data layer
 		DataLayer dataLayer = new DataLayer(dataProvider);
-		GlazedListsEventLayer<BaseMetric> listEventLayer = new GlazedListsEventLayer<BaseMetric>(dataLayer, eventList);
+		GlazedListsEventLayer<FilterDataItem> listEventLayer = new GlazedListsEventLayer<FilterDataItem>(dataLayer, eventList);
 		DefaultBodyLayerStack defaultLayerStack = new DefaultBodyLayerStack(listEventLayer);
 		
 		dataLayer.setColumnWidthPercentageByPosition(INDEX_VISIBILITY, 10);
@@ -271,7 +273,7 @@ public abstract class AbstractFilterComposite
 		// grid layer
 		GridLayer gridLayer = new GridLayer(defaultLayerStack, colummnLayer, rowHeaderLayer, cornerLayer);
 		
-		defaultLayerStack.setConfigLabelAccumulator(new MetricConfigLabelAccumulator(defaultLayerStack, dataProvider, root));
+		defaultLayerStack.setConfigLabelAccumulator(new MetricConfigLabelAccumulator(defaultLayerStack, dataProvider, input.getRoot()));
 		
 		// the table
 		NatTable natTable = new NatTable(parentContainer, gridLayer, false); 
@@ -285,12 +287,15 @@ public abstract class AbstractFilterComposite
 		//natTable.setConfigRegistry(configRegistry); 
 		natTable.configure();
 
-		textMatcher = new TextMatcherEditor<>(new TextFilterator<BaseMetric>() {
+		textMatcher = new TextMatcherEditor<>(new TextFilterator<FilterDataItem>() {
 
 			@Override
-			public void getFilterStrings(List<String> baseList, BaseMetric element) {
-				baseList.add(element.getDisplayName());
-				baseList.add(element.getDescription());
+			public void getFilterStrings(List<String> baseList, FilterDataItem element) {
+				baseList.add(element.label);
+				if (element.getData() != null) {
+					BaseMetric metric = (BaseMetric) element.getData();
+					baseList.add(metric.getDescription());
+				}
 			}
 		});
 		textMatcher.setMode(TextMatcherEditor.CONTAINS);
@@ -341,7 +346,7 @@ public abstract class AbstractFilterComposite
 	private static class MetricConfigLabelAccumulator extends ColumnLabelAccumulator
 	{
 		private final ILayer bodyLayer;
-		private final IRowDataProvider<BaseMetric> dataProvider;
+		private final IRowDataProvider<FilterDataItem> dataProvider;
 		private RootScope root;
 		
 		/***
@@ -350,7 +355,7 @@ public abstract class AbstractFilterComposite
 		 * @param dataProvider the data provider
 		 * @param listMetrics the list 
 		 */
-		public MetricConfigLabelAccumulator(ILayer bodyLayer, IRowDataProvider<BaseMetric> dataProvider, RootScope root) {
+		public MetricConfigLabelAccumulator(ILayer bodyLayer, IRowDataProvider<FilterDataItem> dataProvider, RootScope root) {
 			super(dataProvider);
 			this.bodyLayer = bodyLayer;
 			this.dataProvider = dataProvider;
@@ -361,8 +366,8 @@ public abstract class AbstractFilterComposite
 		public void accumulateConfigLabels(LabelStack configLabels, int columnPosition, int rowPosition) {
 			
 			int rowIndex = bodyLayer.getRowIndexByPosition(rowPosition);
-			BaseMetric metric = dataProvider.getRowObject(rowIndex);
-			if (metric.isInvisible() || (root.getMetricValue(metric) == MetricValue.NONE)) {
+			FilterDataItem item = dataProvider.getRowObject(rowIndex);
+			if (!item.enabled) {
 				configLabels.addLabel(LABEL_ROW_GRAY);
 			}
 			super.accumulateConfigLabels(configLabels, columnPosition, rowPosition);
@@ -446,47 +451,56 @@ public abstract class AbstractFilterComposite
 	 *Basic metric data provider 
 	 *
 	 *******************************/
-	public static class FilterDataProvider implements IRowDataProvider<BaseMetric> 
+	public static class FilterDataProvider implements IRowDataProvider<FilterDataItem> 
 	{
 		private static final String METRIC_DERIVED = "Derived metric"; //$NON-NLS-N$
 		private static final String METRIC_EMPTY   = "empty";
-		private final List<BaseMetric> list;
+		private final List<FilterDataItem> list;
 		private final RootScope root;
 		
-		public FilterDataProvider(List<BaseMetric> list, RootScope root) {
+		public FilterDataProvider(List<FilterDataItem> list, RootScope root) {
 			this.list = list;
 			this.root = root;
 		}
 
 		public void checkAll() {
-			list.stream().filter(metric-> !metric.isInvisible() && root.getMetricValue(metric)!=MetricValue.NONE)
-						 .forEach(metric->metric.setDisplayed(VisibilityType.SHOW));
+			list.stream().filter(item-> item.data != null && item.enabled)
+						 .forEach(item-> item.setChecked(true));
 		}
 
 		public void uncheckAll() {
-			list.stream().filter(metric-> !metric.isInvisible() && root.getMetricValue(metric)!=MetricValue.NONE)
-					     .forEach(metric->metric.setDisplayed(VisibilityType.HIDE));
+			list.stream().filter(item-> item.data != null && item.enabled)
+			 		     .forEach(item-> item.setChecked(false));
 		}
 		
 		
 		@Override
 		public Object getDataValue(int columnIndex, int rowIndex) {
-			BaseMetric metric = list.get(rowIndex);
+			FilterDataItem item = list.get(rowIndex);
+			Object data = item.getData();
+			
 			switch (columnIndex) {
 			case INDEX_VISIBILITY: 	
-				return metric.getDisplayed(); 
+				return item.isChecked(); 
 			case INDEX_NAME: 		
-				return metric.getDisplayName().trim();
+				return item.label;
 			case INDEX_VALUE:
-				MetricValue mv = root.getMetricValue(metric);
-				if (mv == MetricValue.NONE)
+				if (data == null)
 					return METRIC_EMPTY;
-				return metric.getMetricTextValue(mv);
+				BaseMetric metric = (BaseMetric) data;
+				return metric.getMetricTextValue(root);
 				
 			case INDEX_DESCRIPTION: 
+				if (data == null)
+					return METRIC_EMPTY;
+
+				metric = (BaseMetric) data;
 				if (metric instanceof DerivedMetric) {
-					return METRIC_DERIVED;
+					String desc = metric.getDescription().isEmpty() ? METRIC_DERIVED :
+									metric.getDescription();
+					return desc;
 				}
+				
 				return metric.getDescription();
 			}
 			assert (false);
@@ -495,23 +509,26 @@ public abstract class AbstractFilterComposite
 
 		@Override
 		public void setDataValue(int columnIndex, int rowIndex, Object newValue) {
-			BaseMetric data = list.get(rowIndex);
-			if (data.isInvisible())
-				return;
-			
-			if (root.getMetricValue(data) == MetricValue.NONE)
+			FilterDataItem item = list.get(rowIndex);
+			Object data = item.getData();
+
+			if (data == null || !item.enabled)
 				return;
 
 			switch(columnIndex) {
 			case INDEX_VISIBILITY:
-				VisibilityType visible = (Boolean)newValue ? VisibilityType.SHOW : VisibilityType.HIDE;
-				data.setDisplayed(visible);
+				item.setChecked((boolean) newValue);
 				break;
+				
 			case INDEX_NAME:
-				data.setDisplayName((String) newValue);
+				item.label = (String) newValue;				
+				BaseMetric metric = (BaseMetric) data;
+				metric.setDisplayName((String) newValue);
 				break;
+				
 			case INDEX_DESCRIPTION:
-				data.setDescription((String) newValue);
+				metric = (BaseMetric) data;
+				metric.setDescription((String) newValue);
 				break;
 			default:
 				assert(false);
@@ -529,12 +546,12 @@ public abstract class AbstractFilterComposite
 		}
 
 		@Override
-		public BaseMetric getRowObject(int rowIndex) {
+		public FilterDataItem getRowObject(int rowIndex) {
 			return list.get(rowIndex);
 		}
 
 		@Override
-		public int indexOfRowObject(BaseMetric rowObject) {
+		public int indexOfRowObject(FilterDataItem rowObject) {
 			return list.indexOf(rowObject);
 		}		
 	}

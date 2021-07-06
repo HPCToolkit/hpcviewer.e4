@@ -17,6 +17,9 @@ public class MetricFilterInput
 	private List<FilterDataItem> listItems;
 	private boolean affectAll;
 	
+	public List<FilterDataItem> getFilterList() {
+		return listItems;
+	}
 	
 	public void setFilterList(List<BaseMetric> metrics, TreeColumn []columns) {
 		listItems = new ArrayList<FilterDataItem>(metrics.size());
@@ -24,6 +27,7 @@ public class MetricFilterInput
 		for(BaseMetric metric: metrics) {
 			
 			FilterDataItem item = new FilterDataItem(metric.getDisplayName(), false, false);
+			item.setData(metric);
 			
 			// looking for associated metric in the column
 			// a metric may not exit in table viewer because
@@ -37,7 +41,6 @@ public class MetricFilterInput
 					if (m.equalIndex(metric)) {
 						item.enabled = true;
 						item.checked = column.getWidth() > 1;
-						item.setData(column);
 						
 						break;
 					}

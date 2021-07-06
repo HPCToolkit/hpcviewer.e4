@@ -9,7 +9,7 @@ package edu.rice.cs.hpcfilter.dialog;
  * <li>enabled: if the column status can be changed (true) or not (false)
  * </ul>
  */
-public class FilterDataItem 
+public class FilterDataItem implements Comparable<FilterDataItem> 
 {
 	public String  label   = null;
 	public boolean checked = false;
@@ -35,4 +35,19 @@ public class FilterDataItem
 	public void setData(Object data) {
 		this.data = data;
 	}
+
+	public boolean isChecked() {
+		return checked;
+	}
+
+	public void setChecked(boolean checked) {
+		this.checked = checked;
+	}
+
+	@Override
+	public int compareTo(FilterDataItem o) {
+		return label.compareTo(o.label);
+	}
+	
+	
 }

@@ -1,13 +1,12 @@
 package edu.rice.cs.hpcviewer.ui.internal;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
-import org.eclipse.swt.widgets.TreeColumn;
-
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
+import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
+import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcviewer.ui.base.IViewItem;
 
 public abstract class AbstractBaseViewItem extends CTabItem implements IViewItem {
@@ -17,22 +16,31 @@ public abstract class AbstractBaseViewItem extends CTabItem implements IViewItem
 	}
 	
 	
-
-	
+	/***
+	 * Retrieve the list user visible metrics. 
+	 * This doesn include the list marked as "invisible"
+	 * 
+	 * @return {@code List<BaseMetric>}
+	 */
 	public List<BaseMetric> getVisibleMetrics() {
-		
-		final List<BaseMetric> list = new ArrayList<BaseMetric>();
 		final ScopeTreeViewer treeViewer = getScopeTreeViewer();
-		
-		for(TreeColumn column: treeViewer.getTree().getColumns()) {
-			if (column.getData() == null)
-				continue;
-			
-			if (column.getWidth()>0) {
-				list.add((BaseMetric) column.getData());
-			}
-		}
-		return list;
+		RootScope root = (RootScope) treeViewer.getInput();
+		IMetricManager metricManager = (IMetricManager) root.getExperiment();
+		return metricManager.getVisibleMetrics();
+	}
+	
+	
+	/****
+	 * Retrieve the list of all metrics, including the invisible ones.
+	 * Warning: do not call this method unless you know what you're doing.
+	 * Call {@link getVisibleMetrics} instead.
+	 * @return
+	 */
+	public List<BaseMetric> getMetrics() {
+		final ScopeTreeViewer treeViewer = getScopeTreeViewer();
+		RootScope root = (RootScope) treeViewer.getInput();
+		IMetricManager metricManager = (IMetricManager) root.getExperiment();
+		return metricManager.getMetricList();
 	}
 
 	public abstract ScopeTreeViewer getScopeTreeViewer();
