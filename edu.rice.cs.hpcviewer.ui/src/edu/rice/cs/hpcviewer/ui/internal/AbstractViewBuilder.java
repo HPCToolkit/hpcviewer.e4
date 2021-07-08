@@ -292,17 +292,6 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener
 			treeViewer.getTree().setRedraw(true);
 		}
 
-		// synchronize hide/show columns with other views that already visible
-		// since this view is just created, we need to ensure the columns hide/show
-		// are the same.
-		
-		ViewerDataEvent dataEvent = database.getColumnStatus(experiment);
-		
-		if (dataEvent != null && dataEvent.data != null) {
-			boolean []status = (boolean[]) dataEvent.data;
-			treeViewer.setColumnsStatus(getMetricManager(), status);
-		}
-		
 		// enable/disable action buttons
 		// this has to be in the last statement
 		treeViewer.getTree().getDisplay().asyncExec(()-> {

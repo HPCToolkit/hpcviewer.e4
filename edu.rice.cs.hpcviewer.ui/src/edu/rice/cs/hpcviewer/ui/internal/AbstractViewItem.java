@@ -70,6 +70,8 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 	 * If the root is null, it isn't populated
 	 */
 	protected RootScope       root;
+	
+	private List<Object> listHideShowMetrics;
 
 	public AbstractViewItem(CTabFolder parent, int style) {
 		super(parent, style);
@@ -96,6 +98,8 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 		contentViewer = setContentViewer(parent, menuService);
     	contentViewer.createContent(profilePart, parent, menuService);
 
+    	listHideShowMetrics = new ArrayList<Object>();
+    	
 		// subscribe to user action events
 		eventBroker.subscribe(BaseConstants.TOPIC_HPC_REMOVE_DATABASE,  this);
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN,   this);
@@ -122,6 +126,12 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 			// TODO: this process takes time
 			root = createRoot(experiment);
 			contentViewer.setData(root);
+			if (listHideShowMetrics != null && listHideShowMetrics.size()>0) {
+				listHideShowMetrics.stream().forEach(data -> {
+					updateColumnHideOrShowStatus(data);
+				});
+				listHideShowMetrics.clear();
+			}
 		}
 	}
 	
@@ -139,11 +149,13 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 	@Override
 	public void handleEvent(Event event) {
 		ScopeTreeViewer treeViewer = contentViewer.getTreeViewer();
-		if (treeViewer.getTree().isDisposed())
+		if (treeViewer.getTree().isDisposed()) {
+			eventBroker.unsubscribe(this);
 			return;
+		}
 
 		Object obj = event.getProperty(IEventBroker.DATA);
-		if (obj == null || experiment == null || root == null)
+		if (obj == null || experiment == null)
 			return;
 		
 		if (!(obj instanceof ViewerDataEvent)) 
@@ -153,6 +165,20 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 		if (experiment != eventInfo.experiment) 
 			return;
 		
+		// special case: the table is not populated yet, probably is not activated.
+		// we need to store the current hide/show metric in the list and use it
+		// when the table is populated
+		
+		if (root == null) {
+			if (event.getTopic().equals(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN)) {
+				MetricDataEvent dataEvent = (MetricDataEvent) eventInfo.data;
+				if (dataEvent.applyToAll) {
+					listHideShowMetrics.add(dataEvent.data);
+				}
+			}
+			return;
+		}
+
 		String topic = event.getTopic();
 		if (topic.equals(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN)) {
 			
@@ -167,16 +193,7 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 				if (this != activeView)
 					return;
 			}
-			
-			if (dataEvent.data instanceof List<?>) {
-				List<MetricFilterDataItem> list = (List<MetricFilterDataItem>) dataEvent.data;
-				list.stream().forEach(item -> {
-					setColumnHideOrShow(item);
-				});
-				
-			} else if (dataEvent.data instanceof MetricFilterDataItem) {
-				setColumnHideOrShow((MetricFilterDataItem) dataEvent.data);
-			}
+			updateColumnHideOrShowStatus(dataEvent.data);
 			
 		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC)) {
 			treeViewer.addUserMetricColumn((BaseMetric) eventInfo.data);
@@ -202,15 +219,33 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 	}
 	
 	
+	private void updateColumnHideOrShowStatus(Object data) {
+		if (data instanceof List<?>) {
+			List<MetricFilterDataItem> list = (List<MetricFilterDataItem>) data;
+			list.stream().forEach(item -> {
+				setColumnHideOrShow(item);
+			});
+			
+		} else if (data instanceof MetricFilterDataItem) {
+			setColumnHideOrShow((MetricFilterDataItem) data);
+		}
+	}
+	
+	
 	private void setColumnHideOrShow(MetricFilterDataItem filterItem) {
-		TreeColumn column = filterItem.getColumn();
-		if (column == null)
-			return;
-		
-		boolean show = filterItem.checked;
-		
+
+		BaseMetric metric = (BaseMetric) filterItem.data;
 		ScopeTreeViewer treeViewer = contentViewer.getTreeViewer();
-		treeViewer.setColumnsStatus(column, show);
+		TreeColumn []columns = treeViewer.getTree().getColumns();
+		TreeColumn column = null;
+		for (int i=0; i<columns.length; i++) {
+			if (columns[i].getData() == metric) {
+				column = columns[i];
+				break;
+			}
+		}
+		if (column != null)
+			treeViewer.setColumnsStatus(column, filterItem.checked);
 	}
 	
 	/****
