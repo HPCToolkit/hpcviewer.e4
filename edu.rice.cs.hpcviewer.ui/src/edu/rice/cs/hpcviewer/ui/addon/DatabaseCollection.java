@@ -81,12 +81,14 @@ public class DatabaseCollection
 	final private HashMap<MWindow, List<BaseExperiment>>   mapWindowToExperiments;
 	final private HashMap<BaseExperiment, ViewerDataEvent> mapColumnStatus;
 	
-	private IEventBroker      eventBroker;
     private ExperimentManager experimentManager;
 	
 	private Logger    statusReporter;
 	
 	private @Inject UISynchronize sync;
+	private @Inject IEventBroker eventBroker;
+	
+	
 	
 	public DatabaseCollection() {
 
