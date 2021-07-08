@@ -1,5 +1,6 @@
 package edu.rice.cs.hpcviewer.ui.metric;
 
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
@@ -12,7 +13,9 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.osgi.service.prefs.Preferences;
 
+import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcbase.map.UserInputHistory;
+import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcmetric.AbstractFilterPane;
 import edu.rice.cs.hpcmetric.MetricFilterInput;
 import edu.rice.cs.hpcviewer.ui.base.IUpperPart;
@@ -23,24 +26,21 @@ public class MetricView extends CTabItem implements IUpperPart
 	private static final String HISTORY_APPLY_ALL = "apply-all";
 	public static final  String INPUT_DEFAULT = "edu.rice.cs.hpcviewer.ui.metric.MetricView";
 
+	private final IEventBroker eventBroker ;
 	private final CTabFolder parent;
 	private Button btnApplyToAllViews;
-	private boolean applyToAllViewOption = true;
 	private MetricFilterInput inputFilter;
 
-	public MetricView(CTabFolder parent, int style) {
+	public MetricView(CTabFolder parent, int style, IEventBroker eventBroker ) {
 		super(parent, style);
 		this.parent = parent;
+		this.eventBroker = eventBroker;
+		
 		setText("Metric properties");
 		setShowClose(true);
 	}
 
 	
-	
-	public void enableAllViewOption(boolean applyToAllViewOption)
-	{
-		this.applyToAllViewOption = applyToAllViewOption;
-	}
 
 	
 	@Override
@@ -58,7 +58,16 @@ public class MetricView extends CTabItem implements IUpperPart
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(container);
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(container);
 		
-		new AbstractFilterPane(container, SWT.NONE, inputFilter) {
+		AbstractFilterPane pane = new AbstractFilterPane(container, SWT.NONE, inputFilter) {
+			
+			@Override
+			public void changeEvent(Object data) {
+				MetricDataEvent metricDataEvent = new MetricDataEvent(data, btnApplyToAllViews.getSelection());
+				ViewerDataEvent viewerDataEvent = new ViewerDataEvent((Experiment) inputFilter.getMetricManager(), metricDataEvent);
+				
+				eventBroker.post(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN, viewerDataEvent);
+			}
+
 			
 			@Override
 			protected void createAdditionalButton(Composite parent) {
@@ -66,8 +75,9 @@ public class MetricView extends CTabItem implements IUpperPart
 				btnApplyToAllViews = new Button(parent, SWT.CHECK);
 				btnApplyToAllViews.setText("Apply to all views");
 				btnApplyToAllViews.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-				btnApplyToAllViews.setEnabled(applyToAllViewOption);
-				btnApplyToAllViews.setSelection( applyToAllViewOption && inputFilter.isAffectAll() );
+				btnApplyToAllViews.setEnabled(inputFilter.isAffectAll());
+				boolean checked = getHistory() && inputFilter.isAffectAll();
+				btnApplyToAllViews.setSelection( checked );
 				
 				btnApplyToAllViews.addSelectionListener(new SelectionAdapter() {
 					
@@ -80,6 +90,7 @@ public class MetricView extends CTabItem implements IUpperPart
 				});
 			}
 		};
+		
 		setControl(container);
 	}
 
@@ -106,5 +117,21 @@ public class MetricView extends CTabItem implements IUpperPart
 	private boolean getHistory() {
 		return UserInputHistory.getPreference(HISTORY_COLUMN_PROPERTY).getBoolean(HISTORY_APPLY_ALL, true);
 	}
-
+	
+	
+	public static class MetricDataEvent
+	{
+		public boolean applyToAll;
+		public Object  data;
+		
+		public MetricDataEvent(Object data, boolean applyToAll) {
+			this.applyToAll = applyToAll;
+			this.data = data;
+		}
+		
+		@Override
+		public String toString() {
+			return "All: " + applyToAll + ", data: " + data;
+		}
+	}
 }

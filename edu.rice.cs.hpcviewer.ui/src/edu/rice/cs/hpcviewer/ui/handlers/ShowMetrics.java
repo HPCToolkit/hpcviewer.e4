@@ -99,7 +99,7 @@ public class ShowMetrics
 		
 		RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
 		TreeColumn []columns = item.getScopeTreeViewer().getTree().getColumns();
-		MetricFilterInput input = new MetricFilterInput(root, columns, true);
+		MetricFilterInput input = new MetricFilterInput(root, experiment, columns, true);
 		
 		profilePart.addEditor(input);
 	}

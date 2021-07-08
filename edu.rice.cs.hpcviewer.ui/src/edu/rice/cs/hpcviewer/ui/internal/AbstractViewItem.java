@@ -26,13 +26,14 @@ import edu.rice.cs.hpcbase.BaseConstants;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
-import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcmetric.internal.MetricFilterDataItem;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.base.IViewBuilder;
+import edu.rice.cs.hpcviewer.ui.metric.MetricView.MetricDataEvent;
 
 
 /*******************************************************************************************
@@ -100,8 +101,7 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN,   this);
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC, this);
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE,  this);
-
-		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH,  this);
+		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH, this);
 	}
 	
 	@Override
@@ -113,12 +113,17 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 		// important: needs to store the experiment database for further usage
 		// when the view is becoming visible
 		this.experiment = (BaseExperiment) input;
-				
-		// TODO: this process takes time
-		root = createRoot(experiment);
-		contentViewer.setData(root);
 	}
 
+	
+	@Override
+	public void activate() {
+		if (root == null) {			
+			// TODO: this process takes time
+			root = createRoot(experiment);
+			contentViewer.setData(root);
+		}
+	}
 	
 	
 	/****
@@ -150,8 +155,28 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 		
 		String topic = event.getTopic();
 		if (topic.equals(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN)) {
-			IMetricManager mgr = eventInfo.experiment;
-			treeViewer.setColumnsStatus(mgr, (boolean[]) eventInfo.data);
+			
+			MetricDataEvent dataEvent = (MetricDataEvent) eventInfo.data;
+			
+			// if the hide/show event is only for the current active view,
+			// we need to check if this one if the active or not
+			// if not, just leave it
+			
+			if (!dataEvent.applyToAll) {
+				AbstractBaseViewItem activeView = profilePart.getActiveView();
+				if (this != activeView)
+					return;
+			}
+			
+			if (dataEvent.data instanceof List<?>) {
+				List<MetricFilterDataItem> list = (List<MetricFilterDataItem>) dataEvent.data;
+				list.stream().forEach(item -> {
+					setColumnHideOrShow(item);
+				});
+				
+			} else if (dataEvent.data instanceof MetricFilterDataItem) {
+				setColumnHideOrShow((MetricFilterDataItem) dataEvent.data);
+			}
 			
 		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC)) {
 			treeViewer.addUserMetricColumn((BaseMetric) eventInfo.data);
@@ -176,6 +201,17 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 		return contentViewer.getTreeViewer();
 	}
 	
+	
+	private void setColumnHideOrShow(MetricFilterDataItem filterItem) {
+		TreeColumn column = filterItem.getColumn();
+		if (column == null)
+			return;
+		
+		boolean show = filterItem.checked;
+		
+		ScopeTreeViewer treeViewer = contentViewer.getTreeViewer();
+		treeViewer.setColumnsStatus(column, show);
+	}
 	
 	/****
 	 * Reset the content of the table.

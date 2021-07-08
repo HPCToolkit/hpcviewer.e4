@@ -83,12 +83,17 @@ public final class FilterCompositeTest
 			root.setMetricValue(i, mv);
 		}
 		
-		MetricFilterInput input = new MetricFilterInput(root, columns, true);
+		MetricFilterInput input = new MetricFilterInput(root, exp, columns, true);
 		
 		AbstractFilterPane c = new AbstractFilterPane(shell, SWT.NONE, input) {
 			
 			@Override
 			protected void createAdditionalButton(Composite parent) {}
+			
+			@Override
+			public void changeEvent(Object data) {
+				System.out.println("Change: " + data);
+			}
 		};
 
 		shell.open();

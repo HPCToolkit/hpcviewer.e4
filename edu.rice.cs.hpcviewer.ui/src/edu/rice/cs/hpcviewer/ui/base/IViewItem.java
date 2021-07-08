@@ -21,4 +21,6 @@ public interface IViewItem
 	public void setInput(Object input);
 	
 	public Object getInput();
+	
+	public void activate();
 }

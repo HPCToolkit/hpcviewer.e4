@@ -106,11 +106,9 @@ public class ProfilePart implements IProfilePart, EventHandler
 			public void widgetSelected(SelectionEvent e) {
 				for (AbstractViewItem view: views) {
 					if (e.item == view) {
-						if (view.getInput() == null)
-							view.setInput(experiment);
 						
 						sync.asyncExec(()->{
-							view.focus();
+							view.activate();
 						});
 					}
 				}
@@ -165,7 +163,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 		
 		} else if (input instanceof MetricFilterInput) {
 			MetricFilterInput filterInput = (MetricFilterInput) input;
-			viewer = new MetricView(tabFolderTop, SWT.NONE);
+			viewer = new MetricView(tabFolderTop, SWT.NONE, eventBroker);
 			((MetricView)viewer).setInput(filterInput);
 			
 		} else {
@@ -261,6 +259,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 		} else {
 			// background renderer
 			view.createContent(composite);
+			view.setInput(input);
 		}
 	}
 	
@@ -373,6 +372,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 		public void run() {
 			view.createContent(parent);
 			view.setInput(input);
+			view.activate();
 		}
 	}
 }

@@ -42,4 +42,9 @@ public class ViewerDataEvent
 		this.experiment = experiment;
 		this.data		= data;
 	}
+	
+	
+	public String toString() {
+		return "Exp: " + experiment.getName() + ", data: " + data;
+	}
 }

@@ -24,6 +24,7 @@
   <module>edu.rice.cs.hpctraceviewer.config</module>
   <module>edu.rice.cs.hpctraceviewer.data</module>
   <module>edu.rice.cs.hpctraceviewer.ui</module>
+  <module>edu.rice.cs.hpcmetric</module>
   <module>edu.rice.cs.hpcviewer.ui</module>
   <module>edu.rice.cs.hpcviewer.feature</module>
   <module>edu.rice.cs.hpcviewer.product</module>

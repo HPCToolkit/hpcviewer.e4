@@ -304,4 +304,11 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 		}
 		return null;
 	}
+
+
+	@Override
+	public void activate() {
+		// TODO Auto-generated method stub
+		
+	}
 }

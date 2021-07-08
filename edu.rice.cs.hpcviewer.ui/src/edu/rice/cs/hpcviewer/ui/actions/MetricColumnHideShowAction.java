@@ -15,22 +15,15 @@ import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
 public class MetricColumnHideShowAction 
 {	
 	private boolean 	     affectOtherViews;
-	final private IMetricManager metricMgr;
+	private final IMetricManager metricMgr;
+	private final IEventBroker eventBroker;
 	
 	public MetricColumnHideShowAction(IEventBroker eventBroker, IMetricManager metricMgr, boolean affectOtherViews) {
 		this.affectOtherViews = affectOtherViews;
 		this.metricMgr		  = metricMgr;
+		this.eventBroker = eventBroker;
 	}
 	
-	
-	/**
-	 * Set the flag to specify if we want the change of status affect other views or not.
-	 * 
-	 * @param enabled true if the change affects other views. false if the change just affect this view.
-	 */
-	public void setAffectOtherViews(boolean enabled) {
-		this.affectOtherViews = enabled;
-	}
 	
 	/**
      * Show column properties (hidden, visible ...)
@@ -46,7 +39,7 @@ public class MetricColumnHideShowAction
 		
     	TreeColumn []columns = treeViewer.getTree().getColumns(); 
 
-		MetricFilterInput input = new MetricFilterInput(treeViewer.getRootScope(), columns, affectOtherViews);
+		MetricFilterInput input = new MetricFilterInput(treeViewer.getRootScope(), metricMgr, columns, affectOtherViews);
 
 		profilePart.addEditor(input);
     }

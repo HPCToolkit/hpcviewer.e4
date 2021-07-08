@@ -10,6 +10,7 @@ import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcfilter.dialog.FilterDataItem;
+import edu.rice.cs.hpcmetric.internal.IFilterChangeListener;
 import edu.rice.cs.hpcmetric.internal.MetricFilterDataItem;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 
@@ -80,7 +81,7 @@ import org.eclipse.swt.widgets.Text;
  * </ul>
  *
  *********************************************************************/
-public abstract class AbstractFilterPane  
+public abstract class AbstractFilterPane implements IFilterChangeListener
 {	
 	private static final int INDEX_VISIBILITY  = 0;
 	private static final int INDEX_NAME        = 1;
@@ -93,9 +94,9 @@ public abstract class AbstractFilterPane
 	
 	private final Composite parentContainer;
 	private final NatTable  nattable ;
-	
 	private TextMatcherEditor<MetricFilterDataItem> textMatcher;
 	private FilterDataProvider dataProvider;
+
 	
 	/***
 	 * 
@@ -208,12 +209,6 @@ public abstract class AbstractFilterPane
 	}
 
 	
-	/****
-	 * Set listener for every filter event
-	 * @param event IMetricFilterEvent, cannot be null
-	 */
-	public void setFilterEvent(IMetricFilterEvent event) {
-	}
 	
 	
 	/****
@@ -231,7 +226,7 @@ public abstract class AbstractFilterPane
 		SortedList<MetricFilterDataItem> sortedList = new SortedList<MetricFilterDataItem>(eventList);
 		FilterList<MetricFilterDataItem> filterList = new FilterList<MetricFilterDataItem>(sortedList);
 
-		this.dataProvider = new FilterDataProvider(filterList, input.getRoot());
+		this.dataProvider = new FilterDataProvider(input, this);
 
 		// data layer
 		DataLayer dataLayer = new DataLayer(dataProvider);
@@ -291,6 +286,7 @@ public abstract class AbstractFilterPane
 
 		return natTable;
 	}
+	
 	
 	
 	/****************************************************************************
@@ -434,33 +430,38 @@ public abstract class AbstractFilterPane
 	{
 		private static final String METRIC_DERIVED = "Derived metric"; //$NON-NLS-N$
 		private static final String METRIC_EMPTY   = "empty";
-		private final List<MetricFilterDataItem> list;
-		private final RootScope root;
+		private final IFilterChangeListener changeListener;
+		private MetricFilterInput input;
 		
-		public FilterDataProvider(List<MetricFilterDataItem> list, RootScope root) {
-			this.list = list;
-			this.root = root;
+		public FilterDataProvider(MetricFilterInput input, IFilterChangeListener changeListener) {
+			this.input = input;
+			this.changeListener = changeListener;
 		}
 
 		public void checkAll() {
+			List<MetricFilterDataItem> list = input.getFilterList();
 			list.stream().filter(item-> item.data != null && item.enabled)
 						 .forEach(item-> {
 							 item.setChecked(true);
-			 		    	 System.out.println("\tNew value " + item.label +": " + true);
 						 });
+
+			changeListener.changeEvent(list);
 		}
 
 		public void uncheckAll() {
+			List<MetricFilterDataItem> list = input.getFilterList();
 			list.stream().filter(item-> item.data != null && item.enabled)
 			 		     .forEach(item-> { 
 			 		    	 item.setChecked(false);
-			 		    	 System.out.println("\tNew value " + item.label +": " + false);
 			 		       });
+
+			changeListener.changeEvent(list);
 		}
 		
 		
 		@Override
 		public Object getDataValue(int columnIndex, int rowIndex) {
+			List<MetricFilterDataItem> list = input.getFilterList();
 			FilterDataItem item = list.get(rowIndex);
 			Object data = item.getData();
 			
@@ -473,7 +474,7 @@ public abstract class AbstractFilterPane
 				if (data == null)
 					return METRIC_EMPTY;
 				BaseMetric metric = (BaseMetric) data;
-				return metric.getMetricTextValue(root);
+				return metric.getMetricTextValue(input.getRoot());
 				
 			case INDEX_DESCRIPTION: 
 				if (data == null)
@@ -494,7 +495,8 @@ public abstract class AbstractFilterPane
 
 		@Override
 		public void setDataValue(int columnIndex, int rowIndex, Object newValue) {
-			FilterDataItem item = list.get(rowIndex);
+			List<MetricFilterDataItem> list = input.getFilterList();
+			MetricFilterDataItem item = list.get(rowIndex);
 			Object data = item.getData();
 
 			if (data == null || !item.enabled)
@@ -505,7 +507,7 @@ public abstract class AbstractFilterPane
 				boolean newCheck = (boolean) newValue;
 				if (newCheck != item.checked) {
 					item.setChecked((boolean) newValue);
-					System.out.println("\tNew value " + item.label +": " + newValue);
+					changeListener.changeEvent(item);
 				}
 				break;
 				
@@ -531,19 +533,22 @@ public abstract class AbstractFilterPane
 
 		@Override
 		public int getRowCount() {
+			List<MetricFilterDataItem> list = input.getFilterList();
 			return list.size();
 		}
 
 		@Override
 		public MetricFilterDataItem getRowObject(int rowIndex) {
+			List<MetricFilterDataItem> list = input.getFilterList();
 			return list.get(rowIndex);
 		}
 
 		@Override
 		public int indexOfRowObject(MetricFilterDataItem rowObject) {
+			List<MetricFilterDataItem> list = input.getFilterList();
 			return list.indexOf(rowObject);
 		}		
 	}
 	
-	abstract protected void createAdditionalButton(Composite parent); 
+	abstract protected void createAdditionalButton(Composite parent); 	
 }
