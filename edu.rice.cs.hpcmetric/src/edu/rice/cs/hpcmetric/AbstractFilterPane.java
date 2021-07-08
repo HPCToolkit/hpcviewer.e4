@@ -226,7 +226,7 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 		SortedList<MetricFilterDataItem> sortedList = new SortedList<MetricFilterDataItem>(eventList);
 		FilterList<MetricFilterDataItem> filterList = new FilterList<MetricFilterDataItem>(sortedList);
 
-		this.dataProvider = new FilterDataProvider(input, this);
+		this.dataProvider = new FilterDataProvider(input.getRoot(), filterList, this);
 
 		// data layer
 		DataLayer dataLayer = new DataLayer(dataProvider);
@@ -430,16 +430,18 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 	{
 		private static final String METRIC_DERIVED = "Derived metric"; //$NON-NLS-N$
 		private static final String METRIC_EMPTY   = "empty";
-		private final IFilterChangeListener changeListener;
-		private MetricFilterInput input;
 		
-		public FilterDataProvider(MetricFilterInput input, IFilterChangeListener changeListener) {
-			this.input = input;
+		private final IFilterChangeListener changeListener;
+		private final RootScope root;
+		private final List<MetricFilterDataItem> list;
+		
+		public FilterDataProvider(RootScope root, List<MetricFilterDataItem> list, IFilterChangeListener changeListener) {
+			this.root = root;
+			this.list = list;
 			this.changeListener = changeListener;
 		}
 
 		public void checkAll() {
-			List<MetricFilterDataItem> list = input.getFilterList();
 			list.stream().filter(item-> item.data != null && item.enabled)
 						 .forEach(item-> {
 							 item.setChecked(true);
@@ -449,7 +451,6 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 		}
 
 		public void uncheckAll() {
-			List<MetricFilterDataItem> list = input.getFilterList();
 			list.stream().filter(item-> item.data != null && item.enabled)
 			 		     .forEach(item-> { 
 			 		    	 item.setChecked(false);
@@ -461,7 +462,6 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 		
 		@Override
 		public Object getDataValue(int columnIndex, int rowIndex) {
-			List<MetricFilterDataItem> list = input.getFilterList();
 			FilterDataItem item = list.get(rowIndex);
 			Object data = item.getData();
 			
@@ -474,7 +474,7 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 				if (data == null)
 					return METRIC_EMPTY;
 				BaseMetric metric = (BaseMetric) data;
-				return metric.getMetricTextValue(input.getRoot());
+				return metric.getMetricTextValue(root);
 				
 			case INDEX_DESCRIPTION: 
 				if (data == null)
@@ -495,7 +495,6 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 
 		@Override
 		public void setDataValue(int columnIndex, int rowIndex, Object newValue) {
-			List<MetricFilterDataItem> list = input.getFilterList();
 			MetricFilterDataItem item = list.get(rowIndex);
 			Object data = item.getData();
 
@@ -533,19 +532,16 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 
 		@Override
 		public int getRowCount() {
-			List<MetricFilterDataItem> list = input.getFilterList();
 			return list.size();
 		}
 
 		@Override
 		public MetricFilterDataItem getRowObject(int rowIndex) {
-			List<MetricFilterDataItem> list = input.getFilterList();
 			return list.get(rowIndex);
 		}
 
 		@Override
 		public int indexOfRowObject(MetricFilterDataItem rowObject) {
-			List<MetricFilterDataItem> list = input.getFilterList();
 			return list.indexOf(rowObject);
 		}		
 	}
