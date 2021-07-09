@@ -96,7 +96,7 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 	private final NatTable  nattable ;
 	private TextMatcherEditor<MetricFilterDataItem> textMatcher;
 	private FilterDataProvider dataProvider;
-
+	private EventList<MetricFilterDataItem> eventList ;
 	
 	/***
 	 * 
@@ -119,6 +119,7 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 		// check button
 		Button btnCheckAll = new Button(groupButtons, SWT.NONE);
 		btnCheckAll.setText("Check all"); 
+		btnCheckAll.setToolTipText("Select all the current listed items");
 		btnCheckAll.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		btnCheckAll.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -131,6 +132,7 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 		// uncheck button
 		Button btnUnCheckAll = new Button(groupButtons, SWT.NONE);
 		btnUnCheckAll.setText("Uncheck all");
+		btnUnCheckAll.setToolTipText("Remove the selection of the current listed items");
 		btnUnCheckAll.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		btnUnCheckAll.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -144,7 +146,8 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 		final Button btnRegExpression = new Button(groupButtons, SWT.CHECK);
 		btnRegExpression.setText("Regular expression");
 		btnRegExpression.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-		btnRegExpression.setSelection(false);		
+		btnRegExpression.setSelection(false);	
+		btnRegExpression.setToolTipText("Option to enable that the text to filter is a regular expression");
 		
 		createAdditionalButton(groupButtons);
 		
@@ -160,6 +163,7 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 		lblFilter.setText("Filter:");
 		
 		Text objSearchText = new Text (groupFilter, SWT.BORDER);
+		objSearchText.setToolTipText("Type text to filter the list");
 		
 		// expand as much as possible horizontally
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(objSearchText);
@@ -221,8 +225,8 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 	 */
 	protected NatTable setLayer(MetricFilterInput input) {
 
-		List<MetricFilterDataItem> list = input.getFilterList();
-		EventList<MetricFilterDataItem> eventList   = GlazedLists.eventList(list);
+		this.eventList = GlazedLists.eventList(input.getFilterList());
+
 		SortedList<MetricFilterDataItem> sortedList = new SortedList<MetricFilterDataItem>(eventList);
 		FilterList<MetricFilterDataItem> filterList = new FilterList<MetricFilterDataItem>(sortedList);
 
@@ -287,6 +291,14 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 		return natTable;
 	}
 	
+	
+	/****
+	 * Retrieve the list of the modified items
+	 * @return {@code List<MetricFilterDataItem>}
+	 */
+	public List<MetricFilterDataItem> getList() {
+		return eventList;
+	}
 	
 	
 	/****************************************************************************

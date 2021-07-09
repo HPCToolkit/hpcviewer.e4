@@ -22,6 +22,7 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcmetric.AbstractFilterPane;
 import edu.rice.cs.hpcmetric.MetricFilterInput;
+import edu.rice.cs.hpcmetric.internal.MetricFilterDataItem;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
 
@@ -88,7 +89,7 @@ public final class FilterCompositeTest
 		
 		MetricFilterInput input = new MetricFilterInput(root, exp, columns, true);
 		
-		AbstractFilterPane c = new AbstractFilterPane(shell, SWT.NONE, input) {
+		final AbstractFilterPane pane = new AbstractFilterPane(shell, SWT.NONE, input) {
 			
 			@Override
 			protected void createAdditionalButton(Composite parent) {}
@@ -104,6 +105,11 @@ public final class FilterCompositeTest
 			if (!display.readAndDispatch())
 				display.sleep();
 		}
+		List<MetricFilterDataItem> clist = pane.getList();
+		clist.forEach( item -> {
+			System.out.println(item.label + ": " + item.isChecked());
+		});
+
 		display.dispose();
 
 

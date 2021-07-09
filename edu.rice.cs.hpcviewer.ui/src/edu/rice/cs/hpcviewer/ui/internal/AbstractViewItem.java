@@ -71,7 +71,7 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 	 */
 	protected RootScope       root;
 	
-	private List<Object> listHideShowMetrics;
+	private List<MetricFilterDataItem> listHideShowMetrics;
 
 	public AbstractViewItem(CTabFolder parent, int style) {
 		super(parent, style);
@@ -97,8 +97,6 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 	public void createContent(Composite parent) {
 		contentViewer = setContentViewer(parent, menuService);
     	contentViewer.createContent(profilePart, parent, menuService);
-
-    	listHideShowMetrics = new ArrayList<Object>();
     	
 		// subscribe to user action events
 		eventBroker.subscribe(BaseConstants.TOPIC_HPC_REMOVE_DATABASE,  this);
@@ -124,14 +122,17 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 	public void activate() {
 		if (root == null) {			
 			// TODO: this process takes time
-			root = createRoot(experiment);
-			contentViewer.setData(root);
-			if (listHideShowMetrics != null && listHideShowMetrics.size()>0) {
-				listHideShowMetrics.stream().forEach(data -> {
-					updateColumnHideOrShowStatus(data);
-				});
-				listHideShowMetrics.clear();
-			}
+			BusyIndicator.showWhile(getDisplay(), ()-> {
+				root = createRoot(experiment);
+				contentViewer.setData(root);
+				
+				// hide or show columns if needed
+				if (listHideShowMetrics != null && listHideShowMetrics.size()>0) {
+					listHideShowMetrics.stream().forEach(data -> {
+						updateColumnHideOrShowStatus(data);
+					});
+				}
+			});
 		}
 	}
 	
@@ -172,8 +173,8 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 		if (root == null) {
 			if (event.getTopic().equals(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN)) {
 				MetricDataEvent dataEvent = (MetricDataEvent) eventInfo.data;
-				if (dataEvent.applyToAll) {
-					listHideShowMetrics.add(dataEvent.data);
+				if (dataEvent.isApplyToAll()) {
+					listHideShowMetrics = dataEvent.getList();
 				}
 			}
 			return;
@@ -188,12 +189,12 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 			// we need to check if this one if the active or not
 			// if not, just leave it
 			
-			if (!dataEvent.applyToAll) {
+			if (!dataEvent.isApplyToAll()) {
 				AbstractBaseViewItem activeView = profilePart.getActiveView();
 				if (this != activeView)
 					return;
 			}
-			updateColumnHideOrShowStatus(dataEvent.data);
+			updateColumnHideOrShowStatus(dataEvent.getData());
 			
 		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC)) {
 			treeViewer.addUserMetricColumn((BaseMetric) eventInfo.data);

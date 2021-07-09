@@ -1,5 +1,7 @@
 package edu.rice.cs.hpcviewer.ui.metric;
 
+import java.util.List;
+
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -18,8 +20,23 @@ import edu.rice.cs.hpcbase.map.UserInputHistory;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcmetric.AbstractFilterPane;
 import edu.rice.cs.hpcmetric.MetricFilterInput;
+import edu.rice.cs.hpcmetric.internal.MetricFilterDataItem;
 import edu.rice.cs.hpcviewer.ui.base.IUpperPart;
 
+
+/***************************************************************
+ * 
+ * Independent view to display the metric properties:
+ * 
+ * <ul>
+ *  <li> visible or not
+ *  <li> name of the metric
+ *  <li> its long description
+ *  <li> its aggregate value. It's important to show if the metric is empty or not
+ * </ul>
+ * The caller has to listen the event of {@code ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN}
+ * which contain data which metric (or column) to be shown or hidden
+ ***************************************************************/
 public class MetricView extends CTabItem implements IUpperPart 
 {
 	private static final String HISTORY_COLUMN_PROPERTY = "column_property";
@@ -60,10 +77,7 @@ public class MetricView extends CTabItem implements IUpperPart
 			
 			@Override
 			public void changeEvent(Object data) {
-				MetricDataEvent metricDataEvent = new MetricDataEvent(data, btnApplyToAllViews.getSelection());
-				ViewerDataEvent viewerDataEvent = new ViewerDataEvent((Experiment) inputFilter.getMetricManager(), metricDataEvent);
-				
-				eventBroker.post(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN, viewerDataEvent);
+				broadcast(data);
 			}
 
 			
@@ -81,11 +95,27 @@ public class MetricView extends CTabItem implements IUpperPart
 					
 					@Override
 					public void widgetSelected(SelectionEvent e) {
+						// if we select to apply to all views, we should notify all the views
+						// to reflect changes of the column hide/show
+						boolean selected = btnApplyToAllViews.getSelection();
+						if (selected) {
+							broadcast(getList());
+						}
+						// make sure we store the current selection, to be reused for the next session
+						// this isn't critical, but it's just nice to memorize the previous state
+						
 						Preferences pref = UserInputHistory.getPreference(HISTORY_COLUMN_PROPERTY);
-						pref.putBoolean(HISTORY_APPLY_ALL, btnApplyToAllViews.getSelection());
+						pref.putBoolean(HISTORY_APPLY_ALL, selected);
 						UserInputHistory.setPreference(pref);
 					}
 				});
+			}
+			
+			private void broadcast(Object data) {
+				MetricDataEvent metricDataEvent = new MetricDataEvent(data, getList(), btnApplyToAllViews.getSelection());
+				ViewerDataEvent viewerDataEvent = new ViewerDataEvent((Experiment) inputFilter.getMetricManager(), metricDataEvent);
+				
+				eventBroker.post(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN, viewerDataEvent);
 			}
 		};
 		
@@ -119,17 +149,31 @@ public class MetricView extends CTabItem implements IUpperPart
 	
 	public static class MetricDataEvent
 	{
-		public boolean applyToAll;
-		public Object  data;
+		final private boolean applyToAll;
+		final private Object  data;
+		final private List<MetricFilterDataItem> list;
 		
-		public MetricDataEvent(Object data, boolean applyToAll) {
+		public MetricDataEvent(Object data, List<MetricFilterDataItem> list, boolean applyToAll) {
 			this.applyToAll = applyToAll;
 			this.data = data;
+			this.list = list;
 		}
 		
+		public boolean isApplyToAll() {
+			return applyToAll;
+		}
+
+		public Object getData() {
+			return data;
+		}
+
+		public List<MetricFilterDataItem> getList() {
+			return list;
+		}
+
 		@Override
 		public String toString() {
-			return "All: " + applyToAll + ", data: " + data;
+			return "All: " + applyToAll + ", data: " + data + ", list size: " + list.size();
 		}
 	}
 }
