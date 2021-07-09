@@ -47,6 +47,9 @@ public final class FilterCompositeTest
 		TreeColumn []columns  = new TreeColumn[100];
 		Tree tree = new Tree(shell, SWT.NONE);
 
+		GridDataFactory.swtDefaults().grab(true, false).applyTo(tree);
+		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(tree);
+
 		Experiment exp = new Experiment();
 		RootScope root = new RootScope(exp, "root", RootScopeType.CallingContextTree);
 

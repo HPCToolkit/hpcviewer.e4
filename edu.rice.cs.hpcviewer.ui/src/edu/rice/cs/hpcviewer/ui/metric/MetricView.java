@@ -39,9 +39,7 @@ public class MetricView extends CTabItem implements IUpperPart
 		setText("Metric properties");
 		setShowClose(true);
 	}
-
 	
-
 	
 	@Override
 	public String getTitle() {
