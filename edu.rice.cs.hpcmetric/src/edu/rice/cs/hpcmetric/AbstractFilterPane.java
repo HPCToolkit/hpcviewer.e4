@@ -357,7 +357,8 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 
 			Style style = new Style();
 			style.setAttributeValue(CellStyleAttributes.FONT, font);
-			
+			style.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.RIGHT);
+
 			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
 												   style, 
 												   DisplayMode.NORMAL, 
