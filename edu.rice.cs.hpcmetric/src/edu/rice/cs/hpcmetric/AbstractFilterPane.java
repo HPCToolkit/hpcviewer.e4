@@ -203,7 +203,14 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 			public void widgetSelected(SelectionEvent e) {
 				boolean regExp = btnRegExpression.getSelection();
 				if (regExp) {
-					textMatcher.setMode(TextMatcherEditor.REGULAR_EXPRESSION);
+					try {
+						textMatcher.setMode(TextMatcherEditor.REGULAR_EXPRESSION);
+					} catch(Exception err) {
+						Color c = e.display.getSystemColor(SWT.COLOR_YELLOW);
+						objSearchText.setBackground(c);
+						return;
+					}
+					objSearchText.setBackground(defaultBgColor);
 				} else {
 					textMatcher.setMode(TextMatcherEditor.CONTAINS);
 				}
