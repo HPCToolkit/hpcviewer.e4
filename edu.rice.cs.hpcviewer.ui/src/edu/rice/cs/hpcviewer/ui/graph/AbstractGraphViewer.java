@@ -10,7 +10,6 @@ import javax.annotation.PostConstruct;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
-import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -22,7 +21,7 @@ import org.swtchart.IAxisTick;
 import edu.rice.cs.hpcbase.BaseConstants;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcviewer.ui.base.IUpperPart;
+import edu.rice.cs.hpcviewer.ui.internal.AbstractUpperPart;
 import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
 
 import javax.annotation.PreDestroy;
@@ -30,7 +29,7 @@ import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 
-public abstract class AbstractGraphViewer extends CTabItem implements IUpperPart
+public abstract class AbstractGraphViewer extends AbstractUpperPart
 {
 	static public final int PLOT_OK          = 0;
 	static public final int PLOT_ERR_IO 	 = -1;
@@ -46,15 +45,13 @@ public abstract class AbstractGraphViewer extends CTabItem implements IUpperPart
 	public AbstractGraphViewer(CTabFolder tabFolder, int style) {
 		super(tabFolder, style);
 		setShowClose(true);
-	}
-	
-	@PostConstruct
-	public void postConstruct(Composite parent) {
 		
-		this.parent = parent;
+		parent = new Composite(tabFolder, SWT.NONE);
 		
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(parent);
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(parent);
+		
+		setControl(parent);
 	}
 	
 	

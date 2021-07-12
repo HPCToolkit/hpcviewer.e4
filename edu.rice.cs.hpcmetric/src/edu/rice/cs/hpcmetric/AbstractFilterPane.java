@@ -43,16 +43,23 @@ import org.eclipse.nebula.widgets.nattable.grid.layer.GridLayer;
 import org.eclipse.nebula.widgets.nattable.grid.layer.RowHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayer;
+import org.eclipse.nebula.widgets.nattable.layer.ILayerListener;
 import org.eclipse.nebula.widgets.nattable.layer.LabelStack;
 import org.eclipse.nebula.widgets.nattable.layer.cell.ColumnLabelAccumulator;
+import org.eclipse.nebula.widgets.nattable.layer.event.ILayerEvent;
 import org.eclipse.nebula.widgets.nattable.layer.stack.DefaultBodyLayerStack;
 import org.eclipse.nebula.widgets.nattable.painter.cell.CheckBoxPainter;
 import org.eclipse.nebula.widgets.nattable.painter.cell.TextPainter;
+import org.eclipse.nebula.widgets.nattable.selection.config.RowOnlySelectionBindings;
+import org.eclipse.nebula.widgets.nattable.selection.config.RowOnlySelectionConfiguration;
+import org.eclipse.nebula.widgets.nattable.selection.event.CellSelectionEvent;
+import org.eclipse.nebula.widgets.nattable.selection.event.RowSelectionEvent;
 import org.eclipse.nebula.widgets.nattable.style.CellStyleAttributes;
 import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
 import org.eclipse.nebula.widgets.nattable.style.HorizontalAlignmentEnum;
 import org.eclipse.nebula.widgets.nattable.style.Style;
 import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
+import org.eclipse.nebula.widgets.nattable.util.ObjectUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -236,6 +243,7 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 		DataLayer dataLayer = new DataLayer(dataProvider);
 		GlazedListsEventLayer<MetricFilterDataItem> listEventLayer = new GlazedListsEventLayer<MetricFilterDataItem>(dataLayer, eventList);
 		DefaultBodyLayerStack defaultLayerStack = new DefaultBodyLayerStack(listEventLayer);
+		defaultLayerStack.getSelectionLayer().addConfiguration(new RowOnlySelectionConfiguration());
 		
 		dataLayer.setColumnWidthPercentageByPosition(INDEX_VISIBILITY, 10);
 		dataLayer.setColumnWidthPercentageByPosition(INDEX_NAME, 30);
@@ -270,10 +278,14 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 		natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
 		natTable.addConfiguration(new CheckBoxConfiguration());
 		natTable.addConfiguration(new PainterConfiguration());
+		natTable.addConfiguration(new RowOnlySelectionBindings());
 		
 		//natTable.setConfigRegistry(configRegistry); 
 		natTable.configure();
 
+		// 		defaultLayerStack.getSelectionLayer().getSelectedRowCount();
+
+ 		
 		textMatcher = new TextMatcherEditor<>(new TextFilterator<FilterDataItem>() {
 
 			@Override

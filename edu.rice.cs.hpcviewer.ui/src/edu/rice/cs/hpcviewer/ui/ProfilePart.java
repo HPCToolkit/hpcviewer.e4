@@ -43,6 +43,7 @@ import edu.rice.cs.hpcviewer.ui.graph.GraphHistoViewer;
 import edu.rice.cs.hpcviewer.ui.graph.GraphPlotRegularViewer;
 import edu.rice.cs.hpcviewer.ui.graph.GraphPlotSortViewer;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractBaseViewItem;
+import edu.rice.cs.hpcviewer.ui.internal.AbstractUpperPart;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractViewItem;
 import edu.rice.cs.hpcviewer.ui.metric.MetricView;
 import edu.rice.cs.hpcviewer.ui.parts.bottomup.BottomUpView;
@@ -130,20 +131,20 @@ public class ProfilePart implements IProfilePart, EventHandler
 		CTabItem []items =  tabFolderTop.getItems();
 		for (int i=0; i<items.length; i++) {
 			CTabItem item = items[i];
+			
 			if (item instanceof IUpperPart) {
 				IUpperPart editor = (IUpperPart) item;
+				
 				if (editor.hasEqualInput(input)) {
 					editor.setInput(input);
-					
-					tabFolderTop.setSelection((CTabItem) editor);
-					
+					tabFolderTop.setSelection((CTabItem) editor);					
 					return (CTabItem) editor;
 				}
 			}
 		}
 		// the input is not displayed
 		// create a new item for this input
-		CTabItem viewer = null;
+		AbstractUpperPart viewer = null;
 		if (input instanceof GraphEditorInput) {
 			GraphEditorInput graphInput = (GraphEditorInput) input;
 			if (graphInput.getGraphType() == GraphPlotRegularViewer.LABEL) {
@@ -154,29 +155,15 @@ public class ProfilePart implements IProfilePart, EventHandler
 			
 			} else if (graphInput.getGraphType() == GraphHistoViewer.LABEL) {
 				viewer = new GraphHistoViewer(tabFolderTop, SWT.NONE);
-			}
-			
-			Composite parent = new Composite(tabFolderTop, SWT.NONE);
-			((AbstractGraphViewer)viewer).postConstruct(parent);
-			viewer.setControl(parent);
-			((AbstractGraphViewer)viewer).setInput(graphInput);
+			}			
 		
 		} else if (input instanceof MetricFilterInput) {
-			MetricFilterInput filterInput = (MetricFilterInput) input;
 			viewer = new MetricView(tabFolderTop, SWT.NONE, eventBroker);
-			((MetricView)viewer).setInput(filterInput);
 			
 		} else {
-			
 			viewer = new Editor(tabFolderTop, SWT.NONE);
-			viewer.setText("code");
-			((Editor) viewer).setService(eventBroker, partService.getActivePart());
-			
-			Composite parent = new Composite(tabFolderTop, SWT.NONE);
-			viewer.setControl(parent);
-			((Editor) viewer).postConstruct(parent);
-			((Editor) viewer).setInput(input);
 		}
+		viewer.setInput(input);
 		
 		// need to select the input to refresh the viewer
 		// otherwise it will display empty item

@@ -7,7 +7,6 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
-import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -21,7 +20,7 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcmetric.AbstractFilterPane;
 import edu.rice.cs.hpcmetric.MetricFilterInput;
 import edu.rice.cs.hpcmetric.internal.MetricFilterDataItem;
-import edu.rice.cs.hpcviewer.ui.base.IUpperPart;
+import edu.rice.cs.hpcviewer.ui.internal.AbstractUpperPart;
 
 
 /***************************************************************
@@ -37,7 +36,7 @@ import edu.rice.cs.hpcviewer.ui.base.IUpperPart;
  * The caller has to listen the event of {@code ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN}
  * which contain data which metric (or column) to be shown or hidden
  ***************************************************************/
-public class MetricView extends CTabItem implements IUpperPart 
+public class MetricView extends AbstractUpperPart  
 {
 	private static final String HISTORY_COLUMN_PROPERTY = "column_property";
 	private static final String HISTORY_APPLY_ALL = "apply-all";
