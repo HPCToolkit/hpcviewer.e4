@@ -4,6 +4,7 @@ package edu.rice.cs.hpcviewer.ui;
 import javax.inject.Inject;
 import javax.annotation.PostConstruct;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.TreeColumn;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
@@ -30,6 +31,7 @@ import org.eclipse.swt.custom.CTabItem;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcfilter.service.FilterStateProvider;
@@ -78,7 +80,8 @@ public class ProfilePart implements IProfilePart, EventHandler
 	private BaseExperiment  experiment;
 	
 	private AbstractViewItem []views;
-
+	private MetricView metricView;
+	
 	private CTabFolder tabFolderTop, tabFolderBottom;
 
 	
@@ -109,6 +112,13 @@ public class ProfilePart implements IProfilePart, EventHandler
 						
 						sync.asyncExec(()->{
 							view.activate();
+							if (metricView != null && !metricView.isDisposed()) {
+								RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
+								TreeColumn []columns = view.getScopeTreeViewer().getTree().getColumns();
+								MetricFilterInput input = new MetricFilterInput(root, (IMetricManager) experiment, columns, true);
+								
+								metricView.setInput(input);
+							}
 						});
 					}
 				}
@@ -156,7 +166,11 @@ public class ProfilePart implements IProfilePart, EventHandler
 			}			
 		
 		} else if (input instanceof MetricFilterInput) {
-			viewer = new MetricView(tabFolderTop, SWT.NONE, eventBroker);
+			metricView = new MetricView(tabFolderTop, SWT.NONE, eventBroker);
+			metricView.addDisposeListener((event) -> {
+				metricView = null;
+			});
+			viewer = metricView;
 			
 		} else {
 			viewer = new Editor(tabFolderTop, SWT.NONE);
