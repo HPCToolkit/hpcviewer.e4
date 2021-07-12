@@ -1,5 +1,6 @@
 package edu.rice.cs.hpcviewer.ui.metric;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -111,7 +112,8 @@ public class MetricView extends AbstractUpperPart
 			}
 			
 			private void broadcast(Object data) {
-				MetricDataEvent metricDataEvent = new MetricDataEvent(data, getList(), btnApplyToAllViews.getSelection());
+				List<MetricFilterDataItem> copyList = List.copyOf(getList());
+				MetricDataEvent metricDataEvent = new MetricDataEvent(data, copyList, btnApplyToAllViews.getSelection());
 				ViewerDataEvent viewerDataEvent = new ViewerDataEvent((Experiment) inputFilter.getMetricManager(), metricDataEvent);
 				
 				eventBroker.post(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN, viewerDataEvent);

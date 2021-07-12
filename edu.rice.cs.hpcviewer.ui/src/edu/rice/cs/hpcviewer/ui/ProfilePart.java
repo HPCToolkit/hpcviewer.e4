@@ -37,7 +37,6 @@ import edu.rice.cs.hpcmetric.MetricFilterInput;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.base.IProfilePart;
 import edu.rice.cs.hpcviewer.ui.base.IUpperPart;
-import edu.rice.cs.hpcviewer.ui.graph.AbstractGraphViewer;
 import edu.rice.cs.hpcviewer.ui.graph.GraphEditorInput;
 import edu.rice.cs.hpcviewer.ui.graph.GraphHistoViewer;
 import edu.rice.cs.hpcviewer.ui.graph.GraphPlotRegularViewer;
@@ -131,7 +130,6 @@ public class ProfilePart implements IProfilePart, EventHandler
 		CTabItem []items =  tabFolderTop.getItems();
 		for (int i=0; i<items.length; i++) {
 			CTabItem item = items[i];
-			
 			if (item instanceof IUpperPart) {
 				IUpperPart editor = (IUpperPart) item;
 				
