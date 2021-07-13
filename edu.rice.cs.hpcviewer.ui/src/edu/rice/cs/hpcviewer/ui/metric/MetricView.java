@@ -4,8 +4,15 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.widgets.WidgetFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -18,8 +25,11 @@ import org.osgi.service.prefs.Preferences;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcbase.map.UserInputHistory;
 import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
+import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcmetric.AbstractFilterPane;
 import edu.rice.cs.hpcmetric.MetricFilterInput;
+import edu.rice.cs.hpcmetric.dialog.ExtDerivedMetricDlg;
 import edu.rice.cs.hpcmetric.internal.MetricFilterDataItem;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractUpperPart;
 
@@ -47,6 +57,7 @@ public class MetricView extends AbstractUpperPart
 	private final CTabFolder parent;
 	private Button btnApplyToAllViews;
 	private MetricFilterInput inputFilter;
+	private AbstractFilterPane paneFilter ;
 
 	public MetricView(CTabFolder parent, int style, IEventBroker eventBroker ) {
 		super(parent, style);
@@ -73,7 +84,9 @@ public class MetricView extends AbstractUpperPart
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(container);
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(container);
 		
-		AbstractFilterPane pane = new AbstractFilterPane(container, SWT.NONE, inputFilter) {
+		paneFilter = new AbstractFilterPane(container, SWT.NONE, inputFilter) {
+			
+			private Button btnEdit;
 			
 			@Override
 			public void changeEvent(Object data) {
@@ -109,6 +122,18 @@ public class MetricView extends AbstractUpperPart
 						UserInputHistory.setPreference(pref);
 					}
 				});
+				btnEdit = WidgetFactory.button(SWT.PUSH).text("Edit").enabled(false).create(parent);
+				btnEdit.addSelectionListener(new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						ISelectionProvider selection = getSelectionProvider();
+						if (selection != null && !selection.getSelection().isEmpty()) {
+							IStructuredSelection sel = (IStructuredSelection) selection.getSelection();
+							Object element = sel.getFirstElement();
+							edit((MetricFilterDataItem) element);
+						}
+					}
+				});
 			}
 			
 			private void broadcast(Object data) {
@@ -118,11 +143,42 @@ public class MetricView extends AbstractUpperPart
 				
 				eventBroker.post(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN, viewerDataEvent);
 			}
+
+
+			@Override
+			protected void selectionEvent(MetricFilterDataItem event, int action) {
+				if (action == SWT.MouseDown) {
+					btnEdit.setEnabled(true);
+				} else {
+					edit(event);
+				}
+			}
 		};
 		
 		setControl(container);
 	}
 
+	private void edit(MetricFilterDataItem item) {
+		if (item.getData() instanceof DerivedMetric) {
+			ExtDerivedMetricDlg dlg = new ExtDerivedMetricDlg(parent.getShell(), 
+															  inputFilter.getMetricManager(), 
+															  inputFilter.getRoot());
+			dlg.setMetric((DerivedMetric) item.getData());
+			if (dlg.open() == Dialog.OK) {
+				paneFilter.update(dlg.getMetric());
+			} 
+		} else {
+			BaseMetric metric = (BaseMetric) item.getData();
+			InputDialog inDlg = new InputDialog(parent.getShell(), "Edit metric display name", 
+					"Enter the new display name", metric.getDisplayName(), null);
+			if (inDlg.open() == Dialog.OK) {
+				String name = inDlg.getValue();
+				metric.setDisplayName(name);
+				paneFilter.update(metric);
+			}
+		}
+	}
+	
 	
 	@Override
 	public boolean hasEqualInput(Object input) {

@@ -29,4 +29,10 @@ public class MetricFilterDataItem extends FilterDataItem implements Comparable<M
 	public TreeColumn getColumn() {
 		return column;
 	}
+	
+	
+	@Override
+	public String toString() {
+		return (super.toString() + ", " + id + ", " + column.getText());
+	}
 }

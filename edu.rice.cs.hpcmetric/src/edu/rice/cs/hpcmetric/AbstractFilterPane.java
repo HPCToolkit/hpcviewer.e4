@@ -14,12 +14,18 @@ import edu.rice.cs.hpcmetric.internal.IFilterChangeListener;
 import edu.rice.cs.hpcmetric.internal.MetricFilterDataItem;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.config.AbstractRegistryConfiguration;
 import org.eclipse.nebula.widgets.nattable.config.CellConfigAttributes;
@@ -48,16 +54,21 @@ import org.eclipse.nebula.widgets.nattable.layer.cell.ColumnLabelAccumulator;
 import org.eclipse.nebula.widgets.nattable.layer.stack.DefaultBodyLayerStack;
 import org.eclipse.nebula.widgets.nattable.painter.cell.CheckBoxPainter;
 import org.eclipse.nebula.widgets.nattable.painter.cell.TextPainter;
+import org.eclipse.nebula.widgets.nattable.selection.RowSelectionProvider;
 import org.eclipse.nebula.widgets.nattable.selection.config.RowOnlySelectionBindings;
 import org.eclipse.nebula.widgets.nattable.selection.config.RowOnlySelectionConfiguration;
+import org.eclipse.nebula.widgets.nattable.selection.event.ISelectionEvent;
 import org.eclipse.nebula.widgets.nattable.style.CellStyleAttributes;
 import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
 import org.eclipse.nebula.widgets.nattable.style.HorizontalAlignmentEnum;
 import org.eclipse.nebula.widgets.nattable.style.Style;
+import org.eclipse.nebula.widgets.nattable.ui.action.IMouseAction;
+import org.eclipse.nebula.widgets.nattable.ui.matcher.MouseEventMatcher;
 import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
@@ -99,6 +110,7 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 	private TextMatcherEditor<MetricFilterDataItem> textMatcher;
 	private FilterDataProvider dataProvider;
 	private EventList<MetricFilterDataItem> eventList ;
+	private RowSelectionProvider<MetricFilterDataItem> rowSelectionProvider ;
 	
 	/***
 	 * 
@@ -153,7 +165,7 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 		
 		createAdditionalButton(groupButtons);
 		
-		GridLayoutFactory.fillDefaults().numColumns(4).applyTo(groupButtons);
+		GridLayoutFactory.fillDefaults().numColumns(6).applyTo(groupButtons);
 
 		// set the layout for group filter
 		Composite groupFilter = new Composite(parentContainer, SWT.NONE);
@@ -282,11 +294,7 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 		natTable.addConfiguration(new PainterConfiguration());
 		natTable.addConfiguration(new RowOnlySelectionBindings());
 		
-		//natTable.setConfigRegistry(configRegistry); 
 		natTable.configure();
-
-		// 		defaultLayerStack.getSelectionLayer().getSelectedRowCount();
-
  		
 		textMatcher = new TextMatcherEditor<>(new TextFilterator<FilterDataItem>() {
 
@@ -302,6 +310,29 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 		textMatcher.setMode(TextMatcherEditor.CONTAINS);
 		filterList.setMatcherEditor(textMatcher);
 
+		rowSelectionProvider = new RowSelectionProvider<>(defaultLayerStack.getSelectionLayer(), dataProvider);
+		rowSelectionProvider.addSelectionChangedListener((event)-> {
+			IStructuredSelection selection = (IStructuredSelection) event.getSelection();
+            Iterator<MetricFilterDataItem> it = selection.iterator();
+            
+            if (!it.hasNext())
+            	return;
+            MetricFilterDataItem item = (MetricFilterDataItem) it.next();
+            
+            selectionEvent(item, SWT.MouseDown);
+		});
+		
+		natTable.getUiBindingRegistry().registerDoubleClickBinding(MouseEventMatcher.bodyLeftClick(SWT.NONE), new IMouseAction() {
+			
+			@Override
+			public void run(NatTable natTable, MouseEvent event) {
+				int row = natTable.getRowPositionByY(event.y);
+				int index = natTable.getRowIndexByPosition(row);
+				MetricFilterDataItem item = dataProvider.getRowObject(index);
+				selectionEvent(item, SWT.MouseDoubleClick);
+			}
+		});
+		
 		return natTable;
 	}
 	
@@ -314,6 +345,24 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 		return eventList;
 	}
 	
+
+	/****
+	 * Change the current item
+	 * @param metric
+	 */
+	public void update(BaseMetric metric) {
+		dataProvider.update(metric);
+		nattable.redraw();
+	}
+
+
+	/****
+	 * Retrieve the selection provider
+	 * @return {@code ISelectionProvider}
+	 */
+	protected ISelectionProvider getSelectionProvider() {
+		return rowSelectionProvider;
+	}
 	
 	/****************************************************************************
 	 * 
@@ -486,6 +535,19 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 			changeListener.changeEvent(list);
 		}
 		
+
+		public void update(BaseMetric metric) {
+			Optional<MetricFilterDataItem> mfdi = list.stream()
+													.filter( item -> ((BaseMetric)item.data).getIndex() == metric.getIndex() )
+													.findFirst();
+			if (mfdi.isEmpty())
+				return;
+			
+			MetricFilterDataItem item = mfdi.get();
+			item.data = metric;
+			item.label = metric.getDisplayName();
+		}
+		
 		
 		@Override
 		public Object getDataValue(int columnIndex, int rowIndex) {
@@ -574,4 +636,5 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 	}
 	
 	abstract protected void createAdditionalButton(Composite parent); 	
+	abstract protected void selectionEvent(MetricFilterDataItem item, int click);
 }

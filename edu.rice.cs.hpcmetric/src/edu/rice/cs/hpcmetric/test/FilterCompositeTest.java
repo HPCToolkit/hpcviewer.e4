@@ -98,6 +98,11 @@ public final class FilterCompositeTest
 			public void changeEvent(Object data) {
 				System.out.println("Change: " + data);
 			}
+
+			@Override
+			protected void selectionEvent(MetricFilterDataItem item, int click) {
+				System.out.println("Select: " + item);
+			}
 		};
 
 		shell.open();
