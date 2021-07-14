@@ -1,18 +1,15 @@
 package edu.rice.cs.hpcmetric.internal;
 
-import org.eclipse.swt.widgets.TreeColumn;
-
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcfilter.dialog.FilterDataItem;
 
 public class MetricFilterDataItem extends FilterDataItem implements Comparable<MetricFilterDataItem>
 {
 	private final int id;
-	private TreeColumn column;
 
-	public MetricFilterDataItem(int id, TreeColumn column, String label, boolean checked, boolean enabled) {
-		super(label, checked, enabled);
+	public MetricFilterDataItem(int id, Object data, boolean checked, boolean enabled) {
+		super(data, checked, enabled);
 		this.id = id;
-		this.column = column;
 	}
 
 	@Override
@@ -21,18 +18,21 @@ public class MetricFilterDataItem extends FilterDataItem implements Comparable<M
 	}
 	
 	
-	public void setColumn(TreeColumn column) {
-		this.column = column;
+	public void setLabel(String name) {
+		BaseMetric metric = (BaseMetric) data;
+		metric.setDisplayName(name);
 	}
 	
 	
-	public TreeColumn getColumn() {
-		return column;
+	public String getLabel() {
+		BaseMetric metric = (BaseMetric) data;
+		return metric.getDisplayName();
 	}
 	
 	
 	@Override
 	public String toString() {
-		return (super.toString() + ", " + id + ", " + column.getText());
+		BaseMetric metric = (BaseMetric) data;
+		return metric.getDisplayName();
 	}
 }

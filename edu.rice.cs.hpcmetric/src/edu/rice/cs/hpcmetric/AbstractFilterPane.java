@@ -22,10 +22,8 @@ import java.util.regex.Pattern;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.config.AbstractRegistryConfiguration;
 import org.eclipse.nebula.widgets.nattable.config.CellConfigAttributes;
@@ -57,7 +55,6 @@ import org.eclipse.nebula.widgets.nattable.painter.cell.TextPainter;
 import org.eclipse.nebula.widgets.nattable.selection.RowSelectionProvider;
 import org.eclipse.nebula.widgets.nattable.selection.config.RowOnlySelectionBindings;
 import org.eclipse.nebula.widgets.nattable.selection.config.RowOnlySelectionConfiguration;
-import org.eclipse.nebula.widgets.nattable.selection.event.ISelectionEvent;
 import org.eclipse.nebula.widgets.nattable.style.CellStyleAttributes;
 import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
 import org.eclipse.nebula.widgets.nattable.style.HorizontalAlignmentEnum;
@@ -300,7 +297,7 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 
 			@Override
 			public void getFilterStrings(List<String> baseList, FilterDataItem element) {
-				baseList.add(element.label);
+				baseList.add(element.getLabel());
 				if (element.getData() != null) {
 					BaseMetric metric = (BaseMetric) element.getData();
 					baseList.add(metric.getDescription());
@@ -545,7 +542,7 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 			
 			MetricFilterDataItem item = mfdi.get();
 			item.data = metric;
-			item.label = metric.getDisplayName();
+			item.setLabel(metric.getDisplayName());
 		}
 		
 		
@@ -558,7 +555,7 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 			case INDEX_VISIBILITY: 	
 				return item.isChecked(); 
 			case INDEX_NAME: 		
-				return item.label;
+				return item.getLabel();
 			case INDEX_VALUE:
 				if (data == null)
 					return METRIC_EMPTY;
@@ -600,7 +597,7 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 				break;
 				
 			case INDEX_NAME:
-				item.label = (String) newValue;				
+				item.setLabel((String) newValue);;				
 				BaseMetric metric = (BaseMetric) data;
 				metric.setDisplayName((String) newValue);
 				break;

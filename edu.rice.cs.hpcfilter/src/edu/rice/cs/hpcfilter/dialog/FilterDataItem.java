@@ -1,6 +1,5 @@
 package edu.rice.cs.hpcfilter.dialog;
 
-
 /*******
  * 
  * data structure to display metric column status:
@@ -10,9 +9,8 @@ package edu.rice.cs.hpcfilter.dialog;
  * <li>enabled: if the column status can be changed (true) or not (false)
  * </ul>
  */
-public class FilterDataItem 
+public abstract class FilterDataItem 
 {
-	public String  label   = null;
 	public boolean checked = false;
 	public boolean enabled = true;
 	
@@ -22,8 +20,8 @@ public class FilterDataItem
 	public Object  data    = null;
 
 	
-	public FilterDataItem(String label, boolean checked, boolean enabled) {
-		this.label   = label;
+	public FilterDataItem(Object data, boolean checked, boolean enabled) {
+		this.data    = data;
 		this.checked = checked;
 		this.enabled = enabled;
 	}
@@ -31,10 +29,6 @@ public class FilterDataItem
 	
 	public Object getData() {
 		return data;
-	}
-	
-	public void setData(Object data) {
-		this.data = data;
 	}
 
 	public boolean isChecked() {
@@ -48,6 +42,11 @@ public class FilterDataItem
 	
 	@Override
 	public String toString() {
-		return label + ": " + checked + ", " + enabled;
+		return getLabel() + ": " + checked + ", " + enabled;
 	}
+	
+	
+	public abstract void setLabel(String name);
+	public abstract String getLabel();
+
 }

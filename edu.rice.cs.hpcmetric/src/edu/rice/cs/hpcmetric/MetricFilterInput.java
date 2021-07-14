@@ -38,8 +38,7 @@ public class MetricFilterInput
 		
 		for(BaseMetric metric: metrics) {
 			
-			MetricFilterDataItem item = new MetricFilterDataItem(metric.getIndex(), null, metric.getDisplayName(), false, false);
-			item.setData(metric);
+			MetricFilterDataItem item = new MetricFilterDataItem(metric.getIndex(), metric, false, false);
 			
 			// looking for associated metric in the column
 			// a metric may not exit in table viewer because
@@ -53,7 +52,6 @@ public class MetricFilterInput
 					if (m.equalIndex(metric)) {
 						item.enabled = true;
 						item.checked = column.getWidth() > 1;
-						item.setColumn(column);
 						break;
 					}
 				}

@@ -14,7 +14,6 @@ import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.TreeColumn;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
@@ -23,10 +22,10 @@ import org.slf4j.LoggerFactory;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.util.string.StringUtil;
+import edu.rice.cs.hpcfilter.StringFilterDataItem;
 import edu.rice.cs.hpcfilter.dialog.FilterDataItem;
 import edu.rice.cs.hpcfilter.dialog.ThreadFilterDialog;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
@@ -56,6 +55,13 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 	private ThreadViewInput     viewInput; 
 	
 
+	/****
+	 * Constructor for ThreadView. 
+	 * It requires to call {@code setService} immediately after creating the instance.
+	 *  
+	 * @param parent CTabFolder
+	 * @param style any CTabItem SWT style
+	 */
 	public ThreadView(CTabFolder parent, int style) {
 		super(parent, style);
 		setShowClose(true);
@@ -72,6 +78,16 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH, this);
 	}
 
+	
+	/****
+	 * Set Eclipse services required for this class:
+	 * @param partService a EPartService
+	 * @param broker a IEventBroker
+	 * @param database a {@code DatabaseCollection} instance
+	 * @param profilePart the ancestor of this tab item
+	 * @param menuService the instance of {@code EMenuService} 
+	 */
+	@Override
 	public void setService(EPartService partService, 
 			IEventBroker broker,
 			DatabaseCollection database,
@@ -85,21 +101,7 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 		this.menuService = menuService;
 	}
 
-	public List<BaseMetric> getVisibleMetrics() {
-		
-		final List<BaseMetric> list = new ArrayList<BaseMetric>();
-		final ScopeTreeViewer treeViewer = contentViewer.getTreeViewer();
-		
-		for(TreeColumn column: treeViewer.getTree().getColumns()) {
-			if (column.getData() == null)
-				continue;
-			
-			if (column.getWidth()>0) {
-				list.add((BaseMetric) column.getData());
-			}
-		}
-		return list;
-	}
+	
 
 	@Override
 	public void setInput(Object input) {
@@ -182,8 +184,7 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 				});
 			}
 			return;
-		}
-		
+		}		
 	}
 
 
@@ -193,6 +194,7 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 	}
 	
 	
+	@Override
 	public ScopeTreeViewer getScopeTreeViewer() {
 		return contentViewer.getTreeViewer();
 	}
@@ -283,7 +285,7 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 		List<FilterDataItem> items =  new ArrayList<FilterDataItem>(labels.length);
 		
 		for (int i=0; i<labels.length; i++) {
-			FilterDataItem obj = new FilterDataItem(labels[i], false, true);
+			FilterDataItem obj = new StringFilterDataItem(labels[i], false, true);
 			items.add(obj);
 		}
 

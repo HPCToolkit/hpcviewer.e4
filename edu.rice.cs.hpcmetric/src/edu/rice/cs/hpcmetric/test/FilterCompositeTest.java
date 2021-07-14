@@ -112,7 +112,7 @@ public final class FilterCompositeTest
 		}
 		List<MetricFilterDataItem> clist = pane.getList();
 		clist.forEach( item -> {
-			System.out.println(item.label + ": " + item.isChecked());
+			System.out.println(item.data + ": " + item.isChecked());
 		});
 
 		display.dispose();

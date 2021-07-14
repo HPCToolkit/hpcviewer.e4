@@ -1,6 +1,5 @@
 package edu.rice.cs.hpcviewer.ui.metric;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -8,10 +7,8 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.widgets.WidgetFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
@@ -148,8 +145,8 @@ public class MetricView extends AbstractUpperPart
 			@Override
 			protected void selectionEvent(MetricFilterDataItem event, int action) {
 				if (action == SWT.MouseDown) {
-					btnEdit.setEnabled(true);
-				} else {
+					btnEdit.setEnabled(event.enabled);
+				} else if (action == SWT.MouseDoubleClick) {
 					edit(event);
 				}
 			}
@@ -159,6 +156,9 @@ public class MetricView extends AbstractUpperPart
 	}
 
 	private void edit(MetricFilterDataItem item) {
+		if (!item.enabled)
+			return;
+					
 		if (item.getData() instanceof DerivedMetric) {
 			ExtDerivedMetricDlg dlg = new ExtDerivedMetricDlg(parent.getShell(), 
 															  inputFilter.getMetricManager(), 
