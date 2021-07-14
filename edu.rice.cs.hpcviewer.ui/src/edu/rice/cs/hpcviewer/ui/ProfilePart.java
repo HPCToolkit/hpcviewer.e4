@@ -31,7 +31,6 @@ import org.eclipse.swt.custom.CTabItem;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
-import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcfilter.service.FilterStateProvider;
@@ -77,7 +76,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 	/** Each view needs to store the experiment database.
 	 * In case it needs to populate the table, we know which database 
 	 * to be loaded. */
-	private BaseExperiment  experiment;
+	private Experiment  experiment;
 	
 	private AbstractViewItem []views;
 	private MetricView metricView;
@@ -115,7 +114,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 							if (metricView != null && !metricView.isDisposed()) {
 								RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
 								TreeColumn []columns = view.getScopeTreeViewer().getTree().getColumns();
-								MetricFilterInput input = new MetricFilterInput(root, (IMetricManager) experiment, columns, true);
+								MetricFilterInput input = new MetricFilterInput(root, experiment, columns, true);
 								
 								metricView.setInput(input);
 							}
@@ -150,9 +149,10 @@ public class ProfilePart implements IProfilePart, EventHandler
 				}
 			}
 		}
-		// the input is not displayed
+		// the input is not yet displayed
 		// create a new item for this input
 		AbstractUpperPart viewer = null;
+		
 		if (input instanceof GraphEditorInput) {
 			GraphEditorInput graphInput = (GraphEditorInput) input;
 			if (graphInput.getGraphType() == GraphPlotRegularViewer.LABEL) {
@@ -166,11 +166,22 @@ public class ProfilePart implements IProfilePart, EventHandler
 			}			
 		
 		} else if (input instanceof MetricFilterInput) {
-			metricView = new MetricView(tabFolderTop, SWT.NONE, eventBroker);
-			metricView.addDisposeListener((event) -> {
-				metricView = null;
-			});
-			viewer = metricView;
+			viewer = new MetricView(tabFolderTop, SWT.NONE, eventBroker);
+			
+			// if the metric view is created for the traditional views (top-down, bottom-up, flat)
+			// we should store the instance. This will be needed because each 3 views only has 1 metric view.
+			// However, each thread view has its own metric view. Hence no need to store the instance.
+			// to know if a view is thread view or not, we can check from isAffectAll() property.
+			
+			if ( ((MetricFilterInput)input).isAffectAll() ) {
+				// the metric view is generated for the 3 traditional views.
+				// we need to store the instance
+				
+				metricView =  (MetricView) viewer;
+				metricView.addDisposeListener((event) -> {
+					metricView = null;
+				});
+			}
 			
 		} else {
 			viewer = new Editor(tabFolderTop, SWT.NONE);
@@ -296,8 +307,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 		if (input == null ) return;
 		if (!(input instanceof Experiment)) return;
 		
-		Experiment experiment = (Experiment) input;
-		this.experiment = experiment;
+		this.experiment = (Experiment) input;
 		
 		part.setLabel(PREFIX_TITLE + experiment.getName());
 		part.setTooltip(experiment.getDefaultDirectory().getAbsolutePath());

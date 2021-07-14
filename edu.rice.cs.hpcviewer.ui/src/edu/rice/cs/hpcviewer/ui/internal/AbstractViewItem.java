@@ -17,7 +17,6 @@ import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Tree;
-import org.eclipse.swt.widgets.TreeColumn;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.LoggerFactory;
@@ -129,7 +128,7 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 				// hide or show columns if needed
 				if (listHideShowMetrics != null && listHideShowMetrics.size()>0) {
 					listHideShowMetrics.stream().forEach(data -> {
-						updateColumnHideOrShowStatus(data);
+						AbstractBaseViewItem.updateColumnHideOrShowStatus(contentViewer.getTreeViewer(), data);
 					});
 				}
 			});
@@ -194,7 +193,7 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 				if (this != activeView)
 					return;
 			}
-			updateColumnHideOrShowStatus(dataEvent.getData());
+			AbstractBaseViewItem.updateColumnHideOrShowStatus(getScopeTreeViewer(), dataEvent.getData());
 			
 		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC)) {
 			treeViewer.addUserMetricColumn((BaseMetric) eventInfo.data);
@@ -217,36 +216,6 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 	
 	public ScopeTreeViewer getScopeTreeViewer() {
 		return contentViewer.getTreeViewer();
-	}
-	
-	
-	private void updateColumnHideOrShowStatus(Object data) {
-		if (data instanceof List<?>) {
-			List<MetricFilterDataItem> list = (List<MetricFilterDataItem>) data;
-			list.stream().forEach(item -> {
-				setColumnHideOrShow(item);
-			});
-			
-		} else if (data instanceof MetricFilterDataItem) {
-			setColumnHideOrShow((MetricFilterDataItem) data);
-		}
-	}
-	
-	
-	private void setColumnHideOrShow(MetricFilterDataItem filterItem) {
-
-		BaseMetric metric = (BaseMetric) filterItem.data;
-		ScopeTreeViewer treeViewer = contentViewer.getTreeViewer();
-		TreeColumn []columns = treeViewer.getTree().getColumns();
-		TreeColumn column = null;
-		for (int i=0; i<columns.length; i++) {
-			if (columns[i].getData() == metric) {
-				column = columns[i];
-				break;
-			}
-		}
-		if (column != null)
-			treeViewer.setColumnsStatus(column, filterItem.checked);
 	}
 	
 	/****

@@ -33,6 +33,7 @@ import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.base.IViewItem;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractBaseViewItem;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
+import edu.rice.cs.hpcviewer.ui.metric.MetricView.MetricDataEvent;
 
 /*************************************************************
  * 
@@ -76,6 +77,7 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 		
 		// subscribe to filter events
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH, this);
+		eventBroker.subscribe(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN, this);
 	}
 
 	
@@ -173,8 +175,10 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 			return;
 		
 		if (obj instanceof ViewerDataEvent) {
-
-			if (event.getTopic().equals(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH)) {
+			ViewerDataEvent viewDataEvent = (ViewerDataEvent) obj;
+					
+			switch(event.getTopic()) {
+			case ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH:
 				BaseExperiment experiment = profilePart.getExperiment();
 				
 				// TODO: this process takes time
@@ -182,8 +186,17 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 					RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
 					contentViewer.setData(root);
 				});
+				break;
+				
+			case ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN:
+				if (viewDataEvent.experiment == this.contentViewer.getMetricManager()) {
+					MetricDataEvent dataEvent = (MetricDataEvent) viewDataEvent.data;					
+					AbstractBaseViewItem.updateColumnHideOrShowStatus( getScopeTreeViewer(), 
+																	   dataEvent.getData());
+				}
+				break;
+				
 			}
-			return;
 		}		
 	}
 

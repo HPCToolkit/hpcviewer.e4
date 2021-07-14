@@ -1,6 +1,7 @@
 package edu.rice.cs.hpcbase;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 
 /***************************************************************
  * 
@@ -28,7 +29,7 @@ public class ViewerDataEvent
 	/** Event when a metric has been changed or modified by the user */
 	static final public String TOPIC_HPC_METRIC_UPDATE    = "hpcviewer/metric_update";
 	
-	public Experiment experiment;
+	public IMetricManager experiment;
 	public Object 	  data;
 	
 	
@@ -38,13 +39,13 @@ public class ViewerDataEvent
 	 * @param experiment Experiment database
 	 * @param data the data to be shared among different parts
 	 */
-	public ViewerDataEvent(Experiment experiment, Object data) {
+	public ViewerDataEvent(IMetricManager experiment, Object data) {
 		this.experiment = experiment;
 		this.data		= data;
 	}
 	
 	
 	public String toString() {
-		return "Exp: " + experiment.getName() + ", data: " + data;
+		return "Exp: " + experiment.toString() + ", data: " + data;
 	}
 }

@@ -22,7 +22,6 @@ import org.osgi.service.prefs.Preferences;
 
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcbase.map.UserInputHistory;
-import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcmetric.AbstractFilterPane;
@@ -47,6 +46,7 @@ import edu.rice.cs.hpcviewer.ui.internal.AbstractUpperPart;
  ***************************************************************/
 public class MetricView extends AbstractUpperPart  
 {
+	private static final String TITLE_DEFAULT = "Metric properties";
 	private static final String HISTORY_COLUMN_PROPERTY = "column_property";
 	private static final String HISTORY_APPLY_ALL = "apply-all";
 	public static final  String INPUT_DEFAULT = "edu.rice.cs.hpcviewer.ui.metric.MetricView";
@@ -62,14 +62,14 @@ public class MetricView extends AbstractUpperPart
 		this.parent = parent;
 		this.eventBroker = eventBroker;
 		
-		setText("Metric properties");
 		setShowClose(true);
+		setText(TITLE_DEFAULT);
 	}
 	
 	
 	@Override
 	public String getTitle() {
-		return "Metric properties";
+		return TITLE_DEFAULT;
 	}
 
 	@Override
@@ -137,7 +137,7 @@ public class MetricView extends AbstractUpperPart
 			private void broadcast(Object data) {
 				List<MetricFilterDataItem> copyList = new ArrayList<MetricFilterDataItem>(getList()); //List.copyOf(getList());
 				MetricDataEvent metricDataEvent = new MetricDataEvent(data, copyList, btnApplyToAllViews.getSelection());
-				ViewerDataEvent viewerDataEvent = new ViewerDataEvent((Experiment) inputFilter.getMetricManager(), metricDataEvent);
+				ViewerDataEvent viewerDataEvent = new ViewerDataEvent(inputFilter.getMetricManager(), metricDataEvent);
 				
 				eventBroker.post(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN, viewerDataEvent);
 			}

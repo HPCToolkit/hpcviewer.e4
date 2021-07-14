@@ -15,7 +15,7 @@ public class MetricFilterInput
 	private final List<MetricFilterDataItem> listItems;
 	private final boolean affectAll;
 	private final IMetricManager metricManager;
-	//private final IMetricFilterListener listener;
+
 	
 	public MetricFilterInput(RootScope root, IMetricManager metricManager, TreeColumn []columns, boolean affectAll) {		
 
@@ -24,7 +24,6 @@ public class MetricFilterInput
 
 		this.listItems = createFilterList(metricManager.getVisibleMetrics(), columns);
 		this.affectAll = affectAll;
-		//this.listener  = listener;
 	}
 	
 	
