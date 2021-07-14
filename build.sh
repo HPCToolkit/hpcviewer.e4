@@ -14,6 +14,7 @@ then
 	exit
 fi
 
+CHECK=0
 NOTARIZE=0
 RELEASE=`date +"%Y.%m"`
 
@@ -23,6 +24,10 @@ do
 key="$1"
 
 case $key in
+    -c|--check)
+    CHECK=1
+    shift # past argument
+    ;;
     -n|--notarize)
     NOTARIZE=1
     shift # past argument
@@ -49,7 +54,9 @@ set -- "${POSITIONAL[@]}" # restore positional parameters
 #
 GITC=`git rev-parse --short HEAD`
 
-echo "Release ${RELEASE}. Commit $GITC" > edu.rice.cs.hpcviewer.ui/release.txt
+if [ "$CHECK" == "0" ]; then
+    echo "Release ${RELEASE}. Commit $GITC" > edu.rice.cs.hpcviewer.ui/release.txt
+fi
 rm -rf hpcviewer-${RELEASE}*
 
 #
