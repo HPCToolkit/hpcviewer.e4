@@ -94,11 +94,9 @@ public class ProfilePart implements IProfilePart, EventHandler
 		
 		parent.setLayout(new FillLayout(SWT.HORIZONTAL));
 
-		SashForm sashForm = new SashForm(parent, SWT.VERTICAL);
-		
-		tabFolderTop = new CTabFolder(sashForm, SWT.BORDER);
-		
-		tabFolderBottom = new CTabFolder(sashForm, SWT.BORDER);
+		SashForm sashForm = new SashForm(parent, SWT.VERTICAL);		
+		tabFolderTop      = new CTabFolder(sashForm, SWT.BORDER);
+		tabFolderBottom   = new CTabFolder(sashForm, SWT.BORDER);
 		
 		sashForm.setWeights(new int[] {1000, 1700});
 
@@ -107,9 +105,17 @@ public class ProfilePart implements IProfilePart, EventHandler
 			public void widgetSelected(SelectionEvent e) {
 				for (AbstractViewItem view: views) {
 					if (e.item == view) {
+						// activate the view if necessary
+						// this includes creating the tree and populate the metrics
+						// (for bottom-up and flat views)
 						
 						sync.asyncExec(()->{
 							view.activate();
+							
+							// if the metric part is active, we need to inform it that
+							// a new view is activated. The metric part has to refresh
+							// its content to synchronize with the table in the active view
+							
 							if (metricView != null && !metricView.isDisposed()) {
 								RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
 								MetricFilterInput input = new MetricFilterInput(root, experiment, 
@@ -180,6 +186,12 @@ public class ProfilePart implements IProfilePart, EventHandler
 				metricView.addDisposeListener((event) -> {
 					metricView = null;
 				});
+			} else {
+				// for metric properties from thread view, we need to show as well the title of the thread view
+				// this is important to distinguish with other metric properties
+				
+				final String titleView = tabFolderBottom.getSelection().getText();
+				viewer.setText(MetricView.TITLE_DEFAULT + ": " + titleView);
 			}
 			
 		} else {

@@ -52,13 +52,14 @@ import edu.rice.cs.hpcviewer.ui.internal.AbstractUpperPart;
  ***************************************************************/
 public class MetricView extends AbstractUpperPart implements EventHandler, DisposeListener
 {
-	private static final String TITLE_DEFAULT = "Metric properties";
+	public  static final String TITLE_DEFAULT = "Metric properties";
 	private static final String HISTORY_COLUMN_PROPERTY = "column_property";
 	private static final String HISTORY_APPLY_ALL = "apply-all";
-	public static final  String INPUT_DEFAULT = "edu.rice.cs.hpcviewer.ui.metric.MetricView";
+
 
 	private final IEventBroker eventBroker ;
 	private final CTabFolder parent;
+	
 	private Button btnApplyToAllViews;
 	private MetricFilterInput inputFilter;
 	private AbstractFilterPane paneFilter ;
@@ -72,7 +73,6 @@ public class MetricView extends AbstractUpperPart implements EventHandler, Dispo
 		setText(TITLE_DEFAULT);
 		
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC, this);
-		
 		addDisposeListener(this);
 	}
 	
