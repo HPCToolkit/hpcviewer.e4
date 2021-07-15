@@ -11,7 +11,6 @@ import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcfilter.dialog.FilterDataItem;
 import edu.rice.cs.hpcmetric.internal.IFilterChangeListener;
-import edu.rice.cs.hpcmetric.internal.MetricFilterDataItem;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 
 import java.util.Iterator;
@@ -104,10 +103,10 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 	
 	private final Composite parentContainer;
 	private final NatTable  nattable ;
-	private TextMatcherEditor<MetricFilterDataItem> textMatcher;
+	private TextMatcherEditor<FilterDataItem> textMatcher;
 	private FilterDataProvider dataProvider;
-	private EventList<MetricFilterDataItem> eventList ;
-	private RowSelectionProvider<MetricFilterDataItem> rowSelectionProvider ;
+	private EventList<FilterDataItem> eventList ;
+	private RowSelectionProvider<FilterDataItem> rowSelectionProvider ;
 	
 	/***
 	 * 
@@ -245,14 +244,14 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 
 		this.eventList = GlazedLists.eventList(input.getFilterList());
 
-		SortedList<MetricFilterDataItem> sortedList = new SortedList<MetricFilterDataItem>(eventList);
-		FilterList<MetricFilterDataItem> filterList = new FilterList<MetricFilterDataItem>(sortedList);
+		SortedList<FilterDataItem> sortedList = new SortedList<FilterDataItem>(eventList);
+		FilterList<FilterDataItem> filterList = new FilterList<FilterDataItem>(sortedList);
 
 		this.dataProvider = new FilterDataProvider(input.getRoot(), filterList, this);
 
 		// data layer
 		DataLayer dataLayer = new DataLayer(dataProvider);
-		GlazedListsEventLayer<MetricFilterDataItem> listEventLayer = new GlazedListsEventLayer<MetricFilterDataItem>(dataLayer, eventList);
+		GlazedListsEventLayer<FilterDataItem> listEventLayer = new GlazedListsEventLayer<FilterDataItem>(dataLayer, eventList);
 		DefaultBodyLayerStack defaultLayerStack = new DefaultBodyLayerStack(listEventLayer);
 		defaultLayerStack.getSelectionLayer().addConfiguration(new RowOnlySelectionConfiguration());
 		
@@ -310,11 +309,11 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 		rowSelectionProvider = new RowSelectionProvider<>(defaultLayerStack.getSelectionLayer(), dataProvider);
 		rowSelectionProvider.addSelectionChangedListener((event)-> {
 			IStructuredSelection selection = (IStructuredSelection) event.getSelection();
-            Iterator<MetricFilterDataItem> it = selection.iterator();
+            Iterator<FilterDataItem> it = selection.iterator();
             
             if (!it.hasNext())
             	return;
-            MetricFilterDataItem item = (MetricFilterDataItem) it.next();
+            FilterDataItem item = (FilterDataItem) it.next();
             
             selectionEvent(item, SWT.MouseDown);
 		});
@@ -325,7 +324,7 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 			public void run(NatTable natTable, MouseEvent event) {
 				int row = natTable.getRowPositionByY(event.y);
 				int index = natTable.getRowIndexByPosition(row);
-				MetricFilterDataItem item = dataProvider.getRowObject(index);
+				FilterDataItem item = dataProvider.getRowObject(index);
 				selectionEvent(item, SWT.MouseDoubleClick);
 			}
 		});
@@ -336,9 +335,9 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 	
 	/****
 	 * Retrieve the list of the modified items
-	 * @return {@code List<MetricFilterDataItem>}
+	 * @return {@code List<FilterDataItem>}
 	 */
-	public List<MetricFilterDataItem> getList() {
+	public List<FilterDataItem> getList() {
 		return eventList;
 	}
 	
@@ -435,14 +434,14 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 	private static class MetricConfigLabelAccumulator extends ColumnLabelAccumulator
 	{
 		private final ILayer bodyLayer;
-		private final IRowDataProvider<MetricFilterDataItem> dataProvider;
+		private final IRowDataProvider<FilterDataItem> dataProvider;
 		/***
 		 * Constructor for metric label configuration
 		 * @param bodyLayer the body layer, used to convert row position to row index
 		 * @param dataProvider the data provider
 		 * @param listMetrics the list 
 		 */
-		public MetricConfigLabelAccumulator(ILayer bodyLayer, IRowDataProvider<MetricFilterDataItem> dataProvider, RootScope root) {
+		public MetricConfigLabelAccumulator(ILayer bodyLayer, IRowDataProvider<FilterDataItem> dataProvider, RootScope root) {
 			super(dataProvider);
 			this.bodyLayer = bodyLayer;
 			this.dataProvider = dataProvider;
@@ -499,16 +498,16 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 	 *Basic metric data provider 
 	 *
 	 *******************************/
-	public static class FilterDataProvider implements IRowDataProvider<MetricFilterDataItem> 
+	public static class FilterDataProvider implements IRowDataProvider<FilterDataItem> 
 	{
 		private static final String METRIC_DERIVED = "Derived metric"; //$NON-NLS-N$
 		private static final String METRIC_EMPTY   = "empty";
 		
 		private final IFilterChangeListener changeListener;
 		private final RootScope root;
-		private final List<MetricFilterDataItem> list;
+		private final List<FilterDataItem> list;
 		
-		public FilterDataProvider(RootScope root, List<MetricFilterDataItem> list, IFilterChangeListener changeListener) {
+		public FilterDataProvider(RootScope root, List<FilterDataItem> list, IFilterChangeListener changeListener) {
 			this.root = root;
 			this.list = list;
 			this.changeListener = changeListener;
@@ -534,13 +533,13 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 		
 
 		public void update(BaseMetric metric) {
-			Optional<MetricFilterDataItem> mfdi = list.stream()
+			Optional<FilterDataItem> mfdi = list.stream()
 													.filter( item -> ((BaseMetric)item.data).getIndex() == metric.getIndex() )
 													.findFirst();
 			if (mfdi.isEmpty())
 				return;
 			
-			MetricFilterDataItem item = mfdi.get();
+			FilterDataItem item = mfdi.get();
 			item.data = metric;
 			item.setLabel(metric.getDisplayName());
 		}
@@ -581,7 +580,7 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 
 		@Override
 		public void setDataValue(int columnIndex, int rowIndex, Object newValue) {
-			MetricFilterDataItem item = list.get(rowIndex);
+			FilterDataItem item = list.get(rowIndex);
 			Object data = item.getData();
 
 			if (data == null || !item.enabled)
@@ -622,16 +621,16 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 		}
 
 		@Override
-		public MetricFilterDataItem getRowObject(int rowIndex) {
+		public FilterDataItem getRowObject(int rowIndex) {
 			return list.get(rowIndex);
 		}
 
 		@Override
-		public int indexOfRowObject(MetricFilterDataItem rowObject) {
+		public int indexOfRowObject(FilterDataItem rowObject) {
 			return list.indexOf(rowObject);
 		}		
 	}
 	
 	abstract protected void createAdditionalButton(Composite parent); 	
-	abstract protected void selectionEvent(MetricFilterDataItem item, int click);
+	abstract protected void selectionEvent(FilterDataItem item, int click);
 }

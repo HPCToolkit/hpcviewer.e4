@@ -24,6 +24,7 @@ import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcbase.map.UserInputHistory;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
+import edu.rice.cs.hpcfilter.dialog.FilterDataItem;
 import edu.rice.cs.hpcmetric.AbstractFilterPane;
 import edu.rice.cs.hpcmetric.MetricFilterInput;
 import edu.rice.cs.hpcmetric.dialog.ExtDerivedMetricDlg;
@@ -135,7 +136,7 @@ public class MetricView extends AbstractUpperPart
 			}
 			
 			private void broadcast(Object data) {
-				List<MetricFilterDataItem> copyList = new ArrayList<MetricFilterDataItem>(getList()); //List.copyOf(getList());
+				List<FilterDataItem> copyList = new ArrayList<FilterDataItem>(getList()); //List.copyOf(getList());
 				MetricDataEvent metricDataEvent = new MetricDataEvent(data, copyList, btnApplyToAllViews.getSelection());
 				ViewerDataEvent viewerDataEvent = new ViewerDataEvent(inputFilter.getMetricManager(), metricDataEvent);
 				
@@ -144,7 +145,7 @@ public class MetricView extends AbstractUpperPart
 
 
 			@Override
-			protected void selectionEvent(MetricFilterDataItem event, int action) {
+			protected void selectionEvent(FilterDataItem event, int action) {
 				if (action == SWT.MouseDown) {
 					btnEdit.setEnabled(event.enabled);
 				} else if (action == SWT.MouseDoubleClick) {
@@ -156,7 +157,7 @@ public class MetricView extends AbstractUpperPart
 		setControl(container);
 	}
 
-	private void edit(MetricFilterDataItem item) {
+	private void edit(FilterDataItem item) {
 		if (!item.enabled)
 			return;
 					
@@ -209,9 +210,9 @@ public class MetricView extends AbstractUpperPart
 	{
 		final private boolean applyToAll;
 		final private Object  data;
-		final private List<MetricFilterDataItem> list;
+		final private List<FilterDataItem> list;
 		
-		public MetricDataEvent(Object data, List<MetricFilterDataItem> list, boolean applyToAll) {
+		public MetricDataEvent(Object data, List<FilterDataItem> list, boolean applyToAll) {
 			this.applyToAll = applyToAll;
 			this.data = data;
 			this.list = list;
@@ -225,7 +226,7 @@ public class MetricView extends AbstractUpperPart
 			return data;
 		}
 
-		public List<MetricFilterDataItem> getList() {
+		public List<FilterDataItem> getList() {
 			return list;
 		}
 
