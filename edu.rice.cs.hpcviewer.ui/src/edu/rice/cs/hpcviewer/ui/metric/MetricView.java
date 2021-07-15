@@ -167,7 +167,11 @@ public class MetricView extends AbstractUpperPart
 															  inputFilter.getRoot());
 			dlg.setMetric((DerivedMetric) item.getData());
 			if (dlg.open() == Dialog.OK) {
-				paneFilter.update(dlg.getMetric());
+				BaseMetric metric = dlg.getMetric();
+				paneFilter.update(metric);
+				
+				ViewerDataEvent dataEvent = new ViewerDataEvent(inputFilter.getMetricManager(), metric);				
+				eventBroker.post(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE, dataEvent);
 			} 
 		} else {
 			BaseMetric metric = (BaseMetric) item.getData();
@@ -177,6 +181,9 @@ public class MetricView extends AbstractUpperPart
 				String name = inDlg.getValue();
 				metric.setDisplayName(name);
 				paneFilter.update(metric);
+				
+				ViewerDataEvent dataEvent = new ViewerDataEvent(inputFilter.getMetricManager(), metric);				
+				eventBroker.post(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE, dataEvent);
 			}
 		}
 	}
