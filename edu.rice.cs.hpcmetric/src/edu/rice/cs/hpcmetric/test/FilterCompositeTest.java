@@ -20,9 +20,9 @@ import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
+import edu.rice.cs.hpcfilter.FilterDataItem;
 import edu.rice.cs.hpcmetric.AbstractFilterPane;
 import edu.rice.cs.hpcmetric.MetricFilterInput;
-import edu.rice.cs.hpcmetric.internal.MetricFilterDataItem;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
 
@@ -100,7 +100,7 @@ public final class FilterCompositeTest
 			}
 
 			@Override
-			protected void selectionEvent(MetricFilterDataItem item, int click) {
+			protected void selectionEvent(FilterDataItem item, int click) {
 				System.out.println("Select: " + item);
 			}
 		};
@@ -110,7 +110,7 @@ public final class FilterCompositeTest
 			if (!display.readAndDispatch())
 				display.sleep();
 		}
-		List<MetricFilterDataItem> clist = pane.getList();
+		List<FilterDataItem> clist = pane.getList();
 		clist.forEach( item -> {
 			System.out.println(item.data + ": " + item.isChecked());
 		});

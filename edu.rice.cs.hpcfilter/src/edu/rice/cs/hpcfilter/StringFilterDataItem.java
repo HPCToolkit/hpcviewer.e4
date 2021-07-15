@@ -1,8 +1,5 @@
 package edu.rice.cs.hpcfilter;
 
-import edu.rice.cs.hpcfilter.dialog.FilterDataItem;
-
-
 /****
  * 
  * The String data version of {@code FilterDataItem}

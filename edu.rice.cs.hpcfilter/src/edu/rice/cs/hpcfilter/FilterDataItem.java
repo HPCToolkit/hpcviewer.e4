@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcfilter.dialog;
+package edu.rice.cs.hpcfilter;
 
 /*******
  * 

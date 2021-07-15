@@ -9,7 +9,7 @@ import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
-import edu.rice.cs.hpcfilter.dialog.FilterDataItem;
+import edu.rice.cs.hpcfilter.FilterDataItem;
 import edu.rice.cs.hpcmetric.internal.IFilterChangeListener;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 

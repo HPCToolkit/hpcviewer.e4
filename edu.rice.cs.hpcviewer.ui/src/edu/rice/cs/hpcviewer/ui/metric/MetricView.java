@@ -13,18 +13,23 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.widgets.WidgetFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 import org.osgi.service.prefs.Preferences;
 
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcbase.map.UserInputHistory;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
-import edu.rice.cs.hpcfilter.dialog.FilterDataItem;
+import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
+import edu.rice.cs.hpcfilter.FilterDataItem;
 import edu.rice.cs.hpcmetric.AbstractFilterPane;
 import edu.rice.cs.hpcmetric.MetricFilterInput;
 import edu.rice.cs.hpcmetric.dialog.ExtDerivedMetricDlg;
@@ -45,7 +50,7 @@ import edu.rice.cs.hpcviewer.ui.internal.AbstractUpperPart;
  * The caller has to listen the event of {@code ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN}
  * which contain data which metric (or column) to be shown or hidden
  ***************************************************************/
-public class MetricView extends AbstractUpperPart  
+public class MetricView extends AbstractUpperPart implements EventHandler, DisposeListener
 {
 	private static final String TITLE_DEFAULT = "Metric properties";
 	private static final String HISTORY_COLUMN_PROPERTY = "column_property";
@@ -65,6 +70,10 @@ public class MetricView extends AbstractUpperPart
 		
 		setShowClose(true);
 		setText(TITLE_DEFAULT);
+		
+		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC, this);
+		
+		addDisposeListener(this);
 	}
 	
 	
@@ -202,6 +211,32 @@ public class MetricView extends AbstractUpperPart
 	
 	@Override
 	public void setMarker(int lineNumber) {}
+
+
+	@Override
+	public void handleEvent(Event event) {
+		Object obj = event.getProperty(IEventBroker.DATA);
+		if (obj == null )
+			return;
+		
+		if (!(obj instanceof ViewerDataEvent)) 
+			return;
+		
+		IMetricManager metricManager = inputFilter.getMetricManager();
+		ViewerDataEvent eventInfo = (ViewerDataEvent) obj;
+		
+		if (metricManager != eventInfo.experiment) 
+			return;
+		
+		setInput(inputFilter);
+	}
+
+
+	@Override
+	public void widgetDisposed(DisposeEvent e) {
+		eventBroker.unsubscribe(this);
+		removeDisposeListener(this);
+	}
 
 
 	/***
