@@ -3,8 +3,6 @@ package edu.rice.cs.hpcviewer.ui.actions;
 import java.util.List;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.swt.widgets.TreeColumn;
-
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcmetric.MetricFilterInput;
@@ -16,12 +14,9 @@ public class MetricColumnHideShowAction
 {	
 	private boolean 	     affectOtherViews;
 	private final IMetricManager metricMgr;
-	private final IEventBroker eventBroker;
-	
 	public MetricColumnHideShowAction(IEventBroker eventBroker, IMetricManager metricMgr, boolean affectOtherViews) {
 		this.affectOtherViews = affectOtherViews;
 		this.metricMgr		  = metricMgr;
-		this.eventBroker = eventBroker;
 	}
 	
 	
@@ -37,9 +32,9 @@ public class MetricColumnHideShowAction
 		if (metrics == null)
 			return;
 		
-    	TreeColumn []columns = treeViewer.getTree().getColumns(); 
+    	treeViewer.getTree().getColumns(); 
 
-		MetricFilterInput input = new MetricFilterInput(treeViewer.getRootScope(), metricMgr, columns, affectOtherViews);
+		MetricFilterInput input = new MetricFilterInput(treeViewer.getRootScope(), metricMgr, treeViewer, affectOtherViews);
 
 		profilePart.addEditor(input);
     }

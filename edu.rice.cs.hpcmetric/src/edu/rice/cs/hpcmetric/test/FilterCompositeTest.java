@@ -6,6 +6,7 @@ import java.util.Random;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -47,6 +48,7 @@ public final class FilterCompositeTest
 		List<BaseMetric> list = new ArrayList<BaseMetric>();
 		TreeColumn []columns  = new TreeColumn[100];
 		Tree tree = new Tree(shell, SWT.NONE);
+		TreeViewer treeViewer = new TreeViewer(tree);
 
 		GridDataFactory.swtDefaults().grab(true, false).applyTo(tree);
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(tree);
@@ -87,7 +89,7 @@ public final class FilterCompositeTest
 			root.setMetricValue(i, mv);
 		}
 		
-		MetricFilterInput input = new MetricFilterInput(root, exp, columns, true);
+		MetricFilterInput input = new MetricFilterInput(root, exp, treeViewer, true);
 		
 		final AbstractFilterPane pane = new AbstractFilterPane(shell, SWT.NONE, input) {
 			

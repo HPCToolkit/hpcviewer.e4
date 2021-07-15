@@ -2,6 +2,8 @@ package edu.rice.cs.hpcmetric;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.TreeColumn;
 
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
@@ -17,12 +19,12 @@ public class MetricFilterInput
 	private final IMetricManager metricManager;
 
 	
-	public MetricFilterInput(RootScope root, IMetricManager metricManager, TreeColumn []columns, boolean affectAll) {		
+	public MetricFilterInput(RootScope root, IMetricManager metricManager, TreeViewer treeViewer, boolean affectAll) {		
 
 		this.root = root;
 		this.metricManager = metricManager;
 
-		this.listItems = createFilterList(metricManager.getVisibleMetrics(), columns);
+		this.listItems = createFilterList(metricManager.getVisibleMetrics(), treeViewer);
 		this.affectAll = affectAll;
 	}
 	
@@ -32,8 +34,9 @@ public class MetricFilterInput
 	}
 	
 	
-	private List<MetricFilterDataItem> createFilterList(List<BaseMetric> metrics, TreeColumn []columns) {
+	private List<MetricFilterDataItem> createFilterList(List<BaseMetric> metrics, TreeViewer treeViewer) {
 		List<MetricFilterDataItem> listItems = new ArrayList<MetricFilterDataItem>(metrics.size());
+		TreeColumn []columns = treeViewer.getTree().getColumns();
 		
 		for(BaseMetric metric: metrics) {
 			

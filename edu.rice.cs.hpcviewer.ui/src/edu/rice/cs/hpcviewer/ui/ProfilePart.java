@@ -4,7 +4,6 @@ package edu.rice.cs.hpcviewer.ui;
 import javax.inject.Inject;
 import javax.annotation.PostConstruct;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.TreeColumn;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
@@ -113,8 +112,8 @@ public class ProfilePart implements IProfilePart, EventHandler
 							view.activate();
 							if (metricView != null && !metricView.isDisposed()) {
 								RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
-								TreeColumn []columns = view.getScopeTreeViewer().getTree().getColumns();
-								MetricFilterInput input = new MetricFilterInput(root, experiment, columns, true);
+								MetricFilterInput input = new MetricFilterInput(root, experiment, 
+																				view.getScopeTreeViewer(), true);
 								
 								metricView.setInput(input);
 							}

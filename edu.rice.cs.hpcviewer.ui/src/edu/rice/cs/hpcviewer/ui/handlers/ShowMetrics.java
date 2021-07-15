@@ -12,7 +12,6 @@ import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.TreeColumn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,8 +97,8 @@ public class ShowMetrics
 		AbstractBaseViewItem item = profilePart.getActiveView();
 		
 		RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
-		TreeColumn []columns = item.getScopeTreeViewer().getTree().getColumns();
-		MetricFilterInput input = new MetricFilterInput(root, experiment, columns, true);
+		MetricFilterInput input = new MetricFilterInput(root, experiment, 
+														item.getScopeTreeViewer(), true);
 		
 		profilePart.addEditor(input);
 	}
