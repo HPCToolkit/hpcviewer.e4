@@ -58,6 +58,8 @@ import org.eclipse.nebula.widgets.nattable.style.CellStyleAttributes;
 import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
 import org.eclipse.nebula.widgets.nattable.style.HorizontalAlignmentEnum;
 import org.eclipse.nebula.widgets.nattable.style.Style;
+import org.eclipse.nebula.widgets.nattable.style.theme.ModernNatTableThemeConfiguration;
+import org.eclipse.nebula.widgets.nattable.style.theme.ThemeConfiguration;
 import org.eclipse.nebula.widgets.nattable.ui.action.IMouseAction;
 import org.eclipse.nebula.widgets.nattable.ui.matcher.MouseEventMatcher;
 import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
@@ -328,6 +330,9 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 				selectionEvent(item, SWT.MouseDoubleClick);
 			}
 		});
+
+		final ThemeConfiguration modernTheme = new ModernNatTableThemeConfiguration();
+		natTable.setTheme(modernTheme);
 		
 		return natTable;
 	}
