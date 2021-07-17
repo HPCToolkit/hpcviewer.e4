@@ -40,8 +40,8 @@ public class Filter {
 		for(int i=0; i<idTuple.length; i++) {
 			
 			for (int j=0; j<listTypes.size(); j++) {
-				if (idTuple.kind[i] == listTypes.get(j)) {
-					match = match && ranks[j].matches(idTuple.index[i]);
+				if (idTuple.getKind(i) == listTypes.get(j)) {
+					match = match && ranks[j].matches(idTuple.physical_index[i]);
 					if (!match)
 						return false;
 					else 

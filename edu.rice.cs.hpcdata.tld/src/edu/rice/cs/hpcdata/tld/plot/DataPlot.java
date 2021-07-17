@@ -20,7 +20,7 @@ import edu.rice.cs.hpcdata.db.version4.DataSection;
  *******************************************************************************************/
 public class DataPlot extends DataCommon 
 {
-	private static final String HEADER = "HPCPROF-cmsdb___";
+	private static final String HEADER = "HPCPROF-cctdb___";
 	
 	/*** list of cct. In the future we may need to implement with concurrent list.
 	 *** Right now it's just a simple array or list. Please use it carefully   
