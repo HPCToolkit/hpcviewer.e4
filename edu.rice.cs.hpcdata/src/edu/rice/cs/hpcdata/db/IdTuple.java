@@ -27,8 +27,8 @@ public class IdTuple
 	public int   length;
 	
 	public short []kind;
-	public long  []index;
-	
+	public long  []physical_index;
+	public long  []logical_index;
 
 	// -------------------------------------------
 	// Constructors
@@ -45,7 +45,8 @@ public class IdTuple
 		this.profileNum = profileNum;
 		
 		kind  = new short[length];
-		index = new long[length];
+		physical_index = new long[length];
+		logical_index  = new long[length];
 	}
 	
 	/***
@@ -62,6 +63,15 @@ public class IdTuple
 	// API Methods
 	// -------------------------------------------
 
+	public short getInterpret(int level) {
+		return (short) (((kind[level])>>14) & 0x3);
+	}
+	
+	
+	public short getKind(int level) {
+		return (short) ((kind[level]) & ((1<<14)-1));
+	}
+	
 	/****
 	 * Get the index in this id tuple for a certain type.
 	 * Example: If id tuple is (rank 0, thread 1), and calling:
@@ -76,7 +86,7 @@ public class IdTuple
 	public long getIndex(short type) {
 		for (int i=0; i<length; i++) {
 			if (kind[i] == type) {
-				return index[i];
+				return physical_index[i];
 			}
 		}
 		return 0;
@@ -94,7 +104,11 @@ public class IdTuple
 			if (diff != 0)
 				return diff;
 			
-			diff = (int) (index[i] - another.index[i]);
+			diff = (int) (physical_index[i] - another.physical_index[i]);
+			if (diff != 0)
+				return diff;
+			
+			diff = (int) (logical_index[i] - another.logical_index[i]);
 			if (diff != 0)
 				return diff;
 		}
@@ -112,7 +126,7 @@ public class IdTuple
 	 */
 	public boolean hasKind(short kindType) {
 		for(short i=0; i<kind.length; i++) {
-			if (kind[i] == kindType)
+			if (getKind(i) == kindType)
 				return true;
 		}
 		return false;
@@ -133,14 +147,16 @@ public class IdTuple
 	 */
 	public String toString(int level) {
 		String buff = "";
-		if (kind != null && index != null)
+		if (kind != null && physical_index != null)
 			for(int i=0; i<=level; i++) {
 				if (i>0)
 					buff += " ";
-				String strIndex = String.valueOf(index[i]);
+				String strIndex =   String.valueOf(physical_index[i]) 
+								  + " " 
+								  + String.valueOf(logical_index[i]);
 				
-				if (kind[i] == IdTupleType.KIND_NODE) {
-					strIndex = Long.toHexString(index[i]);
+				if (getKind(i) == IdTupleType.KIND_NODE) {
+					strIndex = Long.toHexString(physical_index[i]);
 				}
 				buff += IdTupleType.kindStr(kind[i]) + " " + strIndex;
 			}
@@ -186,20 +202,20 @@ public class IdTuple
 	 */
 	public String toLabel(int level) {
 		
-		if (kind != null && index != null && level>=0 && level<length) {
+		if (kind != null && physical_index != null && level>=0 && level<length) {
 			String str = "";
 			
 			for(int i=0; i<=level; i++) {
-				if (kind[i] == IdTupleType.KIND_RANK   || 
-					kind[i] == IdTupleType.KIND_THREAD ||
-					kind[i] == IdTupleType.KIND_GPU_STREAM ||
-					kind[i] == IdTupleType.KIND_GPU_CONTEXT) {
+				if (getKind(i) == IdTupleType.KIND_RANK   || 
+					getKind(i) == IdTupleType.KIND_THREAD ||
+					getKind(i) == IdTupleType.KIND_GPU_STREAM ||
+					getKind(i) == IdTupleType.KIND_GPU_CONTEXT) {
 					
-					long lblIndex = index[i]; 
+					long lblIndex = physical_index[i]; 
 					if (i==1) {
 						str += ".";
 					} else if (i>1) {
-						lblIndex = (long) (Math.pow(10, level-i) * index[i]);
+						lblIndex = (long) (Math.pow(10, level-i) * physical_index[i]);
 					}
 					str += lblIndex;
 				}

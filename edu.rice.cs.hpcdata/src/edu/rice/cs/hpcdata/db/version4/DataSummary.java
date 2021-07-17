@@ -29,10 +29,10 @@ public class DataSummary extends DataCommon
 	// --------------------------------------------------------------------
 	// constants
 	// --------------------------------------------------------------------
-	private final static String HEADER_MAGIC_STR  = "HPCPROF-pmsdb___";
+	private final static String HEADER_MAGIC_STR  = "HPCPROF-profdb__";
 	private static final int    METRIC_VALUE_SIZE = 8 + 2;
 	private static final int    CCT_RECORD_SIZE   = 4 + 8;
-	private static final int    MAX_LEVELS        = 8;
+	private static final int    MAX_LEVELS        = 18;
 	
 	private static final int    PROFILE_SUMMARY_INDEX = 0;
 	public static final int     PROFILE_SUMMARY       = -1;
@@ -468,7 +468,8 @@ public class DataSummary extends DataCommon
 			
 			for (int j=0; j<item.length; j++) {
 				item.kind[j]  = buffer.getShort();
-				item.index[j] = buffer.getLong();
+				item.physical_index[j] = buffer.getLong();
+				item.logical_index[j]  = buffer.getLong();
 				
 				if (i==0)
 					continue;
@@ -479,7 +480,7 @@ public class DataSummary extends DataCommon
 				
 				// compute the number of appearances of a given kind and level
 				// this is important to know if there's invariant or not
-				Long hash = convertIdTupleToHash(j, item.kind[j], item.index[j]);
+				Long hash = convertIdTupleToHash(j, item.kind[j], item.physical_index[j]);
 				Integer count = mapLevelToHash[j].get(hash);
 				if (count == null) {
 					count = Integer.valueOf(0);
@@ -488,8 +489,8 @@ public class DataSummary extends DataCommon
 				mapLevelToHash[j].put(hash, count);
 				
 				// find min and max for each level
-				minIndex[j] = Math.min(minIndex[j], item.index[j]);
-				maxIndex[j] = Math.min(maxIndex[j], item.index[j]);
+				minIndex[j] = Math.min(minIndex[j], item.physical_index[j]);
+				maxIndex[j] = Math.min(maxIndex[j], item.physical_index[j]);
 			}
 			if (i == 0) {
 				// special treatment for id-tuple = 0: it's a summary profile
@@ -571,9 +572,9 @@ public class DataSummary extends DataCommon
 			for(int j=0; j<idt.length; j++) {
 				if (mapLevelToSkip.get(j) == null) {
 					// we should keep this level
-					short kind = idt.kind[j];
+					short kind = idt.getKind(j);
 					shortVersion.kind[level]  = kind;
-					shortVersion.index[level] = idt.index[j];
+					shortVersion.physical_index[level] = idt.physical_index[j];
 					level++;
 					
 					if (!idTupleTypes.contains(kind))

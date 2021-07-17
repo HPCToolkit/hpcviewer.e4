@@ -125,7 +125,7 @@ abstract public class DataCommon
 		buffer.get(bytes, 0, MESSAGE_SIZE);
 		String header = new String(bytes);
 		if (!isFileHeaderCorrect(header)) {
-			String msg = "Incorrect header: " + header;
+			String msg = file + " has incorrect header: " + header;
 			throw new IOException(msg);
 		}
 		
