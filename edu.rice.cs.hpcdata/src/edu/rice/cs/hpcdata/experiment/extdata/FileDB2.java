@@ -37,7 +37,7 @@ public class FileDB2 implements IFileDB
 	private RandomAccessFile file; 
 	
 	private List<IdTuple> listIdTuples;
-	private List<Short>   listIdTupleTypes;
+	private IdTupleType   listIdTupleTypes;
 
 	@Override
 	public void open(String filename, int headerSize, int recordSz)  throws IOException 
@@ -124,32 +124,37 @@ public class FileDB2 implements IFileDB
 			{
 				x_val = String.valueOf(proc_id) + "." + String.valueOf(thread_id);
 				
-				tuple.kind[0]  = IdTupleType.KIND_RANK;
-				tuple.physical_index[0] = (byte) proc_id;
+				tuple.setKindAndInterpret(IdTupleType.KIND_RANK, 0);
+				tuple.physical_index[0] = proc_id;
+				tuple.logical_index[0]  = proc_id;
 				
-				tuple.kind[1]  = IdTupleType.KIND_THREAD;
-				tuple.physical_index[1] = (byte) thread_id;
+				tuple.setKindAndInterpret(IdTupleType.KIND_THREAD, 1);
+				tuple.physical_index[1] = thread_id;
+				tuple.logical_index[1]  = thread_id;
 				
 			} else if (isMultiProcess()) 
 			{
 				x_val = String.valueOf(proc_id);					
 				
-				tuple.kind[0]  = IdTupleType.KIND_RANK;
-				tuple.physical_index[0] = (byte) proc_id;
+				tuple.setKindAndInterpret(IdTupleType.KIND_RANK, 0);
+				tuple.physical_index[0] = proc_id;
+				tuple.logical_index[0]  = proc_id;
 			} else if (isMultiThreading()) 
 			{
 				x_val = String.valueOf(thread_id);
 				
-				tuple.kind[0]  = IdTupleType.KIND_THREAD;
-				tuple.physical_index[0] = (byte) thread_id;
+				tuple.setKindAndInterpret(IdTupleType.KIND_THREAD, 1);
+				tuple.physical_index[0] = thread_id;
+				tuple.logical_index[1]  = thread_id;
 			} else {
 				// temporary fix: if the application is neither hybrid nor multiproc nor multithreads,
 				// we just print whatever the order of file name alphabetically
 				// this is not the ideal solution, but we cannot trust the value of proc_id and thread_id
 				x_val = String.valueOf(i);
 				
-				tuple.kind[0]  = IdTupleType.KIND_RANK;
-				tuple.physical_index[0] = (byte) i;
+				tuple.setKindAndInterpret(IdTupleType.KIND_RANK, 0);
+				tuple.physical_index[0] = i;
+				tuple.logical_index[0]  = proc_id;
 			}
 			valuesX[i] = x_val;
 			listIdTuples.add(tuple);
@@ -248,18 +253,23 @@ public class FileDB2 implements IFileDB
 	}
 
 	@Override
-	public List<Short> getIdTupleTypes() {
+	public IdTupleType getIdTupleTypes() {
 		if (listIdTupleTypes != null)
 			return listIdTupleTypes;
 		
-		listIdTupleTypes = new ArrayList<>();
+		listIdTupleTypes = new IdTupleType();
 
 		if (isMultiProcess()) {
-			listIdTupleTypes.add(IdTupleType.KIND_RANK);
+			listIdTupleTypes.add(IdTupleType.KIND_RANK, IdTupleType.LABEL_RANK);
 		}
 		if (isMultiThreading()) {
-			listIdTupleTypes.add(IdTupleType.KIND_THREAD);
+			listIdTupleTypes.add(IdTupleType.KIND_THREAD, IdTupleType.LABEL_THREAD);
 		}
 		return listIdTupleTypes;
+	}
+
+	@Override
+	public boolean hasGPU() {
+		return false;
 	}
 }

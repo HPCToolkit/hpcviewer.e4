@@ -154,7 +154,7 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 		IdTuple tag = listTuples.get(process);
 		int rank = (int) tag.getIndex(IdTupleType.KIND_RANK);
 				
-		isCpuThread = !tag.hasKind(IdTupleType.KIND_GPU_CONTEXT);
+		isCpuThread = !tag.isGPU(dataTraces.getExperiment().getIdTupleType());
 
 		RGB rgb = detailData.palette.getRGB(pixelValue);
 		ProcedureColor procColor = colorTable.getProcedureNameByColorHash(rgb.hashCode());

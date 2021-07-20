@@ -197,7 +197,7 @@ public class DataTrace extends DataCommon
 		
 		for(int i=0; i< 10; i++)
 		{
-			int rank = (nranks>1 ? r.nextInt(nranks-1) : 1);
+			int rank = 1 + (nranks>1 ? r.nextInt(nranks-1) : 0);
 			int numsamples = getNumberOfSamples(rank);
 			int sample = r.nextInt(numsamples);
 			try {

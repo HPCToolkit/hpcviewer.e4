@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.ExperimentConfiguration;
@@ -94,7 +95,8 @@ public class BaseExperimentBuilder extends Builder
 
 	private final Map<Integer, CallPath> mapCpidToCallpath;
 	
-
+	private final IdTupleType idTupleType;
+ 
 	//--------------------------------------------------------------------------------------
 	// trace information
 	//--------------------------------------------------------------------------------------
@@ -136,6 +138,8 @@ public class BaseExperimentBuilder extends Builder
 		statusProcedureMap  = new HashMap<Integer, Integer>();
 		
 		mapCpidToCallpath   = new HashMap<>();
+		
+		idTupleType = new IdTupleType();
 		
 		// parse action data structures
 		this.scopeStack   = new Stack<Scope>();
@@ -268,9 +272,20 @@ public class BaseExperimentBuilder extends Builder
 			do_DBFile(BaseExperiment.Db_File_Type.DB_THREADS, attributes, values);
 			break;
 
+		// ---------------------
+		// XML v. 4.0
+		// ---------------------
+		case "IdentifierNameTable":
+			break;
+			
 			// ---------------------
-			// old token from old XML
-			// ---------------------
+		case "Identifier":
+			do_identifier(attributes, values);
+			break;
+			
+		// ---------------------
+		// old token from old XML
+		// ---------------------
 		case "CSPROFILE":
 		case "HPCVIEWER":
 			throw new java.lang.RuntimeException(new OldXMLFormatException());
@@ -340,6 +355,13 @@ public class BaseExperimentBuilder extends Builder
 			end_TraceDBTable();
 			break;
 
+
+		// ---------------------
+		// XML v. 4.0
+		// ---------------------
+		case "IdentifierNameTable":
+			endIdentifierNameTable();
+			break;
 
 			// ignored elements
 			/*
@@ -1095,6 +1117,32 @@ public class BaseExperimentBuilder extends Builder
 		experiment.setTraceAttribute(attribute);
 	}
 
+	
+	/****
+	 * Add id label to the map
+	 * @param attributes
+	 * @param values
+	 */
+	private void do_identifier(String[] attributes, String[] values) {
+		int id = 0;
+		String val = null;
+		for (int i=0; i<attributes.length && i<values.length; i++) {
+			switch (attributes[i]) {
+			case ATTRIBUTE_ID:
+				id = Integer.valueOf(values[i]);
+				break;
+				
+			case ATTRIBUTE_NAME:
+				val = values[i];
+			}
+		}
+		idTupleType.add(id, val);
+	}
+	
+	
+	private void endIdentifierNameTable() {
+		experiment.setIdTupleType(idTupleType);
+	}
 
 
 	//===============================================

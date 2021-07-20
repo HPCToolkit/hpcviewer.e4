@@ -143,7 +143,7 @@ public class MetricRaw  extends BaseMetric
 		if (s == null) return null;
 		
 		RootScope root = ((Scope)s).getRootScope();
-		IThreadDataCollection threadData = root.getThreadData();
+		IThreadDataCollection threadData = root.getExperiment().getThreadData();
 		
 		MetricValue value = MetricValue.NONE;
 		if (threadData != null)
@@ -243,7 +243,7 @@ public class MetricRaw  extends BaseMetric
 		Scope scope    = (Scope) s;
 		RootScope root = scope.getRootScope();
 		
-		IThreadDataCollection threadData = root.getThreadData();
+		IThreadDataCollection threadData = root.getExperiment().getThreadData();
 		
 		long nodeIndex = scope.getCCTIndex();
 		
@@ -271,7 +271,7 @@ public class MetricRaw  extends BaseMetric
 		// there is no API implementation for reading the whole CCT metrics
 		// TODO: using the old get metric for the new database
 		RootScope root = scope.getRootScope();
-		IThreadDataCollection threadData = root.getThreadData();
+		IThreadDataCollection threadData = root.getExperiment().getThreadData();
 
 		if (threadData == null)
 			// this shouldn't happen, unless hpcprof doesn't generate data properly

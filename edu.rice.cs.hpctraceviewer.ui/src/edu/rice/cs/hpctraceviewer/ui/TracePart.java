@@ -5,8 +5,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import java.util.HashMap;
-import java.util.List;
-
 import javax.annotation.PostConstruct;
 
 import org.eclipse.swt.SWT;
@@ -50,7 +48,6 @@ import edu.rice.cs.hpctraceviewer.ui.summary.HPCSummaryView;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 import edu.rice.cs.hpctraceviewer.ui.util.Utility;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
-import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
 import edu.rice.cs.hpcdata.util.OSValidator;
@@ -412,19 +409,8 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 			tbtmTraceView.setInput(stdc);
 			
 			IBaseData data = stdc.getBaseData();
-			List<Short> listIdTupleTypes = data.getIdTupleTypes();
-			boolean hasGPU = false; 
-			
-			// check whether this database has gpu profile or not
-			for (Short type: listIdTupleTypes) {
-				if (IdTupleType.KIND_GPU_CONTEXT == type) {
-					tbtmBlameView.setInput(stdc);
-					hasGPU = true;
-					
-					break;
-				}
-			}
-			if (!hasGPU) {
+
+			if (!data.hasGPU()) {
 				tbtmBlameView.dispose();
 				tbtmSummaryView.setAnalysisTool(IPixelAnalysis.EMPTY);
 			} else {

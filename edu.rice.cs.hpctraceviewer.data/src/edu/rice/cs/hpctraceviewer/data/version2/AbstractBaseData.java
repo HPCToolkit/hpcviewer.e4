@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
+import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
 import edu.rice.cs.hpcdata.experiment.extdata.IFileDB;
 import edu.rice.cs.hpcdata.experiment.extdata.IFileDB.IdTupleOption;
@@ -39,7 +40,7 @@ public abstract class AbstractBaseData implements IBaseData
 	}
 
 	@Override
-	public List<Short>   getIdTupleTypes() {
+	public IdTupleType   getIdTupleTypes() {
 		return baseDataFile.getIdTupleTypes();
 	}
 	
@@ -92,4 +93,8 @@ public abstract class AbstractBaseData implements IBaseData
 		return Constants.SIZEOF_INT + Constants.SIZEOF_LONG;
 	}
 
+	@Override
+	public boolean hasGPU() {
+		return baseDataFile.hasGPU();
+	}
 }

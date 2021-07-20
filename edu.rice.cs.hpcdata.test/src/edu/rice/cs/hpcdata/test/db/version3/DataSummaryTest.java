@@ -2,6 +2,7 @@ package edu.rice.cs.hpcdata.test.db.version3;
 
 import java.io.IOException;
 
+import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.db.version4.DataSummary;
 
 public class DataSummaryTest 
@@ -20,8 +21,8 @@ public class DataSummaryTest
 			filename = argv[0];
 		else
 			filename = DEFAULT_FILE;
-		
-		final DataSummary summary_data = new DataSummary();
+		final IdTupleType idTupleType = new IdTupleType();
+		final DataSummary summary_data = new DataSummary(idTupleType);
 		try {
 			summary_data.open(filename);			
 			summary_data.printInfo(System.out);
