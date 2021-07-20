@@ -26,7 +26,7 @@ public class IdTuple
 	public int   profileNum;
 	public int   length;
 	
-	public short []kind;
+	private int  []kind;
 	public long  []physical_index;
 	public long  []logical_index;
 
@@ -44,7 +44,7 @@ public class IdTuple
 		this.length     = length;
 		this.profileNum = profileNum;
 		
-		kind  = new short[length];
+		kind  = new int[length];
 		physical_index = new long[length];
 		logical_index  = new long[length];
 	}
@@ -63,13 +63,32 @@ public class IdTuple
 	// API Methods
 	// -------------------------------------------
 
+	/***
+	 * Get the interpret version of the id tuple for a given level
+	 * @param level
+	 * @return {@code short}
+	 */
 	public short getInterpret(int level) {
 		return (short) (((kind[level])>>14) & 0x3);
 	}
 	
 	
+	/****
+	 * Get the kind of this id-tuple
+	 * @param level
+	 * @return
+	 */
 	public short getKind(int level) {
 		return (short) ((kind[level]) & ((1<<14)-1));
+	}
+	
+	/***
+	 * Store the kind-and-interpret value for a given level
+	 * @param kindAndInterpet a combined value of kind and interpret
+	 * @param level
+	 */
+	public void setKindAndInterpret(int kindAndInterpet, int level) {
+		kind[level] = kindAndInterpet;
 	}
 	
 	/****
@@ -79,13 +98,13 @@ public class IdTuple
 	 * getIndex(IdTupleType.KIND_RANK) will return 0
 	 * getIndex(IdTupleType.KIND_THREAD) returns 1
 	 * </pre>
-	 * @param type {@code short} the type of id tuple. Must be one of IdTupleType.KIND_*
+	 * @param kindRank {@code short} the type of id tuple. Must be one of IdTupleType.KIND_*
 	 * 
 	 * @return {@code long} the index of the id tuple. Zero if no type is found.
 	 */
-	public long getIndex(short type) {
+	public long getIndex(int kindRank) {
 		for (int i=0; i<length; i++) {
-			if (kind[i] == type) {
+			if (kind[i] == kindRank) {
 				return physical_index[i];
 			}
 		}
@@ -133,32 +152,68 @@ public class IdTuple
 	}
 	
 	
-	/***
-	 * Returns the string representation of this object.
-	 * @return String
-	 */
-	public String toString() {
-		return toString(kind.length-1);
+	public boolean hasKind(String prefix, IdTupleType type) {
+		for(short i=0; i<kind.length; i++) {
+			if (type.kindStr(kind[i]).startsWith(prefix))
+				return true;
+		}
+		return false;
 	}
+	
+	
+	public boolean isGPU(int level, IdTupleType type) {
+		int kindType = IdTupleType.getKind(kind[level]);
+		return (type.getLabel(kindType).startsWith(IdTupleType.PREFIX_GPU));
+	}
+	
+	
+	public boolean isGPU(IdTupleType type) {
+		for (int i=0; i<kind.length; i++) {
+			if (isGPU(i, type))
+				return true;
+		}
+		return false;
+	}
+	
+	
+	public String toString(IdTupleType idTupleType) {
+		return toString(kind.length-1, idTupleType);
+	}
+
+	
 	
 	/***
 	 * Returns the string representation of this object.
 	 * @return String
 	 */
-	public String toString(int level) {
+	public String toString(int level, IdTupleType idTupleType) {
 		String buff = "";
 		if (kind != null && physical_index != null)
 			for(int i=0; i<=level; i++) {
 				if (i>0)
 					buff += " ";
-				String strIndex =   String.valueOf(physical_index[i]) 
-								  + " " 
-								  + String.valueOf(logical_index[i]);
-				
-				if (getKind(i) == IdTupleType.KIND_NODE) {
-					strIndex = Long.toHexString(physical_index[i]);
+				buff += idTupleType.kindStr(kind[i]) + " " ;
+
+				switch (IdTupleType.getInterpret(kind[i])) {
+				case IdTupleType.IDTUPLE_IDS_BOTH_VALID:
+					// physical and logical
+					if (idTupleType.getMode() == IdTupleType.Mode.LOGICAL) {
+						buff += logical_index[i];
+					} else {
+						buff += physical_index[i];
+					}
+					break;
+				case IdTupleType.IDTUPLE_IDS_LOGIC_ONLY:
+					// logical only
+					buff += logical_index[i];
+					break;
+				case IdTupleType.IDTUPLE_IDS_LOGIC_GLOBAL:
+					// physical
+				case IdTupleType.IDTUPLE_IDS_LOGIC_LOCAL:
+					buff += physical_index[i] + "*";
+					break;
+					// physical
 				}
-				buff += IdTupleType.kindStr(kind[i]) + " " + strIndex;
 			}
 		return buff;
 	}
@@ -206,19 +261,14 @@ public class IdTuple
 			String str = "";
 			
 			for(int i=0; i<=level; i++) {
-				if (getKind(i) == IdTupleType.KIND_RANK   || 
-					getKind(i) == IdTupleType.KIND_THREAD ||
-					getKind(i) == IdTupleType.KIND_GPU_STREAM ||
-					getKind(i) == IdTupleType.KIND_GPU_CONTEXT) {
-					
-					long lblIndex = physical_index[i]; 
-					if (i==1) {
-						str += ".";
-					} else if (i>1) {
-						lblIndex = (long) (Math.pow(10, level-i) * physical_index[i]);
-					}
-					str += lblIndex;
+				
+				long lblIndex = physical_index[i]; 
+				if (i==1) {
+					str += ".";
+				} else if (i>1) {
+					lblIndex = (long) (Math.pow(10, level-i) * physical_index[i]);
 				}
+				str += lblIndex;
 			}
 			return str;
 		}

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
+import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.experiment.extdata.IFileDB.IdTupleOption;
 
 /*************************************************************************
@@ -35,7 +36,7 @@ public interface IBaseData
 	 * Retrieve the list of types of id tuples
 	 * @return
 	 */
-	public List<Short>   getIdTupleTypes();
+	public IdTupleType  getIdTupleTypes();
 
 	/****
 	 * retrieve the number of ranks 
@@ -63,6 +64,13 @@ public interface IBaseData
 	 *  @return boolean **/
 	public boolean isHybridRank();
 	
+	
+	/***
+	 * Return {@code true} if the database has GPU measurements
+	 * {@code false} otherwise.
+	 * @return {@code boolean}
+	 */
+	public boolean hasGPU();
 	
 	/***
 	 * Generalized version of {@code isHybridRank}.

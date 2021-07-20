@@ -4,6 +4,7 @@ import java.io.DataOutputStream;
 import java.util.List;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
+import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.experiment.extdata.IFilteredData;
 import edu.rice.cs.hpcdata.experiment.extdata.IFileDB.IdTupleOption;
 import edu.rice.cs.hpcdata.trace.FilterSet;
@@ -100,7 +101,7 @@ public class RemoteFilteredBaseData implements IFilteredData {
 		return null;
 	}
 	@Override
-	public List<Short> getIdTupleTypes() {
+	public IdTupleType getIdTupleTypes() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -122,5 +123,12 @@ public class RemoteFilteredBaseData implements IFilteredData {
 	public List<IdTuple> getDenseListIdTuple(IdTupleOption option) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+
+	@Override
+	public boolean hasGPU() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

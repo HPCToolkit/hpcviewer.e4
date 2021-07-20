@@ -47,6 +47,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
+import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
 import edu.rice.cs.hpcdata.experiment.extdata.IFileDB.IdTupleOption;
 import edu.rice.cs.hpctraceviewer.ui.base.ISpaceTimeCanvas;
@@ -653,7 +654,10 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
         if (proc_end>=listIdTuples.size())
         	proc_end = listIdTuples.size()-1;
         
-        processLabel.setText("Rank Range: [" + listIdTuples.get(proc_start).toString() + ", " + listIdTuples.get(proc_end).toString() +"]");
+        IdTupleType type = stData.getExperiment().getIdTupleType();
+        processLabel.setText("Rank Range: [" + listIdTuples.get(proc_start).toString(type) 
+        									 + ", " + listIdTuples.get(proc_end).toString(type) 
+        									 + "]");
         processLabel.setSize(processLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
 	}
@@ -691,10 +695,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		if ( selectedProc >= 0 && selectedProc < listIdTuples.size() && listIdTuples.size()>1 ) {
 			
 			IdTuple idtuple = listIdTuples.get(selectedProc);
-	        final String buffer = label + "(" + 
-	        							  formatTime.format(selectedTime) + timeUnit + ", " + 
-	        							  idtuple.toString() + 
-	        							  ")";
+			String procStr  = idtuple.toString(traceData.getIdTupleTypes());
+			String timeStr  = formatTime.format(selectedTime) + timeUnit;
+	        final String buffer = label + "(" + timeStr + ", " +  procStr + ")";
 
 	        crossHairLabel.setText(buffer);
 

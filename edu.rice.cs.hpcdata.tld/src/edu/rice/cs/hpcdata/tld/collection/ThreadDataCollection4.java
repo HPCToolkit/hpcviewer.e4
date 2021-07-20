@@ -29,8 +29,8 @@ public class ThreadDataCollection4 extends AbstractThreadDataCollection
 		data_plot = new DataPlot();
 		data_plot.open(directory + File.separatorChar + 
 				BaseExperiment.getDefaultDatabaseName(Db_File_Type.DB_PLOT));
-		
-		data_summary = root.getDataSummary();
+
+		data_summary = root.getExperiment().getDataSummary();
 	}
 
 	@Override
@@ -51,7 +51,7 @@ public class ThreadDataCollection4 extends AbstractThreadDataCollection
 
 	@Override
 	public int getParallelismLevel() {
-		return data_summary.getMaxLevels();
+		return data_summary.getParallelismLevels();
 	}
 
 	@Override

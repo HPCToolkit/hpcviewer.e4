@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
+import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.db.version4.DataSummary;
 import edu.rice.cs.hpcdata.db.version4.DataTrace;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
@@ -89,7 +90,7 @@ public class FileDB4 implements IFileDB
 
 	@Override
 	public int getParallelismLevel() {
-		return dataSummary.getMaxLevels();
+		return dataSummary.getParallelismLevels();
 	}
 
 	@Override
@@ -129,8 +130,12 @@ public class FileDB4 implements IFileDB
 	}
 
 	@Override
-	public List<Short> getIdTupleTypes() {
-		return dataSummary.getIdTupleTypes();
+	public IdTupleType getIdTupleTypes() {
+		return dataSummary.getIdTupleType();
 	}
 
+	@Override
+	public boolean  hasGPU() {
+		return dataSummary.hasGPU();
+	}
 }

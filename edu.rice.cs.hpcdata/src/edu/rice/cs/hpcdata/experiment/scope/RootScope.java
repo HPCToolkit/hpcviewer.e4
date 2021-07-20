@@ -54,8 +54,8 @@ protected RootScopeType rootScopeType;
 private BaseExperiment experiment;
 private String name;
 
-private IThreadDataCollection threadData;
-private DataSummary dataSummary;
+//private IThreadDataCollection threadData;
+//private DataSummary dataSummary;
 
 //////////////////////////////////////////////////////////////////////////
 //	INITIALIZATION														//
@@ -92,25 +92,6 @@ public Scope duplicate() {
 }
 
 
-/****
- * For database version 4.0 only: retrieve the DataSummary object for this root scope.
- * 
- * 
- * @return DataSummary
- * @throws IOException
- */
-public DataSummary getDataSummary() throws IOException {
-	if (dataSummary == null) {
-		dataSummary = new DataSummary();
-		
-		String filename = experiment.getDefaultDirectory().getAbsolutePath() + File.separatorChar
-				+ experiment.getDbFilename(BaseExperiment.Db_File_Type.DB_SUMMARY);
-		
-		dataSummary.open(filename);
-	}
-	return dataSummary;
-}
-
 
 /******
  * Retrieve (and create) the metric collection based on the version of the database.
@@ -128,7 +109,7 @@ public IMetricValueCollection getMetricValueCollection(Scope scope) throws IOExc
 	if (version == Constants.EXPERIMENT_SPARSE_VERSION) 
 	{
 		if (rootScopeType == RootScopeType.CallingContextTree) {
-			DataSummary data = getDataSummary();
+			DataSummary data = experiment.getDataSummary();
 			return new MetricValueCollection3(data, scope);
 			
 		} else if (rootScopeType == RootScopeType.CallerTree || 
@@ -141,26 +122,6 @@ public IMetricValueCollection getMetricValueCollection(Scope scope) throws IOExc
 }
 
 
-
-/****
- * set the IThreadDataCollection object to this root
- * 
- * @param threadData
- */
-public void setThreadData(IThreadDataCollection threadData)
-{
-	this.threadData = threadData;
-}
-
-
-/***
- * Return the IThreadDataCollection of this root if exists.
- * 
- * @return
- */
-public IThreadDataCollection getThreadData() {
-	return threadData;
-}
 
 //////////////////////////////////////////////////////////////////////////
 //	SCOPE DISPLAY														//

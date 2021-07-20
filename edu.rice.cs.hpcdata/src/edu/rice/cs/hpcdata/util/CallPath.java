@@ -37,9 +37,10 @@ public class CallPath
 		int cDepth = maxDepth;
 		Scope cDepthScope = leafScope;
 
-		while(!(cDepthScope.getParentScope() instanceof RootScope) && 
+		while(  cDepthScope != null && cDepthScope.getParent() != null &&
+				!(cDepthScope.getParentScope() instanceof RootScope)   && 
 				(cDepth > depth || !(cDepthScope instanceof CallSiteScope || cDepthScope instanceof ProcedureScope)))
-		{
+		{			
 			cDepthScope = cDepthScope.getParentScope();
 			if((cDepthScope instanceof CallSiteScope) || (cDepthScope instanceof ProcedureScope))
 				cDepth--;

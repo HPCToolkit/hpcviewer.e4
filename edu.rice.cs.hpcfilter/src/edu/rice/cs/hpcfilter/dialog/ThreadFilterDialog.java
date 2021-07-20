@@ -20,10 +20,6 @@ import edu.rice.cs.hpcdata.db.IdTupleType;
 public class ThreadFilterDialog extends AbstractFilterDialog 
 {
 	public ThreadFilterDialog(Shell parentShell, List<FilterDataItem> items) {
-		this(parentShell, items, null);
-	}
-	
-	public ThreadFilterDialog(Shell parentShell, List<FilterDataItem> items, List<Short> listIdTupleKinds) {
 		super(parentShell, "Select threads to view", 
 				"Please check any threads to be viewed.\nYou can narrow the list by specifying partial name of the threads on the filter.", 
 				items);
@@ -71,18 +67,14 @@ public class ThreadFilterDialog extends AbstractFilterDialog
 
 			int rank = random.nextInt(10);
 			int thread = random.nextInt(100);
-			String label = IdTupleType.kindStr(IdTupleType.KIND_RANK) + " " + rank + " " +
-					   	   IdTupleType.kindStr(IdTupleType.KIND_THREAD) + " " + thread;
+			String label = IdTupleType.LABEL_RANK   + " " + rank + " " +
+					   	   IdTupleType.LABEL_THREAD + " " + thread;
 			
 			FilterDataItem obj = new FilterDataItem(label, i<6, i>3);
 			items.add(obj);
 		}
 		
-		List<Short> listKinds = new ArrayList<Short>();
-		listKinds.add(IdTupleType.KIND_RANK);
-		listKinds.add(IdTupleType.KIND_THREAD);	
-		
-		ThreadFilterDialog dialog = new ThreadFilterDialog(shell, items, listKinds);
+		ThreadFilterDialog dialog = new ThreadFilterDialog(shell, items);
 		if (dialog.open() == Dialog.OK) {
 			System.out.println("result-ok: " + dialog.getReturnCode());
 			items = dialog.getResult();

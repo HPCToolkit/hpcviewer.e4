@@ -52,7 +52,7 @@ public final class ThreadDataCollectionFactory
 			data_file = null;
 			break;
 		}
-		root.setThreadData(data_file);
+		root.getExperiment().setThreadData(data_file);
 		
 		return data_file;
 	}
