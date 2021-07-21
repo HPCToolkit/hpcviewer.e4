@@ -162,7 +162,13 @@ public abstract class BasePaintThread implements Callable<List<ImagePosition>>
 	 * @return
 	 */
 	abstract protected ImagePosition finalizePaint(int linenum);
-		
+	
+	
+	/****
+	 * Free allocated resources. To be called by the end of the sessionS
+	 */
+	abstract public void dispose();
+	
 	/***
 	 * basic method to paint on a gc
 	 * 

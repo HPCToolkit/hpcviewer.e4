@@ -13,6 +13,7 @@ import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
+import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
 import edu.rice.cs.hpcdata.experiment.extdata.IFileDB.IdTupleOption;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
@@ -152,9 +153,11 @@ public class DetailViewPaint extends BaseViewPaint
 		if (m == null || m.size()==0)
 			return;
 		
+		final IdTupleType idTupleType = controller.getBaseData().getIdTupleTypes();
+		
 		m.forEach((k,v) -> {
-			IdTuple idt = listIdTuples.get(k);
-			System.out.println(idt + " has invalid cpid: " + v);
+			IdTuple idt = listIdTuples.get(k);			
+			System.out.println(idt.toString(idTupleType) + " has invalid cpid: " + v);
 		});
 
 	}
