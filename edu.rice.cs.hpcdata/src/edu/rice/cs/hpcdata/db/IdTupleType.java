@@ -53,7 +53,7 @@ public class IdTupleType
 
 
 	private final Map<Integer, String> mapIdTuple = new HashMap<>();
-	private Mode mode = Mode.LOGICAL;
+	private Mode mode = Mode.PHYSICAL;
 	
 	
 	public void initOldDatabase() {

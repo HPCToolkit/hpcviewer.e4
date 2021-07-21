@@ -49,4 +49,10 @@ public class DepthPaintThread extends BasePaintThread {
 		gc.dispose();
 		return new ImagePosition(linenum, image);
 	}
+
+	@Override
+	public void dispose() {
+		if (image != null) image.dispose();
+		if (gc != null) gc.dispose();
+	}
 }
