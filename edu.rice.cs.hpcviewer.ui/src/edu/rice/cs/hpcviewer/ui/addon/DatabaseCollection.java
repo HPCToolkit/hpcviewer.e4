@@ -84,7 +84,7 @@ public class DatabaseCollection
 	private IEventBroker      eventBroker;
     private ExperimentManager experimentManager;
 	
-	private Logger    statusReporter;
+	private final Logger statusReporter = LoggerFactory.getLogger(getClass());
 	
 	private @Inject UISynchronize sync;
 	
@@ -107,8 +107,6 @@ public class DatabaseCollection
 			@Named(IServiceConstants.ACTIVE_SHELL) Shell myShell) {
 		
 		this.eventBroker    = broker;
-
-		this.statusReporter = LoggerFactory.getLogger(getClass());
 
 		// handling the command line arguments:
 		// if one of the arguments specify a file or a directory,
