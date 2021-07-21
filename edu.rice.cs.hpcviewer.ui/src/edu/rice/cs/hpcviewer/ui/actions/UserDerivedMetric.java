@@ -9,7 +9,7 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
-import edu.rice.cs.hpcviewer.ui.dialogs.ExtDerivedMetricDlg;
+import edu.rice.cs.hpcmetric.dialog.ExtDerivedMetricDlg;
 
 /****************************************************
  * 

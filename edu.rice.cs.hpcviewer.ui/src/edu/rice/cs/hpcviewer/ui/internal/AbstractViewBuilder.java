@@ -37,7 +37,6 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 
-import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
@@ -217,7 +216,7 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener
 
 		// initialize tool item handler at the end
 		// because we need access to tree viewer :-( 
-		setToolItemHandlers();
+		setToolItemHandlers(profilePart);
 
 		final ExportTable export = new ExportTable(treeViewer, lblMessage);
 		final Action a = new Action("Copy") {
@@ -292,17 +291,6 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener
 			treeViewer.getTree().setRedraw(true);
 		}
 
-		// synchronize hide/show columns with other views that already visible
-		// since this view is just created, we need to ensure the columns hide/show
-		// are the same.
-		
-		ViewerDataEvent dataEvent = database.getColumnStatus(experiment);
-		
-		if (dataEvent != null && dataEvent.data != null) {
-			boolean []status = (boolean[]) dataEvent.data;
-			treeViewer.setColumnsStatus(getMetricManager(), status);
-		}
-		
 		// enable/disable action buttons
 		// this has to be in the last statement
 		treeViewer.getTree().getDisplay().asyncExec(()-> {
@@ -525,7 +513,7 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener
 
     
 
-	private void setToolItemHandlers() {
+	private void setToolItemHandlers(final ProfilePart profilePart) {
 		toolItem[ACTION_HOTPATH].addSelectionListener(new SelectionListener() {
 			
 			@Override
@@ -592,7 +580,7 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener
 					metricAction = new MetricColumnHideShowAction(eventBroker, getMetricManager(), affectOthers);
 				}
 				
-				metricAction.showColumnsProperties(treeViewer, database);
+				metricAction.showColumnsProperties(profilePart, treeViewer, database);
 			}
 			
 			@Override

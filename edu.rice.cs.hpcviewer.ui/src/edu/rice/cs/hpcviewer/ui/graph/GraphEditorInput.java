@@ -18,11 +18,10 @@ public class GraphEditorInput
 
 	/***
 	 * Create a new editor input for a give scope, metric, plot type and database
-	 * @param experiment
+	 * @param threadData
 	 * @param scope
 	 * @param metric
 	 * @param type
-	 * @param database
 	 */
 	public GraphEditorInput(IThreadDataCollection threadData, 
 							Scope scope, 

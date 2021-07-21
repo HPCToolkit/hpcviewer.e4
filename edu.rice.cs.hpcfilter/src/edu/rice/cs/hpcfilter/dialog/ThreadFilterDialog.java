@@ -10,6 +10,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpcdata.db.IdTupleType;
+import edu.rice.cs.hpcfilter.FilterDataItem;
+import edu.rice.cs.hpcfilter.StringFilterDataItem;
 
 
 /******************************************************
@@ -42,7 +44,7 @@ public class ThreadFilterDialog extends AbstractFilterDialog
 		
 		for (int i=0; i<labels.length; i++) {
 			boolean isChecked = checked == null? false : checked[i];
-			FilterDataItem obj = new FilterDataItem(labels[i], isChecked, true);
+			FilterDataItem obj = new StringFilterDataItem(labels[i], isChecked, true);
 			items.add(obj);
 		}
 
@@ -60,6 +62,7 @@ public class ThreadFilterDialog extends AbstractFilterDialog
 	@Override
 	protected void createAdditionalButton(Composite parent) {}
 	
+	
 	// unit test
 	
 	static public void main(String argv[]) {
@@ -74,7 +77,7 @@ public class ThreadFilterDialog extends AbstractFilterDialog
 			String label = IdTupleType.kindStr(IdTupleType.KIND_RANK) + " " + rank + " " +
 					   	   IdTupleType.kindStr(IdTupleType.KIND_THREAD) + " " + thread;
 			
-			FilterDataItem obj = new FilterDataItem(label, i<6, i>3);
+			FilterDataItem obj = new StringFilterDataItem(label, i<6, i>3);
 			items.add(obj);
 		}
 		
@@ -89,7 +92,7 @@ public class ThreadFilterDialog extends AbstractFilterDialog
 			
 			int i=0;
 			for(FilterDataItem res : items) {
-				System.out.println("\t" + i + ": " + res.label + " -> " + res.checked);
+				System.out.println("\t" + i + ": " + res.data + " -> " + res.checked);
 				i++;
 			}
 		}

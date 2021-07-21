@@ -38,6 +38,9 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
+import edu.rice.cs.hpcfilter.FilterDataItem;
+import edu.rice.cs.hpcfilter.StringFilterDataItem;
+
 
 
 public abstract class AbstractFilterDialog extends TitleAreaDialog 
@@ -58,7 +61,6 @@ public abstract class AbstractFilterDialog extends TitleAreaDialog
 	protected ColumnCheckTableViewer objCheckBoxTable ;
 	protected Text objSearchText;
 
-	protected ArrayList<PropertiesModel> arrElements;
 	
 	public AbstractFilterDialog(Shell parentShell, String title, String message, 
 			List<FilterDataItem> items) {
@@ -202,16 +204,12 @@ public abstract class AbstractFilterDialog extends TitleAreaDialog
 		objCheckBoxTable.addCheckStateListener(new ICheckStateListener() {
 			// status has been changed. we need to reset the global variable too !
 			public void checkStateChanged(CheckStateChangedEvent event) {
-				PropertiesModel objItem = (PropertiesModel) event.getElement();
-				objItem.isChecked = event.getChecked();
+				FilterDataItem objItem = (FilterDataItem) event.getElement();
 				
-				if (!objItem.isEditable)
+				if (!objItem.enabled)
 					return;
-				
-				// check if the selected item is in the list
-				if (arrElements.get(objItem.iIndex) != objItem) {
-					arrElements.get(objItem.iIndex).isChecked = objItem.isChecked;
-				}
+
+				objItem.checked = event.getChecked();
 			}
 
 		});
@@ -238,23 +236,17 @@ public abstract class AbstractFilterDialog extends TitleAreaDialog
 		if(items == null)
 			return; // caller of this object need to set up the column first !
 		
-		arrElements = new ArrayList<PropertiesModel>(items.size());
-		ArrayList<PropertiesModel> arrColumns = new ArrayList<PropertiesModel>();
+		ArrayList<FilterDataItem> arrColumns = new ArrayList<FilterDataItem>();
 		
-		int index = 0;
 		for(FilterDataItem item: items) {
-			boolean isVisible = item.checked;		
-			PropertiesModel model = new PropertiesModel(isVisible, item.enabled, item.label, index);
-			index++;
-			
-			arrElements.add( model );
+
 			// we need to find which columns are visible
-			if(isVisible) {
-				arrColumns.add(model);
+			if(item.checked) {
+				arrColumns.add(item);
 			}
 		}
 
-		this.objCheckBoxTable.setInput(arrElements);
+		this.objCheckBoxTable.setInput(items);
 		this.objCheckBoxTable.setCheckedElements(arrColumns.toArray());
 	}
 
@@ -265,19 +257,10 @@ public abstract class AbstractFilterDialog extends TitleAreaDialog
 	 * @return
 	 */
 	protected Object[] getCheckedItemsFromGlobalVariable () {
-		Object []result = null;
-		if (arrElements != null) 
-		{
-			int nb = arrElements.size();
-			ArrayList<PropertiesModel> arrCheckedElements = new ArrayList<PropertiesModel>();
-
-			for (int i=0; i<nb; i++) {
-				if (arrElements.get(i).isChecked)
-					arrCheckedElements.add(arrElements.get(i));
-			} 
-			result = arrCheckedElements.toArray();
+		if (items != null) {
+			return items.stream().filter(d -> d.checked && d.enabled).toArray();
 		}
-		return result;
+		return null;
 	}
 	
 	
@@ -285,13 +268,12 @@ public abstract class AbstractFilterDialog extends TitleAreaDialog
 	 * derived from the parent
 	 */
 	protected void okPressed() {
-		int numChecked = 0;
-		
-		for (int i=0; i<arrElements.size(); i++) {
-			boolean checked = this.arrElements.get(i).isChecked;
-			items.get(i).checked  = checked;
-			numChecked += (checked ? 1 : 0);
-		} 
+		if (items == null) {
+			super.okPressed();
+			return;
+		}
+			
+		int numChecked = (int) items.parallelStream().filter(i -> i.checked && i.enabled).count();
 		if (numChecked == 0) {
 			MessageDialog.openError(getShell(), "Invalid entry", "Empty selection is not allowed.");
 			return;
@@ -306,24 +288,6 @@ public abstract class AbstractFilterDialog extends TitleAreaDialog
 	//--------------------------------------------------
 
 
-	/**
-	 * Data model for the column properties
-	 * Containing two items: the state and the title
-	 *
-	 */
-	protected class PropertiesModel {
-		public boolean isChecked;
-		public boolean isEditable;
-		public String sTitle;
-		public int iIndex;
-
-		public PropertiesModel(boolean b, boolean e, String s, int i) {
-			this.isChecked = b;
-			this.isEditable = e;
-			this.sTitle = s;
-			this.iIndex = i;
-		}
-	}
 
 	/**
 	 * Class to filter the content of the table of columns
@@ -344,14 +308,12 @@ public abstract class AbstractFilterDialog extends TitleAreaDialog
 			// check if the key exist
 			if ( (sKeyToMatch != null) && (sKeyToMatch.length()>0) ){
 				// check if the element is good
-				assert (element instanceof PropertiesModel);
-				PropertiesModel objProperty = (PropertiesModel) element;
-				
+				FilterDataItem objProperty = (FilterDataItem) element;
 				if (useRegularExpression) {
-					bSelect = pattern.matcher(objProperty.sTitle).matches();
+					bSelect = pattern.matcher(objProperty.getLabel()).matches();
 				} else {
 					// simple string matching between the key and the column name
-					bSelect = objProperty.sTitle.toUpperCase().contains(sKeyToMatch);
+					bSelect = objProperty.getLabel().toUpperCase().contains(sKeyToMatch);
 				}
 			}
 			return bSelect;
@@ -396,8 +358,8 @@ public abstract class AbstractFilterDialog extends TitleAreaDialog
 			TableItem[] items = getTable().getItems();
 			for (int i=0; i<items.length; i++) {
 				TableItem objItem = items[i];
-				PropertiesModel objModel = (PropertiesModel) objItem.getData();
-				objModel.isChecked = state;
+				FilterDataItem objModel = (FilterDataItem) objItem.getData();
+				objModel.checked = state;
 			}
 		}
 		
@@ -442,11 +404,11 @@ public abstract class AbstractFilterDialog extends TitleAreaDialog
 
 			StyledString style = new StyledString();
 			
-			PropertiesModel model = (PropertiesModel) element;
-			if (!model.isEditable) {
-				style.append(model.sTitle + " (empty)", STYLE_DISABLED);
+			FilterDataItem model = (FilterDataItem) element;
+			if (!model.enabled) {
+				style.append(model.getLabel() + " (empty)", STYLE_DISABLED);
 			} else {
-				style.append(model.sTitle);
+				style.append(model.getLabel());
 			}
 			return style;
 		}

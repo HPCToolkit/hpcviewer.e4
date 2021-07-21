@@ -8,8 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
 
-import javax.annotation.PostConstruct;
-
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
@@ -19,12 +17,10 @@ import edu.rice.cs.hpcdata.experiment.source.FileSystemSourceFile;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
-import edu.rice.cs.hpcviewer.ui.base.IUpperPart;
 import edu.rice.cs.hpcviewer.ui.graph.GraphEditorInput;
+import edu.rice.cs.hpcviewer.ui.internal.AbstractUpperPart;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
-import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.text.BadLocationException;
@@ -42,7 +38,6 @@ import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.custom.CTabFolder;
-import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
@@ -61,7 +56,7 @@ import org.eclipse.swt.SWT;
  * file viewer. Otherwise, it will create a new viewer.
  *
  **********************************************/
-public class Editor extends CTabItem implements IUpperPart, IPropertyChangeListener
+public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 {
 	
 	static final private String PROPERTY_DATA = "hpceditor.data";
@@ -76,15 +71,8 @@ public class Editor extends CTabItem implements IUpperPart, IPropertyChangeListe
 	public Editor(CTabFolder parent, int style) {
 		super(parent, style);
 		setShowClose(true);
-	}
-	
-	
-	public void setService(IEventBroker broker, MPart part) {
-	}
-	
-	
-	@PostConstruct
-	public void postConstruct(Composite parent) {
+		
+		Composite container = new Composite(parent, SWT.NONE);
 		
 		// add line number column to the source viewer
 		CompositeRuler ruler 	   = new CompositeRuler();
@@ -96,7 +84,7 @@ public class Editor extends CTabItem implements IUpperPart, IPropertyChangeListe
 		lnrc.setFont(font);
 		ruler.addDecorator(0,lnrc);
 
-		textViewer = new SourceViewer(parent, ruler, SWT.BORDER| SWT.MULTI | SWT.V_SCROLL);
+		textViewer = new SourceViewer(container, ruler, SWT.BORDER| SWT.MULTI | SWT.V_SCROLL);
 		textViewer.setEditable(false);
 		
 		StyledText styledText = textViewer.getTextWidget();
@@ -108,10 +96,12 @@ public class Editor extends CTabItem implements IUpperPart, IPropertyChangeListe
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		textViewer.getControl().setLayoutData(gd);
 		
-		GridDataFactory.fillDefaults().grab(true, true).applyTo(parent);
-		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(parent);
+		GridDataFactory.fillDefaults().grab(true, true).applyTo(container);
+		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(container);
 		
 		ViewerPreferenceManager.INSTANCE.getPreferenceStore().addPropertyChangeListener(this);
+		
+		setControl(container);
 	}
 	
 	

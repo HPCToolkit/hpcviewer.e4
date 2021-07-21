@@ -79,20 +79,18 @@ public class DatabaseCollection
 	
 
 	final private HashMap<MWindow, List<BaseExperiment>>   mapWindowToExperiments;
-	final private HashMap<BaseExperiment, ViewerDataEvent> mapColumnStatus;
 	
-	private IEventBroker      eventBroker;
     private ExperimentManager experimentManager;
 	
 	private final Logger statusReporter = LoggerFactory.getLogger(getClass());
 	
 	private @Inject UISynchronize sync;
+	private @Inject IEventBroker eventBroker;
+	
+	
 	
 	public DatabaseCollection() {
-
-		mapColumnStatus = new HashMap<BaseExperiment, ViewerDataEvent>();		
-		experimentManager = new ExperimentManager();
-		
+		experimentManager = new ExperimentManager();		
 		mapWindowToExperiments = new HashMap<MWindow, List<BaseExperiment>>(1);
 	}
 	
@@ -525,8 +523,6 @@ public class DatabaseCollection
 		// If not, they will consider the experiment will be removed.
 		List<BaseExperiment> list = getActiveListExperiments(application.getSelectedElement());
 		list.remove(experiment);
-
-		mapColumnStatus.remove(experiment);
 		
 		MWindow window = application.getSelectedElement();
 		List<MPart> listParts = modelService.findElements(window, null, MPart.class);
@@ -577,30 +573,11 @@ public class DatabaseCollection
 			removeDatabase(application, modelService, partService, exp);
 		}
 		list.clear();
-		mapColumnStatus.clear();
 		
 		return size;
 	}
 	
 	
-	/***
-	 * Store the column status of a given experiment
-	 * @param experiment
-	 * @param data
-	 */
-	public void addColumnStatus(BaseExperiment experiment, ViewerDataEvent data) {
-		mapColumnStatus.put(experiment, data);
-	}
-	
-	
-	/****
-	 * Get the column status of a given experiment
-	 * @param experiment
-	 * @return
-	 */
-	public ViewerDataEvent getColumnStatus(BaseExperiment experiment) {
-		return mapColumnStatus.get(experiment);
-	}
 	
 	
 	/****

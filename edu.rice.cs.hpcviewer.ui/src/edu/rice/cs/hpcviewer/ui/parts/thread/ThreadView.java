@@ -25,13 +25,15 @@ import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.util.string.StringUtil;
-import edu.rice.cs.hpcfilter.dialog.FilterDataItem;
+import edu.rice.cs.hpcfilter.FilterDataItem;
+import edu.rice.cs.hpcfilter.StringFilterDataItem;
 import edu.rice.cs.hpcfilter.dialog.ThreadFilterDialog;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.base.IViewItem;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractBaseViewItem;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
+import edu.rice.cs.hpcviewer.ui.metric.MetricView.MetricDataEvent;
 
 /*************************************************************
  * 
@@ -54,6 +56,13 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 	private ThreadViewInput     viewInput; 
 	
 
+	/****
+	 * Constructor for ThreadView. 
+	 * It requires to call {@code setService} immediately after creating the instance.
+	 *  
+	 * @param parent CTabFolder
+	 * @param style any CTabItem SWT style
+	 */
 	public ThreadView(CTabFolder parent, int style) {
 		super(parent, style);
 		setShowClose(true);
@@ -68,8 +77,19 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 		
 		// subscribe to filter events
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH, this);
+		eventBroker.subscribe(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN, this);
 	}
 
+	
+	/****
+	 * Set Eclipse services required for this class:
+	 * @param partService a EPartService
+	 * @param broker a IEventBroker
+	 * @param database a {@code DatabaseCollection} instance
+	 * @param profilePart the ancestor of this tab item
+	 * @param menuService the instance of {@code EMenuService} 
+	 */
+	@Override
 	public void setService(EPartService partService, 
 			IEventBroker broker,
 			DatabaseCollection database,
@@ -83,6 +103,7 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 		this.menuService = menuService;
 	}
 
+	
 
 	@Override
 	public void setInput(Object input) {
@@ -154,8 +175,10 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 			return;
 		
 		if (obj instanceof ViewerDataEvent) {
-
-			if (event.getTopic().equals(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH)) {
+			ViewerDataEvent viewDataEvent = (ViewerDataEvent) obj;
+					
+			switch(event.getTopic()) {
+			case ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH:
 				BaseExperiment experiment = profilePart.getExperiment();
 				
 				// TODO: this process takes time
@@ -163,10 +186,18 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 					RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
 					contentViewer.setData(root);
 				});
+				break;
+				
+			case ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN:
+				if (viewDataEvent.experiment == this.contentViewer.getMetricManager()) {
+					MetricDataEvent dataEvent = (MetricDataEvent) viewDataEvent.data;					
+					AbstractBaseViewItem.updateColumnHideOrShowStatus( getScopeTreeViewer(), 
+																	   dataEvent.getData());
+				}
+				break;
+				
 			}
-			return;
-		}
-		
+		}		
 	}
 
 
@@ -175,6 +206,12 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 		return viewInput;
 	}
 	
+	
+	@Override
+	public ScopeTreeViewer getScopeTreeViewer() {
+		return contentViewer.getTreeViewer();
+	}
+
 	
 	/***
 	 * Static method to create a label based on the list of thread
@@ -261,7 +298,7 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 		List<FilterDataItem> items =  new ArrayList<FilterDataItem>(labels.length);
 		
 		for (int i=0; i<labels.length; i++) {
-			FilterDataItem obj = new FilterDataItem(labels[i], false, true);
+			FilterDataItem obj = new StringFilterDataItem(labels[i], false, true);
 			items.add(obj);
 		}
 
@@ -281,5 +318,12 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 			}
 		}
 		return null;
+	}
+
+
+	@Override
+	public void activate() {
+		// TODO Auto-generated method stub
+		
 	}
 }

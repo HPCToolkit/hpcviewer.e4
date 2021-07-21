@@ -33,16 +33,18 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcfilter.service.FilterStateProvider;
+import edu.rice.cs.hpcmetric.MetricFilterInput;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.base.IProfilePart;
 import edu.rice.cs.hpcviewer.ui.base.IUpperPart;
-import edu.rice.cs.hpcviewer.ui.graph.AbstractGraphViewer;
 import edu.rice.cs.hpcviewer.ui.graph.GraphEditorInput;
 import edu.rice.cs.hpcviewer.ui.graph.GraphHistoViewer;
 import edu.rice.cs.hpcviewer.ui.graph.GraphPlotRegularViewer;
 import edu.rice.cs.hpcviewer.ui.graph.GraphPlotSortViewer;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractBaseViewItem;
+import edu.rice.cs.hpcviewer.ui.internal.AbstractUpperPart;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractViewItem;
+import edu.rice.cs.hpcviewer.ui.metric.MetricView;
 import edu.rice.cs.hpcviewer.ui.parts.bottomup.BottomUpView;
 import edu.rice.cs.hpcviewer.ui.parts.datacentric.Datacentric;
 import edu.rice.cs.hpcviewer.ui.parts.editor.Editor;
@@ -73,10 +75,11 @@ public class ProfilePart implements IProfilePart, EventHandler
 	/** Each view needs to store the experiment database.
 	 * In case it needs to populate the table, we know which database 
 	 * to be loaded. */
-	private BaseExperiment  experiment;
+	private Experiment  experiment;
 	
 	private AbstractViewItem []views;
-
+	private MetricView metricView;
+	
 	private CTabFolder tabFolderTop, tabFolderBottom;
 
 	
@@ -91,11 +94,9 @@ public class ProfilePart implements IProfilePart, EventHandler
 		
 		parent.setLayout(new FillLayout(SWT.HORIZONTAL));
 
-		SashForm sashForm = new SashForm(parent, SWT.VERTICAL);
-		
-		tabFolderTop = new CTabFolder(sashForm, SWT.BORDER);
-		
-		tabFolderBottom = new CTabFolder(sashForm, SWT.BORDER);
+		SashForm sashForm = new SashForm(parent, SWT.VERTICAL);		
+		tabFolderTop      = new CTabFolder(sashForm, SWT.BORDER);
+		tabFolderBottom   = new CTabFolder(sashForm, SWT.BORDER);
 		
 		sashForm.setWeights(new int[] {1000, 1700});
 
@@ -104,11 +105,24 @@ public class ProfilePart implements IProfilePart, EventHandler
 			public void widgetSelected(SelectionEvent e) {
 				for (AbstractViewItem view: views) {
 					if (e.item == view) {
-						if (view.getInput() == null)
-							view.setInput(experiment);
+						// activate the view if necessary
+						// this includes creating the tree and populate the metrics
+						// (for bottom-up and flat views)
 						
 						sync.asyncExec(()->{
-							view.focus();
+							view.activate();
+							
+							// if the metric part is active, we need to inform it that
+							// a new view is activated. The metric part has to refresh
+							// its content to synchronize with the table in the active view
+							
+							if (metricView != null && !metricView.isDisposed()) {
+								RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
+								MetricFilterInput input = new MetricFilterInput(root, experiment, 
+																				view.getScopeTreeViewer(), true);
+								
+								metricView.setInput(input);
+							}
 						});
 					}
 				}
@@ -132,18 +146,18 @@ public class ProfilePart implements IProfilePart, EventHandler
 			CTabItem item = items[i];
 			if (item instanceof IUpperPart) {
 				IUpperPart editor = (IUpperPart) item;
+				
 				if (editor.hasEqualInput(input)) {
 					editor.setInput(input);
-					
-					tabFolderTop.setSelection((CTabItem) editor);
-					
+					tabFolderTop.setSelection((CTabItem) editor);					
 					return (CTabItem) editor;
 				}
 			}
 		}
-		// the input is not displayed
+		// the input is not yet displayed
 		// create a new item for this input
-		CTabItem viewer = null;
+		AbstractUpperPart viewer = null;
+		
 		if (input instanceof GraphEditorInput) {
 			GraphEditorInput graphInput = (GraphEditorInput) input;
 			if (graphInput.getGraphType() == GraphPlotRegularViewer.LABEL) {
@@ -154,24 +168,36 @@ public class ProfilePart implements IProfilePart, EventHandler
 			
 			} else if (graphInput.getGraphType() == GraphHistoViewer.LABEL) {
 				viewer = new GraphHistoViewer(tabFolderTop, SWT.NONE);
+			}			
+		
+		} else if (input instanceof MetricFilterInput) {
+			viewer = new MetricView(tabFolderTop, SWT.NONE, eventBroker);
+			
+			// if the metric view is created for the traditional views (top-down, bottom-up, flat)
+			// we should store the instance. This will be needed because each 3 views only has 1 metric view.
+			// However, each thread view has its own metric view. Hence no need to store the instance.
+			// to know if a view is thread view or not, we can check from isAffectAll() property.
+			
+			if ( ((MetricFilterInput)input).isAffectAll() ) {
+				// the metric view is generated for the 3 traditional views.
+				// we need to store the instance
+				
+				metricView =  (MetricView) viewer;
+				metricView.addDisposeListener((event) -> {
+					metricView = null;
+				});
+			} else {
+				// for metric properties from thread view, we need to show as well the title of the thread view
+				// this is important to distinguish with other metric properties
+				
+				final String titleView = tabFolderBottom.getSelection().getText();
+				viewer.setText(MetricView.TITLE_DEFAULT + ": " + titleView);
 			}
 			
-			Composite parent = new Composite(tabFolderTop, SWT.NONE);
-			((AbstractGraphViewer)viewer).postConstruct(parent);
-			viewer.setControl(parent);
-			((AbstractGraphViewer)viewer).setInput(graphInput);
-		
 		} else {
-			
 			viewer = new Editor(tabFolderTop, SWT.NONE);
-			viewer.setText("code");
-			((Editor) viewer).setService(eventBroker, partService.getActivePart());
-			
-			Composite parent = new Composite(tabFolderTop, SWT.NONE);
-			viewer.setControl(parent);
-			((Editor) viewer).postConstruct(parent);
-			((Editor) viewer).setInput(input);
 		}
+		viewer.setInput(input);
 		
 		// need to select the input to refresh the viewer
 		// otherwise it will display empty item
@@ -217,6 +243,18 @@ public class ProfilePart implements IProfilePart, EventHandler
 		tabFolderBottom.setSelection(threadView);
 	}
 	
+	
+	/****
+	 * Retrieve the current "selected" view.
+	 * The definition of "selected" view depends on the {@code CTabFolder}.
+	 * It can be the active one or the visible one.
+	 * 
+	 * @return {@code AbstractBaseViewItem} the current active item, or null
+	 */
+	public AbstractBaseViewItem getActiveView() {
+		return (AbstractBaseViewItem) tabFolderBottom.getSelection();
+	}
+	
 	/****
 	 * Add a view tab item (at the lower folder) to the profile part
 	 * 
@@ -242,6 +280,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 		} else {
 			// background renderer
 			view.createContent(composite);
+			view.setInput(input);
 		}
 	}
 	
@@ -279,8 +318,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 		if (input == null ) return;
 		if (!(input instanceof Experiment)) return;
 		
-		Experiment experiment = (Experiment) input;
-		this.experiment = experiment;
+		this.experiment = (Experiment) input;
 		
 		part.setLabel(PREFIX_TITLE + experiment.getName());
 		part.setTooltip(experiment.getDefaultDirectory().getAbsolutePath());
@@ -354,6 +392,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 		public void run() {
 			view.createContent(parent);
 			view.setInput(input);
+			view.activate();
 		}
 	}
 }

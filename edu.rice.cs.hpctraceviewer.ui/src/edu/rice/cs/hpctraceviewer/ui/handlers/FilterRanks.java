@@ -12,7 +12,7 @@ import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
 import edu.rice.cs.hpcdata.experiment.extdata.IFilteredData;
 import edu.rice.cs.hpcdata.experiment.extdata.IFileDB.IdTupleOption;
-import edu.rice.cs.hpcfilter.dialog.FilterDataItem;
+import edu.rice.cs.hpcfilter.FilterDataItem;
 import edu.rice.cs.hpcfilter.dialog.ThreadFilterDialog;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;

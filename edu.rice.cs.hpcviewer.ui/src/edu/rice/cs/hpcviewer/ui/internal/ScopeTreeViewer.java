@@ -464,6 +464,15 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		}
     }
     
+    
+    public void setColumnsStatus(TreeColumn column, boolean show) {
+    	if (show) {
+    		setMetricColumnWidth(null, column);
+    	} else {
+    		column.setWidth(0);
+    	}
+    }
+    
 
     /****
      * Add user derived metric into tree column
@@ -497,8 +506,6 @@ public class ScopeTreeViewer extends TreeViewer implements IPropertyChangeListen
 		} finally {
 			tree.setRedraw(true);
 		}
-
-		// this doesn't work on Linux/GTK
 	}
 
 	@Override

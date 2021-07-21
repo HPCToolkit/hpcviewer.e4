@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcfilter.dialog;
+package edu.rice.cs.hpcfilter;
 
 /*******
  * 
@@ -9,9 +9,8 @@ package edu.rice.cs.hpcfilter.dialog;
  * <li>enabled: if the column status can be changed (true) or not (false)
  * </ul>
  */
-public class FilterDataItem 
+public abstract class FilterDataItem 
 {
-	public String  label   = null;
 	public boolean checked = false;
 	public boolean enabled = true;
 	
@@ -20,19 +19,34 @@ public class FilterDataItem
 	 * **/
 	public Object  data    = null;
 
-	public FilterDataItem() {}
 	
-	public FilterDataItem(String label, boolean checked, boolean enabled) {
-		this.label   = label;
+	public FilterDataItem(Object data, boolean checked, boolean enabled) {
+		this.data    = data;
 		this.checked = checked;
 		this.enabled = enabled;
 	}
 	
+	
 	public Object getData() {
 		return data;
 	}
-	
-	public void setData(Object data) {
-		this.data = data;
+
+	public boolean isChecked() {
+		return checked;
 	}
+
+	public void setChecked(boolean checked) {
+		this.checked = checked;
+	}
+
+	
+	@Override
+	public String toString() {
+		return getLabel() + ": " + checked + ", " + enabled;
+	}
+	
+	
+	public abstract void setLabel(String name);
+	public abstract String getLabel();
+
 }
