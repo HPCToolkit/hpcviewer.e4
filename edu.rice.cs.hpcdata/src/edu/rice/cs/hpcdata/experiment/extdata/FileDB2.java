@@ -143,9 +143,9 @@ public class FileDB2 implements IFileDB
 			{
 				x_val = String.valueOf(thread_id);
 				
-				tuple.setKindAndInterpret(IdTupleType.KIND_THREAD, 1);
+				tuple.setKindAndInterpret(IdTupleType.KIND_THREAD, 0);
 				tuple.physical_index[0] = thread_id;
-				tuple.logical_index[1]  = thread_id;
+				tuple.logical_index[0]  = thread_id;
 			} else {
 				// temporary fix: if the application is neither hybrid nor multiproc nor multithreads,
 				// we just print whatever the order of file name alphabetically
