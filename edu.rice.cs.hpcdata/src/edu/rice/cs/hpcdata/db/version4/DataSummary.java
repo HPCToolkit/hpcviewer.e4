@@ -311,7 +311,7 @@ public class DataSummary extends DataCommon
 			
 			for(int i=0; i<listIdTupleShort.size(); i++) {
 				IdTuple idt  = listIdTupleShort.get(i);
-				strLabels[i] = idt.toString();
+				strLabels[i] = idt.toString(idTupleTypes);
 			}		
 		}
 		return strLabels;
