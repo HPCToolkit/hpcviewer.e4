@@ -46,7 +46,10 @@ public class CallPath
 		
 		int cDepth = maxDepth;
 		Scope cDepthScope = leafScope;
-		
+
+		if (cDepthScope.getParentScope() == null)
+			return cDepthScope;
+
 		// this is a hack to solve issue #99 (filtering leaf nodes problem)
 		// If the leaf node is visible on the trace view, we have to decrement
 		// the current depth.
@@ -60,8 +63,9 @@ public class CallPath
 		// if depth == 3, we should return d instead of c
 		if (isTraceScope(cDepthScope))
 			cDepth--;
-
-		while(!(cDepthScope.getParentScope() instanceof RootScope) && 
+		
+		while(  cDepthScope != null &&
+				!(cDepthScope.getParentScope() instanceof RootScope) && 
 				(cDepth > depth || !isTraceScope(cDepthScope)))
 		{
 			cDepthScope = cDepthScope.getParentScope();

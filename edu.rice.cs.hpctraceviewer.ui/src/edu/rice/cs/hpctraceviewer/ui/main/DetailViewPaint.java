@@ -56,11 +56,9 @@ public class DetailViewPaint extends BaseViewPaint
 	 * @param masterGC
 	 * @param origGC
 	 * @param data
-	 * @param attributes
 	 * @param numLines
 	 * @param changeBound
 	 * @param canvas
-	 * @param threadExecutor
 	 */
 	public DetailViewPaint(final Device device, final GC masterGC, final GC origGC, SpaceTimeDataController data,
 			int numLines, boolean changeBound,

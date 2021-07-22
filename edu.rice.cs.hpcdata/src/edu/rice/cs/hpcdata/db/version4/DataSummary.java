@@ -240,7 +240,7 @@ public class DataSummary extends DataCommon
 	{	
 		ProfInfo info ;
 		if (profileNum == PROFILE_SUMMARY) {
-			info =listProfInfo.get(PROFILE_SUMMARY_INDEX);
+			info = listProfInfo.get(PROFILE_SUMMARY_INDEX);
 		} else {
 			IdTuple idt = listIdTuple.get(profileNum);
 			info = listProfInfo.get(idt.profileNum);

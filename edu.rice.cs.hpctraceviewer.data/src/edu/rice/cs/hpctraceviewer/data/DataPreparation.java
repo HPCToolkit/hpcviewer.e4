@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.swt.graphics.Color;
+
+import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.util.CallPath;
 
 
@@ -66,7 +68,11 @@ public abstract class DataPreparation
 		if (cp == null)
 			return 0;
 		
-		String succFunction = cp.getScopeAt(data.depth).getName(); 
+		Scope scope = cp.getScopeAt(data.depth);
+		if (scope == null)
+			throw new RuntimeException("Scope not found: cannot find at depth " + data.depth);
+		
+		String succFunction = scope.getName(); 
 		Color succColor = data.colorTable.getColor(succFunction);
 		int last_ptl_index = data.ptl.size() - 1;
 		int num_invalid_cp = 0;
@@ -98,7 +104,11 @@ public abstract class DataPreparation
 				cp = data.ptl.getCallPath(indexSucc, data.depth);
 				if(cp != null)
 				{
-					succFunction = cp.getScopeAt(data.depth).getName(); 
+					scope = cp.getScopeAt(data.depth);
+					if (scope == null)
+						throw new RuntimeException("Scope not found: cannot find at depth " + data.depth);
+					
+					succFunction = scope.getName(); 
 					succColor = data.colorTable.getColor(succFunction);
 					
 					// the color will be the same if and only if the two regions have the save function name
