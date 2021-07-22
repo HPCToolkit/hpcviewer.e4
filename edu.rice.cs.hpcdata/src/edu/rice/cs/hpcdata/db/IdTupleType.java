@@ -24,12 +24,25 @@ public class IdTupleType
 	// use for backward compatibility
 	// we will convert old database process.thread format
 	// to id-tuples
+	
+	public final static int KIND_SUMMARY = 0;
+	public final static int KIND_NODE    = 1;
 	public final static int KIND_RANK    = 2;
 	public final static int KIND_THREAD  = 3;
+	public final static int KIND_GPUDEVICE  = 4;
+	public final static int KIND_GPUCONTEXT = 5;
+	public final static int KIND_GPUSTREAM  = 6;
+	public final static int KIND_CORE       = 7;
 	
-	public final static String LABEL_RANK   = "Rank";
-	public final static String LABEL_THREAD = "Thread";
-
+	public final static String LABEL_SUMMARY    = "Summary";
+	public final static String LABEL_NODE       = "Node";
+	public final static String LABEL_RANK       = "Rank";
+	public final static String LABEL_THREAD     = "Thread";
+	public final static String LABEL_GPUDEVICE  = "GPUDevice";
+	public final static String LABEL_GPUCONTEXT = "GPUContext";
+	public final static String LABEL_GPUSTREAM  = "GPUStream";
+	public final static String LABEL_CORE		= "Core";
+	
 	// Constants copied from 
 	// https://github.com/HPCToolkit/hpctoolkit/blob/aa60b422e18f300a0d1ac4f5e365e98e37d45c8a/src/lib/prof-lean/id-tuple.h#L103-L110
 
@@ -56,9 +69,15 @@ public class IdTupleType
 	private Mode mode = Mode.PHYSICAL;
 	
 	
-	public void initOldDatabase() {
+	public void initDefaultTypes() {
+		mapIdTuple.put(KIND_SUMMARY,   LABEL_SUMMARY);
+		mapIdTuple.put(KIND_NODE,   LABEL_NODE);
 		mapIdTuple.put(KIND_RANK,   LABEL_RANK);
 		mapIdTuple.put(KIND_THREAD, LABEL_THREAD);
+		mapIdTuple.put(KIND_GPUDEVICE,   LABEL_GPUDEVICE);
+		mapIdTuple.put(KIND_GPUCONTEXT, LABEL_GPUCONTEXT);
+		mapIdTuple.put(KIND_GPUSTREAM,   LABEL_GPUSTREAM);
+		mapIdTuple.put(KIND_CORE, LABEL_CORE);
 	}
 	
 	/***
@@ -67,7 +86,7 @@ public class IdTupleType
 	 */
 	public static IdTupleType createTypeWithOldFormat() {
 		IdTupleType type = new IdTupleType();
-		type.initOldDatabase();
+		type.initDefaultTypes();
 		return type;
 	}
 	

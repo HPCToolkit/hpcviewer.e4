@@ -93,13 +93,14 @@ public class DataSummary extends DataCommon
 	 * (non-Javadoc)
 	 * @see edu.rice.cs.hpc.data.db.DataCommon#printInfo(java.io.PrintStream)
 	 */
-	public void printInfo( PrintStream out)
+	public void printInfo( PrintStream out )
 	{
 		super.printInfo(out);
+		IdTupleType type = IdTupleType.createTypeWithOldFormat();
 		
 		// print list of id tuples
 		for(IdTuple idt: listIdTuple) {
-			System.out.println(idt);
+			System.out.println(idt.toString(type));
 		}
 		System.out.println();
 
@@ -830,32 +831,4 @@ public class DataSummary extends DataCommon
 				   ", offs: " 	 + offset;
 		}
 	}
-
-	/***************************
-	 * unit test 
-	 * 
-	 * @param argv
-	 ***************************/
-	public static void main(String []argv)
-	{
-		final String DEFAULT_FILE = "/Users/la5/data/sparse/hpctoolkit-database/thread.db";
-		final String filename;
-		if (argv != null && argv.length>0)
-			filename = argv[0];
-		else
-			filename = DEFAULT_FILE;
-		IdTupleType type = IdTupleType.createTypeWithOldFormat();
-		
-		final DataSummary summary_data = new DataSummary(type);
-		try {
-			summary_data.open(filename);			
-			summary_data.printInfo(System.out);
-			summary_data.dispose();	
-			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
 }
