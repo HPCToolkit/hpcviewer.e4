@@ -163,7 +163,8 @@ public class IdTuple
 	
 	public boolean isGPU(int level, IdTupleType type) {
 		int kindType = IdTupleType.getKind(kind[level]);
-		return (type.getLabel(kindType).startsWith(IdTupleType.PREFIX_GPU));
+		String kindStr = type.getLabel(kindType);
+		return (kindStr.startsWith(IdTupleType.PREFIX_GPU));
 	}
 	
 	
@@ -192,7 +193,9 @@ public class IdTuple
 			for(int i=0; i<=level; i++) {
 				if (i>0)
 					buff += " ";
-				buff += idTupleType.kindStr(kind[i]) + " " ;
+				int kindInt = IdTupleType.getKind(kind[i]);
+				String kindStr = idTupleType.kindStr(kindInt); 
+				buff += kindStr + " " ;
 
 				switch (IdTupleType.getInterpret(kind[i])) {
 				case IdTupleType.IDTUPLE_IDS_BOTH_VALID:
