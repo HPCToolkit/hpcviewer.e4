@@ -98,14 +98,23 @@ public class DetailPaintThread
 			}
 		}
 	}
+	
+	@Override
+	public void dispose() {
+		if (lineFinal != null)    lineFinal.dispose();
+		if (lineOriginal != null) lineOriginal.dispose();
+				
+		if (gcFinal != null)    gcFinal.dispose();
+		if (gcOriginal != null) gcOriginal.dispose();
+	}
+	
 
 	@Override
 	protected void initPaint(/*Device device, */int width, int height) {
-
-		lineFinal = new Image(device, width, height);
+		lineFinal    = new Image(device, width, height);
 		lineOriginal = new Image(device, width, 1);
 		
-		gcFinal = new GC(lineFinal);
+		gcFinal    = new GC(lineFinal);
 		gcOriginal = new GC(lineOriginal);		
 	}
 

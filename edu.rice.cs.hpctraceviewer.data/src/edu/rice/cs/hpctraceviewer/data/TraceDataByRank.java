@@ -73,6 +73,9 @@ public class TraceDataByRank implements ITraceDataCollector
 		long minloc = data.getMinLoc(rank);
 		long maxloc = data.getMaxLoc(rank);
 		
+		// corner case: empty samples
+		if (minloc >= maxloc) 
+			return;
 		
 		// get the start location
 		final long startLoc = this.findTimeInInterval(timeStart, minloc, maxloc);

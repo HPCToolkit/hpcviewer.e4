@@ -1,10 +1,14 @@
 package edu.rice.cs.hpcdata.experiment;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.EnumMap;
 import java.util.Map;
 
+import edu.rice.cs.hpcdata.db.IdTupleType;
+import edu.rice.cs.hpcdata.db.version4.DataSummary;
+import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -51,7 +55,10 @@ public abstract class BaseExperiment implements IExperiment
 	
 	private EnumMap<Db_File_Type, String> db_filenames;
 	private int filterNumScopes = 0, filterStatus;
-
+	private IdTupleType idTupleType;
+	private DataSummary dataSummary;
+	private IThreadDataCollection threadData;
+	
 	private BaseTraceAttribute traceAttribute = new TraceAttribute();
 
 	/***
@@ -85,7 +92,68 @@ public abstract class BaseExperiment implements IExperiment
 	}
 	
 	
+	public DataSummary getDataSummary() {
+		if (dataSummary == null) {
+			dataSummary = new DataSummary(getIdTupleType());
+			String databaseDirectory = getDefaultDirectory().getAbsolutePath();
+			String filename = databaseDirectory + File.separator + getDbFilename(BaseExperiment.Db_File_Type.DB_SUMMARY);
+
+			try {
+				dataSummary.open(filename);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return dataSummary;
+	}
+
+
+	public void setDataSummary(DataSummary dataSummary) {
+		this.dataSummary = dataSummary;
+	}
+
+
+	/***
+	 * set the new id tuple type
+	 * @param idTupleType
+	 */
+	public void setIdTupleType(IdTupleType idTupleType) {
+		this.idTupleType = idTupleType;
+	}
 	
+	
+	/****
+	 * get this database's id tuple type
+	 * @return {@code IdTupleType}
+	 */
+	public IdTupleType getIdTupleType() {
+		if (idTupleType == null) {
+			idTupleType = IdTupleType.createTypeWithOldFormat();
+		}
+			
+		return idTupleType;
+	}
+	
+
+	/****
+	 * set the IThreadDataCollection object to this root
+	 * 
+	 * @param threadData
+	 */
+	public void setThreadData(IThreadDataCollection threadData){
+		this.threadData = threadData;
+	}
+
+
+	/***
+	 * Return the IThreadDataCollection of this root if exists.
+	 * 
+	 * @return
+	 */
+	public IThreadDataCollection getThreadData() {
+		return threadData;
+	}
+
 	/******
 	 * set a database filename
 	 * 

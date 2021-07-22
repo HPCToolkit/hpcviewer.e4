@@ -72,8 +72,6 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 	 * parsing the beginning of XML element 
 	 *************************************************************************/
 	public void beginElement(String element, String[] attributes, String[] values) {
-		
-		//TokenXML current = Token2.map(element);
 
 		switch(element)
 		{
@@ -104,9 +102,9 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 		default:
 			super.beginElement(element, attributes, values);
 		}
-		//saveTokenContext(current);
 	}
 
+	
 	/*************************************************************************
 	 *	Takes notice of the ending of an element.
 	 ************************************************************************/

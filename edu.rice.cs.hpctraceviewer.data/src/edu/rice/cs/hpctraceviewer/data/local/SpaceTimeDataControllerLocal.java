@@ -107,7 +107,7 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 			traceFilePath = databaseDirectory + File.separator + exp.getDbFilename(BaseExperiment.Db_File_Type.DB_TRACE);
 			
 			RootScope root = (RootScope) exp.getRootScope(RootScopeType.CallingContextTree);
-			DataSummary ds = root.getDataSummary();
+			DataSummary ds = root.getExperiment().getDataSummary();
 			
 			((FileDB4)fileDB).open(ds, databaseDirectory);
 		}

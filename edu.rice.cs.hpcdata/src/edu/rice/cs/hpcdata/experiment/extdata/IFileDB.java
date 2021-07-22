@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
+import edu.rice.cs.hpcdata.db.IdTupleType;
 
 
 /*************************************************
@@ -41,6 +42,13 @@ public interface IFileDB
 	 */
 	public int 		getParallelismLevel();
 	
+	
+	/***
+	 * Return true if the database contains GPU measurements
+	 * {@code false} otherwise
+	 * @return
+	 */
+	public boolean  hasGPU();
 	/***
 	 * Get the number of processes or threads.
 	 * 
@@ -62,7 +70,7 @@ public interface IFileDB
 	public long[]	getOffsets();
 	
 	public List<IdTuple> getIdTuple(IdTupleOption option);
-	public List<Short>   getIdTupleTypes();
+	public IdTupleType   getIdTupleTypes();
 	
 	public long 	getLong  (long position) throws IOException;
 	public int  	getInt   (long position) throws IOException;

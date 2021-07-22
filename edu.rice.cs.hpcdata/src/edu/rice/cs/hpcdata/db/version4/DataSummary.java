@@ -29,10 +29,10 @@ public class DataSummary extends DataCommon
 	// --------------------------------------------------------------------
 	// constants
 	// --------------------------------------------------------------------
-	private final static String HEADER_MAGIC_STR  = "HPCPROF-pmsdb___";
+	private final static String HEADER_MAGIC_STR  = "HPCPROF-profdb__";
 	private static final int    METRIC_VALUE_SIZE = 8 + 2;
 	private static final int    CCT_RECORD_SIZE   = 4 + 8;
-	private static final int    MAX_LEVELS        = 8;
+	private static final int    MAX_LEVELS        = 18;
 	
 	private static final int    PROFILE_SUMMARY_INDEX = 0;
 	public static final int     PROFILE_SUMMARY       = -1;
@@ -41,6 +41,7 @@ public class DataSummary extends DataCommon
 	// object variable
 	// --------------------------------------------------------------------
 	
+	private final IdTupleType idTupleTypes;
 	private RandomAccessFile file;
 	
 	/*** cache variables so that we don't need to read again and again  ***/
@@ -52,7 +53,6 @@ public class DataSummary extends DataCommon
 	
 	private List<IdTuple>  listIdTuple, listIdTupleShort;
 	private List<ProfInfo> listProfInfo;
-	private int  []listNumKindVariants;
 	
 	/*** mapping from profile number to the sorted order*/
 	private Map<Integer, Integer> mapProfileToOrder;
@@ -64,8 +64,12 @@ public class DataSummary extends DataCommon
 	
 	private double[] labels;
 	private String[] strLabels;
-	private List<Short> idTupleTypes;
-
+	private boolean hasGPU;
+	
+	public DataSummary(IdTupleType idTupleTypes) {
+		this.idTupleTypes = idTupleTypes;
+	}
+	
 	// --------------------------------------------------------------------
 	// Public methods
 	// --------------------------------------------------------------------
@@ -89,13 +93,14 @@ public class DataSummary extends DataCommon
 	 * (non-Javadoc)
 	 * @see edu.rice.cs.hpc.data.db.DataCommon#printInfo(java.io.PrintStream)
 	 */
-	public void printInfo( PrintStream out)
+	public void printInfo( PrintStream out )
 	{
 		super.printInfo(out);
+		IdTupleType type = IdTupleType.createTypeWithOldFormat();
 		
 		// print list of id tuples
 		for(IdTuple idt: listIdTuple) {
-			System.out.println(idt);
+			System.out.println(idt.toString(type));
 		}
 		System.out.println();
 
@@ -176,14 +181,6 @@ public class DataSummary extends DataCommon
 		}
 	}
 	
-	
-	/****
-	 * retrieve the list of id tuples types in this database
-	 * @return {@code List} of id tuple types (Short)
-	 */
-	public List<Short> getIdTupleTypes() {
-		return idTupleTypes;
-	}
 	
 	
 	/****
@@ -315,7 +312,7 @@ public class DataSummary extends DataCommon
 			
 			for(int i=0; i<listIdTupleShort.size(); i++) {
 				IdTuple idt  = listIdTupleShort.get(i);
-				strLabels[i] = idt.toString();
+				strLabels[i] = idt.toString(idTupleTypes);
 			}		
 		}
 		return strLabels;
@@ -342,18 +339,6 @@ public class DataSummary extends DataCommon
 	}
 	
 	
-	/***
-	 * Retrieve the number maximum of parallelism.
-	 * If the application has MPI+OpenMP, then it returns 2.
-	 * If the application has MPI+OpenMP+CUDA, it may return 2 depending if the kernel is launched under MPI rank or not.
-	 * @return int
-	 */
-	public int getMaxLevels() {
-		if (optimized)
-			return idTupleTypes.size();
-		
-		return numLevels;
-	}
 	
 	/*
 	 * (non-Javadoc)
@@ -379,14 +364,6 @@ public class DataSummary extends DataCommon
 	}
 
 	
-	/****
-	 * Return the number of counts for each kind
-	 * 
-	 * @return array of int
-	 */
-	public int []getNumOfKinds() {
-		return listNumKindVariants;
-	}
 	
 	// --------------------------------------------------------------------
 	// Protected methods
@@ -467,8 +444,10 @@ public class DataSummary extends DataCommon
 			numLevels = Math.max(numLevels, item.length);
 			
 			for (int j=0; j<item.length; j++) {
-				item.kind[j]  = buffer.getShort();
-				item.index[j] = buffer.getLong();
+				short kindInterpret = buffer.getShort();
+				item.setKindAndInterpret(kindInterpret, j);
+				item.physical_index[j] = buffer.getLong();
+				item.logical_index[j]  = buffer.getLong();
 				
 				if (i==0)
 					continue;
@@ -479,7 +458,7 @@ public class DataSummary extends DataCommon
 				
 				// compute the number of appearances of a given kind and level
 				// this is important to know if there's invariant or not
-				Long hash = convertIdTupleToHash(j, item.kind[j], item.index[j]);
+				Long hash = convertIdTupleToHash(j, item.getKind(j), item.physical_index[j]);
 				Integer count = mapLevelToHash[j].get(hash);
 				if (count == null) {
 					count = Integer.valueOf(0);
@@ -488,12 +467,13 @@ public class DataSummary extends DataCommon
 				mapLevelToHash[j].put(hash, count);
 				
 				// find min and max for each level
-				minIndex[j] = Math.min(minIndex[j], item.index[j]);
-				maxIndex[j] = Math.min(maxIndex[j], item.index[j]);
+				minIndex[j] = Math.min(minIndex[j], item.physical_index[j]);
+				maxIndex[j] = Math.min(maxIndex[j], item.physical_index[j]);
+				
+				if (!hasGPU)
+					hasGPU = item.isGPU(idTupleTypes);
 			}
-			if (i == 0) {
-				// special treatment for id-tuple = 0: it's a summary profile
-			} else {
+			if (i> 0) {
 				listIdTuple.add(item);
 			}
 		}
@@ -504,7 +484,6 @@ public class DataSummary extends DataCommon
 		// -----------------------------------------
 		
 		Map<Integer, Integer> mapLevelToSkip = new HashMap<Integer, Integer>();
-		listNumKindVariants = new int[IdTupleType.KIND_MAX];
 		
 		for(int i=0; i<mapLevelToHash.length; i++) {
 			
@@ -539,7 +518,6 @@ public class DataSummary extends DataCommon
 		});
 		
 		mapProfileToOrder = new HashMap<Integer, Integer>(listIdTuple.size());
-		idTupleTypes = new ArrayList<>();
 		
 		// -----------------------------------------
 		// 3. a. compute the brief short version of id tuples
@@ -571,15 +549,10 @@ public class DataSummary extends DataCommon
 			for(int j=0; j<idt.length; j++) {
 				if (mapLevelToSkip.get(j) == null) {
 					// we should keep this level
-					short kind = idt.kind[j];
-					shortVersion.kind[level]  = kind;
-					shortVersion.index[level] = idt.index[j];
+					short kind = idt.getKind(j);
+					shortVersion.setKindAndInterpret(kind, level);
+					shortVersion.physical_index[level] = idt.physical_index[j];
 					level++;
-					
-					if (!idTupleTypes.contains(kind))
-						idTupleTypes.add(kind);
-					
-					listNumKindVariants[kind]++;
 				}
 			}
 			listIdTupleShort.add(shortVersion);
@@ -588,6 +561,26 @@ public class DataSummary extends DataCommon
 		}
 	}
 
+	
+	/****
+	 * Return {@code true} if the database contains GPU parallelism
+	 * @return {@code boolean}
+	 */
+	public boolean hasGPU() {
+		return hasGPU;
+	}
+	
+	public IdTupleType getIdTupleType() {
+		return idTupleTypes;
+	}
+	
+	/****
+	 * Retrieve the number of detected parallelism levels of this database
+	 * @return {@code int}
+	 */
+	public int getParallelismLevels() {
+		return numLevels;
+	}
 	
 	/***
 	 * Serialize id tuple into one long number.
@@ -838,31 +831,4 @@ public class DataSummary extends DataCommon
 				   ", offs: " 	 + offset;
 		}
 	}
-
-	/***************************
-	 * unit test 
-	 * 
-	 * @param argv
-	 ***************************/
-	public static void main(String []argv)
-	{
-		final String DEFAULT_FILE = "/Users/la5/data/sparse/hpctoolkit-database/thread.db";
-		final String filename;
-		if (argv != null && argv.length>0)
-			filename = argv[0];
-		else
-			filename = DEFAULT_FILE;
-		
-		final DataSummary summary_data = new DataSummary();
-		try {
-			summary_data.open(filename);			
-			summary_data.printInfo(System.out);
-			summary_data.dispose();	
-			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
 }
