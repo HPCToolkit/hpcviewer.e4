@@ -14,6 +14,15 @@ then
 	exit
 fi
 
+show_help(){
+	echo "Syntax: $0 [-options]"
+	echo "Options: "
+	echo "-c check to create a package without generating the release number"
+	echo "-n (Mac only) notarize the package"
+	echo "-r <release_number> specify the release number"
+	exit
+}
+
 CHECK=0
 NOTARIZE=0
 RELEASE=`date +"%Y.%m"`
@@ -26,6 +35,10 @@ key="$1"
 case $key in
     -c|--check)
     CHECK=1
+    shift # past argument
+    ;;
+    -h|--help)
+    show_help
     shift # past argument
     ;;
     -n|--notarize)
