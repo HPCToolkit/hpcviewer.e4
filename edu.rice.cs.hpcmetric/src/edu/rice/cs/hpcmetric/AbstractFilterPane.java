@@ -9,10 +9,11 @@ import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
-import edu.rice.cs.hpcdata.util.OSValidator;
 import edu.rice.cs.hpcfilter.FilterDataItem;
 import edu.rice.cs.hpcmetric.internal.IFilterChangeListener;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
+import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
+import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 
 import java.util.Iterator;
 import java.util.List;
@@ -21,7 +22,10 @@ import java.util.regex.Pattern;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.nebula.widgets.nattable.NatTable;
@@ -65,6 +69,8 @@ import org.eclipse.nebula.widgets.nattable.ui.action.IMouseAction;
 import org.eclipse.nebula.widgets.nattable.ui.matcher.MouseEventMatcher;
 import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseEvent;
@@ -94,7 +100,9 @@ import org.eclipse.swt.widgets.Text;
  * </ul>
  *
  *********************************************************************/
-public abstract class AbstractFilterPane implements IFilterChangeListener
+public abstract class AbstractFilterPane implements IFilterChangeListener, 
+													IPropertyChangeListener,
+													DisposeListener
 {	
 	private static final int INDEX_VISIBILITY  = 0;
 	private static final int INDEX_NAME        = 1;
@@ -231,6 +239,10 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 		});
 		// expand as much as possible both horizontally and vertically
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(nattable);
+		
+		
+		PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
+		pref.addPropertyChangeListener((IPropertyChangeListener) this);
 	}
 
 	
@@ -288,8 +300,11 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 		// the table
 		NatTable natTable = new NatTable(parentContainer, gridLayer, false); 
 
+		// default style configuration
+		DefaultNatTableStyleConfiguration styleConfig = new DefaultNatTableStyleConfiguration();
+		
 		// additional configuration
-		natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
+		natTable.addConfiguration(styleConfig);
 		natTable.addConfiguration(new CheckBoxConfiguration());
 		natTable.addConfiguration(new PainterConfiguration());
 		natTable.addConfiguration(new RowOnlySelectionBindings());
@@ -367,6 +382,23 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 		return rowSelectionProvider;
 	}
 	
+	@Override
+	public void propertyChange(PropertyChangeEvent event) {
+		final String property = event.getProperty();
+		if ((property.equals(PreferenceConstants.ID_FONT_GENERIC) || 
+			 property.equals(PreferenceConstants.ID_FONT_METRIC)) ) {
+			nattable.redraw();
+		}
+	}
+	
+	
+	@Override
+	public void widgetDisposed(DisposeEvent e) {
+		PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
+		pref.removePropertyChangeListener(this);
+	}
+	
+	
 	/****************************************************************************
 	 * 
 	 * Configuration to paint or render a cell.
@@ -381,6 +413,16 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 				font = FontManager.getMetricFont();
 			} catch (Exception e) {
 				font = JFaceResources.getTextFont();
+			}
+			return font;
+		}
+		
+		public static Font getGenericFont() {
+			Font font;
+			try {
+				font = FontManager.getFontGeneric();
+			} catch (Exception e) {
+				font = JFaceResources.getDefaultFont();
 			}
 			return font;
 		}
@@ -409,14 +451,18 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 			//
 			final Style styleCenter = new Style();
 			styleCenter.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.CENTER);
+			
 			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
 												   styleCenter, DisplayMode.NORMAL, 
 												   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + INDEX_VISIBILITY);
 			
 			// left justified for label columns
 			//
+			final Font fontGeneric = getGenericFont();
 			final Style styleLeft = new Style();
 			styleLeft.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.LEFT);
+			styleLeft.setAttributeValue(CellStyleAttributes.FONT, fontGeneric);
+			
 			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
 												   styleLeft, 
 												   DisplayMode.NORMAL, 
