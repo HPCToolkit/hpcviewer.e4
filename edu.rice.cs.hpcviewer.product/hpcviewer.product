@@ -88,6 +88,7 @@ if advised of the possibility of such damage.
       <feature id="org.eclipse.e4.rcp" installMode="root"/>
       <feature id="org.eclipse.emf.ecore" installMode="root"/>
       <feature id="org.eclipse.emf.common" installMode="root"/>
+      <feature id="org.eclipse.nebula.widgets.nattable.core.feature" installMode="root"/>
    </features>
 
    <configurations>
