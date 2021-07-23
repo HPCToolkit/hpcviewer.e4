@@ -9,6 +9,7 @@ import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
+import edu.rice.cs.hpcdata.util.OSValidator;
 import edu.rice.cs.hpcfilter.FilterDataItem;
 import edu.rice.cs.hpcmetric.internal.IFilterChangeListener;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
@@ -71,6 +72,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -387,7 +389,7 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 		public void configureRegistry(IConfigRegistry configRegistry) {
 			
 			// wrap long texts for description column
-			
+			//
 			TextPainter tp = new TextPainter(true, true, true);			
 			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_PAINTER, 
 												   tp, 
@@ -395,8 +397,8 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 												   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + INDEX_DESCRIPTION);	
 			
 			// gray colors for disabled metrics
-			
-			Style styleGray = new Style();
+			//
+			final Style styleGray = new Style();
 			styleGray.setAttributeValue(CellStyleAttributes.FOREGROUND_COLOR, GUIHelper.COLOR_DARK_GRAY);
 			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
 												   styleGray, 
@@ -404,8 +406,16 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 												   LABEL_ROW_GRAY);
 			
 			// left justified for label columns
+			//
+			final Style styleCenter = new Style();
+			styleCenter.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.CENTER);
+			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
+												   styleCenter, DisplayMode.NORMAL, 
+												   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + INDEX_VISIBILITY);
 			
-			Style styleLeft = new Style();
+			// left justified for label columns
+			//
+			final Style styleLeft = new Style();
 			styleLeft.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.LEFT);
 			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
 												   styleLeft, 
@@ -417,9 +427,10 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 					   							   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + INDEX_DESCRIPTION);
 			
 			// right justify for metric columns
+			//
 			Font font = getMetricFont();
 
-			Style style = new Style();
+			final Style style = new Style();
 			style.setAttributeValue(CellStyleAttributes.FONT, font);
 			style.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.RIGHT);
 
@@ -480,8 +491,16 @@ public abstract class AbstractFilterPane implements IFilterChangeListener
 												   DisplayMode.NORMAL,
 												   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + INDEX_VISIBILITY);
 
+			// need to download better resolution images
+			// the original checkbox images are 16x16, 
+			// and it doesn't look great on mac
+			//
+			Image checked = GUIHelper.getImage("checked_120_120", true, true);
+			Image uncheck = GUIHelper.getImage("unchecked_120_120", true, true);
+			CheckBoxPainter checkboxPainter = new CheckBoxPainter(checked, uncheck, true); 
+			
 			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_PAINTER, 
-												   new CheckBoxPainter(), 
+												   checkboxPainter, 
 												   DisplayMode.NORMAL, 
 												   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + INDEX_VISIBILITY);
 			
