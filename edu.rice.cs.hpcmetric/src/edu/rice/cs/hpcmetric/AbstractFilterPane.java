@@ -447,7 +447,7 @@ public abstract class AbstractFilterPane implements IFilterChangeListener,
 												   DisplayMode.NORMAL, 
 												   LABEL_ROW_GRAY);
 			
-			// left justified for label columns
+			// configuration for check column: center justified
 			//
 			final Style styleCenter = new Style();
 			styleCenter.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.CENTER);
@@ -456,7 +456,9 @@ public abstract class AbstractFilterPane implements IFilterChangeListener,
 												   styleCenter, DisplayMode.NORMAL, 
 												   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + INDEX_VISIBILITY);
 			
-			// left justified for label columns
+			// configuration for name and description columns:
+			// - left justified
+			// - generic fonts
 			//
 			final Font fontGeneric = getGenericFont();
 			final Style styleLeft = new Style();
@@ -468,8 +470,17 @@ public abstract class AbstractFilterPane implements IFilterChangeListener,
 												   DisplayMode.NORMAL, 
 												   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + INDEX_NAME);
 			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
+												   styleLeft, 
+												   DisplayMode.SELECT, 
+												   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + INDEX_NAME);
+			
+			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
 					   							   styleLeft, 
 					   							   DisplayMode.NORMAL, 
+					   							   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + INDEX_DESCRIPTION);
+			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
+					   							   styleLeft, 
+					   							   DisplayMode.SELECT, 
 					   							   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + INDEX_DESCRIPTION);
 			
 			// right justify for metric columns
@@ -484,6 +495,10 @@ public abstract class AbstractFilterPane implements IFilterChangeListener,
 												   style, 
 												   DisplayMode.NORMAL, 
 												   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + INDEX_VALUE);
+			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
+					   							   style, 
+					   							   DisplayMode.SELECT, 
+					   							   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + INDEX_VALUE);
 		}
 	}
 	
