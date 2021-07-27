@@ -28,12 +28,13 @@ import edu.rice.cs.hpcdata.util.string.StringUtil;
 import edu.rice.cs.hpcfilter.FilterDataItem;
 import edu.rice.cs.hpcfilter.StringFilterDataItem;
 import edu.rice.cs.hpcfilter.dialog.ThreadFilterDialog;
+import edu.rice.cs.hpcmetric.MetricDataEvent;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.base.IViewItem;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractBaseViewItem;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
-import edu.rice.cs.hpcviewer.ui.metric.MetricView.MetricDataEvent;
+
 
 /*************************************************************
  * 

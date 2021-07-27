@@ -29,10 +29,10 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcfilter.FilterDataItem;
+import edu.rice.cs.hpcmetric.MetricDataEvent;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.base.IViewBuilder;
-import edu.rice.cs.hpcviewer.ui.metric.MetricView.MetricDataEvent;
 
 
 /*******************************************************************************************

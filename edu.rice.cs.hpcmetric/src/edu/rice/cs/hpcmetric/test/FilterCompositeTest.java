@@ -8,7 +8,6 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
@@ -21,9 +20,10 @@ import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
+import edu.rice.cs.hpcfilter.AbstractFilterPane;
 import edu.rice.cs.hpcfilter.FilterDataItem;
-import edu.rice.cs.hpcmetric.AbstractFilterPane;
 import edu.rice.cs.hpcmetric.MetricFilterInput;
+import edu.rice.cs.hpcmetric.MetricFilterPane;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
 
@@ -91,28 +91,14 @@ public final class FilterCompositeTest
 		
 		MetricFilterInput input = new MetricFilterInput(root, exp, treeViewer, true);
 		
-		final AbstractFilterPane pane = new AbstractFilterPane(shell, SWT.NONE, input) {
-			
-			@Override
-			protected void createAdditionalButton(Composite parent) {}
-			
-			@Override
-			public void changeEvent(Object data) {
-				System.out.println("Change: " + data);
-			}
-
-			@Override
-			protected void selectionEvent(FilterDataItem item, int click) {
-				System.out.println("Select: " + item);
-			}
-		};
+		final AbstractFilterPane pane = new MetricFilterPane(shell, 0, null, input);
 
 		shell.open();
 		while (!shell.isDisposed()) {
 			if (!display.readAndDispatch())
 				display.sleep();
 		}
-		List<FilterDataItem> clist = pane.getList();
+		List<FilterDataItem> clist = pane.getEventList();
 		clist.forEach( item -> {
 			System.out.println(item.data + ": " + item.isChecked());
 		});

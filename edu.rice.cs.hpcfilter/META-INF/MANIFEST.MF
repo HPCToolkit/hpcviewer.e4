@@ -8,6 +8,7 @@ Bundle-Vendor: Rice University
 Export-Package: edu.rice.cs.hpcfilter,
  edu.rice.cs.hpcfilter.cct,
  edu.rice.cs.hpcfilter.dialog,
+ edu.rice.cs.hpcfilter.internal,
  edu.rice.cs.hpcfilter.service
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: edu.rice.cs.hpcdata,
@@ -23,6 +24,10 @@ Require-Bundle: edu.rice.cs.hpcdata,
  org.eclipse.e4.ui.di,
  org.eclipse.e4.ui.model.workbench,
  org.slf4j.api,
- org.eclipse.swt
+ org.eclipse.swt,
+ org.eclipse.nebula.widgets.nattable.core,
+ edu.rice.cs.hpcsetting,
+ ca.odell.glazedlists,
+ org.eclipse.nebula.widgets.nattable.extension.glazedlists
 Bundle-ActivationPolicy: lazy
 Automatic-Module-Name: edu.rice.cs.hpc.filter

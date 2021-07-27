@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcmetric.internal;
+package edu.rice.cs.hpcfilter;
 
 public interface IFilterChangeListener 
 {

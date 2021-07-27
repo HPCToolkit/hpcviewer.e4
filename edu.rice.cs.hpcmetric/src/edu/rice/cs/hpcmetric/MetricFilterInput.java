@@ -9,33 +9,28 @@ import org.eclipse.swt.widgets.TreeColumn;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
+import edu.rice.cs.hpcfilter.FilterDataItem;
+import edu.rice.cs.hpcfilter.FilterInputData;
 import edu.rice.cs.hpcmetric.internal.MetricFilterDataItem;
 
-public class MetricFilterInput 
+public class MetricFilterInput extends FilterInputData
 {
 	private final RootScope root;
-	private final List<MetricFilterDataItem> listItems;
 	private final boolean affectAll;
 	private final IMetricManager metricManager;
 
 	
 	public MetricFilterInput(RootScope root, IMetricManager metricManager, TreeViewer treeViewer, boolean affectAll) {		
-
+		super(createFilterList(metricManager.getVisibleMetrics(), treeViewer));
 		this.root = root;
 		this.metricManager = metricManager;
 
-		this.listItems = createFilterList(metricManager.getVisibleMetrics(), treeViewer);
 		this.affectAll = affectAll;
 	}
 	
 	
-	public List<MetricFilterDataItem> getFilterList() {
-		return listItems;
-	}
-	
-	
-	private List<MetricFilterDataItem> createFilterList(List<BaseMetric> metrics, TreeViewer treeViewer) {
-		List<MetricFilterDataItem> listItems = new ArrayList<MetricFilterDataItem>(metrics.size());
+	private static List<FilterDataItem> createFilterList(List<BaseMetric> metrics, TreeViewer treeViewer) {
+		List<FilterDataItem> listItems = new ArrayList<>(metrics.size());
 		TreeColumn []columns = treeViewer.getTree().getColumns();
 		
 		for(BaseMetric metric: metrics) {
