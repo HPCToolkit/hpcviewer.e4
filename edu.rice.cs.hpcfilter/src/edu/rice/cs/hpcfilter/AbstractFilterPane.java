@@ -45,6 +45,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import ca.odell.glazedlists.EventList;
@@ -57,10 +58,31 @@ import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcfilter.internal.CheckBoxConfiguration;
 import edu.rice.cs.hpcfilter.internal.FilterConfigLabelAccumulator;
 import edu.rice.cs.hpcfilter.internal.FilterPainterConfiguration;
+import edu.rice.cs.hpcfilter.internal.IConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 
 
-
+/***********************************************************************
+ * 
+ * Base class to have a filter pane which consists of:
+ * <ul>
+ *   <li>Action buttons area, which consists of:
+ *     <ul>
+ *       <li>Check all: to check all the enabled visible items</li>
+ *       <li>Uncheck all: to clear the visible checked items</li>
+ *       <li>Others (to be defined by the child</li>
+ *     </ul>
+ *   </li>
+ *   <li>Text filter area</li>
+ *   <li>Table to display list of items to be filtered. The table contains:
+ *     <ul>
+ *       <li>Column check/uncheck</li>
+ *       <li>Label of the item</li>
+ *     </ul>
+ *   </li>
+ * </ul>
+ *
+ ***********************************************************************/
 public abstract class AbstractFilterPane implements IFilterChangeListener, 
 													IPropertyChangeListener, 
 													DisposeListener 
@@ -72,11 +94,17 @@ public abstract class AbstractFilterPane implements IFilterChangeListener,
 	private final RowSelectionProvider<FilterDataItem> rowSelectionProvider;
 	private final FilterList<FilterDataItem> filterList;
 
+	/***
+	 * Constructor to create the item and its composite widgets.
+	 * 
+	 * @param parent 
+	 * @param style SWT style
+	 * @param inputData {@code FilterInputData}
+	 */
 	public AbstractFilterPane(Composite parent, int style, FilterInputData inputData) {
 		this.inputData = inputData;
 		
-		
-		Composite parentContainer = new Composite(parent, SWT.BORDER);
+		Composite parentContainer = new Composite(parent, SWT.NONE);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(parentContainer);
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(parentContainer);
 
@@ -284,10 +312,11 @@ public abstract class AbstractFilterPane implements IFilterChangeListener,
 		// expand as much as possible both horizontally and vertically
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(natTable);
 		
-		
-		PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
-		pref.addPropertyChangeListener((IPropertyChangeListener) this);
-
+		if (!(parent instanceof Shell)) {
+			// Real application, not within a simple unit test
+			PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
+			pref.addPropertyChangeListener((IPropertyChangeListener) this);
+		}
 	}
 	
 	

@@ -6,7 +6,6 @@ import org.eclipse.nebula.widgets.nattable.layer.LabelStack;
 import org.eclipse.nebula.widgets.nattable.layer.cell.ColumnLabelAccumulator;
 
 import edu.rice.cs.hpcfilter.FilterDataItem;
-import edu.rice.cs.hpcfilter.IConstants;
 
 public class FilterConfigLabelAccumulator extends ColumnLabelAccumulator 
 {

@@ -4,6 +4,7 @@ import java.util.List;
 import org.eclipse.nebula.widgets.nattable.data.IRowDataProvider;
 
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
+import edu.rice.cs.hpcfilter.internal.IConstants;
 
 public class FilterDataProvider implements IRowDataProvider<FilterDataItem> 
 {

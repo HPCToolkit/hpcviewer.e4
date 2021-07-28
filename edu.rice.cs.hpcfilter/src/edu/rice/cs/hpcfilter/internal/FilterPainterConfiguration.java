@@ -12,7 +12,6 @@ import org.eclipse.nebula.widgets.nattable.style.Style;
 import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
 import org.eclipse.swt.graphics.Font;
 
-import edu.rice.cs.hpcfilter.IConstants;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 
 public class FilterPainterConfiguration extends AbstractRegistryConfiguration 

@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcfilter;
+package edu.rice.cs.hpcfilter.internal;
 
 public interface IConstants 
 {
