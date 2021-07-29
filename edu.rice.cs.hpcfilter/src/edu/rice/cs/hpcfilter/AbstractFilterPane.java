@@ -112,7 +112,6 @@ public abstract class AbstractFilterPane implements IPropertyChangeListener, Dis
 		
 		Composite parentContainer = new Composite(parent, SWT.NONE);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(parentContainer);
-		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(parentContainer);
 
 		// prepare the buttons: check and uncheck
 
@@ -314,7 +313,8 @@ public abstract class AbstractFilterPane implements IPropertyChangeListener, Dis
 		});
 		// expand as much as possible both horizontally and vertically
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(natTable);
-		
+		GridLayoutFactory.fillDefaults().numColumns(1).generateLayout(parentContainer);
+
 		if (style == STYLE_COMPOSITE) {
 			// Real application, not within a simple unit test
 			PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();

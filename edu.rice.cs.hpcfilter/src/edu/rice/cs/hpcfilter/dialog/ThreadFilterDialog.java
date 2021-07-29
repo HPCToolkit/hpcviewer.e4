@@ -58,9 +58,14 @@ public class ThreadFilterDialog extends Dialog
 
 		GridLayout grid = new GridLayout();
 		grid.numColumns=1;
+		// TODO: bad hack: Have to add a "pad" margin on the top
+		// This may be a SWT bug that the position of the composite is negative on Mac
+		grid.marginTop=30;
+
 		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		composite.setLayout(grid);
 
+		
 		filterPane = new BaseFilterPane(composite, AbstractFilterPane.STYLE_INDEPENDENT, data) {
 
 			@Override
