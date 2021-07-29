@@ -91,7 +91,7 @@ public final class FilterCompositeTest
 		
 		MetricFilterInput input = new MetricFilterInput(root, exp, treeViewer, true);
 		
-		final AbstractFilterPane pane = new MetricFilterPane(shell, 0, null, input);
+		final AbstractFilterPane pane = new MetricFilterPane(shell, AbstractFilterPane.STYLE_INDEPENDENT, null, input);
 
 		shell.open();
 		while (!shell.isDisposed()) {

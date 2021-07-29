@@ -7,6 +7,8 @@ import java.util.Optional;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.preference.PreferenceStore;
+import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -15,6 +17,7 @@ import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -31,15 +34,18 @@ import edu.rice.cs.hpcfilter.AbstractFilterPane;
 import edu.rice.cs.hpcfilter.FilterDataItem;
 import edu.rice.cs.hpcfilter.FilterDataProvider;
 import edu.rice.cs.hpcfilter.FilterInputData;
+import edu.rice.cs.hpcfilter.IFilterChangeListener;
 import edu.rice.cs.hpcmetric.dialog.ExtDerivedMetricDlg;
 import edu.rice.cs.hpcmetric.internal.IConstants;
 import edu.rice.cs.hpcmetric.internal.MetricFilterDataItem;
 import edu.rice.cs.hpcmetric.internal.MetricFilterDataProvider;
 import edu.rice.cs.hpcmetric.internal.MetricPainterConfiguration;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
+import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 
 
 public class MetricFilterPane extends AbstractFilterPane 
+	implements IPropertyChangeListener, DisposeListener, IFilterChangeListener
 {	
 	private static final String HISTORY_COLUMN_PROPERTY = "column_property";
 	private static final String HISTORY_APPLY_ALL = "apply-all";
@@ -53,6 +59,12 @@ public class MetricFilterPane extends AbstractFilterPane
 	public MetricFilterPane(Composite parent, int style, IEventBroker eventBroker, FilterInputData inputData) {
 		super(parent, style, inputData);
 		this.eventBroker = eventBroker;
+		
+		if (style == STYLE_COMPOSITE) {
+			// Real application, not within a simple unit test
+			PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
+			pref.addPropertyChangeListener(this);
+		}
 	}
 
 	
@@ -63,7 +75,7 @@ public class MetricFilterPane extends AbstractFilterPane
 
 	
 	@Override
-	protected void createAdditionalButton(Composite parent) {
+	protected int createAdditionalButton(Composite parent) {
 		final MetricFilterInput  inputFilter = (MetricFilterInput) getInputData();
 		
 		btnApplyToAllViews = new Button(parent, SWT.CHECK);
@@ -103,6 +115,8 @@ public class MetricFilterPane extends AbstractFilterPane
 				}
 			}
 		});
+		// number of additional buttons: 2
+		return 2;
 	}
 	
 	private void broadcast(Object data) {
@@ -198,14 +212,21 @@ public class MetricFilterPane extends AbstractFilterPane
 	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		final String property = event.getProperty();
-		if (property.equals(PreferenceConstants.ID_FONT_GENERIC)) {
+		if (property.equals(PreferenceConstants.ID_FONT_METRIC)) {
 			getNatTable().redraw();
 		}
+		super.propertyChange(event);
 	}
 
 
 	@Override
-	public void widgetDisposed(DisposeEvent e) {}
+	public void widgetDisposed(DisposeEvent e) {
+		// Real application, not within a simple unit test
+		if (getStyle() == STYLE_COMPOSITE) {
+			PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
+			pref.removePropertyChangeListener(this);
+		}
+	}
 
 
 	@Override
@@ -227,6 +248,8 @@ public class MetricFilterPane extends AbstractFilterPane
 	@Override
 	protected void addConfiguration(NatTable table) {
 		table.addConfiguration(new MetricPainterConfiguration());
+		
+		table.addDisposeListener(this);
 	}
 
 

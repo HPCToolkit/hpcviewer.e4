@@ -2,15 +2,17 @@ package edu.rice.cs.hpcfilter.dialog;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
-
-import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
-import edu.rice.cs.hpcdata.db.IdTupleType;
+import edu.rice.cs.hpcfilter.AbstractFilterPane;
+import edu.rice.cs.hpcfilter.BaseFilterPane;
 import edu.rice.cs.hpcfilter.FilterDataItem;
+import edu.rice.cs.hpcfilter.FilterInputData;
 import edu.rice.cs.hpcfilter.StringFilterDataItem;
 
 
@@ -19,13 +21,53 @@ import edu.rice.cs.hpcfilter.StringFilterDataItem;
  * Dialog window specifically to filter ranks or threads or id tuples
  *
  ******************************************************/
-public class ThreadFilterDialog extends AbstractFilterDialog 
+public class ThreadFilterDialog extends TitleAreaDialog 
 {
-	public ThreadFilterDialog(Shell parentShell, List<FilterDataItem> items) {
-		super(parentShell, "Select threads to view", 
-				"Please check any threads to be viewed.\nYou can narrow the list by specifying partial name of the threads on the filter.", 
-				items);
+	private final FilterInputData data;
+	private BaseFilterPane filterPane;
+	
+	
+	public ThreadFilterDialog(Shell parentShell, 
+							  List<FilterDataItem> items) {
+		super(parentShell);		
+		data = new FilterInputData(items);
 	}
+	
+
+	@Override
+	protected boolean isResizable() {
+		return true;
+	}
+	
+	@Override
+	protected Point getInitialSize() {
+		return new Point(600, 500);
+	}
+	
+	@Override
+	protected Control createDialogArea(Composite parent) {
+	    Composite composite = (Composite) super.createDialogArea(parent);
+
+	    final String TITLE = "Select threads to view";
+		final String MSGS  = "Please check any threads to be viewed.";
+		
+		setTitle( TITLE);
+		getShell().setText( TITLE);
+		setMessage(MSGS);
+		
+		filterPane = new BaseFilterPane(composite, AbstractFilterPane.STYLE_INDEPENDENT, data) {
+
+			@Override
+			protected String[] getColumnHeaderLabels() {
+				final String []LABELS = {"Visible", "Threads"};
+				return LABELS;
+			}
+
+		};
+
+		return composite;
+	}
+
 	
 	/****
 	 * Show a filter dialog window and return the list of included items
@@ -50,43 +92,8 @@ public class ThreadFilterDialog extends AbstractFilterDialog
 		}
 		return null;
 	}
-
 	
-	@Override
-	protected void createAdditionalFilter(Composite parent) {}
-
-	@Override
-	protected void createAdditionalButton(Composite parent) {}
-	
-	
-	// unit test
-	
-	static public void main(String argv[]) {
-		Shell shell = new Shell();
-		List<FilterDataItem> items = new ArrayList<FilterDataItem>();
-		Random random = new Random();
-		
-		for(int i=0; i<20; i++) {
-
-			int rank = random.nextInt(10);
-			int thread = random.nextInt(100);
-			String label = IdTupleType.LABEL_RANK   + " " + rank + " " +
-					   	   IdTupleType.LABEL_THREAD + " " + thread;
-			
-			FilterDataItem obj = new StringFilterDataItem(label, i<6, i>3);
-			items.add(obj);
-		}
-		
-		ThreadFilterDialog dialog = new ThreadFilterDialog(shell, items);
-		if (dialog.open() == Dialog.OK) {
-			System.out.println("result-ok: " + dialog.getReturnCode());
-			items = dialog.getResult();
-			
-			int i=0;
-			for(FilterDataItem res : items) {
-				System.out.println("\t" + i + ": " + res.data + " -> " + res.checked);
-				i++;
-			}
-		}
+	public List<FilterDataItem> getResult() {
+		return filterPane.getEventList();
 	}
 }

@@ -8,6 +8,7 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.nebula.widgets.nattable.NatTable;
@@ -34,6 +35,7 @@ import org.eclipse.nebula.widgets.nattable.style.theme.ThemeConfiguration;
 import org.eclipse.nebula.widgets.nattable.ui.action.IMouseAction;
 import org.eclipse.nebula.widgets.nattable.ui.matcher.MouseEventMatcher;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -45,7 +47,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import ca.odell.glazedlists.EventList;
@@ -54,11 +55,12 @@ import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
+
 import edu.rice.cs.hpcfilter.internal.CheckBoxConfiguration;
 import edu.rice.cs.hpcfilter.internal.FilterConfigLabelAccumulator;
 import edu.rice.cs.hpcfilter.internal.FilterPainterConfiguration;
 import edu.rice.cs.hpcfilter.internal.IConstants;
+import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 
 
@@ -83,10 +85,12 @@ import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
  * </ul>
  *
  ***********************************************************************/
-public abstract class AbstractFilterPane implements IFilterChangeListener, 
-													IPropertyChangeListener, 
-													DisposeListener 
+public abstract class AbstractFilterPane implements IPropertyChangeListener, DisposeListener
 {
+	public final static int STYLE_COMPOSITE   = 0;
+	public final static int STYLE_INDEPENDENT = 1;
+	
+	private final int style;
 	private final FilterInputData inputData;
 	private final NatTable  natTable ;
 	private final EventList<FilterDataItem> eventList ;
@@ -98,11 +102,13 @@ public abstract class AbstractFilterPane implements IFilterChangeListener,
 	 * Constructor to create the item and its composite widgets.
 	 * 
 	 * @param parent 
-	 * @param style SWT style
+	 * @param style int
 	 * @param inputData {@code FilterInputData}
+	 * @see STYLE_COMPOSITE, STYLE_INDEPENDENT
 	 */
 	public AbstractFilterPane(Composite parent, int style, FilterInputData inputData) {
 		this.inputData = inputData;
+		this.style     = style;
 		
 		Composite parentContainer = new Composite(parent, SWT.NONE);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(parentContainer);
@@ -111,7 +117,7 @@ public abstract class AbstractFilterPane implements IFilterChangeListener,
 		// prepare the buttons: check and uncheck
 
 		Composite groupButtons = new Composite(parentContainer, SWT.BORDER);
-		GridDataFactory.fillDefaults().grab(true, false).applyTo(groupButtons);
+		GridDataFactory.fillDefaults().grab(true, false).applyTo(groupButtons);		
 
 		// check button
 		Button btnCheckAll = new Button(groupButtons, SWT.NONE);
@@ -146,9 +152,10 @@ public abstract class AbstractFilterPane implements IFilterChangeListener,
 		btnRegExpression.setSelection(false);	
 		btnRegExpression.setToolTipText("Option to enable that the text to filter is a regular expression");
 		
-		createAdditionalButton(groupButtons);
+		// number of buttons: 3 (check, uncheck, regex) + additional buttons
+		int numAddButtons = 3 + createAdditionalButton(groupButtons);
 		
-		GridLayoutFactory.fillDefaults().numColumns(6).applyTo(groupButtons);
+		GridLayoutFactory.fillDefaults().numColumns(numAddButtons).applyTo(groupButtons);
 
 		// set the layout for group filter
 		Composite groupFilter = new Composite(parentContainer, SWT.NONE);
@@ -181,8 +188,8 @@ public abstract class AbstractFilterPane implements IFilterChangeListener,
 		DefaultBodyLayerStack defaultLayerStack = new DefaultBodyLayerStack(listEventLayer);
 		defaultLayerStack.getSelectionLayer().addConfiguration(new RowOnlySelectionConfiguration());
 
-		//
-		//
+		// data layer configuration to be implemented by the child class
+		// 
 		setLayerConfiguration(dataLayer);
 		
 		// columns header
@@ -228,10 +235,6 @@ public abstract class AbstractFilterPane implements IFilterChangeListener,
 			@Override
 			public void getFilterStrings(List<String> baseList, FilterDataItem element) {
 				baseList.add(element.getLabel());
-				if (element.getData() != null) {
-					BaseMetric metric = (BaseMetric) element.getData();
-					baseList.add(metric.getDescription());
-				}
 			}
 		});
 		textMatcher.setMode(TextMatcherEditor.CONTAINS);
@@ -312,13 +315,30 @@ public abstract class AbstractFilterPane implements IFilterChangeListener,
 		// expand as much as possible both horizontally and vertically
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(natTable);
 		
-		if (!(parent instanceof Shell)) {
+		if (style == STYLE_COMPOSITE) {
 			// Real application, not within a simple unit test
 			PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
-			pref.addPropertyChangeListener((IPropertyChangeListener) this);
+			pref.addPropertyChangeListener(this);
+			natTable.addDisposeListener(this);
 		}
 	}
 	
+
+	@Override
+	public void propertyChange(PropertyChangeEvent event) {
+		final String property = event.getProperty();
+		if (property.equals(PreferenceConstants.ID_FONT_GENERIC)) {
+			getNatTable().redraw();
+		}
+	}
+	
+	@Override
+	public void widgetDisposed(DisposeEvent e) {
+		if (style == STYLE_COMPOSITE) {
+			PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
+			pref.removePropertyChangeListener(this);
+		}
+	}
 	
 	protected FilterInputData getInputData() {
 		return inputData;
@@ -343,6 +363,10 @@ public abstract class AbstractFilterPane implements IFilterChangeListener,
 		return filterList;
 	}
 
+	public int getStyle() {
+		return style;
+	}
+
 
 	/****
 	 * Retrieve the selection provider
@@ -355,7 +379,8 @@ public abstract class AbstractFilterPane implements IFilterChangeListener,
 	abstract protected void setLayerConfiguration(DataLayer datalayer);
 	abstract protected String[] getColumnHeaderLabels();
 	abstract protected FilterDataProvider getDataProvider();
-	abstract protected void createAdditionalButton(Composite parent); 	
+
+	abstract protected int createAdditionalButton(Composite parent); 	
 	abstract protected void selectionEvent(FilterDataItem item, int click);
 	abstract protected void addConfiguration(NatTable table);
 }

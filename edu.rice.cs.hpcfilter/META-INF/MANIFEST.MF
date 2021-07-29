@@ -28,6 +28,7 @@ Require-Bundle: edu.rice.cs.hpcdata,
  org.eclipse.nebula.widgets.nattable.core,
  edu.rice.cs.hpcsetting,
  ca.odell.glazedlists,
- org.eclipse.nebula.widgets.nattable.extension.glazedlists
+ org.eclipse.nebula.widgets.nattable.extension.glazedlists,
+ org.eclipse.collections
 Bundle-ActivationPolicy: lazy
 Automatic-Module-Name: edu.rice.cs.hpc.filter
