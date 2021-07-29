@@ -6,12 +6,12 @@ import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.swt.widgets.Composite;
 
-public class BaseFilterPane extends AbstractFilterPane 
+public class BaseFilterPane<T> extends AbstractFilterPane<T> 
 	implements IPropertyChangeListener, IFilterChangeListener
 {
-	private FilterDataProvider dataProvider;
+	private FilterDataProvider<T> dataProvider;
 	
-	public BaseFilterPane(Composite parent, int style, FilterInputData inputData) {
+	public BaseFilterPane(Composite parent, int style, FilterInputData<T> inputData) {
 		super(parent, style, inputData);
 	}
 
@@ -35,9 +35,9 @@ public class BaseFilterPane extends AbstractFilterPane
 	}
 
 	@Override
-	protected FilterDataProvider getDataProvider() {
+	protected FilterDataProvider<T> getDataProvider() {
 		if (dataProvider == null) {
-			dataProvider = new FilterDataProvider(getFilterList(), this);
+			dataProvider = new FilterDataProvider<T>(getFilterList(), this);
 		}
 		return dataProvider;
 	}
@@ -48,7 +48,7 @@ public class BaseFilterPane extends AbstractFilterPane
 	}
 
 	@Override
-	protected void selectionEvent(FilterDataItem item, int click) {}
+	protected void selectionEvent(FilterDataItem<T> item, int click) {}
 
 	@Override
 	protected void addConfiguration(NatTable table) {}

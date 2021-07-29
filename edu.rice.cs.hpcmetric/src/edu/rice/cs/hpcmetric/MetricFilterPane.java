@@ -44,7 +44,7 @@ import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 
 
-public class MetricFilterPane extends AbstractFilterPane 
+public class MetricFilterPane extends AbstractFilterPane<BaseMetric> 
 	implements IPropertyChangeListener, DisposeListener, IFilterChangeListener
 {	
 	private static final String HISTORY_COLUMN_PROPERTY = "column_property";
@@ -54,9 +54,9 @@ public class MetricFilterPane extends AbstractFilterPane
 
 	private Button btnEdit;
 	private Button btnApplyToAllViews;
-	private FilterDataProvider dataProvider;
+	private FilterDataProvider<BaseMetric> dataProvider;
 	
-	public MetricFilterPane(Composite parent, int style, IEventBroker eventBroker, FilterInputData inputData) {
+	public MetricFilterPane(Composite parent, int style, IEventBroker eventBroker, FilterInputData<BaseMetric> inputData) {
 		super(parent, style, inputData);
 		this.eventBroker = eventBroker;
 		
@@ -122,7 +122,7 @@ public class MetricFilterPane extends AbstractFilterPane
 	private void broadcast(Object data) {
 		final MetricFilterInput  inputFilter = (MetricFilterInput) getInputData();
 
-		List<FilterDataItem> copyList = new ArrayList<FilterDataItem>(getEventList()); //List.copyOf(getList());
+		List<FilterDataItem<BaseMetric>> copyList = new ArrayList<FilterDataItem<BaseMetric>>(getEventList()); //List.copyOf(getList());
 		MetricDataEvent metricDataEvent = new MetricDataEvent(data, copyList, btnApplyToAllViews.getSelection());
 		ViewerDataEvent viewerDataEvent = new ViewerDataEvent(inputFilter.getMetricManager(), metricDataEvent);
 		
@@ -146,13 +146,13 @@ public class MetricFilterPane extends AbstractFilterPane
 	 * @param metric
 	 */
 	private void update(BaseMetric metric) {
-		Optional<FilterDataItem> mfdi = getEventList().stream()
+		Optional<FilterDataItem<BaseMetric>> mfdi = getEventList().stream()
 												.filter( item -> ((BaseMetric)item.data).getIndex() == metric.getIndex() )
 												.findFirst();
 		if (mfdi.isEmpty())
 			return;
 		
-		FilterDataItem item = mfdi.get();
+		FilterDataItem<BaseMetric> item = mfdi.get();
 		item.data = metric;
 		item.setLabel(metric.getDisplayName());
 	}
@@ -162,7 +162,7 @@ public class MetricFilterPane extends AbstractFilterPane
 	 * Edit a selected metric
 	 * @param item {@code FilterDataItem} metric to be changed
 	 */
-	private void edit(FilterDataItem item) {
+	private void edit(FilterDataItem<BaseMetric> item) {
 		if (!item.enabled)
 			return;
 
@@ -200,7 +200,7 @@ public class MetricFilterPane extends AbstractFilterPane
 
 
 	@Override
-	protected void selectionEvent(FilterDataItem event, int action) {
+	protected void selectionEvent(FilterDataItem<BaseMetric> event, int action) {
 		if (action == SWT.MouseDown) {
 			btnEdit.setEnabled(event.enabled);
 		} else if (action == SWT.MouseDoubleClick) {
@@ -236,7 +236,7 @@ public class MetricFilterPane extends AbstractFilterPane
 
 
 	@Override
-	protected FilterDataProvider getDataProvider() {
+	protected FilterDataProvider<BaseMetric> getDataProvider() {
 		if (dataProvider == null) {
 			MetricFilterInput input = (MetricFilterInput) getInputData();
 			this.dataProvider = new MetricFilterDataProvider(input.getRoot(), getFilterList(), this);

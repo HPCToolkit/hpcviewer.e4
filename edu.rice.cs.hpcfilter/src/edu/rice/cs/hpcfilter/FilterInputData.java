@@ -3,15 +3,15 @@ package edu.rice.cs.hpcfilter;
 import java.util.List;
 
 
-public class FilterInputData 
+public class FilterInputData<T> 
 {
-	private final List<FilterDataItem> listItems;
+	private final List<FilterDataItem<T>> listItems;
 
-	public FilterInputData(List<FilterDataItem> list) {
+	public FilterInputData(List<FilterDataItem<T>> list) {
 		this.listItems = list;
 	}
 
-	public List<FilterDataItem> getListItems() {
+	public List<FilterDataItem<T>> getListItems() {
 		return listItems;
 	}
 }

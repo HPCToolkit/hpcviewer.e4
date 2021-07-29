@@ -70,7 +70,7 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 	 */
 	protected RootScope       root;
 	
-	private List<FilterDataItem> listHideShowMetrics;
+	private List<FilterDataItem<BaseMetric>> listHideShowMetrics;
 
 	public AbstractViewItem(CTabFolder parent, int style) {
 		super(parent, style);

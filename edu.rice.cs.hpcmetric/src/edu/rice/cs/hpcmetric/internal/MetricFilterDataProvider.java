@@ -1,8 +1,8 @@
 package edu.rice.cs.hpcmetric.internal;
 
-import java.util.List;
 import java.util.Optional;
 
+import ca.odell.glazedlists.FilterList;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
@@ -10,21 +10,21 @@ import edu.rice.cs.hpcfilter.FilterDataItem;
 import edu.rice.cs.hpcfilter.FilterDataProvider;
 import edu.rice.cs.hpcfilter.IFilterChangeListener;
 
-public class MetricFilterDataProvider extends FilterDataProvider 
+public class MetricFilterDataProvider extends FilterDataProvider<BaseMetric>
 {
 	private static final String METRIC_DERIVED = "Derived metric"; //$NON-NLS-N$
 	private static final String METRIC_EMPTY   = "empty";
 
 	private final RootScope root;
 
-	public MetricFilterDataProvider(RootScope root, List<FilterDataItem> list, IFilterChangeListener changeListener) {
-		super(list, changeListener);
+	public MetricFilterDataProvider(RootScope root, FilterList<FilterDataItem<BaseMetric>> filterList, IFilterChangeListener changeListener) {
+		super(filterList, changeListener);
 		this.root = root;
 	}
 
 	
 	public Object getDataValue(int columnIndex, int rowIndex) {
-		FilterDataItem item = getList().get(rowIndex);
+		FilterDataItem<BaseMetric> item = getList().get(rowIndex);
 		Object data = item.getData();
 		
 		switch (columnIndex) {
@@ -52,13 +52,13 @@ public class MetricFilterDataProvider extends FilterDataProvider
 	
 
 	public void update(BaseMetric metric) {
-		Optional<FilterDataItem> mfdi = getList().stream()
+		Optional<FilterDataItem<BaseMetric>> mfdi = getList().stream()
 												.filter( item -> ((BaseMetric)item.data).getIndex() == metric.getIndex() )
 												.findFirst();
 		if (mfdi.isEmpty())
 			return;
 		
-		FilterDataItem item = mfdi.get();
+		FilterDataItem<BaseMetric> item = mfdi.get();
 		item.data = metric;
 		item.setLabel(metric.getDisplayName());
 	}
@@ -72,7 +72,7 @@ public class MetricFilterDataProvider extends FilterDataProvider
 	
 	@Override
 	public void setDataValue(int columnIndex, int rowIndex, Object newValue) {
-		FilterDataItem item = getList().get(rowIndex);
+		FilterDataItem<BaseMetric> item = getList().get(rowIndex);
 		Object data = item.getData();
 
 		if (data == null || !item.enabled)

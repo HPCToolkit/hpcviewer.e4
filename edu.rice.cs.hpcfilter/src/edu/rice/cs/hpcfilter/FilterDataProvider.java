@@ -6,12 +6,12 @@ import org.eclipse.nebula.widgets.nattable.data.IRowDataProvider;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcfilter.internal.IConstants;
 
-public class FilterDataProvider implements IRowDataProvider<FilterDataItem> 
+public class FilterDataProvider<T> implements IRowDataProvider<FilterDataItem<T>> 
 {
 	private final IFilterChangeListener changeListener;
-	private final List<FilterDataItem> list;
+	private final List<FilterDataItem<T>> list;
 	
-	public FilterDataProvider(List<FilterDataItem> list, IFilterChangeListener changeListener) {
+	public FilterDataProvider(List<FilterDataItem<T>> list, IFilterChangeListener changeListener) {
 		this.list = list;
 		this.changeListener = changeListener;
 	}
@@ -39,7 +39,7 @@ public class FilterDataProvider implements IRowDataProvider<FilterDataItem>
 
 	@Override
 	public Object getDataValue(int columnIndex, int rowIndex) {
-		FilterDataItem item = list.get(rowIndex);
+		FilterDataItem<T> item = list.get(rowIndex);
 		
 		switch (columnIndex) {
 		case IConstants.INDEX_VISIBILITY: 	
@@ -53,7 +53,7 @@ public class FilterDataProvider implements IRowDataProvider<FilterDataItem>
 
 	@Override
 	public void setDataValue(int columnIndex, int rowIndex, Object newValue) {
-		FilterDataItem item = list.get(rowIndex);
+		FilterDataItem<T> item = list.get(rowIndex);
 		Object data = item.getData();
 
 		if (data == null || !item.enabled)
@@ -78,7 +78,7 @@ public class FilterDataProvider implements IRowDataProvider<FilterDataItem>
 		}
 	}
 	
-	protected List<FilterDataItem> getList() {
+	protected List<FilterDataItem<T>> getList() {
 		return list;
 	}
 
@@ -98,12 +98,12 @@ public class FilterDataProvider implements IRowDataProvider<FilterDataItem>
 	}
 
 	@Override
-	public FilterDataItem getRowObject(int rowIndex) {
+	public FilterDataItem<T> getRowObject(int rowIndex) {
 		return list.get(rowIndex);
 	}
 
 	@Override
-	public int indexOfRowObject(FilterDataItem rowObject) {
+	public int indexOfRowObject(FilterDataItem<T> rowObject) {
 		return list.indexOf(rowObject);
 	}		
 

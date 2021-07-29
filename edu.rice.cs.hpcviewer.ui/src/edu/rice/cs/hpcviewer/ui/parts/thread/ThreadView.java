@@ -296,10 +296,10 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 			throws NumberFormatException, IOException 
 	{
 		String []labels = threadData.getRankStringLabels();
-		List<FilterDataItem> items =  new ArrayList<FilterDataItem>(labels.length);
+		List<FilterDataItem<String>> items =  new ArrayList<>(labels.length);
 		
 		for (int i=0; i<labels.length; i++) {
-			FilterDataItem obj = new StringFilterDataItem(labels[i], false, true);
+			FilterDataItem<String> obj = new StringFilterDataItem(labels[i], false, true);
 			items.add(obj);
 		}
 

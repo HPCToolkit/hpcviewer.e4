@@ -16,7 +16,7 @@ public class ThreadFilterDialogTest {
 
 	public static void main(String[] args) {
 		Shell shell = new Shell();
-		List<FilterDataItem> items = new ArrayList<FilterDataItem>();
+		List<FilterDataItem<String>> items = new ArrayList<>();
 		Random random = new Random();
 		
 		for(int i=0; i<20; i++) {
@@ -26,7 +26,7 @@ public class ThreadFilterDialogTest {
 			String label = IdTupleType.LABEL_RANK   + " " + rank + " " +
 					   	   IdTupleType.LABEL_THREAD + " " + thread;
 			
-			FilterDataItem obj = new StringFilterDataItem(label, i<6, i>3);
+			FilterDataItem<String> obj = new StringFilterDataItem(label, i<6, i>3);
 			items.add(obj);
 		}
 		
@@ -36,7 +36,7 @@ public class ThreadFilterDialogTest {
 			items = dialog.getResult();
 			
 			int i=0;
-			for(FilterDataItem res : items) {
+			for(FilterDataItem<String> res : items) {
 				System.out.println("\t" + i + ": " + res.data + " -> " + res.checked);
 				i++;
 			}

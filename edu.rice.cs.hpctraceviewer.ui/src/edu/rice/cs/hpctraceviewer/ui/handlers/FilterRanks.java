@@ -78,7 +78,7 @@ public class FilterRanks
         	}
         }
         
-        List<FilterDataItem> list = ThreadFilterDialog.filter(shell, items, checked);
+        List<FilterDataItem<String>> list = ThreadFilterDialog.filter(shell, items, checked);
 		
 		if (list != null){
 			List<Integer> listChecked = new ArrayList<Integer>();

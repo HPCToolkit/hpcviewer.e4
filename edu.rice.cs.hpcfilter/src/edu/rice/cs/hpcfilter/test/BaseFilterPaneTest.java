@@ -27,7 +27,7 @@ public class BaseFilterPaneTest {
 		shell.setLayout(new GridLayout());
 		
 		shell.setText("hello world");
-		List<FilterDataItem> items = new ArrayList<FilterDataItem>();
+		List<FilterDataItem<String>> items = new ArrayList<>();
 		Random random = new Random();
 		
 		for(int i=0; i<20; i++) {
@@ -37,19 +37,13 @@ public class BaseFilterPaneTest {
 			String label = IdTupleType.LABEL_RANK   + " " + rank + " " +
 					   	   IdTupleType.LABEL_THREAD + " " + thread;
 			
-			FilterDataItem obj = new StringFilterDataItem(label, i<6, i>3);
+			FilterDataItem<String> obj = new StringFilterDataItem(label, i<6, i>3);
 			items.add(obj);
 		}
 		
-		FilterInputData data = new FilterInputData(items);
+		FilterInputData<String> data = new FilterInputData<>(items);
 		
-		BaseFilterPane pane = new BaseFilterPane(shell, AbstractFilterPane.STYLE_INDEPENDENT, data) {
-		  
-		  @Override protected String[] getColumnHeaderLabels() { 
-			  final String []LABELS = {"Visible", "Threads"}; 
-			  return LABELS; 
-		  }
-		};
+		BaseFilterPane<String> pane = new BaseFilterPane<>(shell, AbstractFilterPane.STYLE_INDEPENDENT, data) ;
 		 
 		shell.open();
 		
@@ -58,7 +52,7 @@ public class BaseFilterPaneTest {
 				display.sleep();
 		}
 		
-		List<FilterDataItem> clist = pane.getEventList(); 
+		List<FilterDataItem<String>> clist = pane.getEventList(); 
 		clist.forEach( item -> {
 			System.out.println(item.data + ": " + item.isChecked()); 
 		});

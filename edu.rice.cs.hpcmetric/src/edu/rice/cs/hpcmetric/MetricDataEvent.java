@@ -2,18 +2,19 @@ package edu.rice.cs.hpcmetric;
 
 import java.util.List;
 
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcfilter.FilterDataItem;
 
 public class MetricDataEvent 
 {
 	final private boolean applyToAll;
 	final private Object  data;
-	final private List<FilterDataItem> list;
+	final private List<FilterDataItem<BaseMetric>> list;
 	
-	public MetricDataEvent(Object data, List<FilterDataItem> list, boolean applyToAll) {
+	public MetricDataEvent(Object data, List<FilterDataItem<BaseMetric>> copyList, boolean applyToAll) {
 		this.applyToAll = applyToAll;
 		this.data = data;
-		this.list = list;
+		this.list = copyList;
 	}
 	
 	public boolean isApplyToAll() {
@@ -24,7 +25,7 @@ public class MetricDataEvent
 		return data;
 	}
 
-	public List<FilterDataItem> getList() {
+	public List<FilterDataItem<BaseMetric>> getList() {
 		return list;
 	}
 

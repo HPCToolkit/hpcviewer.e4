@@ -28,14 +28,14 @@ import edu.rice.cs.hpcfilter.StringFilterDataItem;
  ******************************************************/
 public class ThreadFilterDialog extends Dialog 
 {
-	private final FilterInputData data;
-	private BaseFilterPane filterPane;
+	private final FilterInputData<String> data;
+	private BaseFilterPane<String> filterPane;
 	
 	
 	public ThreadFilterDialog(Shell parentShell, 
-							  List<FilterDataItem> items) {
+							  List<FilterDataItem<String>> items) {
 		super(parentShell);		
-		data = new FilterInputData(items);
+		data = new FilterInputData<String>(items);
 	}
 	
 
@@ -71,14 +71,7 @@ public class ThreadFilterDialog extends Dialog
 		composite.setLayout(grid);
 
 		
-		filterPane = new BaseFilterPane(composite, AbstractFilterPane.STYLE_INDEPENDENT, data) {
-
-			@Override
-			protected String[] getColumnHeaderLabels() {
-				final String []LABELS = {"Visible", "Threads"};
-				return LABELS;
-			}
-		};
+		filterPane = new BaseFilterPane<String>(composite, AbstractFilterPane.STYLE_INDEPENDENT, data);
 
 		return composite;
 	}
@@ -91,13 +84,13 @@ public class ThreadFilterDialog extends Dialog
 	 * @param checked array of status of the labels: true if the label is checked
 	 * @return {@code List<FilterDataItem>} or null if the user click "Cancel" button.
 	 */
-	public static List<FilterDataItem> filter(Shell shell, String[] labels, boolean []checked) {
+	public static List<FilterDataItem<String>> filter(Shell shell, String[] labels, boolean []checked) {
 
-		List<FilterDataItem> items =  new ArrayList<FilterDataItem>(labels.length);
+		List<FilterDataItem<String>> items =  new ArrayList<>(labels.length);
 		
 		for (int i=0; i<labels.length; i++) {
 			boolean isChecked = checked == null? false : checked[i];
-			FilterDataItem obj = new StringFilterDataItem(labels[i], isChecked, true);
+			FilterDataItem<String> obj = new StringFilterDataItem(labels[i], isChecked, true);
 			items.add(obj);
 		}
 
@@ -108,7 +101,7 @@ public class ThreadFilterDialog extends Dialog
 		return null;
 	}
 	
-	public List<FilterDataItem> getResult() {
+	public List<FilterDataItem<String>> getResult() {
 		return filterPane.getEventList();
 	}
 }

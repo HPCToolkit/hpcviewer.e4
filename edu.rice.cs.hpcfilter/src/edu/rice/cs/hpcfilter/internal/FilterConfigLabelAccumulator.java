@@ -7,27 +7,27 @@ import org.eclipse.nebula.widgets.nattable.layer.cell.ColumnLabelAccumulator;
 
 import edu.rice.cs.hpcfilter.FilterDataItem;
 
-public class FilterConfigLabelAccumulator extends ColumnLabelAccumulator 
+public class FilterConfigLabelAccumulator<T> extends ColumnLabelAccumulator 
 {
 	private final ILayer bodyLayer;
-	private final IRowDataProvider<FilterDataItem> dataProvider;
+	private final IRowDataProvider<FilterDataItem<T>> dataProvider;
 	/***
 	 * Constructor for metric label configuration
 	 * @param bodyLayer the body layer, used to convert row position to row index
-	 * @param dataProvider the data provider
+	 * @param dataProvider2 the data provider
 	 * @param listMetrics the list 
 	 */
-	public FilterConfigLabelAccumulator(ILayer bodyLayer, IRowDataProvider<FilterDataItem> dataProvider) {
-		super(dataProvider);
+	public FilterConfigLabelAccumulator(ILayer bodyLayer, IRowDataProvider<FilterDataItem<T>> dataProvider2) {
+		super(dataProvider2);
 		this.bodyLayer = bodyLayer;
-		this.dataProvider = dataProvider;
+		this.dataProvider = dataProvider2;
 	}
 	
 	@Override
 	public void accumulateConfigLabels(LabelStack configLabels, int columnPosition, int rowPosition) {
 		
 		int rowIndex = bodyLayer.getRowIndexByPosition(rowPosition);
-		FilterDataItem item = dataProvider.getRowObject(rowIndex);
+		FilterDataItem<T> item = dataProvider.getRowObject(rowIndex);
 		if (!item.enabled) {
 			configLabels.addLabel(IConstants.LABEL_ROW_GRAY);
 		}

@@ -146,7 +146,7 @@ public class TopDownContentViewer extends AbstractViewBuilder
 			return;
 		}
 
-		List<FilterDataItem> items = ThreadFilterDialog.filter(shell, labels, null);
+		List<FilterDataItem<String>> items = ThreadFilterDialog.filter(shell, labels, null);
 		
 		if (items != null) {
 			List<Integer> threads = new ArrayList<Integer>();

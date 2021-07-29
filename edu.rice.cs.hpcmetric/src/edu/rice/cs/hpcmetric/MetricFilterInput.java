@@ -13,7 +13,7 @@ import edu.rice.cs.hpcfilter.FilterDataItem;
 import edu.rice.cs.hpcfilter.FilterInputData;
 import edu.rice.cs.hpcmetric.internal.MetricFilterDataItem;
 
-public class MetricFilterInput extends FilterInputData
+public class MetricFilterInput extends FilterInputData<BaseMetric>
 {
 	private final RootScope root;
 	private final boolean affectAll;
@@ -29,13 +29,13 @@ public class MetricFilterInput extends FilterInputData
 	}
 	
 	
-	private static List<FilterDataItem> createFilterList(List<BaseMetric> metrics, TreeViewer treeViewer) {
-		List<FilterDataItem> listItems = new ArrayList<>(metrics.size());
+	private static List<FilterDataItem<BaseMetric>> createFilterList(List<BaseMetric> metrics, TreeViewer treeViewer) {
+		List<FilterDataItem<BaseMetric>> listItems = new ArrayList<>(metrics.size());
 		TreeColumn []columns = treeViewer.getTree().getColumns();
 		
 		for(BaseMetric metric: metrics) {
 			
-			MetricFilterDataItem item = new MetricFilterDataItem(metric.getIndex(), metric, false, false);
+			MetricFilterDataItem item = new MetricFilterDataItem(metric, false, false);
 			
 			// looking for associated metric in the column
 			// a metric may not exit in table viewer because

@@ -3,18 +3,10 @@ package edu.rice.cs.hpcmetric.internal;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcfilter.FilterDataItem;
 
-public class MetricFilterDataItem extends FilterDataItem implements Comparable<MetricFilterDataItem>
+public class MetricFilterDataItem extends FilterDataItem<BaseMetric>
 {
-	private final int id;
-
-	public MetricFilterDataItem(int id, Object data, boolean checked, boolean enabled) {
+	public MetricFilterDataItem(BaseMetric data, boolean checked, boolean enabled) {
 		super(data, checked, enabled);
-		this.id = id;
-	}
-
-	@Override
-	public int compareTo(MetricFilterDataItem o) {
-		return id-o.id;
 	}
 	
 	
@@ -34,5 +26,10 @@ public class MetricFilterDataItem extends FilterDataItem implements Comparable<M
 	public String toString() {
 		BaseMetric metric = (BaseMetric) data;
 		return metric.getDisplayName();
+	}
+
+	@Override
+	public int compareTo(FilterDataItem<BaseMetric> o) {
+		return data.getIndex() - o.data.getIndex();
 	}
 }

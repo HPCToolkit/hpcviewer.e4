@@ -5,7 +5,7 @@ package edu.rice.cs.hpcfilter;
  * The String data version of {@code FilterDataItem}
  *
  */
-public class StringFilterDataItem extends FilterDataItem implements Comparable<StringFilterDataItem>
+public class StringFilterDataItem extends FilterDataItem<String>
 {
 	public StringFilterDataItem(String data, boolean checked, boolean enabled) {
 		super(data, checked, enabled);
@@ -23,8 +23,8 @@ public class StringFilterDataItem extends FilterDataItem implements Comparable<S
 
 
 	@Override
-	public int compareTo(StringFilterDataItem o) {
-		return getLabel().compareTo(o.getLabel());
+	public int compareTo(FilterDataItem<String> o) {
+		return getLabel().compareTo(o.data);
 	}
 
 }

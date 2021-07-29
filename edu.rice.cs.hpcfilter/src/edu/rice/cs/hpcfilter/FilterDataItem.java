@@ -9,7 +9,7 @@ package edu.rice.cs.hpcfilter;
  * <li>enabled: if the column status can be changed (true) or not (false)
  * </ul>
  */
-public abstract class FilterDataItem 
+public abstract class FilterDataItem<T> implements Comparable<FilterDataItem<T>>
 {
 	public boolean checked = false;
 	public boolean enabled = true;
@@ -17,10 +17,10 @@ public abstract class FilterDataItem
 	/** data associated with this item.
 	 *  it shouldn't be modified by any class except the owner (caller).
 	 * **/
-	public Object  data    = null;
+	public T  data    = null;
 
 	
-	public FilterDataItem(Object data, boolean checked, boolean enabled) {
+	public FilterDataItem(T data, boolean checked, boolean enabled) {
 		this.data    = data;
 		this.checked = checked;
 		this.enabled = enabled;

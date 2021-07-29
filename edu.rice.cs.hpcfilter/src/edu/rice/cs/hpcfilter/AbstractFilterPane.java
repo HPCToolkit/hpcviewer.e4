@@ -14,6 +14,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfiguration;
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
+import org.eclipse.nebula.widgets.nattable.data.IRowDataProvider;
 import org.eclipse.nebula.widgets.nattable.extension.glazedlists.GlazedListsEventLayer;
 import org.eclipse.nebula.widgets.nattable.grid.data.DefaultColumnHeaderDataProvider;
 import org.eclipse.nebula.widgets.nattable.grid.data.DefaultCornerDataProvider;
@@ -30,16 +31,15 @@ import org.eclipse.nebula.widgets.nattable.layer.stack.DefaultBodyLayerStack;
 import org.eclipse.nebula.widgets.nattable.selection.RowSelectionProvider;
 import org.eclipse.nebula.widgets.nattable.selection.config.RowOnlySelectionBindings;
 import org.eclipse.nebula.widgets.nattable.selection.config.RowOnlySelectionConfiguration;
+import org.eclipse.nebula.widgets.nattable.sort.SortHeaderLayer;
+import org.eclipse.nebula.widgets.nattable.sort.config.SingleClickSortConfiguration;
 import org.eclipse.nebula.widgets.nattable.style.theme.ModernNatTableThemeConfiguration;
 import org.eclipse.nebula.widgets.nattable.style.theme.ThemeConfiguration;
-import org.eclipse.nebula.widgets.nattable.ui.action.IMouseAction;
-import org.eclipse.nebula.widgets.nattable.ui.matcher.MouseEventMatcher;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
@@ -52,7 +52,6 @@ import org.eclipse.swt.widgets.Text;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
 
@@ -85,18 +84,18 @@ import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
  * </ul>
  *
  ***********************************************************************/
-public abstract class AbstractFilterPane implements IPropertyChangeListener, DisposeListener
+public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, DisposeListener
 {
 	public final static int STYLE_COMPOSITE   = 0;
 	public final static int STYLE_INDEPENDENT = 1;
 	
 	private final int style;
-	private final FilterInputData inputData;
+	private final FilterInputData<T> inputData;
 	private final NatTable  natTable ;
-	private final EventList<FilterDataItem> eventList ;
+	private final EventList<FilterDataItem<T>> eventList ;
 	private final DataLayer dataLayer ;
-	private final RowSelectionProvider<FilterDataItem> rowSelectionProvider;
-	private final FilterList<FilterDataItem> filterList;
+	private final RowSelectionProvider<FilterDataItem<T>> rowSelectionProvider;
+	private final FilterList<FilterDataItem<T>> filterList;
 
 	/***
 	 * Constructor to create the item and its composite widgets.
@@ -106,7 +105,7 @@ public abstract class AbstractFilterPane implements IPropertyChangeListener, Dis
 	 * @param inputData {@code FilterInputData}
 	 * @see STYLE_COMPOSITE, STYLE_INDEPENDENT
 	 */
-	public AbstractFilterPane(Composite parent, int style, FilterInputData inputData) {
+	public AbstractFilterPane(Composite parent, int style, FilterInputData<T> inputData) {
 		this.inputData = inputData;
 		this.style     = style;
 		
@@ -176,14 +175,13 @@ public abstract class AbstractFilterPane implements IPropertyChangeListener, Dis
 		// ------------------------------------------------------------
 		this.eventList = GlazedLists.eventList(inputData.getListItems());
 
-		SortedList<FilterDataItem> sortedList = new SortedList<FilterDataItem>(eventList);
-		filterList = new FilterList<FilterDataItem>(sortedList);
+		filterList = new FilterList<FilterDataItem<T>>(eventList);
 
 		// data layer
-		FilterDataProvider dataProvider = getDataProvider();
+		IRowDataProvider<FilterDataItem<T>> dataProvider = getDataProvider();
 		
 		dataLayer = new DataLayer(dataProvider);
-		GlazedListsEventLayer<FilterDataItem> listEventLayer = new GlazedListsEventLayer<FilterDataItem>(dataLayer, eventList);
+		GlazedListsEventLayer<FilterDataItem<T>> listEventLayer = new GlazedListsEventLayer<FilterDataItem<T>>(dataLayer, eventList);
 		DefaultBodyLayerStack defaultLayerStack = new DefaultBodyLayerStack(listEventLayer);
 		defaultLayerStack.getSelectionLayer().addConfiguration(new RowOnlySelectionConfiguration());
 
@@ -194,7 +192,9 @@ public abstract class AbstractFilterPane implements IPropertyChangeListener, Dis
 		// columns header
 		IDataProvider columnHeaderDataProvider = new DefaultColumnHeaderDataProvider(getColumnHeaderLabels());
 		DataLayer columnDataLayer = new DefaultColumnHeaderDataLayer(columnHeaderDataProvider);
-		ColumnHeaderLayer colummnLayer = new ColumnHeaderLayer(columnDataLayer, defaultLayerStack, defaultLayerStack.getSelectionLayer());
+		ColumnHeaderLayer colummnLayer = new ColumnHeaderLayer(columnDataLayer, defaultLayerStack, defaultLayerStack.getSelectionLayer());		
+		SortHeaderLayer<FilterDataItem<T>> sortHeaderLayer = new SortHeaderLayer<FilterDataItem<T>>(colummnLayer, 
+																									new FilterDataItemSortModel<T>(eventList));
 		
 		// row header
 		DefaultRowHeaderDataProvider rowHeaderDataProvider = new DefaultRowHeaderDataProvider(dataProvider);
@@ -204,23 +204,21 @@ public abstract class AbstractFilterPane implements IPropertyChangeListener, Dis
 		// corner layer
 		DefaultCornerDataProvider cornerDataProvider = new DefaultCornerDataProvider(columnHeaderDataProvider, rowHeaderDataProvider);
 		DataLayer cornerDataLayer = new DataLayer(cornerDataProvider);
-		CornerLayer cornerLayer = new CornerLayer(cornerDataLayer, rowHeaderLayer, colummnLayer);
+		CornerLayer cornerLayer = new CornerLayer(cornerDataLayer, rowHeaderLayer, sortHeaderLayer);
 		
 		// grid layer
-		GridLayer gridLayer = new GridLayer(defaultLayerStack, colummnLayer, rowHeaderLayer, cornerLayer);		
-		defaultLayerStack.setConfigLabelAccumulator(new FilterConfigLabelAccumulator(defaultLayerStack, dataProvider));
+		GridLayer gridLayer = new GridLayer(defaultLayerStack, sortHeaderLayer, rowHeaderLayer, cornerLayer);		
+		defaultLayerStack.setConfigLabelAccumulator(new FilterConfigLabelAccumulator<T>(defaultLayerStack, dataProvider));
 		
 		// the table
 		natTable = new NatTable(parentContainer, gridLayer, false); 
 
-		// default style configuration
-		DefaultNatTableStyleConfiguration styleConfig = new DefaultNatTableStyleConfiguration();
-		
 		// additional configuration
-		natTable.addConfiguration(styleConfig);
+		natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
 		natTable.addConfiguration(new CheckBoxConfiguration(ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + IConstants.INDEX_VISIBILITY));
 		natTable.addConfiguration(new FilterPainterConfiguration());
 		natTable.addConfiguration(new RowOnlySelectionBindings());
+		natTable.addConfiguration(new SingleClickSortConfiguration());
 		
 		// ------------------------------------------------------------
 		// Customized configuration
@@ -229,38 +227,40 @@ public abstract class AbstractFilterPane implements IPropertyChangeListener, Dis
 		
 		natTable.configure();
  		
-		final TextMatcherEditor<FilterDataItem> textMatcher = new TextMatcherEditor<>(new TextFilterator<FilterDataItem>() {
+		final TextMatcherEditor<FilterDataItem<T>> textMatcher = new TextMatcherEditor<>(new TextFilterator<FilterDataItem<T>>() {
 
 			@Override
-			public void getFilterStrings(List<String> baseList, FilterDataItem element) {
+			public void getFilterStrings(List<String> baseList, FilterDataItem<T> element) {
 				baseList.add(element.getLabel());
 			}
 		});
 		textMatcher.setMode(TextMatcherEditor.CONTAINS);
 		filterList.setMatcherEditor(textMatcher);
 
-		rowSelectionProvider = new RowSelectionProvider<>(defaultLayerStack.getSelectionLayer(), dataProvider);
+		rowSelectionProvider = new RowSelectionProvider<FilterDataItem<T>>(defaultLayerStack.getSelectionLayer(), dataProvider);
 		rowSelectionProvider.addSelectionChangedListener((event)-> {
 			IStructuredSelection selection = (IStructuredSelection) event.getSelection();
-            Iterator<FilterDataItem> it = selection.iterator();
+            Iterator<FilterDataItem<T>> it = selection.iterator();
             
             if (!it.hasNext())
             	return;
-            FilterDataItem item = (FilterDataItem) it.next();
+            FilterDataItem<T> item = (FilterDataItem<T>) it.next();
             
             selectionEvent(item, SWT.MouseDown);
 		});
 		
+		// this UI binding causes mouse click event to be extremely slow
+		/*
 		natTable.getUiBindingRegistry().registerDoubleClickBinding(MouseEventMatcher.bodyLeftClick(SWT.NONE), new IMouseAction() {
 			
 			@Override
 			public void run(NatTable natTable, MouseEvent event) {
 				int row = natTable.getRowPositionByY(event.y);
 				int index = natTable.getRowIndexByPosition(row);
-				FilterDataItem item = dataProvider.getRowObject(index);
+				FilterDataItem<T> item = dataProvider.getRowObject(index);
 				selectionEvent(item, SWT.MouseDoubleClick);
 			}
-		});
+		}); */
 
 		final ThemeConfiguration modernTheme = new ModernNatTableThemeConfiguration();
 		natTable.setTheme(modernTheme);
@@ -340,7 +340,7 @@ public abstract class AbstractFilterPane implements IPropertyChangeListener, Dis
 		}
 	}
 	
-	protected FilterInputData getInputData() {
+	protected FilterInputData<T> getInputData() {
 		return inputData;
 	}
 	
@@ -355,11 +355,11 @@ public abstract class AbstractFilterPane implements IPropertyChangeListener, Dis
 	}
 
 	
-	public EventList<FilterDataItem> getEventList() {
+	public EventList<FilterDataItem<T>> getEventList() {
 		return eventList;
 	}
 	
-	public FilterList<FilterDataItem> getFilterList() {
+	public FilterList<FilterDataItem<T>> getFilterList() {
 		return filterList;
 	}
 
@@ -378,9 +378,9 @@ public abstract class AbstractFilterPane implements IPropertyChangeListener, Dis
 
 	abstract protected void setLayerConfiguration(DataLayer datalayer);
 	abstract protected String[] getColumnHeaderLabels();
-	abstract protected FilterDataProvider getDataProvider();
+	abstract protected FilterDataProvider<T> getDataProvider();
 
 	abstract protected int createAdditionalButton(Composite parent); 	
-	abstract protected void selectionEvent(FilterDataItem item, int click);
+	abstract protected void selectionEvent(FilterDataItem<T> item, int click);
 	abstract protected void addConfiguration(NatTable table);
 }
