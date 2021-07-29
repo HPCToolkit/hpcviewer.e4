@@ -2,9 +2,13 @@ package edu.rice.cs.hpcfilter.dialog;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
+
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
@@ -21,7 +25,7 @@ import edu.rice.cs.hpcfilter.StringFilterDataItem;
  * Dialog window specifically to filter ranks or threads or id tuples
  *
  ******************************************************/
-public class ThreadFilterDialog extends TitleAreaDialog 
+public class ThreadFilterDialog extends Dialog 
 {
 	private final FilterInputData data;
 	private BaseFilterPane filterPane;
@@ -41,20 +45,22 @@ public class ThreadFilterDialog extends TitleAreaDialog
 	
 	@Override
 	protected Point getInitialSize() {
-		return new Point(600, 500);
+		return new Point(600, 600);
 	}
 	
 	@Override
 	protected Control createDialogArea(Composite parent) {
-	    Composite composite = (Composite) super.createDialogArea(parent);
-
 	    final String TITLE = "Select threads to view";
-		final String MSGS  = "Please check any threads to be viewed.";
 		
-		setTitle( TITLE);
 		getShell().setText( TITLE);
-		setMessage(MSGS);
 		
+		Composite composite = new Composite(parent, SWT.BORDER);
+
+		GridLayout grid = new GridLayout();
+		grid.numColumns=1;
+		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
+		composite.setLayout(grid);
+
 		filterPane = new BaseFilterPane(composite, AbstractFilterPane.STYLE_INDEPENDENT, data) {
 
 			@Override
@@ -62,7 +68,6 @@ public class ThreadFilterDialog extends TitleAreaDialog
 				final String []LABELS = {"Visible", "Threads"};
 				return LABELS;
 			}
-
 		};
 
 		return composite;
