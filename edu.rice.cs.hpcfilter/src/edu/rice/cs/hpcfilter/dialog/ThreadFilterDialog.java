@@ -13,6 +13,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
+import edu.rice.cs.hpcdata.util.OSValidator;
 import edu.rice.cs.hpcfilter.AbstractFilterPane;
 import edu.rice.cs.hpcfilter.BaseFilterPane;
 import edu.rice.cs.hpcfilter.FilterDataItem;
@@ -60,7 +61,11 @@ public class ThreadFilterDialog extends Dialog
 		grid.numColumns=1;
 		// TODO: bad hack: Have to add a "pad" margin on the top
 		// This may be a SWT bug that the position of the composite is negative on Mac
-		grid.marginTop=30;
+		int padding = 0;
+		if (OSValidator.isMac()) 
+			padding = 30;
+		
+		grid.marginTop=padding;
 
 		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		composite.setLayout(grid);
