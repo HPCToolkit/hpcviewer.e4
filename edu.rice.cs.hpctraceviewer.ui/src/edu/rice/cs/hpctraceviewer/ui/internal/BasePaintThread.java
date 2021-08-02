@@ -82,6 +82,7 @@ public abstract class BasePaintThread implements Callable<List<ImagePosition>>
 				numDataCollected.get()<numberOfTotalLines )  // the data preparation threads haven't finished the job
 		{
 			if (monitor.isCanceled()) {
+				dispose();
 				return listOfImages;
 			}
 			// ------------------------------------------------------------------
@@ -115,8 +116,10 @@ public abstract class BasePaintThread implements Callable<List<ImagePosition>>
 			// ------------------------------------------------------------------
 			for(BaseDataVisualization data : setDataToPaint.getList()) 
 			{
-				if (monitor.isCanceled())
+				if (monitor.isCanceled()) {
+					dispose();
 					return listOfImages;
+				}
 				
 				// ------------------------------------------------------------------
 				// paint the image

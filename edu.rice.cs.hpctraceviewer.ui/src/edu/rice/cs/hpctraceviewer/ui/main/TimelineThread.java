@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import edu.rice.cs.hpcdata.util.CallPath;
-import edu.rice.cs.hpcremote.data.SpaceTimeDataControllerRemote;
+//import edu.rice.cs.hpcremote.data.SpaceTimeDataControllerRemote;
 import edu.rice.cs.hpctraceviewer.data.DataLinePainting;
 import edu.rice.cs.hpctraceviewer.data.DataPreparation;
 import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
@@ -46,12 +46,12 @@ public class TimelineThread
 	protected ProcessTimeline getNextTrace(AtomicInteger currentLine) {
 		
 		// case 1: remote database
-		
+		/*
 		if (stData instanceof SpaceTimeDataControllerRemote) {
 			return ((SpaceTimeDataControllerRemote)stData).getNextTrace(currentLine, totalLines, 
 																		changedBounds, monitor);
 		}
-		
+		*/
 		// case 2: local database
 		
 		ProcessTimeline timeline = null;

@@ -1,5 +1,7 @@
 package edu.rice.cs.hpctraceviewer.ui.depth;
 
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.operations.IOperationHistoryListener;
 import org.eclipse.core.commands.operations.IUndoContext;
@@ -209,7 +211,25 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 		return (stData.getAttributes().getTimeInterval());
 	}
 	
-	
+
+	// remove queue of jobs because it causes deadlock 
+	// 
+	final private ConcurrentLinkedQueue<BaseViewPaint> queue = new ConcurrentLinkedQueue<>();
+
+	/****
+	 * Remove the jobs in the waiting list
+	 */
+	private void cancelJobs() {
+  		if (!queue.isEmpty()) {
+  			queue.stream().forEach(job -> {
+				// a job cannot be terminated.
+				// this is fine, we should wait until it terminates or
+				// response that it will cancel in the future
+  				job.cancel();
+  			});
+		}
+	}
+
     /************
      * method to repaint the canvas
      * this method can be costly, please do not call this unless the data has changed
@@ -228,6 +248,7 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 		currentProcess = frame.position.process;
 
 		final Display display = Display.getDefault();
+		
 		display.syncExec( new Runnable() {
 			
 			@Override
@@ -257,9 +278,12 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 																true, 
 																DepthTimeCanvas.this,
 																visibleDepths);
+				cancelJobs();
 				
 				depthPaint.addJobChangeListener(new DepthJobListener());
 				depthPaint.schedule();
+
+				queue.add(depthPaint);
 			}
 		});
 	}
