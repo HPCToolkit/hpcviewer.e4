@@ -10,12 +10,12 @@ import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
-public class TreeDataProvider implements IDataProvider 
+public class ScopeTreeDataProvider implements IDataProvider 
 {
 	private final ITreeData<Scope> treeData;
 	private final Experiment experiment;
 	
-	public TreeDataProvider(ITreeData<Scope> treeData, Experiment experiment) {
+	public ScopeTreeDataProvider(ITreeData<Scope> treeData, Experiment experiment) {
 		this.treeData   = treeData;
 		this.experiment = experiment;
 	}

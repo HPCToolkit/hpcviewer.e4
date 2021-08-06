@@ -46,7 +46,7 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpctree.ScopeTreeRowModel;
 import edu.rice.cs.hpctree.ScopeTreeData;
-import edu.rice.cs.hpctree.TreeDataProvider;
+import edu.rice.cs.hpctree.ScopeTreeDataProvider;
 
 
 public class TestMain 
@@ -226,7 +226,7 @@ public class TestMain
         					  ITreeData<Scope> treeData,
         					  Experiment experiment) {
 
-            this.bodyDataProvider = new TreeDataProvider(treeData, experiment); 
+            this.bodyDataProvider = new ScopeTreeDataProvider(treeData, experiment); 
             DataLayer bodyDataLayer = new DataLayer(this.bodyDataProvider);
 
             // simply apply labels for every column by index
