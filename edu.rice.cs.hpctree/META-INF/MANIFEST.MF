@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: hpctree
+Bundle-SymbolicName: edu.rice.cs.hpctree
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Rice University
+Automatic-Module-Name: edu.rice.cs.hpctree
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Require-Bundle: edu.rice.cs.hpcdata,
+ org.eclipse.swt,
+ org.eclipse.nebula.widgets.nattable.core,
+ ca.odell.glazedlists,
+ org.eclipse.jface,
+ org.eclipse.collections,
+ org.slf4j.api,
+ org.eclipse.core.runtime
