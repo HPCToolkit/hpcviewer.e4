@@ -45,7 +45,7 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpctree.ScopeTreeRowModel;
-import edu.rice.cs.hpctree.TreeData;
+import edu.rice.cs.hpctree.ScopeTreeData;
 import edu.rice.cs.hpctree.TreeDataProvider;
 
 
@@ -87,7 +87,9 @@ public class TestMain
         // handling
         ConfigRegistry configRegistry = new ConfigRegistry();
         
-        final BodyLayerStack bodyLayerStack = new BodyLayerStack(root, new TreeData(root));
+        final BodyLayerStack bodyLayerStack = new BodyLayerStack(root, 
+        														 new ScopeTreeData(root), 
+        														 (Experiment) root.getExperiment());
         
         // build the column header layer
         IDataProvider columnHeaderDataProvider = new ColumnHeaderDataProvider(root);
@@ -221,9 +223,10 @@ public class TestMain
         private final TreeLayer treeLayer;
 
         public BodyLayerStack(RootScope root,
-        					  ITreeData<Scope> treeData) {
+        					  ITreeData<Scope> treeData,
+        					  Experiment experiment) {
 
-            this.bodyDataProvider = new TreeDataProvider(root); 
+            this.bodyDataProvider = new TreeDataProvider(treeData, experiment); 
             DataLayer bodyDataLayer = new DataLayer(this.bodyDataProvider);
 
             // simply apply labels for every column by index

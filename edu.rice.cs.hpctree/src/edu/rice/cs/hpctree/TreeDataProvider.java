@@ -3,30 +3,28 @@ package edu.rice.cs.hpctree;
 import java.util.List;
 
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
+import org.eclipse.nebula.widgets.nattable.tree.ITreeData;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
-import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 public class TreeDataProvider implements IDataProvider 
 {
-	private final RootScope root;
-	private int columnSorted;
+	private final ITreeData<Scope> treeData;
+	private final Experiment experiment;
 	
-	public TreeDataProvider(RootScope root) {
-		this.root = root;
-		columnSorted = 0;
+	public TreeDataProvider(ITreeData<Scope> treeData, Experiment experiment) {
+		this.treeData   = treeData;
+		this.experiment = experiment;
 	}
 
-	public void setSortColumn(int column) {
-		columnSorted = column;
-	}
 	
 	@Override
 	public Object getDataValue(int columnIndex, int rowIndex) {
-		Scope scope = rowIndex == 0 ? root : (Scope) root.getChildAt(rowIndex-1);
+		Scope scope = treeData.getDataAtIndex(rowIndex);
+
 		if (columnIndex == 0)
 			return scope.getName();
 
@@ -38,9 +36,9 @@ public class TreeDataProvider implements IDataProvider
 	public void setDataValue(int columnIndex, int rowIndex, Object newValue) {
 	}
 
+	
 	@Override
 	public int getColumnCount() {
-		Experiment experiment = (Experiment) root.getExperiment();
 		List<BaseMetric> metrics = experiment.getVisibleMetrics();
 		
 		return 1 + metrics.size();
@@ -48,7 +46,7 @@ public class TreeDataProvider implements IDataProvider
 
 	@Override
 	public int getRowCount() {
-		return 1 + root.getChildCount();
+		return treeData.getElementCount();
 	}
 
 }

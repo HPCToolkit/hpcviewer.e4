@@ -1,5 +1,6 @@
 package edu.rice.cs.hpctree;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.nebula.widgets.nattable.tree.ITreeData;
@@ -7,14 +8,15 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 
-public class TreeData implements ITreeData<Scope> 
+public class ScopeTreeData implements ITreeData<Scope> 
 {
 	private final RootScope root;
 	private List<Scope> list;
 	
-	public TreeData(RootScope root) {
+	public ScopeTreeData(RootScope root) {
 		this.root = root;
-		this.list = (List<Scope>)(List<? extends TreeNode>)root.getListChildren();
+		this.list = new ArrayList<>();
+		this.list.add(root);
 	}
 	
 	
@@ -22,7 +24,20 @@ public class TreeData implements ITreeData<Scope>
 		Scope scope = list.get(index);
 		List<? extends TreeNode> children = scope.getListChildren();
 		List<Scope> listScopes = convert(children);
+		int n1 = list.size();
 		list.addAll(index+1, listScopes);
+		int n2 = list.size();
+		System.out.println("expand " + index + " size " + n1 + " -> " + n2 + ", fk: " + listScopes.get(0).getName());
+	}
+	
+	
+	public void collapse(int index) {
+		Scope scope = list.get(index);
+		List<? extends TreeNode> children = scope.getListChildren();
+		int n1 = list.size();
+		list.subList(index+1, index+1+children.size()).clear();
+		int n2 = list.size();
+		System.out.println("collapse " + index + " size " + n1 + " -> " + n2);
 	}
 	
 	
