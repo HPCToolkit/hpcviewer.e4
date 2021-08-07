@@ -34,6 +34,12 @@ public class ScopeTreeDataProvider implements IDataProvider
 
 	@Override
 	public void setDataValue(int columnIndex, int rowIndex, Object newValue) {
+		Scope scope = treeData.getDataAtIndex(rowIndex);
+
+		if (columnIndex == 0) {
+			return;
+		}
+		scope.setMetricValue(columnIndex-1, (MetricValue) newValue);
 	}
 
 	

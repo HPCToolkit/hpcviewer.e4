@@ -10,44 +10,51 @@ import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 
 public class ScopeTreeData implements ITreeData<Scope> 
 {
-	private final RootScope root;
 	private List<Scope> list;
 	
+	/***
+	 * Constructor to create a tree data based on the root
+	 * @param root the root scope
+	 */
 	public ScopeTreeData(RootScope root) {
-		this.root = root;
 		this.list = new ArrayList<>();
 		this.list.add(root);
 	}
 	
 	
+	/****
+	 * Expand a tree node.
+	 * This method has to be called BEFORE calling tree data's expand
+	 * @param index
+	 */
 	public void expand(int index) {
 		Scope scope = list.get(index);
 		List<? extends TreeNode> children = scope.getListChildren();
 		List<Scope> listScopes = convert(children);
-		int n1 = list.size();
 		list.addAll(index+1, listScopes);
-		int n2 = list.size();
-		System.out.println("expand " + index + " size " + n1 + " -> " + n2 + ", fk: " + listScopes.get(0).getName());
 	}
 	
 	
+	/****
+	 * Collapse a tree node. 
+	 * This methid has to be called BEFORE calling the tree data
+	 * @param index element index
+	 */
 	public void collapse(int index) {
 		Scope scope = list.get(index);
 		List<? extends TreeNode> children = scope.getListChildren();
-		int n1 = list.size();
 		list.subList(index+1, index+1+children.size()).clear();
-		int n2 = list.size();
-		System.out.println("collapse " + index + " size " + n1 + " -> " + n2);
 	}
 	
 	
+	@SuppressWarnings("unchecked")
 	private List<Scope> convert(List<? extends TreeNode> list) {
 		return (List<Scope>) list;
 	}
 	
 	
 	private boolean isRootScope(Scope scope) {
-		return (scope == root) || (scope instanceof RootScope);
+		return (scope == null) || (scope instanceof RootScope);
 	}
 	
 	@Override
@@ -95,8 +102,7 @@ public class ScopeTreeData implements ITreeData<Scope>
 	@Override
 	public List<Scope> getChildren(Scope object) {
 		List<? extends TreeNode> list = object.getListChildren();
-		List<Scope> listScopes = (List<Scope>) list;
-		return listScopes;
+		return convert(list);
 	}
 
 	@Override

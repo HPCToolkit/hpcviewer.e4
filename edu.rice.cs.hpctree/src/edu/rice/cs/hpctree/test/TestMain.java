@@ -45,13 +45,21 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpctree.ScopeTreeRowModel;
+import edu.rice.cs.hpctree.internal.IScopeTreeAction;
 import edu.rice.cs.hpctree.ScopeTreeData;
 import edu.rice.cs.hpctree.ScopeTreeDataProvider;
 
 
-public class TestMain 
+public class TestMain implements IScopeTreeAction
 {
+	NatTable natTable ;
 	
+	@Override
+	public void refresh() {
+		if (natTable != null)
+			natTable.redraw();
+	}
+
 
 	public static void main(String[] args) {
 		System.out.println("Test begin");
@@ -89,7 +97,7 @@ public class TestMain
         
         final BodyLayerStack bodyLayerStack = new BodyLayerStack(root, 
         														 new ScopeTreeData(root), 
-        														 (Experiment) root.getExperiment());
+        														 (Experiment) root.getExperiment(), this);
         
         // build the column header layer
         IDataProvider columnHeaderDataProvider = new ColumnHeaderDataProvider(root);
@@ -120,14 +128,14 @@ public class TestMain
 
         // turn the auto configuration off as we want to add our header menu
         // configuration
-        final NatTable natTable = new NatTable(container, gridLayer, false);
+        natTable = new NatTable(container, gridLayer, false);
 
         // as the autoconfiguration of the NatTable is turned off, we have to
         // add the DefaultNatTableStyleConfiguration and the ConfigRegistry
         // manually
         natTable.setConfigRegistry(configRegistry);
         natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
-
+        natTable.refresh();
         natTable.configure();
 
         GridDataFactory.fillDefaults().grab(true, true).applyTo(natTable);
@@ -214,7 +222,8 @@ public class TestMain
      *
      * @param <T>
      */
-    class BodyLayerStack extends AbstractLayerTransform {
+    class BodyLayerStack extends AbstractLayerTransform  
+    {
 
         private final IDataProvider bodyDataProvider;
 
@@ -224,7 +233,8 @@ public class TestMain
 
         public BodyLayerStack(RootScope root,
         					  ITreeData<Scope> treeData,
-        					  Experiment experiment) {
+        					  Experiment experiment,
+        					  IScopeTreeAction treeAction) {
 
             this.bodyDataProvider = new ScopeTreeDataProvider(treeData, experiment); 
             DataLayer bodyDataLayer = new DataLayer(this.bodyDataProvider);
@@ -232,13 +242,15 @@ public class TestMain
             // simply apply labels for every column by index
             bodyDataLayer.setConfigLabelAccumulator(new ColumnLabelAccumulator());
 
-            ScopeTreeRowModel treeRowModel = new ScopeTreeRowModel((ITreeData<Scope>) treeData);
+            ScopeTreeRowModel treeRowModel = new ScopeTreeRowModel((ITreeData<Scope>) treeData, treeAction);
 
             this.selectionLayer = new SelectionLayer(bodyDataLayer);
 
             this.treeLayer = new TreeLayer(this.selectionLayer, treeRowModel);
             ViewportLayer viewportLayer = new ViewportLayer(this.treeLayer);
 
+            treeLayer.expandTreeRow(0);
+            
             setUnderlyingLayer(viewportLayer);
         }
 
