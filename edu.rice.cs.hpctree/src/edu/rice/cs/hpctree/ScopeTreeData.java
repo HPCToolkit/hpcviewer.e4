@@ -1,7 +1,9 @@
 package edu.rice.cs.hpctree;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import org.eclipse.collections.api.list.MutableList;
+import org.eclipse.collections.impl.list.mutable.MutableListFactoryImpl;
 
 import org.eclipse.nebula.widgets.nattable.tree.ITreeData;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
@@ -10,14 +12,15 @@ import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 
 public class ScopeTreeData implements ITreeData<Scope> 
 {
-	private List<Scope> list;
+	//private ArrayList<Scope> list;
+	private MutableList<Scope> list;
 	
 	/***
 	 * Constructor to create a tree data based on the root
 	 * @param root the root scope
 	 */
 	public ScopeTreeData(RootScope root) {
-		this.list = new ArrayList<>();
+		this.list = MutableListFactoryImpl.INSTANCE.empty();
 		this.list.add(root);
 	}
 	
