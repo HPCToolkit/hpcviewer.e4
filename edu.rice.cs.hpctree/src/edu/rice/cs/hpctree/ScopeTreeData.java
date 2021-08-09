@@ -3,8 +3,7 @@ package edu.rice.cs.hpctree;
 import java.util.List;
 
 import org.eclipse.collections.api.list.MutableList;
-import org.eclipse.collections.impl.list.mutable.MutableListFactoryImpl;
-
+import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.nebula.widgets.nattable.tree.ITreeData;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -12,7 +11,6 @@ import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 
 public class ScopeTreeData implements ITreeData<Scope> 
 {
-	//private ArrayList<Scope> list;
 	private MutableList<Scope> list;
 	
 	/***
@@ -20,7 +18,7 @@ public class ScopeTreeData implements ITreeData<Scope>
 	 * @param root the root scope
 	 */
 	public ScopeTreeData(RootScope root) {
-		this.list = MutableListFactoryImpl.INSTANCE.empty();
+		this.list = FastList.newList();
 		this.list.add(root);
 	}
 	

@@ -1,28 +1,37 @@
 package edu.rice.cs.hpctree;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
+import org.eclipse.collections.impl.set.mutable.primitive.IntHashSet;
 import org.eclipse.nebula.widgets.nattable.tree.ITreeData;
 import org.eclipse.nebula.widgets.nattable.tree.TreeRowModel;
 
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpctree.internal.IScopeTreeAction;
 
+
+/***********************************************************
+ * 
+ * Specific tree model for tree Scope.
+ * The class basically inherits attributes from {@link TreeRowModel}
+ * but it stores the list of items that have been expanded.
+ * The reason is 
+ *
+ ***********************************************************/
 public class ScopeTreeRowModel extends TreeRowModel<Scope> 
 {
-	private final Set<Integer> expandedIndexes = new HashSet<>();
+	private IntHashSet expandSet;
 	private final IScopeTreeAction treeAction;
 	
 	public ScopeTreeRowModel(ITreeData<Scope> treeData, IScopeTreeAction treeAction) {
 		super(treeData);
 		this.treeAction = treeAction;
+		this.expandSet  = new IntHashSet();
 	}
 	
 	@Override
     public boolean isCollapsed(int index) {
-		return (! expandedIndexes.contains(index));
+		
+		return (! expandSet.contains(index));
 	}
 	
 	@Override
@@ -30,14 +39,14 @@ public class ScopeTreeRowModel extends TreeRowModel<Scope>
 		ITreeData<Scope> treeData = getTreeData();
 		ScopeTreeData tdata = (ScopeTreeData) treeData;
 		tdata.collapse(index);
-		expandedIndexes.remove(index);
+		expandSet.remove(index);
 		
 		return super.collapse(index);
 	}
 
 	@Override
     public List<Integer> collapseAll() {
-		expandedIndexes.clear();
+		expandSet.clear();
 		
 		return super.collapseAll();
 	}
@@ -48,7 +57,7 @@ public class ScopeTreeRowModel extends TreeRowModel<Scope>
 		ITreeData<Scope> treeData = getTreeData();
 		ScopeTreeData tdata = (ScopeTreeData) treeData;
 		tdata.expand(index);
-		expandedIndexes.add(index);
+		expandSet.add(index);
 		
 		List<Integer> list = super.expand(index);
 		if (index == 0) {
