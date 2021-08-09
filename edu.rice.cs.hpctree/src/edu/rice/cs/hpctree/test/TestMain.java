@@ -9,6 +9,9 @@ import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.config.ConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfiguration;
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
+import org.eclipse.nebula.widgets.nattable.freeze.CompositeFreezeLayer;
+import org.eclipse.nebula.widgets.nattable.freeze.FreezeLayer;
+import org.eclipse.nebula.widgets.nattable.freeze.command.FreezeColumnCommand;
 import org.eclipse.nebula.widgets.nattable.grid.data.DefaultCornerDataProvider;
 import org.eclipse.nebula.widgets.nattable.grid.data.DefaultRowHeaderDataProvider;
 import org.eclipse.nebula.widgets.nattable.grid.layer.ColumnHeaderLayer;
@@ -24,6 +27,8 @@ import org.eclipse.nebula.widgets.nattable.layer.cell.ColumnLabelAccumulator;
 import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
 import org.eclipse.nebula.widgets.nattable.tree.ITreeData;
 import org.eclipse.nebula.widgets.nattable.tree.TreeLayer;
+import org.eclipse.nebula.widgets.nattable.ui.menu.AbstractHeaderMenuConfiguration;
+import org.eclipse.nebula.widgets.nattable.ui.menu.PopupMenuBuilder;
 import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
@@ -104,7 +109,7 @@ public class TestMain implements IScopeTreeAction
         DataLayer columnHeaderDataLayer =
                 new DefaultColumnHeaderDataLayer(columnHeaderDataProvider);
         ILayer columnHeaderLayer =
-                new ColumnHeaderLayer(columnHeaderDataLayer, bodyLayerStack, bodyLayerStack.getSelectionLayer());
+                new ColumnHeaderLayer(columnHeaderDataLayer, bodyLayerStack.getFreezeLayer(), bodyLayerStack.getSelectionLayer());
 
         // build the row header layer
         IDataProvider rowHeaderDataProvider =
@@ -124,7 +129,7 @@ public class TestMain implements IScopeTreeAction
 
         // build the grid layer
         GridLayer gridLayer =
-                new GridLayer(bodyLayerStack, columnHeaderLayer, rowHeaderLayer, cornerLayer);
+                new GridLayer(bodyLayerStack.getFreezeLayer(), columnHeaderLayer, rowHeaderLayer, cornerLayer);
 
         // turn the auto configuration off as we want to add our header menu
         // configuration
@@ -135,10 +140,26 @@ public class TestMain implements IScopeTreeAction
         // manually
         natTable.setConfigRegistry(configRegistry);
         natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
+        natTable.addConfiguration(new AbstractHeaderMenuConfiguration(natTable) {
+            @Override
+            protected PopupMenuBuilder createColumnHeaderMenu(NatTable natTable) {
+            	return super.createColumnHeaderMenu(natTable)
+                        .withHideColumnMenuItem()
+                        .withShowAllColumnsMenuItem()
+                        .withColumnChooserMenuItem()
+                        .withFreezeColumnMenuItem();
+            }
+        });
         natTable.refresh();
         natTable.configure();
 
         GridDataFactory.fillDefaults().grab(true, true).applyTo(natTable);
+
+        natTable.getDisplay().asyncExec(()-> {
+            natTable.doCommand(new FreezeColumnCommand(natTable, 1, false, true));
+        });
+
+        //natTable.doCommand(new FreezeColumnCommand(bodyLayerStack.getTreeLayer(), 1));
 	}
 	
 	private RootScope createTree() {
@@ -157,7 +178,7 @@ public class TestMain implements IScopeTreeAction
 		RootScope root = new RootScope(experiment, "root", RootScopeType.DatacentricTree);
 		createMetric(root, experiment);
 		
-		for (int i=0; i<20; i++) {
+		for (int i=0; i<20000; i++) {
 			Scope child = new ProcedureScope(root, null, i, i, "Proc " + i, false, i, i, null, 0);
 			child.setParentScope(root);
 			createMetric(child, experiment);
@@ -226,10 +247,11 @@ public class TestMain implements IScopeTreeAction
     {
 
         private final IDataProvider bodyDataProvider;
-
         private final SelectionLayer selectionLayer;
-
         private final TreeLayer treeLayer;
+        private final ViewportLayer viewportLayer;
+        private final FreezeLayer freezeLayer ;
+        private final CompositeFreezeLayer compositeFreezeLayer ;
 
         public BodyLayerStack(RootScope root,
         					  ITreeData<Scope> treeData,
@@ -245,13 +267,14 @@ public class TestMain implements IScopeTreeAction
             ScopeTreeRowModel treeRowModel = new ScopeTreeRowModel((ITreeData<Scope>) treeData, treeAction);
 
             this.selectionLayer = new SelectionLayer(bodyDataLayer);
-
             this.treeLayer = new TreeLayer(this.selectionLayer, treeRowModel);
-            ViewportLayer viewportLayer = new ViewportLayer(this.treeLayer);
-
+            this.viewportLayer = new ViewportLayer(this.treeLayer);
+            this.freezeLayer = new FreezeLayer(treeLayer);
+            compositeFreezeLayer = new CompositeFreezeLayer(freezeLayer, viewportLayer, selectionLayer);
+            
             treeLayer.expandTreeRow(0);
             
-            setUnderlyingLayer(viewportLayer);
+            setUnderlyingLayer(compositeFreezeLayer);
         }
 
         public SelectionLayer getSelectionLayer() {
@@ -261,8 +284,16 @@ public class TestMain implements IScopeTreeAction
         public TreeLayer getTreeLayer() {
             return this.treeLayer;
         }
+        
+        public ViewportLayer getViewportLayer() {
+        	return this.viewportLayer;
+        }
 
-        public IDataProvider getBodyDataProvider() {
+        public CompositeFreezeLayer getFreezeLayer() {
+			return compositeFreezeLayer;
+		}
+
+		public IDataProvider getBodyDataProvider() {
             return this.bodyDataProvider;
         }
     }
