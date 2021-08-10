@@ -79,9 +79,6 @@ public class ScopeTreeData implements ITreeData<Scope>
 	@Override
 	public Scope getDataAtIndex(int index) {
 		Scope scope = list.get(index);
-		if (scope == null) {
-			throw new RuntimeException("index does not exist: " + index);
-		}
 		return scope;
 	}
 

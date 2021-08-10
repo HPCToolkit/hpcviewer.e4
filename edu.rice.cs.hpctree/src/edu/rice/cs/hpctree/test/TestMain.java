@@ -4,37 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.nebula.widgets.nattable.NatTable;
-import org.eclipse.nebula.widgets.nattable.config.ConfigRegistry;
-import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfiguration;
-import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
-import org.eclipse.nebula.widgets.nattable.freeze.CompositeFreezeLayer;
-import org.eclipse.nebula.widgets.nattable.freeze.FreezeLayer;
-import org.eclipse.nebula.widgets.nattable.freeze.command.FreezeColumnCommand;
-import org.eclipse.nebula.widgets.nattable.grid.data.DefaultCornerDataProvider;
-import org.eclipse.nebula.widgets.nattable.grid.data.DefaultRowHeaderDataProvider;
-import org.eclipse.nebula.widgets.nattable.grid.layer.ColumnHeaderLayer;
-import org.eclipse.nebula.widgets.nattable.grid.layer.CornerLayer;
-import org.eclipse.nebula.widgets.nattable.grid.layer.DefaultColumnHeaderDataLayer;
-import org.eclipse.nebula.widgets.nattable.grid.layer.DefaultRowHeaderDataLayer;
-import org.eclipse.nebula.widgets.nattable.grid.layer.GridLayer;
-import org.eclipse.nebula.widgets.nattable.grid.layer.RowHeaderLayer;
-import org.eclipse.nebula.widgets.nattable.layer.AbstractLayerTransform;
-import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
-import org.eclipse.nebula.widgets.nattable.layer.ILayer;
-import org.eclipse.nebula.widgets.nattable.layer.cell.ColumnLabelAccumulator;
-import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
-import org.eclipse.nebula.widgets.nattable.tree.ITreeData;
-import org.eclipse.nebula.widgets.nattable.tree.TreeLayer;
-import org.eclipse.nebula.widgets.nattable.ui.menu.AbstractHeaderMenuConfiguration;
-import org.eclipse.nebula.widgets.nattable.ui.menu.PopupMenuBuilder;
-import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
@@ -49,10 +22,8 @@ import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpctree.ScopeTreeRowModel;
 import edu.rice.cs.hpctree.internal.IScopeTreeAction;
-import edu.rice.cs.hpctree.ScopeTreeData;
-import edu.rice.cs.hpctree.ScopeTreeDataProvider;
+import edu.rice.cs.hpctree.ScopeTreeTable;
 
 
 public class TestMain implements IScopeTreeAction
@@ -75,8 +46,10 @@ public class TestMain implements IScopeTreeAction
 		shell.setLayout(new FillLayout());
 		shell.setText("Test Tree");
 		
-		TestMain tm = new TestMain();
-		tm.create(shell);
+        RootScope root = createTree();
+
+		ScopeTreeTable table = new ScopeTreeTable(shell, SWT.NONE, root);
+
 		
 		shell.open();
 		
@@ -90,79 +63,9 @@ public class TestMain implements IScopeTreeAction
 		System.out.println("Test end");
 	}
 
-	public void create(Composite parent) {
-        Composite container = new Composite(parent, SWT.NONE);
-        container.setLayout(new GridLayout());
 
-        RootScope root = createTree();
-        
-        // create a new ConfigRegistry which will be needed for GlazedLists
-        // handling
-        ConfigRegistry configRegistry = new ConfigRegistry();
-        
-        final BodyLayerStack bodyLayerStack = new BodyLayerStack(root, 
-        														 new ScopeTreeData(root), 
-        														 (Experiment) root.getExperiment(), this);
-        
-        // build the column header layer
-        IDataProvider columnHeaderDataProvider = new ColumnHeaderDataProvider(root);
-        DataLayer columnHeaderDataLayer =
-                new DefaultColumnHeaderDataLayer(columnHeaderDataProvider);
-        ILayer columnHeaderLayer =
-                new ColumnHeaderLayer(columnHeaderDataLayer, bodyLayerStack.getFreezeLayer(), bodyLayerStack.getSelectionLayer());
-
-        // build the row header layer
-        IDataProvider rowHeaderDataProvider =
-                new DefaultRowHeaderDataProvider(bodyLayerStack.getBodyDataProvider());
-        DataLayer rowHeaderDataLayer =
-                new DefaultRowHeaderDataLayer(rowHeaderDataProvider);
-        ILayer rowHeaderLayer =
-                new RowHeaderLayer(rowHeaderDataLayer, bodyLayerStack, bodyLayerStack.getSelectionLayer());
-
-        // build the corner layer
-        IDataProvider cornerDataProvider =
-                new DefaultCornerDataProvider(columnHeaderDataProvider, rowHeaderDataProvider);
-        DataLayer cornerDataLayer =
-                new DataLayer(cornerDataProvider);
-        ILayer cornerLayer =
-                new CornerLayer(cornerDataLayer, rowHeaderLayer, columnHeaderLayer);
-
-        // build the grid layer
-        GridLayer gridLayer =
-                new GridLayer(bodyLayerStack.getFreezeLayer(), columnHeaderLayer, rowHeaderLayer, cornerLayer);
-
-        // turn the auto configuration off as we want to add our header menu
-        // configuration
-        natTable = new NatTable(container, gridLayer, false);
-
-        // as the autoconfiguration of the NatTable is turned off, we have to
-        // add the DefaultNatTableStyleConfiguration and the ConfigRegistry
-        // manually
-        natTable.setConfigRegistry(configRegistry);
-        natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
-        natTable.addConfiguration(new AbstractHeaderMenuConfiguration(natTable) {
-            @Override
-            protected PopupMenuBuilder createColumnHeaderMenu(NatTable natTable) {
-            	return super.createColumnHeaderMenu(natTable)
-                        .withHideColumnMenuItem()
-                        .withShowAllColumnsMenuItem()
-                        .withColumnChooserMenuItem()
-                        .withFreezeColumnMenuItem();
-            }
-        });
-        natTable.refresh();
-        natTable.configure();
-
-        GridDataFactory.fillDefaults().grab(true, true).applyTo(natTable);
-
-        natTable.getDisplay().asyncExec(()-> {
-            natTable.doCommand(new FreezeColumnCommand(natTable, 1, false, true));
-        });
-
-        //natTable.doCommand(new FreezeColumnCommand(bodyLayerStack.getTreeLayer(), 1));
-	}
 	
-	private RootScope createTree() {
+	private static RootScope createTree() {
 		Experiment experiment = new Experiment();
 		List<BaseMetric> listMetrics = new ArrayList<>();
 		for (int i=0; i<20; i++) {
@@ -194,7 +97,7 @@ public class TestMain implements IScopeTreeAction
 		return root;
 	}
 	
-	private void createMetric(Scope scope, Experiment exp) {
+	private static void createMetric(Scope scope, Experiment exp) {
 		Random r = new Random();
 		
 		for(int i=0; i<exp.getMetricCount(); i++) {
@@ -206,96 +109,4 @@ public class TestMain implements IScopeTreeAction
 		}
 		
 	}
-	
-	private static class ColumnHeaderDataProvider implements IDataProvider
-	{
-		private final Experiment exp;
-		
-		public ColumnHeaderDataProvider(RootScope root) {
-			exp = (Experiment) root.getExperiment();			
-		}
-		@Override
-		public Object getDataValue(int columnIndex, int rowIndex) {
-			if (columnIndex == 0)
-				return "Tree scope";
-			
-			return exp.getMetric(columnIndex-1).getDisplayName();
-		}
-
-		@Override
-		public void setDataValue(int columnIndex, int rowIndex, Object newValue) {}
-
-		@Override
-		public int getColumnCount() {
-			return 1 + exp.getMetricCount();
-		}
-
-		@Override
-		public int getRowCount() {
-			return 1;
-		}
-		
-	}
-	
-    /**
-     * Always encapsulate the body layer stack in an AbstractLayerTransform to
-     * ensure that the index transformations are performed in later commands.
-     *
-     * @param <T>
-     */
-    class BodyLayerStack extends AbstractLayerTransform  
-    {
-
-        private final IDataProvider bodyDataProvider;
-        private final SelectionLayer selectionLayer;
-        private final TreeLayer treeLayer;
-        private final ViewportLayer viewportLayer;
-        private final FreezeLayer freezeLayer ;
-        private final CompositeFreezeLayer compositeFreezeLayer ;
-
-        public BodyLayerStack(RootScope root,
-        					  ITreeData<Scope> treeData,
-        					  Experiment experiment,
-        					  IScopeTreeAction treeAction) {
-
-            this.bodyDataProvider = new ScopeTreeDataProvider(treeData, experiment); 
-            DataLayer bodyDataLayer = new DataLayer(this.bodyDataProvider);
-
-            // simply apply labels for every column by index
-            bodyDataLayer.setConfigLabelAccumulator(new ColumnLabelAccumulator());
-
-            ScopeTreeRowModel treeRowModel = new ScopeTreeRowModel((ITreeData<Scope>) treeData, treeAction);
-
-            this.selectionLayer = new SelectionLayer(bodyDataLayer);
-            this.treeLayer = new TreeLayer(this.selectionLayer, treeRowModel);
-            this.viewportLayer = new ViewportLayer(this.treeLayer);
-            this.freezeLayer = new FreezeLayer(treeLayer);
-            compositeFreezeLayer = new CompositeFreezeLayer(freezeLayer, viewportLayer, selectionLayer);
-            
-            treeLayer.expandTreeRow(0);
-            
-            setUnderlyingLayer(compositeFreezeLayer);
-        }
-
-        public SelectionLayer getSelectionLayer() {
-            return this.selectionLayer;
-        }
-
-        public TreeLayer getTreeLayer() {
-            return this.treeLayer;
-        }
-        
-        public ViewportLayer getViewportLayer() {
-        	return this.viewportLayer;
-        }
-
-        public CompositeFreezeLayer getFreezeLayer() {
-			return compositeFreezeLayer;
-		}
-
-		public IDataProvider getBodyDataProvider() {
-            return this.bodyDataProvider;
-        }
-    }
-
 }
