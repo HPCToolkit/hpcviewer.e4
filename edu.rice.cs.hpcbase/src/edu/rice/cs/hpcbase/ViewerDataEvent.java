@@ -1,6 +1,5 @@
 package edu.rice.cs.hpcbase;
 
-import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 
 /***************************************************************

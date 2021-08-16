@@ -10,7 +10,6 @@ Export-Package: edu.rice.cs.hpcfilter,
  edu.rice.cs.hpcfilter.dialog,
  edu.rice.cs.hpcfilter.internal,
  edu.rice.cs.hpcfilter.service
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: edu.rice.cs.hpcdata,
  edu.rice.cs.hpcbase,
  edu.rice.cs.hpcdata.tld,
