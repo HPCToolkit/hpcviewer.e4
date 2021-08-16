@@ -24,6 +24,7 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
     private final TreeLayer treeLayer;
     private final FreezeLayer freezeLayer ;
     private final CompositeFreezeLayer compositeFreezeLayer ;
+    private final ScopeTreeRowModel treeRowModel ;
 
     public ScopeTreeBodyLayerStack(RootScope root,
     					  		   ITreeData<Scope> treeData,
@@ -36,7 +37,7 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
         // simply apply labels for every column by index
         bodyDataLayer.setConfigLabelAccumulator(new ColumnLabelAccumulator());
 
-        ScopeTreeRowModel treeRowModel = new ScopeTreeRowModel((ITreeData<Scope>) treeData, treeAction);
+        treeRowModel = new ScopeTreeRowModel((ITreeData<Scope>) treeData, treeAction);
 
         this.selectionLayer = new SelectionLayer(bodyDataLayer);
         this.treeLayer      = new TreeLayer(this.selectionLayer, treeRowModel);
@@ -59,6 +60,10 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
 
     public CompositeFreezeLayer getFreezeLayer() {
 		return compositeFreezeLayer;
+	}
+
+	public ScopeTreeRowModel getTreeRowModel() {
+		return treeRowModel;
 	}
 
 	public IDataProvider getBodyDataProvider() {

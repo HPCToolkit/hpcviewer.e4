@@ -16,6 +16,8 @@ import org.eclipse.nebula.widgets.nattable.grid.layer.GridLayer;
 import org.eclipse.nebula.widgets.nattable.grid.layer.RowHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayer;
+import org.eclipse.nebula.widgets.nattable.sort.SortHeaderLayer;
+import org.eclipse.nebula.widgets.nattable.sort.config.SingleClickSortConfiguration;
 import org.eclipse.nebula.widgets.nattable.ui.menu.AbstractHeaderMenuConfiguration;
 import org.eclipse.nebula.widgets.nattable.ui.menu.PopupMenuBuilder;
 import org.eclipse.swt.layout.GridLayout;
@@ -23,7 +25,9 @@ import org.eclipse.swt.widgets.Composite;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
+import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpctree.internal.IScopeTreeAction;
+
 
 public class ScopeTreeTable extends Composite implements IScopeTreeAction
 {
@@ -38,8 +42,9 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction
         // handling
         ConfigRegistry configRegistry = new ConfigRegistry();
         
+        final ScopeTreeData treedata = new ScopeTreeData(root);
         final ScopeTreeBodyLayerStack bodyLayerStack = new ScopeTreeBodyLayerStack(root, 
-        														 new ScopeTreeData(root), 
+        														 treedata, 
         														 (Experiment) root.getExperiment(), this);
         
         // build the column header layer
@@ -48,6 +53,7 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction
                 new DefaultColumnHeaderDataLayer(columnHeaderDataProvider);
         ILayer columnHeaderLayer =
                 new ColumnHeaderLayer(columnHeaderDataLayer, bodyLayerStack.getFreezeLayer(), bodyLayerStack.getSelectionLayer());
+        SortHeaderLayer<Scope> headerLayer = new SortHeaderLayer<>(columnHeaderLayer, bodyLayerStack.getTreeRowModel());
 
         // build the row header layer
         IDataProvider rowHeaderDataProvider =
@@ -63,11 +69,11 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction
         DataLayer cornerDataLayer =
                 new DataLayer(cornerDataProvider);
         ILayer cornerLayer =
-                new CornerLayer(cornerDataLayer, rowHeaderLayer, columnHeaderLayer);
+                new CornerLayer(cornerDataLayer, rowHeaderLayer, headerLayer);
 
         // build the grid layer
         GridLayer gridLayer =
-                new GridLayer(bodyLayerStack.getFreezeLayer(), columnHeaderLayer, rowHeaderLayer, cornerLayer);
+                new GridLayer(bodyLayerStack.getFreezeLayer(), headerLayer, rowHeaderLayer, cornerLayer);
 
         // turn the auto configuration off as we want to add our header menu
         // configuration
@@ -78,6 +84,7 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction
         // manually
         natTable.setConfigRegistry(configRegistry);
         natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
+		natTable.addConfiguration(new SingleClickSortConfiguration());
         natTable.addConfiguration(new AbstractHeaderMenuConfiguration(natTable) {
             @Override
             protected PopupMenuBuilder createColumnHeaderMenu(NatTable natTable) {
