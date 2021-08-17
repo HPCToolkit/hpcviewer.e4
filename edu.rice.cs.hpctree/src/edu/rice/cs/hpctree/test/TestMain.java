@@ -81,13 +81,13 @@ public class TestMain implements IScopeTreeAction
 		RootScope root = new RootScope(experiment, "root", RootScopeType.DatacentricTree);
 		createMetric(root, experiment);
 		
-		for (int i=0; i<20000; i++) {
+		for (int i=0; i<20; i++) {
 			Scope child = new ProcedureScope(root, null, i, i, "Proc " + i, false, i, i, null, 0);
 			child.setParentScope(root);
 			createMetric(child, experiment);
  			root.addSubscope(child);
 			
-			for(int j=0; j<30; j++) {
+			for(int j=0; j<10; j++) {
 				Scope grandChild = new ProcedureScope(root, null, i, i, "g-proc " + i +", " + j, false, i, i, null, 0);
 				grandChild.setParentScope(child);
 				createMetric(grandChild, experiment);

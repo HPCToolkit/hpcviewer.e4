@@ -2,9 +2,6 @@ package edu.rice.cs.hpctree;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.nebula.widgets.nattable.sort.SortDirectionEnum;
@@ -18,7 +15,7 @@ import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 public class ScopeTreeData implements ITreeData<Scope> 
 {
 	private MutableList<Scope> list;
-	private final SortedSet<Integer> sortedColumns;
+	private int sortedColumn;
 	private SortDirectionEnum sortDirection;
 
 	/***
@@ -28,9 +25,14 @@ public class ScopeTreeData implements ITreeData<Scope>
 	public ScopeTreeData(RootScope root) {
 		this.list = FastList.newList();
 		this.list.add(root);
-		this.sortedColumns = new TreeSet<>();
-		this.sortedColumns.add(1);
+		
+		clear();
+	}
+	
+	
+	public void clear() {
 		this.sortDirection = SortDirectionEnum.DESC;
+		this.sortedColumn  = 1;
 	}
 	
 	
@@ -40,11 +42,17 @@ public class ScopeTreeData implements ITreeData<Scope>
 
 	
 	public void sort(int columnIndex, SortDirectionEnum sortDirection, boolean accumulate) {
-		sortedColumns.remove(columnIndex);		
-		sortedColumns.add(columnIndex);
-		this.sortDirection = sortDirection; 
+		sortedColumn = columnIndex;
+		this.sortDirection = sortDirection;
 		
-		ColumnComparator comparator = getComparator(columnIndex, sortDirection);
+		// We only allow 2 types of sort: ascending and descending
+		// other than that (case for none), we have to convert it		
+		if (sortDirection.equals(SortDirectionEnum.NONE)) {
+			this.sortDirection = this.sortDirection.equals(SortDirectionEnum.ASC)?
+								 SortDirectionEnum.DESC : SortDirectionEnum.ASC;
+		}
+		
+		ColumnComparator comparator = getComparator(columnIndex, this.sortDirection);
 		list.sort(comparator);
 	}
 	
@@ -54,7 +62,16 @@ public class ScopeTreeData implements ITreeData<Scope>
 		return comparator;
 	}
 	
+	
+	public int getSortedColumn() {
+		return sortedColumn;
+	}
 
+	public SortDirectionEnum getSortDirection() {
+		return sortDirection;
+	}
+	
+	
 	/****
 	 * Expand a tree node.
 	 * This method has to be called BEFORE calling tree data's expand
@@ -65,7 +82,7 @@ public class ScopeTreeData implements ITreeData<Scope>
 		List<? extends TreeNode> children = scope.getListChildren();
 		List<Scope> listScopes = convert(children);
 		
-		int colIndex = sortedColumns.last();
+		int colIndex = sortedColumn;
 		ColumnComparator comparator = getComparator(colIndex, sortDirection);
 		listScopes.sort(comparator);
 		

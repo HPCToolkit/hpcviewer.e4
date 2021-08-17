@@ -18,26 +18,25 @@ import edu.rice.cs.hpctree.internal.IScopeTreeAction;
 
 public class ScopeTreeBodyLayerStack extends AbstractLayerTransform 
 {
-
-    private final IDataProvider bodyDataProvider;
+    private final IDataProvider  bodyDataProvider;
     private final SelectionLayer selectionLayer;
-    private final TreeLayer treeLayer;
-    private final FreezeLayer freezeLayer ;
+    private final TreeLayer      treeLayer;
+    private final FreezeLayer    freezeLayer ;
     private final CompositeFreezeLayer compositeFreezeLayer ;
-    private final ScopeTreeRowModel treeRowModel ;
+    private final ScopeTreeRowModel    treeRowModel ;
 
     public ScopeTreeBodyLayerStack(RootScope root,
     					  		   ITreeData<Scope> treeData,
     							   Experiment experiment,
     							   IScopeTreeAction treeAction) {
 
-        this.bodyDataProvider = new ScopeTreeDataProvider(treeData, experiment); 
+        this.bodyDataProvider   = new ScopeTreeDataProvider(treeData, experiment); 
         DataLayer bodyDataLayer = new DataLayer(this.bodyDataProvider);
 
         // simply apply labels for every column by index
         bodyDataLayer.setConfigLabelAccumulator(new ColumnLabelAccumulator());
 
-        treeRowModel = new ScopeTreeRowModel((ITreeData<Scope>) treeData, treeAction);
+        treeRowModel = new ScopeTreeRowModel(treeData, treeAction);
 
         this.selectionLayer = new SelectionLayer(bodyDataLayer);
         this.treeLayer      = new TreeLayer(this.selectionLayer, treeRowModel);
