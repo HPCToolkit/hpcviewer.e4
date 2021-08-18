@@ -42,16 +42,20 @@ public class ScopeTreeData implements ITreeData<Scope>
 
 	
 	public void sort(int columnIndex, SortDirectionEnum sortDirection, boolean accumulate) {
-		sortedColumn = columnIndex;
 		this.sortDirection = sortDirection;
 		
 		// We only allow 2 types of sort: ascending and descending
 		// other than that (case for none), we have to convert it		
 		if (sortDirection.equals(SortDirectionEnum.NONE)) {
-			this.sortDirection = this.sortDirection.equals(SortDirectionEnum.ASC)?
-								 SortDirectionEnum.DESC : SortDirectionEnum.ASC;
+			if (columnIndex == sortedColumn) {
+				this.sortDirection = this.sortDirection.equals(SortDirectionEnum.ASC)?
+						 SortDirectionEnum.DESC : SortDirectionEnum.ASC;
+			} else {
+				this.sortDirection = SortDirectionEnum.DESC;
+			}
 		}
-		
+		sortedColumn = columnIndex;
+
 		ColumnComparator comparator = getComparator(columnIndex, this.sortDirection);
 		list.sort(comparator);
 	}
