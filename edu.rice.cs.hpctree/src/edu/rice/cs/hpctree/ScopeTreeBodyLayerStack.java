@@ -7,13 +7,9 @@ import org.eclipse.nebula.widgets.nattable.layer.AbstractLayerTransform;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.nebula.widgets.nattable.layer.cell.ColumnLabelAccumulator;
 import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
-import org.eclipse.nebula.widgets.nattable.tree.ITreeData;
 import org.eclipse.nebula.widgets.nattable.tree.TreeLayer;
 import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
 
-import edu.rice.cs.hpcdata.experiment.Experiment;
-import edu.rice.cs.hpcdata.experiment.scope.RootScope;
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpctree.internal.IScopeTreeAction;
 
 public class ScopeTreeBodyLayerStack extends AbstractLayerTransform 
@@ -25,14 +21,14 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
     private final CompositeFreezeLayer compositeFreezeLayer ;
     private final ScopeTreeRowModel    treeRowModel ;
 
-    public ScopeTreeBodyLayerStack(RootScope root,
-    					  		   ITreeData<Scope> treeData,
-    							   Experiment experiment,
+    public ScopeTreeBodyLayerStack(ScopeTreeData treeData,
     							   IScopeTreeAction treeAction) {
 
-        this.bodyDataProvider   = new ScopeTreeDataProvider(treeData, experiment); 
+        this.bodyDataProvider   = new ScopeTreeDataProvider(treeData, treeData.getMetricManager()); 
         DataLayer bodyDataLayer = new DataLayer(this.bodyDataProvider);
 
+        bodyDataLayer.setColumnsResizableByDefault(true);
+        bodyDataLayer.setColumnWidthByPosition(0, 350);
         // simply apply labels for every column by index
         bodyDataLayer.setConfigLabelAccumulator(new ColumnLabelAccumulator());
 
@@ -44,7 +40,7 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
         this.freezeLayer     = new FreezeLayer(treeLayer);
         compositeFreezeLayer = new CompositeFreezeLayer(freezeLayer, viewportLayer, selectionLayer);
         
-        if (root.hasChildren())
+        if (treeData.getRoot().hasChildren())
         	treeLayer.expandTreeRow(0);
         
         setUnderlyingLayer(compositeFreezeLayer);

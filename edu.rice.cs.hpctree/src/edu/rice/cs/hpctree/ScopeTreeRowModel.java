@@ -26,7 +26,9 @@ import edu.rice.cs.hpctree.internal.IScopeTreeAction;
  ***********************************************************/
 public class ScopeTreeRowModel extends TreeRowModel<Scope> implements ISortModel, ILayerListener
 {
-	private IntHashSet expandSet;
+	/** to keep track the expanded nodes, 
+	 *  used to check if a node is expanded or not **/
+	private final IntHashSet       expandSet;
 	private final IScopeTreeAction treeAction;
 
 	public ScopeTreeRowModel(ITreeData<Scope> treeData, IScopeTreeAction treeAction) {
@@ -133,7 +135,7 @@ public class ScopeTreeRowModel extends TreeRowModel<Scope> implements ISortModel
 	public void handleLayerEvent(ILayerEvent event) {
 		if (event instanceof StructuralRefreshEvent
                 && ((StructuralRefreshEvent) event).isHorizontalStructureChanged()) {
-			
+			System.out.println("table layer event: " + event.toString());
 		}
 	}
 }

@@ -23,7 +23,7 @@ import org.eclipse.nebula.widgets.nattable.ui.menu.PopupMenuBuilder;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
-import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpctree.internal.IScopeTreeAction;
@@ -33,11 +33,11 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction
 {
 	private final NatTable natTable ;
 
-	public ScopeTreeTable(Composite parent, int style, RootScope root) {
-		this(parent, style, root, new ScopeTreeData(root));
+	public ScopeTreeTable(Composite parent, int style, RootScope root, IMetricManager metricManager) {
+		this(parent, style, new ScopeTreeData(root, metricManager));
 	}
 	
-	public ScopeTreeTable(Composite parent, int style, RootScope root, ScopeTreeData treeData) {
+	public ScopeTreeTable(Composite parent, int style, ScopeTreeData treeData) {
 		super(parent, style);
 
 		setLayout(new GridLayout());
@@ -46,20 +46,21 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction
         // handling
         ConfigRegistry configRegistry = new ConfigRegistry();
         
-        final ScopeTreeData treedata = new ScopeTreeData(root);
-        final ScopeTreeBodyLayerStack bodyLayerStack = new ScopeTreeBodyLayerStack(root, 
-        														 treedata, 
-        														 (Experiment) root.getExperiment(), this);
+        final ScopeTreeBodyLayerStack bodyLayerStack = new ScopeTreeBodyLayerStack(treeData,  this);
         
+        // --------------------------------
         // build the column header layer
-        IDataProvider columnHeaderDataProvider = new ColumnHeaderDataProvider(root);
+        // --------------------------------
+        IDataProvider columnHeaderDataProvider = new ColumnHeaderDataProvider(treeData.getMetricManager());
         DataLayer columnHeaderDataLayer =
                 new DefaultColumnHeaderDataLayer(columnHeaderDataProvider);
         ILayer columnHeaderLayer =
                 new ColumnHeaderLayer(columnHeaderDataLayer, bodyLayerStack.getFreezeLayer(), bodyLayerStack.getSelectionLayer());
         SortHeaderLayer<Scope> headerLayer = new SortHeaderLayer<>(columnHeaderLayer, bodyLayerStack.getTreeRowModel());
 
+        // --------------------------------
         // build the row header layer
+        // --------------------------------
         IDataProvider rowHeaderDataProvider =
                 new DefaultRowHeaderDataProvider(bodyLayerStack.getBodyDataProvider());
         DataLayer rowHeaderDataLayer =
@@ -99,6 +100,8 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction
                         .withFreezeColumnMenuItem();
             }
         });
+        // I don't know why we have to refresh the table here
+        // However, without refreshing, the content will be weird
         natTable.refresh();
         natTable.configure();
 
@@ -120,17 +123,17 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction
 	
 	private static class ColumnHeaderDataProvider implements IDataProvider
 	{
-		private final Experiment exp;
+		private final IMetricManager metricManager;
 		
-		public ColumnHeaderDataProvider(RootScope root) {
-			exp = (Experiment) root.getExperiment();			
+		public ColumnHeaderDataProvider(IMetricManager metricManager) {
+			this.metricManager = metricManager;			
 		}
 		@Override
 		public Object getDataValue(int columnIndex, int rowIndex) {
 			if (columnIndex == 0)
-				return "Tree scope";
+				return "Scope";
 			
-			return exp.getMetric(columnIndex-1).getDisplayName();
+			return metricManager.getMetric(columnIndex-1).getDisplayName();
 		}
 
 		@Override
@@ -138,7 +141,7 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction
 
 		@Override
 		public int getColumnCount() {
-			return 1 + exp.getMetricCount();
+			return 1 + metricManager.getMetricCount();
 		}
 
 		@Override

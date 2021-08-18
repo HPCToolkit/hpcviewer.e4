@@ -7,15 +7,16 @@ import org.eclipse.nebula.widgets.nattable.tree.ITreeData;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
+import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 public class ScopeTreeDataProvider implements IDataProvider 
 {
 	private final ITreeData<Scope> treeData;
-	private final Experiment experiment;
+	private final IMetricManager experiment;
 	
-	public ScopeTreeDataProvider(ITreeData<Scope> treeData, Experiment experiment) {
+	public ScopeTreeDataProvider(ITreeData<Scope> treeData, IMetricManager experiment) {
 		this.treeData   = treeData;
 		this.experiment = experiment;
 	}

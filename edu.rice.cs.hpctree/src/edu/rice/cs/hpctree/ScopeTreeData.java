@@ -7,6 +7,7 @@ import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.nebula.widgets.nattable.sort.SortDirectionEnum;
 import org.eclipse.nebula.widgets.nattable.tree.ITreeData;
 
+import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -14,7 +15,10 @@ import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 
 public class ScopeTreeData implements ITreeData<Scope> 
 {
-	private MutableList<Scope> list;
+	private final MutableList<Scope> list;
+	private final RootScope root;
+	private final IMetricManager metricManager;
+	
 	private int sortedColumn;
 	private SortDirectionEnum sortDirection;
 
@@ -22,13 +26,25 @@ public class ScopeTreeData implements ITreeData<Scope>
 	 * Constructor to create a tree data based on the root
 	 * @param root the root scope
 	 */
-	public ScopeTreeData(RootScope root) {
+	public ScopeTreeData(RootScope root, IMetricManager metricManager) {
 		this.list = FastList.newList();
 		this.list.add(root);
+		
+		this.root = root;
+		this.metricManager = metricManager;
 		
 		clear();
 	}
 	
+	
+	public RootScope getRoot() {
+		return root;
+	}
+	
+	
+	public IMetricManager getMetricManager() {
+		return metricManager;
+	}
 	
 	public void clear() {
 		this.sortDirection = SortDirectionEnum.DESC;

@@ -15,6 +15,7 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
+import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.Metric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
@@ -48,7 +49,7 @@ public class TestMain implements IScopeTreeAction
 		
         RootScope root = createTree();
 
-		ScopeTreeTable table = new ScopeTreeTable(shell, SWT.NONE, root);
+		ScopeTreeTable table = new ScopeTreeTable(shell, SWT.NONE, root, (IMetricManager) root.getExperiment());
 
 		
 		shell.open();
