@@ -79,11 +79,13 @@ public class ScopeTreeData implements ITreeData<Scope>
 	 */
 	public void expand(int index) {
 		Scope scope = list.get(index);
+		if (!scope.hasChildren())
+			return;
+		
 		List<? extends TreeNode> children = scope.getListChildren();
 		List<Scope> listScopes = convert(children);
 		
-		int colIndex = sortedColumn;
-		ColumnComparator comparator = getComparator(colIndex, sortDirection);
+		ColumnComparator comparator = getComparator(sortedColumn, sortDirection);
 		listScopes.sort(comparator);
 		
 		list.addAll(index+1, listScopes);
@@ -177,6 +179,20 @@ public class ScopeTreeData implements ITreeData<Scope>
 	public boolean isValidIndex(int index) {
 		return (index >= 0) && (index < list.size());
 	}
+	
+	public static Scope getAncestor(Scope scope, int currentDepth, int targetDepth) {
+		if (scope == null)
+			return null;
+		
+		int depth=currentDepth-1;
+		Scope current = scope.getParentScope();
+		
+		for (;depth>targetDepth && current != null; depth--) {
+			current = current.getParentScope();
+		}
+		return current;
+		
+	}
 
 	private static class ColumnComparator implements Comparator<Scope> 
 	{
@@ -199,12 +215,14 @@ public class ScopeTreeData implements ITreeData<Scope>
 				int d2 = this.treeData.getDepthOfData(o2);
 				
 				if (d1 > d2) {
-					result = compare(o1.getParentScope(), o2, index, dir);
+					Scope ancestor1 = ScopeTreeData.getAncestor(o1, d1, d2);
+					result = compare(ancestor1, o2, index, dir);
 					if (result == 0) {
 						return 1;
 					}
 				} else if (d1 < d2) {
-					result = compare(o1, o2.getParentScope(), index, dir);
+					Scope ancestor2 = ScopeTreeData.getAncestor(o2, d2, d1);
+					result = compare(o1, ancestor2, index, dir);
 					if (result == 0) {
 						return -1;
 					}

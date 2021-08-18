@@ -34,6 +34,10 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction
 	private final NatTable natTable ;
 
 	public ScopeTreeTable(Composite parent, int style, RootScope root) {
+		this(parent, style, root, new ScopeTreeData(root));
+	}
+	
+	public ScopeTreeTable(Composite parent, int style, RootScope root, ScopeTreeData treeData) {
 		super(parent, style);
 
 		setLayout(new GridLayout());
