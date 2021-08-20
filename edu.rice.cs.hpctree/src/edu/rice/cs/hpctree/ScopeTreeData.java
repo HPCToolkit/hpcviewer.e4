@@ -3,15 +3,10 @@ package edu.rice.cs.hpctree;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import org.eclipse.collections.api.list.MutableList;
-import org.eclipse.collections.api.map.primitive.IntIntMap;
-import org.eclipse.collections.api.set.primitive.IntSet;
 import org.eclipse.collections.impl.list.mutable.FastList;
-import org.eclipse.collections.impl.map.mutable.primitive.IntIntHashMap;
 import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
-import org.eclipse.collections.impl.set.mutable.primitive.IntHashSet;
 import org.eclipse.nebula.widgets.nattable.sort.SortDirectionEnum;
 import org.eclipse.nebula.widgets.nattable.tree.ITreeData;
 
@@ -21,19 +16,31 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 
-public class ScopeTreeData implements ITreeData<Scope> 
+/******************************************************
+ * 
+ * Default ITreeData of hpcviewer tree 
+ *
+ ******************************************************/
+public class ScopeTreeData implements IScopeTreeData
 {
-	private final MutableList<Scope> list;
 	private final RootScope root;
 	private final IMetricManager metricManager;
+
+	/** list of current data. The list is dynamic, always incremental **/
+	private final MutableList<Scope> list;
+	/** map of the collapsed nodes. The key is the parent index. 
+	 *  The  value is the list of collapsed nodes of the parent */
 	private final IntObjectHashMap<List<? extends TreeNode>> mapCollapsedScopes;
 
+	// attributes to handle sorting
 	private int sortedColumn;
 	private SortDirectionEnum sortDirection;
 
+	
 	/***
 	 * Constructor to create a tree data based on the root
 	 * @param root the root scope
+	 * @param metricManager the metric manager of the experiment or database
 	 */
 	public ScopeTreeData(RootScope root, IMetricManager metricManager) {
 		this.list = FastList.newList();
@@ -47,27 +54,53 @@ public class ScopeTreeData implements ITreeData<Scope>
 		clear();
 	}
 	
-	
+	/****
+	 * Get the root of this tree data
+	 * @return RootScope
+	 */
+	@Override
 	public RootScope getRoot() {
 		return root;
 	}
 	
-	
+	/***
+	 * Get the metric manager of this tree data
+	 * @return
+	 */
+	@Override
 	public IMetricManager getMetricManager() {
 		return metricManager;
 	}
 	
+	
+	/** 
+	 * Reset the data
+	 */
+	@Override
 	public void clear() {
 		this.sortDirection = SortDirectionEnum.DESC;
 		this.sortedColumn  = 1;
 	}
 	
 	
+	/***
+	 * Get the current list of data.
+	 * Recall that the list is created and added dynamically depending if the tree
+	 * has been expanded or not.
+	 * 
+	 * @return {@code MutableList<Scope>} list of scope data
+	 */
+	@Override
 	public MutableList<Scope> getList() {
 		return list;
 	}
 
-	
+	/***
+	 * Method to notify to sort the data based on certain column and direction
+	 * @param columnIndex the column index. Must be greater or equal to 0
+	 * @param sortDirection {@code SortDirectionEnum}
+	 * @param accumulate
+	 */
 	public void sort(int columnIndex, SortDirectionEnum sortDirection, boolean accumulate) {
 		this.sortDirection = sortDirection;
 		
@@ -107,7 +140,7 @@ public class ScopeTreeData implements ITreeData<Scope>
 	
 	/****
 	 * Expand a tree node.
-	 * This method has to be called BEFORE calling tree data's expand
+	 * This method has to be called BEFORE calling tree model's {@code expand}
 	 * @param index
 	 */
 	public void expand(int index) {
@@ -126,30 +159,16 @@ public class ScopeTreeData implements ITreeData<Scope>
 			listScopes.sort(comparator);
 			
 			list.addAll(index+1, listScopes);
-			System.out.println(": Expand " + index + " direct-kids: " + listScopes.size());
 		}
 	}
 	
-	
+		
 	/****
 	 * Collapse a tree node. 
-	 * This method has to be called BEFORE calling the tree data
+	 * This method has to be called AFTER calling the tree data
 	 * @param index element index
+	 * @param listCollapsedIndexes list of collapsed indexes from {@code TreeRowModel}
 	 */
-	public List<Integer> collapse(int index) {
-		List<Integer> childrenIndexes = FastList.newList();
-		
-		Scope scope = list.get(index);
-		List<? extends TreeNode> children = scope.getListChildren();
-		
-		list.subList(index+1, index+1+children.size()).clear();
-		mapCollapsedScopes.put(index, children);
-		
-		System.out.println("\t" + ": Collapse " + index + " direct-kids: " + children.size() + " kids ");
-		return childrenIndexes;
-	}
-	
-	
 	public void collapse(int parentIndex, List<Integer> listCollapsedIndexes) {
 		List<Scope> collapsedChildren = FastList.newList();
 		synchronized (list) {
@@ -158,8 +177,6 @@ public class ScopeTreeData implements ITreeData<Scope>
 				collapsedChildren.add(list.get(index.intValue()));
 			});
 			mapCollapsedScopes.put(parentIndex, collapsedChildren);
-
-			System.out.println("\t" + ": Collapse children " + collapsedChildren + " , index: " + listCollapsedIndexes);
 		}
 	}
 	
@@ -253,6 +270,14 @@ public class ScopeTreeData implements ITreeData<Scope>
 		return listChildren.contains(scope);
 	}
 	
+	
+	/***
+	 * Retrieve the ancestor of specific depth from a scope  
+	 * @param scope the current scope
+	 * @param currentDepth the depth of the current scope
+	 * @param targetDepth the depth of the ancestor
+	 * @return the ancestor if exists, {@code null} otherwise
+	 */
 	public static Scope getAncestor(Scope scope, int currentDepth, int targetDepth) {
 		if (scope == null)
 			return null;

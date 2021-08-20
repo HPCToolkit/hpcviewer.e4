@@ -4,13 +4,11 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.nebula.widgets.nattable.layer.ILayerListener;
 import org.eclipse.nebula.widgets.nattable.layer.event.ILayerEvent;
 import org.eclipse.nebula.widgets.nattable.layer.event.StructuralRefreshEvent;
 import org.eclipse.nebula.widgets.nattable.sort.ISortModel;
 import org.eclipse.nebula.widgets.nattable.sort.SortDirectionEnum;
-import org.eclipse.nebula.widgets.nattable.tree.ITreeData;
 import org.eclipse.nebula.widgets.nattable.tree.TreeRowModel;
 
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -29,17 +27,16 @@ public class ScopeTreeRowModel extends TreeRowModel<Scope> implements ISortModel
 {
 	private final IScopeTreeAction treeAction;
 
-	public ScopeTreeRowModel(ITreeData<Scope> treeData, IScopeTreeAction treeAction) {
+	public ScopeTreeRowModel(IScopeTreeData treeData, IScopeTreeAction treeAction) {
 		super(treeData);
 		this.treeAction = treeAction;
 	}
 	
 	@Override
     public boolean isCollapsed(int index) {
-		ScopeTreeData tdata = (ScopeTreeData) getTreeData();
+		IScopeTreeData tdata = (IScopeTreeData) getTreeData();
 		Scope scope = tdata.getDataAtIndex(index);
 		if (!scope.hasChildren()) {
-			System.out.println("isCollapsed " + index + ": false");
 			return false;
 		}
 		Scope child = scope.getSubscope(0);
@@ -52,14 +49,13 @@ public class ScopeTreeRowModel extends TreeRowModel<Scope> implements ISortModel
     public List<Integer> collapse(int index) {
 		// remove the collapsed children of the scope before 
 		// calculating the child indexes
-		ScopeTreeData tdata = (ScopeTreeData) getTreeData();
+		IScopeTreeData tdata = (IScopeTreeData) getTreeData();
 
 		// calculate the children indexes, including all the 
 		// expanded descendants
 		List<Integer> listIndexes = super.collapse(index);
 		tdata.collapse(index, listIndexes);
 		
-		System.out.println("\tCollapse " + index + ": " + listIndexes + " vs " +tdata.getList());
 		return listIndexes;
 	}
 
@@ -72,7 +68,7 @@ public class ScopeTreeRowModel extends TreeRowModel<Scope> implements ISortModel
 	@Override
     public List<Integer> expand(int index) {
 		// first, create the children 
-		ScopeTreeData tdata = (ScopeTreeData) getTreeData();
+		IScopeTreeData tdata = (IScopeTreeData) getTreeData();
 		tdata.expand(index);
 		
 		// calculate the children indexes, including all the 
@@ -83,7 +79,6 @@ public class ScopeTreeRowModel extends TreeRowModel<Scope> implements ISortModel
 			// TODO: hack by refresh the table. Otherwise there is no change
 			treeAction.refresh();
 		}
-		System.out.println("Expand " + index + ": " + list + " vs " + tdata.getList());
 		return list;
 	}
 	
@@ -96,20 +91,20 @@ public class ScopeTreeRowModel extends TreeRowModel<Scope> implements ISortModel
 	@Override
 	public List<Integer> getSortedColumnIndexes() {
 		final List<Integer> list = new ArrayList<>(1);
-		ScopeTreeData treeData = (ScopeTreeData) getTreeData();
+		IScopeTreeData treeData = (IScopeTreeData) getTreeData();
 		list.add(treeData.getSortedColumn());
 		return list;
 	}
 
 	@Override
 	public boolean isColumnIndexSorted(int columnIndex) {
-		ScopeTreeData treeData = (ScopeTreeData) getTreeData();
+		IScopeTreeData treeData = (IScopeTreeData) getTreeData();
 		return columnIndex == treeData.getSortedColumn();
 	}
 
 	@Override
 	public SortDirectionEnum getSortDirection(int columnIndex) {
-		ScopeTreeData treeData = (ScopeTreeData) getTreeData();
+		IScopeTreeData treeData = (IScopeTreeData) getTreeData();
 		return treeData.getSortDirection();
 	}
 
@@ -131,13 +126,13 @@ public class ScopeTreeRowModel extends TreeRowModel<Scope> implements ISortModel
 
 	@Override
 	public void sort(int columnIndex, SortDirectionEnum sortDirection, boolean accumulate) {
-		ScopeTreeData treedata = (ScopeTreeData) getTreeData();
+		IScopeTreeData treedata = (IScopeTreeData) getTreeData();
 		treedata.sort(columnIndex, sortDirection, accumulate);
 	}
 
 	@Override
 	public void clear() {
-		ScopeTreeData treedata = (ScopeTreeData) getTreeData();
+		IScopeTreeData treedata = (IScopeTreeData) getTreeData();
 		treedata.clear();
 	}
 
