@@ -18,6 +18,8 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
     private final SelectionLayer selectionLayer;
     private final TreeLayer      treeLayer;
     private final FreezeLayer    freezeLayer ;
+    private final ViewportLayer  viewportLayer;
+
     private final CompositeFreezeLayer compositeFreezeLayer ;
     private final ScopeTreeRowModel    treeRowModel ;
 
@@ -36,7 +38,7 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
 
         this.selectionLayer = new SelectionLayer(bodyDataLayer);
         this.treeLayer      = new TreeLayer(this.selectionLayer, treeRowModel);
-        ViewportLayer viewportLayer = new ViewportLayer(this.treeLayer);
+        this.viewportLayer  = new ViewportLayer(this.treeLayer);
         this.freezeLayer     = new FreezeLayer(treeLayer);
         compositeFreezeLayer = new CompositeFreezeLayer(freezeLayer, viewportLayer, selectionLayer);
         
@@ -58,11 +60,11 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
 		return compositeFreezeLayer;
 	}
 
+	public ViewportLayer getViewportLayer() {
+		return viewportLayer;
+	}
+
 	public ScopeTreeRowModel getTreeRowModel() {
 		return treeRowModel;
 	}
-
-	public IDataProvider getBodyDataProvider() {
-        return this.bodyDataProvider;
-    }
 }

@@ -79,10 +79,10 @@ public class TestMain implements IScopeTreeAction
 		}
 		experiment.setMetrics(listMetrics);
 		
-		RootScope root = new RootScope(experiment, "root", RootScopeType.DatacentricTree);
+		RootScope root = new RootScope(experiment, "proc 0", RootScopeType.DatacentricTree);
 		createMetric(root, experiment);
 		Random r = new Random();
-		createTreeNode(root, root, 1, r.nextInt(4)+1, 0, 10);
+		createTreeNode(root, root, 1, 4, 1, 10);
 		
 		return root;
 	}
@@ -90,15 +90,18 @@ public class TestMain implements IScopeTreeAction
 	private static void createTreeNode(RootScope root, Scope parent, int id, int children, int level, int maxLevel) {
 
 		for(int j=0; j<children; j++) {
-			int myid = 29 + id * children + j;
-			Scope grandChild = new ProcedureScope(root, null, id, id, "proc " + level + " - " + j + ": " + id, false, myid, myid, null, 0);
+			String myid = String.valueOf(level) +  String.valueOf(j);
+			String parentName = parent instanceof RootScope ? "proc 0" : parent.getName();
+			String name = parentName + "." +  myid;
+			int intmyid = Integer.valueOf(myid);
+			Scope grandChild = new ProcedureScope(root, null, 0, 0, name , false, intmyid, intmyid, null, 0);
 			grandChild.setParentScope(parent);
 			createMetric(grandChild, (Experiment) root.getExperiment());
 			parent.addSubscope(grandChild);
 			
 			if (level < maxLevel) {
 				Random r = new Random();
-				createTreeNode(root, grandChild, id + j, r.nextInt(4), level+1, maxLevel);
+				createTreeNode(root, grandChild, intmyid, 3, level+1, maxLevel);
 			}
 		}
 	}

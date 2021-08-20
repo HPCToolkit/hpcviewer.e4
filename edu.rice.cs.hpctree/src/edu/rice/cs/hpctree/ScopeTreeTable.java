@@ -6,6 +6,7 @@ import org.eclipse.nebula.widgets.nattable.config.ConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfiguration;
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
 import org.eclipse.nebula.widgets.nattable.freeze.command.FreezeColumnCommand;
+import org.eclipse.nebula.widgets.nattable.grid.GridRegion;
 import org.eclipse.nebula.widgets.nattable.grid.data.DefaultCornerDataProvider;
 import org.eclipse.nebula.widgets.nattable.grid.data.DefaultRowHeaderDataProvider;
 import org.eclipse.nebula.widgets.nattable.grid.layer.ColumnHeaderLayer;
@@ -14,6 +15,7 @@ import org.eclipse.nebula.widgets.nattable.grid.layer.DefaultColumnHeaderDataLay
 import org.eclipse.nebula.widgets.nattable.grid.layer.DefaultRowHeaderDataLayer;
 import org.eclipse.nebula.widgets.nattable.grid.layer.GridLayer;
 import org.eclipse.nebula.widgets.nattable.grid.layer.RowHeaderLayer;
+import org.eclipse.nebula.widgets.nattable.layer.CompositeLayer;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayer;
 import org.eclipse.nebula.widgets.nattable.sort.SortHeaderLayer;
@@ -55,34 +57,21 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction
         DataLayer columnHeaderDataLayer =
                 new DefaultColumnHeaderDataLayer(columnHeaderDataProvider);
         ILayer columnHeaderLayer =
-                new ColumnHeaderLayer(columnHeaderDataLayer, bodyLayerStack.getFreezeLayer(), bodyLayerStack.getSelectionLayer());
+                new ColumnHeaderLayer(columnHeaderDataLayer, bodyLayerStack, bodyLayerStack.getSelectionLayer());
         SortHeaderLayer<Scope> headerLayer = new SortHeaderLayer<>(columnHeaderLayer, bodyLayerStack.getTreeRowModel());
 
         // --------------------------------
-        // build the row header layer
+        // build the composite
         // --------------------------------
-        IDataProvider rowHeaderDataProvider =
-                new DefaultRowHeaderDataProvider(bodyLayerStack.getBodyDataProvider());
-        DataLayer rowHeaderDataLayer =
-                new DefaultRowHeaderDataLayer(rowHeaderDataProvider);
-        ILayer rowHeaderLayer =
-                new RowHeaderLayer(rowHeaderDataLayer, bodyLayerStack, bodyLayerStack.getSelectionLayer());
-
-        // build the corner layer
-        IDataProvider cornerDataProvider =
-                new DefaultCornerDataProvider(columnHeaderDataProvider, rowHeaderDataProvider);
-        DataLayer cornerDataLayer =
-                new DataLayer(cornerDataProvider);
-        ILayer cornerLayer =
-                new CornerLayer(cornerDataLayer, rowHeaderLayer, headerLayer);
-
-        // build the grid layer
-        GridLayer gridLayer =
-                new GridLayer(bodyLayerStack.getFreezeLayer(), headerLayer, rowHeaderLayer, cornerLayer);
+        
+        CompositeLayer compositeLayer = new CompositeLayer(1, 2);
+        compositeLayer.setChildLayer(GridRegion.COLUMN_HEADER, headerLayer, 0, 0);
+        compositeLayer.setChildLayer(GridRegion.BODY, bodyLayerStack, 0, 1);
+        
 
         // turn the auto configuration off as we want to add our header menu
         // configuration
-        natTable = new NatTable(this, gridLayer, false);
+        natTable = new NatTable(this, compositeLayer, false);
 
         // as the autoconfiguration of the NatTable is turned off, we have to
         // add the DefaultNatTableStyleConfiguration and the ConfigRegistry

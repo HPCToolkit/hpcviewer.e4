@@ -3,7 +3,8 @@ package edu.rice.cs.hpctree;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import org.eclipse.collections.impl.set.mutable.primitive.IntHashSet;
+
+import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.nebula.widgets.nattable.layer.ILayerListener;
 import org.eclipse.nebula.widgets.nattable.layer.event.ILayerEvent;
 import org.eclipse.nebula.widgets.nattable.layer.event.StructuralRefreshEvent;
@@ -26,53 +27,63 @@ import edu.rice.cs.hpctree.internal.IScopeTreeAction;
  ***********************************************************/
 public class ScopeTreeRowModel extends TreeRowModel<Scope> implements ISortModel, ILayerListener
 {
-	/** to keep track the expanded nodes, 
-	 *  used to check if a node is expanded or not **/
-	private final IntHashSet       expandSet;
 	private final IScopeTreeAction treeAction;
 
 	public ScopeTreeRowModel(ITreeData<Scope> treeData, IScopeTreeAction treeAction) {
 		super(treeData);
 		this.treeAction = treeAction;
-		this.expandSet  = new IntHashSet();
 	}
 	
 	@Override
     public boolean isCollapsed(int index) {
-		
-		return (! expandSet.contains(index));
+		ScopeTreeData tdata = (ScopeTreeData) getTreeData();
+		Scope scope = tdata.getDataAtIndex(index);
+		if (!scope.hasChildren()) {
+			System.out.println("isCollapsed " + index + ": false");
+			return false;
+		}
+		Scope child = scope.getSubscope(0);
+		int childIndex = tdata.indexOf(child);
+
+		return (childIndex < 0);
 	}
 	
 	@Override
     public List<Integer> collapse(int index) {
-		ITreeData<Scope> treeData = getTreeData();
-		ScopeTreeData tdata = (ScopeTreeData) treeData;
-		tdata.collapse(index);
-		expandSet.remove(index);
+		// remove the collapsed children of the scope before 
+		// calculating the child indexes
+		ScopeTreeData tdata = (ScopeTreeData) getTreeData();
+
+		// calculate the children indexes, including all the 
+		// expanded descendants
+		List<Integer> listIndexes = super.collapse(index);
+		tdata.collapse(index, listIndexes);
 		
-		return super.collapse(index);
+		System.out.println("\tCollapse " + index + ": " + listIndexes + " vs " +tdata.getList());
+		return listIndexes;
 	}
 
 	@Override
     public List<Integer> collapseAll() {
-		expandSet.clear();
-		
 		return super.collapseAll();
 	}
 	
 	
 	@Override
     public List<Integer> expand(int index) {
-		ITreeData<Scope> treeData = getTreeData();
-		ScopeTreeData tdata = (ScopeTreeData) treeData;
+		// first, create the children 
+		ScopeTreeData tdata = (ScopeTreeData) getTreeData();
 		tdata.expand(index);
-		expandSet.add(index);
 		
+		// calculate the children indexes, including all the 
+		// indirect descendants
 		List<Integer> list = super.expand(index);
+		
 		if (index == 0) {
-			// refresh the table. Otherwise there is no change
+			// TODO: hack by refresh the table. Otherwise there is no change
 			treeAction.refresh();
 		}
+		System.out.println("Expand " + index + ": " + list + " vs " + tdata.getList());
 		return list;
 	}
 	

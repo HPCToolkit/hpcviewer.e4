@@ -1,9 +1,17 @@
 package edu.rice.cs.hpctree;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import org.eclipse.collections.api.list.MutableList;
+import org.eclipse.collections.api.map.primitive.IntIntMap;
+import org.eclipse.collections.api.set.primitive.IntSet;
 import org.eclipse.collections.impl.list.mutable.FastList;
+import org.eclipse.collections.impl.map.mutable.primitive.IntIntHashMap;
+import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
+import org.eclipse.collections.impl.set.mutable.primitive.IntHashSet;
 import org.eclipse.nebula.widgets.nattable.sort.SortDirectionEnum;
 import org.eclipse.nebula.widgets.nattable.tree.ITreeData;
 
@@ -18,7 +26,8 @@ public class ScopeTreeData implements ITreeData<Scope>
 	private final MutableList<Scope> list;
 	private final RootScope root;
 	private final IMetricManager metricManager;
-	
+	private final IntObjectHashMap<List<? extends TreeNode>> mapCollapsedScopes;
+
 	private int sortedColumn;
 	private SortDirectionEnum sortDirection;
 
@@ -32,6 +41,8 @@ public class ScopeTreeData implements ITreeData<Scope>
 		
 		this.root = root;
 		this.metricManager = metricManager;
+		
+		this.mapCollapsedScopes = IntObjectHashMap.newMap();
 		
 		clear();
 	}
@@ -73,7 +84,9 @@ public class ScopeTreeData implements ITreeData<Scope>
 		sortedColumn = columnIndex;
 
 		ColumnComparator comparator = getComparator(columnIndex, this.sortDirection);
-		list.sort(comparator);
+		synchronized (list) {
+			list.sort(comparator);
+		}
 	}
 	
 	
@@ -98,29 +111,56 @@ public class ScopeTreeData implements ITreeData<Scope>
 	 * @param index
 	 */
 	public void expand(int index) {
-		Scope scope = list.get(index);
-		if (!scope.hasChildren())
-			return;
-		
-		List<? extends TreeNode> children = scope.getListChildren();
-		List<Scope> listScopes = convert(children);
-		
-		ColumnComparator comparator = getComparator(sortedColumn, sortDirection);
-		listScopes.sort(comparator);
-		
-		list.addAll(index+1, listScopes);
+		synchronized (list) {
+			Scope scope = list.get(index);
+			if (!scope.hasChildren())
+				return;
+			
+			List<? extends TreeNode> children = mapCollapsedScopes.remove(index);
+			if (children != null) {
+				return;
+			}
+			List<Scope> listScopes = convert(scope.getListChildren());
+			
+			ColumnComparator comparator = getComparator(sortedColumn, sortDirection);
+			listScopes.sort(comparator);
+			
+			list.addAll(index+1, listScopes);
+			System.out.println(": Expand " + index + " direct-kids: " + listScopes.size());
+		}
 	}
 	
 	
 	/****
 	 * Collapse a tree node. 
-	 * This methid has to be called BEFORE calling the tree data
+	 * This method has to be called BEFORE calling the tree data
 	 * @param index element index
 	 */
-	public void collapse(int index) {
+	public List<Integer> collapse(int index) {
+		List<Integer> childrenIndexes = FastList.newList();
+		
 		Scope scope = list.get(index);
 		List<? extends TreeNode> children = scope.getListChildren();
+		
 		list.subList(index+1, index+1+children.size()).clear();
+		mapCollapsedScopes.put(index, children);
+		
+		System.out.println("\t" + ": Collapse " + index + " direct-kids: " + children.size() + " kids ");
+		return childrenIndexes;
+	}
+	
+	
+	public void collapse(int parentIndex, List<Integer> listCollapsedIndexes) {
+		List<Scope> collapsedChildren = FastList.newList();
+		synchronized (list) {
+			Collections.sort(listCollapsedIndexes, Collections.reverseOrder());
+			listCollapsedIndexes.forEach(index-> {
+				collapsedChildren.add(list.get(index.intValue()));
+			});
+			mapCollapsedScopes.put(parentIndex, collapsedChildren);
+
+			System.out.println("\t" + ": Collapse children " + collapsedChildren + " , index: " + listCollapsedIndexes);
+		}
 	}
 	
 	
@@ -160,6 +200,8 @@ public class ScopeTreeData implements ITreeData<Scope>
 
 	@Override
 	public int indexOf(Scope child) {
+		if (child == null || isCollapsed(child))
+			return -1;
 		return list.indexOf(child);
 	}
 
@@ -176,6 +218,8 @@ public class ScopeTreeData implements ITreeData<Scope>
 	@Override
 	public List<Scope> getChildren(Scope object) {
 		List<? extends TreeNode> list = object.getListChildren();
+		if (list == null)
+			return new ArrayList<>(0);
 		return convert(list);
 	}
 
@@ -200,6 +244,15 @@ public class ScopeTreeData implements ITreeData<Scope>
 		return (index >= 0) && (index < list.size());
 	}
 	
+	private boolean isCollapsed(Scope scope) {
+		int parentIndex = indexOf(scope.getParentScope());
+		List<? extends TreeNode> listChildren = mapCollapsedScopes.get(parentIndex);
+		if (listChildren == null)
+			return false;
+		
+		return listChildren.contains(scope);
+	}
+	
 	public static Scope getAncestor(Scope scope, int currentDepth, int targetDepth) {
 		if (scope == null)
 			return null;
@@ -210,8 +263,7 @@ public class ScopeTreeData implements ITreeData<Scope>
 		for (;depth>targetDepth && current != null; depth--) {
 			current = current.getParentScope();
 		}
-		return current;
-		
+		return current;		
 	}
 
 	private static class ColumnComparator implements Comparator<Scope> 
