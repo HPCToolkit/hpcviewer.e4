@@ -7,14 +7,8 @@ import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfigurat
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
 import org.eclipse.nebula.widgets.nattable.freeze.command.FreezeColumnCommand;
 import org.eclipse.nebula.widgets.nattable.grid.GridRegion;
-import org.eclipse.nebula.widgets.nattable.grid.data.DefaultCornerDataProvider;
-import org.eclipse.nebula.widgets.nattable.grid.data.DefaultRowHeaderDataProvider;
 import org.eclipse.nebula.widgets.nattable.grid.layer.ColumnHeaderLayer;
-import org.eclipse.nebula.widgets.nattable.grid.layer.CornerLayer;
 import org.eclipse.nebula.widgets.nattable.grid.layer.DefaultColumnHeaderDataLayer;
-import org.eclipse.nebula.widgets.nattable.grid.layer.DefaultRowHeaderDataLayer;
-import org.eclipse.nebula.widgets.nattable.grid.layer.GridLayer;
-import org.eclipse.nebula.widgets.nattable.grid.layer.RowHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.layer.CompositeLayer;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayer;
@@ -39,7 +33,7 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction
 		this(parent, style, new ScopeTreeData(root, metricManager));
 	}
 	
-	public ScopeTreeTable(Composite parent, int style, ScopeTreeData treeData) {
+	public ScopeTreeTable(Composite parent, int style, IScopeTreeData treeData) {
 		super(parent, style);
 
 		setLayout(new GridLayout());
@@ -98,7 +92,7 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction
 
         // need to launch in other time once the table is fully materialized 
         natTable.getDisplay().asyncExec(()-> {
-            natTable.doCommand(new FreezeColumnCommand(natTable, 1, false, true));
+            natTable.doCommand(new FreezeColumnCommand(natTable, 0, false, true));
         });
 	}
 	

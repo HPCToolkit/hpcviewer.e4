@@ -23,7 +23,7 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
     private final CompositeFreezeLayer compositeFreezeLayer ;
     private final ScopeTreeRowModel    treeRowModel ;
 
-    public ScopeTreeBodyLayerStack(ScopeTreeData treeData,
+    public ScopeTreeBodyLayerStack(IScopeTreeData treeData,
     							   IScopeTreeAction treeAction) {
 
         this.bodyDataProvider   = new ScopeTreeDataProvider(treeData, treeData.getMetricManager()); 
