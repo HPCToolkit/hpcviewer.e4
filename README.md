@@ -68,14 +68,12 @@ spack load gtkplus
 
 ## How to build and run via Eclipse IDE
 
-### Getting the source code into the Eclipse IDE
-
 Requirements:
 
-* Recommended: [Eclipse 2021.03](https://www.eclipse.org/downloads/packages/release/2021-03/r/eclipse-ide-rcp-and-rap-developers). 
+* Recommended: [Eclipse 2021.03](https://www.eclipse.org/downloads/packages/release/2021-03/r/eclipse-ide-rcp-and-rap-developers) or newer. 
 * Warning: May not work properly with older versions of Eclipse. 
 
-To import the source code into Eclipse IDE:
+### Getting the source code into the Eclipse IDE
 
 * Start Eclipse
 * Open the Import window via the menu File > Import
@@ -84,7 +82,18 @@ To import the source code into Eclipse IDE:
 * In the Options section of the window, activate Search for nested projects
 * Click Finish
 
-to run:
+### Activating the target plarform
+
+To run hpcviewer, it requires Eclipse bundles and some external libraries such as Nebula NatTable, Eclipse Collections, JCraft and SLF4J.
+The set of bundles that are available is defined by the bundles in the Eclipse workspace, and additionally the bundles in the active target platform
+The first Eclipse starts after the installation, the target platform only includes the bundles that are installed in the workspace which doesn't include the external libraries.
+
+The bundles that hpcviewer needs are defined in a custom target platform definition project, which is located in the `target.platform` directory:
+
+* Open file `target-platform.target` in `target.platform project`.
+* Click the "Set as Active Target Platform" link at the top-right panel.
+
+### Run the app
 
 * Open product configuration `hpcviewer.product` at `edu.rice.cs.hpcviewer.product`
 * To run: Click `Launch an Eclipse application`
