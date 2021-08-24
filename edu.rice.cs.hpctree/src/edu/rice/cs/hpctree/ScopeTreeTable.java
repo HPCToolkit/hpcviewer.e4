@@ -23,6 +23,8 @@ import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpctree.internal.IScopeTreeAction;
+import edu.rice.cs.hpctree.internal.MetricTableRegistryConfiguration;
+import edu.rice.cs.hpctree.internal.TableConfigLabelProvider;
 
 
 public class ScopeTreeTable extends Composite implements IScopeTreeAction
@@ -43,7 +45,8 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction
         ConfigRegistry configRegistry = new ConfigRegistry();
         
         final ScopeTreeBodyLayerStack bodyLayerStack = new ScopeTreeBodyLayerStack(treeData,  this);
-        
+        bodyLayerStack.setConfigLabelAccumulator(new TableConfigLabelProvider());
+
         // --------------------------------
         // build the column header layer
         // --------------------------------
@@ -73,6 +76,7 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction
         natTable.setConfigRegistry(configRegistry);
         natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
 		natTable.addConfiguration(new SingleClickSortConfiguration());
+		natTable.addConfiguration(new MetricTableRegistryConfiguration());
         natTable.addConfiguration(new AbstractHeaderMenuConfiguration(natTable) {
             @Override
             protected PopupMenuBuilder createColumnHeaderMenu(NatTable natTable) {

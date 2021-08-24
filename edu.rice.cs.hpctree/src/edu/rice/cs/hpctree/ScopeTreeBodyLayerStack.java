@@ -12,6 +12,7 @@ import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
 
 import edu.rice.cs.hpctree.internal.IScopeTreeAction;
 
+
 public class ScopeTreeBodyLayerStack extends AbstractLayerTransform 
 {
     private final IDataProvider  bodyDataProvider;
