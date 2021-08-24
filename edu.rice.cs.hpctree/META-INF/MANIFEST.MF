@@ -13,4 +13,5 @@ Require-Bundle: edu.rice.cs.hpcdata,
  org.eclipse.jface,
  org.eclipse.collections,
  org.slf4j.api,
- org.eclipse.core.runtime
+ org.eclipse.core.runtime,
+ edu.rice.cs.hpcsetting
