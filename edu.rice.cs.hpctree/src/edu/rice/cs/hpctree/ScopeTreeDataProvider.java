@@ -3,8 +3,9 @@ package edu.rice.cs.hpctree;
 import java.util.List;
 
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
-import org.eclipse.nebula.widgets.nattable.tree.ITreeData;
 
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
@@ -12,14 +13,30 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 public class ScopeTreeDataProvider implements IDataProvider 
 {
-	private final ITreeData<Scope> treeData;
-	private final IMetricManager metricManager;
+	private final EventList<BaseMetric> listMetrics;
+	private final IScopeTreeData treeData;
 	
-	public ScopeTreeDataProvider(ITreeData<Scope> treeData, IMetricManager metricManager) {
+	public ScopeTreeDataProvider(IScopeTreeData treeData) {
 		this.treeData   = treeData;
-		this.metricManager = metricManager;
+		
+		listMetrics = new BasicEventList<>();
+		IMetricManager metricManager = treeData.getMetricManager();
+		List<BaseMetric> listVisibleMetrics = metricManager.getVisibleMetrics();
+		
+		for(BaseMetric metric: listVisibleMetrics) {
+			if (treeData.getRoot().getMetricValue(metric) != MetricValue.NONE) {
+				listMetrics.add(metric);
+			}
+		}
 	}
 
+	public BaseMetric getMetric(int columnIndex) {
+		if (columnIndex == 0)
+			return null;
+		
+		return listMetrics.get(columnIndex-1);
+	}
+	
 	
 	@Override
 	public Object getDataValue(int columnIndex, int rowIndex) {
@@ -28,8 +45,7 @@ public class ScopeTreeDataProvider implements IDataProvider
 		if (columnIndex == 0)
 			return scope.getName();
 
-		List<BaseMetric> metrics = metricManager.getVisibleMetrics();
-		BaseMetric metric = metrics.get(columnIndex-1);
+		BaseMetric metric = listMetrics.get(columnIndex-1);
 		return metric.getMetricTextValue(scope);
 	}
 
@@ -46,9 +62,8 @@ public class ScopeTreeDataProvider implements IDataProvider
 	
 	@Override
 	public int getColumnCount() {
-		List<BaseMetric> metrics = metricManager.getVisibleMetrics();
 		
-		return 1 + metrics.size();
+		return 1 + listMetrics.size();
 	}
 
 	@Override

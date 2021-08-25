@@ -14,7 +14,6 @@ import edu.rice.cs.hpctree.internal.IScopeTreeAction;
 
 public class ScopeTreeBodyLayerStack extends AbstractLayerTransform 
 {
-	private final IDataProvider  bodyDataProvider;
     private final SelectionLayer selectionLayer;
     private final FreezeLayer    freezeLayer ;
     private final ViewportLayer  viewportLayer;
@@ -23,11 +22,11 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
     private final CompositeFreezeLayer compositeFreezeLayer ;
     private final ScopeTreeRowModel    treeRowModel ;
 
-	public ScopeTreeBodyLayerStack(IScopeTreeData treeData,
+	public ScopeTreeBodyLayerStack(IScopeTreeData treeData, 
+								   IDataProvider  bodyDataProvider,
     							   IScopeTreeAction treeAction) {
 
-        this.bodyDataProvider = new ScopeTreeDataProvider(treeData, treeData.getMetricManager()); 
-        this.bodyDataLayer    = new DataLayer(this.bodyDataProvider);
+        this.bodyDataLayer    = new DataLayer(bodyDataProvider);
 
         bodyDataLayer.setColumnsResizableByDefault(true);
         // simply apply labels for every column by index

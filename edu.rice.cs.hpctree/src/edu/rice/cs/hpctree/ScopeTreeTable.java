@@ -16,6 +16,7 @@ import org.eclipse.nebula.widgets.nattable.grid.layer.DefaultColumnHeaderDataLay
 import org.eclipse.nebula.widgets.nattable.layer.CompositeLayer;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayer;
+import org.eclipse.nebula.widgets.nattable.selection.config.RowOnlySelectionBindings;
 import org.eclipse.nebula.widgets.nattable.sort.SortHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.sort.config.SingleClickSortConfiguration;
 import org.eclipse.nebula.widgets.nattable.ui.menu.AbstractHeaderMenuConfiguration;
@@ -24,13 +25,12 @@ import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.util.OSValidator;
+import edu.rice.cs.hpctree.internal.ColumnHeaderDataProvider;
 import edu.rice.cs.hpctree.internal.IScopeTreeAction;
 import edu.rice.cs.hpctree.internal.MetricTableRegistryConfiguration;
 import edu.rice.cs.hpctree.internal.TableConfigLabelProvider;
@@ -44,6 +44,7 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction
 	private final NatTable natTable ;
 	private final ScopeTreeBodyLayerStack bodyLayerStack ;
 	private final IDataProvider columnHeaderDataProvider ;
+	private final ScopeTreeDataProvider bodyDataProvider;
 
 	public ScopeTreeTable(Composite parent, int style, RootScope root, IMetricManager metricManager) {
 		this(parent, style, new ScopeTreeData(root, metricManager));
@@ -54,17 +55,19 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction
 
 		setLayout(new GridLayout());
         
+        this.bodyDataProvider = new ScopeTreeDataProvider(treeData); 
+
         // create a new ConfigRegistry which will be needed for GlazedLists
         // handling
         ConfigRegistry configRegistry = new ConfigRegistry();
         
-        bodyLayerStack = new ScopeTreeBodyLayerStack(treeData,  this);
+        bodyLayerStack = new ScopeTreeBodyLayerStack(treeData, bodyDataProvider, this);
         bodyLayerStack.setConfigLabelAccumulator(new TableConfigLabelProvider());
 
         // --------------------------------
         // build the column header layer
         // --------------------------------
-        columnHeaderDataProvider = new ColumnHeaderDataProvider(treeData.getMetricManager());
+        columnHeaderDataProvider = new ColumnHeaderDataProvider(bodyDataProvider);
         DataLayer columnHeaderDataLayer = new DefaultColumnHeaderDataLayer(columnHeaderDataProvider);
         ILayer columnHeaderLayer =
                 new ColumnHeaderLayer(columnHeaderDataLayer, bodyLayerStack, bodyLayerStack.getSelectionLayer());
@@ -88,6 +91,7 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction
         // manually
         natTable.setConfigRegistry(configRegistry);
         natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
+		natTable.addConfiguration(new RowOnlySelectionBindings());
 		natTable.addConfiguration(new SingleClickSortConfiguration());
 		natTable.addConfiguration(new MetricTableRegistryConfiguration());
         natTable.addConfiguration(new AbstractHeaderMenuConfiguration(natTable) {
@@ -132,7 +136,7 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction
         bodyDataLayer.setColumnWidthByPosition(0, 350);
 
         // metric columns (if any)
-    	Point columnSize = getMetricColumnSize(natTable.getDisplay());
+    	Point columnSize = getMetricColumnSize();
     	int numColumns   = columnHeaderDataProvider.getColumnCount();
     	
     	GC gc = new GC(getDisplay());
@@ -148,8 +152,8 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction
 	}
 	
 	
-	public Point getMetricColumnSize(Display display) {
-		final GC gc = new GC(display);		
+	private Point getMetricColumnSize() {
+		final GC gc = new GC(natTable.getDisplay());		
 		
 		gc.setFont(MetricTableRegistryConfiguration.getMetricFont());
 		String text = TEXT_METRIC_COLUMN;
@@ -181,34 +185,5 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction
 	public void refresh() {
 		if (natTable != null)
 			natTable.redraw();
-	}
-
-	
-	private static class ColumnHeaderDataProvider implements IDataProvider
-	{
-		private final List<BaseMetric> listMetrics;
-		
-		public ColumnHeaderDataProvider(IMetricManager metricManager) {
-			listMetrics = metricManager.getVisibleMetrics();			
-		}
-		@Override
-		public Object getDataValue(int columnIndex, int rowIndex) {
-			if (columnIndex == 0)
-				return "Scope";
-			return listMetrics.get(columnIndex-1).getDisplayName();
-		}
-
-		@Override
-		public void setDataValue(int columnIndex, int rowIndex, Object newValue) {}
-
-		@Override
-		public int getColumnCount() {
-			return 1 + listMetrics.size();
-		}
-
-		@Override
-		public int getRowCount() {
-			return 1;
-		}		
 	}
 }
