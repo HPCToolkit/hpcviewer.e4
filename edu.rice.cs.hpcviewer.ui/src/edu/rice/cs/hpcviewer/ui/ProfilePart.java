@@ -51,6 +51,7 @@ import edu.rice.cs.hpcviewer.ui.parts.editor.Editor;
 import edu.rice.cs.hpcviewer.ui.parts.flat.FlatView;
 import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadView;
 import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadViewInput;
+import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownPart;
 import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownView;
 
 
@@ -331,6 +332,10 @@ public class ProfilePart implements IProfilePart, EventHandler
 			
 			if (root.getType() == RootScopeType.CallingContextTree) {
 				views[numViews] = new TopDownView(tabFolderBottom, SWT.NONE);
+				
+				// new table test
+				TopDownPart tdp = new TopDownPart(tabFolderBottom, SWT.NONE);
+				addView(tdp, input, true);
 				
 			} else if (root.getType() == RootScopeType.CallerTree) {
 				views[numViews] = new BottomUpView(tabFolderBottom, SWT.NONE);

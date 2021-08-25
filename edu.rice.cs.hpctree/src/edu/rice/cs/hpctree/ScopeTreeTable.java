@@ -1,5 +1,7 @@
 package edu.rice.cs.hpctree;
 
+import java.util.List;
+
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.config.ConfigRegistry;
@@ -19,6 +21,7 @@ import org.eclipse.nebula.widgets.nattable.ui.menu.PopupMenuBuilder;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -120,8 +123,8 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction
 		public Object getDataValue(int columnIndex, int rowIndex) {
 			if (columnIndex == 0)
 				return "Scope";
-			
-			return metricManager.getMetric(columnIndex-1).getDisplayName();
+			List<BaseMetric> list = metricManager.getVisibleMetrics();
+			return list.get(columnIndex-1).getDisplayName();
 		}
 
 		@Override

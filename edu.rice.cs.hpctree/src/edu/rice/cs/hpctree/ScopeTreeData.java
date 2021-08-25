@@ -8,6 +8,8 @@ import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
 import org.eclipse.nebula.widgets.nattable.sort.SortDirectionEnum;
+
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
@@ -335,8 +337,10 @@ public class ScopeTreeData implements IScopeTreeData
 			if (index == 0) {
 				return factor * o1.getName().compareTo(o2.getName());
 			}
-			MetricValue mv1 = o1.getMetricValue(index-1);
-			MetricValue mv2 = o2.getMetricValue(index-1);
+			BaseMetric metric = treeData.getMetricManager().getVisibleMetrics().get(index-1);
+			int metricIndex = metric.getIndex();
+			MetricValue mv1 = o1.getMetricValue(metricIndex);
+			MetricValue mv2 = o2.getMetricValue(metricIndex);
 
 			if (mv1.getValue() > mv2.getValue())
 				return factor * 1;
