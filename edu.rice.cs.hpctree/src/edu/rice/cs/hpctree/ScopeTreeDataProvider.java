@@ -13,11 +13,11 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 public class ScopeTreeDataProvider implements IDataProvider 
 {
 	private final ITreeData<Scope> treeData;
-	private final IMetricManager experiment;
+	private final IMetricManager metricManager;
 	
-	public ScopeTreeDataProvider(ITreeData<Scope> treeData, IMetricManager experiment) {
+	public ScopeTreeDataProvider(ITreeData<Scope> treeData, IMetricManager metricManager) {
 		this.treeData   = treeData;
-		this.experiment = experiment;
+		this.metricManager = metricManager;
 	}
 
 	
@@ -28,8 +28,9 @@ public class ScopeTreeDataProvider implements IDataProvider
 		if (columnIndex == 0)
 			return scope.getName();
 
-		MetricValue mv = scope.getMetricValue(columnIndex-1);
-		return mv.getValue();
+		List<BaseMetric> metrics = metricManager.getVisibleMetrics();
+		BaseMetric metric = metrics.get(columnIndex-1);
+		return metric.getMetricTextValue(scope);
 	}
 
 	@Override
@@ -45,7 +46,7 @@ public class ScopeTreeDataProvider implements IDataProvider
 	
 	@Override
 	public int getColumnCount() {
-		List<BaseMetric> metrics = experiment.getVisibleMetrics();
+		List<BaseMetric> metrics = metricManager.getVisibleMetrics();
 		
 		return 1 + metrics.size();
 	}

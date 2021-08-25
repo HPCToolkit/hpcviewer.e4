@@ -96,6 +96,7 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction
 
         // need to launch in other time once the table is fully materialized 
         natTable.getDisplay().asyncExec(()-> {
+        	bodyLayerStack.pack(getDisplay());
             natTable.doCommand(new FreezeColumnCommand(natTable, 0, false, true));
         });
 	}
