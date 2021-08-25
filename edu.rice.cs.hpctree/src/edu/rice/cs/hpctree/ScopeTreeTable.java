@@ -105,16 +105,30 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction
         natTable.refresh();
         natTable.configure();
 
+        // need to freeze the first column once the table is fully materialized 
+    	// The position for top-left and the bottom-right are both (0, -1) so
+    	// we just need one variable to specify the position coordinate
+    	
+    	PositionCoordinate pc = new PositionCoordinate(bodyLayerStack, 0, -1);
+    	FreezeHelper.freeze(bodyLayerStack.getFreezeLayer(), bodyLayerStack.getViewportLayer(), pc, pc);
+
+    	// Need to set the grid data and layout
+    	// if not set here, the table will be weird. I don't know why.
+    	
         GridDataFactory.fillDefaults().grab(true, true).applyTo(natTable);
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(natTable);
 	}
 	
 	@Override
 	public void pack() {
-
+		super.pack();
+		
+		// ---------------------------------------------------------------
+		// pack the columns based on the title or the content of the cell
+		// ---------------------------------------------------------------
 		DataLayer bodyDataLayer = bodyLayerStack.getBodyDataLayer();
 		
-    	// tree column
+    	// tree column: the width is hard coded at the moment 
         bodyDataLayer.setColumnWidthByPosition(0, 350);
 
         // metric columns (if any)
@@ -131,13 +145,6 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction
         	bodyDataLayer.setColumnWidthByPosition(i, colWidth);
     	}
     	gc.dispose();
-
-        // need to freeze the first column once the table is fully materialized 
-    	// The position for top-left and the bottom-right are both (0, -1) so
-    	// we just need one variable to specify the position coordinate
-    	
-    	PositionCoordinate pc = new PositionCoordinate(bodyLayerStack, 0, -1);
-    	FreezeHelper.freeze(bodyLayerStack.getFreezeLayer(), bodyLayerStack.getViewportLayer(), pc, pc);
 	}
 	
 	
@@ -202,8 +209,6 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction
 		@Override
 		public int getRowCount() {
 			return 1;
-		}
-		
+		}		
 	}
-
 }
