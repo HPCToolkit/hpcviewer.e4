@@ -332,7 +332,7 @@ public class ScopeTreeData implements IScopeTreeData
 		}
 		
 		private int compare(Scope o1, Scope o2, int index, SortDirectionEnum dir) {
-			int factor = dir == SortDirectionEnum.ASC ? -1 : 1;
+			int factor = dir == SortDirectionEnum.ASC ? 1 : -1;
 
 			if (index == 0) {
 				return factor * o1.getName().compareTo(o2.getName());

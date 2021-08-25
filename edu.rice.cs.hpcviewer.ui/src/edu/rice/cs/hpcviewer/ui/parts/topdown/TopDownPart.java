@@ -172,6 +172,9 @@ public class TopDownPart extends AbstractBaseViewItem
 		metricManager = (IMetricManager) input;
 		root = ((Experiment)metricManager).getRootScope(RootScopeType.CallingContextTree);
 		ScopeTreeTable table = new ScopeTreeTable(parent, SWT.NONE, root, metricManager);
+		
+		table.pack();
+		
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(table);
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(table);
 	}

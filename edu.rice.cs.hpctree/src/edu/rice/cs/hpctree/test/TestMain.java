@@ -50,7 +50,7 @@ public class TestMain implements IScopeTreeAction
         RootScope root = createTree();
 
 		ScopeTreeTable table = new ScopeTreeTable(shell, SWT.NONE, root, (IMetricManager) root.getExperiment());
-
+		table.pack();
 		
 		shell.open();
 		
