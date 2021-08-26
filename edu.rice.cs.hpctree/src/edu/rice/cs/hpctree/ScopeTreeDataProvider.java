@@ -6,12 +6,13 @@ import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.event.ListEventListener;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
-public class ScopeTreeDataProvider implements IDataProvider 
+public class ScopeTreeDataProvider implements IDataProvider
 {
 	private final EventList<BaseMetric> listMetrics;
 	private final IScopeTreeData treeData;
@@ -35,6 +36,16 @@ public class ScopeTreeDataProvider implements IDataProvider
 			return null;
 		
 		return listMetrics.get(columnIndex-1);
+	}
+	
+	
+	public void addListener( ListEventListener<BaseMetric> listener ) {
+		listMetrics.addListEventListener(listener);
+	}
+	
+	
+	public void removeListener( ListEventListener<BaseMetric> listener ) {
+		listMetrics.removeListEventListener(listener);
 	}
 	
 	

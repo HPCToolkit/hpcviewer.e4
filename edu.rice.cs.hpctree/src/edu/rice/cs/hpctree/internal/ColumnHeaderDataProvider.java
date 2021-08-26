@@ -2,10 +2,12 @@ package edu.rice.cs.hpctree.internal;
 
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
 
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpctree.ScopeTreeDataProvider;
 
-public class ColumnHeaderDataProvider implements IDataProvider 
+public class ColumnHeaderDataProvider implements IDataProvider, ListEventListener<BaseMetric> 
 {
 	private final ScopeTreeDataProvider treeDataProvider;
 	
@@ -36,5 +38,11 @@ public class ColumnHeaderDataProvider implements IDataProvider
 	@Override
 	public int getRowCount() {
 		return 1;
+	}
+
+	@Override
+	public void listChanged(ListEvent<BaseMetric> listChanges) {
+		// TODO Auto-generated method stub
+		
 	}
 }

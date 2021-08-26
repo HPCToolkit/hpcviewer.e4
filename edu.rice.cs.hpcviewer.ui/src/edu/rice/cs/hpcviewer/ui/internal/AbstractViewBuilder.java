@@ -47,11 +47,12 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.util.ScopeComparator;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
+import edu.rice.cs.hpctree.IScopeTreeAction;
+import edu.rice.cs.hpctree.action.ZoomAction;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.actions.ExportTable;
 import edu.rice.cs.hpcviewer.ui.actions.HotCallPath;
 import edu.rice.cs.hpcviewer.ui.actions.MetricColumnHideShowAction;
-import edu.rice.cs.hpcviewer.ui.actions.ZoomAction;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.base.ISortContentProvider;
 import edu.rice.cs.hpcviewer.ui.base.IViewBuilder;
@@ -71,7 +72,7 @@ import edu.rice.cs.hpcviewer.ui.util.SortColumn;
  * {@link beginToolbar} and {@link endToolbar}
  */
 public abstract class AbstractViewBuilder 
-implements IViewBuilder, ISelectionChangedListener, DisposeListener
+implements IViewBuilder, ISelectionChangedListener, DisposeListener, IScopeTreeAction
 {
 	static protected enum ViewerType {
 		/** the viewer is independent to others. No need to update the status from others. */
@@ -315,6 +316,34 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener
 		return treeViewer;
 	}
 	
+	@Override
+	public void setRoot(Scope scope) {
+		try {
+			treeViewer.getTree().setRedraw(false);
+			treeViewer.setInput(null); // clear the table to speed up the next set input
+			treeViewer.setInput(scope);		
+			treeViewer.expandToLevel(2, true);
+		} finally {
+			treeViewer.getTree().setRedraw(true);
+		}
+	}
+	
+	@Override
+	public Scope getRoot() {
+		return (Scope) treeViewer.getInput();
+	}
+	
+
+	@Override
+	public void refresh() {
+		treeViewer.refresh(false);
+	}
+
+	@Override
+	public void expand(int index) {
+		treeViewer.expandToLevel(2, true);
+	}
+
 	
 	/****
 	 * Sort the table based on the first visible metric column
@@ -525,7 +554,7 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener
 			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
 		
-		zoomAction = new ZoomAction(getViewer());
+		zoomAction = new ZoomAction(this);
 
 		toolItem[ACTION_ZOOM_IN].addSelectionListener(new SelectionListener() {
 			

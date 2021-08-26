@@ -15,4 +15,5 @@ Require-Bundle: edu.rice.cs.hpcdata,
  org.slf4j.api,
  org.eclipse.core.runtime,
  edu.rice.cs.hpcsetting
-Export-Package: edu.rice.cs.hpctree
+Export-Package: edu.rice.cs.hpctree,
+ edu.rice.cs.hpctree.action

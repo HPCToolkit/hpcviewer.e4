@@ -9,7 +9,6 @@ import org.eclipse.nebula.widgets.nattable.layer.cell.ColumnLabelAccumulator;
 import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
 import org.eclipse.nebula.widgets.nattable.tree.TreeLayer;
 import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
-import edu.rice.cs.hpctree.internal.IScopeTreeAction;
 
 
 public class ScopeTreeBodyLayerStack extends AbstractLayerTransform 
@@ -18,6 +17,7 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
     private final FreezeLayer    freezeLayer ;
     private final ViewportLayer  viewportLayer;
     private final DataLayer bodyDataLayer;
+    private final TreeLayer treeLayer ;
 
     private final CompositeFreezeLayer compositeFreezeLayer ;
     private final ScopeTreeRowModel    treeRowModel ;
@@ -26,7 +26,7 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
 								   IDataProvider  bodyDataProvider,
     							   IScopeTreeAction treeAction) {
 
-        this.bodyDataLayer    = new DataLayer(bodyDataProvider);
+        this.bodyDataLayer = new DataLayer(bodyDataProvider);
 
         bodyDataLayer.setColumnsResizableByDefault(true);
         // simply apply labels for every column by index
@@ -35,7 +35,7 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
         this.treeRowModel = new ScopeTreeRowModel(treeData, treeAction);
 
         this.selectionLayer = new SelectionLayer(bodyDataLayer);
-        TreeLayer treeLayer = new TreeLayer(this.selectionLayer, treeRowModel);
+        this.treeLayer      = new TreeLayer(this.selectionLayer, treeRowModel);
         this.viewportLayer  = new ViewportLayer(treeLayer);
         this.freezeLayer     = new FreezeLayer(treeLayer);
         compositeFreezeLayer = new CompositeFreezeLayer(freezeLayer, viewportLayer, selectionLayer);
@@ -46,6 +46,10 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
         setUnderlyingLayer(compositeFreezeLayer);
     }
     
+	public void expand(int parentIndex) {
+    	treeLayer.expandTreeRow(parentIndex);
+	}
+	
 
     public SelectionLayer getSelectionLayer() {
         return this.selectionLayer;

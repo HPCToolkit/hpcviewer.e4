@@ -36,6 +36,7 @@ public class TopDownPart extends AbstractBaseViewItem
 	
 	private IMetricManager metricManager;
 	private RootScope      root;
+	private ScopeTreeTable table ;
 
 	public TopDownPart(CTabFolder parent, int style) {
 		super(parent, style);
@@ -135,6 +136,7 @@ public class TopDownPart extends AbstractBaseViewItem
 		// -------------------------------------------
 		// default tool bar
 		// -------------------------------------------
+		//toolItem = new ToolItem[actionTypes.length];
 
 		
 		// -------------------------------------------
@@ -171,7 +173,7 @@ public class TopDownPart extends AbstractBaseViewItem
 		
 		metricManager = (IMetricManager) input;
 		root = ((Experiment)metricManager).getRootScope(RootScopeType.CallingContextTree);
-		ScopeTreeTable table = new ScopeTreeTable(parent, SWT.NONE, root, metricManager);
+		table = new ScopeTreeTable(parent, SWT.NONE, root, metricManager);
 		
 		table.pack();
 		
@@ -186,8 +188,7 @@ public class TopDownPart extends AbstractBaseViewItem
 
 	@Override
 	public void activate() {
-		// TODO Auto-generated method stub
-		
+		table.redraw();
 	}
 
 	@Override

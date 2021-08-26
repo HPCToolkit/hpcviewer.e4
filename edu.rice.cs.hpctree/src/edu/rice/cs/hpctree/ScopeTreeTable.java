@@ -1,7 +1,5 @@
 package edu.rice.cs.hpctree;
 
-import java.util.List;
-
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.nebula.widgets.nattable.NatTable;
@@ -31,7 +29,6 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.util.OSValidator;
 import edu.rice.cs.hpctree.internal.ColumnHeaderDataProvider;
-import edu.rice.cs.hpctree.internal.IScopeTreeAction;
 import edu.rice.cs.hpctree.internal.MetricTableRegistryConfiguration;
 import edu.rice.cs.hpctree.internal.TableConfigLabelProvider;
 
@@ -123,17 +120,21 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(natTable);
 	}
 	
+	
+	
 	@Override
-	public void pack() {
-		super.pack();
+	public void pack() {		
+		final int TREE_COLUMN_WIDTH  = 350;
 		
+		super.pack();
+
 		// ---------------------------------------------------------------
 		// pack the columns based on the title or the content of the cell
 		// ---------------------------------------------------------------
 		DataLayer bodyDataLayer = bodyLayerStack.getBodyDataLayer();
 		
     	// tree column: the width is hard coded at the moment 
-        bodyDataLayer.setColumnWidthByPosition(0, 350);
+        bodyDataLayer.setColumnWidthByPosition(0, TREE_COLUMN_WIDTH);
 
         // metric columns (if any)
     	Point columnSize = getMetricColumnSize();
@@ -184,6 +185,33 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction
 	@Override
 	public void refresh() {
 		if (natTable != null)
+			natTable.refresh();;
+	}
+	
+	
+	/***
+	 * Redraw the painting of the table.
+	 * This doesn't refresh the structure of the table.
+	 */
+	public void redraw() {
+		if (natTable != null)
 			natTable.redraw();
+	}
+	
+	@Override
+	public void expand(int index) {
+		bodyLayerStack.expand(index);
+	}
+
+	@Override
+	public void setRoot(Scope scope) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public Scope getRoot() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
