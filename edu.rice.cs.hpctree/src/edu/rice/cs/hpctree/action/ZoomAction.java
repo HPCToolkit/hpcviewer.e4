@@ -47,9 +47,7 @@ public class ZoomAction
 		
 		stackRootTree.push(old); // save the node for future zoom-out
 		
-		Scope root = old.duplicate();
-		root.addSubscope(current);
-		treeAction.setRoot(root);
+		treeAction.setRoot(current);
 		treeAction.expand(0);
 	}
 	

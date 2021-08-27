@@ -3,6 +3,7 @@ package edu.rice.cs.hpctree;
 import java.util.List;
 
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
+import org.eclipse.nebula.widgets.nattable.data.IRowDataProvider;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -12,7 +13,7 @@ import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
-public class ScopeTreeDataProvider implements IDataProvider
+public class ScopeTreeDataProvider implements IDataProvider, IRowDataProvider<Scope>
 {
 	private final EventList<BaseMetric> listMetrics;
 	private final IScopeTreeData treeData;
@@ -80,6 +81,16 @@ public class ScopeTreeDataProvider implements IDataProvider
 	@Override
 	public int getRowCount() {
 		return treeData.getElementCount();
+	}
+
+	@Override
+	public Scope getRowObject(int rowIndex) {
+		return treeData.getDataAtIndex(rowIndex);
+	}
+
+	@Override
+	public int indexOfRowObject(Scope rowObject) {
+		return treeData.indexOf(rowObject);
 	}
 
 }

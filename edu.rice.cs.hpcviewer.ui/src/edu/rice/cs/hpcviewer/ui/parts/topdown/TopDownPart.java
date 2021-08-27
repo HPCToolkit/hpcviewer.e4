@@ -1,12 +1,19 @@
 package edu.rice.cs.hpcviewer.ui.parts.topdown;
 
+import javax.inject.Inject;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.services.EMenuService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.nebula.widgets.nattable.layer.ILayerListener;
+import org.eclipse.nebula.widgets.nattable.layer.event.ILayerEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -20,7 +27,10 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
+import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpctree.ScopeTreeTable;
+import edu.rice.cs.hpctree.action.IActionListener;
+import edu.rice.cs.hpctree.action.ZoomAction;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractBaseViewItem;
@@ -28,8 +38,18 @@ import edu.rice.cs.hpcviewer.ui.internal.LabelMessage;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 
-public class TopDownPart extends AbstractBaseViewItem 
+public class TopDownPart extends AbstractBaseViewItem implements ILayerListener 
 {	
+
+	final private int ACTION_ZOOM_IN      = 0;
+	final private int ACTION_ZOOM_OUT     = 1;
+	final private int ACTION_HOTPATH      = 2;
+	final private int ACTION_ADD_METRIC   = 3;
+	final private int ACTION_EXPORT_DATA  = 4;
+	final private int ACTION_COLUMN_HIDE  = 5; 
+	final private int ACTION_FONT_BIGGER  = 6;
+	final private int ACTION_FONT_SMALLER = 7;
+
 	private Composite    parent ;
 	private ToolItem     toolItem[];
 	private LabelMessage lblMessage;
@@ -37,13 +57,15 @@ public class TopDownPart extends AbstractBaseViewItem
 	private IMetricManager metricManager;
 	private RootScope      root;
 	private ScopeTreeTable table ;
+	private ZoomAction     zoomAction;
 
+	@Inject ESelectionService selectionService;
+
+	
 	public TopDownPart(CTabFolder parent, int style) {
 		super(parent, style);
 		setText("Top down part");
 	}
-	
-
 	
 	
 	/**
@@ -136,8 +158,30 @@ public class TopDownPart extends AbstractBaseViewItem
 		// -------------------------------------------
 		// default tool bar
 		// -------------------------------------------
-		//toolItem = new ToolItem[actionTypes.length];
+		toolItem = new ToolItem[3];
+		
+		toolItem[ACTION_ZOOM_IN]  = createToolItem(toolBar, IconManager.Image_ZoomIn,  "Zoom-in the selected node");
+		toolItem[ACTION_ZOOM_OUT] = createToolItem(toolBar, IconManager.Image_ZoomOut, "Zoom-out from the current tree scope");
 
+		toolItem[ACTION_HOTPATH]  = createToolItem(toolBar, IconManager.Image_FlameIcon, "Expand the hot path below the selected node");
+
+		toolItem[ACTION_ZOOM_IN].addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+
+				Scope selection = table.getSelection();
+				if (selection == null)
+					return;
+
+				zoomAction.zoomIn(selection);
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {}
+		});
+		updateButtonStatus();
+		
 		
 		// -------------------------------------------
 		// add the end of toolbar
@@ -173,12 +217,22 @@ public class TopDownPart extends AbstractBaseViewItem
 		
 		metricManager = (IMetricManager) input;
 		root = ((Experiment)metricManager).getRootScope(RootScopeType.CallingContextTree);
-		table = new ScopeTreeTable(parent, SWT.NONE, root, metricManager);
 		
+		table = new ScopeTreeTable(parent, SWT.NONE, root, metricManager);
 		table.pack();
+		table.addSelectionListener(new IActionListener() {
+			
+			@Override
+			public void select(Scope scope) {
+				System.out.println("select: " + scope.getName());
+			}
+		});
+		
 		
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(table);
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(table);
+		
+		zoomAction = new ZoomAction(table);		
 	}
 
 	@Override
@@ -188,13 +242,24 @@ public class TopDownPart extends AbstractBaseViewItem
 
 	@Override
 	public void activate() {
-		table.redraw();
+		if (table != null && !table.isDisposed())
+			table.redraw();
 	}
 
 	@Override
 	public ScopeTreeViewer getScopeTreeViewer() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
+	private void updateButtonStatus() {
+		toolItem[ACTION_ZOOM_IN].setEnabled(true);
+		toolItem[ACTION_ZOOM_OUT].setEnabled(true);
+	}
+
+
+
+	@Override
+	public void handleLayerEvent(ILayerEvent event) {
+		System.out.println("event: " + event);
+	}
 }

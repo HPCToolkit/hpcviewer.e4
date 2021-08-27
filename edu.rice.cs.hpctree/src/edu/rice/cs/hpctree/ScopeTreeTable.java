@@ -1,11 +1,17 @@
 package edu.rice.cs.hpctree;
 
+import java.util.Collection;
+import java.util.Set;
+
+import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.config.ConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfiguration;
 import org.eclipse.nebula.widgets.nattable.coordinate.PositionCoordinate;
+import org.eclipse.nebula.widgets.nattable.coordinate.Range;
+
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
 import org.eclipse.nebula.widgets.nattable.freeze.FreezeHelper;
 import org.eclipse.nebula.widgets.nattable.grid.GridRegion;
@@ -14,11 +20,17 @@ import org.eclipse.nebula.widgets.nattable.grid.layer.DefaultColumnHeaderDataLay
 import org.eclipse.nebula.widgets.nattable.layer.CompositeLayer;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayer;
+import org.eclipse.nebula.widgets.nattable.layer.ILayerListener;
+import org.eclipse.nebula.widgets.nattable.layer.event.ILayerEvent;
 import org.eclipse.nebula.widgets.nattable.selection.config.RowOnlySelectionBindings;
+import org.eclipse.nebula.widgets.nattable.selection.event.RowSelectionEvent;
 import org.eclipse.nebula.widgets.nattable.sort.SortHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.sort.config.SingleClickSortConfiguration;
+import org.eclipse.nebula.widgets.nattable.tree.ITreeData;
 import org.eclipse.nebula.widgets.nattable.ui.menu.AbstractHeaderMenuConfiguration;
 import org.eclipse.nebula.widgets.nattable.ui.menu.PopupMenuBuilder;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridLayout;
@@ -28,12 +40,13 @@ import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.util.OSValidator;
+import edu.rice.cs.hpctree.action.IActionListener;
 import edu.rice.cs.hpctree.internal.ColumnHeaderDataProvider;
 import edu.rice.cs.hpctree.internal.MetricTableRegistryConfiguration;
 import edu.rice.cs.hpctree.internal.TableConfigLabelProvider;
 
 
-public class ScopeTreeTable extends Composite implements IScopeTreeAction
+public class ScopeTreeTable extends Composite implements IScopeTreeAction, DisposeListener, ILayerListener
 {
 	private final static float  FACTOR_BOLD_FONT   = 1.2f;
 	private final static String TEXT_METRIC_COLUMN = "|8x88+88xx888x8%--";
@@ -42,6 +55,7 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction
 	private final ScopeTreeBodyLayerStack bodyLayerStack ;
 	private final IDataProvider columnHeaderDataProvider ;
 	private final ScopeTreeDataProvider bodyDataProvider;
+	private final Collection<IActionListener> listeners = new FastList<IActionListener>();
 
 	public ScopeTreeTable(Composite parent, int style, RootScope root, IMetricManager metricManager) {
 		this(parent, style, new ScopeTreeData(root, metricManager));
@@ -60,6 +74,8 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction
         
         bodyLayerStack = new ScopeTreeBodyLayerStack(treeData, bodyDataProvider, this);
         bodyLayerStack.setConfigLabelAccumulator(new TableConfigLabelProvider());
+
+        bodyLayerStack.getSelectionLayer().addLayerListener(this);
 
         // --------------------------------
         // build the column header layer
@@ -118,9 +134,43 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction
     	
         GridDataFactory.fillDefaults().grab(true, true).applyTo(natTable);
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(natTable);
+
+		addDisposeListener(this);
+	}
+
+	
+	public Scope getSelection() {
+		Set<Range> ranges = bodyLayerStack.getSelectionLayer().getSelectedRowPositions();
+		for(Range r: ranges) {
+			Scope s = bodyDataProvider.getRowObject(r.start);
+			if (s != null) {
+				return s;
+			}
+		}
+		return null;
 	}
 	
+	public void addSelectionListener(IActionListener listener) {
+		listeners.add(listener);
+	}
 	
+	public void removeSelectionListener(IActionListener listener) {
+		listeners.remove(listener);
+	}
+
+	@Override
+	public void handleLayerEvent(ILayerEvent event) {
+		if (event instanceof RowSelectionEvent) {
+			RowSelectionEvent rowEvent = (RowSelectionEvent) event;
+			int row = rowEvent.getRowPositionToMoveIntoViewport();
+			final Scope scope = bodyDataProvider.getRowObject(row);
+			
+			listeners.forEach(l -> {
+				l.select(scope);
+			});
+		}
+	}
+
 	
 	@Override
 	public void pack() {		
@@ -204,14 +254,23 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction
 	}
 
 	@Override
-	public void setRoot(Scope scope) {
-		// TODO Auto-generated method stub
+	public void setRoot(Scope root) {
+		ITreeData<Scope> treedata = bodyLayerStack.getTreeRowModel().getTreeData();
+		ScopeTreeData scopeData = (ScopeTreeData) treedata;
+		scopeData.setRoot(root);
 		
+		this.refresh();
 	}
 
 	@Override
 	public Scope getRoot() {
-		// TODO Auto-generated method stub
-		return null;
+		ITreeData<Scope> treedata = bodyLayerStack.getTreeRowModel().getTreeData();
+		ScopeTreeData scopeData = (ScopeTreeData) treedata;
+		return scopeData.getRoot();
+	}
+
+	@Override
+	public void widgetDisposed(DisposeEvent e) {
+        bodyLayerStack.getSelectionLayer().removeLayerListener(this);
 	}
 }

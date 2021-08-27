@@ -7,7 +7,6 @@ import org.eclipse.nebula.widgets.nattable.sort.SortDirectionEnum;
 import org.eclipse.nebula.widgets.nattable.tree.ITreeData;
 
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
-import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 public interface IScopeTreeData extends ITreeData<Scope> 
@@ -56,11 +55,14 @@ public interface IScopeTreeData extends ITreeData<Scope>
 	 */
 	public IMetricManager getMetricManager();
 	
+	
+	public void setRoot(Scope root);
+	
 	/****
 	 * Get the root of this tree data
 	 * @return RootScope
 	 */
-	public RootScope getRoot();
+	public Scope getRoot();
 	
 	public int getSortedColumn();
 	

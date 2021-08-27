@@ -23,7 +23,6 @@ import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
  ******************************************************/
 public class ScopeTreeData implements IScopeTreeData
 {
-	private final RootScope root;
 	private final IMetricManager metricManager;
 
 	/** list of current data. The list is dynamic, always incremental **/
@@ -32,6 +31,8 @@ public class ScopeTreeData implements IScopeTreeData
 	 *  The  value is the list of collapsed nodes of the parent */
 	private final IntObjectHashMap<List<? extends TreeNode>> mapCollapsedScopes;
 
+	private Scope root;
+	
 	// attributes to handle sorting
 	private int sortedColumn;
 	private SortDirectionEnum sortDirection;
@@ -54,12 +55,22 @@ public class ScopeTreeData implements IScopeTreeData
 		clear();
 	}
 	
+	
+	@Override
+	public void setRoot(Scope root) {
+		list.clear();
+		mapCollapsedScopes.clear();
+		
+		list.add(root);
+		this.root = root;
+	}
+	
 	/****
 	 * Get the root of this tree data
 	 * @return RootScope
 	 */
 	@Override
-	public RootScope getRoot() {
+	public Scope getRoot() {
 		return root;
 	}
 	
