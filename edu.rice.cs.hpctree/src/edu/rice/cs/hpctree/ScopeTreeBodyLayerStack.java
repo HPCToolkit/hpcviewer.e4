@@ -11,6 +11,11 @@ import org.eclipse.nebula.widgets.nattable.tree.TreeLayer;
 import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
 
 
+/********************************************************************
+ * 
+ * Main body layer class 
+ *
+ ********************************************************************/
 public class ScopeTreeBodyLayerStack extends AbstractLayerTransform 
 {
     private final SelectionLayer selectionLayer;

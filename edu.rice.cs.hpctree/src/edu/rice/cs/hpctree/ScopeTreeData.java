@@ -199,7 +199,7 @@ public class ScopeTreeData implements IScopeTreeData
 	
 	
 	private boolean isRootScope(Scope scope) {
-		return (scope == null) || (scope instanceof RootScope);
+		return (scope == null) || (scope instanceof RootScope) || (scope == root);
 	}
 	
 	@Override

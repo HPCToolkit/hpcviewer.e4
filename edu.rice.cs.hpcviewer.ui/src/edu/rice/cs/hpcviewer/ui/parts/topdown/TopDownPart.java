@@ -7,7 +7,6 @@ import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.nebula.widgets.nattable.layer.ILayerListener;
 import org.eclipse.nebula.widgets.nattable.layer.event.ILayerEvent;
 import org.eclipse.swt.SWT;
@@ -38,7 +37,7 @@ import edu.rice.cs.hpcviewer.ui.internal.LabelMessage;
 import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 
-public class TopDownPart extends AbstractBaseViewItem implements ILayerListener 
+public class TopDownPart extends AbstractBaseViewItem 
 {	
 
 	final private int ACTION_ZOOM_IN      = 0;
@@ -224,7 +223,6 @@ public class TopDownPart extends AbstractBaseViewItem implements ILayerListener
 			
 			@Override
 			public void select(Scope scope) {
-				System.out.println("select: " + scope.getName());
 			}
 		});
 		
@@ -254,12 +252,5 @@ public class TopDownPart extends AbstractBaseViewItem implements ILayerListener
 	private void updateButtonStatus() {
 		toolItem[ACTION_ZOOM_IN].setEnabled(true);
 		toolItem[ACTION_ZOOM_OUT].setEnabled(true);
-	}
-
-
-
-	@Override
-	public void handleLayerEvent(ILayerEvent event) {
-		System.out.println("event: " + event);
 	}
 }
