@@ -99,6 +99,7 @@ public class ScopeTreeRowModel extends TreeRowModel<Scope> implements ISortModel
 	}
 	
 	
+	
 	@Override
     public List<Integer> expandAll() {
 		System.err.println("NOT SUPPORTED");

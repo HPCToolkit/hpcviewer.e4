@@ -64,6 +64,9 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
 		return bodyDataLayer;
 	}
 
+    public TreeLayer getTreeLayer() {
+    	return treeLayer;
+    }
 
 	public FreezeLayer getFreezeLayer() {
 		return freezeLayer;

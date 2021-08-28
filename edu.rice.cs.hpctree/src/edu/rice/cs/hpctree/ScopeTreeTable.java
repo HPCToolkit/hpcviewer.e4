@@ -1,5 +1,6 @@
 package edu.rice.cs.hpctree;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -27,6 +28,7 @@ import org.eclipse.nebula.widgets.nattable.selection.config.RowOnlySelectionBind
 import org.eclipse.nebula.widgets.nattable.selection.event.RowSelectionEvent;
 import org.eclipse.nebula.widgets.nattable.sort.SortHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.sort.config.SingleClickSortConfiguration;
+import org.eclipse.nebula.widgets.nattable.tree.TreeLayer;
 import org.eclipse.nebula.widgets.nattable.tree.command.TreeExpandToLevelCommand;
 import org.eclipse.nebula.widgets.nattable.ui.menu.AbstractHeaderMenuConfiguration;
 import org.eclipse.nebula.widgets.nattable.ui.menu.PopupMenuBuilder;
@@ -293,7 +295,12 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 	@Override
 	public List<? extends TreeNode> expand(Scope scope) {
 		ScopeTreeRowModel treeRowModel = bodyLayerStack.getTreeRowModel();
-		return treeRowModel.expandScope(scope);
+		int index = treeRowModel.getTreeData().indexOf(scope);
+		if (treeRowModel.isCollapsed(scope)) {
+			TreeLayer treeLayer = bodyLayerStack.getTreeLayer();
+			treeLayer.expandOrCollapseIndex(index);
+		}
+		return treeRowModel.getDirectChildren(index);
 	}
 	
 	

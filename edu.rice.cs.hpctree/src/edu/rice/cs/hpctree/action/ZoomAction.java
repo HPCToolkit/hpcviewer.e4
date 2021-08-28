@@ -91,7 +91,7 @@ public class ZoomAction
 			return false;
 		
 		Scope input = treeAction.getRoot();
-		if (input.getChildAt(0) == node)
+		if (input == node)
 			return false;
 		
 		if (node instanceof CallSiteScopeCallerView) {
