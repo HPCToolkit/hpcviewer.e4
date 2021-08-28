@@ -1,52 +1,25 @@
 package edu.rice.cs.hpctree;
 
-import java.util.List;
-
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
 import org.eclipse.nebula.widgets.nattable.data.IRowDataProvider;
 
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.event.ListEventListener;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
-import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 public class ScopeTreeDataProvider implements IDataProvider, IRowDataProvider<Scope>
 {
-	private final EventList<BaseMetric> listMetrics;
-	private final IScopeTreeData treeData;
+	private final ScopeTreeData treeData;
 	
 	public ScopeTreeDataProvider(IScopeTreeData treeData) {
-		this.treeData   = treeData;
-		
-		listMetrics = new BasicEventList<>();
-		IMetricManager metricManager = treeData.getMetricManager();
-		List<BaseMetric> listVisibleMetrics = metricManager.getVisibleMetrics();
-		
-		for(BaseMetric metric: listVisibleMetrics) {
-			if (treeData.getRoot().getMetricValue(metric) != MetricValue.NONE) {
-				listMetrics.add(metric);
-			}
-		}
+		this.treeData   = (ScopeTreeData) treeData;
 	}
 
 	public BaseMetric getMetric(int columnIndex) {
 		if (columnIndex == 0)
 			return null;
 		
-		return listMetrics.get(columnIndex-1);
-	}
-	
-	
-	public void addListener( ListEventListener<BaseMetric> listener ) {
-		listMetrics.addListEventListener(listener);
-	}
-	
-	
-	public void removeListener( ListEventListener<BaseMetric> listener ) {
-		listMetrics.removeListEventListener(listener);
+		return treeData.getMetric(columnIndex-1);
 	}
 	
 	
@@ -57,7 +30,7 @@ public class ScopeTreeDataProvider implements IDataProvider, IRowDataProvider<Sc
 		if (columnIndex == 0)
 			return scope.getName();
 
-		BaseMetric metric = listMetrics.get(columnIndex-1);
+		BaseMetric metric = treeData.getMetric(columnIndex-1);
 		return metric.getMetricTextValue(scope);
 	}
 
@@ -75,7 +48,7 @@ public class ScopeTreeDataProvider implements IDataProvider, IRowDataProvider<Sc
 	@Override
 	public int getColumnCount() {
 		
-		return 1 + listMetrics.size();
+		return 1 + treeData.getMetricCount();
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package edu.rice.cs.hpctree;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.collections.impl.list.mutable.FastList;
@@ -26,7 +27,7 @@ import org.eclipse.nebula.widgets.nattable.selection.config.RowOnlySelectionBind
 import org.eclipse.nebula.widgets.nattable.selection.event.RowSelectionEvent;
 import org.eclipse.nebula.widgets.nattable.sort.SortHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.sort.config.SingleClickSortConfiguration;
-import org.eclipse.nebula.widgets.nattable.tree.ITreeData;
+import org.eclipse.nebula.widgets.nattable.tree.command.TreeExpandToLevelCommand;
 import org.eclipse.nebula.widgets.nattable.ui.menu.AbstractHeaderMenuConfiguration;
 import org.eclipse.nebula.widgets.nattable.ui.menu.PopupMenuBuilder;
 import org.eclipse.swt.events.DisposeEvent;
@@ -36,9 +37,11 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 import edu.rice.cs.hpcdata.util.OSValidator;
 import edu.rice.cs.hpctree.action.IActionListener;
 import edu.rice.cs.hpctree.internal.ColumnHeaderDataProvider;
@@ -139,6 +142,7 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 	}
 
 	
+	@Override
 	public Scope getSelection() {
 		Set<Range> ranges = bodyLayerStack.getSelectionLayer().getSelectedRowPositions();
 		for(Range r: ranges) {
@@ -148,6 +152,15 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 			}
 		}
 		return null;
+	}
+	
+	public void setSelection(int row) {
+		bodyLayerStack.getSelectionLayer().selectRow(0, row, false, false);
+		
+	}
+	
+	public int indexOf(Scope scope) {
+		return bodyDataProvider.indexOfRowObject(scope);
 	}
 	
 	public void addSelectionListener(IActionListener listener) {
@@ -244,33 +257,53 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 	 * This doesn't refresh the structure of the table.
 	 */
 	public void redraw() {
-		if (natTable != null)
+		if (natTable != null) {
 			natTable.redraw();
+		}
 	}
 	
 	@Override
 	public void expand(int index) {
 		bodyLayerStack.expand(index);
+		if (natTable != null) {
+			natTable.doCommand(new TreeExpandToLevelCommand(index, 1));
+		}
 	}
 
 	@Override
 	public void setRoot(Scope root) {
-		ITreeData<Scope> treedata = bodyLayerStack.getTreeRowModel().getTreeData();
-		ScopeTreeData scopeData = (ScopeTreeData) treedata;
-		scopeData.setRoot(root);
+		ScopeTreeRowModel treeRowModel = bodyLayerStack.getTreeRowModel();
+		treeRowModel.setRoot(root);
 		
 		this.refresh();
 	}
 
 	@Override
 	public Scope getRoot() {
-		ITreeData<Scope> treedata = bodyLayerStack.getTreeRowModel().getTreeData();
-		ScopeTreeData scopeData = (ScopeTreeData) treedata;
-		return scopeData.getRoot();
+		ScopeTreeRowModel treeRowModel = bodyLayerStack.getTreeRowModel();
+		return treeRowModel.getRoot();
 	}
 
 	@Override
 	public void widgetDisposed(DisposeEvent e) {
         bodyLayerStack.getSelectionLayer().removeLayerListener(this);
+	}
+	
+	
+	@Override
+	public List<? extends TreeNode> expand(Scope scope) {
+		ScopeTreeRowModel treeRowModel = bodyLayerStack.getTreeRowModel();
+		return treeRowModel.expandScope(scope);
+	}
+	
+	
+	@Override
+	public int getSortedColumn() {
+		ScopeTreeRowModel treeRowModel = bodyLayerStack.getTreeRowModel();
+		return treeRowModel.getSortedColumnIndexes().get(0);
+	}
+	
+	public BaseMetric getMetric(int columnIndex) {
+		return bodyDataProvider.getMetric(columnIndex);
 	}
 }

@@ -7,12 +7,10 @@ import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.nebula.widgets.nattable.layer.ILayerListener;
-import org.eclipse.nebula.widgets.nattable.layer.event.ILayerEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -28,6 +26,7 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpctree.ScopeTreeTable;
+import edu.rice.cs.hpctree.action.HotPathAction;
 import edu.rice.cs.hpctree.action.IActionListener;
 import edu.rice.cs.hpctree.action.ZoomAction;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
@@ -161,11 +160,9 @@ public class TopDownPart extends AbstractBaseViewItem
 		
 		toolItem[ACTION_ZOOM_IN]  = createToolItem(toolBar, IconManager.Image_ZoomIn,  "Zoom-in the selected node");
 		toolItem[ACTION_ZOOM_OUT] = createToolItem(toolBar, IconManager.Image_ZoomOut, "Zoom-out from the current tree scope");
-
 		toolItem[ACTION_HOTPATH]  = createToolItem(toolBar, IconManager.Image_FlameIcon, "Expand the hot path below the selected node");
 
-		toolItem[ACTION_ZOOM_IN].addSelectionListener(new SelectionListener() {
-			
+		toolItem[ACTION_ZOOM_IN].addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 
@@ -174,13 +171,29 @@ public class TopDownPart extends AbstractBaseViewItem
 					return;
 
 				zoomAction.zoomIn(selection);
+				updateButtonStatus();
 			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
-		updateButtonStatus();
 		
+		toolItem[ACTION_ZOOM_OUT].addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				zoomAction.zoomOut();
+				updateButtonStatus();
+			}
+		});
+		
+		toolItem[ACTION_HOTPATH].addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				HotPathAction action = new HotPathAction(table);
+				if (action.showHotCallPath() == HotPathAction.RET_OK) {
+					lblMessage.showInfo("Found a hot call path");
+				} else {
+					lblMessage.showErrorMessage(action.getMessage());
+				}
+			}
+		});
 		
 		// -------------------------------------------
 		// add the end of toolbar
@@ -204,15 +217,17 @@ public class TopDownPart extends AbstractBaseViewItem
 		lblMessage = new LabelMessage(composite, SWT.NONE);
 
 		
-		// -------------------------------------------
-		// table creation
-		// -------------------------------------------
+		updateButtonStatus();
 	}
 
 	@Override
 	public void setInput(Object input) {
 		if (!(input instanceof IMetricManager))
 			return;
+		
+		// -------------------------------------------
+		// table creation
+		// -------------------------------------------
 		
 		metricManager = (IMetricManager) input;
 		root = ((Experiment)metricManager).getRootScope(RootScopeType.CallingContextTree);
@@ -223,9 +238,9 @@ public class TopDownPart extends AbstractBaseViewItem
 			
 			@Override
 			public void select(Scope scope) {
+				updateButtonStatus();
 			}
 		});
-		
 		
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(table);
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(table);
@@ -250,7 +265,22 @@ public class TopDownPart extends AbstractBaseViewItem
 	}
 
 	private void updateButtonStatus() {
-		toolItem[ACTION_ZOOM_IN].setEnabled(true);
-		toolItem[ACTION_ZOOM_OUT].setEnabled(true);
+		if (table == null) {
+			toolItem[ACTION_ZOOM_IN] .setEnabled(false);
+			toolItem[ACTION_ZOOM_OUT].setEnabled(false);
+			toolItem[ACTION_HOTPATH] .setEnabled(false);
+			return;
+		}
+		Scope selectedScope = table.getSelection();
+		boolean canZoomIn = zoomAction == null ? false : zoomAction.canZoomIn(selectedScope); 
+		toolItem[ACTION_ZOOM_IN].setEnabled(canZoomIn);
+		
+		boolean canZoomOut = zoomAction == null ? false : zoomAction.canZoomOut();
+		toolItem[ACTION_ZOOM_OUT].setEnabled(canZoomOut);
+		
+		boolean canHotPath = table.getSelection() != null;
+		toolItem[ACTION_HOTPATH].setEnabled(canHotPath);
+		
+		
 	}
 }

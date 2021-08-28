@@ -2,12 +2,11 @@ package edu.rice.cs.hpctree;
 
 import java.util.List;
 
-import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.nebula.widgets.nattable.sort.SortDirectionEnum;
 import org.eclipse.nebula.widgets.nattable.tree.ITreeData;
 
-import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 
 public interface IScopeTreeData extends ITreeData<Scope> 
 {
@@ -16,7 +15,7 @@ public interface IScopeTreeData extends ITreeData<Scope>
 	 * This method has to be called BEFORE calling tree model's {@code expand}
 	 * @param index
 	 */
-	public void expand(int index);
+	public List<? extends TreeNode> expand(int index);
 	
 	/****
 	 * Collapse a tree node. 
@@ -34,27 +33,13 @@ public interface IScopeTreeData extends ITreeData<Scope>
 	 * @param accumulate
 	 */
 	public void sort(int columnIndex, SortDirectionEnum sortDirection, boolean accumulate);
-	
-	/***
-	 * Get the current list of data.
-	 * Recall that the list is created and added dynamically depending if the tree
-	 * has been expanded or not.
-	 * 
-	 * @return {@code MutableList<Scope>} list of scope data
-	 */
-	public MutableList<Scope> getList();
+
 	
 	/** 
 	 * Reset the data
 	 */
 	public void clear();
-	
-	/***
-	 * Get the metric manager of this tree data
-	 * @return
-	 */
-	public IMetricManager getMetricManager();
-	
+		
 	
 	public void setRoot(Scope root);
 	

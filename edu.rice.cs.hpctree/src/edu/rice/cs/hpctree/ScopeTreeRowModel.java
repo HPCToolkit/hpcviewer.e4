@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.nebula.widgets.nattable.layer.ILayerListener;
 import org.eclipse.nebula.widgets.nattable.layer.event.ILayerEvent;
 import org.eclipse.nebula.widgets.nattable.layer.event.StructuralRefreshEvent;
@@ -12,6 +13,7 @@ import org.eclipse.nebula.widgets.nattable.sort.SortDirectionEnum;
 import org.eclipse.nebula.widgets.nattable.tree.TreeRowModel;
 
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 
 
 /***********************************************************
@@ -81,6 +83,22 @@ public class ScopeTreeRowModel extends TreeRowModel<Scope> implements ISortModel
 		return list;
 	}
 	
+	
+	public List<? extends TreeNode> expandScope(Scope scope) {
+		int index = getTreeData().indexOf(scope);
+		List<Integer> list = expand(index);
+		if (list == null)
+			return new ArrayList<>(0);
+		
+		List<Scope> children = new FastList<>(list.size());
+		list.forEach(i -> {
+			Scope s = getTreeData().getDataAtIndex(i);
+			children.add(s);
+		});
+		return (List<? extends TreeNode>) children;
+	}
+	
+	
 	@Override
     public List<Integer> expandAll() {
 		System.err.println("NOT SUPPORTED");
@@ -142,5 +160,15 @@ public class ScopeTreeRowModel extends TreeRowModel<Scope> implements ISortModel
                 && ((StructuralRefreshEvent) event).isHorizontalStructureChanged()) {
 			System.out.println("table layer event: " + event.toString());
 		}
+	}
+
+	public void setRoot(Scope root) {
+		IScopeTreeData treedata = (IScopeTreeData) getTreeData();
+		treedata.setRoot(root);
+	}
+
+	public Scope getRoot() {
+		IScopeTreeData treedata = (IScopeTreeData) getTreeData();
+		return treedata.getRoot();
 	}
 }

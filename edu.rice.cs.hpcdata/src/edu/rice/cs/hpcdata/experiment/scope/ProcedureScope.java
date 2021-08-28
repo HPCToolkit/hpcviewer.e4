@@ -131,7 +131,7 @@ public ProcedureScope(RootScope root, LoadModuleScope loadModule, SourceFile fil
 	//this.iScopeID = sid;
 	this.objLoadModule = loadModule;
 }
-
+/*
 public boolean equals(Object obj) {
 	if (obj instanceof ProcedureScope) {
 		ProcedureScope p = (ProcedureScope) obj;
@@ -148,7 +148,7 @@ public boolean equals(Object obj) {
 		}
 	} 
 	return false;
-}
+}*/
 
 //////////////////////////////////////////////////////////////////////////
 //	SCOPE DISPLAY	

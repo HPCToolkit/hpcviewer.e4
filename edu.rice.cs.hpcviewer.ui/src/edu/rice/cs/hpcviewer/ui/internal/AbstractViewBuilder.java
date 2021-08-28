@@ -44,6 +44,7 @@ import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 import edu.rice.cs.hpcdata.util.ScopeComparator;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
@@ -343,7 +344,28 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener, IScopeTreeA
 	public void expand(int index) {
 		treeViewer.expandToLevel(2, true);
 	}
+	
+	@Override
+	public List<? extends TreeNode> expand(Scope scope) {
+		// TODO: not implemented yet
+		return null;
+	}
 
+	
+	@Override
+	public int getSortedColumn() {
+		TreeColumn col = treeViewer.getTree().getSortColumn();
+		for(int i=0; i<treeViewer.getTree().getColumnCount(); i++) {
+			if (treeViewer.getTree().getColumn(i) == col)
+				return i;
+		}
+		return -1;
+	}
+	
+	@Override
+	public Scope getSelection() {
+		return treeViewer.getSelectedNode();
+	}
 	
 	/****
 	 * Sort the table based on the first visible metric column
