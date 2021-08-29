@@ -14,6 +14,7 @@ import edu.rice.cs.hpcdata.experiment.scope.CallSiteScopeCallerView;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.util.Util;
 import edu.rice.cs.hpcdata.util.string.StringUtil;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
@@ -111,7 +112,7 @@ public class StyledScopeLabelProvider extends DelegatingStyledCellLabelProvider
 				
 				// the line number in XML is 0-based, while the editor is 1-based
 				int line = 1+cs.getLineScope().getFirstLineNumber();
-				boolean isReadable = Utilities.isFileReadable(cs.getLineScope());
+				boolean isReadable = Util.isFileReadable(cs.getLineScope());
 				
 				// show the line number
 				if (line>0) {
@@ -125,7 +126,7 @@ public class StyledScopeLabelProvider extends DelegatingStyledCellLabelProvider
 			Scope node = (Scope) element;
 			final String text = getText(node);
 
-			if(Utilities.isFileReadable(node)) {
+			if(Util.isFileReadable(node)) {
 				styledString.append( text, STYLE_ACTIVE_LINK );
 			} else {
 				styledString.append( text, Utilities.STYLE_INACTIVE_LINK );
@@ -219,7 +220,7 @@ public class StyledScopeLabelProvider extends DelegatingStyledCellLabelProvider
 			// - the file is NOT readable; and
 			// - doesn't have load module suffix
 
-			return (!Utilities.isFileReadable(node) && node.getName().lastIndexOf(']')<0);
+			return (!Util.isFileReadable(node) && node.getName().lastIndexOf(']')<0);
 
 		}
 		return false;

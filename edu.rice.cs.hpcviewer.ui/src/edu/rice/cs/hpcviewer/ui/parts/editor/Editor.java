@@ -14,12 +14,12 @@ import org.eclipse.swt.widgets.Display;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.source.FileSystemSourceFile;
+import edu.rice.cs.hpcdata.util.Util;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpcviewer.ui.graph.GraphEditorInput;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractUpperPart;
-import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -257,7 +257,7 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 		if (input instanceof Scope) {
 			Scope scope = (Scope) input;
 			
-			if (!Utilities.isFileReadable(scope))
+			if (!Util.isFileReadable(scope))
 				return;
 			
 			FileSystemSourceFile file = (FileSystemSourceFile) scope.getSourceFile();

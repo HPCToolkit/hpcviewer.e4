@@ -158,13 +158,12 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 	}
 
 	private void setConfigRegistry(ConfigRegistry configRegistry) {
-		IconManager iconManager = IconManager.getInstance();
-		
-		ImagePainter imageCallTo = new ImagePainter(iconManager.getImage(IconManager.Image_CallTo));
-		CellPainterDecorator cellPainter = new CellPainterDecorator(new TextPainter(), CellEdgeEnum.LEFT, imageCallTo);
-		
-		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_PAINTER, cellPainter, DisplayMode.NORMAL, ScopeTreeLabelAccumulator.LABEL_CALLSITE);
-		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_PAINTER, cellPainter, DisplayMode.SELECT, ScopeTreeLabelAccumulator.LABEL_CALLSITE);
+
+		addIconLabel(configRegistry, IconManager.Image_CallTo, ScopeTreeLabelAccumulator.LABEL_CALLSITE);
+		addIconLabel(configRegistry, IconManager.Image_CallToDisabled, ScopeTreeLabelAccumulator.LABEL_CALLSITE_DISABLED);
+
+		addIconLabel(configRegistry, IconManager.Image_CallFrom, ScopeTreeLabelAccumulator.LABEL_CALLER);
+		addIconLabel(configRegistry, IconManager.Image_CallFromDisabled, ScopeTreeLabelAccumulator.LABEL_CALLER_DISABLED);
 		
 		// configuration for metric column
 		//
@@ -173,8 +172,16 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 		styleMetric.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.RIGHT);
 		styleMetric.setAttributeValue(CellStyleAttributes.VERTICAL_ALIGNMENT, VerticalAlignmentEnum.MIDDLE);
 		styleMetric.setAttributeValue(CellStyleAttributes.FONT, fontMetric);
-		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, styleMetric, DisplayMode.NORMAL, ScopeTreeLabelAccumulator.LABEL_METRICOLUMN);
-		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, styleMetric, DisplayMode.SELECT, ScopeTreeLabelAccumulator.LABEL_METRICOLUMN);
+		
+		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
+											   styleMetric, 
+											   DisplayMode.NORMAL, 
+											   ScopeTreeLabelAccumulator.LABEL_METRICOLUMN);
+		
+		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
+											   styleMetric, 
+											   DisplayMode.SELECT, 
+											   ScopeTreeLabelAccumulator.LABEL_METRICOLUMN);
 
 		// configuration for tree column
 		//
@@ -191,6 +198,24 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 				   							   styleTree, 
 											   DisplayMode.SELECT, 
 											   ScopeTreeLabelAccumulator.LABEL_TREECOLUMN);
+	}
+	
+	
+	private void addIconLabel(ConfigRegistry configRegistry, String imageName, String label) {
+		IconManager iconManager = IconManager.getInstance();
+		
+		ImagePainter imagePainter = new ImagePainter(iconManager.getImage(imageName));
+		CellPainterDecorator cellPainter = new CellPainterDecorator(new TextPainter(), CellEdgeEnum.LEFT, imagePainter);
+		
+		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_PAINTER, 
+											   cellPainter, 
+											   DisplayMode.NORMAL, 
+											   label);
+		
+		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_PAINTER, 
+											   cellPainter, 
+											   DisplayMode.SELECT, 
+											   label);
 	}
 	
 	@Override
