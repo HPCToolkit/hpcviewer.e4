@@ -14,6 +14,7 @@ Require-Bundle: edu.rice.cs.hpcdata,
  org.eclipse.collections,
  org.slf4j.api,
  org.eclipse.core.runtime,
- edu.rice.cs.hpcsetting
+ edu.rice.cs.hpcsetting,
+ edu.rice.cs.hpcbase
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Automatic-Module-Name: edu.rice.cs.hpctree

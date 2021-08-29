@@ -5,10 +5,10 @@ import org.eclipse.nebula.widgets.nattable.freeze.CompositeFreezeLayer;
 import org.eclipse.nebula.widgets.nattable.freeze.FreezeLayer;
 import org.eclipse.nebula.widgets.nattable.layer.AbstractLayerTransform;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
-import org.eclipse.nebula.widgets.nattable.layer.cell.ColumnLabelAccumulator;
 import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
 import org.eclipse.nebula.widgets.nattable.tree.TreeLayer;
 import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
+
 
 
 /********************************************************************
@@ -32,16 +32,13 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
     							   IScopeTreeAction treeAction) {
 
         this.bodyDataLayer = new DataLayer(bodyDataProvider);
+        this.bodyDataLayer.setColumnsResizableByDefault(true);
 
-        bodyDataLayer.setColumnsResizableByDefault(true);
-        // simply apply labels for every column by index
-        bodyDataLayer.setConfigLabelAccumulator(new ColumnLabelAccumulator());
-
-        this.treeRowModel = new ScopeTreeRowModel(treeData, treeAction);
-
+        this.treeRowModel   = new ScopeTreeRowModel(treeData, treeAction);
         this.selectionLayer = new SelectionLayer(bodyDataLayer);
         this.treeLayer      = new TreeLayer(this.selectionLayer, treeRowModel);
         this.viewportLayer  = new ViewportLayer(treeLayer);
+      
         this.freezeLayer     = new FreezeLayer(treeLayer);
         compositeFreezeLayer = new CompositeFreezeLayer(freezeLayer, viewportLayer, selectionLayer);
         

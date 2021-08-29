@@ -1,6 +1,5 @@
 package edu.rice.cs.hpctree;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -8,7 +7,9 @@ import java.util.Set;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.nebula.widgets.nattable.NatTable;
+import org.eclipse.nebula.widgets.nattable.config.CellConfigAttributes;
 import org.eclipse.nebula.widgets.nattable.config.ConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfiguration;
 import org.eclipse.nebula.widgets.nattable.coordinate.PositionCoordinate;
@@ -24,16 +25,26 @@ import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayerListener;
 import org.eclipse.nebula.widgets.nattable.layer.event.ILayerEvent;
+import org.eclipse.nebula.widgets.nattable.painter.cell.ImagePainter;
+import org.eclipse.nebula.widgets.nattable.painter.cell.TextPainter;
+import org.eclipse.nebula.widgets.nattable.painter.cell.decorator.CellPainterDecorator;
 import org.eclipse.nebula.widgets.nattable.selection.config.RowOnlySelectionBindings;
 import org.eclipse.nebula.widgets.nattable.selection.event.RowSelectionEvent;
 import org.eclipse.nebula.widgets.nattable.sort.SortHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.sort.config.SingleClickSortConfiguration;
+import org.eclipse.nebula.widgets.nattable.style.CellStyleAttributes;
+import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
+import org.eclipse.nebula.widgets.nattable.style.HorizontalAlignmentEnum;
+import org.eclipse.nebula.widgets.nattable.style.Style;
+import org.eclipse.nebula.widgets.nattable.style.VerticalAlignmentEnum;
 import org.eclipse.nebula.widgets.nattable.tree.TreeLayer;
 import org.eclipse.nebula.widgets.nattable.tree.command.TreeExpandToLevelCommand;
 import org.eclipse.nebula.widgets.nattable.ui.menu.AbstractHeaderMenuConfiguration;
 import org.eclipse.nebula.widgets.nattable.ui.menu.PopupMenuBuilder;
+import org.eclipse.nebula.widgets.nattable.ui.util.CellEdgeEnum;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridLayout;
@@ -45,10 +56,12 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 import edu.rice.cs.hpcdata.util.OSValidator;
+import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpctree.action.IActionListener;
 import edu.rice.cs.hpctree.internal.ColumnHeaderDataProvider;
-import edu.rice.cs.hpctree.internal.MetricTableRegistryConfiguration;
-import edu.rice.cs.hpctree.internal.TableConfigLabelProvider;
+import edu.rice.cs.hpctree.internal.ScopeTreeLabelAccumulator;
+import edu.rice.cs.hpctree.resources.IconManager;
+
 
 
 public class ScopeTreeTable extends Composite implements IScopeTreeAction, DisposeListener, ILayerListener
@@ -78,10 +91,12 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
         ConfigRegistry configRegistry = new ConfigRegistry();
         
         bodyLayerStack = new ScopeTreeBodyLayerStack(treeData, bodyDataProvider, this);
-        bodyLayerStack.setConfigLabelAccumulator(new TableConfigLabelProvider());
+        bodyLayerStack.setConfigLabelAccumulator(new ScopeTreeLabelAccumulator(treeData));
 
         bodyLayerStack.getSelectionLayer().addLayerListener(this);
 
+        setConfigRegistry(configRegistry);
+        
         // --------------------------------
         // build the column header layer
         // --------------------------------
@@ -111,7 +126,6 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
         natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
 		natTable.addConfiguration(new RowOnlySelectionBindings());
 		natTable.addConfiguration(new SingleClickSortConfiguration());
-		natTable.addConfiguration(new MetricTableRegistryConfiguration());
         natTable.addConfiguration(new AbstractHeaderMenuConfiguration(natTable) {
             @Override
             protected PopupMenuBuilder createColumnHeaderMenu(NatTable natTable) {
@@ -143,6 +157,41 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 		addDisposeListener(this);
 	}
 
+	private void setConfigRegistry(ConfigRegistry configRegistry) {
+		IconManager iconManager = IconManager.getInstance();
+		
+		ImagePainter imageCallTo = new ImagePainter(iconManager.getImage(IconManager.Image_CallTo));
+		CellPainterDecorator cellPainter = new CellPainterDecorator(new TextPainter(), CellEdgeEnum.LEFT, imageCallTo);
+		
+		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_PAINTER, cellPainter, DisplayMode.NORMAL, ScopeTreeLabelAccumulator.LABEL_CALLSITE);
+		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_PAINTER, cellPainter, DisplayMode.SELECT, ScopeTreeLabelAccumulator.LABEL_CALLSITE);
+		
+		// configuration for metric column
+		//
+		final Font fontMetric  = getMetricFont();
+		final Style styleMetric = new Style();
+		styleMetric.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.RIGHT);
+		styleMetric.setAttributeValue(CellStyleAttributes.VERTICAL_ALIGNMENT, VerticalAlignmentEnum.MIDDLE);
+		styleMetric.setAttributeValue(CellStyleAttributes.FONT, fontMetric);
+		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, styleMetric, DisplayMode.NORMAL, ScopeTreeLabelAccumulator.LABEL_METRICOLUMN);
+		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, styleMetric, DisplayMode.SELECT, ScopeTreeLabelAccumulator.LABEL_METRICOLUMN);
+
+		// configuration for tree column
+		//
+		final Font fontGeneric = getGenericFont();
+		final Style styleTree  = new Style();
+		styleTree.setAttributeValue(CellStyleAttributes.FONT, fontGeneric);
+
+		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
+											   styleTree, 
+											   DisplayMode.NORMAL, 
+											   ScopeTreeLabelAccumulator.LABEL_TREECOLUMN);
+		
+		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
+				   							   styleTree, 
+											   DisplayMode.SELECT, 
+											   ScopeTreeLabelAccumulator.LABEL_TREECOLUMN);
+	}
 	
 	@Override
 	public Scope getSelection() {
@@ -218,10 +267,30 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 	}
 	
 	
+	private static Font getMetricFont() {
+		Font font ;
+		try {
+			font = FontManager.getMetricFont();
+		} catch (Exception e) {
+			font = JFaceResources.getTextFont();
+		}
+		return font;
+	}
+
+	private static Font getGenericFont() {
+		Font font;
+		try {
+			font = FontManager.getFontGeneric();
+		} catch (Exception e) {
+			font = JFaceResources.getDefaultFont();
+		}
+		return font;
+	}
+
 	private Point getMetricColumnSize() {
 		final GC gc = new GC(natTable.getDisplay());		
 		
-		gc.setFont(MetricTableRegistryConfiguration.getMetricFont());
+		gc.setFont(getMetricFont());
 		String text = TEXT_METRIC_COLUMN;
 		if (OSValidator.isWindows()) {
 			
@@ -237,7 +306,7 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 		// check the height if we use generic font (tree column)
 		// if this font is higher, we should use this height as the standard.
 		
-		gc.setFont(MetricTableRegistryConfiguration.getGenericFont());
+		gc.setFont(getGenericFont());
 		extent = gc.stringExtent(text);
 		size.y = Math.max(size.y, extent.y);
 		
