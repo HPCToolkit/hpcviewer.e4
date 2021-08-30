@@ -62,7 +62,7 @@ public class TopDownPart extends AbstractBaseViewItem
 	
 	public TopDownPart(CTabFolder parent, int style) {
 		super(parent, style);
-		setText("Top down part");
+		setText("Top-down view");
 	}
 	
 	

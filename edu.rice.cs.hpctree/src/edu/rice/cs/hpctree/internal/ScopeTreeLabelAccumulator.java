@@ -49,5 +49,4 @@ public class ScopeTreeLabelAccumulator implements IConfigLabelAccumulator
 				configLabels.add(LABEL_CALLER_DISABLED);
 		}	
 	}
-
 }
