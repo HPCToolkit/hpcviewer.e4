@@ -54,7 +54,7 @@ public class ScopeTreeDataProvider implements IDataProvider, IRowDataProvider<Sc
 			
 			// show the line number
 			if (line>0) {
-				text += line + " ";
+				text += line + ": ";
 			}
 		}
 		text += getDebugText(scope) + scope.getName();

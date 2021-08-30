@@ -5,6 +5,7 @@ import org.eclipse.nebula.widgets.nattable.layer.cell.IConfigLabelAccumulator;
 
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScopeCallerView;
+import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.util.Util;
 import edu.rice.cs.hpctree.IScopeTreeData;
@@ -17,6 +18,8 @@ public class ScopeTreeLabelAccumulator implements IConfigLabelAccumulator
 
 	public final static String LABEL_CALLSITE_DISABLED = "scope.dis.callsite";
 	public final static String LABEL_CALLER_DISABLED   = "scope.dis.caller";
+	
+	public final static String LABEL_SOURCE_AVAILABLE  = "source.available";
 	
 	public final static String LABEL_TREECOLUMN  = "column.tree";
 	public final static String LABEL_METRICOLUMN = "column.metric_";
@@ -37,16 +40,21 @@ public class ScopeTreeLabelAccumulator implements IConfigLabelAccumulator
 		
 		Scope scope = treeData.getDataAtIndex(rowPosition);
 		if (scope instanceof CallSiteScope) {
-			if (Util.isFileReadable(scope)) {
+			LineScope ls = ((CallSiteScope)scope).getLineScope();
+			if (Util.isFileReadable(ls)) {
 				configLabels.add(LABEL_CALLSITE);				
 			} else {
 				configLabels.add(LABEL_CALLSITE_DISABLED);
 			}
 		} else if (scope instanceof CallSiteScopeCallerView) {
-			if (Util.isFileReadable(scope))
+			LineScope ls = ((CallSiteScopeCallerView)scope).getLineScope();
+			if (Util.isFileReadable(ls))
 				configLabels.add(LABEL_CALLER);
 			else
 				configLabels.add(LABEL_CALLER_DISABLED);
-		}	
+		}
+		if (Util.isFileReadable(scope)) {
+			configLabels.add(LABEL_SOURCE_AVAILABLE);
+		}
 	}
 }

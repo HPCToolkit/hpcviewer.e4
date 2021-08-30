@@ -15,6 +15,7 @@ import org.eclipse.nebula.widgets.nattable.style.Style;
 import org.eclipse.nebula.widgets.nattable.style.VerticalAlignmentEnum;
 import org.eclipse.nebula.widgets.nattable.ui.binding.UiBindingRegistry;
 import org.eclipse.nebula.widgets.nattable.ui.util.CellEdgeEnum;
+import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
 import org.eclipse.swt.graphics.Font;
 
 import edu.rice.cs.hpcsetting.fonts.FontManager;
@@ -67,6 +68,13 @@ public class TableConfiguration implements IConfiguration
 				   							   styleTree, 
 											   DisplayMode.SELECT, 
 											   ScopeTreeLabelAccumulator.LABEL_TREECOLUMN);
+
+		final Style styleActive = new Style();
+		styleActive.setAttributeValue(CellStyleAttributes.FOREGROUND_COLOR, GUIHelper.COLOR_BLUE);
+		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
+					styleActive, 
+					DisplayMode.NORMAL, 
+					ScopeTreeLabelAccumulator.LABEL_SOURCE_AVAILABLE);
 	}
 
 	@Override
