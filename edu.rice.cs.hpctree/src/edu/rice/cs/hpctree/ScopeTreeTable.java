@@ -7,9 +7,7 @@ import java.util.Set;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.nebula.widgets.nattable.NatTable;
-import org.eclipse.nebula.widgets.nattable.config.CellConfigAttributes;
 import org.eclipse.nebula.widgets.nattable.config.ConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfiguration;
 import org.eclipse.nebula.widgets.nattable.coordinate.PositionCoordinate;
@@ -25,26 +23,17 @@ import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayerListener;
 import org.eclipse.nebula.widgets.nattable.layer.event.ILayerEvent;
-import org.eclipse.nebula.widgets.nattable.painter.cell.ImagePainter;
-import org.eclipse.nebula.widgets.nattable.painter.cell.TextPainter;
-import org.eclipse.nebula.widgets.nattable.painter.cell.decorator.CellPainterDecorator;
+import org.eclipse.nebula.widgets.nattable.painter.layer.NatGridLayerPainter;
 import org.eclipse.nebula.widgets.nattable.selection.config.RowOnlySelectionBindings;
 import org.eclipse.nebula.widgets.nattable.selection.event.RowSelectionEvent;
 import org.eclipse.nebula.widgets.nattable.sort.SortHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.sort.config.SingleClickSortConfiguration;
-import org.eclipse.nebula.widgets.nattable.style.CellStyleAttributes;
-import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
-import org.eclipse.nebula.widgets.nattable.style.HorizontalAlignmentEnum;
-import org.eclipse.nebula.widgets.nattable.style.Style;
-import org.eclipse.nebula.widgets.nattable.style.VerticalAlignmentEnum;
 import org.eclipse.nebula.widgets.nattable.tree.TreeLayer;
 import org.eclipse.nebula.widgets.nattable.tree.command.TreeExpandToLevelCommand;
 import org.eclipse.nebula.widgets.nattable.ui.menu.AbstractHeaderMenuConfiguration;
 import org.eclipse.nebula.widgets.nattable.ui.menu.PopupMenuBuilder;
-import org.eclipse.nebula.widgets.nattable.ui.util.CellEdgeEnum;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridLayout;
@@ -56,11 +45,10 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 import edu.rice.cs.hpcdata.util.OSValidator;
-import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpctree.action.IActionListener;
 import edu.rice.cs.hpctree.internal.ColumnHeaderDataProvider;
 import edu.rice.cs.hpctree.internal.ScopeTreeLabelAccumulator;
-import edu.rice.cs.hpctree.resources.IconManager;
+import edu.rice.cs.hpctree.internal.TableConfiguration;
 
 
 
@@ -92,18 +80,15 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
         
         bodyLayerStack = new ScopeTreeBodyLayerStack(treeData, bodyDataProvider, this);
         bodyLayerStack.setConfigLabelAccumulator(new ScopeTreeLabelAccumulator(treeData));
-
         bodyLayerStack.getSelectionLayer().addLayerListener(this);
-
-        setConfigRegistry(configRegistry);
+        bodyLayerStack.addConfiguration(new TableConfiguration());
         
         // --------------------------------
         // build the column header layer
         // --------------------------------
         columnHeaderDataProvider = new ColumnHeaderDataProvider(bodyDataProvider);
         DataLayer columnHeaderDataLayer = new DefaultColumnHeaderDataLayer(columnHeaderDataProvider);
-        ILayer columnHeaderLayer =
-                new ColumnHeaderLayer(columnHeaderDataLayer, bodyLayerStack, bodyLayerStack.getSelectionLayer());
+        ILayer columnHeaderLayer = new ColumnHeaderLayer(columnHeaderDataLayer, bodyLayerStack, bodyLayerStack.getSelectionLayer());
         SortHeaderLayer<Scope> headerLayer = new SortHeaderLayer<>(columnHeaderLayer, bodyLayerStack.getTreeRowModel());
 
         // --------------------------------
@@ -117,7 +102,7 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 
         // turn the auto configuration off as we want to add our header menu
         // configuration
-        natTable = new NatTable(this, compositeLayer, false);
+        natTable = new NatTable(this, NatTable.DEFAULT_STYLE_OPTIONS , compositeLayer, false);
 
         // as the autoconfiguration of the NatTable is turned off, we have to
         // add the DefaultNatTableStyleConfiguration and the ConfigRegistry
@@ -154,69 +139,11 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
         GridDataFactory.fillDefaults().grab(true, true).applyTo(natTable);
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(natTable);
 
+		natTable.setLayerPainter(new NatGridLayerPainter(natTable, DataLayer.DEFAULT_ROW_HEIGHT));
 		addDisposeListener(this);
 	}
 
-	private void setConfigRegistry(ConfigRegistry configRegistry) {
-
-		addIconLabel(configRegistry, IconManager.Image_CallTo, ScopeTreeLabelAccumulator.LABEL_CALLSITE);
-		addIconLabel(configRegistry, IconManager.Image_CallToDisabled, ScopeTreeLabelAccumulator.LABEL_CALLSITE_DISABLED);
-
-		addIconLabel(configRegistry, IconManager.Image_CallFrom, ScopeTreeLabelAccumulator.LABEL_CALLER);
-		addIconLabel(configRegistry, IconManager.Image_CallFromDisabled, ScopeTreeLabelAccumulator.LABEL_CALLER_DISABLED);
-		
-		// configuration for metric column
-		//
-		final Font fontMetric  = getMetricFont();
-		final Style styleMetric = new Style();
-		styleMetric.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.RIGHT);
-		styleMetric.setAttributeValue(CellStyleAttributes.VERTICAL_ALIGNMENT, VerticalAlignmentEnum.MIDDLE);
-		styleMetric.setAttributeValue(CellStyleAttributes.FONT, fontMetric);
-		
-		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
-											   styleMetric, 
-											   DisplayMode.NORMAL, 
-											   ScopeTreeLabelAccumulator.LABEL_METRICOLUMN);
-		
-		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
-											   styleMetric, 
-											   DisplayMode.SELECT, 
-											   ScopeTreeLabelAccumulator.LABEL_METRICOLUMN);
-
-		// configuration for tree column
-		//
-		final Font fontGeneric = getGenericFont();
-		final Style styleTree  = new Style();
-		styleTree.setAttributeValue(CellStyleAttributes.FONT, fontGeneric);
-
-		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
-											   styleTree, 
-											   DisplayMode.NORMAL, 
-											   ScopeTreeLabelAccumulator.LABEL_TREECOLUMN);
-		
-		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
-				   							   styleTree, 
-											   DisplayMode.SELECT, 
-											   ScopeTreeLabelAccumulator.LABEL_TREECOLUMN);
-	}
 	
-	
-	private void addIconLabel(ConfigRegistry configRegistry, String imageName, String label) {
-		IconManager iconManager = IconManager.getInstance();
-		
-		ImagePainter imagePainter = new ImagePainter(iconManager.getImage(imageName));
-		CellPainterDecorator cellPainter = new CellPainterDecorator(new TextPainter(), CellEdgeEnum.LEFT, imagePainter);
-		
-		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_PAINTER, 
-											   cellPainter, 
-											   DisplayMode.NORMAL, 
-											   label);
-		
-		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_PAINTER, 
-											   cellPainter, 
-											   DisplayMode.SELECT, 
-											   label);
-	}
 	
 	@Override
 	public Scope getSelection() {
@@ -232,7 +159,6 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 	
 	public void setSelection(int row) {
 		bodyLayerStack.getSelectionLayer().selectRow(0, row, false, false);
-		
 	}
 	
 	public int indexOf(Scope scope) {
@@ -292,30 +218,11 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 	}
 	
 	
-	private static Font getMetricFont() {
-		Font font ;
-		try {
-			font = FontManager.getMetricFont();
-		} catch (Exception e) {
-			font = JFaceResources.getTextFont();
-		}
-		return font;
-	}
-
-	private static Font getGenericFont() {
-		Font font;
-		try {
-			font = FontManager.getFontGeneric();
-		} catch (Exception e) {
-			font = JFaceResources.getDefaultFont();
-		}
-		return font;
-	}
 
 	private Point getMetricColumnSize() {
 		final GC gc = new GC(natTable.getDisplay());		
 		
-		gc.setFont(getMetricFont());
+		gc.setFont(TableConfiguration.getMetricFont());
 		String text = TEXT_METRIC_COLUMN;
 		if (OSValidator.isWindows()) {
 			
@@ -331,7 +238,7 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 		// check the height if we use generic font (tree column)
 		// if this font is higher, we should use this height as the standard.
 		
-		gc.setFont(getGenericFont());
+		gc.setFont(TableConfiguration.getGenericFont());
 		extent = gc.stringExtent(text);
 		size.y = Math.max(size.y, extent.y);
 		
