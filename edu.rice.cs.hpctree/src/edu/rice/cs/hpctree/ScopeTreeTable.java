@@ -190,7 +190,7 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 	@Override
 	public void pack() {		
 		final int TREE_COLUMN_WIDTH  = 350;
-		
+
 		super.pack();
 
 		// ---------------------------------------------------------------

@@ -188,9 +188,6 @@ public class TopDownPart extends AbstractBaseViewItem
 			public void widgetSelected(SelectionEvent e) {
 				HotPathAction action = new HotPathAction(table);
 				if (action.showHotCallPath() == HotPathAction.RET_OK) {
-					lblMessage.showInfo("Found a hot call path");
-				} else {
-					lblMessage.showErrorMessage(action.getMessage());
 				}
 			}
 		});

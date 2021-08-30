@@ -49,7 +49,7 @@ public class HotPathAction
 		
 		if (!getHotCallPath(scope, metric, objHotPath)) {
 			errMsg = "No hot path found";
-			return RET_ERR;
+			// return RET_ERR;
 		}
 		treeAction.redraw();
 		int rowIndex = treeAction.indexOf(objHotPath.node);
@@ -78,6 +78,7 @@ public class HotPathAction
 		if (children != null && children.size() > 0) {
 			// get the highest child node
 			Scope scopeChild = (Scope) children.get(0);
+			objHotPath.node = scopeChild;
 
 			// compare the value of the parent and the child
 			// if the ratio is significant, we stop 
@@ -90,7 +91,6 @@ public class HotPathAction
 			// simple comparison: if the child has "significant" difference compared to its parent
 			// then we consider it as hot path node.
 			if(dChild < (0.5 * dParent)) {
-				objHotPath.node = scope;
 				return true;
 			} else {
 				return getHotCallPath(scopeChild, metric, objHotPath);
