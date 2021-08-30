@@ -1,10 +1,12 @@
 package edu.rice.cs.hpctree.internal;
 
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.config.CellConfigAttributes;
 import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.config.IConfiguration;
 import org.eclipse.nebula.widgets.nattable.layer.ILayer;
+import org.eclipse.nebula.widgets.nattable.layer.LabelStack;
 import org.eclipse.nebula.widgets.nattable.painter.cell.ImagePainter;
 import org.eclipse.nebula.widgets.nattable.painter.cell.TextPainter;
 import org.eclipse.nebula.widgets.nattable.painter.cell.decorator.CellPainterDecorator;
@@ -14,8 +16,10 @@ import org.eclipse.nebula.widgets.nattable.style.HorizontalAlignmentEnum;
 import org.eclipse.nebula.widgets.nattable.style.Style;
 import org.eclipse.nebula.widgets.nattable.style.VerticalAlignmentEnum;
 import org.eclipse.nebula.widgets.nattable.ui.binding.UiBindingRegistry;
+import org.eclipse.nebula.widgets.nattable.ui.matcher.IMouseEventMatcher;
 import org.eclipse.nebula.widgets.nattable.ui.util.CellEdgeEnum;
 import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Font;
 
 import edu.rice.cs.hpcsetting.fonts.FontManager;
@@ -78,7 +82,17 @@ public class TableConfiguration implements IConfiguration
 	}
 
 	@Override
-	public void configureUiBindings(UiBindingRegistry uiBindingRegistry) {}
+	public void configureUiBindings(UiBindingRegistry uiBindingRegistry) {
+		uiBindingRegistry.registerFirstMouseDownBinding(new IMouseEventMatcher() {
+			
+			@Override
+			public boolean matches(NatTable natTable, MouseEvent event, LabelStack regionLabels) {
+				// TODO Auto-generated method stub
+				return false;
+			}
+		}, null);
+		
+	}
 	
 	
 	private void addIconLabel(IConfigRegistry configRegistry, String imageName, String label) {

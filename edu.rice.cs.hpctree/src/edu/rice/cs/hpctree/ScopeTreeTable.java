@@ -41,7 +41,6 @@ import org.eclipse.nebula.widgets.nattable.tree.command.TreeExpandToLevelCommand
 import org.eclipse.nebula.widgets.nattable.ui.binding.UiBindingRegistry;
 import org.eclipse.nebula.widgets.nattable.ui.menu.AbstractHeaderMenuConfiguration;
 import org.eclipse.nebula.widgets.nattable.ui.menu.PopupMenuBuilder;
-import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.GC;
@@ -89,7 +88,7 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
         ConfigRegistry configRegistry = new ConfigRegistry();
         
         bodyLayerStack = new ScopeTreeBodyLayerStack(treeData, bodyDataProvider, this);
-        bodyLayerStack.setConfigLabelAccumulator(new ScopeTreeLabelAccumulator(treeData));
+        bodyLayerStack.getBodyDataLayer().setConfigLabelAccumulator(new ScopeTreeLabelAccumulator(treeData));
         bodyLayerStack.getSelectionLayer().addLayerListener(this);
         bodyLayerStack.addConfiguration(new TableConfiguration());
         
