@@ -1,6 +1,5 @@
 package edu.rice.cs.hpctree;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -310,12 +309,13 @@ public class ScopeTreeData implements IScopeTreeData
 	@Override
 	public List<Scope> getChildren(int index) {
 		Scope scope = getDataAtIndex(index);
+		
+		// if the node doesn't exist, it should be a critical error
+		// should we throw an exception?		
 		int numChildren = scope.getChildCount();
-		List<Scope> children = new FastList<>(numChildren);
-		for(int i=index+1; i < index+1+numChildren; i++) {
-			children.add(list.get(i));
-		}
-		return children;
+		
+		// copy the children in the list to the new list
+		return ((FastList<Scope>)list).subList(index+1, index+1+numChildren);
 	}
 
 	@Override
