@@ -187,7 +187,8 @@ public class TopDownPart extends AbstractBaseViewItem
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				HotPathAction action = new HotPathAction(table);
-				if (action.showHotCallPath() == HotPathAction.RET_OK) {
+				if (action.showHotCallPath() == HotPathAction.RET_ERR) {
+					lblMessage.showErrorMessage(action.getMessage());
 				}
 			}
 		});

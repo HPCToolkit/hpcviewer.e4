@@ -84,20 +84,6 @@ public class ScopeTreeRowModel extends TreeRowModel<Scope> implements ISortModel
 	}
 	
 	
-	public List<? extends TreeNode> expandScope(Scope scope) {
-		int index = getTreeData().indexOf(scope);
-		List<Integer> list = expand(index);
-		if (list == null)
-			return new ArrayList<>(0);
-		
-		List<Scope> children = new FastList<>(list.size());
-		list.forEach(i -> {
-			Scope s = getTreeData().getDataAtIndex(i);
-			children.add(s);
-		});
-		return (List<? extends TreeNode>) children;
-	}
-	
 	
 	
 	@Override

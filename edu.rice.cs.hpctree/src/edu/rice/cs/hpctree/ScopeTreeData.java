@@ -298,10 +298,8 @@ public class ScopeTreeData implements IScopeTreeData
 
 	@Override
 	public List<Scope> getChildren(Scope object) {
-		List<? extends TreeNode> list = object.getListChildren();
-		if (list == null)
-			return new ArrayList<>(0);
-		return convert(list);
+		int index = indexOf(object);
+		return getChildren(index);
 	}
 
 	@Override
@@ -312,7 +310,12 @@ public class ScopeTreeData implements IScopeTreeData
 	@Override
 	public List<Scope> getChildren(int index) {
 		Scope scope = getDataAtIndex(index);
-		return getChildren(scope);
+		int numChildren = scope.getChildCount();
+		List<Scope> children = new FastList<>(numChildren);
+		for(int i=index+1; i < index+1+numChildren; i++) {
+			children.add(list.get(i));
+		}
+		return children;
 	}
 
 	@Override
