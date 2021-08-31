@@ -57,7 +57,7 @@ public class TopDownPart extends AbstractBaseViewItem
 	private ScopeTreeTable table ;
 	private ZoomAction     zoomAction;
 
-	@Inject ESelectionService selectionService;
+	private ProfilePart profilePart;
 
 	
 	public TopDownPart(CTabFolder parent, int style) {
@@ -128,9 +128,9 @@ public class TopDownPart extends AbstractBaseViewItem
 
 	@Override
 	public void setService(EPartService partService, IEventBroker broker, DatabaseCollection database,
-			ProfilePart profilePart, EMenuService menuService) {
-		// TODO Auto-generated method stub
-		
+						   ProfilePart profilePart, EMenuService menuService) {
+
+		this.profilePart = profilePart;
 	}
 
 	@Override
@@ -231,12 +231,10 @@ public class TopDownPart extends AbstractBaseViewItem
 		
 		table = new ScopeTreeTable(parent, SWT.NONE, root, metricManager);
 		table.pack();
-		table.addSelectionListener(new IActionListener() {
-			
-			@Override
-			public void select(Scope scope) {
-				updateButtonStatus();
-			}
+		table.addSelectionListener(scope -> updateButtonStatus());
+		
+		table.addActionListener(scope -> {
+			profilePart.addEditor(scope);
 		});
 		
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(table);

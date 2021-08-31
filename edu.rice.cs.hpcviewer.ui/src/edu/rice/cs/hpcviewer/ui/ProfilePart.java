@@ -34,6 +34,7 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcfilter.service.FilterStateProvider;
 import edu.rice.cs.hpcmetric.MetricFilterInput;
+import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.base.IProfilePart;
 import edu.rice.cs.hpcviewer.ui.base.IUpperPart;
@@ -51,6 +52,7 @@ import edu.rice.cs.hpcviewer.ui.parts.flat.FlatView;
 import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadView;
 import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadViewInput;
 import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownPart;
+import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownView;
 
 
 
@@ -322,6 +324,8 @@ public class ProfilePart implements IProfilePart, EventHandler
 		part.setLabel(PREFIX_TITLE + experiment.getName());
 		part.setTooltip(experiment.getDefaultDirectory().getAbsolutePath());
 		
+		ViewerPreferenceManager vpm = ViewerPreferenceManager.INSTANCE;
+		
 		Object []roots = experiment.getRootScopeChildren();
 		views = new AbstractBaseViewItem[roots.length];		
 		
@@ -329,11 +333,12 @@ public class ProfilePart implements IProfilePart, EventHandler
 			RootScope root = (RootScope) roots[numViews];
 			
 			if (root.getType() == RootScopeType.CallingContextTree) {
-				//views[numViews] = new TopDownView(tabFolderBottom, SWT.NONE);
-				
-				// new table test
-				views[numViews] = new TopDownPart(tabFolderBottom, SWT.NONE);
-				//addView(tdp, input, true);
+				if (vpm.getDebugFlat()) {
+					// new table test
+					views[numViews] = new TopDownPart(tabFolderBottom, SWT.NONE);
+				} else {
+					views[numViews] = new TopDownView(tabFolderBottom, SWT.NONE);
+				}
 				
 			} else if (root.getType() == RootScopeType.CallerTree) {
 				views[numViews] = new BottomUpView(tabFolderBottom, SWT.NONE);

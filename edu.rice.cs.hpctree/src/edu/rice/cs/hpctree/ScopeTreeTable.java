@@ -58,18 +58,31 @@ import edu.rice.cs.hpctree.action.IActionListener;
 import edu.rice.cs.hpctree.internal.ColumnHeaderDataProvider;
 import edu.rice.cs.hpctree.internal.ScopeTreeLabelAccumulator;
 import edu.rice.cs.hpctree.internal.TableConfiguration;
+import edu.rice.cs.hpctree.internal.TableUIBindingConfiguration;
 
 
-
+/********************************************************************
+ * 
+ * Main hpcviewer table composite widget based on NatTable containing:
+ * <ul>
+ * <li>A tree column</li>
+ * <li>Zero or more metric columns</li>
+ * </ul>
+ * This class is inherited from Composite class, hence can be treated 
+ * like a composite for the layout.
+ *
+ ********************************************************************/
 public class ScopeTreeTable extends Composite implements IScopeTreeAction, DisposeListener, ILayerListener
 {
 	private final static float  FACTOR_BOLD_FONT   = 1.2f;
 	private final static String TEXT_METRIC_COLUMN = "|8x88+88xx888x8%--";
+	private final static String LABEL_COLUMN = "col";
 
 	private final NatTable natTable ;
 	private final ScopeTreeBodyLayerStack bodyLayerStack ;
 	private final IDataProvider columnHeaderDataProvider ;
 	private final ScopeTreeDataProvider bodyDataProvider;
+	private final TableUIBindingConfiguration uiConfiguration;
 	private final Collection<IActionListener> listeners = new FastList<IActionListener>();
 
 	public ScopeTreeTable(Composite parent, int style, RootScope root, IMetricManager metricManager) {
@@ -104,7 +117,7 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 			
 			@Override
 			public void accumulateConfigLabels(LabelStack configLabels, int columnPosition, int rowPosition) {
-				configLabels.add(TEXT_METRIC_COLUMN);
+				configLabels.add(LABEL_COLUMN);
 			}
 		});
 
@@ -118,8 +131,8 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 				final Style style = new Style();
 				style.setAttributeValue(CellStyleAttributes.FONT, TableConfiguration.getGenericFont());
 
-				configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, style, DisplayMode.SELECT, TEXT_METRIC_COLUMN);
-				configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, style, DisplayMode.NORMAL, TEXT_METRIC_COLUMN);
+				configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, style, DisplayMode.SELECT, LABEL_COLUMN);
+				configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, style, DisplayMode.NORMAL, LABEL_COLUMN);
 			}
 			
 			@Override
@@ -139,10 +152,14 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
         // configuration
         natTable = new NatTable(this, NatTable.DEFAULT_STYLE_OPTIONS , compositeLayer, false);
 
+        uiConfiguration = new TableUIBindingConfiguration(bodyDataProvider);
+        
         // as the autoconfiguration of the NatTable is turned off, we have to
         // add the DefaultNatTableStyleConfiguration and the ConfigRegistry
         // manually
         natTable.setConfigRegistry(configRegistry);
+        
+        natTable.addConfiguration(uiConfiguration);
         natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
 		natTable.addConfiguration(new RowOnlySelectionBindings());
 		natTable.addConfiguration(new SingleClickSortConfiguration());
@@ -206,6 +223,14 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 	
 	public void removeSelectionListener(IActionListener listener) {
 		listeners.remove(listener);
+	}
+	
+	public void addActionListener(IActionListener action) {
+		uiConfiguration.addListener(action);
+	}
+	
+	public void removeActionListener(IActionListener action) {
+		uiConfiguration.removeListener(action);
 	}
 
 	@Override
