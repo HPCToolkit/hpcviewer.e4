@@ -33,7 +33,7 @@ public class TableUIBindingConfiguration extends AbstractUiBindingConfiguration
 				MouseEventMatcher.LEFT_BUTTON, 
 				ScopeTreeLabelAccumulator.LABEL_SOURCE_AVAILABLE);
 		
-		uiBindingRegistry.registerFirstSingleClickBinding(mouseMatcher, new IMouseAction() {
+		uiBindingRegistry.registerSingleClickBinding(mouseMatcher, new IMouseAction() {
 			
 			@Override
 			public void run(NatTable natTable, MouseEvent event) {
