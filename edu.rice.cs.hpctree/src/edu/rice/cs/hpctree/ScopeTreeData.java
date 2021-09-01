@@ -1,5 +1,6 @@
 package edu.rice.cs.hpctree;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -170,14 +171,16 @@ public class ScopeTreeData implements IScopeTreeData
 			Scope scope = list.get(index);
 			if (!scope.hasChildren())
 				return null;
+
+			ColumnComparator comparator = getComparator(sortedColumn, sortDirection);
 			
 			List<? extends TreeNode> children = mapCollapsedScopes.remove(index);
 			if (children != null) {
+				children.sort(comparator);
 				return children;
 			}
 			List<Scope> listScopes = convert(scope.getListChildren());
 			
-			ColumnComparator comparator = getComparator(sortedColumn, sortDirection);
 			listScopes.sort(comparator);			
 			list.addAll(index+1, listScopes);
 			
@@ -313,9 +316,23 @@ public class ScopeTreeData implements IScopeTreeData
 		// if the node doesn't exist, it should be a critical error
 		// should we throw an exception?		
 		int numChildren = scope.getChildCount();
+		if (numChildren == 0)
+			return new ArrayList<Scope>(0);
+		
+		if (mapCollapsedScopes.get(index) != null) {
+			// the node is collapsed. The children is invisible
+			return new ArrayList<Scope>(0);
+		}
+		// the node has children. Check if the children are expanded or not
+		boolean isExpanded = list.indexOf(scope.getChildAt(0)) >= 0;
+		if (!isExpanded) {
+			return new ArrayList<Scope>(0);
+		}
 		
 		// copy the children in the list to the new list
-		return ((FastList<Scope>)list).subList(index+1, index+1+numChildren);
+		// List<Scope> children = ((FastList<Scope>)list).subList(index+1, index+1+numChildren);
+		// System.out.println(index + " has " + children.size() + ": " + children);
+		return convert(scope.getListChildren());
 	}
 
 	@Override
@@ -345,20 +362,20 @@ public class ScopeTreeData implements IScopeTreeData
 	 * @param targetDepth the depth of the ancestor
 	 * @return the ancestor if exists, {@code null} otherwise
 	 */
-	public static Scope getAncestor(Scope scope, int currentDepth, int targetDepth) {
+	public static TreeNode getAncestor(TreeNode scope, int currentDepth, int targetDepth) {
 		if (scope == null)
 			return null;
 		
 		int depth=currentDepth-1;
-		Scope current = scope.getParentScope();
+		TreeNode current = scope.getParent();
 		
 		for (;depth>targetDepth && current != null; depth--) {
-			current = current.getParentScope();
+			current = current.getParent();
 		}
 		return current;		
 	}
 
-	private static class ColumnComparator implements Comparator<Scope> 
+	private static class ColumnComparator implements Comparator<TreeNode> 
 	{
 		private final int index;
 		private final SortDirectionEnum dir;
@@ -371,28 +388,28 @@ public class ScopeTreeData implements IScopeTreeData
 		}
 		
 		@Override
-		public int compare(Scope o1, Scope o2) {
+		public int compare(TreeNode o1, TreeNode o2) {
             int result = 0;
 
 			if (o1.getParent() != null && o2.getParent() != null) {
-				int d1 = this.treeData.getDepthOfData(o1);
-				int d2 = this.treeData.getDepthOfData(o2);
+				int d1 = this.treeData.getDepthOfData((Scope) o1);
+				int d2 = this.treeData.getDepthOfData((Scope) o2);
 				
 				if (d1 > d2) {
-					Scope ancestor1 = ScopeTreeData.getAncestor(o1, d1, d2);
-					result = compare(ancestor1, o2, index, dir);
+					TreeNode ancestor1 = ScopeTreeData.getAncestor(o1, d1, d2);
+					result = compare((Scope) ancestor1, (Scope) o2, index, dir);
 					if (result == 0) {
 						return 1;
 					}
 				} else if (d1 < d2) {
-					Scope ancestor2 = ScopeTreeData.getAncestor(o2, d2, d1);
-					result = compare(o1, ancestor2, index, dir);
+					TreeNode ancestor2 = ScopeTreeData.getAncestor(o2, d2, d1);
+					result = compare((Scope) o1, (Scope) ancestor2, index, dir);
 					if (result == 0) {
 						return -1;
 					}
 					
 				} else {
-					result = compare(o1, o2, index, dir);
+					result = compare((Scope) o1, (Scope) o2, index, dir);
 				}
 			}
 			return result;
