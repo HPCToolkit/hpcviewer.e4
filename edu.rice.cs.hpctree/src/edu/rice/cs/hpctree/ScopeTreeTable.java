@@ -36,7 +36,6 @@ import org.eclipse.nebula.widgets.nattable.sort.config.SingleClickSortConfigurat
 import org.eclipse.nebula.widgets.nattable.style.CellStyleAttributes;
 import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
 import org.eclipse.nebula.widgets.nattable.style.Style;
-import org.eclipse.nebula.widgets.nattable.tree.TreeLayer;
 import org.eclipse.nebula.widgets.nattable.tree.command.TreeExpandToLevelCommand;
 import org.eclipse.nebula.widgets.nattable.ui.binding.UiBindingRegistry;
 import org.eclipse.nebula.widgets.nattable.ui.menu.AbstractHeaderMenuConfiguration;
@@ -357,10 +356,7 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 	public List<? extends TreeNode> expand(Scope scope) {
 		ScopeTreeRowModel treeRowModel = bodyLayerStack.getTreeRowModel();
 		int index = treeRowModel.getTreeData().indexOf(scope);
-		if (treeRowModel.isCollapsed(scope)) {
-			TreeLayer treeLayer = bodyLayerStack.getTreeLayer();
-			treeLayer.expandOrCollapseIndex(index);
-		}
+		expand(index);
 		return treeRowModel.getDirectChildren(index);
 	}
 	

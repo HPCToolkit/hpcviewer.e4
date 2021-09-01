@@ -123,6 +123,9 @@ public class ScopeTreeData implements IScopeTreeData
 		synchronized (list) {
 			list.sort(comparator);
 		}
+		mapCollapsedScopes.forEach((children) -> {
+			children.sort(comparator);
+		});
 	}
 	
 	
@@ -390,6 +393,7 @@ public class ScopeTreeData implements IScopeTreeData
 		@Override
 		public int compare(TreeNode o1, TreeNode o2) {
             int result = 0;
+			int factor = dir == SortDirectionEnum.ASC ? 1 : -1;
 
 			if (o1.getParent() != null && o2.getParent() != null) {
 				int d1 = this.treeData.getDepthOfData((Scope) o1);
@@ -416,6 +420,11 @@ public class ScopeTreeData implements IScopeTreeData
 		}
 		
 		private int compare(Scope o1, Scope o2, int index, SortDirectionEnum dir) {
+			// o1 and o2 are exactly the same object. This should return 0
+			// no need to go further
+			if (o1 == o2)
+				return 0;
+			
 			int factor = dir == SortDirectionEnum.ASC ? 1 : -1;
 
 			if (index == 0) {
@@ -430,7 +439,15 @@ public class ScopeTreeData implements IScopeTreeData
 				return factor * 1;
 			if (mv1.getValue() < mv2.getValue())
 				return factor * -1;
-			return 0;
+			
+			// ok. So far o1 looks the same as o2
+			// we don't want returning 0 because it will cause the tree looks weird
+			// let's try to compare with the name, and then with the hash code
+			int result = o1.getName().compareTo(o2.getName());
+			if (result == 0) {
+				result = o1.hashCode() - o2.hashCode();
+			}
+			return result;
 		}
 	}
 
