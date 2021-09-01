@@ -48,7 +48,7 @@ public class ZoomAction
 		stackRootTree.push(old); // save the node for future zoom-out
 		
 		treeAction.setRoot(current);
-		treeAction.expand(0);
+		treeAction.traverseOrExpand(0);
 	}
 	
 	/**
@@ -66,7 +66,7 @@ public class ZoomAction
 			throw( new java.lang.RuntimeException("ScopeViewActions - illegal zoomout: "+parent));
 		}
 		treeAction.setRoot(parent);
-		treeAction.expand(0);
+		treeAction.traverseOrExpand(0);
 	}
 	
 	/**

@@ -13,7 +13,7 @@ public interface IScopeTreeAction
 	 * Expand one level the node of index  
 	 * @param index the index of the node to expand 
 	 */
-	public void expand(int index);
+	public void traverseOrExpand(int index);
 	
 	/***
 	 * Expand one level a scope node and return the list
@@ -21,7 +21,7 @@ public interface IScopeTreeAction
 	 * @param scope the parent scope
 	 * @return
 	 */
-	public List<? extends TreeNode> expand(Scope scope);
+	public List<? extends TreeNode> traverseOrExpand(Scope scope);
 	
 	public void setRoot(Scope scope);
 	

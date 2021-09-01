@@ -71,7 +71,7 @@ public class HotPathAction
 		if(scope == null || metric == null )
 			return false;
 
-		List<? extends TreeNode> children = treeAction.expand(scope);
+		List<? extends TreeNode> children = treeAction.traverseOrExpand(scope);
 		
 		// singly depth first search
 		// bug fix: we only drill once !

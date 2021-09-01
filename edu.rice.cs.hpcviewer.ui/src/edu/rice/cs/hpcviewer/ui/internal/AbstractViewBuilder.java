@@ -341,12 +341,12 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener, IScopeTreeA
 	}
 
 	@Override
-	public void expand(int index) {
+	public void traverseOrExpand(int index) {
 		treeViewer.expandToLevel(2, true);
 	}
 	
 	@Override
-	public List<? extends TreeNode> expand(Scope scope) {
+	public List<? extends TreeNode> traverseOrExpand(Scope scope) {
 		// TODO: not implemented yet
 		return null;
 	}

@@ -6,7 +6,8 @@ import java.util.Comparator;
 import java.util.List;
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.impl.list.mutable.FastList;
-import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
+import org.eclipse.collections.impl.map.mutable.AbstractMutableMap;
+import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 import org.eclipse.nebula.widgets.nattable.sort.SortDirectionEnum;
 
 import ca.odell.glazedlists.BasicEventList;
@@ -30,9 +31,9 @@ public class ScopeTreeData implements IScopeTreeData
 	
 	/** list of current data. The list is dynamic, always incremental **/
 	private final MutableList<Scope> list;
-	/** map of the collapsed nodes. The key is the parent index. 
+	/** map of the collapsed nodes. The key is the parent node. 
 	 *  The  value is the list of collapsed nodes of the parent */
-	private final IntObjectHashMap<List<? extends TreeNode>> mapCollapsedScopes;
+	private final AbstractMutableMap<Scope, List<Scope>> mapCollapsedScopes;
 
 	private final EventList<BaseMetric> listMetrics;
 
@@ -62,7 +63,7 @@ public class ScopeTreeData implements IScopeTreeData
 			}
 		}
 		
-		this.mapCollapsedScopes = IntObjectHashMap.newMap();
+		this.mapCollapsedScopes = new UnifiedMap<>();
 		
 		clear();
 	}
@@ -123,9 +124,6 @@ public class ScopeTreeData implements IScopeTreeData
 		synchronized (list) {
 			list.sort(comparator);
 		}
-		mapCollapsedScopes.forEach((children) -> {
-			children.sort(comparator);
-		});
 	}
 	
 	
@@ -177,7 +175,7 @@ public class ScopeTreeData implements IScopeTreeData
 
 			ColumnComparator comparator = getComparator(sortedColumn, sortDirection);
 			
-			List<? extends TreeNode> children = mapCollapsedScopes.remove(index);
+			List<? extends TreeNode> children = mapCollapsedScopes.remove(scope);
 			if (children != null) {
 				children.sort(comparator);
 				return children;
@@ -238,10 +236,24 @@ public class ScopeTreeData implements IScopeTreeData
 			listCollapsedIndexes.forEach(index-> {
 				collapsedChildren.add(list.get(index.intValue()));
 			});
-			mapCollapsedScopes.put(parentIndex, collapsedChildren);
 		}
+		Scope parent = getDataAtIndex(parentIndex);
+		mapCollapsedScopes.put(parent, collapsedChildren);
 	}
 	
+	
+	public boolean shouldExpand(Scope scope) {
+		// check if it's collapsed
+		if (mapCollapsedScopes.containsKey(scope))
+			return true;
+		
+		// check if the children are not visible
+		if (scope.hasChildren()) {
+			int indexFirstChild = indexOf(scope.getSubscope(0));
+			return indexFirstChild < 0;
+		}
+		return false;
+	}
 	
 	@SuppressWarnings("unchecked")
 	private List<Scope> convert(List<? extends TreeNode> list) {
@@ -279,8 +291,9 @@ public class ScopeTreeData implements IScopeTreeData
 
 	@Override
 	public int indexOf(Scope child) {
-		if (child == null || isCollapsed(child))
+		if (child == null || mapCollapsedScopes.containsKey(child.getParentScope()))
 			return -1;
+		
 		int index = list.indexOf(child);
 		if (UNIT_TEST && index >= 0) {
 			Scope s = list.get(index);
@@ -322,7 +335,7 @@ public class ScopeTreeData implements IScopeTreeData
 		if (numChildren == 0)
 			return new ArrayList<Scope>(0);
 		
-		if (mapCollapsedScopes.get(index) != null) {
+		if (mapCollapsedScopes.get(scope) != null) {
 			// the node is collapsed. The children is invisible
 			return new ArrayList<Scope>(0);
 		}
@@ -334,7 +347,7 @@ public class ScopeTreeData implements IScopeTreeData
 		
 		// copy the children in the list to the new list
 		// List<Scope> children = ((FastList<Scope>)list).subList(index+1, index+1+numChildren);
-		// System.out.println(index + " has " + children.size() + ": " + children);
+		// System.out.println(index + " has " + scope.getChildCount() + ": " + scope.getListChildren());
 		return convert(scope.getListChildren());
 	}
 
@@ -348,15 +361,7 @@ public class ScopeTreeData implements IScopeTreeData
 		return (index >= 0) && (index < list.size());
 	}
 	
-	private boolean isCollapsed(Scope scope) {
-		int parentIndex = indexOf(scope.getParentScope());
-		List<? extends TreeNode> listChildren = mapCollapsedScopes.get(parentIndex);
-		if (listChildren == null)
-			return false;
-		
-		return listChildren.contains(scope);
-	}
-	
+
 	
 	/***
 	 * Retrieve the ancestor of specific depth from a scope  
@@ -393,8 +398,6 @@ public class ScopeTreeData implements IScopeTreeData
 		@Override
 		public int compare(TreeNode o1, TreeNode o2) {
             int result = 0;
-			int factor = dir == SortDirectionEnum.ASC ? 1 : -1;
-
 			if (o1.getParent() != null && o2.getParent() != null) {
 				int d1 = this.treeData.getDepthOfData((Scope) o1);
 				int d2 = this.treeData.getDepthOfData((Scope) o2);

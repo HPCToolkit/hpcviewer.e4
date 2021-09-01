@@ -36,7 +36,6 @@ import org.eclipse.nebula.widgets.nattable.sort.config.SingleClickSortConfigurat
 import org.eclipse.nebula.widgets.nattable.style.CellStyleAttributes;
 import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
 import org.eclipse.nebula.widgets.nattable.style.Style;
-import org.eclipse.nebula.widgets.nattable.tree.command.TreeExpandToLevelCommand;
 import org.eclipse.nebula.widgets.nattable.ui.binding.UiBindingRegistry;
 import org.eclipse.nebula.widgets.nattable.ui.menu.AbstractHeaderMenuConfiguration;
 import org.eclipse.nebula.widgets.nattable.ui.menu.PopupMenuBuilder;
@@ -325,11 +324,10 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 	}
 	
 	@Override
-	public void expand(int index) {
-		bodyLayerStack.expand(index);
-		if (natTable != null) {
-			natTable.doCommand(new TreeExpandToLevelCommand(index, 1));
-		}
+	public void traverseOrExpand(int index) {
+		ScopeTreeRowModel treeRowModel = bodyLayerStack.getTreeRowModel();
+		Scope scope = treeRowModel.getTreeData().getDataAtIndex(index);
+		traverseOrExpand(scope);
 	}
 
 	@Override
@@ -353,11 +351,14 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 	
 	
 	@Override
-	public List<? extends TreeNode> expand(Scope scope) {
+	public List<? extends TreeNode> traverseOrExpand(Scope scope) {
 		ScopeTreeRowModel treeRowModel = bodyLayerStack.getTreeRowModel();
-		int index = treeRowModel.getTreeData().indexOf(scope);
-		expand(index);
-		return treeRowModel.getDirectChildren(index);
+		if (treeRowModel.shouldExpand(scope)) {
+			int index = treeRowModel.getTreeData().indexOf(scope);
+			bodyLayerStack.expand(index);
+		}
+		List<? extends TreeNode> children = treeRowModel.getTreeData().getChildren(scope);
+		return children;
 	}
 	
 	

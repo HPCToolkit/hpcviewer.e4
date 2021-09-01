@@ -147,6 +147,11 @@ public class ScopeTreeRowModel extends TreeRowModel<Scope> implements ISortModel
 		}
 	}
 
+	public boolean shouldExpand(Scope scope) {
+		ScopeTreeData treeData = (ScopeTreeData) getTreeData();
+		return treeData.shouldExpand(scope);
+	}
+	
 	public void setRoot(Scope root) {
 		IScopeTreeData treedata = (IScopeTreeData) getTreeData();
 		treedata.setRoot(root);
