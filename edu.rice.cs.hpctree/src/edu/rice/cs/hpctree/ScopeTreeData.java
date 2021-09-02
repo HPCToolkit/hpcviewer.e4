@@ -450,7 +450,7 @@ public class ScopeTreeData implements IScopeTreeData
 			if (result == 0) {
 				result = o1.hashCode() - o2.hashCode();
 			}
-			return result;
+			return factor * result;
 		}
 	}
 
