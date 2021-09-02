@@ -190,38 +190,6 @@ public class ScopeTreeData implements IScopeTreeData
 	}
 	
 	
-	/****
-	 * Expand a scope and return the sorted children
-	 * @param scope the parent scope
-	 * @return {@code List} the list of sorted children
-	 */
-	/*
-	public List<? extends TreeNode> expand(Scope scope) {
-		int index = indexOf(scope);
-		if (index < 0 || index >= list.size()) {
-			// the scope doesn't exist. 
-			return new ArrayList<>(0);
-		}
-		List<? extends TreeNode> children = mapCollapsedScopes.get(index);
-		if (children == null) {
-			// the scope hasn't been expanded
-			// we need to force to expand it and grab the children
-			return expand(index);
-		}
-		if (children.size() ==0)
-			return children;
-		
-		// case where the scope has been expanded, we need to copy
-		// the children to the list
-		int numChildren = scope.getChildCount();		
-		List<TreeNode> copyChildren = new FastList<>(numChildren);
-		
-		for(int i=index+1; i<index+1+numChildren; i++) {
-			copyChildren.add(list.get(i));
-		}
-		
-		return copyChildren;
-	} */
 		
 	/****
 	 * Collapse a tree node. 
@@ -242,6 +210,15 @@ public class ScopeTreeData implements IScopeTreeData
 	}
 	
 	
+	/***
+	 * Check if a scope should call expand to traverse the child.
+	 * If the scope is not expanded or the children are not visible, it
+	 * returns true.
+	 * It returns false if the scope is already expanded or it has no children.
+	 * 
+	 * @param scope
+	 * @return {@code boolean}
+	 */
 	public boolean shouldExpand(Scope scope) {
 		// check if it's collapsed
 		if (mapCollapsedScopes.containsKey(scope))
@@ -315,19 +292,7 @@ public class ScopeTreeData implements IScopeTreeData
 	}
 
 	@Override
-	public List<Scope> getChildren(Scope object) {
-		int index = indexOf(object);
-		return getChildren(index);
-	}
-
-	@Override
-	public List<Scope> getChildren(Scope object, boolean fullDepth) {
-		return getChildren(object);
-	}
-
-	@Override
-	public List<Scope> getChildren(int index) {
-		Scope scope = getDataAtIndex(index);
+	public List<Scope> getChildren(Scope scope) {
 		
 		// if the node doesn't exist, it should be a critical error
 		// should we throw an exception?		
@@ -348,7 +313,31 @@ public class ScopeTreeData implements IScopeTreeData
 		// copy the children in the list to the new list
 		// List<Scope> children = ((FastList<Scope>)list).subList(index+1, index+1+numChildren);
 		// System.out.println(index + " has " + scope.getChildCount() + ": " + scope.getListChildren());
-		return convert(scope.getListChildren());
+		List<TreeNode> children = scope.getListChildren();
+		final BaseMetric metric = sortedColumn == 0 ? null : getMetric(sortedColumn-1);
+		Comparator<TreeNode> comparator = new Comparator<TreeNode>() {
+
+			@Override
+			public int compare(TreeNode o1, TreeNode o2) {
+				Scope s1 = (Scope) o1;
+				Scope s2 = (Scope) o2;				
+				return compareNodes(s1, s2, metric, sortDirection);
+			}
+		};
+		children.sort(comparator);
+		
+		return convert(children);
+	}
+
+	@Override
+	public List<Scope> getChildren(Scope object, boolean fullDepth) {
+		return getChildren(object);
+	}
+
+	@Override
+	public List<Scope> getChildren(int index) {
+		Scope scope = getDataAtIndex(index);
+		return getChildren(scope);
 	}
 
 	@Override
@@ -385,14 +374,17 @@ public class ScopeTreeData implements IScopeTreeData
 
 	private static class ColumnComparator implements Comparator<TreeNode> 
 	{
-		private final int index;
+		private final BaseMetric metric;
 		private final SortDirectionEnum dir;
 		private final ScopeTreeData treeData;
 		
-		public ColumnComparator(ScopeTreeData treeData, int index, SortDirectionEnum dir) {
+		public ColumnComparator(ScopeTreeData treeData, int columnIndex, SortDirectionEnum dir) {
 			this.treeData = treeData;
-			this.index = index;
 			this.dir = dir;
+			if (columnIndex == 0)
+				metric = null;
+			else
+				metric = treeData.getMetric(columnIndex-1);
 		}
 		
 		@Override
@@ -404,54 +396,55 @@ public class ScopeTreeData implements IScopeTreeData
 				
 				if (d1 > d2) {
 					TreeNode ancestor1 = ScopeTreeData.getAncestor(o1, d1, d2);
-					result = compare((Scope) ancestor1, (Scope) o2, index, dir);
+					result = ScopeTreeData.compareNodes((Scope) ancestor1, (Scope) o2, metric, dir);
 					if (result == 0) {
 						return 1;
 					}
 				} else if (d1 < d2) {
 					TreeNode ancestor2 = ScopeTreeData.getAncestor(o2, d2, d1);
-					result = compare((Scope) o1, (Scope) ancestor2, index, dir);
+					result = ScopeTreeData.compareNodes((Scope) o1, (Scope) ancestor2, metric, dir);
 					if (result == 0) {
 						return -1;
 					}
 					
 				} else {
-					result = compare((Scope) o1, (Scope) o2, index, dir);
+					result = ScopeTreeData.compareNodes((Scope) o1, (Scope) o2, metric, dir);
 				}
 			}
 			return result;
-		}
+		}		
+	}
+
+	
+	protected static int compareNodes(Scope o1, Scope o2, BaseMetric metric, SortDirectionEnum dir) {
+		// o1 and o2 are exactly the same object. This should return 0
+		// no need to go further
+		if (o1 == o2)
+			return 0;
 		
-		private int compare(Scope o1, Scope o2, int index, SortDirectionEnum dir) {
-			// o1 and o2 are exactly the same object. This should return 0
-			// no need to go further
-			if (o1 == o2)
-				return 0;
-			
-			int factor = dir == SortDirectionEnum.ASC ? 1 : -1;
+		int factor = dir == SortDirectionEnum.ASC ? 1 : -1;
 
-			if (index == 0) {
-				return factor * o1.getName().compareTo(o2.getName());
-			}
-			BaseMetric metric = treeData.getMetric(index-1);
-			int metricIndex = metric.getIndex();
-			MetricValue mv1 = o1.getMetricValue(metricIndex);
-			MetricValue mv2 = o2.getMetricValue(metricIndex);
-
-			if (mv1.getValue() > mv2.getValue())
-				return factor * 1;
-			if (mv1.getValue() < mv2.getValue())
-				return factor * -1;
-			
-			// ok. So far o1 looks the same as o2
-			// we don't want returning 0 because it will cause the tree looks weird
-			// let's try to compare with the name, and then with the hash code
-			int result = o1.getName().compareTo(o2.getName());
-			if (result == 0) {
-				result = o1.hashCode() - o2.hashCode();
-			}
-			return factor * result;
+		if (metric == null) {
+			return factor * o1.getName().compareTo(o2.getName());
 		}
+
+		int metricIndex = metric.getIndex();
+		MetricValue mv1 = o1.getMetricValue(metricIndex);
+		MetricValue mv2 = o2.getMetricValue(metricIndex);
+
+		if (mv1.getValue() > mv2.getValue())
+			return factor * 1;
+		if (mv1.getValue() < mv2.getValue())
+			return factor * -1;
+		
+		// ok. So far o1 looks the same as o2
+		// we don't want returning 0 because it will cause the tree looks weird
+		// let's try to compare with the name, and then with the hash code
+		int result = o1.getName().compareTo(o2.getName());
+		if (result == 0) {
+			result = o1.hashCode() - o2.hashCode();
+		}
+		return factor * result;
 	}
 
 }
