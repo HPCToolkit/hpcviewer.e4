@@ -23,20 +23,13 @@ import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpctree.internal.IScopeTreeAction;
 import edu.rice.cs.hpctree.ScopeTreeTable;
 
 
-public class TestMain implements IScopeTreeAction
+public class TestMain 
 {
 	NatTable natTable ;
 	
-	@Override
-	public void refresh() {
-		if (natTable != null)
-			natTable.redraw();
-	}
-
 
 	public static void main(String[] args) {
 		System.out.println("Test begin");
@@ -50,7 +43,7 @@ public class TestMain implements IScopeTreeAction
         RootScope root = createTree();
 
 		ScopeTreeTable table = new ScopeTreeTable(shell, SWT.NONE, root, (IMetricManager) root.getExperiment());
-
+		table.pack();
 		
 		shell.open();
 		
@@ -81,7 +74,6 @@ public class TestMain implements IScopeTreeAction
 		
 		RootScope root = new RootScope(experiment, "proc 0", RootScopeType.DatacentricTree);
 		createMetric(root, experiment);
-		Random r = new Random();
 		createTreeNode(root, root, 1, 4, 1, 10);
 		
 		return root;
@@ -100,7 +92,6 @@ public class TestMain implements IScopeTreeAction
 			parent.addSubscope(grandChild);
 			
 			if (level < maxLevel) {
-				Random r = new Random();
 				createTreeNode(root, grandChild, intmyid, 3, level+1, maxLevel);
 			}
 		}

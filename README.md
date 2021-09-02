@@ -1,3 +1,6 @@
+![GitHub](https://img.shields.io/github/license/hpctoolkit/hpcviewer.e4?style=for-the-badge)
+![GitHub issues](https://img.shields.io/github/issues/hpctoolkit/hpcviewer.e4?style=for-the-badge)
+
 # hpcviewer.e4
 
 hpcviewer is the presentation layer of HPCToolkit which is a suite of tools

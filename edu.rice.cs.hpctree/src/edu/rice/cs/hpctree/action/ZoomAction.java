@@ -1,22 +1,23 @@
 /**
  * 
  */
-package edu.rice.cs.hpcviewer.ui.actions;
+package edu.rice.cs.hpctree.action;
 
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScopeCallerView;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcviewer.ui.internal.ScopeTreeViewer;
+import edu.rice.cs.hpctree.IScopeTreeAction;
+
 
 /**
  * Class to manage zoom-in and zoom out of a scope
  */
-public class ZoomAction {
+public class ZoomAction 
+{
 	// --------------------------------------------------------------------
 	//	ATTRIBUTES
 	// --------------------------------------------------------------------
-	private ScopeTreeViewer viewer;
-	
-    private java.util.Stack<Scope> stackRootTree;
+    private final java.util.Stack<Scope> stackRootTree;
+    private final IScopeTreeAction treeAction;
 
 	// --------------------------------------------------------------------
 	//	CONSTRUCTORS
@@ -26,8 +27,8 @@ public class ZoomAction {
 	 * @param treeViewer
 	 * @param objGUI
 	 */
-	public ZoomAction ( ScopeTreeViewer treeViewer) {
-		this.viewer = treeViewer;
+	public ZoomAction ( IScopeTreeAction treeAction) {
+		this.treeAction = treeAction;
 		stackRootTree = new java.util.Stack<Scope>();
 	}
 	
@@ -42,20 +43,12 @@ public class ZoomAction {
 	 */
 	public void zoomIn (Scope current) {
 
-		Scope old = (Scope) viewer.getInput();
+		Scope old = treeAction.getRoot();
 		
 		stackRootTree.push(old); // save the node for future zoom-out
 		
-		Scope root = old.duplicate();
-		root.addSubscope(current);
-		try {
-			viewer.getTree().setRedraw(false);
-			viewer.setInput(null); // clear the table to speed up the next set input
-			viewer.setInput(root);		
-			viewer.expandToLevel(2, true);
-		} finally {
-			viewer.getTree().setRedraw(true);
-		}
+		treeAction.setRoot(current);
+		treeAction.traverseOrExpand(0);
 	}
 	
 	/**
@@ -69,17 +62,11 @@ public class ZoomAction {
 		} else {
 			// case where the tree hasn't been zoomed
 			// FIXME: there must be a bug if the code comes to here !
-			parent = (Scope)viewer.getInput();
+			parent = treeAction.getRoot();
 			throw( new java.lang.RuntimeException("ScopeViewActions - illegal zoomout: "+parent));
 		}
-		try {
-			viewer.getTree().setRedraw(false);
-			viewer.setInput(null); // clear the table to speed up the next set input
-			viewer.setInput( parent );		
-		} finally {
-			viewer.getTree().setRedraw(true);			
-			viewer.expandToLevel(2, true);
-		}
+		treeAction.setRoot(parent);
+		treeAction.traverseOrExpand(0);
 	}
 	
 	/**
@@ -103,8 +90,8 @@ public class ZoomAction {
 		if (node == null)
 			return false;
 		
-		Scope input = (Scope) viewer.getInput();
-		if (input.getChildAt(0) == node)
+		Scope input = treeAction.getRoot();
+		if (input == node)
 			return false;
 		
 		if (node instanceof CallSiteScopeCallerView) {
@@ -113,9 +100,5 @@ public class ZoomAction {
 			return ((CallSiteScopeCallerView)node).hasScopeChildren();
 		}
 		return ( node.getChildCount()>0 );
-	}
-	
-	public void setViewer ( ScopeTreeViewer treeViewer ) {
-		viewer = treeViewer;
 	}
 }

@@ -5,41 +5,41 @@ import org.eclipse.nebula.widgets.nattable.freeze.CompositeFreezeLayer;
 import org.eclipse.nebula.widgets.nattable.freeze.FreezeLayer;
 import org.eclipse.nebula.widgets.nattable.layer.AbstractLayerTransform;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
-import org.eclipse.nebula.widgets.nattable.layer.cell.ColumnLabelAccumulator;
+import org.eclipse.nebula.widgets.nattable.reorder.ColumnReorderLayer;
 import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
 import org.eclipse.nebula.widgets.nattable.tree.TreeLayer;
 import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
 
-import edu.rice.cs.hpctree.internal.IScopeTreeAction;
 
 
+/********************************************************************
+ * 
+ * Main body layer class 
+ *
+ ********************************************************************/
 public class ScopeTreeBodyLayerStack extends AbstractLayerTransform 
 {
-    private final IDataProvider  bodyDataProvider;
     private final SelectionLayer selectionLayer;
-    private final TreeLayer      treeLayer;
     private final FreezeLayer    freezeLayer ;
     private final ViewportLayer  viewportLayer;
+    private final DataLayer bodyDataLayer;
+    private final TreeLayer treeLayer ;
 
     private final CompositeFreezeLayer compositeFreezeLayer ;
     private final ScopeTreeRowModel    treeRowModel ;
 
-    public ScopeTreeBodyLayerStack(IScopeTreeData treeData,
+	public ScopeTreeBodyLayerStack(IScopeTreeData treeData, 
+								   IDataProvider  bodyDataProvider,
     							   IScopeTreeAction treeAction) {
 
-        this.bodyDataProvider   = new ScopeTreeDataProvider(treeData, treeData.getMetricManager()); 
-        DataLayer bodyDataLayer = new DataLayer(this.bodyDataProvider);
+        this.bodyDataLayer = new DataLayer(bodyDataProvider);
+        this.bodyDataLayer.setColumnsResizableByDefault(true);
 
-        bodyDataLayer.setColumnsResizableByDefault(true);
-        bodyDataLayer.setColumnWidthByPosition(0, 350);
-        // simply apply labels for every column by index
-        bodyDataLayer.setConfigLabelAccumulator(new ColumnLabelAccumulator());
-
-        treeRowModel = new ScopeTreeRowModel(treeData, treeAction);
-
-        this.selectionLayer = new SelectionLayer(bodyDataLayer);
+        this.treeRowModel   = new ScopeTreeRowModel(treeData, treeAction);
+        this.selectionLayer = new SelectionLayer(new ColumnReorderLayer(bodyDataLayer));
         this.treeLayer      = new TreeLayer(this.selectionLayer, treeRowModel);
-        this.viewportLayer  = new ViewportLayer(this.treeLayer);
+        this.viewportLayer  = new ViewportLayer(treeLayer);
+      
         this.freezeLayer     = new FreezeLayer(treeLayer);
         compositeFreezeLayer = new CompositeFreezeLayer(freezeLayer, viewportLayer, selectionLayer);
         
@@ -48,17 +48,26 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
         
         setUnderlyingLayer(compositeFreezeLayer);
     }
+    
+	public void expand(int parentIndex) {
+    	treeLayer.expandTreeRow(parentIndex);
+	}
+	
 
     public SelectionLayer getSelectionLayer() {
         return this.selectionLayer;
     }
 
+    public DataLayer getBodyDataLayer() {
+		return bodyDataLayer;
+	}
+
     public TreeLayer getTreeLayer() {
-        return this.treeLayer;
+    	return treeLayer;
     }
 
-    public CompositeFreezeLayer getFreezeLayer() {
-		return compositeFreezeLayer;
+	public FreezeLayer getFreezeLayer() {
+		return freezeLayer;
 	}
 
 	public ViewportLayer getViewportLayer() {

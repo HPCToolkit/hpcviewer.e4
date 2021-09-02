@@ -44,7 +44,8 @@ Require-Bundle: edu.rice.cs.hpcdata,
  org.eclipse.nebula.widgets.nattable.core,
  ca.odell.glazedlists,
  org.eclipse.nebula.widgets.nattable.extension.glazedlists,
- edu.rice.cs.hpcmetric
+ edu.rice.cs.hpcmetric,
+ edu.rice.cs.hpctree
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Provide-Capability: licensing.feature;licensing.feature="edu.rice.cs.hpcviewer.ui.product"

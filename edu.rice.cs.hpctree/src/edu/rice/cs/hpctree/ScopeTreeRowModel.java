@@ -12,7 +12,6 @@ import org.eclipse.nebula.widgets.nattable.sort.SortDirectionEnum;
 import org.eclipse.nebula.widgets.nattable.tree.TreeRowModel;
 
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpctree.internal.IScopeTreeAction;
 
 
 /***********************************************************
@@ -82,6 +81,9 @@ public class ScopeTreeRowModel extends TreeRowModel<Scope> implements ISortModel
 		return list;
 	}
 	
+	
+	
+	
 	@Override
     public List<Integer> expandAll() {
 		System.err.println("NOT SUPPORTED");
@@ -143,5 +145,20 @@ public class ScopeTreeRowModel extends TreeRowModel<Scope> implements ISortModel
                 && ((StructuralRefreshEvent) event).isHorizontalStructureChanged()) {
 			System.out.println("table layer event: " + event.toString());
 		}
+	}
+
+	public boolean shouldExpand(Scope scope) {
+		ScopeTreeData treeData = (ScopeTreeData) getTreeData();
+		return treeData.shouldExpand(scope);
+	}
+	
+	public void setRoot(Scope root) {
+		IScopeTreeData treedata = (IScopeTreeData) getTreeData();
+		treedata.setRoot(root);
+	}
+
+	public Scope getRoot() {
+		IScopeTreeData treedata = (IScopeTreeData) getTreeData();
+		return treedata.getRoot();
 	}
 }

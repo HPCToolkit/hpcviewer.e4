@@ -6,8 +6,14 @@ import java.util.Comparator;
 import java.util.List;
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.impl.list.mutable.FastList;
-import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
+import org.eclipse.collections.impl.map.mutable.AbstractMutableMap;
+import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 import org.eclipse.nebula.widgets.nattable.sort.SortDirectionEnum;
+
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.event.ListEventListener;
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
@@ -21,15 +27,18 @@ import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
  ******************************************************/
 public class ScopeTreeData implements IScopeTreeData
 {
-	private final RootScope root;
-	private final IMetricManager metricManager;
-
+	private final static boolean UNIT_TEST = true;
+	
 	/** list of current data. The list is dynamic, always incremental **/
 	private final MutableList<Scope> list;
-	/** map of the collapsed nodes. The key is the parent index. 
+	/** map of the collapsed nodes. The key is the parent node. 
 	 *  The  value is the list of collapsed nodes of the parent */
-	private final IntObjectHashMap<List<? extends TreeNode>> mapCollapsedScopes;
+	private final AbstractMutableMap<Scope, List<Scope>> mapCollapsedScopes;
 
+	private final EventList<BaseMetric> listMetrics;
+
+	private Scope root;
+	
 	// attributes to handle sorting
 	private int sortedColumn;
 	private SortDirectionEnum sortDirection;
@@ -45,11 +54,28 @@ public class ScopeTreeData implements IScopeTreeData
 		this.list.add(root);
 		
 		this.root = root;
-		this.metricManager = metricManager;
+		listMetrics = new BasicEventList<>();
+		List<BaseMetric> listVisibleMetrics = metricManager.getVisibleMetrics();
 		
-		this.mapCollapsedScopes = IntObjectHashMap.newMap();
+		for(BaseMetric metric: listVisibleMetrics) {
+			if (root.getMetricValue(metric) != MetricValue.NONE) {
+				listMetrics.add(metric);
+			}
+		}
+		
+		this.mapCollapsedScopes = new UnifiedMap<>();
 		
 		clear();
+	}
+	
+	
+	@Override
+	public void setRoot(Scope root) {
+		list.clear();
+		mapCollapsedScopes.clear();
+		
+		list.add(root);
+		this.root = root;
 	}
 	
 	/****
@@ -57,18 +83,10 @@ public class ScopeTreeData implements IScopeTreeData
 	 * @return RootScope
 	 */
 	@Override
-	public RootScope getRoot() {
+	public Scope getRoot() {
 		return root;
 	}
 	
-	/***
-	 * Get the metric manager of this tree data
-	 * @return
-	 */
-	@Override
-	public IMetricManager getMetricManager() {
-		return metricManager;
-	}
 	
 	
 	/** 
@@ -79,20 +97,8 @@ public class ScopeTreeData implements IScopeTreeData
 		this.sortDirection = SortDirectionEnum.DESC;
 		this.sortedColumn  = 1;
 	}
-	
-	
-	/***
-	 * Get the current list of data.
-	 * Recall that the list is created and added dynamically depending if the tree
-	 * has been expanded or not.
-	 * 
-	 * @return {@code MutableList<Scope>} list of scope data
-	 */
-	@Override
-	public MutableList<Scope> getList() {
-		return list;
-	}
 
+	
 	/***
 	 * Method to notify to sort the data based on certain column and direction
 	 * @param columnIndex the column index. Must be greater or equal to 0
@@ -135,30 +141,54 @@ public class ScopeTreeData implements IScopeTreeData
 		return sortDirection;
 	}
 	
+	public BaseMetric getMetric(int indexMetric) {
+		return listMetrics.get(indexMetric);
+	}
+	
+	public int getMetricCount() {
+		return listMetrics.size();
+	}
+	
+	
+	public void addListener( ListEventListener<BaseMetric> listener ) {
+		listMetrics.addListEventListener(listener);
+	}
+	
+	
+	public void removeListener( ListEventListener<BaseMetric> listener ) {
+		listMetrics.removeListEventListener(listener);
+	}
+	
+
 	
 	/****
 	 * Expand a tree node.
 	 * This method has to be called BEFORE calling tree model's {@code expand}
 	 * @param index
 	 */
-	public void expand(int index) {
+	@Override
+	public List<? extends TreeNode> expand(int index) {
 		synchronized (list) {
 			Scope scope = list.get(index);
 			if (!scope.hasChildren())
-				return;
+				return null;
+
+			ColumnComparator comparator = getComparator(sortedColumn, sortDirection);
 			
-			List<? extends TreeNode> children = mapCollapsedScopes.remove(index);
+			List<? extends TreeNode> children = mapCollapsedScopes.remove(scope);
 			if (children != null) {
-				return;
+				children.sort(comparator);
+				return children;
 			}
 			List<Scope> listScopes = convert(scope.getListChildren());
 			
-			ColumnComparator comparator = getComparator(sortedColumn, sortDirection);
-			listScopes.sort(comparator);
-			
+			listScopes.sort(comparator);			
 			list.addAll(index+1, listScopes);
+			
+			return listScopes;
 		}
 	}
+	
 	
 		
 	/****
@@ -174,10 +204,33 @@ public class ScopeTreeData implements IScopeTreeData
 			listCollapsedIndexes.forEach(index-> {
 				collapsedChildren.add(list.get(index.intValue()));
 			});
-			mapCollapsedScopes.put(parentIndex, collapsedChildren);
 		}
+		Scope parent = getDataAtIndex(parentIndex);
+		mapCollapsedScopes.put(parent, collapsedChildren);
 	}
 	
+	
+	/***
+	 * Check if a scope should call expand to traverse the child.
+	 * If the scope is not expanded or the children are not visible, it
+	 * returns true.
+	 * It returns false if the scope is already expanded or it has no children.
+	 * 
+	 * @param scope
+	 * @return {@code boolean}
+	 */
+	public boolean shouldExpand(Scope scope) {
+		// check if it's collapsed
+		if (mapCollapsedScopes.containsKey(scope))
+			return true;
+		
+		// check if the children are not visible
+		if (scope.hasChildren()) {
+			int indexFirstChild = indexOf(scope.getSubscope(0));
+			return indexFirstChild < 0;
+		}
+		return false;
+	}
 	
 	@SuppressWarnings("unchecked")
 	private List<Scope> convert(List<? extends TreeNode> list) {
@@ -186,7 +239,7 @@ public class ScopeTreeData implements IScopeTreeData
 	
 	
 	private boolean isRootScope(Scope scope) {
-		return (scope == null) || (scope instanceof RootScope);
+		return (scope == null) || (scope instanceof RootScope) || (scope == root);
 	}
 	
 	@Override
@@ -215,9 +268,17 @@ public class ScopeTreeData implements IScopeTreeData
 
 	@Override
 	public int indexOf(Scope child) {
-		if (child == null || isCollapsed(child))
+		if (child == null || mapCollapsedScopes.containsKey(child.getParentScope()))
 			return -1;
-		return list.indexOf(child);
+		
+		int index = list.indexOf(child);
+		if (UNIT_TEST && index >= 0) {
+			Scope s = list.get(index);
+			if (child.getCCTIndex() != s.getCCTIndex()) {
+				throw new RuntimeException("====WARNING " + child.getName() + " " + child.hashCode() + "/" + child.getCCTIndex() + " vs " + s.hashCode() + " / " + s.getCCTIndex());
+			}
+		}
+		return index;
 	}
 
 	@Override
@@ -231,11 +292,41 @@ public class ScopeTreeData implements IScopeTreeData
 	}
 
 	@Override
-	public List<Scope> getChildren(Scope object) {
-		List<? extends TreeNode> list = object.getListChildren();
-		if (list == null)
-			return new ArrayList<>(0);
-		return convert(list);
+	public List<Scope> getChildren(Scope scope) {
+		
+		// if the node doesn't exist, it should be a critical error
+		// should we throw an exception?		
+		int numChildren = scope.getChildCount();
+		if (numChildren == 0)
+			return new ArrayList<Scope>(0);
+		
+		if (mapCollapsedScopes.get(scope) != null) {
+			// the node is collapsed. The children is invisible
+			return new ArrayList<Scope>(0);
+		}
+		// the node has children. Check if the children are expanded or not
+		boolean isExpanded = list.indexOf(scope.getChildAt(0)) >= 0;
+		if (!isExpanded) {
+			return new ArrayList<Scope>(0);
+		}
+		
+		// copy the children in the list to the new list
+		// List<Scope> children = ((FastList<Scope>)list).subList(index+1, index+1+numChildren);
+		// System.out.println(index + " has " + scope.getChildCount() + ": " + scope.getListChildren());
+		List<TreeNode> children = scope.getListChildren();
+		final BaseMetric metric = sortedColumn == 0 ? null : getMetric(sortedColumn-1);
+		Comparator<TreeNode> comparator = new Comparator<TreeNode>() {
+
+			@Override
+			public int compare(TreeNode o1, TreeNode o2) {
+				Scope s1 = (Scope) o1;
+				Scope s2 = (Scope) o2;				
+				return compareNodes(s1, s2, metric, sortDirection);
+			}
+		};
+		children.sort(comparator);
+		
+		return convert(children);
 	}
 
 	@Override
@@ -259,15 +350,7 @@ public class ScopeTreeData implements IScopeTreeData
 		return (index >= 0) && (index < list.size());
 	}
 	
-	private boolean isCollapsed(Scope scope) {
-		int parentIndex = indexOf(scope.getParentScope());
-		List<? extends TreeNode> listChildren = mapCollapsedScopes.get(parentIndex);
-		if (listChildren == null)
-			return false;
-		
-		return listChildren.contains(scope);
-	}
-	
+
 	
 	/***
 	 * Retrieve the ancestor of specific depth from a scope  
@@ -276,74 +359,92 @@ public class ScopeTreeData implements IScopeTreeData
 	 * @param targetDepth the depth of the ancestor
 	 * @return the ancestor if exists, {@code null} otherwise
 	 */
-	public static Scope getAncestor(Scope scope, int currentDepth, int targetDepth) {
+	public static TreeNode getAncestor(TreeNode scope, int currentDepth, int targetDepth) {
 		if (scope == null)
 			return null;
 		
 		int depth=currentDepth-1;
-		Scope current = scope.getParentScope();
+		TreeNode current = scope.getParent();
 		
 		for (;depth>targetDepth && current != null; depth--) {
-			current = current.getParentScope();
+			current = current.getParent();
 		}
 		return current;		
 	}
 
-	private static class ColumnComparator implements Comparator<Scope> 
+	private static class ColumnComparator implements Comparator<TreeNode> 
 	{
-		private final int index;
+		private final BaseMetric metric;
 		private final SortDirectionEnum dir;
 		private final ScopeTreeData treeData;
 		
-		public ColumnComparator(ScopeTreeData treeData, int index, SortDirectionEnum dir) {
+		public ColumnComparator(ScopeTreeData treeData, int columnIndex, SortDirectionEnum dir) {
 			this.treeData = treeData;
-			this.index = index;
 			this.dir = dir;
+			if (columnIndex == 0)
+				metric = null;
+			else
+				metric = treeData.getMetric(columnIndex-1);
 		}
 		
 		@Override
-		public int compare(Scope o1, Scope o2) {
+		public int compare(TreeNode o1, TreeNode o2) {
             int result = 0;
-
 			if (o1.getParent() != null && o2.getParent() != null) {
-				int d1 = this.treeData.getDepthOfData(o1);
-				int d2 = this.treeData.getDepthOfData(o2);
+				int d1 = this.treeData.getDepthOfData((Scope) o1);
+				int d2 = this.treeData.getDepthOfData((Scope) o2);
 				
 				if (d1 > d2) {
-					Scope ancestor1 = ScopeTreeData.getAncestor(o1, d1, d2);
-					result = compare(ancestor1, o2, index, dir);
+					TreeNode ancestor1 = ScopeTreeData.getAncestor(o1, d1, d2);
+					result = ScopeTreeData.compareNodes((Scope) ancestor1, (Scope) o2, metric, dir);
 					if (result == 0) {
 						return 1;
 					}
 				} else if (d1 < d2) {
-					Scope ancestor2 = ScopeTreeData.getAncestor(o2, d2, d1);
-					result = compare(o1, ancestor2, index, dir);
+					TreeNode ancestor2 = ScopeTreeData.getAncestor(o2, d2, d1);
+					result = ScopeTreeData.compareNodes((Scope) o1, (Scope) ancestor2, metric, dir);
 					if (result == 0) {
 						return -1;
 					}
 					
 				} else {
-					result = compare(o1, o2, index, dir);
+					result = ScopeTreeData.compareNodes((Scope) o1, (Scope) o2, metric, dir);
 				}
 			}
 			return result;
-		}
-		
-		private int compare(Scope o1, Scope o2, int index, SortDirectionEnum dir) {
-			int factor = dir == SortDirectionEnum.ASC ? -1 : 1;
+		}		
+	}
 
-			if (index == 0) {
-				return factor * o1.getName().compareTo(o2.getName());
-			}
-			MetricValue mv1 = o1.getMetricValue(index-1);
-			MetricValue mv2 = o2.getMetricValue(index-1);
-
-			if (mv1.getValue() > mv2.getValue())
-				return factor * 1;
-			if (mv1.getValue() < mv2.getValue())
-				return factor * -1;
+	
+	protected static int compareNodes(Scope o1, Scope o2, BaseMetric metric, SortDirectionEnum dir) {
+		// o1 and o2 are exactly the same object. This should return 0
+		// no need to go further
+		if (o1 == o2)
 			return 0;
+		
+		int factor = dir == SortDirectionEnum.ASC ? 1 : -1;
+
+		if (metric == null) {
+			return factor * o1.getName().compareTo(o2.getName());
 		}
+
+		int metricIndex = metric.getIndex();
+		MetricValue mv1 = o1.getMetricValue(metricIndex);
+		MetricValue mv2 = o2.getMetricValue(metricIndex);
+
+		if (mv1.getValue() > mv2.getValue())
+			return factor * 1;
+		if (mv1.getValue() < mv2.getValue())
+			return factor * -1;
+		
+		// ok. So far o1 looks the same as o2
+		// we don't want returning 0 because it will cause the tree looks weird
+		// let's try to compare with the name, and then with the hash code
+		int result = o1.getName().compareTo(o2.getName());
+		if (result == 0) {
+			result = o1.hashCode() - o2.hashCode();
+		}
+		return factor * result;
 	}
 
 }

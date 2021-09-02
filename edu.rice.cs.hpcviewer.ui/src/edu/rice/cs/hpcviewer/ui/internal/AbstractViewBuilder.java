@@ -44,14 +44,16 @@ import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 import edu.rice.cs.hpcdata.util.ScopeComparator;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
+import edu.rice.cs.hpctree.IScopeTreeAction;
+import edu.rice.cs.hpctree.action.ZoomAction;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.actions.ExportTable;
 import edu.rice.cs.hpcviewer.ui.actions.HotCallPath;
 import edu.rice.cs.hpcviewer.ui.actions.MetricColumnHideShowAction;
-import edu.rice.cs.hpcviewer.ui.actions.ZoomAction;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.base.ISortContentProvider;
 import edu.rice.cs.hpcviewer.ui.base.IViewBuilder;
@@ -71,7 +73,7 @@ import edu.rice.cs.hpcviewer.ui.util.SortColumn;
  * {@link beginToolbar} and {@link endToolbar}
  */
 public abstract class AbstractViewBuilder 
-implements IViewBuilder, ISelectionChangedListener, DisposeListener
+implements IViewBuilder, ISelectionChangedListener, DisposeListener, IScopeTreeAction
 {
 	static protected enum ViewerType {
 		/** the viewer is independent to others. No need to update the status from others. */
@@ -315,6 +317,55 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener
 		return treeViewer;
 	}
 	
+	@Override
+	public void setRoot(Scope scope) {
+		try {
+			treeViewer.getTree().setRedraw(false);
+			treeViewer.setInput(null); // clear the table to speed up the next set input
+			treeViewer.setInput(scope);		
+			treeViewer.expandToLevel(2, true);
+		} finally {
+			treeViewer.getTree().setRedraw(true);
+		}
+	}
+	
+	@Override
+	public Scope getRoot() {
+		return (Scope) treeViewer.getInput();
+	}
+	
+
+	@Override
+	public void refresh() {
+		treeViewer.refresh(false);
+	}
+
+	@Override
+	public void traverseOrExpand(int index) {
+		treeViewer.expandToLevel(2, true);
+	}
+	
+	@Override
+	public List<? extends TreeNode> traverseOrExpand(Scope scope) {
+		// TODO: not implemented yet
+		return null;
+	}
+
+	
+	@Override
+	public int getSortedColumn() {
+		TreeColumn col = treeViewer.getTree().getSortColumn();
+		for(int i=0; i<treeViewer.getTree().getColumnCount(); i++) {
+			if (treeViewer.getTree().getColumn(i) == col)
+				return i;
+		}
+		return -1;
+	}
+	
+	@Override
+	public Scope getSelection() {
+		return treeViewer.getSelectedNode();
+	}
 	
 	/****
 	 * Sort the table based on the first visible metric column
@@ -525,7 +576,7 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener
 			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
 		
-		zoomAction = new ZoomAction(getViewer());
+		zoomAction = new ZoomAction(this);
 
 		toolItem[ACTION_ZOOM_IN].addSelectionListener(new SelectionListener() {
 			

@@ -34,6 +34,7 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcfilter.service.FilterStateProvider;
 import edu.rice.cs.hpcmetric.MetricFilterInput;
+import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.base.IProfilePart;
 import edu.rice.cs.hpcviewer.ui.base.IUpperPart;
@@ -43,7 +44,6 @@ import edu.rice.cs.hpcviewer.ui.graph.GraphPlotRegularViewer;
 import edu.rice.cs.hpcviewer.ui.graph.GraphPlotSortViewer;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractBaseViewItem;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractUpperPart;
-import edu.rice.cs.hpcviewer.ui.internal.AbstractViewItem;
 import edu.rice.cs.hpcviewer.ui.metric.MetricView;
 import edu.rice.cs.hpcviewer.ui.parts.bottomup.BottomUpView;
 import edu.rice.cs.hpcviewer.ui.parts.datacentric.Datacentric;
@@ -51,6 +51,7 @@ import edu.rice.cs.hpcviewer.ui.parts.editor.Editor;
 import edu.rice.cs.hpcviewer.ui.parts.flat.FlatView;
 import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadView;
 import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadViewInput;
+import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownPart;
 import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownView;
 
 
@@ -77,7 +78,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 	 * to be loaded. */
 	private Experiment  experiment;
 	
-	private AbstractViewItem []views;
+	private AbstractBaseViewItem []views;
 	private MetricView metricView;
 	
 	private CTabFolder tabFolderTop, tabFolderBottom;
@@ -103,7 +104,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 		tabFolderBottom.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				for (AbstractViewItem view: views) {
+				for (AbstractBaseViewItem view: views) {
 					if (e.item == view) {
 						// activate the view if necessary
 						// this includes creating the tree and populate the metrics
@@ -323,14 +324,21 @@ public class ProfilePart implements IProfilePart, EventHandler
 		part.setLabel(PREFIX_TITLE + experiment.getName());
 		part.setTooltip(experiment.getDefaultDirectory().getAbsolutePath());
 		
+		ViewerPreferenceManager vpm = ViewerPreferenceManager.INSTANCE;
+		
 		Object []roots = experiment.getRootScopeChildren();
-		views = new AbstractViewItem[roots.length];		
+		views = new AbstractBaseViewItem[roots.length];		
 		
 		for(int numViews=0; numViews<roots.length; numViews++) {
 			RootScope root = (RootScope) roots[numViews];
 			
 			if (root.getType() == RootScopeType.CallingContextTree) {
-				views[numViews] = new TopDownView(tabFolderBottom, SWT.NONE);
+				if (vpm.getDebugFlat()) {
+					// new table test
+					views[numViews] = new TopDownPart(tabFolderBottom, SWT.NONE);
+				} else {
+					views[numViews] = new TopDownView(tabFolderBottom, SWT.NONE);
+				}
 				
 			} else if (root.getType() == RootScopeType.CallerTree) {
 				views[numViews] = new BottomUpView(tabFolderBottom, SWT.NONE);

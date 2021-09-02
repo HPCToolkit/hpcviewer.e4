@@ -23,10 +23,8 @@ import edu.rice.cs.hpcdata.experiment.scope.CallSiteScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.experiment.source.FileSystemSourceFile;
-import edu.rice.cs.hpcdata.experiment.source.SourceFile;
 import edu.rice.cs.hpcdata.util.OSValidator;
+import edu.rice.cs.hpcdata.util.Util;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
@@ -191,12 +189,12 @@ public class Utilities
 			CallSiteScope scopeCall = (CallSiteScope) scope;
         	LineScope lineScope = (scopeCall).getLineScope();
 			if (((CallSiteScope) scope).getType() == CallSiteScopeType.CALL_TO_PROCEDURE) {
-				if(Utilities.isFileReadable(lineScope))
+				if(Util.isFileReadable(lineScope))
 					return iconManager.getImage(IconManager.Image_CallTo);
 				else
 					return iconManager.getImage(IconManager.Image_CallToDisabled);
 			} else {
-				if(Utilities.isFileReadable(lineScope))
+				if(Util.isFileReadable(lineScope))
 					return iconManager.getImage(IconManager.Image_CallFrom);
 				else
 					return iconManager.getImage(IconManager.Image_CallFromDisabled);
@@ -215,7 +213,7 @@ public class Utilities
 	{
 		if (proc.isAlien()) {
 			IconManager iconManager = IconManager.getInstance();
-			boolean readable = Utilities.isFileReadable(proc);
+			boolean readable = Util.isFileReadable(proc);
 			
 			if (readable) {
 				return iconManager.getImage(IconManager.Image_InlineTo);
@@ -225,42 +223,6 @@ public class Utilities
 		}
 		return null;
 	}
-
-    /**
-     * Verify if the file exist or not.
-     * Remark: we will update the flag that indicates the availability of the source code
-     * in the scope level. The reason is that it is less time consuming (apparently) to
-     * access to the scope level instead of converting and checking into FileSystemSourceFile
-     * level.
-     * @param scope
-     * @return true if the source is available. false otherwise
-     */
-    static public boolean isFileReadable(Scope scope) {
-    	// check if the source code availability is already computed
-    	if(scope.iSourceCodeAvailability == Scope.SOURCE_CODE_UNKNOWN) {
-    		SourceFile newFile = (scope.getSourceFile());
-    		if (newFile != null && !newFile.getName().isEmpty()) {
-        		if( (newFile != SourceFile.NONE)
-            			|| ( newFile.isAvailable() )  ) {
-            			if (newFile instanceof FileSystemSourceFile) {
-            				FileSystemSourceFile objFile = (FileSystemSourceFile) newFile;
-            				if(objFile != null) {
-            					// find the availability of the source code
-            					if (objFile.isAvailable()) {
-            						scope.iSourceCodeAvailability = Scope.SOURCE_CODE_AVAILABLE;
-            						return true;
-            					} 
-            				}
-            			}
-            		}
-    		}
-    	} else
-    		// the source code availability is already computed, we just reuse it
-    		return (scope.iSourceCodeAvailability == Scope.SOURCE_CODE_AVAILABLE);
-    	// in this level, we don't think the source code is available
-		scope.iSourceCodeAvailability = Scope.SOURCE_CODE_NOT_AVAILABLE;
-		return false;
-    }
     
     
     /****

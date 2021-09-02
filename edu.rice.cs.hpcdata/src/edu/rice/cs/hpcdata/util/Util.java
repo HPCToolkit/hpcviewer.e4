@@ -18,6 +18,11 @@ package edu.rice.cs.hpcdata.util;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.text.NumberFormat;
+
+import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.experiment.source.FileSystemSourceFile;
+import edu.rice.cs.hpcdata.experiment.source.SourceFile;
+
 import java.text.DecimalFormat;
 
 
@@ -271,12 +276,42 @@ static public void printMemory() {
     System.out.println("Max memory  : " + maxMemory   + " MB");
 
 }
+
+
+/**
+ * Verify if the file exist or not.
+ * Remark: we will update the flag that indicates the availability of the source code
+ * in the scope level. The reason is that it is less time consuming (apparently) to
+ * access to the scope level instead of converting and checking into FileSystemSourceFile
+ * level.
+ * @param scope
+ * @return true if the source is available. false otherwise
+ */
+static public boolean isFileReadable(Scope scope) {
+	// check if the source code availability is already computed
+	if(scope.iSourceCodeAvailability == Scope.SOURCE_CODE_UNKNOWN) {
+		SourceFile newFile = (scope.getSourceFile());
+		if (newFile != null && !newFile.getName().isEmpty()) {
+    		if( (newFile != SourceFile.NONE)
+        			|| ( newFile.isAvailable() )  ) {
+        			if (newFile instanceof FileSystemSourceFile) {
+        				FileSystemSourceFile objFile = (FileSystemSourceFile) newFile;
+        				if(objFile != null) {
+        					// find the availability of the source code
+        					if (objFile.isAvailable()) {
+        						scope.iSourceCodeAvailability = Scope.SOURCE_CODE_AVAILABLE;
+        						return true;
+        					} 
+        				}
+        			}
+        		}
+		}
+	} else
+		// the source code availability is already computed, we just reuse it
+		return (scope.iSourceCodeAvailability == Scope.SOURCE_CODE_AVAILABLE);
+	// in this level, we don't think the source code is available
+	scope.iSourceCodeAvailability = Scope.SOURCE_CODE_NOT_AVAILABLE;
+	return false;
 }
 
-
-
-
-
-
-
-
+}
