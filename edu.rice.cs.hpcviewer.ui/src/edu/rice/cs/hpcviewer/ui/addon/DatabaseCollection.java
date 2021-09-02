@@ -123,17 +123,13 @@ public class DatabaseCollection
 			if (arg.charAt(0) != '-')
 				path = arg;
 		}
-		if (path == null || path.length() < 1) {
-			String filename = checkExistance(application.getSelectedElement(), shell, null);
-			if (filename == null)
-				return; 
-			path = filename;
-		}
-		final String filePath = path;
+		String filename = checkExistance(application.getSelectedElement(), shell, path);
+		if (filename == null)
+			return; 
 		
 		// On Linux TWM window manager, the window may not be ready yet.
 		sync.asyncExec(()-> {
-			openDatabaseAndCreateViews(application, modelService, partService, shell, filePath);
+			openDatabaseAndCreateViews(application, modelService, partService, shell, filename);
 		});
 	}
 	
