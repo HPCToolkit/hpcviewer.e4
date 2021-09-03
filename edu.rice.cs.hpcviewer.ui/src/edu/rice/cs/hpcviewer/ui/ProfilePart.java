@@ -333,7 +333,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 			RootScope root = (RootScope) roots[numViews];
 			
 			if (root.getType() == RootScopeType.CallingContextTree) {
-				if (vpm.getDebugFlat()) {
+				if (!vpm.getDebugFlat()) {
 					// new table test
 					views[numViews] = new TopDownPart(tabFolderBottom, SWT.NONE);
 				} else {
