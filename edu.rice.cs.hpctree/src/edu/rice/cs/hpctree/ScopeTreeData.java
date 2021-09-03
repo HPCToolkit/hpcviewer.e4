@@ -1,7 +1,6 @@
 package edu.rice.cs.hpctree;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import org.eclipse.collections.api.list.MutableList;
@@ -29,11 +28,12 @@ public class ScopeTreeData implements IScopeTreeData
 {
 	private final static boolean UNIT_TEST = true;
 	
-	/** list of current data. The list is dynamic, always incremental **/
+	/** list of current data. The list is dynamic **/
 	private final MutableList<Scope> list;
+	
 	/** map of the collapsed nodes. The key is the parent node. 
 	 *  The  value is the list of collapsed nodes of the parent */
-	private final AbstractMutableMap<Scope, List<Scope>> mapCollapsedScopes;
+	private final AbstractMutableMap<Scope, List<Integer>> mapCollapsedScopes;
 
 	private final EventList<BaseMetric> listMetrics;
 
@@ -62,8 +62,7 @@ public class ScopeTreeData implements IScopeTreeData
 				listMetrics.add(metric);
 			}
 		}
-		
-		this.mapCollapsedScopes = new UnifiedMap<>();
+		this.mapCollapsedScopes   = new UnifiedMap<>();
 		
 		clear();
 	}
@@ -168,25 +167,19 @@ public class ScopeTreeData implements IScopeTreeData
 	 */
 	@Override
 	public List<? extends TreeNode> expand(int index) {
-		synchronized (list) {
-			Scope scope = list.get(index);
-			if (!scope.hasChildren())
-				return null;
+		Scope scope = list.get(index);
+		if (!scope.hasChildren())
+			return new ArrayList<>(0);
 
+		List<Scope> children;
+		List<Integer> childrenIndexes = mapCollapsedScopes.remove(scope);
+		if (childrenIndexes == null) {
+			children = convert(scope.getListChildren()); 
 			ColumnComparator comparator = getComparator(sortedColumn, sortDirection);
-			
-			List<? extends TreeNode> children = mapCollapsedScopes.remove(scope);
-			if (children != null) {
-				children.sort(comparator);
-				return children;
-			}
-			List<Scope> listScopes = convert(scope.getListChildren());
-			
-			listScopes.sort(comparator);			
-			list.addAll(index+1, listScopes);
-			
-			return listScopes;
+			children.sort(comparator);			
+			list.addAll(index+1, children);
 		}
+		return null;
 	}
 	
 	
@@ -198,17 +191,27 @@ public class ScopeTreeData implements IScopeTreeData
 	 * @param listCollapsedIndexes list of collapsed indexes from {@code TreeRowModel}
 	 */
 	public void collapse(int parentIndex, List<Integer> listCollapsedIndexes) {
-		List<Scope> collapsedChildren = FastList.newList();
-		synchronized (list) {
-			Collections.sort(listCollapsedIndexes, Collections.reverseOrder());
-			listCollapsedIndexes.forEach(index-> {
-				collapsedChildren.add(list.get(index.intValue()));
-			});
-		}
 		Scope parent = getDataAtIndex(parentIndex);
+
+		// move the children to another variable
+		List<Integer> collapsedChildren = FastList.newList(listCollapsedIndexes);
 		mapCollapsedScopes.put(parent, collapsedChildren);
 	}
 	
+	
+	public boolean isCollapsed(int index) {
+		Scope scope = getDataAtIndex(index);
+		if (!scope.hasChildren())
+			return false;
+		
+		// it is collapsed if the node is in the list of collapsed
+		if (mapCollapsedScopes.containsKey(scope))
+			return true;
+		
+		// if the child doesn't exist in the list, it means the node is collapsed
+		Scope child = scope.getSubscope(0);
+		return (indexOf(child) < 0);
+	}
 	
 	/***
 	 * Check if a scope should call expand to traverse the child.
@@ -266,6 +269,7 @@ public class ScopeTreeData implements IScopeTreeData
 		return scope;
 	}
 
+	
 	@Override
 	public int indexOf(Scope child) {
 		if (child == null || mapCollapsedScopes.containsKey(child.getParentScope()))
@@ -304,15 +308,9 @@ public class ScopeTreeData implements IScopeTreeData
 			// the node is collapsed. The children is invisible
 			return new ArrayList<Scope>(0);
 		}
-		// the node has children. Check if the children are expanded or not
-		boolean isExpanded = list.indexOf(scope.getChildAt(0)) >= 0;
-		if (!isExpanded) {
-			return new ArrayList<Scope>(0);
-		}
 		
-		// copy the children in the list to the new list
-		// List<Scope> children = ((FastList<Scope>)list).subList(index+1, index+1+numChildren);
-		// System.out.println(index + " has " + scope.getChildCount() + ": " + scope.getListChildren());
+		// get the children from the original tree, and sort them
+		// based on the sorted column (either metric or tree column)
 		List<TreeNode> children = scope.getListChildren();
 		final BaseMetric metric = sortedColumn == 0 ? null : getMetric(sortedColumn-1);
 		Comparator<TreeNode> comparator = new Comparator<TreeNode>() {

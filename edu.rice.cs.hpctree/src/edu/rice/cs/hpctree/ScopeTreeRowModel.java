@@ -33,15 +33,8 @@ public class ScopeTreeRowModel extends TreeRowModel<Scope> implements ISortModel
 	
 	@Override
     public boolean isCollapsed(int index) {
-		IScopeTreeData tdata = (IScopeTreeData) getTreeData();
-		Scope scope = tdata.getDataAtIndex(index);
-		if (!scope.hasChildren()) {
-			return false;
-		}
-		Scope child = scope.getSubscope(0);
-		int childIndex = tdata.indexOf(child);
-
-		return (childIndex < 0);
+		ScopeTreeData tdata = (ScopeTreeData) getTreeData();
+		return (tdata.isCollapsed(index));
 	}
 	
 	@Override

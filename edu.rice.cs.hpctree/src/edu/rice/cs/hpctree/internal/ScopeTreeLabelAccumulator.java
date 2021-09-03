@@ -39,6 +39,9 @@ public class ScopeTreeLabelAccumulator implements IConfigLabelAccumulator
 		configLabels.add(LABEL_TREECOLUMN);
 		
 		Scope scope = treeData.getDataAtIndex(rowPosition);
+		if (scope ==  null)
+			return;
+		
 		if (scope instanceof CallSiteScope) {
 			LineScope ls = ((CallSiteScope)scope).getLineScope();
 			if (Util.isFileReadable(ls)) {
