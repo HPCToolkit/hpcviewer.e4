@@ -34,21 +34,17 @@ public class ScopeTreeRowModel extends TreeRowModel<Scope> implements ISortModel
 	@Override
     public boolean isCollapsed(int index) {
 		ScopeTreeData tdata = (ScopeTreeData) getTreeData();
-		return (tdata.isCollapsed(index));
+		Scope scope = tdata.getDataAtIndex(index);
+		if (scope.hasChildren()) {
+			int indexChild = tdata.indexOf(scope.getSubscope(0));
+			return (indexChild < 0);
+		}
+		return false;
 	}
 	
 	@Override
     public List<Integer> collapse(int index) {
-		// remove the collapsed children of the scope before 
-		// calculating the child indexes
-		IScopeTreeData tdata = (IScopeTreeData) getTreeData();
-
-		// calculate the children indexes, including all the 
-		// expanded descendants
-		List<Integer> listIndexes = super.collapse(index);
-		tdata.collapse(index, listIndexes);
-		
-		return listIndexes;
+		return new ArrayList<>(0);
 	}
 
 	@Override
@@ -59,19 +55,12 @@ public class ScopeTreeRowModel extends TreeRowModel<Scope> implements ISortModel
 	
 	@Override
     public List<Integer> expand(int index) {
-		// first, create the children 
-		IScopeTreeData tdata = (IScopeTreeData) getTreeData();
-		tdata.expand(index);
-		
-		// calculate the children indexes, including all the 
-		// indirect descendants
-		List<Integer> list = super.expand(index);
 		
 		if (index == 0) {
 			// TODO: hack by refresh the table. Otherwise there is no change
 			treeAction.refresh();
 		}
-		return list;
+		return new ArrayList<>(0);
 	}
 	
 	
@@ -123,6 +112,7 @@ public class ScopeTreeRowModel extends TreeRowModel<Scope> implements ISortModel
 	public void sort(int columnIndex, SortDirectionEnum sortDirection, boolean accumulate) {
 		IScopeTreeData treedata = (IScopeTreeData) getTreeData();
 		treedata.sort(columnIndex, sortDirection, accumulate);
+		treeAction.refresh();
 	}
 
 	@Override
@@ -140,9 +130,13 @@ public class ScopeTreeRowModel extends TreeRowModel<Scope> implements ISortModel
 		}
 	}
 
-	public boolean shouldExpand(Scope scope) {
-		ScopeTreeData treeData = (ScopeTreeData) getTreeData();
-		return treeData.shouldExpand(scope);
+	public boolean isChildrenVisible(Scope scope) {
+		if (scope.hasChildren())
+			return false;
+
+		ScopeTreeData tdata = (ScopeTreeData) getTreeData();
+		int indexChild = tdata.indexOf(scope.getSubscope(0));
+		return (indexChild < 0);
 	}
 	
 	public void setRoot(Scope root) {

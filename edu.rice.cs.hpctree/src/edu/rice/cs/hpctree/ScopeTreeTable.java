@@ -309,7 +309,7 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 	@Override
 	public void refresh() {
 		if (natTable != null)
-			natTable.refresh();;
+			natTable.refresh();
 	}
 	
 	
@@ -353,7 +353,7 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 	@Override
 	public List<? extends TreeNode> traverseOrExpand(Scope scope) {
 		ScopeTreeRowModel treeRowModel = bodyLayerStack.getTreeRowModel();
-		if (treeRowModel.shouldExpand(scope)) {
+		if (!treeRowModel.isChildrenVisible(scope)) {
 			int index = treeRowModel.getTreeData().indexOf(scope);
 			bodyLayerStack.expand(index);
 		}

@@ -7,7 +7,6 @@ import org.eclipse.nebula.widgets.nattable.layer.AbstractLayerTransform;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.nebula.widgets.nattable.reorder.ColumnReorderLayer;
 import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
-import org.eclipse.nebula.widgets.nattable.tree.TreeLayer;
 import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
 
 
@@ -23,7 +22,7 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
     private final FreezeLayer    freezeLayer ;
     private final ViewportLayer  viewportLayer;
     private final DataLayer bodyDataLayer;
-    private final TreeLayer treeLayer ;
+    private final ScopeTreeLayer treeLayer ;
 
     private final CompositeFreezeLayer compositeFreezeLayer ;
     private final ScopeTreeRowModel    treeRowModel ;
@@ -37,7 +36,7 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
 
         this.treeRowModel   = new ScopeTreeRowModel(treeData, treeAction);
         this.selectionLayer = new SelectionLayer(new ColumnReorderLayer(bodyDataLayer));
-        this.treeLayer      = new TreeLayer(this.selectionLayer, treeRowModel);
+        this.treeLayer      = new ScopeTreeLayer(this.selectionLayer, treeRowModel);
         this.viewportLayer  = new ViewportLayer(treeLayer);
       
         this.freezeLayer     = new FreezeLayer(treeLayer);
@@ -62,7 +61,7 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
 		return bodyDataLayer;
 	}
 
-    public TreeLayer getTreeLayer() {
+    public AbstractLayerTransform getTreeLayer() {
     	return treeLayer;
     }
 
