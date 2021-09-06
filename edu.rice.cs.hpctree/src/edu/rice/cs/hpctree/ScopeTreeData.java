@@ -89,7 +89,9 @@ public class ScopeTreeData implements IScopeTreeData
 	@Override
 	public void clear() {
 		this.sortDirection = SortDirectionEnum.DESC;
-		this.sortedColumn  = 1;
+		this.sortedColumn  = 0;
+		if (this.listMetrics != null && this.listMetrics.size()>0)
+			this.sortedColumn = 1;
 	}
 
 	
@@ -136,6 +138,8 @@ public class ScopeTreeData implements IScopeTreeData
 	}
 	
 	public BaseMetric getMetric(int indexMetric) {
+		if (listMetrics == null || listMetrics.size() <= indexMetric)
+			return null;
 		return listMetrics.get(indexMetric);
 	}
 	

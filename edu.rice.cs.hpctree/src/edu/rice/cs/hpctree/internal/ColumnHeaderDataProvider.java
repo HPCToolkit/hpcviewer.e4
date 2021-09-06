@@ -24,6 +24,9 @@ public class ColumnHeaderDataProvider implements IDataProvider, ListEventListene
 			return "Scope";
 		
 		BaseMetric metric = treeDataProvider.getMetric(columnIndex);
+		if (metric == null)
+			return "No metric";
+		
 		return metric.getDisplayName();
 	}
 

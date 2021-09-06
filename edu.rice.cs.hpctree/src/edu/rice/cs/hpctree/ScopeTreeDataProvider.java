@@ -41,6 +41,8 @@ public class ScopeTreeDataProvider implements IDataProvider, IRowDataProvider<Sc
 
 		if (columnIndex > 0) {
 			BaseMetric metric = treeData.getMetric(columnIndex-1);
+			if (metric == null)
+				return null;
 			return metric.getMetricTextValue(scope);
 		}
 		
