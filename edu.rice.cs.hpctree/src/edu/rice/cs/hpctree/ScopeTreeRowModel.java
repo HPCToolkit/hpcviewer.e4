@@ -9,6 +9,7 @@ import org.eclipse.nebula.widgets.nattable.layer.event.ILayerEvent;
 import org.eclipse.nebula.widgets.nattable.layer.event.StructuralRefreshEvent;
 import org.eclipse.nebula.widgets.nattable.sort.ISortModel;
 import org.eclipse.nebula.widgets.nattable.sort.SortDirectionEnum;
+import org.eclipse.nebula.widgets.nattable.tree.AbstractTreeRowModel;
 import org.eclipse.nebula.widgets.nattable.tree.TreeRowModel;
 
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -22,8 +23,9 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
  * The reason is 
  *
  ***********************************************************/
-public class ScopeTreeRowModel extends TreeRowModel<Scope> implements ISortModel, ILayerListener
+public class ScopeTreeRowModel extends AbstractTreeRowModel<Scope> implements ISortModel, ILayerListener
 {
+	private final String ERR_MSG_NOTSUPPORTED = "NOT SUPPORTED";
 	private final IScopeTreeAction treeAction;
 
 	public ScopeTreeRowModel(IScopeTreeData treeData, IScopeTreeAction treeAction) {
@@ -49,7 +51,7 @@ public class ScopeTreeRowModel extends TreeRowModel<Scope> implements ISortModel
 
 	@Override
     public List<Integer> collapseAll() {
-		return super.collapseAll();
+		return collapse(0);
 	}
 	
 	
@@ -65,11 +67,9 @@ public class ScopeTreeRowModel extends TreeRowModel<Scope> implements ISortModel
 	
 	
 	
-	
 	@Override
     public List<Integer> expandAll() {
-		System.err.println("NOT SUPPORTED");
-		return super.expandAll();
+		throw new RuntimeException(ERR_MSG_NOTSUPPORTED);
 	}
 
 	@Override
@@ -147,5 +147,15 @@ public class ScopeTreeRowModel extends TreeRowModel<Scope> implements ISortModel
 	public Scope getRoot() {
 		IScopeTreeData treedata = (IScopeTreeData) getTreeData();
 		return treedata.getRoot();
+	}
+
+	@Override
+	public List<Integer> expandToLevel(int parentIndex, int level) {
+		throw new RuntimeException(ERR_MSG_NOTSUPPORTED);
+	}
+
+	@Override
+	public List<Integer> expandToLevel(int level) {
+		throw new RuntimeException(ERR_MSG_NOTSUPPORTED);
 	}
 }
