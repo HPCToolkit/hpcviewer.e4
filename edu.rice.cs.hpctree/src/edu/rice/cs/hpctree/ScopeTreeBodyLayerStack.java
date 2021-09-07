@@ -42,9 +42,6 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
         this.freezeLayer     = new FreezeLayer(treeLayer);
         compositeFreezeLayer = new CompositeFreezeLayer(freezeLayer, viewportLayer, selectionLayer);
         
-        if (treeData.getRoot().hasChildren())
-        	treeLayer.expandTreeRow(0);
-        
         setUnderlyingLayer(compositeFreezeLayer);
     }
     

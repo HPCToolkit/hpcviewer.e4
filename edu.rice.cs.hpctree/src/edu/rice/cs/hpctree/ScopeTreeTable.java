@@ -161,6 +161,30 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 
 		natTable.setLayerPainter(new NatGridLayerPainter(natTable, DataLayer.DEFAULT_ROW_HEIGHT));
 		addDisposeListener(this);
+		
+		natTable.getDisplay().asyncExec(()-> {
+			expandAndSelectRootChild(getRoot());
+		});
+	}
+	
+	
+	private void expandAndSelectRootChild(Scope root) {
+		if (root == null)
+			return;
+		
+		// expand the root and select the first child if exist        
+        if (root.hasChildren()) {
+        	ScopeTreeLayer treeLayer = (ScopeTreeLayer) bodyLayerStack.getTreeLayer();
+        	treeLayer.expandTreeRow(0);
+        	setSelection(1);
+        	
+        	Scope node = getSelection();
+        	if (node != null) {
+    			listeners.forEach(l -> {
+    				l.select(node);
+    			});
+        	}
+        }
 	}
 
 	
@@ -306,6 +330,8 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 		treeRowModel.setRoot(root);
 		
 		this.refresh();
+		
+		expandAndSelectRootChild(root);
 	}
 
 	@Override
