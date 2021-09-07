@@ -8,11 +8,8 @@ import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.nebula.widgets.nattable.NatTable;
-import org.eclipse.nebula.widgets.nattable.config.CellConfigAttributes;
 import org.eclipse.nebula.widgets.nattable.config.ConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfiguration;
-import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
-import org.eclipse.nebula.widgets.nattable.config.IConfiguration;
 import org.eclipse.nebula.widgets.nattable.coordinate.PositionCoordinate;
 import org.eclipse.nebula.widgets.nattable.coordinate.Range;
 
@@ -25,18 +22,12 @@ import org.eclipse.nebula.widgets.nattable.layer.CompositeLayer;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayerListener;
-import org.eclipse.nebula.widgets.nattable.layer.LabelStack;
-import org.eclipse.nebula.widgets.nattable.layer.cell.IConfigLabelAccumulator;
 import org.eclipse.nebula.widgets.nattable.layer.event.ILayerEvent;
 import org.eclipse.nebula.widgets.nattable.painter.layer.NatGridLayerPainter;
 import org.eclipse.nebula.widgets.nattable.selection.config.RowOnlySelectionBindings;
 import org.eclipse.nebula.widgets.nattable.selection.event.RowSelectionEvent;
 import org.eclipse.nebula.widgets.nattable.sort.SortHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.sort.config.SingleClickSortConfiguration;
-import org.eclipse.nebula.widgets.nattable.style.CellStyleAttributes;
-import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
-import org.eclipse.nebula.widgets.nattable.style.Style;
-import org.eclipse.nebula.widgets.nattable.ui.binding.UiBindingRegistry;
 import org.eclipse.nebula.widgets.nattable.ui.menu.AbstractHeaderMenuConfiguration;
 import org.eclipse.nebula.widgets.nattable.ui.menu.PopupMenuBuilder;
 import org.eclipse.swt.events.DisposeEvent;
@@ -54,9 +45,9 @@ import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 import edu.rice.cs.hpcdata.util.OSValidator;
 import edu.rice.cs.hpctree.action.IActionListener;
 import edu.rice.cs.hpctree.internal.ColumnHeaderDataProvider;
+import edu.rice.cs.hpctree.internal.HeaderLayerConfiguration;
 import edu.rice.cs.hpctree.internal.ScopeTreeLabelAccumulator;
 import edu.rice.cs.hpctree.internal.TableConfiguration;
-import edu.rice.cs.hpctree.internal.TableUIBindingConfiguration;
 
 
 /********************************************************************
@@ -74,13 +65,13 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 {
 	private final static float  FACTOR_BOLD_FONT   = 1.2f;
 	private final static String TEXT_METRIC_COLUMN = "|8x88+88xx888x8%--";
-	private final static String LABEL_COLUMN = "col";
 
 	private final NatTable natTable ;
 	private final ScopeTreeBodyLayerStack bodyLayerStack ;
 	private final IDataProvider columnHeaderDataProvider ;
 	private final ScopeTreeDataProvider bodyDataProvider;
-	private final TableUIBindingConfiguration uiConfiguration;
+	private final TableConfiguration    tableConfiguration;
+	//private final TableUIBindingConfiguration uiConfiguration;
 	private final Collection<IActionListener> listeners = new FastList<IActionListener>();
 
 	public ScopeTreeTable(Composite parent, int style, RootScope root, IMetricManager metricManager) {
@@ -101,7 +92,9 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
         bodyLayerStack = new ScopeTreeBodyLayerStack(treeData, bodyDataProvider, this);
         bodyLayerStack.getBodyDataLayer().setConfigLabelAccumulator(new ScopeTreeLabelAccumulator(treeData));
         bodyLayerStack.getSelectionLayer().addLayerListener(this);
-        bodyLayerStack.addConfiguration(new TableConfiguration());
+        
+        tableConfiguration =  new TableConfiguration(bodyDataProvider);
+        bodyLayerStack.addConfiguration(tableConfiguration);
         
         // --------------------------------
         // build the column header layer
@@ -111,31 +104,9 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
         ILayer columnHeaderLayer = new ColumnHeaderLayer(columnHeaderDataLayer, bodyLayerStack, bodyLayerStack.getSelectionLayer());
         SortHeaderLayer<Scope> headerLayer = new SortHeaderLayer<>(columnHeaderLayer, bodyLayerStack.getTreeRowModel());
         
-        headerLayer.setConfigLabelAccumulator(new IConfigLabelAccumulator() {
-			
-			@Override
-			public void accumulateConfigLabels(LabelStack configLabels, int columnPosition, int rowPosition) {
-				configLabels.add(LABEL_COLUMN);
-			}
-		});
-
-        headerLayer.addConfiguration(new IConfiguration() {
-			
-			@Override
-			public void configureUiBindings(UiBindingRegistry uiBindingRegistry) {}
-			
-			@Override
-			public void configureRegistry(IConfigRegistry configRegistry) {
-				final Style style = new Style();
-				style.setAttributeValue(CellStyleAttributes.FONT, TableConfiguration.getGenericFont());
-
-				configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, style, DisplayMode.SELECT, LABEL_COLUMN);
-				configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, style, DisplayMode.NORMAL, LABEL_COLUMN);
-			}
-			
-			@Override
-			public void configureLayer(ILayer layer) {}
-		});
+        HeaderLayerConfiguration headerConfiguration = new HeaderLayerConfiguration();
+        headerLayer.setConfigLabelAccumulator(headerConfiguration);
+        headerLayer.addConfiguration(headerConfiguration);
 
         // --------------------------------
         // build the composite
@@ -149,15 +120,15 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
         // turn the auto configuration off as we want to add our header menu
         // configuration
         natTable = new NatTable(this, NatTable.DEFAULT_STYLE_OPTIONS , compositeLayer, false);
-
-        uiConfiguration = new TableUIBindingConfiguration(bodyDataProvider);
         
         // as the autoconfiguration of the NatTable is turned off, we have to
         // add the DefaultNatTableStyleConfiguration and the ConfigRegistry
         // manually
         natTable.setConfigRegistry(configRegistry);
+
+        //uiConfiguration = new TableUIBindingConfiguration(bodyDataProvider);
         
-        natTable.addConfiguration(uiConfiguration);
+        //natTable.addConfiguration(uiConfiguration);
         natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
 		natTable.addConfiguration(new RowOnlySelectionBindings());
 		natTable.addConfiguration(new SingleClickSortConfiguration());
@@ -224,11 +195,11 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 	}
 	
 	public void addActionListener(IActionListener action) {
-		uiConfiguration.addListener(action);
+		tableConfiguration.addListener(action);
 	}
 	
 	public void removeActionListener(IActionListener action) {
-		uiConfiguration.removeListener(action);
+		tableConfiguration.removeListener(action);
 	}
 
 	@Override

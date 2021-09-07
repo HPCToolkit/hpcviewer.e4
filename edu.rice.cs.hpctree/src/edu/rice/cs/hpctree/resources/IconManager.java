@@ -1,6 +1,5 @@
 package edu.rice.cs.hpctree.resources;
 
-import org.eclipse.jface.resource.ImageRegistry;
 import edu.rice.cs.hpcbase.ui.BaseIconManager;
 
 public class IconManager extends BaseIconManager 
@@ -17,20 +16,6 @@ public class IconManager extends BaseIconManager
 	
 	private static IconManager INSTANCE;
 	
-	public IconManager() {
-		ImageRegistry registry = getRegistry();
-/*
-		registerImage(registry, getClass(), Image_CallFrom); 
-		registerImage(registry, getClass(), Image_CallTo); 
-		registerImage(registry, getClass(), Image_CallFromDisabled); 
-		registerImage(registry, getClass(), Image_CallToDisabled);
-
-		registerImage(registry, getClass(), Image_InlineFrom);
-		registerImage(registry, getClass(), Image_InlineTo); 
-		registerImage(registry, getClass(), Image_InlineFromDisabled); 
-		registerImage(registry, getClass(), Image_InlineToDisabled);
-		*/
-	}
 	
 	public static IconManager getInstance() {
 		if (INSTANCE == null) {
