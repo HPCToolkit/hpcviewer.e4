@@ -71,7 +71,6 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 	private final IDataProvider columnHeaderDataProvider ;
 	private final ScopeTreeDataProvider bodyDataProvider;
 	private final TableConfiguration    tableConfiguration;
-	//private final TableUIBindingConfiguration uiConfiguration;
 	private final Collection<IActionListener> listeners = new FastList<IActionListener>();
 
 	public ScopeTreeTable(Composite parent, int style, RootScope root, IMetricManager metricManager) {

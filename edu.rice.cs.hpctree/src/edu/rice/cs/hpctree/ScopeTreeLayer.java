@@ -222,6 +222,9 @@ public class ScopeTreeLayer extends AbstractLayerTransform implements IUniqueInd
      */
     public void expandTreeRow(int parentIndex) {
     	List<Scope> children = this.treeRowModel.getDirectChildren(parentIndex);
+    	if (children == null || children.size() == 0)
+    		return;
+    	
     	doCommand(new RowInsertCommand<Scope>(parentIndex + 1, children));
     }
     

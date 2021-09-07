@@ -2,9 +2,9 @@ package edu.rice.cs.hpctree.internal;
 
 import java.util.List;
 
-import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
+import org.eclipse.nebula.widgets.nattable.grid.GridRegion;
 import org.eclipse.nebula.widgets.nattable.layer.LabelStack;
 import org.eclipse.nebula.widgets.nattable.layer.cell.ILayerCell;
 import org.eclipse.nebula.widgets.nattable.painter.cell.ICellPainter;
@@ -13,19 +13,39 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Rectangle;
 
+
+/*********************************************************************
+ * 
+ * Generic class to match mouse event with a region painter in the cell.
+ * If the cell has an attribute (like {@code ImagePainter} of interest,
+ * it will return true so that the class can do an action.
+ * <p>
+ * This class is specifically designed to be used in {@code UiBindingRegistry}
+ * and matched with any IMouseAction.
+ * 
+ *********************************************************************/
 public class ScopeAttributeMouseEventMatcher extends MouseEventMatcher 
 {
-	private final FastList<String> labels;
+	private final List<String> labels;
 	private final List<ICellPainter> painters;
 	
-    public ScopeAttributeMouseEventMatcher(String body, int leftButton, List<ICellPainter> painters) {
+	
+	/***
+	 * Constructor to specify which painters need to be matched.
+	 * 
+	 * @param body the region in the table (mostly {@code GridRegion.BODY})
+	 * @param leftButton the mouse button (like {@code MouseEventMatcher.LEFT_BUTTON})
+	 * @param painters {@code List} of {@code ICellPainter} to be matched. If one of
+	 *  	  items is matched, the caller will trigger an action
+	 *  
+	 *  @see GridRegion
+	 *  @see MouseEventMatcher 
+	 */
+    public ScopeAttributeMouseEventMatcher(String body, int leftButton, List<String> labels, List<ICellPainter> painters) {
     	super(body, leftButton);
     	
-    	this.painters = painters;
-    	
-    	labels = new FastList<>();
-    	labels.add(ScopeTreeLabelAccumulator.LABEL_CALLSITE);
-    	labels.add(ScopeTreeLabelAccumulator.LABEL_CALLER);
+    	this.painters = painters;    	
+    	this.labels = labels;
 	}
 
 	@Override
@@ -67,7 +87,6 @@ public class ScopeAttributeMouseEventMatcher extends MouseEventMatcher
                     
                     if (clickedCellPainter != null) {
                     	if (painters.contains(clickedCellPainter)) {
-                        	System.out.println("clickedCellPainter: " + clickedCellPainter.getClass());
                         	result = true;
                     	}
                     }

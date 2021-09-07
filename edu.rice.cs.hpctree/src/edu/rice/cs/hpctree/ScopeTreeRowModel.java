@@ -131,12 +131,12 @@ public class ScopeTreeRowModel extends AbstractTreeRowModel<Scope> implements IS
 	}
 
 	public boolean isChildrenVisible(Scope scope) {
-		if (scope.hasChildren())
+		if (!scope.hasChildren())
 			return false;
 
 		ScopeTreeData tdata = (ScopeTreeData) getTreeData();
 		int indexChild = tdata.indexOf(scope.getSubscope(0));
-		return (indexChild < 0);
+		return (indexChild >= 0);
 	}
 	
 	public void setRoot(Scope root) {

@@ -1,5 +1,6 @@
 package edu.rice.cs.hpctree.internal;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.collections.impl.list.mutable.FastList;
@@ -103,9 +104,14 @@ public class TableConfiguration implements IConfiguration
 	@Override
 	public void configureUiBindings(UiBindingRegistry uiBindingRegistry) {		
 		
+		List<String> labels = new ArrayList<>(2);
+    	labels.add(ScopeTreeLabelAccumulator.LABEL_CALLSITE);
+    	labels.add(ScopeTreeLabelAccumulator.LABEL_CALLER);
+
 		ScopeAttributeMouseEventMatcher scopeMatcher = new ScopeAttributeMouseEventMatcher(
 				GridRegion.BODY, 
 				MouseEventMatcher.LEFT_BUTTON, 
+				labels, 
 				painters);
 		
 		uiBindingRegistry.registerSingleClickBinding(scopeMatcher, (natTable, event) -> {
@@ -115,7 +121,6 @@ public class TableConfiguration implements IConfiguration
 
             if (scope instanceof CallSiteScope) {
             	Scope cs = ((CallSiteScope)scope).getLineScope();
-            	System.out.println("callsite: " + cs.getName());
 	            listeners.forEach(action -> action.select(cs));
             }
 		});
