@@ -156,14 +156,16 @@ public class TableConfiguration implements IConfiguration
 
 	
 	
-	private List<ICellPainter> addIconLabel(IConfigRegistry configRegistry, String imageName, String label) {
+	private List<ICellPainter> addIconLabel(IConfigRegistry configRegistry, 
+											String  imageName, 
+											String  label) {
+		
 		IconManager iconManager = IconManager.getInstance();
 		
 		ImagePainter imagePainter = new ImagePainter(iconManager.getImage(imageName));
 		ScopeAttributePainter att = new ScopeAttributePainter(dataProvider);
 		
-		CellPainterDecorator attPainter = new CellPainterDecorator(imagePainter, CellEdgeEnum.RIGHT, att);
-		
+		CellPainterDecorator attPainter  = new CellPainterDecorator(imagePainter, CellEdgeEnum.RIGHT, att);
 		CellPainterDecorator cellPainter = new CellPainterDecorator(new TextPainter(), CellEdgeEnum.LEFT, attPainter);
 		
 		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_PAINTER, 

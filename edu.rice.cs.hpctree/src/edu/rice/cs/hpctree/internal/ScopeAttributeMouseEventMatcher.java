@@ -35,6 +35,7 @@ public class ScopeAttributeMouseEventMatcher extends MouseEventMatcher
 	 * 
 	 * @param body the region in the table (mostly {@code GridRegion.BODY})
 	 * @param leftButton the mouse button (like {@code MouseEventMatcher.LEFT_BUTTON})
+	 * @param labels {@code List} of {@code String} of labels to matched against this event
 	 * @param painters {@code List} of {@code ICellPainter} to be matched. If one of
 	 *  	  items is matched, the caller will trigger an action
 	 *  
