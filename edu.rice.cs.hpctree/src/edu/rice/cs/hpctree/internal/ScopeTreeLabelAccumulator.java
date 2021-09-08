@@ -15,7 +15,7 @@ public class ScopeTreeLabelAccumulator implements IConfigLabelAccumulator
 {
 	public final static String LABEL_CALLSITE = "scope.callsite";
 	public final static String LABEL_CALLER   = "scope.caller";
-
+	
 	public final static String LABEL_CALLSITE_DISABLED = "scope.dis.callsite";
 	public final static String LABEL_CALLER_DISABLED   = "scope.dis.caller";
 	
@@ -49,12 +49,14 @@ public class ScopeTreeLabelAccumulator implements IConfigLabelAccumulator
 			} else {
 				configLabels.add(LABEL_CALLSITE_DISABLED);
 			}
+			
 		} else if (scope instanceof CallSiteScopeCallerView) {
 			LineScope ls = ((CallSiteScopeCallerView)scope).getLineScope();
 			if (Util.isFileReadable(ls))
 				configLabels.add(LABEL_CALLER);
 			else
 				configLabels.add(LABEL_CALLER_DISABLED);
+
 		}
 		if (Util.isFileReadable(scope)) {
 			configLabels.add(LABEL_SOURCE_AVAILABLE);

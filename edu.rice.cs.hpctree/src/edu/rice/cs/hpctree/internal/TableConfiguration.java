@@ -160,7 +160,11 @@ public class TableConfiguration implements IConfiguration
 		IconManager iconManager = IconManager.getInstance();
 		
 		ImagePainter imagePainter = new ImagePainter(iconManager.getImage(imageName));
-		CellPainterDecorator cellPainter = new CellPainterDecorator(new TextPainter(), CellEdgeEnum.LEFT, imagePainter);
+		ScopeAttributePainter att = new ScopeAttributePainter(dataProvider);
+		
+		CellPainterDecorator attPainter = new CellPainterDecorator(imagePainter, CellEdgeEnum.RIGHT, att);
+		
+		CellPainterDecorator cellPainter = new CellPainterDecorator(new TextPainter(), CellEdgeEnum.LEFT, attPainter);
 		
 		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_PAINTER, 
 											   cellPainter, 

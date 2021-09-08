@@ -46,20 +46,7 @@ public class ScopeTreeDataProvider implements IDataProvider, IRowDataProvider<Sc
 			return metric.getMetricTextValue(scope);
 		}
 		
-		String text = "";
-		
-		if (scope instanceof CallSiteScope) {
-			final CallSiteScope cs = (CallSiteScope) scope;
-			
-			// the line number in XML is 0-based, while the editor is 1-based
-			int line = 1+cs.getLineScope().getFirstLineNumber();
-			
-			// show the line number
-			if (line>0) {
-				text += line + ": ";
-			}
-		}
-		text += getDebugText(scope) + scope.getName();
+		String text = getDebugText(scope) + scope.getName();
 		
 		if (needToAddLoadModuleSuffix(scope) ) {
 			String lm = null;
