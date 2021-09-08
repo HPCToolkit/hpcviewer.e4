@@ -53,10 +53,10 @@ public class TableConfiguration implements IConfiguration
 
 	@Override
 	public void configureRegistry(IConfigRegistry configRegistry) {
-		painters.add( addIconLabel(configRegistry, IconManager.Image_CallTo, ScopeTreeLabelAccumulator.LABEL_CALLSITE) );
+		painters.addAll( addIconLabel(configRegistry, IconManager.Image_CallTo, ScopeTreeLabelAccumulator.LABEL_CALLSITE) );
 		addIconLabel(configRegistry, IconManager.Image_CallToDisabled, ScopeTreeLabelAccumulator.LABEL_CALLSITE_DISABLED);
 
-		painters.add( addIconLabel(configRegistry, IconManager.Image_CallFrom, ScopeTreeLabelAccumulator.LABEL_CALLER) );
+		painters.addAll( addIconLabel(configRegistry, IconManager.Image_CallFrom, ScopeTreeLabelAccumulator.LABEL_CALLER) );
 		addIconLabel(configRegistry, IconManager.Image_CallFromDisabled, ScopeTreeLabelAccumulator.LABEL_CALLER_DISABLED);
 		
 		// configuration for metric column
@@ -156,7 +156,7 @@ public class TableConfiguration implements IConfiguration
 
 	
 	
-	private ICellPainter addIconLabel(IConfigRegistry configRegistry, String imageName, String label) {
+	private List<ICellPainter> addIconLabel(IConfigRegistry configRegistry, String imageName, String label) {
 		IconManager iconManager = IconManager.getInstance();
 		
 		ImagePainter imagePainter = new ImagePainter(iconManager.getImage(imageName));
@@ -175,8 +175,11 @@ public class TableConfiguration implements IConfiguration
 											   cellPainter, 
 											   DisplayMode.SELECT, 
 											   label);
+		List<ICellPainter> listPainter = new ArrayList<>(2);
+		listPainter.add(imagePainter);
+		listPainter.add(att);
 		
-		return imagePainter;
+		return listPainter;
 	}
 	
 	public static Font getMetricFont() {
