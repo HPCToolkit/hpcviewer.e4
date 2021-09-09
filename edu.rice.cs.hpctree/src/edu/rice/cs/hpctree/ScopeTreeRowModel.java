@@ -26,11 +26,9 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 public class ScopeTreeRowModel extends AbstractTreeRowModel<Scope> implements ISortModel, ILayerListener
 {
 	private final String ERR_MSG_NOTSUPPORTED = "NOT SUPPORTED";
-	private final IScopeTreeAction treeAction;
 
-	public ScopeTreeRowModel(IScopeTreeData treeData, IScopeTreeAction treeAction) {
+	public ScopeTreeRowModel(IScopeTreeData treeData) {
 		super(treeData);
-		this.treeAction = treeAction;
 	}
 	
 	@Override

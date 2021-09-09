@@ -25,7 +25,6 @@ import org.eclipse.nebula.widgets.nattable.layer.ILayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayerListener;
 import org.eclipse.nebula.widgets.nattable.layer.event.ILayerEvent;
 import org.eclipse.nebula.widgets.nattable.painter.layer.NatGridLayerPainter;
-import org.eclipse.nebula.widgets.nattable.selection.config.RowOnlySelectionBindings;
 import org.eclipse.nebula.widgets.nattable.selection.event.RowSelectionEvent;
 import org.eclipse.nebula.widgets.nattable.sort.SortHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.sort.config.SingleClickSortConfiguration;
@@ -88,7 +87,7 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
         // handling
         ConfigRegistry configRegistry = new ConfigRegistry();
         
-        bodyLayerStack = new ScopeTreeBodyLayerStack(treeData, bodyDataProvider, this);
+        bodyLayerStack = new ScopeTreeBodyLayerStack(treeData, bodyDataProvider);
         bodyLayerStack.getBodyDataLayer().setConfigLabelAccumulator(new ScopeTreeLabelAccumulator(treeData));
         bodyLayerStack.getSelectionLayer().addLayerListener(this);
         
@@ -115,7 +114,6 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
         compositeLayer.setChildLayer(GridRegion.COLUMN_HEADER, headerLayer, 0, 0);
         compositeLayer.setChildLayer(GridRegion.BODY, bodyLayerStack, 0, 1);
         
-
         // turn the auto configuration off as we want to add our header menu
         // configuration
         natTable = new NatTable(this, NatTable.DEFAULT_STYLE_OPTIONS , compositeLayer, false);
@@ -125,11 +123,7 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
         // manually
         natTable.setConfigRegistry(configRegistry);
 
-        //uiConfiguration = new TableUIBindingConfiguration(bodyDataProvider);
-        
-        //natTable.addConfiguration(uiConfiguration);
         natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
-		natTable.addConfiguration(new RowOnlySelectionBindings());
 		natTable.addConfiguration(new SingleClickSortConfiguration());
         natTable.addConfiguration(new AbstractHeaderMenuConfiguration(natTable) {
             @Override
