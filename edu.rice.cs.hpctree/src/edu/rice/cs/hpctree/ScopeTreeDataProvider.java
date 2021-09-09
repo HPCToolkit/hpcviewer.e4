@@ -46,8 +46,8 @@ public class ScopeTreeDataProvider implements IDataProvider, IRowDataProvider<Sc
 			return metric.getMetricTextValue(scope);
 		}
 		
-		String text = getDebugText(scope) + scope.getName();
-		
+		// tree column, assuming column 0 is always the tree column
+		String text = getDebugText(scope) + scope.getName();		
 		if (needToAddLoadModuleSuffix(scope) ) {
 			String lm = null;
 			ProcedureScope proc = null;

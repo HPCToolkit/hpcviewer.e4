@@ -45,7 +45,5 @@ public class ColumnHeaderDataProvider implements IDataProvider, ListEventListene
 
 	@Override
 	public void listChanged(ListEvent<BaseMetric> listChanges) {
-		// TODO Auto-generated method stub
-		
 	}
 }

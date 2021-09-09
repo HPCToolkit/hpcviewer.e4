@@ -20,16 +20,19 @@ public class MetricFilterInput extends FilterInputData<BaseMetric>
 	private final IMetricManager metricManager;
 
 	
-	public MetricFilterInput(RootScope root, IMetricManager metricManager, TreeViewer treeViewer, boolean affectAll) {		
-		super(createFilterList(metricManager.getVisibleMetrics(), treeViewer));
+	public MetricFilterInput(RootScope root, IMetricManager metricManager, List<FilterDataItem<BaseMetric>> listMetrics, boolean affectAll) {
+		super(listMetrics);
 		this.root = root;
 		this.metricManager = metricManager;
-
 		this.affectAll = affectAll;
+	}
+ 	
+	public MetricFilterInput(RootScope root, IMetricManager metricManager, TreeViewer treeViewer, boolean affectAll) {		
+		this(root, metricManager, createFilterList(metricManager.getVisibleMetrics(), treeViewer), affectAll);
 	}
 	
 	
-	private static List<FilterDataItem<BaseMetric>> createFilterList(List<BaseMetric> metrics, TreeViewer treeViewer) {
+	public static List<FilterDataItem<BaseMetric>> createFilterList(List<BaseMetric> metrics, TreeViewer treeViewer) {
 		List<FilterDataItem<BaseMetric>> listItems = new ArrayList<>(metrics.size());
 		TreeColumn []columns = treeViewer.getTree().getColumns();
 		

@@ -4,9 +4,9 @@ import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.CoolBar;
 import org.eclipse.swt.widgets.ToolBar;
 
-import edu.rice.cs.hpcviewer.ui.internal.AbstractTablePartItem;
+import edu.rice.cs.hpcviewer.ui.internal.AbstractTableView;
 
-public class TopDownPart extends AbstractTablePartItem 
+public class TopDownPart extends AbstractTableView 
 {	
 	private static final String TITLE = "Top-down view";
 	

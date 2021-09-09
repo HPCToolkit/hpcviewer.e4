@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
+import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.util.string.StringUtil;
@@ -323,8 +324,10 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 
 
 	@Override
-	public void activate() {
-		// TODO Auto-generated method stub
-		
+	public IMetricManager getMetricManager() {
+		return this.contentViewer.getMetricManager();
 	}
+	
+	@Override
+	public void activate() {}
 }

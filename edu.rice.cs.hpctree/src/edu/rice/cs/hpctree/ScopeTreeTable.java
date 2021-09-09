@@ -13,11 +13,11 @@ import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfigurat
 import org.eclipse.nebula.widgets.nattable.coordinate.PositionCoordinate;
 import org.eclipse.nebula.widgets.nattable.coordinate.Range;
 
-import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
 import org.eclipse.nebula.widgets.nattable.freeze.FreezeHelper;
 import org.eclipse.nebula.widgets.nattable.grid.GridRegion;
 import org.eclipse.nebula.widgets.nattable.grid.layer.ColumnHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.grid.layer.DefaultColumnHeaderDataLayer;
+import org.eclipse.nebula.widgets.nattable.hideshow.ColumnHideShowLayer;
 import org.eclipse.nebula.widgets.nattable.layer.CompositeLayer;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayer;
@@ -68,9 +68,8 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 
 	private final NatTable natTable ;
 	private final ScopeTreeBodyLayerStack bodyLayerStack ;
-	private final IDataProvider columnHeaderDataProvider ;
-	private final ScopeTreeDataProvider bodyDataProvider;
-	private final TableConfiguration    tableConfiguration;
+	private final ScopeTreeDataProvider   bodyDataProvider;
+	private final TableConfiguration      tableConfiguration;
 	private final Collection<IActionListener> listeners = new FastList<IActionListener>();
 
 	public ScopeTreeTable(Composite parent, int style, RootScope root, IMetricManager metricManager) {
@@ -98,8 +97,8 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
         // --------------------------------
         // build the column header layer
         // --------------------------------
-        columnHeaderDataProvider = new ColumnHeaderDataProvider(bodyDataProvider);
-        DataLayer columnHeaderDataLayer = new DefaultColumnHeaderDataLayer(columnHeaderDataProvider);
+
+        DataLayer columnHeaderDataLayer = new DefaultColumnHeaderDataLayer(new ColumnHeaderDataProvider(bodyDataProvider));
         ILayer columnHeaderLayer = new ColumnHeaderLayer(columnHeaderDataLayer, bodyLayerStack, bodyLayerStack.getSelectionLayer());
         SortHeaderLayer<Scope> headerLayer = new SortHeaderLayer<>(columnHeaderLayer, bodyLayerStack.getTreeRowModel());
         
@@ -187,6 +186,49 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
         }
 	}
 
+	/****
+	 * Hide one or more columns
+	 * @param columnIndexes int or int[] of column indexes
+	 */
+	public void hideColumn(int... columnIndexes) {
+		ColumnHideShowLayer colLayer = bodyLayerStack.getColumnHideShowLayer();
+		colLayer.hideColumnIndexes(columnIndexes);
+		refresh();
+	}
+	
+	public void showColumn(int... columnIndexes) {
+		ColumnHideShowLayer colLayer = bodyLayerStack.getColumnHideShowLayer();
+		colLayer.showColumnIndexes(columnIndexes);
+		refresh();
+	}
+	
+	
+	/***
+	 * Hide or show columns, including the tree column (not advised).
+	 * @param columnsStatus 
+	 * 			array of boolean. Column will be shown if the value is true. Hidden otherwise.
+	 * 			The size of the array has to be the same as the size of columns in the table.
+	 * 			The zero-th item should be the tree column.
+	 */
+	public void hideAndShowColumns(boolean []columnsStatus) {
+		ColumnHideShowLayer colLayer = bodyLayerStack.getColumnHideShowLayer();
+
+		for(int i=0; i<columnsStatus.length; i++) {
+			if (columnsStatus[i]) {
+				// show
+				colLayer.showColumnIndexes(i);
+			} else {
+				colLayer.hideColumnIndexes(i);
+			}
+		}
+		refresh();
+	}
+	
+	
+	public int[] getHiddenColumnIndexes() {
+		ColumnHideShowLayer colLayer = bodyLayerStack.getColumnHideShowLayer();
+		return colLayer.getHiddenColumnIndexesArray();
+	}
 	
 	
 	@Override
@@ -255,12 +297,12 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 
         // metric columns (if any)
     	Point columnSize = getMetricColumnSize();
-    	int numColumns   = columnHeaderDataProvider.getColumnCount();
+    	int numColumns   = bodyDataProvider.getColumnCount();
     	
     	GC gc = new GC(getDisplay());
     	
     	for(int i=1; i<numColumns; i++) {
-    		String title = (String) columnHeaderDataProvider.getDataValue(i, 0);
+    		String title = (String) bodyDataProvider.getDataValue(i, 0);
     		Point titleSize = gc.textExtent(title + "XXX");
     		int colWidth = (int) Math.max(titleSize.x * FACTOR_BOLD_FONT, columnSize.x);
     		
@@ -366,5 +408,9 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 	
 	public BaseMetric getMetric(int columnIndex) {
 		return bodyDataProvider.getMetric(columnIndex);
+	}
+	
+	public int getColumnCount() {
+		return bodyDataProvider.getColumnCount();
 	}
 }

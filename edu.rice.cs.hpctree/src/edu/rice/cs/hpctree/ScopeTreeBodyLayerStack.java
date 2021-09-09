@@ -3,6 +3,7 @@ package edu.rice.cs.hpctree;
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
 import org.eclipse.nebula.widgets.nattable.freeze.CompositeFreezeLayer;
 import org.eclipse.nebula.widgets.nattable.freeze.FreezeLayer;
+import org.eclipse.nebula.widgets.nattable.hideshow.ColumnHideShowLayer;
 import org.eclipse.nebula.widgets.nattable.layer.AbstractLayerTransform;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.nebula.widgets.nattable.reorder.ColumnReorderLayer;
@@ -23,6 +24,7 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
     private final ViewportLayer  viewportLayer;
     private final DataLayer bodyDataLayer;
     private final ScopeTreeLayer treeLayer ;
+    private final ColumnHideShowLayer hideShowLayer;
 
     private final CompositeFreezeLayer compositeFreezeLayer ;
     private final ScopeTreeRowModel    treeRowModel ;
@@ -34,8 +36,10 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
         this.bodyDataLayer = new DataLayer(bodyDataProvider);
         this.bodyDataLayer.setColumnsResizableByDefault(true);
 
+        this.hideShowLayer  = new ColumnHideShowLayer(bodyDataLayer);
+
         this.treeRowModel   = new ScopeTreeRowModel(treeData, treeAction);
-        this.selectionLayer = new SelectionLayer(new ColumnReorderLayer(bodyDataLayer));
+        this.selectionLayer = new SelectionLayer(new ColumnReorderLayer(hideShowLayer));
         this.treeLayer      = new ScopeTreeLayer(this.selectionLayer, treeRowModel);
         this.viewportLayer  = new ViewportLayer(treeLayer);
       
@@ -58,6 +62,10 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
 		return bodyDataLayer;
 	}
 
+    public ColumnHideShowLayer getColumnHideShowLayer() {
+    	return hideShowLayer;
+    }
+    
     public AbstractLayerTransform getTreeLayer() {
     	return treeLayer;
     }

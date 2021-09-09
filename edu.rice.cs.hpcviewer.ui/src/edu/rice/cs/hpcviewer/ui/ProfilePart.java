@@ -44,6 +44,7 @@ import edu.rice.cs.hpcviewer.ui.graph.GraphPlotRegularViewer;
 import edu.rice.cs.hpcviewer.ui.graph.GraphPlotSortViewer;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractBaseViewItem;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractUpperPart;
+import edu.rice.cs.hpcviewer.ui.internal.AbstractView;
 import edu.rice.cs.hpcviewer.ui.metric.MetricView;
 import edu.rice.cs.hpcviewer.ui.parts.bottomup.BottomUpView;
 import edu.rice.cs.hpcviewer.ui.parts.datacentric.Datacentric;
@@ -78,7 +79,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 	 * to be loaded. */
 	private Experiment  experiment;
 	
-	private AbstractBaseViewItem []views;
+	private AbstractView []views;
 	private MetricView metricView;
 	
 	private CTabFolder tabFolderTop, tabFolderBottom;
@@ -104,7 +105,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 		tabFolderBottom.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				for (AbstractBaseViewItem view: views) {
+				for (AbstractView view: views) {
 					if (e.item == view) {
 						// activate the view if necessary
 						// this includes creating the tree and populate the metrics
@@ -119,8 +120,9 @@ public class ProfilePart implements IProfilePart, EventHandler
 							
 							if (metricView != null && !metricView.isDisposed()) {
 								RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
+								view.getInput();
 								MetricFilterInput input = new MetricFilterInput(root, experiment, 
-																				view.getScopeTreeViewer(), true);
+																				view.getFilterDataItems(), true);
 								
 								metricView.setInput(input);
 							}
@@ -252,8 +254,8 @@ public class ProfilePart implements IProfilePart, EventHandler
 	 * 
 	 * @return {@code AbstractBaseViewItem} the current active item, or null
 	 */
-	public AbstractBaseViewItem getActiveView() {
-		return (AbstractBaseViewItem) tabFolderBottom.getSelection();
+	public AbstractView getActiveView() {
+		return (AbstractView) tabFolderBottom.getSelection();
 	}
 	
 	/****
@@ -263,7 +265,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 	 * @param input the view's input
 	 * @param sync boolean whether the display has to be synchronous or not
 	 */
-	public void addView(AbstractBaseViewItem view, Object input, boolean sync) {
+	public void addView(AbstractView view, Object input, boolean sync) {
 		
 		// TODO: make sure this statement is called early.
 		// The content builder will need many services. So we have to make they are initialized
@@ -327,7 +329,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 		ViewerPreferenceManager vpm = ViewerPreferenceManager.INSTANCE;
 		
 		Object []roots = experiment.getRootScopeChildren();
-		views = new AbstractBaseViewItem[roots.length];		
+		views = new AbstractView[roots.length];		
 		
 		for(int numViews=0; numViews<roots.length; numViews++) {
 			RootScope root = (RootScope) roots[numViews];
@@ -385,11 +387,11 @@ public class ProfilePart implements IProfilePart, EventHandler
 	 **********************************************/
 	static private class RunViewCreation implements Runnable 
 	{
-		final private AbstractBaseViewItem view;
+		final private AbstractView view;
 		final private Composite parent;
 		final private Object input;
 		
-		RunViewCreation(AbstractBaseViewItem view, Composite parent, Object input) {
+		RunViewCreation(AbstractView view, Composite parent, Object input) {
 			this.view   = view;
 			this.parent = parent;
 			this.input  = input;
