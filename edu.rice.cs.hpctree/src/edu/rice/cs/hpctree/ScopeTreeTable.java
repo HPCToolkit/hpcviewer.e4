@@ -23,7 +23,6 @@ import org.eclipse.nebula.widgets.nattable.layer.CompositeLayer;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayerListener;
-import org.eclipse.nebula.widgets.nattable.layer.cell.ILayerCell;
 import org.eclipse.nebula.widgets.nattable.layer.event.ILayerEvent;
 import org.eclipse.nebula.widgets.nattable.painter.layer.NatGridLayerPainter;
 import org.eclipse.nebula.widgets.nattable.selection.event.RowSelectionEvent;
@@ -56,7 +55,7 @@ import edu.rice.cs.hpctree.internal.TableConfiguration;
 
 /********************************************************************
  * 
- * Main hpcviewer table composite widget based on NatTable containing:
+ * Main hpcviewer dynamic table composite widget based on NatTable containing:
  * <ul>
  * <li>A tree column</li>
  * <li>Zero or more metric columns</li>
@@ -67,7 +66,7 @@ import edu.rice.cs.hpctree.internal.TableConfiguration;
  ********************************************************************/
 public class ScopeTreeTable extends Composite implements IScopeTreeAction, DisposeListener, ILayerListener
 {
-	private final static float  FACTOR_BOLD_FONT   = 1.2f;
+	private final static float  FACTOR_BOLD_FONT   = 1.5f;
 	private final static String TEXT_METRIC_COLUMN = "|8x88+88xx888x8%--";
 
 	private final NatTable natTable ;
