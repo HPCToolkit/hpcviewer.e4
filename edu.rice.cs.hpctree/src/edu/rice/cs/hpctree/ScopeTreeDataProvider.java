@@ -1,5 +1,7 @@
 package edu.rice.cs.hpctree;
 
+import java.util.List;
+
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
 import org.eclipse.nebula.widgets.nattable.data.IRowDataProvider;
 
@@ -32,6 +34,11 @@ public class ScopeTreeDataProvider implements IDataProvider, IRowDataProvider<Sc
 			return null;
 		
 		return treeData.getMetric(columnIndex-1);
+	}
+	
+	
+	public List<BaseMetric> getMetrics() {
+		return this.treeData.getMetrics();
 	}
 	
 	
@@ -97,6 +104,15 @@ public class ScopeTreeDataProvider implements IDataProvider, IRowDataProvider<Sc
 	@Override
 	public int indexOfRowObject(Scope rowObject) {
 		return treeData.indexOf(rowObject);
+	}
+	
+	
+	public void addColumn(int index, BaseMetric metric) {
+		treeData.addMetric(index, metric);
+	}
+	
+	public void addColumn(BaseMetric metric) {
+		treeData.addMetric(metric);
 	}
 	
 	private String getDebugText(Scope node) {

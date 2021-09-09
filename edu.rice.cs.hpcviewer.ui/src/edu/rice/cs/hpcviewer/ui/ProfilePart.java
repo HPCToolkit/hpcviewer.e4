@@ -276,10 +276,8 @@ public class ProfilePart implements IProfilePart, EventHandler
 		composite.setLayout(new GridLayout(1, false));
 
 		if (sync) {
-
 			RunViewCreation createView = new RunViewCreation(view, composite, input);
 			BusyIndicator.showWhile(composite.getDisplay(), createView);
-			
 		} else {
 			// background renderer
 			view.createContent(composite);

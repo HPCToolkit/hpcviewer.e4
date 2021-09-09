@@ -12,7 +12,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -228,27 +227,42 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		return metricManager;
 	}
 
+	/****
+	 * Retrieve the list of metrics to be filtered.
+	 * The list contains all metrics, including "unmodifiable" metrics just for the
+	 * sake of convenience to show users that these metrics exist.
+	 * Most "unmodifiable" metrics are because they are empty. 
+	 * 
+	 * @return list of filter data of metrics to be filtered
+	 */
 	@Override
 	public List<FilterDataItem<BaseMetric>> getFilterDataItems() {
-		final List<BaseMetric> visibleMetrics = getMetricManager().getVisibleMetrics();
-		final List<FilterDataItem<BaseMetric>> list = new ArrayList<FilterDataItem<BaseMetric>>(visibleMetrics.size());
-		final int []hiddenColumnIndexes = table.getHiddenColumnIndexes();
+		final List<BaseMetric> listMetrics    = table.getMetricColumns();
+		final List<BaseMetric> listAllMetrics = getMetricManager().getVisibleMetrics();	
 		
-		for(int i=0; i<visibleMetrics.size(); i++) {
-			final BaseMetric metric = visibleMetrics.get(i);
-			boolean checked = true;
+		// List of indexes of the hidden columns based on the info from the table.
+		// FIXME: the index starts with tree column. Hence index 0 is the tree column,
+		//  and after that are the metric columns.
+		final int []hiddenColumnIndexes = table.getHiddenColumnIndexes();
+
+		final List<FilterDataItem<BaseMetric>> list = new ArrayList<FilterDataItem<BaseMetric>>(listAllMetrics.size());
+		
+		// fill up the visible metrics first
+		for(int i=0; i<listMetrics.size(); i++) {
+			boolean enabled = true;
+			boolean checked = isShown(i, hiddenColumnIndexes);
+			FilterDataItem<BaseMetric> item = new MetricFilterDataItem(listMetrics.get(i), checked, enabled);
+			list.add(item);
+		}
+		
+		// fill up the invisible metrics		
+		for(int i=0; i<listAllMetrics.size(); i++) {
+			final BaseMetric metric = listAllMetrics.get(i);
+			if (listMetrics.contains(metric))
+				continue;
 			
-			// FIXME: ugly code. Try to find if this metric is hidden or not by
-			//        checking if the metric order is the hidden column indexes
-			for (int j=0; j<hiddenColumnIndexes.length; j++) {
-				if (hiddenColumnIndexes[j]+1 == i) {
-					checked = false;
-					break;
-				}
-			}
-			final MetricValue mv = root.getMetricValue(metric);
-			final boolean enabled = mv != MetricValue.NONE;
-			if (!enabled) checked = false;
+			final boolean checked = false;
+			final boolean enabled = false;
 			
 			FilterDataItem<BaseMetric> item = new MetricFilterDataItem(metric, checked, enabled);
 			list.add(item);
@@ -256,12 +270,25 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		return list;
 	}
 	
+	private boolean isShown(int metricIndex, final int []hiddenColumnIndexes)  {
+		
+		// FIXME: ugly code. Try to find if this metric is hidden or not by
+		//        checking if the metric order is the hidden column indexes
+		// FIXME: Recall that hiddenColumnIndexes starts with 1. The 0 value is for tree column
+		for (int j=0; j<hiddenColumnIndexes.length; j++) {
+			if (hiddenColumnIndexes[j]+1 == metricIndex) {
+				return false;
+			}
+		}
+		return true;
+	}
 
 	@Override
 	public IMetricManager getMetricManager() {
 		return metricManager;
 	}
 
+	
 	@Override
 	public void activate() {
 		if (table != null && !table.isDisposed())
@@ -300,6 +327,11 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 					return;
 			}
 			hideORShowColumns(dataEvent);
+		
+		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC)) {
+			// add a new metric column
+			BaseMetric metric = (BaseMetric) eventInfo.data;
+			table.addMetricColumn(metric);
 		}
 	}
 	
@@ -410,7 +442,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 				derivedMetricAction.addNewMeric();
 			}			
 		});
-		toolItem[ACTION_COLUMN_HIDE].addSelectionListener(new SelectionListener() {
+		toolItem[ACTION_COLUMN_HIDE].addSelectionListener(new SelectionAdapter() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -418,9 +450,6 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 																getFilterDataItems(), true);
 				profilePart.addEditor(input);
 			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
 	}
 

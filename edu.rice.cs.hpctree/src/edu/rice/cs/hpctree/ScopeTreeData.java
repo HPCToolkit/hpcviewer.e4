@@ -48,8 +48,8 @@ public class ScopeTreeData implements IScopeTreeData
 		this.list.add(root);
 		
 		this.root = root;
-		listMetrics = new BasicEventList<>();
 		List<BaseMetric> listVisibleMetrics = metricManager.getVisibleMetrics();
+		listMetrics = new BasicEventList<>(listVisibleMetrics.size());
 		
 		for(BaseMetric metric: listVisibleMetrics) {
 			if (root.getMetricValue(metric) != MetricValue.NONE) {
@@ -143,10 +143,21 @@ public class ScopeTreeData implements IScopeTreeData
 		return listMetrics.get(indexMetric);
 	}
 	
+	public void addMetric(int index, BaseMetric metric) {
+		listMetrics.add(index, metric);
+	}
+	
+	public void addMetric(BaseMetric metric) {
+		listMetrics.add(metric);
+	}
+	
 	public int getMetricCount() {
 		return listMetrics.size();
 	}
 	
+	public List<BaseMetric> getMetrics() {
+		return listMetrics;
+	}
 	
 	public void addListener( ListEventListener<BaseMetric> listener ) {
 		listMetrics.addListEventListener(listener);

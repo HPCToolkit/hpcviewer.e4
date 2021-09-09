@@ -161,6 +161,25 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 		});
 	}
 	
+	
+	/****
+	 * Add a new metric column
+	 * @param metric
+	 */
+	public void addMetricColumn(BaseMetric metric) {
+		bodyDataProvider.addColumn(0, metric);
+		refresh();
+	}
+	
+	public List<BaseMetric> getMetricColumns() {
+		return bodyDataProvider.getMetrics();
+	}
+	
+	
+	/****
+	 * Freeze the tree column. 
+	 * This should be called after the table initialization and after the hide/show action. 
+	 */
 	public void freezeTreeColumn() {
         // need to freeze the first column once the table is fully materialized 
     	// The position for top-left and the bottom-right are both (0, -1) so
