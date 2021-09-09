@@ -1,7 +1,6 @@
 package edu.rice.cs.hpcviewer.ui.internal;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -333,6 +332,8 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 			int index = getColumnIndexByMetric(item, metrics);
 			hideOrShowColumn(index, item.checked);
 		}
+		table.refresh();
+		table.freezeTreeColumn();
 	}
 	
 	private void hideOrShowColumn(int columnIndex, boolean shown) {

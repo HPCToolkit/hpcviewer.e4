@@ -145,13 +145,8 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
         natTable.refresh();
         natTable.configure();
 
-        // need to freeze the first column once the table is fully materialized 
-    	// The position for top-left and the bottom-right are both (0, -1) so
-    	// we just need one variable to specify the position coordinate
-    	
-    	PositionCoordinate pc = new PositionCoordinate(bodyLayerStack, 0, -1);
-    	FreezeHelper.freeze(bodyLayerStack.getFreezeLayer(), bodyLayerStack.getViewportLayer(), pc, pc);
-
+        freezeTreeColumn();
+        
     	// Need to set the grid data and layout
     	// if not set here, the table will be weird. I don't know why.
     	
@@ -164,6 +159,15 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 		natTable.getDisplay().asyncExec(()-> {
 			expandAndSelectRootChild(getRoot());
 		});
+	}
+	
+	public void freezeTreeColumn() {
+        // need to freeze the first column once the table is fully materialized 
+    	// The position for top-left and the bottom-right are both (0, -1) so
+    	// we just need one variable to specify the position coordinate
+    	
+    	PositionCoordinate pc = new PositionCoordinate(bodyLayerStack, 0, -1);
+    	FreezeHelper.freeze(bodyLayerStack.getFreezeLayer(), bodyLayerStack.getViewportLayer(), pc, pc);
 	}
 	
 	
@@ -193,13 +197,11 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 	public void hideColumn(int... columnIndexes) {
 		ColumnHideShowLayer colLayer = bodyLayerStack.getColumnHideShowLayer();
 		colLayer.hideColumnIndexes(columnIndexes);
-		refresh();
 	}
 	
 	public void showColumn(int... columnIndexes) {
 		ColumnHideShowLayer colLayer = bodyLayerStack.getColumnHideShowLayer();
 		colLayer.showColumnIndexes(columnIndexes);
-		refresh();
 	}
 	
 	
@@ -221,7 +223,6 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 				colLayer.hideColumnIndexes(i);
 			}
 		}
-		refresh();
 	}
 	
 	
