@@ -58,10 +58,6 @@ public class ScopeTreeRowModel extends AbstractTreeRowModel<Scope> implements IS
 	@Override
     public List<Integer> expand(int index) {
 		
-		if (index == 0) {
-			// TODO: hack by refresh the table. Otherwise there is no change
-			treeAction.refresh();
-		}
 		return new ArrayList<>(0);
 	}
 	
@@ -112,8 +108,7 @@ public class ScopeTreeRowModel extends AbstractTreeRowModel<Scope> implements IS
 	public void sort(int columnIndex, SortDirectionEnum sortDirection, boolean accumulate) {
 		IScopeTreeData treedata = (IScopeTreeData) getTreeData();
 		treedata.sort(columnIndex, sortDirection, accumulate);
-		treeAction.refresh();
-	}
+ 	}
 
 	@Override
 	public void clear() {

@@ -8,6 +8,7 @@ import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.nebula.widgets.nattable.NatTable;
+import org.eclipse.nebula.widgets.nattable.command.VisualRefreshCommand;
 import org.eclipse.nebula.widgets.nattable.config.ConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfiguration;
 import org.eclipse.nebula.widgets.nattable.coordinate.PositionCoordinate;
@@ -368,6 +369,11 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 			natTable.refresh();
 	}
 	
+	public void visualRefresh() {
+		if (natTable != null) {
+			natTable.doCommand(new VisualRefreshCommand());
+		}		
+	}
 	
 	/***
 	 * Redraw the painting of the table.
