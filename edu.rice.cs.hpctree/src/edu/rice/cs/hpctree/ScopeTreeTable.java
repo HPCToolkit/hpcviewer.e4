@@ -293,6 +293,10 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 	public void handleLayerEvent(ILayerEvent event) {
 		if (event instanceof RowSelectionEvent) {
 			RowSelectionEvent rowEvent = (RowSelectionEvent) event;
+			int []indexes = rowEvent.getRowIndexes();
+			if (indexes == null || indexes.length == 0)
+				return;
+			
 			int row = rowEvent.getRowPositionToMoveIntoViewport();
 			final Scope scope = bodyDataProvider.getRowObject(row);
 			
@@ -449,7 +453,7 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 	 ************************************************************/
 	private static class ScopeToolTip extends NatTableContentTooltip
 	{
-		private final static int MAX_TOOLTIP_CHAR = 200;
+		private final static int MAX_TOOLTIP_CHAR = 150;
 		private final ScopeTreeDataProvider bodyDataProvider;
 
 		public ScopeToolTip(NatTable natTable, ScopeTreeDataProvider bodyDataProvider) {

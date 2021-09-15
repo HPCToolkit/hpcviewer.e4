@@ -306,7 +306,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		//        checking if the metric order is the hidden column indexes
 		// FIXME: Recall that hiddenColumnIndexes starts with 1. The 0 value is for tree column
 		for (int j=0; j<hiddenColumnIndexes.length; j++) {
-			if (hiddenColumnIndexes[j]+1 == metricIndex) {
+			if (hiddenColumnIndexes[j] == metricIndex+1) {
 				return false;
 			}
 		}
