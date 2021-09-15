@@ -215,12 +215,12 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 	 * Hide one or more columns
 	 * @param columnIndexes int or int[] of column indexes
 	 */
-	public void hideColumn(int... columnIndexes) {
+	synchronized public void hideColumn(int... columnIndexes) {
 		ColumnHideShowLayer colLayer = bodyLayerStack.getColumnHideShowLayer();
 		colLayer.hideColumnIndexes(columnIndexes);
 	}
 	
-	public void showColumn(int... columnIndexes) {
+	synchronized public void showColumn(int... columnIndexes) {
 		ColumnHideShowLayer colLayer = bodyLayerStack.getColumnHideShowLayer();
 		colLayer.showColumnIndexes(columnIndexes);
 	}
