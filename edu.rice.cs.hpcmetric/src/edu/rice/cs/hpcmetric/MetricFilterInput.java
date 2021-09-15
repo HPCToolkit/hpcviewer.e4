@@ -19,7 +19,15 @@ public class MetricFilterInput extends FilterInputData<BaseMetric>
 	private final boolean affectAll;
 	private final IMetricManager metricManager;
 
-	
+
+	/****
+	 * Constructor for the metric filter input
+	 * 
+	 * @param root The root scope used to display the metric values of the root. It can be any root, but the preference is the cct root. 
+	 * @param metricManager Current metric manager. Usually it's the experiment class
+	 * @param listMetrics List of metric status
+	 * @param affectAll boolean true if the change affects all other views within the experiment database
+	 */
 	public MetricFilterInput(RootScope root, IMetricManager metricManager, List<FilterDataItem<BaseMetric>> listMetrics, boolean affectAll) {
 		super(listMetrics);
 		this.root = root;

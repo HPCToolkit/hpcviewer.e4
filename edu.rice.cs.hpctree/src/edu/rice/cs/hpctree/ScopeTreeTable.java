@@ -157,9 +157,10 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 		natTable.setLayerPainter(new NatGridLayerPainter(natTable, DataLayer.DEFAULT_ROW_HEIGHT));
 		addDisposeListener(this);
 		
+		/*
 		natTable.getDisplay().asyncExec(()-> {
 			expandAndSelectRootChild(getRoot());
-		});
+		}); */
 	}
 	
 	

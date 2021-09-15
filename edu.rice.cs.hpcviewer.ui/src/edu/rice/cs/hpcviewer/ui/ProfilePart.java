@@ -30,6 +30,7 @@ import org.eclipse.swt.custom.CTabItem;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcfilter.service.FilterStateProvider;
@@ -121,8 +122,16 @@ public class ProfilePart implements IProfilePart, EventHandler
 							
 							if (metricView != null && !metricView.isDisposed()) {
 								RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
-								view.getInput();
-								MetricFilterInput input = new MetricFilterInput(root, experiment, 
+								Object o = view.getInput();
+								IMetricManager metricMgr;
+								if (o instanceof IMetricManager) {
+									metricMgr = (IMetricManager) o;
+								} else if (view instanceof ThreadView) {
+									metricMgr = ((ThreadView)view).getMetricManager();
+								} else {
+									throw new RuntimeException("Unknown view: " + view.getText());
+								}
+								MetricFilterInput input  = new MetricFilterInput(root, metricMgr, 
 																				view.getFilterDataItems(), true);
 								
 								metricView.setInput(input);
