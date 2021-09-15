@@ -9,6 +9,7 @@ import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -53,6 +54,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 	final private int ACTION_ADD_METRIC   = 3;
 	final private int ACTION_EXPORT_DATA  = 4;
 	final private int ACTION_COLUMN_HIDE  = 5; 
+	
 	private Composite    parent ;
 	private ToolItem     toolItem[];
 	private LabelMessage lblMessage;
@@ -201,8 +203,12 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		// -------------------------------------------
 		
 		metricManager = (IMetricManager) input;
-		root = ((Experiment)metricManager).getRootScope(RootScopeType.CallingContextTree);
 		
+		// -------------------------------------------
+		// Create the main table
+		// -------------------------------------------
+		
+		root = ((Experiment)metricManager).getRootScope(getRootType());
 		table = new ScopeTreeTable(parent, SWT.NONE, root, metricManager);
 		table.pack();
 		table.addSelectionListener(scope -> updateButtonStatus());
@@ -270,6 +276,25 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		return list;
 	}
 	
+	private boolean initialized = false;
+	
+	@Override
+	public void activate() {
+		if (!initialized) {
+			// TODO: this process takes time
+			BusyIndicator.showWhile(getDisplay(), ()-> {
+				root = createRoot();
+				table.setRoot(root);
+				
+				// hide or show columns if needed
+				
+				// flip the flag
+				initialized = true;
+			});
+		}
+	}
+
+	
 	private boolean isShown(int metricIndex, final int []hiddenColumnIndexes)  {
 		
 		// FIXME: ugly code. Try to find if this metric is hidden or not by
@@ -288,12 +313,6 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		return metricManager;
 	}
 
-	
-	@Override
-	public void activate() {
-		if (table != null && !table.isDisposed())
-			table.redraw();
-	}
 
 	
 	@Override
@@ -452,6 +471,11 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 			}
 		});
 	}
+	
+	protected ScopeTreeTable getTable() {
+		return table;
+	}
+
 
 	protected void updateButtonStatus() {
 		updateStatus();
@@ -476,6 +500,9 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		toolItem[ACTION_HOTPATH].setEnabled(canHotPath);
 	}
 	
+	public abstract RootScopeType getRootType();
+	
+	protected abstract RootScope createRoot();
     protected abstract void beginToolbar(CoolBar coolbar, ToolBar toolbar);
     protected abstract void endToolbar  (CoolBar coolbar, ToolBar toolbar);
     protected abstract void updateStatus();

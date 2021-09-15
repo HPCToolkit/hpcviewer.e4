@@ -4,6 +4,10 @@ import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.CoolBar;
 import org.eclipse.swt.widgets.ToolBar;
 
+import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
+import edu.rice.cs.hpcdata.experiment.scope.RootScope;
+import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractTableView;
 
 public class TopDownPart extends AbstractTableView 
@@ -23,6 +27,20 @@ public class TopDownPart extends AbstractTableView
 
 
 	protected void updateStatus() {
+	}
+
+
+	@Override
+	protected RootScope createRoot() {
+		IMetricManager mm = getMetricManager();
+		Experiment exp = (Experiment) mm;
 		
+		return exp.getRootScope(getRootType());
+	}
+
+
+	@Override
+	public RootScopeType getRootType() {
+		return RootScopeType.CallingContextTree;
 	}
 }

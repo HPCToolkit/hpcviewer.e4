@@ -42,13 +42,14 @@ import edu.rice.cs.hpcviewer.ui.graph.GraphEditorInput;
 import edu.rice.cs.hpcviewer.ui.graph.GraphHistoViewer;
 import edu.rice.cs.hpcviewer.ui.graph.GraphPlotRegularViewer;
 import edu.rice.cs.hpcviewer.ui.graph.GraphPlotSortViewer;
-import edu.rice.cs.hpcviewer.ui.internal.AbstractBaseViewItem;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractUpperPart;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractView;
 import edu.rice.cs.hpcviewer.ui.metric.MetricView;
+import edu.rice.cs.hpcviewer.ui.parts.bottomup.BottomUpPart;
 import edu.rice.cs.hpcviewer.ui.parts.bottomup.BottomUpView;
 import edu.rice.cs.hpcviewer.ui.parts.datacentric.Datacentric;
 import edu.rice.cs.hpcviewer.ui.parts.editor.Editor;
+import edu.rice.cs.hpcviewer.ui.parts.flat.FlatPart;
 import edu.rice.cs.hpcviewer.ui.parts.flat.FlatView;
 import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadView;
 import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadViewInput;
@@ -341,11 +342,18 @@ public class ProfilePart implements IProfilePart, EventHandler
 				}
 				
 			} else if (root.getType() == RootScopeType.CallerTree) {
-				views[numViews] = new BottomUpView(tabFolderBottom, SWT.NONE);
+				if (!vpm.getDebugFlat()) {
+					views[numViews] = new BottomUpPart(tabFolderBottom, SWT.NONE);
+				} else {
+					views[numViews] = new BottomUpView(tabFolderBottom, SWT.NONE);
+				}
 				
 			} else if (root.getType() == RootScopeType.Flat) {
-				
-				views[numViews] = new FlatView(tabFolderBottom, SWT.NONE);
+				if (!vpm.getDebugFlat()) {
+					views[numViews] = new FlatPart(tabFolderBottom, SWT.NONE);					
+				} else {
+					views[numViews] = new FlatView(tabFolderBottom, SWT.NONE);
+				}
 			
 			} else if (root.getType() == RootScopeType.DatacentricTree) {
 				
