@@ -33,7 +33,7 @@ public class ScopeTreeRowModel extends AbstractTreeRowModel<Scope> implements IS
 	
 	@Override
     public boolean isCollapsed(int index) {
-		ScopeTreeData tdata = (ScopeTreeData) getTreeData();
+		IScopeTreeData tdata = (ScopeTreeData) getTreeData();
 		Scope scope = tdata.getDataAtIndex(index);
 		if (scope.hasChildren()) {
 			int indexChild = tdata.indexOf(scope.getSubscope(0));
@@ -127,7 +127,7 @@ public class ScopeTreeRowModel extends AbstractTreeRowModel<Scope> implements IS
 		if (!scope.hasChildren())
 			return false;
 
-		ScopeTreeData tdata = (ScopeTreeData) getTreeData();
+		IScopeTreeData tdata = (IScopeTreeData) getTreeData();
 		int indexChild = tdata.indexOf(scope.getSubscope(0));
 		return (indexChild >= 0);
 	}

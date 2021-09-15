@@ -8,6 +8,8 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
+import edu.rice.cs.hpctree.IScopeTreeData;
+import edu.rice.cs.hpctree.ScopeTreeData;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractTableView;
 
 public class TopDownPart extends AbstractTableView 
@@ -42,5 +44,11 @@ public class TopDownPart extends AbstractTableView
 	@Override
 	public RootScopeType getRootType() {
 		return RootScopeType.CallingContextTree;
+	}
+
+
+	@Override
+	protected IScopeTreeData getTreeData(RootScope root, IMetricManager metricManager) {
+		return new ScopeTreeData(root, metricManager);
 	}
 }

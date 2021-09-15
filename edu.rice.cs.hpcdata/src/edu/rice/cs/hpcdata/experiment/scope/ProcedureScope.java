@@ -244,6 +244,12 @@ public ProcedureType getProcedureType() {
 	return this.type;
 }
 
+
+@Override
+public boolean hasScopeChildren() {
+	return true;
+}
+
 }
 
 

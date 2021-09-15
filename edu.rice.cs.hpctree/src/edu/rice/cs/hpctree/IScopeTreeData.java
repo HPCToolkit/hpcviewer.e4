@@ -1,8 +1,11 @@
 package edu.rice.cs.hpctree;
 
+import java.util.List;
+
 import org.eclipse.nebula.widgets.nattable.sort.SortDirectionEnum;
 import org.eclipse.nebula.widgets.nattable.tree.ITreeData;
 
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 public interface IScopeTreeData extends ITreeData<Scope> 
@@ -21,6 +24,7 @@ public interface IScopeTreeData extends ITreeData<Scope>
 	 */
 	public void clear();
 		
+	public List<Scope> getList();
 	
 	public void setRoot(Scope root);
 	
@@ -31,6 +35,11 @@ public interface IScopeTreeData extends ITreeData<Scope>
 	public Scope getRoot();
 	
 	public int getSortedColumn();
-	
 	public SortDirectionEnum getSortDirection();
+	
+	public BaseMetric getMetric(int indexMetric);
+	public List<BaseMetric> getMetrics();
+	public void addMetric(int index, BaseMetric metric);
+	public void addMetric(BaseMetric metric);
+	public int getMetricCount();
 }

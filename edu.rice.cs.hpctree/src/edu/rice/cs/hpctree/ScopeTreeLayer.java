@@ -55,7 +55,7 @@ public class ScopeTreeLayer extends AbstractLayerTransform implements IUniqueInd
         registerCommandHandler(new ScopeTreeExpandCollapseCommandHandler(this));
         registerCommandHandler(new ScopeTreeExpandToLevelCommandHandler(this));
         
-        List<?> listBodyData = ((ScopeTreeData)treeRowModel.getTreeData()).getList();
+        List<?> listBodyData = ((IScopeTreeData)treeRowModel.getTreeData()).getList();
         registerCommandHandler(new RowInsertCommandHandler<>(listBodyData));
         registerCommandHandler(new RowDeleteCommandHandler<>(listBodyData));
 	}

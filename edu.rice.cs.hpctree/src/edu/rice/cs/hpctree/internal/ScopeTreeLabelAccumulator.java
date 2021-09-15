@@ -9,7 +9,7 @@ import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.util.Util;
 import edu.rice.cs.hpctree.IScopeTreeData;
-import edu.rice.cs.hpctree.ScopeTreeData;
+
 
 public class ScopeTreeLabelAccumulator implements IConfigLabelAccumulator 
 {
@@ -24,10 +24,10 @@ public class ScopeTreeLabelAccumulator implements IConfigLabelAccumulator
 	public final static String LABEL_TREECOLUMN  = "column.tree";
 	public final static String LABEL_METRICOLUMN = "column.metric_";
 	
-	private final ScopeTreeData treeData;
+	private final IScopeTreeData treeData;
 	
-	public ScopeTreeLabelAccumulator(IScopeTreeData treeData2) {
-		this.treeData = (ScopeTreeData) treeData2;
+	public ScopeTreeLabelAccumulator(IScopeTreeData treeData) {
+		this.treeData = treeData;
 	}
 
 	@Override

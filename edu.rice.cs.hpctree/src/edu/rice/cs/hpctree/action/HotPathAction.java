@@ -37,11 +37,6 @@ public class HotPathAction
 		if (scope == null)
 			scope = treeAction.getRoot();
 		
-		if (!scope.hasChildren()) {
-			errMsg = "No children";
-			return RET_ERR;
-		}
-		
 		int col = treeAction.getSortedColumn();
 		if (col == 0) {
 			errMsg = "No metric column is selected";

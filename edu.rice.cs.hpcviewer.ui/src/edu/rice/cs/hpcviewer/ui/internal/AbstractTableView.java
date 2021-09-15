@@ -36,6 +36,7 @@ import edu.rice.cs.hpcfilter.FilterDataItem;
 import edu.rice.cs.hpcmetric.MetricDataEvent;
 import edu.rice.cs.hpcmetric.MetricFilterInput;
 import edu.rice.cs.hpcmetric.internal.MetricFilterDataItem;
+import edu.rice.cs.hpctree.IScopeTreeData;
 import edu.rice.cs.hpctree.ScopeTreeTable;
 import edu.rice.cs.hpctree.action.HotPathAction;
 import edu.rice.cs.hpctree.action.ZoomAction;
@@ -209,7 +210,9 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		// -------------------------------------------
 		
 		root = ((Experiment)metricManager).getRootScope(getRootType());
-		table = new ScopeTreeTable(parent, SWT.NONE, root, metricManager);
+		IScopeTreeData treeData = getTreeData(root, metricManager);
+		
+		table = new ScopeTreeTable(parent, SWT.NONE, treeData);
 		table.pack();
 		table.addSelectionListener(scope -> updateButtonStatus());
 		
@@ -291,6 +294,8 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 				// flip the flag
 				initialized = true;
 			});
+		} else {
+			table.visualRefresh();
 		}
 	}
 
@@ -450,6 +455,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 				if (action.showHotCallPath() == HotPathAction.RET_ERR) {
 					lblMessage.showErrorMessage(action.getMessage());
 				}
+				updateButtonStatus();
 			}
 		});
 
@@ -459,6 +465,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 			public void widgetSelected(SelectionEvent e) {
 				UserDerivedMetric derivedMetricAction = new UserDerivedMetric(root, metricManager, eventBroker);
 				derivedMetricAction.addNewMeric();
+				updateButtonStatus();
 			}			
 		});
 		toolItem[ACTION_COLUMN_HIDE].addSelectionListener(new SelectionAdapter() {
@@ -468,6 +475,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 				MetricFilterInput input = new MetricFilterInput(root, getMetricManager(), 
 																getFilterDataItems(), true);
 				profilePart.addEditor(input);
+				updateButtonStatus();
 			}
 		});
 	}
@@ -496,8 +504,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		boolean canZoomOut = zoomAction == null ? false : zoomAction.canZoomOut();
 		toolItem[ACTION_ZOOM_OUT].setEnabled(canZoomOut);
 		
-		boolean canHotPath = table.getSelection() != null;
-		toolItem[ACTION_HOTPATH].setEnabled(canHotPath);
+		toolItem[ACTION_HOTPATH].setEnabled(canZoomIn);
 	}
 	
 	public abstract RootScopeType getRootType();
@@ -506,4 +513,5 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
     protected abstract void beginToolbar(CoolBar coolbar, ToolBar toolbar);
     protected abstract void endToolbar  (CoolBar coolbar, ToolBar toolbar);
     protected abstract void updateStatus();
+    protected abstract IScopeTreeData getTreeData(RootScope root, IMetricManager metricManager);
 }

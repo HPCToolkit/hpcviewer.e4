@@ -23,10 +23,10 @@ import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
  ****************************************************************/
 public class ScopeTreeDataProvider implements IDataProvider, IRowDataProvider<Scope>
 {
-	private final ScopeTreeData treeData;
+	private final IScopeTreeData treeData;
 	
 	public ScopeTreeDataProvider(IScopeTreeData treeData) {
-		this.treeData   = (ScopeTreeData) treeData;
+		this.treeData = treeData;
 	}
 
 	public BaseMetric getMetric(int columnIndex) {

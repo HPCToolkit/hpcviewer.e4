@@ -60,7 +60,8 @@ public class ScopeTreeData implements IScopeTreeData
 	}
 	
 	
-	public List<?> getList() {
+	@Override
+	public List<Scope> getList() {
 		return list;
 	}
 	
@@ -137,24 +138,34 @@ public class ScopeTreeData implements IScopeTreeData
 		return sortDirection;
 	}
 	
+	
+	@Override
 	public BaseMetric getMetric(int indexMetric) {
 		if (listMetrics == null || listMetrics.size() <= indexMetric)
 			return null;
 		return listMetrics.get(indexMetric);
 	}
 	
+	
+	@Override
 	public void addMetric(int index, BaseMetric metric) {
 		listMetrics.add(index, metric);
 	}
 	
+	
+	@Override
 	public void addMetric(BaseMetric metric) {
 		listMetrics.add(metric);
 	}
 	
+	
+	@Override
 	public int getMetricCount() {
 		return listMetrics.size();
 	}
 	
+	
+	@Override
 	public List<BaseMetric> getMetrics() {
 		return listMetrics;
 	}
@@ -293,9 +304,9 @@ public class ScopeTreeData implements IScopeTreeData
 	{
 		private final BaseMetric metric;
 		private final SortDirectionEnum dir;
-		private final ScopeTreeData treeData;
+		private final IScopeTreeData treeData;
 		
-		public ColumnComparator(ScopeTreeData treeData, int columnIndex, SortDirectionEnum dir) {
+		public ColumnComparator(IScopeTreeData treeData, int columnIndex, SortDirectionEnum dir) {
 			this.treeData = treeData;
 			this.dir = dir;
 			if (columnIndex == 0)

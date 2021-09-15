@@ -30,4 +30,5 @@ public interface IMergedScope {
 	public Object[] getAllChildren(	MetricValuePropagationFilter inclusiveOnly, 
 									MetricValuePropagationFilter exclusiveOnly );
 	
+	public boolean hasScopeChildren();
 }

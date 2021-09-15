@@ -5,8 +5,11 @@ import org.eclipse.swt.widgets.CoolBar;
 import org.eclipse.swt.widgets.ToolBar;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
+import edu.rice.cs.hpctree.IScopeTreeData;
+import edu.rice.cs.hpctree.ScopeTreeData;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractTableView;
 
 public class FlatPart extends AbstractTableView 
@@ -19,22 +22,19 @@ public class FlatPart extends AbstractTableView
 
 	@Override
 	protected void beginToolbar(CoolBar coolbar, ToolBar toolbar) {
-		// TODO Auto-generated method stub
-
 	}
 
+	
 	@Override
 	protected void endToolbar(CoolBar coolbar, ToolBar toolbar) {
-		// TODO Auto-generated method stub
-
 	}
+	
 
 	@Override
 	protected void updateStatus() {
-		// TODO Auto-generated method stub
-
 	}
 
+	
 	@Override
 	protected RootScope createRoot() {
 		Experiment experiment = (Experiment) getMetricManager();
@@ -54,6 +54,12 @@ public class FlatPart extends AbstractTableView
 	@Override
 	public RootScopeType getRootType() {
 		return RootScopeType.Flat;
+	}
+
+
+	@Override
+	protected IScopeTreeData getTreeData(RootScope root, IMetricManager metricManager) {
+		return new ScopeTreeData(root, metricManager);
 	}
 
 }
