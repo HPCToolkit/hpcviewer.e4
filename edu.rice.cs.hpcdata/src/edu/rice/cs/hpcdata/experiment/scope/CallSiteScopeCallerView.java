@@ -101,6 +101,12 @@ public class CallSiteScopeCallerView extends CallSiteScope implements IMergedSco
 		return this.flag_scope_has_child;
 	}
 
+	
+	@Override
+	public boolean hasChildren() {
+		return hasScopeChildren();
+	}
+	
 	/*****************
 	 * retrieve the child scopes of this node. 
 	 * If a node has merged siblings, then we need to reconstruct the children of the merged scopes

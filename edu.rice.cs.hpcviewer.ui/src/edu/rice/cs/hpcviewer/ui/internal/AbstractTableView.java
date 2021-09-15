@@ -144,7 +144,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		parent.setLayout(new GridLayout(1, false));
 		parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		Composite composite = new Composite(parent, SWT.BORDER);
+		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout(2, false));
 		GridData gd_composite = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
 		gd_composite.widthHint = 506;
