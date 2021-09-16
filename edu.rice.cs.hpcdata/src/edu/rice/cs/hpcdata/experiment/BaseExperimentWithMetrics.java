@@ -178,7 +178,7 @@ implements IMetricManager
 	@Override
 	public void addDerivedMetric(DerivedMetric objMetric) {
 
-		metrics.add(objMetric);
+		metrics.add(0, objMetric);
 		mapIndexToMetric.put(objMetric.getIndex(), objMetric);
 	}
 

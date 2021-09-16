@@ -34,10 +34,8 @@ public class HotPathAction
 	 */
 	public int showHotCallPath() {
 		Scope scope = treeAction.getSelection();
-		if (!scope.hasChildren()) {
-			errMsg = "No children";
-			return RET_ERR;
-		}
+		if (scope == null)
+			scope = treeAction.getRoot();
 		
 		int col = treeAction.getSortedColumn();
 		if (col == 0) {

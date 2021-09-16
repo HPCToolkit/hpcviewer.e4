@@ -30,6 +30,7 @@ import org.eclipse.swt.custom.CTabItem;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcfilter.service.FilterStateProvider;
@@ -42,12 +43,14 @@ import edu.rice.cs.hpcviewer.ui.graph.GraphEditorInput;
 import edu.rice.cs.hpcviewer.ui.graph.GraphHistoViewer;
 import edu.rice.cs.hpcviewer.ui.graph.GraphPlotRegularViewer;
 import edu.rice.cs.hpcviewer.ui.graph.GraphPlotSortViewer;
-import edu.rice.cs.hpcviewer.ui.internal.AbstractBaseViewItem;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractUpperPart;
+import edu.rice.cs.hpcviewer.ui.internal.AbstractView;
 import edu.rice.cs.hpcviewer.ui.metric.MetricView;
+import edu.rice.cs.hpcviewer.ui.parts.bottomup.BottomUpPart;
 import edu.rice.cs.hpcviewer.ui.parts.bottomup.BottomUpView;
 import edu.rice.cs.hpcviewer.ui.parts.datacentric.Datacentric;
 import edu.rice.cs.hpcviewer.ui.parts.editor.Editor;
+import edu.rice.cs.hpcviewer.ui.parts.flat.FlatPart;
 import edu.rice.cs.hpcviewer.ui.parts.flat.FlatView;
 import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadView;
 import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadViewInput;
@@ -78,7 +81,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 	 * to be loaded. */
 	private Experiment  experiment;
 	
-	private AbstractBaseViewItem []views;
+	private AbstractView []views;
 	private MetricView metricView;
 	
 	private CTabFolder tabFolderTop, tabFolderBottom;
@@ -104,7 +107,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 		tabFolderBottom.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				for (AbstractBaseViewItem view: views) {
+				for (AbstractView view: views) {
 					if (e.item == view) {
 						// activate the view if necessary
 						// this includes creating the tree and populate the metrics
@@ -119,8 +122,17 @@ public class ProfilePart implements IProfilePart, EventHandler
 							
 							if (metricView != null && !metricView.isDisposed()) {
 								RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
-								MetricFilterInput input = new MetricFilterInput(root, experiment, 
-																				view.getScopeTreeViewer(), true);
+								Object o = view.getInput();
+								IMetricManager metricMgr;
+								if (o instanceof IMetricManager) {
+									metricMgr = (IMetricManager) o;
+								} else if (view instanceof ThreadView) {
+									metricMgr = ((ThreadView)view).getMetricManager();
+								} else {
+									throw new RuntimeException("Unknown view: " + view.getText());
+								}
+								MetricFilterInput input  = new MetricFilterInput(root, metricMgr, 
+																				view.getFilterDataItems(), true);
 								
 								metricView.setInput(input);
 							}
@@ -252,8 +264,8 @@ public class ProfilePart implements IProfilePart, EventHandler
 	 * 
 	 * @return {@code AbstractBaseViewItem} the current active item, or null
 	 */
-	public AbstractBaseViewItem getActiveView() {
-		return (AbstractBaseViewItem) tabFolderBottom.getSelection();
+	public AbstractView getActiveView() {
+		return (AbstractView) tabFolderBottom.getSelection();
 	}
 	
 	/****
@@ -263,7 +275,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 	 * @param input the view's input
 	 * @param sync boolean whether the display has to be synchronous or not
 	 */
-	public void addView(AbstractBaseViewItem view, Object input, boolean sync) {
+	public void addView(AbstractView view, Object input, boolean sync) {
 		
 		// TODO: make sure this statement is called early.
 		// The content builder will need many services. So we have to make they are initialized
@@ -274,10 +286,8 @@ public class ProfilePart implements IProfilePart, EventHandler
 		composite.setLayout(new GridLayout(1, false));
 
 		if (sync) {
-
 			RunViewCreation createView = new RunViewCreation(view, composite, input);
 			BusyIndicator.showWhile(composite.getDisplay(), createView);
-			
 		} else {
 			// background renderer
 			view.createContent(composite);
@@ -327,13 +337,13 @@ public class ProfilePart implements IProfilePart, EventHandler
 		ViewerPreferenceManager vpm = ViewerPreferenceManager.INSTANCE;
 		
 		Object []roots = experiment.getRootScopeChildren();
-		views = new AbstractBaseViewItem[roots.length];		
+		views = new AbstractView[roots.length];		
 		
 		for(int numViews=0; numViews<roots.length; numViews++) {
 			RootScope root = (RootScope) roots[numViews];
 			
 			if (root.getType() == RootScopeType.CallingContextTree) {
-				if (vpm.getDebugFlat()) {
+				if (!vpm.getDebugFlat()) {
 					// new table test
 					views[numViews] = new TopDownPart(tabFolderBottom, SWT.NONE);
 				} else {
@@ -341,11 +351,18 @@ public class ProfilePart implements IProfilePart, EventHandler
 				}
 				
 			} else if (root.getType() == RootScopeType.CallerTree) {
-				views[numViews] = new BottomUpView(tabFolderBottom, SWT.NONE);
+				if (!vpm.getDebugFlat()) {
+					views[numViews] = new BottomUpPart(tabFolderBottom, SWT.NONE);
+				} else {
+					views[numViews] = new BottomUpView(tabFolderBottom, SWT.NONE);
+				}
 				
 			} else if (root.getType() == RootScopeType.Flat) {
-				
-				views[numViews] = new FlatView(tabFolderBottom, SWT.NONE);
+				if (!vpm.getDebugFlat()) {
+					views[numViews] = new FlatPart(tabFolderBottom, SWT.NONE);					
+				} else {
+					views[numViews] = new FlatView(tabFolderBottom, SWT.NONE);
+				}
 			
 			} else if (root.getType() == RootScopeType.DatacentricTree) {
 				
@@ -385,11 +402,11 @@ public class ProfilePart implements IProfilePart, EventHandler
 	 **********************************************/
 	static private class RunViewCreation implements Runnable 
 	{
-		final private AbstractBaseViewItem view;
+		final private AbstractView view;
 		final private Composite parent;
 		final private Object input;
 		
-		RunViewCreation(AbstractBaseViewItem view, Composite parent, Object input) {
+		RunViewCreation(AbstractView view, Composite parent, Object input) {
 			this.view   = view;
 			this.parent = parent;
 			this.input  = input;

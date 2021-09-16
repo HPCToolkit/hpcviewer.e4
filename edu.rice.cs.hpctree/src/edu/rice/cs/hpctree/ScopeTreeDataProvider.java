@@ -1,5 +1,7 @@
 package edu.rice.cs.hpctree;
 
+import java.util.List;
+
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
 import org.eclipse.nebula.widgets.nattable.data.IRowDataProvider;
 
@@ -21,10 +23,10 @@ import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
  ****************************************************************/
 public class ScopeTreeDataProvider implements IDataProvider, IRowDataProvider<Scope>
 {
-	private final ScopeTreeData treeData;
+	private final IScopeTreeData treeData;
 	
 	public ScopeTreeDataProvider(IScopeTreeData treeData) {
-		this.treeData   = (ScopeTreeData) treeData;
+		this.treeData = treeData;
 	}
 
 	public BaseMetric getMetric(int columnIndex) {
@@ -35,30 +37,24 @@ public class ScopeTreeDataProvider implements IDataProvider, IRowDataProvider<Sc
 	}
 	
 	
+	public List<BaseMetric> getMetrics() {
+		return this.treeData.getMetrics();
+	}
+	
+	
 	@Override
 	public Object getDataValue(int columnIndex, int rowIndex) {
 		Scope scope = treeData.getDataAtIndex(rowIndex);
 
 		if (columnIndex > 0) {
 			BaseMetric metric = treeData.getMetric(columnIndex-1);
+			if (metric == null)
+				return null;
 			return metric.getMetricTextValue(scope);
 		}
 		
-		String text = "";
-		
-		if (scope instanceof CallSiteScope) {
-			final CallSiteScope cs = (CallSiteScope) scope;
-			
-			// the line number in XML is 0-based, while the editor is 1-based
-			int line = 1+cs.getLineScope().getFirstLineNumber();
-			
-			// show the line number
-			if (line>0) {
-				text += line + ": ";
-			}
-		}
-		text += getDebugText(scope) + scope.getName();
-		
+		// tree column, assuming column 0 is always the tree column
+		String text = getDebugText(scope) + scope.getName();		
 		if (needToAddLoadModuleSuffix(scope) ) {
 			String lm = null;
 			ProcedureScope proc = null;
@@ -108,6 +104,15 @@ public class ScopeTreeDataProvider implements IDataProvider, IRowDataProvider<Sc
 	@Override
 	public int indexOfRowObject(Scope rowObject) {
 		return treeData.indexOf(rowObject);
+	}
+	
+	
+	public void addColumn(int index, BaseMetric metric) {
+		treeData.addMetric(index, metric);
+	}
+	
+	public void addColumn(BaseMetric metric) {
+		treeData.addMetric(metric);
 	}
 	
 	private String getDebugText(Scope node) {

@@ -1,13 +1,10 @@
 package edu.rice.cs.hpctree;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.impl.list.mutable.FastList;
-import org.eclipse.collections.impl.map.mutable.AbstractMutableMap;
-import org.eclipse.collections.impl.map.mutable.UnifiedMap;
 import org.eclipse.nebula.widgets.nattable.sort.SortDirectionEnum;
 
 import ca.odell.glazedlists.BasicEventList;
@@ -29,12 +26,9 @@ public class ScopeTreeData implements IScopeTreeData
 {
 	private final static boolean UNIT_TEST = true;
 	
-	/** list of current data. The list is dynamic, always incremental **/
+	/** list of current data. The list is dynamic **/
 	private final MutableList<Scope> list;
-	/** map of the collapsed nodes. The key is the parent node. 
-	 *  The  value is the list of collapsed nodes of the parent */
-	private final AbstractMutableMap<Scope, List<Scope>> mapCollapsedScopes;
-
+	
 	private final EventList<BaseMetric> listMetrics;
 
 	private Scope root;
@@ -54,26 +48,27 @@ public class ScopeTreeData implements IScopeTreeData
 		this.list.add(root);
 		
 		this.root = root;
-		listMetrics = new BasicEventList<>();
 		List<BaseMetric> listVisibleMetrics = metricManager.getVisibleMetrics();
+		listMetrics = new BasicEventList<>(listVisibleMetrics.size());
 		
 		for(BaseMetric metric: listVisibleMetrics) {
 			if (root.getMetricValue(metric) != MetricValue.NONE) {
 				listMetrics.add(metric);
 			}
-		}
-		
-		this.mapCollapsedScopes = new UnifiedMap<>();
-		
+		}		
 		clear();
 	}
 	
 	
 	@Override
+	public List<Scope> getList() {
+		return list;
+	}
+	
+	
+	@Override
 	public void setRoot(Scope root) {
-		list.clear();
-		mapCollapsedScopes.clear();
-		
+		list.clear();		
 		list.add(root);
 		this.root = root;
 	}
@@ -95,7 +90,9 @@ public class ScopeTreeData implements IScopeTreeData
 	@Override
 	public void clear() {
 		this.sortDirection = SortDirectionEnum.DESC;
-		this.sortedColumn  = 1;
+		this.sortedColumn  = 0;
+		if (this.listMetrics != null && this.listMetrics.size()>0)
+			this.sortedColumn = 1;
 	}
 
 	
@@ -141,14 +138,37 @@ public class ScopeTreeData implements IScopeTreeData
 		return sortDirection;
 	}
 	
+	
+	@Override
 	public BaseMetric getMetric(int indexMetric) {
+		if (listMetrics == null || listMetrics.size() <= indexMetric)
+			return null;
 		return listMetrics.get(indexMetric);
 	}
 	
+	
+	@Override
+	public void addMetric(int index, BaseMetric metric) {
+		listMetrics.add(index, metric);
+	}
+	
+	
+	@Override
+	public void addMetric(BaseMetric metric) {
+		listMetrics.add(metric);
+	}
+	
+	
+	@Override
 	public int getMetricCount() {
 		return listMetrics.size();
 	}
 	
+	
+	@Override
+	public List<BaseMetric> getMetrics() {
+		return listMetrics;
+	}
 	
 	public void addListener( ListEventListener<BaseMetric> listener ) {
 		listMetrics.addListEventListener(listener);
@@ -159,78 +179,6 @@ public class ScopeTreeData implements IScopeTreeData
 		listMetrics.removeListEventListener(listener);
 	}
 	
-
-	
-	/****
-	 * Expand a tree node.
-	 * This method has to be called BEFORE calling tree model's {@code expand}
-	 * @param index
-	 */
-	@Override
-	public List<? extends TreeNode> expand(int index) {
-		synchronized (list) {
-			Scope scope = list.get(index);
-			if (!scope.hasChildren())
-				return null;
-
-			ColumnComparator comparator = getComparator(sortedColumn, sortDirection);
-			
-			List<? extends TreeNode> children = mapCollapsedScopes.remove(scope);
-			if (children != null) {
-				children.sort(comparator);
-				return children;
-			}
-			List<Scope> listScopes = convert(scope.getListChildren());
-			
-			listScopes.sort(comparator);			
-			list.addAll(index+1, listScopes);
-			
-			return listScopes;
-		}
-	}
-	
-	
-		
-	/****
-	 * Collapse a tree node. 
-	 * This method has to be called AFTER calling the tree data
-	 * @param index element index
-	 * @param listCollapsedIndexes list of collapsed indexes from {@code TreeRowModel}
-	 */
-	public void collapse(int parentIndex, List<Integer> listCollapsedIndexes) {
-		List<Scope> collapsedChildren = FastList.newList();
-		synchronized (list) {
-			Collections.sort(listCollapsedIndexes, Collections.reverseOrder());
-			listCollapsedIndexes.forEach(index-> {
-				collapsedChildren.add(list.get(index.intValue()));
-			});
-		}
-		Scope parent = getDataAtIndex(parentIndex);
-		mapCollapsedScopes.put(parent, collapsedChildren);
-	}
-	
-	
-	/***
-	 * Check if a scope should call expand to traverse the child.
-	 * If the scope is not expanded or the children are not visible, it
-	 * returns true.
-	 * It returns false if the scope is already expanded or it has no children.
-	 * 
-	 * @param scope
-	 * @return {@code boolean}
-	 */
-	public boolean shouldExpand(Scope scope) {
-		// check if it's collapsed
-		if (mapCollapsedScopes.containsKey(scope))
-			return true;
-		
-		// check if the children are not visible
-		if (scope.hasChildren()) {
-			int indexFirstChild = indexOf(scope.getSubscope(0));
-			return indexFirstChild < 0;
-		}
-		return false;
-	}
 	
 	@SuppressWarnings("unchecked")
 	private List<Scope> convert(List<? extends TreeNode> list) {
@@ -266,19 +214,10 @@ public class ScopeTreeData implements IScopeTreeData
 		return scope;
 	}
 
+	
 	@Override
 	public int indexOf(Scope child) {
-		if (child == null || mapCollapsedScopes.containsKey(child.getParentScope()))
-			return -1;
-		
-		int index = list.indexOf(child);
-		if (UNIT_TEST && index >= 0) {
-			Scope s = list.get(index);
-			if (child.getCCTIndex() != s.getCCTIndex()) {
-				throw new RuntimeException("====WARNING " + child.getName() + " " + child.hashCode() + "/" + child.getCCTIndex() + " vs " + s.hashCode() + " / " + s.getCCTIndex());
-			}
-		}
-		return index;
+		return list.indexOf(child);
 	}
 
 	@Override
@@ -300,19 +239,8 @@ public class ScopeTreeData implements IScopeTreeData
 		if (numChildren == 0)
 			return new ArrayList<Scope>(0);
 		
-		if (mapCollapsedScopes.get(scope) != null) {
-			// the node is collapsed. The children is invisible
-			return new ArrayList<Scope>(0);
-		}
-		// the node has children. Check if the children are expanded or not
-		boolean isExpanded = list.indexOf(scope.getChildAt(0)) >= 0;
-		if (!isExpanded) {
-			return new ArrayList<Scope>(0);
-		}
-		
-		// copy the children in the list to the new list
-		// List<Scope> children = ((FastList<Scope>)list).subList(index+1, index+1+numChildren);
-		// System.out.println(index + " has " + scope.getChildCount() + ": " + scope.getListChildren());
+		// get the children from the original tree, and sort them
+		// based on the sorted column (either metric or tree column)
 		List<TreeNode> children = scope.getListChildren();
 		final BaseMetric metric = sortedColumn == 0 ? null : getMetric(sortedColumn-1);
 		Comparator<TreeNode> comparator = new Comparator<TreeNode>() {
@@ -376,9 +304,9 @@ public class ScopeTreeData implements IScopeTreeData
 	{
 		private final BaseMetric metric;
 		private final SortDirectionEnum dir;
-		private final ScopeTreeData treeData;
+		private final IScopeTreeData treeData;
 		
-		public ColumnComparator(ScopeTreeData treeData, int columnIndex, SortDirectionEnum dir) {
+		public ColumnComparator(IScopeTreeData treeData, int columnIndex, SortDirectionEnum dir) {
 			this.treeData = treeData;
 			this.dir = dir;
 			if (columnIndex == 0)

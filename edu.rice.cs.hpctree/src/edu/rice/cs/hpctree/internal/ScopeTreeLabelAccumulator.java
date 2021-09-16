@@ -9,13 +9,13 @@ import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.util.Util;
 import edu.rice.cs.hpctree.IScopeTreeData;
-import edu.rice.cs.hpctree.ScopeTreeData;
+
 
 public class ScopeTreeLabelAccumulator implements IConfigLabelAccumulator 
 {
 	public final static String LABEL_CALLSITE = "scope.callsite";
 	public final static String LABEL_CALLER   = "scope.caller";
-
+	
 	public final static String LABEL_CALLSITE_DISABLED = "scope.dis.callsite";
 	public final static String LABEL_CALLER_DISABLED   = "scope.dis.caller";
 	
@@ -24,10 +24,10 @@ public class ScopeTreeLabelAccumulator implements IConfigLabelAccumulator
 	public final static String LABEL_TREECOLUMN  = "column.tree";
 	public final static String LABEL_METRICOLUMN = "column.metric_";
 	
-	private final ScopeTreeData treeData;
+	private final IScopeTreeData treeData;
 	
-	public ScopeTreeLabelAccumulator(IScopeTreeData treeData2) {
-		this.treeData = (ScopeTreeData) treeData2;
+	public ScopeTreeLabelAccumulator(IScopeTreeData treeData) {
+		this.treeData = treeData;
 	}
 
 	@Override
@@ -39,6 +39,9 @@ public class ScopeTreeLabelAccumulator implements IConfigLabelAccumulator
 		configLabels.add(LABEL_TREECOLUMN);
 		
 		Scope scope = treeData.getDataAtIndex(rowPosition);
+		if (scope ==  null)
+			return;
+		
 		if (scope instanceof CallSiteScope) {
 			LineScope ls = ((CallSiteScope)scope).getLineScope();
 			if (Util.isFileReadable(ls)) {
@@ -46,12 +49,14 @@ public class ScopeTreeLabelAccumulator implements IConfigLabelAccumulator
 			} else {
 				configLabels.add(LABEL_CALLSITE_DISABLED);
 			}
+			
 		} else if (scope instanceof CallSiteScopeCallerView) {
 			LineScope ls = ((CallSiteScopeCallerView)scope).getLineScope();
 			if (Util.isFileReadable(ls))
 				configLabels.add(LABEL_CALLER);
 			else
 				configLabels.add(LABEL_CALLER_DISABLED);
+
 		}
 		if (Util.isFileReadable(scope)) {
 			configLabels.add(LABEL_SOURCE_AVAILABLE);

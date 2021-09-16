@@ -9,6 +9,7 @@ import org.eclipse.nebula.widgets.nattable.layer.event.ILayerEvent;
 import org.eclipse.nebula.widgets.nattable.layer.event.StructuralRefreshEvent;
 import org.eclipse.nebula.widgets.nattable.sort.ISortModel;
 import org.eclipse.nebula.widgets.nattable.sort.SortDirectionEnum;
+import org.eclipse.nebula.widgets.nattable.tree.AbstractTreeRowModel;
 import org.eclipse.nebula.widgets.nattable.tree.TreeRowModel;
 
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -22,72 +23,47 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
  * The reason is 
  *
  ***********************************************************/
-public class ScopeTreeRowModel extends TreeRowModel<Scope> implements ISortModel, ILayerListener
+public class ScopeTreeRowModel extends AbstractTreeRowModel<Scope> implements ISortModel, ILayerListener
 {
-	private final IScopeTreeAction treeAction;
+	private final String ERR_MSG_NOTSUPPORTED = "NOT SUPPORTED";
 
-	public ScopeTreeRowModel(IScopeTreeData treeData, IScopeTreeAction treeAction) {
+	public ScopeTreeRowModel(IScopeTreeData treeData) {
 		super(treeData);
-		this.treeAction = treeAction;
 	}
 	
 	@Override
     public boolean isCollapsed(int index) {
-		IScopeTreeData tdata = (IScopeTreeData) getTreeData();
+		IScopeTreeData tdata = (ScopeTreeData) getTreeData();
 		Scope scope = tdata.getDataAtIndex(index);
-		if (!scope.hasChildren()) {
-			return false;
+		if (scope.hasChildren()) {
+			int indexChild = tdata.indexOf(scope.getSubscope(0));
+			return (indexChild < 0);
 		}
-		Scope child = scope.getSubscope(0);
-		int childIndex = tdata.indexOf(child);
-
-		return (childIndex < 0);
+		return false;
 	}
 	
 	@Override
     public List<Integer> collapse(int index) {
-		// remove the collapsed children of the scope before 
-		// calculating the child indexes
-		IScopeTreeData tdata = (IScopeTreeData) getTreeData();
-
-		// calculate the children indexes, including all the 
-		// expanded descendants
-		List<Integer> listIndexes = super.collapse(index);
-		tdata.collapse(index, listIndexes);
-		
-		return listIndexes;
+		return new ArrayList<>(0);
 	}
 
 	@Override
     public List<Integer> collapseAll() {
-		return super.collapseAll();
+		return collapse(0);
 	}
 	
 	
 	@Override
     public List<Integer> expand(int index) {
-		// first, create the children 
-		IScopeTreeData tdata = (IScopeTreeData) getTreeData();
-		tdata.expand(index);
 		
-		// calculate the children indexes, including all the 
-		// indirect descendants
-		List<Integer> list = super.expand(index);
-		
-		if (index == 0) {
-			// TODO: hack by refresh the table. Otherwise there is no change
-			treeAction.refresh();
-		}
-		return list;
+		return new ArrayList<>(0);
 	}
-	
 	
 	
 	
 	@Override
     public List<Integer> expandAll() {
-		System.err.println("NOT SUPPORTED");
-		return super.expandAll();
+		throw new RuntimeException(ERR_MSG_NOTSUPPORTED);
 	}
 
 	@Override
@@ -130,7 +106,7 @@ public class ScopeTreeRowModel extends TreeRowModel<Scope> implements ISortModel
 	public void sort(int columnIndex, SortDirectionEnum sortDirection, boolean accumulate) {
 		IScopeTreeData treedata = (IScopeTreeData) getTreeData();
 		treedata.sort(columnIndex, sortDirection, accumulate);
-	}
+ 	}
 
 	@Override
 	public void clear() {
@@ -147,9 +123,13 @@ public class ScopeTreeRowModel extends TreeRowModel<Scope> implements ISortModel
 		}
 	}
 
-	public boolean shouldExpand(Scope scope) {
-		ScopeTreeData treeData = (ScopeTreeData) getTreeData();
-		return treeData.shouldExpand(scope);
+	public boolean isChildrenVisible(Scope scope) {
+		if (!scope.hasChildren())
+			return false;
+
+		IScopeTreeData tdata = (IScopeTreeData) getTreeData();
+		int indexChild = tdata.indexOf(scope.getSubscope(0));
+		return (indexChild >= 0);
 	}
 	
 	public void setRoot(Scope root) {
@@ -160,5 +140,15 @@ public class ScopeTreeRowModel extends TreeRowModel<Scope> implements ISortModel
 	public Scope getRoot() {
 		IScopeTreeData treedata = (IScopeTreeData) getTreeData();
 		return treedata.getRoot();
+	}
+
+	@Override
+	public List<Integer> expandToLevel(int parentIndex, int level) {
+		throw new RuntimeException(ERR_MSG_NOTSUPPORTED);
+	}
+
+	@Override
+	public List<Integer> expandToLevel(int level) {
+		throw new RuntimeException(ERR_MSG_NOTSUPPORTED);
 	}
 }

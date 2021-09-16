@@ -24,7 +24,9 @@ import org.slf4j.LoggerFactory;
 import edu.rice.cs.hpcbase.BaseConstants;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
+import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
+import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -189,7 +191,7 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 			// if not, just leave it
 			
 			if (!dataEvent.isApplyToAll()) {
-				AbstractBaseViewItem activeView = profilePart.getActiveView();
+				AbstractView activeView = profilePart.getActiveView();
 				if (this != activeView)
 					return;
 			}
@@ -214,9 +216,17 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 	}
 	
 	
+	@Override
 	public ScopeTreeViewer getScopeTreeViewer() {
 		return contentViewer.getTreeViewer();
 	}
+	
+
+	@Override
+	public IMetricManager getMetricManager() {
+		return (Experiment)experiment;
+	}
+
 	
 	/****
 	 * Reset the content of the table.

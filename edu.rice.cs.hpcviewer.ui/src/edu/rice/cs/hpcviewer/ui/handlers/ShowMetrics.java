@@ -22,7 +22,7 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcmetric.MetricFilterInput;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
-import edu.rice.cs.hpcviewer.ui.internal.AbstractBaseViewItem;
+import edu.rice.cs.hpcviewer.ui.internal.AbstractView;
 
 import java.util.Iterator;
 import java.util.List;
@@ -94,11 +94,11 @@ public class ShowMetrics
 			logger.debug("Database not found");
 			return;
 		}
-		AbstractBaseViewItem item = profilePart.getActiveView();
+		AbstractView item = profilePart.getActiveView();
 		
 		RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
 		MetricFilterInput input = new MetricFilterInput(root, experiment, 
-														item.getScopeTreeViewer(), true);
+														item.getFilterDataItems(), true);
 		
 		profilePart.addEditor(input);
 	}

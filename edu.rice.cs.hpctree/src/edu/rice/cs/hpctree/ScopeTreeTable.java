@@ -8,35 +8,27 @@ import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.nebula.widgets.nattable.NatTable;
-import org.eclipse.nebula.widgets.nattable.config.CellConfigAttributes;
+import org.eclipse.nebula.widgets.nattable.command.VisualRefreshCommand;
 import org.eclipse.nebula.widgets.nattable.config.ConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfiguration;
-import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
-import org.eclipse.nebula.widgets.nattable.config.IConfiguration;
 import org.eclipse.nebula.widgets.nattable.coordinate.PositionCoordinate;
 import org.eclipse.nebula.widgets.nattable.coordinate.Range;
 
-import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
 import org.eclipse.nebula.widgets.nattable.freeze.FreezeHelper;
 import org.eclipse.nebula.widgets.nattable.grid.GridRegion;
 import org.eclipse.nebula.widgets.nattable.grid.layer.ColumnHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.grid.layer.DefaultColumnHeaderDataLayer;
+import org.eclipse.nebula.widgets.nattable.hideshow.ColumnHideShowLayer;
 import org.eclipse.nebula.widgets.nattable.layer.CompositeLayer;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayerListener;
-import org.eclipse.nebula.widgets.nattable.layer.LabelStack;
-import org.eclipse.nebula.widgets.nattable.layer.cell.IConfigLabelAccumulator;
 import org.eclipse.nebula.widgets.nattable.layer.event.ILayerEvent;
 import org.eclipse.nebula.widgets.nattable.painter.layer.NatGridLayerPainter;
-import org.eclipse.nebula.widgets.nattable.selection.config.RowOnlySelectionBindings;
 import org.eclipse.nebula.widgets.nattable.selection.event.RowSelectionEvent;
 import org.eclipse.nebula.widgets.nattable.sort.SortHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.sort.config.SingleClickSortConfiguration;
-import org.eclipse.nebula.widgets.nattable.style.CellStyleAttributes;
-import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
-import org.eclipse.nebula.widgets.nattable.style.Style;
-import org.eclipse.nebula.widgets.nattable.ui.binding.UiBindingRegistry;
+import org.eclipse.nebula.widgets.nattable.tooltip.NatTableContentTooltip;
 import org.eclipse.nebula.widgets.nattable.ui.menu.AbstractHeaderMenuConfiguration;
 import org.eclipse.nebula.widgets.nattable.ui.menu.PopupMenuBuilder;
 import org.eclipse.swt.events.DisposeEvent;
@@ -45,6 +37,7 @@ import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
 
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
@@ -52,16 +45,17 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 import edu.rice.cs.hpcdata.util.OSValidator;
+import edu.rice.cs.hpcdata.util.string.StringUtil;
 import edu.rice.cs.hpctree.action.IActionListener;
 import edu.rice.cs.hpctree.internal.ColumnHeaderDataProvider;
+import edu.rice.cs.hpctree.internal.HeaderLayerConfiguration;
 import edu.rice.cs.hpctree.internal.ScopeTreeLabelAccumulator;
 import edu.rice.cs.hpctree.internal.TableConfiguration;
-import edu.rice.cs.hpctree.internal.TableUIBindingConfiguration;
 
 
 /********************************************************************
  * 
- * Main hpcviewer table composite widget based on NatTable containing:
+ * Main hpcviewer dynamic table composite widget based on NatTable containing:
  * <ul>
  * <li>A tree column</li>
  * <li>Zero or more metric columns</li>
@@ -72,15 +66,13 @@ import edu.rice.cs.hpctree.internal.TableUIBindingConfiguration;
  ********************************************************************/
 public class ScopeTreeTable extends Composite implements IScopeTreeAction, DisposeListener, ILayerListener
 {
-	private final static float  FACTOR_BOLD_FONT   = 1.2f;
+	private final static float  FACTOR_BOLD_FONT   = 1.5f;
 	private final static String TEXT_METRIC_COLUMN = "|8x88+88xx888x8%--";
-	private final static String LABEL_COLUMN = "col";
 
 	private final NatTable natTable ;
 	private final ScopeTreeBodyLayerStack bodyLayerStack ;
-	private final IDataProvider columnHeaderDataProvider ;
-	private final ScopeTreeDataProvider bodyDataProvider;
-	private final TableUIBindingConfiguration uiConfiguration;
+	private final ScopeTreeDataProvider   bodyDataProvider;
+	private final TableConfiguration      tableConfiguration;
 	private final Collection<IActionListener> listeners = new FastList<IActionListener>();
 
 	public ScopeTreeTable(Composite parent, int style, RootScope root, IMetricManager metricManager) {
@@ -98,44 +90,24 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
         // handling
         ConfigRegistry configRegistry = new ConfigRegistry();
         
-        bodyLayerStack = new ScopeTreeBodyLayerStack(treeData, bodyDataProvider, this);
+        bodyLayerStack = new ScopeTreeBodyLayerStack(treeData, bodyDataProvider);
         bodyLayerStack.getBodyDataLayer().setConfigLabelAccumulator(new ScopeTreeLabelAccumulator(treeData));
         bodyLayerStack.getSelectionLayer().addLayerListener(this);
-        bodyLayerStack.addConfiguration(new TableConfiguration());
+        
+        tableConfiguration =  new TableConfiguration(bodyDataProvider);
+        bodyLayerStack.addConfiguration(tableConfiguration);
         
         // --------------------------------
         // build the column header layer
         // --------------------------------
-        columnHeaderDataProvider = new ColumnHeaderDataProvider(bodyDataProvider);
-        DataLayer columnHeaderDataLayer = new DefaultColumnHeaderDataLayer(columnHeaderDataProvider);
+
+        DataLayer columnHeaderDataLayer = new DefaultColumnHeaderDataLayer(new ColumnHeaderDataProvider(bodyDataProvider));
         ILayer columnHeaderLayer = new ColumnHeaderLayer(columnHeaderDataLayer, bodyLayerStack, bodyLayerStack.getSelectionLayer());
         SortHeaderLayer<Scope> headerLayer = new SortHeaderLayer<>(columnHeaderLayer, bodyLayerStack.getTreeRowModel());
         
-        headerLayer.setConfigLabelAccumulator(new IConfigLabelAccumulator() {
-			
-			@Override
-			public void accumulateConfigLabels(LabelStack configLabels, int columnPosition, int rowPosition) {
-				configLabels.add(LABEL_COLUMN);
-			}
-		});
-
-        headerLayer.addConfiguration(new IConfiguration() {
-			
-			@Override
-			public void configureUiBindings(UiBindingRegistry uiBindingRegistry) {}
-			
-			@Override
-			public void configureRegistry(IConfigRegistry configRegistry) {
-				final Style style = new Style();
-				style.setAttributeValue(CellStyleAttributes.FONT, TableConfiguration.getGenericFont());
-
-				configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, style, DisplayMode.SELECT, LABEL_COLUMN);
-				configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, style, DisplayMode.NORMAL, LABEL_COLUMN);
-			}
-			
-			@Override
-			public void configureLayer(ILayer layer) {}
-		});
+        HeaderLayerConfiguration headerConfiguration = new HeaderLayerConfiguration();
+        headerLayer.setConfigLabelAccumulator(headerConfiguration);
+        headerLayer.addConfiguration(headerConfiguration);
 
         // --------------------------------
         // build the composite
@@ -145,21 +117,16 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
         compositeLayer.setChildLayer(GridRegion.COLUMN_HEADER, headerLayer, 0, 0);
         compositeLayer.setChildLayer(GridRegion.BODY, bodyLayerStack, 0, 1);
         
-
         // turn the auto configuration off as we want to add our header menu
         // configuration
         natTable = new NatTable(this, NatTable.DEFAULT_STYLE_OPTIONS , compositeLayer, false);
-
-        uiConfiguration = new TableUIBindingConfiguration(bodyDataProvider);
         
         // as the autoconfiguration of the NatTable is turned off, we have to
         // add the DefaultNatTableStyleConfiguration and the ConfigRegistry
         // manually
         natTable.setConfigRegistry(configRegistry);
-        
-        natTable.addConfiguration(uiConfiguration);
+
         natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
-		natTable.addConfiguration(new RowOnlySelectionBindings());
 		natTable.addConfiguration(new SingleClickSortConfiguration());
         natTable.addConfiguration(new AbstractHeaderMenuConfiguration(natTable) {
             @Override
@@ -167,22 +134,20 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
             	return super.createColumnHeaderMenu(natTable)
                         .withHideColumnMenuItem()
                         .withShowAllColumnsMenuItem()
-                        .withColumnChooserMenuItem()
                         .withFreezeColumnMenuItem();
             }
         });
+        
+        // add tooltip
+        new ScopeToolTip(natTable, bodyDataProvider);
+        
         // I don't know why we have to refresh the table here
         // However, without refreshing, the content will be weird
         natTable.refresh();
         natTable.configure();
 
-        // need to freeze the first column once the table is fully materialized 
-    	// The position for top-left and the bottom-right are both (0, -1) so
-    	// we just need one variable to specify the position coordinate
-    	
-    	PositionCoordinate pc = new PositionCoordinate(bodyLayerStack, 0, -1);
-    	FreezeHelper.freeze(bodyLayerStack.getFreezeLayer(), bodyLayerStack.getViewportLayer(), pc, pc);
-
+        freezeTreeColumn();
+        
     	// Need to set the grid data and layout
     	// if not set here, the table will be weird. I don't know why.
     	
@@ -191,8 +156,101 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 
 		natTable.setLayerPainter(new NatGridLayerPainter(natTable, DataLayer.DEFAULT_ROW_HEIGHT));
 		addDisposeListener(this);
+		
+		/*
+		natTable.getDisplay().asyncExec(()-> {
+			expandAndSelectRootChild(getRoot());
+		}); */
+	}
+	
+	
+	/****
+	 * Add a new metric column
+	 * @param metric
+	 */
+	public void addMetricColumn(BaseMetric metric) {
+		bodyDataProvider.addColumn(0, metric);
+		refresh();
+	}
+	
+	public List<BaseMetric> getMetricColumns() {
+		return bodyDataProvider.getMetrics();
+	}
+	
+	
+	/****
+	 * Freeze the tree column. 
+	 * This should be called after the table initialization and after the hide/show action. 
+	 */
+	public void freezeTreeColumn() {
+        // need to freeze the first column once the table is fully materialized 
+    	// The position for top-left and the bottom-right are both (0, -1) so
+    	// we just need one variable to specify the position coordinate
+    	
+    	PositionCoordinate pc = new PositionCoordinate(bodyLayerStack, 0, -1);
+    	FreezeHelper.freeze(bodyLayerStack.getFreezeLayer(), bodyLayerStack.getViewportLayer(), pc, pc);
+	}
+	
+	
+	private void expandAndSelectRootChild(Scope root) {
+		if (root == null)
+			return;
+		
+		// expand the root and select the first child if exist        
+        if (root.hasChildren()) {
+        	ScopeTreeLayer treeLayer = (ScopeTreeLayer) bodyLayerStack.getTreeLayer();
+        	treeLayer.expandTreeRow(0);
+        	setSelection(1);
+        	
+        	Scope node = getSelection();
+        	if (node != null) {
+    			listeners.forEach(l -> {
+    				l.select(node);
+    			});
+        	}
+        }
 	}
 
+	/****
+	 * Hide one or more columns
+	 * @param columnIndexes int or int[] of column indexes
+	 */
+	synchronized public void hideColumn(int... columnIndexes) {
+		ColumnHideShowLayer colLayer = bodyLayerStack.getColumnHideShowLayer();
+		colLayer.hideColumnIndexes(columnIndexes);
+	}
+	
+	synchronized public void showColumn(int... columnIndexes) {
+		ColumnHideShowLayer colLayer = bodyLayerStack.getColumnHideShowLayer();
+		colLayer.showColumnIndexes(columnIndexes);
+	}
+	
+	
+	/***
+	 * Hide or show columns, including the tree column (not advised).
+	 * @param columnsStatus 
+	 * 			array of boolean. Column will be shown if the value is true. Hidden otherwise.
+	 * 			The size of the array has to be the same as the size of columns in the table.
+	 * 			The zero-th item should be the tree column.
+	 */
+	public void hideAndShowColumns(boolean []columnsStatus) {
+		ColumnHideShowLayer colLayer = bodyLayerStack.getColumnHideShowLayer();
+
+		for(int i=0; i<columnsStatus.length; i++) {
+			if (columnsStatus[i]) {
+				// show
+				colLayer.showColumnIndexes(i);
+			} else {
+				colLayer.hideColumnIndexes(i);
+			}
+		}
+	}
+	
+	
+	public int[] getHiddenColumnIndexes() {
+		ColumnHideShowLayer colLayer = bodyLayerStack.getColumnHideShowLayer();
+		return colLayer.getHiddenColumnIndexesArray();
+	}
 	
 	
 	@Override
@@ -224,17 +282,21 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 	}
 	
 	public void addActionListener(IActionListener action) {
-		uiConfiguration.addListener(action);
+		tableConfiguration.addListener(action);
 	}
 	
 	public void removeActionListener(IActionListener action) {
-		uiConfiguration.removeListener(action);
+		tableConfiguration.removeListener(action);
 	}
 
 	@Override
 	public void handleLayerEvent(ILayerEvent event) {
 		if (event instanceof RowSelectionEvent) {
 			RowSelectionEvent rowEvent = (RowSelectionEvent) event;
+			int []indexes = rowEvent.getRowIndexes();
+			if (indexes == null || indexes.length == 0)
+				return;
+			
 			int row = rowEvent.getRowPositionToMoveIntoViewport();
 			final Scope scope = bodyDataProvider.getRowObject(row);
 			
@@ -261,12 +323,12 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 
         // metric columns (if any)
     	Point columnSize = getMetricColumnSize();
-    	int numColumns   = columnHeaderDataProvider.getColumnCount();
+    	int numColumns   = bodyDataProvider.getColumnCount();
     	
     	GC gc = new GC(getDisplay());
     	
     	for(int i=1; i<numColumns; i++) {
-    		String title = (String) columnHeaderDataProvider.getDataValue(i, 0);
+    		String title = (String) bodyDataProvider.getDataValue(i, 0);
     		Point titleSize = gc.textExtent(title + "XXX");
     		int colWidth = (int) Math.max(titleSize.x * FACTOR_BOLD_FONT, columnSize.x);
     		
@@ -309,9 +371,14 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 	@Override
 	public void refresh() {
 		if (natTable != null)
-			natTable.refresh();;
+			natTable.refresh();
 	}
 	
+	public void visualRefresh() {
+		if (natTable != null) {
+			natTable.doCommand(new VisualRefreshCommand());
+		}		
+	}
 	
 	/***
 	 * Redraw the painting of the table.
@@ -336,6 +403,8 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 		treeRowModel.setRoot(root);
 		
 		this.refresh();
+		
+		expandAndSelectRootChild(root);
 	}
 
 	@Override
@@ -353,7 +422,7 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 	@Override
 	public List<? extends TreeNode> traverseOrExpand(Scope scope) {
 		ScopeTreeRowModel treeRowModel = bodyLayerStack.getTreeRowModel();
-		if (treeRowModel.shouldExpand(scope)) {
+		if (!treeRowModel.isChildrenVisible(scope)) {
 			int index = treeRowModel.getTreeData().indexOf(scope);
 			bodyLayerStack.expand(index);
 		}
@@ -370,5 +439,56 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 	
 	public BaseMetric getMetric(int columnIndex) {
 		return bodyDataProvider.getMetric(columnIndex);
+	}
+	
+	public int getColumnCount() {
+		return bodyDataProvider.getColumnCount();
+	}
+	
+	
+	/************************************************************
+	 * 
+	 * Class to display tooltips only for column header and the tree column
+	 *
+	 ************************************************************/
+	private static class ScopeToolTip extends NatTableContentTooltip
+	{
+		private final static int MAX_TOOLTIP_CHAR = 150;
+		private final ScopeTreeDataProvider bodyDataProvider;
+
+		public ScopeToolTip(NatTable natTable, ScopeTreeDataProvider bodyDataProvider) {
+			super(natTable, GridRegion.BODY, GridRegion.COLUMN_HEADER);
+			this.bodyDataProvider = bodyDataProvider;
+		}
+		
+		@Override
+	    protected String getText(Event event) {
+
+	        int col = this.natTable.getColumnPositionByX(event.x);
+	        int row = this.natTable.getRowPositionByY(event.y);
+	        int colIndex = this.natTable.getColumnIndexByPosition(col);
+	        int rowIndex = this.natTable.getRowIndexByPosition(row);
+	        
+	        // We only show the tooltip for column header and the tree column (col index = 0)
+        	if (rowIndex == 0) {
+        		// header of the table
+        		if (colIndex > 0) {
+	        		BaseMetric metric = bodyDataProvider.getMetric(colIndex);
+	        		String name = metric.getDisplayName();
+	        		String desc = StringUtil.wrapScopeName(metric.getDescription(), MAX_TOOLTIP_CHAR);
+	        		if (desc == null)
+	        			return name;
+	        		return name + "\n" + desc;
+        		}
+        	}
+        	if (colIndex == 0) {
+        		String text = super.getText(event);
+        		if (text != null && text.length() > 0) {
+        			text = StringUtil.wrapScopeName(text, MAX_TOOLTIP_CHAR);
+        		}
+        		return text;
+        	}
+        	return null;
+		}
 	}
 }

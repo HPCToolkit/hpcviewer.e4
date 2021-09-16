@@ -1,0 +1,102 @@
+package edu.rice.cs.hpctree.internal;
+
+import java.util.List;
+
+import org.eclipse.nebula.widgets.nattable.NatTable;
+import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
+import org.eclipse.nebula.widgets.nattable.grid.GridRegion;
+import org.eclipse.nebula.widgets.nattable.layer.LabelStack;
+import org.eclipse.nebula.widgets.nattable.layer.cell.ILayerCell;
+import org.eclipse.nebula.widgets.nattable.painter.cell.ICellPainter;
+import org.eclipse.nebula.widgets.nattable.ui.matcher.MouseEventMatcher;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Rectangle;
+
+
+/*********************************************************************
+ * 
+ * Generic class to match mouse event with a region painter in the cell.
+ * If the cell has an attribute (like {@code ImagePainter} of interest,
+ * it will return true so that the class can do an action.
+ * <p>
+ * This class is specifically designed to be used in {@code UiBindingRegistry}
+ * and matched with any IMouseAction.
+ * 
+ *********************************************************************/
+public class ScopeAttributeMouseEventMatcher extends MouseEventMatcher 
+{
+	private final List<String> labels;
+	private final List<ICellPainter> painters;
+	
+	
+	/***
+	 * Constructor to specify which painters need to be matched.
+	 * 
+	 * @param body the region in the table (mostly {@code GridRegion.BODY})
+	 * @param leftButton the mouse button (like {@code MouseEventMatcher.LEFT_BUTTON})
+	 * @param labels {@code List} of {@code String} of labels to matched against this event
+	 * @param painters {@code List} of {@code ICellPainter} to be matched. If one of
+	 *  	  items is matched, the caller will trigger an action
+	 *  
+	 *  @see GridRegion
+	 *  @see MouseEventMatcher 
+	 */
+    public ScopeAttributeMouseEventMatcher(String body, int leftButton, List<String> labels, List<ICellPainter> painters) {
+    	super(body, leftButton);
+    	
+    	this.painters = painters;    	
+    	this.labels = labels;
+	}
+
+	@Override
+    public boolean matches(NatTable natTable, MouseEvent event, LabelStack regionLabels) {
+        boolean result = false;
+    	if (super.matches(natTable, event, regionLabels)) {
+
+            int columnPosition = natTable.getColumnPositionByX(event.x);
+            int rowPosition = natTable.getRowPositionByY(event.y);
+
+            LabelStack customLabels = natTable.getConfigLabelsByPosition(columnPosition, rowPosition);
+            if (!labels.stream().anyMatch(customLabels::contains))
+            	return false;
+
+            
+            ILayerCell cell = natTable.getCellByPosition(columnPosition, rowPosition);
+            if (cell != null) {
+                IConfigRegistry configRegistry = natTable.getConfigRegistry();
+                ICellPainter cellPainter = cell.getLayer().getCellPainter(
+                        columnPosition,
+                        rowPosition,
+                        cell,
+                        configRegistry);
+
+                GC gc = new GC(natTable.getDisplay());
+                try {
+                    Rectangle adjustedCellBounds = natTable.getLayerPainter().adjustCellBounds(
+                            columnPosition,
+                            rowPosition,
+                            cell.getBounds());
+
+                    ICellPainter clickedCellPainter = cellPainter.getCellPainterAt(
+                            event.x,
+                            event.y,
+                            cell,
+                            gc,
+                            adjustedCellBounds,
+                            configRegistry);
+                    
+                    if (clickedCellPainter != null) {
+                    	if (painters.contains(clickedCellPainter)) {
+                        	result = true;
+                    	}
+                    }
+                } finally {
+                    gc.dispose();
+                }
+            }
+    	}
+    	
+        return result;
+    }
+}

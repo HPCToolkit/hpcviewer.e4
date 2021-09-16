@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.parts.topdown;
+package edu.rice.cs.hpcviewer.ui.parts.flat;
 
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.CoolBar;
@@ -12,38 +12,48 @@ import edu.rice.cs.hpctree.IScopeTreeData;
 import edu.rice.cs.hpctree.ScopeTreeData;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractTableView;
 
-public class TopDownPart extends AbstractTableView 
-{	
-	private static final String TITLE = "Top-down view";
+public class FlatPart extends AbstractTableView 
+{
+
+	public FlatPart(CTabFolder parent, int style) {
+		super(parent, style, "Flat view");
+	}
+
+
+	@Override
+	protected void beginToolbar(CoolBar coolbar, ToolBar toolbar) {
+	}
+
 	
-	public TopDownPart(CTabFolder parent, int style) {
-		super(parent, style, TITLE);
+	@Override
+	protected void endToolbar(CoolBar coolbar, ToolBar toolbar) {
 	}
 	
 
 	@Override
-    protected void beginToolbar(CoolBar coolbar, ToolBar toolbar) {}
-	
-	@Override
-    protected void endToolbar  (CoolBar coolbar, ToolBar toolbar) {}
-
-
 	protected void updateStatus() {
 	}
 
-
+	
 	@Override
 	protected RootScope createRoot() {
-		IMetricManager mm = getMetricManager();
-		Experiment exp = (Experiment) mm;
+		Experiment experiment = (Experiment) getMetricManager();
+		RootScope rootCCT  = experiment.getRootScope(RootScopeType.CallingContextTree);
+		RootScope rootFlat = experiment.getRootScope(RootScopeType.Flat);
 		
-		return exp.getRootScope(getRootType());
+		if (rootCCT != null && rootFlat != null)
+			return ((Experiment) experiment).createFlatView(rootCCT, rootFlat);
+
+		if (rootFlat != null && rootFlat.hasChildren())
+			return rootFlat;
+		
+		return null;
 	}
 
 
 	@Override
 	public RootScopeType getRootType() {
-		return RootScopeType.CallingContextTree;
+		return RootScopeType.Flat;
 	}
 
 
@@ -51,4 +61,5 @@ public class TopDownPart extends AbstractTableView
 	protected IScopeTreeData getTreeData(RootScope root, IMetricManager metricManager) {
 		return new ScopeTreeData(root, metricManager);
 	}
+
 }
