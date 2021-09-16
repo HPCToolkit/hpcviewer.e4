@@ -213,15 +213,11 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		IScopeTreeData treeData = getTreeData(root, metricManager);
 		
 		table = new ScopeTreeTable(parent, SWT.NONE, treeData);
-		table.pack();
 		table.addSelectionListener(scope -> updateButtonStatus());
 		
 		table.addActionListener(scope -> {
 			profilePart.addEditor(scope);
 		});
-		
-		GridDataFactory.fillDefaults().grab(true, true).applyTo(table);
-		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(table);
 		
 		updateButtonStatus();
 
@@ -322,7 +318,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 	
 	@Override
 	public void handleEvent(Event event) {
-		if (table == null || table.isDisposed()) {
+		if (table == null) {
 			eventBroker.unsubscribe(this);
 			return;
 		}
