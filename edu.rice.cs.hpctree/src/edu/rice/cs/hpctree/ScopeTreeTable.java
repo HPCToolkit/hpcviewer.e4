@@ -28,9 +28,12 @@ import org.eclipse.nebula.widgets.nattable.painter.layer.NatGridLayerPainter;
 import org.eclipse.nebula.widgets.nattable.selection.event.RowSelectionEvent;
 import org.eclipse.nebula.widgets.nattable.sort.SortHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.sort.config.SingleClickSortConfiguration;
+import org.eclipse.nebula.widgets.nattable.sort.event.SortColumnEvent;
 import org.eclipse.nebula.widgets.nattable.tooltip.NatTableContentTooltip;
 import org.eclipse.nebula.widgets.nattable.ui.menu.AbstractHeaderMenuConfiguration;
 import org.eclipse.nebula.widgets.nattable.ui.menu.PopupMenuBuilder;
+import org.eclipse.nebula.widgets.nattable.viewport.command.ShowRowInViewportCommand;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.GC;
@@ -104,6 +107,7 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
         DataLayer columnHeaderDataLayer = new DefaultColumnHeaderDataLayer(new ColumnHeaderDataProvider(bodyDataProvider));
         ILayer columnHeaderLayer = new ColumnHeaderLayer(columnHeaderDataLayer, bodyLayerStack, bodyLayerStack.getSelectionLayer());
         SortHeaderLayer<Scope> headerLayer = new SortHeaderLayer<>(columnHeaderLayer, bodyLayerStack.getTreeRowModel());
+        headerLayer.addLayerListener(this);
         
         HeaderLayerConfiguration headerConfiguration = new HeaderLayerConfiguration();
         headerLayer.setConfigLabelAccumulator(headerConfiguration);
@@ -143,7 +147,7 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
         
         // I don't know why we have to refresh the table here
         // However, without refreshing, the content will be weird
-        natTable.refresh();
+        visualRefresh();
         natTable.configure();
 
         freezeTreeColumn();
@@ -157,10 +161,10 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 		natTable.setLayerPainter(new NatGridLayerPainter(natTable, DataLayer.DEFAULT_ROW_HEIGHT));
 		addDisposeListener(this);
 		
-		/*
+		
 		natTable.getDisplay().asyncExec(()-> {
-			expandAndSelectRootChild(getRoot());
-		}); */
+			//System.out.println("b: " +  natTable.getBounds() + ", s: " + natTable.getSize() + ", c: " + natTable.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		}); 
 	}
 	
 	
@@ -291,6 +295,7 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 
 	@Override
 	public void handleLayerEvent(ILayerEvent event) {
+
 		if (event instanceof RowSelectionEvent) {
 			RowSelectionEvent rowEvent = (RowSelectionEvent) event;
 			int []indexes = rowEvent.getRowIndexes();
@@ -303,6 +308,14 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 			listeners.forEach(l -> {
 				l.select(scope);
 			});
+		} else if (event instanceof SortColumnEvent) {
+			Set<Range> ranges = bodyLayerStack.getSelectionLayer().getSelectedRowPositions();
+			if (!ranges.isEmpty()) {
+				Range range = ranges.iterator().next();
+				if (range.start >= 0) {
+					natTable.doCommand(new ShowRowInViewportCommand(range.start));
+				}
+			}
 		}
 	}
 
@@ -310,7 +323,7 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 	@Override
 	public void pack() {		
 		final int TREE_COLUMN_WIDTH  = 350;
-
+		
 		super.pack();
 
 		// ---------------------------------------------------------------
