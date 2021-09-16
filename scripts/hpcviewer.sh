@@ -10,7 +10,7 @@
 #
 
 name=hpcviewer
-arch=`uname -p`
+arch=`uname -m`
 workspace="${HOME}/.hpctoolkit/${name}/${arch}"
 
 # Substitute the Java bindir from the install script, if needed.
