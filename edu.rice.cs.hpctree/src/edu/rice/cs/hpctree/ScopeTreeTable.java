@@ -24,7 +24,6 @@ import org.eclipse.nebula.widgets.nattable.layer.ILayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayerListener;
 import org.eclipse.nebula.widgets.nattable.layer.event.ILayerEvent;
 import org.eclipse.nebula.widgets.nattable.painter.layer.NatGridLayerPainter;
-import org.eclipse.nebula.widgets.nattable.resize.command.AutoResizeRowsCommand;
 import org.eclipse.nebula.widgets.nattable.selection.event.RowSelectionEvent;
 import org.eclipse.nebula.widgets.nattable.sort.SortHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.sort.config.SingleClickSortConfiguration;
@@ -37,6 +36,7 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 
@@ -156,11 +156,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		natTable.setLayerPainter(new NatGridLayerPainter(natTable, DataLayer.DEFAULT_ROW_HEIGHT));
 		natTable.addDisposeListener(this);
 		
-		pack();
-		
-		natTable.getDisplay().asyncExec(()-> {
-			//System.out.println("b: " +  natTable.getBounds() + ", s: " + natTable.getSize() + ", c: " + natTable.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		}); 
+		pack(this.bodyDataProvider);
 	}
 	
 	
@@ -316,30 +312,41 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	}
 
 	
-	public void pack() {		
+	private void pack(ScopeTreeDataProvider dataProvider) {		
 		final int TREE_COLUMN_WIDTH  = 350;
 		
 		// ---------------------------------------------------------------
 		// pack the columns based on the title or the content of the cell
 		// ---------------------------------------------------------------
 		DataLayer bodyDataLayer = bodyLayerStack.getBodyDataLayer();
-		
-    	// tree column: the width is hard coded at the moment 
-        bodyDataLayer.setColumnWidthByPosition(0, TREE_COLUMN_WIDTH);
 
         // metric columns (if any)
     	Point columnSize = getMetricColumnSize();
     	int numColumns   = bodyDataProvider.getColumnCount();
     	
     	GC gc = new GC(natTable.getDisplay());
-    	
+    	int totSize = 0;
     	for(int i=1; i<numColumns; i++) {
     		String title = (String) bodyDataProvider.getDataValue(i, 0);
     		Point titleSize = gc.textExtent(title + "XXX");
     		int colWidth = (int) Math.max(titleSize.x * FACTOR_BOLD_FONT, columnSize.x);
     		
         	bodyDataLayer.setColumnWidthByPosition(i, colWidth);
+        	totSize += colWidth;
     	}
+    	
+    	// compute the size of the tree column
+    	// if the total size is less than the display, we can use the percentage for the tree column
+    	// otherwise we should specify explicitly the width
+    	
+    	Rectangle r = natTable.getDisplay().getClientArea();
+    	totSize += TREE_COLUMN_WIDTH;
+		if (totSize < r.width) {
+			bodyDataLayer.setColumnWidthPercentageByPosition(0, 50);
+		} else {
+	    	// tree column: the width is hard coded at the moment
+	        bodyDataLayer.setColumnWidthByPosition(0, TREE_COLUMN_WIDTH);
+		} 
     	gc.dispose();
 	}
 	
@@ -380,6 +387,10 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 			natTable.refresh();
 	}
 	
+	/***
+	 * The same as {@code refresh} but more lightweight.
+	 * Use this method if there is no structural changes
+	 */
 	public void visualRefresh() {
 		if (natTable != null) {
 			natTable.doCommand(new VisualRefreshCommand());
