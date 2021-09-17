@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.preference.PreferenceStore;
+import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.resource.FontRegistry;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
@@ -106,4 +107,31 @@ public class FontManager
 		// have to do this manually to reflect the current change
 		INSTANCE.fontRegistry.put(fontPreferenceID, fontData);
 	}
+	
+	
+	static public void changeFontHeight(int deltaHeight) {
+		changeFontHeight(PreferenceConstants.ID_FONT_GENERIC, deltaHeight);
+		changeFontHeight(PreferenceConstants.ID_FONT_METRIC,  deltaHeight);
+		changeFontHeight(PreferenceConstants.ID_FONT_TEXT,    deltaHeight);
+	}
+	
+	/****
+	 * Change the height of the font for a given font id from the {@link PreferenceConstants}
+	 * @param id the font id from {@link PreferenceConstants}
+	 * @param deltaHeight the number of increase/decrease
+	 */
+	static public void changeFontHeight(String id, int deltaHeight) {
+		FontData []oldfd = FontManager.getFontDataPreference(id);
+		FontData []newFd = FontDescriptor.copy(oldfd);
+		int height = newFd[0].getHeight();
+		int heightNew = height+deltaHeight;
+		newFd[0].setHeight(heightNew);
+		try {
+			FontManager.setFontPreference(id, newFd);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+			return;
+		}
+	}
+
 }

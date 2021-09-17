@@ -1,6 +1,5 @@
 package edu.rice.cs.hpcviewer.ui.internal;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Stack;
 
@@ -11,7 +10,6 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -24,7 +22,6 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -47,7 +44,6 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 import edu.rice.cs.hpcdata.util.ScopeComparator;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
-import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpctree.IScopeTreeAction;
 import edu.rice.cs.hpctree.action.ZoomAction;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
@@ -672,9 +668,7 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener, IScopeTreeA
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				changeFontHeight(PreferenceConstants.ID_FONT_GENERIC, 1);
-				changeFontHeight(PreferenceConstants.ID_FONT_METRIC,  1);
-				changeFontHeight(PreferenceConstants.ID_FONT_TEXT,    1);
+				FontManager.changeFontHeight(1);
 			}
 			
 			@Override
@@ -685,9 +679,7 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener, IScopeTreeA
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				changeFontHeight(PreferenceConstants.ID_FONT_GENERIC, -1);
-				changeFontHeight(PreferenceConstants.ID_FONT_METRIC,  -1);
-				changeFontHeight(PreferenceConstants.ID_FONT_TEXT,    -1);
+				FontManager.changeFontHeight(-1);
 			}
 			
 			@Override
@@ -695,25 +687,6 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener, IScopeTreeA
 		});
 	}
 	
-	
-	/****
-	 * Change the height of the font for a given font id from the {@link PreferenceConstants}
-	 * @param id the font id from {@link PreferenceConstants}
-	 * @param deltaHeight the number of increase/decrease
-	 */
-	private void changeFontHeight(String id, int deltaHeight) {
-		FontData []oldfd = FontManager.getFontDataPreference(id);
-		FontData []newFd = FontDescriptor.copy(oldfd);
-		int height = newFd[0].getHeight();
-		int heightNew = height+deltaHeight;
-		newFd[0].setHeight(heightNew);
-		try {
-			FontManager.setFontPreference(id, newFd);
-		} catch (IOException e1) {
-			e1.printStackTrace();
-			return;
-		}
-	}
 	
 	
 	/***

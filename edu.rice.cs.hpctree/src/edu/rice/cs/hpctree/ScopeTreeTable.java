@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.collections.impl.list.mutable.FastList;
-import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.command.VisualRefreshCommand;
 import org.eclipse.nebula.widgets.nattable.config.ConfigRegistry;
@@ -14,7 +13,6 @@ import org.eclipse.nebula.widgets.nattable.coordinate.PositionCoordinate;
 import org.eclipse.nebula.widgets.nattable.coordinate.Range;
 import org.eclipse.nebula.widgets.nattable.export.command.ExportCommand;
 import org.eclipse.nebula.widgets.nattable.export.command.ExportCommandHandler;
-import org.eclipse.nebula.widgets.nattable.export.config.DefaultExportBindings;
 import org.eclipse.nebula.widgets.nattable.freeze.FreezeHelper;
 import org.eclipse.nebula.widgets.nattable.grid.GridRegion;
 import org.eclipse.nebula.widgets.nattable.grid.layer.ColumnHeaderLayer;
@@ -35,11 +33,13 @@ import org.eclipse.nebula.widgets.nattable.ui.menu.AbstractHeaderMenuConfigurati
 import org.eclipse.nebula.widgets.nattable.ui.menu.PopupMenuBuilder;
 import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
 import org.eclipse.nebula.widgets.nattable.viewport.command.ShowRowInViewportCommand;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 
@@ -55,6 +55,7 @@ import edu.rice.cs.hpctree.internal.HeaderLayerConfiguration;
 import edu.rice.cs.hpctree.internal.ScopeTreeExportConfiguration;
 import edu.rice.cs.hpctree.internal.ScopeTreeLabelAccumulator;
 import edu.rice.cs.hpctree.internal.TableConfiguration;
+import edu.rice.cs.hpctree.internal.TableFontConfiguration;
 
 
 /********************************************************************
@@ -97,6 +98,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         
         tableConfiguration =  new TableConfiguration(bodyDataProvider);
         bodyLayerStack.addConfiguration(tableConfiguration);
+        bodyLayerStack.addConfiguration(new TableFontConfiguration(this));
         
         // --------------------------------
         // build the column header layer
@@ -157,7 +159,10 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
     	// Need to set the grid data and layout
     	// if not set here, the table will be weird. I don't know why.
     	
-        GridDataFactory.fillDefaults().grab(true, true).applyTo(natTable);
+        GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+        gridData.minimumHeight = 1;
+        gridData.minimumWidth  = 1;
+        natTable.setLayoutData(gridData);
 
 		natTable.setLayerPainter(new NatGridLayerPainter(natTable, DataLayer.DEFAULT_ROW_HEIGHT));
 		natTable.addDisposeListener(this);
@@ -364,7 +369,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	private Point getMetricColumnSize() {
 		final GC gc = new GC(natTable.getDisplay());		
 		
-		gc.setFont(TableConfiguration.getMetricFont());
+		gc.setFont(TableFontConfiguration.getMetricFont());
 		String text = TEXT_METRIC_COLUMN + STRING_PADDING;
 		Point extent = gc.stringExtent(text);
 		Point size   = new Point((int) (extent.x), extent.y + 2);
@@ -372,7 +377,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		// check the height if we use generic font (tree column)
 		// if this font is higher, we should use this height as the standard.
 		
-		gc.setFont(TableConfiguration.getGenericFont());
+		gc.setFont(TableFontConfiguration.getGenericFont());
 		extent = gc.stringExtent(text);
 		size.y = Math.max(size.y, extent.y);
 		
@@ -397,6 +402,8 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 			natTable.doCommand(new VisualRefreshCommand());
 		}		
 	}
+	
+
 	
 	/***
 	 * Redraw the painting of the table.

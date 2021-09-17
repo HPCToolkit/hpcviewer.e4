@@ -11,6 +11,8 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
@@ -36,6 +38,7 @@ import edu.rice.cs.hpcfilter.FilterDataItem;
 import edu.rice.cs.hpcmetric.MetricDataEvent;
 import edu.rice.cs.hpcmetric.MetricFilterInput;
 import edu.rice.cs.hpcmetric.internal.MetricFilterDataItem;
+import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpctree.IScopeTreeData;
 import edu.rice.cs.hpctree.ScopeTreeTable;
 import edu.rice.cs.hpctree.action.HotPathAction;
@@ -47,14 +50,18 @@ import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 
 
 
-public abstract class AbstractTableView extends AbstractView implements EventHandler
+public abstract class AbstractTableView extends AbstractView implements EventHandler, DisposeListener
 {
 	final private int ACTION_ZOOM_IN      = 0;
 	final private int ACTION_ZOOM_OUT     = 1;
 	final private int ACTION_HOTPATH      = 2;
+	
 	final private int ACTION_ADD_METRIC   = 3;
 	final private int ACTION_EXPORT_DATA  = 4;
-	final private int ACTION_COLUMN_HIDE  = 5; 
+	final private int ACTION_COLUMN_HIDE  = 5;
+	
+	final private int ACTION_FONT_INC     = 6;
+	final private int ACTION_FONT_DEC     = 7;
 	
 	private Composite    parent ;
 	private ToolItem     toolItem[];
@@ -161,7 +168,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		// -------------------------------------------
 		// default tool bar
 		// -------------------------------------------
-		toolItem = new ToolItem[6];
+		toolItem = new ToolItem[8];
 		
 		toolItem[ACTION_ZOOM_IN]  = createToolItem(toolBar, IconManager.Image_ZoomIn,  "Zoom-in the selected node");
 		toolItem[ACTION_ZOOM_OUT] = createToolItem(toolBar, IconManager.Image_ZoomOut, "Zoom-out from the current tree scope");
@@ -171,6 +178,8 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		toolItem[ACTION_EXPORT_DATA] = createToolItem(toolBar, IconManager.Image_SaveCSV,  "Export the current table into a CSV file");
 		toolItem[ACTION_COLUMN_HIDE] = createToolItem(toolBar, IconManager.Image_CheckColumns,  "Show/hide columns");
 
+		toolItem[ACTION_FONT_INC] = createToolItem(toolBar, IconManager.Image_FontBigger,  "Increase the font size");
+		toolItem[ACTION_FONT_DEC] = createToolItem(toolBar, IconManager.Image_FontSmaller, "Decrease the font size");
 		
 		// -------------------------------------------
 		// add the end of toolbar
@@ -225,6 +234,8 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC, this);
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN,   this);
+	
+		parent.addDisposeListener(this);
 	}
 
 	@Override
@@ -356,6 +367,13 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 	}
 	
 	
+
+	@Override
+	public void widgetDisposed(DisposeEvent e) {
+	}
+
+
+	
 	private void hideORShowColumns(MetricDataEvent dataEvent) {
 		Object objData = dataEvent.getData();
 		
@@ -384,7 +402,14 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 			int index = getColumnIndexByMetric(item, metrics);
 			hideOrShowColumn(index, item.checked);
 		}
+		// hide or show columns cause visual changes.
+		// however, we are forced to refresh completely the whole layer of the table.
+		// calling visualRefresh won't help and I don't know why
 		table.refresh();
+		
+		// have to freeze again the tree column. 
+		// Sometimes after the hide/show the frozen attribute disappears and the column is not frozen anymore
+		// I don't know why.
 		table.freezeTreeColumn();
 	}
 	
@@ -483,6 +508,22 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 				table.export();
 			}
 		});
+		
+		toolItem[ACTION_FONT_INC].addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				FontManager.changeFontHeight(1);
+			}
+		});
+		
+		toolItem[ACTION_FONT_DEC].addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				FontManager.changeFontHeight(-1);
+			}
+		});
 	}
 	
 	protected ScopeTreeTable getTable() {
@@ -502,6 +543,8 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		toolItem[ACTION_ADD_METRIC] .setEnabled(true);
 		toolItem[ACTION_COLUMN_HIDE].setEnabled(true);
 		toolItem[ACTION_EXPORT_DATA].setEnabled(true);
+		toolItem[ACTION_FONT_INC].setEnabled(true);
+		toolItem[ACTION_FONT_DEC].setEnabled(true);
 		
 		Scope selectedScope = table.getSelection();
 		boolean canZoomIn = zoomAction == null ? false : zoomAction.canZoomIn(selectedScope); 
