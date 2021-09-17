@@ -342,7 +342,9 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
     	Rectangle r = natTable.getDisplay().getClientArea();
     	totSize += TREE_COLUMN_WIDTH;
 		if (totSize < r.width) {
-			bodyDataLayer.setColumnWidthPercentageByPosition(0, 50);
+			//bodyDataLayer.setColumnWidthPercentageByPosition(0, 50);
+			int width = r.width - totSize - 20;
+	        bodyDataLayer.setColumnWidthByPosition(0, width);
 		} else {
 	    	// tree column: the width is hard coded at the moment
 	        bodyDataLayer.setColumnWidthByPosition(0, TREE_COLUMN_WIDTH);
