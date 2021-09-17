@@ -31,6 +31,7 @@ import org.eclipse.nebula.widgets.nattable.sort.event.SortColumnEvent;
 import org.eclipse.nebula.widgets.nattable.tooltip.NatTableContentTooltip;
 import org.eclipse.nebula.widgets.nattable.ui.menu.AbstractHeaderMenuConfiguration;
 import org.eclipse.nebula.widgets.nattable.ui.menu.PopupMenuBuilder;
+import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
 import org.eclipse.nebula.widgets.nattable.viewport.command.ShowRowInViewportCommand;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -45,7 +46,6 @@ import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
-import edu.rice.cs.hpcdata.util.OSValidator;
 import edu.rice.cs.hpcdata.util.string.StringUtil;
 import edu.rice.cs.hpctree.action.IActionListener;
 import edu.rice.cs.hpctree.internal.ColumnHeaderDataProvider;
@@ -67,8 +67,8 @@ import edu.rice.cs.hpctree.internal.TableConfiguration;
  ********************************************************************/
 public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayerListener
 {
-	private final static float  FACTOR_BOLD_FONT   = 1.5f;
-	private final static String TEXT_METRIC_COLUMN = "|8x88+88xx888x8%--";
+	private final static String TEXT_METRIC_COLUMN = "|8x88+88xx888x8%-";
+	private final static String STRING_PADDING  = "XX"; 
 
 	private final NatTable natTable ;
 	private final ScopeTreeBodyLayerStack bodyLayerStack ;
@@ -151,7 +151,6 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
     	// if not set here, the table will be weird. I don't know why.
     	
         GridDataFactory.fillDefaults().grab(true, true).applyTo(natTable);
-		//GridLayoutFactory.fillDefaults().numColumns(1).applyTo(natTable);
 
 		natTable.setLayerPainter(new NatGridLayerPainter(natTable, DataLayer.DEFAULT_ROW_HEIGHT));
 		natTable.addDisposeListener(this);
@@ -323,16 +322,16 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         // metric columns (if any)
     	Point columnSize = getMetricColumnSize();
     	int numColumns   = bodyDataProvider.getColumnCount();
-    	
+
     	GC gc = new GC(natTable.getDisplay());
     	int totSize = 0;
     	for(int i=1; i<numColumns; i++) {
-    		String title = (String) bodyDataProvider.getDataValue(i, 0);
-    		Point titleSize = gc.textExtent(title + "XXX");
-    		int colWidth = (int) Math.max(titleSize.x * FACTOR_BOLD_FONT, columnSize.x);
-    		
-        	bodyDataLayer.setColumnWidthByPosition(i, colWidth);
-        	totSize += colWidth;
+    		String title = bodyDataProvider.getMetric(i).getDisplayName();
+    		Point titleSize = gc.textExtent(title + STRING_PADDING);
+    		int colWidth = (int) Math.max(titleSize.x , columnSize.x);
+    		int pixelWidth = GUIHelper.convertHorizontalDpiToPixel(colWidth);
+        	bodyDataLayer.setColumnWidthByPosition(i, pixelWidth);
+        	totSize += pixelWidth;
     	}
     	
     	// compute the size of the tree column
@@ -342,9 +341,10 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
     	Rectangle r = natTable.getDisplay().getClientArea();
     	totSize += TREE_COLUMN_WIDTH;
 		if (totSize < r.width) {
-			//bodyDataLayer.setColumnWidthPercentageByPosition(0, 50);
-			int width = r.width - totSize - 20;
-	        bodyDataLayer.setColumnWidthByPosition(0, width);
+			bodyDataLayer.setColumnWidthPercentageByPosition(0, 30);
+			/* int width = r.width - totSize - 10;
+    		int pixelWidth = GUIHelper.convertHorizontalDpiToPixel(width);
+	        bodyDataLayer.setColumnWidthByPosition(0, pixelWidth); */
 		} else {
 	    	// tree column: the width is hard coded at the moment
 	        bodyDataLayer.setColumnWidthByPosition(0, TREE_COLUMN_WIDTH);
@@ -358,17 +358,9 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		final GC gc = new GC(natTable.getDisplay());		
 		
 		gc.setFont(TableConfiguration.getMetricFont());
-		String text = TEXT_METRIC_COLUMN;
-		if (OSValidator.isWindows()) {
-			
-			// FIXME: ugly hack to add some spaces for Windows
-			// Somehow, Windows 10 doesn't allow to squeeze the text inside the table
-			// we have to give them some spaces (2 spaces in my case).
-			// A temporary fix for issue #37
-			text += "xx";
-		}
+		String text = TEXT_METRIC_COLUMN + STRING_PADDING;
 		Point extent = gc.stringExtent(text);
-		Point size   = new Point((int) (extent.x * FACTOR_BOLD_FONT), extent.y + 2);
+		Point size   = new Point((int) (extent.x), extent.y + 2);
 		
 		// check the height if we use generic font (tree column)
 		// if this font is higher, we should use this height as the standard.
