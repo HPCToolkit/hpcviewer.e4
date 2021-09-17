@@ -12,7 +12,9 @@ import org.eclipse.nebula.widgets.nattable.config.ConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfiguration;
 import org.eclipse.nebula.widgets.nattable.coordinate.PositionCoordinate;
 import org.eclipse.nebula.widgets.nattable.coordinate.Range;
-
+import org.eclipse.nebula.widgets.nattable.export.command.ExportCommand;
+import org.eclipse.nebula.widgets.nattable.export.command.ExportCommandHandler;
+import org.eclipse.nebula.widgets.nattable.export.config.DefaultExportBindings;
 import org.eclipse.nebula.widgets.nattable.freeze.FreezeHelper;
 import org.eclipse.nebula.widgets.nattable.grid.GridRegion;
 import org.eclipse.nebula.widgets.nattable.grid.layer.ColumnHeaderLayer;
@@ -50,6 +52,7 @@ import edu.rice.cs.hpcdata.util.string.StringUtil;
 import edu.rice.cs.hpctree.action.IActionListener;
 import edu.rice.cs.hpctree.internal.ColumnHeaderDataProvider;
 import edu.rice.cs.hpctree.internal.HeaderLayerConfiguration;
+import edu.rice.cs.hpctree.internal.ScopeTreeExportConfiguration;
 import edu.rice.cs.hpctree.internal.ScopeTreeLabelAccumulator;
 import edu.rice.cs.hpctree.internal.TableConfiguration;
 
@@ -116,6 +119,9 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         compositeLayer.setChildLayer(GridRegion.COLUMN_HEADER, headerLayer, 0, 0);
         compositeLayer.setChildLayer(GridRegion.BODY, bodyLayerStack, 0, 1);
         
+        // special event handler to export the content of the table
+        compositeLayer.registerCommandHandler(new ExportCommandHandler(compositeLayer));
+        
         // turn the auto configuration off as we want to add our header menu
         // configuration
         natTable = new NatTable(parent, NatTable.DEFAULT_STYLE_OPTIONS , compositeLayer, false);
@@ -126,6 +132,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         natTable.setConfigRegistry(configRegistry);
 
         natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
+        natTable.addConfiguration(new ScopeTreeExportConfiguration(bodyLayerStack.getTreeRowModel()));
 		natTable.addConfiguration(new SingleClickSortConfiguration());
         natTable.addConfiguration(new AbstractHeaderMenuConfiguration(natTable) {
             @Override
@@ -446,6 +453,11 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	public int getSortedColumn() {
 		ScopeTreeRowModel treeRowModel = bodyLayerStack.getTreeRowModel();
 		return treeRowModel.getSortedColumnIndexes().get(0);
+	}
+	
+	public void export() {
+		ExportCommand export = new ExportCommand(natTable.getConfigRegistry(), natTable.getShell());
+		natTable.doCommand(export);
 	}
 	
 	public BaseMetric getMetric(int columnIndex) {

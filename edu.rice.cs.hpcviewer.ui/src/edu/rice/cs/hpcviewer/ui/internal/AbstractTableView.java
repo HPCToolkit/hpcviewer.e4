@@ -464,6 +464,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 				updateButtonStatus();
 			}			
 		});
+		
 		toolItem[ACTION_COLUMN_HIDE].addSelectionListener(new SelectionAdapter() {
 			
 			@Override
@@ -472,6 +473,14 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 																getFilterDataItems(), true);
 				profilePart.addEditor(input);
 				updateButtonStatus();
+			}
+		});
+		
+		toolItem[ACTION_EXPORT_DATA].addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				table.export();
 			}
 		});
 	}
@@ -492,6 +501,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		}
 		toolItem[ACTION_ADD_METRIC] .setEnabled(true);
 		toolItem[ACTION_COLUMN_HIDE].setEnabled(true);
+		toolItem[ACTION_EXPORT_DATA].setEnabled(true);
 		
 		Scope selectedScope = table.getSelection();
 		boolean canZoomIn = zoomAction == null ? false : zoomAction.canZoomIn(selectedScope); 
