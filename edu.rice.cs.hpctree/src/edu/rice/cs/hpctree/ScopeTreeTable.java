@@ -36,6 +36,7 @@ import org.eclipse.nebula.widgets.nattable.viewport.command.ShowRowInViewportCom
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -332,10 +333,14 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		DataLayer bodyDataLayer = bodyLayerStack.getBodyDataLayer();
 
         // metric columns (if any)
+		// the width is the max between the title of the column and the cell value 
     	Point columnSize = getMetricColumnSize();
     	int numColumns   = bodyDataProvider.getColumnCount();
 
     	GC gc = new GC(natTable.getDisplay());
+    	Font metricFont = TableFontConfiguration.getMetricFont();
+    	gc.setFont(metricFont);
+    	
     	int totSize = 0;
     	for(int i=1; i<numColumns; i++) {
     		String title = bodyDataProvider.getMetric(i).getDisplayName();
@@ -361,6 +366,22 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	    	// tree column: the width is hard coded at the moment
 	        bodyDataLayer.setColumnWidthByPosition(0, TREE_COLUMN_WIDTH);
 		} 
+		
+		// compute the ideal size of the row's height
+
+		// 1. size for metric font
+		Point metricSize = gc.stringExtent(TEXT_METRIC_COLUMN);
+		
+		// 2. size for generic font 
+		Font genericFont = TableFontConfiguration.getGenericFont();
+		gc.setFont(genericFont);
+		Point genericSize = gc.stringExtent(TEXT_METRIC_COLUMN);
+		
+		int height = Math.max(metricSize.y, genericSize.y);
+		int pixelH = GUIHelper.convertVerticalDpiToPixel(height);
+		
+		bodyDataLayer.setDefaultRowHeight(pixelH);
+		
     	gc.dispose();
 	}
 	
