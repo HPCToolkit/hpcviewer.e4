@@ -403,6 +403,15 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		}		
 	}
 	
+	
+	/***
+	 * Same as visual refresh, plus recompute the width and height
+	 * of the cells
+	 */
+	public void attributeRefresh() {
+		visualRefresh();
+		pack(bodyDataProvider);
+	}
 
 	
 	/***

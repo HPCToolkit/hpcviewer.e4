@@ -174,9 +174,13 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		toolItem[ACTION_ZOOM_OUT] = createToolItem(toolBar, IconManager.Image_ZoomOut, "Zoom-out from the current tree scope");
 		toolItem[ACTION_HOTPATH]  = createToolItem(toolBar, IconManager.Image_FlameIcon, "Expand the hot path below the selected node");
 		
+		new ToolItem(toolBar, SWT.SEPARATOR);
+		
 		toolItem[ACTION_ADD_METRIC]  = createToolItem(toolBar, IconManager.Image_FnMetric, "Create a new user-derived metric");
 		toolItem[ACTION_EXPORT_DATA] = createToolItem(toolBar, IconManager.Image_SaveCSV,  "Export the current table into a CSV file");
 		toolItem[ACTION_COLUMN_HIDE] = createToolItem(toolBar, IconManager.Image_CheckColumns,  "Show/hide columns");
+		
+		new ToolItem(toolBar, SWT.SEPARATOR);
 
 		toolItem[ACTION_FONT_INC] = createToolItem(toolBar, IconManager.Image_FontBigger,  "Increase the font size");
 		toolItem[ACTION_FONT_DEC] = createToolItem(toolBar, IconManager.Image_FontSmaller, "Decrease the font size");

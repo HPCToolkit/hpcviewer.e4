@@ -92,7 +92,7 @@ public class TableFontConfiguration implements IConfiguration, IPropertyChangeLi
 		
 		if (need_to_refresh) {
 			configureRegistry(configRegistry);
-			treeTable.visualRefresh();
+			treeTable.attributeRefresh();
 		}
 	}
 
