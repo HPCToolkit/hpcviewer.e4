@@ -32,6 +32,8 @@ public class BottomUpPart extends AbstractTableView
 	protected void updateStatus() {
 	}
 	
+	
+	private boolean isInitialized = false;
 
 	@Override
 	protected RootScope createRoot() {
@@ -41,8 +43,11 @@ public class BottomUpPart extends AbstractTableView
 		RootScope rootCCT  = experiment.getRootScope(RootScopeType.CallingContextTree);
 		RootScope rootCall = experiment.getRootScope(RootScopeType.CallerTree);
 		
-		RootScope root = ((Experiment) experiment).createCallersView(rootCCT, rootCall);
-		return root;
+		if (!isInitialized) {
+			((Experiment) experiment).createCallersView(rootCCT, rootCall);
+			isInitialized = true;
+		}
+		return rootCall;
 	}
 
 	@Override

@@ -35,19 +35,22 @@ public class FlatPart extends AbstractTableView
 	}
 
 	
+	private boolean isInitialized = false;
+	
 	@Override
 	protected RootScope createRoot() {
 		Experiment experiment = (Experiment) getMetricManager();
 		RootScope rootCCT  = experiment.getRootScope(RootScopeType.CallingContextTree);
 		RootScope rootFlat = experiment.getRootScope(RootScopeType.Flat);
 		
-		if (rootCCT != null && rootFlat != null)
-			return ((Experiment) experiment).createFlatView(rootCCT, rootFlat);
-
-		if (rootFlat != null && rootFlat.hasChildren())
+		if (rootFlat == null || rootCCT == null)
+			return null;
+		
+		if (isInitialized)
 			return rootFlat;
 		
-		return null;
+		isInitialized = true;
+		return ((Experiment) experiment).createFlatView(rootCCT, rootFlat);
 	}
 
 
