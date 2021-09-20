@@ -8,7 +8,6 @@ import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.command.VisualRefreshCommand;
 import org.eclipse.nebula.widgets.nattable.config.ConfigRegistry;
-import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfiguration;
 import org.eclipse.nebula.widgets.nattable.coordinate.PositionCoordinate;
 import org.eclipse.nebula.widgets.nattable.coordinate.Range;
 import org.eclipse.nebula.widgets.nattable.export.command.ExportCommand;
@@ -57,6 +56,7 @@ import edu.rice.cs.hpctree.internal.ScopeTreeExportConfiguration;
 import edu.rice.cs.hpctree.internal.ScopeTreeLabelAccumulator;
 import edu.rice.cs.hpctree.internal.TableConfiguration;
 import edu.rice.cs.hpctree.internal.TableFontConfiguration;
+import edu.rice.cs.hpctree.internal.config.ScopeTableStyleConfiguration;
 
 
 /********************************************************************
@@ -134,7 +134,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         // manually
         natTable.setConfigRegistry(configRegistry);
 
-        natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
+        natTable.addConfiguration(new ScopeTableStyleConfiguration());
         natTable.addConfiguration(new ScopeTreeExportConfiguration(bodyLayerStack.getTreeRowModel()));
 		natTable.addConfiguration(new SingleClickSortConfiguration());
         natTable.addConfiguration(new AbstractHeaderMenuConfiguration(natTable) {
