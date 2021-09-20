@@ -50,7 +50,7 @@ public class Experiment extends BaseExperimentWithMetrics
 	static final public String TITLE_DATACENTRIC_VIEW = "Datacentric view";
 	
 	// thread level database
-	private List<MetricRaw>  metrics_raw;
+	private List<BaseMetric>  metrics_raw;
 	private boolean mergedDatabase = false;
 	private ExperimentOpenFlag flag;
 
@@ -398,7 +398,7 @@ public class Experiment extends BaseExperimentWithMetrics
 	 * 
 	 * @param metricRawList MetricRaw []
 	 */
-	public void setMetricRaw(List<MetricRaw> metricRawList) {
+	public void setMetricRaw(List<BaseMetric> metricRawList) {
 		metrics_raw = metricRawList;
 
 		if (getMajorVersion() >= Constants.EXPERIMENT_SPARSE_VERSION) {
@@ -406,18 +406,6 @@ public class Experiment extends BaseExperimentWithMetrics
 			Collections.sort(metrics_raw, new MetricComparator());
 		}
 	}
-
-
-	/*****
-	 * Retrieve the array of raw metrics.
-	 * Raw metrics are used to get the value of metric-db (or thread-level metrics).
-	 * 
-	 * @return BaseMetric[]
-	 */
-	public List<MetricRaw>  getMetricRaw() {		
-		return metrics_raw;
-	}
-
 
 
 	@Override
@@ -461,5 +449,11 @@ public class Experiment extends BaseExperimentWithMetrics
 	@Override
 	protected void open_finalize() {
 		postprocess(flag == ExperimentOpenFlag.TREE_ALL);		
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<BaseMetric> getRawMetrics() {
+		return ((List<BaseMetric>)(List<? extends BaseMetric>) metrics_raw);
 	}
 }

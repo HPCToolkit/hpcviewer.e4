@@ -40,7 +40,7 @@ public class ThreadContentViewer extends TopDownContentViewer
 
 		// 3. add the new metrics into the table
 		final Experiment experiment = (Experiment) input.getRootScope().getExperiment();
-		initTableColumns(input, experiment.getMetricRaw());
+		initTableColumns(input, experiment.getRawMetrics());
 
 		// 4. update the table content, including the aggregate experiment
 		ScopeTreeViewer treeViewer = getViewer();
@@ -62,7 +62,7 @@ public class ThreadContentViewer extends TopDownContentViewer
 	 * @param threads : list of threads
 	 * @throws IOException 
 	 */
-	private void initTableColumns(ThreadViewInput input, List<MetricRaw> list)  {
+	private void initTableColumns(ThreadViewInput input, List<BaseMetric> list)  {
 		if (list == null) {
 			// error
 			return;
@@ -87,7 +87,7 @@ public class ThreadContentViewer extends TopDownContentViewer
 		boolean sort = true;
 		HashMap<Integer, BaseMetric> listOfDuplicates = new HashMap<Integer, BaseMetric>(list.size());
 		
-		for(MetricRaw metricOrig: list)
+		for(BaseMetric metricOrig: list)
 		{
 			MetricRaw mdup = MetricRaw.create(metricOrig);
 			mdup.setThread(threads);

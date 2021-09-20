@@ -530,6 +530,11 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		});
 	}
 	
+	protected ProfilePart getProfilePart() {	
+		return profilePart;
+	}
+	
+	
 	protected ScopeTreeTable getTable() {
 		return table;
 	}

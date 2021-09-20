@@ -89,7 +89,7 @@ public class ExperimentMerger
 		
 		if (with_raw_metrics)
 		{
-			final List<MetricRaw> metricRaw = buildMetricRaws( exp1.getMetricRaw(), exp2.getMetricRaw() );
+			final List<BaseMetric> metricRaw = buildMetricRaws( exp1.getRawMetrics(), exp2.getRawMetrics() );
 			merged.setMetricRaw(metricRaw);
 		}
 
@@ -276,14 +276,14 @@ public class ExperimentMerger
 	/***
 	 * merge two metric raws
 	 * 
-	 * @param raws1
-	 * @param raws2
+	 * @param list
+	 * @param list2
 	 * @return
 	 */
-	private static List<MetricRaw> buildMetricRaws( List<MetricRaw> raws1, List<MetricRaw> raws2) 
+	private static List<BaseMetric> buildMetricRaws( List<BaseMetric> list, List<BaseMetric> list2) 
 	{
-		List<MetricRaw> rawList = new ArrayList<>(raws1);
-		rawList.addAll(raws2);
+		List<BaseMetric> rawList = new ArrayList<>(list);
+		rawList.addAll(list2);
 		
 		return rawList;
 	}
