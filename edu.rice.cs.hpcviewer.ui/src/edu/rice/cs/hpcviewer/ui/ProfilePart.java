@@ -53,7 +53,6 @@ import edu.rice.cs.hpcviewer.ui.parts.editor.Editor;
 import edu.rice.cs.hpcviewer.ui.parts.flat.FlatPart;
 import edu.rice.cs.hpcviewer.ui.parts.flat.FlatView;
 import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadPart;
-import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadView;
 import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadViewInput;
 import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownPart;
 import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownView;
@@ -127,8 +126,8 @@ public class ProfilePart implements IProfilePart, EventHandler
 								IMetricManager metricMgr;
 								if (o instanceof IMetricManager) {
 									metricMgr = (IMetricManager) o;
-								} else if (view instanceof ThreadView) {
-									metricMgr = ((ThreadView)view).getMetricManager();
+								} else if (view instanceof ThreadPart) {
+									metricMgr = ((ThreadPart)view).getMetricManager();
 								} else {
 									throw new RuntimeException("Unknown view: " + view.getText());
 								}
