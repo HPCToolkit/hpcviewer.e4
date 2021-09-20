@@ -52,6 +52,7 @@ import edu.rice.cs.hpcviewer.ui.parts.datacentric.Datacentric;
 import edu.rice.cs.hpcviewer.ui.parts.editor.Editor;
 import edu.rice.cs.hpcviewer.ui.parts.flat.FlatPart;
 import edu.rice.cs.hpcviewer.ui.parts.flat.FlatView;
+import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadPart;
 import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadView;
 import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadViewInput;
 import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownPart;
@@ -238,9 +239,17 @@ public class ProfilePart implements IProfilePart, EventHandler
 	 */
 	public void addThreadView(ThreadViewInput input) {
 		CTabItem []items = tabFolderBottom.getItems();
+		/*
+		 * for(CTabItem item: items) { if (item instanceof ThreadView) { ThreadView tv =
+		 * (ThreadView) item; ThreadViewInput tvinput = (ThreadViewInput) tv.getInput();
+		 * 
+		 * if (input.getThreads().equals(tvinput.getThreads())) {
+		 * tabFolderBottom.setSelection(tv); return; } } } ThreadView threadView = new
+		 * ThreadView(tabFolderBottom, SWT.NONE);
+		 */
 		for(CTabItem item: items) {
-			if (item instanceof ThreadView) {
-				ThreadView tv = (ThreadView) item;
+			if (item instanceof ThreadPart) {
+				ThreadPart tv = (ThreadPart) item;
 				ThreadViewInput tvinput = (ThreadViewInput) tv.getInput();
 				
 				if (input.getThreads().equals(tvinput.getThreads())) {
@@ -249,7 +258,8 @@ public class ProfilePart implements IProfilePart, EventHandler
 				}
 			}
 		}
-		ThreadView threadView = new ThreadView(tabFolderBottom, SWT.NONE);
+		ThreadPart threadView = new ThreadPart(tabFolderBottom, SWT.NONE);
+
 		addView(threadView, input, true);
 		
 		// make sure the new view is visible and get the focus

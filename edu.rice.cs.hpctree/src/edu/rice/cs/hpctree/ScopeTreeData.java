@@ -43,7 +43,7 @@ public class ScopeTreeData implements IScopeTreeData
 	 * @param root the root scope
 	 * @param metricManager the metric manager of the experiment or database
 	 */
-	public ScopeTreeData(RootScope root, IMetricManager metricManager) {
+	public ScopeTreeData(RootScope root, IMetricManager metricManager, boolean noEmptyColumns) {
 		this.list = FastList.newList();
 		this.list.add(root);
 		
@@ -52,13 +52,21 @@ public class ScopeTreeData implements IScopeTreeData
 		listMetrics = new BasicEventList<>(listVisibleMetrics.size());
 		
 		for(BaseMetric metric: listVisibleMetrics) {
-			if (root.getMetricValue(metric) != MetricValue.NONE) {
-				listMetrics.add(metric);
+			// if we don't want to include empty metrics, we need to check the value
+			// otherwise, just add blindly
+			if (noEmptyColumns) {
+				MetricValue mv = metric.getValue(root);
+				if (mv == MetricValue.NONE) 
+					continue;
 			}
+			listMetrics.add(metric);
 		}		
 		clear();
 	}
 	
+	public ScopeTreeData(RootScope root, IMetricManager metricManager) {
+		this(root, metricManager, true);
+	}
 	
 	@Override
 	public List<Scope> getList() {
@@ -356,9 +364,8 @@ public class ScopeTreeData implements IScopeTreeData
 			return factor * o1.getName().compareTo(o2.getName());
 		}
 
-		int metricIndex = metric.getIndex();
-		MetricValue mv1 = o1.getMetricValue(metricIndex);
-		MetricValue mv2 = o2.getMetricValue(metricIndex);
+		MetricValue mv1 = metric.getValue(o1);
+		MetricValue mv2 = metric.getValue(o2);
 
 		if (mv1.getValue() > mv2.getValue())
 			return factor * 1;

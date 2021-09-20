@@ -27,7 +27,6 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
 import edu.rice.cs.hpcbase.ViewerDataEvent;
-import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
@@ -212,17 +211,23 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		if (!(input instanceof IMetricManager))
 			return;
 		
+		createTable((IMetricManager) input);
+	}
+
+	
+	protected void createTable(IMetricManager input) {
+		
 		// -------------------------------------------
 		// table creation
 		// -------------------------------------------
 		
-		metricManager = (IMetricManager) input;
+		metricManager = input;
 		
 		// -------------------------------------------
 		// Create the main table
 		// -------------------------------------------
 		
-		root = ((Experiment)metricManager).getRootScope(getRootType());
+		root = createRoot();
 		IScopeTreeData treeData = getTreeData(root, metricManager);
 		
 		table = new ScopeTreeTable(parent, SWT.NONE, treeData);
@@ -241,7 +246,8 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 	
 		parent.addDisposeListener(this);
 	}
-
+	
+	
 	@Override
 	public Object getInput() {
 		return metricManager;
@@ -440,7 +446,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 			if (m == metric) {
 				return index;
 			}
-			MetricValue mv = root.getMetricValue(m);
+			MetricValue mv = m.getValue(root);
 			if (mv != MetricValue.NONE)
 				index++;
 		}
