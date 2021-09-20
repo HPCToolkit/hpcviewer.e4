@@ -16,7 +16,7 @@ hpcviewer is part of Rice University&apos;s HPCToolkit project. Development of H
    </configIni>
 
    <launcherArgs>
-      <programArgs>-clearPersistedState
+      <programArgs>-clearPersistedState -Dosgi.locking=none
       </programArgs>
       <vmArgs>-Xmx2G
       </vmArgs>
