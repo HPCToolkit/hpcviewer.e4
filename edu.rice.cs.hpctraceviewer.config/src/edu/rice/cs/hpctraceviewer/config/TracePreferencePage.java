@@ -7,10 +7,8 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +27,7 @@ public class TracePreferencePage extends AbstractPage
 	private final static int TOOLTIP_DELAY_INCREMENT_MS = 1000;
 	
 	//private Button []btnRenders;
-	private Button []colorPolicies;
+	//private Button []colorPolicies;
 	
 	private Spinner tooltipDelay;
 	private Spinner spMaxThreads;
@@ -47,11 +45,11 @@ public class TracePreferencePage extends AbstractPage
 
 	@Override
 	public void apply() {
-		if (colorPolicies == null || tooltipDelay == null) 
+		if (tooltipDelay == null) 
 			return;
 		
 		PreferenceStore pref = TracePreferenceManager.INSTANCE.getPreferenceStore();	
-		
+		/*
 		int colorOld = pref.getInt(TracePreferenceConstants.PREF_COLOR_OPTION);		
 		for (int i=0; i<colorPolicies.length; i++) {
 			Button btn = colorPolicies[i];
@@ -60,7 +58,7 @@ public class TracePreferencePage extends AbstractPage
 				pref.setValue(TracePreferenceConstants.PREF_COLOR_OPTION, i);
 				break;
 			}
-		}
+		} */
 		/*
 		int renderOld = pref.getInt(TracePreferenceConstants.PREF_RENDER_OPTION);
 		
@@ -96,18 +94,19 @@ public class TracePreferencePage extends AbstractPage
 		// Color generator
 		// ------------------------------------------------------------------------
 
+		PreferenceStore pref = TracePreferenceManager.INSTANCE.getPreferenceStore();		
+
+		/*
 		Composite groupColor = createGroupControl(parent, "Color policy", false);
 		groupColor.setToolTipText("Change the policy to map the procedure's name to a color.\n" +
 								  "The change will take effect at the next session");
-
 		colorPolicies = createRadioButtonControl(groupColor, TracePreferenceConstants.colorOptions);
 		Label lbl = new Label(groupColor, SWT.NONE);
 		lbl.setText("The change will take effect at the next session");
 		
-		PreferenceStore pref = TracePreferenceManager.INSTANCE.getPreferenceStore();		
 		int colorSelected    = pref.getInt(TracePreferenceConstants.PREF_COLOR_OPTION);
 		colorPolicies[colorSelected].setSelection(true);
-		
+		*/
 		// ------------------------------------------------------------------------
 		// Rendering mode
 		// ------------------------------------------------------------------------
