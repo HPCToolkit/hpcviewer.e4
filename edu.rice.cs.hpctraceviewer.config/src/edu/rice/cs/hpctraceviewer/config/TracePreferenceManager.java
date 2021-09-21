@@ -40,9 +40,8 @@ public class TracePreferenceManager extends AbstractPreferenceManager
 	 * @return true if name-based color policy has to be used.
 	 */
 	public static boolean useNameBasedColorPolicy() {
-		return true;
-		//int colorOption = getColorOption();
-		//return colorOption == TracePreferenceConstants.COLOR_NAME_BASED;
+		int colorOption = getColorOption();
+		return colorOption == TracePreferenceConstants.COLOR_NAME_BASED;
 	}
 	
 	/***
@@ -67,9 +66,9 @@ public class TracePreferenceManager extends AbstractPreferenceManager
 	/*
 	private static int getRenderOption() {
 		return INSTANCE.getPreferenceStore().getInt(TracePreferenceConstants.PREF_RENDER_OPTION);
-	} 
+	} */
 	
 	private static int getColorOption() {
 		return INSTANCE.getPreferenceStore().getInt(TracePreferenceConstants.PREF_COLOR_OPTION);
-	} */
+	}
 }
