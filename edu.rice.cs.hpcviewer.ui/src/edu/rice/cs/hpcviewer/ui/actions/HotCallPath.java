@@ -75,7 +75,8 @@ public class HotCallPath
 				is_found = getHotCallPath((Scope) node, metric, objHotPath);
 
 				// whether we find it or not, we should reveal the tree path to the last scope
-				treeViewer.setSelection(new StructuredSelection(objHotPath.path), false);
+				// fix issue #107 (node selected is 1 level too deep)
+				treeViewer.setSelection(new StructuredSelection(objHotPath.path.getParentPath()), false);
 			} finally {
 				treeViewer.getTree().setRedraw(true);
 			}
