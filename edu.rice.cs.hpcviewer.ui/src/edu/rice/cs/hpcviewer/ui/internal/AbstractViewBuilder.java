@@ -45,6 +45,8 @@ import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 import edu.rice.cs.hpcdata.util.ScopeComparator;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpctree.IScopeTreeAction;
+import edu.rice.cs.hpctree.action.IUndoableActionManager;
+import edu.rice.cs.hpctree.action.UndoableActionManager;
 import edu.rice.cs.hpctree.action.ZoomAction;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.actions.ExportTable;
@@ -572,7 +574,8 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener, IScopeTreeA
 			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
 		
-		zoomAction = new ZoomAction(this);
+		final IUndoableActionManager actionManager = new UndoableActionManager();		
+		zoomAction = new ZoomAction(actionManager, this);
 
 		toolItem[ACTION_ZOOM_IN].addSelectionListener(new SelectionListener() {
 			

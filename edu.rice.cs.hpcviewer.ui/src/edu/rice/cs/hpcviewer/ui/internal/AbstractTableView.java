@@ -41,6 +41,8 @@ import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpctree.IScopeTreeData;
 import edu.rice.cs.hpctree.ScopeTreeTable;
 import edu.rice.cs.hpctree.action.HotPathAction;
+import edu.rice.cs.hpctree.action.IUndoableActionManager;
+import edu.rice.cs.hpctree.action.UndoableActionManager;
 import edu.rice.cs.hpctree.action.ZoomAction;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.actions.UserDerivedMetric;
@@ -71,12 +73,14 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 	private ScopeTreeTable table ;
 	private ZoomAction     zoomAction;
 
-	private ProfilePart profilePart;
+	private ProfilePart  profilePart;
 	private IEventBroker eventBroker;
-
+	private IUndoableActionManager actionManager;
+	
 	public AbstractTableView(CTabFolder parent, int style, String title) {
 		super(parent, style);
 		setText(title);
+		actionManager = new UndoableActionManager();
 	}
 
 
@@ -188,7 +192,6 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		// add the end of toolbar
 		// -------------------------------------------
 		endToolbar(coolBar, toolBar);
-
 		createCoolItem(coolBar, toolBar);
 		
 		Point p = coolBar.computeSize(SWT.DEFAULT, SWT.DEFAULT);
@@ -456,7 +459,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 	
 	private void addButtonListener(RootScope root, IMetricManager metricManager) {
 		
-		zoomAction = new ZoomAction(table);	
+		zoomAction = new ZoomAction(actionManager, table);	
 
 		toolItem[ACTION_ZOOM_IN].addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -534,6 +537,10 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 				FontManager.changeFontHeight(-1);
 			}
 		});
+	}
+	
+	protected IUndoableActionManager getActionManager() {
+		return actionManager;
 	}
 	
 	protected ProfilePart getProfilePart() {	

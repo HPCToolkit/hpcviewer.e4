@@ -3,6 +3,8 @@
  */
 package edu.rice.cs.hpctree.action;
 
+import java.util.Stack;
+
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScopeCallerView;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpctree.IScopeTreeAction;
@@ -13,12 +15,15 @@ import edu.rice.cs.hpctree.IScopeTreeAction;
  */
 public class ZoomAction 
 {
+	private static final String CONTEXT = "Zoom";
+	
 	// --------------------------------------------------------------------
 	//	ATTRIBUTES
 	// --------------------------------------------------------------------
-    private final java.util.Stack<Scope> stackRootTree;
-    private final IScopeTreeAction treeAction;
-
+    private final Stack<Scope> 		     stackRootTree;
+    private final IScopeTreeAction       treeAction;
+    private final IUndoableActionManager actionManager;
+    
 	// --------------------------------------------------------------------
 	//	CONSTRUCTORS
 	// --------------------------------------------------------------------
@@ -27,9 +32,10 @@ public class ZoomAction
 	 * @param treeViewer
 	 * @param objGUI
 	 */
-	public ZoomAction ( IScopeTreeAction treeAction) {
-		this.treeAction = treeAction;
-		stackRootTree = new java.util.Stack<Scope>();
+	public ZoomAction (IUndoableActionManager actionManager, IScopeTreeAction treeAction) {
+		this.treeAction    = treeAction;
+		this.actionManager = actionManager;
+		this.stackRootTree = new Stack<Scope>();
 	}
 	
 	// --------------------------------------------------------------------
@@ -46,6 +52,7 @@ public class ZoomAction
 		Scope old = treeAction.getRoot();
 		
 		stackRootTree.push(old); // save the node for future zoom-out
+		actionManager.push(CONTEXT);
 		
 		treeAction.setRoot(current);
 		treeAction.traverseOrExpand(0);
@@ -55,18 +62,24 @@ public class ZoomAction
 	 * zoom out
 	 */
 	public void zoomOut () {
+		if (!actionManager.canUndo(CONTEXT))
+			return;
+		
 		Scope parent; 
 		if(stackRootTree.size()>0) {
 			// the tree has been zoomed
 			parent = stackRootTree.pop();
+			actionManager.undo();
+			
+			treeAction.setRoot(parent);
+			treeAction.traverseOrExpand(0);
+
 		} else {
 			// case where the tree hasn't been zoomed
 			// FIXME: there must be a bug if the code comes to here !
 			parent = treeAction.getRoot();
 			throw( new java.lang.RuntimeException("ScopeViewActions - illegal zoomout: "+parent));
 		}
-		treeAction.setRoot(parent);
-		treeAction.traverseOrExpand(0);
 	}
 	
 	/**
@@ -74,6 +87,9 @@ public class ZoomAction
 	 * @return
 	 */
 	public boolean canZoomOut () {
+		if (!actionManager.canUndo(CONTEXT))
+			return false;
+		
 		boolean bRet = (stackRootTree != null);
 		if (bRet) {
 			bRet = ( stackRootTree.size()>0 );
