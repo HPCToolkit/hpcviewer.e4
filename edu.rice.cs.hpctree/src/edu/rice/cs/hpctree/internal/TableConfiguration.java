@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.collections.impl.list.mutable.FastList;
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.config.CellConfigAttributes;
 import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
@@ -17,9 +16,7 @@ import org.eclipse.nebula.widgets.nattable.painter.cell.TextPainter;
 import org.eclipse.nebula.widgets.nattable.painter.cell.decorator.CellPainterDecorator;
 import org.eclipse.nebula.widgets.nattable.style.CellStyleAttributes;
 import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
-import org.eclipse.nebula.widgets.nattable.style.HorizontalAlignmentEnum;
 import org.eclipse.nebula.widgets.nattable.style.Style;
-import org.eclipse.nebula.widgets.nattable.style.VerticalAlignmentEnum;
 import org.eclipse.nebula.widgets.nattable.ui.NatEventData;
 import org.eclipse.nebula.widgets.nattable.ui.action.IMouseAction;
 import org.eclipse.nebula.widgets.nattable.ui.binding.UiBindingRegistry;
@@ -28,11 +25,8 @@ import org.eclipse.nebula.widgets.nattable.ui.matcher.MouseEventMatcher;
 import org.eclipse.nebula.widgets.nattable.ui.util.CellEdgeEnum;
 import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
 import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.graphics.Font;
-
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpctree.ScopeTreeDataProvider;
 import edu.rice.cs.hpctree.action.IActionListener;
 import edu.rice.cs.hpctree.resources.IconManager;
@@ -59,39 +53,6 @@ public class TableConfiguration implements IConfiguration
 		painters.addAll( addIconLabel(configRegistry, IconManager.Image_CallFrom, ScopeTreeLabelAccumulator.LABEL_CALLER) );
 		addIconLabel(configRegistry, IconManager.Image_CallFromDisabled, ScopeTreeLabelAccumulator.LABEL_CALLER_DISABLED);
 		
-		// configuration for metric column
-		//
-		final Font fontMetric  = getMetricFont();
-		final Style styleMetric = new Style();
-		styleMetric.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.RIGHT);
-		styleMetric.setAttributeValue(CellStyleAttributes.VERTICAL_ALIGNMENT, VerticalAlignmentEnum.MIDDLE);
-		styleMetric.setAttributeValue(CellStyleAttributes.FONT, fontMetric);
-		
-		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
-											   styleMetric, 
-											   DisplayMode.NORMAL, 
-											   ScopeTreeLabelAccumulator.LABEL_METRICOLUMN);
-		
-		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
-											   styleMetric, 
-											   DisplayMode.SELECT, 
-											   ScopeTreeLabelAccumulator.LABEL_METRICOLUMN);
-
-		// configuration for tree column
-		//
-		final Font fontGeneric = getGenericFont();
-		final Style styleTree  = new Style();
-		styleTree.setAttributeValue(CellStyleAttributes.FONT, fontGeneric);
-
-		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
-											   styleTree, 
-											   DisplayMode.NORMAL, 
-											   ScopeTreeLabelAccumulator.LABEL_TREECOLUMN);
-		
-		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
-				   							   styleTree, 
-											   DisplayMode.SELECT, 
-											   ScopeTreeLabelAccumulator.LABEL_TREECOLUMN);
 
 		final Style styleActive = new Style();
 		styleActive.setAttributeValue(CellStyleAttributes.FOREGROUND_COLOR, GUIHelper.COLOR_BLUE);
@@ -183,25 +144,4 @@ public class TableConfiguration implements IConfiguration
 		
 		return listPainter;
 	}
-	
-	public static Font getMetricFont() {
-		Font font ;
-		try {
-			font = FontManager.getMetricFont();
-		} catch (Exception e) {
-			font = JFaceResources.getTextFont();
-		}
-		return font;
-	}
-
-	public static Font getGenericFont() {
-		Font font;
-		try {
-			font = FontManager.getFontGeneric();
-		} catch (Exception e) {
-			font = JFaceResources.getDefaultFont();
-		}
-		return font;
-	}
-
 }

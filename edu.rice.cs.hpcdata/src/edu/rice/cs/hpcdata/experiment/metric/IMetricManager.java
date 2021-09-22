@@ -43,6 +43,13 @@ public interface IMetricManager
 	/** get metrics that are NOT invisible (can be hidden, but not invisible) */
 	public List<BaseMetric> getVisibleMetrics();
 
+	
+	/****
+	 * get the list of "raw" metrics used for plotting graphs
+	 * @return
+	 */
+	public List<BaseMetric> getRawMetrics();
+	
 	/****
 	 * Add a new user derived metrics
 	 * @param objMetric {@code DerivedMetric} a new metric

@@ -21,7 +21,7 @@ public class HeaderLayerConfiguration implements IConfiguration, IConfigLabelAcc
 	@Override
 	public void configureRegistry(IConfigRegistry configRegistry) {
 		final Style style = new Style();
-		style.setAttributeValue(CellStyleAttributes.FONT, TableConfiguration.getGenericFont());
+		style.setAttributeValue(CellStyleAttributes.FONT, TableFontConfiguration.getGenericFont());
 
 		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, style, DisplayMode.SELECT, LABEL_COLUMN);
 		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, style, DisplayMode.NORMAL, LABEL_COLUMN);

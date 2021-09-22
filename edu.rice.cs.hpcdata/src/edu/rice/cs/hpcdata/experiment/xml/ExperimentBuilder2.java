@@ -33,7 +33,7 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 {
 	/** The parsed metric objects. */
 	private List<BaseMetric> metricList;
-	private List<MetricRaw> metricRawList;
+	private List<BaseMetric> metricRawList;
 
 	/** Maximum number of metrics provided by the experiment file.
     We use the maxNumberOfMetrics value to generate short names for the self metrics*/
@@ -698,7 +698,7 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 	 */
 	private void begin_MetricRawTable() 
 	{
-		this.metricRawList = new ArrayList<MetricRaw>();
+		this.metricRawList = new ArrayList<>();
 	}
 
 	/***
@@ -707,13 +707,13 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 	private void end_MetricRawTable() 
 	{
 		if (metricRawList != null && metricRawList.size()>0) {
-			for (MetricRaw m : metricRawList) {
+			for (BaseMetric m : metricRawList) {
 				int partner_index = m.getPartner();
 				if (partner_index >= 0) {
 					// find the metric partner
-					for(MetricRaw mr: metricRawList) {
+					for(BaseMetric mr: metricRawList) {
 						if (mr.getIndex() == partner_index) {
-							m.setMetricPartner(mr);
+							((MetricRaw) m).setMetricPartner((MetricRaw) mr);
 							break;
 						}
 					}

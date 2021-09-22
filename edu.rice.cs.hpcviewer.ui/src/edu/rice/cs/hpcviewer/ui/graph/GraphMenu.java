@@ -8,10 +8,9 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.custom.CTabItem;
 
-import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
-import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
+import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 
@@ -25,7 +24,7 @@ public class GraphMenu
 {
 	static public void createAdditionalContextMenu(
 			ProfilePart profilePart,
-			IMenuManager mgr, Experiment experiment, 
+			IMenuManager mgr, IMetricManager experiment, 
 			IThreadDataCollection threadData, Scope scope) {
 		
 		if (scope != null) {
@@ -34,7 +33,7 @@ public class GraphMenu
 				// no menus if there is no thread-level data
 				return;
 			
-			final List<MetricRaw> metrics = experiment.getMetricRaw();
+			final List<BaseMetric> metrics = experiment.getRawMetrics();
 			if (metrics == null)
 				return;
 			

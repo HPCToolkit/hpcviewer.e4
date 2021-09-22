@@ -88,4 +88,9 @@ public class MetricRawManager implements IMetricManager
 		}
 		return null;
 	}
+
+	@Override
+	public List<BaseMetric> getRawMetrics() {
+		return getVisibleMetrics();
+	}
 }

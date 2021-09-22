@@ -5,15 +5,13 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.collections.impl.list.mutable.FastList;
-import org.eclipse.jface.layout.GridDataFactory;
-import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.command.VisualRefreshCommand;
 import org.eclipse.nebula.widgets.nattable.config.ConfigRegistry;
-import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfiguration;
 import org.eclipse.nebula.widgets.nattable.coordinate.PositionCoordinate;
 import org.eclipse.nebula.widgets.nattable.coordinate.Range;
-
+import org.eclipse.nebula.widgets.nattable.export.command.ExportCommand;
+import org.eclipse.nebula.widgets.nattable.export.command.ExportCommandHandler;
 import org.eclipse.nebula.widgets.nattable.freeze.FreezeHelper;
 import org.eclipse.nebula.widgets.nattable.grid.GridRegion;
 import org.eclipse.nebula.widgets.nattable.grid.layer.ColumnHeaderLayer;
@@ -28,14 +26,20 @@ import org.eclipse.nebula.widgets.nattable.painter.layer.NatGridLayerPainter;
 import org.eclipse.nebula.widgets.nattable.selection.event.RowSelectionEvent;
 import org.eclipse.nebula.widgets.nattable.sort.SortHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.sort.config.SingleClickSortConfiguration;
+import org.eclipse.nebula.widgets.nattable.sort.event.SortColumnEvent;
 import org.eclipse.nebula.widgets.nattable.tooltip.NatTableContentTooltip;
 import org.eclipse.nebula.widgets.nattable.ui.menu.AbstractHeaderMenuConfiguration;
 import org.eclipse.nebula.widgets.nattable.ui.menu.PopupMenuBuilder;
+import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
+import org.eclipse.nebula.widgets.nattable.viewport.command.ShowRowInViewportCommand;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 
@@ -44,13 +48,15 @@ import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
-import edu.rice.cs.hpcdata.util.OSValidator;
 import edu.rice.cs.hpcdata.util.string.StringUtil;
 import edu.rice.cs.hpctree.action.IActionListener;
 import edu.rice.cs.hpctree.internal.ColumnHeaderDataProvider;
 import edu.rice.cs.hpctree.internal.HeaderLayerConfiguration;
+import edu.rice.cs.hpctree.internal.ScopeTreeExportConfiguration;
 import edu.rice.cs.hpctree.internal.ScopeTreeLabelAccumulator;
 import edu.rice.cs.hpctree.internal.TableConfiguration;
+import edu.rice.cs.hpctree.internal.TableFontConfiguration;
+import edu.rice.cs.hpctree.internal.config.ScopeTableStyleConfiguration;
 
 
 /********************************************************************
@@ -64,10 +70,10 @@ import edu.rice.cs.hpctree.internal.TableConfiguration;
  * like a composite for the layout.
  *
  ********************************************************************/
-public class ScopeTreeTable extends Composite implements IScopeTreeAction, DisposeListener, ILayerListener
+public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayerListener
 {
-	private final static float  FACTOR_BOLD_FONT   = 1.5f;
-	private final static String TEXT_METRIC_COLUMN = "|8x88+88xx888x8%--";
+	private final static String TEXT_METRIC_COLUMN = "|8x88+88xx888x8%-";
+	private final static String STRING_PADDING  = "XX"; 
 
 	private final NatTable natTable ;
 	private final ScopeTreeBodyLayerStack bodyLayerStack ;
@@ -80,9 +86,6 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 	}
 	
 	public ScopeTreeTable(Composite parent, int style, IScopeTreeData treeData) {
-		super(parent, style);
-
-		setLayout(new GridLayout());
         
         this.bodyDataProvider = new ScopeTreeDataProvider(treeData); 
 
@@ -96,6 +99,7 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
         
         tableConfiguration =  new TableConfiguration(bodyDataProvider);
         bodyLayerStack.addConfiguration(tableConfiguration);
+        bodyLayerStack.addConfiguration(new TableFontConfiguration(this));
         
         // --------------------------------
         // build the column header layer
@@ -104,6 +108,7 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
         DataLayer columnHeaderDataLayer = new DefaultColumnHeaderDataLayer(new ColumnHeaderDataProvider(bodyDataProvider));
         ILayer columnHeaderLayer = new ColumnHeaderLayer(columnHeaderDataLayer, bodyLayerStack, bodyLayerStack.getSelectionLayer());
         SortHeaderLayer<Scope> headerLayer = new SortHeaderLayer<>(columnHeaderLayer, bodyLayerStack.getTreeRowModel());
+        headerLayer.addLayerListener(this);
         
         HeaderLayerConfiguration headerConfiguration = new HeaderLayerConfiguration();
         headerLayer.setConfigLabelAccumulator(headerConfiguration);
@@ -117,16 +122,20 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
         compositeLayer.setChildLayer(GridRegion.COLUMN_HEADER, headerLayer, 0, 0);
         compositeLayer.setChildLayer(GridRegion.BODY, bodyLayerStack, 0, 1);
         
+        // special event handler to export the content of the table
+        compositeLayer.registerCommandHandler(new ExportCommandHandler(compositeLayer));
+        
         // turn the auto configuration off as we want to add our header menu
         // configuration
-        natTable = new NatTable(this, NatTable.DEFAULT_STYLE_OPTIONS , compositeLayer, false);
+        natTable = new NatTable(parent, NatTable.DEFAULT_STYLE_OPTIONS , compositeLayer, false);
         
         // as the autoconfiguration of the NatTable is turned off, we have to
         // add the DefaultNatTableStyleConfiguration and the ConfigRegistry
         // manually
         natTable.setConfigRegistry(configRegistry);
 
-        natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
+        natTable.addConfiguration(new ScopeTableStyleConfiguration());
+        natTable.addConfiguration(new ScopeTreeExportConfiguration(bodyLayerStack.getTreeRowModel()));
 		natTable.addConfiguration(new SingleClickSortConfiguration());
         natTable.addConfiguration(new AbstractHeaderMenuConfiguration(natTable) {
             @Override
@@ -143,7 +152,7 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
         
         // I don't know why we have to refresh the table here
         // However, without refreshing, the content will be weird
-        natTable.refresh();
+        visualRefresh();
         natTable.configure();
 
         freezeTreeColumn();
@@ -151,16 +160,15 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
     	// Need to set the grid data and layout
     	// if not set here, the table will be weird. I don't know why.
     	
-        GridDataFactory.fillDefaults().grab(true, true).applyTo(natTable);
-		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(natTable);
+        GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+        gridData.minimumHeight = 1;
+        gridData.minimumWidth  = 1;
+        natTable.setLayoutData(gridData);
 
 		natTable.setLayerPainter(new NatGridLayerPainter(natTable, DataLayer.DEFAULT_ROW_HEIGHT));
-		addDisposeListener(this);
+		natTable.addDisposeListener(this);
 		
-		/*
-		natTable.getDisplay().asyncExec(()-> {
-			expandAndSelectRootChild(getRoot());
-		}); */
+		pack(this.bodyDataProvider);
 	}
 	
 	
@@ -291,6 +299,7 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 
 	@Override
 	public void handleLayerEvent(ILayerEvent event) {
+
 		if (event instanceof RowSelectionEvent) {
 			RowSelectionEvent rowEvent = (RowSelectionEvent) event;
 			int []indexes = rowEvent.getRowIndexes();
@@ -303,37 +312,76 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 			listeners.forEach(l -> {
 				l.select(scope);
 			});
+		} else if (event instanceof SortColumnEvent) {
+			Set<Range> ranges = bodyLayerStack.getSelectionLayer().getSelectedRowPositions();
+			if (!ranges.isEmpty()) {
+				Range range = ranges.iterator().next();
+				if (range.start >= 0) {
+					natTable.doCommand(new ShowRowInViewportCommand(range.start));
+				}
+			}
 		}
 	}
 
 	
-	@Override
-	public void pack() {		
+	private void pack(ScopeTreeDataProvider dataProvider) {		
 		final int TREE_COLUMN_WIDTH  = 350;
-
-		super.pack();
-
+		
 		// ---------------------------------------------------------------
 		// pack the columns based on the title or the content of the cell
 		// ---------------------------------------------------------------
 		DataLayer bodyDataLayer = bodyLayerStack.getBodyDataLayer();
-		
-    	// tree column: the width is hard coded at the moment 
-        bodyDataLayer.setColumnWidthByPosition(0, TREE_COLUMN_WIDTH);
 
         // metric columns (if any)
+		// the width is the max between the title of the column and the cell value 
     	Point columnSize = getMetricColumnSize();
     	int numColumns   = bodyDataProvider.getColumnCount();
+
+    	GC gc = new GC(natTable.getDisplay());
+    	Font metricFont = TableFontConfiguration.getMetricFont();
+    	gc.setFont(metricFont);
     	
-    	GC gc = new GC(getDisplay());
-    	
+    	int totSize = 0;
     	for(int i=1; i<numColumns; i++) {
-    		String title = (String) bodyDataProvider.getDataValue(i, 0);
-    		Point titleSize = gc.textExtent(title + "XXX");
-    		int colWidth = (int) Math.max(titleSize.x * FACTOR_BOLD_FONT, columnSize.x);
-    		
-        	bodyDataLayer.setColumnWidthByPosition(i, colWidth);
+    		String title = bodyDataProvider.getMetric(i).getDisplayName();
+    		Point titleSize = gc.textExtent(title + STRING_PADDING);
+    		int colWidth = (int) Math.max(titleSize.x , columnSize.x);
+    		int pixelWidth = GUIHelper.convertHorizontalDpiToPixel(colWidth);
+        	bodyDataLayer.setColumnWidthByPosition(i, pixelWidth);
+        	totSize += pixelWidth;
     	}
+    	
+    	// compute the size of the tree column
+    	// if the total size is less than the display, we can use the percentage for the tree column
+    	// otherwise we should specify explicitly the width
+    	
+    	Rectangle r = natTable.getDisplay().getClientArea();
+    	totSize += TREE_COLUMN_WIDTH;
+		if (totSize < r.width) {
+			bodyDataLayer.setColumnWidthPercentageByPosition(0, 30);
+			/* int width = r.width - totSize - 10;
+    		int pixelWidth = GUIHelper.convertHorizontalDpiToPixel(width);
+	        bodyDataLayer.setColumnWidthByPosition(0, pixelWidth); */
+		} else {
+	    	// tree column: the width is hard coded at the moment
+	        bodyDataLayer.setColumnWidthByPosition(0, TREE_COLUMN_WIDTH);
+		} 
+		
+		// compute the ideal size of the row's height
+
+		// 1. size for metric font
+		Point metricSize = gc.stringExtent(TEXT_METRIC_COLUMN);
+		
+		// 2. size for generic font 
+		Font genericFont = TableFontConfiguration.getGenericFont();
+		gc.setFont(genericFont);
+		Point genericSize = gc.stringExtent(TEXT_METRIC_COLUMN);
+		
+		int height = Math.max(metricSize.y, genericSize.y);
+		int pixelH = GUIHelper.convertVerticalDpiToPixel(height);
+		
+		bodyDataLayer.setDefaultRowHeight(pixelH);
+		
     	gc.dispose();
 	}
 	
@@ -342,23 +390,15 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 	private Point getMetricColumnSize() {
 		final GC gc = new GC(natTable.getDisplay());		
 		
-		gc.setFont(TableConfiguration.getMetricFont());
-		String text = TEXT_METRIC_COLUMN;
-		if (OSValidator.isWindows()) {
-			
-			// FIXME: ugly hack to add some spaces for Windows
-			// Somehow, Windows 10 doesn't allow to squeeze the text inside the table
-			// we have to give them some spaces (2 spaces in my case).
-			// A temporary fix for issue #37
-			text += "xx";
-		}
+		gc.setFont(TableFontConfiguration.getMetricFont());
+		String text = TEXT_METRIC_COLUMN + STRING_PADDING;
 		Point extent = gc.stringExtent(text);
-		Point size   = new Point((int) (extent.x * FACTOR_BOLD_FONT), extent.y + 2);
+		Point size   = new Point((int) (extent.x), extent.y + 2);
 		
 		// check the height if we use generic font (tree column)
 		// if this font is higher, we should use this height as the standard.
 		
-		gc.setFont(TableConfiguration.getGenericFont());
+		gc.setFont(TableFontConfiguration.getGenericFont());
 		extent = gc.stringExtent(text);
 		size.y = Math.max(size.y, extent.y);
 		
@@ -374,11 +414,26 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 			natTable.refresh();
 	}
 	
+	/***
+	 * The same as {@code refresh} but more lightweight.
+	 * Use this method if there is no structural changes
+	 */
 	public void visualRefresh() {
 		if (natTable != null) {
 			natTable.doCommand(new VisualRefreshCommand());
 		}		
 	}
+	
+	
+	/***
+	 * Same as visual refresh, plus recompute the width and height
+	 * of the cells
+	 */
+	public void attributeRefresh() {
+		visualRefresh();
+		pack(bodyDataProvider);
+	}
+
 	
 	/***
 	 * Redraw the painting of the table.
@@ -435,6 +490,11 @@ public class ScopeTreeTable extends Composite implements IScopeTreeAction, Dispo
 	public int getSortedColumn() {
 		ScopeTreeRowModel treeRowModel = bodyLayerStack.getTreeRowModel();
 		return treeRowModel.getSortedColumnIndexes().get(0);
+	}
+	
+	public void export() {
+		ExportCommand export = new ExportCommand(natTable.getConfigRegistry(), natTable.getShell());
+		natTable.doCommand(export);
 	}
 	
 	public BaseMetric getMetric(int columnIndex) {

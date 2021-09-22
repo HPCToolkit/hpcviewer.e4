@@ -3,16 +3,13 @@ package edu.rice.cs.hpctree.internal;
 import org.eclipse.nebula.widgets.nattable.config.CellConfigAttributes;
 import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.config.IConfiguration;
-import org.eclipse.nebula.widgets.nattable.export.ExportConfigAttributes;
 import org.eclipse.nebula.widgets.nattable.grid.GridRegion;
 import org.eclipse.nebula.widgets.nattable.layer.ILayer;
 import org.eclipse.nebula.widgets.nattable.style.CellStyleAttributes;
 import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
 import org.eclipse.nebula.widgets.nattable.style.HorizontalAlignmentEnum;
 import org.eclipse.nebula.widgets.nattable.style.Style;
-import org.eclipse.nebula.widgets.nattable.tree.TreeLayer;
 import org.eclipse.nebula.widgets.nattable.tree.action.TreeExpandCollapseAction;
-import org.eclipse.nebula.widgets.nattable.tree.config.TreeExportFormatter;
 import org.eclipse.nebula.widgets.nattable.tree.painter.TreeImagePainter;
 import org.eclipse.nebula.widgets.nattable.ui.action.NoOpMouseAction;
 import org.eclipse.nebula.widgets.nattable.ui.binding.UiBindingRegistry;
@@ -23,11 +20,7 @@ import edu.rice.cs.hpctree.ScopeTreeLayer;
 
 public class ScopeTreeLayerConfiguration implements IConfiguration 
 {
-	private final ScopeTreeLayer treeLayer;
-	
-	
 	public ScopeTreeLayerConfiguration(ScopeTreeLayer treeLayer) {
-		this.treeLayer = treeLayer;
 	}
 
 	@Override
@@ -46,12 +39,6 @@ public class ScopeTreeLayerConfiguration implements IConfiguration
 				style,
 				DisplayMode.NORMAL,
 				ScopeTreeLayer.TREE_COLUMN_CELL);
-
-		configRegistry.registerConfigAttribute(
-				ExportConfigAttributes.EXPORT_FORMATTER,
-				new TreeExportFormatter(this.treeLayer.getModel()),
-				DisplayMode.NORMAL,
-				TreeLayer.TREE_COLUMN_CELL);
 	}
 
 	@Override

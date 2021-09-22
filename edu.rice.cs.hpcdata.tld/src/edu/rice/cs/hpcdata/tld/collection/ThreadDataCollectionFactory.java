@@ -36,7 +36,7 @@ public final class ThreadDataCollectionFactory
 		case 1:
 		case Constants.EXPERIMENT_DENSED_VERSION:
 
-			if (experiment.getMetricRaw()!=null) {
+			if (experiment.getRawMetrics()!=null) {
 				data_file = new ThreadDataCollection2(experiment);
 				String directory = experiment.getDefaultDirectory().getAbsolutePath();
 				data_file.open(root, directory);
