@@ -70,13 +70,13 @@ public class HotCallPath
 			objHotPath.path  = objSel.getPaths()[0];
 			objHotPath.node  = (Scope) node;
 			
+			is_found = getHotCallPath((Scope) node, metric, objHotPath);
+
 			try {
 				treeViewer.getTree().setRedraw(false);		
-				is_found = getHotCallPath((Scope) node, metric, objHotPath);
-
 				// whether we find it or not, we should reveal the tree path to the last scope
-				// fix issue #107 (node selected is 1 level too deep)
-				treeViewer.setSelection(new StructuredSelection(objHotPath.path.getParentPath()), false);
+				treeViewer.reveal(objHotPath.path);
+				treeViewer.setSelection(new StructuredSelection(objHotPath.path), false);
 			} finally {
 				treeViewer.getTree().setRedraw(true);
 			}
@@ -125,22 +125,17 @@ public class HotCallPath
 				double dParent = MetricValue.getValue(mvParent);
 				double dChild  = MetricValue.getValue(mvChild);
 
-				objHotPath.path = objHotPath.path.createChildPath(scopeChild);
-				objHotPath.node = scopeChild;
-
 				// simple comparison: if the child has "significant" difference compared to its parent
 				// then we consider it as hot path node.
-				if(dChild < (0.5 * dParent)) {
-					try {
-						treeViewer.getTree().setRedraw(false);
-						treeViewer.reveal(objHotPath.path);
-					} finally {
-						treeViewer.getTree().setRedraw(true);
-					}
-
-					return true;
-				} else {
+				if(dChild >= (0.5 * dParent)) {
+					// fix issue #107 (hot path is too 1 level too deep): 
+					// 	add the path only if we "meet" the criteria
+					objHotPath.path = objHotPath.path.createChildPath(scopeChild);
+					objHotPath.node = scopeChild;
 					return getHotCallPath(scopeChild, metric, objHotPath);
+					
+				} else {
+					return true;
 				}
 			}
 		}
