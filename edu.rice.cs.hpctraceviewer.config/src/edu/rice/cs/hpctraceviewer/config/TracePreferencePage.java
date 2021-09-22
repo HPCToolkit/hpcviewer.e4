@@ -10,7 +10,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
 import org.slf4j.Logger;
@@ -29,7 +28,7 @@ public class TracePreferencePage extends AbstractPage
 	private final static int TOOLTIP_DELAY_MAX_MS = 10000;
 	private final static int TOOLTIP_DELAY_INCREMENT_MS = 1000;
 	
-	private Button []btnRenders;
+	//private Button []btnRenders;
 	private Button []colorPolicies;
 	
 	private Spinner tooltipDelay;
@@ -48,7 +47,7 @@ public class TracePreferencePage extends AbstractPage
 
 	@Override
 	public void apply() {
-		if (colorPolicies == null || btnRenders == null || tooltipDelay == null) 
+		if (colorPolicies == null || tooltipDelay == null) 
 			return;
 		
 		PreferenceStore pref = TracePreferenceManager.INSTANCE.getPreferenceStore();	
@@ -62,7 +61,7 @@ public class TracePreferencePage extends AbstractPage
 				break;
 			}
 		}
-		
+		/*
 		int renderOld = pref.getInt(TracePreferenceConstants.PREF_RENDER_OPTION);
 		
 		for (int i=0; i<btnRenders.length; i++) {
@@ -72,7 +71,7 @@ public class TracePreferencePage extends AbstractPage
 				pref.setValue(TracePreferenceConstants.PREF_RENDER_OPTION, i);
 				break;
 			}
-		}
+		} */
 		
 		int max_threads = spMaxThreads.getSelection();
 		pref.setValue(TracePreferenceConstants.PREF_MAX_THREADS, max_threads);
@@ -112,12 +111,13 @@ public class TracePreferencePage extends AbstractPage
 		// ------------------------------------------------------------------------
 		// Rendering mode
 		// ------------------------------------------------------------------------
-		
+		/*
 		Group groupFont = createGroupControl(parent, "Rendering mode", false);
 		btnRenders = createRadioButtonControl(groupFont, TracePreferenceConstants.renderingOptions);
 		
 		int renderOld = pref.getInt(TracePreferenceConstants.PREF_RENDER_OPTION);
 		btnRenders[renderOld].setSelection(true);
+		*/
 
 		// ------------------------------------------------------------------------
 		// maximum threads
@@ -165,10 +165,12 @@ public class TracePreferencePage extends AbstractPage
 	protected void performDefaults() {
 		
 		// by default the first label is selected
+		/*
 		btnRenders[0].setSelection(true);
 		for(int i=1; i<btnRenders.length; i++) {
 			btnRenders[i].setSelection(false);
 		}
+		*/
 		int maxThreads = Math.min(ThreadManager.getNumThreads(0), TracePreferenceConstants.DEFAULT_MAX_THREADS);
 		spMaxThreads.setSelection(maxThreads);
 		

@@ -7,11 +7,52 @@
 # This script is only for Unix and X windows.
 #
 
+#------------------------------------------------------------
+# Error messages
+#------------------------------------------------------------
+
+die()
+{
+    echo "$0: error: $*" 1>&2
+    exit 1
+}
+
+
+#------------------------------------------------------------
+# Check maven
+#------------------------------------------------------------
 if ! command -v mvn &> /dev/null
 then
-	echo "Maven mvn command is not found"
-	echo "Please install Apache maven"
-	exit
+	die "Apache Maven (mvn) command is not found"
+fi
+
+#------------------------------------------------------------
+# Check the java version.
+#------------------------------------------------------------
+JAVA=`type -p java`
+
+if [ "$JAVA"x != "x" ]; then
+    JAVA=java
+elif [[ -n "$JAVA_HOME" ]] && [[ -x "$JAVA_HOME/bin/java" ]];  then
+    echo found java executable in JAVA_HOME     
+    JAVA="$JAVA_HOME/bin/java"
+else
+    die "unable to find program 'java' on your PATH"
+fi
+
+JAVA_MAJOR_VERSION=`java -version 2>&1 \
+	  | head -1 \
+	  | cut -d'"' -f2 \
+	  | sed 's/^1\.//' \
+	  | cut -d'.' -f1`
+
+echo "Java version $JAVA_MAJOR_VERSION"
+
+# we need Java 11 at least
+jvm_required=11
+
+if [ "$JAVA_MAJOR_VERSION" -lt "$jvm_required" ]; then
+	die "$name requires Java $jvm_required"
 fi
 
 show_help(){
@@ -24,6 +65,9 @@ show_help(){
 }
 
 CHECK=0
+#------------------------------------------------------------
+# start to build
+#------------------------------------------------------------
 NOTARIZE=0
 RELEASE=`date +"%Y.%m"`
 

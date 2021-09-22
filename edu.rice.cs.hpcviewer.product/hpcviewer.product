@@ -18,7 +18,7 @@ hpcviewer is part of Rice University&apos;s HPCToolkit project. Development of H
    <launcherArgs>
       <programArgs>-clearPersistedState
       </programArgs>
-      <vmArgs>-Xmx2G
+      <vmArgs>-Xmx2G   -Dosgi.locking=none
       </vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts
       </vmArgsMac>
