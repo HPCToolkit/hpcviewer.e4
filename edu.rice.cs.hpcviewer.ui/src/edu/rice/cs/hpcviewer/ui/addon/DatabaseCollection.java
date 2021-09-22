@@ -81,10 +81,10 @@ public class DatabaseCollection
 	final private HashMap<MWindow, List<BaseExperiment>>   mapWindowToExperiments;
 	final private HashMap<BaseExperiment, ViewerDataEvent> mapColumnStatus;
 	
-	private IEventBroker      eventBroker;
-    private ExperimentManager experimentManager;
+	private @Inject IEventBroker eventBroker;
+    private ExperimentManager    experimentManager;
 	
-	private Logger    statusReporter;
+	private Logger statusReporter;
 	
 	private @Inject UISynchronize sync;
 	
@@ -535,7 +535,8 @@ public class DatabaseCollection
 		// first, notify all the parts that have experiment that they will be destroyed.
 		
 		ViewerDataEvent data = new ViewerDataEvent((Experiment) experiment, null);
-		eventBroker.send(BaseConstants.TOPIC_HPC_REMOVE_DATABASE, data);
+		if (eventBroker != null)
+			eventBroker.send(BaseConstants.TOPIC_HPC_REMOVE_DATABASE, data);
 		
 		// make sure the experiment's resources are disposed
 		experiment.dispose();
