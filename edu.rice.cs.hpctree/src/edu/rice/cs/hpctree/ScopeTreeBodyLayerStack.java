@@ -39,18 +39,24 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
 	public ScopeTreeBodyLayerStack(IScopeTreeData treeData, 
 								   ScopeTreeDataProvider  bodyDataProvider) {
 
+		// initialize the stack of layers for the tree table
+		// careful: the order is important. 
+		// we have to ensure the data layer is the bottom and the column reorder
+		// has to be before the column hide show layer. Otherwise we can't hide/
+		// show columns properly
+		
         this.bodyDataLayer = new DataLayer(bodyDataProvider);
         this.bodyDataLayer.setColumnsResizableByDefault(true);
 
-        ColumnReorderLayer reorderLayer = new ColumnReorderLayer(bodyDataLayer);
+        ColumnReorderLayer reorderLayer = new ColumnReorderLayer(this.bodyDataLayer);
         this.hideShowLayer  = new ColumnHideShowLayer(reorderLayer);
-        this.selectionLayer = new SelectionLayer(hideShowLayer, false);
+        this.selectionLayer = new SelectionLayer(this.hideShowLayer, false);
         
         this.treeRowModel   = new ScopeTreeRowModel(treeData);
-        this.treeLayer      = new ScopeTreeLayer(this.selectionLayer, treeRowModel);
-        this.viewportLayer  = new ViewportLayer(treeLayer);
+        this.treeLayer      = new ScopeTreeLayer(this.selectionLayer, this.treeRowModel);
+        this.viewportLayer  = new ViewportLayer(this.treeLayer);
       
-        this.freezeLayer    = new FreezeLayer(treeLayer);
+        this.freezeLayer    = new FreezeLayer(this.treeLayer);
         this.compositeFreezeLayer = new CompositeFreezeLayer(freezeLayer, viewportLayer, selectionLayer);
         
         final IRowIdAccessor<Scope> rowIdAccessor = new IRowIdAccessor<Scope>() {

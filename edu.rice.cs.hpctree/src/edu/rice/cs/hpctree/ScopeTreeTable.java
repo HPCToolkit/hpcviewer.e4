@@ -226,11 +226,11 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	 * @param columnIndexes int or int[] of column indexes
 	 */
 	public void hideColumn(int... columnIndexes) {
+		// the MultiColumnHideCommand requires the column position, not the
+		// index one. So we have to convert from index to position :-(
 		ColumnHideShowLayer layer = bodyLayerStack.getColumnHideShowLayer();
-		int []positions = new int[columnIndexes.length];
-		for(int i=0; i<columnIndexes.length; i++) {
-			positions[i] = layer.getColumnPositionByIndex(columnIndexes[i]);
-		}
+		int []positions = layer.getColumnPositionsByIndexes(columnIndexes);
+		
 		natTable.doCommand(new MultiColumnHideCommand(layer, positions));
 	}
 	
