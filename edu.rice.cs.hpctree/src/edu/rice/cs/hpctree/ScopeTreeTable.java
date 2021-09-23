@@ -231,7 +231,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		for(int i=0; i<columnIndexes.length; i++) {
 			positions[i] = layer.getColumnPositionByIndex(columnIndexes[i]);
 		}
-		natTable.doCommand(new MultiColumnHideCommand(natTable, positions));
+		natTable.doCommand(new MultiColumnHideCommand(layer, positions));
 	}
 	
 	public void showColumn(int... columnIndexes) {
