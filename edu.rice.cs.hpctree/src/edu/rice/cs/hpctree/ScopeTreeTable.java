@@ -124,10 +124,6 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         bodyLayerStack.getBodyDataLayer().setConfigLabelAccumulator(new ScopeTreeLabelAccumulator(treeData));
         bodyLayerStack.getSelectionLayer().addLayerListener(this);
         
-        tableConfiguration =  new TableConfiguration(bodyDataProvider);
-        bodyLayerStack.addConfiguration(tableConfiguration);
-        bodyLayerStack.addConfiguration(new TableFontConfiguration(this));
-        
         // --------------------------------
         // build the column header layer
         // --------------------------------
@@ -161,6 +157,10 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         // manually
         natTable.setConfigRegistry(configRegistry);
 
+        // --------------------------------
+        // setup the configuration for natTable
+        // --------------------------------
+
         natTable.addConfiguration(new ScopeTableStyleConfiguration());
         natTable.addConfiguration(new ScopeTreeExportConfiguration(bodyLayerStack.getTreeRowModel()));
 		natTable.addConfiguration(new SingleClickSortConfiguration());
@@ -174,6 +174,18 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
             }
         });
         
+        // --------------------------------
+        // setup the configuration for the layers
+        // --------------------------------
+
+        tableConfiguration =  new TableConfiguration(natTable, bodyDataProvider);
+        bodyLayerStack.addConfiguration(tableConfiguration);
+        bodyLayerStack.addConfiguration(new TableFontConfiguration(this));
+
+        // --------------------------------
+        // finalization
+        // --------------------------------
+
         // add tooltip
         new ScopeToolTip(natTable, bodyDataProvider);
         

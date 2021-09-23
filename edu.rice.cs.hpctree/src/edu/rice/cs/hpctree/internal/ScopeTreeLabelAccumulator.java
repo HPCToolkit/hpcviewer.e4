@@ -13,6 +13,8 @@ import edu.rice.cs.hpctree.IScopeTreeData;
 
 public class ScopeTreeLabelAccumulator implements IConfigLabelAccumulator 
 {
+	public final static String LABEL_TOP_ROW  = "top.row";
+	
 	public final static String LABEL_CALLSITE = "scope.callsite";
 	public final static String LABEL_CALLER   = "scope.caller";
 	
@@ -32,6 +34,9 @@ public class ScopeTreeLabelAccumulator implements IConfigLabelAccumulator
 
 	@Override
 	public void accumulateConfigLabels(LabelStack configLabels, int columnPosition, int rowPosition) {
+		if (rowPosition == 0)
+			configLabels.add(LABEL_TOP_ROW);
+		
 		if (columnPosition > 0) {
 			configLabels.add(LABEL_METRICOLUMN);
 			return;

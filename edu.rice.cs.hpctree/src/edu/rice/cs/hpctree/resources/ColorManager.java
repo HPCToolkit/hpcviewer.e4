@@ -1,8 +1,5 @@
-package edu.rice.cs.hpcviewer.ui.resources;
+package edu.rice.cs.hpctree.resources;
 
-import javax.inject.Singleton;
-
-import org.eclipse.e4.core.di.annotations.Creatable;
 import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.graphics.Color;
@@ -15,8 +12,6 @@ import org.eclipse.swt.widgets.Control;
  * Add-on class to manage colors used in the application
  *
  ********************************************************/
-@Creatable
-@Singleton
 public class ColorManager 
 {
 	static final private String COLOR_TOP = "hpcviewer.COLOR_TOP";
