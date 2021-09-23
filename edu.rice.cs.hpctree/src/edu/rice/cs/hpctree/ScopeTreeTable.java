@@ -78,6 +78,8 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	private final static String STRING_PADDING  = "XX"; 
 
 	private final NatTable natTable ;
+	
+	private final DataLayer 			  columnHeaderDataLayer ;
 	private final ScopeTreeBodyLayerStack bodyLayerStack ;
 	private final ScopeTreeDataProvider   bodyDataProvider;
 	private final TableConfiguration      tableConfiguration;
@@ -107,7 +109,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         // build the column header layer
         // --------------------------------
 
-        DataLayer columnHeaderDataLayer = new DefaultColumnHeaderDataLayer(new ColumnHeaderDataProvider(bodyDataProvider));
+        columnHeaderDataLayer = new DefaultColumnHeaderDataLayer(new ColumnHeaderDataProvider(bodyDataProvider));
         ILayer columnHeaderLayer = new ColumnHeaderLayer(columnHeaderDataLayer, bodyLayerStack, bodyLayerStack.getSelectionLayer());
         SortHeaderLayer<Scope> headerLayer = new SortHeaderLayer<>(columnHeaderLayer, bodyLayerStack.getTreeRowModel());
         headerLayer.addLayerListener(this);
@@ -365,6 +367,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		int pixelH = GUIHelper.convertVerticalDpiToPixel(height);
 		
 		bodyDataLayer.setDefaultRowHeight(pixelH);
+		columnHeaderDataLayer.setDefaultRowHeight(pixelH + 4);
 		
     	gc.dispose();
 	}
