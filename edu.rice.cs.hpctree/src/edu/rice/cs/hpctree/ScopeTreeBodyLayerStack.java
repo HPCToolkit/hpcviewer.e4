@@ -15,7 +15,7 @@ import org.eclipse.nebula.widgets.nattable.selection.config.DefaultRowSelectionL
 import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
 
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpctree.internal.RemoveHeaderSelectionConfiguration;
+import edu.rice.cs.hpctree.internal.config.RemoveHeaderSelectionConfiguration;
 
 
 

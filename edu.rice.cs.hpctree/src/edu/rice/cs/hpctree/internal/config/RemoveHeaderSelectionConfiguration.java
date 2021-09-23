@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctree.internal;
+package edu.rice.cs.hpctree.internal.config;
 
 import org.eclipse.nebula.widgets.nattable.config.AbstractRegistryConfiguration;
 import org.eclipse.nebula.widgets.nattable.config.CellConfigAttributes;

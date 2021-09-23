@@ -53,12 +53,12 @@ import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 import edu.rice.cs.hpcdata.util.string.StringUtil;
 import edu.rice.cs.hpctree.action.IActionListener;
 import edu.rice.cs.hpctree.internal.ColumnHeaderDataProvider;
-import edu.rice.cs.hpctree.internal.HeaderLayerConfiguration;
-import edu.rice.cs.hpctree.internal.ScopeTreeExportConfiguration;
 import edu.rice.cs.hpctree.internal.ScopeTreeLabelAccumulator;
-import edu.rice.cs.hpctree.internal.TableConfiguration;
-import edu.rice.cs.hpctree.internal.TableFontConfiguration;
+import edu.rice.cs.hpctree.internal.config.HeaderLayerConfiguration;
 import edu.rice.cs.hpctree.internal.config.ScopeTableStyleConfiguration;
+import edu.rice.cs.hpctree.internal.config.ScopeTreeExportConfiguration;
+import edu.rice.cs.hpctree.internal.config.TableConfiguration;
+import edu.rice.cs.hpctree.internal.config.TableFontConfiguration;
 
 
 /********************************************************************
@@ -85,10 +85,33 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	private final TableConfiguration      tableConfiguration;
 	private final Collection<IActionListener> listeners = new FastList<IActionListener>();
 
+	
+	/****
+	 * Constructor to a dynamic create tree table using the default tree provider
+	 * 
+	 * @param parent 
+	 * 			the parent widget, it has to be a composite
+	 * @param style
+	 * 			The style of the table (not used)
+	 * @param root
+	 * 			The root of the table
+	 * @param metricManager
+	 * 			The metric manager {@link IMetricManager} can be an experiment class 
+	 */
 	public ScopeTreeTable(Composite parent, int style, RootScope root, IMetricManager metricManager) {
 		this(parent, style, new ScopeTreeData(root, metricManager));
 	}
 	
+	
+	/**** 
+	 * Default constructor by specifying the custom {@code IScopeTreeData}
+	 * @param parent
+	 * 			the parent widget, it has to be a composite
+	 * @param style
+	 * 			The style of the table (not used)
+	 * @param treeData
+	 * 			Instance of {@link IScopeTreeData}}
+	 */
 	public ScopeTreeTable(Composite parent, int style, IScopeTreeData treeData) {
         
         this.bodyDataProvider = new ScopeTreeDataProvider(treeData); 
@@ -185,6 +208,12 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		refresh();
 	}
 	
+	
+	/***
+	 * Get the list of used metrics.
+	 * This returns all "user visible" metrics whether shown or hidden.
+	 * @return
+	 */
 	public List<BaseMetric> getMetricColumns() {
 		return bodyDataProvider.getMetrics();
 	}
@@ -485,6 +514,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		ScopeTreeRowModel treeRowModel = bodyLayerStack.getTreeRowModel();
 		return treeRowModel.getSortedColumnIndexes().get(0);
 	}
+	
 	
 	public void export() {
 		ExportCommand export = new ExportCommand(natTable.getConfigRegistry(), natTable.getShell());

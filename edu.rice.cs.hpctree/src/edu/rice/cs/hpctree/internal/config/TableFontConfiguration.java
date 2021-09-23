@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctree.internal;
+package edu.rice.cs.hpctree.internal.config;
 
 import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
@@ -20,6 +20,7 @@ import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpctree.ScopeTreeTable;
+import edu.rice.cs.hpctree.internal.ScopeTreeLabelAccumulator;
 
 public class TableFontConfiguration implements IConfiguration, IPropertyChangeListener 
 {
