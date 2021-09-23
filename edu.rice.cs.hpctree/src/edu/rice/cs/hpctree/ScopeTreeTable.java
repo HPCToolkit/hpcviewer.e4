@@ -17,6 +17,8 @@ import org.eclipse.nebula.widgets.nattable.grid.GridRegion;
 import org.eclipse.nebula.widgets.nattable.grid.layer.ColumnHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.grid.layer.DefaultColumnHeaderDataLayer;
 import org.eclipse.nebula.widgets.nattable.hideshow.ColumnHideShowLayer;
+import org.eclipse.nebula.widgets.nattable.hideshow.command.MultiColumnHideCommand;
+import org.eclipse.nebula.widgets.nattable.hideshow.command.MultiColumnShowCommand;
 import org.eclipse.nebula.widgets.nattable.layer.CompositeLayer;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayer;
@@ -224,13 +226,16 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	 * @param columnIndexes int or int[] of column indexes
 	 */
 	public void hideColumn(int... columnIndexes) {
-		ColumnHideShowLayer colLayer = bodyLayerStack.getColumnHideShowLayer();
-		colLayer.hideColumnIndexes(columnIndexes);
+		ColumnHideShowLayer layer = bodyLayerStack.getColumnHideShowLayer();
+		int []positions = new int[columnIndexes.length];
+		for(int i=0; i<columnIndexes.length; i++) {
+			positions[i] = layer.getColumnPositionByIndex(columnIndexes[i]);
+		}
+		natTable.doCommand(new MultiColumnHideCommand(natTable, positions));
 	}
 	
 	public void showColumn(int... columnIndexes) {
-		ColumnHideShowLayer colLayer = bodyLayerStack.getColumnHideShowLayer();
-		colLayer.showColumnIndexes(columnIndexes);
+		natTable.doCommand(new MultiColumnShowCommand(columnIndexes));
 	}
 		
 	

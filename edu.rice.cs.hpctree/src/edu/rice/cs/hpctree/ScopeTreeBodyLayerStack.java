@@ -42,14 +42,15 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
         this.bodyDataLayer = new DataLayer(bodyDataProvider);
         this.bodyDataLayer.setColumnsResizableByDefault(true);
 
-        this.hideShowLayer  = new ColumnHideShowLayer(bodyDataLayer);
-
+        ColumnReorderLayer reorderLayer = new ColumnReorderLayer(bodyDataLayer);
+        this.hideShowLayer  = new ColumnHideShowLayer(reorderLayer);
+        this.selectionLayer = new SelectionLayer(hideShowLayer, false);
+        
         this.treeRowModel   = new ScopeTreeRowModel(treeData);
-        this.selectionLayer = new SelectionLayer(new ColumnReorderLayer(hideShowLayer), false);
         this.treeLayer      = new ScopeTreeLayer(this.selectionLayer, treeRowModel);
         this.viewportLayer  = new ViewportLayer(treeLayer);
       
-        this.freezeLayer     = new FreezeLayer(treeLayer);
+        this.freezeLayer    = new FreezeLayer(treeLayer);
         this.compositeFreezeLayer = new CompositeFreezeLayer(freezeLayer, viewportLayer, selectionLayer);
         
         final IRowIdAccessor<Scope> rowIdAccessor = new IRowIdAccessor<Scope>() {
