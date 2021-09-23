@@ -426,7 +426,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		table.freezeTreeColumn();
 	}
 	
-	private void hideOrShowColumn(int columnIndex, boolean shown) {
+	synchronized private void hideOrShowColumn(int columnIndex, boolean shown) {
 		// the index zero is only for the tree column
 		// we want to keep this column to be always visible
 		if (columnIndex == 0) 

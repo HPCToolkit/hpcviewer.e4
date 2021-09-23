@@ -317,6 +317,11 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener, IScopeTreeA
 	
 	@Override
 	public void setRoot(Scope scope) {
+		setRoot(scope, 0);
+	}
+	
+	@Override
+	public void setRoot(Scope scope, int level) {
 		try {
 			treeViewer.getTree().setRedraw(false);
 			treeViewer.setInput(null); // clear the table to speed up the next set input

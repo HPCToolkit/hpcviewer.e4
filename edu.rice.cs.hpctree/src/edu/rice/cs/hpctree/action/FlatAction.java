@@ -13,12 +13,13 @@ public class FlatAction
 	private final IUndoableActionManager actionManager;
 	private IScopeTreeAction treeAction;
 	private Stack<Scope> 	 stackFlatNodes;
-
+	private int currentLevel;
 	
 	public FlatAction(IUndoableActionManager actionManager, IScopeTreeAction treeAction) {
 		this.actionManager = actionManager;
 		this.treeAction = treeAction;
 		this.stackFlatNodes = new Stack<>();
+		currentLevel = 0;
 	}
 	
 	public void flatten(Scope root) {
@@ -53,7 +54,8 @@ public class FlatAction
 		if(hasKids) {
 			if (objFlattenedNode.hasChildren()) {
 				stackFlatNodes.push(root);
-				treeAction.setRoot(objFlattenedNode);
+				currentLevel++;
+				treeAction.setRoot(objFlattenedNode, currentLevel);
 				treeAction.traverseOrExpand(0);
 				actionManager.push(CONTEXT);
 			}
@@ -71,7 +73,10 @@ public class FlatAction
 		if(objParentNode == null) 
 			return false;
 
-		treeAction.setRoot(objParentNode);
+		currentLevel--;
+		assert(currentLevel >= 0);
+		
+		treeAction.setRoot(objParentNode, currentLevel);
 		treeAction.traverseOrExpand(0);
 		actionManager.undo();
 		

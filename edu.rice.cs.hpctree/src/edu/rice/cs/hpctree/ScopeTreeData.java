@@ -27,8 +27,7 @@ public class ScopeTreeData implements IScopeTreeData
 	private final static boolean UNIT_TEST = true;
 	
 	/** list of current data. The list is dynamic **/
-	private final MutableList<Scope> list;
-	
+	private final MutableList<Scope>    listScopes;	
 	private final EventList<BaseMetric> listMetrics;
 
 	private Scope root;
@@ -44,8 +43,8 @@ public class ScopeTreeData implements IScopeTreeData
 	 * @param metricManager the metric manager of the experiment or database
 	 */
 	public ScopeTreeData(RootScope root, IMetricManager metricManager, boolean noEmptyColumns) {
-		this.list = FastList.newList();
-		this.list.add(root);
+		this.listScopes = FastList.newList();
+		this.listScopes.add(root);
 		
 		this.root = root;
 		List<BaseMetric> listVisibleMetrics = metricManager.getVisibleMetrics();
@@ -70,14 +69,14 @@ public class ScopeTreeData implements IScopeTreeData
 	
 	@Override
 	public List<Scope> getList() {
-		return list;
+		return listScopes;
 	}
 	
 	
 	@Override
 	public void setRoot(Scope root) {
-		list.clear();		
-		list.add(root);
+		listScopes.clear();		
+		listScopes.add(root);
 		this.root = root;
 	}
 	
@@ -126,8 +125,8 @@ public class ScopeTreeData implements IScopeTreeData
 		sortedColumn = columnIndex;
 
 		ColumnComparator comparator = getComparator(columnIndex, this.sortDirection);
-		synchronized (list) {
-			list.sort(comparator);
+		synchronized (listScopes) {
+			listScopes.sort(comparator);
 		}
 	}
 	
@@ -200,7 +199,7 @@ public class ScopeTreeData implements IScopeTreeData
 	
 	@Override
 	public int getDepthOfData(Scope object) {
-		if (object == null) return 0;
+		if (object == null || isRootScope(object)) return 0;
 		
 		int depth = 0;
 		Scope scope = object;
@@ -218,14 +217,14 @@ public class ScopeTreeData implements IScopeTreeData
 
 	@Override
 	public Scope getDataAtIndex(int index) {
-		Scope scope = list.get(index);
+		Scope scope = listScopes.get(index);
 		return scope;
 	}
 
 	
 	@Override
 	public int indexOf(Scope child) {
-		return list.indexOf(child);
+		return listScopes.indexOf(child);
 	}
 
 	@Override
@@ -278,12 +277,12 @@ public class ScopeTreeData implements IScopeTreeData
 
 	@Override
 	public int getElementCount() {
-		return list.size();
+		return listScopes.size();
 	}
 
 	@Override
 	public boolean isValidIndex(int index) {
-		return (index >= 0) && (index < list.size());
+		return (index >= 0) && (index < listScopes.size());
 	}
 	
 

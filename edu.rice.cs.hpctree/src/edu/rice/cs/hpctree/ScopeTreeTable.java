@@ -223,37 +223,16 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	 * Hide one or more columns
 	 * @param columnIndexes int or int[] of column indexes
 	 */
-	synchronized public void hideColumn(int... columnIndexes) {
+	public void hideColumn(int... columnIndexes) {
 		ColumnHideShowLayer colLayer = bodyLayerStack.getColumnHideShowLayer();
 		colLayer.hideColumnIndexes(columnIndexes);
 	}
 	
-	synchronized public void showColumn(int... columnIndexes) {
+	public void showColumn(int... columnIndexes) {
 		ColumnHideShowLayer colLayer = bodyLayerStack.getColumnHideShowLayer();
 		colLayer.showColumnIndexes(columnIndexes);
 	}
-	
-	
-	/***
-	 * Hide or show columns, including the tree column (not advised).
-	 * @param columnsStatus 
-	 * 			array of boolean. Column will be shown if the value is true. Hidden otherwise.
-	 * 			The size of the array has to be the same as the size of columns in the table.
-	 * 			The zero-th item should be the tree column.
-	 */
-	public void hideAndShowColumns(boolean []columnsStatus) {
-		ColumnHideShowLayer colLayer = bodyLayerStack.getColumnHideShowLayer();
-
-		for(int i=0; i<columnsStatus.length; i++) {
-			if (columnsStatus[i]) {
-				// show
-				colLayer.showColumnIndexes(i);
-			} else {
-				colLayer.hideColumnIndexes(i);
-			}
-		}
-	}
-	
+		
 	
 	public int[] getHiddenColumnIndexes() {
 		ColumnHideShowLayer colLayer = bodyLayerStack.getColumnHideShowLayer();
@@ -454,14 +433,21 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 
 	@Override
 	public void setRoot(Scope root) {
+		setRoot(root, 0);
+	}
+
+
+	@Override
+	public void setRoot(Scope root, int level) {
 		ScopeTreeRowModel treeRowModel = bodyLayerStack.getTreeRowModel();
-		treeRowModel.setRoot(root);
+		treeRowModel.setRoot(root, level);
 		
 		this.refresh();
 		
 		expandAndSelectRootChild(root);
 	}
 
+	
 	@Override
 	public Scope getRoot() {
 		ScopeTreeRowModel treeRowModel = bodyLayerStack.getTreeRowModel();
