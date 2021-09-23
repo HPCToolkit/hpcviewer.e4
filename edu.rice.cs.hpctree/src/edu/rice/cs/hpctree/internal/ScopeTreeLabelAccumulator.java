@@ -42,21 +42,20 @@ public class ScopeTreeLabelAccumulator implements IConfigLabelAccumulator
 		if (scope ==  null)
 			return;
 		
-		if (scope instanceof CallSiteScope) {
+		if (scope instanceof CallSiteScopeCallerView) {
+			LineScope ls = ((CallSiteScopeCallerView)scope).getLineScope();
+			if (Util.isFileReadable(ls))
+				configLabels.add(LABEL_CALLER);
+			else
+				configLabels.add(LABEL_CALLER_DISABLED);
+			
+		} else if (scope instanceof CallSiteScope) {
 			LineScope ls = ((CallSiteScope)scope).getLineScope();
 			if (Util.isFileReadable(ls)) {
 				configLabels.add(LABEL_CALLSITE);				
 			} else {
 				configLabels.add(LABEL_CALLSITE_DISABLED);
 			}
-			
-		} else if (scope instanceof CallSiteScopeCallerView) {
-			LineScope ls = ((CallSiteScopeCallerView)scope).getLineScope();
-			if (Util.isFileReadable(ls))
-				configLabels.add(LABEL_CALLER);
-			else
-				configLabels.add(LABEL_CALLER_DISABLED);
-
 		}
 		if (Util.isFileReadable(scope)) {
 			configLabels.add(LABEL_SOURCE_AVAILABLE);
