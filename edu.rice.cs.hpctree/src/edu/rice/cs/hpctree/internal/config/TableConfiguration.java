@@ -26,7 +26,10 @@ import org.eclipse.nebula.widgets.nattable.ui.util.CellEdgeEnum;
 import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Link;
 
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -73,7 +76,13 @@ public class TableConfiguration implements IConfiguration
 					ScopeTreeLabelAccumulator.LABEL_TOP_ROW);
 		
 		final Style styleActive = new Style();
-		styleActive.setAttributeValue(CellStyleAttributes.FOREGROUND_COLOR, GUIHelper.COLOR_BLUE);
+		Color clrActive = GUIHelper.COLOR_BLUE;
+		if (Display.isSystemDarkTheme()) {
+			Link l = new Link((Composite) widget, 0);
+			clrActive = l.getLinkForeground();
+
+		}
+		styleActive.setAttributeValue(CellStyleAttributes.FOREGROUND_COLOR, clrActive);
 		configRegistry.registerConfigAttribute(
 					CellConfigAttributes.CELL_STYLE, 
 					styleActive, 

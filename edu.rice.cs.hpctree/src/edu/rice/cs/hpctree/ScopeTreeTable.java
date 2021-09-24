@@ -8,7 +8,6 @@ import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.command.VisualRefreshCommand;
 import org.eclipse.nebula.widgets.nattable.config.ConfigRegistry;
-import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfiguration;
 import org.eclipse.nebula.widgets.nattable.coordinate.PositionCoordinate;
 import org.eclipse.nebula.widgets.nattable.coordinate.Range;
 import org.eclipse.nebula.widgets.nattable.export.command.ExportCommand;
@@ -144,10 +143,6 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         ILayer columnHeaderLayer = new ColumnHeaderLayer(columnHeaderDataLayer, bodyLayerStack, bodyLayerStack.getSelectionLayer());
         SortHeaderLayer<Scope> headerLayer = new SortHeaderLayer<>(columnHeaderLayer, bodyLayerStack.getTreeRowModel());
         headerLayer.addLayerListener(this);
-        
-        HeaderLayerConfiguration headerConfiguration = new HeaderLayerConfiguration();
-        headerLayer.setConfigLabelAccumulator(headerConfiguration);
-        headerLayer.addConfiguration(headerConfiguration);
 
         // --------------------------------
         // build the composite
@@ -184,6 +179,10 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
                         .withFreezeColumnMenuItem();
             }
         });
+        
+        HeaderLayerConfiguration headerConfiguration = new HeaderLayerConfiguration(natTable);
+        headerLayer.setConfigLabelAccumulator(headerConfiguration);
+        headerLayer.addConfiguration(headerConfiguration);
 
         // --------------------------------
         // finalization
