@@ -26,6 +26,7 @@ import org.eclipse.nebula.widgets.nattable.ui.util.CellEdgeEnum;
 import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.widgets.Control;
 
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -40,13 +41,13 @@ import edu.rice.cs.hpctree.resources.IconManager;
 public class TableConfiguration implements IConfiguration 
 {
 	private final ScopeTreeDataProvider dataProvider;
-	private final NatTable natTable;
+	private final Control widget;
 	
 	private final List<ICellPainter> painters     = new FastList<>();
 	private final List<IActionListener> listeners = new FastList<>();
 
-	public TableConfiguration(NatTable natTable, ScopeTreeDataProvider dataProvider) {
-		this.natTable = natTable;
+	public TableConfiguration(Control widget, ScopeTreeDataProvider dataProvider) {
+		this.widget = widget;
 		this.dataProvider = dataProvider;
 	}
 	
@@ -63,7 +64,7 @@ public class TableConfiguration implements IConfiguration
 		addIconLabel(configRegistry, IconManager.Image_CallFromDisabled, ScopeTreeLabelAccumulator.LABEL_CALLER_DISABLED);
 		
 		final Style styleTopRow = new Style();
-		Color clrBg = ColorManager.getColorTopRow(natTable);
+		Color clrBg = ColorManager.getColorTopRow(widget);
 		styleTopRow.setAttributeValue(CellStyleAttributes.BACKGROUND_COLOR, clrBg);
 		configRegistry.registerConfigAttribute(
 					CellConfigAttributes.CELL_STYLE, 

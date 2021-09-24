@@ -29,6 +29,9 @@ public class TableFontConfiguration implements IConfiguration, IPropertyChangeLi
 	
 	public TableFontConfiguration(ScopeTreeTable treeTable) {
 		this.treeTable = treeTable;
+		
+		PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
+		pref.addPropertyChangeListener(this);
 	}
 	
 	
@@ -74,10 +77,6 @@ public class TableFontConfiguration implements IConfiguration, IPropertyChangeLi
 				   styleMetric, 
 				   DisplayMode.SELECT, 
 				   ScopeTreeLabelAccumulator.LABEL_METRICOLUMN);
-
-		
-		PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
-		pref.addPropertyChangeListener(this);
 	}
 
 
@@ -87,15 +86,14 @@ public class TableFontConfiguration implements IConfiguration, IPropertyChangeLi
 		final String property = event.getProperty();
 		
 		boolean need_to_refresh = (property.equals(PreferenceConstants.ID_FONT_GENERIC) || 
-								   property.equals(PreferenceConstants.ID_FONT_METRIC)  ||
-								   property.equals(PreferenceConstants.ID_DEBUG_CCT_ID) ||
-								   property.equals(PreferenceConstants.ID_DEBUG_FLAT_ID) ); 
+								   property.equals(PreferenceConstants.ID_FONT_METRIC)); 
 		
 		if (need_to_refresh) {
 			configureRegistry(configRegistry);
 			treeTable.attributeRefresh();
 		}
 	}
+	
 
 	public static Font getMetricFont() {
 		Font font ;
@@ -106,6 +104,7 @@ public class TableFontConfiguration implements IConfiguration, IPropertyChangeLi
 		}
 		return font;
 	}
+	
 
 	public static Font getGenericFont() {
 		Font font;

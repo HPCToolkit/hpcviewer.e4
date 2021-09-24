@@ -8,7 +8,7 @@ import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.command.VisualRefreshCommand;
 import org.eclipse.nebula.widgets.nattable.config.ConfigRegistry;
-import org.eclipse.nebula.widgets.nattable.config.IConfiguration;
+import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfiguration;
 import org.eclipse.nebula.widgets.nattable.coordinate.PositionCoordinate;
 import org.eclipse.nebula.widgets.nattable.coordinate.Range;
 import org.eclipse.nebula.widgets.nattable.export.command.ExportCommand;
@@ -124,10 +124,18 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         // handling
         ConfigRegistry configRegistry = new ConfigRegistry();
         
+        // --------------------------------
+        // setup the layers and their configurations
+        // --------------------------------
+        
         bodyLayerStack = new ScopeTreeBodyLayerStack(treeData, bodyDataProvider);
         bodyLayerStack.getBodyDataLayer().setConfigLabelAccumulator(new ScopeTreeLabelAccumulator(treeData));
         bodyLayerStack.getSelectionLayer().addLayerListener(this);
-        
+
+        tableConfiguration =  new TableConfiguration(parent, bodyDataProvider);
+        bodyLayerStack.addConfiguration(tableConfiguration);
+        bodyLayerStack.addConfiguration(new TableFontConfiguration(this));
+
         // --------------------------------
         // build the column header layer
         // --------------------------------
@@ -165,10 +173,6 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         // setup the configuration for natTable
         // --------------------------------
 
-        ThemeConfiguration defaultConfiguration = new ScopeTableStyleConfiguration();
-        if (Display.isSystemDarkTheme())
-        	defaultConfiguration = new DarkScopeTableStyleConfiguration();
-        
         natTable.addConfiguration(new ScopeTreeExportConfiguration(bodyLayerStack.getTreeRowModel()));
 		natTable.addConfiguration(new SingleClickSortConfiguration());
         natTable.addConfiguration(new AbstractHeaderMenuConfiguration(natTable) {
@@ -180,15 +184,6 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
                         .withFreezeColumnMenuItem();
             }
         });
-        natTable.setTheme(defaultConfiguration);
-        
-        // --------------------------------
-        // setup the configuration for the layers
-        // --------------------------------
-
-        tableConfiguration =  new TableConfiguration(natTable, bodyDataProvider);
-        bodyLayerStack.addConfiguration(tableConfiguration);
-        bodyLayerStack.addConfiguration(new TableFontConfiguration(this));
 
         // --------------------------------
         // finalization
@@ -490,7 +485,13 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 
 	@Override
 	public void setRoot(Scope root) {
-		setRoot(root, 0);
+        ThemeConfiguration defaultConfiguration = new ScopeTableStyleConfiguration();
+        if (Display.isSystemDarkTheme())
+        	defaultConfiguration = new DarkScopeTableStyleConfiguration();
+        
+        natTable.setTheme(defaultConfiguration);
+
+        setRoot(root, 0);
 	}
 
 
