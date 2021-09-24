@@ -44,6 +44,8 @@ public class HotPathAction
 		}
 		BaseMetric metric = treeAction.getMetric(col);
 		CallPathItem objHotPath = new CallPathItem();
+		objHotPath.level = 0;
+		objHotPath.node  = scope;
 		
 		if (!getHotCallPath(scope, metric, objHotPath)) {
 			errMsg = "No hot path found";
@@ -51,7 +53,8 @@ public class HotPathAction
 		}
 		treeAction.redraw();
 		int rowIndex = treeAction.indexOf(objHotPath.node);
-		treeAction.setSelection(rowIndex);
+		if (rowIndex >= 0)
+			treeAction.setSelection(rowIndex);
 		
 		return RET_OK;
 	}
