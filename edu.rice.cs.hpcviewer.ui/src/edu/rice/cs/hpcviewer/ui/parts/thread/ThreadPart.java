@@ -30,7 +30,6 @@ public class ThreadPart extends TopDownPart
 	static final private String TITLE_PREFIX  = "Thread view ";
 
 	private ThreadViewInput viewInput; 
-	private Experiment experiment;
 	private List<Integer> threads;
 
 	public ThreadPart(CTabFolder parent, int style) {
@@ -69,7 +68,7 @@ public class ThreadPart extends TopDownPart
 		}
 		// set the table
 		RootScope root  = viewInput.getRootScope();
-		this.experiment = (Experiment) root.getExperiment();
+		Experiment experiment = (Experiment) root.getExperiment();
 		List<BaseMetric> rawMetrics = experiment.getRawMetrics();
 		ThreadMetricManager metricManager = new ThreadMetricManager(rawMetrics, threads);
 		
@@ -94,7 +93,13 @@ public class ThreadPart extends TopDownPart
 	
 	
 	@Override
-	protected RootScope createRoot() {
+	protected RootScope getRoot() {
+		return viewInput.getRootScope();
+	}
+	
+	
+	@Override
+	protected RootScope buildTree() {
 		return viewInput.getRootScope();
 	}
 	

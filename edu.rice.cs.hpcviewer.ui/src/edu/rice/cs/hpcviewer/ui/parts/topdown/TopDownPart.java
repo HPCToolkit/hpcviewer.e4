@@ -156,7 +156,7 @@ public class TopDownPart extends AbstractTableView
 
 
 	@Override
-	protected RootScope createRoot() {
+	protected RootScope buildTree() {
 		IMetricManager mm = getMetricManager();
 		Experiment exp = (Experiment) mm;
 		RootScope root = exp.getRootScope(getRootType());
@@ -176,6 +176,14 @@ public class TopDownPart extends AbstractTableView
 	@Override
 	public RootScopeType getRootType() {
 		return RootScopeType.CallingContextTree;
+	}
+
+
+	@Override
+	protected RootScope getRoot() {
+		IMetricManager mm = getMetricManager();
+		Experiment experiment = (Experiment) mm;
+		return experiment.getRootScope(RootScopeType.CallingContextTree);
 	}
 
 

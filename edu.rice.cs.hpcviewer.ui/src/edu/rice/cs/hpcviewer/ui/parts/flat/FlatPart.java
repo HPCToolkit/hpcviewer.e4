@@ -85,7 +85,7 @@ public class FlatPart extends AbstractTableView
 	private boolean isInitialized = false;
 	
 	@Override
-	protected RootScope createRoot() {
+	protected RootScope buildTree() {
 		Experiment experiment = (Experiment) getMetricManager();
 		RootScope rootCCT  = experiment.getRootScope(RootScopeType.CallingContextTree);
 		RootScope rootFlat = experiment.getRootScope(RootScopeType.Flat);
@@ -104,6 +104,13 @@ public class FlatPart extends AbstractTableView
 	@Override
 	public RootScopeType getRootType() {
 		return RootScopeType.Flat;
+	}
+
+	@Override
+	protected RootScope getRoot() {
+		IMetricManager mm = getMetricManager();
+		Experiment experiment = (Experiment) mm;
+		return experiment.getRootScope(RootScopeType.Flat);
 	}
 
 

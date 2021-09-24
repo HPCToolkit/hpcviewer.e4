@@ -230,7 +230,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		// Create the main table
 		// -------------------------------------------
 		
-		root = createRoot();
+		root = getRoot();
 		IScopeTreeData treeData = getTreeData(root, metricManager);
 		
 		table = new ScopeTreeTable(parent, SWT.NONE, treeData);
@@ -306,7 +306,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		if (!initialized) {
 			// TODO: this process takes time
 			BusyIndicator.showWhile(getDisplay(), ()-> {
-				root = createRoot();
+				root = buildTree();
 				table.setRoot(root);
 				
 				// hide or show columns if needed
@@ -580,7 +580,8 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 	
 	public abstract RootScopeType getRootType();
 	
-	protected abstract RootScope createRoot();
+	protected abstract RootScope getRoot();
+	protected abstract RootScope buildTree();
     protected abstract void beginToolbar(CoolBar coolbar, ToolBar toolbar);
     protected abstract void endToolbar  (CoolBar coolbar, ToolBar toolbar);
     protected abstract void updateStatus();
