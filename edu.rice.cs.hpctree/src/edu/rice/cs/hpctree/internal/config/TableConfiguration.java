@@ -80,6 +80,7 @@ public class TableConfiguration implements IConfiguration
 					ScopeTreeLabelAccumulator.LABEL_SOURCE_AVAILABLE);
 	}
 
+	
 	@Override
 	public void configureUiBindings(UiBindingRegistry uiBindingRegistry) {		
 		
@@ -122,7 +123,6 @@ public class TableConfiguration implements IConfiguration
 			}
 		});
 	}
-	
 	
 
 	public void addListener(IActionListener action) {
