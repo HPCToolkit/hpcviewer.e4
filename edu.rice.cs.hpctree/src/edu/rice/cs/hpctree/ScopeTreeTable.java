@@ -133,7 +133,6 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 
         tableConfiguration =  new TableConfiguration(parent, bodyDataProvider);
         bodyLayerStack.addConfiguration(tableConfiguration);
-        bodyLayerStack.addConfiguration(new TableFontConfiguration(this));
 
         // --------------------------------
         // build the column header layer
@@ -169,6 +168,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         // --------------------------------
 
         natTable.addConfiguration(new ScopeTreeExportConfiguration(bodyLayerStack.getTreeRowModel()));
+        natTable.addConfiguration(new TableFontConfiguration(natTable));
 		natTable.addConfiguration(new SingleClickSortConfiguration());
         natTable.addConfiguration(new AbstractHeaderMenuConfiguration(natTable) {
             @Override
