@@ -30,6 +30,7 @@ import org.eclipse.nebula.widgets.nattable.selection.event.RowSelectionEvent;
 import org.eclipse.nebula.widgets.nattable.sort.SortHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.sort.config.SingleClickSortConfiguration;
 import org.eclipse.nebula.widgets.nattable.sort.event.SortColumnEvent;
+import org.eclipse.nebula.widgets.nattable.style.theme.ThemeConfiguration;
 import org.eclipse.nebula.widgets.nattable.tooltip.NatTableContentTooltip;
 import org.eclipse.nebula.widgets.nattable.ui.menu.AbstractHeaderMenuConfiguration;
 import org.eclipse.nebula.widgets.nattable.ui.menu.PopupMenuBuilder;
@@ -56,6 +57,7 @@ import edu.rice.cs.hpcdata.util.string.StringUtil;
 import edu.rice.cs.hpctree.action.IActionListener;
 import edu.rice.cs.hpctree.internal.ColumnHeaderDataProvider;
 import edu.rice.cs.hpctree.internal.ScopeTreeLabelAccumulator;
+import edu.rice.cs.hpctree.internal.config.DarkScopeTableStyleConfiguration;
 import edu.rice.cs.hpctree.internal.config.HeaderLayerConfiguration;
 import edu.rice.cs.hpctree.internal.config.ScopeTableStyleConfiguration;
 import edu.rice.cs.hpctree.internal.config.ScopeTreeExportConfiguration;
@@ -163,11 +165,10 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         // setup the configuration for natTable
         // --------------------------------
 
-        IConfiguration defaultConfiguration = new ScopeTableStyleConfiguration();
+        ThemeConfiguration defaultConfiguration = new ScopeTableStyleConfiguration();
         if (Display.isSystemDarkTheme())
         	defaultConfiguration = new DarkScopeTableStyleConfiguration();
         
-        natTable.addConfiguration(defaultConfiguration);
         natTable.addConfiguration(new ScopeTreeExportConfiguration(bodyLayerStack.getTreeRowModel()));
 		natTable.addConfiguration(new SingleClickSortConfiguration());
         natTable.addConfiguration(new AbstractHeaderMenuConfiguration(natTable) {
@@ -179,6 +180,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
                         .withFreezeColumnMenuItem();
             }
         });
+        natTable.setTheme(defaultConfiguration);
         
         // --------------------------------
         // setup the configuration for the layers

@@ -33,6 +33,7 @@ import org.eclipse.nebula.widgets.nattable.selection.config.RowOnlySelectionBind
 import org.eclipse.nebula.widgets.nattable.selection.config.RowOnlySelectionConfiguration;
 import org.eclipse.nebula.widgets.nattable.sort.SortHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.sort.config.SingleClickSortConfiguration;
+import org.eclipse.nebula.widgets.nattable.style.theme.DarkNatTableThemeConfiguration;
 import org.eclipse.nebula.widgets.nattable.style.theme.ModernNatTableThemeConfiguration;
 import org.eclipse.nebula.widgets.nattable.style.theme.ThemeConfiguration;
 import org.eclipse.swt.SWT;
@@ -46,6 +47,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
@@ -214,7 +216,6 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 		natTable = new NatTable(parentContainer, gridLayer, false); 
 
 		// additional configuration
-		natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
 		natTable.addConfiguration(new CheckBoxConfiguration(ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + IConstants.INDEX_VISIBILITY));
 		natTable.addConfiguration(new FilterPainterConfiguration());
 		natTable.addConfiguration(new RowOnlySelectionBindings());
@@ -262,7 +263,10 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 			}
 		}); */
 
-		final ThemeConfiguration modernTheme = new ModernNatTableThemeConfiguration();
+		ThemeConfiguration modernTheme = new ModernNatTableThemeConfiguration();
+		if (Display.isSystemDarkTheme())
+			modernTheme = new DarkNatTableThemeConfiguration();
+		
 		natTable.setTheme(modernTheme);
 		
 		final Color defaultBgColor = objSearchText.getBackground();
