@@ -43,6 +43,7 @@ public class HeaderLayerConfiguration implements IConfiguration, IConfigLabelAcc
 		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, style, DisplayMode.NORMAL, LABEL_COLUMN);
 	}
 	
+	
 	@Override
 	public void configureLayer(ILayer layer) {}
 

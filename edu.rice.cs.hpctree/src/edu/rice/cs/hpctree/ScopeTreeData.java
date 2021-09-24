@@ -194,7 +194,9 @@ public class ScopeTreeData implements IScopeTreeData
 	
 	
 	private boolean isRootScope(Scope scope) {
-		return (scope == null) || (scope instanceof RootScope) || (scope == root);
+		return (scope == null) || 
+			   (scope instanceof RootScope) || 
+			   (scope.getCCTIndex() == root.getCCTIndex());
 	}
 	
 	@Override
