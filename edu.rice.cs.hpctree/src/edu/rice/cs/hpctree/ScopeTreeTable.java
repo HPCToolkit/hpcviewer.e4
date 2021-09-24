@@ -188,14 +188,31 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         // --------------------------------
         // finalization
         // --------------------------------
-
-        // add tooltip
-        new ScopeToolTip(natTable, bodyDataProvider);
         
         // I don't know why we have to refresh the table here
         // However, without refreshing, the content will be weird
         visualRefresh();
         natTable.configure();
+
+        // --------------------------------
+        // misc config
+        // --------------------------------
+
+        // add tooltip
+        new ScopeToolTip(natTable, bodyDataProvider);
+
+        // add theme configuration. automatically detect if we are in dark mode or not
+        // this config happens only at the start of the table. It doesn't change automatically
+        // in the middle of the system switch mode
+        
+        ThemeConfiguration defaultConfiguration = new ScopeTableStyleConfiguration();
+        if (Display.isSystemDarkTheme())
+        	defaultConfiguration = new DarkScopeTableStyleConfiguration();        
+        natTable.setTheme(defaultConfiguration);
+
+        // --------------------------------
+        // table settings
+        // --------------------------------
 
         freezeTreeColumn();
         
@@ -476,6 +493,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		}
 	}
 	
+	
 	@Override
 	public void traverseOrExpand(int index) {
 		ScopeTreeRowModel treeRowModel = bodyLayerStack.getTreeRowModel();
@@ -483,14 +501,9 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		traverseOrExpand(scope);
 	}
 
+	
 	@Override
 	public void setRoot(Scope root) {
-        ThemeConfiguration defaultConfiguration = new ScopeTableStyleConfiguration();
-        if (Display.isSystemDarkTheme())
-        	defaultConfiguration = new DarkScopeTableStyleConfiguration();
-        
-        natTable.setTheme(defaultConfiguration);
-
         setRoot(root, 0);
 	}
 

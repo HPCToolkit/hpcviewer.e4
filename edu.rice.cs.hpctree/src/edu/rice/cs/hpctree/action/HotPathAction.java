@@ -76,7 +76,6 @@ public class HotPathAction
 		if (children != null && children.size() > 0) {
 			// get the highest child node
 			Scope scopeChild = (Scope) children.get(0);
-			objHotPath.node = scopeChild;
 
 			// compare the value of the parent and the child
 			// if the ratio is significant, we stop 
@@ -91,6 +90,7 @@ public class HotPathAction
 			if(dChild < (0.5 * dParent)) {
 				return true;
 			} else {
+				objHotPath.node = scopeChild;
 				return getHotCallPath(scopeChild, metric, objHotPath);
 			}
 		}
