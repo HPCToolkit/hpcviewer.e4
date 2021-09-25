@@ -76,7 +76,7 @@ import edu.rice.cs.hpctree.internal.config.TableFontConfiguration;
  ********************************************************************/
 public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayerListener
 {
-	private final static String TEXT_METRIC_COLUMN = "|8x88+88xx888x8%-";
+	private final static String TEXT_METRIC_COLUMN = "8x88+88xx888x8%";
 	private final static String STRING_PADDING  = "XX"; 
 
 	private final NatTable natTable ;
@@ -199,7 +199,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         // this config happens only at the start of the table. It doesn't change automatically
         // in the middle of the system switch mode
         
-        ThemeConfiguration defaultConfiguration = new ScopeTableStyleConfiguration(natTable);
+        ThemeConfiguration defaultConfiguration = new ScopeTableStyleConfiguration(this);
         if (Display.isSystemDarkTheme())
         	defaultConfiguration = new DarkScopeTableStyleConfiguration();        
         natTable.setTheme(defaultConfiguration);
@@ -385,7 +385,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
     	int totSize = 0;
     	for(int i=1; i<numColumns; i++) {
     		String title = bodyDataProvider.getMetric(i).getDisplayName();
-    		Point titleSize = gc.textExtent(title + STRING_PADDING);
+    		Point titleSize = gc.textExtent(title);
     		int colWidth = (int) Math.max(titleSize.x , columnSize.x);
     		int pixelWidth = GUIHelper.convertHorizontalDpiToPixel(colWidth);
         	bodyDataLayer.setColumnWidthByPosition(i, pixelWidth);

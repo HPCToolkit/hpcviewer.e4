@@ -1,5 +1,6 @@
 package edu.rice.cs.hpctree.internal.config;
 
+import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.nebula.widgets.nattable.NatTable;
@@ -20,19 +21,27 @@ import org.eclipse.nebula.widgets.nattable.ui.util.CellEdgeEnum;
 import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
 
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
+import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
+import edu.rice.cs.hpctree.ScopeTreeTable;
 
 public class ScopeTableStyleConfiguration extends ModernNatTableThemeConfiguration implements IPropertyChangeListener
 {
-	private final NatTable table;
+	private final ScopeTreeTable table;
+	private IConfigRegistry registry; 
 
-	public ScopeTableStyleConfiguration(NatTable table) {
+	public ScopeTableStyleConfiguration(ScopeTreeTable table) {
 		this.table = table;
+		
+		PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
+		pref.addPropertyChangeListener(this);
 	}
 	
 	
 	@Override
-    public void configureRegistry(IConfigRegistry configRegistry) {    	
+    public void configureRegistry(IConfigRegistry configRegistry) {
     	super.configureRegistry(configRegistry);
+    	this.registry = configRegistry;
+    	
 		IStyle style = configRegistry.getConfigAttribute(CellConfigAttributes.CELL_STYLE, DisplayMode.NORMAL, GridRegion.COLUMN_HEADER);
 		if (style == null) {
 			style = new Style();
@@ -96,9 +105,8 @@ public class ScopeTableStyleConfiguration extends ModernNatTableThemeConfigurati
 								   property.equals(PreferenceConstants.ID_FONT_METRIC)); 
 		
 		if (need_to_refresh) {
-			IConfigRegistry registry = table.getConfigRegistry();
 			configureRegistry(registry);
-			table.doCommand(new VisualRefreshCommand());
+			table.attributeRefresh();
 		}
 	}
 }
