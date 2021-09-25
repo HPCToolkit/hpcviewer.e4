@@ -24,8 +24,6 @@ import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
  ******************************************************/
 public class ScopeTreeData implements IScopeTreeData
 {
-	private final static boolean UNIT_TEST = true;
-	
 	/** list of current data. The list is dynamic **/
 	private final MutableList<Scope>    listScopes;	
 	private final EventList<BaseMetric> listMetrics;
@@ -157,12 +155,18 @@ public class ScopeTreeData implements IScopeTreeData
 	@Override
 	public void addMetric(int index, BaseMetric metric) {
 		listMetrics.add(index, metric);
+		
+		// TODO: this is a bit hack
+		// we shift the sorted column to the right if the sorted column
+		// is a metric column. 
+		if (sortedColumn>0)
+			sortedColumn++;
 	}
 	
 	
 	@Override
 	public void addMetric(BaseMetric metric) {
-		listMetrics.add(metric);
+		addMetric(listMetrics.size(), metric);
 	}
 	
 	

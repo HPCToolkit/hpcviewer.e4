@@ -241,8 +241,12 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	 * @param metric
 	 */
 	public void addMetricColumn(BaseMetric metric) {
+		// insert the new metric at zero-based index,
+		// update the table column which is a one-based index.
+		// sigh...
+		
 		bodyDataProvider.addColumn(0, metric);
-		bodyLayerStack.fireLayerEvent(new ColumnInsertEvent(bodyLayerStack, 0));
+		bodyLayerStack.fireLayerEvent(new ColumnInsertEvent(bodyLayerStack, 1));
 	}
 	
 	
