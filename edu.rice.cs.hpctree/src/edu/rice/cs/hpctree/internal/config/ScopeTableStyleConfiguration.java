@@ -7,7 +7,10 @@ import org.eclipse.nebula.widgets.nattable.config.CellConfigAttributes;
 import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.grid.GridRegion;
 import org.eclipse.nebula.widgets.nattable.painter.cell.BackgroundPainter;
+import org.eclipse.nebula.widgets.nattable.painter.cell.TextPainter;
 import org.eclipse.nebula.widgets.nattable.painter.cell.decorator.PaddingDecorator;
+import org.eclipse.nebula.widgets.nattable.sort.painter.SortIconPainter;
+import org.eclipse.nebula.widgets.nattable.sort.painter.SortableHeaderTextPainter;
 import org.eclipse.nebula.widgets.nattable.style.CellStyleAttributes;
 import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
 import org.eclipse.nebula.widgets.nattable.style.IStyle;
@@ -28,6 +31,8 @@ public class ScopeTableStyleConfiguration extends ModernNatTableThemeConfigurati
 	private IConfigRegistry registry; 
 
 	public ScopeTableStyleConfiguration(ScopeTreeTable table) {
+		super();
+		
 		this.table = table;
 		
 		PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
@@ -40,14 +45,7 @@ public class ScopeTableStyleConfiguration extends ModernNatTableThemeConfigurati
     	super.configureRegistry(configRegistry);
     	this.registry = configRegistry;
     	
-		IStyle style = configRegistry.getConfigAttribute(CellConfigAttributes.CELL_STYLE, DisplayMode.NORMAL, GridRegion.COLUMN_HEADER);
-		if (style == null) {
-			style = new Style();
-		}
-		style.setAttributeValue(CellStyleAttributes.FONT, TableFontConfiguration.getGenericFont());
-
-		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, style, DisplayMode.SELECT, GridRegion.COLUMN_HEADER);
-		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, style, DisplayMode.NORMAL, GridRegion.COLUMN_HEADER);
+    	configureFont(configRegistry);
     }
     
     
@@ -92,6 +90,19 @@ public class ScopeTableStyleConfiguration extends ModernNatTableThemeConfigurati
                                         2,
                                         true),
                                 0, 5, 0, 5, false));
+        
+        selectedSortHeaderCellPainter =
+                new BackgroundPainter(
+                        new PaddingDecorator(
+                                new SortableHeaderTextPainter(
+                                        new TextPainter(false, false),
+                                        CellEdgeEnum.RIGHT,
+                                        new SortIconPainter(false),
+                                        false,
+                                        0,
+                                        false),
+                                0, 2, 0, 5, false));
+
     }
 
 	@Override
@@ -103,8 +114,21 @@ public class ScopeTableStyleConfiguration extends ModernNatTableThemeConfigurati
 								   property.equals(PreferenceConstants.ID_FONT_METRIC)); 
 		
 		if (need_to_refresh) {
-			configureRegistry(registry);
+			configureFont(registry);
 			table.attributeRefresh();
 		}
+	}
+	
+	
+	protected void configureFont(IConfigRegistry configRegistry) {
+    	
+		IStyle style = configRegistry.getConfigAttribute(CellConfigAttributes.CELL_STYLE, DisplayMode.NORMAL, GridRegion.COLUMN_HEADER);
+		if (style == null) {
+			style = new Style();
+		}
+		style.setAttributeValue(CellStyleAttributes.FONT, TableFontConfiguration.getGenericFont());
+
+		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, style, DisplayMode.SELECT, GridRegion.COLUMN_HEADER);
+		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, style, DisplayMode.NORMAL, GridRegion.COLUMN_HEADER);
 	}
 }
