@@ -317,6 +317,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		} else {
 			table.visualRefresh();
 		}
+		table.setFocus();
 	}
 
 	

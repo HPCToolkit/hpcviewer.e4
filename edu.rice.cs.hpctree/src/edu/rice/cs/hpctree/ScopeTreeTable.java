@@ -225,6 +225,16 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	}
 	
 	
+	/**
+	 * Causes the receiver to have the keyboard focus, 
+	 * such that all keyboard events will be delivered to it. 
+	 * Focus reassignment will respect applicable platform constraints.
+	 */
+	public void setFocus() {
+		natTable.setFocus();
+	}
+	
+	
 	/****
 	 * Add a new metric column
 	 * @param metric
