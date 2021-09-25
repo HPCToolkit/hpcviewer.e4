@@ -23,6 +23,7 @@ import org.eclipse.nebula.widgets.nattable.layer.CompositeLayer;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayerListener;
+import org.eclipse.nebula.widgets.nattable.layer.event.ColumnInsertEvent;
 import org.eclipse.nebula.widgets.nattable.layer.event.ILayerEvent;
 import org.eclipse.nebula.widgets.nattable.painter.layer.NatGridLayerPainter;
 import org.eclipse.nebula.widgets.nattable.selection.event.RowSelectionEvent;
@@ -241,7 +242,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	 */
 	public void addMetricColumn(BaseMetric metric) {
 		bodyDataProvider.addColumn(0, metric);
-		refresh();
+		bodyLayerStack.fireLayerEvent(new ColumnInsertEvent(bodyLayerStack, 0));
 	}
 	
 	

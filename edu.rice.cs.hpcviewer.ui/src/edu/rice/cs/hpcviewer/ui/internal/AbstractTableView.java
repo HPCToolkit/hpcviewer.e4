@@ -377,6 +377,12 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 			// add a new metric column
 			BaseMetric metric = (BaseMetric) eventInfo.data;
 			table.addMetricColumn(metric);
+			
+		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE)) {
+			// metric has changed. 
+			// We don't know if the change will incur structural changes or just visual.
+			// it's better to refresh completely the table just in case. 
+			table.refresh();
 		}
 	}
 	
