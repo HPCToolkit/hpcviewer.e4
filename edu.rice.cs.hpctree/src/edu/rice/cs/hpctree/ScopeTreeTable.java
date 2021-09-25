@@ -57,7 +57,6 @@ import edu.rice.cs.hpctree.action.IActionListener;
 import edu.rice.cs.hpctree.internal.ColumnHeaderDataProvider;
 import edu.rice.cs.hpctree.internal.ScopeTreeLabelAccumulator;
 import edu.rice.cs.hpctree.internal.config.DarkScopeTableStyleConfiguration;
-import edu.rice.cs.hpctree.internal.config.HeaderLayerConfiguration;
 import edu.rice.cs.hpctree.internal.config.ScopeTableStyleConfiguration;
 import edu.rice.cs.hpctree.internal.config.ScopeTreeExportConfiguration;
 import edu.rice.cs.hpctree.internal.config.TableConfiguration;
@@ -179,10 +178,6 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
                         .withFreezeColumnMenuItem();
             }
         });
-        
-        HeaderLayerConfiguration headerConfiguration = new HeaderLayerConfiguration(natTable);
-        headerLayer.setConfigLabelAccumulator(headerConfiguration);
-        headerLayer.addConfiguration(headerConfiguration);
 
         // --------------------------------
         // finalization
@@ -204,7 +199,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         // this config happens only at the start of the table. It doesn't change automatically
         // in the middle of the system switch mode
         
-        ThemeConfiguration defaultConfiguration = new ScopeTableStyleConfiguration();
+        ThemeConfiguration defaultConfiguration = new ScopeTableStyleConfiguration(natTable);
         if (Display.isSystemDarkTheme())
         	defaultConfiguration = new DarkScopeTableStyleConfiguration();        
         natTable.setTheme(defaultConfiguration);

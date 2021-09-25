@@ -15,7 +15,6 @@ import org.eclipse.nebula.widgets.nattable.selection.config.DefaultRowSelectionL
 import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
 
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpctree.internal.config.RemoveHeaderSelectionConfiguration;
 
 
 
@@ -72,7 +71,6 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
         																  rowIdAccessor );
         this.selectionLayer.setSelectionModel(selectionModel);
         this.selectionLayer.addConfiguration(new DefaultRowSelectionLayerConfiguration());
-        this.selectionLayer.addConfiguration(new RemoveHeaderSelectionConfiguration());
         
         setUnderlyingLayer(compositeFreezeLayer);
     }
