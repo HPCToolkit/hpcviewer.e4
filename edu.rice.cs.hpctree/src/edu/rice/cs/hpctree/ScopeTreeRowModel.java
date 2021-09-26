@@ -57,10 +57,10 @@ public class ScopeTreeRowModel extends AbstractTreeRowModel<Scope> implements IS
 	
 	
 	@Override
-    public List<Integer> expand(int index) {
-		
+    public List<Integer> expand(int index) {		
 		return new ArrayList<>(0);
 	}
+	
 	
     @Override
     public int depth(int index) {

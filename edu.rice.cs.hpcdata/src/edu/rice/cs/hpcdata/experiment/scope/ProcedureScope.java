@@ -214,6 +214,8 @@ public int getSID() {
 	return this.iScopeID;
 } */
 
+
+@Override
 public Object[] getAllChildren(/*AbstractFinalizeMetricVisitor finalizeVisitor, PercentScopeVisitor percentVisitor,*/
 		MetricValuePropagationFilter inclusiveOnly,
 		MetricValuePropagationFilter exclusiveOnly) 

@@ -13,6 +13,8 @@ import ca.odell.glazedlists.event.ListEventListener;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
+import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
+import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
@@ -233,16 +235,19 @@ public class ScopeTreeData implements IScopeTreeData
 		return listScopes.indexOf(child);
 	}
 
+	
 	@Override
 	public boolean hasChildren(Scope object) {
 		return object.hasChildren();
 	}
 
+	
 	@Override
 	public boolean hasChildren(int index) {
 		return hasChildren(getDataAtIndex(index));
 	}
 
+	
 	@Override
 	public List<Scope> getChildren(Scope scope) {
 		
@@ -270,10 +275,12 @@ public class ScopeTreeData implements IScopeTreeData
 		return convert(children);
 	}
 
+	
 	@Override
 	public List<Scope> getChildren(Scope object, boolean fullDepth) {
 		return getChildren(object);
 	}
+	
 
 	@Override
 	public List<Scope> getChildren(int index) {
@@ -281,16 +288,17 @@ public class ScopeTreeData implements IScopeTreeData
 		return getChildren(scope);
 	}
 
+	
 	@Override
 	public int getElementCount() {
 		return listScopes.size();
 	}
 
+	
 	@Override
 	public boolean isValidIndex(int index) {
 		return (index >= 0) && (index < listScopes.size());
 	}
-	
 
 	
 	/***
@@ -313,6 +321,14 @@ public class ScopeTreeData implements IScopeTreeData
 		return current;		
 	}
 
+	
+	/********************************************************************
+	 * 
+	 * comparator for the table. 
+	 * If it's a metric column, we compare the value.
+	 * If it's a tree column, we compare the name and its line number
+	 *
+	 ********************************************************************/
 	private static class ColumnComparator implements Comparator<TreeNode> 
 	{
 		private final BaseMetric metric;
@@ -366,7 +382,18 @@ public class ScopeTreeData implements IScopeTreeData
 		int factor = dir == SortDirectionEnum.ASC ? 1 : -1;
 
 		if (metric == null) {
-			return factor * o1.getName().compareTo(o2.getName());
+			int result = o1.getName().compareTo(o2.getName());
+			if (result == 0) {
+				// same name: compare the line number
+				if (o1 instanceof CallSiteScope && o2 instanceof CallSiteScope) {
+					LineScope ls1 = ((CallSiteScope) o1).getLineScope();
+					LineScope ls2 = ((CallSiteScope) o2).getLineScope();
+					result = ls1.getLineNumber() - ls2.getLineNumber();
+				} else {
+					result = o1.getFirstLineNumber() - o2.getFirstLineNumber();
+				}
+			}
+			return factor * result;
 		}
 
 		MetricValue mv1 = metric.getValue(o1);
