@@ -373,6 +373,14 @@ public class ScopeTreeData implements IScopeTreeData
 	}
 
 	
+	/***
+	 * Returns a negative integer, zero, or a positive integer as the first argument is less than, equal to, or greater than the second.
+	 * @param o1
+	 * @param o2
+	 * @param metric
+	 * @param dir
+	 * @return
+	 */
 	protected static int compareNodes(Scope o1, Scope o2, BaseMetric metric, SortDirectionEnum dir) {
 		// o1 and o2 are exactly the same object. This should return 0
 		// no need to go further
@@ -382,18 +390,7 @@ public class ScopeTreeData implements IScopeTreeData
 		int factor = dir == SortDirectionEnum.ASC ? 1 : -1;
 
 		if (metric == null) {
-			int result = o1.getName().compareTo(o2.getName());
-			if (result == 0) {
-				// same name: compare the line number
-				if (o1 instanceof CallSiteScope && o2 instanceof CallSiteScope) {
-					LineScope ls1 = ((CallSiteScope) o1).getLineScope();
-					LineScope ls2 = ((CallSiteScope) o2).getLineScope();
-					result = ls1.getLineNumber() - ls2.getLineNumber();
-				} else {
-					result = o1.getFirstLineNumber() - o2.getFirstLineNumber();
-				}
-			}
-			return factor * result;
+			return compareNodeName(o1, o2, factor);
 		}
 
 		MetricValue mv1 = metric.getValue(o1);
@@ -407,11 +404,38 @@ public class ScopeTreeData implements IScopeTreeData
 		// ok. So far o1 looks the same as o2
 		// we don't want returning 0 because it will cause the tree looks weird
 		// let's try to compare with the name, and then with the hash code
+		return compareNodeName(o1, o2, factor);
+	}
+
+	
+	/****
+	 * compare the name of the nodes and guaranteed to be unique (not zero).
+	 * If the nodes have the same node, we compare with the line number.
+	 * If it's still the same, we compare with the hash code. This can't be the same.
+	 * @param o1
+	 * @param o2
+	 * @param factor
+	 * @return a negative integer, zero, or a positive integer as the first argument is less than, equal to, or greater than the second.
+	 */
+	protected static int compareNodeName(Scope o1, Scope o2, int factor) {
 		int result = o1.getName().compareTo(o2.getName());
 		if (result == 0) {
-			result = o1.hashCode() - o2.hashCode();
+			// same name: compare the line number
+			if (o1 instanceof CallSiteScope && o2 instanceof CallSiteScope) {
+				LineScope ls1 = ((CallSiteScope) o1).getLineScope();
+				LineScope ls2 = ((CallSiteScope) o2).getLineScope();
+				result = ls1.getLineNumber() - ls2.getLineNumber();
+			} else {
+				result = o1.getFirstLineNumber() - o2.getFirstLineNumber();
+			}
+			
+			// ok. So far o1 looks the same as o2
+			// we don't want returning 0 because it will cause the tree looks weird
+			// let's try to compare with the hash code
+			if (result == 0) {
+				result = o1.hashCode() - o2.hashCode();
+			}
 		}
 		return factor * result;
 	}
-
 }
