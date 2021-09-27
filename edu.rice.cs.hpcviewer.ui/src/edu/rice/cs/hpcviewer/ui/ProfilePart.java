@@ -161,7 +161,6 @@ public class ProfilePart implements IProfilePart, EventHandler
 				IUpperPart editor = (IUpperPart) item;
 				
 				if (editor.hasEqualInput(input)) {
-					editor.setInput(input);
 					tabFolderTop.setSelection((CTabItem) editor);					
 					return (CTabItem) editor;
 				}

@@ -148,6 +148,11 @@ public class ThreadPart extends TopDownPart
 	}
 
 	
+	@Override
+	protected IThreadDataCollection getThreadDataCollection() {
+		return viewInput.getThreadData();
+	}
+	
 	/***
 	 * Get the list of threads to view in a thread view.
 	 * This method will display a dialog box asking users to choose threads to view.

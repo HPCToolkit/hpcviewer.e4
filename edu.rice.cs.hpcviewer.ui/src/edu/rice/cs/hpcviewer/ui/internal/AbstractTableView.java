@@ -475,10 +475,9 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 			public void widgetSelected(SelectionEvent e) {
 
 				Scope selection = table.getSelection();
-				if (selection == null)
-					return;
+				if (selection != null)
+					zoomAction.zoomIn(selection);
 
-				zoomAction.zoomIn(selection);
 				updateButtonStatus();
 			}
 		});
@@ -584,7 +583,8 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		boolean canZoomOut = zoomAction == null ? false : zoomAction.canZoomOut();
 		toolItem[ACTION_ZOOM_OUT].setEnabled(canZoomOut);
 		
-		toolItem[ACTION_HOTPATH].setEnabled(canZoomIn);
+		boolean canHotPath = selectedScope != null && selectedScope.hasChildren();
+		toolItem[ACTION_HOTPATH].setEnabled(canHotPath);
 	}
 	
 	public abstract RootScopeType getRootType();
