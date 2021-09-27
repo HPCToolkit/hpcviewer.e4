@@ -18,6 +18,7 @@ public class BottomUpPart extends AbstractTableView
 
 	public BottomUpPart(CTabFolder parent, int style) {
 		super(parent, style, TITLE);
+		setToolTipText("A view to display the list of callers");
 	}
 
 	@Override

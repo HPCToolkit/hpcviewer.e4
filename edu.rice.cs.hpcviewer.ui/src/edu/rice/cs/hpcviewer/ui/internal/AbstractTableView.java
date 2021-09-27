@@ -50,7 +50,11 @@ import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 
 
-
+/************************************************************************************************
+ * 
+ * Generic class to display a table and its toolbar for the actions
+ *
+ ************************************************************************************************/
 public abstract class AbstractTableView extends AbstractView implements EventHandler, DisposeListener
 {
 	final private int ACTION_ZOOM_IN      = 0;
@@ -77,6 +81,13 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 	private IEventBroker eventBroker;
 	private IUndoableActionManager actionManager;
 	
+	
+	/*****
+	 * Constructor to create a view
+	 * @param parent the folder to be attached
+	 * @param style SWT style 
+	 * @param title the title for this view
+	 */
 	public AbstractTableView(CTabFolder parent, int style, String title) {
 		super(parent, style);
 		setText(title);

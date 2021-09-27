@@ -77,6 +77,7 @@ public class ThreadPart extends TopDownPart
 		try {
 			String title = TITLE_PREFIX + getLabel(viewInput).toString(); 
 			setText(title);
+			setToolTipText(getTooltipText(viewInput));
 		} catch (IOException e) {
 			e.printStackTrace();
 			setText(TITLE_PREFIX + " (Empty)");
@@ -152,6 +153,29 @@ public class ThreadPart extends TopDownPart
 	protected IThreadDataCollection getThreadDataCollection() {
 		return viewInput.getThreadData();
 	}
+	
+	
+	private String getTooltipText(ThreadViewInput input) throws IOException {
+		final String TOOLTIP_PREFIX = "Top down view for thread(s): ";
+		
+		IThreadDataCollection threadData = input.getThreadData();
+		String[] labels = threadData.getRankStringLabels();
+
+		List<Integer> threads = input.getThreads();
+		int size = threads.size();
+
+		String label = TOOLTIP_PREFIX;
+		for(int i=0; i<size; i++) {
+			int index = threads.get(i);
+			label += labels[index];
+			
+			if (i+1 < size) {
+				label += ", ";
+			}
+		}
+		return label;
+	}
+	
 	
 	/***
 	 * Get the list of threads to view in a thread view.

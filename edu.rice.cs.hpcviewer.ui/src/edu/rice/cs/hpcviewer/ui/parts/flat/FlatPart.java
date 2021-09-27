@@ -27,6 +27,7 @@ public class FlatPart extends AbstractTableView
 
 	public FlatPart(CTabFolder parent, int style) {
 		super(parent, style, "Flat view");
+		setToolTipText("A view to display the static structure of the application and its metrics");
 	}
 
 

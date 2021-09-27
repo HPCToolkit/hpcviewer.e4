@@ -54,6 +54,7 @@ public class TopDownPart extends AbstractTableView
 
 	public TopDownPart(CTabFolder parent, int style) {
 		super(parent, style, TITLE);
+		setToolTipText("A view to display the calling context tree (CCT) of the profile data");
 	}
 	
 
