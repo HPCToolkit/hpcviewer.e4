@@ -33,8 +33,6 @@ import org.eclipse.nebula.widgets.nattable.sort.config.SingleClickSortConfigurat
 import org.eclipse.nebula.widgets.nattable.sort.event.SortColumnEvent;
 import org.eclipse.nebula.widgets.nattable.style.theme.ThemeConfiguration;
 import org.eclipse.nebula.widgets.nattable.tooltip.NatTableContentTooltip;
-import org.eclipse.nebula.widgets.nattable.ui.menu.AbstractHeaderMenuConfiguration;
-import org.eclipse.nebula.widgets.nattable.ui.menu.PopupMenuBuilder;
 import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
 import org.eclipse.nebula.widgets.nattable.viewport.command.ShowRowInViewportCommand;
 import org.eclipse.swt.SWT;
@@ -152,9 +150,6 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         compositeLayer.setChildLayer(GridRegion.COLUMN_HEADER, headerLayer, 0, 0);
         compositeLayer.setChildLayer(GridRegion.BODY, bodyLayerStack, 0, 1);
         
-        // special event handler to export the content of the table
-        compositeLayer.registerCommandHandler(new ExportCommandHandler(compositeLayer));
-        
         // turn the auto configuration off as we want to add our header menu
         // configuration
         natTable = new NatTable(parent, NatTable.DEFAULT_STYLE_OPTIONS , compositeLayer, false);
@@ -163,6 +158,9 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         // add the DefaultNatTableStyleConfiguration and the ConfigRegistry
         // manually
         natTable.setConfigRegistry(configRegistry);
+        
+        // special event handler to export the content of the table
+        natTable.registerCommandHandler(new ExportCommandHandler(natTable));
 
         // --------------------------------
         // setup the configuration for natTable
@@ -171,15 +169,6 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         natTable.addConfiguration(new ScopeTreeExportConfiguration(bodyLayerStack.getTreeRowModel()));
         natTable.addConfiguration(new TableFontConfiguration(natTable));
 		natTable.addConfiguration(new SingleClickSortConfiguration());
-        natTable.addConfiguration(new AbstractHeaderMenuConfiguration(natTable) {
-            @Override
-            protected PopupMenuBuilder createColumnHeaderMenu(NatTable natTable) {
-            	return super.createColumnHeaderMenu(natTable)
-                        .withHideColumnMenuItem()
-                        .withShowAllColumnsMenuItem()
-                        .withFreezeColumnMenuItem();
-            }
-        });
 
         // --------------------------------
         // finalization
