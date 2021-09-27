@@ -245,6 +245,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		addButtonListener(root, metricManager);
 
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC, this);
+		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE,  this);
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN,   this);
 	
 		parent.addDisposeListener(this);
@@ -382,6 +383,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 			// metric has changed. 
 			// We don't know if the change will incur structural changes or just visual.
 			// it's better to refresh completely the table just in case. 
+
 			table.refresh();
 		}
 	}
