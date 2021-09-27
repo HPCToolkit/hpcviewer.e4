@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.nebula.widgets.nattable.NatTable;
+import org.eclipse.nebula.widgets.nattable.command.StructuralRefreshCommand;
 import org.eclipse.nebula.widgets.nattable.command.VisualRefreshCommand;
 import org.eclipse.nebula.widgets.nattable.config.ConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.coordinate.PositionCoordinate;
@@ -87,7 +88,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	private final ScopeTreeDataProvider   bodyDataProvider;
 	private final TableConfiguration      tableConfiguration;
 	private final Collection<IActionListener> listeners = new FastList<IActionListener>();
-
+	private final SortHeaderLayer<Scope> headerLayer;
 	
 	/****
 	 * Constructor to a dynamic create tree table using the default tree provider
@@ -140,9 +141,9 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 
         columnHeaderDataLayer = new DefaultColumnHeaderDataLayer(new ColumnHeaderDataProvider(bodyDataProvider));
         ILayer columnHeaderLayer = new ColumnHeaderLayer(columnHeaderDataLayer, bodyLayerStack, bodyLayerStack.getSelectionLayer());
-        SortHeaderLayer<Scope> headerLayer = new SortHeaderLayer<>(columnHeaderLayer, bodyLayerStack.getTreeRowModel());
+        headerLayer = new SortHeaderLayer<>(columnHeaderLayer, bodyLayerStack.getTreeRowModel());
         headerLayer.addLayerListener(this);
-
+        
         // --------------------------------
         // build the composite
         // --------------------------------
@@ -246,9 +247,16 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		// sigh...
 		
 		bodyDataProvider.addColumn(0, metric);
-		bodyLayerStack.fireLayerEvent(new ColumnInsertEvent(bodyLayerStack, 1));
+		bodyLayerStack.getBodyDataLayer().fireLayerEvent(new ColumnInsertEvent(bodyLayerStack, 1));
+		pack(bodyDataProvider);
 	}
 	
+	
+	public void updateColumn(int index, Object newValue) {
+		BaseMetric metric = (BaseMetric) newValue;
+		bodyDataProvider.updateColumn(index, metric);
+		headerLayer.doCommand(new StructuralRefreshCommand());
+	}
 	
 	/***
 	 * Get the list of used metrics.

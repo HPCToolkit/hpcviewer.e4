@@ -167,6 +167,19 @@ public class ScopeTreeData implements IScopeTreeData
 	
 	
 	@Override
+	public int getMetricIndex(BaseMetric metric) {
+		return listMetrics.indexOf(metric);
+	}
+	
+	
+	@Override
+	public void updateMetric(int index, BaseMetric metric) {
+		if (index >=0  && index < listMetrics.size())
+			listMetrics.set(index, metric);
+	}
+	
+	
+	@Override
 	public void addMetric(BaseMetric metric) {
 		addMetric(listMetrics.size(), metric);
 	}

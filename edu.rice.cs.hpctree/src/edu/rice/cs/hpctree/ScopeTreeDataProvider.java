@@ -111,8 +111,15 @@ public class ScopeTreeDataProvider implements IDataProvider, IRowDataProvider<Sc
 		treeData.addMetric(index, metric);
 	}
 	
+	
 	public void addColumn(BaseMetric metric) {
 		treeData.addMetric(metric);
+	}
+	
+	
+	public void updateColumn(int index, BaseMetric metric) {
+		int i = treeData.getMetricIndex(metric);
+		treeData.updateMetric(i, metric);
 	}
 	
 	private String getDebugText(Scope node) {
