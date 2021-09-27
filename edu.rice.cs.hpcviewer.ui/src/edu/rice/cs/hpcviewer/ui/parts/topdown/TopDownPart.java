@@ -125,8 +125,8 @@ public class TopDownPart extends AbstractTableView
 			MessageDialog.openError(shell, msg, e.getClass().getName() + ": " + e.getLocalizedMessage());
 			return;
 		}
-
-		List<FilterDataItem<String>> items = ThreadFilterDialog.filter(shell, labels, null);
+		
+		List<FilterDataItem<String>> items = ThreadFilterDialog.filter(shell, "Select rank/thread to view", labels, null);
 		
 		if (items != null) {
 			List<Integer> threads = new ArrayList<Integer>();

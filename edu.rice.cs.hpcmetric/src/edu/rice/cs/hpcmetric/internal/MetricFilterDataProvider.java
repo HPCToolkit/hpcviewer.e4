@@ -87,7 +87,8 @@ public class MetricFilterDataProvider extends FilterDataProvider<BaseMetric>
 			break;
 		case IConstants.INDEX_METRIC_VAL:
 			break;
+		default: 
+			super.setDataValue(columnIndex, rowIndex, newValue);
 		}
-		super.setDataValue(columnIndex, rowIndex, newValue);
 	}
 }

@@ -3,7 +3,6 @@ package edu.rice.cs.hpcfilter;
 import java.util.List;
 import org.eclipse.nebula.widgets.nattable.data.IRowDataProvider;
 
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcfilter.internal.IConstants;
 
 public class FilterDataProvider<T> implements IRowDataProvider<FilterDataItem<T>> 
@@ -69,9 +68,7 @@ public class FilterDataProvider<T> implements IRowDataProvider<FilterDataItem<T>
 			break;
 			
 		case IConstants.INDEX_NAME:
-			item.setLabel((String) newValue);;				
-			BaseMetric metric = (BaseMetric) data;
-			metric.setDisplayName((String) newValue);
+			item.setLabel((String) newValue);
 			break;
 		default:
 			assert(false);

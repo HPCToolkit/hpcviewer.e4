@@ -176,7 +176,7 @@ public class ThreadPart extends TopDownPart
 			items.add(obj);
 		}
 
-		ThreadFilterDialog dialog = new ThreadFilterDialog(shell, items);
+		ThreadFilterDialog dialog = new ThreadFilterDialog(shell, "Select rank/thread to view", items);
 		
 		if (dialog.open() == Window.OK) {
 			items = dialog.getResult();
