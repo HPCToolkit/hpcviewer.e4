@@ -157,12 +157,14 @@ public class ProfilePart implements IProfilePart, EventHandler
 		CTabItem []items =  tabFolderTop.getItems();
 		for (int i=0; i<items.length; i++) {
 			CTabItem item = items[i];
-			if (item instanceof IUpperPart) {
-				IUpperPart editor = (IUpperPart) item;
+			if (item instanceof AbstractUpperPart) {
+				AbstractUpperPart editor = (AbstractUpperPart) item;
 				
 				if (editor.hasEqualInput(input)) {
-					tabFolderTop.setSelection((CTabItem) editor);					
-					return (CTabItem) editor;
+					editor.setInput(input);
+					tabFolderTop.setSelection(editor);
+					
+					return editor;
 				}
 			}
 		}
