@@ -76,7 +76,7 @@ import edu.rice.cs.hpctree.internal.config.TableFontConfiguration;
  ********************************************************************/
 public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayerListener
 {
-	private final static String TEXT_METRIC_COLUMN = "8x88+88xx888x8%";
+	private final static String TEXT_METRIC_COLUMN = "|8x88+88xx888x8%";
 	private final static String STRING_PADDING  = "XX"; 
 
 	private final NatTable natTable ;
@@ -391,8 +391,8 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
     	int numColumns   = bodyDataProvider.getColumnCount();
 
     	GC gc = new GC(natTable.getDisplay());
-    	Font metricFont = TableFontConfiguration.getMetricFont();
-    	gc.setFont(metricFont);
+    	Font genericFont = TableFontConfiguration.getGenericFont();
+    	gc.setFont(genericFont);
     	
     	int totSize = 0;
     	for(int i=1; i<numColumns; i++) {
@@ -422,19 +422,19 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		
 		// compute the ideal size of the row's height
 
-		// 1. size for metric font
-		Point metricSize = gc.stringExtent(TEXT_METRIC_COLUMN);
-		
-		// 2. size for generic font 
-		Font genericFont = TableFontConfiguration.getGenericFont();
-		gc.setFont(genericFont);
+		// 1. size for generic font
 		Point genericSize = gc.stringExtent(TEXT_METRIC_COLUMN);
 		
-		int height = Math.max(metricSize.y, genericSize.y);
-		int pixelH = GUIHelper.convertVerticalDpiToPixel(height);
+		// 2. size for metric font 
+		Font metricFont = TableFontConfiguration.getMetricFont();
+		gc.setFont(metricFont);
+		Point metricSize = gc.stringExtent(TEXT_METRIC_COLUMN);
 		
-		bodyDataLayer.setDefaultRowHeight(pixelH);
-		columnHeaderDataLayer.setDefaultRowHeight(pixelH + 4);
+		int height = Math.max(metricSize.y, genericSize.y);
+		int pixelV = GUIHelper.convertVerticalDpiToPixel(height);
+
+		bodyDataLayer.setDefaultRowHeight(pixelV + 4);
+		columnHeaderDataLayer.setDefaultRowHeight(pixelV + 4);
 		
     	gc.dispose();
 	}
@@ -457,7 +457,6 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		size.y = Math.max(size.y, extent.y);
 		
 		gc.dispose();
-		
 		return size;
 	}
 
