@@ -273,7 +273,7 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 		
 		ViewerDataEvent eventInfo = (ViewerDataEvent) obj;
 		final MetricFilterInput  inputFilter = (MetricFilterInput) getInputData();
-		if (eventInfo.experiment != inputFilter.getMetricManager())
+		if (eventInfo.metricManager != inputFilter.getMetricManager())
 			return;
 		
 		if (event.getTopic().equals(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC)) {

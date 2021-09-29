@@ -5,7 +5,6 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.widgets.Display;
 
 import edu.rice.cs.hpcbase.ViewerDataEvent;
-import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
@@ -50,7 +49,7 @@ public class UserDerivedMetric
 			final DerivedMetric metric = dialog.getMetric();
 			metricMgr.addDerivedMetric(metric);
 			
-			ViewerDataEvent data = new ViewerDataEvent((Experiment) root.getExperiment(), metric);
+			ViewerDataEvent data = new ViewerDataEvent(metricMgr, metric);
 			eventBroker.post(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC, data);
 		}
 	}

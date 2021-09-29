@@ -367,7 +367,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 			return;
 		
 		ViewerDataEvent eventInfo = (ViewerDataEvent) obj;
-		if (metricManager != eventInfo.experiment) 
+		if (metricManager != eventInfo.metricManager) 
 			return;
 
 		String topic = event.getTopic();

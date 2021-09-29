@@ -7,7 +7,6 @@ import java.util.List;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.custom.CTabFolder;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,14 +43,15 @@ public class ThreadPart extends TopDownPart
 		if (input == null || (!(input instanceof ThreadViewInput)))
 			return;
 
-		// important: needs to store the experiment database for further usage
-		// when the view is becoming visible
+		// if the input doesn't include the list of threads to be displayed,
+		// we'll ask the user to pick the threads
+		
 		viewInput = (ThreadViewInput) input;
 		threads   = viewInput.getThreads();
 		if (threads == null) {
-			Display display = Display.getDefault();
+			final Shell shell = getDisplay().getActiveShell();
 			try {
-				threads = getThreads(display.getActiveShell(), viewInput.getThreadData());
+				threads = getThreads(shell, viewInput.getThreadData());
 				if (threads == null)
 					return;
 				
@@ -61,7 +61,7 @@ public class ThreadPart extends TopDownPart
 				final String label = "Error while opening thread-level data";
 				Logger logger = LoggerFactory.getLogger(getClass());
 				logger.error(label, e);
-				MessageDialog.openError(display.getActiveShell(), label, e.getClass().getName() +": " + e.getLocalizedMessage());
+				MessageDialog.openError(shell, label, e.getClass().getName() +": " + e.getLocalizedMessage());
 				
 				throw new RuntimeException(e.getMessage());
 			}
@@ -205,7 +205,7 @@ public class ThreadPart extends TopDownPart
 		if (dialog.open() == Window.OK) {
 			items = dialog.getResult();
 			if (items != null) {
-				List<Integer> threads = new ArrayList<Integer>();
+				final List<Integer> threads = new ArrayList<Integer>();
 				for(int i=0; i<items.size(); i++) {
 					if (items.get(i).checked) {
 						threads.add(i);
@@ -217,6 +217,4 @@ public class ThreadPart extends TopDownPart
 		}
 		return null;
 	}
-
-
 }
