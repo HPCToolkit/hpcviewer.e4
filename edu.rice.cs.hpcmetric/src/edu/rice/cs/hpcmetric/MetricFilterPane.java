@@ -57,11 +57,15 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 
 	private final IEventBroker eventBroker;
 
+	private MetricFilterDataProvider dataProvider;
+	
 	private Button btnEdit;
 	private Button btnApplyToAllViews;
 	
 	public MetricFilterPane(Composite parent, int style, IEventBroker eventBroker, FilterInputData<BaseMetric> inputData) {
 		super(parent, style, inputData);
+		super.setInput(inputData);
+		
 		this.eventBroker = eventBroker;
 		
 		if (style == STYLE_COMPOSITE) {
@@ -73,6 +77,7 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 		}
 	}
 
+		
 	
 	@Override
 	public void changeEvent(Object data) {
@@ -242,9 +247,20 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 
 
 	@Override
+	public void setInput(FilterInputData<BaseMetric> inputData) { 
+		MetricFilterInput input = (MetricFilterInput) inputData;
+		dataProvider = new MetricFilterDataProvider(input.getRoot(), input.getListItems(), this);
+		
+		super.setInput(inputData);
+	}
+	
+	@Override
 	protected FilterDataProvider<BaseMetric> getDataProvider() {
-		MetricFilterInput input = (MetricFilterInput) getInputData();
-		return new MetricFilterDataProvider(input.getRoot(), getFilterList(), this);
+		if (dataProvider == null) {
+			MetricFilterInput input = (MetricFilterInput) getInputData();
+			dataProvider = new MetricFilterDataProvider(input.getRoot(), getFilterList(), this);
+		}
+		return dataProvider;
 	}
 
 

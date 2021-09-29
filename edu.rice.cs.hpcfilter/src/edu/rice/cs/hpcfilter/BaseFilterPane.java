@@ -13,6 +13,7 @@ public class BaseFilterPane<T> extends AbstractFilterPane<T>
 	
 	public BaseFilterPane(Composite parent, int style, FilterInputData<T> inputData) {
 		super(parent, style, inputData);
+		super.setInput(inputData);
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package edu.rice.cs.hpcmetric.internal;
 
+import java.util.List;
 import java.util.Optional;
 
 import ca.odell.glazedlists.FilterList;
@@ -17,7 +18,7 @@ public class MetricFilterDataProvider extends FilterDataProvider<BaseMetric>
 
 	private final RootScope root;
 
-	public MetricFilterDataProvider(RootScope root, FilterList<FilterDataItem<BaseMetric>> filterList, IFilterChangeListener changeListener) {
+	public MetricFilterDataProvider(RootScope root, List<FilterDataItem<BaseMetric>> filterList, IFilterChangeListener changeListener) {
 		super(filterList, changeListener);
 		this.root = root;
 	}

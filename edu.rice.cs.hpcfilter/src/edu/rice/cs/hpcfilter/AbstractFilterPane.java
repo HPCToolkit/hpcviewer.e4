@@ -91,13 +91,17 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 	public final static int STYLE_INDEPENDENT = 1;
 	
 	private final int style;
-	private final FilterInputData<T> inputData;
-	private final NatTable  natTable ;
-	private final EventList<FilterDataItem<T>> eventList ;
-	private final DataLayer dataLayer ;
-	private final RowSelectionProvider<FilterDataItem<T>> rowSelectionProvider;
-	private final FilterList<FilterDataItem<T>> filterList;
+	private FilterInputData<T> inputData;
+	private NatTable  natTable ;
+	private EventList<FilterDataItem<T>> eventList ;
+	private DataLayer dataLayer ;
+	private RowSelectionProvider<FilterDataItem<T>> rowSelectionProvider;
+	private FilterList<FilterDataItem<T>> filterList;
 
+	private Composite parentContainer ;
+	private Text objSearchText;
+	private Button btnRegExpression;
+	
 	/***
 	 * Constructor to create the item and its composite widgets.
 	 * 
@@ -108,9 +112,13 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 	 */
 	public AbstractFilterPane(Composite parent, int style, FilterInputData<T> inputData) {
 		this.inputData = inputData;
-		this.style     = style;
-		
-		Composite parentContainer = new Composite(parent, SWT.NONE);
+		this.style = style;
+		createContentArea(parent);
+	}
+
+	
+	public void createContentArea(Composite parent) {		
+		parentContainer = new Composite(parent, SWT.NONE);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(parentContainer);
 
 		// prepare the buttons: check and uncheck
@@ -145,7 +153,7 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 		});
 
 		// regular expression option
-		final Button btnRegExpression = new Button(groupButtons, SWT.CHECK);
+		btnRegExpression = new Button(groupButtons, SWT.CHECK);
 		btnRegExpression.setText("Regular expression");
 		btnRegExpression.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		btnRegExpression.setSelection(false);	
@@ -165,11 +173,16 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 		Label lblFilter = new Label (groupFilter, SWT.FLAT);
 		lblFilter.setText("Filter:");
 		
-		Text objSearchText = new Text (groupFilter, SWT.BORDER);
+		objSearchText = new Text (groupFilter, SWT.BORDER);
 		objSearchText.setToolTipText("Type text to filter the list");
 		
 		// expand as much as possible horizontally
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(objSearchText);
+	}
+	
+	
+	public void setInput(FilterInputData<T> inputData) {
+		this.inputData = inputData;
 
 		// ------------------------------------------------------------
 		// Start building the nat-table
@@ -325,6 +338,7 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 			natTable.addDisposeListener(this);
 		}
 	}
+	
 	
 
 	@Override
