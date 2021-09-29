@@ -114,27 +114,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 						
 						sync.asyncExec(()->{
 							view.activate();
-							
-							// if the metric part is active, we need to inform it that
-							// a new view is activated. The metric part has to refresh
-							// its content to synchronize with the table in the active view
-							
-							if (metricView != null && !metricView.isDisposed()) {
-								RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
-								Object o = view.getInput();
-								IMetricManager metricMgr;
-								if (o instanceof IMetricManager) {
-									metricMgr = (IMetricManager) o;
-								} else if (view instanceof ThreadPart) {
-									metricMgr = ((ThreadPart)view).getMetricManager();
-								} else {
-									throw new RuntimeException("Unknown view: " + view.getText());
-								}
-								MetricFilterInput input  = new MetricFilterInput(root, metricMgr, 
-																				view.getFilterDataItems(), true);
-								
-								metricView.setInput(input);
-							}
+							refreshMetricView(view);
 						});
 					}
 				}
@@ -143,6 +123,32 @@ public class ProfilePart implements IProfilePart, EventHandler
 		tabFolderBottom.setFocus();
 	}
 	
+	
+	private void refreshMetricView(AbstractView view) {
+		
+		// if the metric part is active, we need to inform it that
+		// a new view is activated. The metric part has to refresh
+		// its content to synchronize with the table in the active view
+		
+		if (metricView != null && !metricView.isDisposed()) {
+			RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
+			Object o = view.getInput();
+			IMetricManager metricMgr;
+			if (o instanceof IMetricManager) {
+				metricMgr = (IMetricManager) o;
+			} else if (view instanceof ThreadPart) {
+				metricMgr = ((ThreadPart)view).getMetricManager();
+			} else {
+				throw new RuntimeException("Unknown view: " + view.getText());
+			}
+			boolean affectAll = view.getViewType() == AbstractView.ViewType.COLLECTIVE;
+			MetricFilterInput input  = new MetricFilterInput(root, 
+															 metricMgr, 
+															 view.getFilterDataItems(), 
+															 affectAll);								
+			metricView.setInput(input);
+		}
+	}
 	
 	/***
 	 * Display an editor in the top folder
@@ -238,14 +244,6 @@ public class ProfilePart implements IProfilePart, EventHandler
 	 */
 	public void addThreadView(ThreadViewInput input) {
 		CTabItem []items = tabFolderBottom.getItems();
-		/*
-		 * for(CTabItem item: items) { if (item instanceof ThreadView) { ThreadView tv =
-		 * (ThreadView) item; ThreadViewInput tvinput = (ThreadViewInput) tv.getInput();
-		 * 
-		 * if (input.getThreads().equals(tvinput.getThreads())) {
-		 * tabFolderBottom.setSelection(tv); return; } } } ThreadView threadView = new
-		 * ThreadView(tabFolderBottom, SWT.NONE);
-		 */
 		for(CTabItem item: items) {
 			if (item instanceof ThreadPart) {
 				ThreadPart tv = (ThreadPart) item;
@@ -258,8 +256,11 @@ public class ProfilePart implements IProfilePart, EventHandler
 			}
 		}
 		ThreadPart threadView = new ThreadPart(tabFolderBottom, SWT.NONE);
-
 		addView(threadView, input, true);
+
+		// the metric view has to be updated according to the current active view
+		// since we have just created the thread view, the metric view should be updated too
+		refreshMetricView(threadView);
 		
 		// make sure the new view is visible and get the focus
 		tabFolderBottom.setSelection(threadView);

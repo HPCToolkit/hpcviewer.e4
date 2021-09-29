@@ -405,7 +405,11 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 	public void widgetDisposed(DisposeEvent e) {
 	}
 
-
+	
+	@Override
+	public ViewType getViewType() {
+		return AbstractView.ViewType.COLLECTIVE;
+	}
 	
 	private void hideORShowColumns(MetricDataEvent dataEvent) {
 		Object objData = dataEvent.getData();

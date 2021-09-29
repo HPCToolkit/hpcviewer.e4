@@ -30,6 +30,8 @@ public class MetricView extends AbstractUpperPart
 	private final IEventBroker eventBroker ;
 	private final CTabFolder parent;
 	
+	private MetricFilterPane pane;
+	
 	private MetricFilterInput inputFilter;
 	public MetricView(CTabFolder parent, int style, IEventBroker eventBroker ) {
 		super(parent, style);
@@ -52,11 +54,16 @@ public class MetricView extends AbstractUpperPart
 			return;
 		inputFilter = (MetricFilterInput) input;
 
+		setMetricPane(inputFilter);
+	}
+
+	
+	private void setMetricPane(MetricFilterInput inputFilter) {
 		Composite container = new Composite(parent, SWT.BORDER);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(container);
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(container);
 		
-		MetricFilterPane pane = new MetricFilterPane(container, getStyle(), eventBroker, inputFilter);
+		pane = new MetricFilterPane(container, getStyle(), eventBroker, inputFilter);
 		
 		if (pane != null)
 			setControl(container);

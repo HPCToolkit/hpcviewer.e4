@@ -21,6 +21,7 @@ import edu.rice.cs.hpcfilter.StringFilterDataItem;
 import edu.rice.cs.hpcfilter.dialog.ThreadFilterDialog;
 import edu.rice.cs.hpctree.IScopeTreeData;
 import edu.rice.cs.hpctree.ScopeTreeData;
+import edu.rice.cs.hpcviewer.ui.internal.AbstractView;
 import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownPart;
 
 public class ThreadPart extends TopDownPart 
@@ -154,6 +155,13 @@ public class ThreadPart extends TopDownPart
 		return viewInput.getThreadData();
 	}
 	
+	
+	
+	@Override
+	public ViewType getViewType() {
+		return AbstractView.ViewType.INDIVIDUAL;
+	}
+
 	
 	private String getTooltipText(ThreadViewInput input) throws IOException {
 		final String TOOLTIP_PREFIX = "Top down view for thread(s): ";
