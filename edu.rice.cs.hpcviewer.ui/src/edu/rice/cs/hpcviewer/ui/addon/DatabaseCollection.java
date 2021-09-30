@@ -82,17 +82,14 @@ public class DatabaseCollection
 	final private HashMap<BaseExperiment, ViewerDataEvent> mapColumnStatus;
 	
 	private @Inject IEventBroker eventBroker;
-    private ExperimentManager    experimentManager;
-	
-	private Logger statusReporter;
-	
 	private @Inject UISynchronize sync;
-	
-	public DatabaseCollection() {
 
-		mapColumnStatus = new HashMap<BaseExperiment, ViewerDataEvent>();		
-		experimentManager = new ExperimentManager();
+	private ExperimentManager    experimentManager;
+	private Logger statusReporter;
 		
+	public DatabaseCollection() {
+		mapColumnStatus   = new HashMap<BaseExperiment, ViewerDataEvent>();		
+		experimentManager = new ExperimentManager();
 		mapWindowToExperiments = new HashMap<MWindow, List<BaseExperiment>>(1);
 	}
 	
@@ -107,7 +104,6 @@ public class DatabaseCollection
 			@Named(IServiceConstants.ACTIVE_SHELL) Shell myShell) {
 		
 		this.eventBroker    = broker;
-
 		this.statusReporter = LoggerFactory.getLogger(getClass());
 
 		// handling the command line arguments:
@@ -120,7 +116,6 @@ public class DatabaseCollection
 			myShell = new Shell(SWT.TOOL | SWT.NO_TRIM);
 		}
 		final Shell shell = myShell;
-		
 		String path = null;
 		
 		for (String arg: args) {
@@ -245,9 +240,9 @@ public class DatabaseCollection
 	 * @return int
 	 */
 	private int showPart( BaseExperiment experiment, 
-						   MApplication   application, 
-						   EModelService  modelService,
-						   EPartService   service) {
+						  MApplication   application, 
+						  EModelService  modelService,
+						  EPartService   service) {
 
 		//----------------------------------------------------------------
 		// find an empty slot in the part stack
@@ -463,7 +458,11 @@ public class DatabaseCollection
 		
 		String filename = fileOrDirectory;
 		if (filename == null) {
-			filename = experimentManager.openFileExperiment(shell);
+			try {
+				filename = experimentManager.openFileExperiment(shell);
+			} catch (Exception e) {
+				MessageDialog.openError(shell, "File to open the database", e.getMessage());
+			}
 			if (filename == null)
 				return null;
 		} else {

@@ -105,6 +105,15 @@ public static class FileXMLFilter implements FilenameFilter {
 	}
 }
 
+public static class FileHpcrunFilter implements FilenameFilter {
+	public boolean accept(File pathname, String sName) {
+		int iLength = sName.length();
+		if (iLength < 7) // the file should contain at least four letters: ".xml"
+			return false;
+		return (pathname.canRead() && sName.endsWith(".hpcrun"));
+	}
+}
+
 
 /**
  *  File filter to find a file with a glob-style pattern
