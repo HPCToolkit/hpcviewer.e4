@@ -80,17 +80,14 @@ public class DatabaseCollection
 
 	final private HashMap<MWindow, List<BaseExperiment>>   mapWindowToExperiments;
 	
-    private ExperimentManager experimentManager;
-	
-	private final Logger statusReporter = LoggerFactory.getLogger(getClass());
-	
-	private @Inject UISynchronize sync;
 	private @Inject IEventBroker eventBroker;
-	
-	
-	
+	private @Inject UISynchronize sync;
+
+	private ExperimentManager    experimentManager;
+	private Logger statusReporter;
+		
 	public DatabaseCollection() {
-		experimentManager = new ExperimentManager();		
+		experimentManager = new ExperimentManager();
 		mapWindowToExperiments = new HashMap<MWindow, List<BaseExperiment>>(1);
 	}
 	
@@ -105,6 +102,7 @@ public class DatabaseCollection
 			@Named(IServiceConstants.ACTIVE_SHELL) Shell myShell) {
 		
 		this.eventBroker    = broker;
+		this.statusReporter = LoggerFactory.getLogger(getClass());
 
 		// handling the command line arguments:
 		// if one of the arguments specify a file or a directory,
@@ -116,7 +114,6 @@ public class DatabaseCollection
 			myShell = new Shell(SWT.TOOL | SWT.NO_TRIM);
 		}
 		final Shell shell = myShell;
-		
 		String path = null;
 		
 		for (String arg: args) {
@@ -241,9 +238,9 @@ public class DatabaseCollection
 	 * @return int
 	 */
 	private int showPart( BaseExperiment experiment, 
-						   MApplication   application, 
-						   EModelService  modelService,
-						   EPartService   service) {
+						  MApplication   application, 
+						  EModelService  modelService,
+						  EPartService   service) {
 
 		//----------------------------------------------------------------
 		// find an empty slot in the part stack
@@ -459,7 +456,11 @@ public class DatabaseCollection
 		
 		String filename = fileOrDirectory;
 		if (filename == null) {
-			filename = experimentManager.openFileExperiment(shell);
+			try {
+				filename = experimentManager.openFileExperiment(shell);
+			} catch (Exception e) {
+				MessageDialog.openError(shell, "File to open the database", e.getMessage());
+			}
 			if (filename == null)
 				return null;
 		} else {
@@ -529,7 +530,8 @@ public class DatabaseCollection
 		// first, notify all the parts that have experiment that they will be destroyed.
 		
 		ViewerDataEvent data = new ViewerDataEvent((Experiment) experiment, null);
-		eventBroker.send(BaseConstants.TOPIC_HPC_REMOVE_DATABASE, data);
+		if (eventBroker != null)
+			eventBroker.send(BaseConstants.TOPIC_HPC_REMOVE_DATABASE, data);
 		
 		// make sure the experiment's resources are disposed
 		experiment.dispose();
