@@ -13,12 +13,18 @@ public class FilterDataItemSortModel<T> implements ISortModel, Comparator<Filter
     protected int currentSortColumn = -1;
     protected SortDirectionEnum currentSortDirect = SortDirectionEnum.NONE;
 
-    private final List<FilterDataItem<T>> list;
+    private List<FilterDataItem<T>> list;
     
     public FilterDataItemSortModel(List<FilterDataItem<T>> list) {
-    	this.list = list;
-	}
+    	setList(list);
+	}    
     
+    
+	public void setList(List<FilterDataItem<T>> list) {
+		this.list = list;
+	}
+
+
 	@Override
 	public List<Integer> getSortedColumnIndexes() {
 		List<Integer> list = new ArrayList<Integer>(1);

@@ -3,7 +3,6 @@ package edu.rice.cs.hpcmetric.internal;
 import java.util.List;
 import java.util.Optional;
 
-import ca.odell.glazedlists.FilterList;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;

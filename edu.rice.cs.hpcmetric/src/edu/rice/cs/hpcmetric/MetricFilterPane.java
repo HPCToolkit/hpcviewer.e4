@@ -28,6 +28,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.osgi.service.prefs.Preferences;
 
+import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 
 
@@ -58,14 +59,14 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 	private final IEventBroker eventBroker;
 
 	private MetricFilterDataProvider dataProvider;
+	private MetricFilterInput  input;
 	
 	private Button btnEdit;
 	private Button btnApplyToAllViews;
 	
 	public MetricFilterPane(Composite parent, int style, IEventBroker eventBroker, FilterInputData<BaseMetric> inputData) {
 		super(parent, style, inputData);
-		super.setInput(inputData);
-		
+		this.input = (MetricFilterInput) inputData;
 		this.eventBroker = eventBroker;
 		
 		if (style == STYLE_COMPOSITE) {
@@ -86,14 +87,14 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 
 	
 	@Override
-	protected int createAdditionalButton(Composite parent) {
-		final MetricFilterInput  inputFilter = (MetricFilterInput) getInputData();
+	protected int createAdditionalButton(Composite parent, FilterInputData<BaseMetric> inputData) {
+		input = (MetricFilterInput) inputData; 
 		
 		btnApplyToAllViews = new Button(parent, SWT.CHECK);
 		btnApplyToAllViews.setText("Apply to all views");
 		btnApplyToAllViews.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-		btnApplyToAllViews.setEnabled(inputFilter.isAffectAll());
-		boolean checked = getHistoryApplyAll() && inputFilter.isAffectAll();
+		btnApplyToAllViews.setEnabled(input.isAffectAll());
+		boolean checked = getHistoryApplyAll() && input.isAffectAll();
 		btnApplyToAllViews.setSelection( checked );
 		
 		btnApplyToAllViews.addSelectionListener(new SelectionAdapter() {
@@ -131,11 +132,9 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 	}
 	
 	private void broadcast(Object data) {
-		final MetricFilterInput  inputFilter = (MetricFilterInput) getInputData();
-
 		List<FilterDataItem<BaseMetric>> copyList = new ArrayList<FilterDataItem<BaseMetric>>(getEventList()); //List.copyOf(getList());
 		MetricDataEvent metricDataEvent = new MetricDataEvent(data, copyList, btnApplyToAllViews.getSelection());
-		ViewerDataEvent viewerDataEvent = new ViewerDataEvent(inputFilter.getMetricManager(), metricDataEvent);
+		ViewerDataEvent viewerDataEvent = new ViewerDataEvent(input.getMetricManager(), metricDataEvent);
 		
 		eventBroker.post(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN, viewerDataEvent);
 	}
@@ -177,19 +176,17 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 		if (!item.enabled)
 			return;
 
-		final MetricFilterInput  inputFilter = (MetricFilterInput) getInputData();
-
 		if (item.getData() instanceof DerivedMetric) {
 			Shell shell = getNatTable().getShell();
 			ExtDerivedMetricDlg dlg = new ExtDerivedMetricDlg(shell, 
-															  inputFilter.getMetricManager(), 
-															  inputFilter.getRoot());
+					input.getMetricManager(), 
+					input.getRoot());
 			dlg.setMetric((DerivedMetric) item.getData());
 			if (dlg.open() == Dialog.OK) {
 				BaseMetric metric = dlg.getMetric();
 				update(metric);
 				
-				ViewerDataEvent dataEvent = new ViewerDataEvent(inputFilter.getMetricManager(), metric);				
+				ViewerDataEvent dataEvent = new ViewerDataEvent(input.getMetricManager(), metric);				
 				eventBroker.post(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE, dataEvent);
 			} 
 		} else {
@@ -203,7 +200,7 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 				metric.setDisplayName(name);
 				update(metric);
 				
-				ViewerDataEvent dataEvent = new ViewerDataEvent(inputFilter.getMetricManager(), metric);				
+				ViewerDataEvent dataEvent = new ViewerDataEvent(input.getMetricManager(), metric);				
 				eventBroker.post(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE, dataEvent);
 			}
 		}
@@ -246,19 +243,17 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 	}
 
 
-	@Override
 	public void setInput(FilterInputData<BaseMetric> inputData) { 
-		MetricFilterInput input = (MetricFilterInput) inputData;
-		dataProvider = new MetricFilterDataProvider(input.getRoot(), input.getListItems(), this);
-		
-		super.setInput(inputData);
+		dataProvider = null;
+		super.reset(inputData);
+		getNatTable().refresh();
 	}
 	
+	
 	@Override
-	protected FilterDataProvider<BaseMetric> getDataProvider() {
+	protected FilterDataProvider<BaseMetric> getDataProvider(FilterList<FilterDataItem<BaseMetric>> filterList) {
 		if (dataProvider == null) {
-			MetricFilterInput input = (MetricFilterInput) getInputData();
-			dataProvider = new MetricFilterDataProvider(input.getRoot(), getFilterList(), this);
+			dataProvider = new MetricFilterDataProvider(input.getRoot(), filterList, this);
 		}
 		return dataProvider;
 	}
@@ -288,8 +283,7 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 			return;
 		
 		ViewerDataEvent eventInfo = (ViewerDataEvent) obj;
-		final MetricFilterInput  inputFilter = (MetricFilterInput) getInputData();
-		if (eventInfo.metricManager != inputFilter.getMetricManager())
+		if (eventInfo.metricManager != input.getMetricManager())
 			return;
 		
 		if (event.getTopic().equals(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC)) {

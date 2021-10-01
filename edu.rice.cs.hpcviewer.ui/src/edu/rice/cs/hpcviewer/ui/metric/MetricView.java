@@ -62,6 +62,10 @@ public class MetricView extends AbstractUpperPart
 
 	
 	private void setMetricPane(MetricFilterInput inputFilter) {
+		if (pane != null) {
+			pane.setInput(inputFilter);
+			return;
+		}
 		Composite container = new Composite(parent, SWT.BORDER);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(container);
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(container);
