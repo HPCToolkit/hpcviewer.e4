@@ -55,10 +55,17 @@ public class MetricView extends AbstractUpperPart
 		if (input == null || !(input instanceof MetricFilterInput))
 			return;
 		inputFilter = (MetricFilterInput) input;
+		
+		// if the panel is already created, we just need to reset the panel
+		// with a new input (list). No need to recreate it again.
+		
 		if (pane != null) {
 			pane.setInput(inputFilter);
 			return;
-		}
+		}		
+		// the panel is not created yet
+		// we will create it from the scratch
+		
 		Composite container = new Composite(parent, SWT.BORDER);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(container);
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(container);

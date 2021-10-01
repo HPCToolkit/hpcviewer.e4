@@ -128,6 +128,7 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 	
 	/****
 	 * Reset the content of the table with the new list.
+	 * This method is called to change the content of the table only.
 	 * 
 	 * @param inputData The input data containing the new list
 	 */
@@ -135,6 +136,9 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 		this.eventList  = createEventList(inputData.getListItems());
 		this.filterList = createFilterList(eventList);
 
+		// this method has to be called AFTER the creation of the table and its layers.
+		// If the table is not created, we have to throw an exception
+		
 		if (this.sortList == null)
 			throw new RuntimeException("Invalid access to reset the table. The table is not created yet.");
 		
@@ -412,6 +416,9 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 	}
 	
 	
+	/*****
+	 * Event triggered when user type something in the filter text
+	 */
 	private void eventFilterText() {
 		String text = objSearchText.getText();
 		if (text == null) {
@@ -426,15 +433,18 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 					objSearchText.setBackground(c);
 					return;
 				}
-				objSearchText.setBackground(GUIHelper.COLOR_WIDGET_BACKGROUND);
+				objSearchText.setBackground(GUIHelper.COLOR_LIST_BACKGROUND);
 			}
 			textMatcher.setFilterText(new String [] {text});
 		}
 		if (natTable != null)
 			natTable.refresh(false);
-
 	}
 	
+	
+	/***
+	 * Event when users toggle the regular expression on/off
+	 */
 	private void toggleRegularExpression() {
 		boolean regExp = btnRegExpression.getSelection();
 		if (regExp) {
@@ -445,7 +455,7 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 				objSearchText.setBackground(c);
 				return;
 			}
-			objSearchText.setBackground(GUIHelper.COLOR_WIDGET_BACKGROUND);
+			objSearchText.setBackground(GUIHelper.COLOR_LIST_BACKGROUND);
 		} else {
 			textMatcher.setMode(TextMatcherEditor.CONTAINS);
 		}

@@ -396,7 +396,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
     	
     	int totSize = 0;
     	for(int i=1; i<numColumns; i++) {
-    		String title = bodyDataProvider.getMetric(i).getDisplayName();
+    		String title = bodyDataProvider.getMetric(i).getDisplayName() + STRING_PADDING;
     		Point titleSize = gc.textExtent(title);
     		int colWidth = (int) Math.max(titleSize.x , columnSize.x);
     		int pixelWidth = GUIHelper.convertHorizontalDpiToPixel(colWidth);

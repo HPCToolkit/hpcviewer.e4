@@ -148,15 +148,13 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
      * @param toolBar toolbar to be added in the cool item
      */
 	protected void createCoolItem(CoolBar coolBar, ToolBar toolBar) {
-
 		CoolItem coolItem = new CoolItem(coolBar, SWT.NONE);
 		coolItem.setControl(toolBar);
 		Point size = toolBar.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 		size.x += 20;
 		coolItem.setSize(size);
     	
-    }
-	
+    }	
 	
 
 	@Override
@@ -183,6 +181,9 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		// default tool bar
 		// -------------------------------------------
 		toolItem = new ToolItem[8];
+		
+		ToolItem padding = new ToolItem(toolBar, SWT.NONE);
+		padding.setText(" ");
 		
 		toolItem[ACTION_ZOOM_IN]  = createToolItem(toolBar, IconManager.Image_ZoomIn,  "Zoom-in the selected node");
 		toolItem[ACTION_ZOOM_OUT] = createToolItem(toolBar, IconManager.Image_ZoomOut, "Zoom-out from the current tree scope");

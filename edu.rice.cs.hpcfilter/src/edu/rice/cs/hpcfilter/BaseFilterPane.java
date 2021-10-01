@@ -8,6 +8,13 @@ import org.eclipse.swt.widgets.Composite;
 
 import ca.odell.glazedlists.FilterList;
 
+
+/*************************************************************
+ * 
+ * Basic filter panel.
+ *
+ * @param <T>
+ *************************************************************/
 public class BaseFilterPane<T> extends AbstractFilterPane<T> 
 	implements IPropertyChangeListener, IFilterChangeListener
 {
