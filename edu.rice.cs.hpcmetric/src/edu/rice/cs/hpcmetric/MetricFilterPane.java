@@ -7,8 +7,6 @@ import java.util.Optional;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.InputDialog;
-import org.eclipse.jface.preference.PreferenceStore;
-import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -16,8 +14,6 @@ import org.eclipse.jface.widgets.WidgetFactory;
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -46,7 +42,6 @@ import edu.rice.cs.hpcmetric.internal.MetricFilterDataItem;
 import edu.rice.cs.hpcmetric.internal.MetricFilterDataProvider;
 import edu.rice.cs.hpcmetric.internal.MetricPainterConfiguration;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
-import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 
 
 /************************************************************************
@@ -55,13 +50,14 @@ import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
  *
  ************************************************************************/
 public class MetricFilterPane extends AbstractFilterPane<BaseMetric> 
-	implements IPropertyChangeListener, DisposeListener, IFilterChangeListener, EventHandler
+	implements IFilterChangeListener, EventHandler
 {	
 	private static final String HISTORY_COLUMN_PROPERTY = "column_property";
 	private static final String HISTORY_APPLY_ALL = "apply-all";
 
 	private final IEventBroker eventBroker;
 
+	private MetricPainterConfiguration painterConfiguration;
 	private MetricFilterDataProvider dataProvider;
 	private MetricFilterInput  input;
 	
@@ -85,9 +81,6 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 		
 		if (style == STYLE_COMPOSITE) {
 			// Real application, not within a simple unit test
-			PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
-			pref.addPropertyChangeListener(this);
-			
 			eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC, this);
 		}
 	}
@@ -248,20 +241,17 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		final String property = event.getProperty();
-		if (property.equals(PreferenceConstants.ID_FONT_METRIC)) {
-			getNatTable().redraw();
+		if (property.equals(PreferenceConstants.ID_FONT_METRIC) ||
+			property.equals(PreferenceConstants.ID_FONT_GENERIC)) {
+
+			painterConfiguration.configureRegistry(getNatTable().getConfigRegistry());
 		}
 		super.propertyChange(event);
-	}
-
-
-	@Override
-	public void widgetDisposed(DisposeEvent e) {
-		// Real application, not within a simple unit test
-		if (getStyle() == STYLE_COMPOSITE) {
-			PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
-			pref.removePropertyChangeListener(this);
-		}
+		
+		// need to refresh for the font metric because the parent
+		// only refresh for changes in generic font
+		if (property.equals(PreferenceConstants.ID_FONT_METRIC))
+			getNatTable().refresh(false);
 	}
 
 
@@ -282,7 +272,8 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 
 	@Override
 	protected void addConfiguration(NatTable table) {
-		table.addConfiguration(new MetricPainterConfiguration());		
+		painterConfiguration = new MetricPainterConfiguration();
+		table.addConfiguration(painterConfiguration);		
 		table.addDisposeListener(this);
 	}
 

@@ -97,6 +97,7 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 	
 	private DefaultBodyLayerStack defaultLayerStack;
 	private RowSelectionProvider<FilterDataItem<T>> rowSelectionProvider;
+	private FilterPainterConfiguration painterConfiguration;
 
 	private EventList<FilterDataItem<T>>  eventList ;
 	private FilterList<FilterDataItem<T>> filterList;
@@ -357,8 +358,9 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 		natTable = new NatTable(parentContainer, gridLayer, false); 
 
 		// additional configuration
+		painterConfiguration = new FilterPainterConfiguration();
+		natTable.addConfiguration(painterConfiguration);
 		natTable.addConfiguration(new CheckBoxConfiguration(ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + IConstants.INDEX_VISIBILITY));
-		natTable.addConfiguration(new FilterPainterConfiguration());
 		natTable.addConfiguration(new RowOnlySelectionBindings());
 		natTable.addConfiguration(new SingleClickSortConfiguration());
 		
@@ -468,7 +470,8 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 	public void propertyChange(PropertyChangeEvent event) {
 		final String property = event.getProperty();
 		if (property.equals(PreferenceConstants.ID_FONT_GENERIC)) {
-			getNatTable().redraw();
+			painterConfiguration.configureRegistry(natTable.getConfigRegistry());
+			natTable.refresh(false);
 		}
 	}
 	

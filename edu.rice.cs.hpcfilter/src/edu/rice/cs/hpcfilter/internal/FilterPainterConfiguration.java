@@ -14,7 +14,8 @@ import org.eclipse.swt.graphics.Font;
 
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 
-public class FilterPainterConfiguration extends AbstractRegistryConfiguration 
+public class FilterPainterConfiguration 
+	extends AbstractRegistryConfiguration 
 {
 	
 	public static Font getGenericFont() {
