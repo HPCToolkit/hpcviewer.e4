@@ -7,8 +7,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.Composite;
 
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
-import edu.rice.cs.hpcfilter.FilterInputData;
 import edu.rice.cs.hpcmetric.MetricFilterInput;
 import edu.rice.cs.hpcmetric.MetricFilterPane;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractUpperPart;
@@ -57,11 +55,6 @@ public class MetricView extends AbstractUpperPart
 		if (input == null || !(input instanceof MetricFilterInput))
 			return;
 		inputFilter = (MetricFilterInput) input;
-		setMetricPane(inputFilter);
-	}
-
-	
-	private void setMetricPane(MetricFilterInput inputFilter) {
 		if (pane != null) {
 			pane.setInput(inputFilter);
 			return;

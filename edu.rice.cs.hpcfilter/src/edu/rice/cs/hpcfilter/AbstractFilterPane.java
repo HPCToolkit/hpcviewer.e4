@@ -126,44 +126,58 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 	}
 
 	
+	/****
+	 * Reset the content of the table with the new list.
+	 * 
+	 * @param inputData The input data containing the new list
+	 */
 	public void reset(FilterInputData<T> inputData) {
 		this.eventList  = createEventList(inputData.getListItems());
 		this.filterList = createFilterList(eventList);
 
-		if (this.sortList != null) {
-			this.sortList.setList(filterList);
-		}
+		if (this.sortList == null)
+			throw new RuntimeException("Invalid access to reset the table. The table is not created yet.");
+		
+		this.sortList.setList(filterList);
 		
 		FilterDataProvider<T> dataProvider = getDataProvider(filterList);
-		if (this.labelAccumulator != null) {
-			this.labelAccumulator.setDataProvider(dataProvider);
-		}
-		
-		if (this.dataLayer != null) {
-			this.dataLayer.setDataProvider(dataProvider);
-		}
-		
-		if (this.rowSelectionProvider != null) {
-			this.rowSelectionProvider.updateSelectionProvider(
-					defaultLayerStack.getSelectionLayer(), 
-					dataProvider);
-		}
+
+		this.labelAccumulator.setDataProvider(dataProvider);
+		this.dataLayer.setDataProvider(dataProvider);
+		this.rowSelectionProvider.updateSelectionProvider(
+				defaultLayerStack.getSelectionLayer(), 
+				dataProvider);
 	}
 
 	
+	/****
+	 * Update the data provider to check all items in the list
+	 */
 	private void checkAll() {
 		getDataProvider(filterList).checkAll();
 		natTable.refresh(false);
 	}
 
 	
+	/****
+	 * Update the data provider to uncheck all items in the list
+	 */
 	private void uncheckAll() {
 		getDataProvider(filterList).uncheckAll();
 		natTable.refresh(false);
 	}
 	
 	
-	public void createContentArea(Composite parent, FilterInputData<T> inputData) {		
+	/*****
+	 * Create the content area of the panel.
+	 * This method will create the button area and the filter text.
+	 * 
+	 * @param parent 
+	 * 			the parent composite
+	 * @param inputData
+	 * 			the input.
+	 */
+	private void createContentArea(Composite parent, FilterInputData<T> inputData) {		
 		parentContainer = new Composite(parent, SWT.NONE);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(parentContainer);
 
@@ -239,13 +253,26 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 	}
 	
 	
-	protected EventList<FilterDataItem<T>> createEventList(List<FilterDataItem<T>> list) {
-		EventList<FilterDataItem<T>> eventList  = GlazedLists.eventList(list);
+	/****
+	 * Create an event list for this table. 
+	 * 
+	 * @param list
+	 * @return
+	 */
+	private EventList<FilterDataItem<T>> createEventList(List<FilterDataItem<T>> list) {
+		EventList<FilterDataItem<T>> eventList = GlazedLists.eventList(list);
 		return eventList;
 	}
 	
 	
-	protected FilterList<FilterDataItem<T>> createFilterList(EventList<FilterDataItem<T>> eventList) {
+	/****
+	 * Create the filter list for the table.
+	 * This method will set the text matcher to the new filter list automatically.
+	 * 
+	 * @param eventList
+	 * @return
+	 */
+	private FilterList<FilterDataItem<T>> createFilterList(EventList<FilterDataItem<T>> eventList) {
 		FilterList<FilterDataItem<T>> filterList = new FilterList<FilterDataItem<T>>(eventList);
  		
 		textMatcher = new TextMatcherEditor<>(new TextFilterator<FilterDataItem<T>>() {
@@ -261,12 +288,24 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 	}
 	
 	
-	protected FilterDataItemSortModel<T> createSortModel(EventList<FilterDataItem<T>> eventList) {
+	/*****
+	 * Create the sorting model for this table.
+	 * 
+	 * @param eventList
+	 * @return
+	 */
+	private FilterDataItemSortModel<T> createSortModel(EventList<FilterDataItem<T>> eventList) {
 		return new FilterDataItemSortModel<T>(eventList);
 	}
 	
 	
-	public void createTable(EventList<FilterDataItem<T>> eventList, 
+	/*****
+	 * Main method to create the table. Should be called after the constructor
+	 * 
+	 * @param eventList
+	 * @param filterList
+	 */
+	private void createTable(EventList<FilterDataItem<T>> eventList, 
 							FilterList<FilterDataItem<T>> filterList) {
 		this.objSearchText.setText("");
 		
@@ -431,10 +470,6 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 		}
 	}
 	
-	
-	protected DataLayer getDataLayer() {
-		return dataLayer;
-	}
 	
 	
 	protected NatTable getNatTable() {

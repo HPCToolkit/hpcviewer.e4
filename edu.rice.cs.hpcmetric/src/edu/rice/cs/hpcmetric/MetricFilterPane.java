@@ -28,7 +28,6 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.osgi.service.prefs.Preferences;
 
-import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 
 
@@ -50,6 +49,11 @@ import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 
 
+/************************************************************************
+ * 
+ * Special Inherited class from {@link AbstractFilterPane} for metrics.
+ *
+ ************************************************************************/
 public class MetricFilterPane extends AbstractFilterPane<BaseMetric> 
 	implements IPropertyChangeListener, DisposeListener, IFilterChangeListener, EventHandler
 {	
@@ -64,6 +68,16 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 	private Button btnEdit;
 	private Button btnApplyToAllViews;
 	
+	
+	/*****
+	 * Constructor to create filter for metric panel which includes button area and filter text.
+	 * 
+	 * @param parent
+	 * 			The composite parent for the table
+	 * @param style
+	 * @param eventBroker
+	 * @param inputData
+	 */
 	public MetricFilterPane(Composite parent, int style, IEventBroker eventBroker, FilterInputData<BaseMetric> inputData) {
 		super(parent, style, inputData);
 		this.input = (MetricFilterInput) inputData;
@@ -78,6 +92,20 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 		}
 	}
 
+
+	/*****
+	 * Change the input of the table with the new one.
+	 * This method will completely wipe out the existing list items.
+	 * 
+	 * @param inputData
+	 */
+	public void setInput(FilterInputData<BaseMetric> inputData) { 
+		this.input = (MetricFilterInput) inputData;
+		dataProvider = null;
+		super.reset(inputData);
+		getNatTable().refresh();
+	}
+	
 		
 	
 	@Override
@@ -242,13 +270,6 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 		return IConstants.COLUMN_LABELS;
 	}
 
-
-	public void setInput(FilterInputData<BaseMetric> inputData) { 
-		dataProvider = null;
-		super.reset(inputData);
-		getNatTable().refresh();
-	}
-	
 	
 	@Override
 	protected FilterDataProvider<BaseMetric> getDataProvider(FilterList<FilterDataItem<BaseMetric>> filterList) {
