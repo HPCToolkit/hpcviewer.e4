@@ -212,7 +212,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		natTable.setLayerPainter(new NatGridLayerPainter(natTable, DataLayer.DEFAULT_ROW_HEIGHT));
 		natTable.addDisposeListener(this);
 		
-		pack(this.bodyDataProvider);
+		pack();
 	}
 	
 	
@@ -237,7 +237,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		
 		bodyDataProvider.addColumn(0, metric);
 		bodyLayerStack.getBodyDataLayer().fireLayerEvent(new ColumnInsertEvent(bodyLayerStack, 1));
-		pack(bodyDataProvider);
+		pack();
 	}
 	
 	
@@ -377,7 +377,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	}
 
 	
-	private void pack(ScopeTreeDataProvider dataProvider) {		
+	public void pack() {		
 		final int TREE_COLUMN_WIDTH  = 350;
 		
 		// ---------------------------------------------------------------
@@ -408,20 +408,22 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
     	// if the total size is less than the display, we can use the percentage for the tree column
     	// otherwise we should specify explicitly the width
     	
-    	Rectangle r = natTable.getDisplay().getClientArea();
-    	totSize += TREE_COLUMN_WIDTH;
-		if (totSize < r.width) {
+    	Rectangle area = natTable.getClientArea();
+    	if (area.width < 10)
+    		area = natTable.getShell().getClientArea();
+
+		if (totSize + TREE_COLUMN_WIDTH < area.width) {
 			bodyDataLayer.setColumnWidthPercentageByPosition(0, 30);
 			/* int width = r.width - totSize - 10;
     		int pixelWidth = GUIHelper.convertHorizontalDpiToPixel(width);
 	        bodyDataLayer.setColumnWidthByPosition(0, pixelWidth); */
 		} else {
 	    	// tree column: the width is hard coded at the moment
-	        bodyDataLayer.setColumnWidthByPosition(0, TREE_COLUMN_WIDTH);
-		} 
-		
-		// compute the ideal size of the row's height
+			int w = Math.max(TREE_COLUMN_WIDTH, area.width-totSize);
+	        bodyDataLayer.setColumnWidthByPosition(0, w);
+		}
 
+		// Now, compute the ideal size of the row's height
 		// 1. size for generic font
 		Point genericSize = gc.stringExtent(TEXT_METRIC_COLUMN);
 		
@@ -484,7 +486,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	 */
 	public void attributeRefresh() {
 		visualRefresh();
-		pack(bodyDataProvider);
+		pack();
 	}
 
 	

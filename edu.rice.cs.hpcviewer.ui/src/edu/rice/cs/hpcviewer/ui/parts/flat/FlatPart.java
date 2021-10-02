@@ -33,11 +33,6 @@ public class FlatPart extends AbstractTableView
 
 	@Override
 	protected void beginToolbar(CoolBar coolbar, ToolBar toolbar) {
-	}
-
-	
-	@Override
-	protected void endToolbar(CoolBar coolbar, ToolBar toolbar) {
 		items = new ToolItem[2];
 		
 		items[ITEM_FLAT]   = createToolItem(toolbar, 
@@ -62,6 +57,11 @@ public class FlatPart extends AbstractTableView
 				updateButtonStatus();
 			}
 		});
+	}
+
+	
+	@Override
+	protected void endToolbar(CoolBar coolbar, ToolBar toolbar) {
 	}
 
 	

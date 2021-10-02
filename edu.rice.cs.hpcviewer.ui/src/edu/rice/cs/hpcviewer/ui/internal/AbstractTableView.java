@@ -169,21 +169,18 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		gd_composite.widthHint = 506;
 		composite.setLayoutData(gd_composite);
 				
-		CoolBar coolBar = new CoolBar(composite, SWT.FLAT);
-		ToolBar toolBar = new ToolBar(coolBar, SWT.FLAT | SWT.RIGHT);
+		//CoolBar coolBar = new CoolBar(composite, SWT.FLAT);
+		ToolBar toolBar = new ToolBar(composite, SWT.FLAT | SWT.RIGHT);
 
 		// -------------------------------------------
 		// add the beginning of toolbar
 		// -------------------------------------------
-		beginToolbar(coolBar, toolBar);
+		beginToolbar(null, toolBar);
 		
 		// -------------------------------------------
 		// default tool bar
 		// -------------------------------------------
 		toolItem = new ToolItem[8];
-		
-		ToolItem padding = new ToolItem(toolBar, SWT.NONE);
-		padding.setText(" ");
 		
 		toolItem[ACTION_ZOOM_IN]  = createToolItem(toolBar, IconManager.Image_ZoomIn,  "Zoom-in the selected node");
 		toolItem[ACTION_ZOOM_OUT] = createToolItem(toolBar, IconManager.Image_ZoomOut, "Zoom-out from the current tree scope");
@@ -203,16 +200,16 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		// -------------------------------------------
 		// add the end of toolbar
 		// -------------------------------------------
-		endToolbar(coolBar, toolBar);
-		createCoolItem(coolBar, toolBar);
+		endToolbar(null, toolBar);
+		//createCoolItem(coolBar, toolBar);
 		
-		Point p = coolBar.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-		p.x += 20;
+		//Point p = coolBar.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+		//p.x += 20;
 		
-		coolBar.setSize(p);
+		//coolBar.setSize(p);
 		
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).grab(false, false).applyTo(coolBar);
-		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(coolBar);
+		//GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).grab(false, false).applyTo(coolBar);
+		//GridLayoutFactory.fillDefaults().numColumns(1).applyTo(coolBar);
 
 		// -------------------------------------------
 		// message label
@@ -440,6 +437,8 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 			int index = getColumnIndexByMetric(item, metrics);
 			hideOrShowColumn(index, item.checked);
 		}
+		table.pack();
+		
 		// hide or show columns cause visual changes.
 		// however, we are forced to refresh completely the whole layer of the table.
 		// calling visualRefresh won't help and I don't know why
