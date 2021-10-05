@@ -2,7 +2,7 @@
 
 if ! command -v gon &> /dev/null
 then 
-	echo "gon is not installed. Unable to continue the script"
+	echo "Error: gon is not installed. Unable to continue the script"
 	echo "Please install gon from https://github.com/mitchellh/gon" 
 	exit
 fi
@@ -12,7 +12,7 @@ fi
 #
 check_file() {
 if [ ! -f $1 ]; then
-	echo "hpcviewer mac file doesn't exist: $1"
+	echo "Error: hpcviewer mac file doesn't exist: $1"
 	exit 1
 fi
 }
@@ -45,8 +45,13 @@ fi
 #
 ##############################
 
-DIR_PREP="prepare_sign"
+DIR_PREP="prepare_sign_$FILE"
 
+if [ -e $DIR_PREP ]; then
+	echo "Warning: Directory $DIR_PREP already exist, and it will be replaced."
+ 	echo "Enter any key to continue ..."
+	read
+fi
 rm -rf $DIR_PREP
 mkdir $DIR_PREP
 
