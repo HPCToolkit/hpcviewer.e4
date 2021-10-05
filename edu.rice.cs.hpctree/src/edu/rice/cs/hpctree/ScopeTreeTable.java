@@ -388,14 +388,15 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         // metric columns (if any)
 		// the width is the max between the title of the column and the cell value 
     	Point columnSize = getMetricColumnSize();
-    	int numColumns   = bodyDataProvider.getColumnCount();
+    	int visibleColumns  = bodyLayerStack.getColumnHideShowLayer().getColumnCount();
+    	int totalAllColumns = bodyDataProvider.getColumnCount();
 
     	GC gc = new GC(natTable.getDisplay());
     	Font genericFont = TableFontConfiguration.getGenericFont();
     	gc.setFont(genericFont);
     	
     	int totSize = 0;
-    	for(int i=1; i<numColumns; i++) {
+    	for(int i=1; i<visibleColumns; i++) {
     		String title = bodyDataProvider.getMetric(i).getDisplayName() + STRING_PADDING;
     		Point titleSize = gc.textExtent(title);
     		int colWidth = (int) Math.max(titleSize.x , columnSize.x);
@@ -412,15 +413,22 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
     	if (area.width < 10)
     		area = natTable.getShell().getClientArea();
 
-		if (totSize + TREE_COLUMN_WIDTH < area.width) {
-			bodyDataLayer.setColumnWidthPercentageByPosition(0, 30);
-			/* int width = r.width - totSize - 10;
-    		int pixelWidth = GUIHelper.convertHorizontalDpiToPixel(width);
-	        bodyDataLayer.setColumnWidthByPosition(0, pixelWidth); */
+    	int areaWidth = GUIHelper.convertHorizontalDpiToPixel(area.width);
+    	
+		if (totSize + TREE_COLUMN_WIDTH < areaWidth) {
+			// if some columns are hidden, we want to allow users to resize the tree column
+			if (totalAllColumns == visibleColumns) {
+				bodyDataLayer.setColumnWidthPercentageByPosition(0, 40);				
+			} else {
+		    	int currentWidth = bodyDataLayer.getColumnWidthByPosition(0);
+				int width = Math.max(currentWidth, areaWidth - totSize - 5);
+	    		bodyDataLayer.setColumnWidthByPosition(0, width); 
+			}
 		} else {
 	    	// tree column: the width is hard coded at the moment
-			int w = Math.max(TREE_COLUMN_WIDTH, area.width-totSize);
-	        bodyDataLayer.setColumnWidthByPosition(0, w);
+	    	int currentWidth = bodyDataLayer.getColumnWidthByPosition(0);
+			int w = Math.max(currentWidth, Math.max(TREE_COLUMN_WIDTH, areaWidth-totSize) );
+    		bodyDataLayer.setColumnWidthByPosition(0, w);
 		}
 
 		// Now, compute the ideal size of the row's height
