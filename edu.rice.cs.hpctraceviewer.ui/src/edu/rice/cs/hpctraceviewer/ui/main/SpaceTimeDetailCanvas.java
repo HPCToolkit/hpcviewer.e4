@@ -1183,9 +1183,26 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		// -----------------------------------------------------------------------
 		// notify to all other views that a new image has been created,
 		//	and it needs to refresh the view
+		// issue #112: Ideally we should send the "original" image to other views so that
+		// 			   they can compute the statistics correctly. However, when the original
+		//             image doesn't fit to the canvas, some lines (like white lines) are
+		// 			   overlapped with other lines. this makes the summary doesn't represent
+		//             the main view.
+		// 
 		// -----------------------------------------------------------------------
 		int deviceZoom = DPIUtil.getDeviceZoom();
-		notifyChangeBuffer(imageOrig.getImageData(deviceZoom));
+		int viewHeight = stData.getAttributes().getPixelVertical();
+		ImageData imgData = imageOrig.getImageData(deviceZoom);
+		int imageHeight = imgData.height;
+		float scaleY = imageHeight / viewHeight;
+		
+		// if the original image doesn't fit the screen, we just use the final image.
+		// This is not a good solution, but it at least makes the summary view appears the 
+		// same as the main view.
+		//
+		if (scaleY > 1)
+			imgData = imageFinal.getImageData();
+		notifyChangeBuffer(imgData);
 		
 		updateButtonStates();
 	}
