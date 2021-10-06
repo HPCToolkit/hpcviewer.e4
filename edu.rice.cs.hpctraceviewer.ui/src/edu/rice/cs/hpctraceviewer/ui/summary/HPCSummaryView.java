@@ -71,7 +71,7 @@ public class HPCSummaryView extends AbstractBaseItem
 		 * Add listeners
 		 *************************************************************************/
 		
-		setToolTipText("The view to show for the whole time range dislayed, the proportion of each subroutine in a certain time.");
+		setToolTipText("The view to show for the whole time range displayed, the proportion of each subroutine in a certain time.");
 	}
 	
 

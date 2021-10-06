@@ -50,6 +50,7 @@ import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
 import edu.rice.cs.hpcdata.experiment.extdata.IFileDB.IdTupleOption;
+import edu.rice.cs.hpcdata.util.OSValidator;
 import edu.rice.cs.hpctraceviewer.ui.base.ISpaceTimeCanvas;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.base.ITraceViewAction;
@@ -188,6 +189,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		frame.depth = stData.getDefaultDepth();
 		
 		home(frame);
+		if (OSValidator.isWindows()) {
+			redraw();
+		}
 	}
 	
 	/***
@@ -1194,14 +1198,14 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		int viewHeight = stData.getAttributes().getPixelVertical();
 		ImageData imgData = imageOrig.getImageData(deviceZoom);
 		int imageHeight = imgData.height;
-		float scaleY = imageHeight / viewHeight;
 		
 		// if the original image doesn't fit the screen, we just use the final image.
 		// This is not a good solution, but it at least makes the summary view appears the 
 		// same as the main view.
 		//
-		if (scaleY > 1)
-			imgData = imageFinal.getImageData();
+		if (imageHeight > viewHeight)
+			imgData = imageFinal.getImageData(deviceZoom);
+		
 		notifyChangeBuffer(imgData);
 		
 		updateButtonStates();
