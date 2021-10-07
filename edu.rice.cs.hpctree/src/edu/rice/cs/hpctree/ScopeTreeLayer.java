@@ -50,7 +50,7 @@ public class ScopeTreeLayer extends AbstractLayerTransform implements IUniqueInd
 		this.treeRowModel = treeRowModel;
 		this.indentedTreeImagePainter = new IndentedTreeImagePainter();
 		
-		addConfiguration(new ScopeTreeLayerConfiguration(this));
+		addConfiguration(new ScopeTreeLayerConfiguration());
 		
         registerCommandHandler(new ScopeTreeExpandCollapseCommandHandler(this));
         registerCommandHandler(new ScopeTreeExpandToLevelCommandHandler(this));

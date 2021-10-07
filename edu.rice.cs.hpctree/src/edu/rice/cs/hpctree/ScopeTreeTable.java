@@ -87,6 +87,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	private final TableConfiguration      tableConfiguration;
 	private final Collection<IActionListener> listeners = new FastList<IActionListener>();
 	private final SortHeaderLayer<Scope> headerLayer;
+
 	
 	/****
 	 * Constructor to a dynamic create tree table using the default tree provider
@@ -167,7 +168,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         // --------------------------------
 
         natTable.addConfiguration(new ScopeTreeExportConfiguration(bodyLayerStack.getTreeRowModel()));
-        natTable.addConfiguration(new TableFontConfiguration(natTable));
+        natTable.addConfiguration(new TableFontConfiguration(this));
 		natTable.addConfiguration(new SingleClickSortConfiguration());
 
         // --------------------------------
@@ -190,9 +191,8 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         // this config happens only at the start of the table. It doesn't change automatically
         // in the middle of the system switch mode
         
-        ThemeConfiguration defaultConfiguration = new ScopeTableStyleConfiguration(this);
-        if (Display.isSystemDarkTheme())
-        	defaultConfiguration = new DarkScopeTableStyleConfiguration();        
+        ThemeConfiguration defaultConfiguration = Display.isSystemDarkTheme() ? 
+        							new DarkScopeTableStyleConfiguration() :  new ScopeTableStyleConfiguration();
         natTable.setTheme(defaultConfiguration);
 
         // --------------------------------
@@ -215,6 +215,10 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		pack();
 	}
 	
+	
+	public NatTable getTable() {
+		return this.natTable;
+	}
 	
 	/**
 	 * Causes the receiver to have the keyboard focus, 
