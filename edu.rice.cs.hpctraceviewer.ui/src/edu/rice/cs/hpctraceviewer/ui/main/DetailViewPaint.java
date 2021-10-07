@@ -92,7 +92,7 @@ public class DetailViewPaint extends BaseViewPaint
 	}
 
 	@Override
-	protected int getNumberOfLines() {
+	public int getNumberOfLines() {
 		return numLines;
 	}
 

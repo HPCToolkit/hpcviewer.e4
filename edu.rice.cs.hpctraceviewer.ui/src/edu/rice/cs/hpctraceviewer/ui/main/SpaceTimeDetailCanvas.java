@@ -50,11 +50,13 @@ import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
 import edu.rice.cs.hpcdata.experiment.extdata.IFileDB.IdTupleOption;
+import edu.rice.cs.hpcdata.util.OSValidator;
 import edu.rice.cs.hpctraceviewer.ui.base.ISpaceTimeCanvas;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.base.ITraceViewAction;
 import edu.rice.cs.hpctraceviewer.ui.context.BaseTraceContext;
 import edu.rice.cs.hpctraceviewer.ui.internal.AbstractTimeCanvas;
+import edu.rice.cs.hpctraceviewer.ui.internal.BaseTimelineThread;
 import edu.rice.cs.hpctraceviewer.ui.internal.BaseViewPaint;
 import edu.rice.cs.hpctraceviewer.ui.internal.BufferPaint;
 import edu.rice.cs.hpctraceviewer.ui.internal.ResizeListener;
@@ -188,6 +190,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		frame.depth = stData.getDefaultDepth();
 		
 		home(frame);
+		if (OSValidator.isWindows()) {
+			redraw();
+		}
 	}
 	
 	/***
@@ -1140,7 +1145,11 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		final DetailViewPaint detailPaint = new DetailViewPaint(getDisplay(), bufferGC, origGC, stData, 
 																numLines, changedBounds, this); 
 
-		DetailPaintJobChangeListener listener = new DetailPaintJobChangeListener(detailPaint, imageOrig, imageFinal, bufferGC, origGC, changedBounds);
+		DetailPaintJobChangeListener listener = new DetailPaintJobChangeListener(
+														detailPaint, view.height, 
+														imageOrig,   imageFinal, 
+														bufferGC,    origGC, 
+														changedBounds);
 		detailPaint.addJobChangeListener(listener);
 		
 		// this part of the code causes deadlock on VirtualBox Ubuntu
@@ -1163,7 +1172,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		}
 	}
 	
-	private void donePainting(Image imageOrig, Image imageFinal, boolean refreshData)
+	private void donePainting(Image imageOrig, Image imageFinal, 
+							  int imageHeight, int viewHeight, 
+							  boolean refreshData)
 	{		
 		initBuffer();
 		setBuffer( imageFinal );
@@ -1183,9 +1194,25 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		// -----------------------------------------------------------------------
 		// notify to all other views that a new image has been created,
 		//	and it needs to refresh the view
+		// issue #112: Ideally we should send the "original" image to other views so that
+		// 			   they can compute the statistics correctly. However, when the original
+		//             image doesn't fit to the canvas, some lines (like white lines) are
+		// 			   overlapped with other lines. this makes the summary doesn't represent
+		//             the main view.
+		// 
 		// -----------------------------------------------------------------------
 		int deviceZoom = DPIUtil.getDeviceZoom();
-		notifyChangeBuffer(imageOrig.getImageData(deviceZoom));
+		ImageData imgData = imageOrig.getImageData(deviceZoom);
+		final double yscale = Math.max(getScalePixelsPerRank(), 1);		
+		
+		// if the original image doesn't fit the screen, we just use the final image.
+		// This is not a good solution, but it at least makes the summary view appears the 
+		// same as the main view.
+		//
+		if (yscale < BaseTimelineThread.MIN_HEIGHT_FOR_SEPARATOR_LINES)
+			imgData = imageFinal.getImageData(deviceZoom);
+		
+		notifyChangeBuffer(imgData);
 		
 		updateButtonStates();
 	}
@@ -1424,12 +1451,18 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		private final Image imageOrig, imageFinal;
 		private final boolean changedBounds;
 		private final GC bufferGC, origGC;
+		private final int viewHeight;
 		
 		public DetailPaintJobChangeListener( DetailViewPaint detailPaint, 
-									 Image imageOrig, Image imageFinal,
-									 GC bufferGC, GC origGC, boolean changedBounds) {
+											 int viewHeight,
+											 Image imageOrig, 
+											 Image imageFinal,
+											 GC bufferGC, 
+											 GC origGC, 
+											 boolean changedBounds) {
 
 			this.detailPaint = detailPaint;
+			this.viewHeight  = viewHeight;
 			this.imageOrig   = imageOrig;
 			this.imageFinal  = imageFinal;
 			this.bufferGC    = bufferGC;
@@ -1450,7 +1483,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 				queue.remove(detailPaint);
 				
 				if (event.getResult() == Status.OK_STATUS) {
-					donePainting(imageOrig, imageFinal, changedBounds);
+					donePainting(imageOrig, imageFinal, 
+								 detailPaint.getNumberOfLines(), viewHeight, 
+								 changedBounds);
 					
 				} else if (event.getResult() == Status.CANCEL_STATUS) {
 					// we don't need this "new image" since the paint fails

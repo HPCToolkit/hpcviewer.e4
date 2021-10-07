@@ -61,7 +61,7 @@ public class DepthViewPaint extends BaseViewPaint {
 
 
 	@Override
-	protected int getNumberOfLines() {
+	public int getNumberOfLines() {
 		final ImageTraceAttributes attributes = controller.getAttributes();
 		return Math.min(attributes.getDepthPixelVertical(), visibleDepth);
 	}
