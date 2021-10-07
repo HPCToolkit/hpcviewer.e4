@@ -15,7 +15,6 @@ import org.eclipse.nebula.widgets.nattable.selection.config.DefaultRowSelectionL
 import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
 
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpctree.internal.RemoveHeaderSelectionConfiguration;
 
 
 
@@ -39,17 +38,24 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
 	public ScopeTreeBodyLayerStack(IScopeTreeData treeData, 
 								   ScopeTreeDataProvider  bodyDataProvider) {
 
+		// initialize the stack of layers for the tree table
+		// careful: the order is important. 
+		// we have to ensure the data layer is the bottom and the column reorder
+		// has to be before the column hide show layer. Otherwise we can't hide/
+		// show columns properly
+		
         this.bodyDataLayer = new DataLayer(bodyDataProvider);
         this.bodyDataLayer.setColumnsResizableByDefault(true);
 
-        this.hideShowLayer  = new ColumnHideShowLayer(bodyDataLayer);
-
+        ColumnReorderLayer reorderLayer = new ColumnReorderLayer(this.bodyDataLayer);
+        this.hideShowLayer  = new ColumnHideShowLayer(reorderLayer);
+        this.selectionLayer = new SelectionLayer(this.hideShowLayer, false);
+        
         this.treeRowModel   = new ScopeTreeRowModel(treeData);
-        this.selectionLayer = new SelectionLayer(new ColumnReorderLayer(hideShowLayer), false);
-        this.treeLayer      = new ScopeTreeLayer(this.selectionLayer, treeRowModel);
-        this.viewportLayer  = new ViewportLayer(treeLayer);
+        this.treeLayer      = new ScopeTreeLayer(this.selectionLayer, this.treeRowModel);
+        this.viewportLayer  = new ViewportLayer(this.treeLayer);
       
-        this.freezeLayer     = new FreezeLayer(treeLayer);
+        this.freezeLayer    = new FreezeLayer(this.treeLayer);
         this.compositeFreezeLayer = new CompositeFreezeLayer(freezeLayer, viewportLayer, selectionLayer);
         
         final IRowIdAccessor<Scope> rowIdAccessor = new IRowIdAccessor<Scope>() {
@@ -65,7 +71,6 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
         																  rowIdAccessor );
         this.selectionLayer.setSelectionModel(selectionModel);
         this.selectionLayer.addConfiguration(new DefaultRowSelectionLayerConfiguration());
-        this.selectionLayer.addConfiguration(new RemoveHeaderSelectionConfiguration());
         
         setUnderlyingLayer(compositeFreezeLayer);
     }

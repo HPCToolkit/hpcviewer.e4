@@ -30,7 +30,7 @@ public class ThreadFilterDialogTest {
 			items.add(obj);
 		}
 		
-		ThreadFilterDialog dialog = new ThreadFilterDialog(shell, items);
+		ThreadFilterDialog dialog = new ThreadFilterDialog(shell, "Select rank/thread to view", items);
 		if (dialog.open() == Dialog.OK) {
 			System.out.println("result-ok: " + dialog.getReturnCode());
 			items = dialog.getResult();

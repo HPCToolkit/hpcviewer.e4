@@ -27,8 +27,11 @@ public class ScopeTreeRowModel extends AbstractTreeRowModel<Scope> implements IS
 {
 	private final String ERR_MSG_NOTSUPPORTED = "NOT SUPPORTED";
 
+	private int currentLevel;
+	
 	public ScopeTreeRowModel(IScopeTreeData treeData) {
 		super(treeData);
+		currentLevel = 0;
 	}
 	
 	@Override
@@ -54,12 +57,26 @@ public class ScopeTreeRowModel extends AbstractTreeRowModel<Scope> implements IS
 	
 	
 	@Override
-    public List<Integer> expand(int index) {
-		
+    public List<Integer> expand(int index) {		
 		return new ArrayList<>(0);
 	}
 	
 	
+    @Override
+    public int depth(int index) {
+    	if (index == 0)
+    		return 0;
+    	
+    	Scope scope = getTreeData().getDataAtIndex(index);    	
+        int depth   = getTreeData().getDepthOfData(index);
+        int cdepth  = depth - currentLevel;
+        if (!scope.hasChildren() && cdepth <= 0) {
+        	return 1;
+        }
+        return cdepth;
+    }
+
+
 	
 	@Override
     public List<Integer> expandAll() {
@@ -133,8 +150,14 @@ public class ScopeTreeRowModel extends AbstractTreeRowModel<Scope> implements IS
 	}
 	
 	public void setRoot(Scope root) {
+		setRoot(root, 0);
+	}
+
+	
+	public void setRoot(Scope root, int level) {
 		IScopeTreeData treedata = (IScopeTreeData) getTreeData();
 		treedata.setRoot(root);
+		currentLevel = level;
 	}
 
 	public Scope getRoot() {

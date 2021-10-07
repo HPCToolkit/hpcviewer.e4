@@ -12,7 +12,6 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.nebula.widgets.nattable.NatTable;
-import org.eclipse.nebula.widgets.nattable.config.DefaultNatTableStyleConfiguration;
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
 import org.eclipse.nebula.widgets.nattable.data.IRowDataProvider;
 import org.eclipse.nebula.widgets.nattable.extension.glazedlists.GlazedListsEventLayer;
@@ -33,8 +32,10 @@ import org.eclipse.nebula.widgets.nattable.selection.config.RowOnlySelectionBind
 import org.eclipse.nebula.widgets.nattable.selection.config.RowOnlySelectionConfiguration;
 import org.eclipse.nebula.widgets.nattable.sort.SortHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.sort.config.SingleClickSortConfiguration;
+import org.eclipse.nebula.widgets.nattable.style.theme.DarkNatTableThemeConfiguration;
 import org.eclipse.nebula.widgets.nattable.style.theme.ModernNatTableThemeConfiguration;
 import org.eclipse.nebula.widgets.nattable.style.theme.ThemeConfiguration;
+import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -46,6 +47,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
@@ -90,13 +92,23 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 	public final static int STYLE_INDEPENDENT = 1;
 	
 	private final int style;
-	private final FilterInputData<T> inputData;
-	private final NatTable  natTable ;
-	private final EventList<FilterDataItem<T>> eventList ;
-	private final DataLayer dataLayer ;
-	private final RowSelectionProvider<FilterDataItem<T>> rowSelectionProvider;
-	private final FilterList<FilterDataItem<T>> filterList;
+	private NatTable  natTable ;
+	private DataLayer dataLayer ;
+	
+	private DefaultBodyLayerStack defaultLayerStack;
+	private RowSelectionProvider<FilterDataItem<T>> rowSelectionProvider;
+	private FilterPainterConfiguration painterConfiguration;
 
+	private EventList<FilterDataItem<T>>  eventList ;
+	private FilterList<FilterDataItem<T>> filterList;
+	private FilterDataItemSortModel<T>    sortList;
+	private FilterConfigLabelAccumulator<T> labelAccumulator;
+
+	private Composite parentContainer ;
+	private Text objSearchText;
+	private Button btnRegExpression;
+	private TextMatcherEditor<FilterDataItem<T>> textMatcher;
+	
 	/***
 	 * Constructor to create the item and its composite widgets.
 	 * 
@@ -106,10 +118,72 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 	 * @see STYLE_COMPOSITE, STYLE_INDEPENDENT
 	 */
 	public AbstractFilterPane(Composite parent, int style, FilterInputData<T> inputData) {
-		this.inputData = inputData;
-		this.style     = style;
+		this.style = style;
+		createContentArea(parent, inputData);
+
+		this.eventList  = createEventList(inputData.getListItems());
+		this.filterList = createFilterList(eventList);
+		createTable(eventList, filterList);
+	}
+
+	
+	/****
+	 * Reset the content of the table with the new list.
+	 * This method is called to change the content of the table only.
+	 * 
+	 * @param inputData The input data containing the new list
+	 */
+	public void reset(FilterInputData<T> inputData) {
+		this.eventList  = createEventList(inputData.getListItems());
+		this.filterList = createFilterList(eventList);
+
+		// this method has to be called AFTER the creation of the table and its layers.
+		// If the table is not created, we have to throw an exception
 		
-		Composite parentContainer = new Composite(parent, SWT.NONE);
+		if (this.sortList == null)
+			throw new RuntimeException("Invalid access to reset the table. The table is not created yet.");
+		
+		this.sortList.setList(filterList);
+		
+		FilterDataProvider<T> dataProvider = getDataProvider(filterList);
+
+		this.labelAccumulator.setDataProvider(dataProvider);
+		this.dataLayer.setDataProvider(dataProvider);
+		this.rowSelectionProvider.updateSelectionProvider(
+				defaultLayerStack.getSelectionLayer(), 
+				dataProvider);
+	}
+
+	
+	/****
+	 * Update the data provider to check all items in the list
+	 */
+	private void checkAll() {
+		getDataProvider(filterList).checkAll();
+		natTable.refresh(false);
+	}
+
+	
+	/****
+	 * Update the data provider to uncheck all items in the list
+	 */
+	private void uncheckAll() {
+		getDataProvider(filterList).uncheckAll();
+		natTable.refresh(false);
+	}
+	
+	
+	/*****
+	 * Create the content area of the panel.
+	 * This method will create the button area and the filter text.
+	 * 
+	 * @param parent 
+	 * 			the parent composite
+	 * @param inputData
+	 * 			the input.
+	 */
+	private void createContentArea(Composite parent, FilterInputData<T> inputData) {		
+		parentContainer = new Composite(parent, SWT.NONE);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(parentContainer);
 
 		// prepare the buttons: check and uncheck
@@ -125,8 +199,7 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 		btnCheckAll.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				getDataProvider().checkAll();
-				natTable.refresh(false);
+				checkAll();
 			}
 		});
 
@@ -138,20 +211,19 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 		btnUnCheckAll.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				getDataProvider().uncheckAll();
-				natTable.refresh(false);
+				uncheckAll();
 			}
 		});
 
 		// regular expression option
-		final Button btnRegExpression = new Button(groupButtons, SWT.CHECK);
+		btnRegExpression = new Button(groupButtons, SWT.CHECK);
 		btnRegExpression.setText("Regular expression");
 		btnRegExpression.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		btnRegExpression.setSelection(false);	
 		btnRegExpression.setToolTipText("Option to enable that the text to filter is a regular expression");
 		
 		// number of buttons: 3 (check, uncheck, regex) + additional buttons
-		int numAddButtons = 3 + createAdditionalButton(groupButtons);
+		int numAddButtons = 3 + createAdditionalButton(groupButtons, inputData);
 		
 		GridLayoutFactory.fillDefaults().numColumns(numAddButtons).applyTo(groupButtons);
 
@@ -164,25 +236,94 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 		Label lblFilter = new Label (groupFilter, SWT.FLAT);
 		lblFilter.setText("Filter:");
 		
-		Text objSearchText = new Text (groupFilter, SWT.BORDER);
+		objSearchText = new Text (groupFilter, SWT.BORDER);
 		objSearchText.setToolTipText("Type text to filter the list");
 		
+		objSearchText.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				eventFilterText();
+			}
+		});
+
+		btnRegExpression.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				toggleRegularExpression();
+			}
+		});
+
 		// expand as much as possible horizontally
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(objSearchText);
-
+	}
+	
+	
+	/****
+	 * Create an event list for this table. 
+	 * 
+	 * @param list
+	 * @return
+	 */
+	private EventList<FilterDataItem<T>> createEventList(List<FilterDataItem<T>> list) {
+		EventList<FilterDataItem<T>> eventList = GlazedLists.eventList(list);
+		return eventList;
+	}
+	
+	
+	/****
+	 * Create the filter list for the table.
+	 * This method will set the text matcher to the new filter list automatically.
+	 * 
+	 * @param eventList
+	 * @return
+	 */
+	private FilterList<FilterDataItem<T>> createFilterList(EventList<FilterDataItem<T>> eventList) {
+		FilterList<FilterDataItem<T>> filterList = new FilterList<FilterDataItem<T>>(eventList);
+ 		
+		textMatcher = new TextMatcherEditor<>(new TextFilterator<FilterDataItem<T>>() {
+			@Override
+			public void getFilterStrings(List<String> baseList, FilterDataItem<T> element) {
+				baseList.add(element.getLabel());
+			}
+		});
+		textMatcher.setMode(TextMatcherEditor.CONTAINS);
+		filterList.setMatcherEditor(textMatcher);
+		
+		return filterList;
+	}
+	
+	
+	/*****
+	 * Create the sorting model for this table.
+	 * 
+	 * @param eventList
+	 * @return
+	 */
+	private FilterDataItemSortModel<T> createSortModel(EventList<FilterDataItem<T>> eventList) {
+		return new FilterDataItemSortModel<T>(eventList);
+	}
+	
+	
+	/*****
+	 * Main method to create the table. Should be called after the constructor
+	 * 
+	 * @param eventList
+	 * @param filterList
+	 */
+	private void createTable(EventList<FilterDataItem<T>> eventList, 
+							FilterList<FilterDataItem<T>> filterList) {
+		this.objSearchText.setText("");
+		
 		// ------------------------------------------------------------
 		// Start building the nat-table
 		// ------------------------------------------------------------
-		this.eventList = GlazedLists.eventList(inputData.getListItems());
-
-		filterList = new FilterList<FilterDataItem<T>>(eventList);
-
-		// data layer
-		IRowDataProvider<FilterDataItem<T>> dataProvider = getDataProvider();
 		
-		dataLayer = new DataLayer(dataProvider);
+		// data layer
+		IRowDataProvider<FilterDataItem<T>> dataProvider = getDataProvider(filterList);
+		this.dataLayer = new DataLayer(dataProvider);
+
 		GlazedListsEventLayer<FilterDataItem<T>> listEventLayer = new GlazedListsEventLayer<FilterDataItem<T>>(dataLayer, eventList);
-		DefaultBodyLayerStack defaultLayerStack = new DefaultBodyLayerStack(listEventLayer);
+		defaultLayerStack = new DefaultBodyLayerStack(listEventLayer);
 		defaultLayerStack.getSelectionLayer().addConfiguration(new RowOnlySelectionConfiguration());
 
 		// data layer configuration to be implemented by the child class
@@ -192,9 +333,10 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 		// columns header
 		IDataProvider columnHeaderDataProvider = new DefaultColumnHeaderDataProvider(getColumnHeaderLabels());
 		DataLayer columnDataLayer = new DefaultColumnHeaderDataLayer(columnHeaderDataProvider);
-		ColumnHeaderLayer colummnLayer = new ColumnHeaderLayer(columnDataLayer, defaultLayerStack, defaultLayerStack.getSelectionLayer());		
-		SortHeaderLayer<FilterDataItem<T>> sortHeaderLayer = new SortHeaderLayer<FilterDataItem<T>>(colummnLayer, 
-																									new FilterDataItemSortModel<T>(eventList));
+		ColumnHeaderLayer colummnLayer = new ColumnHeaderLayer(columnDataLayer, defaultLayerStack, defaultLayerStack.getSelectionLayer());
+
+		this.sortList = createSortModel(eventList);
+		SortHeaderLayer<FilterDataItem<T>> sortHeaderLayer = new SortHeaderLayer<FilterDataItem<T>>(colummnLayer, sortList);
 		
 		// row header
 		DefaultRowHeaderDataProvider rowHeaderDataProvider = new DefaultRowHeaderDataProvider(dataProvider);
@@ -207,16 +349,18 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 		CornerLayer cornerLayer = new CornerLayer(cornerDataLayer, rowHeaderLayer, sortHeaderLayer);
 		
 		// grid layer
-		GridLayer gridLayer = new GridLayer(defaultLayerStack, sortHeaderLayer, rowHeaderLayer, cornerLayer);		
-		defaultLayerStack.setConfigLabelAccumulator(new FilterConfigLabelAccumulator<T>(defaultLayerStack, dataProvider));
+		GridLayer gridLayer = new GridLayer(defaultLayerStack, sortHeaderLayer, rowHeaderLayer, cornerLayer);
+
+		labelAccumulator = new FilterConfigLabelAccumulator<T>(defaultLayerStack, dataProvider);
+		defaultLayerStack.setConfigLabelAccumulator(labelAccumulator);
 		
 		// the table
 		natTable = new NatTable(parentContainer, gridLayer, false); 
 
 		// additional configuration
-		natTable.addConfiguration(new DefaultNatTableStyleConfiguration());
+		painterConfiguration = new FilterPainterConfiguration();
+		natTable.addConfiguration(painterConfiguration);
 		natTable.addConfiguration(new CheckBoxConfiguration(ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + IConstants.INDEX_VISIBILITY));
-		natTable.addConfiguration(new FilterPainterConfiguration());
 		natTable.addConfiguration(new RowOnlySelectionBindings());
 		natTable.addConfiguration(new SingleClickSortConfiguration());
 		
@@ -226,18 +370,11 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 		addConfiguration(natTable);
 		
 		natTable.configure();
- 		
-		final TextMatcherEditor<FilterDataItem<T>> textMatcher = new TextMatcherEditor<>(new TextFilterator<FilterDataItem<T>>() {
 
-			@Override
-			public void getFilterStrings(List<String> baseList, FilterDataItem<T> element) {
-				baseList.add(element.getLabel());
-			}
-		});
-		textMatcher.setMode(TextMatcherEditor.CONTAINS);
-		filterList.setMatcherEditor(textMatcher);
+		this.rowSelectionProvider = new RowSelectionProvider<FilterDataItem<T>>(
+				defaultLayerStack.getSelectionLayer(), 
+				dataProvider);
 
-		rowSelectionProvider = new RowSelectionProvider<FilterDataItem<T>>(defaultLayerStack.getSelectionLayer(), dataProvider);
 		rowSelectionProvider.addSelectionChangedListener((event)-> {
 			IStructuredSelection selection = (IStructuredSelection) event.getSelection();
             Iterator<FilterDataItem<T>> it = selection.iterator();
@@ -262,55 +399,12 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 			}
 		}); */
 
-		final ThemeConfiguration modernTheme = new ModernNatTableThemeConfiguration();
+		ThemeConfiguration modernTheme = new ModernNatTableThemeConfiguration();
+		if (Display.isSystemDarkTheme())
+			modernTheme = new DarkNatTableThemeConfiguration();
+		
 		natTable.setTheme(modernTheme);
-		
-		final Color defaultBgColor = objSearchText.getBackground();
-		
-		objSearchText.addModifyListener(new ModifyListener() {
-			
-			@Override
-			public void modifyText(ModifyEvent e) {
-				String text = objSearchText.getText();
-				if (text == null) {
-					textMatcher.setFilterText(new String [] {});
-				} else {
-					if (btnRegExpression.getSelection()) {
-						// check if the regular expression is correct
-						try {
-							Pattern.compile(text);
-						} catch(Exception err) {
-							Color c = e.display.getSystemColor(SWT.COLOR_YELLOW);
-							objSearchText.setBackground(c);
-							return;
-						}
-						objSearchText.setBackground(defaultBgColor);
-					}
-					textMatcher.setFilterText(new String [] {text});
-				}
-				natTable.refresh(false);
-			}
-		});
 
-		btnRegExpression.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				boolean regExp = btnRegExpression.getSelection();
-				if (regExp) {
-					try {
-						textMatcher.setMode(TextMatcherEditor.REGULAR_EXPRESSION);
-					} catch(Exception err) {
-						Color c = e.display.getSystemColor(SWT.COLOR_YELLOW);
-						objSearchText.setBackground(c);
-						return;
-					}
-					objSearchText.setBackground(defaultBgColor);
-				} else {
-					textMatcher.setMode(TextMatcherEditor.CONTAINS);
-				}
-				natTable.refresh(false);
-			}
-		});
 		// expand as much as possible both horizontally and vertically
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(natTable);
 		GridLayoutFactory.fillDefaults().numColumns(1).generateLayout(parentContainer);
@@ -323,12 +417,61 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 		}
 	}
 	
+	
+	/*****
+	 * Event triggered when user type something in the filter text
+	 */
+	private void eventFilterText() {
+		String text = objSearchText.getText();
+		if (text == null) {
+			textMatcher.setFilterText(new String [] {});
+		} else {
+			if (btnRegExpression.getSelection()) {
+				// check if the regular expression is correct
+				try {
+					Pattern.compile(text);
+				} catch(Exception err) {
+					Color c = GUIHelper.COLOR_YELLOW;
+					objSearchText.setBackground(c);
+					return;
+				}
+				objSearchText.setBackground(GUIHelper.COLOR_LIST_BACKGROUND);
+			}
+			textMatcher.setFilterText(new String [] {text});
+		}
+		if (natTable != null)
+			natTable.refresh(false);
+	}
+	
+	
+	/***
+	 * Event when users toggle the regular expression on/off
+	 */
+	private void toggleRegularExpression() {
+		boolean regExp = btnRegExpression.getSelection();
+		if (regExp) {
+			try {
+				textMatcher.setMode(TextMatcherEditor.REGULAR_EXPRESSION);
+			} catch(Exception err) {
+				Color c = GUIHelper.COLOR_YELLOW;
+				objSearchText.setBackground(c);
+				return;
+			}
+			objSearchText.setBackground(GUIHelper.COLOR_LIST_BACKGROUND);
+		} else {
+			textMatcher.setMode(TextMatcherEditor.CONTAINS);
+		}
+		if (natTable != null)
+			natTable.refresh(false);
+	}
+	
 
 	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		final String property = event.getProperty();
 		if (property.equals(PreferenceConstants.ID_FONT_GENERIC)) {
-			getNatTable().redraw();
+			painterConfiguration.configureRegistry(natTable.getConfigRegistry());
+			natTable.refresh(false);
 		}
 	}
 	
@@ -340,17 +483,9 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 		}
 	}
 	
-	protected FilterInputData<T> getInputData() {
-		return inputData;
-	}
 	
 	
-	protected DataLayer getDataLayer() {
-		return dataLayer;
-	}
-	
-	
-	public NatTable getNatTable() {
+	protected NatTable getNatTable() {
 		return natTable;
 	}
 
@@ -378,9 +513,9 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 
 	abstract protected void setLayerConfiguration(DataLayer datalayer);
 	abstract protected String[] getColumnHeaderLabels();
-	abstract protected FilterDataProvider<T> getDataProvider();
+	abstract protected FilterDataProvider<T> getDataProvider(FilterList<FilterDataItem<T>> filterList);
 
-	abstract protected int createAdditionalButton(Composite parent); 	
+	abstract protected int createAdditionalButton(Composite parent, FilterInputData<T> inputData); 	
 	abstract protected void selectionEvent(FilterDataItem<T> item, int click);
 	abstract protected void addConfiguration(NatTable table);
 }

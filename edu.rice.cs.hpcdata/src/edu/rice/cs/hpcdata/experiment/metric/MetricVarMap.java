@@ -22,6 +22,7 @@ public class MetricVarMap extends VarMap
 {
 	private Scope 	scope;
 	private BaseMetric 		metric = null;
+	private final IMetricManager metricManager;
 
 	public MetricVarMap() {
 		this(null, null, null);
@@ -34,6 +35,7 @@ public class MetricVarMap extends VarMap
 	public MetricVarMap(RootScope root, IMetricScope s, IMetricManager metricManager) {
 		super(false);
 		this.scope = (Scope) s;
+		this.metricManager = metricManager;
 	}
 	
 
@@ -77,9 +79,8 @@ public class MetricVarMap extends VarMap
 			// Metric variable
 			String sIndex = varName.substring(1);
 			RootScope root = scope.getRootScope();
-			IMetricManager metricManager = (IMetricManager) root.getExperiment();
-
-			BaseMetric metricToQuery = metricManager.getMetric(Integer.valueOf(sIndex));
+			IMetricManager mm = metricManager == null ? (IMetricManager) root.getExperiment() : metricManager;
+			BaseMetric metricToQuery = mm.getMetric(Integer.valueOf(sIndex));
 			if (metricToQuery == null) 
 				throw new RuntimeException("metric ID unknown: " + sIndex);
 			

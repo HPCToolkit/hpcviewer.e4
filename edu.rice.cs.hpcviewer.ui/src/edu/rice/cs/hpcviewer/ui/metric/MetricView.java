@@ -6,6 +6,7 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.Composite;
+
 import edu.rice.cs.hpcmetric.MetricFilterInput;
 import edu.rice.cs.hpcmetric.MetricFilterPane;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractUpperPart;
@@ -30,6 +31,8 @@ public class MetricView extends AbstractUpperPart
 	private final IEventBroker eventBroker ;
 	private final CTabFolder parent;
 	
+	private MetricFilterPane pane;
+	
 	private MetricFilterInput inputFilter;
 	public MetricView(CTabFolder parent, int style, IEventBroker eventBroker ) {
 		super(parent, style);
@@ -40,6 +43,7 @@ public class MetricView extends AbstractUpperPart
 		setText(TITLE_DEFAULT);
 	}
 	
+
 	
 	@Override
 	public String getTitle() {
@@ -51,15 +55,23 @@ public class MetricView extends AbstractUpperPart
 		if (input == null || !(input instanceof MetricFilterInput))
 			return;
 		inputFilter = (MetricFilterInput) input;
-
+		
+		// if the panel is already created, we just need to reset the panel
+		// with a new input (list). No need to recreate it again.
+		
+		if (pane != null) {
+			pane.setInput(inputFilter);
+			return;
+		}		
+		// the panel is not created yet
+		// we will create it from the scratch
+		
 		Composite container = new Composite(parent, SWT.BORDER);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(container);
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(container);
 		
-		MetricFilterPane pane = new MetricFilterPane(container, getStyle(), eventBroker, inputFilter);
-		
-		if (pane != null)
-			setControl(container);
+		pane = new MetricFilterPane(container, getStyle(), eventBroker, inputFilter);
+		setControl(container);
 	}
 	
 	

@@ -2,18 +2,12 @@
 package edu.rice.cs.hpcviewer.ui.parts.datacentric;
 
 import javax.inject.Inject;
-import org.eclipse.e4.ui.services.EMenuService;
 import org.eclipse.swt.custom.CTabFolder;
-import org.eclipse.swt.widgets.Composite;
-
-import edu.rice.cs.hpcdata.experiment.BaseExperiment;
-import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
-import edu.rice.cs.hpcviewer.ui.base.IViewBuilder;
-import edu.rice.cs.hpcviewer.ui.internal.AbstractViewItem;
-import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownContentViewer;
+import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownPart;
 
-public class Datacentric extends AbstractViewItem
+
+public class Datacentric extends TopDownPart
 {
 
 	@Inject
@@ -24,21 +18,9 @@ public class Datacentric extends AbstractViewItem
 	}
 	
 
-	@Override
-	protected RootScope createRoot(BaseExperiment experiment) {
-
-		return experiment.getRootScope(RootScopeType.DatacentricTree);
-	}
 
 	@Override
-	protected IViewBuilder setContentViewer(Composite parent, EMenuService menuService) {
-
-		IViewBuilder contentViewer = new TopDownContentViewer(partService, eventBroker, databaseAddOn, null);
-    	return contentViewer;
-	}
-
-	@Override
-	protected RootScopeType getRootType() {
+	public RootScopeType getRootType() {
 
 		return RootScopeType.DatacentricTree;
 	}

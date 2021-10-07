@@ -91,14 +91,14 @@ public final class FilterCompositeTest
 		
 		MetricFilterInput input = new MetricFilterInput(root, exp, treeViewer, true);
 		
-		final AbstractFilterPane pane = new MetricFilterPane(shell, AbstractFilterPane.STYLE_INDEPENDENT, null, input);
+		final AbstractFilterPane<BaseMetric> pane = new MetricFilterPane(shell, AbstractFilterPane.STYLE_INDEPENDENT, null, input);
 
 		shell.open();
 		while (!shell.isDisposed()) {
 			if (!display.readAndDispatch())
 				display.sleep();
 		}
-		List<FilterDataItem> clist = pane.getEventList();
+		List<FilterDataItem<BaseMetric>> clist = pane.getEventList();
 		clist.forEach( item -> {
 			System.out.println(item.data + ": " + item.isChecked());
 		});

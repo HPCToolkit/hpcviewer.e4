@@ -7,7 +7,6 @@ import java.util.List;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.custom.CTabFolder;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +21,7 @@ import edu.rice.cs.hpcfilter.StringFilterDataItem;
 import edu.rice.cs.hpcfilter.dialog.ThreadFilterDialog;
 import edu.rice.cs.hpctree.IScopeTreeData;
 import edu.rice.cs.hpctree.ScopeTreeData;
+import edu.rice.cs.hpcviewer.ui.internal.AbstractView;
 import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownPart;
 
 public class ThreadPart extends TopDownPart 
@@ -30,7 +30,6 @@ public class ThreadPart extends TopDownPart
 	static final private String TITLE_PREFIX  = "Thread view ";
 
 	private ThreadViewInput viewInput; 
-	private Experiment experiment;
 	private List<Integer> threads;
 
 	public ThreadPart(CTabFolder parent, int style) {
@@ -45,14 +44,15 @@ public class ThreadPart extends TopDownPart
 		if (input == null || (!(input instanceof ThreadViewInput)))
 			return;
 
-		// important: needs to store the experiment database for further usage
-		// when the view is becoming visible
+		// if the input doesn't include the list of threads to be displayed,
+		// we'll ask the user to pick the threads
+		
 		viewInput = (ThreadViewInput) input;
 		threads   = viewInput.getThreads();
 		if (threads == null) {
-			Display display = Display.getDefault();
+			final Shell shell = getDisplay().getActiveShell();
 			try {
-				threads = getThreads(display.getActiveShell(), viewInput.getThreadData());
+				threads = getThreads(shell, viewInput.getThreadData());
 				if (threads == null)
 					return;
 				
@@ -62,14 +62,14 @@ public class ThreadPart extends TopDownPart
 				final String label = "Error while opening thread-level data";
 				Logger logger = LoggerFactory.getLogger(getClass());
 				logger.error(label, e);
-				MessageDialog.openError(display.getActiveShell(), label, e.getClass().getName() +": " + e.getLocalizedMessage());
+				MessageDialog.openError(shell, label, e.getClass().getName() +": " + e.getLocalizedMessage());
 				
 				throw new RuntimeException(e.getMessage());
 			}
 		}
 		// set the table
 		RootScope root  = viewInput.getRootScope();
-		this.experiment = (Experiment) root.getExperiment();
+		Experiment experiment = (Experiment) root.getExperiment();
 		List<BaseMetric> rawMetrics = experiment.getRawMetrics();
 		ThreadMetricManager metricManager = new ThreadMetricManager(rawMetrics, threads);
 		
@@ -78,6 +78,7 @@ public class ThreadPart extends TopDownPart
 		try {
 			String title = TITLE_PREFIX + getLabel(viewInput).toString(); 
 			setText(title);
+			setToolTipText(getTooltipText(viewInput));
 		} catch (IOException e) {
 			e.printStackTrace();
 			setText(TITLE_PREFIX + " (Empty)");
@@ -94,7 +95,13 @@ public class ThreadPart extends TopDownPart
 	
 	
 	@Override
-	protected RootScope createRoot() {
+	protected RootScope getRoot() {
+		return viewInput.getRootScope();
+	}
+	
+	
+	@Override
+	protected RootScope buildTree() {
 		return viewInput.getRootScope();
 	}
 	
@@ -143,6 +150,41 @@ public class ThreadPart extends TopDownPart
 	}
 
 	
+	@Override
+	protected IThreadDataCollection getThreadDataCollection() {
+		return viewInput.getThreadData();
+	}
+	
+	
+	
+	@Override
+	public ViewType getViewType() {
+		return AbstractView.ViewType.INDIVIDUAL;
+	}
+
+	
+	private String getTooltipText(ThreadViewInput input) throws IOException {
+		final String TOOLTIP_PREFIX = "Top down view for thread(s): ";
+		
+		IThreadDataCollection threadData = input.getThreadData();
+		String[] labels = threadData.getRankStringLabels();
+
+		List<Integer> threads = input.getThreads();
+		int size = threads.size();
+
+		String label = TOOLTIP_PREFIX;
+		for(int i=0; i<size; i++) {
+			int index = threads.get(i);
+			label += labels[index];
+			
+			if (i+1 < size) {
+				label += ", ";
+			}
+		}
+		return label;
+	}
+	
+	
 	/***
 	 * Get the list of threads to view in a thread view.
 	 * This method will display a dialog box asking users to choose threads to view.
@@ -166,12 +208,12 @@ public class ThreadPart extends TopDownPart
 			items.add(obj);
 		}
 
-		ThreadFilterDialog dialog = new ThreadFilterDialog(shell, items);
+		ThreadFilterDialog dialog = new ThreadFilterDialog(shell, "Select rank/thread to view", items);
 		
 		if (dialog.open() == Window.OK) {
 			items = dialog.getResult();
 			if (items != null) {
-				List<Integer> threads = new ArrayList<Integer>();
+				final List<Integer> threads = new ArrayList<Integer>();
 				for(int i=0; i<items.size(); i++) {
 					if (items.get(i).checked) {
 						threads.add(i);
@@ -183,6 +225,4 @@ public class ThreadPart extends TopDownPart
 		}
 		return null;
 	}
-
-
 }

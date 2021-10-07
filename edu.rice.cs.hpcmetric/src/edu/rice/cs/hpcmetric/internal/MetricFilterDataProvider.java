@@ -1,8 +1,8 @@
 package edu.rice.cs.hpcmetric.internal;
 
+import java.util.List;
 import java.util.Optional;
 
-import ca.odell.glazedlists.FilterList;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
@@ -17,7 +17,7 @@ public class MetricFilterDataProvider extends FilterDataProvider<BaseMetric>
 
 	private final RootScope root;
 
-	public MetricFilterDataProvider(RootScope root, FilterList<FilterDataItem<BaseMetric>> filterList, IFilterChangeListener changeListener) {
+	public MetricFilterDataProvider(RootScope root, List<FilterDataItem<BaseMetric>> filterList, IFilterChangeListener changeListener) {
 		super(filterList, changeListener);
 		this.root = root;
 	}
@@ -87,7 +87,8 @@ public class MetricFilterDataProvider extends FilterDataProvider<BaseMetric>
 			break;
 		case IConstants.INDEX_METRIC_VAL:
 			break;
+		default: 
+			super.setDataValue(columnIndex, rowIndex, newValue);
 		}
-		super.setDataValue(columnIndex, rowIndex, newValue);
 	}
 }

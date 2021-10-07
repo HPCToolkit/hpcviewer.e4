@@ -8,8 +8,8 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.CoolBar;
@@ -54,6 +54,7 @@ public class TopDownPart extends AbstractTableView
 
 	public TopDownPart(CTabFolder parent, int style) {
 		super(parent, style, TITLE);
+		setToolTipText("A view to display the calling context tree (CCT) of the profile data");
 	}
 	
 
@@ -72,7 +73,7 @@ public class TopDownPart extends AbstractTableView
 		items[ITEM_THREAD] = createToolItem(toolbar, IconManager.Image_ThreadView, 
 				"Show the metric(s) of a group of threads");
 
-		items[ITEM_GRAPH].addSelectionListener(new SelectionListener() {
+		items[ITEM_GRAPH].addSelectionListener(new SelectionAdapter() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -92,7 +93,8 @@ public class TopDownPart extends AbstractTableView
 					IMetricManager metricManager = getMetricManager();
 					
 					// create the context menu of graphs
-					GraphMenu.createAdditionalContextMenu(getProfilePart(),  mgr, (Experiment) metricManager, threadData, scope);
+					IThreadDataCollection threadData = getThreadDataCollection();
+					GraphMenu.createAdditionalContextMenu(getProfilePart(),  mgr, metricManager, threadData, scope);
 					
 					// make the context menu appears next to tool item
 					final Menu menu = mgr.getMenu();
@@ -100,27 +102,20 @@ public class TopDownPart extends AbstractTableView
 					menu.setVisible(true);
 				}
 			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
 		
-		items[ITEM_THREAD].addSelectionListener(new SelectionListener() {
-			
+		items[ITEM_THREAD].addSelectionListener(new SelectionAdapter() {			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-
 				showThreadView(e.widget.getDisplay().getActiveShell());
 			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
 	}
 
 	
 	private void showThreadView(Shell shell) {
 		String[] labels = null;
+		IThreadDataCollection threadData = getThreadDataCollection();
 		try {
 			labels = threadData.getRankStringLabels();
 		} catch (IOException e) {
@@ -131,8 +126,8 @@ public class TopDownPart extends AbstractTableView
 			MessageDialog.openError(shell, msg, e.getClass().getName() + ": " + e.getLocalizedMessage());
 			return;
 		}
-
-		List<FilterDataItem<String>> items = ThreadFilterDialog.filter(shell, labels, null);
+		
+		List<FilterDataItem<String>> items = ThreadFilterDialog.filter(shell, "Select rank/thread to view", labels, null);
 		
 		if (items != null) {
 			List<Integer> threads = new ArrayList<Integer>();
@@ -142,7 +137,7 @@ public class TopDownPart extends AbstractTableView
 				}
 			}
 			if (threads.size()>0) {
-				RootScope root = ((Experiment)getMetricManager()).getRootScope(getRootType());
+				RootScope root = getRoot();
 				ThreadViewInput input = new ThreadViewInput(root, threadData, threads);
 				ProfilePart profilePart = getProfilePart();
 				profilePart.addThreadView(input);
@@ -151,25 +146,23 @@ public class TopDownPart extends AbstractTableView
 	}
 
 
+	@Override
 	protected void updateStatus() {
+		IThreadDataCollection threadData = getThreadDataCollection();
+		boolean enableItems = (threadData != null);
+		items[ITEM_THREAD].setEnabled(enableItems);
+		
+		Scope selectedScope = super.getTable().getSelection();
+		boolean enableGraph = enableItems && (selectedScope != null);
+		items[ITEM_GRAPH] .setEnabled(enableGraph);
 	}
 
 
 	@Override
-	protected RootScope createRoot() {
-		IMetricManager mm = getMetricManager();
-		Experiment exp = (Experiment) mm;
-		RootScope root = exp.getRootScope(getRootType());
-		try {
-			threadData = ThreadDataCollectionFactory.build(root);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		boolean enableItems = (threadData != null);
-		items[ITEM_GRAPH] .setEnabled(enableItems);
-		items[ITEM_THREAD].setEnabled(enableItems);
-
-		return root;
+	protected RootScope buildTree() {
+		// the tree is already built by the hpcprof
+		// just return the existing root
+		return getRoot();		
 	}
 
 
@@ -180,7 +173,35 @@ public class TopDownPart extends AbstractTableView
 
 
 	@Override
+	protected RootScope getRoot() {
+		IMetricManager mm = getMetricManager();
+		Experiment experiment = (Experiment) mm;
+		return experiment.getRootScope(RootScopeType.CallingContextTree);
+	}
+
+
+	@Override
 	protected IScopeTreeData getTreeData(RootScope root, IMetricManager metricManager) {
 		return new ScopeTreeData(root, metricManager);
+	}
+	
+	/***
+	 * Retrieve the object of {@link IThreadDataCollection}.
+	 * Ideally this object is created only once after opening the database.
+	 * However, since it may take time (minutes) to collect thread data with
+	 * old databases, we should generate it on demand. 
+	 * 
+	 * @return object of {@link IThreadDataCollection}
+	 */
+	protected IThreadDataCollection getThreadDataCollection() {
+		if (threadData == null) {
+			RootScope root = getRoot();
+			try {
+				threadData = ThreadDataCollectionFactory.build(root);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return threadData;
 	}
 }

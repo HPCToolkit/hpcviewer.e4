@@ -3,16 +3,16 @@
  */
 package edu.rice.cs.hpcviewer.ui.experiment;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Shell;
 
 import java.io.File;
-
+import java.io.FilenameFilter;
 import edu.rice.cs.hpcbase.map.ProcedureAliasMap;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.util.Constants;
+import edu.rice.cs.hpcdata.util.Util;
 import edu.rice.cs.hpcdata.util.Util.FileXMLFilter;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 
@@ -25,17 +25,7 @@ import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
  *
  */
 public class ExperimentManager 
-{
-	
-	/**
-	 * Constructor to instantiate experiment file
-	 * @param win: the current workbench window
-	 */
-	public ExperimentManager() {
-	}
-	
-
-	
+{		
 	/**
 	 * Get the list of database file name
 	 * @param shell : the shell widget of the application
@@ -43,16 +33,16 @@ public class ExperimentManager
 	 * 
 	 * @return the list of XML files in the selected directory
 	 * null if the user click the "cancel" button
+	 * @throws Exception 
 	 */
-	private File[] getDatabaseFileList(Shell shell, String sTitle) {
+	private File[] getDatabaseFileList(Shell shell, String sTitle) throws Exception {
 		// preparing the dialog for selecting a directory
-		Shell objShell = shell;
-		DirectoryDialog dirDlg = new DirectoryDialog(objShell);
+		DirectoryDialog dirDlg = new DirectoryDialog(shell);
 		dirDlg.setText("hpcviewer");
 		dirDlg.setFilterPath(ViewerPreferenceManager.getLastPath());		// recover the last opened path
 		dirDlg.setMessage(sTitle);
 		String sDir = dirDlg.open();	// ask the user to select a directory
-		if(sDir != null){
+		if(sDir != null && checkDirectory(sDir)) {
 			return this.getListOfXMLFiles(sDir);
 		}
 		
@@ -68,12 +58,16 @@ public class ExperimentManager
 	 * @throws Exception 
 	 */
 	public BaseExperiment openDatabaseFromDirectory(Shell shell, String sPath) throws Exception {
+		if (!checkDirectory(sPath))
+			return null;
+		
 		File []fileXML = this.getListOfXMLFiles(sPath);
-		if(fileXML != null) {
-			String filename = getFileExperimentFromListOfFiles(shell, fileXML);
-			if (filename != null) {
-				return loadExperiment(filename);
-			}
+		if (fileXML == null)
+			return null;
+		
+		String filename = getFileExperimentFromListOfFiles(fileXML);
+		if (filename != null) {
+			return loadExperiment(filename);
 		}
 		return null;
 	}
@@ -83,12 +77,13 @@ public class ExperimentManager
 	 * Attempt to open an experiment database if valid then
 	 * open the scope view  
 	 * @return true if everything is OK. false otherwise
+	 * @throws Exception 
 	 */
-	public String openFileExperiment(Shell shell) {
+	public String openFileExperiment(Shell shell) throws Exception {
 		File []fileXML = getDatabaseFileList(shell, 
 				"Select a directory containing a profiling database.");
 		if(fileXML != null) {
-			return getFileExperimentFromListOfFiles(shell, fileXML);
+			return getFileExperimentFromListOfFiles(fileXML);
 		}
 		return null;
 	}
@@ -101,14 +96,14 @@ public class ExperimentManager
 	 * Open an experiment database based on given an array of java.lang.File
 	 * @param filesXML: list of files
 	 * @return true if the opening is successful
+	 * @throws Exception 
 	 */
-	private String getFileExperimentFromListOfFiles(Shell shell, File []filesXML) {
+	private String getFileExperimentFromListOfFiles(File []filesXML) throws Exception {
 		if((filesXML != null) && (filesXML.length>0)) {
-			boolean bContinue = true;
 			// let's make it complicated: assuming there are more than 1 XML file in this directory,
 			// we need to test one by one if it is a valid database file.
 			// Problem: if in the directory it has two XML files, then the second one will NEVER be opened !
-			for(int i=0;i<(filesXML.length) && (bContinue);i++) 
+			for(int i=0;i<(filesXML.length);i++) 
 			{
 				File objFile = filesXML[i];
 
@@ -121,14 +116,27 @@ public class ExperimentManager
 						return objFile.getAbsolutePath();
 				}
 			}
-			return null;
+			throw new Exception("Cannot find experiment.xml in the directory");
 		}
-		MessageDialog.openError(shell, "Failed to open a database", 
-			"Either the selected directory is not a database or the file is corrupted.\n"+
-			"A database directory must contain at least one XML file which contains profiling information.");
-		return null;
+		// no experiment.xml in the directory
+		// either the user mistakenly open a measurement directory, or it's just a mistake
+		throw new Exception("Either the selected directory is not a database or the file is corrupted.\n"+
+				"A database directory must contain at least one XML file which contains profiling information.");
 	}
 	
+	private boolean checkDirectory(String path) throws Exception {
+		if (path == null) {
+			return false;
+		}
+		File dir = new File(path);
+		FilenameFilter filter = new Util.FileHpcrunFilter();
+		File []hpcrunFiles = dir.listFiles(filter);
+		if (hpcrunFiles != null && hpcrunFiles.length>0) {
+			throw new Exception( "The folder is a measurement direcory.\n" +
+							     "You need to run hpcprof to generate a database");
+		}
+		return true;
+	}
 	
 	/**
 	 * Return the list of .xml files in a directory

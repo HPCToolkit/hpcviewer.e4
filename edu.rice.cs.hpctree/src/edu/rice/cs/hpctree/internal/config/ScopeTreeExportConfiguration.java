@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctree.internal;
+package edu.rice.cs.hpctree.internal.config;
 
 import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.config.IConfiguration;
@@ -22,11 +22,9 @@ public class ScopeTreeExportConfiguration implements IConfiguration
 	}
 	
 	@Override
-	public void configureLayer(ILayer layer) {
-		// TODO Auto-generated method stub
+	public void configureLayer(ILayer layer) {}
 
-	}
-
+	
 	@Override
 	public void configureRegistry(IConfigRegistry configRegistry) {
         configRegistry.registerConfigAttribute(
@@ -39,6 +37,7 @@ public class ScopeTreeExportConfiguration implements IConfiguration
                 ExportConfigAttributes.DATE_FORMAT, "m/d/yy h:mm"); //$NON-NLS-1$
 	}
 
+	
 	@Override
 	public void configureUiBindings(UiBindingRegistry uiBindingRegistry) {
         uiBindingRegistry.registerKeyBinding(

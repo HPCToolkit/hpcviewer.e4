@@ -14,18 +14,6 @@ import edu.rice.cs.hpcbase.ui.BaseIconManager;
  */
 public class IconManager  extends BaseIconManager
 {
-	final static public String Image_CallFrom = "CallFrom.gif";
-	final static public String Image_CallTo = "CallTo.gif";
-	final static public String Image_CallFromDisabled = "CallFromDisabled.gif";
-	final static public String Image_CallToDisabled = "CallToDisabled.gif";
-	
-	final static public String Image_InlineFrom = "CallFromInline.gif";
-	final static public String Image_InlineTo = "CallToInline.gif";
-	final static public String Image_InlineFromDisabled = "CallFromInlineDisabled.gif";
-	final static public String Image_InlineToDisabled = "CallToInlineDisabled.gif";
-	
-	final static public String Image_MetricAggregate  = "MetricAggregate.png";
-	
 	final static public String Image_ZoomIn = "ZoomIn.gif";
 	final static public String Image_ZoomOut = "ZoomOut.gif";
 	final static public String Image_Flatten = "Flatten.png";
@@ -86,18 +74,6 @@ public class IconManager  extends BaseIconManager
 		
 		if (isInitialized.compareAndSet(false,true)) {
 			ImageRegistry registry = JFaceResources.getImageRegistry();
-			
-			registerImage(registry, getClass(), Image_CallFrom); 
-			registerImage(registry, getClass(), Image_CallTo); 
-			registerImage(registry, getClass(), Image_CallFromDisabled); 
-			registerImage(registry, getClass(), Image_CallToDisabled);
-
-			registerImage(registry, getClass(), Image_InlineFrom);
-			registerImage(registry, getClass(), Image_InlineTo); 
-			registerImage(registry, getClass(), Image_InlineFromDisabled); 
-			registerImage(registry, getClass(), Image_InlineToDisabled);
-
-			registerImage(registry, getClass(), Image_MetricAggregate);
 
 			registerImage(registry, getClass(), Image_ZoomIn); 
 			registerImage(registry, getClass(), Image_ZoomOut); 

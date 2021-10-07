@@ -16,7 +16,7 @@ public class TracePreferenceManager extends AbstractPreferenceManager
 		PreferenceStore store = getPreferenceStore();
 
 		store.setDefault(TracePreferenceConstants.PREF_COLOR_OPTION,  TracePreferenceConstants.COLOR_NAME_BASED);
-		store.setDefault(TracePreferenceConstants.PREF_RENDER_OPTION, TracePreferenceConstants.RENDERING_MIDPOINT);
+		store.setDefault(TracePreferenceConstants.PREF_RENDER_OPTION, TracePreferenceConstants.RENDERING_RIGHTMOST);
 		store.setDefault(TracePreferenceConstants.PREF_TOOLTIP_DELAY, TracePreferenceConstants.DEFAULT_TOOLTIP_DELAY);
 		store.setDefault(TracePreferenceConstants.PREF_MAX_THREADS,   TracePreferenceConstants.DEFAULT_MAX_THREADS);
 	}
@@ -27,8 +27,11 @@ public class TracePreferenceManager extends AbstractPreferenceManager
 	 * @return true if midpoint painting is enabled. False otherwise.
 	 */
 	public static boolean isMidpointEnabled() {
+		return false;
+		/*
 		int renderOption = getRenderOption();
 		return renderOption == TracePreferenceConstants.RENDERING_MIDPOINT;
+		*/
 	}
 	
 	
@@ -60,9 +63,10 @@ public class TracePreferenceManager extends AbstractPreferenceManager
 	//
 	////////////////////////////////////////
 
+	/*
 	private static int getRenderOption() {
 		return INSTANCE.getPreferenceStore().getInt(TracePreferenceConstants.PREF_RENDER_OPTION);
-	}
+	} */
 	
 	private static int getColorOption() {
 		return INSTANCE.getPreferenceStore().getInt(TracePreferenceConstants.PREF_COLOR_OPTION);

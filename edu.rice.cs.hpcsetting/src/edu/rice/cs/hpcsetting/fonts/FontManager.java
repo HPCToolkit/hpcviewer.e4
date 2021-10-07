@@ -98,14 +98,14 @@ public class FontManager
 	 * @throws IOException
 	 */
 	static public void setFontPreference(String fontPreferenceID, FontData[] fontData) throws IOException {
-
-		PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();		
-		PreferenceConverter.setValue(pref, fontPreferenceID, fontData);
-		pref.save();
 		
 		// update the cache in the font registry
 		// have to do this manually to reflect the current change
 		INSTANCE.fontRegistry.put(fontPreferenceID, fontData);
+
+		PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();		
+		PreferenceConverter.setValue(pref, fontPreferenceID, fontData);
+		pref.save();
 	}
 	
 	

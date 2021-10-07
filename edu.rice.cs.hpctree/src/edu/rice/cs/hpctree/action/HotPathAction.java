@@ -44,6 +44,8 @@ public class HotPathAction
 		}
 		BaseMetric metric = treeAction.getMetric(col);
 		CallPathItem objHotPath = new CallPathItem();
+		objHotPath.level = 0;
+		objHotPath.node  = scope;
 		
 		if (!getHotCallPath(scope, metric, objHotPath)) {
 			errMsg = "No hot path found";
@@ -51,7 +53,8 @@ public class HotPathAction
 		}
 		treeAction.redraw();
 		int rowIndex = treeAction.indexOf(objHotPath.node);
-		treeAction.setSelection(rowIndex);
+		if (rowIndex >= 0)
+			treeAction.setSelection(rowIndex);
 		
 		return RET_OK;
 	}
@@ -76,7 +79,6 @@ public class HotPathAction
 		if (children != null && children.size() > 0) {
 			// get the highest child node
 			Scope scopeChild = (Scope) children.get(0);
-			objHotPath.node = scopeChild;
 
 			// compare the value of the parent and the child
 			// if the ratio is significant, we stop 
@@ -91,6 +93,7 @@ public class HotPathAction
 			if(dChild < (0.5 * dParent)) {
 				return true;
 			} else {
+				objHotPath.node = scopeChild;
 				return getHotCallPath(scopeChild, metric, objHotPath);
 			}
 		}

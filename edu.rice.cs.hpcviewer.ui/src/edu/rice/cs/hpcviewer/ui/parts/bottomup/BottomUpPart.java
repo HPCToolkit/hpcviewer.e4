@@ -18,6 +18,7 @@ public class BottomUpPart extends AbstractTableView
 
 	public BottomUpPart(CTabFolder parent, int style) {
 		super(parent, style, TITLE);
+		setToolTipText("A view to display the list of callers");
 	}
 
 	@Override
@@ -36,7 +37,7 @@ public class BottomUpPart extends AbstractTableView
 	private boolean isInitialized = false;
 
 	@Override
-	protected RootScope createRoot() {
+	protected RootScope buildTree() {
 		IMetricManager mm = getMetricManager();
 		Experiment experiment = (Experiment) mm;
 		
@@ -58,5 +59,12 @@ public class BottomUpPart extends AbstractTableView
 	@Override
 	protected IScopeTreeData getTreeData(RootScope root, IMetricManager metricManager) {
 		return new BottomUpScopeTreeData(root, metricManager);
+	}
+
+	@Override
+	protected RootScope getRoot() {
+		IMetricManager mm = getMetricManager();
+		Experiment experiment = (Experiment) mm;
+		return experiment.getRootScope(RootScopeType.CallerTree);
 	}
 }

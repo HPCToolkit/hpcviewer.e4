@@ -1,9 +1,11 @@
-package edu.rice.cs.hpctree.internal;
+package edu.rice.cs.hpctree.internal.config;
 
 import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.nebula.widgets.nattable.NatTable;
+import org.eclipse.nebula.widgets.nattable.command.VisualRefreshCommand;
 import org.eclipse.nebula.widgets.nattable.config.CellConfigAttributes;
 import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.config.IConfiguration;
@@ -19,22 +21,22 @@ import org.eclipse.swt.graphics.Font;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
-import edu.rice.cs.hpctree.ScopeTreeTable;
+import edu.rice.cs.hpctree.internal.ScopeTreeLabelAccumulator;
 
 public class TableFontConfiguration implements IConfiguration, IPropertyChangeListener 
 {
-	private IConfigRegistry configRegistry;
-	private final ScopeTreeTable treeTable;
+	private final NatTable natTable;
 	
-	public TableFontConfiguration(ScopeTreeTable treeTable) {
-		this.treeTable = treeTable;
+	public TableFontConfiguration(NatTable natTable) {
+		this.natTable = natTable;
+		
+		PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
+		pref.addPropertyChangeListener(this);
 	}
 	
 	
 	@Override
 	public void configureRegistry(IConfigRegistry configRegistry) {
-
-		this.configRegistry = configRegistry;
 		
 		// configuration for tree column
 		//
@@ -73,10 +75,6 @@ public class TableFontConfiguration implements IConfiguration, IPropertyChangeLi
 				   styleMetric, 
 				   DisplayMode.SELECT, 
 				   ScopeTreeLabelAccumulator.LABEL_METRICOLUMN);
-
-		
-		PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
-		pref.addPropertyChangeListener(this);
 	}
 
 
@@ -86,15 +84,14 @@ public class TableFontConfiguration implements IConfiguration, IPropertyChangeLi
 		final String property = event.getProperty();
 		
 		boolean need_to_refresh = (property.equals(PreferenceConstants.ID_FONT_GENERIC) || 
-								   property.equals(PreferenceConstants.ID_FONT_METRIC)  ||
-								   property.equals(PreferenceConstants.ID_DEBUG_CCT_ID) ||
-								   property.equals(PreferenceConstants.ID_DEBUG_FLAT_ID) ); 
+								   property.equals(PreferenceConstants.ID_FONT_METRIC)); 
 		
 		if (need_to_refresh) {
-			configureRegistry(configRegistry);
-			treeTable.attributeRefresh();
+			configureRegistry(natTable.getConfigRegistry());
+			natTable.doCommand(new VisualRefreshCommand());
 		}
 	}
+	
 
 	public static Font getMetricFont() {
 		Font font ;
@@ -105,6 +102,7 @@ public class TableFontConfiguration implements IConfiguration, IPropertyChangeLi
 		}
 		return font;
 	}
+	
 
 	public static Font getGenericFont() {
 		Font font;

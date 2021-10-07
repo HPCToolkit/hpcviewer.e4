@@ -41,6 +41,8 @@ import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpctree.IScopeTreeData;
 import edu.rice.cs.hpctree.ScopeTreeTable;
 import edu.rice.cs.hpctree.action.HotPathAction;
+import edu.rice.cs.hpctree.action.IUndoableActionManager;
+import edu.rice.cs.hpctree.action.UndoableActionManager;
 import edu.rice.cs.hpctree.action.ZoomAction;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.actions.UserDerivedMetric;
@@ -48,7 +50,11 @@ import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 
 
-
+/************************************************************************************************
+ * 
+ * Generic class to display a table and its toolbar for the actions
+ *
+ ************************************************************************************************/
 public abstract class AbstractTableView extends AbstractView implements EventHandler, DisposeListener
 {
 	final private int ACTION_ZOOM_IN      = 0;
@@ -71,12 +77,21 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 	private ScopeTreeTable table ;
 	private ZoomAction     zoomAction;
 
-	private ProfilePart profilePart;
+	private ProfilePart  profilePart;
 	private IEventBroker eventBroker;
-
+	private IUndoableActionManager actionManager;
+	
+	
+	/*****
+	 * Constructor to create a view
+	 * @param parent the folder to be attached
+	 * @param style SWT style 
+	 * @param title the title for this view
+	 */
 	public AbstractTableView(CTabFolder parent, int style, String title) {
 		super(parent, style);
 		setText(title);
+		actionManager = new UndoableActionManager();
 	}
 
 
@@ -133,15 +148,13 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
      * @param toolBar toolbar to be added in the cool item
      */
 	protected void createCoolItem(CoolBar coolBar, ToolBar toolBar) {
-
 		CoolItem coolItem = new CoolItem(coolBar, SWT.NONE);
 		coolItem.setControl(toolBar);
 		Point size = toolBar.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 		size.x += 20;
 		coolItem.setSize(size);
     	
-    }
-	
+    }	
 	
 
 	@Override
@@ -156,13 +169,13 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		gd_composite.widthHint = 506;
 		composite.setLayoutData(gd_composite);
 				
-		CoolBar coolBar = new CoolBar(composite, SWT.FLAT);
-		ToolBar toolBar = new ToolBar(coolBar, SWT.FLAT | SWT.RIGHT);
+		//CoolBar coolBar = new CoolBar(composite, SWT.FLAT);
+		ToolBar toolBar = new ToolBar(composite, SWT.FLAT | SWT.RIGHT);
 
 		// -------------------------------------------
 		// add the beginning of toolbar
 		// -------------------------------------------
-		beginToolbar(coolBar, toolBar);
+		beginToolbar(null, toolBar);
 		
 		// -------------------------------------------
 		// default tool bar
@@ -187,17 +200,16 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		// -------------------------------------------
 		// add the end of toolbar
 		// -------------------------------------------
-		endToolbar(coolBar, toolBar);
-
-		createCoolItem(coolBar, toolBar);
+		endToolbar(null, toolBar);
+		//createCoolItem(coolBar, toolBar);
 		
-		Point p = coolBar.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-		p.x += 20;
+		//Point p = coolBar.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+		//p.x += 20;
 		
-		coolBar.setSize(p);
+		//coolBar.setSize(p);
 		
-		GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).grab(false, false).applyTo(coolBar);
-		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(coolBar);
+		//GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).grab(false, false).applyTo(coolBar);
+		//GridLayoutFactory.fillDefaults().numColumns(1).applyTo(coolBar);
 
 		// -------------------------------------------
 		// message label
@@ -227,7 +239,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		// Create the main table
 		// -------------------------------------------
 		
-		root = createRoot();
+		root = getRoot();
 		IScopeTreeData treeData = getTreeData(root, metricManager);
 		
 		table = new ScopeTreeTable(parent, SWT.NONE, treeData);
@@ -242,6 +254,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		addButtonListener(root, metricManager);
 
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC, this);
+		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE,  this);
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN,   this);
 	
 		parent.addDisposeListener(this);
@@ -303,7 +316,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		if (!initialized) {
 			// TODO: this process takes time
 			BusyIndicator.showWhile(getDisplay(), ()-> {
-				root = createRoot();
+				root = buildTree();
 				table.setRoot(root);
 				
 				// hide or show columns if needed
@@ -314,6 +327,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		} else {
 			table.visualRefresh();
 		}
+		table.setFocus();
 	}
 
 	
@@ -351,7 +365,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 			return;
 		
 		ViewerDataEvent eventInfo = (ViewerDataEvent) obj;
-		if (metricManager != eventInfo.experiment) 
+		if (metricManager != eventInfo.metricManager) 
 			return;
 
 		String topic = event.getTopic();
@@ -373,6 +387,13 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 			// add a new metric column
 			BaseMetric metric = (BaseMetric) eventInfo.data;
 			table.addMetricColumn(metric);
+			
+		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE)) {
+			// metric has changed. 
+			// We don't know if the change will incur structural changes or just visual.
+			// it's better to refresh completely the table just in case. 
+
+			table.refresh();
 		}
 	}
 	
@@ -382,7 +403,11 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 	public void widgetDisposed(DisposeEvent e) {
 	}
 
-
+	
+	@Override
+	public ViewType getViewType() {
+		return AbstractView.ViewType.COLLECTIVE;
+	}
 	
 	private void hideORShowColumns(MetricDataEvent dataEvent) {
 		Object objData = dataEvent.getData();
@@ -412,6 +437,8 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 			int index = getColumnIndexByMetric(item, metrics);
 			hideOrShowColumn(index, item.checked);
 		}
+		table.pack();
+		
 		// hide or show columns cause visual changes.
 		// however, we are forced to refresh completely the whole layer of the table.
 		// calling visualRefresh won't help and I don't know why
@@ -423,7 +450,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		table.freezeTreeColumn();
 	}
 	
-	private void hideOrShowColumn(int columnIndex, boolean shown) {
+	synchronized private void hideOrShowColumn(int columnIndex, boolean shown) {
 		// the index zero is only for the tree column
 		// we want to keep this column to be always visible
 		if (columnIndex == 0) 
@@ -456,17 +483,16 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 	
 	private void addButtonListener(RootScope root, IMetricManager metricManager) {
 		
-		zoomAction = new ZoomAction(table);	
+		zoomAction = new ZoomAction(actionManager, table);	
 
 		toolItem[ACTION_ZOOM_IN].addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 
 				Scope selection = table.getSelection();
-				if (selection == null)
-					return;
+				if (selection != null)
+					zoomAction.zoomIn(selection);
 
-				zoomAction.zoomIn(selection);
 				updateButtonStatus();
 			}
 		});
@@ -536,6 +562,10 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		});
 	}
 	
+	protected IUndoableActionManager getActionManager() {
+		return actionManager;
+	}
+	
 	protected ProfilePart getProfilePart() {	
 		return profilePart;
 	}
@@ -568,12 +598,14 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		boolean canZoomOut = zoomAction == null ? false : zoomAction.canZoomOut();
 		toolItem[ACTION_ZOOM_OUT].setEnabled(canZoomOut);
 		
-		toolItem[ACTION_HOTPATH].setEnabled(canZoomIn);
+		boolean canHotPath = selectedScope != null && selectedScope.hasChildren();
+		toolItem[ACTION_HOTPATH].setEnabled(canHotPath);
 	}
 	
 	public abstract RootScopeType getRootType();
 	
-	protected abstract RootScope createRoot();
+	protected abstract RootScope getRoot();
+	protected abstract RootScope buildTree();
     protected abstract void beginToolbar(CoolBar coolbar, ToolBar toolbar);
     protected abstract void endToolbar  (CoolBar coolbar, ToolBar toolbar);
     protected abstract void updateStatus();

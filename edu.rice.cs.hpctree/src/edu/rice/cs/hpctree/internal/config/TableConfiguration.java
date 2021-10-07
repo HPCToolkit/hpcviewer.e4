@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctree.internal;
+package edu.rice.cs.hpctree.internal.config;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,19 +25,32 @@ import org.eclipse.nebula.widgets.nattable.ui.matcher.MouseEventMatcher;
 import org.eclipse.nebula.widgets.nattable.ui.util.CellEdgeEnum;
 import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Link;
+
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpctree.ScopeTreeDataProvider;
 import edu.rice.cs.hpctree.action.IActionListener;
+import edu.rice.cs.hpctree.internal.ScopeAttributeMouseEventMatcher;
+import edu.rice.cs.hpctree.internal.ScopeAttributePainter;
+import edu.rice.cs.hpctree.internal.ScopeTreeLabelAccumulator;
+import edu.rice.cs.hpctree.resources.ColorManager;
 import edu.rice.cs.hpctree.resources.IconManager;
 
 public class TableConfiguration implements IConfiguration 
 {
 	private final ScopeTreeDataProvider dataProvider;
-	private final List<ICellPainter> painters = new FastList<>();
+	private final Control widget;
+	
+	private final List<ICellPainter> painters     = new FastList<>();
 	private final List<IActionListener> listeners = new FastList<>();
 
-	public TableConfiguration(ScopeTreeDataProvider dataProvider) {
+	public TableConfiguration(Control widget, ScopeTreeDataProvider dataProvider) {
+		this.widget = widget;
 		this.dataProvider = dataProvider;
 	}
 	
@@ -53,15 +66,31 @@ public class TableConfiguration implements IConfiguration
 		painters.addAll( addIconLabel(configRegistry, IconManager.Image_CallFrom, ScopeTreeLabelAccumulator.LABEL_CALLER) );
 		addIconLabel(configRegistry, IconManager.Image_CallFromDisabled, ScopeTreeLabelAccumulator.LABEL_CALLER_DISABLED);
 		
-
+		final Style styleTopRow = new Style();
+		Color clrBg = ColorManager.getColorTopRow(widget);
+		styleTopRow.setAttributeValue(CellStyleAttributes.BACKGROUND_COLOR, clrBg);
+		configRegistry.registerConfigAttribute(
+					CellConfigAttributes.CELL_STYLE, 
+					styleTopRow, 
+					DisplayMode.NORMAL, 
+					ScopeTreeLabelAccumulator.LABEL_TOP_ROW);
+		
 		final Style styleActive = new Style();
-		styleActive.setAttributeValue(CellStyleAttributes.FOREGROUND_COLOR, GUIHelper.COLOR_BLUE);
-		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
+		Color clrActive = GUIHelper.COLOR_BLUE;
+		if (Display.isSystemDarkTheme()) {
+			Link l = new Link((Composite) widget, 0);
+			clrActive = l.getLinkForeground();
+
+		}
+		styleActive.setAttributeValue(CellStyleAttributes.FOREGROUND_COLOR, clrActive);
+		configRegistry.registerConfigAttribute(
+					CellConfigAttributes.CELL_STYLE, 
 					styleActive, 
 					DisplayMode.NORMAL, 
 					ScopeTreeLabelAccumulator.LABEL_SOURCE_AVAILABLE);
 	}
 
+	
 	@Override
 	public void configureUiBindings(UiBindingRegistry uiBindingRegistry) {		
 		
@@ -104,7 +133,6 @@ public class TableConfiguration implements IConfiguration
 			}
 		});
 	}
-	
 	
 
 	public void addListener(IActionListener action) {

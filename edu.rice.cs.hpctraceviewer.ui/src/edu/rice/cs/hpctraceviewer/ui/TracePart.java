@@ -479,7 +479,7 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 		
 		// check if we have a generic event
 		ViewerDataEvent eventInfo = (ViewerDataEvent) obj;
-		if (experiment != eventInfo.experiment) 
+		if (experiment != eventInfo.metricManager) 
 			return;
 
 		if (event.getTopic().equals(BaseConstants.TOPIC_HPC_REMOVE_DATABASE)) {

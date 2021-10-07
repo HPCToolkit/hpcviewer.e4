@@ -10,7 +10,8 @@ import edu.rice.cs.hpcfilter.FilterDataItem;
 public class FilterConfigLabelAccumulator<T> extends ColumnLabelAccumulator 
 {
 	private final ILayer bodyLayer;
-	private final IRowDataProvider<FilterDataItem<T>> dataProvider;
+	private IRowDataProvider<FilterDataItem<T>> dataProvider;
+
 	/***
 	 * Constructor for metric label configuration
 	 * @param bodyLayer the body layer, used to convert row position to row index
@@ -33,4 +34,8 @@ public class FilterConfigLabelAccumulator<T> extends ColumnLabelAccumulator
 		}
 		super.accumulateConfigLabels(configLabels, columnPosition, rowPosition);
 	} 
+	
+	public void setDataProvider(IRowDataProvider<FilterDataItem<T>> dataProvider) {
+		this.dataProvider = dataProvider;
+	}
 }

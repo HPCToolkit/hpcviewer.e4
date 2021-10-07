@@ -6,8 +6,6 @@ import javax.inject.Inject;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
-import javax.annotation.PostConstruct;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.graphics.Color;
@@ -77,7 +75,7 @@ public abstract class AbstractGraphViewer extends AbstractUpperPart
 		
 		return inputNew.getScope()     == this.input.getScope()     && 
 			   inputNew.getGraphType() == this.input.getGraphType() &&
-			   inputNew.getMetric()    == this.input.getMetric();
+			   inputNew.getMetric().compareTo(this.input.getMetric()) == 0;
 	}
 
 	@Override

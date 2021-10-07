@@ -28,7 +28,7 @@ import org.eclipse.nebula.widgets.nattable.tree.painter.IndentedTreeImagePainter
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpctree.internal.ScopeTreeExpandCollapseCommandHandler;
 import edu.rice.cs.hpctree.internal.ScopeTreeExpandToLevelCommandHandler;
-import edu.rice.cs.hpctree.internal.ScopeTreeLayerConfiguration;
+import edu.rice.cs.hpctree.internal.config.ScopeTreeLayerConfiguration;
 
 public class ScopeTreeLayer extends AbstractLayerTransform implements IUniqueIndexLayer 
 {

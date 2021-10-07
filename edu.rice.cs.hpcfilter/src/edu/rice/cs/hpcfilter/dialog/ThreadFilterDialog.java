@@ -30,12 +30,13 @@ public class ThreadFilterDialog extends Dialog
 {
 	private final FilterInputData<String> data;
 	private BaseFilterPane<String> filterPane;
+	final String TITLE;
 	
-	
-	public ThreadFilterDialog(Shell parentShell, 
+	public ThreadFilterDialog(Shell parentShell, String title,
 							  List<FilterDataItem<String>> items) {
 		super(parentShell);		
 		data = new FilterInputData<String>(items);
+		this.TITLE = title;
 	}
 	
 
@@ -51,8 +52,6 @@ public class ThreadFilterDialog extends Dialog
 	
 	@Override
 	protected Control createDialogArea(Composite parent) {
-	    final String TITLE = "Select threads to view";
-		
 		getShell().setText( TITLE);
 		
 		Composite composite = new Composite(parent, SWT.BORDER);
@@ -84,7 +83,7 @@ public class ThreadFilterDialog extends Dialog
 	 * @param checked array of status of the labels: true if the label is checked
 	 * @return {@code List<FilterDataItem>} or null if the user click "Cancel" button.
 	 */
-	public static List<FilterDataItem<String>> filter(Shell shell, String[] labels, boolean []checked) {
+	public static List<FilterDataItem<String>> filter(Shell shell, String title, String[] labels, boolean []checked) {
 
 		List<FilterDataItem<String>> items =  new ArrayList<>(labels.length);
 		
@@ -94,7 +93,7 @@ public class ThreadFilterDialog extends Dialog
 			items.add(obj);
 		}
 
-		ThreadFilterDialog dialog = new ThreadFilterDialog(shell, items);
+		ThreadFilterDialog dialog = new ThreadFilterDialog(shell, title, items);
 		if (dialog.open() == Window.OK) {
 			return dialog.getResult();
 		}

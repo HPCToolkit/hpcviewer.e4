@@ -13,6 +13,8 @@ import ca.odell.glazedlists.event.ListEventListener;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
+import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
+import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
@@ -24,11 +26,8 @@ import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
  ******************************************************/
 public class ScopeTreeData implements IScopeTreeData
 {
-	private final static boolean UNIT_TEST = true;
-	
 	/** list of current data. The list is dynamic **/
-	private final MutableList<Scope> list;
-	
+	private final MutableList<Scope>    listScopes;	
 	private final EventList<BaseMetric> listMetrics;
 
 	private Scope root;
@@ -44,8 +43,8 @@ public class ScopeTreeData implements IScopeTreeData
 	 * @param metricManager the metric manager of the experiment or database
 	 */
 	public ScopeTreeData(RootScope root, IMetricManager metricManager, boolean noEmptyColumns) {
-		this.list = FastList.newList();
-		this.list.add(root);
+		this.listScopes = FastList.newList();
+		this.listScopes.add(root);
 		
 		this.root = root;
 		List<BaseMetric> listVisibleMetrics = metricManager.getVisibleMetrics();
@@ -70,14 +69,14 @@ public class ScopeTreeData implements IScopeTreeData
 	
 	@Override
 	public List<Scope> getList() {
-		return list;
+		return listScopes;
 	}
 	
 	
 	@Override
 	public void setRoot(Scope root) {
-		list.clear();		
-		list.add(root);
+		listScopes.clear();		
+		listScopes.add(root);
 		this.root = root;
 	}
 	
@@ -126,8 +125,8 @@ public class ScopeTreeData implements IScopeTreeData
 		sortedColumn = columnIndex;
 
 		ColumnComparator comparator = getComparator(columnIndex, this.sortDirection);
-		synchronized (list) {
-			list.sort(comparator);
+		synchronized (listScopes) {
+			listScopes.sort(comparator);
 		}
 	}
 	
@@ -158,12 +157,31 @@ public class ScopeTreeData implements IScopeTreeData
 	@Override
 	public void addMetric(int index, BaseMetric metric) {
 		listMetrics.add(index, metric);
+		
+		// TODO: this is a bit hack
+		// we shift the sorted column to the right if the sorted column
+		// is a metric column. 
+		if (sortedColumn>0)
+			sortedColumn++;
+	}
+	
+	
+	@Override
+	public int getMetricIndex(BaseMetric metric) {
+		return listMetrics.indexOf(metric);
+	}
+	
+	
+	@Override
+	public void updateMetric(int index, BaseMetric metric) {
+		if (index >=0  && index < listMetrics.size())
+			listMetrics.set(index, metric);
 	}
 	
 	
 	@Override
 	public void addMetric(BaseMetric metric) {
-		listMetrics.add(metric);
+		addMetric(listMetrics.size(), metric);
 	}
 	
 	
@@ -195,12 +213,14 @@ public class ScopeTreeData implements IScopeTreeData
 	
 	
 	private boolean isRootScope(Scope scope) {
-		return (scope == null) || (scope instanceof RootScope) || (scope == root);
+		return (scope == null) || 
+			   (scope instanceof RootScope) || 
+			   (scope.getCCTIndex() == root.getCCTIndex());
 	}
 	
 	@Override
 	public int getDepthOfData(Scope object) {
-		if (object == null) return 0;
+		if (object == null || isRootScope(object)) return 0;
 		
 		int depth = 0;
 		Scope scope = object;
@@ -218,26 +238,29 @@ public class ScopeTreeData implements IScopeTreeData
 
 	@Override
 	public Scope getDataAtIndex(int index) {
-		Scope scope = list.get(index);
+		Scope scope = listScopes.get(index);
 		return scope;
 	}
 
 	
 	@Override
 	public int indexOf(Scope child) {
-		return list.indexOf(child);
+		return listScopes.indexOf(child);
 	}
 
+	
 	@Override
 	public boolean hasChildren(Scope object) {
 		return object.hasChildren();
 	}
 
+	
 	@Override
 	public boolean hasChildren(int index) {
 		return hasChildren(getDataAtIndex(index));
 	}
 
+	
 	@Override
 	public List<Scope> getChildren(Scope scope) {
 		
@@ -265,10 +288,12 @@ public class ScopeTreeData implements IScopeTreeData
 		return convert(children);
 	}
 
+	
 	@Override
 	public List<Scope> getChildren(Scope object, boolean fullDepth) {
 		return getChildren(object);
 	}
+	
 
 	@Override
 	public List<Scope> getChildren(int index) {
@@ -276,16 +301,17 @@ public class ScopeTreeData implements IScopeTreeData
 		return getChildren(scope);
 	}
 
+	
 	@Override
 	public int getElementCount() {
-		return list.size();
+		return listScopes.size();
 	}
 
+	
 	@Override
 	public boolean isValidIndex(int index) {
-		return (index >= 0) && (index < list.size());
+		return (index >= 0) && (index < listScopes.size());
 	}
-	
 
 	
 	/***
@@ -308,6 +334,14 @@ public class ScopeTreeData implements IScopeTreeData
 		return current;		
 	}
 
+	
+	/********************************************************************
+	 * 
+	 * comparator for the table. 
+	 * If it's a metric column, we compare the value.
+	 * If it's a tree column, we compare the name and its line number
+	 *
+	 ********************************************************************/
 	private static class ColumnComparator implements Comparator<TreeNode> 
 	{
 		private final BaseMetric metric;
@@ -352,6 +386,14 @@ public class ScopeTreeData implements IScopeTreeData
 	}
 
 	
+	/***
+	 * Returns a negative integer, zero, or a positive integer as the first argument is less than, equal to, or greater than the second.
+	 * @param o1
+	 * @param o2
+	 * @param metric
+	 * @param dir
+	 * @return
+	 */
 	protected static int compareNodes(Scope o1, Scope o2, BaseMetric metric, SortDirectionEnum dir) {
 		// o1 and o2 are exactly the same object. This should return 0
 		// no need to go further
@@ -361,7 +403,7 @@ public class ScopeTreeData implements IScopeTreeData
 		int factor = dir == SortDirectionEnum.ASC ? 1 : -1;
 
 		if (metric == null) {
-			return factor * o1.getName().compareTo(o2.getName());
+			return compareNodeName(o1, o2, factor);
 		}
 
 		MetricValue mv1 = metric.getValue(o1);
@@ -375,11 +417,38 @@ public class ScopeTreeData implements IScopeTreeData
 		// ok. So far o1 looks the same as o2
 		// we don't want returning 0 because it will cause the tree looks weird
 		// let's try to compare with the name, and then with the hash code
+		return compareNodeName(o1, o2, factor);
+	}
+
+	
+	/****
+	 * compare the name of the nodes and guaranteed to be unique (not zero).
+	 * If the nodes have the same node, we compare with the line number.
+	 * If it's still the same, we compare with the hash code. This can't be the same.
+	 * @param o1
+	 * @param o2
+	 * @param factor
+	 * @return a negative integer, zero, or a positive integer as the first argument is less than, equal to, or greater than the second.
+	 */
+	protected static int compareNodeName(Scope o1, Scope o2, int factor) {
 		int result = o1.getName().compareTo(o2.getName());
 		if (result == 0) {
-			result = o1.hashCode() - o2.hashCode();
+			// same name: compare the line number
+			if (o1 instanceof CallSiteScope && o2 instanceof CallSiteScope) {
+				LineScope ls1 = ((CallSiteScope) o1).getLineScope();
+				LineScope ls2 = ((CallSiteScope) o2).getLineScope();
+				result = ls1.getLineNumber() - ls2.getLineNumber();
+			} else {
+				result = o1.getFirstLineNumber() - o2.getFirstLineNumber();
+			}
+			
+			// ok. So far o1 looks the same as o2
+			// we don't want returning 0 because it will cause the tree looks weird
+			// let's try to compare with the hash code
+			if (result == 0) {
+				result = o1.hashCode() - o2.hashCode();
+			}
 		}
 		return factor * result;
 	}
-
 }

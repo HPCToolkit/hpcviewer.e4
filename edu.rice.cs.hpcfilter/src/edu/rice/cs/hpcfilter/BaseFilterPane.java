@@ -6,6 +6,15 @@ import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.swt.widgets.Composite;
 
+import ca.odell.glazedlists.FilterList;
+
+
+/*************************************************************
+ * 
+ * Basic filter panel.
+ *
+ * @param <T>
+ *************************************************************/
 public class BaseFilterPane<T> extends AbstractFilterPane<T> 
 	implements IPropertyChangeListener, IFilterChangeListener
 {
@@ -35,15 +44,15 @@ public class BaseFilterPane<T> extends AbstractFilterPane<T>
 	}
 
 	@Override
-	protected FilterDataProvider<T> getDataProvider() {
+	protected FilterDataProvider<T> getDataProvider(FilterList<FilterDataItem<T>> filterList) {
 		if (dataProvider == null) {
-			dataProvider = new FilterDataProvider<T>(getFilterList(), this);
+			dataProvider = new FilterDataProvider<T>(filterList, this);
 		}
 		return dataProvider;
 	}
 
 	@Override
-	protected int createAdditionalButton(Composite parent) {
+	protected int createAdditionalButton(Composite parent, FilterInputData<T> inputData) {
 		return 0;
 	}
 

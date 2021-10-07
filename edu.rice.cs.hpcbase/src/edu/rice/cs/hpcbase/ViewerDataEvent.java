@@ -28,23 +28,23 @@ public class ViewerDataEvent
 	/** Event when a metric has been changed or modified by the user */
 	static final public String TOPIC_HPC_METRIC_UPDATE    = "hpcviewer/metric_update";
 	
-	public IMetricManager experiment;
+	public IMetricManager metricManager;
 	public Object 	  data;
 	
 	
 	/***
 	 * Constructor to create a data event
 	 * 
-	 * @param experiment Experiment database
+	 * @param metricManager IMetricManager object to control the metrics
 	 * @param data the data to be shared among different parts
 	 */
-	public ViewerDataEvent(IMetricManager experiment, Object data) {
-		this.experiment = experiment;
+	public ViewerDataEvent(IMetricManager metricManager, Object data) {
+		this.metricManager = metricManager;
 		this.data		= data;
 	}
 	
 	
 	public String toString() {
-		return "Exp: " + experiment.toString() + ", data: " + data;
+		return metricManager.toString() + ", data: " + data;
 	}
 }

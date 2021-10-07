@@ -42,4 +42,10 @@ public interface IScopeTreeData extends ITreeData<Scope>
 	public void addMetric(int index, BaseMetric metric);
 	public void addMetric(BaseMetric metric);
 	public int getMetricCount();
+
+
+	void updateMetric(int index, BaseMetric metric);
+
+
+	int getMetricIndex(BaseMetric metric);
 }

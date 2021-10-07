@@ -7,8 +7,6 @@ import java.util.Optional;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.InputDialog;
-import org.eclipse.jface.preference.PreferenceStore;
-import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -16,8 +14,6 @@ import org.eclipse.jface.widgets.WidgetFactory;
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -46,33 +42,64 @@ import edu.rice.cs.hpcmetric.internal.MetricFilterDataItem;
 import edu.rice.cs.hpcmetric.internal.MetricFilterDataProvider;
 import edu.rice.cs.hpcmetric.internal.MetricPainterConfiguration;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
-import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 
 
+/************************************************************************
+ * 
+ * Special Inherited class from {@link AbstractFilterPane} for metrics.
+ *
+ ************************************************************************/
 public class MetricFilterPane extends AbstractFilterPane<BaseMetric> 
-	implements IPropertyChangeListener, DisposeListener, IFilterChangeListener, EventHandler
+	implements IFilterChangeListener, EventHandler
 {	
 	private static final String HISTORY_COLUMN_PROPERTY = "column_property";
 	private static final String HISTORY_APPLY_ALL = "apply-all";
 
 	private final IEventBroker eventBroker;
 
+	private MetricPainterConfiguration painterConfiguration;
+	private MetricFilterDataProvider dataProvider;
+	private MetricFilterInput  input;
+	
 	private Button btnEdit;
 	private Button btnApplyToAllViews;
 	
+	
+	/*****
+	 * Constructor to create filter for metric panel which includes button area and filter text.
+	 * 
+	 * @param parent
+	 * 			The composite parent for the table
+	 * @param style
+	 * @param eventBroker
+	 * @param inputData
+	 */
 	public MetricFilterPane(Composite parent, int style, IEventBroker eventBroker, FilterInputData<BaseMetric> inputData) {
 		super(parent, style, inputData);
+		this.input = (MetricFilterInput) inputData;
 		this.eventBroker = eventBroker;
 		
 		if (style == STYLE_COMPOSITE) {
 			// Real application, not within a simple unit test
-			PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
-			pref.addPropertyChangeListener(this);
-			
 			eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC, this);
 		}
 	}
 
+
+	/*****
+	 * Change the input of the table with the new one.
+	 * This method will completely wipe out the existing list items.
+	 * 
+	 * @param inputData
+	 */
+	public void setInput(FilterInputData<BaseMetric> inputData) { 
+		this.input = (MetricFilterInput) inputData;
+		dataProvider = null;
+		super.reset(inputData);
+		getNatTable().refresh();
+	}
+	
+		
 	
 	@Override
 	public void changeEvent(Object data) {
@@ -81,14 +108,14 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 
 	
 	@Override
-	protected int createAdditionalButton(Composite parent) {
-		final MetricFilterInput  inputFilter = (MetricFilterInput) getInputData();
+	protected int createAdditionalButton(Composite parent, FilterInputData<BaseMetric> inputData) {
+		input = (MetricFilterInput) inputData; 
 		
 		btnApplyToAllViews = new Button(parent, SWT.CHECK);
 		btnApplyToAllViews.setText("Apply to all views");
 		btnApplyToAllViews.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-		btnApplyToAllViews.setEnabled(inputFilter.isAffectAll());
-		boolean checked = getHistoryApplyAll() && inputFilter.isAffectAll();
+		btnApplyToAllViews.setEnabled(input.isAffectAll());
+		boolean checked = getHistoryApplyAll() && input.isAffectAll();
 		btnApplyToAllViews.setSelection( checked );
 		
 		btnApplyToAllViews.addSelectionListener(new SelectionAdapter() {
@@ -126,11 +153,9 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 	}
 	
 	private void broadcast(Object data) {
-		final MetricFilterInput  inputFilter = (MetricFilterInput) getInputData();
-
 		List<FilterDataItem<BaseMetric>> copyList = new ArrayList<FilterDataItem<BaseMetric>>(getEventList()); //List.copyOf(getList());
 		MetricDataEvent metricDataEvent = new MetricDataEvent(data, copyList, btnApplyToAllViews.getSelection());
-		ViewerDataEvent viewerDataEvent = new ViewerDataEvent(inputFilter.getMetricManager(), metricDataEvent);
+		ViewerDataEvent viewerDataEvent = new ViewerDataEvent(input.getMetricManager(), metricDataEvent);
 		
 		eventBroker.post(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN, viewerDataEvent);
 	}
@@ -172,19 +197,17 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 		if (!item.enabled)
 			return;
 
-		final MetricFilterInput  inputFilter = (MetricFilterInput) getInputData();
-
 		if (item.getData() instanceof DerivedMetric) {
 			Shell shell = getNatTable().getShell();
 			ExtDerivedMetricDlg dlg = new ExtDerivedMetricDlg(shell, 
-															  inputFilter.getMetricManager(), 
-															  inputFilter.getRoot());
+					input.getMetricManager(), 
+					input.getRoot());
 			dlg.setMetric((DerivedMetric) item.getData());
 			if (dlg.open() == Dialog.OK) {
 				BaseMetric metric = dlg.getMetric();
 				update(metric);
 				
-				ViewerDataEvent dataEvent = new ViewerDataEvent(inputFilter.getMetricManager(), metric);				
+				ViewerDataEvent dataEvent = new ViewerDataEvent(input.getMetricManager(), metric);				
 				eventBroker.post(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE, dataEvent);
 			} 
 		} else {
@@ -198,7 +221,7 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 				metric.setDisplayName(name);
 				update(metric);
 				
-				ViewerDataEvent dataEvent = new ViewerDataEvent(inputFilter.getMetricManager(), metric);				
+				ViewerDataEvent dataEvent = new ViewerDataEvent(input.getMetricManager(), metric);				
 				eventBroker.post(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE, dataEvent);
 			}
 		}
@@ -218,20 +241,17 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		final String property = event.getProperty();
-		if (property.equals(PreferenceConstants.ID_FONT_METRIC)) {
-			getNatTable().redraw();
+		if (property.equals(PreferenceConstants.ID_FONT_METRIC) ||
+			property.equals(PreferenceConstants.ID_FONT_GENERIC)) {
+
+			painterConfiguration.configureRegistry(getNatTable().getConfigRegistry());
 		}
 		super.propertyChange(event);
-	}
-
-
-	@Override
-	public void widgetDisposed(DisposeEvent e) {
-		// Real application, not within a simple unit test
-		if (getStyle() == STYLE_COMPOSITE) {
-			PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
-			pref.removePropertyChangeListener(this);
-		}
+		
+		// need to refresh for the font metric because the parent
+		// only refresh for changes in generic font
+		if (property.equals(PreferenceConstants.ID_FONT_METRIC))
+			getNatTable().refresh(false);
 	}
 
 
@@ -240,17 +260,20 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 		return IConstants.COLUMN_LABELS;
 	}
 
-
+	
 	@Override
-	protected FilterDataProvider<BaseMetric> getDataProvider() {
-		MetricFilterInput input = (MetricFilterInput) getInputData();
-		return new MetricFilterDataProvider(input.getRoot(), getFilterList(), this);
+	protected FilterDataProvider<BaseMetric> getDataProvider(FilterList<FilterDataItem<BaseMetric>> filterList) {
+		if (dataProvider == null) {
+			dataProvider = new MetricFilterDataProvider(input.getRoot(), filterList, this);
+		}
+		return dataProvider;
 	}
 
 
 	@Override
 	protected void addConfiguration(NatTable table) {
-		table.addConfiguration(new MetricPainterConfiguration());		
+		painterConfiguration = new MetricPainterConfiguration();
+		table.addConfiguration(painterConfiguration);		
 		table.addDisposeListener(this);
 	}
 
@@ -272,8 +295,7 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 			return;
 		
 		ViewerDataEvent eventInfo = (ViewerDataEvent) obj;
-		final MetricFilterInput  inputFilter = (MetricFilterInput) getInputData();
-		if (eventInfo.experiment != inputFilter.getMetricManager())
+		if (eventInfo.metricManager != input.getMetricManager())
 			return;
 		
 		if (event.getTopic().equals(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC)) {
