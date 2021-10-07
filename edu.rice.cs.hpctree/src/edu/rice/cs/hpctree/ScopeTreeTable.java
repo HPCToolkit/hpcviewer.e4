@@ -381,6 +381,10 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	}
 
 	
+	/****
+	 * Resize the columns based on the number of visible columns and the 
+	 * size of the table (or area of the parent composite).
+	 */
 	public void pack() {		
 		final int TREE_COLUMN_WIDTH  = 350;
 		
@@ -424,14 +428,14 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 			if (totalAllColumns == visibleColumns) {
 				bodyDataLayer.setColumnWidthPercentageByPosition(0, 40);				
 			} else {
-		    	int currentWidth = bodyDataLayer.getColumnWidthByPosition(0);
-				int width = Math.max(currentWidth, areaWidth - totSize - 5);
+				int width = Math.max(TREE_COLUMN_WIDTH, areaWidth - totSize - 5);
 	    		bodyDataLayer.setColumnWidthByPosition(0, width); 
 			}
 		} else {
 	    	// tree column: the width is hard coded at the moment
 	    	int currentWidth = bodyDataLayer.getColumnWidthByPosition(0);
 			int w = Math.max(currentWidth, Math.max(TREE_COLUMN_WIDTH, areaWidth-totSize) );
+			w = Math.min(w, areaWidth/2);
     		bodyDataLayer.setColumnWidthByPosition(0, w);
 		}
 
