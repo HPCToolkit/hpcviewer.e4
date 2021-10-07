@@ -111,7 +111,7 @@ public abstract class BaseViewPaint extends Job
 			return false;
 		
 		final int max_threads = TracePreferenceManager.getMaxThreads();
-		int num_threads = ThreadManager.getNumThreads(max_threads);
+		int num_threads = Math.min(linesToPaint, ThreadManager.getNumThreads(max_threads));
 		
 		// -------------------------------------------------------------------
 		// initialize the painting (to be implemented by the instance)
@@ -385,7 +385,7 @@ public abstract class BaseViewPaint extends Job
 	 * Retrieve the number of lines to paint 
 	 * @return
 	 */
-	abstract protected int getNumberOfLines();
+	public abstract int getNumberOfLines();
 	
 	/****
 	 * launching threads for remote communication
