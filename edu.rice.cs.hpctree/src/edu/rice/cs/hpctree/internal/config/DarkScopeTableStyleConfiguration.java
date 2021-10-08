@@ -9,7 +9,7 @@ public class DarkScopeTableStyleConfiguration extends DarkNatTableThemeConfigura
     	super.createPainterInstances();
     	
         treeStructurePainter = ScopeTreePainter.getTreeStructureSelectionPainter();
-        treeStructureSelectionPainter = ScopeTreePainter.getTreeStructurePainter();
+        treeStructureSelectionPainter = ScopeTreePainter.getTreeStructureSelectionPainter();
         selectedSortHeaderCellPainter = ScopeTreePainter.getSelectedSortHeaderCellPainter();
     }
 }
