@@ -159,7 +159,7 @@ public class TopDownPart extends AbstractTableView
 
 
 	@Override
-	protected RootScope buildTree() {
+	protected RootScope buildTree(boolean reset) {
 		// the tree is already built by the hpcprof
 		// just return the existing root
 		return getRoot();		

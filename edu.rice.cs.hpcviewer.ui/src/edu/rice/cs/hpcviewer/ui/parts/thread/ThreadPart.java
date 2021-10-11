@@ -101,7 +101,7 @@ public class ThreadPart extends TopDownPart
 	
 	
 	@Override
-	protected RootScope buildTree() {
+	protected RootScope buildTree(boolean reset) {
 		return viewInput.getRootScope();
 	}
 	

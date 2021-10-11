@@ -315,7 +315,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		if (!initialized) {
 			// TODO: this process takes time
 			BusyIndicator.showWhile(getDisplay(), ()-> {
-				root = buildTree();
+				root = buildTree(false);
 				table.setRoot(root);
 				
 				// hide or show columns if needed
@@ -394,7 +394,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 			table.refresh();
 			
 		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH)) {
-			RootScope root = this.buildTree();
+			RootScope root = this.buildTree(true);
 			table.reset(root);
 		}
 	}
@@ -607,7 +607,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 	public abstract RootScopeType getRootType();
 	
 	protected abstract RootScope getRoot();
-	protected abstract RootScope buildTree();
+	protected abstract RootScope buildTree(boolean reset);
     protected abstract void beginToolbar(CoolBar coolbar, ToolBar toolbar);
     protected abstract void endToolbar  (CoolBar coolbar, ToolBar toolbar);
     protected abstract void updateStatus();
