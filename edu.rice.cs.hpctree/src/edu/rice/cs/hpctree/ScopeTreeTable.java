@@ -281,7 +281,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		
 		// expand the root and select the first child if exist        
         if (root.hasChildren()) {
-        	ScopeTreeLayer treeLayer = (ScopeTreeLayer) bodyLayerStack.getTreeLayer();
+        	ScopeTreeLayer treeLayer = bodyLayerStack.getTreeLayer();
         	treeLayer.expandTreeRow(0);
         	setSelection(1);
         	
@@ -484,6 +484,49 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		if (natTable != null)
 			natTable.refresh();
 	}
+
+	
+	/*****
+	 * The same as refresh, but this time it will reset the root of the tree
+	 * and reconstruct completely the tree.
+	 */
+	public void reset(RootScope root) {
+		if (natTable == null)
+			return;
+		
+		Scope currentNode = getSelection();
+		FastList<Scope> selectedPath = new FastList<>();
+		
+		if (currentNode != null) {
+			// preserve the selection
+			IScopeTreeData treeData = (IScopeTreeData) this.bodyLayerStack.getTreeRowModel().getTreeData();
+			selectedPath = (FastList<Scope>) treeData.getPath(currentNode);
+		}
+		// reset the root node
+		setRoot(root);
+		
+		// expand and restore the selection
+		if (selectedPath.size() == 0)
+			return;
+		
+		final ScopeTreeLayer treeLayer = bodyLayerStack.getTreeLayer();
+		FastList<Scope> reversePath = selectedPath.reverseThis();
+		int lastIndex = 0;
+		int lastRow   = 0;
+		
+		for(lastIndex=0; lastIndex<reversePath.size(); lastIndex++) {
+			Scope scope = reversePath.get(lastIndex);
+			int row = bodyDataProvider.indexOfRowBasedOnCCT(scope.getCCTIndex());
+			if (row < 0) {
+				break;
+			}
+			lastRow = row;
+			treeLayer.expandTreeRow(lastRow);
+		}
+		// select the latest common path
+		this.setSelection(lastRow);
+	}
+	
 	
 	/***
 	 * The same as {@code refresh} but more lightweight.

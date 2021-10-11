@@ -218,6 +218,18 @@ public class ScopeTreeData implements IScopeTreeData
 			   (scope.getCCTIndex() == root.getCCTIndex());
 	}
 	
+	
+	@Override
+	public List<Scope> getPath(Scope node) {
+		List<Scope> path = FastList.newList();
+		Scope current = node;
+		while(current != null  &&  !isRootScope(current)) {
+			path.add(current);
+			current = current.getParentScope();
+		}
+		return path;
+	}
+	
 	@Override
 	public int getDepthOfData(Scope object) {
 		if (object == null || isRootScope(object)) return 0;
@@ -248,6 +260,15 @@ public class ScopeTreeData implements IScopeTreeData
 		return listScopes.indexOf(child);
 	}
 
+	
+	@Override
+	public int indexOfBasedOnCCT(int cctIndex) {
+		for(int i=0; i<listScopes.size(); i++) {
+			if (listScopes.get(i).getCCTIndex() == cctIndex)
+				return i;
+		}
+		return -1;
+	}
 	
 	@Override
 	public boolean hasChildren(Scope object) {

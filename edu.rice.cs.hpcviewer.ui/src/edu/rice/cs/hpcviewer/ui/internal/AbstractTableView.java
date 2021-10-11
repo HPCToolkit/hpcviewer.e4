@@ -6,8 +6,6 @@ import java.util.List;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.services.EMenuService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
-import org.eclipse.jface.layout.GridDataFactory;
-import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.CTabFolder;
@@ -256,6 +254,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC, this);
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE,  this);
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN,   this);
+		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH, this);
 	
 		parent.addDisposeListener(this);
 	}
@@ -392,8 +391,11 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 			// metric has changed. 
 			// We don't know if the change will incur structural changes or just visual.
 			// it's better to refresh completely the table just in case. 
-
 			table.refresh();
+			
+		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH)) {
+			RootScope root = this.buildTree();
+			table.reset(root);
 		}
 	}
 	

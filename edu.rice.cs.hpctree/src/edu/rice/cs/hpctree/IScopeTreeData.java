@@ -44,8 +44,37 @@ public interface IScopeTreeData extends ITreeData<Scope>
 	public int getMetricCount();
 
 
+	/****
+	 * Set a metric to the specified index.
+	 * @param index
+	 * @param metric
+	 */
 	void updateMetric(int index, BaseMetric metric);
 
 
+	/*****
+	 * Get the index of a metric. 
+	 * The index is usually the position of the metric from the table.
+	 * 
+	 * @param metric
+	 * @return the index from the list
+	 */
 	int getMetricIndex(BaseMetric metric);
+
+	/****
+	 * Retrieve the path (list of nodes) from the current node to the current "root".
+	 * The current root can be the main root of the zoomed root.
+	 * 
+	 * @param node
+	 * @return
+	 */
+	List<Scope> getPath(Scope node);
+
+
+	/***
+	 * Get the index of node based on CCT index
+	 * @param cctIndex
+	 * @return
+	 */
+	int indexOfBasedOnCCT(int cctIndex);
 }

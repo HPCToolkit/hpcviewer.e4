@@ -92,7 +92,7 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
     	return hideShowLayer;
     }
     
-    public AbstractLayerTransform getTreeLayer() {
+    public ScopeTreeLayer getTreeLayer() {
     	return treeLayer;
     }
 

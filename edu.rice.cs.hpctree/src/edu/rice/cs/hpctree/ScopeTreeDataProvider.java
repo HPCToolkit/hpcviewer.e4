@@ -107,6 +107,10 @@ public class ScopeTreeDataProvider implements IDataProvider, IRowDataProvider<Sc
 	}
 	
 	
+	public int indexOfRowBasedOnCCT(int cctIndex) {
+		return treeData.indexOfBasedOnCCT(cctIndex);
+	}
+	
 	public void addColumn(int index, BaseMetric metric) {
 		treeData.addMetric(index, metric);
 	}

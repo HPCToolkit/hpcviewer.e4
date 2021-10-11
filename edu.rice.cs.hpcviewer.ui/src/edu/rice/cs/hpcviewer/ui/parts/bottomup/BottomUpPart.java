@@ -34,20 +34,16 @@ public class BottomUpPart extends AbstractTableView
 	}
 	
 	
-	private boolean isInitialized = false;
-
 	@Override
 	protected RootScope buildTree() {
-		IMetricManager mm = getMetricManager();
-		Experiment experiment = (Experiment) mm;
-		
+		Experiment experiment = (Experiment) getMetricManager();		
 		RootScope rootCCT  = experiment.getRootScope(RootScopeType.CallingContextTree);
 		RootScope rootCall = experiment.getRootScope(RootScopeType.CallerTree);
 		
-		if (!isInitialized) {
-			((Experiment) experiment).createCallersView(rootCCT, rootCall);
-			isInitialized = true;
-		}
+		if (rootCCT == null || rootCall == null)
+			return null;
+		
+		experiment.createCallersView(rootCCT, rootCall);
 		return rootCall;
 	}
 

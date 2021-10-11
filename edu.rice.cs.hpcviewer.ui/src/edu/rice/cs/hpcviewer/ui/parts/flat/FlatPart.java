@@ -83,8 +83,6 @@ public class FlatPart extends AbstractTableView
 	}
 
 	
-	private boolean isInitialized = false;
-	
 	@Override
 	protected RootScope buildTree() {
 		Experiment experiment = (Experiment) getMetricManager();
@@ -93,12 +91,8 @@ public class FlatPart extends AbstractTableView
 		
 		if (rootFlat == null || rootCCT == null)
 			return null;
-		
-		if (isInitialized)
-			return rootFlat;
-		
-		isInitialized = true;
-		return ((Experiment) experiment).createFlatView(rootCCT, rootFlat);
+
+		return experiment.createFlatView(rootCCT, rootFlat);
 	}
 
 
