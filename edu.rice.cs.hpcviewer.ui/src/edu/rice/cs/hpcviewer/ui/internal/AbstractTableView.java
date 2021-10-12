@@ -395,7 +395,9 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 			
 		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH)) {
 			RootScope root = this.buildTree(true);
+			actionManager.clear();
 			table.reset(root);
+			updateButtonStatus();
 		}
 	}
 	
