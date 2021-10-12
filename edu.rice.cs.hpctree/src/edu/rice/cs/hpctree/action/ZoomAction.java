@@ -117,4 +117,12 @@ public class ZoomAction
 		}
 		return ( node.getChildCount()>0 );
 	}
+	
+	/****
+	 * Clear the zoom root stack.
+	 * This operation is useful when the tree has a new root.  
+	 */
+	public void clear() {
+		stackRootTree.clear();
+	}
 }
