@@ -14,4 +14,9 @@ public interface IViewBuilder
 	public void setData(RootScope root, int sortColumnIndex, int sortDirection);
 	
 	public ScopeTreeViewer getTreeViewer();
+	
+	/****
+	 * Clear the actions and the  buttons
+	 */
+	void clear();
 }

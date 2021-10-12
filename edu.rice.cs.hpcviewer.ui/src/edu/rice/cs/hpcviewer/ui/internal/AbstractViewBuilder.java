@@ -148,6 +148,17 @@ implements IViewBuilder, ISelectionChangedListener, DisposeListener
 		stackActions = new Stack<Object>();
 	}
 	
+	
+	/****
+	 * Clear the actions and the  buttons
+	 */
+	@Override
+	public void clear() {
+		zoomAction.clear();
+		stackActions.clear();
+	}
+	
+	
 	@Override
 	public void createContent(ProfilePart profilePart, Composite parent, EMenuService menuService) {
 		

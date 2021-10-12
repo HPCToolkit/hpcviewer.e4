@@ -26,6 +26,14 @@ public class FlatScopeAction
 	}
 
 
+	/****
+	 * Clear and reset the stack of operations
+	 */
+	public void clear() {
+		stackFlatNodes.clear();
+	}
+	
+	
 	//-----------------------------------------------------------------------
 	// 					FLATTEN: PUBLIC INTERFACES
 	//-----------------------------------------------------------------------

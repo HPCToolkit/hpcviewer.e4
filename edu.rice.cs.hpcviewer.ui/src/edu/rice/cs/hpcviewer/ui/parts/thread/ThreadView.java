@@ -162,6 +162,7 @@ public class ThreadView extends AbstractBaseViewItem implements IViewItem, Event
 				BusyIndicator.showWhile(getDisplay(), ()->{
 					RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
 					contentViewer.setData(root);
+					contentViewer.clear();
 				});
 			}
 			return;

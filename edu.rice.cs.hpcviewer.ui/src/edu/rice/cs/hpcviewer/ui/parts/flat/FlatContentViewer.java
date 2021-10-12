@@ -39,6 +39,13 @@ public class FlatContentViewer extends AbstractViewBuilder
 		
 	}
 
+	
+	@Override
+	public void clear() {
+		action.clear();
+		super.clear();
+	}
+	
 	@Override
 	protected void beginToolbar(CoolBar coolbar, ToolBar toolbar) {
 

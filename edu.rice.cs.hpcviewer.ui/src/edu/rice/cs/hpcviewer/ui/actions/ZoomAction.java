@@ -118,4 +118,13 @@ public class ZoomAction {
 	public void setViewer ( ScopeTreeViewer treeViewer ) {
 		viewer = treeViewer;
 	}
+	
+	
+	/****
+	 * Clear the zoom root stack.
+	 * This operation is useful when the tree has a new root.  
+	 */
+	public void clear() {
+		stackRootTree.clear();
+	}
 }

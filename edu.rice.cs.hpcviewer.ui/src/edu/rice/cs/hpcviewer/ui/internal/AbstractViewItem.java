@@ -208,6 +208,9 @@ public abstract class AbstractViewItem extends AbstractBaseViewItem implements E
 		Scope rootTable = root.createRoot();
 		treeViewer.setInput(rootTable);
 		
+		// clear the stack of operations for zooms
+		contentViewer.clear();
+		
 		long t1 = System.currentTimeMillis();
 		LoggerFactory.getLogger(getClass()).debug("Time to reset: " + (t1-t0) + " ms");
 
