@@ -55,6 +55,8 @@ import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 import edu.rice.cs.hpcdata.util.string.StringUtil;
 import edu.rice.cs.hpctree.action.IActionListener;
 import edu.rice.cs.hpctree.internal.ColumnHeaderDataProvider;
+import edu.rice.cs.hpctree.internal.ScopeTreeBodyLayerStack;
+import edu.rice.cs.hpctree.internal.ScopeTreeDataProvider;
 import edu.rice.cs.hpctree.internal.ScopeTreeLabelAccumulator;
 import edu.rice.cs.hpctree.internal.config.DarkScopeTableStyleConfiguration;
 import edu.rice.cs.hpctree.internal.config.ScopeTableStyleConfiguration;
@@ -438,7 +440,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 			w = Math.min(w, areaWidth/2);
     		bodyDataLayer.setColumnWidthByPosition(0, w);
 		}
-
+		
 		// Now, compute the ideal size of the row's height
 		// 1. size for generic font
 		Point genericSize = gc.stringExtent(TEXT_METRIC_COLUMN);

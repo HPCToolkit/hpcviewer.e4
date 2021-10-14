@@ -5,7 +5,6 @@ import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
-import edu.rice.cs.hpctree.ScopeTreeDataProvider;
 
 public class ColumnHeaderDataProvider implements IDataProvider, ListEventListener<BaseMetric> 
 {

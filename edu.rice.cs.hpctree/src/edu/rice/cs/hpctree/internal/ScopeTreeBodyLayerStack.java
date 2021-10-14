@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctree;
+package edu.rice.cs.hpctree.internal;
 
 import java.io.Serializable;
 
@@ -15,6 +15,9 @@ import org.eclipse.nebula.widgets.nattable.selection.config.DefaultRowSelectionL
 import org.eclipse.nebula.widgets.nattable.viewport.ViewportLayer;
 
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpctree.IScopeTreeData;
+import edu.rice.cs.hpctree.ScopeTreeLayer;
+import edu.rice.cs.hpctree.ScopeTreeRowModel;
 
 
 
