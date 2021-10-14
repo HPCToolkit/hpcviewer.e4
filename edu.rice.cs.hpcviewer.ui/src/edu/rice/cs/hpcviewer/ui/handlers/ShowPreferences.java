@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcsetting.preferences.AppearencePage;
-import edu.rice.cs.hpcsetting.preferences.MainProfilePage;
+import edu.rice.cs.hpcsetting.preferences.DebugConfigPage;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceDialog;
 import edu.rice.cs.hpctraceviewer.config.TracePreferencePage;
 
@@ -20,15 +20,9 @@ public class ShowPreferences
 
 		ViewerPreferenceDialog vprefDialog = new ViewerPreferenceDialog(shell);
 		
-		final String profileId    = "General";		
-		final String appearenceId = "Appearance";
-
-		vprefDialog.addPage(profileId, new MainProfilePage(profileId));
-		vprefDialog.addPage(appearenceId, new AppearencePage(appearenceId));
-		
-		final String traceId = "Traces";
-		
-		vprefDialog.addPage(traceId, new TracePreferencePage(traceId));
+		vprefDialog.addPage(AppearencePage.TITLE, new AppearencePage());
+		vprefDialog.addPage(TracePreferencePage.TITLE, new TracePreferencePage());
+		vprefDialog.addPage(DebugConfigPage.TITLE, new DebugConfigPage());
 
 		try {
 			vprefDialog.open();

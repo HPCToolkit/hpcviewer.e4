@@ -25,6 +25,8 @@ import edu.rice.cs.hpcsetting.preferences.AbstractPage;
  ********************************************************/
 public class TracePreferencePage extends AbstractPage 
 {
+	public final static String TITLE = "Traces";
+	
 	private final static int TOOLTIP_DELAY_MAX_MS = 10000;
 	private final static int TOOLTIP_DELAY_INCREMENT_MS = 1000;
 	
@@ -34,8 +36,8 @@ public class TracePreferencePage extends AbstractPage
 	private Spinner tooltipDelay;
 	private Spinner spMaxThreads;
 
-	public TracePreferencePage(String title) {
-		super(title);
+	public TracePreferencePage() {
+		super(TITLE);
 	}
 
 	
