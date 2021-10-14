@@ -119,5 +119,6 @@ public class DebugConfigPage extends AbstractPage
 	
 	@Override
 	protected void performDefaults() {
+		setDebugMode(false);
 	}
 }
