@@ -474,10 +474,13 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		BaseMetric metric = item.data;
 		
 		for(BaseMetric m : metrics) {
-			if (m == metric) {
+			if (metric.equalIndex(m)) {
 				return index;
 			}
 			MetricValue mv = m.getValue(root);
+
+			// empty metric is not visible (usually).
+			// the column index should be based on non-empty metrics
 			if (mv != MetricValue.NONE)
 				index++;
 		}

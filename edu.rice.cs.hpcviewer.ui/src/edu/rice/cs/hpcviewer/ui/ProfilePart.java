@@ -237,6 +237,18 @@ public class ProfilePart implements IProfilePart, EventHandler
 	}
 	
 	
+	/****
+	 * Retrieve the current "selected" view.
+	 * The definition of "selected" view depends on the {@code CTabFolder}.
+	 * It can be the active one or the visible one.
+	 * 
+	 * @return {@code AbstractBaseViewItem} the current active item, or null
+	 */
+	public AbstractView getActiveView() {
+		return (AbstractView) tabFolderBottom.getSelection();
+	}
+
+	
 	/*****
 	 * Specifically adding a new thread view
 	 * 
@@ -265,18 +277,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 		// make sure the new view is visible and get the focus
 		tabFolderBottom.setSelection(threadView);
 	}
-	
-	
-	/****
-	 * Retrieve the current "selected" view.
-	 * The definition of "selected" view depends on the {@code CTabFolder}.
-	 * It can be the active one or the visible one.
-	 * 
-	 * @return {@code AbstractBaseViewItem} the current active item, or null
-	 */
-	public AbstractView getActiveView() {
-		return (AbstractView) tabFolderBottom.getSelection();
-	}
+
 	
 	/****
 	 * Add a view tab item (at the lower folder) to the profile part

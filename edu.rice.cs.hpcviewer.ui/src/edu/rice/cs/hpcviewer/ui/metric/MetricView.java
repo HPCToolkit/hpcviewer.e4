@@ -28,12 +28,21 @@ import edu.rice.cs.hpcviewer.ui.internal.AbstractUpperPart;
 public class MetricView extends AbstractUpperPart
 {
 	public  static final String TITLE_DEFAULT = "Metric properties";
+	
 	private final IEventBroker eventBroker ;
-	private final CTabFolder parent;
+	private final CTabFolder   parent;
 	
-	private MetricFilterPane pane;
-	
+	private MetricFilterPane  pane;	
 	private MetricFilterInput inputFilter;
+	
+	/*****
+	 * Constructor of the class without creating any content. <br/> 
+	 * Caller needs to call {@link setInput} to create the content.
+	 * 
+	 * @param parent
+	 * @param style
+	 * @param eventBroker
+	 */
 	public MetricView(CTabFolder parent, int style, IEventBroker eventBroker ) {
 		super(parent, style);
 		this.parent = parent;
@@ -54,11 +63,11 @@ public class MetricView extends AbstractUpperPart
 	public void setInput(Object input) {
 		if (input == null || !(input instanceof MetricFilterInput))
 			return;
+		
 		inputFilter = (MetricFilterInput) input;
 		
 		// if the panel is already created, we just need to reset the panel
-		// with a new input (list). No need to recreate it again.
-		
+		// with a new input (list). No need to recreate it again.		
 		if (pane != null) {
 			pane.setInput(inputFilter);
 			return;

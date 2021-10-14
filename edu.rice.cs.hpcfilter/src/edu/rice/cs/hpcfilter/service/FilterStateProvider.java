@@ -33,9 +33,6 @@ public class FilterStateProvider
 	
 	@Inject IEventBroker eventBroker;
 	
-	public FilterStateProvider() {
-	}
-
 	
 	public String getTopic() {
 		return FILTER_REFRESH_PROVIDER;
