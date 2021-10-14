@@ -103,6 +103,10 @@ public class DebugConfigPage extends AbstractPage
 		debugMode.setSelection(enabled);
 		cctId.setEnabled(enabled);
 		flatId.setEnabled(enabled);
+		if (!enabled) {
+			cctId.setSelection(false);
+			flatId.setSelection(false);
+		}
 		LogProperty.setDebug(enabled);
 	}
 	
