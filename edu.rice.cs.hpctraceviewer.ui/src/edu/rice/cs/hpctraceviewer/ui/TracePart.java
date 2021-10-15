@@ -51,6 +51,8 @@ import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
 import edu.rice.cs.hpcdata.util.OSValidator;
+import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
+import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 
 import javax.annotation.PreDestroy;
 
@@ -277,6 +279,7 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 		
 		partService.addPartListener(this);
 		TracePreferenceManager.INSTANCE.getPreferenceStore().addPropertyChangeListener(this);
+		ViewerPreferenceManager.INSTANCE.getPreferenceStore().addPropertyChangeListener(this);
 		
 		eventBroker.subscribe(BaseConstants.TOPIC_HPC_REMOVE_DATABASE, this);
 	}
@@ -333,7 +336,13 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 		if (depthEditor != null)
 			depthEditor.dispose();
 		
+		// remove listener to trace config
 		PreferenceStore pref = TracePreferenceManager.INSTANCE.getPreferenceStore();
+		if (pref != null)
+			pref.removePropertyChangeListener(this);
+		
+		// remove listener to debug config
+		pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
 		if (pref != null)
 			pref.removePropertyChangeListener(this);
 	}
@@ -439,8 +448,7 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 		if (context != null)
 			return context;
 
-		context = new BaseTraceContext(label);
-		
+		context = new BaseTraceContext(label);		
 		mapLabelToContext.put(label, context);
 		
 		return context;
@@ -467,6 +475,9 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 		case TracePreferenceConstants.PREF_RENDER_OPTION:
 			// refresh the content
 			eventBroker.post(IConstants.TOPIC_COLOR_MAPPING, data);
+			break;
+		case PreferenceConstants.ID_DEBUG_MODE:
+			tbtmTraceView.redraw();
 			break;
 		}
 	}
