@@ -102,11 +102,12 @@ gon $BASE_CONFIG
 
 mkdir -p tmp/hpcviewer.app
 cd tmp/hpcviewer.app
-unzip ../../"${FILE_BASE}.zip"
+unzip -q ../../"${FILE_BASE}.zip"
 cd ..
-zip -r "${FILE_BASE}.zip" hpcviewer.app
+zip -q -r "${FILE_BASE}.zip" hpcviewer.app
 cd ..
-mv "${FILE_BASE}.zip" ..
+cp "tmp/${FILE_BASE}.zip" ..
+cp "${FILE_BASE}.dmg" ..
 
 ##############################
 #
@@ -114,5 +115,5 @@ mv "${FILE_BASE}.zip" ..
 # 
 ##############################
 
-cd ..
+cd ../..
 ls -l "$DIR_PREP/${FILE_BASE}.*"
