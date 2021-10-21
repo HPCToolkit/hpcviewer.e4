@@ -53,6 +53,7 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 import edu.rice.cs.hpcdata.util.string.StringUtil;
+import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpctree.action.IActionListener;
 import edu.rice.cs.hpctree.internal.ColumnHeaderDataProvider;
 import edu.rice.cs.hpctree.internal.ScopeTreeBodyLayerStack;
@@ -402,7 +403,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
     	int totalAllColumns = bodyDataProvider.getColumnCount();
 
     	GC gc = new GC(natTable.getDisplay());
-    	Font genericFont = TableFontConfiguration.getGenericFont();
+    	Font genericFont = FontManager.getFontGeneric();
     	gc.setFont(genericFont);
     	
     	int totSize = 0;
@@ -446,7 +447,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		Point genericSize = gc.stringExtent(TEXT_METRIC_COLUMN);
 		
 		// 2. size for metric font 
-		Font metricFont = TableFontConfiguration.getMetricFont();
+		Font metricFont = FontManager.getMetricFont();
 		gc.setFont(metricFont);
 		Point metricSize = gc.stringExtent(TEXT_METRIC_COLUMN);
 		
@@ -464,7 +465,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	private Point getMetricColumnSize() {
 		final GC gc = new GC(natTable.getDisplay());		
 		
-		gc.setFont(TableFontConfiguration.getMetricFont());
+		gc.setFont(FontManager.getMetricFont());
 		String text = TEXT_METRIC_COLUMN + STRING_PADDING;
 		Point extent = gc.stringExtent(text);
 		Point size   = new Point((int) (extent.x), extent.y + 2);
@@ -472,7 +473,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		// check the height if we use generic font (tree column)
 		// if this font is higher, we should use this height as the standard.
 		
-		gc.setFont(TableFontConfiguration.getGenericFont());
+		gc.setFont(FontManager.getFontGeneric());
 		extent = gc.stringExtent(text);
 		size.y = Math.max(size.y, extent.y);
 		

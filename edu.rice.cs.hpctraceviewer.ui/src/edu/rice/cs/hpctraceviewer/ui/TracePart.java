@@ -44,6 +44,7 @@ import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
 import edu.rice.cs.hpctraceviewer.ui.main.HPCTraceView;
 import edu.rice.cs.hpctraceviewer.ui.minimap.SpaceTimeMiniCanvas;
 import edu.rice.cs.hpctraceviewer.ui.statistic.HPCStatView;
+import edu.rice.cs.hpctraceviewer.ui.statistic.HPCStatisticView;
 import edu.rice.cs.hpctraceviewer.ui.summary.HPCSummaryView;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 import edu.rice.cs.hpctraceviewer.ui.util.Utility;
@@ -103,7 +104,7 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 	
 	private DepthEditor     depthEditor;
 
-	private HPCStatView tbtmStatView;
+	private HPCStatisticView tbtmStatView;
 	private HPCBlameView tbtmBlameView;
 	
 	private ToolItem tiZoomIn, tiZoomOut;
@@ -216,7 +217,7 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 		tbtmCallStack = new HPCCallStackView(tabFolderRight, SWT.NONE);
 		createTabItem(tbtmCallStack, "Call stack", tabFolderRight, eventBroker);
 
-		tbtmStatView = new HPCStatView(tabFolderRight, SWT.NONE);
+		tbtmStatView = new HPCStatisticView(tabFolderRight, 0); //HPCStatView(tabFolderRight, SWT.NONE);
 		createTabItem(tbtmStatView, "Statistics", tabFolderRight, eventBroker);
 		
 		tbtmBlameView = new HPCBlameView(tabFolderRight, SWT.NONE);

@@ -11,7 +11,7 @@ For static linked program, the variable environment ```HPCRUN_TRACE``` has to be
 
 ## General Requirements
 
-* Java 11. 
+* Java 11 or newer
   Can be downloaded via Spack 
   or from Oracle https://www.oracle.com/java/technologies/javase-downloads.html 
   or AdoptJDK https://adoptopenjdk.net
