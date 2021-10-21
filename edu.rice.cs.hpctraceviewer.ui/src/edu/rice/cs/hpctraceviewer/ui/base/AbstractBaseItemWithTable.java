@@ -557,19 +557,6 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 												   styleProcedure, 
 					   							   DisplayMode.SELECT, 
 					   							   TableLabelAccumulator.LABEL_PROCEDURE);
-			
-			// header style
-			Style styleHeader = new Style();
-			styleHeader.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.CENTER);
-			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
-												   styleHeader, 
-												   DisplayMode.NORMAL, 
-												   GridRegion.COLUMN_HEADER);
-			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
-												   styleHeader, 
-												   DisplayMode.SELECT, 
-												   GridRegion.COLUMN_HEADER);
-
 		}
 
 		@Override
