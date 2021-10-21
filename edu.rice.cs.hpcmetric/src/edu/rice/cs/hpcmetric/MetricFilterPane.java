@@ -16,6 +16,8 @@ import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -41,6 +43,7 @@ import edu.rice.cs.hpcmetric.internal.IConstants;
 import edu.rice.cs.hpcmetric.internal.MetricFilterDataItem;
 import edu.rice.cs.hpcmetric.internal.MetricFilterDataProvider;
 import edu.rice.cs.hpcmetric.internal.MetricPainterConfiguration;
+import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 
 
@@ -151,6 +154,26 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 		// number of additional buttons: 2
 		return 2;
 	}
+	
+	
+	@Override
+	public void pack() {
+		final String TEXT = "|/'_{]";
+
+		GC gc = new GC(getNatTable());
+		gc.setFont(FontManager.getMetricFont());
+		Point sizeMetricFont = gc.textExtent(TEXT);
+		
+		gc.setFont(FontManager.getFontGeneric());
+		Point sizeGenericFont = gc.textExtent(TEXT);
+		
+		gc.dispose();
+		
+		int height = 4 + Math.max(sizeMetricFont.y, sizeGenericFont.y);
+		DataLayer dataLayer = getDataLayer();
+		dataLayer.setDefaultRowHeight(height);
+	}
+	
 	
 	private void broadcast(Object data) {
 		List<FilterDataItem<BaseMetric>> copyList = new ArrayList<FilterDataItem<BaseMetric>>(getEventList()); //List.copyOf(getList());
