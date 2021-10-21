@@ -45,6 +45,7 @@ import org.eclipse.nebula.widgets.nattable.style.Style;
 import org.eclipse.nebula.widgets.nattable.style.theme.DarkNatTableThemeConfiguration;
 import org.eclipse.nebula.widgets.nattable.style.theme.ModernNatTableThemeConfiguration;
 import org.eclipse.nebula.widgets.nattable.style.theme.ThemeConfiguration;
+import org.eclipse.nebula.widgets.nattable.tooltip.NatTableContentTooltip;
 import org.eclipse.nebula.widgets.nattable.ui.binding.UiBindingRegistry;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
@@ -62,6 +63,7 @@ import org.osgi.service.event.EventHandler;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
+import edu.rice.cs.hpcdata.util.string.StringUtil;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
@@ -69,6 +71,18 @@ import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
 
 
+/**************************************************************************
+ * 
+ * Base class to display a statistic table in a view.
+ * <p>This class will show a table with 3 columns:
+ * <ul>
+ * <li>A color column. Depending of the name of the procedure
+ * <li>The procedure name
+ * <li>A statistic number
+ * </ul>
+ * </p>
+ *
+ **************************************************************************/
 public abstract class AbstractBaseItemWithTable extends AbstractBaseItem 
 implements EventHandler, DisposeListener, IPropertyChangeListener 
 {
@@ -139,6 +153,8 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
         // configuration
         natTable = new NatTable(tableComposite, NatTable.DEFAULT_STYLE_OPTIONS, compositeLayer, false);
         GridDataFactory.fillDefaults().grab(true, true).applyTo(natTable);
+                
+        new BaseTooltip(natTable);
         
         // as the auto configuration of the NatTable is turned off, we have to
         // add the DefaultNatTableStyleConfiguration and the ConfigRegistry
@@ -325,7 +341,19 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 		}
 	}
 
-	
+
+	/****
+	 * Default method to get the row data provider.
+	 * The child class can override this method to supply a customized
+	 * row data provider.
+	 * 
+	 * @param eventList
+	 * @return
+	 */
+	protected IRowDataProvider<StatisticItem> getRowDataProvider(EventList<StatisticItem> eventList) {
+		return new RowDataProvider(eventList);
+	}
+
 	/******************************************************************
 	 * 
 	 * Sorting model
@@ -491,6 +519,7 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 
 		@Override
 		public void configureRegistry(IConfigRegistry configRegistry) {
+			// color column
 			ColorCellPainter painter = new ColorCellPainter(dataProvider);					
 			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_PAINTER, 
 												   painter, 
@@ -501,6 +530,7 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 												   DisplayMode.SELECT, 
 												   TableLabelAccumulator.LABEL_COLOR);
 			
+			// metric column
 			Style styleMetric = new Style();
 			Font  fontMetric  = FontManager.getMetricFont();
 			styleMetric.setAttributeValue(CellStyleAttributes.FONT, fontMetric);
@@ -514,6 +544,7 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 					   							   DisplayMode.SELECT, 
 					   							   TableLabelAccumulator.LABEL_NUMBER);
 			
+			// procedure column
 			Style styleProcedure = new Style();
 			Font  fontProcedure  = FontManager.getFontGeneric();
 			styleProcedure.setAttributeValue(CellStyleAttributes.FONT, fontProcedure);
@@ -526,6 +557,19 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 												   styleProcedure, 
 					   							   DisplayMode.SELECT, 
 					   							   TableLabelAccumulator.LABEL_PROCEDURE);
+			
+			// header style
+			Style styleHeader = new Style();
+			styleHeader.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.CENTER);
+			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
+												   styleHeader, 
+												   DisplayMode.NORMAL, 
+												   GridRegion.COLUMN_HEADER);
+			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
+												   styleHeader, 
+												   DisplayMode.SELECT, 
+												   GridRegion.COLUMN_HEADER);
+
 		}
 
 		@Override
@@ -558,10 +602,93 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 	    		gc.fillRectangle(rectangle);
 	    		return;
 	        }
-
         	super.paintCell(cell, gc, rectangle, configRegistry);
 		}
 	}
+	
+	
+	/******************************************************************
+	 * 
+	 * Tooltip for the table. It's the same as the default NatTable tooltip
+	 * but wrapped.
+	 *
+	 ******************************************************************/
+	private static class BaseTooltip extends NatTableContentTooltip
+	{
+		private final static int MAX_CHARS_WRAP = 80;
+		
+		public BaseTooltip(NatTable natTable) {
+			super(natTable, GridRegion.BODY, GridRegion.COLUMN_HEADER);
+		}
+		
+		@Override
+	    protected String getText(org.eclipse.swt.widgets.Event event) {
+			
+			String text = super.getText(event);
+			return StringUtil.wrapScopeName(text, MAX_CHARS_WRAP);
+		}
+	}
+	
+	
+
+	/*****************************************************************************
+	 * 
+	 * Default class for {@code IRowDataProvider} implementation
+	 *
+	 *****************************************************************************/
+	protected static class RowDataProvider implements IRowDataProvider<StatisticItem>
+	{
+		private static final String FORMAT_PERCENT = "%.1f%%";
+		private List<StatisticItem> list;
+		
+		public RowDataProvider(List<StatisticItem> list) {
+			this.list = list;
+		}
+		
+		public void setList(List<StatisticItem> list) {
+			this.list = list;
+		}
+
+		@Override
+		public Object getDataValue(int columnIndex, int rowIndex) {
+			StatisticItem item = list.get(rowIndex);
+			switch (columnIndex) {
+			case 0:
+				return item.procedure.color;
+			case 1:
+				return item.procedure.getProcedure();
+			case 2:
+				return String.format(FORMAT_PERCENT, item.percent);
+			}
+			return null;
+		}
+
+		
+		@Override
+		public void setDataValue(int columnIndex, int rowIndex, Object newValue) {}
+
+		@Override
+		public int getColumnCount() {
+			return 3;
+		}
+
+		@Override
+		public int getRowCount() {
+			return list.size();
+		}
+
+		@Override
+		public StatisticItem getRowObject(int rowIndex) {
+			return list.get(rowIndex);
+		}
+
+		@Override
+		public int indexOfRowObject(StatisticItem rowObject) {
+			return list.indexOf(rowObject);
+		}
+		
+	}
+
 	
 	/***
 	 * Return the name of the event topic to be handled.
@@ -577,6 +704,4 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 	 * @return
 	 */
 	abstract protected List<StatisticItem> getListItems(Object input);
-
-	public abstract IRowDataProvider<StatisticItem> getRowDataProvider(EventList<StatisticItem> eventList);
 }

@@ -640,7 +640,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	 ************************************************************/
 	private static class ScopeToolTip extends NatTableContentTooltip
 	{
-		private final static int MAX_TOOLTIP_CHAR = 150;
+		private final static int MAX_TOOLTIP_CHAR = 80;
 		private final ScopeTreeDataProvider bodyDataProvider;
 
 		public ScopeToolTip(NatTable natTable, ScopeTreeDataProvider bodyDataProvider) {

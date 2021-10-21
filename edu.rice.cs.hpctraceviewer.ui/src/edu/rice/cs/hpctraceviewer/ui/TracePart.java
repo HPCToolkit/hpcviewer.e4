@@ -43,7 +43,6 @@ import edu.rice.cs.hpctraceviewer.ui.depthEditor.DepthEditor;
 import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
 import edu.rice.cs.hpctraceviewer.ui.main.HPCTraceView;
 import edu.rice.cs.hpctraceviewer.ui.minimap.SpaceTimeMiniCanvas;
-import edu.rice.cs.hpctraceviewer.ui.statistic.HPCStatView;
 import edu.rice.cs.hpctraceviewer.ui.statistic.HPCStatisticView;
 import edu.rice.cs.hpctraceviewer.ui.summary.HPCSummaryView;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
