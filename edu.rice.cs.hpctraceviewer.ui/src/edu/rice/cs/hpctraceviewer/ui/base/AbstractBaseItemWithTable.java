@@ -118,6 +118,14 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 	@Override
 	public void setInput(Object input) {
 		this.input = (SpaceTimeDataController) input;
+		Display.getDefault().asyncExec(()-> createTable());
+	}
+
+	
+	private void createTable() {
+		// only create the table once
+		if (rowDataProvider != null)
+			return;
 		
 		final List<StatisticItem> list = FastList.newList();
 		eventList = GlazedLists.eventList(list);
@@ -183,7 +191,7 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 		ViewerPreferenceManager.INSTANCE.getPreferenceStore().addPropertyChangeListener(this);
 		addDisposeListener(this);
 	}
-
+	
 	
 	/*****
 	 * Ensure the table columns are well compact 
@@ -229,7 +237,7 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 			TraceEventData eventData = (TraceEventData) obj;			
 			if (eventData.data != input)
 				return;
-
+			
 			List<StatisticItem> list = getListItems(eventData.value);
 			TableSortModel sortModel = (TableSortModel) sortHeaderLayer.getSortModel();
 			sortModel.resetList(list);
