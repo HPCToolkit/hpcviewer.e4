@@ -6,9 +6,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.eclipse.nebula.widgets.nattable.data.IRowDataProvider;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.graphics.RGB;
 
+import ca.odell.glazedlists.EventList;
 import edu.rice.cs.hpctraceviewer.data.color.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.color.ProcedureColor;
 import edu.rice.cs.hpctraceviewer.ui.base.AbstractBaseItemWithTable;
@@ -23,6 +25,8 @@ import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
  *************************************************************************/
 public class HPCBlameView extends AbstractBaseItemWithTable 
 {
+	private RowDataProvider dataProvider;
+
 	public HPCBlameView(CTabFolder parent, int style) {
 		super(parent, style);
 	}
@@ -55,4 +59,17 @@ public class HPCBlameView extends AbstractBaseItemWithTable
 		}
 		return listItems;
 	}
+	
+	
+	
+	@Override
+	public IRowDataProvider<StatisticItem> getRowDataProvider(EventList<StatisticItem> eventList) {
+		if (dataProvider == null) {
+			dataProvider = new RowDataProvider(eventList);
+		} else {
+			dataProvider.setList(eventList);
+		}
+		return dataProvider;
+	}
+
 }

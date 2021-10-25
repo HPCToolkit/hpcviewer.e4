@@ -424,6 +424,7 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 				tbtmSummaryView.setAnalysisTool(IPixelAnalysis.EMPTY);
 			} else {
 				tbtmSummaryView.setAnalysisTool(new CpuBlameAnalysis(eventBroker));
+				tbtmBlameView.setInput(stdc);
 			}
 			updateToolItem();
 

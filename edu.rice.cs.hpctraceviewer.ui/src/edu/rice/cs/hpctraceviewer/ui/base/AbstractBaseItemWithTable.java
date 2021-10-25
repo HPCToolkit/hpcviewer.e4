@@ -220,7 +220,9 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 	
 	@Override
 	public void widgetDisposed(DisposeEvent e) {
-		ViewerPreferenceManager.INSTANCE.getPreferenceStore().removePropertyChangeListener(this);;
+		removeDisposeListener(this);
+		ViewerPreferenceManager.INSTANCE.getPreferenceStore().removePropertyChangeListener(this);
+		broker.unsubscribe(this);
 	}
 	
 
