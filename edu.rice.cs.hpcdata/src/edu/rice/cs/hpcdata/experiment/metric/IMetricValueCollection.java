@@ -2,6 +2,8 @@ package edu.rice.cs.hpcdata.experiment.metric;
 
 import java.util.AbstractMap;
 
+import org.eclipse.collections.api.map.primitive.IntObjectMap;
+
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 /***********************************************************
@@ -68,5 +70,5 @@ public interface IMetricValueCollection
 	 */
 	public void dispose();
 	
-	AbstractMap<Integer, MetricValue> getValues();
+	IntObjectMap<MetricValue> getValues();
 }

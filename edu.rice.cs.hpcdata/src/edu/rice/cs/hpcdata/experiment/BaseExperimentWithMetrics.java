@@ -7,6 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.collections.api.map.primitive.MutableIntObjectMap;
+import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
+
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
@@ -37,7 +40,8 @@ implements IMetricManager
 	/**
 	 * map ID to the metric descriptor
 	 */
-	private Map<Integer, BaseMetric> mapIndexToMetric;	
+	//private Map<Integer, BaseMetric> mapIndexToMetric;	
+	private MutableIntObjectMap<BaseMetric> mapIndexToMetric;
 	private Map<String, BaseMetric>  mapIdToMetric;
 	
 	//////////////////////////////////////////////////////////////////////////
@@ -56,7 +60,7 @@ implements IMetricManager
 	 */
 	public void setMetrics(List<BaseMetric> metricList) {
 		metrics = metricList;
-		mapIndexToMetric = new HashMap<Integer, BaseMetric>(metricList.size());
+		mapIndexToMetric = new IntObjectHashMap<>(metricList.size());// HashMap<Integer, BaseMetric>(metricList.size());
 		mapIdToMetric    = new HashMap<>(metricList.size());
 		metricsWithOrder = new HashMap<>(metricList.size()/2);
 		
