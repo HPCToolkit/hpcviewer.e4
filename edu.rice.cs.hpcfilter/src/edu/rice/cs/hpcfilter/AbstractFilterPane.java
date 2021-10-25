@@ -44,6 +44,8 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -61,6 +63,7 @@ import edu.rice.cs.hpcfilter.internal.CheckBoxConfiguration;
 import edu.rice.cs.hpcfilter.internal.FilterConfigLabelAccumulator;
 import edu.rice.cs.hpcfilter.internal.FilterPainterConfiguration;
 import edu.rice.cs.hpcfilter.internal.IConstants;
+import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 
@@ -259,6 +262,15 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 	
 	
 	/****
+	 * Retrieve the current data layer of the table
+	 * @return
+	 */
+	protected DataLayer getDataLayer() {
+		return dataLayer;
+	}
+	
+	
+	/****
 	 * Create an event list for this table. 
 	 * 
 	 * @param list
@@ -404,7 +416,8 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 			modernTheme = new DarkNatTableThemeConfiguration();
 		
 		natTable.setTheme(modernTheme);
-
+		pack();
+		
 		// expand as much as possible both horizontally and vertically
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(natTable);
 		GridLayoutFactory.fillDefaults().numColumns(1).generateLayout(parentContainer);
@@ -415,6 +428,20 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 			pref.addPropertyChangeListener(this);
 			natTable.addDisposeListener(this);
 		}
+	}
+	
+	
+	/****
+	 * Attempt to resize the rows and columns if possible
+	 */
+	public void pack() {
+		// get the font size
+		GC gc = new GC(natTable);
+		gc.setFont(FontManager.getFontGeneric());
+		Point size = gc.stringExtent("|{}/',!^_");
+		this.dataLayer.setDefaultRowHeight(size.y+4);
+		
+		gc.dispose();
 	}
 	
 	
@@ -471,6 +498,7 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 		final String property = event.getProperty();
 		if (property.equals(PreferenceConstants.ID_FONT_GENERIC)) {
 			painterConfiguration.configureRegistry(natTable.getConfigRegistry());
+			pack();
 			natTable.refresh(false);
 		}
 	}

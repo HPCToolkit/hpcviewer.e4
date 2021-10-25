@@ -199,10 +199,15 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 	}
 	
 	/****
-	 * check if two metric has the same display name. (A display name is unique).
+	 * check if two metric has the same index (index has to be unique
+	 * regardless the name.<br/> 
+	 * It's recommended to compare metrics with the index instead of the name.
+	 * <br/>
+	 * Warning: The same metric index can have different name since users
+	 * can rename it.
 	 * 
 	 * @param other other metric
-	 * @return
+	 * @return true if metric has the same index. False otherwise.
 	 */
 	public boolean equalIndex(BaseMetric other) 
 	{

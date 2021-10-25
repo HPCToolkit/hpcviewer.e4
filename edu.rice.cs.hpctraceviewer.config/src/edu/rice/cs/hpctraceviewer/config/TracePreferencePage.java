@@ -25,6 +25,8 @@ import edu.rice.cs.hpcsetting.preferences.AbstractPage;
  ********************************************************/
 public class TracePreferencePage extends AbstractPage 
 {
+	public final static String TITLE = "Traces";
+	
 	private final static int TOOLTIP_DELAY_MAX_MS = 10000;
 	private final static int TOOLTIP_DELAY_INCREMENT_MS = 1000;
 	
@@ -34,8 +36,8 @@ public class TracePreferencePage extends AbstractPage
 	private Spinner tooltipDelay;
 	private Spinner spMaxThreads;
 
-	public TracePreferencePage(String title) {
-		super(title);
+	public TracePreferencePage() {
+		super(TITLE);
 	}
 
 	
@@ -163,14 +165,10 @@ public class TracePreferencePage extends AbstractPage
 	
 	@Override
 	protected void performDefaults() {
+
+		colorPolicies[TracePreferenceConstants.COLOR_NAME_BASED].setSelection(true);
+		colorPolicies[TracePreferenceConstants.COLOR_RANDOM].setSelection(false);
 		
-		// by default the first label is selected
-		/*
-		btnRenders[0].setSelection(true);
-		for(int i=1; i<btnRenders.length; i++) {
-			btnRenders[i].setSelection(false);
-		}
-		*/
 		int maxThreads = Math.min(ThreadManager.getNumThreads(0), TracePreferenceConstants.DEFAULT_MAX_THREADS);
 		spMaxThreads.setSelection(maxThreads);
 		

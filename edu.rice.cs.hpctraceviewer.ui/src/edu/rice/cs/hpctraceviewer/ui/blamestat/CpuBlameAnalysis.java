@@ -19,6 +19,7 @@ import edu.rice.cs.hpcdata.experiment.extdata.IFileDB.IdTupleOption;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.color.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.color.ProcedureColor;
+import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
 import edu.rice.cs.hpctraceviewer.ui.base.IPixelAnalysis;
@@ -141,8 +142,13 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 		List<IdTuple> listTuples = traceData.getListOfIdTuples(IdTupleOption.BRIEF);
 
 		// get the profile of the current pixel
-		int process = ptlService.getProcessTimeline(y).getProcessNum(); //attributes.convertTraceLineToRank(y);				
-
+		final ProcessTimeline ptl = ptlService.getProcessTimeline(y);
+		if (ptl == null)
+			// hack: sometimes the summary view is still have the old image
+			// and it isn't sync with the current process time line
+			return;
+		
+		int process =  ptl.getProcessNum(); //attributes.convertTraceLineToRank(y);				
 		boolean isCpuThread = true;
 
 		// get the profile's id tuple and verify if the later is a cpu thread

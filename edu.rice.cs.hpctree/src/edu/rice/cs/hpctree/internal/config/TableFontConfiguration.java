@@ -1,7 +1,6 @@
 package edu.rice.cs.hpctree.internal.config;
 
 import org.eclipse.jface.preference.PreferenceStore;
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.nebula.widgets.nattable.config.CellConfigAttributes;
@@ -18,8 +17,6 @@ import org.eclipse.nebula.widgets.nattable.style.VerticalAlignmentEnum;
 import org.eclipse.nebula.widgets.nattable.ui.binding.UiBindingRegistry;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.graphics.Font;
-
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
@@ -60,29 +57,7 @@ public class TableFontConfiguration implements IConfiguration, IPropertyChangeLi
 			treeTable.pack();
 		}
 	}
-	
-
-	public static Font getMetricFont() {
-		Font font ;
-		try {
-			font = FontManager.getMetricFont();
-		} catch (Exception e) {
-			font = JFaceResources.getTextFont();
-		}
-		return font;
-	}
-	
-
-	public static Font getGenericFont() {
-		Font font;
-		try {
-			font = FontManager.getFontGeneric();
-		} catch (Exception e) {
-			font = JFaceResources.getDefaultFont();
-		}
-		return font;
-	}
-
+		
 	
 	protected void configureFont(IConfigRegistry configRegistry) {
     	
@@ -91,7 +66,7 @@ public class TableFontConfiguration implements IConfiguration, IPropertyChangeLi
 		if (style == null) {
 			style = new Style();
 		}
-		style.setAttributeValue(CellStyleAttributes.FONT, getGenericFont());
+		style.setAttributeValue(CellStyleAttributes.FONT, FontManager.getFontGeneric());
 
 		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, style, DisplayMode.SELECT, GridRegion.COLUMN_HEADER);
 		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, style, DisplayMode.NORMAL, GridRegion.COLUMN_HEADER);
@@ -100,7 +75,7 @@ public class TableFontConfiguration implements IConfiguration, IPropertyChangeLi
 		final Style styleTree  = new Style();
 		styleTree.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.LEFT);
 		styleTree.setAttributeValue(CellStyleAttributes.VERTICAL_ALIGNMENT, VerticalAlignmentEnum.MIDDLE);
-		styleTree.setAttributeValue(CellStyleAttributes.FONT, getGenericFont());
+		styleTree.setAttributeValue(CellStyleAttributes.FONT, FontManager.getFontGeneric());
 
 		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, styleTree, DisplayMode.SELECT, ScopeTreeLabelAccumulator.LABEL_TREECOLUMN);
 		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, styleTree, DisplayMode.NORMAL, ScopeTreeLabelAccumulator.LABEL_TREECOLUMN);
@@ -109,7 +84,7 @@ public class TableFontConfiguration implements IConfiguration, IPropertyChangeLi
 		final Style styleMetric = new Style();
 		styleMetric.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.RIGHT);
 		styleMetric.setAttributeValue(CellStyleAttributes.VERTICAL_ALIGNMENT, VerticalAlignmentEnum.MIDDLE);
-		styleMetric.setAttributeValue(CellStyleAttributes.FONT, getMetricFont());
+		styleMetric.setAttributeValue(CellStyleAttributes.FONT, FontManager.getMetricFont());
 
 		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, styleMetric, DisplayMode.SELECT, ScopeTreeLabelAccumulator.LABEL_METRICOLUMN);
 		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, styleMetric, DisplayMode.NORMAL, ScopeTreeLabelAccumulator.LABEL_METRICOLUMN);

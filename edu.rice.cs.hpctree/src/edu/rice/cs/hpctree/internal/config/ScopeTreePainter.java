@@ -10,9 +10,7 @@ import org.eclipse.nebula.widgets.nattable.tree.painter.IndentedTreeImagePainter
 import org.eclipse.nebula.widgets.nattable.tree.painter.TreeImagePainter;
 import org.eclipse.nebula.widgets.nattable.ui.util.CellEdgeEnum;
 import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.internal.DPIUtil;
-import org.eclipse.swt.widgets.Display;
 
 public class ScopeTreePainter 
 {
@@ -28,7 +26,6 @@ public class ScopeTreePainter
 	
 	public static int getZoomFactor() {
 		int zoom = DPIUtil.getDeviceZoom();
-		Point p = Display.getDefault().getDPI();
 		return (int)zoom / 100;
 	}
 	

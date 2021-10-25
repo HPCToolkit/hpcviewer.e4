@@ -32,4 +32,8 @@ public class UndoableActionManager implements IUndoableActionManager
 		return context.equals(actions.peek());
 	}
 
+	@Override
+	public void clear() {
+		actions.clear();
+	}
 }

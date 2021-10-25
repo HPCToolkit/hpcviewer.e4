@@ -1,6 +1,5 @@
 package edu.rice.cs.hpcfilter.internal;
 
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.nebula.widgets.nattable.config.AbstractRegistryConfiguration;
 import org.eclipse.nebula.widgets.nattable.config.CellConfigAttributes;
 import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
@@ -9,6 +8,7 @@ import org.eclipse.nebula.widgets.nattable.style.CellStyleAttributes;
 import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
 import org.eclipse.nebula.widgets.nattable.style.HorizontalAlignmentEnum;
 import org.eclipse.nebula.widgets.nattable.style.Style;
+import org.eclipse.nebula.widgets.nattable.style.VerticalAlignmentEnum;
 import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
 import org.eclipse.swt.graphics.Font;
 
@@ -17,16 +17,6 @@ import edu.rice.cs.hpcsetting.fonts.FontManager;
 public class FilterPainterConfiguration 
 	extends AbstractRegistryConfiguration 
 {
-	
-	public static Font getGenericFont() {
-		Font font;
-		try {
-			font = FontManager.getFontGeneric();
-		} catch (Exception e) {
-			font = JFaceResources.getDefaultFont();
-		}
-		return font;
-	}
 
 	@Override
 	public void configureRegistry(IConfigRegistry configRegistry) {
@@ -45,6 +35,7 @@ public class FilterPainterConfiguration
 		//
 		final Style styleCenter = new Style();
 		styleCenter.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.CENTER);
+		styleCenter.setAttributeValue(CellStyleAttributes.VERTICAL_ALIGNMENT, VerticalAlignmentEnum.MIDDLE);
 		
 		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
 											   styleCenter, DisplayMode.NORMAL, 
@@ -54,9 +45,10 @@ public class FilterPainterConfiguration
 		// - left justified
 		// - generic fonts
 		//
-		final Font fontGeneric = getGenericFont();
+		final Font fontGeneric = FontManager.getFontGeneric();
 		final Style styleLeft = new Style();
 		styleLeft.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.LEFT);
+		styleLeft.setAttributeValue(CellStyleAttributes.VERTICAL_ALIGNMENT, VerticalAlignmentEnum.MIDDLE);
 		styleLeft.setAttributeValue(CellStyleAttributes.FONT, fontGeneric);
 		
 		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 

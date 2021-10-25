@@ -5,6 +5,9 @@ import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.List;
 
+import org.eclipse.collections.api.map.primitive.IntObjectMap;
+import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
+
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
@@ -32,7 +35,7 @@ public class MetricValueCollection3 implements IMetricValueCollection
 {
 	private DataSummary dataSummary;
 
-	private HashMap<Integer, MetricValue> values;
+	private IntObjectHashMap<MetricValue> values; //HashMap<Integer, MetricValue> values;
 	
 	public MetricValueCollection3(DataSummary dataSummary, Scope scope) throws IOException
 	{
@@ -62,7 +65,7 @@ public class MetricValueCollection3 implements IMetricValueCollection
 			
 			if (sparseValues != null && sparseValues.size()>0)
 			{
-				values = new HashMap<Integer, MetricValue>(sparseValues.size());
+				values = new IntObjectHashMap<MetricValue>(sparseValues.size()); //new HashMap<Integer, MetricValue>(sparseValues.size());
 				
 				for (MetricValueSparse mvs: sparseValues) {
 					float value = mvs.getValue();
@@ -86,7 +89,7 @@ public class MetricValueCollection3 implements IMetricValueCollection
 					return mv;
 			} else {
 				// create empty cache value so that we avoid searching again for this cct
-				values = new HashMap<>(0);
+				values = new IntObjectHashMap<MetricValue>(0); //new HashMap<>(0);
 			}
 
 		} else 
@@ -184,23 +187,21 @@ public class MetricValueCollection3 implements IMetricValueCollection
 
 	@Override
 	public void appendMetrics(IMetricValueCollection mvCollection, int offset) {
-		AbstractMap<Integer, MetricValue> source = mvCollection.getValues();
+		IntObjectMap<MetricValue> source = mvCollection.getValues();
 		if (source == null)
 			return;
 		
 		if (values == null) {
-			values = new HashMap<Integer, MetricValue>(source.size());
+			values = new IntObjectHashMap<>(source.size()); //new HashMap<Integer, MetricValue>(source.size());
 		}
 		// tricky part: append the metric values and shift the index by an offset
-		
-		AbstractMap<Integer, MetricValue> mapSource = mvCollection.getValues();
-		mapSource.forEach( (index, mv) -> {
+		source.forEachKeyValue((index, mv) -> {
 			values.put(index + offset, mv);
 		});
 	}
 
 	@Override
-	public AbstractMap<Integer, MetricValue> getValues() {
+	public IntObjectMap<MetricValue> getValues() {
 		return values;
 	}
 }

@@ -16,7 +16,6 @@ import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.util.Util;
-import edu.rice.cs.hpctree.ScopeTreeDataProvider;
 
 public class ScopeAttributePainter extends TextPainter 
 {

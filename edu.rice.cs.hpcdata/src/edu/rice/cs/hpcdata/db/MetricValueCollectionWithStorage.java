@@ -1,7 +1,7 @@
 package edu.rice.cs.hpcdata.db;
 
-import java.util.AbstractMap;
-import java.util.HashMap;
+import org.eclipse.collections.api.map.primitive.IntObjectMap;
+import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
@@ -27,15 +27,16 @@ public class MetricValueCollectionWithStorage implements IMetricValueCollection
 	/** Sparse storage of metric values.
 	 *  The key is the metric index, the value is a 
 	 *  {@code MetricValue} object. Usually not {@code NONE} **/
-	private AbstractMap<Integer, MetricValue> values;
+	private IntObjectHashMap<MetricValue> values;
 	
 	
 	/***
 	 * Constructor of the class. No parameter is needed.
 	 */
 	public MetricValueCollectionWithStorage() {
-		values = new HashMap<Integer, MetricValue>(2);
+		values = new IntObjectHashMap<MetricValue>(2); //new HashMap<Integer, MetricValue>(2);
 	}
+	
 	
 	@Override
 	public MetricValue getValue(Scope scope, int index) {
@@ -119,23 +120,22 @@ public class MetricValueCollectionWithStorage implements IMetricValueCollection
 
 	@Override
 	public void appendMetrics(IMetricValueCollection mvCollection, int offset) {
-		AbstractMap<Integer, MetricValue> source = mvCollection.getValues();
+		IntObjectMap<MetricValue> source = mvCollection.getValues();
 		if (values == null) {
-			values = new HashMap<Integer, MetricValue>(source.size());
+			values = new IntObjectHashMap<>(source.size()); //new HashMap<Integer, MetricValue>(source.size());
 		}
 		// tricky part: append the metric values and shift the index by an offset
 		
-		AbstractMap<Integer, MetricValue> mapSource = mvCollection.getValues();
-		if (mapSource == null ) {
+		if (source == null ) {
 			return;
 		}
-		mapSource.forEach( (index, mv) -> {
+		source.forEachKeyValue( (index, mv) -> {
 			values.put(index + offset, mv);
 		});
 	}
 
 	@Override
-	public AbstractMap<Integer, MetricValue> getValues() {
+	public IntObjectMap<MetricValue> getValues() {
 		return values;
 	}
 

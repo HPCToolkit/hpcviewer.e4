@@ -15,13 +15,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import edu.rice.cs.hpclog.LogProperty;
 
-public class MainProfilePage extends AbstractPage 
+public class DebugConfigPage extends AbstractPage 
 {	
-	Button debugMode;
-	Button cctId, flatId;
+	public final static String TITLE = "Debugging";
 	
-	public MainProfilePage(String title) {
-		super(title);
+	private Button debugMode;
+	private Button cctId, flatId;
+	
+	public DebugConfigPage() {
+		super(TITLE);
 	}
 	
 	
@@ -101,6 +103,10 @@ public class MainProfilePage extends AbstractPage
 		debugMode.setSelection(enabled);
 		cctId.setEnabled(enabled);
 		flatId.setEnabled(enabled);
+		if (!enabled) {
+			cctId.setSelection(false);
+			flatId.setSelection(false);
+		}
 		LogProperty.setDebug(enabled);
 	}
 	
@@ -113,5 +119,6 @@ public class MainProfilePage extends AbstractPage
 	
 	@Override
 	protected void performDefaults() {
+		setDebugMode(false);
 	}
 }

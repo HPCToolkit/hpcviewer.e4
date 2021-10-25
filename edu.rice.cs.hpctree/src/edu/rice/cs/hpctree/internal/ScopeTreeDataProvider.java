@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctree;
+package edu.rice.cs.hpctree.internal;
 
 import java.util.List;
 
@@ -13,6 +13,7 @@ import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.util.Util;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
+import edu.rice.cs.hpctree.IScopeTreeData;
 
 /****************************************************************
  * 

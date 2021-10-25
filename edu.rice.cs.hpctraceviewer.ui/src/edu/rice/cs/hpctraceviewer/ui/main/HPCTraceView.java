@@ -132,6 +132,13 @@ public class HPCTraceView extends AbstractBaseItem
 	public void refresh() {
 		detailCanvas.refresh(true);
 	}
+	
+	/****
+	 * Similar to refresh, without changing the structure
+	 */
+	public void redraw() {
+		detailCanvas.refresh(false);
+	}
 
 	@Override
 	public void setInput(Object input) {

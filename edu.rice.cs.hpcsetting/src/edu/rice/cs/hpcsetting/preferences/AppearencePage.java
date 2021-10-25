@@ -26,13 +26,15 @@ import edu.rice.cs.hpcsetting.fonts.FontManager;
  ***********************************************************/
 public class AppearencePage extends AbstractPage 
 {
+	public final static String TITLE = "Appearance";
+	
 	private ViewerFontFieldEditor fontGenericEditor;
 	private ViewerFontFieldEditor fontMetricEditor;
 	private ViewerFontFieldEditor fontSourceEditor;
 	
 
-	public AppearencePage(String title) {
-		super(title);
+	public AppearencePage() {
+		super(TITLE);
 	}
 
 	
