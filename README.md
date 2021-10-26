@@ -1,4 +1,3 @@
-![GitHub](https://img.shields.io/github/license/hpctoolkit/hpcviewer.e4?style=for-the-badge)
 ![GitHub issues](https://img.shields.io/github/issues/hpctoolkit/hpcviewer.e4?style=for-the-badge)
 
 # hpcviewer.e4
