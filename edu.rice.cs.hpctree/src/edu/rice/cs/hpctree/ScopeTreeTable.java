@@ -280,25 +280,6 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	}
 	
 	
-	private void expandAndSelectRootChild(Scope root) {
-		if (root == null)
-			return;
-		
-		// expand the root and select the first child if exist        
-        if (root.hasChildren()) {
-        	ScopeTreeLayer treeLayer = bodyLayerStack.getTreeLayer();
-        	treeLayer.expandTreeRow(0);
-        	setSelection(1);
-        	
-        	Scope node = getSelection();
-        	if (node != null) {
-    			listeners.forEach(l -> {
-    				l.select(node);
-    			});
-        	}
-        }
-	}
-
 	/****
 	 * Hide one or more columns
 	 * @param columnIndexes int or int[] of column indexes
@@ -575,7 +556,19 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		
 		this.refresh();
 		
-		expandAndSelectRootChild(root);
+		// expand the root and select the first child if exist        
+        if (root.hasChildren()) {
+        	ScopeTreeLayer treeLayer = bodyLayerStack.getTreeLayer();
+        	treeLayer.expandTreeRow(0);
+        	setSelection(1);
+        	
+        	Scope node = getSelection();
+        	if (node != null) {
+    			listeners.forEach(l -> {
+    				l.select(node);
+    			});
+        	}
+        }
 	}
 
 	
@@ -617,10 +610,6 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	
 	public BaseMetric getMetric(int columnIndex) {
 		return bodyDataProvider.getMetric(columnIndex);
-	}
-	
-	public int getColumnCount() {
-		return bodyDataProvider.getColumnCount();
 	}
 	
 	
