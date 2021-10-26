@@ -215,7 +215,9 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		natTable.setLayerPainter(new NatGridLayerPainter(natTable, DataLayer.DEFAULT_ROW_HEIGHT));
 		natTable.addDisposeListener(this);
 		
-		pack();
+		natTable.getDisplay().asyncExec(()-> {
+			pack();			
+		});
 	}
 	
 	
@@ -400,8 +402,6 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		// the width is the max between the title of the column and the cell value 
     	Point columnSize = getMetricColumnSize();
     	int visibleColumns  = bodyLayerStack.getColumnHideShowLayer().getColumnCount();
-    	int totalAllColumns = bodyDataProvider.getColumnCount();
-
     	GC gc = new GC(natTable.getDisplay());
     	Font genericFont = FontManager.getFontGeneric();
     	gc.setFont(genericFont);
@@ -419,28 +419,19 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
     	// compute the size of the tree column
     	// if the total size is less than the display, we can use the percentage for the tree column
     	// otherwise we should specify explicitly the width
-    	
     	Rectangle area = natTable.getClientArea();
     	if (area.width < 10)
     		area = natTable.getShell().getClientArea();
 
     	int areaWidth = GUIHelper.convertHorizontalDpiToPixel(area.width);
     	
-		if (totSize + TREE_COLUMN_WIDTH < areaWidth) {
-			// if some columns are hidden, we want to allow users to resize the tree column
-			if (totalAllColumns == visibleColumns) {
-				bodyDataLayer.setColumnWidthPercentageByPosition(0, 40);				
-			} else {
-				int width = Math.max(TREE_COLUMN_WIDTH, areaWidth - totSize - 5);
-	    		bodyDataLayer.setColumnWidthByPosition(0, width); 
-			}
-		} else {
-	    	// tree column: the width is hard coded at the moment
-	    	int currentWidth = bodyDataLayer.getColumnWidthByPosition(0);
-			int w = Math.max(currentWidth, Math.max(TREE_COLUMN_WIDTH, areaWidth-totSize) );
-			w = Math.min(w, areaWidth/2);
-    		bodyDataLayer.setColumnWidthByPosition(0, w);
-		}
+    	// tree column: the width is the max between 
+    	//  - TREE_COLUMN_WIDTH, 
+    	//  - the current width 
+    	//  - the calculated recommended width
+    	int currentWidth = bodyDataLayer.getColumnWidthByPosition(0);
+		int w = Math.max(currentWidth, Math.max(TREE_COLUMN_WIDTH, areaWidth-totSize) );
+		bodyDataLayer.setColumnWidthByPosition(0, w);
 		
 		// Now, compute the ideal size of the row's height
 		// 1. size for generic font
