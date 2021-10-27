@@ -215,9 +215,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		natTable.setLayerPainter(new NatGridLayerPainter(natTable, DataLayer.DEFAULT_ROW_HEIGHT));
 		natTable.addDisposeListener(this);
 		
-		natTable.getDisplay().asyncExec(()-> {
-			pack();			
-		});
+		pack();			
 	}
 	
 	
@@ -401,8 +399,10 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
     	// if the total size is less than the display, we can use the percentage for the tree column
     	// otherwise we should specify explicitly the width
     	Rectangle area = natTable.getClientArea();
-    	if (area.width < 10)
+    	if (area.width < 10) {
     		area = natTable.getShell().getClientArea();
+    		area.width -= 20;
+    	}
 
     	int areaWidth = GUIHelper.convertHorizontalDpiToPixel(area.width);
     	
