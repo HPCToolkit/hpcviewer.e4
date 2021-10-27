@@ -410,8 +410,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
     	//  - TREE_COLUMN_WIDTH, 
     	//  - the current width 
     	//  - the calculated recommended width
-    	int currentWidth = bodyDataLayer.getColumnWidthByPosition(0);
-		int w = Math.max(currentWidth, Math.max(TREE_COLUMN_WIDTH, areaWidth-totSize) );
+		int w = Math.max(TREE_COLUMN_WIDTH, areaWidth-totSize);
 		bodyDataLayer.setColumnWidthByPosition(0, w);
 		
 		// Now, compute the ideal size of the row's height
