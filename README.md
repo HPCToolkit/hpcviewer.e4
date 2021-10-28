@@ -1,4 +1,3 @@
-![GitHub](https://img.shields.io/github/license/hpctoolkit/hpcviewer.e4?style=for-the-badge)
 ![GitHub issues](https://img.shields.io/github/issues/hpctoolkit/hpcviewer.e4?style=for-the-badge)
 
 # hpcviewer.e4
@@ -41,10 +40,8 @@ spack load gtkplus
     ```
     ./build.sh
     ``` 
-    This will build Linux x86_64, Linux ppc64le and Windows with Eclipse 4.16,
-    and Linux Arm (beta version) and MacOS with Eclipse 4.19.
     The script generates five `hpcviewer-<release>-<platform>.[zip|tgz]` files:
-    Windows, Mac, Linux, x86_64, Linux ppcle64, and Linux Arm (experimental).
+    Windows, Mac (x86_64 and Arm), and Linux (x86_64, ppcle64, and Arm).
   * `untar` or `unzip` the file based according to the platform. 
   * For Linux platform: run 
   ```./install.sh <directory>``` 

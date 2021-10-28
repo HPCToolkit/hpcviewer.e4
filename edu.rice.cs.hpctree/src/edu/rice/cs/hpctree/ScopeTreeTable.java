@@ -215,7 +215,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		natTable.setLayerPainter(new NatGridLayerPainter(natTable, DataLayer.DEFAULT_ROW_HEIGHT));
 		natTable.addDisposeListener(this);
 		
-		pack();
+		pack();			
 	}
 	
 	
@@ -278,25 +278,6 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	}
 	
 	
-	private void expandAndSelectRootChild(Scope root) {
-		if (root == null)
-			return;
-		
-		// expand the root and select the first child if exist        
-        if (root.hasChildren()) {
-        	ScopeTreeLayer treeLayer = bodyLayerStack.getTreeLayer();
-        	treeLayer.expandTreeRow(0);
-        	setSelection(1);
-        	
-        	Scope node = getSelection();
-        	if (node != null) {
-    			listeners.forEach(l -> {
-    				l.select(node);
-    			});
-        	}
-        }
-	}
-
 	/****
 	 * Hide one or more columns
 	 * @param columnIndexes int or int[] of column indexes
@@ -400,8 +381,6 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		// the width is the max between the title of the column and the cell value 
     	Point columnSize = getMetricColumnSize();
     	int visibleColumns  = bodyLayerStack.getColumnHideShowLayer().getColumnCount();
-    	int totalAllColumns = bodyDataProvider.getColumnCount();
-
     	GC gc = new GC(natTable.getDisplay());
     	Font genericFont = FontManager.getFontGeneric();
     	gc.setFont(genericFont);
@@ -419,28 +398,20 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
     	// compute the size of the tree column
     	// if the total size is less than the display, we can use the percentage for the tree column
     	// otherwise we should specify explicitly the width
-    	
     	Rectangle area = natTable.getClientArea();
-    	if (area.width < 10)
+    	if (area.width < 10) {
     		area = natTable.getShell().getClientArea();
+    		area.width -= 20;
+    	}
 
     	int areaWidth = GUIHelper.convertHorizontalDpiToPixel(area.width);
     	
-		if (totSize + TREE_COLUMN_WIDTH < areaWidth) {
-			// if some columns are hidden, we want to allow users to resize the tree column
-			if (totalAllColumns == visibleColumns) {
-				bodyDataLayer.setColumnWidthPercentageByPosition(0, 40);				
-			} else {
-				int width = Math.max(TREE_COLUMN_WIDTH, areaWidth - totSize - 5);
-	    		bodyDataLayer.setColumnWidthByPosition(0, width); 
-			}
-		} else {
-	    	// tree column: the width is hard coded at the moment
-	    	int currentWidth = bodyDataLayer.getColumnWidthByPosition(0);
-			int w = Math.max(currentWidth, Math.max(TREE_COLUMN_WIDTH, areaWidth-totSize) );
-			w = Math.min(w, areaWidth/2);
-    		bodyDataLayer.setColumnWidthByPosition(0, w);
-		}
+    	// tree column: the width is the max between 
+    	//  - TREE_COLUMN_WIDTH, 
+    	//  - the current width 
+    	//  - the calculated recommended width
+		int w = Math.max(TREE_COLUMN_WIDTH, areaWidth-totSize);
+		bodyDataLayer.setColumnWidthByPosition(0, w);
 		
 		// Now, compute the ideal size of the row's height
 		// 1. size for generic font
@@ -584,7 +555,19 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		
 		this.refresh();
 		
-		expandAndSelectRootChild(root);
+		// expand the root and select the first child if exist        
+        if (root.hasChildren()) {
+        	ScopeTreeLayer treeLayer = bodyLayerStack.getTreeLayer();
+        	treeLayer.expandTreeRow(0);
+        	setSelection(1);
+        	
+        	Scope node = getSelection();
+        	if (node != null) {
+    			listeners.forEach(l -> {
+    				l.select(node);
+    			});
+        	}
+        }
 	}
 
 	
@@ -626,10 +609,6 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	
 	public BaseMetric getMetric(int columnIndex) {
 		return bodyDataProvider.getMetric(columnIndex);
-	}
-	
-	public int getColumnCount() {
-		return bodyDataProvider.getColumnCount();
 	}
 	
 	
