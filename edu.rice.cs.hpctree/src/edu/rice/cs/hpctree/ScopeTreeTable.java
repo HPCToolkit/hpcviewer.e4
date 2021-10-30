@@ -544,14 +544,8 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	
 	@Override
 	public void setRoot(Scope root) {
-        setRoot(root, 0);
-	}
-
-
-	@Override
-	public void setRoot(Scope root, int level) {
 		ScopeTreeRowModel treeRowModel = bodyLayerStack.getTreeRowModel();
-		treeRowModel.setRoot(root, level);
+		treeRowModel.setRoot(root);
 		
 		this.refresh();
 		

@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Arrays;
 import java.util.List;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
@@ -14,6 +13,7 @@ import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.ScopeComparator;
 import edu.rice.cs.hpcdata.util.Util;
@@ -144,7 +144,7 @@ public class PrintData
 		// print the summary
 		//------------------------------------------------------------------------------------
 		
-		Object []roots = experiment.getRootScopeChildren();
+		List<TreeNode> roots = experiment.getRootScopeChildren();
 		
 		for(Object root: roots) {
 			objPrint.println();
@@ -168,19 +168,21 @@ public class PrintData
 		
 		// sort the children from the highest value to the lowest based on the first metric
 		
-		Object []children = scope.getChildren();
+		List<? extends TreeNode> children = scope.getChildren();
 		
 		ScopeComparator comparator = new ScopeComparator();
 		comparator.setMetric(metrics.get(0));
 		comparator.setDirection(ScopeComparator.SORT_DESCENDING);
 		
-		Arrays.sort(children, comparator);
+		@SuppressWarnings("unchecked")
+		List<Scope> childrenScope = (List<Scope>) children;
+		childrenScope.sort(comparator);
 		
 		// print the first 5 children
-		for(int i=0; i<Math.min(5, children.length); i++) {
+		for(int i=0; i<Math.min(5, childrenScope.size()); i++) {
 			objPrint.println();
 			
-			Scope child = (Scope) children[i];
+			Scope child = (Scope) childrenScope.get(i);
 			printMetrics(objPrint, child, metrics, "   ");
 		}
 	}

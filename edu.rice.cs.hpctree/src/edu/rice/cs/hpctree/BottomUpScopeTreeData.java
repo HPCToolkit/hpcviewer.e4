@@ -1,6 +1,5 @@
 package edu.rice.cs.hpctree;
 
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -35,9 +34,8 @@ public class BottomUpScopeTreeData extends ScopeTreeData
 		
 		if (scope instanceof IMergedScope) {
 			IMergedScope ms = (IMergedScope) scope;
-			Object []children = ms.getAllChildren(inclusiveOnly, exclusiveOnly);
-			if (children != null) {
-				List<?> list = Arrays.asList(children);
+			List<? extends TreeNode> listChildren = ms.getAllChildren(inclusiveOnly, exclusiveOnly);
+			if (listChildren != null) {
 				
 				final BaseMetric metric = getSortedColumn() == 0 ? null : getMetric(getSortedColumn()-1);
 				Comparator<TreeNode> comparator = new Comparator<TreeNode>() {
@@ -49,10 +47,9 @@ public class BottomUpScopeTreeData extends ScopeTreeData
 						return compareNodes(s1, s2, metric, getSortDirection());
 					}
 				};
-				List<Scope> listChildren = (List<Scope>) list;
 				listChildren.sort(comparator);
 
-				return listChildren;
+				return (List<Scope>) listChildren;
 			}
 		}
 		return super.getChildren(scope);

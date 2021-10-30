@@ -14,6 +14,8 @@
 
 package edu.rice.cs.hpcdata.experiment.scope;
 
+import java.util.List;
+
 import edu.rice.cs.hpcdata.experiment.scope.filters.MetricValuePropagationFilter;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.IScopeVisitor;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
@@ -216,7 +218,7 @@ public int getSID() {
 
 
 @Override
-public Object[] getAllChildren(/*AbstractFinalizeMetricVisitor finalizeVisitor, PercentScopeVisitor percentVisitor,*/
+public List<TreeNode> getAllChildren(/*AbstractFinalizeMetricVisitor finalizeVisitor, PercentScopeVisitor percentVisitor,*/
 		MetricValuePropagationFilter inclusiveOnly,
 		MetricValuePropagationFilter exclusiveOnly) 
 {

@@ -29,14 +29,6 @@ public interface IScopeTreeAction
 	 */
 	public void setRoot(Scope scope);
 	
-	/***
-	 * Reset the root of the table and specify the root level.
-	 * The root level is useful to inform that the tree is moved up.
-	 * 
-	 * @param scope the root tree
-	 * @param level the level of the root
-	 */
-	public void setRoot(Scope scope, int level);
 	
 	/****
 	 * Get the current root of the table

@@ -11,8 +11,8 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
+import edu.rice.cs.hpctree.FlatScopeTreeData;
 import edu.rice.cs.hpctree.IScopeTreeData;
-import edu.rice.cs.hpctree.ScopeTreeData;
 import edu.rice.cs.hpctree.action.FlatAction;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractTableView;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
@@ -24,6 +24,7 @@ public class FlatPart extends AbstractTableView
 	
 	private FlatAction flatAction;
 	private ToolItem[] items;
+	private FlatScopeTreeData treeData;
 
 	public FlatPart(CTabFolder parent, int style) {
 		super(parent, style, "Flat view");
@@ -71,6 +72,7 @@ public class FlatPart extends AbstractTableView
 		// we have to initialize flatAction here because we need the value of
 		// getTable() which is created after setInput
 		flatAction = new FlatAction(getActionManager(), getTable());
+		flatAction.setTreeData(treeData);
 	}
 
 	@Override
@@ -115,7 +117,9 @@ public class FlatPart extends AbstractTableView
 
 	@Override
 	protected IScopeTreeData getTreeData(RootScope root, IMetricManager metricManager) {
-		return new ScopeTreeData(root, metricManager);
+		if (treeData == null)
+			treeData = new FlatScopeTreeData(root, metricManager);
+		return treeData;
 	}
 
 }

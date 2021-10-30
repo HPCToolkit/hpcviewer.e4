@@ -37,6 +37,7 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
+import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 import edu.rice.cs.hpcfilter.service.FilterStateProvider;
 import edu.rice.cs.hpcmetric.MetricFilterInput;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
@@ -348,11 +349,12 @@ public class ProfilePart implements IProfilePart, EventHandler
 		part.setLabel(PREFIX_TITLE + experiment.getName());
 		part.setTooltip(experiment.getDefaultDirectory().getAbsolutePath());
 		
-		Object []roots = experiment.getRootScopeChildren();
-		views = FastList.newList(roots.length);		
+		List<TreeNode> roots = experiment.getRootScopeChildren();
+		views = FastList.newList(roots.size());		
+		boolean active = true;
 		
-		for(int numViews=0; numViews<roots.length; numViews++) {
-			RootScope root = (RootScope) roots[numViews];
+		for(TreeNode rootNode: roots) {
+			RootScope root = (RootScope) rootNode;
 			AbstractView view;
 			
 			if (root.getType() == RootScopeType.CallingContextTree) {
@@ -370,7 +372,8 @@ public class ProfilePart implements IProfilePart, EventHandler
 				System.err.println("Not supported root: " + root.getType());
 				break;
 			}
-			addView(view, input, numViews==0);
+			addView(view, input, active);
+			active = false; // only the first view will be activated first
 		}
 		// subscribe to filter events
 		eventBroker.subscribe(FilterStateProvider.FILTER_REFRESH_PROVIDER, this);
