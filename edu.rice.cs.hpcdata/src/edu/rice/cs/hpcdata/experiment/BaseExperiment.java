@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 
 import edu.rice.cs.hpcdata.db.IdTupleType;
@@ -12,6 +13,7 @@ import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.DisposeResourcesVisitor;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.FilterScopeVisitor;
 import edu.rice.cs.hpcdata.filter.IFilterData;
@@ -243,7 +245,7 @@ public abstract class BaseExperiment implements IExperiment
 	}
 
 
-	public Object[] getRootScopeChildren() {
+	public List<TreeNode> getRootScopeChildren() {
 		RootScope root = (RootScope) getRootScope();
 
 		if (root != null)

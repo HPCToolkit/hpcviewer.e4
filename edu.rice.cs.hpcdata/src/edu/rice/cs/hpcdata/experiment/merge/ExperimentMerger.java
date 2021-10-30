@@ -112,7 +112,7 @@ public class ExperimentMerger
 		
 		root1.dfsVisitScopeTree(new DuplicateScopeTreesVisitor(rootScope, 0));
 		
-		RootScope rootMerged = (RootScope) merged.getRootScopeChildren()[0];	
+		RootScope rootMerged = (RootScope) merged.getRootScopeChildren().get(0);	
 
 		// -----------------------------------------------
 		// step 5: merge the two experiments

@@ -800,10 +800,10 @@ public void dfsVisitFilterScopeTree(FilterScopeVisitor sv) {
 		// we will first retrieve the original list of children, and then investigate
 		// one-by-one, even though the list of children has changed.
 		
-		Object []children = getChildren(); // copy the original children
+		List<TreeNode> children = getChildren(); // copy the original children
 		if (children != null)
 		{
-			for(Object child: children)
+			for(TreeNode child: children)
 			{
 				Scope scope = (Scope) child;
 				scope.dfsVisitFilterScopeTree(sv);

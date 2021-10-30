@@ -72,9 +72,9 @@ public class TreeNode {
 	 * @return The child nodes; may be <code>null</code>, but never empty.
 	 *         There should be no <code>null</code> children in the array.
 	 */
-	public Object[] getChildren() {
+	public List<TreeNode> getChildren() {
 		if (children != null && children.size() > 0) {
-			return children.toArray();
+			return children;
 		}
 		return null;
 	}
@@ -83,8 +83,8 @@ public class TreeNode {
 	 * Replace the current children with the new ones
 	 * @param children
 	 */
-	public void setChildren(TreeNode []children) {
-		this.children = Arrays.asList(children);
+	public void setChildren(List<TreeNode> children) {
+		this.children = children;
 	}
 
 	

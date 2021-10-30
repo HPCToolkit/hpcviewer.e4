@@ -3,6 +3,7 @@ package edu.rice.cs.hpcdata.experiment.scope;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 
 import edu.rice.cs.hpcdata.experiment.metric.AbstractCombineMetric;
 import edu.rice.cs.hpcdata.experiment.scope.filters.MetricValuePropagationFilter;
@@ -114,13 +115,13 @@ public class CallSiteScopeCallerView extends CallSiteScope implements IMergedSco
 	 * @param exclusiveOnly: filter for exclusive metrics 
 	 */
 	@Override
-	public Object[] getAllChildren(
+	public List<TreeNode> getAllChildren(
 			MetricValuePropagationFilter inclusiveOnly, 
 			MetricValuePropagationFilter exclusiveOnly ) {
 
-		Object children[] = this.getChildren();
+		List<TreeNode> children = this.getChildren();
 
-		if (children != null && children.length>0) {
+		if (children != null && children.size()>0) {
 			
 			//-------------------------------------------------------------------------
 			// this scope has already computed children, we do nothing, just return them

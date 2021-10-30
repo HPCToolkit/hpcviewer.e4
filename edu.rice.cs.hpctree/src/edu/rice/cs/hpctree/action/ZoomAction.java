@@ -15,7 +15,7 @@ import edu.rice.cs.hpctree.IScopeTreeAction;
  */
 public class ZoomAction 
 {
-	private static final String CONTEXT = "Zoom";
+	public static final String CONTEXT = "Zoom";
 	
 	// --------------------------------------------------------------------
 	//	ATTRIBUTES

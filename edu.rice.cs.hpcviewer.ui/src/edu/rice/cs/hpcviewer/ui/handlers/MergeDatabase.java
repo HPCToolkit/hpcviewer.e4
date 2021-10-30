@@ -18,9 +18,11 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.merge.ExperimentMerger;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
+import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 
 import java.util.Iterator;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -115,10 +117,10 @@ public class MergeDatabase
 				// if we already merge the topdowns, we should disable topdown merge
 				// similarly, if the merged flat exists, we disable the flat merge
 				
-				Object []roots = exp.getRootScopeChildren();
+				List<TreeNode> roots = exp.getRootScopeChildren();
 				if (roots == null) continue;
 				
-				RootScope root = (RootScope) roots[0];
+				RootScope root = (RootScope) roots.get(0);
 				
 				if (root.getType()== RootScopeType.CallingContextTree && param.equals(PARAM_VALUE_TOPDOWN)) {
 					return false;

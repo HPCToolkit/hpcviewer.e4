@@ -4,33 +4,50 @@ import java.util.Stack;
 
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
+import edu.rice.cs.hpctree.FlatScopeTreeData;
 import edu.rice.cs.hpctree.IScopeTreeAction;
+import edu.rice.cs.hpctree.action.IUndoableActionManager.IUndoableActionListener;
 
-public class FlatAction 
+public class FlatAction implements IUndoableActionListener
 {
 	private final static String CONTEXT = "Flat";
 	
 	private final IUndoableActionManager actionManager;
 	private IScopeTreeAction treeAction;
 	private Stack<Scope> 	 stackFlatNodes;
-	private int currentLevel;
+	private Stack<Integer>   currentLevel;
+	private FlatScopeTreeData treeData;
 	
 	public FlatAction(IUndoableActionManager actionManager, IScopeTreeAction treeAction) {
 		this.actionManager = actionManager;
 		this.treeAction = treeAction;
 		this.stackFlatNodes = new Stack<>();
-		currentLevel = 0;
+		currentLevel = new Stack<>();
+		currentLevel.push(0);
+		
+		actionManager.addActionListener(ZoomAction.CONTEXT, this);
 	}
 	
-	public void flatten(Scope root) {
-		
+	
+	/*******
+	 * Main action to flatten of a given root scope. If the root has no kids,
+	 * no modification is executed.<br/>
+	 * Flatten means:
+	 * <ul>
+	 *  <li> remove one level of the children of the root
+	 *  <li> the grand children of the root become its children.
+	 * </ul>
+	 * @param root
+	 */
+	public void flatten(Scope root) {		
 		// -------------------------------------------------------------------
 		// copy the "root" of the current input
 		// -------------------------------------------------------------------
-		Scope objFlattenedNode = (root.duplicate());
+		Scope objFlattenedNode = root.duplicate();
 		root.copyMetrics(objFlattenedNode, 0);
 		
-		boolean hasKids = false;
+		boolean updateTable = false;
 
 		// create the list of flattened node
 		for (int i=0;i<root.getChildCount();i++) {
@@ -38,29 +55,59 @@ public class FlatAction
 			if(node.getChildCount()>0) {
 				
 				// this node has children, add the children
-				for (Object child: node.getChildren()) {
+				for (TreeNode child: node.getChildren()) {
 					Scope childNode = (Scope) child;
 					if (!(childNode instanceof CallSiteScope)) {
-						objFlattenedNode.add(childNode);
+						addNode(objFlattenedNode, childNode);
 					}
 				}
-				hasKids = true;
+				// we only update the table if there are one or more grand child nodes
+				// move to one level up.
+				updateTable = true;
 			} else {
 				// no children: add the node itself !
-				objFlattenedNode.add(node);
+				addNode(objFlattenedNode, node);
 			}
 		}
 		
-		if(hasKids) {
+		if(updateTable) {
 			if (objFlattenedNode.hasChildren()) {
 				stackFlatNodes.push(root);
-				currentLevel++;
-				treeAction.setRoot(objFlattenedNode, currentLevel);
+				
+				int level = currentLevel.pop();
+				level++;
+				currentLevel.push(level);
+				
+				treeAction.setRoot(objFlattenedNode);
+				treeData.setCurrentLevel(level);
+				
 				treeAction.traverseOrExpand(0);
 				actionManager.push(CONTEXT);
 			}
 		}
 	}
+	
+	
+	private void addNode(Scope parent, Scope child) {
+		parent.addSubscope(child);
+		/*
+		Scope copyChild = child.duplicate();
+		child.copyMetrics(copyChild, 0);
+		
+		if (parent instanceof RootScope)
+			copyChild.setRootScope((RootScope)parent);
+		else 
+			copyChild.setRootScope(parent.getRootScope());
+		
+		copyChild.setParentScope(parent);
+		
+		List<TreeNode> children = child.getChildren();
+		copyChild.setChildren(children);
+		
+		parent.addSubscope(copyChild);
+		*/
+	}
+	
 	
 	public boolean unflatten() {
 		if (!actionManager.canUndo(CONTEXT))
@@ -73,10 +120,14 @@ public class FlatAction
 		if(objParentNode == null) 
 			return false;
 
-		currentLevel--;
-		assert(currentLevel >= 0);
+		int level = currentLevel.pop();
+		level--;
+		assert(level >= 0);
+		currentLevel.push(level);
 		
-		treeAction.setRoot(objParentNode, currentLevel);
+		treeAction.setRoot(objParentNode);
+		treeData.setCurrentLevel(level);
+		
 		treeAction.traverseOrExpand(0);
 		actionManager.undo();
 		
@@ -95,5 +146,25 @@ public class FlatAction
 			return false;
 		
 		return !stackFlatNodes.isEmpty();
+	}
+
+
+	public void setTreeData(FlatScopeTreeData treeData) {
+		this.treeData = treeData;
+	}
+
+
+	@Override
+	public void actionPush(String context) {
+		int level = 0;
+		currentLevel.push(level);
+		treeData.setCurrentLevel(level);
+	}
+
+
+	@Override
+	public void actionUndo(String context) {
+		currentLevel.pop();
+		treeData.setCurrentLevel(currentLevel.peek());
 	}
 }

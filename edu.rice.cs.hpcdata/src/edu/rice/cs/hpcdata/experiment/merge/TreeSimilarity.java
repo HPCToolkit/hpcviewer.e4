@@ -13,6 +13,7 @@ import edu.rice.cs.hpcdata.experiment.scope.LoopScope;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.DuplicateScopeTreesVisitor;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.IScopeVisitor;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.PercentScopeVisitor;
@@ -145,7 +146,7 @@ public class TreeSimilarity
 		// case 1: if the source has no children. no need to continue
 		// ------------------------------------------------------------
 		
-		final Scope []sortedSource = getSortedChildren( source, metricToCompare[METRIC_SOURCE] );
+		final List<Scope>sortedSource = getSortedChildren( source, metricToCompare[METRIC_SOURCE] );
 
 		if (sortedSource == null)
 			return;
@@ -153,14 +154,14 @@ public class TreeSimilarity
 		// ------------------------------------------------------------
 		// case 2: if the target has no children, just add from the source
 		// ------------------------------------------------------------
-		final Scope []sortedTarget = getSortedChildren( target, metricToCompare[METRIC_TARGET] );
+		final List<Scope>sortedTarget = getSortedChildren( target, metricToCompare[METRIC_TARGET] );
 		if (sortedTarget == null) 
 		{
 			for (Scope childSource: sortedSource)
 			{
 				addSubTree(target, childSource);
 			}
-			numUnmerges += sortedSource.length;
+			numUnmerges += sortedSource.size();
 			return;
 		}
 		
@@ -180,9 +181,9 @@ public class TreeSimilarity
 				// ---------------------------------------------------------
 				
 				// step 1: check if one of the child in the source is similar
-				for (int i=0; i<sortedSource.length; i++)
+				for (int i=0; i<sortedSource.size(); i++)
 				{	
-					Scope childSource = sortedSource[i];
+					Scope childSource = sortedSource.get(i);
 					// check if the source has been merged or not
 					if (childSource.isCounterZero())
 					{
@@ -228,7 +229,7 @@ public class TreeSimilarity
 				numUnmerges++;
 			}
 		}
-		numNodes += (sortedSource.length + sortedTarget.length);
+		numNodes += (sortedSource.size() + sortedTarget.size());
 	}
 	
 	/*****
@@ -238,21 +239,21 @@ public class TreeSimilarity
 	 * @param scope2 : a list of scopes which children are to be compared
 	 * @param metricOffset : the metric offset 
 	 */
-	private void checkInlinedScope(Scope []scope1, Scope []scope2, BaseMetric metric1, BaseMetric metric2)
+	private void checkInlinedScope(List<Scope> scope1, List<Scope> scope2, BaseMetric metric1, BaseMetric metric2)
 	{
-		for (int j=0; j<scope1.length; j++)
+		for (int j=0; j<scope1.size(); j++)
 		{
-			Scope s1 = scope1[j];
+			Scope s1 = scope1.get(j);
 			if (s1.isCounterZero())
 			{
 				for (Scope s2: scope2)
 				{
 					if (s1.isCounterZero() && s2.isCounterZero() && s2.getChildCount()>0)
 					{
-						Scope []sortedGrandChildren = getSortedChildren(s2, metric2);
-						for (int i=0; i<sortedGrandChildren.length; i++)
+						List<Scope> sortedGrandChildren = getSortedChildren(s2, metric2);
+						for (int i=0; i<sortedGrandChildren.size(); i++)
 						{
-							Scope ss2 = sortedGrandChildren[i];
+							Scope ss2 = sortedGrandChildren.get(i);
 							if (ss2.isCounterZero() && s1.isCounterZero())
 							{
 								int numMetric1 = ((Experiment) s1.getExperiment()).getMetricCount();
@@ -337,30 +338,15 @@ public class TreeSimilarity
 	 * @param scope
 	 * @return
 	 */
-	private Scope[] getSortedChildren(Scope scope, BaseMetric metric)
+	private List<Scope> getSortedChildren(Scope scope, BaseMetric metric)
 	{
-		Object []children = scope.getChildren();
+		List<? extends TreeNode> children = (List<? extends TreeNode>)scope.getChildren();
 		if (children == null)
 			return null;
-		Scope []sortedChildren = sortArrayOfNodes(children, metric);
+		List<Scope> childrenScope = (List<Scope>) children;
+		childrenScope.sort(new CompareScope(metric));
 		
-		return sortedChildren;
-	}
-	
-	/******
-	 * sort an array of nodes
-	 * 
-	 * @param nodes
-	 * @return sorted nodes
-	 */
-	private Scope [] sortArrayOfNodes(Object []nodes, BaseMetric metric)
-	{
-		Scope []sorted = new Scope[nodes.length];
-		System.arraycopy(nodes, 0, sorted, 0, nodes.length);
-		
-		Arrays.sort(sorted, new CompareScope(metric) );
-		
-		return sorted;
+		return childrenScope;
 	}
 	
 	private class CoupleNodes
@@ -392,7 +378,7 @@ public class TreeSimilarity
 			BaseMetric metric1,
 			BaseMetric metric2,
 			int offsetScope2, 
-			Scope []siblingsScope2)
+			List<Scope> siblingsScope2)
 	{
 		Similarity similar = checkNodesSimilarity( scope1, scope2, metric1, metric2);
 		
@@ -413,7 +399,7 @@ public class TreeSimilarity
 			// Looks for only a couple of siblings, we do not need to check
 			//	everyone for similarity
 			
-			int numSiblings = Math.min(siblingsScope2.length-nextOffset, 
+			int numSiblings = Math.min(siblingsScope2.size()-nextOffset, 
 					Constants.MAX_LEN_BFS);
 			Scope candidate = scope2;
 			
@@ -421,7 +407,7 @@ public class TreeSimilarity
 			
 			for (int i=nextOffset; i<nextOffset+numSiblings; i++) 
 			{
-				Scope sibling = siblingsScope2[i];
+				Scope sibling = siblingsScope2.get(i);
 				if (sibling.isCounterZero())
 				{
 					Similarity result = checkNodesSimilarity(scope1, sibling, metric1, metric2);
@@ -637,24 +623,24 @@ public class TreeSimilarity
 		if (s1.getChildCount()==0 || s2.getChildCount()==0)
 			return false;
 		
-		final Scope sortedS1[] = getSortedChildren(s1, metric1);
-		final Scope sortedS2[] = getSortedChildren(s2, metric2);
+		final List<Scope> sortedS1 = getSortedChildren(s1, metric1);
+		final List<Scope> sortedS2 = getSortedChildren(s2, metric2);
 
 		// we only check with limited number of children
 		// there's no need to check all children
-		int c1 = Math.min( Constants.MAX_LEN_BFS, sortedS1.length );
-		int c2 = Math.min( Constants.MAX_LEN_BFS, sortedS2.length );
+		int c1 = Math.min( Constants.MAX_LEN_BFS, sortedS1.size() );
+		int c2 = Math.min( Constants.MAX_LEN_BFS, sortedS2.size() );
 		
 		int finalScore = 0;
 		
 		// is there a child that is exactly the same ?
 		for (int i=0; i<c1 ; i++)
 		{
-			final Scope cs1 = sortedS1[i];
+			final Scope cs1 = sortedS1.get(i);
 			
 			for (int j=0; j<c2; j++) 
 			{
-				final Scope cs2 = sortedS2[j];
+				final Scope cs2 = sortedS2.get(j);
 				int score = getScopeSimilarityScore( cs1, cs2, metric1, metric2 );
 				
 				if (score > Constants.SCORE_SIMILAR)

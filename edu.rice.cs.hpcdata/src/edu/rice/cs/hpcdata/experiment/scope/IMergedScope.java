@@ -1,5 +1,7 @@
 package edu.rice.cs.hpcdata.experiment.scope;
 
+import java.util.List;
+
 import edu.rice.cs.hpcdata.experiment.scope.filters.MetricValuePropagationFilter;
 
 
@@ -27,7 +29,7 @@ public interface IMergedScope {
 	 * @param exclusiveOnly
 	 * @return
 	 */
-	public Object[] getAllChildren(	MetricValuePropagationFilter inclusiveOnly, 
+	public List<TreeNode> getAllChildren(	MetricValuePropagationFilter inclusiveOnly, 
 									MetricValuePropagationFilter exclusiveOnly );
 	
 	public boolean hasScopeChildren();

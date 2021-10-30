@@ -104,9 +104,9 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 		
 		if (vt == ScopeVisitType.PreVisit) {
 			this.listCombinedScopes.push();
+			if (!scope.isAlien()) {
 				// Find (or add) callee in top-level hashtable
-			ProcedureScope callee = this.createProcedureIfNecessary(scope);
-			if (scope.isAlien()) {
+				ProcedureScope callee = this.createProcedureIfNecessary(scope);
 				prepareCallChain(scope, callee);
 			}
 

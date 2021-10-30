@@ -45,8 +45,9 @@ public class ScopeTreeData implements IScopeTreeData
 	public ScopeTreeData(RootScope root, IMetricManager metricManager, boolean noEmptyColumns) {
 		this.listScopes = FastList.newList();
 		this.listScopes.add(root);
-		
+
 		this.root = root;
+
 		List<BaseMetric> listVisibleMetrics = metricManager.getVisibleMetrics();
 		listMetrics = new BasicEventList<>(listVisibleMetrics.size());
 		
@@ -79,6 +80,7 @@ public class ScopeTreeData implements IScopeTreeData
 		listScopes.add(root);
 		this.root = root;
 	}
+		
 	
 	/****
 	 * Get the root of this tree data
