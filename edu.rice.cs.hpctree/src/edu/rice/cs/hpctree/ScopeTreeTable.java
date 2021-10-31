@@ -441,7 +441,6 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
     	gc.dispose();
 	}
 	
-	
 
 	private Point getMetricColumnSize() {
 		final GC gc = new GC(natTable.getDisplay());		
