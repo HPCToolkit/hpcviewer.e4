@@ -665,6 +665,8 @@ public class DatabaseCollection
 											final Shell shell, 
 											final String xmlFileOrDirectory) {
 		final BaseExperiment experiment;
+		if (this.statusReporter == null)
+			this.statusReporter = LoggerFactory.getLogger(getClass());
 		try {
 			experiment = openDatabase(shell, xmlFileOrDirectory);
 			if (experiment == null) {

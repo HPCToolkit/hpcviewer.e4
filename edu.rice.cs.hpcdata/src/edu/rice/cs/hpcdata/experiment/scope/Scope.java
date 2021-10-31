@@ -746,8 +746,9 @@ protected void ensureMetricStorage()
 		try {
 			metrics = root.getMetricValueCollection(this);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			RuntimeException e2 = new RuntimeException(e.getMessage());
+			e2.setStackTrace(e.getStackTrace());
+			throw e2;
 		}
 	}
 }
