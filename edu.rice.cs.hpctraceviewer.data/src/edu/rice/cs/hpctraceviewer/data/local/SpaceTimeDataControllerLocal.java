@@ -115,45 +115,6 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 		dataTrace 	= new BaseData(fileDB);
 	}
 
-	/*********************
-	 * get the absolute path of the trace file (experiment.mt).
-	 * If the file doesn't exist, it is possible it is not merged yet 
-	 *  (in this case we'll merge them automatically)
-	 * 
-	 * @param directory
-	 * @param statusMgr
-	 * @return
-	 *********************/
-	static private String getTraceFile(String directory, final IProgressMonitor statusMgr)
-	{
-		final ProgressReport traceReport = new ProgressReport();
-		final String outputFile = directory + File.separatorChar + "experiment.mt";
-		
-		try {
-			File dirFile = new File(directory);
-			final MergeDataFiles.MergeDataAttribute att = MergeDataFiles
-														 .merge(dirFile, "*.hpctrace", outputFile, traceReport);
-			
-			if (att != MergeDataFiles.MergeDataAttribute.FAIL_NO_DATA) {
-				File fileTrace = new File(outputFile);
-				if (fileTrace.length() > MIN_TRACE_SIZE) {
-					return fileTrace.getAbsolutePath();
-				}
-				
-				System.err.println("Warning! Trace file "
-						+ fileTrace.getName()
-						+ " is too small: "
-						+ fileTrace.length() + "bytes .");
-			}
-			System.err
-					.println("Error: trace file(s) does not exist or fail to open "
-							+ outputFile);
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
 
 	
 
@@ -197,7 +158,44 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 		return exp.getDefaultDirectory().getPath();
 	}
 	
-	
+	/*********************
+	 * get the absolute path of the trace file (experiment.mt).
+	 * If the file doesn't exist, it is possible it is not merged yet 
+	 *  (in this case we'll merge them automatically)
+	 * 
+	 * @param directory
+	 * @param statusMgr
+	 * @return
+	 *********************/
+	static private String getTraceFile(String directory, final IProgressMonitor statusMgr)
+	{
+		final ProgressReport traceReport = new ProgressReport();
+		final String outputFile = directory + File.separatorChar + "experiment.mt";
+		
+		try {
+			File dirFile = new File(directory);
+			final MergeDataFiles.MergeDataAttribute att = MergeDataFiles
+														 .merge(dirFile, "*.hpctrace", outputFile, traceReport);
+			
+			if (att != MergeDataFiles.MergeDataAttribute.FAIL_NO_DATA) {
+				File fileTrace = new File(outputFile);
+				if (fileTrace.length() > MIN_TRACE_SIZE) {
+					return fileTrace.getAbsolutePath();
+				}
+				
+				System.err.println("Warning! Trace file "
+						+ fileTrace.getName()
+						+ " is too small: "
+						+ fileTrace.length() + "bytes .");
+			}
+			throw new RuntimeException("Trace file does not exist or file is corrupt:" + outputFile);
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 	/*******************
 	 * Progress bar
 	 *

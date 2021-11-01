@@ -1,6 +1,5 @@
 package edu.rice.cs.hpctree.internal.config;
 
-import org.eclipse.nebula.widgets.nattable.style.IStyle;
 import org.eclipse.nebula.widgets.nattable.style.theme.ModernNatTableThemeConfiguration;
 import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
 
@@ -25,10 +24,6 @@ public class ScopeTableStyleConfiguration extends ModernNatTableThemeConfigurati
 		cHeaderSelectionFgColor = GUIHelper.COLOR_WHITE;
 	}
 	
-	
-	protected IStyle getColumnHeaderSelectionStyle() {
-		return super.getColumnHeaderSelectionStyle();
-	}
 	
 	
     @Override

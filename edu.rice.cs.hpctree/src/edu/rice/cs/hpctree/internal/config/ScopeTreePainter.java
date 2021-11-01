@@ -30,7 +30,7 @@ public class ScopeTreePainter
 	}
 	
     public static ICellPainter getTreeStructurePainter() {
-    	int zoom = (getZoomFactor()-1) % 2;
+    	int zoom = (getZoomFactor() <= 1) ? 0 : 1;
     	
         TreeImagePainter treeImagePainter =
                 new TreeImagePainter(

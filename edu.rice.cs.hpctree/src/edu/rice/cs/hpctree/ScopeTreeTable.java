@@ -380,15 +380,25 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         // metric columns (if any)
 		// the width is the max between the title of the column and the cell value 
     	Point columnSize = getMetricColumnSize();
-    	int visibleColumns  = bodyLayerStack.getColumnHideShowLayer().getColumnCount();
+    	final ColumnHideShowLayer hideShowLayer = bodyLayerStack.getColumnHideShowLayer();
+    	int visibleColumns  = hideShowLayer.getColumnCount();
     	GC gc = new GC(natTable.getDisplay());
     	Font genericFont = FontManager.getFontGeneric();
     	gc.setFont(genericFont);
     	
     	int totSize = 0;
+    	//
+    	// compute and resize the metric columns first.
+    	// the tree column is resized the last one since it has the highest priority and
+    	// will get the width whatever remains (if exist)
+    	//
     	for(int i=1; i<visibleColumns; i++) {
-    		String title = bodyDataProvider.getMetric(i).getDisplayName() + STRING_PADDING;
+    		// List of metrics is based on column position, while the current display is based on index.
+    		// We need to convert from an index to a position.
+    		int position = hideShowLayer.getColumnIndexByPosition(i);
+    		String title = bodyDataProvider.getMetric(position).getDisplayName() + STRING_PADDING;
     		Point titleSize = gc.textExtent(title);
+    		
     		int colWidth = (int) Math.max(titleSize.x , columnSize.x);
     		int pixelWidth = GUIHelper.convertHorizontalDpiToPixel(colWidth);
         	bodyDataLayer.setColumnWidthByPosition(i, pixelWidth);
@@ -430,7 +440,6 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		
     	gc.dispose();
 	}
-	
 	
 
 	private Point getMetricColumnSize() {

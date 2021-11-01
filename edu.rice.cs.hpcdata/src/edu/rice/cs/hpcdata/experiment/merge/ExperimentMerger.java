@@ -84,7 +84,7 @@ public class ExperimentMerger
 		// -----------------------------------------------
 		// step 2: combine all metrics
 		// -----------------------------------------------
-		ListMergedMetrics metrics = buildMetricList(merged, exp1.getMetricList(), exp2.getMetricList());
+		ListMergedMetrics metrics = mergeMetrics(exp1.getMetricList(), exp2.getMetricList());
 		merged.setMetrics(metrics);
 		
 		if (with_raw_metrics)
@@ -186,7 +186,7 @@ public class ExperimentMerger
 	 * @param m2 second metric list
 	 * @return the new metric list that has been set to experiment exp
 	 */
-	private static ListMergedMetrics buildMetricList(Experiment exp, List<BaseMetric> m1, List<BaseMetric> m2) 
+	private static ListMergedMetrics mergeMetrics(List<BaseMetric> m1, List<BaseMetric> m2) 
 	{
 		// ----------------------------------------------------------------
 		// step 1: add the first metrics into the merged experiment
@@ -211,7 +211,7 @@ public class ExperimentMerger
 		}
 		
 		ListMergedMetrics metricsMerged = new ListMergedMetrics(metricList);
-		
+		m1_last_index++;
 		metricsMerged.setOffset(m1_last_index);
 		
 		// ----------------------------------------------------------------
@@ -255,7 +255,7 @@ public class ExperimentMerger
 		}
 		
 		// ----------------------------------------------------------------
-		// step 2b: rename the formula in derived metrics
+		// step 3: rename the formula in derived metrics
 		// ----------------------------------------------------------------
 		if (listDerivedMetrics.size()>0) {
 			for(AbstractMetricWithFormula m: listDerivedMetrics) {
@@ -263,11 +263,6 @@ public class ExperimentMerger
 				metricsMerged.add(m);
 			}
 		}
-		
-		// ----------------------------------------------------------------
-		// step 3: set the list of metric into the experiment
-		// ----------------------------------------------------------------
-		exp.setMetrics(metricsMerged);
 		
 		return metricsMerged;
 	}

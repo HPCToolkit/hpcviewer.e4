@@ -6,18 +6,32 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Control;
 
+import edu.rice.cs.hpcsetting.color.ColorManager;
+
 
 /********************************************************
  * 
  * Add-on class to manage colors used in the application
  *
  ********************************************************/
-public class ColorManager 
+public class ViewerColorManager 
 {
 	static final private String COLOR_TOP = "hpcviewer.COLOR_TOP";
-	static final private int CONTRAST_COLOR = 40;
+	static final private int CONTRAST_COLOR = 60;
 	
-	static public Color getColorTopRow(Control parent) {
+	
+	/****
+	 * Retrieve the background color of the top row
+	 * 
+	 * @param parent 
+	 * 	the table {@link Control} panel. It is used to know what color
+	 * 	is the panel and the background will adapt it. We want the top
+	 *  color has contrast color to the panel.
+	 *  
+	 * @return {@link Color}
+	 *   default color for the background
+	 */
+	static public Color getBgTopRow(Control parent) {
 		ColorRegistry registry = JFaceResources.getColorRegistry();
 		if (registry == null)
 			return null;
@@ -35,5 +49,19 @@ public class ColorManager
 		registry.put(COLOR_TOP, rgb);
 		
 		return topColor;
+	}
+	
+
+	/*****
+	 * Get the foreground color of the top row of the table.
+	 * This method will check the color of the background (see {@link getBgTopRow}
+	 * and then adjust the color for the foreground.
+	 * 
+	 * @param parent
+	 * @return
+	 */
+	static public Color getFgTopRow(Control parent) {
+		Color bg = getBgTopRow(parent);
+		return ColorManager.getTextFg(bg);
 	}
 }

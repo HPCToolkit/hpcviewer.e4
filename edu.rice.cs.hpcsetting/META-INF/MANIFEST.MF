@@ -9,9 +9,11 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jface,
  org.slf4j.api,
  ch.qos.logback.classic,
- edu.rice.cs.hpclog
+ edu.rice.cs.hpclog,
+ edu.rice.cs.hpcbase
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: edu.rice.cs.hpcsetting
 Bundle-ActivationPolicy: lazy
-Export-Package: edu.rice.cs.hpcsetting.fonts,
+Export-Package: edu.rice.cs.hpcsetting.color,
+ edu.rice.cs.hpcsetting.fonts,
  edu.rice.cs.hpcsetting.preferences

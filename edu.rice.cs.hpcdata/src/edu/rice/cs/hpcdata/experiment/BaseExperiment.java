@@ -94,17 +94,13 @@ public abstract class BaseExperiment implements IExperiment
 	}
 	
 	
-	public DataSummary getDataSummary() {
+	public DataSummary getDataSummary() throws IOException {
 		if (dataSummary == null) {
 			dataSummary = new DataSummary(getIdTupleType());
 			String databaseDirectory = getDefaultDirectory().getAbsolutePath();
 			String filename = databaseDirectory + File.separator + getDbFilename(BaseExperiment.Db_File_Type.DB_SUMMARY);
 
-			try {
-				dataSummary.open(filename);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			dataSummary.open(filename);
 		}
 		return dataSummary;
 	}

@@ -19,11 +19,11 @@ import org.eclipse.swt.widgets.Event;
 
 import edu.rice.cs.hpcdata.util.OSValidator;
 import edu.rice.cs.hpcdata.util.string.StringUtil;
+import edu.rice.cs.hpcsetting.color.ColorManager;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceConstants;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.color.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.color.ProcedureColor;
-import edu.rice.cs.hpctraceviewer.data.util.Constants;
 import edu.rice.cs.hpctraceviewer.ui.base.ITraceCanvas;
 
 
@@ -166,14 +166,14 @@ implements ITraceCanvas, PaintListener
 			// to render the alpha transformation.
 			if (!OSValidator.isUnix()) 
 			{
-	        	event.gc.setBackground(Constants.COLOR_WHITE);
+	        	event.gc.setBackground(ColorManager.COLOR_WHITE);
 	    		event.gc.setAlpha(100);
 	    		event.gc.fillRectangle( selection );
 	    		event.gc.setAlpha(240);
 	
 			}    		
     		event.gc.setLineWidth(2);
-    		event.gc.setForeground(Constants.COLOR_BLACK);
+    		event.gc.setForeground(ColorManager.COLOR_BLACK);
     		event.gc.drawRectangle(selection);
 		}
 	}

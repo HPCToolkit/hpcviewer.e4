@@ -92,12 +92,13 @@ public class FlatPart extends AbstractTableView
 		RootScope rootCCT  = experiment.getRootScope(RootScopeType.CallingContextTree);
 		RootScope rootFlat = experiment.getRootScope(RootScopeType.Flat);
 		
-		if (rootFlat == null || rootCCT == null)
-			return null;
+		if (rootFlat != null && rootCCT == null)
+			return rootFlat;
 
 		if (isInitialized && !reset)
 			return rootFlat;
 		
+		isInitialized = true;
 		return experiment.createFlatView(rootCCT, rootFlat);
 	}
 

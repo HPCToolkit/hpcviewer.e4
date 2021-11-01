@@ -24,13 +24,11 @@ import org.eclipse.nebula.widgets.nattable.ui.matcher.CellLabelMouseEventMatcher
 import org.eclipse.nebula.widgets.nattable.ui.matcher.MouseEventMatcher;
 import org.eclipse.nebula.widgets.nattable.ui.util.CellEdgeEnum;
 import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Link;
-
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpctree.action.IActionListener;
@@ -38,9 +36,24 @@ import edu.rice.cs.hpctree.internal.ScopeAttributeMouseEventMatcher;
 import edu.rice.cs.hpctree.internal.ScopeAttributePainter;
 import edu.rice.cs.hpctree.internal.ScopeTreeDataProvider;
 import edu.rice.cs.hpctree.internal.ScopeTreeLabelAccumulator;
-import edu.rice.cs.hpctree.resources.ColorManager;
+import edu.rice.cs.hpctree.resources.ViewerColorManager;
 import edu.rice.cs.hpctree.resources.IconManager;
 
+
+/*******************************************************************
+ * 
+ * Base class to set the configuration of the table and its layers.
+ * This class is tightly coupled with {@link ScopeTreeLabelAccumulator}
+ * and will use the labels based defined in this class.
+ * 
+ * @see ScopeTreeLabelAccumulator.LABEL_TOP_ROW
+ * @see ScopeTreeLabelAccumulator.LABEL_SOURCE_AVAILABLE
+ * @see ScopeTreeLabelAccumulator.LABEL_CALLSITE
+ * @see ScopeTreeLabelAccumulator.LABEL_CALLER
+ * @see ScopeTreeLabelAccumulator.LABEL_CALLSITE_DISABLED
+ * @see ScopeTreeLabelAccumulator.LABEL_CALLER_DISABLED
+ *
+ *******************************************************************/
 public class TableConfiguration implements IConfiguration 
 {
 	private final ScopeTreeDataProvider dataProvider;
@@ -67,8 +80,12 @@ public class TableConfiguration implements IConfiguration
 		addIconLabel(configRegistry, IconManager.Image_CallFromDisabled, ScopeTreeLabelAccumulator.LABEL_CALLER_DISABLED);
 		
 		final Style styleTopRow = new Style();
-		Color clrBg = ColorManager.getColorTopRow(widget);
+		Color clrBg = ViewerColorManager.getBgTopRow(widget);
+		Color clrFg = ViewerColorManager.getFgTopRow(widget);
+		
 		styleTopRow.setAttributeValue(CellStyleAttributes.BACKGROUND_COLOR, clrBg);
+		styleTopRow.setAttributeValue(CellStyleAttributes.FOREGROUND_COLOR, clrFg);
+
 		configRegistry.registerConfigAttribute(
 					CellConfigAttributes.CELL_STYLE, 
 					styleTopRow, 
@@ -78,8 +95,7 @@ public class TableConfiguration implements IConfiguration
 		final Style styleActive = new Style();
 		Color clrActive = GUIHelper.COLOR_BLUE;
 		if (Display.isSystemDarkTheme()) {
-			Link l = new Link((Composite) widget, 0);
-			clrActive = l.getLinkForeground();
+			clrActive = Display.getDefault().getSystemColor(SWT.COLOR_LINK_FOREGROUND);
 
 		}
 		styleActive.setAttributeValue(CellStyleAttributes.FOREGROUND_COLOR, clrActive);
@@ -135,10 +151,21 @@ public class TableConfiguration implements IConfiguration
 	}
 	
 
+	/****
+	 * Add a click listener to the icon or text when the source file is available.
+	 * 
+	 * @param action
+	 * 	 to be executed when a user clicks on a node when its source is available
+	 */
 	public void addListener(IActionListener action) {
 		listeners.add(action);
 	}
 	
+	
+	/*****
+	 * Remove a click listener
+	 * @param action
+	 */
 	public void removeListener(IActionListener action) {
 		listeners.remove(action);
 	}
