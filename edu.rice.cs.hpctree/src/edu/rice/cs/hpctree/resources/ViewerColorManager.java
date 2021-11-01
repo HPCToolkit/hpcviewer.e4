@@ -17,7 +17,7 @@ import edu.rice.cs.hpcsetting.color.ColorManager;
 public class ViewerColorManager 
 {
 	static final private String COLOR_TOP = "hpcviewer.COLOR_TOP";
-	static final private int CONTRAST_COLOR = 40;
+	static final private int CONTRAST_COLOR = 60;
 	
 	
 	/****

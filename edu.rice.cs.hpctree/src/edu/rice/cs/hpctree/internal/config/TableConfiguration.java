@@ -24,13 +24,11 @@ import org.eclipse.nebula.widgets.nattable.ui.matcher.CellLabelMouseEventMatcher
 import org.eclipse.nebula.widgets.nattable.ui.matcher.MouseEventMatcher;
 import org.eclipse.nebula.widgets.nattable.ui.util.CellEdgeEnum;
 import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Link;
-
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpctree.action.IActionListener;
@@ -97,8 +95,7 @@ public class TableConfiguration implements IConfiguration
 		final Style styleActive = new Style();
 		Color clrActive = GUIHelper.COLOR_BLUE;
 		if (Display.isSystemDarkTheme()) {
-			Link l = new Link((Composite) widget, 0);
-			clrActive = l.getLinkForeground();
+			clrActive = Display.getDefault().getSystemColor(SWT.COLOR_LINK_FOREGROUND);
 
 		}
 		styleActive.setAttributeValue(CellStyleAttributes.FOREGROUND_COLOR, clrActive);
@@ -154,10 +151,21 @@ public class TableConfiguration implements IConfiguration
 	}
 	
 
+	/****
+	 * Add a click listener to the icon or text when the source file is available.
+	 * 
+	 * @param action
+	 * 	 to be executed when a user clicks on a node when its source is available
+	 */
 	public void addListener(IActionListener action) {
 		listeners.add(action);
 	}
 	
+	
+	/*****
+	 * Remove a click listener
+	 * @param action
+	 */
 	public void removeListener(IActionListener action) {
 		listeners.remove(action);
 	}

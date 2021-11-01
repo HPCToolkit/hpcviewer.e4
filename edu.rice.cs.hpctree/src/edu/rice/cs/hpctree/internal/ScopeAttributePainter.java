@@ -11,11 +11,13 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Display;
 
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.util.Util;
+import edu.rice.cs.hpcsetting.color.ColorManager;
 
 public class ScopeAttributePainter extends TextPainter 
 {
@@ -50,12 +52,18 @@ public class ScopeAttributePainter extends TextPainter
                 IStyle cellStyle = CellStyleUtil.getCellStyle(cell, configRegistry);
                 setupGCFromConfig(gc, cellStyle);
 
+				Color oldForeground = gc.getForeground();
+				Color oldBackgrColor = gc.getBackground();
+
                 // setup the color depending on the file availability
-				Color color = gc.getDevice().getSystemColor(SWT.COLOR_BLACK);
+				Color color = ColorManager.getTextFg(oldBackgrColor);
 				if (Util.isFileReadable(ls)) {
-					color = gc.getDevice().getSystemColor(SWT.COLOR_BLUE);
+					if (Display.isSystemDarkTheme())
+						color = Display.getDefault().getSystemColor(SWT.COLOR_CYAN);
+					else
+						color = gc.getDevice().getSystemColor(SWT.COLOR_DARK_CYAN);
 				}
-				Color oldColor = gc.getForeground();
+				
 				gc.setForeground(color);
 
                 int fontHeight = gc.getFontMetrics().getHeight();
@@ -106,7 +114,7 @@ public class ScopeAttributePainter extends TextPainter
                     int length = gc.textExtent(text).x;
                     paintDecoration(cellStyle, gc, x, y, length, fontHeight);
                 }
-				gc.setForeground(oldColor);
+				gc.setForeground(oldForeground);
 
 	            gc.setClipping(originalClipping);
 	            resetGC(gc);
