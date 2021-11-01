@@ -51,6 +51,7 @@ import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
 import edu.rice.cs.hpcdata.experiment.extdata.IFileDB.IdTupleOption;
 import edu.rice.cs.hpcdata.util.OSValidator;
+import edu.rice.cs.hpcsetting.color.ColorManager;
 import edu.rice.cs.hpctraceviewer.ui.base.ISpaceTimeCanvas;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.base.ITraceViewAction;
@@ -1103,7 +1104,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 				
 		final Image imageFinal = new Image(getDisplay(), view.width, view.height);
 		final GC bufferGC = new GC(imageFinal);
-		bufferGC.setBackground(Constants.COLOR_WHITE);
+		bufferGC.setBackground(ColorManager.COLOR_WHITE);
 		bufferGC.fillRectangle(0,0,view.width,view.height);
 		
 		// -----------------------------------------------------------------------
@@ -1117,7 +1118,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		final Image imageOrig = new Image(getDisplay(), view.width, numLines);
 		
 		final GC origGC = new GC(imageOrig);
-		origGC.setBackground(Constants.COLOR_WHITE);
+		origGC.setBackground(ColorManager.COLOR_WHITE);
 		origGC.fillRectangle(0,0,view.width, numLines);
 
 		// -----------------------------------------------------------------------

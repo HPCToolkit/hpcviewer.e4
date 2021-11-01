@@ -36,6 +36,7 @@ import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.color.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
+import edu.rice.cs.hpcsetting.color.ColorManager;
 import edu.rice.cs.hpctraceviewer.data.Frame;
 import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
 import edu.rice.cs.hpctraceviewer.data.Position;
@@ -171,7 +172,7 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 		setBuffer(imageBuffer);
 
 		GC buffer = new GC(imageBuffer);
-		buffer.setBackground(Constants.COLOR_WHITE);
+		buffer.setBackground(ColorManager.COLOR_WHITE);
 		buffer.fillRectangle(0, 0, viewWidth, viewHeight);
 
 		float width  = detailData.width / zoomFactor;

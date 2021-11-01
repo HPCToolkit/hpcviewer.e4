@@ -30,10 +30,10 @@ import edu.rice.cs.hpctraceviewer.ui.operation.PositionOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.ZoomOperation;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.color.ColorTable;
+import edu.rice.cs.hpcsetting.color.ColorManager;
 import edu.rice.cs.hpctraceviewer.data.Frame;
 import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
 import edu.rice.cs.hpctraceviewer.data.Position;
-import edu.rice.cs.hpctraceviewer.data.util.Constants;
 
 
 
@@ -113,7 +113,7 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 		//draws cross hairs
 		//--------------------
 		
-		event.gc.setForeground(Constants.COLOR_WHITE);
+		event.gc.setForeground(ColorManager.COLOR_WHITE);
 		//event.gc.setAlpha(240);
 		
 		long selectedTime = stData.getAttributes().getFrame().position.time;

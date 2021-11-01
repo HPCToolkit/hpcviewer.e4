@@ -11,10 +11,10 @@ import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.Point;
 
 import edu.rice.cs.hpcbase.BaseConstants;
+import edu.rice.cs.hpcsetting.color.ColorManager;
 import edu.rice.cs.hpctraceviewer.data.BaseDataVisualization;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TimelineDataSet;
-import edu.rice.cs.hpctraceviewer.data.util.Constants;
 import edu.rice.cs.hpctraceviewer.ui.internal.BasePaintThread;
 import edu.rice.cs.hpctraceviewer.ui.internal.ImagePosition;
 
@@ -89,9 +89,9 @@ public class DetailPaintThread
 				// Pick the color of the text indicating sample depth. 
 				// If the background is suffciently light, pick black, otherwise white
 				if (color.getRed()+color.getBlue()+color.getGreen()>BaseConstants.DARKEST_COLOR_FOR_BLACK_TEXT)
-					gc.setForeground(Constants.COLOR_BLACK);
+					gc.setForeground(ColorManager.COLOR_BLACK);
 				else
-					gc.setForeground(Constants.COLOR_WHITE);
+					gc.setForeground(ColorManager.COLOR_WHITE);
 				
 				Point textSize = gc.textExtent(decoration);
 				gc.drawText(decoration, odInitPixel+((box_width - textSize.x)/2), ((box_height - textSize.y)/2));

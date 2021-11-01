@@ -38,9 +38,24 @@ import edu.rice.cs.hpctree.internal.ScopeAttributeMouseEventMatcher;
 import edu.rice.cs.hpctree.internal.ScopeAttributePainter;
 import edu.rice.cs.hpctree.internal.ScopeTreeDataProvider;
 import edu.rice.cs.hpctree.internal.ScopeTreeLabelAccumulator;
-import edu.rice.cs.hpctree.resources.ColorManager;
+import edu.rice.cs.hpctree.resources.ViewerColorManager;
 import edu.rice.cs.hpctree.resources.IconManager;
 
+
+/*******************************************************************
+ * 
+ * Base class to set the configuration of the table and its layers.
+ * This class is tightly coupled with {@link ScopeTreeLabelAccumulator}
+ * and will use the labels based defined in this class.
+ * 
+ * @see ScopeTreeLabelAccumulator.LABEL_TOP_ROW
+ * @see ScopeTreeLabelAccumulator.LABEL_SOURCE_AVAILABLE
+ * @see ScopeTreeLabelAccumulator.LABEL_CALLSITE
+ * @see ScopeTreeLabelAccumulator.LABEL_CALLER
+ * @see ScopeTreeLabelAccumulator.LABEL_CALLSITE_DISABLED
+ * @see ScopeTreeLabelAccumulator.LABEL_CALLER_DISABLED
+ *
+ *******************************************************************/
 public class TableConfiguration implements IConfiguration 
 {
 	private final ScopeTreeDataProvider dataProvider;
@@ -67,8 +82,12 @@ public class TableConfiguration implements IConfiguration
 		addIconLabel(configRegistry, IconManager.Image_CallFromDisabled, ScopeTreeLabelAccumulator.LABEL_CALLER_DISABLED);
 		
 		final Style styleTopRow = new Style();
-		Color clrBg = ColorManager.getColorTopRow(widget);
+		Color clrBg = ViewerColorManager.getBgTopRow(widget);
+		Color clrFg = ViewerColorManager.getFgTopRow(widget);
+		
 		styleTopRow.setAttributeValue(CellStyleAttributes.BACKGROUND_COLOR, clrBg);
+		styleTopRow.setAttributeValue(CellStyleAttributes.FOREGROUND_COLOR, clrFg);
+
 		configRegistry.registerConfigAttribute(
 					CellConfigAttributes.CELL_STYLE, 
 					styleTopRow, 
