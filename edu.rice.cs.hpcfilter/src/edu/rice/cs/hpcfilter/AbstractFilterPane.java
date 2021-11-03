@@ -32,8 +32,6 @@ import org.eclipse.nebula.widgets.nattable.selection.config.RowOnlySelectionBind
 import org.eclipse.nebula.widgets.nattable.selection.config.RowOnlySelectionConfiguration;
 import org.eclipse.nebula.widgets.nattable.sort.SortHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.sort.config.SingleClickSortConfiguration;
-import org.eclipse.nebula.widgets.nattable.style.theme.DarkNatTableThemeConfiguration;
-import org.eclipse.nebula.widgets.nattable.style.theme.ModernNatTableThemeConfiguration;
 import org.eclipse.nebula.widgets.nattable.style.theme.ThemeConfiguration;
 import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
 import org.eclipse.swt.SWT;
@@ -66,6 +64,8 @@ import edu.rice.cs.hpcfilter.internal.IConstants;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
+import edu.rice.cs.hpcsetting.table.DarkThemeConfiguration;
+import edu.rice.cs.hpcsetting.table.DayThemeConfiguration;
 
 
 /***********************************************************************
@@ -389,7 +389,8 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 
 		rowSelectionProvider.addSelectionChangedListener((event)-> {
 			IStructuredSelection selection = (IStructuredSelection) event.getSelection();
-            Iterator<FilterDataItem<T>> it = selection.iterator();
+            @SuppressWarnings("unchecked")
+			Iterator<FilterDataItem<T>> it = selection.iterator();
             
             if (!it.hasNext())
             	return;
@@ -411,11 +412,10 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 			}
 		}); */
 
-		ThemeConfiguration modernTheme = new ModernNatTableThemeConfiguration();
-		if (Display.isSystemDarkTheme())
-			modernTheme = new DarkNatTableThemeConfiguration();
+        ThemeConfiguration themeConfig = Display.isSystemDarkTheme() ? 
+				new DarkThemeConfiguration(this.natTable) :  new DayThemeConfiguration();
 		
-		natTable.setTheme(modernTheme);
+		natTable.setTheme(themeConfig);
 		pack();
 		
 		// expand as much as possible both horizontally and vertically

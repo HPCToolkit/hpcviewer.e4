@@ -18,6 +18,7 @@ import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.util.Util;
 import edu.rice.cs.hpcsetting.color.ColorManager;
+import edu.rice.cs.hpctree.resources.ViewerColorManager;
 
 public class ScopeAttributePainter extends TextPainter 
 {
@@ -58,10 +59,7 @@ public class ScopeAttributePainter extends TextPainter
                 // setup the color depending on the file availability
 				Color color = ColorManager.getTextFg(oldBackgrColor);
 				if (Util.isFileReadable(ls)) {
-					if (Display.isSystemDarkTheme())
-						color = Display.getDefault().getSystemColor(SWT.COLOR_CYAN);
-					else
-						color = gc.getDevice().getSystemColor(SWT.COLOR_DARK_CYAN);
+					color = ViewerColorManager.getActiveColor();
 				}
 				
 				gc.setForeground(color);

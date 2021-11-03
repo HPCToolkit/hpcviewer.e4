@@ -23,12 +23,9 @@ import org.eclipse.nebula.widgets.nattable.ui.binding.UiBindingRegistry;
 import org.eclipse.nebula.widgets.nattable.ui.matcher.CellLabelMouseEventMatcher;
 import org.eclipse.nebula.widgets.nattable.ui.matcher.MouseEventMatcher;
 import org.eclipse.nebula.widgets.nattable.ui.util.CellEdgeEnum;
-import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpctree.action.IActionListener;
@@ -93,11 +90,7 @@ public class TableConfiguration implements IConfiguration
 					ScopeTreeLabelAccumulator.LABEL_TOP_ROW);
 		
 		final Style styleActive = new Style();
-		Color clrActive = GUIHelper.COLOR_BLUE;
-		if (Display.isSystemDarkTheme()) {
-			clrActive = Display.getDefault().getSystemColor(SWT.COLOR_LINK_FOREGROUND);
-
-		}
+		Color clrActive = ViewerColorManager.getActiveColor();
 		styleActive.setAttributeValue(CellStyleAttributes.FOREGROUND_COLOR, clrActive);
 		configRegistry.registerConfigAttribute(
 					CellConfigAttributes.CELL_STYLE, 

@@ -1,30 +1,17 @@
 package edu.rice.cs.hpctree.internal.config;
 
-import org.eclipse.nebula.widgets.nattable.style.theme.DarkNatTableThemeConfiguration;
-import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
+import org.eclipse.nebula.widgets.nattable.NatTable;
+import edu.rice.cs.hpcsetting.table.DarkThemeConfiguration;
 
-import edu.rice.cs.hpcsetting.color.ColorManager;
-
-public class DarkScopeTableStyleConfiguration extends DarkNatTableThemeConfiguration 
-{
+public class DarkScopeTableStyleConfiguration extends DarkThemeConfiguration 
+{	
 	
-	public DarkScopeTableStyleConfiguration() {
-		super();
-		// Fix issue #120: the color has to make the line separator visible
-		// so far dark gray is good enough, for most themes (to be verified)
-		cHeaderBgColor = GUIHelper.COLOR_WHITE;
-		cHeaderFgColor = ColorManager.getTextFg(cHeaderBgColor);
-		
-		cHeaderSelectionBgColor = GUIHelper.COLOR_WHITE;
-		cHeaderSelectionFgColor = GUIHelper.COLOR_DARK_GRAY;
-		
-        selectionAnchorSelectionBgColor = defaultSelectionBgColor;
-        selectionAnchorSelectionFgColor = defaultSelectionFgColor;
-
+	
+    public DarkScopeTableStyleConfiguration(NatTable nattable) {
+		super(nattable);
 	}
-	
-	
-    @Override
+
+	@Override
     public void createPainterInstances() {
     	super.createPainterInstances();
     	

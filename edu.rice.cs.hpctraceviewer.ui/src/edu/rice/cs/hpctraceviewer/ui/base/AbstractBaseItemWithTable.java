@@ -67,6 +67,8 @@ import edu.rice.cs.hpcdata.util.string.StringUtil;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
+import edu.rice.cs.hpcsetting.table.DarkThemeConfiguration;
+import edu.rice.cs.hpcsetting.table.DayThemeConfiguration;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
 
@@ -183,7 +185,7 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
         // in the middle of the system switch mode
         
         ThemeConfiguration defaultConfiguration = Display.isSystemDarkTheme() ? 
-        							new DarkNatTableThemeConfiguration() :  new  ModernNatTableThemeConfiguration();
+        							new DarkThemeConfiguration(natTable) :  new  DayThemeConfiguration();
         natTable.setTheme(defaultConfiguration);
         
         // add listeners

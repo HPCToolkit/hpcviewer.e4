@@ -24,7 +24,7 @@ public class FilterPainterConfiguration
 		// gray colors for disabled metrics
 		//
 		final Style styleGray = new Style();
-		styleGray.setAttributeValue(CellStyleAttributes.FOREGROUND_COLOR, GUIHelper.COLOR_DARK_GRAY);
+		styleGray.setAttributeValue(CellStyleAttributes.FOREGROUND_COLOR, GUIHelper.COLOR_GRAY);
 		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
 											   styleGray, 
 											   DisplayMode.NORMAL, 

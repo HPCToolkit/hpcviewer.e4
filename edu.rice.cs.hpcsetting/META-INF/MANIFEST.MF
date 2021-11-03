@@ -10,10 +10,12 @@ Require-Bundle: org.eclipse.core.runtime,
  org.slf4j.api,
  ch.qos.logback.classic,
  edu.rice.cs.hpclog,
- edu.rice.cs.hpcbase
+ edu.rice.cs.hpcbase,
+ org.eclipse.nebula.widgets.nattable.core;bundle-version="2.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: edu.rice.cs.hpcsetting
 Bundle-ActivationPolicy: lazy
 Export-Package: edu.rice.cs.hpcsetting.color,
  edu.rice.cs.hpcsetting.fonts,
- edu.rice.cs.hpcsetting.preferences
+ edu.rice.cs.hpcsetting.preferences,
+ edu.rice.cs.hpcsetting.table
