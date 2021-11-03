@@ -99,6 +99,8 @@ public class ScopeTreeDataProvider implements IDataProvider, IRowDataProvider<Sc
 
 	@Override
 	public Scope getRowObject(int rowIndex) {
+		if (rowIndex < 0)
+			return null;
 		return treeData.getDataAtIndex(rowIndex);
 	}
 
