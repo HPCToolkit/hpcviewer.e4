@@ -64,7 +64,6 @@ public class ProcedureScope extends Scope  implements IMergedScope
 	final private int procedureFeature;
 	
 	private ProcedureType type;
-
 	/** The name of the procedure. */
 	protected String procedureName;
 	protected boolean isalien;
@@ -109,7 +108,6 @@ public ProcedureScope(RootScope root, SourceFile file, int first, int last,
 		if (!procedureName.startsWith(INLINE_NOTATION))
 			procedureName = INLINE_NOTATION + procedureName;
 	}
-
 	this.objLoadModule 	  = null;
 	this.procedureFeature = procedureFeature;
 }
@@ -249,9 +247,10 @@ public ProcedureType getProcedureType() {
 }
 
 
+
 @Override
 public boolean hasScopeChildren() {
-	return true;
+	return hasChildren();
 }
 
 }
