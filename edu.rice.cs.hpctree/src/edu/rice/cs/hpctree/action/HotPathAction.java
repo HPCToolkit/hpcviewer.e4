@@ -38,7 +38,7 @@ public class HotPathAction
 			scope = treeAction.getRoot();
 		
 		int col = treeAction.getSortedColumn();
-		if (col == 0) {
+		if (col <= 0) {
 			errMsg = "No metric column is selected";
 			return RET_ERR;
 		}

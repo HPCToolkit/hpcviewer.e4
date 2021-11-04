@@ -601,7 +601,16 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	@Override
 	public int getSortedColumn() {
 		ScopeTreeRowModel treeRowModel = bodyLayerStack.getTreeRowModel();
-		return treeRowModel.getSortedColumnIndexes().get(0);
+		List<Integer> sortedIndexes = treeRowModel.getSortedColumnIndexes();
+		Integer sortedIndex = sortedIndexes.get(0);
+
+		Collection<Integer> hiddenIndexes = bodyLayerStack.getColumnHideShowLayer().getHiddenColumnIndexes();
+		if (hiddenIndexes != null && hiddenIndexes.size()>0) {
+			if (hiddenIndexes.contains(sortedIndex))
+				return -1;
+		}
+		
+		return sortedIndex;
 	}
 	
 	
