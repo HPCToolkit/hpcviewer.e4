@@ -199,15 +199,6 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		// add the end of toolbar
 		// -------------------------------------------
 		endToolbar(null, toolBar);
-		//createCoolItem(coolBar, toolBar);
-		
-		//Point p = coolBar.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-		//p.x += 20;
-		
-		//coolBar.setSize(p);
-		
-		//GridDataFactory.fillDefaults().align(SWT.LEFT, SWT.CENTER).grab(false, false).applyTo(coolBar);
-		//GridLayoutFactory.fillDefaults().numColumns(1).applyTo(coolBar);
 
 		// -------------------------------------------
 		// message label
@@ -317,8 +308,6 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 			BusyIndicator.showWhile(getDisplay(), ()-> {
 				root = buildTree(false);
 				table.setRoot(root);
-				
-				// hide or show columns if needed
 				
 				// flip the flag
 				initialized = true;

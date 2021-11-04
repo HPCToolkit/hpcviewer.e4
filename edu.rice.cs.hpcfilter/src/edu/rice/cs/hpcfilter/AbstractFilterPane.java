@@ -435,11 +435,16 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 	 * Attempt to resize the rows and columns if possible
 	 */
 	public void pack() {
+		// need more space between top and the bottom of the row to display the check box
+		// the original dimension of the check box is 20x20
+		final int CHECK_BOX_DIMENSION_Y = 22;
+		
 		// get the font size
 		GC gc = new GC(natTable);
 		gc.setFont(FontManager.getFontGeneric());
 		Point size = gc.stringExtent("|{}/',!^_");
-		this.dataLayer.setDefaultRowHeight(size.y+4);
+		int height = Math.max(CHECK_BOX_DIMENSION_Y, size.y);
+		this.dataLayer.setDefaultRowHeight(height);
 		
 		gc.dispose();
 	}
