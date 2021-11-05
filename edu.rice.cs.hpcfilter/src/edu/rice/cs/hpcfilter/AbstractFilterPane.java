@@ -311,7 +311,7 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 	 * @param eventList
 	 * @return
 	 */
-	private FilterDataItemSortModel<T> createSortModel(EventList<FilterDataItem<T>> eventList) {
+	protected FilterDataItemSortModel<T> createSortModel(EventList<FilterDataItem<T>> eventList) {
 		return new FilterDataItemSortModel<T>(eventList);
 	}
 	

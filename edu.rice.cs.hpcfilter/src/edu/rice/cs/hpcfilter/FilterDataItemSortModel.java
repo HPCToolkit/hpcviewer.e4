@@ -24,6 +24,11 @@ public class FilterDataItemSortModel<T> implements ISortModel, Comparator<Filter
 		this.list = list;
 	}
 
+	
+	protected List<FilterDataItem<T>> getList() {
+		return list;
+	}
+	
 
 	@Override
 	public List<Integer> getSortedColumnIndexes() {
@@ -49,6 +54,7 @@ public class FilterDataItemSortModel<T> implements ISortModel, Comparator<Filter
 		return 0;
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public List<Comparator> getComparatorsForColumnIndex(int columnIndex) {
 		return null;

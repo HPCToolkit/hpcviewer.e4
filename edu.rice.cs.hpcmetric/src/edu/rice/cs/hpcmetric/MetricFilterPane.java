@@ -26,6 +26,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.osgi.service.prefs.Preferences;
 
+import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 
 
@@ -35,6 +36,7 @@ import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcfilter.AbstractFilterPane;
 import edu.rice.cs.hpcfilter.FilterDataItem;
+import edu.rice.cs.hpcfilter.FilterDataItemSortModel;
 import edu.rice.cs.hpcfilter.FilterDataProvider;
 import edu.rice.cs.hpcfilter.FilterInputData;
 import edu.rice.cs.hpcfilter.IFilterChangeListener;
@@ -42,6 +44,7 @@ import edu.rice.cs.hpcmetric.dialog.ExtDerivedMetricDlg;
 import edu.rice.cs.hpcmetric.internal.IConstants;
 import edu.rice.cs.hpcmetric.internal.MetricFilterDataItem;
 import edu.rice.cs.hpcmetric.internal.MetricFilterDataProvider;
+import edu.rice.cs.hpcmetric.internal.MetricFilterSortModel;
 import edu.rice.cs.hpcmetric.internal.MetricPainterConfiguration;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
@@ -291,8 +294,14 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 		}
 		return dataProvider;
 	}
+	
 
+	@Override
+	protected FilterDataItemSortModel<BaseMetric> createSortModel(EventList<FilterDataItem<BaseMetric>> eventList) {
+		return new MetricFilterSortModel(input.getRoot(), eventList);
+	}
 
+	
 	@Override
 	protected void addConfiguration(NatTable table) {
 		painterConfiguration = new MetricPainterConfiguration();
@@ -303,9 +312,9 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 
 	@Override
 	protected void setLayerConfiguration(DataLayer dataLayer) {
-		dataLayer.setColumnWidthPercentageByPosition(0, 10);
+		dataLayer.setColumnWidthPercentageByPosition(0, 5);
 		dataLayer.setColumnWidthPercentageByPosition(1, 30);
-		dataLayer.setColumnWidthPercentageByPosition(2, 40);
+		dataLayer.setColumnWidthPercentageByPosition(2, 45);
 		dataLayer.setColumnWidthPercentageByPosition(3, 20);
 		dataLayer.setColumnsResizableByDefault(true);
 	}
