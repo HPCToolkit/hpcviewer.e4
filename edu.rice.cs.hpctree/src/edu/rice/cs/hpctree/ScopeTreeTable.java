@@ -556,7 +556,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		ScopeTreeRowModel treeRowModel = bodyLayerStack.getTreeRowModel();
 		treeRowModel.setRoot(root);
 		
-		this.refresh();
+		refresh();
 		
 		// expand the root and select the first child if exist        
         if (root.hasChildren()) {

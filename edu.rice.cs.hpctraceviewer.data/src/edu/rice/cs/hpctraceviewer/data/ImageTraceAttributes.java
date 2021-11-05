@@ -30,7 +30,7 @@ public class ImageTraceAttributes
 	{
 		frame = new Frame();
 
-		mapIntegerToUnit = new HashMap<Integer, TimeUnit>(6);
+		mapIntegerToUnit = new HashMap<Integer, TimeUnit>(7);
 		
 		mapIntegerToUnit.put(0, TimeUnit.NANOSECONDS);
 		mapIntegerToUnit.put(1, TimeUnit.MICROSECONDS);
@@ -38,8 +38,9 @@ public class ImageTraceAttributes
 		mapIntegerToUnit.put(3, TimeUnit.SECONDS);
 		mapIntegerToUnit.put(4, TimeUnit.MINUTES);
 		mapIntegerToUnit.put(5, TimeUnit.HOURS);
+		mapIntegerToUnit.put(6, TimeUnit.DAYS);
 		
-		mapUnitToString = new HashMap<TimeUnit, String>(6);
+		mapUnitToString = new HashMap<TimeUnit, String>(7);
 		
 		mapUnitToString.put(TimeUnit.NANOSECONDS, "ns");
 		mapUnitToString.put(TimeUnit.MICROSECONDS, "us");
@@ -47,6 +48,7 @@ public class ImageTraceAttributes
 		mapUnitToString.put(TimeUnit.SECONDS, "s");
 		mapUnitToString.put(TimeUnit.MINUTES, "min");
 		mapUnitToString.put(TimeUnit.HOURS, "hr");
+		mapUnitToString.put(TimeUnit.HOURS, "day");
 	}
 
 	/****
