@@ -42,11 +42,10 @@ import org.eclipse.nebula.widgets.nattable.style.CellStyleAttributes;
 import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
 import org.eclipse.nebula.widgets.nattable.style.HorizontalAlignmentEnum;
 import org.eclipse.nebula.widgets.nattable.style.Style;
-import org.eclipse.nebula.widgets.nattable.style.theme.DarkNatTableThemeConfiguration;
-import org.eclipse.nebula.widgets.nattable.style.theme.ModernNatTableThemeConfiguration;
 import org.eclipse.nebula.widgets.nattable.style.theme.ThemeConfiguration;
 import org.eclipse.nebula.widgets.nattable.tooltip.NatTableContentTooltip;
 import org.eclipse.nebula.widgets.nattable.ui.binding.UiBindingRegistry;
+import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.events.DisposeEvent;
@@ -71,6 +70,7 @@ import edu.rice.cs.hpcsetting.table.DarkThemeConfiguration;
 import edu.rice.cs.hpcsetting.table.DayThemeConfiguration;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
+import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 
 
 /**************************************************************************
@@ -199,21 +199,25 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 	 * Ensure the table columns are well compact 
 	 */
 	public void pack() {
+		// set the width of the columns
 		final String TEXT = "{XXX.XX%|";
-		dataLayer.setColumnWidthByPosition(0, 20);
+		final int colorColWidth = GUIHelper.convertHorizontalDpiToPixel(IConstants.COLUMN_COLOR_WIDTH_PIXELS);
+		dataLayer.setColumnWidthByPosition(0, colorColWidth);
 		
 		GC gc = new GC(getDisplay());
 		gc.setFont(FontManager.getMetricFont());
 		Point sizeNumber = gc.textExtent(TEXT);
-		dataLayer.setColumnWidthByPosition(2, sizeNumber.x);
+		int widthColNumber = GUIHelper.convertHorizontalDpiToPixel(sizeNumber.x);
+		dataLayer.setColumnWidthByPosition(2, widthColNumber);
 		
+		// the procedure name column should take whatever the remainder space
 		dataLayer.setColumnWidthPercentageByPosition(1, 97);
 		dataLayer.setColumnPercentageSizing(1, true);
 		
 		// row's height
 		gc.setFont(FontManager.getFontGeneric());
 		Point sizeGeneric = gc.textExtent(TEXT);
-		int height = 4 + Math.max(sizeGeneric.y, sizeNumber.y);
+		final int height = GUIHelper.convertHorizontalDpiToPixel(4 + Math.max(sizeGeneric.y, sizeNumber.y));
 		dataLayer.setDefaultRowHeight(height);
 		
 		gc.dispose();

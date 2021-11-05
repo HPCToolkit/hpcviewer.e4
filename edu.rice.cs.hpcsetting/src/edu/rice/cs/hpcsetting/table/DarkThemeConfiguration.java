@@ -22,8 +22,11 @@ public class DarkThemeConfiguration extends DarkNatTableThemeConfiguration
         selectionAnchorSelectionBgColor = defaultSelectionBgColor;
         selectionAnchorSelectionFgColor = defaultSelectionFgColor;
 
-		// Fix issue #132 more contrast is needed for color selection
+		// Fix issue #132 and issue #134 more contrast is needed for color selection
         defaultBgColor = nattable.getBackground();
+        evenRowBgColor = defaultBgColor;
+        oddRowBgColor  = defaultBgColor;
+        
 		defaultFgColor = ColorManager.getTextFg(this.defaultBgColor);
 		rHeaderFgColor = ColorManager.getTextFg(this.rHeaderBgColor);
 	}
