@@ -9,36 +9,43 @@ import java.util.FormatterClosedException;
 import java.util.IllegalFormatException;
 import java.util.List;
 
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.layout.LayoutConstants;
 // swt
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.ExpandBar;
 import org.eclipse.swt.widgets.ExpandItem;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.MouseAdapter;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.events.SelectionEvent;
 
 import com.graphbuilder.math.ExpressionParseException;
+
 // hpcviewer
 import edu.rice.cs.hpcbase.map.UserInputHistory;
-import edu.rice.cs.hpcdata.experiment.metric.*;
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
+import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
+import edu.rice.cs.hpcdata.experiment.metric.ExtFuncMap;
+import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
+import edu.rice.cs.hpcdata.experiment.metric.MetricType;
+import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
+import edu.rice.cs.hpcdata.experiment.metric.MetricVarMap;
 import edu.rice.cs.hpcdata.experiment.metric.format.IMetricValueFormat;
 import edu.rice.cs.hpcdata.experiment.metric.format.MetricValuePredefinedFormat;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
@@ -69,11 +76,11 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 	
 	// ------------ Metric and math variables
 	private String expFormula;
-	private List<BaseMetric> listOfMetrics;
 	
 	private final ExtFuncMap fctMap;
 	private final MetricVarMap varMap;
 	private final RootScope root;
+	private final BaseMetric[] metrics;
 	
 	private DerivedMetric metric;
 	
@@ -104,9 +111,14 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 		super(parent);
 		metricManager = mm;
 		this.root  = root;
-		this.setMetrics(mm.getVisibleMetrics());
 		this.fctMap = new ExtFuncMap();
 		this.varMap = new MetricVarMap ( root, s, mm );
+		
+    	List<BaseMetric> listOfMetrics = this.metricManager.getVisibleMetrics();
+    	metrics = listOfMetrics.
+    				stream().
+    				filter(m -> root.getMetricValue(m) != MetricValue.NONE).toArray(BaseMetric[]::new);
+
 	}
 	
 	  //==========================================================
@@ -230,16 +242,14 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 	    	
 	    	// combo box that lists the metrics
 	    	final Combo cbMetric = new Combo(grpInsertion, SWT.READ_ONLY);
-	    	
-			  int nbMetrics = listOfMetrics.size();
-			  String []arrStrMetrics = new String[nbMetrics];
-			  for(int i=0;i<nbMetrics;i++) {
-				  BaseMetric metric = listOfMetrics.get(i);
-				  arrStrMetrics[i] = metric.getShortName() + ": "+ metric.getDisplayName();
-			  }
+	    	final String[]metricNames = new String[metrics.length];
+	    	int i=0;
+			for(BaseMetric metric: metrics) {
+				metricNames[i++] = metric.getShortName() + ": " + metric.getDisplayName(); 
+			}
 
-	    	cbMetric.setItems(arrStrMetrics);
-	    	cbMetric.setText(arrStrMetrics[0]);
+	    	cbMetric.setItems(metricNames);
+	    	cbMetric.select(0);
 
 	    	//---------------------------------------------------------------
 	    	// button to insert the metric code into the expression field
@@ -443,7 +453,7 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 		  StringBuffer sBuff = new StringBuffer(sText);
 
 		  // insert the metric variable ( i.e.: $ + metric index)
-		  final String sMetricIndex = signToPrepend + listOfMetrics.get(selection_index).getShortName() ; 
+		  final String sMetricIndex = signToPrepend + metrics[selection_index].getShortName() ; 
 		  sBuff.insert(iSelIndex, sMetricIndex );
 		  cbExpression.setText(sBuff.toString());
 
@@ -585,15 +595,6 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 	  // ---- PUBLIC METHODS
 	  //==========================================================
 		
-	  /****
-	   * setup the dialog with the list of metrics
-	   * 
-	   * @param listOfMetrics
-	   */
-	  private void setMetrics(List<BaseMetric> listOfMetrics) {
-		  this.listOfMetrics = listOfMetrics;
-		  
-	  }
 	  
 	  /***
 	   * set the default metric to modify
