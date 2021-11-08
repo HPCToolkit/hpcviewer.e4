@@ -8,12 +8,13 @@ import java.util.Stack;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScopeCallerView;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpctree.IScopeTreeAction;
+import edu.rice.cs.hpctree.action.IUndoableActionManager.IUndoableActionListener;
 
 
 /**
  * Class to manage zoom-in and zoom out of a scope
  */
-public class ZoomAction 
+public class ZoomAction implements IUndoableActionListener
 {
 	public static final String CONTEXT = "Zoom";
 	
@@ -36,6 +37,8 @@ public class ZoomAction
 		this.treeAction    = treeAction;
 		this.actionManager = actionManager;
 		this.stackRootTree = new Stack<Scope>();
+
+		actionManager.addActionListener(ZoomAction.CONTEXT, this);
 	}
 	
 	// --------------------------------------------------------------------
@@ -117,12 +120,15 @@ public class ZoomAction
 		}
 		return ( node.getChildCount()>0 );
 	}
-	
-	/****
-	 * Clear the zoom root stack.
-	 * This operation is useful when the tree has a new root.  
-	 */
-	public void clear() {
+
+	@Override
+	public void actionPush(String context) {}
+
+	@Override
+	public void actionUndo(String context) {}
+
+	@Override
+	public void actionClear() {
 		stackRootTree.clear();
 	}
 }

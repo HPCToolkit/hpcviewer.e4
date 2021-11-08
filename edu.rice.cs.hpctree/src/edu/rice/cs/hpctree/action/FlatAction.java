@@ -167,4 +167,12 @@ public class FlatAction implements IUndoableActionListener
 		currentLevel.pop();
 		treeData.setCurrentLevel(currentLevel.peek());
 	}
+
+
+	@Override
+	public void actionClear() {
+		currentLevel.clear();
+		currentLevel.push(0);
+		stackFlatNodes.clear();
+	}
 }

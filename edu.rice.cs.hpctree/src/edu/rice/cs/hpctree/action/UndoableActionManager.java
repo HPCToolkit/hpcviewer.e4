@@ -63,6 +63,9 @@ public class UndoableActionManager implements IUndoableActionManager
 
 	@Override
 	public void clear() {
+		listeners.forEach((context, list) -> {
+			list.forEach(f->f.actionClear());
+		});
 		actions.clear();
 	}
 
