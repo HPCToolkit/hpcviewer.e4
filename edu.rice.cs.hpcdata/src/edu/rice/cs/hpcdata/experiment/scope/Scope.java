@@ -18,7 +18,6 @@ package edu.rice.cs.hpcdata.experiment.scope;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.BaseExperimentWithMetrics;
 import edu.rice.cs.hpcdata.experiment.Experiment;
@@ -801,10 +800,12 @@ public void dfsVisitFilterScopeTree(FilterScopeVisitor sv) {
 		// we will first retrieve the original list of children, and then investigate
 		// one-by-one, even though the list of children has changed.
 		
-		List<TreeNode> children = getChildren(); // copy the original children
+		List<TreeNode> children = getChildren(); 
 		if (children != null)
 		{
-			for(TreeNode child: children)
+			// copy the original children
+			List<TreeNode> copyChildren = new ArrayList<>(children);			
+			for(TreeNode child: copyChildren)
 			{
 				Scope scope = (Scope) child;
 				scope.dfsVisitFilterScopeTree(sv);

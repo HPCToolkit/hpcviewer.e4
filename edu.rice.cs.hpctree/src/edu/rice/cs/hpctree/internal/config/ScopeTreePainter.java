@@ -25,6 +25,7 @@ public class ScopeTreePainter
 	private static final String []IMG_INV_EXPANDED  = {"right_down_inv_120_120", "right_down_inv_144_144" };
 	
 	public static int getZoomFactor() {
+		@SuppressWarnings("restriction")
 		int zoom = DPIUtil.getDeviceZoom();
 		return (int)zoom / 100;
 	}
@@ -56,7 +57,7 @@ public class ScopeTreePainter
 
     
     public static ICellPainter getTreeStructureSelectionPainter() {
-    	int zoom = getZoomFactor()-1;
+    	int zoom = (getZoomFactor() <= 1) ? 0 : 1;
 
         TreeImagePainter treeSelectionImagePainter =
                 new TreeImagePainter(

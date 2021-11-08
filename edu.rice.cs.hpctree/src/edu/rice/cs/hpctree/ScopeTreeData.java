@@ -296,7 +296,7 @@ public class ScopeTreeData implements IScopeTreeData
 		
 		// get the children from the original tree, and sort them
 		// based on the sorted column (either metric or tree column)
-		List<TreeNode> children = scope.getListChildren();
+		List<TreeNode> children = scope.getChildren();
 		final BaseMetric metric = sortedColumn == 0 ? null : getMetric(sortedColumn-1);
 		Comparator<TreeNode> comparator = new Comparator<TreeNode>() {
 

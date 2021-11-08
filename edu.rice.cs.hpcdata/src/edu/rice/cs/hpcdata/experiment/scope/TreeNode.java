@@ -1,7 +1,6 @@
 package edu.rice.cs.hpcdata.experiment.scope;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -73,10 +72,7 @@ public class TreeNode {
 	 *         There should be no <code>null</code> children in the array.
 	 */
 	public List<TreeNode> getChildren() {
-		if (children != null && children.size() > 0) {
-			return children;
-		}
-		return null;
+		return children;
 	}
 	
 	/****
@@ -87,15 +83,6 @@ public class TreeNode {
 		this.children = children;
 	}
 
-	
-	/***
-	 * Return the list of children as a {@code List} object
-	 * @return
-	 */
-	public List<TreeNode> getListChildren() {
-		return children;
-	}
-	
 	
 	/****
 	 * Replace the children with the new list
