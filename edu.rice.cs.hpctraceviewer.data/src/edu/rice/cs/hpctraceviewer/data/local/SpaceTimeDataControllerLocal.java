@@ -1,6 +1,7 @@
 package edu.rice.cs.hpctraceviewer.data.local;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
@@ -166,34 +167,31 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 	 * @param directory
 	 * @param statusMgr
 	 * @return
+	 * @throws IOException 
+	 * @throws FileNotFoundException 
 	 *********************/
-	static private String getTraceFile(String directory, final IProgressMonitor statusMgr)
+	static private String getTraceFile(String directory, final IProgressMonitor statusMgr) 
+			throws FileNotFoundException, IOException
 	{
 		final ProgressReport traceReport = new ProgressReport();
 		final String outputFile = directory + File.separatorChar + "experiment.mt";
 		
-		try {
-			File dirFile = new File(directory);
-			final MergeDataFiles.MergeDataAttribute att = MergeDataFiles
-														 .merge(dirFile, "*.hpctrace", outputFile, traceReport);
-			
-			if (att != MergeDataFiles.MergeDataAttribute.FAIL_NO_DATA) {
-				File fileTrace = new File(outputFile);
-				if (fileTrace.length() > MIN_TRACE_SIZE) {
-					return fileTrace.getAbsolutePath();
-				}
-				
-				System.err.println("Warning! Trace file "
-						+ fileTrace.getName()
-						+ " is too small: "
-						+ fileTrace.length() + "bytes .");
+		File dirFile = new File(directory);
+		final MergeDataFiles.MergeDataAttribute att = MergeDataFiles
+													 .merge(dirFile, "*.hpctrace", outputFile, traceReport);
+		
+		if (att != MergeDataFiles.MergeDataAttribute.FAIL_NO_DATA) {
+			File fileTrace = new File(outputFile);
+			if (fileTrace.length() > MIN_TRACE_SIZE) {
+				return fileTrace.getAbsolutePath();
 			}
-			throw new RuntimeException("Trace file does not exist or file is corrupt:" + outputFile);
-
-		} catch (IOException e) {
-			e.printStackTrace();
+			
+			System.err.println("Warning! Trace file "
+					+ fileTrace.getName()
+					+ " is too small: "
+					+ fileTrace.length() + "bytes .");
 		}
-		return null;
+		throw new RuntimeException("Trace file does not exist or file is corrupt:" + outputFile);
 	}
 
 	/*******************
