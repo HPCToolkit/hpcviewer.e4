@@ -29,7 +29,7 @@ public class LabelMessage implements IUserMessage
 		lblMessage  = new Label(parent, SWT.FLAT | SWT.LEFT);
 		colorNormal = lblMessage.getBackground();
 		
-		GridDataFactory.fillDefaults().grab(true, false).applyTo(lblMessage);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(lblMessage);
 	}
 
     

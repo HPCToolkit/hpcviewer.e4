@@ -100,6 +100,9 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 	 */
 	public void setInput(FilterInputData<BaseMetric> inputData) { 
 		this.input = (MetricFilterInput) inputData;
+		
+		// important: has to reset the data provider to null 
+		// so we'll create a different instance of data provider 
 		dataProvider = null;
 		super.reset(inputData);
 		getNatTable().refresh();
