@@ -155,6 +155,9 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 		this.rowSelectionProvider.updateSelectionProvider(
 				defaultLayerStack.getSelectionLayer(), 
 				dataProvider);
+		
+		// Important: need to clear again the search text since we have new filter list
+		this.objSearchText.setText("");
 	}
 
 	
