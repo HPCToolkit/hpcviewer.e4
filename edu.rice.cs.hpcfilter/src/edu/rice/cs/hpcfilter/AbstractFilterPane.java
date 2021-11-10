@@ -17,7 +17,6 @@ import org.eclipse.nebula.widgets.nattable.data.IRowDataProvider;
 import org.eclipse.nebula.widgets.nattable.extension.glazedlists.GlazedListsEventLayer;
 import org.eclipse.nebula.widgets.nattable.grid.data.DefaultColumnHeaderDataProvider;
 import org.eclipse.nebula.widgets.nattable.grid.data.DefaultCornerDataProvider;
-import org.eclipse.nebula.widgets.nattable.grid.data.DefaultRowHeaderDataProvider;
 import org.eclipse.nebula.widgets.nattable.grid.layer.ColumnHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.grid.layer.CornerLayer;
 import org.eclipse.nebula.widgets.nattable.grid.layer.DefaultColumnHeaderDataLayer;
@@ -60,6 +59,7 @@ import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import edu.rice.cs.hpcfilter.internal.CheckBoxConfiguration;
 import edu.rice.cs.hpcfilter.internal.FilterConfigLabelAccumulator;
 import edu.rice.cs.hpcfilter.internal.FilterPainterConfiguration;
+import edu.rice.cs.hpcfilter.internal.FilterRowDataProvider;
 import edu.rice.cs.hpcfilter.internal.IConstants;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
@@ -100,6 +100,7 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 	
 	private DefaultBodyLayerStack defaultLayerStack;
 	private RowSelectionProvider<FilterDataItem<T>> rowSelectionProvider;
+	private FilterRowDataProvider rowHeaderDataProvider;
 	private FilterPainterConfiguration painterConfiguration;
 
 	private EventList<FilterDataItem<T>>  eventList ;
@@ -152,9 +153,8 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 
 		this.labelAccumulator.setDataProvider(dataProvider);
 		this.dataLayer.setDataProvider(dataProvider);
-		this.rowSelectionProvider.updateSelectionProvider(
-				defaultLayerStack.getSelectionLayer(), 
-				dataProvider);
+		this.rowHeaderDataProvider.setDataProvider(dataProvider);
+		this.rowSelectionProvider.updateSelectionProvider(defaultLayerStack.getSelectionLayer(), dataProvider);		
 		
 		// Important: need to clear again the search text since we have new filter list
 		this.objSearchText.setText("");
@@ -354,7 +354,7 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 		SortHeaderLayer<FilterDataItem<T>> sortHeaderLayer = new SortHeaderLayer<FilterDataItem<T>>(colummnLayer, sortList);
 		
 		// row header
-		DefaultRowHeaderDataProvider rowHeaderDataProvider = new DefaultRowHeaderDataProvider(dataProvider);
+		rowHeaderDataProvider = new FilterRowDataProvider(dataProvider);
 		DefaultRowHeaderDataLayer rowHeaderDataLayer = new DefaultRowHeaderDataLayer(rowHeaderDataProvider);
 		RowHeaderLayer rowHeaderLayer = new RowHeaderLayer(rowHeaderDataLayer, defaultLayerStack, defaultLayerStack.getSelectionLayer());
 

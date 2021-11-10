@@ -8,7 +8,7 @@ import edu.rice.cs.hpcfilter.internal.IConstants;
 public class FilterDataProvider<T> implements IRowDataProvider<FilterDataItem<T>> 
 {
 	private final IFilterChangeListener changeListener;
-	private final List<FilterDataItem<T>> list;
+	private List<FilterDataItem<T>> list;
 	
 	public FilterDataProvider(List<FilterDataItem<T>> list, IFilterChangeListener changeListener) {
 		this.list = list;
@@ -80,6 +80,11 @@ public class FilterDataProvider<T> implements IRowDataProvider<FilterDataItem<T>
 	}
 
 	
+	public void setList(List<FilterDataItem<T>> list) {
+		this.list = list;
+	}
+
+
 	protected IFilterChangeListener getChangeListener() {
 		return changeListener;
 	}

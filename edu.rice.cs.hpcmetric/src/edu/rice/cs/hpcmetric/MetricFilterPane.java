@@ -294,6 +294,8 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 	protected FilterDataProvider<BaseMetric> getDataProvider(FilterList<FilterDataItem<BaseMetric>> filterList) {
 		if (dataProvider == null) {
 			dataProvider = new MetricFilterDataProvider(input.getRoot(), filterList, this);
+		} else {
+			dataProvider.setList(filterList);
 		}
 		return dataProvider;
 	}
