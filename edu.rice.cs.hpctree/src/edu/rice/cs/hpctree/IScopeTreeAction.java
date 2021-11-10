@@ -47,4 +47,10 @@ public interface IScopeTreeAction
 	 * @return
 	 */
 	public int getSortedColumn();
+
+	
+	/****
+	 * Export the content of the table to a file
+	 */
+	void export();
 }

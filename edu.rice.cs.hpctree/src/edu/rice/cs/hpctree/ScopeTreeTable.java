@@ -56,6 +56,7 @@ import edu.rice.cs.hpcdata.util.string.StringUtil;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpctree.action.IActionListener;
 import edu.rice.cs.hpctree.internal.ColumnHeaderDataProvider;
+import edu.rice.cs.hpctree.internal.ResizeListener;
 import edu.rice.cs.hpctree.internal.ScopeTreeBodyLayerStack;
 import edu.rice.cs.hpctree.internal.ScopeTreeDataProvider;
 import edu.rice.cs.hpctree.internal.ScopeTreeLabelAccumulator;
@@ -90,7 +91,8 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	private final TableConfiguration      tableConfiguration;
 	private final Collection<IActionListener> listeners = new FastList<IActionListener>();
 	private final SortHeaderLayer<Scope> headerLayer;
-
+	
+	private final ResizeListener resizeListener;
 	
 	/****
 	 * Constructor to a dynamic create tree table using the default tree provider
@@ -214,6 +216,9 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 
 		natTable.setLayerPainter(new NatGridLayerPainter(natTable, DataLayer.DEFAULT_ROW_HEIGHT));
 		natTable.addDisposeListener(this);
+		
+		resizeListener = new ResizeListener(this);
+		parent.addControlListener(resizeListener);
 		
 		pack();			
 	}
@@ -521,15 +526,6 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		}		
 	}
 	
-	
-	/***
-	 * Same as visual refresh, plus recompute the width and height
-	 * of the cells
-	 */
-	public void attributeRefresh() {
-		visualRefresh();
-		pack();
-	}
 
 	
 	/***
@@ -580,9 +576,11 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		return treeRowModel.getRoot();
 	}
 
+	
 	@Override
 	public void widgetDisposed(DisposeEvent e) {
         bodyLayerStack.getSelectionLayer().removeLayerListener(this);
+        natTable.getParent().removeControlListener(resizeListener);
 	}
 	
 	
@@ -608,16 +606,17 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		if (hiddenIndexes != null && hiddenIndexes.size()>0) {
 			if (hiddenIndexes.contains(sortedIndex))
 				return -1;
-		}
-		
+		}		
 		return sortedIndex;
 	}
 	
 	
+	@Override
 	public void export() {
 		ExportCommand export = new ExportCommand(natTable.getConfigRegistry(), natTable.getShell());
 		natTable.doCommand(export);
 	}
+	
 	
 	public BaseMetric getMetric(int columnIndex) {
 		return bodyDataProvider.getMetric(columnIndex);
