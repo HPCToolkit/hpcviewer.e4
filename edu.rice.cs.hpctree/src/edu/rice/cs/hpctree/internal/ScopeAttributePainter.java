@@ -11,8 +11,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Display;
-
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -95,13 +93,18 @@ public class ScopeAttributePainter extends TextPainter
                 if (numberOfNewLines == 1) {
                     int contentWidth = Math.min(getLengthFromCache(gc, text), rectangle.width);
 
-                    gc.drawText(
-                            text,
-                            rectangle.x + CellStyleUtil.getHorizontalAlignmentPadding(cellStyle, rectangle, contentWidth) + this.spacing,
-                            rectangle.y + CellStyleUtil.getVerticalAlignmentPadding(cellStyle, rectangle, contentHeight) + this.spacing,
-                            SWT.DRAW_TRANSPARENT | SWT.DRAW_DELIMITER | SWT.DRAW_TAB);
+                    int x = rectangle.x
+                            + CellStyleUtil.getHorizontalAlignmentPadding(cellStyle, rectangle, contentWidth)
+                            + this.spacing;
+
+                    int y = rectangle.y
+                            + CellStyleUtil.getVerticalAlignmentPadding(cellStyle, rectangle, contentHeight)
+                            + this.spacing;
+
+                    gc.drawText(text, x, y, SWT.DRAW_TRANSPARENT | SWT.DRAW_DELIMITER | SWT.DRAW_TAB);
 
                     // start x of line = start x of text
+                    /*
                     int x = rectangle.x
                             + CellStyleUtil.getHorizontalAlignmentPadding(cellStyle, rectangle, contentWidth)
                             + this.spacing;
@@ -111,6 +114,7 @@ public class ScopeAttributePainter extends TextPainter
                             + this.spacing;
                     int length = gc.textExtent(text).x;
                     paintDecoration(cellStyle, gc, x, y, length, fontHeight);
+                    */
                 }
 				gc.setForeground(oldForeground);
 
