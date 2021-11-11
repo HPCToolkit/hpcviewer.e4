@@ -22,7 +22,7 @@ public class ScopeTableStyleConfiguration extends DayThemeConfiguration
     	super.createPainterInstances();
     	
         treeStructurePainter = ScopeTreePainter.getTreeStructurePainter();
-        treeStructureSelectionPainter = ScopeTreePainter.getTreeStructureSelectionPainter();
+        treeStructureSelectionPainter = ScopeTreePainter.getTreeStructurePainter();
         selectedSortHeaderCellPainter = ScopeTreePainter.getSelectedSortHeaderCellPainter();
     }
 }

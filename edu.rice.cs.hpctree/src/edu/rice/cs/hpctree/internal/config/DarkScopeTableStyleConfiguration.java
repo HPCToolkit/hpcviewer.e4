@@ -15,8 +15,8 @@ public class DarkScopeTableStyleConfiguration extends DarkThemeConfiguration
     public void createPainterInstances() {
     	super.createPainterInstances();
     	
-        treeStructurePainter = ScopeTreePainter.getTreeStructureSelectionPainter();
-        treeStructureSelectionPainter = ScopeTreePainter.getTreeStructureSelectionPainter();
+        treeStructurePainter = ScopeTreePainter.getInvTreeStructurePainter();
+        treeStructureSelectionPainter = ScopeTreePainter.getInvTreeStructurePainter();
         selectedSortHeaderCellPainter = ScopeTreePainter.getSelectedSortHeaderCellPainter();
     }
 }

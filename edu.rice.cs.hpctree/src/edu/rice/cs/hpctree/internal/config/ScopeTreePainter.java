@@ -56,7 +56,7 @@ public class ScopeTreePainter
     }
 
     
-    public static ICellPainter getTreeStructureSelectionPainter() {
+    public static ICellPainter getInvTreeStructurePainter() {
     	int zoom = (getZoomFactor() <= 1) ? 0 : 1;
 
         TreeImagePainter treeSelectionImagePainter =
