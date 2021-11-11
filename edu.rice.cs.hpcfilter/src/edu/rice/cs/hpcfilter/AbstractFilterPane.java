@@ -240,7 +240,7 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 		
 		// string to match
 		Label lblFilter = new Label (groupFilter, SWT.FLAT);
-		lblFilter.setText("Filter:");
+		lblFilter.setText(getFilterLabel());
 		
 		objSearchText = new Text (groupFilter, SWT.BORDER);
 		objSearchText.setToolTipText("Type text to filter the list");
@@ -263,6 +263,16 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(objSearchText);
 	}
 	
+	
+	/****
+	 * Method to retrieve the label of the filter search.
+	 * The child class can override this to customize the label.
+	 * 
+	 * @return
+	 */
+	protected String getFilterLabel() {
+		return "Filter: ";
+	}
 	
 	/****
 	 * Retrieve the current data layer of the table

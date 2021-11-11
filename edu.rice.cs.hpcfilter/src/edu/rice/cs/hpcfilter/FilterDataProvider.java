@@ -5,6 +5,17 @@ import org.eclipse.nebula.widgets.nattable.data.IRowDataProvider;
 
 import edu.rice.cs.hpcfilter.internal.IConstants;
 
+/********************************************************************************
+ * 
+ * Basic data provider for filter table. This class has a basic methods to:
+ * <ul>
+ * <li> {@link checkAll} to check all the items
+ * <li> {@link uncheckAll} to uncheck all the items
+ * </ul>
+ *
+ * @param <T> the data item class
+ * 
+ ********************************************************************************/
 public class FilterDataProvider<T> implements IRowDataProvider<FilterDataItem<T>> 
 {
 	private final IFilterChangeListener changeListener;

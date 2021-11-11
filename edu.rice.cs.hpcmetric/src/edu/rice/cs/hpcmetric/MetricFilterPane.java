@@ -108,7 +108,11 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 		getNatTable().refresh();
 	}
 	
-		
+	
+	@Override
+	protected String getFilterLabel() {
+		return "Metric's name to filter: ";
+	}
 	
 	@Override
 	public void changeEvent(Object data) {
