@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.collections.api.map.primitive.MutableIntObjectMap;
 import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
@@ -15,6 +16,8 @@ import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.MetricComparator;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
+import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
+import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.util.Constants;
 
 
@@ -89,6 +92,7 @@ implements IMetricManager
 	 * Retrieve the list of metrics
 	 * @return {@code List<BaseMetric>}
 	 */
+	@Override
 	public List<BaseMetric> getMetricList() 
 	{
 		return metrics;
@@ -101,6 +105,7 @@ implements IMetricManager
 	 * or on list of metrics. 
 	 * Perhaps we should change the term to be "displayable" metrics.
 	 */
+	@Override
 	public List<BaseMetric> getVisibleMetrics() 
 	{
 		ArrayList<BaseMetric> listMetrics = new ArrayList<>(metrics.size());
@@ -128,6 +133,17 @@ implements IMetricManager
 			}
 		}
 		return listMetrics;
+	}
+
+	
+
+	@Override
+	public List<BaseMetric> getNonEmptyVisibleMetrics(Scope scope) {
+		List<BaseMetric> list = getVisibleMetrics();
+		
+		return list.stream()
+				   .filter(m -> m.getValue(scope) != MetricValue.NONE)
+				   .collect(Collectors.toList());
 	}
 
 	

@@ -28,15 +28,27 @@ public class MetricFilterInput extends FilterInputData<BaseMetric>
 	 * @param listMetrics List of metric status
 	 * @param affectAll boolean true if the change affects all other views within the experiment database
 	 */
-	public MetricFilterInput(RootScope root, IMetricManager metricManager, List<FilterDataItem<BaseMetric>> listMetrics, boolean affectAll) {
-		super(listMetrics);
+	public MetricFilterInput(RootScope root, IMetricManager metricManager, IFilterable view, boolean affectAll) {
+		super(view.getFilterDataItems());
 		this.root = root;
 		this.metricManager = metricManager;
 		this.affectAll = affectAll;
 	}
  	
-	public MetricFilterInput(RootScope root, IMetricManager metricManager, TreeViewer treeViewer, boolean affectAll) {		
-		this(root, metricManager, createFilterList(metricManager.getVisibleMetrics(), treeViewer), affectAll);
+	
+	/****
+	 * Constructor for unit test only
+	 * 
+	 * @param root
+	 * @param metricManager
+	 * @param treeViewer
+	 * @param affectAll
+	 */
+	public MetricFilterInput(RootScope root, IMetricManager metricManager, TreeViewer treeViewer, boolean affectAll) {	
+		super(createFilterList(metricManager.getVisibleMetrics(), treeViewer));
+		this.root = root;
+		this.metricManager = metricManager;
+		this.affectAll = affectAll;
 	}
 	
 	

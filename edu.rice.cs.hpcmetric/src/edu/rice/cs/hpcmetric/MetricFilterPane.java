@@ -80,9 +80,9 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 	 * @param eventBroker
 	 * @param inputData
 	 */
-	public MetricFilterPane(Composite parent, int style, IEventBroker eventBroker, FilterInputData<BaseMetric> inputData) {
+	public MetricFilterPane(Composite parent, int style, IEventBroker eventBroker, MetricFilterInput inputData) {
 		super(parent, style, inputData);
-		this.input = (MetricFilterInput) inputData;
+		this.input = inputData;
 		this.eventBroker = eventBroker;
 		
 		if (style == STYLE_COMPOSITE) {

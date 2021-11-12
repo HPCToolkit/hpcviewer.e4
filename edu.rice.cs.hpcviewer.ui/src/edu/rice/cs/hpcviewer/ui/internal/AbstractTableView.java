@@ -266,7 +266,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 	 */
 	@Override
 	public List<FilterDataItem<BaseMetric>> getFilterDataItems() {
-		final List<BaseMetric> listMetrics    = table.getMetricColumns();
+		final List<BaseMetric> listMetrics    = getMetricManager().getNonEmptyVisibleMetrics(getRoot());
 		final List<BaseMetric> listAllMetrics = getMetricManager().getVisibleMetrics();	
 		
 		// List of indexes of the hidden columns based on the info from the table.
@@ -527,7 +527,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				MetricFilterInput input = new MetricFilterInput(root, getMetricManager(), 
-																getFilterDataItems(), true);
+																AbstractTableView.this, true);
 				profilePart.addEditor(input);
 				updateButtonStatus();
 			}

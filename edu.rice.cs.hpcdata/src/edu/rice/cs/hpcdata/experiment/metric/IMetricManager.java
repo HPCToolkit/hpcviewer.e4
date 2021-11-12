@@ -2,6 +2,8 @@ package edu.rice.cs.hpcdata.experiment.metric;
 
 import java.util.List;
 
+import edu.rice.cs.hpcdata.experiment.scope.Scope;
+
 /******************************************************************
  * 
  * Interface to handle metric descriptors
@@ -43,6 +45,7 @@ public interface IMetricManager
 	/** get metrics that are NOT invisible (can be hidden, but not invisible) */
 	public List<BaseMetric> getVisibleMetrics();
 
+	public List<BaseMetric> getNonEmptyVisibleMetrics(Scope scope);
 	
 	/****
 	 * get the list of "raw" metrics used for plotting graphs

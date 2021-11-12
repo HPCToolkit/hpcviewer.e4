@@ -98,7 +98,7 @@ public class ShowMetrics
 		
 		RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
 		MetricFilterInput input = new MetricFilterInput(root, experiment, 
-														item.getFilterDataItems(), true);
+														item, true);
 		
 		profilePart.addEditor(input);
 	}

@@ -8,6 +8,7 @@ import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
+import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 
 public class ThreadMetricManager implements IMetricManager 
@@ -67,6 +68,11 @@ public class ThreadMetricManager implements IMetricManager
 	@Override
 	public void addDerivedMetric(DerivedMetric objMetric) {
 		getRawMetrics().add(objMetric);
+	}
+
+	@Override
+	public List<BaseMetric> getNonEmptyVisibleMetrics(Scope scope) {
+		return getVisibleMetrics();
 	}
 
 }

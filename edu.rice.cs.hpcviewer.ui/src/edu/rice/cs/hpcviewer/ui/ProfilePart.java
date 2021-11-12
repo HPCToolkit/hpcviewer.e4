@@ -145,7 +145,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 			boolean affectAll = view.getViewType() == AbstractView.ViewType.COLLECTIVE;
 			MetricFilterInput input  = new MetricFilterInput(root, 
 															 metricMgr, 
-															 view.getFilterDataItems(), 
+															 view, 
 															 affectAll);								
 			metricView.setInput(input);
 		}
