@@ -447,11 +447,22 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	}
 
 	
-	public void refreshColumns() {
+	/*********
+	 * Add a new column
+	 * @param columnPosition
+	 * 			 the position of the new column. It has to reflect the position of the added new metric.
+	 */
+	public void addNewColumn(int columnPosition) {
+		// notify the tree data that we have to refresh the list of metrics
 		IScopeTreeData treeData = (IScopeTreeData) this.bodyLayerStack.getTreeRowModel().getTreeData();
 		treeData.refresh();
+		
+		// make sure the table is refreshed to take into account the new column
 		refresh();
-		bodyLayerStack.getBodyDataLayer().fireLayerEvent(new ColumnInsertEvent(bodyLayerStack, 1));
+		
+		// hack: needs to add a column manually for the new metric
+		// without this, the display is weird and the position of the columns is incorrect. I don't know why
+		bodyLayerStack.getBodyDataLayer().fireLayerEvent(new ColumnInsertEvent(bodyLayerStack, columnPosition));
 	}
 	
 	

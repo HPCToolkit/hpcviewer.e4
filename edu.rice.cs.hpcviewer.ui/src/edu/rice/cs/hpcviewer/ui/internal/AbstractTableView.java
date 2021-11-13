@@ -379,7 +379,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 			// add a new metric column
 			//BaseMetric metric = (BaseMetric) eventInfo.data;
 			//table.addMetricColumn(metric);
-			table.refreshColumns();
+			table.addNewColumn(1);
 			table.pack();
 			
 		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE)) {
