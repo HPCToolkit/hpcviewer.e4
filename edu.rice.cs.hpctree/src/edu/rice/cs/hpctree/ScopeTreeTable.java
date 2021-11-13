@@ -450,7 +450,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	public void refreshColumns() {
 		IScopeTreeData treeData = (IScopeTreeData) this.bodyLayerStack.getTreeRowModel().getTreeData();
 		treeData.refresh();
-		
+		refresh();
 		bodyLayerStack.getBodyDataLayer().fireLayerEvent(new ColumnInsertEvent(bodyLayerStack, 1));
 	}
 	
