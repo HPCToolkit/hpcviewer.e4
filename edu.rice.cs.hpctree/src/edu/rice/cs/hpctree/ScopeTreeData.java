@@ -7,9 +7,6 @@ import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.nebula.widgets.nattable.sort.SortDirectionEnum;
 
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.event.ListEventListener;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
@@ -28,8 +25,10 @@ public class ScopeTreeData implements IScopeTreeData
 {
 	/** list of current data. The list is dynamic **/
 	private final MutableList<Scope>    listScopes;	
-	private final EventList<BaseMetric> listMetrics;
+	//private final EventList<BaseMetric> listMetrics;
+	private List<Integer> indexesNonEmptyMetrics;
 
+	private IMetricManager metricManager;
 	private Scope root;
 	
 	// attributes to handle sorting
@@ -45,28 +44,23 @@ public class ScopeTreeData implements IScopeTreeData
 	public ScopeTreeData(RootScope root, IMetricManager metricManager, boolean noEmptyColumns) {
 		this.listScopes = FastList.newList();
 		this.listScopes.add(root);
-
+		this.metricManager = metricManager;
 		this.root = root;
-
-		List<BaseMetric> listVisibleMetrics = metricManager.getVisibleMetrics();
-		listMetrics = new BasicEventList<>(listVisibleMetrics.size());
+		this.indexesNonEmptyMetrics = metricManager.getNonEmptyMetricIDs(root);
 		
-		for(BaseMetric metric: listVisibleMetrics) {
-			// if we don't want to include empty metrics, we need to check the value
-			// otherwise, just add blindly
-			if (noEmptyColumns) {
-				MetricValue mv = metric.getValue(root);
-				if (mv == MetricValue.NONE) 
-					continue;
-			}
-			listMetrics.add(metric);
-		}		
 		clear();
 	}
 	
 	public ScopeTreeData(RootScope root, IMetricManager metricManager) {
 		this(root, metricManager, true);
 	}
+	
+	
+	@Override
+	public void refresh() {
+		this.indexesNonEmptyMetrics = metricManager.getNonEmptyMetricIDs(root);
+	}
+	
 	
 	@Override
 	public List<Scope> getList() {
@@ -100,8 +94,9 @@ public class ScopeTreeData implements IScopeTreeData
 	public void clear() {
 		this.sortDirection = SortDirectionEnum.DESC;
 		this.sortedColumn  = 0;
-		if (this.listMetrics != null && this.listMetrics.size()>0)
+		if (this.indexesNonEmptyMetrics != null && this.indexesNonEmptyMetrics.size()>0)
 			this.sortedColumn = 1;
+		this.indexesNonEmptyMetrics = metricManager.getNonEmptyMetricIDs(root);
 	}
 
 	
@@ -149,64 +144,17 @@ public class ScopeTreeData implements IScopeTreeData
 	
 	
 	@Override
-	public BaseMetric getMetric(int indexMetric) {
-		if (listMetrics == null || listMetrics.size() <= indexMetric)
-			return null;
-		return listMetrics.get(indexMetric);
+	public BaseMetric getMetric(int indexMetricColumn) {
+		int id = indexesNonEmptyMetrics.get(indexMetricColumn);
+		return metricManager.getMetric(id);
 	}
 	
-	
-	@Override
-	public void addMetric(int index, BaseMetric metric) {
-		listMetrics.add(index, metric);
-		
-		// TODO: this is a bit hack
-		// we shift the sorted column to the right if the sorted column
-		// is a metric column. 
-		if (sortedColumn>0)
-			sortedColumn++;
-	}
-	
-	
-	@Override
-	public int getMetricIndex(BaseMetric metric) {
-		return listMetrics.indexOf(metric);
-	}
-	
-	
-	@Override
-	public void updateMetric(int index, BaseMetric metric) {
-		if (index >=0  && index < listMetrics.size())
-			listMetrics.set(index, metric);
-	}
-	
-	
-	@Override
-	public void addMetric(BaseMetric metric) {
-		addMetric(listMetrics.size(), metric);
-	}
-	
-	
+			
 	@Override
 	public int getMetricCount() {
-		return listMetrics.size();
+		return indexesNonEmptyMetrics.size();
 	}
-	
-	
-	@Override
-	public List<BaseMetric> getMetrics() {
-		return listMetrics;
-	}
-	
-	public void addListener( ListEventListener<BaseMetric> listener ) {
-		listMetrics.addListEventListener(listener);
-	}
-	
-	
-	public void removeListener( ListEventListener<BaseMetric> listener ) {
-		listMetrics.removeListEventListener(listener);
-	}
-	
+		
 	
 	@SuppressWarnings("unchecked")
 	private List<Scope> convert(List<? extends TreeNode> list) {

@@ -1,5 +1,6 @@
 package edu.rice.cs.hpcviewer.ui.parts.thread;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.collections.impl.list.mutable.FastList;
@@ -71,8 +72,13 @@ public class ThreadMetricManager implements IMetricManager
 	}
 
 	@Override
-	public List<BaseMetric> getNonEmptyVisibleMetrics(Scope scope) {
-		return getVisibleMetrics();
+	public List<Integer> getNonEmptyMetricIDs(Scope scope) {
+		List<BaseMetric> metrics = getVisibleMetrics();
+		List<Integer> listIDs = new ArrayList<>(metrics.size());
+		for(BaseMetric m: metrics) {
+			listIDs.add(m.getIndex());
+		}
+		return listIDs;
 	}
 
 }

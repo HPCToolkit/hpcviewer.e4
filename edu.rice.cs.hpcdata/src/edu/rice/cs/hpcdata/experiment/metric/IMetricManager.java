@@ -45,7 +45,7 @@ public interface IMetricManager
 	/** get metrics that are NOT invisible (can be hidden, but not invisible) */
 	public List<BaseMetric> getVisibleMetrics();
 
-	public List<BaseMetric> getNonEmptyVisibleMetrics(Scope scope);
+	public List<Integer> getNonEmptyMetricIDs(Scope scope);
 	
 	/****
 	 * get the list of "raw" metrics used for plotting graphs

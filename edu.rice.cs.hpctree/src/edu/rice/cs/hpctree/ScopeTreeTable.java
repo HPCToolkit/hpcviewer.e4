@@ -6,7 +6,6 @@ import java.util.Set;
 
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.nebula.widgets.nattable.NatTable;
-import org.eclipse.nebula.widgets.nattable.command.StructuralRefreshCommand;
 import org.eclipse.nebula.widgets.nattable.command.VisualRefreshCommand;
 import org.eclipse.nebula.widgets.nattable.config.ConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.coordinate.PositionCoordinate;
@@ -236,38 +235,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	public void setFocus() {
 		natTable.setFocus();
 	}
-	
-	
-	/****
-	 * Add a new metric column
-	 * @param metric
-	 */
-	public void addMetricColumn(BaseMetric metric) {
-		// insert the new metric at zero-based index,
-		// update the table column which is a one-based index.
-		// sigh...
 		
-		bodyDataProvider.addColumn(0, metric);
-		bodyLayerStack.getBodyDataLayer().fireLayerEvent(new ColumnInsertEvent(bodyLayerStack, 1));
-		pack();
-	}
-	
-	
-	public void updateColumn(int index, Object newValue) {
-		BaseMetric metric = (BaseMetric) newValue;
-		bodyDataProvider.updateColumn(index, metric);
-		headerLayer.doCommand(new StructuralRefreshCommand());
-	}
-	
-	/***
-	 * Get the list of used metrics.
-	 * This returns all "user visible" metrics whether shown or hidden.
-	 * @return
-	 */
-	public List<BaseMetric> getMetricColumns() {
-		return bodyDataProvider.getMetrics();
-	}
-	
 	
 	/****
 	 * Freeze the tree column. 
@@ -296,6 +264,11 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		natTable.doCommand(new MultiColumnHideCommand(layer, positions));
 	}
 	
+	
+	/****
+	 * Show one or more columns.
+	 * @param columnIndexes int or int[] of column indexes
+	 */
 	public void showColumn(int... columnIndexes) {
 		natTable.doCommand(new MultiColumnShowCommand(columnIndexes));
 	}
@@ -474,6 +447,14 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	}
 
 	
+	public void refreshColumns() {
+		IScopeTreeData treeData = (IScopeTreeData) this.bodyLayerStack.getTreeRowModel().getTreeData();
+		treeData.refresh();
+		
+		bodyLayerStack.getBodyDataLayer().fireLayerEvent(new ColumnInsertEvent(bodyLayerStack, 1));
+	}
+	
+	
 	/*****
 	 * The same as refresh, but this time it will reset the root of the tree
 	 * and reconstruct completely the tree.
@@ -537,14 +518,6 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 			natTable.redraw();
 		}
 	}
-	
-	
-	@Override
-	public void traverseOrExpand(int index) {
-		ScopeTreeRowModel treeRowModel = bodyLayerStack.getTreeRowModel();
-		Scope scope = treeRowModel.getTreeData().getDataAtIndex(index);
-		traverseOrExpand(scope);
-	}
 
 	
 	@Override
@@ -581,6 +554,14 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	public void widgetDisposed(DisposeEvent e) {
         bodyLayerStack.getSelectionLayer().removeLayerListener(this);
         natTable.getParent().removeControlListener(resizeListener);
+	}
+	
+	
+	@Override
+	public void traverseOrExpand(int index) {
+		ScopeTreeRowModel treeRowModel = bodyLayerStack.getTreeRowModel();
+		Scope scope = treeRowModel.getTreeData().getDataAtIndex(index);
+		traverseOrExpand(scope);
 	}
 	
 	

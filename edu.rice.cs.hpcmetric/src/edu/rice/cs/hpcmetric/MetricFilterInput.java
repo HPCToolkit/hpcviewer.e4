@@ -18,7 +18,7 @@ public class MetricFilterInput extends FilterInputData<BaseMetric>
 	private final RootScope root;
 	private final boolean affectAll;
 	private final IMetricManager metricManager;
-
+	private final IFilterable view;
 
 	/****
 	 * Constructor for the metric filter input
@@ -31,6 +31,7 @@ public class MetricFilterInput extends FilterInputData<BaseMetric>
 	public MetricFilterInput(RootScope root, IMetricManager metricManager, IFilterable view, boolean affectAll) {
 		super(view.getFilterDataItems());
 		this.root = root;
+		this.view = view;
 		this.metricManager = metricManager;
 		this.affectAll = affectAll;
 	}
@@ -47,10 +48,14 @@ public class MetricFilterInput extends FilterInputData<BaseMetric>
 	public MetricFilterInput(RootScope root, IMetricManager metricManager, TreeViewer treeViewer, boolean affectAll) {	
 		super(createFilterList(metricManager.getVisibleMetrics(), treeViewer));
 		this.root = root;
+		this.view = null;
 		this.metricManager = metricManager;
 		this.affectAll = affectAll;
 	}
 	
+	public IFilterable getView() {
+		return view;
+	}
 	
 	public static List<FilterDataItem<BaseMetric>> createFilterList(List<BaseMetric> metrics, TreeViewer treeViewer) {
 		List<FilterDataItem<BaseMetric>> listItems = new ArrayList<>(metrics.size());

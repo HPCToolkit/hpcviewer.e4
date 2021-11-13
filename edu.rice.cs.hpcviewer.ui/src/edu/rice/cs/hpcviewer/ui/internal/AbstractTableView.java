@@ -26,6 +26,7 @@ import org.osgi.service.event.EventHandler;
 
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
+import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
@@ -266,7 +267,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 	 */
 	@Override
 	public List<FilterDataItem<BaseMetric>> getFilterDataItems() {
-		final List<BaseMetric> listMetrics    = getMetricManager().getNonEmptyVisibleMetrics(getRoot());
+		IScopeTreeData treeData = getTreeData(root, metricManager);
 		final List<BaseMetric> listAllMetrics = getMetricManager().getVisibleMetrics();	
 		
 		// List of indexes of the hidden columns based on the info from the table.
@@ -277,24 +278,24 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		final List<FilterDataItem<BaseMetric>> list = new ArrayList<FilterDataItem<BaseMetric>>(listAllMetrics.size());
 		
 		// fill up the visible metrics first
-		for(int i=0; i<listMetrics.size(); i++) {
+		for(int i=0; i<treeData.getMetricCount(); i++) {
 			boolean enabled = true;
 			boolean checked = isShown(i, hiddenColumnIndexes);
-			FilterDataItem<BaseMetric> item = new MetricFilterDataItem(listMetrics.get(i), checked, enabled);
+			BaseMetric metric = treeData.getMetric(i);
+			FilterDataItem<BaseMetric> item = new MetricFilterDataItem(metric, checked, enabled);
 			list.add(item);
 		}
 		
-		// fill up the invisible metrics		
+		// fill up the "invisible" metrics		
 		for(int i=0; i<listAllMetrics.size(); i++) {
 			final BaseMetric metric = listAllMetrics.get(i);
-			if (listMetrics.contains(metric))
-				continue;
-			
-			final boolean checked = false;
-			final boolean enabled = false;
-			
-			FilterDataItem<BaseMetric> item = new MetricFilterDataItem(metric, checked, enabled);
-			list.add(item);
+			if (metric.getValue(root) == MetricValue.NONE) {
+				final boolean checked = false;
+				final boolean enabled = false;
+				
+				FilterDataItem<BaseMetric> item = new MetricFilterDataItem(metric, checked, enabled);
+				list.add(item);
+			}			
 		}
 		return list;
 	}
@@ -373,13 +374,25 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		
 		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC)) {
 			// add a new metric column
-			BaseMetric metric = (BaseMetric) eventInfo.data;
-			table.addMetricColumn(metric);
+			//BaseMetric metric = (BaseMetric) eventInfo.data;
+			//table.addMetricColumn(metric);
+			table.refreshColumns();
+			table.pack();
 			
 		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE)) {
 			// metric has changed. 
 			// We don't know if the change will incur structural changes or just visual.
 			// it's better to refresh completely the table just in case. 
+			BaseMetric metric = (BaseMetric) eventInfo.data;
+			BaseMetric currentMetric = metricManager.getMetric(metric.getIndex());
+			currentMetric.setDisplayName(metric.getDisplayName());
+			
+			if (metric instanceof DerivedMetric) {
+				DerivedMetric dm = (DerivedMetric) metric;
+				DerivedMetric cm = (DerivedMetric) currentMetric;
+				cm.setExpression(dm.getFormula());
+				cm.setDisplayFormat(dm.getDisplayFormat());
+			}
 			table.refresh();
 			
 		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH)) {
@@ -473,6 +486,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 			if (mv != MetricValue.NONE)
 				index++;
 		}
+		assert(false);
 		return -1;
 	}
 	

@@ -340,11 +340,16 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 			return;
 		
 		if (event.getTopic().equals(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC)) {
-			BaseMetric metric = (BaseMetric) eventInfo.data;
+			/*BaseMetric metric = (BaseMetric) eventInfo.data;
 			FilterDataItem<BaseMetric> item = new MetricFilterDataItem(metric, true, true);
 			FilterList<FilterDataItem<BaseMetric>> listMetrics = getFilterList();
 			listMetrics.add(0, item);
-			getNatTable().refresh();
+			getNatTable().refresh();*/
+			MetricFilterInput input2 = new MetricFilterInput(input.getRoot(), 
+															 input.getMetricManager(), 
+															 input.getView(), 
+															 input.isAffectAll());
+			reset(input2);
 		}
 	}
 }

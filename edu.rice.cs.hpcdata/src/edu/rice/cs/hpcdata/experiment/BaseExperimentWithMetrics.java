@@ -6,8 +6,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
 import org.eclipse.collections.api.map.primitive.MutableIntObjectMap;
 import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
 
@@ -45,7 +43,7 @@ implements IMetricManager
 	 */
 	//private Map<Integer, BaseMetric> mapIndexToMetric;	
 	private MutableIntObjectMap<BaseMetric> mapIndexToMetric;
-	private Map<String, BaseMetric>  mapIdToMetric;
+
 	
 	//////////////////////////////////////////////////////////////////////////
 	//ACCESS TO METRICS													    //
@@ -64,7 +62,6 @@ implements IMetricManager
 	public void setMetrics(List<BaseMetric> metricList) {
 		metrics = metricList;
 		mapIndexToMetric = new IntObjectHashMap<>(metricList.size());// HashMap<Integer, BaseMetric>(metricList.size());
-		mapIdToMetric    = new HashMap<>(metricList.size());
 		metricsWithOrder = new HashMap<>(metricList.size()/2);
 		
 		// the simple index has to start from 1 since the zero index
@@ -78,7 +75,6 @@ implements IMetricManager
 				metricsWithOrder.put(metric.getOrder(), metric);
 			}
 			mapIndexToMetric.put(metric.getIndex(), metric);
-			mapIdToMetric.put(metric.getShortName(), metric);
 		}
 		
 		if (getMajorVersion() >= Constants.EXPERIMENT_SPARSE_VERSION) {
@@ -138,12 +134,19 @@ implements IMetricManager
 	
 
 	@Override
-	public List<BaseMetric> getNonEmptyVisibleMetrics(Scope scope) {
+	public List<Integer> getNonEmptyMetricIDs(Scope scope) {
 		List<BaseMetric> list = getVisibleMetrics();
+		List<Integer> listIDs = new ArrayList<>(list.size());
 		
-		return list.stream()
-				   .filter(m -> m.getValue(scope) != MetricValue.NONE)
-				   .collect(Collectors.toList());
+		// a non-efficient way to collect metric index into a list
+		// we should use Java's stream, but not sure how to do that
+		// any volunteer?
+		for(int i=0; i<list.size(); i++) {
+			BaseMetric m = list.get(i);
+			if (m.getValue(scope) != MetricValue.NONE)
+				listIDs.add(m.getIndex());
+		}
+		return listIDs;
 	}
 
 	
@@ -175,7 +178,7 @@ implements IMetricManager
 	 ************************************************************************/
 	public BaseMetric getMetric(String shortName)
 	{
-		return mapIdToMetric.get(shortName);	
+		return this.getMetric(Integer.valueOf(shortName));	
 	}
 	
 	@Override

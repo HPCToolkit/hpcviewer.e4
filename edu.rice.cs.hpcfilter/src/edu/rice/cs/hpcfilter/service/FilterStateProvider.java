@@ -1,6 +1,7 @@
 package edu.rice.cs.hpcfilter.service;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -67,7 +68,8 @@ public class FilterStateProvider
 				// ---------------------------------------
 				// conserve the added metrics
 				// ---------------------------------------
-				ArrayList<DerivedMetric> metrics = new ArrayList<DerivedMetric>(1);
+				List<BaseMetric> metrics = new ArrayList<BaseMetric>(experiment.getMetricCount());
+
 				for (BaseMetric metric : experiment.getMetricList()) {
 					if (metric instanceof DerivedMetric && 
 						metric.getMetricType()==MetricType.UNKNOWN) {
@@ -76,6 +78,8 @@ public class FilterStateProvider
 						//  provided by hpcprof
 						
 						metrics.add((DerivedMetric) metric);
+					} else {
+						metrics.add(metric.duplicate());
 					}
 				}
 				// ---------------------------------------
@@ -85,11 +89,10 @@ public class FilterStateProvider
 				experiment.filter(FilterMap.getInstance());
 				
 				// ---------------------------------------
-				// put the derived metrics back
+				// put the original metrics and derived metrics back
 				// ---------------------------------------
-				for (DerivedMetric metric: metrics) {
-					experiment.addDerivedMetric(metric);
-				}
+				experiment.setMetrics(metrics);
+
 				RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
 				ThreadDataCollectionFactory.build(root);
 				

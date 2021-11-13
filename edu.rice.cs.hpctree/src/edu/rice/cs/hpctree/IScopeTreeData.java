@@ -35,31 +35,12 @@ public interface IScopeTreeData extends ITreeData<Scope>
 	public Scope getRoot();
 	
 	public int getSortedColumn();
+
 	public SortDirectionEnum getSortDirection();
 	
-	public BaseMetric getMetric(int indexMetric);
-	public List<BaseMetric> getMetrics();
-	public void addMetric(int index, BaseMetric metric);
-	public void addMetric(BaseMetric metric);
+	public BaseMetric getMetric(int indexMetricColumn);
+
 	public int getMetricCount();
-
-
-	/****
-	 * Set a metric to the specified index.
-	 * @param index
-	 * @param metric
-	 */
-	void updateMetric(int index, BaseMetric metric);
-
-
-	/*****
-	 * Get the index of a metric. 
-	 * The index is usually the position of the metric from the table.
-	 * 
-	 * @param metric
-	 * @return the index from the list
-	 */
-	int getMetricIndex(BaseMetric metric);
 
 	/****
 	 * Retrieve the path (list of nodes) from the current node to the current "root".
@@ -77,4 +58,12 @@ public interface IScopeTreeData extends ITreeData<Scope>
 	 * @return
 	 */
 	int indexOfBasedOnCCT(int cctIndex);
+
+
+	/****
+	 * Refresh the content of the tree data.
+	 * This is used when there is a change in the metrics, 
+	 * like new metrics have been added.
+	 */
+	void refresh();
 }
