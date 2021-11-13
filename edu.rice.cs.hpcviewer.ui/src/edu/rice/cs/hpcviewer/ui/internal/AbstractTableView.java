@@ -285,16 +285,19 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 			FilterDataItem<BaseMetric> item = new MetricFilterDataItem(metric, checked, enabled);
 			list.add(item);
 		}
+		final List<Integer> indexes = metricManager.getNonEmptyMetricIDs(root);
 		
 		// fill up the "invisible" metrics		
 		for(int i=0; i<listAllMetrics.size(); i++) {
 			final BaseMetric metric = listAllMetrics.get(i);
 			if (metric.getValue(root) == MetricValue.NONE) {
-				final boolean checked = false;
-				final boolean enabled = false;
-				
-				FilterDataItem<BaseMetric> item = new MetricFilterDataItem(metric, checked, enabled);
-				list.add(item);
+				if (!indexes.contains(metric.getIndex())) {
+					final boolean checked = false;
+					final boolean enabled = false;
+					
+					FilterDataItem<BaseMetric> item = new MetricFilterDataItem(metric, checked, enabled);
+					list.add(item);
+				}
 			}			
 		}
 		return list;

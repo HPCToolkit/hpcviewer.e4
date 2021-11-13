@@ -68,7 +68,7 @@ public class ThreadMetricManager implements IMetricManager
 
 	@Override
 	public void addDerivedMetric(DerivedMetric objMetric) {
-		getRawMetrics().add(objMetric);
+		getRawMetrics().add(0, objMetric);
 	}
 
 	@Override

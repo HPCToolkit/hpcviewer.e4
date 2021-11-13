@@ -44,7 +44,6 @@ import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.ExtFuncMap;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
-import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.metric.MetricVarMap;
 import edu.rice.cs.hpcdata.experiment.metric.format.IMetricValueFormat;
 import edu.rice.cs.hpcdata.experiment.metric.format.MetricValuePredefinedFormat;
@@ -80,7 +79,6 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 	private final ExtFuncMap fctMap;
 	private final MetricVarMap varMap;
 	private final RootScope root;
-	private final BaseMetric[] metrics;
 	
 	private DerivedMetric metric;
 	
@@ -109,16 +107,10 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 	
 	public ExtDerivedMetricDlg(Shell parent, IMetricManager mm, RootScope root, Scope s) {
 		super(parent);
-		metricManager = mm;
-		this.root  = root;
+		this.metricManager = mm;
+		this.root   = root;
 		this.fctMap = new ExtFuncMap();
 		this.varMap = new MetricVarMap ( root, s, mm );
-		
-    	List<BaseMetric> listOfMetrics = this.metricManager.getVisibleMetrics();
-    	metrics = listOfMetrics.
-    				stream().
-    				filter(m -> root.getMetricValue(m) != MetricValue.NONE).toArray(BaseMetric[]::new);
-
 	}
 	
 	  //==========================================================
@@ -242,10 +234,14 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 	    	
 	    	// combo box that lists the metrics
 	    	final Combo cbMetric = new Combo(grpInsertion, SWT.READ_ONLY);
-	    	final String[]metricNames = new String[metrics.length];
+			
+	    	List<Integer> indexes = this.metricManager.getNonEmptyMetricIDs(root);
+	    	final String[]metricNames = new String[indexes.size()];
+
 	    	int i=0;
-			for(BaseMetric metric: metrics) {
-				metricNames[i++] = metric.getShortName() + ": " + metric.getDisplayName(); 
+			for(Integer index: indexes) {				
+				BaseMetric m = metricManager.getMetric(index);
+				metricNames[i++] = m.getShortName() + ": " + m.getDisplayName(); 
 			}
 
 	    	cbMetric.setItems(metricNames);
@@ -453,7 +449,10 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 		  StringBuffer sBuff = new StringBuffer(sText);
 
 		  // insert the metric variable ( i.e.: $ + metric index)
-		  final String sMetricIndex = signToPrepend + metrics[selection_index].getShortName() ; 
+		  List<Integer> indexes = metricManager.getNonEmptyMetricIDs(root);
+		  BaseMetric m = metricManager.getMetric(indexes.get(selection_index));
+		  
+		  final String sMetricIndex = signToPrepend + m.getShortName() ; 
 		  sBuff.insert(iSelIndex, sMetricIndex );
 		  cbExpression.setText(sBuff.toString());
 
