@@ -2,6 +2,7 @@ package edu.rice.cs.hpcdata.experiment.metric;
 
 import java.util.List;
 
+import ca.odell.glazedlists.event.ListEventListener;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 /******************************************************************
@@ -58,4 +59,17 @@ public interface IMetricManager
 	 * @param objMetric {@code DerivedMetric} a new metric
 	 */
 	public void addDerivedMetric(DerivedMetric objMetric);
+	
+	/****
+	 * Add a listener for any change in list of metrics
+	 * @param listener
+	 */
+	public void addMetricListener(ListEventListener<BaseMetric> listener);
+	
+	
+	/****
+	 * Remove the existing listener
+	 * @param listener
+	 */
+	public void removeMetricListener(ListEventListener<BaseMetric> listener);
 }

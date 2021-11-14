@@ -243,7 +243,6 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 
 		addButtonListener(root, metricManager);
 
-		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC, this);
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE,  this);
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN,   this);
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH, this);
@@ -374,13 +373,6 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 					return;
 			}
 			hideORShowColumns(dataEvent);
-		
-		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC)) {
-			// add a new metric column
-			//BaseMetric metric = (BaseMetric) eventInfo.data;
-			//table.addMetricColumn(metric);
-			table.addNewColumn(1);
-			table.pack();
 			
 		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE)) {
 			// metric has changed. 

@@ -156,15 +156,14 @@ public class MetricValueCollection3 implements IMetricValueCollection
 
 	@Override
 	public boolean hasMetrics(Scope scope) {
-		// trigger initialization
-		Experiment exp = (Experiment) scope.getRootScope().getExperiment();
-		List<BaseMetric> list = exp.getMetricList();
 	
 		// TODO: hack -- grab the first metric for initialization purpose
 		// just to make sure we already initialized :-(
 		
 		if (values == null) {
-			getValue(scope, list.get(0).getIndex());
+			// trigger initialization
+			Experiment exp = (Experiment) scope.getRootScope().getExperiment();
+			getValue(scope, exp.getMetric(0).getIndex());
 		}
 
 		if (values != null)

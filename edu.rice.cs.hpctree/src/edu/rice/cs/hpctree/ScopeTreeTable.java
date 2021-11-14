@@ -46,6 +46,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
@@ -77,37 +79,21 @@ import edu.rice.cs.hpctree.internal.config.TableFontConfiguration;
  * like a composite for the layout.
  *
  ********************************************************************/
-public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayerListener
+public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayerListener, ListEventListener<BaseMetric>
 {
 	private final static String TEXT_METRIC_COLUMN = "|8x88+88xx888x8%";
 	private final static String STRING_PADDING  = "XX"; 
 
-	private final NatTable natTable ;
-	
+	private final NatTable       natTable ;
+	private final ResizeListener resizeListener;
+
 	private final DataLayer 			  columnHeaderDataLayer ;
 	private final ScopeTreeBodyLayerStack bodyLayerStack ;
 	private final ScopeTreeDataProvider   bodyDataProvider;
 	private final TableConfiguration      tableConfiguration;
+	private final SortHeaderLayer<Scope>  headerLayer;
+		
 	private final Collection<IActionListener> listeners = new FastList<IActionListener>();
-	private final SortHeaderLayer<Scope> headerLayer;
-	
-	private final ResizeListener resizeListener;
-	
-	/****
-	 * Constructor to a dynamic create tree table using the default tree provider
-	 * 
-	 * @param parent 
-	 * 			the parent widget, it has to be a composite
-	 * @param style
-	 * 			The style of the table (not used)
-	 * @param root
-	 * 			The root of the table
-	 * @param metricManager
-	 * 			The metric manager {@link IMetricManager} can be an experiment class 
-	 */
-	public ScopeTreeTable(Composite parent, int style, RootScope root, IMetricManager metricManager) {
-		this(parent, style, new ScopeTreeData(root, metricManager));
-	}
 	
 	
 	/**** 
@@ -200,7 +186,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         natTable.setTheme(defaultConfiguration);
 
         // --------------------------------
-        // table settings
+        // table settings and layouts
         // --------------------------------
 
         freezeTreeColumn();
@@ -212,12 +198,19 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         gridData.minimumHeight = 1;
         gridData.minimumWidth  = 1;
         natTable.setLayoutData(gridData);
-
 		natTable.setLayerPainter(new NatGridLayerPainter(natTable, DataLayer.DEFAULT_ROW_HEIGHT));
+
+        // --------------------------------
+		// table listeners
+        // --------------------------------
+
 		natTable.addDisposeListener(this);
 		
 		resizeListener = new ResizeListener(this);
 		parent.addControlListener(resizeListener);
+		
+		IMetricManager metricManager = treeData.getMetricManager();
+		metricManager.addMetricListener(this);
 		
 		pack();			
 	}
@@ -447,25 +440,6 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	}
 
 	
-	/*********
-	 * Add a new column
-	 * @param columnPosition
-	 * 			 the position of the new column. It has to reflect the position of the added new metric.
-	 */
-	public void addNewColumn(int columnPosition) {
-		// notify the tree data that we have to refresh the list of metrics
-		IScopeTreeData treeData = (IScopeTreeData) this.bodyLayerStack.getTreeRowModel().getTreeData();
-		treeData.refresh();
-		
-		// make sure the table is refreshed to take into account the new column
-		refresh();
-		
-		// hack: needs to add a column manually for the new metric
-		// without this, the display is weird and the position of the columns is incorrect. I don't know why
-		bodyLayerStack.getBodyDataLayer().fireLayerEvent(new ColumnInsertEvent(bodyLayerStack, columnPosition));
-	}
-	
-	
 	/*****
 	 * The same as refresh, but this time it will reset the root of the tree
 	 * and reconstruct completely the tree.
@@ -530,6 +504,23 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		}
 	}
 
+
+	@Override
+	public void listChanged(ListEvent<BaseMetric> listChanges) {
+		IScopeTreeData treeData = (IScopeTreeData) bodyLayerStack.getTreeRowModel().getTreeData();
+		treeData.refresh();
+		while(listChanges.next()) {
+			switch(listChanges.getType()) {
+			case ListEvent.INSERT:
+				int index = listChanges.getIndex();
+				bodyLayerStack.getBodyDataLayer().fireLayerEvent(new ColumnInsertEvent(bodyLayerStack, index+1));
+
+			}
+		}
+		refresh();
+		pack();
+	}
+
 	
 	@Override
 	public void setRoot(Scope root) {
@@ -563,6 +554,11 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	
 	@Override
 	public void widgetDisposed(DisposeEvent e) {
+		((IScopeTreeData)bodyLayerStack
+							.getTreeRowModel()
+							.getTreeData())
+								.getMetricManager()
+								.removeMetricListener(this);
         bodyLayerStack.getSelectionLayer().removeLayerListener(this);
         natTable.getParent().removeControlListener(resizeListener);
 	}

@@ -15,7 +15,6 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
-import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.Metric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
@@ -23,6 +22,8 @@ import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpctree.IScopeTreeData;
+import edu.rice.cs.hpctree.ScopeTreeData;
 import edu.rice.cs.hpctree.ScopeTreeTable;
 
 
@@ -40,9 +41,9 @@ public class TestMain
 		shell.setLayout(new FillLayout());
 		shell.setText("Test Tree");
 		
-        RootScope root = createTree();
+		IScopeTreeData treeData = createTree();
 
-		ScopeTreeTable table = new ScopeTreeTable(shell, SWT.NONE, root, (IMetricManager) root.getExperiment());
+		new ScopeTreeTable(shell, SWT.NONE, treeData);
 		
 		shell.open();
 		
@@ -58,7 +59,7 @@ public class TestMain
 
 
 	
-	private static RootScope createTree() {
+	private static IScopeTreeData createTree() {
 		Experiment experiment = new Experiment();
 		List<BaseMetric> listMetrics = new ArrayList<>();
 		for (int i=0; i<20; i++) {
@@ -75,7 +76,9 @@ public class TestMain
 		createMetric(root, experiment);
 		createTreeNode(root, root, 1, 4, 1, 10);
 		
-		return root;
+        IScopeTreeData treeData = new ScopeTreeData(root, experiment);
+
+		return treeData;
 	}
 	
 	private static void createTreeNode(RootScope root, Scope parent, int id, int children, int level, int maxLevel) {

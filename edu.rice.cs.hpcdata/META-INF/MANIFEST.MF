@@ -23,7 +23,8 @@ Export-Package: edu.rice.cs.hpcdata.db,
  edu.rice.cs.hpcdata.util.string
 Main-Class: edu.rice.cs.hpcdata.framework.Application
 Require-Bundle: com.graphbuilder,
- org.eclipse.collections
+ org.eclipse.collections,
+ ca.odell.glazedlists
 Automatic-Module-Name: edu.rice.cs.hpcdata
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .,

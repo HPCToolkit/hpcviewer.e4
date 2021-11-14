@@ -5,6 +5,9 @@ import java.util.List;
 
 import org.eclipse.collections.impl.list.mutable.FastList;
 
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.event.ListEventListener;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
@@ -14,15 +17,16 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 public class ThreadMetricManager implements IMetricManager 
 {
-	private final List<BaseMetric> rawMetrics;
+	private final EventList<BaseMetric> rawMetrics;
 	
 	public ThreadMetricManager(List<BaseMetric> metrics, List<Integer> listThreads) {
-		this.rawMetrics = FastList.newList(metrics.size());
+		List<BaseMetric> listMetrics = FastList.newList(metrics.size());
 		for(BaseMetric m: metrics) {
 			MetricRaw mr = MetricRaw.create(m);
 			mr.setThread(listThreads);
-			rawMetrics.add(mr);
+			listMetrics.add(mr);
 		}
+		rawMetrics = GlazedLists.eventList(listMetrics);
 	}
 
 	@Override
@@ -79,6 +83,16 @@ public class ThreadMetricManager implements IMetricManager
 			listIDs.add(m.getIndex());
 		}
 		return listIDs;
+	}
+
+	@Override
+	public void addMetricListener(ListEventListener<BaseMetric> listener) {
+		rawMetrics.addListEventListener(listener);
+	}
+
+	@Override
+	public void removeMetricListener(ListEventListener<BaseMetric> listener) {
+		rawMetrics.removeListEventListener(listener);
 	}
 
 }

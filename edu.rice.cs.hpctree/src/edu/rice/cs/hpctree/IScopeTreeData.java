@@ -6,6 +6,7 @@ import org.eclipse.nebula.widgets.nattable.sort.SortDirectionEnum;
 import org.eclipse.nebula.widgets.nattable.tree.ITreeData;
 
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
+import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 public interface IScopeTreeData extends ITreeData<Scope> 
@@ -23,9 +24,20 @@ public interface IScopeTreeData extends ITreeData<Scope>
 	 * Reset the data
 	 */
 	public void clear();
-		
+	
+	
+	/*****
+	 * get the current list of nodes in the table.
+	 * 
+	 * @return
+	 */
 	public List<Scope> getList();
 	
+	
+	/*****
+	 * Set the new root to the table. This will generate new list of nodes.
+	 * @param root
+	 */
 	public void setRoot(Scope root);
 	
 	/****
@@ -34,12 +46,44 @@ public interface IScopeTreeData extends ITreeData<Scope>
 	 */
 	public Scope getRoot();
 	
+	
+	/****
+	 * Get the current sorted column
+	 * 
+	 * @return
+	 */
 	public int getSortedColumn();
 
+	
+	/****
+	 * Get the current sort direction
+	 * @return
+	 */
 	public SortDirectionEnum getSortDirection();
 	
+	
+	
+	/****
+	 * Retrieve the metric manager of this tree
+	 * @return
+	 */
+	public IMetricManager getMetricManager();
+	
+	/****
+	 * Retrieve the metric of the current metric index (the index is based on table column index,
+	 * not a metric ID or the experiment's index).
+	 * 
+	 * @param indexMetricColumn
+	 * @return
+	 */
 	public BaseMetric getMetric(int indexMetricColumn);
 
+	
+	/****
+	 * Retrieve the total number of metrics, including current hidden metrics
+	 * 
+	 * @return
+	 */
 	public int getMetricCount();
 
 	/****

@@ -16,7 +16,6 @@ package edu.rice.cs.hpcdata.experiment;
 
 
 import edu.rice.cs.hpcdata.experiment.metric.*;
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
 import edu.rice.cs.hpcdata.experiment.scope.*;
 import edu.rice.cs.hpcdata.experiment.scope.filters.*;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.*;
@@ -25,7 +24,6 @@ import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.IUserData;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -99,15 +97,6 @@ public class Experiment extends BaseExperimentWithMetrics
 				accumulateMetricsFromKids(target, child, filter);
 			}
 			target.accumulateMetrics(child, filter, this.getMetricCount());
-		}
-	}
-
-	protected void copyMetric(Scope target, Scope source, int src_i, int targ_i, MetricValuePropagationFilter filter) {
-		if (filter.doPropagation(source, target, src_i, targ_i)) {
-			MetricValue mv = source.getMetricValue(src_i);
-			if (mv != MetricValue.NONE && Float.compare(MetricValue.getValue(mv), 0.0f)!=0) {
-				target.setMetricValue(targ_i, mv);
-			}
 		}
 	}
 
@@ -228,51 +217,6 @@ public class Experiment extends BaseExperimentWithMetrics
 		scope.dfsVisitScopeTree(visitor);
 	}
 
-	protected void copyMetricsToPartner(Scope scope, MetricType sourceType, MetricValuePropagationFilter filter) {
-		ArrayList<BaseMetric> listDerivedMetrics = new ArrayList<>();
-		
-		for(BaseMetric metric: metrics) {
-			if (metric instanceof Metric) {
-				if (metric.getMetricType() == sourceType) {
-					// get the partner index (if the metric exclusive, its partner is inclusive)
-					
-					int partner 			 = metric.getPartner(); 	 // get the partner ID
-					BaseMetric partnerMetric = getMetric(partner);   // get the partner metric
-					int partnerIndex		 = partnerMetric.getIndex(); // get the index of partner metric
-					
-					copyMetric(scope, scope, metric.getIndex(), partnerIndex, filter);
-				}
-			} else if (metric instanceof AggregateMetric) {
-				if (metric.getMetricType() == MetricType.EXCLUSIVE ) {
-					int partner = ((AggregateMetric)metric).getPartner();
-					String partner_id = String.valueOf(partner);
-					BaseMetric partner_metric = getMetric( partner_id );
-
-					// case for old database: no partner information
-					if (partner_metric != null) {
-						MetricValue partner_value = scope.getMetricValue( partner_metric );
-						scope.setMetricValue(metric.getIndex(), partner_value);
-					}
-				}
-			} else if (metric instanceof DerivedMetric) {
-				listDerivedMetrics.add(metric);
-			}
-		}
-
-		// compute the root value of derived metric at the end
-		// some times, hpcrun derived metrics require the value of "future" metrics. 
-		// This causes the value of derived metrics to be empty.
-		// If we compute derived metrics at the end, we are more guaranteed that the value
-		// is not empty.
-		// FIXME: unless a derived metric requires a value of "future" derived metric. 
-		//        In this case, we are doomed.
-		
-		for (BaseMetric metric: listDerivedMetrics) {
-			// compute the metric value
-			MetricValue mv = metric.getValue(scope);
-			scope.setMetricValue(metric.getIndex(), mv);
-		}
-	}
 
 	protected void addPercents(Scope scope, RootScope totalScope)
 	{	
@@ -343,34 +287,9 @@ public class Experiment extends BaseExperimentWithMetrics
 		} else if (firstRootType.equals(RootScopeType.Flat)) {
 			addPercents(firstSubTree, (RootScope) firstSubTree);
 		}
-		
-		// hide columns if the metric is to be shown but has no value
-		for(BaseMetric metric: metrics) {
-			if (metric.getVisibility() == VisibilityType.SHOW &&
-				metric.getValue(firstSubTree) == MetricValue.NONE) {
-				
-				metric.setDisplayed(BaseMetric.VisibilityType.HIDE);
-			}
-		}
+		hideEmptyMetrics(firstSubTree);
 	}
 
-
-	/**
-	 * Check if an inclusive computation is needed or not
-	 * <br/>we need to compute inclusive metrics if the metric is a raw metric (or its kinds)
-	 * @return true if inclusive computation is needed
-	 */
-	private boolean inclusiveNeeded() {
-		
-		for (BaseMetric m: metrics) {
-			boolean isNeeded = !(   (m instanceof FinalMetric) 
-					     || (m instanceof AggregateMetric) 
-					     || (m instanceof DerivedMetric) );
-			if (isNeeded)
-				return true;
-		}
-		return false;
-	}
 
 	public Experiment duplicate() {
 

@@ -106,6 +106,7 @@ public class ScopeTreeData implements IScopeTreeData
 	 * @param sortDirection {@code SortDirectionEnum}
 	 * @param accumulate
 	 */
+	@Override
 	public void sort(int columnIndex, SortDirectionEnum sortDirection, boolean accumulate) {
 		this.sortDirection = sortDirection;
 		
@@ -128,20 +129,28 @@ public class ScopeTreeData implements IScopeTreeData
 	}
 	
 	
-	public ColumnComparator getComparator(int columnIndex, SortDirectionEnum sortDir) {
-		ColumnComparator comparator = new ColumnComparator(this, columnIndex, sortDir);
-		return comparator;
+	protected ColumnComparator getComparator(int columnIndex, SortDirectionEnum sortDir) {
+		return new ColumnComparator(this, columnIndex, sortDir);
 	}
 	
 	
+
+	@Override
 	public int getSortedColumn() {
 		return sortedColumn;
 	}
 
+
+	@Override
 	public SortDirectionEnum getSortDirection() {
 		return sortDirection;
 	}
 	
+	
+	@Override
+	public IMetricManager getMetricManager() {
+		return metricManager;
+	}
 	
 	@Override
 	public BaseMetric getMetric(int indexMetricColumn) {
