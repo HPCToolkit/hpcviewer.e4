@@ -22,14 +22,12 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
 import org.osgi.service.prefs.Preferences;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
-
-
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcbase.map.UserInputHistory;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
@@ -56,7 +54,7 @@ import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
  *
  ************************************************************************/
 public class MetricFilterPane extends AbstractFilterPane<BaseMetric> 
-	implements IFilterChangeListener, EventHandler
+	implements IFilterChangeListener, ListEventListener<BaseMetric>
 {	
 	private static final String HISTORY_COLUMN_PROPERTY = "column_property";
 	private static final String HISTORY_APPLY_ALL = "apply-all";
@@ -87,7 +85,7 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 		
 		if (style == STYLE_COMPOSITE) {
 			// Real application, not within a simple unit test
-			eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC, this);
+			inputData.getMetricManager().addMetricListener(this);
 		}
 	}
 
@@ -329,27 +327,19 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 	}
 
 
+
 	@Override
-	public void handleEvent(Event event) {
-		Object obj = event.getProperty(IEventBroker.DATA);
-		if (obj == null)
-			return;
-		
-		ViewerDataEvent eventInfo = (ViewerDataEvent) obj;
-		if (eventInfo.metricManager != input.getMetricManager())
-			return;
-		
-		if (event.getTopic().equals(ViewerDataEvent.TOPIC_HPC_ADD_NEW_METRIC)) {
-			/*BaseMetric metric = (BaseMetric) eventInfo.data;
-			FilterDataItem<BaseMetric> item = new MetricFilterDataItem(metric, true, true);
-			FilterList<FilterDataItem<BaseMetric>> listMetrics = getFilterList();
-			listMetrics.add(0, item);
-			getNatTable().refresh();*/
-			MetricFilterInput input2 = new MetricFilterInput(input.getRoot(), 
-															 input.getMetricManager(), 
-															 input.getView(), 
-															 input.isAffectAll());
-			reset(input2);
-		}
+	public void listChanged(ListEvent<BaseMetric> listChanges) {
+		while (listChanges.next()) {
+			if (listChanges.getType() == ListEvent.INSERT) {
+				// new metric has been added
+				// need to refresh the underlying layer
+				MetricFilterInput input2 = new MetricFilterInput(input.getRoot(), 
+						 input.getMetricManager(), 
+						 input.getView(), 
+						 input.isAffectAll());
+				reset(input2);
+			}
+		}		
 	}
 }
