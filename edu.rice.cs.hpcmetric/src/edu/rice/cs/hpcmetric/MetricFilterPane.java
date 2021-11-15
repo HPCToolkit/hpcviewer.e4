@@ -22,6 +22,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 import org.osgi.service.prefs.Preferences;
 
 import ca.odell.glazedlists.EventList;
@@ -32,6 +34,7 @@ import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcbase.map.UserInputHistory;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
+import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcfilter.AbstractFilterPane;
 import edu.rice.cs.hpcfilter.FilterDataItem;
 import edu.rice.cs.hpcfilter.FilterDataItemSortModel;
@@ -54,7 +57,7 @@ import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
  *
  ************************************************************************/
 public class MetricFilterPane extends AbstractFilterPane<BaseMetric> 
-	implements IFilterChangeListener, ListEventListener<BaseMetric>
+	implements IFilterChangeListener, ListEventListener<BaseMetric>, EventHandler
 {	
 	private static final String HISTORY_COLUMN_PROPERTY = "column_property";
 	private static final String HISTORY_APPLY_ALL = "apply-all";
@@ -85,7 +88,8 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 		
 		if (style == STYLE_COMPOSITE) {
 			// Real application, not within a simple unit test
-			inputData.getMetricManager().addMetricListener(this);
+			updateMetricManager(input.getMetricManager());
+			eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH, this);
 		}
 	}
 
@@ -97,7 +101,13 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 	 * @param inputData
 	 */
 	public void setInput(FilterInputData<BaseMetric> inputData) { 
+		// first, remove the listener to the old metric manager
+		input.getMetricManager().removeMetricListener(this);
+
+		// then register to listen to this manager
 		this.input = (MetricFilterInput) inputData;
+
+		updateMetricManager(input.getMetricManager());
 		
 		// important: has to reset the data provider to null 
 		// so we'll create a different instance of data provider 
@@ -106,6 +116,10 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 		getNatTable().refresh();
 	}
 	
+	
+	private void updateMetricManager(IMetricManager metricManager) {		
+		input.getMetricManager().addMetricListener(this);
+	}
 	
 	@Override
 	protected String getFilterLabel() {
@@ -341,5 +355,22 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 				reset(input2);
 			}
 		}		
+	}
+
+
+	@Override
+	public void handleEvent(Event event) {
+		Object obj = event.getProperty(IEventBroker.DATA);
+		if (obj == null || input == null)
+			return;
+		
+		// check if we have a generic event
+		ViewerDataEvent eventInfo = (ViewerDataEvent) obj;
+		if (input.getMetricManager() != eventInfo.metricManager) 
+			return;
+
+		if (event.getTopic().equals(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH)) {
+			updateMetricManager(eventInfo.metricManager);
+		}
 	}
 }

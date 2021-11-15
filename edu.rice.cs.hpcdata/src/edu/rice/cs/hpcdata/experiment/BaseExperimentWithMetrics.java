@@ -174,8 +174,7 @@ implements IMetricManager, ListEventListener<BaseMetric>
 	 * <br/>we need to compute inclusive metrics if the metric is a raw metric (or its kinds)
 	 * @return true if inclusive computation is needed
 	 */
-	protected boolean inclusiveNeeded() {
-		
+	protected boolean inclusiveNeeded() {		
 		for (BaseMetric m: metrics) {
 			boolean isNeeded = !(   (m instanceof FinalMetric) 
 					     || (m instanceof AggregateMetric) 
@@ -187,6 +186,7 @@ implements IMetricManager, ListEventListener<BaseMetric>
 	}
 
 
+	@Override
 	public void listChanged(ListEvent<BaseMetric> listChanges) {
 		while(listChanges.next()) {
 			if (listChanges.getType() == ListEvent.INSERT) {

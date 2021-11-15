@@ -527,6 +527,10 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		ScopeTreeRowModel treeRowModel = bodyLayerStack.getTreeRowModel();
 		treeRowModel.setRoot(root);
 		
+		// new data: need to add listener to the change in the metrics
+		ScopeTreeData treeData = (ScopeTreeData) treeRowModel.getTreeData();
+		treeData.getMetricManager().addMetricListener(this);
+		
 		refresh();
 		
 		// expand the root and select the first child if exist        

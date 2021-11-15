@@ -25,9 +25,8 @@ public class ScopeTreeData implements IScopeTreeData
 {
 	/** list of current data. The list is dynamic **/
 	private final MutableList<Scope>    listScopes;	
-	//private final EventList<BaseMetric> listMetrics;
-	private List<Integer> indexesNonEmptyMetrics;
 
+	private List<Integer> indexesNonEmptyMetrics;
 	private IMetricManager metricManager;
 	private Scope root;
 	

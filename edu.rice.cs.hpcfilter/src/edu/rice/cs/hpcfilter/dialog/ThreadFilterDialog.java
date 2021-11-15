@@ -70,7 +70,13 @@ public class ThreadFilterDialog extends Dialog
 		composite.setLayout(grid);
 
 		
-		filterPane = new BaseFilterPane<String>(composite, AbstractFilterPane.STYLE_INDEPENDENT, data);
+		filterPane = new BaseFilterPane<String>(composite, AbstractFilterPane.STYLE_INDEPENDENT, data) {
+
+			@Override
+			protected String[] getColumnHeaderLabels() {
+				return new String[] {"  ", "Ranks or threads"};
+			}
+		};
 
 		return composite;
 	}
