@@ -10,12 +10,14 @@ import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.config.IConfiguration;
 import org.eclipse.nebula.widgets.nattable.grid.GridRegion;
 import org.eclipse.nebula.widgets.nattable.layer.ILayer;
+import org.eclipse.nebula.widgets.nattable.layer.cell.ILayerCell;
 import org.eclipse.nebula.widgets.nattable.painter.cell.ICellPainter;
 import org.eclipse.nebula.widgets.nattable.painter.cell.ImagePainter;
 import org.eclipse.nebula.widgets.nattable.painter.cell.TextPainter;
 import org.eclipse.nebula.widgets.nattable.painter.cell.decorator.CellPainterDecorator;
 import org.eclipse.nebula.widgets.nattable.style.CellStyleAttributes;
 import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
+import org.eclipse.nebula.widgets.nattable.style.IStyle;
 import org.eclipse.nebula.widgets.nattable.style.Style;
 import org.eclipse.nebula.widgets.nattable.ui.NatEventData;
 import org.eclipse.nebula.widgets.nattable.ui.action.IMouseAction;
@@ -25,12 +27,14 @@ import org.eclipse.nebula.widgets.nattable.ui.matcher.MouseEventMatcher;
 import org.eclipse.nebula.widgets.nattable.ui.util.CellEdgeEnum;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.widgets.Control;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
+import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcsetting.color.ColorManager;
 import edu.rice.cs.hpctree.action.IActionListener;
 import edu.rice.cs.hpctree.internal.ScopeAttributeMouseEventMatcher;
-import edu.rice.cs.hpctree.internal.ScopeAttributePainter;
 import edu.rice.cs.hpctree.internal.ScopeTreeDataProvider;
 import edu.rice.cs.hpctree.internal.ScopeTreeLabelAccumulator;
 import edu.rice.cs.hpctree.resources.ViewerColorManager;
@@ -53,6 +57,8 @@ import edu.rice.cs.hpctree.resources.IconManager;
  *******************************************************************/
 public class TableConfiguration implements IConfiguration 
 {
+	private static final String SUFFIX_LINE  = ": ";
+
 	private final ScopeTreeDataProvider dataProvider;
 	private final Control widget;
 	
@@ -70,11 +76,11 @@ public class TableConfiguration implements IConfiguration
 
 	@Override
 	public void configureRegistry(IConfigRegistry configRegistry) {
-		painters.addAll( addIconLabel(configRegistry, IconManager.Image_CallTo, ScopeTreeLabelAccumulator.LABEL_CALLSITE) );
-		addIconLabel(configRegistry, IconManager.Image_CallToDisabled, ScopeTreeLabelAccumulator.LABEL_CALLSITE_DISABLED);
+		painters.addAll( addIconLabel(configRegistry, IconManager.Image_CallTo, ScopeTreeLabelAccumulator.LABEL_CALLSITE, true));
+		addIconLabel(configRegistry, IconManager.Image_CallToDisabled, ScopeTreeLabelAccumulator.LABEL_CALLSITE_DISABLED, false);
 
-		painters.addAll( addIconLabel(configRegistry, IconManager.Image_CallFrom, ScopeTreeLabelAccumulator.LABEL_CALLER) );
-		addIconLabel(configRegistry, IconManager.Image_CallFromDisabled, ScopeTreeLabelAccumulator.LABEL_CALLER_DISABLED);
+		painters.addAll( addIconLabel(configRegistry, IconManager.Image_CallFrom, ScopeTreeLabelAccumulator.LABEL_CALLER, true));
+		addIconLabel(configRegistry, IconManager.Image_CallFromDisabled, ScopeTreeLabelAccumulator.LABEL_CALLER_DISABLED, false);
 		
 		final Style styleTopRow = new Style();
 		Color clrBg = ViewerColorManager.getBgTopRow(widget);
@@ -167,14 +173,41 @@ public class TableConfiguration implements IConfiguration
 	
 	private List<ICellPainter> addIconLabel(IConfigRegistry configRegistry, 
 											String  imageName, 
-											String  label) {
+											String  label,
+											boolean active) {
 		
 		IconManager iconManager = IconManager.getInstance();
 		
 		ImagePainter imagePainter = new ImagePainter(iconManager.getImage(imageName));
-		ScopeAttributePainter att = new ScopeAttributePainter(dataProvider);
+		TextPainter  textPainter  = new TextPainter() {
+			@Override
+			protected String convertDataType(ILayerCell cell, IConfigRegistry configRegistry) {
+				int rowIndex = cell.getRowIndex();
+				Scope scope = dataProvider.getRowObject(rowIndex);
+				if (scope instanceof CallSiteScope) {
+					LineScope ls = ((CallSiteScope)scope).getLineScope();
+					int ln = ls.getFirstLineNumber();
+					if (ln < 1)
+						return EMPTY;
+					int line = 1 + ln;
+					return line + SUFFIX_LINE;
+				}
+				return EMPTY;
+			}
+			
+		    public void setupGCFromConfig(GC gc, IStyle cellStyle) {
+		    	super.setupGCFromConfig(gc, cellStyle);
+		    	
+				Color oldBackgrColor = gc.getBackground();
+				Color color = ColorManager.getTextFg(oldBackgrColor);
+		    	if (active) {
+					color = ViewerColorManager.getActiveColor();		    		
+		    	}
+		    	gc.setForeground(color);
+		    }
+		};
 		
-		CellPainterDecorator attPainter  = new CellPainterDecorator(imagePainter, CellEdgeEnum.RIGHT, att);
+		CellPainterDecorator attPainter  = new CellPainterDecorator(imagePainter, CellEdgeEnum.RIGHT, textPainter);
 		CellPainterDecorator cellPainter = new CellPainterDecorator(new TextPainter(), CellEdgeEnum.LEFT, attPainter);
 		
 		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_PAINTER, 
@@ -188,7 +221,7 @@ public class TableConfiguration implements IConfiguration
 											   label);
 		List<ICellPainter> listPainter = new ArrayList<>(2);
 		listPainter.add(imagePainter);
-		listPainter.add(att);
+		listPainter.add(textPainter);
 		
 		return listPainter;
 	}
