@@ -3,7 +3,9 @@ package edu.rice.cs.hpcviewer.ui.parts.thread;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.collections.api.map.primitive.MutableIntObjectMap;
 import org.eclipse.collections.impl.list.mutable.FastList;
+import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
@@ -18,36 +20,36 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 public class ThreadMetricManager implements IMetricManager 
 {
 	private final EventList<BaseMetric> rawMetrics;
+	private final MutableIntObjectMap<BaseMetric> mapIntToMetric;
 	
 	public ThreadMetricManager(List<BaseMetric> metrics, List<Integer> listThreads) {
 		List<BaseMetric> listMetrics = FastList.newList(metrics.size());
+		mapIntToMetric = new IntObjectHashMap<BaseMetric>();
+
 		for(BaseMetric m: metrics) {
 			MetricRaw mr = MetricRaw.create(m);
 			mr.setThread(listThreads);
 			listMetrics.add(mr);
+			mapIntToMetric.put(m.getIndex(), mr);
 		}
 		rawMetrics = GlazedLists.eventList(listMetrics);
 	}
 
 	@Override
 	public BaseMetric getMetric(String ID) {
-		for(BaseMetric m: rawMetrics) {
-			if (m.getShortName().equals(ID))
-				return m;
-		}
-		return null;
+		return getMetric(Integer.valueOf(ID));
 	}
 
 	@Override
 	public BaseMetric getMetric(int index) {
-		return getRawMetrics().get(index);
+		return mapIntToMetric.get(index);
 	}
 
 	@Override
 	public BaseMetric getMetricFromOrder(int order) {
 		// not supported in raw metric
 		// should we return null or exception or ??
-		return getMetric(order);
+		throw new UnsupportedOperationException("getMetricFromOrder");
 	}
 
 	@Override
@@ -72,6 +74,7 @@ public class ThreadMetricManager implements IMetricManager
 
 	@Override
 	public void addDerivedMetric(DerivedMetric objMetric) {
+		mapIntToMetric.put(objMetric.getIndex(), objMetric);
 		getRawMetrics().add(0, objMetric);
 	}
 
@@ -94,5 +97,4 @@ public class ThreadMetricManager implements IMetricManager
 	public void removeMetricListener(ListEventListener<BaseMetric> listener) {
 		rawMetrics.removeListEventListener(listener);
 	}
-
 }

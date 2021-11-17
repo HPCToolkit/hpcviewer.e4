@@ -49,7 +49,6 @@ import org.eclipse.swt.widgets.Event;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
-import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
@@ -208,11 +207,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		
 		resizeListener = new ResizeListener(this);
 		parent.addControlListener(resizeListener);
-		
-		IMetricManager metricManager = treeData.getMetricManager();
-		metricManager.addMetricListener(this);
-		
-		pack();			
+		treeData.getMetricManager().addMetricListener(this);
 	}
 	
 	
@@ -448,18 +443,24 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		if (natTable == null)
 			return;
 		
+		// 1. Before updating the root: if the original tree has a selection,
+		// we need to preserve it first so that we can restore the selection
+		// after updating the root
+		//
 		Scope currentNode = getSelection();
 		FastList<Scope> selectedPath = new FastList<>();
-		
+		IScopeTreeData treeData = (IScopeTreeData) this.bodyLayerStack.getTreeRowModel().getTreeData();		
 		if (currentNode != null) {
 			// preserve the selection
-			IScopeTreeData treeData = (IScopeTreeData) this.bodyLayerStack.getTreeRowModel().getTreeData();
 			selectedPath = (FastList<Scope>) treeData.getPath(currentNode);
 		}
-		// reset the root node
+		
+		// 2. reset the root node
+		// this will disruptively change the table structure and the metric as well
+		// the method setRoot should keep listen to the list of metrics
 		setRoot(root);
 		
-		// expand and restore the selection
+		// 3. expand and restore the selection
 		if (selectedPath.size() == 0)
 			return;
 		
@@ -479,6 +480,9 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		}
 		// select the latest common path
 		this.setSelection(lastRow);
+		
+		// 4. new data: need to add listener to the change in the metrics
+		treeData.getMetricManager().addMetricListener(this);
 	}
 	
 	
@@ -505,19 +509,38 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	}
 
 
+	/*****
+	 * {@inheritDoc}
+	 * 
+	 * Called when there is an update in the list of metrics (like a new metric)
+	 */
 	@Override
 	public void listChanged(ListEvent<BaseMetric> listChanges) {
+		// there is a change in the list of metrics
 		IScopeTreeData treeData = (IScopeTreeData) bodyLayerStack.getTreeRowModel().getTreeData();
-		treeData.refresh();
+		treeData.refresh();		
+
+		int []hiddenIndexes = getHiddenColumnIndexes();
+		int []shiftedIndexes = new int[hiddenIndexes.length];
+		int idx=0;
+		for(int i: hiddenIndexes) {
+			shiftedIndexes[idx] = i+1;
+			idx++;
+		}
+		
+		refresh();
+
 		while(listChanges.next()) {
 			switch(listChanges.getType()) {
 			case ListEvent.INSERT:
-				int index = listChanges.getIndex();
-				bodyLayerStack.getBodyDataLayer().fireLayerEvent(new ColumnInsertEvent(bodyLayerStack, index+1));
-
+				
+				int index = listChanges.getIndex();				
+				bodyLayerStack.fireLayerEvent(new ColumnInsertEvent(bodyLayerStack, index+1));
+				
+				bodyLayerStack.getColumnHideShowLayer().showAllColumns();
+				bodyLayerStack.getColumnHideShowLayer().hideColumnIndexes(shiftedIndexes);
 			}
 		}
-		refresh();
 		pack();
 	}
 
@@ -526,10 +549,6 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	public void setRoot(Scope root) {
 		ScopeTreeRowModel treeRowModel = bodyLayerStack.getTreeRowModel();
 		treeRowModel.setRoot(root);
-		
-		// new data: need to add listener to the change in the metrics
-		ScopeTreeData treeData = (ScopeTreeData) treeRowModel.getTreeData();
-		treeData.getMetricManager().addMetricListener(this);
 		
 		refresh();
 		
@@ -546,6 +565,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
     			});
         	}
         }
+		pack();	
 	}
 
 	
