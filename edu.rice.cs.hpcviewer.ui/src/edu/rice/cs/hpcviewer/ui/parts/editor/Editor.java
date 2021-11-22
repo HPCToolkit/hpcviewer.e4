@@ -5,9 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.stream.Stream;
-
+import java.nio.file.Path;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
@@ -21,6 +19,7 @@ import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpcviewer.ui.graph.GraphEditorInput;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractUpperPart;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.text.BadLocationException;
@@ -134,21 +133,6 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 		return file;
 	}
 	
-	
-	private static String readLineByLineJava8(String filePath) 
-	{
-	    StringBuilder contentBuilder = new StringBuilder();
-	    try (Stream<String> stream = Files.lines( Paths.get(filePath), StandardCharsets.UTF_8)) 
-	    {
-	        stream.forEach(s -> contentBuilder.append(s).append("\n"));
-	    }
-	    catch (IOException e) 
-	    {
-	        e.printStackTrace();
-	    }
-	    return contentBuilder.toString();
-	}
-
 	
 	public boolean search(String text) {
 
@@ -297,9 +281,24 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 		AnnotationModel annModel = new AnnotationModel();
 		annModel.connect(document);
 		
-		String text = readLineByLineJava8(filename);
-		document.set(text);
+		Path path = Path.of(filename);
+		String text = "";
+		try {
+			// Fix issue #143: malformed input exception due to special copyright character.
+			// this character is not recognized by standard UTF 8, but works well with iso 8859
+			//
+			text = Files.readString(path, StandardCharsets.ISO_8859_1);	
 
+			// TODO: The problem with Files.readString is that the file size is limited to 2GB
+			// bigger than that, it will cause an exception. Should we handle huge file?
+			// In theory we should, but it will cause the UI to be sluggish and other memory problems.
+			// It's better to not to visualize huge file (who has 2GB file to display anyway?)
+			
+		} catch (IOException e) {
+			MessageDialog.openError(getControl().getShell(), filename, e.getMessage());
+			e.printStackTrace();			
+		}
+		document.set(text);
 		textViewer.setDocument(document, annModel);
 		textViewer.setData(PROPERTY_DATA, obj);
 
