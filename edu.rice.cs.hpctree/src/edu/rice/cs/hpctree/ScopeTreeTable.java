@@ -23,7 +23,6 @@ import org.eclipse.nebula.widgets.nattable.layer.CompositeLayer;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayer;
 import org.eclipse.nebula.widgets.nattable.layer.ILayerListener;
-import org.eclipse.nebula.widgets.nattable.layer.event.ColumnInsertEvent;
 import org.eclipse.nebula.widgets.nattable.layer.event.ILayerEvent;
 import org.eclipse.nebula.widgets.nattable.painter.layer.NatGridLayerPainter;
 import org.eclipse.nebula.widgets.nattable.selection.event.RowSelectionEvent;
@@ -511,31 +510,39 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 
 	/*****
 	 * {@inheritDoc}
-	 * 
-	 * Called when there is an update in the list of metrics (like a new metric)
+	 * <p>
+	 * Called when there is an update in the list of metrics (like a new metric).
+	 * We want the listener for metric changes to be here so that we can be sure
+	 * to make some adaptation AFTER refreshing the tree data. 
 	 */
 	@Override
 	public void listChanged(ListEvent<BaseMetric> listChanges) {
+		/**
+		 * How far the index to be shifted.
+		 * Since in our case we only add ONE metric on the left,
+		 * we only shift the existing columns ONE to the right.
+		 */
+		final int SHIFTED_INDEX = 1;
+		
 		// there is a change in the list of metrics
 		IScopeTreeData treeData = (IScopeTreeData) bodyLayerStack.getTreeRowModel().getTreeData();
-		treeData.refresh();		
+		treeData.refreshAndShift(SHIFTED_INDEX);		
 
 		int []hiddenIndexes = getHiddenColumnIndexes();
 		int []shiftedIndexes = new int[hiddenIndexes.length];
-		int idx=0;
-		for(int i: hiddenIndexes) {
-			shiftedIndexes[idx] = i+1;
-			idx++;
+		for(int i=0; i<hiddenIndexes.length; i++) {
+			shiftedIndexes[i] = hiddenIndexes[i];
 		}
 		
 		refresh();
-
+		
 		while(listChanges.next()) {
 			switch(listChanges.getType()) {
 			case ListEvent.INSERT:
 				
-				int index = listChanges.getIndex();				
-				bodyLayerStack.fireLayerEvent(new ColumnInsertEvent(bodyLayerStack, index+1));
+				int index = listChanges.getIndex();	
+				for(int i=0; i<hiddenIndexes.length; i++)
+					shiftedIndexes[i] = shiftedIndexes[i] + index + SHIFTED_INDEX;
 				
 				bodyLayerStack.getColumnHideShowLayer().showAllColumns();
 				bodyLayerStack.getColumnHideShowLayer().hideColumnIndexes(shiftedIndexes);

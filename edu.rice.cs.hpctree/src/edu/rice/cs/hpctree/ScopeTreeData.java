@@ -56,7 +56,8 @@ public class ScopeTreeData implements IScopeTreeData
 	
 	
 	@Override
-	public void refresh() {
+	public void refreshAndShift(int shift) {
+		this.sortedColumn += 1;
 		this.indexesNonEmptyMetrics = metricManager.getNonEmptyMetricIDs(root);
 	}
 	

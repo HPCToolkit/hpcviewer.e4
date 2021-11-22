@@ -108,6 +108,11 @@ public interface IScopeTreeData extends ITreeData<Scope>
 	 * Refresh the content of the tree data.
 	 * This is used when there is a change in the metrics, 
 	 * like new metrics have been added.
+	 * 
+	 * @param shift the number of indexes a column to be shifted
+	 * 			If the value of {@code shift} is 1, then all column indexes
+	 * 			will be shifted to 1. This is important to update the index of
+	 *     		sorted column. 
 	 */
-	void refresh();
+	void refreshAndShift(int shift);
 }
