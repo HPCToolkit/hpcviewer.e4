@@ -27,25 +27,18 @@ import org.eclipse.swt.graphics.Rectangle;
 public class ScopeAttributeMouseEventMatcher extends MouseEventMatcher 
 {
 	private final List<String> labels;
-	private final List<ICellPainter> painters;
-	
-	
 	/***
 	 * Constructor to specify which painters need to be matched.
 	 * 
 	 * @param body the region in the table (mostly {@code GridRegion.BODY})
 	 * @param leftButton the mouse button (like {@code MouseEventMatcher.LEFT_BUTTON})
 	 * @param labels {@code List} of {@code String} of labels to matched against this event
-	 * @param painters {@code List} of {@code ICellPainter} to be matched. If one of
-	 *  	  items is matched, the caller will trigger an action
 	 *  
 	 *  @see GridRegion
 	 *  @see MouseEventMatcher 
 	 */
-    public ScopeAttributeMouseEventMatcher(String body, int leftButton, List<String> labels, List<ICellPainter> painters) {
-    	super(body, leftButton);
-    	
-    	this.painters = painters;    	
+    public ScopeAttributeMouseEventMatcher(String body, int leftButton, List<String> labels) {
+    	super(body, leftButton);    	
     	this.labels = labels;
 	}
 
@@ -87,9 +80,8 @@ public class ScopeAttributeMouseEventMatcher extends MouseEventMatcher
                             configRegistry);
                     
                     if (clickedCellPainter != null) {
-                    	if (painters.contains(clickedCellPainter)) {
-                        	result = true;
-                    	}
+                    	result = clickedCellPainter instanceof CallSiteTextPainter || 
+                    			 clickedCellPainter instanceof CallSiteImagePainter;
                     }
                 } finally {
                     gc.dispose();

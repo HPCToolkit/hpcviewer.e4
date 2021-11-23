@@ -180,7 +180,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         // in the middle of the system switch mode
         
         ThemeConfiguration defaultConfiguration = Display.isSystemDarkTheme() ? 
-        							new DarkScopeTableStyleConfiguration(this.natTable) :  new ScopeTableStyleConfiguration();
+        							new DarkScopeTableStyleConfiguration(this.natTable, bodyDataProvider) :  new ScopeTableStyleConfiguration(bodyDataProvider);
         natTable.setTheme(defaultConfiguration);
 
         // --------------------------------

@@ -3,6 +3,7 @@ package edu.rice.cs.hpctree.internal.config;
 import org.eclipse.nebula.widgets.nattable.painter.cell.BackgroundPainter;
 import org.eclipse.nebula.widgets.nattable.painter.cell.ICellPainter;
 import org.eclipse.nebula.widgets.nattable.painter.cell.TextPainter;
+import org.eclipse.nebula.widgets.nattable.painter.cell.decorator.CellPainterDecorator;
 import org.eclipse.nebula.widgets.nattable.painter.cell.decorator.PaddingDecorator;
 import org.eclipse.nebula.widgets.nattable.sort.painter.SortIconPainter;
 import org.eclipse.nebula.widgets.nattable.sort.painter.SortableHeaderTextPainter;
@@ -11,6 +12,10 @@ import org.eclipse.nebula.widgets.nattable.tree.painter.TreeImagePainter;
 import org.eclipse.nebula.widgets.nattable.ui.util.CellEdgeEnum;
 import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
 import org.eclipse.swt.internal.DPIUtil;
+
+import edu.rice.cs.hpctree.internal.CallSiteImagePainter;
+import edu.rice.cs.hpctree.internal.CallSiteTextPainter;
+import edu.rice.cs.hpctree.internal.ScopeTreeDataProvider;
 
 public class ScopeTreePainter 
 {
@@ -30,7 +35,7 @@ public class ScopeTreePainter
 		return (int)zoom / 100;
 	}
 	
-    public static ICellPainter getTreeStructurePainter() {
+    public static ICellPainter getTreeStructurePainter(ScopeTreeDataProvider dataProvider) {
     	int zoom = (getZoomFactor() <= 1) ? 0 : 1;
     	
         TreeImagePainter treeImagePainter =
@@ -39,6 +44,15 @@ public class ScopeTreePainter
                         GUIHelper.getImage(IMG_COLLAPSED[zoom]), //$NON-NLS-1$
                         GUIHelper.getImage(IMG_EXPANDED[zoom]),  //$NON-NLS-1$
                         null);
+    	
+        // call site image and text
+        CallSiteImagePainter callsitePainter = new CallSiteImagePainter();
+        CallSiteTextPainter  textPainter = new CallSiteTextPainter(dataProvider);
+        CellPainterDecorator decoratorCS = new CellPainterDecorator(callsitePainter, CellEdgeEnum.RIGHT, textPainter);
+        
+        // combining tree and call site info
+        CellPainterDecorator decorator = new CellPainterDecorator(treeImagePainter, CellEdgeEnum.RIGHT, decoratorCS);
+        
         BackgroundPainter treeStructurePainter =
                 new BackgroundPainter(
                         new PaddingDecorator(
@@ -46,17 +60,16 @@ public class ScopeTreePainter
                                         10,
                                         null,
                                         CellEdgeEnum.LEFT,
-                                        treeImagePainter,
+                                        decorator,
                                         false,
                                         2,
                                         true),
                                 0, 5, 0, 5, false));
-	
         return treeStructurePainter;
     }
 
     
-    public static ICellPainter getInvTreeStructurePainter() {
+    public static ICellPainter getInvTreeStructurePainter(ScopeTreeDataProvider dataProvider) {
     	int zoom = (getZoomFactor() <= 1) ? 0 : 1;
 
         TreeImagePainter treeSelectionImagePainter =
@@ -65,6 +78,15 @@ public class ScopeTreePainter
                         GUIHelper.getImage(IMG_INV_COLLAPSED[zoom]), //$NON-NLS-1$
                         GUIHelper.getImage(IMG_INV_EXPANDED[zoom]), //$NON-NLS-1$
                         null);
+    	
+        // call site image and text
+        CallSiteImagePainter callsitePainter = new CallSiteImagePainter();
+        CallSiteTextPainter  textPainter = new CallSiteTextPainter(dataProvider);
+        CellPainterDecorator decoratorCS = new CellPainterDecorator(callsitePainter, CellEdgeEnum.RIGHT, textPainter);
+        
+        // combining tree and call site info
+        CellPainterDecorator decorator = new CellPainterDecorator(treeSelectionImagePainter, CellEdgeEnum.RIGHT, decoratorCS);
+
         BackgroundPainter treeStructureSelectionPainter =
                 new BackgroundPainter(
                         new PaddingDecorator(
@@ -72,7 +94,7 @@ public class ScopeTreePainter
                                         10,
                                         null,
                                         CellEdgeEnum.LEFT,
-                                        treeSelectionImagePainter,
+                                        decorator,
                                         false,
                                         2,
                                         true),
