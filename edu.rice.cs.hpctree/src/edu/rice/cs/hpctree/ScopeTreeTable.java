@@ -30,7 +30,6 @@ import org.eclipse.nebula.widgets.nattable.sort.SortHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.sort.config.SingleClickSortConfiguration;
 import org.eclipse.nebula.widgets.nattable.sort.event.SortColumnEvent;
 import org.eclipse.nebula.widgets.nattable.style.theme.ThemeConfiguration;
-import org.eclipse.nebula.widgets.nattable.tooltip.NatTableContentTooltip;
 import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
 import org.eclipse.nebula.widgets.nattable.viewport.command.ShowRowInViewportCommand;
 import org.eclipse.swt.SWT;
@@ -43,19 +42,17 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
-
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
-import edu.rice.cs.hpcdata.util.string.StringUtil;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpctree.action.IActionListener;
 import edu.rice.cs.hpctree.internal.ColumnHeaderDataProvider;
 import edu.rice.cs.hpctree.internal.ResizeListener;
+import edu.rice.cs.hpctree.internal.ScopeTooltip;
 import edu.rice.cs.hpctree.internal.ScopeTreeBodyLayerStack;
 import edu.rice.cs.hpctree.internal.ScopeTreeDataProvider;
 import edu.rice.cs.hpctree.internal.ScopeTreeLabelAccumulator;
@@ -173,7 +170,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         // --------------------------------
 
         // add tooltip
-        new ScopeToolTip(natTable, bodyDataProvider);
+        new ScopeTooltip(natTable, bodyDataProvider);
 
         // add theme configuration. automatically detect if we are in dark mode or not
         // this config happens only at the start of the table. It doesn't change automatically
@@ -639,52 +636,5 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	
 	public BaseMetric getMetric(int columnIndex) {
 		return bodyDataProvider.getMetric(columnIndex);
-	}
-	
-	
-	/************************************************************
-	 * 
-	 * Class to display tooltips only for column header and the tree column
-	 *
-	 ************************************************************/
-	private static class ScopeToolTip extends NatTableContentTooltip
-	{
-		private final static int MAX_TOOLTIP_CHAR = 80;
-		private final ScopeTreeDataProvider bodyDataProvider;
-
-		public ScopeToolTip(NatTable natTable, ScopeTreeDataProvider bodyDataProvider) {
-			super(natTable, GridRegion.BODY, GridRegion.COLUMN_HEADER);
-			this.bodyDataProvider = bodyDataProvider;
-		}
-		
-		@Override
-	    protected String getText(Event event) {
-
-	        int col = this.natTable.getColumnPositionByX(event.x);
-	        int row = this.natTable.getRowPositionByY(event.y);
-	        int colIndex = this.natTable.getColumnIndexByPosition(col);
-	        int rowIndex = this.natTable.getRowIndexByPosition(row);
-	        
-	        // We only show the tooltip for column header and the tree column (col index = 0)
-        	if (rowIndex == 0) {
-        		// header of the table
-        		if (colIndex > 0) {
-	        		BaseMetric metric = bodyDataProvider.getMetric(colIndex);
-	        		String name = metric.getDisplayName();
-	        		String desc = StringUtil.wrapScopeName(metric.getDescription(), MAX_TOOLTIP_CHAR);
-	        		if (desc == null)
-	        			return name;
-	        		return name + "\n" + desc;
-        		}
-        	}
-        	if (colIndex == 0) {
-        		String text = super.getText(event);
-        		if (text != null && text.length() > 0) {
-        			text = StringUtil.wrapScopeName(text, MAX_TOOLTIP_CHAR);
-        		}
-        		return text;
-        	}
-        	return null;
-		}
-	}
+	}	
 }
