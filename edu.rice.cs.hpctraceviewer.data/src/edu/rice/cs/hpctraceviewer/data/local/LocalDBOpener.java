@@ -6,10 +6,10 @@ import java.io.IOException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 
+import edu.rice.cs.hpcdata.db.IFileDB;
+import edu.rice.cs.hpcdata.db.version2.FileDB2;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
-import edu.rice.cs.hpcdata.experiment.extdata.FileDB2;
-import edu.rice.cs.hpcdata.experiment.extdata.IFileDB;
 import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.Util;
 import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;

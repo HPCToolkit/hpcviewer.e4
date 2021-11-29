@@ -3,11 +3,11 @@ package edu.rice.cs.hpctraceviewer.data.version2;
 import java.io.IOException;
 import java.util.List;
 
+import edu.rice.cs.hpcdata.db.IFileDB;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
+import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
 import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
-import edu.rice.cs.hpcdata.experiment.extdata.IFileDB;
-import edu.rice.cs.hpcdata.experiment.extdata.IFileDB.IdTupleOption;
 import edu.rice.cs.hpcdata.util.Constants;
 
 /*********************************************************
@@ -62,11 +62,6 @@ public abstract class AbstractBaseData implements IBaseData
 		return baseDataFile.getInt(position);
 	}
 
-
-	@Override
-	public boolean isHybridRank() {
-		return baseDataFile.getParallelismLevel() > 1;
-	}
 
 	@Override
 	public int getNumLevels() {

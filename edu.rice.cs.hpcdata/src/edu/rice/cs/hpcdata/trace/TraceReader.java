@@ -2,7 +2,7 @@ package edu.rice.cs.hpcdata.trace;
 
 import java.io.IOException;
 
-import edu.rice.cs.hpcdata.experiment.extdata.IFileDB;
+import edu.rice.cs.hpcdata.db.IFileDB;
 import edu.rice.cs.hpcdata.util.Constants;
 
 public class TraceReader 

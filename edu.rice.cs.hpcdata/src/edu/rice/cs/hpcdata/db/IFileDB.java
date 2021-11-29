@@ -1,10 +1,7 @@
-package edu.rice.cs.hpcdata.experiment.extdata;
+package edu.rice.cs.hpcdata.db;
 
 import java.io.IOException;
 import java.util.List;
-
-import edu.rice.cs.hpcdata.db.IdTuple;
-import edu.rice.cs.hpcdata.db.IdTupleType;
 
 
 /*************************************************
@@ -49,6 +46,8 @@ public interface IFileDB
 	 * @return
 	 */
 	public boolean  hasGPU();
+	
+	
 	/***
 	 * Get the number of processes or threads.
 	 * 
