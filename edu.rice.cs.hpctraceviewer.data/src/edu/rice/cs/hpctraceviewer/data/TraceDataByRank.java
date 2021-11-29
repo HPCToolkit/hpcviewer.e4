@@ -91,22 +91,16 @@ public class TraceDataByRank implements ITraceDataCollector
 		// if the data-to-display is fit in the display zone, we don't need to use recursive binary search
 		//	we just simply display everything from the file
 		// --------------------------------------------------------------------------------------------------
-		if (numRec<=numPixelH) {
-			
+		if (numRec<=numPixelH) {			
 			// display all the records
-			for(long i=startLoc;i<=endLoc; ) {
+			// increment one record of data contains of an integer (cpid) and a long (time)
+			for(long i=startLoc;i<=endLoc; i+=data.getRecordSize()) {
 				listcpid.add(getData(i));
-				// one record of data contains of an integer (cpid) and a long (time)
-				i =  i + data.getRecordSize();
-			}
-			
+			}			
 		} else {
-			
-			// the data is too big: try to fit the "big" data into the display
-			
+			// the data is too big: try to fit the "big" data into the display			
 			//fills in the rest of the data for this process timeline
-			this.sampleTimeLine(startLoc, endLoc, 0, numPixelH, 0, pixelLength, timeStart);
-			
+			this.sampleTimeLine(startLoc, endLoc, 0, numPixelH, 0, pixelLength, timeStart);			
 		}
 		
 		// --------------------------------------------------------------------------------------------------
@@ -284,9 +278,12 @@ public class TraceDataByRank implements ITraceDataCollector
 	/*********************************************************************************
 	 *	Returns the location in the traceFile of the trace data (time stamp and cpid)
 	 *	Precondition: the location of the trace data is between minLoc and maxLoc.
-	 * @param time: the time to be found
-	 * @param left_boundary_offset: the start location. 0 means the beginning of the data in a process
-	 * @param right_boundary_offset: the end location.
+	 * @param time 
+	 * 			the time to be found
+	 * @param left_boundary_offset 
+	 * 			the start location. 0 means the beginning of the data in a process
+	 * @param right_boundary_offset 
+	 * 			the end location.
 	 * @throws IOException 
 	 ********************************************************************************/
 	private long findTimeInInterval(long time, long left_boundary_offset, long right_boundary_offset) throws IOException

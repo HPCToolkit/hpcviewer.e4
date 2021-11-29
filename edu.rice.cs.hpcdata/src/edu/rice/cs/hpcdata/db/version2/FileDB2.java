@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcdata.experiment.extdata;
+package edu.rice.cs.hpcdata.db.version2;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -6,6 +6,7 @@ import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.rice.cs.hpcdata.db.IFileDB;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.util.Constants;

@@ -5,13 +5,17 @@ import java.util.List;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
-import edu.rice.cs.hpcdata.experiment.extdata.IFileDB.IdTupleOption;
+import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
 
 /*************************************************************************
  * 
  * Interface for managing the access to "external" data
- * Note: External here means outside xml file
- *
+ * where the term "External" here means outside xml file.
+ * <p>
+ * This class is the abstraction to access any kind of data:
+ * dense, filter and even remote data (see hpcremote plugin).
+ * </p>
+ * 
  *************************************************************************/
 public interface IBaseData 
 {	
@@ -58,11 +62,6 @@ public interface IBaseData
 
 	/** Is every rank included between the first and the last as provided above?*/
 	public boolean isDenseBetweenFirstAndLast();
-	
-	/** Return true if the application is a hybrid app (such as MPI+OpenMP). 
-	 *  False otherwise
-	 *  @return boolean **/
-	public boolean isHybridRank();
 	
 	
 	/***

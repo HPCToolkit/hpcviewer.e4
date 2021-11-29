@@ -5,8 +5,8 @@ import java.util.List;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
+import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
 import edu.rice.cs.hpcdata.experiment.extdata.IFilteredData;
-import edu.rice.cs.hpcdata.experiment.extdata.IFileDB.IdTupleOption;
 import edu.rice.cs.hpcdata.trace.FilterSet;
 import edu.rice.cs.hpcdata.trace.TraceName;
 
@@ -15,12 +15,10 @@ import edu.rice.cs.hpcdata.trace.TraceName;
 
 public class RemoteFilteredBaseData implements IFilteredData {
 
-	private final TraceName[] allNames;
 	private int[] indexes;
 	FilterSet filter;
 	
 	public RemoteFilteredBaseData(TraceName[] names, int _headerSz, DataOutputStream server) {
-		allNames = names;
 		filter = new FilterSet();
 		indexes = new int[names.length];
 		for (int i = 0; i < indexes.length; i++) {
@@ -46,22 +44,22 @@ public class RemoteFilteredBaseData implements IFilteredData {
 	public boolean isGoodFilter() {
 		return getNumberOfRanks() > 0;
 	}
+	
 	@Override
 	public int getFirstIncluded() {
 		return indexes[0];
 	}
+	
 	@Override
 	public int getLastIncluded() {
 		return indexes[indexes.length-1];
 	}
+	
 	@Override
 	public boolean isDenseBetweenFirstAndLast() {
 		return indexes[indexes.length-1] == indexes.length-1;
 	}
-	@Override
-	public boolean isHybridRank() {
-		return allNames[0].toString().contains(".");
-	}
+
 	
 	@Override
 	public int getNumLevels() {

@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
 
+import edu.rice.cs.hpcdata.db.version2.FileDB2;
 import edu.rice.cs.hpcdata.experiment.ExperimentWithoutMetrics;
-import edu.rice.cs.hpcdata.experiment.extdata.FileDB2;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.util.CallPath;
 import edu.rice.cs.hpcdata.util.MergeDataFiles;

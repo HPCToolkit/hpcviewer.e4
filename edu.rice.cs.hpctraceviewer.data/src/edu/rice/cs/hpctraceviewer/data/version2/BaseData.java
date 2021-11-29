@@ -1,6 +1,6 @@
 package edu.rice.cs.hpctraceviewer.data.version2;
 
-import edu.rice.cs.hpcdata.experiment.extdata.IFileDB;
+import edu.rice.cs.hpcdata.db.IFileDB;
 
 
 /*************************************

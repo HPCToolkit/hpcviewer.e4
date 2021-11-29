@@ -3,7 +3,7 @@ package edu.rice.cs.hpcdata.experiment.extdata;
 import java.util.List;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
-import edu.rice.cs.hpcdata.experiment.extdata.IFileDB.IdTupleOption;
+import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
 
 public interface IFilteredData extends IBaseData
 {
