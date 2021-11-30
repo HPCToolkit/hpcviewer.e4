@@ -478,6 +478,7 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 			eventBroker.post(IConstants.TOPIC_COLOR_MAPPING, data);
 			break;
 		case PreferenceConstants.ID_DEBUG_MODE:
+		case TracePreferenceConstants.PREF_GPU_TRACES:
 			tbtmTraceView.redraw();
 			break;
 		}
