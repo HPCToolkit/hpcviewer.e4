@@ -136,4 +136,11 @@ public class FilteredBaseData extends AbstractBaseData implements IFilteredData 
 	public List<IdTuple> getDenseListIdTuple(IdTupleOption option) {
 		return super.getListOfIdTuples(option);
 	}
+	
+	@Override
+	public boolean isGPU(int rank) {
+		// Fix issue #62: make sure checking the GPU works for filtered ranks
+		int index = indexes.get(rank);
+		return baseDataFile.isGPU(index);
+	}
 }
