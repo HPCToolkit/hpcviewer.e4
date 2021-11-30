@@ -51,16 +51,27 @@ public class TraceDataByRank implements ITraceDataCollector
 		listcpid = new Vector<DataRecord>(numPixelH);
 	}
 	
-	public boolean isEmpty() {
-		return listcpid == null || listcpid.size()==0;
-	}
-	
+	/***
+	 * Special constructor for remote database
+	 * @param data
+	 */
 	public TraceDataByRank(DataRecord[] data) {
 		listcpid = new Vector<DataRecord>(Arrays.asList(data));
 	}
 	
+	@Override
+	public boolean isEmpty() {
+		return listcpid == null || listcpid.size()==0;
+	}
+
+	@Override
+	public boolean isGPU() {
+		return data.isGPU(rank);
+	}
+	
 	/***
-	 * reading data from file
+	 * Reading data from file. This method has to be called FIRST before calling other APIs.
+	 * @apiNote This is a hack. If possible, call this immediately after the constructor.
 	 * 
 	 * @param rank
 	 * 			The rank number. A rank can be a process or a thread or a GPU stream.
@@ -70,9 +81,9 @@ public class TraceDataByRank implements ITraceDataCollector
 	 * 			the range of time per pixel. Its unit is time, usually nanoseconds for data version 4.
 	 * @throws IOException 
 	 */
+	@Override
 	public void readInData(int rank, long timeStart, long timeRange, double pixelLength) throws IOException
-	{
-			
+	{			
 		long minloc = data.getMinLoc(rank);
 		long maxloc = data.getMaxLoc(rank);
 		
@@ -127,7 +138,10 @@ public class TraceDataByRank implements ITraceDataCollector
 	}
 	
 	
-	/**Gets the time that corresponds to the index sample in times.*/
+	/**Gets the time that corresponds to the index sample in times.
+	 * @param sample the index sample
+	 * */
+	@Override
 	public long getTime(int sample)
 	{
 		if(sample<0 || listcpid == null || listcpid.size() == 0)
@@ -143,8 +157,10 @@ public class TraceDataByRank implements ITraceDataCollector
 	}
 	
 	/**Gets the cpid that corresponds to the index sample in timeLine.
+	 * @param sample the sample index (has to be bigger or equal to zero)
 	 * @return call path ID if the sample exist, <0 otherwise
 	 * */
+	@Override
 	public int getCpid(int sample)
 	{
 		if (sample < listcpid.size())
@@ -161,6 +177,7 @@ public class TraceDataByRank implements ITraceDataCollector
 
 	
 	/**Shifts all the times in the ProcessTimeline to the left by lowestStartingTime.*/
+	@Override
 	public void shiftTimeBy(long lowestStartingTime)
 	{
 		for(int i = 0; i<listcpid.size(); i++)
@@ -181,10 +198,11 @@ public class TraceDataByRank implements ITraceDataCollector
 
 	
 	/**Finds the sample to which 'time' most closely corresponds in the ProcessTimeline.
+	 * @param time  the requested time
 	 * @param usingMidpoint 
-	 * @param time: the requested time
 	 * @return the index of the sample if the time is within the range, -1 otherwise 
 	 * */
+	@Override
 	public int findClosestSample(long time, boolean usingMidpoint) throws Exception
 	{
 		if (listcpid.size()==0)

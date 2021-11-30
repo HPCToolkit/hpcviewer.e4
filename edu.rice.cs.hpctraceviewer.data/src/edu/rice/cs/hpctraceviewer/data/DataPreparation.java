@@ -8,6 +8,8 @@ import org.eclipse.swt.graphics.Color;
 
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.util.CallPath;
+import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
+import edu.rice.cs.hpctraceviewer.data.util.Constants;
 
 
 /***********************************************************************
@@ -72,6 +74,10 @@ public abstract class DataPreparation
 		if (scope == null)
 			throw new RuntimeException("Scope not found: cannot find at depth " + data.depth);
 		
+		final boolean gpuTrace  = data.ptl.isGPU();
+		final boolean exposeGPU = TracePreferenceManager.getGPUTraceExposure() && gpuTrace;
+		
+		String prevFunction = null;
 		String succFunction = scope.getName(); 
 		Color succColor = data.colorTable.getColor(succFunction);
 		int last_ptl_index = data.ptl.size() - 1;
@@ -161,9 +167,19 @@ public abstract class DataPreparation
 				// johnmc: replaced above because it doesn't seem correct
 				succSampleMidpoint = (int) Math.max(0, ((data.ptl.getTime(end)-data.begTime)/data.pixelLength)); 
 			}
-			
+			// if we want to expose the GPU trace,
+			// AND the length of the pixel is zero,
+			// AND the current pixel it NOT a "no activity"
+			// AND the previous pixel is a "no activity"
+			// then we should extend the width of the pixel by decrementing the starting pixel
+			if (exposeGPU && currSampleMidpoint == succSampleMidpoint && !procName.startsWith(Constants.PROC_NO_ACTIVITY)) {
+				if (prevFunction == null || prevFunction.startsWith(Constants.PROC_NO_ACTIVITY)) {
+					currSampleMidpoint--;
+				}
+			}
 			finishLine(procName, currSampleMidpoint, succSampleMidpoint, currDepth, currColor, end - index + 1);
 			index = end;
+			prevFunction = procName;
 		}
 		return num_invalid_cp;
 	}

@@ -129,4 +129,11 @@ public class RemoteFilteredBaseData implements IFilteredData {
 		// TODO Auto-generated method stub
 		return false;
 	}
+
+
+	@Override
+	public boolean isGPU(int rank) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

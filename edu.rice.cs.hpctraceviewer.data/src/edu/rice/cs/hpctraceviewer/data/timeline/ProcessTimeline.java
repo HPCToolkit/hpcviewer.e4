@@ -171,6 +171,11 @@ public class ProcessTimeline {
 	{
 		return data.isEmpty();
 	}
+	
+	public boolean isGPU() 
+	{
+		return data.isGPU();
+	}
 	// These are potentially useful for debugging, but otherwise serve no use.
 //	@Override
 //	public String toString() {

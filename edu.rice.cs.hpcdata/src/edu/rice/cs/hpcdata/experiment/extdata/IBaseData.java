@@ -119,4 +119,6 @@ public interface IBaseData
 	 * @return
 	 */
 	public long getMaxLoc(int rank);
+
+	boolean isGPU(int rank);
 }
