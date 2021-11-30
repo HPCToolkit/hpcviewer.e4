@@ -93,6 +93,15 @@ public class FileDB4 implements IFileDB
 		return dataSummary.getParallelismLevels();
 	}
 
+	
+	@Override
+	public boolean isGPU(int rank) {
+		List<IdTuple> listId = dataSummary.getIdTuple();
+		IdTuple idTuple = listId.get(rank);
+		return idTuple.isGPU(getIdTupleTypes());
+	}
+	
+	
 	@Override
 	public long getMinLoc(int rank) {
 		// another redirection: look at id tuple to get the profile number
