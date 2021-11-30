@@ -19,6 +19,7 @@ public class TracePreferenceManager extends AbstractPreferenceManager
 		store.setDefault(TracePreferenceConstants.PREF_RENDER_OPTION, TracePreferenceConstants.RENDERING_RIGHTMOST);
 		store.setDefault(TracePreferenceConstants.PREF_TOOLTIP_DELAY, TracePreferenceConstants.DEFAULT_TOOLTIP_DELAY);
 		store.setDefault(TracePreferenceConstants.PREF_MAX_THREADS,   TracePreferenceConstants.DEFAULT_MAX_THREADS);
+		store.setDefault(TracePreferenceConstants.PREF_GPU_TRACES,    TracePreferenceConstants.DEFAULT_GPU_TRACES);
 	}
 	
 	
@@ -56,6 +57,9 @@ public class TracePreferenceManager extends AbstractPreferenceManager
 		return INSTANCE.getPreferenceStore().getInt(TracePreferenceConstants.PREF_TOOLTIP_DELAY);
 	}
 
+	public static boolean getGPUTraceExposure() {
+		return INSTANCE.getPreferenceStore().getBoolean(TracePreferenceConstants.PREF_GPU_TRACES);
+	}
 	
 	////////////////////////////////////////
 	// 

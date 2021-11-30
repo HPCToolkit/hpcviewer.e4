@@ -32,6 +32,7 @@ public class TracePreferencePage extends AbstractPage
 	
 	//private Button []btnRenders;
 	private Button []colorPolicies;
+	private Button gpuTrace;
 	
 	private Spinner tooltipDelay;
 	private Spinner spMaxThreads;
@@ -63,6 +64,10 @@ public class TracePreferencePage extends AbstractPage
 				break;
 			}
 		}
+		
+		boolean isGPU = gpuTrace.getSelection();
+		pref.setValue(TracePreferenceConstants.PREF_GPU_TRACES, isGPU);
+		
 		/*
 		int renderOld = pref.getInt(TracePreferenceConstants.PREF_RENDER_OPTION);
 		
@@ -109,6 +114,19 @@ public class TracePreferencePage extends AbstractPage
 		PreferenceStore pref = TracePreferenceManager.INSTANCE.getPreferenceStore();		
 		int colorSelected    = pref.getInt(TracePreferenceConstants.PREF_COLOR_OPTION);
 		colorPolicies[colorSelected].setSelection(true);
+		
+		// ------------------------------------------------------------------------
+		// GPU traces
+		// ------------------------------------------------------------------------
+		
+		Composite groupGPU = createGroupControl(parent, "GPU Traces", false);
+		groupGPU.setToolTipText("Configure how the GPU traces will be rendered");
+		
+		gpuTrace = createCheckBoxControl(groupGPU, "Expose GPU traces");
+		boolean isGPU = pref.getBoolean(TracePreferenceConstants.PREF_GPU_TRACES);
+		gpuTrace.setSelection(isGPU);
+		
+		createLabelControl(groupGPU, "This will reveal GPU traces whenever possible. Enabling this option causes trace stratistics may not be reliable.");
 		
 		// ------------------------------------------------------------------------
 		// Rendering mode

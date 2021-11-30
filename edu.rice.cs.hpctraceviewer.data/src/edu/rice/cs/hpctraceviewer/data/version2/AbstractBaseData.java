@@ -92,4 +92,9 @@ public abstract class AbstractBaseData implements IBaseData
 	public boolean hasGPU() {
 		return baseDataFile.hasGPU();
 	}
+	
+	@Override
+	public boolean isGPU(int rank) {
+		return baseDataFile.isGPU(rank);
+	}
 }

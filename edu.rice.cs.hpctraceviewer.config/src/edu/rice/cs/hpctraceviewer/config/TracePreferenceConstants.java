@@ -15,8 +15,9 @@ public class TracePreferenceConstants
 	public final static String PREF_RENDER_OPTION = "trace/render";	
 	public final static String PREF_MAX_THREADS   = "trace/threads";
 	public final static String PREF_TOOLTIP_DELAY = "trace/tooltip";
+	public final static String PREF_GPU_TRACES    = "trace/gpu";
 
-	public final static int DEFAULT_MAX_THREADS   = 10;
-	public final static int DEFAULT_TOOLTIP_DELAY = 2000;
-
+	public final static int DEFAULT_MAX_THREADS    = 10;
+	public final static int DEFAULT_TOOLTIP_DELAY  = 2000;
+	public final static boolean DEFAULT_GPU_TRACES = false;
 }

@@ -279,6 +279,7 @@ public class FileDB2 implements IFileDB
 		if (!isMultiThreading())
 			return false;
 		IdTuple idTuple = listIdTuples.get(rank);
-		return idTuple.isGPU(getIdTupleTypes());
+		long thread = idTuple.getIndex(IdTupleType.KIND_THREAD);
+		return thread >= 500;
 	}
 }
