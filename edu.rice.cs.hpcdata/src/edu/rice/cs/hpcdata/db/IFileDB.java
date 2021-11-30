@@ -79,4 +79,6 @@ public interface IFileDB
 	public long 	getMaxLoc(int rank);
 	
 	public void		dispose();
+
+	boolean isGPU(int rank);
 }

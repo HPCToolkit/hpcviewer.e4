@@ -62,9 +62,12 @@ public class TraceDataByRank implements ITraceDataCollector
 	/***
 	 * reading data from file
 	 * 
+	 * @param rank
+	 * 			The rank number. A rank can be a process or a thread or a GPU stream.
 	 * @param timeStart
 	 * @param timeRange
-	 * @param pixelLength : number of records
+	 * @param pixelLength 
+	 * 			the range of time per pixel. Its unit is time, usually nanoseconds for data version 4.
 	 * @throws IOException 
 	 */
 	public void readInData(int rank, long timeStart, long timeRange, double pixelLength) throws IOException

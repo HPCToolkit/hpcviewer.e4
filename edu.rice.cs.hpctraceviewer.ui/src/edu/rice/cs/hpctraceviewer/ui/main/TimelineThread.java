@@ -107,8 +107,7 @@ public class TimelineThread
 			}
 			trace.shiftTimeBy(stData.getMinBegTime());
 		}
-		boolean res = (trace.size()>=2);
-		return res;
+		return (trace.size()>=2);
 	}
 
 	@Override

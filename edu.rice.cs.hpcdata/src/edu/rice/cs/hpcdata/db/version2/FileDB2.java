@@ -273,4 +273,12 @@ public class FileDB2 implements IFileDB
 	public boolean hasGPU() {
 		return false;
 	}
+	
+	@Override
+	public boolean isGPU(int rank) {
+		if (!isMultiThreading())
+			return false;
+		IdTuple idTuple = listIdTuples.get(rank);
+		return idTuple.isGPU(getIdTupleTypes());
+	}
 }
