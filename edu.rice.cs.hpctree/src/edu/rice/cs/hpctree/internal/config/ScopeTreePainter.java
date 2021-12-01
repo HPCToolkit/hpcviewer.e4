@@ -19,6 +19,9 @@ import edu.rice.cs.hpctree.internal.ScopeTreeDataProvider;
 
 public class ScopeTreePainter 
 {
+	// Issue #137: need a spacer for the lead nodes
+	private static final String IMG_LEAF = "leaf";
+	
 	// light mode: when the nodes are not selected (normal mode)
 	// dark mode:   when the nodes are selected (select mode)
 	private static final String []IMG_COLLAPSED = {"right_120_120", "right_144_144"};
@@ -43,7 +46,7 @@ public class ScopeTreePainter
                         false,
                         GUIHelper.getImage(IMG_COLLAPSED[zoom]), //$NON-NLS-1$
                         GUIHelper.getImage(IMG_EXPANDED[zoom]),  //$NON-NLS-1$
-                        null);
+                        GUIHelper.getImage(IMG_LEAF));
     	
         // call site image and text
         CallSiteImagePainter callsitePainter = new CallSiteImagePainter();
@@ -77,7 +80,7 @@ public class ScopeTreePainter
                         false,
                         GUIHelper.getImage(IMG_INV_COLLAPSED[zoom]), //$NON-NLS-1$
                         GUIHelper.getImage(IMG_INV_EXPANDED[zoom]), //$NON-NLS-1$
-                        null);
+                        GUIHelper.getImage(IMG_LEAF));
     	
         // call site image and text
         CallSiteImagePainter callsitePainter = new CallSiteImagePainter();
