@@ -234,13 +234,11 @@ public class FileDB2 implements IFileDB
 	@Override
 	public long getMinLoc(int rank) {
 		final long offsets[] = getOffsets();
-		long loc = -1;
 		
-		if (rank < offsets.length) {
-			loc = offsets[rank] + headerSize;
-		} else {
+		if (rank >= offsets.length) {
 			throw new RuntimeException("File DB2: incorrect rank: " + rank +" (bigger than " + offsets.length+")");
 		}
+		final long loc = offsets[rank] + headerSize;
 		return loc;
 	}
 

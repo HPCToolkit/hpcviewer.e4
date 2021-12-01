@@ -163,7 +163,8 @@ public class MetricValueCollection3 implements IMetricValueCollection
 		if (values == null) {
 			// trigger initialization
 			Experiment exp = (Experiment) scope.getRootScope().getExperiment();
-			getValue(scope, exp.getMetric(0).getIndex());
+			BaseMetric metric = exp.getVisibleMetrics().get(0);
+			getValue(scope, metric.getIndex());
 		}
 
 		if (values != null)
