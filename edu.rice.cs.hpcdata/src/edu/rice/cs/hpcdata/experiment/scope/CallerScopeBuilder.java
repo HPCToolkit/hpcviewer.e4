@@ -145,8 +145,8 @@ public class CallerScopeBuilder {
 			final LineScope firstLineScope  = first.getLineScope();
 			final LineScope callerLineScope = existingCaller.getLineScope();
 									
-			if (firstProc.getFlatIndex()            == callerProc.getFlatIndex()     &&
-				firstLineScope.getFirstLineNumber() == callerLineScope.getFirstLineNumber()) {
+			if (firstProc.getFlatIndex()      == callerProc.getFlatIndex()   &&
+				firstLineScope.getFlatIndex() == callerLineScope.getFlatIndex()) {
 
 				//------------------------------------------------------------------------
 				// combine metric values for first to those of existingCaller.

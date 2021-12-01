@@ -14,18 +14,14 @@ import edu.rice.cs.hpcdata.experiment.scope.filters.InclusiveOnlyMetricPropagati
 import edu.rice.cs.hpcdata.experiment.scope.filters.MetricValuePropagationFilter;
 
 
-/*************************
- * A class that manages the initialization phase of the creation of callers tree
- * For the second phase of callers tree (incremental callers path) should be seen in CallSiteScopeCallerView
+/*************************************************************************
  * 
- * @author laksonoadhianto
+ * A class that manages the initialization phase of the creation of callers tree
+ * For the second phase of callers tree (incremental callers path) should be 
+ * seen in {@code CallSiteScopeCallerView} 
  *
- */
+ *************************************************************************/
 public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScopeVisitor {
-
-	//----------------------------------------------------
-	// Constants
-	//----------------------------------------------------
 
 	//----------------------------------------------------
 	// private data
@@ -35,11 +31,10 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 	private final ExclusiveOnlyMetricPropagationFilter exclusiveOnly;
 	private final InclusiveOnlyMetricPropagationFilter inclusiveOnly;
 	
-	final private ListCombinedScopes listCombinedScopes;
-
-	final private Hashtable<String, Scope> calleeht = new Hashtable<String, Scope>();
+	private final ListCombinedScopes listCombinedScopes;
+	private final Hashtable<String, Scope> calleeht;
 	
-	private RootScope callersViewRootScope;
+	private final RootScope callersViewRootScope;
 	
 	/****
 	 * Constructor to create a dynamic bottom-up tree
@@ -56,7 +51,7 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 		combinedMetrics = new CombineCallerScopeMetric();
 
 		listCombinedScopes = new ListCombinedScopes();
-
+		calleeht = new Hashtable<String, Scope>();
 	}
 
 	//----------------------------------------------------
@@ -76,12 +71,10 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 			this.listCombinedScopes.push();
 
 			// Find (or add) callee in top-level hashtable
-			ProcedureScope callee = this.createProcedureIfNecessary(scope);
-			
+			ProcedureScope callee = this.createProcedureIfNecessary(scope);			
 			prepareCallChain(scope, callee);
 
-		} else if (vt == ScopeVisitType.PostVisit)  {
-			
+		} else if (vt == ScopeVisitType.PostVisit)  {			
 			this.decrementCounter();
 		}
 	}
@@ -103,15 +96,17 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 		}
 		
 		if (vt == ScopeVisitType.PreVisit) {
+			// have to push whether we will create a procedure or not since
+			// we will pop during Post visit.
+			// TODO: Ugly code
 			this.listCombinedScopes.push();
+			
 			if (!scope.isAlien()) {
 				// Find (or add) callee in top-level hashtable
 				ProcedureScope callee = this.createProcedureIfNecessary(scope);
 				prepareCallChain(scope, callee);
 			}
-
-		} else if (vt == ScopeVisitType.PostVisit){
-			
+		} else if (vt == ScopeVisitType.PostVisit){			
 			this.decrementCounter();
 		}
 	}
@@ -149,8 +144,9 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 	/********
 	 * Find caller view's procedure of a given scope. 
 	 * If it doesn't exist, create a new one, attach to the tree, and copy the metrics
-	 * @param cct_s: either call site or procedure
-	 * @return
+	 * 
+	 * @param cct_s : either call site or procedure
+	 * @return ProcedureScope
 	 ********/
 	private ProcedureScope createProcedureIfNecessary( Scope cct_s ) {
 		ProcedureScope cct_proc_s;
@@ -185,8 +181,10 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 
 	
 	/********
-	 * decrement the counter of a caller scope
-	 * @param caller_s
+	 * decrement the counter of a caller scope.
+	 * Increment and decrement the counter have to match to avoid miscalculation
+	 * for recursive functions.
+	 * @see CombineCallerScopeMetric 
 	 ********/
 	private void decrementCounter() {
 		
@@ -236,14 +234,17 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 			ArrayList<Scope> list = this.combinedScopes.peek();
 			list.add(combined);
 		}
-		
 	}
 	
 	
 	/********************************************************************
 	 *
-	 * class to combine metrics from different scopes
-	 *
+	 * class to combine metrics from different scopes.
+	 * This class will increment the counter of the "combined" scope to avoid
+	 *  miscalculation of recursive functions.
+	 * The caller has to decrement the counter upon the post visit.
+	 * 
+	 * @see  decrementCounter
 	 ********************************************************************/
 	private class CombineCallerScopeMetric extends AbstractCombineMetric {
 
@@ -260,9 +261,6 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 			target.incrementCounter();
 
 			listCombinedScopes.addList(target);
-			
 		}
 	}
-	
-	
 }
