@@ -73,9 +73,6 @@ public class CanvasAxisX extends AbstractAxisCanvas
 			return;
 		
 		final SpaceTimeDataController data = (SpaceTimeDataController) getData();
-
-        if (data == null)
-        	return;
                 
         // try to adapt automatically the font height if the height of the canvas isn't sufficient
         // Theoretically, the height is always constant in the beginning of the first appearance. 
@@ -110,14 +107,6 @@ public class CanvasAxisX extends AbstractAxisCanvas
 		final ImageTraceAttributes attribute = data.getAttributes();
 		final Rectangle area = getClientArea();
 		
-		// --------------------------------------------------------------------------
-		// finding some HINTs of number of ticks, and distance between ticks 	
-		// --------------------------------------------------------------------------
-		
-		int numAxisLabel = area.width / TICK_X_PIXEL;
-		double numTicks  = (double)area.width / TICK_X_PIXEL;
-		double fraction  = (double)attribute.getTimeInterval() / numTicks;
-		
 		TimeUnit dbTimeUnit = data.getTimeUnit();
 		
 		// --------------------------------------------------------------------------
@@ -128,6 +117,13 @@ public class CanvasAxisX extends AbstractAxisCanvas
 		// --------------------------------------------------------------------------
 		
 		TimeUnit displayTimeUnit = attribute.getDisplayTimeUnit(data);
+		
+		// --------------------------------------------------------------------------
+		// finding some HINTs of number of ticks, and distance between ticks 	
+		// --------------------------------------------------------------------------
+		
+		double numTicks  = (double)area.width / TICK_X_PIXEL;
+		double fraction  = (double)attribute.getTimeInterval() / numTicks;
 
 		// --------------------------------------------------------------------------
 		// find the nice rounded number
@@ -163,14 +159,13 @@ public class CanvasAxisX extends AbstractAxisCanvas
 		int logdt 	 = (int) Math.log10(dt);
 		long dtRound = (int) Math.pow(10, logdt);
 		int maxTicks = (area.width/MINIMUM_PIXEL_BETWEEN_TICKS); 
+		int numAxisLabel = area.width / TICK_X_PIXEL;
 		do {
 			numAxisLabel = (int) (displayTimeUnit.convert(attribute.getTimeInterval(), dbTimeUnit) / dtRound);
 			if (numAxisLabel > maxTicks) {
 				dtRound *= 10;
 			}
 		} while (numAxisLabel > maxTicks);
-
-		double deltaXPixels = (double)attribute.getPixelHorizontal() / displayTimeUnit.convert(attribute.getTimeInterval(), dbTimeUnit);
 		
 		// Issue #20 : avoid displaying big numbers.
 		// if the time is 1200ms we should display it as 1.2s
@@ -213,7 +208,9 @@ public class CanvasAxisX extends AbstractAxisCanvas
 		Point prevTextArea  = new Point(0, 0);
 		int   prevPositionX = 0;
 		long  displayTimeBegin = displayTimeUnit.convert(attribute.getTimeBegin(),dbTimeUnit);
-		
+		double deltaXPixels    = (double)attribute.getPixelHorizontal() / 
+								 displayTimeUnit.convert(attribute.getTimeInterval(), dbTimeUnit);
+
 		// --------------------------------------------------------------------------
 		// draw the ticks and the labels if there's enough space
 		// --------------------------------------------------------------------------
@@ -226,7 +223,9 @@ public class CanvasAxisX extends AbstractAxisCanvas
 			// we want to draw the label if the number is nicely readable
 			// nice numbers: 1, 2, 4, ...
 			// not nice numbers: 1.1, 2.3, ...
-			boolean toDrawLabel = (time % 500 == 0) || (multiplier == 1 && time % 2 == 0);
+			boolean toDrawLabel = (time % 500 == 0)    ||
+								  (deltaXPixels > 50)  ||
+								  (multiplier == 1 && time % 2 == 0);
 			
 			if (i==0 || toDrawLabel) {
 				String strTime   = formatTime.format(multiplier * time) + userUnitTime;			
