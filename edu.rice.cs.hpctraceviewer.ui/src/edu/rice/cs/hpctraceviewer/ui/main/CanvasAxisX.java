@@ -171,9 +171,13 @@ public class CanvasAxisX extends AbstractAxisCanvas
 		} while (numAxisLabel > maxTicks);
 
 		double deltaXPixels = (double)attribute.getPixelHorizontal() / displayTimeUnit.convert(attribute.getTimeInterval(), dbTimeUnit);
-		String userUnitTime = attribute.getTimeUnitName(displayTimeUnit);
 		
+		// Issue #20 : avoid displaying big numbers.
+		// if the time is 1200ms we should display it as 1.2s
+		// this doesn't change the real unit time. It's just for the display
+		String userUnitTime = attribute.getTimeUnitName(displayTimeUnit);
 		float multiplier = 1; 
+
 		if (dtRound >= 100) {
 			final TimeUnit userDisplayTimeUnit = attribute.increment(displayTimeUnit);
 			userUnitTime = attribute.getTimeUnitName(userDisplayTimeUnit);
@@ -214,25 +218,9 @@ public class CanvasAxisX extends AbstractAxisCanvas
 		// draw the ticks and the labels if there's enough space
 		// --------------------------------------------------------------------------
 
-		for(int i=0; i <= numAxisLabel; i++) {
-			
+		for(int i=0; i <= numAxisLabel; i++) {			
 			double time      = (timeBegin + dtRound * i);			
-			String strTime   = formatTime.format(multiplier * time) + userUnitTime;			
-			Point textArea   = e.gc.stringExtent(strTime);
-			
 			int axis_x_pos	 = (int) convertTimeToPixel(displayTimeBegin, (long)time, deltaXPixels);
-
-			// by default x position is in the middle of the tick
-			int position_x   = (int) axis_x_pos - (textArea.x/2);
-			
-			// make sure we don't trim the text in the beginning of the axis
-			if (position_x<0) {
-				position_x = 0;
-			}
-			// make sure x position is not beyond the view's width
-			else if (position_x + textArea.x > area.width) {
-				position_x = axis_x_pos - textArea.x;
-			}
 			int axis_tick_mark_height = position_y+TICK_SMALL;
 
 			// we want to draw the label if the number is nicely readable
@@ -240,14 +228,30 @@ public class CanvasAxisX extends AbstractAxisCanvas
 			// not nice numbers: 1.1, 2.3, ...
 			boolean toDrawLabel = (time % 500 == 0) || (multiplier == 1 && time % 2 == 0);
 			
-			// draw the label only if we have space
-			if (i==0 || (toDrawLabel && prevPositionX+prevTextArea.x + 10 < position_x)) {
-				e.gc.drawText(strTime, position_x, position_y + TICK_BIG+1);
+			if (i==0 || toDrawLabel) {
+				String strTime   = formatTime.format(multiplier * time) + userUnitTime;			
+				Point textArea   = e.gc.stringExtent(strTime);
 
-				prevTextArea.x = textArea.x;
-				prevPositionX  = position_x;
+				// by default x position is in the middle of the tick
+				int position_x   = (int) axis_x_pos - (textArea.x/2);
 				
-				axis_tick_mark_height+=TICK_BIG;
+				// make sure we don't trim the text in the beginning of the axis
+				if (position_x<0) {
+					position_x = 0;
+				}
+				// make sure x position is not beyond the view's width
+				else if (position_x + textArea.x > area.width) {
+					position_x = axis_x_pos - textArea.x;
+				}
+				// draw the label only if we have space
+				if (i==0 || prevPositionX+prevTextArea.x + 10 < position_x) {
+					e.gc.drawText(strTime, position_x, position_y + TICK_BIG+1);
+
+					prevTextArea.x = textArea.x;
+					prevPositionX  = position_x;
+					
+					axis_tick_mark_height+=TICK_BIG;
+				}
 			}
 			// always draw the ticks
 			e.gc.drawLine(axis_x_pos, position_y, axis_x_pos, axis_tick_mark_height);
