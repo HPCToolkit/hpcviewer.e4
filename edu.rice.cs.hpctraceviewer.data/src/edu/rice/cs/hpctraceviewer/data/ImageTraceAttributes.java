@@ -2,7 +2,9 @@ package edu.rice.cs.hpctraceviewer.data;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 
 /***********
@@ -135,6 +137,45 @@ public class ImageTraceAttributes
 			unit = mapIntegerToUnit.size() - 1;
 		
 		return mapIntegerToUnit.get(unit);
+	}
+	
+	/*****
+	 * Retrieve the higher resolution of the specific time unit.
+	 * If the input is Millisecond, it returns Microsecond.
+	 * 
+	 * @param unit the current unit time (unmodified) 
+	 * @return The higher resolution of the time unit
+	 */
+	public TimeUnit decrement(TimeUnit unit) {
+		Optional<Integer> key = getOrdinal(unit).findFirst();
+		
+		Integer ordinal = key.get();
+		ordinal--;
+		return mapIntegerToUnit.get(ordinal);
+	}
+	
+	/****
+	 * Get the lower resolution of the given time unit.
+	 * If the input is Millisecond, it returns Second.
+	 * 
+	 * @param unit
+	 * @return
+	 */
+	public TimeUnit increment(TimeUnit unit) {
+		Optional<Integer> key = getOrdinal(unit).findFirst();
+		
+		Integer ordinal = key.get();
+		ordinal++;
+		return mapIntegerToUnit.get(ordinal);
+	}
+	
+	private Stream<Integer> getOrdinal(TimeUnit unit) {
+		Stream<Integer> keys = mapIntegerToUnit.entrySet()
+				.stream()
+				.filter(entry -> unit.equals(entry.getValue()))
+				.map(Map.Entry::getKey);
+		
+		return keys;
 	}
 	
 	/*************************************************************************
