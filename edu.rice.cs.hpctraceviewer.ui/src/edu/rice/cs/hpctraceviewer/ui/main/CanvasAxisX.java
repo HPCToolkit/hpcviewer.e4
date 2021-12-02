@@ -53,7 +53,7 @@ public class CanvasAxisX extends AbstractAxisCanvas
 		
 		bgColor = parent.getBackground();
 		
-		formatTime = new DecimalFormat("###,###,###,###,###");
+		formatTime = new DecimalFormat("###,###,###,###,###.##");
 	}
 
 	
@@ -76,8 +76,7 @@ public class CanvasAxisX extends AbstractAxisCanvas
 
         if (data == null)
         	return;
-        
-        
+                
         // try to adapt automatically the font height if the height of the canvas isn't sufficient
         // Theoretically, the height is always constant in the beginning of the first appearance. 
         // However, during the view creation, SWT returns the size of height and width are both zero.
@@ -109,7 +108,6 @@ public class CanvasAxisX extends AbstractAxisCanvas
 		}
 
 		final ImageTraceAttributes attribute = data.getAttributes();
-
 		final Rectangle area = getClientArea();
 		
 		// --------------------------------------------------------------------------
@@ -171,15 +169,24 @@ public class CanvasAxisX extends AbstractAxisCanvas
 				dtRound *= 10;
 			}
 		} while (numAxisLabel > maxTicks);
+
+		double deltaXPixels = (double)attribute.getPixelHorizontal() / displayTimeUnit.convert(attribute.getTimeInterval(), dbTimeUnit);
+		String userUnitTime = attribute.getTimeUnitName(displayTimeUnit);
 		
+		float multiplier = 1; 
+		if (dtRound >= 100) {
+			final TimeUnit userDisplayTimeUnit = attribute.increment(displayTimeUnit);
+			userUnitTime = attribute.getTimeUnitName(userDisplayTimeUnit);
+			multiplier = (float) 0.001;
+		}
 		double timeBegin    = displayTimeUnit.convert(attribute.getTimeBegin(), dbTimeUnit);
 		
 		// round the time to the upper bound
 		// if the time is 22, we round it to 30
 		
-		long remainder      = (long) timeBegin % dtRound;
+		long remainder = (long) timeBegin % dtRound;
 		if (remainder > 0)
-			timeBegin       = timeBegin + (dtRound - remainder);
+			timeBegin = timeBegin + (dtRound - remainder);
 		
 		// --------------------------------------------------------------------------
         // Manually fill the client area with the default background color
@@ -201,20 +208,19 @@ public class CanvasAxisX extends AbstractAxisCanvas
 		
 		Point prevTextArea  = new Point(0, 0);
 		int   prevPositionX = 0;
-
+		long  displayTimeBegin = displayTimeUnit.convert(attribute.getTimeBegin(),dbTimeUnit);
+		
 		// --------------------------------------------------------------------------
 		// draw the ticks and the labels if there's enough space
 		// --------------------------------------------------------------------------
 
 		for(int i=0; i <= numAxisLabel; i++) {
 			
-			double time      = timeBegin + dtRound * i;
-			
-			String strTime   = formatTime.format((long)time) + attribute.getTimeUnitName(displayTimeUnit);
-			
+			double time      = (timeBegin + dtRound * i);			
+			String strTime   = formatTime.format(multiplier * time) + userUnitTime;			
 			Point textArea   = e.gc.stringExtent(strTime);
 			
-			int axis_x_pos	 = (int) convertTimeToPixel(attribute, dbTimeUnit, (long)time, displayTimeUnit);
+			int axis_x_pos	 = (int) convertTimeToPixel(displayTimeBegin, (long)time, deltaXPixels);
 
 			// by default x position is in the middle of the tick
 			int position_x   = (int) axis_x_pos - (textArea.x/2);
@@ -228,9 +234,14 @@ public class CanvasAxisX extends AbstractAxisCanvas
 				position_x = axis_x_pos - textArea.x;
 			}
 			int axis_tick_mark_height = position_y+TICK_SMALL;
+
+			// we want to draw the label if the number is nicely readable
+			// nice numbers: 1, 2, 4, ...
+			// not nice numbers: 1.1, 2.3, ...
+			boolean toDrawLabel = (time % 500 == 0) || (multiplier == 1 && time % 2 == 0);
 			
 			// draw the label only if we have space
-			if (i==0 || prevPositionX+prevTextArea.x + 10 < position_x) {
+			if (i==0 || (toDrawLabel && prevPositionX+prevTextArea.x + 10 < position_x)) {
 				e.gc.drawText(strTime, position_x, position_y + TICK_BIG+1);
 
 				prevTextArea.x = textArea.x;
@@ -252,16 +263,13 @@ public class CanvasAxisX extends AbstractAxisCanvas
 	 * 
 	 * @return pixel (x-axis)
 	 */
-	private int convertTimeToPixel(ImageTraceAttributes attribute, 
-			TimeUnit dbUnit, long time, TimeUnit displayUnit)
+	private int convertTimeToPixel(long displayTimeBegin,
+								   long time, 
+								   double deltaXPixels)
 	{
 		// define pixel : (time - TimeBegin) x number_of_pixel_per_time 
 		//				  (time - TimeBegin) x (numPixelsH/timeInterval)
-		double dT = (double)attribute.getPixelHorizontal() / displayUnit.convert(attribute.getTimeInterval(), dbUnit);
-		long dTime = time-displayUnit.convert(attribute.getTimeBegin(),dbUnit);
-		int pixel = (int) (dT * dTime);
-		
-		return pixel;
+		long dTime = time-displayTimeBegin;
+		return(int) (deltaXPixels * dTime);
 	}
-
 }
