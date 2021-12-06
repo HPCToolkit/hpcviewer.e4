@@ -51,7 +51,6 @@ import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpctree.action.IActionListener;
 import edu.rice.cs.hpctree.internal.ColumnHeaderDataProvider;
-import edu.rice.cs.hpctree.internal.ResizeListener;
 import edu.rice.cs.hpctree.internal.ScopeTooltip;
 import edu.rice.cs.hpctree.internal.ScopeTreeBodyLayerStack;
 import edu.rice.cs.hpctree.internal.ScopeTreeDataProvider;
@@ -80,7 +79,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	private final static String STRING_PADDING  = "XX"; 
 
 	private final NatTable       natTable ;
-	private final ResizeListener resizeListener;
+	//private final ResizeListener resizeListener;
 
 	private final DataLayer 			  columnHeaderDataLayer ;
 	private final ScopeTreeBodyLayerStack bodyLayerStack ;
@@ -201,8 +200,9 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 
 		natTable.addDisposeListener(this);
 		
-		resizeListener = new ResizeListener(this);
-		parent.addControlListener(resizeListener);
+		// Fix issue #145: do not listen to table resizing
+		//resizeListener = new ResizeListener(this);
+		//parent.addControlListener(resizeListener);
 		treeData.getMetricManager().addMetricListener(this);
 	}
 	
@@ -588,7 +588,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 								.getMetricManager()
 								.removeMetricListener(this);
         bodyLayerStack.getSelectionLayer().removeLayerListener(this);
-        natTable.getParent().removeControlListener(resizeListener);
+        //natTable.getParent().removeControlListener(resizeListener);
 	}
 	
 	
