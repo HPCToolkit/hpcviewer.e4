@@ -8,6 +8,7 @@ import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.config.CellConfigAttributes;
 import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.config.IConfiguration;
+import org.eclipse.nebula.widgets.nattable.data.convert.DefaultDisplayConverter;
 import org.eclipse.nebula.widgets.nattable.grid.GridRegion;
 import org.eclipse.nebula.widgets.nattable.layer.ILayer;
 import org.eclipse.nebula.widgets.nattable.style.CellStyleAttributes;
@@ -72,6 +73,7 @@ public class TableConfiguration implements IConfiguration
 	@Override
 	public void configureRegistry(IConfigRegistry configRegistry) {
 
+		// set the style for the top row (experiment aggregate)
 		final Style styleTopRow = new Style();
 		Color clrBg = ViewerColorManager.getBgTopRow(widget);
 		Color clrFg = ViewerColorManager.getFgTopRow(widget);
@@ -85,6 +87,7 @@ public class TableConfiguration implements IConfiguration
 					DisplayMode.NORMAL, 
 					ScopeTreeLabelAccumulator.LABEL_TOP_ROW);
 		
+		// set the "clickable" cell. It' clickable if the cell has the source code to display
 		final Style styleActive = new Style();
 		Color clrActive = ViewerColorManager.getActiveColor();
 		styleActive.setAttributeValue(CellStyleAttributes.FOREGROUND_COLOR, clrActive);
@@ -93,6 +96,13 @@ public class TableConfiguration implements IConfiguration
 					styleActive, 
 					DisplayMode.NORMAL, 
 					ScopeTreeLabelAccumulator.LABEL_SOURCE_AVAILABLE);
+		
+		// Issue #142: the display converted is needed for the "Find" feature
+		// without this attribute, it always fails to find a text
+		configRegistry.registerConfigAttribute(CellConfigAttributes.DISPLAY_CONVERTER, 
+											   new DefaultDisplayConverter(), 
+											   DisplayMode.NORMAL, 
+											   ScopeTreeLabelAccumulator.LABEL_TREECOLUMN);
 	}
 
 	
