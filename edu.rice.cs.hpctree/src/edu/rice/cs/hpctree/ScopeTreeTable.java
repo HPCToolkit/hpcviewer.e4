@@ -55,6 +55,7 @@ import edu.rice.cs.hpctree.internal.ScopeTooltip;
 import edu.rice.cs.hpctree.internal.ScopeTreeBodyLayerStack;
 import edu.rice.cs.hpctree.internal.ScopeTreeDataProvider;
 import edu.rice.cs.hpctree.internal.ScopeTreeLabelAccumulator;
+import edu.rice.cs.hpctree.internal.config.ContextMenuConfiguration;
 import edu.rice.cs.hpctree.internal.config.DarkScopeTableStyleConfiguration;
 import edu.rice.cs.hpctree.internal.config.ScopeTableStyleConfiguration;
 import edu.rice.cs.hpctree.internal.config.ScopeTreeExportConfiguration;
@@ -154,6 +155,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         natTable.addConfiguration(new ScopeTreeExportConfiguration(bodyLayerStack.getTreeRowModel()));
         natTable.addConfiguration(new TableFontConfiguration(this));
 		natTable.addConfiguration(new SingleClickSortConfiguration());
+		natTable.addConfiguration(new ContextMenuConfiguration(this));
 
         // --------------------------------
         // finalization
