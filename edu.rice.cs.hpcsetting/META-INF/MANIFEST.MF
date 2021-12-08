@@ -12,7 +12,6 @@ Require-Bundle: org.eclipse.core.runtime,
  edu.rice.cs.hpclog,
  edu.rice.cs.hpcbase,
  org.eclipse.nebula.widgets.nattable.core;bundle-version="2.0.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: edu.rice.cs.hpcsetting
 Bundle-ActivationPolicy: lazy
 Export-Package: edu.rice.cs.hpcsetting.color,
