@@ -2,6 +2,7 @@ package edu.rice.cs.hpctree.internal.config;
 
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.config.AbstractUiBindingConfiguration;
+import org.eclipse.nebula.widgets.nattable.copy.command.CopyDataToClipboardCommand;
 import org.eclipse.nebula.widgets.nattable.search.CellValueAsStringComparator;
 import org.eclipse.nebula.widgets.nattable.search.gui.SearchDialog;
 import org.eclipse.nebula.widgets.nattable.ui.binding.UiBindingRegistry;
@@ -20,8 +21,8 @@ import edu.rice.cs.hpctree.ScopeTreeTable;
  * Configuration to show the context menu for scope tree table.
  * The context menu contains:
  * <ul>
- * <li>Find : to search a text in the tree column (not the whole table)</li>
  * <li>Copy : to copy the selected row to the clip-board</li>
+ * <li>Find : to search a text in the tree column (not the whole table)</li>
  * </ul>
  *
  *********************************************************/
@@ -31,6 +32,22 @@ public class ContextMenuConfiguration extends AbstractUiBindingConfiguration
 	
 	public ContextMenuConfiguration(final ScopeTreeTable scopeTreeTable) {
 		this.menu = new Menu(scopeTreeTable.getTable());
+		
+		// copy menu
+		MenuItem copyMenu = new MenuItem(menu, SWT.PUSH);
+		copyMenu.setText("Copy");
+		copyMenu.setAccelerator(SWT.MOD1 + 'c');
+		copyMenu.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				NatTable natTable = scopeTreeTable.getTable();
+				natTable.doCommand(new CopyDataToClipboardCommand("\t", 
+																  "\n", 
+																  natTable.getConfigRegistry()));
+			}
+		});
+		
+		// find menu 
 		MenuItem findMenu = new MenuItem(menu, SWT.PUSH);
 		findMenu.setText("Find");
 		findMenu.setAccelerator(SWT.MOD1 + 'f');
