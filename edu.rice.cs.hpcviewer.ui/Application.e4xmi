@@ -40,7 +40,6 @@
     <bindings xmi:id="_-3xvsKqFEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.keybinding.open" keySequence="M1+O" command="_U14sMI7vEeqBPbXbG7_Dzw"/>
     <bindings xmi:id="_k4-EoKuTEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.keybinding.add" keySequence="M1+A" command="_cPW0II7vEeqBPbXbG7_Dzw"/>
     <bindings xmi:id="_lyW3ALWUEeqkhNpo_ZhE2A" elementId="edu.rice.cs.hpcviewer.ui.keybinding.new" keySequence="M1+N" command="_FHXw4LV7EeqkhNpo_ZhE2A"/>
-    <bindings xmi:id="_L2SY8MH9Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpcviewer.ui.keybinding.find" keySequence="M1+F" command="_JcLG8MH9Eeqcdd3a7pzIFA"/>
     <bindings xmi:id="_By4mUKSGEeuSWoXTomb4gg" elementId="edu.rice.cs.hpcviewer.ui.keybinding.minimize" keySequence="M1+M" command="_HkWOoKSGEeuSWoXTomb4gg"/>
   </bindingTables>
   <rootContext xmi:id="_c3AF2cjYEeSyMNYR5xypkQ" elementId="org.eclipse.ui.contexts.dialogAndWindow" name="In Dialog and Windows">
