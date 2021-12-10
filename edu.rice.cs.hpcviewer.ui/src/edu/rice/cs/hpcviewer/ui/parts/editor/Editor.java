@@ -70,6 +70,12 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 	private FindReplaceDocumentAdapter finder;
 	
 
+	/******
+	 * Create a new editor tab based on the parent folder.
+	 * Editor is a {@link CTabItem} object.
+	 * @param parent
+	 * @param style
+	 */
 	public Editor(CTabFolder parent, int style) {
 		super(parent, style);
 		setShowClose(true);
@@ -191,16 +197,14 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 		}
 		
 		try {
-			if ((ir = finder.find(offset, text, true, false, false, false)) != null) {
-				
+			if ((ir = finder.find(offset, text, true, false, false, false)) != null) {				
 				setMarker(ir);
 				searchOffsetStart = ir.getOffset();
 				searchOffsetEnd = ir.getOffset() + ir.getLength();
 				return true;
 			} else {
 				// cannot find a region, try to search from the beginning
-				if ((ir = finder.find(0, text, true, false, false, false)) != null) {
-					
+				if ((ir = finder.find(0, text, true, false, false, false)) != null) {					
 					setMarker(ir);
 					searchOffsetStart = ir.getOffset();
 					searchOffsetEnd = ir.getOffset() + ir.getLength();
