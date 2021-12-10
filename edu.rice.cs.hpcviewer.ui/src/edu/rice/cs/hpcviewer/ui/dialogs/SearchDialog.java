@@ -343,22 +343,23 @@ public class SearchDialog extends Dialog {
         this.wholeWordButton = new Button(optionsGroup, SWT.CHECK);
         this.wholeWordButton.setText("Whole word"); //$NON-NLS-1$
         this.wholeWordButton.setSelection(this.wholeWordValue);
-        this.wholeWordButton.setEnabled(!this.regexValue);
+        this.wholeWordButton.setEnabled(false);
         this.incrementalButton = new Button(optionsGroup, SWT.CHECK);
         this.incrementalButton.setText("Incremental"); //$NON-NLS-1$
         this.incrementalButton.setSelection(this.incrementalValue);
-        this.incrementalButton.setEnabled(!this.regexValue);
+        this.incrementalButton.setEnabled(false);
         this.incrementalButton.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 if (SearchDialog.this.incrementalButton.getSelection()) {
-                    resetIncrementalSelections();
+                    //resetIncrementalSelections();
                 }
             }
         });
         this.regexButton = new Button(optionsGroup, SWT.CHECK);
         this.regexButton.setText("Regex"); //$NON-NLS-1$
         this.regexButton.setSelection(this.regexValue);
+        this.regexButton.setEnabled(false);
         this.regexButton.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -525,9 +526,9 @@ public class SearchDialog extends Dialog {
 
         this.wrapSearchValue = s.get("wrap") == null || s.getBoolean("wrap"); //$NON-NLS-1$ //$NON-NLS-2$
         this.caseSensitiveValue = s.getBoolean("casesensitive"); //$NON-NLS-1$
-        this.wholeWordValue = s.getBoolean("wholeword"); //$NON-NLS-1$
-        this.incrementalValue = s.getBoolean("incremental"); //$NON-NLS-1$
-        this.regexValue = s.getBoolean("isRegEx"); //$NON-NLS-1$
+        this.wholeWordValue = false; //s.getBoolean("wholeword"); //$NON-NLS-1$
+        this.incrementalValue = false; //s.getBoolean("incremental"); //$NON-NLS-1$
+        this.regexValue = false; //s.getBoolean("isRegEx"); //$NON-NLS-1$
         // TODO
         // includeCollapsedValue = s.get("includeCollapsed") == null
         // //$NON-NLS-1$

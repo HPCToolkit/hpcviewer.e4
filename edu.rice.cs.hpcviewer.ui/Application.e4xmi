@@ -33,7 +33,6 @@
   <handlers xmi:id="_fC4SMKwbEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.handler.about" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.About" command="_lIBrgKwbEeq2aaPo7yBcWg"/>
   <handlers xmi:id="_AChSwLpkEeqjBNbAJCPSRg" elementId="edu.rice.cs.hpcviewer.ui.handler.preference" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.ShowPreferences" command="_svnesLpjEeqjBNbAJCPSRg"/>
   <handlers xmi:id="_ZlWvYL17EeqIaLNodVh-xg" elementId="edu.rice.cs.hpcviewer.ui.handler.showMetric" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.ShowMetrics" command="_XIwxIL17EeqIaLNodVh-xg"/>
-  <handlers xmi:id="_SsIPYMH9Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpcviewer.ui.handler.find" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.Find" command="_JcLG8MH9Eeqcdd3a7pzIFA"/>
   <handlers xmi:id="_rqxmwOAkEeqsmOAkZNeqjw" elementId="edu.rice.cs.hpcviewer.ui.handler.splitWindow" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.SplitWindow" command="_ocHSYOAkEeqsmOAkZNeqjw"/>
   <handlers xmi:id="_P4JQ0KSGEeuSWoXTomb4gg" elementId="edu.rice.cs.hpcviewer.ui.handler.windowMinimize" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.WindowMinimize" command="_HkWOoKSGEeuSWoXTomb4gg"/>
   <bindingTables xmi:id="_7fwrAKqFEeq2aaPo7yBcWg" elementId="edu.rice.cs.hpcviewer.ui.bindingtable.file" bindingContext="_c3AF2cjYEeSyMNYR5xypkQ">
@@ -135,7 +134,6 @@
   <commands xmi:id="_hDG4MLYZEeqhffqM1zV0iA" elementId="edu.rice.cs.hpcviewer.ui.command.close" commandName="Close database"/>
   <commands xmi:id="_svnesLpjEeqjBNbAJCPSRg" elementId="org.eclipse.ui.window.preferences" commandName="Preferences" description="Show the preferences"/>
   <commands xmi:id="_XIwxIL17EeqIaLNodVh-xg" elementId="edu.rice.cs.hpcviewer.ui.command.showMetric" commandName="Show metrics"/>
-  <commands xmi:id="_JcLG8MH9Eeqcdd3a7pzIFA" elementId="edu.rice.cs.hpcviewer.ui.command.find" commandName="Find" description="Find a text"/>
   <commands xmi:id="_ocHSYOAkEeqsmOAkZNeqjw" elementId="edu.rice.cs.hpcviewer.ui.command.splitWindow" commandName="Split window"/>
   <commands xmi:id="_HkWOoKSGEeuSWoXTomb4gg" elementId="edu.rice.cs.hpcviewer.ui.command.windowMinimize" commandName="Minimize window" description="Minimize window into an icon state"/>
   <addons xmi:id="_c3AF0sjYEeSyMNYR5xypkQ" elementId="org.eclipse.e4.core.commands.service" contributionURI="bundleclass://org.eclipse.e4.core.commands/org.eclipse.e4.core.commands.CommandServiceAddon"/>
