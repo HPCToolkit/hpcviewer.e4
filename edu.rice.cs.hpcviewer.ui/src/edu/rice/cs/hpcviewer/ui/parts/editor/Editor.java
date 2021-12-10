@@ -41,6 +41,8 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.SWT;
@@ -111,6 +113,7 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 		
 		setControl(container);
 		setMenu();
+		setKeyCommand();
 	}
 	
 	
@@ -129,6 +132,13 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 		return fileNew == fileOld;
 	}
 	
+	
+	private void find() {
+		SearchDialog searchDialog = new SearchDialog(getControl().getShell(), SWT.NONE);
+		searchDialog.setInput(Editor.this, null);
+		searchDialog.open();
+	}
+	
 	/****
 	 * create the context menu for this source text viewer.
 	 */
@@ -139,9 +149,7 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 			manager.add(new Action("Find") {
 				@Override
 				public void run() {
-					SearchDialog searchDialog = new SearchDialog(getControl().getShell(), SWT.NONE);
-					searchDialog.setInput(Editor.this, null);
-					searchDialog.open();
+					find();
 				}
 			});
 		});
@@ -152,6 +160,18 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 		control.setMenu(ctxMenu);
 	}
 	
+	
+	private void setKeyCommand() {
+		StyledText textPart = textViewer.getTextWidget();
+		textPart.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if ( e.stateMask == SWT.MOD1 && (e.keyCode == 'f' || e.keyCode == 'F')) {
+					find();
+				}
+			}
+		});
+	}
 	
 	/****
 	 * Find the file object of a given input.
