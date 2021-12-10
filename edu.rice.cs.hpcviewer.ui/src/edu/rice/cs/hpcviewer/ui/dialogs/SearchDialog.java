@@ -35,11 +35,8 @@ public class SearchDialog extends Dialog {
 
     private class SelectionItem {
         String text;
-        int pos;
-
         SelectionItem(String text, int pos) {
             this.text = text;
-            this.pos = pos;
         }
     }
 
