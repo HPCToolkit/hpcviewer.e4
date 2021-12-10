@@ -8,7 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-
+import org.eclipse.swt.widgets.Menu;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.source.FileSystemSourceFile;
@@ -16,9 +16,12 @@ import edu.rice.cs.hpcdata.util.Util;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
+import edu.rice.cs.hpcviewer.ui.dialogs.SearchDialog;
 import edu.rice.cs.hpcviewer.ui.graph.GraphEditorInput;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractUpperPart;
 
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -101,6 +104,7 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 		ViewerPreferenceManager.INSTANCE.getPreferenceStore().addPropertyChangeListener(this);
 		
 		setControl(container);
+		setMenu();
 	}
 	
 	
@@ -119,7 +123,37 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 		return fileNew == fileOld;
 	}
 	
+	/****
+	 * create the context menu for this source text viewer.
+	 */
+	private void setMenu() {
+		MenuManager menuManager = new MenuManager();
+		menuManager.setRemoveAllWhenShown(true);
+		menuManager.addMenuListener(manager -> {
+			manager.add(new Action("Find") {
+				@Override
+				public void run() {
+					SearchDialog searchDialog = new SearchDialog(getControl().getShell(), SWT.NONE);
+					searchDialog.setInput(Editor.this, null);
+					searchDialog.open();
+				}
+			});
+		});
+		
+		StyledText control = textViewer.getTextWidget();
+		Menu ctxMenu = menuManager.createContextMenu(control);
+		ctxMenu.setVisible(true);
+		control.setMenu(ctxMenu);
+	}
 	
+	
+	/****
+	 * Find the file object of a given input.
+	 * If the input is a scope object, the file is the source file of the scope.
+	 * If the input is an experiment, the file is the database experiment.xml
+	 * @param input
+	 * @return
+	 */
 	private File getFileFromInput(Object input) {
 		if (input == null) return null;
 		
@@ -133,7 +167,13 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 		return file;
 	}
 	
-	
+	/*****
+	 * Search a text in the source viewer
+	 * @param text
+	 * 			Text to search
+	 * @return 
+	 * 		boolean true if the text is found
+	 */
 	public boolean search(String text) {
 
 		IRegion ir;
