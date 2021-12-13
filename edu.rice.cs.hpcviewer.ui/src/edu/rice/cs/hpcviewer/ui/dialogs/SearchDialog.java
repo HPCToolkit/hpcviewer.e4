@@ -171,7 +171,7 @@ public class SearchDialog extends Dialog {
             return;
         }
         this.dialogPositionValue = getShell().getBounds();
-        this.forwardValue = this.forwardButton.getSelection();
+//        this.forwardValue = this.forwardButton.getSelection();
         this.allValue = this.allButton.getSelection();
         this.caseSensitiveValue = this.caseSensitiveButton.getSelection();
         this.wrapSearchValue = this.wrapSearchButton.getSelection();
@@ -420,7 +420,7 @@ public class SearchDialog extends Dialog {
     private void doFind0(final boolean isIncremental, final String text) {
 
         BusyIndicator.showWhile(getShell().getDisplay(), () -> {
-        	if (editor.search(text)) {
+        	if (editor.search(text, forwardButton.getSelection())) {
         		
         	}
         });

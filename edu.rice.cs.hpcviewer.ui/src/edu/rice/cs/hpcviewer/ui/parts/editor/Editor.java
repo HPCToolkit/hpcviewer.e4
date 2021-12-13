@@ -197,13 +197,15 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 	 * Search a text in the source viewer
 	 * @param text
 	 * 			Text to search
+	 * @param forward
+	 * 			search direction: {@code true} goes forward, {@code false} backward
 	 * @return 
 	 * 		boolean true if the text is found
 	 */
-	public boolean search(String text) {
+	public boolean search(String text, boolean forward) {
 
 		IRegion ir;
-		int offset = searchOffsetEnd;
+		int offset = forward ? searchOffsetEnd : searchOffsetStart;
 		
 		// make sure we allow user cursor position
 		// if the cursor position is the same as the previous selected region, we should use
@@ -217,7 +219,7 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 		}
 		
 		try {
-			if ((ir = finder.find(offset, text, true, false, false, false)) != null) {				
+			if ((ir = finder.find(offset, text, forward, false, false, false)) != null) {				
 				setMarker(ir);
 				searchOffsetStart = ir.getOffset();
 				searchOffsetEnd = ir.getOffset() + ir.getLength();
