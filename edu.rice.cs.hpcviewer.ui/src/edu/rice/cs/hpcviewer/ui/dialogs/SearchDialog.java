@@ -343,7 +343,7 @@ public class SearchDialog extends Dialog {
         this.wholeWordButton = new Button(optionsGroup, SWT.CHECK);
         this.wholeWordButton.setText("Whole word"); //$NON-NLS-1$
         this.wholeWordButton.setSelection(this.wholeWordValue);
-        this.wholeWordButton.setEnabled(false);
+        this.wholeWordButton.setEnabled(!regexValue);
         this.incrementalButton = new Button(optionsGroup, SWT.CHECK);
         this.incrementalButton.setText("Incremental"); //$NON-NLS-1$
         this.incrementalButton.setSelection(this.incrementalValue);
@@ -420,8 +420,12 @@ public class SearchDialog extends Dialog {
     private void doFind0(final boolean isIncremental, final String text) {
 
         BusyIndicator.showWhile(getShell().getDisplay(), () -> {
-        	if (editor.search(text, forwardButton.getSelection())) {
-        		
+        	forwardValue = forwardButton.getSelection();
+        	caseSensitiveValue = caseSensitiveButton.getSelection();
+        	wholeWordValue = wholeWordButton.getSelection();
+        	
+        	if (!editor.search(text, forwardValue, caseSensitiveValue, wholeWordValue)) {
+        		//                 getShell().getDisplay().beep();
         	}
         });
     }
