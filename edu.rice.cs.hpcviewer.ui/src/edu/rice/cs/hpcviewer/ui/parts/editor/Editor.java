@@ -202,7 +202,7 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 	 * @return 
 	 * 		boolean true if the text is found
 	 */
-	public boolean search(String text, boolean forward) {
+	public boolean search(String text, boolean forward, boolean caseSensitive, boolean wholeWord) {
 
 		IRegion ir;
 		int offset = forward ? searchOffsetEnd : searchOffsetStart;
@@ -219,14 +219,14 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 		}
 		
 		try {
-			if ((ir = finder.find(offset, text, forward, false, false, false)) != null) {				
+			if ((ir = finder.find(offset, text, forward, caseSensitive, wholeWord, false)) != null) {				
 				setMarker(ir);
 				searchOffsetStart = ir.getOffset();
 				searchOffsetEnd = ir.getOffset() + ir.getLength();
 				return true;
 			} else {
 				// cannot find a region, try to search from the beginning
-				if ((ir = finder.find(0, text, true, false, false, false)) != null) {					
+				if ((ir = finder.find(0, text, forward, caseSensitive, wholeWord, false)) != null) {					
 					setMarker(ir);
 					searchOffsetStart = ir.getOffset();
 					searchOffsetEnd = ir.getOffset() + ir.getLength();
