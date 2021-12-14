@@ -1,4 +1,6 @@
 ![GitHub issues](https://img.shields.io/github/issues/hpctoolkit/hpcviewer.e4?style=for-the-badge)
+![Build](https://github.com/hpctoolkit/hpcviewer.e4/actions/workflows/maven.yml/badge.svg)
+
 
 # hpcviewer.e4
 
