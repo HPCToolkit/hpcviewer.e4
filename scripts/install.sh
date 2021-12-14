@@ -137,7 +137,7 @@ bin_dir="${install_dir}/bin"
 libexec_dir="${install_dir}/libexec/$name"
 binary_file="$name"
 ini_file="${name}.ini"
-sh_file="${name}.sh"
+sh_file="${name}_launcher.sh"
 
 # bug no 20: https://github.com/HPCToolkit/hpcviewer/issues/20
 if [ -e $libexec_dir ]; then
