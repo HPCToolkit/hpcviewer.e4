@@ -54,7 +54,23 @@ Options:
                               hpcviewer  -jh 3g
                            will use a JVM maximum heap size of 3GB for this execution
                            of hpcviewer.
+                           
+  -v, --version            Print the current version 
 EOF
+}
+
+
+#------------------------------------------------------------
+# print the application version
+#------------------------------------------------------------
+
+print_version()
+{
+   # Note:
+   #   the install script should replace the variable version automatically
+   #
+   echo "__VERSION__"
+   exit 1
 }
 
 #------------------------------------------------------------
@@ -130,6 +146,7 @@ while (( "$#" )); do
       usage
       exit 0
       ;;
+      
     -jh|--java-heap)
       if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
         viewer_args="-vmargs -Xmx$2"
@@ -139,6 +156,11 @@ while (( "$#" )); do
         exit 1
       fi
       ;;
+      
+    -v|--version)
+      print_version
+      ;;
+
     *) # preserve positional arguments
       PARAMS="$PARAMS $1"
       shift

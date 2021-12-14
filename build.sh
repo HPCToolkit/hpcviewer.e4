@@ -110,9 +110,24 @@ set -- "${POSITIONAL[@]}" # restore positional parameters
 # Update the release file 
 #
 GITC=`git rev-parse --short HEAD`
+name="hpcviewer"
+sh_file="scripts/${name}.sh"
+launcher_name="${name}_launcher.sh"
+launcher="scripts/${launcher_name}"
 
 if [ "$CHECK" == "0" ]; then
-    echo "Release ${RELEASE}. Commit $GITC" > edu.rice.cs.hpcviewer.ui/release.txt
+    # create the release number
+    VERSION="Release ${RELEASE}. Commit $GITC" 
+    echo "$VERSION" > edu.rice.cs.hpcviewer.ui/release.txt
+
+    # insert the release number to the launcher script:
+    # first, copy the launcher script
+    # second, replace the release variable with the current version
+
+    cp -f "$sh_file" "$launcher" \
+       || die "unable to copy files"
+
+    sed -i "s/__VERSION__/$VERSION/g" $launcher
 fi
 rm -rf hpcviewer-${RELEASE}*
 
@@ -147,7 +162,7 @@ repackage_linux(){
 	cd tmp/hpcviewer
 
 	tar xzf  ../../$package
-	cp ../../scripts/hpcviewer.sh .
+	cp ../../$launcher .
 	cp ../../scripts/install.sh .
 	cp ../../scripts/README .
 
