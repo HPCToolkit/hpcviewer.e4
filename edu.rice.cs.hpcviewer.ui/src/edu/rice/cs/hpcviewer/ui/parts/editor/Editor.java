@@ -199,10 +199,17 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 	 * 			Text to search
 	 * @param forward
 	 * 			search direction: {@code true} goes forward, {@code false} backward
+	 * @param caseSensitive
+	 * 			boolean true if the search has to be case sensitive. false otherwise
+	 * @param wholeWord
+	 * 			true if the search is exclusively whole word.
+	 * @param wrap
+	 * 			true if the search wrap to the other side of the file
 	 * @return 
 	 * 		boolean true if the text is found
+	 * @throws Exception 
 	 */
-	public boolean search(String text, boolean forward, boolean caseSensitive, boolean wholeWord) {
+	public boolean search(String text, boolean forward, boolean caseSensitive, boolean wholeWord, boolean wrap) throws Exception {
 
 		IRegion ir;
 		int offset = forward ? searchOffsetEnd : searchOffsetStart;
@@ -218,23 +225,21 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 				offset = selection.getOffset();
 		}
 		
-		try {
-			if ((ir = finder.find(offset, text, forward, caseSensitive, wholeWord, false)) != null) {				
+		if ((ir = finder.find(offset, text, forward, caseSensitive, wholeWord, false)) != null) {				
+			setMarker(ir);
+			searchOffsetStart = ir.getOffset();
+			searchOffsetEnd = ir.getOffset() + ir.getLength();
+			return true;
+		} else if (wrap) {
+			// cannot find a region, try to search from the beginning
+			IDocument document = textViewer.getDocument();
+			offset = forward ? 0 : document.getLength();			
+			if ((ir = finder.find(offset, text, forward, caseSensitive, wholeWord, false)) != null) {					
 				setMarker(ir);
 				searchOffsetStart = ir.getOffset();
 				searchOffsetEnd = ir.getOffset() + ir.getLength();
-				return true;
-			} else {
-				// cannot find a region, try to search from the beginning
-				if ((ir = finder.find(0, text, forward, caseSensitive, wholeWord, false)) != null) {					
-					setMarker(ir);
-					searchOffsetStart = ir.getOffset();
-					searchOffsetEnd = ir.getOffset() + ir.getLength();
-					return true;
-				}
+				return true;				
 			}
-		} catch (BadLocationException e) {
-			e.printStackTrace();
 		}
 		return false;
 	}

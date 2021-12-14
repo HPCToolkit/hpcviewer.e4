@@ -423,10 +423,16 @@ public class SearchDialog extends Dialog {
         	forwardValue = forwardButton.getSelection();
         	caseSensitiveValue = caseSensitiveButton.getSelection();
         	wholeWordValue = wholeWordButton.getSelection();
-        	
-        	if (!editor.search(text, forwardValue, caseSensitiveValue, wholeWordValue)) {
-        		//                 getShell().getDisplay().beep();
-        	}
+        	wrapSearchValue = wrapSearchButton.getSelection();
+        	try {
+				if (!editor.search(text, forwardValue, caseSensitiveValue, wholeWordValue, wrapSearchValue)) {
+					statusLabel.setText("String not found");
+					getShell().getDisplay().beep();
+				}
+			} catch (Exception e) {
+				statusLabel.setText(e.getLocalizedMessage());
+				getShell().getDisplay().beep();
+			}
         });
     }
 
