@@ -276,7 +276,9 @@ public abstract class BaseExperiment implements IExperiment
 	 * @param need_metric : whether we need to assign metrics or not
 	 * @throws Exception
 	 */
-	public void open(File fileExperiment, IUserData<String, String> userData, boolean need_metric)
+	public void open(File fileExperiment, 
+					 IUserData<String, String> userData, 
+					 boolean need_metric)
 			throws	Exception
 	{
 		databaseRepresentation = new LocalDatabaseRepresentation(fileExperiment, userData, need_metric);
@@ -293,8 +295,9 @@ public abstract class BaseExperiment implements IExperiment
 	 * @param name : the remote directory
 	 * @throws Exception 
 	 *****/
-	public void open(InputStream expStream, IUserData<String, String> userData,
-		String name) throws Exception {
+	public void open(InputStream expStream, 
+					 IUserData<String, String> userData,
+					 String name) throws Exception {
 		databaseRepresentation = new RemoteDatabaseRepresentation(expStream, userData, name);
 		databaseRepresentation.open(this);
 		open_finalize();
