@@ -37,28 +37,6 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 	
 	private String traceFilePath;
 	private IFileDB fileDB;
-
-	/************************
-	 * Constructor to setup local database
-	 * 
-	 * @param context IEclipseContext
-	 * @param statusMgr  IProgressMonitor
-	 * @param databaseDirectory : database directory
-	 * @param fileDB IFileDB 
-	 * 
-	 * @throws InvalExperimentException
-	 * @throws Exception
-	 */
-	public SpaceTimeDataControllerLocal(
-			IEclipseContext context, 
-			IProgressMonitor statusMgr, 
-			String databaseDirectory, 
-			IFileDB fileDB) 
-			throws InvalExperimentException, Exception 
-	{
-		super(context, new File(databaseDirectory));
-		init(statusMgr, fileDB);
-	}
 	
 	
 	/***

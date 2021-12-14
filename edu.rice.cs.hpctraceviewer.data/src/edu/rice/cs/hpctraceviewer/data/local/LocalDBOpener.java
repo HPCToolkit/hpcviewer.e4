@@ -13,7 +13,6 @@ import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.Util;
 import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
-import edu.rice.cs.hpctraceviewer.data.DatabaseAccessInfo;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.version4.FileDB4;
 
@@ -25,23 +24,10 @@ import edu.rice.cs.hpctraceviewer.data.version4.FileDB4;
  ****************************************************/
 public class LocalDBOpener extends AbstractDBOpener 
 {
-	private String directory;
 	private int version;
 	private BaseExperiment experiment;
 	private final IEclipseContext context;
 	
-	/*******
-	 * prepare opening a database 
-	 * 
-	 * @param IEclipseContext context
-	 * @param DatabaseAccessInfo info
-	 * 
-	 * @throws Exception 
-	 */
-	public LocalDBOpener(IEclipseContext context, DatabaseAccessInfo info) throws Exception
-	{
-		this(context, info.getDatabasePath());
-	}
 
 	
 	/*****
@@ -51,28 +37,17 @@ public class LocalDBOpener extends AbstractDBOpener
 	 * @throws Exception 
 	 */
 	public LocalDBOpener(IEclipseContext context, BaseExperiment experiment) throws Exception {
-		this(context, experiment.getDefaultDirectory().getAbsolutePath());
+		this.context   = context;
 		this.experiment = experiment;
 		version = experiment.getMajorVersion();
-	}
-	
-	
-	/*****
-	 * Prepare opening a database.
-	 * @param IEclipseContext context
-	 * @param directory absolute path to the directory
-	 */
-	public LocalDBOpener(IEclipseContext context, String directory)  throws Exception {
-		
-		this.context   = context;
-		this.directory = directory;
-		version = LocalDBOpener.directoryHasTraceData(directory);
-		if (version<=0) {
+		String directory = experiment.getDefaultDirectory().getAbsolutePath();
+		if (directoryHasTraceData(directory)<=0) {
 			throw new Exception("The directory does not contain hpctoolkit database with trace data:"
 					+ directory);
 		}
 	}
-
+	
+	
 	@Override
 	public int getVersion() {
 		return version;
@@ -116,10 +91,7 @@ public class LocalDBOpener extends AbstractDBOpener
 		IFileDB fileDB = getFileDB();
 		
 		// prepare the xml experiment and all extended data
-		if (experiment == null)
-			return new SpaceTimeDataControllerLocal(context, statusMgr, directory, fileDB);
-		else 
-			return new SpaceTimeDataControllerLocal(context, statusMgr, experiment, fileDB);
+		return new SpaceTimeDataControllerLocal(context, statusMgr, experiment, fileDB);
 	}
 
 	
