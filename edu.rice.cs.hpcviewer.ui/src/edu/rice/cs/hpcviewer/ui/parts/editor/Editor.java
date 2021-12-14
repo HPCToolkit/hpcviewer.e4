@@ -22,6 +22,7 @@ import edu.rice.cs.hpcviewer.ui.internal.AbstractUpperPart;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -65,7 +66,7 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 	
 	static final private String PROPERTY_DATA = "hpceditor.data";
 
-	
+	private DialogSettings dialogSettings;
 	private SourceViewer textViewer;
 	private Object input;
 	private int    searchOffsetStart, searchOffsetEnd;
@@ -110,7 +111,8 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(container);
 		
 		ViewerPreferenceManager.INSTANCE.getPreferenceStore().addPropertyChangeListener(this);
-		
+		dialogSettings = new DialogSettings(PROPERTY_DATA);
+
 		setControl(container);
 		setMenu();
 		setKeyCommand();
@@ -135,7 +137,7 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 	
 	private void find() {
 		SearchDialog searchDialog = new SearchDialog(getControl().getShell(), SWT.NONE);
-		searchDialog.setInput(Editor.this, null);
+		searchDialog.setInput(Editor.this, dialogSettings);
 		searchDialog.open();
 	}
 	

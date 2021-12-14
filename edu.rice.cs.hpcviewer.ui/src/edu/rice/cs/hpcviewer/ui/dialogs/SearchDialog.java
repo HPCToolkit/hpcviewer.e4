@@ -428,6 +428,8 @@ public class SearchDialog extends Dialog {
 				if (!editor.search(text, forwardValue, caseSensitiveValue, wholeWordValue, wrapSearchValue)) {
 					statusLabel.setText("String not found");
 					getShell().getDisplay().beep();
+				} else {
+					updateFindHistory();
 				}
 			} catch (Exception e) {
 				statusLabel.setText(e.getLocalizedMessage());
