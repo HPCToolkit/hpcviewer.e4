@@ -94,11 +94,10 @@ public Scope duplicate() {
 /******
  * Retrieve (and create) the metric collection based on the version of the database.
  *  
- * @param scope : the current scope
  * @return IMetricValueCollection
  * @throws IOException
  */
-public IMetricValueCollection getMetricValueCollection(Scope scope) throws IOException
+public IMetricValueCollection getMetricValueCollection() throws IOException
 {
 	final int version  	  = experiment.getMajorVersion();
 	
@@ -108,7 +107,7 @@ public IMetricValueCollection getMetricValueCollection(Scope scope) throws IOExc
 	{
 		if (rootScopeType == RootScopeType.CallingContextTree) {
 			DataSummary data = experiment.getDataSummary();
-			return new MetricValueCollection3(data, scope);
+			return new MetricValueCollection3(data);
 			
 		} else if (rootScopeType == RootScopeType.CallerTree || 
 				   rootScopeType == RootScopeType.Flat) {
