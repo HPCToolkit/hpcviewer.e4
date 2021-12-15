@@ -35,7 +35,7 @@ public class MetricValueCollection3 implements IMetricValueCollection
 
 	private IntObjectHashMap<MetricValue> values; //HashMap<Integer, MetricValue> values;
 	
-	public MetricValueCollection3(DataSummary dataSummary, Scope scope) throws IOException
+	public MetricValueCollection3(DataSummary dataSummary) throws IOException
 	{
 		this.dataSummary = dataSummary;
 	}

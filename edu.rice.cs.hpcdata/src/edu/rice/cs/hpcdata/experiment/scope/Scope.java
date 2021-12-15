@@ -743,7 +743,7 @@ protected void ensureMetricStorage()
 	if (metrics == null)
 	{
 		try {
-			metrics = root.getMetricValueCollection(this);
+			metrics = root.getMetricValueCollection();
 		} catch (IOException e) {
 			RuntimeException e2 = new RuntimeException(e.getMessage());
 			e2.setStackTrace(e.getStackTrace());
