@@ -4,6 +4,7 @@ import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.layer.LabelStack;
 import org.eclipse.nebula.widgets.nattable.layer.cell.ILayerCell;
 import org.eclipse.nebula.widgets.nattable.painter.cell.TextPainter;
+import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
 import org.eclipse.nebula.widgets.nattable.style.IStyle;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
@@ -21,6 +22,7 @@ public class CallSiteTextPainter extends TextPainter
 
 	private final ScopeTreeDataProvider dataProvider;
 	private boolean active;
+	private DisplayMode displayMode;
 	
 	public CallSiteTextPainter(ScopeTreeDataProvider dataProvider) {
 		this.dataProvider = dataProvider;
@@ -49,6 +51,8 @@ public class CallSiteTextPainter extends TextPainter
     	active = labels.hasLabel(ScopeTreeLabelAccumulator.LABEL_CALLSITE) ||
     			 labels.hasLabel(ScopeTreeLabelAccumulator.LABEL_CALLER);
     	
+    	displayMode = cell.getDisplayMode();
+    	
     	super.paintCell(cell, gc, rectangle, configRegistry);
     }
     
@@ -59,7 +63,8 @@ public class CallSiteTextPainter extends TextPainter
     	
 		Color oldBackgrColor = gc.getBackground();
 		Color color = ColorManager.getTextFg(oldBackgrColor);
-    	if (active) {
+		// Fix issue #134: do not change the active color if we are in the select mode
+    	if (active && displayMode != DisplayMode.SELECT) {
 			color = ViewerColorManager.getActiveColor();		    		
     	}
     	gc.setForeground(color);
