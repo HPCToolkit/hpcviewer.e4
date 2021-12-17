@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcdata.trace;
+package edu.rice.cs.hpcapp;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -9,6 +9,9 @@ import java.util.Map;
 import edu.rice.cs.hpcdata.db.version2.FileDB2;
 import edu.rice.cs.hpcdata.experiment.ExperimentWithoutMetrics;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.trace.TraceAttribute;
+import edu.rice.cs.hpcdata.trace.TraceReader;
+import edu.rice.cs.hpcdata.trace.TraceRecord;
 import edu.rice.cs.hpcdata.util.CallPath;
 import edu.rice.cs.hpcdata.util.MergeDataFiles;
 

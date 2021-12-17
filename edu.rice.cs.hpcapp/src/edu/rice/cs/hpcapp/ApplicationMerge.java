@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcdata.framework;
+package edu.rice.cs.hpcapp;
 
 import java.io.File;
 
