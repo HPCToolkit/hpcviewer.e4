@@ -1,8 +1,7 @@
 package edu.rice.cs.hpcdata.util.string;
 
 import java.text.DecimalFormat;
-import org.apache.commons.text.WordUtils;
-
+import org.apache.commons.lang.WordUtils;
 import edu.rice.cs.hpcdata.util.Dialogs;
 
 public class StringUtil 
@@ -16,7 +15,7 @@ public class StringUtil
 	// whenever a tool tip line exceeds the specified target length, wrap it to a new
 	// line following the next embedded space.
 	static public String wrapScopeName(String s, int desiredLineLength) {
-		return WordUtils.wrap(s, desiredLineLength, "\n", true, "");
+		return WordUtils.wrap(s, desiredLineLength, "\n", true);
 	}
 	
 

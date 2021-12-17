@@ -18,14 +18,14 @@ Export-Package: edu.rice.cs.hpcdata.db,
  edu.rice.cs.hpcdata.experiment.source,
  edu.rice.cs.hpcdata.experiment.xml,
  edu.rice.cs.hpcdata.filter,
- edu.rice.cs.hpcdata.framework,
  edu.rice.cs.hpcdata.trace,
  edu.rice.cs.hpcdata.util,
  edu.rice.cs.hpcdata.util.string
 Main-Class: edu.rice.cs.hpcdata.framework.Application
 Require-Bundle: com.graphbuilder,
  org.eclipse.collections,
- ca.odell.glazedlists
+ ca.odell.glazedlists,
+ org.apache.commons.lang
 Automatic-Module-Name: edu.rice.cs.hpcdata
 Bundle-ClassPath: .,
  lib/commons-lang3-3.11.jar,

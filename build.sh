@@ -114,19 +114,23 @@ name="hpcviewer"
 sh_file="scripts/${name}.sh"
 launcher_name="${name}_launcher.sh"
 launcher="scripts/${launcher_name}"
+RELEASE_FILE="edu.rice.cs.hpcviewer.ui/release.txt"
+
+cp -f "$sh_file" "$launcher" \
+       || die "unable to copy files"
 
 if [ "$CHECK" == "0" ]; then
     # create the release number
     VERSION="Release ${RELEASE}. Commit $GITC" 
-    echo "$VERSION" > edu.rice.cs.hpcviewer.ui/release.txt
+    echo "$VERSION" > ${RELEASE_FILE}
 
     # insert the release number to the launcher script:
     # first, copy the launcher script
     # second, replace the release variable with the current version
 
-    cp -f "$sh_file" "$launcher" \
-       || die "unable to copy files"
-
+    sed -i "s/__VERSION__/$VERSION/g" $launcher
+else
+    VERSION=`cat $RELEASE_FILE`   	    
     sed -i "s/__VERSION__/$VERSION/g" $launcher
 fi
 rm -rf hpcviewer-${RELEASE}*
