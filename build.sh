@@ -58,13 +58,13 @@ fi
 show_help(){
 	echo "Syntax: $0 [-options]"
 	echo "Options: "
-	echo "-c check to create a package without generating the release number"
+	echo "-c create a package and generate the release number"
 	echo "-n (Mac only) notarize the package"
 	echo "-r <release_number> specify the release number"
 	exit
 }
 
-CHECK=0
+CHECK=1
 #------------------------------------------------------------
 # start to build
 #------------------------------------------------------------
@@ -78,7 +78,7 @@ key="$1"
 
 case $key in
     -c|--check)
-    CHECK=1
+    CHECK=0
     shift # past argument
     ;;
     -h|--help)
@@ -115,24 +115,31 @@ sh_file="scripts/${name}.sh"
 launcher_name="${name}_launcher.sh"
 launcher="scripts/${launcher_name}"
 RELEASE_FILE="edu.rice.cs.hpcviewer.ui/release.txt"
+OS=`uname`
+
+# insert the release number to the launcher script:
+# first, copy the launcher script
+# second, replace the release variable with the current version
 
 cp -f "$sh_file" "$launcher" \
        || die "unable to copy files"
 
 if [ "$CHECK" == "0" ]; then
-    # create the release number
+    # create the release number: the current month and the commit hash
+    # users may don't care with the hash, but it's important for debugging
     VERSION="Release ${RELEASE}. Commit $GITC" 
     echo "$VERSION" > ${RELEASE_FILE}
-
-    # insert the release number to the launcher script:
-    # first, copy the launcher script
-    # second, replace the release variable with the current version
-
-    sed -i "s/__VERSION__/$VERSION/g" $launcher
 else
     VERSION=`cat $RELEASE_FILE`   	    
-    sed -i "s/__VERSION__/$VERSION/g" $launcher
 fi
+
+if [[ "$OS" == "Darwin" ]]; then 
+    sed -i '' "s/__VERSION__/\"$VERSION\"/g" $launcher
+else
+    sed -i "s/__VERSION__/\"$VERSION\"/g" $launcher
+fi
+
+# This is not necessary: removing old release files
 rm -rf hpcviewer-${RELEASE}*
 
 #
@@ -242,7 +249,6 @@ repackage_mac $input $output
 ###################################################################
 # special treatement for mac OS
 ###################################################################
-OS=`uname`
 if [[ "$OS" == "Darwin" && "$NOTARIZE" == "1" ]]; then 
         macPkgs="hpcviewer-${RELEASE}-macosx.cocoa.x86_64.zip"
 	macos/notarize.sh $macPkgs
