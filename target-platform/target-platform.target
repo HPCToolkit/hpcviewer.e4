@@ -35,10 +35,6 @@
 			<repository location="http://download.eclipse.org/releases/2021-06/"/>
 			<unit id="org.eclipse.userstorage.sdk.feature.group" version="1.2.0.v20210518-1310"/>
 			<unit id="org.eclipse.sdk.feature.group" version="4.20.0.v20210611-1636"/>
-		</location>
-		<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-			<repository location="http://eclipse.jcraft.com/"/>
-			<unit id="com.jcraft.eclipse.jsch.feature.group" version="0.0.1"/>
 		</location> 
 	</locations>
 </target>

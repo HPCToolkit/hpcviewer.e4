@@ -1,7 +1,6 @@
 package edu.rice.cs.hpcdata.util.string;
 
 import java.text.DecimalFormat;
-import org.apache.commons.lang.WordUtils;
 import edu.rice.cs.hpcdata.util.Dialogs;
 
 public class StringUtil 
