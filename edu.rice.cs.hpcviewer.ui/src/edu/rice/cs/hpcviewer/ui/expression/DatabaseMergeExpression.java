@@ -32,6 +32,6 @@ public class DatabaseMergeExpression
 			}
 		}
 		
-		return numDb == 2;
+		return numDb >= 2;
 	}
 }

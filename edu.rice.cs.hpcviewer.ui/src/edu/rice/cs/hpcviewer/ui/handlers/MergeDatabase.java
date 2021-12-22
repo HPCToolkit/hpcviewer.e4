@@ -4,8 +4,10 @@ package edu.rice.cs.hpcviewer.ui.handlers;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,11 +18,12 @@ import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.merge.ExperimentMerger;
-import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
-import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
+import edu.rice.cs.hpcmerge.DatabaseMergeWizard;
+import edu.rice.cs.hpcmerge.DatabasesToMerge;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -50,52 +53,54 @@ public class MergeDatabase
 		// gather 2 databases to be merged.
 		// we don't want to merge an already merged database. Skip it.
 		// ---------------------------------------------------------------
-		final Experiment []db = new Experiment[2];
+		List<Experiment> db = new ArrayList<Experiment>(2);
 		
 		Iterator<BaseExperiment> iterator = database.getIterator(application.getSelectedElement());
-		int numDb = 0;
 		while(iterator.hasNext()) {
 			Experiment exp = (Experiment) iterator.next();
 			if (!exp.isMergedDatabase()) {
-				db[numDb] = exp;
-				numDb++;
+				db.add(exp);
 			}
 		}
 
-		if (numDb!=2) {
-			String msg = "hpcviewer currently does not support merging more than two databases";
-			MessageDialog.openError(shell, "Unsupported action", msg);
-			return;
+		if (db.size() < 2) {
+			throw new RuntimeException("Can't merge one database");
+		} if (db.size() > 2) {
+			DatabaseMergeWizard dmw = new DatabaseMergeWizard(db);
+			WizardDialog dialog = new WizardDialog(shell, dmw);
+			
+			if (dialog.open() == Dialog.CANCEL)
+				return;
+			
+			DatabasesToMerge dm = dmw.getDatabaseToMerge();
+			db.set(0, dm.experiment[0]);
+			db.set(1, dm.experiment[1]);
 		}
 		
 		final RootScopeType mergeType;
 		if (param.equals(PARAM_VALUE_TOPDOWN)) {
-			mergeType = RootScopeType.CallingContextTree;
-			
+			mergeType = RootScopeType.CallingContextTree;			
 		} else if (param.equals(PARAM_VALUE_FLAT)) {
-			mergeType = RootScopeType.Flat;
-			
+			mergeType = RootScopeType.Flat;			
 		} else {
 			Logger logger = LoggerFactory.getLogger(getClass());
 			logger.error("Error: merge param unknown: " + param);
 
 			return;
 		}
+		// dummy final variables so that the java thread can access to db[] variables
+		// TODO fix this
+		final Experiment e1 = db.get(0);
+		final Experiment e2 = db.get(1);
 		
-		final Display display = shell.getDisplay();
-		display.asyncExec(new Runnable() {
-			
-			@Override
-			public void run() {
-				try {
-					Experiment mergedExp = ExperimentMerger.merge(db[0], db[1], mergeType);
-					database.createViewsAndAddDatabase(mergedExp, application, service, modelService);
-					
-				} catch (Exception e) {
-					MessageDialog.openError(shell, "Error merging database",
-							e.getClass().getName() + ": \n" + e.getMessage());
-				}
+		BusyIndicator.showWhile(shell.getDisplay(), () -> {
+			try {
+				Experiment mergedExp = ExperimentMerger.merge(e1, e2, mergeType);
+				database.createViewsAndAddDatabase(mergedExp, application, service, modelService);
 				
+			} catch (Exception e) {
+				MessageDialog.openError(shell, "Error merging database",
+						e.getClass().getName() + ": \n" + e.getMessage());
 			}
 		});
 	}
@@ -103,37 +108,17 @@ public class MergeDatabase
 	
 	@CanExecute
 	public boolean canExecute(MApplication application, @Optional @Named(PARAM_ID) String param) {
-		
-		// temporarily, we don't support merging more than 2 databases
-		
 		Iterator<BaseExperiment> iterator = database.getIterator(application.getSelectedElement());
 		
-		int numDb = 0;
-		
+		int numDb = 0;		
 		while(iterator.hasNext()) {
 			Experiment exp = (Experiment) iterator.next();
-			if (exp.isMergedDatabase()) {
-				
-				// if we already merge the topdowns, we should disable topdown merge
-				// similarly, if the merged flat exists, we disable the flat merge
-				
-				List<TreeNode> roots = exp.getRootScopeChildren();
-				if (roots == null) continue;
-				
-				RootScope root = (RootScope) roots.get(0);
-				
-				if (root.getType()== RootScopeType.CallingContextTree && param.equals(PARAM_VALUE_TOPDOWN)) {
-					return false;
-				}
-				if (root.getType()== RootScopeType.Flat && param.equals(PARAM_VALUE_FLAT)) {
-					return false;
-				}
-			} else {
+			if (!exp.isMergedDatabase()) {
 				numDb++;
 			}
 		}
 		
-		return numDb==2;
+		return numDb>=2;
 	}
 		
 }
