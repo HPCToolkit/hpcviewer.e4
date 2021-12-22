@@ -202,7 +202,8 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 		MetricDataEvent metricDataEvent = new MetricDataEvent(data, copyList, btnApplyToAllViews.getSelection());
 		ViewerDataEvent viewerDataEvent = new ViewerDataEvent(input.getMetricManager(), metricDataEvent);
 		
-		eventBroker.post(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN, viewerDataEvent);
+		if (eventBroker != null)
+			eventBroker.post(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN, viewerDataEvent);
 	}
 
 	
@@ -252,7 +253,7 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 				BaseMetric metric = dlg.getMetric();
 				update(metric);
 				
-				ViewerDataEvent dataEvent = new ViewerDataEvent(input.getMetricManager(), metric);				
+				ViewerDataEvent dataEvent = new ViewerDataEvent(input.getMetricManager(), metric);	
 				eventBroker.post(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE, dataEvent);
 			} 
 		} else {
@@ -266,8 +267,9 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 				metric.setDisplayName(name);
 				update(metric);
 				
-				ViewerDataEvent dataEvent = new ViewerDataEvent(input.getMetricManager(), metric);				
-				eventBroker.post(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE, dataEvent);
+				ViewerDataEvent dataEvent = new ViewerDataEvent(input.getMetricManager(), metric);
+				if (eventBroker != null)
+					eventBroker.post(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE, dataEvent);
 			}
 		}
 	}
