@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcfilter.test;
+package edu.rice.cs.hpctest.filter;
 
 import java.util.ArrayList;
 import java.util.List;

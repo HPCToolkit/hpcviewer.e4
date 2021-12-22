@@ -56,11 +56,19 @@ if [ "$JAVA_MAJOR_VERSION" -lt "$jvm_required" ]; then
 fi
 
 show_help(){
-	echo "Syntax: $0 [-options]"
+	echo "Syntax: $0 [-options] [commands]"
 	echo "Options: "
 	echo "-c create a package and generate the release number"
 	echo "-n (Mac only) notarize the package"
 	echo "-r <release_number> specify the release number"
+  	echo "Commands:"
+	echo " clean : remove objects and temporary files"
+	exit
+}
+
+clean_up() {
+	mvn clean
+	rm -f scripts/hpcviewer_launcher.sh
 	exit
 }
 
@@ -77,6 +85,10 @@ do
 key="$1"
 
 case $key in
+    clean)
+    clean_up
+    shift # past argument
+    ;;
     -c|--check)
     CHECK=0
     shift # past argument

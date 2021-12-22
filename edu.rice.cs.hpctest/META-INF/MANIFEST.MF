@@ -9,4 +9,7 @@ Require-Bundle: edu.rice.cs.hpcdata,
  edu.rice.cs.hpcmerge,
  org.eclipse.core.runtime,
  org.eclipse.swt,
- org.eclipse.jface
+ org.eclipse.jface,
+ edu.rice.cs.hpc.filter,
+ ca.odell.glazedlists,
+ org.eclipse.nebula.widgets.nattable.core
