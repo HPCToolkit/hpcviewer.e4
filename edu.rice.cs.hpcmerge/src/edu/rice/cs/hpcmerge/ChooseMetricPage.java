@@ -14,6 +14,7 @@ import org.eclipse.swt.widgets.List;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
+import edu.rice.cs.hpcdata.merge.DatabasesToMerge;
 
 public class ChooseMetricPage extends WizardPage 
 {

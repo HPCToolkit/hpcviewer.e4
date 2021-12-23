@@ -18,9 +18,9 @@ import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
+import edu.rice.cs.hpcdata.merge.DatabasesToMerge;
 import edu.rice.cs.hpcdata.merge.ExperimentMerger;
 import edu.rice.cs.hpcmerge.DatabaseMergeWizard;
-import edu.rice.cs.hpcmerge.DatabasesToMerge;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 
 import java.util.ArrayList;

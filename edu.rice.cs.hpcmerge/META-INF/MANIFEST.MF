@@ -7,6 +7,7 @@ Bundle-Vendor: Rice University
 Automatic-Module-Name: edu.rice.cs.hpcmerge
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: edu.rice.cs.hpcdata,
+ edu.rice.cs.hpcdata.merge,
  org.eclipse.jface,
  org.eclipse.core.runtime
 Export-Package: edu.rice.cs.hpcmerge

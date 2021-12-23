@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcmerge;
+package edu.rice.cs.hpcdata.merge;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;

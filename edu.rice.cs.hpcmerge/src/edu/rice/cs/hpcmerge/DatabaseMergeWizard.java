@@ -6,6 +6,7 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
 import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.merge.DatabasesToMerge;
 
 public class DatabaseMergeWizard extends Wizard 
 {

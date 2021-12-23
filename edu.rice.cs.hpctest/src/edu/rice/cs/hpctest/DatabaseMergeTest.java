@@ -9,8 +9,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.merge.DatabasesToMerge;
 import edu.rice.cs.hpcmerge.DatabaseMergeWizard;
-import edu.rice.cs.hpcmerge.DatabasesToMerge;
 import edu.rice.cs.hpctest.data.DataFactory;
 
 public class DatabaseMergeTest {

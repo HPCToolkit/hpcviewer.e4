@@ -84,7 +84,7 @@ public class ExperimentMerger
 		// -----------------------------------------------
 		// step 2: combine all metrics
 		// -----------------------------------------------
-		ListMergedMetrics metrics = mergeMetrics(exp1.getMetricList(), exp2.getMetricList());
+		ListMergedMetrics metrics = mergeMetrics(exp1.getVisibleMetrics(), exp2.getVisibleMetrics());
 		merged.setMetrics(metrics);
 		
 		if (with_raw_metrics)
