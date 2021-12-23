@@ -64,7 +64,7 @@ public class ChooseMetricPage extends WizardPage
 					BaseMetric metric = exp.getVisibleMetrics().get(index);
 					database.metric[index] = metric;
 					
-					label.setText(s);
+					label.setText("Selected metric: " + s);
 					setPageComplete(isDone());
 				}
 			}
@@ -113,6 +113,12 @@ public class ChooseMetricPage extends WizardPage
 		
 		setControl(container);
 		setPageComplete(false);
+		
+		// if the databases have been selected, we can go to fill the content
+		if (database.experiment[0] != null && database.experiment[1] != null) {
+			fillContent(0);
+			fillContent(1);
+		}
 	}
 
 	@Override

@@ -37,7 +37,19 @@ public class DatabaseMergeWizard extends Wizard
     
     @Override
     public void addPages() {
-    	pages = new WizardPage[] {new ChooseDatabasePage(listDb, database), new ChooseMetricPage(database)};
+    	// if we only have 2 database, we directly pick the metric to compare.
+    	// otherwise we have to chose the databases, and then select the metric.
+    	if (listDb.size() == 2) {
+    		// no need to select databases
+    		// initialize the two databases to merge here. 
+    		database.experiment[0] = listDb.get(0);
+    		database.experiment[1] = listDb.get(1);
+    		
+    		ChooseMetricPage page = new ChooseMetricPage(database);
+    		pages = new WizardPage[] {page};
+    	} else {
+    		pages = new WizardPage[] {new ChooseDatabasePage(listDb, database), new ChooseMetricPage(database)};
+    	}
     	for(WizardPage page : pages) {
         	addPage(page);
     	}

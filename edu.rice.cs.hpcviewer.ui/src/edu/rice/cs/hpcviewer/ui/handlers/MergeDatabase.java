@@ -65,18 +65,21 @@ public class MergeDatabase
 
 		if (db.size() < 2) {
 			throw new RuntimeException("Can't merge one database");
-		} if (db.size() > 2) {
-			DatabaseMergeWizard dmw = new DatabaseMergeWizard(db);
-			WizardDialog dialog = new WizardDialog(shell, dmw);
-			
-			if (dialog.open() == Dialog.CANCEL)
-				return;
-			
-			DatabasesToMerge dm = dmw.getDatabaseToMerge();
-			db.set(0, dm.experiment[0]);
-			db.set(1, dm.experiment[1]);
 		}
+		// in case there are more than 2 databases: we select two databases to merge and its metric
+		// case for exactly 2 databases: just select the metric to compare
+		DatabaseMergeWizard dmw = new DatabaseMergeWizard(db);
+		WizardDialog dialog = new WizardDialog(shell, dmw);
 		
+		if (dialog.open() == Dialog.CANCEL)
+			return;
+		
+		DatabasesToMerge dm = dmw.getDatabaseToMerge();
+		db.set(0, dm.experiment[0]);
+		db.set(1, dm.experiment[1]);
+		
+		// check the type of merging: top-down or flat. 
+		// bottom up is not supported yet
 		final RootScopeType mergeType;
 		if (param.equals(PARAM_VALUE_TOPDOWN)) {
 			mergeType = RootScopeType.CallingContextTree;			
