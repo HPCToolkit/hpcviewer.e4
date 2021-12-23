@@ -5,7 +5,6 @@ import java.util.List;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
-import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoopScope;
@@ -52,11 +51,13 @@ public class TreeSimilarity
 	 * @param source: the source root scope
 	 * 
 	 */
-	public TreeSimilarity(int offset, RootScope target, RootScope source)
+	public TreeSimilarity(int offset, RootScope target, RootScope source, DatabasesToMerge db)
 	{
 		metricOffset = offset;
-		
-		metricToCompare = getMetricsToCompare(target, source);
+		metricToCompare = db.metric;
+
+		if (db.metric == null || db.metric[0] == null || db.metric[1] == null )
+			metricToCompare = DatabasesToMerge.getMetricsToCompare(db.experiment);
 		
 		// reset counter
 		IScopeVisitor visitor = new ResetCounterVisitor();
@@ -83,54 +84,7 @@ public class TreeSimilarity
 		}
 	}
 	
-	
-	private BaseMetric[] getMetricsToCompare(RootScope rootTarget, RootScope rootSource) {
-
-		Experiment expSource = (Experiment) rootSource.getExperiment();
-		Experiment expTarget = (Experiment) rootTarget.getExperiment();
 		
-		List<BaseMetric> metricSource = expSource.getVisibleMetrics();
-		List<BaseMetric> metricTarget = expTarget.getVisibleMetrics();
-		
-		BaseMetric []metrics = new BaseMetric[2];
-		
-		for(BaseMetric m1: metricSource) {
-			if (m1.getMetricType() == MetricType.INCLUSIVE) {
-				for(BaseMetric m2: metricTarget) {
-					if (m1.getDisplayName().equals(m2.getDisplayName())) {
-						metrics[METRIC_TARGET] = m2;
-						metrics[METRIC_SOURCE] = m1;
-						
-						return metrics;
-					}
-				}
-			}
-		}
-		// no metric matches by name. 
-		// let's use the first metric. Hopefully it works :-(
-		
-		BaseMetric metricSourceCompare = metricSource.get(0);
-		for (BaseMetric m: metricSource) {
-			if (m.getMetricType() == MetricType.INCLUSIVE) {
-				metricSourceCompare = m;
-				break;
-			}
-		}
-		
-		BaseMetric metricTargetCompare = metricTarget.get(0);
-		for (BaseMetric m: metricTarget) {
-			if (m.getMetricType() == MetricType.INCLUSIVE) {
-				metricTargetCompare = m;
-				break;
-			}
-		}
-		
-		metrics[METRIC_TARGET] = metricTargetCompare;
-		metrics[METRIC_SOURCE] = metricSourceCompare;
-		
-		return metrics;
-	}
-	
 	/****
 	 * check similarity between 2 trees, and merge them into the
 	 * target tree

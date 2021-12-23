@@ -46,11 +46,11 @@ public class ExperimentMerger
 	 * @return merged experiment database
 	 * @throws Exception 
 	 */
-	static public Experiment merge(Experiment exp1, Experiment exp2, RootScopeType type) throws Exception {
+	static public Experiment merge(DatabasesToMerge db) throws Exception {
 		
-		final String parent_dir = generateMergeName(exp1, exp2);
+		final String parent_dir = generateMergeName(db.experiment[0], db.experiment[1]);
 
-		return merge(exp1, exp2, type, parent_dir);
+		return merge(db, parent_dir);
 	}
 	
 	/******
@@ -63,8 +63,10 @@ public class ExperimentMerger
 	 * @return the new merged database
 	 * @throws Exception 
 	 */
-	static public Experiment merge(Experiment exp1, Experiment exp2, RootScopeType type, 
-			String parent_dir) throws Exception {
+	static public Experiment merge(DatabasesToMerge db, String parent_dir) throws Exception {
+		
+		Experiment exp1 = db.experiment[0];
+		Experiment exp2 = db.experiment[1];
 		
 		// -----------------------------------------------
 		// step 1: create new base Experiment
@@ -104,11 +106,11 @@ public class ExperimentMerger
 		// step 4: create a new root by duplicating the tree of experiment 1
 		// -----------------------------------------------		
 		
-		RootScope root1 = exp1.getRootScope(type);
+		RootScope root1 = exp1.getRootScope(db.type);
 		if (root1 == null) {
-			throw new Exception("Unable to find root type " + type + " in " + exp1.getDefaultDirectory());
+			throw new Exception("Unable to find root type " + db.type + " in " + exp1.getDefaultDirectory());
 		}
-		createFlatTree(exp1, type, root1);
+		createFlatTree(exp1, db.type, root1);
 		
 		root1.dfsVisitScopeTree(new DuplicateScopeTreesVisitor(rootScope, 0));
 		
@@ -118,13 +120,13 @@ public class ExperimentMerger
 		// step 5: merge the two experiments
 		// -----------------------------------------------
 
-		RootScope root2 = exp2.getRootScope(type);
+		RootScope root2 = exp2.getRootScope(db.type);
 		if (root2 == null) {
-			throw new Exception("Unable to find root type " + type + " in " + exp2.getDefaultDirectory());
+			throw new Exception("Unable to find root type " + db.type + " in " + exp2.getDefaultDirectory());
 		}
-		createFlatTree(exp2, type, root2);
+		createFlatTree(exp2, db.type, root2);
 
-		new TreeSimilarity(metrics.getOffset(), rootMerged, root2);
+		new TreeSimilarity(metrics.getOffset(), rootMerged, root2, db);
 		
 		merged.setMergedDatabase(true);
 		

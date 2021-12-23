@@ -74,31 +74,24 @@ public class MergeDatabase
 		if (dialog.open() == Dialog.CANCEL)
 			return;
 		
-		DatabasesToMerge dm = dmw.getDatabaseToMerge();
-		db.set(0, dm.experiment[0]);
-		db.set(1, dm.experiment[1]);
+		final DatabasesToMerge dm = dmw.getDatabaseToMerge();
 		
 		// check the type of merging: top-down or flat. 
 		// bottom up is not supported yet
-		final RootScopeType mergeType;
+
 		if (param.equals(PARAM_VALUE_TOPDOWN)) {
-			mergeType = RootScopeType.CallingContextTree;			
+			dm.type = RootScopeType.CallingContextTree;			
 		} else if (param.equals(PARAM_VALUE_FLAT)) {
-			mergeType = RootScopeType.Flat;			
+			dm.type = RootScopeType.Flat;			
 		} else {
 			Logger logger = LoggerFactory.getLogger(getClass());
 			logger.error("Error: merge param unknown: " + param);
-
 			return;
 		}
-		// dummy final variables so that the java thread can access to db[] variables
-		// TODO fix this
-		final Experiment e1 = db.get(0);
-		final Experiment e2 = db.get(1);
 		
 		BusyIndicator.showWhile(shell.getDisplay(), () -> {
 			try {
-				Experiment mergedExp = ExperimentMerger.merge(e1, e2, mergeType);
+				Experiment mergedExp = ExperimentMerger.merge(dm);
 				database.createViewsAndAddDatabase(mergedExp, application, service, modelService);
 				
 			} catch (Exception e) {

@@ -4,6 +4,7 @@ import java.io.File;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
+import edu.rice.cs.hpcdata.merge.DatabasesToMerge;
 import edu.rice.cs.hpcdata.merge.ExperimentMerger;
 import edu.rice.cs.hpcdata.merge.TreeSimilarity;
 
@@ -51,9 +52,13 @@ public class ApplicationMerge {
 			System.err.println("Cannot open database: " + args[1]);
 		}
 		System.setProperty(TreeSimilarity.PROP_DEBUG, "true");
+		DatabasesToMerge db = new DatabasesToMerge();
+		db.experiment[0] = exp1;
+		db.experiment[1] = exp2;
+		db.type = RootScopeType.CallingContextTree;
 		
 		try {
-			ExperimentMerger.merge(exp1, exp2, RootScopeType.CallingContextTree);
+			ExperimentMerger.merge(db);
 		} catch (Exception e) {
 			System.err.println("Fail to merge");
 			e.printStackTrace();

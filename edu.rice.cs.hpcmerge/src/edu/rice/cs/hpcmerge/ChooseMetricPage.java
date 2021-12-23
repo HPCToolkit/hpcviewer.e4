@@ -43,6 +43,21 @@ public class ChooseMetricPage extends WizardPage
 		this.database = db;
 		fillContent(0);
 		fillContent(1);
+		
+		if (db.metric[0] == null || db.metric[1] == null) {
+			db.metric = DatabasesToMerge.getMetricsToCompare(db.experiment);
+		}
+		selectMetric(listMetrics[0], db.metric[0]);
+		selectMetric(listMetrics[1], db.metric[1]);
+	}
+	
+	private void selectMetric(List list, BaseMetric metric) {
+		for(int i=0; i<list.getItemCount(); i++) {
+			if (list.getItem(i).equals(metric.getDisplayName())) {
+				list.select(i);
+				return;
+			}
+		}
 	}
 	
 	
@@ -60,7 +75,9 @@ public class ChooseMetricPage extends WizardPage
 		// clear and fill the list of metrics
 		list.removeAll();
 		
-		exp.getVisibleMetrics().stream().forEach(metric -> {
+		final java.util.List<BaseMetric> metrics = exp.getVisibleMetrics();
+		
+		metrics.stream().forEach(metric -> {
 			list.add(metric.getDisplayName());
 		});
 		
@@ -69,12 +86,11 @@ public class ChooseMetricPage extends WizardPage
 		list.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				String s = list.getSelection()[0];
-				if (s != null) {
-					BaseMetric metric = exp.getVisibleMetrics().get(index);
-					database.metric[index] = metric;
+				if (list.getSelectionCount() > 0) {
+					int select = list.getSelectionIndex();
+					database.metric[index] = metrics.get(select);
 					
-					label.setText("Metric: " + s);
+					label.setText("Metric: " + database.metric[index].getDisplayName());
 					setPageComplete(isDone());
 				}
 			}
