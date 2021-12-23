@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcdata.experiment.merge;
+package edu.rice.cs.hpcdata.merge;
 
 import java.util.Comparator;
 import java.util.List;
@@ -89,8 +89,8 @@ public class TreeSimilarity
 		Experiment expSource = (Experiment) rootSource.getExperiment();
 		Experiment expTarget = (Experiment) rootTarget.getExperiment();
 		
-		List<BaseMetric> metricSource = expSource.getMetricList();
-		List<BaseMetric> metricTarget = expTarget.getMetricList();
+		List<BaseMetric> metricSource = expSource.getVisibleMetrics();
+		List<BaseMetric> metricTarget = expTarget.getVisibleMetrics();
 		
 		BaseMetric []metrics = new BaseMetric[2];
 		
@@ -342,6 +342,8 @@ public class TreeSimilarity
 		List<? extends TreeNode> children = (List<? extends TreeNode>)scope.getChildren();
 		if (children == null)
 			return null;
+		
+		@SuppressWarnings("unchecked")
 		List<Scope> childrenScope = (List<Scope>) children;
 		childrenScope.sort(new CompareScope(metric));
 		
@@ -478,7 +480,7 @@ public class TreeSimilarity
 		// check if it's the same name
 		final boolean same_name = areSameName( s1, s2 );
 		
-		int score = (int) (Constants.SCORE_INIT + (1-metric_distance) * Constants.WEIGHT_METRIC);
+		int score = (int) (Constants.SCORE_INIT + metric_distance);
 		
 		int score_loc = (int) Math.max(Constants.WEIGHT_LOCATION, loc_distance * Constants.WEIGHT_LOCATION_COEF);
 		
@@ -596,9 +598,14 @@ public class TreeSimilarity
 	
 	private float getMetricDistance( Scope s1, Scope s2, BaseMetric m1, BaseMetric m2 )
 	{
+		int MULTIPLIER = Constants.WEIGHT_METRIC;
+		
 		final float v1 = getAnnotationValue(s1, m1);
 		final float v2 = getAnnotationValue(s2, m2);
-		return (Math.abs(v2-v1));
+		if (v1 > .5 && v2 > .5)
+			MULTIPLIER *= 2;
+		float distance = 1 - Math.abs(v2-v1);
+		return (distance * MULTIPLIER);
 	}
 	
 

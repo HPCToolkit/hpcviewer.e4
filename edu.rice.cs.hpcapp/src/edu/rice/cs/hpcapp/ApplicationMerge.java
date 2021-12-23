@@ -3,9 +3,9 @@ package edu.rice.cs.hpcapp;
 import java.io.File;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
-import edu.rice.cs.hpcdata.experiment.merge.ExperimentMerger;
-import edu.rice.cs.hpcdata.experiment.merge.TreeSimilarity;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
+import edu.rice.cs.hpcdata.merge.ExperimentMerger;
+import edu.rice.cs.hpcdata.merge.TreeSimilarity;
 
 public class ApplicationMerge {
 

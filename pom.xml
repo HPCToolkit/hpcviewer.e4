@@ -14,6 +14,7 @@
  <modules>
   <module>externals</module>
   <module>edu.rice.cs.hpcdata</module>
+  <module>edu.rice.cs.hpcdata.merge</module>
   <module>edu.rice.cs.hpcapp</module>
   <module>edu.rice.cs.hpcfilter</module>
   <module>edu.rice.cs.hpcdata.tld</module>

@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcdata.experiment.merge;
+package edu.rice.cs.hpcdata.merge;
 
 final class Constants {
 	static final float MIN_DISTANCE_METRIC = (float) 0.15;

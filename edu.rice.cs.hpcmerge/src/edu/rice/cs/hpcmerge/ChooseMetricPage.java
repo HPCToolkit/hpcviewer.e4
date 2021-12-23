@@ -17,7 +17,9 @@ import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 
 public class ChooseMetricPage extends WizardPage 
 {
-	private static final String TITLE = "Choose a leading metric";
+	private static final String TITLE = "Choose a metric to compare";
+	private static final String DEFAULT_LABEL = "Please select a metric from the list below";
+	
 	private Label labelDatabase[];
 	private List  listMetrics[];
 	private Group groups[];
@@ -48,14 +50,21 @@ public class ChooseMetricPage extends WizardPage
 		Group group = groups[index];
 		List list   = listMetrics[index];
 		Label label = labelDatabase[index];
+		label.setText(DEFAULT_LABEL);
 		
 		String text = exp.getXMLExperimentFile().getAbsolutePath();
 		group.setText(text);
 		group.setToolTipText(text);
+
+		// clear and fill the list of metrics
+		list.removeAll();
 		
 		exp.getVisibleMetrics().stream().forEach(metric -> {
 			list.add(metric.getDisplayName());
 		});
+		
+		setPageComplete(isDone());
+
 		list.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -64,7 +73,7 @@ public class ChooseMetricPage extends WizardPage
 					BaseMetric metric = exp.getVisibleMetrics().get(index);
 					database.metric[index] = metric;
 					
-					label.setText("Selected metric: " + s);
+					label.setText("Metric: " + s);
 					setPageComplete(isDone());
 				}
 			}
@@ -93,7 +102,7 @@ public class ChooseMetricPage extends WizardPage
 		groups[0].setText("Database 1");
 		
 		labelDatabase[0] = new Label(groups[0], SWT.WRAP | SWT.BORDER);
-		labelDatabase[0].setText("Select a metric for database 1");
+		labelDatabase[0].setText(DEFAULT_LABEL);
 		GridDataFactory.swtDefaults().grab(true, false).applyTo(labelDatabase[0]);
 		
 		listMetrics[0] = new List(groups[0], SWT.V_SCROLL | SWT.SINGLE);
@@ -105,7 +114,7 @@ public class ChooseMetricPage extends WizardPage
 		groups[1].setText("Database 1");
 		
 		labelDatabase[1] = new Label(groups[1], SWT.WRAP | SWT.BORDER);
-		labelDatabase[1].setText("Select a metric for database 2");
+		labelDatabase[1].setText(DEFAULT_LABEL);
 		GridDataFactory.swtDefaults().grab(true, false).applyTo(labelDatabase[1]);
 		
 		listMetrics[1] = new List(groups[1], SWT.V_SCROLL | SWT.SINGLE);

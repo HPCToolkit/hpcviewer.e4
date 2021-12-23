@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcdata.experiment.merge;
+package edu.rice.cs.hpcdata.merge;
 
 import java.util.ArrayList;
 import java.util.List;

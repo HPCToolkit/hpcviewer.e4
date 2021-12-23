@@ -8,7 +8,7 @@
 //	(c) Copyright 2007-2012 Rice University. All rights reserved.		//
 //																		//
 //////////////////////////////////////////////////////////////////////////
-package edu.rice.cs.hpcdata.experiment.merge;
+package edu.rice.cs.hpcdata.merge;
 
 import java.io.File;
 import java.util.*;

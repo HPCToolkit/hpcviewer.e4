@@ -24,7 +24,7 @@ public class DatabaseMergeTest {
 		shell.setText("Test wizard");
 		
 
-		List<Experiment> list = DataFactory.createExperiments(2);
+		List<Experiment> list = DataFactory.createExperiments();
 
 		DatabaseMergeWizard wz = new DatabaseMergeWizard(list);
 		WizardDialog wd = new WizardDialog(shell, wz);

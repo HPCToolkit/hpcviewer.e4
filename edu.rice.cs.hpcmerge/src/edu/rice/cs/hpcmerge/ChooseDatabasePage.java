@@ -58,11 +58,8 @@ public class ChooseDatabasePage extends WizardPage
 			}
 		});
 		tableViewer.addCheckStateListener(event -> {
-			boolean done = isDone();
-				if (done) {
-					setPageComplete(done);
-					getWizard().getContainer().updateButtons();
-				}
+				setPageComplete(isDone());
+				getWizard().getContainer().updateButtons();
 			}
 		);
 		tableViewer.setInput(listDb);
