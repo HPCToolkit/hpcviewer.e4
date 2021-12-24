@@ -20,7 +20,7 @@ import edu.rice.cs.hpcdata.merge.DatabasesToMerge;
 public class ChooseMetricPage extends WizardPage 
 {
 	private static final String TITLE = "Choose a metric to compare";
-	private static final String DEFAULT_LABEL = "Please select a metric from the list below";
+	private static final String DEFAULT_LABEL = "Please select a metric from the list above";
 	
 	private Label labelDatabase[], labelMetric[];
 	private List  listMetrics[];
@@ -41,25 +41,31 @@ public class ChooseMetricPage extends WizardPage
 	 */
 	public void setDatabasesToMerge(DatabasesToMerge db) {
 		this.database = db;
-		fillContent(0);
-		fillContent(1);
+		if (database.experiment[0] != null) fillContent(0);
+		if (database.experiment[1] != null) fillContent(1);
 		
 		if (db.metric[0] == null || db.metric[1] == null) {
 			db.metric = DatabasesToMerge.getMetricsToCompare(db.experiment);
 		}
-		selectMetric(listMetrics[0], db.metric[0]);
-		selectMetric(listMetrics[1], db.metric[1]);
+		selectMetric(listMetrics[0], db.metric[0], labelMetric[0]);
+		selectMetric(listMetrics[1], db.metric[1], labelMetric[1]);
+		setPageComplete(isDone());
 	}
 	
-	private void selectMetric(List list, BaseMetric metric) {
+	
+	private void selectMetric(List list, BaseMetric metric, Label label) {
 		for(int i=0; i<list.getItemCount(); i++) {
 			if (list.getItem(i).equals(metric.getDisplayName())) {
 				list.select(i);
+				setMetricLabel(label, metric.getDisplayName());
 				return;
 			}
 		}
 	}
 	
+	private void setMetricLabel(Label label, String metricName) {
+		label.setText("Metric: " + metricName);
+	}
 	
 	private void fillContent(int index) {
 		Experiment exp = database.experiment[index];
@@ -88,7 +94,7 @@ public class ChooseMetricPage extends WizardPage
 					int select = list.getSelectionIndex();
 					database.metric[index] = metrics.get(select);
 					
-					label.setText("Metric: " + database.metric[index].getDisplayName());
+					setMetricLabel(label, database.metric[index].getDisplayName());
 					setPageComplete(isDone());
 				}
 			}
@@ -135,10 +141,8 @@ public class ChooseMetricPage extends WizardPage
 		setPageComplete(false);
 		
 		// if the databases have been selected, we can go to fill the content
-		if (database.experiment[0] != null && database.experiment[1] != null) {
-			fillContent(0);
-			fillContent(1);
-		}
+		if (database.experiment[0] != null && database.experiment[1] != null)
+			setDatabasesToMerge(database);
 	}
 
 	@Override

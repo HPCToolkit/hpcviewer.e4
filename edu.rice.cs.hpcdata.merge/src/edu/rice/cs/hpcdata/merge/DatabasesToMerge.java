@@ -40,21 +40,18 @@ public class DatabasesToMerge
 	 * @return An array of two elements of metrics
 	 */
 	public static BaseMetric[] getMetricsToCompare(Experiment[] experiments) {
-
-		Experiment expSource = experiments[0];
-		Experiment expTarget = experiments[1];
 		
-		List<BaseMetric> metricSource = expSource.getVisibleMetrics();
-		List<BaseMetric> metricTarget = expTarget.getVisibleMetrics();
+		List<BaseMetric> metrics1 = experiments[0].getVisibleMetrics();
+		List<BaseMetric> metrics2 = experiments[1].getVisibleMetrics();
 		
 		BaseMetric []metrics = new BaseMetric[2];
 		
-		for(BaseMetric m1: metricSource) {
+		for(BaseMetric m1: metrics1) {
 			if (m1.getMetricType() == MetricType.INCLUSIVE) {
-				for(BaseMetric m2: metricTarget) {
+				for(BaseMetric m2: metrics2) {
 					if (m1.getDisplayName().equals(m2.getDisplayName())) {
-						metrics[0] = m2;
-						metrics[1] = m1;
+						metrics[0] = m1;
+						metrics[1] = m2;
 						
 						return metrics;
 					}
@@ -64,16 +61,16 @@ public class DatabasesToMerge
 		// no metric matches by name. 
 		// let's use the first metric. Hopefully it works :-(
 		
-		BaseMetric metricSourceCompare = metricSource.get(0);
-		for (BaseMetric m: metricSource) {
+		BaseMetric metricSourceCompare = metrics1.get(0);
+		for (BaseMetric m: metrics1) {
 			if (m.getMetricType() == MetricType.INCLUSIVE) {
 				metricSourceCompare = m;
 				break;
 			}
 		}
 		
-		BaseMetric metricTargetCompare = metricTarget.get(0);
-		for (BaseMetric m: metricTarget) {
+		BaseMetric metricTargetCompare = metrics2.get(0);
+		for (BaseMetric m: metrics2) {
 			if (m.getMetricType() == MetricType.INCLUSIVE) {
 				metricTargetCompare = m;
 				break;
