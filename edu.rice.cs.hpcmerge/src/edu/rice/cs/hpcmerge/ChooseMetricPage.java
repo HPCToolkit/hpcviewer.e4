@@ -5,10 +5,11 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
 
@@ -21,9 +22,8 @@ public class ChooseMetricPage extends WizardPage
 	private static final String TITLE = "Choose a metric to compare";
 	private static final String DEFAULT_LABEL = "Please select a metric from the list below";
 	
-	private Label labelDatabase[];
+	private Label labelDatabase[], labelMetric[];
 	private List  listMetrics[];
-	private Group groups[];
 	private DatabasesToMerge database;
 	
 	public ChooseMetricPage(DatabasesToMerge database) {
@@ -63,14 +63,12 @@ public class ChooseMetricPage extends WizardPage
 	
 	private void fillContent(int index) {
 		Experiment exp = database.experiment[index];
-		Group group = groups[index];
-		List list   = listMetrics[index];
-		Label label = labelDatabase[index];
-		label.setText(DEFAULT_LABEL);
 		
 		String text = exp.getXMLExperimentFile().getAbsolutePath();
-		group.setText(text);
-		group.setToolTipText(text);
+		labelDatabase[index].setText(text);
+
+		List list   = listMetrics[index];
+		Label label = labelMetric[index];
 
 		// clear and fill the list of metrics
 		list.removeAll();
@@ -103,41 +101,37 @@ public class ChooseMetricPage extends WizardPage
 	}
 	
 	
+	private void createPanel(SashForm form, int index) {
+
+		Composite areaPanel = new Composite(form, SWT.BORDER);
+		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(areaPanel);
+		GridDataFactory.fillDefaults().grab(true, true).applyTo(areaPanel);
+		
+		labelDatabase[index] = new Label(areaPanel, SWT.WRAP);
+		labelDatabase[index].setText(DEFAULT_LABEL);
+		GridDataFactory.swtDefaults().grab(true, false).applyTo(labelDatabase[index]);
+		
+		listMetrics[index] = new List(areaPanel, SWT.V_SCROLL | SWT.SINGLE);
+		GridDataFactory.fillDefaults().grab(true, true).applyTo(listMetrics[index]);
+
+		labelMetric[index] = new Label(areaPanel, SWT.WRAP);
+		labelMetric[index].setText(DEFAULT_LABEL);
+		GridDataFactory.swtDefaults().grab(true, false).applyTo(labelMetric[index]);
+	}
+	
 	@Override
 	public void createControl(Composite parent) {
-		Composite container = new Composite(parent, SWT.BORDER_SOLID);
-		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(container);
-		GridDataFactory.fillDefaults().grab(true, true).applyTo(container);
-
 		labelDatabase = new Label[2];
+		labelMetric   = new Label[2];
 		listMetrics   = new List[2];
-		groups        = new Group[2];
 		
-		groups[0] = new Group(container, SWT.BORDER | SWT.WRAP);
-		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(groups[0]);
-		GridDataFactory.fillDefaults().grab(true, true).applyTo(groups[0]);
-		groups[0].setText("Database 1");
-		
-		labelDatabase[0] = new Label(groups[0], SWT.WRAP | SWT.BORDER);
-		labelDatabase[0].setText(DEFAULT_LABEL);
-		GridDataFactory.swtDefaults().grab(true, false).applyTo(labelDatabase[0]);
-		
-		listMetrics[0] = new List(groups[0], SWT.V_SCROLL | SWT.SINGLE);
-		GridDataFactory.fillDefaults().grab(true, true).applyTo(listMetrics[0]);
+		SashForm form = new SashForm(parent, SWT.HORIZONTAL);
+		form.setLayout(new FillLayout());
 
-		groups[1] = new Group(container, SWT.BORDER | SWT.WRAP);
-		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(groups[1]);
-		GridDataFactory.fillDefaults().grab(true, true).applyTo(groups[1]);
-		groups[1].setText("Database 1");
+		createPanel(form, 0);
+		createPanel(form, 1);
 		
-		labelDatabase[1] = new Label(groups[1], SWT.WRAP | SWT.BORDER);
-		labelDatabase[1].setText(DEFAULT_LABEL);
-		GridDataFactory.swtDefaults().grab(true, false).applyTo(labelDatabase[1]);
-		
-		listMetrics[1] = new List(groups[1], SWT.V_SCROLL | SWT.SINGLE);
-		GridDataFactory.fillDefaults().grab(true, true).applyTo(listMetrics[1]);
-		
-		setControl(container);
+		setControl(form);
 		setPageComplete(false);
 		
 		// if the databases have been selected, we can go to fill the content
