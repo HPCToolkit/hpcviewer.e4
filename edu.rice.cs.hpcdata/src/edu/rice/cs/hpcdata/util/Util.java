@@ -271,11 +271,6 @@ static public boolean isCorrectDisplay() {
 	return false;
 }
 
-static public void main(String argv[]) {
-	
-	System.out.println("Display: " +  System.getenv("DISPLAY"));
-	System.out.println("Display correct: " + isCorrectDisplay());
-}
 
 static public void printMemory() {
 	

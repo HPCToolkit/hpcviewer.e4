@@ -1,6 +1,5 @@
 package edu.rice.cs.hpcfilter.cct;
 
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -10,7 +9,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
@@ -137,20 +135,4 @@ public class FilterInputDialog extends InputDialog
         }
         super.buttonPressed(buttonId);
     }
-
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) 
-	{
-		final Display display = new Display();
-		final Shell   shell   = new Shell(display);
-		shell.setText("Test dialog filter");
-		
-		FilterInputDialog dialog = new FilterInputDialog(shell, "Toto", "initial", null);
-		if (dialog.open() == Dialog.OK){
-			System.out.println("pattern: " + dialog.getValue());
-			System.out.println("att: " + dialog.getAttribute());
-		}
-	}
 }

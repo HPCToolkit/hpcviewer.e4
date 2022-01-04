@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcdata.test.db.version3;
+package edu.rice.cs.hpctest.data;
 
 import java.io.IOException;
 
@@ -15,7 +15,7 @@ public class DataSummaryTest
 	 ***************************/
 	public static void main(String []argv)
 	{
-		final String DEFAULT_FILE = "/home/la5/data/prof2/dpr-torch/profile.db";
+		final String DEFAULT_FILE = "/Users/la5/Data/prof2/ht2.sdt.8n/profile.db";
 		final String filename;
 		if (argv != null && argv.length>0)
 			filename = argv[0];

@@ -13,7 +13,7 @@ import edu.rice.cs.hpcdata.experiment.metric.format.IMetricValueFormat;
 /**
  * Manual unit test for metric format
  */
-public class TestMetricFormat {
+public class MetricFormatTest {
 	/**
 	 * @param args
 	 */

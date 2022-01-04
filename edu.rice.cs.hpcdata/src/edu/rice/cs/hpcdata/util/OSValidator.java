@@ -2,7 +2,6 @@ package edu.rice.cs.hpcdata.util;
 
 /*******************************************************
  * Check the Operating system of the current JVM
- * @author laksonoadhianto
  *
  *******************************************************/
 public class OSValidator {
@@ -12,22 +11,6 @@ public class OSValidator {
 	static private final boolean win = ( os.indexOf("win") >= 0 );
 	static private final boolean unix = ( os.indexOf( "nix") >=0 || os.indexOf( "nux") >=0 );
 	
-	/****
-	 * test unit
-	 * @param args
-	 */
-	public static void main(String[] args)
-	{
-		if(isWindows()){
-			System.out.println("This is Windows");
-		}else if(isMac()){
-			System.out.println("This is Mac");
-		}else if(isUnix()){
-			System.out.println("This is Unix or Linux");
-		}else{
-			System.out.println("Your OS is not supported!!");
-		}
-	}
  
 	/******
 	 * check if we are on windows
