@@ -53,3 +53,5 @@ Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Provide-Capability: licensing.feature;licensing.feature="edu.rice.cs.hpcviewer.ui.product"
 Automatic-Module-Name: edu.rice.cs.hpcviewer.ui
+Export-Package: edu.rice.cs.hpcviewer.ui.dialogs,
+ edu.rice.cs.hpcviewer.ui.graph

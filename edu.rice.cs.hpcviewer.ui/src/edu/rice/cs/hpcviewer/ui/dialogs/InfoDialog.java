@@ -239,18 +239,4 @@ public class InfoDialog extends Dialog
 		*/
 		return mapTableItems;
 	}
-	
-	
-	/***
-	 * Unit test
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		Display display = new Display();
-		Shell shell = new Shell(display);
-		shell.setLayout(new FillLayout());
-		
-		InfoDialog dlg = new InfoDialog(shell);
-		dlg.open();
-	}
 }

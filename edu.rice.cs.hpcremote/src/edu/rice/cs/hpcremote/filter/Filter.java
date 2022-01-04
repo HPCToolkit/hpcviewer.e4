@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcdata.trace;
+package edu.rice.cs.hpcremote.filter;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
+import edu.rice.cs.hpcdata.trace.TraceName;
 
 
 public class Filter {

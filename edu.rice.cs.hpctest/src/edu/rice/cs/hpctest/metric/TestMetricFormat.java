@@ -1,8 +1,11 @@
 /**
  * 
  */
-package edu.rice.cs.hpcdata.experiment.metric;
+package edu.rice.cs.hpctest.metric;
 
+import edu.rice.cs.hpcdata.experiment.metric.Metric;
+import edu.rice.cs.hpcdata.experiment.metric.MetricType;
+import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
 import edu.rice.cs.hpcdata.experiment.metric.format.IMetricValueFormat;

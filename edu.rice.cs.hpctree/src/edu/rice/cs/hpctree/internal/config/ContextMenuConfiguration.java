@@ -1,5 +1,6 @@
 package edu.rice.cs.hpctree.internal.config;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.config.AbstractUiBindingConfiguration;
 import org.eclipse.nebula.widgets.nattable.copy.command.CopyDataToClipboardCommand;
@@ -40,6 +41,10 @@ public class ContextMenuConfiguration extends AbstractUiBindingConfiguration
 		copyMenu.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				if (scopeTreeTable.getSelection() == null) {
+					MessageDialog.openError(e.display.getActiveShell(), "Error", "Cannot copy: no row is selected.\nPlease select a row to be copied to the clipboard.");
+					return;
+				}
 				NatTable natTable = scopeTreeTable.getTable();
 				natTable.doCommand(new CopyDataToClipboardCommand("\t", 
 																  "\n", 

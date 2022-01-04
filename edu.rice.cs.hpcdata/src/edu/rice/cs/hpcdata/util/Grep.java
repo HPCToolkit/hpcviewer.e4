@@ -64,23 +64,4 @@ public class Grep
 		inputFile.close();
 		outputFile.close();
 	}
-
-	/**
-	 * for unit test only
-	 * @param Argvs
-	 */
-	static public void main(String args[])
-	{
-		if (args.length>1)
-		{
-			final String file = args[0];
-			final String fout = args[1];
-			try {
-				Grep.removeMetrics(file, fout);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	}
 }

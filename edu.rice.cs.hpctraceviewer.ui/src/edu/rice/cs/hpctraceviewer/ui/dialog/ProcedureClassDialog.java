@@ -507,23 +507,4 @@ public class ProcedureClassDialog extends Dialog
     protected Point getInitialSize() {
         return new Point(450, 300);
     }
-
-	
-	/***
-	 * unit test
-	 * 
-	 * @param argv
-	 */
-	static public void main(String argv[]) {
-		Display display = Display.getDefault();
-		
-		ProcedureClassMap pcMap = new ProcedureClassMap(display);
-		ProcedureClassDialog dlg = new ProcedureClassDialog(display.getActiveShell(), pcMap );
-
-		if ( dlg.open() == Dialog.OK ) {
-			if (dlg.isModified()) {
-				pcMap.save();
-			}
-		}
-	}
 }

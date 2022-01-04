@@ -73,7 +73,7 @@ public class ProcedureMapDetailDialog extends Dialog
 	 * @param proc : default name of the procedure
 	 * @param procClass : default name of the class
 	 */
-	protected ProcedureMapDetailDialog(Shell parentShell, String title, String proc, String procClass, RGB color) {
+	public ProcedureMapDetailDialog(Shell parentShell, String title, String proc, String procClass, RGB color) {
 		super(parentShell);
 		
 		this.proc = proc;
@@ -205,21 +205,4 @@ public class ProcedureMapDetailDialog extends Dialog
 			}
 		}
 	}
-	
-	/***
-	 * unit test
-	 * 
-	 * @param argv
-	 */
-	static public void main(String argv[]) {
-		Display display = Display.getDefault();
-		Shell shell = display.getActiveShell();
-		
-		ProcedureMapDetailDialog dlg = new ProcedureMapDetailDialog(shell, "edit", "procedure", "procedure-class", null);
-
-		dlg.open();
-		
-		System.out.println("proc: " + dlg.proc + ", class: " + dlg.description + ", color: " + dlg.getRGB());
-	}
-
 }
