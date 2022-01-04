@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcdata.tld.plot;
+package edu.rice.cs.hpcdata.db.version4;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -8,9 +8,6 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.ArrayList;
 import java.util.List;
-
-import edu.rice.cs.hpcdata.db.version4.DataCommon;
-import edu.rice.cs.hpcdata.db.version4.DataSection;
 
 /*******************************************************************************************
  * 
@@ -343,30 +340,6 @@ public class DataPlot extends DataCommon
 					", nv: " + numValues +
 					", nm: " + numNonZeroMetrics +
 					", of: " + offset;
-		}
-	}
-
-	
-	
-	/////////////////////////////////////////////////////////////////////////////
-	// unit test
-	/////////////////////////////////////////////////////////////////////////////
-	static public void main(String []argv)
-	{
-		final DataPlot data = new DataPlot();
-		String filename;
-		if (argv != null && argv.length>0) {
-			filename = argv[0];
-		} else {
-			filename = "/Users/la5/data/sparse/gpu/hpctoolkit-fib-sparse-database/cct.db"; 
-		}
-		try {
-			data.open(filename);
-			data.printInfo(System.out);
-			data.dispose();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	}
 }

@@ -16,7 +16,7 @@ import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
-import edu.rice.cs.hpcdata.tld.collection.ThreadDataCollectionFactory;
+import edu.rice.cs.hpcdata.tld.ThreadDataCollectionFactory;
 
 /**************************************************************
  * 

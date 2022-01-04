@@ -1,10 +1,12 @@
-package edu.rice.cs.hpcdata.tld.collection;
+package edu.rice.cs.hpcdata.tld;
 
 import java.io.IOException;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
+import edu.rice.cs.hpcdata.tld.v2.ThreadDataCollection2;
+import edu.rice.cs.hpcdata.tld.v4.ThreadDataCollection4;
 import edu.rice.cs.hpcdata.util.Constants;
 
 /*************************************************
