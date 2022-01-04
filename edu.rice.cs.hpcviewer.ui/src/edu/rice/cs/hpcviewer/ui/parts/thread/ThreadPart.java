@@ -15,7 +15,9 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
+import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
+import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcfilter.FilterDataItem;
 import edu.rice.cs.hpcfilter.StringFilterDataItem;
 import edu.rice.cs.hpcfilter.dialog.ThreadFilterDialog;
@@ -161,6 +163,12 @@ public class ThreadPart extends TopDownPart
 	public ViewType getViewType() {
 		return AbstractView.ViewType.INDIVIDUAL;
 	}
+
+	@Override
+	protected boolean isMetricToSkip(Scope scope, BaseMetric metric) {
+		return false;
+	}
+
 
 	
 	private String getTooltipText(ThreadViewInput input) throws IOException {

@@ -474,17 +474,34 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 			if (metric.equalIndex(m)) {
 				return index;
 			}
-			MetricValue mv = m.getValue(root);
-
-			// empty metric is not visible (usually).
-			// the column index should be based on non-empty metrics
-			if (mv != MetricValue.NONE)
+			if (!isMetricToSkip(root, m))
 				index++;
 		}
 		assert(false);
 		return -1;
 	}
 	
+
+	/***
+	 * Check if a certain metric needs to be hidden all the time or not.
+	 * To save the memory, we usually hide empty columns. 
+	 * However, the children can display them if necessary.
+	 * 
+	 * @param scope
+	 * 			the current scope. Usually the root of the table
+	 * @param metric
+	 * 			the metric which to be verified whether to be skipped or not.
+	 * @return
+	 * 			boolean true if it has to be skipped. False otherwise. 
+	 */
+	protected boolean isMetricToSkip(Scope scope, BaseMetric metric) {
+		MetricValue mv = metric.getValue(scope);
+
+		// empty metric is not visible (usually).
+		// the column index should be based on non-empty metrics
+		return (mv == MetricValue.NONE);
+	}
+
 	
 	private void addButtonListener(RootScope root, IMetricManager metricManager) {
 		
