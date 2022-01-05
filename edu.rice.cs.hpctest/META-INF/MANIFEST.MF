@@ -17,6 +17,4 @@ Require-Bundle: edu.rice.cs.hpcdata,
  edu.rice.cs.hpcmetric,
  org.eclipse.osgi.services,
  org.eclipse.e4.core.services,
- edu.rice.cs.hpcviewer.ui,
- edu.rice.cs.hpctraceviewer.data,
- edu.rice.cs.hpctraceviewer.ui
+ edu.rice.cs.hpcviewer.ui

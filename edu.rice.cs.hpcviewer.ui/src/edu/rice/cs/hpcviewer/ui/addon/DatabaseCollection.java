@@ -405,18 +405,6 @@ public class DatabaseCollection
 	
 	
 	/***
-	 * Remove the last registered database
-	 * @return
-	 */
-	public BaseExperiment getLast(MWindow window) {
-		List<BaseExperiment> list = getActiveListExperiments(window);
-		return list.get(list.size()-1);
-	}
-	
-	
-	
-	
-	/***
 	 * Retrieve the experiment object given a XML file path
 	 * 
 	 * @param pathXML the absolute path of the experiment XNK file path

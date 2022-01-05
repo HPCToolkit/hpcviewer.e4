@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctest.ui;
+package edu.rice.cs.hpctest.dialog;
 
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Display;
