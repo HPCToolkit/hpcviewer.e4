@@ -116,4 +116,11 @@
    </plugin>
   </plugins>
  </build>
+ <organization>
+ 	<name>hpctoolkit</name>
+ 	<url>http://hpctoolkit.org</url>
+ </organization>
+ <scm>
+ 	<url>https://github.com/HPCToolkit/hpcviewer.e4</url>
+ </scm>
 </project>

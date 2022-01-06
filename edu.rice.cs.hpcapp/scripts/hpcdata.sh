@@ -13,5 +13,5 @@ for j in $JAR_DIR; do
 done
 
 CMD="java -cp ${JAR_FILES} ${MAIN_CLASS}"
-echo "$CMD $@"
+#echo "$CMD $@"
 $CMD $@
