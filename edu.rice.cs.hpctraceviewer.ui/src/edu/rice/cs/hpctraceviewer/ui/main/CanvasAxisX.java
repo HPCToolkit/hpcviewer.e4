@@ -207,7 +207,7 @@ public class CanvasAxisX extends AbstractAxisCanvas
 		
 		Point prevTextArea  = new Point(0, 0);
 		int   prevPositionX = 0;
-		long  displayTimeBegin = displayTimeUnit.convert(attribute.getTimeBegin(),dbTimeUnit);
+		long  displayTimeBegin = displayTimeUnit.convert(attribute.getTimeBegin(), dbTimeUnit);
 		double deltaXPixels    = (double)attribute.getPixelHorizontal() / 
 								 displayTimeUnit.convert(attribute.getTimeInterval(), dbTimeUnit);
 
@@ -223,7 +223,7 @@ public class CanvasAxisX extends AbstractAxisCanvas
 			// we want to draw the label if the number is nicely readable
 			// nice numbers: 1, 2, 4, ...
 			// not nice numbers: 1.1, 2.3, ...
-			boolean toDrawLabel = (time % 500 == 0)    ||
+			boolean toDrawLabel = (time % 100 == 0)    ||
 								  (deltaXPixels > 50)  ||
 								  (multiplier == 1 && time % 2 == 0);
 			
@@ -260,9 +260,9 @@ public class CanvasAxisX extends AbstractAxisCanvas
 	/*****
 	 * convert from time to pixel
 	 * 
-	 * @param attribute current attribute time configuration
-	 * @param unitTimeNs conversion multipler from time to nanosecond 
+	 * @param displayTimeBegin current attribute time configuration
 	 * @param time the time to convert
+	 * @param deltaXPixels the distance for two different time (in pixel)
 	 * 
 	 * @return pixel (x-axis)
 	 */
