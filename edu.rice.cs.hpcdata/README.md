@@ -1,17 +1,21 @@
 # hpcdata Plugin
 
 hpcdata is an independent plugin part of hpcviewer written purely in Java to ensure portability across platforms.
+No Eclipse SWT or JFace can be used in this project.
 
 ## Requirements
 - Java 11 or newer
-- Apache Ant. You can install Apache Ant via `spack install ant`
+- External libraries:
+  - com.graphbuilder
+  - org.eclipse.collections
+  - ca.odell.glazedlists
 
-To build as an independent plugin:
+To build as an independent application:
 
-- Go to `script` directory
-- Type `ant -buildfile hpcdata.xml`
-- copy `hpcdata.zip` to the installation directory
-- unzip `hpcdata.zip`
+- Go to `edu.rice.cs.hpcapp` project directory
+- Run `./build.sh` script 
+- copy `hpcdata.tgz` to the installation directory
+- untar `hpcdata.tgz`
 - Optionally, change the permission of `hpcdata.sh` (like `chmod ugo+x hpcdata.sh`)
 
 # How to run

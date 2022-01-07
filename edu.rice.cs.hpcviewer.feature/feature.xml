@@ -339,4 +339,18 @@
          version="0.0.0"
          unpack="false"/>
 
+   <plugin
+         id="edu.rice.cs.hpcmerge"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="edu.rice.cs.hpcdata.merge"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
 </feature>

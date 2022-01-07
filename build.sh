@@ -56,15 +56,23 @@ if [ "$JAVA_MAJOR_VERSION" -lt "$jvm_required" ]; then
 fi
 
 show_help(){
-	echo "Syntax: $0 [-options]"
+	echo "Syntax: $0 [-options] [commands]"
 	echo "Options: "
-	echo "-c check to create a package without generating the release number"
+	echo "-c create a package and generate the release number"
 	echo "-n (Mac only) notarize the package"
 	echo "-r <release_number> specify the release number"
+  	echo "Commands:"
+	echo " clean : remove objects and temporary files"
 	exit
 }
 
-CHECK=0
+clean_up() {
+	mvn clean
+	rm -f scripts/hpcviewer_launcher.sh
+	exit
+}
+
+CHECK=1
 #------------------------------------------------------------
 # start to build
 #------------------------------------------------------------
@@ -77,8 +85,12 @@ do
 key="$1"
 
 case $key in
+    clean)
+    clean_up
+    shift # past argument
+    ;;
     -c|--check)
-    CHECK=1
+    CHECK=0
     shift # past argument
     ;;
     -h|--help)
@@ -114,21 +126,32 @@ name="hpcviewer"
 sh_file="scripts/${name}.sh"
 launcher_name="${name}_launcher.sh"
 launcher="scripts/${launcher_name}"
+RELEASE_FILE="edu.rice.cs.hpcviewer.ui/release.txt"
+OS=`uname`
 
-if [ "$CHECK" == "0" ]; then
-    # create the release number
-    VERSION="Release ${RELEASE}. Commit $GITC" 
-    echo "$VERSION" > edu.rice.cs.hpcviewer.ui/release.txt
+# insert the release number to the launcher script:
+# first, copy the launcher script
+# second, replace the release variable with the current version
 
-    # insert the release number to the launcher script:
-    # first, copy the launcher script
-    # second, replace the release variable with the current version
-
-    cp -f "$sh_file" "$launcher" \
+cp -f "$sh_file" "$launcher" \
        || die "unable to copy files"
 
-    sed -i "s/__VERSION__/$VERSION/g" $launcher
+if [ "$CHECK" == "0" ]; then
+    # create the release number: the current month and the commit hash
+    # users may don't care with the hash, but it's important for debugging
+    VERSION="Release ${RELEASE}. Commit $GITC" 
+    echo "$VERSION" > ${RELEASE_FILE}
+else
+    VERSION=`cat $RELEASE_FILE`   	    
 fi
+
+if [[ "$OS" == "Darwin" ]]; then 
+    sed -i '' "s/__VERSION__/\"$VERSION\"/g" $launcher
+else
+    sed -i "s/__VERSION__/\"$VERSION\"/g" $launcher
+fi
+
+# This is not necessary: removing old release files
 rm -rf hpcviewer-${RELEASE}*
 
 #
@@ -238,7 +261,6 @@ repackage_mac $input $output
 ###################################################################
 # special treatement for mac OS
 ###################################################################
-OS=`uname`
 if [[ "$OS" == "Darwin" && "$NOTARIZE" == "1" ]]; then 
         macPkgs="hpcviewer-${RELEASE}-macosx.cocoa.x86_64.zip"
 	macos/notarize.sh $macPkgs
@@ -247,6 +269,10 @@ if [[ "$OS" == "Darwin" && "$NOTARIZE" == "1" ]]; then
 	macos/notarize.sh $macPkgs
 fi
 
+
+###################################################################
+# packaging the hpcdata
+###################################################################
 
 echo "=================================="
 echo " Done" 

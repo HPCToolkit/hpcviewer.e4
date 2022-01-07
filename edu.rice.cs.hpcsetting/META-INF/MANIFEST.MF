@@ -11,10 +11,11 @@ Require-Bundle: org.eclipse.core.runtime,
  ch.qos.logback.classic,
  edu.rice.cs.hpclog,
  edu.rice.cs.hpcbase,
- org.eclipse.nebula.widgets.nattable.core;bundle-version="2.0.0"
+ org.eclipse.nebula.widgets.nattable.core
 Automatic-Module-Name: edu.rice.cs.hpcsetting
 Bundle-ActivationPolicy: lazy
 Export-Package: edu.rice.cs.hpcsetting.color,
  edu.rice.cs.hpcsetting.fonts,
  edu.rice.cs.hpcsetting.preferences,
  edu.rice.cs.hpcsetting.table
+Import-Package: edu.rice.cs.hpcsetting.color

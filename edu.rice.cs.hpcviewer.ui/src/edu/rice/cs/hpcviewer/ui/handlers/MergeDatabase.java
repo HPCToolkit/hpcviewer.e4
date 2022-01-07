@@ -5,7 +5,6 @@ import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,12 +14,11 @@ import org.eclipse.e4.ui.workbench.modeling.EPartService;
 
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
-import edu.rice.cs.hpcdata.experiment.merge.ExperimentMerger;
-import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
-import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
+import edu.rice.cs.hpcmerge.MergeManager;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -50,52 +48,44 @@ public class MergeDatabase
 		// gather 2 databases to be merged.
 		// we don't want to merge an already merged database. Skip it.
 		// ---------------------------------------------------------------
-		final Experiment []db = new Experiment[2];
+		List<Experiment> db = new ArrayList<Experiment>(2);
 		
 		Iterator<BaseExperiment> iterator = database.getIterator(application.getSelectedElement());
-		int numDb = 0;
 		while(iterator.hasNext()) {
 			Experiment exp = (Experiment) iterator.next();
 			if (!exp.isMergedDatabase()) {
-				db[numDb] = exp;
-				numDb++;
+				db.add(exp);
 			}
 		}
 
-		if (numDb!=2) {
-			String msg = "hpcviewer currently does not support merging more than two databases";
-			MessageDialog.openError(shell, "Unsupported action", msg);
-			return;
+		if (db.size() < 2) {
+			throw new RuntimeException("Can't merge one database");
 		}
 		
-		final RootScopeType mergeType;
+		// check the type of merging: top-down or flat. 
+		// bottom up is not supported yet
+		RootScopeType type;
+		
 		if (param.equals(PARAM_VALUE_TOPDOWN)) {
-			mergeType = RootScopeType.CallingContextTree;
-			
+			type = RootScopeType.CallingContextTree;			
 		} else if (param.equals(PARAM_VALUE_FLAT)) {
-			mergeType = RootScopeType.Flat;
-			
+			type = RootScopeType.Flat;			
 		} else {
 			Logger logger = LoggerFactory.getLogger(getClass());
 			logger.error("Error: merge param unknown: " + param);
-
 			return;
 		}
 		
-		final Display display = shell.getDisplay();
-		display.asyncExec(new Runnable() {
+		// everything looks fine: do the merging
+		MergeManager.merge(shell, db, type, new MergeManager.IMergeCallback() {			
+			@Override
+			public void mergeError(String errorMsg) {
+				MessageDialog.openError(shell, "Error merging database", errorMsg);
+			}
 			
 			@Override
-			public void run() {
-				try {
-					Experiment mergedExp = ExperimentMerger.merge(db[0], db[1], mergeType);
-					database.createViewsAndAddDatabase(mergedExp, application, service, modelService);
-					
-				} catch (Exception e) {
-					MessageDialog.openError(shell, "Error merging database",
-							e.getClass().getName() + ": \n" + e.getMessage());
-				}
-				
+			public void mergeDone(Experiment experiment) {
+				database.createViewsAndAddDatabase(experiment, application, service, modelService);
 			}
 		});
 	}
@@ -103,37 +93,16 @@ public class MergeDatabase
 	
 	@CanExecute
 	public boolean canExecute(MApplication application, @Optional @Named(PARAM_ID) String param) {
-		
-		// temporarily, we don't support merging more than 2 databases
-		
 		Iterator<BaseExperiment> iterator = database.getIterator(application.getSelectedElement());
 		
-		int numDb = 0;
-		
+		int numDb = 0;		
 		while(iterator.hasNext()) {
 			Experiment exp = (Experiment) iterator.next();
-			if (exp.isMergedDatabase()) {
-				
-				// if we already merge the topdowns, we should disable topdown merge
-				// similarly, if the merged flat exists, we disable the flat merge
-				
-				List<TreeNode> roots = exp.getRootScopeChildren();
-				if (roots == null) continue;
-				
-				RootScope root = (RootScope) roots.get(0);
-				
-				if (root.getType()== RootScopeType.CallingContextTree && param.equals(PARAM_VALUE_TOPDOWN)) {
-					return false;
-				}
-				if (root.getType()== RootScopeType.Flat && param.equals(PARAM_VALUE_FLAT)) {
-					return false;
-				}
-			} else {
+			if (!exp.isMergedDatabase()) {
 				numDb++;
 			}
-		}
-		
-		return numDb==2;
+		}		
+		return numDb>=2;
 	}
 		
 }

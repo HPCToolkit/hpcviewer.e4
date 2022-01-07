@@ -307,30 +307,4 @@ public class DataTrace extends DataCommon
 			return profIndex + ": " + start +"-" + end;
 		}
 	}
-
-	/***************************
-	 * unit test 
-	 * 
-	 * @param argv
-	 ***************************/
-	public static void main(String []argv)
-	{
-		final DataTrace trace_data = new DataTrace();
-		final String filename;
-		if (argv != null && argv.length>0) 
-		{
-			filename = argv[0];
-		} else {
-			filename = "/Users/la5/data/sparse/gpu/hpctoolkit-tower-one-sparse-database/trace.db";
-		}
-		try {
-			trace_data.open(filename);			
-			trace_data.printInfo(System.out);
-			trace_data.dispose();
-			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
 }

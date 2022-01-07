@@ -319,6 +319,17 @@ public abstract class BaseExperiment implements IExperiment
 		}
 	}
 
+	
+	/****
+	 * Update the database representation of this experiment database.
+	 * A database representation can be remote or local.
+	 * 
+	 * @param databaseRepresentation
+	 */
+	public void setDatabaseRepresentation(IDatabaseRepresentation databaseRepresentation) {
+		this.databaseRepresentation = databaseRepresentation;
+	}
+	
 	/******
 	 * set the database version
 	 * 

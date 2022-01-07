@@ -11,23 +11,8 @@ import java.util.Set;
 public class JavaValidator 
 {
 	// minimum Java supported
-	private final static int JAVA_8 = 8;
 	private final static int JAVA_11 = 11;
-	
-	static public void main(String []args) {
-		System.out.println();
-		
-		if (isGCJ()) {
-			System.out.println("Unsupported JVM: GNU GCJ");
-		} else {
-			if (isCorrectJavaVersion())
-				System.out.println("Valid JVM");
-			else
-				System.out.println("Invalid JVM: Needs to be higher or equal than " 
-						+ JAVA_8);
-		}
-	}
-	
+	public  final static int JAVA_SUPPORTED = JAVA_11;
 	
 	/***
 	 * print all the JVM properties
@@ -120,15 +105,7 @@ public class JavaValidator
 	}
 	
 	static private boolean isSupported(int version) {
-		if (OSValidator.isMac()) {
-			return JAVA_11 <= version;
-		} else if (OSValidator.isUnix()) {
-			String arch = System.getProperty("os.arch");
-			if (arch.equals("aarch64")) {
-				return JAVA_11 <= version;
-			}
-		}
-		return JAVA_8 <= version;
+		return JAVA_SUPPORTED <= version;
 	}
 
 }

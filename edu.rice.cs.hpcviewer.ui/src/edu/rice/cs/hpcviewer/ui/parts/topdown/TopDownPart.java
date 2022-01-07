@@ -26,7 +26,7 @@ import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.tld.collection.ThreadDataCollectionFactory;
+import edu.rice.cs.hpcdata.tld.ThreadDataCollectionFactory;
 import edu.rice.cs.hpcfilter.FilterDataItem;
 import edu.rice.cs.hpcfilter.dialog.ThreadFilterDialog;
 import edu.rice.cs.hpctree.IScopeTreeData;

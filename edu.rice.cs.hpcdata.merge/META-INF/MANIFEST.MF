@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: hpcdata.merge
+Bundle-SymbolicName: edu.rice.cs.hpcdata.merge
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Rice University
+Automatic-Module-Name: edu.rice.cs.hpcdata.merge
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Require-Bundle: edu.rice.cs.hpcdata
+Export-Package: edu.rice.cs.hpcdata.merge

@@ -143,30 +143,4 @@ public class MetricVarMap extends VarMap
 
 		return 0.0d;
 	}
-	
-	
-	/**
-	 * Unit test for MetricVarMap
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		String s = "@1*r^2";
-		Expression x = ExpressionTree.parse(s);
-
-		MetricVarMap vm = new MetricVarMap();
-		vm.setValue("r", 5);
-
-		FuncMap fm = new FuncMap(); // no functions in expression
-		fm.loadDefaultFunctions();
-		System.out.println(x); 
-		System.out.println(x.eval(vm, fm)); 
-
-		vm.setValue("r", 10);
-		System.out.println(x.eval(vm, fm)); 
-		Function []fs = fm.getFunctions();
-		for( int i=0; i<fs.length ; i++) {
-			System.out.println("\t<tr><td>" + " <code> " + fs[i].toString() + " </code> </td> <td></td> </tr>");
-		}
-	}
-
 }

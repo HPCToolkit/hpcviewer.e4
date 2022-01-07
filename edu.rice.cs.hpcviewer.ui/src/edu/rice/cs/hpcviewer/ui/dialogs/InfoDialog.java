@@ -224,8 +224,8 @@ public class InfoDialog extends Dialog
 		long memTot  = Runtime.getRuntime().totalMemory();
 		
 		mapTableItems.put("Max memory",   String.valueOf(memMax));
-		mapTableItems.put("Free memory",  String.valueOf(memFree));
-		mapTableItems.put("Total memory", String.valueOf(memTot));
+		mapTableItems.put("JVM Free memory",  String.valueOf(memFree));
+		mapTableItems.put("JVM Total memory", String.valueOf(memTot));
 		
 		mapTableItems.put("Java Properties", null);
 		Properties properties = System.getProperties();
@@ -238,19 +238,5 @@ public class InfoDialog extends Dialog
 		mapTableItems.putAll(mapSystem);
 		*/
 		return mapTableItems;
-	}
-	
-	
-	/***
-	 * Unit test
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		Display display = new Display();
-		Shell shell = new Shell(display);
-		shell.setLayout(new FillLayout());
-		
-		InfoDialog dlg = new InfoDialog(shell);
-		dlg.open();
 	}
 }

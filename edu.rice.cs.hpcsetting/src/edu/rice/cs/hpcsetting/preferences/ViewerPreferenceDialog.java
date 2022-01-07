@@ -39,9 +39,4 @@ public class ViewerPreferenceDialog extends PreferenceDialog
 		
 		return super.open();
 	}
-
-	
-	public static void main(String[] args) {
-
-	}
 }

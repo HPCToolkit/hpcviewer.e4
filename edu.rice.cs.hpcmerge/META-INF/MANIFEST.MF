@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: hpcmerge
+Bundle-SymbolicName: edu.rice.cs.hpcmerge
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Rice University
+Automatic-Module-Name: edu.rice.cs.hpcmerge
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Require-Bundle: edu.rice.cs.hpcdata,
+ edu.rice.cs.hpcdata.merge,
+ org.eclipse.jface,
+ org.eclipse.core.runtime
+Export-Package: edu.rice.cs.hpcmerge

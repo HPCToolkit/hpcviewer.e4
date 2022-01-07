@@ -14,11 +14,14 @@
  <modules>
   <module>externals</module>
   <module>edu.rice.cs.hpcdata</module>
+  <module>edu.rice.cs.hpcdata.merge</module>
+  <module>edu.rice.cs.hpcapp</module>
   <module>edu.rice.cs.hpcfilter</module>
   <module>edu.rice.cs.hpcdata.tld</module>
   <module>edu.rice.cs.hpcbase</module>
   <module>edu.rice.cs.hpclog</module>
   <module>edu.rice.cs.hpcsetting</module>
+  <module>edu.rice.cs.hpcmerge</module>
   <module>edu.rice.cs.hpctoolcontrol</module>
   <module>edu.rice.cs.hpcremote</module>
   <module>edu.rice.cs.hpctree</module>

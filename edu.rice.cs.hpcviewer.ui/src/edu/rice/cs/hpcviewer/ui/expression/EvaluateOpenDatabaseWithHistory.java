@@ -9,6 +9,7 @@ import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import edu.rice.cs.hpcbase.map.UserInputHistory;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.handlers.RecentDatabase;
+import edu.rice.cs.hpcviewer.ui.util.IConstants;
 
 public class EvaluateOpenDatabaseWithHistory 
 {
@@ -19,7 +20,7 @@ public class EvaluateOpenDatabaseWithHistory
 		UserInputHistory history = new UserInputHistory(RecentDatabase.HISTORY_DATABASE_RECENT, 
 														RecentDatabase.HISTORY_MAX);
 		if (history.getHistory().size() > 0) {
-			return database.getNumDatabase(window) <= 1;
+			return database.getNumDatabase(window) <= IConstants.MAX_DATABASES_PER_WINDOW;
 		}
 		return false;
 	}
