@@ -1,7 +1,7 @@
 #!/bin/bash
 
 JAR_DIR="jars/*.jar"
-MAIN_CLASS="edu.rice.cs.hpcapp.PrintData"
+MAIN_CLASS="edu.rice.cs.hpcdata.app.PrintData"
 JAR_FILES=""
 
 for j in $JAR_DIR; do

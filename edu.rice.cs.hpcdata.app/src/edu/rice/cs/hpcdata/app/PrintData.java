@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcapp;
+package edu.rice.cs.hpcdata.app;
 
 import java.io.File;
 import java.io.FileNotFoundException;

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# libraries and jar needed to run hpcapp program
+# libraries and jar needed to run hpcdata program
 # if hpcdata requires more jar, need to include in this variable manually
 # Notes: Please do not specify the version number of the jar file to keep portability
 #	 across different versions
@@ -43,7 +43,7 @@ FILES="edu.rice.cs.hpcviewer.product/target/repository/plugins/ca.odell.glazedli
 	externals/graphbuilder/target/com.graphbuilder-*.jar \
 	edu.rice.cs.hpcdata/target/edu.rice.cs.hpcdata-*.jar \
 	edu.rice.cs.hpcdata.merge/target/edu.rice.cs.hpcdata.merge-*.jar \
-	edu.rice.cs.hpcapp/target/edu.rice.cs.hpcapp-*.jar"
+	edu.rice.cs.hpcdata.app/target/edu.rice.cs.hpcdata.app-*.jar"
 
 rm -rf ${TEMP}
 mkdir ${TEMP}
