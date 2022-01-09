@@ -1,6 +1,7 @@
 #!/bin/bash
 
-JAR_DIR="jars/*.jar"
+DIR=`dirname $(readlink -f $0)`
+JAR_DIR="${DIR}/jars/*.jar"
 MAIN_CLASS="edu.rice.cs.hpcdata.app.PrintData"
 JAR_FILES=""
 

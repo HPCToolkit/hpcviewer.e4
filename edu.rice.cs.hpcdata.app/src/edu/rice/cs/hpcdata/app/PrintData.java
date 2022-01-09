@@ -5,10 +5,12 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
+import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
@@ -30,6 +32,9 @@ import edu.rice.cs.hpcdata.util.Util;
  ****************************************************************/
 public class PrintData 
 {
+	private static final int MAX_METRIC_NAME = 32;
+	private static final int MAX_NAME_CHARS = 44;
+	
 	/***
 	 * The main method
 	 * 
@@ -147,45 +152,107 @@ public class PrintData
 		List<TreeNode> roots = experiment.getRootScopeChildren();
 		
 		for(Object root: roots) {
-			objPrint.println();
 
 			RootScope aRoot = (RootScope) root;
-			objPrint.println("Summary of " + aRoot.getType());
+			objPrint.println("Summary of " + aRoot.getType() + "\n");
 			
 			// print root CCT metrics
-			printScopeAndChildren(objPrint, aRoot, experiment.getMetricList());
+			printScopeAndChildren(objPrint, aRoot, experiment);
 		}
 	}
 
 	
-	static private void printScopeAndChildren(PrintStream objPrint, Scope scope, List<BaseMetric> metrics) {
+	static private void printScopeAndChildren(PrintStream objPrint, Scope scope, Experiment experiment) {
+		
+		List<BaseMetric> metrics = experiment.getVisibleMetrics();
 		
 		// print root CCT metrics
-		printMetrics(objPrint, scope, metrics, "");
-		
+		printRootMetrics(objPrint, scope, metrics);
 		if (!scope.hasChildren())
 			return;
 		
 		// sort the children from the highest value to the lowest based on the first metric
 		
 		List<? extends TreeNode> children = scope.getChildren();
+		List<Integer> nonEmptyIds = experiment.getNonEmptyMetricIDs(scope);		
+		BaseMetric sortMetric = metrics.get(0);
+		
+		for(int i=0; i<nonEmptyIds.size(); i++) {
+			int id = nonEmptyIds.get(i);
+			BaseMetric m = experiment.getMetric(id);
+			if (m.getMetricType() == MetricType.INCLUSIVE) {
+				sortMetric = m;
+				break;
+			}
+		}
 		
 		ScopeComparator comparator = new ScopeComparator();
-		comparator.setMetric(metrics.get(0));
+		comparator.setMetric(sortMetric);
 		comparator.setDirection(ScopeComparator.SORT_DESCENDING);
 		
 		@SuppressWarnings("unchecked")
 		List<Scope> childrenScope = (List<Scope>) children;
 		childrenScope.sort(comparator);
 		
+		List<Integer> nonEmptyIndex = new ArrayList<Integer>(nonEmptyIds.size());
+		for(int i=0; i<metrics.size(); i++) {
+			BaseMetric metric = metrics.get(i);
+			if (metric.getValue(scope) != MetricValue.NONE) {
+				nonEmptyIndex.add(i);
+			}
+		}
+		
+		// print the metric header
+		System.out.print(String.format("\n%" + (4+MAX_NAME_CHARS) + "s", " "));
+		for(Integer index: nonEmptyIndex) {
+			BaseMetric metric = metrics.get(index);
+			String metricName = getTrimmedName(metric.getDisplayName(), 12);
+			System.out.print(String.format(" [%3d] %s", index, metricName));
+		}
+		
 		// print the first 5 children
 		for(int i=0; i<Math.min(5, childrenScope.size()); i++) {
 			objPrint.println();
 			
 			Scope child = (Scope) childrenScope.get(i);
-			printMetrics(objPrint, child, metrics, "   ");
+			printMetrics(objPrint, child, metrics, nonEmptyIndex, "   ");
 		}
 	}
+	
+	
+	static private String getTrimmedName(String name, int maxChars) {
+		if (name.length()>maxChars) {
+			name = name.substring(0, maxChars-3) + " ..";
+		} else {
+			name = String.format("%" + (-maxChars) + "s", name);
+		}
+		return name;
+	}
+	
+	
+	static private String getScopeName(Scope scope) {
+		String name = getTrimmedName(scope.getName(), MAX_NAME_CHARS);
+		return name;
+	}
+	
+	
+	static private void printRootMetrics(PrintStream objPrint, Scope scope, List<BaseMetric> metrics) {
+		String name = getScopeName(scope);
+		objPrint.println("- " + name);
+		
+		for(int i=0; i<metrics.size(); i++) {
+			BaseMetric metric = metrics.get(i);
+			String metricName = getTrimmedName(metric.getDisplayName(), MAX_METRIC_NAME);
+			objPrint.print(String.format("\t [%3d] %s", i, metricName));
+			if (scope.getMetricValue(metric) == MetricValue.NONE) {
+				objPrint.println("            0.0");
+			} else  {
+				String out = metric.getMetricTextValue(scope).substring(0, 15);
+				objPrint.println(out);
+			}
+		}
+	}
+	
 	
 	/****
 	 * Print metric values of a given scope
@@ -195,15 +262,23 @@ public class PrintData
 	 * @param metrics list of metrics
 	 * @param indent output indentation
 	 */
-	static private void printMetrics(PrintStream objPrint, Scope scope, List<BaseMetric> metrics, String indent) {
+	static private void printMetrics(PrintStream objPrint, 
+									 Scope scope, 
+									 List<BaseMetric> metrics,
+									 List<Integer> nonEmptyIndex,
+									 String indent) {
+		String name = getScopeName(scope);
+		objPrint.print(indent + "- " + name);
 		
-		objPrint.println(indent + "- " + scope.getName());
-		
-		for(BaseMetric metric: metrics) {
-			if (scope.getMetricValue(metric) == MetricValue.NONE)
-				continue;
-			
-			objPrint.println( indent + "    " + metric.getDisplayName() + ": " + metric.getMetricTextValue(scope));
+		for(Integer index: nonEmptyIndex) {
+			BaseMetric metric = metrics.get(index);
+			objPrint.print(indent + " ");
+			if (scope.getMetricValue(metric) == MetricValue.NONE) {
+				objPrint.print("            0.0");
+			} else  {
+				String out = metric.getMetricTextValue(scope).substring(0, 15);
+				objPrint.print(out);
+			}
 		}
 	}
 	
