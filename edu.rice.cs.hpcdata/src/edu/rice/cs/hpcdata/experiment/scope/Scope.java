@@ -3,7 +3,7 @@
 //	Scope.java													//
 //																//
 //																//
-//	(c) Copyright 2015 Rice University. All rights reserved.	//
+//	(c) Copyright 2002-2022 Rice University. All rights reserved.	//
 //																//
 //	$LastChangedDate$		
 //  $LastChangedBy$ 					//

@@ -6,7 +6,7 @@
 //									types as children					//
 //	Last edited: February 8, 2005 										//
 //																		//
-//	(c) Copyright 2005 Rice University. All rights reserved.			//
+//	(c) Copyright 2002-2022 Rice University. All rights reserved.			//
 //																		//
 //////////////////////////////////////////////////////////////////////////
 

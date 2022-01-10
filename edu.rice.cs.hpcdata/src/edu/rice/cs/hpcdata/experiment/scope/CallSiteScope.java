@@ -3,7 +3,7 @@
 //	CallSiteScope.java				//
 //									//
 //	experiment.scope.CallSiteScope -- a function callsite scope	//
-//	(c) Copyright 2001-2012 Rice University. All rights reserved.	//
+//	(c) Copyright 2002-2022 Rice University. All rights reserved.	//
 //  $Id$							//
 //									//
 //////////////////////////////////////////////////////////////////////////

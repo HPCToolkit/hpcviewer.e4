@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2002-2019, Rice University.
+# Copyright (c) 2002-2022, Rice University.
 # See the file README.License for details.
 #
 # Launch the viewer binary and set the workspace directory.

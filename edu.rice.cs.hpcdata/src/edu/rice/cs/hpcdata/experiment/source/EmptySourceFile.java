@@ -5,7 +5,7 @@
 //	experiment.source.EmptySourceFile -- an empty source file			//
 //	Last edited: January 29, 2001 at 12:21								//
 //																		//
-//	(c) Copyright 2002 Rice University. All rights reserved.			//
+//	(c) Copyright 2002-2022 Rice University. All rights reserved.			//
 //																		//
 //////////////////////////////////////////////////////////////////////////
 

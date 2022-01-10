@@ -5,7 +5,7 @@
 //	experiment.source.AbstractSourceFile -- generic source file class	//
 //	Last edited: October 10, 2001 at 4:24 pm							//
 //																		//
-//	(c) Copyright 2001 Rice University. All rights reserved.			//
+//	(c) Copyright 2002-2022 Rice University. All rights reserved.			//
 //																		//
 //////////////////////////////////////////////////////////////////////////
 package edu.rice.cs.hpcdata.experiment.source;

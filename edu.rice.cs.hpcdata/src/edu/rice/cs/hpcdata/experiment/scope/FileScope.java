@@ -5,7 +5,7 @@
 //	experiment.scope.FileScope -- a source file in an experiment		//
 //	Last edited: August 10, 2001 at 3:20 pm								//
 //																		//
-//	(c) Copyright 2001 Rice University. All rights reserved.			//
+//	(c) Copyright 2002-2022 Rice University. All rights reserved.			//
 //																		//
 //////////////////////////////////////////////////////////////////////////
 

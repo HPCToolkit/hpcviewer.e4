@@ -5,7 +5,7 @@
 //	ExperimentMerger -- class to merge two Experiments					//
 //	Created: May 7, 2007 												//
 //																		//
-//	(c) Copyright 2007-2012 Rice University. All rights reserved.		//
+//	(c) Copyright 2002-2022 Rice University. All rights reserved.		//
 //																		//
 //////////////////////////////////////////////////////////////////////////
 package edu.rice.cs.hpcdata.merge;

@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2002-2021, Rice University.
+# Copyright (c) 2002-2022, Rice University.
 # See the file edu.rice.cs.hpcviewer.ui/License.txt for details.
 #
 # Build hpcviewer and generate tar or zip files
@@ -58,9 +58,9 @@ fi
 show_help(){
 	echo "Syntax: $0 [-options] [commands]"
 	echo "Options: "
-	echo "-c create a package and generate the release number"
-	echo "-n (Mac only) notarize the package"
-	echo "-r <release_number> specify the release number"
+	echo " -c              create a package and generate the release number"
+	echo " -n              (Mac only) notarize the package"
+	echo " -r <release>    specify the release number"
   	echo "Commands:"
 	echo " clean : remove objects and temporary files"
 	exit
@@ -69,6 +69,9 @@ show_help(){
 clean_up() {
 	mvn clean
 	rm -f scripts/hpcviewer_launcher.sh
+	cd edu.rice.cs.hpcdata.app/scripts/
+	./build.sh  clean
+	cd ../..
 	exit
 }
 
@@ -89,7 +92,7 @@ case $key in
     clean_up
     shift # past argument
     ;;
-    -c|--check)
+    -c|--create)
     CHECK=0
     shift # past argument
     ;;
@@ -275,7 +278,28 @@ fi
 ###################################################################
 
 echo "=================================="
+echo " Building hpcdata" 
+echo "=================================="
+
+cd edu.rice.cs.hpcdata.app/scripts
+./build.sh
+if [  -f hpcdata*.tgz ]; then
+	cp hpcdata*.tgz ../..
+else
+	echo "Fail to build hpcdata"
+fi
+
+cd ../..
+
+###################################################################
+# End
+###################################################################
+
+echo "=================================="
 echo " Done" 
 echo "=================================="
 
 ls -l hpcviewer-${RELEASE}-*
+if [  -f hpcdata*.tgz ]; then
+	ls -l hpcdata*
+fi

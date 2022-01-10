@@ -5,7 +5,7 @@
 //	util.Dialogs -- generally useful stuff								//
 //	Last edited: January 14, 2002 at 6:31 pm							//
 //																		//
-//	(c) Copyright 2002 Rice University. All rights reserved.			//
+//	(c) Copyright 2002-2022 Rice University. All rights reserved.			//
 //																		//
 //////////////////////////////////////////////////////////////////////////
 
