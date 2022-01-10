@@ -5,7 +5,7 @@
 //	ComputedMetricVisitor -- visitor class to compute scalability 		//
 //	Created: May 15, 2007 												//
 //																		//
-//	(c) Copyright 2007 Rice University. All rights reserved.			//
+//	(c) Copyright 2002-2022 Rice University. All rights reserved.			//
 //																		//
 //////////////////////////////////////////////////////////////////////////
 package edu.rice.cs.hpcdata.experiment.scope.visitors;

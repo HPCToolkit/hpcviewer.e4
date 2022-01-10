@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2002-2013, Rice University.
+# Copyright (c) 2002-2022, Rice University.
 # See the file README.License for details.
 #
 # Install hpcviewer into hpctoolkit directory.

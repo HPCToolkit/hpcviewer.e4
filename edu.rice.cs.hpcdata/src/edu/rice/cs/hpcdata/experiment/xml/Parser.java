@@ -5,7 +5,7 @@
 //	experiment.xml.Parser -- fast callback-based XML parser		//
 //	Last edited: January 16, 2002 at 11:27 am			//
 //									//
-//	(c) Copyright 2002 Rice University. All rights reserved.	//
+//	(c) Copyright 2002-2022 Rice University. All rights reserved.	//
 //									//
 //////////////////////////////////////////////////////////////////////////
 

@@ -5,7 +5,7 @@
 //	util.Strings -- strings appearing in the hpcviewer user interface	//
 //	Last edited: January 16, 2002 at 12:52 pm							//
 //																		//
-//	(c) Copyright 2002 Rice University. All rights reserved.			//
+//	(c) Copyright 2002-2022 Rice University. All rights reserved.			//
 //																		//
 //////////////////////////////////////////////////////////////////////////
 
@@ -43,7 +43,7 @@ public static final String CANT_CLONE_SUBPART		= "Can't clone a subpart";
 public static final String CANT_OPEN_SOURCEFILE		= "Can't open source file";
 public static final String CANT_READ_PROPERTY_FILE	= "Can't read user's property file, will use defaults";
 public static final String CANT_READ_SOURCEFILE		= "Can't read source file";
-public static final String COPYRIGHT				= "hpcviewer\n(C) Copyright 2002, 2003 Rice University";
+public static final String COPYRIGHT				= "hpcviewer\n(C) Copyright 2002-2022, 2003 Rice University";
 public static final String EMPTY_METHOD				= "Method is intentionally empty";
 public static final String ERROR					= "Error";
 public static final String ERROR_EXPFILE_IO			= "IO error reading experiment file";

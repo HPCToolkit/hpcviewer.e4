@@ -5,7 +5,7 @@
 //	experiment.xml.Builder -- interface for SAX2 state machines			//
 //	Last edited: January 16, 2002 at 12:41 pm							//
 //																		//
-//	(c) Copyright 2002 Rice University. All rights reserved.			//
+//	(c) Copyright 2002-2022 Rice University. All rights reserved.			//
 //																		//
 //////////////////////////////////////////////////////////////////////////
 

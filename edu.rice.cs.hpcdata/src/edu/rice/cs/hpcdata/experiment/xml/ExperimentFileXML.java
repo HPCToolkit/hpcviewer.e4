@@ -5,7 +5,7 @@
 //	experiment.ExperimentFileXML -- a file containing an experiment	//
 //	$LastChangedDate: 2011-11-29 17:10:53 -0600 (Tue, 29 Nov 2011) $			//
 //									//
-//	(c) Copyright 2011 Rice University. All rights reserved.	//
+//	(c) Copyright 2002-2022 Rice University. All rights reserved.	//
 //									//
 //////////////////////////////////////////////////////////////////////////
 

@@ -5,7 +5,7 @@
 //	experiment.Metric -- a metric and its data in an experiment			//
 //	Last edited: January 15, 2002 at 12:37 am							//
 //																		//
-//	(c) Copyright 2002 Rice University. All rights reserved.			//
+//	(c) Copyright 2002-2022 Rice University. All rights reserved.			//
 //																		//
 //////////////////////////////////////////////////////////////////////////
 

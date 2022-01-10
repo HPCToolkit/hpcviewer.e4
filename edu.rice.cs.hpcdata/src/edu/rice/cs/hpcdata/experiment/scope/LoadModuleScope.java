@@ -5,7 +5,7 @@
 //	experiment.scope.LoadModuleScope -- a load module scope		//
 //	Last edited: April 4, 2003 at 5:00 pm				//
 //									//
-//	(c) Copyright 2003 Rice University. All rights reserved.	//
+//	(c) Copyright 2002-2022 Rice University. All rights reserved.	//
 //									//
 //////////////////////////////////////////////////////////////////////////
 

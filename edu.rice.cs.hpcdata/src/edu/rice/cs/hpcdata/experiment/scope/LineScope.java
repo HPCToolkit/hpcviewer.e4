@@ -5,7 +5,7 @@
 //	experiment.scope.LineScope -- a single-line scope in an experiment	//
 //	Last edited: May 18, 2001 at 6:19 pm								//
 //																		//
-//	(c) Copyright 2001 Rice University. All rights reserved.			//
+//	(c) Copyright 2002-2022 Rice University. All rights reserved.			//
 //																		//
 //////////////////////////////////////////////////////////////////////////
 

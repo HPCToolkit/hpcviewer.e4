@@ -5,7 +5,7 @@
 //	util.Util -- miscellaneous useful operations						//
 //	Last edited: September 18, 2001 at 6:55 pm							//
 //																		//
-//	(c) Copyright 2001 Rice University. All rights reserved.			//
+//	(c) Copyright 2002-2022 Rice University. All rights reserved.			//
 //																		//
 //////////////////////////////////////////////////////////////////////////
 

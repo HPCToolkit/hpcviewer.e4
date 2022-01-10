@@ -5,7 +5,7 @@
 //	experiment.MetricValue -- a value of a metric at some scope			//
 //	Last edited: September 14, 2001 at 4:47 pm							//
 //																		//
-//	(c) Copyright 2001 Rice University. All rights reserved.			//
+//	(c) Copyright 2002-2022 Rice University. All rights reserved.			//
 //																		//
 //////////////////////////////////////////////////////////////////////////
 

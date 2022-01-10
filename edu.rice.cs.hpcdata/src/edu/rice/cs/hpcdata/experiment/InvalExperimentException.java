@@ -5,7 +5,7 @@
 //	experiment.InvalExperimentException -- bad experiment file  		//
 //	Last edited: January 16, 2002 at 12:49 pm							//
 //																		//
-//	(c) Copyright 2002 Rice University. All rights reserved.			//
+//	(c) Copyright 2002-2022 Rice University. All rights reserved.			//
 //																		//
 //////////////////////////////////////////////////////////////////////////
 

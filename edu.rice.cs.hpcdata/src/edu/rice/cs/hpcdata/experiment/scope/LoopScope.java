@@ -5,7 +5,7 @@
 //	experiment.scope.LoopScope -- a loop scope							//
 //	Last edited: August 10, 2001 at 2:22 pm								//
 //																		//
-//	(c) Copyright 2001 Rice University. All rights reserved.			//
+//	(c) Copyright 2002-2022 Rice University. All rights reserved.			//
 //																		//
 //////////////////////////////////////////////////////////////////////////
 
