@@ -11,15 +11,19 @@ POSITIONAL=()
 
 show_help(){
 	echo "$0 [options] [commands]"
-	echo "-h,--help   show this help"
-	echo "clean       remove the temporary files"
+	echo "-h,--help          Show this help"
+	echo "-r,--release <n>   Set the release number to <n>"
+	echo "clean              Remove the temporary files"
 	exit 0
 }
 
 clean_up() {
-    	rm -rf $TEMP
+    	rm -rf $TEMP LICENSE
 	exit 0
 }
+
+# default release number: yyyy.mm
+RELEASE=`date +"%Y.%m"`
 
 while [[ $# -gt 0 ]]
 do
@@ -31,6 +35,11 @@ case $key in
     	;;
     -h|--help)
 	show_help
+	shift
+	;;
+    -r|--release)
+     	RELEASE="$2"
+	shift
 	shift
 	;;
 esac
@@ -61,6 +70,5 @@ for f in ${FILES}; do
 	fi
 done
 echo "tar the script and jar files..."
-tar czf hpcdata.tgz  hpcdata.sh ${TEMP}
-echo "output: "
-ls -l *.tgz
+cp ../../LICENSE .
+tar czf hpcdata-${RELEASE}.tgz  hpcdata.sh ${TEMP} LICENSE
