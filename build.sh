@@ -92,7 +92,7 @@ case $key in
     clean_up
     shift # past argument
     ;;
-    -c|--check)
+    -c|--create)
     CHECK=0
     shift # past argument
     ;;
