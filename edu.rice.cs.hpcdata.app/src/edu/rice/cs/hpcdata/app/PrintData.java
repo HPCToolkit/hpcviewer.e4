@@ -35,6 +35,14 @@ public class PrintData
 	private static final int MAX_METRIC_NAME = 32;
 	private static final int MAX_NAME_CHARS = 44;
 	
+	private final static int DISPLAY_TOPDOWN  = 1;
+	private final static int DISPLAY_BOTTOMUP = 2;
+	private final static int DISPLAY_FLAT     = 4;
+	private final static int DISPLAY_ALLVIEWS = DISPLAY_TOPDOWN | DISPLAY_BOTTOMUP | DISPLAY_FLAT;
+	
+	private final static int NODES_SUMMARY = 0;
+	private final static int NODES_ALL     = 16;
+	
 	/***
 	 * The main method
 	 * 
@@ -45,48 +53,81 @@ public class PrintData
 		PrintStream objPrint = System.out;
 		String sFilename;
 		boolean std_output = true;
-		
+
+		int display_mode = 0;
+
 		//------------------------------------------------------------------------------------
 		// processing the command line argument
 		//------------------------------------------------------------------------------------
-		if ( (args == null) || (args.length==0)) {
-			System.out.println("Usage: hpcdata.sh [-o output_file] experiment_database");
+		if ( (args == null) || (args.length==0) || args[0].equals("-h") || args[0].equals("--help")) {
+			System.out.println("Usage: hpcdata.sh [Options] experiment_database");
+			System.out.println("Options: ");
+			System.out.println("     -o output_file");
+			System.out.println("     -a display all the tree nodes");
+			System.out.println("     -b display the bottom-up view only ");
+			System.out.println("     -f display the flat view only ");
+			System.out.println("     -t display the top-down view only");
+			System.out.println("     -s display only the first 5 nodes (default)");
 			return;
 		} else  {
 			sFilename = args[0];
 			
 			for (int i=0; i<args.length; i++) {
-				if (args[i].equals("-o") && (i<args.length-1)) {
-					String sOutput = args[i+1];
-					File f = new File(sOutput);
-					if (!f.exists())
+				final String option = args[i];
+				switch(option) {
+				case "-a":
+					display_mode |=  NODES_ALL;
+					break;
+				case "-b":
+					display_mode |=  DISPLAY_BOTTOMUP;
+					break;
+				case "-f":
+					display_mode |=  DISPLAY_FLAT;
+					break;
+				case "-s":
+					display_mode |=  NODES_SUMMARY;
+					break;
+				case "-t":
+					display_mode |=  DISPLAY_TOPDOWN;
+					break;
+				case "-o":
+					if (i<args.length-1) {
+						String sOutput = args[i+1];
+						File f = new File(sOutput);
+						if (!f.exists())
+							try {
+								f.createNewFile();
+							} catch (IOException e1) {
+								e1.printStackTrace();
+								return;
+							}
 						try {
-							f.createNewFile();
-						} catch (IOException e1) {
-							e1.printStackTrace();
-							return;
-						}
-					try {
-						FileOutputStream file = new FileOutputStream(sOutput);
-						try {
-							objPrint = new PrintStream( file );
-							std_output = false;
-							i++;
-						} catch (Exception e) {
-							System.err.println("Error: cannot create the file " + sOutput + ": " +e.getMessage());
-							return;
-						}
+							FileOutputStream file = new FileOutputStream(sOutput);
+							try {
+								objPrint = new PrintStream( file );
+								std_output = false;
+								i++;
+							} catch (Exception e) {
+								System.err.println("Error: cannot create the file " + sOutput + ": " +e.getMessage());
+								return;
+							}
 
-					
-					} catch (FileNotFoundException e2) {
-						System.err.println("Error: cannot open the file " + sOutput + ": " +e2.getMessage());
-						e2.printStackTrace();
+						
+						} catch (FileNotFoundException e2) {
+							System.err.println("Error: cannot open the file " + sOutput + ": " +e2.getMessage());
+							e2.printStackTrace();
+						}
 					}
-				} else {
-					sFilename = args[i];
+					break;
+					
+				default:
+						sFilename = args[i];
 				}
+				
 			}
 		}
+		if (display_mode == 0)
+			display_mode = DISPLAY_ALLVIEWS;
 		
 		//------------------------------------------------------------------------------------
 		// open the experiment if possible
@@ -152,17 +193,28 @@ public class PrintData
 		List<TreeNode> roots = experiment.getRootScopeChildren();
 		
 		for(Object root: roots) {
-
 			RootScope aRoot = (RootScope) root;
-			objPrint.println("Summary of " + aRoot.getType() + "\n");
-			
-			// print root CCT metrics
-			printScopeAndChildren(objPrint, aRoot, experiment);
+			boolean displayRoot = (aRoot.getType() == RootScopeType.CallingContextTree && 
+				    				(display_mode & DISPLAY_TOPDOWN) != 0)  ||
+								  (aRoot.getType() == RootScopeType.CallerTree && 
+								    (display_mode & DISPLAY_BOTTOMUP) != 0)  ||
+								  (aRoot.getType() == RootScopeType.Flat && 
+								    (display_mode & DISPLAY_FLAT) != 0) 
+								  ;
+			if (displayRoot) {
+				objPrint.println("\nSummary of " + aRoot.getType());
+				
+				// print root CCT metrics
+				printScopeAndChildren(objPrint, aRoot, experiment, display_mode);
+			}
 		}
 	}
 
 	
-	static private void printScopeAndChildren(PrintStream objPrint, Scope scope, Experiment experiment) {
+	static private void printScopeAndChildren(PrintStream objPrint, 
+											  Scope scope, 
+											  Experiment experiment,
+											  int display_mode) {
 		
 		List<BaseMetric> metrics = experiment.getVisibleMetrics();
 		
@@ -210,8 +262,10 @@ public class PrintData
 			System.out.print(String.format(" [%3d] %s", index, metricName));
 		}
 		
-		// print the first 5 children
-		for(int i=0; i<Math.min(5, childrenScope.size()); i++) {
+		// print the children
+		boolean displayAll = (display_mode & NODES_ALL) != 0;
+		int numChildren = displayAll ? childrenScope.size() : Math.min(5, childrenScope.size());
+		for(int i=0; i<numChildren; i++) {
 			objPrint.println();
 			
 			Scope child = (Scope) childrenScope.get(i);
