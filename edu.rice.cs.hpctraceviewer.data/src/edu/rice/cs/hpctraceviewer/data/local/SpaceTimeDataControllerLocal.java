@@ -17,6 +17,7 @@ import edu.rice.cs.hpcdata.trace.TraceAttribute;
 import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.IProgressReport;
 import edu.rice.cs.hpcdata.util.MergeDataFiles;
+import edu.rice.cs.hpcdata.util.MergeDataFiles.MergeDataAttribute;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TraceDataByRank;
 import edu.rice.cs.hpctraceviewer.data.version2.BaseData;
@@ -158,7 +159,8 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 		final MergeDataFiles.MergeDataAttribute att = MergeDataFiles
 													 .merge(dirFile, "*.hpctrace", outputFile, traceReport);
 		
-		if (att != MergeDataFiles.MergeDataAttribute.FAIL_NO_DATA) {
+		if (att == MergeDataFiles.MergeDataAttribute.SUCCESS_ALREADY_CREATED ||
+			att == MergeDataFiles.MergeDataAttribute.SUCCESS_MERGED) {
 			File fileTrace = new File(outputFile);
 			if (fileTrace.length() > MIN_TRACE_SIZE) {
 				return fileTrace.getAbsolutePath();
@@ -169,6 +171,9 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 					+ " is too small: "
 					+ fileTrace.length() + "bytes .");
 		}
+		if (att == MergeDataAttribute.FAIL_NOT_WRITABLE) 
+			throw new RuntimeException("Directory is not writable: " + directory);
+		
 		throw new RuntimeException("Trace file does not exist or file is corrupt:" + outputFile);
 	}
 
