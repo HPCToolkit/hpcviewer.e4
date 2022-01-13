@@ -100,9 +100,7 @@ public class PrintData
 							} catch (Exception e) {
 								System.err.println("Error: cannot create the file " + sOutput + ": " +e.getMessage());
 								return;
-							}
-
-						
+							}						
 						} catch (FileNotFoundException e2) {
 							System.err.println("Error: cannot open the file " + sOutput + ": " +e2.getMessage());
 							e2.printStackTrace();

@@ -26,7 +26,7 @@ public abstract class AliasMap<K,V> implements IUserData<K, V>
 	/***
 	 * read map or create file if it doesn't exist
 	 */
-	public AliasMap() {
+	protected AliasMap() {
 
 	}
 		
@@ -57,9 +57,7 @@ public abstract class AliasMap<K,V> implements IUserData<K, V>
 	 */
 	public V remove(K key) {
 		checkData();
-		V oldClass = data.remove(key);
-		
-		return oldClass;
+		return  data.remove(key);
 	}
 
 	/****
