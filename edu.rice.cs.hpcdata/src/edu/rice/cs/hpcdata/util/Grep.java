@@ -45,23 +45,26 @@ public class Grep
 	private static void removeMetrics(String fin, String fout) 
 			throws IOException 
 	{
-		//String encoding = "UTF-8";
-		
-		final BufferedReader inputFile = new BufferedReader(new InputStreamReader(new FileInputStream(fin)));
-		final BufferedWriter outputFile = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fout))); 
-		
-		Pattern metricTag = Pattern.compile("<M ");
-		Matcher matcher = metricTag.matcher("");
-		
-		String inputLine;
-		while ((inputLine = inputFile.readLine()) != null) {
-			matcher.reset(inputLine);
-	        if (!matcher.lookingAt()) {
-	        	outputFile.write(inputLine);
-	        	outputFile.newLine();
-	        }
+		BufferedReader inputFile  = null;
+		BufferedWriter outputFile = null;
+		try {
+			inputFile  = new BufferedReader(new InputStreamReader(new FileInputStream(fin)));
+			outputFile = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fout))); 
+			
+			Pattern metricTag = Pattern.compile("<M ");
+			Matcher matcher = metricTag.matcher("");
+			
+			String inputLine;
+			while ((inputLine = inputFile.readLine()) != null) {
+				matcher.reset(inputLine);
+		        if (!matcher.lookingAt()) {
+		        	outputFile.write(inputLine);
+		        	outputFile.newLine();
+		        }
+			}
+		} finally {
+			inputFile.close();
+			outputFile.close();
 		}
-		inputFile.close();
-		outputFile.close();
 	}
 }

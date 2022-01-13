@@ -41,10 +41,10 @@ import edu.rice.cs.hpcdata.util.Constants;
 
 public class RootScope extends Scope
 {
-static final private String NAME = "Experiment Aggregate Metrics";
+	private static final String DEFAULT_SCOPE_NAME = "Experiment Aggregate Metrics";
 
-static final public int DEFAULT_CCT_ID  = 0;
-static final public int DEFAULT_FLAT_ID = 0;
+	public static final int DEFAULT_CCT_ID  = 0;
+	public static final int DEFAULT_FLAT_ID = 0;
 
 /** The name of the experiment's program. */
 protected String rootScopeName;
@@ -134,7 +134,7 @@ public IMetricValueCollection getMetricValueCollection() throws IOException
 public String getName()
 {
 	if (name == null)
-		return NAME;
+		return DEFAULT_SCOPE_NAME;
 	else
 		return name;
 }
