@@ -1,7 +1,6 @@
 package edu.rice.cs.hpcdata.app;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -38,7 +37,11 @@ public class PrintData
 	private final static int DISPLAY_TOPDOWN  = 1;
 	private final static int DISPLAY_BOTTOMUP = 2;
 	private final static int DISPLAY_FLAT     = 4;
-	private final static int DISPLAY_ALLVIEWS = DISPLAY_TOPDOWN | DISPLAY_BOTTOMUP | DISPLAY_FLAT;
+	private final static int DISPLAY_EXCLUSIVE = 8;
+	private final static int DISPLAY_INCLUSIVE = 16;
+	
+	private final static int DISPLAY_ALLVIEWS = DISPLAY_TOPDOWN   | DISPLAY_BOTTOMUP | DISPLAY_FLAT |
+												DISPLAY_EXCLUSIVE | DISPLAY_INCLUSIVE;
 	
 	private final static int NODES_SUMMARY = 0;
 	private final static int NODES_ALL     = 16;
@@ -47,8 +50,9 @@ public class PrintData
 	 * The main method
 	 * 
 	 * @param args
+	 * @throws IOException 
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		PrintData objApp = new PrintData();
 		PrintStream objPrint = System.out;
 		String sFilename = null;
@@ -71,8 +75,14 @@ public class PrintData
 				case "-b":
 					display_mode |=  DISPLAY_BOTTOMUP;
 					break;
+				case "-e":
+					display_mode |=  DISPLAY_EXCLUSIVE;
+					break;
 				case "-f":
 					display_mode |=  DISPLAY_FLAT;
+					break;
+				case "-i":
+					display_mode |=  DISPLAY_INCLUSIVE;
 					break;
 				case "-s":
 					display_mode |=  NODES_SUMMARY;
@@ -85,26 +95,13 @@ public class PrintData
 						String sOutput = args[i+1];
 						File f = new File(sOutput);
 						if (!f.exists())
-							try {
-								f.createNewFile();
-							} catch (IOException e1) {
-								e1.printStackTrace();
-								return;
-							}
-						try {
-							FileOutputStream file = new FileOutputStream(sOutput);
-							try {
-								objPrint = new PrintStream( file );
-								std_output = false;
-								i++;
-							} catch (Exception e) {
-								System.err.println("Error: cannot create the file " + sOutput + ": " +e.getMessage());
-								return;
-							}						
-						} catch (FileNotFoundException e2) {
-							System.err.println("Error: cannot open the file " + sOutput + ": " +e2.getMessage());
-							e2.printStackTrace();
-						}
+							f.createNewFile();
+						
+						FileOutputStream file = new FileOutputStream(sOutput);
+						objPrint = new PrintStream( file );
+						std_output = false;
+						i++;
+						file.close();
 					}
 					break;
 					
