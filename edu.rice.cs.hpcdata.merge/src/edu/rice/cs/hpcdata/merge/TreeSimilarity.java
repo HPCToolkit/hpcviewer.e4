@@ -504,17 +504,6 @@ public class TreeSimilarity
 		return result;
 	}
 
-	/***
-	 * check if the string has an underscore suffix
-	 * @param s
-	 * @return
-	 */
-	private boolean hasUnderscoreSuffix(String s)
-	{
-		final int l = s.length();
-		return (s.charAt( l - 1) == '_');
-	}
-	
 	/**
 	 * check if the name of two scopes are similar 
 	 * 
@@ -524,22 +513,7 @@ public class TreeSimilarity
 	 */
 	private boolean areSameName( Scope s1, Scope s2 )
 	{
-		if (s1 instanceof CallSiteScope && s2 instanceof CallSiteScope) 
-		{
-			final String n1 = s1.getName();
-			final String n2 = s2.getName();
-			
-			int diff = Math.abs( n1.compareTo(n2) );
-			if (diff == 1)
-			{
-				return (hasUnderscoreSuffix(n1) || hasUnderscoreSuffix(n2));
-			}
-			return (diff == 0);
-		}
-		else 
-		{
-			return s1.getName().equals(s2.getName());
-		}
+		return s1.getName().equals(s2.getName());
 	}
 	
 	private boolean areSameType( Scope s1, Scope s2)

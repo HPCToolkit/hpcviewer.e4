@@ -89,16 +89,14 @@ public abstract class AliasMap<K,V> implements IUserData<K, V>
 			out = new ObjectOutputStream( new FileOutputStream(file.getAbsoluteFile()) );
 			out.writeObject(data);
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println(e.getMessage());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println(e.getMessage());
 		} finally {
 			try {
-				out.close();
+				if (out != null) out.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				System.err.println(e.getMessage());
 			}
 		}
 	}	
@@ -154,16 +152,16 @@ public abstract class AliasMap<K,V> implements IUserData<K, V>
 				result =  true;
 			}
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			System.err.println(e.getMessage());
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.err.println(e.getMessage());
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			System.err.println(e.getMessage());
 		} finally {
 			try {
 				in.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				System.err.println(e.getMessage());
 			}
 		}
 		return result;

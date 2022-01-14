@@ -134,16 +134,11 @@ public class ThreadDataCollection2 extends AbstractThreadDataCollection
 	}
 
 
-
-	
 	private void ensureDataFile(int metricIndex) throws IOException
 	{
-		if (data_file != null) 
+		if (data_file[metricIndex] != null)
 		{
-			if (data_file[metricIndex] != null)
-			{
-				return;
-			}
+			return;
 		}
 		// data hasn't been created. Try to merge and open the file
 		String file = ThreadLevelDataCompatibility.getMergedFile(experiment, directory, metricIndex);
