@@ -9,6 +9,7 @@ import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.resource.StringConverter;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -46,8 +47,7 @@ public class AppearencePage extends AbstractPage
 	}
 	
 	@Override
-	public void apply() {
-		
+	public void apply() {		
 		saveFont(fontMetricEditor , PreferenceConstants.ID_FONT_METRIC);
 		saveFont(fontGenericEditor, PreferenceConstants.ID_FONT_GENERIC);
 		saveFont(fontSourceEditor , PreferenceConstants.ID_FONT_TEXT);
@@ -71,24 +71,19 @@ public class AppearencePage extends AbstractPage
 		if (editor == null)
 			return;
 		
-		editor.store();
-		Font font = editor.getChosenFont();
+		FontData font = editor.getChosenFont();
 
-		if (font != null) {
-			try {
-				FontManager.setFontPreference(id, font.getFontData());
+		try {
+			FontManager.setFontPreference(id, new FontData[] {font});
 
-			} catch (IOException e) {
-				Logger logger = LoggerFactory.getLogger(getClass());
-				logger.error("Unable to store the preference " + id, e);
-			}
+		} catch (IOException e) {
+			Logger logger = LoggerFactory.getLogger(getClass());
+			logger.error("Unable to store the preference " + id, e);
 		}
-
 	}
 	
-	private ViewerFontFieldEditor createFontEditor(Composite parent, String id, String label, Font fontDefault) {
-        
-		ViewerFontFieldEditor editor = new ViewerFontFieldEditor(parent, id, label, fontDefault);
+	private ViewerFontFieldEditor createFontEditor(Composite parent, String id, String label, Font fontDefault) {        
+		ViewerFontFieldEditor editor = new ViewerFontFieldEditor(parent, id, label, fontDefault.getFontData()[0]);
 		editor.setPreferenceStore(getPreferenceStore());
 		editor.load();
         
@@ -105,19 +100,21 @@ public class AppearencePage extends AbstractPage
 	@Override
 	protected void performDefaults() {
 
-		Font fontGeneric = JFaceResources.getDefaultFont();
-
+		FontData fontGeneric = JFaceResources.getDefaultFont().getFontData()[0];
 		PreferenceStore store = (PreferenceStore) getPreferenceStore();
-		PreferenceConverter.setValue(store, PreferenceConstants.ID_FONT_GENERIC, fontGeneric.getFontData());
+		PreferenceConverter.setValue(store, PreferenceConstants.ID_FONT_GENERIC, fontGeneric);
 
 		fontGenericEditor.setFontLabel(fontGeneric);
 		
-		Font fontFixed = JFaceResources.getTextFont();
-
-		PreferenceConverter.setValue(store, PreferenceConstants.ID_FONT_METRIC, fontGeneric.getFontData());
+		FontData fontFixed = JFaceResources.getTextFont().getFontData()[0];
+		PreferenceConverter.setValue(store, PreferenceConstants.ID_FONT_METRIC, fontFixed);
 
 		fontMetricEditor.setFontLabel(fontFixed);
 		fontSourceEditor.setFontLabel(fontFixed);
+		
+		fontGenericEditor.store();
+		fontMetricEditor.store();
+		fontSourceEditor.store();
 	}
 	
 	
@@ -130,13 +127,11 @@ public class AppearencePage extends AbstractPage
 	static class ViewerFontFieldEditor extends FontFieldEditor
 	{
 		private final Composite groupFont;
-		private Font chosenFont;
 		
-		public ViewerFontFieldEditor(Composite parent, String id, String label, Font defaultFont) {
+		public ViewerFontFieldEditor(Composite parent, String id, String label, FontData defaultFont) {
 			super(id, label, parent);
 			
 			this.groupFont = parent;
-			chosenFont = defaultFont;
 			setFontLabel(defaultFont);
 		}
 
@@ -145,15 +140,13 @@ public class AppearencePage extends AbstractPage
 		 * the preference itself.
 		 * @param font
 		 */
-		public void setFontLabel(Font font) {
+		public void setFontLabel(FontData font) {
 			Label label = getValueControl(groupFont);
 			if (label == null)
 				return;
 			
-			String fontLabel = StringConverter.asString(font.getFontData());
+			String fontLabel = StringConverter.asString(font);
 			label.setText(fontLabel);
-			
-			this.chosenFont = font;
 		}
 		
 		
@@ -161,21 +154,12 @@ public class AppearencePage extends AbstractPage
 		 * return the chosen font if the last action is "Restore defaults"
 		 * Otherwise return null.
 		 * 
-		 * @return Font (see the description)
+		 * @return FontData (see the description)
 		 */
-		public Font getChosenFont() {
-			if (chosenFont == null)
-				return null;
-			
+		public FontData getChosenFont() {
 			Label label = getValueControl(groupFont);
-			String fontName = label.getText();
-			String chosenName = StringConverter.asString(chosenFont.getFontData());
-			
-			if (fontName.equals(chosenName))
-				return chosenFont;
-			
-			return null;
+			String fontName = label.getText();			
+			return StringConverter.asFontData(fontName);
 		}
 	}
-
 }
