@@ -432,9 +432,9 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 
 		} catch (Exception e) {
 			Shell shell = Display.getDefault().getActiveShell();
-			MessageDialog.openError(shell, "Error in opening the database", e.getClass() + ":" + e.getMessage());
+			MessageDialog.openError(shell, "Error in opening the database", e.getClass().getSimpleName() + ":" + e.getMessage());
 			preDestroy();
-			partService.hidePart(part, true);
+			//partService.hidePart(part, true);
 		}
 	}
 

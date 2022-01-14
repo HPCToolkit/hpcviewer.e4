@@ -12,7 +12,7 @@ import java.io.RandomAccessFile;
 
 
 /*****
- * Adaptation of TraceCompactor from traceviewer for more general purpose
+ * Adaptation of TraceCompactor from trace viewer for more general purpose
  *  
  * Example of input files: 
  * 
@@ -24,8 +24,6 @@ import java.io.RandomAccessFile;
  * data.hpctrace.single
  * data.metric-db.single
  * 
- * @author laksono 
- *
  */
 public class MergeDataFiles {
 	
@@ -34,7 +32,7 @@ public class MergeDataFiles {
 	private static final int PROC_POS = 5;
 	private static final int THREAD_POS = 4;
 	
-	public enum MergeDataAttribute {SUCCESS_MERGED, SUCCESS_ALREADY_CREATED, FAIL_NO_DATA};
+	public enum MergeDataAttribute {SUCCESS_MERGED, SUCCESS_ALREADY_CREATED, FAIL_NO_DATA, FAIL_NOT_WRITABLE};
 	
 	/***
 	 * create a single file from multiple data files
@@ -61,6 +59,12 @@ public class MergeDataFiles {
 				return MergeDataAttribute.SUCCESS_ALREADY_CREATED;
 			// the file exists but corrupted. In this case, we have to remove and create a new one
 			throw new RuntimeException("MT file corrupted.");
+		}
+		// the merged file doesn't exit
+		// check if we can create it
+		if (!directory.canWrite()) {
+			return MergeDataAttribute.FAIL_NOT_WRITABLE;
+			//throw new RuntimeException("Directory is not writable: " + directory.getAbsolutePath());
 		}
 		
 		// check if the files in glob patterns is correct
@@ -140,21 +144,25 @@ public class MergeDataFiles {
 		// 3. Copy all data from the multiple files into one file
 		//-----------------------------------------------------
 		for(int i = 0; i < file_metric.length; ++i) {
-			DataInputStream dis = new DataInputStream(new FileInputStream(file_metric[i]));
-			byte[] data = new byte[PAGE_SIZE_GUESS];
-			
-			int numRead = dis.read(data);
-			while(numRead > 0) {
-				dos.write(data, 0, numRead);
-				numRead = dis.read(data);
+			DataInputStream dis = null;
+			try {
+				dis = new DataInputStream(new FileInputStream(file_metric[i]));
+				byte[] data = new byte[PAGE_SIZE_GUESS];
+				
+				int numRead = dis.read(data);
+				while(numRead > 0) {
+					dos.write(data, 0, numRead);
+					numRead = dis.read(data);
+				}
+			} finally {
+				dis.close();				
+				progress.advance();
 			}
-			dis.close();
-			
-			progress.advance();
 		}		
 		insertMarker(dos);
 		
 		dos.close();
+		fos.close();
 		
 		//-----------------------------------------------------
 		// 4. FIXME: write the type of the application
