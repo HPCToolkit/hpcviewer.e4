@@ -95,7 +95,7 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 		lnrc.setFont(font);
 		ruler.addDecorator(0,lnrc);
 
-		textViewer = new SourceViewer(container, ruler, SWT.BORDER| SWT.MULTI | SWT.V_SCROLL);
+		textViewer = new SourceViewer(container, ruler, SWT.BORDER| SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
 		textViewer.setEditable(false);
 		
 		StyledText styledText = textViewer.getTextWidget();
