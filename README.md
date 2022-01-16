@@ -1,6 +1,12 @@
 ![GitHub issues](https://img.shields.io/github/issues/hpctoolkit/hpcviewer.e4?style=for-the-badge)
 ![Build](https://github.com/hpctoolkit/hpcviewer.e4/actions/workflows/maven.yml/badge.svg)
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=HPCToolkit_hpcviewer.e4&metric=alert_status)](https://sonarcloud.io/dashboard?id=HPCToolkit_hpcviewer.e4)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=HPCToolkit_hpcviewer.e4&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=HPCToolkit_hpcviewer.e4)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=HPCToolkit_hpcviewer.e4&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=HPCToolkit_hpcviewer.e4)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=HPCToolkit_hpcviewer.e4&metric=security_rating)](https://sonarcloud.io/dashboard?id=HPCToolkit_hpcviewer.e4)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=HPCToolkit_hpcviewer.e4&metric=coverage)](https://sonarcloud.io/dashboard?id=HPCToolkit_hpcviewer.e4)
+
 
 # hpcviewer.e4
 
@@ -103,4 +109,6 @@ The bundles that hpcviewer needs are defined in a custom target platform definit
 
 ## Coding style
 
-Recommended coding and formatting style: [https://google.github.io/styleguide/javaguide.html](Google Java style guide).
+Recommended coding and formatting style:
+* [Sonar source quality standards](https://www.sonarsource.com/java/)
+* [Google Java style guide](https://google.github.io/styleguide/javaguide.html)
