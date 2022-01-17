@@ -158,7 +158,8 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 		
 		StyledText control = textViewer.getTextWidget();
 		Menu ctxMenu = menuManager.createContextMenu(control);
-		ctxMenu.setVisible(true);
+		// Fix issue #162: hide the context menu by default
+		ctxMenu.setVisible(false);
 		control.setMenu(ctxMenu);
 	}
 	
