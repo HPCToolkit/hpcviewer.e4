@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: hpcdata.tests
+Bundle-SymbolicName: edu.rice.cs.hpcdata.tests
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Rice University
+Automatic-Module-Name: edu.rice.cs.hpcdata.tests
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Require-Bundle: org.junit.jupiter.api,
+ edu.rice.cs.hpcdata;bundle-version="6.0.0"
