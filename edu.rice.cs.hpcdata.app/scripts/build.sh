@@ -14,12 +14,18 @@ show_help(){
 	echo "-h,--help          Show this help"
 	echo "-r,--release <n>   Set the release number to <n>"
 	echo "clean              Remove the temporary files"
+	echo "distclean          Remove the temporary and target files"
 	exit 0
 }
 
 clean_up() {
-    	rm -rf $TEMP LICENSE
+    rm -rf $TEMP LICENSE
 	exit 0
+}
+
+distclean_up() {
+	clean_up
+	rm -f hpcdata-*
 }
 
 # default release number: yyyy.mm
@@ -32,6 +38,9 @@ key="$1"
 case $key in
     clean)
 	clean_up
+    	;;
+    distclean)
+	distclean_up
     	;;
     -h|--help)
 	show_help

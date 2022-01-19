@@ -58,11 +58,12 @@ fi
 show_help(){
 	echo "Syntax: $0 [-options] [commands]"
 	echo "Options: "
-	echo " -c              create a package and generate the release number"
-	echo " -n              (Mac only) notarize the package"
-	echo " -r <release>    specify the release number"
+	echo " -c              	create a package and generate the release number"
+	echo " -n              	(Mac only) notarize the package"
+	echo " -r <release>    	specify the release number"
   	echo "Commands:"
-	echo " clean : remove objects and temporary files"
+	echo " clean            remove objects and temporary files"
+	echo " distclean        remove the temporary and target files"
 	exit
 }
 
@@ -72,6 +73,12 @@ clean_up() {
 	cd edu.rice.cs.hpcdata.app/scripts/
 	./build.sh  clean
 	cd ../..
+	exit
+}
+
+distclean_up() {
+	clean_up
+	rm -f hpcviewer-*
 	exit
 }
 
@@ -92,6 +99,11 @@ case $key in
     clean_up
     shift # past argument
     ;;
+    distclean)
+    distclean_up
+    shift # past argument
+    ;;
+
     -c|--create)
     CHECK=0
     shift # past argument
