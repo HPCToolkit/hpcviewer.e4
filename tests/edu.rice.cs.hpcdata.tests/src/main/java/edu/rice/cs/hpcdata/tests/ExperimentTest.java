@@ -19,9 +19,9 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
-import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
+import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 
 class ExperimentTest {
 
@@ -59,19 +59,11 @@ class ExperimentTest {
 		assertFalse(experiment.isMergedDatabase());
 	}
 
-	@Test
-	void testCreateFlatView() {
-		RootScope root = experiment.getRootScope(RootScopeType.Flat);
-		assertNotNull(root);
-		assertNotNull(root.getChildren());
-		assertTrue(root.getChildCount() > 0);
-	}
 
 	@Test
 	void testGetRawMetrics() {
 		List<BaseMetric> metrics = experiment.getRawMetrics();
-		assertNotNull(metrics);
-		assertTrue(metrics.size() == 0);
+		assertNull(metrics);
 	}
 
 	@Test
@@ -163,17 +155,17 @@ class ExperimentTest {
 
 	@Test
 	void testGetMajorVersion() {
-		assertTrue(experiment.getMajorVersion() > 0);
+		assertTrue(experiment.getMajorVersion() == 2);
 	}
 
 	@Test
 	void testGetMinorVersion() {
-		assertTrue(experiment.getMinorVersion() == 0);
+		assertTrue(experiment.getMinorVersion() == 2);
 	}
 
 	@Test
 	void testGetMaxDepth() {
-		assertTrue(experiment.getMaxDepth() > 2);
+		assertTrue(experiment.getMaxDepth() == 40);
 	}
 
 	@Test
@@ -183,13 +175,17 @@ class ExperimentTest {
 
 	@Test
 	void testGetRootScopeChildren() {
-		fail("Not yet implemented");
+		List<TreeNode> children = experiment.getRootScopeChildren();
+		assertNotNull(children);
+		assertTrue(children.size() == 3);
 	}
 
 	@Test
 	void testGetRootScopeRootScopeType() {
-		fail("Not yet implemented");
+		RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
+		assertNotNull(root);
 	}
+	
 
 	@Test
 	void testOpenFileIUserDataOfStringStringBoolean() {
