@@ -1152,11 +1152,13 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 														bufferGC,    origGC, 
 														changedBounds);
 		detailPaint.addJobChangeListener(listener);
+
+		setMessage("Processing ...");
 		
 		// this part of the code causes deadlock on VirtualBox Ubuntu
 		// if we don't clear the queue
-
 		cancelJobs();
+		
 		detailPaint.schedule();
 		
 		queue.add(detailPaint);
@@ -1216,6 +1218,8 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		notifyChangeBuffer(imgData);
 		
 		updateButtonStates();
+  		if (restoreMessage != null)
+  			restoreMessage.clear();
 	}
 	
 	
