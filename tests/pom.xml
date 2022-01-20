@@ -11,6 +11,6 @@
  </parent>
 
  <modules>
-  <module>edu.rice.cs.hpcviewer.test</module>
+  <module>edu.rice.cs.hpcdata.test</module>
  </modules>
 </project>

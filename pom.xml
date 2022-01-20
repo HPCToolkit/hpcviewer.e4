@@ -32,5 +32,6 @@
   <module>edu.rice.cs.hpcviewer.ui</module>
   <module>edu.rice.cs.hpcviewer.feature</module>
   <module>edu.rice.cs.hpcviewer.product</module>
+  <module>tests</module>
  </modules>
 </project>
