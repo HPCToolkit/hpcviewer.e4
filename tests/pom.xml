@@ -12,5 +12,6 @@
 
  <modules>
   <module>edu.rice.cs.hpcdata.test</module>
+  <module>edu.rice.cs.hpcviewer.test</module>
  </modules>
 </project>
