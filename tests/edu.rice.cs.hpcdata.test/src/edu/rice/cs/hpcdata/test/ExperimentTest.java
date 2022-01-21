@@ -37,7 +37,7 @@ public class ExperimentTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		Path resource = Paths.get("resources", "bug-no-gpu-trace");
+		Path resource = Paths.get("..", "resources", "bug-no-gpu-trace");
 		database = resource.toFile();
 		
 		assertNotNull(database);
@@ -216,7 +216,7 @@ public class ExperimentTest {
 	@Test
 	public void testGetName() {
 		String name = experiment.getName();
-		assertNotNull(name.equals("bandwidth"));
+		assertNotNull(name.equals("bandwidthTest"));
 	}
 
 	@Test
@@ -234,7 +234,9 @@ public class ExperimentTest {
 	public void testGetXMLExperimentFile() {
 		File file = experiment.getXMLExperimentFile();
 		assertNotNull(file);
-		assertTrue(file.getAbsolutePath().equals(database.getAbsolutePath()));
+		File dir = file.getParentFile();
+		File dbPath = database.getAbsoluteFile();
+		assertTrue(dir.getAbsolutePath().equals(dbPath.getAbsolutePath()));
 	}
 
 }
