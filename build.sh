@@ -61,7 +61,8 @@ show_help(){
 	echo " -c              	create a package and generate the release number"
 	echo " -n              	(Mac only) notarize the package"
 	echo " -r <release>    	specify the release number"
-  	echo "Commands:"
+	echo "Commands:"
+	echo " check            build and run the tests. No package is generated."
 	echo " clean            remove objects and temporary files"
 	echo " distclean        remove the temporary and target files"
 	exit
@@ -82,7 +83,9 @@ distclean_up() {
 	exit
 }
 
-CHECK=1
+CHECK_PACKAGE=0
+CREATE_PACKAGE=1
+
 #------------------------------------------------------------
 # start to build
 #------------------------------------------------------------
@@ -95,6 +98,10 @@ do
 key="$1"
 
 case $key in
+    check)
+    CHECK_PACKAGE=1
+    shift # past argument
+    ;;
     clean)
     clean_up
     shift # past argument
@@ -105,7 +112,7 @@ case $key in
     ;;
 
     -c|--create)
-    CHECK=0
+    CREATE_PACKAGE=0
     shift # past argument
     ;;
     -h|--help)
@@ -151,7 +158,7 @@ OS=`uname`
 cp -f "$sh_file" "$launcher" \
        || die "unable to copy files"
 
-if [ "$CHECK" == "0" ]; then
+if [ "$CREATE_PACKAGE" == "0" ]; then
     # create the release number: the current month and the commit hash
     # users may don't care with the hash, but it's important for debugging
     VERSION="Release ${RELEASE}. Commit $GITC" 
@@ -175,7 +182,12 @@ rm -rf hpcviewer-${RELEASE}*
 echo "=================================="
 echo " Building the viewer"
 echo "=================================="
-mvn clean package
+if [ ${CHECK_PACKAGE}=="1" ]; then
+	mvn clean verify 
+	exit
+else
+	mvn clean package
+fi
 
 # The result should be:
 #

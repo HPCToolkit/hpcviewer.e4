@@ -6,4 +6,5 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: Rice University
 Automatic-Module-Name: edu.rice.cs.hpcviewer.test
 Bundle-RequiredExecutionEnvironment: JavaSE-11
-Require-Bundle: org.junit
+Require-Bundle: org.junit,
+ edu.rice.cs.hpcdata
