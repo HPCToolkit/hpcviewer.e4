@@ -584,6 +584,10 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		restoreMessage.showWarning(message);
 	}
 	
+	private void clearMessage() {
+  		if (restoreMessage != null)
+  			restoreMessage.clear();
+	}
 	
 	/**************************************************************************
 	 * Updates what the labels display to the viewer's current state.
@@ -1218,8 +1222,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		notifyChangeBuffer(imgData);
 		
 		updateButtonStates();
-  		if (restoreMessage != null)
-  			restoreMessage.clear();
+		clearMessage();
 	}
 	
 	
