@@ -265,6 +265,9 @@ public class DataSummary extends DataCommon
 			profileNumberCache = profileNum;
 		}
 
+		if (info.num_nz_contexts == 0)
+			return null;
+		
 		long []indexes = newtonSearch(cct_id, 0, info.num_nz_contexts, byteBufferCache);
 
 		if (indexes == null)
@@ -708,6 +711,9 @@ public class DataSummary extends DataCommon
 	private long[] newtonSearch(int cct, int first, int last, ByteBuffer buffer) {
 		int left_index  = first;
 		int right_index = last - 1;
+		
+		if (left_index < 0 || right_index < 0)
+			return null;
 		
 		int left_cct  = getCCTIndex(buffer, left_index);
 		int right_cct = getCCTIndex(buffer, right_index);
