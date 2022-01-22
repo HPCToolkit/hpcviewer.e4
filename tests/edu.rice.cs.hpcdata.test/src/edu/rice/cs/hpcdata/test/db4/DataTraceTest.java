@@ -21,7 +21,7 @@ public class DataTraceTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		Path resource = Paths.get("..", "resources", "prof2");
+		Path resource = Paths.get("..", "resources", "prof2", "empty-trace");
 		File dbPath = resource.toFile();
 		
 		assertNotNull(dbPath);
