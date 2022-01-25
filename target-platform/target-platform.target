@@ -36,5 +36,11 @@
 			<unit id="org.eclipse.nebula.widgets.nattable.extension.poi.feature.feature.group" version="2.0.2.202111300816"/>
 			<unit id="org.eclipse.nebula.widgets.nattable.extension.poi.source.feature.feature.group" version="2.0.2.202111300816"/>
 		</location>
+		<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+            <repository location="http://download.eclipse.org/technology/swtbot/releases/latest/"/>
+            <unit id="org.eclipse.swtbot.eclipse.feature.group" version="0.0.0"/>
+            <unit id="org.eclipse.swtbot.e4.finder" version="0.0.0"/>
+            <unit id="org.eclipse.swtbot.eclipse.test.junit.feature.group" version="0.0.0"/>
+        </location>
 	</locations>
 </target>
