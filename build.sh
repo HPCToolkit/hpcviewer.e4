@@ -182,7 +182,7 @@ rm -rf hpcviewer-${RELEASE}*
 echo "=================================="
 echo " Building the viewer"
 echo "=================================="
-if [ ${CHECK_PACKAGE}=="1" ]; then
+if [ $CHECK_PACKAGE != "0" ]; then
 	mvn clean verify 
 	exit
 else
