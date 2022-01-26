@@ -34,8 +34,8 @@ public class DatabaseMergeTest {
 			assert(dm != null);
 			
 			System.out.println("To merge: ");
-			System.out.println("\t" + dm.experiment[0].getXMLExperimentFile().getAbsolutePath() + " metric: " + dm.metric[0].getDisplayName());
-			System.out.println("\t" + dm.experiment[1].getXMLExperimentFile().getAbsolutePath() + " metric: " + dm.metric[1].getDisplayName());
+			System.out.println("\t" + dm.experiment[0].getExperimentFile().getAbsolutePath() + " metric: " + dm.metric[0].getDisplayName());
+			System.out.println("\t" + dm.experiment[1].getExperimentFile().getAbsolutePath() + " metric: " + dm.metric[1].getDisplayName());
 		}
 		
 		shell.open();

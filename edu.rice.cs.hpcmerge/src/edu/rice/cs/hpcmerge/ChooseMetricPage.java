@@ -70,7 +70,7 @@ public class ChooseMetricPage extends WizardPage
 	private void fillContent(int index) {
 		Experiment exp = database.experiment[index];
 		
-		String text = exp.getXMLExperimentFile().getAbsolutePath();
+		String text = exp.getExperimentFile().getAbsolutePath();
 		labelDatabase[index].setText(text);
 
 		List list   = listMetrics[index];

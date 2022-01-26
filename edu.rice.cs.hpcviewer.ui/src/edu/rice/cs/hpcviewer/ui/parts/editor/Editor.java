@@ -191,7 +191,7 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 		if (input instanceof Scope) {
 			file = ((Scope)input).getSourceFile().getFilename();
 		} else if (input instanceof BaseExperiment) {
-			file = ((BaseExperiment)input).getXMLExperimentFile();
+			file = ((BaseExperiment)input).getExperimentFile();
 		}
 		return file;
 	}
@@ -298,7 +298,7 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 		if (input instanceof Scope) {
 			filename = ((Scope)input).getSourceFile().getName(); 
 		} else if (input instanceof BaseExperiment) {
-			filename = ((BaseExperiment)input).getXMLExperimentFile().getName();
+			filename = ((BaseExperiment)input).getExperimentFile().getName();
 		} else if (input instanceof GraphEditorInput) {
 			filename = ((GraphEditorInput)input).toString();
 		}
@@ -330,7 +330,7 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 		} else if (input instanceof BaseExperiment) {
 			
 			BaseExperiment experiment = (BaseExperiment) input;
-			String filename = experiment.getXMLExperimentFile().getAbsolutePath();
+			String filename = experiment.getExperimentFile().getAbsolutePath();
 			
 			displayFile(experiment, filename, 0);
 			

@@ -417,7 +417,7 @@ public class DatabaseCollection
 			return null;
 		
 		for (BaseExperiment exp: list) {
-			String directory = exp.getXMLExperimentFile().getAbsolutePath();
+			String directory = exp.getExperimentFile().getAbsolutePath();
 			if (directory.equals(pathXML)) {
 
 				return exp;

@@ -232,7 +232,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetXMLExperimentFile() {
-		File file = experiment.getXMLExperimentFile();
+		File file = experiment.getExperimentFile();
 		assertNotNull(file);
 		File dir = file.getParentFile();
 		File dbPath = database.getAbsoluteFile();

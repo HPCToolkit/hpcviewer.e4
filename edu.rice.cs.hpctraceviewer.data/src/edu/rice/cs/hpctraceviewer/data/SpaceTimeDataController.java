@@ -1,6 +1,5 @@
 package edu.rice.cs.hpctraceviewer.data;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
@@ -10,7 +9,7 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.swt.widgets.Display;
 import edu.rice.cs.hpcbase.map.ProcedureAliasMap;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
-import edu.rice.cs.hpcdata.experiment.ExperimentWithoutMetrics;
+import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
 import edu.rice.cs.hpcdata.experiment.extdata.IFilteredData;
@@ -53,23 +52,7 @@ public abstract class SpaceTimeDataController
 	// TODO: we need to remove this and delegate to the inherited class instead !
 	//private int currentDataIdx;
 
-	/***
-	 * Constructor to create a data based on File. This constructor is more suitable
-	 * for local database
-	 * 
-	 * @param _window : SWT window
-	 * @param expFile : experiment file (XML format)
-	 */
-	public SpaceTimeDataController(IEclipseContext context, File expFile) 
-			throws InvalExperimentException, Exception 
-	{			
-		exp = new ExperimentWithoutMetrics();
 
-		// possible java.lang.OutOfMemoryError exception here
-		exp.open(expFile, new ProcedureAliasMap(), false);
-
-		init(context, exp);
-	}
 	
 	/*****
 	 * Constructor to create a data based on input stream, which is convenient for remote database
@@ -82,7 +65,7 @@ public abstract class SpaceTimeDataController
 	public SpaceTimeDataController(IEclipseContext context, InputStream expStream, String Name) 
 			throws InvalExperimentException, Exception 
 	{	
-		exp = new ExperimentWithoutMetrics();
+		exp = new Experiment();
 
 		// Without metrics, so param 3 is false
 		exp.open(expStream, new ProcedureAliasMap(), Name);
