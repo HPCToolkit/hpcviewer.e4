@@ -442,8 +442,9 @@ public class DatabaseCollection
 	 */
 	public String checkExistance(MWindow window, Shell shell, String fileOrDirectory) {
 		
+		// -------------------------------------------------------
 		// 1. convert the database path to experiment.xml file name
-		
+		// -------------------------------------------------------
 		String filename = null;
 		if (fileOrDirectory == null) {
 			try {
@@ -469,7 +470,11 @@ public class DatabaseCollection
 			}
 		}
 
+		// -------------------------------------------------------
 		// 2. check if the file exists
+		// -------------------------------------------------------
+		if (filename == null)
+			return null;
 		
 		File file = new File(filename);
 		if (!file.exists()) {
@@ -479,7 +484,9 @@ public class DatabaseCollection
 			return null;
 		}
 
+		// -------------------------------------------------------
 		// 3. check if the database already opened or not
+		// -------------------------------------------------------
 		
 		BaseExperiment exp = getExperimentObject(window, filename);
 		if (exp == null)

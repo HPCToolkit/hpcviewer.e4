@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcdata.experiment.xml;
+package edu.rice.cs.hpcdata.app;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,12 +12,10 @@ import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
-import edu.rice.cs.hpcdata.experiment.scope.visitors.PrintFlatViewScopeVisitor;
 
 
 /***************************************************************************************
  * Class to print the content of an experiment database into an output stream
- * @author laksonoadhianto
  *
  ***************************************************************************************/
 public class PrintFileXML {

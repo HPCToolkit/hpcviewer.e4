@@ -12,7 +12,6 @@ import edu.rice.cs.hpcbase.map.ProcedureAliasMap;
 import edu.rice.cs.hpcdata.db.DatabaseManager;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
-import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.Util;
 import edu.rice.cs.hpcdata.util.Util.DatabaseFileFilter;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
