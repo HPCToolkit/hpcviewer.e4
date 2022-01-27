@@ -107,10 +107,6 @@ public abstract class BaseExperiment implements IExperiment
 	}
 
 
-	public void setDataSummary(DataSummary dataSummary) {
-		this.dataSummary = dataSummary;
-	}
-
 
 	/***
 	 * set the new id tuple type

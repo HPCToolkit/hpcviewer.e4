@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcdata.experiment.scope.visitors;
+package edu.rice.cs.hpcdata.app;
 
 import java.io.PrintStream;
 
@@ -17,13 +17,12 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.ScopeVisitType;
 import edu.rice.cs.hpcdata.experiment.scope.StatementRangeScope;
+import edu.rice.cs.hpcdata.experiment.scope.visitors.IScopeVisitor;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
-import edu.rice.cs.hpcdata.experiment.xml.PrintFileXML;
 
 
 /****************************************************************************************
  * 
- * @author laksonoadhianto
  *
  ****************************************************************************************/
 public class PrintFlatViewScopeVisitor implements IScopeVisitor {
