@@ -16,7 +16,7 @@ public class DatabaseManager
 	
 	/***
 	 * Check if a file is a database file.
-	 * @param filename
+	 * @param filename The file name without the absolute path
 	 * @return boolean true if it's a recognized database file
 	 */
 	public static boolean isDatabaseFile(String filename) {
