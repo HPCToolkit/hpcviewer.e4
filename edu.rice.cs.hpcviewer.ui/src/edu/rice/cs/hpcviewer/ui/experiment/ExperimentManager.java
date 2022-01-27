@@ -9,11 +9,12 @@ import org.eclipse.swt.widgets.Shell;
 import java.io.File;
 import java.io.FilenameFilter;
 import edu.rice.cs.hpcbase.map.ProcedureAliasMap;
+import edu.rice.cs.hpcdata.db.DatabaseManager;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.Util;
-import edu.rice.cs.hpcdata.util.Util.FileXMLFilter;
+import edu.rice.cs.hpcdata.util.Util.DatabaseFileFilter;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 
 
@@ -110,10 +111,10 @@ public class ExperimentManager
 				// Since rel 5.x, the name of database is experiment.xml
 				// there is no need to maintain compatibility with hpctoolkit prior 5.x 
 				// 	where the name of database is config.xml
-				if(objFile.getName().startsWith(Constants.DATABASE_FILENAME))  
-				{
+				if (DatabaseManager.isDatabaseFile(objFile.getName())) {
 					if (objFile.canRead())
 						return objFile.getAbsolutePath();
+					
 				}
 			}
 			throw new Exception("Cannot find experiment.xml in the directory");
@@ -147,7 +148,7 @@ public class ExperimentManager
 		// find XML files in this directory
 		File files = new File(sPath);
 		// for debugging purpose, let have separate variable
-		File filesXML[] = files.listFiles(new FileXMLFilter());
+		File filesXML[] = files.listFiles(new DatabaseFileFilter());
 
 		// store the current path in the preference
 		ViewerPreferenceManager.setLastPath(sPath);

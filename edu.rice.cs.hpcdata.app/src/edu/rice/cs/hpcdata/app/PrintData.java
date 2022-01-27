@@ -7,6 +7,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.rice.cs.hpcdata.db.DatabaseManager;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
@@ -15,7 +16,6 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
-import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.ScopeComparator;
 import edu.rice.cs.hpcdata.util.Util;
 
@@ -137,10 +137,11 @@ public class PrintData
 			for (File file: files) 
 			{
 				// only experiment*.xml will be considered as database file
-				if (file.getName().startsWith(Constants.DATABASE_FILENAME)) {
+				if (DatabaseManager.isDatabaseFile(file.getName())) {
 					experiment = objApp.openExperiment(print_msg, file);
 					if (experiment != null)
 						break;
+					
 				}
 			}
 		} else {

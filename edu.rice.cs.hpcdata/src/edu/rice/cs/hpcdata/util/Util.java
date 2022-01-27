@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.text.NumberFormat;
 
+import edu.rice.cs.hpcdata.db.DatabaseManager;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.source.FileSystemSourceFile;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
@@ -94,22 +95,29 @@ public static DecimalFormat makeDecimalFormatter(String pattern)
 
 
 /**
- * Class to filter the list of files in a directory and return only XML files 
- * The filter is basically very simple: if the last 3 letters has "xml" substring
- * then we consider it as XML file.
- * TODO: we need to have a more sophisticated approach to filter only the real XML files
- *
+ * Class to filter the list of files in a directory and return only Database files.
+ * Possible database files:
+ * <ul>
+ * <li> experiment.xml
+ * <li> meta.db
+ * </ul> 
+ * @see {@link edu.rice.cs.hpcdata.util.Constants.DATABASE_FILENAME}
  */
-public static class FileXMLFilter implements FilenameFilter {
+public static class DatabaseFileFilter implements FilenameFilter {
 	public boolean accept(File pathname, String sName) {
-		int iLength = sName.length();
-		if (iLength <4) // the file should contain at least four letters: ".xml"
+		if (sName.length() < 4) // the file should contain at least four letters: ".xml" or "*.db"
 			return false;
-		String sExtension = (sName.substring(iLength-3, iLength)).toLowerCase();
-		return (pathname.canRead() && sExtension.endsWith("xml"));
+		if (!pathname.canRead())
+			return false;
+		return DatabaseManager.isDatabaseFile(sName);
 	}
 }
 
+/****
+ * 
+ * Class to filter the list of hpcrun file in a directory
+ *
+ */
 public static class FileHpcrunFilter implements FilenameFilter {
 	public boolean accept(File pathname, String sName) {
 		int iLength = sName.length();
@@ -144,7 +152,7 @@ public static File[] getListOfXMLFiles(String sDir)
 	// find XML files in this directory
 	File files = new File(sDir);
 	// for debugging purpose, let have separate variable
-	File filesXML[] = files.listFiles(new FileXMLFilter());
+	File filesXML[] = files.listFiles(new DatabaseFileFilter());
 	return filesXML;
 }
 
