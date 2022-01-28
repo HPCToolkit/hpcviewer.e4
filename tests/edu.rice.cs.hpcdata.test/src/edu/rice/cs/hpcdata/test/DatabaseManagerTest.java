@@ -63,9 +63,8 @@ public class DatabaseManagerTest {
 	public void testGetDatabaseReader() {
 		Path resource = Paths.get("..", "resources", "bug-no-gpu-trace");
 		var database = resource.toFile();
-		var path = DatabaseManager.getDatabaseFilePath(database.getAbsolutePath());
 
-		var parser = DatabaseManager.getDatabaseReader(path.orElseThrow());
+		var parser = DatabaseManager.getDatabaseReader(database);
 		assertNotNull(parser);
 		assertTrue(parser instanceof ExperimentFileXML);
 	}

@@ -37,7 +37,7 @@ public class LocalDatabaseRepresentation implements IDatabaseRepresentation
 	@Override
 	public void open(BaseExperiment experiment) throws Exception
 	{	
-		ExperimentFile reader = DatabaseManager.getDatabaseReader(fileExperiment.getAbsolutePath());
+		ExperimentFile reader = DatabaseManager.getDatabaseReader(fileExperiment);
 		fileExperiment = reader.parse(fileExperiment, experiment, need_metric, userData);	
 	}
 

@@ -1,5 +1,6 @@
 package edu.rice.cs.hpcdata.db;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -89,7 +90,17 @@ public class DatabaseManager
 	 * @param filename
 	 * @return
 	 */
-	public static ExperimentFile getDatabaseReader(String filename) {
+	public static ExperimentFile getDatabaseReader(File fileOrDirectory) {
+		String filename = fileOrDirectory.getAbsolutePath();
+		
+		if (fileOrDirectory.isDirectory()) {
+			var filepath = getDatabaseFilePath(filename);
+			if (filepath.isPresent()) 
+				filename = filepath.get();
+			else
+				return null;
+		}
+
 		if (filename.endsWith(DATABASE_FILENAME[0])) {
 			return new ExperimentFileXML();
 		} else if (filename.endsWith(DATABASE_FILENAME[1])) {
