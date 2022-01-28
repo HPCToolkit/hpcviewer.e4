@@ -20,7 +20,7 @@ import edu.rice.cs.hpcdata.experiment.ExperimentConfiguration;
 import edu.rice.cs.hpcdata.experiment.metric.*;
 import edu.rice.cs.hpcdata.experiment.scope.*;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.*;
-import edu.rice.cs.hpcdata.util.Constants;
+
 
 /****
  * Merging experiments
@@ -87,7 +87,11 @@ public class ExperimentMerger
 		// -----------------------------------------------
 		// step 2: combine all metrics
 		// -----------------------------------------------
-		ListMergedMetrics metrics = mergeMetrics(exp1.getVisibleMetrics(), exp2.getVisibleMetrics());
+
+		// Bug fix issue #168:
+		//  the formula in stat metrics are not computed properly because the hidden metrics
+		//	are not merged. We have to merge even the hidden ones :-(				 
+		ListMergedMetrics metrics = mergeMetrics(exp1.getMetricList(), exp2.getMetricList());
 		merged.setMetrics(metrics);
 		
 		if (with_raw_metrics)
