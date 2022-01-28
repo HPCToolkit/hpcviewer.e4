@@ -1,12 +1,11 @@
 <project>
  <modelVersion>4.0.0</modelVersion>
- <groupId>edu.rice.hpcviewer</groupId>
  <artifactId>root</artifactId>
  <version>6.0.0-SNAPSHOT</version>
  <packaging>pom</packaging>
  <parent>
-   <groupId>edu.rice.hpcviewer</groupId>
-   <artifactId>edu.rice.hpcviewer.configuration</artifactId>
+   <groupId>edu.rice.cs.hpcviewer</groupId>
+   <artifactId>edu.rice.cs.hpcviewer.configuration</artifactId>
    <version>1.0.0-SNAPSHOT</version>
   <relativePath>./releng</relativePath>
  </parent>
