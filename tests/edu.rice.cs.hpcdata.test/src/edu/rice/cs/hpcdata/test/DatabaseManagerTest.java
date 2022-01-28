@@ -9,6 +9,7 @@ import java.util.Optional;
 import org.junit.Test;
 
 import edu.rice.cs.hpcdata.db.DatabaseManager;
+import edu.rice.cs.hpcdata.experiment.xml.ExperimentFileXML;
 
 public class DatabaseManagerTest {
 
@@ -57,4 +58,15 @@ public class DatabaseManagerTest {
 		assertTrue(filename.get().equals("meta.db"));
 	}
 
+	
+	@Test
+	public void testGetDatabaseReader() {
+		Path resource = Paths.get("..", "resources", "bug-no-gpu-trace");
+		var database = resource.toFile();
+		var path = DatabaseManager.getDatabaseFilePath(database.getAbsolutePath());
+
+		var parser = DatabaseManager.getDatabaseReader(path.orElseThrow());
+		assertNotNull(parser);
+		assertTrue(parser instanceof ExperimentFileXML);
+	}
 }
