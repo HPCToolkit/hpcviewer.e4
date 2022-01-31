@@ -22,8 +22,8 @@ public class PrintFileXML {
 	//-----------------------------------------------------------------------
 	// Constants
 	//-----------------------------------------------------------------------
-	final private String DTD_FILE_NAME = "experiment.dtd";
-	final private int MAX_BUFFER = 1024;
+	private static final String DTD_FILE_NAME = "experiment.dtd";
+	private static final int MAX_BUFFER = 1024;
 
 	
 	/**--------------------------------------------------------------------------------**
@@ -71,7 +71,7 @@ public class PrintFileXML {
 	 * @param attribute
 	 * @param value
 	 **--------------------------------------------------------------------------------**/
-	static public void printAttribute(PrintStream objPrint, String attribute, Object value) {
+	public static void printAttribute(PrintStream objPrint, String attribute, Object value) {
 		objPrint.print(" "+ attribute + "=\"" + value + "\"");
 	}
 

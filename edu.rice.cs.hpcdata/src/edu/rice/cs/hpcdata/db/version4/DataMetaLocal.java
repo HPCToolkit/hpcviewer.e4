@@ -19,4 +19,9 @@ public class DataMetaLocal extends LocalDatabaseRepresentation
 	public void open(BaseExperiment experiment) throws Exception {
 		data = new DataMeta();
 	}
+
+	public DataMeta getMetaData() {
+		return data;
+	}
+	
 }
