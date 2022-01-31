@@ -26,7 +26,7 @@ import edu.rice.cs.hpcdata.experiment.source.SourceFile;
  *
  ****************************************************************************************/
 public class PrintFlatViewScopeVisitor implements IScopeVisitor {
-	static private StringBuffer indent;
+	private StringBuilder indent;
 
 	private Experiment objExperiment;
 	private PrintStream objOutputStream;
@@ -35,7 +35,7 @@ public class PrintFlatViewScopeVisitor implements IScopeVisitor {
 	public PrintFlatViewScopeVisitor(Experiment experiment, PrintStream stream) {
 		this.objExperiment = experiment;
 		this.objOutputStream = stream;
-		indent = new StringBuffer();
+		indent = new StringBuilder();
 	}
 	
 	//----------------------------------------------------
@@ -125,17 +125,13 @@ public class PrintFlatViewScopeVisitor implements IScopeVisitor {
 		PrintFileXML.printAttribute(objOutputStream, "i", objScopeToPrint.getFlatIndex());
 		
 		if (name) {
-			final String scopeName;
+			String scopeName = objScopeToPrint.getName();
 			// if the scope is a file, we have to print the original path from hpcprof
 			if (objScopeToPrint instanceof FileScope) 
 			{
 				SourceFile srcFile = ((FileScope)objScopeToPrint).getSourceFile();
 				if (srcFile != null && srcFile.getFilename()!= null)
 					scopeName = srcFile.getFilename().toString();
-				else
-					scopeName = objScopeToPrint.getName();
-			} else {
-				scopeName = objScopeToPrint.getName();
 			}
 			// 2010.12.17 Ashay addition:
 			// Escape the "name" so that we conform to a valid XML syntax
