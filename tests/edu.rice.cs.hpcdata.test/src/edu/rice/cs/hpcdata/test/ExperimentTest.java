@@ -29,29 +29,37 @@ import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 
 public class ExperimentTest {
 
-	private static Experiment experiment;
-	private static File database;
+	private static Experiment []experiments;
+	private static File []database;
 	
 	public ExperimentTest() {
 	}
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		Path resource = Paths.get("..", "resources", "bug-no-gpu-trace");
-		database = resource.toFile();
-		
-		assertNotNull(database);
-		
-		System.out.println("Test database: " + database.getAbsolutePath());
+		String []dbPaths = new String[] {"bug-no-gpu-trace", "bug-empty", "bug-nometric"};
+		experiments = new Experiment[dbPaths.length];
+		database   = new File[dbPaths.length];
+		int i=0;
+		for (String dbp: dbPaths) {
+			
+			Path resource = Paths.get("..", "resources", dbp);
+			database[i] = resource.toFile();
+			
+			assertNotNull(database);
+			
+			System.out.println("Test database: " + database[i].getAbsolutePath());
 
-		experiment = new Experiment();
-		try {
-			experiment.open(database, null, Experiment.ExperimentOpenFlag.TREE_ALL);
-		} catch (Exception e) {
-			assertFalse(e.getMessage(), true);
+			experiments[i]= new Experiment();
+			try {
+				experiments[i].open(database[i], null, Experiment.ExperimentOpenFlag.TREE_ALL);
+			} catch (Exception e) {
+				assertFalse(e.getMessage(), true);
+			}
+			
+			assertNotNull(experiments[i].getRootScope());
+			i++;
 		}
-		
-		assertNotNull(experiment.getRootScope());
 	}
 
 	@AfterClass
@@ -68,175 +76,249 @@ public class ExperimentTest {
 
 	@Test
 	public void testIsMergedDatabase() {
-		assertFalse(experiment.isMergedDatabase());
+		for(var exp: experiments) {
+			assertFalse(exp.isMergedDatabase());
+		}
 	}
 
 
 	@Test
 	public void testGetRawMetrics() {
-		List<BaseMetric> metrics = experiment.getRawMetrics();
-		assertNull(metrics);
+		for(var exp: experiments) {
+			List<BaseMetric> metrics = exp.getRawMetrics();
+			assertNull(metrics);
+		}
 	}
 
 	@Test
 	public void testGetVisibleMetrics() {
-		List<BaseMetric> metrics = experiment.getVisibleMetrics();
-		assertNotNull(metrics);
-		assertTrue(metrics.size() > 1);
+		int num[] = new int[] {97, 2, 0};
+		int i = 0;
+		for(var experiment: experiments) {
+			List<BaseMetric> metrics = experiment.getVisibleMetrics();
+			assertNotNull(metrics);
+			assertTrue(metrics.size() == num[i]);
+			i++;
+		}
 	}
 
 	@Test
 	public void testGetNonEmptyMetricIDs() {
-		RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
-		List<Integer> metrics = experiment.getNonEmptyMetricIDs(root);
-		assertNotNull(metrics);
-		assertTrue(metrics.size() > 1);
+		final int nmetrics[] = new int[] {18, 0, 0};
+		int i=0;
+		for(var experiment: experiments) {
+			RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
+			List<Integer> metrics = experiment.getNonEmptyMetricIDs(root);
+			assertNotNull(metrics);
+			assertTrue(metrics.size() >= nmetrics[i]);
+			i++;
+		}
 	}
 
 	@Test
 	public void testGetMetricCount() {
-		assertTrue(experiment.getMetricCount() > 1);
+		int counts[] = new int[] {10, 0, 0};
+		int i=0;
+		
+		for(var experiment: experiments) {
+			assertTrue(experiment.getMetricCount() >= counts[i]);
+			i++;
+		}
 	}
 
 	@Test
 	public void testGetMetricInt() {
-		List<BaseMetric> list = experiment.getVisibleMetrics();
-		BaseMetric metric = experiment.getMetric(list.get(0).getIndex());
-		assertNotNull(metric);
-		assertEquals(list.get(0), metric);
+		for(var experiment: experiments) {
+			List<BaseMetric> list = experiment.getVisibleMetrics();
+			if (list != null && list.size()>0) {
+				BaseMetric metric = experiment.getMetric(list.get(0).getIndex());
+				assertNotNull(metric);
+				assertEquals(list.get(0), metric);
+			}
+		}
 	}
 
 	@Test
 	public void testGetMetricString() {
-		BaseMetric metric = experiment.getMetric("732");
-		assertNotNull(metric);
+		for(var experiment: experiments) {
+			List<BaseMetric> list = experiment.getVisibleMetrics();
+			if (list != null && list.size()>0) {
+				BaseMetric metric = experiment.getMetric(list.get(0).getShortName());
+				assertNotNull(metric);
+			}
+		}
 	}
 
 	@Test
 	public void testGetMetricFromOrder() {
-		BaseMetric metric = experiment.getMetricFromOrder(0);
-		assertNotNull(metric);
+		for(var experiment: experiments) {
+			if (experiment.getMetricCount()>0) {
+				BaseMetric metric = experiment.getMetricFromOrder(0);
+				assertNotNull(metric);				
+			}
+		}
 	}
 
 	@Test
 	public void testAddDerivedMetric() {
-		RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
-		BaseMetric metric = experiment.getMetric(762);
-		int numMetrics = experiment.getMetricCount();
-		DerivedMetric dm = new DerivedMetric(root, 
-									experiment, 
-									"$762", 
-									"DM " + metric.getDisplayName(), 
-									String.valueOf(numMetrics), 
-									numMetrics, AnnotationType.NONE, metric.getMetricType());
-		experiment.addDerivedMetric(dm);
+		int indexes[] = new int[] {762, 0, 0};
+		int i=0;
 		
-		assertTrue(experiment.getMetricCount() == numMetrics + 1);
+		for(var experiment: experiments) {
+			if (experiment.getMetricCount()==0) 
+				continue;
+			
+			RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
+			BaseMetric metric = experiment.getMetric(indexes[i]);
+			int numMetrics = experiment.getMetricCount();
+			DerivedMetric dm = new DerivedMetric(root, 
+										experiment, 
+										"$" + metric.getIndex(), 
+										"DM " + metric.getDisplayName(), 
+										String.valueOf(numMetrics), 
+										numMetrics, AnnotationType.NONE, metric.getMetricType());
+			experiment.addDerivedMetric(dm);
+			
+			assertTrue(experiment.getMetricCount() == numMetrics + 1);
+			i++;
+		}
 	}
 
 	@Test
 	public void testGetRootScope() {
-		RootScope rootCCT = experiment.getRootScope(RootScopeType.CallingContextTree);
-		RootScope rootCall = experiment.getRootScope(RootScopeType.CallerTree);
-		RootScope rootFlat = experiment.getRootScope(RootScopeType.Flat);
-		
-		assertNotNull(rootCCT);
-		assertNotNull(rootCall);
-		assertNotNull(rootFlat);
-		
-		assertTrue(rootCCT != rootCall);
-		assertTrue(rootCall != rootFlat);
+		for(var experiment: experiments) {
+			RootScope rootCCT = experiment.getRootScope(RootScopeType.CallingContextTree);
+			RootScope rootCall = experiment.getRootScope(RootScopeType.CallerTree);
+			RootScope rootFlat = experiment.getRootScope(RootScopeType.Flat);
+			
+			assertNotNull(rootCCT);
+			assertNotNull(rootCall);
+			assertNotNull(rootFlat);
+			
+			assertTrue(rootCCT != rootCall);
+			assertTrue(rootCall != rootFlat);
+		}
 	}
 
 	@Test
 	public void testGetDataSummary() {
-
-		try {
-			experiment.getDataSummary();
-			assertFalse(true);
-			
-		} catch (IOException e) {
-			assertTrue("Correct: no summary", true);
+		for(var experiment: experiments) {
+			try {
+				experiment.getDataSummary();
+				assertFalse(true);
+				
+			} catch (IOException e) {
+				assertTrue("Correct: no summary", true);
+			}
 		}
-
 	}
 
 	@Test
 	public void testGetThreadData() {
-		assertNull(experiment.getThreadData());
+		for(var experiment: experiments) {
+			assertNull(experiment.getThreadData());
+		}
 	}
 
 	@Test
 	public void testGetMajorVersion() {
-		assertTrue(experiment.getMajorVersion() == 2);
+		for(var experiment: experiments) {
+			assertTrue(experiment.getMajorVersion() == 2);
+		}
 	}
 
 	@Test
 	public void testGetMinorVersion() {
-		assertTrue(experiment.getMinorVersion() == 2);
+		for(var experiment: experiments) {
+			assertTrue(experiment.getMinorVersion() == 2);
+		}
 	}
 
 	@Test
 	public void testGetMaxDepth() {
-		assertTrue(experiment.getMaxDepth() == 40);
+		final int maxdepth[] = new int[] {4, 0, 0};
+		int i=0;
+		for(var experiment: experiments) {
+			assertTrue(experiment.getMaxDepth() > maxdepth[i]);
+			i++;
+		}
 	}
 
 	@Test
 	public void testGetScopeMap() {
-		assertNotNull(experiment.getScopeMap());
+		for(var experiment: experiments) {
+			assertNotNull(experiment.getScopeMap());
+		}
 	}
 
 	@Test
 	public void testGetRootScopeChildren() {
-		List<TreeNode> children = experiment.getRootScopeChildren();
-		assertNotNull(children);
-		assertTrue(children.size() == 3);
+		for(var experiment: experiments) {
+			List<TreeNode> children = experiment.getRootScopeChildren();
+			assertNotNull(children);
+			assertTrue(children.size() == 3);
+		}
 	}
 
 	@Test
 	public void testGetRootScopeRootScopeType() {
-		RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
-		assertNotNull(root);
+		for(var experiment: experiments) {
+			RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
+			assertNotNull(root);
+		}
 	}
 	
 
 	@Test
 	public void testOpenFileIUserDataOfStringStringBoolean() {
-		Experiment exp = new Experiment();
-
-		try {
-			exp.open(experiment.getDefaultDirectory(), null, true);
-		} catch (Exception e) {
-			assertFalse(e.getMessage(), true);
+		for(var experiment: experiments) {
+			Experiment exp = new Experiment();
+			try {
+				exp.open(experiment.getDefaultDirectory(), null, true);
+			} catch (Exception e) {
+				assertFalse(e.getMessage(), true);
+			}
+			assertTrue(exp.getName().equals(experiment.getName()));
 		}
-
-		assertTrue(exp.getName().equals(experiment.getName()));
 	}
 
 	@Test
 	public void testGetName() {
-		String name = experiment.getName();
-		assertNotNull(name.equals("bandwidthTest"));
+		final String []names = new String[] {"bandwidthTest", "a.out", "a.out"};
+		int i=0;
+		for(var experiment: experiments) {
+			String name = experiment.getName();
+			assertNotNull(name.equals(names[i]));
+			i++;
+		}
 	}
 
 	@Test
 	public void testGetConfiguration() {
-		assertNotNull(experiment.getConfiguration());
+		for(var experiment: experiments) {
+			assertNotNull(experiment.getConfiguration());
+		}
 	}
 
 	@Test
 	public void testGetDefaultDirectory() {
-		File dir = experiment.getDefaultDirectory();
-		assertNotNull(dir);
+		for(var experiment: experiments) {
+			File dir = experiment.getDefaultDirectory();
+			assertNotNull(dir);
+		}
 	}
 
 	@Test
-	public void testGetXMLExperimentFile() {
-		File file = experiment.getExperimentFile();
-		assertNotNull(file);
-		File dir = file.getParentFile();
-		File dbPath = database.getAbsoluteFile();
-		assertTrue(dir.getAbsolutePath().equals(dbPath.getAbsolutePath()));
+	public void testGetExperimentFile() {
+		int i=0;
+		for(var experiment: experiments) {
+			File file = experiment.getExperimentFile();
+			assertNotNull(file);
+			File dir = file.getParentFile();
+			File dbPath = database[i].getAbsoluteFile();
+			assertTrue(dir.getAbsolutePath().equals(dbPath.getAbsolutePath()));
+			i++;
+		}
 	}
 
 }
