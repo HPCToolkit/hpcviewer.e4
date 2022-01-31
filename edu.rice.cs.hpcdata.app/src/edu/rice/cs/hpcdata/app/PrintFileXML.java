@@ -26,11 +26,11 @@ public class PrintFileXML {
 	private static final int MAX_BUFFER = 1024;
 
 	
-	/**--------------------------------------------------------------------------------**
+	/****
 	 * print an experiment into a given output stream
 	 * @param objPrint
 	 * @param experiment
-	 **--------------------------------------------------------------------------------**/
+	 ****/
 	public void print(PrintStream objStream, Experiment experiment) {
 		RootScope cctRoot  = experiment.getRootScope(RootScopeType.CallingContextTree);
 		RootScope flatRoot = experiment.getRootScope(RootScopeType.Flat);
@@ -65,22 +65,22 @@ public class PrintFileXML {
 	}
 	
 	
-	/**--------------------------------------------------------------------------------**
+	/****
 	 * Static method to print an attribute and its value to a specific format
 	 * @param objPrint
 	 * @param attribute
 	 * @param value
-	 **--------------------------------------------------------------------------------**/
+	 ****/
 	public static void printAttribute(PrintStream objPrint, String attribute, Object value) {
 		objPrint.print(" "+ attribute + "=\"" + value + "\"");
 	}
 
 	
-	/**--------------------------------------------------------------------------------**
+	/*****
 	 * 
 	 * @param objPrint
 	 * @param experiment
-	 **--------------------------------------------------------------------------------**/
+	 *****/
 	private void printMetricTable(PrintStream objPrint, Experiment experiment) {
 		objPrint.println(" <MetricTable>");
 		List<BaseMetric> metrics = experiment.getMetricList();
@@ -102,11 +102,11 @@ public class PrintFileXML {
 	}
 	
 	
-	/**--------------------------------------------------------------------------------**
+	/*****
 	 * 
 	 * @param m
 	 * @return
-	 **--------------------------------------------------------------------------------**/
+	 *****/
 	private String getMetricType (BaseMetric m) {
 		if (m.getMetricType() == MetricType.EXCLUSIVE )
 			return "exclusive";
@@ -116,11 +116,11 @@ public class PrintFileXML {
 	}
 	
 	
-	/**--------------------------------------------------------------------------------**
+	/*****
 	 * print the type of annotation
 	 * @param objPrint
 	 * @param m
-	 **--------------------------------------------------------------------------------**/
+	 *****/
 	private void printAnnotationType (PrintStream objPrint, BaseMetric m) {
 		
 		switch (m.getAnnotationType()) {
@@ -138,11 +138,11 @@ public class PrintFileXML {
 	}
 	
 	
-	/**--------------------------------------------------------------------------------**
+	/*****
 	 * 
 	 * @param b
 	 * @return
-	 **--------------------------------------------------------------------------------**/
+	 *****/
 	private int booleanToInt(boolean b) {
 		if (b)
 			return 1;
@@ -151,11 +151,11 @@ public class PrintFileXML {
 	}
 	
 	
-	/**--------------------------------------------------------------------------------**
+	/*****
 	 * 
 	 * @param objPrint
 	 * @param experiment
-	 **--------------------------------------------------------------------------------**/
+	 *****/
 	private void printHeader(PrintStream objPrint, Experiment experiment) {
 		objPrint.println("<HPCToolkitExperiment version=\"" + experiment.getMajorVersion() + "\">");
 
@@ -216,8 +216,7 @@ public class PrintFileXML {
 				numRead = objFile.read(buf, 0, buf.length);
 			} catch (IOException e) {
 				// Sonar doesn't like we print stack trace
-				// just print the message
-				System.err.println(e.getMessage());
+				// System.err.println(e.getMessage());
 			}
             if (numRead <= 0) {
                 break;
