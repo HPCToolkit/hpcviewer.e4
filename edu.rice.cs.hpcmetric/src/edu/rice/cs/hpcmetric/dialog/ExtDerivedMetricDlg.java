@@ -6,8 +6,10 @@ package edu.rice.cs.hpcmetric.dialog;
 // jface
 import java.util.Formatter;
 import java.util.FormatterClosedException;
+import java.util.HashMap;
 import java.util.IllegalFormatException;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.jface.bindings.keys.ParseException;
@@ -42,7 +44,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import com.graphbuilder.math.Expression;
 import com.graphbuilder.math.ExpressionParseException;
+import com.graphbuilder.math.ExpressionTree;
 
 // hpcviewer
 import edu.rice.cs.hpcbase.map.UserInputHistory;
@@ -51,6 +55,7 @@ import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.ExtFuncMap;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
+import edu.rice.cs.hpcdata.experiment.metric.MetricFormulaExpression;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.metric.MetricVarMap;
 import edu.rice.cs.hpcdata.experiment.metric.format.IMetricValueFormat;
@@ -59,8 +64,19 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 /**
- * @author la5
  * Dialog box to enter a math formula to define a derived metric
+ * 
+ * <b>Warning: </b>
+ * <p>
+ * Due to issue in #151 (renumbering metric), we need to change the metric index used in the formula. 
+ * in this class, the metric index will be converted from the original metric index in experiment.xml file,
+ *  to a sequential index (or other thing).
+ * </p>
+ * It's much simpler to renumbering the metric index inside the derived metric window instead of in the beginning.
+ * If we renumber in the beginning, we'll have headache with storing the formula as the metric index will differ from experiment.xml to the stored one.
+ *
+ * This may not be an issue in prof2 since we don't have metric id. Damn backward compatibility. 
+ * Make my life horrible.
  */
 public class ExtDerivedMetricDlg extends TitleAreaDialog {
 
@@ -83,6 +99,8 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 	private final RootScope root;
 
 	private DerivedMetric metric;
+	private final Map<Integer, Integer> mapMetricNewIndex;
+	private final Map<Integer, Integer> mapMetricOldIndex;
 
 	// ------------- Others
 	private static final String HISTORY_METRIC_NAME = "metric.formula";	//$NON-NLS-1$
@@ -112,6 +130,18 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 		this.root   = root;
 		this.fctMap = new ExtFuncMap();
 		this.varMap = new MetricVarMap ( root, s, mm );
+		
+		var indexes = metricManager.getNonEmptyMetricIDs(s);
+		mapMetricNewIndex = new HashMap<>(indexes.size());
+		mapMetricOldIndex = new HashMap<>(indexes.size());
+		
+		int newIndex = 0;
+		
+		for(int index: indexes) {
+			mapMetricNewIndex.put(newIndex, index);
+			mapMetricOldIndex.put(index, newIndex);
+			newIndex++;
+		}
 	}
 
 	//==========================================================
@@ -187,6 +217,7 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 						String formula = select.substring(idxSep + 4, select.length());
 						txtMetricFormula.setText(formula);
 					}
+					cbMetricName.setText(select.substring(0, idxSep));
 				}
 			});
 
@@ -197,7 +228,7 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 			int i=0;
 			for(Integer index: indexes) {				
 				BaseMetric m = metricManager.getMetric(index);
-				metricNames[i] = m.getShortName() + ": " + m.getDisplayName();
+				metricNames[i] = mapMetricOldIndex.get(m.getIndex()) + ": " + m.getDisplayName();
 				metrics[i] = m;
 				i++;
 			}
@@ -208,10 +239,10 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 			Label lblFormula = new Label(nameArea, SWT.NONE);
 			lblFormula.setText("Formula: ");
 
-			this.txtMetricFormula = new Text(nameArea, SWT.NONE);
+			txtMetricFormula = new Text(nameArea, SWT.NONE);
 			txtMetricFormula.setToolTipText("A spreadsheet-like formula using other metrics (variables), arithmetic operators, functions, and numerical constants");
 
-			var proposals = new MetricContentProposalProvider(metrics);
+			var proposals = new MetricContentProposalProvider(metrics, mapMetricOldIndex);
 			KeyStroke keystroke = null;
 			try {
 				keystroke = KeyStroke.getInstance("ctrl+space");
@@ -221,7 +252,10 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 			new ContentProposalAdapter(txtMetricFormula, new TextContentAdapter(), proposals, keystroke, new char[] {'$', '@'}) ;
 
 			if (metric != null) {
-				txtMetricFormula.setText( metric.getFormula() );
+				String formula = metric.getFormula();
+				Expression exp = ExpressionTree.parse(formula);
+				MetricFormulaExpression.rename(exp, mapMetricOldIndex, null);
+				txtMetricFormula.setText( exp.toString() );
 			}
 
 			GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(nameArea);
@@ -464,7 +498,9 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 		List<Integer> indexes = metricManager.getNonEmptyMetricIDs(root);
 		BaseMetric m = metricManager.getMetric(indexes.get(selection_index));
 
-		final String sMetricIndex = signToPrepend + m.getShortName() ; 
+		int newIndex = mapMetricOldIndex.get(m.getIndex());
+		final String sMetricIndex = signToPrepend + newIndex;
+		
 		sBuff.insert(iSelIndex, sMetricIndex );
 		txtMetricFormula.setText(sBuff.toString());
 
@@ -477,25 +513,27 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 
 	/**
 	 * check if the expression is correct
-	 * @return
+	 * @return boolean {@code true} if the expression is valid. false otherwise.
 	 */
 	private boolean checkExpression() {
-		boolean bResult = false;
 		String expFormula = this.txtMetricFormula.getText();
-		if(expFormula.length() > 0) {
-			try {
-				bResult = DerivedMetric.evaluateExpression(expFormula, varMap, fctMap);
-			} catch (ExpressionParseException e) {
-				MessageDialog.openError(getShell(), "Error: incorrect expression", e.getDescription());
-			} catch (Exception e) {
-				MessageDialog.openError(getShell(), "Error detected", e.getMessage());
-			}
-		} else {
+		if(expFormula.length() == 0) {
 			MessageDialog.openError(getShell(), 
-									"Error: empty expression", 
-									"An expression can not be empty.");
+					"Error: empty expression", 
+					"An expression can not be empty.");
+			return false;
 		}
-		return bResult;
+		try {
+			Expression newFormula = ExpressionTree.parse(expFormula);
+			MetricFormulaExpression.rename(newFormula, mapMetricNewIndex, null);
+			
+			return DerivedMetric.evaluateExpression(newFormula.toString(), varMap, fctMap);
+		} catch (ExpressionParseException e) {
+			MessageDialog.openError(getShell(), "Error: incorrect expression", e.getDescription());
+		} catch (Exception e) {
+			MessageDialog.openError(getShell(), "Error detected", e.getMessage());
+		}
+		return false;
 	}
 
 	/***
@@ -571,7 +609,10 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 			maxIndex = Integer.valueOf(metricLastID) + 1;
 			metricLastID = String.valueOf(maxIndex);
 
-			metric = new DerivedMetric(root, metricManager, txtMetricFormula.getText(), 
+			Expression newFormula = ExpressionTree.parse(txtMetricFormula.getText());
+			MetricFormulaExpression.rename(newFormula, mapMetricNewIndex, null);
+
+			metric = new DerivedMetric(root, metricManager, newFormula.toString(), 
 					cbMetricName.getText(), metricLastID, maxIndex, 
 					annType, MetricType.UNKNOWN);
 
@@ -659,12 +700,13 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 	{
 		private final ContentProposal proposals[];
 
-		public MetricContentProposalProvider(BaseMetric []metrics) {
+		public MetricContentProposalProvider(BaseMetric []metrics, Map<Integer, Integer> mapMetricIndex) {
 			proposals = new ContentProposal[metrics.length];
 			int i=0;
 
 			for(BaseMetric m: metrics ) {
-				final String index = m.getShortName();
+				int newIndex = mapMetricIndex.get(m.getIndex());
+				String index = String.valueOf(newIndex);
 				proposals[i] = new ContentProposal(index, index + ": " + m.getDisplayName(), m.getDescription());			
 				i++;
 			}
