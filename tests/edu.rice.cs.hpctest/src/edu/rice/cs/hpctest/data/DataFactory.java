@@ -56,9 +56,14 @@ public class DataFactory
 		IDatabaseRepresentation dbr = new LocalDatabaseRepresentation(new File(name), null, false);
 		experiment.setDatabaseRepresentation(dbr);
 		
-		RootScope root = new RootScope(experiment, "proc 0", RootScopeType.DatacentricTree);
-		createMetric(root, experiment);
-		createTreeNode(root, root, 1, 4, 1, 10);
+		RootScope mainRoot = new RootScope(experiment, "Invisible", RootScopeType.Invisible);
+		RootScope rootCCT  = new RootScope(experiment, "root cct", RootScopeType.CallingContextTree);
+		mainRoot.addSubscope(rootCCT);
+		rootCCT.setParentScope(mainRoot);
+		
+		createMetric(rootCCT, experiment);
+		createTreeNode(rootCCT, rootCCT, 1, 4, 1, 10);
+		experiment.setRootScope(mainRoot);
 
 		return experiment;
 	}
