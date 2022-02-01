@@ -20,7 +20,8 @@ public class ExtDerivedMetricDlgTest {
 		ExtDerivedMetricDlg dlg = new ExtDerivedMetricDlg(shell, exp.get(0), exp.get(0).getRootScope(RootScopeType.CallingContextTree));
 		int r = dlg.open();
 		var m = dlg.getMetric();
-		System.out.println("return: " + r + " metric: " + m.getDisplayName() + " " + m.getFormula());
+		if (m != null)
+			System.out.println("return: " + r + " metric: " + m.getDisplayName() + " " + m.getFormula());
 	}
 
 }

@@ -81,7 +81,8 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 public class ExtDerivedMetricDlg extends TitleAreaDialog {
 
 	//------------- Constants
-	final private String FORMAT_PERCENT = "%.2f %%";
+	private static final String FORMAT_PERCENT  = "%.2f %%";
+	private static final String LABEL_SEPARATOR = " :  ";
 
 	//------------- GUI variables
 	private Combo  cbMetricName;
@@ -192,16 +193,15 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 			//--------------------------------------------
 			final Composite nameArea = new Composite(grpExpression, SWT.NONE);
 			final Label lblName = new Label(nameArea, SWT.LEFT);
-			lblName.setText("Name:");
+			lblName.setText("Name:");	// $NON-SLS
 
 			this.cbMetricName = new Combo(nameArea, SWT.NONE);
-			this.cbMetricName.setToolTipText("Name of the derived metric");
+			this.cbMetricName.setToolTipText("Name of the derived metric");	// $NON-SLS
 			objHistoryName = new UserInputHistory( ExtDerivedMetricDlg.HISTORY_METRIC_NAME );
 
-			final String labelSeparator = " :  ";
 			final List<String> nameHistory = objHistoryName.getHistory();
 			for(String name: nameHistory) {
-				String label = name.replace(HISTORY_SEPARATOR, labelSeparator);
+				String label = name.replace(HISTORY_SEPARATOR, LABEL_SEPARATOR);
 				cbMetricName.add(label);
 			}
 
@@ -212,7 +212,7 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					String select = cbMetricName.getText();
-					int idxSep = select.indexOf(labelSeparator);
+					int idxSep = select.indexOf(LABEL_SEPARATOR);
 					if (idxSep > 0) {
 						String formula = select.substring(idxSep + 4, select.length());
 						txtMetricFormula.setText(formula);
@@ -228,7 +228,7 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 			int i=0;
 			for(Integer index: indexes) {				
 				BaseMetric m = metricManager.getMetric(index);
-				metricNames[i] = mapMetricOldIndex.get(m.getIndex()) + ": " + m.getDisplayName();
+				metricNames[i] = mapMetricOldIndex.get(m.getIndex()) + LABEL_SEPARATOR + m.getDisplayName();
 				metrics[i] = m;
 				i++;
 			}
@@ -476,9 +476,7 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 
 			barOptions.setToolTipText("Optional settings");
 		}
-
-		GridLayoutFactory.fillDefaults().numColumns(1).margins(ptMargin).generateLayout(
-				composite);
+		GridLayoutFactory.fillDefaults().numColumns(1).margins(ptMargin).generateLayout(composite);
 		return composite;
 	}
 
@@ -707,7 +705,7 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 			for(BaseMetric m: metrics ) {
 				int newIndex = mapMetricIndex.get(m.getIndex());
 				String index = String.valueOf(newIndex);
-				proposals[i] = new ContentProposal(index, index + ": " + m.getDisplayName(), m.getDescription());			
+				proposals[i] = new ContentProposal(index, index + LABEL_SEPARATOR + m.getDisplayName(), m.getDescription());			
 				i++;
 			}
 		}
