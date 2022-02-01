@@ -85,6 +85,7 @@ distclean_up() {
 
 CHECK_PACKAGE=0
 CREATE_PACKAGE=1
+VERBOSE=0
 
 #------------------------------------------------------------
 # start to build
@@ -127,6 +128,10 @@ case $key in
     RELEASE="$2"
     shift # past argument
     shift # past value
+    ;;
+    -v|--verbose)
+    VERBOSE=1
+    shift # past argument
     ;;
     --default)
     DEFAULT=YES
@@ -219,6 +224,9 @@ repackage_linux(){
 	cd ..
 
 	output="hpcviewer-${RELEASE}-${prefix}.${platform}.$extension"
+	if [[ "$VERBOSE" == 1 ]]; then
+		echo "Packaging $output from $package"
+	fi
 	tar czf ../$output hpcviewer/
 	chmod 664 ../$output
 
@@ -231,6 +239,9 @@ repackage_linux(){
 repackage_mac() {
       input=$1
       output=$2
+      if [[ "$VERBOSE" == 1 ]]; then
+	      echo "Packaging $output from $input"
+      fi
       cp $input $output
       chmod 664 $output
 }
@@ -239,6 +250,10 @@ repackage_mac() {
 repackage_windows() {
       input=$1
       output=$2
+      if [[ "$VERBOSE" == 1 ]]; then
+		echo "Packaging $output from $input"
+      fi
+      
       # for windows, we need to create a special hpcviewer directory
       if [ -e hpcviewer ]; then
          echo "File or directory hpcviewer already exist. Do you want to remove it? (y/n) "
@@ -306,7 +321,11 @@ echo " Building hpcdata"
 echo "=================================="
 
 cd edu.rice.cs.hpcdata.app/scripts
-./build.sh
+if [[ "$VERBOSE" == "1" ]]; then
+	OPTION="-v"
+fi
+./build.sh ${OPTION}
+
 if [  -f hpcdata*.tgz ]; then
 	cp hpcdata*.tgz ../..
 else
