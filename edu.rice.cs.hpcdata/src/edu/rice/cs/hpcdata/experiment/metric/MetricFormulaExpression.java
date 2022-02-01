@@ -16,6 +16,14 @@ import com.graphbuilder.math.VarNode;
  *************************************************************************/
 public class MetricFormulaExpression 
 {
+	/**
+	 * private constructor to avoid being instantiated by outsiders.
+	 * Sonar will balk if the instantiation is not protected
+	 */
+	private MetricFormulaExpression() {
+		throw new IllegalStateException(getClass().getCanonicalName());
+	}
+	
 	/****
 	 * Rename the math expression given the mapping of metric index.
 	 *  

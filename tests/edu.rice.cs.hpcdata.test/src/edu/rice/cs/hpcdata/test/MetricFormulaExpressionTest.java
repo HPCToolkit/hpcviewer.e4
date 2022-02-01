@@ -24,7 +24,7 @@ public class MetricFormulaExpressionTest {
 			mapOldIndex.put(i, j);
 			mapNewIndex.put(j, i);
 		}
-		final String formula[] = new String[] {	"$100+@110/$120", 
+		final String []formula = new String[] {	"$100+@110/$120", 
 												"10+10+20", 
 												"$110" , 
 												"sum($120, $123, $133)",
@@ -39,12 +39,12 @@ public class MetricFormulaExpressionTest {
 			Expression e = ExpressionTree.parse(f);
 			assertNotNull(e);
 			
-			String fOrig = new String(e.toString());
+			String fOrig = e.toString();
 			MetricFormulaExpression.rename(e, mapOldIndex, null);
 
 			String f2 = e.toString();
 			// stupid test: make sure the converted formula has no old index
-			mapOldIndex.forEach((k, v)->{ assertFalse(f2.contains(String.valueOf(k))); });
+			mapOldIndex.forEach((k, v)-> assertFalse(f2.contains(String.valueOf(k))) );
 
 			// convert back the new index to the original one
 			Expression e2 = ExpressionTree.parse(f2);

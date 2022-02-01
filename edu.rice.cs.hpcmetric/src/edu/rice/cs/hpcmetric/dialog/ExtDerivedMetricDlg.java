@@ -11,6 +11,7 @@ import java.util.IllegalFormatException;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jface.bindings.keys.IKeyLookup;
 import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.jface.bindings.keys.ParseException;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -62,6 +63,7 @@ import edu.rice.cs.hpcdata.experiment.metric.format.IMetricValueFormat;
 import edu.rice.cs.hpcdata.experiment.metric.format.MetricValuePredefinedFormat;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+
 
 /**
  * Dialog box to enter a math formula to define a derived metric
@@ -245,8 +247,9 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 			var proposals = new MetricContentProposalProvider(metrics, mapMetricOldIndex);
 			KeyStroke keystroke = null;
 			try {
-				keystroke = KeyStroke.getInstance("ctrl+space");
+				keystroke = KeyStroke.getInstance(IKeyLookup.CTRL_NAME + "+" + IKeyLookup.SPACE_NAME);
 			} catch (ParseException e1) {
+				// keystroke is not 
 			}
 
 			new ContentProposalAdapter(txtMetricFormula, new TextContentAdapter(), proposals, keystroke, new char[] {'$', '@'}) ;
@@ -357,7 +360,7 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 				public void widgetSelected(SelectionEvent e) {
 					Point p = expression_position;
 					String sFunc = arrFuncNames[cbFunc.getSelectionIndex()];
-					StringBuffer sb = new StringBuffer( txtMetricFormula.getText() );
+					StringBuilder sb = new StringBuilder( txtMetricFormula.getText() );
 					int iLen = sFunc.length();
 					sb.insert( p.x, sFunc );
 					sb.insert( p.x + iLen, "()" );
@@ -418,6 +421,7 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 			txtFormat.setToolTipText(txtCustomFormat);
 			btnCustomFormat.addSelectionListener(new SelectionAdapter(){
 
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					txtFormat.setEnabled(true); 
 				}
@@ -425,6 +429,7 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 
 			btnPercentFormat.addSelectionListener(new SelectionAdapter(){
 
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					txtFormat.setEnabled(false);
 					txtFormat.setFocus();
@@ -490,7 +495,7 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 	private void insertMetricToFormula(String signToPrepend, int selection_index) {
 		final String sText = txtMetricFormula.getText();
 		final int iSelIndex = expression_position.x; 
-		StringBuffer sBuff = new StringBuffer(sText);
+		StringBuilder sBuff = new StringBuilder(sText);
 
 		// insert the metric variable ( i.e.: $ + metric index)
 		List<Integer> indexes = metricManager.getNonEmptyMetricIDs(root);
@@ -696,7 +701,7 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 	 ****************************************/
 	private static class MetricContentProposalProvider implements IContentProposalProvider
 	{
-		private final ContentProposal proposals[];
+		private final ContentProposal []proposals;
 
 		public MetricContentProposalProvider(BaseMetric []metrics, Map<Integer, Integer> mapMetricIndex) {
 			proposals = new ContentProposal[metrics.length];
@@ -713,19 +718,6 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 		@Override
 		public IContentProposal[] getProposals(String contents, int position) {
 			return proposals;
-			/*
-			  List<IContentProposal> result = new ArrayList<>();
-			  String userContent = contents.substring(1, contents.length());
-			  for(ContentProposal proposal: proposals) {
-				  final String label = proposal.getLabel();
-				  if (userContent.length()==0 || 
-						  (label.length() >= userContent.length() && 
-						   label.substring(0, label.length()).equalsIgnoreCase(userContent)))
-					  result.add(proposal);
-			  }
-			  System.out.println("c: " + contents + ", uc: " + userContent + ", p: " + result.size());
-			  return result.toArray(new IContentProposal[result.size()]);
-			 */
 		}
 	}
 }
