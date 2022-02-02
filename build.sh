@@ -188,7 +188,7 @@ echo "=================================="
 echo " Building the viewer"
 echo "=================================="
 if [ $CHECK_PACKAGE != "0" ]; then
-	mvn clean verify 
+	mvn clean verify -Pjacoco
 	exit
 else
 	mvn clean package
