@@ -13,29 +13,15 @@
 	<artifactId>edu.rice.cs.hpcviewer.tests.report</artifactId>
 	<name>Aggregate Test Report</name>
 	
-	<dependencies>
-		<dependency>
-			<groupId>edu.rice.cs.hpcviewer</groupId>
-			<artifactId>edu.rice.cs.hpcdata</artifactId>
-			<version>6.0.0-SNAPSHOT</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>edu.rice.cs.hpcviewer</groupId>
-			<artifactId>edu.rice.cs.hpcdata.test</artifactId>
-			<version>6.0.0-SNAPSHOT</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.jacoco</groupId>
-			<artifactId>jacoco-maven-plugin</artifactId>
-			<version>${jacoco.version}</version>
-		</dependency>
-	</dependencies>
+	
+	<packaging>pom</packaging>
 
 	<profiles>
 		<profile>
-			<id>coverage</id>
+			<id>jacoco</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
 			<build>
 				<plugins>
 					<plugin>
@@ -44,7 +30,6 @@
 						<version>${jacoco.version}</version>
 						<executions>
 							<execution>
-								<id>report-aggregate</id>
 								<phase>verify</phase>
 								<goals>
 									<goal>report-aggregate</goal>
@@ -56,8 +41,25 @@
 			</build>
 		</profile>
 	</profiles>
-
-	<properties>
-		<jacoco.version>0.8.6</jacoco.version>
-	</properties>
+	
+	<dependencies>
+		<dependency>
+			<groupId>edu.rice.cs.hpcviewer</groupId>
+			<artifactId>edu.rice.cs.hpcdata</artifactId>
+			<version>6.0.0-SNAPSHOT</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>edu.rice.cs.hpcviewer</groupId>
+			<artifactId>edu.rice.cs.hpcdata.merge</artifactId>
+			<version>6.0.0-SNAPSHOT</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>edu.rice.cs.hpcviewer</groupId>
+			<artifactId>edu.rice.cs.hpcdata.test</artifactId>
+			<version>6.0.0-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 </project>

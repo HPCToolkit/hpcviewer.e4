@@ -12,6 +12,16 @@
   <eclipse-repo.url>http://download.eclipse.org/releases/2021-06</eclipse-repo.url>
   <sonar.organization>hpctoolkit</sonar.organization>
   <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+  <jacoco.version>0.8.6</jacoco.version>
+  <aggregate.report.dir>${project.basedir}/tests/edu.rice.cs.hpcviewer.tests.report/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.dir>
+  <tycho.testArgLine.local></tycho.testArgLine.local>
+
+  <!-- 
+  The bundles are tested by seperate test bundles and test coverage results are 
+  aggregated into a report project. Tell SonarCloud to use the aggregated data.
+  -->
+  <sonar.coverage.jacoco.xmlReportPaths>${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
+
  </properties>
 
  <repositories>
@@ -27,6 +37,50 @@
    <layout>p2</layout>
   </repository>
  </repositories>
+
+
+	<profiles>
+		<profile>
+			<id>jacoco</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<properties>
+				<tycho.testArgLine.local>${tycho.testArgLine}</tycho.testArgLine.local>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.jacoco</groupId>
+						<artifactId>jacoco-maven-plugin</artifactId>
+						<version>${jacoco.version}</version>
+						<executions>
+							<execution>
+								<goals>
+									<goal>prepare-agent</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<groupId>org.eluder.coveralls</groupId>
+							<artifactId>coveralls-maven-plugin</artifactId>
+							<version>4.3.0</version>
+							<configuration>
+								<jacocoReports>
+									<jacocoReport>${project.basedir}/tests/edu.rice.cs.hpcviewer.test.report/target/site/jacoco-aggregate/jacoco.xml</jacocoReport>
+								</jacocoReports>
+							</configuration>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+			</build>
+		</profile>
+	</profiles>
+
 
  <build>
   <pluginManagement>
@@ -118,6 +172,7 @@
    </plugin>
   </plugins>
  </build>
+	 
  <organization>
  	<name>hpctoolkit</name>
  	<url>http://hpctoolkit.org</url>
