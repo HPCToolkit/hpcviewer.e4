@@ -2,8 +2,6 @@ package edu.rice.cs.hpcdata.test;
 
 import static org.junit.Assert.*;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
@@ -15,13 +13,7 @@ import edu.rice.cs.hpcdata.experiment.metric.format.IMetricValueFormat;
 
 public class MetricFormatTest {
 
-	@Before
-	public void setUp() throws Exception {
-	}
 
-	@After
-	public void tearDown() throws Exception {
-	}
 
 	@Test
 	public void testFormat() {

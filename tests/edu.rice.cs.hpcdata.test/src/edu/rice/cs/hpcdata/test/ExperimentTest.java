@@ -13,9 +13,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -33,6 +30,7 @@ public class ExperimentTest {
 	private static File []database;
 	
 	public ExperimentTest() {
+		// empty, nothing to do
 	}
 	
 	@BeforeClass
@@ -62,17 +60,6 @@ public class ExperimentTest {
 		}
 	}
 
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-	}
-
-	@Before
-	public void setUp() throws Exception {
-	}
-
-	@After
-	public void tearDown() throws Exception {
-	}
 
 	@Test
 	public void testIsMergedDatabase() {

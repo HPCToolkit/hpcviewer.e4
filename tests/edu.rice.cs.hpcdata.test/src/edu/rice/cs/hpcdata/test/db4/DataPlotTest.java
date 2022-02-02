@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -35,9 +34,6 @@ public class DataPlotTest {
 		data.open(dbPath.getAbsolutePath() + File.separatorChar + "cct.db");
 	}
 
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-	}
 
 
 	@Test

@@ -39,7 +39,7 @@ public class DatabaseManagerTest {
 		path = DatabaseManager.getDatabaseFilePath(database.getAbsolutePath());
 		assertTrue(path.isPresent());
 		
-		String filepath = path.get();
+		String filepath = path.orElse("");
 		Path p = Paths.get(filepath);
 		assertNotNull(p);
 		var f = p.toFile();
@@ -51,11 +51,11 @@ public class DatabaseManagerTest {
 	public void testGetDatabaseFilename() {
 		var filename = DatabaseManager.getDatabaseFilename("xml");
 		assertTrue(filename.isPresent());
-		assertTrue(filename.get().equals("experiment.xml"));
+		assertTrue(filename.orElse("").equals("experiment.xml"));
 		
 		filename = DatabaseManager.getDatabaseFilename("db");
 		assertTrue(filename.isPresent());
-		assertTrue(filename.get().equals("meta.db"));
+		assertTrue(filename.orElse("").equals("meta.db"));
 	}
 
 	

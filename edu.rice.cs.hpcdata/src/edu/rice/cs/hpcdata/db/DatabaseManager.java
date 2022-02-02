@@ -19,6 +19,11 @@ public class DatabaseManager
 
 	private static final String []DATABASE_FILENAME = { "experiment.xml", "meta.db" };
 	
+	private DatabaseManager() {
+		// hide the constructor
+	}
+	
+	
 	/***
 	 * Check if a file is a database file.
 	 * @param filename The file name without the absolute path

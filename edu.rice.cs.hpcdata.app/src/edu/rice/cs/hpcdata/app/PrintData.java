@@ -46,6 +46,11 @@ public class PrintData
 	private final static int NODES_SUMMARY = 0;
 	private final static int NODES_ALL     = 16;
 	
+	private PrintData() {
+		// hide the constructor
+		// use the static method openExperiment instead
+	}
+	
 	/***
 	 * The main method
 	 * 
@@ -53,7 +58,6 @@ public class PrintData
 	 * @throws IOException 
 	 */
 	public static void main(String[] args) throws IOException {
-		PrintData objApp = new PrintData();
 		PrintStream objPrint = System.out;
 		String sFilename = null;
 		boolean std_output = true;
@@ -64,55 +68,57 @@ public class PrintData
 		// processing the command line argument
 		//------------------------------------------------------------------------------------
 		if ( (args == null) || (args.length==0) || args[0].equals("-h") || args[0].equals("--help")) {
-			objApp.showHelp();
-		} else  {
-			for (int i=0; i<args.length; i++) {
-				final String option = args[i];
-				switch(option) {
-				case "-a":
-					display_mode |=  NODES_ALL;
-					break;
-				case "-b":
-					display_mode |=  DISPLAY_BOTTOMUP;
-					break;
-				case "-e":
-					display_mode |=  DISPLAY_EXCLUSIVE;
-					break;
-				case "-f":
-					display_mode |=  DISPLAY_FLAT;
-					break;
-				case "-i":
-					display_mode |=  DISPLAY_INCLUSIVE;
-					break;
-				case "-s":
-					display_mode |=  NODES_SUMMARY;
-					break;
-				case "-t":
-					display_mode |=  DISPLAY_TOPDOWN;
-					break;
-				case "-o":
-					if (i<args.length-1) {
-						String sOutput = args[i+1];
-						File f = new File(sOutput);
-						if (!f.exists())
-							f.createNewFile();
-						
-						FileOutputStream file = new FileOutputStream(sOutput);
-						objPrint = new PrintStream( file );
-						std_output = false;
-						i++;
-						file.close();
-					}
-					break;
-					
-				default:
-					if (!option.startsWith("-"))
-						sFilename = option;
-				}				
-			}
+			PrintData.showHelp();
+			return;
 		}
-		if (sFilename == null)
-			objApp.showHelp();
+		for (int i=0; i<args.length; i++) {
+			final String option = args[i];
+			switch(option) {
+			case "-a":
+				display_mode |=  NODES_ALL;
+				break;
+			case "-b":
+				display_mode |=  DISPLAY_BOTTOMUP;
+				break;
+			case "-e":
+				display_mode |=  DISPLAY_EXCLUSIVE;
+				break;
+			case "-f":
+				display_mode |=  DISPLAY_FLAT;
+				break;
+			case "-i":
+				display_mode |=  DISPLAY_INCLUSIVE;
+				break;
+			case "-s":
+				display_mode |=  NODES_SUMMARY;
+				break;
+			case "-t":
+				display_mode |=  DISPLAY_TOPDOWN;
+				break;
+			case "-o":
+				if (i<args.length-1) {
+					String sOutput = args[i+1];
+					File f = new File(sOutput);
+					if (!f.exists())
+						f.createNewFile();
+					
+					FileOutputStream file = new FileOutputStream(sOutput);
+					objPrint = new PrintStream( file );
+					std_output = false;
+					i++;
+					file.close();
+				}
+				break;
+				
+			default:
+				if (!option.startsWith("-"))
+					sFilename = option;
+			}				
+		}
+		if (sFilename == null) {
+			PrintData.showHelp();
+			return;
+		}
 		
 		if (display_mode == 0)
 			display_mode = DISPLAY_ALLVIEWS;
@@ -120,6 +126,10 @@ public class PrintData
 		//------------------------------------------------------------------------------------
 		// open the experiment if possible
 		//------------------------------------------------------------------------------------
+		openExperiment(sFilename, objPrint, display_mode, std_output);
+	}
+	
+	private static void openExperiment(String sFilename, PrintStream objPrint, int display_mode, boolean std_output) {
 		PrintStream print_msg;
 		if (std_output)
 			print_msg = System.err;
@@ -131,7 +141,8 @@ public class PrintData
 		print_msg.println("Opening database " + sFilename);
 		
 		Experiment experiment = null;
-		
+		PrintData objApp = new PrintData();
+
 		if (objFile.isDirectory()) {
 			File files[] = Util.getListOfXMLFiles(sFilename);
 			for (File file: files) 
@@ -151,11 +162,11 @@ public class PrintData
 			print_msg.println("Incorrect database: " + objFile.getAbsolutePath());
 			return;
 		}
-		objApp.print(experiment, objPrint, display_mode);
+		print(experiment, objPrint, display_mode);
 	}
 	
 	
-	public void showHelp() {
+	public static void showHelp() {
 		System.out.println("Usage: hpcdata.sh [Options] experiment_database");
 		System.out.println("Options: ");
 		System.out.println("     -o output_file");
@@ -169,7 +180,7 @@ public class PrintData
 	}
 	
 	
-	public void print(Experiment experiment, PrintStream objPrint, int display_mode) {
+	public static void print(Experiment experiment, PrintStream objPrint, int display_mode) {
 		
 		//------------------------------------------------------------------------------------
 		// create derivative roots: bottom-up and flat trees
@@ -209,7 +220,7 @@ public class PrintData
 	}
 
 	
-	private void printScopeAndChildren(PrintStream objPrint, 
+	private static void printScopeAndChildren(PrintStream objPrint, 
 											  Scope scope, 
 											  Experiment experiment,
 											  int display_mode) {
@@ -272,7 +283,7 @@ public class PrintData
 	}
 	
 	
-	private String getTrimmedName(String name, int maxChars) {
+	private static String getTrimmedName(String name, int maxChars) {
 		if (name.length()>maxChars) {
 			name = name.substring(0, maxChars-3) + " ..";
 		} else {
@@ -282,13 +293,13 @@ public class PrintData
 	}
 	
 	
-	private String getScopeName(Scope scope) {
+	private static String getScopeName(Scope scope) {
 		String name = getTrimmedName(scope.getName(), MAX_NAME_CHARS);
 		return name;
 	}
 	
 	
-	private void printRootMetrics(PrintStream objPrint, Scope scope, List<BaseMetric> metrics) {
+	private static void printRootMetrics(PrintStream objPrint, Scope scope, List<BaseMetric> metrics) {
 		String name = getScopeName(scope);
 		objPrint.println("- " + name);
 		
@@ -314,7 +325,7 @@ public class PrintData
 	 * @param metrics list of metrics
 	 * @param indent output indentation
 	 */
-	private void printMetrics(PrintStream objPrint, 
+	private static void printMetrics(PrintStream objPrint, 
 									 Scope scope, 
 									 List<BaseMetric> metrics,
 									 List<Integer> nonEmptyIndex,
