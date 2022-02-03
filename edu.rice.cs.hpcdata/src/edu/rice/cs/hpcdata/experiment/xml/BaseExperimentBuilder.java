@@ -960,6 +960,9 @@ public class BaseExperimentBuilder extends Builder
 			case ATTRIBUTE_TRACE_ID:
 				cpid = Integer.parseInt(values[i]);
 				break;
+			default:
+				// skip unsupported attributes
+				break;
 			}
 		}
 
