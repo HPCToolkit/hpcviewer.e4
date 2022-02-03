@@ -74,13 +74,14 @@ clean_up() {
 	cd edu.rice.cs.hpcdata.app/scripts/
 	./build.sh  clean
 	cd ../..
-	exit
 }
 
 distclean_up() {
 	clean_up
-	rm -f hpcviewer-*
-	exit
+	rm -f hpcviewer-* hpcdata-*
+	cd edu.rice.cs.hpcdata.app/scripts/
+	./build.sh  distclean
+	cd ../..
 }
 
 CHECK_PACKAGE=0
@@ -106,10 +107,12 @@ case $key in
     clean)
     clean_up
     shift # past argument
+    exit
     ;;
     distclean)
     distclean_up
     shift # past argument
+    exit
     ;;
 
     -c|--create)

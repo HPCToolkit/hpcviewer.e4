@@ -19,13 +19,12 @@ show_help(){
 }
 
 clean_up() {
-    rm -rf $TEMP LICENSE
-	exit 0
+    	rm -rf $TEMP LICENSE
 }
 
 distclean_up() {
-	clean_up
 	rm -f hpcdata-*
+	clean_up
 }
 
 # default release number: yyyy.mm
@@ -39,9 +38,11 @@ key="$1"
 case $key in
     clean)
 	clean_up
+	exit 0
     	;;
     distclean)
 	distclean_up
+	exit 0
     	;;
     -v|--verbose)
 	VERBOSE=1
