@@ -7,7 +7,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import edu.rice.cs.hpcdata.db.version2.FileDB2;
-import edu.rice.cs.hpcdata.experiment.ExperimentWithoutMetrics;
+import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
 import edu.rice.cs.hpcdata.trace.TraceReader;
@@ -41,15 +41,15 @@ public class TracePrinter
 		// we don't need this step, but it's best practice
 		// ------------------------------------------------------------------------
 		
-		final ExperimentWithoutMetrics experiment = new ExperimentWithoutMetrics();
+		final Experiment experiment = new Experiment();
 		try {
-			experiment.open(new File(args[0]), null);
+			experiment.open(new File(args[0]), null, false);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return;
 		}
 		
-		final TraceAttribute trAttribute = experiment.getTraceAttribute();		
+		final TraceAttribute trAttribute = (TraceAttribute) experiment.getTraceAttribute();		
 
 		// ------------------------------------------------------------------------
 		// open, read and merge (if necessary) hpctrace files
@@ -85,7 +85,7 @@ public class TracePrinter
 	}
 
 	
-	private static void printTrace(ExperimentWithoutMetrics experiment, int rank, FileDB2 fileDB) throws IOException {
+	private static void printTrace(Experiment experiment, int rank, FileDB2 fileDB) throws IOException {
 		
 		final int MAX_NAME = 16;
 		

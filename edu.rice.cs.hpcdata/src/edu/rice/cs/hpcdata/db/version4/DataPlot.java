@@ -11,7 +11,7 @@ import java.util.List;
 
 /*******************************************************************************************
  * 
- * Class to manage plot.db file
+ * Class to manage cct.db (aka plot.db in older version) file
  * <p>See {@link getPlotEntry} to get the list of plot data</p>
  *
  *******************************************************************************************/
@@ -141,7 +141,7 @@ public class DataPlot extends DataCommon
 	 * Retrieve a plot entry given a cct id
 	 * 
 	 * @param cct the CCT id
-	 * @param metric the metric id
+	 * @param metric the metric "raw" id, it is NOT the metric id. This "raw" id starts from zero.
 	 * @return array of plot data entry if exists, null otherwise.
 	 * 
 	 * @throws IOException
@@ -162,7 +162,7 @@ public class DataPlot extends DataCommon
 	 * 
 	 * @throws IOException
 	 */
-	public DataPlotEntry []getPlotEntry(ContextInfo info, int metric) throws IOException
+	private DataPlotEntry []getPlotEntry(ContextInfo info, int metric) throws IOException
 	{
 		if (file == null)
 			return null;
@@ -175,14 +175,14 @@ public class DataPlot extends DataCommon
 		
 		ByteBuffer buffer = file.getChannel().map(MapMode.READ_ONLY, metricPosition, size);
 		
-		long []indexes = binarySearch((short) metric, 0, info.numNonZeroMetrics+1, buffer);
+		long []indexes = binarySearch((short) metric, 0, info.numNonZeroMetrics, buffer);
 		//long []indexes = newtonSearch((short) metric, 0, info.numNonZeroMetrics+1, buffer);
 
 		if (indexes == null)
 			return null;
 		
 		file.seek(info.offset +  DataPlotEntry.SIZE * indexes[0]);
-		int numMetrics = (int) (indexes[1] - indexes[0]);
+		int numMetrics = 1 + (int) (indexes[1] - indexes[0]);
 		DataPlotEntry []values = new DataPlotEntry[numMetrics];
 		
 		for (int i=0; i<numMetrics; i++) {

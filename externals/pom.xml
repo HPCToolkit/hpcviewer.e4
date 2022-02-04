@@ -4,7 +4,7 @@
  <artifactId>externals</artifactId>
  <packaging>pom</packaging>
  <parent>
-   <groupId>edu.rice.hpcviewer</groupId>
+   <groupId>edu.rice.cs.hpcviewer</groupId>
    <artifactId>root</artifactId>
    <version>6.0.0-SNAPSHOT</version>
   <relativePath>..</relativePath>

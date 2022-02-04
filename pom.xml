@@ -1,16 +1,21 @@
 <project>
  <modelVersion>4.0.0</modelVersion>
- <groupId>edu.rice.hpcviewer</groupId>
  <artifactId>root</artifactId>
  <version>6.0.0-SNAPSHOT</version>
  <packaging>pom</packaging>
  <parent>
-   <groupId>edu.rice.hpcviewer</groupId>
-   <artifactId>edu.rice.hpcviewer.configuration</artifactId>
-   <version>1.0.0-SNAPSHOT</version>
+   <groupId>edu.rice.cs.hpcviewer</groupId>
+   <artifactId>edu.rice.cs.hpcviewer.configuration</artifactId>
+   <version>6.0.0-SNAPSHOT</version>
   <relativePath>./releng</relativePath>
  </parent>
-
+ <properties>
+	<!-- 
+  	The bundles are tested by seperate test bundles and test coverage results are 
+  	aggregated into a report project. Tell SonarCloud to use the aggregated data.
+  	-->
+  	<sonar.coverage.jacoco.xmlReportPaths>${basedir}/../${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
+ </properties>
  <modules>
   <module>externals</module>
   <module>edu.rice.cs.hpcdata</module>
@@ -32,5 +37,6 @@
   <module>edu.rice.cs.hpcviewer.ui</module>
   <module>edu.rice.cs.hpcviewer.feature</module>
   <module>edu.rice.cs.hpcviewer.product</module>
+  <module>tests</module>
  </modules>
 </project>

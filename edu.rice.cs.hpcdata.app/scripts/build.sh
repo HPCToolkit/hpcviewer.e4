@@ -14,16 +14,22 @@ show_help(){
 	echo "-h,--help          Show this help"
 	echo "-r,--release <n>   Set the release number to <n>"
 	echo "clean              Remove the temporary files"
+	echo "distclean          Remove the temporary and target files"
 	exit 0
 }
 
 clean_up() {
     	rm -rf $TEMP LICENSE
-	exit 0
+}
+
+distclean_up() {
+	rm -f hpcdata-*
+	clean_up
 }
 
 # default release number: yyyy.mm
 RELEASE=`date +"%Y.%m"`
+VERBOSE=0
 
 while [[ $# -gt 0 ]]
 do
@@ -32,7 +38,16 @@ key="$1"
 case $key in
     clean)
 	clean_up
+	exit 0
     	;;
+    distclean)
+	distclean_up
+	exit 0
+    	;;
+    -v|--verbose)
+	VERBOSE=1
+	shift
+	;;
     -h|--help)
 	show_help
 	shift
@@ -62,13 +77,17 @@ for f in ${FILES}; do
 	if [ -r ${JAR} ]; then 
 		BASE=`basename $JAR`
 		CMD="cp $JAR ${TEMP}/${BASE}"
-		echo $CMD
+		if [ $VERBOSE == "1" ]; then
+			echo $CMD
+		fi
 		${CMD}
 	else
 		echo "File not found: ${JAR}"
 		exit 1
 	fi
 done
-echo "tar the script and jar files..."
+if [[ "$VERBOSE" == "1" ]]; then
+	echo "tar the script and jar files..."
+fi
 cp ../../LICENSE .
 tar czf hpcdata-${RELEASE}.tgz  hpcdata.sh ${TEMP} LICENSE

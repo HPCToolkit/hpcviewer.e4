@@ -38,7 +38,7 @@ public class ViewXML
 				return;
 			}
 			experiment = ((IBasePart)obj).getExperiment();
-			File file = experiment.getXMLExperimentFile();
+			File file = experiment.getExperimentFile();
 			
 			// sanity check: the file must exist
 			
@@ -79,7 +79,7 @@ public class ViewXML
 			Object obj = part.getObject();
 			if (obj instanceof IBasePart) {
 				BaseExperiment experiment = ((IBasePart)obj).getExperiment();
-				File file = experiment.getXMLExperimentFile();
+				File file = experiment.getExperimentFile();
 				
 				// we need to make sure the XML file really exist
 				// for a merged database, we have a fake xml file. Hence, we shouldn't 

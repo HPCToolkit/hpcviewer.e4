@@ -51,6 +51,8 @@ public class BaseExperimentBuilder extends Builder
 	protected final static String ATTRIBUTE_ID 			= "i";
 	protected final static String ATTRIBUTE_TYPE 		= "t";
 	protected final static String ATTRIBUTE_ALIEN 		= "a";
+	protected final static String ATTRIBUTE_STATIC_ID   = "s";
+	protected final static String ATTRIBUTE_TRACE_ID    = "it";
 	
 	private final static String PROCEDURE_UNKNOWN = "unknown procedure";
 
@@ -934,25 +936,33 @@ public class BaseExperimentBuilder extends Builder
 		// make a new statement-range scope object
 		int firstLn = 0;
 		int cpid = -1;
+		SourceFile srcFile = this.srcFileStack.peek();
 
 		for(int i=0; i<attributes.length; i++) {
-			if(attributes[i].equals(ATTRIBUTE_LINE)) {
+			switch(attributes[i]) {
+			case ATTRIBUTE_ID:
+				cct_id = Integer.parseInt(values[i]);
+				break;
+			case ATTRIBUTE_LINE:
 				firstLn = Integer.parseInt(values[i]);
-				
-			} else if(attributes[i].equals("s"))  {
+				break;
+			case ATTRIBUTE_FILENAME:
+				Integer fileID = Integer.valueOf(values[i]);
+				srcFile = hashSourceFileTable.get(fileID);
+				if (srcFile == null)
+					throw new RuntimeException("File id does not exist: " + fileID);
+				break;
+			case ATTRIBUTE_STATIC_ID:
 				flat_id = Integer.parseInt(values[i]);
 				if (cct_id == 0)
 					cct_id = flat_id;
-				
-			} else if(attributes[i].equals(ATTRIBUTE_ID))  {
-				cct_id = Integer.parseInt(values[i]);
-
-			} else if(attributes[i].equals("it")) { //the cpid
+				break;
+			case ATTRIBUTE_TRACE_ID:
 				cpid = Integer.parseInt(values[i]);
+				break;
 			}
 		}
 
-		SourceFile srcFile = this.srcFileStack.peek();
 		Scope scope = new LineScope(rootStack.peek(), srcFile, firstLn-1, cct_id, flat_id);
 		
 		// issue #68: do not record cpid for all line statement

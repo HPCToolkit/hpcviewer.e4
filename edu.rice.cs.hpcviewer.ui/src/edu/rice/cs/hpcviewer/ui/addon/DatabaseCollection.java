@@ -3,6 +3,8 @@ package edu.rice.cs.hpcviewer.ui.addon;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -44,11 +46,11 @@ import edu.rice.cs.hpcbase.BaseConstants;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcbase.map.UserInputHistory;
 import edu.rice.cs.hpcbase.ui.IMainPart;
+import edu.rice.cs.hpcdata.db.DatabaseManager;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 import edu.rice.cs.hpcdata.trace.BaseTraceAttribute;
-import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcfilter.service.FilterMap;
 import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
 import edu.rice.cs.hpctraceviewer.data.local.LocalDBOpener;
@@ -417,7 +419,7 @@ public class DatabaseCollection
 			return null;
 		
 		for (BaseExperiment exp: list) {
-			String directory = exp.getXMLExperimentFile().getAbsolutePath();
+			String directory = exp.getExperimentFile().getAbsolutePath();
 			if (directory.equals(pathXML)) {
 
 				return exp;
@@ -436,30 +438,43 @@ public class DatabaseCollection
 
 	 * @param shell
 	 * @param pathXML the absolute path to XML file
-	 * @return {@code DatabaseExistance}
+	 * @return {@code String} database file path
 	 */
 	public String checkExistance(MWindow window, Shell shell, String fileOrDirectory) {
 		
+		// -------------------------------------------------------
 		// 1. convert the database path to experiment.xml file name
-		
-		String filename = fileOrDirectory;
-		if (filename == null) {
+		// -------------------------------------------------------
+		String filename = null;
+		if (fileOrDirectory == null) {
 			try {
 				filename = experimentManager.openFileExperiment(shell);
 			} catch (Exception e) {
 				MessageDialog.openError(shell, "File to open the database", e.getMessage());
-			}
-			if (filename == null)
 				return null;
+			}
 		} else {
-			int index = filename.lastIndexOf(Constants.DATABASE_FILENAME);
-			if (index<0) {
-				// it's a directory. Add the experiment.xml file
-				filename += File.separator + Constants.DATABASE_FILENAME; 
+			if (Files.isRegularFile(Paths.get(fileOrDirectory))) {
+				filename = fileOrDirectory;
+			} else {
+				var filepath = DatabaseManager.getDatabaseFilePath(fileOrDirectory);
+				if (filepath.isEmpty()) {
+					String files = DatabaseManager.getDatabaseFilenames(java.util.Optional.empty());
+					MessageDialog.openError(shell, 
+											"Error opening a database", 
+											"Directory has no database: " + fileOrDirectory +
+											"\nRecognized database files:\n" + files );
+					return null;				
+				}
+				filename = filepath.get();
 			}
 		}
 
+		// -------------------------------------------------------
 		// 2. check if the file exists
+		// -------------------------------------------------------
+		if (filename == null)
+			return null;
 		
 		File file = new File(filename);
 		if (!file.exists()) {
@@ -469,7 +484,9 @@ public class DatabaseCollection
 			return null;
 		}
 
+		// -------------------------------------------------------
 		// 3. check if the database already opened or not
+		// -------------------------------------------------------
 		
 		BaseExperiment exp = getExperimentObject(window, filename);
 		if (exp == null)
@@ -699,12 +716,8 @@ public class DatabaseCollection
 		// we need to ensure we only store the directory, not the xml file
 		// minor fix: only store the absolute path, not the relative one.
 		
-		String path = experiment.getDefaultDirectory().getAbsolutePath();
-		int index = path.lastIndexOf(Constants.DATABASE_FILENAME);
-
-		if (index>0) {
-			path = path.substring(0, index-1);
-		}
+		File dir = experiment.getDefaultDirectory();
+		String path = dir.getAbsolutePath();
 		UserInputHistory history = new UserInputHistory(RecentDatabase.HISTORY_DATABASE_RECENT);
 		history.addLine(path);
 	}

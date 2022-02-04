@@ -31,17 +31,18 @@ import edu.rice.cs.hpcdata.util.IUserData;
  */
 public abstract class BaseExperiment implements IExperiment 
 {
-	static public final int DB_SUMMARY_INDEX = 0;
-	static public final int DB_SUMMARY_TRACE = 1;
-	static public final int DB_SUMMARY_PLOT = 2;
+	static public final int DB_SUMMARY_INDEX  = 0;
+	static public final int DB_SUMMARY_TRACE  = 1;
+	static public final int DB_SUMMARY_PLOT   = 2;
 	static public final int DB_SUMMARY_THREAD = 3;
+	static public final int DB_SUMMARY_META   = 4;
 	
 	/*****
 	 *  Enumeration for database file type
 	 */
-	static public enum Db_File_Type {DB_SUMMARY, DB_TRACE, DB_PLOT, DB_THREADS};
+	static public enum Db_File_Type {DB_SUMMARY, DB_TRACE, DB_PLOT, DB_THREADS, DB_META};
 	
-	static final private String []DefaultDbFilename = {"profile.db", "trace.db", "cct.db", "profile.db"};
+	static final private String []DefaultDbFilename = {"profile.db", "trace.db", "cct.db", "profile.db", "meta.db"};
 	
 	/** The experiment's configuration. */
 	protected ExperimentConfiguration configuration;
@@ -105,10 +106,6 @@ public abstract class BaseExperiment implements IExperiment
 		return dataSummary;
 	}
 
-
-	public void setDataSummary(DataSummary dataSummary) {
-		this.dataSummary = dataSummary;
-	}
 
 
 	/***
@@ -181,6 +178,7 @@ public abstract class BaseExperiment implements IExperiment
 			db_filenames.put(Db_File_Type.DB_TRACE,   DefaultDbFilename[DB_SUMMARY_TRACE]);
 			db_filenames.put(Db_File_Type.DB_PLOT,    DefaultDbFilename[DB_SUMMARY_PLOT]);
 			db_filenames.put(Db_File_Type.DB_THREADS, DefaultDbFilename[DB_SUMMARY_THREAD]);
+			db_filenames.put(Db_File_Type.DB_META,    DefaultDbFilename[DB_SUMMARY_META]);
 		}
 		return db_filenames.get(file_index);
 	}
@@ -388,10 +386,10 @@ public abstract class BaseExperiment implements IExperiment
 
 	public File getDefaultDirectory()
 	{
-		return getXMLExperimentFile().getParentFile();
+		return getExperimentFile().getParentFile();
 	}
 
-	public File getXMLExperimentFile() {
+	public File getExperimentFile() {
 		return databaseRepresentation.getFile();
 	}
 

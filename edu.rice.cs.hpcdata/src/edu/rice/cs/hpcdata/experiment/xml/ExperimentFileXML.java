@@ -15,8 +15,8 @@
 package edu.rice.cs.hpcdata.experiment.xml;
 
 
+import edu.rice.cs.hpcdata.db.DatabaseManager;
 import edu.rice.cs.hpcdata.experiment.*;
-import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.Grep;
 import edu.rice.cs.hpcdata.util.IUserData;
 
@@ -123,7 +123,7 @@ public File parse(File location, BaseExperiment experiment, boolean need_metrics
 	String directory, xmlFilePath;
 	if (location.isDirectory()) {
 		directory = location.getAbsolutePath(); // it's a database directory
-		xmlFilePath = directory + File.separatorChar + Constants.DATABASE_FILENAME;
+		xmlFilePath = directory + File.separatorChar + DatabaseManager.getDatabaseFilename("xml").orElse("");
 	} else {
 		directory = location.getParent(); // it's experiment.xml file
 		xmlFilePath = location.getAbsolutePath();

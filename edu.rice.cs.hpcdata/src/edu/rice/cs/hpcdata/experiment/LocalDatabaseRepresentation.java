@@ -2,7 +2,7 @@ package edu.rice.cs.hpcdata.experiment;
 
 import java.io.File;
 
-import edu.rice.cs.hpcdata.experiment.xml.ExperimentFileXML;
+import edu.rice.cs.hpcdata.db.DatabaseManager;
 import edu.rice.cs.hpcdata.util.IUserData;
 
 
@@ -36,9 +36,9 @@ public class LocalDatabaseRepresentation implements IDatabaseRepresentation
 
 	@Override
 	public void open(BaseExperiment experiment) throws Exception
-	{		
-		ExperimentFileXML fileXML = new ExperimentFileXML();
-		fileExperiment = fileXML.parse(fileExperiment, experiment, need_metric, userData);	
+	{	
+		ExperimentFile reader = DatabaseManager.getDatabaseReader(fileExperiment);
+		fileExperiment = reader.parse(fileExperiment, experiment, need_metric, userData);	
 	}
 
 	@Override

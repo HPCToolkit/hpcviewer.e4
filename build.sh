@@ -58,11 +58,13 @@ fi
 show_help(){
 	echo "Syntax: $0 [-options] [commands]"
 	echo "Options: "
-	echo " -c              create a package and generate the release number"
-	echo " -n              (Mac only) notarize the package"
-	echo " -r <release>    specify the release number"
-  	echo "Commands:"
-	echo " clean : remove objects and temporary files"
+	echo " -c              	create a package and generate the release number"
+	echo " -n              	(Mac only) notarize the package"
+	echo " -r <release>    	specify the release number"
+	echo "Commands:"
+	echo " check            build and run the tests. No package is generated."
+	echo " clean            remove objects and temporary files"
+	echo " distclean        remove the temporary and target files"
 	exit
 }
 
@@ -72,10 +74,20 @@ clean_up() {
 	cd edu.rice.cs.hpcdata.app/scripts/
 	./build.sh  clean
 	cd ../..
-	exit
 }
 
-CHECK=1
+distclean_up() {
+	clean_up
+	rm -f hpcviewer-* hpcdata-*
+	cd edu.rice.cs.hpcdata.app/scripts/
+	./build.sh  distclean
+	cd ../..
+}
+
+CHECK_PACKAGE=0
+CREATE_PACKAGE=1
+VERBOSE=0
+
 #------------------------------------------------------------
 # start to build
 #------------------------------------------------------------
@@ -88,12 +100,23 @@ do
 key="$1"
 
 case $key in
+    check)
+    CHECK_PACKAGE=1
+    shift # past argument
+    ;;
     clean)
     clean_up
     shift # past argument
+    exit
     ;;
+    distclean)
+    distclean_up
+    shift # past argument
+    exit
+    ;;
+
     -c|--create)
-    CHECK=0
+    CREATE_PACKAGE=0
     shift # past argument
     ;;
     -h|--help)
@@ -108,6 +131,10 @@ case $key in
     RELEASE="$2"
     shift # past argument
     shift # past value
+    ;;
+    -v|--verbose)
+    VERBOSE=1
+    shift # past argument
     ;;
     --default)
     DEFAULT=YES
@@ -139,7 +166,7 @@ OS=`uname`
 cp -f "$sh_file" "$launcher" \
        || die "unable to copy files"
 
-if [ "$CHECK" == "0" ]; then
+if [ "$CREATE_PACKAGE" == "0" ]; then
     # create the release number: the current month and the commit hash
     # users may don't care with the hash, but it's important for debugging
     VERSION="Release ${RELEASE}. Commit $GITC" 
@@ -163,7 +190,15 @@ rm -rf hpcviewer-${RELEASE}*
 echo "=================================="
 echo " Building the viewer"
 echo "=================================="
-mvn clean package
+if [ $CHECK_PACKAGE != "0" ]; then
+	mvn clean verify -Pjacoco
+	if [ -d tests/edu.rice.cs.hpcviewer.test.report/target/site/jacoco-aggregate/ ]; then
+		echo "Code coverage result: tests/edu.rice.cs.hpcviewer.test.report/target/site/jacoco-aggregate/"
+	fi
+	exit
+else
+	mvn clean package
+fi
 
 # The result should be:
 #
@@ -195,6 +230,9 @@ repackage_linux(){
 	cd ..
 
 	output="hpcviewer-${RELEASE}-${prefix}.${platform}.$extension"
+	if [[ "$VERBOSE" == 1 ]]; then
+		echo "Packaging $output from $package"
+	fi
 	tar czf ../$output hpcviewer/
 	chmod 664 ../$output
 
@@ -207,6 +245,9 @@ repackage_linux(){
 repackage_mac() {
       input=$1
       output=$2
+      if [[ "$VERBOSE" == 1 ]]; then
+	      echo "Packaging $output from $input"
+      fi
       cp $input $output
       chmod 664 $output
 }
@@ -215,6 +256,10 @@ repackage_mac() {
 repackage_windows() {
       input=$1
       output=$2
+      if [[ "$VERBOSE" == 1 ]]; then
+		echo "Packaging $output from $input"
+      fi
+      
       # for windows, we need to create a special hpcviewer directory
       if [ -e hpcviewer ]; then
          echo "File or directory hpcviewer already exist. Do you want to remove it? (y/n) "
@@ -282,7 +327,11 @@ echo " Building hpcdata"
 echo "=================================="
 
 cd edu.rice.cs.hpcdata.app/scripts
-./build.sh
+if [[ "$VERBOSE" == "1" ]]; then
+	OPTION="-v"
+fi
+./build.sh ${OPTION}
+
 if [  -f hpcdata*.tgz ]; then
 	cp hpcdata*.tgz ../..
 else

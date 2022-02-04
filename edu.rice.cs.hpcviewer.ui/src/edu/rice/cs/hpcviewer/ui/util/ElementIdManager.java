@@ -14,7 +14,7 @@ public class ElementIdManager
 	
 	static public String getElementId(BaseExperiment experiment) {
 		// has to set the element Id before populating the view
-		String path = experiment.getXMLExperimentFile().getAbsolutePath();
+		String path = experiment.getExperimentFile().getAbsolutePath();
 		return path;
 	}
 	

@@ -54,7 +54,7 @@ public class ChooseDatabasePage extends WizardPage
 			@Override
 			public String getText(Object element) {
 				Experiment exp = (Experiment) element;
-				String str = exp.getXMLExperimentFile().getAbsolutePath(); 
+				String str = exp.getExperimentFile().getAbsolutePath(); 
 				return str; 				
 			}
 		});

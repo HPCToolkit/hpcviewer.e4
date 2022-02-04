@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+    xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>edu.rice.hpcviewer</groupId>
+        <artifactId>tests</artifactId>
+        <version>6.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>edu.rice.cs.hpcviewer.test</artifactId>
+    <packaging>eclipse-test-plugin</packaging>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-surefire-plugin</artifactId>
+                <version>${tycho.version}</version>
+                <configuration>
+                    <useUIHarness>true</useUIHarness>
+                    <useUIThread>false</useUIThread>
+                    <product>edu.rice.cs.hpcviewer.ui.hpcviewer</product>
+                    <application>org.eclipse.e4.ui.workbench.swt.E4Application</application>
+                    <runOrder>alphabetical</runOrder>
+                    <threadCount>1</threadCount>
+                    <environmentVariables>
+	                    <!--  
+	                    This will ensure the XServer backend is used on Linux instead of Wayland.
+	                    The ",*" is important so that GDK is trying other backends e.g. on Windows or Mac
+	                    if x11 is not available.
+	                    -->
+                    	<GDK_BACKEND>x11,*</GDK_BACKEND>
+                    </environmentVariables>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

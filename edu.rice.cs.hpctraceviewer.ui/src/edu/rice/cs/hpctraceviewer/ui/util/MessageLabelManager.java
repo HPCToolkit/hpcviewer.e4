@@ -20,6 +20,7 @@ public class MessageLabelManager
 	final private Display display;
 
 	private Color colorBackground;
+	private Color colorForeground;
 
 	public MessageLabelManager(final Display display, Label messageLabel) {
 
@@ -40,12 +41,22 @@ public class MessageLabelManager
 				
 				if (display != null && !display.isDisposed()) {
 					Shell shell = display.getActiveShell();
-					if (shell != null && !shell.isDisposed())
+					if (shell != null && !shell.isDisposed()) {
 						colorBackground = display.getActiveShell().getBackground();	
+						colorForeground = display.getActiveShell().getForeground();
+					}
 				}
 			}
 			
 		});
+	}
+	
+	public void clear() {
+		if (messageLabel == null || messageLabel.isDisposed())
+			return;
+		messageLabel.setText("");
+		messageLabel.setBackground(colorBackground);
+		messageLabel.setForeground(colorForeground);
 	}
 	
 	public void showWarning(String message) {
@@ -135,10 +146,8 @@ public class MessageLabelManager
 					// 
 					try {
 						messageLabel.setText("");
-						
-						if (colorBackground != null)
-							// if color background is null we are doom
-							messageLabel.setBackground(colorBackground);
+						// if color background is null we are doom
+						messageLabel.setBackground(colorBackground);
 					} catch (Exception e) {
 						System.err.println(e.getMessage());
 					}

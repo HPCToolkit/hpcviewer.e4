@@ -8,6 +8,7 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -195,17 +196,14 @@ public class DataSummary extends DataCommon
 	public double getMetric(int profileNum, int cctId, int metricId) 
 			throws IOException
 	{
-		List<MetricValueSparse> listValues = getMetrics(profileNum, cctId);
+		List<MetricValueSparse> listValues = getMetrics(profileNum, cctId);		
 		
-		if (listValues != null) {
-			
-			// TODO ugly temporary code
-			// We need to grab a value directly from the memory instead of searching O(n)
-			
-			for (MetricValueSparse mvs: listValues) {
-				if (mvs.getIndex() == metricId) {
-					return mvs.getValue();
-				}
+		// TODO ugly temporary code
+		// We need to grab a value directly from the memory instead of searching O(n)
+		
+		for (MetricValueSparse mvs: listValues) {
+			if (mvs.getIndex() == metricId) {
+				return mvs.getValue();
 			}
 		}
 		return 0.0d;
@@ -265,11 +263,14 @@ public class DataSummary extends DataCommon
 			profileNumberCache = profileNum;
 		}
 
+		if (info.num_nz_contexts == 0)
+			return Collections.emptyList();
+		
 		long []indexes = newtonSearch(cct_id, 0, info.num_nz_contexts, byteBufferCache);
 
-		if (indexes == null)
+		if (indexes.length<2)
 			// the cct id is not found or the cct has no metrics. Should we return null or empty list?
-			return null;
+			return Collections.emptyList();
 		
 		// -------------------------------------------
 		// initialize the metrics
@@ -709,6 +710,9 @@ public class DataSummary extends DataCommon
 		int left_index  = first;
 		int right_index = last - 1;
 		
+		if (left_index < 0 || right_index < 0)
+			return null;
+		
 		int left_cct  = getCCTIndex(buffer, left_index);
 		int right_cct = getCCTIndex(buffer, right_index);
 		
@@ -758,7 +762,7 @@ public class DataSummary extends DataCommon
 		}
 		// not found: the cct node has no metrics. 
 		// we may should return array of zeros instead of null
-		return null;
+		return new long[0];
 	}
 	
 

@@ -95,7 +95,7 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 		lnrc.setFont(font);
 		ruler.addDecorator(0,lnrc);
 
-		textViewer = new SourceViewer(container, ruler, SWT.BORDER| SWT.MULTI | SWT.V_SCROLL);
+		textViewer = new SourceViewer(container, ruler, SWT.BORDER| SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
 		textViewer.setEditable(false);
 		
 		StyledText styledText = textViewer.getTextWidget();
@@ -158,7 +158,8 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 		
 		StyledText control = textViewer.getTextWidget();
 		Menu ctxMenu = menuManager.createContextMenu(control);
-		ctxMenu.setVisible(true);
+		// Fix issue #162: hide the context menu by default
+		ctxMenu.setVisible(false);
 		control.setMenu(ctxMenu);
 	}
 	
@@ -190,7 +191,7 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 		if (input instanceof Scope) {
 			file = ((Scope)input).getSourceFile().getFilename();
 		} else if (input instanceof BaseExperiment) {
-			file = ((BaseExperiment)input).getXMLExperimentFile();
+			file = ((BaseExperiment)input).getExperimentFile();
 		}
 		return file;
 	}
@@ -297,7 +298,7 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 		if (input instanceof Scope) {
 			filename = ((Scope)input).getSourceFile().getName(); 
 		} else if (input instanceof BaseExperiment) {
-			filename = ((BaseExperiment)input).getXMLExperimentFile().getName();
+			filename = ((BaseExperiment)input).getExperimentFile().getName();
 		} else if (input instanceof GraphEditorInput) {
 			filename = ((GraphEditorInput)input).toString();
 		}
@@ -329,7 +330,7 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 		} else if (input instanceof BaseExperiment) {
 			
 			BaseExperiment experiment = (BaseExperiment) input;
-			String filename = experiment.getXMLExperimentFile().getAbsolutePath();
+			String filename = experiment.getExperimentFile().getAbsolutePath();
 			
 			displayFile(experiment, filename, 0);
 			

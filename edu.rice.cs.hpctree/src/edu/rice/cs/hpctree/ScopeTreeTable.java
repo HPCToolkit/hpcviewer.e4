@@ -27,7 +27,6 @@ import org.eclipse.nebula.widgets.nattable.layer.event.ILayerEvent;
 import org.eclipse.nebula.widgets.nattable.painter.layer.NatGridLayerPainter;
 import org.eclipse.nebula.widgets.nattable.selection.event.RowSelectionEvent;
 import org.eclipse.nebula.widgets.nattable.sort.SortHeaderLayer;
-import org.eclipse.nebula.widgets.nattable.sort.config.SingleClickSortConfiguration;
 import org.eclipse.nebula.widgets.nattable.sort.event.SortColumnEvent;
 import org.eclipse.nebula.widgets.nattable.style.theme.ThemeConfiguration;
 import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
@@ -57,6 +56,7 @@ import edu.rice.cs.hpctree.internal.ScopeTreeDataProvider;
 import edu.rice.cs.hpctree.internal.ScopeTreeLabelAccumulator;
 import edu.rice.cs.hpctree.internal.config.ContextMenuConfiguration;
 import edu.rice.cs.hpctree.internal.config.DarkScopeTableStyleConfiguration;
+import edu.rice.cs.hpctree.internal.config.ScopeSortConfiguration;
 import edu.rice.cs.hpctree.internal.config.ScopeTableStyleConfiguration;
 import edu.rice.cs.hpctree.internal.config.ScopeTreeExportConfiguration;
 import edu.rice.cs.hpctree.internal.config.TableConfiguration;
@@ -154,7 +154,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 
         natTable.addConfiguration(new ScopeTreeExportConfiguration(bodyLayerStack.getTreeRowModel()));
         natTable.addConfiguration(new TableFontConfiguration(this));
-		natTable.addConfiguration(new SingleClickSortConfiguration());
+		natTable.addConfiguration(new ScopeSortConfiguration(this));
 		natTable.addConfiguration(new ContextMenuConfiguration(this));
 
         // --------------------------------
@@ -202,14 +202,18 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         // --------------------------------
 
 		natTable.addDisposeListener(this);
+		treeData.getMetricManager().addMetricListener(this);
 		
 		// Fix issue #145: do not listen to table resizing
 		//resizeListener = new ResizeListener(this);
 		//parent.addControlListener(resizeListener);
-		treeData.getMetricManager().addMetricListener(this);
 	}
 	
 	
+	/****
+	 * Get the nattable widget of this table
+	 * @return
+	 */
 	public NatTable getTable() {
 		return this.natTable;
 	}
@@ -261,6 +265,10 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	}
 		
 	
+	/****
+	 * Retrieve the indexes of the hidden columns
+	 * @return
+	 */
 	public int[] getHiddenColumnIndexes() {
 		ColumnHideShowLayer colLayer = bodyLayerStack.getColumnHideShowLayer();
 		return colLayer.getHiddenColumnIndexesArray();
@@ -279,8 +287,21 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		return null;
 	}
 	
+	
+	/*****
+	 * Select a row in the table. It isn't guaranteed that the row will be made visible
+	 * @param row
+	 */
 	public void setSelection(int row) {
 		bodyLayerStack.getSelectionLayer().selectRow(0, row, false, false);
+	}
+	
+	
+	/*****
+	 * Clear the current selection
+	 */
+	public void clearSelection() {
+		bodyLayerStack.getSelectionLayer().clear();
 	}
 	
 	public int indexOf(Scope scope) {
