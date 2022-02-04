@@ -134,7 +134,7 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 	@Override
 	public void analysisPixelXY(ImageData detailData, int x, int y, int pixelValue) {
 
-		dataTraces.getAttributes();
+		dataTraces.getTraceDisplayAttribute();
 		
         final IBaseData traceData = dataTraces.getBaseData();
         

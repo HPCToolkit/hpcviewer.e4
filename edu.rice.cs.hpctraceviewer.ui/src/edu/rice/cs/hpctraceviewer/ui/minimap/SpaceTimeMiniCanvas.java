@@ -26,7 +26,7 @@ import org.eclipse.swt.widgets.Display;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
 import edu.rice.cs.hpctraceviewer.data.Frame;
-import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
+import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
 import edu.rice.cs.hpctraceviewer.ui.base.ITraceCanvas;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.context.BaseTraceContext;
@@ -101,7 +101,7 @@ public class SpaceTimeMiniCanvas extends SpaceTimeCanvas
 			@Override
 			public void controlResized(ControlEvent e) {
 				if (stData != null) {
-					final Frame frame = stData.getAttributes().getFrame();
+					final Frame frame = stData.getTraceDisplayAttribute().getFrame();
 					setBox(frame);
 				}
 			}
@@ -184,7 +184,7 @@ public class SpaceTimeMiniCanvas extends SpaceTimeCanvas
 	 */
 	public void updateView() 
 	{
-		final Frame frame = stData.getAttributes().getFrame();		
+		final Frame frame = stData.getTraceDisplayAttribute().getFrame();		
 		IBaseData baseData = stData.getBaseData();
 
 		int p1 = (int) Math.round( (frame.begProcess+baseData.getFirstIncluded()) * getScalePixelsPerRank() );
@@ -220,7 +220,7 @@ public class SpaceTimeMiniCanvas extends SpaceTimeCanvas
 		
 		// paint the current view
 		
-		final Frame frame = stData.getAttributes().getFrame();		
+		final Frame frame = stData.getTraceDisplayAttribute().getFrame();		
 		IBaseData baseData = stData.getBaseData();
 
 		int p1 = (int) Math.round( (baseData.getFirstIncluded()) * getScalePixelsPerRank() );
@@ -391,7 +391,7 @@ public class SpaceTimeMiniCanvas extends SpaceTimeCanvas
 			detailBottomRightProcess = detailTopLeftProcess + 1;
 		}
 		
-		final Frame originalFrame = stData.getAttributes().getFrame();
+		final Frame originalFrame = stData.getTraceDisplayAttribute().getFrame();
 		
 		// copy the frame from the original one so that we can copy the values of depth and position
 		Frame frame = new Frame( originalFrame );
@@ -562,7 +562,7 @@ public class SpaceTimeMiniCanvas extends SpaceTimeCanvas
 					adjustSelection(mouseDown, mouseUp);	
 					confirmNewRegion();
 				}else {
-					final ImageTraceAttributes attributes = stData.getAttributes();
+					final TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
 					//Set the selection box back to what it was because we didn't zoom
 					setBox(attributes.getFrame());
 				}
@@ -605,7 +605,7 @@ public class SpaceTimeMiniCanvas extends SpaceTimeCanvas
 		IUndoContext context = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_BUFFER);
 		if (operation.hasContext(context)) {
 
-			final Frame frame = stData.getAttributes().getFrame();
+			final Frame frame = stData.getTraceDisplayAttribute().getFrame();
 			setBox(frame);
 		}
 	}

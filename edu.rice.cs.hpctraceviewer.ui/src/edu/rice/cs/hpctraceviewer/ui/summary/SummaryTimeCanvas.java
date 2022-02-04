@@ -38,7 +38,7 @@ import edu.rice.cs.hpctraceviewer.data.color.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 import edu.rice.cs.hpcsetting.color.ColorManager;
 import edu.rice.cs.hpctraceviewer.data.Frame;
-import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
+import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
 import edu.rice.cs.hpctraceviewer.data.Position;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
 
@@ -333,7 +333,7 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 	 * @return
 	 */
 	private long getNumTimeDisplayed() {
-		return (dataTraces.getAttributes().getTimeInterval());
+		return (dataTraces.getTraceDisplayAttribute().getTimeInterval());
 	}
 
 
@@ -378,7 +378,7 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 
 	@Override
 	protected void changeRegion(Rectangle region) {
-		final ImageTraceAttributes attributes = dataTraces.getAttributes();
+		final TraceDisplayAttribute attributes = dataTraces.getTraceDisplayAttribute();
 
 		long timeBegin = attributes.getTimeBegin();
 		int left  = region.x;

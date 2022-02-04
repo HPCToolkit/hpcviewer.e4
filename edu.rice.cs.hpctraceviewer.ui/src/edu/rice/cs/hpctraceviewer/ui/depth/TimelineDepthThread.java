@@ -10,7 +10,7 @@ import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpcdata.util.CallPath;
 import edu.rice.cs.hpctraceviewer.data.DataLinePainting;
 import edu.rice.cs.hpctraceviewer.data.DataPreparation;
-import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
+import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
 import edu.rice.cs.hpctraceviewer.data.TimelineDataSet;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 import edu.rice.cs.hpctraceviewer.ui.internal.BaseTimelineThread;
@@ -36,7 +36,7 @@ public class TimelineDepthThread
 	 * @param width  : the width
 	 */
 	public TimelineDepthThread( SpaceTimeDataController data, 
-								ImageTraceAttributes attributes,
+								TraceDisplayAttribute attributes,
 								double scaleY, Queue<TimelineDataSet> queue, 
 								AtomicInteger timelineDone, 
 								IProgressMonitor monitor,
@@ -55,7 +55,7 @@ public class TimelineDepthThread
 			monitor.done(); // forcing to reset the title bar
 			return null;
 		}
-		final ImageTraceAttributes attributes = stData.getAttributes();
+		final TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
 		int currentDepthLineNum = currentLine.getAndIncrement();
 		if (currentDepthLineNum < Math.min(attributes.getDepthPixelVertical(), visibleDepths)) {
 			
@@ -86,7 +86,7 @@ public class TimelineDepthThread
 
 	@Override
 	protected DataPreparation getData( DataLinePainting data ) {
-		int selectedDepth = stData.getAttributes().getDepth();
+		int selectedDepth = stData.getTraceDisplayAttribute().getDepth();
 		int maxDepth = stData.getMaxDepth();
 		int minDepth = getMinDepth(selectedDepth, visibleDepths, maxDepth);
 		

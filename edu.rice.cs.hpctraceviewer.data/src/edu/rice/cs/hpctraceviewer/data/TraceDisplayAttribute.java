@@ -1,5 +1,7 @@
 package edu.rice.cs.hpctraceviewer.data;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -18,17 +20,26 @@ import java.util.stream.Stream;
  * <br/>
  * It contains methods to check the bounds and to covert from pixel to position 
  */
-public class ImageTraceAttributes 
+public class TraceDisplayAttribute 
 {
-	final private Map<Integer, TimeUnit> mapIntegerToUnit;
-	final private Map<TimeUnit, String>  mapUnitToString;
+	public static final String DISPLAY_TIME_UNIT = "prop.disp.tu";
+	
+	private final Map<Integer, TimeUnit> mapIntegerToUnit;
+	private final Map<TimeUnit, String>  mapUnitToString;
 	
 	private int numPixelsH, numPixelsV;
 	private int numPixelsDepthV;
 
 	private Frame frame;
 
-	public ImageTraceAttributes()
+	// sometimes the time unit is not the same as the displayed time unit
+	// the reason is that the time unit can be in millisecond, but the displayed one is in second
+	// This is due to issue #20 which complicates a lot of stuff. It simplifies users, but painful to code.
+	
+	private TimeUnit displayTimeUnit, timeUnit;
+	private PropertyChangeSupport support;
+
+	public TraceDisplayAttribute()
 	{
 		frame = new Frame();
 
@@ -51,6 +62,10 @@ public class ImageTraceAttributes
 		mapUnitToString.put(TimeUnit.MINUTES, "min");
 		mapUnitToString.put(TimeUnit.HOURS, "hr");
 		mapUnitToString.put(TimeUnit.HOURS, "day");
+		
+		displayTimeUnit = TimeUnit.SECONDS;
+		timeUnit = TimeUnit.SECONDS;
+		support = new PropertyChangeSupport(displayTimeUnit);
 	}
 
 	/****
@@ -68,7 +83,7 @@ public class ImageTraceAttributes
 		}
 		return -1;
 	}
-	
+
 	/****
 	 * return the time unit for a given ordinal. 
 	 * This is an inverse version of {@code getTimeUnitOrdinal}
@@ -79,6 +94,39 @@ public class ImageTraceAttributes
 		return mapIntegerToUnit.get(ordinal);
 	}
 	
+	
+	public TimeUnit getTimeUnit() {
+		return timeUnit;
+	}
+	
+	public void setTimeUnit(TimeUnit timeUnit) {
+		this.timeUnit = timeUnit;
+	}
+	
+    public void addPropertyChangeListener(PropertyChangeListener pcl) {
+        support.addPropertyChangeListener(pcl);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener pcl) {
+        support.removePropertyChangeListener(pcl);
+    }
+    
+    public void setDisplayTimeUnit(TimeUnit displayTimeUnit) {
+        this.displayTimeUnit = displayTimeUnit;
+        support.firePropertyChange(DISPLAY_TIME_UNIT, this.displayTimeUnit, displayTimeUnit);
+    }
+    
+    public TimeUnit getDisplayTimeUnit() {
+    	return displayTimeUnit;
+    }
+	
+    
+    public float getTimeUnitMultiplier() {
+    	float mult = displayTimeUnit.equals(timeUnit) ? 1.0f : 0.001f;
+    	
+    	return mult;
+    }
+    
 	/***
 	 * Returns the name of the give time unit
 	 * 
@@ -96,7 +144,7 @@ public class ImageTraceAttributes
 	 * @param data
 	 * @return
 	 */
-	public TimeUnit getDisplayTimeUnit(SpaceTimeDataController data) {
+	public TimeUnit computeDisplayTimeUnit(SpaceTimeDataController data) {
 				
 		TimeUnit unitInDatabase = data.getTimeUnit();
 		
@@ -263,7 +311,7 @@ public class ImageTraceAttributes
 			return 1;
 	}
 	
-	public boolean sameTrace(ImageTraceAttributes other)
+	public boolean sameTrace(TraceDisplayAttribute other)
 	{
 		return ( frame.begTime==other.frame.begTime && frame.endTime==other.frame.endTime &&
 				frame.begProcess==other.frame.begProcess && frame.endProcess==other.frame.endProcess &&
@@ -368,7 +416,7 @@ public class ImageTraceAttributes
 	 * @param other
 	 * @return
 	 */
-	public boolean sameDepth(ImageTraceAttributes other)
+	public boolean sameDepth(TraceDisplayAttribute other)
 	{
 		return ( frame.begTime==other.frame.begTime && frame.endTime==other.frame.endTime &&
 				 numPixelsH==other.numPixelsH && numPixelsDepthV==other.numPixelsDepthV);
@@ -378,7 +426,7 @@ public class ImageTraceAttributes
 	 * Copy from another attribute
 	 * @param other
 	 */
-	public void copy(ImageTraceAttributes other)
+	public void copy(TraceDisplayAttribute other)
 	{
 		frame.begTime = other.frame.begTime;
 		frame.endTime = other.frame.endTime;
@@ -394,9 +442,9 @@ public class ImageTraceAttributes
 	 * 
 	 * @return a new image attribute
 	 */
-	public ImageTraceAttributes duplicate() 
+	public TraceDisplayAttribute duplicate() 
 	{
-		ImageTraceAttributes att = new ImageTraceAttributes();
+		TraceDisplayAttribute att = new TraceDisplayAttribute();
 		att.copy(this);
 		return att;
 	}
