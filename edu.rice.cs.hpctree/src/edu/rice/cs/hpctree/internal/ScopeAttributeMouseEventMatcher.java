@@ -81,7 +81,7 @@ public class ScopeAttributeMouseEventMatcher extends MouseEventMatcher
                     
                     if (clickedCellPainter != null) {
                     	result = clickedCellPainter instanceof CallSiteTextPainter || 
-                    			 clickedCellPainter instanceof CallSiteImagePainter;
+                    			 clickedCellPainter instanceof CallSiteArrowPainter;
                     }
                 } finally {
                     gc.dispose();

@@ -68,7 +68,7 @@ public class ScopeTooltip extends NatTableContentTooltip
         	if (clickedCell != null ) {
 
             	if (clickedCell instanceof CallSiteTextPainter || 
-            		clickedCell instanceof CallSiteImagePainter) {
+            		clickedCell instanceof CallSiteArrowPainter) {
                 		Scope scope = bodyDataProvider.getRowObject(rowIndex);
 
                 		if (scope instanceof CallSiteScope) {

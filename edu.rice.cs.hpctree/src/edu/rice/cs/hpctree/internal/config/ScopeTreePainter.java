@@ -13,6 +13,7 @@ import org.eclipse.nebula.widgets.nattable.ui.util.CellEdgeEnum;
 import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
 import org.eclipse.swt.internal.DPIUtil;
 
+import edu.rice.cs.hpctree.internal.CallSiteArrowPainter;
 import edu.rice.cs.hpctree.internal.CallSiteImagePainter;
 import edu.rice.cs.hpctree.internal.CallSiteTextPainter;
 import edu.rice.cs.hpctree.internal.ScopeTreeDataProvider;
@@ -50,9 +51,9 @@ public class ScopeTreePainter
     	
         // call site image and text
         // Partial fix issue #134: put the text on the left of the icon
-        CallSiteImagePainter callsitePainter = new CallSiteImagePainter();
+        CallSiteArrowPainter arrowImage  = new CallSiteArrowPainter();
         CallSiteTextPainter  textPainter = new CallSiteTextPainter(dataProvider);
-        CellPainterDecorator decoratorCS = new CellPainterDecorator(textPainter, CellEdgeEnum.RIGHT, callsitePainter);
+        CellPainterDecorator decoratorCS = new CellPainterDecorator(textPainter, CellEdgeEnum.RIGHT, arrowImage);
         
         // combining tree and call site info
         CellPainterDecorator decorator = new CellPainterDecorator(treeImagePainter, CellEdgeEnum.RIGHT, decoratorCS);
@@ -85,9 +86,9 @@ public class ScopeTreePainter
     	
         // call site image and text
         // Partial fix issue #134: put the text on the left of the icon
-        CallSiteImagePainter callsitePainter = new CallSiteImagePainter();
+        CallSiteArrowPainter arrowImage  = new CallSiteArrowPainter();
         CallSiteTextPainter  textPainter = new CallSiteTextPainter(dataProvider);
-        CellPainterDecorator decoratorCS = new CellPainterDecorator(textPainter, CellEdgeEnum.RIGHT, callsitePainter);
+        CellPainterDecorator decoratorCS = new CellPainterDecorator(textPainter, CellEdgeEnum.RIGHT, arrowImage);
         
         // combining tree and call site info
         CellPainterDecorator decorator = new CellPainterDecorator(treeSelectionImagePainter, CellEdgeEnum.RIGHT, decoratorCS);
