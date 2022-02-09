@@ -49,9 +49,10 @@ public class ScopeTreePainter
                         GUIHelper.getImage(IMG_LEAF));
     	
         // call site image and text
+        // Partial fix issue #134: put the text on the left of the icon
         CallSiteImagePainter callsitePainter = new CallSiteImagePainter();
         CallSiteTextPainter  textPainter = new CallSiteTextPainter(dataProvider);
-        CellPainterDecorator decoratorCS = new CellPainterDecorator(callsitePainter, CellEdgeEnum.RIGHT, textPainter);
+        CellPainterDecorator decoratorCS = new CellPainterDecorator(textPainter, CellEdgeEnum.RIGHT, callsitePainter);
         
         // combining tree and call site info
         CellPainterDecorator decorator = new CellPainterDecorator(treeImagePainter, CellEdgeEnum.RIGHT, decoratorCS);
@@ -83,9 +84,10 @@ public class ScopeTreePainter
                         GUIHelper.getImage(IMG_LEAF));
     	
         // call site image and text
+        // Partial fix issue #134: put the text on the left of the icon
         CallSiteImagePainter callsitePainter = new CallSiteImagePainter();
         CallSiteTextPainter  textPainter = new CallSiteTextPainter(dataProvider);
-        CellPainterDecorator decoratorCS = new CellPainterDecorator(callsitePainter, CellEdgeEnum.RIGHT, textPainter);
+        CellPainterDecorator decoratorCS = new CellPainterDecorator(textPainter, CellEdgeEnum.RIGHT, callsitePainter);
         
         // combining tree and call site info
         CellPainterDecorator decorator = new CellPainterDecorator(treeSelectionImagePainter, CellEdgeEnum.RIGHT, decoratorCS);
