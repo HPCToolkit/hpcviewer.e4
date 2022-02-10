@@ -1,12 +1,11 @@
 package edu.rice.cs.hpcsetting.preferences;
 
-import java.io.IOException;
-
-
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
+
+import edu.rice.cs.hpcsetting.fonts.FontManager;
 
 
 
@@ -24,15 +23,25 @@ import org.eclipse.jface.resource.JFaceResources;
 public class ViewerPreferenceManager extends AbstractPreferenceManager
 {
 	public static final ViewerPreferenceManager INSTANCE = new ViewerPreferenceManager();
-	public static final String DEFAULT_CALLTO[]   = new String[] {"\u21DB", "\u21D2", "\u21D8", "\u27A5", "\u27F1", "\u2937", "\u2B0A", "\u2B0E", "\u2B46", "\u2B78", "\u2BA1", "\u2BA9", "\u2BB1"};
-	public static final String DEFAULT_CALLFROM[] = new String[] {"\u21DA", "\u21D0", "\u21D6", "\u2BAA", "\u27F0", "\u293A", "\u2B09", "\u2B11", "\u2B45", "\u2B76", "\u2BA2", "\u2BAA", "\u2BB2"};
 	
+	// The symbols in DEFAULT_CALLTO and DEFAULT_CALLFROM have to match
+	// and they should have the same number of items
+	public static final String DEFAULT_CALLTO[]   = new String[] {"\u21C9", "\u21D2", "\u21D8", "\u21DB", "\u21E5", "\u21F2", "\u27A5", "\u2937", "\u2B0A", "\u2B0E", "\u2B46", "\u2B78", "\u2BA1", "\u2BA9", "\u2BAF", "\u2BB1"};
+	public static final String DEFAULT_CALLFROM[] = new String[] {"\u21C7", "\u21D0", "\u21D6", "\u21DA", "\u21E4", "\u21F1", "\u27A6", "\u293A", "\u2B09", "\u2B11", "\u2B45", "\u2B76", "\u2BA2", "\u2BAA", "\u2BAC", "\u2BB2"};
+
+ 	public static final int DEFAULT_CALLSITE_INDEX = 8;
+
  	private static final String EMPTY = "";
-		
 	
 	/****
 	 * Initialize the default preferences.
-	 * @throws IOException 
+	 * <ul>
+	 *  <li>By default, all debug options are false (disabled).
+	 *  <li>The default fonts depend on the JFaceResources 
+	 * 		 as we don't bother to look all the available fonts.
+	 *  <li>The default call site symbols are hard coded. Anyone wants
+	 *  		to add symbols have to modify this code.
+	 * </ul>
 	 */
 	@Override
 	public void setDefaults() {
@@ -48,9 +57,11 @@ public class ViewerPreferenceManager extends AbstractPreferenceManager
 				PreferenceConstants.ID_FONT_METRIC, JFaceResources.getTextFont().getFontData());
 		PreferenceConverter.setDefault(getPreferenceStore(), 
 				PreferenceConstants.ID_FONT_TEXT, JFaceResources.getTextFont().getFontData());
+		PreferenceConverter.setDefault(getPreferenceStore(), 
+				PreferenceConstants.ID_FONT_CALLSITE, FontManager.getCallsiteDefaultFont().getFontData());
 		
-		store.setDefault(PreferenceConstants.ID_CHAR_CALLTO, "\u21DB");
-		store.setDefault(PreferenceConstants.ID_CHAR_CALLFROM, "\u21DA");
+		store.setDefault(PreferenceConstants.ID_CHAR_CALLTO, DEFAULT_CALLTO[DEFAULT_CALLSITE_INDEX]);
+		store.setDefault(PreferenceConstants.ID_CHAR_CALLFROM, DEFAULT_CALLFROM[DEFAULT_CALLSITE_INDEX]);
 	}
 	
 	
@@ -109,7 +120,7 @@ public class ViewerPreferenceManager extends AbstractPreferenceManager
 		return debug && debugSub;
 	}
 	
-	public String getCallToCharacter() {
+	public String getCallToGlyph() {
 		var store = getPreferenceStore();
 		if (store == null)
 			return EMPTY;
@@ -117,7 +128,7 @@ public class ViewerPreferenceManager extends AbstractPreferenceManager
 	}
 	
 	
-	public String getCallFromCharacter() {
+	public String getCallFromGlyph() {
 		var store = getPreferenceStore();
 		if (store == null)
 			return EMPTY;

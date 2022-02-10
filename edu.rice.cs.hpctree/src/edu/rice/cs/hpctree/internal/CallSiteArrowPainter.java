@@ -43,8 +43,8 @@ public class CallSiteArrowPainter extends TextPainter
     					 labels.hasLabel(ScopeTreeLabelAccumulator.LABEL_CALLSITE_DISABLED);
 
     	if (callTo) 
-    		return ViewerPreferenceManager.INSTANCE.getCallToCharacter();
-		return ViewerPreferenceManager.INSTANCE.getCallFromCharacter();
+    		return ViewerPreferenceManager.INSTANCE.getCallToGlyph();
+		return ViewerPreferenceManager.INSTANCE.getCallFromGlyph();
 	}
 	
 	@Override

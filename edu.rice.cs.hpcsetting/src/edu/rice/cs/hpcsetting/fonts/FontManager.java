@@ -79,8 +79,8 @@ public class FontManager
 		int height = fdata[0].getHeight();
 		
 		// we want the call glyph to be more visible
-		fd.setHeight(2+height);
-		return fd.createFont(Display.getDefault());
+		var defaultFont = fd.setHeight(2+height);
+		return defaultFont.createFont(Display.getDefault());
 	}
 	
 	/***

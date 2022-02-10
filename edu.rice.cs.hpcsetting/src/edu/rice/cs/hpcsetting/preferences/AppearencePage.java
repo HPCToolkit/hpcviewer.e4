@@ -109,7 +109,7 @@ public class AppearencePage extends AbstractPage
         
         var contents = new String[callToChars.length];
         int select = 0;
-        final String currValue = ViewerPreferenceManager.INSTANCE.getCallToCharacter();
+        final String currValue = ViewerPreferenceManager.INSTANCE.getCallToGlyph();
         
         for(int i=0; i<callToChars.length; i++) {
         	contents[i] = callToChars[i] + " , " + callFromChars[i] + 
@@ -178,7 +178,7 @@ public class AppearencePage extends AbstractPage
 		fontCallsiteEditor.setFontLabel(FontManager.getCallsiteDefaultFont().getFontData()[0]);
 		fontCallsiteEditor.store();
 		
-		glyphComboEditor.select(0);
+		glyphComboEditor.select(ViewerPreferenceManager.DEFAULT_CALLSITE_INDEX);
 		glyphComboEditor.setFont(FontManager.getCallsiteDefaultFont());
 	}
 	
