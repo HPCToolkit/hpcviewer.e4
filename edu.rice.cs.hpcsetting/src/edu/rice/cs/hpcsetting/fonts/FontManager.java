@@ -10,6 +10,7 @@ import org.eclipse.jface.resource.FontRegistry;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.widgets.Display;
 
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
@@ -50,13 +51,7 @@ public class FontManager
 	 * @return
 	 */
 	static public Font getFontGeneric() {
-		Font font;
-		try {
-			font = INSTANCE.getPreferenceFont(PreferenceConstants.ID_FONT_GENERIC);
-		} catch (Exception e) {
-			font = JFaceResources.getDefaultFont();
-		}
-		return font;
+		return getFont(PreferenceConstants.ID_FONT_GENERIC, JFaceResources.getDefaultFont());
 	}
 	
 	
@@ -65,13 +60,7 @@ public class FontManager
 	 * @return
 	 */
 	static public Font getMetricFont() {
-		Font font;
-		try {
-			font = INSTANCE.getPreferenceFont(PreferenceConstants.ID_FONT_METRIC);
-		} catch (Exception e) {
-			font = JFaceResources.getTextFont();
-		}
-		return font;
+		return getFont(PreferenceConstants.ID_FONT_METRIC, JFaceResources.getTextFont());
 	}	
 	
 	
@@ -80,28 +69,53 @@ public class FontManager
 	 * @return
 	 */
 	static public Font getTextEditorFont() {
-		Font font;
-		try {
-			font = INSTANCE.getPreferenceFont(PreferenceConstants.ID_FONT_TEXT);
-		} catch (Exception e) {
-			font = JFaceResources.getTextFont();
+		return getFont(PreferenceConstants.ID_FONT_TEXT, JFaceResources.getTextFont());
+	}
+	
+	
+	static public Font getCallsiteDefaultFont() {
+		FontDescriptor fd = FontDescriptor.createFrom(JFaceResources.getDefaultFont());
+		FontData fdata[] = fd.getFontData();
+		int height = fdata[0].getHeight();
+		
+		// we want the call glyph to be more visible
+		fd.setHeight(2+height);
+		return fd.createFont(Display.getDefault());
+	}
+	
+	/***
+	 * get the fixed font for metrics
+	 * @return
+	 */
+	static public Font getCallsiteFont() {
+		Font font = getFont(PreferenceConstants.ID_FONT_CALLSITE, null);
+		if (font == null) {
+			return getCallsiteDefaultFont();
 		}
 		return font;
-	}	
+	}
+
 	
+	static private Font getFont(String id, Font fontDefault) {
+		Font font = null;
+		try {
+			font = INSTANCE.getPreferenceFont(id);
+		} catch (Exception e) {
+			font = fontDefault;
+		}
+		return font;
+	}
 
 	/****
 	 * Retrieve font data of a given font preference.
 	 * @see PreferenceConstants.ID_FONT_GENERIC
-	 * @see PreferenceConstants.ID_FONT_METRICT
+	 * @see PreferenceConstants.ID_FONT_METRIC
 	 *  
 	 * @param fontPreferenceID The preference font id. 
 	 * @return
 	 */
 	static public FontData[] getFontDataPreference(String fontPreferenceID) {
-
 		IPreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
-		
 		FontData []fd = PreferenceConverter.getFontDataArray(pref, fontPreferenceID);
 		return fd;
 	}

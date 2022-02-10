@@ -23,8 +23,11 @@ import org.eclipse.jface.resource.JFaceResources;
  **************************************/
 public class ViewerPreferenceManager extends AbstractPreferenceManager
 {
-	public final static ViewerPreferenceManager INSTANCE = new ViewerPreferenceManager();
+	public static final ViewerPreferenceManager INSTANCE = new ViewerPreferenceManager();
+	public static final String DEFAULT_CALLTO[]   = new String[] {"\u21DB", "\u21D2", "\u21D8", "\u27A5", "\u27F1", "\u2937", "\u2B0A", "\u2B0E", "\u2B46", "\u2B78", "\u2BA1", "\u2BA9", "\u2BB1"};
+	public static final String DEFAULT_CALLFROM[] = new String[] {"\u21DA", "\u21D0", "\u21D6", "\u2BAA", "\u27F0", "\u293A", "\u2B09", "\u2B11", "\u2B45", "\u2B76", "\u2BA2", "\u2BAA", "\u2BB2"};
 	
+ 	private static final String EMPTY = "";
 		
 	
 	/****
@@ -46,6 +49,8 @@ public class ViewerPreferenceManager extends AbstractPreferenceManager
 		PreferenceConverter.setDefault(getPreferenceStore(), 
 				PreferenceConstants.ID_FONT_TEXT, JFaceResources.getTextFont().getFontData());
 		
+		store.setDefault(PreferenceConstants.ID_CHAR_CALLTO, "\u21DB");
+		store.setDefault(PreferenceConstants.ID_CHAR_CALLFROM, "\u21DA");
 	}
 	
 	
@@ -102,5 +107,20 @@ public class ViewerPreferenceManager extends AbstractPreferenceManager
 		boolean debugSub = getPreferenceStore().getBoolean(id);
 		
 		return debug && debugSub;
+	}
+	
+	public String getCallToCharacter() {
+		var store = getPreferenceStore();
+		if (store == null)
+			return EMPTY;
+		return store.getString(PreferenceConstants.ID_CHAR_CALLTO);
+	}
+	
+	
+	public String getCallFromCharacter() {
+		var store = getPreferenceStore();
+		if (store == null)
+			return EMPTY;
+		return store.getString(PreferenceConstants.ID_CHAR_CALLFROM);
 	}
 }

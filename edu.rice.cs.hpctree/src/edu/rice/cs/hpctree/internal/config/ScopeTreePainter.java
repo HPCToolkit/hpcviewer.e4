@@ -14,7 +14,6 @@ import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
 import org.eclipse.swt.internal.DPIUtil;
 
 import edu.rice.cs.hpctree.internal.CallSiteArrowPainter;
-import edu.rice.cs.hpctree.internal.CallSiteImagePainter;
 import edu.rice.cs.hpctree.internal.CallSiteTextPainter;
 import edu.rice.cs.hpctree.internal.ScopeTreeDataProvider;
 

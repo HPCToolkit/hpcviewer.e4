@@ -9,17 +9,23 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.RGB;
 
+import edu.rice.cs.hpcsetting.fonts.FontManager;
+import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
+
+
+/*******************************
+ * 
+ * Special painter to draw an arrow based on a Unicode character
+ *
+ *******************************/
 public class CallSiteArrowPainter extends TextPainter 
 {
-	public static final String CALL_TO   = " \u21DB";
-	public static final String CALL_FROM = " \u21DA";
-
 	private static final Color bgColorActive = new Color(new RGB(255, 69, 0));
 	private static final Color bgColorNonActive = new Color(new RGB(255, 201, 160));
 	
 	private boolean enabled;
-
 	
+
 	@Override
 	protected String convertDataType(ILayerCell cell, IConfigRegistry configRegistry) {
     	LabelStack labels = cell.getConfigLabels();
@@ -37,8 +43,8 @@ public class CallSiteArrowPainter extends TextPainter
     					 labels.hasLabel(ScopeTreeLabelAccumulator.LABEL_CALLSITE_DISABLED);
 
     	if (callTo) 
-    		return CALL_TO;
-		return CALL_FROM;
+    		return ViewerPreferenceManager.INSTANCE.getCallToCharacter();
+		return ViewerPreferenceManager.INSTANCE.getCallFromCharacter();
 	}
 	
 	@Override
@@ -48,6 +54,8 @@ public class CallSiteArrowPainter extends TextPainter
     	if (!enabled) {
     		color = bgColorNonActive;
     	}
+    	
+    	gc.setFont(FontManager.getCallsiteFont());
     	gc.setForeground(color);
     }
 }
