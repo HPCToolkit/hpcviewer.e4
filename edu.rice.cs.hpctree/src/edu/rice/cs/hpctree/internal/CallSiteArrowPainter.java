@@ -21,7 +21,7 @@ import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 public class CallSiteArrowPainter extends TextPainter 
 {
 	private static final Color bgColorActive = new Color(new RGB(255, 69, 0));
-	private static final Color bgColorNonActive = new Color(new RGB(255, 201, 160));
+	//private static final Color bgColorNonActive = new Color(new RGB(255, 201, 160));
 	
 	private boolean enabled;
 	
@@ -50,10 +50,12 @@ public class CallSiteArrowPainter extends TextPainter
 	@Override
     public void setupGCFromConfig(GC gc, IStyle cellStyle) {
     	super.setupGCFromConfig(gc, cellStyle);
+    	// Issue on MacOS: The GC can't be made special for a certain cell
+    	// if the color of the first cell is green, and the others are green
     	Color color = bgColorActive;
-    	if (!enabled) {
-    		color = bgColorNonActive;
-    	}
+    	//if (!enabled) {
+    	//	color = bgColorNonActive;
+    	//}
     	
     	gc.setFont(FontManager.getCallsiteFont());
     	gc.setForeground(color);
