@@ -32,82 +32,6 @@ public class ScopeTreePainter
 	private static final String []IMG_INV_COLLAPSED = {"right_inv_120_120", "right_inv_144_144"};
 	private static final String []IMG_INV_EXPANDED  = {"right_down_inv_120_120", "right_down_inv_144_144" };
 	
-	public static int getZoomFactor() {
-		@SuppressWarnings("restriction")
-		int zoom = DPIUtil.getDeviceZoom();
-		return (int)zoom / 100;
-	}
-	
-    public static ICellPainter getTreeStructurePainter(ScopeTreeDataProvider dataProvider) {
-    	int zoom = (getZoomFactor() <= 1) ? 0 : 1;
-    	
-        TreeImagePainter treeImagePainter =
-                new TreeImagePainter(
-                        false,
-                        GUIHelper.getImage(IMG_COLLAPSED[zoom]), //$NON-NLS-1$
-                        GUIHelper.getImage(IMG_EXPANDED[zoom]),  //$NON-NLS-1$
-                        GUIHelper.getImage(IMG_LEAF));
-    	
-        // call site image and text
-        // Partial fix issue #134: put the text on the left of the icon
-        CallSiteArrowPainter arrowImage  = new CallSiteArrowPainter();
-        CallSiteTextPainter  textPainter = new CallSiteTextPainter(dataProvider);
-        CellPainterDecorator decoratorCS = new CellPainterDecorator(textPainter, CellEdgeEnum.RIGHT, arrowImage);
-        
-        // combining tree and call site info
-        CellPainterDecorator decorator = new CellPainterDecorator(treeImagePainter, CellEdgeEnum.RIGHT, decoratorCS);
-        
-        BackgroundPainter treeStructurePainter =
-                new BackgroundPainter(
-                        new PaddingDecorator(
-                                new IndentedTreeImagePainter(
-                                        10,
-                                        null,
-                                        CellEdgeEnum.LEFT,
-                                        decorator,
-                                        false,
-                                        2,
-                                        true),
-                                0, 5, 0, 5, false));
-        return treeStructurePainter;
-    }
-
-    
-    public static ICellPainter getInvTreeStructurePainter(ScopeTreeDataProvider dataProvider) {
-    	int zoom = (getZoomFactor() <= 1) ? 0 : 1;
-
-        TreeImagePainter treeSelectionImagePainter =
-                new TreeImagePainter(
-                        false,
-                        GUIHelper.getImage(IMG_INV_COLLAPSED[zoom]), //$NON-NLS-1$
-                        GUIHelper.getImage(IMG_INV_EXPANDED[zoom]), //$NON-NLS-1$
-                        GUIHelper.getImage(IMG_LEAF));
-    	
-        // call site image and text
-        // Partial fix issue #134: put the text on the left of the icon
-        CallSiteArrowPainter arrowImage  = new CallSiteArrowPainter();
-        CallSiteTextPainter  textPainter = new CallSiteTextPainter(dataProvider);
-        CellPainterDecorator decoratorCS = new CellPainterDecorator(textPainter, CellEdgeEnum.RIGHT, arrowImage);
-        
-        // combining tree and call site info
-        CellPainterDecorator decorator = new CellPainterDecorator(treeSelectionImagePainter, CellEdgeEnum.RIGHT, decoratorCS);
-
-        BackgroundPainter treeStructureSelectionPainter =
-                new BackgroundPainter(
-                        new PaddingDecorator(
-                                new IndentedTreeImagePainter(
-                                        10,
-                                        null,
-                                        CellEdgeEnum.LEFT,
-                                        decorator,
-                                        false,
-                                        2,
-                                        true),
-                                0, 5, 0, 5, false));
-        
-        return treeStructureSelectionPainter;
-    }
-    
     
     public static ICellPainter getSelectedSortHeaderCellPainter() {
     	BackgroundPainter selectedSortHeaderCellPainter =
@@ -123,5 +47,87 @@ public class ScopeTreePainter
                                 0, 2, 0, 5, false));
     	
     	return selectedSortHeaderCellPainter;
+    }
+
+	
+    /****
+     * Retrieve the tree cell painter for a given data provider
+     * @param dataProvider
+     * @return
+     */
+    public static ICellPainter getTreeStructurePainter(ScopeTreeDataProvider dataProvider) {
+    	int zoom = (getZoomFactor() <= 1) ? 0 : 1;
+    	
+        TreeImagePainter treeImagePainter =
+                new TreeImagePainter(
+                        false,
+                        GUIHelper.getImage(IMG_COLLAPSED[zoom]), //$NON-NLS-1$
+                        GUIHelper.getImage(IMG_EXPANDED[zoom]),  //$NON-NLS-1$
+                        GUIHelper.getImage(IMG_LEAF));
+        
+        return getCallSitePainter(dataProvider, treeImagePainter);
+    }
+
+    
+    /****
+     * Retrieve the selected (inverted) tree painter for a given tree data provider
+     * @param dataProvider
+     * @return
+     */
+    public static ICellPainter getInvTreeStructurePainter(ScopeTreeDataProvider dataProvider) {
+    	int zoom = (getZoomFactor() <= 1) ? 0 : 1;
+
+        TreeImagePainter treeSelectionImagePainter =
+                new TreeImagePainter(
+                        false,
+                        GUIHelper.getImage(IMG_INV_COLLAPSED[zoom]), //$NON-NLS-1$
+                        GUIHelper.getImage(IMG_INV_EXPANDED[zoom]), //$NON-NLS-1$
+                        GUIHelper.getImage(IMG_LEAF));
+        
+        return getCallSitePainter(dataProvider, treeSelectionImagePainter);
+    }
+    
+    
+    /****
+     * Retrieve the zoom factor (1, 2, ...)
+     * @return
+     */
+	private static int getZoomFactor() {
+		@SuppressWarnings("restriction")
+		int zoom = DPIUtil.getDeviceZoom();
+		return (int)zoom / 100;
+	}
+	
+
+	/****
+	 * Retrieve the cell painter of the table row
+	 * @param dataProvider
+	 * @param treeImagePainter
+	 * @return
+	 */
+    private static ICellPainter getCallSitePainter(ScopeTreeDataProvider dataProvider, TreeImagePainter treeImagePainter) {    	
+        // call site image and text
+        // Partial fix issue #134: put the text on the left of the icon
+        CallSiteArrowPainter arrowImage  = new CallSiteArrowPainter();
+        CallSiteTextPainter  textPainter = new CallSiteTextPainter(dataProvider);
+        CellPainterDecorator decoratorCS = new CellPainterDecorator(textPainter, CellEdgeEnum.RIGHT, arrowImage);
+        
+        // combining tree and call site info
+        CellPainterDecorator decorator = new CellPainterDecorator(treeImagePainter, CellEdgeEnum.RIGHT, decoratorCS);
+
+        BackgroundPainter treePainter =
+                new BackgroundPainter(
+                        new PaddingDecorator(
+                                new IndentedTreeImagePainter(
+                                        10,
+                                        null,
+                                        CellEdgeEnum.LEFT,
+                                        decorator,
+                                        false,
+                                        2,
+                                        true),
+                                0, 5, 0, 5, false));
+        
+        return treePainter;
     }
 }

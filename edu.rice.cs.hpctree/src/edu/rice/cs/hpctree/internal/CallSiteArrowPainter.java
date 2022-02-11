@@ -9,6 +9,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.RGB;
 
+import edu.rice.cs.hpcdata.util.OSValidator;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 
@@ -21,7 +22,7 @@ import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 public class CallSiteArrowPainter extends TextPainter 
 {
 	private static final Color bgColorActive = new Color(new RGB(255, 69, 0));
-	//private static final Color bgColorNonActive = new Color(new RGB(255, 201, 160));
+	private static final Color bgColorNonActive = new Color(new RGB(255, 201, 160));
 	
 	private boolean enabled;
 	
@@ -53,9 +54,9 @@ public class CallSiteArrowPainter extends TextPainter
     	// Issue on MacOS: The GC can't be made special for a certain cell
     	// if the color of the first cell is green, and the others are green
     	Color color = bgColorActive;
-    	//if (!enabled) {
-    	//	color = bgColorNonActive;
-    	//}
+    	if (!enabled && !OSValidator.isMac()) {
+    		color = bgColorNonActive;
+    	}
     	
     	gc.setFont(FontManager.getCallsiteGlyphFont());
     	gc.setForeground(color);
