@@ -79,7 +79,7 @@ public class AppearencePage extends AbstractPage
         // callsite area
         //
         Group groupCallsite = createGroupControl(parent, "Call-site glyph settings ", false);
-        fontCallsiteEditor = createFontEditor(groupCallsite, PreferenceConstants.ID_FONT_CALLSITE, "Glyph font:",   FontManager.getCallsiteFont());
+        fontCallsiteEditor = createFontEditor(groupCallsite, PreferenceConstants.ID_FONT_CALLSITE, "Glyph font:",   FontManager.getCallsiteGlyphFont());
 
         Composite glyphArea = new Composite(groupCallsite, SWT.NONE);
         GridDataFactory.fillDefaults().grab(true, true).span(3, 1).applyTo(glyphArea);
@@ -120,7 +120,7 @@ public class AppearencePage extends AbstractPage
         }
         var combo = createComboControl(parent, contents, SWT.READ_ONLY);
         combo.select(select);
-        combo.setFont(FontManager.getCallsiteFont());
+        combo.setFont(FontManager.getCallsiteGlyphFont());
         return combo;
 	}
 
@@ -175,11 +175,11 @@ public class AppearencePage extends AbstractPage
 		fontMetricEditor.store();
 		fontSourceEditor.store();
 		
-		fontCallsiteEditor.setFontLabel(FontManager.getCallsiteDefaultFont().getFontData()[0]);
+		fontCallsiteEditor.setFontLabel(FontManager.getCallsiteGlyphDefaultFont().getFontData()[0]);
 		fontCallsiteEditor.store();
 		
 		glyphComboEditor.select(ViewerPreferenceManager.DEFAULT_CALLSITE_INDEX);
-		glyphComboEditor.setFont(FontManager.getCallsiteDefaultFont());
+		glyphComboEditor.setFont(FontManager.getCallsiteGlyphDefaultFont());
 	}
 	
 	

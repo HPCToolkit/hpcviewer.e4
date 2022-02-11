@@ -73,24 +73,33 @@ public class FontManager
 	}
 	
 	
-	static public Font getCallsiteDefaultFont() {
+	/******
+	 * Retrieve the default font for the call-site symbol.
+	 * It's basically the same as the generic font, but with taller font.
+	 * 
+	 * @return {@code Font}
+	 */
+	static public Font getCallsiteGlyphDefaultFont() {
 		FontDescriptor fd = FontDescriptor.createFrom(getFontGeneric());
 		FontData fdata[] = fd.getFontData();
 		int height = fdata[0].getHeight();
 		
 		// we want the call glyph to be more visible
-		var defaultFont = fd.setHeight(2+height);
+		// In most cases, having taller 2 pixels is enough
+		final int PADDING_SIZE = 2;
+		
+		var defaultFont = fd.setHeight(PADDING_SIZE + height);
 		return defaultFont.createFont(Display.getDefault());
 	}
 	
 	/***
-	 * get the fixed font for metrics
+	 * get the font for call-site glyph (the call-site symbol).
 	 * @return
 	 */
-	static public Font getCallsiteFont() {
+	static public Font getCallsiteGlyphFont() {
 		Font font = getFont(PreferenceConstants.ID_FONT_CALLSITE, null);
 		if (font == null) {
-			return getCallsiteDefaultFont();
+			return getCallsiteGlyphDefaultFont();
 		}
 		return font;
 	}

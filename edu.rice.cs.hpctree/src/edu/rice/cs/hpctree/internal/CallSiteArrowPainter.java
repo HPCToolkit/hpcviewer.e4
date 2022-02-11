@@ -57,7 +57,7 @@ public class CallSiteArrowPainter extends TextPainter
     	//	color = bgColorNonActive;
     	//}
     	
-    	gc.setFont(FontManager.getCallsiteFont());
+    	gc.setFont(FontManager.getCallsiteGlyphFont());
     	gc.setForeground(color);
     }
 }
