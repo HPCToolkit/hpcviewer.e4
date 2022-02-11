@@ -74,7 +74,7 @@ public class FontManager
 	
 	
 	static public Font getCallsiteDefaultFont() {
-		FontDescriptor fd = FontDescriptor.createFrom(JFaceResources.getDefaultFont());
+		FontDescriptor fd = FontDescriptor.createFrom(getFontGeneric());
 		FontData fdata[] = fd.getFontData();
 		int height = fdata[0].getHeight();
 		
