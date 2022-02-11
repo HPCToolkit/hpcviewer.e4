@@ -58,10 +58,7 @@ public class AppearencePage extends AbstractPage
 		saveFont(fontSourceEditor ,  PreferenceConstants.ID_FONT_TEXT);
 		saveFont(fontCallsiteEditor, PreferenceConstants.ID_FONT_CALLSITE);
 		
-		var store = getPreferenceStore();
-		int index = glyphComboEditor.getSelectionIndex();
-		store.setValue(PreferenceConstants.ID_CHAR_CALLTO, ViewerPreferenceManager.DEFAULT_CALLTO[index]);
-		store.setValue(PreferenceConstants.ID_CHAR_CALLFROM, ViewerPreferenceManager.DEFAULT_CALLFROM[index]);
+		saveGlyphOptions();
 	}
 
 	
@@ -158,7 +155,6 @@ public class AppearencePage extends AbstractPage
 	
 	@Override
 	protected void performDefaults() {
-
 		FontData fontGeneric = JFaceResources.getDefaultFont().getFontData()[0];
 		PreferenceStore store = (PreferenceStore) getPreferenceStore();
 		PreferenceConverter.setValue(store, PreferenceConstants.ID_FONT_GENERIC, fontGeneric);
@@ -180,8 +176,16 @@ public class AppearencePage extends AbstractPage
 		
 		glyphComboEditor.select(ViewerPreferenceManager.DEFAULT_CALLSITE_INDEX);
 		glyphComboEditor.setFont(FontManager.getCallsiteGlyphDefaultFont());
+		saveGlyphOptions();
 	}
 	
+	
+	private void saveGlyphOptions() {
+		var store = getPreferenceStore();
+		int index = glyphComboEditor.getSelectionIndex();
+		store.setValue(PreferenceConstants.ID_CHAR_CALLTO, ViewerPreferenceManager.DEFAULT_CALLTO[index]);
+		store.setValue(PreferenceConstants.ID_CHAR_CALLFROM, ViewerPreferenceManager.DEFAULT_CALLFROM[index]);
+	}
 	
 	/*************************************************************
 	 * 

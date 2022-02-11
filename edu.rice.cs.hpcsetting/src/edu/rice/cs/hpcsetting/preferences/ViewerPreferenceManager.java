@@ -58,7 +58,7 @@ public class ViewerPreferenceManager extends AbstractPreferenceManager
 		PreferenceConverter.setDefault(getPreferenceStore(), 
 				PreferenceConstants.ID_FONT_TEXT, JFaceResources.getTextFont().getFontData());
 		PreferenceConverter.setDefault(getPreferenceStore(), 
-				PreferenceConstants.ID_FONT_CALLSITE, FontManager.getCallsiteDefaultFont().getFontData());
+				PreferenceConstants.ID_FONT_CALLSITE, FontManager.getCallsiteGlyphDefaultFont().getFontData());
 		
 		store.setDefault(PreferenceConstants.ID_CHAR_CALLTO, DEFAULT_CALLTO[DEFAULT_CALLSITE_INDEX]);
 		store.setDefault(PreferenceConstants.ID_CHAR_CALLFROM, DEFAULT_CALLFROM[DEFAULT_CALLSITE_INDEX]);
