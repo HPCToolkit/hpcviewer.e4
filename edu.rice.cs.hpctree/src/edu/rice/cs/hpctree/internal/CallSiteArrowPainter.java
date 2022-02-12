@@ -12,9 +12,9 @@ import org.eclipse.nebula.widgets.nattable.style.IStyle;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 
+import edu.rice.cs.hpcsetting.color.ColorManager;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 
@@ -26,9 +26,6 @@ import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
  *******************************/
 public class CallSiteArrowPainter extends BackgroundPainter 
 {
-	private static final Color bgColorActive    = new Color(new RGB(255, 69, 0));
-	private static final Color bgColorNonActive = new Color(new RGB(255, 201, 160));
-	
 	private static final String EMPTY = "";
 	private static final Point  EMPTY_SIZE = new Point(0, 0);
 
@@ -39,12 +36,10 @@ public class CallSiteArrowPainter extends BackgroundPainter
     @Override
     public int getPreferredWidth(ILayerCell cell, GC gc, IConfigRegistry configRegistry) {
         Point size = getGlyphBound(cell, gc, configRegistry);
-        if (size != EMPTY_SIZE) {
-        	
+        if (size != EMPTY_SIZE) {        	
             return size.x;
-        } else {
-            return 0;
         }
+        return 0;
     }
 
     
@@ -53,9 +48,8 @@ public class CallSiteArrowPainter extends BackgroundPainter
         Point size = getGlyphBound(cell, gc, configRegistry);
         if (size != EMPTY_SIZE) {
             return size.y;
-        } else {
-            return 0;
         }
+        return 0;
     }
 
 
@@ -63,7 +57,6 @@ public class CallSiteArrowPainter extends BackgroundPainter
     public void paintCell(ILayerCell cell, GC gc, Rectangle bounds, IConfigRegistry configRegistry) {
         Point size = getGlyphBound(cell, gc, configRegistry);
         if (size != EMPTY_SIZE) {
-
             int contentHeight = size.y;
             if (this.calculateByHeight && (contentHeight > bounds.height)) {
                 int contentToCellDiff = (cell.getBounds().height - bounds.height);
@@ -85,9 +78,10 @@ public class CallSiteArrowPainter extends BackgroundPainter
                         contentWidth + contentToCellDiff,
                         true));
             }
-        	Color color = bgColorActive;
+        	Color color = ColorManager.COLOR_ARROW_ACTIVE;
         	if (isDisabled(cell, configRegistry)) {
-        		color = bgColorNonActive;
+        		Color oldBackgrColor = gc.getBackground();
+        		color = ColorManager.getTextFg(oldBackgrColor);
         	}
         	
         	gc.setFont(FontManager.getCallsiteGlyphFont());
