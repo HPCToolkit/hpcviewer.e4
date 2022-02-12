@@ -1,15 +1,20 @@
 package edu.rice.cs.hpctree.internal;
 
 import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
+import org.eclipse.nebula.widgets.nattable.layer.ILayer;
 import org.eclipse.nebula.widgets.nattable.layer.LabelStack;
 import org.eclipse.nebula.widgets.nattable.layer.cell.ILayerCell;
-import org.eclipse.nebula.widgets.nattable.painter.cell.TextPainter;
+import org.eclipse.nebula.widgets.nattable.painter.cell.BackgroundPainter;
+import org.eclipse.nebula.widgets.nattable.resize.command.ColumnResizeCommand;
+import org.eclipse.nebula.widgets.nattable.resize.command.RowResizeCommand;
+import org.eclipse.nebula.widgets.nattable.style.CellStyleUtil;
 import org.eclipse.nebula.widgets.nattable.style.IStyle;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.graphics.Rectangle;
 
-import edu.rice.cs.hpcdata.util.OSValidator;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 
@@ -19,24 +24,122 @@ import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
  * Special painter to draw an arrow based on a Unicode character
  *
  *******************************/
-public class CallSiteArrowPainter extends TextPainter 
+public class CallSiteArrowPainter extends BackgroundPainter 
 {
-	private static final Color bgColorActive = new Color(new RGB(255, 69, 0));
+	private static final Color bgColorActive    = new Color(new RGB(255, 69, 0));
 	private static final Color bgColorNonActive = new Color(new RGB(255, 201, 160));
 	
-	private boolean enabled;
-	
+	private static final String EMPTY = "";
+	private static final Point  EMPTY_SIZE = new Point(0, 0);
 
-	@Override
-	protected String convertDataType(ILayerCell cell, IConfigRegistry configRegistry) {
+    protected boolean calculateByWidth  = true;
+    protected boolean calculateByHeight = true;
+
+
+    @Override
+    public int getPreferredWidth(ILayerCell cell, GC gc, IConfigRegistry configRegistry) {
+        Point size = getGlyphBound(cell, gc, configRegistry);
+        if (size != EMPTY_SIZE) {
+        	
+            return size.x;
+        } else {
+            return 0;
+        }
+    }
+
+    
+    @Override
+    public int getPreferredHeight(ILayerCell cell, GC gc, IConfigRegistry configRegistry) {
+        Point size = getGlyphBound(cell, gc, configRegistry);
+        if (size != EMPTY_SIZE) {
+            return size.y;
+        } else {
+            return 0;
+        }
+    }
+
+
+    @Override
+    public void paintCell(ILayerCell cell, GC gc, Rectangle bounds, IConfigRegistry configRegistry) {
+        Point size = getGlyphBound(cell, gc, configRegistry);
+        if (size != EMPTY_SIZE) {
+
+            int contentHeight = size.y;
+            if (this.calculateByHeight && (contentHeight > bounds.height)) {
+                int contentToCellDiff = (cell.getBounds().height - bounds.height);
+                ILayer layer = cell.getLayer();
+                layer.doCommand(new RowResizeCommand(
+                        layer,
+                        cell.getRowPosition(),
+                        contentHeight + contentToCellDiff,
+                        true));
+            }
+
+            int contentWidth = size.x;
+            if (this.calculateByWidth && (contentWidth > bounds.width)) {
+                int contentToCellDiff = (cell.getBounds().width - bounds.width);
+                ILayer layer = cell.getLayer();
+                layer.doCommand(new ColumnResizeCommand(
+                        layer,
+                        cell.getColumnPosition(),
+                        contentWidth + contentToCellDiff,
+                        true));
+            }
+        	Color color = bgColorActive;
+        	if (isDisabled(cell, configRegistry)) {
+        		color = bgColorNonActive;
+        	}
+        	
+        	gc.setFont(FontManager.getCallsiteGlyphFont());
+        	gc.setForeground(color);
+
+            IStyle cellStyle = CellStyleUtil.getCellStyle(cell, configRegistry);
+        	String text = getCallsiteGlyph(cell, configRegistry);
+        	
+            gc.drawText(text, 
+                    	bounds.x + CellStyleUtil.getHorizontalAlignmentPadding(cellStyle, bounds, size.x),
+                    	bounds.y + CellStyleUtil.getVerticalAlignmentPadding(cellStyle, bounds, size.y));
+        }
+    }
+
+    
+    /****
+     * Retrieve the size of the glyph including the padding.
+     * 
+     * @param cell
+     * @param gc
+     * @param configRegistry
+     * @return
+     */
+    protected Point getGlyphBound(ILayerCell cell, GC gc, IConfigRegistry configRegistry) {
+    	String text = getCallsiteGlyph(cell, configRegistry);
+    	if (EMPTY == text)
+    		return EMPTY_SIZE;
+    	
+    	final int PADDING = 2;    	
+    	Point size  = gc.stringExtent(text);
+    	
+    	size.x += PADDING;
+    	size.y += PADDING;
+    	return size;
+    }
+    
+
+    /*****
+     * Get the symbol representation of the call site. Depending if it's
+     * a bottom-up (caller) or top-down (callsite), it return the corrsponding
+     * symbol.
+     * 
+     * @param cell
+     * @param configRegistry
+     * @return
+     */
+	private String getCallsiteGlyph(ILayerCell cell, IConfigRegistry configRegistry) {
     	LabelStack labels = cell.getConfigLabels();
     	
-    	enabled = labels.hasLabel(ScopeTreeLabelAccumulator.LABEL_CALLSITE) ||
-    			 labels.hasLabel(ScopeTreeLabelAccumulator.LABEL_CALLER);
-    	
-    	boolean disabled = labels.hasLabel(ScopeTreeLabelAccumulator.LABEL_CALLER_DISABLED) ||
-    					   labels.hasLabel(ScopeTreeLabelAccumulator.LABEL_CALLSITE_DISABLED);
-    	
+    	boolean enabled = isEnabled(cell, configRegistry);
+    	boolean disabled = isDisabled(cell, configRegistry);
+    			
     	if (!enabled && !disabled)
     		return EMPTY;
     	
@@ -48,17 +151,17 @@ public class CallSiteArrowPainter extends TextPainter
 		return ViewerPreferenceManager.INSTANCE.getCallFromGlyph();
 	}
 	
-	@Override
-    public void setupGCFromConfig(GC gc, IStyle cellStyle) {
-    	super.setupGCFromConfig(gc, cellStyle);
-    	// Issue on MacOS: The GC can't be made special for a certain cell
-    	// if the color of the first cell is green, and the others are green
-    	Color color = bgColorActive;
-    	if (!enabled && !OSValidator.isMac()) {
-    		color = bgColorNonActive;
-    	}
-    	
-    	gc.setFont(FontManager.getCallsiteGlyphFont());
-    	gc.setForeground(color);
-    }
+	
+	private boolean isEnabled(ILayerCell cell, IConfigRegistry configRegistry) {
+    	LabelStack labels = cell.getConfigLabels();
+    	return labels.hasLabel(ScopeTreeLabelAccumulator.LABEL_CALLSITE) ||
+		 	   labels.hasLabel(ScopeTreeLabelAccumulator.LABEL_CALLER);
+	}
+	
+	
+	private boolean isDisabled(ILayerCell cell, IConfigRegistry configRegistry) {
+    	LabelStack labels = cell.getConfigLabels();
+    	return labels.hasLabel(ScopeTreeLabelAccumulator.LABEL_CALLSITE_DISABLED) ||
+		 	   labels.hasLabel(ScopeTreeLabelAccumulator.LABEL_CALLER_DISABLED);
+	}
 }
