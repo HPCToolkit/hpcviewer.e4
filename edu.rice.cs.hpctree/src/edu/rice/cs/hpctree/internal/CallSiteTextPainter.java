@@ -55,7 +55,7 @@ public class CallSiteTextPainter extends TextPainter
 		Color color = ColorManager.getTextFg(oldBackgrColor);
 		// Fix issue #134: do not change the active color if we are in the select mode
     	if (enabled && displayMode != DisplayMode.SELECT) {
-			color = ViewerColorManager.getActiveColor();  		
+			color = ViewerColorManager.getActiveColor(oldBackgrColor);
     	}
     	gc.setForeground(color);
     }

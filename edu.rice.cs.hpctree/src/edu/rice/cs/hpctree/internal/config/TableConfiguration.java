@@ -89,7 +89,7 @@ public class TableConfiguration implements IConfiguration
 		
 		// set the "clickable" cell. It' clickable if the cell has the source code to display
 		final Style styleActive = new Style();
-		Color clrActive = ViewerColorManager.getActiveColor();
+		Color clrActive = ViewerColorManager.getActiveColor(widget.getBackground());
 		styleActive.setAttributeValue(CellStyleAttributes.FOREGROUND_COLOR, clrActive);
 		configRegistry.registerConfigAttribute(
 					CellConfigAttributes.CELL_STYLE, 
