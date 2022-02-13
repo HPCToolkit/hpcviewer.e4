@@ -10,8 +10,6 @@ import org.eclipse.jface.resource.FontRegistry;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
-import org.eclipse.swt.widgets.Display;
-
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 
@@ -25,6 +23,8 @@ import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
  *************************************************************/
 public class FontManager 
 {
+	private static final String ID_FONT_CALLSITE_DEFAULT = "hpcviewer.font.def.cs";
+	
 	public final static FontManager INSTANCE = new FontManager();
 	private final FontRegistry fontRegistry;
 	
@@ -86,10 +86,12 @@ public class FontManager
 		
 		// we want the call glyph to be more visible
 		// In most cases, having taller 2 pixels is enough
-		final int PADDING_SIZE = 2;
+		final int ADJUSTED_SIZE = 2;
 		
-		var defaultFont = fd.setHeight(PADDING_SIZE + height);
-		return defaultFont.createFont(Display.getDefault());
+		var defaultFont = fd.setHeight(ADJUSTED_SIZE + height);
+		INSTANCE.fontRegistry.put(ID_FONT_CALLSITE_DEFAULT, defaultFont.getFontData());
+		
+		return INSTANCE.fontRegistry.get(ID_FONT_CALLSITE_DEFAULT);
 	}
 	
 	/***
