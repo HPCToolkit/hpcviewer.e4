@@ -182,8 +182,8 @@ public abstract class AbstractPage extends PreferencePage
      *            the combo items
      * @return the combo
      */
-    protected Combo createComboControl(Composite parent, String[] items) {
-        Combo combo = new Combo(parent, SWT.BORDER | SWT.SINGLE);
+    protected Combo createComboControl(Composite parent, String[] items, int style) {
+        Combo combo = new Combo(parent, SWT.BORDER | SWT.SINGLE | style);
         combo.setItems(items);
 
         GridData gridData = new GridData(GridData.FILL_HORIZONTAL);

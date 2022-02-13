@@ -8,8 +8,6 @@ import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
 import org.eclipse.nebula.widgets.nattable.style.IStyle;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Rectangle;
-
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -18,20 +16,24 @@ import edu.rice.cs.hpctree.resources.ViewerColorManager;
 
 public class CallSiteTextPainter extends TextPainter 
 {
-	private static final String SUFFIX_LINE  = ": ";
-
 	private final ScopeTreeDataProvider dataProvider;
-	private boolean active;
+	private boolean enabled;
 	private DisplayMode displayMode;
 	
 	public CallSiteTextPainter(ScopeTreeDataProvider dataProvider) {
 		this.dataProvider = dataProvider;
-		this.active = false;
+		this.enabled = false;
 	}
 	
 	@Override
 	protected String convertDataType(ILayerCell cell, IConfigRegistry configRegistry) {
-		int rowIndex = cell.getRowIndex();
+    	LabelStack labels = cell.getConfigLabels();
+    	enabled = labels.hasLabel(ScopeTreeLabelAccumulator.LABEL_CALLSITE) ||
+    			  labels.hasLabel(ScopeTreeLabelAccumulator.LABEL_CALLER);
+    	
+    	displayMode = cell.getDisplayMode();
+
+    	int rowIndex = cell.getRowIndex();
 		Scope scope = dataProvider.getRowObject(rowIndex);
 		if (scope instanceof CallSiteScope) {
 			LineScope ls = ((CallSiteScope)scope).getLineScope();
@@ -39,22 +41,10 @@ public class CallSiteTextPainter extends TextPainter
 			if (ln < 1)
 				return EMPTY;
 			int line = 1 + ln;
-			return line + SUFFIX_LINE;
+			return String.valueOf(line);
 		}
 		return EMPTY;
 	}
-	
-	
-    @Override
-    public void paintCell(ILayerCell cell, GC gc, Rectangle rectangle, IConfigRegistry configRegistry) {
-    	LabelStack labels = cell.getConfigLabels();
-    	active = labels.hasLabel(ScopeTreeLabelAccumulator.LABEL_CALLSITE) ||
-    			 labels.hasLabel(ScopeTreeLabelAccumulator.LABEL_CALLER);
-    	
-    	displayMode = cell.getDisplayMode();
-    	
-    	super.paintCell(cell, gc, rectangle, configRegistry);
-    }
     
     
 	@Override
@@ -64,8 +54,8 @@ public class CallSiteTextPainter extends TextPainter
 		Color oldBackgrColor = gc.getBackground();
 		Color color = ColorManager.getTextFg(oldBackgrColor);
 		// Fix issue #134: do not change the active color if we are in the select mode
-    	if (active && displayMode != DisplayMode.SELECT) {
-			color = ViewerColorManager.getActiveColor();		    		
+    	if (enabled && displayMode != DisplayMode.SELECT) {
+			color = ViewerColorManager.getActiveColor(oldBackgrColor);
     	}
     	gc.setForeground(color);
     }

@@ -17,6 +17,7 @@ import org.eclipse.nebula.widgets.nattable.painter.cell.BackgroundPainter;
 import org.eclipse.nebula.widgets.nattable.painter.cell.CellPainterWrapper;
 import org.eclipse.nebula.widgets.nattable.painter.cell.ICellPainter;
 import org.eclipse.nebula.widgets.nattable.painter.cell.decorator.CellPainterDecorator;
+import org.eclipse.nebula.widgets.nattable.selection.SelectionLayer;
 import org.eclipse.nebula.widgets.nattable.tree.ITreeRowModel;
 import org.eclipse.nebula.widgets.nattable.tree.TreeLayer;
 import org.eclipse.nebula.widgets.nattable.tree.command.TreeExpandCollapseCommand;
@@ -210,7 +211,28 @@ public class ScopeTreeLayer extends AbstractLayerTransform implements IUniqueInd
     	// need to grab all child indexes
     	List<Integer> childrenIndexes = this.treeRowModel.getChildIndexes(parentIndex);
     	int []indexes = childrenIndexes.stream().mapToInt(Integer::intValue).toArray();
+
+    	// fix issue #177: need to clear selected row if it's within the collapsed row
+    	// if it isn't clear, nattable only highlight the first column
+    	
+    	int selectionRow = -1;
+    	IUniqueIndexLayer underlyingLayer = getUnderlyingLayer();
+    	if (underlyingLayer instanceof SelectionLayer) {
+    		SelectionLayer selectionLayer = (SelectionLayer) underlyingLayer;
+    		var ranges = selectionLayer.getSelectedRowPositions();
+    		if (ranges.size()>0) {
+        		var range = ranges.iterator().next();
+        		selectionRow = range.start;
+    		}
+    	}
+    	// remove the children
     	doCommand(new RowDeleteCommand(this, indexes));
+    	
+    	// clear the selected rows if they are the collapsed children
+    	if (selectionRow>0) {
+    		if (childrenIndexes.contains(selectionRow))
+    			((SelectionLayer)underlyingLayer).clear();
+    	}
     }
     
     /**

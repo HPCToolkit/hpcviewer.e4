@@ -24,6 +24,17 @@ public class ViewerColorManager
 	static final private int CONTRAST_COLOR = 60;
 	
 	
+	/****
+	 * Get the active hyperlink color. 
+	 * This method will check if the dark mode is on or not and returns
+	 * the corresponding hyperlink color.
+	 * 
+	 * @apiNote 
+	 * 		This method doesn't guarantee if it detects dark mode successfully or not.
+	 * 		Please use {@link getActiveColor(Color)}
+	 * @return hyperlink color
+	 * @deprecated
+	 */
 	static public Color getActiveColor() {
 		Color clrActive = GUIHelper.COLOR_BLUE;
 		if (Display.isSystemDarkTheme()) {
@@ -37,6 +48,33 @@ public class ViewerColorManager
 		return clrActive;
 	}
 	
+	
+	/****
+	 * Get the active hyperlink color given the background color.
+	 * This method is more accurate than {@link getActiveColor} since it detects
+	 * if the background color is dark enough or not.
+	 * 
+	 * @param backgroundColor
+	 * @return
+	 */
+	static public Color getActiveColor(Color backgroundColor) {
+		if (ColorManager.getTextFg(backgroundColor) == ColorManager.COLOR_BLACK) {
+			// light theme
+			return GUIHelper.COLOR_BLUE;
+		}
+		return getActiveColorDarkMode();
+	}
+	
+	
+	static private Color getActiveColorDarkMode() {
+		ColorRegistry registry = JFaceResources.getColorRegistry();
+		Color clrActive = registry.get(COLOR_ACTIVE);
+		if (clrActive == null) {
+			clrActive = new Color(51, 153, 255);
+			registry.put(COLOR_ACTIVE, clrActive.getRGB());
+		}
+		return clrActive;
+	}
 	
 	/****
 	 * Retrieve the background color of the top row

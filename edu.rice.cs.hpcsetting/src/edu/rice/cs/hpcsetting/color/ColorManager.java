@@ -2,14 +2,16 @@ package edu.rice.cs.hpcsetting.color;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 
 import edu.rice.cs.hpcbase.BaseConstants;
 
 public class ColorManager 
 {
-	public final static Color COLOR_WHITE = Display.getCurrent().getSystemColor(SWT.COLOR_WHITE);
-    public final static Color COLOR_BLACK = Display.getCurrent().getSystemColor(SWT.COLOR_BLACK);
+	public static final Color COLOR_WHITE = Display.getCurrent().getSystemColor(SWT.COLOR_WHITE);
+    public static final Color COLOR_BLACK = Display.getCurrent().getSystemColor(SWT.COLOR_BLACK);
+	public static final Color COLOR_ARROW_ACTIVE = new Color(new RGB(255, 69, 0));
 
     public static Color getTextFg(Color bg) {
 

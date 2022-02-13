@@ -10,20 +10,17 @@ import org.eclipse.swt.widgets.Shell;
 public class ViewerPreferenceDialog extends PreferenceDialog 
 {	
 	public ViewerPreferenceDialog(Shell parentShell) {
-		super(parentShell, new PreferenceManager());
-		
+		super(parentShell, new PreferenceManager());		
 	}
 
 	
-	public void addPage(final String label, IPreferencePage page) {
-		
+	public void addPage(final String label, IPreferencePage page) {		
 		PreferenceNode pNode = new PreferenceNode(label);
 		pNode.setPage(page);
 		getPreferenceManager().addToRoot(pNode);
 	}
 	
-	public void addPage(final String parent, final String label, IPreferencePage page) {
-		
+	public void addPage(final String parent, final String label, IPreferencePage page) {		
 		PreferenceNode pNode = new PreferenceNode(label);
 		pNode.setPage(page);
 		getPreferenceManager().addTo(parent, pNode);
@@ -34,7 +31,6 @@ public class ViewerPreferenceDialog extends PreferenceDialog
 		super.create();
 		
 		getShell().setText("Preferences");
-
 		getTreeViewer().expandAll();
 		
 		return super.open();

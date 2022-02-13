@@ -2,15 +2,20 @@ package edu.rice.cs.hpcsetting.preferences;
 
 import java.io.IOException;
 
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.FontFieldEditor;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.preference.PreferenceStore;
+import org.eclipse.jface.resource.FontRegistry;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.resource.StringConverter;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
@@ -29,10 +34,10 @@ public class AppearencePage extends AbstractPage
 {
 	public final static String TITLE = "Appearance";
 	
-	private ViewerFontFieldEditor fontGenericEditor;
-	private ViewerFontFieldEditor fontMetricEditor;
-	private ViewerFontFieldEditor fontSourceEditor;
+	private ViewerFontFieldEditor fontGenericEditor, fontMetricEditor, fontSourceEditor;
 	
+	private ViewerFontFieldEditor fontCallsiteEditor;
+	private Combo glyphComboEditor;
 
 	public AppearencePage() {
 		super(TITLE);
@@ -48,22 +53,72 @@ public class AppearencePage extends AbstractPage
 	
 	@Override
 	public void apply() {		
-		saveFont(fontMetricEditor , PreferenceConstants.ID_FONT_METRIC);
-		saveFont(fontGenericEditor, PreferenceConstants.ID_FONT_GENERIC);
-		saveFont(fontSourceEditor , PreferenceConstants.ID_FONT_TEXT);
+		saveFont(fontMetricEditor ,  PreferenceConstants.ID_FONT_METRIC);
+		saveFont(fontGenericEditor,  PreferenceConstants.ID_FONT_GENERIC);
+		saveFont(fontSourceEditor ,  PreferenceConstants.ID_FONT_TEXT);
+		saveFont(fontCallsiteEditor, PreferenceConstants.ID_FONT_CALLSITE);
+		
+		saveGlyphOptions();
 	}
 
+	
 	@Override
 	protected Control createContents(Composite parent) {
-
+		// font area
+		//
 		Group groupFont = createGroupControl(parent, "Fonts", false);
 		groupFont.setLayout(new GridLayout(1, false));
 		
-        fontGenericEditor = createFontEditor(groupFont, PreferenceConstants.ID_FONT_GENERIC, "Default column font",   FontManager.getFontGeneric());        
-        fontMetricEditor  = createFontEditor(groupFont, PreferenceConstants.ID_FONT_METRIC,  "Metric column font", FontManager.getMetricFont());
-        fontSourceEditor  = createFontEditor(groupFont, PreferenceConstants.ID_FONT_TEXT,    "Text editor font"  , FontManager.getTextEditorFont());
+        fontGenericEditor = createFontEditor(groupFont, PreferenceConstants.ID_FONT_GENERIC, "Default column font:",   FontManager.getFontGeneric());        
+        fontMetricEditor  = createFontEditor(groupFont, PreferenceConstants.ID_FONT_METRIC,  "Metric column font:", FontManager.getMetricFont());
+        fontSourceEditor  = createFontEditor(groupFont, PreferenceConstants.ID_FONT_TEXT,    "Text editor font:"  , FontManager.getTextEditorFont());
+
+        // callsite area
+        //
+        Group groupCallsite = createGroupControl(parent, "Call-site glyph settings ", false);
+        fontCallsiteEditor = createFontEditor(groupCallsite, PreferenceConstants.ID_FONT_CALLSITE, "Glyph font:",   FontManager.getCallsiteGlyphFont());
+
+        Composite glyphArea = new Composite(groupCallsite, SWT.NONE);
+        GridDataFactory.fillDefaults().grab(true, true).span(3, 1).applyTo(glyphArea);
+        GridLayoutFactory.fillDefaults().numColumns(2).applyTo(glyphArea);
         
+        glyphComboEditor = createGlyphOptionCombo(glyphArea);     
+
+        FontRegistry registry = new FontRegistry();
+        
+        fontCallsiteEditor.setPropertyChangeListener(event->{
+        	FontData value = (FontData) event.getNewValue();
+        	registry.put(PreferenceConstants.ID_FONT_CALLSITE, new FontData[] {value});
+        	Font font = registry.get(PreferenceConstants.ID_FONT_CALLSITE);
+        	glyphComboEditor.setFont(font);
+        });
+
 		return parent;
+	}
+	
+	
+	private Combo createGlyphOptionCombo(Composite parent) {        
+        createLabelControl(parent, "Glyph characters:");
+        var callToChars = ViewerPreferenceManager.DEFAULT_CALLTO;
+        var callFromChars = ViewerPreferenceManager.DEFAULT_CALLFROM;
+        
+        assert (callToChars.length == callFromChars.length);
+        
+        var contents = new String[callToChars.length];
+        int select = 0;
+        final String currValue = ViewerPreferenceManager.INSTANCE.getCallToGlyph();
+        
+        for(int i=0; i<callToChars.length; i++) {
+        	contents[i] = callToChars[i] + " , " + callFromChars[i] + 
+        				  "   ( " + String.format("\\u%04x", (int)callToChars[i].charAt(0)) +
+        				  " , " + String.format("\\u%04x", (int)callFromChars[i].charAt(0)) + " )"; 
+        	if (currValue.equals(callToChars[i]))
+        		select = i;
+        }
+        var combo = createComboControl(parent, contents, SWT.READ_ONLY);
+        combo.select(select);
+        combo.setFont(FontManager.getCallsiteGlyphFont());
+        return combo;
 	}
 
 	
@@ -75,12 +130,13 @@ public class AppearencePage extends AbstractPage
 
 		try {
 			FontManager.setFontPreference(id, new FontData[] {font});
-
 		} catch (IOException e) {
 			Logger logger = LoggerFactory.getLogger(getClass());
 			logger.error("Unable to store the preference " + id, e);
 		}
 	}
+	
+	
 	
 	private ViewerFontFieldEditor createFontEditor(Composite parent, String id, String label, Font fontDefault) {        
 		ViewerFontFieldEditor editor = new ViewerFontFieldEditor(parent, id, label, fontDefault.getFontData()[0]);
@@ -99,7 +155,6 @@ public class AppearencePage extends AbstractPage
 	
 	@Override
 	protected void performDefaults() {
-
 		FontData fontGeneric = JFaceResources.getDefaultFont().getFontData()[0];
 		PreferenceStore store = (PreferenceStore) getPreferenceStore();
 		PreferenceConverter.setValue(store, PreferenceConstants.ID_FONT_GENERIC, fontGeneric);
@@ -115,8 +170,22 @@ public class AppearencePage extends AbstractPage
 		fontGenericEditor.store();
 		fontMetricEditor.store();
 		fontSourceEditor.store();
+		
+		fontCallsiteEditor.setFontLabel(FontManager.getCallsiteGlyphDefaultFont().getFontData()[0]);
+		fontCallsiteEditor.store();
+		
+		glyphComboEditor.select(ViewerPreferenceManager.DEFAULT_CALLSITE_INDEX);
+		glyphComboEditor.setFont(FontManager.getCallsiteGlyphDefaultFont());
+		saveGlyphOptions();
 	}
 	
+	
+	private void saveGlyphOptions() {
+		var store = getPreferenceStore();
+		int index = glyphComboEditor.getSelectionIndex();
+		store.setValue(PreferenceConstants.ID_CHAR_CALLTO, ViewerPreferenceManager.DEFAULT_CALLTO[index]);
+		store.setValue(PreferenceConstants.ID_CHAR_CALLFROM, ViewerPreferenceManager.DEFAULT_CALLFROM[index]);
+	}
 	
 	/*************************************************************
 	 * 

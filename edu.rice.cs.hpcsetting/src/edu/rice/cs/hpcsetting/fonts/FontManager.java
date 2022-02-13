@@ -10,7 +10,6 @@ import org.eclipse.jface.resource.FontRegistry;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
-
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 
@@ -24,6 +23,8 @@ import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
  *************************************************************/
 public class FontManager 
 {
+	private static final String ID_FONT_CALLSITE_DEFAULT = "hpcviewer.font.def.cs";
+	
 	public final static FontManager INSTANCE = new FontManager();
 	private final FontRegistry fontRegistry;
 	
@@ -50,13 +51,7 @@ public class FontManager
 	 * @return
 	 */
 	static public Font getFontGeneric() {
-		Font font;
-		try {
-			font = INSTANCE.getPreferenceFont(PreferenceConstants.ID_FONT_GENERIC);
-		} catch (Exception e) {
-			font = JFaceResources.getDefaultFont();
-		}
-		return font;
+		return getFont(PreferenceConstants.ID_FONT_GENERIC, JFaceResources.getDefaultFont());
 	}
 	
 	
@@ -65,13 +60,7 @@ public class FontManager
 	 * @return
 	 */
 	static public Font getMetricFont() {
-		Font font;
-		try {
-			font = INSTANCE.getPreferenceFont(PreferenceConstants.ID_FONT_METRIC);
-		} catch (Exception e) {
-			font = JFaceResources.getTextFont();
-		}
-		return font;
+		return getFont(PreferenceConstants.ID_FONT_METRIC, JFaceResources.getTextFont());
 	}	
 	
 	
@@ -80,28 +69,64 @@ public class FontManager
 	 * @return
 	 */
 	static public Font getTextEditorFont() {
-		Font font;
-		try {
-			font = INSTANCE.getPreferenceFont(PreferenceConstants.ID_FONT_TEXT);
-		} catch (Exception e) {
-			font = JFaceResources.getTextFont();
+		return getFont(PreferenceConstants.ID_FONT_TEXT, JFaceResources.getTextFont());
+	}
+	
+	
+	/******
+	 * Retrieve the default font for the call-site symbol.
+	 * It's basically the same as the generic font, but with taller font.
+	 * 
+	 * @return {@code Font}
+	 */
+	static public Font getCallsiteGlyphDefaultFont() {
+		FontDescriptor fd = FontDescriptor.createFrom(getFontGeneric());
+		FontData fdata[] = fd.getFontData();
+		int height = fdata[0].getHeight();
+		
+		// we want the call glyph to be more visible
+		// In most cases, having taller 2 pixels is enough
+		final int ADJUSTED_SIZE = 2;
+		
+		var defaultFont = fd.setHeight(ADJUSTED_SIZE + height);
+		INSTANCE.fontRegistry.put(ID_FONT_CALLSITE_DEFAULT, defaultFont.getFontData());
+		
+		return INSTANCE.fontRegistry.get(ID_FONT_CALLSITE_DEFAULT);
+	}
+	
+	/***
+	 * get the font for call-site glyph (the call-site symbol).
+	 * @return
+	 */
+	static public Font getCallsiteGlyphFont() {
+		Font font = getFont(PreferenceConstants.ID_FONT_CALLSITE, null);
+		if (font == null) {
+			return getCallsiteGlyphDefaultFont();
 		}
 		return font;
-	}	
+	}
+
 	
+	static private Font getFont(String id, Font fontDefault) {
+		Font font = null;
+		try {
+			font = INSTANCE.getPreferenceFont(id);
+		} catch (Exception e) {
+			font = fontDefault;
+		}
+		return font;
+	}
 
 	/****
 	 * Retrieve font data of a given font preference.
 	 * @see PreferenceConstants.ID_FONT_GENERIC
-	 * @see PreferenceConstants.ID_FONT_METRICT
+	 * @see PreferenceConstants.ID_FONT_METRIC
 	 *  
 	 * @param fontPreferenceID The preference font id. 
 	 * @return
 	 */
 	static public FontData[] getFontDataPreference(String fontPreferenceID) {
-
 		IPreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
-		
 		FontData []fd = PreferenceConverter.getFontDataArray(pref, fontPreferenceID);
 		return fd;
 	}
