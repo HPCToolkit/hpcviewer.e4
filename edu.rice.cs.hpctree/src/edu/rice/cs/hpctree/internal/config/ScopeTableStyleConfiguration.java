@@ -1,5 +1,6 @@
 package edu.rice.cs.hpctree.internal.config;
 
+import edu.rice.cs.hpcsetting.color.ColorManager;
 import edu.rice.cs.hpcsetting.table.DayThemeConfiguration;
 import edu.rice.cs.hpctree.internal.ScopeTreeDataProvider;
 
@@ -23,8 +24,11 @@ public class ScopeTableStyleConfiguration extends DayThemeConfiguration
     @Override
     public void createPainterInstances() {
     	super.createPainterInstances();
-    	
-        treeStructurePainter = ScopeTreePainter.getTreeStructurePainter(dataProvider);
+    	if (defaultBgColor == ColorManager.COLOR_WHITE)
+    		treeStructurePainter = ScopeTreePainter.getInvTreeStructurePainter(dataProvider);
+    	else 
+    		treeStructurePainter = ScopeTreePainter.getTreeStructurePainter(dataProvider);
+
         treeStructureSelectionPainter = treeStructurePainter;
         selectedSortHeaderCellPainter = ScopeTreePainter.getSelectedSortHeaderCellPainter();
     }
