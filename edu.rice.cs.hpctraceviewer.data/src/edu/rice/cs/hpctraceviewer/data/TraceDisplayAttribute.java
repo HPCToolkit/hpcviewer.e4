@@ -196,6 +196,8 @@ public class TraceDisplayAttribute
 	 */
 	public TimeUnit decrement(TimeUnit unit) {
 		Optional<Integer> key = getOrdinal(unit).findFirst();
+		if (key.isEmpty())
+			throw new IndexOutOfBoundsException("Incorrect time unit: " + unit);
 		
 		Integer ordinal = key.get();
 		ordinal--;
@@ -211,6 +213,8 @@ public class TraceDisplayAttribute
 	 */
 	public TimeUnit increment(TimeUnit unit) {
 		Optional<Integer> key = getOrdinal(unit).findFirst();
+		if (key.isEmpty())
+			throw new IndexOutOfBoundsException("Incorrect time unit: " + unit);
 		
 		Integer ordinal = key.get();
 		ordinal++;
