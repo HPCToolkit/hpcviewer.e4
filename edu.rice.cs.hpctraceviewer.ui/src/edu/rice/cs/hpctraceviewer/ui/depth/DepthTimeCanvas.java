@@ -32,7 +32,7 @@ import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.color.ColorTable;
 import edu.rice.cs.hpcsetting.color.ColorManager;
 import edu.rice.cs.hpctraceviewer.data.Frame;
-import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
+import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
 import edu.rice.cs.hpctraceviewer.data.Position;
 
 
@@ -106,7 +106,7 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 		
 		super.paintControl(event);
 		
-		final long topLeftPixelX = Math.round(stData.getAttributes().getTimeBegin()*getScalePixelsPerTime());
+		final long topLeftPixelX = Math.round(stData.getTraceDisplayAttribute().getTimeBegin()*getScalePixelsPerTime());
 		final int viewHeight 	 = bound.height;
 
 		//--------------------
@@ -116,12 +116,12 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 		event.gc.setForeground(ColorManager.COLOR_WHITE);
 		//event.gc.setAlpha(240);
 		
-		long selectedTime = stData.getAttributes().getFrame().position.time;
+		long selectedTime = stData.getTraceDisplayAttribute().getFrame().position.time;
 		
 		int topPixelCrossHairX = (int)(Math.round(selectedTime*getScalePixelsPerTime())-2-topLeftPixelX);
 		event.gc.fillRectangle(topPixelCrossHairX,0,4,viewHeight);
 		
-		final int depth    = stData.getAttributes().getDepth();
+		final int depth    = stData.getTraceDisplayAttribute().getDepth();
 		final int maxDepth = stData.getMaxDepth();
 		final int minDepth = TimelineDepthThread.getMinDepth(depth, visibleDepths, maxDepth);
 		final int cdepth   = depth-minDepth;
@@ -208,7 +208,7 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 
 	private long getNumTimeDisplayed()
 	{
-		return (stData.getAttributes().getTimeInterval());
+		return (stData.getTraceDisplayAttribute().getTimeInterval());
 	}
 	
 
@@ -240,7 +240,7 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 		if (stData == null )
 			return;
 
-		final ImageTraceAttributes attributes = stData.getAttributes();
+		final TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
 		final Frame frame = attributes.getFrame();
 
 		// store the current process so that we don't need to rebuffer every time
@@ -338,9 +338,9 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 
 	@Override
 	protected void changePosition(Point point) {
-    	long closeTime = stData.getAttributes().getTimeBegin() + (long)(point.x / getScalePixelsPerTime());
+    	long closeTime = stData.getTraceDisplayAttribute().getTimeBegin() + (long)(point.x / getScalePixelsPerTime());
     	
-    	Position currentPosition = stData.getAttributes().getPosition();
+    	Position currentPosition = stData.getTraceDisplayAttribute().getPosition();
     	Position newPosition = new Position(closeTime, currentPosition.process);
     	IUndoContext context = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_POSITION);
     		
@@ -357,7 +357,7 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 	@Override
 	protected void changeRegion(Rectangle region) 
 	{
-		final ImageTraceAttributes attributes = stData.getAttributes();
+		final TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
 
 		long topLeftTime 	 = attributes.getTimeBegin() + (long)(region.x / getScalePixelsPerTime());
 		long bottomRightTime = attributes.getTimeBegin() + (long)((region.width+region.x) / getScalePixelsPerTime());

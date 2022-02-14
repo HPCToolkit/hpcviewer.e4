@@ -13,7 +13,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.DataLinePainting;
 import edu.rice.cs.hpctraceviewer.data.DataPreparation;
-import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
+import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TimelineDataSet;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
@@ -66,7 +66,7 @@ public abstract class BaseTimelineThread implements Callable<Integer> {
 	public Integer call() throws Exception {
 
 		ProcessTimeline trace = getNextTrace(currentLine);
-		ImageTraceAttributes attributes = stData.getAttributes();
+		TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
 		
 		final double pixelLength = (attributes.getTimeInterval())/(double)attributes.getPixelHorizontal();
 		final long timeBegin = attributes.getTimeBegin();
@@ -78,7 +78,7 @@ public abstract class BaseTimelineThread implements Callable<Integer> {
 		data.usingMidpoint = TracePreferenceManager.isMidpointEnabled();
 		data.pixelLength   = pixelLength;
 		data.begTime       = timeBegin;
-		data.depth		   = stData.getAttributes().getDepth();
+		data.depth		   = stData.getTraceDisplayAttribute().getDepth();
 		
 		while (trace != null)
 		{

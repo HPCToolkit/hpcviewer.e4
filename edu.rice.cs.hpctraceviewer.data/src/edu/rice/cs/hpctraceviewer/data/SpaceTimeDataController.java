@@ -39,7 +39,7 @@ public abstract class SpaceTimeDataController
 {
 	final protected BaseExperiment  exp;
 
-	protected ImageTraceAttributes attributes;
+	protected TraceDisplayAttribute attributes;
 	
 	protected ColorTable colorTable = null;
 	protected IBaseData dataTrace = null;
@@ -115,7 +115,7 @@ public abstract class SpaceTimeDataController
 		timelineService = (ProcessTimelineService) context.get(Constants.CONTEXT_TIMELINE);
 		
 		// attributes initialization
-		attributes 	 = new ImageTraceAttributes();
+		attributes 	 = new TraceDisplayAttribute();
 		
 		final Display display = Display.getDefault();
 		display.syncExec( ()-> {
@@ -247,10 +247,10 @@ public abstract class SpaceTimeDataController
 
 	
 	/*************************************************************************
-	 * Returns the image trace attribute
+	 * Returns the trace display attribute
 	 * @return {@code ImageTraceAttributes}
 	 *************************************************************************/
-	public ImageTraceAttributes getAttributes() {
+	public TraceDisplayAttribute getTraceDisplayAttribute() {
 		return attributes;
 	}
 
@@ -291,7 +291,7 @@ public abstract class SpaceTimeDataController
 	/*************************************************************************
 	 * return the unit of the current database
 	 * 
-	 * @return {@link ImageTraceAttributes.TimeUnit}
+	 * @return {@link TraceDisplayAttribute.TimeUnit}
 	 *************************************************************************/
 	public TimeUnit getTimeUnit() {
 		int version = exp.getMajorVersion();

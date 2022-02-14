@@ -15,7 +15,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
-import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
+import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
 
 
 /*******************************************************
@@ -104,7 +104,7 @@ public class CanvasAxisX extends AbstractAxisCanvas
 			height = e.gc.stringExtent(text).y;
 		}
 
-		final ImageTraceAttributes attribute = data.getAttributes();
+		final TraceDisplayAttribute attribute = data.getTraceDisplayAttribute();
 		final Rectangle area = getClientArea();
 		
 		TimeUnit dbTimeUnit = data.getTimeUnit();
@@ -116,7 +116,7 @@ public class CanvasAxisX extends AbstractAxisCanvas
 		// 
 		// --------------------------------------------------------------------------
 		
-		TimeUnit displayTimeUnit = attribute.getDisplayTimeUnit(data);
+		TimeUnit displayTimeUnit = attribute.computeDisplayTimeUnit(data);
 		
 		// --------------------------------------------------------------------------
 		// finding some HINTs of number of ticks, and distance between ticks 	
@@ -166,6 +166,11 @@ public class CanvasAxisX extends AbstractAxisCanvas
 				dtRound *= 10;
 			}
 		} while (numAxisLabel > maxTicks);
+
+		// the time unit displayed for users
+		// sometime the time unit is millisecond, but user can see it as second like:
+		// 2.1s, 2.2s instead of 2100ms and 2200ms
+		TimeUnit userDisplayTimeUnit = displayTimeUnit;
 		
 		// Issue #20 : avoid displaying big numbers.
 		// if the time is 1200ms we should display it as 1.2s
@@ -174,9 +179,10 @@ public class CanvasAxisX extends AbstractAxisCanvas
 		float multiplier = 1; 
 
 		if (dtRound >= 100) {
-			final TimeUnit userDisplayTimeUnit = attribute.increment(displayTimeUnit);
-			userUnitTime = attribute.getTimeUnitName(userDisplayTimeUnit);
+			final TimeUnit tu = attribute.increment(displayTimeUnit);
+			userUnitTime      = attribute.getTimeUnitName(tu);
 			multiplier = (float) 0.001;
+			userDisplayTimeUnit = tu;
 		}
 		double timeBegin    = displayTimeUnit.convert(attribute.getTimeBegin(), dbTimeUnit);
 		
@@ -255,6 +261,8 @@ public class CanvasAxisX extends AbstractAxisCanvas
 			// always draw the ticks
 			e.gc.drawLine(axis_x_pos, position_y, axis_x_pos, axis_tick_mark_height);
 		}
+		attribute.setTimeUnit(displayTimeUnit);
+		attribute.setDisplayTimeUnit(userDisplayTimeUnit);
 	}
 	
 	/*****

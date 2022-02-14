@@ -1,5 +1,7 @@
 package edu.rice.cs.hpctraceviewer.ui.main;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -70,7 +72,7 @@ import edu.rice.cs.hpctraceviewer.ui.operation.ZoomOperation;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.color.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.Frame;
-import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
+import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
 import edu.rice.cs.hpctraceviewer.data.Position;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
@@ -90,7 +92,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 			   ISpaceTimeCanvas, 
 			   ITraceViewAction, 
 			   DisposeListener,
-			   EventHandler
+			   EventHandler, PropertyChangeListener
 {		
 	/**The min number of process units you can zoom in.*/
     private final static int MIN_PROC_DISP = 1;
@@ -124,7 +126,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	/** thread to remove message */
 	MessageLabelManager restoreMessage;
 	
-	final private ImageTraceAttributes oldAttributes;
+	final private TraceDisplayAttribute oldAttributes;
 	
 	final private DecimalFormat formatTime;
 
@@ -139,7 +141,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		this.tracePart   = tracePart;
 		this.eventBroker = eventBroker;
 		this.context     = context;
-		oldAttributes    = new ImageTraceAttributes();
+		oldAttributes    = new TraceDisplayAttribute();
 
 		selectionTopLeft     = new Point(0,0);
 		selectionBottomRight = new Point(0,0);
@@ -181,13 +183,16 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 
 		// init configuration
 		Position p = new Position(-1, -1);
-		this.stData.getAttributes().setPosition(p);
-		this.stData.getAttributes().setDepth(0);
+		this.stData.getTraceDisplayAttribute().setPosition(p);
+		this.stData.getTraceDisplayAttribute().setDepth(0);
 		
 		// initialize the depth
 		// we don't know which depth is the best to viewed, but heuristically
 		// the first third is a better one.
-		Frame frame = new Frame(this.stData.getAttributes().getFrame());
+		var displayAttribute = stData.getTraceDisplayAttribute();
+		displayAttribute.addPropertyChangeListener(this);
+		
+		Frame frame = new Frame(displayAttribute.getFrame());
 		frame.depth = stData.getDefaultDepth();
 		
 		home(frame);
@@ -247,7 +252,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	 *************************************************************************/
 	public void zoom(long _topLeftTime, int _topLeftProcess, long _bottomRightTime, int _bottomRightProcess)
 	{
-		final ImageTraceAttributes attributes = stData.getAttributes();
+		final TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
 		attributes.setTime(_topLeftTime, _bottomRightTime);
 		attributes.assertTimeBounds(stData.getTimeWidth());
 		
@@ -301,7 +306,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 
 		super.paintControl(event);
 
-		final ImageTraceAttributes attributes = stData.getAttributes();
+		final TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
 		
 		//draws cross hairs
 		long selectedTime = attributes.getPosition().time - attributes.getTimeBegin();
@@ -326,7 +331,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	{
 		//if this is the first time painting,
 		//some stuff needs to get initialized
-		Frame frame = new Frame(stData.getAttributes().getFrame());
+		Frame frame = new Frame(stData.getTraceDisplayAttribute().getFrame());
 		
 		home(frame);
 	}
@@ -339,7 +344,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		frame.begTime = 0;
 		frame.endTime = stData.getTimeWidth();
 		
-		stData.getAttributes().setFrame(frame);
+		stData.getTraceDisplayAttribute().setFrame(frame);
 		
 		notifyChanges(ZoomOperation.ActionHome, frame);
 	}
@@ -364,7 +369,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	public void processZoomIn()
 	{
 		final double SCALE = .4;
-		final ImageTraceAttributes attributes = stData.getAttributes();
+		final TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
 		
 		double yMid = (attributes.getProcessEnd()+attributes.getProcessBegin())/2.0;
 		
@@ -385,7 +390,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 				p1++;
 			}
 		}
-		final Frame frame = new Frame(stData.getAttributes().getFrame());
+		final Frame frame = new Frame(stData.getTraceDisplayAttribute().getFrame());
 		frame.begProcess = p1;
 		frame.endProcess = p2;
 
@@ -405,7 +410,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	public boolean canProcessZoomOut() {
 		if (stData == null)
 			return false;
-		ImageTraceAttributes attributes = stData.getAttributes();
+		TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
 		return attributes.getProcessBegin()>0 || attributes.getProcessEnd()<stData.getTotalTraceCount(); 
 	}
 	
@@ -418,7 +423,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	public void processZoomOut()
 	{
 		final double SCALE = .625;
-		final ImageTraceAttributes attributes = stData.getAttributes();
+		final TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
 		
 		//zoom out works as follows: find mid point of times (yMid).
 		//Add/Subtract 1/2 of the scaled numProcessDisp to yMid to get new endProcess and begProcess
@@ -440,7 +445,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 				p1--;
 			}
 		}
-		final Frame frame = new Frame(stData.getAttributes().getFrame());
+		final Frame frame = new Frame(stData.getTraceDisplayAttribute().getFrame());
 		frame.begProcess = p1;
 		frame.endProcess = p2;
 
@@ -456,7 +461,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	public void timeZoomIn()
 	{
 		final double SCALE = .4;
-		final ImageTraceAttributes attributes = stData.getAttributes();
+		final TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
 		
 		long xMid = (attributes.getTimeEnd() + attributes.getTimeBegin()) / 2;
 		
@@ -471,7 +476,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 			return;
 		}
 
-		final Frame frame = new Frame(stData.getAttributes().getFrame());
+		final Frame frame = new Frame(stData.getTraceDisplayAttribute().getFrame());
 		frame.begTime = t1;
 		frame.endTime = t2;
 		
@@ -487,7 +492,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	public void timeZoomOut()
 	{
 		final double SCALE = 0.65;
-		final ImageTraceAttributes attributes = stData.getAttributes();
+		final TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
 		
 		//zoom out works as follows: find mid point of times (xMid).
 		//Add/Subtract 1/2 of the scaled numTimeUnitsDisp to xMid to get new endTime and begTime
@@ -499,7 +504,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		final double td1 = (long)(this.getNumTimeUnitDisplayed() * SCALE);
 		long t1 = (long) Math.floor( Math.max(0, xMid - td1) );
 
-		final Frame frame = new Frame(stData.getAttributes().getFrame());
+		final Frame frame = new Frame(stData.getTraceDisplayAttribute().getFrame());
 		frame.begTime = t1;
 		frame.endTime = t2;
 		
@@ -518,7 +523,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	public boolean canTimeZoomOut() {
 		if (stData == null)
 			return false;
-		final ImageTraceAttributes attributes = stData.getAttributes();
+		final TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
 		return attributes.getTimeBegin()>0 || attributes.getTimeEnd()<stData.getTimeWidth();
 	}
 
@@ -529,7 +534,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	@Override
 	public double getScalePixelsPerTime()
 	{
-		ImageTraceAttributes attributes = stData.getAttributes();
+		TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
 		return (double) attributes.getPixelHorizontal() / (double)this.getNumTimeUnitDisplayed();
 	}
 	
@@ -539,7 +544,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	@Override
 	public double getScalePixelsPerRank()
 	{
-		return (double)stData.getAttributes().getScalePixelsPerRank();
+		return (double)stData.getTraceDisplayAttribute().getScalePixelsPerRank();
 	}
 	
 	/**************************************************************************
@@ -549,7 +554,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	{
 		if (isDisposed()) return;
 		
-		stData.getAttributes().setDepth(newDepth);
+		stData.getTraceDisplayAttribute().setDepth(newDepth);
 		refresh(false);
     }
 	
@@ -594,7 +599,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	 **************************************************************************/
 	private void adjustLabels()
     {
-		final ImageTraceAttributes attributes = stData.getAttributes();
+		final TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
         
 		showTimeRange(attributes);
         showProcessRange(attributes);
@@ -608,18 +613,18 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	 * Display the time range label
 	 * @param attributes ImageTraceAttributes
 	 **************************************************************************/
-	private void showTimeRange(final ImageTraceAttributes attributes) {
+	private void showTimeRange(final TraceDisplayAttribute attributes) {
 		
 		final TimeUnit dbTimeUnit = stData.getTimeUnit();
-		final TimeUnit displayTimeUnit = attributes.getDisplayTimeUnit(stData);
+		final TimeUnit displayTimeUnit = attributes.getTimeUnit();
 		
-		double timeInSec 	   = displayTimeUnit.convert(attributes.getTimeBegin(), dbTimeUnit);
-		final String timeStart = formatTime.format(timeInSec);
+		double timeInTimeUnit  = attributes.getTimeUnitMultiplier() * displayTimeUnit.convert(attributes.getTimeBegin(), dbTimeUnit);
+		final String timeStart = formatTime.format(timeInTimeUnit);
 		
-		timeInSec = displayTimeUnit.convert(attributes.getTimeEnd(), dbTimeUnit);
-		final String timeEnd   = formatTime.format(timeInSec);
+		timeInTimeUnit = attributes.getTimeUnitMultiplier() * displayTimeUnit.convert(attributes.getTimeEnd(), dbTimeUnit);
+		final String timeEnd   = formatTime.format(timeInTimeUnit);
         
-		String timeUnit = attributes.getTimeUnitName(displayTimeUnit);
+		String timeUnit = attributes.getTimeUnitName(attributes.getDisplayTimeUnit());
 		
 		timeLabel.setText("Time Range: [" + timeStart + timeUnit + ", " + timeEnd + timeUnit + "]");
         timeLabel.setSize(timeLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT));
@@ -632,15 +637,14 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	 * 
 	 * @param attributes ImageTraceAttributes
 	 **************************************************************************/
-	private void showProcessRange(final ImageTraceAttributes attributes) {
+	private void showProcessRange(final TraceDisplayAttribute attributes) {
 
         final IBaseData traceData = stData.getBaseData();
         if (traceData == null) {
         	// we don't want to throw an exception here, so just do nothing
-        	System.out.println("Data null, skipping the rest.");
         	return;
         }
-        stData.getAttributes().assertProcessBounds(traceData.getNumberOfRanks());
+        stData.getTraceDisplayAttribute().assertProcessBounds(traceData.getNumberOfRanks());
 
         final List<IdTuple> listIdTuples = traceData.getListOfIdTuples(IdTupleOption.BRIEF);
         if (listIdTuples == null || listIdTuples.size() <= 1)
@@ -678,7 +682,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	 * 
 	 * @param attributes
 	 **************************************************************************/
-	private void showCrossHair(final ImageTraceAttributes attributes) {
+	private void showCrossHair(final TraceDisplayAttribute attributes) {
         
         if(stData == null) {        	
             crossHairLabel.setText("Select Sample For Cross Hair");
@@ -687,19 +691,18 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		ProcessTimeline ptl     = stData.getCurrentDepthTrace();
 		if (ptl == null) return;
 		
-    	final Position position = stData.getAttributes().getPosition();
+    	final Position position = stData.getTraceDisplayAttribute().getPosition();
     			
 		final TimeUnit dbTimeUnit = stData.getTimeUnit();
-		final TimeUnit displayTimeUnit = attributes.getDisplayTimeUnit(stData);
-		final long selectedTime = displayTimeUnit.convert(position.time, dbTimeUnit);
+		final TimeUnit displayTimeUnit = attributes.getTimeUnit();
+		final float selectedTime = displayTimeUnit.convert(position.time, dbTimeUnit) * attributes.getTimeUnitMultiplier();
 		
 		final int selectedProc  = ptl.getProcessNum();
 
         final IBaseData traceData = stData.getBaseData();
         final List<IdTuple> listIdTuples = traceData.getListOfIdTuples(IdTupleOption.BRIEF);
 
-		String timeUnit = attributes.getTimeUnitName(displayTimeUnit);
-		
+		String timeUnit = attributes.getTimeUnitName(attributes.getDisplayTimeUnit());
 		String label = "Cross Hair: ";
 
 		if ( selectedProc >= 0 && selectedProc < listIdTuples.size() && listIdTuples.size()>1 ) {
@@ -739,7 +742,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	 **************************************************************************/
 	private void setDetail()
     {
-		ImageTraceAttributes attributes = stData.getAttributes();
+		TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
 		int topLeftProcess = attributes.getProcessBegin() + (int) (selectionTopLeft.y / getScalePixelsPerRank());
 		long topLeftTime   = attributes.getTimeBegin() + (long)(selectionTopLeft.x / getScalePixelsPerTime());
 		
@@ -752,7 +755,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		long bottomRightTime   = attributes.getTimeBegin() + (long)Math.ceil( (selectionBottomRight.x / getScalePixelsPerTime()) );
 
 
-		final Frame frame = new Frame(stData.getAttributes().getFrame());
+		final Frame frame = new Frame(stData.getTraceDisplayAttribute().getFrame());
 		frame.begTime = topLeftTime;
 		frame.endTime = bottomRightTime;
 		frame.begProcess = topLeftProcess;
@@ -765,27 +768,27 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
     @Override
     public boolean canGoLeft() {
     	if (stData == null) return false;
-    	return (stData.getAttributes().getTimeBegin() > 0);
+    	return (stData.getTraceDisplayAttribute().getTimeBegin() > 0);
     }
 
     
     @Override
     public boolean canGoRight() {
     	if (stData == null) return false;
-    	return (stData.getAttributes().getTimeEnd()< this.stData.getTimeWidth());
+    	return (stData.getTraceDisplayAttribute().getTimeEnd()< this.stData.getTimeWidth());
     }
 
     
     @Override
     public boolean canGoUp() {
     	if (stData == null) return false;
-    	return (stData.getAttributes().getProcessBegin()>0);
+    	return (stData.getTraceDisplayAttribute().getProcessBegin()>0);
     }
     
     @Override
     public boolean canGoDown() {
     	if (stData == null) return false;
-    	return (stData.getAttributes().getProcessEnd()<this.stData.getTotalTraceCount());
+    	return (stData.getTraceDisplayAttribute().getProcessEnd()<this.stData.getTotalTraceCount());
     }
 
     
@@ -805,7 +808,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
     	if (!canGoLeft())
     		return;
     	
-    	final ImageTraceAttributes attributes = stData.getAttributes();
+    	final TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
     	
     	long topLeftTime = attributes.getTimeBegin();
 		long bottomRightTime = attributes.getTimeEnd();
@@ -833,7 +836,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
     	if (!canGoRight())
     		return;
     	
-    	final ImageTraceAttributes attributes = stData.getAttributes();
+    	final TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
     	
     	long topLeftTime = attributes.getTimeBegin();
 		long bottomRightTime = attributes.getTimeEnd();
@@ -859,7 +862,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
      */
     public void setTimeRange(long topLeftTime, long bottomRightTime)
     {
-    	final Frame frame = new Frame(stData.getAttributes().getFrame());
+    	final Frame frame = new Frame(stData.getTraceDisplayAttribute().getFrame());
     	frame.begTime = topLeftTime;
     	frame.endTime = bottomRightTime;
     	
@@ -874,7 +877,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
     	if (!canGoUp())
     		return;
     	
-    	final ImageTraceAttributes attributes = stData.getAttributes();
+    	final TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
     	
     	int proc_begin = attributes.getProcessBegin();
     	int proc_end = attributes.getProcessEnd();
@@ -899,7 +902,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
     	if (!canGoDown())
     		return;
     	
-    	final ImageTraceAttributes attributes = stData.getAttributes();
+    	final TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
     	
     	int proc_begin = attributes.getProcessBegin();
     	int proc_end = attributes.getProcessEnd();
@@ -929,7 +932,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		boolean validSaveFileFound = false;
 		while(!validSaveFileFound)
 		{
-			Frame toSave = stData.getAttributes().getFrame();
+			Frame toSave = stData.getTraceDisplayAttribute().getFrame();
 			saveDialog.setFileName( (int)toSave.begTime      + "-"  + 
 									(int)toSave.endTime      + ", " +
 									(int)toSave.begProcess   + "-"  +
@@ -962,7 +965,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 			try
 			{
 				out = new ObjectOutputStream(new FileOutputStream(fileName));
-				out.writeObject(stData.getAttributes().getFrame());
+				out.writeObject(stData.getTraceDisplayAttribute().getFrame());
 			}
 			finally
 			{
@@ -1034,7 +1037,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
      */
 	private void setProcessRange(int pBegin, int pEnd) 
 	{
-    	final ImageTraceAttributes attributes = stData.getAttributes();
+    	final TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
     	final Frame frame = new Frame(attributes.getFrame());
     	frame.begProcess = pBegin;
     	frame.endProcess = pEnd;
@@ -1044,7 +1047,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 
 	private Position updatePosition(Point mouseDown)
 	{
-    	final ImageTraceAttributes attributes = stData.getAttributes();
+    	final TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
     	
     	int selectedProcess = attributes.convertPixelToRank(mouseDown.y);
 
@@ -1062,12 +1065,12 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	
 	private long getNumTimeUnitDisplayed()
 	{
-		return (stData.getAttributes().getTimeInterval());
+		return (stData.getTraceDisplayAttribute().getTimeInterval());
 	}
 	
 	private double getNumProcessesDisplayed()
 	{
-		return (stData.getAttributes().getProcessInterval());
+		return (stData.getTraceDisplayAttribute().getProcessInterval());
 	}
 	
 
@@ -1101,7 +1104,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		if (view.width <= 0 || view.height <= 0) 
 			return;
 		
-		final ImageTraceAttributes attributes = stData.getAttributes();
+		final TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
 
 		attributes.setPixelHorizontal(view.width);
 		attributes.setPixelVertical(view.height);
@@ -1189,7 +1192,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		// in case of filter, we may need to change the cursor position
 		if (refreshData) {
 			final List<IdTuple> list = stData.getBaseData().getListOfIdTuples(IdTupleOption.BRIEF);
-			final Position p = stData.getAttributes().getPosition();
+			final Position p = stData.getTraceDisplayAttribute().getPosition();
 			
 			if (p.process > list.size()-1) {
 				// out of range: need to change the cursor position
@@ -1443,7 +1446,16 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		}
 	}
 
-	
+
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+		if (evt.getPropertyName().equals(TraceDisplayAttribute.DISPLAY_TIME_UNIT)) {
+			if (evt.getNewValue() instanceof TimeUnit) {
+				adjustLabels();
+			}
+		}
+	}
+
 	//-----------------------------------------------------------------------------------------
 	// PRIVATE CLASSES
 	//-----------------------------------------------------------------------------------------
@@ -1523,7 +1535,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		@Override
 		public void rebuffering() {
 			// force the paint to refresh the data			
-			final ImageTraceAttributes attr = stData.getAttributes();
+			final TraceDisplayAttribute attr = stData.getTraceDisplayAttribute();
 			IUndoContext context = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_RESIZE);
 			
 			try {
@@ -1554,7 +1566,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 			// zoom in/out or change of ROI ?
 			if (operation instanceof ZoomOperation || operation instanceof WindowResizeOperation) {
 				Frame frame = ((ZoomOperation)operation).getFrame();
-				final ImageTraceAttributes attributes = stData.getAttributes();
+				final TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
 				
 				attributes.setFrame(frame);
 				zoom(frame.begTime, frame.begProcess, frame.endTime, frame.endProcess);
@@ -1562,7 +1574,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 			// change of cursor position ?
 			else if (operation instanceof PositionOperation) {
 				Position p = ((PositionOperation)operation).getPosition();
-				stData.getAttributes().setPosition(p);
+				stData.getTraceDisplayAttribute().setPosition(p);
 
 				// just change the position, doesn't need to fully refresh
 				redraw();

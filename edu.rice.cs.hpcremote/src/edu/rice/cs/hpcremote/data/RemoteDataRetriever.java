@@ -17,7 +17,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpcdata.util.CallPath;
 import edu.rice.cs.hpcremote.data.DecompressionThread.DecompressionItemToDo;
-import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
+import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
 
 
@@ -92,7 +92,7 @@ public class RemoteDataRetriever {
 	 * @return
 	 * @throws IOException 
 	 */
-	public void getData( ImageTraceAttributes attributes, 
+	public void getData( TraceDisplayAttribute attributes, 
 			Map<Integer, CallPath> map, 
 			final ConcurrentLinkedQueue<DecompressionItemToDo> workToDo) throws IOException
 	{

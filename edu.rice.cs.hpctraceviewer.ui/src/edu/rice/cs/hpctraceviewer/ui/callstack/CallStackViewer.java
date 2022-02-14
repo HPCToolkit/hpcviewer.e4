@@ -46,7 +46,7 @@ import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.color.ColorTable;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
-import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
+import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
 import edu.rice.cs.hpctraceviewer.data.Position;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
@@ -208,7 +208,7 @@ public class CallStackViewer extends AbstractBaseTableViewer
 			return;
 		}
 		// general case
-		final ImageTraceAttributes attributes = stData.getAttributes();
+		final TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
     	int estimatedProcess = (attributes.getPosition().process - attributes.getProcessBegin());
     	int numDisplayedProcess = ptlService.getNumProcessTimeline();
     	
@@ -334,7 +334,7 @@ public class CallStackViewer extends AbstractBaseTableViewer
 				operation.hasContext(positionCtx)) {
 			if (event.getEventType() == OperationHistoryEvent.DONE) {
 				//updateView();
-				setSample(stData.getAttributes().getPosition(), stData.getAttributes().getDepth());			}
+				setSample(stData.getTraceDisplayAttribute().getPosition(), stData.getTraceDisplayAttribute().getDepth());			}
 		}
 	}
 	

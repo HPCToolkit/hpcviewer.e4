@@ -12,7 +12,7 @@ import edu.rice.cs.hpcdata.util.CallPath;
 //import edu.rice.cs.hpcremote.data.SpaceTimeDataControllerRemote;
 import edu.rice.cs.hpctraceviewer.data.DataLinePainting;
 import edu.rice.cs.hpctraceviewer.data.DataPreparation;
-import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
+import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TimelineDataSet;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
@@ -69,7 +69,7 @@ public class TimelineThread
 			traceService.setProcessTimeline(new ProcessTimeline[totalLines]);
 		
 		if (changedBounds) {
-			ImageTraceAttributes attributes = stData.getAttributes();
+			TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
 			ProcessTimeline currentTimeline = new ProcessTimeline(currentLineNum, (HashMap<Integer, CallPath>) stData.getScopeMap(),
 					stData.getBaseData(), lineToPaint(currentLineNum, attributes),
 					attributes.getPixelHorizontal(), attributes.getTimeInterval(), 
@@ -123,7 +123,7 @@ public class TimelineThread
 	
 	/** Returns the index of the file to which the line-th line corresponds. */
 
-	private int lineToPaint(int line, ImageTraceAttributes attributes) {
+	private int lineToPaint(int line, TraceDisplayAttribute attributes) {
 
 		int numTimelinesToPaint = attributes.getProcessInterval();
 		if (numTimelinesToPaint > attributes.getPixelVertical())

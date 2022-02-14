@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.graphics.GC;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
-import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
+import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
 import edu.rice.cs.hpctraceviewer.data.TimelineDataSet;
 import edu.rice.cs.hpctraceviewer.ui.base.ISpaceTimeCanvas;
 import edu.rice.cs.hpctraceviewer.ui.internal.BasePaintThread;
@@ -28,7 +28,7 @@ public class DepthViewPaint extends BaseViewPaint {
 	private final int visibleDepth;
 
 	public DepthViewPaint(final GC masterGC, SpaceTimeDataController data,
-			ImageTraceAttributes attributes, boolean changeBound, 
+			TraceDisplayAttribute attributes, boolean changeBound, 
 			ISpaceTimeCanvas canvas, int visibleDepth) {
 		
 		super("Depth view", data, changeBound,  canvas);
@@ -41,7 +41,7 @@ public class DepthViewPaint extends BaseViewPaint {
 	@Override
 	protected boolean startPainting(int linesToPaint, int numThreads, boolean changedBounds) 
 	{
-		ImageTraceAttributes attributes = controller.getAttributes();
+		TraceDisplayAttribute attributes = controller.getTraceDisplayAttribute();
 		int process = attributes.getPosition().process;
 		
 		// we need to check if the data is ready.
@@ -62,7 +62,7 @@ public class DepthViewPaint extends BaseViewPaint {
 
 	@Override
 	public int getNumberOfLines() {
-		final ImageTraceAttributes attributes = controller.getAttributes();
+		final TraceDisplayAttribute attributes = controller.getTraceDisplayAttribute();
 		return Math.min(attributes.getDepthPixelVertical(), visibleDepth);
 	}
 
@@ -70,7 +70,7 @@ public class DepthViewPaint extends BaseViewPaint {
 	protected BaseTimelineThread getTimelineThread(ISpaceTimeCanvas canvas, double xscale, double yscale,
 			Queue<TimelineDataSet> queue, IProgressMonitor monitor) {
 		
-		ImageTraceAttributes attributes = controller.getAttributes();
+		TraceDisplayAttribute attributes = controller.getTraceDisplayAttribute();
 		
 		return new TimelineDepthThread( controller, attributes, yscale, queue, numDataCollected,
 										monitor, visibleDepth);

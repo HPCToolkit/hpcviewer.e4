@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.InflaterInputStream;
 
-import edu.rice.cs.hpctraceviewer.data.ImageTraceAttributes;
+import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
 import edu.rice.cs.hpcdata.db.version4.DataRecord;
 import edu.rice.cs.hpcdata.util.CallPath;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
@@ -36,7 +36,7 @@ public class DecompressionThread extends Thread {
 
 	final Map<Integer, CallPath> scopeMap;
 
-	final ImageTraceAttributes attributes;
+	final TraceDisplayAttribute attributes;
 	
 	private final IThreadListener listener;
 	
@@ -62,7 +62,7 @@ public class DecompressionThread extends Thread {
 	 */
 	public DecompressionThread(
 			Map<Integer, CallPath> map,
-			ImageTraceAttributes attributes,
+			TraceDisplayAttribute attributes,
 			ConcurrentLinkedQueue<DecompressionItemToDo> workToDo, 
 			ConcurrentLinkedQueue<Integer> timelinesAvailableForRendering,
 			AtomicInteger ranksRemainingToDecompress,
