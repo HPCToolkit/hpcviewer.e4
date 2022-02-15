@@ -64,11 +64,12 @@ import org.eclipse.swt.SWT;
 public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 {
 	
-	static final private String PROPERTY_DATA = "hpceditor.data";
+	private static final String PROPERTY_DATA = "hpceditor.data";
 
-	private DialogSettings dialogSettings;
-	private SourceViewer textViewer;
-	private Object input;
+	private final LineNumberRulerColumn lnrc ;
+	private final DialogSettings dialogSettings;
+	private final SourceViewer textViewer;
+	
 	private int    searchOffsetStart, searchOffsetEnd;
 	private FindReplaceDocumentAdapter finder;
 	
@@ -87,7 +88,7 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 		
 		// add line number column to the source viewer
 		CompositeRuler ruler 	   = new CompositeRuler();
-		LineNumberRulerColumn lnrc = new LineNumberRulerColumn();
+		lnrc = new LineNumberRulerColumn();
 
 		Font font = FontManager.getTextEditorFont();
 
@@ -288,6 +289,7 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 	
 	@Override
 	public String getTitle() {
+		Object input = textViewer.getData(PROPERTY_DATA);
 		return Editor.getTitle(input);
 	}
 	
@@ -309,8 +311,7 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 	@Override
 	public void setInput(Object input) {
 		
-		this.input = input;
-		setText(getTitle());
+		setText(getTitle(input));
 		
 		if (input instanceof Scope) {
 			Scope scope = (Scope) input;
@@ -393,6 +394,7 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 			
 			Font font = FontManager.getTextEditorFont();
 			text.setFont(font);
+			lnrc.setFont(font);
 			
 			textViewer.refresh();
 		}
