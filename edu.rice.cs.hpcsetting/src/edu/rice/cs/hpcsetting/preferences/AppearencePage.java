@@ -173,8 +173,7 @@ public class AppearencePage extends AbstractPage
 		fontMetricEditor.store();
 		fontSourceEditor.store();
 		
-		FontDescriptor fd = FontDescriptor.createFrom(fontGeneric);
-		Font fontGlyph    = FontManager.getCallsiteGlyphDefaultFont(fd.createFont(Display.getDefault()));
+		Font fontGlyph    = FontManager.getCallsiteGlyphDefaultFont(fontGeneric);
 		FontData fdGlyph  = fontGlyph.getFontData()[0];
 		PreferenceConverter.setValue(store, PreferenceConstants.ID_FONT_CALLSITE, fdGlyph);
 				

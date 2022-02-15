@@ -80,7 +80,7 @@ public class FontManager
 	 * @return {@code Font}
 	 */
 	static public Font getCallsiteGlyphDefaultFont() {
-		return getCallsiteGlyphDefaultFont(getFontGeneric());
+		return getCallsiteGlyphDefaultFont(getFontGeneric().getFontData()[0]);
 	}
 	
 	
@@ -93,16 +93,15 @@ public class FontManager
 	 * @return
 	 * 			{@code Font}
 	 */
-	static public Font getCallsiteGlyphDefaultFont(Font fontBase) {
-		FontDescriptor fd = FontDescriptor.createFrom(fontBase);
-		FontData fdata[] = fd.getFontData();
-		int height = fdata[0].getHeight();
+	static public Font getCallsiteGlyphDefaultFont(FontData fontBase) {
+		int height = fontBase.getHeight();
 		
 		// we want the call glyph to be more visible
 		// In most cases, having taller 2 pixels is enough
 		final int ADJUSTED_SIZE = 2;
 		
-		var defaultFont = fd.setHeight(ADJUSTED_SIZE + height);
+		FontDescriptor fd = FontDescriptor.createFrom(fontBase);
+		var defaultFont   = fd.setHeight(ADJUSTED_SIZE + height);
 		INSTANCE.fontRegistry.put(ID_FONT_CALLSITE_DEFAULT, defaultFont.getFontData());
 		
 		return INSTANCE.fontRegistry.get(ID_FONT_CALLSITE_DEFAULT);
