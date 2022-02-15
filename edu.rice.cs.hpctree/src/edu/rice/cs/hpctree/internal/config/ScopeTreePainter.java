@@ -108,12 +108,12 @@ public class ScopeTreePainter
     private static ICellPainter getCallSitePainter(ScopeTreeDataProvider dataProvider, TreeImagePainter treeImagePainter) {    	
         // call site image and text
         // Partial fix issue #134: put the text on the left of the icon
-        CallSiteArrowPainter arrowImage  = new CallSiteArrowPainter();
-        CallSiteTextPainter  textPainter = new CallSiteTextPainter(dataProvider);
-        CellPainterDecorator decoratorCS = new CellPainterDecorator(textPainter, CellEdgeEnum.RIGHT, arrowImage);
+        CallSiteArrowPainter csArrowPainter = new CallSiteArrowPainter();
+        CallSiteTextPainter  csTextPainter  = new CallSiteTextPainter(dataProvider);
+        CellPainterDecorator csPainter = new CellPainterDecorator(csTextPainter, CellEdgeEnum.RIGHT, csArrowPainter);
         
         // combining tree and call site info
-        CellPainterDecorator decorator = new CellPainterDecorator(treeImagePainter, CellEdgeEnum.RIGHT, decoratorCS);
+        CellPainterDecorator decorator = new CellPainterDecorator(treeImagePainter, CellEdgeEnum.RIGHT, csPainter);
 
         BackgroundPainter treePainter =
                 new BackgroundPainter(

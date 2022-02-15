@@ -153,10 +153,18 @@ public class FontManager
 	}
 	
 	
+	/*****
+	 * Changing the font height of generic, metric, text and call site characters
+	 * 
+	 * @param
+	 *  deltaHeight the delta of the height. If delta < 0, it will decrement the height,
+	 *  if delta > 0, it increments it.	 
+	 */
 	static public void changeFontHeight(int deltaHeight) {
-		changeFontHeight(PreferenceConstants.ID_FONT_GENERIC, deltaHeight);
-		changeFontHeight(PreferenceConstants.ID_FONT_METRIC,  deltaHeight);
-		changeFontHeight(PreferenceConstants.ID_FONT_TEXT,    deltaHeight);
+		changeFontHeight(PreferenceConstants.ID_FONT_GENERIC,  deltaHeight);
+		changeFontHeight(PreferenceConstants.ID_FONT_METRIC,   deltaHeight);
+		changeFontHeight(PreferenceConstants.ID_FONT_TEXT,     deltaHeight);
+		changeFontHeight(PreferenceConstants.ID_FONT_CALLSITE, deltaHeight);
 	}
 	
 	/****

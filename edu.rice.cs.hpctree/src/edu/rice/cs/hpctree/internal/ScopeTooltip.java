@@ -5,6 +5,7 @@ import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.grid.GridRegion;
 import org.eclipse.nebula.widgets.nattable.layer.cell.ILayerCell;
 import org.eclipse.nebula.widgets.nattable.painter.cell.ICellPainter;
+import org.eclipse.nebula.widgets.nattable.painter.cell.TextPainter;
 import org.eclipse.nebula.widgets.nattable.tooltip.NatTableContentTooltip;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Rectangle;
@@ -54,6 +55,8 @@ public class ScopeTooltip extends NatTableContentTooltip
     		}
     		return null;
     	}
+    	if (colIndex > 0)
+    		return null;
 
         ILayerCell cell = this.natTable.getCellByPosition(col, row);
         if (cell == null)
@@ -65,29 +68,28 @@ public class ScopeTooltip extends NatTableContentTooltip
         try {
         	Rectangle adjustedBounds = natTable.getLayerPainter().adjustCellBounds(col, row, cell.getBounds());
         	ICellPainter clickedCell = painter.getCellPainterAt(event.x, event.y, cell, gc, adjustedBounds, configRegistry);
-        	if (clickedCell != null ) {
+        	if (clickedCell == null )
+        		return null;
 
-            	if (clickedCell instanceof CallSiteTextPainter || 
-            		clickedCell instanceof CallSiteArrowPainter) {
-                		Scope scope = bodyDataProvider.getRowObject(rowIndex);
+        	if (clickedCell instanceof CallSiteTextPainter || 
+        		clickedCell instanceof CallSiteArrowPainter) {
+        		Scope scope = bodyDataProvider.getRowObject(rowIndex);
 
-                		if (scope instanceof CallSiteScope) {
-                			LineScope ls = ((CallSiteScope)scope).getLineScope();
-                			String filename = ls.getName();
-                			return "Callsite at " + filename;
-                		}
-                	}
+        		if (scope instanceof CallSiteScope) {
+        			LineScope ls = ((CallSiteScope)scope).getLineScope();
+        			String filename = ls.getName();
+        			return "Callsite at " + filename;
+        		}
+        	} else if (clickedCell instanceof TextPainter) {
+        		String text = super.getText(event);
+        		if (text != null && text.length() > 0) {
+        			text = StringUtil.wrapScopeName(text, MAX_TOOLTIP_CHAR);
+        		}
+        		return text;        		
         	}
         } finally {
         	gc.dispose();
         }
-    	if (colIndex == 0) {
-    		String text = super.getText(event);
-    		if (text != null && text.length() > 0) {
-    			text = StringUtil.wrapScopeName(text, MAX_TOOLTIP_CHAR);
-    		}
-    		return text;
-    	}
     	return null;
 	}
 }
