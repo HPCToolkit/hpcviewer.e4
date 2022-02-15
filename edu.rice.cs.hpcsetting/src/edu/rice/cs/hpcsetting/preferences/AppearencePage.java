@@ -8,7 +8,6 @@ import org.eclipse.jface.preference.FontFieldEditor;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.preference.PreferenceStore;
-import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.resource.FontRegistry;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.resource.StringConverter;
@@ -19,7 +18,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.slf4j.Logger;
@@ -34,7 +32,8 @@ import edu.rice.cs.hpcsetting.fonts.FontManager;
  ***********************************************************/
 public class AppearencePage extends AbstractPage 
 {
-	public final static String TITLE = "Appearance";
+	public static final  String TITLE = "Appearance";
+	private static final String FORMAT_UNICODE = "\\u%04x";
 	
 	private ViewerFontFieldEditor fontGenericEditor, fontMetricEditor, fontSourceEditor;
 	
@@ -75,7 +74,7 @@ public class AppearencePage extends AbstractPage
         fontMetricEditor  = createFontEditor(groupFont, PreferenceConstants.ID_FONT_METRIC,  "Metric column font:", FontManager.getMetricFont());
         fontSourceEditor  = createFontEditor(groupFont, PreferenceConstants.ID_FONT_TEXT,    "Text editor font:"  , FontManager.getTextEditorFont());
 
-        // callsite area
+        // call-site area
         //
         Group groupCallsite = createGroupControl(parent, "Call-site glyph settings ", false);
         fontCallsiteEditor = createFontEditor(groupCallsite, PreferenceConstants.ID_FONT_CALLSITE, "Glyph font:",   FontManager.getCallsiteGlyphFont());
@@ -101,7 +100,7 @@ public class AppearencePage extends AbstractPage
 	
 	private Combo createGlyphOptionCombo(Composite parent) {        
         createLabelControl(parent, "Glyph characters:");
-        var callToChars = ViewerPreferenceManager.DEFAULT_CALLTO;
+        var callToChars   = ViewerPreferenceManager.DEFAULT_CALLTO;
         var callFromChars = ViewerPreferenceManager.DEFAULT_CALLFROM;
         
         assert (callToChars.length == callFromChars.length);
@@ -112,8 +111,8 @@ public class AppearencePage extends AbstractPage
         
         for(int i=0; i<callToChars.length; i++) {
         	contents[i] = callToChars[i] + " , " + callFromChars[i] + 
-        				  "   ( " + String.format("\\u%04x", (int)callToChars[i].charAt(0)) +
-        				  " , " + String.format("\\u%04x", (int)callFromChars[i].charAt(0)) + " )"; 
+        				  "   ( " + String.format(FORMAT_UNICODE, (int)callToChars[i].charAt(0))   +
+        				  " , "   + String.format(FORMAT_UNICODE, (int)callFromChars[i].charAt(0)) + " )"; 
         	if (currValue.equals(callToChars[i]))
         		select = i;
         }

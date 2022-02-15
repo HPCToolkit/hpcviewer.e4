@@ -11,13 +11,13 @@ import org.eclipse.nebula.widgets.nattable.config.IConfiguration;
 import org.eclipse.nebula.widgets.nattable.data.convert.DefaultDisplayConverter;
 import org.eclipse.nebula.widgets.nattable.grid.GridRegion;
 import org.eclipse.nebula.widgets.nattable.layer.ILayer;
+import org.eclipse.nebula.widgets.nattable.painter.cell.TextPainter;
 import org.eclipse.nebula.widgets.nattable.style.CellStyleAttributes;
 import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
 import org.eclipse.nebula.widgets.nattable.style.Style;
 import org.eclipse.nebula.widgets.nattable.ui.NatEventData;
 import org.eclipse.nebula.widgets.nattable.ui.action.IMouseAction;
 import org.eclipse.nebula.widgets.nattable.ui.binding.UiBindingRegistry;
-import org.eclipse.nebula.widgets.nattable.ui.matcher.CellLabelMouseEventMatcher;
 import org.eclipse.nebula.widgets.nattable.ui.matcher.MouseEventMatcher;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Color;
@@ -25,6 +25,8 @@ import org.eclipse.swt.widgets.Control;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpctree.action.IActionListener;
+import edu.rice.cs.hpctree.internal.CallSiteArrowPainter;
+import edu.rice.cs.hpctree.internal.CallSiteTextPainter;
 import edu.rice.cs.hpctree.internal.ScopeAttributeMouseEventMatcher;
 import edu.rice.cs.hpctree.internal.ScopeTreeDataProvider;
 import edu.rice.cs.hpctree.internal.ScopeTreeLabelAccumulator;
@@ -109,14 +111,21 @@ public class TableConfiguration implements IConfiguration
 	@Override
 	public void configureUiBindings(UiBindingRegistry uiBindingRegistry) {		
 		
+		// create binding between left click and the call sites (both arrow and texts)
+		// 
 		List<String> labels = new ArrayList<>(2);
     	labels.add(ScopeTreeLabelAccumulator.LABEL_CALLSITE);
     	labels.add(ScopeTreeLabelAccumulator.LABEL_CALLER);
 
-		ScopeAttributeMouseEventMatcher scopeMatcher = new ScopeAttributeMouseEventMatcher(
-				GridRegion.BODY, 
-				MouseEventMatcher.LEFT_BUTTON, 
-				labels);
+    	final List<Class<?>> listPainters = new ArrayList<>(2);
+    	listPainters.add(CallSiteArrowPainter.class);
+    	listPainters.add(CallSiteTextPainter.class);
+    	
+		var scopeMatcher = new ScopeAttributeMouseEventMatcher(
+								GridRegion.BODY, 
+								MouseEventMatcher.LEFT_BUTTON, 
+								labels, 
+								listPainters);
 		
 		uiBindingRegistry.registerSingleClickBinding(scopeMatcher, (natTable, event) -> {
             NatEventData eventData = NatEventData.createInstanceFromEvent(event);
@@ -129,13 +138,20 @@ public class TableConfiguration implements IConfiguration
             }
 		});
 
+		// create binding between left click and the node text if the source is available
+		//
+		final List<Class<?>> listNodePainters = new ArrayList<>(1);
+		listNodePainters.add(TextPainter.class);
+		final List<String> labelSource = new ArrayList<>(1);
+		labelSource.add(ScopeTreeLabelAccumulator.LABEL_SOURCE_AVAILABLE);
 		
-		CellLabelMouseEventMatcher mouseMatcher = new CellLabelMouseEventMatcher(
-				GridRegion.BODY, 
-				MouseEventMatcher.LEFT_BUTTON, 
-				ScopeTreeLabelAccumulator.LABEL_SOURCE_AVAILABLE);
+		var nodeMatcher = new ScopeAttributeMouseEventMatcher(
+								GridRegion.BODY, 
+								MouseEventMatcher.LEFT_BUTTON, 
+								labelSource, 
+								listNodePainters);
 		
-		uiBindingRegistry.registerSingleClickBinding(mouseMatcher, new IMouseAction() {
+		uiBindingRegistry.registerSingleClickBinding(nodeMatcher, new IMouseAction() {
 			
 			@Override
 			public void run(NatTable natTable, MouseEvent event) {

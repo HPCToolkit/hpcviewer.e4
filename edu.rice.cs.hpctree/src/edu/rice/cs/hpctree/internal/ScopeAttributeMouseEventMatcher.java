@@ -27,6 +27,8 @@ import org.eclipse.swt.graphics.Rectangle;
 public class ScopeAttributeMouseEventMatcher extends MouseEventMatcher 
 {
 	private final List<String> labels;
+	private final List<Class<?>> painters;
+	
 	/***
 	 * Constructor to specify which painters need to be matched.
 	 * 
@@ -37,9 +39,13 @@ public class ScopeAttributeMouseEventMatcher extends MouseEventMatcher
 	 *  @see GridRegion
 	 *  @see MouseEventMatcher 
 	 */
-    public ScopeAttributeMouseEventMatcher(String body, int leftButton, List<String> labels) {
+    public ScopeAttributeMouseEventMatcher(String body, 
+    									   int leftButton, 
+    									   List<String> labels,
+    									   List<Class<?>> listPainters) {
     	super(body, leftButton);    	
     	this.labels = labels;
+    	this.painters = listPainters;
 	}
 
 	@Override
@@ -53,42 +59,40 @@ public class ScopeAttributeMouseEventMatcher extends MouseEventMatcher
             LabelStack customLabels = natTable.getConfigLabelsByPosition(columnPosition, rowPosition);
             if (!labels.stream().anyMatch(customLabels::contains))
             	return false;
-
             
             ILayerCell cell = natTable.getCellByPosition(columnPosition, rowPosition);
-            if (cell != null) {
-                IConfigRegistry configRegistry = natTable.getConfigRegistry();
-                ICellPainter cellPainter = cell.getLayer().getCellPainter(
+            if (cell == null)
+            	return false;
+            
+            IConfigRegistry configRegistry = natTable.getConfigRegistry();
+            ICellPainter cellPainter = cell.getLayer().getCellPainter(
+                    columnPosition,
+                    rowPosition,
+                    cell,
+                    configRegistry);
+
+            GC gc = new GC(natTable.getDisplay());
+            try {
+                Rectangle adjustedCellBounds = natTable.getLayerPainter().adjustCellBounds(
                         columnPosition,
                         rowPosition,
+                        cell.getBounds());
+
+                ICellPainter clickedCellPainter = cellPainter.getCellPainterAt(
+                        event.x,
+                        event.y,
                         cell,
+                        gc,
+                        adjustedCellBounds,
                         configRegistry);
-
-                GC gc = new GC(natTable.getDisplay());
-                try {
-                    Rectangle adjustedCellBounds = natTable.getLayerPainter().adjustCellBounds(
-                            columnPosition,
-                            rowPosition,
-                            cell.getBounds());
-
-                    ICellPainter clickedCellPainter = cellPainter.getCellPainterAt(
-                            event.x,
-                            event.y,
-                            cell,
-                            gc,
-                            adjustedCellBounds,
-                            configRegistry);
-                    
-                    if (clickedCellPainter != null) {
-                    	result = clickedCellPainter instanceof CallSiteTextPainter || 
-                    			 clickedCellPainter instanceof CallSiteArrowPainter;
-                    }
-                } finally {
-                    gc.dispose();
+                
+                if (clickedCellPainter != null) {
+                	result = painters.stream().anyMatch(c -> clickedCellPainter.getClass() == c);
                 }
+            } finally {
+                gc.dispose();
             }
-    	}
-    	
+    	}    	
         return result;
     }
 }
