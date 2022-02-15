@@ -80,7 +80,21 @@ public class FontManager
 	 * @return {@code Font}
 	 */
 	static public Font getCallsiteGlyphDefaultFont() {
-		FontDescriptor fd = FontDescriptor.createFrom(getFontGeneric());
+		return getCallsiteGlyphDefaultFont(getFontGeneric());
+	}
+	
+	
+	/****
+	 * Get the default callsite glyph font based on a certain "base" font.
+	 * The glyph font will have height higher than the base font.
+	 * 
+	 * @param fontBase
+	 * 			The base font.
+	 * @return
+	 * 			{@code Font}
+	 */
+	static public Font getCallsiteGlyphDefaultFont(Font fontBase) {
+		FontDescriptor fd = FontDescriptor.createFrom(fontBase);
 		FontData fdata[] = fd.getFontData();
 		int height = fdata[0].getHeight();
 		
@@ -93,6 +107,7 @@ public class FontManager
 		
 		return INSTANCE.fontRegistry.get(ID_FONT_CALLSITE_DEFAULT);
 	}
+	
 	
 	/***
 	 * get the font for call-site glyph (the call-site symbol).

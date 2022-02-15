@@ -8,6 +8,7 @@ import org.eclipse.jface.preference.FontFieldEditor;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.preference.PreferenceStore;
+import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.resource.FontRegistry;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.resource.StringConverter;
@@ -18,6 +19,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.slf4j.Logger;
@@ -171,11 +173,16 @@ public class AppearencePage extends AbstractPage
 		fontMetricEditor.store();
 		fontSourceEditor.store();
 		
-		fontCallsiteEditor.setFontLabel(FontManager.getCallsiteGlyphDefaultFont().getFontData()[0]);
+		FontDescriptor fd = FontDescriptor.createFrom(fontGeneric);
+		Font fontGlyph    = FontManager.getCallsiteGlyphDefaultFont(fd.createFont(Display.getDefault()));
+		FontData fdGlyph  = fontGlyph.getFontData()[0];
+		PreferenceConverter.setValue(store, PreferenceConstants.ID_FONT_CALLSITE, fdGlyph);
+				
+		fontCallsiteEditor.setFontLabel(fdGlyph);
 		fontCallsiteEditor.store();
 		
+		glyphComboEditor.setFont(fontGlyph);
 		glyphComboEditor.select(ViewerPreferenceManager.DEFAULT_CALLSITE_INDEX);
-		glyphComboEditor.setFont(FontManager.getCallsiteGlyphDefaultFont());
 		saveGlyphOptions();
 	}
 	
