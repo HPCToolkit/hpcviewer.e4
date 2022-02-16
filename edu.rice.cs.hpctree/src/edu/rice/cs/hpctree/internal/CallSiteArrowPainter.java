@@ -99,10 +99,11 @@ public class CallSiteArrowPainter extends BackgroundPainter
             IStyle cellStyle = CellStyleUtil.getCellStyle(cell, configRegistry);
         	String text = getCallsiteGlyph(cell, configRegistry);
         	
+        	// Do not use SWT.TRANSPARENT in this gc
+        	// that flag will make all arrow has the same color!
             gc.drawText(text, 
                     	bounds.x + CellStyleUtil.getHorizontalAlignmentPadding(cellStyle, bounds, size.x),
-                    	bounds.y + CellStyleUtil.getVerticalAlignmentPadding(cellStyle, bounds, size.y),
-                    	SWT.DRAW_TRANSPARENT );
+                    	bounds.y + CellStyleUtil.getVerticalAlignmentPadding(cellStyle, bounds, size.y));
 
             gc.setBackground(originalBackground);
         }
