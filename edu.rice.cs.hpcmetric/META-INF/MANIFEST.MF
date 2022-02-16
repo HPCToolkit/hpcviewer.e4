@@ -18,7 +18,7 @@ Require-Bundle: edu.rice.cs.hpcdata,
  edu.rice.cs.hpcsetting,
  edu.rice.cs.hpcbase,
  com.graphbuilder,
- edu.rice.cs.hpc.filter,
+ edu.rice.cs.hpcfilter,
  org.eclipse.e4.core.services,
  org.eclipse.osgi.services
 Export-Package: edu.rice.cs.hpcmetric,

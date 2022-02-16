@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: hpcfilter
-Bundle-SymbolicName: edu.rice.cs.hpc.filter;singleton:=true
+Bundle-SymbolicName: edu.rice.cs.hpcfilter;singleton:=true
 Bundle-Version: 6.0.0.qualifier
 Bundle-Activator: edu.rice.cs.hpcfilter.Activator
 Bundle-Vendor: Rice University
