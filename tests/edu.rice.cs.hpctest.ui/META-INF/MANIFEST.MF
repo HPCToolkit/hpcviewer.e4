@@ -11,4 +11,7 @@ Require-Bundle: org.eclipse.swt,
  edu.rice.cs.hpctraceviewer.data,
  edu.rice.cs.hpctraceviewer.ui,
  edu.rice.cs.hpcbase,
- edu.rice.cs.hpcdata
+ edu.rice.cs.hpcdata,
+ org.junit,
+ org.junit.jupiter.api,
+ edu.rice.cs.hpcsetting

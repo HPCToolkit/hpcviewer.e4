@@ -32,25 +32,12 @@ public class FontManager
 		fontRegistry = new FontRegistry();
 	}
 
-	public Font getPreferenceFont(String id) {
-		Font font = fontRegistry.get(id);
-		if (font != fontRegistry.defaultFont())
-			return font;
-		
-		ViewerPreferenceManager prefManager = ViewerPreferenceManager.INSTANCE;
-		PreferenceStore preferenceStore = prefManager.getPreferenceStore();
-		
-		FontData []data = PreferenceConverter.getFontDataArray(preferenceStore, id);
-		fontRegistry.put(id, data);
-		return fontRegistry.get(id);
-	}
-
 	
 	/***
 	 * get the font for generic text
 	 * @return
 	 */
-	static public Font getFontGeneric() {
+	public static Font getFontGeneric() {
 		return getFont(PreferenceConstants.ID_FONT_GENERIC, JFaceResources.getDefaultFont());
 	}
 	
@@ -59,7 +46,7 @@ public class FontManager
 	 * get the fixed font for metrics
 	 * @return
 	 */
-	static public Font getMetricFont() {
+	public static Font getMetricFont() {
 		return getFont(PreferenceConstants.ID_FONT_METRIC, JFaceResources.getTextFont());
 	}	
 	
@@ -68,7 +55,7 @@ public class FontManager
 	 * get the fixed font for metrics
 	 * @return
 	 */
-	static public Font getTextEditorFont() {
+	public static Font getTextEditorFont() {
 		return getFont(PreferenceConstants.ID_FONT_TEXT, JFaceResources.getTextFont());
 	}
 	
@@ -79,7 +66,7 @@ public class FontManager
 	 * 
 	 * @return {@code Font}
 	 */
-	static public Font getCallsiteGlyphDefaultFont() {
+	public static Font getCallsiteGlyphDefaultFont() {
 		return getCallsiteGlyphDefaultFont(getFontGeneric().getFontData()[0]);
 	}
 	
@@ -93,7 +80,7 @@ public class FontManager
 	 * @return
 	 * 			{@code Font}
 	 */
-	static public Font getCallsiteGlyphDefaultFont(FontData fontBase) {
+	public static Font getCallsiteGlyphDefaultFont(FontData fontBase) {
 		int height = fontBase.getHeight();
 		
 		// we want the call glyph to be more visible
@@ -112,7 +99,7 @@ public class FontManager
 	 * get the font for call-site glyph (the call-site symbol).
 	 * @return
 	 */
-	static public Font getCallsiteGlyphFont() {
+	public static Font getCallsiteGlyphFont() {
 		Font font = getFont(PreferenceConstants.ID_FONT_CALLSITE, null);
 		if (font == null) {
 			return getCallsiteGlyphDefaultFont();
@@ -120,16 +107,6 @@ public class FontManager
 		return font;
 	}
 
-	
-	static private Font getFont(String id, Font fontDefault) {
-		Font font = null;
-		try {
-			font = INSTANCE.getPreferenceFont(id);
-		} catch (Exception e) {
-			font = fontDefault;
-		}
-		return font;
-	}
 
 	/****
 	 * Retrieve font data of a given font preference.
@@ -139,7 +116,7 @@ public class FontManager
 	 * @param fontPreferenceID The preference font id. 
 	 * @return
 	 */
-	static public FontData[] getFontDataPreference(String fontPreferenceID) {
+	public static FontData[] getFontDataPreference(String fontPreferenceID) {
 		IPreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
 		FontData []fd = PreferenceConverter.getFontDataArray(pref, fontPreferenceID);
 		return fd;
@@ -155,7 +132,7 @@ public class FontManager
 	 * @param fontData the new font data
 	 * @throws IOException
 	 */
-	static public void setFontPreference(String fontPreferenceID, FontData[] fontData) throws IOException {
+	public static void setFontPreference(String fontPreferenceID, FontData[] fontData) throws IOException {
 		
 		// update the cache in the font registry
 		// have to do this manually to reflect the current change
@@ -174,7 +151,7 @@ public class FontManager
 	 *  deltaHeight the delta of the height. If delta < 0, it will decrement the height,
 	 *  if delta > 0, it increments it.	 
 	 */
-	static public void changeFontHeight(int deltaHeight) {
+	public static void changeFontHeight(int deltaHeight) {
 		changeFontHeight(PreferenceConstants.ID_FONT_GENERIC,  deltaHeight);
 		changeFontHeight(PreferenceConstants.ID_FONT_METRIC,   deltaHeight);
 		changeFontHeight(PreferenceConstants.ID_FONT_TEXT,     deltaHeight);
@@ -186,7 +163,7 @@ public class FontManager
 	 * @param id the font id from {@link PreferenceConstants}
 	 * @param deltaHeight the number of increase/decrease
 	 */
-	static public void changeFontHeight(String id, int deltaHeight) {
+	public static void changeFontHeight(String id, int deltaHeight) {
 		FontData []oldfd = FontManager.getFontDataPreference(id);
 		FontData []newFd = FontDescriptor.copy(oldfd);
 		int height = newFd[0].getHeight();
@@ -200,4 +177,27 @@ public class FontManager
 		}
 	}
 
+	
+	private static Font getFont(String id, Font fontDefault) {
+		Font font = null;
+		try {
+			font = INSTANCE.getPreferenceFont(id);
+		} catch (Exception e) {
+			font = fontDefault;
+		}
+		return font;
+	}
+
+	private Font getPreferenceFont(String id) {
+		Font font = fontRegistry.get(id);
+		if (font != fontRegistry.defaultFont())
+			return font;
+		
+		ViewerPreferenceManager prefManager = ViewerPreferenceManager.INSTANCE;
+		PreferenceStore preferenceStore = prefManager.getPreferenceStore();
+		
+		FontData []data = PreferenceConverter.getFontDataArray(preferenceStore, id);
+		fontRegistry.put(id, data);
+		return fontRegistry.get(id);
+	}
 }

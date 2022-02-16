@@ -119,7 +119,7 @@ public class CallSiteArrowPainter extends BackgroundPainter
      */
     protected Point getGlyphBound(ILayerCell cell, GC gc, IConfigRegistry configRegistry) {
     	String text = getCallsiteGlyph(cell, configRegistry);
-    	if (EMPTY == text)
+    	if (text.equals(EMPTY))
     		return EMPTY_SIZE;
     	
     	final int PADDING = 2;    	
