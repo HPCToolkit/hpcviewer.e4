@@ -9,6 +9,7 @@ import org.eclipse.nebula.widgets.nattable.resize.command.ColumnResizeCommand;
 import org.eclipse.nebula.widgets.nattable.resize.command.RowResizeCommand;
 import org.eclipse.nebula.widgets.nattable.style.CellStyleUtil;
 import org.eclipse.nebula.widgets.nattable.style.IStyle;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
@@ -86,13 +87,24 @@ public class CallSiteArrowPainter extends BackgroundPainter
         	
         	gc.setFont(FontManager.getCallsiteGlyphFont());
         	gc.setForeground(color);
+        	
+        	// need to paint the background manually
+        	// otherwise the background will be white even when we select the row
+            Color originalBackground = gc.getBackground();
+            Color backgroundColor = getBackgroundColour(cell, configRegistry);
+            if (backgroundColor != null) {
+                gc.setBackground(backgroundColor);
+            }
 
             IStyle cellStyle = CellStyleUtil.getCellStyle(cell, configRegistry);
         	String text = getCallsiteGlyph(cell, configRegistry);
         	
             gc.drawText(text, 
                     	bounds.x + CellStyleUtil.getHorizontalAlignmentPadding(cellStyle, bounds, size.x),
-                    	bounds.y + CellStyleUtil.getVerticalAlignmentPadding(cellStyle, bounds, size.y));
+                    	bounds.y + CellStyleUtil.getVerticalAlignmentPadding(cellStyle, bounds, size.y),
+                    	SWT.DRAW_TRANSPARENT );
+
+            gc.setBackground(originalBackground);
         }
     }
 
