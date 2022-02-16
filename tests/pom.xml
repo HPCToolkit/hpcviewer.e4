@@ -20,6 +20,7 @@
  </properties>
  <modules>
   <module>edu.rice.cs.hpcdata.test</module>
+  <module>edu.rice.cs.hpctest.ui</module>
   <module>edu.rice.cs.hpcviewer.test.report</module>
  </modules>
 </project>

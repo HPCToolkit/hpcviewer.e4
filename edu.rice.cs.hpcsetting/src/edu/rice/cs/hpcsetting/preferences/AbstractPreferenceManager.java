@@ -1,6 +1,9 @@
 package edu.rice.cs.hpcsetting.preferences;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.eclipse.core.runtime.Platform;
@@ -8,6 +11,7 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.osgi.service.datalocation.Location;
+import org.slf4j.LoggerFactory;
 
 
 public abstract class AbstractPreferenceManager 
@@ -50,9 +54,22 @@ public abstract class AbstractPreferenceManager
 				if (file.canRead())
 					preferenceStore.load();
 				
-			} catch (Exception e) {
+			} catch (FileNotFoundException e) {
+				File file = new File(filename);
+				try {
+					file.createNewFile();
+				} catch (IOException e1) {
+					// not accessible error
+					// nothing we can do
+				}
 
-				e.printStackTrace();
+			} catch (MalformedURLException e) {
+				// this can't be right
+				var logger = LoggerFactory.getLogger(getClass());
+				logger.error("MalformedURLException: " + e.getMessage());
+			} catch (IOException e) {
+				var logger = LoggerFactory.getLogger(getClass());
+				logger.error("Something wrong with the IO:" + e.getMessage());
 			}
 		}
 		return preferenceStore;

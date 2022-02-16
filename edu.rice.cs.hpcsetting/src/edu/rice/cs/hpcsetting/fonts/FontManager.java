@@ -10,6 +10,8 @@ import org.eclipse.jface.resource.FontRegistry;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.slf4j.LoggerFactory;
+
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 
@@ -172,8 +174,10 @@ public class FontManager
 		try {
 			FontManager.setFontPreference(id, newFd);
 		} catch (IOException e1) {
-			e1.printStackTrace();
-			return;
+			// can't change the font due to IO. Probably the file doesn't exist
+			// what should we do? I don't know. The environment is corrupted.
+			var logger = LoggerFactory.getLogger(FontManager.class);
+			logger.error("Can't set the font preference", e1);
 		}
 	}
 
