@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcdata.test;
+package edu.rice.cs.hpctest.data;
 
 
 import static org.junit.Assert.assertEquals;

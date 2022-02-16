@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: hpcdata.test
-Bundle-SymbolicName: edu.rice.cs.hpcdata.test
+Bundle-SymbolicName: edu.rice.cs.hpctest.data
 Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Rice University
 Automatic-Module-Name: edu.rice.cs.hpcdata.test

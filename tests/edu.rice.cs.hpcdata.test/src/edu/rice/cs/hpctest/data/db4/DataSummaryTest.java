@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcdata.test.db4;
+package edu.rice.cs.hpctest.data.db4;
 
 import static org.junit.Assert.*;
 
