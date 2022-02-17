@@ -124,11 +124,11 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	private Label messageLabel;
 
 	/** thread to remove message */
-	MessageLabelManager restoreMessage;
+	private MessageLabelManager restoreMessage;
 	
-	final private TraceDisplayAttribute oldAttributes;
+	private final TraceDisplayAttribute oldAttributes;
 	
-	final private DecimalFormat formatTime;
+	private final DecimalFormat formatTime;
 
 	private ResizeListener resizeListener;
 	private KeyListener keyListener;
@@ -544,7 +544,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	@Override
 	public double getScalePixelsPerRank()
 	{
-		return (double)stData.getTraceDisplayAttribute().getScalePixelsPerRank();
+		return stData.getTraceDisplayAttribute().getScalePixelsPerRank();
 	}
 	
 	/**************************************************************************
@@ -689,10 +689,10 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
             return;
         }
 		ProcessTimeline ptl     = stData.getCurrentDepthTrace();
-		if (ptl == null) return;
+		if (ptl == null) 
+			return;
 		
-    	final Position position = stData.getTraceDisplayAttribute().getPosition();
-    			
+    	final Position position = stData.getTraceDisplayAttribute().getPosition();    			
 		final TimeUnit dbTimeUnit = stData.getTimeUnit();
 		final TimeUnit displayTimeUnit = attributes.getTimeUnit();
 		final float selectedTime = displayTimeUnit.convert(position.time, dbTimeUnit) * attributes.getTimeUnitMultiplier();
@@ -1449,10 +1449,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		if (evt.getPropertyName().equals(TraceDisplayAttribute.DISPLAY_TIME_UNIT)) {
-			if (evt.getNewValue() instanceof TimeUnit) {
-				adjustLabels();
-			}
+		if (evt.getPropertyName().equals(TraceDisplayAttribute.DISPLAY_TIME_UNIT) &&
+				evt.getNewValue() instanceof TimeUnit) {
+			adjustLabels();
 		}
 	}
 

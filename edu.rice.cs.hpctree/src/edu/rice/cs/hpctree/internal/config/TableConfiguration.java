@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.collections.impl.list.mutable.FastList;
-import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.config.CellConfigAttributes;
 import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.config.IConfiguration;
@@ -16,10 +15,8 @@ import org.eclipse.nebula.widgets.nattable.style.CellStyleAttributes;
 import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
 import org.eclipse.nebula.widgets.nattable.style.Style;
 import org.eclipse.nebula.widgets.nattable.ui.NatEventData;
-import org.eclipse.nebula.widgets.nattable.ui.action.IMouseAction;
 import org.eclipse.nebula.widgets.nattable.ui.binding.UiBindingRegistry;
 import org.eclipse.nebula.widgets.nattable.ui.matcher.MouseEventMatcher;
-import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Control;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
@@ -151,16 +148,12 @@ public class TableConfiguration implements IConfiguration
 								labelSource, 
 								listNodePainters);
 		
-		uiBindingRegistry.registerSingleClickBinding(nodeMatcher, new IMouseAction() {
-			
-			@Override
-			public void run(NatTable natTable, MouseEvent event) {
-	            NatEventData eventData = NatEventData.createInstanceFromEvent(event);
-	            int rowIndex = natTable.getRowIndexByPosition(eventData.getRowPosition());	            
-	            Scope scope = dataProvider.getRowObject(rowIndex);
-	            
-	            listeners.forEach(action -> action.select(scope));
-			}
+		uiBindingRegistry.registerSingleClickBinding(nodeMatcher, (natTable, event) -> {			
+            NatEventData eventData = NatEventData.createInstanceFromEvent(event);
+            int rowIndex = natTable.getRowIndexByPosition(eventData.getRowPosition());	            
+            Scope scope = dataProvider.getRowObject(rowIndex);
+            
+            listeners.forEach(action -> action.select(scope));
 		});
 	}
 	

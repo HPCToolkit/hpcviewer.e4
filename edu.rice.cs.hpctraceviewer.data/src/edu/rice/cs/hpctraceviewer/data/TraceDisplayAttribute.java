@@ -2,6 +2,7 @@ package edu.rice.cs.hpctraceviewer.data;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -25,7 +26,7 @@ public class TraceDisplayAttribute
 	public static final String DISPLAY_TIME_UNIT = "prop.disp.tu";
 	
 	private final Map<Integer, TimeUnit> mapIntegerToUnit;
-	private final Map<TimeUnit, String>  mapUnitToString;
+	private final EnumMap<TimeUnit, String>  mapUnitToString;
 	
 	private int numPixelsH, numPixelsV;
 	private int numPixelsDepthV;
@@ -43,7 +44,7 @@ public class TraceDisplayAttribute
 	{
 		frame = new Frame();
 
-		mapIntegerToUnit = new HashMap<Integer, TimeUnit>(7);
+		mapIntegerToUnit = new HashMap<>(7);
 		
 		mapIntegerToUnit.put(0, TimeUnit.NANOSECONDS);
 		mapIntegerToUnit.put(1, TimeUnit.MICROSECONDS);
@@ -53,7 +54,7 @@ public class TraceDisplayAttribute
 		mapIntegerToUnit.put(5, TimeUnit.HOURS);
 		mapIntegerToUnit.put(6, TimeUnit.DAYS);
 		
-		mapUnitToString = new HashMap<TimeUnit, String>(7);
+		mapUnitToString = new EnumMap<>(TimeUnit.class);
 		
 		mapUnitToString.put(TimeUnit.NANOSECONDS, "ns");
 		mapUnitToString.put(TimeUnit.MICROSECONDS, "us");
@@ -122,9 +123,7 @@ public class TraceDisplayAttribute
 	
     
     public float getTimeUnitMultiplier() {
-    	float mult = displayTimeUnit.equals(timeUnit) ? 1.0f : 0.001f;
-    	
-    	return mult;
+    	return displayTimeUnit.equals(timeUnit) ? 1.0f : 0.001f;
     }
     
 	/***
@@ -222,12 +221,10 @@ public class TraceDisplayAttribute
 	}
 	
 	private Stream<Integer> getOrdinal(TimeUnit unit) {
-		Stream<Integer> keys = mapIntegerToUnit.entrySet()
+		return mapIntegerToUnit.entrySet()
 				.stream()
 				.filter(entry -> unit.equals(entry.getValue()))
 				.map(Map.Entry::getKey);
-		
-		return keys;
 	}
 	
 	/*************************************************************************
@@ -409,9 +406,7 @@ public class TraceDisplayAttribute
 	public long convertPixelToTime(int pixelX)
 	{
 		double pixelsPerTime = numPixelsH / (double) getTimeInterval();
-		long   time = (long) (getTimeBegin() + (long) pixelX / pixelsPerTime);
-		
-		return time;
+		return (long) (getTimeBegin() + (long) pixelX / pixelsPerTime);
 	}
 	
 	/***

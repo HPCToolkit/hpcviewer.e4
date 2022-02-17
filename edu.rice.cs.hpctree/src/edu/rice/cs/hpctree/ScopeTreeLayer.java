@@ -220,7 +220,7 @@ public class ScopeTreeLayer extends AbstractLayerTransform implements IUniqueInd
     	if (underlyingLayer instanceof SelectionLayer) {
     		SelectionLayer selectionLayer = (SelectionLayer) underlyingLayer;
     		var ranges = selectionLayer.getSelectedRowPositions();
-    		if (ranges.size()>0) {
+    		if (!ranges.isEmpty()) {
         		var range = ranges.iterator().next();
         		selectionRow = range.start;
     		}
@@ -229,9 +229,8 @@ public class ScopeTreeLayer extends AbstractLayerTransform implements IUniqueInd
     	doCommand(new RowDeleteCommand(this, indexes));
     	
     	// clear the selected rows if they are the collapsed children
-    	if (selectionRow>0) {
-    		if (childrenIndexes.contains(selectionRow))
-    			((SelectionLayer)underlyingLayer).clear();
+    	if (selectionRow>0 && childrenIndexes.contains(selectionRow)) {
+			((SelectionLayer)underlyingLayer).clear();
     	}
     }
     

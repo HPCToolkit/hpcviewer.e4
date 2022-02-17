@@ -35,7 +35,8 @@ public class ViewerColorManager
 	 * @return hyperlink color
 	 * @deprecated
 	 */
-	static public Color getActiveColor() {
+	@Deprecated
+	public static Color getActiveColor() {
 		Color clrActive = GUIHelper.COLOR_BLUE;
 		if (Display.isSystemDarkTheme()) {
 			ColorRegistry registry = JFaceResources.getColorRegistry();
@@ -57,7 +58,7 @@ public class ViewerColorManager
 	 * @param backgroundColor
 	 * @return
 	 */
-	static public Color getActiveColor(Color backgroundColor) {
+	public static Color getActiveColor(Color backgroundColor) {
 		if (ColorManager.getTextFg(backgroundColor) == ColorManager.COLOR_BLACK) {
 			// light theme
 			return GUIHelper.COLOR_BLUE;
@@ -66,7 +67,7 @@ public class ViewerColorManager
 	}
 	
 	
-	static private Color getActiveColorDarkMode() {
+	private static Color getActiveColorDarkMode() {
 		ColorRegistry registry = JFaceResources.getColorRegistry();
 		Color clrActive = registry.get(COLOR_ACTIVE);
 		if (clrActive == null) {
@@ -87,7 +88,7 @@ public class ViewerColorManager
 	 * @return {@link Color}
 	 *   default color for the background
 	 */
-	static public Color getBgTopRow(Control parent) {
+	public static Color getBgTopRow(Control parent) {
 		ColorRegistry registry = JFaceResources.getColorRegistry();
 		if (registry == null)
 			return null;
@@ -116,7 +117,7 @@ public class ViewerColorManager
 	 * @param parent
 	 * @return
 	 */
-	static public Color getFgTopRow(Control parent) {
+	public static Color getFgTopRow(Control parent) {
 		Color bg = getBgTopRow(parent);
 		return ColorManager.getTextFg(bg);
 	}

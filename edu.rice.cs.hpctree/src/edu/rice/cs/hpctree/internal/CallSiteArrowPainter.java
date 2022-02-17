@@ -79,7 +79,7 @@ public class CallSiteArrowPainter extends BackgroundPainter
                         true));
             }
         	Color color = ColorManager.COLOR_ARROW_ACTIVE;
-        	if (isDisabled(cell, configRegistry)) {
+        	if (isDisabled(cell)) {
         		Color oldBackgrColor = gc.getBackground();
         		color = ColorManager.getTextFg(oldBackgrColor);
         	}
@@ -143,8 +143,8 @@ public class CallSiteArrowPainter extends BackgroundPainter
 	private String getCallsiteGlyph(ILayerCell cell, IConfigRegistry configRegistry) {
     	LabelStack labels = cell.getConfigLabels();
     	
-    	boolean enabled = isEnabled(cell, configRegistry);
-    	boolean disabled = isDisabled(cell, configRegistry);
+    	boolean enabled = isEnabled(cell);
+    	boolean disabled = isDisabled(cell);
     			
     	if (!enabled && !disabled)
     		return EMPTY;
@@ -158,14 +158,14 @@ public class CallSiteArrowPainter extends BackgroundPainter
 	}
 	
 	
-	private boolean isEnabled(ILayerCell cell, IConfigRegistry configRegistry) {
+	private boolean isEnabled(ILayerCell cell) {
     	LabelStack labels = cell.getConfigLabels();
     	return labels.hasLabel(ScopeTreeLabelAccumulator.LABEL_CALLSITE) ||
 		 	   labels.hasLabel(ScopeTreeLabelAccumulator.LABEL_CALLER);
 	}
 	
 	
-	private boolean isDisabled(ILayerCell cell, IConfigRegistry configRegistry) {
+	private boolean isDisabled(ILayerCell cell) {
     	LabelStack labels = cell.getConfigLabels();
     	return labels.hasLabel(ScopeTreeLabelAccumulator.LABEL_CALLSITE_DISABLED) ||
 		 	   labels.hasLabel(ScopeTreeLabelAccumulator.LABEL_CALLER_DISABLED);
