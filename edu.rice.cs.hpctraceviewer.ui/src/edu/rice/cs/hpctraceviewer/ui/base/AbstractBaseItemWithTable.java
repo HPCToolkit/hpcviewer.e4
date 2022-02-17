@@ -69,6 +69,7 @@ import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpcsetting.table.DarkThemeConfiguration;
 import edu.rice.cs.hpcsetting.table.DayThemeConfiguration;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
+import edu.rice.cs.hpctraceviewer.ui.internal.NoDotTextPainter;
 import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 
@@ -536,7 +537,7 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 		@Override
 		public void configureRegistry(IConfigRegistry configRegistry) {
 			// color column
-			ColorCellPainter painter = new ColorCellPainter(dataProvider);					
+			ColorCellPainter painter = new ColorCellPainter(dataProvider);
 			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_PAINTER, 
 												   painter, 
 												   DisplayMode.NORMAL, 
@@ -561,6 +562,16 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 					   							   TableLabelAccumulator.LABEL_NUMBER);
 			
 			// procedure column
+			var textPainter = new NoDotTextPainter();
+			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_PAINTER, 
+					textPainter, 
+					   DisplayMode.NORMAL, 
+					   TableLabelAccumulator.LABEL_PROCEDURE);
+			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_PAINTER, 
+					textPainter, 
+					   DisplayMode.SELECT, 
+					   TableLabelAccumulator.LABEL_PROCEDURE);
+
 			Style styleProcedure = new Style();
 			Font  fontProcedure  = FontManager.getFontGeneric();
 			styleProcedure.setAttributeValue(CellStyleAttributes.FONT, fontProcedure);
