@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: hpctest.viewer
+Bundle-SymbolicName: edu.rice.cs.hpctest.viewer
+Bundle-Version: 6.0.0.qualifier
+Bundle-Vendor: Rice University
+Automatic-Module-Name: edu.rice.cs.hpctest.viewer
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Require-Bundle: edu.rice.cs.hpcdata,
+ edu.rice.cs.hpcfilter,
+ org.junit,
+ org.junit.jupiter.api,
+ org.eclipse.swt,
+ ca.odell.glazedlists,
+ org.eclipse.nebula.widgets.nattable.core,
+ org.eclipse.jface
