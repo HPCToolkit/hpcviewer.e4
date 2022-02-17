@@ -16,7 +16,7 @@ import edu.rice.cs.hpcfilter.service.FilterStateProvider;
 
 public class ShowFilterView 
 {
-	final public static String ID = "edu.rice.cs.hpc.filter.action.ShowFilterView";
+	final public static String ID = "edu.rice.cs.hpcfilter.action.ShowFilterView";
 	
 	@Inject FilterStateProvider filterService;
 

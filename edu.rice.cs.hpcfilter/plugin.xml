@@ -2,7 +2,7 @@
 <plugin>
 
    <extension
-         id="edu.rice.cs.hpc.filter.fragment"
+         id="edu.rice.cs.hpcfilter.fragment"
          point="org.eclipse.e4.workbench.model">
       <fragment
             uri="fragment.e4xmi"

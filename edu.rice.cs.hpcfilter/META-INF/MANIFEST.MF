@@ -30,4 +30,4 @@ Require-Bundle: edu.rice.cs.hpcdata,
  org.eclipse.nebula.widgets.nattable.extension.glazedlists,
  org.eclipse.collections
 Bundle-ActivationPolicy: lazy
-Automatic-Module-Name: edu.rice.cs.hpc.filter
+Automatic-Module-Name: edu.rice.cs.hpcfilter

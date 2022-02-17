@@ -562,6 +562,10 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 					   							   TableLabelAccumulator.LABEL_NUMBER);
 			
 			// procedure column
+			//
+			// Issue #179: do not use the default text painter in this table
+			//  the default painter will add three dots, while the NoDotTextPainter just shows the text
+			//  whatever it is
 			var textPainter = new NoDotTextPainter();
 			configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_PAINTER, 
 					textPainter, 
