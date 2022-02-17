@@ -14,6 +14,8 @@ jobs:
         run: sudo apt-get update
       - name: Install metacity window manager for background tests
         run: sudo apt-get install metacity
+      - name: Enable xserver
+        run: xhost +
       - name: Checkout
         uses: actions/checkout@v2
         with:
