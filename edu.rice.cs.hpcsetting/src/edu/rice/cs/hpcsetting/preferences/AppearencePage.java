@@ -137,8 +137,6 @@ public class AppearencePage extends AbstractPage
 		}
 	}
 	
-	
-	
 	private ViewerFontFieldEditor createFontEditor(Composite parent, String id, String label, Font fontDefault) {        
 		ViewerFontFieldEditor editor = new ViewerFontFieldEditor(parent, id, label, fontDefault.getFontData()[0]);
 		editor.setPreferenceStore(getPreferenceStore());
@@ -171,7 +169,7 @@ public class AppearencePage extends AbstractPage
 		fontGenericEditor.store();
 		fontMetricEditor.store();
 		fontSourceEditor.store();
-		
+
 		Font fontGlyph    = FontManager.getCallsiteGlyphDefaultFont(fontGeneric);
 		FontData fdGlyph  = fontGlyph.getFontData()[0];
 		PreferenceConverter.setValue(store, PreferenceConstants.ID_FONT_CALLSITE, fdGlyph);
