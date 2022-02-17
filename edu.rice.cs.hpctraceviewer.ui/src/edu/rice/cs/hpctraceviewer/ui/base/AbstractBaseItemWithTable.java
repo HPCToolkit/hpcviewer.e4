@@ -89,7 +89,7 @@ import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 public abstract class AbstractBaseItemWithTable extends AbstractBaseItem 
 implements EventHandler, DisposeListener, IPropertyChangeListener 
 {
-	private final static String []TITLE = {" ", "Procedure", "%"};
+	private static final String []TITLE = {" ", "Procedure", "%"};
 
 	private Composite tableComposite;
 	private SpaceTimeDataController input;
@@ -346,15 +346,17 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 
-		final String property = event.getProperty();
-		
+		final String property   = event.getProperty();		
 		boolean need_to_refresh = (property.equals(PreferenceConstants.ID_FONT_GENERIC) || 
 								   property.equals(PreferenceConstants.ID_FONT_METRIC)); 
 		
 		if (need_to_refresh) {
 			tableConfiguration.configureRegistry(natTable.getConfigRegistry());
-			natTable.refresh();
+			
+			// need to pack first, then refresh to ensure the rows and are well resized
+			// according to the font height
 			pack();
+			natTable.refresh();
 		}
 	}
 
