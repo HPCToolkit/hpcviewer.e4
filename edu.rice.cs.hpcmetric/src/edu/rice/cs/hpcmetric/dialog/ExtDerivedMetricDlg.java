@@ -623,7 +623,11 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 			// update the existing metric
 			metric.setDisplayName( cbMetricName.getText() );
 			metric.setAnnotationType(annType);
-			metric.setExpression(txtMetricFormula.getText());
+			
+			Expression newFormula = ExpressionTree.parse(txtMetricFormula.getText());
+			MetricFormulaExpression.rename(newFormula, mapMetricNewIndex, null);
+
+			metric.setExpression(newFormula.toString());
 		}
 
 		// -----------------------------
