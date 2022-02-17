@@ -10,7 +10,12 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Update packages
+        run: sudo apt-get update
+      - name: Install metacity window manager for background tests
+        run: sudo apt-get install metacity
+      - name: Checkout
+        uses: actions/checkout@v2
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
       - name: Set up JDK 11
