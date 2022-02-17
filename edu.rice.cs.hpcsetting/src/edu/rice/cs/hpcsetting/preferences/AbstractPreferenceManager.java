@@ -57,7 +57,8 @@ public abstract class AbstractPreferenceManager
 			} catch (FileNotFoundException e) {
 				File file = new File(filename);
 				try {
-					file.createNewFile();
+					if (!file.createNewFile())
+						return null;
 				} catch (IOException e1) {
 					// not accessible error
 					// nothing we can do

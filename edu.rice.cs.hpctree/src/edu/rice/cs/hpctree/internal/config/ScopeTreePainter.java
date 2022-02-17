@@ -11,8 +11,10 @@ import org.eclipse.nebula.widgets.nattable.tree.painter.IndentedTreeImagePainter
 import org.eclipse.nebula.widgets.nattable.tree.painter.TreeImagePainter;
 import org.eclipse.nebula.widgets.nattable.ui.util.CellEdgeEnum;
 import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.internal.DPIUtil;
 
+import edu.rice.cs.hpcsetting.color.ColorManager;
 import edu.rice.cs.hpctree.internal.CallSiteArrowPainter;
 import edu.rice.cs.hpctree.internal.CallSiteTextPainter;
 import edu.rice.cs.hpctree.internal.ScopeTreeDataProvider;
@@ -49,6 +51,22 @@ public class ScopeTreePainter
     	return selectedSortHeaderCellPainter;
     }
 
+    
+    /***
+     * Retrieve the tree cell painter based on the background color.
+     * If the background color is dark, it will pick the light painter automatically.
+     * 
+     * @param dataProvider
+     * @param defaultBgColor
+     * @return
+     */
+    public static ICellPainter getTreeStructurePainter(ScopeTreeDataProvider dataProvider, Color defaultBgColor) {
+    	Color fg = ColorManager.getTextFg(defaultBgColor);
+    	if (fg == ColorManager.COLOR_WHITE)
+    		return ScopeTreePainter.getInvTreeStructurePainter(dataProvider);
+
+    	return ScopeTreePainter.getTreeStructurePainter(dataProvider);
+    }
 	
     /****
      * Retrieve the tree cell painter for a given data provider

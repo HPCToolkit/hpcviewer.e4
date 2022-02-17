@@ -45,8 +45,6 @@ public class ExperimentTest {
 			database[i] = resource.toFile();
 			
 			assertNotNull(database);
-			
-			System.out.println("Test database: " + database[i].getAbsolutePath());
 
 			experiments[i]= new Experiment();
 			try {

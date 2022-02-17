@@ -1,9 +1,6 @@
 package edu.rice.cs.hpctree.internal.config;
 
 import org.eclipse.nebula.widgets.nattable.NatTable;
-import org.eclipse.swt.graphics.Color;
-
-import edu.rice.cs.hpcsetting.color.ColorManager;
 import edu.rice.cs.hpcsetting.table.DarkThemeConfiguration;
 import edu.rice.cs.hpctree.internal.ScopeTreeDataProvider;
 
@@ -20,12 +17,7 @@ public class DarkScopeTableStyleConfiguration extends DarkThemeConfiguration
     public void createPainterInstances() {
     	super.createPainterInstances();
 
-    	Color fg = ColorManager.getTextFg(defaultBgColor);
-    	if (fg == ColorManager.COLOR_WHITE)
-    		treeStructurePainter = ScopeTreePainter.getInvTreeStructurePainter(dataProvider);
-    	else 
-    		treeStructurePainter = ScopeTreePainter.getTreeStructurePainter(dataProvider);
-    	
+		treeStructurePainter = ScopeTreePainter.getTreeStructurePainter(dataProvider, defaultBgColor);    	
         treeStructureSelectionPainter = treeStructurePainter;
         selectedSortHeaderCellPainter = ScopeTreePainter.getSelectedSortHeaderCellPainter();
     }

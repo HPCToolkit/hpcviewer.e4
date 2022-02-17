@@ -10,26 +10,24 @@ import org.junit.jupiter.api.BeforeEach;
 public class ViewerTestCase 
 {
 	/** the duration in millisec to show chart */
-	private static final long durationToShowWindow = 100;
+	private static final long WINDOW_DURATION = 100;
 
 	protected Shell shell;
 	
 
 	@BeforeEach
-	public void setUp() throws Exception {
-		System.out.println("Create shell");
+	public void setUp() {
 		shell = createShell("Viewer unit test");
 	}
 
 	@AfterEach
-	public void tearDown() throws Exception {
+	public void tearDown() {
 		shell.dispose();
-		System.out.println("Dispose shell");
 	}
 	
 	protected void showWindow() {
 		long time = System.currentTimeMillis();
-		while(!shell.isDisposed() && System.currentTimeMillis() - time < durationToShowWindow) {
+		while(!shell.isDisposed() && System.currentTimeMillis() - time < WINDOW_DURATION) {
 			Display.getDefault().readAndDispatch();
 		}
 

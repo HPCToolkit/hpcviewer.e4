@@ -20,16 +20,16 @@ import edu.rice.cs.hpctest.viewer.util.*;
 
 class BaseFilterPaneTest extends ViewerTestCase
 {
-	BaseFilterPane<String> pane;
-	FilterInputData<String> data;
+	private Random random = new Random();
+	private BaseFilterPane<String> pane;
+	private FilterInputData<String> data;
 	
 	@BeforeEach
-	public
-	void setUp() throws Exception {
+	@Override
+	public void setUp() {
 		super.setUp();
 		
 		List<FilterDataItem<String>> items = new ArrayList<>();
-		Random random = new Random();
 		
 		for(int i=0; i<20; i++) {
 			int rank = random.nextInt(10);
@@ -46,7 +46,7 @@ class BaseFilterPaneTest extends ViewerTestCase
 
 	
 	@Test
-	void testGetEventList() throws Exception {
+	void testGetEventList() {
 		showWindow();
 		List<FilterDataItem<String>> clist = pane.getEventList(); 
 		clist.stream().forEach(item -> {

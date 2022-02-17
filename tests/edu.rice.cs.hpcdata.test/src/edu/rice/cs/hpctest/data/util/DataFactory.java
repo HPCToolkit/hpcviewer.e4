@@ -1,6 +1,8 @@
 package edu.rice.cs.hpctest.data.util;
 
 import java.io.File;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -24,13 +26,13 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 public class DataFactory 
 {
 	private static final int DEFAULT_DB = 10;
+	private static Random rand; 
 	
-	
-	public static List<Experiment> createExperiments() {
+	public static List<Experiment> createExperiments() throws NoSuchAlgorithmException {
 		return createExperiments(DEFAULT_DB);
 	}
 	
-	public static List<Experiment> createExperiments(int numItems) {
+	public static List<Experiment> createExperiments(int numItems) throws NoSuchAlgorithmException {
 		List<Experiment> list = new ArrayList<>(numItems);
 		for (int i=0; i<numItems; i++) {
 			Experiment exp = createExperiment("Database " + i);
@@ -40,8 +42,7 @@ public class DataFactory
 	}
 	
 	
-	
-	private static Experiment createExperiment(String name) {
+	private static Experiment createExperiment(String name) throws NoSuchAlgorithmException {
 		Experiment experiment = new Experiment();
 		
 		var config = new ExperimentConfiguration();
@@ -73,7 +74,7 @@ public class DataFactory
 		return experiment;
 	}
 	
-	private static void createTreeNode(RootScope root, Scope parent, int id, int children, int level, int maxLevel) {
+	private static void createTreeNode(RootScope root, Scope parent, int id, int children, int level, int maxLevel) throws NoSuchAlgorithmException {
 
 		for(int j=0; j<children; j++) {
 			String myid = String.valueOf(level) +  String.valueOf(j);
@@ -91,14 +92,15 @@ public class DataFactory
 		}
 	}
 	
-	private static void createMetric(Scope scope, Experiment exp) {
-		Random r = new Random();
+	private static void createMetric(Scope scope, Experiment exp) throws NoSuchAlgorithmException {
+		if (rand == null)
+			rand = SecureRandom.getInstanceStrong();
 		
 		for(int i=0; i<exp.getMetricCount(); i++) {
-			if (r.nextInt(20) == 0)
+			if (rand.nextInt(20) == 0)
 				continue;
 			
-			MetricValue mv = new MetricValue(r.nextInt(10));
+			MetricValue mv = new MetricValue(rand.nextInt(10));
 			scope.setMetricValue(i, mv);
 		}
 		

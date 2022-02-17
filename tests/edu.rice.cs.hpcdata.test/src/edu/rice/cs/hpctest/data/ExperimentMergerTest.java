@@ -2,6 +2,7 @@ package edu.rice.cs.hpctest.data;
 
 import static org.junit.Assert.*;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import org.junit.BeforeClass;
@@ -19,7 +20,7 @@ public class ExperimentMergerTest
 	private static List<Experiment> listExperiments;
 
 	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
+	public static void setUpBeforeClass() throws NoSuchAlgorithmException  {
 		listExperiments = DataFactory.createExperiments(2);
 	}
 

@@ -20,7 +20,7 @@ public class DataPlotTest {
 	private static DataPlot data;
 
 	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
+	public static void setUpBeforeClass() throws IOException {
 		Path resource = Paths.get("..", "resources", "prof2", "empty-trace");
 		File dbPath = resource.toFile();
 		

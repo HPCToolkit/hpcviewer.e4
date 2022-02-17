@@ -96,7 +96,7 @@ public class CallSiteArrowPainter extends BackgroundPainter
             }
 
             IStyle cellStyle = CellStyleUtil.getCellStyle(cell, configRegistry);
-        	String text = getCallsiteGlyph(cell, configRegistry);
+        	String text = getCallsiteGlyph(cell);
         	
         	// Do not use SWT.TRANSPARENT in this gc
         	// that flag will make all arrow has the same color!
@@ -118,7 +118,7 @@ public class CallSiteArrowPainter extends BackgroundPainter
      * @return
      */
     protected Point getGlyphBound(ILayerCell cell, GC gc, IConfigRegistry configRegistry) {
-    	String text = getCallsiteGlyph(cell, configRegistry);
+    	String text = getCallsiteGlyph(cell);
     	if (text.equals(EMPTY))
     		return EMPTY_SIZE;
     	
@@ -137,10 +137,9 @@ public class CallSiteArrowPainter extends BackgroundPainter
      * symbol.
      * 
      * @param cell
-     * @param configRegistry
      * @return
      */
-	private String getCallsiteGlyph(ILayerCell cell, IConfigRegistry configRegistry) {
+	private String getCallsiteGlyph(ILayerCell cell) {
     	LabelStack labels = cell.getConfigLabels();
     	
     	boolean enabled = isEnabled(cell);
