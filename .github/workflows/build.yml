@@ -14,8 +14,6 @@ jobs:
         run: sudo apt-get update
       - name: Install metacity window manager for background tests
         run: sudo apt-get install metacity
-      - name: Enable xserver
-        run: xhost +
       - name: Checkout
         uses: actions/checkout@v2
         with:
@@ -40,4 +38,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B verify -Pjacoco org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=HPCToolkit_hpcviewer.e4
+        run: ./scripts/metacity-run.sh mvn -B verify -Pjacoco org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=HPCToolkit_hpcviewer.e4
