@@ -35,7 +35,7 @@ public class CallSiteArrowPainter extends BackgroundPainter
 
     @Override
     public int getPreferredWidth(ILayerCell cell, GC gc, IConfigRegistry configRegistry) {
-        Point size = getGlyphBound(cell, gc, configRegistry);
+        Point size = getGlyphBound(cell, gc);
         if (size != EMPTY_SIZE) {        	
             return size.x;
         }
@@ -45,7 +45,7 @@ public class CallSiteArrowPainter extends BackgroundPainter
     
     @Override
     public int getPreferredHeight(ILayerCell cell, GC gc, IConfigRegistry configRegistry) {
-        Point size = getGlyphBound(cell, gc, configRegistry);
+        Point size = getGlyphBound(cell, gc);
         if (size != EMPTY_SIZE) {
             return size.y;
         }
@@ -55,7 +55,7 @@ public class CallSiteArrowPainter extends BackgroundPainter
 
     @Override
     public void paintCell(ILayerCell cell, GC gc, Rectangle bounds, IConfigRegistry configRegistry) {
-        Point size = getGlyphBound(cell, gc, configRegistry);
+        Point size = getGlyphBound(cell, gc);
         if (size != EMPTY_SIZE) {
             int contentHeight = size.y;
             if (this.calculateByHeight && (contentHeight > bounds.height)) {
@@ -117,7 +117,7 @@ public class CallSiteArrowPainter extends BackgroundPainter
      * @param configRegistry
      * @return
      */
-    protected Point getGlyphBound(ILayerCell cell, GC gc, IConfigRegistry configRegistry) {
+    protected Point getGlyphBound(ILayerCell cell, GC gc) {
     	String text = getCallsiteGlyph(cell);
     	if (text.equals(EMPTY))
     		return EMPTY_SIZE;

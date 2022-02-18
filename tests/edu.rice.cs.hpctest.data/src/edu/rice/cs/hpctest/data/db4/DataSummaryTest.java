@@ -24,7 +24,7 @@ public class DataSummaryTest {
 	private static File dbPath ;
 	
 	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
+	public static void setUpBeforeClass() throws IOException {
 		Path resource = Paths.get("..", "resources", "prof2", "empty-trace");
 		dbPath = resource.toFile();
 		
@@ -122,7 +122,7 @@ public class DataSummaryTest {
 	@Test
 	public void testGetIdTupleType() {
 		IdTupleType type = data.getIdTupleType();
-		assertNotNull(type); // {0=Summary, 1=Node, 2=Rank, 3=Thread, 4=GPUDevice, 5=GPUContext, 6=GPUStream, 7=Core}
+		assertNotNull(type); // check content for: {0=Summary, 1=Node, 2=Rank, 3=Thread, 4=GPUDevice, 5=GPUContext, 6=GPUStream, 7=Core}
 	}
 
 	@Test

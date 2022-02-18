@@ -68,13 +68,13 @@ public class DataFactory
 		rootCCT.setParentScope(mainRoot);
 		
 		createMetric(rootCCT, experiment);
-		createTreeNode(rootCCT, rootCCT, 1, 4, 1, 10);
+		createTreeNode(rootCCT, rootCCT, 4, 1, 10);
 		experiment.setRootScope(mainRoot);
 
 		return experiment;
 	}
 	
-	private static void createTreeNode(RootScope root, Scope parent, int id, int children, int level, int maxLevel) throws NoSuchAlgorithmException {
+	private static void createTreeNode(RootScope root, Scope parent, int children, int level, int maxLevel) throws NoSuchAlgorithmException {
 
 		for(int j=0; j<children; j++) {
 			String myid = String.valueOf(level) +  String.valueOf(j);
@@ -87,7 +87,7 @@ public class DataFactory
 			parent.addSubscope(grandChild);
 			
 			if (level < maxLevel) {
-				createTreeNode(root, grandChild, intmyid, 3, level+1, maxLevel);
+				createTreeNode(root, grandChild, 3, level+1, maxLevel);
 			}
 		}
 	}
