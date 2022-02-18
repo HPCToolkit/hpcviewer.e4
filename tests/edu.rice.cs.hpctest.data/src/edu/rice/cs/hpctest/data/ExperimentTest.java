@@ -28,6 +28,8 @@ public class ExperimentTest {
 
 	private static Experiment []experiments;
 	private static File []database;
+	private static String []dbPaths = new String[] {"bug-no-gpu-trace", "bug-empty", "bug-nometric"};
+	private static int []children   = new int[] {1, 0, 0};
 	
 	public ExperimentTest() {
 		// empty, nothing to do
@@ -35,7 +37,6 @@ public class ExperimentTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		String []dbPaths = new String[] {"bug-no-gpu-trace", "bug-empty", "bug-nometric"};
 		experiments = new Experiment[dbPaths.length];
 		database   = new File[dbPaths.length];
 		int i=0;
@@ -171,6 +172,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetRootScope() {
+		int i=0;
 		for(var experiment: experiments) {
 			RootScope rootCCT = experiment.getRootScope(RootScopeType.CallingContextTree);
 			RootScope rootCall = experiment.getRootScope(RootScopeType.CallerTree);
@@ -182,6 +184,15 @@ public class ExperimentTest {
 			
 			assertTrue(rootCCT != rootCall);
 			assertTrue(rootCall != rootFlat);
+			
+			rootCall = experiment.createCallersView(rootCCT, rootCall);
+			rootFlat = experiment.createFlatView(rootCCT, rootFlat);
+			
+			assertTrue(rootCCT.getChildCount()  >= children[i]);
+			assertTrue(rootCall.getChildCount() >= children[i]);
+			assertTrue(rootFlat.getChildCount() >= children[i]);
+
+			i++;
 		}
 	}
 
