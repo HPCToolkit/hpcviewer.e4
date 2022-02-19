@@ -108,7 +108,7 @@ public class FileDB4 implements IFileDB
 		// then, search the offset of this profile number
 		
 		List<IdTuple> listId = dataSummary.getIdTuple();
-		int profileNum = listId.get(rank).profileNum;
+		int profileNum = listId.get(rank).getProfileNum();
 		return dataTrace.getOffset(profileNum);
 	}
 
@@ -118,7 +118,7 @@ public class FileDB4 implements IFileDB
 		// then, search the offset of this profile number, and its length
 		
 		List<IdTuple> listId = dataSummary.getIdTuple();
-		int profileNum = listId.get(rank).profileNum;
+		int profileNum = listId.get(rank).getProfileNum();
 		return dataTrace.getOffset(profileNum) + dataTrace.getLength(profileNum);
 	}
 

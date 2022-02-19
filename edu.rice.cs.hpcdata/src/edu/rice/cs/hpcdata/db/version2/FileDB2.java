@@ -126,27 +126,27 @@ public class FileDB2 implements IFileDB
 				x_val = String.valueOf(proc_id) + "." + String.valueOf(thread_id);
 				
 				tuple.setKindAndInterpret(IdTupleType.KIND_RANK, 0);
-				tuple.physical_index[0] = proc_id;
-				tuple.logical_index[0]  = proc_id;
+				tuple.setPhysicalIndex(0, proc_id);
+				tuple.setLogicalIndex(0, proc_id);
 				
 				tuple.setKindAndInterpret(IdTupleType.KIND_THREAD, 1);
-				tuple.physical_index[1] = thread_id;
-				tuple.logical_index[1]  = thread_id;
+				tuple.setPhysicalIndex(1, thread_id) ;
+				tuple.setLogicalIndex(1, thread_id);
 				
 			} else if (isMultiProcess()) 
 			{
 				x_val = String.valueOf(proc_id);					
 				
 				tuple.setKindAndInterpret(IdTupleType.KIND_RANK, 0);
-				tuple.physical_index[0] = proc_id;
-				tuple.logical_index[0]  = proc_id;
+				tuple.setPhysicalIndex(0, proc_id);
+				tuple.setLogicalIndex(0, proc_id);
 			} else if (isMultiThreading()) 
 			{
 				x_val = String.valueOf(thread_id);
 				
 				tuple.setKindAndInterpret(IdTupleType.KIND_THREAD, 0);
-				tuple.physical_index[0] = thread_id;
-				tuple.logical_index[0]  = thread_id;
+				tuple.setPhysicalIndex(0, thread_id);
+				tuple.setLogicalIndex(0, thread_id);
 			} else {
 				// temporary fix: if the application is neither hybrid nor multiproc nor multithreads,
 				// we just print whatever the order of file name alphabetically
@@ -154,8 +154,8 @@ public class FileDB2 implements IFileDB
 				x_val = String.valueOf(i);
 				
 				tuple.setKindAndInterpret(IdTupleType.KIND_RANK, 0);
-				tuple.physical_index[0] = i;
-				tuple.logical_index[0]  = proc_id;
+				tuple.setPhysicalIndex(0, i);
+				tuple.setLogicalIndex(0, proc_id);
 			}
 			valuesX[i] = x_val;
 			listIdTuples.add(tuple);

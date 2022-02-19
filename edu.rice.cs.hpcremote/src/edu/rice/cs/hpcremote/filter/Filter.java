@@ -38,11 +38,11 @@ public class Filter {
 		boolean match = true;
 		
 		// for each kind in id tuple, we need to check if there is filter that match
-		for(int i=0; i<idTuple.length; i++) {
+		for(int i=0; i<idTuple.getLength(); i++) {
 			
 			for (int j=0; j<listTypes.size(); j++) {
 				if (idTuple.getKind(i) == listTypes.get(j)) {
-					match = match && ranks[j].matches(idTuple.physical_index[i]);
+					match = match && ranks[j].matches(idTuple.getPhysicalIndex(i));
 					if (!match)
 						return false;
 					else 

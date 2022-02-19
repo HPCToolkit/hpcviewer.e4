@@ -23,12 +23,12 @@ public class IdTuple
 	// variables
 	// -------------------------------------------
 
-	public int   profileNum;
-	public int   length;
+	private final int profileNum;
+	private final int length;
 	
-	private int  []kind;
-	public long  []physical_index;
-	public long  []logical_index;
+	private int   []kinds;
+	private long  []physicalIndexes;
+	private long  []logicalIndexes;
 
 	// -------------------------------------------
 	// Constructors
@@ -44,9 +44,9 @@ public class IdTuple
 		this.length     = length;
 		this.profileNum = profileNum;
 		
-		kind  = new int[length];
-		physical_index = new long[length];
-		logical_index  = new long[length];
+		kinds  = new int[length];
+		physicalIndexes = new long[length];
+		logicalIndexes  = new long[length];
 	}
 	
 	/***
@@ -54,8 +54,7 @@ public class IdTuple
 	 * Caller needs to set {@code profileNum}, {@code length}, {@code kind} and {@code index} variables
 	 */
 	public IdTuple() {
-		length = 0;
-		profileNum = 0;
+		this(0, 0);
 	}
 	
 
@@ -69,7 +68,7 @@ public class IdTuple
 	 * @return {@code short}
 	 */
 	public short getInterpret(int level) {
-		return (short) (((kind[level])>>14) & 0x3);
+		return (short) (((kinds[level])>>14) & 0x3);
 	}
 	
 	
@@ -79,7 +78,7 @@ public class IdTuple
 	 * @return
 	 */
 	public short getKind(int level) {
-		return (short) ((kind[level]) & ((1<<14)-1));
+		return (short) ((kinds[level]) & ((1<<14)-1));
 	}
 	
 	/***
@@ -88,7 +87,7 @@ public class IdTuple
 	 * @param level
 	 */
 	public void setKindAndInterpret(int kindAndInterpet, int level) {
-		kind[level] = kindAndInterpet;
+		kinds[level] = kindAndInterpet;
 	}
 	
 	/****
@@ -104,13 +103,60 @@ public class IdTuple
 	 */
 	public long getIndex(int kindRank) {
 		for (int i=0; i<length; i++) {
-			if (kind[i] == kindRank) {
-				return physical_index[i];
+			if (kinds[i] == kindRank) {
+				return physicalIndexes[i];
 			}
 		}
 		return 0;
 	}
 	
+	public int getProfileNum() {
+		return profileNum;
+	}
+
+	public int getLength() {
+		return length;
+	}
+
+	public int[] getKind() {
+		return kinds;
+	}
+
+	public void setKind(int[] kind) {
+		this.kinds = kind;
+	}
+
+	public long getPhysicalIndex(int index) {
+		return physicalIndexes[index];
+	}
+
+	public void setPhysicalIndex(int index, long physical_index) {
+		this.physicalIndexes[index] = physical_index;
+	}
+
+	public long getLogicalIndex(int index) {
+		return logicalIndexes[index];
+	}
+
+	public void setLogicalIndex(int index, long logical_index) {
+		this.logicalIndexes[index] = logical_index;
+	}
+
+	/****
+	 * Compare this id-tuple with another id-tuple.
+	 * The comparison includes: the length, the kind, physical and logical indexes.
+	 * <p>
+	 * This method returns:
+	 * <ul>
+	 *  <li> Zero if the both are exactly the same
+	 *  <li> Negative number if this id-tuple is lexicographically less than the other tuple
+	 *  <li> Positive number if this id-tuple is lexicographically bigger
+	 * </ul>
+	 * 
+	 * @param another
+	 * 			The other id-tuple to compare
+	 * @return {@code int} 
+	 */
 	public int compareTo(IdTuple another) {
 		int minLength = Math.min(length, another.length);
 		
@@ -119,57 +165,31 @@ public class IdTuple
 			// If they are different, we stop here
 			// another we compare the difference in index
 			
-			int diff = kind[i] - another.kind[i];
+			int diff = kinds[i] - another.kinds[i];
 			if (diff != 0)
 				return diff;
 			
-			diff = (int) (physical_index[i] - another.physical_index[i]);
+			diff = (int) (physicalIndexes[i] - another.physicalIndexes[i]);
 			if (diff != 0)
 				return diff;
 			
-			diff = (int) (logical_index[i] - another.logical_index[i]);
+			diff = (int) (logicalIndexes[i] - another.logicalIndexes[i]);
 			if (diff != 0)
 				return diff;
 		}
 		return length-another.length;
 	}
-	
-	/***
-	 * Check if this tuple has a specific kind.
-	 * @see KIND_NODE
-	 * @see KIND_THREAD
-	 * @see KIND_GPU_CONTEXT
-	 * 
-	 * @param kindType short
-	 * @return boolean true if the tuple has the kind type, false otherwise
-	 */
-	public boolean hasKind(short kindType) {
-		for(short i=0; i<kind.length; i++) {
-			if (getKind(i) == kindType)
-				return true;
-		}
-		return false;
-	}
-	
-	
-	public boolean hasKind(String prefix, IdTupleType type) {
-		for(short i=0; i<kind.length; i++) {
-			if (type.kindStr(kind[i]).startsWith(prefix))
-				return true;
-		}
-		return false;
-	}
-	
+		
 	
 	public boolean isGPU(int level, IdTupleType type) {
-		int kindType = IdTupleType.getKind(kind[level]);
+		int kindType = IdTupleType.getKind(kinds[level]);
 		String kindStr = type.getLabel(kindType);
 		return (kindStr.startsWith(IdTupleType.PREFIX_GPU));
 	}
 	
 	
 	public boolean isGPU(IdTupleType type) {
-		for (int i=0; i<kind.length; i++) {
+		for (int i=0; i<kinds.length; i++) {
 			if (isGPU(i, type))
 				return true;
 		}
@@ -178,7 +198,7 @@ public class IdTuple
 	
 	
 	public String toString(IdTupleType idTupleType) {
-		return toString(kind.length-1, idTupleType);
+		return toString(kinds.length-1, idTupleType);
 	}
 
 	
@@ -189,31 +209,31 @@ public class IdTuple
 	 */
 	public String toString(int level, IdTupleType idTupleType) {
 		String buff = "";
-		if (kind != null && physical_index != null)
+		if (kinds != null && physicalIndexes != null)
 			for(int i=0; i<=level; i++) {
 				if (i>0)
 					buff += " ";
-				int kindInt = IdTupleType.getKind(kind[i]);
+				int kindInt = IdTupleType.getKind(kinds[i]);
 				String kindStr = idTupleType.kindStr(kindInt); 
 				buff += kindStr + " " ;
 
-				switch (IdTupleType.getInterpret(kind[i])) {
+				switch (IdTupleType.getInterpret(kinds[i])) {
 				case IdTupleType.IDTUPLE_IDS_BOTH_VALID:
 					// physical and logical
 					if (idTupleType.getMode() == IdTupleType.Mode.LOGICAL) {
-						buff += logical_index[i];
+						buff += logicalIndexes[i];
 					} else {
-						buff += physical_index[i];
+						buff += physicalIndexes[i];
 					}
 					break;
 				case IdTupleType.IDTUPLE_IDS_LOGIC_ONLY:
 					// logical only
-					buff += logical_index[i];
+					buff += logicalIndexes[i];
 					break;
 				case IdTupleType.IDTUPLE_IDS_LOGIC_GLOBAL:
 					// physical
 				case IdTupleType.IDTUPLE_IDS_LOGIC_LOCAL:
-					buff += physical_index[i] + "*";
+					buff += physicalIndexes[i] + "*";
 					break;
 					// physical
 				}
@@ -260,16 +280,16 @@ public class IdTuple
 	 */
 	public String toLabel(int level) {
 		
-		if (kind != null && physical_index != null && level>=0 && level<length) {
+		if (kinds != null && physicalIndexes != null && level>=0 && level<length) {
 			String str = "";
 			
 			for(int i=0; i<=level; i++) {
 				
-				long lblIndex = physical_index[i]; 
+				long lblIndex = physicalIndexes[i]; 
 				if (i==1) {
 					str += ".";
 				} else if (i>1) {
-					lblIndex = (long) (Math.pow(10, level-i) * physical_index[i]);
+					lblIndex = (long) (Math.pow(10, level-i) * physicalIndexes[i]);
 				}
 				str += lblIndex;
 			}

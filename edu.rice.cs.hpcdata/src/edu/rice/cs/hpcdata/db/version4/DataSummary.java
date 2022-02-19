@@ -241,7 +241,7 @@ public class DataSummary extends DataCommon
 			info = listProfInfo.get(PROFILE_SUMMARY_INDEX);
 		} else {
 			IdTuple idt = listIdTuple.get(profileNum);
-			info = listProfInfo.get(idt.profileNum);
+			info = listProfInfo.get(idt.getProfileNum());
 		}
 		
 		if (profileNumberCache != profileNum || byteBufferCache == null) {
@@ -442,13 +442,13 @@ public class DataSummary extends DataCommon
 			assert(length>0);
 
 			IdTuple item = new IdTuple(i, length);
-			numLevels = Math.max(numLevels, item.length);
+			numLevels = Math.max(numLevels, item.getLength());
 			
-			for (int j=0; j<item.length; j++) {
+			for (int j=0; j<item.getLength(); j++) {
 				short kindInterpret = buffer.getShort();
 				item.setKindAndInterpret(kindInterpret, j);
-				item.physical_index[j] = buffer.getLong();
-				item.logical_index[j]  = buffer.getLong();
+				item.setPhysicalIndex(j, buffer.getLong());
+				item.setLogicalIndex(j, buffer.getLong());
 				
 				if (i==0)
 					continue;
@@ -459,7 +459,7 @@ public class DataSummary extends DataCommon
 				
 				// compute the number of appearances of a given kind and level
 				// this is important to know if there's invariant or not
-				Long hash = convertIdTupleToHash(j, item.getKind(j), item.physical_index[j]);
+				Long hash = convertIdTupleToHash(j, item.getKind(j), item.getPhysicalIndex(j));
 				Integer count = mapLevelToHash[j].get(hash);
 				if (count == null) {
 					count = Integer.valueOf(0);
@@ -468,8 +468,8 @@ public class DataSummary extends DataCommon
 				mapLevelToHash[j].put(hash, count);
 				
 				// find min and max for each level
-				minIndex[j] = Math.min(minIndex[j], item.physical_index[j]);
-				maxIndex[j] = Math.min(maxIndex[j], item.physical_index[j]);
+				minIndex[j] = Math.min(minIndex[j], item.getPhysicalIndex(j));
+				maxIndex[j] = Math.min(maxIndex[j], item.getPhysicalIndex(j));
 				
 				if (!hasGPU)
 					hasGPU = item.isGPU(idTupleTypes);
@@ -530,35 +530,35 @@ public class DataSummary extends DataCommon
 			int totLevels = 0;
 			
 			// find how many levels we can keep for this id tuple
-			for (int j=0; j<idt.length; j++) {
+			for (int j=0; j<idt.getLength(); j++) {
 				if (mapLevelToSkip.get(j) == null) {
 					totLevels++;
 				}
 			}
 			// the profileNum is +1 because the index 0 is for summary
-			IdTuple shortVersion = new IdTuple(idt.profileNum, totLevels);
+			IdTuple shortVersion = new IdTuple(idt.getProfileNum(), totLevels);
 			
 			// this is a hack since hpcprof2-mpi doesn't generate sorted id tuple:
 			// store the map from the profile index to the order index
 			
-			mapProfileToOrder.put(idt.profileNum, i);
+			mapProfileToOrder.put(idt.getProfileNum(), i);
 			
 			int level = 0;
 			
 			// copy not-skipped id tuples to the short version
 			// leave the skipped ones for the full complete id tuple
-			for(int j=0; j<idt.length; j++) {
+			for(int j=0; j<idt.getLength(); j++) {
 				if (mapLevelToSkip.get(j) == null) {
 					// we should keep this level
 					short kind = idt.getKind(j);
 					shortVersion.setKindAndInterpret(kind, level);
-					shortVersion.physical_index[level] = idt.physical_index[j];
+					shortVersion.setPhysicalIndex(level, idt.getPhysicalIndex(j));
 					level++;
 				}
 			}
 			listIdTupleShort.add(shortVersion);
 			
-			numLevels = Math.max(numLevels, idt.length);
+			numLevels = Math.max(numLevels, idt.getLength());
 		}
 	}
 

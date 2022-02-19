@@ -157,11 +157,11 @@ public class CanvasAxisY extends AbstractAxisCanvas
 			
 			IdTuple idtuple  = listIdTuples.get(procNumber);
 
-			for(int j=0; j<idtuple.length; j++) {
+			for(int j=0; j<idtuple.getLength(); j++) {
 
 				int currentColor;
 				
-				if (idtupleOld != null && idtupleOld.physical_index.length>j && idtuple.physical_index[j]!= idtupleOld.physical_index[j]) {
+				if (idtupleOld != null && idtupleOld.getLength()>j && idtuple.getPhysicalIndex(j)!= idtupleOld.getPhysicalIndex(j)) {
 					// make sure the current color is different than the previous one
 					currentColor = 1-oldColorIndex[j];
 				} else {
@@ -247,7 +247,7 @@ public class CanvasAxisY extends AbstractAxisCanvas
 				return null;
 			
 			IdTuple id  = listTuples.get(process); 
-			int level   = Math.min(event.x / columnWidth, id.length-1);
+			int level   = Math.min(event.x / columnWidth, id.getLength()-1);
 			
 			return id.toString(level, traceData.getIdTupleTypes());
 		}
