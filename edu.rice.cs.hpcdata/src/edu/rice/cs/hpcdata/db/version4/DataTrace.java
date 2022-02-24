@@ -20,10 +20,11 @@ import edu.rice.cs.hpcdata.util.LargeByteBuffer;
  *******************************************************************************/
 public class DataTrace extends DataCommon 
 {
-	private final static String HEADER = "HPCPROF-tracedb_";
+	private final static String HEADER = "HPCTOOLKITtrce";
 	private final static int TRACE_HDR_RECORD_SIZE = 22;
 	private final static int TRACE_RECORD_SIZE = 8 + 4;
-	
+	private static final int NUM_ITEMS = 1;
+
 	private RandomAccessFile file;
 	private FileChannel channel;
 	private LargeByteBuffer lbBuffer;
@@ -44,14 +45,9 @@ public class DataTrace extends DataCommon
 	}
 	
 
-
 	@Override
-	/*
-	 * (non-Javadoc)
-	 * @see edu.rice.cs.hpc.data.db.DataCommon#isTypeFormatCorrect(long)
-	 */
-	protected boolean isTypeFormatCorrect(long type) {
-		return type == 2;
+	protected int getNumSections() {
+		return NUM_ITEMS;
 	}
 
 	@Override
@@ -76,7 +72,7 @@ public class DataTrace extends DataCommon
 		// -------------------------------------------------
 		// reading the next 256 byte header
 		// -------------------------------------------------
-		long trace_hdr_size = TRACE_HDR_RECORD_SIZE * numItems;
+		long trace_hdr_size = TRACE_HDR_RECORD_SIZE * NUM_ITEMS;
 		ByteBuffer buffer = ByteBuffer.allocate((int) trace_hdr_size);
 		
 		int numBytes      = input.read(buffer);
@@ -85,9 +81,9 @@ public class DataTrace extends DataCommon
 		
 		buffer.flip();
 		
-		mapProfToTrace = new HashMap<Integer, DataTrace.TraceHeader>((int) numItems);
+		mapProfToTrace = new HashMap<Integer, DataTrace.TraceHeader>((int) NUM_ITEMS);
 		
-		for(int i=0; i<numItems; i++) {
+		for(int i=0; i<NUM_ITEMS; i++) {
 			TraceHeader header = new TraceHeader();
 			
 			// this database starts the profile number with number 1
@@ -161,7 +157,7 @@ public class DataTrace extends DataCommon
 	 */
 	public int getNumberOfRanks()
 	{
-		return (int) numItems;
+		return (int) NUM_ITEMS;
 	}
 	
 	

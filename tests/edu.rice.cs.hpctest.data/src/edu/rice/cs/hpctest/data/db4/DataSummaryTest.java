@@ -25,7 +25,7 @@ public class DataSummaryTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws IOException {
-		Path resource = Paths.get("..", "resources", "prof2", "empty-trace");
+		Path resource = Paths.get("..", "resources", "prof2", "loop-inline");
 		dbPath = resource.toFile();
 		
 		assertNotNull(dbPath);
@@ -70,7 +70,7 @@ public class DataSummaryTest {
 	@Test
 	public void testGetMetric() {
 		try {
-			double val = data.getMetric(DataSummary.PROFILE_SUMMARY, 0, 512);
+			double val = data.getMetric(0, 0, 512);
 			assertTrue(val > 27); // 27.1234130859375
 		} catch (IOException e) {
 			fail(e.getMessage());

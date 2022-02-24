@@ -10,10 +10,6 @@ public class DataMeta extends DataCommon
 	// --------------------------------------------------------------------
 	private final static String HEADER_MAGIC_STR  = "HPCTOOLKITmeta";
 
-	@Override
-	protected boolean isTypeFormatCorrect(long type) {
-		return true;
-	}
 
 	@Override
 	protected boolean isFileHeaderCorrect(String header) {
@@ -22,8 +18,12 @@ public class DataMeta extends DataCommon
 
 	@Override
 	protected boolean readNextHeader(FileChannel input, DataSection[] sections) throws IOException {
-		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	protected int getNumSections() {
+		return 8;
 	}
 
 }

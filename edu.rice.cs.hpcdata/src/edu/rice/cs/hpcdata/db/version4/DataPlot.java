@@ -17,7 +17,7 @@ import java.util.List;
  *******************************************************************************************/
 public class DataPlot extends DataCommon 
 {
-	private static final String HEADER = "HPCPROF-cctdb___";
+	private static final String HEADER = "HPCTOOLKITctxt";
 	
 	/*** list of cct. In the future we may need to implement with concurrent list.
 	 *** Right now it's just a simple array or list. Please use it carefully   
@@ -53,10 +53,13 @@ public class DataPlot extends DataCommon
 		}
 	}
 
+	private static final int NUM_ITEMS = 1;
+
 	@Override
-	protected boolean isTypeFormatCorrect(long type) {
-		return type == 3;
+	protected int getNumSections() {
+		return NUM_ITEMS;
 	}
+
 
 	@Override
 	protected boolean isFileHeaderCorrect(String header) {
@@ -66,20 +69,18 @@ public class DataPlot extends DataCommon
 	
 	@Override
 	protected boolean readNextHeader(FileChannel input, DataSection []sections) throws IOException {
-		if (numItems == 0)
-			return false;
 		
 		input.position(sections[0].offset);
 		
-		listContexts = new ArrayList<DataPlot.ContextInfo>((int) numItems);
+		listContexts = new ArrayList<DataPlot.ContextInfo>((int) NUM_ITEMS);
 		
-		ByteBuffer buffer = ByteBuffer.allocate((int) (numItems * ContextInfo.SIZE));
+		ByteBuffer buffer = ByteBuffer.allocate((int) (NUM_ITEMS * ContextInfo.SIZE));
 		
 		int numBytes = input.read(buffer);
 		if (numBytes > 0) 
 		{
 			buffer.flip();
-			for(int i=0; i<numItems; i++) {
+			for(int i=0; i<NUM_ITEMS; i++) {
 				ContextInfo info = new ContextInfo();
 				
 				info.id = buffer.getInt();
