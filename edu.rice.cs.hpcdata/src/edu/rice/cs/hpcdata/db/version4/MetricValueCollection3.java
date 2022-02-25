@@ -66,7 +66,7 @@ public class MetricValueCollection3 implements IMetricValueCollection
 				values = new IntObjectHashMap<MetricValue>(sparseValues.size()); //new HashMap<Integer, MetricValue>(sparseValues.size());
 				
 				for (MetricValueSparse mvs: sparseValues) {
-					float value = mvs.getValue();
+					float value = (float) mvs.getValue();
 					float annotationValue = 1.0f;
 					
 					// compute the percent annotation

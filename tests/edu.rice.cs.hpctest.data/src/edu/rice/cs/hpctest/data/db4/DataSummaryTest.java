@@ -70,7 +70,7 @@ public class DataSummaryTest {
 	@Test
 	public void testGetMetric() {
 		try {
-			double val = data.getMetric(0, 0, 512);
+			double val = data.getMetric(0, 0, 2);
 			assertTrue(val > 27); // 27.1234130859375
 		} catch (IOException e) {
 			fail(e.getMessage());
@@ -79,17 +79,17 @@ public class DataSummaryTest {
 
 	@Test
 	public void testGetMetricsInt() throws IOException {
-		List<MetricValueSparse> list = data.getMetrics(0);
+		List<MetricValueSparse> list = data.getMetrics(3);
 		assertTrue(list.size() > 0); // 512: 27.123413
 		
 		MetricValueSparse mvs = list.get(0);
-		assertTrue(mvs.getIndex() == 512);
-		assertTrue(mvs.getValue() > 27);
+		assertTrue(mvs.getIndex() == 1);
+		assertTrue(mvs.getValue() > 1.25281e+10);
 	}	
 
 	@Test
 	public void testGetMetricsIntInt() throws IOException {
-		List<MetricValueSparse> list = data.getMetrics(0, 1);
+		List<MetricValueSparse> list = data.getMetrics(0, 2);
 		assertTrue(list.size() > 0);
 	}
 
