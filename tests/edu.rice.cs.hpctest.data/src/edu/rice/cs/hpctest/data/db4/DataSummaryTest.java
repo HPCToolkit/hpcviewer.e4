@@ -15,7 +15,6 @@ import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.db.version4.DataSummary;
-import edu.rice.cs.hpcdata.db.version4.DataSummary.ListCCTAndIndex;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValueSparse;
 
 public class DataSummaryTest {
@@ -40,19 +39,6 @@ public class DataSummaryTest {
 	
 	
 	@Test
-	public void testGetCCTIndex() {
-		try {
-			ListCCTAndIndex list = data.getCCTIndex();
-			assertNotNull(list);
-			assertNotNull(list.listOfdIndex); // [0..45]
-			assertNotNull(list.listOfId);     // [0..74]
-			
-		} catch (IOException e) {
-			fail(e.getMessage());
-		}
-	}
-
-	@Test
 	public void testGetIdTuple() {
 		List<IdTuple> list = data.getIdTuple();
 		assertNotNull(list);
@@ -71,7 +57,7 @@ public class DataSummaryTest {
 	public void testGetMetric() {
 		try {
 			double val = data.getMetric(0, 0, 2);
-			assertTrue(val > 27); // 27.1234130859375
+			assertTrue(val > 1.25E10); 
 		} catch (IOException e) {
 			fail(e.getMessage());
 		}
@@ -80,10 +66,10 @@ public class DataSummaryTest {
 	@Test
 	public void testGetMetricsInt() throws IOException {
 		List<MetricValueSparse> list = data.getMetrics(3);
-		assertTrue(list.size() > 0); // 512: 27.123413
+		assertTrue(list.size() == 1); // 
 		
 		MetricValueSparse mvs = list.get(0);
-		assertTrue(mvs.getIndex() == 1);
+		assertTrue(mvs.getIndex() == 2);
 		assertTrue(mvs.getValue() > 1.25281e+10);
 	}	
 
@@ -107,11 +93,6 @@ public class DataSummaryTest {
 		assertTrue(labels.length == 1); // [0.0]
 	}
 
-	@Test
-	public void testGetProfileIndexFromOrderIndex() {
-		int index = data.getProfileIndexFromOrderIndex(1);
-		assertTrue(index == 0);
-	}
 
 	@Test
 	public void testHasGPU() {

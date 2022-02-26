@@ -25,14 +25,14 @@ public class IdTupleType
 	// we will convert old database process.thread format
 	// to id-tuples
 	
-	public final static int KIND_SUMMARY = 0;
-	public final static int KIND_NODE    = 1;
-	public final static int KIND_RANK    = 2;
-	public final static int KIND_THREAD  = 3;
-	public final static int KIND_GPUDEVICE  = 4;
-	public final static int KIND_GPUCONTEXT = 5;
-	public final static int KIND_GPUSTREAM  = 6;
-	public final static int KIND_CORE       = 7;
+	public final static byte KIND_SUMMARY = 0;
+	public final static byte KIND_NODE    = 1;
+	public final static byte KIND_RANK    = 2;
+	public final static byte KIND_THREAD  = 3;
+	public final static byte KIND_GPUDEVICE  = 4;
+	public final static byte KIND_GPUCONTEXT = 5;
+	public final static byte KIND_GPUSTREAM  = 6;
+	public final static byte KIND_CORE       = 7;
 	
 	public final static String LABEL_SUMMARY    = "Summary";
 	public final static String LABEL_NODE       = "Node";
@@ -65,7 +65,7 @@ public class IdTupleType
 	public final static int IDTUPLE_IDS_LOGIC_ONLY   = 3;
 
 
-	private final Map<Integer, String> mapIdTuple = new HashMap<>();
+	private final Map<Byte, String> mapIdTuple = new HashMap<>();
 	private Mode mode = Mode.PHYSICAL;
 	
 	
@@ -90,26 +90,13 @@ public class IdTupleType
 		return type;
 	}
 	
-	public static int getInterpret(int kind) {
-		return (((kind)>>14) & 0x3);
-	}
-	
-	public static int getKind(int kind) {
-		return ((kind) & ((1<<14)-1));
-	}
-	
-	public static int compose(int kind, int intr) {
-		return (((int)(intr) << 14) | (kind));
-	}
-	
-	
 	
 	/****
 	 * Add a new id tuple type
 	 * @param kind
 	 * @param label
 	 */
-	public void add(int kind, String label) {
+	public void add(byte kind, String label) {
 		mapIdTuple.put(kind, label);
 	}
 	
@@ -119,7 +106,7 @@ public class IdTupleType
 	 * @param kind
 	 * @return
 	 */
-	public String getLabel(int kind) {
+	public String getLabel(byte kind) {
 		return mapIdTuple.get(kind);
 	}
 	
@@ -128,7 +115,7 @@ public class IdTupleType
 	 * get the entry set of the id tuple types
 	 * @return {@code Set<Entry<Integer, String>> }
 	 */
-	public Set<Entry<Integer, String>>  entrySet() {
+	public Set<Entry<Byte, String>>  entrySet() {
 		return mapIdTuple.entrySet();
 	}
 	
@@ -138,7 +125,7 @@ public class IdTupleType
 	 * @return String label of a kind 
 	 * @exception java.lang.ArrayIndexOutOfBoundsException if the kind is invalid
 	 */
-	public String kindStr(int kind)
+	public String kindStr(byte kind)
 	{
 		assert(kind>=0 && mapIdTuple != null && mapIdTuple.containsKey(kind));
 		

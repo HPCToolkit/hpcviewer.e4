@@ -109,7 +109,7 @@ public class FileDB2 implements IFileDB
 			offsets[i] = masterBuff.getLong(current_pos);
 			current_pos += Constants.SIZEOF_LONG;
 			
-			IdTuple tuple = new IdTuple(i, getParallelismLevel());
+			IdTuple tuple = new IdTuple(getParallelismLevel());
 			
 			if (getParallelismLevel() == 0) {
 				// sequential program
@@ -124,12 +124,12 @@ public class FileDB2 implements IFileDB
 			if (this.isHybrid()) 
 			{
 				x_val = String.valueOf(proc_id) + "." + String.valueOf(thread_id);
-				
-				tuple.setKindAndInterpret(IdTupleType.KIND_RANK, 0);
+
+				tuple.setKind(0, IdTupleType.KIND_RANK);
 				tuple.setPhysicalIndex(0, proc_id);
 				tuple.setLogicalIndex(0, proc_id);
 				
-				tuple.setKindAndInterpret(IdTupleType.KIND_THREAD, 1);
+				tuple.setKind(1, IdTupleType.KIND_THREAD);
 				tuple.setPhysicalIndex(1, thread_id) ;
 				tuple.setLogicalIndex(1, thread_id);
 				
@@ -137,14 +137,14 @@ public class FileDB2 implements IFileDB
 			{
 				x_val = String.valueOf(proc_id);					
 				
-				tuple.setKindAndInterpret(IdTupleType.KIND_RANK, 0);
+				tuple.setKind(0, IdTupleType.KIND_RANK);
 				tuple.setPhysicalIndex(0, proc_id);
 				tuple.setLogicalIndex(0, proc_id);
 			} else if (isMultiThreading()) 
 			{
 				x_val = String.valueOf(thread_id);
 				
-				tuple.setKindAndInterpret(IdTupleType.KIND_THREAD, 0);
+				tuple.setKind(0, IdTupleType.KIND_THREAD);
 				tuple.setPhysicalIndex(0, thread_id);
 				tuple.setLogicalIndex(0, thread_id);
 			} else {
@@ -153,7 +153,7 @@ public class FileDB2 implements IFileDB
 				// this is not the ideal solution, but we cannot trust the value of proc_id and thread_id
 				x_val = String.valueOf(i);
 				
-				tuple.setKindAndInterpret(IdTupleType.KIND_RANK, 0);
+				tuple.setKind(0, IdTupleType.KIND_RANK);
 				tuple.setPhysicalIndex(0, i);
 				tuple.setLogicalIndex(0, proc_id);
 			}

@@ -14,10 +14,10 @@ public class IdTupleTest {
 	
 	@BeforeClass
 	public static void setup() {
-		idt1 = new IdTuple(1, 2);
+		idt1 = new IdTuple(2);
 		
-		idt1.setKindAndInterpret(IdTupleType.KIND_RANK, 0);
-		idt1.setKindAndInterpret(IdTupleType.KIND_THREAD, 1);
+		idt1.setKind(0, IdTupleType.KIND_RANK);
+		idt1.setKind(1, IdTupleType.KIND_THREAD);
 		
 		idt1.setPhysicalIndex(0, 0);
 		idt1.setPhysicalIndex(1, 1);
@@ -33,18 +33,23 @@ public class IdTupleTest {
 		assertTrue(idt0.compareTo(idt1) < 0);		
 		assertTrue(idt1.compareTo(idt0) > 0);
 		
-		IdTuple idt2 = new IdTuple(2, 2);		
-		idt2.setKindAndInterpret(IdTupleType.KIND_RANK, 0);
-		idt2.setKindAndInterpret(IdTupleType.KIND_THREAD, 1);
+		IdTuple idt2 = new IdTuple(2);		
+		idt2.setKind(0, IdTupleType.KIND_RANK);
+		idt2.setKind(1, IdTupleType.KIND_THREAD);
+
 		idt2.setPhysicalIndex(0, 0);
 		idt2.setPhysicalIndex(0, 2);
+		
+		idt2.setLogicalIndex(0, 0);
+		idt2.setLogicalIndex(1, 2);
 
 		assertTrue(idt1.compareTo(idt2) < 0);
 		assertTrue(idt2.compareTo(idt1) > 0);
 		
-		IdTuple idt3 = new IdTuple(1, 2);		
-		idt3.setKindAndInterpret(IdTupleType.KIND_RANK, 0);
-		idt3.setKindAndInterpret(IdTupleType.KIND_THREAD, 1);
+		IdTuple idt3 = new IdTuple(2);		
+		
+		idt3.setKind(0, IdTupleType.KIND_RANK);
+		idt3.setKind(1, IdTupleType.KIND_THREAD);
 		idt3.setPhysicalIndex(0, 0);
 		idt3.setPhysicalIndex(1, 1);
 		idt3.setLogicalIndex(0, 0);
@@ -97,9 +102,15 @@ public class IdTupleTest {
 		double num = idt1.toNumber();
 		assertTrue(num == 0.1d);
 	}
+	
+	@Test
+	public void testToString() {
+		String str = idt1.toString(IdTupleType.createTypeWithOldFormat());
+		assertNotNull(str.equals("Rank 0 Thread 1"));
+	}
 
 	@Test
 	public void testToLabel() {
-		assertNotNull( idt1.toLabel());
+		assertNotNull( idt1.toLabel().equals("0.1"));
 	}
 }

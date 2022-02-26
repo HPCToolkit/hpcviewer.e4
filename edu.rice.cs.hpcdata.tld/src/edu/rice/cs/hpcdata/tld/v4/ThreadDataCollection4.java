@@ -85,7 +85,7 @@ public class ThreadDataCollection4 extends AbstractThreadDataCollection
 		{	
 			for(DataPlotEntry e : entry)
 			{
-				int profile = data_summary.getProfileIndexFromOrderIndex(e.tid);
+				int profile = e.tid; //data_summary.getProfileIndexFromOrderIndex(e.tid);
 				
 				// minus 1 because the index is based on profile number.
 				// unfortunately, the profile number starts with number 1 instead of 0

@@ -8,10 +8,8 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.collections.impl.list.mutable.FastList;
 
@@ -39,28 +37,26 @@ public class DataSummary extends DataCommon
 	private static final int FMT_PROFILEDB_SZ_MVal = 0x0a;
 	private static final int FMT_PROFILEDB_SZ_CIdx = 0x0c;
 
+	public static final int INDEX_SUMMARY_PROFILE = 0;
+	
 	// --------------------------------------------------------------------
 	// object variable
 	// --------------------------------------------------------------------
 	
 	private final IdTupleType idTupleTypes;
-	
-	private List<IdTuple>  listIdTuple, listIdTupleShort;
+	private List<IdTuple> listIdTuple;
 	private ProfInfo info;
 	private ListCCTAndIndex listCCT;
-	
-	/*** mapping from profile number to the sorted order*/
-	private Map<Integer, Integer> mapProfileToOrder;
 		
 	protected boolean optimized = true;
-
-	/** Number of parallelism level or number of levels in hierarchy */
-	private int numLevels;
 	
 	private double[] labels;
 	private String[] strLabels;
 	private boolean  hasGPU;
-	
+
+	/** Number of parallelism level or number of levels in hierarchy */
+	private int numLevels;
+
 	public DataSummary(IdTupleType idTupleTypes) {
 		this.idTupleTypes = idTupleTypes;
 	}
@@ -93,8 +89,8 @@ public class DataSummary extends DataCommon
 		IdTupleType type = IdTupleType.createTypeWithOldFormat();
 		
 		// print list of id tuples
-		for(IdTuple idt: listIdTuple) {
-			out.println(idt.toString(type));
+		for(ProfileInfoElement pi: info.piElements) {
+			out.println(pi.getIdTupleLabel(type));
 		}
 		out.println();
 
@@ -103,7 +99,6 @@ public class DataSummary extends DataCommon
 		try {
 			list = getCCTIndex();
 		} catch (IOException e) {
-			e.printStackTrace();
 			return;
 		}
 		
@@ -120,29 +115,25 @@ public class DataSummary extends DataCommon
 
 	
 	/****
-	 * Get the list of cct
+	 * Get the list of cct for the summary profile
 	 * @return
 	 * @throws IOException
 	 */
-	public ListCCTAndIndex getCCTIndex() 
-			throws IOException {
-		if (listCCT == null)
-			listCCT = getCCTIndex(0);
-		
-		return listCCT;
+	private ListCCTAndIndex getCCTIndex() 
+			throws IOException {		
+		return getCCTIndex(INDEX_SUMMARY_PROFILE);
 	}
 	
 	
 	/****
 	 * Retrieve the list of CCT indexes for a specified profile
 	 * 
-	 * @param profileNum
+	 * @param profileNum 
+	 * 			1-based index of profile. The 0 index is reserved for summary profile.
 	 * @return
 	 * @throws IOException
 	 */
-	public ListCCTAndIndex getCCTIndex(int profileNum) throws IOException {
-		if (profileNum == 0 && listCCT != null)
-			return listCCT;
+	private ListCCTAndIndex getCCTIndex(int profileNum) throws IOException {
 		
 		ListCCTAndIndex list = new ListCCTAndIndex(info.piElements[profileNum].nCtxs);
 		
@@ -184,14 +175,14 @@ public class DataSummary extends DataCommon
 	 * @return {@code List<IdTuple>}
 	 */
 	public List<IdTuple> getIdTuple(IdTupleOption option) {
-		switch(option) {
-		case COMPLETE: 
-			return listIdTuple;
-
-		case BRIEF:
-		default:
-			return listIdTupleShort;
+		if (listIdTuple == null) {
+			listIdTuple = FastList.newList();
+			for(ProfileInfoElement pi: info.piElements) {
+				if (pi.pIdTuple != 0)
+					listIdTuple.add(pi.idt);
+			}
 		}
+		return listIdTuple;
 	}
 	
 	
@@ -230,6 +221,7 @@ public class DataSummary extends DataCommon
 		return listValues.get(index).getValue();
 	}
 	
+	
 	/**********
 	 * Reading a set of metrics from the file for a given CCT 
 	 * This method does not support concurrency. The caller is
@@ -249,7 +241,7 @@ public class DataSummary extends DataCommon
 	/****
 	 * Retrieve the list of metrics for a certain profile number and a given cct id
 	 * 
-	 * @param profileNum The profile number. For summary profile, it equals to {@code PROFILE_SUMMARY}
+	 * @param profileNum The profile number. For summary profile, it equals to {@code INDEX_SUMMARY_PROFILE}
 	 * @param cct_id the cct id
 	 * @return List of MetricValueSparse
 	 * @throws IOException
@@ -259,8 +251,8 @@ public class DataSummary extends DataCommon
 	{
 		ListCCTAndIndex list = listCCT;
 		
-		if (profileNum > 0 || list == null) {
-			list = getCCTIndex(profileNum);
+		if (profileNum != INDEX_SUMMARY_PROFILE || list == null) {
+			list = getCCTIndex(profileNum+1);
 			if (list == null)
 				return null;
 		}
@@ -272,15 +264,16 @@ public class DataSummary extends DataCommon
 		
 		// searching for metrics for a given cct
 		//
-		long position = list.listOfdIndex[index];
-		long nextPosition = list.listOfdIndex[index+1];
-		int numMetrics = (int) (nextPosition - position);
-		long diffPosition = FMT_PROFILEDB_SZ_MVal * numMetrics;
+		long position1 = list.listOfdIndex[index];
+		long position2 = list.listOfdIndex[index+1];
+		
+		int numMetrics = (int) (position2 - position1);
+		long numBytes  = FMT_PROFILEDB_SZ_MVal * numMetrics;
 		
 		List<MetricValueSparse> values = FastList.newList(numMetrics);
 		var channel = getChannel();
-		var offset  = info.piElements[profileNum].pValues + position * FMT_PROFILEDB_SZ_MVal;
-		var buffer  = channel.map(MapMode.READ_ONLY, offset, diffPosition);
+		var offset  = info.piElements[profileNum].pValues + position1 * FMT_PROFILEDB_SZ_MVal;
+		var buffer  = channel.map(MapMode.READ_ONLY, offset, numBytes);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		
 		for(int i=0; i<numMetrics; i++) {
@@ -304,12 +297,13 @@ public class DataSummary extends DataCommon
 	 */
 	public String[] getStringLabelIdTuples() {
 		if (strLabels == null) {
-			strLabels = new String[listIdTupleShort.size()];
+			strLabels = new String[info.piElements.length-1];
 			
-			for(int i=0; i<listIdTupleShort.size(); i++) {
-				IdTuple idt  = listIdTupleShort.get(i);
-				strLabels[i] = idt.toString(idTupleTypes);
-			}		
+			// id 0 is reserved
+			for(int i=1; i<info.piElements.length; i++) {
+				ProfileInfoElement piElem = info.piElements[i];
+				strLabels[i-1] = piElem.getIdTupleLabel(idTupleTypes);
+			}
 		}
 		return strLabels;
 	}
@@ -323,17 +317,16 @@ public class DataSummary extends DataCommon
 	 */
 	public double[] getDoubleLableIdTuples() {
 		if (labels == null) {
-			labels    = new double[listIdTupleShort.size()];
+			labels = new double[info.piElements.length-1];
 			
-			for(int i=0; i<listIdTupleShort.size(); i++) {
-				IdTuple idt  = listIdTupleShort.get(i);
-				String label = idt.toLabel();
-				labels[i]    = label == null? 0 : Double.valueOf(label);
+			// id 0 is reserved
+			for(int i=1; i<info.piElements.length; i++) {
+				ProfileInfoElement piElem = info.piElements[i];
+				labels[i-1] = piElem.getIdTupleNumber();
 			}		
 		}
 		return labels;
 	}
-	
 	
 	
 	/*
@@ -343,23 +336,12 @@ public class DataSummary extends DataCommon
 	@Override
 	public void dispose() throws IOException
 	{
+		labels = null;
+		listCCT = null;
 		super.dispose();
 	}
 
-	/***
-	 * Get the profile id based from the rank "order".
-	 * As the data is not sorted based on id tuple, this method will return
-	 * the profile index given the index of sorted id tuples.
-	 * 
-	 * @param orderNumber {@code int} the index
-	 * @return {@code int} the profile index, used fro accessing the database
-	 */
-	public int getProfileIndexFromOrderIndex(int orderNumber) {
-		return mapProfileToOrder.get(orderNumber);
-	}
 
-	
-	
 	// --------------------------------------------------------------------
 	// Protected methods
 	// --------------------------------------------------------------------
@@ -384,7 +366,13 @@ public class DataSummary extends DataCommon
 		// read the hierarchical id tuple 
 		for(int i=0; i<info.nProfile; i++) {
 			info.piElements[i].readIdTuple(input, sections[1]);
+			numLevels = Math.max(numLevels, info.piElements[i].numLevels);
 		}
+		// eager initialization for the cct of the summary profile
+		// this summary will be loaded anyway. There is no harm to do it now. 
+		// ... or I think
+		listCCT = getCCTIndex(INDEX_SUMMARY_PROFILE);
+		
 		return true;
 	}
 	
@@ -531,9 +519,9 @@ public class DataSummary extends DataCommon
 				return;
 			
 			for(MetricValueSparse value: values) {
-				System.out.print(value.getIndex() + ": " + value.getValue() + " , ");
+				out.print(value.getIndex() + ": " + value.getValue() + " , ");
 			}
-			System.out.println();
+			out.println();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -556,14 +544,14 @@ public class DataSummary extends DataCommon
 		
 		@Override
 		public String toString() {
-			String buffer = "";
+			StringBuilder buffer = new StringBuilder();
 			if (listOfId != null) {
-				buffer += "id: [" + listOfId[0] + ".." + listOfId[listOfId.length-1] + "] ";
+				buffer.append(String.format("id: %d..%d", listOfId[0], listOfId[listOfId.length-1]));
 			}
 			if (listOfdIndex != null) {
-				buffer += "idx; [" + listOfdIndex[0] + ".." + listOfdIndex[listOfdIndex.length-1] + "]";
+				buffer.append(String.format(" idx: %d..%d", listOfdIndex[0], listOfdIndex[listOfdIndex.length-1]));
 			}
-			return buffer;
+			return buffer.toString();
 		}
 	}
 	
@@ -589,6 +577,7 @@ public class DataSummary extends DataCommon
 		 */
 		public final ProfileInfoElement []piElements;
 		
+		
 		/***
 		 * Reading profile info in the buffer
 		 * @param buffer
@@ -601,7 +590,6 @@ public class DataSummary extends DataCommon
 			pProfile = buffer.getLong();
 			nProfile = buffer.getInt();
 			szProfile = buffer.get();
-			
 			piElements = new ProfileInfoElement[nProfile];
 			
 			//
@@ -619,7 +607,7 @@ public class DataSummary extends DataCommon
 		
 		@Override
 		public String toString() {
-			return String.format("prof: %x [%d] %d pie: %d", 
+			return String.format("prof: 0x%x [%d] %d pie: %d", 
 								 pProfile, nProfile, szProfile, piElements.length);
 		}
 	}
@@ -632,6 +620,9 @@ public class DataSummary extends DataCommon
 	 *************************************************/
 	private static class ProfileInfoElement
 	{	
+		public static final int FMT_PROFILEDB_SZ_IdTupleElem = 0x10; 
+		public static final int FMT_PROFILEDB_SZ_IdTupleHdr = 0x08;
+		
 		/*
 		 * ProfileMajorSparseValueBlock:
 		 * 	00:	u64			nValues		Number of non-zero values in this block
@@ -649,7 +640,8 @@ public class DataSummary extends DataCommon
 		 */
 		public final long pIdTuple;
 		
-		public IdTupleElem []idTuples;
+		public int numLevels;
+		public IdTuple idt;
 		
 		/***
 		 * Initializing a block for profile-major sparse value
@@ -658,13 +650,13 @@ public class DataSummary extends DataCommon
 		public ProfileInfoElement(ByteBuffer buffer) {
 			nValues = buffer.getLong();
 			pValues = buffer.getLong();
-			nCtxs = buffer.getInt();
+			nCtxs   = buffer.getInt();
 			
 			buffer.getInt(); // alignment 4 bytes
 			
-			pCtxIndices = buffer.getLong();
-			
-			pIdTuple = buffer.getLong();
+			pCtxIndices = buffer.getLong();			
+			pIdTuple    = buffer.getLong();
+			numLevels   = 0;
 		}
 		
 		public void readIdTuple(FileChannel channel, DataSection idTupleSection) throws IOException {
@@ -675,56 +667,39 @@ public class DataSummary extends DataCommon
 			buffer.order(ByteOrder.LITTLE_ENDIAN);
 			short nIds = buffer.getShort();
 
-			buffer = channel.map(MapMode.READ_ONLY, pIdTuple + 2, nIds * IdTupleElem.FMT_PROFILEDB_SZ_IdTupleElem);
+			buffer = channel.map(MapMode.READ_ONLY, pIdTuple + FMT_PROFILEDB_SZ_IdTupleHdr, nIds * FMT_PROFILEDB_SZ_IdTupleElem);
 			buffer.order(ByteOrder.LITTLE_ENDIAN);
-			idTuples = new IdTupleElem[nIds];
+			
+			idt = new IdTuple(nIds);
 			
 			for(int i=0; i<nIds; i++) {
-				buffer.position(i * IdTupleElem.FMT_PROFILEDB_SZ_IdTupleElem);
-				idTuples[i] = new IdTupleElem(buffer);
+				buffer.position(i * FMT_PROFILEDB_SZ_IdTupleElem);
+				byte kind  = buffer.get();
+				buffer.get();
+				short flag = buffer.getShort();
+				int logicalId  = buffer.getInt();
+				long physicalId = buffer.getLong();
+				
+				idt.setKind(i, kind);
+				idt.setFlag(i, (byte)flag);
+				idt.setLogicalIndex(i, logicalId);
+				idt.setPhysicalIndex(i, physicalId);
 			}
+			numLevels = Math.max(numLevels, nIds);
+		}
+		
+		public String getIdTupleLabel(IdTupleType idtype) {
+			return idt.toString(idtype);
+		}
+		
+		public float getIdTupleNumber() {
+			return (float) idt.toNumber();
 		}
 		
 		@Override
 		public String toString() {
-			return String.format("p: %x has %d, ctx: %x has %d, idt: %x", 
-								 pValues, nValues, pCtxIndices, nCtxs, pIdTuple);
-		}
-	}
-	
-	
-	
-	/*****************************
-	 * 
-	 * An Id Tuple element class
-	 *
-	 *****************************/
-	private static class IdTupleElem
-	{
-		public static final int FMT_PROFILEDB_SZ_IdTupleElem = 0x10; 
-		/*
-		 * 	00:	u8	kind	One of the values listed in the meta.db Identifier Names section.
-			02:	{Flags}	flags	See below.
-			04:	u32	logicalId	Logical identifier value, may be arbitrary but dense towards 0.
-			08:	u64	physicalId	Physical identifier value, eg. hostid or PCI bus index.
-			10:		END	
-		 */
-		public final short kind;
-		public final short flags;
-		public final int   logicalId;
-		public final long  physicalId;
-		
-		public IdTupleElem(ByteBuffer buffer) {
-			kind  = buffer.getShort();
-			flags = buffer.getShort();
-			logicalId  = buffer.getInt();
-			physicalId = buffer.getLong();
-		}
-		
-		@Override
-		public String toString() {
-			return String.format("k: %x, f: %x, l: %x, p: %x", 
-								 kind, flags, logicalId, physicalId);
+			return String.format("%s p: 0x%x has %d, ctx: 0x%x has %d, idt: 0x%x", 
+								 idt.toLabel(), pValues, nValues, pCtxIndices, nCtxs, pIdTuple);
 		}
 	}
 }
