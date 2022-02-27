@@ -20,7 +20,7 @@ public class DataTraceTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws IOException {
-		Path resource = Paths.get("..", "resources", "prof2", "empty-trace");
+		Path resource = Paths.get("..", "resources", "prof2", "loop-inline");
 		File dbPath = resource.toFile();
 		
 		assertNotNull(dbPath);
@@ -54,7 +54,7 @@ public class DataTraceTest {
 	@Test
 	public void testGetNumberOfSamples() {
 		int samples = data.getNumberOfSamples(1);
-		assertTrue(samples == 0);
+		assertTrue(samples == 838);
 	}
 
 	@Test
@@ -66,7 +66,7 @@ public class DataTraceTest {
 	@Test
 	public void testGetLength() {
 		long l = data.getLength(1);
-		assertTrue(l < 0);
+		assertTrue(l == 10056);
 	}
 
 }

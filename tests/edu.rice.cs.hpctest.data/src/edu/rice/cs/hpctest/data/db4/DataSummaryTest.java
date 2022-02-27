@@ -43,6 +43,8 @@ public class DataSummaryTest {
 		List<IdTuple> list = data.getIdTuple();
 		assertNotNull(list);
 		assertTrue(list.size() == 1);
+		var idt = list.get(0);
+		assertTrue(idt.getPhysicalIndex(0) == 0x7f0101);
 	}
 
 	@Test
@@ -84,6 +86,8 @@ public class DataSummaryTest {
 		String []labels = data.getStringLabelIdTuples();
 		assertNotNull(labels);
 		assertTrue(labels.length == 1);
+		assertTrue(labels[0].startsWith("Node"));
+		assertTrue(labels[0].contains("Thread"));
 	}
 
 	@Test
@@ -91,6 +95,7 @@ public class DataSummaryTest {
 		double []labels = data.getDoubleLableIdTuples();
 		assertNotNull(labels);
 		assertTrue(labels.length == 1); // [0.0]
+		assertTrue(labels[0] == 0.0);
 	}
 
 
