@@ -1,15 +1,25 @@
 package edu.rice.cs.hpcdata.db.version4;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+
+import org.eclipse.collections.api.map.primitive.LongObjectMap;
+import org.eclipse.collections.impl.map.mutable.primitive.LongObjectHashMap;
+
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
+import edu.rice.cs.hpcdata.experiment.scope.LoadModuleScope;
+import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
+import edu.rice.cs.hpcdata.experiment.source.SimpleSourceFile;
+import edu.rice.cs.hpcdata.experiment.source.SourceFile;
 
 
 /*********************************************
@@ -41,12 +51,21 @@ public class DataMeta extends DataCommon
 	private static final int INDEX_GENERAL = 0;
 	private static final int INDEX_NAMES   = 1;
 	private static final int INDEX_METRICS = 2;
+	private static final int INDEX_CONTEXT = 3;
+	private static final int INDEX_STRINGS = 4;
+	private static final int INDEX_MODULES = 5;
+	private static final int INDEX_FILES   = 6;
+	private static final int INDEX_FUNCTIONS = 7;
 	
-	public String title;
-	public String description;
-
-	public String []kindNames;
-
+	private String title;
+	private String description;
+	private String []kindNames;
+	
+	private LongObjectMap<LoadModuleScope>    mapLoadModules;
+	private LongObjectHashMap<SourceFile>     mapFiles;
+	private LongObjectHashMap<ProcedureScope> mapProcedures;
+	
+	private StringArea stringArea;
 	private List<BaseMetric> metrics;
 
 	public DataMeta() {
@@ -109,6 +128,28 @@ public class DataMeta extends DataCommon
 	}
 	
 	
+	public LoadModuleScope getLoadModule(long id) {		
+		return mapLoadModules.get(id);
+	}
+	
+	
+	public int getNumLoadModules() {
+		return mapLoadModules.size();
+	}
+	
+	public Iterator<LoadModuleScope> getLoadModuleIterator() {
+		return mapLoadModules.iterator();
+	}
+	
+	
+	public int getNumProcedures() {
+		return mapProcedures.size();
+	}
+	
+	public Iterator<ProcedureScope> getProcedureIterator() {
+		return mapProcedures.iterator();
+	}
+	
 	/******
 	 * Mandatory call once the opening is successful.
 	 * @param profileDB
@@ -139,6 +180,28 @@ public class DataMeta extends DataCommon
 		// grab the description of the metrics
 		// --------------------------------------
 		parseMetricDescription(channel, sections[INDEX_METRICS]);
+		
+		// --------------------------------------
+		// grab the string block to be used later
+		// --------------------------------------
+		var buffer = channel.map(MapMode.READ_ONLY, sections[INDEX_STRINGS].offset, sections[INDEX_STRINGS].size);
+		stringArea = new StringArea(buffer, sections[INDEX_STRINGS].offset);
+		
+		// --------------------------------------
+		// parse the load modules
+		// --------------------------------------
+		mapLoadModules = parseLoadModules(channel, sections[INDEX_MODULES]);
+		
+		// --------------------------------------
+		// parse the file table
+		// --------------------------------------
+		mapFiles = parseFiles(channel, sections[INDEX_FILES]);
+		
+		// --------------------------------------
+		// parse the procedure table
+		// --------------------------------------
+		mapProcedures = parseFunctions(channel, sections[INDEX_FUNCTIONS]);
+		
 	}
 	
 	private void parseGeneralDescription(FileChannel channel, DataSection section) throws IOException {
@@ -220,25 +283,104 @@ public class DataMeta extends DataCommon
 											
 					var strFormula = getNullTerminatedString(buffer, (int) (pFormula-section.offset));
 					
-					if (!scopeName.equals(METRIC_SCOPE_POINT)) {
-						var m = new HierarchicalMetric(statMetric, metricName);
-						m.setFormula(strFormula);
-						MetricType type = scopeName.equals(METRIC_SCOPE_EXECUTION) ? 
-															MetricType.INCLUSIVE : 
-															MetricType.EXCLUSIVE;
-						m.setMetricType(type);
-						m.setCombineType(combine);
-						metrics.add(m);
-					}
+					if (scopeName.equals(METRIC_SCOPE_POINT)) 
+						continue;
+					
+					var m = new HierarchicalMetric(statMetric, metricName);
+					m.setFormula(strFormula);
+					MetricType type = scopeName.equals(METRIC_SCOPE_EXECUTION) ? 
+														MetricType.INCLUSIVE : 
+														MetricType.EXCLUSIVE;
+					m.setMetricType(type);
+					m.setCombineType(combine);
+					metrics.add(m);
+
 				}
 			}
 		}
 	}
 	
 	
-	private void parseLoadModules(FileChannel channel, DataSection section) {
+	private LongObjectMap<LoadModuleScope> parseLoadModules(FileChannel channel, DataSection section) throws IOException {
+		var buffer = channel.map(MapMode.READ_ONLY, section.offset, section.size);
+		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		
+		long pModules  = buffer.getLong();
+		int  nModules  = buffer.getInt(0x08);
+		short szModule = buffer.getShort(0x0c);
+		
+		int baseOffset = (int) (pModules - section.offset);
+		LongObjectHashMap<LoadModuleScope> mapLoadModules = new LongObjectHashMap<>(nModules);
+
+		for(int i=0; i<nModules; i++) {
+			int delta        = i * szModule;
+			int position     = baseOffset + delta + 0x08;
+			long pModuleName = buffer.getLong(position);
+			String path      = stringArea.toString(pModuleName);
+			
+			LoadModuleScope lms = new LoadModuleScope(null, path, null, i);
+			mapLoadModules.put(pModules + delta, lms);
+		}
+		return mapLoadModules;
 	}
+	
+	
+	private LongObjectHashMap<SourceFile> parseFiles(FileChannel channel, DataSection section) throws IOException {
+		var buffer = channel.map(MapMode.READ_ONLY, section.offset, section.size);
+		buffer.order(ByteOrder.LITTLE_ENDIAN);
+		
+		long pFiles = buffer.getLong();
+		int  nFiles = buffer.getInt(0x08);
+		short szFiles = buffer.getShort(0x0c);
+		
+		int basePosition = (int) (pFiles - section.offset);
+		LongObjectHashMap<SourceFile> mapSourceFile = new LongObjectHashMap<>(nFiles);
+		
+		for(int i=0; i<nFiles; i++) {
+			int delta    = i * szFiles;
+			int position = basePosition + delta;
+			int flags  = buffer.getInt(position);
+			long pPath = buffer.getLong(position + 0x08);
+			
+			boolean available = (flags & 0x1) == 0x1;
+			String  name = stringArea.toString(pPath);
+			
+			SourceFile sf = new SimpleSourceFile(i, new File(name), available);
+			mapSourceFile.put(pFiles + delta, sf);
+		}
+		return mapSourceFile;
+	}
+	
+	
+	private LongObjectHashMap<ProcedureScope> parseFunctions(FileChannel channel, DataSection section) throws IOException {
+		var buffer = channel.map(MapMode.READ_ONLY, section.offset, section.size);
+		buffer.order(ByteOrder.LITTLE_ENDIAN);
+		
+		long pFunctions = buffer.getLong();
+		int  nFunctions = buffer.getInt(0x08);
+		short szFunctions = buffer.getShort(0x0c);
+		
+		var basePosition = pFunctions - section.offset;
+		LongObjectHashMap<ProcedureScope> mapProcedures = new LongObjectHashMap<>(nFunctions);
+		
+		for(int i=0; i<nFunctions; i++) {
+			int position = (int) (basePosition + (i * szFunctions));
+			long pName   = buffer.getLong(position);
+			long pModule = buffer.getLong(position + 0x08);
+			long offset  = buffer.getLong(position + 0x10);
+			long pFile   = buffer.getLong(position + 0x18);
+			int  line    = buffer.getInt( position + 0x20);
+			
+			var name = stringArea.toString(pName);
+			var lms  = mapLoadModules.get(pModule);
+			var file = mapFiles.get(pFile);
+			
+			ProcedureScope ps = new ProcedureScope(null, lms, file, line, line, name, false, i, i, null, line);
+			mapProcedures.put(position, ps);
+		}
+		return mapProcedures;
+	}
+	
 	
 	private String getNullTerminatedString(ByteBuffer buffer, int startPosition) throws IOException {
 		StringBuilder sb = new StringBuilder();
@@ -250,5 +392,30 @@ public class DataMeta extends DataCommon
 			sb.append((char)b);
 		}
 		return sb.toString();
+	}
+	
+	
+	static class StringArea
+	{
+		private final ByteBuffer stringsArea;
+		private final long baseLocation;
+		
+		public StringArea(ByteBuffer stringsArea, long baseLocation) {
+			this.stringsArea  = stringsArea;
+			this.baseLocation = baseLocation;
+		}
+		
+		public String toString(long absoluteLocation) {
+			int location = (int) (absoluteLocation - baseLocation);			
+			StringBuilder sb = new StringBuilder();
+
+			for(int i=0; i<stringsArea.capacity(); i++) {
+				byte b = stringsArea.get(location + i);
+				if (b == 0)
+					break;
+				sb.append((char)b);
+			}
+			return sb.toString();
+		}
 	}
 }

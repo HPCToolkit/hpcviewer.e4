@@ -56,13 +56,6 @@ protected boolean contentsAvailable;
     Should not be accessed unless <code>this.contentsAvailable</code>. */
 protected File resolvedPath;
 
-/** The number of lines in this source file, lazily computed.
-    Should not be accessed unless <code>this.contentsAvailable</code>. */
-protected int lineCount;
-
-protected boolean istext;
-
-protected String longName;
 
 /**
  * The ID of the file, to be looked in the experiment's hashtable
@@ -86,15 +79,12 @@ public FileSystemSourceFile(BaseExperiment experiment, File filename, int idFile
 
 	// creation arguments
 	this.experiment = experiment;
-	this.filename = filename;
+	this.filename   = filename;
 
 	// lazily computed file properties
 	this.hasBeenSought     = false;
 	this.contentsAvailable = true;
-	
-	this.longName = null;
-	//  laks: bug: default is a text file
-	this.istext = true;
+
 	// Note: 'this.resolvedPath' and 'this.lineCount' should not be accessed
 	//       unless 'this.contentsAvailable'.
 	this.id = idFile;
@@ -119,15 +109,7 @@ public int getFileID () {
 	
 public String getName()
 {
-	if (longName == null) {
-		if (istext) {
-			longName = filename.getName();
-		}
-		else {
-			longName = "binary file " + filename.getName();
-		}
-	}
-	return this.longName;
+	return filename.getName();
 }
 
 
@@ -141,95 +123,6 @@ public File getFilename()
 {
 	return this.filename;
 }
-
-
-
-
-/*************************************************************************
- *	Returns the number of lines in the source file.
- *
- *	<p>
- *	This method should only be called if <code>this.isAvailable()</code>.
- *
- ************************************************************************/
-	
-public int getLineCount()
-{
-	this.requireAvailable();
-	if( this.lineCount == -1 )
-		this.computeLineCount();
-	return this.lineCount;
-}
-
-
-
-
-/*************************************************************************
- *	Counts and stores the number of lines in the source file.
- *
- *	<p>
- *	This method is only called if <code>this.isAvailable()</code>.
- *
- ************************************************************************/
-
-protected void computeLineCount()
-{
-	Dialogs.Assert(this.contentsAvailable, "contents not available FileSystemSourceFile::Compute Line Count");
-
-	InputStream inputStream = this.getStream();
-	LineNumberReader reader = new LineNumberReader(new InputStreamReader(inputStream));
-	try
-	{
-		boolean done = false;
-		while( ! done)
-		{
-			String line = reader.readLine();
-			done = (line == null);
-		}
-	}
-	catch( IOException e)
-	{
-		Dialogs.fatalException(Strings.CANT_READ_SOURCEFILE, this.getName(), e);
-	}
-
-	this.lineCount = 1 + reader.getLineNumber();
-	try {
-		reader.close();
-	} catch (IOException e) {
-		e.printStackTrace();
-	}
-}
-
-
-
-
-/*************************************************************************
- *	Returns an open input stream for reading the source file's contents.
- *
- *	The stream will close itself on finalization.
- *	<p>
- *	This method should only be called if <code>this.isAvailable()</code>.
- *
- ************************************************************************/
-	
-public InputStream getStream()
-{
-	this.requireAvailable();
-	InputStream stream;
-
-	try
-	{
-		stream = new FileInputStream(this.resolvedPath);
-	}
-	catch( IOException e)
-	{
-		Dialogs.fatalException(Strings.CANT_OPEN_SOURCEFILE, this.getName(), e);
-		stream = null;	// compiler can't see 'stream' is returned iff initialized
-	}
-
-	return stream;
-}
-
 
 
 
@@ -251,33 +144,6 @@ public boolean isAvailable()
 
 	return this.contentsAvailable;
 }
-
-
-
-public boolean isText()
- {
-   return this.istext;
- }
-
-
-public void setIsText(boolean bi)
-  { 
-     this.istext=bi;
-  }
-
-/*************************************************************************
- *	Returns whether this source file has a line with the given line number.
- ************************************************************************/
-	
-public boolean hasLine(int lineNumber)
-{
-	Dialogs.Assert(this.contentsAvailable, "contents not available FileSystemSourceFile::Compute Line Count");
-
-	return (lineNumber >= 0) && (lineNumber <= this.getLineCount());
-}
-
-
-
 
 /*************************************************************************
  *	Demands that the source file be available.
@@ -338,7 +204,6 @@ protected void searchForContents()
 	this.hasBeenSought     = true;
 	this.contentsAvailable = (found && resolved.canRead());
 	this.resolvedPath      = resolved;
-	this.lineCount         = -1;		// counting lines is deferred
 }
 
 

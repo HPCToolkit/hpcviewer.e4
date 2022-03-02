@@ -81,7 +81,7 @@ public class DataFactory
 			String parentName = parent instanceof RootScope ? "proc 0" : parent.getName();
 			String name = parentName + "." +  myid;
 			int intmyid = Integer.valueOf(myid);
-			Scope grandChild = new ProcedureScope(root, null, 0, 0, name , false, intmyid, intmyid, null, 0);
+			Scope grandChild = new ProcedureScope(root, null, null, 0, 0, name , false, intmyid, intmyid, null, 0);
 			grandChild.setParentScope(parent);
 			createMetric(grandChild, (Experiment) root.getExperiment());
 			parent.addSubscope(grandChild);

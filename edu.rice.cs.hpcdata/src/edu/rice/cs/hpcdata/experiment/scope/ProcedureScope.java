@@ -85,10 +85,18 @@ public class ProcedureScope extends Scope  implements IMergedScope
 
 /*************************************************************************
  *	Creates a ProcedureScope.
- ************************************************************************/
-	
-public ProcedureScope(RootScope root, SourceFile file, int first, int last, 
-		String proc, boolean _isalien, int cct_id, int flat_id, 
+ * Laks 2008.08.25: We need a special constructor to accept the SID
+ * 
+ * @param experiment
+ * @param file
+ * @param first
+ * @param last
+ * @param proc
+ * @param sid
+ * @param _isalien
+ */
+public ProcedureScope(RootScope root, LoadModuleScope loadModule, SourceFile file, 
+		int first, int last, String proc, boolean _isalien, int cct_id, int flat_id, 
 		IUserData<String,String> userData, int procedureFeature)
 {
 	super(root, file, first, last, cct_id, flat_id);
@@ -110,45 +118,10 @@ public ProcedureScope(RootScope root, SourceFile file, int first, int last,
 	}
 	this.objLoadModule 	  = null;
 	this.procedureFeature = procedureFeature;
-}
-
-
-/**
- * Laks 2008.08.25: We need a special constructor to accept the SID
- * @param experiment
- * @param file
- * @param first
- * @param last
- * @param proc
- * @param sid
- * @param _isalien
- */
-public ProcedureScope(RootScope root, LoadModuleScope loadModule, SourceFile file, 
-		int first, int last, String proc, boolean _isalien, int cct_id, int flat_id, 
-		IUserData<String,String> userData, int procedureFeature)
-{
-	this(root, file, first, last,proc,_isalien, cct_id, flat_id, userData, procedureFeature);
 	//this.iScopeID = sid;
 	this.objLoadModule = loadModule;
 }
-/*
-public boolean equals(Object obj) {
-	if (obj instanceof ProcedureScope) {
-		ProcedureScope p = (ProcedureScope) obj;
-		boolean equal = this.getName().equals(p.getName());
-		if (equal) {
-			// corner case: somehow Eclipse needs to compare different tree item before it closes.
-			// of course, when it's closing, we remove databases and all references to enable
-			// garbage collection to gather unused storage
-			SourceFile mySrc = getSourceFile();
-			SourceFile pSrc  = p.getSourceFile();
-			if (mySrc != null && pSrc != null) {
-				return  mySrc.getName().equals(pSrc.getName());
-			}
-		}
-	} 
-	return false;
-}*/
+
 
 //////////////////////////////////////////////////////////////////////////
 //	SCOPE DISPLAY	

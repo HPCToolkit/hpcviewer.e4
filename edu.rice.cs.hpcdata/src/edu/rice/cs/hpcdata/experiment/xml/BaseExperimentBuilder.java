@@ -550,7 +550,6 @@ public class BaseExperimentBuilder extends Builder
 	 ************************************************************************/
 	private void begin_PF(String[] attributes, String[] values)
 	{
-			boolean istext  = true; 
 			boolean isalien = false; 
 			boolean new_cct_format = false;
 			
@@ -577,7 +576,6 @@ public class BaseExperimentBuilder extends Builder
 					
 				} else if(attributes[i].equals(ATTRIBUTE_FILENAME)) {
 					// file
-					istext = true;
 					try {
 						Integer indexFile = Integer.parseInt(values[i]);
 						srcFile = this.hashSourceFileTable.get(indexFile);
@@ -646,9 +644,7 @@ public class BaseExperimentBuilder extends Builder
 								firstLn-1, lastLn-1, cct_id, flat_id);
 					scope.setCpid(0);
 					scopeStack.push(scope);
-
-					srcFile.setIsText(istext);
-					this.srcFileStack.add(srcFile);
+					srcFileStack.add(srcFile);
 					return;
 				} else {
 					// this is a procedure scope uses the handling below
@@ -659,8 +655,6 @@ public class BaseExperimentBuilder extends Builder
 			if(srcFile == null) {
 					srcFile = this.srcFileStack.peek();
 			} 
-			 
-			srcFile.setIsText(istext);
 			this.srcFileStack.add(srcFile);
 			
 			int feature = 0;

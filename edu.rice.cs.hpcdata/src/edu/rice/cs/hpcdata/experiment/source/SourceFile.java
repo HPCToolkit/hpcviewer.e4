@@ -62,26 +62,6 @@ public abstract int getFileID();
 public abstract String getName();
 
 
-
-
-/*************************************************************************
- *	Returns the number of lines in the source file.
- ************************************************************************/
-	
-public abstract int getLineCount();
-
-
-
-
-/*************************************************************************
- *	Returns an open input stream for reading the file's contents.
- ************************************************************************/
-	
-public abstract InputStream getStream();
-
-
-
-
 //////////////////////////////////////////////////////////////////////////
 //	AVAILABILITY OF SOURCE FILE CONTENTS								//
 //////////////////////////////////////////////////////////////////////////
@@ -96,23 +76,7 @@ public abstract InputStream getStream();
 public abstract boolean isAvailable();
 
 
-
-/*************************************************************************
- *	Returns whether this source file has a line with the given line number.
- ************************************************************************/
-	
-public abstract boolean hasLine(int lineNumber);
-
-
-
-
 public abstract File getFilename();
-
-
-public abstract boolean isText();
-
-public abstract void  setIsText(boolean bi);
-
 }
 
 
