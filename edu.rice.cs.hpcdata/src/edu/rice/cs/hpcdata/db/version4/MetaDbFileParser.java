@@ -23,8 +23,11 @@ public class MetaDbFileParser extends ExperimentFile
 		} else {
 			throw new IOException(location.getName() + ": not readable");
 		}
+		
 		DataMeta data = new DataMeta();
 		data.open(metaDBFilename);
+		
+		DataSummary profileDB = new DataSummary(null);
 		
 		return null;
 	}

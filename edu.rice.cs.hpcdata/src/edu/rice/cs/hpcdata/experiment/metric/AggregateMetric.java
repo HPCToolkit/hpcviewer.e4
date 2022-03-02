@@ -35,7 +35,22 @@ public class AggregateMetric extends AbstractMetricWithFormula
 	private MetricVarMap finalizeVarMap;
 	private CombineAggregateMetricVarMap combineVarMap;
 	
+	
+	/*****
+	 * Compact constructor of the class given its ID and name.
+	 * The caller is responsible to set the formula and other attributes.
+	 *  
+	 * @param sID
+	 * 			 the ID of the metric
+	 * @param sDisplayName
+	 * 			the display name of the metric
+	 */
+	public AggregateMetric(String sID, String sDisplayName) {
+		super(sID, sDisplayName);
+	}
+	
 	/**
+	 * Create a new aggregate metric
 	 * @see BaseMetric
 	 */
 	public AggregateMetric(String sID, String sDisplayName, String sDescription,
