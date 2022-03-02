@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Iterator;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -14,6 +15,7 @@ import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.db.version4.DataMeta;
 import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
+import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 
 public class DataMetaTest 
 {
@@ -72,5 +74,38 @@ public class DataMetaTest
 		assertTrue(m.getIndex() == 2);
 		assertTrue(m.getMetricType() == MetricType.INCLUSIVE);
 		assertTrue(m.getCombineTypeLabel().equals("sum"));
+	}
+	
+	@Test
+	public void testLoadModule() {
+		assertTrue(data.getNumLoadModules() == 5);
+		var iterator = data.getLoadModuleIterator();
+		iterator.forEachRemaining(lm -> {
+			assertNotNull(lm);
+			assertNotNull(lm.getName());
+		});
+	}
+	
+	
+	@Test
+	public void testFiles() {
+		assertTrue(data.getNumFiles() == 5);
+		var iterator = data.getFileIterator();
+		iterator.forEachRemaining(f-> {
+			assertNotNull(f);
+			assertNotNull(f.getName());
+		});
+	}
+	
+	@Test
+	public void testProcedure() {
+		assertTrue(data.getNumProcedures() == 10);
+		
+		Iterator<ProcedureScope> iterator = data.getProcedureIterator();
+		assertNotNull(iterator);
+		iterator.forEachRemaining(ps -> {
+			assertNotNull(ps);
+			assertNotNull(ps.getName());
+		});
 	}
 }

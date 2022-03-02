@@ -128,24 +128,59 @@ public class DataMeta extends DataCommon
 	}
 	
 	
+	/***
+	 * Get the load module for a specified id
+	 * @param id
+	 * @return
+	 */
 	public LoadModuleScope getLoadModule(long id) {		
 		return mapLoadModules.get(id);
 	}
 	
-	
+	/****
+	 * Get the number of load modules
+	 * @return
+	 */
 	public int getNumLoadModules() {
 		return mapLoadModules.size();
 	}
 	
+	/***
+	 * Retrieve the iterator for list of load modules
+	 * @return
+	 */
 	public Iterator<LoadModuleScope> getLoadModuleIterator() {
 		return mapLoadModules.iterator();
 	}
 	
+	/****
+	 * Retrieve the number of files in this database
+	 * @return
+	 */
+	public int getNumFiles() {
+		return mapFiles.size();
+	}
 	
+	/***
+	 * Retrieve the iterator for the list of files
+	 * @return
+	 */
+	public Iterator<SourceFile> getFileIterator() {
+		return mapFiles.iterator();
+	}
+	
+	/****
+	 * Retrieve the number of procedures
+	 * @return
+	 */
 	public int getNumProcedures() {
 		return mapProcedures.size();
 	}
 	
+	/****
+	 * Retrieve the iterator of list of procedure scopes
+	 * @return Iterator
+	 */
 	public Iterator<ProcedureScope> getProcedureIterator() {
 		return mapProcedures.iterator();
 	}
@@ -164,44 +199,38 @@ public class DataMeta extends DataCommon
 	}
 	
 	
-	
+	/*****
+	 * Main function to parse the section header of meta.db file
+	 * 
+	 * @param channel
+	 * 			File channel
+	 * @param sections
+	 * 			array of section headers
+	 * 
+	 * @throws IOException
+	 */
 	private void parseHeaderMetaData(FileChannel channel, DataSection []sections) throws IOException {
-		// --------------------------------------
 		// grab general description of the database
-		// --------------------------------------
 		parseGeneralDescription(channel, sections[INDEX_GENERAL]);
 		
-		// --------------------------------------
 		// grab the id-tuple type names
-		// --------------------------------------
 		parseHierarchicalIdTuple(channel, sections[INDEX_NAMES]);
 		
-		// --------------------------------------
 		// grab the description of the metrics
-		// --------------------------------------
 		parseMetricDescription(channel, sections[INDEX_METRICS]);
 		
-		// --------------------------------------
 		// grab the string block to be used later
-		// --------------------------------------
 		var buffer = channel.map(MapMode.READ_ONLY, sections[INDEX_STRINGS].offset, sections[INDEX_STRINGS].size);
 		stringArea = new StringArea(buffer, sections[INDEX_STRINGS].offset);
 		
-		// --------------------------------------
 		// parse the load modules
-		// --------------------------------------
 		mapLoadModules = parseLoadModules(channel, sections[INDEX_MODULES]);
 		
-		// --------------------------------------
 		// parse the file table
-		// --------------------------------------
 		mapFiles = parseFiles(channel, sections[INDEX_FILES]);
 		
-		// --------------------------------------
 		// parse the procedure table
-		// --------------------------------------
-		mapProcedures = parseFunctions(channel, sections[INDEX_FUNCTIONS]);
-		
+		mapProcedures = parseFunctions(channel, sections[INDEX_FUNCTIONS]);		
 	}
 	
 	private void parseGeneralDescription(FileChannel channel, DataSection section) throws IOException {
@@ -395,7 +424,12 @@ public class DataMeta extends DataCommon
 	}
 	
 	
-	static class StringArea
+	/*******************
+	 * 
+	 * Class to retrieve a string from the string section in meta.db
+	 *
+	 *******************/
+	private static class StringArea
 	{
 		private final ByteBuffer stringsArea;
 		private final long baseLocation;
