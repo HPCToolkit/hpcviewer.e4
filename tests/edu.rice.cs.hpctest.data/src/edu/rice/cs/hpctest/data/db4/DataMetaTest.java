@@ -108,4 +108,13 @@ public class DataMetaTest
 			assertNotNull(ps.getName());
 		});
 	}
+	
+	
+	@Test
+	public void testRoot() {
+		var root = data.getRoot();
+		
+		assertNotNull(root);
+		assertNotNull(root.getName());
+	}
 }

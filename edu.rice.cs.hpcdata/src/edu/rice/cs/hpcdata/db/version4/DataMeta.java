@@ -82,6 +82,7 @@ public class DataMeta extends DataCommon
 	private LongObjectMap<LoadModuleScope>    mapLoadModules;
 	private LongObjectHashMap<SourceFile>     mapFiles;
 	private LongObjectHashMap<ProcedureScope> mapProcedures;
+	private RootScope root;
 	
 	private StringArea stringArea;
 	private List<BaseMetric> metrics;
@@ -203,6 +204,10 @@ public class DataMeta extends DataCommon
 		return mapProcedures.iterator();
 	}
 	
+	public RootScope getRoot() {
+		return root;
+	}
+	
 	/******
 	 * Mandatory call once the opening is successful.
 	 * @param profileDB
@@ -254,7 +259,7 @@ public class DataMeta extends DataCommon
 		// parse the procedure table
 		mapProcedures = parseFunctions(channel, sections[INDEX_FUNCTIONS]);
 		
-		parseRoot(channel, sections[INDEX_CONTEXT]);
+		root = parseRoot(channel, sections[INDEX_CONTEXT]);
 	}
 	
 	private void parseGeneralDescription(FileChannel channel, DataSection section) 
