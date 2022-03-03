@@ -16,10 +16,19 @@ import org.eclipse.collections.impl.map.mutable.primitive.LongObjectHashMap;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
+import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
+import edu.rice.cs.hpcdata.experiment.scope.CallSiteScopeType;
+import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoadModuleScope;
+import edu.rice.cs.hpcdata.experiment.scope.LoopScope;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
+import edu.rice.cs.hpcdata.experiment.scope.RootScope;
+import edu.rice.cs.hpcdata.experiment.scope.RootScopeDynamic;
+import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
+import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.source.SimpleSourceFile;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
+import edu.rice.cs.hpcdata.util.Constants;
 
 
 /*********************************************
@@ -57,6 +66,15 @@ public class DataMeta extends DataCommon
 	private static final int INDEX_FILES   = 6;
 	private static final int INDEX_FUNCTIONS = 7;
 	
+	private static final int FMT_METADB_RELATION_LexicalNest = 0;
+	private static final int FMT_METADB_RELATION_Call = 1;
+	private static final int FMT_METADB_RELATION_InlinedCall = 2;
+
+	private static final int FMT_METADB_LEXTYPE_Function = 0;
+	private static final int FMT_METADB_LEXTYPE_Loop = 1;
+	private static final int FMT_METADB_LEXTYPE_Line = 2;
+	private static final int FMT_METADB_LEXTYPE_Instruction = 3;
+			  
 	private String title;
 	private String description;
 	private String []kindNames;
@@ -196,6 +214,9 @@ public class DataMeta extends DataCommon
 			{if (m instanceof HierarchicalMetric) 
 				((HierarchicalMetric)m).setProfileDatabase(profileDB);
 			});
+		
+		// no string buffer needed
+		stringArea.dispose();
 	}
 	
 	
@@ -209,7 +230,8 @@ public class DataMeta extends DataCommon
 	 * 
 	 * @throws IOException
 	 */
-	private void parseHeaderMetaData(FileChannel channel, DataSection []sections) throws IOException {
+	private void parseHeaderMetaData(FileChannel channel, DataSection []sections) 
+			throws IOException {
 		// grab general description of the database
 		parseGeneralDescription(channel, sections[INDEX_GENERAL]);
 		
@@ -230,10 +252,13 @@ public class DataMeta extends DataCommon
 		mapFiles = parseFiles(channel, sections[INDEX_FILES]);
 		
 		// parse the procedure table
-		mapProcedures = parseFunctions(channel, sections[INDEX_FUNCTIONS]);		
+		mapProcedures = parseFunctions(channel, sections[INDEX_FUNCTIONS]);
+		
+		parseRoot(channel, sections[INDEX_CONTEXT]);
 	}
 	
-	private void parseGeneralDescription(FileChannel channel, DataSection section) throws IOException {
+	private void parseGeneralDescription(FileChannel channel, DataSection section) 
+			throws IOException {
 		var buffer = channel.map(MapMode.READ_ONLY, section.offset, section.size);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		var pTitle = buffer.getLong();
@@ -248,7 +273,8 @@ public class DataMeta extends DataCommon
 	}
 	
 	
-	private void parseHierarchicalIdTuple(FileChannel channel, DataSection section) throws IOException {
+	private void parseHierarchicalIdTuple(FileChannel channel, DataSection section) 
+			throws IOException {
 		var buffer = channel.map(MapMode.READ_ONLY, section.offset, section.size);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		var pNames = buffer.getLong();
@@ -269,7 +295,8 @@ public class DataMeta extends DataCommon
 	}
 	
 	
-	private void parseMetricDescription(FileChannel channel, DataSection section) throws IOException {
+	private void parseMetricDescription(FileChannel channel, DataSection section) 
+			throws IOException {
 		var buffer = channel.map(MapMode.READ_ONLY, section.offset, section.size);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		var pMetrics = buffer.getLong();
@@ -330,7 +357,8 @@ public class DataMeta extends DataCommon
 	}
 	
 	
-	private LongObjectMap<LoadModuleScope> parseLoadModules(FileChannel channel, DataSection section) throws IOException {
+	private LongObjectMap<LoadModuleScope> parseLoadModules(FileChannel channel, DataSection section) 
+			throws IOException {
 		var buffer = channel.map(MapMode.READ_ONLY, section.offset, section.size);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		
@@ -354,7 +382,8 @@ public class DataMeta extends DataCommon
 	}
 	
 	
-	private LongObjectHashMap<SourceFile> parseFiles(FileChannel channel, DataSection section) throws IOException {
+	private LongObjectHashMap<SourceFile> parseFiles(FileChannel channel, DataSection section) 
+			throws IOException {
 		var buffer = channel.map(MapMode.READ_ONLY, section.offset, section.size);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		
@@ -381,7 +410,8 @@ public class DataMeta extends DataCommon
 	}
 	
 	
-	private LongObjectHashMap<ProcedureScope> parseFunctions(FileChannel channel, DataSection section) throws IOException {
+	private LongObjectHashMap<ProcedureScope> parseFunctions(FileChannel channel, DataSection section) 
+			throws IOException {
 		var buffer = channel.map(MapMode.READ_ONLY, section.offset, section.size);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		
@@ -404,13 +434,136 @@ public class DataMeta extends DataCommon
 			var lms  = mapLoadModules.get(pModule);
 			var file = mapFiles.get(pFile);
 			
-			ProcedureScope ps = new ProcedureScope(null, lms, file, line, line, name, false, i, i, null, line);
+			ProcedureScope ps = new ProcedureScope(null, lms, file, line, line, name, false, i, i, null, 0);
 			mapProcedures.put(position, ps);
 		}
 		return mapProcedures;
 	}
 	
 	
+	private Scope parseContext(ByteBuffer buffer, RootScope root, long startLocation, long size) 
+			throws IOException {
+
+		int loc = (int) startLocation;
+
+		long szChildren = buffer.getLong(loc);
+		long pChildren  = buffer.getLong(loc + 0x08);
+		int  ctxId      = buffer.getInt (loc + 0x10);
+		
+		byte flags       = buffer.get(loc + 0x14);
+		byte relation    = buffer.get(loc + 0x15);
+		byte lexicalType = buffer.get(loc + 0x16);
+		byte nFlexWords  = buffer.get(loc + 0x17);
+		
+		long pFunction = 0;
+		long pFile   = 0;
+		int  line    = 0;
+		long pModule = 0;
+		long offset  = 0;		
+		byte nwords  = 0;
+		
+		/*
+			{Flags} above refers to an u8 bit field with the following sub-fields (bit 0 is least significant):
+			
+			Bit 0: hasFunction. If 1, the following sub-fields of flex are present:
+			    - flex[0]: FS* pFunction: Function associated with this context
+			Bit 1: hasSrcLoc. If 1, the following sub-fields of flex are present:
+			    - flex[1]: SFS* pFile: Source file associated with this context
+			    - flex[2]: u32 line: Associated source line in pFile
+			Bit 2: hasPoint. If 1, the following sub-fields of flex are present:
+			    - flex[3]: LMS* pModule: Load module associated with this context
+			    - flex[4]: u64 offset: Assocated byte offset in *pModule
+			Bits 3-7: Reserved for future use.
+		 */
+		if ((flags & 0x1) != 0) {
+			if (nFlexWords < nwords + 1) 
+				return null;
+			pFunction = buffer.getLong(loc + 0x18 + nwords * 8);
+			nwords++;
+		}
+		if ((flags & 0x2) != 0) {
+			if (nFlexWords < nwords + 2) 
+				return null;
+			pFile = buffer.getLong(loc + 0x18 + nwords * 8);
+			nwords++;
+		}
+		if ((flags & 0x4) != 0) {
+			if (nFlexWords < nwords + 2) 
+				return null;
+			pModule = buffer.getLong(loc + 0x18 + nwords * 8);
+			offset  = buffer.getLong(loc + 0x18 + (nwords+1) * 8);
+			nwords++;
+		}
+		ProcedureScope ps = mapProcedures.get(pFunction);
+		SourceFile file = mapFiles.get(pFile);
+		LoadModuleScope lm = mapLoadModules.get(pModule);
+		Scope scope = null;
+
+		boolean alien = false;
+		switch(relation) {
+		case FMT_METADB_RELATION_LexicalNest:
+			break;
+		case FMT_METADB_RELATION_InlinedCall:
+			alien = true;
+		case FMT_METADB_RELATION_Call:
+			break;
+		default:
+			throw new RuntimeException("Invalid node relation field");
+		}
+
+		switch(lexicalType) {
+		case FMT_METADB_LEXTYPE_Function:
+			LineScope ls = new LineScope(root, file, line, ctxId, ctxId);
+			if (ps == null) {
+				ps = new ProcedureScope(root, lm, file, line, line, Constants.PROCEDURE_UNKNOWN, alien, ctxId, ctxId, null, 0);
+			}
+			scope = new CallSiteScope(ls, ps, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, ctxId);			
+		case FMT_METADB_LEXTYPE_Instruction:
+		case FMT_METADB_LEXTYPE_Line:
+			scope = new LineScope(root, file, line, ctxId, ctxId);
+			break;
+		case FMT_METADB_LEXTYPE_Loop:
+			scope = new LoopScope(root, file, line, line, ctxId, ctxId);
+			break;
+		default:
+			throw new RuntimeException("Invalid node relation field");
+		}
+		return scope;
+	}
+	
+	
+	private RootScope parseRoot(FileChannel channel, DataSection section) 
+			throws IOException {
+		var buffer = channel.map(MapMode.READ_ONLY, section.offset, section.size);
+		buffer.order(ByteOrder.LITTLE_ENDIAN);
+
+		long szRoot = buffer.getLong();
+		long pRoot  = buffer.getLong();
+		
+		RootScope root = new RootScopeDynamic(this, RootScope.DEFAULT_SCOPE_NAME, RootScopeType.CallingContextTree);
+		Scope scope = parseContext(buffer, root, pRoot-section.offset, szRoot);
+		root.addSubscope(scope);
+		
+		return root;
+	}
+	
+	private final int FMT_METADB_MINSZ_Context = 0x18;
+	
+	private long FMT_METADB_SZ_Context(int nFlexWords)  {
+		return (FMT_METADB_MINSZ_Context + 8 * (nFlexWords));
+	}
+	
+	/*****
+	 * Find a null-terminated string in a buffer from a specified relative position
+	 *  
+	 * @param buffer
+	 * 			file buffer
+	 * @param startPosition
+	 * 			the relative offset of the string (zero-based)
+	 * @return
+	 * 			The string if exist, empty string otherwise
+	 * @throws IOException
+	 */
 	private String getNullTerminatedString(ByteBuffer buffer, int startPosition) throws IOException {
 		StringBuilder sb = new StringBuilder();
 
@@ -427,6 +580,8 @@ public class DataMeta extends DataCommon
 	/*******************
 	 * 
 	 * Class to retrieve a string from the string section in meta.db
+	 * <br/>
+	 * The caller has to call {@code dispose} to free the allocated resources
 	 *
 	 *******************/
 	private static class StringArea
@@ -450,6 +605,13 @@ public class DataMeta extends DataCommon
 				sb.append((char)b);
 			}
 			return sb.toString();
+		}
+		
+		/***
+		 * Free the resources
+		 */
+		public void dispose() {
+			stringsArea.clear();
 		}
 	}
 }

@@ -17,4 +17,7 @@ public class Constants {
 	
 	public final static int EXPERIMENT_SPARSE_VERSION = 4;
 	public final static int EXPERIMENT_DENSED_VERSION = 2;
+	
+	public final static String PROCEDURE_UNKNOWN = "<unknown>";
+
 }

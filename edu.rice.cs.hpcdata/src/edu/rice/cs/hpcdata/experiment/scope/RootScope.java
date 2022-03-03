@@ -37,14 +37,12 @@ import edu.rice.cs.hpcdata.util.Constants;
  * The root scope of an HPCView experiment.
  *
  */
-
-
 public class RootScope extends Scope
 {
-	private static final String DEFAULT_SCOPE_NAME = "Experiment Aggregate Metrics";
+public static final String DEFAULT_SCOPE_NAME = "Experiment Aggregate Metrics";
 
-	public static final int DEFAULT_CCT_ID  = 0;
-	public static final int DEFAULT_FLAT_ID = 0;
+public static final int DEFAULT_CCT_ID  = 0;
+public static final int DEFAULT_FLAT_ID = 0;
 
 /** The name of the experiment's program. */
 protected String rootScopeName;
@@ -52,14 +50,10 @@ protected RootScopeType rootScopeType;
 private BaseExperiment experiment;
 private String name;
 
-//private IThreadDataCollection threadData;
-//private DataSummary dataSummary;
 
 //////////////////////////////////////////////////////////////////////////
 //	INITIALIZATION														//
 //////////////////////////////////////////////////////////////////////////
-
-
 
 
 /*************************************************************************
