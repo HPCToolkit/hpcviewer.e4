@@ -13,7 +13,6 @@ import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.DisposeResourcesVisitor;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.FilterScopeVisitor;
 import edu.rice.cs.hpcdata.filter.IFilterData;
@@ -239,7 +238,7 @@ public abstract class BaseExperiment implements IExperiment
 	}
 
 
-	public List<TreeNode> getRootScopeChildren() {
+	public List<Scope> getRootScopeChildren() {
 		RootScope root = (RootScope) getRootScope();
 
 		if (root != null)
@@ -258,10 +257,10 @@ public abstract class BaseExperiment implements IExperiment
 	public RootScope getRootScope(RootScopeType type)
 	{
 		RootScope root = (RootScope) getRootScope();
-		for (int i=0; i<root.getChildCount(); i++)
+		for (int i=0; i<root.getSubscopeCount(); i++)
 		{
-			if (((RootScope)root.getChildAt(i)).getType() == type)
-				return (RootScope) root.getChildAt(i);
+			if (((RootScope)root.getSubscope(i)).getType() == type)
+				return (RootScope) root.getSubscope(i);
 		}
 		return null;
 	}
@@ -419,7 +418,7 @@ public abstract class BaseExperiment implements IExperiment
 	public int filter(IFilterData filter)
 	{
 		// TODO :  we assume the first child is the CCT
-		final RootScope rootCCT = (RootScope) rootScope.getChildAt(0);
+		final RootScope rootCCT = (RootScope) rootScope.getSubscope(0);
 
 		// duplicate and filter the cct
 		FilterScopeVisitor visitor = new FilterScopeVisitor(rootCCT, filter);

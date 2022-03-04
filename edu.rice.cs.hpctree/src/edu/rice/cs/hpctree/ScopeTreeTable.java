@@ -46,7 +46,6 @@ import ca.odell.glazedlists.event.ListEventListener;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpctree.action.IActionListener;
 import edu.rice.cs.hpctree.internal.ColumnHeaderDataProvider;
@@ -625,13 +624,13 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	
 	
 	@Override
-	public List<? extends TreeNode> traverseOrExpand(Scope scope) {
+	public List<Scope> traverseOrExpand(Scope scope) {
 		ScopeTreeRowModel treeRowModel = bodyLayerStack.getTreeRowModel();
 		if (!treeRowModel.isChildrenVisible(scope)) {
 			int index = treeRowModel.getTreeData().indexOf(scope);
 			bodyLayerStack.expand(index);
 		}
-		List<? extends TreeNode> children = treeRowModel.getTreeData().getChildren(scope);
+		var children = treeRowModel.getTreeData().getChildren(scope);
 		return children;
 	}
 	

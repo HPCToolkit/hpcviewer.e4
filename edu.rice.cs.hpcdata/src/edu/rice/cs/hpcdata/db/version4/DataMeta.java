@@ -23,7 +23,6 @@ import edu.rice.cs.hpcdata.experiment.scope.LoadModuleScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoopScope;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
-import edu.rice.cs.hpcdata.experiment.scope.RootScopeDynamic;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.source.SimpleSourceFile;
@@ -545,7 +544,7 @@ public class DataMeta extends DataCommon
 		long szRoot = buffer.getLong();
 		long pRoot  = buffer.getLong();
 		
-		RootScope root = new RootScopeDynamic(this, RootScope.DEFAULT_SCOPE_NAME, RootScopeType.CallingContextTree);
+		RootScope root = new RootScope(null, RootScope.DEFAULT_SCOPE_NAME, RootScopeType.CallingContextTree);
 		Scope scope = parseContext(buffer, root, pRoot-section.offset, szRoot);
 		root.addSubscope(scope);
 		

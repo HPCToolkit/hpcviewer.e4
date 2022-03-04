@@ -118,7 +118,7 @@ public class ZoomAction implements IUndoableActionListener
 			// the most reliable way is to retrieve the "mark" if the scope has a child or not
 			return ((CallSiteScopeCallerView)node).hasScopeChildren();
 		}
-		return ( node.getChildCount()>0 );
+		return ( node.hasChildren());
 	}
 
 	@Override

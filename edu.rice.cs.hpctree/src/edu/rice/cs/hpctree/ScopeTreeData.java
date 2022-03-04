@@ -14,7 +14,7 @@ import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
+
 
 /******************************************************
  * 
@@ -164,12 +164,7 @@ public class ScopeTreeData implements IScopeTreeData
 		return indexesNonEmptyMetrics.size();
 	}
 		
-	
-	@SuppressWarnings("unchecked")
-	private List<Scope> convert(List<? extends TreeNode> list) {
-		return (List<Scope>) list;
-	}
-	
+
 	
 	private boolean isRootScope(Scope scope) {
 		return (scope == null) || 
@@ -196,7 +191,7 @@ public class ScopeTreeData implements IScopeTreeData
 		
 		int depth = 0;
 		Scope scope = object;
-		while (scope.getParent() != null && !isRootScope(scope)) {
+		while (scope.getParentScope() != null && !isRootScope(scope)) {
 			depth++;
 			scope = scope.getParentScope();
 		}
@@ -232,7 +227,7 @@ public class ScopeTreeData implements IScopeTreeData
 	
 	@Override
 	public boolean hasChildren(Scope object) {
-		return object.hasChildren();
+		return object.getSubscopeCount()>0;
 	}
 
 	
@@ -247,26 +242,24 @@ public class ScopeTreeData implements IScopeTreeData
 		
 		// if the node doesn't exist, it should be a critical error
 		// should we throw an exception?		
-		int numChildren = scope.getChildCount();
+		int numChildren = scope.getSubscopeCount();
 		if (numChildren == 0)
 			return new ArrayList<Scope>(0);
 		
 		// get the children from the original tree, and sort them
 		// based on the sorted column (either metric or tree column)
-		List<TreeNode> children = scope.getChildren();
+		List<Scope> children = scope.getChildren();
 		final BaseMetric metric = sortedColumn == 0 ? null : getMetric(sortedColumn-1);
-		Comparator<TreeNode> comparator = new Comparator<TreeNode>() {
+		Comparator<Scope> comparator = new Comparator<Scope>() {
 
 			@Override
-			public int compare(TreeNode o1, TreeNode o2) {
-				Scope s1 = (Scope) o1;
-				Scope s2 = (Scope) o2;				
+			public int compare(Scope s1, Scope s2) {
 				return compareNodes(s1, s2, metric, sortDirection);
 			}
 		};
 		children.sort(comparator);
 		
-		return convert(children);
+		return children;
 	}
 
 	
@@ -302,15 +295,15 @@ public class ScopeTreeData implements IScopeTreeData
 	 * @param targetDepth the depth of the ancestor
 	 * @return the ancestor if exists, {@code null} otherwise
 	 */
-	public static TreeNode getAncestor(TreeNode scope, int currentDepth, int targetDepth) {
+	public static Scope getAncestor(Scope scope, int currentDepth, int targetDepth) {
 		if (scope == null)
 			return null;
 		
 		int depth=currentDepth-1;
-		TreeNode current = scope.getParent();
+		var current = scope.getParentScope();
 		
 		for (;depth>targetDepth && current != null; depth--) {
-			current = current.getParent();
+			current = current.getParentScope();
 		}
 		return current;		
 	}
@@ -323,7 +316,7 @@ public class ScopeTreeData implements IScopeTreeData
 	 * If it's a tree column, we compare the name and its line number
 	 *
 	 ********************************************************************/
-	private static class ColumnComparator implements Comparator<TreeNode> 
+	private static class ColumnComparator implements Comparator<Scope> 
 	{
 		private final BaseMetric metric;
 		private final SortDirectionEnum dir;
@@ -339,20 +332,20 @@ public class ScopeTreeData implements IScopeTreeData
 		}
 		
 		@Override
-		public int compare(TreeNode o1, TreeNode o2) {
+		public int compare(Scope o1, Scope o2) {
             int result = 0;
-			if (o1.getParent() != null && o2.getParent() != null) {
+			if (o1.getParentScope() != null && o2.getParentScope() != null) {
 				int d1 = this.treeData.getDepthOfData((Scope) o1);
 				int d2 = this.treeData.getDepthOfData((Scope) o2);
 				
 				if (d1 > d2) {
-					TreeNode ancestor1 = ScopeTreeData.getAncestor(o1, d1, d2);
+					var ancestor1 = ScopeTreeData.getAncestor(o1, d1, d2);
 					result = ScopeTreeData.compareNodes((Scope) ancestor1, (Scope) o2, metric, dir);
 					if (result == 0) {
 						return 1;
 					}
 				} else if (d1 < d2) {
-					TreeNode ancestor2 = ScopeTreeData.getAncestor(o2, d2, d1);
+					var ancestor2 = ScopeTreeData.getAncestor(o2, d2, d1);
 					result = ScopeTreeData.compareNodes((Scope) o1, (Scope) ancestor2, metric, dir);
 					if (result == 0) {
 						return -1;

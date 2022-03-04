@@ -3,7 +3,6 @@ package edu.rice.cs.hpctree;
 import java.util.List;
 
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 
 public interface IScopeTreeAction 
 {
@@ -21,7 +20,7 @@ public interface IScopeTreeAction
 	 * @param scope the parent scope
 	 * @return
 	 */
-	public List<? extends TreeNode> traverseOrExpand(Scope scope);
+	public List<Scope> traverseOrExpand(Scope scope);
 	
 	/****
 	 * Reset the root of the table

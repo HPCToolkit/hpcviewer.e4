@@ -47,7 +47,7 @@ public class ExperimentMergerTest
 			assertNotNull(rootCCT);
 			assertNotNull(rootCCT.getChildren());
 			
-			assertTrue(rootCCT.getChildCount() >= db.experiment[0].getRootScope(RootScopeType.CallingContextTree).getChildCount());
+			assertTrue(rootCCT.getSubscopeCount() >= db.experiment[0].getRootScope(RootScopeType.CallingContextTree).getSubscopeCount());
 			
 			String mergedName = ExperimentMerger.generateMergeName(db.experiment[0], db.experiment[1]);
 			assertNotNull(mergedName);

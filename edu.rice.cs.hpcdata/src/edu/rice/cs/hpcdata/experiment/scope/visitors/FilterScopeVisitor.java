@@ -21,7 +21,6 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.ScopeVisitType;
 import edu.rice.cs.hpcdata.experiment.scope.StatementRangeScope;
-import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 import edu.rice.cs.hpcdata.filter.FilterAttribute;
 import edu.rice.cs.hpcdata.filter.IFilterData;
 import edu.rice.cs.hpcdata.util.CallPath;
@@ -282,14 +281,14 @@ public class FilterScopeVisitor implements IScopeVisitor
 	 */
 	private void addGrandChildren(Scope parent, ScopeVisitType vt, Scope scope_to_remove)
 	{
-		List<TreeNode> children = scope_to_remove.getChildren();
+		var children = scope_to_remove.getChildren();
 		if (children != null)
 		{
 			for(Object child : children)
 			{
 				Scope child_scope = (Scope) child;
-				parent.add(child_scope);
-				child_scope.setParent(parent);
+				parent.addSubscope(scope_to_remove);
+				child_scope.setParentScope(parent);
 			}
 		}
 	}

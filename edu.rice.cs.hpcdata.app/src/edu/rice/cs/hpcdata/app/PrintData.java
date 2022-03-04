@@ -15,7 +15,6 @@ import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 import edu.rice.cs.hpcdata.util.ScopeComparator;
 import edu.rice.cs.hpcdata.util.Util;
 
@@ -199,7 +198,7 @@ public class PrintData
 		// print the summary
 		//------------------------------------------------------------------------------------
 		
-		List<TreeNode> roots = experiment.getRootScopeChildren();
+		var roots = experiment.getRootScopeChildren();
 		
 		for(Object root: roots) {
 			RootScope aRoot = (RootScope) root;
@@ -234,7 +233,7 @@ public class PrintData
 		
 		// sort the children from the highest value to the lowest based on the first metric
 		
-		List<? extends TreeNode> children = scope.getChildren();
+		var children = scope.getChildren();
 		List<Integer> nonEmptyIds = experiment.getNonEmptyMetricIDs(scope);		
 		BaseMetric sortMetric = metrics.get(0);
 		
@@ -250,10 +249,8 @@ public class PrintData
 		ScopeComparator comparator = new ScopeComparator();
 		comparator.setMetric(sortMetric);
 		comparator.setDirection(ScopeComparator.SORT_DESCENDING);
-		
-		@SuppressWarnings("unchecked")
-		List<Scope> childrenScope = (List<Scope>) children;
-		childrenScope.sort(comparator);
+
+		children.sort(comparator);
 		
 		List<Integer> nonEmptyIndex = new ArrayList<Integer>(nonEmptyIds.size());
 		for(int i=0; i<metrics.size(); i++) {
@@ -273,11 +270,11 @@ public class PrintData
 		
 		// print the children
 		boolean displayAll = (display_mode & NODES_ALL) != 0;
-		int numChildren = displayAll ? childrenScope.size() : Math.min(5, childrenScope.size());
+		int numChildren = displayAll ? children.size() : Math.min(5, children.size());
 		for(int i=0; i<numChildren; i++) {
 			objPrint.println();
 			
-			Scope child = (Scope) childrenScope.get(i);
+			Scope child = (Scope) children.get(i);
 			printMetrics(objPrint, child, metrics, nonEmptyIndex, "   ");
 		}
 	}

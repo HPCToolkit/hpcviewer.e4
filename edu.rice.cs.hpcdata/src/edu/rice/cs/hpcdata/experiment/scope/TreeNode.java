@@ -1,7 +1,6 @@
 package edu.rice.cs.hpcdata.experiment.scope;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /*******************************************************************************
@@ -32,7 +31,7 @@ import java.util.List;
  * 
  * @since 3.2
  */
-public class TreeNode {
+public class TreeNode<T> implements ITreeNode<T> {
 
 	/**
 	 * The array of child tree nodes for this tree node. If there are no
@@ -40,13 +39,13 @@ public class TreeNode {
 	 * <code>null</code>. There should be no <code>null</code> children in
 	 * the array.
 	 */
-	private List<TreeNode> children;
+	private List<T> children;
 
 	/**
 	 * The parent tree node for this tree node. This value may be
 	 * <code>null</code> if there is no parent.
 	 */
-	private TreeNode parent;
+	private T parent;
 
 	/**
 	 * The value contained in this node. This value may be anything.
@@ -71,7 +70,8 @@ public class TreeNode {
 	 * @return The child nodes; may be <code>null</code>, but never empty.
 	 *         There should be no <code>null</code> children in the array.
 	 */
-	public List<TreeNode> getChildren() {
+	@Override
+	public List<T> getChildren() {
 		return children;
 	}
 	
@@ -79,7 +79,7 @@ public class TreeNode {
 	 * Replace the current children with the new ones
 	 * @param children
 	 */
-	public void setChildren(List<TreeNode> children) {
+	public void setChildren(List<T> children) {
 		this.children = children;
 	}
 
@@ -88,7 +88,7 @@ public class TreeNode {
 	 * Replace the children with the new list
 	 * @param children
 	 */
-	public void setListChildren(List<TreeNode> children) {
+	public void setListChildren(List<T> children) {
 		this.children = children;
 	}
 	
@@ -98,7 +98,7 @@ public class TreeNode {
 	 * @return The parent node; may be <code>null</code> if there are no
 	 *         parent nodes.
 	 */
-	public TreeNode getParent() {
+	public T getParent() {
 		return parent;
 	}
 
@@ -128,10 +128,10 @@ public class TreeNode {
 	 * 
 	 * @param child : child to be added
 	 */
-	public void add(TreeNode child)
+	public void add(T child)
 	{
 		if (children == null) {
-			children = new ArrayList<TreeNode>(3);
+			children = new ArrayList<>(3);
 		}
 		children.add(child);
 	}
@@ -142,7 +142,7 @@ public class TreeNode {
 	 * 
 	 * @param child : the child to be removed
 	 */
-	public void remove(TreeNode child)
+	public void remove(T child)
 	{
 		children.remove(child);
 	}
@@ -163,7 +163,7 @@ public class TreeNode {
 	 * @param parent
 	 *            The parent node; may be <code>null</code>.
 	 */
-	public void setParent(final TreeNode parent) {
+	public void setParent(T parent) {
 		this.parent = parent;
 	}
 	
@@ -174,7 +174,7 @@ public class TreeNode {
 	 * 
 	 * @return TreeNode: a node
 	 */
-	public TreeNode getChildAt(int index) 
+	public T getChildAt(int index) 
 	{
 		if (children != null) {
 			if (index < children.size())
@@ -195,52 +195,6 @@ public class TreeNode {
 		if (children == null)
 			return 0;
 		return children.size();
-	}
-	
-	/**
-	 * Return the iterator of the children.<br/>
-	 * The advantage of an iterator is that it allows the caller to
-	 * remove elements from the collection of children during the iteration.
-	 * See {@link java.util.Iterator}
-	 * 
-	 * @return java.util.Iterator
-	 */
-	public Iterator<TreeNode> getIterator()
-	{
-		if (children != null)
-			return children.iterator();
-		else
-			return null;
-	}
-	
-	/**
-	 * Provides a hash code for the object -- defending against
-	 * <code>null</code>.
-	 * 
-	 * @param object
-	 *            The object for which a hash code is required.
-	 * @return <code>object.hashCode</code> or <code>0</code> if
-	 *         <code>object</code> if <code>null</code>.
-	 */
-/*	public static final int hashCode(final Object object) {
-		int parentHash = object == null ? 0 : (int) ((TreeNode)object).value;
-		return object != null ? parentHash << 4 | object.hashCode() : 0;
-	}
-*/
-	/**
-	 * Checks whether the two objects are <code>null</code> -- allowing for
-	 * <code>null</code>.
-	 * 
-	 * @param left
-	 *            The left object to compare; may be <code>null</code>.
-	 * @param right
-	 *            The right object to compare; may be <code>null</code>.
-	 * @return <code>true</code> if the two objects are equivalent;
-	 *         <code>false</code> otherwise.
-	 */
-	public static final boolean equals(final Object left, final Object right) {
-		return left == null ? right == null : ((right != null) && left
-				.equals(right));
 	}
 
 	/*****

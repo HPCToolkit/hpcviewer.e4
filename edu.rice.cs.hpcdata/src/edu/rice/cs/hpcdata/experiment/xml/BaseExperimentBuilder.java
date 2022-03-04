@@ -1179,7 +1179,7 @@ public class BaseExperimentBuilder extends Builder
 			}
 		}
 		parent.addSubscope(child);
-		child.setParent(parent);
+		child.setParentScope(parent);
 	}
 	
 	/*************************************************************************

@@ -37,7 +37,6 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
-import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 import edu.rice.cs.hpcfilter.service.FilterStateProvider;
 import edu.rice.cs.hpcmetric.MetricFilterInput;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
@@ -349,11 +348,11 @@ public class ProfilePart implements IProfilePart, EventHandler
 		part.setLabel(PREFIX_TITLE + experiment.getName());
 		part.setTooltip(experiment.getDefaultDirectory().getAbsolutePath());
 		
-		List<TreeNode> roots = experiment.getRootScopeChildren();
+		var roots = experiment.getRootScopeChildren();
 		views = FastList.newList(roots.size());		
 		boolean active = true;
 		
-		for(TreeNode rootNode: roots) {
+		for(var rootNode: roots) {
 			RootScope root = (RootScope) rootNode;
 			AbstractView view;
 			

@@ -4,7 +4,6 @@ import java.util.Stack;
 
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 import edu.rice.cs.hpctree.FlatScopeTreeData;
 import edu.rice.cs.hpctree.IScopeTreeAction;
 import edu.rice.cs.hpctree.action.IUndoableActionManager.IUndoableActionListener;
@@ -50,15 +49,14 @@ public class FlatAction implements IUndoableActionListener
 		boolean updateTable = false;
 
 		// create the list of flattened node
-		for (int i=0;i<root.getChildCount();i++) {
-			Scope node =  (Scope) root.getChildAt(i);
-			if(node.getChildCount()>0) {
+		for (int i=0;i<root.getSubscopeCount();i++) {
+			Scope node =  (Scope) root.getSubscope(i);
+			if(node.getSubscopeCount()>0) {
 				
 				// this node has children, add the children
-				for (TreeNode child: node.getChildren()) {
-					Scope childNode = (Scope) child;
-					if (!(childNode instanceof CallSiteScope)) {
-						addNode(objFlattenedNode, childNode);
+				for (var child: node.getChildren()) {
+					if (!(child instanceof CallSiteScope)) {
+						addNode(objFlattenedNode, child);
 					}
 				}
 				// we only update the table if there are one or more grand child nodes

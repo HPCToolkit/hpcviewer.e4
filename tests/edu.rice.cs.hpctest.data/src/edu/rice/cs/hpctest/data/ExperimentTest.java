@@ -22,7 +22,7 @@ import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
-import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
+
 
 public class ExperimentTest {
 
@@ -188,9 +188,9 @@ public class ExperimentTest {
 			rootCall = experiment.createCallersView(rootCCT, rootCall);
 			rootFlat = experiment.createFlatView(rootCCT, rootFlat);
 			
-			assertTrue(rootCCT.getChildCount()  >= children[i]);
-			assertTrue(rootCall.getChildCount() >= children[i]);
-			assertTrue(rootFlat.getChildCount() >= children[i]);
+			assertTrue(rootCCT.getSubscopeCount()  >= children[i]);
+			assertTrue(rootCall.getSubscopeCount() >= children[i]);
+			assertTrue(rootFlat.getSubscopeCount() >= children[i]);
 
 			i++;
 		}
@@ -250,7 +250,7 @@ public class ExperimentTest {
 	@Test
 	public void testGetRootScopeChildren() {
 		for(var experiment: experiments) {
-			List<TreeNode> children = experiment.getRootScopeChildren();
+			var children = experiment.getRootScopeChildren();
 			assertNotNull(children);
 			assertTrue(children.size() == 3);
 		}

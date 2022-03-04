@@ -333,9 +333,9 @@ public class Experiment extends BaseExperimentWithMetrics
 		//------------------------------------------------------------------------------------------
 		Scope root = getRootScope();
 		int index = 0;
-		while (root.getChildCount() > index)
+		while (root.getSubscopeCount() > index)
 		{
-			RootScopeType type = ((RootScope)root.getChildAt(index)).getType();
+			RootScopeType type = ((RootScope)root.getSubscope(index)).getType();
 			if (type != RootScopeType.CallingContextTree)
 				root.remove(index);
 			else

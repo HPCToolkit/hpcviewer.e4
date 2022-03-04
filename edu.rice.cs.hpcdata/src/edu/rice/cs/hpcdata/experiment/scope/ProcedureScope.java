@@ -189,7 +189,7 @@ public int getSID() {
 
 
 @Override
-public List<TreeNode> getAllChildren(/*AbstractFinalizeMetricVisitor finalizeVisitor, PercentScopeVisitor percentVisitor,*/
+public List<Scope> getAllChildren(/*AbstractFinalizeMetricVisitor finalizeVisitor, PercentScopeVisitor percentVisitor,*/
 		MetricValuePropagationFilter inclusiveOnly,
 		MetricValuePropagationFilter exclusiveOnly) 
 {
@@ -223,7 +223,7 @@ public ProcedureType getProcedureType() {
 
 @Override
 public boolean hasScopeChildren() {
-	return hasChildren();
+	return node.hasChildren();
 }
 
 }
