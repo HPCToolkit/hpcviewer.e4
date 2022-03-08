@@ -1,13 +1,12 @@
 package edu.rice.cs.hpcdata.db.version4;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
-import java.util.ArrayList;
-import java.util.List;
 
 /*******************************************************************************************
  * 
@@ -17,15 +16,14 @@ import java.util.List;
  *******************************************************************************************/
 public class DataPlot extends DataCommon 
 {
-	private static final String HEADER = "HPCTOOLKITctxt";
+	public  static final String FILENAME = "cct.db";
+	private static final String HEADER   = "HPCTOOLKITctxt";
 	
 	/*** list of cct. In the future we may need to implement with concurrent list.
 	 *** Right now it's just a simple array or list. Please use it carefully   
 	 ***/
 	
-	private List<ContextInfo> listContexts;
-		
-	private RandomAccessFile file;
+	private ContextInfo []listContexts;
 	
 	
 	//////////////////////////////////////////////////////////////////////////
@@ -36,21 +34,13 @@ public class DataPlot extends DataCommon
 	public void open(final String filename)
 			throws IOException
 	{
-		super.open(filename);
-		file = new RandomAccessFile(filename, "r");
+		super.open(filename + File.separator + FILENAME);
 	}
 	
 	@Override
-	public void dispose() {
+	public void dispose() throws IOException {
 		listContexts = null;
-		
-		try {
-			if (file != null)
-				file.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		super.dispose();
 	}
 
 	private static final int NUM_ITEMS = 1;
@@ -70,31 +60,27 @@ public class DataPlot extends DataCommon
 	@Override
 	protected boolean readNextHeader(FileChannel input, DataSection []sections) throws IOException {
 		
-		input.position(sections[0].offset);
+		ByteBuffer buffer = input.map(MapMode.READ_ONLY, sections[0].offset, sections[0].size);
+		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		
-		listContexts = new ArrayList<DataPlot.ContextInfo>((int) NUM_ITEMS);
-		
-		ByteBuffer buffer = ByteBuffer.allocate((int) (NUM_ITEMS * ContextInfo.SIZE));
-		
-		int numBytes = input.read(buffer);
-		if (numBytes > 0) 
-		{
-			buffer.flip();
-			for(int i=0; i<NUM_ITEMS; i++) {
-				ContextInfo info = new ContextInfo();
-				
-				info.id = buffer.getInt();
-				info.numValues = buffer.getLong();
-				info.numNonZeroMetrics = buffer.getShort();
-				info.offset = buffer.getLong();
-				
-				listContexts.add(info);
-			}
-		}
-		
-		long nextPosition = sections[0].offset + getMultiplyOf8( sections[0].size);
-		input.position(nextPosition);
+		long pCtx = buffer.getLong();
+		int  nCtx = buffer.getInt(0x08);
+		byte size = buffer.get(0x0c);
+		long basePosition = pCtx - sections[0].offset;
 
+		listContexts = new ContextInfo[nCtx];
+
+		for(int i=0; i<nCtx; i++) {
+			int position   = (int)(basePosition + (i*size));
+			
+			long nValues   = buffer.getLong (position);
+			long pValues   = buffer.getLong (position + 0x08);
+			short nMetrics = buffer.getShort(position + 0x10);
+			long  pIndices = buffer.getLong (position + 0x18);
+			
+			var info = new ContextInfo(nValues, pValues, nMetrics, pIndices);
+			listContexts[i] = info;
+		}
 		return true;
 	}
 
@@ -105,16 +91,16 @@ public class DataPlot extends DataCommon
 		super.printInfo(out);
 		
 		// reading some parts of the indexes
-		for(int j=0; j<listContexts.size(); j++)
+		for(int j=0; j<listContexts.length; j++)
 		{
-			ContextInfo ctxInfo = listContexts.get(j);
-			short numMetrics = ctxInfo.numNonZeroMetrics;
+			ContextInfo ctxInfo = listContexts[j];
+			short numMetrics = ctxInfo.nMetrics;
 
-			out.format("%5d [cct %5d] ", j, ctxInfo.id);
-			System.out.println(ctxInfo);
+			out.format("[cct %5d] ", j);
+			out.println(ctxInfo);
 			
 			for(short i=0; i<numMetrics; i++) {
-				System.out.print("\t m: " + i);
+				out.print("\t m: " + i);
 				try {
 					DataPlotEntry []entries = getPlotEntry(ctxInfo, i);
 					if (entries != null) {
@@ -122,10 +108,9 @@ public class DataPlot extends DataCommon
 							out.print(" " + entry);
 						}
 					}
-					System.out.println();
+					out.println();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					out.print(e.getMessage());
 				}
 	
 			}
@@ -149,7 +134,7 @@ public class DataPlot extends DataCommon
 	 */
 	public DataPlotEntry []getPlotEntry(int cct, int metric) throws IOException
 	{
-		ContextInfo info = listContexts.get(cct);
+		ContextInfo info = listContexts[cct];
 		return getPlotEntry(info, metric);
 	}
 	
@@ -165,161 +150,49 @@ public class DataPlot extends DataCommon
 	 */
 	private DataPlotEntry []getPlotEntry(ContextInfo info, int metric) throws IOException
 	{
-		if (file == null)
-			return null;
-		
 		if (info == null)
 			return null;
 
-		long metricPosition = info.offset + info.numValues * DataPlotEntry.SIZE;
-		long size = (info.numNonZeroMetrics + 1) * RECORD_SIZE;
+		final int FMT_CCTDB_SZ_MIdx = 0x0a;
+		final int FMT_CCTDB_SZ_PVal = 0x0c;
 		
-		ByteBuffer buffer = file.getChannel().map(MapMode.READ_ONLY, metricPosition, size);
-		
-		long []indexes = binarySearch((short) metric, 0, info.numNonZeroMetrics, buffer);
-		//long []indexes = newtonSearch((short) metric, 0, info.numNonZeroMetrics+1, buffer);
+		var channel = getChannel();
+		var bufSize = (info.nMetrics * FMT_CCTDB_SZ_MIdx) + info.pMetricIndices - info.pValues;
+		var buffer  = channel.map(MapMode.READ_ONLY, info.pValues, bufSize);
+		buffer.order(ByteOrder.LITTLE_ENDIAN);
 
-		if (indexes == null)
-			return null;
-		
-		file.seek(info.offset +  DataPlotEntry.SIZE * indexes[0]);
-		int numMetrics = 1 + (int) (indexes[1] - indexes[0]);
-		DataPlotEntry []values = new DataPlotEntry[numMetrics];
-		
-		for (int i=0; i<numMetrics; i++) {
-			DataPlotEntry entry = new DataPlotEntry();
+		var basePosition =  info.pMetricIndices - info.pValues;
+		// TODO: Linear search of metric O(n)
+		// if n (number of non-zero metrics) is huge, we are in trouble
+		for(var i=0; i<info.nMetrics; i++) {			
+			int position  = (int) (basePosition + (i * FMT_CCTDB_SZ_MIdx));
+			short metricId = buffer.getShort(position);
 			
-			entry.metval = file.readDouble();
-			entry.tid    = file.readInt();
+			// TODO: linear search of metric. This should use binary search
+			if (metricId != metric)
+				continue;
 			
-			values[i] = entry;
-		}
-		
-		return values;
-	}
-	
-	
-	//////////////////////////////////////////////////////////////////////////
-	// Private methods
-	//////////////////////////////////////////////////////////////////////////
-
-	private static final int RECORD_SIZE = 2 + 8;
-	
-	/***
-	 * Binary earch the cct index 
-	 * 
-	 * @param index the cct index
-	 * @param first the beginning of the relative index
-	 * @param last  the last of the relative index
-	 * @param buffer ByteBuffer of the file
-	 * @return 2-length array of indexes: the index of the found cct, and its next index
-	 */
-	private long[] binarySearch(short index, int first, int last, ByteBuffer buffer) {
-		int begin = first;
-		int end   = last;
-		int mid   = (begin+end)/2;
-		
-		while (begin <= end) {
-			buffer.position(mid * RECORD_SIZE);
+			int startIdx = (int)buffer.getLong(position + 0x02);			
+			int endIdx   = (int)info.nValues;
 			
-			short metric = buffer.getShort();
-			long offset  = buffer.getLong();
-			
-			if (metric < index) {
-				begin = mid+1;
-			} else if(metric == index) {
-				long nextIndex = offset;
-				
-				if (mid+1<last) {
-					buffer.position(RECORD_SIZE * (mid+1));
-					buffer.getShort();
-					nextIndex = buffer.getLong();
-				}
-				return new long[] {offset, nextIndex};
-			} else {
-				end = mid-1;
+			if (i+1 < info.nMetrics) {
+				position = (int) (basePosition + ((i+1) * FMT_CCTDB_SZ_MIdx));
+				endIdx = (int)buffer.getLong(position + 0x02);
 			}
-			mid = (begin+end)/2;
-		}
-		// not found
+			
+			int numValues = (int)(endIdx-startIdx);
+			DataPlotEntry []values = new DataPlotEntry[numValues];
+			basePosition = 0;
+			for (var j=startIdx; j<endIdx; j++) {
+				position = (int) (basePosition + j * FMT_CCTDB_SZ_PVal);
+				int profIndex = buffer.getInt(position);
+				double value  = buffer.getDouble(position + 0x04);
+
+				values[j-startIdx] = new DataPlotEntry(profIndex, value);
+			}
+			return values;
+		}		
 		return null;
-	}
-
-	
-	/***
-	 * Newton-style of Binary search the cct index 
-	 * 
-	 * @param metric_index the metric index
-	 * @param first the beginning of the relative index
-	 * @param last  the last of the relative index
-	 * @param buffer ByteBuffer of the file
-	 * @return 2-length array of indexes: the index of the found cct, and its next index
-	 */
-	private long[] newtonSearch(int metric_index, int first, int last, ByteBuffer buffer) {
-		int left_index  = first;
-		int right_index = last - 1;
-		
-		short left_metric  = getMetric(buffer, left_index);
-		short right_metric = getMetric(buffer, right_index);
-		
-		while (right_index - left_index > 1) {
-			
-			int predicted_index;
-			final float cct_range = right_metric - left_metric;
-			final float rate = cct_range / (right_index - left_index);
-			final int mid_cct = (int) cct_range / 2;
-			
-			if (metric_index <= mid_cct) {
-				predicted_index = (int) Math.max( ((metric_index - left_metric)/rate) + left_index, left_index);
-			} else {
-				predicted_index = (int) Math.min(right_index - ((right_metric-metric_index)/rate), right_index);
-			}
-			
-			if (predicted_index <= left_metric) {
-				predicted_index = left_index + 1;
-			} 
-			if (predicted_index >= right_metric) {
-				predicted_index = right_index - 1;
-			}
-			
-			short current_metric = getMetric(buffer, predicted_index);
-			
-			if (metric_index >= current_metric) {
-				left_index = predicted_index;
-				left_metric = current_metric;
-			} else {
-				right_index = predicted_index;
-				right_metric = current_metric;
-			}
-		}
-		
-		boolean found = metric_index == left_metric || metric_index == right_metric;
-		
-		if (found) {
-			int index = left_index;
-			if (metric_index == right_metric) 
-				// corrupt data: should throw exception 
-				index = right_index;
-			
-			long o1 = getOffset(buffer, index);
-			long o2 = getOffset(buffer, index + 1);
-
-			return new long[] {o1, o2};
-		}
-		// not found: the cct node has no metrics. 
-		// we may should return array of zeros instead of null
-		return null;
-	}
-
-	
-	private short getMetric(ByteBuffer buffer, int position) {
-		buffer.position(position * RECORD_SIZE);
-		return buffer.getShort();
-	}
-	
-	private long getOffset(ByteBuffer buffer, int position) {
-		buffer.position(position * RECORD_SIZE + Short.SIZE);
-		return buffer.getLong();
 	}
 	
 	
@@ -329,18 +202,20 @@ public class DataPlot extends DataCommon
 
 	private static class ContextInfo
 	{
-		public static final int SIZE = 4 + 8 + 2 + 8;
+		public long  nValues;
+		public long  pValues;
+		public short nMetrics;
+		public long  pMetricIndices;
 		
-		public int   id;
-		public long  numValues;
-		public short numNonZeroMetrics;
-		public long  offset;
+		public ContextInfo(long  nValues, long  pValues, short nMetrics, long pMetricIndices) {
+			this.nValues  = nValues;
+			this.pValues  = pValues;
+			this.nMetrics = nMetrics;
+			this.pMetricIndices = pMetricIndices;
+		}
 		
 		public String toString() {
-			return  "id: "   + id + 
-					", nv: " + numValues +
-					", nm: " + numNonZeroMetrics +
-					", of: " + offset;
+			return String.format("pV: 0x%x, nV: %d, pM: 0x%x, nM: %s", pValues, nValues, pMetricIndices, nMetrics);
 		}
 	}
 }

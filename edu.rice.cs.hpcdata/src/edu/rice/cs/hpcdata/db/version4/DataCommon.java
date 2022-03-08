@@ -66,7 +66,7 @@ abstract public class DataCommon
 			sections = new DataSection[numSections];
 			for(int i=0; i<numSections; i++) {
 				sections[i] = new DataSection();
-				sections[i].size   =buffer.getLong();
+				sections[i].size   = buffer.getLong();
 				sections[i].offset = buffer.getLong();
 			}
 			

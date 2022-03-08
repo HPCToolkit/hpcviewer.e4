@@ -21,7 +21,7 @@ public class DataPlotTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws IOException {
-		Path resource = Paths.get("..", "resources", "prof2", "empty-trace");
+		Path resource = Paths.get("..", "resources", "prof2", "loop-inline");
 		File dbPath = resource.toFile();
 		
 		assertNotNull(dbPath);
@@ -31,7 +31,7 @@ public class DataPlotTest {
 		tupleType.initDefaultTypes();
 		
 		data = new DataPlot();
-		data.open(dbPath.getAbsolutePath() + File.separatorChar + "cct.db");
+		data.open(dbPath.getAbsolutePath());
 	}
 
 
@@ -39,7 +39,30 @@ public class DataPlotTest {
 	@Test
 	public void testGetPlotEntryIntInt() throws IOException {
 		DataPlotEntry []dpe = data.getPlotEntry(0, 0);
+		assertNull(dpe);
+		
+		dpe = data.getPlotEntry(0, 2);
 		assertNotNull(dpe);
-		assertTrue(dpe.length > 0);
+		assertTrue(dpe.length == 1);
+		assertTrue(dpe[0].tid == 1);
+		assertTrue(dpe[0].metval >= 1.25E10);
+		
+		dpe = data.getPlotEntry(6, 0);
+		assertTrue(dpe != null && dpe.length == 1);
+		assertTrue(dpe[0].tid == 1);
+		assertTrue(dpe[0].metval >= 5.86e+07);
+		
+		dpe = data.getPlotEntry(6, 1);
+		assertTrue(dpe != null && dpe.length == 1);
+		assertTrue(dpe[0].tid == 1);
+		assertTrue(dpe[0].metval >= 5.86e+07);
+		
+		dpe = data.getPlotEntry(68, 2);
+		assertTrue(dpe != null && dpe.length == 1);
+		assertTrue(dpe[0].tid == 1);
+		assertTrue(dpe[0].metval == 2);
+		
+		dpe = data.getPlotEntry(69, 0);
+		assertTrue(dpe == null);
 	}
 }
