@@ -35,9 +35,9 @@ public class ThreadViewInput
 	}
 	
 	public String toString() {
-		BaseExperiment exp = rootScope.getExperiment();
-		int dbId = exp.getDefaultDirectory().getAbsolutePath().hashCode();
-		String str = exp.getName() + ":" + String.valueOf(dbId);
+		var exp = rootScope.getExperiment();
+		int dbId = exp.getPath().hashCode();
+		String str = exp.toString() + ":" + String.valueOf(dbId);
 		
 		return str;
 	}

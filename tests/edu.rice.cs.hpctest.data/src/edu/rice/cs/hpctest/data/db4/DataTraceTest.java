@@ -30,7 +30,7 @@ public class DataTraceTest {
 		tupleType.initDefaultTypes();
 		
 		data = new DataTrace();
-		data.open(dbPath.getAbsolutePath() + File.separatorChar + "trace.db");
+		data.open(dbPath.getAbsolutePath());
 	}
 
 

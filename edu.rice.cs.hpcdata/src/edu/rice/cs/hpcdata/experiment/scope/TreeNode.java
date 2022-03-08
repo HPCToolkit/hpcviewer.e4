@@ -3,34 +3,14 @@ package edu.rice.cs.hpcdata.experiment.scope;
 import java.util.ArrayList;
 import java.util.List;
 
-/*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *     IBM Corporation - initial API and implementation
- *******************************************************************************/
-
-
 /**
- * This class is a modified version of org.eclipse.jface.viewers.TreeNode
+ * A simple data structure that is useful for implemented tree models. 
+ * <p>
+ * This class is a inspired from 
  * {@link org.eclipse.jface.viewers.TreeNode} without using Eclipse classes
- * and with additional features, plus a flexible children update 
- * 
- * A simple data structure that is useful for implemented tree models. This can
- * be returned by
- * {@link org.eclipse.jface.viewers.IStructuredContentProvider#getElements(Object)}.
- * It allows simple delegation of methods from
- * {@link org.eclipse.jface.viewers.ITreeContentProvider} such as
- * {@link org.eclipse.jface.viewers.ITreeContentProvider#getChildren(Object)},
- * {@link org.eclipse.jface.viewers.ITreeContentProvider#getParent(Object)} and
- * {@link org.eclipse.jface.viewers.ITreeContentProvider#hasChildren(Object)}
- * 
- * @since 3.2
- */
+ * and with additional features, plus a flexible children update. 
+ * </p>
+ **/
 public class TreeNode<T> implements ITreeNode<T> {
 
 	/**

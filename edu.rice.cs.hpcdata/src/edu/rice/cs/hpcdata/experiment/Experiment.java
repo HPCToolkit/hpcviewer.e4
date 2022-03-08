@@ -373,4 +373,9 @@ public class Experiment extends BaseExperimentWithMetrics
 	public List<BaseMetric> getRawMetrics() {
 		return ((List<BaseMetric>)(List<? extends BaseMetric>) metrics_raw);
 	}
+
+	@Override
+	public String getPath() {
+		return getExperimentFile().getAbsolutePath();
+	}
 }

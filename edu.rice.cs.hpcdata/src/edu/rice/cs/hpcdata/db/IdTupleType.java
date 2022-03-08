@@ -66,7 +66,6 @@ public class IdTupleType
 
 
 	private final Map<Byte, String> mapIdTuple = new HashMap<>();
-	private Mode mode = Mode.PHYSICAL;
 	
 	
 	public void initDefaultTypes() {
@@ -131,13 +130,4 @@ public class IdTupleType
 		
 		return mapIdTuple.get(kind);
 	}
-
-	public Mode getMode() {
-		return mode;
-	}
-
-	public void setMode(Mode mode) {
-		this.mode = mode;
-	}
-
 }

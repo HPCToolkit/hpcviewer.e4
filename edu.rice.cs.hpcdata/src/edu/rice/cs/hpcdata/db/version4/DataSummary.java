@@ -1,5 +1,6 @@
 
 package edu.rice.cs.hpcdata.db.version4;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.ByteBuffer;
@@ -29,6 +30,8 @@ public class DataSummary extends DataCommon
 	// --------------------------------------------------------------------
 	// constants
 	// --------------------------------------------------------------------
+	public  static final String FILENAME = "profile.db";
+	
 	private static final String HEADER_MAGIC_STR  = "HPCTOOLKITprof";
 
 	private static final int CCT_RECORD_SIZE   = 4 + 8;
@@ -74,7 +77,7 @@ public class DataSummary extends DataCommon
 	public void open(final String filename)
 			throws IOException
 	{
-		super.open(filename);
+		super.open(filename + File.separator + FILENAME);
 	}
 	
 

@@ -18,9 +18,11 @@ package edu.rice.cs.hpcdata.experiment.scope;
 import java.io.IOException;
 
 import edu.rice.cs.hpcdata.db.MetricValueCollectionWithStorage;
+import edu.rice.cs.hpcdata.db.version4.DataMeta;
 import edu.rice.cs.hpcdata.db.version4.DataSummary;
 import edu.rice.cs.hpcdata.db.version4.MetricValueCollection3;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
+import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricValueCollection;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.IScopeVisitor;
 import edu.rice.cs.hpcdata.util.Constants;
@@ -47,7 +49,7 @@ public static final int DEFAULT_FLAT_ID = 0;
 /** The name of the experiment's program. */
 protected String rootScopeName;
 protected RootScopeType rootScopeType;
-private BaseExperiment experiment;
+private IExperiment experiment;
 private String name;
 
 
@@ -60,18 +62,19 @@ private String name;
  *	Creates a RootScope.
  ************************************************************************/
 
-public RootScope(BaseExperiment experiment, String name, RootScopeType rst)
+public RootScope(IExperiment experiment, String name, RootScopeType rst)
 {
 	this(experiment, name, rst, DEFAULT_CCT_ID, DEFAULT_FLAT_ID);
 }
 
-public RootScope(BaseExperiment experiment, String name, RootScopeType rst, int cctId, int flatId)
+public RootScope(IExperiment experiment, String name, RootScopeType rst, int cctId, int flatId)
 {
 	super(null, null, Scope.NO_LINE_NUMBER, Scope.NO_LINE_NUMBER, cctId, flatId);	
 	this.rootScopeName 	= name;
 	this.experiment 	= experiment;
 	this.rootScopeType 	= rst;
 	root = this;
+	node = experiment.createTreeNode(this);
 }
 
 
@@ -93,21 +96,10 @@ public Scope duplicate() {
  */
 public IMetricValueCollection getMetricValueCollection() throws IOException
 {
-	final int version  	  = experiment.getMajorVersion();
-	
-	// TODO: this is a hack
-	
-	if (version == Constants.EXPERIMENT_SPARSE_VERSION) 
+	if (experiment.getMajorVersion() == Constants.EXPERIMENT_SPARSE_VERSION) 
 	{
-		if (rootScopeType == RootScopeType.CallingContextTree) {
-			DataSummary data = experiment.getDataSummary();
-			return new MetricValueCollection3(data);
-			
-		} else if (rootScopeType == RootScopeType.CallerTree || 
-				   rootScopeType == RootScopeType.Flat) {
-
-			return new MetricValueCollectionWithStorage();
-		}
+		DataMeta dm = (DataMeta) experiment;
+		return dm.getMetricValueCollection(rootScopeType);
 	}
 	return new MetricValueCollectionWithStorage();		
 }
@@ -159,12 +151,12 @@ public RootScopeType getType()
  * (non-Javadoc)
  * @see edu.rice.cs.hpc.data.experiment.scope.Scope#getExperiment()
  */
-public BaseExperiment getExperiment()
+public IExperiment getExperiment()
 {
 	return experiment;
 }
 
-public void setExperiment(BaseExperiment experiment)
+public void setExperiment(IExperiment experiment)
 {
 	this.experiment = experiment;
 }

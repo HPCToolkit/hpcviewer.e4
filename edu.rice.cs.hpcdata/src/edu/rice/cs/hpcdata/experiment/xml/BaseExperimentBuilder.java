@@ -250,26 +250,6 @@ public class BaseExperimentBuilder extends Builder
 			
 		case "TraceDB":
 			this.do_TraceDB(attributes, values); break;
-
-		// ---------------------
-		// XML v. 3.0
-		// ---------------------
-		case "SummaryDBFile":
-			do_DBFile(BaseExperiment.Db_File_Type.DB_SUMMARY, attributes, values);
-			break;
-			
-		case "TraceDBFile":
-			do_DBFile(BaseExperiment.Db_File_Type.DB_TRACE, attributes, values);
-			break;
-			
-		case "PlotDBFile":
-			do_DBFile(BaseExperiment.Db_File_Type.DB_PLOT, attributes, values);
-			break;
-			
-		case "ThreadIDFile":
-			do_DBFile(BaseExperiment.Db_File_Type.DB_THREADS, attributes, values);
-			break;
-
 			
 		// ---------------------
 		// old token from old XML
@@ -387,17 +367,6 @@ public class BaseExperimentBuilder extends Builder
 		this.experiment.setVersion(version);
 	}
 
-	/*************************************************************************
-	 * Process a Database file name
-	 *************************************************************************/
-	private void do_DBFile(BaseExperiment.Db_File_Type db_type, String []attributes, String []values) {
-		for (int i=0; i<attributes.length; i++) {
-			if (attributes[i].charAt(0) == 'n') {
-				experiment.setDBFilename(db_type, values[i]);
-				return;
-			}
-		}
-	}
 	
 	/*************************************************************************
 	 *      Processes a TARGET element as TITLE.
@@ -427,6 +396,28 @@ public class BaseExperimentBuilder extends Builder
 			sTitle = values[1];
 		}
 		this.configuration.setName(ExperimentConfiguration.NAME_EXPERIMENT, sTitle);
+		
+		// make the root scope
+		rootScope = new RootScope(this.experiment, "Invisible Outer Root Scope", RootScopeType.Invisible, Integer.MAX_VALUE, 1 );
+		
+		scopeStack.push(this.rootScope);	// don't use 'beginScope'
+
+		final String title;
+		final RootScopeType rootType;
+		
+		if (this.csviewer) {
+			title = Experiment.TITLE_TOP_DOWN_VIEW;
+			rootType = RootScopeType.CallingContextTree;
+		} else {
+			title = Experiment.TITLE_FLAT_VIEW;
+			rootType = RootScopeType.Flat;
+		}
+		int cct_id = 0;
+		if (experiment.getMajorVersion() <= Constants.EXPERIMENT_DENSED_VERSION)
+			cct_id = 1;
+		
+		this.viewRootScope  = new RootScope(this.experiment, title, rootType, cct_id, 0);
+		beginScope(this.viewRootScope);
 	}
 
 	/************************************************************************
@@ -1113,27 +1104,6 @@ public class BaseExperimentBuilder extends Builder
 	 ************************************************************************/
 	protected void begin_SecData(String[] attributes, String[] values) 
 	{
-		// make the root scope
-		rootScope = new RootScope(this.experiment, "Invisible Outer Root Scope", RootScopeType.Invisible, Integer.MAX_VALUE, 1 );
-		
-		scopeStack.push(this.rootScope);	// don't use 'beginScope'
-
-		final String title;
-		final RootScopeType rootType;
-		
-		if (this.csviewer) {
-			title = Experiment.TITLE_TOP_DOWN_VIEW;
-			rootType = RootScopeType.CallingContextTree;
-		} else {
-			title = Experiment.TITLE_FLAT_VIEW;
-			rootType = RootScopeType.Flat;
-		}
-		int cct_id = 0;
-		if (experiment.getMajorVersion() <= Constants.EXPERIMENT_DENSED_VERSION)
-			cct_id = 1;
-		
-		this.viewRootScope  = new RootScope(this.experiment, title, rootType, cct_id, 0);
-		beginScope(this.viewRootScope);
 	}
 
 

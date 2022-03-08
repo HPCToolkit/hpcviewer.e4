@@ -5,6 +5,7 @@ import java.util.Map;
 
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricValueCollection;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
@@ -43,7 +44,7 @@ public class FilterScopeVisitor implements IScopeVisitor
 	
 	private final IFilterData filter;
 	private final IMetricValueCollection rootMetricValues;
-	private final BaseExperiment experiment;
+	private final IExperiment experiment;
 	private final RootScope rootOriginalCCT;
 	
 	private List<BaseMetric> metrics = null;
@@ -264,11 +265,11 @@ public class FilterScopeVisitor implements IScopeVisitor
 		// children have been removed
 		// copy the cpid to the parent
 		CallPathTraceVisitor cptv = new CallPathTraceVisitor();
-		cptv.map = experiment.getScopeMap();
+		//cptv.map = experiment.getScopeMap();
 		cptv.parent_scope = parent;
 		cptv.parent_depth = current_depth-1;
 		
-		child.dfsVisitScopeTree(cptv);
+		//child.dfsVisitScopeTree(cptv);
 
 	}
 	

@@ -51,9 +51,8 @@ public class FileDB4 implements IFileDB
 	{
 		this.dataSummary = dataSummary;
 
-		String filename = directory + File.separatorChar + BaseExperiment.getDefaultDbTraceFilename();
 		dataTrace = new DataTrace();
-		dataTrace.open(filename);
+		dataTrace.open(directory);
 	}
 
 	@Override

@@ -6,11 +6,10 @@ import java.io.IOException;
 import java.util.List;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
+import edu.rice.cs.hpcdata.db.version4.DataMeta;
 import edu.rice.cs.hpcdata.db.version4.DataPlot;
 import edu.rice.cs.hpcdata.db.version4.DataPlotEntry;
 import edu.rice.cs.hpcdata.db.version4.DataSummary;
-import edu.rice.cs.hpcdata.experiment.BaseExperiment;
-import edu.rice.cs.hpcdata.experiment.BaseExperiment.Db_File_Type;
 import edu.rice.cs.hpcdata.experiment.extdata.AbstractThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 
@@ -27,10 +26,9 @@ public class ThreadDataCollection4 extends AbstractThreadDataCollection
 	@Override
 	public void open(RootScope root, String directory) throws IOException {
 		data_plot = new DataPlot();
-		data_plot.open(directory + File.separatorChar + 
-				BaseExperiment.getDefaultDatabaseName(Db_File_Type.DB_PLOT));
+		data_plot.open(directory + File.separatorChar + "plot.db");
 
-		data_summary = root.getExperiment().getDataSummary();
+		data_summary = ((DataMeta)root.getExperiment()).getDataSummary();
 	}
 
 	@Override

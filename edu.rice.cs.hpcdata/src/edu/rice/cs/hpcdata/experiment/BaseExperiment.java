@@ -1,18 +1,17 @@
 package edu.rice.cs.hpcdata.experiment;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
 import edu.rice.cs.hpcdata.db.IdTupleType;
-import edu.rice.cs.hpcdata.db.version4.DataSummary;
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
+import edu.rice.cs.hpcdata.experiment.scope.ITreeNode;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.DisposeResourcesVisitor;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.FilterScopeVisitor;
 import edu.rice.cs.hpcdata.filter.IFilterData;
@@ -30,19 +29,6 @@ import edu.rice.cs.hpcdata.util.IUserData;
  */
 public abstract class BaseExperiment implements IExperiment 
 {
-	static public final int DB_SUMMARY_INDEX  = 0;
-	static public final int DB_SUMMARY_TRACE  = 1;
-	static public final int DB_SUMMARY_PLOT   = 2;
-	static public final int DB_SUMMARY_THREAD = 3;
-	static public final int DB_SUMMARY_META   = 4;
-	
-	/*****
-	 *  Enumeration for database file type
-	 */
-	static public enum Db_File_Type {DB_SUMMARY, DB_TRACE, DB_PLOT, DB_THREADS, DB_META};
-	
-	static final private String []DefaultDbFilename = {"profile.db", "trace.db", "cct.db", "profile.db", "meta.db"};
-	
 	/** The experiment's configuration. */
 	protected ExperimentConfiguration configuration;
 
@@ -55,10 +41,8 @@ public abstract class BaseExperiment implements IExperiment
 
 	protected IDatabaseRepresentation databaseRepresentation;
 	
-	private EnumMap<Db_File_Type, String> db_filenames;
 	private int filterNumScopes = 0, filterStatus;
 	private IdTupleType idTupleType;
-	private DataSummary dataSummary;
 	private IThreadDataCollection threadData;
 	
 	private BaseTraceAttribute traceAttribute = new TraceAttribute();
@@ -93,19 +77,6 @@ public abstract class BaseExperiment implements IExperiment
 		return datacentricRootScope;
 	}
 	
-	
-	public DataSummary getDataSummary() throws IOException {
-		if (dataSummary == null) {
-			dataSummary = new DataSummary(getIdTupleType());
-			String databaseDirectory = getDefaultDirectory().getAbsolutePath();
-			String filename = databaseDirectory + File.separator + getDbFilename(BaseExperiment.Db_File_Type.DB_SUMMARY);
-
-			dataSummary.open(filename);
-		}
-		return dataSummary;
-	}
-
-
 
 	/***
 	 * set the new id tuple type
@@ -134,7 +105,7 @@ public abstract class BaseExperiment implements IExperiment
 	 * 
 	 * @param threadData
 	 */
-	public void setThreadData(IThreadDataCollection threadData){
+	public void setThreadData(IThreadDataCollection threadData) {
 		this.threadData = threadData;
 	}
 
@@ -146,40 +117,6 @@ public abstract class BaseExperiment implements IExperiment
 	 */
 	public IThreadDataCollection getThreadData() {
 		return threadData;
-	}
-
-	/******
-	 * set a database filename
-	 * 
-	 * @param file_index : enumerate database filename {@link Db_File_Type}
-	 * @param filename : the name of the file
-	 */
-	public void setDBFilename(Db_File_Type file_index, String filename)
-	{
-		if (db_filenames == null)
-		{
-			db_filenames = new EnumMap<Db_File_Type, String>(Db_File_Type.class);
-		}
-		db_filenames.put(file_index, filename);
-	}
-	
-	/****
-	 * get the database file name 
-	 * @param file_index : enumerate database filename {@link Db_File_Type}
-	 * @return String file name
-	 */
-	public String getDbFilename(Db_File_Type file_index)
-	{
-		if (db_filenames == null)
-		{
-			db_filenames = new EnumMap<BaseExperiment.Db_File_Type, String>(Db_File_Type.class);
-			db_filenames.put(Db_File_Type.DB_SUMMARY, DefaultDbFilename[DB_SUMMARY_INDEX]);
-			db_filenames.put(Db_File_Type.DB_TRACE,   DefaultDbFilename[DB_SUMMARY_TRACE]);
-			db_filenames.put(Db_File_Type.DB_PLOT,    DefaultDbFilename[DB_SUMMARY_PLOT]);
-			db_filenames.put(Db_File_Type.DB_THREADS, DefaultDbFilename[DB_SUMMARY_THREAD]);
-			db_filenames.put(Db_File_Type.DB_META,    DefaultDbFilename[DB_SUMMARY_META]);
-		}
-		return db_filenames.get(file_index);
 	}
 	
 	public int getMajorVersion()
@@ -222,19 +159,6 @@ public abstract class BaseExperiment implements IExperiment
 	 */
 	public void setScopeMap(Map<Integer, CallPath> scopeMap) {
 		traceAttribute.mapCpidToCallpath = scopeMap;
-	}
-
-
-
-
-	static public String getDefaultDatabaseName(Db_File_Type type)
-	{
-		return DefaultDbFilename[type.ordinal()];
-	}
-	
-	static public String getDefaultDbTraceFilename()
-	{
-		return getDefaultDatabaseName(Db_File_Type.DB_TRACE);
 	}
 
 
@@ -350,7 +274,8 @@ public abstract class BaseExperiment implements IExperiment
 
 	/*************************************************************************
 	 *	Returns the name of the experiment.
-	 ************************************************************************/	
+	 ************************************************************************/
+	@Override
 	public String getName()
 	{
 		return configuration.getName(ExperimentConfiguration.NAME_EXPERIMENT);
@@ -487,6 +412,10 @@ public abstract class BaseExperiment implements IExperiment
 		return traceAttribute;
 	}
 
+	@Override
+	public ITreeNode<Scope> createTreeNode(Object value) {
+		return new TreeNode<>(value);
+	}
 
 	/************************************************************************
 	 * In case the experiment has a CCT, continue to create callers tree and

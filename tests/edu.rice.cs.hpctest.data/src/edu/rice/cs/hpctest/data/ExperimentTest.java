@@ -196,18 +196,7 @@ public class ExperimentTest {
 		}
 	}
 
-	@Test
-	public void testGetDataSummary() {
-		for(var experiment: experiments) {
-			try {
-				experiment.getDataSummary();
-				assertFalse(true);
-				
-			} catch (IOException e) {
-				assertTrue("Correct: no summary", true);
-			}
-		}
-	}
+
 
 	@Test
 	public void testGetThreadData() {

@@ -21,6 +21,7 @@ import java.util.List;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.BaseExperimentWithMetrics;
 import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.metric.AggregateMetric;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
@@ -130,7 +131,8 @@ implements IMetricScope
 		this.cpid      = -1;
 		this.iCounter  = 0;
 		
-		node = new TreeNode<>(this);
+		if (root != null)			
+			node = (ITreeNode<Scope>) root.getExperiment().createTreeNode(this);
 	}
 
 
@@ -499,7 +501,7 @@ implements IMetricScope
 	//////////////////////////////////////////////////////////////////////////
 	// EXPERIMENT DATABASE 													//
 	//////////////////////////////////////////////////////////////////////////
-	public BaseExperiment getExperiment() {
+	public IExperiment getExperiment() {
 		return root.getExperiment();
 	}
 

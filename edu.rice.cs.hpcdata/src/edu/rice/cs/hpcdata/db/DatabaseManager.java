@@ -16,8 +16,10 @@ import edu.rice.cs.hpcdata.experiment.xml.ExperimentFileXML;
  */
 public class DatabaseManager 
 {
-
-	private static final String []DATABASE_FILENAME = { "experiment.xml", "meta.db" };
+	public static final String  DB_META_FILE        = "meta.db";
+	public static final String  DB_EXPERIMENT_FILE  = "experiment.xml";
+	
+	private static final String []DATABASE_FILENAME = { DB_EXPERIMENT_FILE, DB_META_FILE };
 	
 	private DatabaseManager() {
 		// hide the constructor

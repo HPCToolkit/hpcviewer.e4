@@ -7,6 +7,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 
 import edu.rice.cs.hpcdata.db.IFileDB;
+import edu.rice.cs.hpcdata.db.version4.DataMeta;
 import edu.rice.cs.hpcdata.db.version4.DataSummary;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
@@ -84,10 +85,11 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 		{
 			// new format
 			String databaseDirectory = exp.getDefaultDirectory().getAbsolutePath(); 
-			traceFilePath = databaseDirectory + File.separator + exp.getDbFilename(BaseExperiment.Db_File_Type.DB_TRACE);
+			traceFilePath = databaseDirectory + File.separator + "trace.db";
 			
 			RootScope root = (RootScope) exp.getRootScope(RootScopeType.CallingContextTree);
-			DataSummary ds = root.getExperiment().getDataSummary();
+			DataMeta dataMeta = (DataMeta) root.getExperiment();
+			DataSummary ds = dataMeta.getDataSummary();
 			
 			((FileDB4)fileDB).open(ds, databaseDirectory);
 		}

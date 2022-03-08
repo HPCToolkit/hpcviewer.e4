@@ -33,14 +33,14 @@ public class DataMetaTest
 		tupleType.initDefaultTypes();
 		
 		data = new DataMeta();
-		data.open(dbPath.getAbsolutePath() + File.separatorChar + "meta.db");
+		data.open(dbPath.getAbsolutePath());
 		data.finalize(null);
 	}
 	
 	
 	@Test
 	public void testGetTitle() {
-		assertTrue(data.getTitle().equals("loop"));
+		assertTrue(data.getName().equals("loop"));
 	}
 	
 	@Test
@@ -52,9 +52,15 @@ public class DataMetaTest
 	@Test
 	public void testgetKindNames() {
 		var kinds = data.getKindNames();
-		assertTrue(kinds.length == 8);
-		assertTrue(kinds[0].equals("SUMMARY"));
-		assertTrue(kinds[7].equals("CORE"));
+		assertNotNull(kinds);
+		
+		var entry = kinds.entrySet();
+		assertNotNull(entry);
+		
+		entry.forEach(kind -> {
+			assertNotNull(kind.getKey());
+			assertFalse(kind.getValue().isEmpty());
+		});
 	}
 	
 	@Test

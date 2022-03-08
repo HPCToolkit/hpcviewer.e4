@@ -11,13 +11,21 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.collections.api.map.primitive.LongObjectMap;
+import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
 import org.eclipse.collections.impl.map.mutable.primitive.LongObjectHashMap;
 
+import edu.rice.cs.hpcdata.db.DatabaseManager;
+import edu.rice.cs.hpcdata.db.IdTupleType;
+import edu.rice.cs.hpcdata.db.MetricValueCollectionWithStorage;
+import edu.rice.cs.hpcdata.experiment.IExperiment;
+import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
+import edu.rice.cs.hpcdata.experiment.metric.IMetricValueCollection;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScopeType;
+import edu.rice.cs.hpcdata.experiment.scope.ITreeNode;
 import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoadModuleScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoopScope;
@@ -47,7 +55,7 @@ import edu.rice.cs.hpcdata.util.Constants;
  * </pre>
  *
  *********************************************/
-public class DataMeta extends DataCommon 
+public class DataMeta extends DataCommon implements IExperiment
 {
 	// --------------------------------------------------------------------
 	// constants
@@ -76,7 +84,6 @@ public class DataMeta extends DataCommon
 			  
 	private String title;
 	private String description;
-	private String []kindNames;
 	
 	private LongObjectMap<LoadModuleScope>    mapLoadModules;
 	private LongObjectHashMap<SourceFile>     mapFiles;
@@ -85,11 +92,23 @@ public class DataMeta extends DataCommon
 	
 	private StringArea stringArea;
 	private List<BaseMetric> metrics;
+	private IntObjectHashMap<MetaDBContext> mapCtxToOffset;
+	private ByteBuffer ctxBuffer;
 
-	public DataMeta() {
-		super();
+	private IdTupleType idTupleTypes;
+	private DataSummary dataSummary;
+	private IThreadDataCollection threadData;
+
+	@Override
+	public void open(final String directory) 
+			throws IOException
+	{
+		super.open(directory + File.separator + DatabaseManager.DB_META_FILE);
+	
+		dataSummary = new DataSummary(idTupleTypes);
+		dataSummary.open(directory);
 	}
-
+	
 	@Override
 	protected boolean isFileHeaderCorrect(String header) {
 		return HEADER_MAGIC_STR.equals(header);
@@ -106,14 +125,19 @@ public class DataMeta extends DataCommon
 		return 8;
 	}
 
-	
+
+	@Override
+	public int getMajorVersion() {
+		return versionMajor;
+	}
+
 	/****
 	 * Retrieve the main title of the database.
 	 * Usually it's the name of the executable.
 	 * 
 	 * @return String
 	 */
-	public String getTitle() {
+	public String getName() {
 		return title;
 	}
 	
@@ -132,8 +156,8 @@ public class DataMeta extends DataCommon
 	 * @return 
 	 * 		array of name of metrics
 	 */
-	public String [] getKindNames() {
-		return kindNames;
+	public IdTupleType getKindNames() {
+		return idTupleTypes;
 	}
 	
 	
@@ -207,6 +231,42 @@ public class DataMeta extends DataCommon
 		return root;
 	}
 	
+	public List<Scope> getChildren(Scope scope) throws IOException {
+		var ctx = mapCtxToOffset.get(scope.getCCTIndex());		
+		parseChildrenContext(ctxBuffer, root, scope, ctx.pChildren, ctx.szChildren);
+		return scope.getChildren();
+	}
+	
+	
+	public IMetricValueCollection getMetricValueCollection(RootScopeType rootScopeType) throws IOException {
+		if (rootScopeType == RootScopeType.CallingContextTree) {
+			return new MetricValueCollection3(dataSummary);
+		}
+		return new MetricValueCollectionWithStorage();
+	}
+	
+
+	public DataSummary getDataSummary() {
+		return dataSummary;
+	}
+	
+	@Override
+	public void setThreadData(IThreadDataCollection data_file) {
+		this.threadData = data_file;
+	}
+	
+	
+	@Override
+	public IThreadDataCollection getThreadData() {
+		return threadData;
+	}
+	
+	
+	@Override
+	public String getPath() {
+		return filename;
+	}
+	
 	/******
 	 * Mandatory call once the opening is successful.
 	 * @param profileDB
@@ -223,7 +283,6 @@ public class DataMeta extends DataCommon
 		stringArea.dispose();
 	}
 	
-	
 	/*****
 	 * Main function to parse the section header of meta.db file
 	 * 
@@ -236,6 +295,8 @@ public class DataMeta extends DataCommon
 	 */
 	private void parseHeaderMetaData(FileChannel channel, DataSection []sections) 
 			throws IOException {
+		
+		root = new RootScope(this, RootScope.DEFAULT_SCOPE_NAME, RootScopeType.CallingContextTree);
 		// grab general description of the database
 		parseGeneralDescription(channel, sections[INDEX_GENERAL]);
 		
@@ -258,7 +319,7 @@ public class DataMeta extends DataCommon
 		// parse the procedure table
 		mapProcedures = parseFunctions(channel, sections[INDEX_FUNCTIONS]);
 		
-		root = parseRoot(channel, sections[INDEX_CONTEXT]);
+		parseRoot(channel, sections[INDEX_CONTEXT]);	
 	}
 	
 	private void parseGeneralDescription(FileChannel channel, DataSection section) 
@@ -287,14 +348,16 @@ public class DataMeta extends DataCommon
 		assert(pNames > section.offset && 
 			   pNames < section.offset + section.size);
 		
-		kindNames = new String[kinds];
+		idTupleTypes = new IdTupleType();
+		
 		int basePosition = (int) (pNames - section.offset);
-		for(int i=0; i<kinds; i++) {
+		for(byte i=0; i<kinds; i++) {
 			buffer.position(basePosition + i*8);
 			long pKind = buffer.getLong();
 			
-			int position   = (int) (pKind - section.offset);
-			kindNames[i] = getNullTerminatedString(buffer, position);
+			int position = (int) (pKind - section.offset);
+			String kind  = getNullTerminatedString(buffer, position);
+			idTupleTypes.add(i, kind);
 		}
 	}
 	
@@ -445,108 +508,128 @@ public class DataMeta extends DataCommon
 	}
 	
 	
-	private Scope parseContext(ByteBuffer buffer, RootScope root, long startLocation, long size) 
+	
+	private void parseChildrenContext(ByteBuffer buffer, RootScope root, Scope parent, long startLocation, long size) 
 			throws IOException {
 
 		int loc = (int) startLocation;
-
-		long szChildren = buffer.getLong(loc);
-		long pChildren  = buffer.getLong(loc + 0x08);
-		int  ctxId      = buffer.getInt (loc + 0x10);
+		long ctxSize = size;
 		
-		byte flags       = buffer.get(loc + 0x14);
-		byte relation    = buffer.get(loc + 0x15);
-		byte lexicalType = buffer.get(loc + 0x16);
-		byte nFlexWords  = buffer.get(loc + 0x17);
-		
-		long pFunction = 0;
-		long pFile   = 0;
-		int  line    = 0;
-		long pModule = 0;
-		long offset  = 0;		
-		byte nwords  = 0;
-		
-		/*
-			{Flags} above refers to an u8 bit field with the following sub-fields (bit 0 is least significant):
-			
-			Bit 0: hasFunction. If 1, the following sub-fields of flex are present:
-			    - flex[0]: FS* pFunction: Function associated with this context
-			Bit 1: hasSrcLoc. If 1, the following sub-fields of flex are present:
-			    - flex[1]: SFS* pFile: Source file associated with this context
-			    - flex[2]: u32 line: Associated source line in pFile
-			Bit 2: hasPoint. If 1, the following sub-fields of flex are present:
-			    - flex[3]: LMS* pModule: Load module associated with this context
-			    - flex[4]: u64 offset: Assocated byte offset in *pModule
-			Bits 3-7: Reserved for future use.
-		 */
-		if ((flags & 0x1) != 0) {
-			if (nFlexWords < nwords + 1) 
-				return null;
-			pFunction = buffer.getLong(loc + 0x18 + nwords * 8);
-			nwords++;
-		}
-		if ((flags & 0x2) != 0) {
-			if (nFlexWords < nwords + 2) 
-				return null;
-			pFile = buffer.getLong(loc + 0x18 + nwords * 8);
-			nwords++;
-		}
-		if ((flags & 0x4) != 0) {
-			if (nFlexWords < nwords + 2) 
-				return null;
-			pModule = buffer.getLong(loc + 0x18 + nwords * 8);
-			offset  = buffer.getLong(loc + 0x18 + (nwords+1) * 8);
-			nwords++;
-		}
-		ProcedureScope ps = mapProcedures.get(pFunction);
-		SourceFile file = mapFiles.get(pFile);
-		LoadModuleScope lm = mapLoadModules.get(pModule);
-		Scope scope = null;
-
-		boolean alien = false;
-		switch(relation) {
-		case FMT_METADB_RELATION_LexicalNest:
-			break;
-		case FMT_METADB_RELATION_InlinedCall:
-			alien = true;
-		case FMT_METADB_RELATION_Call:
-			break;
-		default:
-			throw new RuntimeException("Invalid node relation field");
-		}
-
-		switch(lexicalType) {
-		case FMT_METADB_LEXTYPE_Function:
-			LineScope ls = new LineScope(root, file, line, ctxId, ctxId);
-			if (ps == null) {
-				ps = new ProcedureScope(root, lm, file, line, line, Constants.PROCEDURE_UNKNOWN, alien, ctxId, ctxId, null, 0);
+		while(ctxSize > 0) {
+			if(ctxSize < FMT_METADB_MINSZ_Context) {
+				break;
 			}
-			scope = new CallSiteScope(ls, ps, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, ctxId);			
-		case FMT_METADB_LEXTYPE_Instruction:
-		case FMT_METADB_LEXTYPE_Line:
-			scope = new LineScope(root, file, line, ctxId, ctxId);
-			break;
-		case FMT_METADB_LEXTYPE_Loop:
-			scope = new LoopScope(root, file, line, line, ctxId, ctxId);
-			break;
-		default:
-			throw new RuntimeException("Invalid node relation field");
+			MetaDBContext ctx = new MetaDBContext();
+
+			ctx.szChildren = buffer.getLong(loc);
+			ctx.pChildren  = buffer.getLong(loc + 0x08);
+			int ctxId      = buffer.getInt (loc + 0x10);
+			
+			byte flags       = buffer.get(loc + 0x14);
+			byte relation    = buffer.get(loc + 0x15);
+			byte lexicalType = buffer.get(loc + 0x16);
+			byte nFlexWords  = buffer.get(loc + 0x17);
+			
+			long pFunction = 0;
+			long pFile   = 0;
+			int  line    = 0;
+			long pModule = 0;
+			long offset  = 0;		
+			byte nwords  = 0;
+			
+			
+			mapCtxToOffset.put(ctxId , ctx);
+
+			/*
+				{Flags} above refers to an u8 bit field with the following sub-fields (bit 0 is least significant):
+				
+				Bit 0: hasFunction. If 1, the following sub-fields of flex are present:
+				    - flex[0]: FS* pFunction: Function associated with this context
+				Bit 1: hasSrcLoc. If 1, the following sub-fields of flex are present:
+				    - flex[1]: SFS* pFile: Source file associated with this context
+				    - flex[2]: u32 line: Associated source line in pFile
+				Bit 2: hasPoint. If 1, the following sub-fields of flex are present:
+				    - flex[3]: LMS* pModule: Load module associated with this context
+				    - flex[4]: u64 offset: Assocated byte offset in *pModule
+				Bits 3-7: Reserved for future use.
+			 */
+			if ((flags & 0x1) != 0) {
+				if (nFlexWords < nwords + 1) 
+					return;
+				pFunction = buffer.getLong(loc + 0x18 + nwords * 8);
+				nwords++;
+			}
+			if ((flags & 0x2) != 0) {
+				if (nFlexWords < nwords + 2) 
+					return;
+				pFile = buffer.getLong(loc + 0x18 + nwords * 8);
+				nwords++;
+			}
+			if ((flags & 0x4) != 0) {
+				if (nFlexWords < nwords + 2) 
+					return;
+				pModule = buffer.getLong(loc + 0x18 + nwords * 8);
+				offset  = buffer.getLong(loc + 0x18 + (nwords+1) * 8);
+				nwords++;
+			}
+			ProcedureScope ps = mapProcedures.get(pFunction);
+			SourceFile file = mapFiles.get(pFile);
+			LoadModuleScope lm = mapLoadModules.get(pModule);
+			Scope scope = null;
+
+			boolean alien = false;
+			switch(relation) {
+			case FMT_METADB_RELATION_LexicalNest:
+				break;
+			case FMT_METADB_RELATION_InlinedCall:
+				alien = true;
+			case FMT_METADB_RELATION_Call:
+				break;
+			default:
+				throw new RuntimeException("Invalid node relation field");
+			}
+
+			switch(lexicalType) {
+			case FMT_METADB_LEXTYPE_Function:
+				LineScope ls = new LineScope(root, file, line, ctxId, ctxId);
+				if (ps == null) {
+					ps = new ProcedureScope(root, lm, file, line, line, Constants.PROCEDURE_UNKNOWN, alien, ctxId, ctxId, null, 0);
+				}
+				scope = new CallSiteScope(ls, ps, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, ctxId);	
+				break;
+			case FMT_METADB_LEXTYPE_Instruction:
+			case FMT_METADB_LEXTYPE_Line:
+				scope = new LineScope(root, file, line, ctxId, ctxId);
+				break;
+			case FMT_METADB_LEXTYPE_Loop:
+				scope = new LoopScope(root, file, line, line, ctxId, ctxId);
+				break;
+			default:
+				throw new RuntimeException("Invalid node relation field");
+			}
+			parent.addSubscope(scope);
+			
+			if (ctxSize >= FMT_METADB_SZ_Context(nFlexWords)) {
+				ctxSize -= FMT_METADB_SZ_Context(nFlexWords);
+				loc += FMT_METADB_SZ_Context(nFlexWords);			
+			} else {
+				return;
+			}
 		}
-		return scope;
 	}
 	
 	
 	private RootScope parseRoot(FileChannel channel, DataSection section) 
 			throws IOException {
-		var buffer = channel.map(MapMode.READ_ONLY, section.offset, section.size);
-		buffer.order(ByteOrder.LITTLE_ENDIAN);
+		ctxBuffer = channel.map(MapMode.READ_ONLY, section.offset, section.size);
+		ctxBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
-		long szRoot = buffer.getLong();
-		long pRoot  = buffer.getLong();
+		long szRoot = ctxBuffer.getLong();
+		long pRoot  = ctxBuffer.getLong();
 		
-		RootScope root = new RootScope(null, RootScope.DEFAULT_SCOPE_NAME, RootScopeType.CallingContextTree);
-		Scope scope = parseContext(buffer, root, pRoot-section.offset, szRoot);
-		root.addSubscope(scope);
+		RootScope root = new RootScope(this, RootScope.DEFAULT_SCOPE_NAME, RootScopeType.CallingContextTree);		
+		mapCtxToOffset = new IntObjectHashMap<MetaDBContext>();
+		parseChildrenContext(ctxBuffer, root, root, pRoot-section.offset, szRoot);
 		
 		return root;
 	}
@@ -579,7 +662,45 @@ public class DataMeta extends DataCommon
 		}
 		return sb.toString();
 	}
+
+
+	@Override
+	public ITreeNode<Scope> createTreeNode(Object value) {
+		return new DynamicTreeNode<>(this, 0);
+	}
+
+	@Override
+	public void setRootScope(Scope rootScope) {
+		throw new RuntimeException("Unsupported method: setRootScope");
+	}
+
+	@Override
+	public Scope getRootScope() {
+		return root;
+	}
+
+	@Override
+	public List<?> getRootScopeChildren() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public IExperiment duplicate() {
+		throw new RuntimeException("Unsupported method: duplicate");
+	}
 	
+	
+	private static class MetaDBContext
+	{
+		long szChildren;
+		long pChildren;
+
+		byte relation;
+		byte lexicalType;
+		// NOTE: The following member is ignored on write
+		byte nFlexWords;
+	}
 	
 	/*******************
 	 * 

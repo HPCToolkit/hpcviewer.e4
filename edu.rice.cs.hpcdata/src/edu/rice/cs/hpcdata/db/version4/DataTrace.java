@@ -1,5 +1,6 @@
 package edu.rice.cs.hpcdata.db.version4;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.ByteBuffer;
@@ -19,6 +20,8 @@ import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
  *******************************************************************************/
 public class DataTrace extends DataCommon 
 {
+	public final static  String FILENAME = "trace.db";
+	
 	private final static String HEADER = "HPCTOOLKITtrce";
 	private final static int FMT_TRACEDB_SZ_FHdr = 20;
 	private final static int FMT_TRACEDB_SZ_CtxSample = 0x0c;
@@ -35,7 +38,7 @@ public class DataTrace extends DataCommon
 	public void open(final String file)
 			throws IOException
 	{
-		super.open(file);
+		super.open(file + File.separator + FILENAME);
 	}
 	
 

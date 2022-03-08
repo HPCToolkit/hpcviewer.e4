@@ -34,7 +34,7 @@ public class DataSummaryTest {
 		tupleType.initDefaultTypes();
 		
 		data = new DataSummary(tupleType);
-		data.open(dbPath.getAbsolutePath() + File.separatorChar + "profile.db");
+		data.open(dbPath.getAbsolutePath());
 	}
 	
 	
