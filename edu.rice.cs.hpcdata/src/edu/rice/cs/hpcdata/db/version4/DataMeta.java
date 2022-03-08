@@ -60,6 +60,8 @@ public class DataMeta extends DataCommon implements IExperiment
 	// --------------------------------------------------------------------
 	// constants
 	// --------------------------------------------------------------------
+	public static final String  DB_META_FILE       = "meta.db";
+	
 	private final static String HEADER_MAGIC_STR   = "HPCTOOLKITmeta";
 	private final static String METRIC_SCOPE_POINT = "point";
 	private static final String METRIC_SCOPE_EXECUTION    = "execution";
@@ -103,7 +105,7 @@ public class DataMeta extends DataCommon implements IExperiment
 	public void open(final String directory) 
 			throws IOException
 	{
-		super.open(directory + File.separator + DatabaseManager.DB_META_FILE);
+		super.open(directory + File.separator + DB_META_FILE);
 	
 		dataSummary = new DataSummary(idTupleTypes);
 		dataSummary.open(directory);

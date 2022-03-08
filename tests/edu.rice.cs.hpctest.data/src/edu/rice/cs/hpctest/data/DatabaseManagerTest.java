@@ -40,11 +40,24 @@ public class DatabaseManagerTest {
 		assertTrue(path.isPresent());
 		
 		String filepath = path.orElse("");
+		checkPath(filepath);
+		
+		resource = Paths.get("..", "resources", "prof2", "loop-inline");
+		database = resource.toFile();
+		path = DatabaseManager.getDatabaseFilePath(database.getAbsolutePath());
+		assertTrue(path.isPresent());
+		
+		checkPath(path.orElse(""));
+
+	}
+	
+	private void checkPath(String filepath) {		
 		Path p = Paths.get(filepath);
 		assertNotNull(p);
 		var f = p.toFile();
 		assertNotNull(f);
 		assertTrue(f.canRead());
+
 	}
 
 	@Test

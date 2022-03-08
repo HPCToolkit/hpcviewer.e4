@@ -8,6 +8,6 @@ public interface IDatabaseRepresentation
 	public File getFile();
 	public void setFile(File file);
 	
-	public void open(BaseExperiment experiment) throws	Exception;
+	public void open(IExperiment experiment) throws	Exception;
 	public IDatabaseRepresentation duplicate();
 }

@@ -30,7 +30,7 @@ public class RemoteDatabaseRepresentation implements IDatabaseRepresentation
 	
 
 	@Override
-	public void open(BaseExperiment experiment) throws Exception {
+	public void open(IExperiment experiment) throws Exception {
 		
 		ExperimentFileXML fileXML = new ExperimentFileXML();
 		fileXML.parse(expStream, name, experiment, false, userData);
