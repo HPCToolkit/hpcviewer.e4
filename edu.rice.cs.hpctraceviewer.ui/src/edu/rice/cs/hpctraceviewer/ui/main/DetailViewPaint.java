@@ -112,8 +112,10 @@ public class DetailViewPaint extends BaseViewPaint
 
 	@Override
 	protected BasePaintThread getPaintThread(
-			Queue<TimelineDataSet> queue, int numLines, 
-			int width, IProgressMonitor monitor) {
+			Queue<TimelineDataSet> queue, 
+			int numLines, 
+			int width, 
+			IProgressMonitor monitor) {
 
 		return new DetailPaintThread(device, controller, queue, numLines, 
 				numDataCollected, currentLine, 
@@ -122,7 +124,7 @@ public class DetailViewPaint extends BaseViewPaint
 
 	@Override
 	protected void drawPainting(ISpaceTimeCanvas canvas,
-			ImagePosition imagePosition) {
+								ImagePosition imagePosition) {
 
 		final double pixelsPerRank = canvas.getScalePixelsPerRank();
 		

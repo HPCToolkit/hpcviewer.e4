@@ -4,12 +4,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.LongAccumulator;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.swt.widgets.Display;
 import edu.rice.cs.hpcbase.map.ProcedureAliasMap;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
 import edu.rice.cs.hpcdata.experiment.extdata.IFilteredData;
@@ -37,7 +40,7 @@ import edu.rice.cs.hpctraceviewer.data.util.Constants;
  *******************************************************************************************/
 public abstract class SpaceTimeDataController 
 {
-	final protected BaseExperiment  exp;
+	final protected IExperiment  exp;
 
 	protected TraceDisplayAttribute attributes;
 	
@@ -68,7 +71,7 @@ public abstract class SpaceTimeDataController
 		exp = new Experiment();
 
 		// Without metrics, so param 3 is false
-		exp.open(expStream, new ProcedureAliasMap(), Name);
+		//exp.open(expStream, new ProcedureAliasMap(), Name);
 		
 		init(context, exp);
 	}
@@ -83,7 +86,7 @@ public abstract class SpaceTimeDataController
 	 * @throws InvalExperimentException
 	 * @throws Exception
 	 */
-	public SpaceTimeDataController(IEclipseContext context, BaseExperiment experiment) 			
+	public SpaceTimeDataController(IEclipseContext context, IExperiment experiment) 			
 			throws InvalExperimentException, Exception 
 	{
 		exp = experiment;		
@@ -108,7 +111,7 @@ public abstract class SpaceTimeDataController
 	 * @param _window
 	 * @throws Exception 
 	 *************************************************************************/
-	private void init(IEclipseContext context, BaseExperiment exp) 
+	private void init(IEclipseContext context, IExperiment exp) 
 			throws InvalExperimentException 
 	{	
 		this.context = context;
@@ -142,23 +145,43 @@ public abstract class SpaceTimeDataController
 		return false;
 	}
 
-
+	private LongAccumulator maxDepth = new LongAccumulator(Long::max, 0);
+	
 	/*************************************************************************
 	 * Get the max depth of this traces
 	 * @return int
 	 *************************************************************************/
 	public int getMaxDepth() 
 	{
-		return exp.getMaxDepth();
+		return maxDepth.intValue();
 	}
 	
+	
+	/*************************************************************************
+	 * Set to the max depth. This method is thread-safe and can be called
+	 * concurrently.
+	 * 
+	 * @param maxDepth
+	 * 			Possibly the new depth if the current depth < maxDepth
+	 *************************************************************************/
+	public void setMaxDepth(int maxDepth) {
+		this.maxDepth.accumulate(maxDepth);
+	}
+	
+	
+	/*************************************************************************
+	 * Reset the max depth to zero.
+	 *************************************************************************/
+	public void resetMaxDepth() {
+		this.maxDepth.reset();
+	}
 	
 	/*************************************************************************
 	 * Get the default depth. Currently it's the max depth times .3
 	 * @return int
 	 *************************************************************************/
 	public int getDefaultDepth() {
-		return exp.getMaxDepth()/3;
+		return (int) (maxDepth.get() * 0.3);
 	}
 	
 	
@@ -224,7 +247,9 @@ public abstract class SpaceTimeDataController
 	 * @return
 	 ******************************************************************************/
 	public Map<Integer, CallPath> getScopeMap() {
-		return exp.getScopeMap();
+		// TODO: we should add getScopeMap in IExperiment interface
+		// however, meta.db and trace.db doesn't need it.
+		return ((BaseExperiment)exp).getScopeMap();
 	}
 
 	/******************************************************************************
@@ -241,7 +266,7 @@ public abstract class SpaceTimeDataController
 	 * Returns the experiment database
 	 * @return BaseExperiment
 	 **************************************************************************/
-	public BaseExperiment getExperiment() {
+	public IExperiment getExperiment() {
 		return exp;
 	}
 
@@ -297,7 +322,7 @@ public abstract class SpaceTimeDataController
 		int version = exp.getMajorVersion();
 		
 		if (version == edu.rice.cs.hpcdata.util.Constants.EXPERIMENT_DENSED_VERSION) {
-			if (exp.getMinorVersion() < 2) {
+			if (((BaseExperiment)exp).getMinorVersion() < 2) {
 				// old version of database: always microsecond
 				return TimeUnit.MICROSECONDS;
 			}

@@ -15,7 +15,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
@@ -24,7 +23,6 @@ import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractView;
 
-import java.util.Iterator;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -49,7 +47,7 @@ public class ShowMetrics
 		if (!canExecute(window))
 			return;
 		
-		Iterator<BaseExperiment> iterator = database.getIterator(window);
+		var iterator = database.getIterator(window);
 
 		while(iterator.hasNext()) {
 			Experiment exp = (Experiment) iterator.next();

@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.db.version4.DataMeta;
+import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
@@ -33,14 +34,23 @@ public class DataMetaTest
 		tupleType.initDefaultTypes();
 		
 		data = new DataMeta();
-		data.open(dbPath.getAbsolutePath());
+		
+		assertThrows(RuntimeException.class, ()->{
+			data.open(dbPath.getAbsolutePath());
+		});
+		data.open(new Experiment(), dbPath.getAbsolutePath());
 		data.finalize(null);
 	}
 	
 	
 	@Test
-	public void testGetTitle() {
-		assertTrue(data.getName().equals("loop"));
+	public void testGetExperiment() {
+		var experiment = data.getExperiment();
+		assertNotNull(experiment);
+		
+		assertTrue(experiment.getName().equals("loop"));
+		assertTrue(experiment.getMaxDepth() > 10);
+		assertTrue(experiment.getMajorVersion() == 4);
 	}
 	
 	@Test
@@ -51,7 +61,7 @@ public class DataMetaTest
 	
 	@Test
 	public void testgetKindNames() {
-		var kinds = data.getKindNames();
+		var kinds = data.getExperiment().getIdTupleType();
 		assertNotNull(kinds);
 		
 		var entry = kinds.entrySet();
@@ -65,7 +75,7 @@ public class DataMetaTest
 	
 	@Test
 	public void testGetMetric() {
-		var metrics = data.getMetrics();
+		var metrics = data.getExperiment().getMetrics();
 		assertNotNull(metrics);
 		assertTrue(metrics.size()==2);
 		
@@ -118,9 +128,16 @@ public class DataMetaTest
 	
 	@Test
 	public void testRoot() {
-		var root = data.getRoot();
+		var root = data.getExperiment().getRootScope();
 		
 		assertNotNull(root);
 		assertNotNull(root.getName());
+		
+		var children = root.getChildren();
+		assertNotNull(children);
+		for(var child: children) {
+			assertNotNull(child.getName());
+			assertNotNull(child.getExperiment());
+		}
 	}
 }

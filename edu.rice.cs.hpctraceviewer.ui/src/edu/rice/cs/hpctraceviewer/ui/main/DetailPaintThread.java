@@ -39,6 +39,8 @@ public class DetailPaintThread
 	private GC gcFinal;
 	private GC gcOriginal;
 	
+	private int maxDepth = 0;
+	
 	/****
 	 * constructor of the class, requiring a queue of list of data (per line) to be
 	 * visualized on a set of images. The queue can be thread-safe (in case of multithreaded)
@@ -66,9 +68,9 @@ public class DetailPaintThread
 	
 	private void paintText(GC gc, int odInitPixel, int odFinalPixel, int box_height, 
 			int depth, Color color, int sampleCount) {
-		if (!debugMode) {
+		if (!debugMode) 
 			return;
-		}
+		
 		final int box_width = odFinalPixel - odInitPixel;
 		
 		String decoration = String.valueOf(depth);
@@ -115,7 +117,7 @@ public class DetailPaintThread
 		lineOriginal = new Image(device, width, 1);
 		
 		gcFinal    = new GC(lineFinal);
-		gcOriginal = new GC(lineOriginal);		
+		gcOriginal = new GC(lineOriginal);
 	}
 
 	@Override
@@ -133,6 +135,8 @@ public class DetailPaintThread
 		final DetailDataVisualization dataDetail = (DetailDataVisualization) data;
 		paintText(gcFinal, data.x_start, data.x_end, height,
 				data.depth, data.color, dataDetail.sample_counts);
+		
+		maxDepth = Math.max(maxDepth, data.depth);
 	}
 
 	@Override

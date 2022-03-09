@@ -378,4 +378,9 @@ public class Experiment extends BaseExperimentWithMetrics
 	public String getPath() {
 		return getExperimentFile().getAbsolutePath();
 	}
+
+	@Override
+	public List<BaseMetric> getMetricList() {
+		return getMetrics();
+	}
 }

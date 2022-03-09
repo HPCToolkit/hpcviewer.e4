@@ -18,10 +18,6 @@ package edu.rice.cs.hpcdata.experiment.scope;
 import java.io.IOException;
 
 import edu.rice.cs.hpcdata.db.MetricValueCollectionWithStorage;
-import edu.rice.cs.hpcdata.db.version4.DataMeta;
-import edu.rice.cs.hpcdata.db.version4.DataSummary;
-import edu.rice.cs.hpcdata.db.version4.MetricValueCollection3;
-import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricValueCollection;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.IScopeVisitor;
@@ -96,10 +92,10 @@ public Scope duplicate() {
  */
 public IMetricValueCollection getMetricValueCollection() throws IOException
 {
-	if (experiment.getMajorVersion() == Constants.EXPERIMENT_SPARSE_VERSION) 
+	if (experiment.getMajorVersion() == Constants.EXPERIMENT_SPARSE_VERSION &&
+	    rootScopeType == RootScopeType.CallingContextTree) 
 	{
-		DataMeta dm = (DataMeta) experiment;
-		return dm.getMetricValueCollection(rootScopeType);
+		return experiment.getMetricValueCollection();
 	}
 	return new MetricValueCollectionWithStorage();		
 }
@@ -109,7 +105,6 @@ public IMetricValueCollection getMetricValueCollection() throws IOException
 //////////////////////////////////////////////////////////////////////////
 //	SCOPE DISPLAY														//
 //////////////////////////////////////////////////////////////////////////
-
 
 
 

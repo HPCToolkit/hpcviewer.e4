@@ -2,9 +2,15 @@ package edu.rice.cs.hpcdata.experiment;
 
 import java.util.List;
 
+import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
+import edu.rice.cs.hpcdata.experiment.metric.IMetricValueCollection;
 import edu.rice.cs.hpcdata.experiment.scope.ITreeNode;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.filter.IFilterData;
+import edu.rice.cs.hpcdata.trace.BaseTraceAttribute;
+
 
 
 /**********************************
@@ -64,6 +70,24 @@ public interface IExperiment {
 	 */
 	public IThreadDataCollection getThreadData();
 	
+	/****
+	 * Set the default metric value collection object. 
+	 * This object is used to generate IMetricValueCollection instance inside a scope.
+	 * 
+	 * For sparse and dense databases have different implementation of IMetricValueCollection.
+	 * 
+	 * @param mvc
+	 */
+	public void setMetricValueCollection(IMetricValueCollection mvc);
+	
+	
+	/****
+	 * Get the object of IMetricValueCollection.
+	 * If it return null, the caller has to create its own IMetricValueCollection.
+	 * 
+	 * @return
+	 */
+	public IMetricValueCollection getMetricValueCollection();
 	
 	/*******
 	 * Retrieve the sub-roots of this database
@@ -79,16 +103,95 @@ public interface IExperiment {
 	 */
 	public IExperiment duplicate();
 
-	
+
+	/******
+	 * set the database version
+	 * 
+	 * @param version
+	 * 			version of the database in format {@code Major.Minor}
+	 */
+	void setVersion(String version);
+
 	/****
-	 * Retrieve the major version of the database.
+	 * Retrieve the major version of @Override
+	the database.
 	 * @return int
 	 */
 	public int getMajorVersion();
 
+	
 	/****
 	 * Get the absolute path of the database
+	 * 
 	 * @return
 	 */
 	public String getPath();
+
+	
+	/***
+	 * Filter the current cct with a given filter set
+	 * @param filter
+	 * 			a filter set 
+	 * @return
+	 * 			the number of filtered nodes
+	 */
+	public int filter(IFilterData filter);
+
+	
+	/***
+	 * If exist, retrieve the trace attribute.
+	 * 
+	 * @return {@code BaseTraceAttribute}
+	 * 			This can be null if the database has no trace data 
+	 * 		
+	 */
+	public BaseTraceAttribute getTraceAttribute();
+
+	/***
+	 * set the new id tuple type
+	 * 
+	 * @param idTupleType
+	 */
+	public void setIdTupleType(IdTupleType idTupleType);
+	
+	/***
+	 * get the id tuple type
+	 * @return
+	 */
+	public IdTupleType getIdTupleType();
+
+	/****
+	 * Get the list of metrics
+	 * @return a list of metrics
+	 */
+	public List<BaseMetric> getMetrics();
+
+	/***
+	 * Sets the experiment's configuration.
+	 * This method is to be called only once, during <code>Experiment.open</code>.
+	 * 
+	 * @param configuration
+	 * 			the new configuration
+	 */
+	public void setConfiguration(ExperimentConfiguration configuration);
+
+	/****
+	 * Get the database configuration
+	 * 
+	 * @return
+	 */
+	public ExperimentConfiguration getConfiguration();
+
+	
+	/**
+	 * Set the new depth maximum in the CCT
+	 * @param maxDepth 
+	 * 		the maxDepth to set
+	 */
+	public void setMaxDepth(int maxDepth);
+	
+	/**
+	 * @return the maxDepth
+	 */
+	public int getMaxDepth();
 }

@@ -9,6 +9,7 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import edu.rice.cs.hpcdata.db.IFileDB;
 import edu.rice.cs.hpcdata.db.version2.FileDB2;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
+import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.Util;
@@ -25,7 +26,7 @@ import edu.rice.cs.hpctraceviewer.data.version4.FileDB4;
 public class LocalDBOpener extends AbstractDBOpener 
 {
 	private int version;
-	private BaseExperiment experiment;
+	private IExperiment experiment;
 	private final IEclipseContext context;
 	
 
@@ -33,14 +34,14 @@ public class LocalDBOpener extends AbstractDBOpener
 	/*****
 	 * Prepare opening a database
 	 * @param IEclipseContext context
-	 * @param experiment
+	 * @param experiment2
 	 * @throws Exception 
 	 */
-	public LocalDBOpener(IEclipseContext context, BaseExperiment experiment) throws Exception {
+	public LocalDBOpener(IEclipseContext context, IExperiment experiment2) throws Exception {
 		this.context   = context;
-		this.experiment = experiment;
-		version = experiment.getMajorVersion();
-		String directory = experiment.getDefaultDirectory().getAbsolutePath();
+		this.experiment = experiment2;
+		version = experiment2.getMajorVersion();
+		String directory = experiment2.getPath();
 		if (directoryHasTraceData(directory)<=0) {
 			throw new Exception("The directory does not contain hpctoolkit database with trace data:"
 					+ directory);

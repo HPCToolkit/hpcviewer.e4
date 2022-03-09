@@ -18,6 +18,7 @@ import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.FinalMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
+import edu.rice.cs.hpcdata.experiment.metric.IMetricValueCollection;
 import edu.rice.cs.hpcdata.experiment.metric.Metric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricComparator;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
@@ -59,9 +60,18 @@ implements IMetricManager, ListEventListener<BaseMetric>
 	//ACCESS TO METRICS													    //
 	//////////////////////////////////////////////////////////////////////////
 
-	/*************************************************************************
-	 *	Returns the array of metrics in the experiment.
-	 ************************************************************************/
+	private IMetricValueCollection mvc;
+
+	@Override
+	public void setMetricValueCollection(IMetricValueCollection mvc) {
+		this.mvc = mvc;
+	}
+
+	@Override
+	public IMetricValueCollection getMetricValueCollection() {
+		return mvc;
+	}
+
 
 	/*****
 	 * Set the list of metric descriptors. Ideally this method has to be called
@@ -216,10 +226,9 @@ implements IMetricManager, ListEventListener<BaseMetric>
 	 * 		Please use {@link getMetricCount} and
 	 * 				   {@link getMetric} methods instead.
 	 * @return {@code List<BaseMetric>}
-	 * @deprecated
 	 */
 	@Override
-	public List<BaseMetric> getMetricList() 
+	public List<BaseMetric> getMetrics() 
 	{
 		return metrics;
 	}

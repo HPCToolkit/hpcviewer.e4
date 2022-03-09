@@ -44,7 +44,6 @@ public class ProcessTimeline {
 	public ProcessTimeline(int _lineNum, HashMap<Integer, CallPath> _scopeMap, IBaseData dataTrace, 
 			int processNumber, int _numPixelH, long _timeRange, long _startingTime)
 	{
-
 		lineNum 			= _lineNum;
 		scopeMap 			= _scopeMap;
 
@@ -176,19 +175,5 @@ public class ProcessTimeline {
 	{
 		return data.isGPU();
 	}
-	// These are potentially useful for debugging, but otherwise serve no use.
-//	@Override
-//	public String toString() {
-//		return hashCode() + "#" + data.getRank();
-//	}
-//
-//	@Override
-//	public int hashCode() {
-//		double hash = 0.0;
-//		for (Record r : data.getListOfData()) {
-//			hash += r.cpId + Math.log(r.timestamp);
-//		}
-//		return (int) Math.round(hash);
-//	}
 
 }

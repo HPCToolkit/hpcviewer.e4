@@ -10,6 +10,7 @@ import edu.rice.cs.hpcdata.db.IFileDB;
 import edu.rice.cs.hpcdata.db.version4.DataMeta;
 import edu.rice.cs.hpcdata.db.version4.DataSummary;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
+import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 import edu.rice.cs.hpcdata.experiment.extdata.IFilteredData;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
@@ -54,7 +55,7 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 	public SpaceTimeDataControllerLocal(
 			IEclipseContext context, 
 			IProgressMonitor statusMgr, 
-			BaseExperiment experiment, 
+			IExperiment experiment, 
 			IFileDB fileDB)
 			throws InvalExperimentException, Exception {
 		
@@ -78,16 +79,16 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 		
 		if (version == 1 || version == Constants.EXPERIMENT_DENSED_VERSION)
 		{	// original format
-			traceFilePath = getTraceFile(exp.getDefaultDirectory().getAbsolutePath(), statusMgr);
+			traceFilePath = getTraceFile(exp.getPath(), statusMgr);
 			fileDB.open(traceFilePath, trAttribute.dbHeaderSize, RECORD_SIZE);
 			
 		} else if (version == Constants.EXPERIMENT_SPARSE_VERSION) 
 		{
 			// new format
-			String databaseDirectory = exp.getDefaultDirectory().getAbsolutePath(); 
+			String databaseDirectory = exp.getPath(); 
 			traceFilePath = databaseDirectory + File.separator + "trace.db";
 			
-			RootScope root = (RootScope) exp.getRootScope(RootScopeType.CallingContextTree);
+			RootScope root = (RootScope) exp.getRootScope();
 			DataMeta dataMeta = (DataMeta) root.getExperiment();
 			DataSummary ds = dataMeta.getDataSummary();
 			
@@ -137,7 +138,7 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 
 	@Override
 	public String getName() {
-		return exp.getDefaultDirectory().getPath();
+		return exp.getPath();
 	}
 	
 	/*********************

@@ -18,9 +18,6 @@ package edu.rice.cs.hpcdata.experiment.scope;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import edu.rice.cs.hpcdata.experiment.BaseExperiment;
-import edu.rice.cs.hpcdata.experiment.BaseExperimentWithMetrics;
-import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.metric.AggregateMetric;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
@@ -604,8 +601,8 @@ implements IMetricScope
 	 *	Add the metric cost from a source with a certain filter for all metrics
 	 ************************************************************************/
 	public void accumulateMetrics(Scope source, MetricValuePropagationFilter filter, int nMetrics) {
-		Experiment experiment = (Experiment) root.getExperiment();
-		List<BaseMetric> metrics  = experiment.getMetricList();
+		var experiment = root.getExperiment();
+		var metrics    = experiment.getMetrics();
 		List<DerivedMetric> listDerivedMetrics = new ArrayList<>();
 
 		// compute metrics with predefined values first.
@@ -685,11 +682,10 @@ implements IMetricScope
 	 **************************************************************************/
 	public void combine(Scope source, MetricValuePropagationFilter filter) {
 
-		final BaseExperimentWithMetrics _exp = (BaseExperimentWithMetrics) getExperiment();
+		var exp  = getExperiment();
+		var list = exp.getMetrics();
 
-		List<BaseMetric> list = _exp.getMetricList();
-
-		for (BaseMetric metric: list) {
+		for (var metric: list) {
 
 			if (metric instanceof AggregateMetric) {
 				//--------------------------------------------------------------------

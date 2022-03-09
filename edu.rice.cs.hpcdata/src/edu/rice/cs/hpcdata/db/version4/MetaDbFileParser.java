@@ -21,11 +21,9 @@ public class MetaDbFileParser extends ExperimentFile
 		}
 		
 		DataMeta data = new DataMeta();
-		data.open(directory);
+		data.open(experiment, directory);
 		
-		DataSummary profileDB = new DataSummary(null);
-		
-		return null;
+		return new File(data.filename);
 	}
 
 }

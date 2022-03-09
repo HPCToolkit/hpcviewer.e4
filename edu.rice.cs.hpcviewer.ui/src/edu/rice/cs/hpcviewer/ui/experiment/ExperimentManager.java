@@ -12,6 +12,7 @@ import edu.rice.cs.hpcbase.map.ProcedureAliasMap;
 import edu.rice.cs.hpcdata.db.DatabaseManager;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.util.Util;
 import edu.rice.cs.hpcdata.util.Util.DatabaseFileFilter;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
@@ -19,7 +20,7 @@ import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 
 /**
  * This class manages to select, load and open a database directory
- * We assume that a database directory contains an XML file (i.e. extension .xml)
+ * We assume that a database directory contains an database file (experiment.xml or meta.db)
  * Warning: This class is not compatible with the old version of experiment file 
  *  (the old version has no xml extension)
  *
@@ -41,9 +42,10 @@ public class ExperimentManager
 		dirDlg.setText("hpcviewer");
 		dirDlg.setFilterPath(ViewerPreferenceManager.getLastPath());		// recover the last opened path
 		dirDlg.setMessage(sTitle);
+		
 		String sDir = dirDlg.open();	// ask the user to select a directory
 		if(sDir != null && checkDirectory(sDir)) {
-			return this.getListOfXMLFiles(sDir);
+			return getListOfDatabaseFiles(sDir);
 		}
 		
 		return null;
@@ -57,11 +59,11 @@ public class ExperimentManager
 	 * @return true if the database has been successfully opened
 	 * @throws Exception 
 	 */
-	public BaseExperiment openDatabaseFromDirectory(Shell shell, String sPath) throws Exception {
+	public IExperiment openDatabaseFromDirectory(Shell shell, String sPath) throws Exception {
 		if (!checkDirectory(sPath))
 			return null;
 		
-		File []fileXML = this.getListOfXMLFiles(sPath);
+		File []fileXML = getListOfDatabaseFiles(sPath);
 		if (fileXML == null)
 			return null;
 		
@@ -80,10 +82,10 @@ public class ExperimentManager
 	 * @throws Exception 
 	 */
 	public String openFileExperiment(Shell shell) throws Exception {
-		File []fileXML = getDatabaseFileList(shell, 
+		File []files = getDatabaseFileList(shell, 
 				"Select a directory containing a profiling database.");
-		if(fileXML != null) {
-			return getFileExperimentFromListOfFiles(fileXML);
+		if(files != null) {
+			return getFileExperimentFromListOfFiles(files);
 		}
 		return null;
 	}
@@ -139,20 +141,20 @@ public class ExperimentManager
 	}
 	
 	/**
-	 * Return the list of .xml files in a directory
+	 * Return the list of .xml or meta.db files in a directory
 	 * @param sPath: the directory of the database
 	 * @return
 	 */
-	private File[] getListOfXMLFiles(String sPath) {
+	private File[] getListOfDatabaseFiles(String sPath) {
 		// find XML files in this directory
-		File files = new File(sPath);
+		File directory = new File(sPath);
 		// for debugging purpose, let have separate variable
-		File filesXML[] = files.listFiles(new DatabaseFileFilter());
+		File dbFiles[] = directory.listFiles(new DatabaseFileFilter());
 
 		// store the current path in the preference
 		ViewerPreferenceManager.setLastPath(sPath);
 		
-		return filesXML;
+		return dbFiles;
 	}
 	
 
@@ -163,7 +165,7 @@ public class ExperimentManager
 	 * @return
 	 * @throws Exception
 	 */
-	public BaseExperiment loadExperiment(final String sFilename) throws Exception {
+	public IExperiment loadExperiment(final String sFilename) throws Exception {
 		Experiment experiment = new Experiment();
 		experiment.open( new File(sFilename), new ProcedureAliasMap(), true );
 

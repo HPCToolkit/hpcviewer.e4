@@ -47,6 +47,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
@@ -927,7 +928,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
     	
 		FileDialog saveDialog = new FileDialog(getShell(), SWT.SAVE);
 		saveDialog.setText("Save View Configuration");
-		saveDialog.setFilterPath(stData.getExperiment().getDefaultDirectory().getAbsolutePath());
+		saveDialog.setFilterPath(stData.getExperiment().getPath());
 		String fileName = "";
 		boolean validSaveFileFound = false;
 		while(!validSaveFileFound)
@@ -974,7 +975,8 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		}
 		catch (IOException e)
 		{
-			e.printStackTrace();
+			var logger = LoggerFactory.getLogger(getClass());
+			logger.error(e.getMessage());
 		}
 
 	}
@@ -986,7 +988,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		
 		FileDialog openDialog = new FileDialog(getShell(), SWT.OPEN);
 		openDialog.setText("Open View Configuration");
-		openDialog.setFilterPath(stData.getExperiment().getDefaultDirectory().getAbsolutePath());
+		openDialog.setFilterPath(stData.getExperiment().getPath());
 		String fileName = "";
 		boolean validFrameFound = false;
 		while(!validFrameFound)

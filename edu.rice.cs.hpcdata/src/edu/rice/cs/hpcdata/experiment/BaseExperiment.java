@@ -82,6 +82,7 @@ public abstract class BaseExperiment implements IExperiment
 	 * set the new id tuple type
 	 * @param idTupleType
 	 */
+	@Override
 	public void setIdTupleType(IdTupleType idTupleType) {
 		this.idTupleType = idTupleType;
 	}
@@ -91,6 +92,7 @@ public abstract class BaseExperiment implements IExperiment
 	 * get this database's id tuple type
 	 * @return {@code IdTupleType}
 	 */
+	@Override
 	public IdTupleType getIdTupleType() {
 		if (idTupleType == null) {
 			idTupleType = IdTupleType.createTypeWithOldFormat();
@@ -133,14 +135,18 @@ public abstract class BaseExperiment implements IExperiment
 	/**
 	 * @return the maxDepth
 	 */
+	@Override
 	public int getMaxDepth() {
 		return traceAttribute.maxDepth;
 	}
 
 
 	/**
-	 * @param maxDepth the maxDepth to set
+	 * Set the new depth maximum in the CCT
+	 * @param maxDepth 
+	 * 		the maxDepth to set
 	 */
+	@Override
 	public void setMaxDepth(int maxDepth) {
 		traceAttribute.maxDepth = maxDepth;
 	}
@@ -254,8 +260,10 @@ public abstract class BaseExperiment implements IExperiment
 	/******
 	 * set the database version
 	 * 
-	 * @param v : version of the database
+	 * @param version
+	 * 			version of the database in format {@code Major.Minor}
 	 */
+	@Override
 	public void setVersion (String version) 
 	{
 		if (version == null) {
@@ -293,11 +301,13 @@ public abstract class BaseExperiment implements IExperiment
 	 *	This method is to be called only once, during <code>Experiment.open</code>.
 	 *
 	 ************************************************************************/
+	@Override
 	public void setConfiguration(ExperimentConfiguration configuration)
 	{
 		this.configuration = configuration;
 	}
 
+	@Override
 	public ExperimentConfiguration getConfiguration()
 	{
 		return this.configuration;
@@ -340,6 +350,7 @@ public abstract class BaseExperiment implements IExperiment
 	 * tree are also filtered </p>
 	 * @param filter
 	 *************************************************************************/
+	@Override
 	public int filter(IFilterData filter)
 	{
 		// TODO :  we assume the first child is the CCT
