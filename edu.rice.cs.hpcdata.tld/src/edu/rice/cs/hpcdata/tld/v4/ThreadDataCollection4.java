@@ -21,13 +21,15 @@ public class ThreadDataCollection4 extends AbstractThreadDataCollection
 {
 	private DataPlot    data_plot;
 	private DataSummary data_summary;
+
+	public void init(DataSummary dataSummary) {
+		this.data_summary = dataSummary;
+	}
 	
 	@Override
 	public void open(RootScope root, String directory) throws IOException {
 		data_plot = new DataPlot();
 		data_plot.open(directory);
-
-		data_summary = ((DataMeta)root.getExperiment()).getDataSummary();
 	}
 
 	@Override
