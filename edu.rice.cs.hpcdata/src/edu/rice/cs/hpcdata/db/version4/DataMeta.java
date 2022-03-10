@@ -14,7 +14,6 @@ import org.eclipse.collections.api.map.primitive.LongObjectMap;
 import org.eclipse.collections.impl.map.mutable.primitive.LongObjectHashMap;
 
 import edu.rice.cs.hpcdata.db.IdTupleType;
-import edu.rice.cs.hpcdata.db.MetricValueCollectionWithStorage;
 import edu.rice.cs.hpcdata.experiment.BaseExperimentWithMetrics;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.ExperimentConfiguration;
@@ -23,7 +22,6 @@ import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
-import edu.rice.cs.hpcdata.experiment.metric.IMetricValueCollection;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScopeType;
@@ -142,7 +140,7 @@ public class DataMeta extends DataCommon
 		final BaseExperimentWithMetrics exp = (BaseExperimentWithMetrics) experiment;
 		exp.setMetrics(metrics);
 		
-		experiment.setMetricValueCollection(new MetricValueCollection3(dataSummary));
+		rootCCT.setMetricValueCollection(new MetricValueCollection3(dataSummary));
 	}
 	
 	@Override
@@ -235,16 +233,7 @@ public class DataMeta extends DataCommon
 	public Iterator<ProcedureScope> getProcedureIterator() {
 		return mapProcedures.iterator();
 	}
-	
-	
-	
-	public IMetricValueCollection getMetricValueCollection(RootScopeType rootScopeType) throws IOException {
-		if (rootScopeType == RootScopeType.CallingContextTree) {
-			return new MetricValueCollection3(dataSummary);
-		}
-		return new MetricValueCollectionWithStorage();
-	}
-	
+		
 
 	public DataSummary getDataSummary() {
 		return dataSummary;
@@ -402,7 +391,7 @@ public class DataMeta extends DataCommon
 				int basePosition   = position + (j*szScope);
 				long  pScope       = buffer.getLong (basePosition);
 				short nSummaries   = buffer.getShort(basePosition + 0x08);
-				buffer.getShort(basePosition + 0x0a);
+				short propMetricId = buffer.getShort(basePosition + 0x0a);
 				long  pSummaries   = buffer.getLong (basePosition + 0x10);
 				
 				int scopePosition  = (int) (pScope - section.offset);
@@ -429,6 +418,7 @@ public class DataMeta extends DataCommon
 					m.setMetricType(type);
 					m.setCombineType(combine);
 					m.setDisplayed(VisibilityType.SHOW);
+					m.setOrder(propMetricId);
 					
 					metrics.add(m);
 				}

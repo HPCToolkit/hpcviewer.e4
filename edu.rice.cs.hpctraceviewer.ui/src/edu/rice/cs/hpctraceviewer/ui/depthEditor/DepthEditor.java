@@ -173,7 +173,7 @@ public class DepthEditor implements EventHandler
 		depthEditor.setVisible(true);
 		depthEditor.setToolTipText("Change the current call-stack depth.\nMax depth is " + maxDepth);
 		
-		setSelection(data.getDefaultDepth());
+		setSelection((int) (maxDepth * 0.3));
 
 		maxDepthButton.setToolTipText("Set to max call-stack depth: " + maxDepth);
 		maxDepthButton.setData(Integer.valueOf(maxDepth));

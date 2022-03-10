@@ -15,8 +15,10 @@ public interface IMetricValueCollection
 {
 	/****
 	 * copy metric values from a source {@code IMetricValueCollection} to this collection
-	 * @param listMetric {@code List} list of metric descriptors of the values
-	 * @param mvCollection {@code IMetricValueCollection} source
+	 * @param mvCollection 
+	 * 			{@code IMetricValueCollection} source
+	 * @param offset
+	 * 			Starting index number 
 	 */
 	public void appendMetrics(IMetricValueCollection mvCollection, int offset);
 	
@@ -28,13 +30,6 @@ public interface IMetricValueCollection
 	 * @return
 	 */
 	public MetricValue getValue(Scope scope, int index);
-	
-	/***
-	 * get the annotation of a given metric index
-	 * @param index
-	 * @return
-	 */
-	public float getAnnotation(int index);
 	
 	/****
 	 * set a metric value to a certain index
@@ -51,6 +46,13 @@ public interface IMetricValueCollection
 	 */
 	public void setAnnotation(int index, float ann);
 	
+	/***
+	 * get the annotation of a given metric index
+	 * @param index
+	 * @return
+	 */
+	public float getAnnotation(int index);
+
 	/***
 	 * return if the current scope has at least a metric value
 	 * @return true if a metric value exists, false otherwise.

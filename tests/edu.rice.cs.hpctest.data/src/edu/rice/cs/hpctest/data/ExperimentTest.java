@@ -89,7 +89,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetNonEmptyMetricIDs() {
-		final int nmetrics[] = new int[] {18, 0, 0, 2};
+		final int nmetrics[] = new int[] {18, 0, 0, 1};
 		int i=0;
 		for(var experiment: experiments) {
 			RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
@@ -136,10 +136,13 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetMetricFromOrder() {
+		int []order = new int[] {0, 0, 1, 1};
+		int i = 0;
 		for(var experiment: experiments) {
 			if (experiment.getMetricCount()>0) {
-				BaseMetric metric = experiment.getMetricFromOrder(0);
-				assertNotNull(metric);				
+				BaseMetric metric = experiment.getMetricFromOrder(order[i]);
+				assertNotNull(metric);
+				i++;
 			}
 		}
 	}

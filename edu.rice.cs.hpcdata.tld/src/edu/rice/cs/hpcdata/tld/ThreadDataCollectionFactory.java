@@ -49,7 +49,7 @@ public final class ThreadDataCollectionFactory
 		case Constants.EXPERIMENT_SPARSE_VERSION:
 			data_file = new ThreadDataCollection4();
 			
-			var mvc = (MetricValueCollection3) experiment.getMetricValueCollection();						
+			var mvc = (MetricValueCollection3) root.getMetricValueCollection();						
 			((ThreadDataCollection4)data_file).init(mvc.getDataSummary());
 			
 			String directory = experiment.getDefaultDirectory().getAbsolutePath();

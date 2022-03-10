@@ -928,7 +928,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
     	
 		FileDialog saveDialog = new FileDialog(getShell(), SWT.SAVE);
 		saveDialog.setText("Save View Configuration");
-		saveDialog.setFilterPath(stData.getExperiment().getPath());
+		saveDialog.setFilterPath(stData.getExperiment().getDirectory());
 		String fileName = "";
 		boolean validSaveFileFound = false;
 		while(!validSaveFileFound)

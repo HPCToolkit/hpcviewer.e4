@@ -5,7 +5,6 @@ import java.util.List;
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
-import edu.rice.cs.hpcdata.experiment.metric.IMetricValueCollection;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.filter.IFilterData;
 import edu.rice.cs.hpcdata.trace.BaseTraceAttribute;
@@ -56,25 +55,7 @@ public interface IExperiment {
 	 * @return
 	 */
 	public IThreadDataCollection getThreadData();
-	
-	/****
-	 * Set the default metric value collection object. 
-	 * This object is used to generate IMetricValueCollection instance inside a scope.
-	 * 
-	 * For sparse and dense databases have different implementation of IMetricValueCollection.
-	 * 
-	 * @param mvc
-	 */
-	public void setMetricValueCollection(IMetricValueCollection mvc);
-	
-	
-	/****
-	 * Get the object of IMetricValueCollection.
-	 * If it return null, the caller has to create its own IMetricValueCollection.
-	 * 
-	 * @return
-	 */
-	public IMetricValueCollection getMetricValueCollection();
+
 	
 	/*******
 	 * Retrieve the sub-roots of this database
@@ -108,12 +89,21 @@ public interface IExperiment {
 
 	
 	/****
-	 * Get the absolute path of the database
+	 * Get the absolute path of the database filename.
+	 * This is the path to experiment.xml or meta.db.
 	 * 
 	 * @return
 	 */
 	public String getPath();
 
+	
+	/****
+	 * Get the absolute path to the database directory.
+	 * 
+	 * @return
+	 */
+	public String getDirectory();
+	
 	
 	/***
 	 * Filter the current cct with a given filter set

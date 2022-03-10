@@ -21,7 +21,6 @@ import edu.rice.cs.hpcdata.db.MetricValueCollectionWithStorage;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricValueCollection;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.IScopeVisitor;
-import edu.rice.cs.hpcdata.util.Constants;
 
 
 
@@ -47,6 +46,8 @@ protected String rootScopeName;
 protected RootScopeType rootScopeType;
 private IExperiment experiment;
 private String name;
+private IMetricValueCollection mvc;
+
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -83,6 +84,19 @@ public Scope duplicate() {
 
 
 
+/****
+ * Set the default metric value collection object. 
+ * This object is used to generate IMetricValueCollection instance inside a scope.
+ * 
+ * For sparse and dense databases have different implementation of IMetricValueCollection.
+ * 
+ * @param mvc
+ */
+public void setMetricValueCollection(IMetricValueCollection mvc) {
+	this.mvc = mvc;
+}
+
+
 /******
  * Retrieve (and create) the metric collection based on the version of the database.
  *  
@@ -91,10 +105,8 @@ public Scope duplicate() {
  */
 public IMetricValueCollection getMetricValueCollection() throws IOException
 {
-	if (experiment.getMajorVersion() == Constants.EXPERIMENT_SPARSE_VERSION &&
-	    rootScopeType == RootScopeType.CallingContextTree) 
-	{
-		return experiment.getMetricValueCollection();
+	if (mvc != null) {
+		return mvc;
 	}
 	return new MetricValueCollectionWithStorage();		
 }

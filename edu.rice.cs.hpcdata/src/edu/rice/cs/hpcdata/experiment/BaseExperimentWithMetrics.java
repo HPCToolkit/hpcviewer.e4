@@ -18,7 +18,6 @@ import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.FinalMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
-import edu.rice.cs.hpcdata.experiment.metric.IMetricValueCollection;
 import edu.rice.cs.hpcdata.experiment.metric.Metric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricComparator;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
@@ -59,18 +58,6 @@ implements IMetricManager, ListEventListener<BaseMetric>
 	//////////////////////////////////////////////////////////////////////////
 	//ACCESS TO METRICS													    //
 	//////////////////////////////////////////////////////////////////////////
-
-	private IMetricValueCollection mvc;
-
-	@Override
-	public void setMetricValueCollection(IMetricValueCollection mvc) {
-		this.mvc = mvc;
-	}
-
-	@Override
-	public IMetricValueCollection getMetricValueCollection() {
-		return mvc;
-	}
 
 
 	/*****

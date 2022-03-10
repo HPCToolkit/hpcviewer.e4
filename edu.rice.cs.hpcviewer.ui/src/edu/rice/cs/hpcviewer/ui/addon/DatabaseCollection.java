@@ -53,7 +53,6 @@ import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 import edu.rice.cs.hpcdata.trace.BaseTraceAttribute;
 import edu.rice.cs.hpcfilter.service.FilterMap;
-import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
 import edu.rice.cs.hpctraceviewer.data.local.LocalDBOpener;
 import edu.rice.cs.hpctraceviewer.ui.TracePart;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
@@ -78,7 +77,7 @@ import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
 @Singleton
 public class DatabaseCollection 
 {
-	static private final String STACK_ID_BASE 	  = "edu.rice.cs.hpcviewer.ui.partstack.integrated";
+	static private final String STACK_ID_BASE = "edu.rice.cs.hpcviewer.ui.partstack.integrated";
 	
 
 	final private HashMap<MWindow, List<IExperiment>>   mapWindowToExperiments;
@@ -336,16 +335,12 @@ public class DatabaseCollection
 		//----------------------------------------------------------------
 		// display the trace view if the information exists
 		//----------------------------------------------------------------
+		if (LocalDBOpener.directoryHasTraceData(experiment.getDirectory()) < 0) {
+			return 1;
+		}
+
 		BaseTraceAttribute traceAtt = experiment.getTraceAttribute();
 		if (traceAtt != null && traceAtt.dbTimeMax > 0) {
-			try {
-				AbstractDBOpener dbOpener = new LocalDBOpener(null, experiment);
-				if (dbOpener.getVersion()<=0) {
-					return 1;
-				}
-			} catch (Exception e) {
-				return 0;
-			}
 
 			MPart tracePart  = service.createPart(TracePart.ID);
 			MPart createPart = service.showPart(tracePart, PartState.CREATE);
@@ -368,9 +363,7 @@ public class DatabaseCollection
 		return 1;
 	}
 	
-	
-	
-	
+		
 	/***
 	 * Retrieve the iterator of the database collection from a given windo
 	 * 
@@ -420,9 +413,8 @@ public class DatabaseCollection
 			return null;
 		
 		for (var exp: list) {
-			String directory = exp.getPath();
+			String directory = exp.getDirectory();
 			if (directory.equals(pathXML)) {
-
 				return exp;
 			}
 		}
@@ -497,7 +489,7 @@ public class DatabaseCollection
 		// we cannot have two exactly the same database in one window
 		if (MessageDialog.openQuestion(shell, 
 								   "Warning: database already exists", 
-								   exp.getPath() +
+								   exp.getDirectory() +
 								   ": the database is already opened.\nDo you want to replace the existing one?" ) )
 		
 			// user decides to replace the database
@@ -716,7 +708,7 @@ public class DatabaseCollection
 		// we need to ensure we only store the directory, not the xml file
 		// minor fix: only store the absolute path, not the relative one.
 		
-		String path = experiment.getPath();
+		String path = experiment.getDirectory();
 		UserInputHistory history = new UserInputHistory(RecentDatabase.HISTORY_DATABASE_RECENT);
 		history.addLine(path);
 	}

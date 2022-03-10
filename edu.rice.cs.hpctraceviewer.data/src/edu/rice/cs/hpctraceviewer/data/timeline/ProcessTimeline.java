@@ -30,7 +30,7 @@ public class ProcessTimeline {
 	/** The amount of time that each pixel on the screen correlates to. */
 	private double pixelLength;
 
-	final ITraceDataCollector data;
+	private final ITraceDataCollector data;
 
 	/*************************************************************************
 	 * Reads in the call-stack trace data from the binary traceFile in the form:
@@ -44,6 +44,7 @@ public class ProcessTimeline {
 	public ProcessTimeline(int _lineNum, HashMap<Integer, CallPath> _scopeMap, IBaseData dataTrace, 
 			int processNumber, int _numPixelH, long _timeRange, long _startingTime)
 	{
+
 		lineNum 			= _lineNum;
 		scopeMap 			= _scopeMap;
 
@@ -120,6 +121,7 @@ public class ProcessTimeline {
 	/** returns the call path corresponding to the sample and depth given */
 	public CallPath getCallPath(int sample, int depth) {
 		Assert.isTrue(sample>=0, "sample number is negative");
+		
 		int cpid = getCpid(sample);
 
 		CallPath cp = scopeMap.get(cpid);

@@ -74,7 +74,11 @@ public abstract class BaseExperiment implements IExperiment
 	public RootScope getDatacentricRootScope() {
 		return datacentricRootScope;
 	}
-	
+
+	public String getDirectory() {
+		var location = databaseRepresentation.getFile();
+		return location.getParentFile().getAbsolutePath();
+	}
 
 	/***
 	 * set the new id tuple type

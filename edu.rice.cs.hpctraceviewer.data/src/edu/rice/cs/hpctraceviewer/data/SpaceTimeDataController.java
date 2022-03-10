@@ -4,12 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.LongAccumulator;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.swt.widgets.Display;
-import edu.rice.cs.hpcbase.map.ProcedureAliasMap;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
@@ -67,13 +64,8 @@ public abstract class SpaceTimeDataController
 	 *****/
 	public SpaceTimeDataController(IEclipseContext context, InputStream expStream, String Name) 
 			throws InvalExperimentException, Exception 
-	{	
-		exp = new Experiment();
-
-		// Without metrics, so param 3 is false
-		//exp.open(expStream, new ProcedureAliasMap(), Name);
-		
-		init(context, exp);
+	{
+		this(context, new Experiment());
 	}
 	
 	/*****
@@ -102,6 +94,17 @@ public abstract class SpaceTimeDataController
 	public ProcessTimelineService getProcessTimelineService() {
 		ProcessTimelineService ptlService = (ProcessTimelineService) context.get(Constants.CONTEXT_TIMELINE);
 		return ptlService;
+	}
+	
+	
+	/*************************************************************************
+	 * Check if traces have been painted out in the main trace view.
+	 * Other views (like depth view) will need to check this.
+	 * 
+	 * @return
+	 *************************************************************************/
+	public boolean hasTraces() {
+		return timelineService.getNumProcessTimeline() > 0;
 	}
 	
 	
@@ -145,45 +148,6 @@ public abstract class SpaceTimeDataController
 		return false;
 	}
 
-	private LongAccumulator maxDepth = new LongAccumulator(Long::max, 0);
-	
-	/*************************************************************************
-	 * Get the max depth of this traces
-	 * @return int
-	 *************************************************************************/
-	public int getMaxDepth() 
-	{
-		return maxDepth.intValue();
-	}
-	
-	
-	/*************************************************************************
-	 * Set to the max depth. This method is thread-safe and can be called
-	 * concurrently.
-	 * 
-	 * @param maxDepth
-	 * 			Possibly the new depth if the current depth < maxDepth
-	 *************************************************************************/
-	public void setMaxDepth(int maxDepth) {
-		this.maxDepth.accumulate(maxDepth);
-	}
-	
-	
-	/*************************************************************************
-	 * Reset the max depth to zero.
-	 *************************************************************************/
-	public void resetMaxDepth() {
-		this.maxDepth.reset();
-	}
-	
-	/*************************************************************************
-	 * Get the default depth. Currently it's the max depth times .3
-	 * @return int
-	 *************************************************************************/
-	public int getDefaultDepth() {
-		return (int) (maxDepth.get() * 0.3);
-	}
-	
 	
 	/*************************************************************************
 	 * Get the position of the current selected process
@@ -345,7 +309,20 @@ public abstract class SpaceTimeDataController
 		return TimeUnit.MICROSECONDS;
 	}
 	
+	/*************************************************************************
+	 * Maximum call depth in the CCT
+	 *  
+	 * @return
+	 *************************************************************************/
+	public int getMaxDepth() {
+		return ((TraceAttribute)exp.getTraceAttribute()).maxDepth;
+	}
 
+	public int getDefaultDepth() {
+		return (int)(getMaxDepth() * 0.3);
+	}
+
+	
 	/*************************************************************************
 	 * get the color mapping table
 	 * @return
@@ -404,4 +381,5 @@ public abstract class SpaceTimeDataController
 
 	public abstract void fillTracesWithData(boolean changedBounds, int numThreadsToLaunch)
 			throws IOException;
+
 }

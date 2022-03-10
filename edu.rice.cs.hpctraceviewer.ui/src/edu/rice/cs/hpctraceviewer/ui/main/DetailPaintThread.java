@@ -39,8 +39,6 @@ public class DetailPaintThread
 	private GC gcFinal;
 	private GC gcOriginal;
 	
-	private int maxDepth = 0;
-	
 	/****
 	 * constructor of the class, requiring a queue of list of data (per line) to be
 	 * visualized on a set of images. The queue can be thread-safe (in case of multithreaded)
@@ -135,8 +133,6 @@ public class DetailPaintThread
 		final DetailDataVisualization dataDetail = (DetailDataVisualization) data;
 		paintText(gcFinal, data.x_start, data.x_end, height,
 				data.depth, data.color, dataDetail.sample_counts);
-		
-		maxDepth = Math.max(maxDepth, data.depth);
 	}
 
 	@Override
