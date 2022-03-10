@@ -25,9 +25,6 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		setIndex(index);
 	}
 
-	public HierarchicalMetric(int index, String sDisplayName) {
-		this(null, index, sDisplayName);
-	}
 
 	public void setFormula(String formula) {
 		expression = ExpressionTree.parse(formula);

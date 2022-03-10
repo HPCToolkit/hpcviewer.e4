@@ -6,7 +6,6 @@ import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricValueCollection;
-import edu.rice.cs.hpcdata.experiment.scope.ITreeNode;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.filter.IFilterData;
 import edu.rice.cs.hpcdata.trace.BaseTraceAttribute;
@@ -27,18 +26,6 @@ public interface IExperiment {
 	 * @return
 	 */
 	public String getName();
-	
-	/*****
-	 * Create a tree node object of {@code ITtreeNode} based on the value.
-	 * The implementer can ignore the value. 
-	 * 
-	 * @param value 
-	 * 			Any value represents the node to be created. This can be
-	 * 			an index of even null value.
-	 * @return {@code ITreeNode}
-	 * 			A tree node
-	 */
-	public ITreeNode<Scope> createTreeNode(Object value);
 	
 	/****
 	 * Set the main root for this database. 

@@ -98,7 +98,6 @@ implements IMetricScope
 
 	//the cpid is removed in hpcviewer, but hpctraceview still requires it in order to dfs
 	private int cpid;
-	private int cct_id;
 
 	public int iSourceCodeAvailability = Scope.SOURCE_CODE_UNKNOWN;
 
@@ -124,12 +123,10 @@ implements IMetricScope
 		this.firstLineNumber = first;
 		this.lastLineNumber  = last;
 		this.flat_node_index = flat_id;
-		this.cct_id    = cct_id;
 		this.cpid      = -1;
 		this.iCounter  = 0;
-		
-		if (root != null)			
-			node = (ITreeNode<Scope>) root.getExperiment().createTreeNode(this);
+
+		node = new TreeNode<>(cct_id);
 	}
 
 
@@ -165,7 +162,7 @@ implements IMetricScope
 	 * @return
 	 */
 	public int getCCTIndex() {
-		return cct_id;
+		return (int) node.getValue();
 	}
 
 

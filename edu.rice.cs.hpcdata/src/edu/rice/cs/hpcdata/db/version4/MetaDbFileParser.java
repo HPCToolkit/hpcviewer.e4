@@ -1,7 +1,6 @@
 package edu.rice.cs.hpcdata.db.version4;
 
 import java.io.File;
-import java.io.IOException;
 
 import edu.rice.cs.hpcdata.experiment.ExperimentFile;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
@@ -17,7 +16,7 @@ public class MetaDbFileParser extends ExperimentFile
 		if (location.isFile()) {
 			directory = location.getParent();
 		} else {
-			throw new IOException(location.getName() + ": not readable");
+			directory = location.getAbsolutePath();
 		}
 		
 		DataMeta data = new DataMeta();
@@ -25,5 +24,4 @@ public class MetaDbFileParser extends ExperimentFile
 		
 		return new File(data.filename);
 	}
-
 }

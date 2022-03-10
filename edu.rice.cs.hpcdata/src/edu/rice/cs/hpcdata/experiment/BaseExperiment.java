@@ -7,11 +7,9 @@ import java.util.Map;
 
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
-import edu.rice.cs.hpcdata.experiment.scope.ITreeNode;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.DisposeResourcesVisitor;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.FilterScopeVisitor;
 import edu.rice.cs.hpcdata.filter.IFilterData;
@@ -423,10 +421,6 @@ public abstract class BaseExperiment implements IExperiment
 		return traceAttribute;
 	}
 
-	@Override
-	public ITreeNode<Scope> createTreeNode(Object value) {
-		return new TreeNode<>(value);
-	}
 
 	/************************************************************************
 	 * In case the experiment has a CCT, continue to create callers tree and

@@ -70,7 +70,6 @@ public RootScope(IExperiment experiment, String name, RootScopeType rst, int cct
 	this.experiment 	= experiment;
 	this.rootScopeType 	= rst;
 	root = this;
-	node = experiment.createTreeNode(this);
 }
 
 

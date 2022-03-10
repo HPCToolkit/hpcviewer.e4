@@ -241,11 +241,13 @@ public class Experiment extends BaseExperimentWithMetrics
 	 * @param callerView : flag whether to compute caller view (if true) or not.
 	 */
 	private void postprocess(boolean callerView) {
-		if (this.rootScope.getSubscopeCount() <= 0) return;
+		if (this.rootScope.getSubscopeCount() <= 0) 
+			return;
 		
 		// Get first scope subtree: CCT or Flat
 		Scope firstSubTree = this.rootScope.getSubscope(0);
-		if (!(firstSubTree instanceof RootScope)) return;
+		if (!(firstSubTree instanceof RootScope)) 
+			return;
 		
 		RootScopeType firstRootType = ((RootScope)firstSubTree).getType();
 

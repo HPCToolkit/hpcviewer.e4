@@ -87,6 +87,7 @@ public class TreeNode<T> implements ITreeNode<T> {
 	 * 
 	 * @return The value; may be anything.
 	 */
+	@Override
 	public Object getValue() {
 		return value;
 	}

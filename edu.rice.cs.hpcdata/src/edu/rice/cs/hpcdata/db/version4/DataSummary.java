@@ -203,6 +203,8 @@ public class DataSummary extends DataCommon
 			throws IOException
 	{
 		List<MetricValueSparse> listValues = getMetrics(profileNum, cctId);		
+		if (listValues == null)
+			return 0.0d;
 		
 		// TODO ugly temporary code
 		// We need to grab a value directly from the memory instead of searching O(n)

@@ -20,6 +20,7 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.ExperimentConfiguration;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricValueCollection;
@@ -90,7 +91,7 @@ public class DataMeta extends DataCommon
 	private LongObjectMap<LoadModuleScope>    mapLoadModules;
 	private LongObjectHashMap<SourceFile>     mapFiles;
 	private LongObjectHashMap<ProcedureScope> mapProcedures;
-	private RootScope root;
+	private RootScope root, rootCCT;
 	
 	private StringArea stringArea;
 	private List<BaseMetric> metrics;
@@ -119,13 +120,20 @@ public class DataMeta extends DataCommon
 	 */
 	public void open(IExperiment experiment, String directory) throws IOException {
 		this.experiment = experiment;
-		root = new RootScope(experiment, RootScope.DEFAULT_SCOPE_NAME, RootScopeType.CallingContextTree);
+
+		root = new RootScope(experiment, directory, RootScopeType.Invisible, -1, -1);
+		rootCCT = new RootScope(experiment, RootScope.DEFAULT_SCOPE_NAME, RootScopeType.CallingContextTree);
+		root.addSubscope(rootCCT);
+		rootCCT.setParentScope(root);
+		
 		this.experiment.setRootScope(root);
 		
 		maxDepth = 0;
 		
 		super.open(directory + File.separator + DB_META_FILE);
-		
+
+		dataSummary.open(directory);
+
 		// setup the experiment configuration
 		this.experiment.setVersion(versionMajor + "." + versionMinor);
 		this.experiment.setMaxDepth(maxDepth);
@@ -133,10 +141,6 @@ public class DataMeta extends DataCommon
 		// setup the metrics
 		final BaseExperimentWithMetrics exp = (BaseExperimentWithMetrics) experiment;
 		exp.setMetrics(metrics);
-
-		// prepare profile.db parser
-		dataSummary = new DataSummary(experiment.getIdTupleType());
-		dataSummary.open(directory);
 		
 		experiment.setMetricValueCollection(new MetricValueCollection3(dataSummary));
 	}
@@ -280,7 +284,10 @@ public class DataMeta extends DataCommon
 		
 		// grab the id-tuple type names
 		parseHierarchicalIdTuple(channel, sections[INDEX_NAMES]);
-		
+
+		// prepare profile.db parser
+		dataSummary = new DataSummary(experiment.getIdTupleType());
+
 		// grab the description of the metrics
 		parseMetricDescription(channel, sections[INDEX_METRICS]);
 		
@@ -414,13 +421,15 @@ public class DataMeta extends DataCommon
 					if (scopeName.equals(METRIC_SCOPE_POINT)) 
 						continue;
 					
-					var m = new HierarchicalMetric(statMetric, metricName);
+					var m = new HierarchicalMetric(dataSummary, statMetric, metricName);
 					m.setFormula(strFormula);
 					MetricType type = scopeName.equals(METRIC_SCOPE_EXECUTION) ? 
 														MetricType.INCLUSIVE : 
 														MetricType.EXCLUSIVE;
 					m.setMetricType(type);
 					m.setCombineType(combine);
+					m.setDisplayed(VisibilityType.SHOW);
+					
 					metrics.add(m);
 				}
 			}
@@ -430,7 +439,7 @@ public class DataMeta extends DataCommon
 		for(var metric: metrics) {
 			if (metric instanceof DerivedMetric) {
 				var dm = (DerivedMetric) metric;
-				dm.resetMetric((Experiment) experiment, root);
+				dm.resetMetric((Experiment) experiment, rootCCT);
 			}
 		}
 	}
@@ -463,7 +472,7 @@ public class DataMeta extends DataCommon
 			long pModuleName = buffer.getLong(position);
 			String path      = stringArea.toString(pModuleName);
 			
-			LoadModuleScope lms = new LoadModuleScope(root, path, null, i);
+			LoadModuleScope lms = new LoadModuleScope(rootCCT, path, null, i);
 			mapLoadModules.put(pModules + delta, lms);
 		}
 		return mapLoadModules;
@@ -536,7 +545,7 @@ public class DataMeta extends DataCommon
 			var lms  = mapLoadModules.get(pModule);
 			var file = mapFiles.get(pFile);
 			
-			ProcedureScope ps = new ProcedureScope(root, lms, file, line, line, name, false, i, i, null, 0);
+			ProcedureScope ps = new ProcedureScope(rootCCT, lms, file, line, line, name, false, i, i, null, 0);
 			mapProcedures.put(position, ps);
 		}
 		return mapProcedures;
@@ -619,9 +628,15 @@ public class DataMeta extends DataCommon
 				buffer.getLong(loc + 0x18 + (nwords+1) * 8);
 				nwords++;
 			}
-			ProcedureScope ps = mapProcedures.get(pFunction);
-			SourceFile file = mapFiles.get(pFile);
-			LoadModuleScope lm = mapLoadModules.get(pModule);
+			var ps = mapProcedures.get(pFunction);
+			var fs = mapFiles.get(pFile);
+			var lm = mapLoadModules.get(pModule);
+			
+			if (fs == null)
+				fs = SourceFile.NONE;
+			if (lm == null)
+				lm = LoadModuleScope.NONE;
+			
 			Scope scope = null;
 
 			boolean alien = false;
@@ -639,18 +654,18 @@ public class DataMeta extends DataCommon
 
 			switch(lexicalType) {
 			case FMT_METADB_LEXTYPE_Function:
-				LineScope ls = new LineScope(root, file, line, ctxId, ctxId);
+				LineScope ls = new LineScope(root, fs, line, ctxId, ctxId);
 				if (ps == null) {
-					ps = new ProcedureScope(root, lm, file, line, line, Constants.PROCEDURE_UNKNOWN, alien, ctxId, ctxId, null, 0);
+					ps = new ProcedureScope(root, lm, fs, line, line, Constants.PROCEDURE_UNKNOWN, alien, ctxId, ctxId, null, 0);
 				}
 				scope = new CallSiteScope(ls, ps, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, ctxId);	
 				break;
 			case FMT_METADB_LEXTYPE_Instruction:
 			case FMT_METADB_LEXTYPE_Line:
-				scope = new LineScope(root, file, line, ctxId, ctxId);
+				scope = new LineScope(root, fs, line, ctxId, ctxId);
 				break;
 			case FMT_METADB_LEXTYPE_Loop:
-				scope = new LoopScope(root, file, line, line, ctxId, ctxId);
+				scope = new LoopScope(root, fs, line, line, ctxId, ctxId);
 				break;
 			default:
 				throw new RuntimeException("Invalid node relation field");
@@ -687,9 +702,9 @@ public class DataMeta extends DataCommon
 		long szRoot = ctxBuffer.getLong();
 		long pRoot  = ctxBuffer.getLong();
 		
-		parseChildrenContext(ctxBuffer, root, pRoot, szRoot);
+		parseChildrenContext(ctxBuffer, rootCCT, pRoot, szRoot);
 		
-		return root;
+		return rootCCT;
 	}
 	
 	private final int FMT_METADB_MINSZ_Context = 0x18;
