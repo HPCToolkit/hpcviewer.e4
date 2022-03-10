@@ -1,5 +1,7 @@
 package edu.rice.cs.hpcdata.experiment.metric;
 
+import java.io.IOException;
+
 import org.eclipse.collections.api.map.primitive.IntObjectMap;
 
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -70,5 +72,7 @@ public interface IMetricValueCollection
 	 */
 	public void dispose();
 	
-	IntObjectMap<MetricValue> getValues();
+	public IntObjectMap<MetricValue> getValues();
+	
+	public IMetricValueCollection duplicate() throws IOException;
 }

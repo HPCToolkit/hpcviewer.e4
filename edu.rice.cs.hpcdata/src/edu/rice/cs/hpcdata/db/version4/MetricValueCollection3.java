@@ -202,4 +202,10 @@ public class MetricValueCollection3 implements IMetricValueCollection
 	public IntObjectMap<MetricValue> getValues() {
 		return values;
 	}
+	
+	
+	@Override
+	public IMetricValueCollection duplicate() throws IOException {
+		return new MetricValueCollection3(dataSummary);
+	}
 }

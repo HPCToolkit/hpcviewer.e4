@@ -1,5 +1,7 @@
 package edu.rice.cs.hpcdata.db;
 
+import java.io.IOException;
+
 import org.eclipse.collections.api.map.primitive.IntObjectMap;
 import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
 
@@ -137,6 +139,12 @@ public class MetricValueCollectionWithStorage implements IMetricValueCollection
 	@Override
 	public IntObjectMap<MetricValue> getValues() {
 		return values;
+	}
+
+
+	@Override
+	public IMetricValueCollection duplicate() throws IOException {
+		return new MetricValueCollectionWithStorage();
 	}
 
 }

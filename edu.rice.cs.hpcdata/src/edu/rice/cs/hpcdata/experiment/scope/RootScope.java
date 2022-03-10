@@ -106,7 +106,7 @@ public void setMetricValueCollection(IMetricValueCollection mvc) {
 public IMetricValueCollection getMetricValueCollection() throws IOException
 {
 	if (mvc != null) {
-		return mvc;
+		return mvc.duplicate();
 	}
 	return new MetricValueCollectionWithStorage();		
 }

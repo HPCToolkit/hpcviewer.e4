@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -45,7 +44,10 @@ public class MetricTest {
 			mvc = new MetricValueCollection3(data.getDataSummary());
 		} catch (IOException e) {
 			System.err.println("Fail to create MetricValueCollection3: " + e.getMessage());
+			fail(e.getMessage());
 		}
+		Scope s = (Scope) data.getExperiment().getRootScopeChildren().get(0);		
+		mvc.getValue(s, 0);
 	}
 
 	@Test
@@ -53,6 +55,11 @@ public class MetricTest {
 		Scope s = (Scope) data.getExperiment().getRootScopeChildren().get(0);		
 		var mv = mvc.getValue(s, 1);
 		assertNotNull(mv);
+		assertTrue(mv == MetricValue.NONE);
+		
+		mv = mvc.getValue(s, 2);
+		assertNotNull(mvc);
+		assertTrue(mv.getValue() > 0);
 	}
 
 	@Test
@@ -69,12 +76,15 @@ public class MetricTest {
 
 	@Test
 	public void testSetAnnotation() {
-		fail("Not yet implemented");
+		var ann = mvc.getAnnotation(1);
+		assertTrue(ann == 0.0f);
+		ann = mvc.getAnnotation(2);
+		assertTrue(ann > 0);
 	}
 
 	@Test
 	public void testSize() {
-		fail("Not yet implemented");
+		assertTrue(mvc.size() > 0);
 	}
 
 	@Test
@@ -84,13 +94,24 @@ public class MetricTest {
 	}
 
 	@Test
-	public void testAppendMetrics() {
-		fail("Not yet implemented");
+	public void testAppendMetrics() throws IOException {
+		int size1 = mvc.size();
+		var mvcdup = mvc.duplicate();
+		mvc.appendMetrics(mvcdup, 2);
+		int size2 = mvc.size();
+		assertTrue(size2 == size1);
+		
+		Scope s = (Scope) data.getExperiment().getRootScopeChildren().get(0);		
+		mvcdup.getValue(s, 2);
+		mvc.appendMetrics(mvcdup, 2);
+		size2 = mvc.size();
+		assertTrue(size2 == size1 * 2);
 	}
 
 	@Test
 	public void testGetValues() {
-		fail("Not yet implemented");
+		var values = mvc.getValues();
+		assertNotNull(values);
 	}
 
 }

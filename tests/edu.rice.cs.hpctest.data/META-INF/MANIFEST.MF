@@ -9,4 +9,5 @@ Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: org.junit,
  com.graphbuilder,
  edu.rice.cs.hpcdata,
- edu.rice.cs.hpcdata.merge
+ edu.rice.cs.hpcdata.merge,
+ org.eclipse.collections
