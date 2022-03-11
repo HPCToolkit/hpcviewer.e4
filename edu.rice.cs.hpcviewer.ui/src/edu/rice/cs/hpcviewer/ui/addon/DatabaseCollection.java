@@ -339,26 +339,23 @@ public class DatabaseCollection
 			return 1;
 		}
 
-		BaseTraceAttribute traceAtt = experiment.getTraceAttribute();
-		if (traceAtt != null && traceAtt.dbTimeMax > 0) {
+		MPart tracePart  = service.createPart(TracePart.ID);
+		MPart createPart = service.showPart(tracePart, PartState.CREATE);
+		
+		if (createPart != null) {
+			// need to set the element id to avoid the same issue with the profile view
+			// (see the comment at line 320-323)
+			elementID = "T." + ElementIdManager.getElementId(experiment);
+			createPart.setElementId(elementID);
 
-			MPart tracePart  = service.createPart(TracePart.ID);
-			MPart createPart = service.showPart(tracePart, PartState.CREATE);
+			list.add(createPart);
 			
-			if (createPart != null) {
-				// need to set the element id to avoid the same issue with the profile view
-				// (see the comment at line 320-323)
-				elementID = "T." + ElementIdManager.getElementId(experiment);
-				createPart.setElementId(elementID);
-
-				list.add(createPart);
-				
-				Object objTracePart = createPart.getObject();
-				if (objTracePart != null) {
-					((TracePart)objTracePart).setInput(createPart, experiment);
-				}
+			Object objTracePart = createPart.getObject();
+			if (objTracePart != null) {
+				((TracePart)objTracePart).setInput(createPart, experiment);
 			}
 		}
+		
 		((ProfilePart) view).onFocus();
 		return 1;
 	}
@@ -413,7 +410,7 @@ public class DatabaseCollection
 			return null;
 		
 		for (var exp: list) {
-			String directory = exp.getDirectory();
+			String directory = exp.getPath();
 			if (directory.equals(pathXML)) {
 				return exp;
 			}

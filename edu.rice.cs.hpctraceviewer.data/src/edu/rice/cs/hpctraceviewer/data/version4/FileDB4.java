@@ -3,6 +3,8 @@ package edu.rice.cs.hpctraceviewer.data.version4;
 import java.io.IOException;
 import java.util.List;
 
+import org.slf4j.LoggerFactory;
+
 import edu.rice.cs.hpcdata.db.IFileDB;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
@@ -67,8 +69,7 @@ public class FileDB4 implements IFileDB
 
 	@Override
 	public long[] getOffsets() {
-		System.out.println("ERROR, shouldn't be called!");
-		return null;
+		throw new RuntimeException("ERROR, shouldn't be called!");
 	}
 
 	@Override
@@ -121,10 +122,9 @@ public class FileDB4 implements IFileDB
 	public void dispose() {
 		try {
 			dataTrace.dispose();
-
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			var log = LoggerFactory.getLogger(getClass());
+			log.error(e.getMessage());
 		}
 	}
 
