@@ -171,6 +171,31 @@ public class ExperimentTest {
 			i++;
 		}
 	}
+	
+
+	@Test
+	public void testMetricValueDisplay() {
+		final int nmetrics[] = new int[] {18, 0, 0, 1};
+		int i=0;
+		for(var experiment: experiments) {
+			RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
+			if (experiment.getMetricCount()>0) {
+				var metrics = experiment.getNonEmptyMetricIDs(root);
+				assertNotNull(metrics);
+				assertTrue(metrics.size() >= nmetrics[i]);
+				for(var m: metrics) {
+					var metric = experiment.getMetric(m);
+					var str = metric.getMetricTextValue(root);
+					assertNotNull(str);
+					assertTrue(str.length() > 1);
+					if (i==3)
+						assertTrue(str.equals("1.25e+10 100.0%"));
+				}
+			}
+			i++;
+		}
+	}
+
 
 	@Test
 	public void testGetRootScope() {

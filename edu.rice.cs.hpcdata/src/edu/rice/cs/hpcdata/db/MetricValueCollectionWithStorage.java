@@ -58,8 +58,19 @@ public class MetricValueCollectionWithStorage implements IMetricValueCollection
 			} else {
 				mv = MetricValue.NONE;
 			}
+		}		
+		return mv;
+	}
+	
+	@Override
+	public MetricValue getValue(Scope scope, BaseMetric metric) {
+		MetricValue mv = values.get(metric.getIndex());
+		if (mv == null) {
+			if (metric instanceof DerivedMetric)
+				mv = ((DerivedMetric) metric).getValue(scope);
+			else
+				mv = MetricValue.NONE;
 		}
-		
 		return mv;
 	}
 

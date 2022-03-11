@@ -547,8 +547,8 @@ implements IMetricScope
 
 	public MetricValue getMetricValue(BaseMetric metric)
 	{
-		int index = metric.getIndex();
-		MetricValue value = getMetricValue(index);
+		ensureMetricStorage();
+		MetricValue value = metrics.getValue(this, metric);
 
 		// compute percentage if necessary
 		if (metric.getAnnotationType() == AnnotationType.PERCENT) {

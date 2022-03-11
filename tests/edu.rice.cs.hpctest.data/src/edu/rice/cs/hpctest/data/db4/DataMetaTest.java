@@ -17,6 +17,8 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
+import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
+import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 public class DataMetaTest 
 {
@@ -140,4 +142,18 @@ public class DataMetaTest
 			assertNotNull(child.getExperiment());
 		}
 	}
+	
+	
+	@Test
+	public void testDepth() {
+		var exp   = data.getExperiment();
+		var depth = exp.getMaxDepth();
+
+		assertTrue(depth > 10);
+		
+		var root = ((Experiment)exp).getRootScope(RootScopeType.CallingContextTree);
+		Scope s = root.getSubscope(0).getSubscope(0);
+		Scope p = s.getParentScope().getParentScope();
+		assertTrue(root == p);
+	}		
 }

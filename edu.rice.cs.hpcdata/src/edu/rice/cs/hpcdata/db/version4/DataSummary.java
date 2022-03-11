@@ -269,10 +269,14 @@ public class DataSummary extends DataCommon
 		
 		// searching for metrics for a given cct
 		//
+		int numMetrics = 0;
 		long position1 = list.listOfdIndex[index];
-		long position2 = list.listOfdIndex[index+1];
-		
-		int numMetrics = (int) (position2 - position1);
+		if (index + 1 < list.listOfdIndex.length) {
+			long position2 = list.listOfdIndex[index+1];			
+			numMetrics = (int) (position2 - position1);
+		} else {
+			numMetrics = (int) (info.piElements[profileNum].nValues - position1);
+		}
 		long numBytes  = FMT_PROFILEDB_SZ_MVal * numMetrics;
 		
 		List<MetricValueSparse> values = FastList.newList(numMetrics);

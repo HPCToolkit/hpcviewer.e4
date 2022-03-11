@@ -40,6 +40,13 @@ public class MetricValueCollection3 implements IMetricValueCollection
 		this.dataSummary = dataSummary;
 	}
 	
+
+	@Override
+	public MetricValue getValue(Scope scope, BaseMetric metric) {
+		return getValue(scope, metric.getIndex());
+	}
+
+	
 	@Override
 	public MetricValue getValue(Scope scope, int index) 
 	{

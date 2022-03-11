@@ -34,6 +34,15 @@ public interface IMetricValueCollection
 	public MetricValue getValue(Scope scope, int index);
 	
 	/****
+	 * Get a metric value for a given metric object.
+	 * 
+	 * @param scope
+	 * @param metric
+	 * @return
+	 */
+	public MetricValue getValue(Scope scope, BaseMetric metric);
+	
+	/****
 	 * set a metric value to a certain index
 	 * 
 	 * @param index

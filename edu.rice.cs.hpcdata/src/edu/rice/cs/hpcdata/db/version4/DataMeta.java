@@ -109,6 +109,15 @@ public class DataMeta extends DataCommon
 	}
 	
 	
+	/***
+	 * Get the maximum depth of the tree
+	 * 
+	 * @return
+	 */
+	public int getMaxDepth() {
+		return maxDepth;
+	}
+	
 	/****
 	 * Open a database
 	 * 
@@ -661,6 +670,7 @@ public class DataMeta extends DataCommon
 				throw new RuntimeException("Invalid node relation field");
 			}
 			parent.addSubscope(scope);
+			scope.setParentScope(parent);
 			
 			// recursively parse the children
 			parseChildrenContext(buffer, scope, pChildren, szChildren);

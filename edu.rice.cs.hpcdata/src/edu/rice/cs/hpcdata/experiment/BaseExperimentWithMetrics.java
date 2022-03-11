@@ -13,6 +13,7 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
+import edu.rice.cs.hpcdata.experiment.metric.AbstractMetricWithFormula;
 import edu.rice.cs.hpcdata.experiment.metric.AggregateMetric;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
@@ -81,7 +82,9 @@ implements IMetricManager, ListEventListener<BaseMetric>
 			if (metric.getOrder() >= 0) {
 				metricsWithOrder.put(metric.getOrder(), metric);
 			}
-			mapIndexToMetric.put(metric.getIndex(), metric);
+			var m = mapIndexToMetric.put(metric.getIndex(), metric);
+			if (m != null)
+				throw new RuntimeException("Non-unique index metric " + metric.getDisplayName() + " with index: " + metric.getIndex());
 		}
 		
 		if (getMajorVersion() >= Constants.EXPERIMENT_SPARSE_VERSION) {
@@ -174,8 +177,7 @@ implements IMetricManager, ListEventListener<BaseMetric>
 	protected boolean inclusiveNeeded() {		
 		for (BaseMetric m: metrics) {
 			boolean isNeeded = !(   (m instanceof FinalMetric) 
-					     || (m instanceof AggregateMetric) 
-					     || (m instanceof DerivedMetric) );
+					     		 || (m instanceof AbstractMetricWithFormula));
 			if (isNeeded)
 				return true;
 		}
@@ -289,7 +291,7 @@ implements IMetricManager, ListEventListener<BaseMetric>
 	 *	Returns the metric with a given index.
 	 ************************************************************************/
 	public BaseMetric getMetric(int index)
-	{		
+	{	
 		BaseMetric metric = mapIndexToMetric.get(index);
 		if (metric != null)
 			return metric;
