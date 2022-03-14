@@ -2,7 +2,6 @@ package edu.rice.cs.hpctraceviewer.data;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
@@ -14,7 +13,7 @@ import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
 import edu.rice.cs.hpcdata.experiment.extdata.IFilteredData;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
-import edu.rice.cs.hpcdata.util.CallPath;
+import edu.rice.cs.hpcdata.util.ICallPathInfo;
 import edu.rice.cs.hpctraceviewer.data.color.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
@@ -210,7 +209,7 @@ public abstract class SpaceTimeDataController
 	 * 	Returns the map between cpid and callpath
 	 * @return
 	 ******************************************************************************/
-	public Map<Integer, CallPath> getScopeMap() {
+	public ICallPathInfo getScopeMap() {
 		// TODO: we should add getScopeMap in IExperiment interface
 		// however, meta.db and trace.db doesn't need it.
 		return ((BaseExperiment)exp).getScopeMap();

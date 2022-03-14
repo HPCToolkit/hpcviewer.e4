@@ -6,7 +6,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -15,7 +14,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Shell;
 
-import edu.rice.cs.hpcdata.util.CallPath;
+import edu.rice.cs.hpcdata.util.ICallPathInfo;
 import edu.rice.cs.hpcremote.data.DecompressionThread.DecompressionItemToDo;
 import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
@@ -93,8 +92,8 @@ public class RemoteDataRetriever {
 	 * @throws IOException 
 	 */
 	public void getData( TraceDisplayAttribute attributes, 
-			Map<Integer, CallPath> map, 
-			final ConcurrentLinkedQueue<DecompressionItemToDo> workToDo) throws IOException
+					     ICallPathInfo map, 
+					     final ConcurrentLinkedQueue<DecompressionItemToDo> workToDo) throws IOException
 	{
 		//Make the call
 		//Check to make sure the server is sending back data

@@ -3,8 +3,6 @@ package edu.rice.cs.hpcdata.experiment;
 import java.io.File;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
-
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
@@ -15,7 +13,7 @@ import edu.rice.cs.hpcdata.experiment.scope.visitors.FilterScopeVisitor;
 import edu.rice.cs.hpcdata.filter.IFilterData;
 import edu.rice.cs.hpcdata.trace.BaseTraceAttribute;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
-import edu.rice.cs.hpcdata.util.CallPath;
+import edu.rice.cs.hpcdata.util.ICallPathInfo;
 import edu.rice.cs.hpcdata.util.IUserData;
 
 
@@ -157,7 +155,7 @@ public abstract class BaseExperiment implements IExperiment
 	/**
 	 * @return the scopeMap
 	 */
-	public Map<Integer, CallPath> getScopeMap() {
+	public ICallPathInfo getScopeMap() {
 		return traceAttribute.mapCpidToCallpath;
 	}
 
@@ -165,7 +163,7 @@ public abstract class BaseExperiment implements IExperiment
 	/**
 	 * @param scopeMap the scopeMap to set
 	 */
-	public void setScopeMap(Map<Integer, CallPath> scopeMap) {
+	public void setScopeMap(ICallPathInfo scopeMap) {
 		traceAttribute.mapCpidToCallpath = scopeMap;
 	}
 

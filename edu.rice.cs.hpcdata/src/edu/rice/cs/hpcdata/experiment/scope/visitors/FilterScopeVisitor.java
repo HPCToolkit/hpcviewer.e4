@@ -1,9 +1,6 @@
 package edu.rice.cs.hpcdata.experiment.scope.visitors;
 
 import java.util.List;
-import java.util.Map;
-
-import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
@@ -24,7 +21,7 @@ import edu.rice.cs.hpcdata.experiment.scope.ScopeVisitType;
 import edu.rice.cs.hpcdata.experiment.scope.StatementRangeScope;
 import edu.rice.cs.hpcdata.filter.FilterAttribute;
 import edu.rice.cs.hpcdata.filter.IFilterData;
-import edu.rice.cs.hpcdata.util.CallPath;
+import edu.rice.cs.hpcdata.util.ICallPathInfo;
 
 
 /******************************************************************
@@ -387,7 +384,7 @@ public class FilterScopeVisitor implements IScopeVisitor
 	{
 		Scope parent_scope;
 		int parent_depth;
-		Map<Integer, CallPath> map;
+		ICallPathInfo callpathInfo;
 		
 		//----------------------------------------------------
 		// visitor pattern instantiations for each Scope type
@@ -407,11 +404,7 @@ public class FilterScopeVisitor implements IScopeVisitor
 			if (vt == ScopeVisitType.PreVisit) {
 				int cpid = scope.getCpid();
 				if (cpid >= 0) {
-					CallPath cp = map.get(cpid);
-					if (cp != null) {
-						cp.setLeafScope(parent_scope);
-						cp.setMaxDepth(parent_depth);
-					}
+					callpathInfo.addCallPath(cpid, parent_scope, parent_depth);
 				}
 			}
 		}

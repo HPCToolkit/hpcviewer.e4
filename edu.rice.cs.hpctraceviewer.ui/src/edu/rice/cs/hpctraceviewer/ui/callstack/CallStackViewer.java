@@ -1,8 +1,7 @@
 package edu.rice.cs.hpctraceviewer.ui.callstack;
 
 import java.util.ArrayList;
-import java.util.Vector;
-
+import java.util.List;
 import org.eclipse.core.commands.operations.IOperationHistoryListener;
 import org.eclipse.core.commands.operations.IUndoContext;
 import org.eclipse.core.commands.operations.IUndoableOperation;
@@ -32,7 +31,6 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.rice.cs.hpcdata.util.CallPath;
 import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.string.StringUtil;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
@@ -243,15 +241,13 @@ public class CallStackViewer extends AbstractBaseTableViewer
 			
 			return;
 		}
-		final Vector<String> sampleVector;
-		if (sample>=0) {
-			final CallPath cp = ptl.getCallPath(sample, depth);
-			if (cp != null)
-				sampleVector = cp.getFunctionNames();
-			else
-				// empty array of string
-				sampleVector = new Vector<String>();
-
+		final List<String> sampleVector = new ArrayList<String>();;
+		if (sample >= 0) {
+			var ctxId = ptl.getContextId(sample);
+			if (ctxId >= 0) {
+				var cpInfo = ptl.getCallPathInfo();
+				sampleVector.addAll(cpInfo.getFunctionNames(ctxId));
+			}
 			if (sampleVector != null && sampleVector.size()<=depth)
 			{
 				//-----------------------------------
@@ -262,8 +258,6 @@ public class CallStackViewer extends AbstractBaseTableViewer
 					sampleVector.add(EMPTY_FUNCTION);
 			}
 		} else {
-			// empty array of string
-			sampleVector = new Vector<String>();
 			
 			for(int l = 0; l<=depth; l++)
 				sampleVector.add(EMPTY_FUNCTION);
@@ -274,7 +268,7 @@ public class CallStackViewer extends AbstractBaseTableViewer
 			
 			@Override
 			public void run() {
-				setInput(new ArrayList<String>(sampleVector));
+				setInput(sampleVector);
 				selectDepth(depth);
 				viewerColumn.getColumn().pack();
 			}

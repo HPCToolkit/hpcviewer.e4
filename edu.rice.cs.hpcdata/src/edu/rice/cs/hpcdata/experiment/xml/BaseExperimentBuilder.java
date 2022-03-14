@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Stack;
 
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
@@ -31,6 +30,7 @@ import edu.rice.cs.hpcdata.trace.TraceAttribute;
 import edu.rice.cs.hpcdata.util.CallPath;
 import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.Dialogs;
+import edu.rice.cs.hpcdata.util.ICallPathInfo;
 import edu.rice.cs.hpcdata.util.IUserData;
 
 
@@ -94,7 +94,7 @@ public class BaseExperimentBuilder extends Builder
 	
 	private final HashMap<Integer /*id*/, Integer /*status*/>	  statusProcedureMap;
 
-	private final Map<Integer, CallPath> mapCpidToCallpath;
+	private final ICallPathInfo mapCpidToCallpath;
 
  
 	//--------------------------------------------------------------------------------------
@@ -137,7 +137,7 @@ public class BaseExperimentBuilder extends Builder
 		hashSourceFileTable = new HashMap<Integer, SourceFile>();
 		statusProcedureMap  = new HashMap<Integer, Integer>();
 		
-		mapCpidToCallpath   = new HashMap<>();
+		mapCpidToCallpath   = new CallPath();
 		
 		// parse action data structures
 		this.scopeStack   = new Stack<Scope>();
@@ -936,7 +936,7 @@ public class BaseExperimentBuilder extends Builder
 		// just record whenever the cpid is valid only
 		if (cpid >= 0) {
 			scope.setCpid(cpid);
-			mapCpidToCallpath.put(cpid, new CallPath(scope, current_depth));
+			mapCpidToCallpath.addCallPath(cpid, scope, current_depth);
 		}
 		
 		if (isCallSite) {

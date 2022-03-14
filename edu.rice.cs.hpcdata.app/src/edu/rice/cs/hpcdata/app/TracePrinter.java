@@ -4,15 +4,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Locale;
-import java.util.Map;
-
 import edu.rice.cs.hpcdata.db.version2.FileDB2;
 import edu.rice.cs.hpcdata.experiment.Experiment;
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
 import edu.rice.cs.hpcdata.trace.TraceReader;
 import edu.rice.cs.hpcdata.trace.TraceRecord;
-import edu.rice.cs.hpcdata.util.CallPath;
 import edu.rice.cs.hpcdata.util.MergeDataFiles;
 
 /*****
@@ -89,7 +85,7 @@ public class TracePrinter
 		
 		final int MAX_NAME = 16;
 		
-		Map<Integer, CallPath> map = experiment.getScopeMap(); 
+		var map = experiment.getScopeMap(); 
 		
 		TraceReader reader = new TraceReader(fileDB);
 		long numRecords = reader.getNumberOfRecords(rank);
@@ -102,9 +98,8 @@ public class TracePrinter
 			String name = String.valueOf(prevRecord.cpId);
 			
 			if (map != null) {
-				CallPath cp = map.get(prevRecord.cpId);
-				if (cp != null) {
-					Scope scope = cp.getScopeAt(cp.getMaxDepth());
+				var scope = map.getCallPathScope(prevRecord.cpId);
+				if (scope != null) {
 					name = scope.getName();
 					if (name.length() > MAX_NAME)
 						name = name.substring(0, MAX_NAME) + "...";
