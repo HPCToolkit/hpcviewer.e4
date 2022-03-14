@@ -30,7 +30,7 @@ import edu.rice.cs.hpcdata.trace.TraceAttribute;
 import edu.rice.cs.hpcdata.util.CallPath;
 import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.Dialogs;
-import edu.rice.cs.hpcdata.util.ICallPathInfo;
+import edu.rice.cs.hpcdata.util.ICallPath;
 import edu.rice.cs.hpcdata.util.IUserData;
 
 
@@ -94,7 +94,7 @@ public class BaseExperimentBuilder extends Builder
 	
 	private final HashMap<Integer /*id*/, Integer /*status*/>	  statusProcedureMap;
 
-	private final ICallPathInfo mapCpidToCallpath;
+	private final ICallPath mapCpidToCallpath;
 
  
 	//--------------------------------------------------------------------------------------

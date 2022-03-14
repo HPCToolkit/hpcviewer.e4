@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.eclipse.swt.graphics.Color;
 
-import edu.rice.cs.hpcdata.util.ICallPathInfo.IScopeDepth;
+import edu.rice.cs.hpcdata.util.ICallPath.ICallPathInfo;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
 
@@ -48,7 +48,7 @@ public abstract class DataPreparation
 		
 		int succSampleMidpoint = (int) Math.max(0, (data.ptl.getTime(0)-data.begTime)/data.pixelLength);
 
-		IScopeDepth pathInfo = data.ptl.getCallPathInfo(0);
+		ICallPathInfo pathInfo = data.ptl.getCallPathInfo(0);
 
 		// issue #15: Trace view doesn't render GPU trace line
 		// This happens when the first sample to render has a bad cpid which causes this method to exit prematurely.

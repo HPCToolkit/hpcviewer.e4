@@ -9,7 +9,7 @@ import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
-public class CallPath implements ICallPathInfo
+public class CallPath implements ICallPath
 {
 	private final IntObjectHashMap<Info> mapToInfo;
 	
@@ -36,11 +36,10 @@ public class CallPath implements ICallPathInfo
 
 
 	@Override
-	public IScopeDepth getScopeDepth(int id) {
+	public ICallPathInfo getCallPathInfo(int id) {
 		return mapToInfo.get(id);
 	}
 
-	/**returns the scope at the given depth that's along the path between the root scope and the leafScope*/
 	@Override
 	public Scope getScopeAt(int id, int depth)
 	{
@@ -94,6 +93,9 @@ public class CallPath implements ICallPathInfo
 	public int getCallPathDepth(int id)
 	{
 		var info = mapToInfo.get(id);
+		if (info == null)
+			return -1;
+		
 		return info.maxDepth;
 	}
 
@@ -127,7 +129,14 @@ public class CallPath implements ICallPathInfo
 	}
 	
 	
-	private static class Info implements IScopeDepth
+	/*****
+	 * 
+	 * The implementation class of {@code ICallPathInfo}.
+	 * There is nothing interesting here as it's supposed to be used
+	 * just as an internal class.
+	 *
+	 */
+	private static class Info implements ICallPathInfo
 	{
 		/**the Scope at the current cpid*/
 		Scope leafScope;

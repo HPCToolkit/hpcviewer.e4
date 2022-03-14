@@ -13,7 +13,7 @@ import edu.rice.cs.hpcdata.experiment.scope.visitors.FilterScopeVisitor;
 import edu.rice.cs.hpcdata.filter.IFilterData;
 import edu.rice.cs.hpcdata.trace.BaseTraceAttribute;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
-import edu.rice.cs.hpcdata.util.ICallPathInfo;
+import edu.rice.cs.hpcdata.util.ICallPath;
 import edu.rice.cs.hpcdata.util.IUserData;
 
 
@@ -155,7 +155,7 @@ public abstract class BaseExperiment implements IExperiment
 	/**
 	 * @return the scopeMap
 	 */
-	public ICallPathInfo getScopeMap() {
+	public ICallPath getScopeMap() {
 		return traceAttribute.mapCpidToCallpath;
 	}
 
@@ -163,7 +163,7 @@ public abstract class BaseExperiment implements IExperiment
 	/**
 	 * @param scopeMap the scopeMap to set
 	 */
-	public void setScopeMap(ICallPathInfo scopeMap) {
+	public void setScopeMap(ICallPath scopeMap) {
 		traceAttribute.mapCpidToCallpath = scopeMap;
 	}
 

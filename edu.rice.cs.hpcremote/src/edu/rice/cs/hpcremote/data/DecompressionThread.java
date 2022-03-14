@@ -9,7 +9,7 @@ import java.util.zip.InflaterInputStream;
 
 import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
 import edu.rice.cs.hpcdata.db.version4.DataRecord;
-import edu.rice.cs.hpcdata.util.ICallPathInfo;
+import edu.rice.cs.hpcdata.util.ICallPath;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
 
@@ -33,7 +33,7 @@ public class DecompressionThread extends Thread {
 
 	// Variables for decompression
 
-	final ICallPathInfo scopeMap;
+	final ICallPath scopeMap;
 
 	final TraceDisplayAttribute attributes;
 	
@@ -60,7 +60,7 @@ public class DecompressionThread extends Thread {
 	 * @param listener
 	 */
 	public DecompressionThread(
-			ICallPathInfo map,
+			ICallPath map,
 			TraceDisplayAttribute attributes,
 			ConcurrentLinkedQueue<DecompressionItemToDo> workToDo, 
 			ConcurrentLinkedQueue<Integer> timelinesAvailableForRendering,

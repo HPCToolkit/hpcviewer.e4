@@ -56,7 +56,7 @@ public class TracePrinter
 			String filename = getTraceFile(args[0]);
 			fileDB.open(filename, trAttribute.dbHeaderSize, TraceReader.RECORD_SIZE);
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.err.println(e.getMessage());
 			return;
 		}
 		

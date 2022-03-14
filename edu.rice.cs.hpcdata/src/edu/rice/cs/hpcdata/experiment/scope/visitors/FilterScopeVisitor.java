@@ -21,7 +21,7 @@ import edu.rice.cs.hpcdata.experiment.scope.ScopeVisitType;
 import edu.rice.cs.hpcdata.experiment.scope.StatementRangeScope;
 import edu.rice.cs.hpcdata.filter.FilterAttribute;
 import edu.rice.cs.hpcdata.filter.IFilterData;
-import edu.rice.cs.hpcdata.util.ICallPathInfo;
+import edu.rice.cs.hpcdata.util.ICallPath;
 
 
 /******************************************************************
@@ -384,7 +384,7 @@ public class FilterScopeVisitor implements IScopeVisitor
 	{
 		Scope parent_scope;
 		int parent_depth;
-		ICallPathInfo callpathInfo;
+		ICallPath callpathInfo;
 		
 		//----------------------------------------------------
 		// visitor pattern instantiations for each Scope type

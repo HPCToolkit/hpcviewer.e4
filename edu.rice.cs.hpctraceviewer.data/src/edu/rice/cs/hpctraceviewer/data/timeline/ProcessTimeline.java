@@ -6,8 +6,8 @@ import org.eclipse.core.runtime.Assert;
 import edu.rice.cs.hpcdata.db.version4.DataRecord;
 import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.util.ICallPathInfo;
-import edu.rice.cs.hpcdata.util.ICallPathInfo.IScopeDepth;
+import edu.rice.cs.hpcdata.util.ICallPath;
+import edu.rice.cs.hpcdata.util.ICallPath.ICallPathInfo;
 import edu.rice.cs.hpctraceviewer.data.ITraceDataCollector;
 import edu.rice.cs.hpctraceviewer.data.TraceDataByRank;
 import edu.rice.cs.hpctraceviewer.data.version2.AbstractBaseData;
@@ -16,7 +16,7 @@ import edu.rice.cs.hpctraceviewer.data.version2.AbstractBaseData;
 public class ProcessTimeline {
 
 	/** The mapping between the cpid's and the actual scopes. */
-	private ICallPathInfo scopeMap;
+	private ICallPath scopeMap;
 
 	/** This ProcessTimeline's line number. */
 	private int lineNum, processNumber;
@@ -41,7 +41,7 @@ public class ProcessTimeline {
 	 * @param _numPixelH The number of Horizontal pixels
 	 * @param _timeRange The difference between the start time and the end time
 	 */
-	public ProcessTimeline(int _lineNum, ICallPathInfo _scopeMap, IBaseData dataTrace, 
+	public ProcessTimeline(int _lineNum, ICallPath _scopeMap, IBaseData dataTrace, 
 			int processNumber, int _numPixelH, long _timeRange, long _startingTime)
 	{
 
@@ -72,7 +72,7 @@ public class ProcessTimeline {
 	 * @param _startingTime
 	 */
 	public ProcessTimeline(TraceDataByRank _data,
-			ICallPathInfo _scopeMap, int _processNumber,
+			ICallPath _scopeMap, int _processNumber,
 			int _numPixelH, long _timeRange, long _startingTime) {
 		lineNum = _processNumber;
 		scopeMap = _scopeMap;
@@ -127,13 +127,13 @@ public class ProcessTimeline {
 	}
 	
 	
-	public IScopeDepth getCallPathInfo(int sample) {
+	public ICallPathInfo getCallPathInfo(int sample) {
 		int cpid = getContextId(sample);
-		return scopeMap.getScopeDepth(cpid);
+		return scopeMap.getCallPathInfo(cpid);
 	}
 	
 	
-	public ICallPathInfo getCallPathInfo() {
+	public ICallPath getCallPathInfo() {
 		return scopeMap;
 	}
 	
