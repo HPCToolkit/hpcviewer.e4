@@ -11,6 +11,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edu.rice.cs.hpcdata.db.DatabaseManager;
+import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
 import edu.rice.cs.hpcdata.db.version2.FileDB2;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.Experiment.ExperimentOpenFlag;
@@ -24,6 +25,7 @@ public class CallPathTest {
 	
 	private static Experiment experiment;
 	private static CallPath   callpath;
+	private static FileDB2    fileDB;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -36,7 +38,7 @@ public class CallPathTest {
 
 		final TraceAttribute trAttribute = (TraceAttribute) experiment.getTraceAttribute();		
 
-		final FileDB2 fileDB = new FileDB2();
+		fileDB = new FileDB2();
 		try {
 			String filename = resource.toFile().getAbsolutePath() + File.separator + "experiment.mt";
 			fileDB.open(filename, trAttribute.dbHeaderSize, TraceReader.RECORD_SIZE);
@@ -47,6 +49,41 @@ public class CallPathTest {
 		callpath = new CallPath();
 	}
 
+	
+	@Test
+	public void tetFileDB() throws IOException {
+		int numRanks = fileDB.getNumberOfRanks();
+		assertTrue(numRanks == 6);
+		
+		var offsets = fileDB.getOffsets();
+		assertNotNull(offsets);
+		assertTrue(offsets.length == numRanks);
+
+		int level = fileDB.getParallelismLevel();
+		assertTrue(level == 1);
+
+		final long []controlOffsets = new long[] {104, 103768, 103812, 103856, 103900, 103944};
+		
+		for(int i=0; i<numRanks; i++) {
+			assertTrue(offsets[i] == controlOffsets[i]);
+			
+			long maxLoc = fileDB.getMaxLoc(i);
+			long minLoc = fileDB.getMinLoc(i);
+			
+			assertTrue(maxLoc >= minLoc);
+			
+			long time = fileDB.getLong(minLoc);
+			int  cpid = fileDB.getInt(minLoc + 8);
+			assertTrue(time >= 1598383463041077000L && cpid > 60);
+		}
+		var type = fileDB.getIdTupleTypes();
+		assertNotNull(type);
+		
+		var idt = fileDB.getIdTuple(IdTupleOption.BRIEF);
+		assertNotNull(idt);
+		assertTrue(idt.size() == numRanks);
+	}
+	
 
 	@Test
 	public void testAddCallPath() {
@@ -70,6 +107,7 @@ public class CallPathTest {
 		assertNull(cp);
 	}
 
+	
 	private void addCallPath(Scope scope, int depth) {
 		if (scope == null) {
 			return;
