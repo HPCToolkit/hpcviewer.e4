@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -49,6 +50,10 @@ public class CallPathTest {
 		callpath = new CallPath();
 	}
 
+	@AfterClass
+	public static void afterClass() {
+		fileDB.dispose();
+	}
 	
 	@Test
 	public void tetFileDB() throws IOException {
@@ -82,6 +87,18 @@ public class CallPathTest {
 		var idt = fileDB.getIdTuple(IdTupleOption.BRIEF);
 		assertNotNull(idt);
 		assertTrue(idt.size() == numRanks);
+		
+		var labels = fileDB.getRankLabels();
+		assertNotNull(labels);
+		assertTrue(labels.length == numRanks);
+		String []l = new String[] {"0", "1", "2", "3", "4", "500"};
+		for(int i=0; i<labels.length; i++) {
+			assertTrue(l[i].equals(labels[i]));
+		}
+		
+		assertFalse(fileDB.hasGPU());
+		assertFalse(fileDB.isGPU(0));
+		fileDB.dispose();
 	}
 	
 
