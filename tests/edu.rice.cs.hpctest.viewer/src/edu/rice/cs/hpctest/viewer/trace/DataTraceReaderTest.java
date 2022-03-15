@@ -65,7 +65,7 @@ class DataTraceReaderTest {
 	@Test
 	public void testMaxLoc() {
 		var ml = data.getMaxLoc(0);
-		assertTrue(ml == 10160);
+		assertTrue(ml == 10136);
 	}
 	
 	@Test

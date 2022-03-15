@@ -111,7 +111,10 @@ public interface IExperiment {
 	 */
 	public int filter(IFilterData filter);
 
+
+	public void setTraceAttribute(BaseTraceAttribute attribute);
 	
+
 	/***
 	 * If exist, retrieve the trace attribute.
 	 * 
@@ -171,5 +174,5 @@ public interface IExperiment {
 
 	public void setScopeMap(ICallPath callpath);
 	
-	public void setTraceAttribute(TraceAttribute attribute);
+
 }

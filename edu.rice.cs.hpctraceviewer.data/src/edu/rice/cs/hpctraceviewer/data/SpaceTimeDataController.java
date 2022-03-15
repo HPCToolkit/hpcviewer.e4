@@ -20,7 +20,7 @@ import edu.rice.cs.hpctraceviewer.data.color.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
-import edu.rice.cs.hpctraceviewer.data.version2.BaseData;
+
 
 
 /*******************************************************************************************

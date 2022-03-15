@@ -85,6 +85,10 @@ public class DataTrace extends DataCommon
 	}
 
 	
+	public int getRecordSize() {
+		return traceHeader.szTrace;
+	}
+	
 	public long getMinTime() {
 		return traceHeader.minTimestamp;
 	}

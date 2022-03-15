@@ -314,7 +314,7 @@ public class TraceDataByRank implements ITraceDataCollector
 		long left_index = getRelativeLocation(left_boundary_offset);
 		long right_index = getRelativeLocation(right_boundary_offset);
 		
-		long left_time = data.getLong(left_boundary_offset);
+		long left_time  = data.getLong(left_boundary_offset);
 		long right_time = data.getLong(right_boundary_offset);
 		
 		// apply "Newton's method" to find target time

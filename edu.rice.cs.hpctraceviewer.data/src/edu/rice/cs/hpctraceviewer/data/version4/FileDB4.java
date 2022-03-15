@@ -59,7 +59,8 @@ public class FileDB4 implements IFileDB
 	{
 		dataTrace.open(directory);
 		
-		TraceAttribute attributes = new TraceAttribute();
+		var attributes = experiment.getTraceAttribute();
+		
 		attributes.dbTimeMin = dataTrace.getMinTime();
 		attributes.dbTimeMax = dataTrace.getMaxTime();
 		attributes.maxDepth  = experiment.getMaxDepth();
@@ -125,7 +126,7 @@ public class FileDB4 implements IFileDB
 		// another redirection: look at id tuple to get the profile number
 		// then, search the offset of this profile number, and its length
 		
-		return dataTrace.getOffset(rank) + dataTrace.getLength(rank);
+		return dataTrace.getOffset(rank) + dataTrace.getLength(rank) - dataTrace.getRecordSize();
 	}
 
 	@Override

@@ -61,8 +61,9 @@ public class DataMeta extends DataCommon
 	public static final String  DB_META_FILE       = "meta.db";
 	
 	private final static String HEADER_MAGIC_STR   = "HPCTOOLKITmeta";
-	private final static String METRIC_SCOPE_POINT = "point";
-	private static final String METRIC_SCOPE_EXECUTION    = "execution";
+	
+	private final static String METRIC_SCOPE_POINT     = "point";
+	private static final String METRIC_SCOPE_EXECUTION = "execution";
 		
 	private static final int INDEX_GENERAL = 0;
 	private static final int INDEX_NAMES   = 1;
@@ -81,6 +82,10 @@ public class DataMeta extends DataCommon
 	private static final int FMT_METADB_LEXTYPE_LOOP = 1;
 	private static final int FMT_METADB_LEXTYPE_LINE = 2;
 	private static final int FMT_METADB_LEXTYPE_INSTRUCTION = 3;
+
+	// --------------------------------------------------------------------
+	// variables
+	// --------------------------------------------------------------------
 			  
 	private String title;
 	private String description;
@@ -98,6 +103,10 @@ public class DataMeta extends DataCommon
 	private IExperiment experiment;
 	private ICallPath   callpath;
 	private int maxDepth;
+
+	// --------------------------------------------------------------------
+	// methods
+	// --------------------------------------------------------------------
 	
 	/****
 	 * Get the experiment object
@@ -270,13 +279,14 @@ public class DataMeta extends DataCommon
 		parseGeneralDescription(channel, sections[INDEX_GENERAL]);
 		
 		// grab the id-tuple type names
-		parseHierarchicalIdTuple(channel, sections[INDEX_NAMES]);
+		var idTupleTypes = parseHierarchicalIdTuple(channel, sections[INDEX_NAMES]);
+		experiment.setIdTupleType(idTupleTypes);
 
 		// prepare profile.db parser
 		dataSummary = new DataSummary(experiment.getIdTupleType());
 
 		// grab the description of the metrics
-		parseMetricDescription(channel, sections[INDEX_METRICS]);
+		metrics = parseMetricDescription(channel, sections[INDEX_METRICS]);
 		
 		// grab the string block to be used later
 		var buffer = channel.map(MapMode.READ_ONLY, sections[INDEX_STRINGS].offset, sections[INDEX_STRINGS].size);
@@ -330,7 +340,7 @@ public class DataMeta extends DataCommon
 	 * @param section
 	 * @throws IOException
 	 */
-	private void parseHierarchicalIdTuple(FileChannel channel, DataSection section) 
+	private IdTupleType parseHierarchicalIdTuple(FileChannel channel, DataSection section) 
 			throws IOException {
 		var buffer = channel.map(MapMode.READ_ONLY, section.offset, section.size);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
@@ -351,7 +361,7 @@ public class DataMeta extends DataCommon
 			String kind  = getNullTerminatedString(buffer, position);
 			idTupleTypes.add(i, kind);
 		}
-		experiment.setIdTupleType(idTupleTypes);
+		return idTupleTypes;
 	}
 	
 	
@@ -361,7 +371,7 @@ public class DataMeta extends DataCommon
 	 * @param section
 	 * @throws IOException
 	 */
-	private void parseMetricDescription(FileChannel channel, DataSection section) 
+	private List<BaseMetric> parseMetricDescription(FileChannel channel, DataSection section) 
 			throws IOException {
 		var buffer = channel.map(MapMode.READ_ONLY, section.offset, section.size);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
@@ -371,7 +381,7 @@ public class DataMeta extends DataCommon
 		var szScope  = buffer.get(0x0d);
 		var szSummary = buffer.get(0x0e);
 		
-		metrics = new ArrayList<>(nMetrics);
+		var metrics = new ArrayList<BaseMetric>(nMetrics);
 		int position = (int) (pMetrics - section.offset);
 		
 		for(int i=0; i<nMetrics; i++) {
@@ -432,6 +442,7 @@ public class DataMeta extends DataCommon
 				((HierarchicalMetric)metric).setProfileDatabase(dataSummary);
 			}
 		}
+		return metrics;
 	}
 	
 	
@@ -634,6 +645,7 @@ public class DataMeta extends DataCommon
 			case FMT_METADB_RELATION_LEXICAL_NEST:
 				break;
 			case FMT_METADB_RELATION_CALL_INLINED:
+				maxDepth++;
 				alien = true;
 				break;
 			case FMT_METADB_RELATION_CALL:
@@ -650,7 +662,6 @@ public class DataMeta extends DataCommon
 					ps = new ProcedureScope(root, lm, fs, line, line, Constants.PROCEDURE_UNKNOWN, alien, ctxId, ctxId, null, 0);
 				}
 				scope = new CallSiteScope(ls, ps, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, ctxId);
-				callpath.addCallPath(ctxId, scope, maxDepth);
 				
 				break;
 			case FMT_METADB_LEXTYPE_INSTRUCTION:
@@ -665,7 +676,9 @@ public class DataMeta extends DataCommon
 			}
 			parent.addSubscope(scope);
 			scope.setParentScope(parent);
-			
+
+			callpath.addCallPath(ctxId, scope, maxDepth);
+
 			// recursively parse the children
 			parseChildrenContext(buffer, scope, pChildren, szChildren);
 			
@@ -730,6 +743,9 @@ public class DataMeta extends DataCommon
 		return sb.toString();
 	}
 
+	// --------------------------------------------------------------------
+	// classes
+	// --------------------------------------------------------------------
 
 	/*******************
 	 * 

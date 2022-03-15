@@ -237,8 +237,7 @@ public class CallStackViewer extends AbstractBaseTableViewer
 			// Error: data has changed (resize, zoom-in/out, ...) but we are not notified yet.
 			// let the new thread finish the job
 			Logger logger = LoggerFactory.getLogger(getClass());
-			logger.error("CSV: Fail to get sample for time " + position.time, e);
-			
+			logger.error("CSV: Fail to get sample for time " + position.time, e);			
 			return;
 		}
 		final List<String> sampleVector = new ArrayList<String>();;
@@ -246,7 +245,9 @@ public class CallStackViewer extends AbstractBaseTableViewer
 			var ctxId = ptl.getContextId(sample);
 			if (ctxId >= 0) {
 				var cpInfo = ptl.getCallPathInfo();
-				sampleVector.addAll(cpInfo.getFunctionNames(ctxId));
+				var names  = cpInfo.getFunctionNames(ctxId);
+				if (names != null)
+					sampleVector.addAll(names);
 			}
 			if (sampleVector != null && sampleVector.size()<=depth)
 			{
@@ -257,8 +258,7 @@ public class CallStackViewer extends AbstractBaseTableViewer
 				for(int l = 0; l<numOverDepth; l++)
 					sampleVector.add(EMPTY_FUNCTION);
 			}
-		} else {
-			
+		} else {			
 			for(int l = 0; l<=depth; l++)
 				sampleVector.add(EMPTY_FUNCTION);
 		}
