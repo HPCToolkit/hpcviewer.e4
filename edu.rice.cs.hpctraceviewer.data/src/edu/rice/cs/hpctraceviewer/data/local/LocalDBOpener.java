@@ -128,7 +128,7 @@ public class LocalDBOpener extends AbstractDBOpener
 			database_directory = directory;
 		}
 		// checking for version 4.0
-		String file_path = database_directory + File.separatorChar + DataTrace.FILENAME;
+		String file_path = database_directory + File.separatorChar + DataTrace.FILE_TRACE_DB;
 		File tmp_file 	 = new File(file_path);
 		if (tmp_file.canRead()) {
 			return Constants.EXPERIMENT_SPARSE_VERSION;

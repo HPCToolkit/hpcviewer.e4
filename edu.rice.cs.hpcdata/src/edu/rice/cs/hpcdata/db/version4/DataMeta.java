@@ -635,6 +635,7 @@ public class DataMeta extends DataCommon
 				break;
 			case FMT_METADB_RELATION_InlinedCall:
 				alien = true;
+				break;
 			case FMT_METADB_RELATION_Call:
 				maxDepth++;
 				break;

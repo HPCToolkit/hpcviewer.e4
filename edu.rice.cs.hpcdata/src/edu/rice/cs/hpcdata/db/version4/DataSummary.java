@@ -30,7 +30,7 @@ public class DataSummary extends DataCommon
 	// --------------------------------------------------------------------
 	// constants
 	// --------------------------------------------------------------------
-	public  static final String FILENAME = "profile.db";
+	public  static final String FILE_PROFILE_DB = "profile.db";
 	
 	private static final String HEADER_MAGIC_STR  = "HPCTOOLKITprof";
 
@@ -77,7 +77,7 @@ public class DataSummary extends DataCommon
 	public void open(final String filename)
 			throws IOException
 	{
-		super.open(filename + File.separator + FILENAME);
+		super.open(filename + File.separator + FILE_PROFILE_DB);
 	}
 	
 

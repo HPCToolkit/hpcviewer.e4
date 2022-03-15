@@ -18,7 +18,7 @@ import java.util.Random;
  *******************************************************************************/
 public class DataTrace extends DataCommon 
 {
-	public final static  String FILENAME = "trace.db";
+	public final static  String FILE_TRACE_DB = "trace.db";
 	
 	private final static String HEADER = "HPCTOOLKITtrce";
 	private final static int FMT_TRACEDB_SZ_CtxSample = 0x0c;
@@ -35,7 +35,7 @@ public class DataTrace extends DataCommon
 	public void open(final String file)
 			throws IOException
 	{
-		super.open(file + File.separator + FILENAME);
+		super.open(file + File.separator + FILE_TRACE_DB);
 	}
 	
 
