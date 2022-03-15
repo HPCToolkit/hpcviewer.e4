@@ -251,6 +251,9 @@ public class FilterScopeVisitor implements IScopeVisitor
 		// 2. move the trace call-path id (if exist) to the parent
 		propagateTraceID(parent, child, filterType);
 
+		// 3. clear the child node
+		child.setParentScope(null);
+		
 		return parent;
 	}
 	
@@ -285,7 +288,7 @@ public class FilterScopeVisitor implements IScopeVisitor
 			for(Object child : children)
 			{
 				Scope child_scope = (Scope) child;
-				parent.addSubscope(scope_to_remove);
+				parent.addSubscope(child_scope);
 				child_scope.setParentScope(parent);
 			}
 		}

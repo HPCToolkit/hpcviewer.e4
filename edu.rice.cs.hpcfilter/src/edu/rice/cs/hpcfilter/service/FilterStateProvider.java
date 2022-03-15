@@ -92,9 +92,7 @@ public class FilterStateProvider
 				// put the original metrics and derived metrics back
 				// ---------------------------------------
 				experiment.setMetrics(metrics);
-
-				RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
-				ThreadDataCollectionFactory.build(root);
+				experiment.resetThreadData();
 				
 			} catch (Exception e) {
 				e.printStackTrace();

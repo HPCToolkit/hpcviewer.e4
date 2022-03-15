@@ -334,15 +334,7 @@ public class Experiment extends BaseExperimentWithMetrics
 		// removing the original root for caller tree and flat tree
 		//------------------------------------------------------------------------------------------
 		Scope root = getRootScope();
-		int index = 0;
-		while (root.getSubscopeCount() > index)
-		{
-			RootScopeType type = ((RootScope)root.getSubscope(index)).getType();
-			if (type != RootScopeType.CallingContextTree)
-				root.remove(index);
-			else
-				index++;
-		}
+		root.getChildren().removeIf(c -> ((RootScope)c).getType() != RootScopeType.CallingContextTree);
 		
 		//------------------------------------------------------------------------------------------
 		// filtering callers tree (bottom-up):

@@ -119,6 +119,17 @@ public abstract class BaseExperiment implements IExperiment
 		return threadData;
 	}
 	
+
+	/****
+	 * Reset the thread data. This is important to reset the data
+	 * once the database has been changed (like has been filtered).
+	 * 
+	 * @throws IOException
+	 */
+	public void resetThreadData() throws IOException {
+		threadData = null;
+	}
+	
 	public int getMajorVersion()
 	{
 		return versionMajor;
@@ -352,7 +363,7 @@ public abstract class BaseExperiment implements IExperiment
 	public int filter(IFilterData filter)
 	{
 		// TODO :  we assume the first child is the CCT
-		final RootScope rootCCT = (RootScope) rootScope.getSubscope(0);
+		final RootScope rootCCT = (RootScope) getRootScope(RootScopeType.CallingContextTree);
 
 		// duplicate and filter the cct
 		FilterScopeVisitor visitor = new FilterScopeVisitor(rootCCT, filter);
