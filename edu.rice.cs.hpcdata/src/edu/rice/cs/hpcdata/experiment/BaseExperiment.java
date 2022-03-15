@@ -1,23 +1,21 @@
 package edu.rice.cs.hpcdata.experiment;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
-
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
-import edu.rice.cs.hpcdata.experiment.scope.ITreeNode;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.DisposeResourcesVisitor;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.FilterScopeVisitor;
 import edu.rice.cs.hpcdata.filter.IFilterData;
+import edu.rice.cs.hpcdata.tld.ThreadDataCollectionFactory;
 import edu.rice.cs.hpcdata.trace.BaseTraceAttribute;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
-import edu.rice.cs.hpcdata.util.CallPath;
+import edu.rice.cs.hpcdata.util.ICallPath;
 import edu.rice.cs.hpcdata.util.IUserData;
 
 
@@ -76,12 +74,17 @@ public abstract class BaseExperiment implements IExperiment
 	public RootScope getDatacentricRootScope() {
 		return datacentricRootScope;
 	}
-	
+
+	public String getDirectory() {
+		var location = databaseRepresentation.getFile();
+		return location.getParentFile().getAbsolutePath();
+	}
 
 	/***
 	 * set the new id tuple type
 	 * @param idTupleType
 	 */
+	@Override
 	public void setIdTupleType(IdTupleType idTupleType) {
 		this.idTupleType = idTupleType;
 	}
@@ -91,6 +94,7 @@ public abstract class BaseExperiment implements IExperiment
 	 * get this database's id tuple type
 	 * @return {@code IdTupleType}
 	 */
+	@Override
 	public IdTupleType getIdTupleType() {
 		if (idTupleType == null) {
 			idTupleType = IdTupleType.createTypeWithOldFormat();
@@ -100,23 +104,30 @@ public abstract class BaseExperiment implements IExperiment
 	}
 	
 
-	/****
-	 * set the IThreadDataCollection object to this root
-	 * 
-	 * @param threadData
-	 */
-	public void setThreadData(IThreadDataCollection threadData) {
-		this.threadData = threadData;
-	}
-
-
 	/***
 	 * Return the IThreadDataCollection of this root if exists.
 	 * 
 	 * @return
+	 * @throws IOException 
 	 */
-	public IThreadDataCollection getThreadData() {
+	@Override
+	public IThreadDataCollection getThreadData() throws IOException {
+		if (threadData == null) {
+			var root = getRootScope(RootScopeType.CallingContextTree);
+			threadData = ThreadDataCollectionFactory.build(root);
+		}
 		return threadData;
+	}
+	
+
+	/****
+	 * Reset the thread data. This is important to reset the data
+	 * once the database has been changed (like has been filtered).
+	 * 
+	 * @throws IOException
+	 */
+	public void resetThreadData() throws IOException {
+		threadData = null;
 	}
 	
 	public int getMajorVersion()
@@ -133,14 +144,18 @@ public abstract class BaseExperiment implements IExperiment
 	/**
 	 * @return the maxDepth
 	 */
+	@Override
 	public int getMaxDepth() {
 		return traceAttribute.maxDepth;
 	}
 
 
 	/**
-	 * @param maxDepth the maxDepth to set
+	 * Set the new depth maximum in the CCT
+	 * @param maxDepth 
+	 * 		the maxDepth to set
 	 */
+	@Override
 	public void setMaxDepth(int maxDepth) {
 		traceAttribute.maxDepth = maxDepth;
 	}
@@ -149,7 +164,7 @@ public abstract class BaseExperiment implements IExperiment
 	/**
 	 * @return the scopeMap
 	 */
-	public Map<Integer, CallPath> getScopeMap() {
+	public ICallPath getScopeMap() {
 		return traceAttribute.mapCpidToCallpath;
 	}
 
@@ -157,7 +172,7 @@ public abstract class BaseExperiment implements IExperiment
 	/**
 	 * @param scopeMap the scopeMap to set
 	 */
-	public void setScopeMap(Map<Integer, CallPath> scopeMap) {
+	public void setScopeMap(ICallPath scopeMap) {
 		traceAttribute.mapCpidToCallpath = scopeMap;
 	}
 
@@ -254,8 +269,10 @@ public abstract class BaseExperiment implements IExperiment
 	/******
 	 * set the database version
 	 * 
-	 * @param v : version of the database
+	 * @param version
+	 * 			version of the database in format {@code Major.Minor}
 	 */
+	@Override
 	public void setVersion (String version) 
 	{
 		if (version == null) {
@@ -293,11 +310,13 @@ public abstract class BaseExperiment implements IExperiment
 	 *	This method is to be called only once, during <code>Experiment.open</code>.
 	 *
 	 ************************************************************************/
+	@Override
 	public void setConfiguration(ExperimentConfiguration configuration)
 	{
 		this.configuration = configuration;
 	}
 
+	@Override
 	public ExperimentConfiguration getConfiguration()
 	{
 		return this.configuration;
@@ -340,10 +359,11 @@ public abstract class BaseExperiment implements IExperiment
 	 * tree are also filtered </p>
 	 * @param filter
 	 *************************************************************************/
+	@Override
 	public int filter(IFilterData filter)
 	{
 		// TODO :  we assume the first child is the CCT
-		final RootScope rootCCT = (RootScope) rootScope.getSubscope(0);
+		final RootScope rootCCT = (RootScope) getRootScope(RootScopeType.CallingContextTree);
 
 		// duplicate and filter the cct
 		FilterScopeVisitor visitor = new FilterScopeVisitor(rootCCT, filter);
@@ -412,10 +432,6 @@ public abstract class BaseExperiment implements IExperiment
 		return traceAttribute;
 	}
 
-	@Override
-	public ITreeNode<Scope> createTreeNode(Object value) {
-		return new TreeNode<>(value);
-	}
 
 	/************************************************************************
 	 * In case the experiment has a CCT, continue to create callers tree and

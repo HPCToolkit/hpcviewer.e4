@@ -1,7 +1,6 @@
 package edu.rice.cs.hpcdata.tld.v4;
 
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -22,13 +21,15 @@ public class ThreadDataCollection4 extends AbstractThreadDataCollection
 {
 	private DataPlot    data_plot;
 	private DataSummary data_summary;
+
+	public void init(DataSummary dataSummary) {
+		this.data_summary = dataSummary;
+	}
 	
 	@Override
 	public void open(RootScope root, String directory) throws IOException {
 		data_plot = new DataPlot();
-		data_plot.open(directory + File.separatorChar + "plot.db");
-
-		data_summary = ((DataMeta)root.getExperiment()).getDataSummary();
+		data_plot.open(directory);
 	}
 
 	@Override
@@ -96,7 +97,11 @@ public class ThreadDataCollection4 extends AbstractThreadDataCollection
 
 	@Override
 	public void dispose() {
-		data_plot.dispose();
+		try {
+			data_plot.dispose();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+		}
 	}
 
 	@Override

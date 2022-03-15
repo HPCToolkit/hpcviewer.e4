@@ -1,35 +1,27 @@
 package edu.rice.cs.hpcdata.db.version4;
 
 import java.io.File;
-import java.io.IOException;
 
-import edu.rice.cs.hpcdata.db.DatabaseManager;
-import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.ExperimentFile;
+import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.util.IUserData;
 
 public class MetaDbFileParser extends ExperimentFile
 {
 
 	@Override
-	public File parse(File location, BaseExperiment experiment, boolean need_metrics, IUserData<String, String> userData)
+	public File parse(File location, IExperiment experiment, boolean need_metrics, IUserData<String, String> userData)
 			throws Exception {
-		String metaDBFilename;
-		if (location.isDirectory()) {
-			String directory = location.getAbsolutePath(); // it's a database directory
-			metaDBFilename = directory + File.separatorChar + DatabaseManager.getDatabaseFilename("xml").orElse("");
-		} else if (location.canRead()){
-			metaDBFilename = location.getAbsolutePath();
+		String directory;
+		if (location.isFile()) {
+			directory = location.getParent();
 		} else {
-			throw new IOException(location.getName() + ": not readable");
+			directory = location.getAbsolutePath();
 		}
 		
 		DataMeta data = new DataMeta();
-		data.open(metaDBFilename);
+		data.open(experiment, directory);
 		
-		DataSummary profileDB = new DataSummary(null);
-		
-		return null;
+		return new File(data.filename);
 	}
-
 }

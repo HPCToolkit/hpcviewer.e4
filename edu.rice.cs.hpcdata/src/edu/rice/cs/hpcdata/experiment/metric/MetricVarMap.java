@@ -3,12 +3,7 @@
  */
 package edu.rice.cs.hpcdata.experiment.metric;
 
-import com.graphbuilder.math.Expression;
-import com.graphbuilder.math.ExpressionTree;
-import com.graphbuilder.math.FuncMap;
 import com.graphbuilder.math.VarMap;
-import com.graphbuilder.math.func.Function;
-
 import edu.rice.cs.hpcdata.experiment.scope.IMetricScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;

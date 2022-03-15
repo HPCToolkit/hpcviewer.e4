@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Optional;
 
+import edu.rice.cs.hpcdata.db.version4.DataMeta;
 import edu.rice.cs.hpcdata.db.version4.MetaDbFileParser;
 import edu.rice.cs.hpcdata.experiment.ExperimentFile;
 import edu.rice.cs.hpcdata.experiment.xml.ExperimentFileXML;
@@ -16,10 +17,9 @@ import edu.rice.cs.hpcdata.experiment.xml.ExperimentFileXML;
  */
 public class DatabaseManager 
 {
-	public static final String  DB_META_FILE        = "meta.db";
 	public static final String  DB_EXPERIMENT_FILE  = "experiment.xml";
 	
-	private static final String []DATABASE_FILENAME = { DB_EXPERIMENT_FILE, DB_META_FILE };
+	private static final String []DATABASE_FILENAME = { DB_EXPERIMENT_FILE, DataMeta.DB_META_FILE };
 	
 	private DatabaseManager() {
 		// hide the constructor

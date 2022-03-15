@@ -178,13 +178,6 @@ public class DataSummary extends DataCommon
 	 * @return {@code List<IdTuple>}
 	 */
 	public List<IdTuple> getIdTuple(IdTupleOption option) {
-		if (listIdTuple == null) {
-			listIdTuple = FastList.newList();
-			for(ProfileInfoElement pi: info.piElements) {
-				if (pi.pIdTuple != 0)
-					listIdTuple.add(pi.idt);
-			}
-		}
 		return listIdTuple;
 	}
 	
@@ -203,6 +196,8 @@ public class DataSummary extends DataCommon
 			throws IOException
 	{
 		List<MetricValueSparse> listValues = getMetrics(profileNum, cctId);		
+		if (listValues == null)
+			return 0.0d;
 		
 		// TODO ugly temporary code
 		// We need to grab a value directly from the memory instead of searching O(n)
@@ -267,10 +262,14 @@ public class DataSummary extends DataCommon
 		
 		// searching for metrics for a given cct
 		//
+		int numMetrics = 0;
 		long position1 = list.listOfdIndex[index];
-		long position2 = list.listOfdIndex[index+1];
-		
-		int numMetrics = (int) (position2 - position1);
+		if (index + 1 < list.listOfdIndex.length) {
+			long position2 = list.listOfdIndex[index+1];			
+			numMetrics = (int) (position2 - position1);
+		} else {
+			numMetrics = (int) (info.piElements[profileNum].nValues - position1);
+		}
 		long numBytes  = FMT_PROFILEDB_SZ_MVal * numMetrics;
 		
 		List<MetricValueSparse> values = FastList.newList(numMetrics);
@@ -367,10 +366,14 @@ public class DataSummary extends DataCommon
 		readProfInfo(input, sections[0]);
 		
 		// read the hierarchical id tuple 
+		listIdTuple = FastList.newList();
 		for(int i=0; i<info.nProfile; i++) {
 			info.piElements[i].readIdTuple(input, sections[1]);
 			numLevels = Math.max(numLevels, info.piElements[i].numLevels);
+			if (info.piElements[i].pIdTuple != 0)
+				listIdTuple.add(info.piElements[i].idt);
 		}
+
 		// eager initialization for the cct of the summary profile
 		// this summary will be loaded anyway. There is no harm to do it now. 
 		// ... or I think

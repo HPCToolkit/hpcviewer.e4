@@ -18,14 +18,9 @@ package edu.rice.cs.hpcdata.experiment.scope;
 import java.io.IOException;
 
 import edu.rice.cs.hpcdata.db.MetricValueCollectionWithStorage;
-import edu.rice.cs.hpcdata.db.version4.DataMeta;
-import edu.rice.cs.hpcdata.db.version4.DataSummary;
-import edu.rice.cs.hpcdata.db.version4.MetricValueCollection3;
-import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricValueCollection;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.IScopeVisitor;
-import edu.rice.cs.hpcdata.util.Constants;
 
 
 
@@ -51,6 +46,8 @@ protected String rootScopeName;
 protected RootScopeType rootScopeType;
 private IExperiment experiment;
 private String name;
+private IMetricValueCollection mvc;
+
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -74,7 +71,6 @@ public RootScope(IExperiment experiment, String name, RootScopeType rst, int cct
 	this.experiment 	= experiment;
 	this.rootScopeType 	= rst;
 	root = this;
-	node = experiment.createTreeNode(this);
 }
 
 
@@ -88,6 +84,19 @@ public Scope duplicate() {
 
 
 
+/****
+ * Set the default metric value collection object. 
+ * This object is used to generate IMetricValueCollection instance inside a scope.
+ * 
+ * For sparse and dense databases have different implementation of IMetricValueCollection.
+ * 
+ * @param mvc
+ */
+public void setMetricValueCollection(IMetricValueCollection mvc) {
+	this.mvc = mvc;
+}
+
+
 /******
  * Retrieve (and create) the metric collection based on the version of the database.
  *  
@@ -96,10 +105,8 @@ public Scope duplicate() {
  */
 public IMetricValueCollection getMetricValueCollection() throws IOException
 {
-	if (experiment.getMajorVersion() == Constants.EXPERIMENT_SPARSE_VERSION) 
-	{
-		DataMeta dm = (DataMeta) experiment;
-		return dm.getMetricValueCollection(rootScopeType);
+	if (mvc != null) {
+		return mvc.duplicate();
 	}
 	return new MetricValueCollectionWithStorage();		
 }
@@ -109,7 +116,6 @@ public IMetricValueCollection getMetricValueCollection() throws IOException
 //////////////////////////////////////////////////////////////////////////
 //	SCOPE DISPLAY														//
 //////////////////////////////////////////////////////////////////////////
-
 
 
 

@@ -11,4 +11,3 @@ Require-Bundle: org.eclipse.e4.ui.model.workbench,
  org.eclipse.jface,
  javax.annotation
 Automatic-Module-Name: edu.rice.cs.hpctoolcontrol
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8

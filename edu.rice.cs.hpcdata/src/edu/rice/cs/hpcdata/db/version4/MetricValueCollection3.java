@@ -40,6 +40,13 @@ public class MetricValueCollection3 implements IMetricValueCollection
 		this.dataSummary = dataSummary;
 	}
 	
+
+	@Override
+	public MetricValue getValue(Scope scope, BaseMetric metric) {
+		return getValue(scope, metric.getIndex());
+	}
+
+	
 	@Override
 	public MetricValue getValue(Scope scope, int index) 
 	{
@@ -201,5 +208,11 @@ public class MetricValueCollection3 implements IMetricValueCollection
 	@Override
 	public IntObjectMap<MetricValue> getValues() {
 		return values;
+	}
+	
+	
+	@Override
+	public IMetricValueCollection duplicate() throws IOException {
+		return new MetricValueCollection3(dataSummary);
 	}
 }

@@ -11,21 +11,20 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.collections.api.map.primitive.LongObjectMap;
-import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
 import org.eclipse.collections.impl.map.mutable.primitive.LongObjectHashMap;
 
-import edu.rice.cs.hpcdata.db.DatabaseManager;
 import edu.rice.cs.hpcdata.db.IdTupleType;
-import edu.rice.cs.hpcdata.db.MetricValueCollectionWithStorage;
+import edu.rice.cs.hpcdata.experiment.BaseExperimentWithMetrics;
+import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.ExperimentConfiguration;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
-import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
+import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
-import edu.rice.cs.hpcdata.experiment.metric.IMetricValueCollection;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScopeType;
-import edu.rice.cs.hpcdata.experiment.scope.ITreeNode;
 import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoadModuleScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoopScope;
@@ -35,7 +34,9 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.source.SimpleSourceFile;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
+import edu.rice.cs.hpcdata.util.CallPath;
 import edu.rice.cs.hpcdata.util.Constants;
+import edu.rice.cs.hpcdata.util.ICallPath;
 
 
 /*********************************************
@@ -55,11 +56,13 @@ import edu.rice.cs.hpcdata.util.Constants;
  * </pre>
  *
  *********************************************/
-public class DataMeta extends DataCommon implements IExperiment
+public class DataMeta extends DataCommon 
 {
 	// --------------------------------------------------------------------
 	// constants
 	// --------------------------------------------------------------------
+	public static final String  DB_META_FILE       = "meta.db";
+	
 	private final static String HEADER_MAGIC_STR   = "HPCTOOLKITmeta";
 	private final static String METRIC_SCOPE_POINT = "point";
 	private static final String METRIC_SCOPE_EXECUTION    = "execution";
@@ -88,26 +91,79 @@ public class DataMeta extends DataCommon implements IExperiment
 	private LongObjectMap<LoadModuleScope>    mapLoadModules;
 	private LongObjectHashMap<SourceFile>     mapFiles;
 	private LongObjectHashMap<ProcedureScope> mapProcedures;
-	private RootScope root;
+	private RootScope root, rootCCT;
 	
 	private StringArea stringArea;
 	private List<BaseMetric> metrics;
-	private IntObjectHashMap<MetaDBContext> mapCtxToOffset;
 	private ByteBuffer ctxBuffer;
 
-	private IdTupleType idTupleTypes;
 	private DataSummary dataSummary;
-	private IThreadDataCollection threadData;
+	private IExperiment experiment;
+	private ICallPath   callpath;
+	private int maxDepth;
+	
+	/****
+	 * Get the experiment object
+	 * 
+	 * @return
+	 */
+	public IExperiment getExperiment() {
+		return experiment;
+	}
+	
+	
+	/***
+	 * Get the maximum depth of the tree
+	 * 
+	 * @return
+	 */
+	public int getMaxDepth() {
+		return maxDepth;
+	}
+	
+	/****
+	 * Open a database
+	 * 
+	 * @param experiment
+	 * @param directory
+	 * @throws IOException
+	 */
+	public void open(IExperiment experiment, String directory) throws IOException {
+		this.experiment = experiment;
 
+		root = new RootScope(experiment, directory, RootScopeType.Invisible, -1, -1);
+		rootCCT = new RootScope(experiment, RootScope.DEFAULT_SCOPE_NAME, RootScopeType.CallingContextTree);
+		root.addSubscope(rootCCT);
+		rootCCT.setParentScope(root);
+		
+		callpath = new CallPath();
+		this.experiment.setScopeMap(callpath);
+		this.experiment.setRootScope(root);
+		
+		maxDepth = 0;
+		
+		super.open(directory + File.separator + DB_META_FILE);
+
+		dataSummary.open(directory);
+
+		// setup the experiment configuration
+		this.experiment.setVersion(versionMajor + "." + versionMinor);
+		this.experiment.setMaxDepth(maxDepth);
+		
+		// setup the metrics
+		final BaseExperimentWithMetrics exp = (BaseExperimentWithMetrics) experiment;
+		exp.setMetrics(metrics);
+		
+		rootCCT.setMetricValueCollection(new MetricValueCollection3(dataSummary));
+	}
+	
 	@Override
 	public void open(final String directory) 
 			throws IOException
 	{
-		super.open(directory + File.separator + DatabaseManager.DB_META_FILE);
-	
-		dataSummary = new DataSummary(idTupleTypes);
-		dataSummary.open(directory);
+		throw new RuntimeException("Unsupported. Use open(IExperiment experiment, String directory)");
 	}
+
 	
 	@Override
 	protected boolean isFileHeaderCorrect(String header) {
@@ -125,22 +181,6 @@ public class DataMeta extends DataCommon implements IExperiment
 		return 8;
 	}
 
-
-	@Override
-	public int getMajorVersion() {
-		return versionMajor;
-	}
-
-	/****
-	 * Retrieve the main title of the database.
-	 * Usually it's the name of the executable.
-	 * 
-	 * @return String
-	 */
-	public String getName() {
-		return title;
-	}
-	
 	
 	/***
 	 * Retrieve the database description
@@ -149,26 +189,7 @@ public class DataMeta extends DataCommon implements IExperiment
 	public String getDescription() {
 		return description;
 	}
-	
-	
-	/****
-	 * Get the list of the name of metric kinds
-	 * @return 
-	 * 		array of name of metrics
-	 */
-	public IdTupleType getKindNames() {
-		return idTupleTypes;
-	}
-	
-	
-	/****
-	 * Get the list of metrics
-	 * @return a list of metrics
-	 */
-	public List<BaseMetric> getMetrics() {
-		return metrics;
-	}
-	
+		
 	
 	/***
 	 * Get the load module for a specified id
@@ -226,45 +247,10 @@ public class DataMeta extends DataCommon implements IExperiment
 	public Iterator<ProcedureScope> getProcedureIterator() {
 		return mapProcedures.iterator();
 	}
-	
-	public RootScope getRoot() {
-		return root;
-	}
-	
-	public List<Scope> getChildren(Scope scope) throws IOException {
-		var ctx = mapCtxToOffset.get(scope.getCCTIndex());		
-		parseChildrenContext(ctxBuffer, root, scope, ctx.pChildren, ctx.szChildren);
-		return scope.getChildren();
-	}
-	
-	
-	public IMetricValueCollection getMetricValueCollection(RootScopeType rootScopeType) throws IOException {
-		if (rootScopeType == RootScopeType.CallingContextTree) {
-			return new MetricValueCollection3(dataSummary);
-		}
-		return new MetricValueCollectionWithStorage();
-	}
-	
+		
 
 	public DataSummary getDataSummary() {
 		return dataSummary;
-	}
-	
-	@Override
-	public void setThreadData(IThreadDataCollection data_file) {
-		this.threadData = data_file;
-	}
-	
-	
-	@Override
-	public IThreadDataCollection getThreadData() {
-		return threadData;
-	}
-	
-	
-	@Override
-	public String getPath() {
-		return filename;
 	}
 	
 	/******
@@ -296,13 +282,15 @@ public class DataMeta extends DataCommon implements IExperiment
 	private void parseHeaderMetaData(FileChannel channel, DataSection []sections) 
 			throws IOException {
 		
-		root = new RootScope(this, RootScope.DEFAULT_SCOPE_NAME, RootScopeType.CallingContextTree);
 		// grab general description of the database
 		parseGeneralDescription(channel, sections[INDEX_GENERAL]);
 		
 		// grab the id-tuple type names
 		parseHierarchicalIdTuple(channel, sections[INDEX_NAMES]);
-		
+
+		// prepare profile.db parser
+		dataSummary = new DataSummary(experiment.getIdTupleType());
+
 		// grab the description of the metrics
 		parseMetricDescription(channel, sections[INDEX_METRICS]);
 		
@@ -319,9 +307,19 @@ public class DataMeta extends DataCommon implements IExperiment
 		// parse the procedure table
 		mapProcedures = parseFunctions(channel, sections[INDEX_FUNCTIONS]);
 		
+		// create the top-down tree
 		parseRoot(channel, sections[INDEX_CONTEXT]);	
 	}
 	
+	
+	/****
+	 * Parser for the general section
+	 * 
+	 * @param channel
+	 * @param section
+	 * 			The {@code DataSection} of general section
+	 * @throws IOException
+	 */
 	private void parseGeneralDescription(FileChannel channel, DataSection section) 
 			throws IOException {
 		var buffer = channel.map(MapMode.READ_ONLY, section.offset, section.size);
@@ -335,9 +333,19 @@ public class DataMeta extends DataCommon implements IExperiment
 		position = (int) (pDescription - section.offset);
 		description = getNullTerminatedString(buffer, position);
 
+		ExperimentConfiguration configuration = new ExperimentConfiguration();
+		configuration.setName(ExperimentConfiguration.NAME_EXPERIMENT, title);
+		experiment.setConfiguration(configuration);
 	}
 	
 	
+	/***
+	 * Parser for Id tuple section
+	 * 
+	 * @param channel
+	 * @param section
+	 * @throws IOException
+	 */
 	private void parseHierarchicalIdTuple(FileChannel channel, DataSection section) 
 			throws IOException {
 		var buffer = channel.map(MapMode.READ_ONLY, section.offset, section.size);
@@ -348,7 +356,7 @@ public class DataMeta extends DataCommon implements IExperiment
 		assert(pNames > section.offset && 
 			   pNames < section.offset + section.size);
 		
-		idTupleTypes = new IdTupleType();
+		var idTupleTypes = new IdTupleType();
 		
 		int basePosition = (int) (pNames - section.offset);
 		for(byte i=0; i<kinds; i++) {
@@ -359,9 +367,16 @@ public class DataMeta extends DataCommon implements IExperiment
 			String kind  = getNullTerminatedString(buffer, position);
 			idTupleTypes.add(i, kind);
 		}
+		experiment.setIdTupleType(idTupleTypes);
 	}
 	
 	
+	/****
+	 * Parser for the metric description section
+	 * @param channel
+	 * @param section
+	 * @throws IOException
+	 */
 	private void parseMetricDescription(FileChannel channel, DataSection section) 
 			throws IOException {
 		var buffer = channel.map(MapMode.READ_ONLY, section.offset, section.size);
@@ -409,21 +424,40 @@ public class DataMeta extends DataCommon implements IExperiment
 					if (scopeName.equals(METRIC_SCOPE_POINT)) 
 						continue;
 					
-					var m = new HierarchicalMetric(statMetric, metricName);
+					var m = new HierarchicalMetric(dataSummary, statMetric, metricName);
 					m.setFormula(strFormula);
 					MetricType type = scopeName.equals(METRIC_SCOPE_EXECUTION) ? 
 														MetricType.INCLUSIVE : 
 														MetricType.EXCLUSIVE;
 					m.setMetricType(type);
 					m.setCombineType(combine);
+					m.setDisplayed(VisibilityType.SHOW);
+					m.setOrder(propMetricId);
+					
 					metrics.add(m);
-
 				}
+			}
+		}
+		
+		// for the derived metric, we need to initialize it manually.
+		for(var metric: metrics) {
+			if (metric instanceof DerivedMetric) {
+				var dm = (DerivedMetric) metric;
+				dm.resetMetric((Experiment) experiment, rootCCT);
 			}
 		}
 	}
 	
 	
+	
+	/***
+	 * Parser for the load module section
+	 * @param channel
+	 * @param section
+	 * @return {@code LongObjectMap<LoadModuleScope>}
+	 * 			Map from load module pointer to the load module object
+	 * @throws IOException
+	 */
 	private LongObjectMap<LoadModuleScope> parseLoadModules(FileChannel channel, DataSection section) 
 			throws IOException {
 		var buffer = channel.map(MapMode.READ_ONLY, section.offset, section.size);
@@ -442,13 +476,20 @@ public class DataMeta extends DataCommon implements IExperiment
 			long pModuleName = buffer.getLong(position);
 			String path      = stringArea.toString(pModuleName);
 			
-			LoadModuleScope lms = new LoadModuleScope(null, path, null, i);
+			LoadModuleScope lms = new LoadModuleScope(rootCCT, path, null, i);
 			mapLoadModules.put(pModules + delta, lms);
 		}
 		return mapLoadModules;
 	}
 	
 	
+	/***
+	 * Parser for source file section
+	 * @param channel
+	 * @param section
+	 * @return {@code LongObjectHashMap<SourceFile>}
+	 * @throws IOException
+	 */
 	private LongObjectHashMap<SourceFile> parseFiles(FileChannel channel, DataSection section) 
 			throws IOException {
 		var buffer = channel.map(MapMode.READ_ONLY, section.offset, section.size);
@@ -477,6 +518,13 @@ public class DataMeta extends DataCommon implements IExperiment
 	}
 	
 	
+	/***
+	 * Parser for procedure or function section
+	 * @param channel
+	 * @param section
+	 * @return {@code LongObjectHashMap<ProcedureScope>}
+	 * @throws IOException
+	 */
 	private LongObjectHashMap<ProcedureScope> parseFunctions(FileChannel channel, DataSection section) 
 			throws IOException {
 		var buffer = channel.map(MapMode.READ_ONLY, section.offset, section.size);
@@ -493,7 +541,7 @@ public class DataMeta extends DataCommon implements IExperiment
 			int position = (int) (basePosition + (i * szFunctions));
 			long pName   = buffer.getLong(position);
 			long pModule = buffer.getLong(position + 0x08);
-			long offset  = buffer.getLong(position + 0x10);
+			buffer.getLong(position + 0x10);
 			long pFile   = buffer.getLong(position + 0x18);
 			int  line    = buffer.getInt( position + 0x20);
 			
@@ -501,29 +549,46 @@ public class DataMeta extends DataCommon implements IExperiment
 			var lms  = mapLoadModules.get(pModule);
 			var file = mapFiles.get(pFile);
 			
-			ProcedureScope ps = new ProcedureScope(null, lms, file, line, line, name, false, i, i, null, 0);
+			ProcedureScope ps = new ProcedureScope(rootCCT, lms, file, line, line, name, false, i, i, null, 0);
 			mapProcedures.put(position, ps);
 		}
 		return mapProcedures;
 	}
 	
-	
-	
-	private void parseChildrenContext(ByteBuffer buffer, RootScope root, Scope parent, long startLocation, long size) 
-			throws IOException {
-
-		int loc = (int) startLocation;
+		
+	/****
+	 * Parse all the children of a given parent node.
+	 *  
+	 * @param buffer
+	 * 			buffer containing the node and its children
+	 * @param parent 
+	 * 			(in and out) the parent node. All children (if exist) will be attached to this node.
+	 * @param startLocation
+	 * 			The absolute offset of the children in the {@code buffer}
+	 * @param size
+	 * 			The size of children in bytes
+	 * @throws IOException
+	 */
+	private void parseChildrenContext(
+										ByteBuffer buffer, 
+										Scope parent, 
+										long startLocation, 
+										long size) 
+					throws IOException {
+		
+		RootScope root = parent.getRootScope();
+		int loc = (int) (startLocation - sections[INDEX_CONTEXT].offset);
 		long ctxSize = size;
 		
+		// look for the children as long as we still have the remainder bytes
 		while(ctxSize > 0) {
 			if(ctxSize < FMT_METADB_MINSZ_Context) {
 				break;
 			}
-			MetaDBContext ctx = new MetaDBContext();
 
-			ctx.szChildren = buffer.getLong(loc);
-			ctx.pChildren  = buffer.getLong(loc + 0x08);
-			int ctxId      = buffer.getInt (loc + 0x10);
+			long szChildren = buffer.getLong(loc);
+			long pChildren  = buffer.getLong(loc + 0x08);
+			int ctxId       = buffer.getInt (loc + 0x10);
 			
 			byte flags       = buffer.get(loc + 0x14);
 			byte relation    = buffer.get(loc + 0x15);
@@ -534,12 +599,7 @@ public class DataMeta extends DataCommon implements IExperiment
 			long pFile   = 0;
 			int  line    = 0;
 			long pModule = 0;
-			long offset  = 0;		
-			byte nwords  = 0;
-			
-			
-			mapCtxToOffset.put(ctxId , ctx);
-
+			byte nwords  = 0;			
 			/*
 				{Flags} above refers to an u8 bit field with the following sub-fields (bit 0 is least significant):
 				
@@ -569,12 +629,18 @@ public class DataMeta extends DataCommon implements IExperiment
 				if (nFlexWords < nwords + 2) 
 					return;
 				pModule = buffer.getLong(loc + 0x18 + nwords * 8);
-				offset  = buffer.getLong(loc + 0x18 + (nwords+1) * 8);
+				buffer.getLong(loc + 0x18 + (nwords+1) * 8);
 				nwords++;
 			}
-			ProcedureScope ps = mapProcedures.get(pFunction);
-			SourceFile file = mapFiles.get(pFile);
-			LoadModuleScope lm = mapLoadModules.get(pModule);
+			var ps = mapProcedures.get(pFunction);
+			var fs = mapFiles.get(pFile);
+			var lm = mapLoadModules.get(pModule);
+			
+			if (fs == null)
+				fs = SourceFile.NONE;
+			if (lm == null)
+				lm = LoadModuleScope.NONE;
+			
 			Scope scope = null;
 
 			boolean alien = false;
@@ -584,6 +650,7 @@ public class DataMeta extends DataCommon implements IExperiment
 			case FMT_METADB_RELATION_InlinedCall:
 				alien = true;
 			case FMT_METADB_RELATION_Call:
+				maxDepth++;
 				break;
 			default:
 				throw new RuntimeException("Invalid node relation field");
@@ -591,34 +658,49 @@ public class DataMeta extends DataCommon implements IExperiment
 
 			switch(lexicalType) {
 			case FMT_METADB_LEXTYPE_Function:
-				LineScope ls = new LineScope(root, file, line, ctxId, ctxId);
+				LineScope ls = new LineScope(root, fs, line, ctxId, ctxId);
 				if (ps == null) {
-					ps = new ProcedureScope(root, lm, file, line, line, Constants.PROCEDURE_UNKNOWN, alien, ctxId, ctxId, null, 0);
+					ps = new ProcedureScope(root, lm, fs, line, line, Constants.PROCEDURE_UNKNOWN, alien, ctxId, ctxId, null, 0);
 				}
-				scope = new CallSiteScope(ls, ps, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, ctxId);	
+				scope = new CallSiteScope(ls, ps, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, ctxId);
+				callpath.addCallPath(ctxId, scope, maxDepth);
+				
 				break;
 			case FMT_METADB_LEXTYPE_Instruction:
 			case FMT_METADB_LEXTYPE_Line:
-				scope = new LineScope(root, file, line, ctxId, ctxId);
+				scope = new LineScope(root, fs, line, ctxId, ctxId);
 				break;
 			case FMT_METADB_LEXTYPE_Loop:
-				scope = new LoopScope(root, file, line, line, ctxId, ctxId);
+				scope = new LoopScope(root, fs, line, line, ctxId, ctxId);
 				break;
 			default:
 				throw new RuntimeException("Invalid node relation field");
 			}
 			parent.addSubscope(scope);
+			scope.setParentScope(parent);
 			
-			if (ctxSize >= FMT_METADB_SZ_Context(nFlexWords)) {
-				ctxSize -= FMT_METADB_SZ_Context(nFlexWords);
-				loc += FMT_METADB_SZ_Context(nFlexWords);			
+			// recursively parse the children
+			parseChildrenContext(buffer, scope, pChildren, szChildren);
+			
+			// check if we still have space for other children
+			long szAdditionalCtx = FMT_METADB_SZ_Context(nFlexWords);
+			if (ctxSize >= szAdditionalCtx) {
+				ctxSize -= szAdditionalCtx;
+				loc += szAdditionalCtx;			
 			} else {
-				return;
+				break;
 			}
 		}
 	}
+
 	
-	
+	/***
+	 * Create the main root and parse its direct children
+	 * @param channel
+	 * @param section
+	 * @return
+	 * @throws IOException
+	 */
 	private RootScope parseRoot(FileChannel channel, DataSection section) 
 			throws IOException {
 		ctxBuffer = channel.map(MapMode.READ_ONLY, section.offset, section.size);
@@ -627,17 +709,15 @@ public class DataMeta extends DataCommon implements IExperiment
 		long szRoot = ctxBuffer.getLong();
 		long pRoot  = ctxBuffer.getLong();
 		
-		RootScope root = new RootScope(this, RootScope.DEFAULT_SCOPE_NAME, RootScopeType.CallingContextTree);		
-		mapCtxToOffset = new IntObjectHashMap<MetaDBContext>();
-		parseChildrenContext(ctxBuffer, root, root, pRoot-section.offset, szRoot);
+		parseChildrenContext(ctxBuffer, rootCCT, pRoot, szRoot);
 		
-		return root;
+		return rootCCT;
 	}
 	
 	private final int FMT_METADB_MINSZ_Context = 0x18;
 	
 	private long FMT_METADB_SZ_Context(int nFlexWords)  {
-		return (FMT_METADB_MINSZ_Context + 8 * (nFlexWords));
+		return (FMT_METADB_MINSZ_Context + (8 * nFlexWords));
 	}
 	
 	/*****
@@ -664,44 +744,6 @@ public class DataMeta extends DataCommon implements IExperiment
 	}
 
 
-	@Override
-	public ITreeNode<Scope> createTreeNode(Object value) {
-		return new DynamicTreeNode<>(this, 0);
-	}
-
-	@Override
-	public void setRootScope(Scope rootScope) {
-		throw new RuntimeException("Unsupported method: setRootScope");
-	}
-
-	@Override
-	public Scope getRootScope() {
-		return root;
-	}
-
-	@Override
-	public List<?> getRootScopeChildren() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public IExperiment duplicate() {
-		throw new RuntimeException("Unsupported method: duplicate");
-	}
-	
-	
-	private static class MetaDBContext
-	{
-		long szChildren;
-		long pChildren;
-
-		byte relation;
-		byte lexicalType;
-		// NOTE: The following member is ignored on write
-		byte nFlexWords;
-	}
-	
 	/*******************
 	 * 
 	 * Class to retrieve a string from the string section in meta.db

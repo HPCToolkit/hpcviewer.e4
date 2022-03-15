@@ -85,7 +85,7 @@ public File getFilename()
 	
 public String getName()
 {
-	return "";
+	return "<unknown>";
 }
 
 

@@ -6,8 +6,7 @@ import java.util.List;
 
 import org.eclipse.swt.graphics.Color;
 
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.util.CallPath;
+import edu.rice.cs.hpcdata.util.ICallPath.ICallPathInfo;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
 
@@ -49,14 +48,14 @@ public abstract class DataPreparation
 		
 		int succSampleMidpoint = (int) Math.max(0, (data.ptl.getTime(0)-data.begTime)/data.pixelLength);
 
-		CallPath cp = data.ptl.getCallPath(0, data.depth);
+		ICallPathInfo pathInfo = data.ptl.getCallPathInfo(0);
 
 		// issue #15: Trace view doesn't render GPU trace line
 		// This happens when the first sample to render has a bad cpid which causes this method to exit prematurely.
 		// We shouldn't exit. Instead, we should search for the next available callpath, unless we are at 
 		// the end of the data trace line
 		
-		if (cp==null && data.ptl.size()==0)
+		if (pathInfo==null && data.ptl.size()==0)
 			return 0;
 		
 		// issue #15: Trace view doesn't render GPU trace line
@@ -64,13 +63,13 @@ public abstract class DataPreparation
 		// If there's no data available, we exit
 		
 		int i=1;
-		for(;i<data.ptl.size() && cp == null; i++) {
-			cp = data.ptl.getCallPath(i, data.depth);
+		for(;i<data.ptl.size() && pathInfo == null; i++) {
+			pathInfo = data.ptl.getCallPathInfo(i);
 		}
-		if (cp == null)
+		if (pathInfo == null)
 			return 0;
 		
-		Scope scope = cp.getScopeAt(data.depth);
+		var scope = pathInfo.getScopeAt(data.depth);
 		if (scope == null)
 			throw new RuntimeException("Scope not found: cannot find at depth " + data.depth);
 		
@@ -79,20 +78,21 @@ public abstract class DataPreparation
 		
 		String prevFunction = null;
 		String succFunction = scope.getName(); 
-		Color succColor = data.colorTable.getColor(succFunction);
+		
+		Color succColor    = data.colorTable.getColor(succFunction);
 		int last_ptl_index = data.ptl.size() - 1;
 		int num_invalid_cp = 0;
 
 		for (int index = 0; index < data.ptl.size(); index++)
 		{
 			// in case of bad cpid, we just quit painting the view
-			if (cp==null) {
-				
-				return num_invalid_cp;		// throwing an exception is more preferable, but it will make
+			if (pathInfo == null) {				
+				// throwing an exception is more preferable, but it will make
 				// more complexity to handle inside a running thread
+				return num_invalid_cp;		
 			}
 
-			final int currDepth = cp.getMaxDepth(); 
+			final int currDepth = pathInfo.getMaxDepth(); 
 			int currSampleMidpoint = succSampleMidpoint;
 			
 			//-----------------------------------------------------------------------
@@ -107,10 +107,10 @@ public abstract class DataPreparation
 			
 			while (still_the_same && (++indexSucc <= last_ptl_index))
 			{
-				cp = data.ptl.getCallPath(indexSucc, data.depth);
-				if(cp != null)
+				pathInfo = data.ptl.getCallPathInfo(indexSucc);
+				if(pathInfo != null)
 				{
-					scope = cp.getScopeAt(data.depth);
+					scope = pathInfo.getScopeAt(data.depth);
 					if (scope == null)
 						throw new RuntimeException("Scope not found: cannot find at depth " + data.depth);
 					
@@ -125,11 +125,11 @@ public abstract class DataPreparation
 					//						   has the same depth. In depth view, we don't want to mix with
 					//							different depths
 					
-					still_the_same = (succColor.equals(currColor)) && currDepth == cp.getMaxDepth();
+					still_the_same = (succColor.equals(currColor)) && currDepth == pathInfo.getMaxDepth();
 					if (still_the_same)
 						end = indexSucc;
 				} else {
-					int cpid = data.ptl.getCpid(indexSucc);
+					int cpid = data.ptl.getContextId(indexSucc);
 					Integer num = mapInvalidData.get(cpid);
 					if (num == null) {
 						listInvalidData.add(cpid);

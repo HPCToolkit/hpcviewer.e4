@@ -101,7 +101,7 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 	{
 		bound = getClientArea();
 
-		if (stData == null )
+		if (stData == null || !stData.hasTraces())
 			return;
 		
 		super.paintControl(event);
@@ -114,7 +114,6 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 		//--------------------
 		
 		event.gc.setForeground(ColorManager.COLOR_WHITE);
-		//event.gc.setAlpha(240);
 		
 		long selectedTime = stData.getTraceDisplayAttribute().getFrame().position.time;
 		
@@ -135,7 +134,8 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
      */
     public void refresh() 
     {
-		rebuffer();
+    	if (stData.hasTraces())
+    		rebuffer();
     }
     
     
@@ -167,7 +167,8 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 	 * Zoom out the depth: increase the depth so users can see more 
 	 */
 	public void zoomOut() {
-		visibleDepths  = (int) Math.min(stData.getMaxDepth(), visibleDepths + FRACTION_ZOOM_DEPTH);
+		int maxDepth  = stData.getMaxDepth();
+		visibleDepths = (int) Math.min(maxDepth, visibleDepths + FRACTION_ZOOM_DEPTH);
 		
 		rebuffer();
 	}
@@ -189,7 +190,8 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 	 * @return true if it's feasible
 	 */
 	public boolean canZoomOut() {
-		return visibleDepths < stData.getMaxDepth();
+		int maxDepth = stData.getMaxDepth();
+		return visibleDepths < maxDepth;
 	}
 	
 	

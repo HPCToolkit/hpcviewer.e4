@@ -241,11 +241,13 @@ public class Experiment extends BaseExperimentWithMetrics
 	 * @param callerView : flag whether to compute caller view (if true) or not.
 	 */
 	private void postprocess(boolean callerView) {
-		if (this.rootScope.getSubscopeCount() <= 0) return;
+		if (this.rootScope.getSubscopeCount() <= 0) 
+			return;
 		
 		// Get first scope subtree: CCT or Flat
 		Scope firstSubTree = this.rootScope.getSubscope(0);
-		if (!(firstSubTree instanceof RootScope)) return;
+		if (!(firstSubTree instanceof RootScope)) 
+			return;
 		
 		RootScopeType firstRootType = ((RootScope)firstSubTree).getType();
 
@@ -332,15 +334,7 @@ public class Experiment extends BaseExperimentWithMetrics
 		// removing the original root for caller tree and flat tree
 		//------------------------------------------------------------------------------------------
 		Scope root = getRootScope();
-		int index = 0;
-		while (root.getSubscopeCount() > index)
-		{
-			RootScopeType type = ((RootScope)root.getSubscope(index)).getType();
-			if (type != RootScopeType.CallingContextTree)
-				root.remove(index);
-			else
-				index++;
-		}
+		root.getChildren().removeIf(c -> ((RootScope)c).getType() != RootScopeType.CallingContextTree);
 		
 		//------------------------------------------------------------------------------------------
 		// filtering callers tree (bottom-up):
@@ -377,5 +371,10 @@ public class Experiment extends BaseExperimentWithMetrics
 	@Override
 	public String getPath() {
 		return getExperimentFile().getAbsolutePath();
+	}
+
+	@Override
+	public List<BaseMetric> getMetricList() {
+		return getMetrics();
 	}
 }

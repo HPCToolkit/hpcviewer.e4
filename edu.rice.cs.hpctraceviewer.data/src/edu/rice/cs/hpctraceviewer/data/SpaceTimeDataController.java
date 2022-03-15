@@ -2,19 +2,18 @@ package edu.rice.cs.hpctraceviewer.data;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.swt.widgets.Display;
-import edu.rice.cs.hpcbase.map.ProcedureAliasMap;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
 import edu.rice.cs.hpcdata.experiment.extdata.IFilteredData;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
-import edu.rice.cs.hpcdata.util.CallPath;
+import edu.rice.cs.hpcdata.util.ICallPath;
 import edu.rice.cs.hpctraceviewer.data.color.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
@@ -37,7 +36,7 @@ import edu.rice.cs.hpctraceviewer.data.util.Constants;
  *******************************************************************************************/
 public abstract class SpaceTimeDataController 
 {
-	final protected BaseExperiment  exp;
+	final protected IExperiment  exp;
 
 	protected TraceDisplayAttribute attributes;
 	
@@ -64,13 +63,8 @@ public abstract class SpaceTimeDataController
 	 *****/
 	public SpaceTimeDataController(IEclipseContext context, InputStream expStream, String Name) 
 			throws InvalExperimentException, Exception 
-	{	
-		exp = new Experiment();
-
-		// Without metrics, so param 3 is false
-		exp.open(expStream, new ProcedureAliasMap(), Name);
-		
-		init(context, exp);
+	{
+		this(context, new Experiment());
 	}
 	
 	/*****
@@ -83,7 +77,7 @@ public abstract class SpaceTimeDataController
 	 * @throws InvalExperimentException
 	 * @throws Exception
 	 */
-	public SpaceTimeDataController(IEclipseContext context, BaseExperiment experiment) 			
+	public SpaceTimeDataController(IEclipseContext context, IExperiment experiment) 			
 			throws InvalExperimentException, Exception 
 	{
 		exp = experiment;		
@@ -103,12 +97,23 @@ public abstract class SpaceTimeDataController
 	
 	
 	/*************************************************************************
+	 * Check if traces have been painted out in the main trace view.
+	 * Other views (like depth view) will need to check this.
+	 * 
+	 * @return
+	 *************************************************************************/
+	public boolean hasTraces() {
+		return timelineService.getNumProcessTimeline() > 0;
+	}
+	
+	
+	/*************************************************************************
 	 * Initialize the object
 	 * 
 	 * @param _window
 	 * @throws Exception 
 	 *************************************************************************/
-	private void init(IEclipseContext context, BaseExperiment exp) 
+	private void init(IEclipseContext context, IExperiment exp) 
 			throws InvalExperimentException 
 	{	
 		this.context = context;
@@ -142,25 +147,6 @@ public abstract class SpaceTimeDataController
 		return false;
 	}
 
-
-	/*************************************************************************
-	 * Get the max depth of this traces
-	 * @return int
-	 *************************************************************************/
-	public int getMaxDepth() 
-	{
-		return exp.getMaxDepth();
-	}
-	
-	
-	/*************************************************************************
-	 * Get the default depth. Currently it's the max depth times .3
-	 * @return int
-	 *************************************************************************/
-	public int getDefaultDepth() {
-		return exp.getMaxDepth()/3;
-	}
-	
 	
 	/*************************************************************************
 	 * Get the position of the current selected process
@@ -223,8 +209,10 @@ public abstract class SpaceTimeDataController
 	 * 	Returns the map between cpid and callpath
 	 * @return
 	 ******************************************************************************/
-	public Map<Integer, CallPath> getScopeMap() {
-		return exp.getScopeMap();
+	public ICallPath getScopeMap() {
+		// TODO: we should add getScopeMap in IExperiment interface
+		// however, meta.db and trace.db doesn't need it.
+		return ((BaseExperiment)exp).getScopeMap();
 	}
 
 	/******************************************************************************
@@ -241,7 +229,7 @@ public abstract class SpaceTimeDataController
 	 * Returns the experiment database
 	 * @return BaseExperiment
 	 **************************************************************************/
-	public BaseExperiment getExperiment() {
+	public IExperiment getExperiment() {
 		return exp;
 	}
 
@@ -297,7 +285,7 @@ public abstract class SpaceTimeDataController
 		int version = exp.getMajorVersion();
 		
 		if (version == edu.rice.cs.hpcdata.util.Constants.EXPERIMENT_DENSED_VERSION) {
-			if (exp.getMinorVersion() < 2) {
+			if (((BaseExperiment)exp).getMinorVersion() < 2) {
 				// old version of database: always microsecond
 				return TimeUnit.MICROSECONDS;
 			}
@@ -320,7 +308,20 @@ public abstract class SpaceTimeDataController
 		return TimeUnit.MICROSECONDS;
 	}
 	
+	/*************************************************************************
+	 * Maximum call depth in the CCT
+	 *  
+	 * @return
+	 *************************************************************************/
+	public int getMaxDepth() {
+		return ((TraceAttribute)exp.getTraceAttribute()).maxDepth;
+	}
 
+	public int getDefaultDepth() {
+		return (int)(getMaxDepth() * 0.3);
+	}
+
+	
 	/*************************************************************************
 	 * get the color mapping table
 	 * @return
@@ -379,4 +380,5 @@ public abstract class SpaceTimeDataController
 
 	public abstract void fillTracesWithData(boolean changedBounds, int numThreadsToLaunch)
 			throws IOException;
+
 }

@@ -1,6 +1,5 @@
 package edu.rice.cs.hpcviewer.ui.handlers;
 
-import java.util.Iterator;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -33,7 +32,7 @@ public class FileCloseDatabase
 			EModelService modelService, 
 			MWindow window ) {
 
-		Iterator<BaseExperiment> iterator = database.getIterator(window);
+		var iterator = database.getIterator(window);
 
 		while(iterator.hasNext()) {
 			Experiment exp = (Experiment) iterator.next();

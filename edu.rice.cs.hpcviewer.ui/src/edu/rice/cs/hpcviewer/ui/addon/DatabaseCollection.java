@@ -49,10 +49,9 @@ import edu.rice.cs.hpcbase.ui.IMainPart;
 import edu.rice.cs.hpcdata.db.DatabaseManager;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
-import edu.rice.cs.hpcdata.trace.BaseTraceAttribute;
 import edu.rice.cs.hpcfilter.service.FilterMap;
-import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
 import edu.rice.cs.hpctraceviewer.data.local.LocalDBOpener;
 import edu.rice.cs.hpctraceviewer.ui.TracePart;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
@@ -77,10 +76,10 @@ import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
 @Singleton
 public class DatabaseCollection 
 {
-	static private final String STACK_ID_BASE 	  = "edu.rice.cs.hpcviewer.ui.partstack.integrated";
+	static private final String STACK_ID_BASE = "edu.rice.cs.hpcviewer.ui.partstack.integrated";
 	
 
-	final private HashMap<MWindow, List<BaseExperiment>>   mapWindowToExperiments;
+	final private HashMap<MWindow, List<IExperiment>>   mapWindowToExperiments;
 	
 	private @Inject IEventBroker eventBroker;
 	private @Inject UISynchronize sync;
@@ -90,7 +89,7 @@ public class DatabaseCollection
 		
 	public DatabaseCollection() {
 		experimentManager = new ExperimentManager();
-		mapWindowToExperiments = new HashMap<MWindow, List<BaseExperiment>>(1);
+		mapWindowToExperiments = new HashMap<MWindow, List<IExperiment>>(1);
 	}
 	
 	@Inject
@@ -155,7 +154,7 @@ public class DatabaseCollection
 		if (filename == null)
 			return;
 		
-		BaseExperiment exp = getExperimentObject(window, filename);
+		var exp = getExperimentObject(window, filename);
 		if (exp != null) {
 			removeDatabase(application, modelService, service, exp);
 		}
@@ -204,7 +203,7 @@ public class DatabaseCollection
 	 * @param modelService
 	 * @param parentId the parent EPartStack of the parts. If it's null, the new parts will be assigned to the current active
 	 */
-	public void createViewsAndAddDatabase(BaseExperiment experiment, 
+	public void createViewsAndAddDatabase(IExperiment experiment, 
 										  MApplication 	 application, 
 										  EPartService   service,
 										  EModelService  modelService) {
@@ -239,7 +238,7 @@ public class DatabaseCollection
 	 * 
 	 * @return int
 	 */
-	private int showPart( BaseExperiment experiment, 
+	private int showPart( IExperiment    experiment, 
 						  MApplication   application, 
 						  EModelService  modelService,
 						  EPartService   service) {
@@ -327,7 +326,7 @@ public class DatabaseCollection
 		stack.setVisible(true);
 		stack.setOnTop(true);
 		
-		List<BaseExperiment> listExperiments = getActiveListExperiments(application.getSelectedElement());
+		List<IExperiment> listExperiments = getActiveListExperiments(application.getSelectedElement());
 		if (listExperiments != null) {
 			listExperiments.add(experiment);
 		}
@@ -335,49 +334,40 @@ public class DatabaseCollection
 		//----------------------------------------------------------------
 		// display the trace view if the information exists
 		//----------------------------------------------------------------
-		BaseTraceAttribute traceAtt = experiment.getTraceAttribute();
-		if (traceAtt != null && traceAtt.dbTimeMax > 0) {
-			try {
-				AbstractDBOpener dbOpener = new LocalDBOpener(null, experiment);
-				if (dbOpener.getVersion()<=0) {
-					return 1;
-				}
-			} catch (Exception e) {
-				return 0;
-			}
+		if (LocalDBOpener.directoryHasTraceData(experiment.getDirectory()) < 0) {
+			return 1;
+		}
 
-			MPart tracePart  = service.createPart(TracePart.ID);
-			MPart createPart = service.showPart(tracePart, PartState.CREATE);
+		MPart tracePart  = service.createPart(TracePart.ID);
+		MPart createPart = service.showPart(tracePart, PartState.CREATE);
+		
+		if (createPart != null) {
+			// need to set the element id to avoid the same issue with the profile view
+			// (see the comment at line 320-323)
+			elementID = "T." + ElementIdManager.getElementId(experiment);
+			createPart.setElementId(elementID);
+
+			list.add(createPart);
 			
-			if (createPart != null) {
-				// need to set the element id to avoid the same issue with the profile view
-				// (see the comment at line 320-323)
-				elementID = "T." + ElementIdManager.getElementId(experiment);
-				createPart.setElementId(elementID);
-
-				list.add(createPart);
-				
-				Object objTracePart = createPart.getObject();
-				if (objTracePart != null) {
-					((TracePart)objTracePart).setInput(createPart, experiment);
-				}
+			Object objTracePart = createPart.getObject();
+			if (objTracePart != null) {
+				((TracePart)objTracePart).setInput(createPart, experiment);
 			}
 		}
+		
 		((ProfilePart) view).onFocus();
 		return 1;
 	}
 	
-	
-	
-	
+		
 	/***
 	 * Retrieve the iterator of the database collection from a given windo
 	 * 
 	 * @param window 
 	 * @return Iterator for the list of the given window
 	 */
-	public Iterator<BaseExperiment> getIterator(MWindow window) {
-		List<BaseExperiment> list = mapWindowToExperiments.get(window);
+	public Iterator<IExperiment> getIterator(MWindow window) {
+		 var list = mapWindowToExperiments.get(window);
 		if (list == null)
 			return null;
 		return list.iterator();
@@ -389,7 +379,7 @@ public class DatabaseCollection
 	 * @return
 	 */
 	public int getNumDatabase(MWindow window) {
-		List<BaseExperiment> list = getActiveListExperiments(window);
+		var list = getActiveListExperiments(window);
 		if (list == null)
 			return 0;
 		return list.size();
@@ -401,7 +391,7 @@ public class DatabaseCollection
 	 * @return true if the database is empty
 	 */
 	public boolean isEmpty(MWindow window) {
-		List<BaseExperiment> list = getActiveListExperiments(window);
+		var list = getActiveListExperiments(window);
 		return list.isEmpty();
 	}
 	
@@ -412,16 +402,15 @@ public class DatabaseCollection
 	 * @param pathXML the absolute path of the experiment XNK file path
 	 * @return BaseExperiment object if the database exist, null otherwise.
 	 */
-	public BaseExperiment getExperimentObject(MWindow window, String pathXML) {
-		List<BaseExperiment> list = getActiveListExperiments(window);
+	public IExperiment getExperimentObject(MWindow window, String pathXML) {
+		var list = getActiveListExperiments(window);
 		
 		if (list == null || list.isEmpty())
 			return null;
 		
-		for (BaseExperiment exp: list) {
-			String directory = exp.getExperimentFile().getAbsolutePath();
+		for (var exp: list) {
+			String directory = exp.getPath();
 			if (directory.equals(pathXML)) {
-
 				return exp;
 			}
 		}
@@ -488,7 +477,7 @@ public class DatabaseCollection
 		// 3. check if the database already opened or not
 		// -------------------------------------------------------
 		
-		BaseExperiment exp = getExperimentObject(window, filename);
+		var exp = getExperimentObject(window, filename);
 		if (exp == null)
 			// database is valid, fresh and not already opened
 			return filename;
@@ -496,7 +485,7 @@ public class DatabaseCollection
 		// we cannot have two exactly the same database in one window
 		if (MessageDialog.openQuestion(shell, 
 								   "Warning: database already exists", 
-								   exp.getDefaultDirectory().getAbsolutePath() +
+								   exp.getDirectory() +
 								   ": the database is already opened.\nDo you want to replace the existing one?" ) )
 		
 			// user decides to replace the database
@@ -515,7 +504,7 @@ public class DatabaseCollection
 	public void removeDatabase(MApplication application, 
 							   EModelService modelService, 
 							   EPartService partService, 
-							   final BaseExperiment experiment) {
+							   final IExperiment experiment) {
 		
 		if (experiment == null)
 			return;
@@ -523,7 +512,7 @@ public class DatabaseCollection
 		// remove any database associated with this experiment
 		// some parts may need to check the database if the experiment really exits or not.
 		// If not, they will consider the experiment will be removed.
-		List<BaseExperiment> list = getActiveListExperiments(application.getSelectedElement());
+		var list = getActiveListExperiments(application.getSelectedElement());
 		list.remove(experiment);
 		
 		MWindow window = application.getSelectedElement();
@@ -539,7 +528,7 @@ public class DatabaseCollection
 			eventBroker.send(BaseConstants.TOPIC_HPC_REMOVE_DATABASE, data);
 		
 		// make sure the experiment's resources are disposed
-		experiment.dispose();
+		//experiment.dispose();
 		
 		// destroy all the views and editors that belong to experiment
 		// since Eclipse doesn't have "destroy" method, we hide them.
@@ -561,8 +550,7 @@ public class DatabaseCollection
 	 * @return
 	 */
 	public int removeAll(MApplication application, EModelService modelService, EPartService partService) {
-		List<BaseExperiment> list = getActiveListExperiments(application.getSelectedElement());
-		
+		var list = getActiveListExperiments(application.getSelectedElement());		
 		int size = list.size();
 		
 		// TODO: ugly solution to avoid concurrency (java will not allow to remove a list while iterating).
@@ -588,8 +576,8 @@ public class DatabaseCollection
 	 * @param window
 	 * @return
 	 */
-	public List<BaseExperiment> removeWindowExperiment(MWindow window) {
-		List<BaseExperiment> list = mapWindowToExperiments.remove(window);
+	public List<IExperiment> removeWindowExperiment(MWindow window) {
+		var list = mapWindowToExperiments.remove(window);
 		return list;
 	}
 	
@@ -601,16 +589,16 @@ public class DatabaseCollection
 	 * @return the list of experiments (if there's an active window). null otherwise.
 	 * 
 	 */
-	private List<BaseExperiment> getActiveListExperiments(MWindow window) {
+	private List<IExperiment> getActiveListExperiments(MWindow window) {
 
 		if (window == null) {
 			statusReporter.error("No active window");
 			return null;
 		}
-		List<BaseExperiment> list = mapWindowToExperiments.get(window);
+		List<IExperiment> list = mapWindowToExperiments.get(window);
 		
 		if (list == null) {
-			list = new ArrayList<BaseExperiment>();
+			list = new ArrayList<IExperiment>();
 			mapWindowToExperiments.put(window, list);
 		}
 		return list;
@@ -626,7 +614,7 @@ public class DatabaseCollection
 	 * @return
 	 * @throws Exception 
 	 */
-	private BaseExperiment openDatabase(Shell shell, String directoryOrXMLFile) throws Exception {
+	private IExperiment openDatabase(Shell shell, String directoryOrXMLFile) throws Exception {
     	IFileStore fileStore;
 
 		try {
@@ -643,7 +631,7 @@ public class DatabaseCollection
     	if (!objFileInfo.exists())
     		return null;
 
-    	BaseExperiment experiment = null;
+    	IExperiment experiment = null;
     	
     	if (objFileInfo.isDirectory()) {
     		experiment = experimentManager.openDatabaseFromDirectory(shell, directoryOrXMLFile);
@@ -669,7 +657,7 @@ public class DatabaseCollection
 											final EPartService partService,
 											final Shell shell, 
 											final String xmlFileOrDirectory) {
-		final BaseExperiment experiment;
+		final IExperiment experiment;
 		if (this.statusReporter == null)
 			this.statusReporter = LoggerFactory.getLogger(getClass());
 		try {
@@ -716,8 +704,7 @@ public class DatabaseCollection
 		// we need to ensure we only store the directory, not the xml file
 		// minor fix: only store the absolute path, not the relative one.
 		
-		File dir = experiment.getDefaultDirectory();
-		String path = dir.getAbsolutePath();
+		String path = experiment.getDirectory();
 		UserInputHistory history = new UserInputHistory(RecentDatabase.HISTORY_DATABASE_RECENT);
 		history.addLine(path);
 	}

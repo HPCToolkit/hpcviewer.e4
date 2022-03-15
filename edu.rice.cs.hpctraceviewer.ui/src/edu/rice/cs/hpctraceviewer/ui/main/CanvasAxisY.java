@@ -33,9 +33,9 @@ public class CanvasAxisY extends AbstractAxisCanvas
 	private final int [][]listColorSWT = {
 											{ SWT.COLOR_CYAN,    SWT.COLOR_DARK_BLUE    },
 											{ SWT.COLOR_YELLOW,  SWT.COLOR_DARK_MAGENTA },
-											{ SWT.COLOR_GRAY,    SWT.COLOR_DARK_GREEN   },
+											{ SWT.COLOR_MAGENTA, SWT.COLOR_DARK_GREEN   },
 											{ SWT.COLOR_WHITE,   SWT.COLOR_DARK_RED     },
-											{ SWT.COLOR_MAGENTA, SWT.COLOR_DARK_YELLOW  }
+											{ SWT.COLOR_GRAY,    SWT.COLOR_DARK_YELLOW  }
 										};
 	private int columnWidth = HPCTraceView.Y_AXIS_WIDTH/4;
 	

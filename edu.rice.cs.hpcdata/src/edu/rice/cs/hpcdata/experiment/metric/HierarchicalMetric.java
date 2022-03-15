@@ -25,9 +25,6 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		setIndex(index);
 	}
 
-	public HierarchicalMetric(int index, String sDisplayName) {
-		this(null, index, sDisplayName);
-	}
 
 	public void setFormula(String formula) {
 		expression = ExpressionTree.parse(formula);
@@ -80,6 +77,9 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		} catch (IOException e) {
 			throw new RuntimeException("Cannot find metric value for " + s.toString());
 		}
+		if (value == 0.0d)
+			return MetricValue.NONE;
+		
 		var rootValue = scope.getRootMetricValue(this);
 		MetricValue mv = new MetricValue(value, value/rootValue.getValue());
 		return mv;

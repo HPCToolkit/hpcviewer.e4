@@ -18,9 +18,6 @@ package edu.rice.cs.hpcdata.experiment.scope;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import edu.rice.cs.hpcdata.experiment.BaseExperiment;
-import edu.rice.cs.hpcdata.experiment.BaseExperimentWithMetrics;
-import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.metric.AggregateMetric;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
@@ -101,7 +98,6 @@ implements IMetricScope
 
 	//the cpid is removed in hpcviewer, but hpctraceview still requires it in order to dfs
 	private int cpid;
-	private int cct_id;
 
 	public int iSourceCodeAvailability = Scope.SOURCE_CODE_UNKNOWN;
 
@@ -127,12 +123,10 @@ implements IMetricScope
 		this.firstLineNumber = first;
 		this.lastLineNumber  = last;
 		this.flat_node_index = flat_id;
-		this.cct_id    = cct_id;
 		this.cpid      = -1;
 		this.iCounter  = 0;
-		
-		if (root != null)			
-			node = (ITreeNode<Scope>) root.getExperiment().createTreeNode(this);
+
+		node = new TreeNode<>(cct_id);
 	}
 
 
@@ -168,7 +162,7 @@ implements IMetricScope
 	 * @return
 	 */
 	public int getCCTIndex() {
-		return cct_id;
+		return (int) node.getValue();
 	}
 
 
@@ -553,8 +547,8 @@ implements IMetricScope
 
 	public MetricValue getMetricValue(BaseMetric metric)
 	{
-		int index = metric.getIndex();
-		MetricValue value = getMetricValue(index);
+		ensureMetricStorage();
+		MetricValue value = metrics.getValue(this, metric);
 
 		// compute percentage if necessary
 		if (metric.getAnnotationType() == AnnotationType.PERCENT) {
@@ -604,8 +598,8 @@ implements IMetricScope
 	 *	Add the metric cost from a source with a certain filter for all metrics
 	 ************************************************************************/
 	public void accumulateMetrics(Scope source, MetricValuePropagationFilter filter, int nMetrics) {
-		Experiment experiment = (Experiment) root.getExperiment();
-		List<BaseMetric> metrics  = experiment.getMetricList();
+		var experiment = root.getExperiment();
+		var metrics    = experiment.getMetrics();
 		List<DerivedMetric> listDerivedMetrics = new ArrayList<>();
 
 		// compute metrics with predefined values first.
@@ -685,11 +679,10 @@ implements IMetricScope
 	 **************************************************************************/
 	public void combine(Scope source, MetricValuePropagationFilter filter) {
 
-		final BaseExperimentWithMetrics _exp = (BaseExperimentWithMetrics) getExperiment();
+		var exp  = getExperiment();
+		var list = exp.getMetrics();
 
-		List<BaseMetric> list = _exp.getMetricList();
-
-		for (BaseMetric metric: list) {
+		for (var metric: list) {
 
 			if (metric instanceof AggregateMetric) {
 				//--------------------------------------------------------------------

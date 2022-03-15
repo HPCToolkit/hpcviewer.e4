@@ -9,8 +9,6 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.Random;
 
-import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
-
 /*******************************************************************************
  * 
  * Class to read data trace from file (via DataCommon) and store the info
@@ -23,12 +21,11 @@ public class DataTrace extends DataCommon
 	public final static  String FILENAME = "trace.db";
 	
 	private final static String HEADER = "HPCTOOLKITtrce";
-	private final static int FMT_TRACEDB_SZ_FHdr = 20;
 	private final static int FMT_TRACEDB_SZ_CtxSample = 0x0c;
 	private static final int NUM_ITEMS = 1;
 
 
-	private IntObjectHashMap<TraceContext> mapProfileToTrace;
+	private TraceContext []traceCtxs;
 	
 	@Override
 	/*
@@ -75,12 +72,12 @@ public class DataTrace extends DataCommon
 		buffer = input.map(MapMode.READ_ONLY, traceHeadr.pTraces, traceHeadr.nTraces * traceHeadr.szTrace);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		
-		mapProfileToTrace = new IntObjectHashMap<DataTrace.TraceContext>(traceHeadr.nTraces);
+		traceCtxs = new TraceContext[traceHeadr.nTraces];
 		
 		for(int i=0; i<traceHeadr.nTraces; i++) {
 			int profIndex = buffer.getInt();
 			var tc = new TraceContext(buffer);
-			mapProfileToTrace.put(profIndex, tc);
+			traceCtxs[i] = tc;
 		}
 
 		return true;
@@ -100,8 +97,9 @@ public class DataTrace extends DataCommon
 	 */
 	public DataRecord getSampledData(int rank, long index) throws IOException
 	{
-		var tc = mapProfileToTrace.get(rank);
+		assert(rank < traceCtxs.length);
 		
+		var tc = traceCtxs[rank];		
 		if (tc == null)
 			return null;
 		
@@ -124,7 +122,8 @@ public class DataTrace extends DataCommon
 	 */
 	public int getNumberOfSamples(int rank)
 	{
-		var tc = mapProfileToTrace.get(rank);
+		assert(rank < traceCtxs.length);
+		var tc = traceCtxs[rank];		
 		if (tc == null)
 			return 0;
 		
@@ -146,7 +145,9 @@ public class DataTrace extends DataCommon
 	
 	public long getLength(int rank)
 	{
-		var tc = mapProfileToTrace.get(rank);
+		assert(rank < traceCtxs.length);
+		
+		var tc = traceCtxs[rank];		
 		if (tc == null)
 			throw new RuntimeException("Invalid rank: " + rank);
 		
@@ -156,7 +157,8 @@ public class DataTrace extends DataCommon
 	
 	public long getOffset(int rank)
 	{
-		var tc = mapProfileToTrace.get(rank);
+		assert(rank < traceCtxs.length);
+		var tc = traceCtxs[rank];		
 		if (tc == null)
 			throw new RuntimeException("Invalid rank: " + rank);
 		return tc.pStart;
@@ -181,8 +183,7 @@ public class DataTrace extends DataCommon
 			try {
 				out.format("%d:  %s\n", rank, getSampledData(rank, sample));
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				System.err.println(e.getMessage());
 			}
 		}
 	}

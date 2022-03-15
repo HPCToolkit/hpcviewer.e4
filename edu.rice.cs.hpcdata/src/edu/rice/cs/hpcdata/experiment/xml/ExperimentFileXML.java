@@ -74,27 +74,20 @@ public class ExperimentFileXML extends ExperimentFile
  * @throws Exception
  */
 public void parse(InputStream stream, String name,
-		BaseExperiment experiment, boolean need_metrics, IUserData<String, String> userData)
+		IExperiment experiment, boolean need_metrics, IUserData<String, String> userData)
 		throws Exception {
-	final Builder builder;
-	if (need_metrics) {
-		builder = new ExperimentBuilder2(experiment, name, userData);
-	} else {
-		builder = new BaseExperimentBuilder(experiment, name, userData);
-	}
+	
+	final Builder builder = new ExperimentBuilder2(experiment, name, userData);
 	// We assume it has already been GREP-ed by the server if it needs to be
 
 	IParser parser = new Parser(name, stream, builder);
 	parser.parse(name);
 
-	if (builder.getParseOK() == Builder.PARSER_OK) {
-		// set the file the same as the name of the database
-		// setFile(new File(name));
-		// parsing is done successfully
-	} else
+	if (builder.getParseOK() != Builder.PARSER_OK) {
 		throw new InvalExperimentException(
 				"Parse error in Experiment XML at line " + 
 				builder.getParseErrorLineNumber());
+	}
 }
 
 
@@ -111,7 +104,7 @@ public void parse(InputStream stream, String name,
  *
  ************************************************************************/
 	
-public File parse(File location, BaseExperiment experiment, boolean need_metrics, IUserData<String, String> userData)
+public File parse(File location, IExperiment experiment, boolean need_metrics, IUserData<String, String> userData)
 		throws	Exception
 		{
 	// get an appropriate input stream

@@ -2,6 +2,7 @@ package edu.rice.cs.hpcdata.tld;
 
 import java.io.IOException;
 
+import edu.rice.cs.hpcdata.db.version4.MetricValueCollection3;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
@@ -47,6 +48,10 @@ public final class ThreadDataCollectionFactory
 			
 		case Constants.EXPERIMENT_SPARSE_VERSION:
 			data_file = new ThreadDataCollection4();
+			
+			var mvc = (MetricValueCollection3) root.getMetricValueCollection();						
+			((ThreadDataCollection4)data_file).init(mvc.getDataSummary());
+			
 			String directory = experiment.getDefaultDirectory().getAbsolutePath();
 			((ThreadDataCollection4)data_file).open(root, directory);
 			break;
@@ -54,7 +59,6 @@ public final class ThreadDataCollectionFactory
 			data_file = null;
 			break;
 		}
-		root.getExperiment().setThreadData(data_file);
 		
 		return data_file;
 	}

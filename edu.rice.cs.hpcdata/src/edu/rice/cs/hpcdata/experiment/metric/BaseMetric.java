@@ -134,8 +134,7 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 
 	
 	public BaseMetric(String sID, String sDisplayName) {
-		this.shortName = sID;
-		this.displayName = sDisplayName;
+		this(sID, sDisplayName, sID, VisibilityType.SHOW, null, null, 0, 0, MetricType.UNKNOWN);
 	}
 	
 	//-------------------------------------------------------------------------------

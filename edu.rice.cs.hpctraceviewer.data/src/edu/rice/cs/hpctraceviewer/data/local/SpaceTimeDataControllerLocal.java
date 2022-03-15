@@ -3,17 +3,16 @@ package edu.rice.cs.hpctraceviewer.data.local;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Path;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcdata.db.IFileDB;
-import edu.rice.cs.hpcdata.db.version4.DataMeta;
-import edu.rice.cs.hpcdata.db.version4.DataSummary;
-import edu.rice.cs.hpcdata.experiment.BaseExperiment;
+import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 import edu.rice.cs.hpcdata.experiment.extdata.IFilteredData;
-import edu.rice.cs.hpcdata.experiment.scope.RootScope;
-import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
 import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.IProgressReport;
@@ -23,7 +22,6 @@ import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TraceDataByRank;
 import edu.rice.cs.hpctraceviewer.data.version2.BaseData;
 import edu.rice.cs.hpctraceviewer.data.version2.FilteredBaseData;
-import edu.rice.cs.hpctraceviewer.data.version4.FileDB4;
 
 
 /**
@@ -35,29 +33,32 @@ import edu.rice.cs.hpctraceviewer.data.version4.FileDB4;
 public class SpaceTimeDataControllerLocal extends SpaceTimeDataController 
 {	
 	final static private int MIN_TRACE_SIZE = TraceDataByRank.HeaderSzMin + TraceDataByRank.RecordSzMin * 2;
-	final static public int RECORD_SIZE    = Constants.SIZEOF_LONG + Constants.SIZEOF_INT;
+	final static public int RECORD_SIZE     = Constants.SIZEOF_LONG + Constants.SIZEOF_INT;
 	
-	private String traceFilePath;
 	private IFileDB fileDB;
 	
 	
 	/***
 	 * Constructor to setup local database
 	 * 
-	 * @param context IEclipseContext
-	 * @param statusMgr IProgressMonitor
-	 * @param experiment BaseExperiment
-	 * @param fileDB IFileDB
+	 * @param context 
+	 * 			IEclipseContext
+	 * @param statusMgr 
+	 * 			IProgressMonitor
+	 * @param experiment 
+	 * 			IExperiment
+	 * @param fileDB 
+	 * 			IFileDB
+	 * 
 	 * @throws InvalExperimentException
 	 * @throws Exception
 	 */
 	public SpaceTimeDataControllerLocal(
 			IEclipseContext context, 
 			IProgressMonitor statusMgr, 
-			BaseExperiment experiment, 
+			IExperiment experiment, 
 			IFileDB fileDB)
-			throws InvalExperimentException, Exception {
-		
+					throws InvalExperimentException, Exception {
 		super(context, experiment);
 		init(statusMgr, fileDB);
 	}
@@ -75,30 +76,23 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 		
 		final TraceAttribute trAttribute = (TraceAttribute) exp.getTraceAttribute();		
 		final int version = exp.getMajorVersion();
+		var location = Path.of(exp.getPath()).getParent().toFile();
+		String traceFilePath = location.getAbsolutePath();
 		
 		if (version == 1 || version == Constants.EXPERIMENT_DENSED_VERSION)
-		{	// original format
-			traceFilePath = getTraceFile(exp.getDefaultDirectory().getAbsolutePath(), statusMgr);
-			fileDB.open(traceFilePath, trAttribute.dbHeaderSize, RECORD_SIZE);
-			
-		} else if (version == Constants.EXPERIMENT_SPARSE_VERSION) 
+		{	
+			// original format: we may need to merge the files
+			traceFilePath = getTraceFile(traceFilePath, statusMgr);			
+		} 
+		else if (version != Constants.EXPERIMENT_SPARSE_VERSION) 
 		{
-			// new format
-			String databaseDirectory = exp.getDefaultDirectory().getAbsolutePath(); 
-			traceFilePath = databaseDirectory + File.separator + "trace.db";
-			
-			RootScope root = (RootScope) exp.getRootScope(RootScopeType.CallingContextTree);
-			DataMeta dataMeta = (DataMeta) root.getExperiment();
-			DataSummary ds = dataMeta.getDataSummary();
-			
-			((FileDB4)fileDB).open(ds, databaseDirectory);
+			throw new RuntimeException("Unknown database version: " + version);
 		}
 		this.fileDB = fileDB;
-		dataTrace 	= new BaseData(fileDB);
+		this.fileDB.open(traceFilePath, trAttribute.dbHeaderSize, RECORD_SIZE);
+		dataTrace = new BaseData(fileDB);
 	}
 
-
-	
 
 	@Override
 	public IFilteredData createFilteredBaseData() {
@@ -108,15 +102,13 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 										TraceAttribute.DEFAULT_RECORD_SIZE);
 		}
 		catch (Exception e){
-			e.printStackTrace();
-			return null;
+			var log = LoggerFactory.getLogger(getClass());
+			log.error(e.getMessage());
 		}
-	}
-	
-	public String getTraceFileAbsolutePath(){
-		return traceFilePath;
+		return null;
 	}
 
+	
 	@Override
 	public void closeDB() {
 		dataTrace.dispose();
@@ -137,7 +129,7 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 
 	@Override
 	public String getName() {
-		return exp.getDefaultDirectory().getPath();
+		return exp.getPath();
 	}
 	
 	/*********************
@@ -167,16 +159,11 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 			if (fileTrace.length() > MIN_TRACE_SIZE) {
 				return fileTrace.getAbsolutePath();
 			}
-			
-			System.err.println("Warning! Trace file "
-					+ fileTrace.getName()
-					+ " is too small: "
-					+ fileTrace.length() + "bytes .");
 		}
 		if (att == MergeDataAttribute.FAIL_NOT_WRITABLE) 
-			throw new RuntimeException("Directory is not writable: " + directory);
+			throw new RuntimeException(directory + ": Directory is not writable");
 		
-		throw new RuntimeException("Trace file does not exist or file is corrupt:" + outputFile);
+		throw new RuntimeException(directory + ": Directory has no trace data or trace files are invalid");
 	}
 
 	/*******************

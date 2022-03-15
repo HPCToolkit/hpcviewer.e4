@@ -1,8 +1,9 @@
 package edu.rice.cs.hpctraceviewer.data.version4;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
+
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcdata.db.IFileDB;
 import edu.rice.cs.hpcdata.db.IdTuple;
@@ -10,7 +11,6 @@ import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.db.version2.FileDB2;
 import edu.rice.cs.hpcdata.db.version4.DataSummary;
 import edu.rice.cs.hpcdata.db.version4.DataTrace;
-import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 
 
 /********************************************************************
@@ -26,34 +26,36 @@ public class FileDB4 implements IFileDB
 	private DataTrace dataTrace;
 	private DataSummary dataSummary;
 	
-	
-	/****
-	 * @deprecated method to open a database file.<br/>
-	 * We provide this method just for compatibility purpose. Please use
-	 * the recent method : 
+	/*****
+	 * Creation of FileDB for sparse database version 4.
 	 * 
-	 * {@link open(String)}
-	 * @see edu.rice.cs.hpcdata.db.IFileDB#open(java.lang.String, int, int)
-	 */
-	@Override
-	public void open(String filename, int headerSize, int recordSize)
-			throws IOException 
-	{
-	}
-	
-	/***
-	 * Method to open files of trace database such as trace.db and threads.db
-	 * 
-	 * @param directory
+	 * @param dataSummary
+	 * 			The object of profile.db parser
+	 * 			
 	 * @throws IOException
 	 */
-	public void open(DataSummary dataSummary, String directory) throws IOException
-	{
+	public FileDB4(DataSummary dataSummary) throws IOException {
 		this.dataSummary = dataSummary;
-
 		dataTrace = new DataTrace();
+	}
+
+
+	/****
+	 * Open trace file
+	 * @param directory
+	 * 			The directory of the database
+	 * @param headerSize
+	 * 			unused
+	 * @param recordSize
+	 * 			unused
+	 */
+	@Override
+	public void open(String directory, int headerSize, int recordSize)
+			throws IOException 
+	{
 		dataTrace.open(directory);
 	}
+	
 
 	@Override
 	public int getNumberOfRanks() {
@@ -67,8 +69,7 @@ public class FileDB4 implements IFileDB
 
 	@Override
 	public long[] getOffsets() {
-		System.out.println("ERROR, shouldn't be called!");
-		return null;
+		throw new RuntimeException("ERROR, shouldn't be called!");
 	}
 
 	@Override
@@ -121,10 +122,9 @@ public class FileDB4 implements IFileDB
 	public void dispose() {
 		try {
 			dataTrace.dispose();
-
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			var log = LoggerFactory.getLogger(getClass());
+			log.error(e.getMessage());
 		}
 	}
 

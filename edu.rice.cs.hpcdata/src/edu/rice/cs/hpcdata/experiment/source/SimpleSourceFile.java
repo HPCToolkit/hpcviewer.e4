@@ -1,7 +1,6 @@
 package edu.rice.cs.hpcdata.experiment.source;
 
 import java.io.File;
-import java.io.InputStream;
 
 public class SimpleSourceFile implements SourceFile {
 

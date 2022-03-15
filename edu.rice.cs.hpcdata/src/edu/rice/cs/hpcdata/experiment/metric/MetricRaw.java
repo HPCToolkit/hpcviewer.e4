@@ -143,7 +143,12 @@ public class MetricRaw  extends BaseMetric
 		if (s == null) return null;
 		
 		RootScope root = ((Scope)s).getRootScope();
-		IThreadDataCollection threadData = root.getExperiment().getThreadData();
+		IThreadDataCollection threadData;
+		try {
+			threadData = root.getExperiment().getThreadData();
+		} catch (IOException e1) {
+			throw new RuntimeException(e1);
+		}
 		
 		MetricValue value = MetricValue.NONE;
 		if (threadData != null)

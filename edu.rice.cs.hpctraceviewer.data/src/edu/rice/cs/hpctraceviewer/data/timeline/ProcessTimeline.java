@@ -1,13 +1,13 @@
 package edu.rice.cs.hpctraceviewer.data.timeline;
 
 import java.io.IOException;
-import java.util.HashMap;
-
 import org.eclipse.core.runtime.Assert;
 
 import edu.rice.cs.hpcdata.db.version4.DataRecord;
 import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
-import edu.rice.cs.hpcdata.util.CallPath;
+import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.util.ICallPath;
+import edu.rice.cs.hpcdata.util.ICallPath.ICallPathInfo;
 import edu.rice.cs.hpctraceviewer.data.ITraceDataCollector;
 import edu.rice.cs.hpctraceviewer.data.TraceDataByRank;
 import edu.rice.cs.hpctraceviewer.data.version2.AbstractBaseData;
@@ -16,7 +16,7 @@ import edu.rice.cs.hpctraceviewer.data.version2.AbstractBaseData;
 public class ProcessTimeline {
 
 	/** The mapping between the cpid's and the actual scopes. */
-	private HashMap<Integer, CallPath> scopeMap;
+	private ICallPath scopeMap;
 
 	/** This ProcessTimeline's line number. */
 	private int lineNum, processNumber;
@@ -30,7 +30,7 @@ public class ProcessTimeline {
 	/** The amount of time that each pixel on the screen correlates to. */
 	private double pixelLength;
 
-	final ITraceDataCollector data;
+	private final ITraceDataCollector data;
 
 	/*************************************************************************
 	 * Reads in the call-stack trace data from the binary traceFile in the form:
@@ -41,7 +41,7 @@ public class ProcessTimeline {
 	 * @param _numPixelH The number of Horizontal pixels
 	 * @param _timeRange The difference between the start time and the end time
 	 */
-	public ProcessTimeline(int _lineNum, HashMap<Integer, CallPath> _scopeMap, IBaseData dataTrace, 
+	public ProcessTimeline(int _lineNum, ICallPath _scopeMap, IBaseData dataTrace, 
 			int processNumber, int _numPixelH, long _timeRange, long _startingTime)
 	{
 
@@ -72,7 +72,7 @@ public class ProcessTimeline {
 	 * @param _startingTime
 	 */
 	public ProcessTimeline(TraceDataByRank _data,
-			HashMap<Integer, CallPath> _scopeMap, int _processNumber,
+			ICallPath _scopeMap, int _processNumber,
 			int _numPixelH, long _timeRange, long _startingTime) {
 		lineNum = _processNumber;
 		scopeMap = _scopeMap;
@@ -110,7 +110,7 @@ public class ProcessTimeline {
 	}
 
 	/** Gets the cpid that corresponds to the index sample in timeLine. */
-	public int getCpid(int sample) {
+	public int getContextId(int sample) {
 		return data.getCpid(sample);
 	}
 
@@ -119,12 +119,22 @@ public class ProcessTimeline {
 	}
 
 	/** returns the call path corresponding to the sample and depth given */
-	public CallPath getCallPath(int sample, int depth) {
+	public Scope getCallPath(int sample, int depth) {
 		Assert.isTrue(sample>=0, "sample number is negative");
-		int cpid = getCpid(sample);
-
-		CallPath cp = scopeMap.get(cpid);
- 		return cp;
+		
+		int cpid = getContextId(sample);
+		return scopeMap.getCallPathScope(cpid);
+	}
+	
+	
+	public ICallPathInfo getCallPathInfo(int sample) {
+		int cpid = getContextId(sample);
+		return scopeMap.getCallPathInfo(cpid);
+	}
+	
+	
+	public ICallPath getCallPathInfo() {
+		return scopeMap;
 	}
 	
 	/**
@@ -176,19 +186,5 @@ public class ProcessTimeline {
 	{
 		return data.isGPU();
 	}
-	// These are potentially useful for debugging, but otherwise serve no use.
-//	@Override
-//	public String toString() {
-//		return hashCode() + "#" + data.getRank();
-//	}
-//
-//	@Override
-//	public int hashCode() {
-//		double hash = 0.0;
-//		for (Record r : data.getListOfData()) {
-//			hash += r.cpId + Math.log(r.timestamp);
-//		}
-//		return (int) Math.round(hash);
-//	}
 
 }

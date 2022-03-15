@@ -1,8 +1,6 @@
 package edu.rice.cs.hpcdata.trace;
 
-import java.util.Map;
-
-import edu.rice.cs.hpcdata.util.CallPath;
+import edu.rice.cs.hpcdata.util.ICallPath;
 
 public class BaseTraceAttribute 
 {
@@ -17,7 +15,7 @@ public class BaseTraceAttribute
 	
 	public int maxDepth;
 
-	public Map<Integer, CallPath> mapCpidToCallpath;
+	public ICallPath mapCpidToCallpath;
 
 	public BaseTraceAttribute() {
 		dbTimeMax = Integer.MIN_VALUE;

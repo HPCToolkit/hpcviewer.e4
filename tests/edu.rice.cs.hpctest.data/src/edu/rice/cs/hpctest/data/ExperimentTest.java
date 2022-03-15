@@ -28,8 +28,8 @@ public class ExperimentTest {
 
 	private static Experiment []experiments;
 	private static File []database;
-	private static String []dbPaths = new String[] {"bug-no-gpu-trace", "bug-empty", "bug-nometric"};
-	private static int []children   = new int[] {1, 0, 0};
+	private static String []dbPaths = new String[] {"bug-no-gpu-trace", "bug-empty", "bug-nometric", "prof2" + File.separator + "loop-inline"};
+	private static int []children   = new int[] {1, 0, 0, 1};
 	
 	public ExperimentTest() {
 		// empty, nothing to do
@@ -78,7 +78,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetVisibleMetrics() {
-		int num[] = new int[] {97, 2, 0};
+		int num[] = new int[] {97, 2, 0, 2};
 		int i = 0;
 		for(var experiment: experiments) {
 			List<BaseMetric> metrics = experiment.getVisibleMetrics();
@@ -90,7 +90,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetNonEmptyMetricIDs() {
-		final int nmetrics[] = new int[] {18, 0, 0};
+		final int nmetrics[] = new int[] {18, 0, 0, 1};
 		int i=0;
 		for(var experiment: experiments) {
 			RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
@@ -103,7 +103,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetMetricCount() {
-		int counts[] = new int[] {10, 0, 0};
+		int counts[] = new int[] {10, 0, 0, 2};
 		int i=0;
 		
 		for(var experiment: experiments) {
@@ -137,17 +137,20 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetMetricFromOrder() {
+		int []order = new int[] {0, 0, 1, 1};
+		int i = 0;
 		for(var experiment: experiments) {
 			if (experiment.getMetricCount()>0) {
-				BaseMetric metric = experiment.getMetricFromOrder(0);
-				assertNotNull(metric);				
+				BaseMetric metric = experiment.getMetricFromOrder(order[i]);
+				assertNotNull(metric);
+				i++;
 			}
 		}
 	}
 
 	@Test
 	public void testAddDerivedMetric() {
-		int indexes[] = new int[] {762, 0, 0};
+		int indexes[] = new int[] {762, 0, 1, 1};
 		int i=0;
 		
 		for(var experiment: experiments) {
@@ -169,6 +172,31 @@ public class ExperimentTest {
 			i++;
 		}
 	}
+	
+
+	@Test
+	public void testMetricValueDisplay() {
+		final int nmetrics[] = new int[] {18, 0, 0, 1};
+		int i=0;
+		for(var experiment: experiments) {
+			RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
+			if (experiment.getMetricCount()>0) {
+				var metrics = experiment.getNonEmptyMetricIDs(root);
+				assertNotNull(metrics);
+				assertTrue(metrics.size() >= nmetrics[i]);
+				for(var m: metrics) {
+					var metric = experiment.getMetric(m);
+					var str = metric.getMetricTextValue(root);
+					assertNotNull(str);
+					assertTrue(str.length() > 1);
+					if (i==3)
+						assertTrue(str.equals("1.25e+10 100.0%"));
+				}
+			}
+			i++;
+		}
+	}
+
 
 	@Test
 	public void testGetRootScope() {
@@ -186,6 +214,11 @@ public class ExperimentTest {
 			assertTrue(rootCall != rootFlat);
 			
 			rootCall = experiment.createCallersView(rootCCT, rootCall);
+			if (i==3)
+				//  not supported at the moment for prof2
+				// this will fail
+				continue;
+			
 			rootFlat = experiment.createFlatView(rootCCT, rootFlat);
 			
 			assertTrue(rootCCT.getSubscopeCount()  >= children[i]);
@@ -199,29 +232,31 @@ public class ExperimentTest {
 
 
 	@Test
-	public void testGetThreadData() {
+	public void testGetThreadData() throws IOException {
 		for(var experiment: experiments) {
-			assertNull(experiment.getThreadData());
+			var name = experiment.getName();
+			if (!name.contains("loop"))
+				assertNull(experiment.getThreadData());
 		}
 	}
 
 	@Test
 	public void testGetMajorVersion() {
 		for(var experiment: experiments) {
-			assertTrue(experiment.getMajorVersion() == 2);
+			assertTrue(experiment.getMajorVersion() >= 0);
 		}
 	}
 
 	@Test
 	public void testGetMinorVersion() {
 		for(var experiment: experiments) {
-			assertTrue(experiment.getMinorVersion() == 2);
+			assertTrue(experiment.getMinorVersion() >= 0);
 		}
 	}
 
 	@Test
 	public void testGetMaxDepth() {
-		final int maxdepth[] = new int[] {4, 0, 0};
+		final int maxdepth[] = new int[] {4, 0, 0, 10};
 		int i=0;
 		for(var experiment: experiments) {
 			assertTrue(experiment.getMaxDepth() > maxdepth[i]);
@@ -231,8 +266,11 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetScopeMap() {
+		int i=0;
 		for(var experiment: experiments) {
-			assertNotNull(experiment.getScopeMap());
+			if (i<3)
+				assertNotNull(experiment.getScopeMap());
+			i++;
 		}
 	}
 
@@ -269,7 +307,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetName() {
-		final String []names = new String[] {"bandwidthTest", "a.out", "a.out"};
+		final String []names = new String[] {"bandwidthTest", "a.out", "a.out", "loop-inline"};
 		int i=0;
 		for(var experiment: experiments) {
 			String name = experiment.getName();

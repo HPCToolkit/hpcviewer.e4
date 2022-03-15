@@ -199,7 +199,7 @@ public class DerivedMetric extends AbstractMetricWithFormula {
 	
 	public void resetMetric(Experiment experiment, RootScope root)
 	{
-		this.root 		= root;
+		this.root = root;
 		
 		varMap = new MetricVarMap(root, experiment);
 		varMap.setMetric(this);

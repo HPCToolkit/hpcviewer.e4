@@ -38,12 +38,13 @@ public class DataTraceTest {
 	@Test
 	public void testGetSampledData() throws IOException {
 		DataRecord old = null;
-		int samples = data.getNumberOfSamples(1);
+		int samples = data.getNumberOfSamples(0);
 		for (int i=0; i<Math.min(samples, 10); i++) {
-			DataRecord rec = data.getSampledData(1, i);
+			DataRecord rec = data.getSampledData(0, i);
 			assertNotNull(rec);
-			assertTrue(rec.timestamp > 0);
-			assertTrue(rec.cpId >= 0);
+			assertTrue(rec.timestamp >= 1642398106543405000L &&
+					   rec.timestamp <= 1642398109415400000L);
+			assertTrue(rec.cpId > 0 && rec.cpId <= 69);
 			
 			if (old != null)
 				assertTrue(rec.timestamp > old.timestamp);
@@ -53,7 +54,7 @@ public class DataTraceTest {
 
 	@Test
 	public void testGetNumberOfSamples() {
-		int samples = data.getNumberOfSamples(1);
+		int samples = data.getNumberOfSamples(0);
 		assertTrue(samples == 838);
 	}
 
@@ -65,7 +66,7 @@ public class DataTraceTest {
 
 	@Test
 	public void testGetLength() {
-		long l = data.getLength(1);
+		long l = data.getLength(0);
 		assertTrue(l == 10056);
 	}
 

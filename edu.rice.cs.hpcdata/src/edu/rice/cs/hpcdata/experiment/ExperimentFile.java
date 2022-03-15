@@ -62,7 +62,7 @@ public abstract class ExperimentFile
  *
  ************************************************************************/
 	
-public abstract File parse(File file, BaseExperiment experiment, 
+public abstract File parse(File file, IExperiment experiment, 
 		boolean need_metrics, IUserData<String, String> userData)
 throws
 	Exception;
