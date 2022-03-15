@@ -21,10 +21,10 @@ public class DataTrace extends DataCommon
 	public final static  String FILE_TRACE_DB = "trace.db";
 	
 	private final static String HEADER = "HPCTOOLKITtrce";
-	private final static int FMT_TRACEDB_SZ_CtxSample = 0x0c;
+	private final static int FMT_TRACEDB_SZ_CTX_SAMPLE = 0x0c;
 	private static final int NUM_ITEMS = 1;
 
-
+	private TraceHeader  traceHeader;
 	private TraceContext []traceCtxs;
 	
 	@Override
@@ -67,15 +67,15 @@ public class DataTrace extends DataCommon
 		ByteBuffer buffer = input.map(MapMode.READ_ONLY, sections[0].offset, sections[0].size);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		
-		TraceHeader traceHeadr = new TraceHeader(buffer);
+		traceHeader = new TraceHeader(buffer);
 		
-		long size = (long)traceHeadr.nTraces * traceHeadr.szTrace;
-		buffer = input.map(MapMode.READ_ONLY, traceHeadr.pTraces, size);
+		long size = (long)traceHeader.nTraces * traceHeader.szTrace;
+		buffer = input.map(MapMode.READ_ONLY, traceHeader.pTraces, size);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		
-		traceCtxs = new TraceContext[traceHeadr.nTraces];
+		traceCtxs = new TraceContext[traceHeader.nTraces];
 		
-		for(int i=0; i<traceHeadr.nTraces; i++) {
+		for(int i=0; i<traceHeader.nTraces; i++) {
 			int profIndex = buffer.getInt();
 			var tc = new TraceContext(buffer);
 			traceCtxs[i] = tc;
@@ -84,11 +84,21 @@ public class DataTrace extends DataCommon
 		return true;
 	}
 
+	
+	public long getMinTime() {
+		return traceHeader.minTimestamp;
+	}
+	
+	
+	public long getMaxTime() {
+		return traceHeader.maxTimestamp;
+	}
+	
 	/****
 	 * get a trace record from a given rank and sample index
 	 * 
 	 * @param rank 
-	 * 			profile number
+	 * 			the sequence profile number starts from number 0
 	 * @param index
 	 * 			sample index
 	 * 
@@ -104,8 +114,8 @@ public class DataTrace extends DataCommon
 		if (tc == null)
 			return null;
 		
-		long position = tc.pStart + (index * FMT_TRACEDB_SZ_CtxSample);
-		var buffer = getChannel().map(MapMode.READ_ONLY, position, FMT_TRACEDB_SZ_CtxSample);
+		long position = tc.pStart + (index * FMT_TRACEDB_SZ_CTX_SAMPLE);
+		var buffer = getChannel().map(MapMode.READ_ONLY, position, FMT_TRACEDB_SZ_CTX_SAMPLE);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		
 		long time = buffer.getLong();
@@ -119,7 +129,9 @@ public class DataTrace extends DataCommon
 	 * Retrieve the number of samples of a given ranks
 	 * 
 	 * @param rank
-	 * @return int the number of samples
+	 * 			the sequence profile number starts from number 0
+	 * @return int 
+	 * 			the number of samples
 	 */
 	public int getNumberOfSamples(int rank)
 	{
@@ -129,7 +141,7 @@ public class DataTrace extends DataCommon
 			return 0;
 		
 		long numBytes = tc.pEnd - tc.pStart;
-		return (int) (numBytes / FMT_TRACEDB_SZ_CtxSample);
+		return (int) (numBytes / FMT_TRACEDB_SZ_CTX_SAMPLE);
 	}
 	
 	/****
@@ -140,10 +152,17 @@ public class DataTrace extends DataCommon
 	 */
 	public int getNumberOfRanks()
 	{
-		return (int) NUM_ITEMS;
+		return (int) traceCtxs.length;
 	}
 	
 	
+	/****
+	 * 
+	 * @param rank
+	 * 			the sequence profile number starts from number 0
+	 * @return long
+	 * 			the number of bytes
+	 */
 	public long getLength(int rank)
 	{
 		assert(rank < traceCtxs.length);

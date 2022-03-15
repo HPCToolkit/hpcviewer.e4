@@ -9,6 +9,7 @@ import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.filter.IFilterData;
 import edu.rice.cs.hpcdata.trace.BaseTraceAttribute;
+import edu.rice.cs.hpcdata.trace.TraceAttribute;
 import edu.rice.cs.hpcdata.util.ICallPath;
 
 
@@ -169,4 +170,6 @@ public interface IExperiment {
 	public int getMaxDepth();
 
 	public void setScopeMap(ICallPath callpath);
+	
+	public void setTraceAttribute(TraceAttribute attribute);
 }

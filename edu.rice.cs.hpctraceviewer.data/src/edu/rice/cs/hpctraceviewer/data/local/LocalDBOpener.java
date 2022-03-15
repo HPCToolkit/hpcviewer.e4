@@ -77,7 +77,7 @@ public class LocalDBOpener extends AbstractDBOpener
 			Experiment exp = (Experiment) experiment;
 			var root = exp.getRootScope(RootScopeType.CallingContextTree);
 			MetricValueCollection3 mvc = (MetricValueCollection3) root.getMetricValueCollection();
-			fileDB = new FileDB4(mvc.getDataSummary());
+			fileDB = new FileDB4(experiment, mvc.getDataSummary());
 			break;
 		default:
 			throw new InvalExperimentException("Trace data version is not unknown: " + version);

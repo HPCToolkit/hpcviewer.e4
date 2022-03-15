@@ -37,8 +37,8 @@ public class DataSummary extends DataCommon
 	private static final int CCT_RECORD_SIZE   = 4 + 8;
 	private static final int NUM_ITEMS = 2;
 	
-	private static final int FMT_PROFILEDB_SZ_MVal = 0x0a;
-	private static final int FMT_PROFILEDB_SZ_CIdx = 0x0c;
+	private static final int FMT_PROFILEDB_SZ_MVAL = 0x0a;
+	private static final int FMT_PROFILEDB_SZ_CIDX = 0x0c;
 
 	public static final int INDEX_SUMMARY_PROFILE = 0;
 	
@@ -142,14 +142,14 @@ public class DataSummary extends DataCommon
 		
 		long position = info.piElements[profileNum].pCtxIndices;
 		var input = getChannel();
-		long size = (long)FMT_PROFILEDB_SZ_CIdx * info.piElements[profileNum].nCtxs;
+		long size = (long)FMT_PROFILEDB_SZ_CIDX * info.piElements[profileNum].nCtxs;
 		
 		var buffer = input.map(MapMode.READ_ONLY, position, size);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		
 		for(int i=0; i<info.piElements[profileNum].nCtxs; i++) {
 			// special alignment: each record is SIZE_IDX bytes
-			buffer.position(i * FMT_PROFILEDB_SZ_CIdx);
+			buffer.position(i * FMT_PROFILEDB_SZ_CIDX);
 			
 			list.listOfId[i] = buffer.getInt();
 			list.listOfdIndex[i] = buffer.getLong();
@@ -268,18 +268,18 @@ public class DataSummary extends DataCommon
 		} else {
 			numMetrics = (int) (info.piElements[profileNum].nValues - position1);
 		}
-		long numBytes  = (long)FMT_PROFILEDB_SZ_MVal * numMetrics;
+		long numBytes  = (long)FMT_PROFILEDB_SZ_MVAL * numMetrics;
 		
 		List<MetricValueSparse> values = FastList.newList(numMetrics);
 		var channel = getChannel();
-		var offset  = info.piElements[profileNum].pValues + position1 * FMT_PROFILEDB_SZ_MVal;
+		var offset  = info.piElements[profileNum].pValues + position1 * FMT_PROFILEDB_SZ_MVAL;
 		var buffer  = channel.map(MapMode.READ_ONLY, offset, numBytes);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		
 		for(int i=0; i<numMetrics; i++) {
 			// thanks to the alignment, we have to position every time looking for a record
 			// memory position should be just an assignment.
-			buffer.position(i * FMT_PROFILEDB_SZ_MVal);
+			buffer.position(i * FMT_PROFILEDB_SZ_MVAL);
 			
 			MetricValueSparse val = new MetricValueSparse();
 			val.setIndex(buffer.getShort());
@@ -624,8 +624,8 @@ public class DataSummary extends DataCommon
 	 *************************************************/
 	private static class ProfileInfoElement
 	{	
-		public static final int FMT_PROFILEDB_SZ_IdTupleElem = 0x10; 
-		public static final int FMT_PROFILEDB_SZ_IdTupleHdr = 0x08;
+		public static final int FMT_PROFILEDB_SZ_IDTUPLEELEM = 0x10; 
+		public static final int FMT_PROFILEDB_SZ_IDTUPLEHDR  = 0x08;
 		
 		/*
 		 * ProfileMajorSparseValueBlock:
@@ -671,14 +671,14 @@ public class DataSummary extends DataCommon
 			buffer.order(ByteOrder.LITTLE_ENDIAN);
 			short nIds = buffer.getShort();
 
-			long size = (long)nIds * FMT_PROFILEDB_SZ_IdTupleElem;
-			buffer = channel.map(MapMode.READ_ONLY, pIdTuple + FMT_PROFILEDB_SZ_IdTupleHdr, size);
+			long size = (long)nIds * FMT_PROFILEDB_SZ_IDTUPLEELEM;
+			buffer = channel.map(MapMode.READ_ONLY, pIdTuple + FMT_PROFILEDB_SZ_IDTUPLEHDR, size);
 			buffer.order(ByteOrder.LITTLE_ENDIAN);
 			
 			idt = new IdTuple(nIds);
 			
 			for(int i=0; i<nIds; i++) {
-				buffer.position(i * FMT_PROFILEDB_SZ_IdTupleElem);
+				buffer.position(i * FMT_PROFILEDB_SZ_IDTUPLEELEM);
 				byte kind  = buffer.get();
 				buffer.get();
 				short flag = buffer.getShort();

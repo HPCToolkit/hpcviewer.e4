@@ -32,11 +32,10 @@ import edu.rice.cs.hpctraceviewer.data.version2.FilteredBaseData;
  */
 public class SpaceTimeDataControllerLocal extends SpaceTimeDataController 
 {	
-	final static private int MIN_TRACE_SIZE = TraceDataByRank.HeaderSzMin + TraceDataByRank.RecordSzMin * 2;
-	final static public int RECORD_SIZE     = Constants.SIZEOF_LONG + Constants.SIZEOF_INT;
-	
+	private final static int MIN_TRACE_SIZE = TraceDataByRank.HeaderSzMin + TraceDataByRank.RecordSzMin * 2;
+	private final static int RECORD_SIZE    = Constants.SIZEOF_LONG + Constants.SIZEOF_INT;
+
 	private IFileDB fileDB;
-	
 	
 	/***
 	 * Constructor to setup local database
@@ -88,9 +87,11 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 		{
 			throw new RuntimeException("Unknown database version: " + version);
 		}
+		fileDB.open(traceFilePath, trAttribute.dbHeaderSize, RECORD_SIZE);
 		this.fileDB = fileDB;
-		this.fileDB.open(traceFilePath, trAttribute.dbHeaderSize, RECORD_SIZE);
-		dataTrace = new BaseData(fileDB);
+		
+		// TODO: ugly code
+		dataTrace  = new BaseData(getFileDB());  
 	}
 
 
@@ -106,6 +107,12 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 			log.error(e.getMessage());
 		}
 		return null;
+	}
+
+
+	@Override
+	protected IFileDB getFileDB() {
+		return fileDB;
 	}
 
 	
@@ -189,5 +196,4 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 			System.out.println();
 		}
 	}
-
 }

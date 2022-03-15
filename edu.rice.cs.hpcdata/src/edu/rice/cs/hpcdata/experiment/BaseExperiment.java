@@ -443,6 +443,5 @@ public abstract class BaseExperiment implements IExperiment
 	abstract protected void filter_finalize(RootScope rootMain, IFilterData filter);
 
 	abstract protected void open_finalize();
-
 }
  

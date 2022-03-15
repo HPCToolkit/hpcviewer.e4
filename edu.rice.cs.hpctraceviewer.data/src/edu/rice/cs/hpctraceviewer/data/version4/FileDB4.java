@@ -11,6 +11,8 @@ import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.db.version2.FileDB2;
 import edu.rice.cs.hpcdata.db.version4.DataSummary;
 import edu.rice.cs.hpcdata.db.version4.DataTrace;
+import edu.rice.cs.hpcdata.experiment.IExperiment;
+import edu.rice.cs.hpcdata.trace.TraceAttribute;
 
 
 /********************************************************************
@@ -23,8 +25,9 @@ import edu.rice.cs.hpcdata.db.version4.DataTrace;
  ********************************************************************/
 public class FileDB4 implements IFileDB 
 {
-	private DataTrace dataTrace;
-	private DataSummary dataSummary;
+	private final DataTrace   dataTrace;
+	private final DataSummary dataSummary;
+	private final IExperiment experiment;
 	
 	/*****
 	 * Creation of FileDB for sparse database version 4.
@@ -34,9 +37,10 @@ public class FileDB4 implements IFileDB
 	 * 			
 	 * @throws IOException
 	 */
-	public FileDB4(DataSummary dataSummary) throws IOException {
+	public FileDB4(IExperiment experiment, DataSummary dataSummary) throws IOException {
 		this.dataSummary = dataSummary;
-		dataTrace = new DataTrace();
+		this.dataTrace   = new DataTrace();
+		this.experiment  = experiment;
 	}
 
 
@@ -54,6 +58,13 @@ public class FileDB4 implements IFileDB
 			throws IOException 
 	{
 		dataTrace.open(directory);
+		
+		TraceAttribute attributes = new TraceAttribute();
+		attributes.dbTimeMin = dataTrace.getMinTime();
+		attributes.dbTimeMax = dataTrace.getMaxTime();
+		attributes.maxDepth  = experiment.getMaxDepth();
+		
+		experiment.setTraceAttribute(attributes);
 	}
 	
 
@@ -74,7 +85,6 @@ public class FileDB4 implements IFileDB
 
 	@Override
 	public long getLong(long position) throws IOException {
-
 		return dataTrace.getLong(position);
 	}
 
