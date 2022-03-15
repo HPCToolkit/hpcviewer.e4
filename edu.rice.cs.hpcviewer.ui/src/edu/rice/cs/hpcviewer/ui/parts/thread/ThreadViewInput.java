@@ -2,7 +2,6 @@ package edu.rice.cs.hpcviewer.ui.parts.thread;
 
 import java.util.List;
 
-import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 

@@ -26,6 +26,4 @@ Require-Bundle: com.graphbuilder,
  org.eclipse.collections,
  ca.odell.glazedlists
 Automatic-Module-Name: edu.rice.cs.hpcdata
-Bundle-ClassPath: .,
- lib/commons-lang3-3.11.jar,
- lib/commons-text-1.9.jar
+Bundle-ClassPath: .
