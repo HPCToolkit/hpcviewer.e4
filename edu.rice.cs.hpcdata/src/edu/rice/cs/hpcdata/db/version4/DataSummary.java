@@ -142,7 +142,7 @@ public class DataSummary extends DataCommon
 		
 		long position = info.piElements[profileNum].pCtxIndices;
 		var input = getChannel();
-		long size = FMT_PROFILEDB_SZ_CIdx * info.piElements[profileNum].nCtxs;
+		long size = (long)FMT_PROFILEDB_SZ_CIdx * info.piElements[profileNum].nCtxs;
 		
 		var buffer = input.map(MapMode.READ_ONLY, position, size);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
@@ -251,8 +251,6 @@ public class DataSummary extends DataCommon
 		
 		if (profileNum != INDEX_SUMMARY_PROFILE || list == null) {
 			list = getCCTIndex(profileNum+1);
-			if (list == null)
-				return null;
 		}
 		// search for the cct-id
 		// if it doesn't exist, we return empty metric (or throw an exception?)
@@ -270,7 +268,7 @@ public class DataSummary extends DataCommon
 		} else {
 			numMetrics = (int) (info.piElements[profileNum].nValues - position1);
 		}
-		long numBytes  = FMT_PROFILEDB_SZ_MVal * numMetrics;
+		long numBytes  = (long) (FMT_PROFILEDB_SZ_MVal * numMetrics);
 		
 		List<MetricValueSparse> values = FastList.newList(numMetrics);
 		var channel = getChannel();
@@ -673,7 +671,8 @@ public class DataSummary extends DataCommon
 			buffer.order(ByteOrder.LITTLE_ENDIAN);
 			short nIds = buffer.getShort();
 
-			buffer = channel.map(MapMode.READ_ONLY, pIdTuple + FMT_PROFILEDB_SZ_IdTupleHdr, nIds * FMT_PROFILEDB_SZ_IdTupleElem);
+			long size = (long)nIds * FMT_PROFILEDB_SZ_IdTupleElem;
+			buffer = channel.map(MapMode.READ_ONLY, pIdTuple + FMT_PROFILEDB_SZ_IdTupleHdr, size);
 			buffer.order(ByteOrder.LITTLE_ENDIAN);
 			
 			idt = new IdTuple(nIds);

@@ -46,8 +46,7 @@ class DataTraceReaderTest {
 	@Test
 	public void testgetRankLabels() {
 		var labels = data.getRankLabels();
-		assertTrue(labels != null && labels.length == 1);
-		assertTrue(labels[0].equals("Node 8323329 Thread 0"));		
+		assertTrue(labels != null && labels.length == 1 && labels[0].equals("Node 8323329 Thread 0"));		
 	}
 	
 	@Test

@@ -48,18 +48,15 @@ public class DataPlotTest {
 		assertTrue(dpe[0].metval >= 1.25E10);
 		
 		dpe = data.getPlotEntry(6, 0);
-		assertTrue(dpe != null && dpe.length == 1);
-		assertTrue(dpe[0].tid == 1);
+		assertTrue(dpe.length == 1 && dpe[0].tid == 1);
 		assertTrue(dpe[0].metval >= 5.86e+07);
 		
 		dpe = data.getPlotEntry(6, 1);
-		assertTrue(dpe != null && dpe.length == 1);
-		assertTrue(dpe[0].tid == 1);
+		assertTrue(dpe.length == 1 && dpe[0].tid == 1);
 		assertTrue(dpe[0].metval >= 5.86e+07);
 		
 		dpe = data.getPlotEntry(68, 2);
-		assertTrue(dpe != null && dpe.length == 1);
-		assertTrue(dpe[0].tid == 1);
+		assertTrue(dpe.length == 1 && dpe[0].tid == 1);
 		assertTrue(dpe[0].metval == 2);
 		
 		dpe = data.getPlotEntry(69, 0);

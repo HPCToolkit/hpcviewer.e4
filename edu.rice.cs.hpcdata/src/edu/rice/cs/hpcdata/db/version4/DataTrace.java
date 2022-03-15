@@ -69,7 +69,8 @@ public class DataTrace extends DataCommon
 		
 		TraceHeader traceHeadr = new TraceHeader(buffer);
 		
-		buffer = input.map(MapMode.READ_ONLY, traceHeadr.pTraces, traceHeadr.nTraces * traceHeadr.szTrace);
+		long size = (long)traceHeadr.nTraces * traceHeadr.szTrace;
+		buffer = input.map(MapMode.READ_ONLY, traceHeadr.pTraces, size);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		
 		traceCtxs = new TraceContext[traceHeadr.nTraces];
