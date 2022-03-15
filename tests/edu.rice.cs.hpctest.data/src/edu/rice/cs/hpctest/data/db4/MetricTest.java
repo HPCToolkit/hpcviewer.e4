@@ -38,7 +38,6 @@ public class MetricTest {
 			data.open(dbPath.getAbsolutePath());
 		});
 		data.open(new Experiment(), dbPath.getAbsolutePath());
-		data.finalize(null);
 		
 		try {
 			mvc = new MetricValueCollection3(data.getDataSummary());

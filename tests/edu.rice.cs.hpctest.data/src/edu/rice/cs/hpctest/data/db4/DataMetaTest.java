@@ -41,7 +41,6 @@ public class DataMetaTest
 			data.open(dbPath.getAbsolutePath());
 		});
 		data.open(new Experiment(), dbPath.getAbsolutePath());
-		data.finalize(null);
 	}
 	
 	

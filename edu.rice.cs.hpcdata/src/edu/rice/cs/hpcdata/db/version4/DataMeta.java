@@ -45,14 +45,11 @@ import edu.rice.cs.hpcdata.util.ICallPath;
  * Once instantiated, it requires to call consecutively:
  * <ul>
  *   <li>open the file
- *   <li>call the finalization
  * </ul>
- * Without finalization, the metric descriptors are not set correctly.
  * Example:
  * <pre>
  *   DataMeta dm = new DataMeta()
  *   dm.open(filename);
- *   dm.finalize(profileDB); // have to do this!
  * </pre>
  *
  *********************************************/
@@ -155,6 +152,8 @@ public class DataMeta extends DataCommon
 		exp.setMetrics(metrics);
 		
 		rootCCT.setMetricValueCollection(new MetricValueCollection3(dataSummary));
+		
+		stringArea.dispose();
 	}
 	
 	@Override
@@ -253,21 +252,6 @@ public class DataMeta extends DataCommon
 		return dataSummary;
 	}
 	
-	/******
-	 * Mandatory call once the opening is successful.
-	 * @param profileDB
-	 * 			The summary profile database
-	 */
-	public void finalize(DataSummary profileDB) {
-		// set the profile db to each metric
-		metrics.forEach((m)-> 
-			{if (m instanceof HierarchicalMetric) 
-				((HierarchicalMetric)m).setProfileDatabase(profileDB);
-			});
-		
-		// no string buffer needed
-		stringArea.dispose();
-	}
 	
 	/*****
 	 * Main function to parse the section header of meta.db file
@@ -444,6 +428,8 @@ public class DataMeta extends DataCommon
 			if (metric instanceof DerivedMetric) {
 				var dm = (DerivedMetric) metric;
 				dm.resetMetric((Experiment) experiment, rootCCT);
+			} else if (metric instanceof HierarchicalMetric) {
+				((HierarchicalMetric)metric).setProfileDatabase(dataSummary);
 			}
 		}
 	}
