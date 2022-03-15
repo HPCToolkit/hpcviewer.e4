@@ -1,6 +1,7 @@
 package edu.rice.cs.hpcdata.experiment;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import edu.rice.cs.hpcdata.db.IdTupleType;
@@ -11,6 +12,7 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.DisposeResourcesVisitor;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.FilterScopeVisitor;
 import edu.rice.cs.hpcdata.filter.IFilterData;
+import edu.rice.cs.hpcdata.tld.ThreadDataCollectionFactory;
 import edu.rice.cs.hpcdata.trace.BaseTraceAttribute;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
 import edu.rice.cs.hpcdata.util.ICallPath;
@@ -102,22 +104,18 @@ public abstract class BaseExperiment implements IExperiment
 	}
 	
 
-	/****
-	 * set the IThreadDataCollection object to this root
-	 * 
-	 * @param threadData
-	 */
-	public void setThreadData(IThreadDataCollection threadData) {
-		this.threadData = threadData;
-	}
-
-
 	/***
 	 * Return the IThreadDataCollection of this root if exists.
 	 * 
 	 * @return
+	 * @throws IOException 
 	 */
-	public IThreadDataCollection getThreadData() {
+	@Override
+	public IThreadDataCollection getThreadData() throws IOException {
+		if (threadData == null) {
+			var root = getRootScope(RootScopeType.CallingContextTree);
+			threadData = ThreadDataCollectionFactory.build(root);
+		}
 		return threadData;
 	}
 	

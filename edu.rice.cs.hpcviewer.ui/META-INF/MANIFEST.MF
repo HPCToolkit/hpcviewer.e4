@@ -6,7 +6,6 @@ Bundle-Version: 6.0.0.qualifier
 Bundle-Activator: edu.rice.cs.hpcviewer.ui.Activator
 Bundle-Vendor: Rice University
 Require-Bundle: edu.rice.cs.hpcdata,
- edu.rice.cs.hpcdata.tld,
  edu.rice.cs.hpcbase,
  edu.rice.cs.hpcfilter,
  org.eclipse.core.runtime,

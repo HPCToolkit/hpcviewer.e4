@@ -8,6 +8,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -231,9 +232,11 @@ public class ExperimentTest {
 
 
 	@Test
-	public void testGetThreadData() {
+	public void testGetThreadData() throws IOException {
 		for(var experiment: experiments) {
-			assertNull(experiment.getThreadData());
+			var name = experiment.getName();
+			if (!name.contains("loop"))
+				assertNull(experiment.getThreadData());
 		}
 	}
 

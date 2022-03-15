@@ -1,5 +1,6 @@
 package edu.rice.cs.hpcdata.experiment;
 
+import java.io.IOException;
 import java.util.List;
 
 import edu.rice.cs.hpcdata.db.IdTupleType;
@@ -42,19 +43,13 @@ public interface IExperiment {
 	public Scope getRootScope();
 	
 
-	/****
-	 * Set a thread data object
-	 * 
-	 * @param data_file
-	 */
-	public void setThreadData(IThreadDataCollection data_file);
-
 	/***
 	 * Return the IThreadDataCollection of this root if exists.
 	 * 
 	 * @return
+	 * @throws IOException 
 	 */
-	public IThreadDataCollection getThreadData();
+	public IThreadDataCollection getThreadData() throws IOException;
 
 	
 	/*******
