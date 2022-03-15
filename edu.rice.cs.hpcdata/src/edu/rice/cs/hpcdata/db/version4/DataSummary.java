@@ -178,13 +178,6 @@ public class DataSummary extends DataCommon
 	 * @return {@code List<IdTuple>}
 	 */
 	public List<IdTuple> getIdTuple(IdTupleOption option) {
-		if (listIdTuple == null) {
-			listIdTuple = FastList.newList();
-			for(ProfileInfoElement pi: info.piElements) {
-				if (pi.pIdTuple != 0)
-					listIdTuple.add(pi.idt);
-			}
-		}
 		return listIdTuple;
 	}
 	
@@ -373,10 +366,14 @@ public class DataSummary extends DataCommon
 		readProfInfo(input, sections[0]);
 		
 		// read the hierarchical id tuple 
+		listIdTuple = FastList.newList();
 		for(int i=0; i<info.nProfile; i++) {
 			info.piElements[i].readIdTuple(input, sections[1]);
 			numLevels = Math.max(numLevels, info.piElements[i].numLevels);
+			if (info.piElements[i].pIdTuple != 0)
+				listIdTuple.add(info.piElements[i].idt);
 		}
+
 		// eager initialization for the cct of the summary profile
 		// this summary will be loaded anyway. There is no harm to do it now. 
 		// ... or I think

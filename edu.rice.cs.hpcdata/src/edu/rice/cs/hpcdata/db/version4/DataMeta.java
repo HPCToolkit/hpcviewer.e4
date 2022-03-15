@@ -34,7 +34,9 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.source.SimpleSourceFile;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
+import edu.rice.cs.hpcdata.util.CallPath;
 import edu.rice.cs.hpcdata.util.Constants;
+import edu.rice.cs.hpcdata.util.ICallPath;
 
 
 /*********************************************
@@ -97,6 +99,7 @@ public class DataMeta extends DataCommon
 
 	private DataSummary dataSummary;
 	private IExperiment experiment;
+	private ICallPath   callpath;
 	private int maxDepth;
 	
 	/****
@@ -133,6 +136,8 @@ public class DataMeta extends DataCommon
 		root.addSubscope(rootCCT);
 		rootCCT.setParentScope(root);
 		
+		callpath = new CallPath();
+		this.experiment.setScopeMap(callpath);
 		this.experiment.setRootScope(root);
 		
 		maxDepth = 0;
@@ -657,7 +662,9 @@ public class DataMeta extends DataCommon
 				if (ps == null) {
 					ps = new ProcedureScope(root, lm, fs, line, line, Constants.PROCEDURE_UNKNOWN, alien, ctxId, ctxId, null, 0);
 				}
-				scope = new CallSiteScope(ls, ps, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, ctxId);	
+				scope = new CallSiteScope(ls, ps, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, ctxId);
+				callpath.addCallPath(ctxId, scope, maxDepth);
+				
 				break;
 			case FMT_METADB_LEXTYPE_Instruction:
 			case FMT_METADB_LEXTYPE_Line:
