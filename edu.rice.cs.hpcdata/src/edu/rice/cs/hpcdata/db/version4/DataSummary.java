@@ -268,7 +268,7 @@ public class DataSummary extends DataCommon
 		} else {
 			numMetrics = (int) (info.piElements[profileNum].nValues - position1);
 		}
-		long numBytes  = (long) (FMT_PROFILEDB_SZ_MVal * numMetrics);
+		long numBytes  = (long)FMT_PROFILEDB_SZ_MVal * numMetrics;
 		
 		List<MetricValueSparse> values = FastList.newList(numMetrics);
 		var channel = getChannel();

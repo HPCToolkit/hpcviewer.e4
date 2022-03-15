@@ -73,14 +73,14 @@ public class DataMeta extends DataCommon
 	private static final int INDEX_FILES   = 6;
 	private static final int INDEX_FUNCTIONS = 7;
 	
-	private static final int FMT_METADB_RELATION_LexicalNest = 0;
-	private static final int FMT_METADB_RELATION_Call = 1;
-	private static final int FMT_METADB_RELATION_InlinedCall = 2;
+	private static final int FMT_METADB_RELATION_LEXICAL_NEST = 0;
+	private static final int FMT_METADB_RELATION_CALL = 1;
+	private static final int FMT_METADB_RELATION_CALL_INLINED = 2;
 
-	private static final int FMT_METADB_LEXTYPE_Function = 0;
-	private static final int FMT_METADB_LEXTYPE_Loop = 1;
-	private static final int FMT_METADB_LEXTYPE_Line = 2;
-	private static final int FMT_METADB_LEXTYPE_Instruction = 3;
+	private static final int FMT_METADB_LEXTYPE_FUNCTION = 0;
+	private static final int FMT_METADB_LEXTYPE_LOOP = 1;
+	private static final int FMT_METADB_LEXTYPE_LINE = 2;
+	private static final int FMT_METADB_LEXTYPE_INSTRUCTION = 3;
 			  
 	private String title;
 	private String description;
@@ -631,12 +631,12 @@ public class DataMeta extends DataCommon
 
 			boolean alien = false;
 			switch(relation) {
-			case FMT_METADB_RELATION_LexicalNest:
+			case FMT_METADB_RELATION_LEXICAL_NEST:
 				break;
-			case FMT_METADB_RELATION_InlinedCall:
+			case FMT_METADB_RELATION_CALL_INLINED:
 				alien = true;
 				break;
-			case FMT_METADB_RELATION_Call:
+			case FMT_METADB_RELATION_CALL:
 				maxDepth++;
 				break;
 			default:
@@ -644,7 +644,7 @@ public class DataMeta extends DataCommon
 			}
 
 			switch(lexicalType) {
-			case FMT_METADB_LEXTYPE_Function:
+			case FMT_METADB_LEXTYPE_FUNCTION:
 				LineScope ls = new LineScope(root, fs, line, ctxId, ctxId);
 				if (ps == null) {
 					ps = new ProcedureScope(root, lm, fs, line, line, Constants.PROCEDURE_UNKNOWN, alien, ctxId, ctxId, null, 0);
@@ -653,11 +653,11 @@ public class DataMeta extends DataCommon
 				callpath.addCallPath(ctxId, scope, maxDepth);
 				
 				break;
-			case FMT_METADB_LEXTYPE_Instruction:
-			case FMT_METADB_LEXTYPE_Line:
+			case FMT_METADB_LEXTYPE_INSTRUCTION:
+			case FMT_METADB_LEXTYPE_LINE:
 				scope = new LineScope(root, fs, line, ctxId, ctxId);
 				break;
-			case FMT_METADB_LEXTYPE_Loop:
+			case FMT_METADB_LEXTYPE_LOOP:
 				scope = new LoopScope(root, fs, line, line, ctxId, ctxId);
 				break;
 			default:
