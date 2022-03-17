@@ -81,25 +81,41 @@ public class ProcedureScope extends Scope  implements IMergedScope
 //////////////////////////////////////////////////////////////////////////
 
 
-
-
-/*************************************************************************
+	
+/***
  *	Creates a ProcedureScope.
- * Laks 2008.08.25: We need a special constructor to accept the SID
  * 
- * @param experiment
+ * @param root
+ * 			the root scope
+ * @param loadModule
+ * 			The load module
  * @param file
+ * 			The file of this procedure
  * @param first
+ * 			start line number
  * @param last
+ * 			last line number
  * @param proc
- * @param sid
+ * 			The name of the procedure
  * @param _isalien
+ * 			boolean true if the procedure is inlined
+ * @param cct_id
+ * 			unique id
+ * @param flat_id
+ * 			static id of the procedure. Used to create flat view
+ * @param userData
+ * 			User's defined name
+ * @param procedureFeature 
+ * 			{@code int}
+ * 			kind of procedure: FeatureProcedure, FeaturePlaceHolder, 
+ * 			FeatureRoot, FeatureElided and FeatureTopDown
  */
 public ProcedureScope(RootScope root, LoadModuleScope loadModule, SourceFile file, 
 		int first, int last, String proc, boolean _isalien, int cct_id, int flat_id, 
 		IUserData<String,String> userData, int procedureFeature)
 {
 	super(root, file, first, last, cct_id, flat_id);
+	
 	this.isalien = _isalien;
 	this.procedureName = proc;
 
@@ -116,9 +132,7 @@ public ProcedureScope(RootScope root, LoadModuleScope loadModule, SourceFile fil
 		if (!procedureName.startsWith(INLINE_NOTATION))
 			procedureName = INLINE_NOTATION + procedureName;
 	}
-	this.objLoadModule 	  = null;
 	this.procedureFeature = procedureFeature;
-	//this.iScopeID = sid;
 	this.objLoadModule = loadModule;
 }
 
@@ -182,11 +196,11 @@ public void accept(IScopeVisitor visitor, ScopeVisitType vt) {
 public LoadModuleScope getLoadModule() {
 	return this.objLoadModule;
 }
-/*
-public int getSID() {
-	return this.iScopeID;
-} */
 
+
+//////////////////////////////////////////////////////////////////////////
+//support for bottom-up visitors										//
+//////////////////////////////////////////////////////////////////////////
 
 @Override
 public List<Scope> getAllChildren(/*AbstractFinalizeMetricVisitor finalizeVisitor, PercentScopeVisitor percentVisitor,*/
@@ -195,6 +209,16 @@ public List<Scope> getAllChildren(/*AbstractFinalizeMetricVisitor finalizeVisito
 {
 	return this.getChildren();
 }
+
+
+//////////////////////////////////////////////////////////////////////////
+// misc
+//////////////////////////////////////////////////////////////////////////
+
+public void setLoadModule(LoadModuleScope lm) {
+	this.objLoadModule = lm;
+}
+
 
 public boolean isTopDownProcedure() 
 {	
@@ -224,6 +248,11 @@ public ProcedureType getProcedureType() {
 @Override
 public boolean hasScopeChildren() {
 	return node.hasChildren();
+}
+
+
+public void setAlien(boolean alien) {
+	this.isalien = alien;
 }
 
 }

@@ -395,6 +395,17 @@ implements IMetricScope
 		return this.sourceFile;
 	}
 
+	
+	/*************************************************************************
+	 * Set the scope to a new source file
+	 * 
+	 * @param sourceFile
+	 * 			A source file to be assigned. It can be null.
+	 ************************************************************************/
+	public void setSourceFile(SourceFile sourceFile) 
+	{
+		this.sourceFile = sourceFile;
+	}
 
 	/*************************************************************************
 	 *	Returns the first line number of this scope in its source file.

@@ -93,6 +93,7 @@ public class DataMeta extends DataCommon
 	private LongObjectMap<LoadModuleScope>    mapLoadModules;
 	private LongObjectHashMap<SourceFile>     mapFiles;
 	private LongObjectHashMap<ProcedureScope> mapProcedures;
+	
 	private RootScope root, rootCCT;
 	
 	private StringArea stringArea;
@@ -104,6 +105,10 @@ public class DataMeta extends DataCommon
 	private ICallPath   callpath;
 	private int maxDepth;
 
+	public DataMeta() {
+		super();
+	}
+	
 	// --------------------------------------------------------------------
 	// methods
 	// --------------------------------------------------------------------
@@ -415,19 +420,21 @@ public class DataMeta extends DataCommon
 											
 					var strFormula = getNullTerminatedString(buffer, (int) (pFormula-section.offset));
 					
-					if (scopeName.equals(METRIC_SCOPE_POINT)) 
-						continue;
-					
 					var m = new HierarchicalMetric(dataSummary, statMetric, metricName);
 					m.setFormula(strFormula);
+					m.setCombineType(combine);
+					m.setOrder(propMetricId);
+					
 					MetricType type = scopeName.equals(METRIC_SCOPE_EXECUTION) ? 
 														MetricType.INCLUSIVE : 
 														MetricType.EXCLUSIVE;
 					m.setMetricType(type);
-					m.setCombineType(combine);
-					m.setDisplayed(VisibilityType.SHOW);
-					m.setOrder(propMetricId);
-					
+										
+					VisibilityType vt = scopeName.equals(METRIC_SCOPE_POINT) ? 
+										VisibilityType.HIDE : 
+										VisibilityType.SHOW; 
+					m.setDisplayed(vt);
+
 					metrics.add(m);
 				}
 			}
@@ -474,7 +481,8 @@ public class DataMeta extends DataCommon
 			String path      = stringArea.toString(pModuleName);
 			
 			LoadModuleScope lms = new LoadModuleScope(rootCCT, path, null, i);
-			mapLoadModules.put(pModules + delta, lms);
+			long key = pModules + delta;
+			mapLoadModules.put(key, lms);
 		}
 		return mapLoadModules;
 	}
@@ -509,7 +517,8 @@ public class DataMeta extends DataCommon
 			String  name = stringArea.toString(pPath);
 			
 			SourceFile sf = new SimpleSourceFile(i, new File(name), available);
-			mapSourceFile.put(pFiles + delta, sf);
+			long key = pFiles + delta;
+			mapSourceFile.put(key, sf);
 		}
 		return mapSourceFile;
 	}
@@ -546,8 +555,15 @@ public class DataMeta extends DataCommon
 			var lms  = mapLoadModules.get(pModule);
 			var file = mapFiles.get(pFile);
 			
+			if (file == null)
+				file = SourceFile.NONE;
+			if (lms == null)
+				lms = LoadModuleScope.NONE;
+			
 			ProcedureScope ps = new ProcedureScope(rootCCT, lms, file, line, line, name, false, i, i, null, 0);
-			mapProcedures.put(position, ps);
+			
+			long key = pFunctions + (i * szFunctions);
+			mapProcedures.put(key, ps);
 		}
 		return mapProcedures;
 	}
@@ -573,7 +589,7 @@ public class DataMeta extends DataCommon
 										long size) 
 					throws IOException {
 		
-		RootScope root = parent.getRootScope();
+		final RootScope root = parent.getRootScope();
 		int loc = (int) (startLocation - sections[INDEX_CONTEXT].offset);
 		long ctxSize = size;
 		
@@ -630,69 +646,125 @@ public class DataMeta extends DataCommon
 				nwords++;
 			}
 			var ps = mapProcedures.get(pFunction);
-			var fs = mapFiles.get(pFile);
-			var lm = mapLoadModules.get(pModule);
-			
-			if (fs == null)
-				fs = SourceFile.NONE;
-			if (lm == null)
-				lm = LoadModuleScope.NONE;
+			var fs = mapFiles.getIfAbsent(pFile, ()->SourceFile.NONE);
+			var lm = mapLoadModules.getIfAbsent(pModule, ()->LoadModuleScope.NONE);
 			
 			Scope scope = null;
 
-			boolean alien = false;
-			switch(relation) {
-			case FMT_METADB_RELATION_LEXICAL_NEST:
-				break;
-			case FMT_METADB_RELATION_CALL_INLINED:
-				maxDepth++;
-				alien = true;
-				break;
-			case FMT_METADB_RELATION_CALL:
-				maxDepth++;
-				break;
-			default:
-				throw new RuntimeException("Invalid node relation field");
-			}
-
 			switch(lexicalType) {
 			case FMT_METADB_LEXTYPE_FUNCTION:
-				LineScope ls = new LineScope(root, fs, line, ctxId, ctxId);
-				if (ps == null) {
-					ps = new ProcedureScope(root, lm, fs, line, line, Constants.PROCEDURE_UNKNOWN, alien, ctxId, ctxId, null, 0);
-				}
-				scope = new CallSiteScope(ls, ps, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, ctxId);
-				
-				break;
-			case FMT_METADB_LEXTYPE_INSTRUCTION:
-			case FMT_METADB_LEXTYPE_LINE:
-				scope = new LineScope(root, fs, line, ctxId, ctxId);
+				scope = createLexicalFunction(root, parent, lm, fs, ps, ctxId, line, relation);				
 				break;
 			case FMT_METADB_LEXTYPE_LOOP:
 				scope = new LoopScope(root, fs, line, line, ctxId, ctxId);
 				break;
+			case FMT_METADB_LEXTYPE_LINE:
+				scope = new LineScope(root, fs, line, ctxId, ctxId);
+				break;
+			case FMT_METADB_LEXTYPE_INSTRUCTION:
+				//scope = new LineScope(root, fs, line, ctxId, ctxId);
+				//scope = createLexicalInstruction(parent, lm, fs, ctxId, line, relation);
+				//break;
 			default:
 				throw new RuntimeException("Invalid node relation field");
 			}
-			parent.addSubscope(scope);
-			scope.setParentScope(parent);
-
-			callpath.addCallPath(ctxId, scope, maxDepth);
+			var newParent = beginNewScope(parent, scope);					
 
 			// recursively parse the children
-			parseChildrenContext(buffer, scope, pChildren, szChildren);
+			parseChildrenContext(buffer, newParent, pChildren, szChildren);
 			
 			// check if we still have space for other children
 			long szAdditionalCtx = FMT_METADB_SZ_Context(nFlexWords);
-			if (ctxSize >= szAdditionalCtx) {
-				ctxSize -= szAdditionalCtx;
-				loc += szAdditionalCtx;			
-			} else {
+			if (ctxSize < szAdditionalCtx) {
 				break;
 			}
+			ctxSize -= szAdditionalCtx;
+			loc += szAdditionalCtx;			
 		}
 	}
 
+	/****
+	 * Begin a new scope if needed. If the child scope doesn't exist
+	 * (null value), it doesn't create a child tree and just returns the parent.
+	 * 
+	 * @param parent
+	 * @param scope
+	 * 
+	 * @return {@code Scope}
+	 * 			a new parent if the child scope is valid. 
+	 * 			Otherwise returns the parent itself.
+	 */
+	private Scope beginNewScope(Scope parent, Scope scope) {
+		if (scope == null)
+			return parent;
+		
+		parent.addSubscope(scope);
+		scope.setParentScope(parent);
+
+		maxDepth++;
+		callpath.addCallPath(scope.getCCTIndex(), scope, maxDepth);
+
+		return scope;
+	}
+	
+	
+	/***
+	 * Create a lexical function scope.
+	 * 
+	 * @param root
+	 * @param parent
+	 * @param lm
+	 * @param fs
+	 * @param ps
+	 * @param ctxId
+	 * @param line
+	 * @param relation
+	 * 
+	 * @return {@code Scope}
+	 * 			A call site scope if the line scope exists.
+	 * 			A procedure scope otherwise.
+	 */
+	private Scope createLexicalFunction(RootScope root, 
+										Scope parent, 
+										LoadModuleScope lm,
+										SourceFile fs,
+										ProcedureScope ps, 
+										int ctxId, int line, int relation) {
+		
+		boolean alien  = relation == FMT_METADB_RELATION_CALL_INLINED;
+		var fileSource = fs == null ? SourceFile.NONE : fs;
+		
+		if (!(parent instanceof LineScope)) {
+			// no call site in the stack: it must be a procedure scope
+			String name = Constants.PROCEDURE_UNKNOWN;
+			if (ps != null)
+				name = ps.getName();
+			
+			return new ProcedureScope(root, lm, fileSource, line, line, name, alien, ctxId, ctxId, null, ProcedureScope.FeatureProcedure);
+		}
+		ProcedureScope proc;
+		if (ps == null) {
+			proc = new ProcedureScope(root, lm, fileSource, line, line, Constants.PROCEDURE_UNKNOWN, alien, ctxId, ctxId, null, ProcedureScope.FeatureProcedure);
+		} else {
+			proc = ps;
+			proc.setAlien(alien);
+		}
+		LineScope ls = (LineScope) parent;
+		var cs = new CallSiteScope(ls, ps, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, ctxId);
+		
+		// Only the line statement knows where the source file is
+		// If the line statement is unknown then the source file is unknown.
+		cs.setSourceFile(ls.getSourceFile());
+		
+		// since we merge the line scope to this call site,
+		// we have to remove the line scope from the parent
+		Scope grandParent = parent.getParentScope();
+		grandParent.remove(parent);
+		grandParent.addSubscope(cs);
+		cs.setParentScope(grandParent);
+		
+		return cs;
+	}
 	
 	/***
 	 * Create the main root and parse its direct children
