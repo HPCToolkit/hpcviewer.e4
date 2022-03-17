@@ -78,7 +78,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetVisibleMetrics() {
-		int num[] = new int[] {97, 2, 0, 2};
+		int num[] = new int[] {97, 2, 0, 3};
 		int i = 0;
 		for(var experiment: experiments) {
 			List<BaseMetric> metrics = experiment.getVisibleMetrics();
