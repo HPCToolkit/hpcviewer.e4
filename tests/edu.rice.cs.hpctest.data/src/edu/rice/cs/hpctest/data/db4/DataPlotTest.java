@@ -47,11 +47,11 @@ public class DataPlotTest {
 		assertTrue(dpe[0].tid == 1);
 		assertTrue(dpe[0].metval >= 1.25E10);
 		
-		dpe = data.getPlotEntry(6, 0);
+		dpe = data.getPlotEntry(7, 1);
 		assertTrue(dpe.length == 1 && dpe[0].tid == 1);
 		assertTrue(dpe[0].metval >= 5.86e+07);
 		
-		dpe = data.getPlotEntry(6, 1);
+		dpe = data.getPlotEntry(7, 2);
 		assertTrue(dpe.length == 1 && dpe[0].tid == 1);
 		assertTrue(dpe[0].metval >= 5.86e+07);
 		
@@ -60,6 +60,9 @@ public class DataPlotTest {
 		assertTrue(dpe[0].metval == 2);
 		
 		dpe = data.getPlotEntry(69, 0);
+		assertTrue(dpe == null);
+		
+		dpe = data.getPlotEntry(70, 0);
 		assertTrue(dpe == null);
 	}
 }
