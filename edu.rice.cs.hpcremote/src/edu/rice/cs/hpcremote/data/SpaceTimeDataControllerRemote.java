@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 
+import edu.rice.cs.hpcdata.db.IFileDB;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 import edu.rice.cs.hpcdata.experiment.extdata.IFilteredData;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
@@ -164,5 +165,12 @@ public class SpaceTimeDataControllerRemote extends SpaceTimeDataController
 	@Override
 	public String getName() {
 		return exp.getName();
+	}
+
+
+	@Override
+	protected IFileDB getFileDB() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

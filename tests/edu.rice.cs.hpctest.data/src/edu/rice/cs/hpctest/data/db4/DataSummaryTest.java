@@ -68,9 +68,9 @@ public class DataSummaryTest {
 	@Test
 	public void testGetMetricsInt() throws IOException {
 		List<MetricValueSparse> list = data.getMetrics(3);
-		assertTrue(list.size() == 1); // 
+		assertTrue(list.size() == 2); // 
 		
-		MetricValueSparse mvs = list.get(0);
+		MetricValueSparse mvs = list.get(1);
 		assertTrue(mvs.getIndex() == 2);
 		assertTrue(mvs.getValue() > 1.25281e+10);
 	}	

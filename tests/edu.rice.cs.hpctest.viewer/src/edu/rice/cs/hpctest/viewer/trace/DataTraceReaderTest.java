@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.db.version4.DataSummary;
+import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpctraceviewer.data.version4.FileDB4;
 
 class DataTraceReaderTest {
@@ -33,7 +34,7 @@ class DataTraceReaderTest {
 		DataSummary ds = new DataSummary(IdTupleType.createTypeWithOldFormat());
 		ds.open(dbPath.getAbsolutePath());
 		
-		data = new FileDB4(ds);
+		data = new FileDB4(new Experiment(), ds);
 		data.open(dbPath.getAbsolutePath(), 0, 0);
 	}
 
@@ -46,8 +47,7 @@ class DataTraceReaderTest {
 	@Test
 	public void testgetRankLabels() {
 		var labels = data.getRankLabels();
-		assertTrue(labels != null && labels.length == 1);
-		assertTrue(labels[0].equals("Node 8323329 Thread 0"));		
+		assertTrue(labels != null && labels.length == 1 && labels[0].equals("Node 8323329 Thread 0"));		
 	}
 	
 	@Test
@@ -65,7 +65,7 @@ class DataTraceReaderTest {
 	@Test
 	public void testMaxLoc() {
 		var ml = data.getMaxLoc(0);
-		assertTrue(ml == 10160);
+		assertTrue(ml == 10136);
 	}
 	
 	@Test

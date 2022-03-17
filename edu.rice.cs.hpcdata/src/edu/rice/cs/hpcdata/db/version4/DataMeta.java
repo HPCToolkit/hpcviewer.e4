@@ -45,14 +45,11 @@ import edu.rice.cs.hpcdata.util.ICallPath;
  * Once instantiated, it requires to call consecutively:
  * <ul>
  *   <li>open the file
- *   <li>call the finalization
  * </ul>
- * Without finalization, the metric descriptors are not set correctly.
  * Example:
  * <pre>
  *   DataMeta dm = new DataMeta()
  *   dm.open(filename);
- *   dm.finalize(profileDB); // have to do this!
  * </pre>
  *
  *********************************************/
@@ -64,8 +61,9 @@ public class DataMeta extends DataCommon
 	public static final String  DB_META_FILE       = "meta.db";
 	
 	private final static String HEADER_MAGIC_STR   = "HPCTOOLKITmeta";
-	private final static String METRIC_SCOPE_POINT = "point";
-	private static final String METRIC_SCOPE_EXECUTION    = "execution";
+	
+	private final static String METRIC_SCOPE_POINT     = "point";
+	private static final String METRIC_SCOPE_EXECUTION = "execution";
 		
 	private static final int INDEX_GENERAL = 0;
 	private static final int INDEX_NAMES   = 1;
@@ -76,14 +74,18 @@ public class DataMeta extends DataCommon
 	private static final int INDEX_FILES   = 6;
 	private static final int INDEX_FUNCTIONS = 7;
 	
-	private static final int FMT_METADB_RELATION_LexicalNest = 0;
-	private static final int FMT_METADB_RELATION_Call = 1;
-	private static final int FMT_METADB_RELATION_InlinedCall = 2;
+	private static final int FMT_METADB_RELATION_LEXICAL_NEST = 0;
+	private static final int FMT_METADB_RELATION_CALL = 1;
+	private static final int FMT_METADB_RELATION_CALL_INLINED = 2;
 
-	private static final int FMT_METADB_LEXTYPE_Function = 0;
-	private static final int FMT_METADB_LEXTYPE_Loop = 1;
-	private static final int FMT_METADB_LEXTYPE_Line = 2;
-	private static final int FMT_METADB_LEXTYPE_Instruction = 3;
+	private static final int FMT_METADB_LEXTYPE_FUNCTION = 0;
+	private static final int FMT_METADB_LEXTYPE_LOOP = 1;
+	private static final int FMT_METADB_LEXTYPE_LINE = 2;
+	private static final int FMT_METADB_LEXTYPE_INSTRUCTION = 3;
+
+	// --------------------------------------------------------------------
+	// variables
+	// --------------------------------------------------------------------
 			  
 	private String title;
 	private String description;
@@ -91,6 +93,7 @@ public class DataMeta extends DataCommon
 	private LongObjectMap<LoadModuleScope>    mapLoadModules;
 	private LongObjectHashMap<SourceFile>     mapFiles;
 	private LongObjectHashMap<ProcedureScope> mapProcedures;
+	
 	private RootScope root, rootCCT;
 	
 	private StringArea stringArea;
@@ -101,6 +104,14 @@ public class DataMeta extends DataCommon
 	private IExperiment experiment;
 	private ICallPath   callpath;
 	private int maxDepth;
+
+	public DataMeta() {
+		super();
+	}
+	
+	// --------------------------------------------------------------------
+	// methods
+	// --------------------------------------------------------------------
 	
 	/****
 	 * Get the experiment object
@@ -155,6 +166,8 @@ public class DataMeta extends DataCommon
 		exp.setMetrics(metrics);
 		
 		rootCCT.setMetricValueCollection(new MetricValueCollection3(dataSummary));
+		
+		stringArea.dispose();
 	}
 	
 	@Override
@@ -253,21 +266,6 @@ public class DataMeta extends DataCommon
 		return dataSummary;
 	}
 	
-	/******
-	 * Mandatory call once the opening is successful.
-	 * @param profileDB
-	 * 			The summary profile database
-	 */
-	public void finalize(DataSummary profileDB) {
-		// set the profile db to each metric
-		metrics.forEach((m)-> 
-			{if (m instanceof HierarchicalMetric) 
-				((HierarchicalMetric)m).setProfileDatabase(profileDB);
-			});
-		
-		// no string buffer needed
-		stringArea.dispose();
-	}
 	
 	/*****
 	 * Main function to parse the section header of meta.db file
@@ -286,13 +284,14 @@ public class DataMeta extends DataCommon
 		parseGeneralDescription(channel, sections[INDEX_GENERAL]);
 		
 		// grab the id-tuple type names
-		parseHierarchicalIdTuple(channel, sections[INDEX_NAMES]);
+		var idTupleTypes = parseHierarchicalIdTuple(channel, sections[INDEX_NAMES]);
+		experiment.setIdTupleType(idTupleTypes);
 
 		// prepare profile.db parser
 		dataSummary = new DataSummary(experiment.getIdTupleType());
 
 		// grab the description of the metrics
-		parseMetricDescription(channel, sections[INDEX_METRICS]);
+		metrics = parseMetricDescription(channel, sections[INDEX_METRICS]);
 		
 		// grab the string block to be used later
 		var buffer = channel.map(MapMode.READ_ONLY, sections[INDEX_STRINGS].offset, sections[INDEX_STRINGS].size);
@@ -346,7 +345,7 @@ public class DataMeta extends DataCommon
 	 * @param section
 	 * @throws IOException
 	 */
-	private void parseHierarchicalIdTuple(FileChannel channel, DataSection section) 
+	private IdTupleType parseHierarchicalIdTuple(FileChannel channel, DataSection section) 
 			throws IOException {
 		var buffer = channel.map(MapMode.READ_ONLY, section.offset, section.size);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
@@ -367,7 +366,7 @@ public class DataMeta extends DataCommon
 			String kind  = getNullTerminatedString(buffer, position);
 			idTupleTypes.add(i, kind);
 		}
-		experiment.setIdTupleType(idTupleTypes);
+		return idTupleTypes;
 	}
 	
 	
@@ -377,7 +376,7 @@ public class DataMeta extends DataCommon
 	 * @param section
 	 * @throws IOException
 	 */
-	private void parseMetricDescription(FileChannel channel, DataSection section) 
+	private List<BaseMetric> parseMetricDescription(FileChannel channel, DataSection section) 
 			throws IOException {
 		var buffer = channel.map(MapMode.READ_ONLY, section.offset, section.size);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
@@ -387,7 +386,7 @@ public class DataMeta extends DataCommon
 		var szScope  = buffer.get(0x0d);
 		var szSummary = buffer.get(0x0e);
 		
-		metrics = new ArrayList<>(nMetrics);
+		var metrics = new ArrayList<BaseMetric>(nMetrics);
 		int position = (int) (pMetrics - section.offset);
 		
 		for(int i=0; i<nMetrics; i++) {
@@ -421,19 +420,21 @@ public class DataMeta extends DataCommon
 											
 					var strFormula = getNullTerminatedString(buffer, (int) (pFormula-section.offset));
 					
-					if (scopeName.equals(METRIC_SCOPE_POINT)) 
-						continue;
-					
 					var m = new HierarchicalMetric(dataSummary, statMetric, metricName);
 					m.setFormula(strFormula);
+					m.setCombineType(combine);
+					m.setOrder(propMetricId);
+					
 					MetricType type = scopeName.equals(METRIC_SCOPE_EXECUTION) ? 
 														MetricType.INCLUSIVE : 
 														MetricType.EXCLUSIVE;
 					m.setMetricType(type);
-					m.setCombineType(combine);
-					m.setDisplayed(VisibilityType.SHOW);
-					m.setOrder(propMetricId);
-					
+										
+					VisibilityType vt = scopeName.equals(METRIC_SCOPE_POINT) ? 
+										VisibilityType.HIDE : 
+										VisibilityType.SHOW; 
+					m.setDisplayed(vt);
+
 					metrics.add(m);
 				}
 			}
@@ -444,8 +445,11 @@ public class DataMeta extends DataCommon
 			if (metric instanceof DerivedMetric) {
 				var dm = (DerivedMetric) metric;
 				dm.resetMetric((Experiment) experiment, rootCCT);
+			} else if (metric instanceof HierarchicalMetric) {
+				((HierarchicalMetric)metric).setProfileDatabase(dataSummary);
 			}
 		}
+		return metrics;
 	}
 	
 	
@@ -477,7 +481,8 @@ public class DataMeta extends DataCommon
 			String path      = stringArea.toString(pModuleName);
 			
 			LoadModuleScope lms = new LoadModuleScope(rootCCT, path, null, i);
-			mapLoadModules.put(pModules + delta, lms);
+			long key = pModules + delta;
+			mapLoadModules.put(key, lms);
 		}
 		return mapLoadModules;
 	}
@@ -512,7 +517,8 @@ public class DataMeta extends DataCommon
 			String  name = stringArea.toString(pPath);
 			
 			SourceFile sf = new SimpleSourceFile(i, new File(name), available);
-			mapSourceFile.put(pFiles + delta, sf);
+			long key = pFiles + delta;
+			mapSourceFile.put(key, sf);
 		}
 		return mapSourceFile;
 	}
@@ -549,8 +555,15 @@ public class DataMeta extends DataCommon
 			var lms  = mapLoadModules.get(pModule);
 			var file = mapFiles.get(pFile);
 			
+			if (file == null)
+				file = SourceFile.NONE;
+			if (lms == null)
+				lms = LoadModuleScope.NONE;
+			
 			ProcedureScope ps = new ProcedureScope(rootCCT, lms, file, line, line, name, false, i, i, null, 0);
-			mapProcedures.put(position, ps);
+			
+			long key = pFunctions + (i * szFunctions);
+			mapProcedures.put(key, ps);
 		}
 		return mapProcedures;
 	}
@@ -576,7 +589,7 @@ public class DataMeta extends DataCommon
 										long size) 
 					throws IOException {
 		
-		RootScope root = parent.getRootScope();
+		final RootScope root = parent.getRootScope();
 		int loc = (int) (startLocation - sections[INDEX_CONTEXT].offset);
 		long ctxSize = size;
 		
@@ -633,66 +646,125 @@ public class DataMeta extends DataCommon
 				nwords++;
 			}
 			var ps = mapProcedures.get(pFunction);
-			var fs = mapFiles.get(pFile);
-			var lm = mapLoadModules.get(pModule);
-			
-			if (fs == null)
-				fs = SourceFile.NONE;
-			if (lm == null)
-				lm = LoadModuleScope.NONE;
+			var fs = mapFiles.getIfAbsent(pFile, ()->SourceFile.NONE);
+			var lm = mapLoadModules.getIfAbsent(pModule, ()->LoadModuleScope.NONE);
 			
 			Scope scope = null;
 
-			boolean alien = false;
-			switch(relation) {
-			case FMT_METADB_RELATION_LexicalNest:
-				break;
-			case FMT_METADB_RELATION_InlinedCall:
-				alien = true;
-			case FMT_METADB_RELATION_Call:
-				maxDepth++;
-				break;
-			default:
-				throw new RuntimeException("Invalid node relation field");
-			}
-
 			switch(lexicalType) {
-			case FMT_METADB_LEXTYPE_Function:
-				LineScope ls = new LineScope(root, fs, line, ctxId, ctxId);
-				if (ps == null) {
-					ps = new ProcedureScope(root, lm, fs, line, line, Constants.PROCEDURE_UNKNOWN, alien, ctxId, ctxId, null, 0);
-				}
-				scope = new CallSiteScope(ls, ps, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, ctxId);
-				callpath.addCallPath(ctxId, scope, maxDepth);
-				
+			case FMT_METADB_LEXTYPE_FUNCTION:
+				scope = createLexicalFunction(root, parent, lm, fs, ps, ctxId, line, relation);				
 				break;
-			case FMT_METADB_LEXTYPE_Instruction:
-			case FMT_METADB_LEXTYPE_Line:
-				scope = new LineScope(root, fs, line, ctxId, ctxId);
-				break;
-			case FMT_METADB_LEXTYPE_Loop:
+			case FMT_METADB_LEXTYPE_LOOP:
 				scope = new LoopScope(root, fs, line, line, ctxId, ctxId);
 				break;
+			case FMT_METADB_LEXTYPE_LINE:
+				scope = new LineScope(root, fs, line, ctxId, ctxId);
+				break;
+			case FMT_METADB_LEXTYPE_INSTRUCTION:
+				//scope = new LineScope(root, fs, line, ctxId, ctxId);
+				//scope = createLexicalInstruction(parent, lm, fs, ctxId, line, relation);
+				//break;
 			default:
 				throw new RuntimeException("Invalid node relation field");
 			}
-			parent.addSubscope(scope);
-			scope.setParentScope(parent);
-			
+			var newParent = beginNewScope(parent, scope);					
+
 			// recursively parse the children
-			parseChildrenContext(buffer, scope, pChildren, szChildren);
+			parseChildrenContext(buffer, newParent, pChildren, szChildren);
 			
 			// check if we still have space for other children
 			long szAdditionalCtx = FMT_METADB_SZ_Context(nFlexWords);
-			if (ctxSize >= szAdditionalCtx) {
-				ctxSize -= szAdditionalCtx;
-				loc += szAdditionalCtx;			
-			} else {
+			if (ctxSize < szAdditionalCtx) {
 				break;
 			}
+			ctxSize -= szAdditionalCtx;
+			loc += szAdditionalCtx;			
 		}
 	}
 
+	/****
+	 * Begin a new scope if needed. If the child scope doesn't exist
+	 * (null value), it doesn't create a child tree and just returns the parent.
+	 * 
+	 * @param parent
+	 * @param scope
+	 * 
+	 * @return {@code Scope}
+	 * 			a new parent if the child scope is valid. 
+	 * 			Otherwise returns the parent itself.
+	 */
+	private Scope beginNewScope(Scope parent, Scope scope) {
+		if (scope == null)
+			return parent;
+		
+		parent.addSubscope(scope);
+		scope.setParentScope(parent);
+
+		maxDepth++;
+		callpath.addCallPath(scope.getCCTIndex(), scope, maxDepth);
+
+		return scope;
+	}
+	
+	
+	/***
+	 * Create a lexical function scope.
+	 * 
+	 * @param root
+	 * @param parent
+	 * @param lm
+	 * @param fs
+	 * @param ps
+	 * @param ctxId
+	 * @param line
+	 * @param relation
+	 * 
+	 * @return {@code Scope}
+	 * 			A call site scope if the line scope exists.
+	 * 			A procedure scope otherwise.
+	 */
+	private Scope createLexicalFunction(RootScope root, 
+										Scope parent, 
+										LoadModuleScope lm,
+										SourceFile fs,
+										ProcedureScope ps, 
+										int ctxId, int line, int relation) {
+		
+		boolean alien  = relation == FMT_METADB_RELATION_CALL_INLINED;
+		var fileSource = fs == null ? SourceFile.NONE : fs;
+		
+		if (!(parent instanceof LineScope)) {
+			// no call site in the stack: it must be a procedure scope
+			String name = Constants.PROCEDURE_UNKNOWN;
+			if (ps != null)
+				name = ps.getName();
+			
+			return new ProcedureScope(root, lm, fileSource, line, line, name, alien, ctxId, ctxId, null, ProcedureScope.FeatureProcedure);
+		}
+		ProcedureScope proc;
+		if (ps == null) {
+			proc = new ProcedureScope(root, lm, fileSource, line, line, Constants.PROCEDURE_UNKNOWN, alien, ctxId, ctxId, null, ProcedureScope.FeatureProcedure);
+		} else {
+			proc = ps;
+			proc.setAlien(alien);
+		}
+		LineScope ls = (LineScope) parent;
+		var cs = new CallSiteScope(ls, ps, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, ctxId);
+		
+		// Only the line statement knows where the source file is
+		// If the line statement is unknown then the source file is unknown.
+		cs.setSourceFile(ls.getSourceFile());
+		
+		// since we merge the line scope to this call site,
+		// we have to remove the line scope from the parent
+		Scope grandParent = parent.getParentScope();
+		grandParent.remove(parent);
+		grandParent.addSubscope(cs);
+		cs.setParentScope(grandParent);
+		
+		return cs;
+	}
 	
 	/***
 	 * Create the main root and parse its direct children
@@ -743,6 +815,9 @@ public class DataMeta extends DataCommon
 		return sb.toString();
 	}
 
+	// --------------------------------------------------------------------
+	// classes
+	// --------------------------------------------------------------------
 
 	/*******************
 	 * 

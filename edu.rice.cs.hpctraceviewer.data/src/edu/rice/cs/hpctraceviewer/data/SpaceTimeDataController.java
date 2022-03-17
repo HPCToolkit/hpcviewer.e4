@@ -6,6 +6,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.swt.widgets.Display;
+
+import edu.rice.cs.hpcdata.db.IFileDB;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
@@ -18,6 +20,7 @@ import edu.rice.cs.hpctraceviewer.data.color.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
+
 
 
 /*******************************************************************************************
@@ -41,7 +44,7 @@ public abstract class SpaceTimeDataController
 	protected TraceDisplayAttribute attributes;
 	
 	protected ColorTable colorTable = null;
-	protected IBaseData dataTrace = null;
+	protected IBaseData  dataTrace  = null;
 	
 	protected IEclipseContext context;
 	
@@ -120,7 +123,7 @@ public abstract class SpaceTimeDataController
 		timelineService = (ProcessTimelineService) context.get(Constants.CONTEXT_TIMELINE);
 		
 		// attributes initialization
-		attributes 	 = new TraceDisplayAttribute();
+		attributes = new TraceDisplayAttribute();
 		
 		final Display display = Display.getDefault();
 		display.syncExec( ()-> {
@@ -351,7 +354,7 @@ public abstract class SpaceTimeDataController
 		
 		//Snap it back into the acceptable limits.
 		if (endProcess > dataTrace.getNumberOfRanks())
-			endProcess  = dataTrace.getNumberOfRanks();
+			endProcess = dataTrace.getNumberOfRanks();
 		
 		if (begProcess >= endProcess)
 			begProcess = 0;
@@ -372,10 +375,12 @@ public abstract class SpaceTimeDataController
 	 * 
 	 * @return String: the name of the database
 	 *************************************************************************/
-	abstract public String getName() ;
+	public abstract String getName();
 
 	public abstract void closeDB();
 
+	protected abstract IFileDB getFileDB();
+	
 	public abstract IFilteredData createFilteredBaseData();
 
 	public abstract void fillTracesWithData(boolean changedBounds, int numThreadsToLaunch)

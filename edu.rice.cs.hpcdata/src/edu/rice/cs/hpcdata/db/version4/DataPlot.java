@@ -16,7 +16,7 @@ import java.nio.channels.FileChannel.MapMode;
  *******************************************************************************************/
 public class DataPlot extends DataCommon 
 {
-	public  static final String FILENAME = "cct.db";
+	public  static final String FILE_CCT_DB = "cct.db";
 	private static final String HEADER   = "HPCTOOLKITctxt";
 	
 	/*** list of cct. In the future we may need to implement with concurrent list.
@@ -34,7 +34,7 @@ public class DataPlot extends DataCommon
 	public void open(final String filename)
 			throws IOException
 	{
-		super.open(filename + File.separator + FILENAME);
+		super.open(filename + File.separator + FILE_CCT_DB);
 	}
 	
 	@Override

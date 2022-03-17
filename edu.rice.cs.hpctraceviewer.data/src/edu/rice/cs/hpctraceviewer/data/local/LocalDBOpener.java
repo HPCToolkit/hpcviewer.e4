@@ -77,7 +77,7 @@ public class LocalDBOpener extends AbstractDBOpener
 			Experiment exp = (Experiment) experiment;
 			var root = exp.getRootScope(RootScopeType.CallingContextTree);
 			MetricValueCollection3 mvc = (MetricValueCollection3) root.getMetricValueCollection();
-			fileDB = new FileDB4(mvc.getDataSummary());
+			fileDB = new FileDB4(experiment, mvc.getDataSummary());
 			break;
 		default:
 			throw new InvalExperimentException("Trace data version is not unknown: " + version);
@@ -128,7 +128,7 @@ public class LocalDBOpener extends AbstractDBOpener
 			database_directory = directory;
 		}
 		// checking for version 4.0
-		String file_path = database_directory + File.separatorChar + DataTrace.FILENAME;
+		String file_path = database_directory + File.separatorChar + DataTrace.FILE_TRACE_DB;
 		File tmp_file 	 = new File(file_path);
 		if (tmp_file.canRead()) {
 			return Constants.EXPERIMENT_SPARSE_VERSION;

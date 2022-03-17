@@ -81,7 +81,7 @@ public class ThreadLevelDataFile extends FileDB2
 			try {
 				ecs.take().get();
 			} catch (Exception e) {
-				e.printStackTrace();
+				throw new RuntimeException(e.getMessage());
 			}
 		}
 
@@ -113,7 +113,7 @@ public class ThreadLevelDataFile extends FileDB2
 		double []values = new double[num_cct];
 		for (int i=0; i<num_cct; i++)
 		{
-			long position = getFilePosition(i+1, metricIndex, num_metrics);
+			long position = getFilePosition(i+1L, metricIndex, num_metrics);
 			values[i] = getDouble(offset + position);
 		}
 		return values;

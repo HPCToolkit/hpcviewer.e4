@@ -35,7 +35,7 @@ public class LineScope extends Scope
 {
 
 
-
+private LoadModuleScope loadModule;
 
 //////////////////////////////////////////////////////////////////////////
 //	INITIALIZATION														//
@@ -103,6 +103,14 @@ public String getShortName()
 	return this.getLineNumberCitation();
 }
 
+
+public LoadModuleScope getLoadModule() {
+	return loadModule;
+}
+
+public void setLoadModule(LoadModuleScope loadModule) {
+	this.loadModule = loadModule;
+}
 
 public boolean isequal(LineScope ls)
 {

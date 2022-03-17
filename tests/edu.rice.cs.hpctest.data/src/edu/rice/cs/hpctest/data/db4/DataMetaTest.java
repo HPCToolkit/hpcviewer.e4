@@ -41,7 +41,6 @@ public class DataMetaTest
 			data.open(dbPath.getAbsolutePath());
 		});
 		data.open(new Experiment(), dbPath.getAbsolutePath());
-		data.finalize(null);
 	}
 	
 	
@@ -79,15 +78,15 @@ public class DataMetaTest
 	public void testGetMetric() {
 		var metrics = data.getExperiment().getMetrics();
 		assertNotNull(metrics);
-		assertTrue(metrics.size()==2);
+		assertTrue(metrics.size()==3);
 		
-		HierarchicalMetric m = (HierarchicalMetric) metrics.get(0);
+		HierarchicalMetric m = (HierarchicalMetric) metrics.get(1);
 		assertTrue(m.getDisplayName().equals("cycles (E)"));
 		assertTrue(m.getIndex() == 1);
 		assertTrue(m.getMetricType() == MetricType.EXCLUSIVE);
 		assertTrue(m.getCombineTypeLabel().equals("sum"));
 		
-		m = (HierarchicalMetric) metrics.get(1);
+		m = (HierarchicalMetric) metrics.get(2);
 		assertTrue(m.getDisplayName().equals("cycles (I)"));
 		assertTrue(m.getIndex() == 2);
 		assertTrue(m.getMetricType() == MetricType.INCLUSIVE);
@@ -117,7 +116,7 @@ public class DataMetaTest
 	
 	@Test
 	public void testProcedure() {
-		assertTrue(data.getNumProcedures() == 10);
+		assertTrue(data.getNumProcedures() == 11);
 		
 		Iterator<ProcedureScope> iterator = data.getProcedureIterator();
 		assertNotNull(iterator);

@@ -417,7 +417,7 @@ public abstract class BaseExperiment implements IExperiment
 	 * set the trace attributes (if the tracefile exist)
 	 * @param attribute
 	 */
-	public void setTraceAttribute(TraceAttribute attribute) {
+	public void setTraceAttribute(BaseTraceAttribute attribute) {
 		this.traceAttribute = attribute;
 	}
 
@@ -443,6 +443,5 @@ public abstract class BaseExperiment implements IExperiment
 	abstract protected void filter_finalize(RootScope rootMain, IFilterData filter);
 
 	abstract protected void open_finalize();
-
 }
  
