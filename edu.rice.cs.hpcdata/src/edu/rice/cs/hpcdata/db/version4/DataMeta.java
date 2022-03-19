@@ -386,7 +386,7 @@ public class DataMeta extends DataCommon
 		var szScope  = buffer.get(0x0d);
 		var szSummary = buffer.get(0x0e);
 		
-		var metrics = new ArrayList<BaseMetric>(nMetrics);
+		var metricDesc = new ArrayList<BaseMetric>(nMetrics);
 		int position = (int) (pMetrics - section.offset);
 		
 		for(int i=0; i<nMetrics; i++) {
@@ -435,13 +435,13 @@ public class DataMeta extends DataCommon
 										VisibilityType.SHOW; 
 					m.setDisplayed(vt);
 
-					metrics.add(m);
+					metricDesc.add(m);
 				}
 			}
 		}
 		
 		// for the derived metric, we need to initialize it manually.
-		for(var metric: metrics) {
+		for(var metric: metricDesc) {
 			if (metric instanceof DerivedMetric) {
 				var dm = (DerivedMetric) metric;
 				dm.resetMetric((Experiment) experiment, rootCCT);
@@ -449,7 +449,7 @@ public class DataMeta extends DataCommon
 				((HierarchicalMetric)metric).setProfileDatabase(dataSummary);
 			}
 		}
-		return metrics;
+		return metricDesc;
 	}
 	
 	
@@ -589,7 +589,6 @@ public class DataMeta extends DataCommon
 										long size) 
 					throws IOException {
 		
-		final RootScope root = parent.getRootScope();
 		int loc = (int) (startLocation - sections[INDEX_CONTEXT].offset);
 		long ctxSize = size;
 		
@@ -653,13 +652,13 @@ public class DataMeta extends DataCommon
 
 			switch(lexicalType) {
 			case FMT_METADB_LEXTYPE_FUNCTION:
-				scope = createLexicalFunction(root, parent, lm, fs, ps, ctxId, line, relation);				
+				scope = createLexicalFunction(parent, lm, fs, ps, ctxId, line, relation);				
 				break;
 			case FMT_METADB_LEXTYPE_LOOP:
-				scope = new LoopScope(root, fs, line, line, ctxId, ctxId);
+				scope = new LoopScope(rootCCT, fs, line, line, ctxId, ctxId);
 				break;
 			case FMT_METADB_LEXTYPE_LINE:
-				scope = new LineScope(root, fs, line, ctxId, ctxId);
+				scope = new LineScope(rootCCT, fs, line, ctxId, ctxId);
 				break;
 			case FMT_METADB_LEXTYPE_INSTRUCTION:
 				//scope = new LineScope(root, fs, line, ctxId, ctxId);
@@ -711,7 +710,6 @@ public class DataMeta extends DataCommon
 	/***
 	 * Create a lexical function scope.
 	 * 
-	 * @param root
 	 * @param parent
 	 * @param lm
 	 * @param fs
@@ -724,7 +722,7 @@ public class DataMeta extends DataCommon
 	 * 			A call site scope if the line scope exists.
 	 * 			A procedure scope otherwise.
 	 */
-	private Scope createLexicalFunction(RootScope root, 
+	private Scope createLexicalFunction( 
 										Scope parent, 
 										LoadModuleScope lm,
 										SourceFile fs,
@@ -740,17 +738,17 @@ public class DataMeta extends DataCommon
 			if (ps != null)
 				name = ps.getName();
 			
-			return new ProcedureScope(root, lm, fileSource, line, line, name, alien, ctxId, ctxId, null, ProcedureScope.FeatureProcedure);
+			return new ProcedureScope(rootCCT, lm, fileSource, line, line, name, alien, ctxId, ctxId, null, ProcedureScope.FeatureProcedure);
 		}
 		ProcedureScope proc;
 		if (ps == null) {
-			proc = new ProcedureScope(root, lm, fileSource, line, line, Constants.PROCEDURE_UNKNOWN, alien, ctxId, ctxId, null, ProcedureScope.FeatureProcedure);
+			proc = new ProcedureScope(rootCCT, lm, fileSource, line, line, Constants.PROCEDURE_UNKNOWN, alien, ctxId, ctxId, null, ProcedureScope.FeatureProcedure);
 		} else {
 			proc = ps;
 			proc.setAlien(alien);
 		}
 		LineScope ls = (LineScope) parent;
-		var cs = new CallSiteScope(ls, ps, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, ctxId);
+		var cs = new CallSiteScope(ls, proc, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, ctxId);
 		
 		// Only the line statement knows where the source file is
 		// If the line statement is unknown then the source file is unknown.

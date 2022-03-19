@@ -1,0 +1,880 @@
+!SESSION 2022-03-15 07:08:45.437 -----------------------------------------------
+eclipse.buildId=unknown
+java.version=11.0.9
+java.vendor=Oracle Corporation
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_US
+Framework arguments:  -eclipse.keyring /var/folders/md/zc3588lj7dd68cvqjgntbw780000gq/T/tycho14528471345172686423secure_storage
+Command-line arguments:  -eclipse.keyring /var/folders/md/zc3588lj7dd68cvqjgntbw780000gq/T/tycho14528471345172686423secure_storage
+
+!ENTRY org.eclipse.core.net 1 0 2022-03-15 07:08:45.437
+!MESSAGE System property http.nonProxyHosts has been set to local|*.local|169.254/16|*.169.254/16 by an external source. This value will be overwritten using the values from the preferences
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:13.593
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:13.593
+!MESSAGE Add request for hpcviewer 6.0.0.202203151208 (edu.rice.cs.hpcviewer 6.0.0.202203151208) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:13.593
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203151208 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203151208) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:13.593
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:13.593
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:13.593
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:13.593
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:15.499
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:15.499
+!MESSAGE Add request for hpcviewer 6.0.0.202203151208 (edu.rice.cs.hpcviewer 6.0.0.202203151208) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:15.499
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203151208 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203151208) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:15.499
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:15.499
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:15.499
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:15.499
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:17.303
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:17.303
+!MESSAGE Add request for hpcviewer 6.0.0.202203151208 (edu.rice.cs.hpcviewer 6.0.0.202203151208) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:17.303
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203151208 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203151208) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:17.303
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:17.303
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:17.303
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:17.303
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:18.944
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:18.944
+!MESSAGE Add request for hpcviewer 6.0.0.202203151208 (edu.rice.cs.hpcviewer 6.0.0.202203151208) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:18.944
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203151208 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203151208) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:18.944
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:18.944
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:18.944
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:18.944
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:20.550
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:20.551
+!MESSAGE Add request for hpcviewer 6.0.0.202203151208 (edu.rice.cs.hpcviewer 6.0.0.202203151208) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:20.551
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203151208 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203151208) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:20.551
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:20.551
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:20.551
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:20.551
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:22.329
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:22.329
+!MESSAGE Add request for hpcviewer 6.0.0.202203151208 (edu.rice.cs.hpcviewer 6.0.0.202203151208) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:22.329
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203151208 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203151208) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:22.329
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:22.329
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:22.329
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 07:09:22.329
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+!SESSION 2022-03-15 07:10:25.956 -----------------------------------------------
+eclipse.buildId=unknown
+java.version=11.0.9
+java.vendor=Oracle Corporation
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_US
+Framework arguments:  -eclipse.keyring /var/folders/md/zc3588lj7dd68cvqjgntbw780000gq/T/tycho6050913098894064840secure_storage
+Command-line arguments:  -eclipse.keyring /var/folders/md/zc3588lj7dd68cvqjgntbw780000gq/T/tycho6050913098894064840secure_storage
+
+!ENTRY org.eclipse.core.net 1 0 2022-03-15 07:10:25.957
+!MESSAGE System property http.nonProxyHosts has been set to local|*.local|169.254/16|*.169.254/16 by an external source. This value will be overwritten using the values from the preferences
+!SESSION 2022-03-15 10:59:35.562 -----------------------------------------------
+eclipse.buildId=unknown
+java.version=11.0.9
+java.vendor=Oracle Corporation
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_US
+Framework arguments:  -eclipse.keyring /var/folders/md/zc3588lj7dd68cvqjgntbw780000gq/T/tycho9519763480483258331secure_storage
+Command-line arguments:  -eclipse.keyring /var/folders/md/zc3588lj7dd68cvqjgntbw780000gq/T/tycho9519763480483258331secure_storage
+
+!ENTRY org.eclipse.core.net 1 0 2022-03-15 10:59:35.562
+!MESSAGE System property http.nonProxyHosts has been set to local|*.local|169.254/16|*.169.254/16 by an external source. This value will be overwritten using the values from the preferences
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:06.108
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:06.108
+!MESSAGE Add request for hpcviewer 6.0.0.202203151559 (edu.rice.cs.hpcviewer 6.0.0.202203151559) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:06.108
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:06.108
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:06.108
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203151559 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203151559) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:06.108
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:06.108
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:08.066
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:08.066
+!MESSAGE Add request for hpcviewer 6.0.0.202203151559 (edu.rice.cs.hpcviewer 6.0.0.202203151559) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:08.066
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:08.066
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:08.066
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203151559 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203151559) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:08.066
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:08.066
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:09.946
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:09.946
+!MESSAGE Add request for hpcviewer 6.0.0.202203151559 (edu.rice.cs.hpcviewer 6.0.0.202203151559) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:09.946
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:09.946
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:09.946
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203151559 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203151559) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:09.946
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:09.946
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:11.753
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:11.753
+!MESSAGE Add request for hpcviewer 6.0.0.202203151559 (edu.rice.cs.hpcviewer 6.0.0.202203151559) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:11.753
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:11.753
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:11.753
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203151559 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203151559) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:11.753
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:11.753
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:13.391
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:13.391
+!MESSAGE Add request for hpcviewer 6.0.0.202203151559 (edu.rice.cs.hpcviewer 6.0.0.202203151559) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:13.391
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:13.391
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:13.391
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203151559 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203151559) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:13.391
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:13.391
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:15.215
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:15.215
+!MESSAGE Add request for hpcviewer 6.0.0.202203151559 (edu.rice.cs.hpcviewer 6.0.0.202203151559) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:15.215
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:15.215
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:15.215
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203151559 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203151559) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:15.215
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 11:00:15.215
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+!SESSION 2022-03-15 11:01:04.778 -----------------------------------------------
+eclipse.buildId=unknown
+java.version=11.0.9
+java.vendor=Oracle Corporation
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_US
+Framework arguments:  -eclipse.keyring /var/folders/md/zc3588lj7dd68cvqjgntbw780000gq/T/tycho13772153302474037806secure_storage
+Command-line arguments:  -eclipse.keyring /var/folders/md/zc3588lj7dd68cvqjgntbw780000gq/T/tycho13772153302474037806secure_storage
+
+!ENTRY org.eclipse.core.net 1 0 2022-03-15 11:01:04.778
+!MESSAGE System property http.nonProxyHosts has been set to local|*.local|169.254/16|*.169.254/16 by an external source. This value will be overwritten using the values from the preferences
+!SESSION 2022-03-15 13:00:40.458 -----------------------------------------------
+eclipse.buildId=unknown
+java.version=11.0.9
+java.vendor=Oracle Corporation
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_US
+Framework arguments:  -eclipse.keyring /var/folders/md/zc3588lj7dd68cvqjgntbw780000gq/T/tycho6365337031649434963secure_storage
+Command-line arguments:  -eclipse.keyring /var/folders/md/zc3588lj7dd68cvqjgntbw780000gq/T/tycho6365337031649434963secure_storage
+
+!ENTRY org.eclipse.core.net 1 0 2022-03-15 13:00:40.458
+!MESSAGE System property http.nonProxyHosts has been set to local|*.local|169.254/16|*.169.254/16 by an external source. This value will be overwritten using the values from the preferences
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:10.839
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:10.839
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:10.839
+!MESSAGE Add request for hpcviewer 6.0.0.202203151800 (edu.rice.cs.hpcviewer 6.0.0.202203151800) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:10.839
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203151800 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203151800) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:10.839
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:10.839
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:10.839
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:12.888
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:12.888
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:12.888
+!MESSAGE Add request for hpcviewer 6.0.0.202203151800 (edu.rice.cs.hpcviewer 6.0.0.202203151800) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:12.888
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203151800 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203151800) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:12.888
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:12.888
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:12.888
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:14.586
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:14.587
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:14.587
+!MESSAGE Add request for hpcviewer 6.0.0.202203151800 (edu.rice.cs.hpcviewer 6.0.0.202203151800) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:14.587
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203151800 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203151800) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:14.587
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:14.587
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:14.587
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:16.489
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:16.489
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:16.489
+!MESSAGE Add request for hpcviewer 6.0.0.202203151800 (edu.rice.cs.hpcviewer 6.0.0.202203151800) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:16.489
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203151800 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203151800) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:16.489
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:16.489
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:16.489
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:18.295
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:18.295
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:18.295
+!MESSAGE Add request for hpcviewer 6.0.0.202203151800 (edu.rice.cs.hpcviewer 6.0.0.202203151800) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:18.295
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203151800 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203151800) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:18.295
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:18.295
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:18.295
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:19.906
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:19.906
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:19.906
+!MESSAGE Add request for hpcviewer 6.0.0.202203151800 (edu.rice.cs.hpcviewer 6.0.0.202203151800) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:19.906
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203151800 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203151800) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:19.906
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:19.906
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:01:19.906
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+!SESSION 2022-03-15 13:02:31.276 -----------------------------------------------
+eclipse.buildId=unknown
+java.version=11.0.9
+java.vendor=Oracle Corporation
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_US
+Framework arguments:  -eclipse.keyring /var/folders/md/zc3588lj7dd68cvqjgntbw780000gq/T/tycho11587466518914492964secure_storage
+Command-line arguments:  -eclipse.keyring /var/folders/md/zc3588lj7dd68cvqjgntbw780000gq/T/tycho11587466518914492964secure_storage
+
+!ENTRY org.eclipse.core.net 1 0 2022-03-15 13:02:31.276
+!MESSAGE System property http.nonProxyHosts has been set to local|*.local|169.254/16|*.169.254/16 by an external source. This value will be overwritten using the values from the preferences
+!SESSION 2022-03-15 13:06:05.597 -----------------------------------------------
+eclipse.buildId=unknown
+java.version=11.0.9
+java.vendor=Oracle Corporation
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_US
+Framework arguments:  -eclipse.keyring /var/folders/md/zc3588lj7dd68cvqjgntbw780000gq/T/tycho15415604399677407415secure_storage
+Command-line arguments:  -eclipse.keyring /var/folders/md/zc3588lj7dd68cvqjgntbw780000gq/T/tycho15415604399677407415secure_storage
+
+!ENTRY org.eclipse.core.net 1 0 2022-03-15 13:06:05.598
+!MESSAGE System property http.nonProxyHosts has been set to local|*.local|169.254/16|*.169.254/16 by an external source. This value will be overwritten using the values from the preferences
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:36.289
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:36.289
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:36.289
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:36.289
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:36.289
+!MESSAGE Add request for hpcviewer 6.0.0.202203151806 (edu.rice.cs.hpcviewer 6.0.0.202203151806) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:36.289
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203151806 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203151806) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:36.289
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:38.640
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:38.640
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:38.640
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:38.640
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:38.640
+!MESSAGE Add request for hpcviewer 6.0.0.202203151806 (edu.rice.cs.hpcviewer 6.0.0.202203151806) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:38.640
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203151806 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203151806) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:38.640
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:40.490
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:40.490
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:40.490
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:40.490
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:40.490
+!MESSAGE Add request for hpcviewer 6.0.0.202203151806 (edu.rice.cs.hpcviewer 6.0.0.202203151806) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:40.490
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203151806 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203151806) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:40.490
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:42.224
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:42.224
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:42.224
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:42.224
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:42.224
+!MESSAGE Add request for hpcviewer 6.0.0.202203151806 (edu.rice.cs.hpcviewer 6.0.0.202203151806) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:42.224
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203151806 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203151806) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:42.224
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:43.924
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:43.924
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:43.924
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:43.924
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:43.924
+!MESSAGE Add request for hpcviewer 6.0.0.202203151806 (edu.rice.cs.hpcviewer 6.0.0.202203151806) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:43.924
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203151806 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203151806) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:43.924
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:45.527
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:45.527
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:45.527
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:45.527
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:45.527
+!MESSAGE Add request for hpcviewer 6.0.0.202203151806 (edu.rice.cs.hpcviewer 6.0.0.202203151806) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:45.527
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203151806 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203151806) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 13:06:45.527
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+!SESSION 2022-03-15 13:07:32.182 -----------------------------------------------
+eclipse.buildId=unknown
+java.version=11.0.9
+java.vendor=Oracle Corporation
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_US
+Framework arguments:  -eclipse.keyring /var/folders/md/zc3588lj7dd68cvqjgntbw780000gq/T/tycho2998939966740679930secure_storage
+Command-line arguments:  -eclipse.keyring /var/folders/md/zc3588lj7dd68cvqjgntbw780000gq/T/tycho2998939966740679930secure_storage
+
+!ENTRY org.eclipse.core.net 1 0 2022-03-15 13:07:32.182
+!MESSAGE System property http.nonProxyHosts has been set to local|*.local|169.254/16|*.169.254/16 by an external source. This value will be overwritten using the values from the preferences
+!SESSION 2022-03-15 14:56:54.106 -----------------------------------------------
+eclipse.buildId=unknown
+java.version=11.0.9
+java.vendor=Oracle Corporation
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_US
+Framework arguments:  -eclipse.keyring /var/folders/md/zc3588lj7dd68cvqjgntbw780000gq/T/tycho10497932038885914993secure_storage
+Command-line arguments:  -eclipse.keyring /var/folders/md/zc3588lj7dd68cvqjgntbw780000gq/T/tycho10497932038885914993secure_storage
+
+!ENTRY org.eclipse.core.net 1 0 2022-03-15 14:56:54.106
+!MESSAGE System property http.nonProxyHosts has been set to local|*.local|169.254/16|*.169.254/16 by an external source. This value will be overwritten using the values from the preferences
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:23.774
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:23.774
+!MESSAGE Add request for hpcviewer 6.0.0.202203151956 (edu.rice.cs.hpcviewer 6.0.0.202203151956) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:23.774
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203151956 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203151956) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:23.774
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:23.774
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:23.774
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:23.774
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:25.749
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:25.749
+!MESSAGE Add request for hpcviewer 6.0.0.202203151956 (edu.rice.cs.hpcviewer 6.0.0.202203151956) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:25.749
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203151956 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203151956) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:25.749
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:25.749
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:25.749
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:25.749
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:27.559
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:27.559
+!MESSAGE Add request for hpcviewer 6.0.0.202203151956 (edu.rice.cs.hpcviewer 6.0.0.202203151956) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:27.559
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203151956 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203151956) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:27.559
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:27.559
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:27.559
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:27.559
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:29.250
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:29.250
+!MESSAGE Add request for hpcviewer 6.0.0.202203151956 (edu.rice.cs.hpcviewer 6.0.0.202203151956) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:29.250
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203151956 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203151956) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:29.250
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:29.250
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:29.250
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:29.250
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:31.076
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:31.076
+!MESSAGE Add request for hpcviewer 6.0.0.202203151956 (edu.rice.cs.hpcviewer 6.0.0.202203151956) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:31.076
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203151956 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203151956) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:31.076
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:31.076
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:31.076
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:31.076
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:32.873
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:32.874
+!MESSAGE Add request for hpcviewer 6.0.0.202203151956 (edu.rice.cs.hpcviewer 6.0.0.202203151956) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:32.874
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203151956 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203151956) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:32.874
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:32.874
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:32.874
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-15 14:57:32.874
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+!SESSION 2022-03-15 15:02:17.834 -----------------------------------------------
+eclipse.buildId=unknown
+java.version=11.0.9
+java.vendor=Oracle Corporation
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_US
+Framework arguments:  -eclipse.keyring /var/folders/md/zc3588lj7dd68cvqjgntbw780000gq/T/tycho1136494206201366547secure_storage
+Command-line arguments:  -eclipse.keyring /var/folders/md/zc3588lj7dd68cvqjgntbw780000gq/T/tycho1136494206201366547secure_storage
+
+!ENTRY org.eclipse.core.net 1 0 2022-03-15 15:02:17.834
+!MESSAGE System property http.nonProxyHosts has been set to local|*.local|169.254/16|*.169.254/16 by an external source. This value will be overwritten using the values from the preferences
+!SESSION 2022-03-17 15:23:09.798 -----------------------------------------------
+eclipse.buildId=unknown
+java.version=11.0.9
+java.vendor=Oracle Corporation
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_US
+Framework arguments:  -eclipse.keyring /var/folders/md/zc3588lj7dd68cvqjgntbw780000gq/T/tycho3303051278048308025secure_storage
+Command-line arguments:  -eclipse.keyring /var/folders/md/zc3588lj7dd68cvqjgntbw780000gq/T/tycho3303051278048308025secure_storage
+
+!ENTRY org.eclipse.core.net 1 0 2022-03-17 15:23:09.798
+!MESSAGE System property http.nonProxyHosts has been set to local|*.local|169.254/16|*.169.254/16 by an external source. This value will be overwritten using the values from the preferences
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:47.522
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:47.522
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:47.522
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:47.523
+!MESSAGE Add request for hpcviewer 6.0.0.202203172023 (edu.rice.cs.hpcviewer 6.0.0.202203172023) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:47.523
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:47.523
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203172023 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203172023) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:47.523
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:49.665
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:49.665
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:49.665
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:49.665
+!MESSAGE Add request for hpcviewer 6.0.0.202203172023 (edu.rice.cs.hpcviewer 6.0.0.202203172023) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:49.665
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:49.665
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203172023 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203172023) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:49.665
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:51.595
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:51.595
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:51.595
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:51.595
+!MESSAGE Add request for hpcviewer 6.0.0.202203172023 (edu.rice.cs.hpcviewer 6.0.0.202203172023) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:51.595
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:51.595
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203172023 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203172023) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:51.595
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:53.728
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:53.728
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:53.728
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:53.728
+!MESSAGE Add request for hpcviewer 6.0.0.202203172023 (edu.rice.cs.hpcviewer 6.0.0.202203172023) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:53.728
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:53.728
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203172023 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203172023) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:53.728
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:55.644
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:55.644
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:55.644
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:55.644
+!MESSAGE Add request for hpcviewer 6.0.0.202203172023 (edu.rice.cs.hpcviewer 6.0.0.202203172023) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:55.644
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:55.644
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203172023 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203172023) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:55.644
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:57.413
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:57.413
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:57.413
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:57.413
+!MESSAGE Add request for hpcviewer 6.0.0.202203172023 (edu.rice.cs.hpcviewer 6.0.0.202203172023) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:57.413
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:57.413
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203172023 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203172023) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 15:23:57.413
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+!SESSION 2022-03-17 15:43:09.225 -----------------------------------------------
+eclipse.buildId=unknown
+java.version=11.0.9
+java.vendor=Oracle Corporation
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_US
+Framework arguments:  -eclipse.keyring /var/folders/md/zc3588lj7dd68cvqjgntbw780000gq/T/tycho13478949418226319384secure_storage
+Command-line arguments:  -eclipse.keyring /var/folders/md/zc3588lj7dd68cvqjgntbw780000gq/T/tycho13478949418226319384secure_storage
+
+!ENTRY org.eclipse.core.net 1 0 2022-03-17 15:43:09.225
+!MESSAGE System property http.nonProxyHosts has been set to local|*.local|169.254/16|*.169.254/16 by an external source. This value will be overwritten using the values from the preferences
+!SESSION 2022-03-17 17:32:49.120 -----------------------------------------------
+eclipse.buildId=unknown
+java.version=11.0.9
+java.vendor=Oracle Corporation
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_US
+Framework arguments:  -eclipse.keyring /var/folders/md/zc3588lj7dd68cvqjgntbw780000gq/T/tycho493141220238925212secure_storage
+Command-line arguments:  -eclipse.keyring /var/folders/md/zc3588lj7dd68cvqjgntbw780000gq/T/tycho493141220238925212secure_storage
+
+!ENTRY org.eclipse.core.net 1 0 2022-03-17 17:32:49.120
+!MESSAGE System property http.nonProxyHosts has been set to local|*.local|169.254/16|*.169.254/16 by an external source. This value will be overwritten using the values from the preferences
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:18.778
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:18.778
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:18.778
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:18.778
+!MESSAGE Add request for hpcviewer 6.0.0.202203172232 (edu.rice.cs.hpcviewer 6.0.0.202203172232) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:18.778
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:18.778
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203172232 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203172232) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:18.778
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:20.893
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:20.893
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:20.893
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:20.893
+!MESSAGE Add request for hpcviewer 6.0.0.202203172232 (edu.rice.cs.hpcviewer 6.0.0.202203172232) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:20.893
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:20.893
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203172232 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203172232) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:20.893
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:22.754
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:22.754
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:22.754
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:22.754
+!MESSAGE Add request for hpcviewer 6.0.0.202203172232 (edu.rice.cs.hpcviewer 6.0.0.202203172232) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:22.754
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:22.754
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203172232 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203172232) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:22.754
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:24.540
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:24.540
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:24.541
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:24.541
+!MESSAGE Add request for hpcviewer 6.0.0.202203172232 (edu.rice.cs.hpcviewer 6.0.0.202203172232) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:24.541
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:24.541
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203172232 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203172232) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:24.541
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:26.479
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:26.479
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:26.479
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:26.479
+!MESSAGE Add request for hpcviewer 6.0.0.202203172232 (edu.rice.cs.hpcviewer 6.0.0.202203172232) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:26.479
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:26.479
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203172232 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203172232) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:26.479
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:28.128
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:28.128
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:28.128
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:28.128
+!MESSAGE Add request for hpcviewer 6.0.0.202203172232 (edu.rice.cs.hpcviewer 6.0.0.202203172232) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:28.128
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:28.128
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203172232 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203172232) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:33:28.128
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+!SESSION 2022-03-17 17:34:11.355 -----------------------------------------------
+eclipse.buildId=unknown
+java.version=11.0.9
+java.vendor=Oracle Corporation
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_US
+Framework arguments:  -eclipse.keyring /var/folders/md/zc3588lj7dd68cvqjgntbw780000gq/T/tycho16285569413974989228secure_storage
+Command-line arguments:  -eclipse.keyring /var/folders/md/zc3588lj7dd68cvqjgntbw780000gq/T/tycho16285569413974989228secure_storage
+
+!ENTRY org.eclipse.core.net 1 0 2022-03-17 17:34:11.355
+!MESSAGE System property http.nonProxyHosts has been set to local|*.local|169.254/16|*.169.254/16 by an external source. This value will be overwritten using the values from the preferences
+!SESSION 2022-03-17 17:36:39.643 -----------------------------------------------
+eclipse.buildId=unknown
+java.version=11.0.9
+java.vendor=Oracle Corporation
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_US
+Framework arguments:  -eclipse.keyring /var/folders/md/zc3588lj7dd68cvqjgntbw780000gq/T/tycho7254185980515253376secure_storage
+Command-line arguments:  -eclipse.keyring /var/folders/md/zc3588lj7dd68cvqjgntbw780000gq/T/tycho7254185980515253376secure_storage
+
+!ENTRY org.eclipse.core.net 1 0 2022-03-17 17:36:39.643
+!MESSAGE System property http.nonProxyHosts has been set to local|*.local|169.254/16|*.169.254/16 by an external source. This value will be overwritten using the values from the preferences
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:07.351
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:07.351
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203172236 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203172236) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:07.351
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:07.351
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:07.351
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:07.351
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:07.351
+!MESSAGE Add request for hpcviewer 6.0.0.202203172236 (edu.rice.cs.hpcviewer 6.0.0.202203172236) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:09.294
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:09.294
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203172236 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203172236) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:09.294
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:09.294
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:09.294
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:09.294
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:09.294
+!MESSAGE Add request for hpcviewer 6.0.0.202203172236 (edu.rice.cs.hpcviewer 6.0.0.202203172236) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:11.166
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:11.166
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203172236 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203172236) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:11.166
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:11.166
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:11.166
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:11.166
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:11.166
+!MESSAGE Add request for hpcviewer 6.0.0.202203172236 (edu.rice.cs.hpcviewer 6.0.0.202203172236) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:12.870
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:12.870
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203172236 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203172236) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:12.870
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:12.870
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:12.870
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:12.870
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:12.870
+!MESSAGE Add request for hpcviewer 6.0.0.202203172236 (edu.rice.cs.hpcviewer 6.0.0.202203172236) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:14.751
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:14.751
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203172236 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203172236) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:14.751
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:14.751
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:14.751
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:14.751
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:14.751
+!MESSAGE Add request for hpcviewer 6.0.0.202203172236 (edu.rice.cs.hpcviewer 6.0.0.202203172236) is satisfiable
+
+!ENTRY org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:16.405
+!MESSAGE Overall install request is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:16.405
+!MESSAGE Add request for hpcviewer.Feature 6.0.0.202203172236 (edu.rice.cs.hpcviewer.feature.feature.group 6.0.0.202203172236) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:16.405
+!MESSAGE Add request for NatTable Core Feature 2.0.2.202111300816 (org.eclipse.nebula.widgets.nattable.core.feature.feature.group 2.0.2.202111300816) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:16.405
+!MESSAGE Add request for EMF Common 2.22.0.v20210319-0732 (org.eclipse.emf.common.feature.group 2.22.0.v20210319-0732) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:16.405
+!MESSAGE Add request for Eclipse 4 Rich Client Platform 4.20.0.v20210602-2209 (org.eclipse.e4.rcp.feature.group 4.20.0.v20210602-2209) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:16.405
+!MESSAGE Add request for EMF - Eclipse Modeling Framework Core Runtime 2.24.0.v20210405-0628 (org.eclipse.emf.ecore.feature.group 2.24.0.v20210405-0628) is satisfiable
+!SUBENTRY 1 org.eclipse.equinox.p2.director 0 0 2022-03-17 17:37:16.405
+!MESSAGE Add request for hpcviewer 6.0.0.202203172236 (edu.rice.cs.hpcviewer 6.0.0.202203172236) is satisfiable
+!SESSION 2022-03-17 17:38:20.570 -----------------------------------------------
+eclipse.buildId=unknown
+java.version=11.0.9
+java.vendor=Oracle Corporation
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_US
+Framework arguments:  -eclipse.keyring /var/folders/md/zc3588lj7dd68cvqjgntbw780000gq/T/tycho1777682430749282942secure_storage
+Command-line arguments:  -eclipse.keyring /var/folders/md/zc3588lj7dd68cvqjgntbw780000gq/T/tycho1777682430749282942secure_storage
+
+!ENTRY org.eclipse.core.net 1 0 2022-03-17 17:38:20.570
+!MESSAGE System property http.nonProxyHosts has been set to local|*.local|169.254/16|*.169.254/16 by an external source. This value will be overwritten using the values from the preferences
