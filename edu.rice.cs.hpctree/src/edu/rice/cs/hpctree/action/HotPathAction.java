@@ -79,8 +79,8 @@ public class HotPathAction
 
 			// compare the value of the parent and the child
 			// if the ratio is significant, we stop 
-			MetricValue mvParent = metric.getValue(scope);
-			MetricValue mvChild  = metric.getValue(scopeChild);
+			MetricValue mvParent = scope.getMetricValue(metric);
+			MetricValue mvChild  = scopeChild.getMetricValue(metric);
 			
 			double dParent = MetricValue.getValue(mvParent);
 			double dChild  = MetricValue.getValue(mvChild);

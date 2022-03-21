@@ -12,7 +12,6 @@ import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricValueCollection;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValueSparse;
-import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
@@ -61,22 +60,7 @@ public class MetricValueCollection3 implements IMetricValueCollection
 			//  just need to look at the cache, instead of reading the file again.
 			
 			try {
-				sparseValues = dataSummary.getMetrics(scope.getCCTIndex());
-				if (scope instanceof CallSiteScope) {
-					var ls = ((CallSiteScope)scope).getLineScope();
-					if (ls != null) {
-						var lsValues = dataSummary.getMetrics(ls.getCCTIndex());
-						for(MetricValueSparse val: sparseValues) {
-							for(MetricValueSparse valLs: lsValues) {
-								if (val.getIndex() == valLs.getIndex()) {
-									double dv = val.getValue();
-									val.setValue(dv + valLs.getValue());
-								}
-							}
-						}
-					}
-				}
-					
+				sparseValues = dataSummary.getMetrics(scope.getCCTIndex());					
 			} catch (IOException e1) {
 				throw new RuntimeException(e1.getMessage());
 			}

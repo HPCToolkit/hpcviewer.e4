@@ -289,7 +289,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		// fill up the "invisible" metrics		
 		for(int i=0; i<listAllMetrics.size(); i++) {
 			final BaseMetric metric = listAllMetrics.get(i);
-			if (metric.getValue(root) == MetricValue.NONE) {
+			if (root.getMetricValue(metric) == MetricValue.NONE) {
 				if (!indexes.contains(metric.getIndex())) {
 					final boolean checked = false;
 					final boolean enabled = false;
@@ -495,7 +495,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 	 * 			boolean true if it has to be skipped. False otherwise. 
 	 */
 	protected boolean isMetricToSkip(Scope scope, BaseMetric metric) {
-		MetricValue mv = metric.getValue(scope);
+		MetricValue mv = scope.getMetricValue(metric);
 
 		// empty metric is not visible (usually).
 		// the column index should be based on non-empty metrics

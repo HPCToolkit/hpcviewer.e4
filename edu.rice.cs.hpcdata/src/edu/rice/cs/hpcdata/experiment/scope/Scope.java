@@ -619,23 +619,26 @@ implements IMetricScope
 			if (m instanceof DerivedMetric) {
 				listDerivedMetrics.add((DerivedMetric) m);
 			} else {
-				accumulateMetric(source, m.getIndex(), m.getIndex(), filter);
+				accumulateMetric(source, m, filter);
 			}
 		}
 		// compute the derived metrics
 		for(DerivedMetric m: listDerivedMetrics) {
-			accumulateMetric(source, m.getIndex(), m.getIndex(), filter);
+			accumulateMetric(source, m, filter);
 		}
 	}
 
 	/*************************************************************************
 	 *	Add the metric cost from a source with a certain filter for a certain metric
 	 ************************************************************************/
-	public void accumulateMetric(Scope source, int src_i, int targ_i, MetricValuePropagationFilter filter) {
-		if (filter.doPropagation(source, this, src_i, targ_i)) {
-			MetricValue m = source.getMetricValue(src_i);
+	private void accumulateMetric(Scope source, 
+								  BaseMetric metric, 
+								  MetricValuePropagationFilter filter) {
+		final int mIndex = metric.getIndex();
+		if (filter.doPropagation(source, this, mIndex, mIndex)) {
+			MetricValue m = source.getMetricValue(metric.getIndex());
 			if (m != MetricValue.NONE && Double.compare(MetricValue.getValue(m), 0.0) != 0) {
-				this.accumulateMetricValue(targ_i, MetricValue.getValue(m));
+				this.accumulateMetricValue(metric, m);
 			}
 		}
 	}
@@ -645,17 +648,28 @@ implements IMetricScope
 	 * @param index
 	 * @param value
 	 ************************************************************************/
-	private void accumulateMetricValue(int index, double value)
+	private void accumulateMetricValue(BaseMetric metric, MetricValue value)
 	{
 		ensureMetricStorage();
-
+		
+		int index = metric.getIndex();
 		MetricValue m = metrics.getValue(this, index);
 		if (m == MetricValue.NONE) {
-			MetricValue mv = new MetricValue(value);
+			MetricValue mv = value.duplicate();
 			metrics.setValue(index, mv);
 		} else {
 			// TODO Could do non-additive accumulations here?
-			MetricValue.setValue(m, MetricValue.getValue(m) + value);
+			double newValue = m.getValue() + value.getValue();
+			m.setValue(newValue);
+			
+			// set the annotation if necessary
+			if (metric.getAnnotationType() == AnnotationType.PERCENT) {				
+				var rootValue = getRootScope().getMetricValue(index);
+				if (rootValue != MetricValue.NONE) {
+					float rValue = rootValue.getValue();
+					m.setAnnotationValue((float) (newValue / rValue));
+				}
+			}
 		}
 	}
 
@@ -704,7 +718,7 @@ implements IMetricScope
 					aggMetric.combine(source, this);
 				}
 			} else {
-				this.accumulateMetric(source, metric.getIndex(), metric.getIndex(), filter);
+				this.accumulateMetric(source, metric, filter);
 			}
 		}
 	}

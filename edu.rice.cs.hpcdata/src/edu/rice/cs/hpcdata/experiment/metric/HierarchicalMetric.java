@@ -85,10 +85,6 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		return mv;
 	}
 
-	@Override
-	public MetricValue getRawValue(IMetricScope s) {
-		return getValue(s);
-	}
 
 	@Override
 	public BaseMetric duplicate() {

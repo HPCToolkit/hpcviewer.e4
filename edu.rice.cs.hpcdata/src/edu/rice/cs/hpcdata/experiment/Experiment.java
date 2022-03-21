@@ -265,6 +265,9 @@ public class Experiment extends BaseExperimentWithMetrics
 				computeExclusiveMetrics(callingContextViewRootScope);
 			}
 
+			//----------------------------------------------------------------------------------------------
+			// copy the value of inclusive metrics to exclusive metrics
+			//----------------------------------------------------------------------------------------------
 			EmptyMetricValuePropagationFilter emptyFilter = new EmptyMetricValuePropagationFilter();
 			copyMetricsToPartner(callingContextViewRootScope, MetricType.INCLUSIVE, emptyFilter);
 			

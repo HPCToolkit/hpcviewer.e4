@@ -97,7 +97,8 @@ public class MetricValueCollectionWithStorage implements IMetricValueCollection
 			// replace the existing value
 			
 			mv.setValue(value.getValue());
-			mv.setAnnotationValue(value.getAnnotationValue());
+			if (MetricValue.isAnnotationAvailable(mv))
+				mv.setAnnotationValue(value.getAnnotationValue());
 		} else {
 			// add a new metric index
 			values.put(index, value.duplicate());

@@ -480,7 +480,7 @@ public class DataMeta extends DataCommon
 			long pModuleName = buffer.getLong(position);
 			String path      = stringArea.toString(pModuleName);
 			
-			LoadModuleScope lms = new LoadModuleScope(rootCCT, path, null, i);
+			LoadModuleScope lms = new LoadModuleScope(rootCCT, path, null, position);
 			long key = pModules + delta;
 			mapLoadModules.put(key, lms);
 		}
@@ -516,7 +516,7 @@ public class DataMeta extends DataCommon
 			boolean available = (flags & 0x1) == 0x1;
 			String  name = stringArea.toString(pPath);
 			
-			SourceFile sf = new SimpleSourceFile(i, new File(name), available);
+			SourceFile sf = new SimpleSourceFile(position, new File(name), available);
 			long key = pFiles + delta;
 			mapSourceFile.put(key, sf);
 		}
@@ -560,9 +560,8 @@ public class DataMeta extends DataCommon
 			if (lms == null)
 				lms = LoadModuleScope.NONE;
 			
-			ProcedureScope ps = new ProcedureScope(rootCCT, lms, file, line, line, name, false, i, i, null, 0);
-			
 			long key = pFunctions + (i * szFunctions);
+			ProcedureScope ps = new ProcedureScope(rootCCT, lms, file, line, line, name, false, position, (int) key, null, 0);			
 			mapProcedures.put(key, ps);
 		}
 		return mapProcedures;
@@ -649,16 +648,19 @@ public class DataMeta extends DataCommon
 			var lm = mapLoadModules.getIfAbsent(pModule, ()->LoadModuleScope.NONE);
 			
 			Scope scope = null;
+			Scope newParent = null; 
 
 			switch(lexicalType) {
 			case FMT_METADB_LEXTYPE_FUNCTION:
-				scope = createLexicalFunction(parent, lm, fs, ps, ctxId, line, relation);				
+				newParent = createLexicalFunction(parent, lm, fs, ps, ctxId, line, relation);
 				break;
 			case FMT_METADB_LEXTYPE_LOOP:
 				scope = new LoopScope(rootCCT, fs, line, line, ctxId, ctxId);
+				newParent = beginNewScope(parent, scope);					
 				break;
 			case FMT_METADB_LEXTYPE_LINE:
 				scope = new LineScope(rootCCT, fs, line, ctxId, ctxId);
+				newParent = beginNewScope(parent, scope);					
 				break;
 			case FMT_METADB_LEXTYPE_INSTRUCTION:
 				//scope = new LineScope(root, fs, line, ctxId, ctxId);
@@ -667,7 +669,6 @@ public class DataMeta extends DataCommon
 			default:
 				throw new RuntimeException("Invalid node relation field");
 			}
-			var newParent = beginNewScope(parent, scope);					
 
 			// recursively parse the children
 			parseChildrenContext(buffer, newParent, pChildren, szChildren);
@@ -738,7 +739,8 @@ public class DataMeta extends DataCommon
 			if (ps != null)
 				name = ps.getName();
 			
-			return new ProcedureScope(rootCCT, lm, fileSource, line, line, name, alien, ctxId, ctxId, null, ProcedureScope.FeatureProcedure);
+			var scope = new ProcedureScope(rootCCT, lm, fileSource, line, line, name, alien, ctxId, ctxId, null, ProcedureScope.FeatureProcedure);
+			return beginNewScope(parent, scope);
 		}
 		ProcedureScope proc;
 		if (ps == null) {
@@ -758,10 +760,9 @@ public class DataMeta extends DataCommon
 		// we have to remove the line scope from the parent
 		Scope grandParent = parent.getParentScope();
 		grandParent.remove(parent);
-		grandParent.addSubscope(cs);
-		cs.setParentScope(grandParent);
-		
-		return cs;
+
+		// add the new call site to the tree
+		return beginNewScope(grandParent, cs);
 	}
 	
 	/***

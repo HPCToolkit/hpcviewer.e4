@@ -163,7 +163,7 @@ implements IMetricManager, ListEventListener<BaseMetric>
 		// hide columns if the metric is to be shown but has no value
 		for(BaseMetric metric: metrics) {
 			if (metric.getVisibility() == VisibilityType.SHOW &&
-				metric.getValue(root) == MetricValue.NONE) {				
+				root.getMetricValue(metric) == MetricValue.NONE) {				
 				metric.setDisplayed(BaseMetric.VisibilityType.HIDE);
 			}
 		}
@@ -272,7 +272,7 @@ implements IMetricManager, ListEventListener<BaseMetric>
 		// any volunteer?
 		for(int i=0; i<list.size(); i++) {
 			BaseMetric m = list.get(i);
-			if (m.getValue(scope) != MetricValue.NONE)
+			if (scope.getMetricValue(m) != MetricValue.NONE)
 				listIDs.add(m.getIndex());
 		}
 		return listIDs;
