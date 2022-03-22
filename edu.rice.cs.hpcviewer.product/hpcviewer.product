@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="hpcviewer" uid="edu.rice.cs.hpcviewer" id="edu.rice.cs.hpcviewer.ui.hpcviewer" application="org.eclipse.e4.ui.workbench.swt.E4Application" version="6.0.0.qualifier" useFeatures="true" includeLaunchers="true">
+<product name="hpcviewer" uid="edu.rice.cs.hpcviewer.ui.hpcviewer" id="edu.rice.cs.hpcviewer.ui.hpcviewer" application="org.eclipse.e4.ui.workbench.swt.E4Application" version="6.0.0.qualifier" useFeatures="true" includeLaunchers="true">
 
    <aboutInfo>
       <image path="/edu.rice.cs.hpcviewer.ui/resources/hpcviewer64.gif"/>
