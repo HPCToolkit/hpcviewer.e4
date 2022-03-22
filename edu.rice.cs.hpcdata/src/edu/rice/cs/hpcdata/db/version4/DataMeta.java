@@ -162,8 +162,9 @@ public class DataMeta extends DataCommon
 		this.experiment.setMaxDepth(maxDepth);
 		
 		// setup the metrics
-		final BaseExperimentWithMetrics exp = (BaseExperimentWithMetrics) experiment;
+		final Experiment exp = (Experiment) experiment;
 		exp.setMetrics(metrics);
+		exp.setMetricRaw(metrics);
 		
 		rootCCT.setMetricValueCollection(new MetricValueCollection3(dataSummary));
 		
