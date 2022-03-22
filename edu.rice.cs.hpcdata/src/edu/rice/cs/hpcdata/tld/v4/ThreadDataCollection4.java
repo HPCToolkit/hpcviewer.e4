@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.List;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
-import edu.rice.cs.hpcdata.db.version4.DataMeta;
 import edu.rice.cs.hpcdata.db.version4.DataPlot;
 import edu.rice.cs.hpcdata.db.version4.DataPlotEntry;
 import edu.rice.cs.hpcdata.db.version4.DataSummary;

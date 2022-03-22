@@ -14,7 +14,6 @@ import org.eclipse.collections.api.map.primitive.LongObjectMap;
 import org.eclipse.collections.impl.map.mutable.primitive.LongObjectHashMap;
 
 import edu.rice.cs.hpcdata.db.IdTupleType;
-import edu.rice.cs.hpcdata.experiment.BaseExperimentWithMetrics;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.ExperimentConfiguration;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
@@ -32,9 +31,9 @@ import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.experiment.scope.visitors.TraceScopeVisitor;
 import edu.rice.cs.hpcdata.experiment.source.SimpleSourceFile;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
-import edu.rice.cs.hpcdata.util.CallPath;
 import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.ICallPath;
 
@@ -103,7 +102,6 @@ public class DataMeta extends DataCommon
 	private DataSummary dataSummary;
 	private IExperiment experiment;
 	private ICallPath   callpath;
-	private int maxDepth;
 
 	public DataMeta() {
 		super();
@@ -123,15 +121,6 @@ public class DataMeta extends DataCommon
 	}
 	
 	
-	/***
-	 * Get the maximum depth of the tree
-	 * 
-	 * @return
-	 */
-	public int getMaxDepth() {
-		return maxDepth;
-	}
-	
 	/****
 	 * Open a database
 	 * 
@@ -147,27 +136,31 @@ public class DataMeta extends DataCommon
 		root.addSubscope(rootCCT);
 		rootCCT.setParentScope(root);
 		
-		callpath = new CallPath();
-		this.experiment.setScopeMap(callpath);
-		this.experiment.setRootScope(root);
-		
-		maxDepth = 0;
-		
 		super.open(directory + File.separator + DB_META_FILE);
 
+		// needs to manage the profile.db here since we need it
+		// to access the metric value
 		dataSummary.open(directory);
-
-		// setup the experiment configuration
-		this.experiment.setVersion(versionMajor + "." + versionMinor);
-		this.experiment.setMaxDepth(maxDepth);
 		
-		// setup the metrics
+		// manually setup the metrics for the sake of backward compatibility
 		final Experiment exp = (Experiment) experiment;
 		exp.setMetrics(metrics);
 		exp.setMetricRaw(metrics);
 		
 		rootCCT.setMetricValueCollection(new MetricValueCollection3(dataSummary));
 		
+		// needs to gather info about cct id and its depth
+		// this is needed for traces
+		TraceScopeVisitor visitor = new TraceScopeVisitor();
+		rootCCT.dfsVisitScopeTree(visitor);
+		
+		callpath = visitor.getCallPath();
+		
+		this.experiment.setRootScope(root);
+		this.experiment.setMaxDepth(visitor.getMaxDepth());
+		this.experiment.setScopeMap(callpath);
+		this.experiment.setVersion(versionMajor + "." + versionMinor);
+
 		stringArea.dispose();
 	}
 	
@@ -702,9 +695,6 @@ public class DataMeta extends DataCommon
 		parent.addSubscope(scope);
 		scope.setParentScope(parent);
 
-		maxDepth++;
-		callpath.addCallPath(scope.getCCTIndex(), scope, maxDepth);
-
 		return scope;
 	}
 	
@@ -741,6 +731,7 @@ public class DataMeta extends DataCommon
 				name = ps.getName();
 			
 			var scope = new ProcedureScope(rootCCT, lm, fileSource, line, line, name, alien, ctxId, ctxId, null, ProcedureScope.FeatureProcedure);
+			
 			return beginNewScope(parent, scope);
 		}
 		ProcedureScope proc;
@@ -761,10 +752,11 @@ public class DataMeta extends DataCommon
 		// we have to remove the line scope from the parent
 		Scope grandParent = parent.getParentScope();
 		grandParent.remove(parent);
-
+		
 		// add the new call site to the tree
 		return beginNewScope(grandParent, cs);
 	}
+	
 	
 	/***
 	 * Create the main root and parse its direct children

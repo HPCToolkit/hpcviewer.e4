@@ -23,6 +23,7 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 public class DataMetaTest 
 {
 	static DataMeta data;
+	private static final int MAX_DEPTH = 6;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws IOException {
@@ -50,7 +51,7 @@ public class DataMetaTest
 		assertNotNull(experiment);
 		
 		assertTrue(experiment.getName().equals("loop"));
-		assertTrue(experiment.getMaxDepth() > 10);
+		assertTrue(experiment.getMaxDepth() > MAX_DEPTH);
 		assertTrue(experiment.getMajorVersion() == 4);
 	}
 	
@@ -148,7 +149,7 @@ public class DataMetaTest
 		var exp   = data.getExperiment();
 		var depth = exp.getMaxDepth();
 
-		assertTrue(depth > 10);
+		assertTrue(depth > MAX_DEPTH);
 		
 		var root = ((Experiment)exp).getRootScope(RootScopeType.CallingContextTree);
 		Scope s = root.getSubscope(0).getSubscope(0);

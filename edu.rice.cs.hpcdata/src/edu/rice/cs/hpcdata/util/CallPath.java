@@ -183,7 +183,7 @@ public class CallPath implements ICallPath
 				cDepth--;
 			
 			while(  cDepthScope != null &&
-					!(cDepthScope.getParentScope() instanceof RootScope) && 
+					!(cDepthScope instanceof RootScope) && 
 					(cDepth > depth || !isTraceScope(cDepthScope)))
 			{
 				cDepthScope = cDepthScope.getParentScope();

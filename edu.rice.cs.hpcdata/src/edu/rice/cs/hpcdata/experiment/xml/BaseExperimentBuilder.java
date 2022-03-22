@@ -1174,7 +1174,7 @@ public class BaseExperimentBuilder extends Builder
 		if (scope instanceof RootScope) {
 			rootStack.push((RootScope)scope);
 		}
-		if (isScopeTrace(scope)) {
+		if (CallPath.isTraceScope(scope)) {
 			current_depth++;
 			assert(current_depth >= 0);
 			max_depth = Math.max(max_depth, current_depth);
@@ -1191,7 +1191,7 @@ public class BaseExperimentBuilder extends Builder
 		try {
 			Scope scope = this.scopeStack.pop();
 			
-			if (isScopeTrace(scope)) {
+			if (CallPath.isTraceScope(scope)) {
 				current_depth--;
 				assert(current_depth >= 0);
 			}
@@ -1205,17 +1205,6 @@ public class BaseExperimentBuilder extends Builder
 		}
 	}
 	
-	/***
-	 * Check if the scope is part of trace scope. 
-	 * A trace scope is either a procedure or a call-site scope.
-	 * 
-	 * @param scope
-	 * @return boolean true if it's a trace scope
-	 */
-	private boolean isScopeTrace(Scope scope) {
-		return (scope instanceof ProcedureScope || 
-				scope instanceof CallSiteScope);
-	}
 
 	/*************************************************************************
 	 *	Returns the current scope.
