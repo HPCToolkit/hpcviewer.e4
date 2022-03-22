@@ -655,8 +655,7 @@ implements IMetricScope
 		int index = metric.getIndex();
 		MetricValue m = metrics.getValue(this, index);
 		if (m == MetricValue.NONE) {
-			MetricValue mv = value.duplicate();
-			metrics.setValue(index, mv);
+			metrics.setValue(index, value);
 		} else {
 			// TODO Could do non-additive accumulations here?
 			double newValue = m.getValue() + value.getValue();

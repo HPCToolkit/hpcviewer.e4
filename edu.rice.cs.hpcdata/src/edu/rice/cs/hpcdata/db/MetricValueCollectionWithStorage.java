@@ -58,20 +58,14 @@ public class MetricValueCollectionWithStorage implements IMetricValueCollection
 			} else {
 				mv = MetricValue.NONE;
 			}
+			values.put(index, mv);
 		}		
 		return mv;
 	}
 	
 	@Override
 	public MetricValue getValue(Scope scope, BaseMetric metric) {
-		MetricValue mv = values.get(metric.getIndex());
-		if (mv == null) {
-			if (metric instanceof DerivedMetric)
-				mv = ((DerivedMetric) metric).getValue(scope);
-			else
-				mv = MetricValue.NONE;
-		}
-		return mv;
+		return getValue(scope, metric.getIndex());
 	}
 
 	@Override
@@ -86,23 +80,11 @@ public class MetricValueCollectionWithStorage implements IMetricValueCollection
 	}
 
 	@Override
-	public void setValue(int index, MetricValue value) {
-		
+	public void setValue(int index, MetricValue value) {		
 		if (value == MetricValue.NONE)
 			return;
 		
-		MetricValue mv = values.get(index);
-		
-		if (mv != null) {
-			// replace the existing value
-			
-			mv.setValue(value.getValue());
-			if (MetricValue.isAnnotationAvailable(mv))
-				mv.setAnnotationValue(value.getAnnotationValue());
-		} else {
-			// add a new metric index
-			values.put(index, value.duplicate());
-		}
+		values.put(index, value.duplicate());
 	}
 
 	@Override
