@@ -73,13 +73,7 @@ public class MetricTest {
 		assertTrue(mvc.getValue(null, 1).getValue() == 10f);
 	}
 
-	@Test
-	public void testSetAnnotation() {
-		var ann = mvc.getAnnotation(1);
-		assertTrue(ann == 0.0f);
-		ann = mvc.getAnnotation(2);
-		assertTrue(ann > 0);
-	}
+
 
 	@Test
 	public void testSize() {

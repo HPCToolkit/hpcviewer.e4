@@ -23,7 +23,7 @@ public class MetricFormatTest {
 		
 		double []values = {9.999, 0.999, 9.55,     9.5,       0.9999, 0.945,
 				           0.95,  0.955, 0.9992,   100000001, 123456789.123456789 };
-		MetricValue rootValue = new MetricValue(values[0]);
+		MetricValue rootValue = new MetricValue(values[values.length-1]);
 		
 		for(int i=0; i<values.length; i++) {
 			MetricValue mv = new MetricValue(values[i]);

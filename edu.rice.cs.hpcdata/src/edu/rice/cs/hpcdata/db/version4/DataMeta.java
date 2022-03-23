@@ -18,6 +18,7 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.ExperimentConfiguration;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
@@ -416,6 +417,11 @@ public class DataMeta extends DataCommon
 					m.setCombineType(combine);
 					m.setOrder(propMetricId);
 					m.setDescription(metricName);
+					
+					// TODO: default metric annotation for prof2 database
+					// temporary quick fix: every metric is percent annotated
+					// this should be fixed when we parse metrics.yaml
+					m.setAnnotationType(AnnotationType.PERCENT);
 					
 					MetricType type = scopeName.equals(METRIC_SCOPE_EXECUTION) ? 
 														MetricType.INCLUSIVE : 
