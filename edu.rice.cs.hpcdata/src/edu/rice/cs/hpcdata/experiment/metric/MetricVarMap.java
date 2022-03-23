@@ -91,7 +91,7 @@ public class MetricVarMap extends VarMap
 			if (this.metric != null && this.metric == metricToQuery) {
 				// avoid recursive call: if the metric queries its own value, we returns
 				// the "raw" value 
-				value = currentScope.getMetricValue(metricToQuery);
+				value = currentScope.getMetricValue(metricToQuery.getIndex());
 			} else {
 				value = metricToQuery.getValue(currentScope);
 			}

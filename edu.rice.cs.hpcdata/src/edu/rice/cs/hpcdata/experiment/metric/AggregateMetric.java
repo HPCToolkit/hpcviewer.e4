@@ -177,7 +177,7 @@ public class AggregateMetric extends AbstractMetricWithFormula
 		} else {
 			// metric has no finalize formula
 			// get whatever the combine formula has ?
-			value = scope.getMetricValue(this);
+			value = scope.getMetricValue(index);
 		}
 		return value;
 	}

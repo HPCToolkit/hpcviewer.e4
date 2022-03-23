@@ -553,7 +553,15 @@ implements IMetricScope
 
 
 	/*************************************************************************
-	 *	Returns the value of a given metric at this scope.
+	 * Returns the value of a given metric at this scope.
+	 * This method pays attention of the type of metric. If the metric is a 
+	 * derived incremental metric (class {@code AggregateMetric}) it will ask
+	 * the metric class to finalize the value.
+  	 * 
+  	 * @param metric
+  	 * 			The metric 
+  	 * @return {@code MetricValue}
+  	 * 			The metric value. If the index has no value, it returns {@code MetricValue.NONE}
 	 ************************************************************************/
 
 	public MetricValue getMetricValue(BaseMetric metric)
@@ -563,7 +571,7 @@ implements IMetricScope
 		// special case for raw metric: we need to grab the value
 		// from the metric directly. No caching here.
 		
-		if (metric instanceof MetricRaw)
+		if (metric instanceof MetricRaw || metric instanceof AggregateMetric)
 			return metric.getValue(this);
 		
 		return metrics.getValue(this, metric);
@@ -571,7 +579,17 @@ implements IMetricScope
 
 
 	/***************************************************************************
-  overload the method to take-in the index ---FMZ
+  	 * <p>
+  	 * This method returns the cached raw metric value.
+  	 * Unlike {@link getMetricValue(BaseMetric)}, it doesn't trigger calculation
+  	 * of final metric value.
+  	 * </p>
+  	 * overload the method to take-in the index ---FMZ
+  	 * 
+  	 * @param index
+  	 * 			The metric index
+  	 * @return {@code MetricValue}
+  	 * 			The metric value. If the index has no value, it returns {@code MetricValue.NONE}
 	 ***************************************************************************/
 
 	public MetricValue getMetricValue(int index)
