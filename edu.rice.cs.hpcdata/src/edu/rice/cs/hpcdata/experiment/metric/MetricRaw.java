@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.List;
 
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.scope.IMetricScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;

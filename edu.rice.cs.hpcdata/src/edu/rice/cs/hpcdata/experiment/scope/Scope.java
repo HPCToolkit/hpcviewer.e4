@@ -23,6 +23,7 @@ import edu.rice.cs.hpcdata.experiment.metric.AggregateMetric;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricValueCollection;
+import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.filters.MetricValuePropagationFilter;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.FilterScopeVisitor;
@@ -558,6 +559,13 @@ implements IMetricScope
 	public MetricValue getMetricValue(BaseMetric metric)
 	{
 		ensureMetricStorage();
+		
+		// special case for raw metric: we need to grab the value
+		// from the metric directly. No caching here.
+		
+		if (metric instanceof MetricRaw)
+			return metric.getValue(this);
+		
 		return metrics.getValue(this, metric);
 	}
 
