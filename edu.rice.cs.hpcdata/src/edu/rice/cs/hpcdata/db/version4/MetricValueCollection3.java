@@ -108,10 +108,6 @@ public class MetricValueCollection3 implements IMetricValueCollection
 		return MetricValue.NONE;
 	}
 
-	@Override
-	public float getAnnotation(int index) {
-		return 0.0f;
-	}
 
 	@Override
 	public void setValue(int index, MetricValue value) {
@@ -121,10 +117,6 @@ public class MetricValueCollection3 implements IMetricValueCollection
 
 			values.put(index, value);
 		}
-	}
-
-	@Override
-	public void setAnnotation(int index, float ann) {
 	}
 
 

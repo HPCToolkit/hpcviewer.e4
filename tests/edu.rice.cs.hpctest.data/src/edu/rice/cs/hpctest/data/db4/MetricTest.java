@@ -61,11 +61,7 @@ public class MetricTest {
 		assertTrue(mv.getValue() > 0);
 	}
 
-	@Test
-	public void testGetAnnotation() {
-		float f = mvc.getAnnotation(1);
-		assertTrue(f>-1);
-	}
+
 
 	@Test
 	public void testSetValue() {

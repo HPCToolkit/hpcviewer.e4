@@ -80,8 +80,7 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		if (value == 0.0d)
 			return MetricValue.NONE;
 		
-		MetricValue mv = new MetricValue(value);
-		return mv;
+		return new MetricValue(value);
 	}
 
 

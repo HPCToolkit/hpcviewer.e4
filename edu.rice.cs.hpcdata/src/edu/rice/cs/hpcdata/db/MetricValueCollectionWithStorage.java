@@ -24,8 +24,6 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
  *******************************************/
 public class MetricValueCollectionWithStorage implements IMetricValueCollection 
 {
-	private final float VALUE_ZERO = 0.0f;
-	
 	/** Sparse storage of metric values.
 	 *  The key is the metric index, the value is a 
 	 *  {@code MetricValue} object. Usually not {@code NONE} **/
@@ -69,10 +67,6 @@ public class MetricValueCollectionWithStorage implements IMetricValueCollection
 		return mv;
 	}
 
-	@Override
-	public float getAnnotation(int index) {
-		return VALUE_ZERO;
-	}
 
 	@Override
 	public void setValue(int index, MetricValue value) {		
@@ -82,9 +76,6 @@ public class MetricValueCollectionWithStorage implements IMetricValueCollection
 		values.put(index, value.duplicate());
 	}
 
-	@Override
-	public void setAnnotation(int index, float ann) {
-	}
 
 	@Override
 	public boolean hasMetrics(Scope scope) {

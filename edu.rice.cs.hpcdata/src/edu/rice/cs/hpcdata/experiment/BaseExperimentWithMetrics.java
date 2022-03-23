@@ -128,7 +128,7 @@ implements IMetricManager, ListEventListener<BaseMetric>
 
 					// case for old database: no partner information
 					if (partner_metric != null) {
-						MetricValue partner_value = scope.getMetricValue( partner_metric );
+						MetricValue partner_value = scope.getMetricValue( partner );
 						scope.setMetricValue(metric.getIndex(), partner_value);
 					}
 				}
