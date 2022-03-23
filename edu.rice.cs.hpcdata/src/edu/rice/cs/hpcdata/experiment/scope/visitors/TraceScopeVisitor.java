@@ -81,7 +81,7 @@ public class TraceScopeVisitor implements IScopeVisitor
 	public void visit(LineScope scope, ScopeVisitType vt) { update(scope, vt); }
 
 	@Override
-	public void visit(StatementRangeScope scope, ScopeVisitType vt) {}
+	public void visit(StatementRangeScope scope, ScopeVisitType vt) {/* unused */}
 
 	@Override
 	public void visit(LoopScope scope, ScopeVisitType vt) { update(scope, vt); }
@@ -93,19 +93,19 @@ public class TraceScopeVisitor implements IScopeVisitor
 	public void visit(ProcedureScope scope, ScopeVisitType vt) { update(scope, vt); }
 
 	@Override
-	public void visit(FileScope scope, ScopeVisitType vt) {}
+	public void visit(FileScope scope, ScopeVisitType vt) {/* not treated in this class */}
 
 	@Override
-	public void visit(GroupScope scope, ScopeVisitType vt) {}
+	public void visit(GroupScope scope, ScopeVisitType vt) {/* unused */}
 
 	@Override
-	public void visit(LoadModuleScope scope, ScopeVisitType vt) {}
+	public void visit(LoadModuleScope scope, ScopeVisitType vt) {/* not treated in this class */}
 
 	@Override
-	public void visit(RootScope scope, ScopeVisitType vt) {}
+	public void visit(RootScope scope, ScopeVisitType vt) {/* not treated in this class */}
 
 	@Override
-	public void visit(Scope scope, ScopeVisitType vt) {}
+	public void visit(Scope scope, ScopeVisitType vt) {/* not treated in this class */}
 
 	
 	private void update(Scope scope, ScopeVisitType vt) {
@@ -127,6 +127,12 @@ public class TraceScopeVisitor implements IScopeVisitor
 				currentDepth++;
 				maxDepth = Math.max(maxDepth, currentDepth);
 			}
+			if (current == null)
+				// this may never happen
+				// however, just in case if the database corrupts, we force
+				// to make it the same as the scope.
+				current = scope;
+			
 			callpath.addCallPath(scope.getCCTIndex(), current, currentDepth);
 			
 		} else {

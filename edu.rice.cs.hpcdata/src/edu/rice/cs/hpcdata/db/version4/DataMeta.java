@@ -101,8 +101,8 @@ public class DataMeta extends DataCommon
 
 	private DataSummary dataSummary;
 	private IExperiment experiment;
-	private ICallPath   callpath;
 
+	
 	public DataMeta() {
 		super();
 	}
@@ -154,11 +154,9 @@ public class DataMeta extends DataCommon
 		TraceScopeVisitor visitor = new TraceScopeVisitor();
 		rootCCT.dfsVisitScopeTree(visitor);
 		
-		callpath = visitor.getCallPath();
-		
 		this.experiment.setRootScope(root);
 		this.experiment.setMaxDepth(visitor.getMaxDepth());
-		this.experiment.setScopeMap(callpath);
+		this.experiment.setScopeMap(visitor.getCallPath());
 		this.experiment.setVersion(versionMajor + "." + versionMinor);
 
 		stringArea.dispose();
@@ -390,12 +388,12 @@ public class DataMeta extends DataCommon
 			var nScopes = buffer.getShort(metricLocation + 0x08);
 			var pScopes = buffer.getLong (metricLocation + 0x10);	
 			
-			position = (int) (pName - section.offset);
-			String metricName = getNullTerminatedString(buffer, position);
+			int strPosition = (int) (pName - section.offset);
+			String metricName = getNullTerminatedString(buffer, strPosition);
 			
-			position = (int) (pScopes - section.offset);				
+			int scopesPosition = (int) (pScopes - section.offset);				
 			for(int j=0; j<nScopes; j++) {
-				int basePosition   = position + (j*szScope);
+				int basePosition   = scopesPosition + (j*szScope);
 				long  pScope       = buffer.getLong (basePosition);
 				short nSummaries   = buffer.getShort(basePosition + 0x08);
 				short propMetricId = buffer.getShort(basePosition + 0x0a);
@@ -407,9 +405,9 @@ public class DataMeta extends DataCommon
 				int baseSummariesLocation = (int) (pSummaries - section.offset);
 						
 				for(short k=0; k<nSummaries; k++) {
-					int summaryLoc = baseSummariesLocation + i * szSummary;
-					long pFormula = buffer.getLong(summaryLoc);
-					byte combine  = buffer.get(summaryLoc + 0x08);
+					int summaryLoc = baseSummariesLocation + k * szSummary;
+					long pFormula  = buffer.getLong(summaryLoc);
+					byte combine   = buffer.get(summaryLoc + 0x08);
 					short statMetric = buffer.getShort(summaryLoc + 0x0a);
 											
 					var strFormula = getNullTerminatedString(buffer, (int) (pFormula-section.offset));
@@ -659,7 +657,11 @@ public class DataMeta extends DataCommon
 			case FMT_METADB_LEXTYPE_INSTRUCTION:
 				//scope = new LineScope(root, fs, line, ctxId, ctxId);
 				//scope = createLexicalInstruction(parent, lm, fs, ctxId, line, relation);
-				//break;
+				newParent = parent;
+				scope = new LineScope(rootCCT, fs, line, ctxId, ctxId);
+				((LineScope)scope).setLoadModule(lm);
+				newParent = beginNewScope(parent, scope);					
+				break;
 			default:
 				throw new RuntimeException("Invalid node relation field");
 			}

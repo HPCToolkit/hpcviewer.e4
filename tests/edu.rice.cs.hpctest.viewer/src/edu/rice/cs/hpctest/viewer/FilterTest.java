@@ -22,7 +22,6 @@ import edu.rice.cs.hpcfilter.service.FilterMap;
 @TestMethodOrder(OrderAnnotation.class)
 class FilterTest {
 	private static Experiment []experiments;
-	private static File []database;
 	private static String []dbPaths = new String[] {"bug-no-gpu-trace", "prof2" + File.separator + "loop-inline"};
 	
 	private static FilterMap fmap;
@@ -30,7 +29,7 @@ class FilterTest {
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
 		experiments = new Experiment[dbPaths.length];
-		database   = new File[dbPaths.length];
+		var database   = new File[dbPaths.length];
 		int i=0;
 		for (String dbp: dbPaths) {
 			
@@ -49,6 +48,7 @@ class FilterTest {
 			assertNotNull(experiments[i].getRootScope());
 			i++;
 		}
+		fmap = new FilterMap();
 	}
 	
 	
@@ -70,7 +70,6 @@ class FilterTest {
 	@Test
 	@Order(1)
 	void testFilterInit() {
-		fmap = new FilterMap();
 		var fname = fmap.getFilename();
 		assertNotNull(fname);
 		
