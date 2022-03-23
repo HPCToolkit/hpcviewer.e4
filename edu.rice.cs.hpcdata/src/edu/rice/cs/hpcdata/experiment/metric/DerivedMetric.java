@@ -157,12 +157,7 @@ public class DerivedMetric extends AbstractMetricWithFormula {
 			if(Double.compare(dVal, 0.0d) == 0)
 				return MetricValue.NONE;	// the value is not available !
 		}
-		if(this.getAnnotationType() == AnnotationType.PERCENT){
-			MetricValue myrootValue = getValue(root);
-			return new MetricValue(dVal, ((float) dVal/myrootValue.getValue()));
-		} else {
-			return new MetricValue(dVal);
-		}
+		return new MetricValue(dVal);
 	}
 	
 	public MetricValue getRawValue(IMetricScope s)
@@ -219,10 +214,6 @@ public class DerivedMetric extends AbstractMetricWithFormula {
 		double rootVal = getDoubleValue(rootScope);
 		if (Double.compare(0.0, rootVal) == 0) {
 			return MetricValue.NONE;
-		}
-		if (annotationType != AnnotationType.NONE) {
-			double rootAnn = 1.0d;
-			return new MetricValue(rootVal, rootAnn);
 		}
 		return new MetricValue(rootVal);
 	}

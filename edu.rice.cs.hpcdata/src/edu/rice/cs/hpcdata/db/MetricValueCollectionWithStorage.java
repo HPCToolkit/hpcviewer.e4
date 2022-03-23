@@ -42,15 +42,21 @@ public class MetricValueCollectionWithStorage implements IMetricValueCollection
 	
 	@Override
 	public MetricValue getValue(Scope scope, int index) {
-		MetricValue mv = values.get(index);
+
+		RootScope root = scope.getRootScope();
+		Experiment experiment = (Experiment) root.getExperiment();
+		BaseMetric metric = experiment.getMetric(index);
+		
+		return getValue(scope, metric);
+	}
+	
+	@Override
+	public MetricValue getValue(Scope scope, BaseMetric metric) {
+		MetricValue mv = values.get(metric.getIndex());
 		
 		if (mv == null) {
 			// the cache of metric values already exist, but we cannot find the value of this metric
 			// either the value is empty, or it's a derived metric which have to be computed here
-
-			RootScope root = scope.getRootScope();
-			Experiment experiment = (Experiment) root.getExperiment();
-			BaseMetric metric = experiment.getMetric(index);
 			
 			if (metric instanceof DerivedMetric)
 			{
@@ -58,25 +64,14 @@ public class MetricValueCollectionWithStorage implements IMetricValueCollection
 			} else {
 				mv = MetricValue.NONE;
 			}
-			values.put(index, mv);
+			values.put(metric.getIndex(), mv);
 		}		
 		return mv;
-	}
-	
-	@Override
-	public MetricValue getValue(Scope scope, BaseMetric metric) {
-		return getValue(scope, metric.getIndex());
 	}
 
 	@Override
 	public float getAnnotation(int index) {
-		MetricValue mv = values.get(index);
-		
-		if (mv == null) {
-			return VALUE_ZERO;
-		}
-		
-		return mv.getAnnotationValue();
+		return VALUE_ZERO;
 	}
 
 	@Override
@@ -89,12 +84,6 @@ public class MetricValueCollectionWithStorage implements IMetricValueCollection
 
 	@Override
 	public void setAnnotation(int index, float ann) {
-		MetricValue mv = values.get(index);
-		if (mv != null) {
-			mv.setAnnotationValue(ann);
-		} else {
-			throw new RuntimeException("Metric index unknown: " + index);
-		}
 	}
 
 	@Override

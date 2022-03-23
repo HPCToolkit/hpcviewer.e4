@@ -218,13 +218,6 @@ public class Experiment extends BaseExperimentWithMetrics
 	}
 
 
-	protected void addPercents(Scope scope, RootScope totalScope)
-	{	
-		PercentScopeVisitor psv = new PercentScopeVisitor(totalScope);
-		scope.dfsVisitScopeTree(psv);
-	}
-
-
 
 	/**
 	 * Post-processing for CCT:
@@ -289,8 +282,6 @@ public class Experiment extends BaseExperimentWithMetrics
 			//----------------------------------------------------------------------------------------------
 			prepareDatacentricView();
 
-		} else if (firstRootType.equals(RootScopeType.Flat)) {
-			addPercents(firstSubTree, (RootScope) firstSubTree);
 		}
 		hideEmptyMetrics(firstSubTree);
 	}

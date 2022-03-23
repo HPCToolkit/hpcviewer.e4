@@ -35,7 +35,6 @@ import edu.rice.cs.hpcdata.experiment.scope.visitors.TraceScopeVisitor;
 import edu.rice.cs.hpcdata.experiment.source.SimpleSourceFile;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
 import edu.rice.cs.hpcdata.util.Constants;
-import edu.rice.cs.hpcdata.util.ICallPath;
 
 
 /*********************************************
@@ -416,6 +415,7 @@ public class DataMeta extends DataCommon
 					m.setFormula(strFormula);
 					m.setCombineType(combine);
 					m.setOrder(propMetricId);
+					m.setDescription(metricName);
 					
 					MetricType type = scopeName.equals(METRIC_SCOPE_EXECUTION) ? 
 														MetricType.INCLUSIVE : 
@@ -657,7 +657,6 @@ public class DataMeta extends DataCommon
 			case FMT_METADB_LEXTYPE_INSTRUCTION:
 				//scope = new LineScope(root, fs, line, ctxId, ctxId);
 				//scope = createLexicalInstruction(parent, lm, fs, ctxId, line, relation);
-				newParent = parent;
 				scope = new LineScope(rootCCT, fs, line, ctxId, ctxId);
 				((LineScope)scope).setLoadModule(lm);
 				newParent = beginNewScope(parent, scope);					

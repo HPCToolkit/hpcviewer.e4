@@ -4,7 +4,6 @@ import java.util.List;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
-import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.AlienScope;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.FileScope;
@@ -64,16 +63,5 @@ public class PercentScopeVisitor implements IScopeVisitor {
 	 * @param num_metrics: number of metrics
 	 */
 	protected void setPercentValue(Scope scope) {
-		for (BaseMetric metric: listMetrics) {
-			
-			MetricValue m = scope.getMetricValue(metric);
-			MetricValue root_value = root.getMetricValue(metric);
-			if (m != MetricValue.NONE && root_value != MetricValue.NONE) {
-				double myValue = MetricValue.getValue(m);
-				double total = MetricValue.getValue(root_value);
-				if (Double.compare(total, 0)!=0) 
-					MetricValue.setAnnotationValue(m, myValue/total);
-			}
-		}
 	}
 }

@@ -407,8 +407,8 @@ public String format(double value) {
  *	Returns a <code>String</code> showing a given <code>MetricValue</code>
  *	according to this format.
  ************************************************************************/
-	
-public String format(MetricValue value)
+@Override
+public String format(MetricValue value, MetricValue rootValue)
 {
 	this.ensureFormatters();
 	StringBuffer formatted = new StringBuffer();
@@ -428,9 +428,9 @@ public String format(MetricValue value)
 	// append formatted annotation if wanted
 	if( this.annotationStyle.show )
 	{
-		if( MetricValue.isAnnotationAvailable(value) )
+		if( rootValue != null && rootValue != MetricValue.NONE)
 		{
-			float number = MetricValue.getAnnotationValue(value);
+			float number = rootValue.getValue() / value.getValue();
 
 			// if the formatter pattern is set for percent values, we need to handle special values differently
 			if (annotationStyle.pattern.contains("%")) {

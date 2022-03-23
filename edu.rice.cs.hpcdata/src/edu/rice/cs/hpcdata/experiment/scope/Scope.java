@@ -24,7 +24,6 @@ import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricValueCollection;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.scope.filters.MetricValuePropagationFilter;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.FilterScopeVisitor;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.IScopeVisitor;
@@ -559,23 +558,7 @@ implements IMetricScope
 	public MetricValue getMetricValue(BaseMetric metric)
 	{
 		ensureMetricStorage();
-		MetricValue value = metrics.getValue(this, metric);
-
-		// compute percentage if necessary
-		if (metric.getAnnotationType() == AnnotationType.PERCENT) {
-			if(MetricValue.isAvailable(value) && (! MetricValue.isAnnotationAvailable(value)))
-			{
-				if (this instanceof RootScope) {
-					MetricValue.setAnnotationValue(value, 1.0);
-				} else {
-					MetricValue total = root.getMetricValue(metric);
-					if(MetricValue.isAvailable(total))
-						MetricValue.setAnnotationValue(value, MetricValue.getValue(value)/MetricValue.getValue(total));
-				}
-			} 
-		}
-
-		return value;
+		return metrics.getValue(this, metric);
 	}
 
 
@@ -586,9 +569,7 @@ implements IMetricScope
 	public MetricValue getMetricValue(int index)
 	{
 		ensureMetricStorage();
-		MetricValue value = metrics.getValue(this, index);
-
-		return value;
+		return metrics.getValue(this, index);
 	}
 
 	public MetricValue getRootMetricValue(BaseMetric metric)
@@ -636,7 +617,7 @@ implements IMetricScope
 								  MetricValuePropagationFilter filter) {
 		final int mIndex = metric.getIndex();
 		if (filter.doPropagation(source, this, mIndex, mIndex)) {
-			MetricValue m = source.getMetricValue(metric.getIndex());
+			MetricValue m = source.getMetricValue(metric);
 			if (m != MetricValue.NONE && Double.compare(MetricValue.getValue(m), 0.0) != 0) {
 				this.accumulateMetricValue(metric, m);
 			}
@@ -652,23 +633,13 @@ implements IMetricScope
 	{
 		ensureMetricStorage();
 		
-		int index = metric.getIndex();
-		MetricValue m = metrics.getValue(this, index);
+		MetricValue m = metrics.getValue(this, metric);
 		if (m == MetricValue.NONE) {
-			metrics.setValue(index, value);
+			metrics.setValue(metric.getIndex(), value);
 		} else {
 			// TODO Could do non-additive accumulations here?
 			double newValue = m.getValue() + value.getValue();
 			m.setValue(newValue);
-			
-			// set the annotation if necessary
-			if (metric.getAnnotationType() == AnnotationType.PERCENT) {				
-				var rootValue = getRootScope().getMetricValue(index);
-				if (rootValue != MetricValue.NONE) {
-					float rValue = rootValue.getValue();
-					m.setAnnotationValue((float) (newValue / rValue));
-				}
-			}
 		}
 	}
 

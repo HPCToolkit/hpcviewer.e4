@@ -170,13 +170,6 @@ public class AggregateMetric extends AbstractMetricWithFormula
 				// Java double, so we assume we can compare it with 0.0d
 				if (Double.compare(dValue, 0.0d) != 0) {
 					value = new MetricValue(dValue);
-					if (getAnnotationType() == AnnotationType.PERCENT) {
-						MetricValue	rootValue = scope.getRootMetricValue(this);
-						if (rootValue != MetricValue.NONE) {
-							float percent = (float) (dValue / rootValue.getValue());
-							MetricValue.setAnnotationValue(value, percent);
-						}
-					}
 				}
 			} catch(java.lang.Exception e) {
 				e.printStackTrace();

@@ -40,10 +40,7 @@ public class FilterScopeVisitor implements IScopeVisitor
 	static public final int STATUS_INIT=0, STATUS_OK = 1, STATUS_FAKE_PROCEDURE = 2; 
 	
 	private final IFilterData filter;
-	private final IMetricValueCollection rootMetricValues;
 	private final IExperiment experiment;
-	private final RootScope rootOriginalCCT;
-	
 	private List<BaseMetric> metrics = null;
 	
 	/**** flag to allow the dfs to continue to go deeper or not.  
@@ -65,8 +62,7 @@ public class FilterScopeVisitor implements IScopeVisitor
 	public FilterScopeVisitor(RootScope rootOriginalCCT, IFilterData filter)
 	{
 		this.filter 		  = filter;
-		this.rootMetricValues = rootOriginalCCT.getMetricValues();
-		this.rootOriginalCCT  = rootOriginalCCT;
+		rootOriginalCCT.getMetricValues();
 		need_to_continue 	  = true;
 		current_depth = 0;
 		max_depth = 0;
@@ -323,7 +319,7 @@ public class FilterScopeVisitor implements IScopeVisitor
 		IMetricValueCollection values = child.getMetricValues();
 		for (BaseMetric metric: metrics)
 		{
-			MetricValue childValue = values.getValue(child, metric.getIndex());
+			MetricValue childValue = values.getValue(child, metric);
 			if (childValue == MetricValue.NONE) {
 				// in the original hpcview (2002), we assign the -1 value as the "none existence value"
 				// this is not proper. we should assign as null for the non-existence
@@ -375,10 +371,8 @@ public class FilterScopeVisitor implements IScopeVisitor
 		}
 		// update the filtered value
 		value             += mvChild.getValue();
-		float rootValue   = rootMetricValues.getValue(rootOriginalCCT, metric_exclusive_index).getValue();
-		float annotation  = value / rootValue;
 		
-		MetricValue mv    = new MetricValue(value, annotation);
+		MetricValue mv    = new MetricValue(value);
 		target.setMetricValue(metric_exclusive_index, mv);
 	}
 	

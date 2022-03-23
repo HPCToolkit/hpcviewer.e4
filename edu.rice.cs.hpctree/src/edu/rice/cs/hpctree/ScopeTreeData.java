@@ -9,6 +9,7 @@ import org.eclipse.nebula.widgets.nattable.sort.SortDirectionEnum;
 
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
+import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.LineScope;
@@ -380,8 +381,16 @@ public class ScopeTreeData implements IScopeTreeData
 			return compareNodeName(o1, o2, factor);
 		}
 
-		MetricValue mv1 = o1.getMetricValue(metric);
-		MetricValue mv2 = o2.getMetricValue(metric);
+		final MetricValue mv1;
+		final MetricValue mv2;
+		
+		if (metric instanceof MetricRaw) {
+			mv1 = metric.getValue(o1);
+			mv2 = metric.getValue(o2);
+		} else {
+			mv1 = o1.getMetricValue(metric);
+			mv2 = o2.getMetricValue(metric);
+		}
 
 		if (mv1.getValue() > mv2.getValue())
 			return factor * 1;

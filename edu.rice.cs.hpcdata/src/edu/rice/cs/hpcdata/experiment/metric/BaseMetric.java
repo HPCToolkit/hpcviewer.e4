@@ -314,14 +314,17 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 	 */
 	public String getMetricTextValue(Scope scope) {
 		MetricValue mv = scope.getMetricValue(this);
-		return this.getMetricTextValue(mv);
+		boolean showPercent = getAnnotationType() == AnnotationType.PERCENT;
+		MetricValue rootValue = showPercent ? scope.getRootScope().getMetricValue(this) : MetricValue.NONE;
+		
+		return this.getMetricTextValue(mv, rootValue);
 	}
 
 	/*************************************************************************
 	 * Return the text to display based on the metric value
 	 * @param mv: the value of a metric
 	 *************************************************************************/
-	private String getMetricTextValue(MetricValue mv) {
+	protected String getMetricTextValue(MetricValue mv, MetricValue rootValue) {
 		
 		if (mv == null)
 			return null;
@@ -339,7 +342,7 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 		else if (Float.compare(mv.value, Float.NEGATIVE_INFINITY)==0) sText = "-Infinity";
 		else if (Float.isNaN(mv.value)) sText = "NaN";
 		else {
-			sText = getDisplayFormat().format(mv);
+			sText = getDisplayFormat().format(mv, rootValue);
 		}
 		
 		return sText;

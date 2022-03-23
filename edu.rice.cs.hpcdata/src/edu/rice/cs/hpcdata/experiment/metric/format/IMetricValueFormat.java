@@ -4,5 +4,5 @@ import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 
 public interface IMetricValueFormat {
 
-	public String format(MetricValue value);
+	public String format(MetricValue value, MetricValue rootValue);
 }

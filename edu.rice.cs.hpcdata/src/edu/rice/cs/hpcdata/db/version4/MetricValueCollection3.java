@@ -73,18 +73,7 @@ public class MetricValueCollection3 implements IMetricValueCollection
 				
 				for (MetricValueSparse mvs: sparseValues) {
 					float value = (float) mvs.getValue();
-					float annotationValue = 1.0f;
-					
-					// compute the percent annotation
-					if (!(scope instanceof RootScope)) {
-						RootScope root = scope.getRootScope();
-						MetricValue mv = root.getMetricValue(mvs.getIndex());
-						if (mv != MetricValue.NONE)
-						{
-							annotationValue = value/mv.getValue();
-						}
-					}
-					MetricValue mv = new MetricValue(value, annotationValue);
+					MetricValue mv = new MetricValue(value);
 					values.put(mvs.getIndex(), mv);
 				}
 				
@@ -121,10 +110,6 @@ public class MetricValueCollection3 implements IMetricValueCollection
 
 	@Override
 	public float getAnnotation(int index) {
-		MetricValue mv = values.get(index);
-		if (mv != null)
-			return MetricValue.getAnnotationValue(mv);
-		
 		return 0.0f;
 	}
 
@@ -140,9 +125,6 @@ public class MetricValueCollection3 implements IMetricValueCollection
 
 	@Override
 	public void setAnnotation(int index, float ann) {
-		MetricValue value = values.get(index);
-		if (value != null)
-			MetricValue.setAnnotationValue(value, ann);
 	}
 
 
