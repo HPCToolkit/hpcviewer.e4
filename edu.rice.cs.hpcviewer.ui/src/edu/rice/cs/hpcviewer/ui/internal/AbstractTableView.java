@@ -238,6 +238,12 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		table.addActionListener(scope -> {
 			profilePart.addEditor(scope);
 		});
+		//
+		// fix issue #188: force the table to have a content so natTable can properly resize the columns
+		// this doesn't really slow the UI so it's okay to do this to all tables. 
+		// TODO: ugly quick fix. NatTable has to handle this better!
+		// 
+		table.setRoot(root);
 		
 		updateButtonStatus();
 
