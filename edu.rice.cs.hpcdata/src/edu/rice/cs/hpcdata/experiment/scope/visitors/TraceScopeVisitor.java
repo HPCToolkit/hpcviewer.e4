@@ -109,6 +109,9 @@ public class TraceScopeVisitor implements IScopeVisitor
 
 	
 	private void update(Scope scope, ScopeVisitType vt) {
+		if (scope == null)
+			return;
+		
 		if (vt == ScopeVisitType.PreVisit) {
 			Scope current = scope;
 			
