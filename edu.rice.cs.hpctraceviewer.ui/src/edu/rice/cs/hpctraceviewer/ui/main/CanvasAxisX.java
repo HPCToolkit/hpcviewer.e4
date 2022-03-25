@@ -70,12 +70,7 @@ public class CanvasAxisX extends AbstractAxisCanvas
 		super.dispose();
 	}
 	
-	
-	@Override
-	public void paintControl(PaintEvent e) {
-		super.paintControl(e);
-	}
-	
+		
 	private void rebuffer() {
 
 		if (getData() == null)

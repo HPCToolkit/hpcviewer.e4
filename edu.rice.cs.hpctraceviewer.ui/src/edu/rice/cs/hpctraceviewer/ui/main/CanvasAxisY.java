@@ -2,10 +2,13 @@ package edu.rice.cs.hpctraceviewer.ui.main;
 
 import java.util.List;
 
+import org.eclipse.core.commands.operations.IUndoableOperation;
+import org.eclipse.core.commands.operations.OperationHistoryEvent;
 import org.eclipse.jface.window.DefaultToolTip;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -21,6 +24,7 @@ import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 import edu.rice.cs.hpctraceviewer.ui.base.ITraceCanvas;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.base.ITraceCanvas.MouseState;
+import edu.rice.cs.hpctraceviewer.ui.operation.AbstractTraceOperation;
 
 
 /*********************
@@ -40,7 +44,6 @@ public class CanvasAxisY extends AbstractAxisCanvas
 	private int columnWidth = HPCTraceView.Y_AXIS_WIDTH/4;
 	
 	private final Color [][]listColorObjects;
-	private final Color bgColor;
 	private final ProcessTimelineService timeLine;
 
 	/** Relates to the condition that the mouse is in.*/
@@ -60,7 +63,6 @@ public class CanvasAxisY extends AbstractAxisCanvas
 	public CanvasAxisY(ITracePart tracePart, ProcessTimelineService timeLine, Composite parent, int style) {
 		super(tracePart, parent, style);
 		
-		bgColor = parent.getBackground();
 		this.timeLine = timeLine;
 		
 		listColorObjects = new Color[5][2];
@@ -103,11 +105,8 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		tooltip.setData(stdc, columnWidth);
 	}
 	
-
 	
-	@Override
-	public void paintControl(PaintEvent e) {
-
+	private void rebuffer() {
 		if (getData() == null)
 			return;
 		
@@ -127,13 +126,29 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		if (listIdTuples == null || listIdTuples.size() == 0)
 			return;
 		
+		// ------------------------------------------------------------------------------------------
+		// setup the GC buffer
+		// ------------------------------------------------------------------------------------------
+		initBuffer();
+
+		final int viewWidth = getBounds().width;
+		final int viewHeight = getBounds().height;
+
+		if (viewWidth == 0 || viewHeight == 0)
+			return;
+
+		final Image imageBuffer = new Image(getDisplay(), viewWidth, viewHeight);
+		setBuffer(imageBuffer);
+
+		final GC gc = new GC(imageBuffer);
+
 		// --------------------------------------------------------------------------
         // Manually fill the client area with the default background color
         // Some platforms don't paint the background properly 
 		// --------------------------------------------------------------------------
         
-		e.gc.setBackground(bgColor);
-		e.gc.fillRectangle(getClientArea());
+		gc.setBackground(getParent().getBackground());
+		gc.fillRectangle(getClientArea());
 
 		// -----------------------------------------------------
 		// collect the position and the length of each process
@@ -177,13 +192,15 @@ public class CanvasAxisY extends AbstractAxisCanvas
 
 				Color color  = listColorObjects[j%5][currentColor];
 
-				e.gc.setBackground(color);
-				e.gc.fillRectangle(x_start, y_curr, x_end, y_next);
+				gc.setBackground(color);
+				gc.fillRectangle(x_start, y_curr, x_end, y_next);
 				
 				oldColorIndex[j] = currentColor;
 			}
 			idtupleOld = idtuple;
 		}
+		gc.dispose();
+		redraw();
 	}
 	
 	
@@ -207,6 +224,26 @@ public class CanvasAxisY extends AbstractAxisCanvas
 	}
 
 	
+	
+	@Override
+	public void historyNotification(final OperationHistoryEvent event) {
+
+		if (isDisposed())
+			return;
+		
+		if (event.getEventType() == OperationHistoryEvent.DONE) {
+			final IUndoableOperation operation = event.getOperation();
+			if (!(operation instanceof AbstractTraceOperation)) {
+				return;
+			}
+			final AbstractTraceOperation op = (AbstractTraceOperation) operation;
+			if (op.getData() != getData())
+				return;
+			
+			rebuffer();
+		}
+	}
+
 	/********************************************************
 	 * 
 	 * Tooltip class to show the rank and/or the thread of the 
