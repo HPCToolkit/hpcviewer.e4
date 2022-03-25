@@ -229,12 +229,13 @@ public class CanvasAxisX extends AbstractAxisCanvas
 			// we want to draw the label if the number is nicely readable
 			// nice numbers: 1, 2, 4, ...
 			// not nice numbers: 1.1, 2.3, ...
-			boolean toDrawLabel = (time % 100 == 0)    ||
+			double timeToAppear = time * multiplier;
+			boolean toDrawLabel = (time % 200 == 0)    ||
 								  (deltaXPixels > 50)  ||
-								  (multiplier == 1 && time % 2 == 0);
+								  (timeToAppear % 2 == 0) ;
 			
 			if (i==0 || toDrawLabel) {
-				String strTime   = formatTime.format(multiplier * time) + userUnitTime;			
+				String strTime   = formatTime.format(timeToAppear) + userUnitTime;			
 				Point textArea   = e.gc.stringExtent(strTime);
 
 				// by default x position is in the middle of the tick
