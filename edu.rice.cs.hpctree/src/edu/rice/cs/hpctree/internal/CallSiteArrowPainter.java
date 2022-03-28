@@ -1,22 +1,23 @@
 package edu.rice.cs.hpctree.internal;
 
 import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
-import org.eclipse.nebula.widgets.nattable.layer.ILayer;
 import org.eclipse.nebula.widgets.nattable.layer.LabelStack;
 import org.eclipse.nebula.widgets.nattable.layer.cell.ILayerCell;
 import org.eclipse.nebula.widgets.nattable.painter.cell.BackgroundPainter;
-import org.eclipse.nebula.widgets.nattable.resize.command.ColumnResizeCommand;
-import org.eclipse.nebula.widgets.nattable.resize.command.RowResizeCommand;
-import org.eclipse.nebula.widgets.nattable.style.CellStyleUtil;
-import org.eclipse.nebula.widgets.nattable.style.IStyle;
+import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 
+import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
+import edu.rice.cs.hpcdata.experiment.scope.LineScope;
+import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcsetting.color.ColorManager;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
+import edu.rice.cs.hpctree.resources.ViewerColorManager;
 
 
 /*******************************
@@ -27,107 +28,112 @@ import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 public class CallSiteArrowPainter extends BackgroundPainter 
 {
 	private static final String EMPTY = "";
-	private static final Point  EMPTY_SIZE = new Point(0, 0);
+	private static final String SPACE = " ";
+	private static final int PADDING = 2;    	
+
+	private final ScopeTreeDataProvider dataProvider;
 
     protected boolean calculateByWidth  = true;
     protected boolean calculateByHeight = true;
 
+    
+    /****
+     * Create a call site painter wrapper containing a line number text and a call site glyph.
+     * The font and the symbol of the call site can be customized in the preference window.
+     * 
+     * @param dataProvider
+     */
+    public CallSiteArrowPainter(ScopeTreeDataProvider dataProvider) {
+    	this.dataProvider = dataProvider;
+	}
 
     @Override
     public int getPreferredWidth(ILayerCell cell, GC gc, IConfigRegistry configRegistry) {
-        Point size = getGlyphBound(cell, gc);
-        if (size != EMPTY_SIZE) {        	
-            return size.x;
-        }
-        return 0;
+    	String text = getCallsiteGlyph(cell);
+    	if (text.equals(EMPTY))
+    		return 0;
+    	
+    	Font oldFont = gc.getFont();
+    	gc.setFont(FontManager.getCallsiteGlyphDefaultFont());
+    	Point sizeGlyph = gc.stringExtent(text);
+    	
+    	gc.setFont(FontManager.getFontGeneric());
+    	Point sizeText  = gc.stringExtent(SPACE + getCallsiteText(cell));
+    	
+    	gc.setFont(oldFont);
+    	
+    	return PADDING + sizeGlyph.x + sizeText.x;
     }
 
     
     @Override
     public int getPreferredHeight(ILayerCell cell, GC gc, IConfigRegistry configRegistry) {
-        Point size = getGlyphBound(cell, gc);
-        if (size != EMPTY_SIZE) {
-            return size.y;
-        }
-        return 0;
+        return gc.getFontMetrics().getHeight();
     }
 
 
     @Override
     public void paintCell(ILayerCell cell, GC gc, Rectangle bounds, IConfigRegistry configRegistry) {
-        Point size = getGlyphBound(cell, gc);
-        if (size != EMPTY_SIZE) {
-            int contentHeight = size.y;
-            if (this.calculateByHeight && (contentHeight > bounds.height)) {
-                int contentToCellDiff = (cell.getBounds().height - bounds.height);
-                ILayer layer = cell.getLayer();
-                layer.doCommand(new RowResizeCommand(
-                        layer,
-                        cell.getRowPosition(),
-                        contentHeight + contentToCellDiff,
-                        true));
-            }
+    	String glyph = getCallsiteGlyph(cell);
 
-            int contentWidth = size.x;
-            if (this.calculateByWidth && (contentWidth > bounds.width)) {
-                int contentToCellDiff = (cell.getBounds().width - bounds.width);
-                ILayer layer = cell.getLayer();
-                layer.doCommand(new ColumnResizeCommand(
-                        layer,
-                        cell.getColumnPosition(),
-                        contentWidth + contentToCellDiff,
-                        true));
-            }
-        	Color color = ColorManager.COLOR_ARROW_ACTIVE;
-        	if (isDisabled(cell)) {
-        		Color oldBackgrColor = gc.getBackground();
-        		color = ColorManager.getTextFg(oldBackgrColor);
-        	}
-        	
-        	gc.setFont(FontManager.getCallsiteGlyphFont());
-        	gc.setForeground(color);
-        	
-        	// need to paint the background manually
-        	// otherwise the background will be white even when we select the row
-            Color originalBackground = gc.getBackground();
-            Color backgroundColor = getBackgroundColour(cell, configRegistry);
-            if (backgroundColor != null) {
-                gc.setBackground(backgroundColor);
-            }
-
-            IStyle cellStyle = CellStyleUtil.getCellStyle(cell, configRegistry);
-        	String text = getCallsiteGlyph(cell);
-        	
-        	// Do not use SWT.TRANSPARENT in this gc
-        	// that flag will make all arrow has the same color!
-            gc.drawText(text, 
-                    	bounds.x + CellStyleUtil.getHorizontalAlignmentPadding(cellStyle, bounds, size.x),
-                    	bounds.y + CellStyleUtil.getVerticalAlignmentPadding(cellStyle, bounds, size.y));
-
-            gc.setBackground(originalBackground);
+        if (glyph == EMPTY) 
+        	return;
+        
+    	Color color = ColorManager.COLOR_ARROW_ACTIVE;
+        Color originalBackground = gc.getBackground();
+        final boolean isDisabled = isDisabled(cell);
+    	if (isDisabled) {
+    		color = ColorManager.getTextFg(originalBackground);
+    	}
+    	Font oldFont = gc.getFont();        
+        Font font = FontManager.getFontGeneric();
+        gc.setFont(font);
+    	
+    	// need to paint the background manually
+    	// otherwise the background will be white even when we select the row
+        Color backgroundColor = getBackgroundColour(cell, configRegistry);
+        if (backgroundColor != null) {
+            gc.setBackground(backgroundColor);
         }
-    }
+        
+        int fontHeight = gc.getFontMetrics().getHeight();
+        int deltaY = (bounds.height - fontHeight) / 2;
 
-    
-    /****
-     * Retrieve the size of the glyph including the padding.
-     * 
-     * @param cell
-     * @param gc
-     * @param configRegistry
-     * @return
-     */
-    protected Point getGlyphBound(ILayerCell cell, GC gc) {
-    	String text = getCallsiteGlyph(cell);
-    	if (text.equals(EMPTY))
-    		return EMPTY_SIZE;
+        // ------------------------------------------
+        // Display the call site line number
+        // ------------------------------------------
+		var textColor = ColorManager.getTextFg(originalBackground);
+    	var displayMode = cell.getDisplayMode();
+
+		// Fix issue #134: do not change the active color if we are in the select mode
+    	if (!isDisabled && displayMode != DisplayMode.SELECT) {
+    		textColor = ViewerColorManager.getActiveColor(originalBackground);
+    	}
+    	gc.setForeground(textColor);
+
+    	String lineNum = getCallsiteText(cell);
+    	gc.drawText(lineNum, bounds.x + PADDING, bounds.y + deltaY);
+        
+    	var sizeText = gc.stringExtent(lineNum + SPACE);
+
+        // ------------------------------------------
+        // Display the call site symbols (the arrow)
+        // ------------------------------------------
+
+    	gc.setFont(FontManager.getCallsiteGlyphFont());
+    	gc.setForeground(color);
+
+    	var size = gc.stringExtent(glyph);
+    	deltaY = (bounds.height-size.y)/2;
+
+    	// Do not use SWT.TRANSPARENT in this gc
+    	// that flag will make all arrows the same color!
+        gc.drawText(glyph, 
+                	bounds.x + PADDING + sizeText.x,
+                	bounds.y + deltaY);
     	
-    	final int PADDING = 2;    	
-    	Point size  = gc.stringExtent(text);
-    	
-    	size.x += PADDING;
-    	size.y += PADDING;
-    	return size;
+        gc.setBackground(originalBackground);
+    	gc.setFont(oldFont);
     }
     
 
@@ -156,6 +162,21 @@ public class CallSiteArrowPainter extends BackgroundPainter
 		return ViewerPreferenceManager.INSTANCE.getCallFromGlyph();
 	}
 	
+	
+	private String getCallsiteText(ILayerCell cell) {
+    	int rowIndex = cell.getRowIndex();
+		Scope scope = dataProvider.getRowObject(rowIndex);
+		if (scope instanceof CallSiteScope) {
+			LineScope ls = ((CallSiteScope)scope).getLineScope();
+			int ln = ls.getFirstLineNumber();
+			if (ln < 1)
+				return EMPTY;
+			int line = 1 + ln;
+			return String.valueOf(line);
+		}
+		return EMPTY;
+	}
+
 	
 	private boolean isEnabled(ILayerCell cell) {
     	LabelStack labels = cell.getConfigLabels();
