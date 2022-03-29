@@ -44,16 +44,20 @@ public abstract class AbstractPreferenceManager
 				
 				preferenceStore = new PreferenceStore(path);
 				
-				setDefaults();
-				
 				// It is highly important to load the preference store as early as possible
 				// before we use it to get the preference values
 				// If the store is not loaded, we'll end up to get the default value all the time
-
+				//
+				// btw, I don't know why we need to set the default AFTER loading the preference
+				// If we set the default BEFORE it, the loading doesn't work properly.
+				
 				File file = new File(path);
 				if (file.canRead())
 					preferenceStore.load();
-				
+
+				// has to set the default AFTER the loading
+				setDefaults();
+
 			} catch (FileNotFoundException e) {
 				File file = new File(filename);
 				try {
