@@ -102,19 +102,21 @@ public class CallSiteArrowPainter extends BackgroundPainter
         // ------------------------------------------
         // Display the call site line number
         // ------------------------------------------
-		var textColor = ColorManager.getTextFg(originalBackground);
-    	var displayMode = cell.getDisplayMode();
-
-		// Fix issue #134: do not change the active color if we are in the select mode
-    	if (!isDisabled && displayMode != DisplayMode.SELECT) {
-    		textColor = ViewerColorManager.getActiveColor(originalBackground);
-    	}
-    	gc.setForeground(textColor);
 
     	String lineNum = getCallsiteText(cell);
-    	gc.drawText(lineNum, bounds.x + PADDING, bounds.y + deltaY);
+    	if (lineNum != EMPTY) {
+    		var textColor = ColorManager.getTextFg(originalBackground);
+        	var displayMode = cell.getDisplayMode();
+
+        	// Fix issue #134: do not change the active color if we are in the select mode
+        	if (!isDisabled && displayMode != DisplayMode.SELECT) {
+        		textColor = ViewerColorManager.getActiveColor(originalBackground);
+        	}
+        	gc.setForeground(textColor);
+        	gc.drawText(lineNum, bounds.x + PADDING, bounds.y + deltaY);
+    	}
         
-    	var sizeText = gc.stringExtent(lineNum + SPACE);
+    	Point sizeText = lineNum != EMPTY ? gc.stringExtent(lineNum + SPACE) : new Point(0, 0);
 
         // ------------------------------------------
         // Display the call site symbols (the arrow)
