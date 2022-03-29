@@ -16,7 +16,6 @@ import org.eclipse.swt.internal.DPIUtil;
 
 import edu.rice.cs.hpcsetting.color.ColorManager;
 import edu.rice.cs.hpctree.internal.CallSiteArrowPainter;
-import edu.rice.cs.hpctree.internal.CallSiteTextPainter;
 import edu.rice.cs.hpctree.internal.ScopeTreeDataProvider;
 
 public class ScopeTreePainter 
@@ -126,12 +125,10 @@ public class ScopeTreePainter
     private static ICellPainter getCallSitePainter(ScopeTreeDataProvider dataProvider, TreeImagePainter treeImagePainter) {    	
         // call site image and text
         // Partial fix issue #134: put the text on the left of the icon
-        CallSiteArrowPainter csArrowPainter = new CallSiteArrowPainter();
-        CallSiteTextPainter  csTextPainter  = new CallSiteTextPainter(dataProvider);
-        CellPainterDecorator csPainter = new CellPainterDecorator(csTextPainter, CellEdgeEnum.RIGHT, csArrowPainter);
+        CallSiteArrowPainter csArrowPainter = new CallSiteArrowPainter(dataProvider);
         
         // combining tree and call site info
-        CellPainterDecorator decorator = new CellPainterDecorator(treeImagePainter, CellEdgeEnum.RIGHT, csPainter);
+        CellPainterDecorator decorator = new CellPainterDecorator(treeImagePainter, CellEdgeEnum.RIGHT, csArrowPainter);
 
         BackgroundPainter treePainter =
                 new BackgroundPainter(
@@ -144,7 +141,7 @@ public class ScopeTreePainter
                                         false,
                                         2,
                                         true),
-                                0, 5, 0, 5, false));
+                                0, 0, 0, 0, false));
         
         return treePainter;
     }

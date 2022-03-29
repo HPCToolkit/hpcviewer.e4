@@ -4,17 +4,23 @@ import java.text.DecimalFormat;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.commands.operations.IOperationHistoryListener;
+import org.eclipse.core.commands.operations.IUndoableOperation;
+import org.eclipse.core.commands.operations.OperationHistoryEvent;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
+
+import edu.rice.cs.hpcsetting.color.ColorManager;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
+import edu.rice.cs.hpctraceviewer.ui.operation.AbstractTraceOperation;
 import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
 
 
@@ -37,8 +43,6 @@ public class CanvasAxisX extends AbstractAxisCanvas
 	static private final int TICK_SMALL = 2;
 	
 	final private DecimalFormat formatTime;
-
-	final private Color bgColor;
 	
 	private Font fontX;
 	
@@ -50,10 +54,10 @@ public class CanvasAxisX extends AbstractAxisCanvas
 	 */
 	public CanvasAxisX(ITracePart tracePart, Composite parent, int style) {
 		super(tracePart, parent, SWT.NO_BACKGROUND | style);
-		
-		bgColor = parent.getBackground();
-		
+
 		formatTime = new DecimalFormat("###,###,###,###,###.##");
+		
+		tracePart.getOperationHistory().addOperationHistoryListener(this);
 	}
 
 	
@@ -65,9 +69,8 @@ public class CanvasAxisX extends AbstractAxisCanvas
 		super.dispose();
 	}
 	
-	
-	@Override
-	public void paintControl(PaintEvent e) {
+		
+	private void rebuffer() {
 
 		if (getData() == null)
 			return;
@@ -78,16 +81,33 @@ public class CanvasAxisX extends AbstractAxisCanvas
         // Theoretically, the height is always constant in the beginning of the first appearance. 
         // However, during the view creation, SWT returns the size of height and width are both zero.
         // So Apparently the best way is to compute the height during the paint control :-(
-        
-		FontData []fd = e.gc.getFont().getFontData();
+
+		// ------------------------------------------------------------------------------------------
+		// let use GC instead of ImageData since GC allows us to draw lines and
+		// rectangles
+		// ------------------------------------------------------------------------------------------
+		initBuffer();
+
+		final int viewWidth = getBounds().width;
+		final int viewHeight = getBounds().height;
+
+		if (viewWidth == 0 || viewHeight == 0)
+			return;
+
+		final Image imageBuffer = new Image(getDisplay(), viewWidth, viewHeight);
+		setBuffer(imageBuffer);
+
+		final GC buffer = new GC(imageBuffer);
+
+		FontData []fd = buffer.getFont().getFontData();
 		
 		final String text = "1,";
-		int height = e.gc.stringExtent(text).y;
+		int height = buffer.stringExtent(text).y;
 		
 		// the height of the font must be bigger than the height of the canvas minus ticks and empty spaces
 		final int space = TICK_BIG + 3;
 		
-		while (e.height > 0 && height > e.height-space) {
+		while (viewHeight > 0 && height > viewHeight-space) {
 			// the font is too big
 
 			int fontHeight = fd[0].getHeight() - 1;
@@ -98,10 +118,10 @@ public class CanvasAxisX extends AbstractAxisCanvas
 			if (fontX != null && !fontX.isDisposed()) {
 				fontX.dispose();
 			}
-			fontX = new Font(e.display, fd);
-			e.gc.setFont(fontX);
+			fontX = new Font(getDisplay(), fd);
+			buffer.setFont(fontX);
 			
-			height = e.gc.stringExtent(text).y;
+			height = buffer.stringExtent(text).y;
 		}
 
 		final TraceDisplayAttribute attribute = data.getTraceDisplayAttribute();
@@ -197,9 +217,12 @@ public class CanvasAxisX extends AbstractAxisCanvas
         // Manually fill the client area with the default background color
         // Some platforms don't paint the background properly 
 		// --------------------------------------------------------------------------
+        Color bgColor = getParent().getBackground();
+        Color fgColor = ColorManager.getTextFg(bgColor);
         
-		e.gc.setBackground(bgColor);
-		e.gc.fillRectangle(getClientArea());
+		buffer.setBackground(bgColor);
+		buffer.setForeground(fgColor);
+		buffer.fillRectangle(getClientArea());
 		
 		// --------------------------------------------------------------------------
 		// draw the x-axis
@@ -209,7 +232,7 @@ public class CanvasAxisX extends AbstractAxisCanvas
 		// display axis
 		
 		final int position_y = 0;
-		e.gc.drawLine(area.x, position_y, area.width, position_y);
+		buffer.drawLine(area.x, position_y, area.width, position_y);
 		
 		Point prevTextArea  = new Point(0, 0);
 		int   prevPositionX = 0;
@@ -220,6 +243,10 @@ public class CanvasAxisX extends AbstractAxisCanvas
 		// --------------------------------------------------------------------------
 		// draw the ticks and the labels if there's enough space
 		// --------------------------------------------------------------------------
+		final String maxText    = formatTime.format(timeBegin) + "XX";
+		final Point maxTextArea = buffer.stringExtent(maxText);
+		final int deltaTick     = (int) convertTimeToPixel(displayTimeBegin, (long)timeBegin + dtRound, deltaXPixels);
+		final boolean isFitEnough = deltaTick > maxTextArea.x;
 
 		for(int i=0; i <= numAxisLabel; i++) {			
 			double time      = (timeBegin + dtRound * i);			
@@ -229,13 +256,14 @@ public class CanvasAxisX extends AbstractAxisCanvas
 			// we want to draw the label if the number is nicely readable
 			// nice numbers: 1, 2, 4, ...
 			// not nice numbers: 1.1, 2.3, ...
-			boolean toDrawLabel = (time % 100 == 0)    ||
-								  (deltaXPixels > 50)  ||
-								  (multiplier == 1 && time % 2 == 0);
+			double timeToAppear = time * multiplier;
+			boolean toDrawLabel = isFitEnough        ||
+								  (time % 200 == 0)  ||
+								  (timeToAppear % 2 == 0) ;
 			
 			if (i==0 || toDrawLabel) {
-				String strTime   = formatTime.format(multiplier * time) + userUnitTime;			
-				Point textArea   = e.gc.stringExtent(strTime);
+				String strTime   = formatTime.format(timeToAppear) + userUnitTime;			
+				Point textArea   = buffer.stringExtent(strTime);
 
 				// by default x position is in the middle of the tick
 				int position_x   = (int) axis_x_pos - (textArea.x/2);
@@ -250,7 +278,7 @@ public class CanvasAxisX extends AbstractAxisCanvas
 				}
 				// draw the label only if we have space
 				if (i==0 || prevPositionX+prevTextArea.x + 10 < position_x) {
-					e.gc.drawText(strTime, position_x, position_y + TICK_BIG+1);
+					buffer.drawText(strTime, position_x, position_y + TICK_BIG+1);
 
 					prevTextArea.x = textArea.x;
 					prevPositionX  = position_x;
@@ -259,10 +287,13 @@ public class CanvasAxisX extends AbstractAxisCanvas
 				}
 			}
 			// always draw the ticks
-			e.gc.drawLine(axis_x_pos, position_y, axis_x_pos, axis_tick_mark_height);
+			buffer.drawLine(axis_x_pos, position_y, axis_x_pos, axis_tick_mark_height);
 		}
 		attribute.setTimeUnit(displayTimeUnit);
 		attribute.setDisplayTimeUnit(userDisplayTimeUnit);
+		buffer.dispose();
+		
+		redraw();
 	}
 	
 	/*****
@@ -282,5 +313,25 @@ public class CanvasAxisX extends AbstractAxisCanvas
 		//				  (time - TimeBegin) x (numPixelsH/timeInterval)
 		long dTime = time-displayTimeBegin;
 		return(int) (deltaXPixels * dTime);
+	}
+	
+	
+	@Override
+	public void historyNotification(final OperationHistoryEvent event) {
+
+		if (isDisposed())
+			return;
+		
+		if (event.getEventType() == OperationHistoryEvent.DONE) {
+			final IUndoableOperation operation = event.getOperation();
+			if (!(operation instanceof AbstractTraceOperation)) {
+				return;
+			}
+			final AbstractTraceOperation op = (AbstractTraceOperation) operation;
+			if (op.getData() != getData())
+				return;
+			
+			rebuffer();
+		}
 	}
 }
