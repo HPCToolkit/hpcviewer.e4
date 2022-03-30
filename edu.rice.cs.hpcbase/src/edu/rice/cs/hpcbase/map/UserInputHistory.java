@@ -9,6 +9,7 @@ import java.util.List;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
+import org.slf4j.LoggerFactory;
 
 
 /*****
@@ -91,9 +92,10 @@ public class UserInputHistory
 		try {
 			pref.flush();
 		} catch (BackingStoreException e) {
-			e.printStackTrace();
+			// fail to store the preferences
+			var logger = LoggerFactory.getLogger(UserInputHistory.class);
+			logger.error(e.getMessage(), e);
 		}
-
     }
     
     protected void loadHistoryLines() {
