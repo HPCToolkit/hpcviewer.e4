@@ -138,8 +138,6 @@ public class CanvasAxisY extends AbstractAxisCanvas
 			return;
 
 		final Image imageBuffer = new Image(getDisplay(), viewWidth, viewHeight);
-		setBuffer(imageBuffer);
-
 		final GC gc = new GC(imageBuffer);
 
 		// --------------------------------------------------------------------------
@@ -199,6 +197,7 @@ public class CanvasAxisY extends AbstractAxisCanvas
 			}
 			idtupleOld = idtuple;
 		}
+		setBuffer(imageBuffer);
 		gc.dispose();
 		redraw();
 	}

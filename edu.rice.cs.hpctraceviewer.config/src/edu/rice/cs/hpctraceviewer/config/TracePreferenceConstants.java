@@ -19,5 +19,5 @@ public class TracePreferenceConstants
 
 	public final static int DEFAULT_MAX_THREADS    = 10;
 	public final static int DEFAULT_TOOLTIP_DELAY  = 2000;
-	public final static boolean DEFAULT_GPU_TRACES = false;
+	public final static boolean DEFAULT_GPU_TRACES = true;
 }

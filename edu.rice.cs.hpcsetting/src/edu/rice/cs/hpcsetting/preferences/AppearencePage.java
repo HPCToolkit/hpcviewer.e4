@@ -184,6 +184,10 @@ public class AppearencePage extends AbstractPage
 	
 	
 	private void saveGlyphOptions() {
+		// if this page is not created yet, we don't need to store the settings
+		if (glyphComboEditor == null)
+			return;
+		
 		var store = getPreferenceStore();
 		int index = glyphComboEditor.getSelectionIndex();
 		store.setValue(PreferenceConstants.ID_CHAR_CALLTO, ViewerPreferenceManager.DEFAULT_CALLTO[index]);
