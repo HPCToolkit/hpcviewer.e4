@@ -49,16 +49,23 @@ public class CallSiteArrowPainter extends BackgroundPainter
 
     @Override
     public int getPreferredWidth(ILayerCell cell, GC gc, IConfigRegistry configRegistry) {
-    	String text = getCallsiteGlyph(cell);
-    	if (text.equals(EMPTY))
+    	final String csGlyph = getCallsiteGlyph(cell);
+    	if (csGlyph == EMPTY)
     		return 0;
+
+    	final Font oldFont = gc.getFont();
+
+    	// compute the width of the call site text (line number)
+    	Point sizeText = new Point(0, 0);
+    	String csText  = getCallsiteText(cell);
+    	if (csText != EMPTY) {
+        	gc.setFont(FontManager.getFontGeneric());
+        	sizeText = gc.stringExtent(SPACE + csText);
+    	}
     	
-    	Font oldFont = gc.getFont();
+    	// compute the width of the call site symbol
     	gc.setFont(FontManager.getCallsiteGlyphDefaultFont());
-    	Point sizeGlyph = gc.stringExtent(text);
-    	
-    	gc.setFont(FontManager.getFontGeneric());
-    	Point sizeText  = gc.stringExtent(SPACE + getCallsiteText(cell));
+    	Point sizeGlyph = gc.stringExtent(csGlyph);
     	
     	gc.setFont(oldFont);
     	
