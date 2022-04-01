@@ -14,11 +14,11 @@ import org.eclipse.collections.api.map.primitive.LongObjectMap;
 import org.eclipse.collections.impl.map.mutable.primitive.LongObjectHashMap;
 
 import edu.rice.cs.hpcdata.db.IdTupleType;
-import edu.rice.cs.hpcdata.experiment.BaseExperimentWithMetrics;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.ExperimentConfiguration;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
@@ -32,11 +32,10 @@ import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.experiment.scope.visitors.TraceScopeVisitor;
 import edu.rice.cs.hpcdata.experiment.source.SimpleSourceFile;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
-import edu.rice.cs.hpcdata.util.CallPath;
 import edu.rice.cs.hpcdata.util.Constants;
-import edu.rice.cs.hpcdata.util.ICallPath;
 
 
 /*********************************************
@@ -102,9 +101,8 @@ public class DataMeta extends DataCommon
 
 	private DataSummary dataSummary;
 	private IExperiment experiment;
-	private ICallPath   callpath;
-	private int maxDepth;
 
+	
 	public DataMeta() {
 		super();
 	}
@@ -123,15 +121,6 @@ public class DataMeta extends DataCommon
 	}
 	
 	
-	/***
-	 * Get the maximum depth of the tree
-	 * 
-	 * @return
-	 */
-	public int getMaxDepth() {
-		return maxDepth;
-	}
-	
 	/****
 	 * Open a database
 	 * 
@@ -147,26 +136,29 @@ public class DataMeta extends DataCommon
 		root.addSubscope(rootCCT);
 		rootCCT.setParentScope(root);
 		
-		callpath = new CallPath();
-		this.experiment.setScopeMap(callpath);
-		this.experiment.setRootScope(root);
-		
-		maxDepth = 0;
-		
 		super.open(directory + File.separator + DB_META_FILE);
 
+		// needs to manage the profile.db here since we need it
+		// to access the metric value
 		dataSummary.open(directory);
-
-		// setup the experiment configuration
-		this.experiment.setVersion(versionMajor + "." + versionMinor);
-		this.experiment.setMaxDepth(maxDepth);
 		
-		// setup the metrics
-		final BaseExperimentWithMetrics exp = (BaseExperimentWithMetrics) experiment;
+		// manually setup the metrics for the sake of backward compatibility
+		final Experiment exp = (Experiment) experiment;
 		exp.setMetrics(metrics);
+		exp.setMetricRaw(metrics);
 		
 		rootCCT.setMetricValueCollection(new MetricValueCollection3(dataSummary));
 		
+		// needs to gather info about cct id and its depth
+		// this is needed for traces
+		TraceScopeVisitor visitor = new TraceScopeVisitor();
+		rootCCT.dfsVisitScopeTree(visitor);
+		
+		this.experiment.setRootScope(root);
+		this.experiment.setMaxDepth(visitor.getMaxDepth());
+		this.experiment.setScopeMap(visitor.getCallPath());
+		this.experiment.setVersion(versionMajor + "." + versionMinor);
+
 		stringArea.dispose();
 	}
 	
@@ -386,7 +378,7 @@ public class DataMeta extends DataCommon
 		var szScope  = buffer.get(0x0d);
 		var szSummary = buffer.get(0x0e);
 		
-		var metrics = new ArrayList<BaseMetric>(nMetrics);
+		var metricDesc = new ArrayList<BaseMetric>(nMetrics);
 		int position = (int) (pMetrics - section.offset);
 		
 		for(int i=0; i<nMetrics; i++) {
@@ -396,12 +388,12 @@ public class DataMeta extends DataCommon
 			var nScopes = buffer.getShort(metricLocation + 0x08);
 			var pScopes = buffer.getLong (metricLocation + 0x10);	
 			
-			position = (int) (pName - section.offset);
-			String metricName = getNullTerminatedString(buffer, position);
+			int strPosition = (int) (pName - section.offset);
+			String metricName = getNullTerminatedString(buffer, strPosition);
 			
-			position = (int) (pScopes - section.offset);				
+			int scopesPosition = (int) (pScopes - section.offset);				
 			for(int j=0; j<nScopes; j++) {
-				int basePosition   = position + (j*szScope);
+				int basePosition   = scopesPosition + (j*szScope);
 				long  pScope       = buffer.getLong (basePosition);
 				short nSummaries   = buffer.getShort(basePosition + 0x08);
 				short propMetricId = buffer.getShort(basePosition + 0x0a);
@@ -413,9 +405,9 @@ public class DataMeta extends DataCommon
 				int baseSummariesLocation = (int) (pSummaries - section.offset);
 						
 				for(short k=0; k<nSummaries; k++) {
-					int summaryLoc = baseSummariesLocation + i * szSummary;
-					long pFormula = buffer.getLong(summaryLoc);
-					byte combine  = buffer.get(summaryLoc + 0x08);
+					int summaryLoc = baseSummariesLocation + k * szSummary;
+					long pFormula  = buffer.getLong(summaryLoc);
+					byte combine   = buffer.get(summaryLoc + 0x08);
 					short statMetric = buffer.getShort(summaryLoc + 0x0a);
 											
 					var strFormula = getNullTerminatedString(buffer, (int) (pFormula-section.offset));
@@ -424,6 +416,12 @@ public class DataMeta extends DataCommon
 					m.setFormula(strFormula);
 					m.setCombineType(combine);
 					m.setOrder(propMetricId);
+					m.setDescription(metricName);
+					
+					// TODO: default metric annotation for prof2 database
+					// temporary quick fix: every metric is percent annotated
+					// this should be fixed when we parse metrics.yaml
+					m.setAnnotationType(AnnotationType.PERCENT);
 					
 					MetricType type = scopeName.equals(METRIC_SCOPE_EXECUTION) ? 
 														MetricType.INCLUSIVE : 
@@ -435,13 +433,13 @@ public class DataMeta extends DataCommon
 										VisibilityType.SHOW; 
 					m.setDisplayed(vt);
 
-					metrics.add(m);
+					metricDesc.add(m);
 				}
 			}
 		}
 		
 		// for the derived metric, we need to initialize it manually.
-		for(var metric: metrics) {
+		for(var metric: metricDesc) {
 			if (metric instanceof DerivedMetric) {
 				var dm = (DerivedMetric) metric;
 				dm.resetMetric((Experiment) experiment, rootCCT);
@@ -449,7 +447,7 @@ public class DataMeta extends DataCommon
 				((HierarchicalMetric)metric).setProfileDatabase(dataSummary);
 			}
 		}
-		return metrics;
+		return metricDesc;
 	}
 	
 	
@@ -480,7 +478,7 @@ public class DataMeta extends DataCommon
 			long pModuleName = buffer.getLong(position);
 			String path      = stringArea.toString(pModuleName);
 			
-			LoadModuleScope lms = new LoadModuleScope(rootCCT, path, null, i);
+			LoadModuleScope lms = new LoadModuleScope(rootCCT, path, null, position);
 			long key = pModules + delta;
 			mapLoadModules.put(key, lms);
 		}
@@ -516,7 +514,7 @@ public class DataMeta extends DataCommon
 			boolean available = (flags & 0x1) == 0x1;
 			String  name = stringArea.toString(pPath);
 			
-			SourceFile sf = new SimpleSourceFile(i, new File(name), available);
+			SourceFile sf = new SimpleSourceFile(position, new File(name), available);
 			long key = pFiles + delta;
 			mapSourceFile.put(key, sf);
 		}
@@ -560,9 +558,8 @@ public class DataMeta extends DataCommon
 			if (lms == null)
 				lms = LoadModuleScope.NONE;
 			
-			ProcedureScope ps = new ProcedureScope(rootCCT, lms, file, line, line, name, false, i, i, null, 0);
-			
 			long key = pFunctions + (i * szFunctions);
+			ProcedureScope ps = new ProcedureScope(rootCCT, lms, file, line, line, name, false, position, (int) key, null, 0);			
 			mapProcedures.put(key, ps);
 		}
 		return mapProcedures;
@@ -589,7 +586,6 @@ public class DataMeta extends DataCommon
 										long size) 
 					throws IOException {
 		
-		final RootScope root = parent.getRootScope();
 		int loc = (int) (startLocation - sections[INDEX_CONTEXT].offset);
 		long ctxSize = size;
 		
@@ -650,25 +646,30 @@ public class DataMeta extends DataCommon
 			var lm = mapLoadModules.getIfAbsent(pModule, ()->LoadModuleScope.NONE);
 			
 			Scope scope = null;
+			Scope newParent = null; 
 
 			switch(lexicalType) {
 			case FMT_METADB_LEXTYPE_FUNCTION:
-				scope = createLexicalFunction(root, parent, lm, fs, ps, ctxId, line, relation);				
+				newParent = createLexicalFunction(parent, lm, fs, ps, ctxId, line, relation);
 				break;
 			case FMT_METADB_LEXTYPE_LOOP:
-				scope = new LoopScope(root, fs, line, line, ctxId, ctxId);
+				scope = new LoopScope(rootCCT, fs, line, line, ctxId, ctxId);
+				newParent = beginNewScope(parent, scope);					
 				break;
 			case FMT_METADB_LEXTYPE_LINE:
-				scope = new LineScope(root, fs, line, ctxId, ctxId);
+				scope = new LineScope(rootCCT, fs, line, ctxId, ctxId);
+				newParent = beginNewScope(parent, scope);					
 				break;
 			case FMT_METADB_LEXTYPE_INSTRUCTION:
 				//scope = new LineScope(root, fs, line, ctxId, ctxId);
 				//scope = createLexicalInstruction(parent, lm, fs, ctxId, line, relation);
-				//break;
+				scope = new LineScope(rootCCT, fs, line, ctxId, ctxId);
+				((LineScope)scope).setLoadModule(lm);
+				newParent = beginNewScope(parent, scope);					
+				break;
 			default:
 				throw new RuntimeException("Invalid node relation field");
 			}
-			var newParent = beginNewScope(parent, scope);					
 
 			// recursively parse the children
 			parseChildrenContext(buffer, newParent, pChildren, szChildren);
@@ -701,9 +702,6 @@ public class DataMeta extends DataCommon
 		parent.addSubscope(scope);
 		scope.setParentScope(parent);
 
-		maxDepth++;
-		callpath.addCallPath(scope.getCCTIndex(), scope, maxDepth);
-
 		return scope;
 	}
 	
@@ -711,7 +709,6 @@ public class DataMeta extends DataCommon
 	/***
 	 * Create a lexical function scope.
 	 * 
-	 * @param root
 	 * @param parent
 	 * @param lm
 	 * @param fs
@@ -724,7 +721,7 @@ public class DataMeta extends DataCommon
 	 * 			A call site scope if the line scope exists.
 	 * 			A procedure scope otherwise.
 	 */
-	private Scope createLexicalFunction(RootScope root, 
+	private Scope createLexicalFunction( 
 										Scope parent, 
 										LoadModuleScope lm,
 										SourceFile fs,
@@ -740,17 +737,19 @@ public class DataMeta extends DataCommon
 			if (ps != null)
 				name = ps.getName();
 			
-			return new ProcedureScope(root, lm, fileSource, line, line, name, alien, ctxId, ctxId, null, ProcedureScope.FeatureProcedure);
+			var scope = new ProcedureScope(rootCCT, lm, fileSource, line, line, name, alien, ctxId, ctxId, null, ProcedureScope.FeatureProcedure);
+			
+			return beginNewScope(parent, scope);
 		}
 		ProcedureScope proc;
 		if (ps == null) {
-			proc = new ProcedureScope(root, lm, fileSource, line, line, Constants.PROCEDURE_UNKNOWN, alien, ctxId, ctxId, null, ProcedureScope.FeatureProcedure);
+			proc = new ProcedureScope(rootCCT, lm, fileSource, line, line, Constants.PROCEDURE_UNKNOWN, alien, ctxId, ctxId, null, ProcedureScope.FeatureProcedure);
 		} else {
 			proc = ps;
 			proc.setAlien(alien);
 		}
 		LineScope ls = (LineScope) parent;
-		var cs = new CallSiteScope(ls, ps, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, ctxId);
+		var cs = new CallSiteScope(ls, proc, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, ctxId);
 		
 		// Only the line statement knows where the source file is
 		// If the line statement is unknown then the source file is unknown.
@@ -760,11 +759,11 @@ public class DataMeta extends DataCommon
 		// we have to remove the line scope from the parent
 		Scope grandParent = parent.getParentScope();
 		grandParent.remove(parent);
-		grandParent.addSubscope(cs);
-		cs.setParentScope(grandParent);
 		
-		return cs;
+		// add the new call site to the tree
+		return beginNewScope(grandParent, cs);
 	}
+	
 	
 	/***
 	 * Create the main root and parse its direct children

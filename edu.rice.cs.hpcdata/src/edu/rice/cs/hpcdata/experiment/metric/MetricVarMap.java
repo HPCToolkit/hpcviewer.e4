@@ -84,19 +84,20 @@ public class MetricVarMap extends VarMap
 			// @x returns the aggregate value of metric x 
 			//---------------------------------------------------------
 			final IMetricScope currentScope = (firstLetter == '@' ? root : scope);
+			if (currentScope == null)
+				throw new RuntimeException("Invalid scope: " + varName);
 
-			if (currentScope != null) {
-				MetricValue value = MetricValue.NONE;
-				if (this.metric != null && this.metric == metricToQuery) {
-					// avoid recursive call: if the metric queries its own value, we returns
-					// the "raw" value 
-					value = metricToQuery.getRawValue(currentScope);
-				} else {
-					value = metricToQuery.getValue(currentScope);
-				}
-				if(MetricValue.isAvailable(value))
-					return value.getValue();
+			MetricValue value = MetricValue.NONE;
+			if (this.metric != null && this.metric == metricToQuery) {
+				// avoid recursive call: if the metric queries its own value, we returns
+				// the "raw" value 
+				value = currentScope.getMetricValue(metricToQuery.getIndex());
+			} else {
+				value = metricToQuery.getValue(currentScope);
 			}
+			if(MetricValue.isAvailable(value))
+				return value.getValue();
+
 		} else if (firstLetter == '#') {
 			String sIndex = varName.substring(1);
 			Integer index = Integer.valueOf(sIndex);

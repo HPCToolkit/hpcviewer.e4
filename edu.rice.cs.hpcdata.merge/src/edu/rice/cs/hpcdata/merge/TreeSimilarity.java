@@ -13,7 +13,6 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.DuplicateScopeTreesVisitor;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.IScopeVisitor;
-import edu.rice.cs.hpcdata.experiment.scope.visitors.PercentScopeVisitor;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.ResetCounterVisitor;
 
 /******************************************************
@@ -67,10 +66,6 @@ public class TreeSimilarity
 		
 		// merge the children of the root (tree)
 		mergeTree(target, source);
-		
-		// compute the merged metric percentage
-		PercentScopeVisitor percentVisitor = new PercentScopeVisitor(target);
-		target.dfsVisitScopeTree(percentVisitor);
 		
 		if (debug) {
 			float mergePercent = (float) (numMerges * 100.0 / numNodes);
@@ -663,7 +658,7 @@ public class TreeSimilarity
 		else */
 		{
 			float v 			= mv.getValue();
-			MetricValue root_mv = s.getRootScope().getMetricValue(m.getIndex());
+			MetricValue root_mv = s.getRootScope().getMetricValue(m);
 			float rv 		    = root_mv.getValue();
 			if (Float.compare(rv, 0.0f)!=0) {
 				return v/rv;
@@ -709,8 +704,7 @@ public class TreeSimilarity
 		
 		@Override
 		public int compare(Scope s1, Scope s2) {
-			int metricIndex = metric.getIndex();
-			return (int) (s2.getMetricValue(metricIndex).getValue() - s1.getMetricValue(metricIndex).getValue());
+			return (int) (s2.getMetricValue(metric).getValue() - s1.getMetricValue(metric).getValue());
 		}
 	}
 }

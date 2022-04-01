@@ -273,8 +273,6 @@ public class DatabaseCollection
 		// We don't want this, since it makes the layout weird.
 		//----------------------------------------------------------------
 		if (stack == null) {
-			System.out.println("create a new part stack");
-			
 			stack = modelService.createModelElement(MPartStack.class);
 			stack.setElementId(STACK_ID_BASE);
 			stack.setToBeRendered(true);

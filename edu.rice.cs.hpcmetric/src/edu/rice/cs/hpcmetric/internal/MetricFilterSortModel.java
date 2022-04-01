@@ -39,8 +39,8 @@ public class MetricFilterSortModel extends FilterDataItemSortModel<BaseMetric>
 			BaseMetric m1 = o1.data;
 			BaseMetric m2 = o2.data;
 			
-			MetricValue mv1 = m1.getValue(root);
-			MetricValue mv2 = m2.getValue(root);
+			MetricValue mv1 = root.getMetricValue(m1);
+			MetricValue mv2 = root.getMetricValue(m2);
 			
 			int result = mv1.getValue() > mv2.getValue() ? 1 : (mv1.getValue() < mv2.getValue() ? -1 : 0);
 			return factor * result;

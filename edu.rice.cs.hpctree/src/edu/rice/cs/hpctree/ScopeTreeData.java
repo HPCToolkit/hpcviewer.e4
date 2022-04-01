@@ -380,8 +380,8 @@ public class ScopeTreeData implements IScopeTreeData
 			return compareNodeName(o1, o2, factor);
 		}
 
-		MetricValue mv1 = metric.getValue(o1);
-		MetricValue mv2 = metric.getValue(o2);
+		final MetricValue mv1 = o1.getMetricValue(metric);
+		final MetricValue mv2 = o2.getMetricValue(metric);
 
 		if (mv1.getValue() > mv2.getValue())
 			return factor * 1;

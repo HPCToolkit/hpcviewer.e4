@@ -23,7 +23,6 @@ import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpctree.action.IActionListener;
 import edu.rice.cs.hpctree.internal.CallSiteArrowPainter;
-import edu.rice.cs.hpctree.internal.CallSiteTextPainter;
 import edu.rice.cs.hpctree.internal.ScopeAttributeMouseEventMatcher;
 import edu.rice.cs.hpctree.internal.ScopeTreeDataProvider;
 import edu.rice.cs.hpctree.internal.ScopeTreeLabelAccumulator;
@@ -116,7 +115,6 @@ public class TableConfiguration implements IConfiguration
 
     	final List<Class<?>> listPainters = new ArrayList<>(2);
     	listPainters.add(CallSiteArrowPainter.class);
-    	listPainters.add(CallSiteTextPainter.class);
     	
 		var scopeMatcher = new ScopeAttributeMouseEventMatcher(
 								GridRegion.BODY, 

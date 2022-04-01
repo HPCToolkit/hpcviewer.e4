@@ -9,8 +9,7 @@
 	</parent>
 	<artifactId>edu.rice.cs.hpctest.viewer</artifactId>
 	<packaging>eclipse-test-plugin</packaging>
- 
-<profiles>
+  <profiles>
     <profile>
         <id>platform-mac</id>
         <activation>
@@ -23,7 +22,7 @@
                 <plugin>
                     <groupId>org.eclipse.tycho</groupId>
                     <artifactId>tycho-surefire-plugin</artifactId>
-		    <version>${tycho.version}</version>
+		    		<version>${tycho.version}</version>
                     <configuration>
                         <argLine>-XstartOnFirstThread</argLine>
                     </configuration>
@@ -31,5 +30,5 @@
             </plugins>
         </build>
     </profile>
-</profiles>
+ </profiles>
 </project>

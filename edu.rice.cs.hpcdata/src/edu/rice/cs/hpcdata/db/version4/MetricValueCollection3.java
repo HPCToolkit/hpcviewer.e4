@@ -60,10 +60,9 @@ public class MetricValueCollection3 implements IMetricValueCollection
 			//  just need to look at the cache, instead of reading the file again.
 			
 			try {
-				sparseValues = dataSummary.getMetrics(scope.getCCTIndex());
+				sparseValues = dataSummary.getMetrics(scope.getCCTIndex());					
 			} catch (IOException e1) {
-				e1.printStackTrace();
-				return MetricValue.NONE;
+				throw new RuntimeException(e1.getMessage());
 			}
 			// the reading is successful
 			// fill up the cache containing metrics of this scope for the next usage
@@ -74,18 +73,7 @@ public class MetricValueCollection3 implements IMetricValueCollection
 				
 				for (MetricValueSparse mvs: sparseValues) {
 					float value = (float) mvs.getValue();
-					float annotationValue = 1.0f;
-					
-					// compute the percent annotation
-					if (!(scope instanceof RootScope)) {
-						RootScope root = scope.getRootScope();
-						MetricValue mv = root.getMetricValue(mvs.getIndex());
-						if (mv != MetricValue.NONE)
-						{
-							annotationValue = value/mv.getValue();
-						}
-					}
-					MetricValue mv = new MetricValue(value, annotationValue);
+					MetricValue mv = new MetricValue(value);
 					values.put(mvs.getIndex(), mv);
 				}
 				
@@ -120,14 +108,6 @@ public class MetricValueCollection3 implements IMetricValueCollection
 		return MetricValue.NONE;
 	}
 
-	@Override
-	public float getAnnotation(int index) {
-		MetricValue mv = values.get(index);
-		if (mv != null)
-			return MetricValue.getAnnotationValue(mv);
-		
-		return 0.0f;
-	}
 
 	@Override
 	public void setValue(int index, MetricValue value) {
@@ -137,13 +117,6 @@ public class MetricValueCollection3 implements IMetricValueCollection
 
 			values.put(index, value);
 		}
-	}
-
-	@Override
-	public void setAnnotation(int index, float ann) {
-		MetricValue value = values.get(index);
-		if (value != null)
-			MetricValue.setAnnotationValue(value, ann);
 	}
 
 

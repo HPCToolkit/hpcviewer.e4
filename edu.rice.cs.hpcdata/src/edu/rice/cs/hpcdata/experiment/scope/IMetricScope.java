@@ -11,10 +11,14 @@ import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 public interface IMetricScope 
 {
 	/**
-	 * Returns the value of a given metric at this scope
+	 * Returns the "raw" value of a given metric at this scope.
+	 * This method doesn't execute finalization phase of the metric,
+	 * it just returns whatever the metric in the scope.
 	 * 
-	 * @param index : the index of the metric
-	 * @return
+	 * @param index 
+	 * 			the index of the metric
+	 * @return {@code MetricValue}
+	 * 			The "raw" metric value without finalization.
 	 */
 	public MetricValue getMetricValue(int index);
 	
@@ -22,7 +26,8 @@ public interface IMetricScope
 	 * Returns the value of a given metric at this scope.<br/>
 	 * overload the method to take-in the index ---FMZ
 	 * @param metric
-	 * @return
+	 * 			the metric
+	 * @return {@code MetricValue}
 	 */
 	public MetricValue getMetricValue(BaseMetric metric);
 	
@@ -33,14 +38,4 @@ public interface IMetricScope
 	 * @param value
 	 */
 	public void setMetricValue(int index, MetricValue value);
-	
-	/****
-	 * retrieve the value of the root. <br/>
-	 * This method is useful to compute the percentage
-	 * 
-	 * @param metric : the metric 
-	 * 
-	 * @return metric value
-	 */
-	public MetricValue getRootMetricValue(BaseMetric metric);
 }

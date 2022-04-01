@@ -210,6 +210,10 @@ public class ScopeTreeLayer extends AbstractLayerTransform implements IUniqueInd
     public void collapseTreeRow(int parentIndex) {
     	// need to grab all child indexes
     	List<Integer> childrenIndexes = this.treeRowModel.getChildIndexes(parentIndex);
+    	if (childrenIndexes == null)
+    		// this should never happen unless the tree is corrupted
+    		return;
+    	
     	int []indexes = childrenIndexes.stream().mapToInt(Integer::intValue).toArray();
 
     	// fix issue #177: need to clear selected row if it's within the collapsed row
@@ -228,9 +232,20 @@ public class ScopeTreeLayer extends AbstractLayerTransform implements IUniqueInd
     	// remove the children
     	doCommand(new RowDeleteCommand(this, indexes));
     	
-    	// clear the selected rows if they are the collapsed children
-    	if (selectionRow>0 && childrenIndexes.contains(selectionRow)) {
-			((SelectionLayer)underlyingLayer).clear();
+    	int lastChild = childrenIndexes.get(childrenIndexes.size()-1);
+    	
+    	// issue #177: update the position of the selected row
+    	if (selectionRow > parentIndex && selectionRow <= lastChild) {
+    		// case 1: the selected row in within the expanded nodes
+    		// in this case we just to clear the selection
+			((SelectionLayer)underlyingLayer).clear(false);
+			
+    	} else if (selectionRow > lastChild) {
+    		// case 2: the selected row is AFTER the index
+    		// move the selection to the new row
+    		SelectionLayer selectionLayer = (SelectionLayer) underlyingLayer;
+    		int newRow = selectionRow - childrenIndexes.size();
+    		selectionLayer.selectRow(0, newRow, false, false);
     	}
     }
     
@@ -246,7 +261,30 @@ public class ScopeTreeLayer extends AbstractLayerTransform implements IUniqueInd
     	if (children == null || children.size() == 0)
     		return;
     	
+    	// issue #189 need to clear selected row if it's within the expanded rows
+    	// if it isn't clear, nattable only highlight the first column
+    	    	
+    	int selectionRow = -1;
+    	IUniqueIndexLayer underlyingLayer = getUnderlyingLayer();
+    	if (underlyingLayer instanceof SelectionLayer) {
+    		SelectionLayer selectionLayer = (SelectionLayer) underlyingLayer;
+    		var ranges = selectionLayer.getSelectedRowPositions();
+    		if (!ranges.isEmpty()) {
+        		var range = ranges.iterator().next();
+        		selectionRow = range.start;
+    		}
+    	}
     	doCommand(new RowInsertCommand<Scope>(parentIndex + 1, children));
+
+    	// issue #189 move the selected row into a new index
+    	// if the selected row is r and the expanded parent has x children,
+    	// then the new selected row is r + x
+    	if (selectionRow > parentIndex) {
+    		SelectionLayer selectionLayer = (SelectionLayer) underlyingLayer;
+        	
+    		int newRow = selectionRow + children.size();
+    		selectionLayer.selectRow(0, newRow, false, false);
+    	}
     }
     
 

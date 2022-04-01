@@ -50,19 +50,6 @@ public interface IMetricValueCollection
 	 */
 	public void setValue(int index, MetricValue value);
 	
-	/*****
-	 * add an additional annotation to the metric value
-	 * @param index
-	 * @param ann
-	 */
-	public void setAnnotation(int index, float ann);
-	
-	/***
-	 * get the annotation of a given metric index
-	 * @param index
-	 * @return
-	 */
-	public float getAnnotation(int index);
 
 	/***
 	 * return if the current scope has at least a metric value

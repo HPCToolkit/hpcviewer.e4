@@ -37,13 +37,9 @@ public final class MetricValue
 	/** The actual value if available. */
 	protected float value;
 
-	/** The annotation value if available. */
-	protected float annotation;
-
 	protected byte flags;
 
 	protected static final byte VALUE_IS_AVAILABLE = 1;
-	protected static final byte ANNOTATION_IS_AVAILABLE = 2;
 
 	/** The distinguished metric value indicating no data. */
 	public static final MetricValue NONE = new MetricValue(-1);
@@ -65,23 +61,7 @@ public final class MetricValue
 	public MetricValue()
 	{
 		setAvailable(this, false);
-		setAnnotationAvailable(this, false);
 	}
-
-
-
-
-	/*************************************************************************
-	 *	Creates an available MetricValue with a given value and annotation value.
-	 ************************************************************************/
-
-	public MetricValue(double value, double annotation)
-	{
-		setValue(this, value);
-		setAnnotationValue(this, ((float)annotation));
-	}
-
-
 
 
 	/*************************************************************************
@@ -90,9 +70,8 @@ public final class MetricValue
 
 	public MetricValue(double value)
 	{
-		setValue(this, value);
+		setValue(value);
 		setAvailable(this, true);
-		setAnnotationAvailable(this, false);
 	}
 
 
@@ -120,21 +99,6 @@ public final class MetricValue
 		}	
 	}
 
-
-	private static boolean getAnnotationAvailable(MetricValue m)
-	{
-		boolean available = (m.flags & ANNOTATION_IS_AVAILABLE) == ANNOTATION_IS_AVAILABLE;
-		return available;
-	}
-
-	public static void setAnnotationAvailable(MetricValue m, boolean status)
-	{
-		if (status) {
-			m.flags |= ANNOTATION_IS_AVAILABLE;
-		} else {
-			m.flags &= ~ANNOTATION_IS_AVAILABLE;
-		}	
-	}
 
 
 	public float getValue()
@@ -166,20 +130,7 @@ public final class MetricValue
 		return m.getValue();
 	}
 
-
-
-
-	/*************************************************************************
-	 *	Makes the given actual value available.
-	 ************************************************************************/
-
-	public static void setValue(MetricValue m, double value)
-	{
-		setAvailable(m, true);
-		m.value = (float) value;
-	}
-
-
+	
 	/*************************************************************************
 	 *	Makes the given actual value available.
 	 ************************************************************************/
@@ -190,58 +141,7 @@ public final class MetricValue
 		this.value = (float) value;
 	}
 
-	/*************************************************************************
-	 *	Returns whether the annotation value is available.
-	 ************************************************************************/
-
-	public static boolean isAnnotationAvailable(MetricValue m)
-	{
-		return (m != MetricValue.NONE) && getAnnotationAvailable(m);
-	}
-
-
-
-
-	/*************************************************************************
-	 *	Returns the annotation value if available.
-	 ************************************************************************/
-
-	public static float getAnnotationValue(MetricValue m)
-	{
-		return m.getAnnotationValue();
-	}
-
-
-	public float getAnnotationValue() 
-	{
-		return annotation;
-	}
-
-	/*************************************************************************
-	 *	Makes the given annotation value available.
-	 ************************************************************************/
-
-	public static void setAnnotationValue(MetricValue m, double annotation)
-	{
-		setAnnotationAvailable(m, true);
-		m.annotation = (float) annotation;
-	}
-
-
-	public static void setAnnotationValue(MetricValue m, float annotation)
-	{
-		setAnnotationAvailable(m, true);
-		m.annotation = annotation;
-	}
-
-
-	public void setAnnotationValue(float annotation)
-	{
-		setAnnotationAvailable(this, true);
-		this.annotation = annotation;
-	}
-
-
+	
 	public static boolean isZero(MetricValue m) 
 	{
 		if (m != MetricValue.NONE) {
@@ -284,7 +184,7 @@ public final class MetricValue
 
 	public String toString()
 	{
-		return value + " ( " + annotation + " ) ";
+		return String.valueOf(value);
 	}
 
 	/*****
@@ -294,7 +194,7 @@ public final class MetricValue
 	 */
 	public MetricValue duplicate()
 	{
-		MetricValue mv = new MetricValue(value, annotation);
+		MetricValue mv = new MetricValue(value);
 		mv.flags = flags;
 		return mv;
 	}

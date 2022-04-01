@@ -80,15 +80,9 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		if (value == 0.0d)
 			return MetricValue.NONE;
 		
-		var rootValue = scope.getRootMetricValue(this);
-		MetricValue mv = new MetricValue(value, value/rootValue.getValue());
-		return mv;
+		return new MetricValue(value);
 	}
 
-	@Override
-	public MetricValue getRawValue(IMetricScope s) {
-		return getValue(s);
-	}
 
 	@Override
 	public BaseMetric duplicate() {

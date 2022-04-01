@@ -24,8 +24,6 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
  *******************************************/
 public class MetricValueCollectionWithStorage implements IMetricValueCollection 
 {
-	private final float VALUE_ZERO = 0.0f;
-	
 	/** Sparse storage of metric values.
 	 *  The key is the metric index, the value is a 
 	 *  {@code MetricValue} object. Usually not {@code NONE} **/
@@ -42,15 +40,21 @@ public class MetricValueCollectionWithStorage implements IMetricValueCollection
 	
 	@Override
 	public MetricValue getValue(Scope scope, int index) {
-		MetricValue mv = values.get(index);
+
+		RootScope root = scope.getRootScope();
+		Experiment experiment = (Experiment) root.getExperiment();
+		BaseMetric metric = experiment.getMetric(index);
+		
+		return getValue(scope, metric);
+	}
+	
+	@Override
+	public MetricValue getValue(Scope scope, BaseMetric metric) {
+		MetricValue mv = values.get(metric.getIndex());
 		
 		if (mv == null) {
 			// the cache of metric values already exist, but we cannot find the value of this metric
 			// either the value is empty, or it's a derived metric which have to be computed here
-
-			RootScope root = scope.getRootScope();
-			Experiment experiment = (Experiment) root.getExperiment();
-			BaseMetric metric = experiment.getMetric(index);
 			
 			if (metric instanceof DerivedMetric)
 			{
@@ -58,61 +62,20 @@ public class MetricValueCollectionWithStorage implements IMetricValueCollection
 			} else {
 				mv = MetricValue.NONE;
 			}
+			values.put(metric.getIndex(), mv);
 		}		
 		return mv;
 	}
-	
-	@Override
-	public MetricValue getValue(Scope scope, BaseMetric metric) {
-		MetricValue mv = values.get(metric.getIndex());
-		if (mv == null) {
-			if (metric instanceof DerivedMetric)
-				mv = ((DerivedMetric) metric).getValue(scope);
-			else
-				mv = MetricValue.NONE;
-		}
-		return mv;
-	}
+
 
 	@Override
-	public float getAnnotation(int index) {
-		MetricValue mv = values.get(index);
-		
-		if (mv == null) {
-			return VALUE_ZERO;
-		}
-		
-		return mv.getAnnotationValue();
-	}
-
-	@Override
-	public void setValue(int index, MetricValue value) {
-		
+	public void setValue(int index, MetricValue value) {		
 		if (value == MetricValue.NONE)
 			return;
 		
-		MetricValue mv = values.get(index);
-		
-		if (mv != null) {
-			// replace the existing value
-			
-			mv.setValue(value.getValue());
-			mv.setAnnotationValue(value.getAnnotationValue());
-		} else {
-			// add a new metric index
-			values.put(index, value.duplicate());
-		}
+		values.put(index, value.duplicate());
 	}
 
-	@Override
-	public void setAnnotation(int index, float ann) {
-		MetricValue mv = values.get(index);
-		if (mv != null) {
-			mv.setAnnotationValue(ann);
-		} else {
-			throw new RuntimeException("Metric index unknown: " + index);
-		}
-	}
 
 	@Override
 	public boolean hasMetrics(Scope scope) {

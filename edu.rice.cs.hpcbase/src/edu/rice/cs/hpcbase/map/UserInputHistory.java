@@ -9,6 +9,7 @@ import java.util.List;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
+import org.slf4j.LoggerFactory;
 
 
 /*****
@@ -18,15 +19,13 @@ import org.osgi.service.prefs.Preferences;
  * writable to each user
  *
  */
-public class UserInputHistory {
+public class UserInputHistory 
+{
+	private static final int MAX_HISTORY_DEPTH = 30;
+	
 	private static final String HISTORY_NAME_BASE = "history."; //$NON-NLS-1$
-	private final static String ENCODING = "UTF-8";
-    
-	// temporary revert back to use deprecated code in order to keep backward compatibility
-	// Original code:
-	//     private static final Preferences CONFIGURATION = ConfigurationScope.INSTANCE.getNode("edu.rice.cs.hpc");   
-    //private static final Preferences CONFIGURATION = new ConfigurationScope().getNode("edu.rice.cs.hpc");
-    final static String NODE_HPC = "edu.rice.cs.hpc";
+	private static final String ENCODING = "UTF-8";    
+    private static final String NODE_HPC = "edu.rice.cs.hpc";
     
     private static final Preferences CONFIGURATION = InstanceScope.INSTANCE.getNode(NODE_HPC);
     
@@ -36,7 +35,7 @@ public class UserInputHistory {
 
 
     public UserInputHistory(String name) {
-        this(name, 50);
+        this(name, MAX_HISTORY_DEPTH);
     }
 
     public UserInputHistory(String name, int depth) {
@@ -93,9 +92,10 @@ public class UserInputHistory {
 		try {
 			pref.flush();
 		} catch (BackingStoreException e) {
-			e.printStackTrace();
+			// fail to store the preferences
+			var logger = LoggerFactory.getLogger(UserInputHistory.class);
+			logger.error(e.getMessage(), e);
 		}
-
     }
     
     protected void loadHistoryLines() {

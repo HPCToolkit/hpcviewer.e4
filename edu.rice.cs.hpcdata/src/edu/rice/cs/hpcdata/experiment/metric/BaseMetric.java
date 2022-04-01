@@ -313,15 +313,18 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 	 * @return
 	 */
 	public String getMetricTextValue(Scope scope) {
-		MetricValue mv = this.getValue(scope);
-		return this.getMetricTextValue(mv);
+		MetricValue mv = scope.getMetricValue(this);
+		boolean showPercent = getAnnotationType() == AnnotationType.PERCENT;
+		MetricValue rootValue = showPercent ? scope.getRootScope().getMetricValue(this) : MetricValue.NONE;
+		
+		return this.getMetricTextValue(mv, rootValue);
 	}
 
 	/*************************************************************************
 	 * Return the text to display based on the metric value
 	 * @param mv: the value of a metric
 	 *************************************************************************/
-	public String getMetricTextValue(MetricValue mv) {
+	protected String getMetricTextValue(MetricValue mv, MetricValue rootValue) {
 		
 		if (mv == null)
 			return null;
@@ -339,7 +342,7 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 		else if (Float.compare(mv.value, Float.NEGATIVE_INFINITY)==0) sText = "-Infinity";
 		else if (Float.isNaN(mv.value)) sText = "NaN";
 		else {
-			sText = getDisplayFormat().format(mv);
+			sText = getDisplayFormat().format(mv, rootValue);
 		}
 		
 		return sText;
@@ -445,13 +448,19 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 	//		ABSTRACT METHODS
 	//=================================================================================
 	/*************************************************************************
-	 * method to return the value of a given scope. To be implemented by derived class.
-	 * @param s : scope of the metric value
-	 * @return a metric value
+	 * Method to return the value of a given scope. To be implemented by derived class.
+	 * This method shouldn't be called directly other than from IMetricScope since
+	 * it will grab or compute the value directly from the disk.<br>
+	 * On the other hand, {@link IMetricScope.getMetricValue} will cache the value,
+	 * so it's more optimized.
+	 *   
+	 * @param s 
+	 * 			scope of the metric value
+	 * @return {@code MetricValue}
+	 * 			a metric value, {@code MetricValue.NONE} if the scope has no cost for this metric.
 	 *************************************************************************/
 	abstract public MetricValue getValue(IMetricScope s);
 	
-	abstract public MetricValue getRawValue(IMetricScope s);
 
 	/***
 	 * Method to duplicate itself (cloning)

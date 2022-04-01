@@ -72,7 +72,12 @@ public class ExperimentTest {
 	public void testGetRawMetrics() {
 		for(var exp: experiments) {
 			List<BaseMetric> metrics = exp.getRawMetrics();
-			assertNull(metrics);
+			if (exp.getMajorVersion()<4) {
+				assertNull(metrics);
+			} else {
+				assertNotNull(metrics);
+				assertTrue(metrics.size()>1);
+			}				
 		}
 	}
 
@@ -256,7 +261,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetMaxDepth() {
-		final int maxdepth[] = new int[] {4, 0, 0, 10};
+		final int maxdepth[] = new int[] {4, 0, 0, 6};
 		int i=0;
 		for(var experiment: experiments) {
 			assertTrue(experiment.getMaxDepth() > maxdepth[i]);

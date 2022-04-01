@@ -23,8 +23,8 @@ import edu.rice.cs.hpcdata.experiment.metric.AggregateMetric;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricValueCollection;
+import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.scope.filters.MetricValuePropagationFilter;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.FilterScopeVisitor;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.IScopeVisitor;
@@ -553,48 +553,51 @@ implements IMetricScope
 
 
 	/*************************************************************************
-	 *	Returns the value of a given metric at this scope.
+	 * Returns the value of a given metric at this scope.
+	 * This method pays attention of the type of metric. If the metric is a 
+	 * derived incremental metric (class {@code AggregateMetric}) it will ask
+	 * the metric class to finalize the value.
+  	 * 
+  	 * @param metric
+  	 * 			The metric 
+  	 * @return {@code MetricValue}
+  	 * 			The metric value. If the index has no value, it returns {@code MetricValue.NONE}
 	 ************************************************************************/
 
 	public MetricValue getMetricValue(BaseMetric metric)
 	{
 		ensureMetricStorage();
-		MetricValue value = metrics.getValue(this, metric);
-
-		// compute percentage if necessary
-		if (metric.getAnnotationType() == AnnotationType.PERCENT) {
-			if(MetricValue.isAvailable(value) && (! MetricValue.isAnnotationAvailable(value)))
-			{
-				if (this instanceof RootScope) {
-					MetricValue.setAnnotationValue(value, 1.0);
-				} else {
-					MetricValue total = root.getMetricValue(metric);
-					if(MetricValue.isAvailable(total))
-						MetricValue.setAnnotationValue(value, MetricValue.getValue(value)/MetricValue.getValue(total));
-				}
-			} 
-		}
-
-		return value;
+		
+		// special case for raw metric: we need to grab the value
+		// from the metric directly. No caching here.
+		
+		if (metric instanceof MetricRaw || metric instanceof AggregateMetric)
+			return metric.getValue(this);
+		
+		return metrics.getValue(this, metric);
 	}
 
 
 	/***************************************************************************
-  overload the method to take-in the index ---FMZ
+  	 * <p>
+  	 * This method returns the cached raw metric value.
+  	 * Unlike {@link getMetricValue(BaseMetric)}, it doesn't trigger calculation
+  	 * of final metric value.
+  	 * </p>
+  	 * overload the method to take-in the index ---FMZ
+  	 * 
+  	 * @param index
+  	 * 			The metric index
+  	 * @return {@code MetricValue}
+  	 * 			The metric value. If the index has no value, it returns {@code MetricValue.NONE}
 	 ***************************************************************************/
 
 	public MetricValue getMetricValue(int index)
 	{
 		ensureMetricStorage();
-		MetricValue value = metrics.getValue(this, index);
-
-		return value;
+		return metrics.getValue(this, index);
 	}
 
-	public MetricValue getRootMetricValue(BaseMetric metric)
-	{
-		return getRootScope().getMetricValue(metric);
-	}
 
 	/*************************************************************************
 	 *	Sets the value of a given metric at this scope.
@@ -619,23 +622,26 @@ implements IMetricScope
 			if (m instanceof DerivedMetric) {
 				listDerivedMetrics.add((DerivedMetric) m);
 			} else {
-				accumulateMetric(source, m.getIndex(), m.getIndex(), filter);
+				accumulateMetric(source, m, filter);
 			}
 		}
 		// compute the derived metrics
 		for(DerivedMetric m: listDerivedMetrics) {
-			accumulateMetric(source, m.getIndex(), m.getIndex(), filter);
+			accumulateMetric(source, m, filter);
 		}
 	}
 
 	/*************************************************************************
 	 *	Add the metric cost from a source with a certain filter for a certain metric
 	 ************************************************************************/
-	public void accumulateMetric(Scope source, int src_i, int targ_i, MetricValuePropagationFilter filter) {
-		if (filter.doPropagation(source, this, src_i, targ_i)) {
-			MetricValue m = source.getMetricValue(src_i);
+	private void accumulateMetric(Scope source, 
+								  BaseMetric metric, 
+								  MetricValuePropagationFilter filter) {
+		final int mIndex = metric.getIndex();
+		if (filter.doPropagation(source, this, mIndex, mIndex)) {
+			MetricValue m = source.getMetricValue(metric);
 			if (m != MetricValue.NONE && Double.compare(MetricValue.getValue(m), 0.0) != 0) {
-				this.accumulateMetricValue(targ_i, MetricValue.getValue(m));
+				this.accumulateMetricValue(metric, m);
 			}
 		}
 	}
@@ -645,17 +651,17 @@ implements IMetricScope
 	 * @param index
 	 * @param value
 	 ************************************************************************/
-	private void accumulateMetricValue(int index, double value)
+	private void accumulateMetricValue(BaseMetric metric, MetricValue value)
 	{
 		ensureMetricStorage();
-
-		MetricValue m = metrics.getValue(this, index);
+		
+		MetricValue m = metrics.getValue(this, metric);
 		if (m == MetricValue.NONE) {
-			MetricValue mv = new MetricValue(value);
-			metrics.setValue(index, mv);
+			metrics.setValue(metric.getIndex(), value);
 		} else {
 			// TODO Could do non-additive accumulations here?
-			MetricValue.setValue(m, MetricValue.getValue(m) + value);
+			double newValue = m.getValue() + value.getValue();
+			m.setValue(newValue);
 		}
 	}
 
@@ -704,7 +710,7 @@ implements IMetricScope
 					aggMetric.combine(source, this);
 				}
 			} else {
-				this.accumulateMetric(source, metric.getIndex(), metric.getIndex(), filter);
+				this.accumulateMetric(source, metric, filter);
 			}
 		}
 	}
