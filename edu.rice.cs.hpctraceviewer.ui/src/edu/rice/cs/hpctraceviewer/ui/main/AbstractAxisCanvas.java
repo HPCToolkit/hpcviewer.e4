@@ -4,24 +4,23 @@ import org.eclipse.core.commands.operations.IOperationHistoryListener;
 import org.eclipse.core.commands.operations.IUndoContext;
 import org.eclipse.core.commands.operations.IUndoableOperation;
 import org.eclipse.core.commands.operations.OperationHistoryEvent;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.PaintListener;
-import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.context.BaseTraceContext;
+import edu.rice.cs.hpctraceviewer.ui.internal.BufferedCanvas;
 
-abstract public class AbstractAxisCanvas extends Canvas 
+abstract public class AbstractAxisCanvas extends BufferedCanvas 
 				implements PaintListener, IOperationHistoryListener, DisposeListener
 {
 	final ITracePart tracePart;
 	
 	public AbstractAxisCanvas(ITracePart tracePart, Composite parent, int style) {
-		super(parent, SWT.NO_BACKGROUND | style);
+		super(parent, false);
 		
 		this.tracePart = tracePart;
 

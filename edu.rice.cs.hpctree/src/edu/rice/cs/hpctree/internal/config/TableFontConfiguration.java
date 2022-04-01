@@ -23,6 +23,15 @@ import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpctree.ScopeTreeTable;
 import edu.rice.cs.hpctree.internal.ScopeTreeLabelAccumulator;
 
+/***************************************************
+ * 
+ * Configuration to manage the appearance of the table:
+ * Fonts, colors and glyphs.
+ * <p>
+ * This class takes into account the setting change in the hpcsetting
+ * (preference window).
+ *
+ ***************************************************/
 public class TableFontConfiguration implements IConfiguration, IPropertyChangeListener, DisposeListener
 {
 	private final ScopeTreeTable treeTable;
@@ -48,8 +57,11 @@ public class TableFontConfiguration implements IConfiguration, IPropertyChangeLi
 
 		final String property = event.getProperty();
 		
-		boolean need_to_refresh = (property.equals(PreferenceConstants.ID_FONT_GENERIC) || 
-								   property.equals(PreferenceConstants.ID_FONT_METRIC)); 
+		boolean need_to_refresh = (property.equals(PreferenceConstants.ID_FONT_GENERIC)  || 
+								   property.equals(PreferenceConstants.ID_FONT_METRIC)   ||
+								   property.equals(PreferenceConstants.ID_FONT_CALLSITE) ||
+								   property.equals(PreferenceConstants.ID_CHAR_CALLFROM) ||
+								   property.equals(PreferenceConstants.ID_CHAR_CALLTO)); 
 		
 		if (need_to_refresh) {
 			configureFont(treeTable.getTable().getConfigRegistry());

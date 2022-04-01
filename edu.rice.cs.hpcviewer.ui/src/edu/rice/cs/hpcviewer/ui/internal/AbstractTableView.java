@@ -25,6 +25,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
 import edu.rice.cs.hpcbase.ViewerDataEvent;
+import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
@@ -238,6 +239,12 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		table.addActionListener(scope -> {
 			profilePart.addEditor(scope);
 		});
+		//
+		// fix issue #188: force the table to have a content so natTable can properly resize the columns
+		// this doesn't really slow the UI so it's okay to do this to all tables. 
+		// TODO: ugly quick fix. NatTable has to handle this better!
+		// 
+		table.setRoot(root);
 		
 		updateButtonStatus();
 
@@ -407,6 +414,15 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 	
 	@Override
 	public ViewType getViewType() {
+		// TODO: quick fix for merged database:
+		// - for normal databases we'll have more than 2 views
+		// - for merged database, we'll have only 1 view
+		//
+		if (metricManager instanceof Experiment) {
+			Experiment exp = (Experiment) metricManager;
+			if (exp.isMergedDatabase())
+				return AbstractView.ViewType.INDIVIDUAL;
+		}
 		return AbstractView.ViewType.COLLECTIVE;
 	}
 	
@@ -552,8 +568,11 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				MetricFilterInput input = new MetricFilterInput(root, getMetricManager(), 
-																AbstractTableView.this, true);
+				boolean affectOthers = AbstractTableView.this.getViewType() == AbstractView.ViewType.COLLECTIVE;
+				MetricFilterInput input = new MetricFilterInput(root, 
+																getMetricManager(), 
+																AbstractTableView.this, 
+																affectOthers);
 				profilePart.addEditor(input);
 				updateButtonStatus();
 			}

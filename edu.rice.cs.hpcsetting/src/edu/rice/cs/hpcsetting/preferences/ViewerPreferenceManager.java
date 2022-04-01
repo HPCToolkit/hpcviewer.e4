@@ -51,14 +51,18 @@ public class ViewerPreferenceManager extends AbstractPreferenceManager
 		store.setDefault(PreferenceConstants.ID_DEBUG_CCT_ID,  Boolean.FALSE);
 		store.setDefault(PreferenceConstants.ID_DEBUG_FLAT_ID, Boolean.FALSE);
 		
-		PreferenceConverter.setDefault(getPreferenceStore(), 
-				PreferenceConstants.ID_FONT_GENERIC, JFaceResources.getDefaultFont().getFontData());
-		PreferenceConverter.setDefault(getPreferenceStore(), 
-				PreferenceConstants.ID_FONT_METRIC, JFaceResources.getTextFont().getFontData());
-		PreferenceConverter.setDefault(getPreferenceStore(), 
-				PreferenceConstants.ID_FONT_TEXT, JFaceResources.getTextFont().getFontData());
-		PreferenceConverter.setDefault(getPreferenceStore(), 
-				PreferenceConstants.ID_FONT_CALLSITE, FontManager.getCallsiteGlyphDefaultFont().getFontData());
+		PreferenceConverter.setDefault(store, 
+									   PreferenceConstants.ID_FONT_GENERIC, 
+									   JFaceResources.getDefaultFont().getFontData());
+		PreferenceConverter.setDefault(store, 
+									   PreferenceConstants.ID_FONT_METRIC, 
+									   JFaceResources.getTextFont().getFontData());
+		PreferenceConverter.setDefault(store, 
+									   PreferenceConstants.ID_FONT_TEXT, 
+									   JFaceResources.getTextFont().getFontData());
+		PreferenceConverter.setDefault(store, 
+									   PreferenceConstants.ID_FONT_CALLSITE, 
+									   FontManager.getCallsiteGlyphDefaultFont().getFontData());
 		
 		store.setDefault(PreferenceConstants.ID_CHAR_CALLTO, DEFAULT_CALLTO[DEFAULT_CALLSITE_INDEX]);
 		store.setDefault(PreferenceConstants.ID_CHAR_CALLFROM, DEFAULT_CALLFROM[DEFAULT_CALLSITE_INDEX]);

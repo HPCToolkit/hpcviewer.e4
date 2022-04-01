@@ -6,6 +6,7 @@ Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Rice University
 Automatic-Module-Name: edu.rice.cs.hpcbase
 Require-Bundle: edu.rice.cs.hpcdata,
+ org.slf4j.api,
  org.eclipse.jface,
  org.eclipse.core.runtime,
  org.eclipse.e4.ui.model.workbench,

@@ -22,7 +22,7 @@ import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 public abstract class RecentDatabase 
 {
 	public  static final String HISTORY_DATABASE_RECENT = "recent";
-	public  static final int    HISTORY_MAX = 10;
+	public  static final int    HISTORY_MAX = 20;
 	private static final String ID_DATA_ECP = "viewer/recent";
 		
 	
@@ -36,7 +36,10 @@ public abstract class RecentDatabase
 		if (history.getHistory().size() == 0)
 			return;
 		
+		int i = 0;
 		for(String db: history.getHistory()) {
+			if (i++ > HISTORY_MAX)
+				break;
 			
 			MDirectMenuItem menu = modelService.createModelElement(MDirectMenuItem.class);
 			

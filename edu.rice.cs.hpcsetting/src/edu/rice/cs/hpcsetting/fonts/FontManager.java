@@ -193,9 +193,9 @@ public class FontManager
 	}
 
 	private Font getPreferenceFont(String id) {
-		Font font = fontRegistry.get(id);
-		if (font != fontRegistry.defaultFont())
-			return font;
+		if (fontRegistry.hasValueFor(id)) {
+			return fontRegistry.get(id);
+		}
 		
 		ViewerPreferenceManager prefManager = ViewerPreferenceManager.INSTANCE;
 		PreferenceStore preferenceStore = prefManager.getPreferenceStore();
