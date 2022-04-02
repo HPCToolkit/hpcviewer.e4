@@ -1,7 +1,7 @@
 package edu.rice.cs.hpcdata.util.string;
 
 import java.text.DecimalFormat;
-import edu.rice.cs.hpcdata.util.Dialogs;
+
 
 public class StringUtil 
 {
@@ -51,7 +51,7 @@ public class StringUtil
 
 	public static String spaces(int count)
 	{
-		Dialogs.Assert(count <= SPACES.length(), "request too long Util::spaces");
+		assert count <= SPACES.length() : "request too long Util::spaces";
 
 		return SPACES.substring(0, count);
 	}

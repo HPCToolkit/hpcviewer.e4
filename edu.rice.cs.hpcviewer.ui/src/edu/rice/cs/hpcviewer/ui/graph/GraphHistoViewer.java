@@ -1,6 +1,5 @@
 package edu.rice.cs.hpcviewer.ui.graph;
 
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
@@ -38,7 +37,7 @@ public class GraphHistoViewer extends AbstractGraphViewer
 			IThreadDataCollection threadData = input.getThreadData();
 			y_values = threadData.getMetrics(scope.getCCTIndex(), metric.getRawID(), metric.getSize());
 
-		} catch (IOException e) {
+		} catch (Exception e) {
 			Display display = Display.getDefault();
 			MessageDialog.openError(display.getActiveShell(), "Error reading file !", e.getMessage());
 			return -1;

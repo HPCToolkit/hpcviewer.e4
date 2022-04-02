@@ -260,7 +260,7 @@ public class IdTuple
 				if (i==1) {
 					str += ".";
 				} else if (i>1) {
-					lblIndex = (long) (Math.pow(10, level-i) * logicalIndexes[i]);
+					lblIndex = (long) (Math.pow(10, (double)level-i) * logicalIndexes[i]);
 				}
 				str += lblIndex;
 			}

@@ -84,7 +84,7 @@ public static DecimalFormat makeDecimalFormatter(String pattern)
 {
 	// make a formatter, checking that the locale allows this
 	NumberFormat nf = NumberFormat.getInstance();
-	Dialogs.Assert( nf instanceof DecimalFormat, "bad arg to Util::makeDecimalFormatter");
+	assert ( nf instanceof DecimalFormat) : "bad arg to Util::makeDecimalFormatter";
 	DecimalFormat df = (DecimalFormat) nf;
 	
 	// apply the given pattern

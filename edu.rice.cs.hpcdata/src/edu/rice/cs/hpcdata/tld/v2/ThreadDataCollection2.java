@@ -53,7 +53,7 @@ public class ThreadDataCollection2 extends AbstractThreadDataCollection
 	
 	@Override
 	public double[] getMetrics(long nodeIndex, int metricIndex, int numMetrics) 
-			throws IOException {
+			throws Exception {
 		// check if the data already exists or not
 		ensureDataFile(metricIndex);
 		return data_file[metricIndex].getMetrics(nodeIndex, metricIndex, numMetrics);
