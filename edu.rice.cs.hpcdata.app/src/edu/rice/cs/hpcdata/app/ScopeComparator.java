@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcdata.util;
+package edu.rice.cs.hpcdata.app;
 
 import java.util.Comparator;
 
