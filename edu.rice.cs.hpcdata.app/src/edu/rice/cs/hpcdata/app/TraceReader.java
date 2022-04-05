@@ -1,8 +1,9 @@
-package edu.rice.cs.hpcdata.trace;
+package edu.rice.cs.hpcdata.app;
 
 import java.io.IOException;
 
 import edu.rice.cs.hpcdata.db.IFileDB;
+import edu.rice.cs.hpcdata.trace.TraceRecord;
 import edu.rice.cs.hpcdata.util.Constants;
 
 public class TraceReader 

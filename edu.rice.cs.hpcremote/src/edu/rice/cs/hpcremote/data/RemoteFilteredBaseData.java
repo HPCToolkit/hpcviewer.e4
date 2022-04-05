@@ -7,8 +7,8 @@ import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
 import edu.rice.cs.hpcdata.experiment.extdata.IFilteredData;
-import edu.rice.cs.hpcdata.trace.TraceName;
 import edu.rice.cs.hpcremote.filter.FilterSet;
+import edu.rice.cs.hpcremote.filter.TraceName;
 
 
 

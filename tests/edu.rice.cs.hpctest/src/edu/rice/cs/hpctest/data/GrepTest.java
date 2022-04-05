@@ -2,8 +2,6 @@ package edu.rice.cs.hpctest.data;
 
 import java.io.IOException;
 
-import edu.rice.cs.hpcdata.util.Grep;
-
 public class GrepTest 
 {
 

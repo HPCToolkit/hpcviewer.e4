@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcdata.trace;
+package edu.rice.cs.hpcremote.filter;
 
 public class TraceName {
 	int process;

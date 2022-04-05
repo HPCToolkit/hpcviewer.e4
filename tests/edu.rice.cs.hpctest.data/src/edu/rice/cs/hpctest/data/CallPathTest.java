@@ -19,11 +19,12 @@ import edu.rice.cs.hpcdata.experiment.Experiment.ExperimentOpenFlag;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
-import edu.rice.cs.hpcdata.trace.TraceReader;
 import edu.rice.cs.hpcdata.util.CallPath;
+import edu.rice.cs.hpcdata.util.Constants;
 
 public class CallPathTest {
-	
+	private final static int RECORD_SIZE    = Constants.SIZEOF_LONG + Constants.SIZEOF_INT;
+
 	private static Experiment experiment;
 	private static CallPath   callpath;
 	private static FileDB2    fileDB;
@@ -42,7 +43,7 @@ public class CallPathTest {
 		fileDB = new FileDB2();
 		try {
 			String filename = resource.toFile().getAbsolutePath() + File.separator + "experiment.mt";
-			fileDB.open(filename, trAttribute.dbHeaderSize, TraceReader.RECORD_SIZE);
+			fileDB.open(filename, trAttribute.dbHeaderSize, RECORD_SIZE);
 		} catch (IOException e) {
 			fail(e.getMessage());
 			return;
