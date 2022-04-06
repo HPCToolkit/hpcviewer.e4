@@ -15,9 +15,6 @@
 package edu.rice.cs.hpcdata.experiment.metric;
 
 
-import edu.rice.cs.hpcdata.util.*;
-
-
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -103,8 +100,6 @@ public final class MetricValue
 
 	public float getValue()
 	{
-		boolean available = (flags & VALUE_IS_AVAILABLE) == VALUE_IS_AVAILABLE;
-		Dialogs.Assert(available, "MetricValue::getValue");
 		return this.value;
 	}
 

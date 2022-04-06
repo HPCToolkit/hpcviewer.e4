@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcdata.util;
+package edu.rice.cs.hpctest.data;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

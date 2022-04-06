@@ -16,7 +16,6 @@ package edu.rice.cs.hpcdata.experiment.scope;
 
 import edu.rice.cs.hpcdata.experiment.scope.visitors.IScopeVisitor;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
-import edu.rice.cs.hpcdata.util.*;
 
 
 
@@ -80,18 +79,6 @@ public String getName()
 	return this.sourceFile.getName();
 }
 
-
-
-
-/*************************************************************************
- *	Returns the tool tip for this scope.
- ************************************************************************/
-	
-public String getToolTip()
-{
-	boolean available = this.getSourceFile().isAvailable();
-	return (available ? Strings.SOURCE_FILE_AVAILABLE : Strings.SOURCE_FILE_UNAVAILABLE);
-}
 
 
 

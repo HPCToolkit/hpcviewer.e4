@@ -17,8 +17,6 @@ package edu.rice.cs.hpcdata.experiment.source;
 
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.BaseExperimentWithMetrics;
-import edu.rice.cs.hpcdata.util.*;
-
 import java.io.*;
 
 
@@ -155,7 +153,7 @@ public boolean isAvailable()
 protected void requireAvailable()
 {
 	if( ! this.isAvailable() )
-		Dialogs.fail2("Attempt to open an unavailable SourceFile", this.getName());
+		assert(false);
 }
 
 

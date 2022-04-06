@@ -20,7 +20,7 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import com.jcraft.jsch.JSchException;
 
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
-import edu.rice.cs.hpcdata.trace.TraceName;
+import edu.rice.cs.hpcremote.filter.TraceName;
 import edu.rice.cs.hpcremote.tunnel.LocalTunneling;
 import edu.rice.cs.hpcremote.tunnel.RemoteUserInfo;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
