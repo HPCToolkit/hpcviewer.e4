@@ -23,7 +23,7 @@ import edu.rice.cs.hpcdata.util.CallPath;
 import edu.rice.cs.hpcdata.util.Constants;
 
 public class CallPathTest {
-	private final static int RECORD_SIZE    = Constants.SIZEOF_LONG + Constants.SIZEOF_INT;
+	private static final int RECORD_SIZE    = Constants.SIZEOF_LONG + Constants.SIZEOF_INT;
 
 	private static Experiment experiment;
 	private static CallPath   callpath;

@@ -411,7 +411,7 @@ public String format(double value) {
 public String format(MetricValue value, MetricValue rootValue)
 {
 	this.ensureFormatters();
-	StringBuffer formatted = new StringBuffer();
+	var formatted = new StringBuilder();
 	
 	// append formatted actual value if wanted
 	if( this.valueStyle.show )
@@ -439,7 +439,7 @@ public String format(MetricValue value, MetricValue rootValue)
 }
 
 
-private String getAnnotationText(MetricValue rootValue, MetricValue value, StringBuffer formatted) {
+private String getAnnotationText(MetricValue rootValue, MetricValue value, StringBuilder formatted) {
 	float number = rootValue.getValue() / value.getValue();
 
 	// if the formatter pattern is set for percent values, we need to handle special values differently

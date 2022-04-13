@@ -54,8 +54,6 @@ public class StringUtil
 
 	public static String spaces(int count)
 	{
-		assert count <= SPACES.length() : "request too long Util::spaces";
-
 		return SPACES.substring(0, count);
 	}
 
