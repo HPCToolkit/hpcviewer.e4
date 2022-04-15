@@ -25,6 +25,7 @@ import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScopeType;
+import edu.rice.cs.hpcdata.experiment.scope.InstructionScope;
 import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoadModuleScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoopScope;
@@ -661,10 +662,7 @@ public class DataMeta extends DataCommon
 				newParent = beginNewScope(parent, scope);					
 				break;
 			case FMT_METADB_LEXTYPE_INSTRUCTION:
-				//scope = new LineScope(root, fs, line, ctxId, ctxId);
-				//scope = createLexicalInstruction(parent, lm, fs, ctxId, line, relation);
-				scope = new LineScope(rootCCT, fs, line, ctxId, ctxId);
-				((LineScope)scope).setLoadModule(lm);
+				scope = new InstructionScope(rootCCT, lm, ctxId);
 				newParent = beginNewScope(parent, scope);					
 				break;
 			default:
