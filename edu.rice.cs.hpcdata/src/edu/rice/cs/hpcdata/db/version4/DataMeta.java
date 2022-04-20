@@ -459,7 +459,8 @@ public class DataMeta extends DataCommon
 					if (k == j) 
 						continue;
 					
-					BaseMetric m2 = metricDesc.get(k);
+					int idx2 = metricIndexesPerScope[k];
+					BaseMetric m2 = metricDesc.get(idx2);
 					if (m2.getMetricType() != m1.getMetricType()) {
 						// the type of m2 is different than m1
 						// theoretically m2 is the partner of m1. and vice versa
