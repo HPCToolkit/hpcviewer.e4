@@ -13,6 +13,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.collections.impl.list.mutable.FastList;
+import org.eclipse.collections.impl.map.mutable.primitive.IntIntHashMap;
+import org.eclipse.collections.impl.map.mutable.primitive.LongIntHashMap;
 
 import edu.rice.cs.hpcdata.db.IFileDB;
 import edu.rice.cs.hpcdata.db.IdTuple;
@@ -364,14 +366,8 @@ public class DataSummary extends DataCommon
 		readProfInfo(input, sections[0]);
 		
 		// read the hierarchical id tuple 
-		listIdTuple = FastList.newList();
-		for(int i=0; i<info.nProfile; i++) {
-			info.piElements[i].readIdTuple(input, sections[1]);
-			numLevels = Math.max(numLevels, info.piElements[i].numLevels);
-			if (info.piElements[i].pIdTuple != 0)
-				listIdTuple.add(info.piElements[i].idt);
-		}
-
+		readIdTuple(input);
+		
 		// eager initialization for the cct of the summary profile
 		// this summary will be loaded anyway. There is no harm to do it now. 
 		// ... or I think
@@ -383,7 +379,101 @@ public class DataSummary extends DataCommon
 	// --------------------------------------------------------------------
 	// Private methods
 	// --------------------------------------------------------------------
+	
+	private void readIdTuple(FileChannel input) throws IOException {
+
+		// -----------------------------------------
+		// 1. Read the main Id tuple section
+		//    and load it to a temporary list
+		// -----------------------------------------
+		List<IdTuple> tempIdTupleList = FastList.newList();
 		
+		// mapLevelToHash is important to know if there is an invariant for each level
+		// if a level has invariant (i.e. its size is zero), we'll skip this level
+		int maxLevels = idTupleTypes.size();
+		LongIntHashMap []mapLevelToHash = new LongIntHashMap[maxLevels];
+		
+		for(int i=0; i<info.nProfile; i++) {
+			info.piElements[i].readIdTuple(input, sections[1]);
+			numLevels = Math.max(numLevels, info.piElements[i].numLevels);
+			if (info.piElements[i].pIdTuple  == 0)
+				continue;
+			
+			tempIdTupleList.add(info.piElements[i].idt);
+
+			for(int j=0; j<numLevels; j++) {
+				short kind = info.piElements[i].idt.getKind(j);
+				long idx   = info.piElements[i].idt.getLogicalIndex(j);
+				long hash  = convertIdTupleToHash(kind, idx);
+				
+				if (mapLevelToHash[j] == null)
+					mapLevelToHash[j] = new LongIntHashMap();
+
+				int count = mapLevelToHash[j].getIfAbsent(hash, 0);
+				count++;
+				
+				mapLevelToHash[j].put(hash, count);
+			}
+		}
+
+		// -----------------------------------------
+		// 2. Check for the invariants in id tuple.
+		//    This is to know which the first levels we can skip
+		// -----------------------------------------
+		IntIntHashMap mapLevelToSkip = new IntIntHashMap();
+		
+		for (int i=0; i<numLevels; i++) {
+			if (mapLevelToHash[i] != null && mapLevelToHash[i].size()==1) {
+				mapLevelToSkip.put(i, 1);
+			}
+		}
+		
+		tempIdTupleList.sort((o1, o2) -> {
+			return o1.compareTo(o2);
+		});
+		
+		listIdTuple = FastList.newList(tempIdTupleList.size());
+		numLevels   = 0;
+		
+		for(int i=0; i<tempIdTupleList.size(); i++) {
+			IdTuple idt = tempIdTupleList.get(i);
+			int totLevels = 0;
+			
+			// find how many levels we can keep for this id tuple
+			for (int j=0; j<idt.getLength(); j++) {
+				if (mapLevelToSkip.get(j) == 0) {
+					totLevels++;
+				}
+			}
+			// the profileNum is +1 because the index 0 is for summary
+			IdTuple shortVersion = new IdTuple(totLevels);
+						
+			int level = 0;
+			
+			// copy not-skipped id tuples to the short version
+			// leave the skipped ones for the full complete id tuple
+			for(int j=0; j<idt.getLength(); j++) {
+				if (mapLevelToSkip.get(j) == 0) {
+					// we should keep this level
+					shortVersion.setPhysicalIndex(level, idt.getPhysicalIndex(j));
+					shortVersion.setLogicalIndex (level, idt.getLogicalIndex(j));
+					shortVersion.setKind(level, idt.getKind(j));
+					shortVersion.setFlag(level, idt.getFlag(j));
+					level++;
+				}
+			}
+			listIdTuple.add(shortVersion);
+			
+			numLevels = Math.max(numLevels, shortVersion.getLength());
+		}
+	}
+	
+	private long convertIdTupleToHash(short kind, long index) {
+		long k = (kind << 32);
+		long t = k + index;
+		return t;
+	}
+	
 	/****
 	 * Return {@code true} if the database contains GPU parallelism
 	 * @return {@code boolean}

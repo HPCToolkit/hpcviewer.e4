@@ -9,6 +9,10 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.Random;
 
+import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
+
+import edu.rice.cs.hpcdata.util.LargeByteBuffer;
+
 /*******************************************************************************
  * 
  * Class to read data trace from file (via DataCommon) and store the info
@@ -25,7 +29,8 @@ public class DataTrace extends DataCommon
 	private static final int NUM_ITEMS = 1;
 
 	private TraceHeader  traceHeader;
-	private TraceContext []traceCtxs;
+	private IntObjectHashMap<TraceContext> traceCtxs;
+	private LargeByteBuffer lbBuffer;
 	
 	@Override
 	/*
@@ -39,6 +44,14 @@ public class DataTrace extends DataCommon
 	}
 	
 
+	@Override
+	public void dispose() throws IOException
+	{
+		lbBuffer.dispose();
+		super.dispose();
+	}
+	
+	
 	@Override
 	protected int getNumSections() {
 		return NUM_ITEMS;
@@ -73,13 +86,17 @@ public class DataTrace extends DataCommon
 		buffer = input.map(MapMode.READ_ONLY, traceHeader.pTraces, size);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		
-		traceCtxs = new TraceContext[traceHeader.nTraces];
+		traceCtxs = new IntObjectHashMap<>(traceHeader.nTraces);
 		
 		for(int i=0; i<traceHeader.nTraces; i++) {
-			int profIndex = buffer.getInt();
-			var tc = new TraceContext(buffer);
-			traceCtxs[i] = tc;
+			int loc = (int) (i * traceHeader.szTrace);
+			int profIndex = buffer.getInt(loc);
+			var tc = new TraceContext(buffer, loc);
+			traceCtxs.put(profIndex, tc);
 		}
+		
+		lbBuffer = new LargeByteBuffer(input, 2, FMT_TRACEDB_SZ_CTX_SAMPLE);
+		lbBuffer.setEndian(ByteOrder.LITTLE_ENDIAN);
 
 		return true;
 	}
@@ -112,18 +129,14 @@ public class DataTrace extends DataCommon
 	 */
 	public DataRecord getSampledData(int rank, long index) throws IOException
 	{
-		assert(rank < traceCtxs.length);
-		
-		var tc = traceCtxs[rank];		
+		var tc = traceCtxs.get(rank);		
 		if (tc == null)
 			return null;
 		
 		long position = tc.pStart + (index * FMT_TRACEDB_SZ_CTX_SAMPLE);
-		var buffer = getChannel().map(MapMode.READ_ONLY, position, FMT_TRACEDB_SZ_CTX_SAMPLE);
-		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		
-		long time = buffer.getLong();
-		int  cpid = buffer.getInt();
+		long time = lbBuffer.getLong(position);
+		int  cpid = lbBuffer.getInt(position);
 		DataRecord data = new DataRecord(time, cpid, 0);
 		
 		return data;
@@ -139,8 +152,7 @@ public class DataTrace extends DataCommon
 	 */
 	public int getNumberOfSamples(int rank)
 	{
-		assert(rank < traceCtxs.length);
-		var tc = traceCtxs[rank];		
+		var tc = traceCtxs.get(rank);		
 		if (tc == null)
 			return 0;
 		
@@ -156,7 +168,7 @@ public class DataTrace extends DataCommon
 	 */
 	public int getNumberOfRanks()
 	{
-		return (int) traceCtxs.length;
+		return (int) traceCtxs.size();
 	}
 	
 	
@@ -169,9 +181,7 @@ public class DataTrace extends DataCommon
 	 */
 	public long getLength(int rank)
 	{
-		assert(rank < traceCtxs.length);
-		
-		var tc = traceCtxs[rank];		
+		var tc = traceCtxs.get(rank);		
 		if (tc == null)
 			throw new RuntimeException("Invalid rank: " + rank);
 		
@@ -181,8 +191,7 @@ public class DataTrace extends DataCommon
 	
 	public long getOffset(int rank)
 	{
-		assert(rank < traceCtxs.length);
-		var tc = traceCtxs[rank];		
+		var tc = traceCtxs.get(rank);		
 		if (tc == null)
 			throw new RuntimeException("Invalid rank: " + rank);
 		return tc.pStart;
@@ -232,9 +241,7 @@ public class DataTrace extends DataCommon
 	@Deprecated
 	public long getLong(long position) throws IOException
 	{
-		var buffer = getChannel().map(MapMode.READ_ONLY, position, 8);
-		buffer.order(ByteOrder.LITTLE_ENDIAN);
-		return buffer.getLong();
+		return lbBuffer.getLong(position);
 	}
 	
 	@Deprecated
@@ -253,9 +260,7 @@ public class DataTrace extends DataCommon
 	 */
 	public int getInt(long position) throws IOException
 	{
-		var buffer = getChannel().map(MapMode.READ_ONLY, position, 4);
-		buffer.order(ByteOrder.LITTLE_ENDIAN);
-		return buffer.getInt();
+		return lbBuffer.getInt(position);
 	}
 	
 	@Deprecated
@@ -274,9 +279,7 @@ public class DataTrace extends DataCommon
 	 */
 	public double getDouble(long position) throws IOException
 	{
-		var buffer = getChannel().map(MapMode.READ_ONLY, position, 4);
-		buffer.order(ByteOrder.LITTLE_ENDIAN);
-		return buffer.getDouble();
+		return lbBuffer.getDouble(position);
 	}
 	
 	// --------------------------------------------------------------------
@@ -295,9 +298,20 @@ public class DataTrace extends DataCommon
 		public final long pStart;
 		public final long pEnd;
 		
-		public TraceContext(ByteBuffer buffer) {
-			pStart = buffer.getLong(0x08);
-			pEnd   = buffer.getLong(0x10);
+		/***
+		 * Record of the start and end of a trace profile
+		 * @param buffer 
+		 * 			The file buffer
+		 * @param loc
+		 * 			The beginning of the location of the trace profile
+		 */
+		public TraceContext(ByteBuffer buffer, int loc) {
+			pStart = buffer.getLong(loc + 0x08);
+			pEnd   = buffer.getLong(loc + 0x10);
+		}
+		
+		public String toString() {
+			return String.format("0x%x - 0x%x", pStart, pEnd);
 		}
 	}
 
@@ -316,8 +330,8 @@ public class DataTrace extends DataCommon
 		
 		public TraceHeader(ByteBuffer buffer) {
 			pTraces = buffer.getLong();
-			nTraces = buffer.getInt();
-			szTrace = buffer.get();
+			nTraces = buffer.getInt(0x08);
+			szTrace = buffer.get(0x0c);
 			
 			minTimestamp = buffer.getLong(0x10);
 			maxTimestamp = buffer.getLong(0x18);

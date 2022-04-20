@@ -2,6 +2,7 @@ package edu.rice.cs.hpcdata.util;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 
@@ -14,13 +15,13 @@ import java.nio.channels.FileChannel;
  */
 public class LargeByteBuffer
 {
+	private final FileChannel fcInput;
 	
 	/**The masterBuffer holds a vector of all bytebuffers*/
 	private MappedByteBuffer[] masterBuffer;
 	
 	private long length;
-	
-	final private FileChannel fcInput;
+	private ByteOrder order;
 	
 	// The page size has to be the multiple of record size (24) and header size (can be 24 or 32)
 	// originally: Integer.MAX_VALUE;
@@ -38,7 +39,8 @@ public class LargeByteBuffer
 		throws IOException
 	{
 		fcInput = in;
-		length = in.size();
+		length  = in.size();
+		order   = null;
 		
 		// --------------------------------------------------------------------
 		// compute the page size:
@@ -50,6 +52,12 @@ public class LargeByteBuffer
 		int numPages = 1+(int) (in.size() / pageSize);
 		masterBuffer = new MappedByteBuffer[numPages];		
 	}
+	
+	
+	public void setEndian(ByteOrder order) {
+		this.order = order;
+	}
+	
 	
 	private long getCurrentSize(long index) throws IOException 
 	{
@@ -73,6 +81,9 @@ public class LargeByteBuffer
 		MappedByteBuffer buffer = fcInput.map(FileChannel.MapMode.READ_ONLY, start, 
 				getCurrentSize(page));
 		masterBuffer[page] = buffer;
+		
+		if (order != null)
+			masterBuffer[page].order(order);
 		
 		return buffer;
 	}

@@ -89,6 +89,10 @@ public class IdTupleType
 		return type;
 	}
 	
+	public int size() {
+		return mapIdTuple.size();
+	}
+	
 	
 	/****
 	 * Add a new id tuple type

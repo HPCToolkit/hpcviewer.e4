@@ -36,7 +36,6 @@ public class IdTuple
 	/****
 	 * Constructor
 	 * Caller needs to set {@code kind} and {@code index} variables
-	 * @param profileNum int the profile index
 	 * @param length the int the length (or level) of this id tuple
 	 */
 	public IdTuple(int length) {		
@@ -91,15 +90,15 @@ public class IdTuple
 	 * @param level
 	 * @return
 	 */
-	public short getKind(int level) {
-		return (short) (kinds[level]);
+	public byte getKind(int level) {
+		return kinds[level];
 	}
 
 	public void setKind(int index, byte kind) {
 		this.kinds[index] = kind;
 	}
 	
-	public short getFlag(int index) {
+	public byte getFlag(int index) {
 		return flags[index];
 	}
 	
@@ -115,7 +114,7 @@ public class IdTuple
 		this.physicalIndexes[index] = physical_index;
 	}
 
-	public long getLogicalIndex(int index) {
+	public int getLogicalIndex(int index) {
 		return logicalIndexes[index];
 	}
 

@@ -12,7 +12,6 @@ import edu.rice.cs.hpcdata.db.version2.FileDB2;
 import edu.rice.cs.hpcdata.db.version4.DataSummary;
 import edu.rice.cs.hpcdata.db.version4.DataTrace;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
-import edu.rice.cs.hpcdata.trace.TraceAttribute;
 
 
 /********************************************************************
