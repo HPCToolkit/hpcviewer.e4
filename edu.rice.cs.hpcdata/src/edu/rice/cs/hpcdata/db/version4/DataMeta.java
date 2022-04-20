@@ -155,10 +155,10 @@ public class DataMeta extends DataCommon
 		TraceScopeVisitor visitor = new TraceScopeVisitor();
 		rootCCT.dfsVisitScopeTree(visitor);
 		
-		this.experiment.setRootScope(root);
-		this.experiment.setMaxDepth(visitor.getMaxDepth());
-		this.experiment.setScopeMap(visitor.getCallPath());
-		this.experiment.setVersion(versionMajor + "." + versionMinor);
+		exp.setRootScope(root);
+		exp.setMaxDepth(visitor.getMaxDepth());
+		exp.setScopeMap(visitor.getCallPath());
+		exp.setVersion(versionMajor + "." + versionMinor);
 
 		stringArea.dispose();
 	}
@@ -304,6 +304,10 @@ public class DataMeta extends DataCommon
 	}
 	
 	
+	private void postProcess() {
+		
+	}
+	
 	/****
 	 * Parser for the general section
 	 * 
@@ -391,6 +395,7 @@ public class DataMeta extends DataCommon
 			
 			int strPosition = (int) (pName - section.offset);
 			String metricName = getNullTerminatedString(buffer, strPosition);
+			int []metricIndexesPerScope = new int[nScopes];
 			
 			int scopesPosition = (int) (pScopes - section.offset);				
 			for(int j=0; j<nScopes; j++) {
@@ -434,7 +439,33 @@ public class DataMeta extends DataCommon
 										VisibilityType.SHOW; 
 					m.setDisplayed(vt);
 
+					// store the index of this scope.
+					// we need this to propagate the partner index
+					metricIndexesPerScope[j] = metricDesc.size();
+					
 					metricDesc.add(m);
+				}
+			}
+			// Re-assign the partner index:
+			// here we assume MetricType is either exclusive or inclusive 
+			// (in the future can be more than that)
+			// If a metric is exclusive, then its partner is the inclusive one.
+			// This ugly nested loop tries to find the partner of each metric in this scope.
+			for (int j=0; j<nScopes; j++) {
+				int idx = metricIndexesPerScope[j];
+				BaseMetric m1 =  metricDesc.get(idx);
+				
+				for (int k=0; k<nScopes; k++) {
+					if (k == j) 
+						continue;
+					
+					BaseMetric m2 = metricDesc.get(k);
+					if (m2.getMetricType() != m1.getMetricType()) {
+						// the type of m2 is different than m1
+						// theoretically m2 is the partner of m1. and vice versa
+						m2.setPartner(m1.getIndex());
+						m1.setPartner(m2.getIndex());
+					}
 				}
 			}
 		}
@@ -663,6 +694,7 @@ public class DataMeta extends DataCommon
 				break;
 			case FMT_METADB_LEXTYPE_INSTRUCTION:
 				scope = new InstructionScope(rootCCT, lm, ctxId);
+				scope.setSourceFile(fs);
 				newParent = beginNewScope(parent, scope);					
 				break;
 			default:

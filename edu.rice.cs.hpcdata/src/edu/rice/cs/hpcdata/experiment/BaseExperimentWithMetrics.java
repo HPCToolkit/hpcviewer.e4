@@ -18,6 +18,7 @@ import edu.rice.cs.hpcdata.experiment.metric.AggregateMetric;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.FinalMetric;
+import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.Metric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricComparator;
@@ -110,7 +111,7 @@ implements IMetricManager, ListEventListener<BaseMetric>
 		ArrayList<BaseMetric> listDerivedMetrics = new ArrayList<>();
 		
 		for(BaseMetric metric: metrics) {
-			if (metric instanceof Metric) {
+			if (metric instanceof Metric || metric instanceof HierarchicalMetric) {
 				if (metric.getMetricType() == sourceType) {
 					// get the partner index (if the metric exclusive, its partner is inclusive)
 					
