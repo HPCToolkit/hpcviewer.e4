@@ -136,7 +136,7 @@ public class DataTrace extends DataCommon
 		long position = tc.pStart + (index * FMT_TRACEDB_SZ_CTX_SAMPLE);
 		
 		long time = lbBuffer.getLong(position);
-		int  cpid = lbBuffer.getInt(position);
+		int  cpid = lbBuffer.getInt(position + 8);
 		DataRecord data = new DataRecord(time, cpid, 0);
 		
 		return data;
