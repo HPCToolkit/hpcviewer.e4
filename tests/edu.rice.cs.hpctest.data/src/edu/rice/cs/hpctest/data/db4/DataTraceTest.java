@@ -50,10 +50,10 @@ public class DataTraceTest {
 		for(int j=0; j<data.length; j++) {
 			DataTrace d = data[j];
 			DataRecord old = null;
-			int samples = d.getNumberOfSamples(1);
+			int samples = d.getNumberOfSamples(0);
 			
 			for (int i=0; i<Math.min(samples, 10); i++) {
-				DataRecord rec = d.getSampledData(1, i);
+				DataRecord rec = d.getSampledData(0, i);
 				assertNotNull(rec);
 				assertTrue(rec.timestamp >= minTimeStamp[j] &&
 						   rec.timestamp <= maxTimeStamp[j]);
@@ -73,7 +73,7 @@ public class DataTraceTest {
 		int []numSample = new int[] {838, 442};
 		for(int j=0; j<data.length; j++) {
 			var d = data[j];
-			int samples = d.getNumberOfSamples(1);
+			int samples = d.getNumberOfSamples(0);
 			assertTrue(samples == numSample[j]);
 		}
 	}
@@ -91,7 +91,7 @@ public class DataTraceTest {
 	public void testGetLength() {
 		final int []lengths = new int[] {10056, 5304};
 		for (int i=0; i<data.length; i++) {
-			long l = data[i].getLength(1);
+			long l = data[i].getLength(0);
 			assertTrue(l == lengths[i]);
 		}
 	}

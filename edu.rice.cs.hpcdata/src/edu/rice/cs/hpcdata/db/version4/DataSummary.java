@@ -416,6 +416,11 @@ public class DataSummary extends DataCommon
 			}
 		}
 
+		// no need to find invariant if we have only 1 id tuple
+		if (tempIdTupleList.size() <= 1) {
+			listIdTuple = tempIdTupleList;
+			return;
+		}
 		// -----------------------------------------
 		// 2. Check for the invariants in id tuple.
 		//    This is to know which the first levels we can skip
