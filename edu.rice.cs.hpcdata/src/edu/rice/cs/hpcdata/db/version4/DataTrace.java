@@ -9,8 +9,6 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.Random;
 
-import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
-
 import edu.rice.cs.hpcdata.util.LargeByteBuffer;
 
 /*******************************************************************************
@@ -29,7 +27,7 @@ public class DataTrace extends DataCommon
 	private static final int NUM_ITEMS = 1;
 
 	private TraceHeader  traceHeader;
-	private IntObjectHashMap<TraceContext> traceCtxs;
+	private TraceContext[] traceCtxs;
 	private LargeByteBuffer lbBuffer;
 	
 	@Override
@@ -86,13 +84,13 @@ public class DataTrace extends DataCommon
 		buffer = input.map(MapMode.READ_ONLY, traceHeader.pTraces, size);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		
-		traceCtxs = new IntObjectHashMap<>(traceHeader.nTraces);
+		traceCtxs = new TraceContext[traceHeader.nTraces];
 		
 		for(int i=0; i<traceHeader.nTraces; i++) {
 			int loc = (int) (i * traceHeader.szTrace);
 			int profIndex = buffer.getInt(loc);
 			var tc = new TraceContext(buffer, loc);
-			traceCtxs.put(profIndex, tc);
+			traceCtxs[i] = tc;
 		}
 		
 		lbBuffer = new LargeByteBuffer(input, 2, FMT_TRACEDB_SZ_CTX_SAMPLE);
@@ -129,7 +127,7 @@ public class DataTrace extends DataCommon
 	 */
 	public DataRecord getSampledData(int rank, long index) throws IOException
 	{
-		var tc = traceCtxs.get(rank);		
+		var tc = traceCtxs[rank];		
 		if (tc == null)
 			return null;
 		
@@ -152,7 +150,7 @@ public class DataTrace extends DataCommon
 	 */
 	public int getNumberOfSamples(int rank)
 	{
-		var tc = traceCtxs.get(rank);		
+		var tc = traceCtxs[rank];		
 		if (tc == null)
 			return 0;
 		
@@ -168,7 +166,7 @@ public class DataTrace extends DataCommon
 	 */
 	public int getNumberOfRanks()
 	{
-		return (int) traceCtxs.size();
+		return (int) traceCtxs.length;
 	}
 	
 	
@@ -181,7 +179,7 @@ public class DataTrace extends DataCommon
 	 */
 	public long getLength(int rank)
 	{
-		var tc = traceCtxs.get(rank);		
+		var tc = traceCtxs[rank];		
 		if (tc == null)
 			throw new RuntimeException("Invalid rank: " + rank);
 		
@@ -191,7 +189,7 @@ public class DataTrace extends DataCommon
 	
 	public long getOffset(int rank)
 	{
-		var tc = traceCtxs.get(rank);		
+		var tc = traceCtxs[rank];		
 		if (tc == null)
 			throw new RuntimeException("Invalid rank: " + rank);
 		return tc.pStart;
