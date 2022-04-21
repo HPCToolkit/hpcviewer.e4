@@ -88,8 +88,12 @@ public class DataTrace extends DataCommon
 		
 		for(int i=0; i<traceHeader.nTraces; i++) {
 			int loc = (int) (i * traceHeader.szTrace);
-			int profIndex = buffer.getInt(loc);
+			
+			// TODO: at the moment the profIndex is not used, instead we'll use dense presentation
+			// in the future we should handle sparse profile index.
+			/* int profIndex = */ buffer.getInt(loc);
 			var tc = new TraceContext(buffer, loc);
+			
 			traceCtxs[i] = tc;
 		}
 		

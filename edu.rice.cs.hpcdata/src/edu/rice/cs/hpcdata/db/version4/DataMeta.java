@@ -74,8 +74,9 @@ public class DataMeta extends DataCommon
 	private static final int INDEX_FILES   = 6;
 	private static final int INDEX_FUNCTIONS = 7;
 	
-	private static final int FMT_METADB_RELATION_LEXICAL_NEST = 0;
-	private static final int FMT_METADB_RELATION_CALL = 1;
+	// future usage: 
+	// private static final int FMT_METADB_RELATION_LEXICAL_NEST = 0;
+	// private static final int FMT_METADB_RELATION_CALL = 1;
 	private static final int FMT_METADB_RELATION_CALL_INLINED = 2;
 
 	private static final int FMT_METADB_LEXTYPE_FUNCTION = 0;
@@ -303,10 +304,6 @@ public class DataMeta extends DataCommon
 		parseRoot(channel, sections[INDEX_CONTEXT]);	
 	}
 	
-	
-	private void postProcess() {
-		
-	}
 	
 	/****
 	 * Parser for the general section

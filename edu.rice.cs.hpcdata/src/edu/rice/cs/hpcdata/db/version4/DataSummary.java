@@ -474,7 +474,7 @@ public class DataSummary extends DataCommon
 	}
 	
 	private long convertIdTupleToHash(short kind, long index) {
-		long k = (kind << 32);
+		long k = (kind << 22);
 		long t = k + index;
 		return t;
 	}

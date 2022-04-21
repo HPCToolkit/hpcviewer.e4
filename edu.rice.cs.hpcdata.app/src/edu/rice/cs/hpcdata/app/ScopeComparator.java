@@ -52,7 +52,7 @@ public class ScopeComparator implements Comparator<Object>
 		// according to its element name
 		// otherwise, sort according to the metric
 		if(metric == null || n1 == null || n2 == null) {
-			return multiplier * this.doCompare(node1, node2);
+			return multiplier * doCompare(node1, node2);
 		}
 		
 		MetricValue mv1 = this.metric.getValue(node1); 
