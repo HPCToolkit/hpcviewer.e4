@@ -283,7 +283,7 @@ public class CanvasAxisY extends AbstractAxisCanvas
 				return null;
 			
 			IdTuple id  = listTuples.get(process); 
-			int level   = Math.max(1, Math.min(event.x / columnWidth, id.getLength()) );
+			int level   = Math.min(event.x / columnWidth, id.getLength()-1);
 			
 			return id.toString(level, traceData.getIdTupleTypes());
 		}

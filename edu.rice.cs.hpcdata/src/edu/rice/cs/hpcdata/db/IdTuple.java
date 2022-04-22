@@ -19,6 +19,9 @@ public class IdTuple
 	
 	private final static String STRING_EMPTY = null;
 
+	private static final String SEPARATOR = " ";
+	private static final String SPACE = " ";
+
 	// -------------------------------------------
 	// variables
 	// -------------------------------------------
@@ -178,7 +181,7 @@ public class IdTuple
 	
 	
 	public String toString(IdTupleType idTupleType) {
-		return toString(kinds.length, idTupleType);
+		return toString(kinds.length-1, idTupleType);
 	}
 
 	
@@ -192,25 +195,29 @@ public class IdTuple
 			return null;
 		
 		StringBuilder buff = new StringBuilder();
-		final String SPACE = " ";
+		appendStringIdTuple(buff, 0, idTupleType);
 		
-		for(int i=0; i<level; i++) {
-			if (i>0)
-				buff.append(SPACE);
-			
-			String kindStr = idTupleType.kindStr(kinds[i]); 
-			buff.append(kindStr);
-			buff.append(SPACE);
-
-			if ((flags[i] & 0x1) == 0x1) {
-				buff.append(physicalIndexes[i]);
-			} else {
-				buff.append(logicalIndexes[i]);
-			}
+		for(int i=1; i<=level; i++) {
+			buff.append(SEPARATOR);
+			appendStringIdTuple(buff, i, idTupleType);
 		}
 		return buff.toString();
 	}
 
+	
+	private void appendStringIdTuple(StringBuilder buff, int level, IdTupleType idTupleType) {
+		String kindStr = idTupleType.kindStr(kinds[level]); 
+		buff.append(kindStr);
+		buff.append(SPACE);
+		buff.append(getIndexBaseOnFlag(level));
+	}
+	
+	
+	private long getIndexBaseOnFlag(int level) {
+		if ((flags[level] & 0x1) == 0x1) 
+			return physicalIndexes[level];
+		return logicalIndexes[level];
+	}
 
 	
 	/****
