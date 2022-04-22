@@ -2,6 +2,7 @@ package edu.rice.cs.hpcdata.tld.v2;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -50,8 +51,10 @@ public class ThreadLevelDataFile extends FileDB2
 	 * @param metricIndex: the index of the metrics
 	 * @param numMetrics: the number of metrics in the experiment
 	 * @return
+	 * @throws ExecutionException 
+	 * @throws InterruptedException 
 	 */
-	public double[] getMetrics(long nodeIndex, int metricIndex, int numMetrics) 
+	public double[] getMetrics(long nodeIndex, int metricIndex, int numMetrics) throws InterruptedException, ExecutionException 
 	{
 	
 		final double []metrics = new double[getNumberOfRanks()];
@@ -78,11 +81,7 @@ public class ThreadLevelDataFile extends FileDB2
 		// wait until all threads finish
 		// --------------------------------------------------------------
 		for (int i=0; i<num_threads; i++) {
-			try {
-				ecs.take().get();
-			} catch (Exception e) {
-				throw new RuntimeException(e.getMessage());
-			}
+			ecs.take().get();
 		}
 
 		return metrics;

@@ -1,15 +1,16 @@
-package edu.rice.cs.hpcdata.trace;
+package edu.rice.cs.hpcdata.app;
 
 import java.io.IOException;
 
 import edu.rice.cs.hpcdata.db.IFileDB;
+import edu.rice.cs.hpcdata.trace.TraceRecord;
 import edu.rice.cs.hpcdata.util.Constants;
 
 public class TraceReader 
 {
-	final static public int RECORD_SIZE = Constants.SIZEOF_LONG + Constants.SIZEOF_INT;
+	public static final int RECORD_SIZE = Constants.SIZEOF_LONG + Constants.SIZEOF_INT;
 	
-	final private IFileDB data;
+	private final IFileDB data;
 	
 	public TraceReader(IFileDB data) {
 		this.data = data;

@@ -1,12 +1,12 @@
-package edu.rice.cs.hpcdata.trace;
+package edu.rice.cs.hpcremote.filter;
 
 public class TraceName {
 	int process;
 	int thread;
 
-	public TraceName(int _process, int _thread) {
-		process = _process;
-		thread = _thread;
+	public TraceName(int process, int thread) {
+		this.process = process;
+		this.thread  = thread;
 	}
 
 	@Override

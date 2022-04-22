@@ -29,7 +29,6 @@ import edu.rice.cs.hpcdata.experiment.source.SourceFile;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
 import edu.rice.cs.hpcdata.util.CallPath;
 import edu.rice.cs.hpcdata.util.Constants;
-import edu.rice.cs.hpcdata.util.Dialogs;
 import edu.rice.cs.hpcdata.util.ICallPath;
 import edu.rice.cs.hpcdata.util.IUserData;
 
@@ -1253,7 +1252,7 @@ public class BaseExperimentBuilder extends Builder
 	 ************************************************************************/
 	public void content(String s)
 	{
-		Dialogs.notCalled("ExperimentBuilder.content");
+		assert(false);
 	}
 
 

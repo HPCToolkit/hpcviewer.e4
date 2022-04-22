@@ -233,7 +233,7 @@ public class Experiment extends BaseExperimentWithMetrics
 	 * </ol></p>
 	 * @param callerView : flag whether to compute caller view (if true) or not.
 	 */
-	private void postprocess(boolean callerView) {
+	public void postprocess(boolean callerView) {
 		if (this.rootScope.getSubscopeCount() <= 0) 
 			return;
 		

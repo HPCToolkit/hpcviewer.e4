@@ -25,6 +25,7 @@ import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScopeType;
+import edu.rice.cs.hpcdata.experiment.scope.InstructionScope;
 import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoadModuleScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoopScope;
@@ -73,8 +74,9 @@ public class DataMeta extends DataCommon
 	private static final int INDEX_FILES   = 6;
 	private static final int INDEX_FUNCTIONS = 7;
 	
-	private static final int FMT_METADB_RELATION_LEXICAL_NEST = 0;
-	private static final int FMT_METADB_RELATION_CALL = 1;
+	// future usage: 
+	// private static final int FMT_METADB_RELATION_LEXICAL_NEST = 0;
+	// private static final int FMT_METADB_RELATION_CALL = 1;
 	private static final int FMT_METADB_RELATION_CALL_INLINED = 2;
 
 	private static final int FMT_METADB_LEXTYPE_FUNCTION = 0;
@@ -154,10 +156,10 @@ public class DataMeta extends DataCommon
 		TraceScopeVisitor visitor = new TraceScopeVisitor();
 		rootCCT.dfsVisitScopeTree(visitor);
 		
-		this.experiment.setRootScope(root);
-		this.experiment.setMaxDepth(visitor.getMaxDepth());
-		this.experiment.setScopeMap(visitor.getCallPath());
-		this.experiment.setVersion(versionMajor + "." + versionMinor);
+		exp.setRootScope(root);
+		exp.setMaxDepth(visitor.getMaxDepth());
+		exp.setScopeMap(visitor.getCallPath());
+		exp.setVersion(versionMajor + "." + versionMinor);
 
 		stringArea.dispose();
 	}
@@ -390,6 +392,7 @@ public class DataMeta extends DataCommon
 			
 			int strPosition = (int) (pName - section.offset);
 			String metricName = getNullTerminatedString(buffer, strPosition);
+			int []metricIndexesPerScope = new int[nScopes];
 			
 			int scopesPosition = (int) (pScopes - section.offset);				
 			for(int j=0; j<nScopes; j++) {
@@ -433,7 +436,34 @@ public class DataMeta extends DataCommon
 										VisibilityType.SHOW; 
 					m.setDisplayed(vt);
 
+					// store the index of this scope.
+					// we need this to propagate the partner index
+					metricIndexesPerScope[j] = metricDesc.size();
+					
 					metricDesc.add(m);
+				}
+			}
+			// Re-assign the partner index:
+			// here we assume MetricType is either exclusive or inclusive 
+			// (in the future can be more than that)
+			// If a metric is exclusive, then its partner is the inclusive one.
+			// This ugly nested loop tries to find the partner of each metric in this scope.
+			for (int j=0; j<nScopes; j++) {
+				int idx = metricIndexesPerScope[j];
+				BaseMetric m1 =  metricDesc.get(idx);
+				
+				for (int k=0; k<nScopes; k++) {
+					if (k == j) 
+						continue;
+					
+					int idx2 = metricIndexesPerScope[k];
+					BaseMetric m2 = metricDesc.get(idx2);
+					if (m2.getMetricType() != m1.getMetricType()) {
+						// the type of m2 is different than m1
+						// theoretically m2 is the partner of m1. and vice versa
+						m2.setPartner(m1.getIndex());
+						m1.setPartner(m2.getIndex());
+					}
 				}
 			}
 		}
@@ -661,10 +691,8 @@ public class DataMeta extends DataCommon
 				newParent = beginNewScope(parent, scope);					
 				break;
 			case FMT_METADB_LEXTYPE_INSTRUCTION:
-				//scope = new LineScope(root, fs, line, ctxId, ctxId);
-				//scope = createLexicalInstruction(parent, lm, fs, ctxId, line, relation);
-				scope = new LineScope(rootCCT, fs, line, ctxId, ctxId);
-				((LineScope)scope).setLoadModule(lm);
+				scope = new InstructionScope(rootCCT, lm, ctxId);
+				scope.setSourceFile(fs);
 				newParent = beginNewScope(parent, scope);					
 				break;
 			default:
@@ -696,9 +724,6 @@ public class DataMeta extends DataCommon
 	 * 			Otherwise returns the parent itself.
 	 */
 	private Scope beginNewScope(Scope parent, Scope scope) {
-		if (scope == null)
-			return parent;
-		
 		parent.addSubscope(scope);
 		scope.setParentScope(parent);
 
@@ -757,11 +782,16 @@ public class DataMeta extends DataCommon
 		
 		// since we merge the line scope to this call site,
 		// we have to remove the line scope from the parent
-		Scope grandParent = parent.getParentScope();
-		grandParent.remove(parent);
+		//
+		// Hack 04.22.2022: at the moment we do not remove the parent of the call site
+		// The reason is that sometimes a line scope has multiple children (WtH?) and
+		// integrating the parent as a call site will cause removing the children of the line scope
+		//
+		// Scope grandParent = parent.getParentScope();
+		// grandParent.remove(parent);
 		
 		// add the new call site to the tree
-		return beginNewScope(grandParent, cs);
+		return beginNewScope(ls, cs);
 	}
 	
 	

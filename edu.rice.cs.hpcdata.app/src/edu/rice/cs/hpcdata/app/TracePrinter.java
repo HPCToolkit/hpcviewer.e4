@@ -7,8 +7,8 @@ import java.util.Locale;
 import edu.rice.cs.hpcdata.db.version2.FileDB2;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
-import edu.rice.cs.hpcdata.trace.TraceReader;
 import edu.rice.cs.hpcdata.trace.TraceRecord;
+import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.MergeDataFiles;
 
 /*****
@@ -23,6 +23,7 @@ import edu.rice.cs.hpcdata.util.MergeDataFiles;
  ****/
 public class TracePrinter 
 {
+	private static final int RECORD_SIZE    = Constants.SIZEOF_LONG + Constants.SIZEOF_INT;
 
 	public static void main(String[] args) {
 		
@@ -54,7 +55,7 @@ public class TracePrinter
 		final FileDB2 fileDB = new FileDB2();
 		try {
 			String filename = getTraceFile(args[0]);
-			fileDB.open(filename, trAttribute.dbHeaderSize, TraceReader.RECORD_SIZE);
+			fileDB.open(filename, trAttribute.dbHeaderSize, RECORD_SIZE);
 		} catch (IOException e) {
 			System.err.println(e.getMessage());
 			return;

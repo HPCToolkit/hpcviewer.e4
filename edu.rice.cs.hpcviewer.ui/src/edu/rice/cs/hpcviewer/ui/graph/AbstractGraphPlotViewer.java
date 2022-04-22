@@ -128,9 +128,10 @@ public abstract class AbstractGraphPlotViewer extends AbstractGraphViewer
 	 * @param scope
 	 * @param metric
 	 * @return
+	 * @throws Exception 
 	 */
 	protected abstract double[] getValuesY(Scope scope, BaseMetric metric)
-			 throws IOException;
+			 throws  Exception;
 
 
 	/****

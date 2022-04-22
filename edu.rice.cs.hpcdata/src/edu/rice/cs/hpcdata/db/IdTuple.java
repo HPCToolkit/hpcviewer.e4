@@ -19,6 +19,9 @@ public class IdTuple
 	
 	private final static String STRING_EMPTY = null;
 
+	private static final String SEPARATOR = " ";
+	private static final String SPACE = " ";
+
 	// -------------------------------------------
 	// variables
 	// -------------------------------------------
@@ -36,7 +39,6 @@ public class IdTuple
 	/****
 	 * Constructor
 	 * Caller needs to set {@code kind} and {@code index} variables
-	 * @param profileNum int the profile index
 	 * @param length the int the length (or level) of this id tuple
 	 */
 	public IdTuple(int length) {		
@@ -91,15 +93,15 @@ public class IdTuple
 	 * @param level
 	 * @return
 	 */
-	public short getKind(int level) {
-		return (short) (kinds[level]);
+	public byte getKind(int level) {
+		return kinds[level];
 	}
 
 	public void setKind(int index, byte kind) {
 		this.kinds[index] = kind;
 	}
 	
-	public short getFlag(int index) {
+	public byte getFlag(int index) {
 		return flags[index];
 	}
 	
@@ -115,7 +117,7 @@ public class IdTuple
 		this.physicalIndexes[index] = physical_index;
 	}
 
-	public long getLogicalIndex(int index) {
+	public int getLogicalIndex(int index) {
 		return logicalIndexes[index];
 	}
 
@@ -179,7 +181,7 @@ public class IdTuple
 	
 	
 	public String toString(IdTupleType idTupleType) {
-		return toString(kinds.length, idTupleType);
+		return toString(kinds.length-1, idTupleType);
 	}
 
 	
@@ -193,25 +195,29 @@ public class IdTuple
 			return null;
 		
 		StringBuilder buff = new StringBuilder();
-		final String SPACE = " ";
+		appendStringIdTuple(buff, 0, idTupleType);
 		
-		for(int i=0; i<level; i++) {
-			if (i>0)
-				buff.append(SPACE);
-			
-			String kindStr = idTupleType.kindStr(kinds[i]); 
-			buff.append(kindStr);
-			buff.append(SPACE);
-
-			if ((flags[i] & 0x1) == 0x1) {
-				buff.append(physicalIndexes[i]);
-			} else {
-				buff.append(logicalIndexes[i]);
-			}
+		for(int i=1; i<=level; i++) {
+			buff.append(SEPARATOR);
+			appendStringIdTuple(buff, i, idTupleType);
 		}
 		return buff.toString();
 	}
 
+	
+	private void appendStringIdTuple(StringBuilder buff, int level, IdTupleType idTupleType) {
+		String kindStr = idTupleType.kindStr(kinds[level]); 
+		buff.append(kindStr);
+		buff.append(SPACE);
+		buff.append(getIndexBaseOnFlag(level));
+	}
+	
+	
+	private long getIndexBaseOnFlag(int level) {
+		if ((flags[level] & 0x1) == 0x1) 
+			return physicalIndexes[level];
+		return logicalIndexes[level];
+	}
 
 	
 	/****
@@ -260,7 +266,7 @@ public class IdTuple
 				if (i==1) {
 					str += ".";
 				} else if (i>1) {
-					lblIndex = (long) (Math.pow(10, level-i) * logicalIndexes[i]);
+					lblIndex = (long) (Math.pow(10, (double)level-i) * logicalIndexes[i]);
 				}
 				str += lblIndex;
 			}

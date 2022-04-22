@@ -111,7 +111,7 @@ public class GraphPlotRegularViewer extends AbstractGraphPlotViewer
 	}
 
 	@Override
-	protected double[] getValuesY(Scope scope, BaseMetric metric) throws IOException {
+	protected double[] getValuesY(Scope scope, BaseMetric metric) throws Exception {
 		
 		int id = metric.getIndex();
 		int size = 0;

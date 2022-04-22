@@ -34,14 +34,9 @@ import edu.rice.cs.hpcdata.experiment.source.SourceFile;
 public class LineScope extends Scope
 {
 
-
-private LoadModuleScope loadModule;
-
 //////////////////////////////////////////////////////////////////////////
 //	INITIALIZATION														//
 //////////////////////////////////////////////////////////////////////////
-
-
 
 
 /*************************************************************************
@@ -51,24 +46,12 @@ private LoadModuleScope loadModule;
 public LineScope(RootScope root, SourceFile sourceFile, int lineNumber, int cct_id, int flat_id)
 {
 	super(root, sourceFile, lineNumber, lineNumber, cct_id, flat_id);
-//	this.id = "LineScope";
 }
-
-/*
-public LineScope(Experiment experiment, SourceFile sourceFile, int lineNumber)
-{
-	super(experiment, sourceFile, lineNumber, lineNumber, Scope.idMax++);
-//	this.id = "LineScope";
-}*/
-
 
 
 //////////////////////////////////////////////////////////////////////////
 //	SCOPE DISPLAY														//
 //////////////////////////////////////////////////////////////////////////
-
-
-
 
 
 /*************************************************************************
@@ -82,11 +65,6 @@ public String getName()
 	}
 	return this.getSourceCitation();
 }
-/*
-public int hashCode() {
-	return this.getName().hashCode();
-}
-*/
 
 /*************************************************************************
  *	Returns the short user visible name for this scope.
@@ -104,14 +82,6 @@ public String getShortName()
 }
 
 
-public LoadModuleScope getLoadModule() {
-	return loadModule;
-}
-
-public void setLoadModule(LoadModuleScope loadModule) {
-	this.loadModule = loadModule;
-}
-
 public boolean isequal(LineScope ls)
 {
 	return ((this.firstLineNumber == ls.firstLineNumber) &&
@@ -119,12 +89,10 @@ public boolean isequal(LineScope ls)
 		(this.sourceFile == ls.sourceFile));
 }
 
+
 //////////////////////////////////////////////////////////////////////////
 //	ACCESS TO SCOPE														//
 //////////////////////////////////////////////////////////////////////////
-
-
-
 
 /*************************************************************************
  *	Returns the line number of this line scope.

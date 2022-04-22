@@ -95,10 +95,10 @@ public interface IThreadDataCollection
 	 * @param numMetrics
 	 * 
 	 * @return double[]
-	 * @throws IOException
+	 * @throws Exception 
 	 */
 	public double[] getMetrics(long nodeIndex, int metricIndex, int numMetrics) 
-			throws IOException;
+			throws  Exception;
 
 	/****
 	 * get the array of metric values for all CCT of a specified metric and

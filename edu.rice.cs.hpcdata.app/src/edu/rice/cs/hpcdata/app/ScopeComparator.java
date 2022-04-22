@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcdata.util;
+package edu.rice.cs.hpcdata.app;
 
 import java.util.Comparator;
 
@@ -22,8 +22,8 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 public class ScopeComparator implements Comparator<Object> 
 {
 	
-	final static public int SORT_DESCENDING = 1;  // from high value to lower value
-	final static public int SORT_ASCENDING  = 0; // from low value to higher value
+	public static final int SORT_DESCENDING = 1;  // from high value to lower value
+	public static final int SORT_ASCENDING  = 0; // from low value to higher value
 
 	private BaseMetric metric = null;
 	private int direction = SORT_DESCENDING;
@@ -38,8 +38,6 @@ public class ScopeComparator implements Comparator<Object>
 	 * @param direction
 	 */
 	public void setDirection(int direction) {
-		assert(direction == SORT_DESCENDING || direction == SORT_ASCENDING);
-		
 		this.direction = direction;
 	}
 
@@ -54,7 +52,7 @@ public class ScopeComparator implements Comparator<Object>
 		// according to its element name
 		// otherwise, sort according to the metric
 		if(metric == null || n1 == null || n2 == null) {
-			return multiplier * this.doCompare(node1, node2);
+			return multiplier * doCompare(node1, node2);
 		}
 		
 		MetricValue mv1 = this.metric.getValue(node1); 
@@ -97,7 +95,7 @@ public class ScopeComparator implements Comparator<Object>
 			// sometimes we don't have information of the line number (like non-debug code), and
 			// all the line numbers are all zeros
 			
-			if (ls1 != null && ls2 != null && linediff != 0)
+			if (linediff > 0)
 				return linediff;
 		} 
 		String text1 = node1.getName();

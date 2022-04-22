@@ -7,6 +7,7 @@ public class TraceAttribute extends BaseTraceAttribute
 	public int dbHeaderSize;	
 	
 	public TraceAttribute() {
+		super();
 		dbGlob = null;
 		dbHeaderSize = 0;
 	}

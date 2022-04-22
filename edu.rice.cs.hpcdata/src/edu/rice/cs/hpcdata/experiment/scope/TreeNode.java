@@ -191,5 +191,13 @@ public class TreeNode<T> implements ITreeNode<T> {
 		parent   = null;
 		value  	 = null;
 	}
+	
+	@Override
+	public String toString() {
+		return value + ", p: " + parent + ", c: " + 
+			  children.parallelStream().collect(StringBuilder::new, 
+					  							StringBuilder::append, 
+					  							StringBuilder::append);
+	}
 }
 

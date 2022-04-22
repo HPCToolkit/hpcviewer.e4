@@ -40,13 +40,9 @@ public static final LoadModuleScope NONE = new LoadModuleScope(null, "<unknown>"
 protected String loadModuleName;
 
 
-
-
 //////////////////////////////////////////////////////////////////////////
 //	INITIALIZATION							//
 //////////////////////////////////////////////////////////////////////////
-
-
 
 
 /*************************************************************************
@@ -75,21 +71,14 @@ public Scope duplicate() {
  * @return
  */
 static public LoadModuleScope build(RootScope root, String name, SourceFile file) {
-	id--;
-	
+	id--;	
 	return new LoadModuleScope(root, name, file, id);
 }
 
-/*
-public int hashCode() {
-	return this.loadModuleName.hashCode();
-} */
 
 //////////////////////////////////////////////////////////////////////////
 //	SCOPE DISPLAY														//
 //////////////////////////////////////////////////////////////////////////
-
-
 
 
 /*************************************************************************
@@ -109,13 +98,6 @@ public void accept(IScopeVisitor visitor, ScopeVisitType vt) {
 	visitor.visit(this, vt);
 }
 
-/**
- * retrieve the original name of the module
- * @return
- */
-public String getModuleName() {
-	return this.loadModuleName;
-}
 
 /**
  * Load module doesn't have source file, so it needs to return its name for the citation
