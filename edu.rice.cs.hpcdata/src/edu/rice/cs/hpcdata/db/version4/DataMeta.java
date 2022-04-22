@@ -724,9 +724,6 @@ public class DataMeta extends DataCommon
 	 * 			Otherwise returns the parent itself.
 	 */
 	private Scope beginNewScope(Scope parent, Scope scope) {
-		if (scope == null)
-			return parent;
-		
 		parent.addSubscope(scope);
 		scope.setParentScope(parent);
 
@@ -785,11 +782,16 @@ public class DataMeta extends DataCommon
 		
 		// since we merge the line scope to this call site,
 		// we have to remove the line scope from the parent
-		Scope grandParent = parent.getParentScope();
-		grandParent.remove(parent);
+		//
+		// Hack 04.22.2022: at the moment we do not remove the parent of the call site
+		// The reason is that sometimes a line scope has multiple children (WtH?) and
+		// integrating the parent as a call site will cause removing the children of the line scope
+		//
+		// Scope grandParent = parent.getParentScope();
+		// grandParent.remove(parent);
 		
 		// add the new call site to the tree
-		return beginNewScope(grandParent, cs);
+		return beginNewScope(ls, cs);
 	}
 	
 	

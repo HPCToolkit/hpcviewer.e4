@@ -123,7 +123,7 @@ implements IMetricScope
 		this.firstLineNumber = first;
 		this.lastLineNumber  = last;
 		this.flat_node_index = flat_id;
-		this.cpid      = -1;
+		this.cpid      = cct_id;
 		this.iCounter  = 0;
 
 		node = new TreeNode<>(cct_id);

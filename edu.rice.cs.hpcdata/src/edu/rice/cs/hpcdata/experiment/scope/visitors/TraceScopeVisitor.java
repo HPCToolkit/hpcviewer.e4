@@ -87,7 +87,10 @@ public class TraceScopeVisitor implements IScopeVisitor
 	public void visit(LoopScope scope, ScopeVisitType vt) { update(scope, vt); }
 
 	@Override
-	public void visit(CallSiteScope scope, ScopeVisitType vt) { update(scope, vt); }
+	public void visit(CallSiteScope scope, ScopeVisitType vt) { 
+		update(scope, vt);
+		update(scope.getLineScope(), vt);
+	}
 
 	@Override
 	public void visit(ProcedureScope scope, ScopeVisitType vt) { update(scope, vt); }
