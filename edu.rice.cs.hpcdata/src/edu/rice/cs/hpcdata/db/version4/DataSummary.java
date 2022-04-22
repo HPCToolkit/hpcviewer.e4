@@ -396,11 +396,18 @@ public class DataSummary extends DataCommon
 		for(int i=0; i<info.nProfile; i++) {
 			info.piElements[i].readIdTuple(input, sections[1]);
 			numLevels = Math.max(numLevels, info.piElements[i].numLevels);
+			
+			// the first profile is the summary one (aka summary profile).
+			// We are only interested with individual profiles
 			if (info.piElements[i].pIdTuple  == 0)
 				continue;
 			
 			tempIdTupleList.add(info.piElements[i].idt);
 
+			// gather profile invariants
+			// we want to count the number of duplicate profile id
+			// ex. : profiles (1, 0, 0,1) and (1, 0, 1, 2)
+			//       the invariants are the first two id (1, 0)
 			for(int j=0; j<numLevels; j++) {
 				short kind = info.piElements[i].idt.getKind(j);
 				long idx   = info.piElements[i].idt.getLogicalIndex(j);
@@ -433,9 +440,7 @@ public class DataSummary extends DataCommon
 			}
 		}
 		
-		tempIdTupleList.sort((o1, o2) -> {
-			return o1.compareTo(o2);
-		});
+		tempIdTupleList.sort((o1, o2) -> o1.compareTo(o2));
 		
 		listIdTuple = FastList.newList(tempIdTupleList.size());
 		numLevels   = 0;

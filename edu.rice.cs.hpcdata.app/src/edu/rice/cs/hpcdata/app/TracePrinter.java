@@ -23,7 +23,7 @@ import edu.rice.cs.hpcdata.util.MergeDataFiles;
  ****/
 public class TracePrinter 
 {
-	private final static int RECORD_SIZE    = Constants.SIZEOF_LONG + Constants.SIZEOF_INT;
+	private static final int RECORD_SIZE    = Constants.SIZEOF_LONG + Constants.SIZEOF_INT;
 
 	public static void main(String[] args) {
 		

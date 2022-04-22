@@ -20,10 +20,10 @@ import edu.rice.cs.hpcdata.util.LargeByteBuffer;
  *******************************************************************************/
 public class DataTrace extends DataCommon 
 {
-	public final static  String FILE_TRACE_DB = "trace.db";
+	public static final String FILE_TRACE_DB = "trace.db";
 	
-	private final static String HEADER = "HPCTOOLKITtrce";
-	private final static int FMT_TRACEDB_SZ_CTX_SAMPLE = 0x0c;
+	private static final String HEADER = "HPCTOOLKITtrce";
+	private static final int FMT_TRACEDB_SZ_CTX_SAMPLE = 0x0c;
 	private static final int NUM_ITEMS = 1;
 
 	private TraceHeader  traceHeader;
@@ -87,7 +87,7 @@ public class DataTrace extends DataCommon
 		traceCtxs = new TraceContext[traceHeader.nTraces];
 		
 		for(int i=0; i<traceHeader.nTraces; i++) {
-			int loc = (int) (i * traceHeader.szTrace);
+			int loc = i * traceHeader.szTrace;
 			
 			// TODO: at the moment the profIndex is not used, instead we'll use dense presentation
 			// in the future we should handle sparse profile index.
