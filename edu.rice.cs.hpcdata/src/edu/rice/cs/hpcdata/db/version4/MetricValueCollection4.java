@@ -19,7 +19,7 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 /******************************************************************
  * 
  * The implementation of {@link IMetricValueCollection} for 
- * database version 3 (the compact version).
+ * database version 4 (the compact version).
  * 
  * This class is designed to read metric values when needed.
  * If the scope is never asked for metric value, no access to
@@ -29,13 +29,13 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
  * optimized yet. 
  *
  ******************************************************************/
-public class MetricValueCollection3 implements IMetricValueCollection 
+public class MetricValueCollection4 implements IMetricValueCollection 
 {
 	private DataSummary dataSummary;
 
 	private IntObjectHashMap<MetricValue> values; //HashMap<Integer, MetricValue> values;
 	
-	public MetricValueCollection3(DataSummary dataSummary) throws IOException
+	public MetricValueCollection4(DataSummary dataSummary) throws IOException
 	{
 		this.dataSummary = dataSummary;
 	}
@@ -186,6 +186,6 @@ public class MetricValueCollection3 implements IMetricValueCollection
 	
 	@Override
 	public IMetricValueCollection duplicate() throws IOException {
-		return new MetricValueCollection3(dataSummary);
+		return new MetricValueCollection4(dataSummary);
 	}
 }

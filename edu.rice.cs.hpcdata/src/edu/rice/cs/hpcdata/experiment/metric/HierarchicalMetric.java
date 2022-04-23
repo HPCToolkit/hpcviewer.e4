@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import com.graphbuilder.math.Expression;
 import com.graphbuilder.math.ExpressionTree;
-
 import edu.rice.cs.hpcdata.db.version4.DataSummary;
 import edu.rice.cs.hpcdata.experiment.scope.IMetricScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -50,6 +49,47 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 			return "sum";
 		}
 		return null;
+	}
+	
+	public MetricValue reduce(MetricValue target, MetricValue source) {
+		if (source == MetricValue.NONE)
+			return target;
+
+		if (target == MetricValue.NONE) {
+			target.setValue(source.getValue());
+			return source;
+		}
+
+		switch (combineType) {
+		case FMT_METADB_COMBINE_Max:
+			var v1 = target.getValue();
+			var v2 = source.getValue();
+			v1 = Math.max(v1, v2);
+			target.setValue(v1);
+			break;
+			
+		case FMT_METADB_COMBINE_Min:
+			v1 = target.getValue();
+			v2 = source.getValue();
+			v1 = Math.min(v1, v2);
+			target.setValue(v1);
+			break;
+			
+		case FMT_METADB_COMBINE_Sum:
+			v1 = target.getValue();
+			v2 = source.getValue();
+			v1 = v1-v2;
+			if (Float.compare(v1, 0.0f) == 0)
+				return MetricValue.NONE; 
+			
+			target.setValue(v1);
+			break;
+			
+		default:
+			// nothing. error?
+			throw new RuntimeException("Unknown metric combine type: " + combineType);
+		}
+		return target;
 	}
 	
 	@Override

@@ -22,8 +22,10 @@ import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.metric.AggregateMetric;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
+import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricValueCollection;
 import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
+import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.filters.MetricValuePropagationFilter;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.FilterScopeVisitor;
@@ -666,6 +668,35 @@ implements IMetricScope
 	}
 
 
+	/***************************************************************************
+	 * Reduce the value of this scope from another scope with the same metric.
+	 * <pre>
+	 * If scope A has metric values {a1, a2, ... an} and 
+	 * scope B has metric values {b1, b2, ... bn} 
+	 * then A.reduce(B, filter) equals to:
+	 *  for all a of filter <- a reduce b
+	 * </pre>
+	 * where reduce is usually subtraction for most cases. 
+	 * 
+	 * @param scope the source of the reduction 
+	 * @param filter the metric filter 
+	 ***************************************************************************/
+	public void reduce(Scope scope, MetricType type) {
+		var experiment = root.getExperiment();
+		var metrics    = experiment.getMetrics();
+		
+		for (var m: metrics) {
+			if (!(m instanceof HierarchicalMetric))
+				continue;
+			
+			if (m.getMetricType() != type)
+				continue;
+			
+			HierarchicalMetric hm = (HierarchicalMetric) m;
+			MetricValue mv = hm.reduce(getMetricValue(m), scope.getMetricValue(m));
+			setMetricValue(m.getIndex(), mv);
+		}
+	}
 
 	/***************************************************************************
 	 * retrieve the default metrics

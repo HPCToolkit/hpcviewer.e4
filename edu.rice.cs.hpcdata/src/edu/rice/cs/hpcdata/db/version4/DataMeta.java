@@ -33,6 +33,7 @@ import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.experiment.scope.visitors.CallingContextReassignment;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.TraceScopeVisitor;
 import edu.rice.cs.hpcdata.experiment.source.SimpleSourceFile;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
@@ -87,19 +88,15 @@ public class DataMeta extends DataCommon
 	// --------------------------------------------------------------------
 	// variables
 	// --------------------------------------------------------------------
-			  
-	private String title;
-	private String description;
-	
+			  	
 	private LongObjectMap<LoadModuleScope>    mapLoadModules;
 	private LongObjectHashMap<SourceFile>     mapFiles;
 	private LongObjectHashMap<ProcedureScope> mapProcedures;
 	
-	private RootScope root, rootCCT;
+	private RootScope rootCCT;
 	
 	private StringArea stringArea;
 	private List<BaseMetric> metrics;
-	private ByteBuffer ctxBuffer;
 
 	private DataSummary dataSummary;
 	private IExperiment experiment;
@@ -133,8 +130,8 @@ public class DataMeta extends DataCommon
 	public void open(IExperiment experiment, String directory) throws IOException {
 		this.experiment = experiment;
 
-		root = new RootScope(experiment, directory, RootScopeType.Invisible, -1, -1);
-		rootCCT = new RootScope(experiment, RootScope.DEFAULT_SCOPE_NAME, RootScopeType.CallingContextTree);
+		var root = new RootScope(experiment, directory, RootScopeType.Invisible, -1, -1);
+		rootCCT  = new RootScope(experiment, RootScope.DEFAULT_SCOPE_NAME, RootScopeType.CallingContextTree);
 		root.addSubscope(rootCCT);
 		rootCCT.setParentScope(root);
 		
@@ -149,7 +146,12 @@ public class DataMeta extends DataCommon
 		exp.setMetrics(metrics);
 		exp.setMetricRaw(metrics);
 		
-		rootCCT.setMetricValueCollection(new MetricValueCollection3(dataSummary));
+		rootCCT.setMetricValueCollection(new MetricValueCollection4(dataSummary));
+
+		// restructure the cct
+		// if a line scope has a call site, move it to be the sibling
+		CallingContextReassignment ccr = new CallingContextReassignment();
+		rootCCT.dfsVisitScopeTree(ccr);
 		
 		// needs to gather info about cct id and its depth
 		// this is needed for traces
@@ -160,7 +162,7 @@ public class DataMeta extends DataCommon
 		exp.setMaxDepth(visitor.getMaxDepth());
 		exp.setScopeMap(visitor.getCallPath());
 		exp.setVersion(versionMajor + "." + versionMinor);
-
+		
 		stringArea.dispose();
 	}
 	
@@ -188,16 +190,7 @@ public class DataMeta extends DataCommon
 		return 8;
 	}
 
-	
-	/***
-	 * Retrieve the database description
-	 * @return String
-	 */
-	public String getDescription() {
-		return description;
-	}
 		
-	
 	/***
 	 * Get the load module for a specified id
 	 * @param id
@@ -282,7 +275,7 @@ public class DataMeta extends DataCommon
 		experiment.setIdTupleType(idTupleTypes);
 
 		// prepare profile.db parser
-		dataSummary = new DataSummary(experiment.getIdTupleType());
+		dataSummary = new DataSummary(idTupleTypes);
 
 		// grab the description of the metrics
 		metrics = parseMetricDescription(channel, sections[INDEX_METRICS]);
@@ -321,13 +314,16 @@ public class DataMeta extends DataCommon
 		var pDescription = buffer.getLong();
 		
 		int position = (int) (pTitle-section.offset);
-		title = getNullTerminatedString(buffer, position);
+		var title = getNullTerminatedString(buffer, position);
 		
+		// at the moment we don't use the description field.
+		// still it's harmless to read it here.
 		position = (int) (pDescription - section.offset);
-		description = getNullTerminatedString(buffer, position);
+		getNullTerminatedString(buffer, position);
 
 		ExperimentConfiguration configuration = new ExperimentConfiguration();
 		configuration.setName(ExperimentConfiguration.NAME_EXPERIMENT, title);
+		
 		experiment.setConfiguration(configuration);
 	}
 	
@@ -804,7 +800,7 @@ public class DataMeta extends DataCommon
 	 */
 	private RootScope parseRoot(FileChannel channel, DataSection section) 
 			throws IOException {
-		ctxBuffer = channel.map(MapMode.READ_ONLY, section.offset, section.size);
+		var ctxBuffer = channel.map(MapMode.READ_ONLY, section.offset, section.size);
 		ctxBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
 		long szRoot = ctxBuffer.getLong();

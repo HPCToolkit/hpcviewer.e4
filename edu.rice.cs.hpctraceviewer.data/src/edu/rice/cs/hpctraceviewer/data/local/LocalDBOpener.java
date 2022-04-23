@@ -9,7 +9,7 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import edu.rice.cs.hpcdata.db.IFileDB;
 import edu.rice.cs.hpcdata.db.version2.FileDB2;
 import edu.rice.cs.hpcdata.db.version4.DataTrace;
-import edu.rice.cs.hpcdata.db.version4.MetricValueCollection3;
+import edu.rice.cs.hpcdata.db.version4.MetricValueCollection4;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
@@ -76,7 +76,7 @@ public class LocalDBOpener extends AbstractDBOpener
 		case Constants.EXPERIMENT_SPARSE_VERSION:
 			Experiment exp = (Experiment) experiment;
 			var root = exp.getRootScope(RootScopeType.CallingContextTree);
-			MetricValueCollection3 mvc = (MetricValueCollection3) root.getMetricValueCollection();
+			MetricValueCollection4 mvc = (MetricValueCollection4) root.getMetricValueCollection();
 			fileDB = new FileDB4(experiment, mvc.getDataSummary());
 			break;
 		default:
