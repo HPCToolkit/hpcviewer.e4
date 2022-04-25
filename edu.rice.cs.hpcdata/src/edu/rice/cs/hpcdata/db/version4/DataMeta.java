@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -612,30 +613,64 @@ public class DataMeta extends DataCommon
 										long size) 
 					throws IOException {
 		
+		final ArrayDeque<ContextStack> stack = new ArrayDeque<>();
 		int loc = (int) (startLocation - sections[INDEX_CONTEXT].offset);
 		long ctxSize = size;
 		
 		// look for the children as long as we still have the remainder bytes
-		while(ctxSize > 0) {
-			if(ctxSize < FMT_METADB_MINSZ_Context) {
-				break;
-			}
+		while(ctxSize >= FMT_METADB_MINSZ_Context) {
 
 			ScopeContext context = new ScopeContext(buffer, loc, parent);
-					
-			// recursively parse the children
-			parseChildrenContext(buffer, context.newScope, context.pChildren, context.szChildren);
 			
-			// check if we still have space for the siblings
 			long szAdditionalCtx = FMT_METADB_SZ_Context(context.nFlexWords);
-			if (ctxSize < szAdditionalCtx) {
-				break;
-			}
 			ctxSize -= szAdditionalCtx;
 			loc += szAdditionalCtx;			
+
+			if (context.szChildren > 0) {
+				// we have children: try to traverse the children
+				
+				// store the current information: parent, location and size
+				var ctx = new ContextStack(parent, loc, ctxSize);
+				stack.push(ctx);
+				
+				// prepare for parsing the next children
+				parent = context.newScope;
+				loc = (int) (context.pChildren - sections[INDEX_CONTEXT].offset);
+				ctxSize = context.szChildren;
+			} else {
+				// the current context has no children
+				// check if: 
+				// - we still have space for the siblings; or
+				// - the parent has siblings
+
+				// the parent has no space for sibling:
+				// Try to find an ancestor that has siblings
+				while (!stack.isEmpty() && (ctxSize < FMT_METADB_MINSZ_Context)) {
+					var ctx = stack.pop();
+					parent = ctx.parent;
+					loc = ctx.startLocation;
+					ctxSize = ctx.size;
+				}
+			}
 		}
 	}
 
+	
+	private static class ContextStack
+	{
+		Scope parent; 
+		int startLocation; 
+		long size;
+		
+		public ContextStack(Scope parent, 
+				int startLocation, 
+				long size) {
+
+			this.parent = parent;
+			this.startLocation = startLocation;
+			this.size = size;
+		}
+	}
 	
 	
 	/***
