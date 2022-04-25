@@ -621,85 +621,13 @@ public class DataMeta extends DataCommon
 				break;
 			}
 
-			long szChildren = buffer.getLong(loc);
-			long pChildren  = buffer.getLong(loc + 0x08);
-			int ctxId       = buffer.getInt (loc + 0x10);
-			
-			byte flags       = buffer.get(loc + 0x14);
-			byte relation    = buffer.get(loc + 0x15);
-			byte lexicalType = buffer.get(loc + 0x16);
-			byte nFlexWords  = buffer.get(loc + 0x17);
-			
-			long pFunction = 0;
-			long pFile   = 0;
-			int  line    = 0;
-			long pModule = 0;
-			byte nwords  = 0;			
-			/*
-				{Flags} above refers to an u8 bit field with the following sub-fields (bit 0 is least significant):
-				
-				Bit 0: hasFunction. If 1, the following sub-fields of flex are present:
-				    - flex[0]: FS* pFunction: Function associated with this context
-				Bit 1: hasSrcLoc. If 1, the following sub-fields of flex are present:
-				    - flex[1]: SFS* pFile: Source file associated with this context
-				    - flex[2]: u32 line: Associated source line in pFile
-				Bit 2: hasPoint. If 1, the following sub-fields of flex are present:
-				    - flex[3]: LMS* pModule: Load module associated with this context
-				    - flex[4]: u64 offset: Assocated byte offset in *pModule
-				Bits 3-7: Reserved for future use.
-			 */
-			if ((flags & 0x1) != 0) {
-				if (nFlexWords < nwords + 1) 
-					return;
-				pFunction = buffer.getLong(loc + 0x18 + nwords * 8);
-				nwords++;
-			}
-			if ((flags & 0x2) != 0) {
-				if (nFlexWords < nwords + 2) 
-					return;
-				pFile = buffer.getLong(loc + 0x18 + nwords * 8);
-				nwords++;
-			}
-			if ((flags & 0x4) != 0) {
-				if (nFlexWords < nwords + 2) 
-					return;
-				pModule = buffer.getLong(loc + 0x18 + nwords * 8);
-				buffer.getLong(loc + 0x18 + (nwords+1) * 8);
-				nwords++;
-			}
-			var ps = mapProcedures.get(pFunction);
-			var fs = mapFiles.getIfAbsent(pFile, ()->SourceFile.NONE);
-			var lm = mapLoadModules.getIfAbsent(pModule, ()->LoadModuleScope.NONE);
-			
-			Scope scope = null;
-			Scope newParent = null; 
-
-			switch(lexicalType) {
-			case FMT_METADB_LEXTYPE_FUNCTION:
-				newParent = createLexicalFunction(parent, lm, fs, ps, ctxId, line, relation);
-				break;
-			case FMT_METADB_LEXTYPE_LOOP:
-				scope = new LoopScope(rootCCT, fs, line, line, ctxId, ctxId);
-				newParent = beginNewScope(parent, scope);					
-				break;
-			case FMT_METADB_LEXTYPE_LINE:
-				scope = new LineScope(rootCCT, fs, line, ctxId, ctxId);
-				newParent = beginNewScope(parent, scope);					
-				break;
-			case FMT_METADB_LEXTYPE_INSTRUCTION:
-				scope = new InstructionScope(rootCCT, lm, ctxId);
-				scope.setSourceFile(fs);
-				newParent = beginNewScope(parent, scope);					
-				break;
-			default:
-				throw new RuntimeException("Invalid node relation field");
-			}
-
+			ScopeContext context = new ScopeContext(buffer, loc, parent);
+					
 			// recursively parse the children
-			parseChildrenContext(buffer, newParent, pChildren, szChildren);
+			parseChildrenContext(buffer, context.newScope, context.pChildren, context.szChildren);
 			
-			// check if we still have space for other children
-			long szAdditionalCtx = FMT_METADB_SZ_Context(nFlexWords);
+			// check if we still have space for the siblings
+			long szAdditionalCtx = FMT_METADB_SZ_Context(context.nFlexWords);
 			if (ctxSize < szAdditionalCtx) {
 				break;
 			}
@@ -708,87 +636,6 @@ public class DataMeta extends DataCommon
 		}
 	}
 
-	/****
-	 * Begin a new scope if needed. If the child scope doesn't exist
-	 * (null value), it doesn't create a child tree and just returns the parent.
-	 * 
-	 * @param parent
-	 * @param scope
-	 * 
-	 * @return {@code Scope}
-	 * 			a new parent if the child scope is valid. 
-	 * 			Otherwise returns the parent itself.
-	 */
-	private Scope beginNewScope(Scope parent, Scope scope) {
-		parent.addSubscope(scope);
-		scope.setParentScope(parent);
-
-		return scope;
-	}
-	
-	
-	/***
-	 * Create a lexical function scope.
-	 * 
-	 * @param parent
-	 * @param lm
-	 * @param fs
-	 * @param ps
-	 * @param ctxId
-	 * @param line
-	 * @param relation
-	 * 
-	 * @return {@code Scope}
-	 * 			A call site scope if the line scope exists.
-	 * 			A procedure scope otherwise.
-	 */
-	private Scope createLexicalFunction( 
-										Scope parent, 
-										LoadModuleScope lm,
-										SourceFile fs,
-										ProcedureScope ps, 
-										int ctxId, int line, int relation) {
-		
-		boolean alien  = relation == FMT_METADB_RELATION_CALL_INLINED;
-		var fileSource = fs == null ? SourceFile.NONE : fs;
-		
-		if (!(parent instanceof LineScope)) {
-			// no call site in the stack: it must be a procedure scope
-			String name = Constants.PROCEDURE_UNKNOWN;
-			if (ps != null)
-				name = ps.getName();
-			
-			var scope = new ProcedureScope(rootCCT, lm, fileSource, line, line, name, alien, ctxId, ctxId, null, ProcedureScope.FeatureProcedure);
-			
-			return beginNewScope(parent, scope);
-		}
-		ProcedureScope proc;
-		if (ps == null) {
-			proc = new ProcedureScope(rootCCT, lm, fileSource, line, line, Constants.PROCEDURE_UNKNOWN, alien, ctxId, ctxId, null, ProcedureScope.FeatureProcedure);
-		} else {
-			proc = ps;
-			proc.setAlien(alien);
-		}
-		LineScope ls = (LineScope) parent;
-		var cs = new CallSiteScope(ls, proc, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, ctxId);
-		
-		// Only the line statement knows where the source file is
-		// If the line statement is unknown then the source file is unknown.
-		cs.setSourceFile(ls.getSourceFile());
-		
-		// since we merge the line scope to this call site,
-		// we have to remove the line scope from the parent
-		//
-		// Hack 04.22.2022: at the moment we do not remove the parent of the call site
-		// The reason is that sometimes a line scope has multiple children (WtH?) and
-		// integrating the parent as a call site will cause removing the children of the line scope
-		//
-		// Scope grandParent = parent.getParentScope();
-		// grandParent.remove(parent);
-		
-		// add the new call site to the tree
-		return beginNewScope(ls, cs);
-	}
 	
 	
 	/***
@@ -844,6 +691,185 @@ public class DataMeta extends DataCommon
 	// classes
 	// --------------------------------------------------------------------
 
+
+	/***************************************
+	 * 
+	 * Class to parse the context tree section of meta.db
+	 *
+	 ***************************************/
+	private class ScopeContext
+	{
+		long szChildren;
+		long pChildren;
+		int  ctxId;
+		Scope newScope;
+		byte nFlexWords;
+		
+		public ScopeContext(ByteBuffer buffer, int loc, Scope parent) {
+			szChildren = buffer.getLong(loc);
+			pChildren  = buffer.getLong(loc + 0x08);
+			ctxId      = buffer.getInt (loc + 0x10);
+			
+			readRecord(buffer, loc, parent);
+		}
+
+		
+		private void readRecord(ByteBuffer buffer, int loc, Scope parent) {
+			
+			byte flags       = buffer.get(loc + 0x14);
+			byte relation    = buffer.get(loc + 0x15);
+			byte lexicalType = buffer.get(loc + 0x16);
+			nFlexWords  = buffer.get(loc + 0x17);
+			
+			long pFunction = 0;
+			long pFile   = 0;
+			int  line    = 0;
+			long pModule = 0;
+			byte nwords  = 0;			
+			/*
+				{Flags} above refers to an u8 bit field with the following sub-fields (bit 0 is least significant):
+				
+				Bit 0: hasFunction. If 1, the following sub-fields of flex are present:
+				    - flex[0]: FS* pFunction: Function associated with this context
+				Bit 1: hasSrcLoc. If 1, the following sub-fields of flex are present:
+				    - flex[1]: SFS* pFile: Source file associated with this context
+				    - flex[2]: u32 line: Associated source line in pFile
+				Bit 2: hasPoint. If 1, the following sub-fields of flex are present:
+				    - flex[3]: LMS* pModule: Load module associated with this context
+				    - flex[4]: u64 offset: Assocated byte offset in *pModule
+				Bits 3-7: Reserved for future use.
+			 */
+			if ((flags & 0x1) != 0) {
+				if (nFlexWords < nwords + 1) 
+					return;
+				pFunction = buffer.getLong(loc + 0x18 + nwords * 8);
+				nwords++;
+			}
+			if ((flags & 0x2) != 0) {
+				if (nFlexWords < nwords + 2) 
+					return;
+				pFile = buffer.getLong(loc + 0x18 + nwords * 8);
+				nwords++;
+			}
+			if ((flags & 0x4) != 0) {
+				if (nFlexWords < nwords + 2) 
+					return;
+				pModule = buffer.getLong(loc + 0x18 + nwords * 8);
+				buffer.getLong(loc + 0x18 + (nwords+1) * 8);
+				nwords++;
+			}
+			var ps = mapProcedures.get(pFunction);
+			var fs = mapFiles.getIfAbsent(pFile, ()->SourceFile.NONE);
+			var lm = mapLoadModules.getIfAbsent(pModule, ()->LoadModuleScope.NONE);
+			
+			Scope scope = null;
+			newScope = null; 
+
+			switch(lexicalType) {
+			case FMT_METADB_LEXTYPE_FUNCTION:
+				newScope = createLexicalFunction(parent, lm, fs, ps, ctxId, line, relation);
+				break;
+			case FMT_METADB_LEXTYPE_LOOP:
+				scope = new LoopScope(rootCCT, fs, line, line, ctxId, ctxId);
+				newScope = beginNewScope(parent, scope);					
+				break;
+			case FMT_METADB_LEXTYPE_LINE:
+				scope = new LineScope(rootCCT, fs, line, ctxId, ctxId);
+				newScope = beginNewScope(parent, scope);					
+				break;
+			case FMT_METADB_LEXTYPE_INSTRUCTION:
+				scope = new InstructionScope(rootCCT, lm, ctxId);
+				scope.setSourceFile(fs);
+				newScope = beginNewScope(parent, scope);					
+				break;
+			default:
+				throw new RuntimeException("Invalid node relation field");
+			}
+		}
+		
+		
+		/***
+		 * Create a lexical function scope.
+		 * 
+		 * @param parent
+		 * @param lm
+		 * @param fs
+		 * @param ps
+		 * @param ctxId
+		 * @param line
+		 * @param relation
+		 * 
+		 * @return {@code Scope}
+		 * 			A call site scope if the line scope exists.
+		 * 			A procedure scope otherwise.
+		 */
+		private Scope createLexicalFunction( 
+											Scope parent, 
+											LoadModuleScope lm,
+											SourceFile fs,
+											ProcedureScope ps, 
+											int ctxId, int line, int relation) {
+			
+			boolean alien  = relation == FMT_METADB_RELATION_CALL_INLINED;
+			var fileSource = fs == null ? SourceFile.NONE : fs;
+			
+			if (!(parent instanceof LineScope)) {
+				// no call site in the stack: it must be a procedure scope
+				String name = Constants.PROCEDURE_UNKNOWN;
+				if (ps != null)
+					name = ps.getName();
+				
+				var scope = new ProcedureScope(rootCCT, lm, fileSource, line, line, name, alien, ctxId, ctxId, null, ProcedureScope.FeatureProcedure);
+				
+				return beginNewScope(parent, scope);
+			}
+			ProcedureScope proc;
+			if (ps == null) {
+				proc = new ProcedureScope(rootCCT, lm, fileSource, line, line, Constants.PROCEDURE_UNKNOWN, alien, ctxId, ctxId, null, ProcedureScope.FeatureProcedure);
+			} else {
+				proc = ps;
+				proc.setAlien(alien);
+			}
+			LineScope ls = (LineScope) parent;
+			var cs = new CallSiteScope(ls, proc, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, ctxId);
+			
+			// Only the line statement knows where the source file is
+			// If the line statement is unknown then the source file is unknown.
+			cs.setSourceFile(ls.getSourceFile());
+			
+			// since we merge the line scope to this call site,
+			// we have to remove the line scope from the parent
+			//
+			// Hack 04.22.2022: at the moment we do not remove the parent of the call site
+			// The reason is that sometimes a line scope has multiple children (WtH?) and
+			// integrating the parent as a call site will cause removing the children of the line scope
+			//
+			// Scope grandParent = parent.getParentScope();
+			// grandParent.remove(parent);
+			
+			// add the new call site to the tree
+			return beginNewScope(ls, cs);
+		}
+
+		
+		/****
+		 * Begin a new scope if needed. If the child scope doesn't exist
+		 * (null value), it doesn't create a child tree and just returns the parent.
+		 * 
+		 * @param parent
+		 * @param scope
+		 * 
+		 * @return {@code Scope}
+		 * 			a new parent if the child scope is valid. 
+		 * 			Otherwise returns the parent itself.
+		 */
+		private Scope beginNewScope(Scope parent, Scope scope) {
+			parent.addSubscope(scope);
+			scope.setParentScope(parent);
+
+			return scope;
+		}
+	}
 	/*******************
 	 * 
 	 * Class to retrieve a string from the string section in meta.db
