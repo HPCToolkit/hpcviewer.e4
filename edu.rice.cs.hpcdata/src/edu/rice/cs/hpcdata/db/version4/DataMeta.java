@@ -38,7 +38,6 @@ import edu.rice.cs.hpcdata.experiment.scope.visitors.CallingContextReassignment;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.TraceScopeVisitor;
 import edu.rice.cs.hpcdata.experiment.source.SimpleSourceFile;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
-import edu.rice.cs.hpcdata.util.Constants;
 
 
 /*********************************************
@@ -91,7 +90,7 @@ public class DataMeta extends DataCommon
 	// --------------------------------------------------------------------
 			  	
 	private LongObjectMap<LoadModuleScope>    mapLoadModules;
-	private LongObjectHashMap<SourceFile>     mapFiles;
+	private LongObjectHashMap<SourceFile>     mapFileSources;
 	private LongObjectHashMap<ProcedureScope> mapProcedures;
 	
 	private RootScope rootCCT;
@@ -222,7 +221,7 @@ public class DataMeta extends DataCommon
 	 * @return
 	 */
 	public int getNumFiles() {
-		return mapFiles.size();
+		return mapFileSources.size();
 	}
 	
 	/***
@@ -230,7 +229,7 @@ public class DataMeta extends DataCommon
 	 * @return
 	 */
 	public Iterator<SourceFile> getFileIterator() {
-		return mapFiles.iterator();
+		return mapFileSources.iterator();
 	}
 	
 	/****
@@ -289,7 +288,7 @@ public class DataMeta extends DataCommon
 		mapLoadModules = parseLoadModules(channel, sections[INDEX_MODULES]);
 		
 		// parse the file table
-		mapFiles = parseFiles(channel, sections[INDEX_FILES]);
+		mapFileSources = parseFiles(channel, sections[INDEX_FILES]);
 		
 		// parse the procedure table
 		mapProcedures = parseFunctions(channel, sections[INDEX_FUNCTIONS]);
@@ -505,10 +504,11 @@ public class DataMeta extends DataCommon
 			long pModuleName = buffer.getLong(position);
 			String path      = stringArea.toString(pModuleName);
 			
-			LoadModuleScope lms = new LoadModuleScope(rootCCT, path, null, position);
+			LoadModuleScope lms = new LoadModuleScope(rootCCT, path, SourceFile.NONE, i+1);
 			long key = pModules + delta;
 			mapLoadModules.put(key, lms);
 		}
+		
 		return mapLoadModules;
 	}
 	
@@ -541,10 +541,11 @@ public class DataMeta extends DataCommon
 			boolean available = (flags & 0x1) == 0x1;
 			String  name = stringArea.toString(pPath);
 			
-			SourceFile sf = new SimpleSourceFile(position, new File(name), available);
+			SourceFile sf = new SimpleSourceFile(i+1, new File(name), available);
 			long key = pFiles + delta;
 			mapSourceFile.put(key, sf);
 		}
+		
 		return mapSourceFile;
 	}
 	
@@ -567,7 +568,7 @@ public class DataMeta extends DataCommon
 		
 		var basePosition = pFunctions - section.offset;
 		LongObjectHashMap<ProcedureScope> mapProcedures = new LongObjectHashMap<>(nFunctions);
-		
+
 		for(int i=0; i<nFunctions; i++) {
 			int position = (int) (basePosition + (i * szFunctions));
 			long pName   = buffer.getLong(position);
@@ -578,7 +579,7 @@ public class DataMeta extends DataCommon
 			
 			var name = stringArea.toString(pName);
 			var lms  = mapLoadModules.get(pModule);
-			var file = mapFiles.get(pFile);
+			var file = mapFileSources.get(pFile);
 			
 			if (file == null)
 				file = SourceFile.NONE;
@@ -586,7 +587,7 @@ public class DataMeta extends DataCommon
 				lms = LoadModuleScope.NONE;
 			
 			long key = pFunctions + (i * szFunctions);
-			ProcedureScope ps = new ProcedureScope(rootCCT, lms, file, line, line, name, false, position, (int) key, null, 0);			
+			ProcedureScope ps = new ProcedureScope(rootCCT, lms, file, line, line, name, false, position, i+1, null, 0);			
 			mapProcedures.put(key, ps);
 		}
 		return mapProcedures;
@@ -614,28 +615,28 @@ public class DataMeta extends DataCommon
 					throws IOException {
 		
 		final ArrayDeque<ContextStack> stack = new ArrayDeque<>();
-		int loc = (int) (startLocation - sections[INDEX_CONTEXT].offset);
+		int ctxLoc   = (int) (startLocation - sections[INDEX_CONTEXT].offset);
 		long ctxSize = size;
 		
 		// look for the children as long as we still have the remainder bytes
 		while(ctxSize >= FMT_METADB_MINSZ_Context) {
 
-			ScopeContext context = new ScopeContext(buffer, loc, parent);
+			ScopeContext context = new ScopeContext(buffer, ctxLoc, parent);
 			
 			long szAdditionalCtx = FMT_METADB_SZ_Context(context.nFlexWords);
 			ctxSize -= szAdditionalCtx;
-			loc += szAdditionalCtx;			
+			ctxLoc += szAdditionalCtx;			
 
 			if (context.szChildren > 0) {
 				// we have children: try to traverse the children
 				
 				// store the current information: parent, location and size
-				var ctx = new ContextStack(parent, loc, ctxSize);
+				var ctx = new ContextStack(parent, ctxLoc, ctxSize);
 				stack.push(ctx);
 				
 				// prepare for parsing the next children
-				parent = context.newScope;
-				loc = (int) (context.pChildren - sections[INDEX_CONTEXT].offset);
+				parent  = context.newScope;
+				ctxLoc  = (int) (context.pChildren - sections[INDEX_CONTEXT].offset);
 				ctxSize = context.szChildren;
 			} else {
 				// the current context has no children
@@ -647,31 +648,14 @@ public class DataMeta extends DataCommon
 				// Try to find an ancestor that has siblings
 				while (!stack.isEmpty() && (ctxSize < FMT_METADB_MINSZ_Context)) {
 					var ctx = stack.pop();
-					parent = ctx.parent;
-					loc = ctx.startLocation;
+					parent  = ctx.parent;
+					ctxLoc  = ctx.startLocation;
 					ctxSize = ctx.size;
 				}
 			}
 		}
 	}
 
-	
-	private static class ContextStack
-	{
-		Scope parent; 
-		int startLocation; 
-		long size;
-		
-		public ContextStack(Scope parent, 
-				int startLocation, 
-				long size) {
-
-			this.parent = parent;
-			this.startLocation = startLocation;
-			this.size = size;
-		}
-	}
-	
 	
 	/***
 	 * Create the main root and parse its direct children
@@ -722,9 +706,28 @@ public class DataMeta extends DataCommon
 		return sb.toString();
 	}
 
+	
 	// --------------------------------------------------------------------
 	// classes
 	// --------------------------------------------------------------------
+
+	
+	private static class ContextStack
+	{
+		Scope parent; 
+		int startLocation; 
+		long size;
+		
+		public ContextStack(Scope parent, 
+				int startLocation, 
+				long size) {
+
+			this.parent = parent;
+			this.startLocation = startLocation;
+			this.size = size;
+		}
+	}
+	
 
 
 	/***************************************
@@ -793,35 +796,55 @@ public class DataMeta extends DataCommon
 				buffer.getLong(loc + 0x18 + (nwords+1) * 8);
 				nwords++;
 			}
-			var ps = mapProcedures.get(pFunction);
-			var fs = mapFiles.getIfAbsent(pFile, ()->SourceFile.NONE);
-			var lm = mapLoadModules.getIfAbsent(pModule, ()->LoadModuleScope.NONE);
+			var ps = mapProcedures.getIfAbsent (pFunction, ()->ProcedureScope.NONE);
+			var fs = mapFileSources.getIfAbsent(pFile,     ()->SourceFile.NONE);
+			var lm = mapLoadModules.getIfAbsent(pModule,   ()->LoadModuleScope.NONE);
 			
-			Scope scope = null;
+			if (ps == ProcedureScope.NONE) {
+				Scope s = getEnclosingProc(parent);
+				if (s instanceof ProcedureScope)
+					ps = (ProcedureScope) s;
+			}
+			// linearize the flat id. This is not sufficient and causes collisions for large and complex source code
+			// This needs to be computed more reliably.
+			int flatId = Scope.generateFlatID(lexicalType, lm.getFlatIndex(), fs.getFileID(), ps.getFlatIndex(), line); 
+			
 			newScope = null; 
 
 			switch(lexicalType) {
 			case FMT_METADB_LEXTYPE_FUNCTION:
-				newScope = createLexicalFunction(parent, lm, fs, ps, ctxId, line, relation);
+				newScope = createLexicalFunction(parent, lm, fs, ps, ctxId, flatId, line, relation);
 				break;
 			case FMT_METADB_LEXTYPE_LOOP:
-				scope = new LoopScope(rootCCT, fs, line, line, ctxId, ctxId);
-				newScope = beginNewScope(parent, scope);					
+				newScope = new LoopScope(rootCCT, fs, line, line, ctxId, flatId);
 				break;
 			case FMT_METADB_LEXTYPE_LINE:
-				scope = new LineScope(rootCCT, fs, line, ctxId, ctxId);
-				newScope = beginNewScope(parent, scope);					
+				newScope = new LineScope(rootCCT, fs, line, ctxId, flatId);
 				break;
 			case FMT_METADB_LEXTYPE_INSTRUCTION:
-				scope = new InstructionScope(rootCCT, lm, ctxId);
-				scope.setSourceFile(fs);
-				newScope = beginNewScope(parent, scope);					
+				newScope = new InstructionScope(rootCCT, lm, ctxId, flatId);
+				newScope.setSourceFile(fs);
 				break;
 			default:
 				throw new RuntimeException("Invalid node relation field");
 			}
+			linkParentChild(parent, newScope);					
 		}
 		
+		
+		private Scope getEnclosingProc(Scope scope) {
+			Scope current = scope;
+			while(current != null 
+				  && !(current instanceof RootScope) 
+				  && !(current instanceof ProcedureScope)
+				  && !(current instanceof CallSiteScope)) 
+				current = current.getParentScope();
+			
+			if (current instanceof CallSiteScope)
+				current = ((CallSiteScope)current).getProcedureScope();
+			
+			return current;
+		}
 		
 		/***
 		 * Create a lexical function scope.
@@ -843,47 +866,28 @@ public class DataMeta extends DataCommon
 											LoadModuleScope lm,
 											SourceFile fs,
 											ProcedureScope ps, 
-											int ctxId, int line, int relation) {
+											int ctxId,
+											int flatId,
+											int line, 
+											int relation) {
 			
 			boolean alien  = relation == FMT_METADB_RELATION_CALL_INLINED;
 			var fileSource = fs == null ? SourceFile.NONE : fs;
 			
 			if (!(parent instanceof LineScope)) {
 				// no call site in the stack: it must be a procedure scope
-				String name = Constants.PROCEDURE_UNKNOWN;
-				if (ps != null)
-					name = ps.getName();
-				
-				var scope = new ProcedureScope(rootCCT, lm, fileSource, line, line, name, alien, ctxId, ctxId, null, ProcedureScope.FeatureProcedure);
-				
-				return beginNewScope(parent, scope);
+				return new ProcedureScope(rootCCT, lm, fileSource, line, line, ps.getName(), alien, ctxId, flatId, null, ProcedureScope.FeatureProcedure);				
 			}
-			ProcedureScope proc;
-			if (ps == null) {
-				proc = new ProcedureScope(rootCCT, lm, fileSource, line, line, Constants.PROCEDURE_UNKNOWN, alien, ctxId, ctxId, null, ProcedureScope.FeatureProcedure);
-			} else {
-				proc = ps;
-				proc.setAlien(alien);
-			}
+			
+			ps.setAlien(alien);
 			LineScope ls = (LineScope) parent;
-			var cs = new CallSiteScope(ls, proc, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, ctxId);
+			var cs = new CallSiteScope(ls, ps, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, flatId);
 			
 			// Only the line statement knows where the source file is
 			// If the line statement is unknown then the source file is unknown.
 			cs.setSourceFile(ls.getSourceFile());
 			
-			// since we merge the line scope to this call site,
-			// we have to remove the line scope from the parent
-			//
-			// Hack 04.22.2022: at the moment we do not remove the parent of the call site
-			// The reason is that sometimes a line scope has multiple children (WtH?) and
-			// integrating the parent as a call site will cause removing the children of the line scope
-			//
-			// Scope grandParent = parent.getParentScope();
-			// grandParent.remove(parent);
-			
-			// add the new call site to the tree
-			return beginNewScope(ls, cs);
+			return cs;
 		}
 
 		
@@ -898,13 +902,15 @@ public class DataMeta extends DataCommon
 		 * 			a new parent if the child scope is valid. 
 		 * 			Otherwise returns the parent itself.
 		 */
-		private Scope beginNewScope(Scope parent, Scope scope) {
+		private Scope linkParentChild(Scope parent, Scope scope) {
 			parent.addSubscope(scope);
 			scope.setParentScope(parent);
 
 			return scope;
 		}
 	}
+	
+	
 	/*******************
 	 * 
 	 * Class to retrieve a string from the string section in meta.db

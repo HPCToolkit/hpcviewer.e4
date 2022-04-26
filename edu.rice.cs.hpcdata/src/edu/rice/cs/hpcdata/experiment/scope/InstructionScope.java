@@ -8,8 +8,8 @@ public class InstructionScope extends LineScope
 	
 	private final LoadModuleScope loadModule;
 
-	public InstructionScope(RootScope root, LoadModuleScope loadModule, int scopeID) {
-		super(root, loadModule.getSourceFile(), 0, scopeID, scopeID);
+	public InstructionScope(RootScope root, LoadModuleScope loadModule, int scopeID, int flatID) {
+		super(root, loadModule.getSourceFile(), 0, scopeID, flatID);
 		this.loadModule = loadModule;
 	}
 
@@ -25,7 +25,7 @@ public class InstructionScope extends LineScope
 
 	@Override
 	public Scope duplicate() {
-		return new InstructionScope(root, loadModule, id);
+		return new InstructionScope(root, loadModule, id, getFlatIndex());
 	}
 
 	@Override

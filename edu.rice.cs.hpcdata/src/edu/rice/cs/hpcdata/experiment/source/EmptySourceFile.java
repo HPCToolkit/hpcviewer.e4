@@ -162,8 +162,7 @@ public boolean isText()
 
 
 public int getFileID() {
-	// TODO Auto-generated method stub
-	return 0;
+	return Integer.MIN_VALUE;
 }
 
 }
