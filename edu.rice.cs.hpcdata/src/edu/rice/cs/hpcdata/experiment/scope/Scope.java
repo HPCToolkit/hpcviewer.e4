@@ -161,12 +161,25 @@ implements IMetricScope
 	/***
 	 * retrieve the CCT index of this scope.<br/>
 	 * The index is theoretically unique, so it can be used as an ID.
+	 * 
 	 * @return
 	 */
 	public int getCCTIndex() {
 		return (int) node.getValue();
 	}
 
+	/***
+	 * Set new index for this scope. cct index is usually constant,
+	 * but in case needed, it can be modified.
+	 * <br>
+	 * Use it on your own risk.
+	 * 
+	 * @param index
+	 * 			The new index
+	 */
+	public void setCCTIndex(int index) {
+		node.setValue(index);
+	}
 
 	/***
 	 * Make this scope as a virtual root to be displayed on the table.

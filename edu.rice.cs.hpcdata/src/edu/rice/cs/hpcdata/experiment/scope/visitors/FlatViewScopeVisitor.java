@@ -5,6 +5,7 @@ import java.util.*;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.scope.AlienScope;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
+import edu.rice.cs.hpcdata.experiment.scope.CallSiteScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.FileScope;
 import edu.rice.cs.hpcdata.experiment.scope.GroupScope;
 import edu.rice.cs.hpcdata.experiment.scope.LineScope;
@@ -39,6 +40,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 	private HashMap<String, List<Scope>> htFlatCostAdded;
 	
 	private RootScope root_ft;
+	private int nodeIndex;
 	
 	private InclusiveOnlyMetricPropagationFilter inclusive_filter;
 	private ExclusiveOnlyMetricPropagationFilter exclusive_filter;
@@ -56,7 +58,8 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 		this.htFlatScope     = new HashMap<String, FlatScopeInfo>();
 		this.htFlatCostAdded = new HashMap<String, List<Scope>>();
 		
-		this.root_ft = root;
+		this.root_ft   = root;
+		this.nodeIndex = 10;
 		
 		this.inclusive_filter = new InclusiveOnlyMetricPropagationFilter( exp );
 		this.exclusive_filter = new ExclusiveOnlyMetricPropagationFilter( exp );
@@ -80,11 +83,10 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 	public void visit(LoopScope scope, ScopeVisitType vt) 			{
 		add(scope,vt, true, false); 
 	}
-	public void visit(ProcedureScope scope, ScopeVisitType vt) 		{
-		
+	public void visit(ProcedureScope scope, ScopeVisitType vt) 		{		
 		if (scope.isTopDownProcedure())
 			return;
-		add(scope,vt, true, false); 
+		add(scope, vt, true, false); 
 	}
 
 	
@@ -190,6 +192,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 			// Initialize the flat scope of this cct
 			//-----------------------------------------------------------------------------
 			flat_info_s.flat_s = cct_s.duplicate();
+			flat_info_s.flat_s.setCCTIndex(generateNodeIndex());
 			flat_info_s.flat_s.setRootScope(root_ft);
 			
 			//-----------------------------------------------------------------------------
@@ -226,6 +229,11 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 		return flat_info_s;
 	}
 	
+	
+	private int generateNodeIndex() {
+		return ++nodeIndex;
+	}
+	
 	/*****************************************************************
 	 * Create the flat view of a load module
 	 * @param proc_cct_s
@@ -241,7 +249,9 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 			if (lm_flat_s == null) {
 				// no load module has been created. we allocate a new one
 				lm_flat_s = (LoadModuleScope) lm.duplicate();
+				lm_flat_s.setCCTIndex(generateNodeIndex());
 				lm_flat_s.setRootScope(root_ft);
+				
 				// attach the load module to the root scope
 				this.addToTree(root_ft, lm_flat_s);
 				// store this module into our dictionary
@@ -312,8 +322,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 	 * @return
 	 *****************************************************************/
 	private FileScope createFileScope(SourceFile src_file, LoadModuleScope lm_s, String unique_file_id) {
-		int fileID = src_file.getFileID();
-		FileScope file_s =  new FileScope( this.root_ft, src_file, fileID );
+		FileScope file_s =  new FileScope( this.root_ft, src_file, generateNodeIndex() );
 		//------------------------------------------------------------------------------
 		// if load module is undefined, then we attach the file scope to the root scope
 		//------------------------------------------------------------------------------
@@ -362,25 +371,69 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 				}
 				if (flat_enc_info != null)
 					flat_enc_s = flat_enc_info.flat_s;
-
 			}
 		}
 
 		FlatScopeInfo objFlat = getFlatScope(cct_s);
-		if (objFlat == null)
-			return null;
 
 		if (flat_enc_s != null) {
+			// Check if there is a cyclic dependency between the child and the ancestors
 			if (!isCyclicDependency(flat_enc_s, objFlat.flat_s)) {
-				// normal case: no cyclic dependency between the child and the ancestors
-				this.addToTree(flat_enc_s, objFlat.flat_s);
+
+				// check if cct scope is a procedure AND its parent is also a procedure
+				// normally this doesn't make sense, but in prof2 it's possible a procedure
+				// calls another procedure. For instance in cct:
+				//
+				// <program root>
+				//    |
+				//    +---> main
+				//
+				// in this case both <program root> and main are procedures. We want to
+				// to create the flat tree of this into:
+				//
+				// file
+				//   |
+				//   +---> <program root>
+				//   |         |
+				//   |         +---> main (as a call site)
+				//   |
+				//   +---> main (as a procedure)
+				
+				var scope = objFlat.flat_s;
+				ProcedureScope ps = findEnclosingProcedure(scope);
+				if (ps != null && 
+					scope instanceof ProcedureScope && 
+					ps instanceof ProcedureScope) {
+
+					// try to find a child in the enclosing procedure that has the same flat index
+					// as the current scope.
+					// If this is the case, we should reuse the existing child as the call site
+					Scope cs = null;
+					if (flat_enc_s.hasChildren())
+						for(var child: flat_enc_s.getChildren()) {
+							if (child.getFlatIndex() == scope.getFlatIndex()) {
+								cs = child;
+								break;
+							}
+						}
+					if (cs == null) {
+						// create a copy scope as a callsite
+						LineScope ls = new LineScope(scope.getRootScope(), scope.getSourceFile(), 0, generateNodeIndex(), scope.getFlatIndex());
+						cs = new CallSiteScope(ls, (ProcedureScope)scope, CallSiteScopeType.CALL_TO_PROCEDURE, generateNodeIndex(), scope.getFlatIndex());
+					}
+					scope = cs;					
+					this.addCostIfNecessary(id, scope, cct_s_metrics, true, true);
+				}
+				this.addToTree(flat_enc_s, scope);
 			} else
 			{	// rare case: cyclic dependency
 				// TODO: we should create a new copy and attach it to the tree
 				// but this will cause an issue for adding metrics and decrement counter
 				// at the moment we just avoid cyclic dependency
 				
-				Scope copy = objFlat.flat_s.duplicate();				
+				Scope copy = objFlat.flat_s.duplicate();
+				copy.setCCTIndex(generateNodeIndex());
+				
 				this.addToTree(flat_enc_s, copy);
 			}
 		}
