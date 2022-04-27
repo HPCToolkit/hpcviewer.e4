@@ -305,10 +305,10 @@ implements IMetricScope
 	public static int generateFlatID(int lexicalType, int lmId, int fileId, int procId, int line) {
 		// linearize the flat id. This is not sufficient and causes collisions for large and complex source code
 		// This needs to be computed more reliably.
-		int flatId = lexicalType       << 28 |
-					 lmId      << 24 |
-					 fileId    << 16 | 
-					 procId    << 8  | 
+		int flatId = lexicalType << 28 |
+					 lmId        << 24 |
+					 fileId      << 16 | 
+					 procId      << 8  | 
 					 line;
 		return flatId;
 	}
