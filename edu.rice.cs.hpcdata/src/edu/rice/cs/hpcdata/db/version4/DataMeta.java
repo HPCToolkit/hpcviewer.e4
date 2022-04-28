@@ -100,7 +100,10 @@ public class DataMeta extends DataCommon
 
 	private DataSummary dataSummary;
 	private IExperiment experiment;
-
+	
+	private int numLoadModules;
+	private int numSourceFiles;
+	private int numProcedures;
 	
 	public DataMeta() {
 		super();
@@ -492,13 +495,13 @@ public class DataMeta extends DataCommon
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		
 		long pModules  = buffer.getLong();
-		int  nModules  = buffer.getInt(0x08);
+		numLoadModules = buffer.getInt(0x08);
 		short szModule = buffer.getShort(0x0c);
 		
 		int baseOffset = (int) (pModules - section.offset);
-		LongObjectHashMap<LoadModuleScope> mapLoadModules = new LongObjectHashMap<>(nModules);
+		LongObjectHashMap<LoadModuleScope> mapLoadModules = new LongObjectHashMap<>(numLoadModules);
 
-		for(int i=0; i<nModules; i++) {
+		for(int i=0; i<numLoadModules; i++) {
 			int delta        = i * szModule;
 			int position     = baseOffset + delta + 0x08;
 			long pModuleName = buffer.getLong(position);
@@ -526,13 +529,14 @@ public class DataMeta extends DataCommon
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		
 		long pFiles = buffer.getLong();
-		int  nFiles = buffer.getInt(0x08);
-		short szFiles = buffer.getShort(0x0c);
+		numSourceFiles = buffer.getInt(0x08);
+		short szFiles  = buffer.getShort(0x0c);
 		
 		int basePosition = (int) (pFiles - section.offset);
-		LongObjectHashMap<SourceFile> mapSourceFile = new LongObjectHashMap<>(nFiles);
+		LongObjectHashMap<SourceFile> mapSourceFile = new LongObjectHashMap<>(numSourceFiles);
+		int baseId = numLoadModules + 1;
 		
-		for(int i=0; i<nFiles; i++) {
+		for(int i=0; i<numSourceFiles; i++) {
 			int delta    = i * szFiles;
 			int position = basePosition + delta;
 			int flags  = buffer.getInt(position);
@@ -541,7 +545,7 @@ public class DataMeta extends DataCommon
 			boolean available = (flags & 0x1) == 0x1;
 			String  name = stringArea.toString(pPath);
 			
-			SourceFile sf = new SimpleSourceFile(i+1, new File(name), available);
+			SourceFile sf = new SimpleSourceFile(baseId+i, new File(name), available);
 			long key = pFiles + delta;
 			mapSourceFile.put(key, sf);
 		}
@@ -569,6 +573,8 @@ public class DataMeta extends DataCommon
 		var basePosition = pFunctions - section.offset;
 		LongObjectHashMap<ProcedureScope> mapProcedures = new LongObjectHashMap<>(nFunctions);
 
+		int baseId = numLoadModules + numSourceFiles + 1;
+
 		for(int i=0; i<nFunctions; i++) {
 			int position = (int) (basePosition + (i * szFunctions));
 			long pName   = buffer.getLong(position);
@@ -587,7 +593,7 @@ public class DataMeta extends DataCommon
 				lms = LoadModuleScope.NONE;
 			
 			long key = pFunctions + (i * szFunctions);
-			ProcedureScope ps = new ProcedureScope(rootCCT, lms, file, line, line, name, false, position, i+1, null, 0);			
+			ProcedureScope ps = new ProcedureScope(rootCCT, lms, file, line, line, name, false, position, i+baseId, null, 0);			
 			mapProcedures.put(key, ps);
 		}
 		return mapProcedures;
@@ -787,6 +793,7 @@ public class DataMeta extends DataCommon
 				if (nFlexWords < nwords + 2) 
 					return;
 				pFile = buffer.getLong(loc + 0x18 + nwords * 8);
+				line  = buffer.getInt( loc + 0x18 + (nwords+1) * 8);
 				nwords++;
 			}
 			if ((flags & 0x4) != 0) {
@@ -801,13 +808,15 @@ public class DataMeta extends DataCommon
 			var lm = mapLoadModules.getIfAbsent(pModule,   ()->LoadModuleScope.NONE);
 			
 			if (ps == ProcedureScope.NONE) {
-				Scope s = getEnclosingProc(parent);
-				if (s instanceof ProcedureScope)
-					ps = (ProcedureScope) s;
+				ProcedureScope s = getEnclosingProc(parent);
+				if (s != null)
+					ps = s;
 			}
+			int baseId = numLoadModules + numSourceFiles + numProcedures + 1;
+
 			// linearize the flat id. This is not sufficient and causes collisions for large and complex source code
 			// This needs to be computed more reliably.
-			int flatId = Scope.generateFlatID(lexicalType, lm.getFlatIndex(), fs.getFileID(), ps.getFlatIndex(), line); 
+			int flatId = baseId + Scope.generateFlatID(lexicalType, lm.getFlatIndex(), fs.getFileID(), 0, line);
 			
 			newScope = null; 
 
@@ -832,7 +841,7 @@ public class DataMeta extends DataCommon
 		}
 		
 		
-		private Scope getEnclosingProc(Scope scope) {
+		private ProcedureScope getEnclosingProc(Scope scope) {
 			Scope current = scope;
 			while(current != null 
 				  && !(current instanceof RootScope) 
@@ -840,10 +849,13 @@ public class DataMeta extends DataCommon
 				  && !(current instanceof CallSiteScope)) 
 				current = current.getParentScope();
 			
-			if (current instanceof CallSiteScope)
-				current = ((CallSiteScope)current).getProcedureScope();
+			if (current instanceof ProcedureScope)
+				return (ProcedureScope) current;
 			
-			return current;
+			if (current instanceof CallSiteScope)
+				return ((CallSiteScope)current).getProcedureScope();
+			
+			return null;
 		}
 		
 		/***

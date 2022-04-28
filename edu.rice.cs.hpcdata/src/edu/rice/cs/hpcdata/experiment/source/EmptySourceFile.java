@@ -21,6 +21,8 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 
+import edu.rice.cs.hpcdata.util.Constants;
+
 
 
 
@@ -162,7 +164,7 @@ public boolean isText()
 
 
 public int getFileID() {
-	return Integer.MIN_VALUE;
+	return Constants.FLAT_ID_FILE_UNKNOWN;
 }
 
 }
