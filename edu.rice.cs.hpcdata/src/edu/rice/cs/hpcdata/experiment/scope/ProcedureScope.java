@@ -19,6 +19,7 @@ import java.util.List;
 import edu.rice.cs.hpcdata.experiment.scope.filters.MetricValuePropagationFilter;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.IScopeVisitor;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
+import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.IUserData;
 
 
@@ -37,13 +38,19 @@ import edu.rice.cs.hpcdata.util.IUserData;
 
 public class ProcedureScope extends Scope  implements IMergedScope 
 {
-	final static public int FeatureProcedure   = 0;
-	final static public int FeaturePlaceHolder = 1;
-	final static public int FeatureRoot 	   = 2;
-	final static public int FeatureElided      = 3;
-	final static public int FeatureTopDown     = 4;
+	public static final int FeatureProcedure   = 0;
+	public static final int FeaturePlaceHolder = 1;
+	public static final int FeatureRoot 	   = 2;
+	public static final int FeatureElided      = 3;
+	public static final int FeatureTopDown     = 4;
 	
-	final static public String INLINE_NOTATION = "[I] ";
+	public static final String INLINE_NOTATION = "[I] ";
+	public static final ProcedureScope NONE = new ProcedureScope(null, 
+			LoadModuleScope.NONE, SourceFile.NONE, 
+			0, 0, 
+			Constants.PROCEDURE_UNKNOWN, false, 
+			Integer.MIN_VALUE, Integer.MIN_VALUE, 
+			null, FeatureRoot);
 
 	private static final String TheProcedureWhoShouldNotBeNamed = "-";
 	private static final String TheInlineProcedureLabel 	 	= "<inline>";

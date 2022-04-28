@@ -19,5 +19,8 @@ public class Constants {
 	public final static int EXPERIMENT_DENSED_VERSION = 2;
 	
 	public final static String PROCEDURE_UNKNOWN = "<unknown>";
+	
+	public static final String  PROC_NO_ACTIVITY   = "<no activity>";
+	public static final String  PROC_NO_THREAD     = "<no thread>";
 
 }

@@ -424,7 +424,7 @@ public class ScopeTreeData implements IScopeTreeData
 			// we don't want returning 0 because it will cause the tree looks weird
 			// let's try to compare with the hash code
 			if (result == 0) {
-				result = o1.hashCode() - o2.hashCode();
+				result = o1.getCCTIndex() - o2.getCCTIndex();
 			}
 		}
 		return factor * result;

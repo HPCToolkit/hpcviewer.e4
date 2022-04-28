@@ -55,11 +55,6 @@ public class DataMetaTest
 		assertTrue(experiment.getMajorVersion() == 4);
 	}
 	
-	@Test
-	public void testGetDescription() {
-		// i don't know the exact length. too lazy to find out.
-		assertTrue(data.getDescription().length() > 10);
-	}
 	
 	@Test
 	public void testgetKindNames() {

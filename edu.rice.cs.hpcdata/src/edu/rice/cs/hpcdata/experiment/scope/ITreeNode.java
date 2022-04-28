@@ -23,4 +23,6 @@ public interface ITreeNode<T>
 	public void remove(int index);
 
 	public Object getValue();
+
+	public void setValue(int index);
 }

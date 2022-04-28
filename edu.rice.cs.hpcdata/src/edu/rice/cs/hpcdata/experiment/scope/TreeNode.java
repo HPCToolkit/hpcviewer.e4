@@ -92,6 +92,12 @@ public class TreeNode<T> implements ITreeNode<T> {
 		return value;
 	}
 
+
+	@Override
+	public void setValue(int index) {
+		this.value = index;
+	}
+
 	/**
 	 * Returns whether the tree has any children.
 	 * 

@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.db.version4.DataMeta;
-import edu.rice.cs.hpcdata.db.version4.MetricValueCollection3;
+import edu.rice.cs.hpcdata.db.version4.MetricValueCollection4;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -19,7 +19,7 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 public class MetricTest {
 	
 	private static DataMeta data;
-	private static MetricValueCollection3 mvc;
+	private static MetricValueCollection4 mvc;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -40,7 +40,7 @@ public class MetricTest {
 		data.open(new Experiment(), dbPath.getAbsolutePath());
 		
 		try {
-			mvc = new MetricValueCollection3(data.getDataSummary());
+			mvc = new MetricValueCollection4(data.getDataSummary());
 		} catch (IOException e) {
 			System.err.println("Fail to create MetricValueCollection3: " + e.getMessage());
 			fail(e.getMessage());

@@ -22,8 +22,10 @@ import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.metric.AggregateMetric;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
+import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricValueCollection;
 import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
+import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.filters.MetricValuePropagationFilter;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.FilterScopeVisitor;
@@ -159,16 +161,24 @@ implements IMetricScope
 	/***
 	 * retrieve the CCT index of this scope.<br/>
 	 * The index is theoretically unique, so it can be used as an ID.
+	 * 
 	 * @return
 	 */
 	public int getCCTIndex() {
 		return (int) node.getValue();
 	}
 
-
-	@Override
-	public int hashCode() {
-		return System.identityHashCode(this);
+	/***
+	 * Set new index for this scope. cct index is usually constant,
+	 * but in case needed, it can be modified.
+	 * <br>
+	 * Use it on your own risk.
+	 * 
+	 * @param index
+	 * 			The new index
+	 */
+	public void setCCTIndex(int index) {
+		node.setValue(index);
 	}
 
 	/***
@@ -299,8 +309,22 @@ implements IMetricScope
 		return this.getName();
 	}
 
+	
+	public static int getLexicalType(Scope scope) {
+		String type = scope.getClass().getSimpleName().substring(0, 2);
+		return type.hashCode();
+	}
 
-
+	public static int generateFlatID(int lexicalType, int lmId, int fileId, int procId, int line) {
+		// linearize the flat id. This is not sufficient and causes collisions for large and complex source code
+		// This needs to be computed more reliably.
+		int flatId = lexicalType << 28 |
+					 lmId        << 24 |
+					 fileId      << 16 | 
+					 procId      << 8  | 
+					 line;
+		return flatId;
+	}
 
 
 	/*************************************************************************
@@ -666,6 +690,35 @@ implements IMetricScope
 	}
 
 
+	/***************************************************************************
+	 * Reduce the value of this scope from another scope with the same metric.
+	 * <pre>
+	 * If scope A has metric values {a1, a2, ... an} and 
+	 * scope B has metric values {b1, b2, ... bn} 
+	 * then A.reduce(B, filter) equals to:
+	 *  for all a of filter <- a reduce b
+	 * </pre>
+	 * where reduce is usually subtraction for most cases. 
+	 * 
+	 * @param scope the source of the reduction 
+	 * @param filter the metric filter 
+	 ***************************************************************************/
+	public void reduce(Scope scope, MetricType type) {
+		var experiment = root.getExperiment();
+		var metrics    = experiment.getMetrics();
+		
+		for (var m: metrics) {
+			if (!(m instanceof HierarchicalMetric))
+				continue;
+			
+			if (m.getMetricType() != type)
+				continue;
+			
+			HierarchicalMetric hm = (HierarchicalMetric) m;
+			MetricValue mv = hm.reduce(getMetricValue(m), scope.getMetricValue(m));
+			setMetricValue(m.getIndex(), mv);
+		}
+	}
 
 	/***************************************************************************
 	 * retrieve the default metrics
