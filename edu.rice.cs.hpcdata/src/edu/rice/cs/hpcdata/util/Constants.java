@@ -35,4 +35,5 @@ public class Constants {
 	public static final int FLAT_ID_LOAD_UNKNOWN   = 2;
 	public static final int FLAT_ID_FILE_UNKNOWN   = 3;
 	public static final int FLAT_ID_PROC_UNKNOWN   = 4;
+	public static final int FLAT_ID_BEGIN          = 10;
 }

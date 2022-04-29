@@ -38,6 +38,7 @@ import edu.rice.cs.hpcdata.experiment.scope.visitors.CallingContextReassignment;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.TraceScopeVisitor;
 import edu.rice.cs.hpcdata.experiment.source.SimpleSourceFile;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
+import edu.rice.cs.hpcdata.util.Constants;
 
 
 /*********************************************
@@ -100,10 +101,7 @@ public class DataMeta extends DataCommon
 
 	private DataSummary dataSummary;
 	private IExperiment experiment;
-	
-	private int numLoadModules;
-	private int numSourceFiles;
-	private int numProcedures;
+
 	
 	public DataMeta() {
 		super();
@@ -495,19 +493,20 @@ public class DataMeta extends DataCommon
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		
 		long pModules  = buffer.getLong();
-		numLoadModules = buffer.getInt(0x08);
+		int numModules = buffer.getInt(0x08);
 		short szModule = buffer.getShort(0x0c);
 		
 		int baseOffset = (int) (pModules - section.offset);
-		LongObjectHashMap<LoadModuleScope> mapLoadModules = new LongObjectHashMap<>(numLoadModules);
-
-		for(int i=0; i<numLoadModules; i++) {
+		LongObjectHashMap<LoadModuleScope> mapLoadModules = new LongObjectHashMap<>(numModules);
+		int baseId = Constants.FLAT_ID_BEGIN + 1;
+		
+		for(int i=0; i<numModules; i++) {
 			int delta        = i * szModule;
 			int position     = baseOffset + delta + 0x08;
 			long pModuleName = buffer.getLong(position);
 			String path      = stringArea.toString(pModuleName);
 			
-			LoadModuleScope lms = new LoadModuleScope(rootCCT, path, SourceFile.NONE, i+1);
+			LoadModuleScope lms = new LoadModuleScope(rootCCT, path, SourceFile.NONE, i+baseId);
 			long key = pModules + delta;
 			mapLoadModules.put(key, lms);
 		}
@@ -528,15 +527,15 @@ public class DataMeta extends DataCommon
 		var buffer = channel.map(MapMode.READ_ONLY, section.offset, section.size);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		
-		long pFiles = buffer.getLong();
-		numSourceFiles = buffer.getInt(0x08);
-		short szFiles  = buffer.getShort(0x0c);
+		long pFiles   = buffer.getLong();
+		int numFiles  = buffer.getInt(0x08);
+		short szFiles = buffer.getShort(0x0c);
 		
 		int basePosition = (int) (pFiles - section.offset);
-		LongObjectHashMap<SourceFile> mapSourceFile = new LongObjectHashMap<>(numSourceFiles);
-		int baseId = numLoadModules + 1;
+		LongObjectHashMap<SourceFile> mapSourceFile = new LongObjectHashMap<>(numFiles);
+		int baseId = Constants.FLAT_ID_BEGIN + mapLoadModules.size() + 1;
 		
-		for(int i=0; i<numSourceFiles; i++) {
+		for(int i=0; i<numFiles; i++) {
 			int delta    = i * szFiles;
 			int position = basePosition + delta;
 			int flags  = buffer.getInt(position);
@@ -573,7 +572,7 @@ public class DataMeta extends DataCommon
 		var basePosition = pFunctions - section.offset;
 		LongObjectHashMap<ProcedureScope> mapProcedures = new LongObjectHashMap<>(nFunctions);
 
-		int baseId = numLoadModules + numSourceFiles + 1;
+		int baseId = Constants.FLAT_ID_BEGIN + mapLoadModules.size() + mapFileSources.size() + 1;
 
 		for(int i=0; i<nFunctions; i++) {
 			int position = (int) (basePosition + (i * szFunctions));
@@ -812,7 +811,7 @@ public class DataMeta extends DataCommon
 				if (s != null)
 					ps = s;
 			}
-			int baseId = numLoadModules + numSourceFiles + numProcedures + 1;
+			int baseId = Constants.FLAT_ID_BEGIN + mapLoadModules.size() + mapFileSources.size() + mapProcedures.size() + 1;
 
 			// linearize the flat id. This is not sufficient and causes collisions for large and complex source code
 			// This needs to be computed more reliably.
