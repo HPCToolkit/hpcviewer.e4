@@ -825,8 +825,11 @@ implements IMetricScope
 		int nKids = getSubscopeCount();
 		for (int i=0; i< nKids; i++) {
 			Scope childScope = getSubscope(i);
-			if (childScope != null)
+			if (childScope != null) {
 				childScope.dfsVisitScopeTree(sv);
+				// in case of changes
+				nKids = getSubscopeCount();
+			}
 		}
 		accept(sv, ScopeVisitType.PostVisit);
 	}

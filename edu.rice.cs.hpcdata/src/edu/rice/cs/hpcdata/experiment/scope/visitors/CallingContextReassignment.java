@@ -21,7 +21,7 @@ public class CallingContextReassignment implements IScopeVisitor
 	
 	@Override
 	public void visit(LineScope scope, ScopeVisitType vt) { 
-		if (vt == ScopeVisitType.PreVisit) {
+		if (vt == ScopeVisitType.PostVisit) {
 			var children = scope.getChildren();
 			if (children == null)
 				return;
