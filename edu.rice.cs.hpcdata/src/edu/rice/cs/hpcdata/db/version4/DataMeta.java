@@ -580,7 +580,7 @@ public class DataMeta extends DataCommon
 			long pModule = buffer.getLong(position + 0x08);
 			buffer.getLong(position + 0x10);
 			long pFile   = buffer.getLong(position + 0x18);
-			int  line    = buffer.getInt( position + 0x20);
+			int  line    = buffer.getInt( position + 0x20) - 1;
 			
 			var name = stringArea.toString(pName);
 			var lms  = mapLoadModules.get(pModule);
@@ -792,7 +792,7 @@ public class DataMeta extends DataCommon
 				if (nFlexWords < nwords + 2) 
 					return;
 				pFile = buffer.getLong(loc + 0x18 + nwords * 8);
-				line  = buffer.getInt( loc + 0x18 + (nwords+1) * 8);
+				line  = buffer.getInt( loc + 0x18 + (nwords+1) * 8) - 1;
 				nwords++;
 			}
 			if ((flags & 0x4) != 0) {
