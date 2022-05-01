@@ -379,8 +379,8 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 		if (flat_enc_s != null) {
 			// Check if there is a cyclic dependency between the child and the ancestors
 			if (!isCyclicDependency(flat_enc_s, objFlat.flat_s)) {
-				var scope = checkIfProcedureIsACallsite(id, objFlat.flat_s, flat_enc_s, cct_s_metrics);
-				this.addToTree(flat_enc_s, scope);
+				//var scope = checkIfProcedureIsACallsite(id, objFlat.flat_s, flat_enc_s, cct_s_metrics);
+				this.addToTree(flat_enc_s, objFlat.flat_s);
 				
 			} else {
 				// rare case: cyclic dependency
@@ -389,7 +389,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 				// at the moment we just avoid cyclic dependency
 				
 				Scope copy = objFlat.flat_s.duplicate();
-				copy.setCCTIndex(generateNodeIndex());
+				//copy.setCCTIndex(generateNodeIndex());
 				
 				this.addToTree(flat_enc_s, copy);
 			}
@@ -472,8 +472,9 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 	 ***********************************************************/
 	private String getID( Scope scope ) {
 		final String id = String.valueOf(scope.getFlatIndex());
-		final String class_type = scope.getClass().getSimpleName();
 		StringBuffer hash_id = new StringBuffer(id);
+		
+		final String class_type = scope.getClass().getSimpleName();
 		if (class_type != null) {
 			hash_id.insert(0, class_type.substring(0, 2));
 		}

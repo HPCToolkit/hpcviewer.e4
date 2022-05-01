@@ -747,6 +747,7 @@ public class DataMeta extends DataCommon
 		int  ctxId;
 		Scope newScope;
 		byte nFlexWords;
+
 		
 		public ScopeContext(ByteBuffer buffer, int loc, Scope parent) {
 			szChildren = buffer.getLong(loc);
@@ -806,16 +807,9 @@ public class DataMeta extends DataCommon
 			var fs = mapFileSources.getIfAbsent(pFile,     ()->SourceFile.NONE);
 			var lm = mapLoadModules.getIfAbsent(pModule,   ()->LoadModuleScope.NONE);
 			
-			if (ps == ProcedureScope.NONE) {
-				ProcedureScope s = getEnclosingProc(parent);
-				if (s != null)
-					ps = s;
-			}
-			int baseId = Constants.FLAT_ID_BEGIN + mapLoadModules.size() + mapFileSources.size() + mapProcedures.size() + 1;
-
 			// linearize the flat id. This is not sufficient and causes collisions for large and complex source code
 			// This needs to be computed more reliably.
-			int flatId = baseId + Scope.generateFlatID(lexicalType, lm.getFlatIndex(), fs.getFileID(), 0, line);
+			int flatId = getKey(lm, fs, ps, line, lexicalType);
 			
 			newScope = null; 
 
@@ -839,23 +833,32 @@ public class DataMeta extends DataCommon
 			linkParentChild(parent, newScope);					
 		}
 		
-		
-		private ProcedureScope getEnclosingProc(Scope scope) {
-			Scope current = scope;
-			while(current != null 
-				  && !(current instanceof RootScope) 
-				  && !(current instanceof ProcedureScope)
-				  && !(current instanceof CallSiteScope)) 
-				current = current.getParentScope();
+		private int getKey(LoadModuleScope lms, SourceFile sf, ProcedureScope ps, int line, int lexicalType) {
+			final String SEPARATOR = ":";
 			
-			if (current instanceof ProcedureScope)
-				return (ProcedureScope) current;
+			StringBuilder sb = new StringBuilder();
+			sb.append(lexicalType);
+			sb.append(SEPARATOR);
 			
-			if (current instanceof CallSiteScope)
-				return ((CallSiteScope)current).getProcedureScope();
+			sb.append(lms.getFlatIndex());
+			sb.append(SEPARATOR);
+						
+			sb.append(sf.getFileID());
+			sb.append(SEPARATOR);
 			
-			return null;
+			if (ps != ProcedureScope.NONE) {
+				sb.append(ps.getFlatIndex());
+				sb.append(SEPARATOR);
+			}
+			
+			sb.append(line);
+			
+			int hash = sb.toString().hashCode();
+			int baseId = Constants.FLAT_ID_BEGIN + mapLoadModules.size() + mapFileSources.size() + mapProcedures.size() + 1;
+			
+			return baseId + hash;
 		}
+
 		
 		/***
 		 * Create a lexical function scope.
@@ -883,11 +886,10 @@ public class DataMeta extends DataCommon
 											int relation) {
 			
 			boolean alien  = relation == FMT_METADB_RELATION_CALL_INLINED;
-			var fileSource = fs == null ? SourceFile.NONE : fs;
 			
 			if (!(parent instanceof LineScope)) {
 				// no call site in the stack: it must be a procedure scope
-				return new ProcedureScope(rootCCT, lm, fileSource, line, line, ps.getName(), alien, ctxId, flatId, null, ProcedureScope.FeatureProcedure);				
+				return new ProcedureScope(rootCCT, ps.getLoadModule(), ps.getSourceFile(), line, line, ps.getName(), alien, ctxId, ps.getFlatIndex(), null, ProcedureScope.FeatureProcedure);				
 			}
 			
 			ps.setAlien(alien);
