@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import com.graphbuilder.math.Expression;
 import com.graphbuilder.math.ExpressionTree;
+
 import edu.rice.cs.hpcdata.db.version4.DataSummary;
 import edu.rice.cs.hpcdata.experiment.scope.IMetricScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -56,8 +57,7 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 			return target;
 
 		if (target == MetricValue.NONE) {
-			target.setValue(source.getValue());
-			return target;
+			return source.duplicate();
 		}
 
 		switch (combineType) {
