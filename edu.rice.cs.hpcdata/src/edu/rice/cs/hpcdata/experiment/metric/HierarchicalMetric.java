@@ -57,7 +57,7 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 
 		if (target == MetricValue.NONE) {
 			target.setValue(source.getValue());
-			return source;
+			return target;
 		}
 
 		switch (combineType) {
@@ -79,7 +79,7 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 			v1 = target.getValue();
 			v2 = source.getValue();
 			v1 = v1-v2;
-			if (Float.compare(v1, 0.0f) == 0)
+			if (v1 <= v2)
 				return MetricValue.NONE; 
 			
 			target.setValue(v1);

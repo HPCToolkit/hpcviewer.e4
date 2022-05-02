@@ -816,6 +816,12 @@ public class DataMeta extends DataCommon
 			switch(lexicalType) {
 			case FMT_METADB_LEXTYPE_FUNCTION:
 				newScope = createLexicalFunction(parent, lm, fs, ps, ctxId, flatId, line, relation);
+				if (parent instanceof LineScope) {
+					var p = parent.getParentScope();
+					linkParentChild(p, newScope);
+					parent.addScopeReduce(newScope);
+					return;
+				}
 				break;
 			case FMT_METADB_LEXTYPE_LOOP:
 				newScope = new LoopScope(rootCCT, fs, line, line, ctxId, flatId);
