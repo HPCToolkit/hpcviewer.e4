@@ -53,6 +53,7 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	}
 	
 	public MetricValue reduce(MetricValue target, MetricValue source) {
+		final float INSIGNIFICANT_NUMBER = 0.0000001f;
 		if (source == MetricValue.NONE)
 			return target;
 
@@ -78,11 +79,11 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		case FMT_METADB_COMBINE_Sum:
 			v1 = target.getValue();
 			v2 = source.getValue();
-			v1 = v1-v2;
-			if (v1 <= v2)
+			var d = v1-v2;
+			if (Math.abs(d)/v1 < INSIGNIFICANT_NUMBER)
 				return MetricValue.NONE; 
 			
-			target.setValue(v1);
+			target.setValue(d);
 			break;
 			
 		default:
