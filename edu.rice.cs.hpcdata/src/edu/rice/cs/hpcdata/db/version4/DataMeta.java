@@ -591,11 +591,35 @@ public class DataMeta extends DataCommon
 			if (lms == null)
 				lms = LoadModuleScope.NONE;
 			
+			// this line has to be remove once prof2 is fixed
+			int feature = getProcedureFeature(name);
+			
 			long key = pFunctions + (i * szFunctions);
-			ProcedureScope ps = new ProcedureScope(rootCCT, lms, file, line, line, name, false, position, i+baseId, null, 0);			
+			ProcedureScope ps = new ProcedureScope(rootCCT, lms, file, line, line, name, false, position, i+baseId, null, feature);			
 			mapProcedures.put(key, ps);
 		}
 		return mapProcedures;
+	}
+
+	
+	/*****
+	 * Temporary hack: return the procedure feature by scanning the name
+	 * This is a temporary code. It has to be removed once prof2 implements
+	 * properly the procedure feature. 
+	 * 
+	 * @param name
+	 * @return
+	 */
+	private int getProcedureFeature(String name) {
+		boolean isPartial = name.equals("<partial call paths>");
+
+		// check if the name is in the form of <.* root>
+		boolean isRoot = name.charAt(0) == '<' && name.endsWith(" root>");
+		
+		if (isPartial || isRoot)
+			return ProcedureScope.FeatureTopDown;
+		
+		return ProcedureScope.FeatureProcedure;
 	}
 	
 		
@@ -895,7 +919,8 @@ public class DataMeta extends DataCommon
 			
 			if (!(parent instanceof LineScope)) {
 				// no call site in the stack: it must be a procedure scope
-				return new ProcedureScope(rootCCT, ps.getLoadModule(), ps.getSourceFile(), line, line, ps.getName(), alien, ctxId, ps.getFlatIndex(), null, ProcedureScope.FeatureProcedure);				
+				int procFeature = ps.isTopDownProcedure() ? ProcedureScope.FeatureTopDown : ProcedureScope.FeatureProcedure; 
+				return new ProcedureScope(rootCCT, ps.getLoadModule(), ps.getSourceFile(), line, line, ps.getName(), alien, ctxId, ps.getFlatIndex(), null, procFeature);				
 			}
 			
 			ps.setAlien(alien);
