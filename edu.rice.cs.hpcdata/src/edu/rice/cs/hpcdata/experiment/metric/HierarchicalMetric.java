@@ -53,7 +53,7 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	}
 	
 	public MetricValue reduce(MetricValue target, MetricValue source) {
-		final float INSIGNIFICANT_NUMBER = 0.0000001f;
+		final float INSIGNIFICANT_NUMBER = 0.000001f;
 		if (source == MetricValue.NONE)
 			return target;
 
@@ -80,7 +80,7 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 			v1 = target.getValue();
 			v2 = source.getValue();
 			var d = v1-v2;
-			if (Math.abs(d)/v1 < INSIGNIFICANT_NUMBER)
+			if (Math.abs(d/v1) < INSIGNIFICANT_NUMBER)
 				return MetricValue.NONE; 
 			
 			target.setValue(d);
