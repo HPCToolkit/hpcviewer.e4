@@ -20,16 +20,20 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
+import edu.rice.cs.hpcdata.experiment.metric.MetricType;
+import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
+import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 
 public class ExperimentTest {
 
 	private static Experiment []experiments;
 	private static File []database;
-	private static String []dbPaths = new String[] {"bug-no-gpu-trace", "bug-empty", "bug-nometric", "prof2" + File.separator + "loop-inline"};
-	private static int []children   = new int[] {1, 0, 0, 1};
+	private static String []dbPaths = new String[] {"bug-no-gpu-trace", "bug-empty", "bug-nometric", 
+													"prof2" + File.separator + "loop-inline",
+													"prof2" + File.separator + "multithread"};
 	
 	public ExperimentTest() {
 		// empty, nothing to do
@@ -83,7 +87,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetVisibleMetrics() {
-		int num[] = new int[] {97, 2, 0, 3};
+		int num[] = new int[] {97, 2, 0, 3, 6};
 		int i = 0;
 		for(var experiment: experiments) {
 			List<BaseMetric> metrics = experiment.getVisibleMetrics();
@@ -95,7 +99,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetNonEmptyMetricIDs() {
-		final int nmetrics[] = new int[] {18, 0, 0, 1};
+		final int nmetrics[] = new int[] {18, 0, 0, 1, 3};
 		int i=0;
 		for(var experiment: experiments) {
 			RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
@@ -108,7 +112,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetMetricCount() {
-		int counts[] = new int[] {10, 0, 0, 2};
+		int counts[] = new int[] {10, 0, 0, 2, 6};
 		int i=0;
 		
 		for(var experiment: experiments) {
@@ -142,7 +146,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetMetricFromOrder() {
-		int []order = new int[] {0, 0, 1, 1};
+		int []order = new int[] {0, 0, 1, 1, 1};
 		int i = 0;
 		for(var experiment: experiments) {
 			if (experiment.getMetricCount()>0) {
@@ -155,7 +159,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testAddDerivedMetric() {
-		int indexes[] = new int[] {762, 0, 1, 1};
+		int indexes[] = new int[] {762, 0, 1, 1, 1};
 		int i=0;
 		
 		for(var experiment: experiments) {
@@ -181,7 +185,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testMetricValueDisplay() {
-		final int nmetrics[] = new int[] {18, 0, 0, 1};
+		final int nmetrics[] = new int[] {18, 0, 0, 1, 1};
 		int i=0;
 		for(var experiment: experiments) {
 			RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
@@ -206,6 +210,8 @@ public class ExperimentTest {
 	@Test
 	public void testGetRootScope() {
 		int i=0;
+		final int []children   = new int[] {1, 0, 0, 1, 2, 1};
+		
 		for(var experiment: experiments) {
 			RootScope rootCCT = experiment.getRootScope(RootScopeType.CallingContextTree);
 			RootScope rootCall = experiment.getRootScope(RootScopeType.CallerTree);
@@ -235,13 +241,95 @@ public class ExperimentTest {
 	}
 
 
+	@Test
+	public void testTree() {
+		for(var experiment: experiments) {
+			for (var root: experiment.getRootScopeChildren()) {
+				if (!root.hasChildren())
+					continue;
+				
+				for(var child: root.getChildren()) {
+					boolean result = testFlatContext(experiment, root, child);
+					if (!result)
+						System.err.println();
+					assertTrue( testFlatContext(experiment, root, child) );
+				}
+			}
+		}
+	}
+	
+	private boolean testFlatContext(Experiment exp, Scope parent, Scope context) {
+		var mvc = context.getMetricValues();
+		if (mvc == null)
+			return true;
+		
+		var parent_mvc = parent.getMetricValues();
+		var metrics = exp.getMetricList();
+		
+		for(var metric: metrics) {
+			var partner = exp.getMetric(metric.getPartner());
+			var mv1 = mvc.getValue(context, metric);
+			var mv2 = mvc.getValue(context, partner);
+			
+			// test the exclusive vs inclusive
+			if (metric.getMetricType() == MetricType.INCLUSIVE) {
+				int c = floatCompare(mv1.getValue(), mv2.getValue());
+				if (c < 0)
+					System.err.println("Error: incompatible metric value for " + context.getName() + " metric: " + metric.getDisplayName());
+				assertTrue(c>=0);
+			} else {
+				int c = floatCompare(mv1.getValue(), mv2.getValue());
+				if (c > 0) {
+					System.err.println("Error: incompatible metric value scope: " + context.getName() + " metric: " + metric.getDisplayName());
+				}
+				assertTrue(c<=0);
+			}
+			
+			// test comparison with the parent
+			var pv1 = parent_mvc.getValue(parent, metric);
+			
+			assertTrue(checkChildValue(metric, pv1, mv1));
+		}
+		
+		// traverse all the children
+		if (context.hasChildren()) {
+			for(var child: context.getChildren()) {
+				var result = testFlatContext(exp, context, child);
+				if (!result)
+					return false;
+			}
+		}
+		return true;
+	}
+	
+	private static int floatCompare(float f1, float f2) {
+		final float EPSILON = 0.000001f;
+		final float delta = f1 - f2;
+		final float diffEps = Math.abs(delta) / f1;
+		if (diffEps < EPSILON)
+			return 0;
+		else return (int) delta;
+	}
+	
+	
+	private boolean checkChildValue(BaseMetric metric, MetricValue mv1, MetricValue mv2) {
+		if (metric.getMetricType() == MetricType.INCLUSIVE) {
+			final int  c = floatCompare(mv1.getValue(), mv2.getValue());
+			if (c<0)
+				System.out.println("Error: parent is less than child for " + mv1.getValue() + " vs " + mv2.getValue());
+			return c>=0;
+		}
+		// exclusive metric: anything can happen
+		return true;
+	}
+	
 
 	@Test
 	public void testGetThreadData() throws IOException {
 		for(var experiment: experiments) {
 			var name = experiment.getName();
-			if (!name.contains("loop"))
-				assertNull(experiment.getThreadData());
+			if (name.contains("loop") || name.contains("multithread"))
+				assertNotNull(experiment.getThreadData());
 		}
 	}
 
@@ -261,7 +349,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetMaxDepth() {
-		final int maxdepth[] = new int[] {4, 0, 0, 6};
+		final int maxdepth[] = new int[] {4, 0, 0, 6, 20};
 		int i=0;
 		for(var experiment: experiments) {
 			assertTrue(experiment.getMaxDepth() > maxdepth[i]);
@@ -312,7 +400,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetName() {
-		final String []names = new String[] {"bandwidthTest", "a.out", "a.out", "loop-inline"};
+		final String []names = new String[] {"bandwidthTest", "a.out", "a.out", "loop-inline", "multithread"};
 		int i=0;
 		for(var experiment: experiments) {
 			String name = experiment.getName();
