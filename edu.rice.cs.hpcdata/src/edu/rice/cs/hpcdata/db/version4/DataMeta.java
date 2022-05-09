@@ -76,11 +76,12 @@ public class DataMeta extends DataCommon
 	private static final int INDEX_FILES   = 6;
 	private static final int INDEX_FUNCTIONS = 7;
 	
-	// future usage: 
-	// private static final int FMT_METADB_RELATION_LEXICAL_NEST = 0;
-	// private static final int FMT_METADB_RELATION_CALL = 1;
+	// Parent-child relation: 
+	private static final int FMT_METADB_RELATION_LEXICAL_NEST = 0;
+	private static final int FMT_METADB_RELATION_CALL = 1;
 	private static final int FMT_METADB_RELATION_CALL_INLINED = 2;
 
+	// lexical type:
 	private static final int FMT_METADB_LEXTYPE_FUNCTION = 0;
 	private static final int FMT_METADB_LEXTYPE_LOOP = 1;
 	private static final int FMT_METADB_LEXTYPE_LINE = 2;
@@ -919,11 +920,24 @@ public class DataMeta extends DataCommon
 			boolean alien  = relation == FMT_METADB_RELATION_CALL_INLINED;
 			
 			if (!(parent instanceof LineScope)) {
+				if (parent instanceof RootScope && ps == ProcedureScope.NONE) {
+					// partial call path if the parent is a root scope, and
+					// the procedure is unknown
+					return new ProcedureScope(rootCCT, 
+							LoadModuleScope.NONE, SourceFile.NONE, 
+							0, 0, 
+							"<partial call paths>", false, 
+							ctxId, Constants.FLAT_ID_PROC_UNKNOWN, 
+							null, ProcedureScope.FeatureRoot);
+
+				}
 				// no call site in the stack: it must be a procedure scope
 				int procFeature = ps.isTopDownProcedure() ? ProcedureScope.FeatureTopDown : ProcedureScope.FeatureProcedure; 
 				return new ProcedureScope(rootCCT, ps.getLoadModule(), ps.getSourceFile(), line, line, ps.getName(), alien, ctxId, ps.getFlatIndex(), null, procFeature);				
 			}
-			
+			if (relation == FMT_METADB_RELATION_LEXICAL_NEST)
+				return new ProcedureScope(rootCCT, ps.getLoadModule(), ps.getSourceFile(), line, line, ps.getName(), alien, ctxId, ps.getFlatIndex(), null, ProcedureScope.FeatureProcedure);				
+
 			ps.setAlien(alien);
 			LineScope ls = (LineScope) parent;
 			var cs = new CallSiteScope(ls, ps, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, flatId);
