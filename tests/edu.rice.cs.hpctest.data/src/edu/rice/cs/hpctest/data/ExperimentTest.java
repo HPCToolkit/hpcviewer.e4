@@ -225,10 +225,6 @@ public class ExperimentTest {
 			assertTrue(rootCall != rootFlat);
 			
 			rootCall = experiment.createCallersView(rootCCT, rootCall);
-			if (i==3)
-				//  not supported at the moment for prof2
-				// this will fail
-				continue;
 			
 			rootFlat = experiment.createFlatView(rootCCT, rootFlat);
 			
@@ -251,7 +247,7 @@ public class ExperimentTest {
 				for(var child: root.getChildren()) {
 					boolean result = testFlatContext(experiment, root, child);
 					if (!result)
-						System.err.println();
+						System.err.println("Tree test fails for: " + experiment.getName() + " scope: " + child.getName());
 					assertTrue( testFlatContext(experiment, root, child) );
 				}
 			}

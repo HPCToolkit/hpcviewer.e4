@@ -793,7 +793,8 @@ public class DataMeta extends DataCommon
 			long pFile   = 0;
 			int  line    = 0;
 			long pModule = 0;
-			byte nwords  = 0;			
+			byte nwords  = 0;
+			long offset  = 0;
 			/*
 				{Flags} above refers to an u8 bit field with the following sub-fields (bit 0 is least significant):
 				
@@ -824,7 +825,7 @@ public class DataMeta extends DataCommon
 				if (nFlexWords < nwords + 2) 
 					return;
 				pModule = buffer.getLong(loc + 0x18 + nwords * 8);
-				buffer.getLong(loc + 0x18 + (nwords+1) * 8);
+				offset  = buffer.getLong(loc + 0x18 + (nwords+1) * 8);
 				nwords++;
 			}
 			var ps = mapProcedures.getIfAbsent (pFunction, ()->ProcedureScope.NONE);
@@ -854,11 +855,11 @@ public class DataMeta extends DataCommon
 				newScope = new LineScope(rootCCT, fs, line, ctxId, flatId);
 				break;
 			case FMT_METADB_LEXTYPE_INSTRUCTION:
-				newScope = new InstructionScope(rootCCT, lm, ctxId, flatId);
+				newScope = new InstructionScope(rootCCT, lm, offset, ctxId, flatId);
 				newScope.setSourceFile(fs);
 				break;
 			default:
-				throw new RuntimeException("Invalid node relation field");
+				throw new RuntimeException("Invalid lexical type: " + lexicalType);
 			}
 			linkParentChild(parent, newScope);					
 		}
