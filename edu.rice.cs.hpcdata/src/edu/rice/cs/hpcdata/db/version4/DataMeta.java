@@ -424,14 +424,13 @@ public class DataMeta extends DataCommon
 					// this should be fixed when we parse metrics.yaml
 					m.setAnnotationType(AnnotationType.PERCENT);
 					
-					MetricType type = scopeName.equals(METRIC_SCOPE_EXECUTION) ? 
-														MetricType.INCLUSIVE : 
-														MetricType.EXCLUSIVE;
+					MetricType type = scopeName.equals(METRIC_SCOPE_EXECUTION) ? MetricType.INCLUSIVE  : 
+									  scopeName.equals(METRIC_SCOPE_POINT)     ? MetricType.POINT_EXCL : 
+										  MetricType.EXCLUSIVE;
 					m.setMetricType(type);
 										
-					VisibilityType vt = scopeName.equals(METRIC_SCOPE_POINT) ? 
-										VisibilityType.HIDE : 
-										VisibilityType.SHOW; 
+					VisibilityType vt = type == MetricType.POINT_EXCL ? 
+										VisibilityType.HIDE : VisibilityType.SHOW; 
 					m.setDisplayed(vt);
 
 					// store the index of this scope.
@@ -835,7 +834,7 @@ public class DataMeta extends DataCommon
 			
 			// linearize the flat id. This is not sufficient and causes collisions for large and complex source code
 			// This needs to be computed more reliably.
-			int flatId = getKey(lm, fs, ps, line, lexicalType);
+			int flatId = getKey(lm, fs, ps, line, lexicalType, relation);
 			
 			newScope = null; 
 
@@ -865,11 +864,14 @@ public class DataMeta extends DataCommon
 			linkParentChild(parent, newScope);					
 		}
 		
-		private int getKey(LoadModuleScope lms, SourceFile sf, ProcedureScope ps, int line, int lexicalType) {
+		private int getKey(LoadModuleScope lms, SourceFile sf, ProcedureScope ps, int line, int lexicalType, int relation) {
 			final String SEPARATOR = ":";
 			
 			StringBuilder sb = new StringBuilder();
-			sb.append(lexicalType);
+			sb.append('l' + lexicalType);
+			sb.append(SEPARATOR);
+			
+			sb.append('r' + relation);
 			sb.append(SEPARATOR);
 			
 			sb.append(lms.getFlatIndex());
@@ -927,7 +929,7 @@ public class DataMeta extends DataCommon
 							LoadModuleScope.NONE, SourceFile.NONE, 
 							0, 0, 
 							"<partial call paths>", false, 
-							ctxId, Constants.FLAT_ID_PROC_UNKNOWN, 
+							ctxId, Constants.FLAT_ID_PROC_PARTIAL, 
 							null, ProcedureScope.FeatureRoot);
 
 				}

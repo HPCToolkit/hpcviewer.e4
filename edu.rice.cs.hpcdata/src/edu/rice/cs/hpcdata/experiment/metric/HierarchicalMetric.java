@@ -98,8 +98,10 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		String name = super.getDisplayName();
 		if (getMetricType() == MetricType.EXCLUSIVE)
 			return name + " (E)";
-		else
+		else if (getMetricType() == MetricType.INCLUSIVE)
 			return name + " (I)";
+		else
+			return name + " (X)";
 	}
 	
 	@Override
