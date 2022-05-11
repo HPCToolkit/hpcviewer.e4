@@ -5,7 +5,6 @@ import java.util.*;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.scope.AlienScope;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
-import edu.rice.cs.hpcdata.experiment.scope.CallSiteScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.FileScope;
 import edu.rice.cs.hpcdata.experiment.scope.GroupScope;
 import edu.rice.cs.hpcdata.experiment.scope.InstructionScope;
@@ -390,6 +389,8 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 		}
 
 		FlatScopeInfo objFlat = getFlatScope(cct_s);
+		if (objFlat == null)
+			return null;
 
 		if (flat_enc_s != null) {
 			// Check if there is a cyclic dependency between the child and the ancestors
@@ -415,65 +416,6 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 		
 	}
 	
-	
-	/***
-	 * Special handle:
-	 *  check if cct scope is a procedure AND its parent is also a procedure
-	 *  
-	 * @param id
-	 * @param scope
-	 * @param flat_enc_s
-	 * @param cct_s_metrics
-	 * @return
-	 */
-	private Scope checkIfProcedureIsACallsite(String id, Scope scope, Scope flat_enc_s, Scope cct_s_metrics) {
-		Scope nodeToAdd = scope;
-		
-		// check if cct scope is a procedure AND its parent is also a procedure
-		// normally this doesn't make sense, but in prof2 it's possible a procedure
-		// calls another procedure. For instance in the cct:
-		//
-		// <program root>
-		//    |
-		//    +---> main (as a call site AND a procedure)
-		//
-		// in this case both <program root> and main are procedures. We want to
-		// to create the flat tree of this into:
-		//
-		// file
-		//   |
-		//   +---> <program root>
-		//   |         |
-		//   |         +---> main (as a call site)
-		//   |
-		//   +---> main (as a procedure)
-		
-		ProcedureScope ps = findEnclosingProcedure(scope);
-		if (ps != null && 
-			scope instanceof ProcedureScope && 
-			ps instanceof ProcedureScope) {
-
-			// try to find a child in the enclosing procedure that has the same flat index
-			// as the current scope.
-			// If this is the case, we should reuse the existing child as the call site
-			Scope cs = null;
-			if (flat_enc_s.hasChildren())
-				for(var child: flat_enc_s.getChildren()) {
-					if (child.getFlatIndex() == scope.getFlatIndex()) {
-						cs = child;
-						break;
-					}
-				}
-			if (cs == null) {
-				// create a copy scope as a callsite
-				LineScope ls = new LineScope(scope.getRootScope(), scope.getSourceFile(), 0, generateNodeIndex(), scope.getFlatIndex());
-				cs = new CallSiteScope(ls, (ProcedureScope)scope, CallSiteScopeType.CALL_TO_PROCEDURE, generateNodeIndex(), scope.getFlatIndex());
-			}
-			nodeToAdd = cs;					
-			this.addCostIfNecessary(id, scope, cct_s_metrics, true, true);
-		}
-		return nodeToAdd;
-	}
 	
 	/***********************************************************
 	 * Retrieve the ID given a scope

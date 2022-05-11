@@ -80,7 +80,7 @@ public class DataMeta extends DataCommon
 	
 	// Parent-child relation: 
 	private static final int FMT_METADB_RELATION_LEXICAL_NEST = 0;
-	private static final int FMT_METADB_RELATION_CALL = 1;
+	private static final int FMT_METADB_RELATION_CALL 		  = 1;
 	private static final int FMT_METADB_RELATION_CALL_INLINED = 2;
 
 	// lexical type:
@@ -863,7 +863,8 @@ public class DataMeta extends DataCommon
 			default:
 				newScope = new UnknownScope(rootCCT, fs, flatId);
 			}
-			linkParentChild(parent, newScope);					
+			if (parent != null)
+				linkParentChild(parent, newScope);					
 		}
 		
 		private int getKey(LoadModuleScope lms, SourceFile sf, ProcedureScope ps, int line, int lexicalType, int relation) {
