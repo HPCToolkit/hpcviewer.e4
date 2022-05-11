@@ -127,22 +127,8 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 				if (scope instanceof CallSiteScope) {
 					ProcedureScope proc_cct_s = ((CallSiteScope) scope).getProcedureScope();
 					getFlatCounterPart(proc_cct_s, scope, id);
-				} else if (scope instanceof ProcedureCallScope) {
-					// corner case for prof2: sometimes we have a call to a procedure, and this
-					// procedure can be a leaf node. 
-					// in this case, we should create:
-					//  - a call site of this procedure, and
-					//  - a procedure itself attached to a file
-					//
-					FlatScopeInfo flatProc = getFlatScope(scope);
-					final boolean leafNode = !scope.hasChildren();
-					
-					addCostIfNecessary(id, flatProc.flat_s,    scope, true, leafNode);
-					addCostIfNecessary(id, flatProc.flat_lm,   scope, true, leafNode);
-					addCostIfNecessary(id, flatProc.flat_file, scope, true, leafNode);
 				}
 			}
-
 		} else {
 			
 			//--------------------------------------------------------------------------
@@ -235,7 +221,8 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 			//-----------------------------------------------------------------------------
 			// Attach the scope to the file if it is a procedure
 			//-----------------------------------------------------------------------------
-			if (flat_info_s.flat_s instanceof ProcedureScope) {
+			if (flat_info_s.flat_s instanceof ProcedureScope && 
+				!(flat_info_s.flat_s instanceof ProcedureCallScope)) {
 				this.addToTree(flat_info_s.flat_file, flat_info_s.flat_s);
 			}
 		}
@@ -395,19 +382,13 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 		if (flat_enc_s != null) {
 			// Check if there is a cyclic dependency between the child and the ancestors
 			if (!isCyclicDependency(flat_enc_s, objFlat.flat_s)) {
-				//var scope = checkIfProcedureIsACallsite(id, objFlat.flat_s, flat_enc_s, cct_s_metrics);
-				this.addToTree(flat_enc_s, objFlat.flat_s);
-				
+				// no cyclic dependency: it's safe to add to the parent
+				this.addToTree(flat_enc_s, objFlat.flat_s);				
 			} else {
-				// rare case: cyclic dependency
+				// A very rare case: cyclic dependency
 				// TODO: we should create a new copy and attach it to the tree
 				// but this will cause an issue for adding metrics and decrement counter
-				// at the moment we just avoid cyclic dependency
-				
-				Scope copy = objFlat.flat_s.duplicate();
-				//copy.setCCTIndex(generateNodeIndex());
-				
-				this.addToTree(flat_enc_s, copy);
+				// at the moment we just avoid cyclic dependency				
 			}
 		}
 		this.addCostIfNecessary(id, objFlat.flat_s, cct_s_metrics, true, true);
@@ -459,6 +440,12 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 			hash_id.append(scope.getFlatIndex());
 
 			if (scope instanceof ProcedureCallScope) {
+				// it's a procedure but a call at the same time
+				// get the caller id:
+				Scope parent = scope.getParentScope();
+				hash_id.append(SEPARATOR_ID);
+				hash_id.append(parent.getFlatIndex());
+				
 				// additional signature for prof2's call procedure.
 				hash_id.append(SEPARATOR_ID);
 				hash_id.append("pc");

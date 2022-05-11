@@ -11,4 +11,17 @@ public class ProcedureCallScope extends ProcedureScope {
 		super(root, loadModule, file, lineNumber, lineNumber, proc, _isalien, cct_id, flat_id, userData, procedureFeature);
 	}
 
+	public Scope duplicate() {
+		return new ProcedureCallScope(
+				root, 
+				objLoadModule, 
+				sourceFile, 
+				firstLineNumber, 
+				procedureName, 
+				isalien, 
+				getCCTIndex(), 
+				getFlatIndex(), 
+				null, 
+				FeatureProcedure);
+	}
 }
