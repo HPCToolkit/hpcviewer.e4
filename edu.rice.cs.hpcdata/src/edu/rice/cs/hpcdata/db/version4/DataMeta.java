@@ -30,10 +30,12 @@ import edu.rice.cs.hpcdata.experiment.scope.InstructionScope;
 import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoadModuleScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoopScope;
+import edu.rice.cs.hpcdata.experiment.scope.ProcedureCallScope;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.experiment.scope.UnknownScope;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.CallingContextReassignment;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.TraceScopeVisitor;
 import edu.rice.cs.hpcdata.experiment.source.SimpleSourceFile;
@@ -859,7 +861,7 @@ public class DataMeta extends DataCommon
 				newScope.setSourceFile(fs);
 				break;
 			default:
-				throw new RuntimeException("Invalid lexical type: " + lexicalType);
+				newScope = new UnknownScope(rootCCT, fs, flatId);
 			}
 			linkParentChild(parent, newScope);					
 		}
@@ -935,14 +937,15 @@ public class DataMeta extends DataCommon
 				}
 				// no call site in the stack: it must be a procedure scope
 				int procFeature = ps.isTopDownProcedure() ? ProcedureScope.FeatureTopDown : ProcedureScope.FeatureProcedure; 
-				return new ProcedureScope(rootCCT, ps.getLoadModule(), ps.getSourceFile(), line, line, ps.getName(), alien, ctxId, ps.getFlatIndex(), null, procFeature);				
+				return new ProcedureCallScope(rootCCT, ps.getLoadModule(), ps.getSourceFile(), line, ps.getName(), alien, ctxId, ps.getFlatIndex(), null, procFeature);				
 			}
 			if (relation == FMT_METADB_RELATION_LEXICAL_NEST)
 				return new ProcedureScope(rootCCT, ps.getLoadModule(), ps.getSourceFile(), line, line, ps.getName(), alien, ctxId, ps.getFlatIndex(), null, ProcedureScope.FeatureProcedure);				
 
 			ps.setAlien(alien);
 			LineScope ls = (LineScope) parent;
-			var cs = new CallSiteScope(ls, ps, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, flatId);
+			int fid = new String(String.valueOf(ls.getFlatIndex()) + ":" + flatId).hashCode();
+			var cs = new CallSiteScope(ls, ps, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, fid);
 			
 			// Only the line statement knows where the source file is
 			// If the line statement is unknown then the source file is unknown.
