@@ -8,9 +8,11 @@ import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.FileScope;
 import edu.rice.cs.hpcdata.experiment.scope.GroupScope;
+import edu.rice.cs.hpcdata.experiment.scope.InstructionScope;
 import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoadModuleScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoopScope;
+import edu.rice.cs.hpcdata.experiment.scope.ProcedureCallScope;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -126,6 +128,19 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 				if (scope instanceof CallSiteScope) {
 					ProcedureScope proc_cct_s = ((CallSiteScope) scope).getProcedureScope();
 					getFlatCounterPart(proc_cct_s, scope, id);
+				} else if (scope instanceof ProcedureCallScope) {
+					// corner case for prof2: sometimes we have a call to a procedure, and this
+					// procedure can be a leaf node. 
+					// in this case, we should create:
+					//  - a call site of this procedure, and
+					//  - a procedure itself attached to a file
+					//
+					FlatScopeInfo flatProc = getFlatScope(scope);
+					final boolean leafNode = !scope.hasChildren();
+					
+					addCostIfNecessary(id, flatProc.flat_s,    scope, true, leafNode);
+					addCostIfNecessary(id, flatProc.flat_lm,   scope, true, leafNode);
+					addCostIfNecessary(id, flatProc.flat_file, scope, true, leafNode);
 				}
 			}
 
@@ -354,14 +369,14 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 		if (cct_parent_s != null) {
 			if (cct_parent_s instanceof RootScope) {
 				// ----------------------------------------------
-				// main procedure
+				// main procedure: no parent
 				// ----------------------------------------------
 				flat_enc_s = null;
 			} else {
 				FlatScopeInfo flat_enc_info = null;
 				if ( cct_parent_s instanceof CallSiteScope ) {
 					// ----------------------------------------------
-					// parent is a call site
+					// parent is a call site: find the procedure scope of this call
 					// ----------------------------------------------
 					ProcedureScope proc_cct_s = ((CallSiteScope)cct_parent_s).getProcedureScope(); 
 					flat_enc_info = getFlatScope(proc_cct_s);
@@ -396,7 +411,8 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 		}
 		this.addCostIfNecessary(id, objFlat.flat_s, cct_s_metrics, true, true);
 		
-		return objFlat;		
+		return objFlat;
+		
 	}
 	
 	
@@ -471,8 +487,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 	 * @return
 	 ***********************************************************/
 	private String getID( Scope scope ) {
-		final String id = String.valueOf(scope.getFlatIndex());
-		StringBuffer hash_id = new StringBuffer(id);
+		StringBuffer hash_id = new StringBuffer();
 		
 		final String class_type = scope.getClass().getSimpleName();
 		if (class_type != null) {
@@ -480,12 +495,32 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 		}
 		if (scope instanceof CallSiteScope)
 		{
+			hash_id.append(SEPARATOR_ID);
+			hash_id.append(scope.getFlatIndex());
+
+			CallSiteScope cs = (CallSiteScope) scope;
+			LineScope ls = cs.getLineScope();
+
+			hash_id.append(SEPARATOR_ID);
+			hash_id.append(ls.getSourceFile().getFileID());
+			
+			hash_id.append(SEPARATOR_ID);
+			hash_id.append(ls.getLineNumber());
+
 			// forcing to include procedure ID to ensure uniqueness of call site
-			final int proc_id = ((CallSiteScope)scope).getProcedureScope().getFlatIndex();
+			final int proc_id = cs.getProcedureScope().getFlatIndex();
 			hash_id.append(SEPARATOR_ID);
 			hash_id.append(proc_id);
 		} else if (scope instanceof ProcedureScope) 
 		{
+			hash_id.append(SEPARATOR_ID);
+			hash_id.append(scope.getFlatIndex());
+
+			if (scope instanceof ProcedureCallScope) {
+				// additional signature for prof2's call procedure.
+				hash_id.append(SEPARATOR_ID);
+				hash_id.append("pc");
+			}
 			ProcedureScope proc_scope = (ProcedureScope) scope;
 			if (proc_scope.isFalseProcedure()) {
 				int linenum = proc_scope.getFirstLineNumber();
@@ -497,6 +532,13 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 				hash_id.append(SEPARATOR_ID);
 				hash_id.append(linenum);
 			}
+		} else if (scope instanceof InstructionScope) {
+			InstructionScope is = (InstructionScope) scope;
+			hash_id.append(SEPARATOR_ID);
+			hash_id.append(is.getName());
+		} else if (scope instanceof LoopScope || scope instanceof LineScope) {
+			hash_id.append(SEPARATOR_ID);
+			hash_id.append(scope.getName());
 		}
 		return hash_id.toString();
 	}
