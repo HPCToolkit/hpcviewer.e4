@@ -410,7 +410,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 	 * @return
 	 ***********************************************************/
 	private String getID( Scope scope ) {
-		StringBuffer hash_id = new StringBuffer();
+		var hash_id = new StringBuilder();
 		
 		final String class_type = scope.getClass().getSimpleName();
 		if (class_type != null) {

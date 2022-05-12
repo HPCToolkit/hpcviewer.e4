@@ -28,12 +28,14 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 
 public class ExperimentTest {
-
+	private static final String DB_MULTITHREAD = "multithread";
+	private static final String DB_LOOP_INLINE = "loop-inline";
+	
 	private static Experiment []experiments;
 	private static File []database;
 	private static String []dbPaths = new String[] {"bug-no-gpu-trace", "bug-empty", "bug-nometric", 
-													"prof2" + File.separator + "loop-inline",
-													"prof2" + File.separator + "multithread"};
+													"prof2" + File.separator + DB_LOOP_INLINE,
+													"prof2" + File.separator + DB_MULTITHREAD};
 	
 	public ExperimentTest() {
 		// empty, nothing to do
@@ -87,7 +89,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetVisibleMetrics() {
-		int num[] = new int[] {97, 2, 0, 3, 6};
+		int []num = new int[] {97, 2, 0, 3, 6};
 		int i = 0;
 		for(var experiment: experiments) {
 			List<BaseMetric> metrics = experiment.getVisibleMetrics();
@@ -99,7 +101,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetNonEmptyMetricIDs() {
-		final int nmetrics[] = new int[] {18, 0, 0, 1, 3};
+		final int []nmetrics = new int[] {18, 0, 0, 1, 3};
 		int i=0;
 		for(var experiment: experiments) {
 			RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
@@ -112,7 +114,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetMetricCount() {
-		int counts[] = new int[] {10, 0, 0, 2, 6};
+		int []counts = new int[] {10, 0, 0, 2, 6};
 		int i=0;
 		
 		for(var experiment: experiments) {
@@ -159,7 +161,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testAddDerivedMetric() {
-		int indexes[] = new int[] {762, 0, 1, 1, 1};
+		int []indexes = new int[] {762, 0, 1, 1, 1};
 		int i=0;
 		
 		for(var experiment: experiments) {
@@ -185,7 +187,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testMetricValueDisplay() {
-		final int nmetrics[] = new int[] {18, 0, 0, 1, 1};
+		final int []nmetrics = new int[] {18, 0, 0, 1, 1};
 		int i=0;
 		for(var experiment: experiments) {
 			RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
@@ -259,7 +261,7 @@ public class ExperimentTest {
 		if (mvc == null)
 			return true;
 		
-		var parent_mvc = parent.getMetricValues();
+		var mvcParent = parent.getMetricValues();
 		var metrics = exp.getMetricList();
 		
 		for(var metric: metrics) {
@@ -270,19 +272,14 @@ public class ExperimentTest {
 			// test the exclusive vs inclusive
 			if (metric.getMetricType() == MetricType.INCLUSIVE) {
 				int c = floatCompare(mv1.getValue(), mv2.getValue());
-				if (c < 0)
-					System.err.println("Error: incompatible metric value for " + context.getName() + " metric: " + metric.getDisplayName());
 				assertTrue(c>=0);
 			} else {
 				int c = floatCompare(mv1.getValue(), mv2.getValue());
-				if (c > 0) {
-					System.err.println("Error: incompatible metric value scope: " + context.getName() + " metric: " + metric.getDisplayName());
-				}
 				assertTrue(c<=0);
 			}
 			
 			// test comparison with the parent
-			var pv1 = parent_mvc.getValue(parent, metric);
+			var pv1 = mvcParent.getValue(parent, metric);
 			
 			assertTrue(checkChildValue(metric, pv1, mv1));
 		}
@@ -309,10 +306,8 @@ public class ExperimentTest {
 	
 	
 	private boolean checkChildValue(BaseMetric metric, MetricValue mv1, MetricValue mv2) {
-		if (metric.getMetricType() == MetricType.INCLUSIVE) {
+		if (metric.getMetricType() == MetricType.INCLUSIVE) { 
 			final int  c = floatCompare(mv1.getValue(), mv2.getValue());
-			if (c<0)
-				System.out.println("Error: parent is less than child for " + mv1.getValue() + " vs " + mv2.getValue());
 			return c>=0;
 		}
 		// exclusive metric: anything can happen
@@ -324,7 +319,7 @@ public class ExperimentTest {
 	public void testGetThreadData() throws IOException {
 		for(var experiment: experiments) {
 			var name = experiment.getName();
-			if (name.contains("loop") || name.contains("multithread"))
+			if (name.contains("loop") || name.contains(DB_MULTITHREAD))
 				assertNotNull(experiment.getThreadData());
 		}
 	}
@@ -396,7 +391,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetName() {
-		final String []names = new String[] {"bandwidthTest", "a.out", "a.out", "loop-inline", "multithread"};
+		final String []names = new String[] {"bandwidthTest", "a.out", "a.out", DB_LOOP_INLINE, DB_MULTITHREAD};
 		int i=0;
 		for(var experiment: experiments) {
 			String name = experiment.getName();

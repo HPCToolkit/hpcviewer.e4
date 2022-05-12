@@ -67,6 +67,7 @@ public class DataMeta extends DataCommon
 	private final static String HEADER_MAGIC_STR   = "HPCTOOLKITmeta";
 	
 	private final static String METRIC_SCOPE_POINT     = "point";
+	private static final String METRIC_SCOPE_FUNCTION  = "function";
 	private static final String METRIC_SCOPE_EXECUTION = "execution";
 		
 	private static final int INDEX_GENERAL = 0;
@@ -426,9 +427,18 @@ public class DataMeta extends DataCommon
 					// this should be fixed when we parse metrics.yaml
 					m.setAnnotationType(AnnotationType.PERCENT);
 					
-					MetricType type = scopeName.equals(METRIC_SCOPE_EXECUTION) ? MetricType.INCLUSIVE  : 
-									  scopeName.equals(METRIC_SCOPE_POINT)     ? MetricType.POINT_EXCL : 
-										  MetricType.EXCLUSIVE;
+					MetricType type = MetricType.UNKNOWN;
+					
+					switch(scopeName) {
+					case METRIC_SCOPE_EXECUTION:
+						type = MetricType.INCLUSIVE;
+						break;
+					case METRIC_SCOPE_POINT:
+						type = MetricType.POINT_EXCL;
+						break;
+					case METRIC_SCOPE_FUNCTION:
+						type = MetricType.EXCLUSIVE;
+					}
 					m.setMetricType(type);
 										
 					VisibilityType vt = type == MetricType.POINT_EXCL ? 
@@ -499,7 +509,7 @@ public class DataMeta extends DataCommon
 		short szModule = buffer.getShort(0x0c);
 		
 		int baseOffset = (int) (pModules - section.offset);
-		LongObjectHashMap<LoadModuleScope> mapLoadModules = new LongObjectHashMap<>(numModules);
+		LongObjectHashMap<LoadModuleScope> mapModules = new LongObjectHashMap<>(numModules);
 		int baseId = Constants.FLAT_ID_BEGIN + 1;
 		
 		for(int i=0; i<numModules; i++) {
@@ -510,10 +520,10 @@ public class DataMeta extends DataCommon
 			
 			LoadModuleScope lms = new LoadModuleScope(rootCCT, path, SourceFile.NONE, i+baseId);
 			long key = pModules + delta;
-			mapLoadModules.put(key, lms);
+			mapModules.put(key, lms);
 		}
 		
-		return mapLoadModules;
+		return mapModules;
 	}
 	
 	
@@ -842,7 +852,7 @@ public class DataMeta extends DataCommon
 
 			switch(lexicalType) {
 			case FMT_METADB_LEXTYPE_FUNCTION:
-				newScope = createLexicalFunction(parent, lm, fs, ps, ctxId, flatId, line, relation);
+				newScope = createLexicalFunction(parent, ps, ctxId, flatId, line, relation);
 				if (parent instanceof LineScope) {
 					var p = parent.getParentScope();
 					linkParentChild(p, newScope);
@@ -914,8 +924,6 @@ public class DataMeta extends DataCommon
 		 */
 		private Scope createLexicalFunction( 
 											Scope parent, 
-											LoadModuleScope lm,
-											SourceFile fs,
 											ProcedureScope ps, 
 											int ctxId,
 											int flatId,
@@ -945,7 +953,7 @@ public class DataMeta extends DataCommon
 
 			ps.setAlien(alien);
 			LineScope ls = (LineScope) parent;
-			int fid = new String(String.valueOf(ls.getFlatIndex()) + ":" + flatId).hashCode();
+			int fid = String.valueOf(ls.getFlatIndex() + ":" + ls.getFirstLineNumber()).hashCode();
 			var cs = new CallSiteScope(ls, ps, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, fid);
 			
 			// Only the line statement knows where the source file is

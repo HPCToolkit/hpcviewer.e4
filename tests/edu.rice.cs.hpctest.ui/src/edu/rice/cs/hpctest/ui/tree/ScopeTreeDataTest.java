@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Random;
+import java.security.SecureRandom;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -19,19 +19,20 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpctree.ScopeTreeData;
 
-class ScopeTreeDataTest {
-
-	private static Experiment []experiments;
+class ScopeTreeDataTest 
+{
 	private static String []dbPaths = new String[] {"bug-no-gpu-trace", "bug-empty", "bug-nometric", 
 													"prof2" + File.separator + "loop-inline",
 													"prof2" + File.separator + "multithread"};
 	private static ScopeTreeData []treeData;
+	private static SecureRandom random; 
 
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
-		experiments = new Experiment[dbPaths.length];
+		var experiments = new Experiment[dbPaths.length];
 		treeData    = new ScopeTreeData[dbPaths.length];
-		
+		random = SecureRandom.getInstanceStrong();
+		 
 		File []database = new File[dbPaths.length];
 		int i=0;
 		for (String dbp: dbPaths) {
@@ -73,14 +74,12 @@ class ScopeTreeDataTest {
 	}
 
 	@Test
-	void testSort() {
-		Random r = new Random();
-		
+	void testSort() {		
 		for (ScopeTreeData tree: treeData) {
 			var root = tree.getRoot();
 			assertNotNull(root);
 			int numMetrics = tree.getMetricCount();			
-			int i = numMetrics == 0 ? 0 : r.nextInt(numMetrics);
+			int i = numMetrics == 0 ? 0 : random.nextInt(numMetrics);
 			tree.sort(i, SortDirectionEnum.ASC, false);
 		}
 	}
@@ -98,8 +97,6 @@ class ScopeTreeDataTest {
 
 	@Test
 	void testGetDepthOfDataScope() {
-		Random r = new Random();
-		
 		for (ScopeTreeData tree: treeData) {
 			var root = tree.getRoot();
 			assertNotNull(root);
@@ -114,7 +111,7 @@ class ScopeTreeDataTest {
 				list.addAll(scope.getChildren());
 				
 				int numChildren = scope.getSubscopeCount();
-				int index = r.nextInt(numChildren);				
+				int index = random.nextInt(numChildren);				
 				scope = scope.getSubscope(index);
 				
 				depth++;

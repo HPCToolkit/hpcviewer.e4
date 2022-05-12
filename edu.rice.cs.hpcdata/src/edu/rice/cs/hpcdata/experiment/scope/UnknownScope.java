@@ -25,9 +25,7 @@ public class UnknownScope extends Scope
 				sb.append(":");
 				sb.append(firstLineNumber);
 			}
-		}
-		
-		return "<unknown context>";
+		}		
+		return sb.toString();
 	}
-
 }
