@@ -57,55 +57,30 @@ class ScopeTreeDataTest
 		}
 	}
 
+
 	@Test
-	void testGetList() {
+	void testMain() {		
 		for (ScopeTreeData tree: treeData) {
+			var root = tree.getRoot();
+			assertNotNull(root);
+			
 			var list = tree.getList();
 			assertNotNull(list);
-		}
-	}
 
-	@Test
-	void testGetRoot() {
-		for (ScopeTreeData tree: treeData) {
-			var root = tree.getRoot();
-			assertNotNull(root);
-		}
-	}
-
-	@Test
-	void testSort() {		
-		for (ScopeTreeData tree: treeData) {
-			var root = tree.getRoot();
-			assertNotNull(root);
 			int numMetrics = tree.getMetricCount();			
 			int i = numMetrics == 0 ? 0 : random.nextInt(numMetrics);
 			tree.sort(i, SortDirectionEnum.ASC, false);
-		}
-	}
-
-	@Test
-	void testGetMetric() {
-		for (ScopeTreeData tree: treeData) {
-			int numMetrics = tree.getMetricCount();
-			for (int i=0; i<numMetrics; i++) {
+			
+			for (i=0; i<numMetrics; i++) {
 				var metric = tree.getMetric(i);
 				assertNotNull(metric);
 			}
-		}
-	}
-
-	@Test
-	void testGetDepthOfDataScope() {
-		for (ScopeTreeData tree: treeData) {
-			var root = tree.getRoot();
-			assertNotNull(root);
+			
 			int depth = 0;
 			int numScopes = 1;
 			
 			assertTrue( tree.getDepthOfData(root) == depth);
 			Scope scope = root;
-			var list = tree.getList();
 			
 			while (scope.hasChildren()) {
 				list.addAll(scope.getChildren());
@@ -124,6 +99,7 @@ class ScopeTreeDataTest
 				
 				numScopes += numChildren;
 			}
+
 		}
 	}
 }

@@ -427,7 +427,7 @@ public class DataMeta extends DataCommon
 					// this should be fixed when we parse metrics.yaml
 					m.setAnnotationType(AnnotationType.PERCENT);
 					
-					MetricType type = MetricType.UNKNOWN;
+					MetricType type;
 					
 					switch(scopeName) {
 					case METRIC_SCOPE_EXECUTION:
@@ -438,6 +438,9 @@ public class DataMeta extends DataCommon
 						break;
 					case METRIC_SCOPE_FUNCTION:
 						type = MetricType.EXCLUSIVE;
+						break;
+					default:
+						type = MetricType.UNKNOWN;
 					}
 					m.setMetricType(type);
 										
@@ -852,7 +855,7 @@ public class DataMeta extends DataCommon
 
 			switch(lexicalType) {
 			case FMT_METADB_LEXTYPE_FUNCTION:
-				newScope = createLexicalFunction(parent, ps, ctxId, flatId, line, relation);
+				newScope = createLexicalFunction(parent, ps, ctxId, line, relation);
 				if (parent instanceof LineScope) {
 					var p = parent.getParentScope();
 					linkParentChild(p, newScope);
@@ -926,7 +929,6 @@ public class DataMeta extends DataCommon
 											Scope parent, 
 											ProcedureScope ps, 
 											int ctxId,
-											int flatId,
 											int line, 
 											int relation) {
 			
