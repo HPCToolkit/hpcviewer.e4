@@ -431,9 +431,26 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 			hash_id.append(ls.getLineNumber());
 
 			// forcing to include procedure ID to ensure uniqueness of call site
-			final int proc_id = cs.getProcedureScope().getFlatIndex();
+			final ProcedureScope proc_scope = cs.getProcedureScope();
+			final int proc_id = proc_scope.getFlatIndex();
 			hash_id.append(SEPARATOR_ID);
 			hash_id.append(proc_id);
+			
+			// fix issue #200: needs to separate inlined codes from different calls
+			// assume the following example:
+			//  a -> [i] x
+			//  b -> [i] x
+			// we should make sure the id of inlined x is different from the two calls
+			// The reason is that the line scope of both calls are the same (since they are inlined).
+			// so we have to add the flat id of the parent as an id
+			
+			if (proc_scope.isAlien()) {
+				var parent = scope.getParentScope();
+				if (parent != null) {
+					hash_id.append(SEPARATOR_ID);
+					hash_id.append(parent.getFlatIndex());				
+				}
+			}
 		} else if (scope instanceof ProcedureScope) 
 		{
 			hash_id.append(SEPARATOR_ID);
