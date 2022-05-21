@@ -1,6 +1,5 @@
 package edu.rice.cs.hpctraceviewer.data.local;
 
-import java.io.File;
 import java.io.IOException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -8,7 +7,6 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 
 import edu.rice.cs.hpcdata.db.IFileDB;
 import edu.rice.cs.hpcdata.db.version2.FileDB2;
-import edu.rice.cs.hpcdata.db.version4.DataTrace;
 import edu.rice.cs.hpcdata.db.version4.FileDB4;
 import edu.rice.cs.hpcdata.db.version4.MetricValueCollection4;
 import edu.rice.cs.hpcdata.experiment.Experiment;
@@ -17,7 +15,6 @@ import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.util.Constants;
-import edu.rice.cs.hpcdata.util.Util;
 import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 

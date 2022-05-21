@@ -17,7 +17,6 @@ import edu.rice.cs.hpcdata.db.version4.FileDB4;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.Experiment.ExperimentOpenFlag;
 import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
-import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
@@ -147,8 +146,6 @@ public class CallPathTest {
 
 			var children = scope.getChildren();
 			for(var child: children) {
-				if (child instanceof RootScope)
-					System.out.println();
 				addCallPath(callpath, child, 1);
 			}
 			// test existent cpid

@@ -238,9 +238,7 @@ public class ExperimentTest {
 				
 				for(var child: root.getChildren()) {
 					boolean result = testFlatContext(experiment, root, child);
-					if (!result)
-						System.err.println("Tree test fails for: " + experiment.getName() + " scope: " + child.getName());
-					assertTrue( testFlatContext(experiment, root, child) );
+					assertTrue( "Tree test fails for: " + experiment.getName() + " scope: " + child.getName(), result);
 				}
 			}
 		}
