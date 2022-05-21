@@ -15,4 +15,5 @@ Require-Bundle: edu.rice.cs.hpcdata,
  ca.odell.glazedlists,
  org.eclipse.nebula.widgets.nattable.core,
  org.eclipse.jface,
- edu.rice.cs.hpctraceviewer.data
+ edu.rice.cs.hpctraceviewer.data,
+ edu.rice.cs.hpctest.util

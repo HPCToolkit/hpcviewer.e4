@@ -23,7 +23,7 @@ public class MetricTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		Path resource = Paths.get("..", "resources", "prof2", "loop-inline");
+		Path resource = Paths.get("..", "resources", "metadb", "loop-inline");
 		File dbPath = resource.toFile();
 		
 		assertNotNull(dbPath);

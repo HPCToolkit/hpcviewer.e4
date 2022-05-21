@@ -18,6 +18,10 @@ public class Constants {
 	public final static int EXPERIMENT_SPARSE_VERSION = 4;
 	public final static int EXPERIMENT_DENSED_VERSION = 2;
 	
+	public static final String TRACE_FILE_SPARSE_VERSION = "trace.db";
+	public static final String TRACE_FILE_DENSED_VERSION = "experiment.mt";
+	public static final String TRACE_EXT_RAW_DENSED_VERSION = "*.hpctrace";
+	
 	public final static String PROCEDURE_UNKNOWN = "<unknown>";
 	
 	public static final String  PROC_NO_ACTIVITY   = "<no activity>";

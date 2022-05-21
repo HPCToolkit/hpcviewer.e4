@@ -10,4 +10,5 @@ Require-Bundle: org.junit,
  com.graphbuilder,
  edu.rice.cs.hpcdata,
  edu.rice.cs.hpcdata.merge,
- org.eclipse.collections
+ org.eclipse.collections,
+ edu.rice.cs.hpctest.util

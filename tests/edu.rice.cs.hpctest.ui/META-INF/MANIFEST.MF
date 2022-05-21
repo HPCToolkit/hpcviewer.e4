@@ -16,4 +16,5 @@ Require-Bundle: org.eclipse.swt,
  org.junit.jupiter.api,
  edu.rice.cs.hpcsetting,
  edu.rice.cs.hpctree,
- org.eclipse.nebula.widgets.nattable.core
+ org.eclipse.nebula.widgets.nattable.core,
+ edu.rice.cs.hpctest.util

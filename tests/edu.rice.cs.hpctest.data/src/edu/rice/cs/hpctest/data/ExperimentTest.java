@@ -9,8 +9,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 import org.junit.BeforeClass;
@@ -25,17 +23,14 @@ import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpctest.util.TestDatabase;
 
 
 public class ExperimentTest {
 	private static final String DB_MULTITHREAD = "multithread";
 	private static final String DB_LOOP_INLINE = "loop-inline";
-	
+
 	private static Experiment []experiments;
-	private static File []database;
-	private static String []dbPaths = new String[] {"bug-no-gpu-trace", "bug-empty", "bug-nometric", 
-													"prof2" + File.separator + DB_LOOP_INLINE,
-													"prof2" + File.separator + DB_MULTITHREAD};
 	
 	public ExperimentTest() {
 		// empty, nothing to do
@@ -43,19 +38,14 @@ public class ExperimentTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		experiments = new Experiment[dbPaths.length];
-		database   = new File[dbPaths.length];
-		int i=0;
-		for (String dbp: dbPaths) {
-			
-			Path resource = Paths.get("..", "resources", dbp);
-			database[i] = resource.toFile();
-			
-			assertNotNull(database);
+		var database = TestDatabase.getDatabases();
+		experiments  = new Experiment[database.length];
 
+		int i=0;
+		for (var dbp: database) {
 			experiments[i]= new Experiment();
 			try {
-				experiments[i].open(database[i], null, Experiment.ExperimentOpenFlag.TREE_ALL);
+				experiments[i].open(dbp, null, Experiment.ExperimentOpenFlag.TREE_ALL);
 			} catch (Exception e) {
 				assertFalse(e.getMessage(), true);
 			}
@@ -417,14 +407,13 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetExperimentFile() {
-		int i=0;
 		for(var experiment: experiments) {
 			File file = experiment.getExperimentFile();
 			assertNotNull(file);
+			
 			File dir = file.getParentFile();
-			File dbPath = database[i].getAbsoluteFile();
+			File dbPath = experiment.getDefaultDirectory();
 			assertTrue(dir.getAbsolutePath().equals(dbPath.getAbsolutePath()));
-			i++;
 		}
 	}
 

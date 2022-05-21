@@ -4,87 +4,97 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.db.version4.DataSummary;
+import edu.rice.cs.hpcdata.db.version4.FileDB4;
 import edu.rice.cs.hpcdata.experiment.Experiment;
-import edu.rice.cs.hpctraceviewer.data.version4.FileDB4;
+import edu.rice.cs.hpctest.util.TestDatabase;
 
 class DataTraceReaderTest {
-	static FileDB4 data;
+	static FileDB4 []dataDB;
 	
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
-		Path resource = Paths.get("..", "resources", "prof2", "loop-inline");
-		File dbPath = resource.toFile();
-		
-		assertNotNull(dbPath);
-		assertTrue(dbPath.canRead());
-		
-		IdTupleType tupleType = new IdTupleType();
-		tupleType.initDefaultTypes();
-		
-		DataSummary ds = new DataSummary(IdTupleType.createTypeWithOldFormat());
-		ds.open(dbPath.getAbsolutePath());
-		
-		data = new FileDB4(new Experiment(), ds);
-		data.open(dbPath.getAbsolutePath(), 0, 0);
+		var paths = TestDatabase.getMetaDatabases();
+		dataDB = new FileDB4[paths.length];
+		int i=0;
+		for(var dbPath: paths) {			
+			assertNotNull(dbPath);
+			assertTrue(dbPath.canRead());
+			
+			IdTupleType tupleType = new IdTupleType();
+			tupleType.initDefaultTypes();
+			
+			DataSummary ds = new DataSummary(IdTupleType.createTypeWithOldFormat());
+			ds.open(dbPath.getAbsolutePath());
+			
+			dataDB[i] = new FileDB4(new Experiment(), ds);
+			dataDB[i].open(dbPath.getAbsolutePath(), 0, 0);
+			i++;
+		}
 	}
 
 	@Test
 	public void testNumberOfRanks() {
-		int numRanks = data.getNumberOfRanks();
-		assertTrue(numRanks == 1);
+		for(var data: dataDB) {
+			int numRanks = data.getNumberOfRanks();
+			assertTrue(numRanks >= 1);
+		}
 	}
 	
 	@Test
 	public void testgetRankLabels() {
-		var labels = data.getRankLabels();
-		assertTrue(labels != null && labels.length == 1 && labels[0].equals("Node 8323329 Thread 0"));		
+		for(var data: dataDB) {
+			var labels = data.getRankLabels();
+			assertTrue(labels != null);
+		}
 	}
 	
 	@Test
 	public void testIsGPU() {
-		assertFalse(data.hasGPU());
-		assertFalse(data.isGPU(0));
+		for(var data: dataDB) {
+			assertFalse(data.hasGPU());
+			assertFalse(data.isGPU(0));
+		}
 	}
 
 	@Test
 	public void testMinLoc() {
-		var ml = data.getMinLoc(0);
-		assertTrue(ml == 104);
+		for(var data: dataDB) {
+			var ml = data.getMinLoc(0);
+			assertTrue(ml >= 104);
+		}
 	}
 	
 	@Test
 	public void testMaxLoc() {
-		var ml = data.getMaxLoc(0);
-		assertTrue(ml == 10136);
+		for(var data: dataDB) {
+			var ml = data.getMaxLoc(0);
+			assertTrue(ml >= 101);
+		}
 	}
 	
 	@Test
 	public void testIdTuple() {
-		var idt = data.getIdTuple(IdTupleOption.BRIEF);
-		assertNotNull(idt);
-		assertTrue(idt.size() == 1);
-		
-		var id = idt.get(0);
-		var label = id.toLabel();
-		assertNotNull(label);
-		assertTrue(label.equals("0.0"));
-		
-		assertTrue(id.getLength() == 2);
-		var str = id.toString(data.getIdTupleTypes());
-		assertNotNull(str);
-		assertTrue(str.equals("Node 8323329 Thread 0"));
-		
-		var types = data.getIdTupleTypes();
-		assertNotNull(types);
+		for(var data: dataDB) {
+			var idt = data.getIdTuple(IdTupleOption.BRIEF);
+			assertNotNull(idt);
+			assertTrue(idt.size() >= 1);
+			
+			var id = idt.get(0);
+			var label = id.toLabel();
+			assertNotNull(label);
+			
+			assertTrue(id.getLength() >= 1);
+			var str = id.toString(data.getIdTupleTypes());
+			assertNotNull(str);
+			
+			var types = data.getIdTupleTypes();
+			assertNotNull(types);
+		}
 	}
 }

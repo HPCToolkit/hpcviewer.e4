@@ -9,16 +9,17 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import edu.rice.cs.hpcdata.db.IFileDB;
 import edu.rice.cs.hpcdata.db.version2.FileDB2;
 import edu.rice.cs.hpcdata.db.version4.DataTrace;
+import edu.rice.cs.hpcdata.db.version4.FileDB4;
 import edu.rice.cs.hpcdata.db.version4.MetricValueCollection4;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
+import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.Util;
 import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
-import edu.rice.cs.hpctraceviewer.data.version4.FileDB4;
 
 
 /****************************************************
@@ -118,35 +119,6 @@ public class LocalDBOpener extends AbstractDBOpener
 	 */
 	static public int directoryHasTraceData(String directory)
 	{
-		File file = new File(directory);
-		String database_directory;
-		if (file.isFile()) {
-			// if the argument is a file, then we'll look for its parent directory
-			file = file.getParentFile();
-			database_directory = file.getAbsolutePath();
-		} else {
-			database_directory = directory;
-		}
-		// checking for version 4.0
-		String file_path = database_directory + File.separatorChar + DataTrace.FILE_TRACE_DB;
-		File tmp_file 	 = new File(file_path);
-		if (tmp_file.canRead()) {
-			return Constants.EXPERIMENT_SPARSE_VERSION;
-		}
-		
-		// checking for version 2.0
-		file_path = database_directory + File.separatorChar + "experiment.mt";
-		tmp_file  = new File(file_path);
-		if (tmp_file.canRead()) {
-			return Constants.EXPERIMENT_DENSED_VERSION;
-		}
-		
-		// checking for version 2.0 with old format files
-		tmp_file  = new File(database_directory);
-		File[] file_hpctraces = tmp_file.listFiles( new Util.FileThreadsMetricFilter("*.hpctrace") );
-		if (file_hpctraces != null && file_hpctraces.length>0) {
-			return 1;
-		}
-		return -1;
+		return LocalDatabaseRepresentation.directoryHasTraceData(directory);
 	}
 }

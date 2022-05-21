@@ -4,9 +4,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.SecureRandom;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -17,38 +14,32 @@ import org.eclipse.nebula.widgets.nattable.sort.SortDirectionEnum;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpctest.util.TestDatabase;
 import edu.rice.cs.hpctree.ScopeTreeData;
 
 class ScopeTreeDataTest 
 {
-	private static String []dbPaths = new String[] {"bug-no-gpu-trace", "bug-empty", "bug-nometric", 
-													"prof2" + File.separator + "loop-inline",
-													"prof2" + File.separator + "multithread"};
 	private static ScopeTreeData []treeData;
 	private static SecureRandom random; 
 
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
-		var experiments = new Experiment[dbPaths.length];
-		treeData    = new ScopeTreeData[dbPaths.length];
-		random = SecureRandom.getInstanceStrong();
+		var database    = TestDatabase.getDatabases();
+		var experiments = new Experiment[database.length];
+		treeData = new ScopeTreeData[database.length];
+		random   = SecureRandom.getInstanceStrong();
 		 
-		File []database = new File[dbPaths.length];
 		int i=0;
-		for (String dbp: dbPaths) {
-			
-			Path resource = Paths.get("..", "resources", dbp);
-			database[i] = resource.toFile();
-			
-			assertNotNull(database);
+
+		for (var path: database) {			
+			assertNotNull(path);
 
 			experiments[i]= new Experiment();
 			try {
-				experiments[i].open(database[i], null, Experiment.ExperimentOpenFlag.TREE_ALL);
+				experiments[i].open(path, null, Experiment.ExperimentOpenFlag.TREE_ALL);
 			} catch (Exception e) {
 				assertFalse(e.getMessage(), true);
-			}
-			
+			}			
 			assertNotNull(experiments[i].getRootScope());
 			
 			treeData[i] = new ScopeTreeData(experiments[i].getRootScope(RootScopeType.CallingContextTree), experiments[i]);

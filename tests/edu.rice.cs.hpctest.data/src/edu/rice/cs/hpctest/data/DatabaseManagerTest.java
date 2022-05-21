@@ -9,7 +9,7 @@ import java.util.Optional;
 import org.junit.Test;
 
 import edu.rice.cs.hpcdata.db.DatabaseManager;
-import edu.rice.cs.hpcdata.experiment.xml.ExperimentFileXML;
+import edu.rice.cs.hpctest.util.TestDatabase;
 
 public class DatabaseManagerTest {
 
@@ -31,24 +31,17 @@ public class DatabaseManagerTest {
 
 	@Test
 	public void testGetDatabaseFilePath() {
-		var path = DatabaseManager.getDatabaseFilePath("");
-		assertTrue(path.isEmpty());
-		
-		Path resource = Paths.get("..", "resources", "bug-no-gpu-trace");
-		var database = resource.toFile();
-		path = DatabaseManager.getDatabaseFilePath(database.getAbsolutePath());
-		assertTrue(path.isPresent());
-		
-		String filepath = path.orElse("");
-		checkPath(filepath);
-		
-		resource = Paths.get("..", "resources", "prof2", "loop-inline");
-		database = resource.toFile();
-		path = DatabaseManager.getDatabaseFilePath(database.getAbsolutePath());
-		assertTrue(path.isPresent());
-		
-		checkPath(path.orElse(""));
-
+		var dirs = TestDatabase.getDatabases();
+		for (var dir: dirs) {
+			var path = DatabaseManager.getDatabaseFilePath(dir.getAbsolutePath());
+			checkPath(path.orElse(""));
+			
+			Optional<String> t = Optional.of("\n");
+			DatabaseManager.getDatabaseFilenames(t);
+			
+			var parser = DatabaseManager.getDatabaseReader(dir);
+			assertNotNull(parser);
+		}
 	}
 	
 	private void checkPath(String filepath) {		
@@ -69,16 +62,5 @@ public class DatabaseManagerTest {
 		filename = DatabaseManager.getDatabaseFilename("db");
 		assertTrue(filename.isPresent());
 		assertTrue(filename.orElse("").equals("meta.db"));
-	}
-
-	
-	@Test
-	public void testGetDatabaseReader() {
-		Path resource = Paths.get("..", "resources", "bug-no-gpu-trace");
-		var database = resource.toFile();
-
-		var parser = DatabaseManager.getDatabaseReader(database);
-		assertNotNull(parser);
-		assertTrue(parser instanceof ExperimentFileXML);
 	}
 }

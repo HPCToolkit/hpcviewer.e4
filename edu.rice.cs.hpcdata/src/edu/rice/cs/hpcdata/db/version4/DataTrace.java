@@ -9,6 +9,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.Random;
 
+import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.LargeByteBuffer;
 
 /*******************************************************************************
@@ -20,8 +21,6 @@ import edu.rice.cs.hpcdata.util.LargeByteBuffer;
  *******************************************************************************/
 public class DataTrace extends DataCommon 
 {
-	public static final String FILE_TRACE_DB = "trace.db";
-	
 	private static final String HEADER = "HPCTOOLKITtrce";
 	private static final int FMT_TRACEDB_SZ_CTX_SAMPLE = 0x0c;
 	private static final int NUM_ITEMS = 1;
@@ -38,14 +37,15 @@ public class DataTrace extends DataCommon
 	public void open(final String file)
 			throws IOException
 	{
-		super.open(file + File.separator + FILE_TRACE_DB);
+		super.open(file + File.separator + Constants.TRACE_FILE_SPARSE_VERSION);
 	}
 	
 
 	@Override
 	public void dispose() throws IOException
 	{
-		lbBuffer.dispose();
+		if (lbBuffer != null)
+			lbBuffer.dispose();
 		super.dispose();
 	}
 	
