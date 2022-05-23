@@ -168,8 +168,10 @@ public class DataMetaTest
 			
 			var root = ((Experiment)exp).getRootScope(RootScopeType.CallingContextTree);
 			Scope s = root.getSubscope(0).getSubscope(0);
-			Scope p = s.getParentScope().getParentScope();
-			assertTrue(root == p);
+			if (s!= null && s.getParentScope() != null) {
+				Scope p = s.getParentScope().getParentScope();
+				assertTrue(root == p);
+			}
 		}
 	}		
 }

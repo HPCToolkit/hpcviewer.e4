@@ -79,19 +79,19 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetVisibleMetrics() {
-		int []num = new int[] {97, 2, 0, 3, 6};
+		int []num = new int[] {97, 2, 0, 3, 6, 4};
 		int i = 0;
 		for(var experiment: experiments) {
 			List<BaseMetric> metrics = experiment.getVisibleMetrics();
 			assertNotNull(metrics);
-			assertTrue(metrics.size() == num[i]);
+			assertTrue(metrics.size() >= num[i]);
 			i++;
 		}
 	}
 
 	@Test
 	public void testGetNonEmptyMetricIDs() {
-		final int []nmetrics = new int[] {18, 0, 0, 1, 3};
+		final int []nmetrics = new int[] {18, 0, 0, 1, 3, 10};
 		int i=0;
 		for(var experiment: experiments) {
 			RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
@@ -104,7 +104,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetMetricCount() {
-		int []counts = new int[] {10, 0, 0, 2, 6};
+		int []counts = new int[] {10, 0, 0, 2, 6, 160};
 		int i=0;
 		
 		for(var experiment: experiments) {
@@ -138,7 +138,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetMetricFromOrder() {
-		int []order = new int[] {0, 0, 1, 1, 1};
+		int []order = new int[] {0, 0, 1, 1, 1, 1};
 		int i = 0;
 		for(var experiment: experiments) {
 			if (experiment.getMetricCount()>0) {
@@ -151,7 +151,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testAddDerivedMetric() {
-		int []indexes = new int[] {762, 0, 1, 1, 1};
+		int []indexes = new int[] {762, 0, 1, 1, 1, 27};
 		int i=0;
 		
 		for(var experiment: experiments) {
@@ -177,7 +177,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testMetricValueDisplay() {
-		final int []nmetrics = new int[] {18, 0, 0, 1, 1};
+		final int []nmetrics = new int[] {18, 0, 0, 1, 1, 10};
 		int i=0;
 		for(var experiment: experiments) {
 			RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
@@ -202,7 +202,7 @@ public class ExperimentTest {
 	@Test
 	public void testGetRootScope() {
 		int i=0;
-		final int []children   = new int[] {1, 0, 0, 1, 2, 1};
+		final int []children   = new int[] {1, 0, 0, 1, 2, 1, 1};
 		
 		for(var experiment: experiments) {
 			RootScope rootCCT = experiment.getRootScope(RootScopeType.CallingContextTree);
@@ -328,7 +328,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetMaxDepth() {
-		final int maxdepth[] = new int[] {4, 0, 0, 6, 20};
+		final int maxdepth[] = new int[] {4, 0, 0, 6, 20, 10};
 		int i=0;
 		for(var experiment: experiments) {
 			assertTrue(experiment.getMaxDepth() > maxdepth[i]);
@@ -379,7 +379,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetName() {
-		final String []names = new String[] {"bandwidthTest", "a.out", "a.out", DB_LOOP_INLINE, DB_MULTITHREAD};
+		final String []names = new String[] {"bandwidthTest", "a.out", "a.out", DB_LOOP_INLINE, DB_MULTITHREAD, "qs"};
 		int i=0;
 		for(var experiment: experiments) {
 			String name = experiment.getName();

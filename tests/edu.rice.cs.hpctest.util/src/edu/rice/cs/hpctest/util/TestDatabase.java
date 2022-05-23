@@ -24,7 +24,8 @@ public class TestDatabase
 	
 	private static String []metadbPaths = new String[] {
 			DIR_METADB + File.separator + DB_LOOP_INLINE,
-			DIR_METADB + File.separator + DB_MULTITHREAD};
+			DIR_METADB + File.separator + DB_MULTITHREAD,
+			DIR_METADB + File.separator + "quicksilver"};
 	
 	
 	public static File[] getXMLDatabases() {
