@@ -44,6 +44,9 @@ import org.eclipse.swt.widgets.Display;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
+import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
+import edu.rice.cs.hpcdata.experiment.metric.format.MetricValuePredefinedFormat;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
@@ -77,7 +80,7 @@ import edu.rice.cs.hpctree.internal.config.TableFontConfiguration;
  ********************************************************************/
 public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayerListener, ListEventListener<BaseMetric>
 {
-	private final static String TEXT_METRIC_COLUMN = "|8x88+88xx888x8%";
+	private final static String TEXT_METRIC_COLUMN = "8x88+88xx888x8%";
 	private final static String STRING_PADDING  = "XX"; 
 
 	private final NatTable       natTable ;
@@ -366,12 +369,14 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 
         // metric columns (if any)
 		// the width is the max between the title of the column and the cell value 
-    	Point columnSize = getMetricColumnSize();
+		Point defaultSize = getMetricColumnSize();
     	final ColumnHideShowLayer hideShowLayer = bodyLayerStack.getColumnHideShowLayer();
     	int visibleColumns  = hideShowLayer.getColumnCount();
     	GC gc = new GC(natTable.getDisplay());
     	Font genericFont = FontManager.getFontGeneric();
     	gc.setFont(genericFont);
+    	
+    	TableFitting.ColumnFittingMode mode = TableFitting.getFittingMode();
     	
     	int totSize = 0;
     	//
@@ -380,15 +385,35 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
     	// will get the width whatever remains (if exist)
     	//
     	for(int i=1; i<visibleColumns; i++) {
-    		// List of metrics is based on column position, while the current display is based on index.
-    		// We need to convert from an index to a position.
-    		int position = hideShowLayer.getColumnIndexByPosition(i);
-    		String title = bodyDataProvider.getMetric(position).getDisplayName() + STRING_PADDING;
-    		Point titleSize = gc.textExtent(title);
+        	Point columnSize = defaultSize;
+
+        	int dataIndex = hideShowLayer.getColumnIndexByPosition(i);
+    		var metric   = bodyDataProvider.getMetric(dataIndex);
     		
-    		int colWidth = (int) Math.max(titleSize.x , columnSize.x);
+    		if (metric.getAnnotationType() == AnnotationType.NONE || 
+    			metric instanceof DerivedMetric ||
+    			metric.getDisplayFormat() instanceof MetricValuePredefinedFormat) {
+    			
+    			// since this metric has no annotation (like percent),
+    			// we should compute its particular size.
+    			// let assume the root always has the highest and longest text value.
+    			// this assumption may be wrong, but it's better than traversing all the data to
+    			// find the longest text
+    			var textValue = metric.getMetricTextValue(getRoot()) + STRING_PADDING;
+    			columnSize = gc.textExtent(textValue);
+    		}
+    		int colWidth = columnSize.x;
+    		
+    		if (mode == TableFitting.ColumnFittingMode.FIT_BOTH) {
+        		// List of metrics is based on column position, while the current display is based on index.
+        		// We need to convert from an index to a position.
+        		String title = bodyDataProvider.getMetric(dataIndex).getDisplayName() + STRING_PADDING;
+        		Point titleSize = gc.textExtent(title);
+    			colWidth = (int) Math.max(titleSize.x , columnSize.x);
+    		}
+    		
     		int pixelWidth = GUIHelper.convertHorizontalDpiToPixel(colWidth);
-        	bodyDataLayer.setColumnWidthByPosition(i, pixelWidth);
+        	bodyDataLayer.setColumnWidthByPosition(dataIndex, pixelWidth);
         	totSize += pixelWidth;
     	}
     	
