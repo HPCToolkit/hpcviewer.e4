@@ -63,19 +63,19 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 {
 	private static final String TOOLTIP_AUTOFIT = "Resize the width of metric columns. ";
 	
-	private final int ACTION_ZOOM_IN      = 0;
-	private final int ACTION_ZOOM_OUT     = 1;
-	private final int ACTION_HOTPATH      = 2;
+	private static final int ACTION_ZOOM_IN      = 0;
+	private static final int ACTION_ZOOM_OUT     = 1;
+	private static final int ACTION_HOTPATH      = 2;
 	
-	private final int ACTION_ADD_METRIC   = 3;
-	private final int ACTION_EXPORT_DATA  = 4;
-	private final int ACTION_COLUMN_HIDE  = 5;
+	private static final int ACTION_ADD_METRIC   = 3;
+	private static final int ACTION_EXPORT_DATA  = 4;
+	private static final int ACTION_COLUMN_HIDE  = 5;
 	
-	private final int ACTION_FONT_INC     = 6;
-	private final int ACTION_FONT_DEC     = 7;
+	private static final int ACTION_FONT_INC     = 6;
+	private static final int ACTION_FONT_DEC     = 7;
 	
-	private final int ACTION_RESIZE_COLUMN = 8;
-	private final int ACTION_MAX = 9;
+	private static final int ACTION_RESIZE_COLUMN = 8;
+	private static final int ACTION_MAX = 9;
 	
 	private Composite    parent ;
 	private ToolItem     toolItem[];

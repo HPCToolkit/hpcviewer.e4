@@ -24,10 +24,17 @@ public class TableFitting
 	 *  <li> {@code FIT_HEADER} fit only the header (not supported yet)
 	 * </ul>
 	 */
-	public static enum ColumnFittingMode {
+	public enum ColumnFittingMode {
 		FIT_BOTH, FIT_DATA;
- 	};
+ 	}
 
+ 	
+ 	/**
+ 	 * No implicit constructor
+ 	 */
+ 	private TableFitting() {
+ 		// hide the implicit constructor
+ 	}
 	
  	/****
  	 * Get the label of the {@code ColumnFittingMode} enumearation.
