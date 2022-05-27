@@ -43,6 +43,7 @@ import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpctree.IScopeTreeData;
 import edu.rice.cs.hpctree.ScopeTreeTable;
 import edu.rice.cs.hpctree.TableFitting;
+import edu.rice.cs.hpctree.TableFitting.ColumnFittingMode;
 import edu.rice.cs.hpctree.action.HotPathAction;
 import edu.rice.cs.hpctree.action.IUndoableActionManager;
 import edu.rice.cs.hpctree.action.UndoableActionManager;
@@ -204,7 +205,8 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		toolItem[ACTION_COLUMN_HIDE] = createToolItem(toolBar, IconManager.Image_CheckColumns,  "Show/hide columns");
 		var mode = TableFitting.getFittingMode();
 		mode = TableFitting.getNext(mode);
-		toolItem[ACTION_RESIZE_COLUMN] = createToolItem(toolBar, IconManager.Image_TableFit,  TOOLTIP_AUTOFIT + TableFitting.toString(mode));
+		var imageMode = getFittingModeImageLabel(mode);
+		toolItem[ACTION_RESIZE_COLUMN] = createToolItem(toolBar, imageMode,  TOOLTIP_AUTOFIT + TableFitting.toString(mode));
 		
 		new ToolItem(toolBar, SWT.SEPARATOR);
 
@@ -221,6 +223,13 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		// -------------------------------------------
 
 		lblMessage = new LabelMessage(composite, SWT.NONE);
+	}
+	
+	private String getFittingModeImageLabel(ColumnFittingMode mode) {
+		if (mode == ColumnFittingMode.FIT_DATA)
+			return IconManager.Image_TableFitData;
+		
+		return IconManager.Image_TableFitBoth;
 	}
 
 	@Override
@@ -604,6 +613,9 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 				}
 				var mode = TableFitting.getFittingMode();
 				mode = TableFitting.getNext(mode);
+				final var imageMode = getFittingModeImageLabel(mode);
+				final var image = IconManager.getInstance().getImage(imageMode);
+				toolItem[ACTION_RESIZE_COLUMN].setImage(image);
 				toolItem[ACTION_RESIZE_COLUMN].setToolTipText(TOOLTIP_AUTOFIT + TableFitting.toString(mode));
 			}
 		});

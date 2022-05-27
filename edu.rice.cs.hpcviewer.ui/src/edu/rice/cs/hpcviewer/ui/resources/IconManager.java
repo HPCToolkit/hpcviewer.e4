@@ -21,7 +21,8 @@ public class IconManager  extends BaseIconManager
 	
 	final static public String Image_CheckColumns = "checkColumns.gif";
 	final static public String Image_FlameIcon = "flameIcon.gif";
-	final static public String Image_TableFit  = "tableFit.png";
+	final static public String Image_TableFitBoth  = "TableFitBoth.png";
+	final static public String Image_TableFitData  = "TableFitData.png";
 
 	final static public String Image_FnMetric = "FnMetric.png";
 	final static public String Image_FontBigger = "FontBigger.png";
@@ -82,7 +83,8 @@ public class IconManager  extends BaseIconManager
 			registerImage(registry, getClass(), Image_Unflatten);
 
 			registerImage(registry, getClass(), Image_CheckColumns);
-			registerImage(registry, getClass(), Image_TableFit);
+			registerImage(registry, getClass(), Image_TableFitBoth);
+			registerImage(registry, getClass(), Image_TableFitData);
 			registerImage(registry, getClass(), Image_FlameIcon);
 
 			registerImage(registry, getClass(), Image_FnMetric); 
