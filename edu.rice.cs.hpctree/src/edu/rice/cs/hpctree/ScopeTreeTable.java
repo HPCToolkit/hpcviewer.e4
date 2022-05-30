@@ -120,9 +120,6 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         bodyLayerStack.getBodyDataLayer().setConfigLabelAccumulator(new ScopeTreeLabelAccumulator(treeData));
         bodyLayerStack.getSelectionLayer().addLayerListener(this);
 
-        tableConfiguration =  new TableConfiguration(parent, bodyDataProvider);
-        bodyLayerStack.addConfiguration(tableConfiguration);
-
         // --------------------------------
         // build the column header layer
         // --------------------------------
@@ -156,8 +153,11 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         // setup the configuration for natTable
         // --------------------------------
 
+        tableConfiguration =  new TableConfiguration(parent, bodyDataProvider);
+        var fontConfig = new TableFontConfiguration(this);
+        natTable.addConfiguration(tableConfiguration);
+        natTable.addConfiguration(fontConfig);
         natTable.addConfiguration(new ScopeTreeExportConfiguration(bodyLayerStack.getTreeRowModel()));
-        natTable.addConfiguration(new TableFontConfiguration(this));
 		natTable.addConfiguration(new ScopeSortConfiguration(this));
 		natTable.addConfiguration(new ContextMenuConfiguration(this));
 
@@ -211,6 +211,10 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		// Fix issue #145: do not listen to table resizing
 		// fix issue #199: resizing table should at least show 1 metric column
 		natTable.addControlListener(new ResizeListener(this));
+		
+		fontConfig.configureHeaderFont(natTable.getConfigRegistry());
+        visualRefresh();
+
 	}
 	
 	
