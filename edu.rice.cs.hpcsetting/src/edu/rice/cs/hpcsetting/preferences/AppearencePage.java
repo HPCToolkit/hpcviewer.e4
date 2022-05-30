@@ -70,7 +70,7 @@ public class AppearencePage extends AbstractPage
 		Group groupFont = createGroupControl(parent, "Fonts", false);
 		groupFont.setLayout(new GridLayout(1, false));
 		
-        fontGenericEditor = createFontEditor(groupFont, PreferenceConstants.ID_FONT_GENERIC, "Default column font:",   FontManager.getFontGeneric());        
+        fontGenericEditor = createFontEditor(groupFont, PreferenceConstants.ID_FONT_GENERIC, "Default font:",   FontManager.getFontGeneric());        
         fontMetricEditor  = createFontEditor(groupFont, PreferenceConstants.ID_FONT_METRIC,  "Metric column font:", FontManager.getMetricFont());
         fontSourceEditor  = createFontEditor(groupFont, PreferenceConstants.ID_FONT_TEXT,    "Text editor font:"  , FontManager.getTextEditorFont());
 
