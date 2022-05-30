@@ -210,7 +210,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		
 		// Fix issue #145: do not listen to table resizing
 		// fix issue #199: resizing table should at least show 1 metric column
-		parent.addControlListener(new ResizeListener(this));
+		natTable.addControlListener(new ResizeListener(this));
 	}
 	
 	
@@ -379,6 +379,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
     	TableFitting.ColumnFittingMode mode = TableFitting.getFittingMode();
     	
     	int totSize = 0;
+    	int widthFirstMetricColumn = 0;
     	//
     	// compute and resize the metric columns first.
     	// the tree column is resized the last one since it has the highest priority and
@@ -415,18 +416,24 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
     		int pixelWidth = GUIHelper.convertHorizontalDpiToPixel(colWidth);
         	bodyDataLayer.setColumnWidthByPosition(dataIndex, pixelWidth);
         	totSize += pixelWidth;
+        	
+        	if (i==1)
+        		widthFirstMetricColumn = pixelWidth;
     	}
     	
     	// compute the size of the tree column
     	// if the total size is less than the display, we can use the percentage for the tree column
     	// otherwise we should specify explicitly the width
-		int areaWidth = getTableWidth();
+		int areaWidth = GUIHelper.convertHorizontalDpiToPixel(getTableWidth());
     	
     	// tree column: the width is the max between 
     	//  - TREE_COLUMN_WIDTH, 
     	//  - the current width 
     	//  - the calculated recommended width
 		int w = Math.max(TREE_COLUMN_WIDTH, areaWidth-totSize);
+		if (w > areaWidth) {
+			w = areaWidth - widthFirstMetricColumn;
+		}
 		bodyDataLayer.setColumnWidthByPosition(0, w);
 		
 		// Now, compute the ideal size of the row's height
@@ -448,50 +455,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	}
 	
 	
-	/*****
-	 * Arrange the table so that it displays at least
-	 * a certain number of metric columns
-	 * 
-	 * @param numVisibleMetricColumns
-	 * 			Number of metric columns to be visible
-	 */
-	public void pack(int numVisibleMetricColumns) {
-		DataLayer bodyDataLayer = bodyLayerStack.getBodyDataLayer();
-		int width = bodyDataLayer.getColumnWidthByPosition(0);
-    	
-    	// compute the size of the tree column
-    	// if the size is bigger than the table width, we need to 
-		// reduce its width to fit the metric columns
-		
-		int areaWidth = getTableWidth();
-		
-		if (width < areaWidth) 
-			return;
-		
-    	final GC gc = new GC(natTable.getDisplay());
-    	final Font genericFont = FontManager.getFontGeneric();
-    	gc.setFont(genericFont);
 
-    	final Point columnSize = getMetricColumnSize();
-    	final ColumnHideShowLayer hideShowLayer = bodyLayerStack.getColumnHideShowLayer();
-    	int totalMetricColumnWidth = areaWidth;
-
-    	for(int i=0; i<numVisibleMetricColumns; i++) {
-    		// List of metrics is based on column position, while the current display is based on index.
-    		// We need to convert from an index to a position.
-    		int position = hideShowLayer.getColumnIndexByPosition(1+i);
-    		if (position < 0)
-    			continue;
-    		
-    		String title = bodyDataProvider.getMetric(position).getDisplayName() + STRING_PADDING;
-    		Point titleSize = gc.textExtent(title);
-    		
-    		int colWidth = (int) Math.max(titleSize.x , columnSize.x);
-    		totalMetricColumnWidth -= GUIHelper.convertHorizontalDpiToPixel(colWidth);
-    	}
-    	bodyDataLayer.setColumnWidthByPosition(0, totalMetricColumnWidth);
-    	gc.dispose();
-	}
 	
 	
 	private int getTableWidth() {
@@ -501,7 +465,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
     		area.width -= 20;
     	}
 
-    	return GUIHelper.convertHorizontalDpiToPixel(area.width);
+    	return area.width;
 	}
 
 	private Point getMetricColumnSize() {

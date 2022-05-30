@@ -30,7 +30,7 @@ public class ResizeListener implements ControlListener, Runnable, Listener
 	public void run() {
 		if ((lastEvent + 500) < System.currentTimeMillis() && mouse) {
 			// fix issue #199: at least one metric column is visible when resizing the app
-			table.pack(1);
+			table.pack();
 		} else {
             Display.getDefault().timerExec(500, this);
 		}
