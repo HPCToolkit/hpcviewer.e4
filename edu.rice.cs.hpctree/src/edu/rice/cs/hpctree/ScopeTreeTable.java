@@ -210,8 +210,11 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		
 		// Fix issue #145: do not listen to table resizing
 		// fix issue #199: resizing table should at least show 1 metric column
-		natTable.addControlListener(new ResizeListener(this));
-		
+		var resizeListener = new ResizeListener(this);
+		natTable.addControlListener(resizeListener);
+		natTable.getDisplay().addFilter(SWT.MouseDown, resizeListener);
+		natTable.getDisplay().addFilter(SWT.MouseUp, resizeListener);
+
 		fontConfig.configureHeaderFont(natTable.getConfigRegistry());
         visualRefresh();
 
@@ -434,8 +437,10 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
     	//  - TREE_COLUMN_WIDTH, 
     	//  - the current width 
     	//  - the calculated recommended width
-		int w = Math.max(TREE_COLUMN_WIDTH, areaWidth-totSize);
-		if (w > areaWidth) {
+		int currentTreeColumnWdith = bodyDataLayer.getColumnWidthByPosition(0);
+		int recommendedWidth = areaWidth-totSize;
+		int w = Math.max(currentTreeColumnWdith, Math.max(TREE_COLUMN_WIDTH, recommendedWidth));
+		if (w >= areaWidth) {
 			w = areaWidth - widthFirstMetricColumn;
 		}
 		bodyDataLayer.setColumnWidthByPosition(0, w);
@@ -457,9 +462,6 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		
     	gc.dispose();
 	}
-	
-	
-
 	
 	
 	private int getTableWidth() {
