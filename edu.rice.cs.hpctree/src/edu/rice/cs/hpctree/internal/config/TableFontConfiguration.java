@@ -69,9 +69,18 @@ public class TableFontConfiguration implements IConfiguration, IPropertyChangeLi
 			treeTable.pack();
 		}
 	}
-		
 	
-	protected void configureFont(IConfigRegistry configRegistry) {
+	
+	/****
+	 * Public method to configure the header font. <br/>
+	 * Due to NatTable bug, we have to configure the header font once the table is created,
+	 * otherwise we don't see any change in the font header.
+	 * @see hpcviewer bug issue #204 
+	 *  
+	 * @param configRegistry
+	 * 			The table configuration registry
+	 */
+	public void configureHeaderFont(IConfigRegistry configRegistry) {
     	
 		// set the default to the generic font
 		IStyle style = configRegistry.getConfigAttribute(CellConfigAttributes.CELL_STYLE, DisplayMode.NORMAL, GridRegion.COLUMN_HEADER);
@@ -82,6 +91,11 @@ public class TableFontConfiguration implements IConfiguration, IPropertyChangeLi
 
 		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, style, DisplayMode.SELECT, GridRegion.COLUMN_HEADER);
 		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, style, DisplayMode.NORMAL, GridRegion.COLUMN_HEADER);
+
+	}
+	
+	protected void configureFont(IConfigRegistry configRegistry) {
+		configureHeaderFont(configRegistry);
 		
 		// set the font for tree column
 		final Style styleTree  = new Style();

@@ -23,6 +23,7 @@ import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpctree.action.IActionListener;
 import edu.rice.cs.hpctree.internal.CallSiteArrowPainter;
+import edu.rice.cs.hpctree.internal.NoDotTextPainter;
 import edu.rice.cs.hpctree.internal.ScopeAttributeMouseEventMatcher;
 import edu.rice.cs.hpctree.internal.ScopeTreeDataProvider;
 import edu.rice.cs.hpctree.internal.ScopeTreeLabelAccumulator;
@@ -101,6 +102,17 @@ public class TableConfiguration implements IConfiguration
 											   new DefaultDisplayConverter(), 
 											   DisplayMode.NORMAL, 
 											   ScopeTreeLabelAccumulator.LABEL_TREECOLUMN);
+		
+		var textPainter = new NoDotTextPainter();
+		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_PAINTER, 
+				textPainter, 
+				   DisplayMode.NORMAL, 
+				   ScopeTreeLabelAccumulator.LABEL_METRICOLUMN);
+		configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_PAINTER, 
+				textPainter, 
+				   DisplayMode.SELECT, 
+				   ScopeTreeLabelAccumulator.LABEL_METRICOLUMN);
+
 	}
 
 	

@@ -447,8 +447,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 			if (proc_scope.isAlien()) {
 				var parent = scope.getParentScope();
 				if (parent != null) {
-					hash_id.append(SEPARATOR_ID);
-					hash_id.append(parent.getFlatIndex());				
+					hash_id.append(getID(parent));
 				}
 			}
 		} else if (scope instanceof ProcedureScope) 

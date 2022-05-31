@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
@@ -76,6 +77,23 @@ public class ThreadFilterDialog extends Dialog
 			protected String[] getColumnHeaderLabels() {
 				return new String[] {"  ", "Ranks or threads"};
 			}
+			
+			@Override
+			public void changeEvent(Object data) {
+				// make sure the OK button is only enabled when at least one item is checked
+				var list = getEventList();
+				if (list != null && !list.isEmpty())
+					// traverse the list in O(n) fashion to see if at least there
+					for(var item: list) {
+						if (item.checked) {
+							// an item has been checked, enabled the ok button
+							getButton(IDialogConstants.OK_ID).setEnabled(true);
+							return;
+						}
+					}
+				getButton(IDialogConstants.OK_ID).setEnabled(false);
+			}
+			
 		};
 
 		return composite;
