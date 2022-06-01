@@ -62,6 +62,7 @@ import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 public abstract class AbstractTableView extends AbstractView implements EventHandler, DisposeListener
 {
 	private static final String TOOLTIP_AUTOFIT = "Resize the width of metric columns. ";
+	private static final String AUTOFIT_EVENT   = "eventautofit";
 	
 	private static final int ACTION_ZOOM_IN      = 0;
 	private static final int ACTION_ZOOM_OUT     = 1;
@@ -231,6 +232,15 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		
 		return IconManager.Image_TableFitBoth;
 	}
+	
+	private void refreshAutoFitIcon() {
+		var mode = TableFitting.getFittingMode();
+		mode = TableFitting.getNext(mode);
+		final var imageMode = getFittingModeImageLabel(mode);
+		final var image = IconManager.getInstance().getImage(imageMode);
+		toolItem[ACTION_RESIZE_COLUMN].setImage(image);
+		toolItem[ACTION_RESIZE_COLUMN].setToolTipText(TOOLTIP_AUTOFIT + TableFitting.toString(mode));
+	}
 
 	@Override
 	public void setInput(Object input) {
@@ -276,6 +286,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE,  this);
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN,   this);
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH, this);
+		eventBroker.subscribe(AUTOFIT_EVENT, this);
 	
 		parent.addDisposeListener(this);
 	}
@@ -382,9 +393,13 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		if (obj == null || metricManager == null)
 			return;
 		
-		if (!(obj instanceof ViewerDataEvent)) 
+		if (!(obj instanceof ViewerDataEvent)) {
+			if (event.getTopic().equals(AUTOFIT_EVENT))
+				refreshAutoFitIcon();
+			
 			return;
-		
+		}
+			
 		ViewerDataEvent eventInfo = (ViewerDataEvent) obj;
 		if (metricManager != eventInfo.metricManager) 
 			return;
@@ -448,6 +463,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		}
 		return AbstractView.ViewType.COLLECTIVE;
 	}
+	
 	
 	private void hideORShowColumns(MetricDataEvent dataEvent) {
 		Object objData = dataEvent.getData();
@@ -611,12 +627,14 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 					MessageDialog.openError(table.getTable().getShell(), "Error saving preferences", err.getMessage());
 					return;
 				}
-				var mode = TableFitting.getFittingMode();
-				mode = TableFitting.getNext(mode);
-				final var imageMode = getFittingModeImageLabel(mode);
-				final var image = IconManager.getInstance().getImage(imageMode);
-				toolItem[ACTION_RESIZE_COLUMN].setImage(image);
-				toolItem[ACTION_RESIZE_COLUMN].setToolTipText(TOOLTIP_AUTOFIT + TableFitting.toString(mode));
+				// the autofit button changes the icon every time user click
+				// this makes complicated when the user click autofit in one view
+				// but then switch to another view. This view needs to refresh
+				// the autofit button based on the current mode.
+				//
+				// next time, don't make things complicated
+
+				eventBroker.post(AUTOFIT_EVENT, TableFitting.getFittingMode());
 			}
 		});
 		
