@@ -84,7 +84,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	private final static String STRING_PADDING  = "XX"; 
 
 	private final NatTable       natTable ;
-	//private final ResizeListener resizeListener;
+	private final ResizeListener resizeListener;
 
 	private final DataLayer 			  columnHeaderDataLayer ;
 	private final ScopeTreeBodyLayerStack bodyLayerStack ;
@@ -210,7 +210,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		
 		// Fix issue #145: do not listen to table resizing
 		// fix issue #199: resizing table should at least show 1 metric column
-		var resizeListener = new ResizeListener(this);
+		resizeListener = new ResizeListener(this);
 		natTable.addControlListener(resizeListener);
 		natTable.getDisplay().addFilter(SWT.MouseDown, resizeListener);
 		natTable.getDisplay().addFilter(SWT.MouseUp, resizeListener);
@@ -652,13 +652,16 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	
 	@Override
 	public void widgetDisposed(DisposeEvent e) {
+		natTable.getDisplay().removeFilter(SWT.MouseDown, resizeListener);
+		natTable.getDisplay().removeFilter(SWT.MouseUp, resizeListener);
+		natTable.removeControlListener(resizeListener);
+		
 		((IScopeTreeData)bodyLayerStack
 							.getTreeRowModel()
 							.getTreeData())
 								.getMetricManager()
 								.removeMetricListener(this);
         bodyLayerStack.getSelectionLayer().removeLayerListener(this);
-        //natTable.getParent().removeControlListener(resizeListener);
 	}
 	
 	
