@@ -437,9 +437,9 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
     	//  - TREE_COLUMN_WIDTH, 
     	//  - the current width 
     	//  - the calculated recommended width
-		int currentTreeColumnWdith = bodyDataLayer.getColumnWidthByPosition(0);
+		int treeColumnWidth  = GUIHelper.convertHorizontalDpiToPixel(bodyDataLayer.getColumnWidthByPosition(0));
 		int recommendedWidth = areaWidth-totSize;
-		int w = Math.max(currentTreeColumnWdith, Math.max(TREE_COLUMN_WIDTH, recommendedWidth));
+		int w = Math.max(treeColumnWidth, Math.max(TREE_COLUMN_WIDTH, recommendedWidth));
 		if (w >= areaWidth) {
 			w = areaWidth - widthFirstMetricColumn;
 		}
