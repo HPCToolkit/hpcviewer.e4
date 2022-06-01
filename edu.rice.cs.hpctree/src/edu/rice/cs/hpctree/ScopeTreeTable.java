@@ -369,7 +369,17 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	 * Resize the columns based on the number of visible columns and the 
 	 * size of the table (or area of the parent composite).
 	 */
-	public void pack() {		
+	public void pack() {
+		pack(false);
+	}
+	
+	/***
+	 * Resize all the visible metric columns
+	 * 
+	 * @param keepTreeColumn
+	 * 			true if the tree column has to be kept persistent if possible
+	 */
+	public void pack(boolean keepTreeColumn) {		
 		final int TREE_COLUMN_WIDTH  = 350;
 		
 		// ---------------------------------------------------------------
@@ -440,9 +450,12 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
     	//  - TREE_COLUMN_WIDTH, 
     	//  - the current width 
     	//  - the calculated recommended width
-		int treeColumnWidth  = GUIHelper.convertHorizontalDpiToPixel(bodyDataLayer.getColumnWidthByPosition(0));
 		int recommendedWidth = areaWidth-totSize;
-		int w = Math.max(treeColumnWidth, Math.max(TREE_COLUMN_WIDTH, recommendedWidth));
+		int w = Math.max(TREE_COLUMN_WIDTH, recommendedWidth);
+		if (keepTreeColumn) {
+			int treeColumnWidth  = GUIHelper.convertHorizontalDpiToPixel(bodyDataLayer.getColumnWidthByPosition(0));
+			w = Math.max(treeColumnWidth, w);
+		}
 		if (w >= areaWidth) {
 			w = areaWidth - widthFirstMetricColumn;
 		}

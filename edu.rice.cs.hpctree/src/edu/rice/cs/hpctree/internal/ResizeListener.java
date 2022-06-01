@@ -37,7 +37,8 @@ public class ResizeListener implements ControlListener, Runnable, Listener
 			// working on SWT is highly frustrating :-(
 	    	var width = table.getTable().getSize().x;
 	    	if (width != lastWidth) {
-	    		table.pack();
+	    		// adjust the width of columns, but keep the size of tree column as much as possible
+	    		table.pack(true);
 	    		lastWidth  = table.getTable().getSize().x;
 	    	}
 		} else {
