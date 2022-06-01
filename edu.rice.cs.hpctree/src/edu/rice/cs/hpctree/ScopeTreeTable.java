@@ -29,6 +29,7 @@ import org.eclipse.nebula.widgets.nattable.selection.event.RowSelectionEvent;
 import org.eclipse.nebula.widgets.nattable.sort.SortHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.sort.event.SortColumnEvent;
 import org.eclipse.nebula.widgets.nattable.style.theme.ThemeConfiguration;
+import org.eclipse.nebula.widgets.nattable.tree.config.TreeLayerExpandCollapseKeyBindings;
 import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
 import org.eclipse.nebula.widgets.nattable.viewport.command.ShowRowInViewportCommand;
 import org.eclipse.swt.SWT;
@@ -160,7 +161,9 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         natTable.addConfiguration(new ScopeTreeExportConfiguration(bodyLayerStack.getTreeRowModel()));
 		natTable.addConfiguration(new ScopeSortConfiguration(this));
 		natTable.addConfiguration(new ContextMenuConfiguration(this));
-
+		natTable.addConfiguration(new TreeLayerExpandCollapseKeyBindings(bodyLayerStack.getTreeLayer(), 
+																		 bodyLayerStack.getSelectionLayer()));
+		
         // --------------------------------
         // finalization
         // --------------------------------
