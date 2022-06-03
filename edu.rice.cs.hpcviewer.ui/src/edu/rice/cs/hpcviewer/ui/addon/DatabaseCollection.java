@@ -1,6 +1,7 @@
 package edu.rice.cs.hpcviewer.ui.addon;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -35,6 +36,7 @@ import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -52,6 +54,7 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 import edu.rice.cs.hpcdata.trace.BaseTraceAttribute;
 import edu.rice.cs.hpcfilter.service.FilterMap;
+import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
 import edu.rice.cs.hpctraceviewer.data.local.LocalDBOpener;
 import edu.rice.cs.hpctraceviewer.ui.TracePart;
@@ -682,9 +685,7 @@ public class DatabaseCollection
 			if (filterMap.isFilterEnabled()) {
 				int numFilteredNodes = experiment.filter(filterMap);
 				if (numFilteredNodes > 0) {
-					String unit = numFilteredNodes == 1 ? " node has " : " nodes have ";
-					MessageDialog.openInformation(shell, "Filter is enabled", "CCT node Filter is enabled and at least " + 
-														 numFilteredNodes + unit + "been elided.");
+					showFilterMessage(shell, numFilteredNodes);
 				}
 			}
 			
@@ -718,5 +719,28 @@ public class DatabaseCollection
 		String path = dir.getAbsolutePath();
 		UserInputHistory history = new UserInputHistory(RecentDatabase.HISTORY_DATABASE_RECENT);
 		history.addLine(path);
+	}
+
+	
+	private void showFilterMessage(Shell shell, int numFilteredNodes) throws IOException {
+		final String unit = numFilteredNodes == 1 ? " node has " : " nodes have ";
+		final String filterKey = "filterMessage";
+		
+		var prefStore  = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
+		var checkValue = prefStore.getBoolean(filterKey);
+		if (checkValue)
+			return;
+		
+		var dlg = MessageDialogWithToggle.openWarning(shell,  
+											"Filter is enabled", 
+											"CCT node Filter is enabled and at least " + 
+													 numFilteredNodes + unit + "been elided.", 
+											"Do not show this message next time", 
+											checkValue, 
+											prefStore, 
+											filterKey);
+		checkValue = dlg.getToggleState();
+		prefStore.putValue(filterKey, String.valueOf(checkValue));
+		prefStore.save();
 	}
 }

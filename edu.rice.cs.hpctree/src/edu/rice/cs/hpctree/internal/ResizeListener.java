@@ -32,9 +32,16 @@ public class ResizeListener implements ControlListener, Runnable, Listener
 	@Override
 	public void run() {
 		if ((lastEvent + 500) < System.currentTimeMillis() && mouse) {
+
+			// Corner case: suddenly the table can be disposed
+			// This rarely happens
+			if (table == null || table.getTable() == null || table.getTable().isDisposed())
+				return;
+			
 			// fix issue #199: Make sure we pack the columns only when we resize the table
 			// btw, due to unknown issue on SWT or Linux/GTK or both, check manually if resizing occurs 
 			// working on SWT is highly frustrating :-(
+			
 	    	var width = table.getTable().getSize().x;
 	    	if (width != lastWidth) {
 	    		// adjust the width of columns, but keep the size of tree column as much as possible
