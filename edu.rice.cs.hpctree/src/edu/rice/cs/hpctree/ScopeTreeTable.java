@@ -82,7 +82,7 @@ import edu.rice.cs.hpctree.internal.config.TableFontConfiguration;
 public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayerListener, ListEventListener<BaseMetric>
 {
 	private final static String TEXT_METRIC_COLUMN = "8x88+88xx888x8%";
-	private final static String STRING_PADDING  = "XX"; 
+	private final static String STRING_PADDING  = "X"; 
 
 	private final NatTable       natTable ;
 	private final ResizeListener resizeListener;
@@ -389,15 +389,18 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 
         // metric columns (if any)
 		// the width is the max between the title of the column and the cell value 
-		Point defaultSize = getMetricColumnSize();
+		Point metricFontSize = getMetricColumnSize();
     	final ColumnHideShowLayer hideShowLayer = bodyLayerStack.getColumnHideShowLayer();
     	int visibleColumns  = hideShowLayer.getColumnCount();
+    	
     	GC gc = new GC(natTable.getDisplay());
     	Font genericFont = FontManager.getFontGeneric();
     	gc.setFont(genericFont);
     	
     	TableFitting.ColumnFittingMode mode = TableFitting.getFittingMode();
     	
+    	// the header needs to pad with 2 character to allow the triangle to be visible 
+    	final String headerLabelPadding = STRING_PADDING + STRING_PADDING;
     	int totSize = 0;
     	int widthFirstMetricColumn = 0;
     	//
@@ -406,7 +409,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
     	// will get the width whatever remains (if exist)
     	//
     	for(int i=1; i<visibleColumns; i++) {
-        	Point columnSize = defaultSize;
+        	Point columnSize = metricFontSize;
 
         	int dataIndex = hideShowLayer.getColumnIndexByPosition(i);
     		var metric   = bodyDataProvider.getMetric(dataIndex);
@@ -428,7 +431,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
     		if (mode == TableFitting.ColumnFittingMode.FIT_BOTH) {
         		// List of metrics is based on column position, while the current display is based on index.
         		// We need to convert from an index to a position.
-        		String title = bodyDataProvider.getMetric(dataIndex).getDisplayName() + STRING_PADDING;
+        		String title = bodyDataProvider.getMetric(dataIndex).getDisplayName() + headerLabelPadding;
         		Point titleSize = gc.textExtent(title);
     			colWidth = (int) Math.max(titleSize.x , columnSize.x);
     		}
@@ -462,16 +465,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		bodyDataLayer.setColumnWidthByPosition(0, w);
 		
 		// Now, compute the ideal size of the row's height
-		// 1. size for generic font
-		Point genericSize = gc.stringExtent(TEXT_METRIC_COLUMN);
-		
-		// 2. size for metric font 
-		Font metricFont = FontManager.getMetricFont();
-		gc.setFont(metricFont);
-		Point metricSize = gc.stringExtent(TEXT_METRIC_COLUMN);
-		
-		int height = Math.max(metricSize.y, genericSize.y);
-		int pixelV = GUIHelper.convertVerticalDpiToPixel(height);
+		int pixelV = GUIHelper.convertVerticalDpiToPixel(metricFontSize.y);
 
 		bodyDataLayer.setDefaultRowHeight(pixelV + 4);
 		columnHeaderDataLayer.setDefaultRowHeight(pixelV + 4);
