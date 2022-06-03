@@ -27,6 +27,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
 import edu.rice.cs.hpcbase.ViewerDataEvent;
+import edu.rice.cs.hpcbase.ui.IUserMessage;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
@@ -59,7 +60,8 @@ import edu.rice.cs.hpcviewer.ui.resources.IconManager;
  * Generic class to display a table and its toolbar for the actions
  *
  ************************************************************************************************/
-public abstract class AbstractTableView extends AbstractView implements EventHandler, DisposeListener
+public abstract class AbstractTableView extends AbstractView 
+implements EventHandler, DisposeListener, IUserMessage
 {
 	private static final String TOOLTIP_AUTOFIT = "Resize the width of metric columns. ";
 	private static final String AUTOFIT_EVENT   = "eventautofit";
@@ -104,6 +106,34 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		actionManager = new UndoableActionManager();
 	}
 
+    
+    /***
+     * display an error message for a couple of seconds
+     * @param message
+     */
+	@Override
+    public void showErrorMessage(String message) {
+    	lblMessage.showErrorMessage(message);
+    }
+    
+    /***
+     * Display a normal message
+     * @param message  
+     */
+	@Override
+    public void showInfo(String message) {
+    	lblMessage.showInfo(message);
+    }
+    
+	/***
+	 * Display a warning message
+	 * @param message
+	 */
+	@Override
+    public void showWarning(String message) {
+    	lblMessage.showWarning(message);
+    }
+	
 
 	@Override
 	public void setService(EPartService partService, IEventBroker broker, DatabaseCollection database,

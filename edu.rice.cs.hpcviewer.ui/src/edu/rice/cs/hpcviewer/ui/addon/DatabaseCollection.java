@@ -210,7 +210,8 @@ public class DatabaseCollection
 	public void createViewsAndAddDatabase(BaseExperiment experiment, 
 										  MApplication 	 application, 
 										  EPartService   service,
-										  EModelService  modelService) {
+										  EModelService  modelService,
+										  String         message) {
 		
 		if (experiment == null || service == null) {
 			MessageDialog.openError( Display.getDefault().getActiveShell(), 
@@ -227,7 +228,7 @@ public class DatabaseCollection
 		// is ready. This doesn't guarantee anything, but works in most cases :-(
 
 		sync.asyncExec(()-> {
-			showPart(experiment, application, modelService, service);
+			showPart(experiment, application, modelService, service, message);
 		});
 	}
 	
@@ -245,7 +246,8 @@ public class DatabaseCollection
 	private int showPart( BaseExperiment experiment, 
 						  MApplication   application, 
 						  EModelService  modelService,
-						  EPartService   service) {
+						  EPartService   service,
+						  String         message) {
 
 		//----------------------------------------------------------------
 		// find an empty slot in the part stack
@@ -261,7 +263,7 @@ public class DatabaseCollection
 			// using asyncExec we hope Eclipse will delay the processing until the UI 
 			// is ready. This doesn't guarantee anything, but works in most cases :-(
 			sync.asyncExec(()-> {
-				showPart(experiment, application, modelService, service);
+				showPart(experiment, application, modelService, service, message);
 			});
 			return -1;
 		}
@@ -365,6 +367,13 @@ public class DatabaseCollection
 			}
 		}
 		((ProfilePart) view).onFocus();
+		if (message != null && !message.isEmpty()) {
+			final ProfilePart activePart = (ProfilePart) view;
+			sync.asyncExec(()->{
+				activePart.showWarning(message);
+			});
+		}
+		
 		return 1;
 	}
 	
@@ -678,6 +687,7 @@ public class DatabaseCollection
 			if (experiment == null) {
 				return;
 			}
+			String message = null;
 			
 			// filter the tree if user has defined at least a filter
 			// if we elide some nodes, we should notify the user
@@ -685,12 +695,12 @@ public class DatabaseCollection
 			if (filterMap.isFilterEnabled()) {
 				int numFilteredNodes = experiment.filter(filterMap);
 				if (numFilteredNodes > 0) {
-					showFilterMessage(shell, numFilteredNodes);
+					message = showFilterMessage(shell, numFilteredNodes);
 				}
 			}
 			
 			// Everything works just fine: create views
-			createViewsAndAddDatabase(experiment, application, partService, modelService);
+			createViewsAndAddDatabase(experiment, application, partService, modelService, message);
 
 		} catch (InvalExperimentException ei) {
 			final String msg = "Invalid database " + xmlFileOrDirectory + "\nError at line " + ei.getLineNumber();
@@ -722,14 +732,16 @@ public class DatabaseCollection
 	}
 
 	
-	private void showFilterMessage(Shell shell, int numFilteredNodes) throws IOException {
+	private String showFilterMessage(Shell shell, int numFilteredNodes) throws IOException {
 		final String unit = numFilteredNodes == 1 ? " node has " : " nodes have ";
 		final String filterKey = "filterMessage";
+		final String message   = "CCT node Filter is enabled and at least " + 
+				 				 numFilteredNodes + unit + "been elided.";
 		
 		var prefStore  = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
 		var checkValue = prefStore.getBoolean(filterKey);
 		if (checkValue)
-			return;
+			return message;
 		
 		var dlg = MessageDialogWithToggle.openWarning(shell,  
 											"Filter is enabled", 
@@ -742,5 +754,7 @@ public class DatabaseCollection
 		checkValue = dlg.getToggleState();
 		prefStore.putValue(filterKey, String.valueOf(checkValue));
 		prefStore.save();
+		
+		return null;
 	}
 }

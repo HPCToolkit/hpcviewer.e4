@@ -46,6 +46,7 @@ import edu.rice.cs.hpcviewer.ui.graph.GraphEditorInput;
 import edu.rice.cs.hpcviewer.ui.graph.GraphHistoViewer;
 import edu.rice.cs.hpcviewer.ui.graph.GraphPlotRegularViewer;
 import edu.rice.cs.hpcviewer.ui.graph.GraphPlotSortViewer;
+import edu.rice.cs.hpcviewer.ui.internal.AbstractTableView;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractUpperPart;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractView;
 import edu.rice.cs.hpcviewer.ui.metric.MetricView;
@@ -245,8 +246,8 @@ public class ProfilePart implements IProfilePart, EventHandler
 	 * 
 	 * @return {@code AbstractBaseViewItem} the current active item, or null
 	 */
-	public AbstractView getActiveView() {
-		return (AbstractView) tabFolderBottom.getSelection();
+	public AbstractTableView getActiveView() {
+		return (AbstractTableView) tabFolderBottom.getSelection();
 	}
 
 	
@@ -421,5 +422,26 @@ public class ProfilePart implements IProfilePart, EventHandler
 			view.setInput(input);
 			view.activate();
 		}
+	}
+
+	@Override
+	public void showErrorMessage(String str) {
+		var view = getActiveView();
+		if (view != null)
+			view.showErrorMessage(str);
+	}
+
+	@Override
+	public void showInfo(String message) {
+		var view = getActiveView();
+		if (view != null)
+			view.showInfo(message);
+	}
+
+	@Override
+	public void showWarning(String message) {
+		var view = getActiveView();
+		if (view != null)
+			view.showWarning(message);
 	}
 }

@@ -85,7 +85,8 @@ public class MergeDatabase
 			
 			@Override
 			public void mergeDone(Experiment experiment) {
-				database.createViewsAndAddDatabase(experiment, application, service, modelService);
+				String message = "The two databases have been merged";
+				database.createViewsAndAddDatabase(experiment, application, service, modelService, message);
 			}
 		});
 	}
