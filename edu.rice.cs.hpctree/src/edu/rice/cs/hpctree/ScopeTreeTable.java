@@ -395,6 +395,8 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
     	
     	GC gc = new GC(natTable.getDisplay());
     	Font genericFont = FontManager.getFontGeneric();
+    	Font metricFont  = FontManager.getMetricFont();
+    	
     	gc.setFont(genericFont);
     	
     	TableFitting.ColumnFittingMode mode = TableFitting.getFittingMode();
@@ -424,14 +426,18 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
     			// this assumption may be wrong, but it's better than traversing all the data to
     			// find the longest text
     			var textValue = metric.getMetricTextValue(getRoot()) + STRING_PADDING;
+    			
+    			// Fix issue #203: use the metric font for the metric data 
+    			gc.setFont(metricFont);
     			columnSize = gc.textExtent(textValue);
+    			gc.setFont(genericFont);
     		}
     		int colWidth = columnSize.x;
     		
     		if (mode == TableFitting.ColumnFittingMode.FIT_BOTH) {
         		// List of metrics is based on column position, while the current display is based on index.
         		// We need to convert from an index to a position.
-        		String title = bodyDataProvider.getMetric(dataIndex).getDisplayName() + headerLabelPadding;
+        		String title = metric.getDisplayName() + headerLabelPadding;
         		Point titleSize = gc.textExtent(title);
     			colWidth = (int) Math.max(titleSize.x , columnSize.x);
     		}
