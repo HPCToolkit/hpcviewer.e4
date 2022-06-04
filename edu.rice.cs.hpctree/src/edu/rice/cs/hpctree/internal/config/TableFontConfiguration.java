@@ -66,7 +66,7 @@ public class TableFontConfiguration implements IConfiguration, IPropertyChangeLi
 		if (need_to_refresh) {
 			configureFont(treeTable.getTable().getConfigRegistry());
 			treeTable.visualRefresh();
-			treeTable.pack();
+			treeTable.pack(true);
 		}
 	}
 	

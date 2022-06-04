@@ -4,7 +4,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.security.SecureRandom;
+import java.util.Random;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -20,14 +20,13 @@ import edu.rice.cs.hpctree.ScopeTreeData;
 class ScopeTreeDataTest 
 {
 	private static ScopeTreeData []treeData;
-	private static SecureRandom random; 
+	private static final Random random = new Random(); 
 
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
 		var database    = TestDatabase.getDatabases();
 		var experiments = new Experiment[database.length];
 		treeData = new ScopeTreeData[database.length];
-		random   = SecureRandom.getInstanceStrong();
 		 
 		int i=0;
 

@@ -508,4 +508,22 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 			tbtmTraceView.refresh();
 		}
 	}
+
+	@Override
+	public void showErrorMessage(String str) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void showInfo(String message) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void showWarning(String message) {
+		// TODO Auto-generated method stub
+		
+	}
 }

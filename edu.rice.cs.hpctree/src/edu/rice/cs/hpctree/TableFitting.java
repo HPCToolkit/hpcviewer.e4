@@ -108,6 +108,6 @@ public class TableFitting
 		var mode = getFittingMode();
 		var next = getNext(mode);
 		saveFittingMode(next);
-		table.pack();
+		table.pack(true);
 	}
 }

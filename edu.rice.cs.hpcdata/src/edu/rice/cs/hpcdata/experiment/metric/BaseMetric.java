@@ -20,10 +20,7 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 	// CONSTANTS
 	//-------------------------------------------------------------------------------
 
-	static final public int PARTNER_UNKNOWN = -1;
-
-	//static final private String EMPTY_SUFFIX = "   ";
-	
+	static final public int  PARTNER_UNKNOWN = -1;
 	static final private int NO_ORDER = -1;
 
 	//-------------------------------------------------------------------------------
@@ -102,17 +99,7 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 			AnnotationType annotationType, int index, int partner_index, MetricType type) 
 	{
 		this.displayName = sDisplayName;
-		
-		// in case of instantiation from duplicate() method, we need to make sure there is
-		//	no double empty suffix
-		
-		/* laksono: do not hack here. let's do it in the viewer instead 
-		if (sDisplayName.endsWith(EMPTY_SUFFIX))
-			this.displayName = sDisplayName;
-		else
-			this.displayName = sDisplayName + EMPTY_SUFFIX; // johnmc - hack to leave enough room for ascending/descending triangle;
-		*/
-		this.visibility = displayed;
+		this.visibility  = displayed;
 		this.annotationType = annotationType;
 		
 		this.order = NO_ORDER;

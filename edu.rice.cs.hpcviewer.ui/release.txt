@@ -1,1 +1,1 @@
-Release 2022.03. Commit 78940c93
+Release 2022.06. Commit fa410307
