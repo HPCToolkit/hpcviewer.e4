@@ -77,7 +77,7 @@ public class AppearencePage extends AbstractPage
         // call-site area
         //
         Group groupCallsite = createGroupControl(parent, "Call-site glyph settings ", false);
-        fontCallsiteEditor = createFontEditor(groupCallsite, PreferenceConstants.ID_FONT_CALLSITE, "Glyph font:",   FontManager.getCallsiteGlyphFont());
+        fontCallsiteEditor  = createFontEditor(groupCallsite, PreferenceConstants.ID_FONT_CALLSITE, "Glyph font:",   FontManager.getCallsiteGlyphFont());
 
         Composite glyphArea = new Composite(groupCallsite, SWT.NONE);
         GridDataFactory.fillDefaults().grab(true, true).span(3, 1).applyTo(glyphArea);
@@ -94,7 +94,7 @@ public class AppearencePage extends AbstractPage
         	glyphComboEditor.setFont(font);
         });
 
-		return parent;
+        return parent;
 	}
 	
 	
