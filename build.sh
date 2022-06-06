@@ -332,7 +332,7 @@ if [[ "$VERBOSE" == "1" ]]; then
 fi
 ./build.sh ${OPTION}
 
-if [  -f hpcdata*.tgz ]; then
+if [  -f hpcdata-${RELEASE}.tgz ]; then
 	cp hpcdata*.tgz ../..
 else
 	echo "Fail to build hpcdata"
@@ -349,6 +349,6 @@ echo " Done"
 echo "=================================="
 
 ls -l hpcviewer-${RELEASE}-*
-if [  -f hpcdata*.tgz ]; then
+if [  -f hpcdata-${RELEASE}.tgz ]; then
 	ls -l hpcdata*
 fi
