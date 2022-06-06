@@ -49,7 +49,7 @@ public class ProcedureScope extends Scope  implements IMergedScope
 			LoadModuleScope.NONE, SourceFile.NONE, 
 			0, 0, 
 			Constants.PROCEDURE_UNKNOWN, false, 
-			Integer.MIN_VALUE, Integer.MIN_VALUE, 
+			Constants.FLAT_ID_PROC_UNKNOWN, Constants.FLAT_ID_PROC_UNKNOWN, 
 			null, FeatureRoot);
 
 	private static final String TheProcedureWhoShouldNotBeNamed = "-";

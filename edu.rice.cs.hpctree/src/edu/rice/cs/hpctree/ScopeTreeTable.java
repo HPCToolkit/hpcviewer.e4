@@ -29,6 +29,7 @@ import org.eclipse.nebula.widgets.nattable.selection.event.RowSelectionEvent;
 import org.eclipse.nebula.widgets.nattable.sort.SortHeaderLayer;
 import org.eclipse.nebula.widgets.nattable.sort.event.SortColumnEvent;
 import org.eclipse.nebula.widgets.nattable.style.theme.ThemeConfiguration;
+import org.eclipse.nebula.widgets.nattable.tree.config.TreeLayerExpandCollapseKeyBindings;
 import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
 import org.eclipse.nebula.widgets.nattable.viewport.command.ShowRowInViewportCommand;
 import org.eclipse.swt.SWT;
@@ -44,11 +45,15 @@ import org.eclipse.swt.widgets.Display;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
+import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
+import edu.rice.cs.hpcdata.experiment.metric.format.MetricValuePredefinedFormat;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpctree.action.IActionListener;
 import edu.rice.cs.hpctree.internal.ColumnHeaderDataProvider;
+import edu.rice.cs.hpctree.internal.ResizeListener;
 import edu.rice.cs.hpctree.internal.ScopeTooltip;
 import edu.rice.cs.hpctree.internal.ScopeTreeBodyLayerStack;
 import edu.rice.cs.hpctree.internal.ScopeTreeDataProvider;
@@ -75,11 +80,11 @@ import edu.rice.cs.hpctree.internal.config.TableFontConfiguration;
  ********************************************************************/
 public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayerListener, ListEventListener<BaseMetric>
 {
-	private final static String TEXT_METRIC_COLUMN = "|8x88+88xx888x8%";
-	private final static String STRING_PADDING  = "XX"; 
+	private final static String TEXT_METRIC_COLUMN = "8x88+88xx888x8%";
+	private final static String STRING_PADDING  = "X"; 
 
 	private final NatTable       natTable ;
-	//private final ResizeListener resizeListener;
+	private final ResizeListener resizeListener;
 
 	private final DataLayer 			  columnHeaderDataLayer ;
 	private final ScopeTreeBodyLayerStack bodyLayerStack ;
@@ -115,9 +120,6 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         bodyLayerStack.getBodyDataLayer().setConfigLabelAccumulator(new ScopeTreeLabelAccumulator(treeData));
         bodyLayerStack.getSelectionLayer().addLayerListener(this);
 
-        tableConfiguration =  new TableConfiguration(parent, bodyDataProvider);
-        bodyLayerStack.addConfiguration(tableConfiguration);
-
         // --------------------------------
         // build the column header layer
         // --------------------------------
@@ -151,11 +153,16 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         // setup the configuration for natTable
         // --------------------------------
 
+        tableConfiguration =  new TableConfiguration(parent, bodyDataProvider);
+        var fontConfig = new TableFontConfiguration(this);
+        natTable.addConfiguration(tableConfiguration);
+        natTable.addConfiguration(fontConfig);
         natTable.addConfiguration(new ScopeTreeExportConfiguration(bodyLayerStack.getTreeRowModel()));
-        natTable.addConfiguration(new TableFontConfiguration(this));
 		natTable.addConfiguration(new ScopeSortConfiguration(this));
 		natTable.addConfiguration(new ContextMenuConfiguration(this));
-
+		natTable.addConfiguration(new TreeLayerExpandCollapseKeyBindings(bodyLayerStack.getTreeLayer(), 
+																		 bodyLayerStack.getSelectionLayer()));
+		
         // --------------------------------
         // finalization
         // --------------------------------
@@ -204,8 +211,15 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		treeData.getMetricManager().addMetricListener(this);
 		
 		// Fix issue #145: do not listen to table resizing
-		//resizeListener = new ResizeListener(this);
-		//parent.addControlListener(resizeListener);
+		// fix issue #199: resizing table should at least show 1 metric column
+		resizeListener = new ResizeListener(this);
+		natTable.addControlListener(resizeListener);
+		natTable.getDisplay().addFilter(SWT.MouseDown, resizeListener);
+		natTable.getDisplay().addFilter(SWT.MouseUp, resizeListener);
+
+		fontConfig.configureHeaderFont(natTable.getConfigRegistry());
+        visualRefresh();
+
 	}
 	
 	
@@ -354,7 +368,17 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	 * Resize the columns based on the number of visible columns and the 
 	 * size of the table (or area of the parent composite).
 	 */
-	public void pack() {		
+	public void pack() {
+		pack(false);
+	}
+	
+	/***
+	 * Resize all the visible metric columns
+	 * 
+	 * @param keepTreeColumn
+	 * 			true if the tree column has to be kept persistent if possible
+	 */
+	public void pack(boolean keepTreeColumn) {		
 		final int TREE_COLUMN_WIDTH  = 350;
 		
 		// ---------------------------------------------------------------
@@ -364,61 +388,89 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 
         // metric columns (if any)
 		// the width is the max between the title of the column and the cell value 
-    	Point columnSize = getMetricColumnSize();
+		Point metricFontSize = getMetricColumnSize();
     	final ColumnHideShowLayer hideShowLayer = bodyLayerStack.getColumnHideShowLayer();
     	int visibleColumns  = hideShowLayer.getColumnCount();
+    	
     	GC gc = new GC(natTable.getDisplay());
     	Font genericFont = FontManager.getFontGeneric();
+    	Font metricFont  = FontManager.getMetricFont();
+    	
     	gc.setFont(genericFont);
     	
+    	TableFitting.ColumnFittingMode mode = TableFitting.getFittingMode();
+    	
+    	// the header needs to pad with 2 character to allow the triangle to be visible 
+    	final String headerLabelPadding = STRING_PADDING + STRING_PADDING;
     	int totSize = 0;
+    	int widthFirstMetricColumn = 0;
     	//
     	// compute and resize the metric columns first.
     	// the tree column is resized the last one since it has the highest priority and
     	// will get the width whatever remains (if exist)
     	//
     	for(int i=1; i<visibleColumns; i++) {
-    		// List of metrics is based on column position, while the current display is based on index.
-    		// We need to convert from an index to a position.
-    		int position = hideShowLayer.getColumnIndexByPosition(i);
-    		String title = bodyDataProvider.getMetric(position).getDisplayName() + STRING_PADDING;
-    		Point titleSize = gc.textExtent(title);
+        	Point columnSize = metricFontSize;
+
+        	int dataIndex = hideShowLayer.getColumnIndexByPosition(i);
+    		var metric   = bodyDataProvider.getMetric(dataIndex);
     		
-    		int colWidth = (int) Math.max(titleSize.x , columnSize.x);
+    		if (metric.getAnnotationType() == AnnotationType.NONE || 
+    			metric instanceof DerivedMetric ||
+    			metric.getDisplayFormat() instanceof MetricValuePredefinedFormat) {
+    			
+    			// since this metric has no annotation (like percent),
+    			// we should compute its particular size.
+    			// let assume the root always has the highest and longest text value.
+    			// this assumption may be wrong, but it's better than traversing all the data to
+    			// find the longest text
+    			var textValue = metric.getMetricTextValue(getRoot()) + STRING_PADDING;
+    			
+    			// Fix issue #203: use the metric font for the metric data 
+    			gc.setFont(metricFont);
+    			columnSize = gc.textExtent(textValue);
+    			gc.setFont(genericFont);
+    		}
+    		int colWidth = columnSize.x;
+    		
+    		if (mode == TableFitting.ColumnFittingMode.FIT_BOTH) {
+        		// List of metrics is based on column position, while the current display is based on index.
+        		// We need to convert from an index to a position.
+        		String title = metric.getDisplayName() + headerLabelPadding;
+        		Point titleSize = gc.textExtent(title);
+    			colWidth = (int) Math.max(titleSize.x , columnSize.x);
+    		}
+    		
     		int pixelWidth = GUIHelper.convertHorizontalDpiToPixel(colWidth);
-        	bodyDataLayer.setColumnWidthByPosition(i, pixelWidth);
+        	bodyDataLayer.setColumnWidthByPosition(dataIndex, pixelWidth);
         	totSize += pixelWidth;
+        	
+        	if (i==1)
+        		widthFirstMetricColumn = pixelWidth;
     	}
     	
     	// compute the size of the tree column
     	// if the total size is less than the display, we can use the percentage for the tree column
     	// otherwise we should specify explicitly the width
-    	Rectangle area = natTable.getClientArea();
-    	if (area.width < 10) {
-    		area = natTable.getShell().getClientArea();
-    		area.width -= 20;
-    	}
-
-    	int areaWidth = GUIHelper.convertHorizontalDpiToPixel(area.width);
+		int areaWidth = GUIHelper.convertHorizontalDpiToPixel(getTableWidth());
     	
     	// tree column: the width is the max between 
     	//  - TREE_COLUMN_WIDTH, 
     	//  - the current width 
     	//  - the calculated recommended width
-		int w = Math.max(TREE_COLUMN_WIDTH, areaWidth-totSize);
+		int recommendedWidth = areaWidth-totSize;
+		int w = Math.max(TREE_COLUMN_WIDTH, recommendedWidth);
+		if (keepTreeColumn) {
+			int treeColumnWidth  = GUIHelper.convertHorizontalDpiToPixel(bodyDataLayer.getColumnWidthByPosition(0));
+			w = Math.max(treeColumnWidth, w);
+		}
+		if (w >= areaWidth) {
+			w = areaWidth - widthFirstMetricColumn;
+		}
 		bodyDataLayer.setColumnWidthByPosition(0, w);
 		
 		// Now, compute the ideal size of the row's height
-		// 1. size for generic font
-		Point genericSize = gc.stringExtent(TEXT_METRIC_COLUMN);
-		
-		// 2. size for metric font 
-		Font metricFont = FontManager.getMetricFont();
-		gc.setFont(metricFont);
-		Point metricSize = gc.stringExtent(TEXT_METRIC_COLUMN);
-		
-		int height = Math.max(metricSize.y, genericSize.y);
-		int pixelV = GUIHelper.convertVerticalDpiToPixel(height);
+		int pixelV = GUIHelper.convertVerticalDpiToPixel(metricFontSize.y);
 
 		bodyDataLayer.setDefaultRowHeight(pixelV + 4);
 		columnHeaderDataLayer.setDefaultRowHeight(pixelV + 4);
@@ -426,6 +478,16 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
     	gc.dispose();
 	}
 	
+	
+	private int getTableWidth() {
+    	Rectangle area = natTable.getClientArea();
+    	if (area.width < 10) {
+    		area = natTable.getShell().getClientArea();
+    		area.width -= 20;
+    	}
+
+    	return area.width;
+	}
 
 	private Point getMetricColumnSize() {
 		final GC gc = new GC(natTable.getDisplay());		
@@ -605,13 +667,16 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	
 	@Override
 	public void widgetDisposed(DisposeEvent e) {
+		natTable.getDisplay().removeFilter(SWT.MouseDown, resizeListener);
+		natTable.getDisplay().removeFilter(SWT.MouseUp, resizeListener);
+		natTable.removeControlListener(resizeListener);
+		
 		((IScopeTreeData)bodyLayerStack
 							.getTreeRowModel()
 							.getTreeData())
 								.getMetricManager()
 								.removeMetricListener(this);
         bodyLayerStack.getSelectionLayer().removeLayerListener(this);
-        //natTable.getParent().removeControlListener(resizeListener);
 	}
 	
 	

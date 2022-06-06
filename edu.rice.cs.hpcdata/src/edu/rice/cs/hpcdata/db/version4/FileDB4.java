@@ -1,16 +1,12 @@
-package edu.rice.cs.hpctraceviewer.data.version4;
+package edu.rice.cs.hpcdata.db.version4;
 
 import java.io.IOException;
 import java.util.List;
-
-import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcdata.db.IFileDB;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.db.version2.FileDB2;
-import edu.rice.cs.hpcdata.db.version4.DataSummary;
-import edu.rice.cs.hpcdata.db.version4.DataTrace;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 
 
@@ -133,8 +129,7 @@ public class FileDB4 implements IFileDB
 		try {
 			dataTrace.dispose();
 		} catch (IOException e) {
-			var log = LoggerFactory.getLogger(getClass());
-			log.error(e.getMessage());
+			// unable to dispose
 		}
 	}
 

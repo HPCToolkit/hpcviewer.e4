@@ -3,7 +3,9 @@ package edu.rice.cs.hpcdata.experiment;
 import java.io.File;
 
 import edu.rice.cs.hpcdata.db.DatabaseManager;
+import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.IUserData;
+import edu.rice.cs.hpcdata.util.Util;
 
 
 /***********************************************
@@ -61,5 +63,49 @@ public class LocalDatabaseRepresentation implements IDatabaseRepresentation
 	@Override
 	public void setFile(File file) {
 		fileExperiment = file;
+	}
+	
+
+	/**********************
+	 * static method to check if a directory contains hpctoolkit's trace data
+	 * 
+	 * @param directory 
+	 * 			the main database directory
+	 * @return int 
+	 * 			version of the database if the database is correct and valid
+	 * 			   return negative number otherwise
+	 */
+	static public int directoryHasTraceData(String directory)
+	{
+		File file = new File(directory);
+		String database_directory;
+		if (file.isFile()) {
+			// if the argument is a file, then we'll look for its parent directory
+			file = file.getParentFile();
+			database_directory = file.getAbsolutePath();
+		} else {
+			database_directory = directory;
+		}
+		// checking for version 4.0
+		String file_path = database_directory + File.separatorChar + Constants.TRACE_FILE_SPARSE_VERSION;
+		File tmp_file 	 = new File(file_path);
+		if (tmp_file.canRead()) {
+			return Constants.EXPERIMENT_SPARSE_VERSION;
+		}
+		
+		// checking for version 2.0
+		file_path = database_directory + File.separatorChar + "experiment.mt";
+		tmp_file  = new File(file_path);
+		if (tmp_file.canRead()) {
+			return Constants.EXPERIMENT_DENSED_VERSION;
+		}
+		
+		// checking for version 2.0 with old format files
+		tmp_file  = new File(database_directory);
+		File[] file_hpctraces = tmp_file.listFiles( new Util.FileThreadsMetricFilter("*.hpctrace") );
+		if (file_hpctraces != null && file_hpctraces.length>0) {
+			return 1;
+		}
+		return -1;
 	}
 }

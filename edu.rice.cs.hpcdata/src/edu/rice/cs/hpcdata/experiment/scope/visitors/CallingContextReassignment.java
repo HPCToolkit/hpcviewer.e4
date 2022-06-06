@@ -1,7 +1,5 @@
 package edu.rice.cs.hpcdata.experiment.scope.visitors;
 
-import java.util.ListIterator;
-
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.FileScope;
@@ -22,23 +20,11 @@ public class CallingContextReassignment implements IScopeVisitor
 	@Override
 	public void visit(LineScope scope, ScopeVisitType vt) { 
 		if (vt == ScopeVisitType.PreVisit) {
-			var children = scope.getChildren();
-			if (children == null)
+			var list = scope.getScopeReduce();
+			if (list.isEmpty())
 				return;
-			
-			ListIterator<Scope> iterator = children.listIterator();
-			while(iterator.hasNext()) {
-				var child = iterator.next();
-				if (child instanceof ProcedureScope) {
-					throw new RuntimeException("Illegal procedure scope: " + child);
-				} else if (child instanceof CallSiteScope) {
-					scope.reduce(child, MetricType.INCLUSIVE);
-
-					iterator.remove();
-					Scope parent = scope.getParentScope();
-					parent.addSubscope(child);
-					child.setParentScope(parent);
-				}				
+			for(var child: list) {
+				scope.reduce(child, MetricType.INCLUSIVE);
 			}
 		} else {
 			

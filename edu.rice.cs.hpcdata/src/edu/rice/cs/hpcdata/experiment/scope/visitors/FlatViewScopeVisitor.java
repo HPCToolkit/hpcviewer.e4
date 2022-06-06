@@ -5,12 +5,13 @@ import java.util.*;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.scope.AlienScope;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
-import edu.rice.cs.hpcdata.experiment.scope.CallSiteScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.FileScope;
 import edu.rice.cs.hpcdata.experiment.scope.GroupScope;
+import edu.rice.cs.hpcdata.experiment.scope.InstructionScope;
 import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoadModuleScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoopScope;
+import edu.rice.cs.hpcdata.experiment.scope.ProcedureCallScope;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -128,7 +129,6 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 					getFlatCounterPart(proc_cct_s, scope, id);
 				}
 			}
-
 		} else {
 			
 			//--------------------------------------------------------------------------
@@ -221,7 +221,8 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 			//-----------------------------------------------------------------------------
 			// Attach the scope to the file if it is a procedure
 			//-----------------------------------------------------------------------------
-			if (flat_info_s.flat_s instanceof ProcedureScope) {
+			if (flat_info_s.flat_s instanceof ProcedureScope && 
+				!(flat_info_s.flat_s instanceof ProcedureCallScope)) {
 				this.addToTree(flat_info_s.flat_file, flat_info_s.flat_s);
 			}
 		}
@@ -354,14 +355,14 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 		if (cct_parent_s != null) {
 			if (cct_parent_s instanceof RootScope) {
 				// ----------------------------------------------
-				// main procedure
+				// main procedure: no parent
 				// ----------------------------------------------
 				flat_enc_s = null;
 			} else {
 				FlatScopeInfo flat_enc_info = null;
 				if ( cct_parent_s instanceof CallSiteScope ) {
 					// ----------------------------------------------
-					// parent is a call site
+					// parent is a call site: find the procedure scope of this call
 					// ----------------------------------------------
 					ProcedureScope proc_cct_s = ((CallSiteScope)cct_parent_s).getProcedureScope(); 
 					flat_enc_info = getFlatScope(proc_cct_s);
@@ -375,89 +376,27 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 		}
 
 		FlatScopeInfo objFlat = getFlatScope(cct_s);
+		if (objFlat == null)
+			return null;
 
 		if (flat_enc_s != null) {
 			// Check if there is a cyclic dependency between the child and the ancestors
 			if (!isCyclicDependency(flat_enc_s, objFlat.flat_s)) {
-				var scope = checkIfProcedureIsACallsite(id, objFlat.flat_s, flat_enc_s, cct_s_metrics);
-				this.addToTree(flat_enc_s, scope);
-				
+				// no cyclic dependency: it's safe to add to the parent
+				this.addToTree(flat_enc_s, objFlat.flat_s);				
 			} else {
-				// rare case: cyclic dependency
+				// A very rare case: cyclic dependency
 				// TODO: we should create a new copy and attach it to the tree
 				// but this will cause an issue for adding metrics and decrement counter
-				// at the moment we just avoid cyclic dependency
-				
-				Scope copy = objFlat.flat_s.duplicate();
-				copy.setCCTIndex(generateNodeIndex());
-				
-				this.addToTree(flat_enc_s, copy);
+				// at the moment we just avoid cyclic dependency				
 			}
 		}
 		this.addCostIfNecessary(id, objFlat.flat_s, cct_s_metrics, true, true);
 		
-		return objFlat;		
+		return objFlat;
+		
 	}
 	
-	
-	/***
-	 * Special handle:
-	 *  check if cct scope is a procedure AND its parent is also a procedure
-	 *  
-	 * @param id
-	 * @param scope
-	 * @param flat_enc_s
-	 * @param cct_s_metrics
-	 * @return
-	 */
-	private Scope checkIfProcedureIsACallsite(String id, Scope scope, Scope flat_enc_s, Scope cct_s_metrics) {
-		Scope nodeToAdd = scope;
-		
-		// check if cct scope is a procedure AND its parent is also a procedure
-		// normally this doesn't make sense, but in prof2 it's possible a procedure
-		// calls another procedure. For instance in the cct:
-		//
-		// <program root>
-		//    |
-		//    +---> main (as a call site AND a procedure)
-		//
-		// in this case both <program root> and main are procedures. We want to
-		// to create the flat tree of this into:
-		//
-		// file
-		//   |
-		//   +---> <program root>
-		//   |         |
-		//   |         +---> main (as a call site)
-		//   |
-		//   +---> main (as a procedure)
-		
-		ProcedureScope ps = findEnclosingProcedure(scope);
-		if (ps != null && 
-			scope instanceof ProcedureScope && 
-			ps instanceof ProcedureScope) {
-
-			// try to find a child in the enclosing procedure that has the same flat index
-			// as the current scope.
-			// If this is the case, we should reuse the existing child as the call site
-			Scope cs = null;
-			if (flat_enc_s.hasChildren())
-				for(var child: flat_enc_s.getChildren()) {
-					if (child.getFlatIndex() == scope.getFlatIndex()) {
-						cs = child;
-						break;
-					}
-				}
-			if (cs == null) {
-				// create a copy scope as a callsite
-				LineScope ls = new LineScope(scope.getRootScope(), scope.getSourceFile(), 0, generateNodeIndex(), scope.getFlatIndex());
-				cs = new CallSiteScope(ls, (ProcedureScope)scope, CallSiteScopeType.CALL_TO_PROCEDURE, generateNodeIndex(), scope.getFlatIndex());
-			}
-			nodeToAdd = cs;					
-			this.addCostIfNecessary(id, scope, cct_s_metrics, true, true);
-		}
-		return nodeToAdd;
-	}
 	
 	/***********************************************************
 	 * Retrieve the ID given a scope
@@ -471,20 +410,62 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 	 * @return
 	 ***********************************************************/
 	private String getID( Scope scope ) {
-		final String id = String.valueOf(scope.getFlatIndex());
+		var hash_id = new StringBuilder();
+		
 		final String class_type = scope.getClass().getSimpleName();
-		StringBuffer hash_id = new StringBuffer(id);
 		if (class_type != null) {
 			hash_id.insert(0, class_type.substring(0, 2));
 		}
 		if (scope instanceof CallSiteScope)
 		{
+			hash_id.append(SEPARATOR_ID);
+			hash_id.append(scope.getFlatIndex());
+
+			CallSiteScope cs = (CallSiteScope) scope;
+			LineScope ls = cs.getLineScope();
+
+			hash_id.append(SEPARATOR_ID);
+			hash_id.append(ls.getSourceFile().getFileID());
+			
+			hash_id.append(SEPARATOR_ID);
+			hash_id.append(ls.getLineNumber());
+
 			// forcing to include procedure ID to ensure uniqueness of call site
-			final int proc_id = ((CallSiteScope)scope).getProcedureScope().getFlatIndex();
+			final ProcedureScope proc_scope = cs.getProcedureScope();
+			final int proc_id = proc_scope.getFlatIndex();
 			hash_id.append(SEPARATOR_ID);
 			hash_id.append(proc_id);
+			
+			// fix issue #200: needs to separate inlined codes from different calls
+			// assume the following example:
+			//  a -> [i] x
+			//  b -> [i] x
+			// we should make sure the id of inlined x is different from the two calls
+			// The reason is that the line scope of both calls are the same (since they are inlined).
+			// so we have to add the flat id of the parent as an id
+			
+			if (proc_scope.isAlien()) {
+				var parent = scope.getParentScope();
+				if (parent != null) {
+					hash_id.append(getID(parent));
+				}
+			}
 		} else if (scope instanceof ProcedureScope) 
 		{
+			hash_id.append(SEPARATOR_ID);
+			hash_id.append(scope.getFlatIndex());
+
+			if (scope instanceof ProcedureCallScope) {
+				// it's a procedure but a call at the same time
+				// get the caller id:
+				Scope parent = scope.getParentScope();
+				hash_id.append(SEPARATOR_ID);
+				hash_id.append(parent.getFlatIndex());
+				
+				// additional signature for prof2's call procedure.
+				hash_id.append(SEPARATOR_ID);
+				hash_id.append("pc");
+			}
 			ProcedureScope proc_scope = (ProcedureScope) scope;
 			if (proc_scope.isFalseProcedure()) {
 				int linenum = proc_scope.getFirstLineNumber();
@@ -496,6 +477,13 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 				hash_id.append(SEPARATOR_ID);
 				hash_id.append(linenum);
 			}
+		} else if (scope instanceof InstructionScope) {
+			InstructionScope is = (InstructionScope) scope;
+			hash_id.append(SEPARATOR_ID);
+			hash_id.append(is.getName());
+		} else if (scope instanceof LoopScope || scope instanceof LineScope) {
+			hash_id.append(SEPARATOR_ID);
+			hash_id.append(scope.getName());
 		}
 		return hash_id.toString();
 	}

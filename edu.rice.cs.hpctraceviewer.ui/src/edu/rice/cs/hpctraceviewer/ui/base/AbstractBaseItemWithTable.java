@@ -201,7 +201,9 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 	 */
 	public void pack() {
 		// set the width of the columns
-		final String TEXT = "{XXX.XX%|";
+		final String TEXT = "XXX.XX%";
+		final int PADDING = 4;
+		
 		final int colorColWidth = GUIHelper.convertHorizontalDpiToPixel(IConstants.COLUMN_COLOR_WIDTH_PIXELS);
 		dataLayer.setColumnWidthByPosition(0, colorColWidth);
 		
@@ -212,13 +214,14 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 		dataLayer.setColumnWidthByPosition(2, widthColNumber);
 		
 		// the procedure name column should take whatever the remainder space
-		dataLayer.setColumnWidthPercentageByPosition(1, 97);
+		dataLayer.setColumnWidthPercentageByPosition(1, 99);
 		dataLayer.setColumnPercentageSizing(1, true);
+		dataLayer.setColumnsResizableByDefault(true);
 		
 		// row's height
 		gc.setFont(FontManager.getFontGeneric());
 		Point sizeGeneric = gc.textExtent(TEXT);
-		final int height = GUIHelper.convertHorizontalDpiToPixel(4 + Math.max(sizeGeneric.y, sizeNumber.y));
+		final int height = GUIHelper.convertHorizontalDpiToPixel(PADDING + Math.max(sizeGeneric.y, sizeNumber.y));
 		dataLayer.setDefaultRowHeight(height);
 		
 		gc.dispose();

@@ -24,7 +24,7 @@ public class DataSummaryTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws IOException {
-		Path resource = Paths.get("..", "resources", "prof2", "loop-inline");
+		Path resource = Paths.get("..", "resources", "metadb", "loop-inline");
 		dbPath = resource.toFile();
 		
 		assertNotNull(dbPath);

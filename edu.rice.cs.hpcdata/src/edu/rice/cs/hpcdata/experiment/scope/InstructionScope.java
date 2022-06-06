@@ -4,13 +4,13 @@ import java.io.File;
 
 public class InstructionScope extends LineScope 
 {
-	private static final String LINE_ZERO = ":0";
-	
 	private final LoadModuleScope loadModule;
+	private final long offset;
 
-	public InstructionScope(RootScope root, LoadModuleScope loadModule, int scopeID, int flatID) {
+	public InstructionScope(RootScope root, LoadModuleScope loadModule, long offset, int scopeID, int flatID) {
 		super(root, loadModule.getSourceFile(), 0, scopeID, flatID);
 		this.loadModule = loadModule;
+		this.offset = offset;
 	}
 
 
@@ -25,14 +25,13 @@ public class InstructionScope extends LineScope
 
 	@Override
 	public Scope duplicate() {
-		return new InstructionScope(root, loadModule, id, getFlatIndex());
+		return new InstructionScope(root, loadModule, offset, id, getFlatIndex());
 	}
 
 	@Override
 	public String getName() {
 		String name = loadModule.getName();
 		int index = name.lastIndexOf(File.separatorChar);
-		return name.substring(index+1) + LINE_ZERO;
+		return String.format("%s@0x%x",name.substring(index+1), offset);
 	}
-
 }

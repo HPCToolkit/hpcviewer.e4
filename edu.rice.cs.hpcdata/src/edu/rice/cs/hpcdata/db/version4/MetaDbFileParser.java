@@ -19,7 +19,7 @@ public class MetaDbFileParser extends ExperimentFile
 			directory = location.getAbsolutePath();
 		}
 		
-		DataMeta data = new DataMeta();
+		final DataMeta data = new DataMeta();
 		data.open(experiment, directory);
 		
 		return new File(data.filename);

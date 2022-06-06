@@ -1,11 +1,13 @@
 package edu.rice.cs.hpcviewer.ui.internal;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.services.EMenuService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.CTabFolder;
@@ -25,6 +27,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
 import edu.rice.cs.hpcbase.ViewerDataEvent;
+import edu.rice.cs.hpcbase.ui.IUserMessage;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
@@ -40,6 +43,8 @@ import edu.rice.cs.hpcmetric.internal.MetricFilterDataItem;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpctree.IScopeTreeData;
 import edu.rice.cs.hpctree.ScopeTreeTable;
+import edu.rice.cs.hpctree.TableFitting;
+import edu.rice.cs.hpctree.TableFitting.ColumnFittingMode;
 import edu.rice.cs.hpctree.action.HotPathAction;
 import edu.rice.cs.hpctree.action.IUndoableActionManager;
 import edu.rice.cs.hpctree.action.UndoableActionManager;
@@ -55,18 +60,25 @@ import edu.rice.cs.hpcviewer.ui.resources.IconManager;
  * Generic class to display a table and its toolbar for the actions
  *
  ************************************************************************************************/
-public abstract class AbstractTableView extends AbstractView implements EventHandler, DisposeListener
+public abstract class AbstractTableView extends AbstractView 
+implements EventHandler, DisposeListener, IUserMessage
 {
-	final private int ACTION_ZOOM_IN      = 0;
-	final private int ACTION_ZOOM_OUT     = 1;
-	final private int ACTION_HOTPATH      = 2;
+	private static final String TOOLTIP_AUTOFIT = "Resize the width of metric columns. ";
+	private static final String AUTOFIT_EVENT   = "eventautofit";
 	
-	final private int ACTION_ADD_METRIC   = 3;
-	final private int ACTION_EXPORT_DATA  = 4;
-	final private int ACTION_COLUMN_HIDE  = 5;
+	private static final int ACTION_ZOOM_IN      = 0;
+	private static final int ACTION_ZOOM_OUT     = 1;
+	private static final int ACTION_HOTPATH      = 2;
 	
-	final private int ACTION_FONT_INC     = 6;
-	final private int ACTION_FONT_DEC     = 7;
+	private static final int ACTION_ADD_METRIC   = 3;
+	private static final int ACTION_EXPORT_DATA  = 4;
+	private static final int ACTION_COLUMN_HIDE  = 5;
+	
+	private static final int ACTION_FONT_INC     = 6;
+	private static final int ACTION_FONT_DEC     = 7;
+	
+	private static final int ACTION_RESIZE_COLUMN = 8;
+	private static final int ACTION_MAX = 9;
 	
 	private Composite    parent ;
 	private ToolItem     toolItem[];
@@ -94,6 +106,34 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		actionManager = new UndoableActionManager();
 	}
 
+    
+    /***
+     * display an error message for a couple of seconds
+     * @param message
+     */
+	@Override
+    public void showErrorMessage(String message) {
+    	lblMessage.showErrorMessage(message);
+    }
+    
+    /***
+     * Display a normal message
+     * @param message  
+     */
+	@Override
+    public void showInfo(String message) {
+    	lblMessage.showInfo(message);
+    }
+    
+	/***
+	 * Display a warning message
+	 * @param message
+	 */
+	@Override
+    public void showWarning(String message) {
+    	lblMessage.showWarning(message);
+    }
+	
 
 	@Override
 	public void setService(EPartService partService, IEventBroker broker, DatabaseCollection database,
@@ -180,7 +220,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		// -------------------------------------------
 		// default tool bar
 		// -------------------------------------------
-		toolItem = new ToolItem[8];
+		toolItem = new ToolItem[ACTION_MAX];
 		
 		toolItem[ACTION_ZOOM_IN]  = createToolItem(toolBar, IconManager.Image_ZoomIn,  "Zoom-in the selected node");
 		toolItem[ACTION_ZOOM_OUT] = createToolItem(toolBar, IconManager.Image_ZoomOut, "Zoom-out from the current tree scope");
@@ -190,7 +230,14 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		
 		toolItem[ACTION_ADD_METRIC]  = createToolItem(toolBar, IconManager.Image_FnMetric, "Create a new user-derived metric");
 		toolItem[ACTION_EXPORT_DATA] = createToolItem(toolBar, IconManager.Image_SaveCSV,  "Export the current table into a CSV file");
+		
+		new ToolItem(toolBar, SWT.SEPARATOR);
+
 		toolItem[ACTION_COLUMN_HIDE] = createToolItem(toolBar, IconManager.Image_CheckColumns,  "Show/hide columns");
+		var mode = TableFitting.getFittingMode();
+		mode = TableFitting.getNext(mode);
+		var imageMode = getFittingModeImageLabel(mode);
+		toolItem[ACTION_RESIZE_COLUMN] = createToolItem(toolBar, imageMode,  TOOLTIP_AUTOFIT + TableFitting.toString(mode));
 		
 		new ToolItem(toolBar, SWT.SEPARATOR);
 
@@ -207,6 +254,22 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		// -------------------------------------------
 
 		lblMessage = new LabelMessage(composite, SWT.NONE);
+	}
+	
+	private String getFittingModeImageLabel(ColumnFittingMode mode) {
+		if (mode == ColumnFittingMode.FIT_DATA)
+			return IconManager.Image_TableFitData;
+		
+		return IconManager.Image_TableFitBoth;
+	}
+	
+	private void refreshAutoFitIcon() {
+		var mode = TableFitting.getFittingMode();
+		mode = TableFitting.getNext(mode);
+		final var imageMode = getFittingModeImageLabel(mode);
+		final var image = IconManager.getInstance().getImage(imageMode);
+		toolItem[ACTION_RESIZE_COLUMN].setImage(image);
+		toolItem[ACTION_RESIZE_COLUMN].setToolTipText(TOOLTIP_AUTOFIT + TableFitting.toString(mode));
 	}
 
 	@Override
@@ -253,6 +316,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE,  this);
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN,   this);
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH, this);
+		eventBroker.subscribe(AUTOFIT_EVENT, this);
 	
 		parent.addDisposeListener(this);
 	}
@@ -359,9 +423,13 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		if (obj == null || metricManager == null)
 			return;
 		
-		if (!(obj instanceof ViewerDataEvent)) 
+		if (!(obj instanceof ViewerDataEvent)) {
+			if (event.getTopic().equals(AUTOFIT_EVENT))
+				refreshAutoFitIcon();
+			
 			return;
-		
+		}
+			
 		ViewerDataEvent eventInfo = (ViewerDataEvent) obj;
 		if (metricManager != eventInfo.metricManager) 
 			return;
@@ -425,6 +493,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		}
 		return AbstractView.ViewType.COLLECTIVE;
 	}
+	
 	
 	private void hideORShowColumns(MetricDataEvent dataEvent) {
 		Object objData = dataEvent.getData();
@@ -578,6 +647,27 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 			}
 		});
 		
+		toolItem[ACTION_RESIZE_COLUMN].addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				try {
+					TableFitting.fitTable(table);
+				} catch (IOException err) {
+					MessageDialog.openError(table.getTable().getShell(), "Error saving preferences", err.getMessage());
+					return;
+				}
+				// the autofit button changes the icon every time user click
+				// this makes complicated when the user click autofit in one view
+				// but then switch to another view. This view needs to refresh
+				// the autofit button based on the current mode.
+				//
+				// next time, don't make things complicated
+
+				eventBroker.post(AUTOFIT_EVENT, TableFitting.getFittingMode());
+			}
+		});
+		
 		toolItem[ACTION_EXPORT_DATA].addSelectionListener(new SelectionAdapter() {
 			
 			@Override
@@ -631,6 +721,7 @@ public abstract class AbstractTableView extends AbstractView implements EventHan
 		toolItem[ACTION_EXPORT_DATA].setEnabled(true);
 		toolItem[ACTION_FONT_INC].setEnabled(true);
 		toolItem[ACTION_FONT_DEC].setEnabled(true);
+		toolItem[ACTION_RESIZE_COLUMN].setEnabled(true);
 		
 		Scope selectedScope = table.getSelection();
 		boolean canZoomIn = zoomAction == null ? false : zoomAction.canZoomIn(selectedScope); 

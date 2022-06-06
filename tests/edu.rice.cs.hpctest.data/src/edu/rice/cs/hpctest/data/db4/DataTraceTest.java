@@ -27,7 +27,7 @@ public class DataTraceTest {
 		for(int i=0; i<dbPaths.length; i++) {
 			String dbp = dbPaths[i];
 			
-			Path resource = Paths.get("..", "resources", "prof2", dbp);
+			Path resource = Paths.get("..", "resources", "metadb", dbp);
 			File dbPath = resource.toFile();
 			
 			assertNotNull(dbPath);

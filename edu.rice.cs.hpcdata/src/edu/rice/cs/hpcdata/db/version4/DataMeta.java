@@ -30,14 +30,17 @@ import edu.rice.cs.hpcdata.experiment.scope.InstructionScope;
 import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoadModuleScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoopScope;
+import edu.rice.cs.hpcdata.experiment.scope.ProcedureCallScope;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.experiment.scope.UnknownScope;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.CallingContextReassignment;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.TraceScopeVisitor;
 import edu.rice.cs.hpcdata.experiment.source.SimpleSourceFile;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
+import edu.rice.cs.hpcdata.util.Constants;
 
 
 /*********************************************
@@ -64,6 +67,7 @@ public class DataMeta extends DataCommon
 	private final static String HEADER_MAGIC_STR   = "HPCTOOLKITmeta";
 	
 	private final static String METRIC_SCOPE_POINT     = "point";
+	private static final String METRIC_SCOPE_FUNCTION  = "function";
 	private static final String METRIC_SCOPE_EXECUTION = "execution";
 		
 	private static final int INDEX_GENERAL = 0;
@@ -75,11 +79,12 @@ public class DataMeta extends DataCommon
 	private static final int INDEX_FILES   = 6;
 	private static final int INDEX_FUNCTIONS = 7;
 	
-	// future usage: 
-	// private static final int FMT_METADB_RELATION_LEXICAL_NEST = 0;
-	// private static final int FMT_METADB_RELATION_CALL = 1;
+	// Parent-child relation: 
+	private static final int FMT_METADB_RELATION_LEXICAL_NEST = 0;
+	private static final int FMT_METADB_RELATION_CALL 		  = 1;
 	private static final int FMT_METADB_RELATION_CALL_INLINED = 2;
 
+	// lexical type:
 	private static final int FMT_METADB_LEXTYPE_FUNCTION = 0;
 	private static final int FMT_METADB_LEXTYPE_LOOP = 1;
 	private static final int FMT_METADB_LEXTYPE_LINE = 2;
@@ -422,14 +427,25 @@ public class DataMeta extends DataCommon
 					// this should be fixed when we parse metrics.yaml
 					m.setAnnotationType(AnnotationType.PERCENT);
 					
-					MetricType type = scopeName.equals(METRIC_SCOPE_EXECUTION) ? 
-														MetricType.INCLUSIVE : 
-														MetricType.EXCLUSIVE;
+					MetricType type;
+					
+					switch(scopeName) {
+					case METRIC_SCOPE_EXECUTION:
+						type = MetricType.INCLUSIVE;
+						break;
+					case METRIC_SCOPE_POINT:
+						type = MetricType.POINT_EXCL;
+						break;
+					case METRIC_SCOPE_FUNCTION:
+						type = MetricType.EXCLUSIVE;
+						break;
+					default:
+						type = MetricType.UNKNOWN;
+					}
 					m.setMetricType(type);
 										
-					VisibilityType vt = scopeName.equals(METRIC_SCOPE_POINT) ? 
-										VisibilityType.HIDE : 
-										VisibilityType.SHOW; 
+					VisibilityType vt = type == MetricType.POINT_EXCL ? 
+										VisibilityType.HIDE : VisibilityType.SHOW; 
 					m.setDisplayed(vt);
 
 					// store the index of this scope.
@@ -492,24 +508,25 @@ public class DataMeta extends DataCommon
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		
 		long pModules  = buffer.getLong();
-		int  nModules  = buffer.getInt(0x08);
+		int numModules = buffer.getInt(0x08);
 		short szModule = buffer.getShort(0x0c);
 		
 		int baseOffset = (int) (pModules - section.offset);
-		LongObjectHashMap<LoadModuleScope> mapLoadModules = new LongObjectHashMap<>(nModules);
-
-		for(int i=0; i<nModules; i++) {
+		LongObjectHashMap<LoadModuleScope> mapModules = new LongObjectHashMap<>(numModules);
+		int baseId = Constants.FLAT_ID_BEGIN + 1;
+		
+		for(int i=0; i<numModules; i++) {
 			int delta        = i * szModule;
 			int position     = baseOffset + delta + 0x08;
 			long pModuleName = buffer.getLong(position);
 			String path      = stringArea.toString(pModuleName);
 			
-			LoadModuleScope lms = new LoadModuleScope(rootCCT, path, SourceFile.NONE, i+1);
+			LoadModuleScope lms = new LoadModuleScope(rootCCT, path, SourceFile.NONE, i+baseId);
 			long key = pModules + delta;
-			mapLoadModules.put(key, lms);
+			mapModules.put(key, lms);
 		}
 		
-		return mapLoadModules;
+		return mapModules;
 	}
 	
 	
@@ -525,14 +542,15 @@ public class DataMeta extends DataCommon
 		var buffer = channel.map(MapMode.READ_ONLY, section.offset, section.size);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		
-		long pFiles = buffer.getLong();
-		int  nFiles = buffer.getInt(0x08);
+		long pFiles   = buffer.getLong();
+		int numFiles  = buffer.getInt(0x08);
 		short szFiles = buffer.getShort(0x0c);
 		
 		int basePosition = (int) (pFiles - section.offset);
-		LongObjectHashMap<SourceFile> mapSourceFile = new LongObjectHashMap<>(nFiles);
+		LongObjectHashMap<SourceFile> mapSourceFile = new LongObjectHashMap<>(numFiles);
+		int baseId = Constants.FLAT_ID_BEGIN + mapLoadModules.size() + 1;
 		
-		for(int i=0; i<nFiles; i++) {
+		for(int i=0; i<numFiles; i++) {
 			int delta    = i * szFiles;
 			int position = basePosition + delta;
 			int flags  = buffer.getInt(position);
@@ -541,7 +559,7 @@ public class DataMeta extends DataCommon
 			boolean available = (flags & 0x1) == 0x1;
 			String  name = stringArea.toString(pPath);
 			
-			SourceFile sf = new SimpleSourceFile(i+1, new File(name), available);
+			SourceFile sf = new SimpleSourceFile(baseId+i, new File(name), available);
 			long key = pFiles + delta;
 			mapSourceFile.put(key, sf);
 		}
@@ -569,13 +587,15 @@ public class DataMeta extends DataCommon
 		var basePosition = pFunctions - section.offset;
 		LongObjectHashMap<ProcedureScope> mapProcedures = new LongObjectHashMap<>(nFunctions);
 
+		int baseId = Constants.FLAT_ID_BEGIN + mapLoadModules.size() + mapFileSources.size() + 1;
+
 		for(int i=0; i<nFunctions; i++) {
 			int position = (int) (basePosition + (i * szFunctions));
 			long pName   = buffer.getLong(position);
 			long pModule = buffer.getLong(position + 0x08);
 			buffer.getLong(position + 0x10);
 			long pFile   = buffer.getLong(position + 0x18);
-			int  line    = buffer.getInt( position + 0x20);
+			int  line    = buffer.getInt( position + 0x20) - 1;
 			
 			var name = stringArea.toString(pName);
 			var lms  = mapLoadModules.get(pModule);
@@ -586,11 +606,35 @@ public class DataMeta extends DataCommon
 			if (lms == null)
 				lms = LoadModuleScope.NONE;
 			
+			// this line has to be remove once prof2 is fixed
+			int feature = getProcedureFeature(name);
+			
 			long key = pFunctions + (i * szFunctions);
-			ProcedureScope ps = new ProcedureScope(rootCCT, lms, file, line, line, name, false, position, i+1, null, 0);			
+			ProcedureScope ps = new ProcedureScope(rootCCT, lms, file, line, line, name, false, position, i+baseId, null, feature);			
 			mapProcedures.put(key, ps);
 		}
 		return mapProcedures;
+	}
+
+	
+	/*****
+	 * Temporary hack: return the procedure feature by scanning the name
+	 * This is a temporary code. It has to be removed once prof2 implements
+	 * properly the procedure feature. 
+	 * 
+	 * @param name
+	 * @return
+	 */
+	private int getProcedureFeature(String name) {
+		boolean isPartial = name.equals("<partial call paths>");
+
+		// check if the name is in the form of <.* root>
+		boolean isRoot = name.charAt(0) == '<' && name.endsWith(" root>");
+		
+		if (isPartial || isRoot)
+			return ProcedureScope.FeatureTopDown;
+		
+		return ProcedureScope.FeatureProcedure;
 	}
 	
 		
@@ -742,6 +786,7 @@ public class DataMeta extends DataCommon
 		int  ctxId;
 		Scope newScope;
 		byte nFlexWords;
+
 		
 		public ScopeContext(ByteBuffer buffer, int loc, Scope parent) {
 			szChildren = buffer.getLong(loc);
@@ -763,7 +808,8 @@ public class DataMeta extends DataCommon
 			long pFile   = 0;
 			int  line    = 0;
 			long pModule = 0;
-			byte nwords  = 0;			
+			byte nwords  = 0;
+			long offset  = 0;
 			/*
 				{Flags} above refers to an u8 bit field with the following sub-fields (bit 0 is least significant):
 				
@@ -787,33 +833,35 @@ public class DataMeta extends DataCommon
 				if (nFlexWords < nwords + 2) 
 					return;
 				pFile = buffer.getLong(loc + 0x18 + nwords * 8);
+				line  = buffer.getInt( loc + 0x18 + (nwords+1) * 8) - 1;
 				nwords++;
 			}
 			if ((flags & 0x4) != 0) {
 				if (nFlexWords < nwords + 2) 
 					return;
 				pModule = buffer.getLong(loc + 0x18 + nwords * 8);
-				buffer.getLong(loc + 0x18 + (nwords+1) * 8);
+				offset  = buffer.getLong(loc + 0x18 + (nwords+1) * 8);
 				nwords++;
 			}
 			var ps = mapProcedures.getIfAbsent (pFunction, ()->ProcedureScope.NONE);
 			var fs = mapFileSources.getIfAbsent(pFile,     ()->SourceFile.NONE);
 			var lm = mapLoadModules.getIfAbsent(pModule,   ()->LoadModuleScope.NONE);
 			
-			if (ps == ProcedureScope.NONE) {
-				Scope s = getEnclosingProc(parent);
-				if (s instanceof ProcedureScope)
-					ps = (ProcedureScope) s;
-			}
 			// linearize the flat id. This is not sufficient and causes collisions for large and complex source code
 			// This needs to be computed more reliably.
-			int flatId = Scope.generateFlatID(lexicalType, lm.getFlatIndex(), fs.getFileID(), ps.getFlatIndex(), line); 
+			int flatId = getKey(lm, fs, ps, line, lexicalType, relation);
 			
 			newScope = null; 
 
 			switch(lexicalType) {
 			case FMT_METADB_LEXTYPE_FUNCTION:
-				newScope = createLexicalFunction(parent, lm, fs, ps, ctxId, flatId, line, relation);
+				newScope = createLexicalFunction(parent, ps, ctxId, line, relation);
+				if (parent instanceof LineScope) {
+					var p = parent.getParentScope();
+					linkParentChild(p, newScope);
+					parent.addScopeReduce(newScope);
+					return;
+				}
 				break;
 			case FMT_METADB_LEXTYPE_LOOP:
 				newScope = new LoopScope(rootCCT, fs, line, line, ctxId, flatId);
@@ -822,29 +870,45 @@ public class DataMeta extends DataCommon
 				newScope = new LineScope(rootCCT, fs, line, ctxId, flatId);
 				break;
 			case FMT_METADB_LEXTYPE_INSTRUCTION:
-				newScope = new InstructionScope(rootCCT, lm, ctxId, flatId);
+				newScope = new InstructionScope(rootCCT, lm, offset, ctxId, flatId);
 				newScope.setSourceFile(fs);
 				break;
 			default:
-				throw new RuntimeException("Invalid node relation field");
+				newScope = new UnknownScope(rootCCT, fs, flatId);
 			}
-			linkParentChild(parent, newScope);					
+			if (parent != null)
+				linkParentChild(parent, newScope);					
 		}
 		
-		
-		private Scope getEnclosingProc(Scope scope) {
-			Scope current = scope;
-			while(current != null 
-				  && !(current instanceof RootScope) 
-				  && !(current instanceof ProcedureScope)
-				  && !(current instanceof CallSiteScope)) 
-				current = current.getParentScope();
+		private int getKey(LoadModuleScope lms, SourceFile sf, ProcedureScope ps, int line, int lexicalType, int relation) {
+			final String SEPARATOR = ":";
 			
-			if (current instanceof CallSiteScope)
-				current = ((CallSiteScope)current).getProcedureScope();
+			StringBuilder sb = new StringBuilder();
+			sb.append('l' + lexicalType);
+			sb.append(SEPARATOR);
 			
-			return current;
+			sb.append('r' + relation);
+			sb.append(SEPARATOR);
+			
+			sb.append(lms.getFlatIndex());
+			sb.append(SEPARATOR);
+						
+			sb.append(sf.getFileID());
+			sb.append(SEPARATOR);
+			
+			if (ps != ProcedureScope.NONE) {
+				sb.append(ps.getFlatIndex());
+				sb.append(SEPARATOR);
+			}
+			
+			sb.append(line);
+			
+			int hash = sb.toString().hashCode();
+			int baseId = Constants.FLAT_ID_BEGIN + mapLoadModules.size() + mapFileSources.size() + mapProcedures.size() + 1;
+			
+			return baseId + hash;
 		}
+
 		
 		/***
 		 * Create a lexical function scope.
@@ -863,25 +927,36 @@ public class DataMeta extends DataCommon
 		 */
 		private Scope createLexicalFunction( 
 											Scope parent, 
-											LoadModuleScope lm,
-											SourceFile fs,
 											ProcedureScope ps, 
 											int ctxId,
-											int flatId,
 											int line, 
 											int relation) {
 			
 			boolean alien  = relation == FMT_METADB_RELATION_CALL_INLINED;
-			var fileSource = fs == null ? SourceFile.NONE : fs;
 			
 			if (!(parent instanceof LineScope)) {
+				if (parent instanceof RootScope && ps == ProcedureScope.NONE) {
+					// partial call path if the parent is a root scope, and
+					// the procedure is unknown
+					return new ProcedureScope(rootCCT, 
+							LoadModuleScope.NONE, SourceFile.NONE, 
+							0, 0, 
+							"<partial call paths>", false, 
+							ctxId, Constants.FLAT_ID_PROC_PARTIAL, 
+							null, ProcedureScope.FeatureRoot);
+
+				}
 				// no call site in the stack: it must be a procedure scope
-				return new ProcedureScope(rootCCT, lm, fileSource, line, line, ps.getName(), alien, ctxId, flatId, null, ProcedureScope.FeatureProcedure);				
+				int procFeature = ps.isTopDownProcedure() ? ProcedureScope.FeatureTopDown : ProcedureScope.FeatureProcedure; 
+				return new ProcedureCallScope(rootCCT, ps.getLoadModule(), ps.getSourceFile(), line, ps.getName(), alien, ctxId, ps.getFlatIndex(), null, procFeature);				
 			}
-			
+			if (relation == FMT_METADB_RELATION_LEXICAL_NEST)
+				return new ProcedureScope(rootCCT, ps.getLoadModule(), ps.getSourceFile(), line, line, ps.getName(), alien, ctxId, ps.getFlatIndex(), null, ProcedureScope.FeatureProcedure);				
+
 			ps.setAlien(alien);
 			LineScope ls = (LineScope) parent;
-			var cs = new CallSiteScope(ls, ps, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, flatId);
+			int fid = String.valueOf(ls.getFlatIndex() + ":" + ls.getFirstLineNumber()).hashCode();
+			var cs = new CallSiteScope(ls, ps, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, fid);
 			
 			// Only the line statement knows where the source file is
 			// If the line statement is unknown then the source file is unknown.

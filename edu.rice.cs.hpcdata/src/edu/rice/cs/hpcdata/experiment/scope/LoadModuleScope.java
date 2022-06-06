@@ -17,6 +17,7 @@ package edu.rice.cs.hpcdata.experiment.scope;
 
 import edu.rice.cs.hpcdata.experiment.scope.visitors.IScopeVisitor;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
+import edu.rice.cs.hpcdata.util.Constants;
 
 
 
@@ -34,7 +35,7 @@ import edu.rice.cs.hpcdata.experiment.source.SourceFile;
 
 public class LoadModuleScope extends Scope
 {
-public static final LoadModuleScope NONE = new LoadModuleScope(null, "<unknown module>", SourceFile.NONE, Integer.MIN_VALUE);
+public static final LoadModuleScope NONE = new LoadModuleScope(null, "<unknown module>", SourceFile.NONE, Constants.FLAT_ID_LOAD_UNKNOWN);
 
 /** The name of the load module. */
 protected String loadModuleName;

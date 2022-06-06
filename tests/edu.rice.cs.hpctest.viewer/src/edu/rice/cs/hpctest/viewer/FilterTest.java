@@ -4,10 +4,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
@@ -17,30 +13,25 @@ import org.junit.jupiter.api.TestMethodOrder;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.filter.FilterAttribute;
 import edu.rice.cs.hpcfilter.service.FilterMap;
+import edu.rice.cs.hpctest.util.TestDatabase;
 
 
 @TestMethodOrder(OrderAnnotation.class)
 class FilterTest {
-	private static Experiment []experiments;
-	private static String []dbPaths = new String[] {"bug-no-gpu-trace", "prof2" + File.separator + "loop-inline"};
-	
+	private static Experiment []experiments;	
 	private static FilterMap fmap;
 
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
-		experiments = new Experiment[dbPaths.length];
-		var database   = new File[dbPaths.length];
+		var database   = TestDatabase.getDatabases();		
+		experiments = new Experiment[database.length];
 		int i=0;
-		for (String dbp: dbPaths) {
-			
-			Path resource = Paths.get("..", "resources", dbp);
-			database[i] = resource.toFile();
-			
-			assertNotNull(database);
+		for (var dbp: database) {
+			assertNotNull(dbp);
 
 			experiments[i]= new Experiment();
 			try {
-				experiments[i].open(database[i], null, Experiment.ExperimentOpenFlag.TREE_CCT_ONLY);
+				experiments[i].open(dbp, null, Experiment.ExperimentOpenFlag.TREE_CCT_ONLY);
 			} catch (Exception e) {
 				assertFalse(e.getMessage(), true);
 			}
@@ -56,7 +47,7 @@ class FilterTest {
 	@Test
 	@Order(2)
 	void testFilter() {
-		final int []numFilters = new int[] {36, 0};
+		final int []numFilters = new int[] {36, 1, 1, 0, 0, 11};
 		int i=0;
 		for(var exp: experiments) {
 			int res = exp.filter(fmap);

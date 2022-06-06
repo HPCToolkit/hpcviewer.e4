@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import com.graphbuilder.math.Expression;
 import com.graphbuilder.math.ExpressionTree;
+
 import edu.rice.cs.hpcdata.db.version4.DataSummary;
 import edu.rice.cs.hpcdata.experiment.scope.IMetricScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -52,12 +53,12 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	}
 	
 	public MetricValue reduce(MetricValue target, MetricValue source) {
+		final float INSIGNIFICANT_NUMBER = 0.000001f;
 		if (source == MetricValue.NONE)
 			return target;
 
 		if (target == MetricValue.NONE) {
-			target.setValue(source.getValue());
-			return source;
+			return source.duplicate();
 		}
 
 		switch (combineType) {
@@ -78,11 +79,11 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		case FMT_METADB_COMBINE_Sum:
 			v1 = target.getValue();
 			v2 = source.getValue();
-			v1 = v1-v2;
-			if (Float.compare(v1, 0.0f) == 0)
+			var d = v1-v2;
+			if (Math.abs(d/v1) < INSIGNIFICANT_NUMBER)
 				return MetricValue.NONE; 
 			
-			target.setValue(v1);
+			target.setValue(d);
 			break;
 			
 		default:
@@ -97,8 +98,10 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		String name = super.getDisplayName();
 		if (getMetricType() == MetricType.EXCLUSIVE)
 			return name + " (E)";
-		else
+		else if (getMetricType() == MetricType.INCLUSIVE)
 			return name + " (I)";
+		else
+			return name + " (X)";
 	}
 	
 	@Override

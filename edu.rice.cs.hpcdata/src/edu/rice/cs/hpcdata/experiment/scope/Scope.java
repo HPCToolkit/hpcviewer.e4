@@ -18,6 +18,9 @@ package edu.rice.cs.hpcdata.experiment.scope;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.eclipse.collections.impl.list.mutable.FastList;
+
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.metric.AggregateMetric;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
@@ -100,6 +103,8 @@ implements IMetricScope
 
 	//the cpid is removed in hpcviewer, but hpctraceview still requires it in order to dfs
 	private int cpid;
+	
+	private final List<Scope> listScopeReduce;
 
 	public int iSourceCodeAvailability = Scope.SOURCE_CODE_UNKNOWN;
 
@@ -129,6 +134,7 @@ implements IMetricScope
 		this.iCounter  = 0;
 
 		node = new TreeNode<>(cct_id);
+		listScopeReduce = FastList.newList();
 	}
 
 
@@ -139,7 +145,14 @@ implements IMetricScope
 	}
 
 
-
+	public void addScopeReduce(Scope scope) {
+		listScopeReduce.add(scope);
+	}
+	
+	public List<Scope> getScopeReduce() {
+		return listScopeReduce;
+	}
+	
 	/*************************************************************************
 	 *	Creates a Scope object with associated source file.
 	 ************************************************************************/
@@ -825,8 +838,11 @@ implements IMetricScope
 		int nKids = getSubscopeCount();
 		for (int i=0; i< nKids; i++) {
 			Scope childScope = getSubscope(i);
-			if (childScope != null)
+			if (childScope != null) {
 				childScope.dfsVisitScopeTree(sv);
+				// in case of changes
+				nKids = getSubscopeCount();
+			}
 		}
 		accept(sv, ScopeVisitType.PostVisit);
 	}

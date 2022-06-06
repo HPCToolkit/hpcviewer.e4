@@ -52,9 +52,14 @@ public class CallerScopeBuilder {
 						// hack for alien procedure: use the current scope
 						//	for the enclosing call site
 						enclosingCS = next;
-					}
-					
-				}	else if (next instanceof CallSiteScope) {
+					} else if (next instanceof ProcedureCallScope){
+						// TODO: ugly hack for prof2
+						// prof2 special case: since this scope is a procedure and not a call site
+						// (it should be a call site in the old prof), we emulate it just like a 
+						// call site. Which means this "next" scope is the enclosing call site.
+						enclosingCS = next;
+					}					
+				} else if (next instanceof CallSiteScope) {
 					enclosingCS = next;
 					mycaller = ((CallSiteScope)enclosingCS).getProcedureScope(); 
 				}

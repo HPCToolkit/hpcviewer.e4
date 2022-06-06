@@ -408,7 +408,7 @@ public class DataSummary extends DataCommon
 			// we want to count the number of duplicate profile id
 			// ex. : profiles (1, 0, 0,1) and (1, 0, 1, 2)
 			//       the invariants are the first two id (1, 0)
-			for(int j=0; j<numLevels; j++) {
+			for(int j=0; j<info.piElements[i].numLevels; j++) {
 				short kind = info.piElements[i].idt.getKind(j);
 				long idx   = info.piElements[i].idt.getLogicalIndex(j);
 				long hash  = convertIdTupleToHash(kind, idx);
