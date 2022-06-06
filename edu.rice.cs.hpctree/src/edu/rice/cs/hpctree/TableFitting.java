@@ -14,7 +14,7 @@ import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
  *****************************/
 public class TableFitting 
 {
-	private static final String PREF_FIT_MODE = "viewer.fit.mode";
+	private static final String PREF_FIT_MODE = "hpcviewer.fit.mode";
 	/***
 	 * 
 	 * Mode of table column fitting:
@@ -45,8 +45,8 @@ public class TableFitting
  	 */
 	public static String toString(ColumnFittingMode mode) {
 		if (mode == ColumnFittingMode.FIT_DATA)
-			return "Autofit is based on the data";
-		return "Autofit is based on both the header and the data";
+			return "Resize mode is based on the data";
+		return "Resize mode is based on both the header label and the data";
 	}
 
 	

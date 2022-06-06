@@ -197,8 +197,8 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 			final Label lblName = new Label(nameArea, SWT.LEFT);
 			lblName.setText("Name:");	// $NON-SLS
 
-			this.cbMetricName = new Combo(nameArea, SWT.NONE);
-			this.cbMetricName.setToolTipText("Name of the derived metric");	// $NON-SLS
+			cbMetricName = new Combo(nameArea, SWT.NONE);
+			cbMetricName.setToolTipText("Type the displayed name of the derived metric");	// $NON-SLS
 			objHistoryName = new UserInputHistory( ExtDerivedMetricDlg.HISTORY_METRIC_NAME );
 
 			final List<String> nameHistory = objHistoryName.getHistory();
