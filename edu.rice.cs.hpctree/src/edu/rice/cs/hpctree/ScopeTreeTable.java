@@ -139,7 +139,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         
         // turn the auto configuration off as we want to add our header menu
         // configuration
-        natTable = new NatTable(parent, NatTable.DEFAULT_STYLE_OPTIONS , compositeLayer, false);
+        natTable = new NatTable(parent, NatTable.DEFAULT_STYLE_OPTIONS, compositeLayer, false);
         
         // as the autoconfiguration of the NatTable is turned off, we have to
         // add the DefaultNatTableStyleConfiguration and the ConfigRegistry
@@ -169,7 +169,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         
         // I don't know why we have to refresh the table here
         // However, without refreshing, the content will be weird
-        visualRefresh();
+       // visualRefresh();
         natTable.configure();
 
         // --------------------------------
@@ -217,9 +217,9 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		natTable.getDisplay().addFilter(SWT.MouseDown, resizeListener);
 		natTable.getDisplay().addFilter(SWT.MouseUp, resizeListener);
 
+		// Fix issue #204: has to call header font configuration manually
 		fontConfig.configureHeaderFont(natTable.getConfigRegistry());
         visualRefresh();
-
 	}
 	
 	

@@ -64,8 +64,17 @@ public class ViewerPreferenceManager extends AbstractPreferenceManager
 									   PreferenceConstants.ID_FONT_CALLSITE, 
 									   FontManager.getCallsiteGlyphDefaultFont().getFontData());
 		
-		store.setDefault(PreferenceConstants.ID_CHAR_CALLTO, DEFAULT_CALLTO[DEFAULT_CALLSITE_INDEX]);
-		store.setDefault(PreferenceConstants.ID_CHAR_CALLFROM, DEFAULT_CALLFROM[DEFAULT_CALLSITE_INDEX]);
+		// fix issue #207 (some platforms don't support unicode)
+		// check if the encoding supports UTF or not.
+		// Most systems that have ANSI platform has no UTF support
+		// Example: ANSI_X3.4-1968 is basically an ASCII set
+		int indexDefault = DEFAULT_CALLSITE_INDEX;
+		var encoding = System.getProperty("file.encoding");
+		if (encoding.startsWith("ANSI")) 
+			indexDefault = 0;
+
+		store.setDefault(PreferenceConstants.ID_CHAR_CALLTO, DEFAULT_CALLTO[indexDefault]);
+		store.setDefault(PreferenceConstants.ID_CHAR_CALLFROM, DEFAULT_CALLFROM[indexDefault]);
 	}
 	
 	
