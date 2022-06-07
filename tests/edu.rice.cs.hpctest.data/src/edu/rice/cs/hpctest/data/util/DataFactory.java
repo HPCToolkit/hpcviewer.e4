@@ -2,7 +2,6 @@ package edu.rice.cs.hpctest.data.util;
 
 import java.io.File;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -26,7 +25,7 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 public class DataFactory 
 {
 	private static final int DEFAULT_DB = 10;
-	private static Random rand; 
+	private static final Random rand = new Random(); 
 	
 	public static List<Experiment> createExperiments() throws NoSuchAlgorithmException {
 		return createExperiments(DEFAULT_DB);
@@ -93,9 +92,6 @@ public class DataFactory
 	}
 	
 	private static void createMetric(Scope scope, Experiment exp) throws NoSuchAlgorithmException {
-		if (rand == null)
-			rand = SecureRandom.getInstanceStrong();
-		
 		for(int i=0; i<exp.getMetricCount(); i++) {
 			if (rand.nextInt(20) == 0)
 				continue;
@@ -103,7 +99,5 @@ public class DataFactory
 			MetricValue mv = new MetricValue(rand.nextInt(10));
 			scope.setMetricValue(i, mv);
 		}
-		
 	}
-
 }
