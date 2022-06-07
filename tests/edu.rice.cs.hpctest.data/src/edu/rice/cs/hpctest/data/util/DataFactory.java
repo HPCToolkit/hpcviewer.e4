@@ -2,7 +2,6 @@ package edu.rice.cs.hpctest.data.util;
 
 import java.io.File;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -93,7 +92,6 @@ public class DataFactory
 	}
 	
 	private static void createMetric(Scope scope, Experiment exp) throws NoSuchAlgorithmException {
-		
 		for(int i=0; i<exp.getMetricCount(); i++) {
 			if (rand.nextInt(20) == 0)
 				continue;
