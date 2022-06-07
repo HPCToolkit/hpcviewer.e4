@@ -602,7 +602,8 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		final TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
         
 		showTimeRange(attributes);
-        showProcessRange(attributes);
+		if (stData.getExperiment().getMajorVersion() == edu.rice.cs.hpcdata.util.Constants.EXPERIMENT_DENSED_VERSION)
+			showProcessRange(attributes);
         showCrossHair(attributes);
         
         // resize the composite to make sure all texts are visible
