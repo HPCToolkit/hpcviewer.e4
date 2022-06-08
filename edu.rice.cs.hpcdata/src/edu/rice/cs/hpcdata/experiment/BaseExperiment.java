@@ -418,6 +418,10 @@ public abstract class BaseExperiment implements IExperiment
 	 *************************************************************************/
 	public int filter(IFilterData filter)
 	{
+		if (rootScope == null)
+			// case of corrupt database
+			return 0;
+		
 		// TODO :  we assume the first child is the CCT
 		final RootScope rootCCT = (RootScope) rootScope.getChildAt(0);
 
