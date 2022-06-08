@@ -92,7 +92,7 @@ implements EventHandler, DisposeListener, IUserMessage
 	private ProfilePart  profilePart;
 	private IEventBroker eventBroker;
 	private IUndoableActionManager actionManager;
-	
+	private IScopeTreeData treeData;
 	
 	/*****
 	 * Constructor to create a view
@@ -294,7 +294,7 @@ implements EventHandler, DisposeListener, IUserMessage
 		// -------------------------------------------
 		
 		root = getRoot();
-		IScopeTreeData treeData = getTreeData(root, metricManager);
+		treeData = getTreeData(root, metricManager);
 		
 		table = new ScopeTreeTable(parent, SWT.NONE, treeData);
 		table.addSelectionListener(scope -> updateButtonStatus());
@@ -337,7 +337,6 @@ implements EventHandler, DisposeListener, IUserMessage
 	 */
 	@Override
 	public List<FilterDataItem<BaseMetric>> getFilterDataItems() {
-		IScopeTreeData treeData = getTreeData(root, metricManager);
 		final List<BaseMetric> listAllMetrics = getMetricManager().getVisibleMetrics();	
 		
 		// List of indexes of the hidden columns based on the info from the table.

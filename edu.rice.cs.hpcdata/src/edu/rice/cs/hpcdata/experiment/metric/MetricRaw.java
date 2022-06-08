@@ -161,8 +161,6 @@ public class MetricRaw  extends BaseMetric
 					if (s instanceof RootScope) {
 						if (value != MetricValue.NONE)
 							rootValue = value;
-						else if (metricType != MetricType.EXCLUSIVE)
-							rootValue = getValue((RootScope)s, threads);
 						else if (partner != null)
 							rootValue = partner.getValue((RootScope)s, threads);
 					} else {
