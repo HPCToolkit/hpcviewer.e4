@@ -522,11 +522,14 @@ implements EventHandler, DisposeListener, IUserMessage
 			int index = getColumnIndexByMetric(item, metrics);
 			hideOrShowColumn(index, item.checked);
 		}
+		// Need to resize the column in case some columns are hidden and need to resize
+		// the tree column
 		table.pack();
 		
 		// hide or show columns cause visual changes.
 		// however, we are forced to refresh completely the whole layer of the table.
-		// calling visualRefresh won't help and I don't know why
+		// Fix issue #214: calling visualRefresh won't reset the column position
+		// On the contrary, call refresh() method will reset the position.
 		table.visualRefresh();
 		
 		// have to freeze again the tree column. 

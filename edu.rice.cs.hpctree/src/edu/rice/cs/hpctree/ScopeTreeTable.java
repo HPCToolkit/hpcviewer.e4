@@ -381,6 +381,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	 */
 	public void pack(boolean keepTreeColumn) {		
 		final int TREE_COLUMN_WIDTH  = 350;
+		final int SORT_SYMBOL_WIDTH  = 11;
 		
 		// ---------------------------------------------------------------
 		// pack the columns based on the title or the content of the cell
@@ -402,7 +403,6 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
     	TableFitting.ColumnFittingMode mode = TableFitting.getFittingMode();
     	
     	// the header needs to pad with 2 character to allow the triangle to be visible 
-    	final String headerLabelPadding = STRING_PADDING + STRING_PADDING;
     	int totSize = 0;
     	int widthFirstMetricColumn = 0;
     	//
@@ -437,9 +437,9 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
     		if (mode == TableFitting.ColumnFittingMode.FIT_BOTH) {
         		// List of metrics is based on column position, while the current display is based on index.
         		// We need to convert from an index to a position.
-        		String title = metric.getDisplayName() + headerLabelPadding;
+        		String title = metric.getDisplayName() + STRING_PADDING;
         		Point titleSize = gc.textExtent(title);
-    			colWidth = (int) Math.max(titleSize.x , columnSize.x);
+    			colWidth = (int) Math.max(titleSize.x + SORT_SYMBOL_WIDTH, columnSize.x);
     		}
     		
     		int pixelWidth = GUIHelper.convertHorizontalDpiToPixel(colWidth);
