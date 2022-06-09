@@ -527,7 +527,7 @@ implements EventHandler, DisposeListener, IUserMessage
 		// hide or show columns cause visual changes.
 		// however, we are forced to refresh completely the whole layer of the table.
 		// calling visualRefresh won't help and I don't know why
-		table.refresh();
+		table.visualRefresh();
 		
 		// have to freeze again the tree column. 
 		// Sometimes after the hide/show the frozen attribute disappears and the column is not frozen anymore
