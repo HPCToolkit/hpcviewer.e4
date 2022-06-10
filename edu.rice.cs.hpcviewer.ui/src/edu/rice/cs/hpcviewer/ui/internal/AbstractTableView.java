@@ -462,7 +462,7 @@ implements EventHandler, DisposeListener, IUserMessage
 				cm.setExpression(dm.getFormula());
 				cm.setDisplayFormat(dm.getDisplayFormat());
 			}
-			table.refresh();
+			table.visualRefresh();
 			
 		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH)) {
 			RootScope root = this.buildTree(true);
