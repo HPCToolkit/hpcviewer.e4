@@ -34,6 +34,7 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
     private final DataLayer      bodyDataLayer;
     private final ScopeTreeLayer treeLayer ;
     private final ColumnHideShowLayer hideShowLayer;
+    private final ColumnReorderLayer  reorderLayer;
 
     private final CompositeFreezeLayer compositeFreezeLayer ;
     private final ScopeTreeRowModel    treeRowModel ;
@@ -50,7 +51,7 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
         this.bodyDataLayer = new DataLayer(bodyDataProvider);
         this.bodyDataLayer.setColumnsResizableByDefault(true);
 
-        ColumnReorderLayer reorderLayer = new ColumnReorderLayer(this.bodyDataLayer);
+        this.reorderLayer   = new ColumnReorderLayer(this.bodyDataLayer);
         this.hideShowLayer  = new ColumnHideShowLayer(reorderLayer);
         this.selectionLayer = new SelectionLayer(this.hideShowLayer, false);
         
@@ -90,6 +91,10 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
     public DataLayer getBodyDataLayer() {
 		return bodyDataLayer;
 	}
+    
+    public ColumnReorderLayer getColumnReorderLayer() {
+    	return reorderLayer;
+    }
 
     public ColumnHideShowLayer getColumnHideShowLayer() {
     	return hideShowLayer;

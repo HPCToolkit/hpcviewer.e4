@@ -512,8 +512,9 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	
 	@Override
 	public void refresh() {
-		if (natTable != null)
+		if (natTable != null) {
 			natTable.refresh();
+		}
 	}
 
 	
@@ -617,6 +618,8 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 			shiftedIndexes[i] = hiddenIndexes[i];
 		}
 		
+		ColumnHideShowLayer hideShowLayer = bodyLayerStack.getColumnHideShowLayer();
+
 		refresh();
 		
 		while(listChanges.next()) {
@@ -627,8 +630,8 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 				for(int i=0; i<hiddenIndexes.length; i++)
 					shiftedIndexes[i] = shiftedIndexes[i] + index + SHIFTED_INDEX;
 				
-				bodyLayerStack.getColumnHideShowLayer().showAllColumns();
-				bodyLayerStack.getColumnHideShowLayer().hideColumnIndexes(shiftedIndexes);
+				hideShowLayer.showAllColumns();
+				hideShowLayer.hideColumnIndexes(shiftedIndexes);
 			}
 		}
 		pack();
