@@ -512,8 +512,41 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	
 	@Override
 	public void refresh() {
-		if (natTable != null) {
-			natTable.refresh();
+		if (natTable == null) {
+			return;
+		}
+		final var reorderLayer = bodyLayerStack.getColumnReorderLayer();
+		final var listOrder = reorderLayer.getColumnIndexOrder();
+		
+		natTable.refresh();
+		
+		var newListOrder = reorderLayer.getColumnIndexOrder();
+		int diff = newListOrder.size() - listOrder.size();
+		
+		// Fix issue #214 (metric column position is accidentally reset)
+		//
+		// Let assume the tree column (index=0) is always constant
+		// This means we need to move the column to the original order
+		// plus the difference between old list and the new list
+		// If the list of the original one:
+		//   [0, 3, 1, 4, 2]
+		// and the new reset list:
+		//   [0, 1, 2, 3, 4, 5]
+		// so the new position should be:
+		//   [0, 1, 4, 2, 5, 3]
+		//
+		// Since the tree column is static (always 0 position)
+		// then the index 3 (now its index is 4) has to move to position 2, and 
+		// index 4 moves to position 3
+		for(int i=1; i<listOrder.size(); i++) {
+			int order1 = listOrder.get(i);
+			int order2 = newListOrder.get(i + diff);
+			
+			if (order2 == order1 + diff) 
+				continue;
+			
+			reorderLayer.reorderColumnPosition(order1 + diff, order2);
+			newListOrder = reorderLayer.getColumnIndexOrder();
 		}
 	}
 
