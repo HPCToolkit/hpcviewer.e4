@@ -533,19 +533,22 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		// and the new reset list:
 		//   [0, 1, 2, 3, 4, 5]
 		// so the new position should be:
+		//   [0, 1, 4, 2, 3, 5]
 		//   [0, 1, 4, 2, 5, 3]
 		//
 		// Since the tree column is static (always 0 position)
-		// then the index 3 (now its index is 4) has to move to position 2, and 
-		// index 4 moves to position 3
+		// then the index 3 (now its index is 4) has to move to position 1+1, and 
+		// index 4 (now its index is 5) moves to position 3+1
 		for(int i=1; i<listOrder.size(); i++) {
 			int order1 = listOrder.get(i);
-			int order2 = newListOrder.get(i + diff);
+
+			final var oldPosition = order1 + diff;
+			final var newPosition = newListOrder.get(i + diff);
 			
-			if (order2 == order1 + diff) 
+			if (newPosition == oldPosition) 
 				continue;
 			
-			reorderLayer.reorderColumnPosition(order1 + diff, order2);
+			reorderLayer.reorderColumnPosition(oldPosition, i+diff);
 			newListOrder = reorderLayer.getColumnIndexOrder();
 		}
 	}
