@@ -1,1 +1,1 @@
-Release 2022.06. Commit 0a9dcf68
+Release 2022.06. Commit 1849b26e
