@@ -167,6 +167,26 @@ public class MetricRaw  extends BaseMetric
 				if (threads != null)
 				{
 					value = getValue(s, threads);
+					
+					// to compute the percentage, we need to have the value of the root
+					// If the root has no value, we have to recompute it only for one time
+					// Once we have the root's value, we don't have to recompute it
+					MetricValue rootValue = MetricValue.NONE;
+					
+					if (s instanceof RootScope) {
+						if (value != MetricValue.NONE)
+							rootValue = value;
+						else if (partner != null)
+							rootValue = partner.getValue((RootScope)s, threads);
+					} else {
+						rootValue = getValue(root);//s.getRootMetricValue(this);
+					}
+					/*
+					if (rootValue != null && rootValue != MetricValue.NONE) {
+						// if the value exist, we compute the percentage
+						//setAnnotationType(AnnotationType.PERCENT);
+						MetricValue.setAnnotationValue(value, (double)(value.getValue() / rootValue.getValue()));
+					} */
 				}
 			} catch (IOException e) {
 				e.printStackTrace();

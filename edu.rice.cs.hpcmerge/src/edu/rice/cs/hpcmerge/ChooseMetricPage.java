@@ -15,6 +15,8 @@ import org.eclipse.swt.widgets.List;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
+import edu.rice.cs.hpcdata.experiment.scope.RootScope;
+import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.merge.DatabasesToMerge;
 
 public class ChooseMetricPage extends WizardPage 
@@ -79,9 +81,13 @@ public class ChooseMetricPage extends WizardPage
 		// clear and fill the list of metrics
 		list.removeAll();
 		
+		RootScope root = exp.getRootScope(RootScopeType.CallingContextTree);
+		var nonEmptyMetrics = exp.getNonEmptyMetricIDs(root);
 		final java.util.List<BaseMetric> metrics = exp.getVisibleMetrics();
 		
-		metrics.stream().forEach(metric -> {
+		// fix issue #209: use the non empty metrics to fill the metric list
+		nonEmptyMetrics.stream().forEach(metId -> {
+			BaseMetric metric = exp.getMetric(metId);
 			list.add(metric.getDisplayName());
 		});
 		

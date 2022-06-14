@@ -1,7 +1,9 @@
 package edu.rice.cs.hpcviewer.ui.parts.thread;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.collections.api.map.primitive.MutableIntObjectMap;
 import org.eclipse.collections.impl.list.mutable.FastList;
@@ -17,6 +19,7 @@ import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 
+
 public class ThreadMetricManager implements IMetricManager 
 {
 	private final EventList<BaseMetric> rawMetrics;
@@ -25,12 +28,29 @@ public class ThreadMetricManager implements IMetricManager
 	public ThreadMetricManager(List<BaseMetric> metrics, List<Integer> listThreads) {
 		List<BaseMetric> listMetrics = FastList.newList(metrics.size());
 		mapIntToMetric = new IntObjectHashMap<BaseMetric>();
+		Map<String, MetricRaw> mapNameToMetric = new HashMap<>(listMetrics.size());
 
 		for(BaseMetric m: metrics) {
 			MetricRaw mr = MetricRaw.create(m);
 			mr.setThread(listThreads);
+			
 			listMetrics.add(mr);
 			mapIntToMetric.put(m.getIndex(), mr);
+			
+			// reconstruct the metric partner
+			var length = mr.getDisplayName().length();
+			var baseName = mr.getDisplayName().substring(0, length-4);
+			var partner  = mapNameToMetric.get(baseName);
+			
+			if (partner == null) {
+				mapNameToMetric.put(baseName, mr);
+			} else {
+				partner.setPartner(mr.getIndex());
+				mr.setPartner(partner.getIndex());
+				
+				partner.setMetricPartner(mr);
+				mr.setMetricPartner(partner);
+			}
 		}
 		rawMetrics = GlazedLists.eventList(listMetrics);
 	}

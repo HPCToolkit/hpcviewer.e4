@@ -45,8 +45,8 @@ public class TableFitting
  	 */
 	public static String toString(ColumnFittingMode mode) {
 		if (mode == ColumnFittingMode.FIT_DATA)
-			return "Resize mode is based on the data";
-		return "Resize mode is based on both the header label and the data";
+			return "The resize mode is based on the data";
+		return "The resize mode is based on both the header label and the data";
 	}
 
 	

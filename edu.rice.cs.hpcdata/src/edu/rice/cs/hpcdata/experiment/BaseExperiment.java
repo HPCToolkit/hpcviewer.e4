@@ -362,6 +362,10 @@ public abstract class BaseExperiment implements IExperiment
 	@Override
 	public int filter(IFilterData filter)
 	{
+		if (rootScope == null)
+			// case of corrupt database
+			return 0;
+		
 		// TODO :  we assume the first child is the CCT
 		final RootScope rootCCT = (RootScope) getRootScope(RootScopeType.CallingContextTree);
 
