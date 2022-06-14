@@ -5,6 +5,5 @@ Bundle-SymbolicName: edu.rice.cs.hpcdata.merge
 Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Rice University
 Automatic-Module-Name: edu.rice.cs.hpcdata.merge
-Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: edu.rice.cs.hpcdata
 Export-Package: edu.rice.cs.hpcdata.merge

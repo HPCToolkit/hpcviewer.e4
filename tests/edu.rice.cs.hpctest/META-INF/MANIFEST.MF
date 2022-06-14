@@ -4,7 +4,6 @@ Bundle-Name: hpctest
 Bundle-SymbolicName: edu.rice.cs.hpctest
 Bundle-Version: 1.0.0.qualifier
 Automatic-Module-Name: edu.rice.cs.hpctest
-Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: edu.rice.cs.hpcdata,
  edu.rice.cs.hpcdata.merge,
  edu.rice.cs.hpcmerge,
