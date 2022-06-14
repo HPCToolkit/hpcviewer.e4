@@ -181,12 +181,12 @@ public class MetricRaw  extends BaseMetric
 					} else {
 						rootValue = getValue(root);//s.getRootMetricValue(this);
 					}
-
+					/*
 					if (rootValue != null && rootValue != MetricValue.NONE) {
 						// if the value exist, we compute the percentage
 						//setAnnotationType(AnnotationType.PERCENT);
-						MetricValue.setAnnotationValue(value, value.getValue() / rootValue.getValue());
-					}
+						MetricValue.setAnnotationValue(value, (double)(value.getValue() / rootValue.getValue()));
+					} */
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
