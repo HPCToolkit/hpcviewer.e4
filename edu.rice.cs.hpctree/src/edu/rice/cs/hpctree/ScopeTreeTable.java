@@ -380,6 +380,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	 */
 	public void pack(boolean keepTreeColumn) {		
 		final int TREE_COLUMN_WIDTH  = 350;
+		final int SORT_SYMBOL_WIDTH  = 11;
 		
 		// ---------------------------------------------------------------
 		// pack the columns based on the title or the content of the cell
@@ -401,7 +402,6 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
     	TableFitting.ColumnFittingMode mode = TableFitting.getFittingMode();
     	
     	// the header needs to pad with 2 character to allow the triangle to be visible 
-    	final String headerLabelPadding = STRING_PADDING + STRING_PADDING;
     	int totSize = 0;
     	int widthFirstMetricColumn = 0;
     	//
@@ -436,9 +436,9 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
     		if (mode == TableFitting.ColumnFittingMode.FIT_BOTH) {
         		// List of metrics is based on column position, while the current display is based on index.
         		// We need to convert from an index to a position.
-        		String title = metric.getDisplayName() + headerLabelPadding;
+        		String title = metric.getDisplayName() + STRING_PADDING;
         		Point titleSize = gc.textExtent(title);
-    			colWidth = (int) Math.max(titleSize.x , columnSize.x);
+    			colWidth = (int) Math.max(titleSize.x + SORT_SYMBOL_WIDTH, columnSize.x);
     		}
     		
     		int pixelWidth = GUIHelper.convertHorizontalDpiToPixel(colWidth);
@@ -511,8 +511,45 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	
 	@Override
 	public void refresh() {
-		if (natTable != null)
-			natTable.refresh();
+		if (natTable == null) {
+			return;
+		}
+		final var reorderLayer = bodyLayerStack.getColumnReorderLayer();
+		final var listOrder = reorderLayer.getColumnIndexOrder();
+		
+		natTable.refresh();
+		
+		var newListOrder = reorderLayer.getColumnIndexOrder();
+		int diff = newListOrder.size() - listOrder.size();
+		
+		// Fix issue #214 (metric column position is accidentally reset)
+		//
+		// Let assume the tree column (index=0) is always constant
+		// This means we need to move the column to the original order
+		// plus the difference between old list and the new list
+		// If the list of the original one:
+		//   [0, 3, 1, 4, 2]
+		// and the new reset list:
+		//   [0, 1, 2, 3, 4, 5]
+		// so the new position should be:
+		//   [0, 1, 4, 2, 3, 5]
+		//   [0, 1, 4, 2, 5, 3]
+		//
+		// Since the tree column is static (always 0 position)
+		// then the index 3 (now its index is 4) has to move to position 1+1, and 
+		// index 4 (now its index is 5) moves to position 3+1
+		for(int i=1; i<listOrder.size(); i++) {
+			int order1 = listOrder.get(i);
+
+			final var oldPosition = order1 + diff;
+			final var newPosition = newListOrder.get(i + diff);
+			
+			if (newPosition == oldPosition) 
+				continue;
+			
+			reorderLayer.reorderColumnPosition(oldPosition, i+diff);
+			newListOrder = reorderLayer.getColumnIndexOrder();
+		}
 	}
 
 	
@@ -616,6 +653,8 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 			shiftedIndexes[i] = hiddenIndexes[i];
 		}
 		
+		ColumnHideShowLayer hideShowLayer = bodyLayerStack.getColumnHideShowLayer();
+
 		refresh();
 		
 		while(listChanges.next()) {
@@ -626,8 +665,8 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 				for(int i=0; i<hiddenIndexes.length; i++)
 					shiftedIndexes[i] = shiftedIndexes[i] + index + SHIFTED_INDEX;
 				
-				bodyLayerStack.getColumnHideShowLayer().showAllColumns();
-				bodyLayerStack.getColumnHideShowLayer().hideColumnIndexes(shiftedIndexes);
+				hideShowLayer.showAllColumns();
+				hideShowLayer.hideColumnIndexes(shiftedIndexes);
 			}
 		}
 		pack();

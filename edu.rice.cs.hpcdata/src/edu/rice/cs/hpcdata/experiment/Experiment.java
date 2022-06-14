@@ -233,9 +233,12 @@ public class Experiment extends BaseExperimentWithMetrics
 	 * </ol></p>
 	 * @param callerView : flag whether to compute caller view (if true) or not.
 	 */
-	public void postprocess(boolean callerView) {
-		if (this.rootScope.getSubscopeCount() <= 0) 
-			return;
+	private void postprocess(boolean callerView) {
+		if (rootScope == null)
+			// case of corrupt file
+			throw new RuntimeException("The database is empty or corrupt");
+		
+		if (this.rootScope.getSubscopeCount() <= 0) return;
 		
 		// Get first scope subtree: CCT or Flat
 		Scope firstSubTree = this.rootScope.getSubscope(0);

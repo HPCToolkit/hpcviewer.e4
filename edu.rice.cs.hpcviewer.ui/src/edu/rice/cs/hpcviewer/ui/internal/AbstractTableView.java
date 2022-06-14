@@ -92,7 +92,7 @@ implements EventHandler, DisposeListener, IUserMessage
 	private ProfilePart  profilePart;
 	private IEventBroker eventBroker;
 	private IUndoableActionManager actionManager;
-	
+	private IScopeTreeData treeData;
 	
 	/*****
 	 * Constructor to create a view
@@ -294,7 +294,7 @@ implements EventHandler, DisposeListener, IUserMessage
 		// -------------------------------------------
 		
 		root = getRoot();
-		IScopeTreeData treeData = getTreeData(root, metricManager);
+		treeData = getTreeData(root, metricManager);
 		
 		table = new ScopeTreeTable(parent, SWT.NONE, treeData);
 		table.addSelectionListener(scope -> updateButtonStatus());
@@ -337,7 +337,6 @@ implements EventHandler, DisposeListener, IUserMessage
 	 */
 	@Override
 	public List<FilterDataItem<BaseMetric>> getFilterDataItems() {
-		IScopeTreeData treeData = getTreeData(root, metricManager);
 		final List<BaseMetric> listAllMetrics = getMetricManager().getVisibleMetrics();	
 		
 		// List of indexes of the hidden columns based on the info from the table.
@@ -463,7 +462,7 @@ implements EventHandler, DisposeListener, IUserMessage
 				cm.setExpression(dm.getFormula());
 				cm.setDisplayFormat(dm.getDisplayFormat());
 			}
-			table.refresh();
+			table.visualRefresh();
 			
 		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH)) {
 			RootScope root = this.buildTree(true);
@@ -523,12 +522,15 @@ implements EventHandler, DisposeListener, IUserMessage
 			int index = getColumnIndexByMetric(item, metrics);
 			hideOrShowColumn(index, item.checked);
 		}
+		// Need to resize the column in case some columns are hidden and need to resize
+		// the tree column
 		table.pack();
 		
 		// hide or show columns cause visual changes.
 		// however, we are forced to refresh completely the whole layer of the table.
-		// calling visualRefresh won't help and I don't know why
-		table.refresh();
+		// Fix issue #214: calling visualRefresh won't reset the column position
+		// On the contrary, call refresh() method will reset the position.
+		table.visualRefresh();
 		
 		// have to freeze again the tree column. 
 		// Sometimes after the hide/show the frozen attribute disappears and the column is not frozen anymore
