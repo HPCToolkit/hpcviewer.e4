@@ -445,6 +445,18 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 				hash_id.append(SEPARATOR_ID);
 				hash_id.append(linenum);
 			}
+		} else if (scope instanceof LineScope) {
+			// fix issue #223 (incorrect cost attribution for line scopes)
+			// reconstruct the procedure and file scope:
+			//  since the same procedure scopes may have the different flat ids,
+			//  we need to regenerate the id of line scope which now depends 
+			//  on the id of the parent.
+			//  It looks like this only happens with prof2 database
+			var parent = scope.getParentScope();
+			var parentId = getID(parent);
+			
+			hash_id.append(SEPARATOR_ID);
+			hash_id.append(parentId);
 		}
 		return hash_id.toString();
 	}
