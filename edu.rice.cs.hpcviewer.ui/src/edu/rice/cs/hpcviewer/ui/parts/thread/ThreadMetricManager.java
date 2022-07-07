@@ -16,6 +16,9 @@ import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
+import edu.rice.cs.hpcdata.experiment.metric.MetricType;
+import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
+import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 
@@ -102,8 +105,19 @@ public class ThreadMetricManager implements IMetricManager
 	public List<Integer> getNonEmptyMetricIDs(Scope scope) {
 		List<BaseMetric> metrics = getVisibleMetrics();
 		List<Integer> listIDs = new ArrayList<>(metrics.size());
+		
 		for(BaseMetric m: metrics) {
-			listIDs.add(m.getIndex());
+			// fix issue #221 (do not show empty metrics)
+			// in some versions, the root value of exclusive metric is always empty
+			// in this case we need to get the value from its partner.
+			// yuck.
+			BaseMetric metric = m;
+			if (metric.getMetricType() == MetricType.EXCLUSIVE &&
+				scope instanceof RootScope) 
+				metric = ((MetricRaw)m).getMetricPartner();
+			
+			if (metric != null && metric.getValue(scope) != MetricValue.NONE)
+				listIDs.add(m.getIndex());
 		}
 		return listIDs;
 	}
@@ -116,5 +130,23 @@ public class ThreadMetricManager implements IMetricManager
 	@Override
 	public void removeMetricListener(ListEventListener<BaseMetric> listener) {
 		rawMetrics.removeListEventListener(listener);
+	}
+
+	@Override
+	public MetricRaw getCorrespondentMetricRaw(BaseMetric metric) {
+		if (metric instanceof MetricRaw)
+			return (MetricRaw) metric;
+		
+		if (rawMetrics == null || rawMetrics.size() == 0)
+			return null;
+		
+		var rawMetric = rawMetrics.stream().filter(m -> metric.getDisplayName().
+														startsWith(m.getDisplayName().substring(0, m.getDisplayName().length()-3))
+													)
+											.findAny();
+		if (rawMetric.isPresent())
+			return (MetricRaw) rawMetric.get();
+		
+		return null;
 	}
 }

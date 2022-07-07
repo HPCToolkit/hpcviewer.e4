@@ -1,7 +1,5 @@
 package edu.rice.cs.hpcviewer.ui.graph;
 
-import java.util.List;
-
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
@@ -22,56 +20,71 @@ import edu.rice.cs.hpcviewer.ui.ProfilePart;
  */
 public class GraphMenu 
 {
+	/****
+	 * Add a context menu of plot graphs on the given menu manager.
+	 * The context menu only displays the non-empty metrics of the 
+	 * selected (or specified) scope node.
+	 * 
+	 * @param profilePart
+	 * 			The main profile part to show a plot graph
+	 * @param mgr
+	 * 			The main menu manager
+	 * @param experiment
+	 * 			The current experiment or metric manager (in case thread view)
+	 * @param threadData
+	 * 			An interface to access the raw data
+	 * @param scope
+	 * 			The selected node 
+	 */
 	static public void createAdditionalContextMenu(
 			ProfilePart profilePart,
 			IMenuManager mgr, IMetricManager experiment, 
 			IThreadDataCollection threadData, Scope scope) {
 		
-		if (scope != null) {
+		if (scope == null || threadData == null || !threadData.isAvailable())
+			// no menus if there is no thread-level data
+			return;
+		
+		// fix issue #221: do not show empty metrics
+		// get the list of indexes of non-empty metrics
+		// if the table is empty or has no metrics, do nothing
+		var listOfIndexes = experiment.getNonEmptyMetricIDs(scope);
+		if (listOfIndexes == null || listOfIndexes.size()==0)
+			// TODO: should throw an exception
+			return;
+		
+		mgr.add( new Separator() );
+		
+		final String graphTypes[] = { GraphPlotRegularViewer.LABEL,
+									  GraphPlotSortViewer.LABEL,
+									  GraphHistoViewer.LABEL };
+		
+		for (Integer metricIndex: listOfIndexes) {
+			
+			// issue #221: do not display empty metric 
+			// try to find the correlated between general metric (non-empty) and
+			// the raw metric. 
+			// Note: plot graph and thread view requires raw metrics
+			var m = experiment.getMetric(metricIndex.intValue());
+			BaseMetric metric = experiment.getCorrespondentMetricRaw(m);
 
-			if (threadData == null || !threadData.isAvailable())
-				// no menus if there is no thread-level data
-				return;
+			if (metric == null)
+				continue;
 			
-			final List<BaseMetric> metrics = experiment.getRawMetrics();
-			if (metrics == null)
-				return;
-			
-			mgr.add( new Separator() );
-			
-			final String graphTypes[] = { GraphPlotRegularViewer.LABEL,
-										  GraphPlotSortViewer.LABEL,
-										  GraphHistoViewer.LABEL };
-			
-			for (BaseMetric metric: metrics) {
+			MenuManager subMenu = new MenuManager("Graph "+ metric.getDisplayName() );
+
+			for (String type: graphTypes) {
+	        	GraphEditorInput objInput = new GraphEditorInput(threadData, scope, metric, type);
+
+				// display the menu
 				
-				// do not display empty metric 
-				// this is important to keep consistency with the table
-				// which doesn't display empty metrics
-				/*
-				RootScope root = scope.getRootScope();
-				BaseMetric originalMetric = experiment.getMetric(metric.getShortName());
-				MetricValue mv = root.getMetricValue(originalMetric);
-				if (mv == MetricValue.NONE)
-					continue;
-				*/
+				Action action = new ScopeGraphAction(objInput, profilePart);
+				subMenu.add( action );
 
-				MenuManager subMenu = new MenuManager("Graph "+ metric.getDisplayName() );
-
-				for (String type: graphTypes) {
-		        	GraphEditorInput objInput = new GraphEditorInput(threadData, scope, metric, type);
-
-					// display the menu
-					
-					Action action = new ScopeGraphAction(objInput, profilePart);
-					subMenu.add( action );
-
-					mgr.add(subMenu);
-				}
+				mgr.add(subMenu);
 			}
-		}		
+		}
 	} 
-	
 	
 
     /********************************************************************************

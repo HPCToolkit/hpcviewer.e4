@@ -20,6 +20,7 @@ import edu.rice.cs.hpcdata.experiment.metric.FinalMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.Metric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricComparator;
+import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
@@ -51,7 +52,6 @@ implements IMetricManager, ListEventListener<BaseMetric>
 	/**
 	 * map ID to the metric descriptor
 	 */
-	//private Map<Integer, BaseMetric> mapIndexToMetric;	
 	private MutableIntObjectMap<BaseMetric> mapIndexToMetric;
 
 	
@@ -94,6 +94,24 @@ implements IMetricManager, ListEventListener<BaseMetric>
 		metrics.addListEventListener(this);
 	}
 
+	
+	@Override
+	public MetricRaw getCorrespondentMetricRaw(BaseMetric metric) {
+		var rawMetrics = getRawMetrics();
+		MetricRaw correspondentRawMetric = null;
+
+		var metricName = metric.getDisplayName();
+		var metricBaseName = metricName.replace(":Sum", "");
+		
+		for(var rm: rawMetrics) {
+			if (rm.getDisplayName().equals(metricBaseName)) {
+				correspondentRawMetric = (MetricRaw) rm;
+				break;
+			}
+		}
+		return correspondentRawMetric;
+	}
+	
 	
 	protected void copyMetric(Scope target, Scope source, int src_i, int targ_i, MetricValuePropagationFilter filter) {
 		if (filter.doPropagation(source, target, src_i, targ_i)) {
