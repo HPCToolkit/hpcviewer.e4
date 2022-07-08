@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.collections.api.map.primitive.LongObjectMap;
+import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
 import org.eclipse.collections.impl.map.mutable.primitive.LongObjectHashMap;
 
 import edu.rice.cs.hpcdata.db.IdTupleType;
@@ -366,9 +367,56 @@ public class DataMeta extends DataCommon
 	
 	
 	/****
-	 * Parser for the metric description section
+	 * Parser for the metric description section with
+	 * the following diagram:
+	 * <pre>
+                 ,-------------------.             
+                 |Performance_Metrics|             
+                 |-------------------|             
+                 |pMetric : long     |             
+                 |nMetrics : u32     |             
+                 |szMetric : u8      |             
+                 |szScopeInst : u8   |             
+                 |szSummary : u8     |             
+                 |                   |             
+                 |pScopes : long     |             
+                 |nScopes : u16      |             
+                 |szScope : u8       |             
+                 `-------------------'             
+                            |                      
+                            |                      
+                  ,------------------.             
+                  |Metric_Descriptors|             
+                  |------------------|             
+                  |pName : char*     |             
+                  |pScopeInsts : long|             
+                  |pSummaries : long |             
+                  |nScopeInsts : u16 |             
+                  |nSummaries : u16  |             
+                  `------------------'             
+                      |            |               
+                      |        ,------------------.
+,---------------------------.  |Summary_Statistics|
+|Propagation_Scopes_Instance|  |------------------|
+|---------------------------|  |pScope : long     |
+|pScope : long              |  |pFormula : char*  |
+|propMetricId : u16         |  |combine : u8      |
+`---------------------------'  |statMetricId : u16|
+                   |           `------------------'
+                   |               |               
+                   |               |               
+               ,-----------------------.           
+               |Propagation_Scope      |           
+               |-----------------------|           
+               |pScopeName : char*     |           
+               |type : byte            |           
+               |propagationIndex : byte|           
+               `-----------------------'           
+	 * </pre>
 	 * @param channel
+	 * 			The file IO channel
 	 * @param section
+	 * 			The data for metric section
 	 * @throws IOException
 	 */
 	private List<BaseMetric> parseMetricDescription(FileChannel channel, DataSection section) 
@@ -378,83 +426,141 @@ public class DataMeta extends DataCommon
 		var pMetrics = buffer.getLong();
 		var nMetrics = buffer.getInt();
 		var szMetric = buffer.get(0x0c);
-		var szScope  = buffer.get(0x0d);
-		var szSummary = buffer.get(0x0e);
+		var szScopeInst  = buffer.get(0x0d);
+		var szSummary    = buffer.get(0x0e);
+		
+		long pScopes = buffer.getLong(0x10);
+		var nScopes  = buffer.getShort(0x18);
+		var szScope  = buffer.get(0x1a);
 		
 		var metricDesc = new ArrayList<BaseMetric>(nMetrics);
 		int position = (int) (pMetrics - section.offset);
 		
+		LongObjectHashMap<PropagationIndex> mapPropagationIndex = new LongObjectHashMap<>(nScopes);
+
+		// --------------------------------------
+		// Propagation Scope (PS)
+		// --------------------------------------
+		/*
+		  00:	char* pScopeName	    4.0	Name of the propagation scope
+		  08:	u8	  type	            4.0	Type of propagation scope described
+		  09:	u8	  propagationIndex	4.0	Index of this propagation's propagation bit
+		 */
+		for(int i=0; i<nScopes; i++) {
+
+			int basePosition  = (int) ((pScopes - section.offset) + (i * szScope));			
+			long pScopeName   = buffer.getLong(basePosition);
+			int scopePosition = (int) (pScopeName - section.offset);
+
+			PropagationIndex pi = new PropagationIndex();
+
+			pi.scopeType = buffer.get(basePosition + 0x08);
+			pi.propIndex = buffer.get(basePosition + 0x09);			
+			pi.scopeName = getNullTerminatedString(buffer, scopePosition);
+			
+			long pScope  = pScopes + (i * szScope);
+			mapPropagationIndex.put(pScope, pi);
+		}
+		
+		// --------------------------------------
+		// Gathering the descriptions of performance metrics
+		// --------------------------------------
+		// Hex	Type	Name	Ver.	Description (see the Formats legend)
+		// A 8		ALIGNMENT		See Alignment properties
+		// 00:	char*	pName	4.0	Canonical name for the metric
+		// 08:	{PSI}[nScopeInsts]*	pScopeInsts	4.0	Instantiated propagated sub-metrics
+		// 10:	{SS}[nSummaries]*	pSummaries	4.0	Descriptions of generated summary statistics
+		// 18:	u16	nScopeInsts	4.0	Number of instantiated sub-metrics for this metric
+		// 1a:	u16	nSummaries	4.0	Number of summary statistics for this metric
 		for(int i=0; i<nMetrics; i++) {
 			int metricLocation = position + (i * szMetric);
 
 			var pName   = buffer.getLong (metricLocation);
-			var nScopes = buffer.getShort(metricLocation + 0x08);
-			var pScopes = buffer.getLong (metricLocation + 0x10);	
+			var pScopeInsts = buffer.getLong(metricLocation  + 0x08);
+			var pSummaries  = buffer.getLong(metricLocation  + 0x10);
+			var nScopeInsts = buffer.getShort(metricLocation + 0x18);
+			var nSummaries  = buffer.getShort(metricLocation + 0x1a);
 			
+			int scopesPosition = (int) (pScopeInsts - section.offset);
+			
+			// --------------------------------------
+			// Instantiated propagated sub-metrics (PSI)
+			// --------------------------------------
+			/*
+				00:	{PS}*  pScope	    4.0	Propagation scope instantiated
+				08:	u16	   propMetricId	4.0	Unique identifier for propagated metric values
+			 */
+			short []propMetricId  = new short[nScopeInsts];
+			
+			for (int j=0; j<nScopeInsts; j++) {
+				int basePosition = (int) (scopesPosition + (j * szScope));
+				propMetricId[j]  = buffer.getShort(basePosition + 0x08);
+			}
 			int strPosition = (int) (pName - section.offset);
 			String metricName = getNullTerminatedString(buffer, strPosition);
 			int []metricIndexesPerScope = new int[nScopes];
 			
-			int scopesPosition = (int) (pScopes - section.offset);				
-			for(int j=0; j<nScopes; j++) {
-				int basePosition   = scopesPosition + (j*szScope);
-				long  pScope       = buffer.getLong (basePosition);
-				short nSummaries   = buffer.getShort(basePosition + 0x08);
-				short propMetricId = buffer.getShort(basePosition + 0x0a);
-				long  pSummaries   = buffer.getLong (basePosition + 0x10);
+			int baseSummariesLocation = (int) (pSummaries - section.offset);
+					
+			// --------------------------------------
+			// Summary Statistics (SS)
+			// --------------------------------------
+			/*
+			 00:	{PS}*  pScope	    4.0	Propagation scope summarized
+			 08:	char*  pFormula	    4.0	Canonical unary function used for summary values
+			 10:	u8	   combine	    4.0	Combination n-ary function used for summary values
+			 12:	u16	   statMetricId	4.0	Unique identifier for summary statistic values
+			 */
+			for(short k=0; k<nSummaries; k++) {
+				int summaryLoc = baseSummariesLocation + k * szSummary;
 				
-				int scopePosition  = (int) (pScope - section.offset);
-				String scopeName = getNullTerminatedString(buffer, scopePosition);
-				
-				int baseSummariesLocation = (int) (pSummaries - section.offset);
-						
-				for(short k=0; k<nSummaries; k++) {
-					int summaryLoc = baseSummariesLocation + k * szSummary;
-					long pFormula  = buffer.getLong(summaryLoc);
-					byte combine   = buffer.get(summaryLoc + 0x08);
-					short statMetric = buffer.getShort(summaryLoc + 0x0a);
-											
-					var strFormula = getNullTerminatedString(buffer, (int) (pFormula-section.offset));
-					
-					var m = new HierarchicalMetric(dataSummary, statMetric, metricName);
-					m.setFormula(strFormula);
-					m.setCombineType(combine);
-					m.setOrder(propMetricId);
-					m.setDescription(metricName);
-					
-					// TODO: default metric annotation for prof2 database
-					// temporary quick fix: every metric is percent annotated
-					// this should be fixed when we parse metrics.yaml
-					m.setAnnotationType(AnnotationType.PERCENT);
-					
-					MetricType type;
-					
-					switch(scopeName) {
-					case METRIC_SCOPE_EXECUTION:
-						type = MetricType.INCLUSIVE;
-						break;
-					case METRIC_SCOPE_POINT:
-						type = MetricType.POINT_EXCL;
-						break;
-					case METRIC_SCOPE_FUNCTION:
-						type = MetricType.EXCLUSIVE;
-						break;
-					default:
-						type = MetricType.UNKNOWN;
-					}
-					m.setMetricType(type);
+				long pScope    = buffer.getLong(summaryLoc);
+				long pFormula  = buffer.getLong(summaryLoc + 0x08);
+				byte combine   = buffer.get(summaryLoc + 0x10);
+				short statMetric = buffer.getShort(summaryLoc + 0x12);
 										
-					VisibilityType vt = type == MetricType.POINT_EXCL ? 
-										VisibilityType.HIDE : VisibilityType.SHOW; 
-					m.setDisplayed(vt);
-
-					// store the index of this scope.
-					// we need this to propagate the partner index
-					metricIndexesPerScope[j] = metricDesc.size();
-					
-					metricDesc.add(m);
+				var strFormula = getNullTerminatedString(buffer, (int) (pFormula-section.offset));
+				
+				var m = new HierarchicalMetric(dataSummary, statMetric, metricName);
+				m.setFormula(strFormula);
+				m.setCombineType(combine);
+				m.setDescription(metricName);
+				m.setOrder(statMetric);
+				m.setIndex(propMetricId[k]);
+				
+				// TODO: default metric annotation for prof2 database
+				// temporary quick fix: every metric is percent annotated
+				// this should be fixed when we parse metrics.yaml
+				m.setAnnotationType(AnnotationType.PERCENT);
+				
+				MetricType type;
+				var pi = mapPropagationIndex.get(pScope);
+				switch(pi.scopeType) {
+				case 2:
+					type = MetricType.INCLUSIVE;
+					break;
+				case 1:
+					type = MetricType.POINT_EXCL;
+					break;
+				case 3:
+					type = MetricType.EXCLUSIVE;
+					break;
+				default:
+					type = MetricType.UNKNOWN;
 				}
+				m.setMetricType(type);
+									
+				VisibilityType vt = type == MetricType.POINT_EXCL ? 
+									VisibilityType.HIDE : VisibilityType.SHOW; 
+				m.setDisplayed(vt);
+
+				// store the index of this scope.
+				// we need this to propagate the partner index
+				metricIndexesPerScope[k] = metricDesc.size();
+				
+				metricDesc.add(m);
 			}
+			
 			// Re-assign the partner index:
 			// here we assume MetricType is either exclusive or inclusive 
 			// (in the future can be more than that)
@@ -727,6 +833,8 @@ public class DataMeta extends DataCommon
 		return (FMT_METADB_MINSZ_Context + (8 * nFlexWords));
 	}
 	
+	private final IntObjectHashMap<String> mapString = new IntObjectHashMap<>();
+
 	/*****
 	 * Find a null-terminated string in a buffer from a specified relative position
 	 *  
@@ -739,15 +847,21 @@ public class DataMeta extends DataCommon
 	 * @throws IOException
 	 */
 	private String getNullTerminatedString(ByteBuffer buffer, int startPosition) throws IOException {
-		StringBuilder sb = new StringBuilder();
+		if (mapString.containsKey(startPosition))
+			return mapString.get(startPosition);
 
+		StringBuilder sb = new StringBuilder();
+		
 		for(int i=0; i<buffer.capacity(); i++) {
 			byte b = buffer.get(startPosition + i);
 			if (b == 0)
 				break;
 			sb.append((char)b);
 		}
-		return sb.toString();
+		final var label = sb.toString();
+		mapString.put(startPosition, label);
+		
+		return label;
 	}
 
 	
@@ -985,6 +1099,12 @@ public class DataMeta extends DataCommon
 		}
 	}
 	
+	private static class PropagationIndex 
+	{
+		String scopeName;
+		byte scopeType;
+		byte propIndex;
+	}
 	
 	/*******************
 	 * 
