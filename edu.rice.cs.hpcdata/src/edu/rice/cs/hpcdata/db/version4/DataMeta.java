@@ -819,15 +819,54 @@ public class DataMeta extends DataCommon
 		var ctxBuffer = channel.map(MapMode.READ_ONLY, section.offset, section.size);
 		ctxBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
-		long szRoot = ctxBuffer.getLong();
-		long pRoot  = ctxBuffer.getLong();
+		/*
+		 * 00:	{Entry}[nEntryPoints]*	pEntryPoints	4.0	Pointer to an array of entry point specifications
+		 * 08:	u16	nEntryPoints	4.0	Number of entry points in this context tree
+		 * 0a:	u8	szEntryPoint	4.0	Size of a {Entry} structure in bytes, currently 32
+		 */
+		long pEntryPoints  = ctxBuffer.getLong(0x00);
+		short nEntryPoints = ctxBuffer.getShort(0x08);
+		byte  szEntryPoint = ctxBuffer.get(0x0a);
 		
-		parseChildrenContext(ctxBuffer, rootCCT, pRoot, szRoot);
+		/*
+		 * 00:	u64	szChildren			4.0	Total size of *pChildren, in bytes
+		 * 08:	{Ctx}[...]*	pChildren	4.0	Pointer to the array of child contexts
+		 * 10:	u32	ctxId				4.0	Unique identifier for this context
+		 * 14:	u16	entryPoint			4.0	Type of entry point used here
+		 * 18:	char*	pPrettyName		4.0	Human-readable name for the entry point
+		 */
+		for (int i=0; i<nEntryPoints; i++) {
+			int position = (int) ((pEntryPoints - section.offset) + (i * szEntryPoint));
+			
+			long szChildren = ctxBuffer.getLong(position);
+			long pChildren  = ctxBuffer.getLong(position + 0x08);
+			int  ctxId      = ctxBuffer.getInt(position + 0x10);
+			short entryPoint = ctxBuffer.getShort(position + 0x14);
+			long pPrettyName = ctxBuffer.getLong(position + 0x18);
+			
+			final String label = stringArea.toString(pPrettyName); //getNullTerminatedString(ctxBuffer, namePos);
+			
+			var mainScope = new ProcedureScope(rootCCT, 
+												   LoadModuleScope.NONE, 
+												   SourceFile.NONE, 
+												   0, 
+												   0, 
+												   label, 
+												   false, 
+												   ctxId, 
+												   0, 
+												   null, 
+												   ProcedureScope.FeaturePlaceHolder);
+			rootCCT.addSubscope(mainScope);
+			mainScope.setParentScope(rootCCT);
+			
+			parseChildrenContext(ctxBuffer, mainScope, pChildren, szChildren);
+		}
 		
 		return rootCCT;
 	}
 	
-	private final int FMT_METADB_MINSZ_Context = 0x18;
+	private final int FMT_METADB_MINSZ_Context = 0x20;
 	
 	private long FMT_METADB_SZ_Context(int nFlexWords)  {
 		return (FMT_METADB_MINSZ_Context + (8 * nFlexWords));
@@ -895,28 +934,51 @@ public class DataMeta extends DataCommon
 	 ***************************************/
 	private class ScopeContext
 	{
-		long szChildren;
-		long pChildren;
-		int  ctxId;
-		Scope newScope;
-		byte nFlexWords;
-
+		final long szChildren;
+		final long pChildren;
+		final int  ctxId;
+		final byte nFlexWords;
+		final short propagation;
 		
+		Scope newScope;
+
+		/***
+		 * Read meta.db file at the given start location, and parse a 
+		 * scope context record.
+		 * <br/>
+		 * The caller needs to check the value of {@code szChildren}. 
+		 * If the value is not zero, then the node has children.
+		 * 
+		 *  <pre>
+00:	u64	szChildren	4.0	Total size of *pChildren, in bytes
+08:	{Ctx}[...]*	pChildren	4.0	Pointer to the array of child contexts
+10:	u32	ctxId	    4.0	Unique identifier for this context
+14:	{Flags}	flags	4.0	See below
+15:	u8	relation	4.0	Relation this context has with its parent
+16:	u8	lexicalType	4.0	Type of lexical context represented
+17:	u8	nFlexWords	4.0	Size of flex, in u8[8] "words" (bytes / 8)
+18:	u16	propagation	4.0	Bitmask for defining propagation scopes
+20:	u8[8][nFlexWords]	flex	4.0	Flexible data region, see below
+		 * </pre>
+
+		 * @param buffer
+		 * 			The byte buffer of the meta.db file
+		 * @param loc
+		 * 			The start location
+		 * @param parent
+		 * 			The parent's scope node
+		 */
 		public ScopeContext(ByteBuffer buffer, int loc, Scope parent) {
+
 			szChildren = buffer.getLong(loc);
 			pChildren  = buffer.getLong(loc + 0x08);
 			ctxId      = buffer.getInt (loc + 0x10);
-			
-			readRecord(buffer, loc, parent);
-		}
-
-		
-		private void readRecord(ByteBuffer buffer, int loc, Scope parent) {
 			
 			byte flags       = buffer.get(loc + 0x14);
 			byte relation    = buffer.get(loc + 0x15);
 			byte lexicalType = buffer.get(loc + 0x16);
 			nFlexWords  = buffer.get(loc + 0x17);
+			propagation = buffer.getShort(loc + 0x18);
 			
 			long pFunction = 0;
 			long pFile   = 0;
@@ -940,22 +1002,22 @@ public class DataMeta extends DataCommon
 			if ((flags & 0x1) != 0) {
 				if (nFlexWords < nwords + 1) 
 					return;
-				pFunction = buffer.getLong(loc + 0x18 + nwords * 8);
+				pFunction = buffer.getLong(loc + 0x20 + nwords * 8);
 				nwords++;
 			}
 			if ((flags & 0x2) != 0) {
 				if (nFlexWords < nwords + 2) 
 					return;
-				pFile = buffer.getLong(loc + 0x18 + nwords * 8);
-				line  = buffer.getInt( loc + 0x18 + (nwords+1) * 8) - 1;
-				nwords++;
+				pFile = buffer.getLong(loc + 0x20 + nwords * 8);
+				line  = buffer.getInt( loc + 0x20 + (nwords+1) * 8) - 1;
+				nwords += 2;
 			}
 			if ((flags & 0x4) != 0) {
 				if (nFlexWords < nwords + 2) 
 					return;
-				pModule = buffer.getLong(loc + 0x18 + nwords * 8);
-				offset  = buffer.getLong(loc + 0x18 + (nwords+1) * 8);
-				nwords++;
+				pModule = buffer.getLong(loc + 0x20 + nwords * 8);
+				offset  = buffer.getLong(loc + 0x20 + (nwords+1) * 8);
+				nwords += 2;
 			}
 			var ps = mapProcedures.getIfAbsent (pFunction, ()->ProcedureScope.NONE);
 			var fs = mapFileSources.getIfAbsent(pFile,     ()->SourceFile.NONE);
@@ -965,8 +1027,6 @@ public class DataMeta extends DataCommon
 			// This needs to be computed more reliably.
 			int flatId = getKey(lm, fs, ps, line, lexicalType, relation);
 			
-			newScope = null; 
-
 			switch(lexicalType) {
 			case FMT_METADB_LEXTYPE_FUNCTION:
 				newScope = createLexicalFunction(parent, ps, ctxId, line, relation);
@@ -993,6 +1053,7 @@ public class DataMeta extends DataCommon
 			if (parent != null)
 				linkParentChild(parent, newScope);					
 		}
+		
 		
 		private int getKey(LoadModuleScope lms, SourceFile sf, ProcedureScope ps, int line, int lexicalType, int relation) {
 			final String SEPARATOR = ":";
