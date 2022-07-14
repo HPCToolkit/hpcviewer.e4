@@ -12,9 +12,6 @@ import org.junit.Test;
 
 public class TestDatabase 
 {
-	private static final String DB_MULTITHREAD = "multithread";
-	private static final String DB_LOOP_INLINE = "loop-inline";
-
 	private static final String DIR_XML    = "xml"; 
 	private static final String DIR_METADB = "metadb"; 
 	
