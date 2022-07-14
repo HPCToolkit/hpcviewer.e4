@@ -23,9 +23,7 @@ public class TestDatabase
 													 DIR_XML + File.separator + "bug-nometric"};
 	
 	private static String []metadbPaths = new String[] {
-			DIR_METADB + File.separator + DB_LOOP_INLINE,
-			DIR_METADB + File.separator + DB_MULTITHREAD,
-			DIR_METADB + File.separator + "quicksilver"};
+			DIR_METADB + File.separator + "loop-fork-cycles"};
 	
 	
 	public static File[] getXMLDatabases() {
