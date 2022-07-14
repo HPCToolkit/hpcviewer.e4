@@ -43,6 +43,10 @@ public class ScopeComparator implements Comparator<Object>
 
 	@Override
 	public int compare(Object n1, Object n2) {
+		if (n1 == null)
+			return -1;
+		if (n2 == null)
+			return 1;
 		
 		Scope node1 = (Scope) n1;
 		Scope node2 = (Scope) n2;
@@ -51,7 +55,7 @@ public class ScopeComparator implements Comparator<Object>
 		// dirty solution: if the column position is 0 then we sort
 		// according to its element name
 		// otherwise, sort according to the metric
-		if(metric == null || n1 == null || n2 == null) {
+		if(metric == null) {
 			return multiplier * doCompare(node1, node2);
 		}
 		

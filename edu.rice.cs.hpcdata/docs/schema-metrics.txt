@@ -1,0 +1,45 @@
+@startuml
+class Performance_Metrics {
+  pMetric : long
+  nMetrics : u32
+  szMetric : u8
+  szScopeInst : u8
+  szSummary : u8
+  
+  pScopes : long
+  nScopes : u16
+  szScope : u8
+}
+
+class Metric_Descriptors {
+  pName : char*
+  pScopeInsts : long
+  pSummaries : long
+  nScopeInsts : u16
+  nSummaries : u16
+}
+
+class Propagation_Scopes_Instance {
+  pScope : long
+  propMetricId : u16
+}
+
+class Summary_Statistics {
+  pScope : long
+  pFormula : char*
+  combine : u8
+  statMetricId : u16
+}
+
+class Propagation_Scope {
+  pScopeName : char*
+  type : byte
+  propagationIndex : byte
+}
+
+Performance_Metrics "1" *-- "nMetrics"   Metric_Descriptors : pMetric
+Metric_Descriptors "1" *-- "nScopeInsts" Propagation_Scopes_Instance : pScopeInsts
+Metric_Descriptors "1" *-- "nSummaries" Summary_Statistics : pSummaries
+Summary_Statistics "1" -- Propagation_Scope
+Propagation_Scopes_Instance "1" -- Propagation_Scope : pScope
+@enduml

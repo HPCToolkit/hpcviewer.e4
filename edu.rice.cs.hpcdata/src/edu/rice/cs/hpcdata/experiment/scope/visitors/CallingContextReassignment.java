@@ -26,8 +26,6 @@ public class CallingContextReassignment implements IScopeVisitor
 			for(var child: list) {
 				scope.reduce(child, MetricType.INCLUSIVE);
 			}
-		} else {
-			
 		}
 	}
 
@@ -35,13 +33,13 @@ public class CallingContextReassignment implements IScopeVisitor
 	public void visit(StatementRangeScope scope, ScopeVisitType vt) {/* unused */}
 
 	@Override
-	public void visit(LoopScope scope, ScopeVisitType vt) { update(scope, vt); }
+	public void visit(LoopScope scope, ScopeVisitType vt) { /* unused */ }
 
 	@Override
-	public void visit(CallSiteScope scope, ScopeVisitType vt) { update(scope, vt); }
+	public void visit(CallSiteScope scope, ScopeVisitType vt) { /* unused */ }
 
 	@Override
-	public void visit(ProcedureScope scope, ScopeVisitType vt) { update(scope, vt); }
+	public void visit(ProcedureScope scope, ScopeVisitType vt) { /* unused */ }
 
 	@Override
 	public void visit(FileScope scope, ScopeVisitType vt) {/* not treated in this class */}
@@ -57,13 +55,4 @@ public class CallingContextReassignment implements IScopeVisitor
 
 	@Override
 	public void visit(Scope scope, ScopeVisitType vt) {/* not treated in this class */}
-
-	
-	private void update(Scope scope, ScopeVisitType vt) {
-		if (vt == ScopeVisitType.PreVisit) {
-			
-		} else {
-			
-		}
-	}
 }
