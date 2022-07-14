@@ -442,6 +442,20 @@ public class DataSummary extends DataCommon
 		
 		tempIdTupleList.sort((o1, o2) -> o1.compareTo(o2));
 		
+		// if the number of levels to skip is the same as the real number of levels,
+		// we just return the original id tuple list.
+		// This means all the id-tuples are the same (very unlikely, but it happens).
+		// For instance, if we have:
+		//  NODE 0  THREAD 1
+		//  NODE 0  THREAD 1
+		//
+		// Then perhaps it's better to keep the original "NODE 0 THREAD 1" instead of
+		// removing redundancy (which means removing all the id tuples).
+		if (tempIdTupleList.size() == mapLevelToSkip.size()) {
+			listIdTuple = tempIdTupleList;
+			return;
+		}
+		
 		listIdTuple = FastList.newList(tempIdTupleList.size());
 		numLevels   = 0;
 		
@@ -549,6 +563,7 @@ public class DataSummary extends DataCommon
 	 * @param buffer ByteBuffer of the file
 	 * @return 2-length array of indexes: the index of the found cct, and its next index
 	 */
+	@SuppressWarnings("unused")
 	private long[] newtonSearch(int cct, int first, int last, ByteBuffer buffer) {
 		int left_index  = first;
 		int right_index = last - 1;

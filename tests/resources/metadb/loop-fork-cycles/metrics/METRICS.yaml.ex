@@ -37,7 +37,7 @@ inputs: !!seq
     # Canonical name for the performance metric.
     # See Performance Metric Specification in FORMATS.md for details.
     metric: !!str perf::cycles
-    # Propagation scope for the value required in particular.
+    # Name of the propagation scope for the value referenced.
     # See Performance Metric Specification in FORMATS.md for details.
     scope: !!str function
     # Unary function used to generate summary statistic values, see Performance
@@ -193,7 +193,7 @@ roots:
           formula: !!str first
           # Can also be written as a !!map listing the vector of formulas.
           formula: !!map
-            # Formula to generate "inclusive" cost values. Defaults to null.
+            # The following keys define the formulas used to generate metrics.
             # Formulas are roughly written as a C-like math expression, except:
             # - "Variables" are references to other nodes, which can be other
             #   formulas (sub-expressions) or an entry in the global `inputs:`.
@@ -227,11 +227,23 @@ roots:
             #       strict floor:[a]    # Largest integer less than a
             #       ceil:[a]     # Smallest integer greater than or equal to a
             #       strict ceil:[a]    # Smallest integer greater than a
-            inclusive: [4*,[*in-l1-miss-I,-,*in-l2-miss-I]]
 
-            # Formula to generate "exclusive" cost values. Defaults to null.
-            # Same format as `inclusive:`.
-            exclusive: [4*,[*in-l1-miss-E,-,*in-l2-miss-E]]
+            # Formulas to generate "inclusive" cost values. Defaults to null.
+            inclusive:
+              # Custom formula used when no special properties are required of
+              # the formulation. Defaults to the value of `standard:`.
+              custom: [4*,[*in-l1-miss-I,-,*in-l2-miss-I]]
+
+              # Version of the formula based compeletely on well-defined metric
+              # inputs, which refer only to non-custom propagation scopes. Used
+              # in the bottom-up and flat views, where this property is required
+              # for accurate analysis. Defaults to null.
+              # See the meta.db Performance Metrics section for details.
+              standard: [4*,[*in-l1-miss-I,-,*in-l2-miss-I]]
+
+            # Formulas to generate "exclusive" cost values. Defaults to null.
+            exclusive:
+              standard: [4*,[*in-l1-miss-E,-,*in-l2-miss-E]]
 
         # Another example variant for "L2 Bound"
         Mean:

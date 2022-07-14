@@ -12,9 +12,6 @@ import org.junit.Test;
 
 public class TestDatabase 
 {
-	private static final String DB_MULTITHREAD = "multithread";
-	private static final String DB_LOOP_INLINE = "loop-inline";
-
 	private static final String DIR_XML    = "xml"; 
 	private static final String DIR_METADB = "metadb"; 
 	
@@ -23,9 +20,7 @@ public class TestDatabase
 													 DIR_XML + File.separator + "bug-nometric"};
 	
 	private static String []metadbPaths = new String[] {
-			DIR_METADB + File.separator + DB_LOOP_INLINE,
-			DIR_METADB + File.separator + DB_MULTITHREAD,
-			DIR_METADB + File.separator + "quicksilver"};
+			DIR_METADB + File.separator + "loop-fork-cycles"};
 	
 	
 	public static File[] getXMLDatabases() {

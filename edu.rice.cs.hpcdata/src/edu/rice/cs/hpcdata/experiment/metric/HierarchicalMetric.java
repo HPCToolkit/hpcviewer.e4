@@ -18,6 +18,9 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	private Expression expression;
 	private DataSummary profileDB;
 	private byte combineType; 
+	
+	private byte []psType;
+	private byte []psIndex;
 
 	public HierarchicalMetric(DataSummary profileDB, int index, String sDisplayName) {
 		super(String.valueOf(index), sDisplayName);
@@ -25,6 +28,14 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		setIndex(index);
 	}
 
+	public void setPropagationScope(byte []psType, byte []psIndex) {
+		this.psType = new byte[psType.length];
+		this.psIndex = new byte[psIndex.length];
+		for(int i=0; i<psType.length; i++) {
+			this.psType[i] = psType[i];
+			this.psIndex[i] = psIndex[i];
+		}
+	}
 
 	public void setFormula(String formula) {
 		expression = ExpressionTree.parse(formula);

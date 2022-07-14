@@ -103,7 +103,7 @@ public class DataMetaTest
 	@Test
 	public void testLoadModule() {
 		for(DataMeta data: dataMeta) {
-			assertTrue(data.getNumLoadModules() >= 3);
+			assertTrue(data.getNumLoadModules() >= 2);
 			var iterator = data.getLoadModuleIterator();
 			iterator.forEachRemaining(lm -> {
 				assertNotNull(lm);
@@ -116,7 +116,7 @@ public class DataMetaTest
 	@Test
 	public void testFiles() {
 		for(DataMeta data: dataMeta) {
-			assertTrue(data.getNumFiles() >= 3);
+			assertTrue(data.getNumFiles() >= 2);
 			var iterator = data.getFileIterator();
 			iterator.forEachRemaining(f-> {
 				assertNotNull(f);
@@ -128,7 +128,7 @@ public class DataMetaTest
 	@Test
 	public void testProcedure() {
 		for(DataMeta data: dataMeta) {
-			assertTrue(data.getNumProcedures() >= 9);
+			assertTrue(data.getNumProcedures() >= 8);
 			
 			Iterator<ProcedureScope> iterator = data.getProcedureIterator();
 			assertNotNull(iterator);
