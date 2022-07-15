@@ -52,7 +52,7 @@ public class DataTraceTest {
 				assertNotNull(rec);
 				assertTrue(rec.timestamp >= minTimeStamp[j] &&
 						   rec.timestamp <= maxTimeStamp[j]);
-				assertTrue(rec.cpId > 0 && rec.cpId <= maxCpid[j]);
+				assertTrue(rec.cpId >= 0 && rec.cpId <= maxCpid[j]);
 				
 				if (old != null)
 					assertTrue(rec.timestamp > old.timestamp);
@@ -65,7 +65,7 @@ public class DataTraceTest {
 
 	@Test
 	public void testGetNumberOfSamples() {
-		int []numSample = new int[] {561, 442}; // 
+		int []numSample = new int[] {90, 442}; // 
 		for(int j=0; j<data.length; j++) {
 			var d = data[j];
 			int samples = d.getNumberOfSamples(0);
