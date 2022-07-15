@@ -25,18 +25,12 @@ import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
-import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
-import edu.rice.cs.hpcdata.experiment.scope.CallSiteScopeType;
-import edu.rice.cs.hpcdata.experiment.scope.InstructionScope;
-import edu.rice.cs.hpcdata.experiment.scope.LineScope;
+import edu.rice.cs.hpcdata.experiment.scope.EntryScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoadModuleScope;
-import edu.rice.cs.hpcdata.experiment.scope.LoopScope;
-import edu.rice.cs.hpcdata.experiment.scope.ProcedureCallScope;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.experiment.scope.UnknownScope;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.CallingContextReassignment;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.TraceScopeVisitor;
 import edu.rice.cs.hpcdata.experiment.source.SimpleSourceFile;
@@ -67,10 +61,6 @@ public class DataMeta extends DataCommon
 	
 	private final static String HEADER_MAGIC_STR   = "HPCTOOLKITmeta";
 	
-	private final static String METRIC_SCOPE_POINT     = "point";
-	private static final String METRIC_SCOPE_FUNCTION  = "function";
-	private static final String METRIC_SCOPE_EXECUTION = "execution";
-		
 	private static final int INDEX_GENERAL = 0;
 	private static final int INDEX_NAMES   = 1;
 	private static final int INDEX_METRICS = 2;
@@ -79,17 +69,6 @@ public class DataMeta extends DataCommon
 	private static final int INDEX_MODULES = 5;
 	private static final int INDEX_FILES   = 6;
 	private static final int INDEX_FUNCTIONS = 7;
-	
-	// Parent-child relation: 
-	private static final int FMT_METADB_RELATION_LEXICAL_NEST = 0;
-	private static final int FMT_METADB_RELATION_CALL 		  = 1;
-	private static final int FMT_METADB_RELATION_CALL_INLINED = 2;
-
-	// lexical type:
-	private static final int FMT_METADB_LEXTYPE_FUNCTION = 0;
-	private static final int FMT_METADB_LEXTYPE_LOOP = 1;
-	private static final int FMT_METADB_LEXTYPE_LINE = 2;
-	private static final int FMT_METADB_LEXTYPE_INSTRUCTION = 3;
 
 	// --------------------------------------------------------------------
 	// variables
@@ -423,10 +402,20 @@ public class DataMeta extends DataCommon
 			throws IOException {
 		var buffer = channel.map(MapMode.READ_ONLY, section.offset, section.size);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
+		
+		// 00:	{MD}[nMetrics]*	pMetrics	4.0	Descriptions of performance metrics
+		// 08:	u32	nMetrics				4.0	Number of performance metrics
+		// 0c:	u8	szMetric				4.0	Size of the {MD} structure, currently 32
+		// 0d:	u8	szScopeInst				4.0	Size of the {PSI} structure, currently 16
+		// 0e:	u8	szSummary				4.0	Size of the {SS} structure, currently 24
+		// 10:	{PS}[nScopes]*	pScopes		4.0	Descriptions of propgation scopes
+		// 18:	u16	nScopes					4.0	Number of propgation scopes
+		// 1a:	u8	szScope					4.0	Size of the {PS} structure, currently 16
+
 		var pMetrics = buffer.getLong();
 		var nMetrics = buffer.getInt();
 		var szMetric = buffer.get(0x0c);
-		var szScopeInst  = buffer.get(0x0d);
+		//var szScopeInst  = buffer.get(0x0d);
 		var szSummary    = buffer.get(0x0e);
 		
 		long pScopes = buffer.getLong(0x10);
@@ -441,11 +430,11 @@ public class DataMeta extends DataCommon
 		// --------------------------------------
 		// Propagation Scope (PS)
 		// --------------------------------------
-		/*
-		  00:	char* pScopeName	    4.0	Name of the propagation scope
-		  08:	u8	  type	            4.0	Type of propagation scope described
-		  09:	u8	  propagationIndex	4.0	Index of this propagation's propagation bit
-		 */
+
+		//  00:	char* pScopeName	    4.0	Name of the propagation scope
+		//  08:	u8	  type	            4.0	Type of propagation scope described
+		//  09:	u8	  propagationIndex	4.0	Index of this propagation's propagation bit
+
 		for(int i=0; i<nScopes; i++) {
 
 			int basePosition  = (int) ((pScopes - section.offset) + (i * szScope));			
@@ -465,13 +454,12 @@ public class DataMeta extends DataCommon
 		// --------------------------------------
 		// Gathering the descriptions of performance metrics
 		// --------------------------------------
-		// Hex	Type	Name	Ver.	Description (see the Formats legend)
-		// A 8		ALIGNMENT		See Alignment properties
-		// 00:	char*	pName	4.0	Canonical name for the metric
+		// 00:	char*	pName					4.0	Canonical name for the metric
 		// 08:	{PSI}[nScopeInsts]*	pScopeInsts	4.0	Instantiated propagated sub-metrics
 		// 10:	{SS}[nSummaries]*	pSummaries	4.0	Descriptions of generated summary statistics
-		// 18:	u16	nScopeInsts	4.0	Number of instantiated sub-metrics for this metric
-		// 1a:	u16	nSummaries	4.0	Number of summary statistics for this metric
+		// 18:	u16	nScopeInsts					4.0	Number of instantiated sub-metrics for this metric
+		// 1a:	u16	nSummaries					4.0	Number of summary statistics for this metric
+		//
 		for(int i=0; i<nMetrics; i++) {
 			int metricLocation = position + (i * szMetric);
 
@@ -481,16 +469,14 @@ public class DataMeta extends DataCommon
 			var nScopeInsts = buffer.getShort(metricLocation + 0x18);
 			var nSummaries  = buffer.getShort(metricLocation + 0x1a);
 			
-			int scopesPosition = (int) (pScopeInsts - section.offset);
-			
+			int scopesPosition = (int) (pScopeInsts - section.offset);			
+			short []propMetricId = new short[nScopeInsts];
+
 			// --------------------------------------
 			// Instantiated propagated sub-metrics (PSI)
 			// --------------------------------------
-			/*
-				00:	{PS}*  pScope	    4.0	Propagation scope instantiated
-				08:	u16	   propMetricId	4.0	Unique identifier for propagated metric values
-			 */
-			short []propMetricId  = new short[nScopeInsts];
+			//	00:	{PS}*  pScope	    4.0	Propagation scope instantiated
+			//	08:	u16	   propMetricId	4.0	Unique identifier for propagated metric values
 			
 			for (int j=0; j<nScopeInsts; j++) {
 				int basePosition = (int) (scopesPosition + (j * szScope));
@@ -505,12 +491,11 @@ public class DataMeta extends DataCommon
 			// --------------------------------------
 			// Summary Statistics (SS)
 			// --------------------------------------
-			/*
-			 00:	{PS}*  pScope	    4.0	Propagation scope summarized
-			 08:	char*  pFormula	    4.0	Canonical unary function used for summary values
-			 10:	u8	   combine	    4.0	Combination n-ary function used for summary values
-			 12:	u16	   statMetricId	4.0	Unique identifier for summary statistic values
-			 */
+			// 00:	{PS}*  pScope	    4.0	Propagation scope summarized
+			// 08:	char*  pFormula	    4.0	Canonical unary function used for summary values
+			// 10:	u8	   combine	    4.0	Combination n-ary function used for summary values
+			// 12:	u16	   statMetricId	4.0	Unique identifier for summary statistic values
+
 			for(short k=0; k<nSummaries; k++) {
 				int summaryLoc = baseSummariesLocation + k * szSummary;
 				
@@ -693,7 +678,7 @@ public class DataMeta extends DataCommon
 		var basePosition = pFunctions - section.offset;
 		LongObjectHashMap<ProcedureScope> mapProcedures = new LongObjectHashMap<>(nFunctions);
 
-		int baseId = Constants.FLAT_ID_BEGIN + mapLoadModules.size() + mapFileSources.size() + 1;
+		final int baseId = Constants.FLAT_ID_BEGIN + mapLoadModules.size() + mapFileSources.size() + 1;
 
 		for(int i=0; i<nFunctions; i++) {
 			int position = (int) (basePosition + (i * szFunctions));
@@ -757,9 +742,9 @@ public class DataMeta extends DataCommon
 	 * 			The size of children in bytes
 	 * @throws IOException
 	 */
-	private void parseChildrenContext(
+	private void parseChildrenContext(	ScopeContextFactory scf,
 										ByteBuffer buffer, 
-										Scope parent, 
+										EntryScope entry, 
 										long startLocation, 
 										long size) 
 					throws IOException {
@@ -767,11 +752,13 @@ public class DataMeta extends DataCommon
 		final ArrayDeque<ContextStack> stack = new ArrayDeque<>();
 		int ctxLoc   = (int) (startLocation - sections[INDEX_CONTEXT].offset);
 		long ctxSize = size;
+		Scope parent = entry;
 		
 		// look for the children as long as we still have the remainder bytes
 		while(ctxSize >= FMT_METADB_MINSZ_Context) {
-
-			ScopeContext context = new ScopeContext(buffer, ctxLoc, parent);
+			
+			// read the next context node from the meta.db file
+			ScopeContext context = scf.parse(buffer, ctxLoc, parent);
 			
 			long szAdditionalCtx = FMT_METADB_SZ_Context(context.nFlexWords);
 			ctxSize -= szAdditionalCtx;
@@ -818,6 +805,11 @@ public class DataMeta extends DataCommon
 			throws IOException {
 		var ctxBuffer = channel.map(MapMode.READ_ONLY, section.offset, section.size);
 		ctxBuffer.order(ByteOrder.LITTLE_ENDIAN);
+		
+		final ScopeContextFactory scf = new ScopeContextFactory(mapLoadModules, 
+																mapFileSources, 
+																mapProcedures, 
+																rootCCT);
 
 		/*
 		 * 00:	{Entry}[nEntryPoints]*	pEntryPoints	4.0	Pointer to an array of entry point specifications
@@ -838,29 +830,22 @@ public class DataMeta extends DataCommon
 		for (int i=0; i<nEntryPoints; i++) {
 			int position = (int) ((pEntryPoints - section.offset) + (i * szEntryPoint));
 			
-			long szChildren = ctxBuffer.getLong(position);
-			long pChildren  = ctxBuffer.getLong(position + 0x08);
-			int  ctxId      = ctxBuffer.getInt(position + 0x10);
+			long szChildren  = ctxBuffer.getLong(position);
+			long pChildren   = ctxBuffer.getLong(position  + 0x08);
+			int  ctxId       = ctxBuffer.getInt(position   + 0x10);
 			short entryPoint = ctxBuffer.getShort(position + 0x14);
-			long pPrettyName = ctxBuffer.getLong(position + 0x18);
+			long pPrettyName = ctxBuffer.getLong(position  + 0x18);
 			
-			final String label = stringArea.toString(pPrettyName); //getNullTerminatedString(ctxBuffer, namePos);
+			final String label = stringArea.toString(pPrettyName); 
 			
-			var mainScope = new ProcedureScope(rootCCT, 
-												   LoadModuleScope.NONE, 
-												   SourceFile.NONE, 
-												   0, 
-												   0, 
-												   label, 
-												   false, 
-												   ctxId, 
-												   0, 
-												   null, 
-												   ProcedureScope.FeaturePlaceHolder);
+			var mainScope = new EntryScope(rootCCT, 
+										   label, 
+										   ctxId, 
+										   entryPoint);
 			rootCCT.addSubscope(mainScope);
 			mainScope.setParentScope(rootCCT);
 			
-			parseChildrenContext(ctxBuffer, mainScope, pChildren, szChildren);
+			parseChildrenContext(scf, ctxBuffer, mainScope, pChildren, szChildren);
 		}
 		
 		return rootCCT;
@@ -926,240 +911,6 @@ public class DataMeta extends DataCommon
 	}
 	
 
-
-	/***************************************
-	 * 
-	 * Class to parse the context tree section of meta.db
-	 *
-	 ***************************************/
-	private class ScopeContext
-	{
-		final long szChildren;
-		final long pChildren;
-		final int  ctxId;
-		final byte nFlexWords;
-		final short propagation;
-		
-		Scope newScope;
-
-		/***
-		 * Read meta.db file at the given start location, and parse a 
-		 * scope context record.
-		 * <br/>
-		 * The caller needs to check the value of {@code szChildren}. 
-		 * If the value is not zero, then the node has children.
-		 * 
-		 *  <pre>
-00:	u64	szChildren	4.0	Total size of *pChildren, in bytes
-08:	{Ctx}[...]*	pChildren	4.0	Pointer to the array of child contexts
-10:	u32	ctxId	    4.0	Unique identifier for this context
-14:	{Flags}	flags	4.0	See below
-15:	u8	relation	4.0	Relation this context has with its parent
-16:	u8	lexicalType	4.0	Type of lexical context represented
-17:	u8	nFlexWords	4.0	Size of flex, in u8[8] "words" (bytes / 8)
-18:	u16	propagation	4.0	Bitmask for defining propagation scopes
-20:	u8[8][nFlexWords]	flex	4.0	Flexible data region, see below
-		 * </pre>
-
-		 * @param buffer
-		 * 			The byte buffer of the meta.db file
-		 * @param loc
-		 * 			The start location
-		 * @param parent
-		 * 			The parent's scope node
-		 */
-		public ScopeContext(ByteBuffer buffer, int loc, Scope parent) {
-
-			szChildren = buffer.getLong(loc);
-			pChildren  = buffer.getLong(loc + 0x08);
-			ctxId      = buffer.getInt (loc + 0x10);
-			
-			byte flags       = buffer.get(loc + 0x14);
-			byte relation    = buffer.get(loc + 0x15);
-			byte lexicalType = buffer.get(loc + 0x16);
-			nFlexWords  = buffer.get(loc + 0x17);
-			propagation = buffer.getShort(loc + 0x18);
-			
-			long pFunction = 0;
-			long pFile   = 0;
-			int  line    = 0;
-			long pModule = 0;
-			byte nwords  = 0;
-			long offset  = 0;
-			/*
-				{Flags} above refers to an u8 bit field with the following sub-fields (bit 0 is least significant):
-				
-				Bit 0: hasFunction. If 1, the following sub-fields of flex are present:
-				    - flex[0]: FS* pFunction: Function associated with this context
-				Bit 1: hasSrcLoc. If 1, the following sub-fields of flex are present:
-				    - flex[1]: SFS* pFile: Source file associated with this context
-				    - flex[2]: u32 line: Associated source line in pFile
-				Bit 2: hasPoint. If 1, the following sub-fields of flex are present:
-				    - flex[3]: LMS* pModule: Load module associated with this context
-				    - flex[4]: u64 offset: Assocated byte offset in *pModule
-				Bits 3-7: Reserved for future use.
-			 */
-			if ((flags & 0x1) != 0) {
-				if (nFlexWords < nwords + 1) 
-					return;
-				pFunction = buffer.getLong(loc + 0x20 + nwords * 8);
-				nwords++;
-			}
-			if ((flags & 0x2) != 0) {
-				if (nFlexWords < nwords + 2) 
-					return;
-				pFile = buffer.getLong(loc + 0x20 + nwords * 8);
-				line  = buffer.getInt( loc + 0x20 + (nwords+1) * 8) - 1;
-				nwords += 2;
-			}
-			if ((flags & 0x4) != 0) {
-				if (nFlexWords < nwords + 2) 
-					return;
-				pModule = buffer.getLong(loc + 0x20 + nwords * 8);
-				offset  = buffer.getLong(loc + 0x20 + (nwords+1) * 8);
-				nwords += 2;
-			}
-			var ps = mapProcedures.getIfAbsent (pFunction, ()->ProcedureScope.NONE);
-			var fs = mapFileSources.getIfAbsent(pFile,     ()->SourceFile.NONE);
-			var lm = mapLoadModules.getIfAbsent(pModule,   ()->LoadModuleScope.NONE);
-			
-			// linearize the flat id. This is not sufficient and causes collisions for large and complex source code
-			// This needs to be computed more reliably.
-			int flatId = getKey(lm, fs, ps, line, lexicalType, relation);
-			
-			switch(lexicalType) {
-			case FMT_METADB_LEXTYPE_FUNCTION:
-				newScope = createLexicalFunction(parent, ps, ctxId, line, relation);
-				if (parent instanceof LineScope) {
-					var p = parent.getParentScope();
-					linkParentChild(p, newScope);
-					parent.addScopeReduce(newScope);
-					return;
-				}
-				break;
-			case FMT_METADB_LEXTYPE_LOOP:
-				newScope = new LoopScope(rootCCT, fs, line, line, ctxId, flatId);
-				break;
-			case FMT_METADB_LEXTYPE_LINE:
-				newScope = new LineScope(rootCCT, fs, line, ctxId, flatId);
-				break;
-			case FMT_METADB_LEXTYPE_INSTRUCTION:
-				newScope = new InstructionScope(rootCCT, lm, offset, ctxId, flatId);
-				newScope.setSourceFile(fs);
-				break;
-			default:
-				newScope = new UnknownScope(rootCCT, fs, flatId);
-			}
-			if (parent != null)
-				linkParentChild(parent, newScope);					
-		}
-		
-		
-		private int getKey(LoadModuleScope lms, SourceFile sf, ProcedureScope ps, int line, int lexicalType, int relation) {
-			final String SEPARATOR = ":";
-			
-			StringBuilder sb = new StringBuilder();
-			sb.append('l' + lexicalType);
-			sb.append(SEPARATOR);
-			
-			sb.append('r' + relation);
-			sb.append(SEPARATOR);
-			
-			sb.append(lms.getFlatIndex());
-			sb.append(SEPARATOR);
-						
-			sb.append(sf.getFileID());
-			sb.append(SEPARATOR);
-			
-			if (ps != ProcedureScope.NONE) {
-				sb.append(ps.getFlatIndex());
-				sb.append(SEPARATOR);
-			}
-			
-			sb.append(line);
-			
-			int hash = sb.toString().hashCode();
-			int baseId = Constants.FLAT_ID_BEGIN + mapLoadModules.size() + mapFileSources.size() + mapProcedures.size() + 1;
-			
-			return baseId + hash;
-		}
-
-		
-		/***
-		 * Create a lexical function scope.
-		 * 
-		 * @param parent
-		 * @param lm
-		 * @param fs
-		 * @param ps
-		 * @param ctxId
-		 * @param line
-		 * @param relation
-		 * 
-		 * @return {@code Scope}
-		 * 			A call site scope if the line scope exists.
-		 * 			A procedure scope otherwise.
-		 */
-		private Scope createLexicalFunction( 
-											Scope parent, 
-											ProcedureScope ps, 
-											int ctxId,
-											int line, 
-											int relation) {
-			
-			boolean alien  = relation == FMT_METADB_RELATION_CALL_INLINED;
-			
-			if (!(parent instanceof LineScope)) {
-				if (parent instanceof RootScope && ps == ProcedureScope.NONE) {
-					// partial call path if the parent is a root scope, and
-					// the procedure is unknown
-					return new ProcedureScope(rootCCT, 
-							LoadModuleScope.NONE, SourceFile.NONE, 
-							0, 0, 
-							"<partial call paths>", false, 
-							ctxId, Constants.FLAT_ID_PROC_PARTIAL, 
-							null, ProcedureScope.FeatureRoot);
-
-				}
-				// no call site in the stack: it must be a procedure scope
-				int procFeature = ps.isTopDownProcedure() ? ProcedureScope.FeatureTopDown : ProcedureScope.FeatureProcedure; 
-				return new ProcedureCallScope(rootCCT, ps.getLoadModule(), ps.getSourceFile(), line, ps.getName(), alien, ctxId, ps.getFlatIndex(), null, procFeature);				
-			}
-			if (relation == FMT_METADB_RELATION_LEXICAL_NEST)
-				return new ProcedureScope(rootCCT, ps.getLoadModule(), ps.getSourceFile(), line, line, ps.getName(), alien, ctxId, ps.getFlatIndex(), null, ProcedureScope.FeatureProcedure);				
-
-			ps.setAlien(alien);
-			LineScope ls = (LineScope) parent;
-			int fid = String.valueOf(ls.getFlatIndex() + ":" + ls.getFirstLineNumber()).hashCode();
-			var cs = new CallSiteScope(ls, ps, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, fid);
-			
-			// Only the line statement knows where the source file is
-			// If the line statement is unknown then the source file is unknown.
-			cs.setSourceFile(ls.getSourceFile());
-			
-			return cs;
-		}
-
-		
-		/****
-		 * Begin a new scope if needed. If the child scope doesn't exist
-		 * (null value), it doesn't create a child tree and just returns the parent.
-		 * 
-		 * @param parent
-		 * @param scope
-		 * 
-		 * @return {@code Scope}
-		 * 			a new parent if the child scope is valid. 
-		 * 			Otherwise returns the parent itself.
-		 */
-		private Scope linkParentChild(Scope parent, Scope scope) {
-			parent.addSubscope(scope);
-			scope.setParentScope(parent);
-
-			return scope;
-		}
-	}
-	
 	private static class PropagationIndex 
 	{
 		String scopeName;
