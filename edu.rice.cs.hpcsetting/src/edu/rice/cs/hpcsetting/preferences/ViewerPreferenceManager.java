@@ -29,7 +29,8 @@ public class ViewerPreferenceManager extends AbstractPreferenceManager
 	public static final String []DEFAULT_CALLTO   = new String[] {"\u00bb", "\u21C9", "\u21D2", "\u21D8", "\u21DB", "\u21E5", "\u21F2", "\u27A5", "\u2937", "\u2B0A", "\u2B0E", "\u2B46", "\u2B78", "\u2BA1", "\u2BA9", "\u2BAF", "\u2BB1"};
 	public static final String []DEFAULT_CALLFROM = new String[] {"\u00ab", "\u21C7", "\u21D0", "\u21D6", "\u21DA", "\u21E4", "\u21F1", "\u27A6", "\u293A", "\u2B09", "\u2B11", "\u2B45", "\u2B76", "\u2BA2", "\u2BAA", "\u2BAC", "\u2BB2"};
 
- 	public static final int DEFAULT_CALLSITE_INDEX = 2;
+	// fix issue #207 (some platforms don't support unicode)
+ 	public static final int DEFAULT_CALLSITE_INDEX = 0;
 
  	private static final String EMPTY = "";
 	
@@ -65,16 +66,10 @@ public class ViewerPreferenceManager extends AbstractPreferenceManager
 									   FontManager.getCallsiteGlyphDefaultFont().getFontData());
 		
 		// fix issue #207 (some platforms don't support unicode)
-		// check if the encoding supports UTF or not.
-		// Most systems that have ANSI platform has no UTF support
-		// Example: ANSI_X3.4-1968 is basically an ASCII set
-		int indexDefault = DEFAULT_CALLSITE_INDEX;
-		var encoding = System.getProperty("file.encoding");
-		if (encoding.startsWith("ANSI")) 
-			indexDefault = 0;
+		// Use ASCII character by default
 
-		store.setDefault(PreferenceConstants.ID_CHAR_CALLTO, DEFAULT_CALLTO[indexDefault]);
-		store.setDefault(PreferenceConstants.ID_CHAR_CALLFROM, DEFAULT_CALLFROM[indexDefault]);
+		store.setDefault(PreferenceConstants.ID_CHAR_CALLTO, DEFAULT_CALLTO[DEFAULT_CALLSITE_INDEX]);
+		store.setDefault(PreferenceConstants.ID_CHAR_CALLFROM, DEFAULT_CALLFROM[DEFAULT_CALLSITE_INDEX]);
 	}
 	
 	
