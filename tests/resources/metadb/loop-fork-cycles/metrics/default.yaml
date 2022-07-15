@@ -1,15 +1,5 @@
 version: 0
 inputs:
-  - &instructions-sum-x5b_0x0x5d_-execution
-    metric: instructions
-    scope: execution
-    formula: $$
-    combine: sum
-  - &instructions-sum-x5b_0x0x5d_-function
-    metric: instructions
-    scope: function
-    formula: $$
-    combine: sum
   - &cycles-sum-x5b_0x0x5d_-execution
     metric: cycles
     scope: execution
@@ -35,11 +25,3 @@ roots:
             formula:
               inclusive: *cycles-sum-x5b_0x0x5d_-execution
               exclusive: *cycles-sum-x5b_0x0x5d_-function
-      - name: instructions
-        description: PERF_COUNT_HW_INSTRUCTIONS
-        variants:
-          Sum:
-            render: [number, percent]
-            formula:
-              inclusive: *instructions-sum-x5b_0x0x5d_-execution
-              exclusive: *instructions-sum-x5b_0x0x5d_-function

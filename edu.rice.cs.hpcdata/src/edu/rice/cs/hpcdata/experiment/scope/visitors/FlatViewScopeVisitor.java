@@ -7,7 +7,6 @@ import edu.rice.cs.hpcdata.experiment.scope.AlienScope;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.FileScope;
 import edu.rice.cs.hpcdata.experiment.scope.GroupScope;
-import edu.rice.cs.hpcdata.experiment.scope.InstructionScope;
 import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoadModuleScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoopScope;
@@ -41,7 +40,6 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 	private HashMap<String, List<Scope>> htFlatCostAdded;
 	
 	private RootScope root_ft;
-	private int nodeIndex;
 	
 	private InclusiveOnlyMetricPropagationFilter inclusive_filter;
 	private ExclusiveOnlyMetricPropagationFilter exclusive_filter;
@@ -59,8 +57,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 		this.htFlatScope     = new HashMap<String, FlatScopeInfo>();
 		this.htFlatCostAdded = new HashMap<String, List<Scope>>();
 		
-		this.root_ft   = root;
-		this.nodeIndex = 10;
+		this.root_ft = root;
 		
 		this.inclusive_filter = new InclusiveOnlyMetricPropagationFilter( exp );
 		this.exclusive_filter = new ExclusiveOnlyMetricPropagationFilter( exp );
@@ -192,7 +189,6 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 			// Initialize the flat scope of this cct
 			//-----------------------------------------------------------------------------
 			flat_info_s.flat_s = cct_s.duplicate();
-			flat_info_s.flat_s.setCCTIndex(generateNodeIndex());
 			flat_info_s.flat_s.setRootScope(root_ft);
 			
 			//-----------------------------------------------------------------------------
@@ -230,11 +226,6 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 		return flat_info_s;
 	}
 	
-	
-	private int generateNodeIndex() {
-		return ++nodeIndex;
-	}
-	
 	/*****************************************************************
 	 * Create the flat view of a load module
 	 * @param proc_cct_s
@@ -250,9 +241,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 			if (lm_flat_s == null) {
 				// no load module has been created. we allocate a new one
 				lm_flat_s = (LoadModuleScope) lm.duplicate();
-				lm_flat_s.setCCTIndex(generateNodeIndex());
 				lm_flat_s.setRootScope(root_ft);
-				
 				// attach the load module to the root scope
 				this.addToTree(root_ft, lm_flat_s);
 				// store this module into our dictionary
@@ -323,7 +312,8 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 	 * @return
 	 *****************************************************************/
 	private FileScope createFileScope(SourceFile src_file, LoadModuleScope lm_s, String unique_file_id) {
-		FileScope file_s =  new FileScope( this.root_ft, src_file, generateNodeIndex() );
+		int fileID = src_file.getFileID();
+		FileScope file_s =  new FileScope( this.root_ft, src_file, fileID );
 		//------------------------------------------------------------------------------
 		// if load module is undefined, then we attach the file scope to the root scope
 		//------------------------------------------------------------------------------
@@ -410,28 +400,17 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 	 * @return
 	 ***********************************************************/
 	private String getID( Scope scope ) {
-		var hash_id = new StringBuilder();
-		
+		final String id = String.valueOf(scope.getFlatIndex());
 		final String class_type = scope.getClass().getSimpleName();
+		StringBuffer hash_id = new StringBuffer(id);
 		if (class_type != null) {
 			hash_id.insert(0, class_type.substring(0, 2));
 		}
 		if (scope instanceof CallSiteScope)
 		{
-			hash_id.append(SEPARATOR_ID);
-			hash_id.append(scope.getFlatIndex());
-
-			CallSiteScope cs = (CallSiteScope) scope;
-			LineScope ls = cs.getLineScope();
-
-			hash_id.append(SEPARATOR_ID);
-			hash_id.append(ls.getSourceFile().getFileID());
+			ProcedureScope proc_scope = ((CallSiteScope)scope).getProcedureScope();
 			
-			hash_id.append(SEPARATOR_ID);
-			hash_id.append(ls.getLineNumber());
-
 			// forcing to include procedure ID to ensure uniqueness of call site
-			final ProcedureScope proc_scope = cs.getProcedureScope();
 			final int proc_id = proc_scope.getFlatIndex();
 			hash_id.append(SEPARATOR_ID);
 			hash_id.append(proc_id);
@@ -452,20 +431,6 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 			}
 		} else if (scope instanceof ProcedureScope) 
 		{
-			hash_id.append(SEPARATOR_ID);
-			hash_id.append(scope.getFlatIndex());
-
-			if (scope instanceof ProcedureCallScope) {
-				// it's a procedure but a call at the same time
-				// get the caller id:
-				Scope parent = scope.getParentScope();
-				hash_id.append(SEPARATOR_ID);
-				hash_id.append(parent.getFlatIndex());
-				
-				// additional signature for prof2's call procedure.
-				hash_id.append(SEPARATOR_ID);
-				hash_id.append("pc");
-			}
 			ProcedureScope proc_scope = (ProcedureScope) scope;
 			if (proc_scope.isFalseProcedure()) {
 				int linenum = proc_scope.getFirstLineNumber();
@@ -477,13 +442,6 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 				hash_id.append(SEPARATOR_ID);
 				hash_id.append(linenum);
 			}
-		} else if (scope instanceof InstructionScope) {
-			InstructionScope is = (InstructionScope) scope;
-			hash_id.append(SEPARATOR_ID);
-			hash_id.append(is.getName());
-		} else if (scope instanceof LoopScope) {
-			hash_id.append(SEPARATOR_ID);
-			hash_id.append(scope.getName());
 		} else if (scope instanceof LineScope) {
 			// fix issue #223 (incorrect cost attribution for line scopes)
 			// reconstruct the procedure and file scope:
