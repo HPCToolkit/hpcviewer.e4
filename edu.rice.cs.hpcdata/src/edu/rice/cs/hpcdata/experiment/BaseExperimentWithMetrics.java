@@ -22,7 +22,6 @@ import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.Metric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricComparator;
-import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;

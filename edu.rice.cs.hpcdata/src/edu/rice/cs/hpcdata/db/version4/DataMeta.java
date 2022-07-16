@@ -16,6 +16,7 @@ import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
 import org.eclipse.collections.impl.map.mutable.primitive.LongObjectHashMap;
 
 import edu.rice.cs.hpcdata.db.IdTupleType;
+import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.ExperimentConfiguration;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
@@ -33,7 +34,7 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.CallingContextReassignment;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.TraceScopeVisitor;
-import edu.rice.cs.hpcdata.experiment.source.SimpleSourceFile;
+import edu.rice.cs.hpcdata.experiment.source.FileSystemSourceFile;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
 import edu.rice.cs.hpcdata.util.Constants;
 
@@ -647,10 +648,9 @@ public class DataMeta extends DataCommon
 			int flags  = buffer.getInt(position);
 			long pPath = buffer.getLong(position + 0x08);
 			
-			boolean available = (flags & 0x1) == 0x1;
 			String  name = stringArea.toString(pPath);
 			
-			SourceFile sf = new SimpleSourceFile(baseId+i, new File(name), available);
+			SourceFile sf = new FileSystemSourceFile((BaseExperiment) experiment, new File(name), baseId+i);
 			long key = pFiles + delta;
 			mapSourceFile.put(key, sf);
 		}
