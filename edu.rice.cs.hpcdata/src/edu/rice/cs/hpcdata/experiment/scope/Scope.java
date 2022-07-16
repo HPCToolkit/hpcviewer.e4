@@ -106,8 +106,6 @@ implements IMetricScope
 	
 	private final List<Scope> listScopeReduce;
 
-	public int iSourceCodeAvailability = Scope.SOURCE_CODE_UNKNOWN;
-
 	protected ITreeNode<Scope> node;
 
 
