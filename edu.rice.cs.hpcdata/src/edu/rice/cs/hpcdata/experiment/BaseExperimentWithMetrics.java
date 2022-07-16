@@ -97,16 +97,31 @@ implements IMetricManager, ListEventListener<BaseMetric>
 
 	
 	@Override
-	public MetricRaw getCorrespondentMetricRaw(BaseMetric metric) {
+	public BaseMetric getCorrespondentMetricRaw(BaseMetric metric) {
+		// for sparse database (meta.db), the metrics are hierarchical metrics.
+		// Since they don't separate between normal metrics and metric-db,
+		// it is safe to return their own normal metric as the raw metric.
+		//
+		if (metric instanceof HierarchicalMetric)
+			return metric;
+		
+		// for old database that separate between metric-db and normal metrics,
+		// we don't have the connection between them. The only way to know
+		// a raw metric from a normal one is by looking at the label.
+		// If they share the same basic name, it should be the same metric.
+		// For instance:
+		// in normal metric: "cycles:Sum (I)"
+		// in metric-db:     "cycles (I)"
+		//
 		var rawMetrics = getRawMetrics();
-		MetricRaw correspondentRawMetric = null;
+		BaseMetric correspondentRawMetric = null;
 
 		var metricName = metric.getDisplayName();
 		var metricBaseName = metricName.replace(":Sum", "");
 		
 		for(var rm: rawMetrics) {
 			if (rm.getDisplayName().equals(metricBaseName)) {
-				correspondentRawMetric = (MetricRaw) rm;
+				correspondentRawMetric = rm;
 				break;
 			}
 		}
