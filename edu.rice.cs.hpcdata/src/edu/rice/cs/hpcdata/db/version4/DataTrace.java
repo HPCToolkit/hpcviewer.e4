@@ -64,6 +64,12 @@ public class DataTrace extends DataCommon
 		return header.equals(HEADER);
 	}
 
+
+	@Override
+	protected boolean isFileFooterCorrect(String header) {
+		return header.equals("trace.db");
+	}
+
 	@Override
 	/*
 	 * (non-Javadoc)

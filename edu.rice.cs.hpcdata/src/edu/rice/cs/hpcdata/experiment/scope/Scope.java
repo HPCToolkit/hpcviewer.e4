@@ -361,12 +361,11 @@ implements IMetricScope
 	}
 
 
-
-
-	/*************************************************************************
-	 *	Returns a display string describing the scope's line number range.
-	 ************************************************************************/
-
+	/***
+	 * Returns a display string describing the scope's line number range.
+	 * 
+	 * @return {@code String}
+	 */
 	protected String getLineNumberCitation()
 	{
 		return this.getLineNumberCitation(firstLineNumber, lastLineNumber);
@@ -711,8 +710,12 @@ implements IMetricScope
 	 * </pre>
 	 * where reduce is usually subtraction for most cases. 
 	 * 
-	 * @param scope the source of the reduction 
-	 * @param filter the metric filter 
+	 * @param scope 
+	 * 			the source of the reduction 
+	 * @param type 
+	 * 			the metric type to filter (inclusive, exclusive or point-exclusive) 
+	 * 
+	 * @see MetricType
 	 ***************************************************************************/
 	public void reduce(Scope scope, MetricType type) {
 		var experiment = root.getExperiment();
@@ -878,15 +881,17 @@ implements IMetricScope
 		accept(sv, ScopeVisitType.PostVisit);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see edu.rice.cs.hpc.data.experiment.scope.TreeNode#dispose()
+
+	/***
+	 * Free all allocated object variables so that
+	 * JVM can free the resources.
 	 */
 	public void dispose()
 	{
 		root 		= null;
 		metrics 	= null;
 		sourceFile  = null;
+		node        = null;
 	}
 
 

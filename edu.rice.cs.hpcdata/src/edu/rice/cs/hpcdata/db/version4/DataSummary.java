@@ -358,6 +358,12 @@ public class DataSummary extends DataCommon
 		return header.equals(HEADER_MAGIC_STR);
 	}
 
+
+	@Override
+	protected boolean isFileFooterCorrect(String header) {
+		return header.equals("_prof.db");
+	}
+
 	@Override
 	protected boolean readNextHeader(FileChannel input, DataSection []sections) 
 			throws IOException

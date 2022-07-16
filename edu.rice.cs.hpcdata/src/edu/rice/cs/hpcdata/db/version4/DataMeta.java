@@ -165,6 +165,12 @@ public class DataMeta extends DataCommon
 		return HEADER_MAGIC_STR.equals(header);
 	}
 
+
+	@Override
+	protected boolean isFileFooterCorrect(String header) {
+		return header.equals("_meta.db");
+	}
+
 	@Override
 	protected boolean readNextHeader(FileChannel input, DataSection[] sections) throws IOException {
 		parseHeaderMetaData(input, sections);
@@ -176,6 +182,7 @@ public class DataMeta extends DataCommon
 		return 8;
 	}
 
+	
 		
 	/***
 	 * Get the load module for a specified id

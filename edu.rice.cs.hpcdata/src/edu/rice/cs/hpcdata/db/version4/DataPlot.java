@@ -56,6 +56,12 @@ public class DataPlot extends DataCommon
 		return header.equals(HEADER);
 	}
 
+
+	@Override
+	protected boolean isFileFooterCorrect(String header) {
+		return header.equals("__ctx.db");
+	}
+
 	
 	@Override
 	protected boolean readNextHeader(FileChannel input, DataSection []sections) throws IOException {

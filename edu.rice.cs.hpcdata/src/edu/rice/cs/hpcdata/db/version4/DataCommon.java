@@ -47,6 +47,18 @@ abstract public class DataCommon
 		fis = new FileInputStream(filename);
 		channel  = fis.getChannel();
 		
+		var size = channel.size();
+		
+		ByteBuffer footerBuff = ByteBuffer.allocate(8);
+		int res = channel.read(footerBuff, size - 8);
+		if (res < 8)
+			throw new IOException(file);
+		
+
+		String footer = new String(footerBuff.array());
+		if (!isFileFooterCorrect(footer))
+			throw new IOException(file + ": File footer is invalid\n" + footerBuff.toString());
+		
 		ByteBuffer buffer = ByteBuffer.allocate(HEADER_COMMON_SIZE);
 		int numBytes      = channel.read(buffer);
 		if (numBytes > 0) 
@@ -147,5 +159,6 @@ abstract public class DataCommon
 	
 	protected abstract int getNumSections();
 	protected abstract boolean isFileHeaderCorrect(String header);
+	protected abstract boolean isFileFooterCorrect(String header);
 	protected abstract boolean readNextHeader(FileChannel input, DataSection []sections) throws IOException;
 }
