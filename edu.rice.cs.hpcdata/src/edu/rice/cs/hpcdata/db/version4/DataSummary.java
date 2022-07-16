@@ -451,7 +451,7 @@ public class DataSummary extends DataCommon
 		//
 		// Then perhaps it's better to keep the original "NODE 0 THREAD 1" instead of
 		// removing redundancy (which means removing all the id tuples).
-		if (tempIdTupleList.size() == mapLevelToSkip.size()) {
+		if (numLevels == mapLevelToSkip.size()) {
 			listIdTuple = tempIdTupleList;
 			return;
 		}
