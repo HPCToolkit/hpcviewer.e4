@@ -1,5 +1,6 @@
 package edu.rice.cs.hpcdata.experiment.scope.visitors;
 
+import java.util.Iterator;
 import java.util.List;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
@@ -177,10 +178,14 @@ public class FilterScopeVisitor implements IScopeVisitor
 					//-------------------------------------------------------------------
 					// Filtering only the children, not the scope itself.
 					// remove all the children
+					// We need to remove the child using the iterator's remove method
+					// to avoid ConcurrentModificationException 
 					//-------------------------------------------------------------------
-					for (Object child: scope.getChildren())
+					var iterator = scope.getChildren().iterator();
+					while (iterator.hasNext())
 					{
-						removeNode((Scope) child, filterAttribute.filterType);
+						var child = iterator.next();
+						removeNode(iterator, (Scope) child, filterAttribute.filterType);
 					}
 				} else
 				{
@@ -197,7 +202,7 @@ public class FilterScopeVisitor implements IScopeVisitor
 							mergeMetrics(parent, scope, need_to_continue);
 						}
 					}
-					removeChild(scope, vt, filterAttribute.filterType);
+					removeChild(null, scope, vt, filterAttribute.filterType);
 				}
 			} else 
 			{
@@ -223,13 +228,19 @@ public class FilterScopeVisitor implements IScopeVisitor
 	 * Remove a child from its parent. if the filter type is SELF, we'll attach the grandchildren
 	 * to the parent
 	 * 
-	 * @param childToRemove : scope to remove
-	 * @param filterType : filter type
+	 * @param iterator
+	 * 			The current iterator to remove the child. If the iterator is null, we remove it from the parent.
+	 * @param childToRemove 
+	 * 			scope to remove
+	 * @param filterType 
+	 * 			filter type
+	 * 
+	 * @see FilterAttribute.Type
 	 */
-	private void removeChild(Scope childToRemove, ScopeVisitType vt, FilterAttribute.Type filterType)
+	private void removeChild(Iterator<Scope> iterator, Scope childToRemove, ScopeVisitType vt, FilterAttribute.Type filterType)
 	{
 		// skip to current scope
-		Scope parent = removeNode(childToRemove, filterType);
+		Scope parent = removeNode(iterator, childToRemove, filterType);
 		
 		// remove its children and glue it the parent
 		if (filterType == FilterAttribute.Type.Self_Only)
@@ -238,11 +249,28 @@ public class FilterScopeVisitor implements IScopeVisitor
 		}
 	}
 	
-	
-	private Scope removeNode(Scope child, FilterAttribute.Type filterType) {
+
+	/****
+	 * Remove a child node from the parent, and propagate the trace ID to the parent
+	 * 
+	 * @param iterator
+	 * 			The current iterator to remove the child. If the iterator is null, we remove it from the parent.
+	 * @param child
+	 * 			The child node to be removed
+	 * @param filterType
+	 * 			The type of the filter
+	 * @return Scope
+	 * 			The parent node
+	 * 
+	 * @see FilterAttribute.Type
+	 */
+	private Scope removeNode(Iterator<Scope> iterator, Scope child, FilterAttribute.Type filterType) {
 		// 1. remove the child node
 		Scope parent = child.getParentScope();
-		parent.remove(child);
+		if (iterator == null)
+			parent.remove(child);
+		else
+			iterator.remove();
 
 		// 2. move the trace call-path id (if exist) to the parent
 		propagateTraceID(parent, child, filterType);
