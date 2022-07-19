@@ -678,6 +678,10 @@ public class DataMeta extends DataCommon
 		var buffer = channel.map(MapMode.READ_ONLY, section.offset, section.size);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		
+		// 00: 	FS[nFunctions]* 	pFunctions 	4.0 	Functions used in this database
+		// 08: 	u32 	nFunctions 				4.0 	Number of functions listed in this section
+		// 0c: 	u16 	szFunction 				4.0 	Size of a Function Specification, currently 40
+		
 		long pFunctions = buffer.getLong();
 		int  nFunctions = buffer.getInt(0x08);
 		short szFunctions = buffer.getShort(0x0c);
@@ -687,11 +691,21 @@ public class DataMeta extends DataCommon
 
 		final int baseId = Constants.FLAT_ID_BEGIN + mapLoadModules.size() + mapFileSources.size() + 1;
 
+		// parse the content of the function
+		//
+		// 00: 	char* 	pName 	4.0 	Human-readable name of the function, or 0
+		// 08: 	LMS* 	pModule 4.0 	Load module containing this function, or 0
+		// 10: 	u64 	offset 	4.0 	Offset within *pModule of this function's entry point
+		// 18: 	SFS* 	pFile 	4.0 	Source file of the function's definition, or 0
+		// 20: 	u32 	line 	4.0 	Source line in *pFile of the function's definition
+		// 24: 	u32 	flags 	4.0 	Reserved for future use
+		
 		for(int i=0; i<nFunctions; i++) {
 			int position = (int) (basePosition + (i * szFunctions));
+			
 			long pName   = buffer.getLong(position);
 			long pModule = buffer.getLong(position + 0x08);
-			buffer.getLong(position + 0x10);
+			// not used at the moment: buffer.getLong(position + 0x10);
 			long pFile   = buffer.getLong(position + 0x18);
 			int  line    = buffer.getInt( position + 0x20) - 1;
 			

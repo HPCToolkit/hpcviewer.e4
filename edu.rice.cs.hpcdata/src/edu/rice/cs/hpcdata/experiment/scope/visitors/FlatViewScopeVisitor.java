@@ -73,13 +73,13 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 	public void visit(GroupScope scope, ScopeVisitType vt) 			{ }
 
 	public void visit(CallSiteScope scope, ScopeVisitType vt) 		{ 
-		add(scope,vt, true, false); 
+		add(scope,vt, true, !scope.hasChildren()); 
 	}
 	public void visit(LineScope scope, ScopeVisitType vt) 			{ 
 		add(scope,vt, true, true); 
 	}
 	public void visit(LoopScope scope, ScopeVisitType vt) 			{
-		add(scope,vt, true, false); 
+		add(scope,vt, true, !scope.hasChildren()); 
 	}
 	public void visit(ProcedureScope scope, ScopeVisitType vt) 		{		
 		if (scope.isTopDownProcedure())
@@ -286,21 +286,17 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 		// ATTENTION: it is possible that a file can be included into more than one load module
 		//-----------------------------------------------------------------------------
 		if ( (flat_file == null) ){
-			flat_file = createFileScope(src_file, flat_lm, unique_file_id);
-			
-		} else {
-			
-			Scope parent_lm = flat_file.getParentScope();
-			if (parent_lm instanceof LoadModuleScope) {
-				LoadModuleScope flat_parent_lm = (LoadModuleScope) parent_lm;
-
-				// check if the load module the existing file is the same with the scope's load module
-				if (flat_parent_lm.getFlatIndex() != flat_lm.getFlatIndex() ) {
-					// the same file in different load module scope !!!
-					flat_file = createFileScope(src_file, flat_lm, unique_file_id);
-				}
-			}
+			return getNewFileScope(src_file, flat_lm, unique_file_id);			
 		}
+		
+		Scope parent_lm = flat_file.getParentScope();
+
+		// check if the load module the existing file is the same with the scope's load module
+		if (parent_lm.getFlatIndex() != flat_lm.getFlatIndex() ) {
+			// the same file in different load module scope !!!
+			flat_file = getNewFileScope(src_file, flat_lm, unique_file_id);
+		}
+
 		return flat_file;
 	}
 	
@@ -308,12 +304,15 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 	/*****************************************************************
 	 * Create a new file scope (this procedure will NOT check if the file already exists or not) !
 	 * @param src_file
+	 * 			source file object
 	 * @param lm_s
-	 * @return
+	 * 			the parent load module
+	 * 
+	 * @return a new file scope 
 	 *****************************************************************/
-	private FileScope createFileScope(SourceFile src_file, LoadModuleScope lm_s, String unique_file_id) {
-		int fileID = src_file.getFileID();
-		FileScope file_s =  new FileScope( this.root_ft, src_file, fileID );
+	private FileScope getNewFileScope(SourceFile src_file, LoadModuleScope lm_s, String unique_file_id) {
+
+		FileScope file_s =  new FileScope( this.root_ft, src_file, unique_file_id.hashCode() );
 		//------------------------------------------------------------------------------
 		// if load module is undefined, then we attach the file scope to the root scope
 		//------------------------------------------------------------------------------
@@ -390,19 +389,25 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 	
 	/***********************************************************
 	 * Retrieve the ID given a scope
-	 * a flat ID is the name of the class class concatenated by the flat ID
+	 * <p>
+	 * A flat ID is the name of the class class concatenated by the scope's struct ID
 	 * 	(This is to force to have different ID for different classes
 	 *   since hpcprof may generate the same ID for different type of scopes)
-	 * for call site, we need to add the flat ID of the called procedure
+	 *   </p>
+	 * for a call site, we need to add the flat ID of the called procedure
 	 *  (this is to ensure a flat's call site has different ID.
 	 *   however, it doesn't solve if the called procedures have the same ID)
 	 * @param scope
 	 * @return
 	 ***********************************************************/
 	private String getID( Scope scope ) {
-		final String id = String.valueOf(scope.getFlatIndex());
+		if (scope == null)
+			return String.valueOf(SEPARATOR_ID);
+		
+		var hash_id = new StringBuilder();
+		hash_id.append(scope.getFlatIndex());
+
 		final String class_type = scope.getClass().getSimpleName();
-		StringBuffer hash_id = new StringBuffer(id);
 		if (class_type != null) {
 			hash_id.insert(0, class_type.substring(0, 2));
 		}
@@ -426,6 +431,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 			if (proc_scope.isAlien()) {
 				var parent = scope.getParentScope();
 				if (parent != null) {
+					hash_id.append(SEPARATOR_ID);
 					hash_id.append(getID(parent));
 				}
 			}
@@ -441,6 +447,10 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 				
 				hash_id.append(SEPARATOR_ID);
 				hash_id.append(linenum);
+			}
+			if (proc_scope.isAlien()) {
+				hash_id.append(SEPARATOR_ID);
+				hash_id.append(getID(scope.getParentScope()));
 			}
 		} else if (scope instanceof LineScope) {
 			// fix issue #223 (incorrect cost attribution for line scopes)
@@ -595,7 +605,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 		if (add_exclusive) {
 			if (flat_s instanceof CallSiteScope && cct_s instanceof CallSiteScope) {
 				CallSiteScope cs_scope = (CallSiteScope) cct_s;
-				flat_s.combine(cs_scope.getLineScope(), exclusive_filter);
+				flat_s.combine(cs_scope, exclusive_filter);
 			} else {
 				flat_s.combine(cct_s, exclusive_filter);
 			}
