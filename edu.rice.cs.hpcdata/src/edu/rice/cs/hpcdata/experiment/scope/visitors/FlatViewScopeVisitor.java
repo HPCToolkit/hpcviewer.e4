@@ -73,7 +73,27 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 	public void visit(GroupScope scope, ScopeVisitType vt) 			{ }
 
 	public void visit(CallSiteScope scope, ScopeVisitType vt) 		{ 
-		add(scope,vt, true, !scope.hasChildren()); 
+		// by default we don't add exclusive cost of the call site
+		//	to the file and load module scope.
+		// This is because we will add the exclusive cost of the line scope
+		//  and we don't want to compute the double cost.
+		//
+		// However, for meta.db this may not be the case since a call site
+		// 	can be a leaf, and it may have no children.
+		//  in this case, we can add its exclusive cost to the file or lm.
+		// 
+		// Corner case: a call site that has another call site, its exclusive
+		//	cost can be added to the file and load module scope.
+		// This is allowed only if it has no line scope
+		
+		boolean add_exclusive = !scope.hasChildren();
+		if (scope.hasChildren()) {
+			add_exclusive = !scope.getChildren().
+								  stream().
+								  anyMatch(child -> !(child instanceof CallSiteScope));
+		}
+		
+		add(scope,vt, true, add_exclusive); 
 	}
 	public void visit(LineScope scope, ScopeVisitType vt) 			{ 
 		add(scope,vt, true, true); 
