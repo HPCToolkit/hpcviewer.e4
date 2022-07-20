@@ -138,15 +138,8 @@ public class DataMeta extends DataCommon
 		// if a line scope has a call site, move it to be the sibling
 		CallingContextReassignment ccr = new CallingContextReassignment();
 		rootCCT.dfsVisitScopeTree(ccr);
-		
-		// needs to gather info about cct id and its depth
-		// this is needed for traces
-		TraceScopeVisitor visitor = new TraceScopeVisitor();
-		rootCCT.dfsVisitScopeTree(visitor);
-		
+
 		exp.setRootScope(root);
-		exp.setMaxDepth(visitor.getMaxDepth());
-		exp.setScopeMap(visitor.getCallPath());
 		exp.setVersion(versionMajor + "." + versionMinor);
 		
 		stringArea.dispose();

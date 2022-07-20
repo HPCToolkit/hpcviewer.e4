@@ -7,7 +7,10 @@ import edu.rice.cs.hpcdata.db.IFileDB;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.db.version2.FileDB2;
+import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
+import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
+import edu.rice.cs.hpcdata.experiment.scope.visitors.TraceScopeVisitor;
 
 
 /********************************************************************
@@ -52,8 +55,18 @@ public class FileDB4 implements IFileDB
 	public void open(String directory, int headerSize, int recordSize)
 			throws IOException 
 	{
-		dataTrace.open(directory);
+		dataTrace.open(directory);		
 		
+		var rootCCT = ((BaseExperiment)experiment).getRootScope(RootScopeType.CallingContextTree);
+		
+		// needs to gather info about cct id and its depth
+		// this is needed for traces
+		TraceScopeVisitor visitor = new TraceScopeVisitor();
+		rootCCT.dfsVisitScopeTree(visitor);
+		
+		experiment.setMaxDepth(visitor.getMaxDepth());
+		experiment.setScopeMap(visitor.getCallPath());
+
 		var attributes = experiment.getTraceAttribute();
 		
 		attributes.dbTimeMin = dataTrace.getMinTime();
