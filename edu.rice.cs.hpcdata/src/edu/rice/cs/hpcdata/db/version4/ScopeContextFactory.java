@@ -12,7 +12,6 @@ import edu.rice.cs.hpcdata.experiment.scope.InstructionScope;
 import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoadModuleScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoopScope;
-import edu.rice.cs.hpcdata.experiment.scope.ProcedureCallScope;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -292,17 +291,42 @@ public class ScopeContextFactory
 			ls = (LineScope)parent;
 		} else {
 			if (ps.isTopDownProcedure()) {
-				return new ProcedureCallScope(rootCCT, ps.getLoadModule(), ps.getSourceFile(), line, ps.getName(), alien, ctxId, ps.getFlatIndex(), null, ProcedureScope.FeatureTopDown);				
+				// this is very unlikely: meta.db has no top-down flag
+				// TODO: should we throw an exception?
 			}
 			ls = new LineScope(rootCCT, ps.getSourceFile(), line, ctxId, flatId);
 		}
 
+		// Case for nested functions?
+		// need to find an example from the database
 		if (relation == FMT_METADB_RELATION_LEXICAL_NEST)
-			return new ProcedureScope(rootCCT, ps.getLoadModule(), ps.getSourceFile(), line, line, ps.getName(), alien, ctxId, ps.getFlatIndex(), null, ProcedureScope.FeatureProcedure);				
+			return new ProcedureScope(rootCCT, 
+									  ps.getLoadModule(), 
+									  ps.getSourceFile(), 
+									  line, 
+									  line, 
+									  ps.getName(), 
+									  alien, 
+									  ctxId, 
+									  ps.getFlatIndex(), 
+									  null, 
+									  ProcedureScope.FeatureProcedure);				
 
 		ProcedureScope procScope = ps;
 		if (alien) {
-			procScope = new ProcedureScope(ps.getRootScope(), ps.getLoadModule(), ps.getSourceFile(), ps.getFirstLineNumber(), ps.getLastLineNumber(), ps.getName(), true, ctxId, ps.getFlatIndex(), null, ProcedureScope.FeatureProcedure);
+			// TODO: a quick fix to flag inlined procedure
+			// without duplicating here, there is no [i] notation in the top-down view.
+			procScope = new ProcedureScope(rootCCT, 
+										   ps.getLoadModule(), 
+										   ps.getSourceFile(), 
+										   ps.getFirstLineNumber(), 
+										   ps.getLastLineNumber(), 
+										   ps.getName(), 
+										   true, 
+										   ctxId, 
+										   ps.getFlatIndex(), 
+										   null, 
+										   ProcedureScope.FeatureProcedure);
 		}
 		ps.setAlien(alien);
 		var cs = new CallSiteScope(ls, procScope, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, flatId);
@@ -332,5 +356,4 @@ public class ScopeContextFactory
 
 		return scope;
 	}
-
 }
