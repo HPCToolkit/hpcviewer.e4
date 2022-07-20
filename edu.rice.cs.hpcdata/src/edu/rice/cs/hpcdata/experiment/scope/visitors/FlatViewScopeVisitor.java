@@ -10,7 +10,6 @@ import edu.rice.cs.hpcdata.experiment.scope.GroupScope;
 import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoadModuleScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoopScope;
-import edu.rice.cs.hpcdata.experiment.scope.ProcedureCallScope;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -237,8 +236,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 			//-----------------------------------------------------------------------------
 			// Attach the scope to the file if it is a procedure
 			//-----------------------------------------------------------------------------
-			if (flat_info_s.flat_s instanceof ProcedureScope && 
-				!(flat_info_s.flat_s instanceof ProcedureCallScope)) {
+			if (flat_info_s.flat_s instanceof ProcedureScope) {
 				this.addToTree(flat_info_s.flat_file, flat_info_s.flat_s);
 			}
 		}
