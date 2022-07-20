@@ -89,7 +89,11 @@ public class TraceScopeVisitor implements IScopeVisitor
 	@Override
 	public void visit(CallSiteScope scope, ScopeVisitType vt) { 
 		update(scope, vt);
-		update(scope.getLineScope(), vt);
+
+		// Corner case: the cct-id of the line scope differs than the call site
+		var lineScope = scope.getLineScope();
+		if (scope.getCCTIndex() != lineScope.getCCTIndex())
+			update(scope.getLineScope(), vt);
 	}
 
 	@Override
