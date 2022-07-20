@@ -30,11 +30,14 @@ public class ScopeContextFactory
 	 * Specifically, no call occurred
 	 */
 	private static final int FMT_METADB_RELATION_LEXICAL_NEST = 0;
+	
 	/**
 	 * This context's parent used a typical function call to reach this context. 
 	 * The parent context is the source-level location of the call.
 	 */
+	@SuppressWarnings("unused")
 	private static final int FMT_METADB_RELATION_CALL 		  = 1;
+	
 	/**
 	 * This context's parent used an inlined function call (ie. the call was inlined by the compiler). 
 	 * The parent context is the source-level location of the original call.
@@ -297,8 +300,12 @@ public class ScopeContextFactory
 		if (relation == FMT_METADB_RELATION_LEXICAL_NEST)
 			return new ProcedureScope(rootCCT, ps.getLoadModule(), ps.getSourceFile(), line, line, ps.getName(), alien, ctxId, ps.getFlatIndex(), null, ProcedureScope.FeatureProcedure);				
 
+		ProcedureScope procScope = ps;
+		if (alien) {
+			procScope = new ProcedureScope(ps.getRootScope(), ps.getLoadModule(), ps.getSourceFile(), ps.getFirstLineNumber(), ps.getLastLineNumber(), ps.getName(), true, ctxId, ps.getFlatIndex(), null, ProcedureScope.FeatureProcedure);
+		}
 		ps.setAlien(alien);
-		var cs = new CallSiteScope(ls, ps, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, flatId);
+		var cs = new CallSiteScope(ls, procScope, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, flatId);
 		
 		// Only the line statement knows where the source file is
 		// If the line statement is unknown then the source file is unknown.
