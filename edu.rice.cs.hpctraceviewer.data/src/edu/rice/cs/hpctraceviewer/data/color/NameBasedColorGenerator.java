@@ -11,6 +11,7 @@ import org.eclipse.swt.graphics.RGB;
  ****************************************/
 public class NameBasedColorGenerator implements IColorGenerator 
 {
+	private static final int MAX_COLOR = 235;
 
 	@Override
 	public RGB createColor(String procedureName) {
@@ -19,7 +20,7 @@ public class NameBasedColorGenerator implements IColorGenerator
 		// Maven by default will download 1.13, while Eclipse downloads
 		// 1.15 version :-(
 		
-		int hash = MurmurHash3.hash32(procedureName.getBytes());
+		int hash = MurmurHash3.hash32x86(procedureName.getBytes());
 		//int hash = procedureName.hashCode();
 		
 		// convert the lower 24 bits to color
@@ -29,9 +30,9 @@ public class NameBasedColorGenerator implements IColorGenerator
 		int overflow2 = (hash >> 26) & 0x7;
 		int overflow3 = (hash >> 24) & 0x3;
 		
-		int red  = (hash >> 16) & 0xFF | overflow1;
-		int green = (hash >> 8) & 0xFF | overflow2;
-		int blue  = hash & 0xFF        | overflow3; 
+		int red   = Math.min((hash >> 16) & 0xFF | overflow1, MAX_COLOR);
+		int green = Math.min((hash >> 8) & 0xFF  | overflow2, MAX_COLOR);
+		int blue  = Math.min( hash & 0xFF        | overflow3, MAX_COLOR); 
 		
 		RGB rgb = new RGB(red, green, blue);
 		return rgb;
