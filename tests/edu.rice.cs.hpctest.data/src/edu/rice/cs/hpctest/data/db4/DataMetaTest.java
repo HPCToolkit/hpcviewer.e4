@@ -57,7 +57,6 @@ public class DataMetaTest
 			assertNotNull(experiment);
 			
 			assertTrue(experiment.getName().length()>1);
-			assertTrue(experiment.getMaxDepth() > MAX_DEPTH);
 			assertTrue(experiment.getMajorVersion() == 4);
 		}
 	}
@@ -161,11 +160,7 @@ public class DataMetaTest
 	@Test
 	public void testDepth() {
 		for(DataMeta data: dataMeta) {
-			var exp   = data.getExperiment();
-			var depth = exp.getMaxDepth();
-	
-			assertTrue(depth > MAX_DEPTH);
-			
+			var exp  = data.getExperiment();			
 			var root = ((Experiment)exp).getRootScope(RootScopeType.CallingContextTree);
 			Scope s = root.getSubscope(0).getSubscope(0);
 			if (s!= null && s.getParentScope() != null) {

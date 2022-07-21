@@ -196,6 +196,9 @@ public abstract class BaseExperiment implements IExperiment
 	public RootScope getRootScope(RootScopeType type)
 	{
 		RootScope root = (RootScope) getRootScope();
+		if (root == null)
+			return null;
+		
 		for (int i=0; i<root.getSubscopeCount(); i++)
 		{
 			if (((RootScope)root.getSubscope(i)).getType() == type)

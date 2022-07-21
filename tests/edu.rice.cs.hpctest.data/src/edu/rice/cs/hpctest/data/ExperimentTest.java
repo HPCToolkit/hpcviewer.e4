@@ -14,6 +14,7 @@ import java.util.List;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
@@ -23,6 +24,7 @@ import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.experiment.scope.visitors.TraceScopeVisitor;
 import edu.rice.cs.hpctest.util.TestDatabase;
 
 
@@ -51,8 +53,25 @@ public class ExperimentTest {
 			}
 			
 			assertNotNull(experiments[i].getRootScope());
+			
+			var experiment = experiments[i];
+			var rootCCT = ((BaseExperiment)experiment).getRootScope(RootScopeType.CallingContextTree);
+			
+			// needs to gather info about cct id and its depth
+			// this is needed for traces
+			TraceScopeVisitor visitor = new TraceScopeVisitor();
+			rootCCT.dfsVisitScopeTree(visitor);
+			
+			experiment.setMaxDepth(visitor.getMaxDepth());
+			experiment.setScopeMap(visitor.getCallPath());
+
+			var attributes = experiment.getTraceAttribute();
+			attributes.maxDepth  = experiment.getMaxDepth();
+			
+			experiment.setTraceAttribute(attributes);
+
 			i++;
-		}
+		}		
 	}
 
 
