@@ -86,6 +86,7 @@ public class DataMeta extends DataCommon
 	private DataSummary dataSummary;
 	private IExperiment experiment;
 
+	private String directory;
 	
 	public DataMeta() {
 		super();
@@ -114,6 +115,7 @@ public class DataMeta extends DataCommon
 	 */
 	public void open(IExperiment experiment, String directory) throws IOException {
 		this.experiment = experiment;
+		this.directory  = directory;
 
 		var root = new RootScope(experiment, directory, RootScopeType.Invisible, -1, -1);
 		rootCCT  = new RootScope(experiment, RootScope.DEFAULT_SCOPE_NAME, RootScopeType.CallingContextTree);
@@ -279,7 +281,7 @@ public class DataMeta extends DataCommon
 		
 		// needs to manage the profile.db here since we need it
 		// to access the metric value
-		dataSummary.open(experiment.getDirectory());
+		dataSummary.open(directory);
 	}
 	
 	
