@@ -21,6 +21,11 @@ import edu.rice.cs.hpcdata.util.Constants;
 
 public class ScopeContextFactory 
 {
+	/**
+	 * Default separator between key component
+	 */
+	final String SEPARATOR = ":";
+	
 	// --------------------------------------------------------------------
 	// Constants for Parent-child relation: 
 	// --------------------------------------------------------------------
@@ -223,39 +228,80 @@ public class ScopeContextFactory
 					   int lexicalType, 
 					   int relation) {
 		
-		final String SEPARATOR = ":";
-		
 		StringBuilder sb = new StringBuilder();
 		
-		if (relation == FMT_METADB_RELATION_LEXICAL_NEST ||
-			relation == FMT_METADB_RELATION_CALL_INLINED) {
-			sb.append(parent.getFlatIndex());
-			sb.append(SEPARATOR);
-		}
-		sb.append('l' + lexicalType);
+		sb.append("L" + lexicalType);
 		sb.append(SEPARATOR);
 		
+		// --------------------------------------------------------
+		// reconstruct the normal structure of load-module and file source
+		// the "normal" key should be:
+		// 		<load_module, file_source, line_number>
+		//
+		// this should be sufficient in normal cases, but not all cases.
+		// --------------------------------------------------------
 		sb.append(lms.getFlatIndex());
 		sb.append(SEPARATOR);
 					
 		sb.append(sf.getFileID());
-		sb.append(SEPARATOR);
+		sb.append(SEPARATOR);		
 		
-		if (ps != ProcedureScope.NONE) {
-			sb.append(ps.getFlatIndex());
-			sb.append(SEPARATOR);
-		}
-		
+		// warning: line number can be unknown if debug information
+		// doesn't exist
 		sb.append(line);
 		
-		int hash = sb.toString().hashCode();
-		int key = baseId + hash;
+		// --------------------------------------------------------
+		// sometimes, the line number information doesn't exist.
+		// in this case we can't trust just "normal" structure,
+		// but we need to include the procedure as well.
+		// Now, the key would be:
+		// 		<load_module, file_source, procedure, line_number>
+		// --------------------------------------------------------
 		
-		if (mapHashToFlatID.contains(key))
-			return mapHashToFlatID.get(key);
+		if (ps != ProcedureScope.NONE) {
+			sb.append(SEPARATOR);
+			sb.append(ps.getFlatIndex());
+		}
+
+		// --------------------------------------------------------
+		// For inlined nodes: like inline function or nested functions,
+		// they are linked to the parent regardless if they are defined
+		// at the same place.
+		//
+		// For call sites: need to add the line scope of the call as 
+		//   part of the key. We want to differentiate between:
+		//
+		//   13: call to foo
+		//   17: call to foo
+		//
+		// Where function foo is exactly the same for each call.
+		// Without adding the line scope, we'll end up having the same
+		// flat id for each calls.
+		// --------------------------------------------------------
+
+		if (relation == FMT_METADB_RELATION_LEXICAL_NEST ||
+			relation == FMT_METADB_RELATION_CALL_INLINED) {
+			
+			Scope procParent = parent;
+			if (parent instanceof CallSiteScope) 
+				procParent = ((CallSiteScope)parent).getProcedureScope();
+			
+			sb.append(SEPARATOR);
+			sb.append(procParent.getFlatIndex());
+		} else if (relation == FMT_METADB_RELATION_CALL) {
+			if (parent instanceof LineScope) {
+				sb.append(SEPARATOR);
+				sb.append(parent.getFlatIndex());
+			}
+		}
+		
+		int hash = sb.toString().hashCode();
+		
+		if (mapHashToFlatID.containsKey(hash))
+			return mapHashToFlatID.get(hash);
 		
 		flatID++;
-		mapHashToFlatID.put(key, flatID);
+		mapHashToFlatID.put(hash, flatID);
 		
 		return flatID;
 	}

@@ -19,6 +19,7 @@ import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope.ProcedureType;
 import edu.rice.cs.hpcdata.experiment.scope.filters.ExclusiveOnlyMetricPropagationFilter;
 import edu.rice.cs.hpcdata.experiment.scope.filters.InclusiveOnlyMetricPropagationFilter;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
+import edu.rice.cs.hpcdata.util.Constants;
 
 
 /*************************************************************************************************
@@ -31,7 +32,9 @@ import edu.rice.cs.hpcdata.experiment.source.SourceFile;
 
 public class FlatViewScopeVisitor implements IScopeVisitor 
 {
-	final static private char SEPARATOR_ID = ':';
+	private static final String SEPARATOR_ID = ":";
+	
+	private final Experiment exp;
 	
 	private Hashtable<Integer, LoadModuleScope> htFlatLoadModuleScope;
 	private Hashtable<String, FileScope> htFlatFileScope;
@@ -57,6 +60,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 		this.htFlatCostAdded = new HashMap<String, List<Scope>>();
 		
 		this.root_ft = root;
+		this.exp = exp;
 		
 		this.inclusive_filter = new InclusiveOnlyMetricPropagationFilter( exp );
 		this.exclusive_filter = new ExclusiveOnlyMetricPropagationFilter( exp );
@@ -200,7 +204,6 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 			// That's why we shouldn't throw fake procedures here.
 			
 			if (proc_cct_s == null || proc_cct_s.isTopDownProcedure()) {
-
 				return null;
 			}
 			
@@ -420,72 +423,106 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 	 ***********************************************************/
 	private String getID( Scope scope ) {
 		if (scope == null)
-			return String.valueOf(SEPARATOR_ID);
+			return SEPARATOR_ID;
 		
 		var hash_id = new StringBuilder();
-		hash_id.append(scope.getFlatIndex());
 
+		// --------------------------------------------------------
+		// Why do we need to reconstruct the flat id?
+		// Because some versions of databases screw up the flat id, and
+		//  some of them remove redundancies, some allow duplicates
+		//
+		// Steps of the Id reconstruction works as follows:
+		// (1) <class, flat_id> 
+		//     for sparse database, the first step is sufficient since
+		//     the metadb parser (DataMeta class) will assign the flat id
+		//     properly for flat view.
+		// (2) <class, flat_id, load_module, file_source, line_num>
+		// (3) <class, flat_id, load_module, file_source, procedure, line_num>
+		//
+		// if the node is nested (alien = true): include the parent id
+		// (4a) <class, flat_id, load_module, file_source, procedure, line_num, parent_id>
+		//
+		// or, if the parent is inlined (alien = true), include the parent as well
+		// (4b) <class, flat_id, load_module, file_source, procedure, line_num, parent_id>
+		// --------------------------------------------------------
+
+		// ------
+		// step (1) <class, flat_id>
+		// ------
 		final String class_type = scope.getClass().getSimpleName();
 		if (class_type != null) {
 			hash_id.insert(0, class_type.substring(0, 2));
 		}
-		if (scope instanceof CallSiteScope)
-		{
-			ProcedureScope proc_scope = ((CallSiteScope)scope).getProcedureScope();
-			
-			// forcing to include procedure ID to ensure uniqueness of call site
-			final int proc_id = proc_scope.getFlatIndex();
-			hash_id.append(SEPARATOR_ID);
-			hash_id.append(proc_id);
-			
-			// fix issue #200: needs to separate inlined codes from different calls
-			// assume the following example:
-			//  a -> [i] x
-			//  b -> [i] x
-			// we should make sure the id of inlined x is different from the two calls
-			// The reason is that the line scope of both calls are the same (since they are inlined).
-			// so we have to add the flat id of the parent as an id
-			
-			if (proc_scope.isAlien()) {
-				var parent = scope.getParentScope();
-				if (parent != null) {
-					hash_id.append(SEPARATOR_ID);
-					hash_id.append(getID(parent));
-				}
-			}
-		} else if (scope instanceof ProcedureScope) 
-		{
-			ProcedureScope proc_scope = (ProcedureScope) scope;
-			if (proc_scope.isFalseProcedure()) {
-				int linenum = proc_scope.getFirstLineNumber();
-				String file_id = getUniqueFileID(proc_scope.getSourceFile(), proc_scope.getLoadModule());
+		hash_id.append(scope.getFlatIndex());
 
-				hash_id.append(SEPARATOR_ID);
-				hash_id.append(file_id);
-				
-				hash_id.append(SEPARATOR_ID);
-				hash_id.append(linenum);
-			}
-			if (proc_scope.isAlien()) {
-				hash_id.append(SEPARATOR_ID);
-				hash_id.append(getID(scope.getParentScope()));
-			}
-		} else if (scope instanceof LineScope) {
-			// fix issue #223 (incorrect cost attribution for line scopes)
-			// reconstruct the procedure and file scope:
-			//  since the same procedure scopes may have the different flat ids,
-			//  we need to regenerate the id of line scope which now depends 
-			//  on the id of the parent.
-			//  It looks like this only happens with prof2 database
+		// -----
+		// special case: database version 4 (sparse database)
+		// since the parser (DataMeta class) assigns properly the flat id for us,
+		// there is no need to reconstruct a new-id here.
+		// -----
+		if (exp.getMajorVersion() == Constants.EXPERIMENT_SPARSE_VERSION)
+			return hash_id.toString();
+
+		// ------
+		// step (2) <class, flat_id, load_module, file_source, line_num>
+		// ------
+		var source_file = scope.getSourceFile();
+		hash_id.append(SEPARATOR_ID);
+		hash_id.append(source_file.getFileID());
+		
+		var proc_scope = findEnclosingProcedure(scope);
+		hash_id.append(SEPARATOR_ID);
+		hash_id.append(proc_scope.getLoadModule().getFlatIndex());
+
+		// ------
+		// (3) <class, flat_id, load_module, file_source, procedure, line_num>
+		// ------
+		hash_id.append(SEPARATOR_ID);
+		hash_id.append(proc_scope.getFlatIndex());
+
+		hash_id.append(SEPARATOR_ID);
+		hash_id.append(scope.getFirstLineNumber());
+
+		// ------
+		// (4a) <class, flat_id, load_module, file_source, procedure, line_num, parent_id>
+		// ------
+		String inlineID = getInlineID(scope);
+		hash_id.append(inlineID);
+
+		// ------
+		// (4b) <class, flat_id, load_module, file_source, procedure, line_num, parent_id>
+		// ------
+		if (inlineID.isEmpty()) {
 			var parent = scope.getParentScope();
-			var parentId = getID(parent);
-			
-			hash_id.append(SEPARATOR_ID);
-			hash_id.append(parentId);
+			if (parent instanceof ProcedureScope || parent instanceof CallSiteScope) {
+				ProcedureScope proc;
+				if (parent instanceof ProcedureScope)
+					proc = (ProcedureScope) parent;
+				else
+					proc = ((CallSiteScope) parent).getProcedureScope();
+				hash_id.append(SEPARATOR_ID);
+				hash_id.append(getID(proc));
+			}
 		}
+
 		return hash_id.toString();
 	}
 	
+	private String getInlineID(Scope scope) {		
+		if (scope instanceof ProcedureScope || scope instanceof CallSiteScope) {
+			ProcedureScope proc;
+			if (scope instanceof ProcedureScope)
+				proc = (ProcedureScope) scope;
+			else
+				proc = ((CallSiteScope) scope).getProcedureScope();
+			
+			if (proc.isAlien()) {
+				return SEPARATOR_ID + getID(scope.getParentScope());
+			}
+		}
+		return "";
+	}
 	
 	/***********************************************************
 	 * Add a child as the subscope of a parent
@@ -503,7 +540,8 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 			Scope kid = parent.getSubscope(i);
 			if ( this.isTheSameScope(kid, child) )
 				return;
-		}		
+		}
+		assert(child.getParentScope() == null);
 		addChild(parent, child);
 	}
 	
@@ -623,7 +661,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 		if (add_exclusive) {
 			if (flat_s instanceof CallSiteScope && cct_s instanceof CallSiteScope) {
 				CallSiteScope cs_scope = (CallSiteScope) cct_s;
-				flat_s.combine(cs_scope, exclusive_filter);
+				flat_s.combine(cs_scope.getLineScope(), exclusive_filter);
 			} else {
 				flat_s.combine(cct_s, exclusive_filter);
 			}

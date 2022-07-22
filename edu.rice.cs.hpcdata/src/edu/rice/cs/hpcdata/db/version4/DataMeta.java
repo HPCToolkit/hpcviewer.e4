@@ -33,7 +33,6 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.CallingContextReassignment;
-import edu.rice.cs.hpcdata.experiment.scope.visitors.TraceScopeVisitor;
 import edu.rice.cs.hpcdata.experiment.source.FileSystemSourceFile;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
 import edu.rice.cs.hpcdata.util.Constants;
@@ -122,10 +121,6 @@ public class DataMeta extends DataCommon
 		rootCCT.setParentScope(root);
 		
 		super.open(directory + File.separator + DB_META_FILE);
-
-		// needs to manage the profile.db here since we need it
-		// to access the metric value
-		dataSummary.open(directory);
 		
 		// manually setup the metrics for the sake of backward compatibility
 		final Experiment exp = (Experiment) experiment;
@@ -280,7 +275,11 @@ public class DataMeta extends DataCommon
 		mapProcedures = parseFunctions(channel, sections[INDEX_FUNCTIONS]);
 		
 		// create the top-down tree
-		parseRoot(channel, sections[INDEX_CONTEXT]);	
+		parseRoot(channel, sections[INDEX_CONTEXT]);
+		
+		// needs to manage the profile.db here since we need it
+		// to access the metric value
+		dataSummary.open(experiment.getDirectory());
 	}
 	
 	

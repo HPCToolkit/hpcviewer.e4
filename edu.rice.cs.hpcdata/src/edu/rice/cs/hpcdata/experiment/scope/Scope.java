@@ -251,11 +251,8 @@ implements IMetricScope
 	}
 
 	public void decrementCounter() {
-		if (this.isCounterPositif())
-			this.iCounter--;
-		else {
-			System.err.println("Scope [" + this.getCCTIndex() + "/" + this.flat_node_index + "] "  + this.getName() + " has non-positive counter");
-		}
+		assert(isCounterPositif());
+		this.iCounter--;
 	}
 
 	public void setCounter(int counter) {
