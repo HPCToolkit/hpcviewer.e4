@@ -383,6 +383,17 @@ public class ScopeTreeData implements IScopeTreeData
 		final MetricValue mv1 = o1.getMetricValue(metric);
 		final MetricValue mv2 = o2.getMetricValue(metric);
 
+		if (mv1 == MetricValue.NONE || mv2 == MetricValue.NONE) {
+			if (mv1 == MetricValue.NONE && mv2 == MetricValue.NONE)
+				return compareNodeName(o1, o2, factor);
+
+			if (mv1 == MetricValue.NONE)
+				return factor * -1;
+			
+			return factor * 1;
+		}
+			
+			
 		if (mv1.getValue() > mv2.getValue())
 			return factor * 1;
 		if (mv1.getValue() < mv2.getValue())
@@ -405,16 +416,6 @@ public class ScopeTreeData implements IScopeTreeData
 	 * @return a negative integer, zero, or a positive integer as the first argument is less than, equal to, or greater than the second.
 	 */
 	protected static int compareNodeName(Scope o1, Scope o2, int factor) {
-		if (o1 instanceof CallSiteScope && o2 instanceof CallSiteScope) {
-			// special case for call site: we compare the line number of the call
-			// if they are still the same, we'll compare with the name
-			
-			LineScope ls1 = ((CallSiteScope) o1).getLineScope();
-			LineScope ls2 = ((CallSiteScope) o2).getLineScope();
-			int result = ls1.getLineNumber() - ls2.getLineNumber();
-			if (result != 0)
-				return factor * result;
-		} 
 		int result = o1.getName().compareTo(o2.getName());
 		if (result == 0) {
 			// same name: compare the line number
