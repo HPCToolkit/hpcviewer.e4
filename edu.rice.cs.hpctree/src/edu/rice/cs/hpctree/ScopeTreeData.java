@@ -392,8 +392,7 @@ public class ScopeTreeData implements IScopeTreeData
 			
 			return factor * 1;
 		}
-			
-			
+
 		if (mv1.getValue() > mv2.getValue())
 			return factor * 1;
 		if (mv1.getValue() < mv2.getValue())
