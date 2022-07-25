@@ -6,13 +6,15 @@ import java.util.HashMap;
 import org.eclipse.core.runtime.Assert;
 
 import edu.rice.cs.hpcdata.db.version4.DataRecord;
-import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
 import edu.rice.cs.hpcdata.util.CallPath;
 import edu.rice.cs.hpctraceviewer.data.ITraceDataCollector;
+import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TraceDataByRank;
 import edu.rice.cs.hpctraceviewer.data.version2.AbstractBaseData;
 
-/** A data structure that stores one line of timestamp-cpid data. */
+/** 
+ *  A class that stores and manages one line of time-stamp and cpid data.
+ * */
 public class ProcessTimeline {
 
 	/** The mapping between the cpid's and the actual scopes. */
@@ -37,26 +39,42 @@ public class ProcessTimeline {
 	 * double time-stamp int Call-Path ID double time-stamp int Call-Path ID ...
 	 ************************************************************************/
 
-	/** Creates a new ProcessTimeline with the given parameters. 
-	 * @param _numPixelH The number of Horizontal pixels
-	 * @param _timeRange The difference between the start time and the end time
+	/** 
+	 * Creates a new ProcessTimeline with the given parameters. 
+	 * 
+	 * @param currentLineNum
+	 * 			The relative line number of this process or thread. 
+	 * 			This number starts from zero which is the top line to the
+	 * 			end of line to be painted.
+	 * @param processNumber
+	 * 			The absolute line number of this process or thread.
+	 * 		    This number is based on the file index (in case of old database),
+	 * 			hence it starts from the smallest process (or thread) number to 
+	 * 		    the highest process (or thread) number.  
+	 * @param dataController
+	 * 			The main data of this trace controller
+	 * 
+	 * @see SpaceTimeDataController
 	 */
-	public ProcessTimeline(int _lineNum, HashMap<Integer, CallPath> _scopeMap, IBaseData dataTrace, 
-			int processNumber, int _numPixelH, long _timeRange, long _startingTime)
+	public ProcessTimeline(int currentLineNum, 
+						   int processNumber, 
+						   SpaceTimeDataController dataController)
 	{
+		var experiment      = dataController.getExperiment();
+		lineNum 			= currentLineNum;
+		scopeMap 			= (HashMap<Integer, CallPath>) experiment.getScopeMap();
 
-		lineNum 			= _lineNum;
-		scopeMap 			= _scopeMap;
-
-		timeRange			= _timeRange;
-		startingTime 		= _startingTime;
+		var attributes      = dataController.getTraceDisplayAttribute();
+		this.timeRange		= attributes.getTimeInterval();
+		this.startingTime 	= dataController.getMinBegTime() + attributes.getTimeBegin();
 		this.processNumber  = processNumber;
 
-		pixelLength = timeRange / (double) _numPixelH;
+		pixelLength = timeRange / (double) attributes.getPixelHorizontal();
 		
 		//TODO: Beautify
+		var dataTrace = dataController.getBaseData();
 		if (dataTrace instanceof AbstractBaseData)
-			data = new TraceDataByRank((AbstractBaseData) dataTrace, processNumber, _numPixelH);
+			data = new TraceDataByRank(dataTrace, processNumber, attributes.getPixelHorizontal());
 		else
 			data = new TraceDataByRank(new DataRecord[0]);
 	}
@@ -99,9 +117,7 @@ public class ProcessTimeline {
 	 * @throws IOException 
 	 */
 	public void readInData() throws IOException {
-
-		data.readInData(processNumber, startingTime, timeRange,
-				pixelLength);
+		data.readInData(startingTime, timeRange, pixelLength);
 	}
 
 	/** Gets the time that corresponds to the index sample in times. */
@@ -140,7 +156,10 @@ public class ProcessTimeline {
 		return data.size();
 	}
 
-	/** Returns this ProcessTimeline's line number. */
+	/** 
+	 * Returns this ProcessTimeline's line number.
+	 * This returns the relative line number. 
+	 * */
 	public int line() {
 		return lineNum;
 	}
@@ -176,19 +195,4 @@ public class ProcessTimeline {
 	{
 		return data.isGPU();
 	}
-	// These are potentially useful for debugging, but otherwise serve no use.
-//	@Override
-//	public String toString() {
-//		return hashCode() + "#" + data.getRank();
-//	}
-//
-//	@Override
-//	public int hashCode() {
-//		double hash = 0.0;
-//		for (Record r : data.getListOfData()) {
-//			hash += r.cpId + Math.log(r.timestamp);
-//		}
-//		return (int) Math.round(hash);
-//	}
-
 }

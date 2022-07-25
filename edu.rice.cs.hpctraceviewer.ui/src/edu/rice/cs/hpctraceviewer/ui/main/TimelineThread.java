@@ -2,13 +2,11 @@ package edu.rice.cs.hpctraceviewer.ui.main;
 
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import edu.rice.cs.hpcdata.util.CallPath;
 //import edu.rice.cs.hpcremote.data.SpaceTimeDataControllerRemote;
 import edu.rice.cs.hpctraceviewer.data.DataLinePainting;
 import edu.rice.cs.hpctraceviewer.data.DataPreparation;
@@ -70,10 +68,9 @@ public class TimelineThread
 		
 		if (changedBounds) {
 			TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
-			ProcessTimeline currentTimeline = new ProcessTimeline(currentLineNum, (HashMap<Integer, CallPath>) stData.getScopeMap(),
-					stData.getBaseData(), lineToPaint(currentLineNum, attributes),
-					attributes.getPixelHorizontal(), attributes.getTimeInterval(), 
-					stData.getMinBegTime() + attributes.getTimeBegin());
+			ProcessTimeline currentTimeline = new ProcessTimeline(currentLineNum, 
+																  lineToPaint(currentLineNum, attributes),
+																  stData);
 			
 			if (traceService.setProcessTimeline(currentLineNum, currentTimeline)) {
 				timeline = currentTimeline;
@@ -114,15 +111,14 @@ public class TimelineThread
 	protected void finalize() {
 	}
 
+	
 	@Override
 	protected DataPreparation getData(DataLinePainting data) {
-
 		return new DetailDataPreparation(data);
 	}
 
 	
 	/** Returns the index of the file to which the line-th line corresponds. */
-
 	private int lineToPaint(int line, TraceDisplayAttribute attributes) {
 
 		int numTimelinesToPaint = attributes.getProcessInterval();

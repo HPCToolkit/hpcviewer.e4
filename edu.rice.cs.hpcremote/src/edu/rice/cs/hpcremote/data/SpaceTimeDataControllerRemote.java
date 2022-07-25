@@ -78,17 +78,18 @@ public class SpaceTimeDataControllerRemote extends SpaceTimeDataController
 			// DecompressionThread: consumer
 			final ConcurrentLinkedQueue<DecompressionItemToDo> workToDo = new ConcurrentLinkedQueue<DecompressionItemToDo>();
 			timelineToRender  = new ConcurrentLinkedQueue<Integer>();
-
+			var scopeMap = getExperiment().getScopeMap();
+			
 			for (int i = 0; i < workThreads.length; i++) {
 
-				workThreads[i] = new DecompressionThread(getScopeMap(),
+				workThreads[i] = new DecompressionThread(scopeMap,
 						attributes, workToDo, timelineToRender, ranksRemainingToDecompress,
 						new DecompressionThreadListener());
 				workThreads[i].start();
 			}
 			
 
-			dataRetriever.getData(attributes, getScopeMap(), workToDo);
+			dataRetriever.getData(attributes, scopeMap, workToDo);
 		}
 	}
 

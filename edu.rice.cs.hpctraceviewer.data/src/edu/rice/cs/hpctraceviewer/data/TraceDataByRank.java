@@ -5,8 +5,8 @@ import java.util.Arrays;
 import java.util.Vector;
 
 import edu.rice.cs.hpcdata.db.version4.DataRecord;
+import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
 import edu.rice.cs.hpcdata.util.Constants;
-import edu.rice.cs.hpctraceviewer.data.version2.AbstractBaseData;
 
 /***********************************************************
  * 
@@ -26,7 +26,7 @@ public class TraceDataByRank implements ITraceDataCollector
 										+ Constants.SIZEOF_INT; // call path id
 	
 	//These must be initialized in local mode. They should be considered final unless the data is remote.
-	private AbstractBaseData   data;
+	private IBaseData data;
 	private Vector<DataRecord> listcpid;
 	
 	private int numPixelH;
@@ -40,7 +40,7 @@ public class TraceDataByRank implements ITraceDataCollector
 	 * @param _rank
 	 * @param _numPixelH
 	 */
-	public TraceDataByRank(AbstractBaseData _data, int _rank, int _numPixelH)
+	public TraceDataByRank(IBaseData _data, int _rank, int _numPixelH)
 	{
 		//:'( This is a safe cast because this constructor is only
 		//called in local mode but it's so ugly....
@@ -69,20 +69,9 @@ public class TraceDataByRank implements ITraceDataCollector
 		return data.isGPU(rank);
 	}
 	
-	/***
-	 * Reading data from file. This method has to be called FIRST before calling other APIs.
-	 * @apiNote This is a hack. If possible, call this immediately after the constructor.
-	 * 
-	 * @param rank
-	 * 			The rank number. A rank can be a process or a thread or a GPU stream.
-	 * @param timeStart
-	 * @param timeRange
-	 * @param pixelLength 
-	 * 			the range of time per pixel. Its unit is time, usually nanoseconds for data version 4.
-	 * @throws IOException 
-	 */
+	
 	@Override
-	public void readInData(int rank, long timeStart, long timeRange, double pixelLength) throws IOException
+	public void readInData(long timeStart, long timeRange, double pixelLength) throws IOException
 	{			
 		long minloc = data.getMinLoc(rank);
 		long maxloc = data.getMaxLoc(rank);
