@@ -27,10 +27,9 @@ import edu.rice.cs.hpctraceviewer.data.util.Constants;
  *  transparency.
  * 
  * @author Original authors: Sinchan Banarjee, Michael France, Reed Lundrum and Philip Taffet
- * 
- * Modification:
- * - 2013 Philip: refactoring into three classes : abstract (this class), local and remote
- * - 2014.2.1 Laksono: refactoring to make it as simple as possible and avoid code redundancy
+ *
+ * @version 2013 Philip: refactoring into three classes : abstract (this class), local and remote
+ * @version 2014.2.1 Laksono: refactoring to make it as simple as possible and avoid code redundancy
  *
  *******************************************************************************************/
 public abstract class SpaceTimeDataController 

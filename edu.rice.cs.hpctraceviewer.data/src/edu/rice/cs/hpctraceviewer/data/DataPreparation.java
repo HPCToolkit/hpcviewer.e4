@@ -9,7 +9,7 @@ import org.eclipse.swt.graphics.Color;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.util.CallPath;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
-import edu.rice.cs.hpctraceviewer.data.util.Constants;
+import edu.rice.cs.hpcdata.util.Constants;
 
 
 /***********************************************************************

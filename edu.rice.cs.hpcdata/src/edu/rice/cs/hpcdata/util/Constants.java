@@ -13,8 +13,10 @@ public class Constants {
 	public static final int SIZEOF_INT 	 = Integer.SIZE / Byte.SIZE;
 	public static final int SIZEOF_FLOAT = Float.SIZE / Byte.SIZE;
 	
-	static public final int TOOLTIP_DELAY_MS  = 2000;
+	public static final int TOOLTIP_DELAY_MS  = 2000;
 	
 	public final static int EXPERIMENT_SPARSE_VERSION = 4;
 	public final static int EXPERIMENT_DENSED_VERSION = 2;
+	
+	public static final String  PROC_NO_ACTIVITY   = "<no activity>";
 }

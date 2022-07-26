@@ -3,6 +3,7 @@ package edu.rice.cs.hpcdata.experiment;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +65,10 @@ public abstract class BaseExperiment implements IExperiment
 	
 	private BaseTraceAttribute traceAttribute = new TraceAttribute();
 
+	/** list of call-path ids or context ids that represent idleness.
+	 *  Usually idle means <no activity> or <no thread> */
+	private final List<Integer> listIdleContextIds = new ArrayList<>(1);
+	
 	/***
 	 * the root scope of the experiment
 	 * 
@@ -207,6 +212,27 @@ public abstract class BaseExperiment implements IExperiment
 	 */
 	public void setMaxDepth(int maxDepth) {
 		traceAttribute.maxDepth = maxDepth;
+	}
+
+
+	/****
+	 * Add a new context id that represents idleness.
+	 * 
+	 * @param contextId
+	 * 
+	 * @see getListIdleContextIds
+	 */
+	public void addIdleContextId(int contextId) {
+		listIdleContextIds.add(contextId);
+	}
+	
+	/***
+	 * Get the list of all context ids that represent idleness.
+	 * 
+	 * @return {@code List} of {@code Integer}
+	 */
+	public List<Integer> getListIdleContextIds() {
+		return listIdleContextIds;
 	}
 
 

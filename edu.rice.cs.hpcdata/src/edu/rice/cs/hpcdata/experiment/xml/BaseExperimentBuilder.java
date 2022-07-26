@@ -106,7 +106,8 @@ public class BaseExperimentBuilder extends Builder
 	
 	private int min_cctid = Integer.MAX_VALUE;
 	private int max_cctid = Integer.MIN_VALUE;
-
+	private int idleNodeId = 0;
+	private boolean startIdleNode = false;
 	private int current_depth = 0;
 	
 	private boolean removeInvisibleProcedure = false;
@@ -590,6 +591,8 @@ public class BaseExperimentBuilder extends Builder
 					if (!new_cct_format)
 						// old format: cct ID = flat ID
 						cct_id = flat_id;
+					if (flat_id == idleNodeId) 
+						startIdleNode = true;
 					
 				} else if (attributes[i].equals(ATTRIBUTE_ID)) {
 					// id of the proc frame. needs to cross ref
@@ -836,15 +839,15 @@ public class BaseExperimentBuilder extends Builder
 				statusProc  = Integer.parseInt(values[i]);
 			}			
 		}
-		try {
-			Integer objID = Integer.parseInt(sID);
-			this.hashProcedureTable.put(objID, sData);
-			
-			if (statusProc != null)
-				this.statusProcedureMap.put(objID, statusProc);
-			
-		} catch (java.lang.NumberFormatException e) {
-			e.printStackTrace();
+
+		Integer objID = Integer.parseInt(sID);
+		this.hashProcedureTable.put(objID, sData);
+		
+		if (statusProc != null)
+			this.statusProcedureMap.put(objID, statusProc);
+
+		if (sData.equals(Constants.PROC_NO_ACTIVITY)) {
+			idleNodeId = objID.intValue();
 		}
 	}
 	
@@ -973,6 +976,10 @@ public class BaseExperimentBuilder extends Builder
 		if (cpid >= 0) {
 			scope.setCpid(cpid);
 			mapCpidToCallpath.put(cpid, new CallPath(scope, current_depth));
+			if (startIdleNode) {
+				experiment.addIdleContextId(cpid);
+				startIdleNode = false;
+			}
 		}
 		
 		if (isCallSite) {

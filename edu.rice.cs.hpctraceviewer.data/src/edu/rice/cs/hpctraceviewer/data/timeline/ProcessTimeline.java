@@ -7,6 +7,7 @@ import org.eclipse.core.runtime.Assert;
 
 import edu.rice.cs.hpcdata.db.version4.DataRecord;
 import edu.rice.cs.hpcdata.util.CallPath;
+import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.ITraceDataCollector;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TraceDataByRank;
@@ -73,8 +74,14 @@ public class ProcessTimeline {
 		
 		//TODO: Beautify
 		var dataTrace = dataController.getBaseData();
+		var idleContexts = dataController.getExperiment().getListIdleContextIds();
+		int []idleIds = new int[idleContexts.size()];
+		idleIds[0] = idleContexts.get(0);
+
+		final boolean exposeGPU = TracePreferenceManager.getGPUTraceExposure();
+
 		if (dataTrace instanceof AbstractBaseData)
-			data = new TraceDataByRank(dataTrace, processNumber, attributes.getPixelHorizontal());
+			data = new TraceDataByRank(dataTrace, processNumber, attributes.getPixelHorizontal(), idleIds, exposeGPU);
 		else
 			data = new TraceDataByRank(new DataRecord[0]);
 	}

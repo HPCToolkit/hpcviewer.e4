@@ -29,25 +29,30 @@ public class TraceDataByRank implements ITraceDataCollector
 	private IBaseData data;
 	private Vector<DataRecord> listcpid;
 	
-	private int numPixelH;
-	private int rank;
-	
+	private final int numPixelH;
+	private final int rank;
+	private final int []idleContextIds;
+	private final boolean exposeTraces;
 	
 	/***
 	 * Create a new instance of trace data for a given rank of process or thread 
 	 * Used only for local
-	 * @param _data
-	 * @param _rank
-	 * @param _numPixelH
+	 * @param traceData
+	 * @param tracelineNum
+	 * @param numPixelsHorizontal
 	 */
-	public TraceDataByRank(IBaseData _data, int _rank, int _numPixelH)
+	public TraceDataByRank(IBaseData traceData, 
+						   int tracelineNum, 
+						   int numPixelsHorizontal,
+						   int []idleContextIds,
+						   boolean exposeTraces)
 	{
-		//:'( This is a safe cast because this constructor is only
-		//called in local mode but it's so ugly....
-		data = _data;
-		rank = _rank;
-		numPixelH = _numPixelH;
+		data = traceData;
+		rank = tracelineNum;
+		numPixelH = numPixelsHorizontal;
 
+		this.idleContextIds = idleContextIds;
+		this.exposeTraces   = exposeTraces && data.isGPU(rank);
 		listcpid = new Vector<DataRecord>(numPixelH);
 	}
 	
@@ -57,6 +62,10 @@ public class TraceDataByRank implements ITraceDataCollector
 	 */
 	public TraceDataByRank(DataRecord[] data) {
 		listcpid = new Vector<DataRecord>(Arrays.asList(data));
+		rank = 0;
+		numPixelH = listcpid.size();
+		exposeTraces = false;
+		idleContextIds = new int[0];
 	}
 	
 	@Override
@@ -275,7 +284,24 @@ public class TraceDataByRank implements ITraceDataCollector
 		
 		long loc = findTimeInInterval((long)(midPixel*pixelLength)+startingTime, minLoc, maxLoc);
 		
-		final DataRecord nextData = this.getData(loc);
+		DataRecord nextData = this.getData(loc);
+		if (exposeTraces) {
+			for (var idleId: idleContextIds) {
+				if (nextData.cpId == idleId) {
+					var leftRecord = getData(loc-RecordSzMin);
+					if (leftRecord.cpId != idleId) {
+						nextData = leftRecord;
+						break;
+					}
+					var rightRecord = getData(loc+RecordSzMin);
+					if (rightRecord.cpId != idleId) {
+						nextData = rightRecord;
+						loc = loc+RecordSzMin;
+						break;
+					}
+				}
+			}
+		}
 		
 		addSample(minIndex, nextData);
 		

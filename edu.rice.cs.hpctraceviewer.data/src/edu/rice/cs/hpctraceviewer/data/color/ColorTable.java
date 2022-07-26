@@ -285,7 +285,7 @@ public class ColorTable
 		
 		colorMatcher.put(Constants.NULL_FUNCTION, col_white);
 		
-		ProcedureColor pc = new ProcedureColor(Constants.PROC_NO_ACTIVITY, col_white);
+		ProcedureColor pc = new ProcedureColor(edu.rice.cs.hpcdata.util.Constants.PROC_NO_ACTIVITY, col_white);
 		mapRGBtoProcedure.put(rgb_white.hashCode(), pc);
 	}
 	

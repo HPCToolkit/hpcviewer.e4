@@ -58,7 +58,7 @@ public class ProcedureClassMap extends AliasMap<String,ProcedureClassData> {
 		clear();
 		
 		put(Constants.PROC_NO_THREAD, 	CLASS_IDLE, COLOR_WHITE); // backward compatibility
-		put(Constants.PROC_NO_ACTIVITY, CLASS_IDLE, COLOR_WHITE);
+		put(edu.rice.cs.hpcdata.util.Constants.PROC_NO_ACTIVITY, CLASS_IDLE, COLOR_WHITE);
 	}
 	
 	public Object[] getEntrySet() {

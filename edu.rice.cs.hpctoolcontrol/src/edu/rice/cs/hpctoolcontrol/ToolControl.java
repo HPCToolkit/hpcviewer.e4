@@ -126,6 +126,9 @@ public class ToolControl
 		public void done() {
 			
 			sync.asyncExec(() -> {
+				if (progressBar.isDisposed())
+					return;
+				
 				progressBar.setSelection(0);
 				lblMessage.setText("");
 			});

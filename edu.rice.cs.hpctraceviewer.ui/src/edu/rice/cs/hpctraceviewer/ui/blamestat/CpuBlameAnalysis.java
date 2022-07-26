@@ -170,13 +170,13 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 		String proc_name = procColor.getProcedure();
 		
 		if (isCpuThread) { // cpu thread
-			if (!procColor.getProcedure().contains(Constants.PROC_NO_ACTIVITY)) {
+			if (!procColor.getProcedure().contains(edu.rice.cs.hpcdata.util.Constants.PROC_NO_ACTIVITY)) {
 				addDict(cpu_active_routines, rank, pixelValue, 1);
 				addDict(cpu_active_count, rank, 1);
 			}
 
 		} else {		// gpu thread
-			if (proc_name.contains(Constants.PROC_NO_ACTIVITY) ||
+			if (proc_name.contains(edu.rice.cs.hpcdata.util.Constants.PROC_NO_ACTIVITY) ||
 					proc_name.contains(GPU_SYNC)) {
 								
 				addDict(gpu_idle_count, rank, 1);

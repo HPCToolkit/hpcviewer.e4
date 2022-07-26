@@ -18,9 +18,7 @@ public class Constants {
 
 	public static final String CONTEXT_TIMELINE = "hpctraceviewer.timeline";
 	
-	
-	public static final String  PROC_NO_ACTIVITY   = "<no activity>";
-	public static final String  PROC_NO_THREAD     = "<no thread>";
+	public static final String  PROC_NO_THREAD  = "<no thread>";
 
 	/**A null function*/
 	public static final String NULL_FUNCTION = "-Outside Timeline-";
