@@ -341,6 +341,15 @@ public class ScopeTreeData implements IScopeTreeData
 		@Override
 		public int compare(TreeNode o1, TreeNode o2) {
             int result = 0;
+			if (o1.getParent() == null || o2.getParent() == null) {
+				if (o1.getParent() == null && o2.getParent() == null)
+					return ScopeTreeData.compareNodes((Scope) o1, (Scope) o2, metric, dir);
+				
+				if (o1.getParent() == null)
+					return 1;
+				
+				return -1;
+			}
 			if (o1.getParent() != null && o2.getParent() != null) {
 				int d1 = this.treeData.getDepthOfData((Scope) o1);
 				int d2 = this.treeData.getDepthOfData((Scope) o2);
@@ -389,6 +398,16 @@ public class ScopeTreeData implements IScopeTreeData
 
 		MetricValue mv1 = metric.getValue(o1);
 		MetricValue mv2 = metric.getValue(o2);
+
+		if (mv1 == MetricValue.NONE || mv2 == MetricValue.NONE) {
+			if (mv1 == MetricValue.NONE && mv2 == MetricValue.NONE)
+				return compareNodeName(o1, o2, factor);
+
+			if (mv1 == MetricValue.NONE)
+				return factor * -1;
+			
+			return factor * 1;
+		}
 
 		if (mv1.getValue() > mv2.getValue())
 			return factor * 1;

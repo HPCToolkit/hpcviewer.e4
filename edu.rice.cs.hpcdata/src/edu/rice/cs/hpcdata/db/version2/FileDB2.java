@@ -97,7 +97,8 @@ public class FileDB2 implements IFileDB
 		listIdTuples = new ArrayList<IdTuple>(numFiles);
 		
 		long current_pos = Constants.SIZEOF_INT * 2;
-		
+		int parallelism  = getParallelismLevel();
+
 		// get the procs and threads IDs
 		for(int i=0; i<numFiles; i++) {
 
@@ -109,13 +110,10 @@ public class FileDB2 implements IFileDB
 			offsets[i] = masterBuff.getLong(current_pos);
 			current_pos += Constants.SIZEOF_LONG;
 			
-			IdTuple tuple = new IdTuple(i, getParallelismLevel());
+			// fix issue #222: allow viewing multiple same threads 
+			// it should display thread 0, thread 0, ... instead of empty 
+			IdTuple tuple = new IdTuple(i, parallelism);
 			
-			if (getParallelismLevel() == 0) {
-				// sequential program
-				listIdTuples.add(tuple);
-				continue;
-			}
 			//--------------------------------------------------------------------
 			// adding list of x-axis 
 			//--------------------------------------------------------------------			
@@ -153,9 +151,11 @@ public class FileDB2 implements IFileDB
 				// this is not the ideal solution, but we cannot trust the value of proc_id and thread_id
 				x_val = String.valueOf(i);
 				
-				tuple.setKindAndInterpret(IdTupleType.KIND_RANK, 0);
-				tuple.setPhysicalIndex(0, i);
-				tuple.setLogicalIndex(0, proc_id);
+				// fix issue #222: use thread instead of rank
+				// the physical id will be whatever in thread_id, but the logical id will be the file order
+				tuple.setKindAndInterpret(IdTupleType.KIND_THREAD, 0);
+				tuple.setPhysicalIndex(0, thread_id);
+				tuple.setLogicalIndex(0, i);
 			}
 			valuesX[i] = x_val;
 			listIdTuples.add(tuple);
@@ -165,7 +165,7 @@ public class FileDB2 implements IFileDB
 	@Override
 	public int 	getParallelismLevel()
 	{
-		return Util.countSetBits(type);
+		return Math.max(1, Util.countSetBits(type));
 	}
 
 	/**
@@ -257,13 +257,8 @@ public class FileDB2 implements IFileDB
 			return listIdTupleTypes;
 		
 		listIdTupleTypes = new IdTupleType();
-
-		if (isMultiProcess()) {
-			listIdTupleTypes.add(IdTupleType.KIND_RANK, IdTupleType.LABEL_RANK);
-		}
-		if (isMultiThreading()) {
-			listIdTupleTypes.add(IdTupleType.KIND_THREAD, IdTupleType.LABEL_THREAD);
-		}
+		listIdTupleTypes.initDefaultTypes();
+		
 		return listIdTupleTypes;
 	}
 
