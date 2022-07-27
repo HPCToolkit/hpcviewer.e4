@@ -151,9 +151,11 @@ public class FileDB2 implements IFileDB
 				// this is not the ideal solution, but we cannot trust the value of proc_id and thread_id
 				x_val = String.valueOf(i);
 				
-				tuple.setKindAndInterpret(IdTupleType.KIND_RANK, 0);
-				tuple.setPhysicalIndex(0, i);
-				tuple.setLogicalIndex(0, proc_id);
+				// fix issue #222: use thread instead of rank
+				// the physical id will be whatever in thread_id, but the logical id will be the file order
+				tuple.setKindAndInterpret(IdTupleType.KIND_THREAD, 0);
+				tuple.setPhysicalIndex(0, thread_id);
+				tuple.setLogicalIndex(0, i);
 			}
 			valuesX[i] = x_val;
 			listIdTuples.add(tuple);
