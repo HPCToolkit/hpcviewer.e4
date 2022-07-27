@@ -97,7 +97,8 @@ public class FileDB2 implements IFileDB
 		listIdTuples = new ArrayList<IdTuple>(numFiles);
 		
 		long current_pos = Constants.SIZEOF_INT * 2;
-		
+		int parallelism  = getParallelismLevel();
+
 		// get the procs and threads IDs
 		for(int i=0; i<numFiles; i++) {
 
@@ -109,13 +110,10 @@ public class FileDB2 implements IFileDB
 			offsets[i] = masterBuff.getLong(current_pos);
 			current_pos += Constants.SIZEOF_LONG;
 			
-			IdTuple tuple = new IdTuple(i, getParallelismLevel());
+			// fix issue #222: allow viewing multiple same threads 
+			// it should display thread 0, thread 0, ... instead of empty 
+			IdTuple tuple = new IdTuple(i, parallelism);
 			
-			if (getParallelismLevel() == 0) {
-				// sequential program
-				listIdTuples.add(tuple);
-				continue;
-			}
 			//--------------------------------------------------------------------
 			// adding list of x-axis 
 			//--------------------------------------------------------------------			
@@ -165,7 +163,7 @@ public class FileDB2 implements IFileDB
 	@Override
 	public int 	getParallelismLevel()
 	{
-		return Util.countSetBits(type);
+		return Math.max(1, Util.countSetBits(type));
 	}
 
 	/**
@@ -257,13 +255,8 @@ public class FileDB2 implements IFileDB
 			return listIdTupleTypes;
 		
 		listIdTupleTypes = new IdTupleType();
-
-		if (isMultiProcess()) {
-			listIdTupleTypes.add(IdTupleType.KIND_RANK, IdTupleType.LABEL_RANK);
-		}
-		if (isMultiThreading()) {
-			listIdTupleTypes.add(IdTupleType.KIND_THREAD, IdTupleType.LABEL_THREAD);
-		}
+		listIdTupleTypes.initDefaultTypes();
+		
 		return listIdTupleTypes;
 	}
 
