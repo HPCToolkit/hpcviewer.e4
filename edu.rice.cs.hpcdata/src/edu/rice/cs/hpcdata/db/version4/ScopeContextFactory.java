@@ -356,7 +356,7 @@ public class ScopeContextFactory
 									  ctxId, 
 									  ps.getFlatIndex(), 
 									  null, 
-									  ProcedureScope.FeatureProcedure);				
+									  ProcedureScope.FEATURE_PROCEDURE);				
 
 		ProcedureScope procScope = ps;
 		if (alien) {
@@ -372,7 +372,7 @@ public class ScopeContextFactory
 										   ctxId, 
 										   ps.getFlatIndex(), 
 										   null, 
-										   ProcedureScope.FeatureProcedure);
+										   ProcedureScope.FEATURE_PROCEDURE);
 		}
 		ps.setAlien(alien);
 		var cs = new CallSiteScope(ls, procScope, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, flatId);

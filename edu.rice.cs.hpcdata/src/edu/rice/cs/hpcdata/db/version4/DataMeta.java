@@ -146,7 +146,8 @@ public class DataMeta extends DataCommon
 	public void open(final String directory) 
 			throws IOException
 	{
-		throw new RuntimeException("Unsupported. Use open(IExperiment experiment, String directory)");
+		assert(false);
+		throw new IOException("Unsupported. Use open(IExperiment experiment, String directory)");
 	}
 
 	
@@ -417,7 +418,7 @@ public class DataMeta extends DataCommon
 		var pMetrics = buffer.getLong();
 		var nMetrics = buffer.getInt();
 		var szMetric = buffer.get(0x0c);
-		//var szScopeInst  = buffer.get(0x0d);
+		// this line is not used at the moment: var szScopeInst  = buffer.get(0x0d);
 		var szSummary    = buffer.get(0x0e);
 		
 		long pScopes = buffer.getLong(0x10);
@@ -635,6 +636,10 @@ public class DataMeta extends DataCommon
 		var buffer = channel.map(MapMode.READ_ONLY, section.offset, section.size);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		
+		// 00: 	SFS[nFiles]* 	pFiles 	4.0 	Source files used in this database
+		// 08: 	u32 	nFiles 			4.0 	Number of source files listed in this section
+		// 0c: 	u16 	szFile 			4.0 	Size of a Source File Specification, currently 16
+		
 		long pFiles   = buffer.getLong();
 		int numFiles  = buffer.getInt(0x08);
 		short szFiles = buffer.getShort(0x0c);
@@ -645,8 +650,20 @@ public class DataMeta extends DataCommon
 		
 		for(int i=0; i<numFiles; i++) {
 			int delta    = i * szFiles;
+			
+			// 00: 	{Flags} flags 	4.0 	See below
+			// 08: 	char* 	pPath 	4.0 	Path to the source file. Absolute, or relative to the root database directory.
+			
+			// {Flags} refers to an u32 bitfield with the following sub-fields (bit 0 is least significant):
+			//    Bit 0: copied. If 1, the source file was copied into the database and should always be available. 
+			//                   If 0, the source file was not copied and thus may need to be searched for.
+			//    Bits 1-31: Reserved for future use.
+
+
 			int position = basePosition + delta;
-			int flags  = buffer.getInt(position);
+			// At the moment we don't need to handle the flags since the viewer will 
+			//  try to find the file by itself
+			// we remove buffer.getInt(position);
 			long pPath = buffer.getLong(position + 0x08);
 			
 			String  name = stringArea.toString(pPath);
@@ -681,7 +698,7 @@ public class DataMeta extends DataCommon
 		short szFunctions = buffer.getShort(0x0c);
 		
 		var basePosition = pFunctions - section.offset;
-		LongObjectHashMap<ProcedureScope> mapProcedures = new LongObjectHashMap<>(nFunctions);
+		LongObjectHashMap<ProcedureScope> mapFunctions = new LongObjectHashMap<>(nFunctions);
 
 		final int baseId = Constants.FLAT_ID_BEGIN + mapLoadModules.size() + mapFileSources.size() + 1;
 
@@ -717,9 +734,9 @@ public class DataMeta extends DataCommon
 			
 			long key = pFunctions + (i * szFunctions);
 			ProcedureScope ps = new ProcedureScope(rootCCT, lms, file, line, line, name, false, position, i+baseId, null, feature);			
-			mapProcedures.put(key, ps);
+			mapFunctions.put(key, ps);
 		}
-		return mapProcedures;
+		return mapFunctions;
 	}
 
 	
@@ -738,9 +755,9 @@ public class DataMeta extends DataCommon
 		boolean isRoot = name.charAt(0) == '<' && name.endsWith(" root>");
 		
 		if (isPartial || isRoot)
-			return ProcedureScope.FeatureTopDown;
+			return ProcedureScope.FEATURE_TOPDOWN;
 		
-		return ProcedureScope.FeatureProcedure;
+		return ProcedureScope.FEATURE_PROCEDURE;
 	}
 	
 		

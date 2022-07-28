@@ -356,6 +356,9 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 	 * @return FlatScopeInfo if the flat scope can be created
 	 *****************************************************************/
 	private FlatScopeInfo getFlatCounterPart( Scope cct_s, Scope cct_s_metrics, String id) {
+		if (cct_s == null)
+			return null;
+		
 		// -----------------------------------------------------------------------------
 		// Get the flat scope of the parent 	
 		// -----------------------------------------------------------------------------
@@ -472,6 +475,9 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 		hash_id.append(source_file.getFileID());
 		
 		var proc_scope = findEnclosingProcedure(scope);
+		if (proc_scope == null)
+			return hash_id.toString();
+		
 		hash_id.append(SEPARATOR_ID);
 		hash_id.append(proc_scope.getLoadModule().getFlatIndex());
 
@@ -493,7 +499,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 		// ------
 		// (4b) <class, flat_id, load_module, file_source, procedure, line_num, parent_id>
 		// ------
-		if (inlineID.isEmpty()) {
+		if (inlineID.isEmpty() && scope.getParentScope() != null) {
 			var parent = scope.getParentScope();
 			if (parent instanceof ProcedureScope || parent instanceof CallSiteScope) {
 				ProcedureScope proc;
@@ -612,8 +618,12 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 	 ***********************************************************/
 	private ProcedureScope findEnclosingProcedure(Scope cct_s)
 	{
+		if (cct_s == null)
+			return null;
+			
 		if (cct_s instanceof ProcedureScope) 
 			return (ProcedureScope) cct_s;
+		
 		Scope parent = cct_s.getParentScope();
 		while(parent != null) {
 			if (parent instanceof CallSiteScope) {

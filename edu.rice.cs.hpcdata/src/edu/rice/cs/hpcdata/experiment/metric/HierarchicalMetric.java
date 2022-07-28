@@ -11,9 +11,9 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 public class HierarchicalMetric extends AbstractMetricWithFormula 
 {	
-	private static final byte FMT_METADB_COMBINE_Sum = 0;
-	private static final byte FMT_METADB_COMBINE_Min = 1;
-	private static final byte FMT_METADB_COMBINE_Max = 2;
+	private static final byte FMT_METADB_COMBINE_SUM = 0;
+	private static final byte FMT_METADB_COMBINE_MIN = 1;
+	private static final byte FMT_METADB_COMBINE_MAX = 2;
 
 	private Expression expression;
 	private DataSummary profileDB;
@@ -53,14 +53,15 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	
 	public String getCombineTypeLabel() {
 		switch (combineType) {
-		case FMT_METADB_COMBINE_Max:
+		case FMT_METADB_COMBINE_MAX:
 			return "max";
-		case FMT_METADB_COMBINE_Min:
+		case FMT_METADB_COMBINE_MIN:
 			return "min";
-		case FMT_METADB_COMBINE_Sum:
+		case FMT_METADB_COMBINE_SUM:
 			return "sum";
+		default:
+			return null;
 		}
-		return null;
 	}
 	
 	public MetricValue reduce(MetricValue target, MetricValue source) {
@@ -73,21 +74,21 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		}
 
 		switch (combineType) {
-		case FMT_METADB_COMBINE_Max:
+		case FMT_METADB_COMBINE_MAX:
 			var v1 = target.getValue();
 			var v2 = source.getValue();
 			v1 = Math.max(v1, v2);
 			target.setValue(v1);
 			break;
 			
-		case FMT_METADB_COMBINE_Min:
+		case FMT_METADB_COMBINE_MIN:
 			v1 = target.getValue();
 			v2 = source.getValue();
 			v1 = Math.min(v1, v2);
 			target.setValue(v1);
 			break;
 			
-		case FMT_METADB_COMBINE_Sum:
+		case FMT_METADB_COMBINE_SUM:
 			v1 = target.getValue();
 			v2 = source.getValue();
 			var d = v1-v2;

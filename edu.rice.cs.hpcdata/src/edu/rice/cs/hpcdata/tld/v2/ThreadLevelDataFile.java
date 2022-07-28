@@ -27,6 +27,7 @@ public class ThreadLevelDataFile extends FileDB2
 	private int num_threads;
 	
 	public ThreadLevelDataFile() {
+		// no action needed
 	}
 	
 	

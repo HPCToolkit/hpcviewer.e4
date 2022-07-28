@@ -651,7 +651,7 @@ public class BaseExperimentBuilder extends Builder
 			Integer statusProc = statusProcedureMap.get(flat_id);
 			if (statusProc != null) {
 				feature = statusProc.intValue();
-				if (feature == ProcedureScope.FeatureRoot) {
+				if (feature == ProcedureScope.FEATURE_ROOT) {
 					RootScope datacentricRoot = new RootScope(experiment, procName, RootScopeType.DatacentricTree);
 					// push the new scope to the stack
 					scopeStack.push(datacentricRoot);
@@ -1042,11 +1042,13 @@ public class BaseExperimentBuilder extends Builder
 	//--------------------------------------------------------------------------------
 	private void begin_TraceDBTable(String[] attributes, String[] values) 
 	{
+		// nothing to do
 	}
 
 	
 	private void end_TraceDBTable() 
 	{
+		// nothing to do
 	}
 
 	
@@ -1103,6 +1105,7 @@ public class BaseExperimentBuilder extends Builder
 	 ************************************************************************/
 	protected void begin_SecData(String[] attributes, String[] values) 
 	{
+		// nothing to do
 	}
 
 

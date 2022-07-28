@@ -245,7 +245,7 @@ public class ThreadDataCollection2 extends AbstractThreadDataCollection
 	
 	
 	/*******************
-	 * Progress bar
+	 * Temporary Quick fix: Empty Progress bar
 	 *
 	 */
 	static private class ProgressReport implements IProgressReport 
@@ -253,15 +253,19 @@ public class ThreadDataCollection2 extends AbstractThreadDataCollection
 
 		public ProgressReport()
 		{
+			// no action needed
 		}
 		
 		public void begin(String title, int num_tasks) {
+			// no action needed
 		}
 
 		public void advance() {
+			// no action needed
 		}
 
 		public void end() {
+			// no action needed
 		}
 	}
 }

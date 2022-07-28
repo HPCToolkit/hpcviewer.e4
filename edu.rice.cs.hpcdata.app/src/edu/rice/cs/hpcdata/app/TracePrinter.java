@@ -42,7 +42,6 @@ public class TracePrinter
 		try {
 			experiment.open(new File(args[0]), null, false);
 		} catch (Exception e) {
-			e.printStackTrace();
 			return;
 		}
 		
@@ -57,7 +56,6 @@ public class TracePrinter
 			String filename = getTraceFile(args[0]);
 			fileDB.open(filename, trAttribute.dbHeaderSize, RECORD_SIZE);
 		} catch (IOException e) {
-			System.err.println(e.getMessage());
 			return;
 		}
 		

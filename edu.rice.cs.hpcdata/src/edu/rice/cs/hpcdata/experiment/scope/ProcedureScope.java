@@ -38,22 +38,23 @@ import edu.rice.cs.hpcdata.util.IUserData;
 
 public class ProcedureScope extends Scope  implements IMergedScope 
 {
-	public static final int FeatureProcedure   = 0;
-	public static final int FeaturePlaceHolder = 1;
-	public static final int FeatureRoot 	   = 2;
-	public static final int FeatureElided      = 3;
-	public static final int FeatureTopDown     = 4;
+	public static final int FEATURE_PROCEDURE    = 0;
+	public static final int FEATURE_PLACE_HOLDER = 1;
+	public static final int FEATURE_ROOT 	     = 2;
+	public static final int FEATURE_ELIDED       = 3;
+	public static final int FEATURE_TOPDOWN      = 4;
 	
 	public static final String INLINE_NOTATION = "[I] ";
+	
 	public static final ProcedureScope NONE = new ProcedureScope(null, 
 			LoadModuleScope.NONE, SourceFile.NONE, 
 			0, 0, 
 			Constants.PROCEDURE_UNKNOWN, false, 
 			Constants.FLAT_ID_PROC_UNKNOWN, Constants.FLAT_ID_PROC_UNKNOWN, 
-			null, FeatureRoot);
+			null, FEATURE_ROOT);
 
-	private static final String TheProcedureWhoShouldNotBeNamed = "-";
-	private static final String TheInlineProcedureLabel 	 	= "<inline>";
+	private static final String PROCEDURE_NO_NAME = "-";
+	private static final String PROCEDURE_INLINE  = "<inline>";
 
 	public static enum ProcedureType {
 		ProcedureNormal, 
@@ -132,8 +133,8 @@ public ProcedureScope(RootScope root, LoadModuleScope loadModule, SourceFile fil
 			procedureName = newName;
 	}
 	if (isalien) {
-		if (procedureName.isEmpty() || procedureName.equals(TheProcedureWhoShouldNotBeNamed)
-				|| procedureName.equals(TheInlineProcedureLabel)) {
+		if (procedureName.isEmpty() || procedureName.equals(PROCEDURE_NO_NAME)
+				|| procedureName.equals(PROCEDURE_INLINE)) {
 			procedureName =  "inlined from " + getSourceCitation();
 		}
 		if (!procedureName.startsWith(INLINE_NOTATION))
@@ -229,17 +230,17 @@ public void setLoadModule(LoadModuleScope lm) {
 
 public boolean isTopDownProcedure() 
 {	
-	return procedureFeature == FeatureTopDown;
+	return procedureFeature == FEATURE_TOPDOWN;
 }
 
 public boolean isFalseProcedure()
 {
-	return procedureFeature != FeatureProcedure;
+	return procedureFeature != FEATURE_PROCEDURE;
 }
 
 public boolean toBeElided() 
 {
-	return procedureFeature == FeatureElided;
+	return procedureFeature == FEATURE_ELIDED;
 }
 
 public void setProcedureType(ProcedureType type) {
