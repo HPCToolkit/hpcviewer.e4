@@ -33,7 +33,7 @@ public class MetricValueCollection4 implements IMetricValueCollection
 {
 	private DataSummary dataSummary;
 
-	private IntObjectHashMap<MetricValue> values; //HashMap<Integer, MetricValue> values;
+	private IntObjectHashMap<MetricValue> values;
 	
 	public MetricValueCollection4(DataSummary dataSummary) throws IOException
 	{
@@ -62,14 +62,14 @@ public class MetricValueCollection4 implements IMetricValueCollection
 			try {
 				sparseValues = dataSummary.getMetrics(scope.getCCTIndex());					
 			} catch (IOException e1) {
-				throw new RuntimeException(e1.getMessage());
+				throw new IllegalArgumentException("scope index: " + index + "\n" + e1.getMessage());
 			}
 			// the reading is successful
 			// fill up the cache containing metrics of this scope for the next usage
 			
 			if (sparseValues != null && sparseValues.size()>0)
 			{
-				values = new IntObjectHashMap<MetricValue>(sparseValues.size()); //new HashMap<Integer, MetricValue>(sparseValues.size());
+				values = new IntObjectHashMap<MetricValue>(sparseValues.size()); 
 				
 				for (MetricValueSparse mvs: sparseValues) {
 					float value = (float) mvs.getValue();
@@ -82,7 +82,7 @@ public class MetricValueCollection4 implements IMetricValueCollection
 					return mv;
 			} else {
 				// create empty cache value so that we avoid searching again for this cct
-				values = new IntObjectHashMap<MetricValue>(0); //new HashMap<>(0);
+				values = new IntObjectHashMap<MetricValue>(0); 
 			}
 
 		} else 
@@ -170,7 +170,7 @@ public class MetricValueCollection4 implements IMetricValueCollection
 			return;
 		
 		if (values == null) {
-			values = new IntObjectHashMap<>(source.size()); //new HashMap<Integer, MetricValue>(source.size());
+			values = new IntObjectHashMap<>(source.size()); 
 		}
 		// tricky part: append the metric values and shift the index by an offset
 		source.forEachKeyValue((index, mv) -> {

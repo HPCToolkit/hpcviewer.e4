@@ -180,7 +180,6 @@ public class ScopeContextFactory
 				return sc;
 			pModule = buffer.getLong(loc + 0x20 + nwords * 8);
 			offset  = buffer.getLong(loc + 0x20 + (nwords+1) * 8);
-			nwords += 2;
 		}
 		var ps = mapProcedures.getIfAbsent (pFunction, ()->ProcedureScope.NONE);
 		var fs = mapFileSources.getIfAbsent(pFile,     ()->SourceFile.NONE);
@@ -288,11 +287,10 @@ public class ScopeContextFactory
 			
 			sb.append(SEPARATOR);
 			sb.append(procParent.getFlatIndex());
-		} else if (relation == FMT_METADB_RELATION_CALL) {
-			if (parent instanceof LineScope) {
-				sb.append(SEPARATOR);
-				sb.append(parent.getFlatIndex());
-			}
+		} else if (relation == FMT_METADB_RELATION_CALL && 
+				   parent instanceof LineScope) {
+			sb.append(SEPARATOR);
+			sb.append(parent.getFlatIndex());
 		}
 		
 		int hash = sb.toString().hashCode();

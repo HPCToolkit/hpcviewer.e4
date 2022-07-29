@@ -175,7 +175,9 @@ public class DataSummary extends DataCommon
 	/****
 	 * Retrieve the list of id tuples
 	 * 
-	 * @param shortVersion: true if we want to the short version of the list
+	 * @param option
+	 * 			 may be use for further use to differentiate between
+	 * 			 brief and complete notation.	
 	 * 
 	 * @return {@code List<IdTuple>}
 	 */
@@ -400,7 +402,7 @@ public class DataSummary extends DataCommon
 		LongIntHashMap []mapLevelToHash = new LongIntHashMap[maxLevels];
 		
 		for(int i=0; i<info.nProfile; i++) {
-			info.piElements[i].readIdTuple(input, sections[1]);
+			info.piElements[i].readIdTuple(input);
 			numLevels = Math.max(numLevels, info.piElements[i].numLevels);
 			
 			// the first profile is the summary one (aka summary profile).
@@ -784,7 +786,7 @@ public class DataSummary extends DataCommon
 			numLevels   = 0;
 		}
 		
-		public void readIdTuple(FileChannel channel, DataSection idTupleSection) throws IOException {
+		public void readIdTuple(FileChannel channel) throws IOException {
 			if (pIdTuple == 0)
 				return;
 			

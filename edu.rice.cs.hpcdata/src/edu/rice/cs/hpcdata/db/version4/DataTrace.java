@@ -224,7 +224,7 @@ public class DataTrace extends DataCommon
 			try {
 				out.format("%d:  %s\n", rank, getSampledData(rank, sample));
 			} catch (IOException e) {
-				System.err.println(e.getMessage());
+				// skip the exception
 			}
 		}
 	}

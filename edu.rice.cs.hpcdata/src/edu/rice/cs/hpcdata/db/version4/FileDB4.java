@@ -91,7 +91,8 @@ public class FileDB4 implements IFileDB
 
 	@Override
 	public long[] getOffsets() {
-		throw new RuntimeException("ERROR, shouldn't be called!");
+		// shouldn't be called for v4
+		return null;
 	}
 
 	@Override
