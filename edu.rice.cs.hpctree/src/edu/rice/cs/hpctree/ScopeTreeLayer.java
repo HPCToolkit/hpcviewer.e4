@@ -219,16 +219,19 @@ public class ScopeTreeLayer extends AbstractLayerTransform implements IUniqueInd
     	// fix issue #177: need to clear selected row if it's within the collapsed row
     	// if it isn't clear, nattable only highlight the first column
     	
-    	int selectionRow = -1;
     	IUniqueIndexLayer underlyingLayer = getUnderlyingLayer();
-    	if (underlyingLayer instanceof SelectionLayer) {
-    		SelectionLayer selectionLayer = (SelectionLayer) underlyingLayer;
-    		var ranges = selectionLayer.getSelectedRowPositions();
-    		if (!ranges.isEmpty()) {
-        		var range = ranges.iterator().next();
-        		selectionRow = range.start;
-    		}
-    	}
+    	if (!(underlyingLayer instanceof SelectionLayer))
+    		return;
+
+    	SelectionLayer selectionLayer = (SelectionLayer) underlyingLayer;
+		var ranges = selectionLayer.getSelectedRowPositions();
+		int selectionRow = -1;
+		
+		if (!ranges.isEmpty()) {
+    		var range = ranges.iterator().next();
+    		selectionRow = range.start;
+		}
+
     	// remove the children
     	doCommand(new RowDeleteCommand(this, indexes));
     	
@@ -243,7 +246,6 @@ public class ScopeTreeLayer extends AbstractLayerTransform implements IUniqueInd
     	} else if (selectionRow > lastChild) {
     		// case 2: the selected row is AFTER the index
     		// move the selection to the new row
-    		SelectionLayer selectionLayer = (SelectionLayer) underlyingLayer;
     		int newRow = selectionRow - childrenIndexes.size();
     		selectionLayer.selectRow(0, newRow, false, false);
     	}
@@ -264,24 +266,25 @@ public class ScopeTreeLayer extends AbstractLayerTransform implements IUniqueInd
     	// issue #189 need to clear selected row if it's within the expanded rows
     	// if it isn't clear, nattable only highlight the first column
     	    	
-    	int selectionRow = -1;
     	IUniqueIndexLayer underlyingLayer = getUnderlyingLayer();
-    	if (underlyingLayer instanceof SelectionLayer) {
-    		SelectionLayer selectionLayer = (SelectionLayer) underlyingLayer;
-    		var ranges = selectionLayer.getSelectedRowPositions();
-    		if (!ranges.isEmpty()) {
-        		var range = ranges.iterator().next();
-        		selectionRow = range.start;
-    		}
-    	}
+    	if (!(underlyingLayer instanceof SelectionLayer))
+    		return;    	
+
+		SelectionLayer selectionLayer = (SelectionLayer) underlyingLayer;
+    	int selectionRow = -1;
+		
+		var ranges = selectionLayer.getSelectedRowPositions();
+		if (!ranges.isEmpty()) {
+    		var range = ranges.iterator().next();
+    		selectionRow = range.start;
+		}
+
     	doCommand(new RowInsertCommand<Scope>(parentIndex + 1, children));
 
     	// issue #189 move the selected row into a new index
     	// if the selected row is r and the expanded parent has x children,
     	// then the new selected row is r + x
     	if (selectionRow > parentIndex) {
-    		SelectionLayer selectionLayer = (SelectionLayer) underlyingLayer;
-        	
     		int newRow = selectionRow + children.size();
     		selectionLayer.selectRow(0, newRow, false, false);
     	}

@@ -270,14 +270,13 @@ public class DatabaseCollection
 		List<MStackElement> list = null;
 
 		MPartStack stack  = (MPartStack)modelService.find(STACK_ID_BASE, window);
-		if (stack != null)
+		if (stack != null) {
 			list = stack.getChildren();
-		
-		//----------------------------------------------------------------
-		// create a new part stack if necessary
-		// We don't want this, since it makes the layout weird.
-		//----------------------------------------------------------------
-		if (stack == null) {
+		} else {
+			//----------------------------------------------------------------
+			// create a new part stack if necessary
+			// We don't want this, since it makes the layout weird.
+			//----------------------------------------------------------------
 			stack = modelService.createModelElement(MPartStack.class);
 			stack.setElementId(STACK_ID_BASE);
 			stack.setToBeRendered(true);
@@ -301,7 +300,8 @@ public class DatabaseCollection
 			try {
 				Thread.sleep(300);					
 			} catch (Exception e) {
-				
+				// sleep is interrupted
+				// no op
 			}
 			maxAttempt--;
 		}
@@ -337,8 +337,34 @@ public class DatabaseCollection
 		//----------------------------------------------------------------
 		// display the trace view if the information exists
 		//----------------------------------------------------------------
+		displayTraceView(experiment, service, elementID, list);
+		
+		if (view instanceof ProfilePart) {
+			ProfilePart activeView = (ProfilePart) view;
+			if (message != null && !message.isEmpty()) {
+				sync.asyncExec(()->{
+					activeView.showWarning(message);
+				});
+			}		
+		}
+		return 1;
+	}
+
+	
+	/****
+	 * 
+	 * @param experiment
+	 * @param service
+	 * @param elementID
+	 * @param list
+	 * @return
+	 */
+	private int displayTraceView(IExperiment experiment, 
+								 EPartService service,
+								 String elementID,
+								 List<MStackElement> list) {
 		if (LocalDBOpener.directoryHasTraceData(experiment.getDirectory()) < 0) {
-			return 1;
+			return 0;
 		}
 
 		MPart tracePart  = service.createPart(TracePart.ID);
@@ -357,18 +383,8 @@ public class DatabaseCollection
 				((TracePart)objTracePart).setInput(createPart, experiment);
 			}
 		}
-		
-		((ProfilePart) view).onFocus();
-		if (message != null && !message.isEmpty()) {
-			final ProfilePart activePart = (ProfilePart) view;
-			sync.asyncExec(()->{
-				activePart.showWarning(message);
-			});
-		}
-		
 		return 1;
 	}
-	
 		
 	/***
 	 * Retrieve the iterator of the database collection from a given windo

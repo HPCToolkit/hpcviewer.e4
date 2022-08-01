@@ -50,7 +50,7 @@ public class CallSiteArrowPainter extends BackgroundPainter
     @Override
     public int getPreferredWidth(ILayerCell cell, GC gc, IConfigRegistry configRegistry) {
     	final String csGlyph = getCallsiteGlyph(cell);
-    	if (csGlyph == EMPTY)
+    	if (csGlyph.equals(EMPTY))
     		return 0;
 
     	final Font oldFont = gc.getFont();
@@ -58,7 +58,7 @@ public class CallSiteArrowPainter extends BackgroundPainter
     	// compute the width of the call site text (line number)
     	Point sizeText = new Point(0, 0);
     	String csText  = getCallsiteText(cell);
-    	if (csText != EMPTY) {
+    	if (!csText.equals(EMPTY)) {
         	gc.setFont(FontManager.getFontGeneric());
         	sizeText = gc.stringExtent(SPACE + csText);
     	}
@@ -83,7 +83,7 @@ public class CallSiteArrowPainter extends BackgroundPainter
     public void paintCell(ILayerCell cell, GC gc, Rectangle bounds, IConfigRegistry configRegistry) {
     	String glyph = getCallsiteGlyph(cell);
 
-        if (glyph == EMPTY) 
+        if (glyph.equals(EMPTY)) 
         	return;
         
     	Color color = ColorManager.COLOR_ARROW_ACTIVE;
@@ -111,7 +111,7 @@ public class CallSiteArrowPainter extends BackgroundPainter
         // ------------------------------------------
 
     	String lineNum = getCallsiteText(cell);
-    	if (lineNum != EMPTY) {
+    	if (!lineNum.equals(EMPTY)) {
     		var textColor = ColorManager.getTextFg(originalBackground);
         	var displayMode = cell.getDisplayMode();
 
