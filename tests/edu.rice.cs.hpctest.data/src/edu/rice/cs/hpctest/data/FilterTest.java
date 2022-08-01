@@ -47,48 +47,57 @@ public class FilterTest
 		for (var exp: experiments) {
 			int j = 0;
 			for(var attr: attributes) {
-				IFilterData filterData = new IFilterData() {
-					
-					@Override
-					public boolean select(String element) {
-						return getFilterAttribute(element) != null;
-					}
-					
-					@Override
-					public boolean isFilterEnabled() {
-						return true;
-					}
-					
-					@Override
-					public FilterAttribute getFilterAttribute(String element) {
-						if (element != null) {
-							if (element.startsWith(filterText)) {
-								var fa = new FilterAttribute();
-								fa.enable = true;
-								fa.filterType = attr;
-								return fa;
-							}
-						}
-						return null;
-					}
-				};
-				if (exp != null) {
-					// the first filter attribute Descendants_Only will remove 
-					// 		the descendants but not the node (if match)
-					// the second filter attribute will remove the node itself
-					// the third filter should match nothing since all the matched nodes
-					// 		were already filtered
-					
-					int numScopes = exp.filter(filterData);
-					if (j < 2)
-						assertTrue(numScopes >= numFilteredScopes[i]);
-					else
-						assertTrue(numScopes == 0);
-				}
+				IFilterData filterData = new FilterData(filterText, attr) ;
+				
+				// the first filter attribute Descendants_Only will remove 
+				// 		the descendants but not the node (if match)
+				// the second filter attribute will remove the node itself
+				// the third filter should match nothing since all the matched nodes
+				// 		were already filtered
+				
+				int numScopes = exp.filter(filterData);
+				if (j < 2)
+					assertTrue(numScopes >= numFilteredScopes[i]);
+				else
+					assertTrue(numScopes == 0);
+
 				j++;
 			}
 			i++;
 		}
 	}
 
+	private static class FilterData implements IFilterData
+	{
+		private final String filterText;
+		private final FilterAttribute.Type attr;
+		
+		public FilterData(String textToFilter, FilterAttribute.Type filterType) {
+			this.filterText = textToFilter;
+			this.attr = filterType;
+		}
+		
+		@Override
+		public boolean select(String element) {
+			return getFilterAttribute(element) != null;
+		}
+		
+		@Override
+		public boolean isFilterEnabled() {
+			return true;
+		}
+		
+		@Override
+		public FilterAttribute getFilterAttribute(String element) {
+			if (element != null) {
+				if (element.startsWith(filterText)) {
+					var fa = new FilterAttribute();
+					fa.enable = true;
+					fa.filterType = attr;
+					return fa;
+				}
+			}
+			return null;
+		}
+	}
 }
