@@ -39,7 +39,7 @@ public class DataMetaTest
 			
 			final DataMeta dm = new DataMeta();
 			
-			assertThrows(RuntimeException.class, ()->{
+			assertThrows(IOException.class, ()->{
 				dm.open(dbPath.getAbsolutePath());
 			});
 			dataMeta[i] = dm;

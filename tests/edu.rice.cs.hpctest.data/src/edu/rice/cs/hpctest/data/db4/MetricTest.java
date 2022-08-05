@@ -30,7 +30,7 @@ public class MetricTest {
 			final var dataMeta = data[i];
 			final var dbPath   = dbPaths[i];
 			
-			assertThrows(RuntimeException.class, ()->{
+			assertThrows(IOException.class, ()->{
 				dataMeta.open(dbPath.getAbsolutePath());
 			});
 			dataMeta.open(new Experiment(), dbPaths[i].getAbsolutePath());

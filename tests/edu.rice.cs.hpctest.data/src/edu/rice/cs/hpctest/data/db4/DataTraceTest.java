@@ -65,7 +65,7 @@ public class DataTraceTest {
 
 	@Test
 	public void testGetNumberOfSamples() {
-		int []numSample = new int[] {90, 442}; // 
+		int []numSample = new int[] {90, 0}; // 
 		for(int j=0; j<data.length; j++) {
 			var d = data[j];
 			int samples = d.getNumberOfSamples(0);
@@ -84,7 +84,7 @@ public class DataTraceTest {
 
 	@Test
 	public void testGetLength() {
-		final int []lengths = new int[] {106, 304}; // {6732,  }
+		final int []lengths = new int[] {106, 0}; // {6732,  }
 		for (int i=0; i<data.length; i++) {
 			long l = data[i].getLength(0);
 			assertTrue(l >= lengths[i]);

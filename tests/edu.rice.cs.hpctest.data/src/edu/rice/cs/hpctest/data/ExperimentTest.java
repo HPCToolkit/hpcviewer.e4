@@ -98,7 +98,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetVisibleMetrics() {
-		int []num = new int[] {97, 2, 0, 3, 6, 4};
+		int []num = new int[] {97, 2, 0, 3, 3, 4};
 		int i = 0;
 		for(var experiment: experiments) {
 			List<BaseMetric> metrics = experiment.getVisibleMetrics();
@@ -110,7 +110,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetNonEmptyMetricIDs() {
-		final int []nmetrics = new int[] {18, 0, 0, 1, 3, 10};
+		final int []nmetrics = new int[] {18, 0, 0, 1, 1, 10};
 		int i=0;
 		for(var experiment: experiments) {
 			RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
@@ -123,7 +123,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetMetricCount() {
-		int []counts = new int[] {10, 0, 0, 2, 6, 160};
+		int []counts = new int[] {10, 0, 0, 2, 2, 160};
 		int i=0;
 		
 		for(var experiment: experiments) {
@@ -353,7 +353,7 @@ public class ExperimentTest {
 		final int maxdepth[] = new int[] {4, 0, 0, 6, 20, 10};
 		int i=0;
 		for(var experiment: experiments) {
-			assertTrue(experiment.getMaxDepth() > maxdepth[i]);
+			assertTrue(experiment.getMaxDepth() >= maxdepth[i]);
 			i++;
 		}
 	}

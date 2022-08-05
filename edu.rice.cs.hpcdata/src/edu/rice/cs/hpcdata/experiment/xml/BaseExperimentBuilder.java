@@ -672,11 +672,11 @@ public class BaseExperimentBuilder extends Builder
 			if ( (this.scopeStack.size()>1) && ( this.scopeStack.peek() instanceof LineScope)  ) {
 
 				LineScope ls = (LineScope)this.scopeStack.pop();
-				int	callsiteID = ls.getFlatIndex();
+				int	callsiteID = Integer.MAX_VALUE - ( ls.getFlatIndex() << 16 | procScope.getFlatIndex() );
 				
 				CallSiteScope csn = new CallSiteScope( ls, procScope, 
 						CallSiteScopeType.CALL_TO_PROCEDURE, cct_id, callsiteID );
-
+				
 				// beginScope pushes csn onto the node stack and connects it with its parent
 				// this is done while the ls is off the stack so the parent of csn is ls's parent. 
 				// afterward, we rearrange the top of stack to tuck ls back underneath csn in case it is 

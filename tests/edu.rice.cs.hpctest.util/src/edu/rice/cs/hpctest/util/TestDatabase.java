@@ -20,8 +20,8 @@ public class TestDatabase
 													 DIR_XML + File.separator + "bug-nometric"};
 	
 	private static String []metadbPaths = new String[] {
-			DIR_METADB + File.separator + "loop-fork-cycles"};
-	
+												  DIR_METADB + File.separator + "loop-fork-cycles",
+												  DIR_METADB + File.separator + "lmp-openmp"};	
 	
 	public static File[] getXMLDatabases() {
 		return getDatabases(xmlPaths);
