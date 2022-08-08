@@ -4,7 +4,6 @@ package edu.rice.cs.hpctest.data;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -88,7 +87,9 @@ public class ExperimentTest {
 		for(var exp: experiments) {
 			List<BaseMetric> metrics = exp.getRawMetrics();
 			if (exp.getMajorVersion()<4) {
-				assertNull(metrics);
+				if (metrics != null) {
+					assertTrue(metrics.size() <= exp.getMetricCount());
+				}
 			} else {
 				assertNotNull(metrics);
 				assertTrue(metrics.size()>1);
@@ -98,7 +99,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetVisibleMetrics() {
-		int []num = new int[] {97, 2, 0, 3, 3, 4};
+		int []num = new int[] {97, 2, 0, 3, 3, 3, 6};
 		int i = 0;
 		for(var experiment: experiments) {
 			List<BaseMetric> metrics = experiment.getVisibleMetrics();
@@ -110,7 +111,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetNonEmptyMetricIDs() {
-		final int []nmetrics = new int[] {18, 0, 0, 1, 1, 10};
+		final int []nmetrics = new int[] {18, 0, 0, 1, 1, 2, 2};
 		int i=0;
 		for(var experiment: experiments) {
 			RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
@@ -123,7 +124,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetMetricCount() {
-		int []counts = new int[] {10, 0, 0, 2, 2, 160};
+		int []counts = new int[] {10, 0, 0, 2, 2, 3, 3};
 		int i=0;
 		
 		for(var experiment: experiments) {
@@ -170,27 +171,38 @@ public class ExperimentTest {
 
 	@Test
 	public void testAddDerivedMetric() {
-		int []indexes = new int[] {762, 0, 1, 1, 1, 27};
-		int i=0;
-		
 		for(var experiment: experiments) {
 			if (experiment.getMetricCount()==0) 
 				continue;
 			
 			RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
-			BaseMetric metric = experiment.getMetric(indexes[i]);
+			BaseMetric metric = experiment.getMetricList().get(0);
 			int numMetrics = experiment.getMetricCount();
+			int index = getUnusedMetricIndex(experiment);
+			String ID = String.valueOf(index);
+			
 			DerivedMetric dm = new DerivedMetric(root, 
 										experiment, 
 										"$" + metric.getIndex(), 
 										"DM " + metric.getDisplayName(), 
-										String.valueOf(numMetrics), 
-										numMetrics, AnnotationType.NONE, metric.getMetricType());
+										ID, 
+										index, AnnotationType.NONE, metric.getMetricType());
 			experiment.addDerivedMetric(dm);
 			
 			assertTrue(experiment.getMetricCount() == numMetrics + 1);
-			i++;
 		}
+	}
+	
+	private int getUnusedMetricIndex(Experiment experiment) {
+		int numMetrics = experiment.getMetricCount();
+		int index = 0;
+		var metrics = experiment.getMetricList();
+		for(var metric: metrics) {
+			if (metric.getIndex() != index)
+				return index;
+			index++;
+		}
+		return numMetrics;
 	}
 	
 
@@ -350,7 +362,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetMaxDepth() {
-		final int maxdepth[] = new int[] {4, 0, 0, 6, 20, 10};
+		final int maxdepth[] = new int[] {4, 0, 0, 6, 13, 20, 10};
 		int i=0;
 		for(var experiment: experiments) {
 			assertTrue(experiment.getMaxDepth() >= maxdepth[i]);
@@ -401,7 +413,7 @@ public class ExperimentTest {
 
 	@Test
 	public void testGetName() {
-		final String []names = new String[] {"bandwidthTest", "a.out", "a.out", DB_LOOP_INLINE, DB_MULTITHREAD, "qs"};
+		final String []names = new String[] {"bandwidthTest", "a.out", "a.out", DB_LOOP_INLINE, DB_MULTITHREAD, "qs", "inline"};
 		int i=0;
 		for(var experiment: experiments) {
 			String name = experiment.getName();

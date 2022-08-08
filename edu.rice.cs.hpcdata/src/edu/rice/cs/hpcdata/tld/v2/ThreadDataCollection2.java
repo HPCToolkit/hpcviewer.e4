@@ -20,15 +20,15 @@ import edu.rice.cs.hpcdata.util.MergeDataFiles;
  ******************************************************************/
 public class ThreadDataCollection2 extends AbstractThreadDataCollection
 {
-	private ThreadLevelDataFile data_file[];
+	private ThreadLevelDataFile[] dataFile;
 	private File directory;
 	private Experiment experiment;
 
 	public ThreadDataCollection2(Experiment experiment)
 	{
 		this.experiment = experiment;
-		int num_metrics = experiment.getRawMetrics().size();
-		data_file		= new ThreadLevelDataFile[num_metrics];
+		int numMetrics  = experiment.getRawMetrics().size();
+		dataFile		= new ThreadLevelDataFile[numMetrics];
 	}
 	
 	@Override
@@ -47,7 +47,7 @@ public class ThreadDataCollection2 extends AbstractThreadDataCollection
 		// check if the data already exists or not
 		ensureDataFile(metricIndex);
 		
-		return data_file[metricIndex].getMetric(nodeIndex, metricIndex, profileId, numMetrics);
+		return dataFile[metricIndex].getMetric(nodeIndex, metricIndex, profileId, numMetrics);
 	}
 
 	
@@ -56,28 +56,28 @@ public class ThreadDataCollection2 extends AbstractThreadDataCollection
 			throws Exception {
 		// check if the data already exists or not
 		ensureDataFile(metricIndex);
-		return data_file[metricIndex].getMetrics(nodeIndex, metricIndex, numMetrics);
+		return dataFile[metricIndex].getMetrics(nodeIndex, metricIndex, numMetrics);
 	}
 	
 	@Override
-	public double[] getScopeMetrics(int thread_id, int metricIndex, int numMetrics) throws IOException
+	public double[] getScopeMetrics(int threadId, int metricIndex, int numMetrics) throws IOException
 	{
 		// check if the data already exists or not
 		ensureDataFile(metricIndex);
-		return data_file[metricIndex].getScopeMetrics(thread_id, metricIndex, numMetrics);
+		return dataFile[metricIndex].getScopeMetrics(threadId, metricIndex, numMetrics);
 	}
 
 
 	@Override
 	public boolean isAvailable() {
-		return data_file != null && data_file.length>0;
+		return dataFile != null && dataFile.length>0;
 	}
 
 	
 	@Override
 	public double[] getRankLabels() throws IOException {
 		ensureDataFile(0);
-		final String []labels = data_file[0].getRankLabels();
+		final String []labels = dataFile[0].getRankLabels();
 		
 		double []rankLabels = new double[labels.length];
 		
@@ -86,8 +86,8 @@ public class ThreadDataCollection2 extends AbstractThreadDataCollection
 		// we want to convert it into:  0.0, 0.3, 0.6, 1.0, 1.3, 1.6
 		for(int i=0; i<labels.length; i++)
 		{
-			double rank_double = Double.parseDouble(labels[i]); 
-			rankLabels[i] = rank_double;
+			double rankInDouble = Double.parseDouble(labels[i]); 
+			rankLabels[i] = rankInDouble;
 		}
 		
 		return rankLabels;
@@ -97,13 +97,13 @@ public class ThreadDataCollection2 extends AbstractThreadDataCollection
 	@Override
 	public String[] getRankStringLabels() throws IOException {
 		ensureDataFile(0);
-		return data_file[0].getRankLabels();
+		return dataFile[0].getRankLabels();
 	}
 
 	@Override
 	public int getParallelismLevel() throws IOException {
 		ensureDataFile(0);
-		return data_file[0].getParallelismLevel();
+		return dataFile[0].getParallelismLevel();
 	}
 
 	@Override
@@ -113,7 +113,7 @@ public class ThreadDataCollection2 extends AbstractThreadDataCollection
 		{
 			title = "Process.Thread";
 		} else {
-			if (data_file[0].isMultiProcess())
+			if (dataFile[0].isMultiProcess())
 				title = "Process";
 			else 
 				title = "Thread";
@@ -123,9 +123,9 @@ public class ThreadDataCollection2 extends AbstractThreadDataCollection
 
 	@Override
 	public void dispose() {
-		if (data_file != null)
+		if (dataFile != null)
 		{
-			for(ThreadLevelDataFile df : data_file)
+			for(ThreadLevelDataFile df : dataFile)
 			{
 				if (df != null)
 					df.dispose();
@@ -136,7 +136,7 @@ public class ThreadDataCollection2 extends AbstractThreadDataCollection
 
 	private void ensureDataFile(int metricIndex) throws IOException
 	{
-		if (data_file[metricIndex] != null)
+		if (dataFile[metricIndex] != null)
 		{
 			return;
 		}
@@ -144,8 +144,8 @@ public class ThreadDataCollection2 extends AbstractThreadDataCollection
 		String file = ThreadLevelDataCompatibility.getMergedFile(experiment, directory, metricIndex);
 		if (file != null)
 		{
-			data_file[metricIndex] = new ThreadLevelDataFile();
-			data_file[metricIndex].open(file);
+			dataFile[metricIndex] = new ThreadLevelDataFile();
+			dataFile[metricIndex].open(file);
 		} else {
 			throw new IOException("No thread-level data in " + directory.getAbsolutePath());
 		}
@@ -159,7 +159,7 @@ public class ThreadDataCollection2 extends AbstractThreadDataCollection
 	 * The class also check compatibility with the old version.
 	 *
 	 */
-	static private class ThreadLevelDataCompatibility 
+	private static class ThreadLevelDataCompatibility 
 	{
 		/**
 		 * method to find the name of file for a given metric ID. 
@@ -168,14 +168,14 @@ public class ThreadDataCollection2 extends AbstractThreadDataCollection
 		 * The name of the merge file will depend on the glob pattern
 		 * 
 		 * @param directory
-		 * @param metric_raw_id
+		 * @param metricRawId
 		 * @return
 		 * @throws IOException
 		 */
-		static public String getMergedFile(Experiment experiment, File directory, int metric_raw_id) throws IOException 
+		public static String getMergedFile(Experiment experiment, File directory, int metricRawId) throws IOException 
 		{
-			final HashMap<String, String> listOfFiles = new HashMap<String, String>();
-			final MetricRaw metric = (MetricRaw) experiment.getRawMetrics().get(metric_raw_id);// experiment.getMetricRaw()[metric_raw_id];
+			final HashMap<String, String> listOfFiles = new HashMap<>();
+			final MetricRaw metric = (MetricRaw) experiment.getRawMetrics().get(metricRawId);
 			final String globInputFile = metric.getGlob();
 			
 			// assuming the number of merged experiments is less than 10
@@ -231,7 +231,7 @@ public class ThreadDataCollection2 extends AbstractThreadDataCollection
 			return cacheFileName;
 		}
 		
-		static private void checkOldVersionOfData(File directory) {
+		private static void checkOldVersionOfData(File directory) {
 			
 			String oldFile = directory.getAbsolutePath() + File.separatorChar + "experiment.mdb"; 
 			File file = new File(oldFile);
@@ -248,7 +248,7 @@ public class ThreadDataCollection2 extends AbstractThreadDataCollection
 	 * Temporary Quick fix: Empty Progress bar
 	 *
 	 */
-	static private class ProgressReport implements IProgressReport 
+	private static class ProgressReport implements IProgressReport 
 	{
 
 		public ProgressReport()
@@ -256,7 +256,7 @@ public class ThreadDataCollection2 extends AbstractThreadDataCollection
 			// no action needed
 		}
 		
-		public void begin(String title, int num_tasks) {
+		public void begin(String title, int numTasks) {
 			// no action needed
 		}
 

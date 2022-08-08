@@ -147,7 +147,7 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		dupl.expression     = expression.duplicate();
 		dupl.metricType     = metricType;
 		dupl.order          = order;
-		dupl.partner_index  = partner_index;
+		dupl.partnerIndex  = partnerIndex;
 		dupl.sampleperiod   = sampleperiod;
 		
 		return dupl;

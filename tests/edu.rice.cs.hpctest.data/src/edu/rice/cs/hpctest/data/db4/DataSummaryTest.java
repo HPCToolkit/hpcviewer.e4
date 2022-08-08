@@ -134,7 +134,7 @@ public class DataSummaryTest {
 	public void testGetParallelismLevels() {
 		for(var profile: dataProfiles) {
 			int p = profile.getParallelismLevels();
-			assertTrue(p == 2);
+			assertTrue(p >= 1);
 		}
 	}
 

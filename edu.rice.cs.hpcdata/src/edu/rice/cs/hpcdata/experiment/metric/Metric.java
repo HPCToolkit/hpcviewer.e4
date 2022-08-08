@@ -95,7 +95,7 @@ public int getIndex()
 @Override
 public BaseMetric duplicate() {
 	BaseMetric m = new Metric(shortName, description, displayName, visibility, null, annotationType, 
-			String.valueOf(sampleperiod), index, metricType, partner_index);
+			String.valueOf(sampleperiod), index, metricType, partnerIndex);
 	m.setOrder(order);
 	
 	return m;

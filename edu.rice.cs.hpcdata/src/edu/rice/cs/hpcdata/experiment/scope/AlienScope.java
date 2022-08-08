@@ -58,7 +58,6 @@ public AlienScope(RootScope root, SourceFile file,
 	super(root, file, first, last, id, id);
 	this.fileName = fileName;
 	this.procedureName = procName;
-//	this.id = "AlienScope";
 }
 
 

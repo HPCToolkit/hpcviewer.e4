@@ -13,26 +13,26 @@ public abstract class AbstractThreadDataCollection implements
 		// we only spread the values if the parallelism is more than 1 
 		
 		if (parallelism>1) {
-			
-			for(int i=0; i<values.length; i++) {
-				int num_siblings = 0;
-				int rank_first 	 = (int) Math.floor(values[i]);
+			int i = 0;
+			while(i<values.length) {
+				int numSiblings = 0;
+				int rankFirst 	= (int) Math.floor(values[i]);
 				
 				int j = i+1;
 				for(; j<values.length; j++) {
-					int next_rank =  (int) Math.floor(values[j]);
-					num_siblings++;
+					int nextRank =  (int) Math.floor(values[j]);
+					numSiblings++;
 										
-					if (next_rank > rank_first) {
+					if (nextRank > rankFirst) {
 						break;
 					} else if (j==values.length-1) {
-						num_siblings++;
+						numSiblings++;
 					}
 				}
-				for (int k=0; k<num_siblings; k++) {
-					values[i+k] = (double)rank_first + ((double)k/num_siblings);
+				for (int k=0; k<numSiblings; k++) {
+					values[i+k] = rankFirst + ((double)k/numSiblings);
 				}
-				i = j-1;
+				i = j;
 			}
 		}
 		return values;

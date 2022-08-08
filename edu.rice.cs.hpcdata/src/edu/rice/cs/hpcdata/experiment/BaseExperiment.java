@@ -3,6 +3,7 @@ package edu.rice.cs.hpcdata.experiment;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.List;
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
@@ -35,11 +36,13 @@ public abstract class BaseExperiment implements IExperiment
 	protected RootScope datacentricRootScope;
 	
 	/** version of the database **/
-	private short versionMajor, versionMinor;
+	private short versionMajor;
+	private short versionMinor;
 
 	protected IDatabaseRepresentation databaseRepresentation;
 	
-	private int filterNumScopes = 0, filterStatus;
+	private int filterNumScopes = 0;
+	private int filterStatus;
 	private IdTupleType idTupleType;
 	private IThreadDataCollection threadData;
 	
@@ -124,9 +127,8 @@ public abstract class BaseExperiment implements IExperiment
 	 * Reset the thread data. This is important to reset the data
 	 * once the database has been changed (like has been filtered).
 	 * 
-	 * @throws IOException
 	 */
-	public void resetThreadData() throws IOException {
+	public void resetThreadData() {
 		threadData = null;
 	}
 	
@@ -183,7 +185,7 @@ public abstract class BaseExperiment implements IExperiment
 		if (root != null)
 			return root.getChildren();
 		else
-			return null;
+			return Collections.emptyList();
 	}
 	
 	/****
@@ -212,15 +214,15 @@ public abstract class BaseExperiment implements IExperiment
 	 * 
 	 * @param fileExperiment : file of the experiment xml
 	 * @param userData : map of user preferences
-	 * @param need_metric : whether we need to assign metrics or not
+	 * @param needMetric : whether we need to assign metrics or not
 	 * @throws Exception
 	 */
 	public void open(File fileExperiment, 
 					 IUserData<String, String> userData, 
-					 boolean need_metric)
+					 boolean needMetric)
 			throws	Exception
 	{
-		databaseRepresentation = new LocalDatabaseRepresentation(fileExperiment, userData, need_metric);
+		databaseRepresentation = new LocalDatabaseRepresentation(fileExperiment, userData, needMetric);
 		databaseRepresentation.open(this);
 		open_finalize();
 	}
@@ -254,7 +256,7 @@ public abstract class BaseExperiment implements IExperiment
 			databaseRepresentation.open(this);
 			open_finalize();
 		} else {
-			throw new Exception("Database has not been opened.");
+			throw new IOException("Database has not been opened.");
 		}
 	}
 
@@ -280,8 +282,7 @@ public abstract class BaseExperiment implements IExperiment
 	{
 		if (version == null) {
 			// very old database
-			versionMajor = 1;
-			versionMinor = 0;
+			version = "1.0";
 		}
 		
 		int ip = version.indexOf('.');

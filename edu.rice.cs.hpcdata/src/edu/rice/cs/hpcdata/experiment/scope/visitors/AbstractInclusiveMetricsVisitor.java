@@ -1,6 +1,5 @@
 package edu.rice.cs.hpcdata.experiment.scope.visitors;
 
-import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.scope.AlienScope;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.FileScope;
@@ -18,8 +17,9 @@ import edu.rice.cs.hpcdata.experiment.scope.filters.MetricValuePropagationFilter
 
 public abstract class AbstractInclusiveMetricsVisitor implements IScopeVisitor {
 
-	final protected MetricValuePropagationFilter filter;
-	public AbstractInclusiveMetricsVisitor(Experiment experiment, MetricValuePropagationFilter currentFilter) {
+	protected final MetricValuePropagationFilter filter;
+	
+	protected AbstractInclusiveMetricsVisitor(MetricValuePropagationFilter currentFilter) {
 		this.filter = currentFilter;
 	}
 	//----------------------------------------------------
@@ -45,26 +45,21 @@ public abstract class AbstractInclusiveMetricsVisitor implements IScopeVisitor {
 	protected void up(Scope scope, ScopeVisitType vt) {
 		if (vt == ScopeVisitType.PostVisit) {
 			Scope parent = scope.getParentScope();
-			if (parent != null) {
-				if (scope instanceof CallSiteScope) {
-					// inclusive view: add everything
-					accumulateToParent( parent, scope );
-					
-				} else {
-					// New definition of exclusive cost:
-					//	The cost of Outer loop does not include the cost of inner loop 
-					if(parent instanceof LoopScope && scope instanceof LoopScope) {
-						// for nested loop: we need to accumulate the inclusive but not exclusive.
-						if(filter instanceof InclusiveOnlyMetricPropagationFilter) {
-							// During the creation of CCT, we call this class twice: one for exclusive, the other for incl
-							// so we need to make sure that only the inclusive is taken
-							accumulateToParent( parent, scope );
-						}
-						return;
-					} 
+			if (parent == null)
+				return;
+
+			// New definition of exclusive cost:
+			//	The cost of Outer loop does not include the cost of inner loop 
+			if(parent instanceof LoopScope && scope instanceof LoopScope) {
+				// for nested loop: we need to accumulate the inclusive but not exclusive.
+				if(filter instanceof InclusiveOnlyMetricPropagationFilter) {
+					// During the creation of CCT, we call this class twice: one for exclusive, the other for incl
+					// so we need to make sure that only the inclusive is taken
 					accumulateToParent( parent, scope );
 				}
-			}
+				return;
+			} 
+			accumulateToParent( parent, scope );
 		}
 	}
 	
@@ -74,5 +69,5 @@ public abstract class AbstractInclusiveMetricsVisitor implements IScopeVisitor {
 	 * @param parent
 	 * @param source
 	 */
-	abstract protected void accumulateToParent(Scope parent, Scope source) ;
+	protected abstract void accumulateToParent(Scope parent, Scope source) ;
 }

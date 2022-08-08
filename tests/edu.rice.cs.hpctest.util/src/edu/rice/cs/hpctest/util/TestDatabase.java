@@ -17,11 +17,13 @@ public class TestDatabase
 	
 	private static String []xmlPaths = new String[] {DIR_XML + File.separator + "bug-no-gpu-trace", 
 													 DIR_XML + File.separator + "bug-empty", 
-													 DIR_XML + File.separator + "bug-nometric"};
+													 DIR_XML + File.separator + "bug-nometric", 
+													 DIR_XML + File.separator + "inline.xml.db"};
 	
 	private static String []metadbPaths = new String[] {
 												  DIR_METADB + File.separator + "loop-fork-cycles",
-												  DIR_METADB + File.separator + "lmp-openmp"};	
+												  DIR_METADB + File.separator + "lmp-openmp",
+												  DIR_METADB + File.separator + "inline.meta.db"};	
 	
 	public static File[] getXMLDatabases() {
 		return getDatabases(xmlPaths);

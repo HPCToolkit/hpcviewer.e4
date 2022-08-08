@@ -190,7 +190,7 @@ public class AggregateMetric extends AbstractMetricWithFormula
 	 */
 	public BaseMetric duplicate() {
 		AggregateMetric m = new AggregateMetric(shortName, displayName, description, visibility, 
-				null, annotationType, index, partner_index, metricType);
+				null, annotationType, index, partnerIndex, metricType);
 		m.setOrder(order);
 		if (formulaCombine != null)
 			m.formulaCombine  = formulaCombine.duplicate();

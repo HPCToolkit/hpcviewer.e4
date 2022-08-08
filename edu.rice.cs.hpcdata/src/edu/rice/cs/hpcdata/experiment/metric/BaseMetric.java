@@ -20,23 +20,23 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 	// CONSTANTS
 	//-------------------------------------------------------------------------------
 
-	static final public int  PARTNER_UNKNOWN = -1;
-	static final private int NO_ORDER = -1;
+	public static final int  PARTNER_UNKNOWN = -1;
+	private static final int NO_ORDER = -1;
 
 	//-------------------------------------------------------------------------------
 	// DATA STRUCTURE
 	//-------------------------------------------------------------------------------
 
 	/** Valid types of Annotations to be used with metric values */
-	static public enum AnnotationType { NONE, PERCENT, PROCESS };
+	public enum AnnotationType { NONE, PERCENT, PROCESS };
 	
-	static public enum VisibilityType { 
+	public enum VisibilityType { 
 		HIDE, 				// hide the metric column 
 		SHOW, 				// show the metric column
 		SHOW_INCLUSIVE,		// show only the inclusive metric 
 		SHOW_EXCLUSIVE, 	// show only the exclusive metric
 		INVISIBLE			// the metric shouldn't be visible by users. see issue #67
-	};
+	}
 	
 	
 	//-------------------------------------------------------------------------------
@@ -65,7 +65,7 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 	/** The index of this metric in its experiment's metric list. */
 	protected int index;
 	// partner of the metric. If the metric is exclusive, then its partner is the inclusive one
-	protected int partner_index;
+	protected int partnerIndex;
 
 	/** The display format to be used for this metric. */
 	protected IMetricValueFormat displayFormat;
@@ -90,13 +90,13 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 	 * @param format : format of the display
 	 * @param annotationType : show the percent or process number ?
 	 * @param index : index in the table
-	 * @param partner_index : index of the partner metric. 
+	 * @param partnerIndex : index of the partner metric. 
 	 * 		IT HAS TO BE NEGATIVE IF IT DOESNT HAVE A PARTNER !!
 	 * @param type : type of the metric
 	 *************************************************************************/
 	public BaseMetric(String sID, String sDisplayName, String sDescription,
 			VisibilityType displayed, String format, 
-			AnnotationType annotationType, int index, int partner_index, MetricType type) 
+			AnnotationType annotationType, int index, int partnerIndex, MetricType type) 
 	{
 		this.displayName = sDisplayName;
 		this.visibility  = displayed;
@@ -104,7 +104,7 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 		
 		this.order = NO_ORDER;
 		this.index = index;
-		this.partner_index = partner_index;
+		this.partnerIndex = partnerIndex;
 		
 		// format
 		if (format == null) {
@@ -165,13 +165,13 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 	 * @return the index partner, negative if it has no partner
 	 */
 	public int getPartner() {
-		return partner_index;
+		return partnerIndex;
 	}
 	
 
 	public void setPartner(int ei)
 	{
-		this.partner_index = ei;
+		this.partnerIndex = ei;
 	}
 
 	public void setOrder(int order)
