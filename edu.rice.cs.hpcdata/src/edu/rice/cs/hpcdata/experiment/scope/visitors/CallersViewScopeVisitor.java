@@ -1,11 +1,12 @@
 package edu.rice.cs.hpcdata.experiment.scope.visitors;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.Deque;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Stack;
-
+import java.util.List;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.*;
 import edu.rice.cs.hpcdata.experiment.scope.*;
@@ -32,7 +33,7 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 	private final InclusiveOnlyMetricPropagationFilter inclusiveOnly;
 	
 	private final ListCombinedScopes listCombinedScopes;
-	private final Hashtable<String, Scope> calleeht;
+	private final HashMap<String, Scope> calleeht;
 	
 	private final RootScope callersViewRootScope;
 	
@@ -51,7 +52,7 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 		combinedMetrics = new CombineCallerScopeMetric();
 
 		listCombinedScopes = new ListCombinedScopes();
-		calleeht = new Hashtable<String, Scope>();
+		calleeht = new HashMap<>();
 	}
 
 	//----------------------------------------------------
@@ -79,11 +80,6 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 		}
 	}
 	
-		 
-	public void visit(Scope scope, ScopeVisitType vt) { }
-	public void visit(RootScope scope, ScopeVisitType vt) { }
-	public void visit(LoadModuleScope scope, ScopeVisitType vt) { }
-	public void visit(FileScope scope, ScopeVisitType vt) { }
 	
 	public void visit(ProcedureScope scope, ScopeVisitType vt) { 
 		
@@ -110,12 +106,16 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 			this.decrementCounter();
 		}
 	}
-	
-	public void visit(AlienScope scope, ScopeVisitType vt) { }
-	public void visit(LoopScope scope, ScopeVisitType vt) { }
-	public void visit(StatementRangeScope scope, ScopeVisitType vt) { 	}
-	public void visit(LineScope scope, ScopeVisitType vt) {  }
-	public void visit(GroupScope scope, ScopeVisitType vt) { }
+	 
+	public void visit(Scope scope, ScopeVisitType vt) 				{ /* no action */ }
+	public void visit(RootScope scope, ScopeVisitType vt) 			{ /* no action */ }
+	public void visit(LoadModuleScope scope, ScopeVisitType vt) 	{ /* no action */ }
+	public void visit(FileScope scope, ScopeVisitType vt) 			{ /* no action */ }
+	public void visit(AlienScope scope, ScopeVisitType vt) 			{ /* no action */ }
+	public void visit(LoopScope scope, ScopeVisitType vt) 			{ /* no action */ }
+	public void visit(StatementRangeScope scope, ScopeVisitType vt) { /* no action */ }
+	public void visit(LineScope scope, ScopeVisitType vt) 			{ /* no action */ }
+	public void visit(GroupScope scope, ScopeVisitType vt) 			{ /* no action */ }
 
 	
 	//----------------------------------------------------
@@ -156,7 +156,7 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 		else
 			cct_proc_s = ( (CallSiteScope)cct_s).getProcedureScope();
 		
-		String objCode = cct_s.getSourceFile().getFileID() + ":" + cct_proc_s.getFlatIndex();
+		String objCode = cct_proc_s.getSourceFile().getFileID() + ":" + cct_proc_s.getFlatIndex();
 
 		ProcedureScope caller_proc = (ProcedureScope) calleeht.get(objCode);
 		
@@ -193,7 +193,7 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 		// 	When a caller view scope is created, it creates also its children and its merged children
 		//		the counter of these children are then need to be decremented based on the CCT scope
 		//---------------------------------------------------------------------------
-		ArrayList<Scope> list = this.listCombinedScopes.pop();
+		var list = this.listCombinedScopes.pop();
 		if (list != null) {
 			Iterator<Scope> iter = list.iterator();
 			while (iter.hasNext()) {
@@ -214,19 +214,19 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 	 * class helper to store the list of combined scopes
 	 * 
 	 ********************************************************************/
-	static private class ListCombinedScopes {
-		private Stack<ArrayList<Scope>> combinedScopes;
+	private static class ListCombinedScopes {
+		private Deque<ArrayList<Scope>> combinedScopes;
 		
-		public ArrayList<Scope> push() {
+		public List<Scope> push() {
 			if (this.combinedScopes == null) {
-				this.combinedScopes = new Stack< ArrayList<Scope>>();
+				this.combinedScopes = new ArrayDeque<>();
 			}
-			ArrayList<Scope> list = new ArrayList<Scope>();
+			ArrayList<Scope> list = new ArrayList<>();
 			this.combinedScopes.push(list);
 			return list;
 		}
 		
-		public ArrayList<Scope> pop() {
+		public List<Scope> pop() {
 			return this.combinedScopes.pop();
 		}
 		

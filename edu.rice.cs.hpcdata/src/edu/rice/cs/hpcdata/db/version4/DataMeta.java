@@ -59,7 +59,7 @@ public class DataMeta extends DataCommon
 	// --------------------------------------------------------------------
 	public static final String  DB_META_FILE       = "meta.db";
 	
-	private final static String HEADER_MAGIC_STR   = "HPCTOOLKITmeta";
+	private static final String HEADER_MAGIC_STR   = "HPCTOOLKITmeta";
 	
 	private static final int INDEX_GENERAL = 0;
 	private static final int INDEX_NAMES   = 1;

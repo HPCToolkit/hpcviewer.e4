@@ -661,8 +661,8 @@ public class DataSummary extends DataCommon
 
 	public static class ListCCTAndIndex
 	{
-		public int  []listOfId;
-		public long []listOfdIndex;
+		public final int  []listOfId;
+		public final long []listOfdIndex;
 		
 		public ListCCTAndIndex(int numContexts) {
 			listOfId = new int[numContexts];

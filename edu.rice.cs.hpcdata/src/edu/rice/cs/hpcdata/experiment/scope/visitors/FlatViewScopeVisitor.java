@@ -138,8 +138,8 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 			// Notes: this is not correct for Derived incremental metrics
 			//--------------------------------------------------------------------------
 			if (objFlat != null) {
-				addCostIfNecessary(id, objFlat.flat_lm, scope, add_inclusive, add_exclusive);
-				addCostIfNecessary(id, objFlat.flat_file, scope, add_inclusive, add_exclusive);
+				addCostIfNecessary(id, objFlat.flatLM, scope, add_inclusive, add_exclusive);
+				addCostIfNecessary(id, objFlat.flatFile, scope, add_inclusive, add_exclusive);
 
 				//--------------------------------------------------------------------------
 				// For call site, we need also to create its procedure scope
@@ -210,8 +210,8 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 			//-----------------------------------------------------------------------------
 			// Initialize the flat scope of this cct
 			//-----------------------------------------------------------------------------
-			flat_info_s.flat_s = cct_s.duplicate();
-			flat_info_s.flat_s.setRootScope(root_ft);
+			flat_info_s.flatScope = cct_s.duplicate();
+			flat_info_s.flatScope.setRootScope(root_ft);
 			
 			//-----------------------------------------------------------------------------
 			// save the info into hashtable
@@ -222,25 +222,25 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 			// for inline macro, we don't need to attach the file and load module
 			// an inline macro node will be attached directly to its parent
 			//-----------------------------------------------------------------------------
-			if (isInlineMacro(flat_info_s.flat_s)) {
+			if (isInlineMacro(flat_info_s.flatScope)) {
 				return flat_info_s;
 			}
 			
 			//-----------------------------------------------------------------------------
 			// Initialize the load module scope
 			//-----------------------------------------------------------------------------
-			flat_info_s.flat_lm = this.createFlatModuleScope(proc_cct_s);
+			flat_info_s.flatLM = this.createFlatModuleScope(proc_cct_s);
 
 			//-----------------------------------------------------------------------------
 			// Initialize the flat file scope
 			//-----------------------------------------------------------------------------
-			flat_info_s.flat_file = this.createFlatFileScope(proc_cct_s, flat_info_s.flat_lm);
+			flat_info_s.flatFile = this.createFlatFileScope(proc_cct_s, flat_info_s.flatLM);
 			
 			//-----------------------------------------------------------------------------
 			// Attach the scope to the file if it is a procedure
 			//-----------------------------------------------------------------------------
-			if (flat_info_s.flat_s instanceof ProcedureScope) {
-				this.addToTree(flat_info_s.flat_file, flat_info_s.flat_s);
+			if (flat_info_s.flatScope instanceof ProcedureScope) {
+				this.addToTree(flat_info_s.flatFile, flat_info_s.flatScope);
 			}
 		}
 		
@@ -384,7 +384,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 					flat_enc_info = getFlatScope(cct_parent_s);
 				}
 				if (flat_enc_info != null)
-					flat_enc_s = flat_enc_info.flat_s;
+					flat_enc_s = flat_enc_info.flatScope;
 			}
 		}
 
@@ -394,9 +394,9 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 
 		if (flat_enc_s != null) {
 			// Check if there is a cyclic dependency between the child and the ancestors
-			if (!isCyclicDependency(flat_enc_s, objFlat.flat_s)) {
+			if (!isCyclicDependency(flat_enc_s, objFlat.flatScope)) {
 				// no cyclic dependency: it's safe to add to the parent
-				this.addToTree(flat_enc_s, objFlat.flat_s);				
+				this.addToTree(flat_enc_s, objFlat.flatScope);				
 			} else {
 				// A very rare case: cyclic dependency
 				// TODO: we should create a new copy and attach it to the tree
@@ -404,7 +404,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 				// at the moment we just avoid cyclic dependency				
 			}
 		}
-		this.addCostIfNecessary(id, objFlat.flat_s, cct_s_metrics, true, true);
+		this.addCostIfNecessary(id, objFlat.flatScope, cct_s_metrics, true, true);
 		
 		return objFlat;
 		
@@ -493,42 +493,14 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 		// ------
 		// (4a) <class, flat_id, load_module, file_source, procedure, line_num, parent_id>
 		// ------
-		String inlineID = getInlineID(scope);
-		hash_id.append(inlineID);
 
 		// ------
 		// (4b) <class, flat_id, load_module, file_source, procedure, line_num, parent_id>
 		// ------
-		if (inlineID.isEmpty() && scope.getParentScope() != null) {
-			var parent = scope.getParentScope();
-			if (parent instanceof ProcedureScope || parent instanceof CallSiteScope) {
-				ProcedureScope proc;
-				if (parent instanceof ProcedureScope)
-					proc = (ProcedureScope) parent;
-				else
-					proc = ((CallSiteScope) parent).getProcedureScope();
-				hash_id.append(SEPARATOR_ID);
-				hash_id.append(getID(proc));
-			}
-		}
 
 		return hash_id.toString();
 	}
 	
-	private String getInlineID(Scope scope) {		
-		if (scope instanceof ProcedureScope || scope instanceof CallSiteScope) {
-			ProcedureScope proc;
-			if (scope instanceof ProcedureScope)
-				proc = (ProcedureScope) scope;
-			else
-				proc = ((CallSiteScope) scope).getProcedureScope();
-			
-			if (proc.isAlien()) {
-				return SEPARATOR_ID + getID(scope.getParentScope());
-			}
-		}
-		return "";
-	}
 	
 	/***********************************************************
 	 * Add a child as the subscope of a parent
@@ -627,8 +599,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 		Scope parent = cct_s.getParentScope();
 		while(parent != null) {
 			if (parent instanceof CallSiteScope) {
-				ProcedureScope proc = ((CallSiteScope) parent).getProcedureScope();
-				/*if (!proc.isAlien()) */return proc;
+				return ((CallSiteScope) parent).getProcedureScope();
 			}
 			if (parent instanceof ProcedureScope) {
 				ProcedureScope proc = (ProcedureScope) parent;
@@ -655,50 +626,58 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 	/***********************************************************
 	 * add the cost of the cct into the flat scope if "necessary"
 	 * Necessary means: add the inclusive cost if the cct scope if the outermost scope
-	 * @param flat_s
-	 * @param cct_s
+	 * @param scopeFlat
+	 * @param scopeCCT
 	 ***********************************************************/
-	private void addCostIfNecessary( String objCode, Scope flat_s, Scope cct_s, boolean add_inclusive, boolean add_exclusive ) {
-		if (flat_s == null)
+	private void addCostIfNecessary( String objCode, Scope scopeFlat, Scope scopeCCT, boolean addInclusive, boolean addExclusive ) {
+		if (scopeFlat == null)
 			return;
 		
-		flat_s.incrementCounter();
+		scopeFlat.incrementCounter();
 			
-		if (isOutermostInstance(flat_s)) {
-			if (add_inclusive)
-				flat_s.combine(cct_s, inclusive_filter);
+		if (addInclusive && isOutermostInstance(scopeFlat)) {
+			scopeFlat.combine(scopeCCT, inclusive_filter);
 		}
-		if (add_exclusive) {
-			if (flat_s instanceof CallSiteScope && cct_s instanceof CallSiteScope) {
-				CallSiteScope cs_scope = (CallSiteScope) cct_s;
-				flat_s.combine(cs_scope.getLineScope(), exclusive_filter);
+		if (addExclusive) {
+			if (scopeFlat instanceof CallSiteScope && scopeCCT instanceof CallSiteScope) {
+				Scope scopeSource = scopeCCT;
+				if (this.exp.getMajorVersion() == Constants.EXPERIMENT_DENSED_VERSION) {
+					// fix issue #229: only in old database we use the line scope to combine the metric.
+					// for the new database, we assume the cost of the line scope of the call is zero,
+					// hence we use the cost of the original call site scope
+					CallSiteScope csScope = (CallSiteScope) scopeCCT;
+					scopeSource = csScope.getLineScope();
+				}
+				scopeFlat.combine(scopeSource, exclusive_filter);
 			} else {
-				flat_s.combine(cct_s, exclusive_filter);
+				scopeFlat.combine(scopeCCT, exclusive_filter);
 			}
 		}
 		//-----------------------------------------------------------------------
 		// store the flat scopes that have been updated  
 		//-----------------------------------------------------------------------
 
-		List<Scope> scope_added = htFlatCostAdded.get( objCode );
-		if (scope_added == null) {
-			scope_added = new ArrayList<Scope>();
+		List<Scope> listAddedScopes = htFlatCostAdded.get( objCode );
+		if (listAddedScopes == null) {
+			listAddedScopes = new ArrayList<>();
 		}
-		scope_added.add(flat_s);
+		listAddedScopes.add(scopeFlat);
 
-		htFlatCostAdded.put(objCode, scope_added);
+		htFlatCostAdded.put(objCode, listAddedScopes);
 	}
 
 	
 	/*************************************************************************
 	 * Each scope in the flat view has to be linked with 3 enclosing scopes:
-	 * - load module
-	 * - file
-	 * - procedure
+	 * <ul>
+	 *  <li> load module
+	 *  <li> file
+	 *  <li> procedure
+	 * </ul>
 	 *************************************************************************/
 	private class FlatScopeInfo {
-		LoadModuleScope flat_lm;
-		FileScope flat_file;
-		Scope flat_s;
+		LoadModuleScope flatLM;
+		FileScope flatFile;
+		Scope flatScope;
 	}
 }

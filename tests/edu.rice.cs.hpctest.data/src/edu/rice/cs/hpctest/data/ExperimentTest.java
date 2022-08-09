@@ -3,11 +3,15 @@ package edu.rice.cs.hpctest.data;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
 import org.junit.BeforeClass;
@@ -27,7 +31,8 @@ import edu.rice.cs.hpcdata.experiment.scope.visitors.TraceScopeVisitor;
 import edu.rice.cs.hpctest.util.TestDatabase;
 
 
-public class ExperimentTest {
+public class ExperimentTest 
+{
 	private static final String DB_MULTITHREAD = "multithread";
 	private static final String DB_LOOP_INLINE = "loop-inline";
 
@@ -43,6 +48,7 @@ public class ExperimentTest {
 		experiments  = new Experiment[database.length];
 
 		int i=0;
+
 		for (var dbp: database) {
 			experiments[i]= new Experiment();
 			try {
@@ -69,6 +75,8 @@ public class ExperimentTest {
 			
 			experiment.setTraceAttribute(attributes);
 
+			testGetRootScope(experiments[i]);
+			
 			i++;
 		}		
 	}
@@ -189,7 +197,7 @@ public class ExperimentTest {
 										index, AnnotationType.NONE, metric.getMetricType());
 			experiment.addDerivedMetric(dm);
 			
-			assertTrue(experiment.getMetricCount() == numMetrics + 1);
+			assertEquals(experiment.getMetricCount(), numMetrics + 1);
 		}
 	}
 	
@@ -226,40 +234,32 @@ public class ExperimentTest {
 				// the percentage of the root should be 100%
 				if (metric.getAnnotationType() == AnnotationType.PERCENT) {
 					String percent = str.substring(str.length()-6, str.length());
-					assertTrue(percent.equals("100.0%"));
+					assertEquals("100.0%", percent);
 				}
 			}
 		}
 	}
 
 
-	@Test
-	public void testGetRootScope() {
-		int i=0;
-		final int []children   = new int[] {1, 0, 0, 1, 2, 1, 1};
+	private static void testGetRootScope(Experiment experiment) {
 		
-		for(var experiment: experiments) {
-			RootScope rootCCT = experiment.getRootScope(RootScopeType.CallingContextTree);
-			RootScope rootCall = experiment.getRootScope(RootScopeType.CallerTree);
-			RootScope rootFlat = experiment.getRootScope(RootScopeType.Flat);
-			
-			assertNotNull(rootCCT);
-			assertNotNull(rootCall);
-			assertNotNull(rootFlat);
-			
-			assertTrue(rootCCT != rootCall);
-			assertTrue(rootCall != rootFlat);
-			
-			rootCall = experiment.createCallersView(rootCCT, rootCall);
-			
-			rootFlat = experiment.createFlatView(rootCCT, rootFlat);
-			
-			assertTrue(rootCCT.getSubscopeCount()  >= children[i]);
-			assertTrue(rootCall.getSubscopeCount() >= children[i]);
-			assertTrue(rootFlat.getSubscopeCount() >= children[i]);
-
-			i++;
-		}
+		RootScope rootCCT = experiment.getRootScope(RootScopeType.CallingContextTree);
+		RootScope rootCall = experiment.getRootScope(RootScopeType.CallerTree);
+		RootScope rootFlat = experiment.getRootScope(RootScopeType.Flat);
+		
+		assertNotNull(rootCCT);
+		assertNotNull(rootCall);
+		assertNotNull(rootFlat);
+		
+		assertNotSame(rootCCT, rootCall);
+		assertNotSame(rootCall, rootFlat);
+		
+		rootCall = experiment.createCallersView(rootCCT, rootCall);			
+		rootFlat = experiment.createFlatView(rootCCT, rootFlat);
+		
+		assertTrue(rootCCT.getSubscopeCount()  >= 0);
+		assertTrue(rootCall.getSubscopeCount() >= 0);
+		assertTrue(rootFlat.getSubscopeCount() >= 0);
 	}
 
 
@@ -267,18 +267,38 @@ public class ExperimentTest {
 	public void testTree() {
 		for(var experiment: experiments) {
 			for (var root: experiment.getRootScopeChildren()) {
+				assertTrue(root instanceof RootScope);
+				
 				if (!root.hasChildren())
 					continue;
 				
-				for(var child: root.getChildren()) {
-					boolean result = testFlatContext(experiment, root, child);
-					assertTrue( "Tree test fails for: " + experiment.getName() + " scope: " + child.getName(), result);
+				if (((RootScope)root).getType() == RootScopeType.CallerTree) {
+					var result = testUniqueProcedure((RootScope) root);
+					assertTrue(result);
+				} else {					
+					for(var child: root.getChildren()) {					
+						boolean result = testMetricValueCorrectness(experiment, root, child);
+						assertTrue( "Tree test fails for: " + experiment.getName() + " scope: " + child.getName(), result);
+					}
 				}
 			}
 		}
 	}
 	
-	private boolean testFlatContext(Experiment exp, Scope parent, Scope context) {
+	private boolean testUniqueProcedure(RootScope root) {
+		var children = root.getChildren();
+		var mapProcedure = new HashMap<String, Scope>(children.size());
+		for(var child: children) {
+			var name  = child.getName();
+			var scope = mapProcedure.get(name);
+			if (scope != null) 
+				assertNotEquals(scope.getFlatIndex(), child.getFlatIndex());
+			mapProcedure.put(name, child);
+		}
+		return true;
+	}
+	
+	private boolean testMetricValueCorrectness(Experiment exp, Scope parent, Scope context) {
 		var mvc = context.getMetricValues();
 		if (mvc == null)
 			return true;
@@ -308,8 +328,9 @@ public class ExperimentTest {
 		
 		// traverse all the children
 		if (context.hasChildren()) {
+			assertNotNull(context.getChildren());
 			for(var child: context.getChildren()) {
-				var result = testFlatContext(exp, context, child);
+				var result = testMetricValueCorrectness(exp, context, child);
 				if (!result)
 					return false;
 			}
@@ -385,7 +406,7 @@ public class ExperimentTest {
 		for(var experiment: experiments) {
 			var children = experiment.getRootScopeChildren();
 			assertNotNull(children);
-			assertTrue(children.size() == 3);
+			assertEquals(children.size(), 3);
 		}
 	}
 
@@ -407,17 +428,17 @@ public class ExperimentTest {
 			} catch (Exception e) {
 				assertFalse(e.getMessage(), true);
 			}
-			assertTrue(exp.getName().equals(experiment.getName()));
+			assertEquals(exp.getName(), experiment.getName());
 		}
 	}
 
 	@Test
 	public void testGetName() {
-		final String []names = new String[] {"bandwidthTest", "a.out", "a.out", DB_LOOP_INLINE, DB_MULTITHREAD, "qs", "inline"};
+		final String []names = new String[] {"bandwidthTest", "a.out", "a.out", "inline", "loop", "lmp", "inline"};
 		int i=0;
 		for(var experiment: experiments) {
 			String name = experiment.getName();
-			assertNotNull(name.equals(names[i]));
+			assertEquals(name, names[i]);
 			i++;
 		}
 	}
