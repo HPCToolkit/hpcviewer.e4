@@ -7,8 +7,8 @@ public class EntryScope extends ProcedureScope
 {
 	private final short entryPoint;
 	
-	public EntryScope(RootScope root, String proc, int cct_id, short entryPoint) {
-		super(root, LoadModuleScope.NONE, SourceFile.NONE, 0, 0, proc, false, cct_id, 0, null, ProcedureScope.FEATURE_PLACE_HOLDER);
+	public EntryScope(RootScope root, String proc, int cctId, short entryPoint) {
+		super(root, LoadModuleScope.NONE, SourceFile.NONE, 0, 0, proc, false, cctId, 0, null, ProcedureScope.FEATURE_TOPDOWN);
 		this.entryPoint = entryPoint;
 	}
 

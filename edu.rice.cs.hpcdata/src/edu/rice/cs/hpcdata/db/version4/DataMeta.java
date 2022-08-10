@@ -482,7 +482,7 @@ public class DataMeta extends DataCommon
 			//	08:	u16	   propMetricId	4.0	Unique identifier for propagated metric values
 			
 			for (int j=0; j<nScopeInsts; j++) {
-				int basePosition = (int) (scopesPosition + (j * szScope));
+				int basePosition = scopesPosition + (j * szScope);
 				propMetricId[j]  = buffer.getShort(basePosition + 0x08);
 			}
 			int strPosition = (int) (pName - section.offset);
@@ -730,34 +730,13 @@ public class DataMeta extends DataCommon
 				lms = LoadModuleScope.NONE;
 			
 			// this line has to be remove once prof2 is fixed
-			int feature = getProcedureFeature(name);
+			final int feature = ProcedureScope.FEATURE_PROCEDURE;
 			
 			long key = pFunctions + (i * szFunctions);
 			ProcedureScope ps = new ProcedureScope(rootCCT, lms, file, line, line, name, false, position, i+baseId, null, feature);			
 			mapFunctions.put(key, ps);
 		}
 		return mapFunctions;
-	}
-
-	
-	/*****
-	 * Temporary hack: return the procedure feature by scanning the name
-	 * This is a temporary code. It has to be removed once prof2 implements
-	 * properly the procedure feature. 
-	 * 
-	 * @param name
-	 * @return
-	 */
-	private int getProcedureFeature(String name) {
-		boolean isPartial = name.equals("<partial call paths>");
-
-		// check if the name is in the form of <.* root>
-		boolean isRoot = name.charAt(0) == '<' && name.endsWith(" root>");
-		
-		if (isPartial || isRoot)
-			return ProcedureScope.FEATURE_TOPDOWN;
-		
-		return ProcedureScope.FEATURE_PROCEDURE;
 	}
 	
 		
@@ -778,8 +757,7 @@ public class DataMeta extends DataCommon
 										ByteBuffer buffer, 
 										EntryScope entry, 
 										long startLocation, 
-										long size) 
-					throws IOException {
+										long size) {
 		
 		final ArrayDeque<ContextStack> stack = new ArrayDeque<>();
 		int ctxLoc   = (int) (startLocation - sections[INDEX_CONTEXT].offset);
@@ -787,12 +765,12 @@ public class DataMeta extends DataCommon
 		Scope parent = entry;
 		
 		// look for the children as long as we still have the remainder bytes
-		while(ctxSize >= FMT_METADB_MINSZ_Context) {
+		while(ctxSize >= FMT_METADB_MINSZ_CONTEXT) {
 			
 			// read the next context node from the meta.db file
 			ScopeContext context = scf.parse(buffer, ctxLoc, parent);
 			
-			long szAdditionalCtx = FMT_METADB_SZ_Context(context.nFlexWords);
+			long szAdditionalCtx = getMetaDbContextSize(context.nFlexWords);
 			ctxSize -= szAdditionalCtx;
 			ctxLoc += szAdditionalCtx;			
 
@@ -815,7 +793,7 @@ public class DataMeta extends DataCommon
 
 				// the parent has no space for sibling:
 				// Try to find an ancestor that has siblings
-				while (!stack.isEmpty() && (ctxSize < FMT_METADB_MINSZ_Context)) {
+				while (!stack.isEmpty() && (ctxSize < FMT_METADB_MINSZ_CONTEXT)) {
 					var ctx = stack.pop();
 					parent  = ctx.parent;
 					ctxLoc  = ctx.startLocation;
@@ -825,6 +803,15 @@ public class DataMeta extends DataCommon
 		}
 	}
 
+	/**
+	 * Constants for entry point.
+	 * <ul>
+	 *  <li>0 "unknown entry": No recognized outside caller.
+	 *  <li>1 "main thread": Setup code for the main thread
+	 *  <li>2 "application thread": Setup code for threads created by the application, via pthread_create or similar.
+	 * </ul>
+	 */
+	private static final String []entryLabels = { "<partial unwind>", "<main root>", "<thread root>"};
 	
 	/***
 	 * Create the main root and parse its direct children
@@ -868,7 +855,9 @@ public class DataMeta extends DataCommon
 			short entryPoint = ctxBuffer.getShort(position + 0x14);
 			long pPrettyName = ctxBuffer.getLong(position  + 0x18);
 			
-			final String label = stringArea.toString(pPrettyName); 
+			final String label = entryPoint < entryLabels.length? 
+									entryLabels[entryPoint] : 
+									stringArea.toString(pPrettyName); 
 			
 			var mainScope = new EntryScope(rootCCT, 
 										   label, 
@@ -883,10 +872,10 @@ public class DataMeta extends DataCommon
 		return rootCCT;
 	}
 	
-	private final int FMT_METADB_MINSZ_Context = 0x20;
+	private static final int FMT_METADB_MINSZ_CONTEXT = 0x20;
 	
-	private long FMT_METADB_SZ_Context(int nFlexWords)  {
-		return (FMT_METADB_MINSZ_Context + (8 * nFlexWords));
+	private long getMetaDbContextSize(int nFlexWords)  {
+		return (FMT_METADB_MINSZ_CONTEXT + (8 * nFlexWords));
 	}
 	
 	private final IntObjectHashMap<String> mapString = new IntObjectHashMap<>();
@@ -900,9 +889,8 @@ public class DataMeta extends DataCommon
 	 * 			the relative offset of the string (zero-based)
 	 * @return
 	 * 			The string if exist, empty string otherwise
-	 * @throws IOException
 	 */
-	private String getNullTerminatedString(ByteBuffer buffer, int startPosition) throws IOException {
+	private String getNullTerminatedString(ByteBuffer buffer, int startPosition) {
 		if (mapString.containsKey(startPosition))
 			return mapString.get(startPosition);
 
