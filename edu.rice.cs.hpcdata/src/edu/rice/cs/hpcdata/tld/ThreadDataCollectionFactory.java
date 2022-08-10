@@ -18,6 +18,10 @@ import edu.rice.cs.hpcdata.util.Constants;
  *************************************************/
 public final class ThreadDataCollectionFactory 
 {
+	private ThreadDataCollectionFactory() {
+		// no operation
+	}
+	
 	/*******
 	 * Build an {@link IThreadDataCollection} object
 	 *  
@@ -28,9 +32,9 @@ public final class ThreadDataCollectionFactory
 	 * 
 	 * @throws IOException
 	 *******/
-	static public IThreadDataCollection build(RootScope root) throws IOException
+	public static IThreadDataCollection build(RootScope root) throws IOException
 	{
-		IThreadDataCollection data_file = null;
+		IThreadDataCollection threadDataCollection = null;
 
 		Experiment experiment = (Experiment) root.getExperiment();
 		int version = experiment.getMajorVersion();
@@ -40,26 +44,25 @@ public final class ThreadDataCollectionFactory
 		case Constants.EXPERIMENT_DENSED_VERSION:
 
 			if (experiment.getRawMetrics()!=null) {
-				data_file = new ThreadDataCollection2(experiment);
+				threadDataCollection = new ThreadDataCollection2(experiment);
 				String directory = experiment.getDefaultDirectory().getAbsolutePath();
-				data_file.open(root, directory);
+				threadDataCollection.open(root, directory);
 			}
 			break;
 			
 		case Constants.EXPERIMENT_SPARSE_VERSION:
-			data_file = new ThreadDataCollection4();
+			threadDataCollection = new ThreadDataCollection4();
 			
 			var mvc = (MetricValueCollection4) root.getMetricValueCollection();
-			((ThreadDataCollection4)data_file).init(mvc.getDataSummary());
+			((ThreadDataCollection4)threadDataCollection).init(mvc.getDataSummary());
 			
 			String directory = experiment.getDefaultDirectory().getAbsolutePath();
-			((ThreadDataCollection4)data_file).open(root, directory);
+			((ThreadDataCollection4)threadDataCollection).open(root, directory);
 			break;
 		default:
-			data_file = null;
 			break;
 		}
 		
-		return data_file;
+		return threadDataCollection;
 	}
 }

@@ -325,8 +325,9 @@ public class DataSummary extends DataCommon
 			
 			// id 0 is reserved
 			for(int i=1; i<info.piElements.length; i++) {
-				ProfileInfoElement piElem = info.piElements[i];
-				labels[i-1] = piElem.getIdTupleNumber();
+				// at the moment we don't translate the id tuple to number
+				// This is a temporary hack, we need to find a better approach
+				labels[i-1] = i-1.0f;
 			}		
 		}
 		return labels;
