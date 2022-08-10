@@ -18,61 +18,61 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScope;
  *******************************************************************/
 public class ThreadDataCollection4 extends AbstractThreadDataCollection
 {
-	private DataPlot    data_plot;
-	private DataSummary data_summary;
+	private DataPlot    dataPlot;
+	private DataSummary dataSummary;
 
 	public void init(DataSummary dataSummary) {
-		this.data_summary = dataSummary;
+		this.dataSummary = dataSummary;
 	}
 	
 	@Override
 	public void open(RootScope root, String directory) throws IOException {
-		data_plot = new DataPlot();
-		data_plot.open(directory);
+		dataPlot = new DataPlot();
+		dataPlot.open(directory);
 	}
 
 	@Override
 	public boolean isAvailable() {
-		return ((data_plot != null));
+		return (dataPlot != null);
 	}
 
 	@Override
 	public double[] getRankLabels() {		
-		return data_summary.getDoubleLableIdTuples();
+		return dataSummary.getDoubleLableIdTuples();
 	}
 
 
 	@Override
 	public String[] getRankStringLabels() throws IOException {
-		return data_summary.getStringLabelIdTuples();
+		return dataSummary.getStringLabelIdTuples();
 	}
 
 	@Override
 	public int getParallelismLevel() {
-		return data_summary.getParallelismLevels();
+		return dataSummary.getParallelismLevels();
 	}
 
 	@Override
 	public String getRankTitle() {
-		return "Rank";
+		return "Thread";
 	}
 
 	@Override
 	public double getMetric(long nodeIndex, int metricIndex, int profileId, int numMetrics) throws IOException {
 
-		if (data_summary == null)
+		if (dataSummary == null)
 			return 0.0d;
 
-		return data_summary.getMetric(profileId, (int) nodeIndex, metricIndex);
+		return dataSummary.getMetric(profileId, (int) nodeIndex, metricIndex);
 	}
 
 	@Override
 	public double[] getMetrics(long nodeIndex, int metricIndex, int numMetrics)
 			throws IOException 
 			{
-		final DataPlotEntry []entry = data_plot.getPlotEntry((int) nodeIndex, metricIndex);
+		final DataPlotEntry []entry = dataPlot.getPlotEntry((int) nodeIndex, metricIndex);
 		
-		List<IdTuple> list = data_summary.getIdTuple();
+		List<IdTuple> list = dataSummary.getIdTuple();
 		
 		final int num_ranks 	= Math.max(1, list.size());
 		final double []metrics	= new double[num_ranks];
@@ -83,7 +83,7 @@ public class ThreadDataCollection4 extends AbstractThreadDataCollection
 		{	
 			for(DataPlotEntry e : entry)
 			{
-				int profile = e.tid; //data_summary.getProfileIndexFromOrderIndex(e.tid);
+				int profile = e.tid; 
 				
 				// minus 1 because the index is based on profile number.
 				// unfortunately, the profile number starts with number 1 instead of 0
@@ -97,17 +97,17 @@ public class ThreadDataCollection4 extends AbstractThreadDataCollection
 	@Override
 	public void dispose() {
 		try {
-			data_plot.dispose();
+			dataPlot.dispose();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// unused
 		}
 	}
 
 	@Override
-	public double[] getScopeMetrics(int thread_id, int MetricIndex,
+	public double[] getScopeMetrics(int threadId, int metricIndex,
 			int numMetrics) throws IOException {
 
-		// TODO: not implemented
-		return null;
+		// not implemented yet
+		return new double[0];
 	}
 }
