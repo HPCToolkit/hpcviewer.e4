@@ -20,13 +20,14 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.rice.cs.hpcdata.db.IdTuple;
+import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.tld.ThreadDataCollectionFactory;
 import edu.rice.cs.hpcfilter.FilterDataItem;
 import edu.rice.cs.hpcfilter.dialog.ThreadFilterDialog;
 import edu.rice.cs.hpctree.IScopeTreeData;
@@ -116,29 +117,32 @@ public class TopDownPart extends AbstractTableView
 	private void showThreadView(Shell shell) {
 		String[] labels = null;
 		IThreadDataCollection dataCollector = getThreadDataCollection();
-		try {
-			labels = dataCollector.getRankStringLabels();
-		} catch (IOException e) {
-			String msg = "Error opening thread data";
-			Logger logger = LoggerFactory.getLogger(getClass());
-			logger.error(msg, e);
-			
-			MessageDialog.openError(shell, msg, e.getClass().getName() + ": " + e.getLocalizedMessage());
-			return;
+		var idtuples = dataCollector.getIdTuples();			
+		labels = new String[idtuples.size()];
+		IdTupleType idtype;
+		if (getRoot().getExperiment() instanceof Experiment) {
+			idtype = ((Experiment)getRoot().getExperiment()).getIdTupleType();
+		} else {
+			idtype = IdTupleType.createTypeWithOldFormat();
+		}
+		
+		for(int i=0; i<idtuples.size(); i++) {
+			labels[i] = idtuples.get(i).toString(idtype);
 		}
 		
 		List<FilterDataItem<String>> listItems = ThreadFilterDialog.filter(shell, "Select rank/thread to view", labels, null);
 		
 		if (listItems != null) {
-			List<Integer> threads = new ArrayList<>();
+			List<IdTuple> selectedIdtuples = new ArrayList<>();
+			
 			for(int i=0; i<listItems.size(); i++) {
 				if (listItems.get(i).checked) {
-					threads.add(i);
+					selectedIdtuples.add(idtuples.get(i));
 				}
 			}
-			if (!threads.isEmpty()) {
+			if (!selectedIdtuples.isEmpty()) {
 				RootScope root = getRoot();
-				ThreadViewInput input = new ThreadViewInput(root, dataCollector, threads);
+				ThreadViewInput input = new ThreadViewInput(root, dataCollector, selectedIdtuples);
 				ProfilePart profilePart = getProfilePart();
 				profilePart.addThreadView(input);
 			}

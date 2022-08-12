@@ -2,19 +2,20 @@ package edu.rice.cs.hpcviewer.ui.parts.thread;
 
 import java.util.List;
 
+import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 
 public class ThreadViewInput 
 {
-	final private RootScope rootScope; 
-	final private IThreadDataCollection threadData;
-	private List<Integer> threads;
+	private final RootScope rootScope; 
+	private final IThreadDataCollection threadData;
+	private List<IdTuple> threads;
 	
-	public ThreadViewInput(RootScope rootScope, IThreadDataCollection threadData, List<Integer> threads) {
+	public ThreadViewInput(RootScope rootScope, IThreadDataCollection threadData, List<IdTuple> idTuples) {
 		this.rootScope  = rootScope;
 		this.threadData = threadData;
-		this.threads    = threads;
+		this.threads    = idTuples;
 	}
 	
 	public RootScope getRootScope() {
@@ -25,19 +26,17 @@ public class ThreadViewInput
 		return threadData;
 	}
 
-	public List<Integer> getThreads() {
+	public List<IdTuple> getThreads() {
 		return threads;
 	}
 	
-	public void setThread(List<Integer> threads) {
+	public void setThread(List<IdTuple> threads) {
 		this.threads = threads;
 	}
 	
 	public String toString() {
 		var exp = rootScope.getExperiment();
 		int dbId = exp.getPath().hashCode();
-		String str = exp.toString() + ":" + String.valueOf(dbId);
-		
-		return str;
+		return exp.toString() + ":" + String.valueOf(dbId);
 	}
 }

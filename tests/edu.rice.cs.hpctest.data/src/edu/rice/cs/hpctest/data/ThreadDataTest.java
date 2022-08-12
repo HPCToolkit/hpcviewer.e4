@@ -81,13 +81,17 @@ public class ThreadDataTest
 	}
 
 	@Test
-	public void testBuild() throws IOException {
+	public void testBuild() throws Exception {
 		int i=0;
 		final double delta = 1.0000001f;
 		
 		for(var data: listDataCollector) {
 			var ranks = data.getEvenlySparseRankLabels();
 			assertNotNull(ranks);
+			
+			var idTuples = data.getIdTuples();
+			assertNotNull(idTuples);
+			assertTrue(idTuples.size()>0);
 			
 			var exp = listExperiments.get(i);
 			var metrics = exp.getVisibleMetrics();
@@ -101,11 +105,22 @@ public class ThreadDataTest
 					if (rawMetric == null)
 						continue;
 					
-					var value = data.getMetric(root.getCCTIndex(), rawMetric.getIndex(), 0, rawMetricsSize);
+					var value = data.getMetric(root.getCCTIndex(), rawMetric.getIndex(), idTuples.get(0), rawMetricsSize);
 					
 					final var mv = root.getMetricValue(m);
 					final double control = mv != MetricValue.NONE ? mv.getValue() * delta: 0.0; 
 					assertTrue(control >= value);
+					
+					var values = data.getMetrics(root.getCCTIndex(), rawMetric.getIndex(), rawMetricsSize);
+					if (values != null && values.length>0) {
+						for(int j=0; j<values.length; j++) {
+							var idt = idTuples.get(j);
+							value = data.getMetric(root.getCCTIndex(), rawMetric.getIndex(), idt, rawMetricsSize);
+							var v = values[idt.getProfileIndex()-1];
+							assertEquals(value, v, delta);
+							assertTrue(control >= value);
+						}
+					}
 				}
 			}			
 			i++;

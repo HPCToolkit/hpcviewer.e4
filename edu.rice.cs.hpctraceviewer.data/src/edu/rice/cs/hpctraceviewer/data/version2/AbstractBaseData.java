@@ -18,9 +18,9 @@ import edu.rice.cs.hpcdata.util.Constants;
  *********************************************************/
 public abstract class AbstractBaseData implements IBaseData 
 {
-	final protected IFileDB baseDataFile;
+	protected final IFileDB baseDataFile;
 
-	public AbstractBaseData(IFileDB baseDataFile){
+	protected AbstractBaseData(IFileDB baseDataFile){
 		this.baseDataFile = baseDataFile;
 	}
 	

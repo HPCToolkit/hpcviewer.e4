@@ -14,7 +14,7 @@ public class IdTupleTest {
 	
 	@BeforeClass
 	public static void setup() {
-		idt1 = new IdTuple(2);
+		idt1 = new IdTuple(0, 2);
 		
 		idt1.setKind(0, IdTupleType.KIND_RANK);
 		idt1.setKind(1, IdTupleType.KIND_THREAD);
@@ -28,12 +28,13 @@ public class IdTupleTest {
 
 	@Test
 	public void testIdTupleIntInt() {
-		IdTuple idt0 = new IdTuple();
+		IdTuple idt0 = new IdTuple(0, 0);
 		
 		assertTrue(idt0.compareTo(idt1) < 0);		
 		assertTrue(idt1.compareTo(idt0) > 0);
+		assertNotEquals(idt0, idt1);
 		
-		IdTuple idt2 = new IdTuple(2);		
+		IdTuple idt2 = new IdTuple(1, 2);		
 		idt2.setKind(0, IdTupleType.KIND_RANK);
 		idt2.setKind(1, IdTupleType.KIND_THREAD);
 
@@ -45,8 +46,9 @@ public class IdTupleTest {
 
 		assertTrue(idt1.compareTo(idt2) < 0);
 		assertTrue(idt2.compareTo(idt1) > 0);
+		assertNotEquals(idt1, idt2);
 		
-		IdTuple idt3 = new IdTuple(2);		
+		IdTuple idt3 = new IdTuple(2, 2);		
 		
 		idt3.setKind(0, IdTupleType.KIND_RANK);
 		idt3.setKind(1, IdTupleType.KIND_THREAD);
@@ -55,7 +57,8 @@ public class IdTupleTest {
 		idt3.setLogicalIndex(0, 0);
 		idt3.setLogicalIndex(1, 1);
 
-		assertTrue(idt1.compareTo(idt3) == 0);
+		assertEquals(idt1.compareTo(idt3), 0);
+		assertEquals(idt1, idt3);
 	}
 
 
@@ -69,8 +72,8 @@ public class IdTupleTest {
 
 	@Test
 	public void testGetIndex() {
-		assertTrue( idt1.getIndex(IdTupleType.KIND_RANK) == 0 );
-		assertTrue( idt1.getIndex(IdTupleType.KIND_THREAD) == 1 );
+		assertEquals( 0, idt1.getIndex(IdTupleType.KIND_RANK) );
+		assertEquals( 1, idt1.getIndex(IdTupleType.KIND_THREAD) );
 	}
 
 	@Test
@@ -100,17 +103,17 @@ public class IdTupleTest {
 	@Test
 	public void testToNumber() {
 		double num = idt1.toNumber();
-		assertTrue(num == 0.1d);
+		assertEquals(0.1d, num, 0.000d);
 	}
 	
 	@Test
 	public void testToString() {
 		String str = idt1.toString(IdTupleType.createTypeWithOldFormat());
-		assertNotNull(str.equals("Rank 0 Thread 1"));
+		assertEquals("Rank 0 Thread 1", str);
 	}
 
 	@Test
 	public void testToLabel() {
-		assertNotNull( idt1.toLabel().equals("0.1"));
+		assertEquals("0.1", idt1.toLabel());
 	}
 }

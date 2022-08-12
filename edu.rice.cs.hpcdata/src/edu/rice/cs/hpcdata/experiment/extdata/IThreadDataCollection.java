@@ -1,7 +1,9 @@
 package edu.rice.cs.hpcdata.experiment.extdata;
 
 import java.io.IOException;
+import java.util.List;
 
+import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 
 /********************************************************************************
@@ -26,6 +28,9 @@ public interface IThreadDataCollection
 	 * @return true if plot data exist, false otherwise
 	 */
 	public boolean 	isAvailable();
+	
+	
+	public List<IdTuple> getIdTuples();
 	
 	/*****
 	 * Get a list of the labels for ranks (x-axis)
@@ -75,14 +80,18 @@ public interface IThreadDataCollection
 	 * Get a metric value for a specific node, with a specific metric and 
 	 * a specific profile (or thread) id.
 	 * 
-	 * @param nodeIndex long
-	 * @param metricIndex int
-	 * @param profileId int
-	 * @param numMetrics int
+	 * @param nodeIndex 
+	 * 			The cct index
+	 * @param metricIndex 
+	 * 			The index or id of the metric
+	 * @param idtuple
+	 * 			The id-tuple (profile information)
+	 * @param numMetrics 
+	 * 			The number of the metrics
 	 * 
 	 * @return double
 	 */
-	public double   getMetric(long nodeIndex, int metricIndex, int profileId, int numMetrics)
+	public double   getMetric(long nodeIndex, int metricIndex, IdTuple idtuple, int numMetrics)
 			throws IOException ;
 	
 	/*****

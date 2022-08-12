@@ -13,19 +13,25 @@ public class IdTuple
 	// constants
 	// -------------------------------------------
 	
-	public final static int TUPLE_LENGTH_SIZE = 2;
-	public final static int TUPLE_KIND_SIZE   = 2;
-	public final static int TUPLE_INDEX_SIZE  = 8;
+	public static final int TUPLE_LENGTH_SIZE = 2;
+	public static final int TUPLE_KIND_SIZE   = 2;
+	public static final int TUPLE_INDEX_SIZE  = 8;
 	
-	private final static String STRING_EMPTY = null;
-
+	private static final String STRING_EMPTY = null;
 	private static final String SEPARATOR = " ";
 	private static final String SPACE = " ";
 
+	/***
+	 * Special id-tuple for summary profile, which is the profile
+	 * of the whole execution of the application. 
+	 */
+	public static final IdTuple PROFILE_SUMMARY = new IdTuple(0, 0);
+	
 	// -------------------------------------------
 	// variables
 	// -------------------------------------------
 
+	private final int  profileIndex;
 	
 	private byte []kinds;
 	private byte []flags;
@@ -39,21 +45,19 @@ public class IdTuple
 	/****
 	 * Constructor
 	 * Caller needs to set {@code kind} and {@code index} variables
-	 * @param length the int the length (or level) of this id tuple
+	 * 
+	 * @param index
+	 * 			id or index of this profile. It has to be unique.
+	 * @param length 
+	 * 			the int the length (or level) of this id tuple
 	 */
-	public IdTuple(int length) {		
+	public IdTuple(int index, int length) {		
 		kinds  = new byte[length];
 		flags  = new byte[length];
 		physicalIndexes = new long[length];
 		logicalIndexes  = new int [length];
-	}
-	
-	/***
-	 * Empty constructor.
-	 * Caller needs to set {@code profileNum}, {@code length}, {@code kind} and {@code index} variables
-	 */
-	public IdTuple() {
-		this(0);
+		
+		this.profileIndex = index;
 	}
 	
 
@@ -61,7 +65,22 @@ public class IdTuple
 	// API Methods
 	// -------------------------------------------
 	
+	public int getProfileIndex() {
+		return profileIndex;
+	}
 	
+	@Override
+	public boolean equals(Object idt) {
+		if (!(idt instanceof IdTuple))
+			return false;
+		
+		return compareTo((IdTuple) idt) == 0;
+	}
+	
+	@Override
+	public int hashCode() {
+		return super.hashCode();
+	}
 	
 	/****
 	 * Get the index in this id tuple for a certain type.
@@ -156,7 +175,7 @@ public class IdTuple
 			if (diff != 0)
 				return diff;
 			
-			diff = (int) (logicalIndexes[i] - another.logicalIndexes[i]);
+			diff = logicalIndexes[i] - another.logicalIndexes[i];
 			if (diff != 0)
 				return diff;
 		}

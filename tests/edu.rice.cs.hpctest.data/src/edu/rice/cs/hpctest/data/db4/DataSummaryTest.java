@@ -56,18 +56,25 @@ public class DataSummaryTest {
 			List<IdTuple> listC = profile.getIdTuple(IdTupleOption.COMPLETE);
 			List<IdTuple> listB = profile.getIdTuple(IdTupleOption.BRIEF);
 			
-			assertTrue(listC.size() == listB.size());
+			assertEquals(listC.size(), listB.size());
 		}
 	}
 
 	@Test
-	public void testGetMetric() {
+	public void testGetMetric() throws IOException {
 		for(var profile: dataProfiles) {
 			try {
-				double val = profile.getMetric(0, 0, 2);
+				double val = profile.getMetric(IdTuple.PROFILE_SUMMARY, 0, 2);
 				assertTrue(val > 270); 
 			} catch (IOException e) {
 				fail(e.getMessage());
+			}
+			
+			// test for each id tuples
+			List<IdTuple> idtuples = profile.getIdTuple();
+			for(IdTuple idt: idtuples) {
+				double val = profile.getMetric(idt, 0, 2);
+				assertTrue(val >= 0); 
 			}
 		}
 	}
@@ -87,7 +94,7 @@ public class DataSummaryTest {
 	@Test
 	public void testGetMetricsIntInt() throws IOException {
 		for(var profile: dataProfiles) {
-			List<MetricValueSparse> list = profile.getMetrics(0, 2);
+			List<MetricValueSparse> list = profile.getMetrics(IdTuple.PROFILE_SUMMARY, 2);
 			assertTrue(list.size() > 0);
 		}
 	}

@@ -8,6 +8,7 @@ import java.util.List;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.db.version4.DataMeta;
 import edu.rice.cs.hpcdata.db.version4.DataPlot;
@@ -81,7 +82,7 @@ public class DataPlotTest {
 			}
 		}
 		for(var m: metrics) {
-			var metval = ds.getMetric(0, scope.getCCTIndex(), m.getIndex());
+			var metval = ds.getMetric(IdTuple.PROFILE_SUMMARY, scope.getCCTIndex(), m.getIndex());
 			var dpe = dp.getPlotEntry(scope.getCCTIndex(), m.getIndex());
 			if (dpe == null)
 				continue;

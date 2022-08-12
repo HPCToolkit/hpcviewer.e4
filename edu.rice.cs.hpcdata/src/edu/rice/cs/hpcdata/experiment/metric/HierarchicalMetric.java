@@ -5,6 +5,7 @@ import java.io.IOException;
 import com.graphbuilder.math.Expression;
 import com.graphbuilder.math.ExpressionTree;
 
+import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.version4.DataSummary;
 import edu.rice.cs.hpcdata.experiment.scope.IMetricScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -126,7 +127,7 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		Scope scope = (Scope)s;
 		double value = 0;
 		try {
-			value = profileDB.getMetric(DataSummary.INDEX_SUMMARY_PROFILE, 
+			value = profileDB.getMetric(IdTuple.PROFILE_SUMMARY, 
 											   scope.getCCTIndex(), 
 											   index);
 		} catch (IOException e) {

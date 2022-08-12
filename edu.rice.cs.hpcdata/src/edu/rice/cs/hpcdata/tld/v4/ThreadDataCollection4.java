@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
+import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
 import edu.rice.cs.hpcdata.db.version4.DataPlot;
 import edu.rice.cs.hpcdata.db.version4.DataPlotEntry;
 import edu.rice.cs.hpcdata.db.version4.DataSummary;
@@ -44,7 +45,15 @@ public class ThreadDataCollection4 extends AbstractThreadDataCollection
 
 	@Override
 	public String[] getRankStringLabels() throws IOException {
-		return dataSummary.getStringLabelIdTuples();
+		var listIdTuples = dataSummary.getIdTuple(IdTupleOption.BRIEF);
+		if (listIdTuples == null || listIdTuples.isEmpty())
+			return new String[0];
+		
+		String []labels  = new String[listIdTuples.size()];
+		for(int i=0; i<listIdTuples.size(); i++) {
+			labels[i] = listIdTuples.get(i).toString(dataSummary.getIdTupleType());
+		}
+		return labels;
 	}
 
 	@Override
@@ -54,16 +63,16 @@ public class ThreadDataCollection4 extends AbstractThreadDataCollection
 
 	@Override
 	public String getRankTitle() {
-		return "Thread";
+		return "Context";
 	}
 
 	@Override
-	public double getMetric(long nodeIndex, int metricIndex, int profileId, int numMetrics) throws IOException {
+	public double getMetric(long nodeIndex, int metricIndex, IdTuple idtuple, int numMetrics) throws IOException {
 
 		if (dataSummary == null)
 			return 0.0d;
 
-		return dataSummary.getMetric(profileId, (int) nodeIndex, metricIndex);
+		return dataSummary.getMetric(idtuple, (int) nodeIndex, metricIndex);
 	}
 
 	@Override
@@ -109,5 +118,10 @@ public class ThreadDataCollection4 extends AbstractThreadDataCollection
 
 		// not implemented yet
 		return new double[0];
+	}
+
+	@Override
+	public List<IdTuple> getIdTuples() {
+		return dataSummary.getIdTuple();
 	}
 }

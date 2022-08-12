@@ -126,7 +126,7 @@ public class DataSummary extends DataCommon
 	 */
 	private ListCCTAndIndex getCCTIndex() 
 			throws IOException {		
-		return getCCTIndex(INDEX_SUMMARY_PROFILE);
+		return getCCTIndex(IdTuple.PROFILE_SUMMARY);
 	}
 	
 	
@@ -138,8 +138,8 @@ public class DataSummary extends DataCommon
 	 * @return
 	 * @throws IOException
 	 */
-	private ListCCTAndIndex getCCTIndex(int profileNum) throws IOException {
-		
+	private ListCCTAndIndex getCCTIndex(IdTuple idtuple) throws IOException {
+		int profileNum = idtuple.getProfileIndex();
 		ListCCTAndIndex list = new ListCCTAndIndex(info.piElements[profileNum].nCtxs);
 		
 		long position = info.piElements[profileNum].pCtxIndices;
@@ -190,23 +190,23 @@ public class DataSummary extends DataCommon
 	/****
 	 * Get the value of a specific profile with specific cct and metric id
 	 * 
-	 * @param profileNum
+	 * @param idtuple
 	 * @param cctId
 	 * @param metricId
 	 * @return
 	 * @throws IOException
 	 */
-	public double getMetric(int profileNum, int cctId, int metricId) 
+	public double getMetric(IdTuple idtuple, int cctId, int metricId) 
 			throws IOException
 	{
-		List<MetricValueSparse> listValues = getMetrics(profileNum, cctId);		
+		List<MetricValueSparse> listValues = getMetrics(idtuple, cctId);		
 		if (listValues == null)
 			return 0.0d;
 		
-		// TODO ugly temporary code
 		// We need to grab a value directly from the memory instead of searching O(n)
 		int index = Collections.binarySearch(listValues, metricId, (o1, o2) -> {
-			Integer i1, i2;
+			Integer i1;
+			Integer i2;
 			if (o1 instanceof MetricValueSparse) 
 				i1 = ((MetricValueSparse)o1).getIndex();
 			else
@@ -229,43 +229,48 @@ public class DataSummary extends DataCommon
 	 * This method does not support concurrency. The caller is
 	 * responsible to handle mutual exclusion.
 	 * 
-	 * @param cct_id
+	 * @param cctId
 	 * @return List of MetricValueSparse
 	 * @throws IOException
 	 */
-	public List<MetricValueSparse> getMetrics(int cct_id) 
+	public List<MetricValueSparse> getMetrics(int cctId) 
 			throws IOException
 	{		
-		return getMetrics(0, cct_id);
+		return getMetrics(IdTuple.PROFILE_SUMMARY, cctId);
 	}
 	
 	
 	/****
 	 * Retrieve the list of metrics for a certain profile number and a given cct id
 	 * 
-	 * @param profileNum The profile number. For summary profile, it equals to {@code INDEX_SUMMARY_PROFILE}
-	 * @param cct_id the cct id
-	 * @return List of MetricValueSparse
+	 * @param profileNum 
+	 * 			The profile number. For summary profile, it equals to {@code INDEX_SUMMARY_PROFILE}
+	 * @param cctId 
+	 * 			the cct id
+	 * @return List of {@code MetricValueSparse}
+	 * 
 	 * @throws IOException
 	 */
-	public List<MetricValueSparse> getMetrics(int profileNum, int cct_id) 
+	public List<MetricValueSparse> getMetrics(IdTuple idtuple, int cctId) 
 			throws IOException 
 	{
 		ListCCTAndIndex list = listCCT;
 		
-		if (profileNum != INDEX_SUMMARY_PROFILE || list == null) {
-			list = getCCTIndex(profileNum+1);
+		if (!idtuple.equals(IdTuple.PROFILE_SUMMARY) || list == null) {
+			list = getCCTIndex(idtuple);
 		}
 		// search for the cct-id
 		// if it doesn't exist, we return empty metric (or throw an exception?)
-		int index = Arrays.binarySearch(list.listOfId, cct_id);
+		int index = Arrays.binarySearch(list.listOfId, cctId);
 		if (index < 0)
-			return null;
+			return Collections.emptyList();
 		
 		// searching for metrics for a given cct
 		//
+		int profileNum = idtuple.getProfileIndex();
 		int numMetrics = 0;
 		long position1 = list.listOfdIndex[index];
+		
 		if (index + 1 < list.listOfdIndex.length) {
 			long position2 = list.listOfdIndex[index+1];			
 			numMetrics = (int) (position2 - position1);
@@ -315,8 +320,10 @@ public class DataSummary extends DataCommon
 	
 	/****
 	 * Retrieve the list of id tuple representation in double.
-	 * For OpenMP programs, it returns the list of 1, 2, 3,...
-	 * For MPI+OpenMP programs, it returns the list of 1.0, 1.1, 1.2, 2.0, 2.1, ... 
+	 * <ul>
+	 *  <li>For OpenMP programs, it returns the list of 1, 2, 3,...
+	 *  <li>For MPI+OpenMP programs, it returns the list of 1.0, 1.1, 1.2, 2.0, 2.1, ...
+	 * </ul> 
 	 * @return double[]
 	 */
 	public double[] getDoubleLableIdTuples() {
@@ -380,7 +387,7 @@ public class DataSummary extends DataCommon
 		// eager initialization for the cct of the summary profile
 		// this summary will be loaded anyway. There is no harm to do it now. 
 		// ... or I think
-		listCCT = getCCTIndex(INDEX_SUMMARY_PROFILE);
+		listCCT = getCCTIndex(IdTuple.PROFILE_SUMMARY);
 		
 		return true;
 	}
@@ -403,7 +410,7 @@ public class DataSummary extends DataCommon
 		LongIntHashMap []mapLevelToHash = new LongIntHashMap[maxLevels];
 		
 		for(int i=0; i<info.nProfile; i++) {
-			info.piElements[i].readIdTuple(input);
+			info.piElements[i].readIdTuple(i, input);
 			numLevels = Math.max(numLevels, info.piElements[i].numLevels);
 			
 			// the first profile is the summary one (aka summary profile).
@@ -479,7 +486,7 @@ public class DataSummary extends DataCommon
 				}
 			}
 			// the profileNum is +1 because the index 0 is for summary
-			IdTuple shortVersion = new IdTuple(totLevels);
+			IdTuple shortVersion = new IdTuple(idt.getProfileIndex(), totLevels);
 						
 			int level = 0;
 			
@@ -503,8 +510,7 @@ public class DataSummary extends DataCommon
 	
 	private long convertIdTupleToHash(short kind, long index) {
 		long k = (kind << 22);
-		long t = k + index;
-		return t;
+		return k + index;
 	}
 	
 	/****
@@ -690,7 +696,7 @@ public class DataSummary extends DataCommon
 	 */
 	private static class ProfInfo
 	{
-		public final static int SIZE = 8+4+1;
+		public static final int SIZE = 8+4+1;
 		/*
 		 00:	{PI}xN*(8)	pProfiles	Pointer to an array of nProfiles profile descriptions
 		 08:	u32	nProfiles	Number of profiles listed in this section
@@ -768,8 +774,8 @@ public class DataSummary extends DataCommon
 		 */
 		public final long pIdTuple;
 		
-		public int numLevels;
-		public IdTuple idt;
+		private int numLevels;
+		private IdTuple idt;
 		
 		/***
 		 * Initializing a block for profile-major sparse value
@@ -787,7 +793,18 @@ public class DataSummary extends DataCommon
 			numLevels   = 0;
 		}
 		
-		public void readIdTuple(FileChannel channel) throws IOException {
+		/***
+		 * Read an id-tuple from the file.
+		 * 
+		 * @param index 
+		 * 			zero-based index of the id-tuple. 
+		 * 			This method will add +1 for index automatically since zero is reserved for summary profile
+		 * @param channel
+		 * 			The file channel
+		 * 
+		 * @throws IOException
+		 */
+		public void readIdTuple(int index, FileChannel channel) throws IOException {
 			if (pIdTuple == 0)
 				return;
 			
@@ -799,7 +816,7 @@ public class DataSummary extends DataCommon
 			buffer = channel.map(MapMode.READ_ONLY, pIdTuple + FMT_PROFILEDB_SZ_IDTUPLEHDR, size);
 			buffer.order(ByteOrder.LITTLE_ENDIAN);
 			
-			idt = new IdTuple(nIds);
+			idt = new IdTuple(index, nIds);
 			
 			for(int i=0; i<nIds; i++) {
 				buffer.position(i * FMT_PROFILEDB_SZ_IDTUPLEELEM);
@@ -819,10 +836,6 @@ public class DataSummary extends DataCommon
 		
 		public String getIdTupleLabel(IdTupleType idtype) {
 			return idt.toString(idtype);
-		}
-		
-		public float getIdTupleNumber() {
-			return (float) idt.toNumber();
 		}
 		
 		@Override

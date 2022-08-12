@@ -2,8 +2,12 @@ package edu.rice.cs.hpcdata.tld.v2;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
+import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
+import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.extdata.AbstractThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
@@ -42,12 +46,12 @@ public class ThreadDataCollection2 extends AbstractThreadDataCollection
 	
 
 	@Override
-	public double getMetric(long nodeIndex, int metricIndex, int profileId, int numMetrics) 
+	public double getMetric(long nodeIndex, int metricIndex, IdTuple idtuple, int numMetrics) 
 			throws IOException {
 		// check if the data already exists or not
 		ensureDataFile(metricIndex);
 		
-		return dataFile[metricIndex].getMetric(nodeIndex, metricIndex, profileId, numMetrics);
+		return dataFile[metricIndex].getMetric(nodeIndex, metricIndex, idtuple, numMetrics);
 	}
 
 	
@@ -267,5 +271,15 @@ public class ThreadDataCollection2 extends AbstractThreadDataCollection
 		public void end() {
 			// no action needed
 		}
+	}
+
+
+
+	@Override
+	public List<IdTuple> getIdTuples() {
+		if (dataFile == null || dataFile.length == 0)
+			return Collections.emptyList();
+		
+		return dataFile[0].getIdTuple(IdTupleOption.BRIEF);
 	}
 }

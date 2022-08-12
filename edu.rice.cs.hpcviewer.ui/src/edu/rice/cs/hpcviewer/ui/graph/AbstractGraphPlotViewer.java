@@ -21,12 +21,12 @@ import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 
 public abstract class AbstractGraphPlotViewer extends AbstractGraphViewer 
 {
-	static private final int DEFAULT_DIAMETER = 3;
+	private static final int DEFAULT_DIAMETER = 3;
 
 	@Inject EPartService partService;
 	@Inject DatabaseCollection database;
 	
-	public AbstractGraphPlotViewer(CTabFolder tabFolder, int style) {
+	protected AbstractGraphPlotViewer(CTabFolder tabFolder, int style) {
 		super(tabFolder, style);
 	}
 

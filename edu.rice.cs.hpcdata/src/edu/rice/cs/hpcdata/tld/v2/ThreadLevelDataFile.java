@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.version2.FileDB2;
 import edu.rice.cs.hpcdata.util.Constants;
 
@@ -20,7 +21,7 @@ public class ThreadLevelDataFile extends FileDB2
 {
 
 	// header bytes to skip
-	static private final int HEADER_LONG	=	32;
+	private static final int HEADER_LONG	=	32;
 	static int recordSz = Constants.SIZEOF_LONG + Constants.SIZEOF_LONG;
 
 	private ExecutorService threadExecutor;
@@ -60,7 +61,7 @@ public class ThreadLevelDataFile extends FileDB2
 	
 		final double []metrics = new double[getNumberOfRanks()];
 
-		ExecutorCompletionService<Integer> ecs = new ExecutorCompletionService<Integer>(threadExecutor);
+		ExecutorCompletionService<Integer> ecs = new ExecutorCompletionService<>(threadExecutor);
 
 		final int numWork = getNumberOfRanks();
 		final int numWorkPerThreads = (int) Math.ceil((float)numWork / (float)num_threads);
@@ -98,8 +99,12 @@ public class ThreadLevelDataFile extends FileDB2
 	 * @return
 	 * @throws IOException
 	 */
-	public double getMetric(long nodeIndex, int metricIndex, int profileId, int numMetrics) throws IOException
+	public double getMetric(long nodeIndex, int metricIndex, IdTuple idtuple, int numMetrics) throws IOException
 	{
+		// quick fix: the zero index is reserved for summary profile
+		// hence the profile index from idtuple starts with 1
+		int profileId = idtuple.getProfileIndex() - 1;
+		
 		long offset = getOffsets()[profileId];
 		long position = getFilePosition(nodeIndex, metricIndex, numMetrics);
 		
@@ -145,7 +150,7 @@ public class ThreadLevelDataFile extends FileDB2
 	 * @param num_metrics
 	 * @return
 	 */
-	static private long getFilePosition(long nodeIndex, int metricIndex, int num_metrics) {
+	private static long getFilePosition(long nodeIndex, int metricIndex, int num_metrics) {
 		return ((nodeIndex-1) * num_metrics * Constants.SIZEOF_LONG) + (metricIndex * Constants.SIZEOF_LONG) +
 			// header to skip
 			HEADER_LONG;
@@ -156,14 +161,14 @@ public class ThreadLevelDataFile extends FileDB2
 	 * Thread helper class to read a range of files
 	 *
 	 */
-	static private class DataReadThread implements Callable<Integer> 
+	private static class DataReadThread implements Callable<Integer> 
 	{
-		final private long _nodeIndex;
-		final private int _metricIndex;
-		final private int _numMetrics;
-		final private int _indexFileStart, _indexFileEnd;
-		final private double _metrics[];
-		final private ThreadLevelDataFile data;
+		private final long _nodeIndex;
+		private final int _metricIndex;
+		private final int _numMetrics;
+		private final int _indexFileStart, _indexFileEnd;
+		private final double _metrics[];
+		private final ThreadLevelDataFile data;
 		
 		/***
 		 * Initialization for reading a range of file from indexFileStart to indexFileEnd

@@ -289,7 +289,6 @@ public class ProfilePart implements IProfilePart, EventHandler
 	 */
 	public void addView(AbstractView view, Object input, boolean sync) {
 		
-		// TODO: make sure this statement is called early.
 		// The content builder will need many services. So we have to make they are initialized
 		view.setService(partService, eventBroker, databaseAddOn, this, menuService);
 
