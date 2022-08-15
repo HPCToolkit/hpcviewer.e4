@@ -40,10 +40,10 @@ public abstract class AbstractGraphPlotViewer extends AbstractGraphViewer
 		// gather x and y values
 		// -----------------------------------------------------------------
 		
-		double []y_values = null;
+		double []valuesY = null;
 
 		try {
-			y_values = getValuesY(scope, metric);
+			valuesY = getValuesY(scope, metric);
 			
 		} catch (Exception e) {
 			showErrorMessage(e);
@@ -65,8 +65,8 @@ public abstract class AbstractGraphPlotViewer extends AbstractGraphViewer
 		// set x-axis
 		// -----------------------------------------------------------------
 
-		String axis_x = this.getXAxisTitle( );
-		chart.getAxisSet().getXAxis(0).getTitle().setText( axis_x );
+		String axisX = this.getXAxisTitle( );
+		chart.getAxisSet().getXAxis(0).getTitle().setText( axisX );
 		chart.getAxisSet().getYAxis(0).getTitle().setText( "Metric Value" );
 		
 		IAxisSet axisSet = chart.getAxisSet();
@@ -75,7 +75,7 @@ public abstract class AbstractGraphPlotViewer extends AbstractGraphViewer
 		// set the values x and y to the plot
 		// -----------------------------------------------------------------
 		setupXAxis(input, scatterSeries);
-		scatterSeries.setYSeries(y_values);
+		scatterSeries.setYSeries(valuesY);
 
 		// set the lower range to be zero so that we can see if there is load imbalance or not
 		

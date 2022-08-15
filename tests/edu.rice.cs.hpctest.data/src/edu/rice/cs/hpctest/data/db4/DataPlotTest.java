@@ -81,6 +81,8 @@ public class DataPlotTest {
 				checkMetric(ds, dp, child, metrics);
 			}
 		}
+		var listIdTuples = ds.getIdTuple();
+		
 		for(var m: metrics) {
 			var metval = ds.getMetric(IdTuple.PROFILE_SUMMARY, scope.getCCTIndex(), m.getIndex());
 			var dpe = dp.getPlotEntry(scope.getCCTIndex(), m.getIndex());
@@ -89,6 +91,7 @@ public class DataPlotTest {
 			
 			for(var val: dpe) {
 				assertTrue(val.metval <= metval);
+				assertTrue(val.tid  <= listIdTuples.size());
 			}
 		}
 	}

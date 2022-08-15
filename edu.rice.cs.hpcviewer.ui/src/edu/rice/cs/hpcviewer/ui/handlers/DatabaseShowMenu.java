@@ -12,7 +12,9 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 
 public abstract class DatabaseShowMenu 
-{
+{	
+	protected static final String ID_DATA_EXP = "viewer/data";
+	
 	@AboutToShow
 	public void aboutToShow( List<MMenuElement> items, 
 							 EModelService modelService, 
@@ -36,6 +38,7 @@ public abstract class DatabaseShowMenu
 			menu.setElementId(path);
 			menu.setLabel(label);
 			menu.setContributionURI(getMenuURI());
+			menu.getTransientData().put(ID_DATA_EXP, exp);
 			
 			items.add(menu);
 		}		

@@ -92,12 +92,19 @@ public class ThreadDataCollection4 extends AbstractThreadDataCollection
 		{	
 			for(DataPlotEntry e : entry)
 			{
-				int profile = e.tid; 
+				int profile = list.get(e.tid).getProfileIndex();
+				for (int i=0; i<list.size(); i++) {
+					var idt = list.get(i);
+					if (e.tid == idt.getProfileIndex()-1) {
+						profile = i;
+						break;
+					}
+				}
 				
 				// minus 1 because the index is based on profile number.
 				// unfortunately, the profile number starts with number 1 instead of 0
 				// the profile 0 is reserved for summary profile. sigh
-				metrics[profile-1] = e.metval;
+				metrics[profile] = e.metval;
 			}
 		}
 		return metrics;

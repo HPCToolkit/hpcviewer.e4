@@ -17,8 +17,6 @@ public class FileCloseDatabase extends DatabaseShowMenu
 
 	private static final String ID_MENU_URI = "bundleclass://edu.rice.cs.hpcviewer.ui/" + 
 												FileCloseDatabase.class.getName();
-	
-	private static final String ID_DATA_EXP = "viewer/data";
 
 	@Execute
 	public void execute(MApplication application, 

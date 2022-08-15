@@ -26,7 +26,7 @@ public class GraphPlotRegularViewer extends AbstractGraphPlotViewer
 		super(tabFolder, style);
 	}
 
-	static public final String LABEL = "Plot graph";
+	public static final String LABEL = "Plot graph";
 
 	@Override
 	protected String getXAxisTitle() {
@@ -54,59 +54,17 @@ public class GraphPlotRegularViewer extends AbstractGraphPlotViewer
 	
 	@Override
 	protected int setupXAxis(GraphEditorInput input, ILineSeries scatterSeries) {
-		//IAxisSet axisSet = getChart().getAxisSet();
 		try {
-			//final IAxisTick xTick = axisSet.getXAxis(0).getTick();
-			//xTick.setFormat(new DecimalFormat("#############"));
-
 			Scope scope = input.getScope();
 			BaseMetric metric = input.getMetric();
 
-			double [] x_values = getValuesX(scope, metric);
-			scatterSeries.setXSeries(x_values);
+			double [] valuesX = getValuesX(scope, metric);
+			scatterSeries.setXSeries(valuesX);
 			
 		} catch (NumberFormatException | IOException e) {
 			showErrorMessage(e);
 			return PLOT_ERR_UNKNOWN;
 		}
-/*		
- 		IThreadDataCollection threadData = input.getThreadData();
-		if (threadData instanceof ThreadDataCollection2) {			
-			try {
-				final IAxisTick xTick = axisSet.getXAxis(0).getTick();
-				xTick.setFormat(new DecimalFormat("#############"));
-
-				Scope scope = input.getScope();
-				BaseMetric metric = input.getMetric();
-
-				double [] x_values = getValuesX(scope, metric);
-				scatterSeries.setXSeries(x_values);
-				
-			} catch (NumberFormatException | IOException e) {
-				showErrorMessage(e);
-				return PLOT_ERR_UNKNOWN;
-			}
-		} else {
-			ThreadDataCollection3 data = (ThreadDataCollection3) threadData;
-			try {
-
-				Scope scope = input.getScope();
-				BaseMetric metric = input.getMetric();
-				
-				double []x_values = getValuesX(scope, metric);
-				scatterSeries.setXSeries(x_values);
-
-				String []labels = data.getRankStringLabels();
-				
-				axisSet.getXAxis(0).enableCategory(true);
-				axisSet.getXAxis(0).setCategorySeries(labels);
-				axisSet.getXAxis(0).getTick().setTickLabelAngle(45);
-				
-			} catch (IOException e) {
-				showErrorMessage(e);
-				return PLOT_ERR_UNKNOWN;
-			}
-		} */
 		return PLOT_OK;
 	}
 
@@ -116,14 +74,13 @@ public class GraphPlotRegularViewer extends AbstractGraphPlotViewer
 		int id = metric.getIndex();
 		int size = 0;
 		
-		// in case of old databae, the metric is from MetricRaw
+		// in case of old database, the metric is from MetricRaw
 		if (metric instanceof MetricRaw) {
 			id = ((MetricRaw) metric).getRawID();
 			size = ((MetricRaw)metric).getSize();
 		}
 		IThreadDataCollection threadData = getInput().getThreadData();
-		double []y_values = threadData.getMetrics(scope.getCCTIndex(), id, size);
-		return y_values;
+		return threadData.getMetrics(scope.getCCTIndex(), id, size);
 	}
 
 	@Override

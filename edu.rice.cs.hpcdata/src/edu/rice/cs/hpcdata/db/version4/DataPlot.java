@@ -109,10 +109,8 @@ public class DataPlot extends DataCommon
 				out.print("\t m: " + i);
 				try {
 					DataPlotEntry []entries = getPlotEntry(ctxInfo, i);
-					if (entries != null) {
-						for (DataPlotEntry entry: entries) {
-							out.print(" " + entry);
-						}
+					for (DataPlotEntry entry: entries) {
+						out.print(" " + entry);
 					}
 					out.println();
 				} catch (IOException e) {
@@ -157,7 +155,7 @@ public class DataPlot extends DataCommon
 	private DataPlotEntry []getPlotEntry(ContextInfo info, int metric) throws IOException
 	{
 		if (info == null)
-			return null;
+			return new DataPlotEntry[0];
 
 		final int FMT_CCTDB_SZ_MIdx = 0x0a;
 		final int FMT_CCTDB_SZ_PVal = 0x0c;
@@ -168,37 +166,45 @@ public class DataPlot extends DataCommon
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 
 		var basePosition =  info.pMetricIndices - info.pValues;
-		// TODO: Linear search of metric O(n)
+
+		// Linear search of metric O(n)
 		// if n (number of non-zero metrics) is huge, we are in trouble
-		for(var i=0; i<info.nMetrics; i++) {			
+		for(var i=0; i<info.nMetrics; i++) {
+			// Get {Idx} start 
+			// 00: 	u16 	metricId 	4.0 	Unique identifier of a metric listed in the meta.db
+			// 02: 	u64 	startIndex 	4.0 	Start index of *pValues from the associated metric
 			int position  = (int) (basePosition + (i * FMT_CCTDB_SZ_MIdx));
 			short metricId = buffer.getShort(position);
 			
-			// TODO: linear search of metric. This should use binary search
 			if (metricId != metric)
 				continue;
 			
 			int startIdx = (int)buffer.getLong(position + 0x02);			
 			int endIdx   = (int)info.nValues;
-			
+
+			// Get {Idx} next or end 			
 			if (i+1 < info.nMetrics) {
 				position = (int) (basePosition + ((i+1) * FMT_CCTDB_SZ_MIdx));
 				endIdx = (int)buffer.getLong(position + 0x02);
 			}
 			
-			int numValues = (int)(endIdx-startIdx);
+			int numValues = (endIdx-startIdx);
 			DataPlotEntry []values = new DataPlotEntry[numValues];
 			basePosition = 0;
+			
+			// Read all metric values of this cct
+			// 00: 	u32 	profIndex 	4.0 	Index of a profile listed in the profile.db
+			// 04: 	f64 	value 	    4.0 	Value attributed to the profile indicated by profIndex
 			for (var j=startIdx; j<endIdx; j++) {
 				position = (int) (basePosition + j * FMT_CCTDB_SZ_PVal);
 				int profIndex = buffer.getInt(position);
 				double value  = buffer.getDouble(position + 0x04);
 
-				values[j-startIdx] = new DataPlotEntry(profIndex, value);
+				values[j-startIdx] = new DataPlotEntry(profIndex-1, value);
 			}
 			return values;
 		}		
-		return null;
+		return new DataPlotEntry[0];
 	}
 	
 	
@@ -208,10 +214,10 @@ public class DataPlot extends DataCommon
 
 	private static class ContextInfo
 	{
-		public long  nValues;
-		public long  pValues;
-		public short nMetrics;
-		public long  pMetricIndices;
+		private final long  nValues;
+		private final long  pValues;
+		private final short nMetrics;
+		private final long  pMetricIndices;
 		
 		public ContextInfo(long  nValues, long  pValues, short nMetrics, long pMetricIndices) {
 			this.nValues  = nValues;

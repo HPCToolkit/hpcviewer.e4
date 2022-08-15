@@ -116,7 +116,7 @@ public class ThreadDataTest
 						for(int j=0; j<values.length; j++) {
 							var idt = idTuples.get(j);
 							value = data.getMetric(root.getCCTIndex(), rawMetric.getIndex(), idt, rawMetricsSize);
-							var v = values[idt.getProfileIndex()-1];
+							var v = values[j];
 							assertEquals(value, v, delta);
 							assertTrue(control >= value);
 						}
