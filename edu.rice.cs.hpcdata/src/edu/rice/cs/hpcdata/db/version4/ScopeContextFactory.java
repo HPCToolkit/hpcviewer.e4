@@ -24,7 +24,7 @@ public class ScopeContextFactory
 	/**
 	 * Default separator between key component
 	 */
-	final String SEPARATOR = ":";
+	static final String SEPARATOR = ":";
 	
 	// --------------------------------------------------------------------
 	// Constants for Parent-child relation: 
@@ -334,10 +334,6 @@ public class ScopeContextFactory
 		if (parent instanceof LineScope) {
 			ls = (LineScope)parent;
 		} else {
-			if (ps.isTopDownProcedure()) {
-				// this is very unlikely: meta.db has no top-down flag
-				// TODO: should we throw an exception?
-			}
 			ls = new LineScope(rootCCT, ps.getSourceFile(), line, ctxId, flatId);
 		}
 

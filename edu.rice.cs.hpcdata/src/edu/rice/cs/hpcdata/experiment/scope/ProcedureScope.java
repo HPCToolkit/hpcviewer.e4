@@ -56,33 +56,15 @@ public class ProcedureScope extends Scope  implements IMergedScope
 	private static final String PROCEDURE_NO_NAME = "-";
 	private static final String PROCEDURE_INLINE  = "<inline>";
 
-	public static enum ProcedureType {
-		ProcedureNormal, 
-		ProcedureInlineFunction, 
-		ProcedureInlineMacro, 
-		ProcedureRoot,
-		
-		VariableDynamicAllocation, 
-		VariableStatic, 
-		VariableUnknown, 
-		VariableAccess
-	}
-
 	
-	final private int procedureFeature;
+	private final int procedureFeature;
 	
-	private ProcedureType type;
 	/** The name of the procedure. */
 	protected String procedureName;
 	protected boolean isalien;
 	// we assume that all procedure scope has the information on load module it resides
 	protected LoadModuleScope objLoadModule;
 
-
-	/**
-	 * scope ID of the procedure frame. The ID is given by hpcstruct and hpcprof
-	 */
-	//protected int iScopeID;
 
 //////////////////////////////////////////////////////////////////////////
 //	INITIALIZATION	
@@ -168,7 +150,7 @@ public String getName()
  ************************************************************************/
 
 public Scope duplicate() {
-	ProcedureScope ps = new ProcedureScope(this.root,
+	return new ProcedureScope(this.root,
 			this.objLoadModule,
 			this.sourceFile, 
 			this.firstLineNumber, 
@@ -179,10 +161,6 @@ public Scope duplicate() {
 			this.flat_node_index,
 			null,
 			this.procedureFeature);
-
-	ps.setProcedureType(type);
-	
-	return ps;
 }
 
 public boolean isAlien() {
@@ -193,6 +171,7 @@ public boolean isAlien() {
 //support for visitors													//
 //////////////////////////////////////////////////////////////////////////
 
+@Override
 public void accept(IScopeVisitor visitor, ScopeVisitType vt) {
 	visitor.visit(this, vt);
 }
@@ -242,16 +221,6 @@ public boolean toBeElided()
 {
 	return procedureFeature == FEATURE_ELIDED;
 }
-
-public void setProcedureType(ProcedureType type) {
-	this.type = type;
-}
-
-public ProcedureType getProcedureType() {
-	return this.type;
-}
-
-
 
 @Override
 public boolean hasScopeChildren() {

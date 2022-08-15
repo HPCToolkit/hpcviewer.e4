@@ -23,7 +23,6 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.StatementRangeScope;
-import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope.ProcedureType;
 import edu.rice.cs.hpcdata.experiment.source.FileSystemSourceFile;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
@@ -70,7 +69,7 @@ public class BaseExperimentBuilder extends Builder
 
 	private boolean csviewer;
 	
-	final private IUserData<String, String> userData;
+	private final IUserData<String, String> userData;
 
 	//--------------------------------------------------------------------------------------
 	// stacks
@@ -687,10 +686,8 @@ public class BaseExperimentBuilder extends Builder
 				this.scopeStack.push(ls);
 				this.scopeStack.push(csn2);
 
-				if (isalien)
-					procScope.setProcedureType(ProcedureType.ProcedureInlineFunction);
-				else 
-					procScope.setProcedureType(ProcedureType.ProcedureNormal);
+				procScope.setAlien(isalien);
+
 			} else {
 				this.beginScope(procScope);
 
@@ -699,10 +696,7 @@ public class BaseExperimentBuilder extends Builder
 				//   and procedure root (such as thread root, program root and omp idle).
 				// need to check if a procedure is an alien or not. Procedure root has no alien information
 				
-				if (isalien)
-					procScope.setProcedureType(ProcedureType.ProcedureInlineMacro);
-				else
-					procScope.setProcedureType(ProcedureType.ProcedureRoot);
+				procScope.setAlien(isalien);
 			}
 	}
 	

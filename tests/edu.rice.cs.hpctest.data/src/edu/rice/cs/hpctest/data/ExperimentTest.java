@@ -6,7 +6,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -34,8 +33,6 @@ import edu.rice.cs.hpctest.util.TestDatabase;
 public class ExperimentTest 
 {
 	private static final String DB_MULTITHREAD = "multithread";
-	private static final String DB_LOOP_INLINE = "loop-inline";
-
 	private static Experiment []experiments;
 	
 	public ExperimentTest() {
@@ -197,7 +194,7 @@ public class ExperimentTest
 										index, AnnotationType.NONE, metric.getMetricType());
 			experiment.addDerivedMetric(dm);
 			
-			assertEquals(experiment.getMetricCount(), numMetrics + 1);
+			assertEquals(experiment.getMetricCount(), numMetrics + 1L);
 		}
 	}
 	
@@ -406,7 +403,7 @@ public class ExperimentTest
 		for(var experiment: experiments) {
 			var children = experiment.getRootScopeChildren();
 			assertNotNull(children);
-			assertEquals(children.size(), 3);
+			assertEquals(3, children.size());
 		}
 	}
 
@@ -466,7 +463,7 @@ public class ExperimentTest
 			
 			File dir = file.getParentFile();
 			File dbPath = experiment.getDefaultDirectory();
-			assertTrue(dir.getAbsolutePath().equals(dbPath.getAbsolutePath()));
+			assertEquals(dir.getAbsolutePath(), dbPath.getAbsolutePath());
 		}
 	}
 

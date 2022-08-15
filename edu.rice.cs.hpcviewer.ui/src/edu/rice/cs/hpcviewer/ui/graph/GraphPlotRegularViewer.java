@@ -39,8 +39,8 @@ public class GraphPlotRegularViewer extends AbstractGraphPlotViewer
 		
 		try {
 			title = threadData.getRankTitle();
-		} catch (IOException e) {			
-			e.printStackTrace();
+		} catch (IOException e) {
+			// nothing to do, not important
 		}
 		return title;
 	}

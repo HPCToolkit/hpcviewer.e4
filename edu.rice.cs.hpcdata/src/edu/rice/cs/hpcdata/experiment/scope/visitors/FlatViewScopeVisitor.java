@@ -15,7 +15,6 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.ScopeVisitType;
 import edu.rice.cs.hpcdata.experiment.scope.StatementRangeScope;
-import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope.ProcedureType;
 import edu.rice.cs.hpcdata.experiment.scope.filters.ExclusiveOnlyMetricPropagationFilter;
 import edu.rice.cs.hpcdata.experiment.scope.filters.InclusiveOnlyMetricPropagationFilter;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
@@ -568,7 +567,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 			return false;
 		
 		ProcedureScope ps = (ProcedureScope) scope;
-		return ps.getProcedureType() == ProcedureType.ProcedureInlineMacro;
+		return ps.isAlien();
 	}
 	
 	/******************************************************************

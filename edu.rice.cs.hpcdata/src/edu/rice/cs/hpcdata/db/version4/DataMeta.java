@@ -70,6 +70,16 @@ public class DataMeta extends DataCommon
 	private static final int INDEX_FILES   = 6;
 	private static final int INDEX_FUNCTIONS = 7;
 
+	/**
+	 * Constants for entry point. See HPCToolkit FORMATS.md
+	 * <ul>
+	 *  <li>0 "unknown entry": No recognized outside caller.
+	 *  <li>1 "main thread": Setup code for the main thread
+	 *  <li>2 "application thread": Setup code for threads created by the application, via pthread_create or similar.
+	 * </ul>
+	 */
+	private static final String []entryLabels = { "<partial unwind>", "<main root>", "<thread root>"};
+
 	// --------------------------------------------------------------------
 	// variables
 	// --------------------------------------------------------------------
@@ -663,7 +673,6 @@ public class DataMeta extends DataCommon
 			int position = basePosition + delta;
 			// At the moment we don't need to handle the flags since the viewer will 
 			//  try to find the file by itself
-			// we remove buffer.getInt(position);
 			long pPath = buffer.getLong(position + 0x08);
 			
 			String  name = stringArea.toString(pPath);
@@ -716,7 +725,7 @@ public class DataMeta extends DataCommon
 			
 			long pName   = buffer.getLong(position);
 			long pModule = buffer.getLong(position + 0x08);
-			// not used at the moment: buffer.getLong(position + 0x10);
+			long offset  = buffer.getLong(position + 0x10);
 			long pFile   = buffer.getLong(position + 0x18);
 			int  line    = buffer.getInt( position + 0x20) - 1;
 			
@@ -803,15 +812,6 @@ public class DataMeta extends DataCommon
 		}
 	}
 
-	/**
-	 * Constants for entry point.
-	 * <ul>
-	 *  <li>0 "unknown entry": No recognized outside caller.
-	 *  <li>1 "main thread": Setup code for the main thread
-	 *  <li>2 "application thread": Setup code for threads created by the application, via pthread_create or similar.
-	 * </ul>
-	 */
-	private static final String []entryLabels = { "<partial unwind>", "<main root>", "<thread root>"};
 	
 	/***
 	 * Create the main root and parse its direct children
