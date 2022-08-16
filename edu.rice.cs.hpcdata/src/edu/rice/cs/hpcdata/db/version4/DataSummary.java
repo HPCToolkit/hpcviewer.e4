@@ -49,6 +49,8 @@ public class DataSummary extends DataCommon
 	// --------------------------------------------------------------------
 	
 	private final IdTupleType idTupleTypes;
+	
+	/** List of id tuples in sorted order */
 	private List<IdTuple> listIdTuple;
 	private ProfInfo info;
 	private ListCCTAndIndex listCCT;

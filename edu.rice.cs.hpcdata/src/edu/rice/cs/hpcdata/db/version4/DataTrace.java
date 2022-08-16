@@ -93,14 +93,8 @@ public class DataTrace extends DataCommon
 		traceCtxs = new TraceContext[traceHeader.nTraces];
 		
 		for(int i=0; i<traceHeader.nTraces; i++) {
-			int loc = i * traceHeader.szTrace;
-			
-			// TODO: at the moment the profIndex is not used, instead we'll use dense presentation
-			// in the future we should handle sparse profile index.
-			/* int profIndex = */ buffer.getInt(loc);
-			var tc = new TraceContext(buffer, loc);
-			
-			traceCtxs[i] = tc;
+			int loc = i * traceHeader.szTrace;			
+			traceCtxs[i] = new TraceContext(buffer, loc);
 		}
 		
 		lbBuffer = new LargeByteBuffer(input, 2, FMT_TRACEDB_SZ_CTX_SAMPLE);
@@ -145,9 +139,7 @@ public class DataTrace extends DataCommon
 		
 		long time = lbBuffer.getLong(position);
 		int  cpid = lbBuffer.getInt(position + 8);
-		DataRecord data = new DataRecord(time, cpid, 0);
-		
-		return data;
+		return new DataRecord(time, cpid, 0);
 	}
 	
 	/***
@@ -222,7 +214,7 @@ public class DataTrace extends DataCommon
 			int numsamples = getNumberOfSamples(rank);
 			int sample = r.nextInt(numsamples);
 			try {
-				out.format("%d:  %s\n", rank, getSampledData(rank, sample));
+				out.format("%d:  %s%n", rank, getSampledData(rank, sample));
 			} catch (IOException e) {
 				// skip the exception
 			}
@@ -303,8 +295,9 @@ public class DataTrace extends DataCommon
 	 ******************/
 	private static class TraceContext
 	{
-		public final long pStart;
-		public final long pEnd;
+		final int profIndex;
+		final long pStart;
+		final long pEnd;
 		
 		/***
 		 * Record of the start and end of a trace profile
@@ -314,12 +307,17 @@ public class DataTrace extends DataCommon
 		 * 			The beginning of the location of the trace profile
 		 */
 		public TraceContext(ByteBuffer buffer, int loc) {
+			// 00: 	u32 	profIndex 	4.0 	Index of a profile listed in the profile.db			
+			// 08: 	{Elem}* 	pStart 	4.0 	Pointer to the first element of the trace line (array)
+			// 10: 	{Elem}* 	pEnd 	4.0 	Pointer to the after-end element of the trace line (array)
+			
+			profIndex = buffer.getInt(loc);
 			pStart = buffer.getLong(loc + 0x08);
 			pEnd   = buffer.getLong(loc + 0x10);
 		}
 		
 		public String toString() {
-			return String.format("0x%x - 0x%x", pStart, pEnd);
+			return String.format("%d: 0x%x - 0x%x", profIndex, pStart, pEnd);
 		}
 	}
 
@@ -337,6 +335,13 @@ public class DataTrace extends DataCommon
 		public final long maxTimestamp;
 		
 		public TraceHeader(ByteBuffer buffer) {
+			// 00: 	{CTH}[nTraces]* 	pTraces 	4.0 	Header for each trace
+			// 08: 	u32 	nTraces 	4.0 	Number of traces listed in this section
+			// 0c: 	u8 		szTrace 	4.0 	Size of a {TH} structure, currently 24
+			//				
+			// 10: 	u64 	minTimestamp 	4.0 	Smallest timestamp of the traces listed in *pTraces
+			// 18: 	u64 	maxTimestamp 	4.0 	Largest timestamp of the traces listed in *pTraces
+			
 			pTraces = buffer.getLong();
 			nTraces = buffer.getInt(0x08);
 			szTrace = buffer.get(0x0c);

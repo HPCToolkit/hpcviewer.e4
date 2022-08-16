@@ -128,16 +128,20 @@ public class FileDB4 implements IFileDB
 	public long getMinLoc(int rank) {
 		// another redirection: look at id tuple to get the profile number
 		// then, search the offset of this profile number
-		
-		return dataTrace.getOffset(rank);
+		List<IdTuple> listId = dataSummary.getIdTuple();
+		int profile = listId.get(rank).getProfileIndex() - 1;
+
+		return dataTrace.getOffset(profile);
 	}
 
 	@Override
 	public long getMaxLoc(int rank) {
 		// another redirection: look at id tuple to get the profile number
 		// then, search the offset of this profile number, and its length
+		List<IdTuple> listId = dataSummary.getIdTuple();
+		int profile = listId.get(rank).getProfileIndex() - 1;
 		
-		return dataTrace.getOffset(rank) + dataTrace.getLength(rank) - dataTrace.getRecordSize();
+		return dataTrace.getOffset(profile) + dataTrace.getLength(profile) - dataTrace.getRecordSize();
 	}
 
 	@Override
