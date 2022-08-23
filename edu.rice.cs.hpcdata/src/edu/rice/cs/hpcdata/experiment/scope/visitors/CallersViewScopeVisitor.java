@@ -94,7 +94,6 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 		if (vt == ScopeVisitType.PreVisit) {
 			// have to push whether we will create a procedure or not since
 			// we will pop during Post visit.
-			// TODO: Ugly code
 			this.listCombinedScopes.push();
 			
 			if (!scope.isAlien()) {
@@ -145,37 +144,37 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 	 * Find caller view's procedure of a given scope. 
 	 * If it doesn't exist, create a new one, attach to the tree, and copy the metrics
 	 * 
-	 * @param cct_s : either call site or procedure
+	 * @param scopeCCT : either call site or procedure
 	 * @return ProcedureScope
 	 ********/
-	private ProcedureScope createProcedureIfNecessary( Scope cct_s ) {
-		ProcedureScope cct_proc_s;
+	private ProcedureScope createProcedureIfNecessary( Scope scopeCCT ) {
+		ProcedureScope procCCT;
 		
-		if (cct_s instanceof ProcedureScope)
-			cct_proc_s = (ProcedureScope) cct_s;
+		if (scopeCCT instanceof ProcedureScope)
+			procCCT = (ProcedureScope) scopeCCT;
 		else
-			cct_proc_s = ( (CallSiteScope)cct_s).getProcedureScope();
+			procCCT = ( (CallSiteScope)scopeCCT).getProcedureScope();
 		
-		String objCode = cct_proc_s.getSourceFile().getFileID() + ":" + cct_proc_s.getFlatIndex();
+		String objCode = procCCT.getSourceFile().getFileID() + ":" + procCCT.getFirstLineNumber() + ":" + procCCT.getName().hashCode();
 
-		ProcedureScope caller_proc = (ProcedureScope) calleeht.get(objCode);
+		ProcedureScope procCaller = (ProcedureScope) calleeht.get(objCode);
 		
-		if (caller_proc == null) {
+		if (procCaller == null) {
 			// create a new procedure scope
-			caller_proc = (ProcedureScope) cct_proc_s.duplicate();
-			caller_proc.setRootScope(callersViewRootScope);
+			procCaller = (ProcedureScope) procCCT.duplicate();
+			procCaller.setRootScope(callersViewRootScope);
 			
 			// add to the tree
-			callersViewRootScope.addSubscope(caller_proc);
-			caller_proc.setParentScope(this.callersViewRootScope);
+			callersViewRootScope.addSubscope(procCaller);
+			procCaller.setParentScope(this.callersViewRootScope);
 			
 			// add to the dictionary
-			calleeht.put(objCode, caller_proc);
+			calleeht.put(objCode, procCaller);
 		}
 		
 		// accumulate the metrics
-		this.combinedMetrics.combine(caller_proc, cct_s, inclusiveOnly, exclusiveOnly);
-		return caller_proc;
+		this.combinedMetrics.combine(procCaller, scopeCCT, inclusiveOnly, exclusiveOnly);
+		return procCaller;
 	}
 		
 

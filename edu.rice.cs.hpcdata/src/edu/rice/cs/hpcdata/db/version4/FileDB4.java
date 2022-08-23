@@ -35,7 +35,7 @@ public class FileDB4 implements IFileDB
 	 * 			
 	 * @throws IOException
 	 */
-	public FileDB4(IExperiment experiment, DataSummary dataSummary) throws IOException {
+	public FileDB4(IExperiment experiment, DataSummary dataSummary) {
 		this.dataSummary = dataSummary;
 		this.dataTrace   = new DataTrace();
 		this.experiment  = experiment;
@@ -92,7 +92,7 @@ public class FileDB4 implements IFileDB
 	@Override
 	public long[] getOffsets() {
 		// shouldn't be called for v4
-		return null;
+		return new long[0];
 	}
 
 	@Override

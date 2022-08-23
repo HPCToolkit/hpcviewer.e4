@@ -171,30 +171,30 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 	 * @param scopeCCT
 	 * @return
 	 ****************************************************************************/
-	private FlatScopeInfo getFlatScope( Scope cct_s ) {
+	private FlatScopeInfo getFlatScope( Scope cctScope ) {
 		//-----------------------------------------------------------------------------
 		// get the flat scope
 		//-----------------------------------------------------------------------------
-		String id = getID(cct_s);
-		FlatScopeInfo flat_info_s = this.htFlatScope.get( id );
+		String id = getID(cctScope);
+		FlatScopeInfo flatScopeInfo = this.htFlatScope.get( id );
 		
-		if (flat_info_s == null) {
+		if (flatScopeInfo == null) {
 
 			//-----------------------------------------------------------------------------
 			// Initialize the flat scope
 			//-----------------------------------------------------------------------------
-			flat_info_s = new FlatScopeInfo();
+			flatScopeInfo = new FlatScopeInfo();
 			
 			//-----------------------------------------------------------------------------
 			// finding enclosing procedure of this cct scope:
 			// if it is a call site, then the file and the module can be found in the scope
 			// for others, we need to find the enclosing procedure iteratively
 			//-----------------------------------------------------------------------------
-			ProcedureScope proc_cct_s;
-			if (cct_s instanceof CallSiteScope) {
-				proc_cct_s = ((CallSiteScope)cct_s).getProcedureScope();
+			ProcedureScope procScope;
+			if (cctScope instanceof CallSiteScope) {
+				procScope = ((CallSiteScope)cctScope).getProcedureScope();
 			} else {
-				proc_cct_s = findEnclosingProcedure(cct_s);
+				procScope = findEnclosingProcedure(cctScope);
 			}
 
 			// ideally we shouldn't allow place folders (fake procedures) to be created in the flat tree.
@@ -202,48 +202,48 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 			// hence should be added in the tree.
 			// That's why we shouldn't throw fake procedures here.
 			
-			if (proc_cct_s == null || proc_cct_s.isTopDownProcedure()) {
+			if (procScope == null || procScope.isTopDownProcedure()) {
 				return null;
 			}
 			
 			//-----------------------------------------------------------------------------
 			// Initialize the flat scope of this cct
 			//-----------------------------------------------------------------------------
-			flat_info_s.flatScope = cct_s.duplicate();
-			flat_info_s.flatScope.setRootScope(root_ft);
+			flatScopeInfo.flatScope = cctScope.duplicate();
+			flatScopeInfo.flatScope.setRootScope(root_ft);
 			
 			//-----------------------------------------------------------------------------
 			// save the info into hashtable
 			//-----------------------------------------------------------------------------
-			this.htFlatScope.put( id, flat_info_s);
+			this.htFlatScope.put( id, flatScopeInfo);
 
 			//-----------------------------------------------------------------------------
 			// for inline macro, we don't need to attach the file and load module
 			// an inline macro node will be attached directly to its parent
 			//-----------------------------------------------------------------------------
-			if (isInlineMacro(flat_info_s.flatScope)) {
-				return flat_info_s;
+			if (isInlineMacro(flatScopeInfo.flatScope)) {
+				return flatScopeInfo;
 			}
 			
 			//-----------------------------------------------------------------------------
 			// Initialize the load module scope
 			//-----------------------------------------------------------------------------
-			flat_info_s.flatLM = this.createFlatModuleScope(proc_cct_s);
+			flatScopeInfo.flatLM = this.createFlatModuleScope(procScope);
 
 			//-----------------------------------------------------------------------------
 			// Initialize the flat file scope
 			//-----------------------------------------------------------------------------
-			flat_info_s.flatFile = this.createFlatFileScope(proc_cct_s, flat_info_s.flatLM);
+			flatScopeInfo.flatFile = this.createFlatFileScope(procScope, flatScopeInfo.flatLM);
 			
 			//-----------------------------------------------------------------------------
 			// Attach the scope to the file if it is a procedure
 			//-----------------------------------------------------------------------------
-			if (flat_info_s.flatScope instanceof ProcedureScope) {
-				this.addToTree(flat_info_s.flatFile, flat_info_s.flatScope);
+			if (flatScopeInfo.flatScope instanceof ProcedureScope) {
+				this.addToTree(flatScopeInfo.flatFile, flatScopeInfo.flatScope);
 			}
 		}
 		
-		return flat_info_s;
+		return flatScopeInfo;
 	}
 	
 	/*****************************************************************
@@ -398,7 +398,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 				this.addToTree(flat_enc_s, objFlat.flatScope);				
 			} else {
 				// A very rare case: cyclic dependency
-				// TODO: we should create a new copy and attach it to the tree
+				// We should create a new copy and attach it to the tree
 				// but this will cause an issue for adding metrics and decrement counter
 				// at the moment we just avoid cyclic dependency				
 			}
@@ -427,7 +427,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 		if (scope == null)
 			return SEPARATOR_ID;
 		
-		var hash_id = new StringBuilder();
+		var hashId = new StringBuilder();
 
 		// --------------------------------------------------------
 		// Why do we need to reconstruct the flat id?
@@ -454,9 +454,9 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 		// ------
 		final String class_type = scope.getClass().getSimpleName();
 		if (class_type != null) {
-			hash_id.insert(0, class_type.substring(0, 2));
+			hashId.insert(0, class_type.substring(0, 2));
 		}
-		hash_id.append(scope.getFlatIndex());
+		hashId.append(scope.getFlatIndex());
 
 		// -----
 		// special case: database version 4 (sparse database)
@@ -464,30 +464,29 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 		// there is no need to reconstruct a new-id here.
 		// -----
 		if (exp.getMajorVersion() == Constants.EXPERIMENT_SPARSE_VERSION)
-			return hash_id.toString();
+			return hashId.toString();
 
 		// ------
 		// step (2) <class, flat_id, load_module, file_source, line_num>
 		// ------
-		var source_file = scope.getSourceFile();
-		hash_id.append(SEPARATOR_ID);
-		hash_id.append(source_file.getFileID());
+		hashId.append(SEPARATOR_ID);
+		hashId.append(scope.getSourceFile().getFileID());
 		
-		var proc_scope = findEnclosingProcedure(scope);
-		if (proc_scope == null)
-			return hash_id.toString();
+		var procScope = findEnclosingProcedure(scope);
+		if (procScope == null)
+			return hashId.toString();
 		
-		hash_id.append(SEPARATOR_ID);
-		hash_id.append(proc_scope.getLoadModule().getFlatIndex());
+		hashId.append(SEPARATOR_ID);
+		hashId.append(procScope.getLoadModule().getFlatIndex());
 
 		// ------
 		// (3) <class, flat_id, load_module, file_source, procedure, line_num>
 		// ------
-		hash_id.append(SEPARATOR_ID);
-		hash_id.append(proc_scope.getFlatIndex());
+		hashId.append(SEPARATOR_ID);
+		hashId.append(procScope.getFlatIndex());
 
-		hash_id.append(SEPARATOR_ID);
-		hash_id.append(scope.getFirstLineNumber());
+		hashId.append(SEPARATOR_ID);
+		hashId.append(scope.getFirstLineNumber());
 
 		// ------
 		// (4a) <class, flat_id, load_module, file_source, procedure, line_num, parent_id>
@@ -497,7 +496,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 		// (4b) <class, flat_id, load_module, file_source, procedure, line_num, parent_id>
 		// ------
 
-		return hash_id.toString();
+		return hashId.toString();
 	}
 	
 	
@@ -584,18 +583,18 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 	
 	/***********************************************************
 	 * Iteratively finding an enclosing procedure of a CCT scope
-	 * @param cct_s
+	 * @param cctScope
 	 * @return
 	 ***********************************************************/
-	private ProcedureScope findEnclosingProcedure(Scope cct_s)
+	private ProcedureScope findEnclosingProcedure(Scope cctScope)
 	{
-		if (cct_s == null)
+		if (cctScope == null)
 			return null;
 			
-		if (cct_s instanceof ProcedureScope) 
-			return (ProcedureScope) cct_s;
+		if (cctScope instanceof ProcedureScope) 
+			return (ProcedureScope) cctScope;
 		
-		Scope parent = cct_s.getParentScope();
+		Scope parent = cctScope.getParentScope();
 		while(parent != null) {
 			if (parent instanceof CallSiteScope) {
 				return ((CallSiteScope) parent).getProcedureScope();

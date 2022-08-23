@@ -354,7 +354,6 @@ public class ScopeContextFactory
 
 		ProcedureScope procScope = ps;
 		if (alien) {
-			// TODO: a quick fix to flag inlined procedure
 			// without duplicating here, there is no [i] notation in the top-down view.
 			procScope = new ProcedureScope(rootCCT, 
 										   ps.getLoadModule(), 
