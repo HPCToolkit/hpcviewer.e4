@@ -330,7 +330,7 @@ cd edu.rice.cs.hpcdata.app/scripts
 if [[ "$VERBOSE" == "1" ]]; then
 	OPTION="-v"
 fi
-./build.sh ${OPTION}
+./build.sh ${OPTION} --release "$RELEASE"
 
 if [  -f hpcdata-${RELEASE}.tgz ]; then
 	cp hpcdata*.tgz ../..
