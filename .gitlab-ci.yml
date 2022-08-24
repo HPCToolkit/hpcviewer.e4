@@ -44,7 +44,7 @@ precommit:
   stage: lint
   needs: []
   tags: [docker, linux/amd64]
-  image: registry.gitlab.com/hpctoolkit/ci-images/selfcheck/amd64:latest
+  image: registry.gitlab.com/hpctoolkit/ci-images/selfcheck:amd64
   cache:
     key: precommit
     paths:
