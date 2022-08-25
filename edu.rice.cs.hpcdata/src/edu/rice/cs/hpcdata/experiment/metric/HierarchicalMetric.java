@@ -16,8 +16,8 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	private static final byte FMT_METADB_COMBINE_MIN = 1;
 	private static final byte FMT_METADB_COMBINE_MAX = 2;
 
+	private final DataSummary profileDB;
 	private Expression expression;
-	private DataSummary profileDB;
 	private byte combineType; 
 	
 	private byte []psType;
@@ -42,10 +42,6 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		expression = ExpressionTree.parse(formula);
 	}
 	
-	
-	public void setProfileDatabase(DataSummary profileDB) {
-		this.profileDB = profileDB;
-	}
 	
 	
 	public void setCombineType(byte type) {
@@ -101,9 +97,21 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 			
 		default:
 			// nothing. error?
-			throw new RuntimeException("Unknown metric combine type: " + combineType);
 		}
 		return target;
+	}
+	
+	
+	/****
+	 * Retrieve the original metric name without any changes or suffixes.
+	 * 
+	 * @see getDisplayName
+	 * 
+	 * @return {@code String} 
+	 * 			the original name
+	 */
+	public String getName() {
+		return displayName;
 	}
 	
 	@Override

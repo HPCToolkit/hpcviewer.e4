@@ -23,7 +23,6 @@ import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
-import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.scope.EntryScope;
@@ -581,16 +580,6 @@ public class DataMeta extends DataCommon
 						m1.setPartner(m2.getIndex());
 					}
 				}
-			}
-		}
-		
-		// for the derived metric, we need to initialize it manually.
-		for(var metric: metricDesc) {
-			if (metric instanceof DerivedMetric) {
-				var dm = (DerivedMetric) metric;
-				dm.resetMetric((Experiment) experiment, rootCCT);
-			} else if (metric instanceof HierarchicalMetric) {
-				((HierarchicalMetric)metric).setProfileDatabase(dataSummary);
 			}
 		}
 		return metricDesc;
