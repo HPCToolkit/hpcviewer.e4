@@ -24,6 +24,7 @@ Export-Package: edu.rice.cs.hpcdata.db,
 Main-Class: edu.rice.cs.hpcdata.framework.Application
 Require-Bundle: com.graphbuilder,
  org.eclipse.collections,
- ca.odell.glazedlists
+ ca.odell.glazedlists,
+ org.yaml.snakeyaml
 Automatic-Module-Name: edu.rice.cs.hpcdata
 Bundle-ClassPath: .

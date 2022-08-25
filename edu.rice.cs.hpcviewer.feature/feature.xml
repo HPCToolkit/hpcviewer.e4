@@ -75,6 +75,7 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+
    <plugin
          id="org.eclipse.jface"
          download-size="0"
@@ -302,6 +303,13 @@
 
    <plugin
          id="edu.rice.cs.hpcfilter"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.yaml.snakeyaml"
          download-size="0"
          install-size="0"
          version="0.0.0"

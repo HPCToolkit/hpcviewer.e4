@@ -10,4 +10,5 @@ Require-Bundle: org.junit,
  edu.rice.cs.hpcdata,
  edu.rice.cs.hpcdata.merge,
  org.eclipse.collections,
- edu.rice.cs.hpctest.util
+ edu.rice.cs.hpctest.util,
+ org.yaml.snakeyaml

@@ -427,7 +427,6 @@ public class DataMeta extends DataCommon
 		var pMetrics = buffer.getLong();
 		var nMetrics = buffer.getInt();
 		var szMetric = buffer.get(0x0c);
-		// this line is not used at the moment: var szScopeInst  = buffer.get(0x0d);
 		var szSummary    = buffer.get(0x0e);
 		
 		long pScopes = buffer.getLong(0x10);
@@ -525,7 +524,6 @@ public class DataMeta extends DataCommon
 				m.setOrder(statMetric);
 				m.setIndex(propMetricId[k]);
 				
-				// TODO: default metric annotation for prof2 database
 				// temporary quick fix: every metric is percent annotated
 				// this should be fixed when we parse metrics.yaml
 				m.setAnnotationType(AnnotationType.PERCENT);

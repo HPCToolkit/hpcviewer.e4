@@ -42,9 +42,6 @@ protected FormatStyle valueStyle;
 /** The number format to be used for the annotation value. */
 protected FormatStyle annotationStyle;
 
-/** The pattern to use when formatting annotation values. */
-//protected String annotationFormatPattern;
-
 /** How many space characters separate the metric value and its annotation. */
 protected int separatorWidth;
 
@@ -90,10 +87,10 @@ public MetricValueFormat(boolean showValue,
 	this.annotationStyle.fieldWidth = annotationFieldWidth;
 	this.annotationStyle.fractionDigits = annotationFractionDigits;
 	if (annotationFormatPattern == null) {
-		annotationFormatPattern = "#0.0%";			// need to have something so default to what is used for percent values.
+		// need to have something so default to what is used for percent values.
+		annotationFormatPattern = "#0.0%";
 	}
 	this.annotationStyle.pattern = annotationFormatPattern;
-	//this.annotationFormatPattern = annotationFormatPattern;
 	
 	this.separatorWidth = separatorWidth;
 	
@@ -388,21 +385,7 @@ public int getFormattedLength()
 }
 
 
-/**
- * format the value without the information from MetricValue. This
- * method is need to compute the derived metrics on the fly without
- * instantiating or creating new class which will consume more memory
- * (I guess ---laks).
- * @param value
- * @return <code>String</code> the text format.
- *//*
-public String format(double value) {
-	StringBuffer formatted = new StringBuffer();
-	String string = this.formatDouble(value, this.valueFormatter, this.valueStyle);
-	formatted.append(string);
-	formatted.append(Util.spaces(this.annotationStyle.fieldWidth));
-	return formatted.toString();
-}*/
+
 /*************************************************************************
  *	Returns a <code>String</code> showing a given <code>MetricValue</code>
  *	according to this format.
@@ -561,7 +544,6 @@ protected void ensureFormatters()
 	if( this.annotationStyle.formatter == null )
 	{
 		this.annotationStyle.formatter = Util.makeDecimalFormatter(annotationStyle.pattern); 
-				// Util.makeDecimalFormatter(this.annotationFormatPattern);
 	}
 	
 	// separation between values

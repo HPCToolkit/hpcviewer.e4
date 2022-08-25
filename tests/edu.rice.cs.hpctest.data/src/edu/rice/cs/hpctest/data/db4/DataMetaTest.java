@@ -89,13 +89,13 @@ public class DataMetaTest
 			assertTrue(m.getDisplayName().length()>1);
 			assertTrue(m.getIndex() >= 0);
 			assertTrue(m.getMetricType() == MetricType.EXCLUSIVE);
-			assertTrue(m.getCombineTypeLabel().equals("sum"));
+			assertTrue(m.getCombineTypeLabel().equals("Sum"));
 			
 			m = (HierarchicalMetric) metrics.get(2);
 			assertTrue(m.getDisplayName().length()>1);
 			assertTrue(m.getIndex() >= 1);
 			assertTrue(m.getMetricType() == MetricType.INCLUSIVE);
-			assertTrue(m.getCombineTypeLabel().equals("sum"));
+			assertTrue(m.getCombineTypeLabel().equals("Sum"));
 		}
 	}
 	

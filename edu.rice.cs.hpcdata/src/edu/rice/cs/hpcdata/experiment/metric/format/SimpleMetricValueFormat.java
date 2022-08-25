@@ -22,12 +22,12 @@ import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
  ****************************************************************/
 public class SimpleMetricValueFormat implements IMetricValueFormat 
 {
-	private final String Exponent = "e";
-	private final String Exponent_Plus  = Exponent + "+";
-	private final String Exponent_Minus = Exponent + "-";
+	private static final String Exponent = "e";
+	private static final String Exponent_Plus  = Exponent + "+";
+	private static final String Exponent_Minus = Exponent + "-";
 	
-	private DecimalFormat formatValue;
-	private DecimalFormat formatPercent;
+	private final DecimalFormat formatValue;
+	private final DecimalFormat formatPercent;
 	
 	private static SimpleMetricValueFormat Instance;
 	

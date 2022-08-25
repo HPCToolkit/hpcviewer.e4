@@ -15,9 +15,20 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	private static final byte FMT_METADB_COMBINE_SUM = 0;
 	private static final byte FMT_METADB_COMBINE_MIN = 1;
 	private static final byte FMT_METADB_COMBINE_MAX = 2;
+	
+	private static final String []COMBINE_LABEL = {"Sum", "Min", "Max"};
 
 	private final DataSummary profileDB;
 	private Expression expression;
+	
+	/**
+	 * The combination function combine is an enumeration with the following possible values (the name after / is the matching name for inputs:combine in METRICS.yaml):
+	 * <ul>
+	 *   <li>0/sum: Sum of input values
+	 *   <li>1/min: Minimum of input values
+	 *   <li>2/max: Maximum of input values
+	 * </ul>
+	 */
 	private byte combineType; 
 	
 	private byte []psType;
@@ -30,7 +41,7 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	}
 
 	public void setPropagationScope(byte []psType, byte []psIndex) {
-		this.psType = new byte[psType.length];
+		this.psType  = new byte[psType.length];
 		this.psIndex = new byte[psIndex.length];
 		for(int i=0; i<psType.length; i++) {
 			this.psType[i] = psType[i];
@@ -48,19 +59,32 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		this.combineType = type;
 	}
 	
+	
+	/***
+	 * Get the name of combine function.
+	 * 
+	 * @return {@code String}
+	 */
 	public String getCombineTypeLabel() {
-		switch (combineType) {
-		case FMT_METADB_COMBINE_MAX:
-			return "max";
-		case FMT_METADB_COMBINE_MIN:
-			return "min";
-		case FMT_METADB_COMBINE_SUM:
-			return "sum";
-		default:
-			return null;
-		}
+		return COMBINE_LABEL[combineType];
 	}
 	
+	
+	/***
+	 * Perform reduction depending on the combine type function.
+	 * <ul>
+	 * 	<li>If it's a sum, then the reduce operator is minus.
+	 *  <li>If it's a min, then the operator is the minimum of the two values
+	 *  <li>etc.
+	 * </ul>
+	 * 
+	 * @param target
+	 * 			The destination of the result of reduction
+	 * @param source
+	 * 			The source of reduce operation
+	 * @return {@code MetricValue}
+	 * 			Equivalent with the {@code target} variable in the argument
+	 */
 	public MetricValue reduce(MetricValue target, MetricValue source) {
 		final float INSIGNIFICANT_NUMBER = 0.000001f;
 		if (source == MetricValue.NONE)
@@ -139,7 +163,7 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 											   scope.getCCTIndex(), 
 											   index);
 		} catch (IOException e) {
-			throw new RuntimeException("Cannot find metric value for " + s.toString());
+			throw new IllegalArgumentException("Cannot find metric value for " + s.toString());
 		}
 		if (value == 0.0d)
 			return MetricValue.NONE;
