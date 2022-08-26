@@ -62,6 +62,10 @@ public class CallPathTest {
 				DataSummary ds = new DataSummary(IdTupleType.createTypeWithOldFormat());
 				ds.open(filename);
 				fileDB[i] = new FileDB4(experiment[i], ds);
+			} else if (version == 1) {
+				// original *.hpctrace files
+				// needs to convert to *.mt file
+				continue;
 			} else 
 				fail("unknown database");
 			try {				

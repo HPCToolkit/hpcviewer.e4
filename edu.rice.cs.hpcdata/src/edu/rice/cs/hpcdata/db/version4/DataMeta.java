@@ -155,7 +155,6 @@ public class DataMeta extends DataCommon
 	public void open(final String directory) 
 			throws IOException
 	{
-		assert(false);
 		throw new IOException("Unsupported. Use open(IExperiment experiment, String directory)");
 	}
 

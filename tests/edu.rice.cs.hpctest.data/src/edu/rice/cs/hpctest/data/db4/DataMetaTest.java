@@ -21,7 +21,6 @@ import edu.rice.cs.hpctest.util.TestDatabase;
 public class DataMetaTest 
 {
 	static DataMeta []dataMeta;
-	private static final int MAX_DEPTH = 6;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws IOException {
@@ -57,7 +56,7 @@ public class DataMetaTest
 			assertNotNull(experiment);
 			
 			assertTrue(experiment.getName().length()>1);
-			assertTrue(experiment.getMajorVersion() == 4);
+			assertEquals(experiment.getMajorVersion(), 4);
 		}
 	}
 	
@@ -88,14 +87,14 @@ public class DataMetaTest
 			HierarchicalMetric m = (HierarchicalMetric) metrics.get(1);
 			assertTrue(m.getDisplayName().length()>1);
 			assertTrue(m.getIndex() >= 0);
-			assertTrue(m.getMetricType() == MetricType.EXCLUSIVE);
-			assertTrue(m.getCombineTypeLabel().equals("Sum"));
+			assertSame(MetricType.EXCLUSIVE, m.getMetricType());
+			assertEquals("Sum", m.getCombineTypeLabel());
 			
 			m = (HierarchicalMetric) metrics.get(2);
 			assertTrue(m.getDisplayName().length()>1);
 			assertTrue(m.getIndex() >= 1);
-			assertTrue(m.getMetricType() == MetricType.INCLUSIVE);
-			assertTrue(m.getCombineTypeLabel().equals("Sum"));
+			assertSame(MetricType.INCLUSIVE, m.getMetricType());
+			assertEquals("Sum", m.getCombineTypeLabel());
 		}
 	}
 	

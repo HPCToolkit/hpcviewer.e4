@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
@@ -45,7 +46,10 @@ public class MetricYamlParser
 		final var dbPath = experiment.getDirectory();
 		final var fname  = dbPath + File.separator + "metrics" + File.separator + "default.yaml";
 		
-		Yaml yaml = new Yaml();
+		LoaderOptions loaderOption = new LoaderOptions();
+		loaderOption.setMaxAliasesForCollections(1000);
+		
+		Yaml yaml = new Yaml(loaderOption);
 		var data  = yaml.load(new FileInputStream(fname));
 		if (!(data instanceof LinkedHashMap<?, ?>))
 			return;

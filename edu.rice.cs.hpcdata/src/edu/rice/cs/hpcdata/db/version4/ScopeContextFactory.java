@@ -187,7 +187,7 @@ public class ScopeContextFactory
 		
 		// linearize the flat id. This is not sufficient and causes collisions for large and complex source code
 		// This needs to be computed more reliably.
-		int flatId = getKey(parent, lm, fs, ps, line, lexicalType, relation);
+		int flatId = getKey(parent, lm, fs, ps, line, lexicalType, relation, offset);
 		
 		switch(lexicalType) {
 		case FMT_METADB_LEXTYPE_FUNCTION:
@@ -225,13 +225,14 @@ public class ScopeContextFactory
 					   ProcedureScope ps, 
 					   int line, 
 					   int lexicalType, 
-					   int relation) {
+					   int relation,
+					   long offset) {
 		
 		StringBuilder sb = new StringBuilder();
 		
 		sb.append("L" + lexicalType);
 		sb.append(SEPARATOR);
-		
+
 		// --------------------------------------------------------
 		// reconstruct the normal structure of load-module and file source
 		// the "normal" key should be:
@@ -240,6 +241,9 @@ public class ScopeContextFactory
 		// this should be sufficient in normal cases, but not all cases.
 		// --------------------------------------------------------
 		sb.append(lms.getFlatIndex());
+		sb.append(SEPARATOR);
+
+		sb.append("O" + offset);
 		sb.append(SEPARATOR);
 					
 		sb.append(sf.getFileID());
@@ -281,16 +285,14 @@ public class ScopeContextFactory
 		if (relation == FMT_METADB_RELATION_LEXICAL_NEST ||
 			relation == FMT_METADB_RELATION_CALL_INLINED) {
 			
-			Scope procParent = parent;
-			if (parent instanceof CallSiteScope) 
-				procParent = ((CallSiteScope)parent).getProcedureScope();
-			
-			sb.append(SEPARATOR);
-			sb.append(procParent.getFlatIndex());
-		} else if (relation == FMT_METADB_RELATION_CALL && 
-				   parent instanceof LineScope) {
-			sb.append(SEPARATOR);
-			sb.append(parent.getFlatIndex());
+			sb.append(getProcedureParentFlatId(parent));
+		} else if (relation == FMT_METADB_RELATION_CALL) {
+			if (lexicalType == FMT_METADB_LEXTYPE_INSTRUCTION) {
+				sb.append(getProcedureParentFlatId(parent));
+			} else if (parent instanceof LineScope ) {
+				sb.append(SEPARATOR);
+				sb.append(parent.getFlatIndex());
+			}
 		}
 		
 		int hash = sb.toString().hashCode();
@@ -304,6 +306,13 @@ public class ScopeContextFactory
 		return flatID;
 	}
 
+	private String getProcedureParentFlatId(Scope parent) {
+		Scope procParent = parent;
+		if (parent instanceof CallSiteScope) 
+			procParent = ((CallSiteScope)parent).getProcedureScope();
+		
+		return SEPARATOR + procParent.getFlatIndex();
+	}
 	
 	/***
 	 * Create a lexical function scope.

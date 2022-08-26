@@ -104,7 +104,7 @@ public class ExperimentTest
 
 	@Test
 	public void testGetVisibleMetrics() {
-		int []num = new int[] {97, 2, 0, 3, 3, 3, 6};
+		int []num = new int[] {97, 2, 0, 3, 10, 3, 3, 6, 10};
 		int i = 0;
 		for(var experiment: experiments) {
 			List<BaseMetric> metrics = experiment.getVisibleMetrics();
@@ -116,7 +116,7 @@ public class ExperimentTest
 
 	@Test
 	public void testGetNonEmptyMetricIDs() {
-		final int []nmetrics = new int[] {18, 0, 0, 1, 1, 2, 2};
+		final int []nmetrics = new int[] {18, 0, 0, 4, 1, 1, 2, 2, 4};
 		int i=0;
 		for(var experiment: experiments) {
 			RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
@@ -129,7 +129,7 @@ public class ExperimentTest
 
 	@Test
 	public void testGetMetricCount() {
-		int []counts = new int[] {10, 0, 0, 2, 2, 3, 3};
+		int []counts = new int[] {10, 0, 0, 3, 10, 2, 2, 3, 10};
 		int i=0;
 		
 		for(var experiment: experiments) {
@@ -163,7 +163,7 @@ public class ExperimentTest
 
 	@Test
 	public void testGetMetricFromOrder() {
-		int []order = new int[] {0, 0, 1, 1, 1, 1};
+		int []order = new int[] {0, 0, 1, 1, 1, 1, 1, 1};
 		int i = 0;
 		for(var experiment: experiments) {
 			if (experiment.getMetricCount()>0) {
@@ -336,7 +336,7 @@ public class ExperimentTest
 	}
 	
 	private static int floatCompare(float f1, float f2) {
-		final float EPSILON = 0.000001f;
+		final float EPSILON = 0.001f;
 		final float delta = f1 - f2;
 		final float diffEps = Math.abs(delta) / f1;
 		if (diffEps < EPSILON)
@@ -346,7 +346,8 @@ public class ExperimentTest
 	
 	
 	private boolean checkChildValue(BaseMetric metric, MetricValue mv1, MetricValue mv2) {
-		if (metric.getMetricType() == MetricType.INCLUSIVE) { 
+		if (!(metric instanceof DerivedMetric) && 
+			 (metric.getMetricType() == MetricType.INCLUSIVE)) { 
 			final int  c = floatCompare(mv1.getValue(), mv2.getValue());
 			return c>=0;
 		}
@@ -380,7 +381,7 @@ public class ExperimentTest
 
 	@Test
 	public void testGetMaxDepth() {
-		final int maxdepth[] = new int[] {4, 0, 0, 6, 13, 20, 10};
+		final int maxdepth[] = new int[] {4, 0, 0, 6, 10, 13, 20, 10, 10};
 		int i=0;
 		for(var experiment: experiments) {
 			assertTrue(experiment.getMaxDepth() >= maxdepth[i]);
@@ -431,7 +432,7 @@ public class ExperimentTest
 
 	@Test
 	public void testGetName() {
-		final String []names = new String[] {"bandwidthTest", "a.out", "a.out", "inline", "loop", "lmp", "inline"};
+		final String []names = new String[] {"bandwidthTest", "a.out", "a.out", "inline", "vectorAdd", "loop", "lmp", "inline", "vectorAdd"};
 		int i=0;
 		for(var experiment: experiments) {
 			String name = experiment.getName();

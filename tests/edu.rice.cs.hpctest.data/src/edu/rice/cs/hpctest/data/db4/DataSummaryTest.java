@@ -65,7 +65,7 @@ public class DataSummaryTest {
 		for(var profile: dataProfiles) {
 			try {
 				double val = profile.getMetric(IdTuple.PROFILE_SUMMARY, 0, 2);
-				assertTrue(val > 270); 
+				assertTrue(val > 250); 
 			} catch (IOException e) {
 				fail(e.getMessage());
 			}
@@ -87,7 +87,7 @@ public class DataSummaryTest {
 			
 			MetricValueSparse mvs = list.get(0);
 			assertTrue(mvs.getIndex() >= 2);
-			assertTrue(mvs.getValue() > 270);
+			assertTrue(mvs.getValue() > 250);
 		}
 	}	
 
