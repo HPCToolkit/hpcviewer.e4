@@ -7,9 +7,23 @@ import com.graphbuilder.math.ExpressionTree;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.version4.DataSummary;
+import edu.rice.cs.hpcdata.experiment.TreeNode;
 import edu.rice.cs.hpcdata.experiment.scope.IMetricScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
+/****************************************************************
+ * 
+ * Metric class with tree-based structure
+ * <p>
+ * This class is designed to work with meta.db database which allows
+ * to create a hierarchy of metrics.<br/>
+ * 
+ * It has the same structure as the 
+ * {@link edu.rice.cs.hpcdata.experiment.scope.Scope} class: <br/>
+ * The root metric has no parent (or the parent is null), and the
+ * leaves have no children. 
+ *
+ ****************************************************************/
 public class HierarchicalMetric extends AbstractMetricWithFormula 
 {	
 	private static final byte FMT_METADB_COMBINE_SUM = 0;
@@ -19,6 +33,8 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	private static final String []COMBINE_LABEL = {"Sum", "Min", "Max"};
 
 	private final DataSummary profileDB;
+	private final TreeNode<HierarchicalMetric> node;
+	
 	private Expression expression;
 	
 	/**
@@ -34,10 +50,44 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	private byte []psType;
 	private byte []psIndex;
 
-	public HierarchicalMetric(DataSummary profileDB, int index, String sDisplayName) {
-		super(String.valueOf(index), sDisplayName);
+	
+	/***
+	 * Create a basic metric descriptor without hierarchy information.
+	 * The caller has to provide the parent/children information later on.
+	 * 
+	 * @param profileDB
+	 * 			The object to access summary.db file.
+	 * @param index
+	 * 			The index of this metric
+	 * @param name
+	 * 			The basic name of the metric. This is not the displayed name.
+	 */
+	public HierarchicalMetric(DataSummary profileDB, int index, String name) {
+		super(String.valueOf(index), name);
 		this.profileDB = profileDB;
 		setIndex(index);
+		node = new TreeNode<>(index);
+	}
+	
+	
+	public void setParent(HierarchicalMetric parent) {
+		node.setParent(parent);
+	}
+	
+	public HierarchicalMetric getParent() {
+		return node.getParent();
+	}
+	
+	public void addChild(HierarchicalMetric child) {
+		node.add(child);
+	}
+	
+	public int getChildCount() {
+		return node.getChildCount();
+	}
+	
+	public HierarchicalMetric getChildAt(int index) {
+		return node.getChildAt(index);
 	}
 
 	public void setPropagationScope(byte []psType, byte []psIndex) {
@@ -54,7 +104,14 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	}
 	
 	
-	
+	/**
+	 * Set the type of combine function. 
+	 * <ul>
+	 *   <li>0/sum: Sum of input values
+	 *   <li>1/min: Minimum of input values
+	 *   <li>2/max: Maximum of input values
+	 * </ul>
+	 */
 	public void setCombineType(byte type) {
 		this.combineType = type;
 	}

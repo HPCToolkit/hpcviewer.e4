@@ -1,6 +1,7 @@
-package edu.rice.cs.hpcdata.experiment.scope;
+package edu.rice.cs.hpcdata.experiment;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -39,7 +40,9 @@ public class TreeNode<T> implements ITreeNode<T> {
 	 *            The value held by this node; may be anything.
 	 */
 	public TreeNode(final Object value) {
-		this.value = value;
+		this.value    = value;
+		this.parent   = null;
+		this.children = null;
 	}
 	
 
@@ -63,14 +66,6 @@ public class TreeNode<T> implements ITreeNode<T> {
 		this.children = children;
 	}
 
-	
-	/****
-	 * Replace the children with the new list
-	 * @param children
-	 */
-	public void setListChildren(List<T> children) {
-		this.children = children;
-	}
 	
 	/**
 	 * Returns the parent node.
@@ -106,7 +101,7 @@ public class TreeNode<T> implements ITreeNode<T> {
 	 *         otherwise.
 	 */
 	public boolean hasChildren() {
-		return children != null && children.size() > 0;
+		return children != null && !children.isEmpty();
 	}
 	
 
@@ -167,7 +162,7 @@ public class TreeNode<T> implements ITreeNode<T> {
 			if (index < children.size())
 				return children.get(index);
 			else
-				throw new RuntimeException("Index is not correct: " + index + " bigger than " + children.size());
+				throw new IllegalArgumentException("Index is not correct: " + index + " bigger than " + children.size());
 		}
 		return null;
 	}

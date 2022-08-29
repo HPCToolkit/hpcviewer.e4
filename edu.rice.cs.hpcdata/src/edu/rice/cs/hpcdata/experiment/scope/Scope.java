@@ -22,6 +22,8 @@ import java.util.List;
 import org.eclipse.collections.impl.list.mutable.FastList;
 
 import edu.rice.cs.hpcdata.experiment.IExperiment;
+import edu.rice.cs.hpcdata.experiment.ITreeNode;
+import edu.rice.cs.hpcdata.experiment.TreeNode;
 import edu.rice.cs.hpcdata.experiment.metric.AggregateMetric;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;

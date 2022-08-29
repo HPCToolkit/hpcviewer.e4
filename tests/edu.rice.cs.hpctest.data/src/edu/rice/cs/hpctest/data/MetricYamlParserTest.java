@@ -39,7 +39,7 @@ public class MetricYamlParserTest
 		assertNotNull(experiments);
 		
 		for(var exp: experiments) {
-			MetricYamlParser parser = new MetricYamlParser(exp);
+			MetricYamlParser parser = new MetricYamlParser(null, exp);
 			assertNotNull(parser);
 			
 			int version = parser.getVersion();

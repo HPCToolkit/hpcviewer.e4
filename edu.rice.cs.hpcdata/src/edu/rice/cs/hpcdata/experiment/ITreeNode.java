@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcdata.experiment.scope;
+package edu.rice.cs.hpcdata.experiment;
 
 import java.util.List;
 
