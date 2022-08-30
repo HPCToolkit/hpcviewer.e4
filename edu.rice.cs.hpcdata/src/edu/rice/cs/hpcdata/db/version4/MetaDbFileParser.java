@@ -21,7 +21,7 @@ public class MetaDbFileParser extends ExperimentFile
 		
 		final DataMeta data = new DataMeta();
 		data.open(experiment, directory);
-		
+
 		return new File(data.filename);
 	}
 }

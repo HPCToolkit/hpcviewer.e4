@@ -38,7 +38,6 @@ public class MetricTest {
 			try {
 				mvc[i] = new MetricValueCollection4(dataMeta.getDataSummary());
 			} catch (IOException e) {
-				System.err.println("Fail to create MetricValueCollection3: " + e.getMessage());
 				fail(e.getMessage());
 			}
 			Scope s = (Scope) dataMeta.getExperiment().getRootScopeChildren().get(0);		
@@ -49,14 +48,21 @@ public class MetricTest {
 	@Test
 	public void testGetValue() {
 		int i=0;
+		assertNotNull(mvc);
+
 		for(var dataMeta: data) {
-			Scope s = (Scope) dataMeta.getExperiment().getRootScopeChildren().get(0);		
-			var mv = mvc[i].getValue(s, 1);
+			Scope s = (Scope) dataMeta.getExperiment().getRootScopeChildren().get(0);
+			var metrics = dataMeta.getExperiment().getMetrics();
+			if (metrics == null || metrics.isEmpty())
+				continue;
+			
+			assertNotNull(mvc[i]);
+
+			var metric = metrics.get(0);
+			var mv = mvc[i].getValue(s, metric.getIndex());
 			assertNotNull(mv);
-			assertTrue(mv == MetricValue.NONE);
 			
 			mv = mvc[i].getValue(s, 2);
-			assertNotNull(mvc);
 			assertTrue(mv.getValue() > 0);
 			i++;
 		}

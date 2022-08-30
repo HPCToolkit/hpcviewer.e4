@@ -25,7 +25,8 @@ public final class ThreadDataCollectionFactory
 	/*******
 	 * Build an {@link IThreadDataCollection} object
 	 *  
-	 * @param experiment : experiment database. Should have thread-level data
+	 * @param root 
+	 * 			The root of the top-down view
 	 * 
 	 * @return IThreadDataCollection : interface to access thread-level data,
 	 * or null if the database has no thread-level data.

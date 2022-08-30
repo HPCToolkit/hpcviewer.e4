@@ -82,7 +82,7 @@ public class DataMetaTest
 		for(DataMeta data: dataMeta) {
 			var metrics = data.getExperiment().getMetrics();
 			assertNotNull(metrics);
-			assertTrue(metrics.size()>=3);
+			assertTrue(metrics.size()>=2);
 			
 			HierarchicalMetric m = (HierarchicalMetric) metrics.get(1);
 			assertTrue(m.getDisplayName().length()>1);
@@ -90,7 +90,7 @@ public class DataMetaTest
 			assertSame(MetricType.EXCLUSIVE, m.getMetricType());
 			assertEquals("Sum", m.getCombineTypeLabel());
 			
-			m = (HierarchicalMetric) metrics.get(2);
+			m = (HierarchicalMetric) metrics.get(0);
 			assertTrue(m.getDisplayName().length()>1);
 			assertTrue(m.getIndex() >= 1);
 			assertSame(MetricType.INCLUSIVE, m.getMetricType());

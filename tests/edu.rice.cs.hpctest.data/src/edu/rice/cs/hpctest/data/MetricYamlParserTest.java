@@ -8,7 +8,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import edu.rice.cs.hpcdata.experiment.Experiment;
-import edu.rice.cs.hpcdata.experiment.metric.MetricYamlParser;
 import edu.rice.cs.hpctest.util.TestDatabase;
 
 public class MetricYamlParserTest 
@@ -39,15 +38,8 @@ public class MetricYamlParserTest
 		assertNotNull(experiments);
 		
 		for(var exp: experiments) {
-			MetricYamlParser parser = new MetricYamlParser(null, exp);
-			assertNotNull(parser);
-			
-			int version = parser.getVersion();
-			assertTrue(version >= 0);
-			
-			var metrics = parser.getListMetrics();
-			assertNotNull(metrics);
-			assertTrue(metrics.size() <= exp.getMetricCount());
+			var numOriginalMetrics = exp.getMetricCount();
+			assertTrue(numOriginalMetrics>=0);
 		}
 	}
 }

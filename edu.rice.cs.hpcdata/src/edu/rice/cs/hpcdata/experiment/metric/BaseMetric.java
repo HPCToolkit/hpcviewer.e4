@@ -28,7 +28,7 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 	//-------------------------------------------------------------------------------
 
 	/** Valid types of Annotations to be used with metric values */
-	public enum AnnotationType { NONE, PERCENT, PROCESS }
+	public enum AnnotationType { NONE, PERCENT, PROCESS, COLOR_BAR }
 	
 	public enum VisibilityType { 
 		HIDE, 				// hide the metric column 

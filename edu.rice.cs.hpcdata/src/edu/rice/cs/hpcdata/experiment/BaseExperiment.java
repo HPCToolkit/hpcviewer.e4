@@ -80,6 +80,8 @@ public abstract class BaseExperiment implements IExperiment
 
 	public String getDirectory() {
 		var location = databaseRepresentation.getFile();
+		if (location.isDirectory())
+			return location.getAbsolutePath();
 		return location.getParentFile().getAbsolutePath();
 	}
 

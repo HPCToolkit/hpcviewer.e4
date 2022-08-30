@@ -25,6 +25,7 @@ import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
 import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
+import edu.rice.cs.hpcdata.experiment.metric.MetricYamlParser;
 import edu.rice.cs.hpcdata.experiment.scope.EntryScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoadModuleScope;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
@@ -135,9 +136,15 @@ public class DataMeta extends DataCommon
 		
 		// manually setup the metrics for the sake of backward compatibility
 		final Experiment exp = (Experiment) experiment;
-		exp.setMetrics(metrics);
-		exp.setMetricRaw(metrics);
 		
+		MetricYamlParser yamlParser = new MetricYamlParser(directory, dataSummary, metrics);		
+		assert(yamlParser.getVersion() >= 0);
+
+		// Reset the new list of metric descriptors to the experiment database  
+		// Note: Metrics are based on the yaml file, not meta.db
+		exp.setMetrics(yamlParser.getListMetrics());
+		exp.setMetricRaw(yamlParser.getListMetrics());
+
 		rootCCT.setMetricValueCollection(new MetricValueCollection4(dataSummary));
 
 		// restructure the cct
@@ -181,7 +188,14 @@ public class DataMeta extends DataCommon
 		return 8;
 	}
 
-	
+	/***
+	 * Return the database directory of this meta.db file
+	 * 
+	 * @return {@code String}
+	 */
+	public String getDirectory() {
+		return directory;
+	}
 		
 	/***
 	 * Get the load module for a specified id

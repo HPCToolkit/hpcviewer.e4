@@ -6,7 +6,6 @@ import java.io.FileNotFoundException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -21,8 +20,6 @@ import edu.rice.cs.hpcdata.db.version4.DataSummary;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
-import edu.rice.cs.hpcdata.experiment.metric.format.IMetricValueFormat;
-import edu.rice.cs.hpcdata.experiment.metric.format.SimpleMetricValueFormat;
 
 /*********************************************************
  * 
@@ -32,9 +29,9 @@ import edu.rice.cs.hpcdata.experiment.metric.format.SimpleMetricValueFormat;
  *********************************************************/
 public class MetricYamlParser 
 {
-	private final Experiment       experiment;
 	private final List<BaseMetric> listMetrics;
 	private final DataSummary  	   dataSummary;
+	private final List<BaseMetric> metricsInMetaDB;
 
 	private Deque<HierarchicalMetric> stackMetrics;
 	
@@ -50,16 +47,15 @@ public class MetricYamlParser
 	 * @param experiment
 	 * @throws FileNotFoundException
 	 */
-	public MetricYamlParser(DataSummary dataSummary, Experiment experiment) throws FileNotFoundException {
+	public MetricYamlParser(String directory, DataSummary dataSummary, List<BaseMetric> metricsInMetaDB) throws FileNotFoundException {
 		this.dataSummary = dataSummary;
-		this.experiment  = experiment;
-		this.listMetrics = new ArrayList<>(experiment.getMetricCount());
+		this.listMetrics = new ArrayList<>(metricsInMetaDB.size());
+		this.metricsInMetaDB = metricsInMetaDB;
 		
 		parentIndex = -1;
 		stackMetrics = new ArrayDeque<>();
 		
-		final var dbPath = experiment.getDirectory();
-		final var fname  = dbPath + File.separator + "metrics" + File.separator + "default.yaml";
+		final var fname  = directory + File.separator + "metrics" + File.separator + "default.yaml";
 		
 		LoaderOptions loaderOption = new LoaderOptions();
 		loaderOption.setMaxAliasesForCollections(1000);
@@ -74,10 +70,6 @@ public class MetricYamlParser
 		
 		// parse the metric structure
 		parseRoots((LinkedHashMap<String, ?>) data);
-		
-		// set the new list of metric descriptors to the experiment database  
-		// Note: based on the yaml file, not meta.db
-		experiment.setMetrics(listMetrics);
 	}
 	
 
@@ -134,7 +126,7 @@ inputs: ArrayList<E>  (id=98)
 		if (!(inputs instanceof ArrayList<?>))
 			return;
 		
-		var metrics     = experiment.getMetricList();
+		var metrics     = metricsInMetaDB;
 		var listInputs  = (List<Map<String, ?>>)inputs;
 		mapCodeToMetric = new HashMap<>(listInputs.size());
 		
@@ -250,6 +242,14 @@ roots:
 	}
 	
 	
+	/***
+	 * Parse the render field
+	 * 
+	 * @param metric
+	 * 			the current metric
+	 * @param mapAttribute
+	 * 			the current yaml map 
+	 */
 	private void parseRender(BaseMetric metric, Map<String, ?> mapAttribute) {
 		var render = mapAttribute.get("render");
 		if (render == null || metric == null)
@@ -268,6 +268,9 @@ roots:
 			if (attr.equalsIgnoreCase("hidden")) 
 				metric.setDisplayed(VisibilityType.HIDE);
 			else if (attr.equalsIgnoreCase("percent"))
+				metric.setAnnotationType(AnnotationType.PERCENT);
+			else if (attr.equals("colorbar"))
+				// TODO: not supported at the moment
 				metric.setAnnotationType(AnnotationType.PERCENT);
 		}
 	}

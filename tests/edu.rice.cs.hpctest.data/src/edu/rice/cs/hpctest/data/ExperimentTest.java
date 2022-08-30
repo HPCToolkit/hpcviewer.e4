@@ -104,7 +104,7 @@ public class ExperimentTest
 
 	@Test
 	public void testGetVisibleMetrics() {
-		int []num = new int[] {97, 2, 0, 3, 10, 3, 3, 6, 10};
+		int []num = new int[] {97, 2, 0, 3, 10, 2, 2, 4, 10};
 		int i = 0;
 		for(var experiment: experiments) {
 			List<BaseMetric> metrics = experiment.getVisibleMetrics();
@@ -163,7 +163,7 @@ public class ExperimentTest
 
 	@Test
 	public void testGetMetricFromOrder() {
-		int []order = new int[] {0, 0, 1, 1, 1, 1, 1, 1};
+		int []order = new int[] {0, 0, 1, 1, 1, 1, 1, 31, 1};
 		int i = 0;
 		for(var experiment: experiments) {
 			if (experiment.getMetricCount()>0) {
