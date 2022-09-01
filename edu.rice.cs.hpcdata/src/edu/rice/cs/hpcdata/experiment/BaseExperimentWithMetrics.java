@@ -2,7 +2,6 @@ package edu.rice.cs.hpcdata.experiment;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,13 +20,11 @@ import edu.rice.cs.hpcdata.experiment.metric.FinalMetric;
 import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.Metric;
-import edu.rice.cs.hpcdata.experiment.metric.MetricComparator;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.filters.MetricValuePropagationFilter;
-import edu.rice.cs.hpcdata.util.Constants;
 
 
 /****************************************************************************
@@ -85,11 +82,6 @@ implements IMetricManager, ListEventListener<BaseMetric>
 			var m = mapIndexToMetric.put(metric.getIndex(), metric);
 			if (m != null)
 				throw new RuntimeException("Non-unique index metric " + metric.getDisplayName() + " with index: " + metric.getIndex());
-		}
-		
-		if (getMajorVersion() >= Constants.EXPERIMENT_SPARSE_VERSION) {
-			// reorder the metric since hpcprof2 will output not in order fashion
-			Collections.sort(metrics, new MetricComparator());
 		}
 		metrics.addListEventListener(this);
 	}

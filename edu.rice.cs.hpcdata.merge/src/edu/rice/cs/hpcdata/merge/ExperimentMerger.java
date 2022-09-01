@@ -133,7 +133,7 @@ public class ExperimentMerger
 
 		new TreeSimilarity(metrics.getOffset(), rootMerged, root2, db);
 		
-		merged.setMergedDatabase(true);
+		merged.setMergedDatabase();
 		
 		return merged;
 	}

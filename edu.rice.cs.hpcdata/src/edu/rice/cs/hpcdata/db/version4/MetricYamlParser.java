@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcdata.experiment.metric;
+package edu.rice.cs.hpcdata.db.version4;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,24 +16,48 @@ import java.util.stream.Collectors;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 
-import edu.rice.cs.hpcdata.db.version4.DataSummary;
-import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
+import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
+import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
 
 /*********************************************************
  * 
  * Default parser for metrics.yaml (or default.yaml).
- * 
+ * <br>Only for database version 4 (sparse database).
+ * Typical use of this class:<p>
+ * <code>
+ * var parser  = new MetricYamlParser(...); <br/>
+ * var metrics = parser.getListMetrics();
+ * </code>
+ * </p>
  *
  *********************************************************/
 public class MetricYamlParser 
 {
+	private final static String FILENAME_YAML = File.separator + "metrics" + File.separator + "default.yaml";
+	
+	private final static String FIELD_METRIC  = "metric";
+	private final static String FIELD_NAME    = "name";
+	private final static String FIELD_DESC	  = "description";
+	private final static String FIELD_VARIANT = "variants";
+	
+	
+	/****
+	 * 
+	 * Special enumeration for return code in {@code parseVariant}
+	 *
+	 */
+	enum VariantResult {OK, OK_NEW_PARENT, ERROR}
+	
+
+	private final List<HierarchicalMetric> listRootMetrics;
 	private final List<BaseMetric> listMetrics;
+	private final Deque<HierarchicalMetric> stackMetrics;
+	
 	private final DataSummary  	   dataSummary;
 	private final List<BaseMetric> metricsInMetaDB;
-
-	private Deque<HierarchicalMetric> stackMetrics;
 	
 	private int version;
 	private int parentIndex;
@@ -42,20 +66,30 @@ public class MetricYamlParser
 
 	
 	/****
-	 * Directly parse the metrics yaml file during the class construction.
+	 * Create a parser of metrics' yaml file.<br/>
+	 * Use the {@link getListRootMetrics} to retrieve the top-level metrics,
+	 *  or the {@link getListMetrics} to retrieve all the leaf metrics.
 	 * 
-	 * @param experiment
+	 * @param directory
+	 * 			The database directory
+	 * @param dataSummary
+	 * 			The profile.db object
+	 * @param metricsInMetaDB
+	 * 			The list of metrics as specified in meta.db file
+	 * 
 	 * @throws FileNotFoundException
 	 */
-	public MetricYamlParser(String directory, DataSummary dataSummary, List<BaseMetric> metricsInMetaDB) throws FileNotFoundException {
+	public MetricYamlParser(String directory, DataSummary dataSummary, List<BaseMetric> metricsInMetaDB) 
+			throws FileNotFoundException {
 		this.dataSummary = dataSummary;
 		this.listMetrics = new ArrayList<>(metricsInMetaDB.size());
+		listRootMetrics  = new ArrayList<>(1);
 		this.metricsInMetaDB = metricsInMetaDB;
 		
 		parentIndex = -1;
 		stackMetrics = new ArrayDeque<>();
 		
-		final var fname  = directory + File.separator + "metrics" + File.separator + "default.yaml";
+		final var fname  = directory + FILENAME_YAML;
 		
 		LoaderOptions loaderOption = new LoaderOptions();
 		loaderOption.setMaxAliasesForCollections(1000);
@@ -71,12 +105,26 @@ public class MetricYamlParser
 		// parse the metric structure
 		parseRoots((LinkedHashMap<String, ?>) data);
 	}
+
 	
+	/****
+	 * Return the list of root metrics (the top-level metrics)
+	 * if any.
+	 * 
+	 * @return {@code List} of {@code HierarchicalMetric}.
+	 * 			The list can't be null. If there is no root metric, 
+	 * 			it returns empty list.
+	 */
+	public List<HierarchicalMetric> getListRootMetrics() {
+		return listRootMetrics;
+	}
 
 	/***
 	 * Retrieve the list of metric descriptors specified in metrics.yaml
 	 * 
-	 * @return {@code List} of {@code BaseMetric}
+	 * @return {@code List} of {@code BaseMetric}.
+	 * 			The list can't be null. If there is no root metric, 
+	 * 			it returns empty list.
 	 */
 	public List<BaseMetric> getListMetrics() {
 		return listMetrics;
@@ -92,6 +140,7 @@ version: 0
 inputs: 
     . . .
 	 * </pre>
+	 * 
 	 * @param mapFields
 	 * 			The main map object
 	 */
@@ -119,6 +168,7 @@ inputs: ArrayList<E>  (id=98)
     formula: $$
     combine: sum
 	 * </pre>
+	 * 
 	 * @param data
 	 */
 	private void parseInputs(LinkedHashMap<String, ?> data) {
@@ -131,7 +181,7 @@ inputs: ArrayList<E>  (id=98)
 		mapCodeToMetric = new HashMap<>(listInputs.size());
 		
 		for(var input: listInputs) {
-			var metric  = input.get("metric");
+			var metric  = input.get(FIELD_METRIC);
 			var scope   = input.get("scope");
 			var combine = (String)input.get("combine");
 
@@ -212,10 +262,10 @@ roots:
 			//
 			// create the root of metrics
 			//
-			String name = (String) aRoot.get("name");
-			String desc = (String) aRoot.get("description");
+			String name = (String) aRoot.get(FIELD_NAME);
+			String desc = (String) aRoot.get(FIELD_DESC);
 			
-			var variants = aRoot.get("variants");
+			var variants = aRoot.get(FIELD_VARIANT);
 			LinkedHashMap<String, Object> listMapVariants;
 			
 			if (variants instanceof LinkedHashMap) {
@@ -223,21 +273,15 @@ roots:
 			} else {
 				listMapVariants =  new LinkedHashMap<>(0);
 			}
-			
-			HierarchicalMetric rootMetric = createParentMetric(name, desc);
-			
-			var iterator = listMapVariants.entrySet().iterator();
-			while(iterator.hasNext()) {
-				var v = iterator.next();
-				LinkedHashMap<String, ?> val = (LinkedHashMap<String, ?>) v.getValue();
-				parseRender(rootMetric, val);
-			}
+			var result = parseVariants(name, desc, listMapVariants);
 			
 			//
 			// traverse the children of this root metric
 			//
 			parseMetricChildren(aRoot);
-			stackMetrics.pop();
+			
+			if (result == VariantResult.OK_NEW_PARENT)
+				stackMetrics.pop();
 		}
 	}
 	
@@ -315,10 +359,10 @@ roots:
 	 * </pre>
 	 * @param childAttributes
 	 */
-	private void parseMetric(LinkedHashMap<String, ?> childAttributes) {
-		var name = childAttributes.get("name");
-		var desc = childAttributes.get("description");
-		var variants = childAttributes.get("variants");
+	private VariantResult parseMetric(LinkedHashMap<String, ?> childAttributes) {
+		var name = childAttributes.get(FIELD_NAME);
+		var desc = childAttributes.get(FIELD_DESC);
+		var variants = childAttributes.get(FIELD_VARIANT);
 		if (!(variants instanceof LinkedHashMap<?, ?>))
 			throw new IllegalStateException("No list of children");
 
@@ -326,18 +370,12 @@ roots:
 		
 		// parsing if the children of this metric if any
 		parseMetricChildren(childAttributes);
-		
+				
 		if (result == VariantResult.OK_NEW_PARENT)
 			stackMetrics.pop();
+
+		return result;
 	}
-	
-	
-	/****
-	 * 
-	 * Special enumeration for return code in {@code parseVariant}
-	 *
-	 */
-	enum VariantResult {OK, OK_NEW_PARENT, ERROR}
 	
 	
 	/***
@@ -385,7 +423,6 @@ roots:
 				var formulaType = getMetricFormulaType(formulaItem.getKey());
 				
 				var mapMetrics  = formulaItem.getValue();
-				var parent = stackMetrics.peek();
 				var metric = mapCodeToMetric.get(mapMetrics.hashCode());
 				HierarchicalMetric hm;
 				
@@ -400,8 +437,7 @@ roots:
 					// it's a normal metric visible to user (mostly)
 					hm = (HierarchicalMetric) metric;					
 					hm.setDescription(desc);
-					hm.setParent(parent);
-					parent.addChild(hm);
+					linkParentChild(hm);
 
 					listMetrics.add(metric);
 				} else {
@@ -415,15 +451,22 @@ roots:
 	}
 	
 	
-	private HierarchicalMetric createParentMetric(String name, String desc) {
-		var parent = stackMetrics.peek();
-		var metric = new HierarchicalMetric(dataSummary, parentIndex, name);
-		
-		metric.setDescription(desc);
+	private void linkParentChild(HierarchicalMetric metric) {
+		var parent = stackMetrics.peek();		
 		metric.setParent(parent);
 		
-		if (parent != null)
-			parent.addChild(metric);		
+		if (parent == null)
+			listRootMetrics.add(metric);
+		else
+			parent.addChild(metric);	
+
+	}
+	
+	private HierarchicalMetric createParentMetric(String name, String desc) {
+		var metric = new HierarchicalMetric(dataSummary, parentIndex, name);		
+		metric.setDescription(desc);
+
+		linkParentChild(metric);
 		
 		// this metric is a parent
 		parentIndex--;

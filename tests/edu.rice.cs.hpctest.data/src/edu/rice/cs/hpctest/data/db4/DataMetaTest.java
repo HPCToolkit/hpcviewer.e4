@@ -92,8 +92,8 @@ public class DataMetaTest
 			
 			m = (HierarchicalMetric) metrics.get(0);
 			assertTrue(m.getDisplayName().length()>1);
-			assertTrue(m.getIndex() >= 1);
-			assertSame(MetricType.INCLUSIVE, m.getMetricType());
+			assertTrue(m.getIndex() == Integer.valueOf(m.getShortName()));
+			assertNotNull(m.getMetricType());
 			assertEquals("Sum", m.getCombineTypeLabel());
 		}
 	}
@@ -114,7 +114,7 @@ public class DataMetaTest
 	@Test
 	public void testFiles() {
 		for(DataMeta data: dataMeta) {
-			assertTrue(data.getNumFiles() >= 2);
+			assertTrue(data.getNumFiles() >= 1);
 			var iterator = data.getFileIterator();
 			iterator.forEachRemaining(f-> {
 				assertNotNull(f);
@@ -126,7 +126,7 @@ public class DataMetaTest
 	@Test
 	public void testProcedure() {
 		for(DataMeta data: dataMeta) {
-			assertTrue(data.getNumProcedures() >= 8);
+			assertTrue(data.getNumProcedures() >= 2);
 			
 			Iterator<ProcedureScope> iterator = data.getProcedureIterator();
 			assertNotNull(iterator);

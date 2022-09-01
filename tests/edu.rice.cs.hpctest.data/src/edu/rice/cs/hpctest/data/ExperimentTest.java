@@ -104,7 +104,7 @@ public class ExperimentTest
 
 	@Test
 	public void testGetVisibleMetrics() {
-		int []num = new int[] {97, 2, 0, 3, 10, 2, 2, 4, 10};
+		int []num = new int[] {97, 2, 0, 3, 10, 2, 2, 4, 10, 2};
 		int i = 0;
 		for(var experiment: experiments) {
 			List<BaseMetric> metrics = experiment.getVisibleMetrics();
@@ -116,7 +116,7 @@ public class ExperimentTest
 
 	@Test
 	public void testGetNonEmptyMetricIDs() {
-		final int []nmetrics = new int[] {18, 0, 0, 4, 1, 1, 2, 2, 4};
+		final int []nmetrics = new int[] {18, 0, 0, 4, 1, 1, 2, 2, 4, 2};
 		int i=0;
 		for(var experiment: experiments) {
 			RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
@@ -129,7 +129,7 @@ public class ExperimentTest
 
 	@Test
 	public void testGetMetricCount() {
-		int []counts = new int[] {10, 0, 0, 3, 10, 2, 2, 3, 10};
+		int []counts = new int[] {10, 0, 0, 3, 10, 2, 2, 3, 10, 2};
 		int i=0;
 		
 		for(var experiment: experiments) {
@@ -163,7 +163,7 @@ public class ExperimentTest
 
 	@Test
 	public void testGetMetricFromOrder() {
-		int []order = new int[] {0, 0, 1, 1, 1, 1, 1, 31, 1};
+		int []order = new int[] {0, 0, 1, 1, 1, 1, 1, 31, 1, 1};
 		int i = 0;
 		for(var experiment: experiments) {
 			if (experiment.getMetricCount()>0) {
@@ -381,7 +381,7 @@ public class ExperimentTest
 
 	@Test
 	public void testGetMaxDepth() {
-		final int maxdepth[] = new int[] {4, 0, 0, 6, 10, 13, 20, 10, 10};
+		final int maxdepth[] = new int[] {4, 0, 0, 6, 10, 13, 20, 10, 10, 3};
 		int i=0;
 		for(var experiment: experiments) {
 			assertTrue(experiment.getMaxDepth() >= maxdepth[i]);
@@ -432,7 +432,7 @@ public class ExperimentTest
 
 	@Test
 	public void testGetName() {
-		final String []names = new String[] {"bandwidthTest", "a.out", "a.out", "inline", "vectorAdd", "loop", "lmp", "inline", "vectorAdd"};
+		final String []names = new String[] {"bandwidthTest", "a.out", "a.out", "inline", "vectorAdd", "loop", "lmp", "inline", "vectorAdd", "a.out"};
 		int i=0;
 		for(var experiment: experiments) {
 			String name = experiment.getName();

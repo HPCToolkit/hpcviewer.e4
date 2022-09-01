@@ -86,7 +86,7 @@ public class DataSummaryTest {
 			assertTrue(list.size() >= 1); // 
 			
 			MetricValueSparse mvs = list.get(0);
-			assertTrue(mvs.getIndex() >= 2);
+			assertTrue(mvs.getIndex() >= 1);
 			assertTrue(mvs.getValue() > 250);
 		}
 	}	

@@ -66,7 +66,7 @@ class DataTraceReaderTest {
 	public void testMinLoc() {
 		for(var data: dataDB) {
 			var ml = data.getMinLoc(0);
-			assertTrue(ml >= 104);
+			assertTrue(ml >= 88);
 		}
 	}
 	
@@ -74,7 +74,7 @@ class DataTraceReaderTest {
 	public void testMaxLoc() {
 		for(var data: dataDB) {
 			var ml = data.getMaxLoc(0);
-			assertTrue(ml >= 101);
+			assertTrue(ml >= 64);
 		}
 	}
 	

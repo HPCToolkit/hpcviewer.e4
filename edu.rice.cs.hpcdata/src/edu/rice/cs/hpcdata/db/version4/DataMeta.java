@@ -25,7 +25,6 @@ import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
 import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
-import edu.rice.cs.hpcdata.experiment.metric.MetricYamlParser;
 import edu.rice.cs.hpcdata.experiment.scope.EntryScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoadModuleScope;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
@@ -136,14 +135,7 @@ public class DataMeta extends DataCommon
 		
 		// manually setup the metrics for the sake of backward compatibility
 		final Experiment exp = (Experiment) experiment;
-		
-		MetricYamlParser yamlParser = new MetricYamlParser(directory, dataSummary, metrics);		
-		assert(yamlParser.getVersion() >= 0);
-
-		// Reset the new list of metric descriptors to the experiment database  
-		// Note: Metrics are based on the yaml file, not meta.db
-		exp.setMetrics(yamlParser.getListMetrics());
-		exp.setMetricRaw(yamlParser.getListMetrics());
+		exp.setMetrics(metrics);
 
 		rootCCT.setMetricValueCollection(new MetricValueCollection4(dataSummary));
 
@@ -197,14 +189,6 @@ public class DataMeta extends DataCommon
 		return directory;
 	}
 		
-	/***
-	 * Get the load module for a specified id
-	 * @param id
-	 * @return
-	 */
-	public LoadModuleScope getLoadModule(long id) {		
-		return mapLoadModules.get(id);
-	}
 	
 	/****
 	 * Get the number of load modules
@@ -252,6 +236,16 @@ public class DataMeta extends DataCommon
 	 */
 	public Iterator<ProcedureScope> getProcedureIterator() {
 		return mapProcedures.iterator();
+	}
+	
+	
+	/**
+	 * Return the list of metrics specified in meta.db file.
+	 * 
+	 * @return {@code List} of {@code BaseMetric}
+	 */
+	public List<BaseMetric> getMetrics() {
+		return metrics;
 	}
 		
 

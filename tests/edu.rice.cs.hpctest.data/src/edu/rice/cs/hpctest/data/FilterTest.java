@@ -35,7 +35,7 @@ public class FilterTest
 
 	@Test
 	public void testFilter() {
-		final int []numFilteredScopes = new int[] {1, 0, 0, 0, 0, 0, 0, 0, 0};
+		final int []numFilteredScopes = new int[] {1, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 		
 		final String filterText = "testBandwidth";
 		FilterAttribute.Type []attributes = new FilterAttribute.Type[] {

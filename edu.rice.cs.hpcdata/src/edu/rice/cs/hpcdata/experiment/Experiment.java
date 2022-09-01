@@ -24,7 +24,9 @@ import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.IUserData;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 //////////////////////////////////////////////////////////////////////////
@@ -40,43 +42,72 @@ import java.util.List;
 
 public class Experiment extends BaseExperimentWithMetrics
 {
-	static public enum ExperimentOpenFlag {TREE_CCT_ONLY, TREE_ALL};
+	static public enum ExperimentOpenFlag {TREE_CCT_ONLY, TREE_ALL, TREE_MERGED};
 	
 	static final public String TITLE_TOP_DOWN_VIEW    = "Top-down view";
 	static final public String TITLE_BOTTOM_UP_VIEW   = "Bottom-up view";
 	static final public String TITLE_FLAT_VIEW 		  = "Flat view";
 	static final public String TITLE_DATACENTRIC_VIEW = "Datacentric view";
 	
-	// thread level database
+	/** 
+	 * List of raw metrics for thread level database.<br/>
+	 * This is only available for the old dense metric format.
+	 * For the new format, we don't need this, but still the caller
+	 * needs to set the raw metrics to ensure the compatibility :-(
+	 * <br/>
+	 */
 	private List<BaseMetric>  metrics_raw;
-	private boolean mergedDatabase = false;
+	
+	/***
+	 * Any flag about this experiment database.
+	 */
 	private ExperimentOpenFlag flag;
+	
+	private final List<HierarchicalMetric> rootMetrics = new ArrayList<>(0);
 
 	//////////////////////////////////////////////////////////////////////////
-	//	PERSISTENCE															//
+	//	hierarchy of metrics												//
 	//////////////////////////////////////////////////////////////////////////
 
+	public void addRootMetric(HierarchicalMetric metric) {
+		rootMetrics.add(metric);
+	}
+	
+	
+	public int getRootMetricCount() {
+		return rootMetrics.size();
+	}
+	
+	public HierarchicalMetric getRootMetric(int index) {
+		return rootMetrics.get(index);
+	}
+	
+	public Iterator<HierarchicalMetric> getRootMetricIterator() {
+		return rootMetrics.iterator();
+	}
 
 	//////////////////////////////////////////////////////////////////////////
 	// Case for merged database
 	//////////////////////////////////////////////////////////////////////////
 	
-	public void setMergedDatabase(boolean flag)
+	public void setMergedDatabase()
 	{
-		mergedDatabase = flag;
+		this.flag = ExperimentOpenFlag.TREE_MERGED;
 	}
 	
 	public boolean isMergedDatabase()
 	{
-		return mergedDatabase;
+		return this.flag == ExperimentOpenFlag.TREE_MERGED;
 	}
 	
 	//////////////////////////////////////////////////////////////////////////
 	// File opening															//
 	//////////////////////////////////////////////////////////////////////////
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * Open a database and specify what kind of the database it is. 
+	 * 
+	 * @see edu.rice.cs.hpcdata.experiment.Experiment.ExperimentOpenFlag
 	 * @see edu.rice.cs.hpc.data.experiment.BaseExperiment#open(java.io.File, edu.rice.cs.hpc.data.util.IUserData, boolean)
 	 */
 	public void open(File fileExperiment, IUserData<String, String> userData, ExperimentOpenFlag flag)
@@ -290,6 +321,9 @@ public class Experiment extends BaseExperimentWithMetrics
 	}
 
 
+	/***
+	 * Clone the this experiment including the configuration 
+	 */
 	public Experiment duplicate() {
 
 		Experiment copy 	= new Experiment();
@@ -309,6 +343,7 @@ public class Experiment extends BaseExperimentWithMetrics
 		databaseRepresentation.setFile(file);
 	}
 
+	
 	/***
 	 * Set the list of metric raw.
 	 * 
@@ -316,11 +351,6 @@ public class Experiment extends BaseExperimentWithMetrics
 	 */
 	public void setMetricRaw(List<BaseMetric> metricRawList) {
 		metrics_raw = metricRawList;
-
-		if (getMajorVersion() >= Constants.EXPERIMENT_SPARSE_VERSION) {
-			// reorder the metric since hpcprof2 will output not in order fashion
-			Collections.sort(metrics_raw, new MetricComparator());
-		}
 	}
 
 
