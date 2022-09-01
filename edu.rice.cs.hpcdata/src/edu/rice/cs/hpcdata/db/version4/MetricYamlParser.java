@@ -2,7 +2,7 @@ package edu.rice.cs.hpcdata.db.version4;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,6 +36,8 @@ import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
  *********************************************************/
 public class MetricYamlParser 
 {
+	private final static int MAX_ALIASES = 1000;
+	
 	private final static String FILENAME_YAML = File.separator + "metrics" + File.separator + "default.yaml";
 	
 	private final static String FIELD_METRIC  = "metric";
@@ -76,34 +78,57 @@ public class MetricYamlParser
 	 * 			The profile.db object
 	 * @param metricsInMetaDB
 	 * 			The list of metrics as specified in meta.db file
-	 * 
-	 * @throws FileNotFoundException
+	 * @throws IOException 
 	 */
 	public MetricYamlParser(String directory, DataSummary dataSummary, List<BaseMetric> metricsInMetaDB) 
-			throws FileNotFoundException {
+			throws IOException {
 		this.dataSummary = dataSummary;
 		this.listMetrics = new ArrayList<>(metricsInMetaDB.size());
 		listRootMetrics  = new ArrayList<>(1);
 		this.metricsInMetaDB = metricsInMetaDB;
 		
-		parentIndex = -1;
+		parentIndex  = -1;
 		stackMetrics = new ArrayDeque<>();
 		
 		final var fname  = directory + FILENAME_YAML;
 		
+		// make sure we allow high number of aliases.
+		// The number of aliases is equal to the number of metrics in meta.db
+		int numMaxAlias = MAX_ALIASES;
+		var maxAliases = System.getenv("HPCVIEWER_MAX_ALIASES");
+		if (maxAliases != null)
+			numMaxAlias = Integer.parseInt(maxAliases);
+		
 		LoaderOptions loaderOption = new LoaderOptions();
-		loaderOption.setMaxAliasesForCollections(1000);
+		loaderOption.setMaxAliasesForCollections(numMaxAlias);
+		
+		// Create the yaml object, parse the file and store the result 
+		// (in the LinkedHashMap format) to data variable
 		
 		Yaml yaml = new Yaml(loaderOption);
-		var data  = yaml.load(new FileInputStream(fname));
+		var fis   = new FileInputStream(fname);
+		var data  = yaml.load(fis);
+		
+		fis.close();
+		
 		if (!(data instanceof LinkedHashMap<?, ?>))
 			return;
 		
-		// parse the configuration
+		// parse the configuration (version, inputs, ..)
 		parseYaml ((LinkedHashMap<String, ?>) data);
 		
-		// parse the metric structure
+		// parse the metric structure (roots and its descendants)
 		parseRoots((LinkedHashMap<String, ?>) data);
+	}
+	
+
+	/****
+	 * Return the metrics' YAML version
+	 * 
+	 * @return
+	 */
+	public int getVersion() {
+		return version;
 	}
 
 	
@@ -458,9 +483,9 @@ roots:
 		if (parent == null)
 			listRootMetrics.add(metric);
 		else
-			parent.addChild(metric);	
-
+			parent.addChild(metric);
 	}
+	
 	
 	private HierarchicalMetric createParentMetric(String name, String desc) {
 		var metric = new HierarchicalMetric(dataSummary, parentIndex, name);		
@@ -475,6 +500,7 @@ roots:
 		return metric;
 	}
 	
+	
 	private MetricType getMetricFormulaType(String formulaType) {
 		if (formulaType.equals("inclusive")) {
 			return MetricType.INCLUSIVE;
@@ -482,9 +508,5 @@ roots:
 			return MetricType.EXCLUSIVE;
 		}
 		throw new IllegalArgumentException("unknown formula type: " + formulaType);
-	}
-	
-	public int getVersion() {
-		return version;
 	}
 }

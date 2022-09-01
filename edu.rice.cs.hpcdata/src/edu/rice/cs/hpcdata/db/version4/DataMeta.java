@@ -133,13 +133,18 @@ public class DataMeta extends DataCommon
 		
 		super.open(directory + File.separator + DB_META_FILE);
 		
-		// manually setup the metrics for the sake of backward compatibility
+		// WARNING: quick fix
+		// Since we need to re-assign calling contexts (see the code where the  
+		//   class CallingContextReassignment is used), we have to 
+		//   manually setup the metrics for the sake of backward compatibility
 		final Experiment exp = (Experiment) experiment;
 		exp.setMetrics(metrics);
 
 		rootCCT.setMetricValueCollection(new MetricValueCollection4(dataSummary));
 
-		// restructure the cct
+		// restructure the cct which requires metric value adjustment.
+		// we need to make sure the experiment has list of metrics already.
+		//
 		// if a line scope has a call site, move it to be the sibling
 		CallingContextReassignment ccr = new CallingContextReassignment();
 		rootCCT.dfsVisitScopeTree(ccr);
