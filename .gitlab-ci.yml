@@ -68,7 +68,7 @@ secret_detection:
 test:
   extends: .maven
   stage: test
-  image: docker.io/maven:3-eclipse-temurin-$JDK-focal
+  image: docker.io/maven:3-ibm-semeru-$JDK-focal
   tags: [docker, linux/$ARCH, services-work]
   parallel:
     matrix:
