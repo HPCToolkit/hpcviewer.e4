@@ -51,7 +51,7 @@ public class MetricYamlParser
 	 * Special enumeration for return code in {@code parseVariant}
 	 *
 	 */
-	enum VariantResult {OK, OK_NEW_PARENT, ERROR}
+	private enum VariantResult {OK, OK_NEW_PARENT, ERROR}
 	
 
 	private final List<HierarchicalMetric> listRootMetrics;

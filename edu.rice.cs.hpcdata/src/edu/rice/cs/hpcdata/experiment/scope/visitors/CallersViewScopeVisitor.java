@@ -22,7 +22,9 @@ import edu.rice.cs.hpcdata.experiment.scope.filters.MetricValuePropagationFilter
  * seen in {@code CallSiteScopeCallerView} 
  *
  *************************************************************************/
-public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScopeVisitor {
+public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScopeVisitor 
+{
+	private static final String SEPARATOR = ":";
 
 	//----------------------------------------------------
 	// private data
@@ -72,7 +74,7 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 			this.listCombinedScopes.push();
 
 			// Find (or add) callee in top-level hashtable
-			ProcedureScope callee = this.createProcedureIfNecessary(scope);			
+			ProcedureScope callee = this.createProcedureIfNecessary(scope, scope.getProcedureScope());			
 			prepareCallChain(scope, callee);
 
 		} else if (vt == ScopeVisitType.PostVisit)  {			
@@ -98,7 +100,7 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 			
 			if (!scope.isAlien()) {
 				// Find (or add) callee in top-level hashtable
-				ProcedureScope callee = this.createProcedureIfNecessary(scope);
+				ProcedureScope callee = this.createProcedureIfNecessary(scope, scope);
 				prepareCallChain(scope, callee);
 			}
 		} else if (vt == ScopeVisitType.PostVisit){			
@@ -106,7 +108,31 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 		}
 	}
 	 
-	public void visit(Scope scope, ScopeVisitType vt) 				{ /* no action */ }
+	public void visit(Scope scope, ScopeVisitType vt) { 
+		// we are interested only in instruction scope
+		if (!(scope instanceof InstructionScope))
+			return;
+		
+		//--------------------------------------------------------------------------------
+		// if there are no exclusive costs to attribute from this context, we are done here
+		//--------------------------------------------------------------------------------
+		if (!scope.hasNonzeroMetrics()) {
+			return; 
+		}
+		
+		if (vt == ScopeVisitType.PreVisit) {
+			this.listCombinedScopes.push();
+
+			// Find (or add) callee in top-level hashtable
+			InstructionScope is   = (InstructionScope) scope;
+			ProcedureScope callee = this.createProcedureIfNecessary(scope, is.getProcedure());			
+			prepareCallChain(scope, callee);
+
+		} else if (vt == ScopeVisitType.PostVisit)  {			
+			this.decrementCounter();
+		}
+	}
+	
 	public void visit(RootScope scope, ScopeVisitType vt) 			{ /* no action */ }
 	public void visit(LoadModuleScope scope, ScopeVisitType vt) 	{ /* no action */ }
 	public void visit(FileScope scope, ScopeVisitType vt) 			{ /* no action */ }
@@ -147,28 +173,24 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 	 * @param scopeCCT : either call site or procedure
 	 * @return ProcedureScope
 	 ********/
-	private ProcedureScope createProcedureIfNecessary( Scope scopeCCT ) {
-		ProcedureScope procCCT;
+	private ProcedureScope createProcedureIfNecessary( Scope scopeCCT, ProcedureScope procScopeCCT ) {
 		
-		if (scopeCCT instanceof ProcedureScope)
-			procCCT = (ProcedureScope) scopeCCT;
-		else
-			procCCT = ( (CallSiteScope)scopeCCT).getProcedureScope();
-		
-		String objCode = procCCT.getSourceFile().getFileID() + ":" + procCCT.getFirstLineNumber() + ":" + procCCT.getName().hashCode();
+		String objCode = procScopeCCT.getSourceFile().getFileID() + SEPARATOR + 
+						 procScopeCCT.getFirstLineNumber() + SEPARATOR + 
+						 procScopeCCT.getName().hashCode();
 
 		ProcedureScope procCaller = (ProcedureScope) calleeht.get(objCode);
 		
 		if (procCaller == null) {
 			// create a new procedure scope
-			procCaller = (ProcedureScope) procCCT.duplicate();
+			procCaller = (ProcedureScope) procScopeCCT.duplicate();
 			procCaller.setRootScope(callersViewRootScope);
-			
+
 			// add to the tree
 			callersViewRootScope.addSubscope(procCaller);
 			procCaller.setParentScope(this.callersViewRootScope);
 			
-			// add to the dictionary
+			// add to the dictionary to make sure we have unique procedure for each procedures
 			calleeht.put(objCode, procCaller);
 		}
 		

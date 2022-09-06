@@ -21,8 +21,6 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.ExperimentConfiguration;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
 import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.scope.EntryScope;
@@ -538,7 +536,7 @@ public class DataMeta extends DataCommon
 				
 				// temporary quick fix: every metric is percent annotated
 				// this should be fixed when we parse metrics.yaml
-				m.setAnnotationType(AnnotationType.PERCENT);
+				m.setAnnotationType(BaseMetric.AnnotationType.PERCENT);
 				
 				MetricType type;
 				var pi = mapPropagationIndex.get(pScope);
@@ -557,8 +555,8 @@ public class DataMeta extends DataCommon
 				}
 				m.setMetricType(type);
 									
-				VisibilityType vt = type == MetricType.POINT_EXCL ? 
-									VisibilityType.HIDE : VisibilityType.SHOW; 
+				BaseMetric.VisibilityType vt = type == MetricType.POINT_EXCL ? 
+						BaseMetric.VisibilityType.HIDE : BaseMetric.VisibilityType.SHOW; 
 				m.setDisplayed(vt);
 
 				// store the index of this scope.

@@ -7,6 +7,7 @@ import edu.rice.cs.hpcdata.experiment.scope.AlienScope;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.FileScope;
 import edu.rice.cs.hpcdata.experiment.scope.GroupScope;
+import edu.rice.cs.hpcdata.experiment.scope.InstructionScope;
 import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoadModuleScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoopScope;
@@ -66,7 +67,12 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 	}
 	
 	
-	public void visit(Scope scope, ScopeVisitType vt) 				{ }
+	public void visit(Scope scope, ScopeVisitType vt) 				{ 
+		if (scope instanceof InstructionScope) {
+			boolean add_exclusive = !scope.hasChildren();
+			add(scope, vt, true, add_exclusive);
+		}
+	}
 	public void visit(RootScope scope, ScopeVisitType vt) 			{ }
 	public void visit(LoadModuleScope scope, ScopeVisitType vt) 	{ }
 	public void visit(FileScope scope, ScopeVisitType vt) 			{ }
@@ -114,8 +120,10 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 	 * Create or add a flat scope based on the scope from CCT
 	 * @param scope
 	 * @param vt
-	 * @param add_inclusive: flag if an inclusive cost had to be combined in flat/module scope
-	 * @param add_exclusive: flag if an exclusive cost had to be combined in flat/module scope
+	 * @param add_inclusive 
+	 * 			flag if an inclusive cost had to be combined in flat/module scope
+	 * @param add_exclusive
+	 * 			flag if an exclusive cost had to be combined in flat/module scope
 	 ******************************************************************/
 	private void add( Scope scope, ScopeVisitType vt, boolean add_inclusive, boolean add_exclusive ) {
 		
@@ -146,6 +154,9 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 				if (scope instanceof CallSiteScope) {
 					ProcedureScope proc_cct_s = ((CallSiteScope) scope).getProcedureScope();
 					getFlatCounterPart(proc_cct_s, scope, id);
+				} else if (scope instanceof InstructionScope) {
+					ProcedureScope proc_cct_s = ((InstructionScope) scope).getProcedure();
+					getFlatCounterPart(proc_cct_s, scope, "Pa" + proc_cct_s.getFlatIndex() + SEPARATOR_ID + id);
 				}
 			}
 		} else {
@@ -190,12 +201,7 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 			// if it is a call site, then the file and the module can be found in the scope
 			// for others, we need to find the enclosing procedure iteratively
 			//-----------------------------------------------------------------------------
-			ProcedureScope procScope;
-			if (cctScope instanceof CallSiteScope) {
-				procScope = ((CallSiteScope)cctScope).getProcedureScope();
-			} else {
-				procScope = findEnclosingProcedure(cctScope);
-			}
+			ProcedureScope procScope = findEnclosingProcedure(cctScope);
 
 			// ideally we shouldn't allow place folders (fake procedures) to be created in the flat tree.
 			// However, some place folders like <gpu copyin> and <gpu copyout> contains metric values 
@@ -604,7 +610,10 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 				if (!proc.isAlien())
 					return proc;
 			}
-			if (parent instanceof RootScope) return null;
+			if (parent instanceof InstructionScope)
+				return ((InstructionScope) parent).getProcedure();
+			if (parent instanceof RootScope) 
+				return null;
 			parent = parent.getParentScope();
 		}
 		return null;
