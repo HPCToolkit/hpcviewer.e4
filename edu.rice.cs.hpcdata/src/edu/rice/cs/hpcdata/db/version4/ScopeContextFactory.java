@@ -289,7 +289,8 @@ public class ScopeContextFactory
 		} else if (relation == FMT_METADB_RELATION_CALL) {
 			if (lexicalType == FMT_METADB_LEXTYPE_INSTRUCTION) {
 				sb.append(getProcedureParentFlatId(parent));
-			} else if (parent instanceof LineScope ) {
+			} else if (parent instanceof LineScope || 
+					   parent instanceof InstructionScope) {
 				sb.append(SEPARATOR);
 				sb.append(parent.getFlatIndex());
 			}

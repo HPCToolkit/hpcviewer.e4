@@ -9,10 +9,9 @@ public class InstructionScope extends Scope
 	private final ProcedureScope procScope;
 
 	public InstructionScope(RootScope root, LoadModuleScope loadModule, long offset, int scopeID, int flatID) {
-		super(root, loadModule.getSourceFile(), 0, 0, scopeID, flatID);
-		this.loadModule = loadModule;
-		this.offset = offset;
-		procScope   = new ProcedureScope(root, 
+		this(root, 
+			 loadModule, 
+			 new ProcedureScope(root, 
 										 loadModule, 
 										 loadModule.getSourceFile(), 
 										 0, 
@@ -22,9 +21,20 @@ public class InstructionScope extends Scope
 										 scopeID, 
 										 flatID, 
 										 null, 
-										 ProcedureScope.FEATURE_PROCEDURE);
+										 ProcedureScope.FEATURE_PROCEDURE), 
+			 offset,
+			 scopeID,
+			 flatID);
 	}
 
+	
+	public InstructionScope(RootScope root, LoadModuleScope loadModule, ProcedureScope proc, long offset, int scopeID, int flatID) {
+		super(root, loadModule.getSourceFile(), 0, 0, scopeID, flatID);
+		
+		this.loadModule = loadModule;
+		this.offset     = offset;
+		this.procScope  = proc;
+	}
 	
 	/***
 	 * Retrieve the procedure object of this instruction.
@@ -46,7 +56,7 @@ public class InstructionScope extends Scope
 
 	@Override
 	public Scope duplicate() {
-		return new InstructionScope(root, loadModule, offset, id, getFlatIndex());
+		return new InstructionScope(root, loadModule, procScope, offset, getCCTIndex(), getFlatIndex());
 	}
 
 	@Override

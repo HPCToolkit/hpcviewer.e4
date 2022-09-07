@@ -154,9 +154,6 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 				if (scope instanceof CallSiteScope) {
 					ProcedureScope proc_cct_s = ((CallSiteScope) scope).getProcedureScope();
 					getFlatCounterPart(proc_cct_s, scope, id);
-				} else if (scope instanceof InstructionScope) {
-					ProcedureScope proc_cct_s = ((InstructionScope) scope).getProcedure();
-					getFlatCounterPart(proc_cct_s, scope, "Pa" + proc_cct_s.getFlatIndex() + SEPARATOR_ID + id);
 				}
 			}
 		} else {
@@ -304,13 +301,10 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 	 * @return
 	 *****************************************************************/
 	private FileScope createFlatFileScope(Scope cct_s, LoadModuleScope flat_lm) {
-		SourceFile src_file = cct_s.getSourceFile();	
+		SourceFile src_file   = cct_s.getSourceFile();	
 		String unique_file_id = getUniqueFileID(src_file, flat_lm);
-		FileScope flat_file = this.htFlatFileScope.get( unique_file_id );
-		
-		//-----------------------------------------------------------------------------
-		// ATTENTION: it is possible that a file can be included into more than one load module
-		//-----------------------------------------------------------------------------
+		FileScope flat_file   = this.htFlatFileScope.get( unique_file_id );
+
 		if ( (flat_file == null) ){
 			return getNewFileScope(src_file, flat_lm, unique_file_id);			
 		}
