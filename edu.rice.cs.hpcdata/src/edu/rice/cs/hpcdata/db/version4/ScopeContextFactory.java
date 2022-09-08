@@ -379,6 +379,7 @@ public class ScopeContextFactory
 		}
 		ps.setAlien(alien);
 		var cs = new CallSiteScope(ls, procScope, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, flatId);
+		cs.setRootScope(rootCCT);
 		
 		// Only the line statement knows where the source file is
 		// If the line statement is unknown then the source file is unknown.
