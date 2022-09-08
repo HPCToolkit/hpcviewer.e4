@@ -594,6 +594,9 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 		if (cctScope instanceof ProcedureScope) 
 			return (ProcedureScope) cctScope;
 		
+		if (cctScope instanceof CallSiteScope)
+			return ((CallSiteScope) cctScope).getProcedureScope();
+		
 		Scope parent = cctScope.getParentScope();
 		while(parent != null) {
 			if (parent instanceof CallSiteScope) {

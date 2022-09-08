@@ -36,8 +36,7 @@ import java.io.*;
 
 public class FileSystemSourceFile implements SourceFile
 {
-/** The type ID of the Source file. */
-public static final int STATICID = 1111;
+
 /** The experiment owning this source file. */
 protected BaseExperiment experiment;
 

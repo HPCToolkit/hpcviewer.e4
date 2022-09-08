@@ -730,10 +730,10 @@ public class DataMeta extends DataCommon
 			var lms  = mapLoadModules.get(pModule);
 			var file = mapFileSources.get(pFile);
 			
-			if (file == null)
-				file = SourceFile.NONE;
 			if (lms == null)
 				lms = LoadModuleScope.NONE;
+			if (file == null)
+				file = lms.getSourceFile();
 			
 			// this line has to be remove once prof2 is fixed
 			final int feature = ProcedureScope.FEATURE_PROCEDURE;
