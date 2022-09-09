@@ -210,7 +210,7 @@ public class ScopeTreeLayer extends AbstractLayerTransform implements IUniqueInd
     public void collapseTreeRow(int parentIndex) {
     	// need to grab all child indexes
     	List<Integer> childrenIndexes = this.treeRowModel.getChildIndexes(parentIndex);
-    	if (childrenIndexes == null)
+    	if (childrenIndexes == null || childrenIndexes.isEmpty())
     		// this should never happen unless the tree is corrupted
     		return;
     	
