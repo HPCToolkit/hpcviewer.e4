@@ -66,7 +66,7 @@ public class ScopeContextFactory
 	private final LongObjectHashMap<ProcedureScope> mapProcedures;
 
 	private final IntIntHashMap mapHashToFlatID;
-	private final int baseId;
+
 	
 	// --------------------------------------------------------------------
 	// local mutable variables
@@ -100,8 +100,10 @@ public class ScopeContextFactory
 		
 		mapHashToFlatID = new IntIntHashMap();
 
-		baseId = Constants.FLAT_ID_BEGIN + mapLoadModules.size() + mapFileSources.size() + mapProcedures.size() + 1;		
-		flatID = baseId;
+		flatID = Constants.FLAT_ID_BEGIN + 
+				 mapLoadModules.size()   + 
+				 mapFileSources.size()   + 
+				 mapProcedures.size()    + 1;
 	}
 
 	/***
