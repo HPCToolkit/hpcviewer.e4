@@ -58,7 +58,7 @@ public class CallerScopeBuilder {
 					mycaller    = ((CallSiteScope)enclosingCS).getProcedureScope(); 
 				} else if (next instanceof InstructionScope) {
 					enclosingCS = next;
-					mycaller    = ((InstructionScope)next).getProcedure();
+					mycaller    = ((InstructionScope)next).getProcedureScope();
 				}
 				
 				LineScope lineScope = null;

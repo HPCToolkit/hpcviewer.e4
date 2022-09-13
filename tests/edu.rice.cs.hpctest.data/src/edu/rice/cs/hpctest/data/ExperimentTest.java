@@ -27,8 +27,10 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.TraceScopeVisitor;
+import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpctest.util.TestDatabase;
 
+import edu.rice.cs.hpctest.data.util.TestMetricValue;
 
 public class ExperimentTest 
 {
@@ -274,7 +276,7 @@ public class ExperimentTest
 					assertTrue(result);
 				} else {					
 					for(var child: root.getChildren()) {					
-						boolean result = testMetricValueCorrectness(experiment, root, child);
+						boolean result = TestMetricValue.testMetricValueCorrectness(experiment, root, child);
 						assertTrue( "Tree test fails for: " + experiment.getName() + " scope: " + child.getName(), result);
 					}
 				}
@@ -294,73 +296,15 @@ public class ExperimentTest
 		}
 		return true;
 	}
-	
-	private boolean testMetricValueCorrectness(Experiment exp, Scope parent, Scope context) {
-		var mvc = context.getMetricValues();
-		if (mvc == null)
-			return true;
 		
-		var mvcParent = parent.getMetricValues();
-		var metrics = exp.getMetricList();
-		
-		for(var metric: metrics) {
-			var partner = exp.getMetric(metric.getPartner());
-			var mv1 = mvc.getValue(context, metric);
-			var mv2 = mvc.getValue(context, partner);
-			
-			// test the exclusive vs inclusive
-			if (metric.getMetricType() == MetricType.INCLUSIVE) {
-				int c = floatCompare(mv1.getValue(), mv2.getValue());
-				assertTrue(c>=0);
-			} else {
-				int c = floatCompare(mv1.getValue(), mv2.getValue());
-				assertTrue(c<=0);
-			}
-			
-			// test comparison with the parent
-			var pv1 = mvcParent.getValue(parent, metric);
-			
-			assertTrue(checkChildValue(metric, pv1, mv1));
-		}
-		
-		// traverse all the children
-		if (context.hasChildren()) {
-			assertNotNull(context.getChildren());
-			for(var child: context.getChildren()) {
-				var result = testMetricValueCorrectness(exp, context, child);
-				if (!result)
-					return false;
-			}
-		}
-		return true;
-	}
-	
-	private static int floatCompare(float f1, float f2) {
-		final float EPSILON = 0.001f;
-		final float delta = f1 - f2;
-		final float diffEps = Math.abs(delta) / f1;
-		if (diffEps < EPSILON)
-			return 0;
-		else return (int) delta;
-	}
-	
-	
-	private boolean checkChildValue(BaseMetric metric, MetricValue mv1, MetricValue mv2) {
-		if (!(metric instanceof DerivedMetric) && 
-			 (metric.getMetricType() == MetricType.INCLUSIVE)) { 
-			final int  c = floatCompare(mv1.getValue(), mv2.getValue());
-			return c>=0;
-		}
-		// exclusive metric: anything can happen
-		return true;
-	}
-	
 
 	@Test
 	public void testGetThreadData() throws IOException {
 		for(var experiment: experiments) {
 			var name = experiment.getName();
-			if (name.contains("loop") || name.contains(DB_MULTITHREAD))
+			if (name.contains("loop") || 
+				name.contains(DB_MULTITHREAD) || 
+				experiment.getMajorVersion() == Constants.EXPERIMENT_SPARSE_VERSION)
 				assertNotNull(experiment.getThreadData());
 		}
 	}

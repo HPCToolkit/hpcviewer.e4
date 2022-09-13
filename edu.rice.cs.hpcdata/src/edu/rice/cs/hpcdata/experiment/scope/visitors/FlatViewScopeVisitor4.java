@@ -46,7 +46,7 @@ public class FlatViewScopeVisitor4 extends FlaViewScopeBuilder implements IScope
 
 	public void visit(Scope scope, ScopeVisitType vt) 				{ 
 		if (scope instanceof InstructionScope) {
-			add(scope, vt, true, true);
+			add(scope, vt, true, false);
 		}
 	}
 	public void visit(RootScope scope, ScopeVisitType vt) 			{ }
@@ -85,9 +85,14 @@ public class FlatViewScopeVisitor4 extends FlaViewScopeBuilder implements IScope
 			combine(id, flatScope.flatFile, metricScope, exclusive);
 			combine(id, flatScope.flatScope, metricScope, true);
 
-			if (scope instanceof CallSiteScope) {
-				CallSiteScope cs = (CallSiteScope) scope;
-				var procFlatScope = getFlatCounterPart(id, cs.getProcedureScope(), metricScope, exclusive);
+			if (scope instanceof CallSiteScope || scope instanceof InstructionScope) {
+				ProcedureScope procScope;
+				if (scope instanceof CallSiteScope) {
+					procScope = ((CallSiteScope) scope).getProcedureScope();
+				} else {
+					procScope = ((InstructionScope) scope).getProcedureScope();
+				}
+				var procFlatScope = getFlatCounterPart(id, procScope, metricScope, exclusive);
 
 				combine(id, procFlatScope.flatLM, metricScope, true);
 				combine(id, procFlatScope.flatFile, metricScope, true);

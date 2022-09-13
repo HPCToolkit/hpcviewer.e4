@@ -125,7 +125,7 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 
 			// Find (or add) callee in top-level hashtable
 			InstructionScope is   = (InstructionScope) scope;
-			ProcedureScope callee = this.createProcedureIfNecessary(scope, is.getProcedure());			
+			ProcedureScope callee = this.createProcedureIfNecessary(scope, is.getProcedureScope());			
 			prepareCallChain(scope, callee);
 
 		} else if (vt == ScopeVisitType.PostVisit)  {			

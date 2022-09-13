@@ -143,7 +143,11 @@ public class MetricValueCollection4 implements IMetricValueCollection
 		if (values == null) {
 			// trigger initialization
 			Experiment exp = (Experiment) scope.getRootScope().getExperiment();
-			BaseMetric metric = exp.getVisibleMetrics().get(0);
+			var metrics = exp.getVisibleMetrics();
+			if (metrics == null || metrics.isEmpty())
+				return false;
+			
+			BaseMetric metric = metrics.get(0);
 			getValue(scope, metric.getIndex());
 		}
 

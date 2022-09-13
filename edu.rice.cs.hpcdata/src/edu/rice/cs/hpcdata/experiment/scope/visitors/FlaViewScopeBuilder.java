@@ -40,7 +40,7 @@ public class FlaViewScopeBuilder
 					return proc;
 			}
 			if (parent instanceof InstructionScope)
-				return ((InstructionScope) parent).getProcedure();
+				return ((InstructionScope) parent).getProcedureScope();
 			if (parent instanceof RootScope) 
 				return null;
 			parent = parent.getParentScope();

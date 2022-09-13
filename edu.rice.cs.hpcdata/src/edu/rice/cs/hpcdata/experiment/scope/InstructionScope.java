@@ -16,7 +16,7 @@ public class InstructionScope extends Scope
 										 loadModule.getSourceFile(), 
 										 0, 
 										 0, 
-										 InstructionScope.getCanonicalName(loadModule, offset), 
+										 getCanonicalName(loadModule, offset), 
 										 false, 
 										 scopeID, 
 										 flatID, 
@@ -41,7 +41,7 @@ public class InstructionScope extends Scope
 	 * 
 	 * @return {@code ProcedureScope}
 	 */
-	public ProcedureScope getProcedure() {
+	public ProcedureScope getProcedureScope() {
 		return procScope;
 	}
 
@@ -64,7 +64,7 @@ public class InstructionScope extends Scope
 		return getCanonicalName(loadModule, offset);
 	}
 	
-	private static String getCanonicalName(LoadModuleScope lms, long offset ) {
+	public static String getCanonicalName(LoadModuleScope lms, long offset ) {
 		String name = lms.getName();
 		int index = name.lastIndexOf(File.separatorChar);
 		return String.format("%s@0x%x",name.substring(index+1), offset);

@@ -210,7 +210,10 @@ public class ScopeContextFactory
 			sc.newScope = new LineScope(rootCCT, fs, line, sc.ctxId, flatId);
 			break;
 		case FMT_METADB_LEXTYPE_INSTRUCTION:
-			sc.newScope = new InstructionScope(rootCCT, lm, offset, sc.ctxId, flatId);
+			var instName = InstructionScope.getCanonicalName(lm, offset);
+			var procFlatId = ++flatID;
+			ProcedureScope procScope = new ProcedureScope(rootCCT, lm, lm.getSourceFile(), 0, 0, instName, false, sc.ctxId, procFlatId, null, ProcedureScope.FEATURE_PROCEDURE);
+			sc.newScope = new InstructionScope(rootCCT, lm, procScope, offset, sc.ctxId, flatId);
 			sc.newScope.setSourceFile(fs);
 			break;
 		default:
