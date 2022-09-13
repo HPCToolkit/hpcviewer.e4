@@ -25,7 +25,6 @@ import edu.rice.cs.hpcdata.util.IUserData;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -208,7 +207,9 @@ public class Experiment extends BaseExperimentWithMetrics
 	 */
 	public RootScope createFlatView(Scope callingContextViewRootScope, RootScope flatViewRootScope)
 	{
-		FlatViewScopeVisitor fv = new FlatViewScopeVisitor(this, (RootScope) flatViewRootScope);
+		IScopeVisitor fv = getMajorVersion() == Constants.EXPERIMENT_DENSED_VERSION ?
+									new FlatViewScopeVisitor(this, (RootScope) flatViewRootScope) :
+									new FlatViewScopeVisitor4(flatViewRootScope);
 
 		callingContextViewRootScope.dfsVisitScopeTree(fv);
 		return flatViewRootScope;

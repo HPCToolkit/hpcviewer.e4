@@ -107,6 +107,8 @@ implements IMetricScope
 	private int cpid;
 	
 	private final List<Scope> listScopeReduce;
+	
+	private int relation;
 
 	protected ITreeNode<Scope> node;
 
@@ -914,5 +916,15 @@ implements IMetricScope
 
 	public boolean hasChildren() {
 		return node.hasChildren();
+	}
+
+
+	public int getRelation() {
+		return relation;
+	}
+
+
+	public void setRelation(int relation) {
+		this.relation = relation;
 	}
 }

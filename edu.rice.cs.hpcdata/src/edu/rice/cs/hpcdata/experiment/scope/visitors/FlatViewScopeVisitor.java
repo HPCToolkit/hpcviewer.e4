@@ -30,7 +30,7 @@ import edu.rice.cs.hpcdata.util.Constants;
  *
  *************************************************************************************************/
 
-public class FlatViewScopeVisitor implements IScopeVisitor 
+public class FlatViewScopeVisitor extends FlaViewScopeBuilder implements IScopeVisitor 
 {
 	private static final String SEPARATOR_ID = ":";
 	
@@ -569,63 +569,6 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 		return ps.isAlien();
 	}
 	
-	/******************************************************************
-	 * add child to the parent
-	 * 
-	 * @param parent
-	 * @param child
-	 ****************************************************************/
-	private void addChild(Scope parent, Scope child) {
-		parent.addSubscope(child);
-		child.setParentScope(parent);
-	}
-	
-	
-	/***********************************************************
-	 * Iteratively finding an enclosing procedure of a CCT scope
-	 * @param cctScope
-	 * @return
-	 ***********************************************************/
-	private ProcedureScope findEnclosingProcedure(Scope cctScope)
-	{
-		if (cctScope == null)
-			return null;
-			
-		if (cctScope instanceof ProcedureScope) 
-			return (ProcedureScope) cctScope;
-		
-		if (cctScope instanceof CallSiteScope)
-			return ((CallSiteScope) cctScope).getProcedureScope();
-		
-		Scope parent = cctScope.getParentScope();
-		while(parent != null) {
-			if (parent instanceof CallSiteScope) {
-				return ((CallSiteScope) parent).getProcedureScope();
-			}
-			if (parent instanceof ProcedureScope) {
-				ProcedureScope proc = (ProcedureScope) parent;
-				if (!proc.isAlien())
-					return proc;
-			}
-			if (parent instanceof InstructionScope)
-				return ((InstructionScope) parent).getProcedure();
-			if (parent instanceof RootScope) 
-				return null;
-			parent = parent.getParentScope();
-		}
-		return null;
-	}
-
-	
-	/***********************************************************
-	 * check if a scope has been assigned as the outermost instance
-	 * @param scope
-	 * @return
-	 ***********************************************************/
-	private boolean isOutermostInstance(Scope scope) {
-		return scope.getCounter() == 1;
-	}
-
 	
 	/***********************************************************
 	 * add the cost of the cct into the flat scope if "necessary"
@@ -668,20 +611,5 @@ public class FlatViewScopeVisitor implements IScopeVisitor
 		listAddedScopes.add(scopeFlat);
 
 		htFlatCostAdded.put(objCode, listAddedScopes);
-	}
-
-	
-	/*************************************************************************
-	 * Each scope in the flat view has to be linked with 3 enclosing scopes:
-	 * <ul>
-	 *  <li> load module
-	 *  <li> file
-	 *  <li> procedure
-	 * </ul>
-	 *************************************************************************/
-	private class FlatScopeInfo {
-		LoadModuleScope flatLM;
-		FileScope flatFile;
-		Scope flatScope;
 	}
 }

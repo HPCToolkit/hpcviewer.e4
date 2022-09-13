@@ -14,7 +14,7 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 
 /*******************************************************************
  * 
- * Class to manage a collection of metric plot data for database v.3
+ * Class to manage a collection of metric plot data for database v.4
  *
  *******************************************************************/
 public class ThreadDataCollection4 extends AbstractThreadDataCollection

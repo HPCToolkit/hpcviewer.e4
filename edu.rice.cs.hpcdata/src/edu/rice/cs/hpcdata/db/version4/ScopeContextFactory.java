@@ -194,6 +194,8 @@ public class ScopeContextFactory
 		switch(lexicalType) {
 		case FMT_METADB_LEXTYPE_FUNCTION:
 			sc.newScope = createLexicalFunction(parent, ps, sc.ctxId, flatId, line, relation);
+			sc.newScope.setRelation(relation);
+			
 			if (parent instanceof LineScope) {
 				var p = parent.getParentScope();
 				linkParentChild(p, sc.newScope);
@@ -214,6 +216,7 @@ public class ScopeContextFactory
 		default:
 			sc.newScope = new UnknownScope(rootCCT, fs, flatId);
 		}
+		sc.newScope.setRelation(relation);
 		if (parent != null)
 			linkParentChild(parent, sc.newScope);	
 		
