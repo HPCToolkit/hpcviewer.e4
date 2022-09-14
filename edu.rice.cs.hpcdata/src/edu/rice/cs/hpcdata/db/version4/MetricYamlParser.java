@@ -210,7 +210,7 @@ inputs: ArrayList<E>  (id=98)
 			var scope   = input.get("scope");
 			var combine = (String)input.get("combine");
 
-			final MetricType mtype = scope.equals("execution") ? MetricType.INCLUSIVE : MetricType.EXCLUSIVE;
+			final MetricType mtype = MetricType.convertFromPropagationScope((String) scope);
 			
 			// try to find metric in meta.db that match the metric in yaml file
 			// We should find a matched metric, otherwise there is something wrong
@@ -445,36 +445,56 @@ roots:
 			
 			while(formulaIterator.hasNext()) {
 				var formulaItem = formulaIterator.next();
-				var formulaType = getMetricFormulaType(formulaItem.getKey());
+				var formulaType = MetricType.convertFromName(formulaItem.getKey());
 				
-				var mapMetrics  = formulaItem.getValue();
-				var metric = mapCodeToMetric.get(mapMetrics.hashCode());
-				HierarchicalMetric hm;
+				LinkedHashMap<String, ?> mapMetrics  = (LinkedHashMap<String, ?>) formulaItem.getValue();
+				HierarchicalMetric metric = getMetricCorrespondance(mapMetrics.hashCode(), formulaType, desc);
 				
 				if (metric == null) {
+					// either it's a list of metrics or a more specific formula or a parent metric
+					boolean parentMetric = true;
+					var subIterator = mapMetrics.entrySet().iterator();
+					while(subIterator.hasNext()) {
+						var subKey = subIterator.next();
+						var subVal = subKey.getValue();
+						if (subKey.getKey().equals("standard")) {
+							parentMetric = false;
+						} else if (subKey.getKey().equals("custom")) {
+							parentMetric = false;
+						}
+						metric = getMetricCorrespondance(subVal.hashCode(), formulaType, desc);
+					}
+
 					// no correspondent metric: this may be a new parent metric
 					// or an error?
-					hm = createParentMetric(name, desc);
-					result = VariantResult.OK_NEW_PARENT;
-					
-				} else if (metric.getMetricType() == formulaType &&
-						   metric instanceof HierarchicalMetric) {
-					// it's a normal metric visible to user (mostly)
-					hm = (HierarchicalMetric) metric;					
-					hm.setDescription(desc);
-					linkParentChild(hm);
-
-					listMetrics.add(metric);
-				} else {
-					throw new IllegalStateException("Unknown metric: ");
+					if (parentMetric) {
+						metric = createParentMetric(name, desc);
+						result = VariantResult.OK_NEW_PARENT;
+					}
 				}
-
-				parseRender(hm, mapAttributes);
+				if (metric != null)
+					parseRender(metric, mapAttributes);
 			}
 		}
 		return result;
 	}
 	
+	private HierarchicalMetric getMetricCorrespondance(int hashcode, MetricType formulaType, String desc) {
+		var metric = mapCodeToMetric.get(hashcode);
+		if (metric != null && 
+			metric instanceof HierarchicalMetric) {
+			
+			HierarchicalMetric hm = (HierarchicalMetric) metric;
+			hm.setDescription(desc);
+			hm.setMetricType(formulaType);
+			
+			linkParentChild(hm);
+			listMetrics.add(hm);
+			
+			return hm;
+		}
+		return null;
+	}
 	
 	private void linkParentChild(HierarchicalMetric metric) {
 		var parent = stackMetrics.peek();		
@@ -498,15 +518,5 @@ roots:
 		stackMetrics.push(metric);
 
 		return metric;
-	}
-	
-	
-	private MetricType getMetricFormulaType(String formulaType) {
-		if (formulaType.equals("inclusive")) {
-			return MetricType.INCLUSIVE;
-		} else if (formulaType.equals("exclusive")) {
-			return MetricType.EXCLUSIVE;
-		}
-		throw new IllegalArgumentException("unknown formula type: " + formulaType);
 	}
 }

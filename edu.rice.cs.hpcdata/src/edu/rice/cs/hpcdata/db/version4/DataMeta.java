@@ -538,26 +538,9 @@ public class DataMeta extends DataCommon
 				// this should be fixed when we parse metrics.yaml
 				m.setAnnotationType(BaseMetric.AnnotationType.PERCENT);
 				
-				MetricType type;
 				var pi = mapPropagationIndex.get(pScope);
-				switch(pi.scopeType) {
-				case 2:
-					type = MetricType.INCLUSIVE;
-					break;
-				case 1:
-					type = MetricType.POINT_EXCL;
-					break;
-				case 3:
-					type = MetricType.EXCLUSIVE;
-					break;
-				default:
-					type = MetricType.UNKNOWN;
-				}
-				m.setMetricType(type);
-									
-				BaseMetric.VisibilityType vt = type == MetricType.POINT_EXCL ? 
-						BaseMetric.VisibilityType.HIDE : BaseMetric.VisibilityType.SHOW; 
-				m.setDisplayed(vt);
+				MetricType type = MetricType.convertFromPropagationScope(pi.scopeType);
+				m.setMetricType(type);									
 
 				// store the index of this scope.
 				// we need this to propagate the partner index
