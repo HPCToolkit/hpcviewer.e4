@@ -47,7 +47,7 @@ class FilterTest {
 	@Test
 	@Order(2)
 	void testFilter() {
-		final int []numFilters = new int[] {36, 1, 1, 0, 0, 0, 19, 0, 0, 0};
+		final int []numFilters = new int[] {36, 1, 1, 0, 0, 0, 19, 0, 0, 0, 0};
 		int i=0;
 		for(var exp: experiments) {
 			int res = exp.filter(fmap);

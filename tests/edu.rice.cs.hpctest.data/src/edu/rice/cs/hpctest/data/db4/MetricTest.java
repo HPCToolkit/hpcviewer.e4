@@ -62,8 +62,8 @@ public class MetricTest {
 			var mv = mvc[i].getValue(s, metric.getIndex());
 			assertNotNull(mv);
 			
-			mv = mvc[i].getValue(s, 2);
-			assertTrue(mv.getValue() > 0);
+			mv = mvc[i].getValue(s, metric.getPartner());
+			assertNotNull(mv);
 			i++;
 		}
 	}

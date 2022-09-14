@@ -26,7 +26,8 @@ public class TestDatabase
 												  DIR_METADB + File.separator + "lmp-openmp",
 												  DIR_METADB + File.separator + "inline.meta.db",
 												  DIR_METADB + File.separator + "vectorAdd",
-												  DIR_METADB + File.separator + "d.x"};	
+												  DIR_METADB + File.separator + "d.x",
+												  DIR_METADB + File.separator + "d.foo"};	
 	
 	public static File[] getXMLDatabases() {
 		return getDatabases(xmlPaths);
