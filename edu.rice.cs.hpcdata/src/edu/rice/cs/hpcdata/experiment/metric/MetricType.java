@@ -14,6 +14,19 @@ public class MetricType
 	
 	public String toString() { return value; }
 	
+	/****
+	 * Convert from the name of the propagation scope to a metric type
+	 * 
+	 * @param scopePropagationName
+	 * 			The name of scope propagation
+	 * 
+	 * @return MetricType
+	 * 
+	 * @see INCLUSIVE
+	 * @see EXCLUSIVE
+	 * @see POINT_EXCL
+	 * @see UNKNOWN
+	 */
 	public static MetricType convertFromPropagationScope(String scopePropagationName) {
 		if (scopePropagationName.equalsIgnoreCase("execution")) 
 			return MetricType.INCLUSIVE;

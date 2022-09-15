@@ -75,7 +75,7 @@ public class DataMeta extends DataCommon
 	 *  <li>2 "application thread": Setup code for threads created by the application, via pthread_create or similar.
 	 * </ul>
 	 */
-	private static final String []entryLabels = { "<partial unwind>", "<main root>", "<thread root>"};
+	private static final String []entryLabels = { "<partial unwind>", "<program root>", "<thread root>"};
 
 	// --------------------------------------------------------------------
 	// variables

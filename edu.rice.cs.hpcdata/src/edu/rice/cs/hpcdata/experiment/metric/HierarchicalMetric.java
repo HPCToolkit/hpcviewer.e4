@@ -202,6 +202,8 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 			return name + " (E)";
 		else if (getMetricType() == MetricType.INCLUSIVE)
 			return name + " (I)";
+		else if (getMetricType() == MetricType.POINT_EXCL)
+			return name;
 		else
 			return name + " (X)";
 	}
