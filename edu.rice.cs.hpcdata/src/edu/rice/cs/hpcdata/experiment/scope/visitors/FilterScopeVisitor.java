@@ -357,6 +357,13 @@ public class FilterScopeVisitor implements IScopeVisitor
 			}
 			if (exclusive_filter && metric.getMetricType() == MetricType.EXCLUSIVE)
 			{
+				// fix Marty's reported bug that filtering a loop or a line scope
+				// double count the exclusive cost of the procedure scope parent. 
+				// Since the cost of the procedure scope includes the cost of the child
+				// we shouldn't merge the cost of the child to the parent.
+				if (isParentEnclosingChild(parent, child))
+					continue;
+				
 				MetricValue value = parent.getMetricValue(metric);
 				if (value != MetricValue.NONE)
 				  value = value.duplicate();
@@ -373,6 +380,22 @@ public class FilterScopeVisitor implements IScopeVisitor
 				mergeMetricToParent(parent, metric_exc.getIndex(), childValue);
 			}
 		}
+	}
+	
+	
+	/***
+	 * Check if the parent is the enclosing procedure of the child
+	 * 
+	 * @param parent
+	 * @param child
+	 * 
+	 * @return true if the parent is the enclosing procedure
+	 */
+	private boolean isParentEnclosingChild(Scope parent, Scope child) {
+		if (!(child instanceof LineScope || child instanceof LoopScope))
+			return false;
+		
+		return (parent instanceof CallSiteScope || parent instanceof ProcedureScope);
 	}
 	
 	/*******
