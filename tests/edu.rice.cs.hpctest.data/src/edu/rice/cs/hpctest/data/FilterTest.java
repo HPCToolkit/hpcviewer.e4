@@ -6,8 +6,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.scope.RootScope;
+import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.filter.FilterAttribute;
 import edu.rice.cs.hpcdata.filter.IFilterData;
+import edu.rice.cs.hpctest.data.util.TestMetricValue;
 import edu.rice.cs.hpctest.util.TestDatabase;
 
 public class FilterTest 
@@ -24,6 +27,14 @@ public class FilterTest
 			experiments[i]= new Experiment();
 			try {
 				experiments[i].open(dbp, null, Experiment.ExperimentOpenFlag.TREE_ALL);
+								
+				RootScope rootCCT  = experiments[i].getRootScope(RootScopeType.CallingContextTree);
+				RootScope rootCall = experiments[i].getRootScope(RootScopeType.CallerTree);
+				RootScope rootFlat = experiments[i].getRootScope(RootScopeType.Flat);
+
+				rootCall = experiments[i].createCallersView(rootCCT, rootCall);			
+				rootFlat = experiments[i].createFlatView(rootCCT, rootFlat);
+				
 			} catch (Exception e) {
 				assertFalse(e.getMessage(), true);
 			}
@@ -35,35 +46,32 @@ public class FilterTest
 
 	@Test
 	public void testFilter() {
-		final int []numFilteredScopes = new int[] {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		final String []filterText = {"testBandwidth", "loop at *", "*: *"};
 		
-		final String filterText = "testBandwidth";
 		FilterAttribute.Type []attributes = new FilterAttribute.Type[] {
 				FilterAttribute.Type.Descendants_Only,
 				FilterAttribute.Type.Self_And_Descendants,
 				FilterAttribute.Type.Self_Only};
 		
-		int i = 0;
 		for (var exp: experiments) {
-			int j = 0;
 			for(var attr: attributes) {
-				IFilterData filterData = new FilterData(filterText, attr) ;
-				
-				// the first filter attribute Descendants_Only will remove 
-				// 		the descendants but not the node (if match)
-				// the second filter attribute will remove the node itself
-				// the third filter should match nothing since all the matched nodes
-				// 		were already filtered
-				
-				int numScopes = exp.filter(filterData);
-				if (j < 2)
-					assertTrue(numScopes >= numFilteredScopes[i]);
-				else
-					assertTrue(numScopes == 0);
-
-				j++;
+				for(var text: filterText) {
+					IFilterData filterData = new FilterData(text, attr) ;
+					
+					int numScopes = exp.filter(filterData);
+					assertTrue(numScopes >= 0);
+					
+					var roots = exp.getRootScopeChildren();
+					for(var root: roots) {
+						if (root.getSubscopeCount() == 0)
+							continue;
+						for(var child: root.getChildren()) {					
+							boolean result = TestMetricValue.testMetricValueCorrectness(exp, root, child);
+							assertTrue( "Tree test fails for: " + exp.getName() + " scope: " + child.getName(), result);
+						}
+					}
+				}
 			}
-			i++;
 		}
 	}
 

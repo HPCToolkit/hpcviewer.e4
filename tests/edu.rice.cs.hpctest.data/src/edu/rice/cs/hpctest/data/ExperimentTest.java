@@ -21,8 +21,6 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
-import edu.rice.cs.hpcdata.experiment.metric.MetricType;
-import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -274,7 +272,7 @@ public class ExperimentTest
 				if (((RootScope)root).getType() == RootScopeType.CallerTree) {
 					var result = testUniqueProcedure((RootScope) root);
 					assertTrue(result);
-				} else {					
+				} else {
 					for(var child: root.getChildren()) {					
 						boolean result = TestMetricValue.testMetricValueCorrectness(experiment, root, child);
 						assertTrue( "Tree test fails for: " + experiment.getName() + " scope: " + child.getName(), result);
