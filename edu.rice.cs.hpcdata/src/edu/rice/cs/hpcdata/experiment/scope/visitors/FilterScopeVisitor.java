@@ -11,6 +11,7 @@ import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.FileScope;
 import edu.rice.cs.hpcdata.experiment.scope.GroupScope;
+import edu.rice.cs.hpcdata.experiment.scope.InstructionScope;
 import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoadModuleScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoopScope;
@@ -384,7 +385,9 @@ public class FilterScopeVisitor implements IScopeVisitor
 	
 	
 	/***
-	 * Check if the parent is the enclosing procedure of the child
+	 * Check if the parent is the enclosing procedure of the child.
+	 * A child is within the same context as the parent is when
+	 * the parent is a procedure context while the child is not.
 	 * 
 	 * @param parent
 	 * @param child
@@ -392,10 +395,26 @@ public class FilterScopeVisitor implements IScopeVisitor
 	 * @return true if the parent is the enclosing procedure
 	 */
 	private boolean isParentEnclosingChild(Scope parent, Scope child) {
+		// if the child is not a line or a loop, they must be in different context
+		// like between a call site and an instruction scope. 
 		if (!(child instanceof LineScope || child instanceof LoopScope))
 			return false;
 		
-		return (parent instanceof CallSiteScope || parent instanceof ProcedureScope);
+		// if a child is a line and the parent is a loop, they are in the same context
+		if (child instanceof LineScope && parent instanceof LoopScope)
+			return true;
+		
+		// only if the parent is a call site or a procedure scope, we change the context
+		// Usually an instruction scope also changes the context.
+		// Note: It's almost impossible to have instruction as the parent and child is a loop
+		//
+		// e.g.: libxxx@123 -> loop at file.c: 0
+		//
+		// My understanding is that this is very unlikely.
+		
+		return (parent instanceof CallSiteScope  || 
+				parent instanceof ProcedureScope || 
+				parent instanceof InstructionScope);
 	}
 	
 	/*******
