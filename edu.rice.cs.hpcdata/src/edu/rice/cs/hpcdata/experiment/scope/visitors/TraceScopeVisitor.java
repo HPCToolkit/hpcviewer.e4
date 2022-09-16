@@ -3,6 +3,7 @@ package edu.rice.cs.hpcdata.experiment.scope.visitors;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.FileScope;
 import edu.rice.cs.hpcdata.experiment.scope.GroupScope;
+import edu.rice.cs.hpcdata.experiment.scope.InstructionScope;
 import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoadModuleScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoopScope;
@@ -88,12 +89,8 @@ public class TraceScopeVisitor implements IScopeVisitor
 
 	@Override
 	public void visit(CallSiteScope scope, ScopeVisitType vt) { 
+		// fix issue #233: no separate treatment between line scope and call site
 		update(scope, vt);
-
-		// Corner case: the cct-id of the line scope differs than the call site
-		var lineScope = scope.getLineScope();
-		if (scope.getCCTIndex() != lineScope.getCCTIndex())
-			update(scope.getLineScope(), vt);
 	}
 
 	@Override
@@ -112,7 +109,12 @@ public class TraceScopeVisitor implements IScopeVisitor
 	public void visit(RootScope scope, ScopeVisitType vt) {/* not treated in this class */}
 
 	@Override
-	public void visit(Scope scope, ScopeVisitType vt) {/* not treated in this class */}
+	public void visit(Scope scope, ScopeVisitType vt) {
+		// issue #233: needs to include the instruction scope as part of the traces
+		if (scope instanceof InstructionScope) {
+			update(scope, vt);
+		}
+	}
 
 	
 	private void update(Scope scope, ScopeVisitType vt) {
@@ -144,7 +146,7 @@ public class TraceScopeVisitor implements IScopeVisitor
 				current = scope;
 			
 			callpath.addCallPath(scope.getCCTIndex(), current, currentDepth);
-			
+
 		} else {
 			if (CallPath.isTraceScope(scope))
 				currentDepth--;

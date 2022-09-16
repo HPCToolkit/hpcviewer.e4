@@ -5,6 +5,7 @@ import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
 
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
+import edu.rice.cs.hpcdata.experiment.scope.InstructionScope;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -35,7 +36,9 @@ public class CallPath implements ICallPath
 	 * @return
 	 */
 	public static boolean isTraceScope(Scope scope) {
-		return (scope instanceof CallSiteScope || scope instanceof ProcedureScope);
+		return (scope instanceof CallSiteScope  || 
+				scope instanceof ProcedureScope ||
+				scope instanceof InstructionScope);
 	}
 	
 
