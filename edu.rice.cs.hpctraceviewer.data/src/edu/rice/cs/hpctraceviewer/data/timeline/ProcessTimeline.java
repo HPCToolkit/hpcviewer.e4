@@ -12,6 +12,7 @@ import edu.rice.cs.hpctraceviewer.data.ITraceDataCollector;
 import edu.rice.cs.hpctraceviewer.data.TraceDataByRank;
 import edu.rice.cs.hpctraceviewer.data.version2.AbstractBaseData;
 
+
 /** A data structure that stores one line of timestamp-cpid data. */
 public class ProcessTimeline {
 
@@ -58,7 +59,7 @@ public class ProcessTimeline {
 		if (dataTrace instanceof AbstractBaseData)
 			data = new TraceDataByRank((AbstractBaseData) dataTrace, processNumber, _numPixelH);
 		else
-			data = new TraceDataByRank(new DataRecord[0]);
+			data = new TraceDataByRank(new DataRecord[0], processNumber);
 	}
 
 	/**
@@ -81,7 +82,7 @@ public class ProcessTimeline {
 
 		pixelLength = timeRange / (double) _numPixelH;
 		if (_data == null)
-			data = new TraceDataByRank(new DataRecord[0]);
+			data = new TraceDataByRank(new DataRecord[0], processNumber);
 		else
 			data = _data;
 		
@@ -99,9 +100,7 @@ public class ProcessTimeline {
 	 * @throws IOException 
 	 */
 	public void readInData() throws IOException {
-
-		data.readInData(processNumber, startingTime, timeRange,
-				pixelLength);
+		data.readInData(startingTime, timeRange, pixelLength);
 	}
 
 	/** Gets the time that corresponds to the index sample in times. */

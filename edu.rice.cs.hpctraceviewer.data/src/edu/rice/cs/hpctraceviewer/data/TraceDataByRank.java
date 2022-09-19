@@ -1,11 +1,15 @@
 package edu.rice.cs.hpctraceviewer.data;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Vector;
 
 import edu.rice.cs.hpcdata.db.version4.DataRecord;
 import edu.rice.cs.hpcdata.util.Constants;
+import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.version2.AbstractBaseData;
 
 /***********************************************************
@@ -19,19 +23,19 @@ import edu.rice.cs.hpctraceviewer.data.version2.AbstractBaseData;
  ***********************************************************/
 public class TraceDataByRank implements ITraceDataCollector 
 {
-
 	//	tallent: safe to assume version 1.01 and greater here
 	public final static int HeaderSzMin = Header.MagicLen + Header.VersionLen + Header.EndianLen + Header.FlagsLen;
 	public final static int RecordSzMin = Constants.SIZEOF_LONG // time stamp
 										+ Constants.SIZEOF_INT; // call path id
 	
+	private final TraceOption option;
+
 	//These must be initialized in local mode. They should be considered final unless the data is remote.
 	private AbstractBaseData   data;
 	private Vector<DataRecord> listcpid;
 	
 	private int numPixelH;
-	private int rank;
-	
+	private final int rank;
 	
 	/***
 	 * Create a new instance of trace data for a given rank of process or thread 
@@ -47,16 +51,29 @@ public class TraceDataByRank implements ITraceDataCollector
 		data = _data;
 		rank = _rank;
 		numPixelH = _numPixelH;
-
+		
+		option = isGPU() && TracePreferenceManager.getGPUTraceExposure() ?
+				  	ITraceDataCollector.TraceOption.REVEAL_GPU_TRACE :
+					ITraceDataCollector.TraceOption.ORIGINAL_TRACE;
+		
 		listcpid = new Vector<DataRecord>(numPixelH);
+	}
+	
+	public TraceOption getOption() {
+		return option;
 	}
 	
 	/***
 	 * Special constructor for remote database
 	 * @param data
 	 */
-	public TraceDataByRank(DataRecord[] data) {
+	public TraceDataByRank(DataRecord[] data, int rank) {
 		listcpid = new Vector<DataRecord>(Arrays.asList(data));
+		this.rank = rank;
+		
+		option = isGPU() && TracePreferenceManager.getGPUTraceExposure() ?
+				  	ITraceDataCollector.TraceOption.REVEAL_GPU_TRACE :
+					ITraceDataCollector.TraceOption.ORIGINAL_TRACE;
 	}
 	
 	@Override
@@ -73,8 +90,6 @@ public class TraceDataByRank implements ITraceDataCollector
 	 * Reading data from file. This method has to be called FIRST before calling other APIs.
 	 * @apiNote This is a hack. If possible, call this immediately after the constructor.
 	 * 
-	 * @param rank
-	 * 			The rank number. A rank can be a process or a thread or a GPU stream.
 	 * @param timeStart
 	 * @param timeRange
 	 * @param pixelLength 
@@ -82,8 +97,8 @@ public class TraceDataByRank implements ITraceDataCollector
 	 * @throws IOException 
 	 */
 	@Override
-	public void readInData(int rank, long timeStart, long timeRange, double pixelLength) throws IOException
-	{			
+	public void readInData(long timeStart, long timeRange, double pixelLength) throws IOException
+	{
 		long minloc = data.getMinLoc(rank);
 		long maxloc = data.getMaxLoc(rank);
 		
@@ -135,6 +150,31 @@ public class TraceDataByRank implements ITraceDataCollector
 			this.addSample(0, dataFirst);
 		}
 		postProcess();
+	}
+	
+	public List<DataRecord> getAllDataRecord(long timeStart, long timeRange) throws IOException {
+		long minloc = data.getMinLoc(rank);
+		long maxloc = data.getMaxLoc(rank);
+		
+		// corner case: empty samples
+		if (minloc >= maxloc) 
+			return Collections.emptyList();
+		
+		// get the start location
+		final long startLoc = this.findTimeInInterval(timeStart, minloc, maxloc);
+		
+		// get the end location
+		final long endTime = timeStart + timeRange;
+		final long endLoc = Math.min(this.findTimeInInterval(endTime, minloc, maxloc) + data.getRecordSize(), maxloc );
+
+		List<DataRecord> listRecords = new ArrayList<>();
+		
+		// display all the records
+		// increment one record of data contains of an integer (cpid) and a long (time)
+		for(long i=startLoc;i<=endLoc; i+=data.getRecordSize()) {
+			listRecords.add(getData(i));
+		}
+		return listRecords;
 	}
 	
 	
@@ -287,6 +327,16 @@ public class TraceDataByRank implements ITraceDataCollector
 		long loc = findTimeInInterval((long)(midPixel*pixelLength)+startingTime, minLoc, maxLoc);
 		
 		final DataRecord nextData = this.getData(loc);
+		
+		if (option == TraceOption.REVEAL_GPU_TRACE && nextData.cpId == 0) {
+			long rightLoc = loc + data.getRecordSize();
+			final var rightData = getData(rightLoc);
+			if (rightData.cpId != 0) {
+				loc = rightLoc;
+				nextData.cpId = rightData.cpId;
+				nextData.timestamp = rightData.timestamp;
+			}
+		}
 		
 		addSample(minIndex, nextData);
 		
