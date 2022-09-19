@@ -326,7 +326,7 @@ public class TraceDataByRank implements ITraceDataCollector
 		if (option == TraceOption.REVEAL_GPU_TRACE && isIdle(nextData.cpId)) {
 			long rightLoc = loc + data.getRecordSize();
 			final var rightData = getData(rightLoc);
-			if (isIdle(rightData.cpId)) {
+			if (!isIdle(rightData.cpId)) {
 				loc = rightLoc;
 				nextData.cpId = rightData.cpId;
 				nextData.timestamp = rightData.timestamp;

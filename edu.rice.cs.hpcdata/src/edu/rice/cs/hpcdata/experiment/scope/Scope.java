@@ -927,4 +927,13 @@ implements IMetricScope
 	public void setRelation(int relation) {
 		this.relation = relation;
 	}
+	
+	
+	/***
+	 * Return true of this scope represents an idle state (no activity)
+	 * @return
+	 */
+	public boolean isIdle() {
+		return getCCTIndex() == 0;
+	}
 }

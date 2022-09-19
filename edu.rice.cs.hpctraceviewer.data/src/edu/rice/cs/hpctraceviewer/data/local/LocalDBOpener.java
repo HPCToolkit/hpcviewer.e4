@@ -50,12 +50,6 @@ public class LocalDBOpener extends AbstractDBOpener
 	}
 	
 	
-	@Override
-	public int getVersion() {
-		return version;
-	}
-
-	
 	/****
 	 * Create an instance of {@code IFileDB} depending on the database version 
 	 * @return IFileDB

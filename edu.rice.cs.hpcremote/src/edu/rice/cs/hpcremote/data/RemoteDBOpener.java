@@ -440,12 +440,6 @@ public class RemoteDBOpener extends AbstractDBOpener
 		
 		return true;
 	}
-
-	@Override
-	public int getVersion() {
-		// TODO Auto-generated method stub
-		return 0;
-	}	
 }
 
 
