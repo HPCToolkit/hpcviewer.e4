@@ -1,10 +1,7 @@
 package edu.rice.cs.hpctraceviewer.data;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.Vector;
 
 import edu.rice.cs.hpcdata.db.version4.DataRecord;
@@ -30,12 +27,15 @@ public class TraceDataByRank implements ITraceDataCollector
 	
 	private final TraceOption option;
 
-	//These must be initialized in local mode. They should be considered final unless the data is remote.
-	private AbstractBaseData   data;
-	private Vector<DataRecord> listcpid;
+	/** 
+	 * These must be initialized in local mode. 
+	 * They should be considered final unless the data is remote.*/
+	private final AbstractBaseData   data;
 	
-	private int numPixelH;
+	private final int numPixelH;
 	private final int rank;
+	
+	private Vector<DataRecord> listcpid;
 	
 	/***
 	 * Create a new instance of trace data for a given rank of process or thread 
@@ -58,10 +58,7 @@ public class TraceDataByRank implements ITraceDataCollector
 		
 		listcpid = new Vector<DataRecord>(numPixelH);
 	}
-	
-	public TraceOption getOption() {
-		return option;
-	}
+
 	
 	/***
 	 * Special constructor for remote database
@@ -70,6 +67,9 @@ public class TraceDataByRank implements ITraceDataCollector
 	public TraceDataByRank(DataRecord[] data, int rank) {
 		listcpid = new Vector<DataRecord>(Arrays.asList(data));
 		this.rank = rank;
+		
+		this.data = null;// unused
+		numPixelH = 0;	 // unused
 		
 		option = isGPU() && TracePreferenceManager.getGPUTraceExposure() ?
 				  	ITraceDataCollector.TraceOption.REVEAL_GPU_TRACE :
@@ -152,34 +152,11 @@ public class TraceDataByRank implements ITraceDataCollector
 		postProcess();
 	}
 	
-	public List<DataRecord> getAllDataRecord(long timeStart, long timeRange) throws IOException {
-		long minloc = data.getMinLoc(rank);
-		long maxloc = data.getMaxLoc(rank);
-		
-		// corner case: empty samples
-		if (minloc >= maxloc) 
-			return Collections.emptyList();
-		
-		// get the start location
-		final long startLoc = this.findTimeInInterval(timeStart, minloc, maxloc);
-		
-		// get the end location
-		final long endTime = timeStart + timeRange;
-		final long endLoc = Math.min(this.findTimeInInterval(endTime, minloc, maxloc) + data.getRecordSize(), maxloc );
-
-		List<DataRecord> listRecords = new ArrayList<>();
-		
-		// display all the records
-		// increment one record of data contains of an integer (cpid) and a long (time)
-		for(long i=startLoc;i<=endLoc; i+=data.getRecordSize()) {
-			listRecords.add(getData(i));
-		}
-		return listRecords;
-	}
 	
-	
-	/**Gets the time that corresponds to the index sample in times.
-	 * @param sample the index sample
+	/**
+	 * Gets the time that corresponds to the index sample in times.
+	 * @param sample 
+	 * 			the index sample
 	 * */
 	@Override
 	public long getTime(int sample)
@@ -207,13 +184,6 @@ public class TraceDataByRank implements ITraceDataCollector
 			return listcpid.get(sample).cpId;
 		return -1;
 	}
-	
-	// Intentionally remove an unused method
-	// Nathan: could you please derive your own class to add additional feature ?
-	/*public int getMetricId(int sample)
-	{
-		return 0;//listcpid.get(sample).metricId;
-	}*/
 
 	
 	/**Shifts all the times in the ProcessTimeline to the left by lowestStartingTime.*/
@@ -227,7 +197,6 @@ public class TraceDataByRank implements ITraceDataCollector
 			listcpid.set(i,timecpid);
 		}
 	}
-
 	
 	
 	/**Returns the number of elements in this ProcessTimeline.*/
@@ -290,6 +259,7 @@ public class TraceDataByRank implements ITraceDataCollector
 	 * 
 	 * @param traceData: another object to be copied
 	 */
+	@Override
 	public void duplicate(ITraceDataCollector traceData)
 	{
 		this.listcpid = ((TraceDataByRank)traceData).listcpid;
@@ -300,6 +270,21 @@ public class TraceDataByRank implements ITraceDataCollector
 		return (listcpid.get(left).timestamp + listcpid.get(right).timestamp) / 2;
 	}
 	
+	
+	/***
+	 * Check if the call-path id or context id is an idle activity.<br/>
+	 * On meta-db, the idle activity is represented by number zero.
+	 * On experiment.xml it can be different for each database.
+	 * 
+	 * @param contextId
+	 * 			The call-path id or context id.
+	 * 
+	 * @return true if the context id is an idle activity.
+	 */
+	private boolean isIdle(int contextId) {
+		return contextId == 0;
+	}
+	
 	/*******************************************************************************************
 	 * Recursive method that fills in times and timeLine with the correct data from the file.
 	 * Takes in two pixel locations as endpoints and finds the timestamp that owns the pixel
@@ -307,12 +292,17 @@ public class TraceDataByRank implements ITraceDataCollector
 	 * location and the newfound location as endpoints and once with the newfound location 
 	 * and the end location as endpoints. Effectively updates times and timeLine by calculating 
 	 * the index in which to insert the next data. This way, it keeps times and timeLine sorted.
+	 * 
 	 * @author Reed Landrum and Michael Franco
+	 * 
 	 * @param minLoc The beginning location in the file to bound the search.
 	 * @param maxLoc The end location in the file to bound the search.
 	 * @param startPixel The beginning pixel in the image that corresponds to minLoc.
 	 * @param endPixel The end pixel in the image that corresponds to maxLoc.
 	 * @param minIndex An index used for calculating the index in which the data is to be inserted.
+	 * @param pixelLength the range of time per pixel. Its unit is time, usually nanoseconds for data version 4.
+	 * @param startingTime starting time
+	 * 
 	 * @return Returns the index that shows the size of the recursive subtree that has been read.
 	 * Used for calculating the index in which the data is to be inserted.
 	 * @throws IOException 
@@ -328,7 +318,7 @@ public class TraceDataByRank implements ITraceDataCollector
 		
 		final DataRecord nextData = this.getData(loc);
 		
-		if (option == TraceOption.REVEAL_GPU_TRACE && nextData.cpId == 0) {
+		if (option == TraceOption.REVEAL_GPU_TRACE && isIdle(nextData.cpId)) {
 			long rightLoc = loc + data.getRecordSize();
 			final var rightData = getData(rightLoc);
 			if (rightData.cpId != 0) {
