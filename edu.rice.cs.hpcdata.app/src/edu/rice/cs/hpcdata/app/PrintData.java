@@ -306,7 +306,9 @@ public class PrintData
 			if (scope.getMetricValue(metric) == MetricValue.NONE) {
 				objPrint.println("            0.0");
 			} else  {
-				String out = metric.getMetricTextValue(scope).substring(0, 15);
+				var value  = metric.getMetricTextValue(scope);
+				var lenVal = Math.min(15, value.length());
+				String out = value.substring(0, lenVal);
 				objPrint.println(out);
 			}
 		}
