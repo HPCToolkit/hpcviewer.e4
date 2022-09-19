@@ -117,7 +117,6 @@ public class TimelineThread
 
 	@Override
 	protected DataPreparation getData(DataLinePainting data) {
-
 		return new DetailDataPreparation(data);
 	}
 

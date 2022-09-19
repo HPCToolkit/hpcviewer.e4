@@ -27,15 +27,19 @@ public class TimelineDepthThread
 	/*****
 	 * Thread initialization
 	 *  
-	 * @param data : global data
-	 * @param canvas : depth view canvas
-	 * @param scaleX : The scale in the x-direction of pixels to time 
-	 * @param scaleY : The scale in the y-direction of max depth
-	 * @param width  : the width
+	 * @param data 
+	 * 			global data of the trace
+	 * @param canvas 
+	 * 			depth view canvas
+	 * @param queue
+	 * 			global queue to store the result data
+	 * @param timelineDone
+	 * @param monitor
+	 * @param visibleDepths
 	 */
 	public TimelineDepthThread( SpaceTimeDataController data, 
-								TraceDisplayAttribute attributes,
-								double scaleY, Queue<TimelineDataSet> queue, 
+								double scaleY, 
+								Queue<TimelineDataSet> queue, 
 								AtomicInteger timelineDone, 
 								IProgressMonitor monitor,
 								int visibleDepths)
@@ -62,7 +66,7 @@ public class TimelineDepthThread
 			// it.
 			ProcessTimeline toDonate = new ProcessTimeline(currentDepthLineNum,
 					stData.getScopeMap(), stData.getBaseData(), 
-					stData.computeScaledProcess(), attributes.getPixelHorizontal(),
+					depthTrace.getProcessNum(), attributes.getPixelHorizontal(),
 					attributes.getTimeInterval(), 
 					stData.getMinBegTime() + attributes.getTimeBegin());
 

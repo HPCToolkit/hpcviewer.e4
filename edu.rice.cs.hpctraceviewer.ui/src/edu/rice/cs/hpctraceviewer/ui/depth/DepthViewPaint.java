@@ -70,9 +70,7 @@ public class DepthViewPaint extends BaseViewPaint {
 	protected BaseTimelineThread getTimelineThread(ISpaceTimeCanvas canvas, double xscale, double yscale,
 			Queue<TimelineDataSet> queue, IProgressMonitor monitor) {
 		
-		TraceDisplayAttribute attributes = controller.getTraceDisplayAttribute();
-		
-		return new TimelineDepthThread( controller, attributes, yscale, queue, numDataCollected,
+		return new TimelineDepthThread( controller, yscale, queue, numDataCollected,
 										monitor, visibleDepth);
 	}
 

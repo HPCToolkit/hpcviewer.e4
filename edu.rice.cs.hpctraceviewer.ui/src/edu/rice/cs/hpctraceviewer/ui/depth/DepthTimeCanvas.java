@@ -8,7 +8,7 @@ import org.eclipse.core.commands.operations.IUndoContext;
 import org.eclipse.core.commands.operations.IUndoableOperation;
 import org.eclipse.core.commands.operations.OperationHistoryEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.IJobChangeListener;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.PaintEvent;
@@ -352,9 +352,9 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 					null, null);
 		} catch (ExecutionException e) {
 			e.printStackTrace();
-		}
-		
+		}		
 	}
+	
 
 	@Override
 	protected void changeRegion(Rectangle region) 
@@ -385,18 +385,8 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 		}
 	}
 	
-	private class DepthJobListener implements IJobChangeListener
+	private class DepthJobListener extends JobChangeAdapter
 	{
-		
-		@Override
-		public void sleeping(IJobChangeEvent event) {}
-		
-		@Override
-		public void scheduled(IJobChangeEvent event) {}
-		
-		@Override
-		public void running(IJobChangeEvent event) {}
-		
 		@Override
 		public void done(IJobChangeEvent event) {
 
@@ -409,18 +399,11 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 				}
 			} );
 		}
-		
-		@Override
-		public void awake(IJobChangeEvent event) {}
-		
-		@Override
-		public void aboutToRun(IJobChangeEvent event) {}
-
 	}
 
 	@Override
 	public void setMessage(String message) {
-		
+		// not needed.
 	}
 
 	@Override

@@ -63,6 +63,7 @@ public class TraceDataByRank implements ITraceDataCollector
 	/***
 	 * Special constructor for remote database
 	 * @param data
+	 * @param rank
 	 */
 	public TraceDataByRank(DataRecord[] data, int rank) {
 		listcpid = new Vector<DataRecord>(Arrays.asList(data));
@@ -318,10 +319,14 @@ public class TraceDataByRank implements ITraceDataCollector
 		
 		final DataRecord nextData = this.getData(loc);
 		
+		// corner case: if we are forced to reveal the gpu traces (since they are short-lives),
+		// we need to check if the current sample is an "idle" activity or not.
+		// if this is the case, we look at the right and if it isn't idle, we'll use
+		// this sample instead.
 		if (option == TraceOption.REVEAL_GPU_TRACE && isIdle(nextData.cpId)) {
 			long rightLoc = loc + data.getRecordSize();
 			final var rightData = getData(rightLoc);
-			if (rightData.cpId != 0) {
+			if (isIdle(rightData.cpId)) {
 				loc = rightLoc;
 				nextData.cpId = rightData.cpId;
 				nextData.timestamp = rightData.timestamp;
@@ -330,7 +335,7 @@ public class TraceDataByRank implements ITraceDataCollector
 		
 		addSample(minIndex, nextData);
 		
-		int addedLeft = sampleTimeLine(minLoc, loc, startPixel, midPixel, minIndex, pixelLength, startingTime);
+		int addedLeft  = sampleTimeLine(minLoc, loc, startPixel, midPixel, minIndex, pixelLength, startingTime);
 		int addedRight = sampleTimeLine(loc, maxLoc, midPixel, endPixel, minIndex+addedLeft+1, pixelLength, startingTime);
 		
 		return (addedLeft+addedRight+1);

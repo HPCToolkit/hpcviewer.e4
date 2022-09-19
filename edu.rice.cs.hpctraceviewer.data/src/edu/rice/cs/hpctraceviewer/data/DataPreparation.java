@@ -153,7 +153,9 @@ public abstract class DataPreparation
 				//		in time line: p0 < p1 < p2
 				// a non-midpoint policy then should have a range of p0 to p2 with p0 color.
 				
-				double succ = data.usingMidpoint ? midpoint(data.ptl.getTime(end), data.ptl.getTime(end+1)) : data.ptl.getTime(end+1);
+				double succ = data.usingMidpoint ? 
+										midpoint(data.ptl.getTime(end), data.ptl.getTime(end+1)) :
+										data.ptl.getTime(end+1);
 				succSampleMidpoint = (int) Math.max(0, ((succ-data.begTime)/data.pixelLength));
 			}
 			else
