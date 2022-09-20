@@ -1,7 +1,9 @@
 package edu.rice.cs.hpctraceviewer.data;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Vector;
 
 import edu.rice.cs.hpcdata.db.version4.DataRecord;
@@ -25,6 +27,8 @@ public class TraceDataByRank implements ITraceDataCollector
 	public final static int RecordSzMin = Constants.SIZEOF_LONG // time stamp
 										+ Constants.SIZEOF_INT; // call path id
 	
+	public final static float NUM_PIXELS_TOLERATED = 2.0f;
+
 	private final TraceOption option;
 
 	/** 
@@ -35,7 +39,7 @@ public class TraceDataByRank implements ITraceDataCollector
 	private final int numPixelH;
 	private final int rank;
 	
-	private Vector<DataRecord> listcpid;
+	private List<DataRecord> listcpid;
 	
 	/***
 	 * Create a new instance of trace data for a given rank of process or thread 
@@ -56,7 +60,7 @@ public class TraceDataByRank implements ITraceDataCollector
 				  	ITraceDataCollector.TraceOption.REVEAL_GPU_TRACE :
 					ITraceDataCollector.TraceOption.ORIGINAL_TRACE;
 		
-		listcpid = new Vector<DataRecord>(numPixelH);
+		listcpid = new ArrayList<DataRecord>(numPixelH);
 	}
 
 	
@@ -247,12 +251,25 @@ public class TraceDataByRank implements ITraceDataCollector
 				return low+1;
 			else
 				return low;
-		} else 
-		{
-			// without using midpoint, we adopt the leftmost sample approach.
-			// this means whoever on the left side, it will be the painted
-			return low;
 		}
+		// for gpu stream, if we need to force to reveal the gpu trace
+		// if the current sample is an idle activity, 
+		// we check if the next sample is within the range or not.
+		var l = listcpid.get(low);
+		if (option == TraceOption.REVEAL_GPU_TRACE && isIdle(l.cpId) && low < listcpid.size()) {			
+			var r = listcpid.get(low+1);
+			var last  = listcpid.get(listcpid.size()-1);
+			var first = listcpid.get(0);
+			var timePerPixel = (last.timestamp - first.timestamp)/numPixelH;
+			var dtime = (r.timestamp - l.timestamp);
+			float dFraction = (float) dtime/timePerPixel;
+			
+			if (dFraction < NUM_PIXELS_TOLERATED && !isIdle(r.cpId))
+				return low+1;
+		}
+		// without using midpoint, we adopt the leftmost sample approach.
+		// this means whoever on the left side, it will be the painted
+		return low;
 	}
 
 	/***
@@ -323,13 +340,26 @@ public class TraceDataByRank implements ITraceDataCollector
 		// we need to check if the current sample is an "idle" activity or not.
 		// if this is the case, we look at the right and if it isn't idle, we'll use
 		// this sample instead.
-		if (option == TraceOption.REVEAL_GPU_TRACE && isIdle(nextData.cpId)) {
-			long rightLoc = loc + data.getRecordSize();
-			final var rightData = getData(rightLoc);
-			if (!isIdle(rightData.cpId)) {
-				loc = rightLoc;
-				nextData.cpId = rightData.cpId;
-				nextData.timestamp = rightData.timestamp;
+		if (option == TraceOption.REVEAL_GPU_TRACE) {
+			if (isIdle(nextData.cpId)) {	
+				// if this sample is idle, check if the next sample is also idle or not
+				// (mostly not idle). If the next sample is NOT idle and within a range
+				// let's move to the next sample instead
+				long rightLoc = loc + data.getRecordSize();
+				final var rightData = getData(rightLoc);
+				if (!isIdle(rightData.cpId)) {
+					
+					// make sure the next non-idle samples are within the tolerated number of pixels
+					// if the next sample is too far, we just skip it and accept the "idle" sample.
+					var dTime = (rightData.timestamp - nextData.timestamp) / pixelLength < NUM_PIXELS_TOLERATED;
+					if (dTime) {
+						loc = rightLoc;
+						nextData.cpId = rightData.cpId;
+						nextData.timestamp = rightData.timestamp;
+					}
+				}
+			} else {
+				
 			}
 		}
 		
