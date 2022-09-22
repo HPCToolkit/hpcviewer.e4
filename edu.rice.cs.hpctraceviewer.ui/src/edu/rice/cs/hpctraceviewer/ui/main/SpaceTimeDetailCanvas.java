@@ -28,6 +28,8 @@ import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.preference.PreferenceStore;
+import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -72,6 +74,8 @@ import edu.rice.cs.hpctraceviewer.ui.operation.WindowResizeOperation;
 import edu.rice.cs.hpctraceviewer.ui.operation.ZoomOperation;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.color.ColorTable;
+import edu.rice.cs.hpctraceviewer.config.TracePreferenceConstants;
+import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.Frame;
 import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
 import edu.rice.cs.hpctraceviewer.data.Position;
@@ -93,7 +97,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 			   ISpaceTimeCanvas, 
 			   ITraceViewAction, 
 			   DisposeListener,
-			   EventHandler, PropertyChangeListener
+			   EventHandler, 
+			   PropertyChangeListener,
+			   IPropertyChangeListener
 {		
 	/**The min number of process units you can zoom in.*/
     private final static int MIN_PROC_DISP = 1;
@@ -171,6 +177,8 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		{
 			addCanvasListener();
 			tracePart.getOperationHistory().addOperationHistoryListener(this);
+			PreferenceStore pref = TracePreferenceManager.INSTANCE.getPreferenceStore();
+			pref.addPropertyChangeListener(this);
 			
 			eventBroker.subscribe(IConstants.TOPIC_DEPTH_UPDATE,  this);
 			eventBroker.subscribe(IConstants.TOPIC_FILTER_RANKS,  this);
@@ -1249,6 +1257,10 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 			removeControlListener(resizeListener);
 				
 		tracePart.getOperationHistory().removeOperationHistoryListener(this);
+		tracePart.getOperationHistory().addOperationHistoryListener(this);
+		
+		PreferenceStore pref = TracePreferenceManager.INSTANCE.getPreferenceStore();
+		pref.removePropertyChangeListener(this);
 		
 		super.widgetDisposed(e);
 	}
@@ -1457,6 +1469,19 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 			adjustLabels();
 		}
 	}
+	
+
+	@Override
+	/**
+	 * Change of preference setting
+	 * 
+	 */
+	public void propertyChange(org.eclipse.jface.util.PropertyChangeEvent event) {
+		if (event.getProperty().equals(TracePreferenceConstants.PREF_GPU_TRACES)) {
+			refresh(true);
+		}
+	}
+
 
 	//-----------------------------------------------------------------------------------------
 	// PRIVATE CLASSES

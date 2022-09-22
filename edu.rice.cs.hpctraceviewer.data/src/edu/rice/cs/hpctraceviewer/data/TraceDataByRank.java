@@ -27,7 +27,7 @@ public class TraceDataByRank implements ITraceDataCollector
 	public final static int RecordSzMin = Constants.SIZEOF_LONG // time stamp
 										+ Constants.SIZEOF_INT; // call path id
 	
-	public final static float NUM_PIXELS_TOLERATED = 2.0f;
+	public final static float NUM_PIXELS_TOLERATED = 1.0f;
 
 	private final TraceOption option;
 
