@@ -457,7 +457,8 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 		gc.setFont(FontManager.getFontGeneric());
 		Point size = gc.stringExtent("|{}/',!^_");
 		int height = Math.max(CHECK_BOX_DIMENSION_Y, size.y);
-		this.dataLayer.setDefaultRowHeight(height);
+		int scaled = GUIHelper.convertVerticalDpiToPixel(height);
+		this.dataLayer.setDefaultRowHeight(scaled);
 		
 		gc.dispose();
 	}
