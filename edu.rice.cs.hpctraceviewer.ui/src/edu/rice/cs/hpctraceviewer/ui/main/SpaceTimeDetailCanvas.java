@@ -1477,11 +1477,13 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	 * 
 	 */
 	public void propertyChange(org.eclipse.jface.util.PropertyChangeEvent event) {
-		if (event.getProperty().equals(TracePreferenceConstants.PREF_GPU_TRACES)) {
+		if (event.getProperty().equals(TracePreferenceConstants.PREF_GPU_TRACES) &&
+				OSValidator.isMac() &&
+				this.stData.getBaseData().hasGPU()) {
 			// do not refresh at the moment.
 			// auto refresh causes deadlock on linux/gtk
-			// I don't know why
-			//refresh(true);
+			// I don't know why but it works just fine on MacOS.
+			refresh(true);
 		}
 	}
 

@@ -421,6 +421,7 @@ public class DataSummary extends DataCommon
 				continue;
 			
 			tempIdTupleList.add(info.piElements[i].idt);
+			hasGPU = hasGPU || info.piElements[i].idt.isGPU(idTupleTypes);
 
 			// gather profile invariants
 			// we want to count the number of duplicate profile id
