@@ -22,19 +22,19 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
  ***********************************************************************/
 public abstract class DataPreparation
 {
-	final protected DataLinePainting data;
-	final private HashMap<Integer, Integer>mapInvalidData;
-	final private List<Integer> listInvalidData;
+	protected final DataLinePainting data;
+	private final HashMap<Integer, Integer>mapInvalidData;
+	private final List<Integer> listInvalidData;
 	
 	/****
 	 * Abstract class constructor to paint a line (whether it's detail view or depth view) 
 	 * @param data a DataLinePainting object
 	 */
-	public DataPreparation(DataLinePainting data)
+	protected DataPreparation(DataLinePainting data)
 	{
 		this.data = data;
-		mapInvalidData = new HashMap<Integer, Integer>();
-		listInvalidData = new ArrayList<Integer>();
+		mapInvalidData = new HashMap<>();
+		listInvalidData = new ArrayList<>();
 	}
 	
 	/**Painting action
@@ -80,8 +80,8 @@ public abstract class DataPreparation
 		String succFunction = scope.getName(); 
 		
 		Color succColor    = data.colorTable.getColor(succFunction);
-		int last_ptl_index = data.ptl.size() - 1;
-		int num_invalid_cp = 0;
+		int lastIndexPTL = data.ptl.size() - 1;
+		int numInvalidCP = 0;
 
 		for (int index = 0; index < data.ptl.size(); index++)
 		{
@@ -89,7 +89,7 @@ public abstract class DataPreparation
 			if (pathInfo == null) {				
 				// throwing an exception is more preferable, but it will make
 				// more complexity to handle inside a running thread
-				return num_invalid_cp;		
+				return numInvalidCP;		
 			}
 
 			final int currDepth = pathInfo.getMaxDepth(); 
@@ -98,7 +98,7 @@ public abstract class DataPreparation
 			//-----------------------------------------------------------------------
 			// skipping if the successor has the same color and depth
 			//-----------------------------------------------------------------------
-			boolean still_the_same = true;
+			boolean stillTheSameColor = true;
 			int indexSucc = index;
 			int end = index;
 
@@ -106,7 +106,7 @@ public abstract class DataPreparation
 			final String procName = succFunction;
 			final Scope currScope = scope;
 			
-			while (still_the_same && (++indexSucc <= last_ptl_index))
+			while (stillTheSameColor && (++indexSucc <= lastIndexPTL))
 			{
 				pathInfo = data.ptl.getCallPathInfo(indexSucc);
 				if(pathInfo != null)
@@ -126,8 +126,8 @@ public abstract class DataPreparation
 					//						   has the same depth. In depth view, we don't want to mix with
 					//							different depths
 					
-					still_the_same = (succColor.equals(currColor)) && currDepth == pathInfo.getMaxDepth();
-					if (still_the_same)
+					stillTheSameColor = (succColor.equals(currColor)) && currDepth == pathInfo.getMaxDepth();
+					if (stillTheSameColor)
 						end = indexSucc;
 				} else {
 					int cpid = data.ptl.getContextId(indexSucc);
@@ -137,12 +137,12 @@ public abstract class DataPreparation
 						num = 0;
 					}
 					num++;
-					num_invalid_cp++;
+					numInvalidCP++;
 					mapInvalidData.put(cpid, num);
 				}
 			}
 			
-			if (end < last_ptl_index)
+			if (end < lastIndexPTL)
 			{
 				// --------------------------------------------------------------------
 				// start and middle samples: the rightmost point is the midpoint between
@@ -184,7 +184,7 @@ public abstract class DataPreparation
 			index = end;
 			prevScope = currScope;
 		}
-		return num_invalid_cp;
+		return numInvalidCP;
 	}
 	
 	
@@ -192,8 +192,15 @@ public abstract class DataPreparation
 		return listInvalidData;
 	}
 	
-	 //This is potentially vulnerable to overflows but I think we are safe for now.
-	/**Returns the midpoint between x1 and x2*/
+
+	/**
+	 * Returns the midpoint between x1 and x2
+	 * 
+	 * @apiNote This is potentially vulnerable to overflows but I think we are safe for now.
+	 * 
+	 * @param x1 
+	 * @param x2
+	 * */
 	private static long midpoint(long x1, long x2)
 	{
 		return (x1 + x2)/2;

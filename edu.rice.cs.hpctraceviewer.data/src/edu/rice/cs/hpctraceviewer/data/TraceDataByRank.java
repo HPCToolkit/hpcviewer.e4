@@ -23,11 +23,11 @@ import edu.rice.cs.hpctraceviewer.data.version2.AbstractBaseData;
 public class TraceDataByRank implements ITraceDataCollector 
 {
 	//	tallent: safe to assume version 1.01 and greater here
-	public final static int HeaderSzMin = Header.MagicLen + Header.VersionLen + Header.EndianLen + Header.FlagsLen;
-	public final static int RecordSzMin = Constants.SIZEOF_LONG // time stamp
+	public static final int HeaderSzMin = Header.MagicLen + Header.VersionLen + Header.EndianLen + Header.FlagsLen;
+	public static final int RecordSzMin = Constants.SIZEOF_LONG // time stamp
 										+ Constants.SIZEOF_INT; // call path id
 	
-	public final static float NUM_PIXELS_TOLERATED = 1.0f;
+	public static final float NUM_PIXELS_TOLERATED = 1.0f;
 
 	private final TraceOption option;
 
@@ -44,23 +44,23 @@ public class TraceDataByRank implements ITraceDataCollector
 	/***
 	 * Create a new instance of trace data for a given rank of process or thread 
 	 * Used only for local
-	 * @param _data
-	 * @param _rank
-	 * @param _numPixelH
+	 * @param dataAccess
+	 * @param currentRank
+	 * @param widthInPixels
 	 */
-	public TraceDataByRank(AbstractBaseData _data, int _rank, int _numPixelH)
+	public TraceDataByRank(AbstractBaseData dataAccess, int currentRank, int widthInPixels)
 	{
 		//:'( This is a safe cast because this constructor is only
 		//called in local mode but it's so ugly....
-		data = _data;
-		rank = _rank;
-		numPixelH = _numPixelH;
+		data = dataAccess;
+		rank = currentRank;
+		numPixelH = widthInPixels;
 		
 		option = isGPU() && TracePreferenceManager.getGPUTraceExposure() ?
 				  	ITraceDataCollector.TraceOption.REVEAL_GPU_TRACE :
 					ITraceDataCollector.TraceOption.ORIGINAL_TRACE;
 		
-		listcpid = new ArrayList<DataRecord>(numPixelH);
+		listcpid = new ArrayList<>(numPixelH);
 	}
 
 	
@@ -70,7 +70,7 @@ public class TraceDataByRank implements ITraceDataCollector
 	 * @param rank
 	 */
 	public TraceDataByRank(DataRecord[] data, int rank) {
-		listcpid = new Vector<DataRecord>(Arrays.asList(data));
+		listcpid = new Vector<>(Arrays.asList(data));
 		this.rank = rank;
 		
 		this.data = null;// unused
@@ -83,7 +83,7 @@ public class TraceDataByRank implements ITraceDataCollector
 	
 	@Override
 	public boolean isEmpty() {
-		return listcpid == null || listcpid.size()==0;
+		return listcpid == null || listcpid.isEmpty();
 	}
 
 	@Override
@@ -166,7 +166,7 @@ public class TraceDataByRank implements ITraceDataCollector
 	@Override
 	public long getTime(int sample)
 	{
-		if(sample<0 || listcpid == null || listcpid.size() == 0)
+		if(sample<0 || listcpid == null || listcpid.isEmpty())
 			return 0;
 
 		final int last_index = listcpid.size() - 1;
@@ -219,7 +219,7 @@ public class TraceDataByRank implements ITraceDataCollector
 	@Override
 	public int findClosestSample(long time, boolean usingMidpoint) throws Exception
 	{
-		if (listcpid.size()==0)
+		if (listcpid.isEmpty())
 			return 0;
 
 		int low = 0;
@@ -358,8 +358,6 @@ public class TraceDataByRank implements ITraceDataCollector
 						nextData.timestamp = rightData.timestamp;
 					}
 				}
-			} else {
-				
 			}
 		}
 		
@@ -395,9 +393,9 @@ public class TraceDataByRank implements ITraceDataCollector
 		// apply "Newton's method" to find target time
 		while (right_index - left_index > 1) {
 			long predicted_index;
-			final double time_range = right_time - left_time;
-			final double rate = time_range / (right_index - left_index);
-			final long mtime = (long) (time_range / 2);
+			final long time_range = right_time - left_time;
+			final double rate = (double)time_range / (right_index - left_index);
+			final long mtime  = time_range / 2;
 			if (time <= mtime) {
 				predicted_index = Math.max((long) ((time - left_time) / rate) + left_index, left_index);
 			} else {

@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.text.DecimalFormat;
-import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
@@ -21,6 +20,7 @@ import org.eclipse.core.commands.operations.IUndoableOperation;
 import org.eclipse.core.commands.operations.OperationHistoryEvent;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -102,7 +102,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 			   IPropertyChangeListener
 {		
 	/**The min number of process units you can zoom in.*/
-    private final static int MIN_PROC_DISP = 1;
+    private static final int MIN_PROC_DISP = 1;
 	
 	private final IEventBroker eventBroker;
 
@@ -110,7 +110,8 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	protected SpaceTimeDataController stData;
 		
 	/** The top-left and bottom-right point that you selected.*/
-	final private Point selectionTopLeft, selectionBottomRight;
+	private final Point selectionTopLeft;
+	private final Point selectionBottomRight;
 	
 	private final IEclipseContext context;
 	private final ITracePart 	  tracePart;
@@ -154,16 +155,11 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		selectionBottomRight = new Point(0,0);
 		stData  = null;
 		
-		initMouseSelection();
+		initSelectionRectangle();
 		
 		formatTime = new DecimalFormat("###,###,###.##");
 	}
 
-
-	private void initMouseSelection()
-	{
-		initSelectionRectangle();
-	}
 	
 	/*****
 	 * set new database and refresh the screen
@@ -219,7 +215,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		addPaintListener(this);
 		
 		keyListener = new KeyListener(){
-			public void keyPressed(KeyEvent e) {}
+			public void keyPressed(KeyEvent e) { /* unused */ }
 
 			public void keyReleased(KeyEvent e) {
 				switch (e.keyCode) {
@@ -235,7 +231,10 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 					break;
 				case SWT.ARROW_RIGHT:
 					goRight();
-					break;				
+					break;
+				default:
+					// do nothing for other keys
+					break;
 				}
 			}			
 		};
@@ -259,28 +258,28 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	 * Sets the bounds of the data displayed on the detail canvas to be those 
 	 * specified by the zoom operation and adjusts everything accordingly.
 	 *************************************************************************/
-	public void zoom(long _topLeftTime, int _topLeftProcess, long _bottomRightTime, int _bottomRightProcess)
+	public void zoom(long topLeftTime, int topLeftProcess, long bottomRightTime, int bottomRightProcess)
 	{
 		final TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
-		attributes.setTime(_topLeftTime, _bottomRightTime);
+		attributes.setTime(topLeftTime, bottomRightTime);
 		attributes.assertTimeBounds(stData.getTimeWidth());
 		
-		attributes.setProcess(_topLeftProcess, _bottomRightProcess);
+		attributes.setProcess(topLeftProcess, bottomRightProcess);
 		attributes.assertProcessBounds(stData.getTotalTraceCount());
 		
 		final long numTimeDisplayed = this.getNumTimeUnitDisplayed();
 		if (numTimeDisplayed < Constants.MIN_TIME_UNITS_DISP)
 		{
-			long begTime = _topLeftTime + (numTimeDisplayed - Constants.MIN_TIME_UNITS_DISP) / 2;
-			long endTime = _topLeftTime + Constants.MIN_TIME_UNITS_DISP;
+			long begTime = topLeftTime + (numTimeDisplayed - Constants.MIN_TIME_UNITS_DISP) / 2;
+			long endTime = topLeftTime + Constants.MIN_TIME_UNITS_DISP;
 			attributes.setTime(begTime, endTime);
 		}
 		
 		final double numProcessDisp = this.getNumProcessesDisplayed();
 		if (numProcessDisp < MIN_PROC_DISP)
 		{
-			int endProcess = _topLeftProcess + MIN_PROC_DISP;
-			attributes.setProcess(_topLeftProcess, endProcess );
+			int endProcess = topLeftProcess + MIN_PROC_DISP;
+			attributes.setProcess(topLeftProcess, endProcess );
 		}
 
 		updateButtonStates();
@@ -308,6 +307,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	 * (basically when anything at all is changed anywhere on the application 
 	 * OR when redraw() is called).
 	 ******************************************************************************/
+	@Override
 	public void paintControl(PaintEvent event)
 	{	
 		if (this.stData == null)
@@ -508,7 +508,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 
 		double xMid = attributes.getTimeBegin() + (attributes.getTimeInterval() * 0.5);
 		
-		final double td2 = (double)(this.getNumTimeUnitDisplayed() * SCALE); 
+		final double td2 = (this.getNumTimeUnitDisplayed() * SCALE); 
 		long t2 = (long) Math.ceil( Math.min( stData.getTimeWidth(), xMid + td2) );
 		final double td1 = (long)(this.getNumTimeUnitDisplayed() * SCALE);
 		long t1 = (long) Math.floor( Math.max(0, xMid - td1) );
@@ -571,9 +571,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	/**************************************************************************
 	 * Sets up the labels (the ones below the detail canvas).
 	 **************************************************************************/
-	public void setLabels(Composite _labelGroup)
+	public void setLabels(Composite groupOfLabels)
     {
-		labelGroup = _labelGroup;
+		labelGroup = groupOfLabels;
 
 		GridLayoutFactory.fillDefaults().numColumns(4).generateLayout(labelGroup);
 		GridDataFactory.fillDefaults().grab(true, false).
@@ -596,11 +596,6 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 			restoreMessage = new MessageLabelManager(getDisplay(), messageLabel);
 		
 		restoreMessage.showWarning(message);
-	}
-	
-	private void clearMessage() {
-  		if (restoreMessage != null)
-  			restoreMessage.clear();
 	}
 	
 	/**************************************************************************
@@ -661,9 +656,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
         	// sequential program. No process range display is needed
         	return;
 
-        int proc_start = attributes.getProcessBegin();
-        if (proc_start < 0 || proc_start >= listIdTuples.size())
-        	proc_start = 0;
+        int procStart = attributes.getProcessBegin();
+        if (procStart < 0 || procStart >= listIdTuples.size())
+        	procStart = 0;
         
         // -------------------------------------------------------------------------------------------------
         // bug fix: since the end of the process is the ceiling of the selected region,
@@ -671,16 +666,14 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
         //			we need to decrement the value of max process (in the range).
         // WARN: the display of process range should be then between inclusive min and inclusive max
         //
-        // TODO: we should fix the rendering to inclusive min and inclusive max, otherwise it is too much
-        //		 headache to maintain
         // -------------------------------------------------------------------------------------------------
-        int proc_end   = attributes.getProcessEnd() - 1;
-        if (proc_end>=listIdTuples.size())
-        	proc_end = listIdTuples.size()-1;
+        int procEnd   = attributes.getProcessEnd() - 1;
+        if (procEnd>=listIdTuples.size())
+        	procEnd = listIdTuples.size()-1;
         
         IdTupleType type = stData.getExperiment().getIdTupleType();
-        processLabel.setText("Rank Range: [" + listIdTuples.get(proc_start).toString(type) 
-        									 + ", " + listIdTuples.get(proc_end).toString(type) 
+        processLabel.setText("Rank Range: [" + listIdTuples.get(procStart).toString(type) 
+        									 + ", " + listIdTuples.get(procEnd).toString(type) 
         									 + "]");
         processLabel.setSize(processLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
@@ -807,7 +800,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
     			UIEvents.ALL_ELEMENT_ID);	
     }
     
-	final static private double SCALE_MOVE = 0.20;
+	private static final double SCALE_MOVE = 0.20;
     
 	/***
 	 * go to the left one step
@@ -943,10 +936,10 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		while(!validSaveFileFound)
 		{
 			Frame toSave = stData.getTraceDisplayAttribute().getFrame();
-			saveDialog.setFileName( (int)toSave.begTime      + "-"  + 
-									(int)toSave.endTime      + ", " +
-									(int)toSave.begProcess   + "-"  +
-									(int)toSave.endProcess   + ".bin");
+			saveDialog.setFileName( (int)toSave.begTime + "-"  + 
+									(int)toSave.endTime + ", " +
+									toSave.begProcess   + "-"  +
+									toSave.endProcess   + ".bin");
 			fileName = saveDialog.open();
 			
 			if (fileName == null)
@@ -958,9 +951,6 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 				else
 				{
 					//open message box confirming whether or not they want to overwrite saved file
-					//if they select yes, validSaveFileFound = true;
-					//if they select no, validSaveFileFound = false;
-
 					validSaveFileFound = MessageDialog.openConfirm(
 											getShell(), 
 											"File exists", 
@@ -1065,8 +1055,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
     	long closeTime = attributes.getTimeBegin() + (long)(mouseDown.x / getScalePixelsPerTime());
     	
     	if (closeTime > attributes.getTimeEnd()) {
-    		System.err.println("ERR STDC SCSSample time: " + closeTime +" max time: " + 
-    				attributes.getTimeEnd() + "\t new: " + ((attributes.getTimeBegin() + attributes.getTimeEnd()) >> 1));
+    		// impossible to happen unless there's a data race issue
     		closeTime = (attributes.getTimeBegin() + attributes.getTimeEnd()) >> 1;
     	}
 
@@ -1087,7 +1076,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 
 	// remove queue of jobs because it causes deadlock 
 	// 
-	final private ConcurrentLinkedQueue<BaseViewPaint> queue = new ConcurrentLinkedQueue<>();
+	private final ConcurrentLinkedQueue<BaseViewPaint> queue = new ConcurrentLinkedQueue<>();
 	
 	/*********************************************************************************
 	 * Refresh the content of the canvas with new input data or boundary or parameters
@@ -1095,7 +1084,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	 *  @param refreshData boolean whether we need to refresh and read again the data or not
 	 *********************************************************************************/
 	public void refresh(boolean refreshData) {
-		//Debugger.printTrace("STDC rebuffer");
+
 		//Okay, so here's how this works. In order to draw to an Image (the Eclipse kind)
 		//you need to draw to its GC. So, we have this bufferImage that we draw to, so
 		//we get its GC (bufferGC), and then pass that GC to paintViewport, which draws
@@ -1165,7 +1154,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 																numLines, changedBounds, this); 
 
 		DetailPaintJobChangeListener listener = new DetailPaintJobChangeListener(
-														detailPaint, view.height, 
+														detailPaint, 
 														imageOrig,   imageFinal, 
 														bufferGC,    origGC, 
 														changedBounds);
@@ -1184,60 +1173,10 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 
 	private void cancelJobs() {
   		if (!queue.isEmpty()) {
-  			queue.stream().forEach(job -> {
-				// a job cannot be terminated.
-				// this is fine, we should wait until it terminates or
-				// response that it will cancel in the future
-  				job.cancel();
-  			});
+  			queue.stream().forEach(Job::cancel);
 		}
 	}
 	
-	private void donePainting(Image imageOrig, Image imageFinal, 
-							  int imageHeight, int viewHeight, 
-							  boolean refreshData)
-	{		
-		initBuffer();
-		setBuffer( imageFinal );
-		
-		// in case of filter, we may need to change the cursor position
-		if (refreshData) {
-			final List<IdTuple> list = stData.getBaseData().getListOfIdTuples(IdTupleOption.BRIEF);
-			final Position p = stData.getTraceDisplayAttribute().getPosition();
-			
-			if (p.process > list.size()-1) {
-				// out of range: need to change the cursor position
-				Position new_p = new Position( p.time, list.size() >> 1 );
-				notifyChangePosition(new_p);
-			}
-		}
-
-		// -----------------------------------------------------------------------
-		// notify to all other views that a new image has been created,
-		//	and it needs to refresh the view
-		// issue #112: Ideally we should send the "original" image to other views so that
-		// 			   they can compute the statistics correctly. However, when the original
-		//             image doesn't fit to the canvas, some lines (like white lines) are
-		// 			   overlapped with other lines. this makes the summary doesn't represent
-		//             the main view.
-		// 
-		// -----------------------------------------------------------------------
-		int deviceZoom = DPIUtil.getDeviceZoom();
-		ImageData imgData = imageOrig.getImageData(deviceZoom);
-		final double yscale = Math.max(getScalePixelsPerRank(), 1);		
-		
-		// if the original image doesn't fit the screen, we just use the final image.
-		// This is not a good solution, but it at least makes the summary view appears the 
-		// same as the main view.
-		//
-		if (yscale < BaseTimelineThread.MIN_HEIGHT_FOR_SEPARATOR_LINES)
-			imgData = imageFinal.getImageData(deviceZoom);
-		
-		notifyChangeBuffer(imgData);
-		
-		updateButtonStates();
-		clearMessage();
-	}
 	
 	
 	@Override
@@ -1281,8 +1220,8 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	private void notifyChanges(String label, Frame frame) 
 	{
 		String sLabel = (label == null ? "Set region" : label);
-		IUndoContext context = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_TRACE);
-		ZoomOperation opZoom = new ZoomOperation(stData, sLabel, frame, context);
+		IUndoContext contextTraceOp = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_TRACE);
+		ZoomOperation opZoom = new ZoomOperation(stData, sLabel, frame, contextTraceOp);
 
 		// forces all other views to refresh with the new region
 		try {
@@ -1301,8 +1240,8 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	 ***********************************************************************************/
 	private void notifyChangePosition(Position position) 
 	{
-		IUndoContext context = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_POSITION);
-		PositionOperation op = new PositionOperation(stData, position, context);
+		IUndoContext contextPositionOp = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_POSITION);
+		PositionOperation op = new PositionOperation(stData, position, contextPositionOp);
 		try {
 			tracePart.getOperationHistory().execute( op, null, null);
 		} catch (ExecutionException e) {
@@ -1310,26 +1249,6 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		}
 	}
 	
-	/***********************************************************************************
-	 * Notify other views (especially summary view) that we have changed the buffer.
-	 * The other views need to refresh the display if needed.
-	 * 
-	 * @param imageData
-	 ***********************************************************************************/
-	private void notifyChangeBuffer(ImageData imageData)
-	{
-		// -----------------------------------------------------------------------
-		// notify to SummaryView that a new image has been created,
-		//	and it needs to refresh the view
-		// -----------------------------------------------------------------------
-		IUndoContext context = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_BUFFER);
-		BufferRefreshOperation brOp = new BufferRefreshOperation(stData, imageData, context);
-		try {
-			tracePart.getOperationHistory().execute(brOp, null, null);
-		} catch (ExecutionException e) {
-			e.printStackTrace();
-		}
-	}
 
 	//-----------------------------------------------------------------------------------------
 	// Part for handling operation triggered from other views
@@ -1360,7 +1279,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 			switch (type)
 			{
 			case OperationHistoryEvent.ABOUT_TO_EXECUTE:
-			case OperationHistoryEvent.ABOUT_TO_REDO:
+			case OperationHistoryEvent.ABOUT_TO_REDO: 
 			case OperationHistoryEvent.ABOUT_TO_UNDO:
 				historyOperation.setOperation(operation);
 				
@@ -1377,17 +1296,11 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 				}
 				break;
 			}
-		} else if (operation.hasContext(tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_BUFFER))) {
-			if (event.getEventType() == OperationHistoryEvent.DONE) {
-				// this event is triggered by non ui-thread
-				// we need to ask ui thread to execute it
-				Display.getDefault().asyncExec(new Runnable() {					
-					@Override
-					public void run() {
-						adjustLabels();
-					}
-				});
-			}
+		} else if ((event.getEventType() == OperationHistoryEvent.DONE) && 
+				    operation.hasContext(tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_BUFFER))) {
+			// this event is triggered by non ui-thread
+			// we need to ask ui thread to execute it
+			Display.getDefault().asyncExec(() -> adjustLabels() );
 		}
 	}
 	
@@ -1500,13 +1413,12 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	private class DetailPaintJobChangeListener extends JobChangeAdapter
 	{
 		private final DetailViewPaint detailPaint;
-		private final Image imageOrig, imageFinal;
+		private final Image imageOrig;
+		private final Image imageFinal;
 		private final boolean changedBounds;
-		private final GC bufferGC, origGC;
-		private final int viewHeight;
-		
+		private final GC bufferGC;
+		private final GC origGC;
 		public DetailPaintJobChangeListener( DetailViewPaint detailPaint, 
-											 int viewHeight,
 											 Image imageOrig, 
 											 Image imageFinal,
 											 GC bufferGC, 
@@ -1514,17 +1426,11 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 											 boolean changedBounds) {
 
 			this.detailPaint = detailPaint;
-			this.viewHeight  = viewHeight;
 			this.imageOrig   = imageOrig;
 			this.imageFinal  = imageFinal;
 			this.bufferGC    = bufferGC;
 			this.origGC      = origGC;
 			this.changedBounds = changedBounds;
-		}
-		
-		@Override
-		public void aboutToRun(IJobChangeEvent event) {
-			Instant.now().toEpochMilli();
 		}
 
 		
@@ -1536,7 +1442,6 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 				
 				if (event.getResult() == Status.OK_STATUS) {
 					donePainting(imageOrig, imageFinal, 
-								 detailPaint.getNumberOfLines(), viewHeight, 
 								 changedBounds);
 					
 				} else if (event.getResult() == Status.CANCEL_STATUS) {
@@ -1551,7 +1456,78 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 				origGC.dispose();
 				imageOrig.dispose();
 			});
-		}		
+		}	
+		
+		private void donePainting(Image imageOrig, Image imageFinal, 
+				  boolean refreshData)
+		{
+			initBuffer();
+			setBuffer( imageFinal );
+			
+			// in case of filter, we may need to change the cursor position
+			if (refreshData) {
+			final List<IdTuple> list = stData.getBaseData().getListOfIdTuples(IdTupleOption.BRIEF);
+			final Position p = stData.getTraceDisplayAttribute().getPosition();
+			
+			if (p.process > list.size()-1) {
+				// out of range: need to change the cursor position
+				Position newPosition = new Position( p.time, list.size() >> 1 );
+				notifyChangePosition(newPosition);
+			}
+			}
+			
+			// -----------------------------------------------------------------------
+			// notify to all other views that a new image has been created,
+			//	and it needs to refresh the view
+			// issue #112: Ideally we should send the "original" image to other views so that
+			// 			   they can compute the statistics correctly. However, when the original
+			//             image doesn't fit to the canvas, some lines (like white lines) are
+			// 			   overlapped with other lines. this makes the summary doesn't represent
+			//             the main view.
+			// 
+			// -----------------------------------------------------------------------
+			int deviceZoom = DPIUtil.getDeviceZoom();
+			ImageData imgData = imageOrig.getImageData(deviceZoom);
+			final double yscale = Math.max(getScalePixelsPerRank(), 1);		
+			
+			// if the original image doesn't fit the screen, we just use the final image.
+			// This is not a good solution, but it at least makes the summary view appears the 
+			// same as the main view.
+			//
+			if (yscale < BaseTimelineThread.MIN_HEIGHT_FOR_SEPARATOR_LINES)
+				imgData = imageFinal.getImageData(deviceZoom);
+			
+			notifyChangeBuffer(imgData);
+			
+			updateButtonStates();
+			clearMessage();
+		}
+		
+		/***********************************************************************************
+		 * Notify other views (especially summary view) that we have changed the buffer.
+		 * The other views need to refresh the display if needed.
+		 * 
+		 * @param imageData
+		 ***********************************************************************************/
+		private void notifyChangeBuffer(ImageData imageData)
+		{
+			// -----------------------------------------------------------------------
+			// notify to SummaryView that a new image has been created,
+			//	and it needs to refresh the view
+			// -----------------------------------------------------------------------
+			IUndoContext contextBufferOp = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_BUFFER);
+			BufferRefreshOperation brOp = new BufferRefreshOperation(stData, imageData, contextBufferOp);
+			try {
+				tracePart.getOperationHistory().execute(brOp, null, null);
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		private void clearMessage() {
+	  		if (restoreMessage != null)
+	  			restoreMessage.clear();
+		}
 	}
 	
 
@@ -1568,15 +1544,14 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		public void rebuffering() {
 			// force the paint to refresh the data			
 			final TraceDisplayAttribute attr = stData.getTraceDisplayAttribute();
-			IUndoContext context = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_RESIZE);
+			IUndoContext contextResizeOp = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_RESIZE);
 			
 			try {
 				tracePart.getOperationHistory().execute(
-						new WindowResizeOperation(stData, attr.getFrame(), context), null, null);
+						new WindowResizeOperation(stData, attr.getFrame(), contextResizeOp), null, null);
 			} catch (ExecutionException e) {
 				e.printStackTrace();
 			}
-			//notifyChanges("Resize", attr.getFrame() );
 		}
 	}
 
