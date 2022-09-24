@@ -125,7 +125,12 @@ public class DataSummaryTest {
 	public void testHasGPU() {
 		for(var profile: dataProfiles) {
 			boolean gpu = profile.hasGPU();
-			assertFalse(gpu);
+			
+			var idtuples = profile.getIdTuple();
+			var idttypes = profile.getIdTupleType();
+			boolean isgpu = idtuples.stream().anyMatch(idt -> idt.isGPU(idttypes));
+			
+			assertEquals(gpu, isgpu);
 		}
 	}
 

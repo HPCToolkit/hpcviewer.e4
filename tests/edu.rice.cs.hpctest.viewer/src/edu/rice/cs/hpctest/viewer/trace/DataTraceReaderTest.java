@@ -57,8 +57,15 @@ class DataTraceReaderTest {
 	@Test
 	public void testIsGPU() {
 		for(var data: dataDB) {
-			assertFalse(data.hasGPU());
-			assertFalse(data.isGPU(0));
+			var types = data.getIdTupleTypes();
+			var idTuples = data.getIdTuple(IdTupleOption.COMPLETE);
+			var hasgpu   = idTuples.stream().anyMatch(idt -> idt.isGPU(types));
+			
+			assertEquals(data.hasGPU(), hasgpu);
+			
+			for(int i=0; i<idTuples.size(); i++) {
+				assertFalse(data.isGPU(i) != idTuples.get(i).isGPU(types));
+			}
 		}
 	}
 
