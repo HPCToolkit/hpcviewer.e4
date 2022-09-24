@@ -389,9 +389,11 @@ public class ScopeContextFactory
 		var cs = new CallSiteScope(ls, procScope, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, flatId);
 		cs.setRootScope(rootCCT);
 		
-		// Only the line statement knows where the source file is
-		// If the line statement is unknown then the source file is unknown.
-		cs.setSourceFile(ls.getSourceFile());
+		// Issue #237: when a user clicks the name of the procedure, we should show
+		// the procedure declaration, not the call site.
+		// Similarly, we mark a call site node has the file source if the procedure
+		// has the file available. So we should identify a call site node with its procedure.
+		cs.setSourceFile(procScope.getSourceFile());
 		
 		return cs;
 	}
