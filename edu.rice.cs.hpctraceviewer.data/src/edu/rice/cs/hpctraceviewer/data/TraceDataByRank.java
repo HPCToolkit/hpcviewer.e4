@@ -402,15 +402,16 @@ public class TraceDataByRank implements ITraceDataCollector
 				predicted_index = Math.min((right_index - (long) ((right_time - time) / rate)), right_index); 
 			}
 			
-			// adjust so that the predicted index differs from both ends
-			// except in the case where the interval is of length only 1
-			// this helps us achieve the convergence condition
+			// adjust predicted_index so that it differs from the endpoints.
+			// without that, the search may fail to converge.
 			if (predicted_index <= left_index) 
 				predicted_index = left_index + 1;
+
 			if (predicted_index >= right_index)
 				predicted_index = right_index - 1;
 
 			long temp = data.getLong(getAbsoluteLocation(predicted_index));
+
 			if (time >= temp) {
 				left_index = predicted_index;
 				left_time = temp;
@@ -419,20 +420,10 @@ public class TraceDataByRank implements ITraceDataCollector
 				right_time = temp;
 			}
 		}
+
 		long left_offset = getAbsoluteLocation(left_index);
-		long right_offset = getAbsoluteLocation(right_index);
 
-		left_time = data.getLong(left_offset);
-		right_time = data.getLong(right_offset);
-
-		// return the closer sample or the maximum sample if the 
-		// time is at or beyond the right boundary of the interval
-		final boolean is_left_closer = Math.abs(time - left_time) < Math.abs(right_time - time);
-		long maxloc = data.getMaxLoc(rank);
-		
-		if ( is_left_closer ) return left_offset;
-		else if (right_offset < maxloc) return right_offset;
-		else return maxloc;
+		return left_offset;
 	}
 	
 	private long getAbsoluteLocation(long relativePosition)
