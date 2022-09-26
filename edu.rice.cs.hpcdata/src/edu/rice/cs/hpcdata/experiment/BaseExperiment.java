@@ -253,13 +253,11 @@ public abstract class BaseExperiment implements IExperiment
 	 */
 	public void reopen() throws Exception
 	{
-		if (databaseRepresentation != null)
-		{
-			databaseRepresentation.open(this);
-			open_finalize();
-		} else {
+		if (databaseRepresentation == null)
 			throw new IOException("Database has not been opened.");
-		}
+		
+		databaseRepresentation.open(this);
+		open_finalize();
 	}
 
 	

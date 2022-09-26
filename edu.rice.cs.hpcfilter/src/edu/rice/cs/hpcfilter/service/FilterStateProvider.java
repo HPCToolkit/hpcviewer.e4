@@ -14,6 +14,8 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
+import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
+import edu.rice.cs.hpcdata.experiment.scope.visitors.TraceScopeVisitor;
 
 /**************************************************************
  * 
@@ -80,9 +82,25 @@ public class FilterStateProvider
 					}
 				}
 				// ---------------------------------------
-				// filtering 
+				// reopening the database 
 				// ---------------------------------------
 				experiment.reopen();
+				
+				// ---------------------------------------
+				// recompute the trace id and the max depth
+				// needs to gather info about cct id and its depth
+				// this is needed for traces
+				// ---------------------------------------
+				var rootCCT = experiment.getRootScope(RootScopeType.CallingContextTree);
+				TraceScopeVisitor visitor = new TraceScopeVisitor();
+				rootCCT.dfsVisitScopeTree(visitor);
+				
+				experiment.setMaxDepth(visitor.getMaxDepth());
+				experiment.setScopeMap(visitor.getCallPath());
+
+				// ---------------------------------------
+				// filtering 
+				// ---------------------------------------
 				experiment.filter(FilterMap.getInstance());
 				
 				// ---------------------------------------
