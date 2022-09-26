@@ -382,6 +382,9 @@ public class TraceDataByRank implements ITraceDataCollector
 	 ********************************************************************************/
 	private long findTimeInInterval(long time, long left_boundary_offset, long right_boundary_offset) throws IOException
 	{
+	        boolean debug_search = false;
+	        if (debug_search) System.err.printf("findTimeInInterval: %d with index range [%d, %d]\n", time, left_boundary_offset, right_boundary_offset);
+
 		if (left_boundary_offset == right_boundary_offset) return left_boundary_offset;
 
 		long left_index = getRelativeLocation(left_boundary_offset);
@@ -390,6 +393,8 @@ public class TraceDataByRank implements ITraceDataCollector
 		long left_time  = data.getLong(left_boundary_offset);
 		long right_time = data.getLong(right_boundary_offset);
 		
+		if (debug_search) System.err.printf("findTimeInInterval: %d with time range [%d, %d]\n", time, left_time, right_time);
+
 		// apply "Newton's method" to find target time
 		while (right_index - left_index > 1) {
 			long predicted_index;
@@ -402,15 +407,21 @@ public class TraceDataByRank implements ITraceDataCollector
 				predicted_index = Math.min((right_index - (long) ((right_time - time) / rate)), right_index); 
 			}
 			
-			// adjust so that the predicted index differs from both ends
-			// except in the case where the interval is of length only 1
-			// this helps us achieve the convergence condition
+			if (debug_search) System.err.printf("newton predicted index = %d\n", predicted_index);
+
+			// adjust predicted_index so that it differs from the endpoints.
+			// without that, the search may fail to converge.
 			if (predicted_index <= left_index) 
 				predicted_index = left_index + 1;
+
 			if (predicted_index >= right_index)
 				predicted_index = right_index - 1;
 
+			if (debug_search) System.err.printf("adjusted predicted index = %d\n", predicted_index);
+
 			long temp = data.getLong(getAbsoluteLocation(predicted_index));
+
+			if (debug_search) System.err.printf("before: indices [%d, %d] time interval [%d, %d] target time = %d rel: [%d, %d] , rate = %f predicted_time = %d\n", left_index, right_index, left_time, right_time, time, temp - left_time, right_time - temp, rate, temp); 
 			if (time >= temp) {
 				left_index = predicted_index;
 				left_time = temp;
@@ -418,8 +429,13 @@ public class TraceDataByRank implements ITraceDataCollector
 				right_index = predicted_index;
 				right_time = temp;
 			}
+			if (debug_search) System.err.printf("after: indices [%d, %d] time interval [%d, %d] target time = %d, rate = %f\n", left_index, right_index, left_time, right_time, time, rate);  
 		}
+
 		long left_offset = getAbsoluteLocation(left_index);
+		return left_offset;
+
+		/*
 		long right_offset = getAbsoluteLocation(right_index);
 
 		left_time = data.getLong(left_offset);
@@ -430,9 +446,11 @@ public class TraceDataByRank implements ITraceDataCollector
 		final boolean is_left_closer = Math.abs(time - left_time) < Math.abs(right_time - time);
 		long maxloc = data.getMaxLoc(rank);
 		
+
 		if ( is_left_closer ) return left_offset;
 		else if (right_offset < maxloc) return right_offset;
 		else return maxloc;
+		*/
 	}
 	
 	private long getAbsoluteLocation(long relativePosition)
