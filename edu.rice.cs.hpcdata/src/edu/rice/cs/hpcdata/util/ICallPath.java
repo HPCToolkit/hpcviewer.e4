@@ -91,4 +91,19 @@ public interface ICallPath
 		public int   getMaxDepth();
 		public Scope getScopeAt(int depth);
 	}
+
+
+	/****
+	 * Replace a context id (or trace id) with another scope object.
+	 * This method is used when a node is filtered out (or removed) and
+	 * we want to keep its trace id by using its ancestor as the replacement.
+	 * 
+	 * @param id
+	 * 			The context id to be replaced
+	 * @param scope
+	 * 			The assigned context object (should be the ancestor)
+	 * @param depth
+	 * 			The depth of the ancestor
+	 */
+	ICallPathInfo replaceCallPath(int id, Scope scope, int depth);
 }

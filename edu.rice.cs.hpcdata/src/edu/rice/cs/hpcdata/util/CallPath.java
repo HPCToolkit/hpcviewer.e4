@@ -113,6 +113,14 @@ public class CallPath implements ICallPath
 		mapToInfo.put(id, info);
 	}
 	
+	
+	@Override
+	public ICallPathInfo replaceCallPath(int id, Scope scope, int depth) {
+		ICallPathInfo info = mapToInfo.remove(id);
+		addCallPath(id, scope, depth);
+		
+		return info;
+	}
 
 	@Override
 	public Scope getCallPathScope(int id) {

@@ -39,10 +39,12 @@ import edu.rice.cs.hpcdata.util.ICallPath;
  ******************************************************************/
 public class FilterScopeVisitor implements IScopeVisitor 
 {
-	static public final int STATUS_INIT=0, STATUS_OK = 1, STATUS_FAKE_PROCEDURE = 2; 
+	public static final int STATUS_INIT=0, STATUS_OK = 1, STATUS_FAKE_PROCEDURE = 2; 
 	
 	private final IFilterData filter;
 	private final IExperiment experiment;
+	private final ICallPath   callPathTraces;
+	
 	private List<BaseMetric> metrics = null;
 	
 	/**** flag to allow the dfs to continue to go deeper or not.  
@@ -72,7 +74,11 @@ public class FilterScopeVisitor implements IScopeVisitor
 		experiment = rootOriginalCCT.getExperiment();
 		if (experiment instanceof Experiment)
 		{
-			metrics = ((Experiment)experiment).getMetricList();
+			Experiment exp = (Experiment) experiment;
+			metrics        = exp.getMetricList();
+			callPathTraces = exp.getScopeMap();
+		} else {
+			callPathTraces = null;
 		}
 	}
 	
@@ -167,12 +173,11 @@ public class FilterScopeVisitor implements IScopeVisitor
 					if (metrics != null)
 					{
 						// glue the metrics of all the children to the scope
-						for(Object child: scope.getChildren())
+						for(var child: scope.getChildren())
 						{
 							if (!(child instanceof LineScope))
 							{
-								Scope child_scope = (Scope) child;
-								mergeMetrics(scope, child_scope, false);
+								mergeMetrics(scope, child, false);
 							}
 						}
 					}
@@ -186,7 +191,7 @@ public class FilterScopeVisitor implements IScopeVisitor
 					while (iterator.hasNext())
 					{
 						var child = iterator.next();
-						removeNode(iterator, (Scope) child, filterAttribute.filterType);
+						removeNode(iterator, child, filterAttribute.filterType);
 					}
 				} else
 				{
@@ -246,7 +251,7 @@ public class FilterScopeVisitor implements IScopeVisitor
 		// remove its children and glue it the parent
 		if (filterType == FilterAttribute.Type.Self_Only)
 		{
-			addGrandChildren(parent, vt, childToRemove);
+			addGrandChildren(parent, childToRemove);
 		}
 	}
 	
@@ -274,7 +279,8 @@ public class FilterScopeVisitor implements IScopeVisitor
 			iterator.remove();
 
 		// 2. move the trace call-path id (if exist) to the parent
-		propagateTraceID(parent, child, filterType);
+		if (experiment.getTraceAttribute().dbTimeMax > 0)
+			propagateTraceID(parent, child, filterType);
 
 		// 3. clear the child node
 		child.setParentScope(null);
@@ -284,18 +290,19 @@ public class FilterScopeVisitor implements IScopeVisitor
 	
 	
 	private void propagateTraceID(Scope parent, Scope child, FilterAttribute.Type filterType) {
-		if (filterType == FilterAttribute.Type.Self_Only)
+		if (filterType == FilterAttribute.Type.Self_Only) {
+			callPathTraces.replaceCallPath(child.getCpid(), parent, current_depth);
 			return;
+		}
 		
 		// children have been removed
 		// copy the cpid to the parent
 		CallPathTraceVisitor cptv = new CallPathTraceVisitor();
-		//cptv.map = experiment.getScopeMap();
 		cptv.parent_scope = parent;
+		cptv.callpathInfo = callPathTraces;
 		cptv.parent_depth = current_depth-1;
 		
-		//child.dfsVisitScopeTree(cptv);
-
+		child.dfsVisitScopeTree(cptv);
 	}
 	
 	
@@ -305,16 +312,15 @@ public class FilterScopeVisitor implements IScopeVisitor
 	 * @param parent
 	 * @param scope_to_remove
 	 */
-	private void addGrandChildren(Scope parent, ScopeVisitType vt, Scope scope_to_remove)
+	private void addGrandChildren(Scope parent, Scope scope_to_remove)
 	{
 		var children = scope_to_remove.getChildren();
 		if (children != null)
 		{
-			for(Object child : children)
+			for(var child : children)
 			{
-				Scope child_scope = (Scope) child;
-				parent.addSubscope(child_scope);
-				child_scope.setParentScope(parent);
+				parent.addSubscope(child);
+				child.setParentScope(parent);
 			}
 		}
 	}
@@ -470,8 +476,8 @@ public class FilterScopeVisitor implements IScopeVisitor
 		private void update(Scope scope, ScopeVisitType vt) {
 			if (vt == ScopeVisitType.PreVisit) {
 				int cpid = scope.getCpid();
-				if (cpid >= 0) {
-					callpathInfo.addCallPath(cpid, parent_scope, parent_depth);
+				if (cpid > 0) {
+					callpathInfo.replaceCallPath(cpid, parent_scope, parent_depth);
 				}
 			}
 		}
