@@ -65,7 +65,7 @@ public class FilterStateProvider
 				// ---------------------------------------
 				// conserve the added metrics
 				// ---------------------------------------
-				List<BaseMetric> metrics = new ArrayList<BaseMetric>(experiment.getMetricCount());
+				List<BaseMetric> metrics = new ArrayList<>(experiment.getMetricCount());
 
 				for (BaseMetric metric : experiment.getMetricList()) {
 					if (metric instanceof DerivedMetric && 
@@ -74,7 +74,7 @@ public class FilterStateProvider
 						// only add user derived metrics, not all derived metrics
 						//  provided by hpcprof
 						
-						metrics.add((DerivedMetric) metric);
+						metrics.add(metric);
 					} else {
 						metrics.add(metric.duplicate());
 					}

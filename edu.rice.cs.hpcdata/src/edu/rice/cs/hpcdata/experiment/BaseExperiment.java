@@ -373,7 +373,7 @@ public abstract class BaseExperiment implements IExperiment
 			return 0;
 		
 		// TODO :  we assume the first child is the CCT
-		final RootScope rootCCT = (RootScope) getRootScope(RootScopeType.CallingContextTree);
+		final RootScope rootCCT = getRootScope(RootScopeType.CallingContextTree);
 
 		// duplicate and filter the cct
 		FilterScopeVisitor visitor = new FilterScopeVisitor(rootCCT, filter);
