@@ -56,7 +56,7 @@ public class FilterStateProvider
 	 * @param experiment
 	 * @return Experiment itself (if changed)
 	 */
-	static public Experiment filterExperiment(Experiment experiment) {
+	public static Experiment filterExperiment(Experiment experiment) {
 		// filter the experiment if it is not null and it is in original form
 		// (it isn't a merged database)
 		if (experiment != null && !experiment.isMergedDatabase()) 

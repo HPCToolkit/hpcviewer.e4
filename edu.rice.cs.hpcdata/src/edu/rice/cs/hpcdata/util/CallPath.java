@@ -10,6 +10,11 @@ import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
+/*****************************************
+ * 
+ * Implementation of {@link ICallPath}
+ *
+ *****************************************/
 public class CallPath implements ICallPath
 {
 	private final IntObjectHashMap<Info> mapToInfo;
