@@ -361,6 +361,7 @@ public abstract class BaseExperiment implements IExperiment
 	/*****
 	 * disposing the experiment resources.
 	 */
+	@Override
 	public void dispose()
 	{
 		if (rootScope != null)

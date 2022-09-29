@@ -194,4 +194,10 @@ public interface IExperiment {
 	 * @return
 	 */
 	int getTraceDataVersion();
+	
+	
+	/****
+	 * Free the allocated resources since GC is not smart enough.
+	 */
+	public void dispose();	
 }
