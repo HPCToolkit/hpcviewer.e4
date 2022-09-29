@@ -38,4 +38,22 @@
   <module>edu.rice.cs.hpcviewer.product</module>
   <module>tests</module>
  </modules>
+ <build>
+  <plugins>
+   <plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-pmd-plugin</artifactId>
+    <version>3.19.0</version>
+    <configuration>
+     <linkXref>false</linkXref>
+     <targetJdk>11</targetJdk>
+     <excludes>
+      <exclude>com/graphbuilder/**/*.java</exclude>
+      <exclude>org/swtchart/**/*.java</exclude>
+      <exclude>org/swtchart/ext/**/*.java</exclude>
+     </excludes>
+    </configuration>
+   </plugin>
+  </plugins>
+ </build>
 </project>
