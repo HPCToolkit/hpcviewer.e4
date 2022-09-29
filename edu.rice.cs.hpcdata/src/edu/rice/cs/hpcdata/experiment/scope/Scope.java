@@ -124,7 +124,7 @@ implements IMetricScope
 	 *	Creates a Scope object with associated source line range.
 	 ************************************************************************/
 
-	public Scope(RootScope root, SourceFile file, int first, int last, int cct_id, int flat_id)
+	protected Scope(RootScope root, SourceFile file, int first, int last, int cct_id, int flat_id)
 	{
 		// creation arguments
 		this.root       = root;
@@ -139,11 +139,17 @@ implements IMetricScope
 		listScopeReduce = FastList.newList();
 	}
 
-
-	public Scope(RootScope root, SourceFile file, int first, int last, int cct_id, int flat_id, int cpid)
+	
+	/*************************************************************************
+	 * Creates a Scope object with associated source file.
+	 * 
+	 * @param root
+	 * @param file
+	 * @param scopeID
+	 ************************************************************************/
+	protected Scope(RootScope root, SourceFile file, int scopeID)
 	{
-		this(root, file, first, last, cct_id, flat_id);
-		this.cpid = cpid;
+		this(root, file, Scope.NO_LINE_NUMBER, Scope.NO_LINE_NUMBER, scopeID, scopeID);
 	}
 
 
@@ -153,15 +159,6 @@ implements IMetricScope
 	
 	public List<Scope> getScopeReduce() {
 		return listScopeReduce;
-	}
-	
-	/*************************************************************************
-	 *	Creates a Scope object with associated source file.
-	 ************************************************************************/
-
-	public Scope(RootScope root, SourceFile file, int scopeID)
-	{
-		this(root, file, Scope.NO_LINE_NUMBER, Scope.NO_LINE_NUMBER, scopeID, scopeID);
 	}
 
 	/***
@@ -277,6 +274,8 @@ implements IMetricScope
 
 	/*************************************************************************
 	 * Returns which processor was active
+	 * 
+	 * @return the trace context id
 	 ************************************************************************/
 
 	public int getCpid()
@@ -286,12 +285,16 @@ implements IMetricScope
 
 
 	/*************************************************************************
-	 *	Sets the value of the cpid
+	 * Sets the value of the cpid
+	 * 
+	 * @param cpid
+	 * 		The trace context id
+	 * 
 	 ************************************************************************/
 
-	public void setCpid(int _cpid)
+	public void setCpid(int cpid)
 	{
-		this.cpid = _cpid;
+		this.cpid = cpid;
 	}
 
 	/*************************************************************************
