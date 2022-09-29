@@ -330,12 +330,11 @@ implements IMetricScope
 	public static int generateFlatID(int lexicalType, int lmId, int fileId, int procId, int line) {
 		// linearize the flat id. This is not sufficient and causes collisions for large and complex source code
 		// This needs to be computed more reliably.
-		int flatId = lexicalType << 28 |
+		return lexicalType << 28 |
 					 lmId        << 24 |
 					 fileId      << 16 | 
 					 procId      << 8  | 
 					 line;
-		return flatId;
 	}
 
 
@@ -489,6 +488,9 @@ implements IMetricScope
 
 	public Scope getParentScope()
 	{
+		if (node == null)
+			return null;
+		
 		return node.getParent();
 	}
 
@@ -807,7 +809,9 @@ implements IMetricScope
 		if (metrics == null)
 		{
 			try {
-				metrics = root.getMetricValueCollection();
+				metrics = (this instanceof RootScope ? 
+								((RootScope)this).getMetricValueCollection() :
+									root.getMetricValueCollection());
 			} catch (IOException e) {
 				RuntimeException e2 = new RuntimeException(e.getMessage());
 				e2.setStackTrace(e.getStackTrace());
@@ -889,12 +893,21 @@ implements IMetricScope
 	 */
 	public void dispose()
 	{
+		if (getSubscopeCount() > 0)
+			for(var child: getChildren()) {
+				child.dispose();
+			}
 		root 		= null;
 		metrics 	= null;
 		sourceFile  = null;
+		
+		if (listScopeReduce != null)
+			listScopeReduce.clear();
+		
+		node.setParent(null);
 		node        = null;
 	}
-
+	
 
 	/****
 	 * Retrieve the list of all children.

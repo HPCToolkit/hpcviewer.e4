@@ -89,19 +89,6 @@ public class AggregateMetric extends AbstractMetricWithFormula
 	}
 	
 	
-	/*********
-	 * initialize the metric.
-	 * THIS METHOD HAS TO BE CALLED before asking the value
-	 * @param type
-	 * @param exp
-	 *******/
-	public void init(BaseExperimentWithMetrics exp) {
-		this.finalizeVarMap.setMetricManager((Experiment)exp);
-		this.combineVarMap.setMetricManager((Experiment)exp);
-	}
-	
-	
-	
 	/******
 	 * combining the metric from another view (typically cct) to this view
 	 * if the target metric is not available (or empty) then we initialize it with

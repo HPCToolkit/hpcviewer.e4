@@ -346,13 +346,12 @@ public abstract class BaseExperiment implements IExperiment
 	 */
 	public void dispose()
 	{
-		if (rootScope != null) {
-			DisposeResourcesVisitor visitor = new DisposeResourcesVisitor();
-			rootScope.dfsVisitScopeTree(visitor);
-		}
-		rootScope = null;
+		if (rootScope != null)
+			rootScope.dispose();
 		
-		datacentricRootScope   = null;
+		if (datacentricRootScope != null)
+			datacentricRootScope   = null;
+		
 		databaseRepresentation = null;
 	}
 
@@ -448,8 +447,8 @@ public abstract class BaseExperiment implements IExperiment
 	 * @param rootCCT
 	 * @param filter
 	 ************************************************************************/
-	abstract protected void filter_finalize(RootScope rootMain, IFilterData filter);
+	protected abstract void filter_finalize(RootScope rootMain, IFilterData filter);
 
-	abstract protected void open_finalize();
+	protected abstract void open_finalize();
 }
  

@@ -244,14 +244,13 @@ public class FilterScopeVisitor implements IScopeVisitor
 	 */
 	private void removeChild(Iterator<Scope> iterator, Scope childToRemove, ScopeVisitType vt, FilterAttribute.Type filterType)
 	{
-		// skip to current scope
-		Scope parent = removeNode(iterator, childToRemove, filterType);
-		
 		// remove its children and glue it the parent
 		if (filterType == FilterAttribute.Type.Self_Only)
 		{
-			addGrandChildren(parent, childToRemove);
+			addGrandChildren(childToRemove.getParentScope(), childToRemove);
 		}
+		// skip to current scope
+		removeNode(iterator, childToRemove, filterType);		
 	}
 	
 
@@ -270,19 +269,20 @@ public class FilterScopeVisitor implements IScopeVisitor
 	 * @see FilterAttribute.Type
 	 */
 	private Scope removeNode(Iterator<Scope> iterator, Scope child, FilterAttribute.Type filterType) {
-		// 1. remove the child node
 		Scope parent = child.getParentScope();
+
+		// move the trace call-path id (if exist) to the parent
+		if (experiment.getTraceAttribute().dbTimeMax > 0)
+			propagateTraceID(parent, child, filterType);
+
+		// remove the child node
 		if (iterator == null)
 			parent.remove(child);
 		else
 			iterator.remove();
 
-		// 2. move the trace call-path id (if exist) to the parent
-		if (experiment.getTraceAttribute().dbTimeMax > 0)
-			propagateTraceID(parent, child, filterType);
-
-		// 3. clear the child node
-		child.setParentScope(null);
+		// clear the child node
+		child.dispose();
 		
 		return parent;
 	}
