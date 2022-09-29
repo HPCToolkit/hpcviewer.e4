@@ -2,6 +2,9 @@ package edu.rice.cs.hpcdata.experiment.scope.visitors;
 
 import java.util.Iterator;
 import java.util.List;
+
+import org.eclipse.collections.impl.list.mutable.FastList;
+
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
@@ -48,6 +51,8 @@ public class FilterScopeVisitor implements IScopeVisitor
 	private final ICallPath   callPathTraces;
 	
 	private List<BaseMetric> metrics = null;
+	private List<Scope> listScopesToRemove;
+	private List<Scope> listTreeToRemove;
 	
 	/**** flag to allow the dfs to continue to go deeper or not.  
 	      For inclusive filter, we should stop going deeper      *****/
@@ -68,10 +73,14 @@ public class FilterScopeVisitor implements IScopeVisitor
 	public FilterScopeVisitor(RootScope rootOriginalCCT, IFilterData filter)
 	{
 		this.filter  = filter;
+		
 		rootOriginalCCT.getMetricValues();
 		needToContinue 	= true;
 		currentDepth = 0;
 		maxDepth     = 0;
+		
+		listScopesToRemove = FastList.newList();
+		listTreeToRemove   = FastList.newList();
 		
 		experiment = rootOriginalCCT.getExperiment();
 		if (experiment instanceof Experiment)
@@ -82,6 +91,21 @@ public class FilterScopeVisitor implements IScopeVisitor
 		} else {
 			callPathTraces = null;
 		}
+	}
+	
+	
+	/*****
+	 * List of scopes to be removed.
+	 * 
+	 * @return
+	 */
+	public List<Scope> getScopeToRemove() {
+		return listScopesToRemove;
+	}
+	
+	
+	public List<Scope> getTreeToRemove() {
+		return listTreeToRemove;
 	}
 	
 	/**************
@@ -189,11 +213,11 @@ public class FilterScopeVisitor implements IScopeVisitor
 					// We need to remove the child using the iterator's remove method
 					// to avoid ConcurrentModificationException 
 					//-------------------------------------------------------------------
-					var iterator = scope.getChildren().iterator();
-					while (iterator.hasNext())
+					var childIterator = scope.getChildren().iterator();
+					while (childIterator.hasNext())
 					{
-						var child = iterator.next();
-						removeNode(iterator, child, filterAttribute.filterType);
+						var child = childIterator.next();
+						removeNode(childIterator, child, filterAttribute.filterType);
 					}
 				} else
 				{
@@ -250,7 +274,7 @@ public class FilterScopeVisitor implements IScopeVisitor
 			addGrandChildren(childToRemove.getParentScope(), childToRemove);
 		}
 		// skip to current scope
-		removeNode(iterator, childToRemove, filterType);		
+		removeNode(iterator, childToRemove, filterType);
 	}
 	
 
@@ -272,17 +296,14 @@ public class FilterScopeVisitor implements IScopeVisitor
 		Scope parent = child.getParentScope();
 
 		// move the trace call-path id (if exist) to the parent
-		if (experiment.getTraceAttribute().dbTimeMax > 0)
+		if (experiment.getTraceDataVersion() > 0)
 			propagateTraceID(parent, child, filterType);
 
-		// remove the child node
-		if (iterator == null)
-			parent.remove(child);
+		if (filterType == FilterAttribute.Type.Self_Only)
+			// remove the child node
+			listScopesToRemove.add(child);
 		else
-			iterator.remove();
-
-		// clear the child node
-		child.dispose();
+			listTreeToRemove.add(child);
 		
 		return parent;
 	}

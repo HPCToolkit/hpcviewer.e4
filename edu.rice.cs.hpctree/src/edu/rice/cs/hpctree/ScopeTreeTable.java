@@ -1,6 +1,5 @@
 package edu.rice.cs.hpctree;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -685,8 +684,8 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	@Override
 	public void setRoot(Scope root) {
 		var oldRoot = getRoot();
-		if (oldRoot != null && root != getRoot())
-			oldRoot.dispose();
+		if (oldRoot != null && root != oldRoot)
+			oldRoot.disposeSelfAndChildren();
 		
 		ScopeTreeRowModel treeRowModel = bodyLayerStack.getTreeRowModel();
 		treeRowModel.setRoot(root);

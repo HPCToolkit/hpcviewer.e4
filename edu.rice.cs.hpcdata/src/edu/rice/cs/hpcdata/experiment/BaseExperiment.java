@@ -10,8 +10,8 @@ import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.experiment.scope.visitors.DisposeResourcesVisitor;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.FilterScopeVisitor;
+import edu.rice.cs.hpcdata.experiment.scope.visitors.TraceScopeVisitor;
 import edu.rice.cs.hpcdata.filter.IFilterData;
 import edu.rice.cs.hpcdata.tld.ThreadDataCollectionFactory;
 import edu.rice.cs.hpcdata.trace.BaseTraceAttribute;
@@ -168,6 +168,7 @@ public abstract class BaseExperiment implements IExperiment
 	/**
 	 * @return the scopeMap
 	 */
+	@Override
 	public ICallPath getScopeMap() {
 		return traceAttribute.mapCpidToCallpath;
 	}
@@ -176,6 +177,7 @@ public abstract class BaseExperiment implements IExperiment
 	/**
 	 * @param scopeMap the scopeMap to set
 	 */
+	@Override
 	public void setScopeMap(ICallPath scopeMap) {
 		traceAttribute.mapCpidToCallpath = scopeMap;
 	}
@@ -329,6 +331,8 @@ public abstract class BaseExperiment implements IExperiment
 
 	/*************************************************************************
 	 *	Returns the default directory from which to resolve relative paths.
+	 *
+	 * @return File
 	 ************************************************************************/
 
 	public File getDefaultDirectory()
@@ -336,10 +340,23 @@ public abstract class BaseExperiment implements IExperiment
 		return getExperimentFile().getParentFile();
 	}
 
+	
+	/****
+	 * Retrieve the file reference of the main database file.
+	 * For the old version it's the experiment.xml, for the newer version 
+	 * it's the meta.db file.
+	 * 
+	 * @return File
+	 */
 	public File getExperimentFile() {
 		return databaseRepresentation.getFile();
 	}
 
+	
+	@Override
+	public int getTraceDataVersion() {
+		return databaseRepresentation.getTraceDataVersion();
+	}
 
 	/*****
 	 * disposing the experiment resources.
@@ -347,10 +364,10 @@ public abstract class BaseExperiment implements IExperiment
 	public void dispose()
 	{
 		if (rootScope != null)
-			rootScope.dispose();
+			rootScope.disposeSelfAndChildren();
 		
 		if (datacentricRootScope != null)
-			datacentricRootScope   = null;
+			datacentricRootScope.disposeSelfAndChildren();
 		
 		databaseRepresentation = null;
 	}
@@ -369,12 +386,40 @@ public abstract class BaseExperiment implements IExperiment
 			// case of corrupt database
 			return 0;
 		
-		// TODO :  we assume the first child is the CCT
 		final RootScope rootCCT = getRootScope(RootScopeType.CallingContextTree);
 
+		if (traceAttribute != null && 
+			traceAttribute.dbTimeMax < 0 && 
+			getTraceDataVersion() > 0) {
+			
+			// needs to gather info about cct id and its depth
+			// this is needed for traces
+			TraceScopeVisitor visitor = new TraceScopeVisitor();
+			rootCCT.dfsVisitScopeTree(visitor);
+			
+			setMaxDepth(visitor.getMaxDepth());
+			setScopeMap(visitor.getCallPath());
+		}
 		// duplicate and filter the cct
 		FilterScopeVisitor visitor = new FilterScopeVisitor(rootCCT, filter);
 		rootCCT.dfsVisitFilterScopeTree(visitor);
+		
+		var listToRemove = visitor.getScopeToRemove();
+		if (listToRemove != null && !listToRemove.isEmpty()) {
+			filterNumScopes = listToRemove.size();
+			listToRemove.stream().forEach( scope -> {
+				scope.getParentScope().remove(scope);
+				scope.dispose(); 
+			});
+		}
+		var listTreeToRemove = visitor.getTreeToRemove();
+		if (listTreeToRemove != null && !listTreeToRemove.isEmpty()) {
+			filterNumScopes += listTreeToRemove.size();
+			for(var tree: listTreeToRemove) {
+				tree.getParentScope().remove(tree);
+				tree.disposeSelfAndChildren();
+			}
+		}
 
 		// finalize the filter: for hpcviewer, we need to prepare to create subtrees:
 		// bottom-up, flat and optionally data-centric tree
@@ -382,8 +427,8 @@ public abstract class BaseExperiment implements IExperiment
 		if (rootCCT.getType() == RootScopeType.CallingContextTree) {
 			filter_finalize(rootCCT, filter);
 		}
-		filterNumScopes = visitor.numberOfFilteredScopes();
-		filterStatus	= visitor.getFilterStatus();
+
+		filterStatus = visitor.getFilterStatus();
 		setMaxDepth(visitor.getMaxDepth());
 		
 		return filterNumScopes;

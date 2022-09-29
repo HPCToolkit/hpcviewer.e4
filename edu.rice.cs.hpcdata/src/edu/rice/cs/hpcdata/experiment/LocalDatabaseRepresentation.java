@@ -108,4 +108,10 @@ public class LocalDatabaseRepresentation implements IDatabaseRepresentation
 		}
 		return -1;
 	}
+
+
+	@Override
+	public int getTraceDataVersion() {
+		return directoryHasTraceData(fileExperiment.getAbsolutePath());
+	}
 }
