@@ -898,6 +898,13 @@ implements IMetricScope
 	 */
 	public void dispose()
 	{
+		// TODO: temporary HACK HACK HACK
+		// since a root is used by some parts in the viewer, we can't let it
+		// null or otherwise we need to update everywhere.
+		// At the moment just avoid to dispose a root.
+		if (this instanceof RootScope)
+			return;
+		
 		root 		= null;
 		metrics 	= null;
 		sourceFile  = null;

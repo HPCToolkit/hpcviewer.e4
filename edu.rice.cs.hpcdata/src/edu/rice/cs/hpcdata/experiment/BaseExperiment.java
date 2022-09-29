@@ -388,9 +388,7 @@ public abstract class BaseExperiment implements IExperiment
 		
 		final RootScope rootCCT = getRootScope(RootScopeType.CallingContextTree);
 
-		if (traceAttribute != null && 
-			traceAttribute.dbTimeMax < 0 && 
-			getTraceDataVersion() > 0) {
+		if (getTraceDataVersion() > 0) {
 			
 			// needs to gather info about cct id and its depth
 			// this is needed for traces
