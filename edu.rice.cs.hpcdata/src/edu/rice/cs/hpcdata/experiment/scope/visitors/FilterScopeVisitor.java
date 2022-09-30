@@ -184,62 +184,60 @@ public class FilterScopeVisitor implements IScopeVisitor
 				maxDepth = Math.max(maxDepth, currentDepth);
 			} 
 			FilterAttribute filterAttribute = filter.getFilterAttribute(scope.getName());
-			if (filterAttribute != null)
-			{
-				if (filterStatus == STATUS_INIT) {
-					filterStatus = STATUS_OK;
-				}
-				numScopeFiltered++;
-				needToContinue = (filterAttribute.filterType == FilterAttribute.Type.Self_Only);
-
-				if (filterAttribute.filterType == FilterAttribute.Type.Descendants_Only)
-				{
-					//-------------------------------------------------------------------
-					// merge with the metrics of the children
-					//-------------------------------------------------------------------
-					if (metrics != null)
-					{
-						// glue the metrics of all the children to the scope
-						for(var child: scope.getChildren())
-						{
-							if (!(child instanceof LineScope))
-							{
-								mergeMetrics(scope, child, false);
-							}
-						}
-					}
-					//-------------------------------------------------------------------
-					// Filtering only the children, not the scope itself.
-					// remove all the children
-					// We need to remove the child using the iterator's remove method
-					// to avoid ConcurrentModificationException 
-					//-------------------------------------------------------------------
-					var childIterator = scope.getChildren().iterator();
-					while (childIterator.hasNext())
-					{
-						var child = childIterator.next();
-						removeNode(childIterator, child, filterAttribute.filterType);
-					}
-				} else
-				{
-					//-------------------------------------------------------------------
-					// Filtering the scope or/and the children
-					//-------------------------------------------------------------------
-					if (metrics != null && !(scope instanceof LineScope))
-					{
-						// no need to merge metric if the filtered child is a line statement.
-						// in this case, the parent (PF) already includes the exclusive value.
-						Scope parent = scope.getParentScope();
-						mergeMetrics(parent, scope, needToContinue);
-					}
-					removeChild(null, scope, vt, filterAttribute.filterType);
-					currentDepth--;
-				}
-			} else 
-			{
+			if (filterAttribute == null) {
 				// filter is not needed, we can surely continue to investigate the descendants
 				needToContinue = true;
-			}	
+				return needToContinue;
+			}
+			filterStatus   = filterStatus != STATUS_FAKE_PROCEDURE ? STATUS_OK : STATUS_FAKE_PROCEDURE;
+			needToContinue = (filterAttribute.filterType == FilterAttribute.Type.Self_Only);
+			numScopeFiltered++;
+
+			if (filterAttribute.filterType == FilterAttribute.Type.Descendants_Only &&
+				scope.getSubscopeCount() > 0)
+			{
+				//-------------------------------------------------------------------
+				// merge with the metrics of the children
+				//-------------------------------------------------------------------
+				if (metrics != null)
+				{
+					// glue the metrics of all the children to the scope
+					for(var child: scope.getChildren())
+					{
+						if (!(child instanceof LineScope))
+						{
+							mergeMetrics(scope, child, false);
+						}
+					}
+				}
+				//-------------------------------------------------------------------
+				// Filtering only the children, not the scope itself.
+				// remove all the children
+				// We need to remove the child using the iterator's remove method
+				// to avoid ConcurrentModificationException 
+				//-------------------------------------------------------------------
+				var childIterator = scope.getChildren().iterator();
+				while (childIterator.hasNext())
+				{
+					var child = childIterator.next();
+					removeNode(childIterator, child, filterAttribute.filterType);
+				}
+			} else if(filterAttribute.filterType == FilterAttribute.Type.Self_And_Descendants ||
+					  filterAttribute.filterType == FilterAttribute.Type.Self_Only)
+			{
+				//-------------------------------------------------------------------
+				// Filtering the scope or/and the children
+				//-------------------------------------------------------------------
+				if (metrics != null && !(scope instanceof LineScope))
+				{
+					// no need to merge metric if the filtered child is a line statement.
+					// in this case, the parent (PF) already includes the exclusive value.
+					Scope parent = scope.getParentScope();
+					mergeMetrics(parent, scope, needToContinue);
+				}
+				removeChild(null, scope, vt, filterAttribute.filterType);
+				currentDepth--;
+			}
 		} else 
 		{ // PostVisit
 			if (isScopeTrace(scope)) {

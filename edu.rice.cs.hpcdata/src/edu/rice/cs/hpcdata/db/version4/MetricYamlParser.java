@@ -36,14 +36,14 @@ import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
  *********************************************************/
 public class MetricYamlParser 
 {
-	private final static int MAX_ALIASES = 1000;
+	private static final int MAX_ALIASES = 1000;
 	
-	private final static String FILENAME_YAML = File.separator + "metrics" + File.separator + "default.yaml";
+	private static final String FILENAME_YAML = File.separator + "metrics" + File.separator + "default.yaml";
 	
-	private final static String FIELD_METRIC  = "metric";
-	private final static String FIELD_NAME    = "name";
-	private final static String FIELD_DESC	  = "description";
-	private final static String FIELD_VARIANT = "variants";
+	private static final String FIELD_METRIC  = "metric";
+	private static final String FIELD_NAME    = "name";
+	private static final String FIELD_DESC	  = "description";
+	private static final String FIELD_VARIANT = "variants";
 	
 	
 	/****
@@ -481,8 +481,7 @@ roots:
 	
 	private HierarchicalMetric getMetricCorrespondance(int hashcode, MetricType formulaType, String desc) {
 		var metric = mapCodeToMetric.get(hashcode);
-		if (metric != null && 
-			metric instanceof HierarchicalMetric) {
+		if (metric instanceof HierarchicalMetric) {
 			
 			HierarchicalMetric hm = (HierarchicalMetric) metric;
 			hm.setDescription(desc);
