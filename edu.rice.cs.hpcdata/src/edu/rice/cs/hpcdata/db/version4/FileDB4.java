@@ -15,10 +15,12 @@ import edu.rice.cs.hpcdata.experiment.scope.visitors.TraceScopeVisitor;
 
 /********************************************************************
  * 
- * Class to manage access to extended database file
- * This class uses a compact version of database format (version 3)
- * and not compatible with the old one.<br/>
- * See {@link FileDB2} for accessing the older format
+ * Class to manage access to extended database file like <code>trace.db</code> 
+ * <p>
+ * This class uses a compact version of database format (version 4)
+ * and not compatible with the old one.</p>
+ * 
+ * @see {@link FileDB2} for accessing the older format
  *
  ********************************************************************/
 public class FileDB4 implements IFileDB 
@@ -30,6 +32,8 @@ public class FileDB4 implements IFileDB
 	/*****
 	 * Creation of FileDB for sparse database version 4.
 	 * 
+	 * @param experiment
+	 * 			The experiment database
 	 * @param dataSummary
 	 * 			The object of profile.db parser
 	 * 			
@@ -58,6 +62,9 @@ public class FileDB4 implements IFileDB
 		dataTrace.open(directory);		
 		
 		var rootCCT = ((BaseExperiment)experiment).getRootScope(RootScopeType.CallingContextTree);
+		
+		// If we already computed the call-path map, we do not do it again.
+		// It's harmless to recompute but it such a waste of CPU resources.
 		
 		if (rootCCT != null && experiment.getScopeMap() == null) {
 			// needs to gather info about cct id and its depth

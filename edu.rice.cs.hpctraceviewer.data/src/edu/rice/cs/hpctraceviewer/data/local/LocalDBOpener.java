@@ -38,13 +38,14 @@ public class LocalDBOpener extends AbstractDBOpener
 	 * @param experiment2
 	 * @throws Exception 
 	 */
-	public LocalDBOpener(IEclipseContext context, IExperiment experiment2) throws Exception {
+	public LocalDBOpener(IEclipseContext context, IExperiment experiment2) throws IllegalArgumentException {
 		this.context   = context;
 		this.experiment = experiment2;
 		version = experiment2.getMajorVersion();
 		String directory = experiment2.getPath();
+		
 		if (directoryHasTraceData(directory)<=0) {
-			throw new Exception("The directory does not contain hpctoolkit database with trace data:"
+			throw new IllegalArgumentException("The directory does not contain hpctoolkit database with trace data:"
 					+ directory);
 		}
 	}
@@ -80,7 +81,7 @@ public class LocalDBOpener extends AbstractDBOpener
 	
 	@Override
 	public SpaceTimeDataController openDBAndCreateSTDC(IProgressMonitor statusMgr)
-			throws IOException, InvalExperimentException, Exception {
+			throws Exception {
 
 		// ---------------------------------------------------------------------
 		// Try to open the database and refresh the data
@@ -96,7 +97,7 @@ public class LocalDBOpener extends AbstractDBOpener
 
 	
 	@Override
-	public void end() {}
+	public void end() { /* unused */ }
 
 
 	/**********************
@@ -108,7 +109,7 @@ public class LocalDBOpener extends AbstractDBOpener
 	 * 			version of the database if the database is correct and valid
 	 * 			   return negative number otherwise
 	 */
-	static public int directoryHasTraceData(String directory)
+	public static int directoryHasTraceData(String directory)
 	{
 		return LocalDatabaseRepresentation.directoryHasTraceData(directory);
 	}
