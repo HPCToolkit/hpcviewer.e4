@@ -913,7 +913,12 @@ implements IMetricScope
 			listScopeReduce.clear();
 		
 		node.setParent(null);
-		node = null;
+		
+		// fix issue #239: remove the children but not the node
+		// Removing the node is problematic since it may be used to
+		// retrieve the value of the node (like cct id)
+		if (node.getChildCount() > 0)
+			node.getChildren().clear();
 	}
 	
 	
