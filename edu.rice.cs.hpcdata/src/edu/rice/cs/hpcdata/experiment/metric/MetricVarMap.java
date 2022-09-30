@@ -15,30 +15,25 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
  */
 public class MetricVarMap extends VarMap 
 {
-	private Scope 	scope;
-	private BaseMetric 		metric = null;
+	private Scope scope;
+	private BaseMetric metric = null;
 	private final IMetricManager metricManager;
 
 	public MetricVarMap() {
-		this(null, null, null);
+		this(null);
 	}
 	
-	public MetricVarMap(RootScope root, IMetricManager metricManager) {
-		this(root, null, metricManager);
+	public MetricVarMap(IMetricManager metricManager) {
+		this(null, metricManager);
 	}
 	
-	public MetricVarMap(RootScope root, IMetricScope s, IMetricManager metricManager) {
+	public MetricVarMap(IMetricScope s, IMetricManager metricManager) {
 		super(false);
 		this.scope = (Scope) s;
 		this.metricManager = metricManager;
 	}
 	
-
 	//===========================
-	
-
-	public void setMetricManager(IMetricManager metricManager) {
-	}
 	
 	public void setMetric(BaseMetric metric)
 	{
@@ -53,9 +48,6 @@ public class MetricVarMap extends VarMap
 		this.scope = (Scope) s;
 	}
 	
-	public void setRootScope(RootScope root)
-	{
-	}
 	
 	/**
 	 * Overloaded method: a callback to retrieve the value of a variable (or a metric)
@@ -73,7 +65,7 @@ public class MetricVarMap extends VarMap
 
 			// Metric variable
 			String sIndex = varName.substring(1);
-			RootScope root = scope.getRootScope();
+			RootScope root    = scope instanceof RootScope? (RootScope) scope : scope.getRootScope();
 			IMetricManager mm = metricManager == null ? (IMetricManager) root.getExperiment() : metricManager;
 			BaseMetric metricToQuery = mm.getMetric(Integer.valueOf(sIndex));
 			if (metricToQuery == null) 
@@ -87,7 +79,7 @@ public class MetricVarMap extends VarMap
 			if (currentScope == null)
 				throw new RuntimeException("Invalid scope: " + varName);
 
-			MetricValue value = MetricValue.NONE;
+			MetricValue value;
 			if (this.metric != null && this.metric == metricToQuery) {
 				// avoid recursive call: if the metric queries its own value, we returns
 				// the "raw" value 
@@ -102,10 +94,10 @@ public class MetricVarMap extends VarMap
 			String sIndex = varName.substring(1);
 			Integer index = Integer.valueOf(sIndex);
 			
-			RootScope root = scope.getRootScope();
-			IMetricManager metricManager = (IMetricManager) root.getExperiment();
+			RootScope root = scope instanceof RootScope? (RootScope) scope : scope.getRootScope();
+			IMetricManager mm = metricManager == null ? (IMetricManager) root.getExperiment() : metricManager;
 
-			BaseMetric bm = metricManager.getMetricFromOrder(index);
+			BaseMetric bm = mm.getMetricFromOrder(index);
 			
 			if (bm != null) {
 				
@@ -116,7 +108,7 @@ public class MetricVarMap extends VarMap
 					// for exclusive metric, we have to compute the exclusive metric of the source
 					// not the inclusive one
 
-					BaseMetric pm   = metricManager.getMetric(bm.getPartner());
+					BaseMetric pm   = mm.getMetric(bm.getPartner());
 					
 					if (pm != null)
 						value = pm.getValue(currentScope);

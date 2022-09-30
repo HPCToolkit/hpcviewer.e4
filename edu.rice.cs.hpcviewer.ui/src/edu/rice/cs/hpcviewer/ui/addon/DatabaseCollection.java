@@ -568,6 +568,7 @@ public class DatabaseCollection
 				}
 			}
 		}
+		experiment.dispose();
 	}	
 	
 	

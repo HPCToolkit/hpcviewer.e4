@@ -1,7 +1,6 @@
  
 package edu.rice.cs.hpcviewer.ui.parts.editor;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -129,10 +128,13 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 	public boolean hasEqualInput(Object input) {
 		if (input == null) return false;
 		
-		File fileNew = getFileFromInput(input);
-		File fileOld = getFileFromInput(textViewer.getData(PROPERTY_DATA));
+		var fileNew = getFileFromInput(input);
+		var fileOld = getFileFromInput(textViewer.getData(PROPERTY_DATA));
 		
-		return fileNew == fileOld;
+		if (fileNew != null && fileOld != null)
+			return fileNew.equals(fileOld);
+		
+		return false;
 	}
 	
 	
@@ -184,15 +186,19 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 	 * @param input
 	 * @return
 	 */
-	private File getFileFromInput(Object input) {
+	private String getFileFromInput(Object input) {
 		if (input == null) return null;
 		
-		File file = null;
+		String file = null;
 		
-		if (input instanceof Scope) {
-			file = ((Scope)input).getSourceFile().getFilename();
+		if (input instanceof String) {
+			file = (String) input;
+		} else if (input instanceof Scope) {
+			var scope = (Scope) input;
+			var fileSource = (FileSystemSourceFile) scope.getSourceFile();
+			file = fileSource.getCompleteFilename();
 		} else if (input instanceof BaseExperiment) {
-			file = ((BaseExperiment)input).getExperimentFile();
+			file = ((BaseExperiment)input).getExperimentFile().getAbsolutePath();
 		}
 		return file;
 	}
@@ -278,8 +284,7 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 		try {
 			document.addPosition(new Position(region.getOffset()));
 		} catch (BadLocationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// no need to catch?
 		}
 		
 		TextSelection selection = new TextSelection(document, region.getOffset(), region.getLength());
@@ -297,7 +302,9 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 	public static String getTitle(Object input) {
 		String filename = null;
 		
-		if (input instanceof Scope) {
+		if (input instanceof String) {
+			filename = (String) input;
+		} else if (input instanceof Scope) {
 			filename = ((Scope)input).getSourceFile().getName(); 
 		} else if (input instanceof BaseExperiment) {
 			filename = ((BaseExperiment)input).getExperimentFile().getName();
@@ -375,7 +382,7 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 		}
 		document.set(text);
 		textViewer.setDocument(document, annModel);
-		textViewer.setData(PROPERTY_DATA, obj);
+		textViewer.setData(PROPERTY_DATA, filename);
 
 		finder = new FindReplaceDocumentAdapter(document);
 

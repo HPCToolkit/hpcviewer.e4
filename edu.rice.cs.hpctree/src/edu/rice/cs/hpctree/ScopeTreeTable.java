@@ -566,11 +566,21 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		// after updating the root
 		//
 		Scope currentNode = getSelection();
-		FastList<Scope> selectedPath = new FastList<>();
-		IScopeTreeData treeData = (IScopeTreeData) this.bodyLayerStack.getTreeRowModel().getTreeData();		
+		IScopeTreeData treeData = (IScopeTreeData) this.bodyLayerStack.getTreeRowModel().getTreeData();	
+		FastList<Scope> reversePath = null;
+		int []expandedNodes = null;
+		
 		if (currentNode != null) {
 			// preserve the selection
-			selectedPath = (FastList<Scope>) treeData.getPath(currentNode);
+			var selectedPath = (FastList<Scope>) treeData.getPath(currentNode);
+			reversePath  = selectedPath.reverseThis();
+			expandedNodes = new int[reversePath.size()];
+			
+			int i=0;
+			for(var scope: reversePath) {
+				expandedNodes[i] = scope.getCCTIndex();
+				i++;
+			}
 		}
 		
 		// 2. reset the root node
@@ -579,22 +589,20 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		setRoot(root);
 		
 		// 3. expand and restore the selection
-		if (selectedPath.size() == 0)
+		if (expandedNodes == null || expandedNodes.length == 0)
 			return;
 		
 		final ScopeTreeLayer treeLayer = bodyLayerStack.getTreeLayer();
-		FastList<Scope> reversePath = selectedPath.reverseThis();
-		int lastIndex = 0;
-		int lastRow   = 0;
+
+		int lastRow = 0;
 		
-		for(lastIndex=0; lastIndex<reversePath.size(); lastIndex++) {
-			Scope scope = reversePath.get(lastIndex);
-			int row = bodyDataProvider.indexOfRowBasedOnCCT(scope.getCCTIndex());
+		for(var cctId: expandedNodes) {
+			int row = bodyDataProvider.indexOfRowBasedOnCCT(cctId);
 			if (row < 0) {
 				break;
 			}
 			lastRow = row;
-			treeLayer.expandTreeRow(lastRow);
+			treeLayer.expandTreeRow(row);
 		}
 		// select the latest common path
 		this.setSelection(lastRow);
@@ -675,6 +683,10 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	
 	@Override
 	public void setRoot(Scope root) {
+		var oldRoot = getRoot();
+		if (oldRoot != null && root != oldRoot)
+			oldRoot.disposeSelfAndChildren();
+		
 		ScopeTreeRowModel treeRowModel = bodyLayerStack.getTreeRowModel();
 		treeRowModel.setRoot(root);
 		

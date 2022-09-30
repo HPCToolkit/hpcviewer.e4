@@ -18,6 +18,7 @@ package edu.rice.cs.hpcdata.experiment.scope;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 
 import org.eclipse.collections.impl.list.mutable.FastList;
 
@@ -47,7 +48,6 @@ import edu.rice.cs.hpcdata.experiment.source.SourceFile;
  *
  * A scope in an HPCView experiment.
  *
- * FIXME: do we want to merge the functionality of Scope and Scope.Node?
  * it's kind of irritating to have the two things be distinct and having
  * objects which point at each other makes me a little uneasy.
  */
@@ -71,9 +71,9 @@ implements IMetricScope
 	/** The value used to indicate "no line number". */
 	public static final int NO_LINE_NUMBER = -169; // any negative number other than -1
 
-	static public final int SOURCE_CODE_UNKNOWN = 0;
-	static public final int SOURCE_CODE_AVAILABLE = 1;
-	static public final int SOURCE_CODE_NOT_AVAILABLE= 2;
+	public static final int SOURCE_CODE_UNKNOWN = 0;
+	public static final int SOURCE_CODE_AVAILABLE = 1;
+	public static final int SOURCE_CODE_NOT_AVAILABLE= 2;
 
 	//////////////////////////////////////////////////////////////////////////
 	// ATTRIBUTES
@@ -124,7 +124,7 @@ implements IMetricScope
 	 *	Creates a Scope object with associated source line range.
 	 ************************************************************************/
 
-	public Scope(RootScope root, SourceFile file, int first, int last, int cct_id, int flat_id)
+	protected Scope(RootScope root, SourceFile file, int first, int last, int cct_id, int flat_id)
 	{
 		// creation arguments
 		this.root       = root;
@@ -139,11 +139,17 @@ implements IMetricScope
 		listScopeReduce = FastList.newList();
 	}
 
-
-	public Scope(RootScope root, SourceFile file, int first, int last, int cct_id, int flat_id, int cpid)
+	
+	/*************************************************************************
+	 * Creates a Scope object with associated source file.
+	 * 
+	 * @param root
+	 * @param file
+	 * @param scopeID
+	 ************************************************************************/
+	protected Scope(RootScope root, SourceFile file, int scopeID)
 	{
-		this(root, file, first, last, cct_id, flat_id);
-		this.cpid = cpid;
+		this(root, file, Scope.NO_LINE_NUMBER, Scope.NO_LINE_NUMBER, scopeID, scopeID);
 	}
 
 
@@ -153,15 +159,6 @@ implements IMetricScope
 	
 	public List<Scope> getScopeReduce() {
 		return listScopeReduce;
-	}
-	
-	/*************************************************************************
-	 *	Creates a Scope object with associated source file.
-	 ************************************************************************/
-
-	public Scope(RootScope root, SourceFile file, int scopeID)
-	{
-		this(root, file, Scope.NO_LINE_NUMBER, Scope.NO_LINE_NUMBER, scopeID, scopeID);
 	}
 
 	/***
@@ -202,15 +199,15 @@ implements IMetricScope
 	 * @return new root which is the duplicate of this scope.
 	 */
 	public Scope createRoot() {
-		Scope root = duplicate();
-		root.setParentScope(getParentScope());
-		root.addSubscope(this);
-		if (root instanceof CallSiteScopeCallerView) {
-			((CallSiteScopeCallerView)root).markScopeHasChildren();
+		Scope newRoot = duplicate();
+		newRoot.setParentScope(getParentScope());
+		newRoot.addSubscope(this);
+		if (newRoot instanceof CallSiteScopeCallerView) {
+			((CallSiteScopeCallerView)newRoot).markScopeHasChildren();
 		}
-		copyMetrics(root, 0);
+		copyMetrics(newRoot, 0);
 
-		return root;
+		return newRoot;
 	}
 
 
@@ -277,6 +274,8 @@ implements IMetricScope
 
 	/*************************************************************************
 	 * Returns which processor was active
+	 * 
+	 * @return the trace context id
 	 ************************************************************************/
 
 	public int getCpid()
@@ -286,12 +285,16 @@ implements IMetricScope
 
 
 	/*************************************************************************
-	 *	Sets the value of the cpid
+	 * Sets the value of the cpid
+	 * 
+	 * @param cpid
+	 * 		The trace context id
+	 * 
 	 ************************************************************************/
 
-	public void setCpid(int _cpid)
+	public void setCpid(int cpid)
 	{
-		this.cpid = _cpid;
+		this.cpid = cpid;
 	}
 
 	/*************************************************************************
@@ -330,12 +333,11 @@ implements IMetricScope
 	public static int generateFlatID(int lexicalType, int lmId, int fileId, int procId, int line) {
 		// linearize the flat id. This is not sufficient and causes collisions for large and complex source code
 		// This needs to be computed more reliably.
-		int flatId = lexicalType << 28 |
+		return lexicalType << 28 |
 					 lmId        << 24 |
 					 fileId      << 16 | 
 					 procId      << 8  | 
 					 line;
-		return flatId;
 	}
 
 
@@ -489,6 +491,9 @@ implements IMetricScope
 
 	public Scope getParentScope()
 	{
+		if (node == null)
+			return null;
+		
 		return node.getParent();
 	}
 
@@ -647,13 +652,13 @@ implements IMetricScope
 	 *	Add the metric cost from a source with a certain filter for all metrics
 	 ************************************************************************/
 	public void accumulateMetrics(Scope source, MetricValuePropagationFilter filter, int nMetrics) {
-		var experiment = root.getExperiment();
-		var metrics    = experiment.getMetrics();
+		var experiment  = root.getExperiment();
+		var metricDescs = experiment.getMetrics();
 		List<DerivedMetric> listDerivedMetrics = new ArrayList<>();
 
 		// compute metrics with predefined values first.
 		// we'll compute the derived metrics once all other metrics are initialized
-		for (BaseMetric m: metrics) {
+		for (BaseMetric m: metricDescs) {
 			if (m instanceof DerivedMetric) {
 				listDerivedMetrics.add((DerivedMetric) m);
 			} else {
@@ -719,10 +724,10 @@ implements IMetricScope
 	 * @see MetricType
 	 ***************************************************************************/
 	public void reduce(Scope scope, MetricType type) {
-		var experiment = root.getExperiment();
-		var metrics    = experiment.getMetrics();
+		var experiment  = root.getExperiment();
+		var metricDescs = experiment.getMetrics();
 		
-		for (var m: metrics) {
+		for (var m: metricDescs) {
 			if (!(m instanceof HierarchicalMetric))
 				continue;
 			
@@ -807,7 +812,9 @@ implements IMetricScope
 		if (metrics == null)
 		{
 			try {
-				metrics = root.getMetricValueCollection();
+				metrics = (this instanceof RootScope ? 
+								((RootScope)this).getMetricValueCollection() :
+									root.getMetricValueCollection());
 			} catch (IOException e) {
 				RuntimeException e2 = new RuntimeException(e.getMessage());
 				e2.setStackTrace(e.getStackTrace());
@@ -849,6 +856,7 @@ implements IMetricScope
 		accept(sv, ScopeVisitType.PostVisit);
 	}
 
+	
 	public void accept(IScopeVisitor visitor, ScopeVisitType vt) {
 		visitor.visit(this, vt);
 	}
@@ -864,8 +872,6 @@ implements IMetricScope
 		{
 			// during the process of filtering, it is possible the tree has been changed
 			// and the some children may be removed. 
-			// we will first retrieve the original list of children, and then investigate
-			// one-by-one, even though the list of children has changed.
 
 			var children = node.getChildren(); 
 			if (children != null)
@@ -874,8 +880,7 @@ implements IMetricScope
 				var copyChildren = new ArrayList<Scope>(children);			
 				for(var child: copyChildren)
 				{
-					Scope scope = (Scope) child;
-					scope.dfsVisitFilterScopeTree(sv);
+					child.dfsVisitFilterScopeTree(sv);
 				}
 			}
 		}
@@ -886,15 +891,65 @@ implements IMetricScope
 	/***
 	 * Free all allocated object variables so that
 	 * JVM can free the resources.
+	 * 
+	 * @apiNote
+	 * The caller is responsible to remove this child from the parent
+	 * Since we don't want to change the parent.
 	 */
 	public void dispose()
 	{
+		// TODO: temporary HACK HACK HACK
+		// since a root is used by some parts in the viewer, we can't let it
+		// null or otherwise we need to update everywhere.
+		// At the moment just avoid to dispose a root.
+		if (this instanceof RootScope)
+			return;
+		
 		root 		= null;
 		metrics 	= null;
 		sourceFile  = null;
-		node        = null;
+		
+		if (listScopeReduce != null)
+			listScopeReduce.clear();
+		
+		node.setParent(null);
+		
+		// fix issue #239: remove the children but not the node
+		// Removing the node is problematic since it may be used to
+		// retrieve the value of the node (like cct id)
+		if (node.getChildCount() > 0)
+			node.getChildren().clear();
 	}
-
+	
+	
+	/*****
+	 * Free the resource of this node and all its descendants.
+	 * 
+	 * @apiNote
+	 * The caller is responsible to remove this child from the parent
+	 * Since we don't want to change the parent.
+	 */
+	public void disposeSelfAndChildren() {
+		if (node == null || getSubscopeCount() == 0) {
+			// in case it has no children or already disposed,
+			// we free the resources and quit.
+			dispose();
+			return;
+		}
+		
+		ListIterator<Scope> list = getChildren().listIterator();
+		if (list == null)
+			return;
+		
+		while(list.hasNext()) {
+			var child = list.next();
+			
+			child.disposeSelfAndChildren();
+			
+			list.remove();
+		}
+		dispose();
+	}
 
 	/****
 	 * Retrieve the list of all children.

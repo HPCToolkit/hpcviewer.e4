@@ -171,7 +171,33 @@ public interface IExperiment {
 	 */
 	public int getMaxDepth();
 
-	public void setScopeMap(ICallPath callpath);
 	
+	/****
+	 * Set the call path map to this database
+	 *  
+	 * @param callpath
+	 */
+	public void setScopeMap(ICallPath callpath);
 
+
+	/**
+	 * Get the call path map of this database.
+	 * 
+	 * @return the scopeMap
+	 */
+	ICallPath getScopeMap();
+	
+	/****
+	 * Retrieve the version of trace database.
+	 * Usually it has the same version of the database.
+	 * It returns negative if the database doesn't include traces. 
+	 * @return
+	 */
+	int getTraceDataVersion();
+	
+	
+	/****
+	 * Free the allocated resources since GC is not smart enough.
+	 */
+	public void dispose();	
 }

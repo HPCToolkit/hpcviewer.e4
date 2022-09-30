@@ -14,6 +14,8 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
+import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
+import edu.rice.cs.hpcdata.experiment.scope.visitors.TraceScopeVisitor;
 
 /**************************************************************
  * 
@@ -54,7 +56,7 @@ public class FilterStateProvider
 	 * @param experiment
 	 * @return Experiment itself (if changed)
 	 */
-	static public Experiment filterExperiment(Experiment experiment) {
+	public static Experiment filterExperiment(Experiment experiment) {
 		// filter the experiment if it is not null and it is in original form
 		// (it isn't a merged database)
 		if (experiment != null && !experiment.isMergedDatabase()) 
@@ -65,7 +67,7 @@ public class FilterStateProvider
 				// ---------------------------------------
 				// conserve the added metrics
 				// ---------------------------------------
-				List<BaseMetric> metrics = new ArrayList<BaseMetric>(experiment.getMetricCount());
+				List<BaseMetric> metrics = new ArrayList<>(experiment.getMetricCount());
 
 				for (BaseMetric metric : experiment.getMetricList()) {
 					if (metric instanceof DerivedMetric && 
@@ -74,15 +76,31 @@ public class FilterStateProvider
 						// only add user derived metrics, not all derived metrics
 						//  provided by hpcprof
 						
-						metrics.add((DerivedMetric) metric);
+						metrics.add(metric);
 					} else {
 						metrics.add(metric.duplicate());
 					}
 				}
 				// ---------------------------------------
-				// filtering 
+				// reopening the database 
 				// ---------------------------------------
 				experiment.reopen();
+				
+				// ---------------------------------------
+				// recompute the trace id and the max depth
+				// needs to gather info about cct id and its depth
+				// this is needed for traces
+				// ---------------------------------------
+				var rootCCT = experiment.getRootScope(RootScopeType.CallingContextTree);
+				TraceScopeVisitor visitor = new TraceScopeVisitor();
+				rootCCT.dfsVisitScopeTree(visitor);
+				
+				experiment.setMaxDepth(visitor.getMaxDepth());
+				experiment.setScopeMap(visitor.getCallPath());
+
+				// ---------------------------------------
+				// filtering 
+				// ---------------------------------------
 				experiment.filter(FilterMap.getInstance());
 				
 				// ---------------------------------------

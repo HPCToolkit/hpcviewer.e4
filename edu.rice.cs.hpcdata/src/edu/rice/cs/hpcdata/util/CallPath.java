@@ -10,6 +10,11 @@ import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
+/*****************************************
+ * 
+ * Implementation of {@link ICallPath}
+ *
+ *****************************************/
 public class CallPath implements ICallPath
 {
 	private final IntObjectHashMap<Info> mapToInfo;
@@ -90,6 +95,25 @@ public class CallPath implements ICallPath
 	
 	
 	/*******************************
+	 * Get the trace depth of a scope
+	 * 
+	 * @param scope
+	 * 
+	 * @return
+	 *******************************/
+	public static int getDepth(Scope scope) {
+		Scope current = scope;
+		int depth = 0;
+		
+		while(current != null && !(current instanceof RootScope)) {
+			if (isTraceScope(current))
+				depth++;
+			current = current.getParentScope();
+		}
+		return depth;
+	}
+	
+	/*******************************
 	 * Retrieve the maximum depth of this call path
 	 * 
 	 * @param id 
@@ -113,6 +137,14 @@ public class CallPath implements ICallPath
 		mapToInfo.put(id, info);
 	}
 	
+	
+	@Override
+	public ICallPathInfo replaceCallPath(int id, Scope scope, int depth) {
+		ICallPathInfo info = mapToInfo.remove(id);
+		addCallPath(id, scope, depth);
+		
+		return info;
+	}
 
 	@Override
 	public Scope getCallPathScope(int id) {

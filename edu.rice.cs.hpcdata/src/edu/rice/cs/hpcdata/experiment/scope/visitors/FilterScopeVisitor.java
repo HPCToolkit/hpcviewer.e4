@@ -2,6 +2,9 @@ package edu.rice.cs.hpcdata.experiment.scope.visitors;
 
 import java.util.Iterator;
 import java.util.List;
+
+import org.eclipse.collections.impl.list.mutable.FastList;
+
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
@@ -23,6 +26,7 @@ import edu.rice.cs.hpcdata.experiment.scope.ScopeVisitType;
 import edu.rice.cs.hpcdata.experiment.scope.StatementRangeScope;
 import edu.rice.cs.hpcdata.filter.FilterAttribute;
 import edu.rice.cs.hpcdata.filter.IFilterData;
+import edu.rice.cs.hpcdata.util.CallPath;
 import edu.rice.cs.hpcdata.util.ICallPath;
 
 
@@ -39,20 +43,26 @@ import edu.rice.cs.hpcdata.util.ICallPath;
  ******************************************************************/
 public class FilterScopeVisitor implements IScopeVisitor 
 {
-	static public final int STATUS_INIT=0, STATUS_OK = 1, STATUS_FAKE_PROCEDURE = 2; 
+	public static final int STATUS_INIT=0;
+	public static final int STATUS_OK = 1;
+	public static final int STATUS_FAKE_PROCEDURE = 2; 
 	
 	private final IFilterData filter;
 	private final IExperiment experiment;
+	private final ICallPath   callPathTraces;
+	
 	private List<BaseMetric> metrics = null;
+	private List<Scope> listScopesToRemove;
+	private List<Scope> listTreeToRemove;
 	
 	/**** flag to allow the dfs to continue to go deeper or not.  
 	      For inclusive filter, we should stop going deeper      *****/
-	private boolean need_to_continue;
+	private boolean needToContinue;
 
-	private int num_scope_filtered = 0;
-	private int filterStatus 	   = STATUS_INIT;
-	private int current_depth;
-	private int max_depth;
+	private int numScopeFiltered = 0;
+	private int filterStatus     = STATUS_INIT;
+	private int currentDepth;
+	private int maxDepth;
 	
 	/***********
 	 * Constructor to filter a cct
@@ -63,17 +73,40 @@ public class FilterScopeVisitor implements IScopeVisitor
 	 */
 	public FilterScopeVisitor(RootScope rootOriginalCCT, IFilterData filter)
 	{
-		this.filter 		  = filter;
+		this.filter  = filter;
+		
 		rootOriginalCCT.getMetricValues();
-		need_to_continue 	  = true;
-		current_depth = 0;
-		max_depth = 0;
+		needToContinue 	= true;
+		currentDepth = 0;
+		maxDepth     = 0;
+		
+		listScopesToRemove = FastList.newList();
+		listTreeToRemove   = FastList.newList();
 		
 		experiment = rootOriginalCCT.getExperiment();
 		if (experiment instanceof Experiment)
 		{
-			metrics = ((Experiment)experiment).getMetricList();
+			Experiment exp = (Experiment) experiment;
+			metrics        = exp.getMetricList();
+			callPathTraces = exp.getScopeMap();
+		} else {
+			callPathTraces = null;
 		}
+	}
+	
+	
+	/*****
+	 * List of scopes to be removed.
+	 * 
+	 * @return
+	 */
+	public List<Scope> getScopeToRemove() {
+		return listScopesToRemove;
+	}
+	
+	
+	public List<Scope> getTreeToRemove() {
+		return listTreeToRemove;
 	}
 	
 	/**************
@@ -83,7 +116,7 @@ public class FilterScopeVisitor implements IScopeVisitor
 	 */
 	public boolean needToContinue()
 	{
-		return need_to_continue;
+		return needToContinue;
 	}
 	
 	
@@ -93,7 +126,7 @@ public class FilterScopeVisitor implements IScopeVisitor
 	 */
 	public int numberOfFilteredScopes() 
 	{
-		return num_scope_filtered;
+		return numScopeFiltered;
 	}
 	
 	
@@ -113,7 +146,7 @@ public class FilterScopeVisitor implements IScopeVisitor
 	 * @return int
 	 */
 	public int getMaxDepth() {
-		return max_depth;
+		return maxDepth;
 	}
 	
 	//----------------------------------------------------
@@ -147,8 +180,8 @@ public class FilterScopeVisitor implements IScopeVisitor
 		if (vt == ScopeVisitType.PreVisit) {
 			// Previsit
 			if (isScopeTrace(scope)) {
-				current_depth++;
-				max_depth = Math.max(max_depth, current_depth);
+				currentDepth++;
+				maxDepth = Math.max(maxDepth, currentDepth);
 			} 
 			FilterAttribute filterAttribute = filter.getFilterAttribute(scope.getName());
 			if (filterAttribute != null)
@@ -156,8 +189,8 @@ public class FilterScopeVisitor implements IScopeVisitor
 				if (filterStatus == STATUS_INIT) {
 					filterStatus = STATUS_OK;
 				}
-				num_scope_filtered++;
-				need_to_continue = (filterAttribute.filterType == FilterAttribute.Type.Self_Only);
+				numScopeFiltered++;
+				needToContinue = (filterAttribute.filterType == FilterAttribute.Type.Self_Only);
 
 				if (filterAttribute.filterType == FilterAttribute.Type.Descendants_Only)
 				{
@@ -167,12 +200,11 @@ public class FilterScopeVisitor implements IScopeVisitor
 					if (metrics != null)
 					{
 						// glue the metrics of all the children to the scope
-						for(Object child: scope.getChildren())
+						for(var child: scope.getChildren())
 						{
 							if (!(child instanceof LineScope))
 							{
-								Scope child_scope = (Scope) child;
-								mergeMetrics(scope, child_scope, false);
+								mergeMetrics(scope, child, false);
 							}
 						}
 					}
@@ -182,41 +214,39 @@ public class FilterScopeVisitor implements IScopeVisitor
 					// We need to remove the child using the iterator's remove method
 					// to avoid ConcurrentModificationException 
 					//-------------------------------------------------------------------
-					var iterator = scope.getChildren().iterator();
-					while (iterator.hasNext())
+					var childIterator = scope.getChildren().iterator();
+					while (childIterator.hasNext())
 					{
-						var child = iterator.next();
-						removeNode(iterator, (Scope) child, filterAttribute.filterType);
+						var child = childIterator.next();
+						removeNode(childIterator, child, filterAttribute.filterType);
 					}
 				} else
 				{
 					//-------------------------------------------------------------------
 					// Filtering the scope or/and the children
 					//-------------------------------------------------------------------
-					if (metrics  != null)
+					if (metrics != null && !(scope instanceof LineScope))
 					{
-						if (!(scope instanceof LineScope))
-						{
-							// no need to merge metric if the filtered child is a line statement.
-							// in this case, the parent (PF) already includes the exclusive value.
-							Scope parent = scope.getParentScope();
-							mergeMetrics(parent, scope, need_to_continue);
-						}
+						// no need to merge metric if the filtered child is a line statement.
+						// in this case, the parent (PF) already includes the exclusive value.
+						Scope parent = scope.getParentScope();
+						mergeMetrics(parent, scope, needToContinue);
 					}
 					removeChild(null, scope, vt, filterAttribute.filterType);
+					currentDepth--;
 				}
 			} else 
 			{
 				// filter is not needed, we can surely continue to investigate the descendants
-				need_to_continue = true;
+				needToContinue = true;
 			}	
 		} else 
 		{ // PostVisit
 			if (isScopeTrace(scope)) {
-				current_depth--;
+				currentDepth--;
 			}
 		}
-		return need_to_continue;
+		return needToContinue;
 	}
 	
 	
@@ -240,14 +270,13 @@ public class FilterScopeVisitor implements IScopeVisitor
 	 */
 	private void removeChild(Iterator<Scope> iterator, Scope childToRemove, ScopeVisitType vt, FilterAttribute.Type filterType)
 	{
-		// skip to current scope
-		Scope parent = removeNode(iterator, childToRemove, filterType);
-		
 		// remove its children and glue it the parent
 		if (filterType == FilterAttribute.Type.Self_Only)
 		{
-			addGrandChildren(parent, vt, childToRemove);
+			addGrandChildren(childToRemove.getParentScope(), childToRemove);
 		}
+		// skip to current scope
+		removeNode(iterator, childToRemove, filterType);
 	}
 	
 
@@ -266,36 +295,37 @@ public class FilterScopeVisitor implements IScopeVisitor
 	 * @see FilterAttribute.Type
 	 */
 	private Scope removeNode(Iterator<Scope> iterator, Scope child, FilterAttribute.Type filterType) {
-		// 1. remove the child node
 		Scope parent = child.getParentScope();
-		if (iterator == null)
-			parent.remove(child);
+
+		// move the trace call-path id (if exist) to the parent
+		if (experiment.getTraceDataVersion() > 0)
+			propagateTraceID(parent, child, filterType);
+
+		if (filterType == FilterAttribute.Type.Self_Only)
+			// remove the child node
+			listScopesToRemove.add(child);
 		else
-			iterator.remove();
-
-		// 2. move the trace call-path id (if exist) to the parent
-		propagateTraceID(parent, child, filterType);
-
-		// 3. clear the child node
-		child.setParentScope(null);
+			listTreeToRemove.add(child);
 		
 		return parent;
 	}
 	
 	
 	private void propagateTraceID(Scope parent, Scope child, FilterAttribute.Type filterType) {
-		if (filterType == FilterAttribute.Type.Self_Only)
+		if (filterType == FilterAttribute.Type.Self_Only) {
+			int depth = CallPath.getDepth(parent);
+			callPathTraces.replaceCallPath(child.getCpid(), parent, depth);
 			return;
+		}
 		
 		// children have been removed
 		// copy the cpid to the parent
 		CallPathTraceVisitor cptv = new CallPathTraceVisitor();
-		//cptv.map = experiment.getScopeMap();
-		cptv.parent_scope = parent;
-		cptv.parent_depth = current_depth-1;
+		cptv.parentScope  = parent;
+		cptv.callpathInfo = callPathTraces;
+		cptv.parentDepth  = CallPath.getDepth(parent);
 		
-		//child.dfsVisitScopeTree(cptv);
-
+		child.dfsVisitScopeTree(cptv);
 	}
 	
 	
@@ -303,18 +333,17 @@ public class FilterScopeVisitor implements IScopeVisitor
 	/*****
 	 * Add the grand children to the parent
 	 * @param parent
-	 * @param scope_to_remove
+	 * @param scopeToRemove
 	 */
-	private void addGrandChildren(Scope parent, ScopeVisitType vt, Scope scope_to_remove)
+	private void addGrandChildren(Scope parent, Scope scopeToRemove)
 	{
-		var children = scope_to_remove.getChildren();
+		var children = scopeToRemove.getChildren();
 		if (children != null)
 		{
-			for(Object child : children)
+			for(var child : children)
 			{
-				Scope child_scope = (Scope) child;
-				parent.addSubscope(child_scope);
-				child_scope.setParentScope(parent);
+				parent.addSubscope(child);
+				child.setParentScope(parent);
 			}
 		}
 	}
@@ -334,15 +363,13 @@ public class FilterScopeVisitor implements IScopeVisitor
 	 *
 	 * @param parent : the parent scope
 	 * @param child  : the child scope to be excluded  
-	 * @param exclusive_filter : whether to merge exclusive only (true) or inclusive metric
+	 * @param exclusiveFilter : whether to merge exclusive only (true) or inclusive metric
 	 * 	to the exclusive metric of the parent
 	 */
-	private void mergeMetrics(Scope parent, Scope child, boolean exclusive_filter)
+	private void mergeMetrics(Scope parent, Scope child, boolean exclusiveFilter)
 	{
-		if (parent instanceof ProcedureScope) {
-			if (((ProcedureScope)parent).isFalseProcedure() ) {
-				filterStatus = STATUS_FAKE_PROCEDURE;
-			}
+		if (parent instanceof ProcedureScope && ((ProcedureScope)parent).isFalseProcedure()) {
+			filterStatus = STATUS_FAKE_PROCEDURE;
 		}
 		// we need to merge the metric values
 		IMetricValueCollection values = child.getMetricValues();
@@ -356,7 +383,7 @@ public class FilterScopeVisitor implements IScopeVisitor
 				//  merging to the parent since x - 1 is not the same as x - 0
 				continue;
 			}
-			if (exclusive_filter && metric.getMetricType() == MetricType.EXCLUSIVE)
+			if (exclusiveFilter && metric.getMetricType() == MetricType.EXCLUSIVE)
 			{
 				// fix Marty's reported bug that filtering a loop or a line scope
 				// double count the exclusive cost of the procedure scope parent. 
@@ -373,12 +400,12 @@ public class FilterScopeVisitor implements IScopeVisitor
 				// exclusive filter: merge the exclusive metrics to the parent's exclusive
 				mergeMetricToParent(parent, metric.getIndex(), childValue);
 				
-			} else if (!exclusive_filter && metric.getMetricType() == MetricType.INCLUSIVE)
+			} else if (!exclusiveFilter && metric.getMetricType() == MetricType.INCLUSIVE)
 			{
 				// inclusive filter: merge the inclusive metrics to the parent's exclusive
-				int index_exclusive_metric = metric.getPartner();
-				BaseMetric metric_exc = ((Experiment)experiment).getMetric(index_exclusive_metric);
-				mergeMetricToParent(parent, metric_exc.getIndex(), childValue);
+				int exclusiveMetricIndex   = metric.getPartner();
+				BaseMetric exclusiveMetric = ((Experiment)experiment).getMetric(exclusiveMetricIndex);
+				mergeMetricToParent(parent, exclusiveMetric.getIndex(), childValue);
 			}
 		}
 	}
@@ -422,35 +449,34 @@ public class FilterScopeVisitor implements IScopeVisitor
      *
 	 * @param root
 	 * @param target
-	 * @param metric_exclusive_index
+	 * @param exclusiveMetricIndex
 	 * @param mvChild
 	 */
 	private void mergeMetricToParent(Scope target, 
-			int metric_exclusive_index, MetricValue mvChild)
+			int exclusiveMetricIndex, MetricValue mvChild)
 	{
 		// corner case: we shouldn't modify the value of the root.
 		// they are supposed to be constant, unless it's a derived metric :-(
 		if (target instanceof RootScope)
 			return;
 		
-		MetricValue mvParentExc = target.getMetricValue(metric_exclusive_index);
+		MetricValue mvParentExc = target.getMetricValue(exclusiveMetricIndex);
 		float value = 0;
 		if (mvParentExc.getValue() >= 0) {
 			// Initialize with the original value if it has a value (otherwise the value is -1)
 			value = mvParentExc.getValue();
 		}
 		// update the filtered value
-		value             += mvChild.getValue();
-		
+		value            += mvChild.getValue();		
 		MetricValue mv    = new MetricValue(value);
-		target.setMetricValue(metric_exclusive_index, mv);
+		target.setMetricValue(exclusiveMetricIndex, mv);
 	}
 	
 	
 	private static class CallPathTraceVisitor implements IScopeVisitor
 	{
-		Scope parent_scope;
-		int parent_depth;
+		Scope parentScope;
+		int parentDepth;
 		ICallPath callpathInfo;
 		
 		//----------------------------------------------------
@@ -470,8 +496,8 @@ public class FilterScopeVisitor implements IScopeVisitor
 		private void update(Scope scope, ScopeVisitType vt) {
 			if (vt == ScopeVisitType.PreVisit) {
 				int cpid = scope.getCpid();
-				if (cpid >= 0) {
-					callpathInfo.addCallPath(cpid, parent_scope, parent_depth);
+				if (cpid > 0) {
+					callpathInfo.replaceCallPath(cpid, parentScope, parentDepth);
 				}
 			}
 		}

@@ -51,4 +51,10 @@ public class RemoteDatabaseRepresentation implements IDatabaseRepresentation
 	public void setFile(File file) {
 		fileExperiment = file;
 	}
+
+
+	@Override
+	public int getTraceDataVersion() {
+		return 0;
+	}
 }

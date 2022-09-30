@@ -59,7 +59,7 @@ public class FileDB4 implements IFileDB
 		
 		var rootCCT = ((BaseExperiment)experiment).getRootScope(RootScopeType.CallingContextTree);
 		
-		if (rootCCT != null) {
+		if (rootCCT != null && experiment.getScopeMap() == null) {
 			// needs to gather info about cct id and its depth
 			// this is needed for traces
 			TraceScopeVisitor visitor = new TraceScopeVisitor();

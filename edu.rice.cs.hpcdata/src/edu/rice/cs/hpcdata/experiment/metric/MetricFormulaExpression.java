@@ -63,6 +63,12 @@ public class MetricFormulaExpression
 		
 		String name = node.getName();
 		String varIndex = name.substring(1);
+		
+		// corner case for hierarchical metric from meta.db:
+		// $$ means the value of itself. There is nothing to be renamed here.
+		if (varIndex.charAt(0) == '$')
+			return;
+		
 		Integer intIndex = Integer.valueOf(varIndex);
 		Integer newIndex = map.get(intIndex);
 		if (newIndex != null) {

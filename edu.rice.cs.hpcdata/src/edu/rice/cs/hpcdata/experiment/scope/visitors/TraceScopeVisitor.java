@@ -145,7 +145,7 @@ public class TraceScopeVisitor implements IScopeVisitor
 				// to make it the same as the scope.
 				current = scope;
 			
-			callpath.addCallPath(scope.getCCTIndex(), current, currentDepth);
+			callpath.addCallPath(scope.getCpid(), current, currentDepth);
 
 		} else {
 			if (CallPath.isTraceScope(scope))

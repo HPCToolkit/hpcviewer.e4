@@ -16,23 +16,26 @@ import edu.rice.cs.hpcdata.util.Util;
 public class LocalDatabaseRepresentation implements IDatabaseRepresentation 
 {
 	private File fileExperiment;
-	final private IUserData<String, String> userData; 
-	final private boolean need_metric;
+	private final IUserData<String, String> userData; 
+	private final boolean needMetric;
 
 	/*****
 	 * Create a local database representation. T
 	 * 
-	 * @param location : the location of database. It can be a file or directory
+	 * @param location 
+	 * 			the location of database. It can be a file or directory
 	 * @param userData
-	 * @param need_metric
+	 * 			User-defined data
+	 * @param needMetric
+	 * 			true if metrics are needed (for compatibility with old database only)
 	 */
 	public LocalDatabaseRepresentation(File location, 
 			IUserData<String, String> userData, 
-			boolean need_metric)
+			boolean needMetric)
 	{
 		this.fileExperiment = location;
 		this.userData		= userData;
-		this.need_metric	= need_metric;
+		this.needMetric	    = needMetric;
 	}
 	
 
@@ -40,19 +43,16 @@ public class LocalDatabaseRepresentation implements IDatabaseRepresentation
 	public void open(IExperiment experiment) throws Exception
 	{	
 		ExperimentFile reader = DatabaseManager.getDatabaseReader(fileExperiment);
-		fileExperiment = reader.parse(fileExperiment, experiment, need_metric, userData);	
+		fileExperiment = reader.parse(fileExperiment, experiment, needMetric, userData);	
 	}
 
 	@Override
 	public IDatabaseRepresentation duplicate() {
 		// we need to copy the path just in case it will be modified by the caller
 		final String path   = this.fileExperiment.getAbsolutePath();
-		File fileExperiment = new File(path);
 		
 		// create a new representation
-		LocalDatabaseRepresentation dup = new LocalDatabaseRepresentation(fileExperiment, userData, need_metric);
-		
-		return dup;
+		return new LocalDatabaseRepresentation(new File(path), userData, needMetric);
 	}
 
 	@Override
@@ -74,38 +74,56 @@ public class LocalDatabaseRepresentation implements IDatabaseRepresentation
 	 * @return int 
 	 * 			version of the database if the database is correct and valid
 	 * 			   return negative number otherwise
+	 * 
+	 * @see Constants.EXPERIMENT_SPARSE_VERSION
+	 * @see Constants.EXPERIMENT_DENSED_VERSION
 	 */
-	static public int directoryHasTraceData(String directory)
+	public static int directoryHasTraceData(String directory)
 	{
 		File file = new File(directory);
-		String database_directory;
+		String databaseDirectory;
 		if (file.isFile()) {
 			// if the argument is a file, then we'll look for its parent directory
 			file = file.getParentFile();
-			database_directory = file.getAbsolutePath();
+			databaseDirectory = file.getAbsolutePath();
 		} else {
-			database_directory = directory;
+			databaseDirectory = directory;
 		}
 		// checking for version 4.0
-		String file_path = database_directory + File.separatorChar + Constants.TRACE_FILE_SPARSE_VERSION;
-		File tmp_file 	 = new File(file_path);
-		if (tmp_file.canRead()) {
+		String filePath = databaseDirectory + File.separatorChar + Constants.TRACE_FILE_SPARSE_VERSION;
+		File tmpFile 	= new File(filePath);
+		if (tmpFile.canRead()) {
 			return Constants.EXPERIMENT_SPARSE_VERSION;
 		}
 		
 		// checking for version 2.0
-		file_path = database_directory + File.separatorChar + "experiment.mt";
-		tmp_file  = new File(file_path);
-		if (tmp_file.canRead()) {
+		filePath = databaseDirectory + File.separatorChar + "experiment.mt";
+		tmpFile  = new File(filePath);
+		if (tmpFile.canRead()) {
 			return Constants.EXPERIMENT_DENSED_VERSION;
 		}
 		
 		// checking for version 2.0 with old format files
-		tmp_file  = new File(database_directory);
-		File[] file_hpctraces = tmp_file.listFiles( new Util.FileThreadsMetricFilter("*.hpctrace") );
-		if (file_hpctraces != null && file_hpctraces.length>0) {
+		tmpFile  = new File(databaseDirectory);
+		File[] fileHpctraces = tmpFile.listFiles( new Util.FileThreadsMetricFilter("*.hpctrace") );
+		if (fileHpctraces != null && fileHpctraces.length>0) {
 			return 1;
 		}
 		return -1;
+	}
+
+
+	@Override
+	/****
+	 * 
+	 * @return int 
+	 * 			version of the database if the database is correct and valid
+	 * 			   return negative number otherwise
+	 * 
+	 * @see Constants.EXPERIMENT_SPARSE_VERSION
+	 * @see Constants.EXPERIMENT_DENSED_VERSION
+	 */
+	public int getTraceDataVersion() {
+		return directoryHasTraceData(fileExperiment.getAbsolutePath());
 	}
 }

@@ -41,7 +41,7 @@ public class MetricValueCollectionWithStorage implements IMetricValueCollection
 	@Override
 	public MetricValue getValue(Scope scope, int index) {
 
-		RootScope root = scope.getRootScope();
+		RootScope root = scope instanceof RootScope ? (RootScope)scope : scope.getRootScope();
 		Experiment experiment = (Experiment) root.getExperiment();
 		BaseMetric metric = experiment.getMetric(index);
 		
