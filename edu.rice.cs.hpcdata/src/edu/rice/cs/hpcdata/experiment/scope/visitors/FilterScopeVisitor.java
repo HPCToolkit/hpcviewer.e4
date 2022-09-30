@@ -26,6 +26,7 @@ import edu.rice.cs.hpcdata.experiment.scope.ScopeVisitType;
 import edu.rice.cs.hpcdata.experiment.scope.StatementRangeScope;
 import edu.rice.cs.hpcdata.filter.FilterAttribute;
 import edu.rice.cs.hpcdata.filter.IFilterData;
+import edu.rice.cs.hpcdata.util.CallPath;
 import edu.rice.cs.hpcdata.util.ICallPath;
 
 
@@ -232,6 +233,7 @@ public class FilterScopeVisitor implements IScopeVisitor
 						mergeMetrics(parent, scope, needToContinue);
 					}
 					removeChild(null, scope, vt, filterAttribute.filterType);
+					currentDepth--;
 				}
 			} else 
 			{
@@ -311,16 +313,17 @@ public class FilterScopeVisitor implements IScopeVisitor
 	
 	private void propagateTraceID(Scope parent, Scope child, FilterAttribute.Type filterType) {
 		if (filterType == FilterAttribute.Type.Self_Only) {
-			callPathTraces.replaceCallPath(child.getCpid(), parent, currentDepth);
+			int depth = CallPath.getDepth(parent);
+			callPathTraces.replaceCallPath(child.getCpid(), parent, depth);
 			return;
 		}
 		
 		// children have been removed
 		// copy the cpid to the parent
 		CallPathTraceVisitor cptv = new CallPathTraceVisitor();
-		cptv.parentScope = parent;
+		cptv.parentScope  = parent;
 		cptv.callpathInfo = callPathTraces;
-		cptv.parentDepth = currentDepth-1;
+		cptv.parentDepth  = CallPath.getDepth(parent);
 		
 		child.dfsVisitScopeTree(cptv);
 	}
