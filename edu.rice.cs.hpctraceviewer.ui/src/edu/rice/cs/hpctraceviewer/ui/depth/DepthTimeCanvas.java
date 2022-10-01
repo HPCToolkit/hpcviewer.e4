@@ -45,8 +45,8 @@ import edu.rice.cs.hpctraceviewer.data.Position;
 public class DepthTimeCanvas extends AbstractTimeCanvas 
 	implements IOperationHistoryListener, ISpaceTimeCanvas
 {	
-	private final static float FRACTION_ZOOM_DEPTH = 2.0f;
-	private final static int   DEPTH_MIN = 1;
+	private static final float FRACTION_ZOOM_DEPTH = 2.0f;
+	private static final int   DEPTH_MIN = 1;
 	
 	private final ITracePart tracePart;
 
@@ -144,13 +144,7 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 	{
 		if (bound == null) {
 			final Display display = Display.getDefault();
-			display.syncExec(new Runnable() {
-				
-				@Override
-				public void run() {
-					bound = getClientArea();
-				}
-			});
+			display.syncExec( () -> bound = getClientArea() );
 		}
 		final int viewWidth = bound.width;
 
@@ -216,7 +210,7 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 
 	// remove queue of jobs because it causes deadlock 
 	// 
-	final private ConcurrentLinkedQueue<BaseViewPaint> queue = new ConcurrentLinkedQueue<>();
+	private final ConcurrentLinkedQueue<BaseViewPaint> queue = new ConcurrentLinkedQueue<>();
 
 	/****
 	 * Remove the jobs in the waiting list

@@ -74,8 +74,8 @@ public class ThreadDataTest
 			assertEquals(sparseLabels.length, labels.length);
 			
 			for(int i=1; i<sparseLabels.length; i++) {
-				assertTrue(sparseLabels[i-1] < sparseLabels[i]);
-				assertTrue(labels[i-1] < labels[i]);
+				assertTrue(sparseLabels[i-1] <= sparseLabels[i]);
+				assertTrue(labels[i-1] <= labels[i]);
 			}
 		}
 	}

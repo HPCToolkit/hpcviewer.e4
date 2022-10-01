@@ -330,13 +330,16 @@ public class DataSummary extends DataCommon
 	 */
 	public double[] getDoubleLableIdTuples() {
 		if (labels == null) {
-			labels = new double[info.piElements.length-1];
+			
+			labels = new double[listIdTuple.size()];
 			
 			// id 0 is reserved
-			for(int i=1; i<info.piElements.length; i++) {
-				// at the moment we don't translate the id tuple to number
-				// This is a temporary hack, we need to find a better approach
-				labels[i-1] = i-1.0f;
+			int j=0;
+			for(var idt: listIdTuple) {
+				if (!idt.isGPU(idTupleTypes)) {
+					labels[j] = idt.toNumber();
+					j++;
+				}
 			}		
 		}
 		return labels;
