@@ -5,10 +5,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
@@ -80,7 +78,7 @@ public class DepthEditor implements EventHandler
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(depthArea);
 		GridLayoutFactory.fillDefaults().numColumns(3).applyTo(depthArea);
 		
-		maxDepthButton.addSelectionListener(new SelectionListener() {
+		maxDepthButton.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -93,64 +91,46 @@ public class DepthEditor implements EventHandler
 
 				depthEditor.setSelection(depth);
 			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
 		
-		depthEditor.addModifyListener(new ModifyListener() {
+		depthEditor.addModifyListener(e -> {
+			if (!getEnableAction())
+				return;
 			
-			@Override
-			public void modifyText(ModifyEvent e) {
-				if (!getEnableAction())
-					return;
-				
-				String string = depthEditor.getText();
-				int value = 0;
-				if (string.length()<1) {
-					// be careful: on linux/GTK, any change in the spinner will consists of two steps:
-					//  1) empty the string
-					//  2) set with the specified value
-					// therefore, we consider any empty string to be illegal
-					return;
-				} else {
-					try {
-						value = Integer.valueOf(string);
-					} catch (final NumberFormatException errorException) {
-						e.display.asyncExec(new Runnable() {
-							
-							@Override
-							public void run() {
-								Color yellow = depthEditor.getDisplay().getSystemColor(SWT.COLOR_YELLOW);
-								depthEditor.setBackground(yellow);
-								depthEditor.setToolTipText("Incorrect number: " + errorException.getMessage());
-							}
-						});
-						return;
-					}
-				}
-				
-				final int maximum = depthEditor.getMaximum();
-				int minimum = 0;
-
-				if (value > maximum) {
-					value = maximum;
-					
-					e.display.asyncExec(new Runnable() {
-						
-						@Override
-						public void run() {
-							Shell shell = e.widget.getDisplay().getActiveShell();
-							MessageDialog.openWarning(shell, "Value not allowed", 
-									  "The value is higher than the maximum depth (" + maximum +").");
-						}
+			String string = depthEditor.getText();
+			int value = 0;
+			if (string.length()<1) {
+				// be careful: on linux/GTK, any change in the spinner will consists of two steps:
+				//  1) empty the string
+				//  2) set with the specified value
+				// therefore, we consider any empty string to be illegal
+				return;
+			} else {
+				try {
+					value = Integer.valueOf(string);
+				} catch (final NumberFormatException errorException) {
+					e.display.asyncExec(() -> {
+						Color yellow = depthEditor.getDisplay().getSystemColor(SWT.COLOR_YELLOW);
+						depthEditor.setBackground(yellow);
+						depthEditor.setToolTipText("Incorrect number: " + errorException.getMessage());
 					});
+					return;
 				}
-				if (value < minimum) {
-					value = minimum;
-				}
-				broadcast(value);
 			}
+			
+			final int maximum = depthEditor.getMaximum();
+
+			if (value > maximum) {
+				value = maximum;
+				
+				e.display.asyncExec(() -> {
+					Shell shell = e.widget.getDisplay().getActiveShell();
+					MessageDialog.openWarning(shell, "Value not allowed", 
+							  "The value is higher than the maximum depth (" + maximum +").");
+				});
+			}
+			value = Math.max(value, 0);
+			broadcast(value);
 		});
 		eventBroker.subscribe(IConstants.TOPIC_DEPTH_UPDATE, this);
 	}
@@ -167,7 +147,7 @@ public class DepthEditor implements EventHandler
 		//  like many in depth views, depend on the definition that max_depth = max_call_path + 1
 		// Hence, it's simpler to correct the max depth here.
 		
-		final int maxDepth = data.getMaxDepth()-1;
+		final int maxDepth = data.getMaxDepth();
 		depthEditor.setSelection(0);
 		depthEditor.setMaximum(maxDepth);		
 		depthEditor.setVisible(true);

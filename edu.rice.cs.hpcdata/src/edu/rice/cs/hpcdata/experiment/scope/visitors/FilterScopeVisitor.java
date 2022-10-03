@@ -179,7 +179,7 @@ public class FilterScopeVisitor implements IScopeVisitor
 
 		if (vt == ScopeVisitType.PreVisit) {
 			// Previsit
-			if (isScopeTrace(scope)) {
+			if (CallPath.isTraceScope(scope)) {
 				currentDepth++;
 				maxDepth = Math.max(maxDepth, currentDepth);
 			} 
@@ -236,23 +236,17 @@ public class FilterScopeVisitor implements IScopeVisitor
 					mergeMetrics(parent, scope, needToContinue);
 				}
 				removeChild(null, scope, vt, filterAttribute.filterType);
-				currentDepth--;
 			}
 		} else 
 		{ // PostVisit
-			if (isScopeTrace(scope)) {
+			if (CallPath.isTraceScope(scope)) {
 				currentDepth--;
 			}
 		}
 		return needToContinue;
 	}
 	
-	
-	private boolean isScopeTrace(Scope scope) {
-		return (scope instanceof ProcedureScope || scope instanceof CallSiteScope) ;
-	}
-	
-	
+		
 	/********
 	 * Remove a child from its parent. if the filter type is SELF, we'll attach the grandchildren
 	 * to the parent
