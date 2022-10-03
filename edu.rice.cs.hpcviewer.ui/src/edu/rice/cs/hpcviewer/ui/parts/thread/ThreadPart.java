@@ -5,13 +5,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.Shell;
+import org.osgi.service.event.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.experiment.Experiment;
@@ -19,6 +22,7 @@ import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
+import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcfilter.FilterDataItem;
 import edu.rice.cs.hpcfilter.StringFilterDataItem;
@@ -88,7 +92,29 @@ public class ThreadPart extends TopDownPart
 		setShowClose(true);
 	}
 
-	
+	@Override
+	public void handleEvent(Event event) {
+		super.handleEvent(event);
+		
+		String topic = event.getTopic();
+		if (topic.equals(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH)) {
+			Object obj = event.getProperty(IEventBroker.DATA);
+			if (obj instanceof ViewerDataEvent) {
+				ViewerDataEvent data = (ViewerDataEvent) obj;
+				if (data.metricManager instanceof Experiment) {
+					// grab the new root of the refreshed database
+					var newRoot = ((Experiment) data.metricManager).getRootScope(RootScopeType.CallingContextTree);
+					
+					// duplicate codes from AbstractTableView to refresh the table
+					// need to avoid duplication
+					viewInput.setRootScope(newRoot);
+					getActionManager().clear();
+					getTable().reset(newRoot);
+					updateButtonStatus();
+				}
+			}
+		}
+	}
 	
 	@Override
 	public Object getInput() {

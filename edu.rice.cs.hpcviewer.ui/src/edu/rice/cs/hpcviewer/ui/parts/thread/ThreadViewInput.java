@@ -8,8 +8,8 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 
 public class ThreadViewInput 
 {
-	private final RootScope rootScope; 
 	private final IThreadDataCollection threadData;
+	private RootScope rootScope; 
 	private List<IdTuple> threads;
 	
 	public ThreadViewInput(RootScope rootScope, IThreadDataCollection threadData, List<IdTuple> idTuples) {
@@ -20,6 +20,10 @@ public class ThreadViewInput
 	
 	public RootScope getRootScope() {
 		return rootScope;
+	}
+	
+	public void setRootScope(RootScope root) {
+		this.rootScope = root;
 	}
 
 	public IThreadDataCollection getThreadData() {
