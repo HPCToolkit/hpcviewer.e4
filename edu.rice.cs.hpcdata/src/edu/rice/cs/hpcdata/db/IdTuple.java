@@ -89,17 +89,18 @@ public class IdTuple
 	 * getIndex(IdTupleType.KIND_RANK) will return 0
 	 * getIndex(IdTupleType.KIND_THREAD) returns 1
 	 * </pre>
-	 * @param kindRank {@code short} the type of id tuple. Must be one of IdTupleType.KIND_*
+	 * @param kindType {@code short} the type of id tuple. Must be one of IdTupleType.KIND_*
 	 * 
-	 * @return {@code long} the index of the id tuple. Zero if no type is found.
+	 * @return {@code long} the index of the id tuple. 
+	 * 			A negative number if no type is found.
 	 */
-	public long getIndex(int kindRank) {
+	public long getIndex(byte kindType) {
 		for (int i=0; i<kinds.length; i++) {
-			if (kinds[i] == kindRank) {
+			if (kinds[i] == kindType) {
 				return physicalIndexes[i];
 			}
 		}
-		return 0;
+		return -1;
 	}
 	
 	public int getLength() {

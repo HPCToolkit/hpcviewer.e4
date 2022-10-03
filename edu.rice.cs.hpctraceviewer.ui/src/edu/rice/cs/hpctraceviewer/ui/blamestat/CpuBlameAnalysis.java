@@ -157,7 +157,7 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 		}
 		
 		IdTuple tag = listTuples.get(process);
-		int rank = (int) tag.getIndex(IdTupleType.KIND_RANK);
+		int rank = (int) Math.max(0, tag.getIndex(IdTupleType.KIND_RANK));
 				
 		isCpuThread = !tag.isGPU(dataTraces.getExperiment().getIdTupleType());
 

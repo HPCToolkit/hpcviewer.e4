@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
+import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
 import edu.rice.cs.hpcdata.db.version4.DataPlot;
 import edu.rice.cs.hpcdata.db.version4.DataPlotEntry;
@@ -63,6 +64,17 @@ public class ThreadDataCollection4 extends AbstractThreadDataCollection
 
 	@Override
 	public String getRankTitle() {
+		var idtuples = dataSummary.getIdTuple();
+		var isRank = idtuples.stream().anyMatch(idt -> idt.getIndex(IdTupleType.KIND_RANK) >= 0);
+		var isThread = idtuples.stream().anyMatch(idt -> idt.getIndex(IdTupleType.KIND_THREAD) >= 0);
+		
+		if (isRank && isThread) 
+			return "Rank.Thread";
+		else if (isRank)
+			return "Rank";
+		else if (isThread)
+			return "Thread";
+		
 		return "Context";
 	}
 
@@ -83,7 +95,7 @@ public class ThreadDataCollection4 extends AbstractThreadDataCollection
 		
 		List<IdTuple> list = dataSummary.getIdTuple();
 		
-		final int num_ranks 	= Math.max(1, list.size());
+		final int num_ranks 	= Math.max(1, list.size()); // shouldn't include gpus
 		final double []metrics	= new double[num_ranks];
 		
 		// if there is no plot data in the database, we return an array of zeros
