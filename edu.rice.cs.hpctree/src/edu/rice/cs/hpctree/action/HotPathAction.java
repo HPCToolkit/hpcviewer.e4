@@ -1,12 +1,9 @@
 package edu.rice.cs.hpctree.action;
 
 
-import java.util.List;
-
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 import edu.rice.cs.hpctree.IScopeTreeAction;
 import edu.rice.cs.hpctree.ScopeTreeTable;
 
@@ -72,7 +69,7 @@ public class HotPathAction
 		if(scope == null || metric == null )
 			return false;
 
-		List<? extends TreeNode> children = treeAction.traverseOrExpand(scope);
+		var children = treeAction.traverseOrExpand(scope);
 		
 		// singly depth first search
 		// bug fix: we only drill once !
@@ -82,8 +79,8 @@ public class HotPathAction
 
 			// compare the value of the parent and the child
 			// if the ratio is significant, we stop 
-			MetricValue mvParent = metric.getValue(scope);
-			MetricValue mvChild  = metric.getValue(scopeChild);
+			MetricValue mvParent = scope.getMetricValue(metric);
+			MetricValue mvChild  = scopeChild.getMetricValue(metric);
 			
 			double dParent = MetricValue.getValue(mvParent);
 			double dChild  = MetricValue.getValue(mvChild);

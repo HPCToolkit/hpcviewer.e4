@@ -38,9 +38,6 @@
       <import plugin="org.eclipse.e4.core.commands"/>
       <import plugin="org.eclipse.osgi"/>
       <import plugin="org.eclipse.equinox.common"/>
-      <import plugin="javax.xml"/>
-      <import plugin="org.apache.xml.resolver"/>
-      <import plugin="org.apache.xml.serializer"/>
       <import plugin="org.eclipse.text"/>
       <import plugin="org.eclipse.jface"/>
       <import plugin="org.eclipse.emf.common"/>
@@ -74,34 +71,6 @@
 
    <plugin
          id="com.graphbuilder"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.xerces"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="javax.xml"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.xml.resolver"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.xml.serializer"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -179,13 +148,6 @@
 
    <plugin
          id="org.swtchart.ext"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="edu.rice.cs.hpcdata.tld"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -341,6 +303,13 @@
 
    <plugin
          id="edu.rice.cs.hpcfilter"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.yaml.snakeyaml"
          download-size="0"
          install-size="0"
          version="0.0.0"

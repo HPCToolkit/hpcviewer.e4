@@ -21,7 +21,7 @@ import java.text.NumberFormat;
 
 import edu.rice.cs.hpcdata.db.DatabaseManager;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.experiment.source.FileSystemSourceFile;
+import edu.rice.cs.hpcdata.experiment.source.EmptySourceFile;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
 
 import java.text.DecimalFormat;
@@ -84,7 +84,7 @@ public static DecimalFormat makeDecimalFormatter(String pattern)
 {
 	// make a formatter, checking that the locale allows this
 	NumberFormat nf = NumberFormat.getInstance();
-	Dialogs.Assert( nf instanceof DecimalFormat, "bad arg to Util::makeDecimalFormatter");
+	assert ( nf instanceof DecimalFormat) : "bad arg to Util::makeDecimalFormatter";
 	DecimalFormat df = (DecimalFormat) nf;
 	
 	// apply the given pattern
@@ -300,30 +300,11 @@ static public void printMemory() {
  * @return true if the source is available. false otherwise
  */
 static public boolean isFileReadable(Scope scope) {
-	// check if the source code availability is already computed
-	if(scope.iSourceCodeAvailability == Scope.SOURCE_CODE_UNKNOWN) {
-		SourceFile newFile = (scope.getSourceFile());
-		if (newFile != null && !newFile.getName().isEmpty()) {
-    		if( (newFile != SourceFile.NONE)
-        			|| ( newFile.isAvailable() )  ) {
-        			if (newFile instanceof FileSystemSourceFile) {
-        				FileSystemSourceFile objFile = (FileSystemSourceFile) newFile;
-        				if(objFile != null) {
-        					// find the availability of the source code
-        					if (objFile.isAvailable()) {
-        						scope.iSourceCodeAvailability = Scope.SOURCE_CODE_AVAILABLE;
-        						return true;
-        					} 
-        				}
-        			}
-        		}
-		}
-	} else
-		// the source code availability is already computed, we just reuse it
-		return (scope.iSourceCodeAvailability == Scope.SOURCE_CODE_AVAILABLE);
-	// in this level, we don't think the source code is available
-	scope.iSourceCodeAvailability = Scope.SOURCE_CODE_NOT_AVAILABLE;
-	return false;
-}
 
+	SourceFile newFile = (scope.getSourceFile());
+	if (newFile == null || newFile instanceof EmptySourceFile)
+		return false;
+
+	return (newFile.isAvailable());
+}
 }

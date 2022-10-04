@@ -1,11 +1,14 @@
 package edu.rice.cs.hpctraceviewer.data;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Vector;
 
 import edu.rice.cs.hpcdata.db.version4.DataRecord;
 import edu.rice.cs.hpcdata.util.Constants;
+import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.version2.AbstractBaseData;
 
 /***********************************************************
@@ -19,49 +22,68 @@ import edu.rice.cs.hpctraceviewer.data.version2.AbstractBaseData;
  ***********************************************************/
 public class TraceDataByRank implements ITraceDataCollector 
 {
-
 	//	tallent: safe to assume version 1.01 and greater here
-	public final static int HeaderSzMin = Header.MagicLen + Header.VersionLen + Header.EndianLen + Header.FlagsLen;
-	public final static int RecordSzMin = Constants.SIZEOF_LONG // time stamp
+	public static final int HeaderSzMin = Header.MagicLen + Header.VersionLen + Header.EndianLen + Header.FlagsLen;
+	public static final int RecordSzMin = Constants.SIZEOF_LONG // time stamp
 										+ Constants.SIZEOF_INT; // call path id
 	
-	//These must be initialized in local mode. They should be considered final unless the data is remote.
-	private AbstractBaseData   data;
-	private Vector<DataRecord> listcpid;
+	public static final float NUM_PIXELS_TOLERATED = 1.0f;
+
+	private final TraceOption option;
+
+	/** 
+	 * These must be initialized in local mode. 
+	 * They should be considered final unless the data is remote.*/
+	private final AbstractBaseData   data;
 	
-	private int numPixelH;
-	private int rank;
+	private final int numPixelH;
+	private final int rank;
 	
+	private List<DataRecord> listcpid;
 	
 	/***
 	 * Create a new instance of trace data for a given rank of process or thread 
 	 * Used only for local
-	 * @param _data
-	 * @param _rank
-	 * @param _numPixelH
+	 * @param dataAccess
+	 * @param currentRank
+	 * @param widthInPixels
 	 */
-	public TraceDataByRank(AbstractBaseData _data, int _rank, int _numPixelH)
+	public TraceDataByRank(AbstractBaseData dataAccess, int currentRank, int widthInPixels)
 	{
 		//:'( This is a safe cast because this constructor is only
 		//called in local mode but it's so ugly....
-		data = _data;
-		rank = _rank;
-		numPixelH = _numPixelH;
-
-		listcpid = new Vector<DataRecord>(numPixelH);
+		data = dataAccess;
+		rank = currentRank;
+		numPixelH = widthInPixels;
+		
+		option = isGPU() && TracePreferenceManager.getGPUTraceExposure() ?
+				  	ITraceDataCollector.TraceOption.REVEAL_GPU_TRACE :
+					ITraceDataCollector.TraceOption.ORIGINAL_TRACE;
+		
+		listcpid = new ArrayList<>(numPixelH);
 	}
+
 	
 	/***
 	 * Special constructor for remote database
 	 * @param data
+	 * @param rank
 	 */
-	public TraceDataByRank(DataRecord[] data) {
-		listcpid = new Vector<DataRecord>(Arrays.asList(data));
+	public TraceDataByRank(DataRecord[] data, int rank) {
+		listcpid = new Vector<>(Arrays.asList(data));
+		this.rank = rank;
+		
+		this.data = null;// unused
+		numPixelH = 0;	 // unused
+		
+		option = isGPU() && TracePreferenceManager.getGPUTraceExposure() ?
+				  	ITraceDataCollector.TraceOption.REVEAL_GPU_TRACE :
+					ITraceDataCollector.TraceOption.ORIGINAL_TRACE;
 	}
 	
 	@Override
 	public boolean isEmpty() {
-		return listcpid == null || listcpid.size()==0;
+		return listcpid == null || listcpid.isEmpty();
 	}
 
 	@Override
@@ -73,8 +95,6 @@ public class TraceDataByRank implements ITraceDataCollector
 	 * Reading data from file. This method has to be called FIRST before calling other APIs.
 	 * @apiNote This is a hack. If possible, call this immediately after the constructor.
 	 * 
-	 * @param rank
-	 * 			The rank number. A rank can be a process or a thread or a GPU stream.
 	 * @param timeStart
 	 * @param timeRange
 	 * @param pixelLength 
@@ -82,8 +102,8 @@ public class TraceDataByRank implements ITraceDataCollector
 	 * @throws IOException 
 	 */
 	@Override
-	public void readInData(int rank, long timeStart, long timeRange, double pixelLength) throws IOException
-	{			
+	public void readInData(long timeStart, long timeRange, double pixelLength) throws IOException
+	{
 		long minloc = data.getMinLoc(rank);
 		long maxloc = data.getMaxLoc(rank);
 		
@@ -138,13 +158,15 @@ public class TraceDataByRank implements ITraceDataCollector
 	}
 	
 	
-	/**Gets the time that corresponds to the index sample in times.
-	 * @param sample the index sample
+	/**
+	 * Gets the time that corresponds to the index sample in times.
+	 * @param sample 
+	 * 			the index sample
 	 * */
 	@Override
 	public long getTime(int sample)
 	{
-		if(sample<0 || listcpid == null || listcpid.size() == 0)
+		if(sample<0 || listcpid == null || listcpid.isEmpty())
 			return 0;
 
 		final int last_index = listcpid.size() - 1;
@@ -167,13 +189,6 @@ public class TraceDataByRank implements ITraceDataCollector
 			return listcpid.get(sample).cpId;
 		return -1;
 	}
-	
-	// Intentionally remove an unused method
-	// Nathan: could you please derive your own class to add additional feature ?
-	/*public int getMetricId(int sample)
-	{
-		return 0;//listcpid.get(sample).metricId;
-	}*/
 
 	
 	/**Shifts all the times in the ProcessTimeline to the left by lowestStartingTime.*/
@@ -187,7 +202,6 @@ public class TraceDataByRank implements ITraceDataCollector
 			listcpid.set(i,timecpid);
 		}
 	}
-
 	
 	
 	/**Returns the number of elements in this ProcessTimeline.*/
@@ -205,7 +219,7 @@ public class TraceDataByRank implements ITraceDataCollector
 	@Override
 	public int findClosestSample(long time, boolean usingMidpoint) throws Exception
 	{
-		if (listcpid.size()==0)
+		if (listcpid.isEmpty())
 			return 0;
 
 		int low = 0;
@@ -237,12 +251,25 @@ public class TraceDataByRank implements ITraceDataCollector
 				return low+1;
 			else
 				return low;
-		} else 
-		{
-			// without using midpoint, we adopt the leftmost sample approach.
-			// this means whoever on the left side, it will be the painted
-			return low;
 		}
+		// for gpu stream, if we need to force to reveal the gpu trace
+		// if the current sample is an idle activity, 
+		// we check if the next sample is within the range or not.
+		var l = listcpid.get(low);
+		if (option == TraceOption.REVEAL_GPU_TRACE && isIdle(l.cpId) && low < listcpid.size()) {			
+			var r = listcpid.get(low+1);
+			var last  = listcpid.get(listcpid.size()-1);
+			var first = listcpid.get(0);
+			var timePerPixel = (last.timestamp - first.timestamp)/numPixelH;
+			var dtime = (r.timestamp - l.timestamp);
+			float dFraction = (float) dtime/timePerPixel;
+			
+			if (dFraction < NUM_PIXELS_TOLERATED && !isIdle(r.cpId))
+				return low+1;
+		}
+		// without using midpoint, we adopt the leftmost sample approach.
+		// this means whoever on the left side, it will be the painted
+		return low;
 	}
 
 	/***
@@ -250,6 +277,7 @@ public class TraceDataByRank implements ITraceDataCollector
 	 * 
 	 * @param traceData: another object to be copied
 	 */
+	@Override
 	public void duplicate(ITraceDataCollector traceData)
 	{
 		this.listcpid = ((TraceDataByRank)traceData).listcpid;
@@ -260,6 +288,21 @@ public class TraceDataByRank implements ITraceDataCollector
 		return (listcpid.get(left).timestamp + listcpid.get(right).timestamp) / 2;
 	}
 	
+	
+	/***
+	 * Check if the call-path id or context id is an idle activity.<br/>
+	 * On meta-db, the idle activity is represented by number zero.
+	 * On experiment.xml it can be different for each database.
+	 * 
+	 * @param contextId
+	 * 			The call-path id or context id.
+	 * 
+	 * @return true if the context id is an idle activity.
+	 */
+	private boolean isIdle(int contextId) {
+		return contextId == 0;
+	}
+	
 	/*******************************************************************************************
 	 * Recursive method that fills in times and timeLine with the correct data from the file.
 	 * Takes in two pixel locations as endpoints and finds the timestamp that owns the pixel
@@ -267,12 +310,17 @@ public class TraceDataByRank implements ITraceDataCollector
 	 * location and the newfound location as endpoints and once with the newfound location 
 	 * and the end location as endpoints. Effectively updates times and timeLine by calculating 
 	 * the index in which to insert the next data. This way, it keeps times and timeLine sorted.
+	 * 
 	 * @author Reed Landrum and Michael Franco
+	 * 
 	 * @param minLoc The beginning location in the file to bound the search.
 	 * @param maxLoc The end location in the file to bound the search.
 	 * @param startPixel The beginning pixel in the image that corresponds to minLoc.
 	 * @param endPixel The end pixel in the image that corresponds to maxLoc.
 	 * @param minIndex An index used for calculating the index in which the data is to be inserted.
+	 * @param pixelLength the range of time per pixel. Its unit is time, usually nanoseconds for data version 4.
+	 * @param startingTime starting time
+	 * 
 	 * @return Returns the index that shows the size of the recursive subtree that has been read.
 	 * Used for calculating the index in which the data is to be inserted.
 	 * @throws IOException 
@@ -288,9 +336,34 @@ public class TraceDataByRank implements ITraceDataCollector
 		
 		final DataRecord nextData = this.getData(loc);
 		
+		// corner case: if we are forced to reveal the gpu traces (since they are short-lives),
+		// we need to check if the current sample is an "idle" activity or not.
+		// if this is the case, we look at the right and if it isn't idle, we'll use
+		// this sample instead.
+		if (option == TraceOption.REVEAL_GPU_TRACE) {
+			if (isIdle(nextData.cpId)) {	
+				// if this sample is idle, check if the next sample is also idle or not
+				// (mostly not idle). If the next sample is NOT idle and within a range
+				// let's move to the next sample instead
+				long rightLoc = loc + data.getRecordSize();
+				final var rightData = getData(rightLoc);
+				if (!isIdle(rightData.cpId)) {
+					
+					// make sure the next non-idle samples are within the tolerated number of pixels
+					// if the next sample is too far, we just skip it and accept the "idle" sample.
+					var dTime = (rightData.timestamp - nextData.timestamp) / pixelLength < NUM_PIXELS_TOLERATED;
+					if (dTime) {
+						loc = rightLoc;
+						nextData.cpId = rightData.cpId;
+						nextData.timestamp = rightData.timestamp;
+					}
+				}
+			}
+		}
+		
 		addSample(minIndex, nextData);
 		
-		int addedLeft = sampleTimeLine(minLoc, loc, startPixel, midPixel, minIndex, pixelLength, startingTime);
+		int addedLeft  = sampleTimeLine(minLoc, loc, startPixel, midPixel, minIndex, pixelLength, startingTime);
 		int addedRight = sampleTimeLine(loc, maxLoc, midPixel, endPixel, minIndex+addedLeft+1, pixelLength, startingTime);
 		
 		return (addedLeft+addedRight+1);
@@ -314,30 +387,31 @@ public class TraceDataByRank implements ITraceDataCollector
 		long left_index = getRelativeLocation(left_boundary_offset);
 		long right_index = getRelativeLocation(right_boundary_offset);
 		
-		long left_time = data.getLong(left_boundary_offset);
+		long left_time  = data.getLong(left_boundary_offset);
 		long right_time = data.getLong(right_boundary_offset);
 		
 		// apply "Newton's method" to find target time
 		while (right_index - left_index > 1) {
 			long predicted_index;
-			final double time_range = right_time - left_time;
-			final double rate = time_range / (right_index - left_index);
-			final long mtime = (long) (time_range / 2);
+			final long time_range = right_time - left_time;
+			final double rate = (double)time_range / (right_index - left_index);
+			final long mtime  = time_range / 2;
 			if (time <= mtime) {
 				predicted_index = Math.max((long) ((time - left_time) / rate) + left_index, left_index);
 			} else {
 				predicted_index = Math.min((right_index - (long) ((right_time - time) / rate)), right_index); 
 			}
 			
-			// adjust so that the predicted index differs from both ends
-			// except in the case where the interval is of length only 1
-			// this helps us achieve the convergence condition
+			// adjust predicted_index so that it differs from the endpoints.
+			// without that, the search may fail to converge.
 			if (predicted_index <= left_index) 
 				predicted_index = left_index + 1;
+
 			if (predicted_index >= right_index)
 				predicted_index = right_index - 1;
 
 			long temp = data.getLong(getAbsoluteLocation(predicted_index));
+
 			if (time >= temp) {
 				left_index = predicted_index;
 				left_time = temp;
@@ -346,20 +420,10 @@ public class TraceDataByRank implements ITraceDataCollector
 				right_time = temp;
 			}
 		}
+
 		long left_offset = getAbsoluteLocation(left_index);
-		long right_offset = getAbsoluteLocation(right_index);
 
-		left_time = data.getLong(left_offset);
-		right_time = data.getLong(right_offset);
-
-		// return the closer sample or the maximum sample if the 
-		// time is at or beyond the right boundary of the interval
-		final boolean is_left_closer = Math.abs(time - left_time) < Math.abs(right_time - time);
-		long maxloc = data.getMaxLoc(rank);
-		
-		if ( is_left_closer ) return left_offset;
-		else if (right_offset < maxloc) return right_offset;
-		else return maxloc;
+		return left_offset;
 	}
 	
 	private long getAbsoluteLocation(long relativePosition)

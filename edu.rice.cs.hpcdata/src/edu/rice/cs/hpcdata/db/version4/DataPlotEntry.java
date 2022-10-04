@@ -14,8 +14,8 @@ public class DataPlotEntry
 {
 	public static final int SIZE = 4 + 8; 
 			
-	public int tid;		// thread (or rank) id
-	public double metval;	// metric value
+	public final int    tid;	// thread (or rank) id
+	public final double metval;	// metric value
 	
 	public DataPlotEntry()
 	{

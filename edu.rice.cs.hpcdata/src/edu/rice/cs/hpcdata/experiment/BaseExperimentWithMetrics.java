@@ -2,7 +2,6 @@ package edu.rice.cs.hpcdata.experiment;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,20 +12,19 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
+import edu.rice.cs.hpcdata.experiment.metric.AbstractMetricWithFormula;
 import edu.rice.cs.hpcdata.experiment.metric.AggregateMetric;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.FinalMetric;
+import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.Metric;
-import edu.rice.cs.hpcdata.experiment.metric.MetricComparator;
-import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.filters.MetricValuePropagationFilter;
-import edu.rice.cs.hpcdata.util.Constants;
 
 
 /****************************************************************************
@@ -59,9 +57,6 @@ implements IMetricManager, ListEventListener<BaseMetric>
 	//ACCESS TO METRICS													    //
 	//////////////////////////////////////////////////////////////////////////
 
-	/*************************************************************************
-	 *	Returns the array of metrics in the experiment.
-	 ************************************************************************/
 
 	/*****
 	 * Set the list of metric descriptors. Ideally this method has to be called
@@ -84,28 +79,40 @@ implements IMetricManager, ListEventListener<BaseMetric>
 			if (metric.getOrder() >= 0) {
 				metricsWithOrder.put(metric.getOrder(), metric);
 			}
-			mapIndexToMetric.put(metric.getIndex(), metric);
-		}
-		
-		if (getMajorVersion() >= Constants.EXPERIMENT_SPARSE_VERSION) {
-			// reorder the metric since hpcprof2 will output not in order fashion
-			Collections.sort(metrics, new MetricComparator());
+			var m = mapIndexToMetric.put(metric.getIndex(), metric);
+			if (m != null)
+				throw new RuntimeException("Non-unique index metric " + metric.getDisplayName() + " with index: " + metric.getIndex());
 		}
 		metrics.addListEventListener(this);
 	}
 
 	
 	@Override
-	public MetricRaw getCorrespondentMetricRaw(BaseMetric metric) {
+	public BaseMetric getCorrespondentMetricRaw(BaseMetric metric) {
+		// for sparse database (meta.db), the metrics are hierarchical metrics.
+		// Since they don't separate between normal metrics and metric-db,
+		// it is safe to return their own normal metric as the raw metric.
+		//
+		if (metric instanceof HierarchicalMetric)
+			return metric;
+		
+		// for old database that separate between metric-db and normal metrics,
+		// we don't have the connection between them. The only way to know
+		// a raw metric from a normal one is by looking at the label.
+		// If they share the same basic name, it should be the same metric.
+		// For instance:
+		// in normal metric: "cycles:Sum (I)"
+		// in metric-db:     "cycles (I)"
+		//
 		var rawMetrics = getRawMetrics();
-		MetricRaw correspondentRawMetric = null;
+		BaseMetric correspondentRawMetric = null;
 
 		var metricName = metric.getDisplayName();
 		var metricBaseName = metricName.replace(":Sum", "");
 		
 		for(var rm: rawMetrics) {
 			if (rm.getDisplayName().equals(metricBaseName)) {
-				correspondentRawMetric = (MetricRaw) rm;
+				correspondentRawMetric = rm;
 				break;
 			}
 		}
@@ -128,7 +135,7 @@ implements IMetricManager, ListEventListener<BaseMetric>
 		ArrayList<BaseMetric> listDerivedMetrics = new ArrayList<>();
 		
 		for(BaseMetric metric: metrics) {
-			if (metric instanceof Metric) {
+			if (metric instanceof Metric || metric instanceof HierarchicalMetric) {
 				if (metric.getMetricType() == sourceType) {
 					// get the partner index (if the metric exclusive, its partner is inclusive)
 					
@@ -146,7 +153,7 @@ implements IMetricManager, ListEventListener<BaseMetric>
 
 					// case for old database: no partner information
 					if (partner_metric != null) {
-						MetricValue partner_value = scope.getMetricValue( partner_metric );
+						MetricValue partner_value = scope.getMetricValue( partner );
 						scope.setMetricValue(metric.getIndex(), partner_value);
 					}
 				}
@@ -181,7 +188,7 @@ implements IMetricManager, ListEventListener<BaseMetric>
 		// hide columns if the metric is to be shown but has no value
 		for(BaseMetric metric: metrics) {
 			if (metric.getVisibility() == VisibilityType.SHOW &&
-				metric.getValue(root) == MetricValue.NONE) {				
+				root.getMetricValue(metric) == MetricValue.NONE) {				
 				metric.setDisplayed(BaseMetric.VisibilityType.HIDE);
 			}
 		}
@@ -195,8 +202,7 @@ implements IMetricManager, ListEventListener<BaseMetric>
 	protected boolean inclusiveNeeded() {		
 		for (BaseMetric m: metrics) {
 			boolean isNeeded = !(   (m instanceof FinalMetric) 
-					     || (m instanceof AggregateMetric) 
-					     || (m instanceof DerivedMetric) );
+					     		 || (m instanceof AbstractMetricWithFormula));
 			if (isNeeded)
 				return true;
 		}
@@ -234,10 +240,9 @@ implements IMetricManager, ListEventListener<BaseMetric>
 	 * 		Please use {@link getMetricCount} and
 	 * 				   {@link getMetric} methods instead.
 	 * @return {@code List<BaseMetric>}
-	 * @deprecated
 	 */
 	@Override
-	public List<BaseMetric> getMetricList() 
+	public List<BaseMetric> getMetrics() 
 	{
 		return metrics;
 	}
@@ -292,7 +297,7 @@ implements IMetricManager, ListEventListener<BaseMetric>
 		// any volunteer?
 		for(int i=0; i<list.size(); i++) {
 			BaseMetric m = list.get(i);
-			if (m.getValue(scope) != MetricValue.NONE)
+			if (scope.getMetricValue(m) != MetricValue.NONE)
 				listIDs.add(m.getIndex());
 		}
 		return listIDs;
@@ -311,7 +316,7 @@ implements IMetricManager, ListEventListener<BaseMetric>
 	 *	Returns the metric with a given index.
 	 ************************************************************************/
 	public BaseMetric getMetric(int index)
-	{		
+	{	
 		BaseMetric metric = mapIndexToMetric.get(index);
 		if (metric != null)
 			return metric;

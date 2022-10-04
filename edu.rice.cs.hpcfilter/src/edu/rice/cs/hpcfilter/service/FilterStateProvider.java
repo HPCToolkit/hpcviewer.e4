@@ -14,9 +14,6 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
-import edu.rice.cs.hpcdata.experiment.scope.RootScope;
-import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
-import edu.rice.cs.hpcdata.tld.ThreadDataCollectionFactory;
 
 /**************************************************************
  * 
@@ -57,7 +54,7 @@ public class FilterStateProvider
 	 * @param experiment
 	 * @return Experiment itself (if changed)
 	 */
-	static public Experiment filterExperiment(Experiment experiment) {
+	public static Experiment filterExperiment(Experiment experiment) {
 		// filter the experiment if it is not null and it is in original form
 		// (it isn't a merged database)
 		if (experiment != null && !experiment.isMergedDatabase()) 
@@ -68,7 +65,7 @@ public class FilterStateProvider
 				// ---------------------------------------
 				// conserve the added metrics
 				// ---------------------------------------
-				List<BaseMetric> metrics = new ArrayList<BaseMetric>(experiment.getMetricCount());
+				List<BaseMetric> metrics = new ArrayList<>(experiment.getMetricCount());
 
 				for (BaseMetric metric : experiment.getMetricList()) {
 					if (metric instanceof DerivedMetric && 
@@ -77,24 +74,26 @@ public class FilterStateProvider
 						// only add user derived metrics, not all derived metrics
 						//  provided by hpcprof
 						
-						metrics.add((DerivedMetric) metric);
+						metrics.add(metric);
 					} else {
 						metrics.add(metric.duplicate());
 					}
 				}
 				// ---------------------------------------
-				// filtering 
+				// reopening the database 
 				// ---------------------------------------
 				experiment.reopen();
+
+				// ---------------------------------------
+				// filtering 
+				// ---------------------------------------
 				experiment.filter(FilterMap.getInstance());
 				
 				// ---------------------------------------
 				// put the original metrics and derived metrics back
 				// ---------------------------------------
 				experiment.setMetrics(metrics);
-
-				RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
-				ThreadDataCollectionFactory.build(root);
+				experiment.resetThreadData();
 				
 			} catch (Exception e) {
 				e.printStackTrace();

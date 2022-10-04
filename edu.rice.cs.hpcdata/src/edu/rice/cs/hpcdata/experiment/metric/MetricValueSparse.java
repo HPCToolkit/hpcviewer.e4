@@ -1,16 +1,16 @@
 package edu.rice.cs.hpcdata.experiment.metric;
 
-public class MetricValueSparse 
+public class MetricValueSparse implements Comparable<MetricValueSparse> 
 {
-	private int   index;
-	private float value;
+	private short   index;
+	private double value;
 	
 	public MetricValueSparse() {
 		index = 0;
 		value = 0.0f;
 	}
 	
-	public MetricValueSparse(int index, float value) {
+	public MetricValueSparse(short index, double value) {
 		this.index = index;
 		this.value = value;
 	}
@@ -25,24 +25,29 @@ public class MetricValueSparse
 	/**
 	 * @param index the index to set
 	 */
-	public void setIndex(int index) {
+	public void setIndex(short index) {
 		this.index = index;
 	}
 	
 	/**
 	 * @return the value
 	 */
-	public float getValue() {
+	public double getValue() {
 		return value;
 	}
 	/**
 	 * @param value the value to set
 	 */
-	public void setValue(float value) {
+	public void setValue(double value) {
 		this.value = value;
 	}
 
 	public String toString() {
 		return index + ": " + value;
+	}
+
+	@Override
+	public int compareTo(MetricValueSparse o) {
+		return (int) (index-o.index);
 	}
 }

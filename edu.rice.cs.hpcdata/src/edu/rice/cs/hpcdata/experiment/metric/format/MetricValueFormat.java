@@ -42,9 +42,6 @@ protected FormatStyle valueStyle;
 /** The number format to be used for the annotation value. */
 protected FormatStyle annotationStyle;
 
-/** The pattern to use when formatting annotation values. */
-//protected String annotationFormatPattern;
-
 /** How many space characters separate the metric value and its annotation. */
 protected int separatorWidth;
 
@@ -90,10 +87,10 @@ public MetricValueFormat(boolean showValue,
 	this.annotationStyle.fieldWidth = annotationFieldWidth;
 	this.annotationStyle.fractionDigits = annotationFractionDigits;
 	if (annotationFormatPattern == null) {
-		annotationFormatPattern = "#0.0%";			// need to have something so default to what is used for percent values.
+		// need to have something so default to what is used for percent values.
+		annotationFormatPattern = "#0.0%";
 	}
 	this.annotationStyle.pattern = annotationFormatPattern;
-	//this.annotationFormatPattern = annotationFormatPattern;
 	
 	this.separatorWidth = separatorWidth;
 	
@@ -388,30 +385,16 @@ public int getFormattedLength()
 }
 
 
-/**
- * format the value without the information from MetricValue. This
- * method is need to compute the derived metrics on the fly without
- * instantiating or creating new class which will consume more memory
- * (I guess ---laks).
- * @param value
- * @return <code>String</code> the text format.
- *//*
-public String format(double value) {
-	StringBuffer formatted = new StringBuffer();
-	String string = this.formatDouble(value, this.valueFormatter, this.valueStyle);
-	formatted.append(string);
-	formatted.append(Util.spaces(this.annotationStyle.fieldWidth));
-	return formatted.toString();
-}*/
+
 /*************************************************************************
  *	Returns a <code>String</code> showing a given <code>MetricValue</code>
  *	according to this format.
  ************************************************************************/
-	
-public String format(MetricValue value)
+@Override
+public String format(MetricValue value, MetricValue rootValue)
 {
 	this.ensureFormatters();
-	StringBuffer formatted = new StringBuffer();
+	var formatted = new StringBuilder();
 	
 	// append formatted actual value if wanted
 	if( this.valueStyle.show )
@@ -428,36 +411,10 @@ public String format(MetricValue value)
 	// append formatted annotation if wanted
 	if( this.annotationStyle.show )
 	{
-		if( MetricValue.isAnnotationAvailable(value) )
+		if( rootValue != null && rootValue != MetricValue.NONE)
 		{
-			float number = MetricValue.getAnnotationValue(value);
-
-			// if the formatter pattern is set for percent values, we need to handle special values differently
-			if (annotationStyle.pattern.contains("%")) {
-			//if (this.annotationFormatPattern.contains("%")) {
-				// if value shows this used all of it, show that without decimal places
-				if (Float.compare(number, 1.0f)==0) {
-					formatted.append("100 %");
-					return formatted.toString();
-				}
-
-				// if value shows a small negative number, show a percent of zero
-				if ( (number > -0.0001) && (number < 0.0) ) {
-					// Laks 2009.02.12: dirty hack to solve the problem when a small negative percentage occurs
-					// instead of displaying -0.0% we force to display 0.0%
-					// a better solution is by defining the proper pattern. But so far I don't see any good solution
-					// 	this hack should be a temporary fix !
-					formatted.append(" 0.0%");
-					return formatted.toString();
-				}
-			}
-
-			// not a value that needs special treatment, just format with the specified pattern
-			String string = this.formatDouble(number, this.annotationStyle.formatter, this.annotationStyle);
-			formatted.append(string);
-			return formatted.toString();
+			return getAnnotationText(rootValue, rootValue, formatted);
 		}
-
 		formatted.append(StringUtil.spaces(this.annotationStyle.fieldWidth));
 	}
 	
@@ -465,6 +422,33 @@ public String format(MetricValue value)
 }
 
 
+private String getAnnotationText(MetricValue rootValue, MetricValue value, StringBuilder formatted) {
+	float number = rootValue.getValue() / value.getValue();
+
+	// if the formatter pattern is set for percent values, we need to handle special values differently
+	if (annotationStyle.pattern.contains("%")) {
+		// if value shows this used all of it, show that without decimal places
+		if (Float.compare(number, 1.0f)==0) {
+			formatted.append("100 %");
+			return formatted.toString();
+		}
+
+		// if value shows a small negative number, show a percent of zero
+		if ( (number > -0.0001) && (number < 0.0) ) {
+			// Laks 2009.02.12: dirty hack to solve the problem when a small negative percentage occurs
+			// instead of displaying -0.0% we force to display 0.0%
+			// a better solution is by defining the proper pattern. But so far I don't see any good solution
+			// 	this hack should be a temporary fix !
+			formatted.append(" 0.0%");
+			return formatted.toString();
+		}
+	}
+
+	// not a value that needs special treatment, just format with the specified pattern
+	String string = this.formatDouble(number, this.annotationStyle.formatter, this.annotationStyle);
+	formatted.append(string);
+	return formatted.toString();
+}
 
 
 /*************************************************************************
@@ -560,7 +544,6 @@ protected void ensureFormatters()
 	if( this.annotationStyle.formatter == null )
 	{
 		this.annotationStyle.formatter = Util.makeDecimalFormatter(annotationStyle.pattern); 
-				// Util.makeDecimalFormatter(this.annotationFormatPattern);
 	}
 	
 	// separation between values

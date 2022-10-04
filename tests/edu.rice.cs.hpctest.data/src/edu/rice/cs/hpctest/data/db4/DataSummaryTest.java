@@ -2,10 +2,7 @@ package edu.rice.cs.hpctest.data.db4;
 
 import static org.junit.Assert.*;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 import org.junit.BeforeClass;
@@ -15,120 +12,142 @@ import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.db.version4.DataSummary;
-import edu.rice.cs.hpcdata.db.version4.DataSummary.ListCCTAndIndex;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValueSparse;
+import edu.rice.cs.hpctest.util.TestDatabase;
 
 public class DataSummaryTest {
 
-	private static DataSummary data;
-	private static File dbPath ;
+	private static DataSummary []dataProfiles;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws IOException {
-		Path resource = Paths.get("..", "resources", "prof2", "empty-trace");
-		dbPath = resource.toFile();
+		var dbPath = TestDatabase.getMetaDatabases();
 		
 		assertNotNull(dbPath);
-		assertTrue(dbPath.isDirectory());
+		assertTrue(dbPath.length>0);
 		
 		IdTupleType tupleType = new IdTupleType();
 		tupleType.initDefaultTypes();
 		
-		data = new DataSummary(tupleType);
-		data.open(dbPath.getAbsolutePath() + File.separatorChar + "profile.db");
+		dataProfiles = new DataSummary[dbPath.length];
+		int i = 0;
+		for(var path: dbPath) {
+			dataProfiles[i] = new DataSummary(tupleType);
+			dataProfiles[i].open(path.getAbsolutePath());
+			i++;
+		}
 	}
 	
 	
 	@Test
-	public void testGetCCTIndex() {
-		try {
-			ListCCTAndIndex list = data.getCCTIndex();
+	public void testGetIdTuple() {
+		for(var profile: dataProfiles) {
+			List<IdTuple> list = profile.getIdTuple();
 			assertNotNull(list);
-			assertNotNull(list.listOfdIndex); // [0..45]
-			assertNotNull(list.listOfId);     // [0..74]
-			
-		} catch (IOException e) {
-			fail(e.getMessage());
+			assertTrue(list.size() >= 1);
+			var idt = list.get(0);
+			assertTrue(idt.getPhysicalIndex(0) >= 0);
 		}
 	}
 
 	@Test
-	public void testGetIdTuple() {
-		List<IdTuple> list = data.getIdTuple();
-		assertNotNull(list);
-		assertTrue(list.size() == 1);
-	}
-
-	@Test
 	public void testGetIdTupleIdTupleOption() {
-		List<IdTuple> listC = data.getIdTuple(IdTupleOption.COMPLETE);
-		List<IdTuple> listB = data.getIdTuple(IdTupleOption.BRIEF);
-		
-		assertTrue(listC.size() == listB.size());
+		for(var profile: dataProfiles) {
+			List<IdTuple> listC = profile.getIdTuple(IdTupleOption.COMPLETE);
+			List<IdTuple> listB = profile.getIdTuple(IdTupleOption.BRIEF);
+			
+			assertEquals(listC.size(), listB.size());
+		}
 	}
 
 	@Test
-	public void testGetMetric() {
-		try {
-			double val = data.getMetric(DataSummary.PROFILE_SUMMARY, 0, 512);
-			assertTrue(val > 27); // 27.1234130859375
-		} catch (IOException e) {
-			fail(e.getMessage());
+	public void testGetMetric() throws IOException {
+		for(var profile: dataProfiles) {
+			try {
+				double val = profile.getMetric(IdTuple.PROFILE_SUMMARY, 0, 2);
+				assertTrue(val >= 0); 
+			} catch (IOException e) {
+				fail(e.getMessage());
+			}
+			
+			// test for each id tuples
+			List<IdTuple> idtuples = profile.getIdTuple();
+			for(IdTuple idt: idtuples) {
+				double val = profile.getMetric(idt, 0, 2);
+				assertTrue(val >= 0); 
+			}
 		}
 	}
 
 	@Test
 	public void testGetMetricsInt() throws IOException {
-		List<MetricValueSparse> list = data.getMetrics(0);
-		assertTrue(list.size() > 0); // 512: 27.123413
-		
-		MetricValueSparse mvs = list.get(0);
-		assertTrue(mvs.getIndex() == 512);
-		assertTrue(mvs.getValue() > 27);
+		for(var profile: dataProfiles) {
+			List<MetricValueSparse> list = profile.getMetrics(3);
+			assertTrue(list.size() >= 1); // 
+			
+			MetricValueSparse mvs = list.get(0);
+			assertTrue(mvs.getIndex() >= 1);
+			assertTrue(mvs.getValue() > 250);
+		}
 	}	
 
 	@Test
 	public void testGetMetricsIntInt() throws IOException {
-		List<MetricValueSparse> list = data.getMetrics(0, 1);
-		assertTrue(list.size() > 0);
+		for(var profile: dataProfiles) {
+			List<MetricValueSparse> list = profile.getMetrics(IdTuple.PROFILE_SUMMARY, 2);
+			assertTrue(list.size() > 0);
+		}
 	}
 
 	@Test
 	public void testGetStringLabelIdTuples() {
-		String []labels = data.getStringLabelIdTuples();
-		assertNotNull(labels);
-		assertTrue(labels.length == 1);
+		for(var profile: dataProfiles) {
+			String []labels = profile.getStringLabelIdTuples();
+			assertNotNull(labels);
+			assertTrue(labels.length >= 1);
+			assertTrue(labels[0].startsWith("Node"));
+			assertTrue(labels[0].contains("Thread"));
+		}
 	}
 
 	@Test
 	public void testGetDoubleLableIdTuples() {
-		double []labels = data.getDoubleLableIdTuples();
-		assertNotNull(labels);
-		assertTrue(labels.length == 1); // [0.0]
+		for(var profile: dataProfiles) {
+			double []labels = profile.getDoubleLableIdTuples();
+			assertNotNull(labels);
+			assertTrue(labels.length >= 1); // [0.0]
+			assertTrue(labels[0] >= 0.0);
+		}
 	}
 
-	@Test
-	public void testGetProfileIndexFromOrderIndex() {
-		int index = data.getProfileIndexFromOrderIndex(1);
-		assertTrue(index == 0);
-	}
 
 	@Test
 	public void testHasGPU() {
-		boolean gpu = data.hasGPU();
-		assertFalse(gpu);
+		for(var profile: dataProfiles) {
+			boolean gpu = profile.hasGPU();
+			
+			var idtuples = profile.getIdTuple();
+			var idttypes = profile.getIdTupleType();
+			boolean isgpu = idtuples.stream().anyMatch(idt -> idt.isGPU(idttypes));
+			
+			assertEquals(gpu, isgpu);
+		}
 	}
 
 	@Test
 	public void testGetIdTupleType() {
-		IdTupleType type = data.getIdTupleType();
-		assertNotNull(type); // check content for: {0=Summary, 1=Node, 2=Rank, 3=Thread, 4=GPUDevice, 5=GPUContext, 6=GPUStream, 7=Core}
+		for(var profile: dataProfiles) {
+			IdTupleType type = profile.getIdTupleType();
+			assertNotNull(type); // check content for: {0=Summary, 1=Node, 2=Rank, 3=Thread, 4=GPUDevice, 5=GPUContext, 6=GPUStream, 7=Core}
+		}
 	}
 
 	@Test
 	public void testGetParallelismLevels() {
-		int p = data.getParallelismLevels();
-		assertTrue(p == 2);
+		for(var profile: dataProfiles) {
+			int p = profile.getParallelismLevels();
+			assertTrue(p >= 1);
+		}
 	}
 
 }

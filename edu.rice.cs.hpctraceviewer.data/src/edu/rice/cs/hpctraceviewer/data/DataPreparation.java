@@ -6,10 +6,9 @@ import java.util.List;
 
 import org.eclipse.swt.graphics.Color;
 
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.util.CallPath;
+import edu.rice.cs.hpcdata.util.ICallPath.ICallPathInfo;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
-import edu.rice.cs.hpctraceviewer.data.util.Constants;
+import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 
 /***********************************************************************
@@ -23,19 +22,19 @@ import edu.rice.cs.hpctraceviewer.data.util.Constants;
  ***********************************************************************/
 public abstract class DataPreparation
 {
-	final protected DataLinePainting data;
-	final private HashMap<Integer, Integer>mapInvalidData;
-	final private List<Integer> listInvalidData;
+	protected final DataLinePainting data;
+	private final HashMap<Integer, Integer>mapInvalidData;
+	private final List<Integer> listInvalidData;
 	
 	/****
 	 * Abstract class constructor to paint a line (whether it's detail view or depth view) 
 	 * @param data a DataLinePainting object
 	 */
-	public DataPreparation(DataLinePainting data)
+	protected DataPreparation(DataLinePainting data)
 	{
 		this.data = data;
-		mapInvalidData = new HashMap<Integer, Integer>();
-		listInvalidData = new ArrayList<Integer>();
+		mapInvalidData = new HashMap<>();
+		listInvalidData = new ArrayList<>();
 	}
 	
 	/**Painting action
@@ -49,14 +48,14 @@ public abstract class DataPreparation
 		
 		int succSampleMidpoint = (int) Math.max(0, (data.ptl.getTime(0)-data.begTime)/data.pixelLength);
 
-		CallPath cp = data.ptl.getCallPath(0, data.depth);
+		ICallPathInfo pathInfo = data.ptl.getCallPathInfo(0);
 
 		// issue #15: Trace view doesn't render GPU trace line
 		// This happens when the first sample to render has a bad cpid which causes this method to exit prematurely.
 		// We shouldn't exit. Instead, we should search for the next available callpath, unless we are at 
 		// the end of the data trace line
 		
-		if (cp==null && data.ptl.size()==0)
+		if (pathInfo==null && data.ptl.size()==0)
 			return 0;
 		
 		// issue #15: Trace view doesn't render GPU trace line
@@ -64,53 +63,55 @@ public abstract class DataPreparation
 		// If there's no data available, we exit
 		
 		int i=1;
-		for(;i<data.ptl.size() && cp == null; i++) {
-			cp = data.ptl.getCallPath(i, data.depth);
+		for(;i<data.ptl.size() && pathInfo == null; i++) {
+			pathInfo = data.ptl.getCallPathInfo(i);
 		}
-		if (cp == null)
+		if (pathInfo == null)
 			return 0;
 		
-		Scope scope = cp.getScopeAt(data.depth);
+		var scope = pathInfo.getScopeAt(data.depth);
 		if (scope == null)
 			throw new RuntimeException("Scope not found: cannot find at depth " + data.depth);
 		
 		final boolean gpuTrace  = data.ptl.isGPU();
 		final boolean exposeGPU = TracePreferenceManager.getGPUTraceExposure() && gpuTrace;
 		
-		String prevFunction = null;
+		Scope  prevScope = null;
 		String succFunction = scope.getName(); 
-		Color succColor = data.colorTable.getColor(succFunction);
-		int last_ptl_index = data.ptl.size() - 1;
-		int num_invalid_cp = 0;
+		
+		Color succColor    = data.colorTable.getColor(succFunction);
+		int lastIndexPTL = data.ptl.size() - 1;
+		int numInvalidCP = 0;
 
 		for (int index = 0; index < data.ptl.size(); index++)
 		{
 			// in case of bad cpid, we just quit painting the view
-			if (cp==null) {
-				
-				return num_invalid_cp;		// throwing an exception is more preferable, but it will make
+			if (pathInfo == null) {				
+				// throwing an exception is more preferable, but it will make
 				// more complexity to handle inside a running thread
+				return numInvalidCP;		
 			}
 
-			final int currDepth = cp.getMaxDepth(); 
+			final int currDepth = pathInfo.getMaxDepth(); 
 			int currSampleMidpoint = succSampleMidpoint;
 			
 			//-----------------------------------------------------------------------
 			// skipping if the successor has the same color and depth
 			//-----------------------------------------------------------------------
-			boolean still_the_same = true;
+			boolean stillTheSameColor = true;
 			int indexSucc = index;
 			int end = index;
 
 			final Color currColor = succColor;
 			final String procName = succFunction;
+			final Scope currScope = scope;
 			
-			while (still_the_same && (++indexSucc <= last_ptl_index))
+			while (stillTheSameColor && (++indexSucc <= lastIndexPTL))
 			{
-				cp = data.ptl.getCallPath(indexSucc, data.depth);
-				if(cp != null)
+				pathInfo = data.ptl.getCallPathInfo(indexSucc);
+				if(pathInfo != null)
 				{
-					scope = cp.getScopeAt(data.depth);
+					scope = pathInfo.getScopeAt(data.depth);
 					if (scope == null)
 						throw new RuntimeException("Scope not found: cannot find at depth " + data.depth);
 					
@@ -125,23 +126,23 @@ public abstract class DataPreparation
 					//						   has the same depth. In depth view, we don't want to mix with
 					//							different depths
 					
-					still_the_same = (succColor.equals(currColor)) && currDepth == cp.getMaxDepth();
-					if (still_the_same)
+					stillTheSameColor = (succColor.equals(currColor)) && currDepth == pathInfo.getMaxDepth();
+					if (stillTheSameColor)
 						end = indexSucc;
 				} else {
-					int cpid = data.ptl.getCpid(indexSucc);
+					int cpid = data.ptl.getContextId(indexSucc);
 					Integer num = mapInvalidData.get(cpid);
 					if (num == null) {
 						listInvalidData.add(cpid);
 						num = 0;
 					}
 					num++;
-					num_invalid_cp++;
+					numInvalidCP++;
 					mapInvalidData.put(cpid, num);
 				}
 			}
 			
-			if (end < last_ptl_index)
+			if (end < lastIndexPTL)
 			{
 				// --------------------------------------------------------------------
 				// start and middle samples: the rightmost point is the midpoint between
@@ -154,7 +155,9 @@ public abstract class DataPreparation
 				//		in time line: p0 < p1 < p2
 				// a non-midpoint policy then should have a range of p0 to p2 with p0 color.
 				
-				double succ = data.usingMidpoint ? midpoint(data.ptl.getTime(end), data.ptl.getTime(end+1)) : data.ptl.getTime(end+1);
+				double succ = data.usingMidpoint ? 
+										midpoint(data.ptl.getTime(end), data.ptl.getTime(end+1)) :
+										data.ptl.getTime(end+1);
 				succSampleMidpoint = (int) Math.max(0, ((succ-data.begTime)/data.pixelLength));
 			}
 			else
@@ -169,19 +172,19 @@ public abstract class DataPreparation
 			}
 			// if we want to expose the GPU trace,
 			// AND the length of the pixel is zero,
-			// AND the current pixel it NOT a "no activity"
-			// AND the previous pixel is a "no activity"
+			// AND the current pixel it NOT a "idle context"
+			// AND the previous pixel is a "idle context"
 			// then we should extend the width of the pixel by decrementing the starting pixel
-			if (exposeGPU && currSampleMidpoint == succSampleMidpoint && !procName.startsWith(Constants.PROC_NO_ACTIVITY)) {
-				if (prevFunction == null || prevFunction.startsWith(Constants.PROC_NO_ACTIVITY)) {
+			if (exposeGPU && currSampleMidpoint == succSampleMidpoint && !currScope.isIdle()) {
+				if (prevScope == null || prevScope.isIdle()) {
 					currSampleMidpoint--;
 				}
 			}
 			finishLine(procName, currSampleMidpoint, succSampleMidpoint, currDepth, currColor, end - index + 1);
 			index = end;
-			prevFunction = procName;
+			prevScope = currScope;
 		}
-		return num_invalid_cp;
+		return numInvalidCP;
 	}
 	
 	
@@ -189,8 +192,15 @@ public abstract class DataPreparation
 		return listInvalidData;
 	}
 	
-	 //This is potentially vulnerable to overflows but I think we are safe for now.
-	/**Returns the midpoint between x1 and x2*/
+
+	/**
+	 * Returns the midpoint between x1 and x2
+	 * 
+	 * @apiNote This is potentially vulnerable to overflows but I think we are safe for now.
+	 * 
+	 * @param x1 
+	 * @param x2
+	 * */
 	private static long midpoint(long x1, long x2)
 	{
 		return (x1 + x2)/2;

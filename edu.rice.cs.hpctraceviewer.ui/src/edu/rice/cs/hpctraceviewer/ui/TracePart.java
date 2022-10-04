@@ -12,7 +12,6 @@ import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -84,10 +83,10 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 {
 	public static final String ID = "edu.rice.cs.hpctraceviewer.ui.partdescriptor.trace";
 	
-	private final static String LABEL_ZOOM_IN_Y = "zoom.in";
-	private final static String ICON_ZOOM_IN_Y  =  "platform:/plugin/edu.rice.cs.hpctraceviewer.ui/resources/zoom-in-process.png";
-	private final static String LABEL_ZOOM_OUT_Y = "zoom.out";
-	private final static String ICON_ZOOM_OUT_Y  =  "platform:/plugin/edu.rice.cs.hpctraceviewer.ui/resources/zoom-out-process.png";
+	private static final String LABEL_ZOOM_IN_Y  = "zoom.in";
+	private static final String ICON_ZOOM_IN_Y   =  "platform:/plugin/edu.rice.cs.hpctraceviewer.ui/resources/zoom-in-process.png";
+	private static final String LABEL_ZOOM_OUT_Y = "zoom.out";
+	private static final String ICON_ZOOM_OUT_Y  =  "platform:/plugin/edu.rice.cs.hpctraceviewer.ui/resources/zoom-out-process.png";
 
 	private final HashMap<String, IUndoContext> mapLabelToContext;
 	
@@ -106,7 +105,8 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 	private HPCStatisticView tbtmStatView;
 	private HPCBlameView tbtmBlameView;
 	
-	private ToolItem tiZoomIn, tiZoomOut;
+	private ToolItem tiZoomIn;
+	private ToolItem tiZoomOut;
 	
 	private SpaceTimeMiniCanvas miniCanvas;
 	
@@ -117,7 +117,7 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 	
 	@Inject
 	public TracePart() {
-		mapLabelToContext = new HashMap<String, IUndoContext>(8);
+		mapLabelToContext = new HashMap<>(8);
 	}
 	
 	@PostConstruct
@@ -165,7 +165,7 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 		tabFolderBottomLeft.setTopRight(toolbar);
 		tabFolderBottomLeft.setTabHeight(Math.max(toolbar.computeSize(SWT.DEFAULT, SWT.DEFAULT).y, tabFolderBottomLeft.getTabHeight()));
 		
-		tabFolderBottomLeft.addSelectionListener(new SelectionListener() {
+		tabFolderBottomLeft.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -173,9 +173,6 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 				tiZoomIn.setEnabled (activateDepth && tbtmDepthView.canZoomIn());
 				tiZoomOut.setEnabled(activateDepth && tbtmDepthView.canZoomOut());
 			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
 		
 		tiZoomIn.addSelectionListener(new SelectionAdapter() {
@@ -216,13 +213,13 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 		tbtmCallStack = new HPCCallStackView(tabFolderRight, SWT.NONE);
 		createTabItem(tbtmCallStack, "Call stack", tabFolderRight, eventBroker);
 
-		tbtmStatView = new HPCStatisticView(tabFolderRight, 0); //HPCStatView(tabFolderRight, SWT.NONE);
+		tbtmStatView = new HPCStatisticView(tabFolderRight, 0); 
 		createTabItem(tbtmStatView, "Statistics", tabFolderRight, eventBroker);
 		
 		tbtmBlameView = new HPCBlameView(tabFolderRight, SWT.NONE);
 		createTabItem(tbtmBlameView, "GPU Idleness Blame", tabFolderRight, eventBroker);
 		
-		tabFolderRight.addSelectionListener(new SelectionListener() {
+		tabFolderRight.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -234,9 +231,6 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 					}
 				}
 			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
 		
 		// ---------------
@@ -264,9 +258,10 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 		// sash settings
 		// ---------------
 		
-		sashFormLeft .setWeights(new int[] {8000, 2000});		
-		sashFormRight.setWeights(new int[] {8000, 2000});		
-		sashFormMain .setWeights(new int[] {8000, 2000});
+		final int []weights = new int[] {8000, 2000};
+		sashFormLeft .setWeights(weights);		
+		sashFormRight.setWeights(weights);		
+		sashFormMain .setWeights(weights);
 
 		// ---------------
 		// finalization
@@ -372,16 +367,16 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 	}
 
 	@Override
-	public void partActivated(MPart part) {}
+	public void partActivated(MPart part) { /* unused */ }
 
 	@Override
-	public void partBroughtToTop(MPart part) {}
+	public void partBroughtToTop(MPart part) { /* unused */ }
 
 	@Override
-	public void partDeactivated(MPart part) {}
+	public void partDeactivated(MPart part) { /* unused */ }
 
 	@Override
-	public void partHidden(MPart part) {}
+	public void partHidden(MPart part) { /* unused */ }
 
 	@Override
 	public void partVisible(MPart part) {
@@ -400,13 +395,12 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 			AbstractDBOpener dbOpener = new LocalDBOpener(context, experiment);
 			stdc = dbOpener.openDBAndCreateSTDC(null);
 
-			// TODO: make sure all the tabs other than trace view has the stdc first
+			// make sure all the tabs other than trace view has the stdc first
 			tbtmDepthView.setInput(stdc);
 			tbtmCallStack.setInput(stdc);
 			miniCanvas.   updateView(stdc);
 			tbtmStatView .setInput(stdc);
 			
-			// TODO: summary view has to be set AFTER the stat view 
 			//       since the stat view requires info from summary view 
 			tbtmSummaryView.setInput(stdc);
 
@@ -434,7 +428,6 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 			Shell shell = Display.getDefault().getActiveShell();
 			MessageDialog.openError(shell, "Error in opening the database", e.getClass().getSimpleName() + ":" + e.getMessage());
 			preDestroy();
-			//partService.hidePart(part, true);
 		}
 	}
 
@@ -445,14 +438,14 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 
 	@Override
 	public IUndoContext getContext(final String label) {
-		IUndoContext context = mapLabelToContext.get(label);
-		if (context != null)
-			return context;
+		IUndoContext labelContext = mapLabelToContext.get(label);
+		if (labelContext != null)
+			return labelContext;
 
-		context = new BaseTraceContext(label);		
-		mapLabelToContext.put(label, context);
+		labelContext = new BaseTraceContext(label);		
+		mapLabelToContext.put(label, labelContext);
 		
-		return context;
+		return labelContext;
 	}
 	
 	
@@ -511,19 +504,16 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 
 	@Override
 	public void showErrorMessage(String str) {
-		// TODO Auto-generated method stub
-		
+		// unused		
 	}
 
 	@Override
 	public void showInfo(String message) {
-		// TODO Auto-generated method stub
-		
+		// unused		
 	}
 
 	@Override
 	public void showWarning(String message) {
-		// TODO Auto-generated method stub
-		
+		// unused		
 	}
 }

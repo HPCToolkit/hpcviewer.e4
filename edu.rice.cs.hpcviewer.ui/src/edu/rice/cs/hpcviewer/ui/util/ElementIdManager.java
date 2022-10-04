@@ -1,6 +1,6 @@
 package edu.rice.cs.hpcviewer.ui.util;
 
-import edu.rice.cs.hpcdata.experiment.BaseExperiment;
+import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 
 /******************************************************************
@@ -12,10 +12,9 @@ public class ElementIdManager
 {
 	static public final String ELEMENT_SEPARATOR = ":";
 	
-	static public String getElementId(BaseExperiment experiment) {
+	static public String getElementId(IExperiment iExperiment) {
 		// has to set the element Id before populating the view
-		String path = experiment.getExperimentFile().getAbsolutePath();
-		return path;
+		return iExperiment.getPath();
 	}
 	
 	static public String getElementId(RootScope root) {

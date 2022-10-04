@@ -49,9 +49,9 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 	 * 
 	 * @param need_metrics: do we need metrics ?
 	 */
-	public ExperimentBuilder2(BaseExperiment experiment, String defaultName, IUserData<String, String> userData) {
+	public ExperimentBuilder2(IExperiment experiment, String defaultName, IUserData<String, String> userData) {
 		
-		super(experiment, defaultName, userData);
+		super((BaseExperiment) experiment, defaultName, userData);
 		this.metricList = new ArrayList<BaseMetric>();
 		
 		listOfDerivedMetrics   = new ArrayList<DerivedMetric>(2);
@@ -423,7 +423,6 @@ public class ExperimentBuilder2 extends BaseExperimentBuilder
 			case Derived_Incr:
 				metricInc = new AggregateMetric(sID, sDisplayName, sDescription,
 									visibility, format, percent, iSelf, partner, objType);
-				((AggregateMetric) metricInc).init( (BaseExperimentWithMetrics) this.experiment );
 				break;
 			case Derived:
 				metricInc = new DerivedMetric(sDisplayName, sID, iSelf, percent, objType);

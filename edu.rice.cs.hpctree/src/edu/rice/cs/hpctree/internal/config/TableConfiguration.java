@@ -163,7 +163,15 @@ public class TableConfiguration implements IConfiguration
             int rowIndex = natTable.getRowIndexByPosition(eventData.getRowPosition());	            
             Scope scope = dataProvider.getRowObject(rowIndex);
             
-            listeners.forEach(action -> action.select(scope));
+            // fix issue #237 (incorrect source code)
+            // If we click the procedure name, we should display the definition of the procedure
+            // not the call site
+            if (scope instanceof CallSiteScope) {
+            	CallSiteScope cs = (CallSiteScope) scope;
+            	scope = cs.getProcedureScope();
+            }
+            final Scope scopeToShow = scope;
+            listeners.forEach(action -> action.select(scopeToShow));
 		});
 	}
 	

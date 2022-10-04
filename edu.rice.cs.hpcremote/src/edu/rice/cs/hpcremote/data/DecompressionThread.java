@@ -3,14 +3,13 @@ package edu.rice.cs.hpcremote.data;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.InflaterInputStream;
 
 import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
 import edu.rice.cs.hpcdata.db.version4.DataRecord;
-import edu.rice.cs.hpcdata.util.CallPath;
+import edu.rice.cs.hpcdata.util.ICallPath;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
 
@@ -34,7 +33,7 @@ public class DecompressionThread extends Thread {
 
 	// Variables for decompression
 
-	final Map<Integer, CallPath> scopeMap;
+	final ICallPath scopeMap;
 
 	final TraceDisplayAttribute attributes;
 	
@@ -61,7 +60,7 @@ public class DecompressionThread extends Thread {
 	 * @param listener
 	 */
 	public DecompressionThread(
-			Map<Integer, CallPath> map,
+			ICallPath map,
 			TraceDisplayAttribute attributes,
 			ConcurrentLinkedQueue<DecompressionItemToDo> workToDo, 
 			ConcurrentLinkedQueue<Integer> timelinesAvailableForRendering,

@@ -8,7 +8,7 @@ import org.eclipse.core.commands.operations.IUndoContext;
 import org.eclipse.core.commands.operations.IUndoableOperation;
 import org.eclipse.core.commands.operations.OperationHistoryEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.IJobChangeListener;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.PaintEvent;
@@ -45,8 +45,8 @@ import edu.rice.cs.hpctraceviewer.data.Position;
 public class DepthTimeCanvas extends AbstractTimeCanvas 
 	implements IOperationHistoryListener, ISpaceTimeCanvas
 {	
-	private final static float FRACTION_ZOOM_DEPTH = 2.0f;
-	private final static int   DEPTH_MIN = 1;
+	private static final float FRACTION_ZOOM_DEPTH = 2.0f;
+	private static final int   DEPTH_MIN = 1;
 	
 	private final ITracePart tracePart;
 
@@ -101,7 +101,7 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 	{
 		bound = getClientArea();
 
-		if (stData == null )
+		if (stData == null || !stData.hasTraces())
 			return;
 		
 		super.paintControl(event);
@@ -114,7 +114,6 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 		//--------------------
 		
 		event.gc.setForeground(ColorManager.COLOR_WHITE);
-		//event.gc.setAlpha(240);
 		
 		long selectedTime = stData.getTraceDisplayAttribute().getFrame().position.time;
 		
@@ -135,7 +134,8 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
      */
     public void refresh() 
     {
-		rebuffer();
+    	if (stData.hasTraces())
+    		rebuffer();
     }
     
     
@@ -144,13 +144,7 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 	{
 		if (bound == null) {
 			final Display display = Display.getDefault();
-			display.syncExec(new Runnable() {
-				
-				@Override
-				public void run() {
-					bound = getClientArea();
-				}
-			});
+			display.syncExec( () -> bound = getClientArea() );
 		}
 		final int viewWidth = bound.width;
 
@@ -167,7 +161,8 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 	 * Zoom out the depth: increase the depth so users can see more 
 	 */
 	public void zoomOut() {
-		visibleDepths  = (int) Math.min(stData.getMaxDepth(), visibleDepths + FRACTION_ZOOM_DEPTH);
+		int maxDepth  = stData.getMaxDepth();
+		visibleDepths = (int) Math.min(maxDepth, visibleDepths + FRACTION_ZOOM_DEPTH);
 		
 		rebuffer();
 	}
@@ -189,7 +184,8 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 	 * @return true if it's feasible
 	 */
 	public boolean canZoomOut() {
-		return visibleDepths < stData.getMaxDepth();
+		int maxDepth = stData.getMaxDepth();
+		return visibleDepths < maxDepth;
 	}
 	
 	
@@ -214,7 +210,7 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 
 	// remove queue of jobs because it causes deadlock 
 	// 
-	final private ConcurrentLinkedQueue<BaseViewPaint> queue = new ConcurrentLinkedQueue<>();
+	private final ConcurrentLinkedQueue<BaseViewPaint> queue = new ConcurrentLinkedQueue<>();
 
 	/****
 	 * Remove the jobs in the waiting list
@@ -350,9 +346,9 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 					null, null);
 		} catch (ExecutionException e) {
 			e.printStackTrace();
-		}
-		
+		}		
 	}
+	
 
 	@Override
 	protected void changeRegion(Rectangle region) 
@@ -383,18 +379,8 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 		}
 	}
 	
-	private class DepthJobListener implements IJobChangeListener
+	private class DepthJobListener extends JobChangeAdapter
 	{
-		
-		@Override
-		public void sleeping(IJobChangeEvent event) {}
-		
-		@Override
-		public void scheduled(IJobChangeEvent event) {}
-		
-		@Override
-		public void running(IJobChangeEvent event) {}
-		
 		@Override
 		public void done(IJobChangeEvent event) {
 
@@ -407,18 +393,11 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 				}
 			} );
 		}
-		
-		@Override
-		public void awake(IJobChangeEvent event) {}
-		
-		@Override
-		public void aboutToRun(IJobChangeEvent event) {}
-
 	}
 
 	@Override
 	public void setMessage(String message) {
-		
+		// not needed.
 	}
 
 	@Override

@@ -29,8 +29,8 @@ public class FileDB2 implements IFileDB
 	private LargeByteBuffer masterBuff;
 	
 	private int numFiles = 0;
-	private String valuesX[];
-	private long offsets[];
+	private String[] valuesX;
+	private long[] offsets;
 	
 	private int recordSz;
 	private int headerSize;
@@ -94,70 +94,68 @@ public class FileDB2 implements IFileDB
 		valuesX = new String[numFiles];
 		offsets = new long[numFiles];
 		
-		listIdTuples = new ArrayList<IdTuple>(numFiles);
+		listIdTuples = new ArrayList<>(numFiles);
 		
-		long current_pos = Constants.SIZEOF_INT * 2;
-		int parallelism  = getParallelismLevel();
+		long currentPos = Constants.SIZEOF_INT * 2L;
+		int parallelism = getParallelismLevel();
 
 		// get the procs and threads IDs
 		for(int i=0; i<numFiles; i++) {
 
-			final int proc_id = masterBuff.getInt(current_pos);
-			current_pos += Constants.SIZEOF_INT;
-			final int thread_id = masterBuff.getInt(current_pos);
-			current_pos += Constants.SIZEOF_INT;
+			final int proc_id = masterBuff.getInt(currentPos);
+			currentPos += Constants.SIZEOF_INT;
+			final int thread_id = masterBuff.getInt(currentPos);
+			currentPos += Constants.SIZEOF_INT;
 			
-			offsets[i] = masterBuff.getLong(current_pos);
-			current_pos += Constants.SIZEOF_LONG;
+			offsets[i] = masterBuff.getLong(currentPos);
+			currentPos += Constants.SIZEOF_LONG;
 			
-			// fix issue #222: allow viewing multiple same threads 
-			// it should display thread 0, thread 0, ... instead of empty 
-			IdTuple tuple = new IdTuple(i, parallelism);
+			IdTuple tuple = new IdTuple(i+1, parallelism);
 			
 			//--------------------------------------------------------------------
 			// adding list of x-axis 
 			//--------------------------------------------------------------------			
 			
-			String x_val;
+			String xVal;
 			if (this.isHybrid()) 
 			{
-				x_val = String.valueOf(proc_id) + "." + String.valueOf(thread_id);
-				
-				tuple.setKindAndInterpret(IdTupleType.KIND_RANK, 0);
+				xVal = String.valueOf(proc_id) + "." + thread_id;
+
+				tuple.setKind(0, IdTupleType.KIND_RANK);
 				tuple.setPhysicalIndex(0, proc_id);
 				tuple.setLogicalIndex(0, proc_id);
 				
-				tuple.setKindAndInterpret(IdTupleType.KIND_THREAD, 1);
+				tuple.setKind(1, IdTupleType.KIND_THREAD);
 				tuple.setPhysicalIndex(1, thread_id) ;
 				tuple.setLogicalIndex(1, thread_id);
 				
 			} else if (isMultiProcess()) 
 			{
-				x_val = String.valueOf(proc_id);					
+				xVal = String.valueOf(proc_id);					
 				
-				tuple.setKindAndInterpret(IdTupleType.KIND_RANK, 0);
+				tuple.setKind(0, IdTupleType.KIND_RANK);
 				tuple.setPhysicalIndex(0, proc_id);
 				tuple.setLogicalIndex(0, proc_id);
 			} else if (isMultiThreading()) 
 			{
-				x_val = String.valueOf(thread_id);
+				xVal = String.valueOf(thread_id);
 				
-				tuple.setKindAndInterpret(IdTupleType.KIND_THREAD, 0);
+				tuple.setKind(0, IdTupleType.KIND_THREAD);
 				tuple.setPhysicalIndex(0, thread_id);
 				tuple.setLogicalIndex(0, thread_id);
 			} else {
 				// temporary fix: if the application is neither hybrid nor multiproc nor multithreads,
 				// we just print whatever the order of file name alphabetically
 				// this is not the ideal solution, but we cannot trust the value of proc_id and thread_id
-				x_val = String.valueOf(i);
+				xVal = String.valueOf(i);
 				
 				// fix issue #222: use thread instead of rank
 				// the physical id will be whatever in thread_id, but the logical id will be the file order
-				tuple.setKindAndInterpret(IdTupleType.KIND_THREAD, 0);
+				tuple.setKind(0, IdTupleType.KIND_THREAD);
 				tuple.setPhysicalIndex(0, thread_id);
 				tuple.setLogicalIndex(0, i);
 			}
-			valuesX[i] = x_val;
+			valuesX[i] = xVal;
 			listIdTuples.add(tuple);
 		}
 	}
@@ -165,6 +163,8 @@ public class FileDB2 implements IFileDB
 	@Override
 	public int 	getParallelismLevel()
 	{
+		// fix issue #222: allow viewing multiple same threads 
+		// it should display thread 0, thread 0, ... instead of empty 
 		return Math.max(1, Util.countSetBits(type));
 	}
 
@@ -225,30 +225,27 @@ public class FileDB2 implements IFileDB
 				// ------------------------------------------------------
 				file.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				// nothing to do
 			}
 		}
 	}
 
 	@Override
 	public long getMinLoc(int rank) {
-		final long offsets[] = getOffsets();
+		final long[] rankOffsets = getOffsets();
 		
-		if (rank >= offsets.length) {
-			throw new RuntimeException("File DB2: incorrect rank: " + rank +" (bigger than " + offsets.length+")");
+		if (rank >= rankOffsets.length) {
+			throw new RuntimeException("File DB2: incorrect rank: " + rank +" (bigger than " + rankOffsets.length+")");
 		}
-		final long loc = offsets[rank] + headerSize;
-		return loc;
+		return rankOffsets[rank] + headerSize;
 	}
 
 	@Override
 	public long getMaxLoc(int rank) {
-		final long offsets[] = getOffsets();
-		long maxloc = ( (rank+1<getNumberOfRanks())? 
-				offsets[rank+1] : masterBuff.size()-1 )
+		final long[] rankOffsets = getOffsets();
+		return ( (rank+1<getNumberOfRanks())? 
+				rankOffsets[rank+1] : masterBuff.size()-1 )
 				- recordSz;
-		return maxloc;
 	}
 
 	@Override

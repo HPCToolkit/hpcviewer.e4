@@ -1,6 +1,7 @@
 package edu.rice.cs.hpcdata.experiment.scope.visitors;
 
-import java.util.Stack;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.FileScope;
@@ -15,12 +16,13 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.ScopeVisitType;
 import edu.rice.cs.hpcdata.experiment.scope.StatementRangeScope;
 
-public abstract class BaseDuplicateScopeTreesVisitor implements IScopeVisitor {
-	protected Stack<Scope> scopeStack;
+public abstract class BaseDuplicateScopeTreesVisitor implements IScopeVisitor 
+{
+	protected Deque<Scope> scopeStack;
 	private final int metricOffset;
 	
-	public BaseDuplicateScopeTreesVisitor(Scope newRoot, int metricOffset) {
-		scopeStack = new Stack<Scope>();
+	protected BaseDuplicateScopeTreesVisitor(Scope newRoot, int metricOffset) {
+		scopeStack = new ArrayDeque<>();
 		scopeStack.push(newRoot);
 		this.metricOffset = metricOffset;
 	}
@@ -44,9 +46,9 @@ public abstract class BaseDuplicateScopeTreesVisitor implements IScopeVisitor {
 	public void visit(LineScope scope, 				ScopeVisitType vt) { mergeInsert(scope, vt); }
 
 	
-	private Scope mergeInsert(Scope scope, ScopeVisitType vt) {
+	private void mergeInsert(Scope scope, ScopeVisitType vt) {
 		if (!scope.isCounterZero())
-			return null;
+			return;
 		
 		if (vt == ScopeVisitType.PreVisit) {
 			Scope newParent = scopeStack.peek();
@@ -55,10 +57,10 @@ public abstract class BaseDuplicateScopeTreesVisitor implements IScopeVisitor {
 			
 			Scope newKid = this.addMetricColumns(newParent, kid, scope);
 			
-			return scopeStack.push(newKid);
+			scopeStack.push(newKid);
 			
 		} else { // PostVisit
-			return scopeStack.pop();
+			scopeStack.pop();
 		}
 	}
 
@@ -113,6 +115,6 @@ public abstract class BaseDuplicateScopeTreesVisitor implements IScopeVisitor {
 	 * @param toMatch
 	 * @return the kid
 	 */
-	abstract protected Scope findMatch(Scope parent, Scope toMatch);
+	protected abstract Scope findMatch(Scope parent, Scope toMatch);
 
 }

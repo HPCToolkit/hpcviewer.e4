@@ -124,11 +124,9 @@ public abstract class BaseTimelineThread implements Callable<Integer> {
 			// ---------------------------------
 			finalize();
 		}
-		//System.out.println("BTT q: " + queue.size() + " line:" + currentLine.get() +" tot: " + numTraces);
-		// terminate the monitor progress bar (if any) when there's no more work to do 
-		//monitor.done();
 		return Integer.valueOf(num_invalid_samples);
 	}
+	
 
 	public Map<Integer, List<?>> getInvalidData() {
 		return mapInvalidData;

@@ -1,6 +1,5 @@
 package edu.rice.cs.hpctraceviewer.data.local;
 
-import java.io.File;
 import java.io.IOException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -8,13 +7,16 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 
 import edu.rice.cs.hpcdata.db.IFileDB;
 import edu.rice.cs.hpcdata.db.version2.FileDB2;
-import edu.rice.cs.hpcdata.experiment.BaseExperiment;
+import edu.rice.cs.hpcdata.db.version4.FileDB4;
+import edu.rice.cs.hpcdata.db.version4.MetricValueCollection4;
+import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
+import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
+import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.util.Constants;
-import edu.rice.cs.hpcdata.util.Util;
 import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
-import edu.rice.cs.hpctraceviewer.data.version4.FileDB4;
 
 
 /****************************************************
@@ -25,7 +27,7 @@ import edu.rice.cs.hpctraceviewer.data.version4.FileDB4;
 public class LocalDBOpener extends AbstractDBOpener 
 {
 	private int version;
-	private BaseExperiment experiment;
+	private IExperiment experiment;
 	private final IEclipseContext context;
 	
 
@@ -33,33 +35,29 @@ public class LocalDBOpener extends AbstractDBOpener
 	/*****
 	 * Prepare opening a database
 	 * @param IEclipseContext context
-	 * @param experiment
+	 * @param experiment2
 	 * @throws Exception 
 	 */
-	public LocalDBOpener(IEclipseContext context, BaseExperiment experiment) throws Exception {
+	public LocalDBOpener(IEclipseContext context, IExperiment experiment2) throws IllegalArgumentException {
 		this.context   = context;
-		this.experiment = experiment;
-		version = experiment.getMajorVersion();
-		String directory = experiment.getDefaultDirectory().getAbsolutePath();
+		this.experiment = experiment2;
+		version = experiment2.getMajorVersion();
+		String directory = experiment2.getPath();
+		
 		if (directoryHasTraceData(directory)<=0) {
-			throw new Exception("The directory does not contain hpctoolkit database with trace data:"
+			throw new IllegalArgumentException("The directory does not contain hpctoolkit database with trace data:"
 					+ directory);
 		}
 	}
 	
 	
-	@Override
-	public int getVersion() {
-		return version;
-	}
-
-	
 	/****
 	 * Create an instance of {@code IFileDB} depending on the database version 
 	 * @return IFileDB
 	 * @throws InvalExperimentException
+	 * @throws IOException 
 	 */
-	private IFileDB getFileDB() throws InvalExperimentException {
+	private IFileDB getFileDB() throws InvalExperimentException, IOException {
 		IFileDB fileDB = null;
 		switch (version)
 		{
@@ -69,7 +67,10 @@ public class LocalDBOpener extends AbstractDBOpener
 			break;
 		case 3:
 		case Constants.EXPERIMENT_SPARSE_VERSION:
-			fileDB = new FileDB4();
+			Experiment exp = (Experiment) experiment;
+			var root = exp.getRootScope(RootScopeType.CallingContextTree);
+			MetricValueCollection4 mvc = (MetricValueCollection4) root.getMetricValueCollection();
+			fileDB = new FileDB4(experiment, mvc.getDataSummary());
 			break;
 		default:
 			throw new InvalExperimentException("Trace data version is not unknown: " + version);
@@ -80,7 +81,7 @@ public class LocalDBOpener extends AbstractDBOpener
 	
 	@Override
 	public SpaceTimeDataController openDBAndCreateSTDC(IProgressMonitor statusMgr)
-			throws IOException, InvalExperimentException, Exception {
+			throws Exception {
 
 		// ---------------------------------------------------------------------
 		// Try to open the database and refresh the data
@@ -96,47 +97,20 @@ public class LocalDBOpener extends AbstractDBOpener
 
 	
 	@Override
-	public void end() {}
+	public void end() { /* unused */ }
 
 
 	/**********************
 	 * static method to check if a directory contains hpctoolkit's trace data
 	 * 
-	 * @param directory : a database directory
-	 * @return int version of the database if the database is correct and valid
+	 * @param directory 
+	 * 			the main database directory
+	 * @return int 
+	 * 			version of the database if the database is correct and valid
 	 * 			   return negative number otherwise
 	 */
-	static private int directoryHasTraceData(String directory)
+	public static int directoryHasTraceData(String directory)
 	{
-		File file = new File(directory);
-		String database_directory;
-		if (file.isFile()) {
-			// if the argument is a file, then we'll look for its parent directory
-			file = file.getParentFile();
-			database_directory = file.getAbsolutePath();
-		} else {
-			database_directory = directory;
-		}
-		// checking for version 4.0
-		String file_path = database_directory + File.separatorChar + "trace.db";
-		File tmp_file 	 = new File(file_path);
-		if (tmp_file.canRead()) {
-			return Constants.EXPERIMENT_SPARSE_VERSION;
-		}
-		
-		// checking for version 2.0
-		file_path = database_directory + File.separatorChar + "experiment.mt";
-		tmp_file  = new File(file_path);
-		if (tmp_file.canRead()) {
-			return Constants.EXPERIMENT_DENSED_VERSION;
-		}
-		
-		// checking for version 2.0 with old format files
-		tmp_file  = new File(database_directory);
-		File[] file_hpctraces = tmp_file.listFiles( new Util.FileThreadsMetricFilter("*.hpctrace") );
-		if (file_hpctraces != null && file_hpctraces.length>0) {
-			return 1;
-		}
-		return -1;
+		return LocalDatabaseRepresentation.directoryHasTraceData(directory);
 	}
 }

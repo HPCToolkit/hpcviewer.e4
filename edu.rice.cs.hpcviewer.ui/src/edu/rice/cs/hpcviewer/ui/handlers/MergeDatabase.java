@@ -12,14 +12,12 @@ import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 
-import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcmerge.MergeManager;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -50,7 +48,7 @@ public class MergeDatabase
 		// ---------------------------------------------------------------
 		List<Experiment> db = new ArrayList<Experiment>(2);
 		
-		Iterator<BaseExperiment> iterator = database.getIterator(application.getSelectedElement());
+		var iterator = database.getIterator(application.getSelectedElement());
 		while(iterator.hasNext()) {
 			Experiment exp = (Experiment) iterator.next();
 			if (!exp.isMergedDatabase()) {
@@ -94,7 +92,7 @@ public class MergeDatabase
 	
 	@CanExecute
 	public boolean canExecute(MApplication application, @Optional @Named(PARAM_ID) String param) {
-		Iterator<BaseExperiment> iterator = database.getIterator(application.getSelectedElement());
+		var iterator = database.getIterator(application.getSelectedElement());
 		
 		int numDb = 0;		
 		while(iterator.hasNext()) {

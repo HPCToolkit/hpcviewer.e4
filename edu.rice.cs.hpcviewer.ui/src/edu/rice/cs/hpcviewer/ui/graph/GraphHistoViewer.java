@@ -1,6 +1,5 @@
 package edu.rice.cs.hpcviewer.ui.graph;
 
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
@@ -32,13 +31,27 @@ public class GraphHistoViewer extends AbstractGraphViewer
 		final int bins = 10;
 		
 		final Scope scope = input.getScope();
-		final MetricRaw metric = (MetricRaw) input.getMetric();
+		final var metric = input.getMetric();
 		double y_values[], x_values[];
+		
+		// new meta.db database: the id is from metric index,
+		// and we don't need the size of metrics
+		// set to zero is fine.
+		int id = metric.getIndex();
+		int size = 0;
+		
+		// in case of old database, the metric is from MetricRaw
+		// the information of the size is available in metric raw.
+		if (metric instanceof MetricRaw) {
+			id = ((MetricRaw) metric).getRawID();
+			size = ((MetricRaw)metric).getSize();
+		}
+		
 		try {
 			IThreadDataCollection threadData = input.getThreadData();
-			y_values = threadData.getMetrics(scope.getCCTIndex(), metric.getRawID(), metric.getSize());
+			y_values = threadData.getMetrics(scope.getCCTIndex(), id, size);
 
-		} catch (IOException e) {
+		} catch (Exception e) {
 			Display display = Display.getDefault();
 			MessageDialog.openError(display.getActiveShell(), "Error reading file !", e.getMessage());
 			return -1;

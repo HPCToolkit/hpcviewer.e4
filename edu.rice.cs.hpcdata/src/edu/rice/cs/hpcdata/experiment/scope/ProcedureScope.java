@@ -19,6 +19,7 @@ import java.util.List;
 import edu.rice.cs.hpcdata.experiment.scope.filters.MetricValuePropagationFilter;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.IScopeVisitor;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
+import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.IUserData;
 
 
@@ -37,33 +38,27 @@ import edu.rice.cs.hpcdata.util.IUserData;
 
 public class ProcedureScope extends Scope  implements IMergedScope 
 {
-	final static public int FeatureProcedure   = 0;
-	final static public int FeaturePlaceHolder = 1;
-	final static public int FeatureRoot 	   = 2;
-	final static public int FeatureElided      = 3;
-	final static public int FeatureTopDown     = 4;
+	public static final int FEATURE_PROCEDURE    = 0;
+	public static final int FEATURE_PLACE_HOLDER = 1;
+	public static final int FEATURE_ROOT 	     = 2;
+	public static final int FEATURE_ELIDED       = 3;
+	public static final int FEATURE_TOPDOWN      = 4;
 	
-	final static public String INLINE_NOTATION = "[I] ";
+	public static final String INLINE_NOTATION = "[I] ";
+	
+	public static final ProcedureScope NONE = new ProcedureScope(null, 
+			LoadModuleScope.NONE, SourceFile.NONE, 
+			0, 0, 
+			Constants.PROCEDURE_UNKNOWN, false, 
+			Constants.FLAT_ID_PROC_UNKNOWN, Constants.FLAT_ID_PROC_UNKNOWN, 
+			null, FEATURE_ROOT);
 
-	private static final String TheProcedureWhoShouldNotBeNamed = "-";
-	private static final String TheInlineProcedureLabel 	 	= "<inline>";
-
-	public static enum ProcedureType {
-		ProcedureNormal, 
-		ProcedureInlineFunction, 
-		ProcedureInlineMacro, 
-		ProcedureRoot,
-		
-		VariableDynamicAllocation, 
-		VariableStatic, 
-		VariableUnknown, 
-		VariableAccess
-	}
+	private static final String PROCEDURE_NO_NAME = "-";
+	private static final String PROCEDURE_INLINE  = "<inline>";
 
 	
-	final private int procedureFeature;
+	private final int procedureFeature;
 	
-	private ProcedureType type;
 	/** The name of the procedure. */
 	protected String procedureName;
 	protected boolean isalien;
@@ -71,27 +66,46 @@ public class ProcedureScope extends Scope  implements IMergedScope
 	protected LoadModuleScope objLoadModule;
 
 
-	/**
-	 * scope ID of the procedure frame. The ID is given by hpcstruct and hpcprof
-	 */
-	//protected int iScopeID;
-
 //////////////////////////////////////////////////////////////////////////
 //	INITIALIZATION	
 //////////////////////////////////////////////////////////////////////////
 
 
-
-
-/*************************************************************************
- *	Creates a ProcedureScope.
- ************************************************************************/
 	
-public ProcedureScope(RootScope root, SourceFile file, int first, int last, 
-		String proc, boolean _isalien, int cct_id, int flat_id, 
+/***
+ *	Creates a ProcedureScope.
+ * 
+ * @param root
+ * 			the root scope
+ * @param loadModule
+ * 			The load module
+ * @param file
+ * 			The file of this procedure
+ * @param first
+ * 			start line number
+ * @param last
+ * 			last line number
+ * @param proc
+ * 			The name of the procedure
+ * @param _isalien
+ * 			boolean true if the procedure is inlined
+ * @param cct_id
+ * 			unique id
+ * @param flat_id
+ * 			static id of the procedure. Used to create flat view
+ * @param userData
+ * 			User's defined name
+ * @param procedureFeature 
+ * 			{@code int}
+ * 			kind of procedure: FeatureProcedure, FeaturePlaceHolder, 
+ * 			FeatureRoot, FeatureElided and FeatureTopDown
+ */
+public ProcedureScope(RootScope root, LoadModuleScope loadModule, SourceFile file, 
+		int first, int last, String proc, boolean _isalien, int cct_id, int flat_id, 
 		IUserData<String,String> userData, int procedureFeature)
 {
 	super(root, file, first, last, cct_id, flat_id);
+	
 	this.isalien = _isalien;
 	this.procedureName = proc;
 
@@ -101,54 +115,17 @@ public ProcedureScope(RootScope root, SourceFile file, int first, int last,
 			procedureName = newName;
 	}
 	if (isalien) {
-		if (procedureName.isEmpty() || procedureName.equals(TheProcedureWhoShouldNotBeNamed)
-				|| procedureName.equals(TheInlineProcedureLabel)) {
+		if (procedureName.isEmpty() || procedureName.equals(PROCEDURE_NO_NAME)
+				|| procedureName.equals(PROCEDURE_INLINE)) {
 			procedureName =  "inlined from " + getSourceCitation();
 		}
 		if (!procedureName.startsWith(INLINE_NOTATION))
 			procedureName = INLINE_NOTATION + procedureName;
 	}
-	this.objLoadModule 	  = null;
 	this.procedureFeature = procedureFeature;
-}
-
-
-/**
- * Laks 2008.08.25: We need a special constructor to accept the SID
- * @param experiment
- * @param file
- * @param first
- * @param last
- * @param proc
- * @param sid
- * @param _isalien
- */
-public ProcedureScope(RootScope root, LoadModuleScope loadModule, SourceFile file, 
-		int first, int last, String proc, boolean _isalien, int cct_id, int flat_id, 
-		IUserData<String,String> userData, int procedureFeature)
-{
-	this(root, file, first, last,proc,_isalien, cct_id, flat_id, userData, procedureFeature);
-	//this.iScopeID = sid;
 	this.objLoadModule = loadModule;
 }
-/*
-public boolean equals(Object obj) {
-	if (obj instanceof ProcedureScope) {
-		ProcedureScope p = (ProcedureScope) obj;
-		boolean equal = this.getName().equals(p.getName());
-		if (equal) {
-			// corner case: somehow Eclipse needs to compare different tree item before it closes.
-			// of course, when it's closing, we remove databases and all references to enable
-			// garbage collection to gather unused storage
-			SourceFile mySrc = getSourceFile();
-			SourceFile pSrc  = p.getSourceFile();
-			if (mySrc != null && pSrc != null) {
-				return  mySrc.getName().equals(pSrc.getName());
-			}
-		}
-	} 
-	return false;
-}*/
+
 
 //////////////////////////////////////////////////////////////////////////
 //	SCOPE DISPLAY	
@@ -173,7 +150,7 @@ public String getName()
  ************************************************************************/
 
 public Scope duplicate() {
-	ProcedureScope ps = new ProcedureScope(this.root,
+	return new ProcedureScope(this.root,
 			this.objLoadModule,
 			this.sourceFile, 
 			this.firstLineNumber, 
@@ -184,10 +161,6 @@ public Scope duplicate() {
 			this.flat_node_index,
 			null,
 			this.procedureFeature);
-
-	ps.setProcedureType(type);
-	
-	return ps;
 }
 
 public boolean isAlien() {
@@ -198,6 +171,7 @@ public boolean isAlien() {
 //support for visitors													//
 //////////////////////////////////////////////////////////////////////////
 
+@Override
 public void accept(IScopeVisitor visitor, ScopeVisitType vt) {
 	visitor.visit(this, vt);
 }
@@ -209,48 +183,53 @@ public void accept(IScopeVisitor visitor, ScopeVisitType vt) {
 public LoadModuleScope getLoadModule() {
 	return this.objLoadModule;
 }
-/*
-public int getSID() {
-	return this.iScopeID;
-} */
 
+
+//////////////////////////////////////////////////////////////////////////
+//support for bottom-up visitors										//
+//////////////////////////////////////////////////////////////////////////
 
 @Override
-public List<TreeNode> getAllChildren(/*AbstractFinalizeMetricVisitor finalizeVisitor, PercentScopeVisitor percentVisitor,*/
+public List<Scope> getAllChildren(/*AbstractFinalizeMetricVisitor finalizeVisitor, PercentScopeVisitor percentVisitor,*/
 		MetricValuePropagationFilter inclusiveOnly,
 		MetricValuePropagationFilter exclusiveOnly) 
 {
 	return this.getChildren();
 }
 
+
+//////////////////////////////////////////////////////////////////////////
+// misc
+//////////////////////////////////////////////////////////////////////////
+
+public void setLoadModule(LoadModuleScope lm) {
+	this.objLoadModule = lm;
+}
+
+
 public boolean isTopDownProcedure() 
 {	
-	return procedureFeature == FeatureTopDown;
+	return procedureFeature == FEATURE_TOPDOWN;
 }
 
 public boolean isFalseProcedure()
 {
-	return procedureFeature != FeatureProcedure;
+	return procedureFeature != FEATURE_PROCEDURE;
 }
 
 public boolean toBeElided() 
 {
-	return procedureFeature == FeatureElided;
+	return procedureFeature == FEATURE_ELIDED;
 }
-
-public void setProcedureType(ProcedureType type) {
-	this.type = type;
-}
-
-public ProcedureType getProcedureType() {
-	return this.type;
-}
-
-
 
 @Override
 public boolean hasScopeChildren() {
-	return hasChildren();
+	return node.hasChildren();
+}
+
+
+public void setAlien(boolean alien) {
+	this.isalien = alien;
 }
 
 }

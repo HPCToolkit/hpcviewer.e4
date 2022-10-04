@@ -20,24 +20,23 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 	// CONSTANTS
 	//-------------------------------------------------------------------------------
 
-	static final public int PARTNER_UNKNOWN = -1;
-	
-	static final private int NO_ORDER = -1;
+	public static final int  PARTNER_UNKNOWN = -1;
+	private static final int NO_ORDER = -1;
 
 	//-------------------------------------------------------------------------------
 	// DATA STRUCTURE
 	//-------------------------------------------------------------------------------
 
 	/** Valid types of Annotations to be used with metric values */
-	static public enum AnnotationType { NONE, PERCENT, PROCESS };
+	public enum AnnotationType { NONE, PERCENT, PROCESS, COLOR_BAR }
 	
-	static public enum VisibilityType { 
+	public enum VisibilityType { 
 		HIDE, 				// hide the metric column 
 		SHOW, 				// show the metric column
 		SHOW_INCLUSIVE,		// show only the inclusive metric 
 		SHOW_EXCLUSIVE, 	// show only the exclusive metric
 		INVISIBLE			// the metric shouldn't be visible by users. see issue #67
-	};
+	}
 	
 	
 	//-------------------------------------------------------------------------------
@@ -66,7 +65,7 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 	/** The index of this metric in its experiment's metric list. */
 	protected int index;
 	// partner of the metric. If the metric is exclusive, then its partner is the inclusive one
-	protected int partner_index;
+	protected int partnerIndex;
 
 	/** The display format to be used for this metric. */
 	protected IMetricValueFormat displayFormat;
@@ -91,24 +90,21 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 	 * @param format : format of the display
 	 * @param annotationType : show the percent or process number ?
 	 * @param index : index in the table
-	 * @param partner_index : index of the partner metric. 
+	 * @param partnerIndex : index of the partner metric. 
 	 * 		IT HAS TO BE NEGATIVE IF IT DOESNT HAVE A PARTNER !!
 	 * @param type : type of the metric
 	 *************************************************************************/
-	public BaseMetric(String sID, String sDisplayName, String sDescription,
+	protected BaseMetric(String sID, String sDisplayName, String sDescription,
 			VisibilityType displayed, String format, 
-			AnnotationType annotationType, int index, int partner_index, MetricType type) 
+			AnnotationType annotationType, int index, int partnerIndex, MetricType type) 
 	{
-		// in case of instantiation from duplicate() method, we need to make sure there is
-		//	no double empty suffix
 		this.displayName = sDisplayName;
-
-		this.visibility = displayed;
+		this.visibility  = displayed;
 		this.annotationType = annotationType;
 		
 		this.order = NO_ORDER;
 		this.index = index;
-		this.partner_index = partner_index;
+		this.partnerIndex = partnerIndex;
 		
 		// format
 		if (format == null) {
@@ -123,6 +119,11 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 		this.metricType = type;
 	}
 
+	
+	protected BaseMetric(String sID, String sDisplayName) {
+		this(sID, sDisplayName, sID, VisibilityType.SHOW, null, null, 0, 0, MetricType.UNKNOWN);
+	}
+	
 	//-------------------------------------------------------------------------------
 	// METHODS
 	//-------------------------------------------------------------------------------
@@ -164,13 +165,13 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 	 * @return the index partner, negative if it has no partner
 	 */
 	public int getPartner() {
-		return partner_index;
+		return partnerIndex;
 	}
 	
 
 	public void setPartner(int ei)
 	{
-		this.partner_index = ei;
+		this.partnerIndex = ei;
 	}
 
 	public void setOrder(int order)
@@ -253,10 +254,9 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 	 ************************************************************************/	
 	public boolean getDisplayed()
 	{
-		boolean display = visibility == VisibilityType.SHOW || 
+		return visibility == VisibilityType.SHOW || 
 				(visibility == VisibilityType.SHOW_EXCLUSIVE && metricType == MetricType.EXCLUSIVE) ||
 				(visibility == VisibilityType.SHOW_INCLUSIVE && metricType == MetricType.INCLUSIVE);
-		return display;
 	}
 
 	
@@ -299,15 +299,18 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 	 * @return
 	 */
 	public String getMetricTextValue(Scope scope) {
-		MetricValue mv = this.getValue(scope);
-		return this.getMetricTextValue(mv);
+		MetricValue mv = scope.getMetricValue(this);
+		boolean showPercent = getAnnotationType() == AnnotationType.PERCENT;
+		MetricValue rootValue = showPercent ? scope.getRootScope().getMetricValue(this) : MetricValue.NONE;
+		
+		return this.getMetricTextValue(mv, rootValue);
 	}
 
 	/*************************************************************************
 	 * Return the text to display based on the metric value
 	 * @param mv: the value of a metric
 	 *************************************************************************/
-	public String getMetricTextValue(MetricValue mv) {
+	protected String getMetricTextValue(MetricValue mv, MetricValue rootValue) {
 		
 		if (mv == null)
 			return null;
@@ -325,7 +328,7 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 		else if (Float.compare(mv.value, Float.NEGATIVE_INFINITY)==0) sText = "-Infinity";
 		else if (Float.isNaN(mv.value)) sText = "NaN";
 		else {
-			sText = getDisplayFormat().format(mv);
+			sText = getDisplayFormat().format(mv, rootValue);
 		}
 		
 		return sText;
@@ -402,28 +405,23 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 	 * 
 	 * @return VisibilityType. Default is the metric to be shown.
 	 *************************************************************************/
-	static public VisibilityType convertToVisibilityType(int type) 
+	public static VisibilityType convertToVisibilityType(int type) 
 	{
-		VisibilityType vType = VisibilityType.SHOW;
-		
 		switch(type) {
 		case 0:
-			vType = VisibilityType.HIDE;
-			break;
+			return VisibilityType.HIDE;
 		case 1:
-			vType = VisibilityType.SHOW;
-			break;
+			return VisibilityType.SHOW;
 		case 2:
-			vType = VisibilityType.SHOW_INCLUSIVE;
-			break;
+			return VisibilityType.SHOW_INCLUSIVE;
 		case 3:
-			vType = VisibilityType.SHOW_EXCLUSIVE;
-			break;
+			return VisibilityType.SHOW_EXCLUSIVE;
 		case 4:
 			// see issue #67
-			vType = VisibilityType.INVISIBLE;
+			return VisibilityType.INVISIBLE;
+		default:
+			return VisibilityType.SHOW;
 		}
-		return vType;
 	}
 	
 	
@@ -431,19 +429,25 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 	//		ABSTRACT METHODS
 	//=================================================================================
 	/*************************************************************************
-	 * method to return the value of a given scope. To be implemented by derived class.
-	 * @param s : scope of the metric value
-	 * @return a metric value
+	 * Method to return the value of a given scope. To be implemented by derived class.
+	 * This method shouldn't be called directly other than from IMetricScope since
+	 * it will grab or compute the value directly from the disk.<br>
+	 * On the other hand, {@link IMetricScope.getMetricValue} will cache the value,
+	 * so it's more optimized.
+	 *   
+	 * @param s 
+	 * 			scope of the metric value
+	 * @return {@code MetricValue}
+	 * 			a metric value, {@code MetricValue.NONE} if the scope has no cost for this metric.
 	 *************************************************************************/
-	abstract public MetricValue getValue(IMetricScope s);
+	public abstract MetricValue getValue(IMetricScope s);
 	
-	abstract public MetricValue getRawValue(IMetricScope s);
 
 	/***
 	 * Method to duplicate itself (cloning)
 	 * @return
 	 */
-	abstract public BaseMetric duplicate();
+	public abstract BaseMetric duplicate();
 
 
 	//=================================================================================
@@ -458,17 +462,16 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 		return this.unit == 'e';
 	}
 	
-	private IMetricValueFormat getFormatBasedOnAnnotation(AnnotationType annotationType) {
-		
-		IMetricValueFormat displayFormat;
+	private IMetricValueFormat getFormatBasedOnAnnotation(AnnotationType annotationType) {		
+		IMetricValueFormat format;
 		if (annotationType == AnnotationType.PERCENT) {
-			displayFormat = SimpleMetricValueFormat.getInstance(); //MetricValueFormatFactory.createFormatPercent();
+			format = SimpleMetricValueFormat.getInstance(); 
 		} else if (annotationType == AnnotationType.PROCESS) {
-			displayFormat = MetricValueFormatFactory.createFormatProcess(); 
+			format = MetricValueFormatFactory.createFormatProcess(); 
 		} else {
-			displayFormat = SimpleMetricValueFormat.getInstance(); //.createFormatDefault(); 
+			format = SimpleMetricValueFormat.getInstance();  
 		}
-		return displayFormat;
+		return format;
 	}
 
 	/**
@@ -485,7 +488,7 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 			try {
 				period = Double.parseDouble(sPeriod);
 			} catch (java.lang.NumberFormatException e) {
-				System.err.println("The sample period is incorrect :" + sPeriod);
+				// not treated
 			}
 		}
 		return period;

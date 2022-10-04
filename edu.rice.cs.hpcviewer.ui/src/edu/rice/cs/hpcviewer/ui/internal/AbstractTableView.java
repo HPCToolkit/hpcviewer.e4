@@ -81,7 +81,7 @@ implements EventHandler, DisposeListener, IUserMessage
 	private static final int ACTION_MAX = 9;
 	
 	private Composite    parent ;
-	private ToolItem     toolItem[];
+	private ToolItem[]   toolItem;
 	private LabelMessage lblMessage;
 	
 	private IMetricManager metricManager;
@@ -209,7 +209,6 @@ implements EventHandler, DisposeListener, IUserMessage
 		gd_composite.widthHint = 506;
 		composite.setLayoutData(gd_composite);
 				
-		//CoolBar coolBar = new CoolBar(composite, SWT.FLAT);
 		ToolBar toolBar = new ToolBar(composite, SWT.FLAT | SWT.RIGHT);
 
 		// -------------------------------------------
@@ -359,7 +358,7 @@ implements EventHandler, DisposeListener, IUserMessage
 		// fill up the "invisible" metrics		
 		for(int i=0; i<listAllMetrics.size(); i++) {
 			final BaseMetric metric = listAllMetrics.get(i);
-			if (metric.getValue(root) == MetricValue.NONE) {
+			if (root.getMetricValue(metric) == MetricValue.NONE) {
 				if (!indexes.contains(metric.getIndex())) {
 					final boolean checked = false;
 					final boolean enabled = false;
@@ -442,9 +441,8 @@ implements EventHandler, DisposeListener, IUserMessage
 			// we need to check if this one if the active or not
 			// if not, just leave it
 			
-			if (!dataEvent.isApplyToAll()) {
-				if (profilePart.getActiveView() != this)
-					return;
+			if (!dataEvent.isApplyToAll() && profilePart.getActiveView() != this) {
+				return;
 			}
 			hideORShowColumns(dataEvent);
 			
@@ -465,9 +463,9 @@ implements EventHandler, DisposeListener, IUserMessage
 			table.visualRefresh();
 			
 		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH)) {
-			RootScope root = this.buildTree(true);
+			RootScope newRoot = this.buildTree(true);
 			actionManager.clear();
-			table.reset(root);
+			table.reset(newRoot);
 			updateButtonStatus();
 		}
 	}
@@ -582,7 +580,7 @@ implements EventHandler, DisposeListener, IUserMessage
 	 * 			boolean true if it has to be skipped. False otherwise. 
 	 */
 	protected boolean isMetricToSkip(Scope scope, BaseMetric metric) {
-		MetricValue mv = metric.getValue(scope);
+		MetricValue mv = scope.getMetricValue(metric);
 
 		// empty metric is not visible (usually).
 		// the column index should be based on non-empty metrics

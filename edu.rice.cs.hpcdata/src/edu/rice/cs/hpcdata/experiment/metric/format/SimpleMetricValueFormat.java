@@ -22,12 +22,12 @@ import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
  ****************************************************************/
 public class SimpleMetricValueFormat implements IMetricValueFormat 
 {
-	private final String Exponent = "e";
-	private final String Exponent_Plus  = Exponent + "+";
-	private final String Exponent_Minus = Exponent + "-";
+	private static final String Exponent = "e";
+	private static final String Exponent_Plus  = Exponent + "+";
+	private static final String Exponent_Minus = Exponent + "-";
 	
-	private DecimalFormat formatValue;
-	private DecimalFormat formatPercent;
+	private final DecimalFormat formatValue;
+	private final DecimalFormat formatPercent;
 	
 	private static SimpleMetricValueFormat Instance;
 	
@@ -49,15 +49,15 @@ public class SimpleMetricValueFormat implements IMetricValueFormat
 	}
 
 	@Override
-	public String format(MetricValue value) {
+	public String format(MetricValue value, MetricValue rootValue) {
 		
 		String txtValue  = formatValue.format(value.getValue());
 		if (!txtValue.contains(Exponent_Minus)) {
 			txtValue = txtValue.replace(Exponent, Exponent_Plus);
 		}
 		String paddAnn = "";
-		if (MetricValue.isAnnotationAvailable(value)) {
-			String txtAnn  = formatPercent.format(value.getAnnotationValue());
+		if (rootValue != MetricValue.NONE && rootValue != null) {
+			String txtAnn  = formatPercent.format(value.getValue()/rootValue.getValue());
 			paddAnn = String.format(" %6s", txtAnn); 
 		}
 		

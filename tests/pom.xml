@@ -19,6 +19,7 @@
   	<sonar.coverage.jacoco.xmlReportPaths>${basedir}/../../${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
  </properties>
  <modules>
+  <module>edu.rice.cs.hpctest.util</module>
   <module>edu.rice.cs.hpctest.data</module>
   <module>edu.rice.cs.hpctest.ui</module>
   <module>edu.rice.cs.hpctest.viewer</module>

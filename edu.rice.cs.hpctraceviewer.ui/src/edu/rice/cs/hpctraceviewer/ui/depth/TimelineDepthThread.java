@@ -1,13 +1,11 @@
 package edu.rice.cs.hpctraceviewer.ui.depth;
 
-import java.util.HashMap;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
-import edu.rice.cs.hpcdata.util.CallPath;
 import edu.rice.cs.hpctraceviewer.data.DataLinePainting;
 import edu.rice.cs.hpctraceviewer.data.DataPreparation;
 import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
@@ -29,15 +27,19 @@ public class TimelineDepthThread
 	/*****
 	 * Thread initialization
 	 *  
-	 * @param data : global data
-	 * @param canvas : depth view canvas
-	 * @param scaleX : The scale in the x-direction of pixels to time 
-	 * @param scaleY : The scale in the y-direction of max depth
-	 * @param width  : the width
+	 * @param data 
+	 * 			global data of the trace
+	 * @param canvas 
+	 * 			depth view canvas
+	 * @param queue
+	 * 			global queue to store the result data
+	 * @param timelineDone
+	 * @param monitor
+	 * @param visibleDepths
 	 */
 	public TimelineDepthThread( SpaceTimeDataController data, 
-								TraceDisplayAttribute attributes,
-								double scaleY, Queue<TimelineDataSet> queue, 
+								double scaleY, 
+								Queue<TimelineDataSet> queue, 
 								AtomicInteger timelineDone, 
 								IProgressMonitor monitor,
 								int visibleDepths)
@@ -63,8 +65,8 @@ public class TimelineDepthThread
 			// a ProcessTimeline with data=null and then copy the actual data to
 			// it.
 			ProcessTimeline toDonate = new ProcessTimeline(currentDepthLineNum,
-					(HashMap<Integer, CallPath>) stData.getScopeMap(), stData.getBaseData(), 
-					stData.computeScaledProcess(), attributes.getPixelHorizontal(),
+					stData.getScopeMap(), stData.getBaseData(), 
+					depthTrace.getProcessNum(), attributes.getPixelHorizontal(),
 					attributes.getTimeInterval(), 
 					stData.getMinBegTime() + attributes.getTimeBegin());
 

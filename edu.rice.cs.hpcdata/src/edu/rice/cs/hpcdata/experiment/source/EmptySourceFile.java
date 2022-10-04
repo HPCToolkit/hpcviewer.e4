@@ -21,6 +21,8 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 
+import edu.rice.cs.hpcdata.util.Constants;
+
 
 
 
@@ -85,7 +87,7 @@ public File getFilename()
 	
 public String getName()
 {
-	return "";
+	return "<unknown file>";
 }
 
 
@@ -162,8 +164,7 @@ public boolean isText()
 
 
 public int getFileID() {
-	// TODO Auto-generated method stub
-	return 0;
+	return Constants.FLAT_ID_FILE_UNKNOWN;
 }
 
 }

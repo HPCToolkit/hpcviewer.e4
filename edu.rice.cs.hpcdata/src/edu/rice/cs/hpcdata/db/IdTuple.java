@@ -13,22 +13,30 @@ public class IdTuple
 	// constants
 	// -------------------------------------------
 	
-	public final static int TUPLE_LENGTH_SIZE = 2;
-	public final static int TUPLE_KIND_SIZE   = 2;
-	public final static int TUPLE_INDEX_SIZE  = 8;
+	public static final int TUPLE_LENGTH_SIZE = 2;
+	public static final int TUPLE_KIND_SIZE   = 2;
+	public static final int TUPLE_INDEX_SIZE  = 8;
 	
-	private final static String STRING_EMPTY = null;
+	private static final String STRING_EMPTY = null;
+	private static final String SEPARATOR = " ";
+	private static final String SPACE = " ";
 
+	/***
+	 * Special id-tuple for summary profile, which is the profile
+	 * of the whole execution of the application. 
+	 */
+	public static final IdTuple PROFILE_SUMMARY = new IdTuple(0, 0);
+	
 	// -------------------------------------------
 	// variables
 	// -------------------------------------------
 
-	private final int profileNum;
-	private final int length;
+	private final int  profileIndex;
 	
-	private int   []kinds;
-	private long  []physicalIndexes;
-	private long  []logicalIndexes;
+	private byte []kinds;
+	private byte []flags;
+	private long []physicalIndexes;
+	private int  []logicalIndexes;
 
 	// -------------------------------------------
 	// Constructors
@@ -37,57 +45,41 @@ public class IdTuple
 	/****
 	 * Constructor
 	 * Caller needs to set {@code kind} and {@code index} variables
-	 * @param profileNum int the profile index
-	 * @param length the int the length (or level) of this id tuple
+	 * 
+	 * @param index
+	 * 			id or index of this profile. It has to be unique.
+	 * @param length 
+	 * 			the int the length (or level) of this id tuple
 	 */
-	public IdTuple(int profileNum, int length) {
-		this.length     = length;
-		this.profileNum = profileNum;
-		
-		kinds  = new int[length];
+	public IdTuple(int index, int length) {		
+		kinds  = new byte[length];
+		flags  = new byte[length];
 		physicalIndexes = new long[length];
-		logicalIndexes  = new long[length];
-	}
-	
-	/***
-	 * Empty constructor.
-	 * Caller needs to set {@code profileNum}, {@code length}, {@code kind} and {@code index} variables
-	 */
-	public IdTuple() {
-		this(0, 0);
+		logicalIndexes  = new int [length];
+		
+		this.profileIndex = index;
 	}
 	
 
 	// -------------------------------------------
 	// API Methods
 	// -------------------------------------------
-
-	/***
-	 * Get the interpret version of the id tuple for a given level
-	 * @param level
-	 * @return {@code short}
-	 */
-	public short getInterpret(int level) {
-		return (short) (((kinds[level])>>14) & 0x3);
+	
+	public int getProfileIndex() {
+		return profileIndex;
 	}
 	
-	
-	/****
-	 * Get the kind of this id-tuple
-	 * @param level
-	 * @return
-	 */
-	public short getKind(int level) {
-		return (short) ((kinds[level]) & ((1<<14)-1));
+	@Override
+	public boolean equals(Object idt) {
+		if (!(idt instanceof IdTuple))
+			return false;
+		
+		return compareTo((IdTuple) idt) == 0;
 	}
 	
-	/***
-	 * Store the kind-and-interpret value for a given level
-	 * @param kindAndInterpet a combined value of kind and interpret
-	 * @param level
-	 */
-	public void setKindAndInterpret(int kindAndInterpet, int level) {
-		kinds[level] = kindAndInterpet;
+	@Override
+	public int hashCode() {
+		return super.hashCode();
 	}
 	
 	/****
@@ -97,33 +89,44 @@ public class IdTuple
 	 * getIndex(IdTupleType.KIND_RANK) will return 0
 	 * getIndex(IdTupleType.KIND_THREAD) returns 1
 	 * </pre>
-	 * @param kindRank {@code short} the type of id tuple. Must be one of IdTupleType.KIND_*
+	 * @param kindType {@code short} the type of id tuple. Must be one of IdTupleType.KIND_*
 	 * 
-	 * @return {@code long} the index of the id tuple. Zero if no type is found.
+	 * @return {@code long} the index of the id tuple. 
+	 * 			A negative number if no type is found.
 	 */
-	public long getIndex(int kindRank) {
-		for (int i=0; i<length; i++) {
-			if (kinds[i] == kindRank) {
+	public long getIndex(byte kindType) {
+		for (int i=0; i<kinds.length; i++) {
+			if (kinds[i] == kindType) {
 				return physicalIndexes[i];
 			}
 		}
-		return 0;
+		return -1;
 	}
 	
-	public int getProfileNum() {
-		return profileNum;
-	}
-
 	public int getLength() {
-		return length;
+		return kinds.length;
 	}
 
-	public int[] getKind() {
-		return kinds;
+	
+	/****
+	 * Get the kind of this id-tuple
+	 * @param level
+	 * @return
+	 */
+	public byte getKind(int level) {
+		return kinds[level];
 	}
 
-	public void setKind(int[] kind) {
-		this.kinds = kind;
+	public void setKind(int index, byte kind) {
+		this.kinds[index] = kind;
+	}
+	
+	public byte getFlag(int index) {
+		return flags[index];
+	}
+	
+	public void setFlag(int index, byte flag) {
+		this.flags[index] = flag;
 	}
 
 	public long getPhysicalIndex(int index) {
@@ -134,11 +137,11 @@ public class IdTuple
 		this.physicalIndexes[index] = physical_index;
 	}
 
-	public long getLogicalIndex(int index) {
+	public int getLogicalIndex(int index) {
 		return logicalIndexes[index];
 	}
 
-	public void setLogicalIndex(int index, long logical_index) {
+	public void setLogicalIndex(int index, int logical_index) {
 		this.logicalIndexes[index] = logical_index;
 	}
 
@@ -158,7 +161,7 @@ public class IdTuple
 	 * @return {@code int} 
 	 */
 	public int compareTo(IdTuple another) {
-		int minLength = Math.min(length, another.length);
+		int minLength = Math.min(kinds.length, another.kinds.length);
 		
 		for(int i=0; i<minLength; i++) {
 			// compare the differences in kind. 
@@ -173,16 +176,16 @@ public class IdTuple
 			if (diff != 0)
 				return diff;
 			
-			diff = (int) (logicalIndexes[i] - another.logicalIndexes[i]);
+			diff = logicalIndexes[i] - another.logicalIndexes[i];
 			if (diff != 0)
 				return diff;
 		}
-		return length-another.length;
+		return kinds.length-another.kinds.length;
 	}
 		
 	
 	public boolean isGPU(int level, IdTupleType type) {
-		int kindType = IdTupleType.getKind(kinds[level]);
+		byte kindType = kinds[level];
 		String kindStr = type.getLabel(kindType);
 		return (kindStr.startsWith(IdTupleType.PREFIX_GPU));
 	}
@@ -208,39 +211,33 @@ public class IdTuple
 	 * @return String
 	 */
 	public String toString(int level, IdTupleType idTupleType) {
-		String buff = "";
-		if (kinds != null && physicalIndexes != null)
-			for(int i=0; i<=level; i++) {
-				if (i>0)
-					buff += " ";
-				int kindInt = IdTupleType.getKind(kinds[i]);
-				String kindStr = idTupleType.kindStr(kindInt); 
-				buff += kindStr + " " ;
-
-				switch (IdTupleType.getInterpret(kinds[i])) {
-				case IdTupleType.IDTUPLE_IDS_BOTH_VALID:
-					// physical and logical
-					if (idTupleType.getMode() == IdTupleType.Mode.LOGICAL) {
-						buff += logicalIndexes[i];
-					} else {
-						buff += physicalIndexes[i];
-					}
-					break;
-				case IdTupleType.IDTUPLE_IDS_LOGIC_ONLY:
-					// logical only
-					buff += logicalIndexes[i];
-					break;
-				case IdTupleType.IDTUPLE_IDS_LOGIC_GLOBAL:
-					// physical
-				case IdTupleType.IDTUPLE_IDS_LOGIC_LOCAL:
-					buff += physicalIndexes[i] + "*";
-					break;
-					// physical
-				}
-			}
-		return buff;
+		if (kinds == null || physicalIndexes == null)
+			return null;
+		
+		StringBuilder buff = new StringBuilder();
+		appendStringIdTuple(buff, 0, idTupleType);
+		
+		for(int i=1; i<=level; i++) {
+			buff.append(SEPARATOR);
+			appendStringIdTuple(buff, i, idTupleType);
+		}
+		return buff.toString();
 	}
 
+	
+	private void appendStringIdTuple(StringBuilder buff, int level, IdTupleType idTupleType) {
+		String kindStr = idTupleType.kindStr(kinds[level]); 
+		buff.append(kindStr);
+		buff.append(SPACE);
+		buff.append(getIndexBaseOnFlag(level));
+	}
+	
+	
+	private long getIndexBaseOnFlag(int level) {
+		if ((flags[level] & 0x1) == 0x1) 
+			return physicalIndexes[level];
+		return logicalIndexes[level];
+	}
 
 	
 	/****
@@ -267,7 +264,7 @@ public class IdTuple
 	 * @return String
 	 */
 	public String toLabel() {
-		return toLabel(length-1);
+		return toLabel(kinds.length-1);
 	}
 	
 	
@@ -280,16 +277,16 @@ public class IdTuple
 	 */
 	public String toLabel(int level) {
 		
-		if (kinds != null && physicalIndexes != null && level>=0 && level<length) {
+		if (kinds != null && logicalIndexes != null && level>=0 && level<kinds.length) {
 			String str = "";
 			
 			for(int i=0; i<=level; i++) {
 				
-				long lblIndex = physicalIndexes[i]; 
+				long lblIndex = logicalIndexes[i]; 
 				if (i==1) {
 					str += ".";
 				} else if (i>1) {
-					lblIndex = (long) (Math.pow(10, level-i) * physicalIndexes[i]);
+					lblIndex = (long) (Math.pow(10, (double)level-i) * logicalIndexes[i]);
 				}
 				str += lblIndex;
 			}

@@ -9,12 +9,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 
-import edu.rice.cs.hpcdata.experiment.ExperimentConfiguration;
+import edu.rice.cs.hpcdata.db.IFileDB;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 import edu.rice.cs.hpcdata.experiment.extdata.IFilteredData;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
-import edu.rice.cs.hpcdata.trace.TraceName;
 import edu.rice.cs.hpcremote.data.DecompressionThread.DecompressionItemToDo;
+import edu.rice.cs.hpcremote.filter.TraceName;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
@@ -164,6 +164,13 @@ public class SpaceTimeDataControllerRemote extends SpaceTimeDataController
 
 	@Override
 	public String getName() {
-		return exp.getConfiguration().getName(ExperimentConfiguration.NAME_EXPERIMENT);
+		return exp.getName();
+	}
+
+
+	@Override
+	protected IFileDB getFileDB() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

@@ -37,7 +37,6 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
-import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 import edu.rice.cs.hpcfilter.service.FilterStateProvider;
 import edu.rice.cs.hpcmetric.MetricFilterInput;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
@@ -290,7 +289,6 @@ public class ProfilePart implements IProfilePart, EventHandler
 	 */
 	public void addView(AbstractView view, Object input, boolean sync) {
 		
-		// TODO: make sure this statement is called early.
 		// The content builder will need many services. So we have to make they are initialized
 		view.setService(partService, eventBroker, databaseAddOn, this, menuService);
 
@@ -350,11 +348,11 @@ public class ProfilePart implements IProfilePart, EventHandler
 		part.setLabel(PREFIX_TITLE + experiment.getName());
 		part.setTooltip(experiment.getDefaultDirectory().getAbsolutePath());
 		
-		List<TreeNode> roots = experiment.getRootScopeChildren();
+		var roots = experiment.getRootScopeChildren();
 		views = FastList.newList(roots.size());		
 		boolean active = true;
 		
-		for(TreeNode rootNode: roots) {
+		for(var rootNode: roots) {
 			RootScope root = (RootScope) rootNode;
 			AbstractView view;
 			
@@ -387,13 +385,13 @@ public class ProfilePart implements IProfilePart, EventHandler
 			// filter the current database
 			// warning: the filtering is not scalable. We should do this in the 
 			//          background job
-			FilterStateProvider.filterExperiment((Experiment) experiment);
+			FilterStateProvider.filterExperiment(experiment);
 			
 			// announce to all views to refresh the content.
 			// this may take time, and should be done asynchronously
 			// with a background task
 			Object obj = event.getProperty(IEventBroker.DATA);
-			ViewerDataEvent data = new ViewerDataEvent((Experiment) experiment, obj);
+			ViewerDataEvent data = new ViewerDataEvent(experiment, obj);
 			eventBroker.post(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH, data);
 		}
 	}

@@ -1,14 +1,15 @@
 package edu.rice.cs.hpcdata.db.version4;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
-import java.util.AbstractMap;
-import java.util.HashMap;
+import java.nio.channels.FileChannel.MapMode;
 import java.util.Random;
 
+import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.LargeByteBuffer;
 
 /*******************************************************************************
@@ -20,16 +21,14 @@ import edu.rice.cs.hpcdata.util.LargeByteBuffer;
  *******************************************************************************/
 public class DataTrace extends DataCommon 
 {
-	private final static String HEADER = "HPCPROF-tracedb_";
-	private final static int TRACE_HDR_RECORD_SIZE = 22;
-	private final static int TRACE_RECORD_SIZE = 8 + 4;
-	
-	private RandomAccessFile file;
-	private FileChannel channel;
+	private static final String HEADER = "HPCTOOLKITtrce";
+	private static final int FMT_TRACEDB_SZ_CTX_SAMPLE = 0x0c;
+	private static final int NUM_ITEMS = 1;
+
+	private TraceHeader  traceHeader;
+	private TraceContext[] traceCtxs;
 	private LargeByteBuffer lbBuffer;
-
-	private AbstractMap<Integer, TraceHeader> mapProfToTrace;
-
+	
 	@Override
 	/*
 	 * (non-Javadoc)
@@ -38,20 +37,22 @@ public class DataTrace extends DataCommon
 	public void open(final String file)
 			throws IOException
 	{
-		super.open(file);
-		
-		open_internal(file);
+		super.open(file + File.separator + Constants.TRACE_FILE_SPARSE_VERSION);
 	}
 	
 
-
 	@Override
-	/*
-	 * (non-Javadoc)
-	 * @see edu.rice.cs.hpc.data.db.DataCommon#isTypeFormatCorrect(long)
-	 */
-	protected boolean isTypeFormatCorrect(long type) {
-		return type == 2;
+	public void dispose() throws IOException
+	{
+		if (lbBuffer != null)
+			lbBuffer.dispose();
+		super.dispose();
+	}
+	
+	
+	@Override
+	protected int getNumSections() {
+		return NUM_ITEMS;
 	}
 
 	@Override
@@ -63,6 +64,12 @@ public class DataTrace extends DataCommon
 		return header.equals(HEADER);
 	}
 
+
+	@Override
+	protected boolean isFileFooterCorrect(String header) {
+		return header.equals("trace.db");
+	}
+
 	@Override
 	/*
 	 * (non-Javadoc)
@@ -71,86 +78,86 @@ public class DataTrace extends DataCommon
 	protected boolean readNextHeader(FileChannel input, DataSection []sections)
 			throws IOException
 	{
-		input.position(sections[0].offset);
-		
 		// -------------------------------------------------
 		// reading the next 256 byte header
 		// -------------------------------------------------
-		long trace_hdr_size = TRACE_HDR_RECORD_SIZE * numItems;
-		ByteBuffer buffer = ByteBuffer.allocate((int) trace_hdr_size);
+		ByteBuffer buffer = input.map(MapMode.READ_ONLY, sections[0].offset, sections[0].size);
+		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		
-		int numBytes      = input.read(buffer);
-		if (numBytes <= 0) 
-			return false;
+		traceHeader = new TraceHeader(buffer);
 		
-		buffer.flip();
+		long size = (long)traceHeader.nTraces * traceHeader.szTrace;
+		buffer = input.map(MapMode.READ_ONLY, traceHeader.pTraces, size);
+		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		
-		mapProfToTrace = new HashMap<Integer, DataTrace.TraceHeader>((int) numItems);
+		traceCtxs = new TraceContext[traceHeader.nTraces];
 		
-		for(int i=0; i<numItems; i++) {
-			TraceHeader header = new TraceHeader();
-			
-			// this database starts the profile number with number 1
-			// the old database starts with number 0
-			
-			header.profIndex  = buffer.getInt();
-			header.traceIndex = buffer.getShort();
-			
-			header.start = buffer.getLong();
-			header.end   = buffer.getLong();
-			
-			mapProfToTrace.put(header.profIndex, header);
+		for(int i=0; i<traceHeader.nTraces; i++) {
+			int loc = i * traceHeader.szTrace;			
+			traceCtxs[i] = new TraceContext(buffer, loc);
 		}
-		buffer.clear();
 		
-		long nextPosition = sections[0].offset + getMultiplyOf8( sections[0].size);
-		input.position(nextPosition);
+		lbBuffer = new LargeByteBuffer(input, 2, FMT_TRACEDB_SZ_CTX_SAMPLE);
+		lbBuffer.setEndian(ByteOrder.LITTLE_ENDIAN);
 
 		return true;
 	}
 
+	
+	public int getRecordSize() {
+		return traceHeader.szTrace;
+	}
+	
+	public long getMinTime() {
+		return traceHeader.minTimestamp;
+	}
+	
+	
+	public long getMaxTime() {
+		return traceHeader.maxTimestamp;
+	}
+	
 	/****
 	 * get a trace record from a given rank and sample index
 	 * 
-	 * @param rank : the rank 
-	 * @param index : sample index
+	 * @param rank 
+	 * 			the sequence profile number starts from number 0
+	 * @param index
+	 * 			sample index
 	 * 
-	 * @return DataRecord containing time and cct ID
+	 * @return {@code DataRecord} containing time and cct ID
 	 * 
 	 * @throws IOException
 	 */
 	public DataRecord getSampledData(int rank, long index) throws IOException
 	{
-		if (rank == 0)
-			System.out.println();
-		
-		int profileNum = rank;
-		TraceHeader th = mapProfToTrace.get(profileNum);
-		if (th == null)
+		var tc = traceCtxs[rank];		
+		if (tc == null)
 			return null;
 		
-		long position = th.start + TRACE_RECORD_SIZE * index;
+		long position = tc.pStart + (index * FMT_TRACEDB_SZ_CTX_SAMPLE);
+		
 		long time = lbBuffer.getLong(position);
 		int  cpid = lbBuffer.getInt(position + 8);
-		DataRecord data = new DataRecord(time, cpid, 0);
-		
-		return data;
+		return new DataRecord(time, cpid, 0);
 	}
 	
 	/***
 	 * Retrieve the number of samples of a given ranks
 	 * 
 	 * @param rank
-	 * @return int the number of samples
+	 * 			the sequence profile number starts from number 0
+	 * @return int 
+	 * 			the number of samples
 	 */
 	public int getNumberOfSamples(int rank)
 	{
-		TraceHeader th = mapProfToTrace.get(rank);
-		if (th == null)
+		var tc = traceCtxs[rank];		
+		if (tc == null)
 			return 0;
 		
-		long numBytes = th.end - th.start;
-		return (int) (numBytes / TRACE_RECORD_SIZE);
+		long numBytes = tc.pEnd - tc.pStart;
+		return (int) (numBytes / FMT_TRACEDB_SZ_CTX_SAMPLE);
 	}
 	
 	/****
@@ -161,27 +168,33 @@ public class DataTrace extends DataCommon
 	 */
 	public int getNumberOfRanks()
 	{
-		return (int) numItems;
+		return (int) traceCtxs.length;
 	}
 	
 	
+	/****
+	 * 
+	 * @param rank
+	 * 			the sequence profile number starts from number 0
+	 * @return long
+	 * 			the number of bytes
+	 */
 	public long getLength(int rank)
 	{
-		TraceHeader th = mapProfToTrace.get(rank);
-		if (th != null) {
-			return th.end - th.start - TRACE_RECORD_SIZE;
-		}
-		throw new RuntimeException("Invalid rank: " + rank);
+		var tc = traceCtxs[rank];		
+		if (tc == null)
+			throw new RuntimeException("Invalid rank: " + rank);
+		
+		return tc.pEnd - tc.pStart;
 	}
 	
 	
 	public long getOffset(int rank)
 	{
-		TraceHeader th = mapProfToTrace.get(rank);
-		if (th != null) {
-			return th.start;
-		}
-		throw new RuntimeException("Invalid rank: " + rank);
+		var tc = traceCtxs[rank];		
+		if (tc == null)
+			throw new RuntimeException("Invalid rank: " + rank);
+		return tc.pStart;
 	}
 	
 	@Override
@@ -201,24 +214,14 @@ public class DataTrace extends DataCommon
 			int numsamples = getNumberOfSamples(rank);
 			int sample = r.nextInt(numsamples);
 			try {
-				out.format("%d:  %s\n", rank, getSampledData(rank, sample));
+				out.format("%d:  %s%n", rank, getSampledData(rank, sample));
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				// skip the exception
 			}
 		}
 	}
 	
-	/*
-	 * (non-Javadoc)
-	 * @see edu.rice.cs.hpc.data.db.DataCommon#dispose()
-	 */
-	public void dispose() throws IOException
-	{
-		channel.close();
-		file.close();
-		lbBuffer.dispose();
-	}
+
 	// --------------------------------------------------------------------
 	// For the sake of compatibility, we need to provide these methods
 	// --------------------------------------------------------------------
@@ -283,28 +286,72 @@ public class DataTrace extends DataCommon
 	// Private methods
 	// --------------------------------------------------------------------
 	
-	private void open_internal(String filename) throws IOException
-	{
-		file 	= new RandomAccessFile(filename, "r");
-		channel = file.getChannel();
-		lbBuffer = new LargeByteBuffer(channel, 2, TRACE_RECORD_SIZE);
-	}
 
+	
+	/******************
+	 * 
+	 * Context trace record containing the start and end of a profile trace
+	 *
+	 ******************/
+	private static class TraceContext
+	{
+		final int profIndex;
+		final long pStart;
+		final long pEnd;
+		
+		/***
+		 * Record of the start and end of a trace profile
+		 * @param buffer 
+		 * 			The file buffer
+		 * @param loc
+		 * 			The beginning of the location of the trace profile
+		 */
+		public TraceContext(ByteBuffer buffer, int loc) {
+			// 00: 	u32 	profIndex 	4.0 	Index of a profile listed in the profile.db			
+			// 08: 	{Elem}* 	pStart 	4.0 	Pointer to the first element of the trace line (array)
+			// 10: 	{Elem}* 	pEnd 	4.0 	Pointer to the after-end element of the trace line (array)
+			
+			profIndex = buffer.getInt(loc);
+			pStart = buffer.getLong(loc + 0x08);
+			pEnd   = buffer.getLong(loc + 0x10);
+		}
+		
+		public String toString() {
+			return String.format("%d: 0x%x - 0x%x", profIndex, pStart, pEnd);
+		}
+	}
 
 	/****
 	 * 
 	 * Class to store the header of trace database
 	 *
 	 */
-	static class TraceHeader
+	private static class TraceHeader
 	{
-		int   profIndex;   // profile number 		
-		short traceIndex;  // style: 0-> cct-style, 1->metric-style
-		long start;		   // start of the offset of this profile
-		long end;		   // end of the offset for this profile
+		public final long pTraces;
+		public final int  nTraces;
+		public final byte szTrace;
+		public final long minTimestamp;
+		public final long maxTimestamp;
+		
+		public TraceHeader(ByteBuffer buffer) {
+			// 00: 	{CTH}[nTraces]* 	pTraces 	4.0 	Header for each trace
+			// 08: 	u32 	nTraces 	4.0 	Number of traces listed in this section
+			// 0c: 	u8 		szTrace 	4.0 	Size of a {TH} structure, currently 24
+			//				
+			// 10: 	u64 	minTimestamp 	4.0 	Smallest timestamp of the traces listed in *pTraces
+			// 18: 	u64 	maxTimestamp 	4.0 	Largest timestamp of the traces listed in *pTraces
+			
+			pTraces = buffer.getLong();
+			nTraces = buffer.getInt(0x08);
+			szTrace = buffer.get(0x0c);
+			
+			minTimestamp = buffer.getLong(0x10);
+			maxTimestamp = buffer.getLong(0x18);
+		}
 		
 		public String toString() {
-			return profIndex + ": " + start +"-" + end;
+			return String.format("0x%x %d - %d", pTraces, szTrace, nTraces);
 		}
 	}
 }

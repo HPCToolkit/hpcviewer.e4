@@ -23,14 +23,12 @@ public interface IMergedScope {
 	/******
 	 * Return the children of the current scope which can be merged previously.
 	 * 
-	 * @param finalizeVisitor
-	 * @param percentVisitor
 	 * @param inclusiveOnly
 	 * @param exclusiveOnly
 	 * @return
 	 */
-	public List<TreeNode> getAllChildren(	MetricValuePropagationFilter inclusiveOnly, 
-									MetricValuePropagationFilter exclusiveOnly );
+	public List<Scope> getAllChildren(MetricValuePropagationFilter inclusiveOnly, 
+										  MetricValuePropagationFilter exclusiveOnly );
 	
 	public boolean hasScopeChildren();
 }

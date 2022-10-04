@@ -3,23 +3,20 @@ package edu.rice.cs.hpcdata.experiment;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.EnumMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-
 import edu.rice.cs.hpcdata.db.IdTupleType;
-import edu.rice.cs.hpcdata.db.version4.DataSummary;
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
-import edu.rice.cs.hpcdata.experiment.scope.visitors.DisposeResourcesVisitor;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.FilterScopeVisitor;
+import edu.rice.cs.hpcdata.experiment.scope.visitors.TraceScopeVisitor;
 import edu.rice.cs.hpcdata.filter.IFilterData;
+import edu.rice.cs.hpcdata.tld.ThreadDataCollectionFactory;
 import edu.rice.cs.hpcdata.trace.BaseTraceAttribute;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
-import edu.rice.cs.hpcdata.util.CallPath;
+import edu.rice.cs.hpcdata.util.ICallPath;
 import edu.rice.cs.hpcdata.util.IUserData;
 
 
@@ -31,19 +28,6 @@ import edu.rice.cs.hpcdata.util.IUserData;
  */
 public abstract class BaseExperiment implements IExperiment 
 {
-	static public final int DB_SUMMARY_INDEX  = 0;
-	static public final int DB_SUMMARY_TRACE  = 1;
-	static public final int DB_SUMMARY_PLOT   = 2;
-	static public final int DB_SUMMARY_THREAD = 3;
-	static public final int DB_SUMMARY_META   = 4;
-	
-	/*****
-	 *  Enumeration for database file type
-	 */
-	static public enum Db_File_Type {DB_SUMMARY, DB_TRACE, DB_PLOT, DB_THREADS, DB_META};
-	
-	static final private String []DefaultDbFilename = {"profile.db", "trace.db", "cct.db", "profile.db", "meta.db"};
-	
 	/** The experiment's configuration. */
 	protected ExperimentConfiguration configuration;
 
@@ -52,14 +36,14 @@ public abstract class BaseExperiment implements IExperiment
 	protected RootScope datacentricRootScope;
 	
 	/** version of the database **/
-	private short versionMajor, versionMinor;
+	private short versionMajor;
+	private short versionMinor;
 
 	protected IDatabaseRepresentation databaseRepresentation;
 	
-	private EnumMap<Db_File_Type, String> db_filenames;
-	private int filterNumScopes = 0, filterStatus;
+	private int filterNumScopes = 0;
+	private int filterStatus;
 	private IdTupleType idTupleType;
-	private DataSummary dataSummary;
 	private IThreadDataCollection threadData;
 	
 	private BaseTraceAttribute traceAttribute = new TraceAttribute();
@@ -93,25 +77,19 @@ public abstract class BaseExperiment implements IExperiment
 	public RootScope getDatacentricRootScope() {
 		return datacentricRootScope;
 	}
-	
-	
-	public DataSummary getDataSummary() throws IOException {
-		if (dataSummary == null) {
-			dataSummary = new DataSummary(getIdTupleType());
-			String databaseDirectory = getDefaultDirectory().getAbsolutePath();
-			String filename = databaseDirectory + File.separator + getDbFilename(BaseExperiment.Db_File_Type.DB_SUMMARY);
 
-			dataSummary.open(filename);
-		}
-		return dataSummary;
+	public String getDirectory() {
+		var location = databaseRepresentation.getFile();
+		if (location.isDirectory())
+			return location.getAbsolutePath();
+		return location.getParentFile().getAbsolutePath();
 	}
-
-
 
 	/***
 	 * set the new id tuple type
 	 * @param idTupleType
 	 */
+	@Override
 	public void setIdTupleType(IdTupleType idTupleType) {
 		this.idTupleType = idTupleType;
 	}
@@ -121,6 +99,7 @@ public abstract class BaseExperiment implements IExperiment
 	 * get this database's id tuple type
 	 * @return {@code IdTupleType}
 	 */
+	@Override
 	public IdTupleType getIdTupleType() {
 		if (idTupleType == null) {
 			idTupleType = IdTupleType.createTypeWithOldFormat();
@@ -130,57 +109,29 @@ public abstract class BaseExperiment implements IExperiment
 	}
 	
 
-	/****
-	 * set the IThreadDataCollection object to this root
-	 * 
-	 * @param threadData
-	 */
-	public void setThreadData(IThreadDataCollection threadData){
-		this.threadData = threadData;
-	}
-
-
 	/***
 	 * Return the IThreadDataCollection of this root if exists.
 	 * 
 	 * @return
+	 * @throws IOException 
 	 */
-	public IThreadDataCollection getThreadData() {
+	@Override
+	public IThreadDataCollection getThreadData() throws IOException {
+		if (threadData == null) {
+			var root = getRootScope(RootScopeType.CallingContextTree);
+			threadData = ThreadDataCollectionFactory.build(root);
+		}
 		return threadData;
 	}
-
-	/******
-	 * set a database filename
-	 * 
-	 * @param file_index : enumerate database filename {@link Db_File_Type}
-	 * @param filename : the name of the file
-	 */
-	public void setDBFilename(Db_File_Type file_index, String filename)
-	{
-		if (db_filenames == null)
-		{
-			db_filenames = new EnumMap<Db_File_Type, String>(Db_File_Type.class);
-		}
-		db_filenames.put(file_index, filename);
-	}
 	
+
 	/****
-	 * get the database file name 
-	 * @param file_index : enumerate database filename {@link Db_File_Type}
-	 * @return String file name
+	 * Reset the thread data. This is important to reset the data
+	 * once the database has been changed (like has been filtered).
+	 * 
 	 */
-	public String getDbFilename(Db_File_Type file_index)
-	{
-		if (db_filenames == null)
-		{
-			db_filenames = new EnumMap<BaseExperiment.Db_File_Type, String>(Db_File_Type.class);
-			db_filenames.put(Db_File_Type.DB_SUMMARY, DefaultDbFilename[DB_SUMMARY_INDEX]);
-			db_filenames.put(Db_File_Type.DB_TRACE,   DefaultDbFilename[DB_SUMMARY_TRACE]);
-			db_filenames.put(Db_File_Type.DB_PLOT,    DefaultDbFilename[DB_SUMMARY_PLOT]);
-			db_filenames.put(Db_File_Type.DB_THREADS, DefaultDbFilename[DB_SUMMARY_THREAD]);
-			db_filenames.put(Db_File_Type.DB_META,    DefaultDbFilename[DB_SUMMARY_META]);
-		}
-		return db_filenames.get(file_index);
+	public void resetThreadData() {
+		threadData = null;
 	}
 	
 	public int getMajorVersion()
@@ -197,14 +148,18 @@ public abstract class BaseExperiment implements IExperiment
 	/**
 	 * @return the maxDepth
 	 */
+	@Override
 	public int getMaxDepth() {
 		return traceAttribute.maxDepth;
 	}
 
 
 	/**
-	 * @param maxDepth the maxDepth to set
+	 * Set the new depth maximum in the CCT
+	 * @param maxDepth 
+	 * 		the maxDepth to set
 	 */
+	@Override
 	public void setMaxDepth(int maxDepth) {
 		traceAttribute.maxDepth = maxDepth;
 	}
@@ -213,7 +168,8 @@ public abstract class BaseExperiment implements IExperiment
 	/**
 	 * @return the scopeMap
 	 */
-	public Map<Integer, CallPath> getScopeMap() {
+	@Override
+	public ICallPath getScopeMap() {
 		return traceAttribute.mapCpidToCallpath;
 	}
 
@@ -221,31 +177,19 @@ public abstract class BaseExperiment implements IExperiment
 	/**
 	 * @param scopeMap the scopeMap to set
 	 */
-	public void setScopeMap(Map<Integer, CallPath> scopeMap) {
+	@Override
+	public void setScopeMap(ICallPath scopeMap) {
 		traceAttribute.mapCpidToCallpath = scopeMap;
 	}
 
 
-
-
-	static public String getDefaultDatabaseName(Db_File_Type type)
-	{
-		return DefaultDbFilename[type.ordinal()];
-	}
-	
-	static public String getDefaultDbTraceFilename()
-	{
-		return getDefaultDatabaseName(Db_File_Type.DB_TRACE);
-	}
-
-
-	public List<TreeNode> getRootScopeChildren() {
+	public List<Scope> getRootScopeChildren() {
 		RootScope root = (RootScope) getRootScope();
 
 		if (root != null)
 			return root.getChildren();
 		else
-			return null;
+			return Collections.emptyList();
 	}
 	
 	/****
@@ -258,10 +202,13 @@ public abstract class BaseExperiment implements IExperiment
 	public RootScope getRootScope(RootScopeType type)
 	{
 		RootScope root = (RootScope) getRootScope();
-		for (int i=0; i<root.getChildCount(); i++)
+		if (root == null)
+			return null;
+		
+		for (int i=0; i<root.getSubscopeCount(); i++)
 		{
-			if (((RootScope)root.getChildAt(i)).getType() == type)
-				return (RootScope) root.getChildAt(i);
+			if (((RootScope)root.getSubscope(i)).getType() == type)
+				return (RootScope) root.getSubscope(i);
 		}
 		return null;
 	}
@@ -271,15 +218,15 @@ public abstract class BaseExperiment implements IExperiment
 	 * 
 	 * @param fileExperiment : file of the experiment xml
 	 * @param userData : map of user preferences
-	 * @param need_metric : whether we need to assign metrics or not
+	 * @param needMetric : whether we need to assign metrics or not
 	 * @throws Exception
 	 */
 	public void open(File fileExperiment, 
 					 IUserData<String, String> userData, 
-					 boolean need_metric)
+					 boolean needMetric)
 			throws	Exception
 	{
-		databaseRepresentation = new LocalDatabaseRepresentation(fileExperiment, userData, need_metric);
+		databaseRepresentation = new LocalDatabaseRepresentation(fileExperiment, userData, needMetric);
 		databaseRepresentation.open(this);
 		open_finalize();
 	}
@@ -308,13 +255,11 @@ public abstract class BaseExperiment implements IExperiment
 	 */
 	public void reopen() throws Exception
 	{
-		if (databaseRepresentation != null)
-		{
-			databaseRepresentation.open(this);
-			open_finalize();
-		} else {
-			throw new Exception("Database has not been opened.");
-		}
+		if (databaseRepresentation == null)
+			throw new IOException("Database has not been opened.");
+		
+		databaseRepresentation.open(this);
+		open_finalize();
 	}
 
 	
@@ -331,14 +276,15 @@ public abstract class BaseExperiment implements IExperiment
 	/******
 	 * set the database version
 	 * 
-	 * @param v : version of the database
+	 * @param version
+	 * 			version of the database in format {@code Major.Minor}
 	 */
+	@Override
 	public void setVersion (String version) 
 	{
 		if (version == null) {
 			// very old database
-			versionMajor = 1;
-			versionMinor = 0;
+			version = "1.0";
 		}
 		
 		int ip = version.indexOf('.');
@@ -351,7 +297,8 @@ public abstract class BaseExperiment implements IExperiment
 
 	/*************************************************************************
 	 *	Returns the name of the experiment.
-	 ************************************************************************/	
+	 ************************************************************************/
+	@Override
 	public String getName()
 	{
 		return configuration.getName(ExperimentConfiguration.NAME_EXPERIMENT);
@@ -369,11 +316,13 @@ public abstract class BaseExperiment implements IExperiment
 	 *	This method is to be called only once, during <code>Experiment.open</code>.
 	 *
 	 ************************************************************************/
+	@Override
 	public void setConfiguration(ExperimentConfiguration configuration)
 	{
 		this.configuration = configuration;
 	}
 
+	@Override
 	public ExperimentConfiguration getConfiguration()
 	{
 		return this.configuration;
@@ -382,6 +331,8 @@ public abstract class BaseExperiment implements IExperiment
 
 	/*************************************************************************
 	 *	Returns the default directory from which to resolve relative paths.
+	 *
+	 * @return File
 	 ************************************************************************/
 
 	public File getDefaultDirectory()
@@ -389,23 +340,36 @@ public abstract class BaseExperiment implements IExperiment
 		return getExperimentFile().getParentFile();
 	}
 
+	
+	/****
+	 * Retrieve the file reference of the main database file.
+	 * For the old version it's the experiment.xml, for the newer version 
+	 * it's the meta.db file.
+	 * 
+	 * @return File
+	 */
 	public File getExperimentFile() {
 		return databaseRepresentation.getFile();
 	}
 
+	
+	@Override
+	public int getTraceDataVersion() {
+		return databaseRepresentation.getTraceDataVersion();
+	}
 
 	/*****
 	 * disposing the experiment resources.
 	 */
+	@Override
 	public void dispose()
 	{
-		if (rootScope != null) {
-			DisposeResourcesVisitor visitor = new DisposeResourcesVisitor();
-			rootScope.dfsVisitScopeTree(visitor);
-		}
-		rootScope = null;
+		if (rootScope != null)
+			rootScope.disposeSelfAndChildren();
 		
-		datacentricRootScope   = null;
+		if (datacentricRootScope != null)
+			datacentricRootScope.disposeSelfAndChildren();
+		
 		databaseRepresentation = null;
 	}
 
@@ -416,18 +380,45 @@ public abstract class BaseExperiment implements IExperiment
 	 * tree are also filtered </p>
 	 * @param filter
 	 *************************************************************************/
+	@Override
 	public int filter(IFilterData filter)
 	{
 		if (rootScope == null)
 			// case of corrupt database
 			return 0;
 		
-		// TODO :  we assume the first child is the CCT
-		final RootScope rootCCT = (RootScope) rootScope.getChildAt(0);
+		final RootScope rootCCT = getRootScope(RootScopeType.CallingContextTree);
 
+		if (getTraceDataVersion() > 0) {
+			
+			// needs to gather info about cct id and its depth
+			// this is needed for traces
+			TraceScopeVisitor visitor = new TraceScopeVisitor();
+			rootCCT.dfsVisitScopeTree(visitor);
+			
+			setMaxDepth(visitor.getMaxDepth());
+			setScopeMap(visitor.getCallPath());
+		}
 		// duplicate and filter the cct
 		FilterScopeVisitor visitor = new FilterScopeVisitor(rootCCT, filter);
 		rootCCT.dfsVisitFilterScopeTree(visitor);
+		
+		var listToRemove = visitor.getScopeToRemove();
+		if (listToRemove != null && !listToRemove.isEmpty()) {
+			filterNumScopes = listToRemove.size();
+			listToRemove.stream().forEach( scope -> {
+				scope.getParentScope().remove(scope);
+				scope.dispose(); 
+			});
+		}
+		var listTreeToRemove = visitor.getTreeToRemove();
+		if (listTreeToRemove != null && !listTreeToRemove.isEmpty()) {
+			filterNumScopes += listTreeToRemove.size();
+			for(var tree: listTreeToRemove) {
+				tree.getParentScope().remove(tree);
+				tree.disposeSelfAndChildren();
+			}
+		}
 
 		// finalize the filter: for hpcviewer, we need to prepare to create subtrees:
 		// bottom-up, flat and optionally data-centric tree
@@ -435,8 +426,8 @@ public abstract class BaseExperiment implements IExperiment
 		if (rootCCT.getType() == RootScopeType.CallingContextTree) {
 			filter_finalize(rootCCT, filter);
 		}
-		filterNumScopes = visitor.numberOfFilteredScopes();
-		filterStatus	= visitor.getFilterStatus();
+
+		filterStatus = visitor.getFilterStatus();
 		setMaxDepth(visitor.getMaxDepth());
 		
 		return filterNumScopes;
@@ -477,7 +468,7 @@ public abstract class BaseExperiment implements IExperiment
 	 * set the trace attributes (if the tracefile exist)
 	 * @param attribute
 	 */
-	public void setTraceAttribute(TraceAttribute attribute) {
+	public void setTraceAttribute(BaseTraceAttribute attribute) {
 		this.traceAttribute = attribute;
 	}
 
@@ -500,9 +491,8 @@ public abstract class BaseExperiment implements IExperiment
 	 * @param rootCCT
 	 * @param filter
 	 ************************************************************************/
-	abstract protected void filter_finalize(RootScope rootMain, IFilterData filter);
+	protected abstract void filter_finalize(RootScope rootMain, IFilterData filter);
 
-	abstract protected void open_finalize();
-
+	protected abstract void open_finalize();
 }
  

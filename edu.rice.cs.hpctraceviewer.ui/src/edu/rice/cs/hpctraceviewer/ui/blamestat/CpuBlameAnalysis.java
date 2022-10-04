@@ -21,12 +21,11 @@ import edu.rice.cs.hpctraceviewer.data.color.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.color.ProcedureColor;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
-import edu.rice.cs.hpctraceviewer.data.util.Constants;
 import edu.rice.cs.hpctraceviewer.ui.base.IPixelAnalysis;
 import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
 import edu.rice.cs.hpctraceviewer.ui.summary.SummaryData;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
-
+import edu.rice.cs.hpcdata.util.Constants;
 
 /************************************************************
  * 
@@ -158,7 +157,7 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 		}
 		
 		IdTuple tag = listTuples.get(process);
-		int rank = (int) tag.getIndex(IdTupleType.KIND_RANK);
+		int rank = (int) Math.max(0, tag.getIndex(IdTupleType.KIND_RANK));
 				
 		isCpuThread = !tag.isGPU(dataTraces.getExperiment().getIdTupleType());
 

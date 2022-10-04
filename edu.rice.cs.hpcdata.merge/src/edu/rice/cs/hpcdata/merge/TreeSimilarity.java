@@ -11,10 +11,8 @@ import edu.rice.cs.hpcdata.experiment.scope.LoopScope;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.experiment.scope.TreeNode;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.DuplicateScopeTreesVisitor;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.IScopeVisitor;
-import edu.rice.cs.hpcdata.experiment.scope.visitors.PercentScopeVisitor;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.ResetCounterVisitor;
 
 /******************************************************
@@ -68,10 +66,6 @@ public class TreeSimilarity
 		
 		// merge the children of the root (tree)
 		mergeTree(target, source);
-		
-		// compute the merged metric percentage
-		PercentScopeVisitor percentVisitor = new PercentScopeVisitor(target);
-		target.dfsVisitScopeTree(percentVisitor);
 		
 		if (debug) {
 			float mergePercent = (float) (numMerges * 100.0 / numNodes);
@@ -201,7 +195,7 @@ public class TreeSimilarity
 			{
 				for (Scope s2: scope2)
 				{
-					if (s1.isCounterZero() && s2.isCounterZero() && s2.getChildCount()>0)
+					if (s1.isCounterZero() && s2.isCounterZero() && s2.getSubscopeCount()>0)
 					{
 						List<Scope> sortedGrandChildren = getSortedChildren(s2, metric2);
 						for (int i=0; i<sortedGrandChildren.size(); i++)
@@ -293,11 +287,10 @@ public class TreeSimilarity
 	 */
 	private List<Scope> getSortedChildren(Scope scope, BaseMetric metric)
 	{
-		List<? extends TreeNode> children = (List<? extends TreeNode>)scope.getChildren();
+		var children = scope.getChildren();
 		if (children == null)
 			return null;
 		
-		@SuppressWarnings("unchecked")
 		List<Scope> childrenScope = (List<Scope>) children;
 		childrenScope.sort(new CompareScope(metric));
 		
@@ -461,8 +454,8 @@ public class TreeSimilarity
 	
 	private boolean isOnlyChild( Scope s1, Scope s2 )
 	{
-		int ns1 = s1.getParentScope().getChildCount();
-		int ns2 = s2.getParentScope().getChildCount();
+		int ns1 = s1.getParentScope().getSubscopeCount();
+		int ns2 = s2.getParentScope().getSubscopeCount();
 		
 		return (ns1==ns2 && ns1==1);
 	}
@@ -554,7 +547,7 @@ public class TreeSimilarity
 			return false;
 		
 		// both should have the same children
-		if (s1.getChildCount()==0 || s2.getChildCount()==0)
+		if (s1.getSubscopeCount()==0 || s2.getSubscopeCount()==0)
 			return false;
 		
 		final List<Scope> sortedS1 = getSortedChildren(s1, metric1);
@@ -665,7 +658,7 @@ public class TreeSimilarity
 		else */
 		{
 			float v 			= mv.getValue();
-			MetricValue root_mv = s.getRootScope().getMetricValue(m.getIndex());
+			MetricValue root_mv = s.getRootScope().getMetricValue(m);
 			float rv 		    = root_mv.getValue();
 			if (Float.compare(rv, 0.0f)!=0) {
 				return v/rv;
@@ -711,8 +704,7 @@ public class TreeSimilarity
 		
 		@Override
 		public int compare(Scope s1, Scope s2) {
-			int metricIndex = metric.getIndex();
-			return (int) (s2.getMetricValue(metricIndex).getValue() - s1.getMetricValue(metricIndex).getValue());
+			return (int) (s2.getMetricValue(metric).getValue() - s1.getMetricValue(metric).getValue());
 		}
 	}
 }

@@ -10,14 +10,13 @@ import edu.rice.cs.hpcdata.experiment.scope.filters.MetricValuePropagationFilter
  *  - CCT when filter are InclusiveOnlyMetricPropagationFilter and ExclusiveOnlyMetricPropagationFilter
  *  - FT when filter is FlatViewInclMetricPropagationFilter
  *  
- * @author laksonoadhianto
  *
  */
 public class InclusiveMetricsScopeVisitor extends AbstractInclusiveMetricsVisitor {
 	private int numberOfPrimaryMetrics;
 
 	public InclusiveMetricsScopeVisitor(Experiment experiment, MetricValuePropagationFilter filter) {
-		super(experiment, filter);
+		super(filter);
 		this.numberOfPrimaryMetrics = experiment.getMetricCount();
 
 	}

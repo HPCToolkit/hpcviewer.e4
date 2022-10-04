@@ -1,0 +1,128 @@
+// Some codes to be merged to the current DataPlot.java
+// 
+
+	
+	//////////////////////////////////////////////////////////////////////////
+	// Private methods
+	//////////////////////////////////////////////////////////////////////////
+
+	
+
+	private static final int RECORD_SIZE = 2 + 8;
+	
+	/***
+	 * Binary earch the cct index 
+	 * 
+	 * @param index the cct index
+	 * @param first the beginning of the relative index
+	 * @param last  the last of the relative index
+	 * @param buffer ByteBuffer of the file
+	 * @return 2-length array of indexes: the index of the found cct, and its next index
+	 */
+	private long[] binarySearch(short index, int first, int last, ByteBuffer buffer) {
+		int begin = first;
+		int end   = last;
+		int mid   = (begin+end)/2;
+		
+		while (begin <= end) {
+			buffer.position(mid * RECORD_SIZE);
+			
+			short metric = buffer.getShort();
+			long offset  = buffer.getLong();
+			
+			if (metric < index) {
+				begin = mid+1;
+			} else if(metric == index) {
+				long nextIndex = offset;
+				
+				if (mid+1<last) {
+					buffer.position(RECORD_SIZE * (mid+1));
+					buffer.getShort();
+					nextIndex = buffer.getLong();
+				}
+				return new long[] {offset, nextIndex};
+			} else {
+				end = mid-1;
+			}
+			mid = (begin+end)/2;
+		}
+		// not found
+		return null;
+	}
+
+	
+	/***
+	 * Newton-style of Binary search the cct index 
+	 * 
+	 * @param metric_index the metric index
+	 * @param first the beginning of the relative index
+	 * @param last  the last of the relative index
+	 * @param buffer ByteBuffer of the file
+	 * @return 2-length array of indexes: the index of the found cct, and its next index
+	 */
+	private long[] newtonSearch(int metric_index, int first, int last, ByteBuffer buffer) {
+		int left_index  = first;
+		int right_index = last - 1;
+		
+		short left_metric  = getMetric(buffer, left_index);
+		short right_metric = getMetric(buffer, right_index);
+		
+		while (right_index - left_index > 1) {
+			
+			int predicted_index;
+			final float cct_range = right_metric - left_metric;
+			final float rate = cct_range / (right_index - left_index);
+			final int mid_cct = (int) cct_range / 2;
+			
+			if (metric_index <= mid_cct) {
+				predicted_index = (int) Math.max( ((metric_index - left_metric)/rate) + left_index, left_index);
+			} else {
+				predicted_index = (int) Math.min(right_index - ((right_metric-metric_index)/rate), right_index);
+			}
+			
+			if (predicted_index <= left_metric) {
+				predicted_index = left_index + 1;
+			} 
+			if (predicted_index >= right_metric) {
+				predicted_index = right_index - 1;
+			}
+			
+			short current_metric = getMetric(buffer, predicted_index);
+			
+			if (metric_index >= current_metric) {
+				left_index = predicted_index;
+				left_metric = current_metric;
+			} else {
+				right_index = predicted_index;
+				right_metric = current_metric;
+			}
+		}
+		
+		boolean found = metric_index == left_metric || metric_index == right_metric;
+		
+		if (found) {
+			int index = left_index;
+			if (metric_index == right_metric) 
+				// corrupt data: should throw exception 
+				index = right_index;
+			
+			long o1 = getOffset(buffer, index);
+			long o2 = getOffset(buffer, index + 1);
+
+			return new long[] {o1, o2};
+		}
+		// not found: the cct node has no metrics. 
+		// we may should return array of zeros instead of null
+		return null;
+	}
+
+	
+	private short getMetric(ByteBuffer buffer, int position) {
+		buffer.position(position * RECORD_SIZE);
+		return buffer.getShort();
+	}
+	
+	private long getOffset(ByteBuffer buffer, int position) {
+		buffer.position(position * RECORD_SIZE + Short.SIZE);
+		return buffer.getLong();
+	}

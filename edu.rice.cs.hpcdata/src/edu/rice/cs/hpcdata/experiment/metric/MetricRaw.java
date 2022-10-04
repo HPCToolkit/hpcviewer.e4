@@ -3,6 +3,7 @@ package edu.rice.cs.hpcdata.experiment.metric;
 import java.io.IOException;
 import java.util.List;
 
+import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.scope.IMetricScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
@@ -22,7 +23,7 @@ public class MetricRaw  extends BaseMetric
 	
 	/*** list of threads that its metric values have to be computed.<br/> 
 	 *   each MetricRaw may have different threads. **/
-	private List<Integer> threads = null;
+	private List<IdTuple> threads = null;
 	
 	/*** similar to partner index, but this partner refers directly to the metric partner.**/
 	private MetricRaw partner;
@@ -61,7 +62,7 @@ public class MetricRaw  extends BaseMetric
 		if (metric instanceof MetricRaw) {
 			numMetrics = ((MetricRaw)metric).num_metrics;
 		}
-		MetricRaw mr = new MetricRaw(metric.index, 
+		return new MetricRaw(metric.index, 
 									 metric.getDisplayName(), 
 									 metric.getDescription(), 
 									 null, 
@@ -69,16 +70,15 @@ public class MetricRaw  extends BaseMetric
 									 metric.getPartner(), 
 									 metric.getMetricType(), 
 									 numMetrics);
-		return mr;
 	}
 	
 	
-	public void setThread(List<Integer> threads)
+	public void setThread(List<IdTuple> threads)
 	{
 		this.threads = threads;
 	}
 	
-	public List<Integer> getThread()
+	public List<IdTuple> getThread()
 	{
 		return threads;
 	}
@@ -139,52 +139,36 @@ public class MetricRaw  extends BaseMetric
 	}
 	
 	@Override
+	public String getMetricTextValue(Scope scope)  {
+		MetricValue mv = getValue(scope);
+		boolean showPercent = getAnnotationType() == AnnotationType.PERCENT;
+		MetricValue rootValue = showPercent ? getValue(scope.getRootScope()) : MetricValue.NONE;
+		
+		return super.getMetricTextValue(mv, rootValue);
+
+	}
+	
+	@Override
 	public MetricValue getValue(IMetricScope s) {
 		if (s == null) return null;
 		
-		RootScope root = ((Scope)s).getRootScope();
-		IThreadDataCollection threadData = root.getExperiment().getThreadData();
-		
-		MetricValue value = MetricValue.NONE;
-		if (threadData != null)
-		{
-			try {
-				if (threads != null)
-				{
-					value = getValue(s, threads);
-					
-					// to compute the percentage, we need to have the value of the root
-					// If the root has no value, we have to recompute it only for one time
-					// Once we have the root's value, we don't have to recompute it
-					MetricValue rootValue = MetricValue.NONE;
-					
-					if (s instanceof RootScope) {
-						if (value != MetricValue.NONE)
-							rootValue = value;
-						else if (partner != null)
-							rootValue = partner.getValue((RootScope)s, threads);
-					} else {
-						rootValue = getValue(root);//s.getRootMetricValue(this);
-					}
-
-					if (rootValue != null && rootValue != MetricValue.NONE) {
-						// if the value exist, we compute the percentage
-						//setAnnotationType(AnnotationType.PERCENT);
-						MetricValue.setAnnotationValue(value, value.getValue() / rootValue.getValue());
-					}
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
+		try {
+			
+			if (threads != null)
+			{
+				return getValue(s, threads);					
 			}
+		} catch (IOException e) {
+			// something wrong
 		}
-		return value;
+		return MetricValue.NONE;
 	}
 
 
 	@Override
 	public BaseMetric duplicate() {
 		MetricRaw dup = new MetricRaw(ID, displayName, description, db_glob, db_id, 
-				partner_index, metricType, num_metrics);
+				partnerIndex, metricType, num_metrics);
 		dup.setOrder(order);
 		
 		return dup;
@@ -198,7 +182,7 @@ public class MetricRaw  extends BaseMetric
 	 * @return a metric value
 	 * @throws IOException
 	 */
-	private MetricValue getValue(IMetricScope s, List<Integer> threads) throws IOException  {
+	private MetricValue getValue(IMetricScope s, List<IdTuple> threads) throws IOException  {
 		MetricValue value = MetricValue.NONE;
 		if (threads != null)
 		{
@@ -213,10 +197,12 @@ public class MetricRaw  extends BaseMetric
 			{
 				value = getSpecificValue(s, threads.get(0));
 			}
-			if (value == MetricValue.NONE && s instanceof RootScope 
-					&& metricType == MetricType.EXCLUSIVE) {
-				if (partner != null)
-					value = partner.getValue(s, threads);
+			if (value == MetricValue.NONE          && 
+				s instanceof RootScope             && 
+				metricType == MetricType.EXCLUSIVE &&
+				partner != null) {
+				
+				value = partner.getValue(s, threads);
 			}
 		}
 		return value;
@@ -234,9 +220,9 @@ public class MetricRaw  extends BaseMetric
 	 * @return
 	 * @throws IOException
 	 */
-	private MetricValue getSumValue(IMetricScope s, List<Integer> threads) throws IOException
+	private MetricValue getSumValue(IMetricScope s, List<IdTuple> threads) throws IOException
 	{
-		double val_sum = 0.0;
+		double valSum = 0.0;
 
 		Scope scope    = (Scope) s;
 		RootScope root = scope.getRootScope();
@@ -245,12 +231,11 @@ public class MetricRaw  extends BaseMetric
 		
 		long nodeIndex = scope.getCCTIndex();
 		
-		for(Integer thread : threads)
+		for(var thread : threads)
 		{
-			val_sum += threadData.getMetric(nodeIndex, ID, thread, num_metrics);
+			valSum += threadData.getMetric(nodeIndex, ID, thread, num_metrics);
 		}
-		MetricValue value = createMetricValue(val_sum); 
-		return value;
+		return createMetricValue(valSum);
 	}
 	
 
@@ -262,12 +247,11 @@ public class MetricRaw  extends BaseMetric
 	 * @return a metric value
 	 * @throws IOException
 	 */
-	private MetricValue getSpecificValue(IMetricScope s, int thread_id) throws IOException
+	private MetricValue getSpecificValue(IMetricScope s, IdTuple idtuple) throws IOException
 	{
 		Scope scope = (Scope)s;
 
 		// there is no API implementation for reading the whole CCT metrics
-		// TODO: using the old get metric for the new database
 		RootScope root = scope.getRootScope();
 		IThreadDataCollection threadData = root.getExperiment().getThreadData();
 
@@ -277,7 +261,7 @@ public class MetricRaw  extends BaseMetric
 		
 		int cctIndex = scope.getCCTIndex();
 		
-		double value = threadData.getMetric(cctIndex, ID, thread_id, num_metrics);
+		double value = threadData.getMetric(cctIndex, ID, idtuple, num_metrics);
 		return createMetricValue(value);
 	}
 	

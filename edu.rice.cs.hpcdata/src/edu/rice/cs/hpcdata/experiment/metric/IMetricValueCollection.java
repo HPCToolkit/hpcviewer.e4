@@ -1,5 +1,7 @@
 package edu.rice.cs.hpcdata.experiment.metric;
 
+import java.io.IOException;
+
 import org.eclipse.collections.api.map.primitive.IntObjectMap;
 
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -15,8 +17,10 @@ public interface IMetricValueCollection
 {
 	/****
 	 * copy metric values from a source {@code IMetricValueCollection} to this collection
-	 * @param listMetric {@code List} list of metric descriptors of the values
-	 * @param mvCollection {@code IMetricValueCollection} source
+	 * @param mvCollection 
+	 * 			{@code IMetricValueCollection} source
+	 * @param offset
+	 * 			Starting index number 
 	 */
 	public void appendMetrics(IMetricValueCollection mvCollection, int offset);
 	
@@ -29,12 +33,14 @@ public interface IMetricValueCollection
 	 */
 	public MetricValue getValue(Scope scope, int index);
 	
-	/***
-	 * get the annotation of a given metric index
-	 * @param index
+	/****
+	 * Get a metric value for a given metric object.
+	 * 
+	 * @param scope
+	 * @param metric
 	 * @return
 	 */
-	public float getAnnotation(int index);
+	public MetricValue getValue(Scope scope, BaseMetric metric);
 	
 	/****
 	 * set a metric value to a certain index
@@ -44,13 +50,7 @@ public interface IMetricValueCollection
 	 */
 	public void setValue(int index, MetricValue value);
 	
-	/*****
-	 * add an additional annotation to the metric value
-	 * @param index
-	 * @param ann
-	 */
-	public void setAnnotation(int index, float ann);
-	
+
 	/***
 	 * return if the current scope has at least a metric value
 	 * @return true if a metric value exists, false otherwise.
@@ -68,5 +68,7 @@ public interface IMetricValueCollection
 	 */
 	public void dispose();
 	
-	IntObjectMap<MetricValue> getValues();
+	public IntObjectMap<MetricValue> getValues();
+	
+	public IMetricValueCollection duplicate() throws IOException;
 }

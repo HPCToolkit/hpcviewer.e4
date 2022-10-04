@@ -2,43 +2,45 @@ package edu.rice.cs.hpcviewer.ui.parts.thread;
 
 import java.util.List;
 
-import edu.rice.cs.hpcdata.experiment.BaseExperiment;
+import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 
 public class ThreadViewInput 
 {
-	final private RootScope rootScope; 
-	final private IThreadDataCollection threadData;
-	private List<Integer> threads;
+	private final IThreadDataCollection threadData;
+	private RootScope rootScope; 
+	private List<IdTuple> threads;
 	
-	public ThreadViewInput(RootScope rootScope, IThreadDataCollection threadData, List<Integer> threads) {
+	public ThreadViewInput(RootScope rootScope, IThreadDataCollection threadData, List<IdTuple> idTuples) {
 		this.rootScope  = rootScope;
 		this.threadData = threadData;
-		this.threads    = threads;
+		this.threads    = idTuples;
 	}
 	
 	public RootScope getRootScope() {
 		return rootScope;
+	}
+	
+	public void setRootScope(RootScope root) {
+		this.rootScope = root;
 	}
 
 	public IThreadDataCollection getThreadData() {
 		return threadData;
 	}
 
-	public List<Integer> getThreads() {
+	public List<IdTuple> getThreads() {
 		return threads;
 	}
 	
-	public void setThread(List<Integer> threads) {
+	public void setThread(List<IdTuple> threads) {
 		this.threads = threads;
 	}
 	
 	public String toString() {
-		BaseExperiment exp = rootScope.getExperiment();
-		int dbId = exp.getDefaultDirectory().getAbsolutePath().hashCode();
-		String str = exp.getName() + ":" + String.valueOf(dbId);
-		
-		return str;
+		var exp = rootScope.getExperiment();
+		int dbId = exp.getPath().hashCode();
+		return exp.toString() + ":" + String.valueOf(dbId);
 	}
 }

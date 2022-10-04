@@ -59,7 +59,7 @@ public class ScopeTreeDataProvider implements IDataProvider, IRowDataProvider<Sc
 				proc = (ProcedureScope) scope;
 			}
 			if (!proc.isFalseProcedure()) {
-				lm = proc.getLoadModule().getModuleName();
+				lm = proc.getLoadModule().getName();
 				int lastDot = 1+lm.lastIndexOf('/');
 				
 				text += " [" + lm.substring(lastDot) + "]";

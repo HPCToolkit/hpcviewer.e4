@@ -12,10 +12,20 @@ import com.graphbuilder.math.Expression;
  ********************************************************************/
 public abstract class AbstractMetricWithFormula extends BaseMetric
 {
+	protected AbstractMetricWithFormula(String sID, String sDisplayName) {
+		super(sID, sDisplayName);
+	}
 	
-	public AbstractMetricWithFormula(String sID, String sDisplayName, String sDescription, VisibilityType displayed,
-			String format, AnnotationType annotationType, int index, int partner_index, MetricType type) {
-		super(sID, sDisplayName, sDescription, displayed, format, annotationType, index, partner_index, type);
+	protected AbstractMetricWithFormula(String sID, 
+										String sDisplayName, 
+										String sDescription, 
+										VisibilityType displayed,
+										String format, 
+										AnnotationType annotationType, 
+										int index, 
+										int partnerIndex, 
+										MetricType type) {
+		super(sID, sDisplayName, sDescription, displayed, format, annotationType, index, partnerIndex, type);
 	}
 
 	/***

@@ -6,10 +6,8 @@ import java.util.ArrayList;
 import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Stack;
 
-import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.ExperimentConfiguration;
@@ -25,13 +23,12 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.StatementRangeScope;
-import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope.ProcedureType;
 import edu.rice.cs.hpcdata.experiment.source.FileSystemSourceFile;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
 import edu.rice.cs.hpcdata.util.CallPath;
 import edu.rice.cs.hpcdata.util.Constants;
-import edu.rice.cs.hpcdata.util.Dialogs;
+import edu.rice.cs.hpcdata.util.ICallPath;
 import edu.rice.cs.hpcdata.util.IUserData;
 
 
@@ -72,7 +69,7 @@ public class BaseExperimentBuilder extends Builder
 
 	private boolean csviewer;
 	
-	final private IUserData<String, String> userData;
+	private final IUserData<String, String> userData;
 
 	//--------------------------------------------------------------------------------------
 	// stacks
@@ -95,9 +92,8 @@ public class BaseExperimentBuilder extends Builder
 	
 	private final HashMap<Integer /*id*/, Integer /*status*/>	  statusProcedureMap;
 
-	private final Map<Integer, CallPath> mapCpidToCallpath;
-	
-	private final IdTupleType idTupleType;
+	private final ICallPath mapCpidToCallpath;
+
  
 	//--------------------------------------------------------------------------------------
 	// trace information
@@ -139,9 +135,7 @@ public class BaseExperimentBuilder extends Builder
 		hashSourceFileTable = new HashMap<Integer, SourceFile>();
 		statusProcedureMap  = new HashMap<Integer, Integer>();
 		
-		mapCpidToCallpath   = new HashMap<>();
-		
-		idTupleType = new IdTupleType();
+		mapCpidToCallpath   = new CallPath();
 		
 		// parse action data structures
 		this.scopeStack   = new Stack<Scope>();
@@ -254,36 +248,6 @@ public class BaseExperimentBuilder extends Builder
 			
 		case "TraceDB":
 			this.do_TraceDB(attributes, values); break;
-
-		// ---------------------
-		// XML v. 3.0
-		// ---------------------
-		case "SummaryDBFile":
-			do_DBFile(BaseExperiment.Db_File_Type.DB_SUMMARY, attributes, values);
-			break;
-			
-		case "TraceDBFile":
-			do_DBFile(BaseExperiment.Db_File_Type.DB_TRACE, attributes, values);
-			break;
-			
-		case "PlotDBFile":
-			do_DBFile(BaseExperiment.Db_File_Type.DB_PLOT, attributes, values);
-			break;
-			
-		case "ThreadIDFile":
-			do_DBFile(BaseExperiment.Db_File_Type.DB_THREADS, attributes, values);
-			break;
-
-		// ---------------------
-		// XML v. 4.0
-		// ---------------------
-		case "IdentifierNameTable":
-			break;
-			
-			// ---------------------
-		case "Identifier":
-			do_identifier(attributes, values);
-			break;
 			
 		// ---------------------
 		// old token from old XML
@@ -358,13 +322,6 @@ public class BaseExperimentBuilder extends Builder
 			break;
 
 
-		// ---------------------
-		// XML v. 4.0
-		// ---------------------
-		case "IdentifierNameTable":
-			endIdentifierNameTable();
-			break;
-
 			// ignored elements
 			/*
 		case "ProcedureTable":
@@ -408,17 +365,6 @@ public class BaseExperimentBuilder extends Builder
 		this.experiment.setVersion(version);
 	}
 
-	/*************************************************************************
-	 * Process a Database file name
-	 *************************************************************************/
-	private void do_DBFile(BaseExperiment.Db_File_Type db_type, String []attributes, String []values) {
-		for (int i=0; i<attributes.length; i++) {
-			if (attributes[i].charAt(0) == 'n') {
-				experiment.setDBFilename(db_type, values[i]);
-				return;
-			}
-		}
-	}
 	
 	/*************************************************************************
 	 *      Processes a TARGET element as TITLE.
@@ -448,6 +394,28 @@ public class BaseExperimentBuilder extends Builder
 			sTitle = values[1];
 		}
 		this.configuration.setName(ExperimentConfiguration.NAME_EXPERIMENT, sTitle);
+		
+		// make the root scope
+		rootScope = new RootScope(this.experiment, "Invisible Outer Root Scope", RootScopeType.Invisible, Integer.MAX_VALUE, 1 );
+		
+		scopeStack.push(this.rootScope);	// don't use 'beginScope'
+
+		final String title;
+		final RootScopeType rootType;
+		
+		if (this.csviewer) {
+			title = Experiment.TITLE_TOP_DOWN_VIEW;
+			rootType = RootScopeType.CallingContextTree;
+		} else {
+			title = Experiment.TITLE_FLAT_VIEW;
+			rootType = RootScopeType.Flat;
+		}
+		int cct_id = 0;
+		if (experiment.getMajorVersion() <= Constants.EXPERIMENT_DENSED_VERSION)
+			cct_id = 1;
+		
+		this.viewRootScope  = new RootScope(this.experiment, title, rootType, cct_id, 0);
+		beginScope(this.viewRootScope);
 	}
 
 	/************************************************************************
@@ -571,7 +539,6 @@ public class BaseExperimentBuilder extends Builder
 	 ************************************************************************/
 	private void begin_PF(String[] attributes, String[] values)
 	{
-			boolean istext  = true; 
 			boolean isalien = false; 
 			boolean new_cct_format = false;
 			
@@ -598,7 +565,6 @@ public class BaseExperimentBuilder extends Builder
 					
 				} else if(attributes[i].equals(ATTRIBUTE_FILENAME)) {
 					// file
-					istext = true;
 					try {
 						Integer indexFile = Integer.parseInt(values[i]);
 						srcFile = this.hashSourceFileTable.get(indexFile);
@@ -667,9 +633,7 @@ public class BaseExperimentBuilder extends Builder
 								firstLn-1, lastLn-1, cct_id, flat_id);
 					scope.setCpid(0);
 					scopeStack.push(scope);
-
-					srcFile.setIsText(istext);
-					this.srcFileStack.add(srcFile);
+					srcFileStack.add(srcFile);
 					return;
 				} else {
 					// this is a procedure scope uses the handling below
@@ -680,15 +644,13 @@ public class BaseExperimentBuilder extends Builder
 			if(srcFile == null) {
 					srcFile = this.srcFileStack.peek();
 			} 
-			 
-			srcFile.setIsText(istext);
 			this.srcFileStack.add(srcFile);
 			
 			int feature = 0;
 			Integer statusProc = statusProcedureMap.get(flat_id);
 			if (statusProc != null) {
 				feature = statusProc.intValue();
-				if (feature == ProcedureScope.FeatureRoot) {
+				if (feature == ProcedureScope.FEATURE_ROOT) {
 					RootScope datacentricRoot = new RootScope(experiment, procName, RootScopeType.DatacentricTree);
 					// push the new scope to the stack
 					scopeStack.push(datacentricRoot);
@@ -709,11 +671,11 @@ public class BaseExperimentBuilder extends Builder
 			if ( (this.scopeStack.size()>1) && ( this.scopeStack.peek() instanceof LineScope)  ) {
 
 				LineScope ls = (LineScope)this.scopeStack.pop();
-				int	callsiteID = ls.getFlatIndex();
+				int	callsiteID = Integer.MAX_VALUE - ( ls.getFlatIndex() << 16 | procScope.getFlatIndex() );
 				
 				CallSiteScope csn = new CallSiteScope( ls, procScope, 
 						CallSiteScopeType.CALL_TO_PROCEDURE, cct_id, callsiteID );
-
+				
 				// beginScope pushes csn onto the node stack and connects it with its parent
 				// this is done while the ls is off the stack so the parent of csn is ls's parent. 
 				// afterward, we rearrange the top of stack to tuck ls back underneath csn in case it is 
@@ -724,10 +686,8 @@ public class BaseExperimentBuilder extends Builder
 				this.scopeStack.push(ls);
 				this.scopeStack.push(csn2);
 
-				if (isalien)
-					procScope.setProcedureType(ProcedureType.ProcedureInlineFunction);
-				else 
-					procScope.setProcedureType(ProcedureType.ProcedureNormal);
+				procScope.setAlien(isalien);
+
 			} else {
 				this.beginScope(procScope);
 
@@ -736,10 +696,7 @@ public class BaseExperimentBuilder extends Builder
 				//   and procedure root (such as thread root, program root and omp idle).
 				// need to check if a procedure is an alien or not. Procedure root has no alien information
 				
-				if (isalien)
-					procScope.setProcedureType(ProcedureType.ProcedureInlineMacro);
-				else
-					procScope.setProcedureType(ProcedureType.ProcedureRoot);
+				procScope.setAlien(isalien);
 			}
 	}
 	
@@ -972,7 +929,7 @@ public class BaseExperimentBuilder extends Builder
 		// just record whenever the cpid is valid only
 		if (cpid >= 0) {
 			scope.setCpid(cpid);
-			mapCpidToCallpath.put(cpid, new CallPath(scope, current_depth));
+			mapCpidToCallpath.addCallPath(cpid, scope, current_depth);
 		}
 		
 		if (isCallSite) {
@@ -1079,11 +1036,13 @@ public class BaseExperimentBuilder extends Builder
 	//--------------------------------------------------------------------------------
 	private void begin_TraceDBTable(String[] attributes, String[] values) 
 	{
+		// nothing to do
 	}
 
 	
 	private void end_TraceDBTable() 
 	{
+		// nothing to do
 	}
 
 	
@@ -1130,33 +1089,6 @@ public class BaseExperimentBuilder extends Builder
 		experiment.setTraceAttribute(attribute);
 	}
 
-	
-	/****
-	 * Add id label to the map
-	 * @param attributes
-	 * @param values
-	 */
-	private void do_identifier(String[] attributes, String[] values) {
-		int id = 0;
-		String val = null;
-		for (int i=0; i<attributes.length && i<values.length; i++) {
-			switch (attributes[i]) {
-			case ATTRIBUTE_ID:
-				id = Integer.valueOf(values[i]);
-				break;
-				
-			case ATTRIBUTE_NAME:
-				val = values[i];
-			}
-		}
-		idTupleType.add(id, val);
-	}
-	
-	
-	private void endIdentifierNameTable() {
-		experiment.setIdTupleType(idTupleType);
-	}
-
 
 	//===============================================
 	// Utilities that may be used by children of the class
@@ -1167,27 +1099,7 @@ public class BaseExperimentBuilder extends Builder
 	 ************************************************************************/
 	protected void begin_SecData(String[] attributes, String[] values) 
 	{
-		// make the root scope
-		rootScope = new RootScope(this.experiment, "Invisible Outer Root Scope", RootScopeType.Invisible, Integer.MAX_VALUE, 1 );
-		
-		scopeStack.push(this.rootScope);	// don't use 'beginScope'
-
-		final String title;
-		final RootScopeType rootType;
-		
-		if (this.csviewer) {
-			title = Experiment.TITLE_TOP_DOWN_VIEW;
-			rootType = RootScopeType.CallingContextTree;
-		} else {
-			title = Experiment.TITLE_FLAT_VIEW;
-			rootType = RootScopeType.Flat;
-		}
-		int cct_id = 0;
-		if (experiment.getMajorVersion() <= Constants.EXPERIMENT_DENSED_VERSION)
-			cct_id = 1;
-		
-		this.viewRootScope  = new RootScope(this.experiment, title, rootType, cct_id, 0);
-		beginScope(this.viewRootScope);
+		// nothing to do
 	}
 
 
@@ -1233,7 +1145,7 @@ public class BaseExperimentBuilder extends Builder
 			}
 		}
 		parent.addSubscope(child);
-		child.setParent(parent);
+		child.setParentScope(parent);
 	}
 	
 	/*************************************************************************
@@ -1258,7 +1170,7 @@ public class BaseExperimentBuilder extends Builder
 		if (scope instanceof RootScope) {
 			rootStack.push((RootScope)scope);
 		}
-		if (isScopeTrace(scope)) {
+		if (CallPath.isTraceScope(scope)) {
 			current_depth++;
 			assert(current_depth >= 0);
 			max_depth = Math.max(max_depth, current_depth);
@@ -1275,7 +1187,7 @@ public class BaseExperimentBuilder extends Builder
 		try {
 			Scope scope = this.scopeStack.pop();
 			
-			if (isScopeTrace(scope)) {
+			if (CallPath.isTraceScope(scope)) {
 				current_depth--;
 				assert(current_depth >= 0);
 			}
@@ -1289,17 +1201,6 @@ public class BaseExperimentBuilder extends Builder
 		}
 	}
 	
-	/***
-	 * Check if the scope is part of trace scope. 
-	 * A trace scope is either a procedure or a call-site scope.
-	 * 
-	 * @param scope
-	 * @return boolean true if it's a trace scope
-	 */
-	private boolean isScopeTrace(Scope scope) {
-		return (scope instanceof ProcedureScope || 
-				scope instanceof CallSiteScope);
-	}
 
 	/*************************************************************************
 	 *	Returns the current scope.
@@ -1348,7 +1249,7 @@ public class BaseExperimentBuilder extends Builder
 	 ************************************************************************/
 	public void content(String s)
 	{
-		Dialogs.notCalled("ExperimentBuilder.content");
+		assert(false);
 	}
 
 

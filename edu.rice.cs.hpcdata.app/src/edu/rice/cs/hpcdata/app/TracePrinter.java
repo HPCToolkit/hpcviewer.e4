@@ -4,15 +4,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Locale;
-import java.util.Map;
-
 import edu.rice.cs.hpcdata.db.version2.FileDB2;
 import edu.rice.cs.hpcdata.experiment.Experiment;
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
-import edu.rice.cs.hpcdata.trace.TraceReader;
 import edu.rice.cs.hpcdata.trace.TraceRecord;
-import edu.rice.cs.hpcdata.util.CallPath;
+import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.MergeDataFiles;
 
 /*****
@@ -27,6 +23,7 @@ import edu.rice.cs.hpcdata.util.MergeDataFiles;
  ****/
 public class TracePrinter 
 {
+	private static final int RECORD_SIZE    = Constants.SIZEOF_LONG + Constants.SIZEOF_INT;
 
 	public static void main(String[] args) {
 		
@@ -45,7 +42,6 @@ public class TracePrinter
 		try {
 			experiment.open(new File(args[0]), null, false);
 		} catch (Exception e) {
-			e.printStackTrace();
 			return;
 		}
 		
@@ -58,9 +54,8 @@ public class TracePrinter
 		final FileDB2 fileDB = new FileDB2();
 		try {
 			String filename = getTraceFile(args[0]);
-			fileDB.open(filename, trAttribute.dbHeaderSize, TraceReader.RECORD_SIZE);
+			fileDB.open(filename, trAttribute.dbHeaderSize, RECORD_SIZE);
 		} catch (IOException e) {
-			e.printStackTrace();
 			return;
 		}
 		
@@ -89,7 +84,7 @@ public class TracePrinter
 		
 		final int MAX_NAME = 16;
 		
-		Map<Integer, CallPath> map = experiment.getScopeMap(); 
+		var map = experiment.getScopeMap(); 
 		
 		TraceReader reader = new TraceReader(fileDB);
 		long numRecords = reader.getNumberOfRecords(rank);
@@ -102,9 +97,8 @@ public class TracePrinter
 			String name = String.valueOf(prevRecord.cpId);
 			
 			if (map != null) {
-				CallPath cp = map.get(prevRecord.cpId);
-				if (cp != null) {
-					Scope scope = cp.getScopeAt(cp.getMaxDepth());
+				var scope = map.getCallPathScope(prevRecord.cpId);
+				if (scope != null) {
 					name = scope.getName();
 					if (name.length() > MAX_NAME)
 						name = name.substring(0, MAX_NAME) + "...";

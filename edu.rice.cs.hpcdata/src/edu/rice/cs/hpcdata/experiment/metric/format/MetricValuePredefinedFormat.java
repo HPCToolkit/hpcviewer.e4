@@ -18,7 +18,7 @@ public class MetricValuePredefinedFormat implements IMetricValueFormat {
 	}
 	
 	
-	public String format(MetricValue value) {
+	public String format(MetricValue value, MetricValue rootValue) {
 		Formatter format_str = null;
 		String fmt = "";
 		

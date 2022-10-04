@@ -1,11 +1,12 @@
 package edu.rice.cs.hpcdata.experiment.scope.visitors;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.Deque;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Stack;
-
+import java.util.List;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.*;
 import edu.rice.cs.hpcdata.experiment.scope.*;
@@ -21,7 +22,9 @@ import edu.rice.cs.hpcdata.experiment.scope.filters.MetricValuePropagationFilter
  * seen in {@code CallSiteScopeCallerView} 
  *
  *************************************************************************/
-public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScopeVisitor {
+public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScopeVisitor 
+{
+	private static final String SEPARATOR = ":";
 
 	//----------------------------------------------------
 	// private data
@@ -32,7 +35,7 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 	private final InclusiveOnlyMetricPropagationFilter inclusiveOnly;
 	
 	private final ListCombinedScopes listCombinedScopes;
-	private final Hashtable<String, Scope> calleeht;
+	private final HashMap<String, Scope> calleeht;
 	
 	private final RootScope callersViewRootScope;
 	
@@ -51,7 +54,7 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 		combinedMetrics = new CombineCallerScopeMetric();
 
 		listCombinedScopes = new ListCombinedScopes();
-		calleeht = new Hashtable<String, Scope>();
+		calleeht = new HashMap<>();
 	}
 
 	//----------------------------------------------------
@@ -71,7 +74,7 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 			this.listCombinedScopes.push();
 
 			// Find (or add) callee in top-level hashtable
-			ProcedureScope callee = this.createProcedureIfNecessary(scope);			
+			ProcedureScope callee = this.createProcedureIfNecessary(scope, scope.getProcedureScope());			
 			prepareCallChain(scope, callee);
 
 		} else if (vt == ScopeVisitType.PostVisit)  {			
@@ -79,11 +82,6 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 		}
 	}
 	
-		 
-	public void visit(Scope scope, ScopeVisitType vt) { }
-	public void visit(RootScope scope, ScopeVisitType vt) { }
-	public void visit(LoadModuleScope scope, ScopeVisitType vt) { }
-	public void visit(FileScope scope, ScopeVisitType vt) { }
 	
 	public void visit(ProcedureScope scope, ScopeVisitType vt) { 
 		
@@ -98,24 +96,51 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 		if (vt == ScopeVisitType.PreVisit) {
 			// have to push whether we will create a procedure or not since
 			// we will pop during Post visit.
-			// TODO: Ugly code
 			this.listCombinedScopes.push();
 			
 			if (!scope.isAlien()) {
 				// Find (or add) callee in top-level hashtable
-				ProcedureScope callee = this.createProcedureIfNecessary(scope);
+				ProcedureScope callee = this.createProcedureIfNecessary(scope, scope);
 				prepareCallChain(scope, callee);
 			}
 		} else if (vt == ScopeVisitType.PostVisit){			
 			this.decrementCounter();
 		}
 	}
+	 
+	public void visit(Scope scope, ScopeVisitType vt) { 
+		// we are interested only in instruction scope
+		if (!(scope instanceof InstructionScope))
+			return;
+		
+		//--------------------------------------------------------------------------------
+		// if there are no exclusive costs to attribute from this context, we are done here
+		//--------------------------------------------------------------------------------
+		if (!scope.hasNonzeroMetrics()) {
+			return; 
+		}
+		
+		if (vt == ScopeVisitType.PreVisit) {
+			this.listCombinedScopes.push();
+
+			// Find (or add) callee in top-level hashtable
+			InstructionScope is   = (InstructionScope) scope;
+			ProcedureScope callee = this.createProcedureIfNecessary(scope, is.getProcedureScope());			
+			prepareCallChain(scope, callee);
+
+		} else if (vt == ScopeVisitType.PostVisit)  {			
+			this.decrementCounter();
+		}
+	}
 	
-	public void visit(AlienScope scope, ScopeVisitType vt) { }
-	public void visit(LoopScope scope, ScopeVisitType vt) { }
-	public void visit(StatementRangeScope scope, ScopeVisitType vt) { 	}
-	public void visit(LineScope scope, ScopeVisitType vt) {  }
-	public void visit(GroupScope scope, ScopeVisitType vt) { }
+	public void visit(RootScope scope, ScopeVisitType vt) 			{ /* no action */ }
+	public void visit(LoadModuleScope scope, ScopeVisitType vt) 	{ /* no action */ }
+	public void visit(FileScope scope, ScopeVisitType vt) 			{ /* no action */ }
+	public void visit(AlienScope scope, ScopeVisitType vt) 			{ /* no action */ }
+	public void visit(LoopScope scope, ScopeVisitType vt) 			{ /* no action */ }
+	public void visit(StatementRangeScope scope, ScopeVisitType vt) { /* no action */ }
+	public void visit(LineScope scope, ScopeVisitType vt) 			{ /* no action */ }
+	public void visit(GroupScope scope, ScopeVisitType vt) 			{ /* no action */ }
 
 	
 	//----------------------------------------------------
@@ -145,37 +170,33 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 	 * Find caller view's procedure of a given scope. 
 	 * If it doesn't exist, create a new one, attach to the tree, and copy the metrics
 	 * 
-	 * @param cct_s : either call site or procedure
+	 * @param scopeCCT : either call site or procedure
 	 * @return ProcedureScope
 	 ********/
-	private ProcedureScope createProcedureIfNecessary( Scope cct_s ) {
-		ProcedureScope cct_proc_s;
+	private ProcedureScope createProcedureIfNecessary( Scope scopeCCT, ProcedureScope procScopeCCT ) {
 		
-		if (cct_s instanceof ProcedureScope)
-			cct_proc_s = (ProcedureScope) cct_s;
-		else
-			cct_proc_s = ( (CallSiteScope)cct_s).getProcedureScope();
-		
-		String objCode = cct_s.getSourceFile().getFileID() + ":" + cct_proc_s.getFlatIndex();
+		String objCode = procScopeCCT.getSourceFile().getFileID() + SEPARATOR + 
+						 procScopeCCT.getFirstLineNumber() + SEPARATOR + 
+						 procScopeCCT.getName().hashCode();
 
-		ProcedureScope caller_proc = (ProcedureScope) calleeht.get(objCode);
+		ProcedureScope procCaller = (ProcedureScope) calleeht.get(objCode);
 		
-		if (caller_proc == null) {
+		if (procCaller == null) {
 			// create a new procedure scope
-			caller_proc = (ProcedureScope) cct_proc_s.duplicate();
-			caller_proc.setRootScope(callersViewRootScope);
-			
+			procCaller = (ProcedureScope) procScopeCCT.duplicate();
+			procCaller.setRootScope(callersViewRootScope);
+
 			// add to the tree
-			callersViewRootScope.addSubscope(caller_proc);
-			caller_proc.setParentScope(this.callersViewRootScope);
+			callersViewRootScope.addSubscope(procCaller);
+			procCaller.setParentScope(this.callersViewRootScope);
 			
-			// add to the dictionary
-			calleeht.put(objCode, caller_proc);
+			// add to the dictionary to make sure we have unique procedure for each procedures
+			calleeht.put(objCode, procCaller);
 		}
 		
 		// accumulate the metrics
-		this.combinedMetrics.combine(caller_proc, cct_s, inclusiveOnly, exclusiveOnly);
-		return caller_proc;
+		this.combinedMetrics.combine(procCaller, scopeCCT, inclusiveOnly, exclusiveOnly);
+		return procCaller;
 	}
 		
 
@@ -193,7 +214,7 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 		// 	When a caller view scope is created, it creates also its children and its merged children
 		//		the counter of these children are then need to be decremented based on the CCT scope
 		//---------------------------------------------------------------------------
-		ArrayList<Scope> list = this.listCombinedScopes.pop();
+		var list = this.listCombinedScopes.pop();
 		if (list != null) {
 			Iterator<Scope> iter = list.iterator();
 			while (iter.hasNext()) {
@@ -214,19 +235,19 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 	 * class helper to store the list of combined scopes
 	 * 
 	 ********************************************************************/
-	static private class ListCombinedScopes {
-		private Stack<ArrayList<Scope>> combinedScopes;
+	private static class ListCombinedScopes {
+		private Deque<ArrayList<Scope>> combinedScopes;
 		
-		public ArrayList<Scope> push() {
+		public List<Scope> push() {
 			if (this.combinedScopes == null) {
-				this.combinedScopes = new Stack< ArrayList<Scope>>();
+				this.combinedScopes = new ArrayDeque<>();
 			}
-			ArrayList<Scope> list = new ArrayList<Scope>();
+			ArrayList<Scope> list = new ArrayList<>();
 			this.combinedScopes.push(list);
 			return list;
 		}
 		
-		public ArrayList<Scope> pop() {
+		public List<Scope> pop() {
 			return this.combinedScopes.pop();
 		}
 		

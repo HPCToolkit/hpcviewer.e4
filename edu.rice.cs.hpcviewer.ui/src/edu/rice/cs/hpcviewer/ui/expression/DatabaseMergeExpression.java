@@ -7,8 +7,8 @@ import javax.inject.Inject;
 import org.eclipse.e4.core.di.annotations.Evaluate;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 
-import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 
 public class DatabaseMergeExpression 
@@ -19,7 +19,7 @@ public class DatabaseMergeExpression
 	@Evaluate
 	public boolean evaluate(MWindow window) {
 		
-		Iterator<BaseExperiment> iterator = database.getIterator(window);
+		Iterator<IExperiment> iterator = database.getIterator(window);
 		if (iterator == null)
 			return false;
 		

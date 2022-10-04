@@ -12,7 +12,6 @@ Export-Package: edu.rice.cs.hpcfilter,
  edu.rice.cs.hpcfilter.service
 Require-Bundle: edu.rice.cs.hpcdata,
  edu.rice.cs.hpcbase,
- edu.rice.cs.hpcdata.tld,
  javax.inject,
  org.eclipse.core.runtime,
  org.eclipse.jface,

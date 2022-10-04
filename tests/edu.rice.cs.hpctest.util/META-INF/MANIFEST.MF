@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: hpctest.util
+Bundle-SymbolicName: edu.rice.cs.hpctest.util
+Bundle-Version: 6.0.0.qualifier
+Bundle-Vendor: Rice University
+Automatic-Module-Name: edu.rice.cs.hpctest.util
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Require-Bundle: org.junit
+Export-Package: edu.rice.cs.hpctest.util

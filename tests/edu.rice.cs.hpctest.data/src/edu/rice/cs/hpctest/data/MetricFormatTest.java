@@ -23,14 +23,13 @@ public class MetricFormatTest {
 		
 		double []values = {9.999, 0.999, 9.55,     9.5,       0.9999, 0.945,
 				           0.95,  0.955, 0.9992,   100000001, 123456789.123456789 };
-		double []annots = {.9999, 0.009, 0.000009, -0.000004, 9.9945,  0.9991234,
-				           0.001, 0.009, 0.000001, 0.9999456,  0.0001};
+		MetricValue rootValue = new MetricValue(values[values.length-1]);
 		
 		for(int i=0; i<values.length; i++) {
-			MetricValue mv = new MetricValue(values[i], annots[i]);
+			MetricValue mv = new MetricValue(values[i]);
 			
 			IMetricValueFormat format = baseMetric.getDisplayFormat();
-			String displayFormat = format.format(mv);
+			String displayFormat = format.format(mv, rootValue);
 			
 			// System.out.println(i + ": " + values[i] + " (" + annots[i] + ") \t= '" + displayFormat +"' ");
 			// output:

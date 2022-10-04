@@ -53,7 +53,7 @@ public class FilterRanks
 		 * current filter with the new filter until we know we have to.
 		 */
         IBaseData filteredBaseData = data.getBaseData();
-        if (filteredBaseData == null || !(filteredBaseData instanceof IFilteredData)) {
+        if (!(filteredBaseData instanceof IFilteredData)) {
         	filteredBaseData = data.createFilteredBaseData();
         }
         List<IdTuple> listDenseIds = ((IFilteredData)filteredBaseData).getDenseListIdTuple(IdTupleOption.BRIEF);
@@ -81,13 +81,13 @@ public class FilterRanks
         List<FilterDataItem<String>> list = ThreadFilterDialog.filter(shell, "Select rank to display", items, checked);
 		
 		if (list != null){
-			List<Integer> listChecked = new ArrayList<Integer>();
+			List<Integer> listChecked = new ArrayList<>();
 			for(int i=0; i<list.size(); i++) {
 				if (list.get(i).checked) {
 					listChecked.add(i);
 				}
 			}
-			if (listChecked.size() == 0) {
+			if (listChecked.isEmpty()) {
 				return;
 			}
 			

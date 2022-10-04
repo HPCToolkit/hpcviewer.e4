@@ -103,7 +103,6 @@ public class CallSiteScopeCallerView extends CallSiteScope implements IMergedSco
 	}
 
 	
-	@Override
 	public boolean hasChildren() {
 		return hasScopeChildren();
 	}
@@ -115,11 +114,11 @@ public class CallSiteScopeCallerView extends CallSiteScope implements IMergedSco
 	 * @param exclusiveOnly: filter for exclusive metrics 
 	 */
 	@Override
-	public List<TreeNode> getAllChildren(
+	public List<Scope> getAllChildren(
 			MetricValuePropagationFilter inclusiveOnly, 
 			MetricValuePropagationFilter exclusiveOnly ) {
 
-		List<TreeNode> children = this.getChildren();
+		var children = this.getChildren();
 
 		if (children != null && children.size()>0) {
 			

@@ -4,69 +4,85 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.db.version4.DataRecord;
 import edu.rice.cs.hpcdata.db.version4.DataTrace;
+import edu.rice.cs.hpctest.util.TestDatabase;
 
 public class DataTraceTest {
 
-	private static DataTrace data;
+	private static DataTrace []data;
+	
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws IOException {
-		Path resource = Paths.get("..", "resources", "prof2", "empty-trace");
-		File dbPath = resource.toFile();
+		final var dbPaths = TestDatabase.getMetaDatabases();
+		data = new DataTrace[dbPaths.length];
 		
-		assertNotNull(dbPath);
-		assertTrue(dbPath.isDirectory());
-		
-		IdTupleType tupleType = new IdTupleType();
-		tupleType.initDefaultTypes();
-		
-		data = new DataTrace();
-		data.open(dbPath.getAbsolutePath() + File.separatorChar + "trace.db");
+		for(int i=0; i<dbPaths.length; i++) {
+			File dbPath = dbPaths[i];
+			
+			assertNotNull(dbPath);
+			assertTrue(dbPath.isDirectory());
+			
+			IdTupleType tupleType = new IdTupleType();
+			tupleType.initDefaultTypes();
+			
+			data[i] = new DataTrace();
+			data[i].open(dbPath.getAbsolutePath());
+		}
 	}
-
 
 
 	@Test
 	public void testGetSampledData() throws IOException {
-		DataRecord old = null;
-		int samples = data.getNumberOfSamples(1);
-		for (int i=0; i<Math.min(samples, 10); i++) {
-			DataRecord rec = data.getSampledData(1, i);
-			assertNotNull(rec);
-			assertTrue(rec.timestamp > 0);
-			assertTrue(rec.cpId >= 0);
+		for(int j=0; j<data.length; j++) {
+			DataTrace d = data[j];
+			DataRecord old = null;
+			int samples = d.getNumberOfSamples(0);
 			
-			if (old != null)
-				assertTrue(rec.timestamp > old.timestamp);
-			old = new DataRecord(rec.timestamp, rec.cpId, 0);
+			for (int i=0; i<Math.min(samples, 10); i++) {
+				DataRecord rec = d.getSampledData(0, i);
+				assertNotNull(rec);
+				assertTrue(rec.timestamp >= 100 &&
+						   rec.timestamp <= Long.MAX_VALUE);
+				assertTrue(rec.cpId >= 0 && rec.cpId <= Integer.MAX_VALUE);
+				
+				if (old != null)
+					assertTrue(rec.timestamp > old.timestamp);
+				
+				old = new DataRecord(rec.timestamp, rec.cpId, 0);
+			}
+		}
+	}
+	
+
+	@Test
+	public void testGetNumberOfSamples() {
+		for(int j=0; j<data.length; j++) {
+			var d = data[j];
+			int samples = d.getNumberOfSamples(0);
+			assertTrue(samples >= 0);
 		}
 	}
 
 	@Test
-	public void testGetNumberOfSamples() {
-		int samples = data.getNumberOfSamples(1);
-		assertTrue(samples == 0);
-	}
-
-	@Test
 	public void testGetNumberOfRanks() {
-		int ranks = data.getNumberOfRanks();
-		assertTrue(ranks == 1);
+		for (int i=0; i<data.length; i++) {
+			int ranks = data[i].getNumberOfRanks();
+			assertTrue(ranks >= 0);
+		}
 	}
 
 	@Test
 	public void testGetLength() {
-		long l = data.getLength(1);
-		assertTrue(l < 0);
+		for (int i=0; i<data.length; i++) {
+			long l = data[i].getLength(0);
+			assertTrue(l >= 0);
+		}
 	}
 
 }

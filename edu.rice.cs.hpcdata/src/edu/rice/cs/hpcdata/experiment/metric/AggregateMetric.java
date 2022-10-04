@@ -35,7 +35,22 @@ public class AggregateMetric extends AbstractMetricWithFormula
 	private MetricVarMap finalizeVarMap;
 	private CombineAggregateMetricVarMap combineVarMap;
 	
+	
+	/*****
+	 * Compact constructor of the class given its ID and name.
+	 * The caller is responsible to set the formula and other attributes.
+	 *  
+	 * @param sID
+	 * 			 the ID of the metric
+	 * @param sDisplayName
+	 * 			the display name of the metric
+	 */
+	public AggregateMetric(String sID, String sDisplayName) {
+		super(sID, sDisplayName);
+	}
+	
 	/**
+	 * Create a new aggregate metric
 	 * @see BaseMetric
 	 */
 	public AggregateMetric(String sID, String sDisplayName, String sDescription,
@@ -72,19 +87,6 @@ public class AggregateMetric extends AbstractMetricWithFormula
 			e.printStackTrace();
 		}
 	}
-	
-	
-	/*********
-	 * initialize the metric.
-	 * THIS METHOD HAS TO BE CALLED before asking the value
-	 * @param type
-	 * @param exp
-	 *******/
-	public void init(BaseExperimentWithMetrics exp) {
-		this.finalizeVarMap.setMetricManager((Experiment)exp);
-		this.combineVarMap.setMetricManager((Experiment)exp);
-	}
-	
 	
 	
 	/******
@@ -155,13 +157,6 @@ public class AggregateMetric extends AbstractMetricWithFormula
 				// Java double, so we assume we can compare it with 0.0d
 				if (Double.compare(dValue, 0.0d) != 0) {
 					value = new MetricValue(dValue);
-					if (getAnnotationType() == AnnotationType.PERCENT) {
-						MetricValue	rootValue = scope.getRootMetricValue(this);
-						if (rootValue != MetricValue.NONE) {
-							float percent = (float) (dValue / rootValue.getValue());
-							MetricValue.setAnnotationValue(value, percent);
-						}
-					}
 				}
 			} catch(java.lang.Exception e) {
 				e.printStackTrace();
@@ -169,17 +164,12 @@ public class AggregateMetric extends AbstractMetricWithFormula
 		} else {
 			// metric has no finalize formula
 			// get whatever the combine formula has ?
-			value = getRawValue(scope);
+			value = scope.getMetricValue(index);
 		}
 		return value;
 	}
 
-	@Override
-	public MetricValue getRawValue(IMetricScope s) {
-		MetricValue mv = s.getMetricValue(this.index);
-		return mv;
-	}
-	
+
 	@Override
 	/*
 	 * (non-Javadoc)
@@ -187,7 +177,7 @@ public class AggregateMetric extends AbstractMetricWithFormula
 	 */
 	public BaseMetric duplicate() {
 		AggregateMetric m = new AggregateMetric(shortName, displayName, description, visibility, 
-				null, annotationType, index, partner_index, metricType);
+				null, annotationType, index, partnerIndex, metricType);
 		m.setOrder(order);
 		if (formulaCombine != null)
 			m.formulaCombine  = formulaCombine.duplicate();

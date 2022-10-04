@@ -132,7 +132,7 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 		this.metricManager = mm;
 		this.root   = root;
 		this.fctMap = new ExtFuncMap();
-		this.varMap = new MetricVarMap ( root, s, mm );
+		this.varMap = new MetricVarMap ( s, mm );
 		
 		var indexes = metricManager.getNonEmptyMetricIDs(s);
 		mapMetricNewIndex = new HashMap<>(indexes.size());

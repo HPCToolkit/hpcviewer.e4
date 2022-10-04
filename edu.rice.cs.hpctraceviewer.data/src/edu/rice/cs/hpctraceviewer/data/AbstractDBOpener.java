@@ -37,12 +37,6 @@ public abstract class AbstractDBOpener {
 			throws IOException, InvalExperimentException, Exception;
 
 	
-	/****
-	 * Return the version of trace database. 
-	 * @return the version or 0 if the database doesn't exist
-	 */
-	public abstract int getVersion();
-	
 	// Our current policy on closing: Except for back-to-back connections to the
 	// same server, we should close the server when we are making a new
 	// connection, local or remote.

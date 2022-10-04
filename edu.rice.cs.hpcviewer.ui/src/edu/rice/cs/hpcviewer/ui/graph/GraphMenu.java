@@ -20,6 +20,10 @@ import edu.rice.cs.hpcviewer.ui.ProfilePart;
  */
 public class GraphMenu 
 {
+	private GraphMenu() {
+		// hide the constructor
+	}
+	
 	/****
 	 * Add a context menu of plot graphs on the given menu manager.
 	 * The context menu only displays the non-empty metrics of the 
@@ -36,7 +40,7 @@ public class GraphMenu
 	 * @param scope
 	 * 			The selected node 
 	 */
-	static public void createAdditionalContextMenu(
+	public static void createAdditionalContextMenu(
 			ProfilePart profilePart,
 			IMenuManager mgr, IMetricManager experiment, 
 			IThreadDataCollection threadData, Scope scope) {
@@ -49,13 +53,13 @@ public class GraphMenu
 		// get the list of indexes of non-empty metrics
 		// if the table is empty or has no metrics, do nothing
 		var listOfIndexes = experiment.getNonEmptyMetricIDs(scope);
-		if (listOfIndexes == null || listOfIndexes.size()==0)
-			// TODO: should throw an exception
+		if (listOfIndexes == null || listOfIndexes.isEmpty())
+			// Perhaps should throw an exception
 			return;
 		
 		mgr.add( new Separator() );
 		
-		final String graphTypes[] = { GraphPlotRegularViewer.LABEL,
+		final String[] graphTypes = { GraphPlotRegularViewer.LABEL,
 									  GraphPlotSortViewer.LABEL,
 									  GraphHistoViewer.LABEL };
 		
@@ -90,10 +94,10 @@ public class GraphMenu
     /********************************************************************************
      * class to initialize an action for displaying a graph
      ********************************************************************************/
-    static private class ScopeGraphAction extends Action 
+    private static class ScopeGraphAction extends Action 
     {
-		final private GraphEditorInput input;
-		final private ProfilePart profilePart;
+		private final GraphEditorInput input;
+		private final ProfilePart profilePart;
 		
 		public ScopeGraphAction(
 				GraphEditorInput input, 
@@ -105,6 +109,7 @@ public class GraphMenu
 			this.profilePart  = profilePart;
 		}
     	
+		@Override
 		public void run() {
 			final CTabItem editor = profilePart.addEditor(input);
 			editor.getDisplay().asyncExec(() -> {

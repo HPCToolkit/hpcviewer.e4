@@ -12,6 +12,7 @@ import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.event.ListEventListener;
+import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
@@ -28,9 +29,9 @@ public class ThreadMetricManager implements IMetricManager
 	private final EventList<BaseMetric> rawMetrics;
 	private final MutableIntObjectMap<BaseMetric> mapIntToMetric;
 	
-	public ThreadMetricManager(List<BaseMetric> metrics, List<Integer> listThreads) {
+	public ThreadMetricManager(List<BaseMetric> metrics, List<IdTuple> listThreads) {
 		List<BaseMetric> listMetrics = FastList.newList(metrics.size());
-		mapIntToMetric = new IntObjectHashMap<BaseMetric>();
+		mapIntToMetric = new IntObjectHashMap<>();
 		Map<String, MetricRaw> mapNameToMetric = new HashMap<>(listMetrics.size());
 
 		for(BaseMetric m: metrics) {
@@ -59,8 +60,8 @@ public class ThreadMetricManager implements IMetricManager
 	}
 
 	@Override
-	public BaseMetric getMetric(String ID) {
-		return getMetric(Integer.valueOf(ID));
+	public BaseMetric getMetric(String id) {
+		return getMetric(Integer.valueOf(id));
 	}
 
 	@Override
@@ -137,7 +138,7 @@ public class ThreadMetricManager implements IMetricManager
 		if (metric instanceof MetricRaw)
 			return (MetricRaw) metric;
 		
-		if (rawMetrics == null || rawMetrics.size() == 0)
+		if (rawMetrics == null || rawMetrics.isEmpty())
 			return null;
 		
 		var rawMetric = rawMetrics.stream().filter(m -> metric.getDisplayName().

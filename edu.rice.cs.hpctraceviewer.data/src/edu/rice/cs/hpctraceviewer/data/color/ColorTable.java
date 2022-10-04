@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcbase.map.ProcedureClassData;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
-import edu.rice.cs.hpctraceviewer.data.util.Constants;
+import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpctraceviewer.data.util.ProcedureClassMap;
 
 /**************************************************************
@@ -25,6 +25,9 @@ import edu.rice.cs.hpctraceviewer.data.util.ProcedureClassMap;
  **************************************************************/
 public class ColorTable
 {	
+	/**A null function*/
+	private static final String NULL_FUNCTION = "-Outside Timeline-";
+	
 	/** user defined color */
 	private ProcedureClassMap classMap;
 	
@@ -283,7 +286,7 @@ public class ColorTable
 		final RGB rgb_white = display.getSystemColor(SWT.COLOR_WHITE).getRGB();
 		final Color col_white = new Color(display, rgb_white);
 		
-		colorMatcher.put(Constants.NULL_FUNCTION, col_white);
+		colorMatcher.put(NULL_FUNCTION, col_white);
 		
 		ProcedureColor pc = new ProcedureColor(Constants.PROC_NO_ACTIVITY, col_white);
 		mapRGBtoProcedure.put(rgb_white.hashCode(), pc);

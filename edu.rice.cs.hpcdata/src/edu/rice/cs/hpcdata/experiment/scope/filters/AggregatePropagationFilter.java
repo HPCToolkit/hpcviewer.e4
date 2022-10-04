@@ -7,10 +7,10 @@ import edu.rice.cs.hpcdata.experiment.metric.FinalMetric;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 /***********************
+ * 
  * Filter metric to filter inclusive metrics and pre-aggregated metrics 
- * @author laksonoadhianto
  *
- */
+ ***********************/
 public class AggregatePropagationFilter extends InclusiveOnlyMetricPropagationFilter {
 
 	public AggregatePropagationFilter(Experiment experiment) {
@@ -19,16 +19,21 @@ public class AggregatePropagationFilter extends InclusiveOnlyMetricPropagationFi
 
 	/****************
 	 *  propagate only if the parent's diPropagation filter it and the metric is a type of aggregate
+	 *  
+	 *  @param source
+	 *  @param target
+	 *  @param indexSource
+	 *  @param indexTarget
 	 */
-	public boolean doPropagation(Scope source, Scope target, int src_idx,
-			int targ_idx) {
-		boolean bParentResult = super.doPropagation(source, target, src_idx, targ_idx);
+	@Override
+	public boolean doPropagation(Scope source, 
+								 Scope target, 
+								 int indexSource,
+								 int indexTarget) {
+		boolean bParentResult = super.doPropagation(source, target, indexSource, indexTarget);
 		if (!bParentResult) {
-			BaseMetric m = this._experiment.getMetric(src_idx);// .getMetricType();
-			bParentResult = bParentResult 	|| (m instanceof FinalMetric) || (m instanceof AggregateMetric);
-			/*|| ( mType == MetricType.PREAGGREGATE )
-											|| ( mType == MetricType.DERIVED_INCR );
-											*/
+			BaseMetric m = this._experiment.getMetric(indexSource);
+			bParentResult = (m instanceof FinalMetric) || (m instanceof AggregateMetric);
 		}
 		return bParentResult;
 	}

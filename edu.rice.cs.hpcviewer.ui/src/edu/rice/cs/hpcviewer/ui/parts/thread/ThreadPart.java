@@ -2,20 +2,27 @@ package edu.rice.cs.hpcviewer.ui.parts.thread;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.Shell;
+import org.osgi.service.event.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.rice.cs.hpcbase.ViewerDataEvent;
+import edu.rice.cs.hpcdata.db.IdTuple;
+import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
+import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcfilter.FilterDataItem;
 import edu.rice.cs.hpcfilter.StringFilterDataItem;
@@ -27,11 +34,10 @@ import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownPart;
 
 public class ThreadPart extends TopDownPart 
 {
-	static final private int MAX_THREAD_INDEX = 2;
-	static final private String TITLE_PREFIX  = "Thread view ";
+	private static final int MAX_THREAD_INDEX = 2;
+	private static final String TITLE_PREFIX  = "Thread view ";
 
 	private ThreadViewInput viewInput; 
-	private List<Integer> threads;
 
 	public ThreadPart(CTabFolder parent, int style) {
 		super(parent, style);
@@ -42,14 +48,14 @@ public class ThreadPart extends TopDownPart
 	@Override
 	public void setInput(Object input) {
 		
-		if (input == null || (!(input instanceof ThreadViewInput)))
+		if (!(input instanceof ThreadViewInput))
 			return;
 
 		// if the input doesn't include the list of threads to be displayed,
 		// we'll ask the user to pick the threads
 		
 		viewInput = (ThreadViewInput) input;
-		threads   = viewInput.getThreads();
+		var threads   = viewInput.getThreads();
 		if (threads == null) {
 			final Shell shell = getDisplay().getActiveShell();
 			try {
@@ -64,8 +70,7 @@ public class ThreadPart extends TopDownPart
 				Logger logger = LoggerFactory.getLogger(getClass());
 				logger.error(label, e);
 				MessageDialog.openError(shell, label, e.getClass().getName() +": " + e.getLocalizedMessage());
-				
-				throw new RuntimeException(e.getMessage());
+				return;
 			}
 		}
 		// set the table
@@ -87,7 +92,29 @@ public class ThreadPart extends TopDownPart
 		setShowClose(true);
 	}
 
-	
+	@Override
+	public void handleEvent(Event event) {
+		super.handleEvent(event);
+		
+		String topic = event.getTopic();
+		if (topic.equals(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH)) {
+			Object obj = event.getProperty(IEventBroker.DATA);
+			if (obj instanceof ViewerDataEvent) {
+				ViewerDataEvent data = (ViewerDataEvent) obj;
+				if (data.metricManager instanceof Experiment) {
+					// grab the new root of the refreshed database
+					var newRoot = ((Experiment) data.metricManager).getRootScope(RootScopeType.CallingContextTree);
+					
+					// duplicate codes from AbstractTableView to refresh the table
+					// need to avoid duplication
+					viewInput.setRootScope(newRoot);
+					getActionManager().clear();
+					getTable().reset(newRoot);
+					updateButtonStatus();
+				}
+			}
+		}
+	}
 	
 	@Override
 	public Object getInput() {
@@ -110,32 +137,38 @@ public class ThreadPart extends TopDownPart
 	 * Static method to create a label based on the list of thread
 	 * 
 	 * @param input ThreadViewInput 
-	 * @return StringBuffer
+	 * @return StringBuilder
 	 * @throws IOException
 	 */
-	private static StringBuffer getLabel(ThreadViewInput input) throws IOException {
+	private static StringBuilder getLabel(ThreadViewInput input) {
 		
-		StringBuffer buffer = new StringBuffer();
+		var buffer = new StringBuilder();
 		buffer.append('[');
-		
-		IThreadDataCollection threadData = input.getThreadData();
-		String[] labels = threadData.getRankStringLabels();
 
-		List<Integer> threads = input.getThreads();
+		var threads = input.getThreads();
 		int size = threads.size();
+		
+		IdTupleType idTypes;
+		
+		var exp = input.getRootScope().getExperiment();
+		if (exp instanceof Experiment) {
+			idTypes = ((Experiment)exp).getIdTupleType();
+		} else {
+			idTypes = IdTupleType.createTypeWithOldFormat();
+		}
 		
 		// for the column title: only list the first MAX_THREAD_INDEX of the set of threads
 		for(int i=0; i<size && i<=MAX_THREAD_INDEX; i++) {
-			final int index;
+			final IdTuple idtuple;
 			if (i<MAX_THREAD_INDEX) {
-				index = threads.get(i);
+				idtuple = threads.get(i);
 			} else {
 				// show the last thread index
 				if (size > MAX_THREAD_INDEX+1)
 					buffer.append("..");
-				index = threads.get(size-1);
+				idtuple = threads.get(size-1);
 			}
-			buffer.append(labels[index]);
+			buffer.append(idtuple.toString(idTypes));
 			if (i < MAX_THREAD_INDEX && i<size-1)
 				buffer.append(',');
 		}
@@ -168,27 +201,23 @@ public class ThreadPart extends TopDownPart
 		return false;
 	}
 
-
 	
 	private String getTooltipText(ThreadViewInput input) throws IOException {
 		final String TOOLTIP_PREFIX = "Top down view for thread(s): ";
-		
-		IThreadDataCollection threadData = input.getThreadData();
-		String[] labels = threadData.getRankStringLabels();
 
-		List<Integer> threads = input.getThreads();
+		var threads = input.getThreads();
 		int size = threads.size();
 
-		String label = TOOLTIP_PREFIX;
+		StringBuilder label = new StringBuilder(TOOLTIP_PREFIX);
+		
 		for(int i=0; i<size; i++) {
-			int index = threads.get(i);
-			label += labels[index];
+			label.append(threads.get(i).toLabel());
 			
 			if (i+1 < size) {
-				label += ", ";
+				label.append(", ");
 			}
 		}
-		return label;
+		return label.toString();
 	}
 	
 	
@@ -202,33 +231,31 @@ public class ThreadPart extends TopDownPart
 	 * @return List<Integer>
 	 * 
 	 * @throws NumberFormatException
-	 * @throws IOException
 	 */
-	static private List<Integer> getThreads(Shell shell, IThreadDataCollection threadData) 
-			throws NumberFormatException, IOException 
+	private static List<IdTuple> getThreads(Shell shell, IThreadDataCollection threadData) 
+			throws NumberFormatException 
 	{
-		String []labels = threadData.getRankStringLabels();
-		List<FilterDataItem<String>> items =  new ArrayList<>(labels.length);
+		var idTuples = threadData.getIdTuples();
 		
-		for (int i=0; i<labels.length; i++) {
-			FilterDataItem<String> obj = new StringFilterDataItem(labels[i], false, true);
-			items.add(obj);
-		}
+		final List<FilterDataItem<String>> items =  new ArrayList<>(idTuples.size());
+		
+		idTuples.stream().forEach(idt -> items.add(new StringFilterDataItem(idt.toLabel(), false, true) ));
 
 		ThreadFilterDialog dialog = new ThreadFilterDialog(shell, "Select rank/thread to view", items);
 		
 		if (dialog.open() == Window.OK) {
-			items = dialog.getResult();
-			if (items != null) {
-				final List<Integer> threads = new ArrayList<Integer>();
-				for(int i=0; i<items.size(); i++) {
-					if (items.get(i).checked) {
-						threads.add(i);
-					}
+			var result = dialog.getResult();
+			if (result == null)
+				return Collections.emptyList();
+			
+			final List<IdTuple> threads = new ArrayList<>();
+			for(int i=0; i<items.size(); i++) {
+				if (items.get(i).checked) {
+					threads.add(idTuples.get(i));
 				}
-				if (threads.size()>0)
-					return threads;
 			}
+			if (!threads.isEmpty())
+				return threads;
 		}
 		return null;
 	}

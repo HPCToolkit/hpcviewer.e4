@@ -24,7 +24,7 @@ public interface IMetricManager
 	 * @return {@code MetricRae}
 	 * 			The correspondent raw metric
 	 */
-	public MetricRaw getCorrespondentMetricRaw(BaseMetric metric);
+	public BaseMetric getCorrespondentMetricRaw(BaseMetric metric);
 	
 	/***
 	 * Returns a metric descriptor given a metric id

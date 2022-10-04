@@ -52,11 +52,13 @@ public class CallerScopeBuilder {
 						// hack for alien procedure: use the current scope
 						//	for the enclosing call site
 						enclosingCS = next;
-					}
-					
-				}	else if (next instanceof CallSiteScope) {
+					}					
+				} else if (next instanceof CallSiteScope) {
 					enclosingCS = next;
-					mycaller = ((CallSiteScope)enclosingCS).getProcedureScope(); 
+					mycaller    = ((CallSiteScope)enclosingCS).getProcedureScope(); 
+				} else if (next instanceof InstructionScope) {
+					enclosingCS = next;
+					mycaller    = ((InstructionScope)next).getProcedureScope();
 				}
 				
 				LineScope lineScope = null;
@@ -65,7 +67,7 @@ public class CallerScopeBuilder {
 					// normal call site
 					lineScope = ((CallSiteScope)innerCS).getLineScope();
 				} else {
-					// hack for alien procedure: create a new line scope
+					// hack for alien procedure and instruction scope: create a new line scope
 					lineScope = new LineScope(innerCS.root, innerCS.getSourceFile(),
 							innerCS.getFirstLineNumber(), innerCS.getCCTIndex(),
 							innerCS.getFlatIndex());
@@ -204,9 +206,9 @@ public class CallerScopeBuilder {
 	 * @return
 	 */
 	static private boolean isCallSiteCandidate(Scope scope, Scope innerCS) {
-		return ( ((scope instanceof CallSiteScope) || 
-				// laks 2013.12.2 original code: (scope instanceof ProcedureScope && !((ProcedureScope)scope).isAlien()) )
-				(scope instanceof ProcedureScope) )
+		return ( ((scope instanceof CallSiteScope)    || 
+			  	  (scope instanceof ProcedureScope)   ||
+				  (scope instanceof InstructionScope))
 				&& (innerCS != null) );
 	}
 }
