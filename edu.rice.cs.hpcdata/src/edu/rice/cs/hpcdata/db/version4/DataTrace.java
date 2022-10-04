@@ -168,7 +168,7 @@ public class DataTrace extends DataCommon
 	 */
 	public int getNumberOfRanks()
 	{
-		return (int) traceCtxs.length;
+		return traceCtxs.length;
 	}
 	
 	

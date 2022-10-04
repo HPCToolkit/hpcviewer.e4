@@ -82,6 +82,26 @@ public class DataTraceTest {
 		for (int i=0; i<data.length; i++) {
 			long l = data[i].getLength(0);
 			assertTrue(l >= 0);
+			
+			l = data[i].getOffset(0);
+			assertTrue(l >= 0);
+			
+			int rs = data[i].getRecordSize();
+			assertTrue(rs >= Long.BYTES + Integer.BYTES);
+		}
+	}
+	
+	
+	@Test
+	public void testMinMax() {
+		for (var d: data) {
+			var max = d.getMaxTime();
+			var min = d.getMinTime();
+			
+			if (min < Long.MAX_VALUE) {
+				assertTrue(max > 0 && min > 0);
+				assertTrue(min < max);
+			}
 		}
 	}
 
