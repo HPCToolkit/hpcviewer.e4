@@ -13,7 +13,7 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.merge.DatabasesToMerge;
 import edu.rice.cs.hpcdata.merge.ExperimentMerger;
-import edu.rice.cs.hpctest.data.util.DataFactory;
+import edu.rice.cs.hpctest.util.DataFactory;
 
 public class ExperimentMergerTest 
 {
