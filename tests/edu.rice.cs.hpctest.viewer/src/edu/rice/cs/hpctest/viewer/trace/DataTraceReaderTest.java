@@ -4,6 +4,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.IOException;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +20,7 @@ class DataTraceReaderTest {
 	static FileDB4 []dataDB;
 	
 	@BeforeAll
-	static void setUpBeforeClass() throws Exception {
+	static void setUpBeforeClass() throws IOException {
 		var paths = TestDatabase.getMetaDatabases();
 		dataDB = new FileDB4[paths.length];
 		int i=0;
@@ -90,7 +92,7 @@ class DataTraceReaderTest {
 		for(var data: dataDB) {
 			var idt = data.getIdTuple(IdTupleOption.BRIEF);
 			assertNotNull(idt);
-			assertTrue(idt.size() >= 1);
+			assertTrue(!idt.isEmpty());
 			
 			var id = idt.get(0);
 			var label = id.toLabel();
