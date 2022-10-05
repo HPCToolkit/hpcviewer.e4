@@ -3,7 +3,11 @@ package edu.rice.cs.hpctest.data.db4;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -104,5 +108,27 @@ public class DataTraceTest {
 			}
 		}
 	}
+	
+	
+	@Test
+	public void testPrintInfo() throws IOException {
+		for (var d: data) {
+			File file = File.createTempFile(d.toString(), "txt");
+			
+			var ps = new PrintStream(file);
+			d.printInfo(ps);
 
+			var is = new FileInputStream(file);
+			var bytes = is.readAllBytes();
+			is.close();
+			
+			var s = new String(bytes);
+			var ranks = d.getNumberOfRanks();
+			int sum = 0;
+			for(int i=0; i<ranks; i++) {
+				sum += d.getNumberOfSamples(i);
+			}
+			assertTrue(s.length() >= sum);
+		}
+	}
 }

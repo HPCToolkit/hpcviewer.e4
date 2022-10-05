@@ -19,7 +19,7 @@ public class DataRecord {
 	}
 	@Override
 	public String toString() {
-		return String.format("Time: %d, Call Path: %d", timestamp, cpId);
+		return String.format("%d %d", timestamp, cpId);
 	}
 
 }
