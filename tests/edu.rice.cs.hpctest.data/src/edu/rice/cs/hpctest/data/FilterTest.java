@@ -45,7 +45,7 @@ public class FilterTest
 	}
 
 	@Test
-	public void testFilter() {
+	public void testFilter() throws Exception {
 		final String []filterText = {"testBandwidth", "loop at *", "*: *"};
 		
 		FilterAttribute.Type []attributes = new FilterAttribute.Type[] {

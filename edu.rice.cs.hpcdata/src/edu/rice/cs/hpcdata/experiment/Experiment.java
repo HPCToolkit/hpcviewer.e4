@@ -25,8 +25,6 @@ import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.IUserData;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 //////////////////////////////////////////////////////////////////////////
@@ -38,16 +36,14 @@ import java.util.List;
  * An HPCView experiment and its data.
  *
  */
-
-
 public class Experiment extends BaseExperimentWithMetrics
 {
-	static public enum ExperimentOpenFlag {TREE_CCT_ONLY, TREE_ALL, TREE_MERGED};
+	public enum ExperimentOpenFlag {TREE_CCT_ONLY, TREE_ALL, TREE_MERGED};
 	
-	static final public String TITLE_TOP_DOWN_VIEW    = "Top-down view";
-	static final public String TITLE_BOTTOM_UP_VIEW   = "Bottom-up view";
-	static final public String TITLE_FLAT_VIEW 		  = "Flat view";
-	static final public String TITLE_DATACENTRIC_VIEW = "Datacentric view";
+	public static final String TITLE_TOP_DOWN_VIEW    = "Top-down view";
+	public static final String TITLE_BOTTOM_UP_VIEW   = "Bottom-up view";
+	public static final String TITLE_FLAT_VIEW 		  = "Flat view";
+	public static final String TITLE_DATACENTRIC_VIEW = "Datacentric view";
 	
 	/** 
 	 * List of raw metrics for thread level database.<br/>
@@ -62,30 +58,8 @@ public class Experiment extends BaseExperimentWithMetrics
 	 * Any flag about this experiment database.
 	 */
 	private ExperimentOpenFlag flag;
-	
-	private final List<HierarchicalMetric> rootMetrics = new ArrayList<>(0);
 
-	//////////////////////////////////////////////////////////////////////////
-	//	hierarchy of metrics												//
-	//////////////////////////////////////////////////////////////////////////
-
-	public void addRootMetric(HierarchicalMetric metric) {
-		rootMetrics.add(metric);
-	}
 	
-	
-	public int getRootMetricCount() {
-		return rootMetrics.size();
-	}
-	
-	public HierarchicalMetric getRootMetric(int index) {
-		return rootMetrics.get(index);
-	}
-	
-	public Iterator<HierarchicalMetric> getRootMetricIterator() {
-		return rootMetrics.iterator();
-	}
-
 	//////////////////////////////////////////////////////////////////////////
 	// Case for merged database
 	//////////////////////////////////////////////////////////////////////////
@@ -187,7 +161,6 @@ public class Experiment extends BaseExperimentWithMetrics
 	 */
 	private RootScope prepareFlatView(Scope cctRootScope) 
 	{
-		//final int RANDOM_NUMBER = 12345;
 		RootScope flatRootScope = new RootScope(this, 
 												Experiment.TITLE_FLAT_VIEW, 
 												RootScopeType.Flat);
@@ -209,7 +182,7 @@ public class Experiment extends BaseExperimentWithMetrics
 	public RootScope createFlatView(Scope callingContextViewRootScope, RootScope flatViewRootScope)
 	{
 		IScopeVisitor fv = getMajorVersion() == Constants.EXPERIMENT_DENSED_VERSION ?
-									new FlatViewScopeVisitor(this, (RootScope) flatViewRootScope) :
+									new FlatViewScopeVisitor(this, flatViewRootScope) :
 									new FlatViewScopeVisitor4(flatViewRootScope);
 
 		callingContextViewRootScope.dfsVisitScopeTree(fv);
@@ -264,9 +237,8 @@ public class Experiment extends BaseExperimentWithMetrics
 	 *  <li>Step 2: create call view (if enabled) and flat view
 	 *  <li>Step 3: finalize metrics for cct and flat view (callers view metric will be finalized dynamically)
 	 * </ol></p>
-	 * @param callerView : flag whether to compute caller view (if true) or not.
 	 */
-	private void postprocess(boolean callerView) {
+	private void postprocess() {
 		if (rootScope == null)
 			// case of corrupt file
 			throw new RuntimeException("The database is empty or corrupt");
@@ -363,11 +335,11 @@ public class Experiment extends BaseExperimentWithMetrics
 	 * 			rules on what to filter
 	 * @return int
 	 * 			number of filtered cct nodes (approximate) 
+	 * @throws Exception 
 	 */
-	public int filter(IFilterData filterData) 
+	public int filter(IFilterData filterData) throws Exception 
 	{	
-		Filter filter = new Filter();
-		int numFilteredNodes = filter.filterExperiment(this, filterData);
+		int numFilteredNodes = Filter.filterExperiment(this, filterData);
 
 		if (numFilteredNodes > 0) {
 			RootScope rootCCT = getRootScope(RootScopeType.CallingContextTree);
@@ -409,7 +381,7 @@ public class Experiment extends BaseExperimentWithMetrics
 
 	@Override
 	protected void open_finalize() {
-		postprocess(flag == ExperimentOpenFlag.TREE_ALL);		
+		postprocess();		
 	}
 
 	@SuppressWarnings("unchecked")

@@ -7,6 +7,7 @@ import java.util.List;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
@@ -219,5 +220,15 @@ public class TopDownPart extends AbstractTableView
 			}
 		}
 		return threadData;
+	}
+	
+
+
+	@Override
+	public void widgetDisposed(DisposeEvent e) {
+		super.dispose();
+		
+		items = null;
+		threadData.dispose();
 	}
 }
