@@ -356,6 +356,14 @@ public class Experiment extends BaseExperimentWithMetrics
 	}
 
 
+	/****
+	 * Filter cct nodes with a given set of filter rules
+	 * 
+	 * @param filterData
+	 * 			rules on what to filter
+	 * @return int
+	 * 			number of filtered cct nodes (approximate) 
+	 */
 	public int filter(IFilterData filterData) 
 	{	
 		Filter filter = new Filter();
