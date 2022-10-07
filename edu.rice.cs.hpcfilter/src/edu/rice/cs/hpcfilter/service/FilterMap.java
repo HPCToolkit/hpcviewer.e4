@@ -21,7 +21,13 @@ import edu.rice.cs.hpcdata.util.*;
 public class FilterMap extends AliasMap<String, FilterAttribute> 
 implements IFilterData
 {
-	static private final String FILE_NAME = "filter.map";
+	/***
+	 * Topic event constant to mark a new filter has been "updated" and
+	 * the existing root has to be filtered, and the table has to refreshed.
+	 */
+	public static final String FILTER_REFRESH_PROVIDER = "hpcfilter/update";
+	
+	private static final String FILE_NAME = "filter.map";
 	
 	public FilterMap() {
 		checkData();
@@ -85,6 +91,7 @@ implements IFilterData
 
 	@Override
 	public void initDefault() {
+		// unused
 	}
 	
 	/******
@@ -97,16 +104,6 @@ implements IFilterData
 		return data.entrySet().toArray();
 	}
 	
-	@Override
-	/*
-	 * (non-Javadoc)
-	 * @see edu.rice.cs.hpc.common.util.AliasMap#put(java.lang.Object, java.lang.Object)
-	 */
-	public void put(String filter, FilterAttribute state)
-	{
-		super.put(filter, state);
-		//save();
-	}
 
 	@Override
 	/*
@@ -149,7 +146,6 @@ implements IFilterData
 			if (toFilter.enable)
 			{
 				// convert glob into regular expression
-				// old: pattern.getKey().replace("*", ".*").replace("?", ".?");
 				final String key = Util.convertGlobToRegex(pattern.getKey());
 				if (element.matches(key)) {
 					return toFilter;
@@ -180,7 +176,6 @@ implements IFilterData
 		{
 			remove(oldKey);
 			put(newKey, attribute);
-			//save();
 			return true;
 		}
 		return false;
@@ -193,17 +188,15 @@ implements IFilterData
 	public boolean isFilterEnabled() 
 	{
 		boolean enabled = false;
-		if (data != null) {
-			if (data.size() > 0) {
-				Collection<FilterAttribute> coll = data.values();
-				Iterator<FilterAttribute> iterator = coll.iterator();
-				
-				// iterate through the list if there is at least one pattern enabled
-				while(iterator.hasNext() && !enabled) {
-					FilterAttribute att = iterator.next();
-					enabled = att.enable;
-				}				
-			}
+		if (data != null && !data.isEmpty()) {
+			Collection<FilterAttribute> coll = data.values();
+			Iterator<FilterAttribute> iterator = coll.iterator();
+			
+			// iterate through the list if there is at least one pattern enabled
+			while(iterator.hasNext() && !enabled) {
+				FilterAttribute att = iterator.next();
+				enabled = att.enable;
+			}				
 		}
 		
 		return enabled;

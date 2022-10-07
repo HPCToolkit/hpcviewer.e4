@@ -2,12 +2,14 @@ package edu.rice.cs.hpcfilter.cct;
 
 import java.util.Iterator;
 import java.util.Map.Entry;
+
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -38,7 +40,6 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 
 import edu.rice.cs.hpcdata.filter.FilterAttribute;
 import edu.rice.cs.hpcfilter.service.FilterMap;
-import edu.rice.cs.hpcfilter.service.FilterStateProvider;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.window.ToolTip;
@@ -58,9 +59,8 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 	private static final int INITIAL_SIZE_X = 450;
 	private static final int INITIAL_SIZE_Y = 500;
 	
-	private final FilterStateProvider filterService;
+	private final IEventBroker eventBroker;
 	
-	private Button btnEdit, btnDelete;
 	private CheckboxTableViewer checkboxTableViewer;
 	
 	private FilterMap filterMap;
@@ -68,15 +68,19 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 	
 	/**
 	 * Create the dialog.
+	 * 
 	 * @param parentShell
+	 * 			The parent of this dialog window
+	 * @param currentEventBroker
+	 * 			Event broker to broadcast messages if a filter has been updated.
 	 */
-	public FilterPropertyDialog(Shell parentShell, FilterStateProvider filterService) {
+	public FilterPropertyDialog(Shell parentShell, IEventBroker currentEventBroker) {
 		super(parentShell);
 
 		setShellStyle(SWT.TITLE | SWT.MODELESS | SWT.RESIZE);
 
 		filterMap = new FilterMap();
-		this.filterService = filterService;
+		this.eventBroker = currentEventBroker;
 	}
 
 	
@@ -135,43 +139,34 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 		Button btnAdd = new Button(grpActions, SWT.NONE);
 		btnAdd.setToolTipText("Add a new pattern filter");
 		btnAdd.setText("Add");
-		btnAdd.addSelectionListener(new SelectionListener() {
+		btnAdd.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				add();
 			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
 		
-		btnEdit = new Button(grpActions, SWT.NONE);
+		var btnEdit = new Button(grpActions, SWT.NONE);
 		btnEdit.setText("Edit");
 		btnEdit.setEnabled(false);
-		btnEdit.addSelectionListener(new SelectionListener() {
+		btnEdit.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				edit();
 			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
 		
-		btnDelete = new Button(grpActions, SWT.NONE);
+		var btnDelete = new Button(grpActions, SWT.NONE);
 		btnDelete.setText("Delete");
 		btnDelete.setEnabled(false);
-		btnDelete.addSelectionListener(new SelectionListener() {
+		btnDelete.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				delete();
 			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
 		
 		Button []buttons = new Button[] {btnEdit, btnDelete};
@@ -256,7 +251,7 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 	private void apply() {
 		// 1. check if there's any change compared to the original filter
 		FilterMap newMap = FilterMap.getInstance();
-		newMap.iterator(); // TODO: forcing to load data
+		newMap.iterator(); // forcing to load data
 		
 		// check if they have the same size
 		// if they do, check the content
@@ -265,9 +260,7 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 		// 2. save the filter, and broadcast it
 		if (!same) {
 			filterMap.save();
-			if (filterService != null) {
-				filterService.broadcast(filterMap);
-			}
+			eventBroker.post(FilterMap.FILTER_REFRESH_PROVIDER, filterMap);
 		}
 	}
 	
@@ -358,7 +351,6 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 			
 			if (dialog.open() == Window.OK)
 			{
-				//final FilterMap filterMap = FilterMap.getInstance();
 				FilterAttribute attribute = dialog.getAttribute();
 				if (filterMap.update(item.getKey(), dialog.getValue(), attribute))
 				{
@@ -444,7 +436,7 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 	 * Label for pattern column
 	 *
 	 */
-	static private class PatternLabelProvider extends CellLabelProvider
+	private static class PatternLabelProvider extends CellLabelProvider
 	{
 		@Override
 		public void update(ViewerCell cell) {
@@ -455,12 +447,12 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 		
 		@Override
 		public String getToolTipText(Object element) {
-			if (element != null && element instanceof Entry<?, ?>) {
+			if (element instanceof Entry<?, ?>) {
 				@SuppressWarnings("unchecked")
 				Entry<String, FilterAttribute> item = (Entry<String, FilterAttribute>) element;
 				FilterAttribute attr = item.getValue();
 				String enable = attr.enable ? " enabled " : " disabled ";
-				StringBuffer sb = new StringBuffer();
+				StringBuilder sb = new StringBuilder();
 				sb.append("Filter '");
 				sb.append(item.getKey());
 				sb.append("' is ");
@@ -479,7 +471,7 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 	 * a label provider class for the filter table
 	 *
 	 *******************************************************************/
-	static private class TypeLabelProvider extends CellLabelProvider
+	private static class TypeLabelProvider extends CellLabelProvider
 	{
 		@Override
 		public void update(ViewerCell cell) {
@@ -490,12 +482,11 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 		
 		@Override
 		public String getToolTipText(Object element) {
-			if (element != null && element instanceof Entry<?, ?>) {
+			if (element instanceof Entry<?, ?>) {
 				@SuppressWarnings("unchecked")
 				final Entry<String, FilterAttribute> item = (Entry<String, FilterAttribute>) element;
 				final FilterAttribute attr = item.getValue();
-				final String text = attr.getDescription();
-				return text;
+				return attr.getDescription();
 			}
 			return element.toString();
 		}
@@ -507,7 +498,7 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 	 * class to fill the value of a check box
 	 *
 	 *******************************************************************/
-	static private class CheckStateProvider implements ICheckStateProvider
+	private static class CheckStateProvider implements ICheckStateProvider
 	{
 		
 		@Override
@@ -534,7 +525,7 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 	 * class for a row comparison  
 	 *
 	 ********************************************************************/
-	static private class PatternViewerComparator extends ViewerComparator
+	private static class PatternViewerComparator extends ViewerComparator
 	{
     	@SuppressWarnings("unchecked")
 		@Override
@@ -553,7 +544,7 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 	 ********************************************************************/
 	private static class SelectionChangedListener implements ISelectionChangedListener
 	{
-		final private Button []btnSelections;
+		private final Button []btnSelections;
 		
 		public SelectionChangedListener(Button []buttons) {
 			btnSelections = buttons;

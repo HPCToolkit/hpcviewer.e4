@@ -1,5 +1,7 @@
 package edu.rice.cs.hpcdata.experiment;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,9 +12,6 @@ import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.experiment.scope.visitors.FilterScopeVisitor;
-import edu.rice.cs.hpcdata.experiment.scope.visitors.TraceScopeVisitor;
-import edu.rice.cs.hpcdata.filter.IFilterData;
 import edu.rice.cs.hpcdata.tld.ThreadDataCollectionFactory;
 import edu.rice.cs.hpcdata.trace.BaseTraceAttribute;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
@@ -28,9 +27,12 @@ import edu.rice.cs.hpcdata.util.IUserData;
  */
 public abstract class BaseExperiment implements IExperiment 
 {
+	public static final String ROOT_CHANGE = "experiment.root.change";
+	
 	/** The experiment's configuration. */
 	protected ExperimentConfiguration configuration;
 
+	private final PropertyChangeSupport changeSupport;
 	protected RootScope rootScope;
 	
 	protected RootScope datacentricRootScope;
@@ -41,20 +43,34 @@ public abstract class BaseExperiment implements IExperiment
 
 	protected IDatabaseRepresentation databaseRepresentation;
 	
-	private int filterNumScopes = 0;
-	private int filterStatus;
 	private IdTupleType idTupleType;
 	private IThreadDataCollection threadData;
 	
 	private BaseTraceAttribute traceAttribute = new TraceAttribute();
 
+	
+	protected BaseExperiment() {
+		this.changeSupport = new PropertyChangeSupport(this);
+	}
+	
+	
+	public void addPropertyChangeListener(PropertyChangeListener listener) {
+		changeSupport.addPropertyChangeListener(listener);
+	}
+	
+	public void removePropertyChangeListener(PropertyChangeListener listener) {
+		changeSupport.removePropertyChangeListener(listener);
+	}
+	
 	/***
 	 * the root scope of the experiment
 	 * 
 	 * @param the root scope
 	 */
-	public void setRootScope(Scope rootScope) {
-		this.rootScope = (RootScope) rootScope;
+	public void setRootScope(Scope newRootScope) {
+		var oldRootScope = rootScope;
+		this.rootScope   = (RootScope) newRootScope;
+		changeSupport.firePropertyChange(ROOT_CHANGE, oldRootScope, rootScope);
 	}
 
 	
@@ -373,79 +389,6 @@ public abstract class BaseExperiment implements IExperiment
 		databaseRepresentation = null;
 	}
 
-
-	/*************************************************************************
-	 * Filter the cct 
-	 * <p>caller needs to call post-process to ensure the callers tree and flat
-	 * tree are also filtered </p>
-	 * @param filter
-	 *************************************************************************/
-	@Override
-	public int filter(IFilterData filter)
-	{
-		if (rootScope == null)
-			// case of corrupt database
-			return 0;
-		
-		final RootScope rootCCT = getRootScope(RootScopeType.CallingContextTree);
-
-		if (getTraceDataVersion() > 0) {
-			
-			// needs to gather info about cct id and its depth
-			// this is needed for traces
-			TraceScopeVisitor visitor = new TraceScopeVisitor();
-			rootCCT.dfsVisitScopeTree(visitor);
-			
-			setMaxDepth(visitor.getMaxDepth());
-			setScopeMap(visitor.getCallPath());
-		}
-		// duplicate and filter the cct
-		FilterScopeVisitor visitor = new FilterScopeVisitor(rootCCT, filter);
-		rootCCT.dfsVisitFilterScopeTree(visitor);
-		
-		var listToRemove = visitor.getScopeToRemove();
-		if (listToRemove != null && !listToRemove.isEmpty()) {
-			filterNumScopes = listToRemove.size();
-			listToRemove.stream().forEach( scope -> {
-				scope.getParentScope().remove(scope);
-				scope.dispose(); 
-			});
-		}
-		var listTreeToRemove = visitor.getTreeToRemove();
-		if (listTreeToRemove != null && !listTreeToRemove.isEmpty()) {
-			filterNumScopes += listTreeToRemove.size();
-			for(var tree: listTreeToRemove) {
-				tree.getParentScope().remove(tree);
-				tree.disposeSelfAndChildren();
-			}
-		}
-
-		// finalize the filter: for hpcviewer, we need to prepare to create subtrees:
-		// bottom-up, flat and optionally data-centric tree
-		
-		if (rootCCT.getType() == RootScopeType.CallingContextTree) {
-			filter_finalize(rootCCT, filter);
-		}
-
-		filterStatus = visitor.getFilterStatus();
-		setMaxDepth(visitor.getMaxDepth());
-		
-		return filterNumScopes;
-	}
-
-	/****
-	 * return the number of matched scopes from the filter.<br/>
-	 * Note that this is NOT the number of removed scopes, but the number of
-	 * scopes that match the filter pattern.
-	 * @return int
-	 */
-	public int getNumberOfFilteredScopes() {
-		return filterNumScopes;
-	}
-	
-	public int getFilterStatus() {
-		return filterStatus;
-	}
 	
 	public void setMinMaxCCTID(int min, int max)
 	{
@@ -482,16 +425,6 @@ public abstract class BaseExperiment implements IExperiment
 	public BaseTraceAttribute getTraceAttribute() {
 		return traceAttribute;
 	}
-
-
-	/************************************************************************
-	 * In case the experiment has a CCT, continue to create callers tree and
-	 * flat tree for the finalization.
-	 * 
-	 * @param rootCCT
-	 * @param filter
-	 ************************************************************************/
-	protected abstract void filter_finalize(RootScope rootMain, IFilterData filter);
 
 	protected abstract void open_finalize();
 }

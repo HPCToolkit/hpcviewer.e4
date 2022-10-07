@@ -19,6 +19,7 @@ import edu.rice.cs.hpcdata.experiment.metric.*;
 import edu.rice.cs.hpcdata.experiment.scope.*;
 import edu.rice.cs.hpcdata.experiment.scope.filters.*;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.*;
+import edu.rice.cs.hpcdata.filter.Filter;
 import edu.rice.cs.hpcdata.filter.IFilterData;
 import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.IUserData;
@@ -355,34 +356,47 @@ public class Experiment extends BaseExperimentWithMetrics
 	}
 
 
-	@Override
-	protected void filter_finalize(RootScope rootCCT, IFilterData filter) 
-	{
-		//------------------------------------------------------------------------------------------
-		// removing the original root for caller tree and flat tree
-		//------------------------------------------------------------------------------------------
-		Scope root = getRootScope();
-		root.getChildren().removeIf(c -> ((RootScope)c).getType() != RootScopeType.CallingContextTree);
+	public int filter(IFilterData filterData) 
+	{	
+		Filter filter = new Filter();
+		int numFilteredNodes = filter.filterExperiment(this, filterData);
+
+		if (numFilteredNodes > 0) {
+			RootScope rootCCT = getRootScope(RootScopeType.CallingContextTree);
+			
+			//------------------------------------------------------------------------------------------
+			// removing the original root for caller tree and flat tree
+			//------------------------------------------------------------------------------------------
+			Scope root = getRootScope();
+			root.getChildren().removeIf(c -> ((RootScope)c).getType() != RootScopeType.CallingContextTree);
+			
+			//------------------------------------------------------------------------------------------
+			// finalize the filter: for hpcviewer, we need to prepare to create subtrees:
+			// bottom-up, flat and optionally data-centric tree
+			//------------------------------------------------------------------------------------------
+
+			//------------------------------------------------------------------------------------------
+			// filtering callers tree (bottom-up):
+			// check if the callers tree has been created or not. If it's been created,
+			// we need to remove it and create a new filter.
+			// otherwise, we do nothing, and let the viewer to create dynamically
+			//------------------------------------------------------------------------------------------
+			prepareCallersView(rootCCT);
+			
+			//------------------------------------------------------------------------------------------
+			// creating the flat tree from the filtered cct tree
+			//------------------------------------------------------------------------------------------
+			// While creating the flat tree, we attribute the cost for procedure scopes
+			// One the tree has been created, we compute the inclusive cost for other scopes
+			prepareFlatView(rootCCT);
+			
+			//----------------------------------------------------------------------------------------------
+			// Datacentric View
+			//----------------------------------------------------------------------------------------------
+			prepareDatacentricView();
+		}
 		
-		//------------------------------------------------------------------------------------------
-		// filtering callers tree (bottom-up):
-		// check if the callers tree has been created or not. If it's been created,
-		// we need to remove it and create a new filter.
-		// otherwise, we do nothing, and let the viewer to create dynamically
-		//------------------------------------------------------------------------------------------
-		prepareCallersView(rootCCT);
-		
-		//------------------------------------------------------------------------------------------
-		// creating the flat tree from the filtered cct tree
-		//------------------------------------------------------------------------------------------
-		// While creating the flat tree, we attribute the cost for procedure scopes
-		// One the tree has been created, we compute the inclusive cost for other scopes
-		prepareFlatView(rootCCT);
-		
-		//----------------------------------------------------------------------------------------------
-		// Datacentric View
-		//----------------------------------------------------------------------------------------------
-		prepareDatacentricView();
+		return numFilteredNodes;
 	}
 
 	@Override

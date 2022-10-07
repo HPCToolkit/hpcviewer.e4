@@ -7,7 +7,6 @@ import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.filter.IFilterData;
 import edu.rice.cs.hpcdata.trace.BaseTraceAttribute;
 import edu.rice.cs.hpcdata.util.ICallPath;
 
@@ -101,16 +100,6 @@ public interface IExperiment {
 	public String getDirectory();
 	
 	
-	/***
-	 * Filter the current cct with a given filter set
-	 * @param filter
-	 * 			a filter set 
-	 * @return
-	 * 			the number of filtered nodes
-	 */
-	public int filter(IFilterData filter);
-
-
 	public void setTraceAttribute(BaseTraceAttribute attribute);
 	
 
