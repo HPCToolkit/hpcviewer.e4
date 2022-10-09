@@ -59,7 +59,6 @@ public class FilterScopeVisitor implements IScopeVisitor
 	      For inclusive filter, we should stop going deeper      *****/
 	private boolean needToContinue;
 
-	private int numScopeFiltered = 0;
 	private int filterStatus     = STATUS_INIT;
 	private int currentDepth;
 	private int maxDepth;
@@ -117,16 +116,6 @@ public class FilterScopeVisitor implements IScopeVisitor
 	public boolean needToContinue()
 	{
 		return needToContinue;
-	}
-	
-	
-	/****
-	 * Retrieve the minimum omitted scopes due to filtering
-	 * @return int
-	 */
-	public int numberOfFilteredScopes() 
-	{
-		return numScopeFiltered;
 	}
 	
 	
@@ -191,25 +180,9 @@ public class FilterScopeVisitor implements IScopeVisitor
 			}
 			filterStatus   = filterStatus != STATUS_FAKE_PROCEDURE ? STATUS_OK : STATUS_FAKE_PROCEDURE;
 			needToContinue = (filterAttribute.filterType == FilterAttribute.Type.Self_Only);
-			numScopeFiltered++;
-
 			if (filterAttribute.filterType == FilterAttribute.Type.Descendants_Only &&
 				scope.getSubscopeCount() > 0)
 			{
-				//-------------------------------------------------------------------
-				// merge with the metrics of the children
-				//-------------------------------------------------------------------
-				if (metrics != null)
-				{
-					// glue the metrics of all the children to the scope
-					for(var child: scope.getChildren())
-					{
-						if (!(child instanceof LineScope))
-						{
-							mergeMetrics(scope, child, false);
-						}
-					}
-				}
 				//-------------------------------------------------------------------
 				// Filtering only the children, not the scope itself.
 				// remove all the children
@@ -220,6 +193,11 @@ public class FilterScopeVisitor implements IScopeVisitor
 				while (childIterator.hasNext())
 				{
 					var child = childIterator.next();
+					
+					// merge with the metrics of the children
+					if (metrics != null)
+						mergeMetrics(scope, child, false);
+
 					removeNode(childIterator, child, filterAttribute.filterType);
 				}
 			} else if(filterAttribute.filterType == FilterAttribute.Type.Self_And_Descendants ||
@@ -293,11 +271,12 @@ public class FilterScopeVisitor implements IScopeVisitor
 		if (experiment.getTraceDataVersion() > 0)
 			propagateTraceID(parent, child, filterType);
 
-		if (filterType == FilterAttribute.Type.Self_Only)
+		if (filterType == FilterAttribute.Type.Self_Only) {
 			// remove the child node
 			listScopesToRemove.add(child);
-		else
+		} else {
 			listTreeToRemove.add(child);
+		}
 		
 		return parent;
 	}
@@ -319,8 +298,7 @@ public class FilterScopeVisitor implements IScopeVisitor
 		
 		child.dfsVisitScopeTree(cptv);
 	}
-	
-	
+		
 	
 	/*****
 	 * Add the grand children to the parent
@@ -339,6 +317,7 @@ public class FilterScopeVisitor implements IScopeVisitor
 			}
 		}
 	}
+	
 	
 	/******
 	 * Merging metrics
