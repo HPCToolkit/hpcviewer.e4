@@ -25,6 +25,7 @@ public class BaseTraceAttribute
 	
 	
 	public void dispose() {
-		mapCpidToCallpath.dispose();
+		if (mapCpidToCallpath != null)
+			mapCpidToCallpath.dispose();
 	}
 }
