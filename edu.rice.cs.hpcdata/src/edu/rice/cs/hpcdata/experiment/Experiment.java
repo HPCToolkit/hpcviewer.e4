@@ -195,6 +195,7 @@ public class Experiment extends BaseExperimentWithMetrics
 	 ****/
 	private void prepareDatacentricView()
 	{
+		var datacentricRootScope = getRootScope(RootScopeType.DatacentricTree);
 		if (datacentricRootScope != null) {
 
 			// include the datacentric root into a child of "invisible root"

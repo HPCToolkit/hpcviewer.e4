@@ -655,8 +655,6 @@ public class BaseExperimentBuilder extends Builder
 					// push the new scope to the stack
 					scopeStack.push(datacentricRoot);
 					rootStack.push(datacentricRoot);
-
-					experiment.setDatacentricRootScope(datacentricRoot);
 					return;
 				}
 			}

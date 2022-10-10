@@ -1,7 +1,5 @@
 package edu.rice.cs.hpcdata.experiment;
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,15 +25,10 @@ import edu.rice.cs.hpcdata.util.IUserData;
  */
 public abstract class BaseExperiment implements IExperiment 
 {
-	public static final String ROOT_CHANGE = "experiment.root.change";
-	
 	/** The experiment's configuration. */
 	protected ExperimentConfiguration configuration;
 
-	private final PropertyChangeSupport changeSupport;
 	protected RootScope rootScope;
-	
-	protected RootScope datacentricRootScope;
 	
 	/** version of the database **/
 	private short versionMajor;
@@ -49,28 +42,13 @@ public abstract class BaseExperiment implements IExperiment
 	private BaseTraceAttribute traceAttribute = new TraceAttribute();
 
 	
-	protected BaseExperiment() {
-		this.changeSupport = new PropertyChangeSupport(this);
-	}
-	
-	
-	public void addPropertyChangeListener(PropertyChangeListener listener) {
-		changeSupport.addPropertyChangeListener(listener);
-	}
-	
-	public void removePropertyChangeListener(PropertyChangeListener listener) {
-		changeSupport.removePropertyChangeListener(listener);
-	}
-	
 	/***
 	 * the root scope of the experiment
 	 * 
 	 * @param the root scope
 	 */
 	public void setRootScope(Scope newRootScope) {
-		var oldRootScope = rootScope;
 		this.rootScope   = (RootScope) newRootScope;
-		changeSupport.firePropertyChange(ROOT_CHANGE, oldRootScope, rootScope);
 	}
 
 	
@@ -82,16 +60,6 @@ public abstract class BaseExperiment implements IExperiment
 	@Override
 	public Scope getRootScope() {
 		return rootScope;
-	}
-
-	
-	public void setDatacentricRootScope(RootScope rootScope) {
-		this.datacentricRootScope = rootScope;
-	}
-	
-	
-	public RootScope getDatacentricRootScope() {
-		return datacentricRootScope;
 	}
 
 	public String getDirectory() {
@@ -382,9 +350,6 @@ public abstract class BaseExperiment implements IExperiment
 	{
 		if (rootScope != null)
 			rootScope.disposeSelfAndChildren();
-		
-		if (datacentricRootScope != null)
-			datacentricRootScope.disposeSelfAndChildren();
 		
 		databaseRepresentation = null;
 	}

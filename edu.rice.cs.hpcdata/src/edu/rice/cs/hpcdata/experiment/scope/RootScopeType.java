@@ -1,29 +1,14 @@
 package edu.rice.cs.hpcdata.experiment.scope;
 
-/*public enum ScopeVisitType {
-	PreVisit, PostVisit
-}*/
-
-/*public class ScopeVisitType {
-	
-	public final static int PreVisit = 0;
-	public final static int PostVisit = 1;
-	
-	public int value;
-	
-	public ScopeVisitType(int v) { value = v; };
-	public boolean isPreVisit() { return value == PreVisit; }
-	public boolean isPostVisit() { return value == PostVisit; }
-}*/
 
 public class RootScopeType 
 {
-	public final static RootScopeType Flat = new RootScopeType("Flat");
-	public final static RootScopeType CallingContextTree = new RootScopeType("CallingContextTree");
-	public final static RootScopeType CallerTree = new RootScopeType("CallerTree");
-	public final static RootScopeType Invisible = new RootScopeType("Invisible");
-	public final static RootScopeType DatacentricTree = new RootScopeType("Datacentric");
-	public final static RootScopeType Unknown         = new RootScopeType("Unknown");
+	public static final RootScopeType Invisible = new RootScopeType("Invisible");
+	public static final RootScopeType Flat = new RootScopeType("Flat");
+	public static final RootScopeType CallingContextTree = new RootScopeType("CallingContextTree");
+	public static final RootScopeType CallerTree = new RootScopeType("CallerTree");
+	public static final RootScopeType DatacentricTree = new RootScopeType("Datacentric");
+	public static final RootScopeType Unknown         = new RootScopeType("Unknown");
 	
 	public String toString() { return value; }
 	
