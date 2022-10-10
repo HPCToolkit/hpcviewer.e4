@@ -48,6 +48,10 @@ public class CallPath implements ICallPath
 	}
 	
 
+	@Override
+	public void dispose() {
+		mapToInfo.clear();
+	}
 
 	@Override
 	public ICallPathInfo getCallPathInfo(int id) {

@@ -106,4 +106,10 @@ public interface ICallPath
 	 * 			The depth of the ancestor
 	 */
 	ICallPathInfo replaceCallPath(int id, Scope scope, int depth);
+
+
+	/*****
+	 * Free allocated resources
+	 */
+	void dispose();
 }

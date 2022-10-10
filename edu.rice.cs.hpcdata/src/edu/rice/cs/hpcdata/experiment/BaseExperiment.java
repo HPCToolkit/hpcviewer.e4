@@ -115,6 +115,9 @@ public abstract class BaseExperiment implements IExperiment
 	 * 
 	 */
 	public void resetThreadData() {
+		if (threadData != null) {
+			threadData.dispose();
+		}
 		threadData = null;
 	}
 	
@@ -348,8 +351,19 @@ public abstract class BaseExperiment implements IExperiment
 	@Override
 	public void dispose()
 	{
-		if (rootScope != null)
+		if (rootScope != null) {
 			rootScope.disposeSelfAndChildren();
+			rootScope = null;
+		}
+		
+		if (threadData != null) {
+			threadData.dispose();
+			threadData = null;
+		}
+		if (traceAttribute != null) {
+			traceAttribute.dispose();
+			traceAttribute = null;
+		}
 		
 		databaseRepresentation = null;
 	}

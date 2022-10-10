@@ -159,6 +159,9 @@ public class Filter
 		}
 
 		experiment.setMaxDepth(visitor.getMaxDepth());
+
+		// clean-up
+		visitor.dispose();
 		
 		return filterNumScopes;
 	}

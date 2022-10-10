@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.collections.impl.list.mutable.FastList;
+import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
@@ -51,15 +52,20 @@ public class FilterScopeVisitor implements IScopeVisitor
 	private final IExperiment experiment;
 	private final ICallPath   callPathTraces;
 	
-	private List<BaseMetric> metrics = null;
-	private List<Scope> listScopesToRemove;
-	private List<Scope> listTreeToRemove;
+	private final List<BaseMetric> metrics;
+	private final List<Scope> listScopesToRemove;
+	private final List<Scope> listTreeToRemove;
+	
+	/** map from a filtered scope to another scope. 
+	 *  This map is useful if we want to associate a child
+	 *  with a filtered parent. **/
+	private final IntObjectHashMap<Scope> mapReplacement;
 	
 	/**** flag to allow the dfs to continue to go deeper or not.  
 	      For inclusive filter, we should stop going deeper      *****/
 	private boolean needToContinue;
 
-	private int filterStatus     = STATUS_INIT;
+	private int filterStatus = STATUS_INIT;
 	private int currentDepth;
 	private int maxDepth;
 	
@@ -81,6 +87,7 @@ public class FilterScopeVisitor implements IScopeVisitor
 		
 		listScopesToRemove = FastList.newList();
 		listTreeToRemove   = FastList.newList();
+		mapReplacement = new IntObjectHashMap<>();
 		
 		experiment = rootOriginalCCT.getExperiment();
 		if (experiment instanceof Experiment)
@@ -90,20 +97,37 @@ public class FilterScopeVisitor implements IScopeVisitor
 			callPathTraces = exp.getScopeMap();
 		} else {
 			callPathTraces = null;
+			metrics = null;
 		}
+	}
+	
+	
+	/****
+	 * Optionally, the caller can call {@code dispose} to free up
+	 * allocated resources. Sometimes GC is unable to free them.
+	 */
+	public void dispose() {
+		mapReplacement.clear();
+		listScopesToRemove.clear();
+		listTreeToRemove.clear();
 	}
 	
 	
 	/*****
 	 * List of scopes to be removed.
 	 * 
-	 * @return
+	 * @return {@code List} of scopes
 	 */
 	public List<Scope> getScopeToRemove() {
 		return listScopesToRemove;
 	}
 	
 	
+	/****
+	 * Get the list of sub trees to be removed
+	 * 
+	 * @return {@code List} of scopes
+	 */
 	public List<Scope> getTreeToRemove() {
 		return listTreeToRemove;
 	}
@@ -243,12 +267,22 @@ public class FilterScopeVisitor implements IScopeVisitor
 		// remove its children and glue it the parent
 		if (filterType == FilterAttribute.Type.Self_Only)
 		{
-			addGrandChildren(childToRemove.getParentScope(), childToRemove);
+			addGrandChildren(getAncestor(childToRemove), childToRemove);
 		}
 		// skip to current scope
 		removeNode(iterator, childToRemove, filterType);
 	}
+
 	
+	private Scope getAncestor(Scope scope) {
+		Scope ancestor = scope.getParentScope();
+		Scope replacement = mapReplacement.get(ancestor.getCpid());
+		if (replacement != null) {
+			ancestor = replacement;
+		}
+		mapReplacement.put(scope.getCpid(), ancestor);
+		return ancestor;
+	}
 
 	/****
 	 * Remove a child node from the parent, and propagate the trace ID to the parent
@@ -265,11 +299,11 @@ public class FilterScopeVisitor implements IScopeVisitor
 	 * @see FilterAttribute.Type
 	 */
 	private Scope removeNode(Iterator<Scope> iterator, Scope child, FilterAttribute.Type filterType) {
-		Scope parent = child.getParentScope();
+		Scope ancestor = getAncestor(child);			
 
 		// move the trace call-path id (if exist) to the parent
 		if (experiment.getTraceDataVersion() > 0)
-			propagateTraceID(parent, child, filterType);
+			propagateTraceID(ancestor, child, filterType);
 
 		if (filterType == FilterAttribute.Type.Self_Only) {
 			// remove the child node
@@ -278,14 +312,22 @@ public class FilterScopeVisitor implements IScopeVisitor
 			listTreeToRemove.add(child);
 		}
 		
-		return parent;
+		return ancestor;
 	}
 	
 	
 	private void propagateTraceID(Scope parent, Scope child, FilterAttribute.Type filterType) {
 		if (filterType == FilterAttribute.Type.Self_Only) {
 			int depth = CallPath.getDepth(parent);
+
+			// replace the current trace id with the ancestor (or parent)
 			callPathTraces.replaceCallPath(child.getCpid(), parent, depth);
+			
+			// replace the children trace id with the ancestor (or parent), 
+			// only if they are not trace scope
+			child.getChildren().stream()
+							   .filter(scope -> !CallPath.isTraceScope(scope))
+							   .forEach(scope -> callPathTraces.replaceCallPath(scope.getCpid(), parent, depth));
 			return;
 		}
 		

@@ -22,4 +22,9 @@ public class BaseTraceAttribute
 		dbTimeMin = Integer.MAX_VALUE;
 		dbUnitTime   = PER_NANO_SECOND;
 	}
+	
+	
+	public void dispose() {
+		mapCpidToCallpath.dispose();
+	}
 }
