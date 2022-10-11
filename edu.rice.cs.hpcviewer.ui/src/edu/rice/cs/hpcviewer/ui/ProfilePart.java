@@ -9,6 +9,7 @@ import javax.annotation.PostConstruct;
 import org.eclipse.swt.widgets.Composite;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.PreDestroy;
 
@@ -37,7 +38,7 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
-import edu.rice.cs.hpcfilter.service.FilterStateProvider;
+import edu.rice.cs.hpcfilter.service.FilterMap;
 import edu.rice.cs.hpcmetric.MetricFilterInput;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 import edu.rice.cs.hpcviewer.ui.base.IProfilePart;
@@ -84,12 +85,10 @@ public class ProfilePart implements IProfilePart, EventHandler
 	private List<AbstractView> views;
 	private MetricView metricView;
 	
-	private CTabFolder tabFolderTop, tabFolderBottom;
+	private CTabFolder tabFolderTop;
+	private CTabFolder tabFolderBottom;
 
 	
-	@Inject
-	public ProfilePart() {
-	}
 	
 	@PostConstruct
 	public void postConstruct(Composite parent, EMenuService menuService) {
@@ -102,7 +101,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 		tabFolderTop      = new CTabFolder(sashForm, SWT.BORDER);
 		tabFolderBottom   = new CTabFolder(sashForm, SWT.BORDER);
 		
-		sashForm.setWeights(new int[] {1000, 1700});
+		sashForm.setWeights(1000, 1700);
 
 		tabFolderBottom.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -203,9 +202,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 				// we need to store the instance
 				
 				metricView =  (MetricView) viewer;
-				metricView.addDisposeListener((event) -> {
-					metricView = null;
-				});
+				metricView.addDisposeListener(event -> metricView = null);
 			} else {
 				// for metric properties from thread view, we need to show as well the title of the thread view
 				// this is important to distinguish with other metric properties
@@ -217,12 +214,15 @@ public class ProfilePart implements IProfilePart, EventHandler
 		} else {
 			viewer = new Editor(tabFolderTop, SWT.NONE);
 		}
-		viewer.setInput(input);
 		
-		// need to select the input to refresh the viewer
-		// otherwise it will display empty item
-		
-		tabFolderTop.setSelection(viewer);
+		if (viewer != null) {
+			viewer.setInput(input);
+			
+			// need to select the input to refresh the viewer
+			// otherwise it will display empty item
+			
+			tabFolderTop.setSelection(viewer);
+		}
 		return viewer;
 	}
 	
@@ -308,11 +308,11 @@ public class ProfilePart implements IProfilePart, EventHandler
 			});
 		}
 	}
-	
-	
+		
 		
 	@PreDestroy
 	public void preDestroy() {
+		eventBroker.unsubscribe(this);
 	}
 	
 	
@@ -368,24 +368,29 @@ public class ProfilePart implements IProfilePart, EventHandler
 			} else if (root.getType() == RootScopeType.DatacentricTree) {				
 				view = new Datacentric(tabFolderBottom, SWT.NONE);
 			} else {
-				System.err.println("Not supported root: " + root.getType());
+				root.getType();
+				LoggerFactory.getLogger(getClass()).error("Not supported root: {}", root.getType());
 				break;
 			}
 			addView(view, input, active);
 			active = false; // only the first view will be activated first
 		}
 		// subscribe to filter events
-		eventBroker.subscribe(FilterStateProvider.FILTER_REFRESH_PROVIDER, this);
+		eventBroker.subscribe(FilterMap.FILTER_REFRESH_PROVIDER, this);
 	}
 	
 
 	@Override
 	public void handleEvent(Event event) {
-		if (event.getTopic().equals(FilterStateProvider.FILTER_REFRESH_PROVIDER)) {
+		if (event.getTopic().equals(FilterMap.FILTER_REFRESH_PROVIDER)) {
 			// filter the current database
 			// warning: the filtering is not scalable. We should do this in the 
 			//          background job
-			FilterStateProvider.filterExperiment(experiment);
+			try {
+				experiment.filter(FilterMap.getInstance());
+			} catch (Exception e) {
+				throw new IllegalStateException(e);
+			}
 			
 			// announce to all views to refresh the content.
 			// this may take time, and should be done asynchronously
@@ -401,11 +406,11 @@ public class ProfilePart implements IProfilePart, EventHandler
 	 * Thread to render a view using background task
 	 *
 	 **********************************************/
-	static private class RunViewCreation implements Runnable 
+	private static class RunViewCreation implements Runnable 
 	{
-		final private AbstractView view;
-		final private Composite parent;
-		final private Object input;
+		private final AbstractView view;
+		private final Composite parent;
+		private final Object input;
 		
 		RunViewCreation(AbstractView view, Composite parent, Object input) {
 			this.view   = view;

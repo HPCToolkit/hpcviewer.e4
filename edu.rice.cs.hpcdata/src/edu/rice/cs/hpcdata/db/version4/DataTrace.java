@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
-import java.util.Random;
+
 
 import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.LargeByteBuffer;
@@ -168,7 +168,7 @@ public class DataTrace extends DataCommon
 	 */
 	public int getNumberOfRanks()
 	{
-		return (int) traceCtxs.length;
+		return traceCtxs.length;
 	}
 	
 	
@@ -204,19 +204,17 @@ public class DataTrace extends DataCommon
 	 */
 	public void printInfo( PrintStream out)
 	{
-
-		Random r = new Random();
 		int nranks = getNumberOfRanks();
 		
-		for(int i=0; i< 10; i++)
+		for(int rank=0; rank< nranks; rank++)
 		{
-			int rank = 1 + (nranks>1 ? r.nextInt(nranks-1) : 0);
 			int numsamples = getNumberOfSamples(rank);
-			int sample = r.nextInt(numsamples);
-			try {
-				out.format("%d:  %s%n", rank, getSampledData(rank, sample));
-			} catch (IOException e) {
-				// skip the exception
+			for(int index=0; index<numsamples; index++) {
+				try {
+					out.format("%d:  %s%n", rank, getSampledData(rank, index));
+				} catch (IOException e) {
+					throw new IllegalStateException(e);
+				}
 			}
 		}
 	}

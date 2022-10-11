@@ -683,11 +683,11 @@ public class DatabaseCollection
 											final EPartService partService,
 											final Shell shell, 
 											final String xmlFileOrDirectory) {
-		final IExperiment experiment;
+		final Experiment experiment;
 		if (this.statusReporter == null)
 			this.statusReporter = LoggerFactory.getLogger(getClass());
 		try {
-			experiment = openDatabase(shell, xmlFileOrDirectory);
+			experiment = (Experiment) openDatabase(shell, xmlFileOrDirectory);
 			if (experiment == null) {
 				return;
 			}

@@ -22,16 +22,13 @@ public class BottomUpPart extends AbstractTableView
 	}
 
 	@Override
-	protected void beginToolbar(CoolBar coolbar, ToolBar toolbar) {
-	}
+	protected void beginToolbar(CoolBar coolbar, ToolBar toolbar) { /* unused */ }
 
 	@Override
-	protected void endToolbar(CoolBar coolbar, ToolBar toolbar) {
-	}
+	protected void endToolbar(CoolBar coolbar, ToolBar toolbar) { /* unused */ }
 
 	@Override
-	protected void updateStatus() {
-	}
+	protected void updateStatus() { /* unused */ }
 	
 	
 	private boolean isInitialized = false;

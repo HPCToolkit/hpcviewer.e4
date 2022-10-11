@@ -66,7 +66,7 @@ implements IMetricManager, ListEventListener<BaseMetric>
 	 */
 	public void setMetrics(List<BaseMetric> metricList) {
 		metrics =  GlazedLists.eventList(metricList);
-		mapIndexToMetric = new IntObjectHashMap<>(metricList.size());// HashMap<Integer, BaseMetric>(metricList.size());
+		mapIndexToMetric = new IntObjectHashMap<>(metricList.size());
 		metricsWithOrder = new HashMap<>(metricList.size()/2);
 		
 		// the simple index has to start from 1 since the zero index
@@ -81,7 +81,7 @@ implements IMetricManager, ListEventListener<BaseMetric>
 			}
 			var m = mapIndexToMetric.put(metric.getIndex(), metric);
 			if (m != null)
-				throw new RuntimeException("Non-unique index metric " + metric.getDisplayName() + " with index: " + metric.getIndex());
+				throw new IllegalArgumentException("Non-unique index metric " + metric.getDisplayName() + " with index: " + metric.getIndex());
 		}
 		metrics.addListEventListener(this);
 	}
@@ -120,7 +120,7 @@ implements IMetricManager, ListEventListener<BaseMetric>
 	}
 	
 	
-	protected void copyMetric(Scope target, Scope source, int src_i, int targ_i, MetricValuePropagationFilter filter) {
+	private void copyMetric(Scope target, Scope source, int src_i, int targ_i, MetricValuePropagationFilter filter) {
 		if (filter.doPropagation(source, target, src_i, targ_i)) {
 			MetricValue mv = source.getMetricValue(src_i);
 			if (mv != MetricValue.NONE && Float.compare(MetricValue.getValue(mv), 0.0f)!=0) {

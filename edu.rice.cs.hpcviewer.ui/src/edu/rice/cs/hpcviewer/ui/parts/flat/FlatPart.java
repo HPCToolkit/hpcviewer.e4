@@ -1,6 +1,7 @@
 package edu.rice.cs.hpcviewer.ui.parts.flat;
 
 import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.CoolBar;
@@ -19,8 +20,8 @@ import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 
 public class FlatPart extends AbstractTableView 
 {
-	static final private int ITEM_FLAT = 0;
-	static final private int ITEM_UNFLAT = 1;
+	private static final int ITEM_FLAT = 0;
+	private static final int ITEM_UNFLAT = 1;
 	
 	private FlatAction flatAction;
 	private ToolItem[] items;
@@ -62,8 +63,7 @@ public class FlatPart extends AbstractTableView
 
 	
 	@Override
-	protected void endToolbar(CoolBar coolbar, ToolBar toolbar) {
-	}
+	protected void endToolbar(CoolBar coolbar, ToolBar toolbar) { /* unused */ }
 
 	
 	@Override
@@ -123,4 +123,13 @@ public class FlatPart extends AbstractTableView
 		return treeData;
 	}
 
+
+	@Override
+	public void widgetDisposed(DisposeEvent e) {
+		super.dispose();
+		
+		items = null;
+		treeData.clear();
+		flatAction = null;
+	}
 }

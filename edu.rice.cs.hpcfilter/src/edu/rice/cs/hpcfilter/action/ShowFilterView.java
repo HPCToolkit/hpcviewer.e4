@@ -2,7 +2,6 @@ package edu.rice.cs.hpcfilter.action;
 
 import java.util.Map;
 
-import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.eclipse.e4.core.di.annotations.Execute;
@@ -12,16 +11,15 @@ import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpcfilter.cct.FilterPropertyDialog;
-import edu.rice.cs.hpcfilter.service.FilterStateProvider;
+
 
 public class ShowFilterView 
 {
-	final public static String ID = "edu.rice.cs.hpcfilter.action.ShowFilterView";
+	public static final String ID = "edu.rice.cs.hpcfilter.action.ShowFilterView";
 	
-	@Inject FilterStateProvider filterService;
 
 	@Execute
-	public Object execute( @Named(IServiceConstants.ACTIVE_SHELL) Shell shell, 
+	public void execute( @Named(IServiceConstants.ACTIVE_SHELL) Shell shell, 
 							IEventBroker eventBroker,
 							MApplication application) 
 	{
@@ -32,18 +30,16 @@ public class ShowFilterView
 		// bring it to the top.
 		// we only allow one filter per application (or session)
 		
-		if (obj != null && (obj instanceof FilterPropertyDialog)) {
+		if (obj instanceof FilterPropertyDialog) {
 			FilterPropertyDialog dlg = (FilterPropertyDialog) obj;
 			if (dlg.getShell() != null && !dlg.getShell().isDisposed()) {
 				dlg.getShell().setActive();
-				return null;
+				return;
 			}
 		}
-		FilterPropertyDialog dialog = new FilterPropertyDialog(shell, filterService);
+		FilterPropertyDialog dialog = new FilterPropertyDialog(shell, eventBroker);
 		map.put(ID, dialog);
 		
 		dialog.open();
-		
-		return null;
 	}
 }

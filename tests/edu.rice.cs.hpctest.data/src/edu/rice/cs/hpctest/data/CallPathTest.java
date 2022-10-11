@@ -189,7 +189,10 @@ public class CallPathTest {
 		}
 		
 		for(var child: children) {
-			addCallPath(callpath, child, depth + 1);
+			int childDepth = depth;
+			if (CallPath.isTraceScope(child))
+				childDepth++;
+			addCallPath(callpath, child, childDepth);
 		}
 	}
 }

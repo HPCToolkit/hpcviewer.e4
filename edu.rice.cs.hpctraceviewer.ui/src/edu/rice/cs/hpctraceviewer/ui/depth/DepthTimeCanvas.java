@@ -385,13 +385,7 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 		public void done(IJobChangeEvent event) {
 
 			Display display = Display.getDefault();
-			display.asyncExec(new Runnable() {
-				
-				@Override
-				public void run() {
-					redraw();
-				}
-			} );
+			display.asyncExec( () -> redraw() );
 		}
 	}
 

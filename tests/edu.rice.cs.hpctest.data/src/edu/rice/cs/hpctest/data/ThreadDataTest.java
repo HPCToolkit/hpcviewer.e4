@@ -49,7 +49,8 @@ public class ThreadDataTest
 			data.dispose();
 		}
 		for(var exp: listExperiments) {
-			exp.dispose();
+			if (exp != null)
+				exp.dispose();
 		}
 	}
 	

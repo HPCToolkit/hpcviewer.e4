@@ -9,6 +9,7 @@ import edu.rice.cs.hpcdata.experiment.scope.InstructionScope;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import java.util.Collections;
 
 /*****************************************
  * 
@@ -31,7 +32,7 @@ public class CallPath implements ICallPath
 		
 		// special prof2: the cpid zero is no activity
 		Scope noActivity = new ProcedureScope(null, null, null, 0, 0, Constants.PROC_NO_ACTIVITY, false, 0, 0, null, 0);
-		Info infoNoActivity = new Info(noActivity, 0);
+		Info infoNoActivity = new Info(noActivity);
 		mapToInfo.put(0, infoNoActivity);
 	}
 	
@@ -47,6 +48,10 @@ public class CallPath implements ICallPath
 	}
 	
 
+	@Override
+	public void dispose() {
+		mapToInfo.clear();
+	}
 
 	@Override
 	public ICallPathInfo getCallPathInfo(int id) {
@@ -77,11 +82,11 @@ public class CallPath implements ICallPath
 	{
 		var info = mapToInfo.get(id);
 		if (info == null)
-			return null;
+			return Collections.emptyList();
 		
 		final List<String> functionNames = new FastList<String>();
 		Scope currentScope = info.leafScope;
-		//int depth = maxDepth;
+
 		while(currentScope != null && !(currentScope instanceof RootScope))
 		{
 			if (isTraceScope(currentScope))
@@ -128,12 +133,12 @@ public class CallPath implements ICallPath
 		if (info == null)
 			return -1;
 		
-		return info.maxDepth;
+		return getDepth(info.leafScope);
 	}
 
 	@Override
 	public void addCallPath(int id, Scope scope, int depth) {
-		var info = new Info(scope, depth);
+		var info = new Info(scope);
 		mapToInfo.put(id, info);
 	}
 	
@@ -163,9 +168,9 @@ public class CallPath implements ICallPath
 
 		Info info = mapToInfo.getFirst();
 		if (mapToInfo.size()==1)  {
-			return String.format("[%s %d]", info.leafScope.getName(), info.maxDepth);
+			return String.format("[%s %d]", info.leafScope.getName(), info.leafScope.getCpid());
 		}
-		return String.format("[%s %d, ... /%d]", info.leafScope, info.maxDepth, mapToInfo.size());
+		return String.format("[%s %d, ... /%d]", info.leafScope, info.leafScope.getCpid(), mapToInfo.size());
 	}
 	
 	
@@ -180,13 +185,9 @@ public class CallPath implements ICallPath
 	{
 		/**the Scope at the current cpid*/
 		Scope leafScope;
-		
-		/**the depth of leafScope (where current cpid is)*/
-		int maxDepth;
 
-		public Info(Scope scope, int depth) {
+		public Info(Scope scope) {
 			leafScope = scope;
-			maxDepth = depth;
 		}
 
 		@Override
@@ -196,13 +197,13 @@ public class CallPath implements ICallPath
 
 		@Override
 		public int getMaxDepth() {
-			return maxDepth;
+			return CallPath.getDepth(leafScope);
 		}
 
 		@Override
 		public Scope getScopeAt(int depth) {
 			
-			int cDepth = maxDepth;
+			int cDepth = getMaxDepth();
 			Scope cDepthScope = leafScope;
 
 			if (cDepthScope.getParentScope() == null)

@@ -74,7 +74,11 @@ public Scope duplicate() {
 	
 public String getName()
 {
-	return "loop at " + this.getSourceCitation();
+	final String PREFIX_LOOP = "loop at ";
+	
+	if (getSourceFile() == null)
+		return PREFIX_LOOP + SourceFile.NONE.getName();
+	return PREFIX_LOOP + this.getSourceCitation();
 }
 
 

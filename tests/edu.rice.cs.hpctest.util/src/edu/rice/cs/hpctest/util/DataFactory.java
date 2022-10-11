@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctest.data.util;
+package edu.rice.cs.hpctest.util;
 
 import java.io.File;
 import java.security.NoSuchAlgorithmException;
