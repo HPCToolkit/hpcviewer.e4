@@ -142,6 +142,9 @@ public class DataSummary extends DataCommon
 	 */
 	private ListCCTAndIndex getCCTIndex(IdTuple idtuple) throws IOException {
 		int profileNum = idtuple.getProfileIndex();
+		if (profileNum < 0 || profileNum >= info.piElements.length)
+			return null;
+		
 		ListCCTAndIndex list = new ListCCTAndIndex(info.piElements[profileNum].nCtxs);
 		
 		long position = info.piElements[profileNum].pCtxIndices;
@@ -261,6 +264,9 @@ public class DataSummary extends DataCommon
 		if (!idtuple.equals(IdTuple.PROFILE_SUMMARY) || list == null) {
 			list = getCCTIndex(idtuple);
 		}
+		if (list == null)
+			return Collections.emptyList();
+		
 		// search for the cct-id
 		// if it doesn't exist, we return empty metric (or throw an exception?)
 		int index = Arrays.binarySearch(list.listOfId, cctId);

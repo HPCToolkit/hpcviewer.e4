@@ -26,10 +26,13 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 public class ThreadMetricManager implements IMetricManager 
 {
+	private final String ID;
 	private final EventList<BaseMetric> rawMetrics;
 	private final MutableIntObjectMap<BaseMetric> mapIntToMetric;
 	
-	public ThreadMetricManager(List<BaseMetric> metrics, List<IdTuple> listThreads) {
+	public ThreadMetricManager(String ID, List<BaseMetric> metrics, List<IdTuple> listThreads) {
+		this.ID = ID;
+		
 		List<BaseMetric> listMetrics = FastList.newList(metrics.size());
 		mapIntToMetric = new IntObjectHashMap<>();
 		Map<String, MetricRaw> mapNameToMetric = new HashMap<>(listMetrics.size());
@@ -149,5 +152,10 @@ public class ThreadMetricManager implements IMetricManager
 			return (MetricRaw) rawMetric.get();
 		
 		return null;
+	}
+
+	@Override
+	public String getID() {
+		return ID;
 	}
 }

@@ -12,6 +12,15 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
  ******************************************************************/
 public interface IMetricManager 
 {
+	/****
+	 * Return the unique ID of this metric manager (or experiment database).
+	 * Usually it's the database directory.
+	 * <p>The goal is to differentiate between different databases.
+	 * 
+	 * @return String
+	 */
+	public String getID();
+	
 	/***
 	 * Get the correlated raw metric version of the given base metric.
 	 * <br/>

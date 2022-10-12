@@ -67,6 +67,7 @@ public class Filter
 					metrics.add(metric.duplicate());
 				}
 			}
+			var rawMetrics = experiment.getRawMetrics();
 
 			// ---------------------------------------
 			// filtering 
@@ -77,6 +78,8 @@ public class Filter
 			// put the original metrics and derived metrics back
 			// ---------------------------------------
 			experiment.setMetrics(metrics);
+			experiment.setMetricRaw(rawMetrics);
+			
 			experiment.resetThreadData();
 
 		}

@@ -77,21 +77,19 @@ public class ThreadPart extends TopDownPart
 		RootScope root  = viewInput.getRootScope();
 		Experiment experiment = (Experiment) root.getExperiment();
 		List<BaseMetric> rawMetrics = experiment.getRawMetrics();
-		ThreadMetricManager metricManager = new ThreadMetricManager(rawMetrics, threads);
+		var id = experiment.getDirectory();
+		
+		ThreadMetricManager metricManager = new ThreadMetricManager(id, rawMetrics, threads);
 		
 		createTable(metricManager);
 		
-		try {
-			String title = TITLE_PREFIX + getLabel(viewInput).toString(); 
-			setText(title);
-			setToolTipText(getTooltipText(viewInput));
-		} catch (IOException e) {
-			e.printStackTrace();
-			setText(TITLE_PREFIX + " (Empty)");
-		}
+		String title = TITLE_PREFIX + getLabel(viewInput).toString(); 
+		setText(title);
+		setToolTipText(getTooltipText(viewInput));
 		setShowClose(true);
 	}
 
+	
 	@Override
 	public void handleEvent(Event event) {
 		super.handleEvent(event);
@@ -101,7 +99,8 @@ public class ThreadPart extends TopDownPart
 			Object obj = event.getProperty(IEventBroker.DATA);
 			if (obj instanceof ViewerDataEvent) {
 				ViewerDataEvent data = (ViewerDataEvent) obj;
-				if (data.metricManager instanceof Experiment) {
+				var thesame = getMetricManager().getID().equals(data.metricManager.getID());
+				if (thesame) {
 					// grab the new root of the refreshed database
 					var newRoot = ((Experiment) data.metricManager).getRootScope(RootScopeType.CallingContextTree);
 					
@@ -202,7 +201,7 @@ public class ThreadPart extends TopDownPart
 	}
 
 	
-	private String getTooltipText(ThreadViewInput input) throws IOException {
+	private String getTooltipText(ThreadViewInput input) {
 		final String TOOLTIP_PREFIX = "Top down view for thread(s): ";
 
 		var threads = input.getThreads();
@@ -257,6 +256,6 @@ public class ThreadPart extends TopDownPart
 			if (!threads.isEmpty())
 				return threads;
 		}
-		return null;
+		return Collections.emptyList();
 	}
 }

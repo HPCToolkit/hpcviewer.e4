@@ -228,6 +228,8 @@ public class MetricRaw  extends BaseMetric
 		RootScope root = scope.getRootScope();
 		
 		IThreadDataCollection threadData = root.getExperiment().getThreadData();
+		if (threadData == null)
+			return MetricValue.NONE;
 		
 		long nodeIndex = scope.getCCTIndex();
 		

@@ -400,4 +400,9 @@ public class Experiment extends BaseExperimentWithMetrics
 	public List<BaseMetric> getMetricList() {
 		return getMetrics();
 	}
+
+	@Override
+	public String getID() {
+		return getDirectory();
+	}
 }
