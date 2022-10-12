@@ -17,7 +17,7 @@ import org.junit.runners.BlockJUnit4ClassRunner;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcmerge.DatabaseMergeWizard;
-import edu.rice.cs.hpctest.data.DataFactory;
+import edu.rice.cs.hpctest.util.DataFactory;
 
 @RunWith(BlockJUnit4ClassRunner.class)
 class ViewerBotTestCase extends SWTBotTestCase {
@@ -25,7 +25,7 @@ class ViewerBotTestCase extends SWTBotTestCase {
 	protected SWTBot bot;
 	protected static Thread uiThread;
 	protected static Shell shell;
-	private final static CyclicBarrier swtBarrier = new CyclicBarrier(2);
+	private static final CyclicBarrier swtBarrier = new CyclicBarrier(2);
 
 
 	@BeforeClass
