@@ -22,6 +22,11 @@ import edu.rice.cs.hpcdata.experiment.scope.filters.ExclusiveOnlyMetricPropagati
 import edu.rice.cs.hpcdata.experiment.scope.filters.InclusiveOnlyMetricPropagationFilter;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
 
+/*************************************************************************
+ * 
+ * Special flat view visitor for meta.db database (db version 4)
+ *
+ *************************************************************************/
 public class FlatViewScopeVisitor4 extends FlaViewScopeBuilder implements IScopeVisitor 
 {
 	private final IntObjectHashMap<FlatScopeInfo> mapIdToFlatScopeInfo;
@@ -29,8 +34,8 @@ public class FlatViewScopeVisitor4 extends FlaViewScopeBuilder implements IScope
 	private final FastListMultimap<Integer, Scope> mapIdToCombinedScopes;
 	
 	private final RootScope root;
-	private final InclusiveOnlyMetricPropagationFilter inclusive_filter;
-	private final ExclusiveOnlyMetricPropagationFilter exclusive_filter;
+	private final InclusiveOnlyMetricPropagationFilter inclusiveFilter;
+	private final ExclusiveOnlyMetricPropagationFilter exclusiveFilter;
 
 	
 	public FlatViewScopeVisitor4(RootScope rootFlatTree) {
@@ -40,8 +45,8 @@ public class FlatViewScopeVisitor4 extends FlaViewScopeBuilder implements IScope
 
 		this.root = rootFlatTree;
 
-		inclusive_filter = new InclusiveOnlyMetricPropagationFilter((Experiment) rootFlatTree.getExperiment());
-		exclusive_filter = new ExclusiveOnlyMetricPropagationFilter((Experiment) rootFlatTree.getExperiment());
+		inclusiveFilter = new InclusiveOnlyMetricPropagationFilter((Experiment) rootFlatTree.getExperiment());
+		exclusiveFilter = new ExclusiveOnlyMetricPropagationFilter((Experiment) rootFlatTree.getExperiment());
 	}
 
 	public void visit(Scope scope, ScopeVisitType vt) 				{ 
@@ -49,12 +54,12 @@ public class FlatViewScopeVisitor4 extends FlaViewScopeBuilder implements IScope
 			add(scope, vt, true, false);
 		}
 	}
-	public void visit(RootScope scope, ScopeVisitType vt) 			{ }
-	public void visit(LoadModuleScope scope, ScopeVisitType vt) 	{ }
-	public void visit(FileScope scope, ScopeVisitType vt) 			{ }
-	public void visit(AlienScope scope, ScopeVisitType vt) 			{ }
-	public void visit(StatementRangeScope scope, ScopeVisitType vt) { }
-	public void visit(GroupScope scope, ScopeVisitType vt) 			{ }
+	public void visit(RootScope scope, ScopeVisitType vt) 			{ /* unused */ }
+	public void visit(LoadModuleScope scope, ScopeVisitType vt) 	{ /* unused */ }
+	public void visit(FileScope scope, ScopeVisitType vt) 			{ /* unused */ }
+	public void visit(AlienScope scope, ScopeVisitType vt) 			{ /* unused */ }
+	public void visit(StatementRangeScope scope, ScopeVisitType vt) { /* unused */ }
+	public void visit(GroupScope scope, ScopeVisitType vt) 			{ /* unused */ }
 
 	public void visit(CallSiteScope scope, ScopeVisitType vt) 		{ 
 		add(scope,vt, true, false); 
@@ -79,7 +84,7 @@ public class FlatViewScopeVisitor4 extends FlaViewScopeBuilder implements IScope
 		int id = scope.getCCTIndex();
 		
 		if (vt == ScopeVisitType.PreVisit) {
-			var flatScope  = getFlatCounterPart(id, scope, metricScope, exclusive);
+			var flatScope  = getFlatCounterPart(scope);
 			
 			combine(id, flatScope.flatLM, metricScope, exclusive);
 			combine(id, flatScope.flatFile, metricScope, exclusive);
@@ -92,7 +97,7 @@ public class FlatViewScopeVisitor4 extends FlaViewScopeBuilder implements IScope
 				} else {
 					procScope = ((InstructionScope) scope).getProcedureScope();
 				}
-				var procFlatScope = getFlatCounterPart(id, procScope, metricScope, exclusive);
+				var procFlatScope = getFlatCounterPart(procScope);
 
 				combine(id, procFlatScope.flatLM, metricScope, true);
 				combine(id, procFlatScope.flatFile, metricScope, true);
@@ -113,7 +118,7 @@ public class FlatViewScopeVisitor4 extends FlaViewScopeBuilder implements IScope
 	}
 	
 	
-	private FlatScopeInfo getFlatCounterPart(int id, Scope scope, Scope metricScope, boolean exclusive) {
+	private FlatScopeInfo getFlatCounterPart(Scope scope) {
 
 		var flatScope = mapIdToFlatScopeInfo.get(scope.getFlatIndex());
 		if (flatScope == null) {
@@ -161,11 +166,11 @@ public class FlatViewScopeVisitor4 extends FlaViewScopeBuilder implements IScope
 		assert(target.getCounter() >= 0);
 		
 		if (target.getCounter() == 0) {
-			target.combine(source, inclusive_filter);
+			target.combine(source, inclusiveFilter);
 		}
 		// add exclusive cost
 		if (exclusive) {
-			target.combine(source, exclusive_filter);
+			target.combine(source, exclusiveFilter);
 		}
 		target.incrementCounter();
 		mapIdToCombinedScopes.put(id, target);
@@ -184,7 +189,7 @@ public class FlatViewScopeVisitor4 extends FlaViewScopeBuilder implements IScope
 		}
 		var flatLm = mapIdToScope.get(lms.getFlatIndex());
 		if (flatLm == null) {
-			flatLm = (LoadModuleScope) lms.duplicate();	
+			flatLm = lms.duplicate();	
 			flatLm.setRootScope(root);
 			addChild(root, flatLm);
 			

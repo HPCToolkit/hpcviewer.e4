@@ -66,7 +66,8 @@ public class ExperimentFileXML extends ExperimentFile
  *            UI
  * @param experiment
  *            Experiment object to own the parsed sub parts.
- * @param need_metrics : flag whether the app needs metrics (hpcviewer) or not 
+ * @param needMetrics 
+ * 			  flag whether the app needs metrics (hpcviewer) or not 
  * 				(hpctraceviewer)
  * @param userData
  *            I don't know why this is here, since it apparently isn't used.
@@ -74,7 +75,7 @@ public class ExperimentFileXML extends ExperimentFile
  * @throws Exception
  */
 public void parse(InputStream stream, String name,
-		IExperiment experiment, boolean need_metrics, IUserData<String, String> userData)
+		IExperiment experiment, boolean needMetrics, IUserData<String, String> userData)
 		throws Exception {
 	
 	final Builder builder = new ExperimentBuilder2(experiment, name, userData);
@@ -112,7 +113,8 @@ public File parse(File location, IExperiment experiment, boolean need_metrics, I
 	String name = location.toString();
 
 	// check if the argument "file" is really a file (old version) or a directory (new version)
-	String directory, xmlFilePath;
+	String directory;
+	String xmlFilePath;
 	if (location.isDirectory()) {
 		directory = location.getAbsolutePath(); // it's a database directory
 		xmlFilePath = directory + File.separatorChar + DatabaseManager.getDatabaseFilename("xml").orElse("");

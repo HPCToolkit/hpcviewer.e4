@@ -112,24 +112,24 @@ public class TopDownPart extends AbstractTableView
 
 	
 	private void showThreadView(Shell shell) {
-		String[] labels = null;
+
 		IThreadDataCollection dataCollector = getThreadDataCollection();
 		var idtuples = dataCollector.getIdTuples();			
-		labels = new String[idtuples.size()];
+
 		IdTupleType idtype;
 		if (getRoot().getExperiment() instanceof Experiment) {
 			idtype = ((Experiment)getRoot().getExperiment()).getIdTupleType();
 		} else {
 			idtype = IdTupleType.createTypeWithOldFormat();
 		}
-		
-		for(int i=0; i<idtuples.size(); i++) {
-			labels[i] = idtuples.get(i).toString(idtype);
-		}
+		var labels = idtuples.stream()
+				 			 .filter(idt -> !idt.isGPU(idtype))
+				 			 .map(idt -> idt.toString(idtype))
+				 			 .toArray();
 		
 		List<FilterDataItem<String>> listItems = ThreadFilterDialog.filter(shell, "Select rank/thread to view", labels, null);
 		
-		if (listItems != null) {
+		if (listItems != null && !listItems.isEmpty()) {
 			List<IdTuple> selectedIdtuples = new ArrayList<>();
 			
 			for(int i=0; i<listItems.size(); i++) {

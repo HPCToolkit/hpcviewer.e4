@@ -1,6 +1,7 @@
 package edu.rice.cs.hpcfilter.dialog;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -107,13 +108,13 @@ public class ThreadFilterDialog extends Dialog
 	 * @param checked array of status of the labels: true if the label is checked
 	 * @return {@code List<FilterDataItem>} or null if the user click "Cancel" button.
 	 */
-	public static List<FilterDataItem<String>> filter(Shell shell, String title, String[] labels, boolean []checked) {
+	public static List<FilterDataItem<String>> filter(Shell shell, String title, Object[] labels, boolean []checked) {
 
 		List<FilterDataItem<String>> items =  new ArrayList<>(labels.length);
 		
 		for (int i=0; i<labels.length; i++) {
-			boolean isChecked = checked == null? false : checked[i];
-			FilterDataItem<String> obj = new StringFilterDataItem(labels[i], isChecked, true);
+			boolean isChecked = (checked != null) && checked[i];
+			FilterDataItem<String> obj = new StringFilterDataItem((String) labels[i], isChecked, true);
 			items.add(obj);
 		}
 
@@ -121,7 +122,7 @@ public class ThreadFilterDialog extends Dialog
 		if (dialog.open() == Window.OK) {
 			return dialog.getResult();
 		}
-		return null;
+		return Collections.emptyList();
 	}
 	
 	public List<FilterDataItem<String>> getResult() {

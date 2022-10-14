@@ -80,7 +80,7 @@ public class FilterRanks
         
         List<FilterDataItem<String>> list = ThreadFilterDialog.filter(shell, "Select rank to display", items, checked);
 		
-		if (list != null){
+		if (list != null && !list.isEmpty()){
 			List<Integer> listChecked = new ArrayList<>();
 			for(int i=0; i<list.size(); i++) {
 				if (list.get(i).checked) {
