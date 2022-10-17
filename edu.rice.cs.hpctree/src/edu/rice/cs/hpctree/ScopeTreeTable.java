@@ -1,5 +1,6 @@
 package edu.rice.cs.hpctree;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -80,8 +81,8 @@ import edu.rice.cs.hpctree.internal.config.TableFontConfiguration;
  ********************************************************************/
 public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayerListener, ListEventListener<BaseMetric>
 {
-	private final static String TEXT_METRIC_COLUMN = "8x88+88xx888x8%";
-	private final static String STRING_PADDING  = "X"; 
+	private static final String TEXT_METRIC_COLUMN = "8x88+88xx888x8%";
+	private static final String STRING_PADDING  = "X"; 
 
 	private final NatTable       natTable ;
 	private final ResizeListener resizeListener;
@@ -92,7 +93,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	private final TableConfiguration      tableConfiguration;
 	private final SortHeaderLayer<Scope>  headerLayer;
 		
-	private final Collection<IActionListener> listeners = new FastList<IActionListener>();
+	private final Collection<IActionListener> listeners;
 	
 	
 	/**** 
@@ -106,6 +107,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	 */
 	public ScopeTreeTable(Composite parent, int style, IScopeTreeData treeData) {
         
+		listeners = new FastList<>();
         this.bodyDataProvider = new ScopeTreeDataProvider(treeData); 
 
         // create a new ConfigRegistry which will be needed for GlazedLists
@@ -167,9 +169,6 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         // finalization
         // --------------------------------
         
-        // I don't know why we have to refresh the table here
-        // However, without refreshing, the content will be weird
-       // visualRefresh();
         natTable.configure();
 
         // --------------------------------
@@ -349,9 +348,8 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 			int row = rowEvent.getRowPositionToMoveIntoViewport();
 			final Scope scope = bodyDataProvider.getRowObject(row);
 			
-			listeners.forEach(l -> {
-				l.select(scope);
-			});
+			listeners.forEach(l -> l.select(scope));
+			
 		} else if (event instanceof SortColumnEvent) {
 			Set<Range> ranges = bodyLayerStack.getSelectionLayer().getSelectedRowPositions();
 			if (!ranges.isEmpty()) {
@@ -438,7 +436,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         		// We need to convert from an index to a position.
         		String title = metric.getDisplayName() + STRING_PADDING;
         		Point titleSize = gc.textExtent(title);
-    			colWidth = (int) Math.max(titleSize.x + SORT_SYMBOL_WIDTH, columnSize.x);
+    			colWidth = Math.max(titleSize.x + SORT_SYMBOL_WIDTH, columnSize.x);
     		}
     		
     		int pixelWidth = GUIHelper.convertHorizontalDpiToPixel(colWidth);
@@ -495,7 +493,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		gc.setFont(FontManager.getMetricFont());
 		String text = TEXT_METRIC_COLUMN + STRING_PADDING;
 		Point extent = gc.stringExtent(text);
-		Point size   = new Point((int) (extent.x), extent.y + 2);
+		Point size   = new Point(extent.x, extent.y + 2);
 		
 		// check the height if we use generic font (tree column)
 		// if this font is higher, we should use this height as the standard.
@@ -656,19 +654,14 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		treeData.refreshAndShift(SHIFTED_INDEX);		
 
 		int []hiddenIndexes = getHiddenColumnIndexes();
-		int []shiftedIndexes = new int[hiddenIndexes.length];
-		for(int i=0; i<hiddenIndexes.length; i++) {
-			shiftedIndexes[i] = hiddenIndexes[i];
-		}
+		int []shiftedIndexes = Arrays.copyOf(hiddenIndexes, hiddenIndexes.length);
 		
 		ColumnHideShowLayer hideShowLayer = bodyLayerStack.getColumnHideShowLayer();
 
 		refresh();
 		
 		while(listChanges.next()) {
-			switch(listChanges.getType()) {
-			case ListEvent.INSERT:
-				
+			if (listChanges.getType() == ListEvent.INSERT) {				
 				int index = listChanges.getIndex();	
 				for(int i=0; i<hiddenIndexes.length; i++)
 					shiftedIndexes[i] = shiftedIndexes[i] + index + SHIFTED_INDEX;
@@ -740,8 +733,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 			int index = treeRowModel.getTreeData().indexOf(scope);
 			bodyLayerStack.expand(index);
 		}
-		var children = treeRowModel.getTreeData().getChildren(scope);
-		return children;
+		return treeRowModel.getTreeData().getChildren(scope);
 	}
 	
 	
@@ -752,9 +744,10 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		Integer sortedIndex = sortedIndexes.get(0);
 
 		Collection<Integer> hiddenIndexes = bodyLayerStack.getColumnHideShowLayer().getHiddenColumnIndexes();
-		if (hiddenIndexes != null && hiddenIndexes.size()>0) {
-			if (hiddenIndexes.contains(sortedIndex))
-				return -1;
+		if (hiddenIndexes != null && 
+			!hiddenIndexes.isEmpty() &&
+			hiddenIndexes.contains(sortedIndex)) {
+			return -1;
 		}		
 		return sortedIndex;
 	}
