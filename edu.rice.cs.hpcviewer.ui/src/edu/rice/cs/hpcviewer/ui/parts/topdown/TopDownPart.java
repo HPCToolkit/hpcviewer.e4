@@ -150,21 +150,8 @@ public class TopDownPart extends AbstractTableView
 	@Override
 	protected void updateStatus() {
 		IThreadDataCollection dataCollector = getThreadDataCollection();
-		boolean enableItems = (dataCollector != null);
+		boolean enableItems = dataCollector.isAvailable();
 
-		if (enableItems) {			
-			try {
-				// do not enable the buttons if we have only 1 rank or thread
-				// there is no point to show a graph or a thread view for only 
-				// 1 thread or rank.
-				enableItems = dataCollector.getRankLabels().length > 1;
-				
-			} catch (IOException e) {
-				// file error. Should we display a message?
-				// usually it's been displayed before, and we don't want
-				// to show a message every time there's a I/O problem 
-			}
-		}
 		items[ITEM_THREAD].setEnabled(enableItems);
 		
 		Scope selectedScope = super.getTable().getSelection();
