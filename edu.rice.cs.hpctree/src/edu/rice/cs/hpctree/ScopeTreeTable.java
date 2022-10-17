@@ -683,10 +683,6 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	
 	@Override
 	public void setRoot(Scope root) {
-		var oldRoot = getRoot();
-		if (oldRoot != null && root != oldRoot)
-			oldRoot.disposeSelfAndChildren();
-		
 		ScopeTreeRowModel treeRowModel = bodyLayerStack.getTreeRowModel();
 		treeRowModel.setRoot(root);
 		
@@ -698,11 +694,9 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         	treeLayer.expandTreeRow(0);
         	setSelection(1);
         	
-        	Scope node = getSelection();
+        	final Scope node = getSelection();
         	if (node != null) {
-    			listeners.forEach(l -> {
-    				l.select(node);
-    			});
+    			listeners.forEach(l -> l.select(node));
         	}
         }
 		pack();	
