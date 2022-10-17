@@ -11,6 +11,7 @@ import java.nio.channels.FileChannel.MapMode;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.map.mutable.primitive.IntIntHashMap;
@@ -327,26 +328,35 @@ public class DataSummary extends DataCommon
 	
 	
 	/****
-	 * Retrieve the list of id tuple representation in double.
+	 * Retrieve the list of NON-GPU id tuple representation in double.
 	 * <ul>
 	 *  <li>For OpenMP programs, it returns the list of 1, 2, 3,...
 	 *  <li>For MPI+OpenMP programs, it returns the list of 1.0, 1.1, 1.2, 2.0, 2.1, ...
-	 * </ul> 
+	 * </ul>
+	 * @apiNote GPU id-tuples will not be represented
+	 * 
 	 * @return double[]
 	 */
 	public double[] getDoubleLableIdTuples() {
 		if (labels == null) {
 			
-			labels = new double[listIdTuple.size()];
+			// collect list of non-gpu id tuples
+			var list = listIdTuple.stream()
+								  .filter(idt -> !idt.isGPU(idTupleTypes))
+								  .collect(Collectors.toList());
 			
-			// id 0 is reserved
-			int j=0;
-			for(var idt: listIdTuple) {
-				if (!idt.isGPU(idTupleTypes)) {
-					labels[j] = idt.toNumber();
-					j++;
-				}
-			}		
+			labels = new double[list.size()];
+			
+			// covert the list to double representation list
+			var doubleList = list.stream()
+								 .map(idt -> idt.toNumber())
+								 .collect(Collectors.toList());
+			
+			int i=0;
+			for(var dl: doubleList) {
+				labels[i] = dl.doubleValue();
+				i++;
+			}
 		}
 		return labels;
 	}

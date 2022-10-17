@@ -3,6 +3,7 @@ package edu.rice.cs.hpcdata.tld.v4;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
@@ -93,9 +94,12 @@ public class ThreadDataCollection4 extends AbstractThreadDataCollection
 			{
 		final DataPlotEntry []entry = dataPlot.getPlotEntry((int) nodeIndex, metricIndex);
 		
-		List<IdTuple> list = dataSummary.getIdTuple();
+		List<IdTuple> list  = dataSummary.getIdTuple();
+		var listWithoutGPUs = list.stream()
+								  .filter(idt -> !idt.isGPU(dataSummary.getIdTupleType()))
+								  .collect(Collectors.toList());
 		
-		final int num_ranks 	= Math.max(1, list.size()); // shouldn't include gpus
+		final int num_ranks 	= Math.max(1, listWithoutGPUs.size()); // shouldn't include gpus
 		final double []metrics	= new double[num_ranks];
 		
 		// if there is no plot data in the database, we return an array of zeros
@@ -104,18 +108,19 @@ public class ThreadDataCollection4 extends AbstractThreadDataCollection
 		{	
 			for(DataPlotEntry e : entry)
 			{
-				int profile = list.get(e.tid).getProfileIndex();
-				for (int i=0; i<list.size(); i++) {
-					var idt = list.get(i);
+				int profile = -1;
+				for (int i=0; i<listWithoutGPUs.size(); i++) {
+					var idt = listWithoutGPUs.get(i);
+					
+					// minus 1 because the index is based on profile number.
+					// unfortunately, the profile number starts with number 1 instead of 0
+					// the profile 0 is reserved for summary profile. sigh
 					if (e.tid == idt.getProfileIndex()-1) {
 						profile = i;
 						break;
 					}
 				}
-				
-				// minus 1 because the index is based on profile number.
-				// unfortunately, the profile number starts with number 1 instead of 0
-				// the profile 0 is reserved for summary profile. sigh
+				assert(profile >= 0);
 				metrics[profile] = e.metval;
 			}
 		}

@@ -117,6 +117,10 @@ public class DataSummaryTest {
 			assertNotNull(labels);
 			assertTrue(labels.length >= 1); // [0.0]
 			assertTrue(labels[0] >= 0.0);
+			
+			for(int i=1; i<labels.length; i++) {
+				assertTrue(labels[i-1] <= labels[i]);
+			}
 		}
 	}
 
