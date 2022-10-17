@@ -150,7 +150,9 @@ public class TopDownPart extends AbstractTableView
 	@Override
 	protected void updateStatus() {
 		IThreadDataCollection dataCollector = getThreadDataCollection();
-		boolean enableItems = dataCollector.isAvailable();
+		
+		// data collector can be null for old database (no metric-db files)
+		boolean enableItems = dataCollector != null && dataCollector.isAvailable();
 
 		items[ITEM_THREAD].setEnabled(enableItems);
 		
