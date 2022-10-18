@@ -2,6 +2,8 @@ package edu.rice.cs.hpcdata.experiment.scope;
 
 import java.io.File;
 
+import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope.ProcedureType;
+
 public class InstructionScope extends Scope 
 {
 	private final LoadModuleScope loadModule;
@@ -17,7 +19,7 @@ public class InstructionScope extends Scope
 										 0, 
 										 0, 
 										 getCanonicalName(loadModule, offset), 
-										 false, 
+										 ProcedureType.REGULAR, 
 										 scopeID, 
 										 flatID, 
 										 null, 

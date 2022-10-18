@@ -9,6 +9,8 @@ import edu.rice.cs.hpcdata.experiment.scope.InstructionScope;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope.ProcedureType;
+
 import java.util.Collections;
 
 /*****************************************
@@ -31,7 +33,7 @@ public class CallPath implements ICallPath
 		mapToInfo = new IntObjectHashMap<>();
 		
 		// special prof2: the cpid zero is no activity
-		Scope noActivity = new ProcedureScope(null, null, null, 0, 0, Constants.PROC_NO_ACTIVITY, false, 0, 0, null, 0);
+		Scope noActivity = new ProcedureScope(null, null, null, 0, 0, Constants.PROC_NO_ACTIVITY, ProcedureType.REGULAR, 0, 0, null, 0);
 		Info infoNoActivity = new Info(noActivity);
 		mapToInfo.put(0, infoNoActivity);
 	}

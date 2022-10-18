@@ -19,6 +19,7 @@ import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoadModuleScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoopScope;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
+import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope.ProcedureType;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -661,13 +662,25 @@ public class BaseExperimentBuilder extends Builder
 			if (objLoadModule == null) {
 				objLoadModule = LoadModuleScope.build(rootStack.peek(), "<unknown>", srcFile);
 			}
+			boolean isCallsite =  (this.scopeStack.size()>1) && ( this.scopeStack.peek() instanceof LineScope);
 			
+			ProcedureType pt = ProcedureType.REGULAR;
+			if (isalien) {
+				// fix bug #36 (omp idle is omitted in flat view)
+				// the root cause of the bug is that we do not differentiate between procedure inline macro
+				//   and procedure root (such as thread root, program root and omp idle).
+				// need to check if a procedure is an alien or not. Procedure root has no alien information
+
+				if (isCallsite)
+					pt = ProcedureType.INLINE_FUNCTION;
+				else
+					pt = ProcedureType.INLINE_MACRO;
+			}
 			ProcedureScope procScope  = new ProcedureScope(rootStack.peek(), objLoadModule, srcFile, 
 					firstLn-1, lastLn-1, 
-					procName, isalien, cct_id, flat_id, userData, feature);
+					procName, pt, cct_id, flat_id, userData, feature);
 
-			if ( (this.scopeStack.size()>1) && ( this.scopeStack.peek() instanceof LineScope)  ) {
-
+			if (isCallsite) {
 				LineScope ls = (LineScope)this.scopeStack.pop();
 				int	callsiteID = Integer.MAX_VALUE - ( ls.getFlatIndex() << 16 | procScope.getFlatIndex() );
 				
@@ -684,17 +697,8 @@ public class BaseExperimentBuilder extends Builder
 				this.scopeStack.push(ls);
 				this.scopeStack.push(csn2);
 
-				procScope.setAlien(isalien);
-
 			} else {
 				this.beginScope(procScope);
-
-				// fix bug #36 (omp idle is omitted in flat view)
-				// the root cause of the bug is that we do not differentiate between procedure inline macro
-				//   and procedure root (such as thread root, program root and omp idle).
-				// need to check if a procedure is an alien or not. Procedure root has no alien information
-				
-				procScope.setAlien(isalien);
 			}
 	}
 	

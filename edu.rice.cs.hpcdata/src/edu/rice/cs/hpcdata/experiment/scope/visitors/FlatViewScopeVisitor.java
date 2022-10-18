@@ -12,6 +12,7 @@ import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoadModuleScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoopScope;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
+import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope.ProcedureType;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.ScopeVisitType;
@@ -566,7 +567,7 @@ public class FlatViewScopeVisitor extends FlaViewScopeBuilder implements IScopeV
 			return false;
 		
 		ProcedureScope ps = (ProcedureScope) scope;
-		return ps.isAlien();
+		return ps.getProcedureType() == ProcedureType.INLINE_MACRO;
 	}
 	
 	

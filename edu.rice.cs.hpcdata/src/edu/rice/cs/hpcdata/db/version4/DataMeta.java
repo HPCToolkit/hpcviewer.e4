@@ -29,6 +29,7 @@ import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope.ProcedureType;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.CallingContextReassignment;
 import edu.rice.cs.hpcdata.experiment.source.FileSystemSourceFile;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
@@ -722,7 +723,7 @@ public class DataMeta extends DataCommon
 			final int feature = ProcedureScope.FEATURE_PROCEDURE;
 			
 			long key = pFunctions + (i * szFunctions);
-			ProcedureScope ps = new ProcedureScope(rootCCT, lms, file, line, line, name, false, position, i+baseId, null, feature);			
+			ProcedureScope ps = new ProcedureScope(rootCCT, lms, file, line, line, name, ProcedureType.REGULAR, position, i+baseId, null, feature);			
 			mapFunctions.put(key, ps);
 		}
 		return mapFunctions;
