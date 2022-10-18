@@ -41,6 +41,7 @@ import edu.rice.cs.hpcmetric.MetricDataEvent;
 import edu.rice.cs.hpcmetric.MetricFilterInput;
 import edu.rice.cs.hpcmetric.internal.MetricFilterDataItem;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
+import edu.rice.cs.hpctree.IScopeTreeAction;
 import edu.rice.cs.hpctree.IScopeTreeData;
 import edu.rice.cs.hpctree.ScopeTreeTable;
 import edu.rice.cs.hpctree.TableFitting;
@@ -100,7 +101,7 @@ implements EventHandler, DisposeListener, IUserMessage
 	 * @param style SWT style 
 	 * @param title the title for this view
 	 */
-	public AbstractTableView(CTabFolder parent, int style, String title) {
+	protected AbstractTableView(CTabFolder parent, int style, String title) {
 		super(parent, style);
 		setText(title);
 		actionManager = new UndoableActionManager();
@@ -205,9 +206,9 @@ implements EventHandler, DisposeListener, IUserMessage
 
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout(2, false));
-		GridData gd_composite = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
-		gd_composite.widthHint = 506;
-		composite.setLayoutData(gd_composite);
+		GridData compositeGD = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
+		compositeGD.widthHint = 506;
+		composite.setLayoutData(compositeGD);
 				
 		ToolBar toolBar = new ToolBar(composite, SWT.FLAT | SWT.RIGHT);
 
@@ -304,7 +305,6 @@ implements EventHandler, DisposeListener, IUserMessage
 		//
 		// fix issue #188: force the table to have a content so natTable can properly resize the columns
 		// this doesn't really slow the UI so it's okay to do this to all tables. 
-		// TODO: ugly quick fix. NatTable has to handle this better!
 		// 
 		table.setRoot(root);
 		
@@ -339,11 +339,11 @@ implements EventHandler, DisposeListener, IUserMessage
 		final List<BaseMetric> listAllMetrics = getMetricManager().getVisibleMetrics();	
 		
 		// List of indexes of the hidden columns based on the info from the table.
-		// FIXME: the index starts with tree column. Hence index 0 is the tree column,
+		// the index starts with tree column. Hence index 0 is the tree column,
 		//  and after that are the metric columns.
 		final int []hiddenColumnIndexes = table.getHiddenColumnIndexes();
 
-		final List<FilterDataItem<BaseMetric>> list = new ArrayList<FilterDataItem<BaseMetric>>(listAllMetrics.size());
+		final List<FilterDataItem<BaseMetric>> list = new ArrayList<>(listAllMetrics.size());
 		
 		// fill up the visible metrics first
 		for(int i=0; i<treeData.getMetricCount(); i++) {
@@ -358,14 +358,13 @@ implements EventHandler, DisposeListener, IUserMessage
 		// fill up the "invisible" metrics		
 		for(int i=0; i<listAllMetrics.size(); i++) {
 			final BaseMetric metric = listAllMetrics.get(i);
-			if (root.getMetricValue(metric) == MetricValue.NONE) {
-				if (!indexes.contains(metric.getIndex())) {
-					final boolean checked = false;
-					final boolean enabled = false;
-					
-					FilterDataItem<BaseMetric> item = new MetricFilterDataItem(metric, checked, enabled);
-					list.add(item);
-				}
+			if (root.getMetricValue(metric) == MetricValue.NONE 
+					&& !indexes.contains(metric.getIndex())) {
+				final boolean checked = false;
+				final boolean enabled = false;
+				
+				FilterDataItem<BaseMetric> item = new MetricFilterDataItem(metric, checked, enabled);
+				list.add(item);
 			}			
 		}
 		return list;
@@ -376,7 +375,7 @@ implements EventHandler, DisposeListener, IUserMessage
 	@Override
 	public void activate() {
 		if (!initialized) {
-			// TODO: this process takes time
+			// Warning: this process takes time
 			BusyIndicator.showWhile(getDisplay(), ()-> {
 				root = buildTree(false);
 				table.setRoot(root);
@@ -395,8 +394,8 @@ implements EventHandler, DisposeListener, IUserMessage
 		
 		// FIXME: ugly code. Try to find if this metric is hidden or not by
 		//        checking if the metric order is the hidden column indexes
-		// FIXME: Recall that hiddenColumnIndexes starts with 1. The 0 value is for tree column
 		for (int j=0; j<hiddenColumnIndexes.length; j++) {
+			// Recall that hiddenColumnIndexes starts with 1. The 0 value is for tree column
 			if (hiddenColumnIndexes[j] == metricIndex+1) {
 				return false;
 			}
@@ -479,7 +478,7 @@ implements EventHandler, DisposeListener, IUserMessage
 	
 	@Override
 	public ViewType getViewType() {
-		// TODO: quick fix for merged database:
+		// quick fix for merged database:
 		// - for normal databases we'll have more than 2 views
 		// - for merged database, we'll have only 1 view
 		//
@@ -536,7 +535,7 @@ implements EventHandler, DisposeListener, IUserMessage
 		table.freezeTreeColumn();
 	}
 	
-	synchronized private void hideOrShowColumn(int columnIndex, boolean shown) {
+	private synchronized void hideOrShowColumn(int columnIndex, boolean shown) {
 		// the index zero is only for the tree column
 		// we want to keep this column to be always visible
 		if (columnIndex == 0) 
@@ -702,7 +701,7 @@ implements EventHandler, DisposeListener, IUserMessage
 	}
 	
 	
-	protected ScopeTreeTable getTable() {
+	protected IScopeTreeAction getTable() {
 		return table;
 	}
 
@@ -724,10 +723,10 @@ implements EventHandler, DisposeListener, IUserMessage
 		toolItem[ACTION_RESIZE_COLUMN].setEnabled(true);
 		
 		Scope selectedScope = table.getSelection();
-		boolean canZoomIn = zoomAction == null ? false : zoomAction.canZoomIn(selectedScope); 
+		boolean canZoomIn = zoomAction != null && zoomAction.canZoomIn(selectedScope); 
 		toolItem[ACTION_ZOOM_IN].setEnabled(canZoomIn);
 		
-		boolean canZoomOut = zoomAction == null ? false : zoomAction.canZoomOut();
+		boolean canZoomOut = zoomAction != null && zoomAction.canZoomOut();
 		toolItem[ACTION_ZOOM_OUT].setEnabled(canZoomOut);
 		
 		boolean canHotPath = selectedScope != null && selectedScope.hasChildren();

@@ -20,6 +20,7 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpctree.IScopeTreeData;
 import edu.rice.cs.hpctree.ScopeTreeData;
+import edu.rice.cs.hpctree.ScopeTreeTable;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractView;
 import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownPart;
 
@@ -100,7 +101,7 @@ public class ThreadPart extends TopDownPart
 					// need to avoid duplication
 					viewInput.setRootScope(newRoot);
 					getActionManager().clear();
-					getTable().reset(newRoot);
+					((ScopeTreeTable)getTable()).reset(newRoot);
 					updateButtonStatus();
 				}
 			}

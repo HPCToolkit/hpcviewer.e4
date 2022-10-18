@@ -86,7 +86,7 @@ public class TopDownPart extends AbstractTableView
 					mgr.removeAll();
 					mgr.createContextMenu(toolbar);
 					
-					ScopeTreeTable table = getTable();
+					var table = getTable();
 					Scope scope = table.getSelection();
 					IMetricManager metricManager = getMetricManager();
 					
