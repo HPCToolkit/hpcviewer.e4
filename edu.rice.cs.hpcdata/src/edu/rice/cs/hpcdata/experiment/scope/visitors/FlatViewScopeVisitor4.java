@@ -176,17 +176,12 @@ public class FlatViewScopeVisitor4 extends FlaViewScopeBuilder implements IScope
 		mapIdToCombinedScopes.put(id, target);
 	}
 	
+	
 	private FlatScopeInfo createFlatScope(Scope cctScope) {
 		// create the flat load module
-		LoadModuleScope lms;
-		if (cctScope instanceof InstructionScope) {
-			lms = ((InstructionScope) cctScope).getLoadModule();
-		} else if (cctScope instanceof ProcedureScope) {
-			lms = ((ProcedureScope) cctScope).getLoadModule();
-		} else {
-			var proc = findEnclosingProcedure(cctScope);
-			lms = proc.getLoadModule();
-		}
+		var procScope = findEnclosingProcedure(cctScope);
+		var lms = procScope.getLoadModule();
+		
 		var flatLm = mapIdToScope.get(lms.getFlatIndex());
 		if (flatLm == null) {
 			flatLm = lms.duplicate();	
@@ -197,7 +192,7 @@ public class FlatViewScopeVisitor4 extends FlaViewScopeBuilder implements IScope
 		}
 		
 		// create the flat file scope
-		SourceFile sf  = cctScope.getSourceFile();
+		SourceFile sf  = procScope.getSourceFile();
 		int fileID = lms.getFlatIndex() << 13 | sf.getFileID();
 		Scope flatFile = mapIdToScope.get(fileID);
 		if (flatFile == null) {

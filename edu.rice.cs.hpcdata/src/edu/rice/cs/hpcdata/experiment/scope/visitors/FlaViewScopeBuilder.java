@@ -26,6 +26,9 @@ public class FlaViewScopeBuilder
 		if (cctScope instanceof ProcedureScope) 
 			return (ProcedureScope) cctScope;
 		
+		if (cctScope instanceof InstructionScope)
+			return ((InstructionScope)cctScope).getProcedureScope();
+		
 		Scope parent = cctScope.getParentScope();
 		if (parent instanceof EntryScope && cctScope instanceof CallSiteScope) {
 			return ((CallSiteScope)cctScope).getProcedureScope();
@@ -83,6 +86,14 @@ public class FlaViewScopeBuilder
 		LoadModuleScope flatLM;
 		FileScope flatFile;
 		Scope flatScope;
+		
+		
+		/***
+		 * Attach file scope to the load module scope
+		 */
+		public void attachFileScope() {
+			flatLM.addSubscope(flatFile);
+			flatFile.setParentScope(flatLM);
+		}
 	}
-
 }
