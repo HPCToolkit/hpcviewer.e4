@@ -1,5 +1,8 @@
 package edu.rice.cs.hpcdata.experiment.scope.visitors;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.FileScope;
@@ -15,7 +18,29 @@ import edu.rice.cs.hpcdata.experiment.scope.StatementRangeScope;
 
 public class CallingContextReassignment implements IScopeVisitor 
 {
-
+	private final List<Scope> listScopesToRemove = new ArrayList<>();
+	
+	
+	/****
+	 * Finalizing the calling context reassignment by removing scopes
+	 * that are not needed to be displayed.
+	 * <br/>
+	 * These scopes are usually the line scopes that have been "reduced" 
+	 * and have no metric values. 
+	 */
+	public void postProcess() {
+		// Fix for issue #245 and #248: remove unneeded scopes
+		for(var scope: listScopesToRemove) {
+			var parent = scope.getParentScope();
+			parent.remove(scope);
+			
+			if (scope.hasChildren()) {
+				for(var child: scope.getChildren()) {
+					parent.addSubscope(child);
+				}
+			}				
+		}
+	}
 	
 	@Override
 	public void visit(LineScope scope, ScopeVisitType vt) { 
@@ -25,6 +50,9 @@ public class CallingContextReassignment implements IScopeVisitor
 				return;
 			for(var child: list) {
 				scope.reduce(child, MetricType.INCLUSIVE);
+			}
+			if (!scope.hasNonzeroMetrics()) {
+				listScopesToRemove.add(scope);
 			}
 		}
 	}

@@ -18,12 +18,11 @@ public class DerivedMetric extends AbstractMetricWithFormula {
 	// DATA
 	//===================================================================================
 
-	final static public String DESCRIPTION = "Derived metric";
+	public static final String DESCRIPTION = "Derived metric";
 	
 	// formula expression
 	private Expression expression;
-	// the total aggregate value
-	//private double dRootValue = 0.0;
+
 	// map function
 	private ExtFuncMap fctMap;
 	// map variable 
@@ -109,7 +108,7 @@ public class DerivedMetric extends AbstractMetricWithFormula {
 		rootValue  = setRootValue(root);
 	}
 
-	static public boolean evaluateExpression(String expression, 
+	public static boolean evaluateExpression(String expression, 
 			MetricVarMap varMap, ExtFuncMap funcMap) {
 		Expression exp = ExpressionTree.parse(expression);
 		exp.eval(varMap, funcMap);
@@ -201,7 +200,7 @@ public class DerivedMetric extends AbstractMetricWithFormula {
 		
 		fctMap.init();
 		
-		rootValue = null; //setRootValue(root);
+		rootValue = null; 
 	}
 	
 	private MetricValue setRootValue(RootScope rootScope) 

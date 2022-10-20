@@ -147,6 +147,9 @@ public class DataMeta extends DataCommon
 		// if a line scope has a call site, move it to be the sibling
 		CallingContextReassignment ccr = new CallingContextReassignment();
 		rootCCT.dfsVisitScopeTree(ccr);
+		
+		// Fix for issue #245 and #248: remove unneeded scopes
+		ccr.postProcess();
 
 		exp.setRootScope(root);
 		exp.setVersion(versionMajor + "." + versionMinor);

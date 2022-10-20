@@ -6,6 +6,7 @@ import com.graphbuilder.math.Expression;
 import com.graphbuilder.math.ExpressionTree;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
+import edu.rice.cs.hpcdata.db.MetricValueCollectionWithStorage;
 import edu.rice.cs.hpcdata.db.version4.DataSummary;
 import edu.rice.cs.hpcdata.experiment.TreeNode;
 import edu.rice.cs.hpcdata.experiment.scope.IMetricScope;
@@ -216,6 +217,12 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	@Override
 	public MetricValue getValue(IMetricScope s) {
 		Scope scope = (Scope)s;
+		// Fix for issue #248 for meta.db: do not grab the value from profile.db
+		// instead, if it's from bottom-up view or flat view, we grab the value 
+		// from the computed metrics.
+		if (scope.getMetricValues() instanceof MetricValueCollectionWithStorage) {
+			return scope.getMetricValue(index);
+		}
 		double value = 0;
 		try {
 			value = profileDB.getMetric(IdTuple.PROFILE_SUMMARY, 

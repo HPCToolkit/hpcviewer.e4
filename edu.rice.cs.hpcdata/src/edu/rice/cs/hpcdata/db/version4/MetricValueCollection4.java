@@ -136,9 +136,6 @@ public class MetricValueCollection4 implements IMetricValueCollection
 
 	@Override
 	public boolean hasMetrics(Scope scope) {
-	
-		// TODO: hack -- grab the first metric for initialization purpose
-		// just to make sure we already initialized :-(
 		
 		if (values == null) {
 			// trigger initialization
@@ -153,7 +150,10 @@ public class MetricValueCollection4 implements IMetricValueCollection
 
 		if (values != null)
 		{
-			return values.size()>0;
+			// make sure the list is NOT empty and has a value (not a NONE metric value)
+			return !values.isEmpty() && 
+					values.stream()
+						  .filter(v -> v != MetricValue.NONE).count()>0;
 		}
 		return false;
 	}
