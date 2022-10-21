@@ -544,6 +544,9 @@ public class DataMeta extends DataCommon
 				
 				var pi = mapPropagationIndex.get(pScope);
 				MetricType type = MetricType.convertFromPropagationScope(pi.scopeType);
+				if (type == MetricType.UNKNOWN)
+					type = MetricType.convertFromPropagationScope(pi.scopeName);
+				
 				m.setMetricType(type);									
 
 				// store the index of this scope.

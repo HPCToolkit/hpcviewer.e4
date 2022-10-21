@@ -140,6 +140,14 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 	}
 	
 	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof BaseMetric)
+			return compareTo((BaseMetric) obj) == 0;
+		return false;
+	}
+	
+	
 	/*************************************************************************
 	 *	Sets the metric's index.
 	 ************************************************************************/

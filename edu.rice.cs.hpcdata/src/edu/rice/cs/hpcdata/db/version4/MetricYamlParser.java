@@ -457,11 +457,9 @@ roots:
 					while(subIterator.hasNext()) {
 						var subKey = subIterator.next();
 						var subVal = subKey.getValue();
-						if (subKey.getKey().equals("standard")) {
-							parentMetric = false;
-						} else if (subKey.getKey().equals("custom")) {
-							parentMetric = false;
-						}
+						parentMetric = !subKey.getKey().equals("standard") &&
+									   !subKey.getKey().equals("custom");
+	
 						metric = getMetricCorrespondance(subVal.hashCode(), formulaType, desc);
 					}
 

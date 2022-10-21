@@ -131,7 +131,6 @@ public class ProfilePart implements IProfilePart, EventHandler
 		// its content to synchronize with the table in the active view
 		
 		if (metricView != null && !metricView.isDisposed()) {
-			RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
 			Object o = view.getInput();
 			IMetricManager metricMgr;
 			if (o instanceof IMetricManager) {
@@ -142,6 +141,8 @@ public class ProfilePart implements IProfilePart, EventHandler
 				throw new RuntimeException("Unknown view: " + view.getText());
 			}
 			boolean affectAll = view.getViewType() == AbstractView.ViewType.COLLECTIVE;
+			RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
+			
 			MetricFilterInput input  = new MetricFilterInput(root, 
 															 metricMgr, 
 															 view, 

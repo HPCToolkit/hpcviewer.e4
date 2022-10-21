@@ -118,7 +118,7 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 	
 	
 	private void updateMetricManager(IMetricManager metricManager) {		
-		input.getMetricManager().addMetricListener(this);
+		metricManager.addMetricListener(this);
 	}
 	
 	@Override

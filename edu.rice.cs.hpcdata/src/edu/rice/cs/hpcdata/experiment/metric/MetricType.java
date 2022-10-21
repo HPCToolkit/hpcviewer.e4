@@ -1,7 +1,5 @@
 package edu.rice.cs.hpcdata.experiment.metric;
 
-/* Java 1.5 public enum MetricType { EXCLUSIVE, INCLUSIVE, EXCLUSIVE_ONLY, DERIVED }*/
-
 // Java 1.4 Compatible enumeration type
 public class MetricType 
 {
@@ -9,8 +7,7 @@ public class MetricType
 	public static final MetricType EXCLUSIVE      = new MetricType("EXCLUSIVE");
 	public static final MetricType INCLUSIVE      = new MetricType("INCLUSIVE");
 	public static final MetricType POINT_EXCL     = new MetricType("XCLUSIVE");
-	//public final static MetricType PREAGGREGATE   = new MetricType("PREAGGREGATE");
-	//public final static MetricType DERIVED_INCR   = new MetricType("DERIVED_INCR");
+	public static final MetricType LEXICAL_AWARE  = new MetricType("LEXICAL_AWARE");
 	
 	public String toString() { return value; }
 	
@@ -30,8 +27,10 @@ public class MetricType
 	public static MetricType convertFromPropagationScope(String scopePropagationName) {
 		if (scopePropagationName.equalsIgnoreCase("execution")) 
 			return MetricType.INCLUSIVE;
-		else if (scopePropagationName.equalsIgnoreCase("function")) 
+		else if (scopePropagationName.equalsIgnoreCase("function")) 				 
 			return MetricType.EXCLUSIVE;
+		else if (scopePropagationName.equalsIgnoreCase("lex_aware"))
+			return MetricType.LEXICAL_AWARE;
 		else if (scopePropagationName.equalsIgnoreCase("point")) 
 			return MetricType.POINT_EXCL;
 		else

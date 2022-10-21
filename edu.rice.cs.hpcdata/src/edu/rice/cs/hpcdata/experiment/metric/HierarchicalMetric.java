@@ -199,7 +199,8 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	@Override
 	public String getDisplayName() {
 		String name = super.getDisplayName();
-		if (getMetricType() == MetricType.EXCLUSIVE)
+		if (getMetricType() == MetricType.EXCLUSIVE || 
+			getMetricType() == MetricType.LEXICAL_AWARE)
 			return name + " (E)";
 		else if (getMetricType() == MetricType.INCLUSIVE)
 			return name + " (I)";

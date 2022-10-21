@@ -61,7 +61,7 @@ public class MetricView extends AbstractUpperPart
 
 	@Override
 	public void setInput(Object input) {
-		if (input == null || !(input instanceof MetricFilterInput))
+		if (!(input instanceof MetricFilterInput))
 			return;
 		
 		inputFilter = (MetricFilterInput) input;

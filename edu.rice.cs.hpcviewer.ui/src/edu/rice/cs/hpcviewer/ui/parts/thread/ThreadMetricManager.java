@@ -26,12 +26,12 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 public class ThreadMetricManager implements IMetricManager 
 {
-	private final String ID;
+	private final String id;
 	private final EventList<BaseMetric> rawMetrics;
 	private final MutableIntObjectMap<BaseMetric> mapIntToMetric;
 	
-	public ThreadMetricManager(String ID, List<BaseMetric> metrics, List<IdTuple> listThreads) {
-		this.ID = ID;
+	public ThreadMetricManager(String id, List<BaseMetric> metrics, List<IdTuple> listThreads) {
+		this.id = id;
 		
 		List<BaseMetric> listMetrics = FastList.newList(metrics.size());
 		mapIntToMetric = new IntObjectHashMap<>();
@@ -41,7 +41,6 @@ public class ThreadMetricManager implements IMetricManager
 			MetricRaw mr = MetricRaw.create(m);
 			mr.setThread(listThreads);
 			
-			listMetrics.add(mr);
 			mapIntToMetric.put(m.getIndex(), mr);
 			
 			// reconstruct the metric partner
@@ -51,12 +50,17 @@ public class ThreadMetricManager implements IMetricManager
 			
 			if (partner == null) {
 				mapNameToMetric.put(baseName, mr);
+				listMetrics.add(mr);
 			} else {
-				partner.setPartner(mr.getIndex());
-				mr.setPartner(partner.getIndex());
-				
-				partner.setMetricPartner(mr);
-				mr.setMetricPartner(partner);
+				if (partner.getMetricPartner() == null) {
+					partner.setPartner(mr.getIndex());
+					mr.setPartner(partner.getIndex());
+					
+					partner.setMetricPartner(mr);
+					mr.setMetricPartner(partner);
+					
+					listMetrics.add(mr);
+				}
 			}
 		}
 		rawMetrics = GlazedLists.eventList(listMetrics);
@@ -102,7 +106,7 @@ public class ThreadMetricManager implements IMetricManager
 	@Override
 	public void addDerivedMetric(DerivedMetric objMetric) {
 		mapIntToMetric.put(objMetric.getIndex(), objMetric);
-		getRawMetrics().add(0, objMetric);
+		rawMetrics.add(0, objMetric);
 	}
 
 	@Override
@@ -156,6 +160,6 @@ public class ThreadMetricManager implements IMetricManager
 
 	@Override
 	public String getID() {
-		return ID;
+		return id;
 	}
 }
