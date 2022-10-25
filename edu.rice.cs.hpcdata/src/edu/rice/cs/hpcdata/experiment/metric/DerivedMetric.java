@@ -29,8 +29,7 @@ public class DerivedMetric extends AbstractMetricWithFormula {
 	private MetricVarMap varMap;
 	
 	private MetricValue rootValue;
-	
-	private RootScope root;
+
 	
 	//===================================================================================
 	// CONSTRUCTORS
@@ -50,7 +49,7 @@ public class DerivedMetric extends AbstractMetricWithFormula {
 	 * @param annotationType
 	 * @param objType
 	 */
-	public DerivedMetric(RootScope root, IMetricManager experiment, String expression, 
+	public DerivedMetric(IMetricManager experiment, String expression, 
 			String sName, String sID, 
 			int index, AnnotationType annotationType, MetricType objType) {
 		
@@ -60,11 +59,10 @@ public class DerivedMetric extends AbstractMetricWithFormula {
 		
 		// set up the functions
 		this.fctMap = new ExtFuncMap();
-		this.root 	= root;		
 		this.fctMap.init();
 
 		// set up the variables
-		this.varMap = new MetricVarMap(root, experiment);
+		this.varMap = new MetricVarMap(null, experiment);
 		this.varMap.setMetric(this);
 		
 		setExpression(expression);
@@ -89,7 +87,6 @@ public class DerivedMetric extends AbstractMetricWithFormula {
 		
 		super(sID, sName, DESCRIPTION, VisibilityType.SHOW, null, annotationType, index, index, objType);
 		
-		this.root 		= null; // to be defined later
 		this.varMap		= null; // to be defined later
 		this.expression = null; // to be defined later
 		
@@ -105,7 +102,7 @@ public class DerivedMetric extends AbstractMetricWithFormula {
 	 */
 	public void setExpression( String expr ) {
 		expression = ExpressionTree.parse(expr);
-		rootValue  = setRootValue(root);
+		rootValue  = null;
 	}
 
 	public static boolean evaluateExpression(String expression, 
@@ -145,7 +142,7 @@ public class DerivedMetric extends AbstractMetricWithFormula {
 			// For raw metrics with formula, the first time we create a derived metric,
 			// the value can be NONE
 			if (rootValue == null || rootValue == MetricValue.NONE) {
-				rootValue = setRootValue((RootScope)scope);
+				rootValue = setRootValue(scope.getRootScope());
 			}
 			return rootValue;
 		} else {
@@ -159,10 +156,6 @@ public class DerivedMetric extends AbstractMetricWithFormula {
 		return new MetricValue(dVal);
 	}
 	
-	public MetricValue getRawValue(IMetricScope s)
-	{
-		return getValue(s);
-	}
 
 	/****
 	 * return the current expression formula
@@ -176,8 +169,8 @@ public class DerivedMetric extends AbstractMetricWithFormula {
 
 	@Override
 	public BaseMetric duplicate() {
-		final DerivedMetric copy = new DerivedMetric(root, 
-													(IMetricManager) root.getExperiment(), 
+		final DerivedMetric copy = new DerivedMetric( 
+													varMap.getMetricManager(), 
 													expression.toString(),
 													displayName, 
 													shortName, 
@@ -185,7 +178,7 @@ public class DerivedMetric extends AbstractMetricWithFormula {
 													annotationType, 
 													metricType);
 		
-		// TODO: hack, we need to conserve the format of the metric.
+		// hack, we need to conserve the format of the metric.
 		copy.displayFormat = displayFormat;
 		return copy;
 	}
@@ -193,8 +186,6 @@ public class DerivedMetric extends AbstractMetricWithFormula {
 	
 	public void resetMetric(Experiment experiment, RootScope root)
 	{
-		this.root = root;
-		
 		varMap = new MetricVarMap(root, experiment);
 		varMap.setMetric(this);
 		

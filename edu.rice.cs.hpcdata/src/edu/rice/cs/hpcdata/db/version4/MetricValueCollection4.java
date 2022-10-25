@@ -35,7 +35,7 @@ public class MetricValueCollection4 implements IMetricValueCollection
 
 	private IntObjectHashMap<MetricValue> values;
 	
-	public MetricValueCollection4(DataSummary dataSummary) throws IOException
+	public MetricValueCollection4(DataSummary dataSummary)
 	{
 		this.dataSummary = dataSummary;
 	}
@@ -62,14 +62,14 @@ public class MetricValueCollection4 implements IMetricValueCollection
 			try {
 				sparseValues = dataSummary.getMetrics(scope.getCCTIndex());					
 			} catch (IOException e1) {
-				throw new IllegalArgumentException("scope index: " + index + "\n" + e1.getMessage());
+				throw new IllegalArgumentException("scope: " + scope.getCCTIndex() + "\n" + e1.getMessage());
 			}
 			// the reading is successful
 			// fill up the cache containing metrics of this scope for the next usage
 			
-			if (sparseValues != null && sparseValues.size()>0)
+			if (sparseValues != null && !sparseValues.isEmpty())
 			{
-				values = new IntObjectHashMap<MetricValue>(sparseValues.size()); 
+				values = new IntObjectHashMap<>(sparseValues.size()); 
 				
 				for (MetricValueSparse mvs: sparseValues) {
 					float value = (float) mvs.getValue();
@@ -82,7 +82,7 @@ public class MetricValueCollection4 implements IMetricValueCollection
 					return mv;
 			} else {
 				// create empty cache value so that we avoid searching again for this cct
-				values = new IntObjectHashMap<MetricValue>(0); 
+				values = new IntObjectHashMap<>(0); 
 			}
 
 		} else 
@@ -101,7 +101,7 @@ public class MetricValueCollection4 implements IMetricValueCollection
 				
 				if (metric instanceof DerivedMetric)
 				{
-					return ((DerivedMetric)metric).getValue(scope);
+					return metric.getValue(scope);
 				}
 			}
 		}

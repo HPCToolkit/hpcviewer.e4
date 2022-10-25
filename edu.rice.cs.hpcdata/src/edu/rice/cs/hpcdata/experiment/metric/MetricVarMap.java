@@ -10,14 +10,16 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 
 /**
- * @author la5
+ * Specialization of {@code VarMap} to map between a variable
+ * to a value given the database for a specific metric and scope.
  *
+ * @see VarMap
  */
 public class MetricVarMap extends VarMap 
 {
 	private Scope scope;
 	private BaseMetric metric = null;
-	private final IMetricManager metricManager;
+	private IMetricManager metricManager;
 
 	public MetricVarMap() {
 		this(null);
@@ -34,7 +36,23 @@ public class MetricVarMap extends VarMap
 	}
 	
 	//===========================
+	// APIs
+	//===========================
+
+	public void setMetricManager(IMetricManager newMetricManager) {
+		this.metricManager = newMetricManager;
+	}
 	
+	public IMetricManager getMetricManager() {
+		return metricManager;
+	}
+	
+	/****
+	 * Set new base metric for this variable mapping
+	 * 
+	 * @param metric
+	 * 			The new metric
+	 */
 	public void setMetric(BaseMetric metric)
 	{
 		this.metric = metric;
@@ -42,7 +60,8 @@ public class MetricVarMap extends VarMap
 	
 	/**
 	 * set the current scope which contains metric values
-	 * @param s: the scope of node
+	 * @param s
+	 * 			the scope of node
 	 */
 	public void setScope(IMetricScope s) {
 		this.scope = (Scope) s;
@@ -54,7 +73,6 @@ public class MetricVarMap extends VarMap
 	 * If the variable is a normal variable, it will call the parent method.		
 	 */
 	public double getValue(String varName) {
-		assert(varName != null);
 		
 		char firstLetter = varName.charAt(0);
 		if (firstLetter == '$' || firstLetter == '@') 
@@ -64,12 +82,11 @@ public class MetricVarMap extends VarMap
 			//---------------------------------------------------------
 
 			// Metric variable
-			String sIndex = varName.substring(1);
-			RootScope root    = scope instanceof RootScope? (RootScope) scope : scope.getRootScope();
+			RootScope root = scope instanceof RootScope? (RootScope) scope : scope.getRootScope();
 			IMetricManager mm = metricManager == null ? (IMetricManager) root.getExperiment() : metricManager;
-			BaseMetric metricToQuery = mm.getMetric(Integer.valueOf(sIndex));
+			BaseMetric metricToQuery = mm.getMetric(getIntMetricIndex(varName));
 			if (metricToQuery == null) 
-				throw new RuntimeException("metric ID unknown: " + sIndex);
+				throw new RuntimeException("metric ID unknown: " + varName);
 			
 			//---------------------------------------------------------
 			// 2011.02.08: new interpretation of the symbol "@x" where x is the metric ID
@@ -83,7 +100,7 @@ public class MetricVarMap extends VarMap
 			if (this.metric != null && this.metric == metricToQuery) {
 				// avoid recursive call: if the metric queries its own value, we returns
 				// the "raw" value 
-				value = currentScope.getMetricValue(metricToQuery.getIndex());
+				value = currentScope.getDirectMetricValue(metricToQuery.getIndex());
 			} else {
 				value = metricToQuery.getValue(currentScope);
 			}
@@ -91,8 +108,7 @@ public class MetricVarMap extends VarMap
 				return value.getValue();
 
 		} else if (firstLetter == '#') {
-			String sIndex = varName.substring(1);
-			Integer index = Integer.valueOf(sIndex);
+			int index = getIntMetricIndex(varName);
 			
 			RootScope root = scope instanceof RootScope? (RootScope) scope : scope.getRootScope();
 			IMetricManager mm = metricManager == null ? (IMetricManager) root.getExperiment() : metricManager;
@@ -130,5 +146,16 @@ public class MetricVarMap extends VarMap
 			return super.getValue(varName);
 
 		return 0.0d;
+	}
+	
+	private int getIntMetricIndex(String varName) {
+		if (varName == null)
+			return -1;
+		
+		if (varName.equals("$$") || varName.equals("##") || varName.equals("@@"))
+			return metric.getIndex();
+		
+		String sIndex = varName.substring(1);
+		return Integer.valueOf(sIndex);
 	}
 }

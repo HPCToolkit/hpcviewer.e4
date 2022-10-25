@@ -10,7 +10,14 @@ import org.junit.Test;
 import com.graphbuilder.math.Expression;
 import com.graphbuilder.math.ExpressionTree;
 
+import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.metric.AbstractMetricWithFormula;
+import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricFormulaExpression;
+import edu.rice.cs.hpcdata.experiment.metric.MetricType;
+import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
+import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
+import edu.rice.cs.hpctest.util.TestDatabase;
 
 public class MetricFormulaExpressionTest {
 
@@ -24,7 +31,8 @@ public class MetricFormulaExpressionTest {
 			mapOldIndex.put(i, j);
 			mapNewIndex.put(j, i);
 		}
-		final String []formula = new String[] {	"$100+@110/$120", 
+		final String []formula = new String[] {	"$$", 
+												"$100+@110/$120", 
 												"10+10+20", 
 												"$110" , 
 												"sum($120, $123, $133)",
@@ -53,8 +61,42 @@ public class MetricFormulaExpressionTest {
 			MetricFormulaExpression.rename(e2, mapNewIndex, null);
 			
 			// the test is valid if the last conversion is the same as the original one.
-			assertTrue(fOrig.compareTo(e2.toString())==0);
+			assertEquals(0, fOrig.compareTo(e2.toString()));
 		}
 	}
 
+	
+	@Test
+	public void testFormula() throws Exception {
+		var files = TestDatabase.getDatabases();
+		for (var file: files) {
+			var database = new Experiment();
+			database.open(file, null, true);
+			var metrics = database.getMetricList();
+			
+			if (metrics == null || metrics.isEmpty())
+				continue;
+			
+			var root = database.getRootScope(RootScopeType.CallingContextTree);
+			
+			for (var metric: metrics) {
+				if (!(metric instanceof AbstractMetricWithFormula))
+					continue;
+				
+				AbstractMetricWithFormula m = (AbstractMetricWithFormula) metric;
+				var textValue = m.getMetricTextValue(root);
+				
+				var mv = root.getMetricValue(metric);
+				if (mv == MetricValue.NONE)
+					assertTrue(textValue.isEmpty());
+				else
+					assertTrue(textValue.length() > 1);
+
+				if (metric.getMetricType() == MetricType.INCLUSIVE) {
+					var val = metric.getValue(root);
+					assertEquals(mv.getValue(), val.getValue(), 0.00001f);
+				}
+			}
+		}
+	}
 }

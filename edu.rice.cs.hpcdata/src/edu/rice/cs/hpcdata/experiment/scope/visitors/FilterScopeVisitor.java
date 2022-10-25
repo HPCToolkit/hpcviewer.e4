@@ -473,7 +473,7 @@ public class FilterScopeVisitor implements IScopeVisitor
 		if (target instanceof RootScope)
 			return;
 		
-		MetricValue mvParentExc = target.getMetricValue(exclusiveMetricIndex);
+		MetricValue mvParentExc = target.getDirectMetricValue(exclusiveMetricIndex);
 		float value = 0;
 		if (mvParentExc.getValue() >= 0) {
 			// Initialize with the original value if it has a value (otherwise the value is -1)

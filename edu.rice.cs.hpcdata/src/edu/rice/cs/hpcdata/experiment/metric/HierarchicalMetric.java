@@ -1,11 +1,8 @@
 package edu.rice.cs.hpcdata.experiment.metric;
 
-import java.io.IOException;
-
 import com.graphbuilder.math.Expression;
 import com.graphbuilder.math.ExpressionTree;
 
-import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.MetricValueCollectionWithStorage;
 import edu.rice.cs.hpcdata.db.version4.DataSummary;
 import edu.rice.cs.hpcdata.experiment.TreeNode;
@@ -36,6 +33,11 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	private final DataSummary profileDB;
 	private final TreeNode<HierarchicalMetric> node;
 	
+	// map function
+	private final ExtFuncMap fctMap;
+	// map variable 
+	private final MetricVarMap varMap;
+
 	private Expression expression;
 	
 	/**
@@ -68,6 +70,11 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		this.profileDB = profileDB;
 		setIndex(index);
 		node = new TreeNode<>(index);
+		
+		varMap = new MetricVarMap();
+		varMap.setMetric(this);
+		
+		fctMap = new ExtFuncMap();
 	}
 	
 	
@@ -222,23 +229,39 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		// instead, if it's from bottom-up view or flat view, we grab the value 
 		// from the computed metrics.
 		if (scope.getMetricValues() instanceof MetricValueCollectionWithStorage) {
-			return scope.getMetricValue(index);
+			return scope.getDirectMetricValue(index);
 		}
-		double value = 0;
-		try {
-			value = profileDB.getMetric(IdTuple.PROFILE_SUMMARY, 
-											   scope.getCCTIndex(), 
-											   index);
-		} catch (IOException e) {
-			throw new IllegalArgumentException("Cannot find metric value for " + s.toString());
+		
+		// if the formula requires other variables, or
+		// function, we need to compute the expression
+		var variables = expression.getVariableNames();
+		if (variables.length > 1 ||
+			expression.getFunctionNames().length > 0) {
+			// require parsing the expression because it contains a function
+			return getComputedValue(s);
 		}
+		// special case: if the formula is $x where x is this metric index,
+		// we return the raw value
+		var sIndex = variables[0].substring(1);
+		if (sIndex.charAt(0) == '$' || 
+			Integer.parseInt(sIndex) == index) {
+			// get the original value from the database
+			return scope.getMetricValue(this);
+		}
+		return getComputedValue(scope);
+	}
+
+
+	private MetricValue getComputedValue(IMetricScope scope) {
+		varMap.setScope(scope);
+		var value = expression.eval(varMap, fctMap);
 		if (value == 0.0d)
 			return MetricValue.NONE;
 		
 		return new MetricValue(value);
 	}
 
-
+	
 	@Override
 	public BaseMetric duplicate() {
 		var dupl = new HierarchicalMetric(profileDB, index, displayName);
@@ -247,7 +270,7 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		dupl.expression     = expression.duplicate();
 		dupl.metricType     = metricType;
 		dupl.order          = order;
-		dupl.partnerIndex  = partnerIndex;
+		dupl.partnerIndex   = partnerIndex;
 		dupl.sampleperiod   = sampleperiod;
 		
 		return dupl;

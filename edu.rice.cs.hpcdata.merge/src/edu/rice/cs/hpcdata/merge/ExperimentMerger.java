@@ -35,7 +35,9 @@ import edu.rice.cs.hpcdata.experiment.scope.visitors.*;
  */
 public class ExperimentMerger 
 {
-	static final private boolean with_raw_metrics = false;
+	private static final boolean with_raw_metrics = false;
+	
+	private ExperimentMerger() {}
 	
 	/**
 	 * Merging two experiments, and return the new experiment
@@ -47,7 +49,7 @@ public class ExperimentMerger
 	 * @return merged experiment database
 	 * @throws Exception 
 	 */
-	static public Experiment merge(DatabasesToMerge db) throws Exception {
+	public static Experiment merge(DatabasesToMerge db) throws Exception {
 		
 		final String parent_dir = generateMergeName(db.experiment[0], db.experiment[1]);
 
@@ -64,7 +66,7 @@ public class ExperimentMerger
 	 * @return the new merged database
 	 * @throws Exception 
 	 */
-	static public Experiment merge(DatabasesToMerge db, String parent_dir) throws Exception {
+	public static Experiment merge(DatabasesToMerge db, String parent_dir) throws Exception {
 		
 		Experiment exp1 = db.experiment[0];
 		Experiment exp2 = db.experiment[1];
@@ -198,12 +200,11 @@ public class ExperimentMerger
 		// ----------------------------------------------------------------
 		// step 1: add the first metrics into the merged experiment
 		// ----------------------------------------------------------------
-		final List<BaseMetric> metricList = m1.stream().
-											   map(metric -> metric.duplicate()).
-											   collect(Collectors.toList());
-		metricList.forEach(metric -> {
-			metric.setDisplayName("1-" + metric.getDisplayName());
-		});
+		final List<BaseMetric> metricList = m1.stream()
+											  .map(BaseMetric::duplicate)
+											  .collect(Collectors.toList());
+		
+		metricList.forEach(metric -> metric.setDisplayName("1-" + metric.getDisplayName()));
 		
 		// attention: hpcprof doesn't guarantee the ID of metric starts with zero
 		//	we should make sure that the next ID for the second group of metrics is not
@@ -264,7 +265,7 @@ public class ExperimentMerger
 		// ----------------------------------------------------------------
 		// step 3: rename the formula in derived metrics
 		// ----------------------------------------------------------------
-		if (listDerivedMetrics.size()>0) {
+		if (!listDerivedMetrics.isEmpty()) {
 			for(AbstractMetricWithFormula m: listDerivedMetrics) {
 				m.renameExpression(mapOldIndex, mapOldOrder);
 				metricsMerged.add(m);

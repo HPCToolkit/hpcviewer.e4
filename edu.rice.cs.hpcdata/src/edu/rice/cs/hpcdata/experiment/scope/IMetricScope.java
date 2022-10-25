@@ -20,7 +20,7 @@ public interface IMetricScope
 	 * @return {@code MetricValue}
 	 * 			The "raw" metric value without finalization.
 	 */
-	public MetricValue getMetricValue(int index);
+	public MetricValue getDirectMetricValue(int index);
 	
 	/***
 	 * Returns the value of a given metric at this scope.<br/>

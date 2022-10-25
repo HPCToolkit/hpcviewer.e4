@@ -615,7 +615,7 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 			Expression newFormula = ExpressionTree.parse(txtMetricFormula.getText());
 			MetricFormulaExpression.rename(newFormula, mapMetricNewIndex, null);
 
-			metric = new DerivedMetric(root, metricManager, newFormula.toString(), 
+			metric = new DerivedMetric( metricManager, newFormula.toString(), 
 					cbMetricName.getText(), metricLastID, maxIndex, 
 					annType, MetricType.UNKNOWN);
 

@@ -122,7 +122,7 @@ implements IMetricManager, ListEventListener<BaseMetric>
 	
 	private void copyMetric(Scope target, Scope source, int src_i, int targ_i, MetricValuePropagationFilter filter) {
 		if (filter.doPropagation(source, target, src_i, targ_i)) {
-			MetricValue mv = source.getMetricValue(src_i);
+			MetricValue mv = source.getDirectMetricValue(src_i);
 			if (mv != MetricValue.NONE && Float.compare(MetricValue.getValue(mv), 0.0f)!=0) {
 				target.setMetricValue(targ_i, mv);
 			}
@@ -153,7 +153,7 @@ implements IMetricManager, ListEventListener<BaseMetric>
 
 					// case for old database: no partner information
 					if (partner_metric != null) {
-						MetricValue partner_value = scope.getMetricValue( partner );
+						MetricValue partner_value = scope.getDirectMetricValue( partner );
 						scope.setMetricValue(metric.getIndex(), partner_value);
 					}
 				}

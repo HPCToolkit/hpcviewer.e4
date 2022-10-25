@@ -190,9 +190,8 @@ public class DataSummary extends DataCommon
 	public List<IdTuple> getIdTuple(IdTupleOption option) {
 		return listIdTuple;
 	}
-	
-	
-	
+
+
 	/****
 	 * Get the value of a specific profile with specific cct and metric id
 	 * 

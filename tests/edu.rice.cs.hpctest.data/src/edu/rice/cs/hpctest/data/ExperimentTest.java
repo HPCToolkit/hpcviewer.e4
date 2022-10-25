@@ -180,13 +180,12 @@ public class ExperimentTest
 			if (experiment.getMetricCount()==0) 
 				continue;
 			
-			RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
 			BaseMetric metric = experiment.getMetricList().get(0);
 			int numMetrics = experiment.getMetricCount();
 			int index = getUnusedMetricIndex(experiment);
 			String ID = String.valueOf(index);
 			
-			DerivedMetric dm = new DerivedMetric(root, 
+			DerivedMetric dm = new DerivedMetric( 
 										experiment, 
 										"$" + metric.getIndex(), 
 										"DM " + metric.getDisplayName(), 

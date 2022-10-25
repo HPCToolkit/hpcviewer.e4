@@ -605,7 +605,7 @@ implements IMetricScope
 
 	/***************************************************************************
   	 * <p>
-  	 * This method returns the cached raw metric value.
+  	 * This method returns directly the cached raw metric value.
   	 * Unlike {@link getMetricValue(BaseMetric)}, it doesn't trigger calculation
   	 * of final metric value.
   	 * </p>
@@ -617,7 +617,7 @@ implements IMetricScope
   	 * 			The metric value. If the index has no value, it returns {@code MetricValue.NONE}
 	 ***************************************************************************/
 
-	public MetricValue getMetricValue(int index)
+	public MetricValue getDirectMetricValue(int index)
 	{
 		ensureMetricStorage();
 		return metrics.getValue(this, index);
