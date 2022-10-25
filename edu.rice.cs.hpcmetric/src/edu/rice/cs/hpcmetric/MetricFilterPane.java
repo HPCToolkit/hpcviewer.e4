@@ -5,12 +5,12 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.widgets.WidgetFactory;
+import org.eclipse.jface.window.Window;
 import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
 import org.eclipse.swt.SWT;
@@ -30,6 +30,7 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
+import edu.rice.cs.hpcbase.BaseConstants.ViewType;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcbase.map.UserInputHistory;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
@@ -105,9 +106,14 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 		input.getMetricManager().removeMetricListener(this);
 
 		// then register to listen to this manager
-		this.input = (MetricFilterInput) inputData;
+		input = (MetricFilterInput) inputData;
 
 		updateMetricManager(input.getMetricManager());
+		
+		btnApplyToAllViews.setEnabled(input.getView().getViewType() == ViewType.COLLECTIVE);
+		
+		boolean selected = getHistoryApplyAll() && input.isAffectAll();
+		btnApplyToAllViews.setSelection(selected);
 		
 		// important: has to reset the data provider to null 
 		// so we'll create a different instance of data provider 
@@ -139,7 +145,8 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 		btnApplyToAllViews = new Button(parent, SWT.CHECK);
 		btnApplyToAllViews.setText("Apply to all views");
 		btnApplyToAllViews.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-		btnApplyToAllViews.setEnabled(input.isAffectAll());
+		btnApplyToAllViews.setEnabled(input.getView().getViewType() == ViewType.COLLECTIVE);
+		
 		boolean checked = getHistoryApplyAll() && input.isAffectAll();
 		btnApplyToAllViews.setSelection( checked );
 		
@@ -198,7 +205,7 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 	
 	
 	private void broadcast(Object data) {
-		List<FilterDataItem<BaseMetric>> copyList = new ArrayList<FilterDataItem<BaseMetric>>(getEventList()); //List.copyOf(getList());
+		List<FilterDataItem<BaseMetric>> copyList = new ArrayList<>(getEventList());
 		MetricDataEvent metricDataEvent = new MetricDataEvent(data, copyList, btnApplyToAllViews.getSelection());
 		ViewerDataEvent viewerDataEvent = new ViewerDataEvent(input.getMetricManager(), metricDataEvent);
 		
@@ -224,7 +231,7 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 	 */
 	private void update(BaseMetric metric) {
 		Optional<FilterDataItem<BaseMetric>> mfdi = getEventList().stream()
-												.filter( item -> ((BaseMetric)item.data).getIndex() == metric.getIndex() )
+												.filter( item -> (item.data).getIndex() == metric.getIndex() )
 												.findFirst();
 		if (mfdi.isEmpty())
 			return;
@@ -249,7 +256,7 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 					input.getMetricManager(), 
 					input.getRoot());
 			dlg.setMetric((DerivedMetric) item.getData());
-			if (dlg.open() == Dialog.OK) {
+			if (dlg.open() == Window.OK) {
 				BaseMetric metric = dlg.getMetric();
 				update(metric);
 				
@@ -262,7 +269,7 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 
 			InputDialog inDlg = new InputDialog(shell, "Edit metric display name", 
 					"Enter the new display name", metric.getDisplayName(), null);
-			if (inDlg.open() == Dialog.OK) {
+			if (inDlg.open() == Window.OK) {
 				String name = inDlg.getValue();
 				metric.setDisplayName(name);
 				update(metric);
@@ -336,8 +343,8 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 	@Override
 	protected void setLayerConfiguration(DataLayer dataLayer) {
 		dataLayer.setColumnWidthPercentageByPosition(0, 5);
-		dataLayer.setColumnWidthPercentageByPosition(1, 30);
-		dataLayer.setColumnWidthPercentageByPosition(2, 45);
+		dataLayer.setColumnWidthPercentageByPosition(1, 25);
+		dataLayer.setColumnWidthPercentageByPosition(2, 50);
 		dataLayer.setColumnWidthPercentageByPosition(3, 20);
 		dataLayer.setColumnsResizableByDefault(true);
 	}

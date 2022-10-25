@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.swt.custom.CTabFolder;
 import org.osgi.service.event.Event;
+
+import edu.rice.cs.hpcbase.BaseConstants.ViewType;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
@@ -21,7 +23,6 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpctree.IScopeTreeData;
 import edu.rice.cs.hpctree.ScopeTreeData;
 import edu.rice.cs.hpctree.ScopeTreeTable;
-import edu.rice.cs.hpcviewer.ui.internal.AbstractView;
 import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownPart;
 
 
@@ -177,7 +178,7 @@ public class ThreadPart extends TopDownPart
 	
 	@Override
 	public ViewType getViewType() {
-		return AbstractView.ViewType.INDIVIDUAL;
+		return ViewType.INDIVIDUAL;
 	}
 
 	@Override

@@ -10,7 +10,8 @@ import edu.rice.cs.hpcdata.experiment.scope.*;
 import com.graphbuilder.math.*;
 
 /**
- * @author la5
+ * Class for user-defined derived metrics and
+ * hpcrun metrics that have to be computed by the viewer.
  *
  */
 public class DerivedMetric extends AbstractMetricWithFormula {

@@ -1,8 +1,6 @@
 package edu.rice.cs.hpcdata.experiment.metric;
 
 import com.graphbuilder.math.Expression;
-import com.graphbuilder.math.ExpressionTree;
-
 import edu.rice.cs.hpcdata.db.MetricValueCollectionWithStorage;
 import edu.rice.cs.hpcdata.db.version4.DataSummary;
 import edu.rice.cs.hpcdata.experiment.TreeNode;
@@ -32,13 +30,6 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 
 	private final DataSummary profileDB;
 	private final TreeNode<HierarchicalMetric> node;
-	
-	// map function
-	private final ExtFuncMap fctMap;
-	// map variable 
-	private final MetricVarMap varMap;
-
-	private Expression expression;
 	
 	/**
 	 * The combination function combine is an enumeration with the following possible values (the name after / is the matching name for inputs:combine in METRICS.yaml):
@@ -70,11 +61,6 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		this.profileDB = profileDB;
 		setIndex(index);
 		node = new TreeNode<>(index);
-		
-		varMap = new MetricVarMap();
-		varMap.setMetric(this);
-		
-		fctMap = new ExtFuncMap();
 	}
 	
 	
@@ -105,10 +91,6 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 			this.psType[i] = psType[i];
 			this.psIndex[i] = psIndex[i];
 		}
-	}
-
-	public void setFormula(String formula) {
-		expression = ExpressionTree.parse(formula);
 	}
 	
 	
@@ -219,7 +201,7 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	
 	@Override
 	protected Expression[] getExpressions() {
-		return new Expression[] {expression};
+		return new Expression[0];
 	}
 
 	@Override
@@ -231,34 +213,7 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		if (scope.getMetricValues() instanceof MetricValueCollectionWithStorage) {
 			return scope.getDirectMetricValue(index);
 		}
-		
-		// if the formula requires other variables, or
-		// function, we need to compute the expression
-		var variables = expression.getVariableNames();
-		if (variables.length > 1 ||
-			expression.getFunctionNames().length > 0) {
-			// require parsing the expression because it contains a function
-			return getComputedValue(s);
-		}
-		// special case: if the formula is $x where x is this metric index,
-		// we return the raw value
-		var sIndex = variables[0].substring(1);
-		if (sIndex.charAt(0) == '$' || 
-			Integer.parseInt(sIndex) == index) {
-			// get the original value from the database
-			return scope.getMetricValue(this);
-		}
-		return getComputedValue(scope);
-	}
-
-
-	private MetricValue getComputedValue(IMetricScope scope) {
-		varMap.setScope(scope);
-		var value = expression.eval(varMap, fctMap);
-		if (value == 0.0d)
-			return MetricValue.NONE;
-		
-		return new MetricValue(value);
+		return scope.getMetricValue(this);
 	}
 
 	
@@ -267,7 +222,6 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		var dupl = new HierarchicalMetric(profileDB, index, displayName);
 		dupl.annotationType = annotationType;
 		dupl.displayFormat  = displayFormat;
-		dupl.expression     = expression.duplicate();
 		dupl.metricType     = metricType;
 		dupl.order          = order;
 		dupl.partnerIndex   = partnerIndex;

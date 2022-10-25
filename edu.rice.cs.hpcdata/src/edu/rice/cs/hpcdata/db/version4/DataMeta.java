@@ -21,7 +21,9 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.ExperimentConfiguration;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
+import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
+import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.scope.EntryScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoadModuleScope;
@@ -528,32 +530,40 @@ public class DataMeta extends DataCommon
 				long pFormula  = buffer.getLong(summaryLoc + 0x08);
 				byte combine   = buffer.get(summaryLoc + 0x10);
 				short statMetric = buffer.getShort(summaryLoc + 0x12);
-										
-				var strFormula = getNullTerminatedString(buffer, (int) (pFormula-section.offset));
 				
-				var m = new HierarchicalMetric(dataSummary, statMetric, metricName);
-				m.setFormula(strFormula);
-				m.setCombineType(combine);
-				m.setDescription(metricName);
-				m.setOrder(statMetric);
-				m.setIndex(propMetricId[k]);
+				BaseMetric metric;
+				
+				var strFormula = getNullTerminatedString(buffer, (int) (pFormula-section.offset));
+				if (requireOtherMetric(strFormula, statMetric)) {
+					// derived metric
+					var index = propMetricId[k];
+					var shortName = String.valueOf(index);
+					metric = new DerivedMetric((IMetricManager) experiment, strFormula, metricName, shortName, index, null, null);
+				} else {
+					metric = new HierarchicalMetric(dataSummary, statMetric, metricName);
+					((HierarchicalMetric) metric).setCombineType(combine);
+				}
+				
+				metric.setDescription(metricName);
+				metric.setOrder(statMetric);
+				metric.setIndex(propMetricId[k]);
 				
 				// temporary quick fix: every metric is percent annotated
 				// this should be fixed when we parse metrics.yaml
-				m.setAnnotationType(BaseMetric.AnnotationType.PERCENT);
+				metric.setAnnotationType(BaseMetric.AnnotationType.PERCENT);
 				
 				var pi = mapPropagationIndex.get(pScope);
 				MetricType type = MetricType.convertFromPropagationScope(pi.scopeType);
 				if (type == MetricType.UNKNOWN)
 					type = MetricType.convertFromPropagationScope(pi.scopeName);
 				
-				m.setMetricType(type);									
+				metric.setMetricType(type);									
 
 				// store the index of this scope.
 				// we need this to propagate the partner index
 				metricIndexesPerScope[k] = metricDesc.size();
 				
-				metricDesc.add(m);
+				metricDesc.add(metric);
 			}
 			
 			// Re-assign the partner index:
@@ -584,6 +594,33 @@ public class DataMeta extends DataCommon
 	}
 	
 	
+	/****
+	 * Return true if the formula requires the value of other metric.
+	 * 
+	 * @param formula
+	 * 			The math formula
+	 * @param metricIndex
+	 * 			This metric index
+	 * 
+	 * @return {@code boolean}
+	 * 
+	 */
+	private boolean requireOtherMetric(String formula, int metricIndex) {
+		if (!formula.isEmpty() && formula.length() > 1) {
+			if (formula.equals("$$"))
+				return false;
+			
+			char firstChar = formula.charAt(0);
+			if (firstChar == '$' || firstChar == '#' || firstChar == '@') {
+				var strIndex = formula.substring(1);
+				int index = Integer.parseInt(strIndex);
+				return index != metricIndex;
+			}
+			// case if the formula includes functions like sum($1, $2) ...
+			return true;
+		}
+		return false;
+	}
 	
 	/***
 	 * Parser for the load module section

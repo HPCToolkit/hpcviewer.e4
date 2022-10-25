@@ -58,6 +58,7 @@ import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadPart;
 import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadViewInput;
 import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownPart;
 
+import edu.rice.cs.hpcbase.BaseConstants.ViewType;
 
 
 public class ProfilePart implements IProfilePart, EventHandler
@@ -140,7 +141,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 			} else {
 				throw new RuntimeException("Unknown view: " + view.getText());
 			}
-			boolean affectAll = view.getViewType() == AbstractView.ViewType.COLLECTIVE;
+			boolean affectAll = view.getViewType() == ViewType.COLLECTIVE;
 			RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
 			
 			MetricFilterInput input  = new MetricFilterInput(root, 

@@ -26,8 +26,11 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
+import edu.rice.cs.hpcbase.BaseConstants;
+import edu.rice.cs.hpcbase.BaseConstants.ViewType;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcbase.ui.IUserMessage;
+
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
@@ -485,9 +488,9 @@ implements EventHandler, DisposeListener, IUserMessage
 		if (metricManager instanceof Experiment) {
 			Experiment exp = (Experiment) metricManager;
 			if (exp.isMergedDatabase())
-				return AbstractView.ViewType.INDIVIDUAL;
+				return BaseConstants.ViewType.INDIVIDUAL;
 		}
-		return AbstractView.ViewType.COLLECTIVE;
+		return BaseConstants.ViewType.COLLECTIVE;
 	}
 	
 	
@@ -497,26 +500,33 @@ implements EventHandler, DisposeListener, IUserMessage
 		// two possibilities of data types for this event:
 		// - List: it contains the list of columns to be shown/hidden
 		// - MetricFilterDataItem: a column to be shown/hidden 
+		var nonEmptyMetricId = metricManager.getNonEmptyMetricIDs(root);
+		final List<BaseMetric> metrics = getMetricManager().getVisibleMetrics();
+		final List<BaseMetric> visibleMetrics = new ArrayList<>();
+		for(var id: nonEmptyMetricId) {
+			var metric = metrics.stream().filter(m->m.getIndex() == id).findAny();
+			if (metric.isPresent()) {
+				visibleMetrics.add(metric.get());
+			}
+		}
 		
 		if (objData instanceof List<?>) {
 			@SuppressWarnings("unchecked")
 			final List<MetricFilterDataItem> list = (List<MetricFilterDataItem>) objData;
-			final List<BaseMetric> metrics = getMetricManager().getVisibleMetrics();
 			
 			// create the list of column status: true if shown, false if hidden
 			for(MetricFilterDataItem item: list) {
 				if (!item.enabled)
 					continue;
 				
-				int i = getColumnIndexByMetric(item, metrics);
+				int i = getColumnIndexByMetric(item, visibleMetrics);
 				hideOrShowColumn(i, item.checked);
 			}
 			
 		} else if (objData instanceof MetricFilterDataItem) {
 			MetricFilterDataItem item = (MetricFilterDataItem) objData; 
-			List<BaseMetric> metrics = getMetricManager().getVisibleMetrics();
 			
-			int index = getColumnIndexByMetric(item, metrics);
+			int index = getColumnIndexByMetric(item, visibleMetrics);
 			hideOrShowColumn(index, item.checked);
 		}
 		// Need to resize the column in case some columns are hidden and need to resize
@@ -636,7 +646,7 @@ implements EventHandler, DisposeListener, IUserMessage
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				boolean affectOthers = AbstractTableView.this.getViewType() == AbstractView.ViewType.COLLECTIVE;
+				boolean affectOthers = AbstractTableView.this.getViewType() == ViewType.COLLECTIVE;
 				MetricFilterInput input = new MetricFilterInput(root, 
 																getMetricManager(), 
 																AbstractTableView.this, 
