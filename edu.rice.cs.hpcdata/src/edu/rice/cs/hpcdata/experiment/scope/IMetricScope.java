@@ -38,4 +38,11 @@ public interface IMetricScope
 	 * @param value
 	 */
 	public void setMetricValue(int index, MetricValue value);
+
+	/****
+	 * get the root scope of this scope
+	 * 
+	 * @return RootScope
+	 */
+	RootScope getRootScope();
 }

@@ -193,23 +193,6 @@ implements IMetricScope
 		node.setValue(index);
 	}
 
-	/***
-	 * Make this scope as a virtual root to be displayed on the table.
-	 * 
-	 * @return new root which is the duplicate of this scope.
-	 */
-	public Scope createRoot() {
-		Scope newRoot = duplicate();
-		newRoot.setParentScope(getParentScope());
-		newRoot.addSubscope(this);
-		if (newRoot instanceof CallSiteScopeCallerView) {
-			((CallSiteScopeCallerView)newRoot).markScopeHasChildren();
-		}
-		copyMetrics(newRoot, 0);
-
-		return newRoot;
-	}
-
 
 	//////////////////////////////////////////////////////////////////////////
 	// DUPLICATION														//
@@ -566,8 +549,10 @@ implements IMetricScope
 
 	/****
 	 * get the root scope of this scope
-	 * @return
+	 * 
+	 * @return RootScope
 	 */
+	@Override
 	public RootScope getRootScope()
 	{
 		return root;
