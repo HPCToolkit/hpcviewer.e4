@@ -265,8 +265,10 @@ public class ExperimentMerger
 		// ----------------------------------------------------------------
 		if (!listDerivedMetrics.isEmpty()) {
 			for(AbstractMetricWithFormula m: listDerivedMetrics) {
-				m.renameExpression(mapOldIndex, mapOldOrder);
-				metricsMerged.add(m);
+				if (m.getMetricType() != MetricType.UNKNOWN) {
+					m.renameExpression(mapOldIndex, mapOldOrder);
+					metricsMerged.add(m);
+				}
 			}
 		}
 		
