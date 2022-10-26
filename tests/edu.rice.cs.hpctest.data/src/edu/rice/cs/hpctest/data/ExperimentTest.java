@@ -180,33 +180,52 @@ public class ExperimentTest
 			if (experiment.getMetricCount()==0) 
 				continue;
 			
-			BaseMetric metric = experiment.getMetricList().get(0);
-			int numMetrics = experiment.getMetricCount();
-			int index = getUnusedMetricIndex(experiment);
-			String ID = String.valueOf(index);
-			
-			DerivedMetric dm = new DerivedMetric( 
-										experiment, 
-										"$" + metric.getIndex(), 
-										"DM " + metric.getDisplayName(), 
-										ID, 
-										index, AnnotationType.NONE, metric.getMetricType());
-			experiment.addDerivedMetric(dm);
-			
-			assertEquals(experiment.getMetricCount(), numMetrics + 1L);
+			var root = experiment.getRootScope(RootScopeType.CallingContextTree);
+			int i=0;
+			for(var metric: experiment.getMetricList()) {
+				if (i>10)
+					break;
+				
+				int numMetrics = experiment.getMetricCount();
+				int index = getUnusedMetricIndex(experiment);
+				String ID = String.valueOf(index);
+				
+				DerivedMetric dm = new DerivedMetric( 
+											experiment, 
+											"$" + metric.getIndex(), 
+											"DM " + metric.getDisplayName(), 
+											ID, 
+											index, AnnotationType.NONE, metric.getMetricType());
+				experiment.addDerivedMetric(dm);
+				
+				assertEquals(experiment.getMetricCount(), numMetrics + 1L);
+				
+				equalMetricValue(root, metric, dm);
+				i++;
+			}
+		}
+	}
+	
+	private void equalMetricValue(Scope scope, BaseMetric m1,BaseMetric m2) {
+		var mv1 = m1.getValue(scope);
+		var mv2 = m2.getValue(scope);
+		
+		assertEquals(mv1, mv2);
+		
+		if (scope.hasChildren()) {
+			for(var child: scope.getChildren()) {
+				equalMetricValue(child, m1, m2);
+			}
 		}
 	}
 	
 	private int getUnusedMetricIndex(Experiment experiment) {
-		int numMetrics = experiment.getMetricCount();
-		int index = 0;
 		var metrics = experiment.getMetricList();
-		for(var metric: metrics) {
-			if (metric.getIndex() != index)
-				return index;
-			index++;
-		}
-		return numMetrics;
+		var x = metrics.stream().mapToInt(BaseMetric::getIndex).max();
+		if (x.isPresent())
+			return x.getAsInt() + 1;
+
+		return experiment.getMetricCount();
 	}
 	
 
