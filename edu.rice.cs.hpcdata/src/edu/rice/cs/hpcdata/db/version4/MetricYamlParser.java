@@ -215,7 +215,7 @@ inputs: ArrayList<E>  (id=98)
 			// try to find metric in meta.db that match the metric in yaml file
 			// We should find a matched metric, otherwise there is something wrong
 			var filteredMetrics = metrics.stream()
-					 .filter(m -> ((HierarchicalMetric)m).getName().equals(metric))
+					 .filter(m -> ((HierarchicalMetric)m).getOriginalName().equals(metric))
 					 .filter(m -> ((HierarchicalMetric)m).getCombineTypeLabel().equalsIgnoreCase(combine))
 					 .filter(m -> m.getMetricType() == mtype)
 					 .collect(Collectors.toList());

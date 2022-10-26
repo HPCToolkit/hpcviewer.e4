@@ -42,8 +42,10 @@ public class GraphMenu
 	 */
 	public static void createAdditionalContextMenu(
 			ProfilePart profilePart,
-			IMenuManager mgr, IMetricManager experiment, 
-			IThreadDataCollection threadData, Scope scope) {
+			IMenuManager mgr, 
+			IMetricManager experiment, 
+			IThreadDataCollection threadData, 
+			Scope scope) {
 		
 		if (scope == null || threadData == null || !threadData.isAvailable())
 			// no menus if there is no thread-level data

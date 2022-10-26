@@ -452,16 +452,6 @@ implements EventHandler, DisposeListener, IUserMessage
 			// metric has changed. 
 			// We don't know if the change will incur structural changes or just visual.
 			// it's better to refresh completely the table just in case. 
-			BaseMetric metric = (BaseMetric) eventInfo.data;
-			BaseMetric currentMetric = metricManager.getMetric(metric.getIndex());
-			currentMetric.setDisplayName(metric.getDisplayName());
-			
-			if (metric instanceof DerivedMetric) {
-				DerivedMetric dm = (DerivedMetric) metric;
-				DerivedMetric cm = (DerivedMetric) currentMetric;
-				cm.setExpression(dm.getFormula());
-				cm.setDisplayFormat(dm.getDisplayFormat());
-			}
 			table.visualRefresh();
 			
 		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH)) {

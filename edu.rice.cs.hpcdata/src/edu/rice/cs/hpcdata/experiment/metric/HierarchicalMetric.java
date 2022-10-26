@@ -30,6 +30,7 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 
 	private final DataSummary profileDB;
 	private final TreeNode<HierarchicalMetric> node;
+	private final String originalName;
 	
 	/**
 	 * The combination function combine is an enumeration with the following possible values (the name after / is the matching name for inputs:combine in METRICS.yaml):
@@ -60,7 +61,9 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		super(String.valueOf(index), name);
 		this.profileDB = profileDB;
 		setIndex(index);
+		
 		node = new TreeNode<>(index);
+		originalName = name;
 	}
 	
 	
@@ -181,26 +184,50 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	 * @return {@code String} 
 	 * 			the original name
 	 */
-	public String getName() {
-		return displayName;
+	public String getOriginalName() {
+		return originalName;
 	}
 	
 	@Override
 	public String getDisplayName() {
-		String name = super.getDisplayName();
+		// the display name of hierarchical metric (meta.db) is tricky
+		// because the name in meta.db doesn't include the metric type suffix
+		// (something like (I) or (E)).
+		// Worse, the metric type is only known after we parse the yaml file.
+		//
+		// So to remedy this issue, we have the "original name" and "display name"
+		// the "display name" is the original name with suffix
+		if (!displayName.equals(originalName))
+			return displayName;
+		
+		final String SUFFIX_EXCLUSIVE = " (E)";
+		final String SUFFIX_INCLUSIVE = " (I)";
+		final String SUFFIX_POINT_EXC = " (X)";
+		
+		// if the display name already have metric-type suffix.
+		// return the real display name
+		if (displayName.endsWith(SUFFIX_EXCLUSIVE) || 
+			displayName.endsWith(SUFFIX_INCLUSIVE) ||
+			displayName.endsWith(SUFFIX_POINT_EXC))
+			return displayName;
+		
+		// otherwise we need to add suffix for the metric type
+		// 
 		if (getMetricType() == MetricType.EXCLUSIVE || 
 			getMetricType() == MetricType.LEXICAL_AWARE)
-			return name + " (E)";
+			displayName = originalName + SUFFIX_EXCLUSIVE;
 		else if (getMetricType() == MetricType.INCLUSIVE)
-			return name + " (I)";
+			displayName = originalName + SUFFIX_INCLUSIVE;
 		else if (getMetricType() == MetricType.POINT_EXCL)
-			return name;
-		else
-			return name + " (X)";
+			displayName = originalName + SUFFIX_POINT_EXC;
+
+		return displayName;
 	}
 	
 	@Override
 	protected Expression[] getExpressions() {
+		// not supported at the moment
+		// all formula-based metrics should use DerivedMetric class
 		return new Expression[0];
 	}
 
@@ -221,6 +248,8 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	public BaseMetric duplicate() {
 		var dupl = new HierarchicalMetric(profileDB, index, displayName);
 		dupl.annotationType = annotationType;
+		dupl.combineType    = combineType;
+		dupl.description    = description;
 		dupl.displayFormat  = displayFormat;
 		dupl.metricType     = metricType;
 		dupl.order          = order;

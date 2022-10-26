@@ -200,7 +200,8 @@ public class MetricRaw  extends BaseMetric
 			if (value == MetricValue.NONE          && 
 				s instanceof RootScope             && 
 				metricType == MetricType.EXCLUSIVE &&
-				partner != null) {
+				partner != null                    &&
+				partner.metricType == MetricType.INCLUSIVE) {
 				
 				value = partner.getValue(s, threads);
 			}

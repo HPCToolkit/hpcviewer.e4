@@ -47,9 +47,8 @@ public class ExperimentMerger
 	 * @param type : root to merge (cct, bottom-up tree, or flat tree)
 	 *  
 	 * @return merged experiment database
-	 * @throws Exception 
 	 */
-	public static Experiment merge(DatabasesToMerge db) throws Exception {
+	public static Experiment merge(DatabasesToMerge db)  {
 		
 		final String parent_dir = generateMergeName(db.experiment[0], db.experiment[1]);
 
@@ -64,9 +63,8 @@ public class ExperimentMerger
 	 * @param type
 	 * @param parent_dir
 	 * @return the new merged database
-	 * @throws Exception 
 	 */
-	public static Experiment merge(DatabasesToMerge db, String parent_dir) throws Exception {
+	public static Experiment merge(DatabasesToMerge db, String parent_dir) {
 		
 		Experiment exp1 = db.experiment[0];
 		Experiment exp2 = db.experiment[1];
@@ -115,7 +113,7 @@ public class ExperimentMerger
 		
 		RootScope root1 = exp1.getRootScope(db.type);
 		if (root1 == null) {
-			throw new Exception("Unable to find root type " + db.type + " in " + exp1.getDefaultDirectory());
+			throw new IllegalArgumentException("Unable to find root type " + db.type + " in " + exp1.getDefaultDirectory());
 		}
 		createFlatTree(exp1, db.type, root1);
 		
@@ -129,7 +127,7 @@ public class ExperimentMerger
 
 		RootScope root2 = exp2.getRootScope(db.type);
 		if (root2 == null) {
-			throw new Exception("Unable to find root type " + db.type + " in " + exp2.getDefaultDirectory());
+			throw new IllegalArgumentException("Unable to find root type " + db.type + " in " + exp2.getDefaultDirectory());
 		}
 		createFlatTree(exp2, db.type, root2);
 
