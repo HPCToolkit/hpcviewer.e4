@@ -325,9 +325,12 @@ public class FilterScopeVisitor implements IScopeVisitor
 			
 			// replace the children trace id with the ancestor (or parent), 
 			// only if they are not trace scope
-			child.getChildren().stream()
-							   .filter(scope -> !CallPath.isTraceScope(scope))
-							   .forEach(scope -> callPathTraces.replaceCallPath(scope.getCpid(), parent, depth));
+			if (child.hasChildren())
+				// sometimes the elided child has no children at all
+				// in this case, we don't propagate the trace id
+				child.getChildren().stream()
+								   .filter(scope -> !CallPath.isTraceScope(scope))
+								   .forEach(scope -> callPathTraces.replaceCallPath(scope.getCpid(), parent, depth));
 			return;
 		}
 		
