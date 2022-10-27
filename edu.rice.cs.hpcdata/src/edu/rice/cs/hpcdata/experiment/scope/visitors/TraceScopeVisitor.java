@@ -124,10 +124,6 @@ public class TraceScopeVisitor implements IScopeVisitor
 		if (vt == ScopeVisitType.PreVisit) {
 			Scope current = scope;
 			
-			// TODO quickfix: since the old databases (version < 4) only
-			// display the functions (or inlines), we need to store the context id
-			// with the corresponding function.
-			// 
 			if (! CallPath.isTraceScope(current)) {
 	 			while ( (current != null) && 
 	 					!CallPath.isTraceScope(current) &&
@@ -146,6 +142,13 @@ public class TraceScopeVisitor implements IScopeVisitor
 				current = scope;
 			
 			callpath.addCallPath(scope.getCpid(), current, currentDepth);
+			
+			// need to add the line scope (which is the parent for prof2 database)
+			// because this parent can be removed later on during Calling Context Reassignment
+			if (scope instanceof CallSiteScope) {
+				CallSiteScope cs = (CallSiteScope) scope;
+				callpath.addCallPath(cs.getLineScope().getCCTIndex(), current, currentDepth);
+			}
 
 		} else {
 			if (CallPath.isTraceScope(scope))
