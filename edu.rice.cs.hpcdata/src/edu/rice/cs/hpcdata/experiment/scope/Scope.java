@@ -593,8 +593,11 @@ implements IMetricScope
 	{
 		ensureMetricStorage();
 		
-		// special case for raw metric: we need to grab the value
-		// from the metric directly. No caching here.
+		// special case for raw metric and any metrics with formula: 
+		// we need to grab the value from the metric directly.
+		// There is no caching here.
+		// 
+		// for other metrics, we may have cached the value
 		
 		if (metric instanceof MetricRaw || metric instanceof AggregateMetric)
 			return metric.getValue(this);
@@ -743,7 +746,6 @@ implements IMetricScope
 	public void setMetricValues(IMetricValueCollection values) {	
 		this.metrics = values;
 	}
-
 
 
 	/**************************************************************************

@@ -25,6 +25,7 @@ Main-Class: edu.rice.cs.hpcdata.framework.Application
 Require-Bundle: com.graphbuilder,
  org.eclipse.collections,
  ca.odell.glazedlists,
- org.yaml.snakeyaml
+ org.yaml.snakeyaml,
+ org.apache.commons.math3
 Automatic-Module-Name: edu.rice.cs.hpcdata
 Bundle-ClassPath: .

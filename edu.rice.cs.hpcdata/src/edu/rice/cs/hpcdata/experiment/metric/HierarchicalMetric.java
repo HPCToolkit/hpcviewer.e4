@@ -1,6 +1,10 @@
 package edu.rice.cs.hpcdata.experiment.metric;
 
+import org.apache.commons.math3.util.Precision;
+
 import com.graphbuilder.math.Expression;
+import com.graphbuilder.math.ExpressionTree;
+
 import edu.rice.cs.hpcdata.db.MetricValueCollectionWithStorage;
 import edu.rice.cs.hpcdata.db.version4.DataSummary;
 import edu.rice.cs.hpcdata.experiment.TreeNode;
@@ -26,11 +30,21 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	private static final byte FMT_METADB_COMBINE_MIN = 1;
 	private static final byte FMT_METADB_COMBINE_MAX = 2;
 	
-	private static final String []COMBINE_LABEL = {"Sum", "Min", "Max"};
+	private static final byte COMBINE_UNKNOWN = -1;
+	
+	private static final String []COMBINE_LABEL = {"Sum", "Min", "Max", "Mean", "StdDev", "CfVar"};
 
 	private final DataSummary profileDB;
 	private final TreeNode<HierarchicalMetric> node;
 	private final String originalName;
+	
+	// map function
+	private final ExtFuncMap fctMap;
+	// map variable 
+	private final MetricVarMap varMap;
+
+	private PropagationScope propagationScope;
+	private Expression formula;
 	
 	/**
 	 * The combination function combine is an enumeration with the following possible values (the name after / is the matching name for inputs:combine in METRICS.yaml):
@@ -41,9 +55,6 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	 * </ul>
 	 */
 	private byte combineType; 
-	
-	private byte []psType;
-	private byte []psIndex;
 
 	
 	/***
@@ -62,8 +73,16 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		this.profileDB = profileDB;
 		setIndex(index);
 		
+		varMap = new HierarchicalMetricVarMap();
+		varMap.setMetric(this);
+		
+		fctMap = new ExtFuncMap();
+		fctMap.loadDefaultFunctions();
+		
 		node = new TreeNode<>(index);
 		originalName = name;
+		
+		combineType = COMBINE_UNKNOWN;
 	}
 	
 	
@@ -86,15 +105,6 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	public HierarchicalMetric getChildAt(int index) {
 		return node.getChildAt(index);
 	}
-
-	public void setPropagationScope(byte []psType, byte []psIndex) {
-		this.psType  = new byte[psType.length];
-		this.psIndex = new byte[psIndex.length];
-		for(int i=0; i<psType.length; i++) {
-			this.psType[i] = psType[i];
-			this.psIndex[i] = psIndex[i];
-		}
-	}
 	
 	
 	/**
@@ -110,12 +120,33 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	}
 	
 	
+	/****
+	 * Set the combine type by name
+	 * 
+	 * @param combineName
+	 */
+	public void setCombineType(String combineName) {
+		if (combineName == null || combineName.isEmpty())
+			return;
+		
+		for(byte i=0; i<COMBINE_LABEL.length; i++) {
+			if (combineName.compareToIgnoreCase(COMBINE_LABEL[i]) == 0) {
+				combineType = i;
+				return;
+			}				
+		}
+		throw new IllegalArgumentException("Unknown combine name: " + combineName);
+	}
+	
 	/***
 	 * Get the name of combine function.
 	 * 
 	 * @return {@code String}
 	 */
 	public String getCombineTypeLabel() {
+		if (combineType == COMBINE_UNKNOWN)
+			return "";
+		
 		return COMBINE_LABEL[combineType];
 	}
 	
@@ -136,6 +167,9 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	 * 			Equivalent with the {@code target} variable in the argument
 	 */
 	public MetricValue reduce(MetricValue target, MetricValue source) {
+		if (combineType == COMBINE_UNKNOWN)
+			return target;
+		
 		final float INSIGNIFICANT_NUMBER = 0.000001f;
 		if (source == MetricValue.NONE)
 			return target;
@@ -188,6 +222,7 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		return originalName;
 	}
 	
+	
 	@Override
 	public String getDisplayName() {
 		// the display name of hierarchical metric (meta.db) is tricky
@@ -211,16 +246,26 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 			displayName.endsWith(SUFFIX_POINT_EXC))
 			return displayName;
 		
+		StringBuilder sb = new StringBuilder(originalName);
+		final String SUFFIX_COMBINE_TYPE = ": ";
+		
+		if (combineType >= 0) {
+			sb.append(SUFFIX_COMBINE_TYPE);
+			sb.append(getCombineTypeLabel());
+		}
+
 		// otherwise we need to add suffix for the metric type
 		// 
 		if (getMetricType() == MetricType.EXCLUSIVE || 
 			getMetricType() == MetricType.LEXICAL_AWARE)
-			displayName = originalName + SUFFIX_EXCLUSIVE;
+			sb.append(SUFFIX_EXCLUSIVE);
 		else if (getMetricType() == MetricType.INCLUSIVE)
-			displayName = originalName + SUFFIX_INCLUSIVE;
+			sb.append(SUFFIX_INCLUSIVE);
 		else if (getMetricType() == MetricType.POINT_EXCL)
-			displayName = originalName + SUFFIX_POINT_EXC;
+			sb.append(SUFFIX_POINT_EXC);
 
+		displayName = sb.toString();
+		
 		return displayName;
 	}
 	
@@ -228,19 +273,73 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	protected Expression[] getExpressions() {
 		// not supported at the moment
 		// all formula-based metrics should use DerivedMetric class
-		return new Expression[0];
+		return new Expression[] {formula};
 	}
+
+	/***
+	 * Get the math formula of the metric
+	 * 
+	 * @return
+	 */
+	public Expression getFormula() {
+		return formula;
+	}
+
+
+	/****
+	 * Set the math formula of the metric
+	 * 
+	 * @param formula
+	 */
+	public void setFormula(String strFormula) {
+		if (strFormula.equals("$$"))
+			formula = null;
+		this.formula = ExpressionTree.parse(strFormula);
+	}
+
+
+	/**
+	 * @return the propagationScope
+	 */
+	public PropagationScope getPropagationScope() {
+		return propagationScope;
+	}
+
+
+	/**
+	 * @param propagationScope the propagationScope to set
+	 */
+	public void setPropagationScope(PropagationScope propagationScope) {
+		this.propagationScope = propagationScope;
+		
+		// redundant information
+		MetricType type = propagationScope.getMetricType();		
+		setMetricType(type);
+	}
+
 
 	@Override
 	public MetricValue getValue(IMetricScope s) {
 		Scope scope = (Scope)s;
+			
 		// Fix for issue #248 for meta.db: do not grab the value from profile.db
 		// instead, if it's from bottom-up view or flat view, we grab the value 
 		// from the computed metrics.
-		if (scope.getMetricValues() instanceof MetricValueCollectionWithStorage) {
+		if (formula == null || 
+			scope.getMetricValues() instanceof MetricValueCollectionWithStorage) {
 			return scope.getDirectMetricValue(index);
 		}
-		return scope.getMetricValue(this);
+		
+		varMap.setScope(scope);
+		var value =  formula.eval(varMap, fctMap);
+		
+		// Usually we don't need to use apache's math to compare zero but in
+		// some cases, it's needed. Let's take the precaution using epsilon 
+		// next time.
+		if (Precision.equals(0.0d, value))
+			return MetricValue.NONE;
+		
+		return new MetricValue(value);
 	}
 
 	
@@ -255,8 +354,21 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		dupl.order          = order;
 		dupl.partnerIndex   = partnerIndex;
 		dupl.sampleperiod   = sampleperiod;
+		dupl.formula = formula.duplicate();
 		
 		return dupl;
 	}
 
+	
+	@Override
+	public boolean equals(Object other) {
+		if (!(other instanceof HierarchicalMetric))
+			return false;
+		
+		HierarchicalMetric otherMetric = (HierarchicalMetric) other;
+		return this.annotationType == otherMetric.annotationType &&
+			   this.combineType    == otherMetric.combineType    &&
+			   this.displayName.equals(otherMetric.displayName)  &&
+			   this.formula.toString().equals(otherMetric.getFormula().toString());  
+	}
 }

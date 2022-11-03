@@ -43,7 +43,7 @@ public class DerivedMetric extends AbstractMetricWithFormula {
 	 * A metric should be independent to root scope. The root scope is only used to compute the percentage
 	 * 
 	 * @param experiment
-	 * @param e
+	 * @param expression
 	 * @param sName
 	 * @param sID
 	 * @param index

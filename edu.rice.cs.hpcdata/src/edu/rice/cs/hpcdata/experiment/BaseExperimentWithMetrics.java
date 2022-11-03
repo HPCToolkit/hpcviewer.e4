@@ -139,11 +139,10 @@ implements IMetricManager, ListEventListener<BaseMetric>
 				if (metric.getMetricType() == sourceType) {
 					// get the partner index (if the metric exclusive, its partner is inclusive)
 					
-					int partner 			 = metric.getPartner(); 	 // get the partner ID
-					BaseMetric partnerMetric = getMetric(partner);   // get the partner metric
-					int partnerIndex		 = partnerMetric.getIndex(); // get the index of partner metric
-					
-					copyMetric(scope, scope, metric.getIndex(), partnerIndex, filter);
+					int partner = metric.getPartner(); 	 // get the partner ID
+					if (partner >= 0) {
+						copyMetric(scope, scope, metric.getIndex(), partner, filter);
+					}
 				}
 			} else if (metric instanceof AggregateMetric) {
 				if (metric.getMetricType() == MetricType.EXCLUSIVE ) {
