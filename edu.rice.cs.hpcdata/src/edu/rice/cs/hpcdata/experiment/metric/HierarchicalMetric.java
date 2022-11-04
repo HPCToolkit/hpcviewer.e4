@@ -325,8 +325,7 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		// Fix for issue #248 for meta.db: do not grab the value from profile.db
 		// instead, if it's from bottom-up view or flat view, we grab the value 
 		// from the computed metrics.
-		if (formula == null || 
-			scope.getMetricValues() instanceof MetricValueCollectionWithStorage) {
+		if (formula == null ) {
 			return scope.getDirectMetricValue(index);
 		}
 		
