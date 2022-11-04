@@ -591,16 +591,19 @@ implements IMetricScope
 
 	public MetricValue getMetricValue(BaseMetric metric)
 	{
-		ensureMetricStorage();
-		
 		// special case for raw metric and any metrics with formula: 
 		// we need to grab the value from the metric directly.
 		// There is no caching here.
 		// 
 		// for other metrics, we may have cached the value
 		
-		if (metric instanceof MetricRaw || metric instanceof AggregateMetric)
+		if (metric instanceof MetricRaw || 
+			metric instanceof AggregateMetric ||
+			metric instanceof HierarchicalMetric)
+			
 			return metric.getValue(this);
+		
+		ensureMetricStorage();
 		
 		return metrics.getValue(this, metric);
 	}

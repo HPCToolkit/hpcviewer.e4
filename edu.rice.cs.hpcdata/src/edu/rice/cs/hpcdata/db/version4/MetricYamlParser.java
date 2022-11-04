@@ -58,10 +58,10 @@ public class MetricYamlParser
 
 	private final List<HierarchicalMetric> listRootMetrics;
 	private final List<BaseMetric> outputMetrics;
+	private final List<BaseMetric> inputMetrics;
 	private final Deque<HierarchicalMetric> stackMetrics;
 	
 	private final DataSummary  	   dataSummary;
-	private final List<BaseMetric> inputMetrics;
 	
 	private int version;
 	private int parentIndex;
@@ -87,8 +87,8 @@ public class MetricYamlParser
 		this.dataSummary = dataSummary;
 		listRootMetrics  = new ArrayList<>(1);
 		
-		outputMetrics = new ArrayList<>(metricsInMetaDB.size());
 		inputMetrics  = metricsInMetaDB;
+		outputMetrics = new ArrayList<>(metricsInMetaDB.size());
 		
 		parentIndex  = -1;
 		stackMetrics = new ArrayDeque<>();
@@ -122,6 +122,18 @@ public class MetricYamlParser
 		
 		// parse the metric structure (roots and its descendants)
 		parseRoots((LinkedHashMap<String, ?>) data);
+		
+		// needs to add the remainder of input metrics to the output
+		// these metrics although not exist in the list of output, but
+		// is used to compute the derived metrics.
+		// Since they are not in the list of output, we hide them from
+		// the user. 
+		for(var metric: inputMetrics) {
+			if (!outputMetrics.contains(metric)) {
+				metric.setDisplayed(VisibilityType.HIDE);
+				outputMetrics.add(metric);
+			}				
+		}
 	}
 	
 
@@ -430,6 +442,8 @@ roots:
 		var result = VariantResult.OK;
 		var iterator = variants.entrySet().iterator();
 		
+		// make sure the new index (which is equal to numMetrics) is at least
+		// bigger than the all metrics combined (input metrics and new derived metrics).
 		int numMetrics = inputMetrics.size() + outputMetrics.size(); 
 				
 		// traverse for each variant within "variants" field
@@ -474,7 +488,8 @@ roots:
 						metric = getMetricCorrespondance(subVal.hashCode(), formulaType, desc);
 						
 						if (metric == null) {
-							// create a derived metric
+							// this metric is not in the list of input metrics
+							// create a new derived metric
 							metric = new HierarchicalMetric(dataSummary, ++numMetrics, name);
 							
 							var expression = subKey.getValue();
@@ -550,17 +565,6 @@ roots:
 			return sb.toString();
 		}
 		return String.valueOf(expression);
-	}
-	
-	private void unaryOperator(StringBuilder sb, String operator, LinkedHashMap<String, ?> exp) {
-		var metric = mapCodeToMetric.get(exp.hashCode());
-		unaryOperator(sb, operator, metric);
-	}
-	
-	private void unaryOperator(StringBuilder sb, String operator, BaseMetric metric) {
-		sb.append(operator);
-		sb.append("$");
-		sb.append(String.valueOf(metric.getIndex()));
 	}
 	
 	private HierarchicalMetric getMetricCorrespondance(int hashcode, MetricType formulaType, String desc) {

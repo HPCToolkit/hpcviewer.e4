@@ -366,7 +366,8 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 			return false;
 		
 		HierarchicalMetric otherMetric = (HierarchicalMetric) other;
-		return this.annotationType == otherMetric.annotationType &&
+		return this.index == otherMetric.index &&
+			   this.annotationType == otherMetric.annotationType &&
 			   this.combineType    == otherMetric.combineType    &&
 			   this.displayName.equals(otherMetric.displayName)  &&
 			   this.formula.toString().equals(otherMetric.getFormula().toString());  
