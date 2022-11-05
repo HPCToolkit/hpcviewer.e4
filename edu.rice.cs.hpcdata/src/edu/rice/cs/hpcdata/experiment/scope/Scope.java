@@ -29,6 +29,7 @@ import edu.rice.cs.hpcdata.experiment.metric.AggregateMetric;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
+import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetricDerivedFormula;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricValueCollection;
 import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
@@ -599,7 +600,7 @@ implements IMetricScope
 		
 		if (metric instanceof MetricRaw || 
 			metric instanceof AggregateMetric ||
-			metric instanceof HierarchicalMetric)
+			metric instanceof HierarchicalMetricDerivedFormula)
 			
 			return metric.getValue(this);
 		

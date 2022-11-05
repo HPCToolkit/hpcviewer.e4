@@ -23,7 +23,7 @@ import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
-import edu.rice.cs.hpcdata.experiment.metric.MetricType;
+import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetricDerivedFormula;
 import edu.rice.cs.hpcdata.experiment.metric.PropagationScope;
 import edu.rice.cs.hpcdata.experiment.scope.EntryScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoadModuleScope;
@@ -532,11 +532,16 @@ public class DataMeta extends DataCommon
 				short statMetric = buffer.getShort(summaryLoc + 0x12);
 				
 				var strFormula = getNullTerminatedString(buffer, (int) (pFormula-section.offset));
+				HierarchicalMetric metric;
 				
-				var metric = new HierarchicalMetric(dataSummary, statMetric, metricName);
+				if (strFormula.isEmpty() || strFormula.equals("$$")) {
+					metric = new HierarchicalMetric(dataSummary, statMetric, metricName);
+				} else {
+					metric = new HierarchicalMetricDerivedFormula(dataSummary, statMetric, metricName);
+					((HierarchicalMetricDerivedFormula) metric).setFormula(strFormula);
+				}
 				metric.setCombineType(combine);
 				metric.setIndex(statMetric);
-				metric.setFormula(strFormula);
 				
 				// the annotation type is unknown until we parse the yaml file
 				metric.setAnnotationType(AnnotationType.PERCENT);

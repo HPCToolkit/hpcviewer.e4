@@ -20,6 +20,7 @@ import com.graphbuilder.math.ExpressionTree;
 
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
+import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetricDerivedFormula;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
@@ -224,29 +225,48 @@ inputs: ArrayList<E>  (id=98)
 			var metric  = input.get(FIELD_METRIC);
 			var scope   = input.get("scope");
 			var combine = (String)input.get("combine");
-			var formula = input.get("formula");
-			var strFormula = String.valueOf(formula);
-			var expFormula = ExpressionTree.parse(strFormula).toString();
 
 			final MetricType mtype = MetricType.convertFromPropagationScope((String) scope);
 			
 			// try to find metric in meta.db that match the metric in yaml file
 			// We should find a matched metric, otherwise there is something wrong
 			var filteredMetrics = metrics.stream()
-					 .filter(m -> ((HierarchicalMetric)m).getOriginalName().equals(metric) &&
-						  	      ((HierarchicalMetric)m).getCombineTypeLabel().equalsIgnoreCase(combine) &&
-						  	      ((HierarchicalMetric)m).getFormula().toString().equals(expFormula) &&
-							      m.getMetricType() == mtype)
-					 .collect(Collectors.toList());
+					 				     .filter(m -> ((HierarchicalMetric)m).getOriginalName().equals(metric) &&
+					 				    		 	  ((HierarchicalMetric)m).getCombineTypeLabel().equalsIgnoreCase(combine) &&
+					 				    		 	  m.getMetricType() == mtype)
+					 				     .collect(Collectors.toList());
 
 			if (filteredMetrics.isEmpty()) {
 				// something wrong: there is no correspondent metric in meta.db
 				throw new IllegalStateException(metric + "/" + combine + ": metric does not exist.");
 			}
 			if (filteredMetrics.size() > 1) {
-				// found more than one matched metrics. that's impossible
-				throw new IllegalStateException(metric + "/" + combine + ": metric has more than 1 matched.");
+				// there are more than 1 matched metrics. Possibly they are statistic metrics
+				// let's trim the list based on formula
+				
+				var formula = input.get("formula");
+				if (formula.equals("$$")) {
+					filteredMetrics = filteredMetrics.stream()
+							   						 .filter(m -> !(m instanceof HierarchicalMetricDerivedFormula))
+							   						 .toList();
+				} else {
+					var strFormula = String.valueOf(formula);
+					var expFormula = ExpressionTree.parse(strFormula).toString();
+
+					filteredMetrics = filteredMetrics
+							 	   .stream()
+								   .filter( m -> m instanceof HierarchicalMetricDerivedFormula &&
+										   ((HierarchicalMetricDerivedFormula)m).getFormula()
+										   										.toString()
+										   										.equals(expFormula))
+								   .collect(Collectors.toList());
+				}
+				
+				if (filteredMetrics.size()>1)
+					// Still found more than one matched metrics. that's impossible
+					throw new IllegalStateException(metric + "/" + combine + ": metric has more than 1 matched.");
 			}
+			
 			mapCodeToMetric.put(input.hashCode(), filteredMetrics.get(0));
 		}
 	}
@@ -473,7 +493,7 @@ roots:
 				var formulaType  = MetricType.convertFromName(formulaScope);
 				
 				LinkedHashMap<String, ?> mapMetrics  = (LinkedHashMap<String, ?>) formulaItem.getValue();
-				HierarchicalMetric metric = getMetricCorrespondance(mapMetrics.hashCode(), formulaType, desc);
+				var metric = getMetricCorrespondance(mapMetrics.hashCode(), formulaType, desc);
 				
 				if (metric == null) {
 					// either it's a list of metrics or a more specific formula or a parent metric
@@ -490,10 +510,11 @@ roots:
 						if (metric == null) {
 							// this metric is not in the list of input metrics
 							// create a new derived metric
-							metric = new HierarchicalMetric(dataSummary, ++numMetrics, name);
+							metric = new HierarchicalMetricDerivedFormula (dataSummary, ++numMetrics, name);
 							
 							var expression = subKey.getValue();
-							metric.setFormula(deconstructFormula((LinkedHashMap<String, ?>) expression));
+							((HierarchicalMetricDerivedFormula)metric).setFormula(deconstructFormula((LinkedHashMap<String, ?>) expression));
+							
 							metric.setDescription(desc);
 							metric.setMetricType(formulaType);
 							metric.setCombineType(combine);

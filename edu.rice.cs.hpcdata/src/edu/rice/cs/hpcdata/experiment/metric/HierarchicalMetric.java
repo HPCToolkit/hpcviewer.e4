@@ -1,11 +1,6 @@
 package edu.rice.cs.hpcdata.experiment.metric;
 
-import org.apache.commons.math3.util.Precision;
-
 import com.graphbuilder.math.Expression;
-import com.graphbuilder.math.ExpressionTree;
-
-import edu.rice.cs.hpcdata.db.MetricValueCollectionWithStorage;
 import edu.rice.cs.hpcdata.db.version4.DataSummary;
 import edu.rice.cs.hpcdata.experiment.TreeNode;
 import edu.rice.cs.hpcdata.experiment.scope.IMetricScope;
@@ -37,14 +32,8 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	private final DataSummary profileDB;
 	private final TreeNode<HierarchicalMetric> node;
 	private final String originalName;
-	
-	// map function
-	private final ExtFuncMap fctMap;
-	// map variable 
-	private final MetricVarMap varMap;
 
 	private PropagationScope propagationScope;
-	private Expression formula;
 	
 	/**
 	 * The combination function combine is an enumeration with the following possible values (the name after / is the matching name for inputs:combine in METRICS.yaml):
@@ -72,12 +61,6 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		super(String.valueOf(index), name);
 		this.profileDB = profileDB;
 		setIndex(index);
-		
-		varMap = new HierarchicalMetricVarMap();
-		varMap.setMetric(this);
-		
-		fctMap = new ExtFuncMap();
-		fctMap.loadDefaultFunctions();
 		
 		node = new TreeNode<>(index);
 		originalName = name;
@@ -273,30 +256,8 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	protected Expression[] getExpressions() {
 		// not supported at the moment
 		// all formula-based metrics should use DerivedMetric class
-		return new Expression[] {formula};
+		return new Expression[] {};
 	}
-
-	/***
-	 * Get the math formula of the metric
-	 * 
-	 * @return
-	 */
-	public Expression getFormula() {
-		return formula;
-	}
-
-
-	/****
-	 * Set the math formula of the metric
-	 * 
-	 * @param formula
-	 */
-	public void setFormula(String strFormula) {
-		if (strFormula.equals("$$"))
-			formula = null;
-		this.formula = ExpressionTree.parse(strFormula);
-	}
-
 
 	/**
 	 * @return the propagationScope
@@ -320,42 +281,30 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 
 	@Override
 	public MetricValue getValue(IMetricScope s) {
-		Scope scope = (Scope)s;
-			
-		// Fix for issue #248 for meta.db: do not grab the value from profile.db
-		// instead, if it's from bottom-up view or flat view, we grab the value 
-		// from the computed metrics.
-		if (formula == null ) {
-			return scope.getDirectMetricValue(index);
-		}
-		
-		varMap.setScope(scope);
-		var value =  formula.eval(varMap, fctMap);
-		
-		// Usually we don't need to use apache's math to compare zero but in
-		// some cases, it's needed. Let's take the precaution using epsilon 
-		// next time.
-		if (Precision.equals(0.0d, value))
-			return MetricValue.NONE;
-		
-		return new MetricValue(value);
+		Scope scope = (Scope)s;			
+		return scope.getDirectMetricValue(index);
 	}
 
 	
 	@Override
 	public BaseMetric duplicate() {
 		var dupl = new HierarchicalMetric(profileDB, index, displayName);
-		dupl.annotationType = annotationType;
-		dupl.combineType    = combineType;
-		dupl.description    = description;
-		dupl.displayFormat  = displayFormat;
-		dupl.metricType     = metricType;
-		dupl.order          = order;
-		dupl.partnerIndex   = partnerIndex;
-		dupl.sampleperiod   = sampleperiod;
-		dupl.formula = formula.duplicate();
+		copy(dupl);
 		
 		return dupl;
+	}
+	
+	protected void copy(HierarchicalMetric target) {
+		target.annotationType = annotationType;
+		target.combineType    = combineType;
+		target.description    = description;
+		target.displayFormat  = displayFormat;
+		target.metricType     = metricType;
+		target.order          = order;
+		target.partnerIndex   = partnerIndex;
+		target.sampleperiod   = sampleperiod;
+		
+		target.propagationScope = propagationScope;
 	}
 
 	
@@ -368,7 +317,16 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		return this.index == otherMetric.index &&
 			   this.annotationType == otherMetric.annotationType &&
 			   this.combineType    == otherMetric.combineType    &&
-			   this.displayName.equals(otherMetric.displayName)  &&
-			   this.formula.toString().equals(otherMetric.getFormula().toString());  
+			   this.displayName.equals(otherMetric.displayName);  
+	}
+	
+	
+	/*****
+	 * Retrieve the parser for profile.db
+	 * 
+	 * @return
+	 */
+	protected DataSummary getDataSummary() {
+		return profileDB;
 	}
 }
