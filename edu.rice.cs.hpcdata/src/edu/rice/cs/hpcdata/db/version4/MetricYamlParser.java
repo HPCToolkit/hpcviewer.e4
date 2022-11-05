@@ -131,7 +131,7 @@ public class MetricYamlParser
 		// the user. 
 		for(var metric: inputMetrics) {
 			if (!outputMetrics.contains(metric)) {
-				metric.setDisplayed(VisibilityType.HIDE);
+				metric.setDisplayed(VisibilityType.INVISIBLE);
 				outputMetrics.add(metric);
 			}				
 		}
