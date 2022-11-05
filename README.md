@@ -1,14 +1,12 @@
-![GitHub issues](https://img.shields.io/github/issues/hpctoolkit/hpcviewer.e4?style=for-the-badge)
-![Build](https://github.com/hpctoolkit/hpcviewer.e4/actions/workflows/maven.yml/badge.svg)
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=HPCToolkit_hpcviewer.e4&metric=alert_status)](https://sonarcloud.io/dashboard?id=HPCToolkit_hpcviewer.e4)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=HPCToolkit_hpcviewer.e4&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=HPCToolkit_hpcviewer.e4)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=HPCToolkit_hpcviewer.e4&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=HPCToolkit_hpcviewer.e4)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=HPCToolkit_hpcviewer.e4&metric=security_rating)](https://sonarcloud.io/dashboard?id=HPCToolkit_hpcviewer.e4)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=HPCToolkit_hpcviewer.e4&metric=coverage)](https://sonarcloud.io/dashboard?id=HPCToolkit_hpcviewer.e4)
 
 
-# hpcviewer.e4
+
+# hpcviewer
 
 hpcviewer is the presentation layer of HPCToolkit which is a suite of tools
 for measurement and analysis of program performance.
@@ -64,12 +62,7 @@ spack load gtkplus
   Example of the output:
 ```
 ...
-[INFO] --- tycho-p2-director-plugin:1.6.0:archive-products (archive-prodcuts) @ edu.rice.cs.hpcviewer ---
-[INFO] Building tar: <hpcviewer.e4>/edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-linux.gtk.x86_64.tar.gz
-[INFO] Building tar: <hpcviewer.e4>/edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-linux.gtk.ppc64le.tar.gz
 [INFO] Building zip: <hpcviewer.e4>/edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-win32.win32.x86_64.zip
-[INFO] Building zip: <hpcviewer.e4>/edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-macosx.cocoa.x86_64.zip
-[INFO] ------------------------------------------------------------------------
 ```
   * Unzip `edu.rice.cs.hpcviewer-win32.win32.x86_64.zip` to another folder. 
     It isn't recommended to overwrite the existing folder.
@@ -78,7 +71,7 @@ spack load gtkplus
 
 Requirements:
 
-* Recommended: [Eclipse 2021.03](https://www.eclipse.org/downloads/packages/release/2021-03/r/eclipse-ide-rcp-and-rap-developers) or newer. 
+* Recommended: [Eclipse 2022.06 RCP](https://www.eclipse.org/downloads/packages/release/2022-06/r/eclipse-ide-rcp-and-rap-developers) or newer. 
 * Warning: May not work properly with older versions of Eclipse. 
 
 ### Getting the source code into the Eclipse IDE
