@@ -248,7 +248,7 @@ inputs: ArrayList<E>  (id=98)
 				if (formula.equals("$$")) {
 					filteredMetrics = filteredMetrics.stream()
 							   						 .filter(m -> !(m instanceof HierarchicalMetricDerivedFormula))
-							   						 .toList();
+							   						 .collect(Collectors.toList());
 				} else {
 					var strFormula = String.valueOf(formula);
 					var expFormula = ExpressionTree.parse(strFormula).toString();
