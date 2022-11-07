@@ -19,7 +19,7 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
  * leaves have no children. 
  *
  ****************************************************************/
-public class HierarchicalMetric extends AbstractMetricWithFormula 
+public class HierarchicalMetric extends AbstractMetricWithFormula
 {	
 	private static final byte FMT_METADB_COMBINE_SUM = 0;
 	private static final byte FMT_METADB_COMBINE_MIN = 1;
@@ -35,6 +35,10 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 
 	private PropagationScope propagationScope;
 	
+	// the name of variant (usually statistic variants like sum, min,....)
+	// it's a bit mix up with the combine
+	private String variant;
+
 	/**
 	 * The combination function combine is an enumeration with the following possible values (the name after / is the matching name for inputs:combine in METRICS.yaml):
 	 * <ul>
@@ -64,7 +68,7 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		
 		node = new TreeNode<>(index);
 		originalName = name;
-		
+
 		combineType = COMBINE_UNKNOWN;
 	}
 	
@@ -106,19 +110,15 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	/****
 	 * Set the combine type by name
 	 * 
-	 * @param combineName
+	 * @param variantLabel
 	 */
-	public void setCombineType(String combineName) {
-		if (combineName == null || combineName.isEmpty())
-			return;
-		
-		for(byte i=0; i<COMBINE_LABEL.length; i++) {
-			if (combineName.compareToIgnoreCase(COMBINE_LABEL[i]) == 0) {
-				combineType = i;
-				return;
-			}				
-		}
-		throw new IllegalArgumentException("Unknown combine name: " + combineName);
+	public void setVariantLabel(String variantLabel) {
+		this.variant = variantLabel.trim();
+	}
+	
+	
+	public String getVariantLabel() {
+		return variant;
 	}
 	
 	/***
@@ -230,11 +230,14 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 			return displayName;
 		
 		StringBuilder sb = new StringBuilder(originalName);
-		final String SUFFIX_COMBINE_TYPE = ": ";
-		
-		if (combineType >= 0) {
-			sb.append(SUFFIX_COMBINE_TYPE);
+
+		final String SUFFIX = ": ";
+		if (variant == null) {
+			sb.append(SUFFIX);
 			sb.append(getCombineTypeLabel());
+		} else if (!variant.isEmpty()) {
+			sb.append(SUFFIX);
+			sb.append(variant);
 		}
 
 		// otherwise we need to add suffix for the metric type
@@ -303,6 +306,7 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		target.order          = order;
 		target.partnerIndex   = partnerIndex;
 		target.sampleperiod   = sampleperiod;
+		target.variant        = variant;
 		
 		target.propagationScope = propagationScope;
 	}

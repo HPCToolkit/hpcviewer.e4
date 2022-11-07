@@ -71,7 +71,7 @@ public class HierarchicalMetricDerivedFormula extends HierarchicalMetric
 		}
 		
 		varMap.setScope(scope);
-		var value =  formula.eval(varMap, fctMap);
+		var value = formula.eval(varMap, fctMap);
 		
 		// Usually we don't need to use apache's math to compare zero but in
 		// some cases, it's needed. Let's take the precaution using epsilon 

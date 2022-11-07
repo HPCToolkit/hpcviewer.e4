@@ -19,6 +19,7 @@ import com.graphbuilder.math.FuncMap;
  *
  */
 public class AggregateMetric extends AbstractMetricWithFormula 
+implements ICombinableMetric
 {
  
 	static final public char FORMULA_COMBINE = 'c';
@@ -94,7 +95,8 @@ public class AggregateMetric extends AbstractMetricWithFormula
 	 * @param s_source
 	 * @param s_target
 	 ******/
-	public void combine(Scope s_source, Scope s_target) {
+	@Override
+	public void combine(Scope s_target, Scope s_source) {
 		MetricValue value = s_target.getMetricValue(this); 
 		if (MetricValue.isAvailable(value)) {
 			//--------------------------------------------------------------------------

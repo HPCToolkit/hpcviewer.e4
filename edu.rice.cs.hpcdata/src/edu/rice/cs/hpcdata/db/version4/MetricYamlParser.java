@@ -470,7 +470,7 @@ roots:
 		// A variant can be Sum, Min or Max
 		while(iterator.hasNext()) {
 			var entry   = iterator.next();
-			var combine = entry.getKey(); // Sum, Min, Max, Mean, StdDev, CfVar
+			var variantLabel = entry.getKey(); // Sum, Min, Max, Mean, StdDev, CfVar
 			var attr = entry.getValue();
 
 			LinkedHashMap<String, ?> mapAttributes = (LinkedHashMap<String, ?>) attr;
@@ -517,7 +517,7 @@ roots:
 							
 							metric.setDescription(desc);
 							metric.setMetricType(formulaType);
-							metric.setCombineType(combine);
+							metric.setVariantLabel(variantLabel);
 							
 							// a derived metric has no "partner"
 							metric.setPartner(-1);
