@@ -42,17 +42,15 @@ import edu.rice.cs.hpcdata.experiment.source.SourceFile;
 
 
 
-//////////////////////////////////////////////////////////////////////////
-//	CLASS SCOPE							//
-//////////////////////////////////////////////////////////////////////////
-
-/**
+/**************************************************************************
  *
- * A scope in an HPCView experiment.
+ * A scope in an HPCViewer experiment.
  *
+ * 
  * it's kind of irritating to have the two things be distinct and having
  * objects which point at each other makes me a little uneasy.
- */
+ * 
+ ***************************************************************************/
 
 
 public abstract class Scope 
@@ -60,13 +58,13 @@ implements IMetricScope
 {
 
 	//////////////////////////////////////////////////////////////////////////
-	//PROTECTED CONSTANTS						//
+	// PROTECTED CONSTANTS						//
 	//////////////////////////////////////////////////////////////////////////
 
 	protected static int id = Integer.MAX_VALUE;
 
 	//////////////////////////////////////////////////////////////////////////
-	//PUBLIC CONSTANTS						//
+	// PUBLIC CONSTANTS						//
 	//////////////////////////////////////////////////////////////////////////
 
 
@@ -112,7 +110,7 @@ implements IMetricScope
 	
 	private int relation;
 
-	protected ITreeNode<Scope> node;
+	protected final ITreeNode<Scope> node;
 
 
 	//////////////////////////////////////////////////////////////////////////
@@ -180,19 +178,6 @@ implements IMetricScope
 	 */
 	public int getCCTIndex() {
 		return (int) node.getValue();
-	}
-
-	/***
-	 * Set new index for this scope. cct index is usually constant,
-	 * but in case needed, it can be modified.
-	 * <br>
-	 * Use it on your own risk.
-	 * 
-	 * @param index
-	 * 			The new index
-	 */
-	public void setCCTIndex(int index) {
-		node.setValue(index);
 	}
 
 
@@ -282,17 +267,6 @@ implements IMetricScope
 		this.cpid = cpid;
 	}
 
-	/*************************************************************************
-	 *	Returns the tool tip for this scope.
-	 ************************************************************************/
-
-	public String getToolTip()
-	{
-		return this.getSourceCitation();
-	}
-
-
-
 
 	/*************************************************************************
 	 *	Converts the scope to a <code>String</code>.
@@ -310,22 +284,6 @@ implements IMetricScope
 	}
 
 	
-	public static int getLexicalType(Scope scope) {
-		String type = scope.getClass().getSimpleName().substring(0, 2);
-		return type.hashCode();
-	}
-
-	public static int generateFlatID(int lexicalType, int lmId, int fileId, int procId, int line) {
-		// linearize the flat id. This is not sufficient and causes collisions for large and complex source code
-		// This needs to be computed more reliably.
-		return lexicalType << 28 |
-					 lmId        << 24 |
-					 fileId      << 16 | 
-					 procId      << 8  | 
-					 line;
-	}
-
-
 	/*************************************************************************
 	 *	Returns a display string describing the scope's source code location.
 	 ************************************************************************/
@@ -493,8 +451,6 @@ implements IMetricScope
 	}
 
 
-
-
 	/*************************************************************************
 	 *	Returns the number of subscopes within this scope.
 	 ************************************************************************/
@@ -503,8 +459,6 @@ implements IMetricScope
 	{
 		return node.getChildCount();
 	}
-
-
 
 
 	/*************************************************************************
@@ -527,10 +481,11 @@ implements IMetricScope
 	}
 
 
-
-	//////////////////////////////////////////////////////////////////////////
-	// EXPERIMENT DATABASE 													//
-	//////////////////////////////////////////////////////////////////////////
+	/*****
+	 * Retrieve the database associated with this scope
+	 * 
+	 * @return
+	 */
 	public IExperiment getExperiment() {
 		return root.getExperiment();
 	}
@@ -733,6 +688,7 @@ implements IMetricScope
 		}
 	}
 
+	
 	/***************************************************************************
 	 * retrieve the default metrics
 	 * @return
@@ -744,6 +700,7 @@ implements IMetricScope
 		return this.metrics;
 	}
 
+	
 	/***************************************************************************
 	 * set the default metrics
 	 * @param values
@@ -792,9 +749,10 @@ implements IMetricScope
 	 **********************************************************************************/
 	public void safeCombine(Scope source, MetricValuePropagationFilter filter) {
 		ensureMetricStorage();
-		this.combine(source, filter);
+		combine(source, filter);
 	}
 
+	
 	/*************************************************************************
 	 *	Makes sure that the scope object has storage for its metric values.
 	 ************************************************************************/
@@ -880,6 +838,10 @@ implements IMetricScope
 	}
 
 
+	//////////////////////////////////////////////////////////////////////////
+	// Support for resource disposal
+	//////////////////////////////////////////////////////////////////////////
+
 	/***
 	 * Free all allocated object variables so that
 	 * JVM can free the resources.
@@ -929,19 +891,24 @@ implements IMetricScope
 			return;
 		}
 		
-		ListIterator<Scope> list = getChildren().listIterator();
-		if (list == null)
+		ListIterator<Scope> childIterator = getChildren().listIterator();
+		if (childIterator == null)
 			return;
 		
-		while(list.hasNext()) {
-			var child = list.next();
+		while(childIterator.hasNext()) {
+			var child = childIterator.next();
 			
 			child.disposeSelfAndChildren();
 			
-			list.remove();
+			childIterator.remove();
 		}
 		dispose();
 	}
+
+	
+	//////////////////////////////////////////////////////////////////////////
+	// Support access to children
+	//////////////////////////////////////////////////////////////////////////
 
 	/****
 	 * Retrieve the list of all children.
@@ -966,6 +933,10 @@ implements IMetricScope
 	}
 
 
+	//////////////////////////////////////////////////////////////////////////
+	// support for relation
+	//////////////////////////////////////////////////////////////////////////
+
 	public int getRelation() {
 		return relation;
 	}
@@ -976,6 +947,10 @@ implements IMetricScope
 	}
 	
 	
+	//////////////////////////////////////////////////////////////////////////
+	// misc
+	//////////////////////////////////////////////////////////////////////////
+
 	/***
 	 * Return true of this scope represents an idle state (no activity)
 	 * @return

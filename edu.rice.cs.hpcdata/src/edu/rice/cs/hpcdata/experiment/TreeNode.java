@@ -1,7 +1,6 @@
 package edu.rice.cs.hpcdata.experiment;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -31,7 +30,7 @@ public class TreeNode<T> implements ITreeNode<T> {
 	/**
 	 * The value contained in this node. This value may be anything.
 	 */
-	protected Object value;
+	protected final Object value;
 
 	/**
 	 * Constructs a new instance of <code>TreeNode</code>.
@@ -90,7 +89,7 @@ public class TreeNode<T> implements ITreeNode<T> {
 
 	@Override
 	public void setValue(int index) {
-		this.value = index;
+		// avoid resetting the value
 	}
 
 	/**
@@ -190,8 +189,8 @@ public class TreeNode<T> implements ITreeNode<T> {
 			children = null;
 		}
 		parent   = null;
-		value  	 = null;
 	}
+
 	
 	@Override
 	public String toString() {
