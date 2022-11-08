@@ -18,6 +18,9 @@ public class ExclusiveOnlyMetricPropagationFilter implements MetricValuePropagat
 		BaseMetric m = this._experiment.getMetric(src_idx);
 		MetricType objType = m.getMetricType();
 		
-		return ( objType == MetricType.EXCLUSIVE ); 
+		// issue #251 and #253 support for derived metrics in meta.db
+		// In this new database the exclusive can be either function scope (exclusive)
+		// or lexical aware (custom exclusive)
+		return ( objType == MetricType.EXCLUSIVE || objType == MetricType.LEXICAL_AWARE); 
 	}
 }

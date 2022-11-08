@@ -770,8 +770,8 @@ implements IMetricScope
 				//--------------------------------------------------------------------
 				// aggregate metric need special treatment when combining two metrics
 				//--------------------------------------------------------------------
-				ICombinableMetric combinableMetric = (ICombinableMetric) metric;
 				if (filter.doPropagation(source, this, metric.getIndex(), metric.getIndex())) {
+					ICombinableMetric combinableMetric = (ICombinableMetric) metric;
 					combinableMetric.combine(this, source);
 				}
 			} else {
