@@ -1,6 +1,5 @@
 package edu.rice.cs.hpcdata.experiment.scope.visitors;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.collections.impl.list.mutable.FastList;
@@ -222,7 +221,7 @@ public class FilterScopeVisitor implements IScopeVisitor
 					if (metrics != null)
 						mergeMetrics(scope, child, false);
 
-					removeNode(childIterator, child, filterAttribute.filterType);
+					removeNode(child, filterAttribute.filterType);
 				}
 			} else if(filterAttribute.filterType == FilterAttribute.Type.Self_And_Descendants ||
 					  filterAttribute.filterType == FilterAttribute.Type.Self_Only)
@@ -237,7 +236,7 @@ public class FilterScopeVisitor implements IScopeVisitor
 					Scope parent = scope.getParentScope();
 					mergeMetrics(parent, scope, needToContinue);
 				}
-				removeChild(null, scope, vt, filterAttribute.filterType);
+				removeChild(scope, filterAttribute.filterType);
 			}
 		} else 
 		{ // PostVisit
@@ -262,7 +261,7 @@ public class FilterScopeVisitor implements IScopeVisitor
 	 * 
 	 * @see FilterAttribute.Type
 	 */
-	private void removeChild(Iterator<Scope> iterator, Scope childToRemove, ScopeVisitType vt, FilterAttribute.Type filterType)
+	private void removeChild(Scope childToRemove, FilterAttribute.Type filterType)
 	{
 		// remove its children and glue it the parent
 		if (filterType == FilterAttribute.Type.Self_Only)
@@ -270,7 +269,7 @@ public class FilterScopeVisitor implements IScopeVisitor
 			addGrandChildren(getAncestor(childToRemove), childToRemove);
 		}
 		// skip to current scope
-		removeNode(iterator, childToRemove, filterType);
+		removeNode(childToRemove, filterType);
 	}
 
 	
@@ -298,7 +297,7 @@ public class FilterScopeVisitor implements IScopeVisitor
 	 * 
 	 * @see FilterAttribute.Type
 	 */
-	private Scope removeNode(Iterator<Scope> iterator, Scope child, FilterAttribute.Type filterType) {
+	private Scope removeNode(Scope child, FilterAttribute.Type filterType) {
 		Scope ancestor = getAncestor(child);			
 
 		// move the trace call-path id (if exist) to the parent
@@ -405,16 +404,16 @@ public class FilterScopeVisitor implements IScopeVisitor
 				// double count the exclusive cost of the procedure scope parent. 
 				// Since the cost of the procedure scope includes the cost of the child
 				// we shouldn't merge the cost of the child to the parent.
-				if (isParentEnclosingChild(parent, child))
-					continue;
-				
-				MetricValue value = parent.getMetricValue(metric);
-				if (value != MetricValue.NONE)
-				  value = value.duplicate();
-				parent.setMetricValue(metric.getIndex(), value);
-				
-				// exclusive filter: merge the exclusive metrics to the parent's exclusive
-				mergeMetricToParent(parent, metric.getIndex(), childValue);
+				if (!isParentEnclosingChild(parent, child)) {					
+					MetricValue value = parent.getMetricValue(metric);
+					if (value != MetricValue.NONE)
+					  value = value.duplicate();
+					
+					parent.setMetricValue(metric.getIndex(), value);
+					
+					// exclusive filter: merge the exclusive metrics to the parent's exclusive
+					mergeMetricToParent(parent, metric.getIndex(), childValue);
+				}
 				
 			} else if (!exclusiveFilter && metric.getMetricType() == MetricType.INCLUSIVE)
 			{

@@ -29,6 +29,8 @@ import edu.rice.cs.hpcdata.experiment.metric.AggregateMetric;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
+import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetricDerivedFormula;
+import edu.rice.cs.hpcdata.experiment.metric.ICombinableMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricValueCollection;
 import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
@@ -591,13 +593,19 @@ implements IMetricScope
 
 	public MetricValue getMetricValue(BaseMetric metric)
 	{
-		ensureMetricStorage();
+		// special case for raw metric and any metrics with formula: 
+		// we need to grab the value from the metric directly.
+		// There is no caching here.
+		// 
+		// for other metrics, we may have cached the value
 		
-		// special case for raw metric: we need to grab the value
-		// from the metric directly. No caching here.
-		
-		if (metric instanceof MetricRaw || metric instanceof AggregateMetric)
+		if (metric instanceof MetricRaw || 
+			metric instanceof AggregateMetric ||
+			metric instanceof HierarchicalMetricDerivedFormula)
+			
 			return metric.getValue(this);
+		
+		ensureMetricStorage();
 		
 		return metrics.getValue(this, metric);
 	}
@@ -745,7 +753,6 @@ implements IMetricScope
 	}
 
 
-
 	/**************************************************************************
 	 * combining metric from source. use this function to combine metric between
 	 * 	different views
@@ -759,13 +766,13 @@ implements IMetricScope
 
 		for (var metric: list) {
 
-			if (metric instanceof AggregateMetric) {
+			if (metric instanceof ICombinableMetric) {
 				//--------------------------------------------------------------------
 				// aggregate metric need special treatment when combining two metrics
 				//--------------------------------------------------------------------
-				AggregateMetric aggMetric = (AggregateMetric) metric;
+				ICombinableMetric combinableMetric = (ICombinableMetric) metric;
 				if (filter.doPropagation(source, this, metric.getIndex(), metric.getIndex())) {
-					aggMetric.combine(source, this);
+					combinableMetric.combine(this, source);
 				}
 			} else {
 				this.accumulateMetric(source, metric, filter);

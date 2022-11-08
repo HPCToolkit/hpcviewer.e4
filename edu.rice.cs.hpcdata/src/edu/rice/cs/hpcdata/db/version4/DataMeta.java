@@ -21,10 +21,10 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.ExperimentConfiguration;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
-import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
-import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
-import edu.rice.cs.hpcdata.experiment.metric.MetricType;
+import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetricDerivedFormula;
+import edu.rice.cs.hpcdata.experiment.metric.PropagationScope;
 import edu.rice.cs.hpcdata.experiment.scope.EntryScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoadModuleScope;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
@@ -452,7 +452,7 @@ public class DataMeta extends DataCommon
 		var metricDesc = new ArrayList<BaseMetric>(nMetrics);
 		int position = (int) (pMetrics - section.offset);
 		
-		LongObjectHashMap<PropagationIndex> mapPropagationIndex = new LongObjectHashMap<>(nScopes);
+		LongObjectHashMap<PropagationScope> mapPropagationIndex = new LongObjectHashMap<>(nScopes);
 
 		// --------------------------------------
 		// Propagation Scope (PS)
@@ -468,14 +468,14 @@ public class DataMeta extends DataCommon
 			long pScopeName   = buffer.getLong(basePosition);
 			int scopePosition = (int) (pScopeName - section.offset);
 
-			PropagationIndex pi = new PropagationIndex();
-
-			pi.scopeType = buffer.get(basePosition + 0x08);
-			pi.propIndex = buffer.get(basePosition + 0x09);			
-			pi.scopeName = getNullTerminatedString(buffer, scopePosition);
+			var scopeType = buffer.get(basePosition + 0x08);
+			var propIndex = buffer.get(basePosition + 0x09);			
+			var scopeName = getNullTerminatedString(buffer, scopePosition);
+			
+			var ps = new PropagationScope(scopeName, scopeType, propIndex);
 			
 			long pScope  = pScopes + (i * szScope);
-			mapPropagationIndex.put(pScope, pi);
+			mapPropagationIndex.put(pScope, ps);
 		}
 		
 		// --------------------------------------
@@ -498,7 +498,7 @@ public class DataMeta extends DataCommon
 			
 			int scopesPosition = (int) (pScopeInsts - section.offset);			
 			short []propMetricId = new short[nScopeInsts];
-
+			
 			// --------------------------------------
 			// Instantiated propagated sub-metrics (PSI)
 			// --------------------------------------
@@ -511,7 +511,7 @@ public class DataMeta extends DataCommon
 			}
 			int strPosition = (int) (pName - section.offset);
 			String metricName = getNullTerminatedString(buffer, strPosition);
-			int []metricIndexesPerScope = new int[nScopes];
+			int []metricIndexesPerScope = new int[nSummaries];
 			
 			int baseSummariesLocation = (int) (pSummaries - section.offset);
 					
@@ -531,33 +531,26 @@ public class DataMeta extends DataCommon
 				byte combine   = buffer.get(summaryLoc + 0x10);
 				short statMetric = buffer.getShort(summaryLoc + 0x12);
 				
-				BaseMetric metric;
-				
 				var strFormula = getNullTerminatedString(buffer, (int) (pFormula-section.offset));
-				if (requireOtherMetric(strFormula, statMetric)) {
-					// derived metric
-					var index = propMetricId[k];
-					var shortName = String.valueOf(index);
-					metric = new DerivedMetric((IMetricManager) experiment, strFormula, metricName, shortName, index, null, null);
-				} else {
-					metric = new HierarchicalMetric(dataSummary, statMetric, metricName);
-					((HierarchicalMetric) metric).setCombineType(combine);
-				}
+				HierarchicalMetric metric;
 				
+				if (strFormula.isEmpty() || strFormula.equals("$$")) {
+					metric = new HierarchicalMetric(dataSummary, statMetric, metricName);
+				} else {
+					metric = new HierarchicalMetricDerivedFormula(dataSummary, statMetric, metricName);
+					((HierarchicalMetricDerivedFormula) metric).setFormula(strFormula);
+				}
+				metric.setCombineType(combine);
+				metric.setIndex(statMetric);
+				
+				// the annotation type is unknown until we parse the yaml file
+				metric.setAnnotationType(AnnotationType.PERCENT);
+								
 				metric.setDescription(metricName);
 				metric.setOrder(statMetric);
-				metric.setIndex(propMetricId[k]);
-				
-				// temporary quick fix: every metric is percent annotated
-				// this should be fixed when we parse metrics.yaml
-				metric.setAnnotationType(BaseMetric.AnnotationType.PERCENT);
 				
 				var pi = mapPropagationIndex.get(pScope);
-				MetricType type = MetricType.convertFromPropagationScope(pi.scopeType);
-				if (type == MetricType.UNKNOWN)
-					type = MetricType.convertFromPropagationScope(pi.scopeName);
-				
-				metric.setMetricType(type);									
+				metric.setPropagationScope(pi);
 
 				// store the index of this scope.
 				// we need this to propagate the partner index
@@ -571,11 +564,11 @@ public class DataMeta extends DataCommon
 			// (in the future can be more than that)
 			// If a metric is exclusive, then its partner is the inclusive one.
 			// This ugly nested loop tries to find the partner of each metric in this scope.
-			for (int j=0; j<nScopes; j++) {
+			for (int j=0; j<nSummaries; j++) {
 				int idx = metricIndexesPerScope[j];
 				BaseMetric m1 =  metricDesc.get(idx);
 				
-				for (int k=0; k<nScopes; k++) {
+				for (int k=0; k<nSummaries; k++) {
 					if (k == j) 
 						continue;
 					
@@ -593,34 +586,6 @@ public class DataMeta extends DataCommon
 		return metricDesc;
 	}
 	
-	
-	/****
-	 * Return true if the formula requires the value of other metric.
-	 * 
-	 * @param formula
-	 * 			The math formula
-	 * @param metricIndex
-	 * 			This metric index
-	 * 
-	 * @return {@code boolean}
-	 * 
-	 */
-	private boolean requireOtherMetric(String formula, int metricIndex) {
-		if (!formula.isEmpty() && formula.length() > 1) {
-			if (formula.equals("$$"))
-				return false;
-			
-			char firstChar = formula.charAt(0);
-			if (firstChar == '$' || firstChar == '#' || firstChar == '@') {
-				var strIndex = formula.substring(1);
-				int index = Integer.parseInt(strIndex);
-				return index != metricIndex;
-			}
-			// case if the formula includes functions like sum($1, $2) ...
-			return true;
-		}
-		return false;
-	}
 	
 	/***
 	 * Parser for the load module section
@@ -955,13 +920,6 @@ public class DataMeta extends DataCommon
 	}
 	
 
-	private static class PropagationIndex 
-	{
-		String scopeName;
-		byte scopeType;
-		byte propIndex;
-	}
-	
 	/*******************
 	 * 
 	 * Class to retrieve a string from the string section in meta.db

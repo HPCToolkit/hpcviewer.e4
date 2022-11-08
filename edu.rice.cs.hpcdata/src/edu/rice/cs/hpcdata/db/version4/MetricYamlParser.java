@@ -16,8 +16,11 @@ import java.util.stream.Collectors;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 
+import com.graphbuilder.math.ExpressionTree;
+
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
+import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetricDerivedFormula;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
@@ -55,11 +58,11 @@ public class MetricYamlParser
 	
 
 	private final List<HierarchicalMetric> listRootMetrics;
-	private final List<BaseMetric> listMetrics;
+	private final List<BaseMetric> outputMetrics;
+	private final List<BaseMetric> inputMetrics;
 	private final Deque<HierarchicalMetric> stackMetrics;
 	
 	private final DataSummary  	   dataSummary;
-	private final List<BaseMetric> metricsInMetaDB;
 	
 	private int version;
 	private int parentIndex;
@@ -83,9 +86,10 @@ public class MetricYamlParser
 	public MetricYamlParser(String directory, DataSummary dataSummary, List<BaseMetric> metricsInMetaDB) 
 			throws IOException {
 		this.dataSummary = dataSummary;
-		this.listMetrics = new ArrayList<>(metricsInMetaDB.size());
 		listRootMetrics  = new ArrayList<>(1);
-		this.metricsInMetaDB = metricsInMetaDB;
+		
+		inputMetrics  = metricsInMetaDB;
+		outputMetrics = new ArrayList<>(metricsInMetaDB.size());
 		
 		parentIndex  = -1;
 		stackMetrics = new ArrayDeque<>();
@@ -119,6 +123,18 @@ public class MetricYamlParser
 		
 		// parse the metric structure (roots and its descendants)
 		parseRoots((LinkedHashMap<String, ?>) data);
+		
+		// needs to add the remainder of input metrics to the output
+		// these metrics although not exist in the list of output, but
+		// is used to compute the derived metrics.
+		// Since they are not in the list of output, we hide them from
+		// the user. 
+		for(var metric: inputMetrics) {
+			if (!outputMetrics.contains(metric)) {
+				metric.setDisplayed(VisibilityType.INVISIBLE);
+				outputMetrics.add(metric);
+			}				
+		}
 	}
 	
 
@@ -152,7 +168,7 @@ public class MetricYamlParser
 	 * 			it returns empty list.
 	 */
 	public List<BaseMetric> getListMetrics() {
-		return listMetrics;
+		return outputMetrics;
 	}
 
 	
@@ -201,7 +217,7 @@ inputs: ArrayList<E>  (id=98)
 		if (!(inputs instanceof ArrayList<?>))
 			return;
 		
-		var metrics     = metricsInMetaDB;
+		var metrics     = inputMetrics;
 		var listInputs  = (List<Map<String, ?>>)inputs;
 		mapCodeToMetric = new HashMap<>(listInputs.size());
 		
@@ -215,19 +231,42 @@ inputs: ArrayList<E>  (id=98)
 			// try to find metric in meta.db that match the metric in yaml file
 			// We should find a matched metric, otherwise there is something wrong
 			var filteredMetrics = metrics.stream()
-					 .filter(m -> ((HierarchicalMetric)m).getOriginalName().equals(metric))
-					 .filter(m -> ((HierarchicalMetric)m).getCombineTypeLabel().equalsIgnoreCase(combine))
-					 .filter(m -> m.getMetricType() == mtype)
-					 .collect(Collectors.toList());
+					 				     .filter(m -> ((HierarchicalMetric)m).getOriginalName().equals(metric) &&
+					 				    		 	  ((HierarchicalMetric)m).getCombineTypeLabel().equalsIgnoreCase(combine) &&
+					 				    		 	  m.getMetricType() == mtype)
+					 				     .collect(Collectors.toList());
 
 			if (filteredMetrics.isEmpty()) {
 				// something wrong: there is no correspondent metric in meta.db
 				throw new IllegalStateException(metric + "/" + combine + ": metric does not exist.");
 			}
 			if (filteredMetrics.size() > 1) {
-				// found more than one matched metrics. that's impossible
-				throw new IllegalStateException(metric + "/" + combine + ": metric has more than 1 matched.");
+				// there are more than 1 matched metrics. Possibly they are statistic metrics
+				// let's trim the list based on formula
+				
+				var formula = input.get("formula");
+				if (formula.equals("$$")) {
+					filteredMetrics = filteredMetrics.stream()
+							   						 .filter(m -> !(m instanceof HierarchicalMetricDerivedFormula))
+							   						 .collect(Collectors.toList());
+				} else {
+					var strFormula = String.valueOf(formula);
+					var expFormula = ExpressionTree.parse(strFormula).toString();
+
+					filteredMetrics = filteredMetrics
+							 	   .stream()
+								   .filter( m -> m instanceof HierarchicalMetricDerivedFormula &&
+										   ((HierarchicalMetricDerivedFormula)m).getFormula()
+										   										.toString()
+										   										.equals(expFormula))
+								   .collect(Collectors.toList());
+				}
+				
+				if (filteredMetrics.size()>1)
+					// Still found more than one matched metrics. that's impossible
+					throw new IllegalStateException(metric + "/" + combine + ": metric has more than 1 matched.");
 			}
+			
 			mapCodeToMetric.put(input.hashCode(), filteredMetrics.get(0));
 		}
 	}
@@ -423,10 +462,15 @@ roots:
 		var result = VariantResult.OK;
 		var iterator = variants.entrySet().iterator();
 		
+		// make sure the new index (which is equal to numMetrics) is at least
+		// bigger than the all metrics combined (input metrics and new derived metrics).
+		int numMetrics = inputMetrics.size() + outputMetrics.size(); 
+				
 		// traverse for each variant within "variants" field
 		// A variant can be Sum, Min or Max
 		while(iterator.hasNext()) {
 			var entry   = iterator.next();
+			var variantLabel = entry.getKey(); // Sum, Min, Max, Mean, StdDev, CfVar
 			var attr = entry.getValue();
 
 			LinkedHashMap<String, ?> mapAttributes = (LinkedHashMap<String, ?>) attr;
@@ -435,7 +479,7 @@ roots:
 			var formula = mapAttributes.get("formula");
 			
 			if (formula instanceof LinkedHashMap<?, ?>) {
-				mapFormula = (LinkedHashMap<String, ?>) formula;
+				mapFormula = (LinkedHashMap<String, ?>) formula; // contains the list of inclusive or exclusive metrics
 			} else {
 				createParentMetric(name, desc);
 				result = VariantResult.OK_NEW_PARENT;
@@ -444,11 +488,12 @@ roots:
 			var formulaIterator = mapFormula.entrySet().iterator();
 			
 			while(formulaIterator.hasNext()) {
-				var formulaItem = formulaIterator.next();
-				var formulaType = MetricType.convertFromName(formulaItem.getKey());
+				var formulaItem  = formulaIterator.next();
+				var formulaScope = formulaItem.getKey();   // inclusive or exclusive
+				var formulaType  = MetricType.convertFromName(formulaScope);
 				
 				LinkedHashMap<String, ?> mapMetrics  = (LinkedHashMap<String, ?>) formulaItem.getValue();
-				HierarchicalMetric metric = getMetricCorrespondance(mapMetrics.hashCode(), formulaType, desc);
+				var metric = getMetricCorrespondance(mapMetrics.hashCode(), formulaType, desc);
 				
 				if (metric == null) {
 					// either it's a list of metrics or a more specific formula or a parent metric
@@ -461,6 +506,24 @@ roots:
 									   !subKey.getKey().equals("custom");
 	
 						metric = getMetricCorrespondance(subVal.hashCode(), formulaType, desc);
+						
+						if (metric == null) {
+							// this metric is not in the list of input metrics
+							// create a new derived metric
+							metric = new HierarchicalMetricDerivedFormula (dataSummary, ++numMetrics, name);
+							
+							var expression = subKey.getValue();
+							((HierarchicalMetricDerivedFormula)metric).setFormula(deconstructFormula((LinkedHashMap<String, ?>) expression));
+							
+							metric.setDescription(desc);
+							metric.setMetricType(formulaType);
+							metric.setVariantLabel(variantLabel);
+							
+							// a derived metric has no "partner"
+							metric.setPartner(-1);
+							
+							outputMetrics.add(metric);
+						}
 					}
 
 					// no correspondent metric: this may be a new parent metric
@@ -477,6 +540,54 @@ roots:
 		return result;
 	}
 	
+	
+	private String deconstructFormula(Object expression) {
+		var m = mapCodeToMetric.get(expression.hashCode());
+		if (m != null) {
+			return "$" + m.getIndex();
+		}
+
+		if (expression.getClass() == LinkedHashMap.class) {
+			LinkedHashMap<String, ?> mapExpression = (LinkedHashMap<String, ?>) expression;
+			var iterator = mapExpression.entrySet().iterator();
+
+			StringBuilder sb = new StringBuilder();
+			while(iterator.hasNext()) {
+				var subExpression = iterator.next();
+				var operator = subExpression.getKey();
+				var otherExpression = subExpression.getValue();
+				
+				if (otherExpression instanceof List<?>) {
+					List<?> listExpression = (List<?>) otherExpression;
+					if (listExpression.size() > 2)
+						throw new IllegalStateException("Formula has " + listExpression.size() + " subs: "+ listExpression );
+					
+					if (listExpression.size() == 1) {
+						var restExpr = deconstructFormula(listExpression.get(0));
+
+						char op = operator.charAt(0);
+						boolean function = ((op >= 'a' && op <= 'z') || (op >='A' && op <= 'Z')) ;
+
+						if (function) 
+							return operator + "(" + restExpr + ")";
+						
+						return operator + restExpr;
+					} 
+					var expLeft  = deconstructFormula(listExpression.get(0));
+					var expRight = deconstructFormula(listExpression.get(1));
+					
+					sb.append("(");
+					sb.append( expLeft + operator + expRight );
+					sb.append(")");
+				} else {
+					throw new IllegalStateException("Unknown expression: " + otherExpression);
+				}				
+			}
+			return sb.toString();
+		}
+		return String.valueOf(expression);
+	}
+	
 	private HierarchicalMetric getMetricCorrespondance(int hashcode, MetricType formulaType, String desc) {
 		var metric = mapCodeToMetric.get(hashcode);
 		if (metric instanceof HierarchicalMetric) {
@@ -486,7 +597,7 @@ roots:
 			hm.setMetricType(formulaType);
 			
 			linkParentChild(hm);
-			listMetrics.add(hm);
+			outputMetrics.add(hm);
 			
 			return hm;
 		}

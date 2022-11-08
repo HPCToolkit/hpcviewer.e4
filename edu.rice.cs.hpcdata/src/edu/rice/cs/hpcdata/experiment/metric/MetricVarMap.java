@@ -53,10 +53,15 @@ public class MetricVarMap extends VarMap
 	 * @param metric
 	 * 			The new metric
 	 */
-	public void setMetric(BaseMetric metric)
-	{
+	public void setMetric(BaseMetric metric) {
 		this.metric = metric;
 	}
+	
+	
+	public BaseMetric getMetric() {
+		return metric;
+	}
+	
 	
 	/**
 	 * set the current scope which contains metric values
@@ -67,6 +72,14 @@ public class MetricVarMap extends VarMap
 		this.scope = (Scope) s;
 	}
 	
+	/****
+	 * Return the current scope for this map 
+	 * 
+	 * @return
+	 */
+	public IMetricScope getScope() {
+		return scope;
+	}
 	
 	/**
 	 * Overloaded method: a callback to retrieve the value of a variable (or a metric)
