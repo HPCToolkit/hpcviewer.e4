@@ -49,6 +49,7 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	 */
 	private byte combineType; 
 
+	private final String formula;
 	
 	/***
 	 * Create a basic metric descriptor without hierarchy information.
@@ -61,7 +62,7 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	 * @param name
 	 * 			The basic name of the metric. This is not the displayed name.
 	 */
-	public HierarchicalMetric(DataSummary profileDB, int index, String name) {
+	public HierarchicalMetric(DataSummary profileDB, int index, String name, String formula) {
 		super(String.valueOf(index), name);
 		this.profileDB = profileDB;
 		setIndex(index);
@@ -69,9 +70,13 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		node = new TreeNode<>(index);
 		originalName = name;
 
-		combineType = COMBINE_UNKNOWN;
+		combineType  = COMBINE_UNKNOWN;
+		this.formula = formula;
 	}
 	
+	public String getFormula() {
+		return formula;
+	}
 	
 	public void setParent(HierarchicalMetric parent) {
 		node.setParent(parent);
@@ -106,6 +111,17 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		this.combineType = type;
 	}
 	
+	
+	/***
+	 * Return the combine type of this metric.
+	 * 
+	 * @see getCombineTypeLabel
+	 * 
+	 * @return byte
+	 */
+	public byte getCombineType() {
+		return combineType;
+	}
 	
 	/****
 	 * Set the combine type by name
@@ -291,7 +307,7 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	
 	@Override
 	public BaseMetric duplicate() {
-		var dupl = new HierarchicalMetric(profileDB, index, displayName);
+		var dupl = new HierarchicalMetric(profileDB, index, displayName, formula);
 		copy(dupl);
 		
 		return dupl;

@@ -10,6 +10,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.collections.api.map.primitive.LongObjectMap;
 import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
@@ -534,12 +535,8 @@ public class DataMeta extends DataCommon
 				var strFormula = getNullTerminatedString(buffer, (int) (pFormula-section.offset));
 				HierarchicalMetric metric;
 				
-				if (strFormula.isEmpty() || strFormula.equals("$$")) {
-					metric = new HierarchicalMetric(dataSummary, statMetric, metricName);
-				} else {
-					metric = new HierarchicalMetricDerivedFormula(dataSummary, statMetric, metricName);
-					((HierarchicalMetricDerivedFormula) metric).setFormula(strFormula);
-				}
+				metric = new HierarchicalMetric(dataSummary, statMetric, metricName, strFormula);
+
 				metric.setCombineType(combine);
 				metric.setIndex(statMetric);
 				
@@ -566,8 +563,13 @@ public class DataMeta extends DataCommon
 			// This ugly nested loop tries to find the partner of each metric in this scope.
 			for (int j=0; j<nSummaries; j++) {
 				int idx = metricIndexesPerScope[j];
-				BaseMetric m1 =  metricDesc.get(idx);
+				HierarchicalMetric m1 =  (HierarchicalMetric) metricDesc.get(idx);
 				
+				metricDesc.stream()
+						  .filter( m -> m instanceof HierarchicalMetric && 
+								  ((HierarchicalMetric)m).getOriginalName().equals(m1.getOriginalName()) &&
+								  ((HierarchicalMetric)m).getCombineType() == m1.getCombineType())
+						  .collect(Collectors.toList());
 				for (int k=0; k<nSummaries; k++) {
 					if (k == j) 
 						continue;

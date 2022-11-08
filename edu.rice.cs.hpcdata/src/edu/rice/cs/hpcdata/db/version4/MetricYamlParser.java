@@ -217,23 +217,26 @@ inputs: ArrayList<E>  (id=98)
 		if (!(inputs instanceof ArrayList<?>))
 			return;
 		
-		var metrics     = inputMetrics;
 		var listInputs  = (List<Map<String, ?>>)inputs;
 		mapCodeToMetric = new HashMap<>(listInputs.size());
 		
 		for(var input: listInputs) {
 			var metric  = input.get(FIELD_METRIC);
 			var scope   = input.get("scope");
-			var combine = (String)input.get("combine");
+			var combine = (String)input.get("combine");			
+			var formula = input.get("formula");
+			var strFormula = String.valueOf(formula);
 
 			final MetricType mtype = MetricType.convertFromPropagationScope((String) scope);
 			
 			// try to find metric in meta.db that match the metric in yaml file
 			// We should find a matched metric, otherwise there is something wrong
-			var filteredMetrics = metrics.stream()
-					 				     .filter(m -> ((HierarchicalMetric)m).getOriginalName().equals(metric) &&
+			var filteredMetrics = inputMetrics.stream()
+					 				     .filter(m -> (m instanceof HierarchicalMetric) &&
+					 				     			  ((HierarchicalMetric)m).getOriginalName().equals(metric) &&
 					 				    		 	  ((HierarchicalMetric)m).getCombineTypeLabel().equalsIgnoreCase(combine) &&
-					 				    		 	  m.getMetricType() == mtype)
+					 				    		 	  m.getMetricType() == mtype &&
+					 		  						  ((HierarchicalMetric)m).getFormula().compareToIgnoreCase(strFormula) == 0)
 					 				     .collect(Collectors.toList());
 
 			if (filteredMetrics.isEmpty()) {
@@ -241,30 +244,8 @@ inputs: ArrayList<E>  (id=98)
 				throw new IllegalStateException(metric + "/" + combine + ": metric does not exist.");
 			}
 			if (filteredMetrics.size() > 1) {
-				// there are more than 1 matched metrics. Possibly they are statistic metrics
-				// let's trim the list based on formula
-				
-				var formula = input.get("formula");
-				if (formula.equals("$$")) {
-					filteredMetrics = filteredMetrics.stream()
-							   						 .filter(m -> !(m instanceof HierarchicalMetricDerivedFormula))
-							   						 .collect(Collectors.toList());
-				} else {
-					var strFormula = String.valueOf(formula);
-					var expFormula = ExpressionTree.parse(strFormula).toString();
-
-					filteredMetrics = filteredMetrics
-							 	   .stream()
-								   .filter( m -> m instanceof HierarchicalMetricDerivedFormula &&
-										   ((HierarchicalMetricDerivedFormula)m).getFormula()
-										   										.toString()
-										   										.equals(expFormula))
-								   .collect(Collectors.toList());
-				}
-				
-				if (filteredMetrics.size()>1)
-					// Still found more than one matched metrics. that's impossible
-					throw new IllegalStateException(metric + "/" + combine + ": metric has more than 1 matched.");
+				// Still found more than one matched metrics. that's impossible
+				throw new IllegalStateException(metric + "/" + combine + ": metric has more than 1 matched.");
 			}
 			
 			mapCodeToMetric.put(input.hashCode(), filteredMetrics.get(0));
@@ -508,22 +489,23 @@ roots:
 						metric = getMetricCorrespondance(subVal.hashCode(), formulaType, desc);
 						
 						if (metric == null) {
-							// this metric is not in the list of input metrics
-							// create a new derived metric
-							metric = new HierarchicalMetricDerivedFormula (dataSummary, ++numMetrics, name);
 							
 							var expression = subKey.getValue();
-							((HierarchicalMetricDerivedFormula)metric).setFormula(deconstructFormula((LinkedHashMap<String, ?>) expression));
+							var strExpression = deconstructFormula((LinkedHashMap<String, ?>) expression);
+
+							// this metric is not in the list of input metrics
+							// create a new derived metric
+							metric = new HierarchicalMetricDerivedFormula (dataSummary, ++numMetrics, name, strExpression);
 							
 							metric.setDescription(desc);
 							metric.setMetricType(formulaType);
-							metric.setVariantLabel(variantLabel);
 							
 							// a derived metric has no "partner"
 							metric.setPartner(-1);
 							
 							outputMetrics.add(metric);
 						}
+						metric.setVariantLabel(variantLabel);
 					}
 
 					// no correspondent metric: this may be a new parent metric
@@ -616,7 +598,7 @@ roots:
 	
 	
 	private HierarchicalMetric createParentMetric(String name, String desc) {
-		var metric = new HierarchicalMetric(dataSummary, parentIndex, name);		
+		var metric = new HierarchicalMetric(dataSummary, parentIndex, name, "");		
 		metric.setDescription(desc);
 
 		linkParentChild(metric);

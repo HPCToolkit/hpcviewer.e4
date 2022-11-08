@@ -24,16 +24,18 @@ public class HierarchicalMetricDerivedFormula extends HierarchicalMetric
 	// map variable 
 	private final MetricVarMap varMap;
 	
-	private Expression formula;
+	private Expression derivedFormula;
 
-	public HierarchicalMetricDerivedFormula(DataSummary profileDB, int index, String name) {
-		super(profileDB, index, name);
+	public HierarchicalMetricDerivedFormula(DataSummary profileDB, int index, String name, String formula) {
+		super(profileDB, index, name, formula);
 		
 		varMap = new HierarchicalMetricVarMap();
 		varMap.setMetric(this);
 		
 		fctMap = new ExtFuncMap();
 		fctMap.loadDefaultFunctions();
+		
+		setFormula(formula);
 	}
 
 
@@ -42,20 +44,21 @@ public class HierarchicalMetricDerivedFormula extends HierarchicalMetric
 	 * 
 	 * @return
 	 */
-	public Expression getFormula() {
-		return formula;
+	@Override
+	public String getFormula() {
+		return derivedFormula.toString();
 	}
 
 
 	/****
 	 * Set the math formula of the metric
 	 * 
-	 * @param formula
+	 * @param derivedFormula
 	 */
 	public void setFormula(String strFormula) {
 		if (strFormula.equals("$$"))
-			formula = null;
-		this.formula = ExpressionTree.parse(strFormula);
+			derivedFormula = null;
+		this.derivedFormula = ExpressionTree.parse(strFormula);
 	}
 
 
@@ -66,12 +69,12 @@ public class HierarchicalMetricDerivedFormula extends HierarchicalMetric
 		// Fix for issue #248 for meta.db: do not grab the value from profile.db
 		// instead, if it's from bottom-up view or flat view, we grab the value 
 		// from the computed metrics.
-		if (formula == null ) {
+		if (derivedFormula == null ) {
 			return scope.getDirectMetricValue(index);
 		}
 		
 		varMap.setScope(scope);
-		var value = formula.eval(varMap, fctMap);
+		var value = derivedFormula.eval(varMap, fctMap);
 		
 		// Usually we don't need to use apache's math to compare zero but in
 		// some cases, it's needed. Let's take the precaution using epsilon 
@@ -84,9 +87,9 @@ public class HierarchicalMetricDerivedFormula extends HierarchicalMetric
 
 	@Override
 	public BaseMetric duplicate() {
-		var dupl = new HierarchicalMetricDerivedFormula(getDataSummary(), index, displayName);
+		var dupl = new HierarchicalMetricDerivedFormula(getDataSummary(), index, displayName, getFormula());
 		copy(dupl);
-		dupl.formula = formula;
+		dupl.derivedFormula = derivedFormula;
 		
 		return dupl;
 	}
