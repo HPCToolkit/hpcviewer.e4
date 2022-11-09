@@ -44,6 +44,11 @@ is a caller-callee relationship (of some kind).
  */
 public class PropagationScope 
 {
+	public static final byte TYPE_CUSTOM     = 0;
+	public static final byte TYPE_POINT      = 1;
+	public static final byte TYPE_EXECUTION  = 2;
+	public static final byte TYPE_TRANSITIVE = 3;
+	
 	/** Name of the propagation scope 
 	 **/
 	private final String scopeName;
@@ -101,5 +106,11 @@ public class PropagationScope
 			metricType = MetricType.convertFromPropagationScope(scopeName);
 		
 		return metricType;
+	}
+	
+	
+	@Override
+	public String toString() {
+		return propagationIndex + ". " + scopeName ;
 	}
 }

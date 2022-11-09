@@ -24,7 +24,6 @@ import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
-import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetricDerivedFormula;
 import edu.rice.cs.hpcdata.experiment.metric.PropagationScope;
 import edu.rice.cs.hpcdata.experiment.scope.EntryScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoadModuleScope;
@@ -512,7 +511,8 @@ public class DataMeta extends DataCommon
 			}
 			int strPosition = (int) (pName - section.offset);
 			String metricName = getNullTerminatedString(buffer, strPosition);
-			int []metricIndexesPerScope = new int[nSummaries];
+
+			List<HierarchicalMetric> listInclusiveMetrics = new ArrayList<>(nSummaries);
 			
 			int baseSummariesLocation = (int) (pSummaries - section.offset);
 					
@@ -551,7 +551,8 @@ public class DataMeta extends DataCommon
 
 				// store the index of this scope.
 				// we need this to propagate the partner index
-				metricIndexesPerScope[k] = metricDesc.size();
+				if ( pi.getType() == PropagationScope.TYPE_EXECUTION )
+					listInclusiveMetrics.add(metric);
 				
 				metricDesc.add(metric);
 			}
@@ -561,27 +562,43 @@ public class DataMeta extends DataCommon
 			// (in the future can be more than that)
 			// If a metric is exclusive, then its partner is the inclusive one.
 			// This ugly nested loop tries to find the partner of each metric in this scope.
-			for (int j=0; j<nSummaries; j++) {
-				int idx = metricIndexesPerScope[j];
-				HierarchicalMetric m1 =  (HierarchicalMetric) metricDesc.get(idx);
+			for (var m1: listInclusiveMetrics) {
 				
-				metricDesc.stream()
-						  .filter( m -> m instanceof HierarchicalMetric && 
+				// find the partner of this inclusive metric.
+				// the partner should be a lex_aware propagation scope (custom type)
+				var partners = metricDesc.stream()
+						  .filter( m -> m instanceof HierarchicalMetric &&
+								  ((HierarchicalMetric)m).getFormula().compareToIgnoreCase(m1.getFormula()) == 0 &&
 								  ((HierarchicalMetric)m).getOriginalName().equals(m1.getOriginalName()) &&
+								  ((HierarchicalMetric)m).getPropagationScope().getType() == PropagationScope.TYPE_CUSTOM &&
 								  ((HierarchicalMetric)m).getCombineType() == m1.getCombineType())
 						  .collect(Collectors.toList());
-				for (int k=0; k<nSummaries; k++) {
-					if (k == j) 
-						continue;
-					
-					int idx2 = metricIndexesPerScope[k];
-					BaseMetric m2 = metricDesc.get(idx2);
-					if (m2.getMetricType() != m1.getMetricType()) {
-						// the type of m2 is different than m1
-						// theoretically m2 is the partner of m1. and vice versa
-						m2.setPartner(m1.getIndex());
+				
+				if (partners.size() > 1)
+					throw new IllegalStateException("Too many partners for " + m1.getDisplayName());
+
+				if (!partners.isEmpty()) {
+					var m2 = partners.get(0);
+
+					m2.setPartner(m1.getIndex());
+					m1.setPartner(m2.getIndex());
+				}
+				// now set the partner for exclusive type with function propagation scope
+				// At the moment this scope shouldn't appear in the metric list, but in can be
+				// visible in the future
+				partners = metricDesc.stream()
+						  .filter( m -> m instanceof HierarchicalMetric &&
+								  ((HierarchicalMetric)m).getFormula().compareToIgnoreCase(m1.getFormula()) == 0 &&
+								  ((HierarchicalMetric)m).getOriginalName().equals(m1.getOriginalName()) &&
+								  ((HierarchicalMetric)m).getPropagationScope().getType() == PropagationScope.TYPE_TRANSITIVE &&
+								  ((HierarchicalMetric)m).getCombineType() == m1.getCombineType())
+						  .collect(Collectors.toList());
+				
+				if (partners.size() == 1) {
+					var m2 = partners.get(0);
+					m2.setPartner(m1.getIndex());
+					if (m1.getPartner() < 0)
 						m1.setPartner(m2.getIndex());
-					}
 				}
 			}
 		}
