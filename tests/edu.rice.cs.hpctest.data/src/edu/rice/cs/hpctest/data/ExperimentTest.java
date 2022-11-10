@@ -97,7 +97,7 @@ public class ExperimentTest
 				}
 			} else {
 				assertNotNull(metrics);
-				assertTrue(metrics.size()>1);
+				assertTrue(metrics.size()>0);
 			}				
 		}
 	}

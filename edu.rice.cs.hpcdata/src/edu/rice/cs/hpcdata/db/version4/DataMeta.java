@@ -24,6 +24,7 @@ import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
+import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
 import edu.rice.cs.hpcdata.experiment.metric.PropagationScope;
 import edu.rice.cs.hpcdata.experiment.scope.EntryScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoadModuleScope;
@@ -92,6 +93,7 @@ public class DataMeta extends DataCommon
 	
 	private StringArea stringArea;
 	private List<BaseMetric> metrics;
+	private List<BaseMetric>  rawMerics;
 
 	private DataSummary dataSummary;
 	private IExperiment experiment;
@@ -258,6 +260,18 @@ public class DataMeta extends DataCommon
 	}
 		
 
+	/**
+	 * @return the rawMerics
+	 */
+	public List<BaseMetric> getRawMerics() {
+		return rawMerics;
+	}
+
+	/***
+	 * Return the access to profile.db
+	 * 
+	 * @return
+	 */
 	public DataSummary getDataSummary() {
 		return dataSummary;
 	}
@@ -478,6 +492,8 @@ public class DataMeta extends DataCommon
 			mapPropagationIndex.put(pScope, ps);
 		}
 		
+		rawMerics = new ArrayList<>(nMetrics);
+		
 		// --------------------------------------
 		// Gathering the descriptions of performance metrics
 		// --------------------------------------
@@ -497,7 +513,10 @@ public class DataMeta extends DataCommon
 			var nSummaries  = buffer.getShort(metricLocation + 0x1a);
 			
 			int scopesPosition = (int) (pScopeInsts - section.offset);			
-			short []propMetricId = new short[nScopeInsts];
+
+			int strPosition = (int) (pName - section.offset);
+			String metricName = getNullTerminatedString(buffer, strPosition);
+			var mapPScopeToMetricRaw = new LongObjectHashMap<MetricRaw>(nScopeInsts);
 			
 			// --------------------------------------
 			// Instantiated propagated sub-metrics (PSI)
@@ -507,10 +526,23 @@ public class DataMeta extends DataCommon
 			
 			for (int j=0; j<nScopeInsts; j++) {
 				int basePosition = scopesPosition + (j * szScope);
-				propMetricId[j]  = buffer.getShort(basePosition + 0x08);
+				var pScope = buffer.getLong(basePosition + 0x00);
+				var propMetricId = buffer.getShort(basePosition + 0x08);
+				
+				var ps = mapPropagationIndex.get(pScope);
+				
+				// hack - hack - hack
+				// we want to store the raw metrics for inclusive (execution scope) and exclusive (lex_aware)
+				if (ps.getType() == PropagationScope.TYPE_EXECUTION ||
+					ps.getType() == PropagationScope.TYPE_CUSTOM) {
+					
+					var displayedName = metricName + " " + ps.getMetricTypeSuffix();
+					MetricRaw metric = new MetricRaw(propMetricId, displayedName, metricName, null, propMetricId, -1, ps.getMetricType(), nMetrics);
+					
+					rawMerics.add(metric);
+					mapPScopeToMetricRaw.put(pScope, metric);					
+				}
 			}
-			int strPosition = (int) (pName - section.offset);
-			String metricName = getNullTerminatedString(buffer, strPosition);
 
 			List<HierarchicalMetric> listInclusiveMetrics = new ArrayList<>(nSummaries);
 			
@@ -539,6 +571,9 @@ public class DataMeta extends DataCommon
 
 				metric.setCombineType(combine);
 				metric.setIndex(statMetric);
+				
+				var rawMetric = mapPScopeToMetricRaw.get(pScope);
+				metric.setMetricRaw(rawMetric);
 				
 				// the annotation type is unknown until we parse the yaml file
 				metric.setAnnotationType(AnnotationType.PERCENT);

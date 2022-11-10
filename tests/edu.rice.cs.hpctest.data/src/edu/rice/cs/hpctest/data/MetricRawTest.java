@@ -68,8 +68,6 @@ public class MetricRawTest
 					assertNotNull(mr.getThread());
 					assertTrue(mr.getThread().isEmpty());
 					
-					assertNotNull(mr.getGlob());
-					
 					assertEquals(mr.getRawID(), mr.getIndex());
 					assertEquals(mr.getIndex(), mr.getID());
 					

@@ -29,7 +29,7 @@ public class MetaDbFileParser extends ExperimentFile
 		// Reset the new list of metric descriptors to the experiment database  
 		// Note: Metrics are based on the yaml file, not meta.db
 		((Experiment)experiment).setMetrics(yamlParser.getListMetrics());
-		((Experiment)experiment).setMetricRaw(yamlParser.getListMetrics());
+		((Experiment)experiment).setMetricRaw(data.getRawMerics());
 
 		return new File(data.filename);
 	}

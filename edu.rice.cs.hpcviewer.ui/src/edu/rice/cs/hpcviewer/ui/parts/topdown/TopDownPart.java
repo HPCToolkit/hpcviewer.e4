@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.events.DisposeEvent;
@@ -92,7 +93,11 @@ public class TopDownPart extends AbstractTableView
 					
 					// create the context menu of graphs
 					var data = getThreadDataCollection();
-					GraphMenu.createAdditionalContextMenu(getProfilePart(),  mgr, metricManager, data, scope);
+					try {
+						GraphMenu.createAdditionalContextMenu(getProfilePart(),  mgr, metricManager, data, scope);
+					} catch (Exception e1) {
+						MessageDialog.openError(e.display.getActiveShell(), "Error", e1.getMessage());
+					}
 					
 					// make the context menu appears next to tool item
 					final Menu menu = mgr.getMenu();

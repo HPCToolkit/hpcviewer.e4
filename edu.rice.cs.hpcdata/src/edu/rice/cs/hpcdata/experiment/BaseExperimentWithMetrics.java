@@ -89,12 +89,12 @@ implements IMetricManager, ListEventListener<BaseMetric>
 	
 	@Override
 	public BaseMetric getCorrespondentMetricRaw(BaseMetric metric) {
-		// for sparse database (meta.db), the metrics are hierarchical metrics.
-		// Since they don't separate between normal metrics and metric-db,
-		// it is safe to return their own normal metric as the raw metric.
-		//
-		if (metric instanceof HierarchicalMetric)
-			return metric;
+		// for sparse database (meta.db), the raw metrics are associated 
+		// directly with the hierarchical metrics.
+		// See meta.db file or DataMeta class.
+		if (metric instanceof HierarchicalMetric) {
+			return ((HierarchicalMetric) metric).getMetricRaw();
+		}
 		
 		// for old database that separate between metric-db and normal metrics,
 		// we don't have the connection between them. The only way to know

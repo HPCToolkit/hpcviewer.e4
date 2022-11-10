@@ -1,5 +1,7 @@
 package edu.rice.cs.hpcviewer.ui.graph;
 
+import java.util.stream.DoubleStream;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
@@ -7,7 +9,6 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.custom.CTabItem;
 
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
@@ -39,24 +40,22 @@ public class GraphMenu
 	 * 			An interface to access the raw data
 	 * @param scope
 	 * 			The selected node 
+	 * @throws Exception 
 	 */
 	public static void createAdditionalContextMenu(
 			ProfilePart profilePart,
 			IMenuManager mgr, 
 			IMetricManager experiment, 
 			IThreadDataCollection threadData, 
-			Scope scope) {
+			Scope scope) throws Exception {
 		
 		if (scope == null || threadData == null || !threadData.isAvailable())
 			// no menus if there is no thread-level data
 			return;
 		
-		// fix issue #221: do not show empty metrics
-		// get the list of indexes of non-empty metrics
-		// if the table is empty or has no metrics, do nothing
 		var listOfIndexes = experiment.getNonEmptyMetricIDs(scope);
 		if (listOfIndexes == null || listOfIndexes.isEmpty())
-			// Perhaps should throw an exception
+			// empty metrics: Perhaps should throw an exception
 			return;
 		
 		mgr.add( new Separator() );
@@ -65,18 +64,15 @@ public class GraphMenu
 									  GraphPlotSortViewer.LABEL,
 									  GraphHistoViewer.LABEL };
 		
-		for (Integer metricIndex: listOfIndexes) {
-			
-			// issue #221: do not display empty metric 
-			// try to find the correlated between general metric (non-empty) and
-			// the raw metric. 
-			// Note: plot graph and thread view requires raw metrics
-			var m = experiment.getMetric(metricIndex.intValue());
-			BaseMetric metric = experiment.getCorrespondentMetricRaw(m);
-
-			if (metric == null)
+		// fix issue #221: do not show empty metrics
+		// get the list of indexes of non-empty metrics
+		// if the table is empty or has no metrics, do nothing
+		var rawMetrics = experiment.getRawMetrics();
+		for(var metric: rawMetrics) {
+			var metrics = threadData.getMetrics(scope.getCCTIndex(), metric.getIndex(), rawMetrics.size());
+			if (metrics == null || metrics.length == 0 || !DoubleStream.of(metrics).anyMatch(d -> d != 0)) {
 				continue;
-			
+			}
 			MenuManager subMenu = new MenuManager("Graph "+ metric.getDisplayName() );
 
 			for (String type: graphTypes) {

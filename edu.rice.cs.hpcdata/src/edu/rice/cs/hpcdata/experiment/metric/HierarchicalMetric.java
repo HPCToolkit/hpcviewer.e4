@@ -38,6 +38,12 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	// the name of variant (usually statistic variants like sum, min,....)
 	// it's a bit mix up with the combine
 	private String variant;
+	
+	// the associated metric raw for this metric
+	// metric raw is used to display plot graph and metric view.
+	// Since this HierarchicalMetric can be based on Statistic metrics, the
+	// mapping to raw metric is many-to-one
+	private MetricRaw metricRaw;
 
 	/**
 	 * The combination function combine is an enumeration with the following possible values (the name after / is the matching name for inputs:combine in METRICS.yaml):
@@ -50,6 +56,8 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	private byte combineType; 
 
 	private final String formula;
+	
+	private short propMetricId;
 	
 	/***
 	 * Create a basic metric descriptor without hierarchy information.
@@ -234,15 +242,11 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		if (!displayName.equals(originalName))
 			return displayName;
 		
-		final String SUFFIX_EXCLUSIVE = " (E)";
-		final String SUFFIX_INCLUSIVE = " (I)";
-		final String SUFFIX_POINT_EXC = " (X)";
-		
 		// if the display name already have metric-type suffix.
 		// return the real display name
-		if (displayName.endsWith(SUFFIX_EXCLUSIVE) || 
-			displayName.endsWith(SUFFIX_INCLUSIVE) ||
-			displayName.endsWith(SUFFIX_POINT_EXC))
+		if (displayName.endsWith(PropagationScope.SUFFIX_EXCLUSIVE) || 
+			displayName.endsWith(PropagationScope.SUFFIX_INCLUSIVE) ||
+			displayName.endsWith(PropagationScope.SUFFIX_POINT_EXC))
 			return displayName;
 		
 		StringBuilder sb = new StringBuilder(originalName);
@@ -258,13 +262,8 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 
 		// otherwise we need to add suffix for the metric type
 		// 
-		if (getMetricType() == MetricType.EXCLUSIVE || 
-			getMetricType() == MetricType.LEXICAL_AWARE)
-			sb.append(SUFFIX_EXCLUSIVE);
-		else if (getMetricType() == MetricType.INCLUSIVE)
-			sb.append(SUFFIX_INCLUSIVE);
-		else if (getMetricType() == MetricType.POINT_EXCL)
-			sb.append(SUFFIX_POINT_EXC);
+		if (propagationScope != null)
+			sb.append(propagationScope.getMetricTypeSuffix());
 
 		displayName = sb.toString();
 		
@@ -297,6 +296,34 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		setMetricType(type);
 	}
 
+
+	/**
+	 * @return the propMetricId
+	 */
+	public short getPropMetricId() {
+		return propMetricId;
+	}
+
+	/**
+	 * @param propMetricId the propMetricId to set
+	 */
+	public void setPropMetricId(short propMetricId) {
+		this.propMetricId = propMetricId;
+	}
+
+	/**
+	 * @return the metricRaw
+	 */
+	public MetricRaw getMetricRaw() {
+		return metricRaw;
+	}
+
+	/**
+	 * @param metricRaw the metricRaw to set
+	 */
+	public void setMetricRaw(MetricRaw metricRaw) {
+		this.metricRaw = metricRaw;
+	}
 
 	@Override
 	public MetricValue getValue(IMetricScope s) {

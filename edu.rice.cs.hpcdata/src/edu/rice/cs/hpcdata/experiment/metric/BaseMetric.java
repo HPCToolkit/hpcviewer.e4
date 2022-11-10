@@ -64,6 +64,7 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 	
 	/** The index of this metric in its experiment's metric list. */
 	protected int index;
+	
 	// partner of the metric. If the metric is exclusive, then its partner is the inclusive one
 	protected int partnerIndex;
 

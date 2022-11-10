@@ -43,7 +43,11 @@ is a caller-callee relationship (of some kind).
  *
  */
 public class PropagationScope 
-{
+{	
+	public static final String SUFFIX_EXCLUSIVE = "(E)";
+	public static final String SUFFIX_INCLUSIVE = "(I)";
+	public static final String SUFFIX_POINT_EXC = "(X)";
+
 	public static final byte TYPE_CUSTOM     = 0;
 	public static final byte TYPE_POINT      = 1;
 	public static final byte TYPE_EXECUTION  = 2;
@@ -75,7 +79,15 @@ public class PropagationScope
 	}
 
 	/**
-	 * @return the type
+	 * Retrieve the propagation type.
+	 * 
+	 * @see TYPE_CUSTOM
+	 * @see TYPE_POINT
+	 * @see TYPE_EXECUTION
+	 * @see TYPE_TRANSITIVE
+	 * 
+	 * @return {@code byte}
+	 * 			the type
 	 */
 	public byte getType() {
 		return type;
@@ -106,6 +118,20 @@ public class PropagationScope
 			metricType = MetricType.convertFromPropagationScope(scopeName);
 		
 		return metricType;
+	}
+	
+	public String getMetricTypeSuffix() {
+		if (getMetricType() == MetricType.EXCLUSIVE || 
+			getMetricType() == MetricType.LEXICAL_AWARE)
+			return(PropagationScope.SUFFIX_EXCLUSIVE);
+		
+		if (getMetricType() == MetricType.INCLUSIVE)
+			return(PropagationScope.SUFFIX_INCLUSIVE);
+		
+		if (getMetricType() == MetricType.POINT_EXCL)
+			return(PropagationScope.SUFFIX_POINT_EXC);
+
+		return "";
 	}
 	
 	
