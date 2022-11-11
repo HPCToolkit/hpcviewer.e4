@@ -35,6 +35,8 @@ public class CallingContextReassignment implements IScopeVisitor
 			parent.remove(scope);
 			
 			if (scope.hasChildren()) {
+				// warning: we assume all children are the call sites
+				// if a child is not a call then we shouldn't remove it.
 				for(var child: scope.getChildren()) {
 					parent.addSubscope(child);
 				}

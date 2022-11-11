@@ -1,9 +1,11 @@
 package edu.rice.cs.hpcviewer.ui.parts.thread;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.DoubleStream;
 
 import org.eclipse.collections.api.map.primitive.MutableIntObjectMap;
 import org.eclipse.collections.impl.list.mutable.FastList;
@@ -13,12 +15,11 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.event.ListEventListener;
 import edu.rice.cs.hpcdata.db.IdTuple;
+import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
-import edu.rice.cs.hpcdata.experiment.metric.MetricType;
-import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
@@ -113,19 +114,20 @@ public class ThreadMetricManager implements IMetricManager
 	public List<Integer> getNonEmptyMetricIDs(Scope scope) {
 		List<BaseMetric> metrics = getVisibleMetrics();
 		List<Integer> listIDs = new ArrayList<>(metrics.size());
-		
-		for(BaseMetric m: metrics) {
-			// fix issue #221 (do not show empty metrics)
-			// in some versions, the root value of exclusive metric is always empty
-			// in this case we need to get the value from its partner.
-			// yuck.
-			BaseMetric metric = m;
-			if (metric.getMetricType() == MetricType.EXCLUSIVE &&
-				scope instanceof RootScope) 
-				metric = ((MetricRaw)m).getMetricPartner();
-			
-			if (metric != null && metric.getValue(scope) != MetricValue.NONE)
-				listIDs.add(m.getIndex());
+
+		RootScope root = scope.getRootScope();
+		try {
+			IThreadDataCollection threadData = root.getExperiment().getThreadData();
+			for (var metric: metrics) {
+				var vals = threadData.getMetrics(scope, metric, getMetricCount());
+				var notEmpty = DoubleStream.of(vals).anyMatch(v -> v != 0.0d);
+				if (notEmpty)
+					listIDs.add(metric.getIndex());
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
 		}
 		return listIDs;
 	}
@@ -138,24 +140,6 @@ public class ThreadMetricManager implements IMetricManager
 	@Override
 	public void removeMetricListener(ListEventListener<BaseMetric> listener) {
 		rawMetrics.removeListEventListener(listener);
-	}
-
-	@Override
-	public MetricRaw getCorrespondentMetricRaw(BaseMetric metric) {
-		if (metric instanceof MetricRaw)
-			return (MetricRaw) metric;
-		
-		if (rawMetrics == null || rawMetrics.isEmpty())
-			return null;
-		
-		var rawMetric = rawMetrics.stream().filter(m -> metric.getDisplayName().
-														startsWith(m.getDisplayName().substring(0, m.getDisplayName().length()-3))
-													)
-											.findAny();
-		if (rawMetric.isPresent())
-			return (MetricRaw) rawMetric.get();
-		
-		return null;
 	}
 
 	@Override

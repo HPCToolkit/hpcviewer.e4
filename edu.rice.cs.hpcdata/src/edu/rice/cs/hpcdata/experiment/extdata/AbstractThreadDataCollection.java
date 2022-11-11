@@ -2,10 +2,43 @@ package edu.rice.cs.hpcdata.experiment.extdata;
 
 import java.io.IOException;
 
+import edu.rice.cs.hpcdata.db.IdTuple;
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
+import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
+import edu.rice.cs.hpcdata.experiment.metric.MetricType;
+import edu.rice.cs.hpcdata.experiment.scope.RootScope;
+import edu.rice.cs.hpcdata.experiment.scope.Scope;
+
 
 public abstract class AbstractThreadDataCollection implements
 		IThreadDataCollection {
 
+
+	@Override
+	public double getMetric(Scope scope, BaseMetric metric, IdTuple idtuple, int numMetrics) throws IOException {
+		int metricIndex = getMetricIndex(scope, metric);
+		return getMetric(scope.getCCTIndex(), metricIndex, idtuple, numMetrics);
+	}
+
+	@Override
+	public double[] getMetrics(Scope scope, BaseMetric metric, int numMetrics) throws Exception {
+		int metricIndex = getMetricIndex(scope, metric);
+		return getMetrics(scope.getCCTIndex(), metricIndex, numMetrics);
+	}
+
+	private int getMetricIndex(Scope scope, BaseMetric metric) {
+		int metricIndex = metric.getIndex();
+		if ( scope instanceof RootScope  && 
+			 metric instanceof MetricRaw && 
+			 metric.getMetricType().isExclusive()) {
+			
+			var partner = ((MetricRaw) metric).getMetricPartner();
+			if (partner != null)
+				metricIndex = partner.getRawID();
+		}
+		return metricIndex;
+	}
+	
 	public double[] getEvenlySparseRankLabels() throws IOException {
 		double []values = getRankLabels();
 		int parallelism = getParallelismLevel();

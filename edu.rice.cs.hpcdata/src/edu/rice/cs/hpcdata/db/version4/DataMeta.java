@@ -25,6 +25,7 @@ import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
+import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.metric.PropagationScope;
 import edu.rice.cs.hpcdata.experiment.scope.EntryScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoadModuleScope;
@@ -93,7 +94,7 @@ public class DataMeta extends DataCommon
 	
 	private StringArea stringArea;
 	private List<BaseMetric> metrics;
-	private List<BaseMetric>  rawMerics;
+	private List<BaseMetric>  rawMetrics;
 
 	private DataSummary dataSummary;
 	private IExperiment experiment;
@@ -264,7 +265,7 @@ public class DataMeta extends DataCommon
 	 * @return the rawMerics
 	 */
 	public List<BaseMetric> getRawMerics() {
-		return rawMerics;
+		return rawMetrics;
 	}
 
 	/***
@@ -492,7 +493,7 @@ public class DataMeta extends DataCommon
 			mapPropagationIndex.put(pScope, ps);
 		}
 		
-		rawMerics = new ArrayList<>(nMetrics);
+		rawMetrics = new ArrayList<>(nMetrics);
 		
 		// --------------------------------------
 		// Gathering the descriptions of performance metrics
@@ -539,11 +540,32 @@ public class DataMeta extends DataCommon
 					var displayedName = metricName + " " + ps.getMetricTypeSuffix();
 					MetricRaw metric = new MetricRaw(propMetricId, displayedName, metricName, null, propMetricId, -1, ps.getMetricType(), nMetrics);
 					
-					rawMerics.add(metric);
+					rawMetrics.add(metric);
 					mapPScopeToMetricRaw.put(pScope, metric);					
 				}
 			}
 
+			// reset the partner
+			for(var rm: rawMetrics) {
+				if (rm.getMetricType() == MetricType.LEXICAL_AWARE) {
+					var l = rawMetrics.stream()
+							  		   .filter(m -> m.getDescription().equals(rm.getDescription()) && 
+									  	            m.getMetricType() == MetricType.INCLUSIVE)
+							  		   .collect(Collectors.toList());
+					if (l.size() == 1) {
+						var partner = l.get(0);
+						
+						// set partner based on index
+						rm.setPartner(partner.getIndex());
+						partner.setPartner(rm.getIndex());
+						
+						// set partner based on metric
+						((MetricRaw) rm).setMetricPartner((MetricRaw) partner);
+						((MetricRaw) partner).setMetricPartner((MetricRaw) rm);
+					}
+				}
+			}
+			
 			List<HierarchicalMetric> listInclusiveMetrics = new ArrayList<>(nSummaries);
 			
 			int baseSummariesLocation = (int) (pSummaries - section.offset);
@@ -571,9 +593,6 @@ public class DataMeta extends DataCommon
 
 				metric.setCombineType(combine);
 				metric.setIndex(statMetric);
-				
-				var rawMetric = mapPScopeToMetricRaw.get(pScope);
-				metric.setMetricRaw(rawMetric);
 				
 				// the annotation type is unknown until we parse the yaml file
 				metric.setAnnotationType(AnnotationType.PERCENT);

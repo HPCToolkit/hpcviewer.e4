@@ -39,12 +39,6 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	// it's a bit mix up with the combine
 	private String variant;
 	
-	// the associated metric raw for this metric
-	// metric raw is used to display plot graph and metric view.
-	// Since this HierarchicalMetric can be based on Statistic metrics, the
-	// mapping to raw metric is many-to-one
-	private MetricRaw metricRaw;
-
 	/**
 	 * The combination function combine is an enumeration with the following possible values (the name after / is the matching name for inputs:combine in METRICS.yaml):
 	 * <ul>
@@ -311,19 +305,6 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		this.propMetricId = propMetricId;
 	}
 
-	/**
-	 * @return the metricRaw
-	 */
-	public MetricRaw getMetricRaw() {
-		return metricRaw;
-	}
-
-	/**
-	 * @param metricRaw the metricRaw to set
-	 */
-	public void setMetricRaw(MetricRaw metricRaw) {
-		this.metricRaw = metricRaw;
-	}
 
 	@Override
 	public MetricValue getValue(IMetricScope s) {

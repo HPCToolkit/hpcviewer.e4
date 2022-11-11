@@ -60,6 +60,10 @@ public class MetricType
 		throw new IllegalArgumentException("unknown formula type: " + formulaType);
 	}
 	
+	public boolean isExclusive() {
+		return this == EXCLUSIVE || this == LEXICAL_AWARE;
+	}
+	
 	private String value;
 	private MetricType(String value) { this.value = value; };
 }

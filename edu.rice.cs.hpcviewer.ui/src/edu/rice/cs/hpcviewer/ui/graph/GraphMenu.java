@@ -69,7 +69,7 @@ public class GraphMenu
 		// if the table is empty or has no metrics, do nothing
 		var rawMetrics = experiment.getRawMetrics();
 		for(var metric: rawMetrics) {
-			var metrics = threadData.getMetrics(scope.getCCTIndex(), metric.getIndex(), rawMetrics.size());
+			var metrics = threadData.getMetrics(scope, metric, rawMetrics.size());
 			if (metrics == null || metrics.length == 0 || !DoubleStream.of(metrics).anyMatch(d -> d != 0)) {
 				continue;
 			}

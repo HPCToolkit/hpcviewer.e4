@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.util.List;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
+import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 /********************************************************************************
  * 
@@ -75,6 +77,38 @@ public interface IThreadDataCollection
 	 */
 	public String   getRankTitle() throws IOException;
 	
+	
+	/****
+	 * A generic version of getMetric for a given Scope and BaseMetric.
+	 * 
+	 * @see getMetric(long nodeIndex, int metricIndex, IdTuple idtuple, int numMetrics)
+	 * 
+	 * @param scope
+	 * @param metric
+	 * @param idtuple
+	 * @param numMetrics
+	 * 
+	 * @throws IOException
+	 *  
+	 * @return
+	 */
+	public double   getMetric(Scope scope, BaseMetric metric, IdTuple idtuple, int numMetrics)
+			throws IOException ;
+	
+	
+	/****
+	 * A generic version of {@code getMetric} for a given {@code Scope} and {@code BaseMetric}
+	 * 
+	 * @param scope
+	 * @param metric
+	 * @param numMetrics
+	 * @return
+	 * 
+	 * @throws Exception
+	 */
+	public double[] getMetrics(Scope scope, BaseMetric metric, int numMetrics)
+			throws  Exception;
+
 	
 	/****
 	 * Get a metric value for a specific node, with a specific metric and 

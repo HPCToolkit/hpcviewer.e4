@@ -85,39 +85,6 @@ implements IMetricManager, ListEventListener<BaseMetric>
 		}
 		metrics.addListEventListener(this);
 	}
-
-	
-	@Override
-	public BaseMetric getCorrespondentMetricRaw(BaseMetric metric) {
-		// for sparse database (meta.db), the raw metrics are associated 
-		// directly with the hierarchical metrics.
-		// See meta.db file or DataMeta class.
-		if (metric instanceof HierarchicalMetric) {
-			return ((HierarchicalMetric) metric).getMetricRaw();
-		}
-		
-		// for old database that separate between metric-db and normal metrics,
-		// we don't have the connection between them. The only way to know
-		// a raw metric from a normal one is by looking at the label.
-		// If they share the same basic name, it should be the same metric.
-		// For instance:
-		// in normal metric: "cycles:Sum (I)"
-		// in metric-db:     "cycles (I)"
-		//
-		var rawMetrics = getRawMetrics();
-		BaseMetric correspondentRawMetric = null;
-
-		var metricName = metric.getDisplayName();
-		var metricBaseName = metricName.replace(":Sum", "");
-		
-		for(var rm: rawMetrics) {
-			if (rm.getDisplayName().equals(metricBaseName)) {
-				correspondentRawMetric = rm;
-				break;
-			}
-		}
-		return correspondentRawMetric;
-	}
 	
 	
 	private void copyMetric(Scope target, Scope source, int src_i, int targ_i, MetricValuePropagationFilter filter) {

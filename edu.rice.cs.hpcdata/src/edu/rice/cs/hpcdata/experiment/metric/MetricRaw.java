@@ -199,7 +199,7 @@ public class MetricRaw  extends BaseMetric
 			}
 			if (value == MetricValue.NONE          && 
 				s instanceof RootScope             && 
-				metricType == MetricType.EXCLUSIVE &&
+				metricType.isExclusive() 		   &&
 				partner != null                    &&
 				partner.metricType == MetricType.INCLUSIVE) {
 				

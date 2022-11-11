@@ -21,19 +21,6 @@ public interface IMetricManager
 	 */
 	public String getID();
 	
-	/***
-	 * Get the correlated raw metric version of the given base metric.
-	 * <br/>
-	 * Database version 2.x or older has no correlation between the base
-	 * metric and the raw metric. This method will return if the base 
-	 * metric has its correspondent raw metric.
-	 * 
-	 * @param metric
-	 * 			The base metric
-	 * @return {@code MetricRae}
-	 * 			The correspondent raw metric
-	 */
-	public BaseMetric getCorrespondentMetricRaw(BaseMetric metric);
 	
 	/***
 	 * Returns a metric descriptor given a metric id
