@@ -23,13 +23,13 @@ public class MetaDbFileParser extends ExperimentFile
 		final DataMeta data = new DataMeta();
 		data.open(experiment, directory);
 		
-		MetricYamlParser yamlParser = new MetricYamlParser(directory, data.getDataSummary(), data.getMetrics());		
+		MetricYamlParser yamlParser = new MetricYamlParser(directory, data);		
 		assert(yamlParser.getVersion() >= 0);
 
 		// Reset the new list of metric descriptors to the experiment database  
 		// Note: Metrics are based on the yaml file, not meta.db
 		((Experiment)experiment).setMetrics(yamlParser.getListMetrics());
-		((Experiment)experiment).setMetricRaw(data.getRawMerics());
+		((Experiment)experiment).setMetricRaw(yamlParser.getRawMetrics());
 
 		return new File(data.filename);
 	}

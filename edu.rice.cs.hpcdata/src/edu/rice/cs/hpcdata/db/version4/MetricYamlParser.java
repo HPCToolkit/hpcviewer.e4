@@ -16,12 +16,12 @@ import java.util.stream.Collectors;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 
-import com.graphbuilder.math.ExpressionTree;
-
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
 import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetricDerivedFormula;
+import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
+import edu.rice.cs.hpcdata.experiment.metric.PropagationScope;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
 
@@ -59,10 +59,11 @@ public class MetricYamlParser
 
 	private final List<HierarchicalMetric> listRootMetrics;
 	private final List<BaseMetric> outputMetrics;
-	private final List<BaseMetric> inputMetrics;
+	private final List<BaseMetric> rawMetrics;
+	
 	private final Deque<HierarchicalMetric> stackMetrics;
 	
-	private final DataSummary  	   dataSummary;
+	private final DataMeta dataMeta;
 	
 	private int version;
 	private int parentIndex;
@@ -77,19 +78,20 @@ public class MetricYamlParser
 	 * 
 	 * @param directory
 	 * 			The database directory
-	 * @param dataSummary
-	 * 			The profile.db object
-	 * @param metricsInMetaDB
-	 * 			The list of metrics as specified in meta.db file
+	 * @param dataMeta
+	 * 			The meta.db file parser object
+	 * 
 	 * @throws IOException 
 	 */
-	public MetricYamlParser(String directory, DataSummary dataSummary, List<BaseMetric> metricsInMetaDB) 
+	public MetricYamlParser(String directory, DataMeta dataMeta) 
 			throws IOException {
-		this.dataSummary = dataSummary;
+
+		this.dataMeta = dataMeta;
 		listRootMetrics  = new ArrayList<>(1);
 		
-		inputMetrics  = metricsInMetaDB;
-		outputMetrics = new ArrayList<>(metricsInMetaDB.size());
+		outputMetrics = new ArrayList<>(dataMeta.getMetrics().size());
+		
+		rawMetrics = new ArrayList<>(dataMeta.getRawMerics().size());
 		
 		parentIndex  = -1;
 		stackMetrics = new ArrayDeque<>();
@@ -129,6 +131,7 @@ public class MetricYamlParser
 		// is used to compute the derived metrics.
 		// Since they are not in the list of output, we hide them from
 		// the user. 
+		var inputMetrics = dataMeta.getMetrics();
 		for(var metric: inputMetrics) {
 			if (!outputMetrics.contains(metric)) {
 				metric.setDisplayed(VisibilityType.INVISIBLE);
@@ -172,6 +175,14 @@ public class MetricYamlParser
 	}
 
 	
+	/**
+	 * @return the rawMetrics
+	 */
+	public List<BaseMetric> getRawMetrics() {
+		return rawMetrics;
+	}
+
+
 	/****
 	 * Parse the "header" (first common level) of the yaml file,
 	 * which include the version and inputs fields. <br/>
@@ -217,6 +228,8 @@ inputs: ArrayList<E>  (id=98)
 		if (!(inputs instanceof ArrayList<?>))
 			return;
 		
+		var inputMetrics = dataMeta.getMetrics();
+
 		var listInputs  = (List<Map<String, ?>>)inputs;
 		mapCodeToMetric = new HashMap<>(listInputs.size());
 		
@@ -233,9 +246,9 @@ inputs: ArrayList<E>  (id=98)
 			// We should find a matched metric, otherwise there is something wrong
 			var filteredMetrics = inputMetrics.stream()
 					 				     .filter(m -> (m instanceof HierarchicalMetric) &&
-					 				     			  ((HierarchicalMetric)m).getOriginalName().equals(metric) &&
+				 				    		 	  	   m.getMetricType() == mtype &&
+					 				     			  ((HierarchicalMetric)m).getOriginalName().equalsIgnoreCase((String) metric) &&
 					 				    		 	  ((HierarchicalMetric)m).getCombineTypeLabel().equalsIgnoreCase(combine) &&
-					 				    		 	  m.getMetricType() == mtype &&
 					 		  						  ((HierarchicalMetric)m).getFormula().compareToIgnoreCase(strFormula) == 0)
 					 				     .collect(Collectors.toList());
 
@@ -334,25 +347,15 @@ roots:
 	/***
 	 * Parse the render field
 	 * 
-	 * @param metric
-	 * 			the current metric
 	 * @param mapAttribute
 	 * 			the current yaml map 
 	 */
-	private void parseRender(BaseMetric metric, Map<String, ?> mapAttribute) {
-		var render = mapAttribute.get("render");
-		if (render == null || metric == null)
+	private void setMetricRender(BaseMetric metric, List<String> renderAttr) {
+		if (renderAttr == null || renderAttr.isEmpty() ||  metric == null)
 			return;
 		
-		List<String> renderAttr;
-		if (render instanceof List<?>) {
-			renderAttr = (List<String>) render;
-		} else if (render instanceof String) {
-			renderAttr = new ArrayList<>(1);
-			renderAttr.add((String) render);
-		} else {
-			throw new IllegalStateException("Invalid render class: " + render);
-		}
+		metric.setAnnotationType(AnnotationType.NONE);
+
 		for(var attr: renderAttr) {
 			if (attr.equalsIgnoreCase("hidden")) 
 				metric.setDisplayed(VisibilityType.HIDE);
@@ -442,7 +445,8 @@ roots:
 	private VariantResult parseVariants(String name, String desc, LinkedHashMap<String, ?> variants) {
 		var result = VariantResult.OK;
 		var iterator = variants.entrySet().iterator();
-		
+		var inputMetrics = dataMeta.getMetrics();
+
 		// make sure the new index (which is equal to numMetrics) is at least
 		// bigger than the all metrics combined (input metrics and new derived metrics).
 		int numMetrics = inputMetrics.size() + outputMetrics.size(); 
@@ -456,6 +460,8 @@ roots:
 
 			LinkedHashMap<String, ?> mapAttributes = (LinkedHashMap<String, ?>) attr;
 			LinkedHashMap<String, ?> mapFormula;
+			
+			var render = mapAttributes.get("render");
 			
 			var formula = mapAttributes.get("formula");
 			
@@ -495,7 +501,7 @@ roots:
 
 							// this metric is not in the list of input metrics
 							// create a new derived metric
-							metric = new HierarchicalMetricDerivedFormula (dataSummary, ++numMetrics, name, strExpression);
+							metric = new HierarchicalMetricDerivedFormula (dataMeta.getDataSummary(), ++numMetrics, name, strExpression);
 							
 							metric.setDescription(desc);
 							metric.setMetricType(formulaType);
@@ -516,7 +522,7 @@ roots:
 					}
 				}
 				if (metric != null)
-					parseRender(metric, mapAttributes);
+					setMetricRender(metric, (List<String>) mapAttributes.get("render"));
 			}
 		}
 		return result;
@@ -576,11 +582,31 @@ roots:
 			
 			HierarchicalMetric hm = (HierarchicalMetric) metric;
 			hm.setDescription(desc);
-			hm.setMetricType(formulaType);
 			
 			linkParentChild(hm);
 			outputMetrics.add(hm);
 			
+			// setting the raw metric which corresponds to this metric
+			if (hm.getPropagationScope().getType() == PropagationScope.TYPE_EXECUTION ||
+				hm.getPropagationScope().getType() == PropagationScope.TYPE_CUSTOM) {
+				
+				var inputRawMetrics = dataMeta.getRawMerics();
+				var filteredRawMetrics = inputRawMetrics.stream()
+														.filter(m -> m instanceof MetricRaw && 
+																m.getDescription().compareToIgnoreCase(hm.getOriginalName()) == 0  &&
+																m.getMetricType() == hm.getMetricType())
+														.collect(Collectors.toList());
+				
+				if (filteredRawMetrics.size() == 1) {					
+					var candidateRawMetric = filteredRawMetrics.get(0);
+					if (!rawMetrics.contains(candidateRawMetric)) {
+						candidateRawMetric.setDescription(desc);
+						candidateRawMetric.setDisplayed(hm.getVisibility());
+						rawMetrics.add(candidateRawMetric);
+					}
+				}
+			}
+
 			return hm;
 		}
 		return null;
@@ -598,7 +624,7 @@ roots:
 	
 	
 	private HierarchicalMetric createParentMetric(String name, String desc) {
-		var metric = new HierarchicalMetric(dataSummary, parentIndex, name, "");		
+		var metric = new HierarchicalMetric(dataMeta.getDataSummary(), parentIndex, name, "");		
 		metric.setDescription(desc);
 
 		linkParentChild(metric);
