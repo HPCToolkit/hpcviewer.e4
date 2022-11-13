@@ -181,22 +181,26 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 
 		switch (combineType) {
 		case FMT_METADB_COMBINE_MAX:
+			/* The same operation as SUM
+			 * 
 			var v1 = target.getValue();
 			var v2 = source.getValue();
 			v1 = Math.max(v1, v2);
 			target.setValue(v1);
-			break;
+			break; */
 			
 		case FMT_METADB_COMBINE_MIN:
+			/* The same operation as SUM
+			 * 
 			v1 = target.getValue();
 			v2 = source.getValue();
 			v1 = Math.min(v1, v2);
 			target.setValue(v1);
-			break;
+			break; */
 			
 		case FMT_METADB_COMBINE_SUM:
-			v1 = target.getValue();
-			v2 = source.getValue();
+			var v1 = target.getValue();
+			var v2 = source.getValue();
 			var d = v1-v2;
 			if (Math.abs(d/v1) < INSIGNIFICANT_NUMBER)
 				return MetricValue.NONE; 
