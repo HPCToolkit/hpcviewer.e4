@@ -1,5 +1,7 @@
 package edu.rice.cs.hpcdata.experiment.metric;
 
+import org.apache.commons.math3.util.Precision;
+
 import com.graphbuilder.math.Expression;
 import edu.rice.cs.hpcdata.db.version4.DataSummary;
 import edu.rice.cs.hpcdata.experiment.TreeNode;
@@ -170,6 +172,11 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	public MetricValue reduce(MetricValue target, MetricValue source) {
 		if (combineType == COMBINE_UNKNOWN)
 			return target;
+
+		// not sure how to perform "reduce" operation for formula of "1"
+		// both the parent and the kids have "1" as value.
+		if (formula.equals("1"))
+			return MetricValue.NONE;
 		
 		final float INSIGNIFICANT_NUMBER = 0.000001f;
 		if (source == MetricValue.NONE)
@@ -179,38 +186,15 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 			return source.duplicate();
 		}
 
-		switch (combineType) {
-		case FMT_METADB_COMBINE_MAX:
-			/* The same operation as SUM
-			 * 
-			var v1 = target.getValue();
-			var v2 = source.getValue();
-			v1 = Math.max(v1, v2);
-			target.setValue(v1);
-			break; */
-			
-		case FMT_METADB_COMBINE_MIN:
-			/* The same operation as SUM
-			 * 
-			v1 = target.getValue();
-			v2 = source.getValue();
-			v1 = Math.min(v1, v2);
-			target.setValue(v1);
-			break; */
-			
-		case FMT_METADB_COMBINE_SUM:
-			var v1 = target.getValue();
-			var v2 = source.getValue();
-			var d = v1-v2;
-			if (Math.abs(d/v1) < INSIGNIFICANT_NUMBER)
-				return MetricValue.NONE; 
-			
-			target.setValue(d);
-			break;
-			
-		default:
-			// nothing. error?
-		}
+		var v1 = target.getValue();
+		var v2 = source.getValue();
+		var d = v1-v2;
+		
+		if (Precision.equals(v1, v2, INSIGNIFICANT_NUMBER))
+			return MetricValue.NONE; 
+		
+		target.setValue(d);
+
 		return target;
 	}
 	

@@ -16,6 +16,18 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.ScopeVisitType;
 import edu.rice.cs.hpcdata.experiment.scope.StatementRangeScope;
 
+
+/*****
+ * 
+ * Combining line scope and procedure scopes for meta.db database.
+ * <br/>
+ * After tree traversal, need to call {@link postProcess} method to
+ * finalizing the calling context tree reassignment.
+ * <p> The line scopes will be removed from the top-down tree if after
+ * the post processing there is no metrics associated with the line.
+ * This is to avoid accidentally removing a line which is the parent of
+ * other scopes that are not procedure frames.
+ */
 public class CallingContextReassignment implements IScopeVisitor 
 {
 	private final List<Scope> listScopesToRemove = new ArrayList<>();

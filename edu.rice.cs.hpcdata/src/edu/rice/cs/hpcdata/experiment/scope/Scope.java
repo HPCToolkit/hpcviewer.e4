@@ -676,15 +676,15 @@ implements IMetricScope
 		var metricDescs = experiment.getMetrics();
 		
 		for (var m: metricDescs) {
-			if (!(m instanceof HierarchicalMetric))
-				continue;
-			
-			if (m.getMetricType() != type)
-				continue;
-			
-			HierarchicalMetric hm = (HierarchicalMetric) m;
-			MetricValue mv = hm.reduce(getMetricValue(m), scope.getMetricValue(m));
-			setMetricValue(m.getIndex(), mv);
+			if (m instanceof HierarchicalMetric) {
+				
+				if (m.getMetricType() != type)
+					continue;
+				
+				HierarchicalMetric hm = (HierarchicalMetric) m;
+				MetricValue mv = hm.reduce(getMetricValue(m), scope.getMetricValue(m));
+				setMetricValue(m.getIndex(), mv);
+			}
 		}
 	}
 
