@@ -480,7 +480,7 @@ roots:
 				var formulaType  = MetricType.convertFromName(formulaScope);
 				
 				LinkedHashMap<String, ?> mapMetrics  = (LinkedHashMap<String, ?>) formulaItem.getValue();
-				var metric = getMetricCorrespondance(mapMetrics.hashCode(), formulaType, desc);
+				var metric = getMetricCorrespondance(mapMetrics.hashCode(), desc);
 				
 				if (metric == null) {
 					// either it's a list of metrics or a more specific formula or a parent metric
@@ -492,7 +492,7 @@ roots:
 						parentMetric = !subKey.getKey().equals("standard") &&
 									   !subKey.getKey().equals("custom");
 	
-						metric = getMetricCorrespondance(subVal.hashCode(), formulaType, desc);
+						metric = getMetricCorrespondance(subVal.hashCode(), desc);
 						
 						if (metric == null) {
 							
@@ -576,7 +576,7 @@ roots:
 		return String.valueOf(expression);
 	}
 	
-	private HierarchicalMetric getMetricCorrespondance(int hashcode, MetricType formulaType, String desc) {
+	private HierarchicalMetric getMetricCorrespondance(int hashcode, String desc) {
 		var metric = mapCodeToMetric.get(hashcode);
 		if (metric instanceof HierarchicalMetric) {
 			

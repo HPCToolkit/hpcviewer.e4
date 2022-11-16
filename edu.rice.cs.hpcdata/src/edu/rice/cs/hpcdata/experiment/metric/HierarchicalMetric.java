@@ -244,9 +244,14 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 
 		// otherwise we need to add suffix for the metric type
 		// 
-		if (propagationScope != null)
+		if (propagationScope != null) {
+			sb.append(" ");
 			sb.append(propagationScope.getMetricTypeSuffix());
-
+		} else if (metricType != null) {
+			sb.append(" ");
+			sb.append(metricType.getSuffix());
+		}
+		
 		displayName = sb.toString();
 		
 		return displayName;

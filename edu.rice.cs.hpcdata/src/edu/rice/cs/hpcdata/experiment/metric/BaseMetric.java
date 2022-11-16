@@ -502,5 +502,4 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 		}
 		return period;
 	}
-
 }

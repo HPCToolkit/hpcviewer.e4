@@ -60,10 +60,25 @@ public class MetricType
 		throw new IllegalArgumentException("unknown formula type: " + formulaType);
 	}
 	
+	
+	public String getSuffix() {
+		if (this == MetricType.EXCLUSIVE || 
+			this == MetricType.LEXICAL_AWARE)
+			return(PropagationScope.SUFFIX_EXCLUSIVE);
+			
+		if (this == MetricType.INCLUSIVE)
+			return(PropagationScope.SUFFIX_INCLUSIVE);
+			
+		if (this == MetricType.POINT_EXCL)
+			return(PropagationScope.SUFFIX_POINT_EXC);
+
+		return "";
+	}
+	
 	public boolean isExclusive() {
 		return this == EXCLUSIVE || this == LEXICAL_AWARE;
 	}
 	
 	private String value;
-	private MetricType(String value) { this.value = value; };
+	private MetricType(String value) { this.value = value; }
 }
