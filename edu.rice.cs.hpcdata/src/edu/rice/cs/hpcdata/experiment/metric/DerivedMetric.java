@@ -59,8 +59,7 @@ public class DerivedMetric extends AbstractMetricWithFormula {
 		super(sID, sName, DESCRIPTION, VisibilityType.SHOW, null, annotationType, index, index, objType);
 		
 		// set up the functions
-		this.fctMap = new ExtFuncMap();
-		this.fctMap.init();
+		this.fctMap = ExtFuncMap.getInstance();
 
 		// set up the variables
 		this.varMap = new MetricVarMap(null, experiment);
@@ -91,8 +90,7 @@ public class DerivedMetric extends AbstractMetricWithFormula {
 		this.varMap		= null; // to be defined later
 		this.expression = null; // to be defined later
 		
-		this.fctMap     = new ExtFuncMap();
-		
+		this.fctMap     = ExtFuncMap.getInstance();		
 	}
 	
 	
@@ -106,13 +104,6 @@ public class DerivedMetric extends AbstractMetricWithFormula {
 		rootValue  = null;
 	}
 
-	public static boolean evaluateExpression(String expression, 
-			MetricVarMap varMap, ExtFuncMap funcMap) {
-		Expression exp = ExpressionTree.parse(expression);
-		exp.eval(varMap, funcMap);
-		return true;
-	}
-	
 	
 	//===================================================================================
 	// GET VALUE
@@ -189,8 +180,6 @@ public class DerivedMetric extends AbstractMetricWithFormula {
 	{
 		varMap = new MetricVarMap(root, experiment);
 		varMap.setMetric(this);
-		
-		fctMap.init();
 		
 		rootValue = null; 
 	}

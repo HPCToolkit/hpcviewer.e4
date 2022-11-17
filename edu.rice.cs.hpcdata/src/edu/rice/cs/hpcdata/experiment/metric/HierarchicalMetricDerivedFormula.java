@@ -32,7 +32,7 @@ public class HierarchicalMetricDerivedFormula extends HierarchicalMetric
 		varMap = new HierarchicalMetricVarMap();
 		varMap.setMetric(this);
 		
-		fctMap = new ExtFuncMap();
+		fctMap = ExtFuncMap.getInstance();
 		fctMap.loadDefaultFunctions();
 		
 		setFormula(formula);

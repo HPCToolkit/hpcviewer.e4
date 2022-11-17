@@ -6,41 +6,56 @@ package edu.rice.cs.hpcdata.experiment.metric;
 import com.graphbuilder.math.FuncMap;
 import com.graphbuilder.math.func.Function;
 
-/**
- * @author laksonoadhianto
+/*************************************************
  *
- */
+ * Special function class for hpcviewer.
+ *
+ *************************************************/
 public class ExtFuncMap extends FuncMap 
 {
-
-	/**
-	 * @param caseSensitive
+	private static ExtFuncMap instance;
+	
+	/*****
+	 * Retrieve the singleton of hpcviewer's default function map
+	 * 
+	 * @return ExtFuncMap
 	 */
-	public ExtFuncMap(boolean caseSensitive) {
+	public static ExtFuncMap getInstance() {
+		if (instance == null) {
+			instance = new ExtFuncMap();
+		}
+		return instance;
+	}
+	
+	/**
+	 * Constructor with custom case sensitivity
+	 * 
+	 * @param caseSensitive
+	 * 			boolean {@code true} if the variables in the expression is case sensitive
+	 */
+	protected ExtFuncMap(boolean caseSensitive) {
 		super(caseSensitive);
 	}
 
 	/***
 	 * construct list of function specifically for hpcdata
-	 * @param metrics: list of metrics
-	 * @param rootscope: a root scope (any root scope will do)
 	 */
-	public ExtFuncMap() {
+	protected ExtFuncMap() {
 		super(false);
 		this.init();
 	}
 
+	
+	/***
+	 * Initialize the object by adding special functions
+	 */
 	public void init() {
-
 		StdDevFunction fctStdDev = new StdDevFunction();
 
 		this.setFunction("stdev", fctStdDev);
 		this.loadDefaultFunctions();
 	}
 	
-	public String []getFunctionNames() {
-		return super.getFunctionNames();
-	}
 	
 	public String []getFunctionNamesWithType() {
 		Function []list = getFunctions();

@@ -25,10 +25,6 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
  ****************************************************************/
 public class HierarchicalMetric extends AbstractMetricWithFormula
 {	
-	private static final byte FMT_METADB_COMBINE_SUM = 0;
-	private static final byte FMT_METADB_COMBINE_MIN = 1;
-	private static final byte FMT_METADB_COMBINE_MAX = 2;
-	
 	private static final byte COMBINE_UNKNOWN = -1;
 	
 	private static final String []COMBINE_LABEL = {"Sum", "Min", "Max", "Mean", "StdDev", "CfVar"};
@@ -89,7 +85,7 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		varMap = new HierarchicalMetricVarMap();
 		varMap.setMetric(this);
 		
-		fctMap = new ExtFuncMap();
+		fctMap = ExtFuncMap.getInstance();
 		fctMap.loadDefaultFunctions();
 	}
 	

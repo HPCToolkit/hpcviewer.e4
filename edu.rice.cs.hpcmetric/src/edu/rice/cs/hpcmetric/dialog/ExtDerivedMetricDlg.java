@@ -131,7 +131,7 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 		super(parent);
 		this.metricManager = mm;
 		this.root   = root;
-		this.fctMap = new ExtFuncMap();
+		this.fctMap = ExtFuncMap.getInstance();
 		this.varMap = new MetricVarMap ( s, mm );
 		
 		var indexes = metricManager.getNonEmptyMetricIDs(s);
@@ -529,8 +529,9 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 		try {
 			Expression newFormula = ExpressionTree.parse(expFormula);
 			MetricFormulaExpression.rename(newFormula, mapMetricNewIndex, null);
+			newFormula.eval(varMap, fctMap);
+			return true;
 			
-			return DerivedMetric.evaluateExpression(newFormula.toString(), varMap, fctMap);
 		} catch (ExpressionParseException e) {
 			MessageDialog.openError(getShell(), "Error: incorrect expression", e.getDescription());
 		} catch (Exception e) {
