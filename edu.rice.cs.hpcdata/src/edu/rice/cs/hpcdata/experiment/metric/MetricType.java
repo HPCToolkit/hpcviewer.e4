@@ -3,6 +3,10 @@ package edu.rice.cs.hpcdata.experiment.metric;
 // Java 1.4 Compatible enumeration type
 public class MetricType 
 {
+	public static final String SUFFIX_EXCLUSIVE = "(E)";
+	public static final String SUFFIX_INCLUSIVE = "(I)";
+	public static final String SUFFIX_POINT_EXC = "(X)";
+
 	public static final MetricType UNKNOWN        = new MetricType("UNKNOWN");
 	public static final MetricType EXCLUSIVE      = new MetricType("EXCLUSIVE");
 	public static final MetricType INCLUSIVE      = new MetricType("INCLUSIVE");
@@ -64,13 +68,13 @@ public class MetricType
 	public String getSuffix() {
 		if (this == MetricType.EXCLUSIVE || 
 			this == MetricType.LEXICAL_AWARE)
-			return(PropagationScope.SUFFIX_EXCLUSIVE);
+			return(SUFFIX_EXCLUSIVE);
 			
 		if (this == MetricType.INCLUSIVE)
-			return(PropagationScope.SUFFIX_INCLUSIVE);
+			return(SUFFIX_INCLUSIVE);
 			
 		if (this == MetricType.POINT_EXCL)
-			return(PropagationScope.SUFFIX_POINT_EXC);
+			return(SUFFIX_POINT_EXC);
 
 		return "";
 	}

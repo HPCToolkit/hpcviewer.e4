@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -350,7 +351,15 @@ roots:
 	 * @param mapAttribute
 	 * 			the current yaml map 
 	 */
-	private void setMetricRender(BaseMetric metric, List<String> renderAttr) {
+	private void setMetricRender(BaseMetric metric, Object render) {
+		List<String> renderAttr;
+		if (render instanceof String)
+			renderAttr = Collections.singletonList((String)render);
+		else if (render instanceof List<?>)
+			renderAttr = (List<String>)render;
+		else
+			throw new IllegalArgumentException("render field is not recognized: " + render.getClass());
+			
 		if (renderAttr == null || renderAttr.isEmpty() ||  metric == null)
 			return;
 		
@@ -362,7 +371,7 @@ roots:
 			else if (attr.equalsIgnoreCase("percent"))
 				metric.setAnnotationType(AnnotationType.PERCENT);
 			else if (attr.equals("colorbar"))
-				// TODO: not supported at the moment
+				// not supported at the moment
 				metric.setAnnotationType(AnnotationType.PERCENT);
 		}
 	}
@@ -489,8 +498,8 @@ roots:
 					while(subIterator.hasNext()) {
 						var subKey = subIterator.next();
 						var subVal = subKey.getValue();
-						parentMetric = !subKey.getKey().equals("standard") &&
-									   !subKey.getKey().equals("custom");
+						var subPS  = subKey.getKey();
+						parentMetric = !subPS.equals("standard") && !subPS.equals("custom");
 	
 						metric = getMetricCorrespondance(subVal.hashCode(), desc);
 						
@@ -512,17 +521,19 @@ roots:
 							outputMetrics.add(metric);
 						}
 						metric.setVariantLabel(variantLabel);
+						if (metric != null)
+							setMetricRender(metric, render);
 					}
 
 					// no correspondent metric: this may be a new parent metric
 					// or an error?
 					if (parentMetric) {
 						metric = createParentMetric(name, desc);
+						setMetricRender(metric, render);
 						result = VariantResult.OK_NEW_PARENT;
 					}
-				}
-				if (metric != null)
-					setMetricRender(metric, (List<String>) mapAttributes.get("render"));
+				} else 
+					setMetricRender(metric, render);
 			}
 		}
 		return result;

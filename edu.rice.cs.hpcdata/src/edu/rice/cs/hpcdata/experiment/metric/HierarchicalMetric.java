@@ -3,6 +3,8 @@ package edu.rice.cs.hpcdata.experiment.metric;
 import org.apache.commons.math3.util.Precision;
 
 import com.graphbuilder.math.Expression;
+import com.graphbuilder.math.ExpressionTree;
+
 import edu.rice.cs.hpcdata.db.version4.DataSummary;
 import edu.rice.cs.hpcdata.experiment.TreeNode;
 import edu.rice.cs.hpcdata.experiment.scope.IMetricScope;
@@ -52,7 +54,13 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	private byte combineType; 
 
 	private final String formula;
-	
+	private final Expression expression;
+
+	// map function
+	private final ExtFuncMap fctMap;
+	// map variable 
+	private final MetricVarMap varMap;
+
 	private short propMetricId;
 	
 	/***
@@ -76,6 +84,13 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 
 		combineType  = COMBINE_UNKNOWN;
 		this.formula = formula;
+		expression   = ExpressionTree.parse(formula);
+		
+		varMap = new HierarchicalMetricVarMap();
+		varMap.setMetric(this);
+		
+		fctMap = new ExtFuncMap();
+		fctMap.loadDefaultFunctions();
 	}
 	
 	public String getFormula() {
@@ -226,9 +241,9 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		
 		// if the display name already have metric-type suffix.
 		// return the real display name
-		if (displayName.endsWith(PropagationScope.SUFFIX_EXCLUSIVE) || 
-			displayName.endsWith(PropagationScope.SUFFIX_INCLUSIVE) ||
-			displayName.endsWith(PropagationScope.SUFFIX_POINT_EXC))
+		if (displayName.endsWith(MetricType.SUFFIX_EXCLUSIVE) || 
+			displayName.endsWith(MetricType.SUFFIX_INCLUSIVE) ||
+			displayName.endsWith(MetricType.SUFFIX_POINT_EXC))
 			return displayName;
 		
 		StringBuilder sb = new StringBuilder(originalName);
@@ -261,7 +276,7 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 	protected Expression[] getExpressions() {
 		// not supported at the moment
 		// all formula-based metrics should use DerivedMetric class
-		return new Expression[] {};
+		return new Expression[] {expression};
 	}
 
 	/**
@@ -301,8 +316,19 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 
 	@Override
 	public MetricValue getValue(IMetricScope s) {
-		Scope scope = (Scope)s;			
-		return scope.getDirectMetricValue(index);
+		Scope scope = (Scope)s;
+		
+		// hack
+		if (formula.compareTo("1") == 0) {
+			return scope.getDirectMetricValue(index);			
+		}
+		
+		varMap.setScope(scope);
+		var dValue = expression.eval(varMap, fctMap);
+		if (Precision.equals(dValue, 0))
+			return MetricValue.NONE;
+		
+		return new MetricValue(dValue);
 	}
 
 	
