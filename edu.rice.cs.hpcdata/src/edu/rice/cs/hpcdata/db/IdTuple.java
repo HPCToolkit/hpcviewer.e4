@@ -164,6 +164,11 @@ public class IdTuple
 		int minLength = Math.min(kinds.length, another.kinds.length);
 		
 		for(int i=0; i<minLength; i++) {
+			// hack - hack -hack
+			// Fix issue #254 no sort on host node 
+			if (kinds[i] == IdTupleType.KIND_NODE)
+				continue;
+			
 			// compare the differences in kind. 
 			// If they are different, we stop here
 			// another we compare the difference in index
