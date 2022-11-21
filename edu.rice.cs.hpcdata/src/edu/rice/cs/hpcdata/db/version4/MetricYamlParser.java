@@ -560,24 +560,37 @@ roots:
 					List<?> listExpression = (List<?>) otherExpression;
 					if (listExpression.size() > 2)
 						throw new IllegalStateException("Formula has " + listExpression.size() + " subs: "+ listExpression );
+
+					char op = operator.charAt(0);
+					boolean isFunction = ((op >= 'a' && op <= 'z') || (op >='A' && op <= 'Z')) ;
 					
 					if (listExpression.size() == 1) {
 						var restExpr = deconstructFormula(listExpression.get(0));
 
-						char op = operator.charAt(0);
-						boolean function = ((op >= 'a' && op <= 'z') || (op >='A' && op <= 'Z')) ;
-
-						if (function) 
+						if (isFunction) 
 							return operator + "(" + restExpr + ")";
 						
 						return operator + restExpr;
-					} 
-					var expLeft  = deconstructFormula(listExpression.get(0));
-					var expRight = deconstructFormula(listExpression.get(1));
-					
-					sb.append("(");
-					sb.append( expLeft + operator + expRight );
-					sb.append(")");
+					} else if (isFunction) {
+						sb.append(operator);
+						sb.append("(");
+						
+						var iterList = listExpression.iterator();
+						while(iterList.hasNext()) {
+							var param = deconstructFormula(iterList.next());
+							sb.append(param);
+							if (iterList.hasNext())
+								sb.append(",");
+						}
+						sb.append(")");
+					} else {
+						var expLeft  = deconstructFormula(listExpression.get(0));
+						var expRight = deconstructFormula(listExpression.get(1));
+						
+						sb.append("(");
+						sb.append( expLeft + operator + expRight );
+						sb.append(")");
+					}
 				} else {
 					throw new IllegalStateException("Unknown expression: " + otherExpression);
 				}				
@@ -586,6 +599,8 @@ roots:
 		}
 		return String.valueOf(expression);
 	}
+	
+	
 	
 	private HierarchicalMetric getMetricCorrespondance(int hashcode, String desc) {
 		var metric = mapCodeToMetric.get(hashcode);
