@@ -22,6 +22,7 @@ import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValueSparse;
+import edu.rice.cs.hpcdata.util.LargeByteBuffer;
 
 /*********************************************
  * 
@@ -51,6 +52,13 @@ public class DataSummary extends DataCommon
 	
 	private final IdTupleType idTupleTypes;
 	
+	/***
+	 * Buffer to cache the metric values. 
+	 * It's important to always use {@code LargeByteBuffer} to cache the values.
+	 * Using Java's mmap will use part of JVM memory and causes out of memory exception
+	 */
+	private LargeByteBuffer lbBuffer;
+
 	/** List of id tuples in sorted order */
 	private List<IdTuple> listIdTuple;
 	private ProfInfo info;
@@ -288,24 +296,18 @@ public class DataSummary extends DataCommon
 		} else {
 			numMetrics = (int) (info.piElements[profileNum].nValues - position1);
 		}
-		long numBytes  = (long)FMT_PROFILEDB_SZ_MVAL * numMetrics;
 		
 		List<MetricValueSparse> values = FastList.newList(numMetrics);
-		var channel = getChannel();
 		var offset  = info.piElements[profileNum].pValues + position1 * FMT_PROFILEDB_SZ_MVAL;
-		var buffer  = channel.map(MapMode.READ_ONLY, offset, numBytes);
-		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		
 		for(int i=0; i<numMetrics; i++) {
 			// thanks to the alignment, we have to position every time looking for a record
 			// memory position should be just an assignment.
-			buffer.position(i * FMT_PROFILEDB_SZ_MVAL);
+			var idx = lbBuffer.getShort(offset  + (i * FMT_PROFILEDB_SZ_MVAL));
+			var val = lbBuffer.getDouble(offset + (i * FMT_PROFILEDB_SZ_MVAL) + Short.BYTES);
 			
-			MetricValueSparse val = new MetricValueSparse();
-			val.setIndex(buffer.getShort());
-			val.setValue(buffer.getDouble());
-			
-			values.add(val);
+			MetricValueSparse mvs = new MetricValueSparse(idx, val);			
+			values.add(mvs);
 		}		
 		return values;
 	}
@@ -373,6 +375,9 @@ public class DataSummary extends DataCommon
 	{
 		labels = null;
 		listCCT = null;
+		if (lbBuffer != null)
+			lbBuffer.dispose();
+
 		super.dispose();
 	}
 
@@ -411,7 +416,10 @@ public class DataSummary extends DataCommon
 		// this summary will be loaded anyway. There is no harm to do it now. 
 		// ... or I think
 		listCCT = getCCTIndex(IdTuple.PROFILE_SUMMARY);
-		
+				
+		lbBuffer = new LargeByteBuffer(input, 2, info.szProfile);
+		lbBuffer.setEndian(ByteOrder.LITTLE_ENDIAN);
+
 		return true;
 	}
 	
@@ -563,8 +571,6 @@ public class DataSummary extends DataCommon
 	 * @throws IOException
 	 */
 	private void readProfInfo(FileChannel input, DataSection profSection) throws IOException {
-		MappedByteBuffer mappedBuffer = input.map(MapMode.READ_ONLY, profSection.offset, ProfInfo.SIZE);
-		mappedBuffer.order(ByteOrder.LITTLE_ENDIAN);
 		info = new ProfInfo(input, profSection);
 	}
 	
@@ -574,11 +580,11 @@ public class DataSummary extends DataCommon
 	 * @param buffer byte buffer
 	 * @param position int index of the cct
 	 * @return int
+	 * @throws IOException 
 	 */
-	private int getCCTIndex(ByteBuffer buffer, int position) {
+	private int getCCTIndex(int position) throws IOException {
 		final int adjustedPosition = position * CCT_RECORD_SIZE;
-		buffer.position(adjustedPosition);
-		return buffer.getInt();
+		return lbBuffer.getInt(adjustedPosition);
 	}
 	
 	/****
@@ -586,10 +592,11 @@ public class DataSummary extends DataCommon
 	 * @param buffer ByteBuffer of the file
 	 * @param position int index of the cct
 	 * @return long
+	 * @throws IOException 
 	 */
-	private long getCCTOffset(ByteBuffer buffer, int position) {
-		buffer.position( (position * CCT_RECORD_SIZE) + Integer.BYTES);
-		return buffer.getLong();
+	private long getCCTOffset(int position) throws IOException {
+		int adjustedPosition = (position * CCT_RECORD_SIZE) + Integer.BYTES;
+		return lbBuffer.getLong(adjustedPosition);
 	}
 	
 	
@@ -599,19 +606,20 @@ public class DataSummary extends DataCommon
 	 * @param cct the cct index
 	 * @param first the beginning of the relative index
 	 * @param last  the last of the relative index
-	 * @param buffer ByteBuffer of the file
+	 *
 	 * @return 2-length array of indexes: the index of the found cct, and its next index
+	 * @throws IOException 
 	 */
 	@SuppressWarnings("unused")
-	private long[] newtonSearch(int cct, int first, int last, ByteBuffer buffer) {
+	private long[] newtonSearch(int cct, int first, int last) throws IOException {
 		int left_index  = first;
 		int right_index = last - 1;
 		
 		if (left_index < 0 || right_index < 0)
 			return null;
 		
-		int left_cct  = getCCTIndex(buffer, left_index);
-		int right_cct = getCCTIndex(buffer, right_index);
+		int left_cct  = getCCTIndex(left_index);
+		int right_cct = getCCTIndex(right_index);
 		
 		while (right_index - left_index > 1) {
 			
@@ -633,7 +641,7 @@ public class DataSummary extends DataCommon
 				predicted_index = right_index - 1;
 			}
 			
-			int current_cct = getCCTIndex(buffer, predicted_index);
+			int current_cct = getCCTIndex(predicted_index);
 			
 			if (cct >= current_cct) {
 				left_index = predicted_index;
@@ -652,8 +660,8 @@ public class DataSummary extends DataCommon
 				// corrupt data: should throw exception 
 				index = right_index;
 			
-			long o1 = getCCTOffset(buffer, index);
-			long o2 = getCCTOffset(buffer, index + 1);
+			long o1 = getCCTOffset(index);
+			long o2 = getCCTOffset(index + 1);
 
 			return new long[] {o1, o2};
 		}
