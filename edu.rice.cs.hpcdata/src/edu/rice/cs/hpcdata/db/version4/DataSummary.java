@@ -160,18 +160,13 @@ public class DataSummary extends DataCommon
 		ListCCTAndIndex list = new ListCCTAndIndex(info.piElements[profileNum].nCtxs);
 		
 		long position = info.piElements[profileNum].pCtxIndices;
-		var input = getChannel();
-		long size = (long)FMT_PROFILEDB_SZ_CIDX * info.piElements[profileNum].nCtxs;
-		
-		var buffer = input.map(MapMode.READ_ONLY, position, size);
-		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		
 		for(int i=0; i<info.piElements[profileNum].nCtxs; i++) {
 			// special alignment: each record is SIZE_IDX bytes
-			buffer.position(i * FMT_PROFILEDB_SZ_CIDX);
+			int curr = (i * FMT_PROFILEDB_SZ_CIDX);
 			
-			list.listOfId[i] = buffer.getInt();
-			list.listOfdIndex[i] = buffer.getLong();
+			list.listOfId[i] = lbBuffer.getInt(position + curr);
+			list.listOfdIndex[i] = lbBuffer.getLong(position + curr + Integer.BYTES);
 		}
 		return list;
 	}
@@ -412,13 +407,14 @@ public class DataSummary extends DataCommon
 		// read the hierarchical id tuple 
 		readIdTuple(input);
 		
+		// need to initialize large byte buffer here before using it in reading cct index
+		lbBuffer = new LargeByteBuffer(input, 2, info.szProfile);
+		lbBuffer.setEndian(ByteOrder.LITTLE_ENDIAN);
+		
 		// eager initialization for the cct of the summary profile
 		// this summary will be loaded anyway. There is no harm to do it now. 
 		// ... or I think
 		listCCT = getCCTIndex(IdTuple.PROFILE_SUMMARY);
-				
-		lbBuffer = new LargeByteBuffer(input, 2, info.szProfile);
-		lbBuffer.setEndian(ByteOrder.LITTLE_ENDIAN);
 
 		return true;
 	}
