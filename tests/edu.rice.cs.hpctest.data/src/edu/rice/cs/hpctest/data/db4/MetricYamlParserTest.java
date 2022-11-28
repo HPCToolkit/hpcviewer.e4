@@ -42,7 +42,12 @@ public class MetricYamlParserTest
 			var metrics = parser.getListMetrics();
 			assertNotNull(metrics);
 			assertTrue(metrics.size() > 0);
-			assertTrue(metrics.size() <= data.getMetrics().size());
+			
+			var rawMetrics = parser.getRawMetrics();
+			assertNotNull(rawMetrics);
+			assertTrue(rawMetrics.size() > 0);
+			
+			assertTrue(metrics.size() + rawMetrics.size() >= data.getMetrics().size());
 			
 			var roots = parser.getListRootMetrics();
 			assertNotNull(roots);

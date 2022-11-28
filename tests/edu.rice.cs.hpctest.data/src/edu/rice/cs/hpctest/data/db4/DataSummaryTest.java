@@ -82,7 +82,7 @@ public class DataSummaryTest {
 	@Test
 	public void testGetMetricsInt() throws IOException {
 		for(var profile: dataProfiles) {
-			List<MetricValueSparse> list = profile.getMetrics(3);
+			List<MetricValueSparse> list = profile.getMetrics(0);
 			assertTrue(list.size() >= 1); // 
 			
 			MetricValueSparse mvs = list.get(0);

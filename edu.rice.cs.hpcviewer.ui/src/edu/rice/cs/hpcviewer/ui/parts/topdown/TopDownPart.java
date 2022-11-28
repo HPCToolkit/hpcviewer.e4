@@ -30,7 +30,6 @@ import edu.rice.cs.hpcfilter.FilterDataItem;
 import edu.rice.cs.hpcfilter.dialog.ThreadFilterDialog;
 import edu.rice.cs.hpctree.IScopeTreeData;
 import edu.rice.cs.hpctree.ScopeTreeData;
-import edu.rice.cs.hpctree.ScopeTreeTable;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.graph.GraphMenu;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractTableView;
