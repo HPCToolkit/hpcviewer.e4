@@ -2,12 +2,12 @@ package edu.rice.cs.hpctest.ui.tree;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Random;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.eclipse.nebula.widgets.nattable.sort.SortDirectionEnum;
 
@@ -81,7 +81,7 @@ class ScopeTreeDataTest
 				
 				depth++;
 				int d = tree.getDepthOfData(scope);
-				assertTrue(depth == d);
+				assertEquals(depth, d, "Inequal depth " + d + " vs " + depth +" for scope " + scope.getCCTIndex() + ": " + scope.getName());
 				
 				var child = tree.getDataAtIndex(numScopes + index);
 				assertNotNull(child);
