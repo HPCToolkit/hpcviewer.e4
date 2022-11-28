@@ -160,7 +160,7 @@ public class ExperimentTest
 
 	@Test
 	public void testGetMetricFromOrder() {
-		int []order = new int[] {0, 0, 1, 1, 1, 1, 1, 31, 1, 1, 1};
+		int []order = new int[] {0, 0, 1, 1, 1, 1, 1, 31, 1, 1, 1, 1};
 		int i = 0;
 		for(var experiment: experiments) {
 			if (experiment.getMetricCount()>0) {
@@ -387,7 +387,7 @@ public class ExperimentTest
 
 	@Test
 	public void testGetName() {
-		final String []names = new String[] {"bandwidthTest", "a.out", "a.out", "inline", "vectorAdd", "loop", "lmp", "inline", "vectorAdd", "a.out", "loops", "main"};
+		final String []names = new String[] {"bandwidthTest", "a.out", "a.out", "inline", "vectorAdd", "loop", "lmp", "inline", "vectorAdd", "a.out", "loops", "main", "main"};
 		int i=0;
 		for(var experiment: experiments) {
 			String name = experiment.getName();

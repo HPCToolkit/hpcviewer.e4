@@ -1,8 +1,11 @@
 package edu.rice.cs.hpcdata.experiment.extdata;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
+import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
@@ -70,4 +73,20 @@ public abstract class AbstractThreadDataCollection implements
 		return values;
 	}
 
-}
+	
+	@Override
+	public List<IdTuple> getIdTupleListWithoutGPU(IdTupleType idtype) {
+		var idtuples = getIdTuples();			
+
+		return idtuples.stream()
+	 			 .filter(idt -> !idt.isGPU(idtype)).collect(Collectors.toList());
+	}
+	
+	
+	@Override
+	public Object[] getIdTupleLabelWithoutGPU(IdTupleType idtype) {
+		var idtuples = getIdTupleListWithoutGPU(idtype);
+		
+		return idtuples.stream().map(idt -> idt.toString(idtype)).toArray();
+	}
+} 

@@ -11,6 +11,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.Experiment.ExperimentOpenFlag;
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
@@ -85,11 +86,14 @@ public class ThreadDataTest
 		int i=0;
 		final double delta = 1.0000001f;
 		
+		var idtype = IdTupleType.createTypeWithOldFormat();
+
+		
 		for(var data: listDataCollector) {
 			var ranks = data.getEvenlySparseRankLabels();
 			assertNotNull(ranks);
 			
-			var idTuples = data.getIdTuples();
+			var idTuples = data.getIdTupleListWithoutGPU(idtype);
 			assertNotNull(idTuples);
 			assertTrue(idTuples.size()>0);
 			
@@ -101,14 +105,11 @@ public class ThreadDataTest
 				int rawMetricsSize = rawMetrics.size();
 				
 				for(var rawMetric: rawMetrics) {
-					
-					var value = data.getMetric(root.getCCTIndex(), rawMetric.getIndex(), idTuples.get(0), rawMetricsSize);
-					
 					var values = data.getMetrics(root.getCCTIndex(), rawMetric.getIndex(), rawMetricsSize);
 					if (values != null && values.length>0) {
 						for(int j=0; j<values.length; j++) {
 							var idt = idTuples.get(j);
-							value = data.getMetric(root.getCCTIndex(), rawMetric.getIndex(), idt, rawMetricsSize);
+							var value = data.getMetric(root.getCCTIndex(), rawMetric.getIndex(), idt, rawMetricsSize);
 							var v = values[j];
 							assertEquals(value, v, delta);
 						}

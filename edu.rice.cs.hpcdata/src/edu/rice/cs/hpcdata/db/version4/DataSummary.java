@@ -216,8 +216,8 @@ public class DataSummary extends DataCommon
 		
 		// We need to grab a value directly from the memory instead of searching O(n)
 		int index = Collections.binarySearch(listValues, metricId, (o1, o2) -> {
-			Integer i1;
-			Integer i2;
+			int i1;
+			int i2;
 			if (o1 instanceof MetricValueSparse) 
 				i1 = ((MetricValueSparse)o1).getIndex();
 			else
