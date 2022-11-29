@@ -7,6 +7,7 @@ import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScopeCallerView;
+import edu.rice.cs.hpcdata.experiment.scope.LoadModuleScope;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.util.Util;
@@ -58,7 +59,9 @@ public class ScopeTreeDataProvider implements IDataProvider, IRowDataProvider<Sc
 			} else {
 				proc = (ProcedureScope) scope;
 			}
-			if (!proc.isFalseProcedure()) {
+			// fix issue #262 (no load module for unknown module)
+			// Do not add load module suffix if the scope has no associated load module
+			if (!proc.isFalseProcedure() && proc.getLoadModule() != LoadModuleScope.NONE) {
 				lm = proc.getLoadModule().getName();
 				int lastDot = 1+lm.lastIndexOf('/');
 				
