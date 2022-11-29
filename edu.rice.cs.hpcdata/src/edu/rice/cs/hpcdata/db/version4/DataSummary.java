@@ -345,15 +345,20 @@ public class DataSummary extends DataCommon
 								  .collect(Collectors.toList());
 			
 			labels = new double[list.size()];
-			
-			// covert the list to double representation list
-			var doubleList = list.stream()
-								 .map(idt -> idt.toNumber())
-								 .collect(Collectors.toList());
-			
 			int i=0;
-			for(var dl: doubleList) {
-				labels[i] = dl.doubleValue();
+
+			// fix issue #261 (incorrect x-axis)
+			// Only consider rank and thread to display the x-axis
+			for(var idt: list) {
+				double constantRankFraction = 1;
+				for(int j=0; j<idt.getLength(); j++) {
+					if (idt.getKind(j) == IdTupleType.KIND_RANK) {
+						labels[i] = idt.getPhysicalIndex(j);
+						constantRankFraction = 0.1;
+					} else if (idt.getKind(j) == IdTupleType.KIND_THREAD) {
+						labels[i] += constantRankFraction * idt.getPhysicalIndex(j);
+					}
+				}
 				i++;
 			}
 		}

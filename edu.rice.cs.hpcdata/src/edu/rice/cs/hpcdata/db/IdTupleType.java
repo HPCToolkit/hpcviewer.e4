@@ -68,7 +68,7 @@ public class IdTupleType
 
 	private final Map<Byte, String> mapIdTuple = new HashMap<>();
 	
-	private static byte[] sortingOrder = new byte[] {0, 3, 1, 2, 4, 5, 6, 7};
+	private static byte[] sortingOrder = new byte[] {2, 3, 4, 5, 6, 7, 1, 0};
 	
 	public void initDefaultTypes() {
 		mapIdTuple.put(KIND_SUMMARY,    LABEL_SUMMARY);
