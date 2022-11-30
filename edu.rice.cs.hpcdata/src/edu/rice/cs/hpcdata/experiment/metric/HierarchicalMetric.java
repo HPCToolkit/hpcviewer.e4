@@ -346,7 +346,7 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		target.partnerIndex   = partnerIndex;
 		target.sampleperiod   = sampleperiod;
 		target.variant        = variant;
-		
+		target.visibility     = visibility;
 		target.propagationScope = propagationScope;
 	}
 
