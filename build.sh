@@ -129,6 +129,7 @@ case $key in
     ;;
     -r|--release)
     RELEASE="$2"
+    CREATE_PACKAGE=0
     shift # past argument
     shift # past value
     ;;
