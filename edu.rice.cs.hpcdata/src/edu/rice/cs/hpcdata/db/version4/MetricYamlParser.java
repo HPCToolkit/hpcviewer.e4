@@ -25,6 +25,7 @@ import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.metric.PropagationScope;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
+import edu.rice.cs.hpcdata.experiment.metric.format.MetricValuePredefinedFormat;
 
 /*********************************************************
  * 
@@ -47,6 +48,7 @@ public class MetricYamlParser
 	private static final String FIELD_METRIC  = "metric";
 	private static final String FIELD_NAME    = "name";
 	private static final String FIELD_DESC	  = "description";
+	private static final String FIELD_FORMAT  = "format";
 	private static final String FIELD_VARIANT = "variants";
 	
 	
@@ -323,6 +325,7 @@ roots:
 			//
 			String name = (String) aRoot.get(FIELD_NAME);
 			String desc = (String) aRoot.get(FIELD_DESC);
+			var format  = aRoot.get(FIELD_FORMAT);
 			
 			var variants = aRoot.get(FIELD_VARIANT);
 			LinkedHashMap<String, Object> listMapVariants;
@@ -332,7 +335,7 @@ roots:
 			} else {
 				listMapVariants =  new LinkedHashMap<>(0);
 			}
-			var result = parseVariants(name, desc, listMapVariants);
+			var result = parseVariants(name, desc, format, listMapVariants);
 			
 			//
 			// traverse the children of this root metric
@@ -419,11 +422,13 @@ roots:
 	private VariantResult parseMetric(LinkedHashMap<String, ?> childAttributes) {
 		var name = childAttributes.get(FIELD_NAME);
 		var desc = childAttributes.get(FIELD_DESC);
+		var fmt  = childAttributes.get(FIELD_FORMAT);
+		
 		var variants = childAttributes.get(FIELD_VARIANT);
 		if (!(variants instanceof LinkedHashMap<?, ?>))
 			throw new IllegalStateException("No list of children");
 
-		var result = parseVariants((String)name, (String)desc, (LinkedHashMap<String, ?>)variants);
+		var result = parseVariants((String)name, (String)desc, fmt, (LinkedHashMap<String, ?>)variants);
 		
 		// parsing if the children of this metric if any
 		parseMetricChildren(childAttributes);
@@ -451,7 +456,7 @@ roots:
 	 * 
 	 * @return VariantResult
 	 */
-	private VariantResult parseVariants(String name, String desc, LinkedHashMap<String, ?> variants) {
+	private VariantResult parseVariants(String name, String desc, Object format, LinkedHashMap<String, ?> variants) {
 		var result = VariantResult.OK;
 		var iterator = variants.entrySet().iterator();
 		var inputMetrics = dataMeta.getMetrics();
@@ -470,8 +475,7 @@ roots:
 			LinkedHashMap<String, ?> mapAttributes = (LinkedHashMap<String, ?>) attr;
 			LinkedHashMap<String, ?> mapFormula;
 			
-			var render = mapAttributes.get("render");
-			
+			var render  = mapAttributes.get("render");
 			var formula = mapAttributes.get("formula");
 			
 			if (formula instanceof LinkedHashMap<?, ?>) {
@@ -521,8 +525,9 @@ roots:
 							outputMetrics.add(metric);
 						}
 						metric.setVariantLabel(variantLabel);
-						if (metric != null)
-							setMetricRender(metric, render);
+						setMetricRender(metric, render);
+						if (format instanceof String)
+							metric.setDisplayFormat(new MetricValuePredefinedFormat((String) format));
 					}
 
 					// no correspondent metric: this may be a new parent metric
