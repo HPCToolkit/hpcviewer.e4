@@ -344,8 +344,13 @@ public class Experiment extends BaseExperimentWithMetrics
 	 */
 	public int filter(IFilterData filterData, boolean reopening) throws Exception 
 	{	
-		int numFilteredNodes = Filter.filterExperiment(this, filterData, reopening);
-
+		int numFilteredNodes;
+		
+		if (reopening)
+			numFilteredNodes = Filter.reopenAndFilterExperiment(this, filterData);
+		else
+			numFilteredNodes = Filter.filterExperiment(this, filterData);
+		
 		if (numFilteredNodes > 0) {
 			RootScope rootCCT = getRootScope(RootScopeType.CallingContextTree);
 			

@@ -48,7 +48,7 @@ class FilterTest {
 	@Order(2)
 	void testFilter() throws Exception {
 		for(var exp: experiments) {
-			int res = exp.filter(fmap);
+			int res = exp.filter(fmap, true);
 			
 			assertTrue(res >= 0);
 		}

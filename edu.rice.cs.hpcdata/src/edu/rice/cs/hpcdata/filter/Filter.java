@@ -29,67 +29,81 @@ public class Filter
 	
 	/*************************************************************************
 	 * filter an experiment database
-	 * <p>caller needs to call post-process to ensure the callers tree and flat
-	 * tree are also filtered </p>
 
 	 * @param experiment
 	 * 			The database
 	 * @param filter
 	 * 			The set of filter rules
-	 * @param reopening
-	 * 			flag if it requires to resetting the all the data and
-	 * 			reopening the database
 	 * 
 	 * @return int
 	 * 			Number of nodes removed 
 	 * @throws Exception 
 	 *************************************************************************/
-	public static int filterExperiment(Experiment experiment, IFilterData filter, boolean reopening) throws Exception {
-		int numFilteredNodes = 0;
+	public static int filterExperiment(Experiment experiment, IFilterData filter) 
+			throws Exception {
+		if (experiment == null || experiment.isMergedDatabase())
+			return 0;
+
+		int numFilteredNodes = filter(experiment, filter);
+
+		experiment.resetThreadData();
+
+		return numFilteredNodes;
+	}
+	
+	
+	/*************************************************************************
+	 * Filter CCT node from an already opened database
+	 * <p>caller needs to call post-process to ensure the callers tree and flat
+	 * tree are also filtered </p>
+	 * 
+	 * @param experiment
+	 * 			The already opened database to be filtered
+	 * @param filter
+	 * 			The set of filter rules
+	 * 
+	 * @return
+	 * 			number of filtered nodes (approximately)
+	 * 
+	 * @throws Exception
+	 *************************************************************************/
+	public static int reopenAndFilterExperiment(Experiment experiment, IFilterData filter) throws Exception {
+		if (experiment == null || experiment.isMergedDatabase())
+			return 0;
 		
-		// filter the experiment if it is not null and it is in original form
-		// (it isn't a merged database)
-		if (experiment != null && !experiment.isMergedDatabase()) 
-		{
-			List<BaseMetric> metrics = null;
-			if (reopening) {
-				// ---------------------------------------
-				// Before filtering: conserve the added user-derived metrics.
-				// The reason is that when we reopen the database, we reset the
-				// list of metrics and lose the user derived metrics.
-				// ---------------------------------------
-				metrics = new ArrayList<>(experiment.getMetricCount());
+		// ---------------------------------------
+		// Before filtering: conserve the added user-derived metrics.
+		// The reason is that when we reopen the database, we reset the
+		// list of metrics and lose the user derived metrics.
+		// ---------------------------------------
+		List<BaseMetric> metrics = new ArrayList<>(experiment.getMetricCount());
 
-				for (BaseMetric metric : experiment.getMetricList()) {
-					if (metric instanceof DerivedMetric && 
-						metric.getMetricType()==MetricType.UNKNOWN) {
-						
-						// only add user derived metrics, not all derived metrics
-						//  provided by hpcprof
-						
-						metrics.add(metric);
-					} else {
-						metrics.add(metric.duplicate());
-					}
-				}
-
-				experiment.reopen();
+		for (BaseMetric metric : experiment.getMetricList()) {
+			if (metric instanceof DerivedMetric && 
+				metric.getMetricType()==MetricType.UNKNOWN) {
+				
+				// only add user derived metrics, not all derived metrics
+				//  provided by hpcprof
+				
+				metrics.add(metric);
+			} else {
+				metrics.add(metric.duplicate());
 			}
-			
-			// ---------------------------------------
-			// filtering 
-			// ---------------------------------------
-			numFilteredNodes = filter(experiment, filter);
-			
-			if (reopening) {
-				// ---------------------------------------
-				// put the original metrics and derived metrics back
-				// ---------------------------------------
-				experiment.setMetrics(metrics);
-			}
-			experiment.resetThreadData();
-
 		}
+
+		experiment.reopen();
+		
+		// ---------------------------------------
+		// filtering 
+		// ---------------------------------------
+		var numFilteredNodes = filter(experiment, filter);
+		
+		// ---------------------------------------
+		// put the original metrics and derived metrics back
+		// ---------------------------------------
+		experiment.setMetrics(metrics);
+		experiment.resetThreadData();
+
 		return numFilteredNodes;
 	}
 
