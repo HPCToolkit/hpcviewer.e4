@@ -36,50 +36,57 @@ public class Filter
 	 * 			The database
 	 * @param filter
 	 * 			The set of filter rules
+	 * @param reopening
+	 * 			flag if it requires to resetting the all the data and
+	 * 			reopening the database
 	 * 
 	 * @return int
 	 * 			Number of nodes removed 
 	 * @throws Exception 
 	 *************************************************************************/
-	public static int filterExperiment(Experiment experiment, IFilterData filter) throws Exception {
+	public static int filterExperiment(Experiment experiment, IFilterData filter, boolean reopening) throws Exception {
 		int numFilteredNodes = 0;
 		
 		// filter the experiment if it is not null and it is in original form
 		// (it isn't a merged database)
 		if (experiment != null && !experiment.isMergedDatabase()) 
 		{
-			// ---------------------------------------
-			// Before filtering: conserve the added user-derived metrics.
-			// The reason is that when we reopen the database, we reset the
-			// list of metrics and lose the user derived metrics.
-			// ---------------------------------------
-			List<BaseMetric> metrics = new ArrayList<>(experiment.getMetricCount());
+			List<BaseMetric> metrics = null;
+			if (reopening) {
+				// ---------------------------------------
+				// Before filtering: conserve the added user-derived metrics.
+				// The reason is that when we reopen the database, we reset the
+				// list of metrics and lose the user derived metrics.
+				// ---------------------------------------
+				metrics = new ArrayList<>(experiment.getMetricCount());
 
-			for (BaseMetric metric : experiment.getMetricList()) {
-				if (metric instanceof DerivedMetric && 
-					metric.getMetricType()==MetricType.UNKNOWN) {
-					
-					// only add user derived metrics, not all derived metrics
-					//  provided by hpcprof
-					
-					metrics.add(metric);
-				} else {
-					metrics.add(metric.duplicate());
+				for (BaseMetric metric : experiment.getMetricList()) {
+					if (metric instanceof DerivedMetric && 
+						metric.getMetricType()==MetricType.UNKNOWN) {
+						
+						// only add user derived metrics, not all derived metrics
+						//  provided by hpcprof
+						
+						metrics.add(metric);
+					} else {
+						metrics.add(metric.duplicate());
+					}
 				}
-			}
-			var rawMetrics = experiment.getRawMetrics();
 
+				experiment.reopen();
+			}
+			
 			// ---------------------------------------
 			// filtering 
 			// ---------------------------------------
 			numFilteredNodes = filter(experiment, filter);
 			
-			// ---------------------------------------
-			// put the original metrics and derived metrics back
-			// ---------------------------------------
-			experiment.setMetrics(metrics);
-			experiment.setMetricRaw(rawMetrics);
-			
+			if (reopening) {
+				// ---------------------------------------
+				// put the original metrics and derived metrics back
+				// ---------------------------------------
+				experiment.setMetrics(metrics);
+			}
 			experiment.resetThreadData();
 
 		}

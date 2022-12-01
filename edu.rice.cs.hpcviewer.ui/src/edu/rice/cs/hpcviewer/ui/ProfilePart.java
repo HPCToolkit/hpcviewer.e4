@@ -389,7 +389,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 			// warning: the filtering is not scalable. We should do this in the 
 			//          background job
 			try {
-				experiment.filter(FilterMap.getInstance());
+				experiment.filter(FilterMap.getInstance(), true);
 			} catch (Exception e) {
 				throw new IllegalStateException(e);
 			}
