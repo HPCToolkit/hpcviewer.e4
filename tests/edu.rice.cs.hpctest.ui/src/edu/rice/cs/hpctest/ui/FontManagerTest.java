@@ -1,49 +1,52 @@
 package edu.rice.cs.hpctest.ui;
 
-import static org.junit.jupiter.api.Assertions.*;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.widgets.Display;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 
 
-class FontManagerTest 
+public class FontManagerTest 
 {
 	private static Display display;
 	
-	@BeforeAll
-	static void setUpBeforeClass() {
+	@BeforeClass
+	public static void setUpBeforeClass() {
 		display = Display.getDefault();
 	}
 
 
 
 	@Test
-	void testGetFontGeneric() {
+	public void testGetFontGeneric() {
 		assertNotNull(FontManager.getFontGeneric() );
 	}
 
 	@Test
-	void testGetMetricFont() {
+	public void testGetMetricFont() {
 		assertNotNull(FontManager.getMetricFont() );
 	}
 
 	@Test
-	void testGetTextEditorFont() {
+	public void testGetTextEditorFont() {
 		assertNotNull(FontManager.getTextEditorFont() );
 	}
 
 	@Test
-	void testGetCallsiteGlyphDefaultFont() {
+	public void testGetCallsiteGlyphDefaultFont() {
 		assertNotNull(FontManager.getCallsiteGlyphDefaultFont() );
 	}
 
 	@Test
-	void testGetCallsiteGlyphDefaultFontFontData() {
+	public void testGetCallsiteGlyphDefaultFontFontData() {
 		Font font = FontManager.getFontGeneric() ;
 		Font fontCS = FontManager.getCallsiteGlyphDefaultFont(font.getFontData()[0]);
 		assertNotNull(fontCS);
@@ -54,7 +57,7 @@ class FontManagerTest
 	}
 
 	@Test
-	void testGetCallsiteGlyphFont() {
+	public void testGetCallsiteGlyphFont() {
 		display.syncExec(()-> {
 			Font cs = FontManager.getCallsiteGlyphFont() ;
 			assertNotNull( cs );
@@ -62,21 +65,21 @@ class FontManagerTest
 	}
 
 	@Test
-	void testGetFontDataPreference() {
+	public void testGetFontDataPreference() {
 		assertThrows( Exception.class, () -> {
 			FontManager.getFontDataPreference(null) ;
 		});
 	}
 
 	@Test
-	void testSetFontPreference() {
+	public void testSetFontPreference() {
 		assertThrows(Exception.class, () -> {
 			FontManager.setFontPreference(null, null);
 		});
 	}
 
 	@Test
-	void testChangeFontHeightInt() {
+	public void testChangeFontHeightInt() {
 		int heightGeneric = getHeight(FontManager.getFontGeneric());
 		int heightMetric  = getHeight(FontManager.getMetricFont());
 		int heightText    = getHeight(FontManager.getTextEditorFont());

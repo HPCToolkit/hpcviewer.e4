@@ -7,9 +7,9 @@
 
 
  <properties>
-  <tycho.version>2.7.4</tycho.version>
+  <tycho.version>2.7.5</tycho.version>
   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  <eclipse-repo.url>http://download.eclipse.org/releases/2021-06</eclipse-repo.url>
+  <eclipse-repo.url>http://download.eclipse.org/releases/2022-09</eclipse-repo.url>
   <sonar.organization>hpctoolkit</sonar.organization>
   <sonar.host.url>https://sonarcloud.io</sonar.host.url>
   <jacoco.version>0.8.8</jacoco.version>

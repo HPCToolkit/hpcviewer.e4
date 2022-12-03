@@ -4,8 +4,9 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.After;
+import org.junit.Before;
+
 
 public class ViewerTestCase 
 {
@@ -15,12 +16,12 @@ public class ViewerTestCase
 	protected Shell shell;
 	
 
-	@BeforeEach
+	@Before
 	public void setUp() {
 		shell = createShell("Viewer unit test");
 	}
 
-	@AfterEach
+	@After
 	public void tearDown() {
 		shell.dispose();
 	}

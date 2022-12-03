@@ -1,13 +1,14 @@
 package edu.rice.cs.hpctest.viewer.trace;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
 import edu.rice.cs.hpcdata.db.IdTupleType;
@@ -16,11 +17,11 @@ import edu.rice.cs.hpcdata.db.version4.FileDB4;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpctest.util.TestDatabase;
 
-class DataTraceReaderTest {
+public class DataTraceReaderTest {
 	static FileDB4 []dataDB;
 	
-	@BeforeAll
-	static void setUpBeforeClass() throws IOException {
+	@BeforeClass
+	public static void setUpBeforeClass() throws IOException {
 		var paths = TestDatabase.getMetaDatabases();
 		dataDB = new FileDB4[paths.length];
 		int i=0;
