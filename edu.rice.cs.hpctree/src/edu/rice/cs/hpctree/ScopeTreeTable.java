@@ -51,6 +51,7 @@ import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.format.MetricValuePredefinedFormat;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.util.OSValidator;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpctree.action.IActionListener;
 import edu.rice.cs.hpctree.internal.ColumnHeaderDataProvider;
@@ -182,9 +183,13 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
         // this config happens only at the start of the table. It doesn't change automatically
         // in the middle of the system switch mode
         
-        ThemeConfiguration defaultConfiguration = Display.isSystemDarkTheme() ? 
-        								new DarkScopeTableStyleConfiguration(this.natTable, bodyDataProvider) :  
-        								new ScopeTableStyleConfiguration(bodyDataProvider);
+        ThemeConfiguration defaultConfiguration = new ScopeTableStyleConfiguration(bodyDataProvider);
+        if (!OSValidator.isMac()) {
+        	defaultConfiguration = Display.isSystemDarkTheme() ? 
+					new DarkScopeTableStyleConfiguration(this.natTable, bodyDataProvider) :  
+					new ScopeTableStyleConfiguration(bodyDataProvider);
+ 
+        }
         natTable.setTheme(defaultConfiguration);
 
         // --------------------------------

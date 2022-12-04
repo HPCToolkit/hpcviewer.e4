@@ -67,7 +67,7 @@ public class TableConfiguration implements IConfiguration
 	
 	
 	@Override
-	public void configureLayer(ILayer layer) {}
+	public void configureLayer(ILayer layer) { /* unused */ }
 
 	@Override
 	public void configureRegistry(IConfigRegistry configRegistry) {
