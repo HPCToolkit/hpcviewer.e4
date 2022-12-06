@@ -2,13 +2,13 @@ package edu.rice.cs.hpctest.ui.tree;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.eclipse.nebula.widgets.nattable.sort.SortDirectionEnum;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
@@ -17,13 +17,13 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpctest.util.TestDatabase;
 import edu.rice.cs.hpctree.ScopeTreeData;
 
-class ScopeTreeDataTest 
+public class ScopeTreeDataTest 
 {
 	private static ScopeTreeData []treeData;
 	private static final Random random = new Random(); 
 
-	@BeforeAll
-	static void setUpBeforeClass() throws Exception {
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
 		var database    = TestDatabase.getDatabases();
 		var experiments = new Experiment[database.length];
 		treeData = new ScopeTreeData[database.length];
@@ -49,7 +49,7 @@ class ScopeTreeDataTest
 
 
 	@Test
-	void testMain() {		
+	public void testMain() {		
 		for (ScopeTreeData tree: treeData) {
 			var root = tree.getRoot();
 			assertNotNull(root);
@@ -81,7 +81,7 @@ class ScopeTreeDataTest
 				
 				depth++;
 				int d = tree.getDepthOfData(scope);
-				assertEquals(depth, d, "Inequal depth " + d + " vs " + depth +" for scope " + scope.getCCTIndex() + ": " + scope.getName());
+				Assert.assertEquals(depth, d);
 				
 				var child = tree.getDataAtIndex(numScopes + index);
 				assertNotNull(child);

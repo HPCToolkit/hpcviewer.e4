@@ -2,13 +2,10 @@ package edu.rice.cs.hpctest.viewer;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.assertTrue;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.filter.FilterAttribute;
@@ -16,13 +13,12 @@ import edu.rice.cs.hpcfilter.service.FilterMap;
 import edu.rice.cs.hpctest.util.TestDatabase;
 
 
-@TestMethodOrder(OrderAnnotation.class)
-class FilterTest {
+public class FilterTest {
 	private static Experiment []experiments;	
 	private static FilterMap fmap;
 
-	@BeforeAll
-	static void setUpBeforeClass() throws Exception {
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
 		var database   = TestDatabase.getDatabases();		
 		experiments = new Experiment[database.length];
 		int i=0;
@@ -40,24 +36,7 @@ class FilterTest {
 			i++;
 		}
 		fmap = new FilterMap();
-	}
-	
-	
-
-	@Test
-	@Order(2)
-	void testFilter() throws Exception {
-		for(var exp: experiments) {
-			int res = exp.filter(fmap, true);
-			
-			assertTrue(res >= 0);
-		}
-	}
-
-
-	@Test
-	@Order(1)
-	void testFilterInit() {
+		
 		var fname = fmap.getFilename();
 		assertNotNull(fname);
 		
@@ -68,5 +47,15 @@ class FilterTest {
 		
 		assertTrue( fmap.size() == 1);
 	}
+	
+	
 
+	@Test
+	public void testFilter() throws Exception {
+		for(var exp: experiments) {
+			int res = exp.filter(fmap, true);
+			
+			assertTrue(res >= 0);
+		}
+	}
 }

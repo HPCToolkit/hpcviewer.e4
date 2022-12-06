@@ -1,13 +1,14 @@
 package edu.rice.cs.hpctest.viewer;
 
-import static org.junit.jupiter.api.Assertions.*;
+
+import static org.junit.Assert.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcfilter.AbstractFilterPane;
@@ -18,13 +19,13 @@ import edu.rice.cs.hpcfilter.StringFilterDataItem;
 
 import edu.rice.cs.hpctest.viewer.util.*;
 
-class BaseFilterPaneTest extends ViewerTestCase
+public class BaseFilterPaneTest extends ViewerTestCase
 {
 	private Random random = new Random();
 	private BaseFilterPane<String> pane;
 	private FilterInputData<String> data;
 	
-	@BeforeEach
+	@Before
 	@Override
 	public void setUp() {
 		super.setUp();
@@ -46,7 +47,7 @@ class BaseFilterPaneTest extends ViewerTestCase
 
 	
 	@Test
-	void testGetEventList() {
+	public void testGetEventList() {
 		showWindow();
 		List<FilterDataItem<String>> clist = pane.getEventList(); 
 		clist.stream().forEach(item -> {
