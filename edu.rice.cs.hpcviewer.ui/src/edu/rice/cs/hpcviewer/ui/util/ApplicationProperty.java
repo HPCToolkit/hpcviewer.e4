@@ -23,7 +23,7 @@ public class ApplicationProperty
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 */
-	public static String getVersion() throws MalformedURLException, IOException {
+	public static String getVersion() throws IOException {
 		return getFileContent(FILE_VERSION);
 	}
 	
@@ -34,7 +34,7 @@ public class ApplicationProperty
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 */
-	public static String getLicense() throws MalformedURLException, IOException {
+	public static String getLicense() throws IOException {
 		return getFileContent(FILE_LICENSE);
 	}
 
@@ -68,7 +68,6 @@ public class ApplicationProperty
 	 * @return String
 	 */
 	public static String getFileLogLocation() {
-		String locInstance = Platform.getInstanceLocation().getURL().getFile() + File.separator + FILE_LOG_NAME;
-		return locInstance;
+		return Platform.getInstanceLocation().getURL().getFile() + File.separator + FILE_LOG_NAME;
 	}
 }
