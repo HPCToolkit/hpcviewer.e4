@@ -62,6 +62,7 @@ import org.osgi.service.event.EventHandler;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
+import edu.rice.cs.hpcbase.Theme;
 import edu.rice.cs.hpcdata.util.string.StringUtil;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
@@ -185,7 +186,7 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
         // this configuration happens only at the start of the table. It doesn't change automatically
         // in the middle of the system switch mode
         
-        ThemeConfiguration defaultConfiguration = Display.isSystemDarkTheme() ? 
+        ThemeConfiguration defaultConfiguration = Theme.isDarkThemeActive() ? 
         							new DarkThemeConfiguration(natTable) :  new  DayThemeConfiguration();
         natTable.setTheme(defaultConfiguration);
         
