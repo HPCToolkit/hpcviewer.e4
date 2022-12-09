@@ -200,7 +200,7 @@ public class DataPlot extends DataCommon
 				int profIndex = buffer.getInt(position);
 				double value  = buffer.getDouble(position + 0x04);
 
-				values[j-startIdx] = new DataPlotEntry(profIndex-1, value);
+				values[j-startIdx] = new DataPlotEntry(profIndex, value);
 			}
 			return values;
 		}		

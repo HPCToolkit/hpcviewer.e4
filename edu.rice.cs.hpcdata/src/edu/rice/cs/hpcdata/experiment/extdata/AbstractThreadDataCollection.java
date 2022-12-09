@@ -79,7 +79,8 @@ public abstract class AbstractThreadDataCollection implements
 		var idtuples = getIdTuples();			
 
 		return idtuples.stream()
-	 			 .filter(idt -> !idt.isGPU(idtype)).collect(Collectors.toList());
+	 			 	   .filter(idt -> !idt.isGPU(idtype))
+	 			 	   .collect(Collectors.toList());
 	}
 	
 	
@@ -87,6 +88,8 @@ public abstract class AbstractThreadDataCollection implements
 	public Object[] getIdTupleLabelWithoutGPU(IdTupleType idtype) {
 		var idtuples = getIdTupleListWithoutGPU(idtype);
 		
-		return idtuples.stream().map(idt -> idt.toString(idtype)).toArray();
+		return idtuples.stream()
+					   .map(idt -> idt.toString(idtype))
+					   .toArray();
 	}
 } 

@@ -205,6 +205,19 @@ public class IdTuple
 	}
 	
 	
+	@Override
+	public String toString() {
+		if (kinds == null || physicalIndexes == null)
+			return "";
+		
+		var sb = new StringBuilder();
+		for(var pi: physicalIndexes) {
+			sb.append(pi);
+			sb.append(" ");
+		}
+		return sb.toString();
+	}
+	
 	public String toString(IdTupleType idTupleType) {
 		return toString(kinds.length-1, idTupleType);
 	}
