@@ -2,6 +2,7 @@ package edu.rice.cs.hpctest.viewer;
 
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,5 +55,18 @@ public class BaseFilterPaneTest extends ViewerTestCase
 			assertNotNull(item);
 			assertNotNull(item.data);
 		});
+	}
+	
+	
+	public void testReset() {
+		var items = data.getListItems();
+		int numItems = items.size();
+		
+		items.add(new StringFilterDataItem("add Label", false, false));
+		data = new FilterInputData<>(items);
+		pane.reset(data);
+		
+		var newList = pane.getFilterList();
+		assertTrue(newList.size() == numItems + 1);
 	}
 }
