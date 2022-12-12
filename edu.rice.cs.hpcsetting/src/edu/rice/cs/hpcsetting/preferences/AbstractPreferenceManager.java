@@ -23,7 +23,7 @@ public abstract class AbstractPreferenceManager
 	 * Retrieve the default preference based on {@link IEclipsePreferences}
 	 * @return IEclipsePreferences
 	 */
-	static public IEclipsePreferences getPreference() {
+	public static IEclipsePreferences getPreference() {
 		return InstanceScope.INSTANCE.getNode(PreferenceConstants.P_HPCVIEWER);
 	}
 	
@@ -88,6 +88,6 @@ public abstract class AbstractPreferenceManager
 		return directory + PreferenceConstants.PREF_FILENAME;
 	}
 
-	abstract public void setDefaults();
+	public abstract void setDefaults();
 
 }

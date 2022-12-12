@@ -2,7 +2,6 @@ package edu.rice.cs.hpctree.action;
 
 import java.util.Stack;
 
-import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpctree.FlatScopeTreeData;
@@ -123,7 +122,9 @@ public class FlatAction implements IUndoableActionListener
 	
 	public boolean canFlatten() {
 		Scope root = treeAction.getRoot();
-		return root.hasChildren();
+		var children = root.getChildren();
+		var hasGrandChildren = children.stream().filter(Scope::hasChildren).findAny();
+		return hasGrandChildren.isPresent();
 	}
 	
 	
