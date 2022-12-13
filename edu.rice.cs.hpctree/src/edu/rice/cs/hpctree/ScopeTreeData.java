@@ -6,6 +6,7 @@ import java.util.List;
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.nebula.widgets.nattable.sort.SortDirectionEnum;
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
@@ -38,7 +39,7 @@ public class ScopeTreeData implements IScopeTreeData
 	 * @param root the root scope
 	 * @param metricManager the metric manager of the experiment or database
 	 */
-	public ScopeTreeData(RootScope root, IMetricManager metricManager, boolean noEmptyColumns) {
+	public ScopeTreeData(RootScope root, IMetricManager metricManager) {
 		this.listScopes = FastList.newList();
 		this.listScopes.add(root);
 		this.metricManager = metricManager;
@@ -46,10 +47,6 @@ public class ScopeTreeData implements IScopeTreeData
 		this.indexesNonEmptyMetrics = metricManager.getNonEmptyMetricIDs(root);
 		
 		clear();
-	}
-	
-	public ScopeTreeData(RootScope root, IMetricManager metricManager) {
-		this(root, metricManager, true);
 	}
 	
 	
@@ -122,12 +119,19 @@ public class ScopeTreeData implements IScopeTreeData
 
 		ColumnComparator comparator = getComparator(columnIndex, this.sortDirection);
 		synchronized (listScopes) {
-			listScopes.sort(comparator);
+			try {
+				listScopes.sort(comparator);
+			} catch (IllegalArgumentException e) {
+				// error in sorting the column
+				LoggerFactory.getLogger(getClass()).error("column: " + columnIndex + ", direction: " + sortDirection, e);
+			}
 		}
 	}
 	
 	
 	protected ColumnComparator getComparator(int columnIndex, SortDirectionEnum sortDir) {
+		assert(sortDir != SortDirectionEnum.NONE);
+		
 		return new ColumnComparator(this, columnIndex, sortDir);
 	}
 	
@@ -415,6 +419,12 @@ public class ScopeTreeData implements IScopeTreeData
 			// let's try to compare with the hash code
 			if (result == 0) {
 				result = o1.getCCTIndex() - o2.getCCTIndex();
+			}
+			// if cct-id of o1 and cct-id of o2 are identical, it must be a bug
+			assert(result != 0);
+			if (result == 0) {
+				// Issue #267 this is to make sure o1 and o2 are NOT identical.
+				result = System.identityHashCode(o1) - System.identityHashCode(o2);
 			}
 		}
 		return factor * result;

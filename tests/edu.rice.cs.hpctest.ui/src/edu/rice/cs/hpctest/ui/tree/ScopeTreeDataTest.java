@@ -1,9 +1,11 @@
 package edu.rice.cs.hpctest.ui.tree;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
 import java.util.Random;
 
 import org.junit.Assert;
@@ -73,23 +75,56 @@ public class ScopeTreeDataTest
 			Scope scope = root;
 			
 			while (scope.hasChildren()) {
-				list.addAll(scope.getChildren());
+				int sortColumn = Math.min(1, numMetrics);
+				tree.sort(sortColumn, SortDirectionEnum.DESC, false);
+				list = tree.getList();
+
+				var listChildren = tree.getChildren(scope);
+				list.addAll(listChildren);
 				
-				int numChildren = scope.getSubscopeCount();
+				int numChildren = listChildren.size();
 				int index = random.nextInt(numChildren);				
-				scope = scope.getSubscope(index);
+				scope = listChildren.get(index);
 				
 				depth++;
 				int d = tree.getDepthOfData(scope);
 				Assert.assertEquals(depth, d);
 				
+				if (scope.getParentScope() != null) {
+					d = tree.getDepthOfData(scope.getParentScope());
+					assertEquals(d, depth-1);
+				}
 				var child = tree.getDataAtIndex(numScopes + index);
 				assertNotNull(child);
 				assertTrue(child == scope);
 				
+				var path = tree.getPath(scope);
+				assertEquals(path.get(0), scope);
+				assertEquals(path.get(path.size()-1).getParentScope(), root);
+				
+				checkMetrics(list, tree);
+				
 				numScopes += numChildren;
 			}
-
 		}
 	}
-}
+	
+	private void checkMetrics(List<Scope> list, ScopeTreeData tree) {
+		var numMetrics = tree.getMetricCount();
+		
+		for(int j=1; j<list.size(); j++) {
+			for(int k=0; k<numMetrics; k++) {
+				tree.sort(k, SortDirectionEnum.DESC, false);
+				list = tree.getList();
+
+				var node = list.get(j);
+				var parent = node.getParentScope();
+				
+				int depthChild = tree.getDepthOfData(node);
+				int depthParent = tree.getDepthOfData(parent);
+				
+				assertTrue(depthParent == depthChild - 1);
+			}
+		}
+	}
+} 

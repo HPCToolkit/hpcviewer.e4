@@ -165,7 +165,7 @@ public class ThreadPart extends TopDownPart
 
 	@Override
 	protected IScopeTreeData getTreeData(RootScope root, IMetricManager metricManager) {
-		return new ScopeTreeData(root, metricManager, false);
+		return new ScopeTreeData(root, metricManager);
 	}
 
 	

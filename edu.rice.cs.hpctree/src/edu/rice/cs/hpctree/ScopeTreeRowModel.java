@@ -65,8 +65,7 @@ public class ScopeTreeRowModel extends AbstractTreeRowModel<Scope> implements IS
     	if (index == 0)
     		return 0;
     	
-        int depth   = getTreeData().getDepthOfData(index);
-        return depth;
+        return getTreeData().getDepthOfData(index);
     }
 
 

@@ -53,7 +53,8 @@ public class CallingContextReassignment implements IScopeVisitor
 					parent.addSubscope(child);
 					child.setParentScope(parent);
 				}
-			}		
+			}
+			scope.dispose();
 		}
 	}
 	
