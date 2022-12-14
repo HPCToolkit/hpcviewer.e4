@@ -88,9 +88,9 @@ public class Frame implements Serializable
 	 *****/
 	public void set(long begTime, long endTime, int begProcess, int endProcess)
 	{
-		this.begProcess = begProcess;
+		this.begProcess = Math.max(0, begProcess);
 		this.endProcess = endProcess;
-		this.begTime	= begTime;
+		this.begTime	= Math.max(0, begTime);
 		this.endTime	= endTime;
 		
 		fixPosition();
