@@ -85,6 +85,7 @@ public LineScope getLineScope()
 //support for visitors													//
 //////////////////////////////////////////////////////////////////////////
 
+@Override
 public void accept(IScopeVisitor visitor, ScopeVisitType vt) {
 	visitor.visit(this, vt);
 }
