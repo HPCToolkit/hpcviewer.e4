@@ -860,8 +860,11 @@ implements IMetricScope
 			return;
 		
 		root 		= null;
-		metrics 	= null;
 		sourceFile  = null;
+		if (metrics != null) {
+			metrics.dispose();
+			metrics = null;
+		}
 		
 		if (listScopeReduce != null)
 			listScopeReduce.clear();

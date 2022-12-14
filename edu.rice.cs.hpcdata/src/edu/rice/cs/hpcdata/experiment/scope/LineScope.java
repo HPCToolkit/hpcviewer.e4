@@ -115,9 +115,10 @@ public int getLineNumber()
 
 public Scope duplicate() {
 	return new LineScope(this.root, 
-				this.sourceFile, 
-				this.firstLineNumber,
-				getCCTIndex(), this.flat_node_index);
+						 this.sourceFile, 
+						 this.firstLineNumber,
+						 getCCTIndex(), 
+						 this.flat_node_index);
 }
 
 //////////////////////////////////////////////////////////////////////////

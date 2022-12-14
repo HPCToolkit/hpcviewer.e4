@@ -350,7 +350,11 @@ public class ScopeContextFactory
 		LineScope ls;
 		
 		if (parent instanceof LineScope) {
-			ls = (LineScope)parent;
+			// fix issue #268 (incorrect file in the call site)
+			// Careful: during the scope reassignment, we'll dispose the line scopes
+			// including to reset the file source. We have to duplicate the line scope
+			// here to avoid disposing the object later.
+			ls = (LineScope)parent.duplicate();
 		} else {
 			ls = new LineScope(rootCCT, ps.getSourceFile(), line, ctxId, flatId);
 		}

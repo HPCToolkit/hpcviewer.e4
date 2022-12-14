@@ -52,7 +52,9 @@ public Scope duplicate() {
     return new CallSiteScope(
     		(LineScope) lineScope.duplicate(), 
     		(ProcedureScope) procScope.duplicate(), 
-    		type, getCCTIndex(), this.flat_node_index);
+    		type, 
+    		getCCTIndex(), 
+    		flat_node_index);
 }
 
 
