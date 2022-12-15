@@ -37,12 +37,17 @@ public class MetricYamlParserTest
 			var experiment = new Experiment();
 			
 			data.open(experiment, db.getAbsolutePath());
-			MetricYamlParser parser = new MetricYamlParser(db.getAbsolutePath(), data.getDataSummary(), data.getMetrics());
+			MetricYamlParser parser = new MetricYamlParser(db.getAbsolutePath(), data);
 			
 			var metrics = parser.getListMetrics();
 			assertNotNull(metrics);
 			assertTrue(metrics.size() > 0);
-			assertTrue(metrics.size() <= data.getMetrics().size());
+			
+			var rawMetrics = parser.getRawMetrics();
+			assertNotNull(rawMetrics);
+			assertTrue(rawMetrics.size() > 0);
+			
+			assertTrue(metrics.size() + rawMetrics.size() >= data.getMetrics().size());
 			
 			var roots = parser.getListRootMetrics();
 			assertNotNull(roots);

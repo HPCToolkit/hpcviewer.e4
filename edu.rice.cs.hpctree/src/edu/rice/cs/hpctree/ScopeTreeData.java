@@ -6,12 +6,11 @@ import java.util.List;
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.nebula.widgets.nattable.sort.SortDirectionEnum;
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
-import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
-import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
@@ -40,7 +39,7 @@ public class ScopeTreeData implements IScopeTreeData
 	 * @param root the root scope
 	 * @param metricManager the metric manager of the experiment or database
 	 */
-	public ScopeTreeData(RootScope root, IMetricManager metricManager, boolean noEmptyColumns) {
+	public ScopeTreeData(RootScope root, IMetricManager metricManager) {
 		this.listScopes = FastList.newList();
 		this.listScopes.add(root);
 		this.metricManager = metricManager;
@@ -48,10 +47,6 @@ public class ScopeTreeData implements IScopeTreeData
 		this.indexesNonEmptyMetrics = metricManager.getNonEmptyMetricIDs(root);
 		
 		clear();
-	}
-	
-	public ScopeTreeData(RootScope root, IMetricManager metricManager) {
-		this(root, metricManager, true);
 	}
 	
 	
@@ -94,7 +89,7 @@ public class ScopeTreeData implements IScopeTreeData
 	public void clear() {
 		this.sortDirection = SortDirectionEnum.DESC;
 		this.sortedColumn  = 0;
-		if (this.indexesNonEmptyMetrics != null && this.indexesNonEmptyMetrics.size()>0)
+		if (this.indexesNonEmptyMetrics != null && !this.indexesNonEmptyMetrics.isEmpty())
 			this.sortedColumn = 1;
 		this.indexesNonEmptyMetrics = metricManager.getNonEmptyMetricIDs(root);
 	}
@@ -124,12 +119,19 @@ public class ScopeTreeData implements IScopeTreeData
 
 		ColumnComparator comparator = getComparator(columnIndex, this.sortDirection);
 		synchronized (listScopes) {
-			listScopes.sort(comparator);
+			try {
+				listScopes.sort(comparator);
+			} catch (IllegalArgumentException e) {
+				// error in sorting the column
+				LoggerFactory.getLogger(getClass()).error("column: " + columnIndex + ", direction: " + sortDirection, e);
+			}
 		}
 	}
 	
 	
 	protected ColumnComparator getComparator(int columnIndex, SortDirectionEnum sortDir) {
+		assert(sortDir != SortDirectionEnum.NONE);
+		
 		return new ColumnComparator(this, columnIndex, sortDir);
 	}
 	
@@ -205,8 +207,7 @@ public class ScopeTreeData implements IScopeTreeData
 
 	@Override
 	public Scope getDataAtIndex(int index) {
-		Scope scope = listScopes.get(index);
-		return scope;
+		return listScopes.get(index);
 	}
 
 	
@@ -244,20 +245,13 @@ public class ScopeTreeData implements IScopeTreeData
 		// should we throw an exception?		
 		int numChildren = scope.getSubscopeCount();
 		if (numChildren == 0)
-			return new ArrayList<Scope>(0);
+			return new ArrayList<>(0);
 		
 		// get the children from the original tree, and sort them
 		// based on the sorted column (either metric or tree column)
 		List<Scope> children = scope.getChildren();
 		final BaseMetric metric = sortedColumn == 0 ? null : getMetric(sortedColumn-1);
-		Comparator<Scope> comparator = new Comparator<Scope>() {
-
-			@Override
-			public int compare(Scope s1, Scope s2) {
-				return compareNodes(s1, s2, metric, sortDirection);
-			}
-		};
-		children.sort(comparator);
+		children.sort((s1, s2) -> compareNodes(s1, s2, metric, sortDirection));
 		
 		return children;
 	}
@@ -335,24 +329,24 @@ public class ScopeTreeData implements IScopeTreeData
 		public int compare(Scope o1, Scope o2) {
             int result = 0;
 			if (o1.getParentScope() != null && o2.getParentScope() != null) {
-				int d1 = this.treeData.getDepthOfData((Scope) o1);
-				int d2 = this.treeData.getDepthOfData((Scope) o2);
+				int d1 = this.treeData.getDepthOfData(o1);
+				int d2 = this.treeData.getDepthOfData(o2);
 				
 				if (d1 > d2) {
 					var ancestor1 = ScopeTreeData.getAncestor(o1, d1, d2);
-					result = ScopeTreeData.compareNodes((Scope) ancestor1, (Scope) o2, metric, dir);
+					result = ScopeTreeData.compareNodes(ancestor1, o2, metric, dir);
 					if (result == 0) {
 						return 1;
 					}
 				} else if (d1 < d2) {
 					var ancestor2 = ScopeTreeData.getAncestor(o2, d2, d1);
-					result = ScopeTreeData.compareNodes((Scope) o1, (Scope) ancestor2, metric, dir);
+					result = ScopeTreeData.compareNodes(o1, ancestor2, metric, dir);
 					if (result == 0) {
 						return -1;
 					}
 					
 				} else {
-					result = ScopeTreeData.compareNodes((Scope) o1, (Scope) o2, metric, dir);
+					result = ScopeTreeData.compareNodes(o1, o2, metric, dir);
 				}
 			}
 			return result;
@@ -425,6 +419,12 @@ public class ScopeTreeData implements IScopeTreeData
 			// let's try to compare with the hash code
 			if (result == 0) {
 				result = o1.getCCTIndex() - o2.getCCTIndex();
+			}
+			// if cct-id of o1 and cct-id of o2 are identical, it must be a bug
+			assert(result != 0);
+			if (result == 0) {
+				// Issue #267 this is to make sure o1 and o2 are NOT identical.
+				result = System.identityHashCode(o1) - System.identityHashCode(o2);
 			}
 		}
 		return factor * result;

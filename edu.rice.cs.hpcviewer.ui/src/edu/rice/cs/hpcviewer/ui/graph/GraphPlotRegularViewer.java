@@ -71,16 +71,14 @@ public class GraphPlotRegularViewer extends AbstractGraphPlotViewer
 	@Override
 	protected double[] getValuesY(Scope scope, BaseMetric metric) throws Exception {
 		
-		int id = metric.getIndex();
 		int size = 0;
 		
 		// in case of old database, the metric is from MetricRaw
 		if (metric instanceof MetricRaw) {
-			id = ((MetricRaw) metric).getRawID();
 			size = ((MetricRaw)metric).getSize();
 		}
 		IThreadDataCollection threadData = getInput().getThreadData();
-		return threadData.getMetrics(scope.getCCTIndex(), id, size);
+		return threadData.getMetrics(scope, metric, size);
 	}
 
 	@Override

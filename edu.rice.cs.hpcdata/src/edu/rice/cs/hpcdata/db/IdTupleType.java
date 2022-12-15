@@ -17,31 +17,32 @@ import java.util.Set;
  ***********************************/
 public class IdTupleType 
 {
-	public static enum Mode {LOGICAL, PHYSICAL};
+	public enum Mode {LOGICAL, PHYSICAL}
 	
-	public final static String PREFIX_GPU = "GPU";
+	public static final String PREFIX_GPU = "GPU";
 	
 	// use for backward compatibility
 	// we will convert old database process.thread format
 	// to id-tuples
 	
-	public final static byte KIND_SUMMARY = 0;
-	public final static byte KIND_NODE    = 1;
-	public final static byte KIND_RANK    = 2;
-	public final static byte KIND_THREAD  = 3;
-	public final static byte KIND_GPUDEVICE  = 4;
-	public final static byte KIND_GPUCONTEXT = 5;
-	public final static byte KIND_GPUSTREAM  = 6;
-	public final static byte KIND_CORE       = 7;
+	public static final byte KIND_SUMMARY = 0;
+	public static final byte KIND_NODE    = 1;
+	public static final byte KIND_RANK    = 2;
+	public static final byte KIND_THREAD  = 3;
+	public static final byte KIND_GPUDEVICE  = 4;
+	public static final byte KIND_GPUCONTEXT = 5;
+	public static final byte KIND_GPUSTREAM  = 6;
+	public static final byte KIND_CORE       = 7;
+	public static final byte KIND_MAX = 8;
 	
-	public final static String LABEL_SUMMARY    = "Summary";
-	public final static String LABEL_NODE       = "Node";
-	public final static String LABEL_RANK       = "Rank";
-	public final static String LABEL_THREAD     = "Thread";
-	public final static String LABEL_GPUDEVICE  = "GPUDevice";
-	public final static String LABEL_GPUCONTEXT = "GPUContext";
-	public final static String LABEL_GPUSTREAM  = "GPUStream";
-	public final static String LABEL_CORE		= "Core";
+	public static final String LABEL_SUMMARY    = "Summary";
+	public static final String LABEL_NODE       = "Node";
+	public static final String LABEL_RANK       = "Rank";
+	public static final String LABEL_THREAD     = "Thread";
+	public static final String LABEL_GPUDEVICE  = "GPUDevice";
+	public static final String LABEL_GPUCONTEXT = "GPUContext";
+	public static final String LABEL_GPUSTREAM  = "GPUStream";
+	public static final String LABEL_CORE		= "Core";
 	
 	// Constants copied from 
 	// https://github.com/HPCToolkit/hpctoolkit/blob/aa60b422e18f300a0d1ac4f5e365e98e37d45c8a/src/lib/prof-lean/id-tuple.h#L103-L110
@@ -49,34 +50,44 @@ public class IdTupleType
 	/**
 	 * BOTH_VALID: Both logical and physical IDs are presentable. For Viewer present logical ID by default and allow physical on request
 	 */
-	public final static int IDTUPLE_IDS_BOTH_VALID   = 0;
+	public static final int IDTUPLE_IDS_BOTH_VALID   = 0;
 	/**
 	 * LOGICAL_LOCAL: For Prof2: logical ID should be generated based on shared prefix. 
 	 * For Viewer present physical ID as if it was logical (and warn that something went wrong in Prof2).
 	 */
-	public final static int IDTUPLE_IDS_LOGIC_LOCAL  = 1;
+	public static final int IDTUPLE_IDS_LOGIC_LOCAL  = 1;
 	/**
 	 * LOGICAL_GLOBAL: For Prof2: logical ID should be generated based on single tuple. For Viewer same as LOGICAL_LOCAL.
 	 */
-	public final static int IDTUPLE_IDS_LOGIC_GLOBAL = 2;
+	public static final int IDTUPLE_IDS_LOGIC_GLOBAL = 2;
 	/**
 	 * LOGICAL_ONLY: Disregard physical ID, only logical ID is presentable. For Viewer present logical ID and never present physical
 	 */
-	public final static int IDTUPLE_IDS_LOGIC_ONLY   = 3;
+	public static final int IDTUPLE_IDS_LOGIC_ONLY   = 3;
 
 
 	private final Map<Byte, String> mapIdTuple = new HashMap<>();
 	
+	private static byte[] sortingOrder = new byte[] {2, 3, 4, 5, 6, 7, 1, 0};
 	
 	public void initDefaultTypes() {
-		mapIdTuple.put(KIND_SUMMARY,   LABEL_SUMMARY);
-		mapIdTuple.put(KIND_NODE,   LABEL_NODE);
-		mapIdTuple.put(KIND_RANK,   LABEL_RANK);
-		mapIdTuple.put(KIND_THREAD, LABEL_THREAD);
-		mapIdTuple.put(KIND_GPUDEVICE,   LABEL_GPUDEVICE);
+		mapIdTuple.put(KIND_SUMMARY,    LABEL_SUMMARY);
+		mapIdTuple.put(KIND_NODE,   	LABEL_NODE);
+		mapIdTuple.put(KIND_RANK,   	LABEL_RANK);
+		mapIdTuple.put(KIND_THREAD, 	LABEL_THREAD);
+		mapIdTuple.put(KIND_GPUDEVICE,  LABEL_GPUDEVICE);
 		mapIdTuple.put(KIND_GPUCONTEXT, LABEL_GPUCONTEXT);
-		mapIdTuple.put(KIND_GPUSTREAM,   LABEL_GPUSTREAM);
-		mapIdTuple.put(KIND_CORE, LABEL_CORE);
+		mapIdTuple.put(KIND_GPUSTREAM,  LABEL_GPUSTREAM);
+		mapIdTuple.put(KIND_CORE, 		LABEL_CORE);		
+	}
+	
+	
+	public static byte[] getSortingOrder() {
+		return sortingOrder;
+	}
+	
+	public static void setSortingOrder(byte []order) {
+		sortingOrder = order;
 	}
 	
 	/***

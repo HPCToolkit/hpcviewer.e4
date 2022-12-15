@@ -22,6 +22,7 @@ public class CombineAggregateMetricVarMap extends MetricVarMap {
 	 * Overloaded method: a callback to retrieve the value of a variable (or a metric)
 	 * If the variable is a normal variable, it will call the parent method.		
 	 */
+	@Override
 	public double getValue(String varName) {
 		assert(iCounter==0 || iCounter==1);
 		if (iCounter<0 || iCounter>1) {

@@ -78,7 +78,7 @@ clean_up() {
 
 distclean_up() {
 	clean_up
-	rm -f hpcviewer-* hpcdata-*
+	rm -f hpcviewer-* hpcdata-* prepare_sign*
 	cd edu.rice.cs.hpcdata.app/scripts/
 	./build.sh  distclean
 	cd ../..
@@ -129,6 +129,7 @@ case $key in
     ;;
     -r|--release)
     RELEASE="$2"
+    CREATE_PACKAGE=0
     shift # past argument
     shift # past value
     ;;

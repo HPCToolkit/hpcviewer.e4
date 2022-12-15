@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.events.DisposeEvent;
@@ -29,7 +30,6 @@ import edu.rice.cs.hpcfilter.FilterDataItem;
 import edu.rice.cs.hpcfilter.dialog.ThreadFilterDialog;
 import edu.rice.cs.hpctree.IScopeTreeData;
 import edu.rice.cs.hpctree.ScopeTreeData;
-import edu.rice.cs.hpctree.ScopeTreeTable;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.graph.GraphMenu;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractTableView;
@@ -86,13 +86,17 @@ public class TopDownPart extends AbstractTableView
 					mgr.removeAll();
 					mgr.createContextMenu(toolbar);
 					
-					ScopeTreeTable table = getTable();
+					var table = getTable();
 					Scope scope = table.getSelection();
 					IMetricManager metricManager = getMetricManager();
 					
 					// create the context menu of graphs
 					var data = getThreadDataCollection();
-					GraphMenu.createAdditionalContextMenu(getProfilePart(),  mgr, metricManager, data, scope);
+					try {
+						GraphMenu.createAdditionalContextMenu(getProfilePart(),  mgr, metricManager, data, scope);
+					} catch (Exception e1) {
+						MessageDialog.openError(e.display.getActiveShell(), "Error", e1.getMessage());
+					}
 					
 					// make the context menu appears next to tool item
 					final Menu menu = mgr.getMenu();
@@ -112,26 +116,23 @@ public class TopDownPart extends AbstractTableView
 
 	
 	private void showThreadView(Shell shell) {
-		String[] labels = null;
+
 		IThreadDataCollection dataCollector = getThreadDataCollection();
-		var idtuples = dataCollector.getIdTuples();			
-		labels = new String[idtuples.size()];
+
 		IdTupleType idtype;
 		if (getRoot().getExperiment() instanceof Experiment) {
 			idtype = ((Experiment)getRoot().getExperiment()).getIdTupleType();
 		} else {
 			idtype = IdTupleType.createTypeWithOldFormat();
 		}
-		
-		for(int i=0; i<idtuples.size(); i++) {
-			labels[i] = idtuples.get(i).toString(idtype);
-		}
+		var labels   = dataCollector.getIdTupleLabelWithoutGPU(idtype);
 		
 		List<FilterDataItem<String>> listItems = ThreadFilterDialog.filter(shell, "Select rank/thread to view", labels, null);
 		
-		if (listItems != null) {
+		if (listItems != null && !listItems.isEmpty()) {
 			List<IdTuple> selectedIdtuples = new ArrayList<>();
-			
+			var idtuples = dataCollector.getIdTupleListWithoutGPU(idtype);			
+
 			for(int i=0; i<listItems.size(); i++) {
 				if (listItems.get(i).checked) {
 					selectedIdtuples.add(idtuples.get(i));
@@ -150,21 +151,10 @@ public class TopDownPart extends AbstractTableView
 	@Override
 	protected void updateStatus() {
 		IThreadDataCollection dataCollector = getThreadDataCollection();
-		boolean enableItems = (dataCollector != null);
+		
+		// data collector can be null for old database (no metric-db files)
+		boolean enableItems = dataCollector != null && dataCollector.isAvailable();
 
-		if (enableItems) {			
-			try {
-				// do not enable the buttons if we have only 1 rank or thread
-				// there is no point to show a graph or a thread view for only 
-				// 1 thread or rank.
-				enableItems = dataCollector.getRankLabels().length > 1;
-				
-			} catch (IOException e) {
-				// file error. Should we display a message?
-				// usually it's been displayed before, and we don't want
-				// to show a message every time there's a I/O problem 
-			}
-		}
 		items[ITEM_THREAD].setEnabled(enableItems);
 		
 		Scope selectedScope = super.getTable().getSelection();

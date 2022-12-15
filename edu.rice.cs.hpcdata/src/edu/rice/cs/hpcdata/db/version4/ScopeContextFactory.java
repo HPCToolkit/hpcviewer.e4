@@ -13,6 +13,7 @@ import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoadModuleScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoopScope;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
+import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope.ProcedureType;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.UnknownScope;
@@ -39,7 +40,6 @@ public class ScopeContextFactory
 	 * This context's parent used a typical function call to reach this context. 
 	 * The parent context is the source-level location of the call.
 	 */
-	@SuppressWarnings("unused")
 	private static final int FMT_METADB_RELATION_CALL 		  = 1;
 	
 	/**
@@ -212,7 +212,7 @@ public class ScopeContextFactory
 		case FMT_METADB_LEXTYPE_INSTRUCTION:
 			var instName = InstructionScope.getCanonicalName(lm, offset);
 			var procFlatId = ++flatID;
-			ProcedureScope procScope = new ProcedureScope(rootCCT, lm, lm.getSourceFile(), 0, 0, instName, false, sc.ctxId, procFlatId, null, ProcedureScope.FEATURE_PROCEDURE);
+			ProcedureScope procScope = new ProcedureScope(rootCCT, lm, lm.getSourceFile(), 0, 0, instName, ProcedureType.REGULAR, sc.ctxId, procFlatId, null, ProcedureScope.FEATURE_PROCEDURE);
 			sc.newScope = new InstructionScope(rootCCT, lm, procScope, offset, sc.ctxId, flatId);
 			sc.newScope.setSourceFile(fs);
 			break;
@@ -350,7 +350,11 @@ public class ScopeContextFactory
 		LineScope ls;
 		
 		if (parent instanceof LineScope) {
-			ls = (LineScope)parent;
+			// fix issue #268 (incorrect file in the call site)
+			// Careful: during the scope reassignment, we'll dispose the line scopes
+			// including to reset the file source. We have to duplicate the line scope
+			// here to avoid disposing the object later.
+			ls = (LineScope)parent.duplicate();
 		} else {
 			ls = new LineScope(rootCCT, ps.getSourceFile(), line, ctxId, flatId);
 		}
@@ -364,7 +368,7 @@ public class ScopeContextFactory
 									  line, 
 									  line, 
 									  ps.getName(), 
-									  alien, 
+									  ProcedureType.INLINE_MACRO, 
 									  ctxId, 
 									  ps.getFlatIndex(), 
 									  null, 
@@ -379,13 +383,13 @@ public class ScopeContextFactory
 										   ps.getFirstLineNumber(), 
 										   ps.getLastLineNumber(), 
 										   ps.getName(), 
-										   true, 
+										   ProcedureType.INLINE_FUNCTION, 
 										   ctxId, 
 										   ps.getFlatIndex(), 
 										   null, 
 										   ProcedureScope.FEATURE_PROCEDURE);
 		}
-		ps.setAlien(alien);
+
 		var cs = new CallSiteScope(ls, procScope, CallSiteScopeType.CALL_TO_PROCEDURE, ctxId, flatId);
 		cs.setRootScope(rootCCT);
 		

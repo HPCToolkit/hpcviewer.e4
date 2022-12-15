@@ -2,7 +2,7 @@ package edu.rice.cs.hpctree.action;
 
 import java.util.Stack;
 
-import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
+import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpctree.FlatScopeTreeData;
 import edu.rice.cs.hpctree.IScopeTreeAction;
@@ -10,7 +10,7 @@ import edu.rice.cs.hpctree.action.IUndoableActionManager.IUndoableActionListener
 
 public class FlatAction implements IUndoableActionListener
 {
-	private final static String CONTEXT = "Flat";
+	private static final String CONTEXT = "Flat";
 	
 	private final IUndoableActionManager actionManager;
 	private IScopeTreeAction treeAction;
@@ -49,20 +49,23 @@ public class FlatAction implements IUndoableActionListener
 		boolean updateTable = false;
 
 		// create the list of flattened node
-		for (int i=0;i<root.getSubscopeCount();i++) {
-			Scope node =  (Scope) root.getSubscope(i);
-			if(node.getSubscopeCount()>0) {
+		for (var node: root.getChildren()) {
+			boolean addSelf = true;
+			
+			if(node.hasChildren()) {
 				
 				// this node has children, add the children
 				for (var child: node.getChildren()) {
-					if (!(child instanceof CallSiteScope)) {
-						addNode(objFlattenedNode, child);
-					}
+					addNode(objFlattenedNode, child);
+					addSelf = false;
 				}
 				// we only update the table if there are one or more grand child nodes
 				// move to one level up.
 				updateTable = true;
-			} else {
+			} else if (node instanceof ProcedureScope) {
+				addSelf = false;
+			}
+			if (addSelf){
 				// no children: add the node itself !
 				addNode(objFlattenedNode, node);
 			}
@@ -88,22 +91,6 @@ public class FlatAction implements IUndoableActionListener
 	
 	private void addNode(Scope parent, Scope child) {
 		parent.addSubscope(child);
-		/*
-		Scope copyChild = child.duplicate();
-		child.copyMetrics(copyChild, 0);
-		
-		if (parent instanceof RootScope)
-			copyChild.setRootScope((RootScope)parent);
-		else 
-			copyChild.setRootScope(parent.getRootScope());
-		
-		copyChild.setParentScope(parent);
-		
-		List<TreeNode> children = child.getChildren();
-		copyChild.setChildren(children);
-		
-		parent.addSubscope(copyChild);
-		*/
 	}
 	
 	
@@ -135,7 +122,9 @@ public class FlatAction implements IUndoableActionListener
 	
 	public boolean canFlatten() {
 		Scope root = treeAction.getRoot();
-		return root.hasChildren();
+		var children = root.getChildren();
+		var hasGrandChildren = children.stream().filter(Scope::hasChildren).findAny();
+		return hasGrandChildren.isPresent();
 	}
 	
 	

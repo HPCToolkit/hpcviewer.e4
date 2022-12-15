@@ -697,7 +697,7 @@ public class DatabaseCollection
 			// if we elide some nodes, we should notify the user
 			FilterMap filterMap = FilterMap.getInstance();
 			if (filterMap.isFilterEnabled()) {
-				int numFilteredNodes = experiment.filter(filterMap);
+				int numFilteredNodes = experiment.filter(filterMap, false);
 				if (numFilteredNodes > 0) {
 					message = showFilterMessage(shell, numFilteredNodes);
 				}

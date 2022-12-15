@@ -52,19 +52,17 @@ public class MetricValueCollectionWithStorage implements IMetricValueCollection
 	public MetricValue getValue(Scope scope, BaseMetric metric) {
 		MetricValue mv = values.get(metric.getIndex());
 		
-		if (mv == null) {
-			// the cache of metric values already exist, but we cannot find the value of this metric
-			// either the value is empty, or it's a derived metric which have to be computed here
-			
-			if (metric instanceof DerivedMetric)
-			{
-				mv = ((DerivedMetric)metric).getValue(scope);
-			} else {
-				mv = MetricValue.NONE;
-			}
-			values.put(metric.getIndex(), mv);
-		}		
-		return mv;
+		if (mv != null)
+			return mv;
+		
+		// the cache of metric values already exist, but we cannot find the value of this metric
+		// either the value is empty, or it's a derived metric which have to be computed here
+		
+		if (metric instanceof DerivedMetric)
+		{
+			return ((DerivedMetric)metric).getValue(scope);
+		}
+		return MetricValue.NONE;
 	}
 
 
@@ -98,7 +96,7 @@ public class MetricValueCollectionWithStorage implements IMetricValueCollection
 	public void appendMetrics(IMetricValueCollection mvCollection, int offset) {
 		IntObjectMap<MetricValue> source = mvCollection.getValues();
 		if (values == null) {
-			values = new IntObjectHashMap<>(source.size()); //new HashMap<Integer, MetricValue>(source.size());
+			values = new IntObjectHashMap<>();
 		}
 		// tricky part: append the metric values and shift the index by an offset
 		

@@ -29,6 +29,8 @@ import edu.rice.cs.hpcdata.experiment.metric.AggregateMetric;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
+import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetricDerivedFormula;
+import edu.rice.cs.hpcdata.experiment.metric.ICombinableMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricValueCollection;
 import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
@@ -40,17 +42,15 @@ import edu.rice.cs.hpcdata.experiment.source.SourceFile;
 
 
 
-//////////////////////////////////////////////////////////////////////////
-//	CLASS SCOPE							//
-//////////////////////////////////////////////////////////////////////////
-
-/**
+/**************************************************************************
  *
- * A scope in an HPCView experiment.
+ * A scope in an HPCViewer experiment.
  *
+ * 
  * it's kind of irritating to have the two things be distinct and having
  * objects which point at each other makes me a little uneasy.
- */
+ * 
+ ***************************************************************************/
 
 
 public abstract class Scope 
@@ -58,13 +58,13 @@ implements IMetricScope
 {
 
 	//////////////////////////////////////////////////////////////////////////
-	//PROTECTED CONSTANTS						//
+	// PROTECTED CONSTANTS						//
 	//////////////////////////////////////////////////////////////////////////
 
 	protected static int id = Integer.MAX_VALUE;
 
 	//////////////////////////////////////////////////////////////////////////
-	//PUBLIC CONSTANTS						//
+	// PUBLIC CONSTANTS						//
 	//////////////////////////////////////////////////////////////////////////
 
 
@@ -110,7 +110,7 @@ implements IMetricScope
 	
 	private int relation;
 
-	protected ITreeNode<Scope> node;
+	protected final ITreeNode<Scope> node;
 
 
 	//////////////////////////////////////////////////////////////////////////
@@ -178,36 +178,6 @@ implements IMetricScope
 	 */
 	public int getCCTIndex() {
 		return (int) node.getValue();
-	}
-
-	/***
-	 * Set new index for this scope. cct index is usually constant,
-	 * but in case needed, it can be modified.
-	 * <br>
-	 * Use it on your own risk.
-	 * 
-	 * @param index
-	 * 			The new index
-	 */
-	public void setCCTIndex(int index) {
-		node.setValue(index);
-	}
-
-	/***
-	 * Make this scope as a virtual root to be displayed on the table.
-	 * 
-	 * @return new root which is the duplicate of this scope.
-	 */
-	public Scope createRoot() {
-		Scope newRoot = duplicate();
-		newRoot.setParentScope(getParentScope());
-		newRoot.addSubscope(this);
-		if (newRoot instanceof CallSiteScopeCallerView) {
-			((CallSiteScopeCallerView)newRoot).markScopeHasChildren();
-		}
-		copyMetrics(newRoot, 0);
-
-		return newRoot;
 	}
 
 
@@ -297,17 +267,6 @@ implements IMetricScope
 		this.cpid = cpid;
 	}
 
-	/*************************************************************************
-	 *	Returns the tool tip for this scope.
-	 ************************************************************************/
-
-	public String getToolTip()
-	{
-		return this.getSourceCitation();
-	}
-
-
-
 
 	/*************************************************************************
 	 *	Converts the scope to a <code>String</code>.
@@ -325,22 +284,6 @@ implements IMetricScope
 	}
 
 	
-	public static int getLexicalType(Scope scope) {
-		String type = scope.getClass().getSimpleName().substring(0, 2);
-		return type.hashCode();
-	}
-
-	public static int generateFlatID(int lexicalType, int lmId, int fileId, int procId, int line) {
-		// linearize the flat id. This is not sufficient and causes collisions for large and complex source code
-		// This needs to be computed more reliably.
-		return lexicalType << 28 |
-					 lmId        << 24 |
-					 fileId      << 16 | 
-					 procId      << 8  | 
-					 line;
-	}
-
-
 	/*************************************************************************
 	 *	Returns a display string describing the scope's source code location.
 	 ************************************************************************/
@@ -508,8 +451,6 @@ implements IMetricScope
 	}
 
 
-
-
 	/*************************************************************************
 	 *	Returns the number of subscopes within this scope.
 	 ************************************************************************/
@@ -518,8 +459,6 @@ implements IMetricScope
 	{
 		return node.getChildCount();
 	}
-
-
 
 
 	/*************************************************************************
@@ -542,10 +481,11 @@ implements IMetricScope
 	}
 
 
-
-	//////////////////////////////////////////////////////////////////////////
-	// EXPERIMENT DATABASE 													//
-	//////////////////////////////////////////////////////////////////////////
+	/*****
+	 * Retrieve the database associated with this scope
+	 * 
+	 * @return
+	 */
 	public IExperiment getExperiment() {
 		return root.getExperiment();
 	}
@@ -566,8 +506,10 @@ implements IMetricScope
 
 	/****
 	 * get the root scope of this scope
-	 * @return
+	 * 
+	 * @return RootScope
 	 */
+	@Override
 	public RootScope getRootScope()
 	{
 		return root;
@@ -606,13 +548,19 @@ implements IMetricScope
 
 	public MetricValue getMetricValue(BaseMetric metric)
 	{
-		ensureMetricStorage();
+		// special case for raw metric and any metrics with formula: 
+		// we need to grab the value from the metric directly.
+		// There is no caching here.
+		// 
+		// for other metrics, we may have cached the value
 		
-		// special case for raw metric: we need to grab the value
-		// from the metric directly. No caching here.
-		
-		if (metric instanceof MetricRaw || metric instanceof AggregateMetric)
+		if (metric instanceof MetricRaw || 
+			metric instanceof AggregateMetric ||
+			metric instanceof HierarchicalMetricDerivedFormula)
+			
 			return metric.getValue(this);
+		
+		ensureMetricStorage();
 		
 		return metrics.getValue(this, metric);
 	}
@@ -620,7 +568,7 @@ implements IMetricScope
 
 	/***************************************************************************
   	 * <p>
-  	 * This method returns the cached raw metric value.
+  	 * This method returns directly the cached raw metric value.
   	 * Unlike {@link getMetricValue(BaseMetric)}, it doesn't trigger calculation
   	 * of final metric value.
   	 * </p>
@@ -632,7 +580,7 @@ implements IMetricScope
   	 * 			The metric value. If the index has no value, it returns {@code MetricValue.NONE}
 	 ***************************************************************************/
 
-	public MetricValue getMetricValue(int index)
+	public MetricValue getDirectMetricValue(int index)
 	{
 		ensureMetricStorage();
 		return metrics.getValue(this, index);
@@ -728,18 +676,19 @@ implements IMetricScope
 		var metricDescs = experiment.getMetrics();
 		
 		for (var m: metricDescs) {
-			if (!(m instanceof HierarchicalMetric))
-				continue;
-			
-			if (m.getMetricType() != type)
-				continue;
-			
-			HierarchicalMetric hm = (HierarchicalMetric) m;
-			MetricValue mv = hm.reduce(getMetricValue(m), scope.getMetricValue(m));
-			setMetricValue(m.getIndex(), mv);
+			if (m instanceof HierarchicalMetric) {
+				
+				if (m.getMetricType() != type)
+					continue;
+				
+				HierarchicalMetric hm = (HierarchicalMetric) m;
+				MetricValue mv = hm.reduce(getMetricValue(m), scope.getMetricValue(m));
+				setMetricValue(m.getIndex(), mv);
+			}
 		}
 	}
 
+	
 	/***************************************************************************
 	 * retrieve the default metrics
 	 * @return
@@ -751,6 +700,7 @@ implements IMetricScope
 		return this.metrics;
 	}
 
+	
 	/***************************************************************************
 	 * set the default metrics
 	 * @param values
@@ -758,7 +708,6 @@ implements IMetricScope
 	public void setMetricValues(IMetricValueCollection values) {	
 		this.metrics = values;
 	}
-
 
 
 	/**************************************************************************
@@ -774,13 +723,13 @@ implements IMetricScope
 
 		for (var metric: list) {
 
-			if (metric instanceof AggregateMetric) {
+			if (metric instanceof ICombinableMetric) {
 				//--------------------------------------------------------------------
 				// aggregate metric need special treatment when combining two metrics
 				//--------------------------------------------------------------------
-				AggregateMetric aggMetric = (AggregateMetric) metric;
 				if (filter.doPropagation(source, this, metric.getIndex(), metric.getIndex())) {
-					aggMetric.combine(source, this);
+					ICombinableMetric combinableMetric = (ICombinableMetric) metric;
+					combinableMetric.combine(this, source);
 				}
 			} else {
 				this.accumulateMetric(source, metric, filter);
@@ -800,9 +749,10 @@ implements IMetricScope
 	 **********************************************************************************/
 	public void safeCombine(Scope source, MetricValuePropagationFilter filter) {
 		ensureMetricStorage();
-		this.combine(source, filter);
+		combine(source, filter);
 	}
 
+	
 	/*************************************************************************
 	 *	Makes sure that the scope object has storage for its metric values.
 	 ************************************************************************/
@@ -888,6 +838,10 @@ implements IMetricScope
 	}
 
 
+	//////////////////////////////////////////////////////////////////////////
+	// Support for resource disposal
+	//////////////////////////////////////////////////////////////////////////
+
 	/***
 	 * Free all allocated object variables so that
 	 * JVM can free the resources.
@@ -906,8 +860,11 @@ implements IMetricScope
 			return;
 		
 		root 		= null;
-		metrics 	= null;
 		sourceFile  = null;
+		if (metrics != null) {
+			metrics.dispose();
+			metrics = null;
+		}
 		
 		if (listScopeReduce != null)
 			listScopeReduce.clear();
@@ -937,19 +894,24 @@ implements IMetricScope
 			return;
 		}
 		
-		ListIterator<Scope> list = getChildren().listIterator();
-		if (list == null)
+		ListIterator<Scope> childIterator = getChildren().listIterator();
+		if (childIterator == null)
 			return;
 		
-		while(list.hasNext()) {
-			var child = list.next();
+		while(childIterator.hasNext()) {
+			var child = childIterator.next();
 			
 			child.disposeSelfAndChildren();
 			
-			list.remove();
+			childIterator.remove();
 		}
 		dispose();
 	}
+
+	
+	//////////////////////////////////////////////////////////////////////////
+	// Support access to children
+	//////////////////////////////////////////////////////////////////////////
 
 	/****
 	 * Retrieve the list of all children.
@@ -974,6 +936,10 @@ implements IMetricScope
 	}
 
 
+	//////////////////////////////////////////////////////////////////////////
+	// support for relation
+	//////////////////////////////////////////////////////////////////////////
+
 	public int getRelation() {
 		return relation;
 	}
@@ -984,6 +950,10 @@ implements IMetricScope
 	}
 	
 	
+	//////////////////////////////////////////////////////////////////////////
+	// misc
+	//////////////////////////////////////////////////////////////////////////
+
 	/***
 	 * Return true of this scope represents an idle state (no activity)
 	 * @return

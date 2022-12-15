@@ -58,7 +58,7 @@ public class FilterTest
 				for(var text: filterText) {
 					IFilterData filterData = new FilterData(text, attr) ;
 					
-					int numScopes = exp.filter(filterData);
+					int numScopes = exp.filter(filterData, true);
 					assertTrue(numScopes >= 0);
 					
 					var roots = exp.getRootScopeChildren();

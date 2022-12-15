@@ -61,7 +61,11 @@ public LineScope(RootScope root, SourceFile sourceFile, int lineNumber, int cct_
 public String getName()
 {
 	if (this.sourceFile==null) {
-		return "unknown file:" + this.lastLineNumber;
+		// fix issue with tooltip: need to add 1 to the line number to
+		// match with the call site label (added 1 in CallSiteArrowPainter class).
+		// In the future we need to deal whether the line number is based on zero or one.
+		// otherwise we keep adding one everywhere.
+		return "unknown file:" + (1+this.lastLineNumber);
 	}
 	return this.getSourceCitation();
 }
@@ -110,19 +114,18 @@ public int getLineNumber()
  ************************************************************************/
 
 public Scope duplicate() {
-	LineScope duplicatedScope = 
-		new LineScope(this.root, 
-				this.sourceFile, 
-				this.firstLineNumber,
-				getCCTIndex(), this.flat_node_index);
-
-	return duplicatedScope;
+	return new LineScope(this.root, 
+						 this.sourceFile, 
+						 this.firstLineNumber,
+						 getCCTIndex(), 
+						 this.flat_node_index);
 }
 
 //////////////////////////////////////////////////////////////////////////
 //support for visitors													//
 //////////////////////////////////////////////////////////////////////////
 
+@Override
 public void accept(IScopeVisitor visitor, ScopeVisitType vt) {
 	visitor.visit(this, vt);
 }

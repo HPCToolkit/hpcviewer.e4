@@ -10,6 +10,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.collections.api.map.primitive.LongObjectMap;
 import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
@@ -21,14 +22,18 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.ExperimentConfiguration;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.HierarchicalMetric;
+import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
+import edu.rice.cs.hpcdata.experiment.metric.PropagationScope;
 import edu.rice.cs.hpcdata.experiment.scope.EntryScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoadModuleScope;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope.ProcedureType;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.CallingContextReassignment;
 import edu.rice.cs.hpcdata.experiment.source.FileSystemSourceFile;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
@@ -89,6 +94,7 @@ public class DataMeta extends DataCommon
 	
 	private StringArea stringArea;
 	private List<BaseMetric> metrics;
+	private List<BaseMetric>  rawMetrics;
 
 	private DataSummary dataSummary;
 	private IExperiment experiment;
@@ -146,6 +152,9 @@ public class DataMeta extends DataCommon
 		// if a line scope has a call site, move it to be the sibling
 		CallingContextReassignment ccr = new CallingContextReassignment();
 		rootCCT.dfsVisitScopeTree(ccr);
+		
+		// Fix for issue #245 and #248: remove unneeded scopes
+		ccr.postProcess();
 
 		exp.setRootScope(root);
 		exp.setVersion(versionMajor + "." + versionMinor);
@@ -252,6 +261,18 @@ public class DataMeta extends DataCommon
 	}
 		
 
+	/**
+	 * @return the rawMerics
+	 */
+	public List<BaseMetric> getRawMerics() {
+		return rawMetrics;
+	}
+
+	/***
+	 * Return the access to profile.db
+	 * 
+	 * @return
+	 */
 	public DataSummary getDataSummary() {
 		return dataSummary;
 	}
@@ -446,7 +467,7 @@ public class DataMeta extends DataCommon
 		var metricDesc = new ArrayList<BaseMetric>(nMetrics);
 		int position = (int) (pMetrics - section.offset);
 		
-		LongObjectHashMap<PropagationIndex> mapPropagationIndex = new LongObjectHashMap<>(nScopes);
+		LongObjectHashMap<PropagationScope> mapPropagationIndex = new LongObjectHashMap<>(nScopes);
 
 		// --------------------------------------
 		// Propagation Scope (PS)
@@ -462,15 +483,17 @@ public class DataMeta extends DataCommon
 			long pScopeName   = buffer.getLong(basePosition);
 			int scopePosition = (int) (pScopeName - section.offset);
 
-			PropagationIndex pi = new PropagationIndex();
-
-			pi.scopeType = buffer.get(basePosition + 0x08);
-			pi.propIndex = buffer.get(basePosition + 0x09);			
-			pi.scopeName = getNullTerminatedString(buffer, scopePosition);
+			var scopeType = buffer.get(basePosition + 0x08);
+			var propIndex = buffer.get(basePosition + 0x09);			
+			var scopeName = getNullTerminatedString(buffer, scopePosition);
+			
+			var ps = new PropagationScope(scopeName, scopeType, propIndex);
 			
 			long pScope  = pScopes + (i * szScope);
-			mapPropagationIndex.put(pScope, pi);
+			mapPropagationIndex.put(pScope, ps);
 		}
+		
+		rawMetrics = new ArrayList<>(nMetrics);
 		
 		// --------------------------------------
 		// Gathering the descriptions of performance metrics
@@ -491,8 +514,11 @@ public class DataMeta extends DataCommon
 			var nSummaries  = buffer.getShort(metricLocation + 0x1a);
 			
 			int scopesPosition = (int) (pScopeInsts - section.offset);			
-			short []propMetricId = new short[nScopeInsts];
 
+			int strPosition = (int) (pName - section.offset);
+			String metricName = getNullTerminatedString(buffer, strPosition);
+			var mapPScopeToMetricRaw = new LongObjectHashMap<MetricRaw>(nScopeInsts);
+			
 			// --------------------------------------
 			// Instantiated propagated sub-metrics (PSI)
 			// --------------------------------------
@@ -501,11 +527,46 @@ public class DataMeta extends DataCommon
 			
 			for (int j=0; j<nScopeInsts; j++) {
 				int basePosition = scopesPosition + (j * szScope);
-				propMetricId[j]  = buffer.getShort(basePosition + 0x08);
+				var pScope = buffer.getLong(basePosition + 0x00);
+				var propMetricId = buffer.getShort(basePosition + 0x08);
+				
+				var ps = mapPropagationIndex.get(pScope);
+				
+				// hack - hack - hack
+				// we want to store the raw metrics for inclusive (execution scope) and exclusive (lex_aware)
+				if (ps.getType() == PropagationScope.TYPE_EXECUTION ||
+					ps.getType() == PropagationScope.TYPE_CUSTOM) {
+					
+					var displayedName = metricName + " " + ps.getMetricTypeSuffix();
+					MetricRaw metric = new MetricRaw(propMetricId, displayedName, metricName, null, propMetricId, -1, ps.getMetricType(), nMetrics);
+					
+					rawMetrics.add(metric);
+					mapPScopeToMetricRaw.put(pScope, metric);					
+				}
 			}
-			int strPosition = (int) (pName - section.offset);
-			String metricName = getNullTerminatedString(buffer, strPosition);
-			int []metricIndexesPerScope = new int[nScopes];
+
+			// reset the partner
+			for(var rm: rawMetrics) {
+				if (rm.getMetricType() == MetricType.LEXICAL_AWARE) {
+					var l = rawMetrics.stream()
+							  		   .filter(m -> m.getDescription().equals(rm.getDescription()) && 
+									  	            m.getMetricType() == MetricType.INCLUSIVE)
+							  		   .collect(Collectors.toList());
+					if (l.size() == 1) {
+						var partner = l.get(0);
+						
+						// set partner based on index
+						rm.setPartner(partner.getIndex());
+						partner.setPartner(rm.getIndex());
+						
+						// set partner based on metric
+						((MetricRaw) rm).setMetricPartner((MetricRaw) partner);
+						((MetricRaw) partner).setMetricPartner((MetricRaw) rm);
+					}
+				}
+			}
+			
+			List<HierarchicalMetric> listInclusiveMetrics = new ArrayList<>(nSummaries);
 			
 			int baseSummariesLocation = (int) (pSummaries - section.offset);
 					
@@ -524,29 +585,30 @@ public class DataMeta extends DataCommon
 				long pFormula  = buffer.getLong(summaryLoc + 0x08);
 				byte combine   = buffer.get(summaryLoc + 0x10);
 				short statMetric = buffer.getShort(summaryLoc + 0x12);
-										
+				
 				var strFormula = getNullTerminatedString(buffer, (int) (pFormula-section.offset));
+				HierarchicalMetric metric;
 				
-				var m = new HierarchicalMetric(dataSummary, statMetric, metricName);
-				m.setFormula(strFormula);
-				m.setCombineType(combine);
-				m.setDescription(metricName);
-				m.setOrder(statMetric);
-				m.setIndex(propMetricId[k]);
+				metric = new HierarchicalMetric(dataSummary, statMetric, metricName, strFormula);
+
+				metric.setCombineType(combine);
+				metric.setIndex(statMetric);
 				
-				// temporary quick fix: every metric is percent annotated
-				// this should be fixed when we parse metrics.yaml
-				m.setAnnotationType(BaseMetric.AnnotationType.PERCENT);
+				// the annotation type is unknown until we parse the yaml file
+				metric.setAnnotationType(AnnotationType.PERCENT);
+								
+				metric.setDescription(metricName);
+				metric.setOrder(statMetric);
 				
 				var pi = mapPropagationIndex.get(pScope);
-				MetricType type = MetricType.convertFromPropagationScope(pi.scopeType);
-				m.setMetricType(type);									
+				metric.setPropagationScope(pi);
 
 				// store the index of this scope.
 				// we need this to propagate the partner index
-				metricIndexesPerScope[k] = metricDesc.size();
+				if ( pi.getType() == PropagationScope.TYPE_EXECUTION )
+					listInclusiveMetrics.add(metric);
 				
-				metricDesc.add(m);
+				metricDesc.add(metric);
 			}
 			
 			// Re-assign the partner index:
@@ -554,28 +616,48 @@ public class DataMeta extends DataCommon
 			// (in the future can be more than that)
 			// If a metric is exclusive, then its partner is the inclusive one.
 			// This ugly nested loop tries to find the partner of each metric in this scope.
-			for (int j=0; j<nScopes; j++) {
-				int idx = metricIndexesPerScope[j];
-				BaseMetric m1 =  metricDesc.get(idx);
+			for (var m1: listInclusiveMetrics) {
 				
-				for (int k=0; k<nScopes; k++) {
-					if (k == j) 
-						continue;
-					
-					int idx2 = metricIndexesPerScope[k];
-					BaseMetric m2 = metricDesc.get(idx2);
-					if (m2.getMetricType() != m1.getMetricType()) {
-						// the type of m2 is different than m1
-						// theoretically m2 is the partner of m1. and vice versa
-						m2.setPartner(m1.getIndex());
+				// find the partner of this inclusive metric.
+				// the partner should be a lex_aware propagation scope (custom type)
+				var partners = metricDesc.stream()
+						  .filter( m -> m instanceof HierarchicalMetric &&
+								  ((HierarchicalMetric)m).getFormula().compareToIgnoreCase(m1.getFormula()) == 0 &&
+								  ((HierarchicalMetric)m).getOriginalName().equals(m1.getOriginalName()) &&
+								  ((HierarchicalMetric)m).getPropagationScope().getType() == PropagationScope.TYPE_CUSTOM &&
+								  ((HierarchicalMetric)m).getCombineType() == m1.getCombineType())
+						  .collect(Collectors.toList());
+				
+				if (partners.size() > 1)
+					throw new IllegalStateException("Too many partners for " + m1.getDisplayName());
+
+				if (!partners.isEmpty()) {
+					var m2 = partners.get(0);
+
+					m2.setPartner(m1.getIndex());
+					m1.setPartner(m2.getIndex());
+				}
+				// now set the partner for exclusive type with function propagation scope
+				// At the moment this scope shouldn't appear in the metric list, but in can be
+				// visible in the future
+				partners = metricDesc.stream()
+						  .filter( m -> m instanceof HierarchicalMetric &&
+								  ((HierarchicalMetric)m).getFormula().compareToIgnoreCase(m1.getFormula()) == 0 &&
+								  ((HierarchicalMetric)m).getOriginalName().equals(m1.getOriginalName()) &&
+								  ((HierarchicalMetric)m).getPropagationScope().getType() == PropagationScope.TYPE_TRANSITIVE &&
+								  ((HierarchicalMetric)m).getCombineType() == m1.getCombineType())
+						  .collect(Collectors.toList());
+				
+				if (partners.size() == 1) {
+					var m2 = partners.get(0);
+					m2.setPartner(m1.getIndex());
+					if (m1.getPartner() < 0)
 						m1.setPartner(m2.getIndex());
-					}
 				}
 			}
 		}
 		return metricDesc;
 	}
-	
 	
 	
 	/***
@@ -722,7 +804,7 @@ public class DataMeta extends DataCommon
 			final int feature = ProcedureScope.FEATURE_PROCEDURE;
 			
 			long key = pFunctions + (i * szFunctions);
-			ProcedureScope ps = new ProcedureScope(rootCCT, lms, file, line, line, name, false, position, i+baseId, null, feature);			
+			ProcedureScope ps = new ProcedureScope(rootCCT, lms, file, line, line, name, ProcedureType.REGULAR, position, i+baseId, null, feature);			
 			mapFunctions.put(key, ps);
 		}
 		return mapFunctions;
@@ -911,13 +993,6 @@ public class DataMeta extends DataCommon
 	}
 	
 
-	private static class PropagationIndex 
-	{
-		String scopeName;
-		byte scopeType;
-		byte propIndex;
-	}
-	
 	/*******************
 	 * 
 	 * Class to retrieve a string from the string section in meta.db

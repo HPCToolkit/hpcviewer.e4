@@ -85,44 +85,11 @@ implements IMetricManager, ListEventListener<BaseMetric>
 		}
 		metrics.addListEventListener(this);
 	}
-
-	
-	@Override
-	public BaseMetric getCorrespondentMetricRaw(BaseMetric metric) {
-		// for sparse database (meta.db), the metrics are hierarchical metrics.
-		// Since they don't separate between normal metrics and metric-db,
-		// it is safe to return their own normal metric as the raw metric.
-		//
-		if (metric instanceof HierarchicalMetric)
-			return metric;
-		
-		// for old database that separate between metric-db and normal metrics,
-		// we don't have the connection between them. The only way to know
-		// a raw metric from a normal one is by looking at the label.
-		// If they share the same basic name, it should be the same metric.
-		// For instance:
-		// in normal metric: "cycles:Sum (I)"
-		// in metric-db:     "cycles (I)"
-		//
-		var rawMetrics = getRawMetrics();
-		BaseMetric correspondentRawMetric = null;
-
-		var metricName = metric.getDisplayName();
-		var metricBaseName = metricName.replace(":Sum", "");
-		
-		for(var rm: rawMetrics) {
-			if (rm.getDisplayName().equals(metricBaseName)) {
-				correspondentRawMetric = rm;
-				break;
-			}
-		}
-		return correspondentRawMetric;
-	}
 	
 	
 	private void copyMetric(Scope target, Scope source, int src_i, int targ_i, MetricValuePropagationFilter filter) {
 		if (filter.doPropagation(source, target, src_i, targ_i)) {
-			MetricValue mv = source.getMetricValue(src_i);
+			MetricValue mv = source.getDirectMetricValue(src_i);
 			if (mv != MetricValue.NONE && Float.compare(MetricValue.getValue(mv), 0.0f)!=0) {
 				target.setMetricValue(targ_i, mv);
 			}
@@ -139,11 +106,10 @@ implements IMetricManager, ListEventListener<BaseMetric>
 				if (metric.getMetricType() == sourceType) {
 					// get the partner index (if the metric exclusive, its partner is inclusive)
 					
-					int partner 			 = metric.getPartner(); 	 // get the partner ID
-					BaseMetric partnerMetric = getMetric(partner);   // get the partner metric
-					int partnerIndex		 = partnerMetric.getIndex(); // get the index of partner metric
-					
-					copyMetric(scope, scope, metric.getIndex(), partnerIndex, filter);
+					int partner = metric.getPartner(); 	 // get the partner ID
+					if (partner >= 0) {
+						copyMetric(scope, scope, metric.getIndex(), partner, filter);
+					}
 				}
 			} else if (metric instanceof AggregateMetric) {
 				if (metric.getMetricType() == MetricType.EXCLUSIVE ) {
@@ -153,7 +119,7 @@ implements IMetricManager, ListEventListener<BaseMetric>
 
 					// case for old database: no partner information
 					if (partner_metric != null) {
-						MetricValue partner_value = scope.getMetricValue( partner );
+						MetricValue partner_value = scope.getDirectMetricValue( partner );
 						scope.setMetricValue(metric.getIndex(), partner_value);
 					}
 				}

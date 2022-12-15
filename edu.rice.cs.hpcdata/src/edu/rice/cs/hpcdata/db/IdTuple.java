@@ -164,6 +164,11 @@ public class IdTuple
 		int minLength = Math.min(kinds.length, another.kinds.length);
 		
 		for(int i=0; i<minLength; i++) {
+			// hack - hack -hack
+			// Fix issue #254 no sort on host node 
+			if (kinds[i] == IdTupleType.KIND_NODE)
+				continue;
+			
 			// compare the differences in kind. 
 			// If they are different, we stop here
 			// another we compare the difference in index
@@ -199,6 +204,19 @@ public class IdTuple
 		return false;
 	}
 	
+	
+	@Override
+	public String toString() {
+		if (kinds == null || physicalIndexes == null)
+			return "";
+		
+		var sb = new StringBuilder();
+		for(var pi: physicalIndexes) {
+			sb.append(pi);
+			sb.append(" ");
+		}
+		return sb.toString();
+	}
 	
 	public String toString(IdTupleType idTupleType) {
 		return toString(kinds.length-1, idTupleType);

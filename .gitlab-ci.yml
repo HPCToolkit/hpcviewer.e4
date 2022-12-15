@@ -84,7 +84,7 @@ test:
   extends: .maven-apt
   stage: test
   image: docker.io/maven:3-ibm-semeru-$JDK-focal
-  tags: [docker, linux/$ARCH, services-work]
+  tags: [docker, linux/$ARCH]
   parallel:
     matrix:
     - ARCH: [amd64, arm64]

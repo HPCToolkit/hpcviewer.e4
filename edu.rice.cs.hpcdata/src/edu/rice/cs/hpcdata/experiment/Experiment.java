@@ -334,14 +334,23 @@ public class Experiment extends BaseExperimentWithMetrics
 	 * 
 	 * @param filterData
 	 * 			rules on what to filter
+	 * @param reopening
+	 * 			flag if it requires to resetting the all the data and
+	 * 			reopening the database
+	 * 
 	 * @return int
 	 * 			number of filtered cct nodes (approximate) 
 	 * @throws Exception 
 	 */
-	public int filter(IFilterData filterData) throws Exception 
+	public int filter(IFilterData filterData, boolean reopening) throws Exception 
 	{	
-		int numFilteredNodes = Filter.filterExperiment(this, filterData);
-
+		int numFilteredNodes;
+		
+		if (reopening)
+			numFilteredNodes = Filter.reopenAndFilterExperiment(this, filterData);
+		else
+			numFilteredNodes = Filter.filterExperiment(this, filterData);
+		
 		if (numFilteredNodes > 0) {
 			RootScope rootCCT = getRootScope(RootScopeType.CallingContextTree);
 			
@@ -399,5 +408,10 @@ public class Experiment extends BaseExperimentWithMetrics
 	@Override
 	public List<BaseMetric> getMetricList() {
 		return getMetrics();
+	}
+
+	@Override
+	public String getID() {
+		return getDirectory();
 	}
 }

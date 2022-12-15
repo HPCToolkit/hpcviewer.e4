@@ -12,19 +12,15 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
  ******************************************************************/
 public interface IMetricManager 
 {
-	/***
-	 * Get the correlated raw metric version of the given base metric.
-	 * <br/>
-	 * Database version 2.x or older has no correlation between the base
-	 * metric and the raw metric. This method will return if the base 
-	 * metric has its correspondent raw metric.
+	/****
+	 * Return the unique ID of this metric manager (or experiment database).
+	 * Usually it's the database directory.
+	 * <p>The goal is to differentiate between different databases.
 	 * 
-	 * @param metric
-	 * 			The base metric
-	 * @return {@code MetricRae}
-	 * 			The correspondent raw metric
+	 * @return String
 	 */
-	public BaseMetric getCorrespondentMetricRaw(BaseMetric metric);
+	public String getID();
+	
 	
 	/***
 	 * Returns a metric descriptor given a metric id

@@ -58,6 +58,7 @@ import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadPart;
 import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadViewInput;
 import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownPart;
 
+import edu.rice.cs.hpcbase.BaseConstants.ViewType;
 
 
 public class ProfilePart implements IProfilePart, EventHandler
@@ -131,7 +132,6 @@ public class ProfilePart implements IProfilePart, EventHandler
 		// its content to synchronize with the table in the active view
 		
 		if (metricView != null && !metricView.isDisposed()) {
-			RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
 			Object o = view.getInput();
 			IMetricManager metricMgr;
 			if (o instanceof IMetricManager) {
@@ -141,7 +141,9 @@ public class ProfilePart implements IProfilePart, EventHandler
 			} else {
 				throw new RuntimeException("Unknown view: " + view.getText());
 			}
-			boolean affectAll = view.getViewType() == AbstractView.ViewType.COLLECTIVE;
+			boolean affectAll = view.getViewType() == ViewType.COLLECTIVE;
+			RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
+			
 			MetricFilterInput input  = new MetricFilterInput(root, 
 															 metricMgr, 
 															 view, 
@@ -387,7 +389,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 			// warning: the filtering is not scalable. We should do this in the 
 			//          background job
 			try {
-				experiment.filter(FilterMap.getInstance());
+				experiment.filter(FilterMap.getInstance(), true);
 			} catch (Exception e) {
 				throw new IllegalStateException(e);
 			}

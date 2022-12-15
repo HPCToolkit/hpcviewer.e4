@@ -1,16 +1,17 @@
 package edu.rice.cs.hpcdata.experiment.metric;
 
-/* Java 1.5 public enum MetricType { EXCLUSIVE, INCLUSIVE, EXCLUSIVE_ONLY, DERIVED }*/
-
 // Java 1.4 Compatible enumeration type
 public class MetricType 
 {
+	public static final String SUFFIX_EXCLUSIVE = "(E)";
+	public static final String SUFFIX_INCLUSIVE = "(I)";
+	public static final String SUFFIX_POINT_EXC = "(X)";
+
 	public static final MetricType UNKNOWN        = new MetricType("UNKNOWN");
 	public static final MetricType EXCLUSIVE      = new MetricType("EXCLUSIVE");
 	public static final MetricType INCLUSIVE      = new MetricType("INCLUSIVE");
 	public static final MetricType POINT_EXCL     = new MetricType("XCLUSIVE");
-	//public final static MetricType PREAGGREGATE   = new MetricType("PREAGGREGATE");
-	//public final static MetricType DERIVED_INCR   = new MetricType("DERIVED_INCR");
+	public static final MetricType LEXICAL_AWARE  = new MetricType("LEXICAL_AWARE");
 	
 	public String toString() { return value; }
 	
@@ -30,8 +31,10 @@ public class MetricType
 	public static MetricType convertFromPropagationScope(String scopePropagationName) {
 		if (scopePropagationName.equalsIgnoreCase("execution")) 
 			return MetricType.INCLUSIVE;
-		else if (scopePropagationName.equalsIgnoreCase("function")) 
+		else if (scopePropagationName.equalsIgnoreCase("function")) 				 
 			return MetricType.EXCLUSIVE;
+		else if (scopePropagationName.equalsIgnoreCase("lex_aware"))
+			return MetricType.LEXICAL_AWARE;
 		else if (scopePropagationName.equalsIgnoreCase("point")) 
 			return MetricType.POINT_EXCL;
 		else
@@ -61,6 +64,25 @@ public class MetricType
 		throw new IllegalArgumentException("unknown formula type: " + formulaType);
 	}
 	
+	
+	public String getSuffix() {
+		if (this == MetricType.EXCLUSIVE || 
+			this == MetricType.LEXICAL_AWARE)
+			return(SUFFIX_EXCLUSIVE);
+			
+		if (this == MetricType.INCLUSIVE)
+			return(SUFFIX_INCLUSIVE);
+			
+		if (this == MetricType.POINT_EXCL)
+			return(SUFFIX_POINT_EXC);
+
+		return "";
+	}
+	
+	public boolean isExclusive() {
+		return this == EXCLUSIVE || this == LEXICAL_AWARE;
+	}
+	
 	private String value;
-	private MetricType(String value) { this.value = value; };
+	private MetricType(String value) { this.value = value; }
 }

@@ -112,7 +112,7 @@ public class ScopeTreePainter
 	private static int getZoomFactor() {
 		@SuppressWarnings("restriction")
 		int zoom = DPIUtil.getDeviceZoom();
-		return (int)zoom / 100;
+		return zoom / 100;
 	}
 	
 

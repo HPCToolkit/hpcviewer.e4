@@ -35,11 +35,7 @@ public class MetricTest {
 			});
 			dataMeta.open(new Experiment(), dbPaths[i].getAbsolutePath());
 			
-			try {
-				mvc[i] = new MetricValueCollection4(dataMeta.getDataSummary());
-			} catch (IOException e) {
-				fail(e.getMessage());
-			}
+			mvc[i] = new MetricValueCollection4(dataMeta.getDataSummary());
 			Scope s = (Scope) dataMeta.getExperiment().getRootScopeChildren().get(0);		
 			mvc[i].getValue(s, 0);
 		}
@@ -62,8 +58,10 @@ public class MetricTest {
 			var mv = mvc[i].getValue(s, metric.getIndex());
 			assertNotNull(mv);
 			
-			mv = mvc[i].getValue(s, metric.getPartner());
-			assertNotNull(mv);
+			if (metric.getPartner() >= 0) {
+				mv = mvc[i].getValue(s, metric.getPartner());
+				assertNotNull(mv);
+			}
 			i++;
 		}
 	}

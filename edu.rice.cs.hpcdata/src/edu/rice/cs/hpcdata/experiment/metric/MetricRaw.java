@@ -55,7 +55,7 @@ public class MetricRaw  extends BaseMetric
 	/**** 
 	 * Create a metric raw based on from another metric
 	 * @param metric
-	 * @return
+	 * @return {@code MetricRaw}
 	 */
 	public static MetricRaw create(BaseMetric metric) {
 		int numMetrics = 1;
@@ -63,13 +63,13 @@ public class MetricRaw  extends BaseMetric
 			numMetrics = ((MetricRaw)metric).num_metrics;
 		}
 		return new MetricRaw(metric.index, 
-									 metric.getDisplayName(), 
-									 metric.getDescription(), 
-									 null, 
-									 metric.index, 
-									 metric.getPartner(), 
-									 metric.getMetricType(), 
-									 numMetrics);
+							 metric.getDisplayName(), 
+							 metric.getDescription(), 
+							 null, 
+							 metric.index, 
+							 metric.getPartner(), 
+							 metric.getMetricType(), 
+							 numMetrics);
 	}
 	
 	
@@ -199,19 +199,16 @@ public class MetricRaw  extends BaseMetric
 			}
 			if (value == MetricValue.NONE          && 
 				s instanceof RootScope             && 
-				metricType == MetricType.EXCLUSIVE &&
-				partner != null) {
+				metricType.isExclusive() 		   &&
+				partner != null                    &&
+				partner.metricType == MetricType.INCLUSIVE) {
 				
 				value = partner.getValue(s, threads);
 			}
 		}
 		return value;
 	}
-	
-	public MetricValue getRawValue(IMetricScope s)
-	{
-		return getValue(s);
-	}
+
 	
 	/***
 	 * compute the sum of the value across the threads
@@ -228,6 +225,8 @@ public class MetricRaw  extends BaseMetric
 		RootScope root = scope.getRootScope();
 		
 		IThreadDataCollection threadData = root.getExperiment().getThreadData();
+		if (threadData == null)
+			return MetricValue.NONE;
 		
 		long nodeIndex = scope.getCCTIndex();
 		

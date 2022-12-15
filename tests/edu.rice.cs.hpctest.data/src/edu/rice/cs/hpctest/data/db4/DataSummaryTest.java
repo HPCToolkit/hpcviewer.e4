@@ -82,12 +82,12 @@ public class DataSummaryTest {
 	@Test
 	public void testGetMetricsInt() throws IOException {
 		for(var profile: dataProfiles) {
-			List<MetricValueSparse> list = profile.getMetrics(3);
+			List<MetricValueSparse> list = profile.getMetrics(0);
 			assertTrue(list.size() >= 1); // 
 			
 			MetricValueSparse mvs = list.get(0);
 			assertTrue(mvs.getIndex() >= 1);
-			assertTrue(mvs.getValue() > 250);
+			assertTrue(mvs.getValue() > 0);
 		}
 	}	
 
@@ -117,6 +117,10 @@ public class DataSummaryTest {
 			assertNotNull(labels);
 			assertTrue(labels.length >= 1); // [0.0]
 			assertTrue(labels[0] >= 0.0);
+			
+			for(int i=1; i<labels.length; i++) {
+				assertTrue(labels[i-1] <= labels[i]);
+			}
 		}
 	}
 

@@ -116,7 +116,12 @@ public abstract class BaseExperiment implements IExperiment
 	 */
 	public void resetThreadData() {
 		if (threadData != null) {
-			threadData.dispose();
+			// we don't need to dispose the resources if only resetting
+			// or filtering the database.
+			// This is to avoid null pointer exception since in meta.db,
+			// disposing threadData means closing access to plot.db file
+			//
+			// threadData.dispose();
 		}
 		threadData = null;
 	}

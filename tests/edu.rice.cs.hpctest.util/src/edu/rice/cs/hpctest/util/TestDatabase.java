@@ -27,7 +27,9 @@ public class TestDatabase
 												  DIR_METADB + File.separator + "inline.meta.db",
 												  DIR_METADB + File.separator + "vectorAdd",
 												  DIR_METADB + File.separator + "d.x",
-												  DIR_METADB + File.separator + "d.foo"};	
+												  DIR_METADB + File.separator + "d.foo",
+												  DIR_METADB + File.separator + "out.of.memory",
+												  DIR_METADB + File.separator + "derived-metrics.db"};	
 	
 	public static File[] getXMLDatabases() {
 		return getDatabases(xmlPaths);

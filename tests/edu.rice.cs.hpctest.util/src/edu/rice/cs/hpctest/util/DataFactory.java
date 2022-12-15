@@ -17,6 +17,7 @@ import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
+import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope.ProcedureType;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -80,7 +81,7 @@ public class DataFactory
 			String parentName = parent instanceof RootScope ? "proc 0" : parent.getName();
 			String name = parentName + "." +  myid;
 			int intmyid = Integer.valueOf(myid);
-			Scope grandChild = new ProcedureScope(root, null, null, 0, 0, name , false, intmyid, intmyid, null, 0);
+			Scope grandChild = new ProcedureScope(root, null, null, 0, 0, name , ProcedureType.REGULAR, intmyid, intmyid, null, 0);
 			grandChild.setParentScope(parent);
 			createMetric(grandChild, (Experiment) root.getExperiment());
 			parent.addSubscope(grandChild);

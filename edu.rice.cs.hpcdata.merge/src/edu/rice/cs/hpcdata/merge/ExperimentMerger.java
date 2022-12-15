@@ -35,7 +35,9 @@ import edu.rice.cs.hpcdata.experiment.scope.visitors.*;
  */
 public class ExperimentMerger 
 {
-	static final private boolean with_raw_metrics = false;
+	private static final boolean with_raw_metrics = false;
+	
+	private ExperimentMerger() {}
 	
 	/**
 	 * Merging two experiments, and return the new experiment
@@ -45,9 +47,8 @@ public class ExperimentMerger
 	 * @param type : root to merge (cct, bottom-up tree, or flat tree)
 	 *  
 	 * @return merged experiment database
-	 * @throws Exception 
 	 */
-	static public Experiment merge(DatabasesToMerge db) throws Exception {
+	public static Experiment merge(DatabasesToMerge db)  {
 		
 		final String parent_dir = generateMergeName(db.experiment[0], db.experiment[1]);
 
@@ -62,9 +63,8 @@ public class ExperimentMerger
 	 * @param type
 	 * @param parent_dir
 	 * @return the new merged database
-	 * @throws Exception 
 	 */
-	static public Experiment merge(DatabasesToMerge db, String parent_dir) throws Exception {
+	public static Experiment merge(DatabasesToMerge db, String parent_dir) {
 		
 		Experiment exp1 = db.experiment[0];
 		Experiment exp2 = db.experiment[1];
@@ -113,7 +113,7 @@ public class ExperimentMerger
 		
 		RootScope root1 = exp1.getRootScope(db.type);
 		if (root1 == null) {
-			throw new Exception("Unable to find root type " + db.type + " in " + exp1.getDefaultDirectory());
+			throw new IllegalArgumentException("Unable to find root type " + db.type + " in " + exp1.getDefaultDirectory());
 		}
 		createFlatTree(exp1, db.type, root1);
 		
@@ -127,7 +127,7 @@ public class ExperimentMerger
 
 		RootScope root2 = exp2.getRootScope(db.type);
 		if (root2 == null) {
-			throw new Exception("Unable to find root type " + db.type + " in " + exp2.getDefaultDirectory());
+			throw new IllegalArgumentException("Unable to find root type " + db.type + " in " + exp2.getDefaultDirectory());
 		}
 		createFlatTree(exp2, db.type, root2);
 
@@ -198,12 +198,11 @@ public class ExperimentMerger
 		// ----------------------------------------------------------------
 		// step 1: add the first metrics into the merged experiment
 		// ----------------------------------------------------------------
-		final List<BaseMetric> metricList = m1.stream().
-											   map(metric -> metric.duplicate()).
-											   collect(Collectors.toList());
-		metricList.forEach(metric -> {
-			metric.setDisplayName("1-" + metric.getDisplayName());
-		});
+		final List<BaseMetric> metricList = m1.stream()
+											  .map(BaseMetric::duplicate)
+											  .collect(Collectors.toList());
+		
+		metricList.forEach(metric -> metric.setDisplayName("1-" + metric.getDisplayName()));
 		
 		// attention: hpcprof doesn't guarantee the ID of metric starts with zero
 		//	we should make sure that the next ID for the second group of metrics is not
@@ -264,10 +263,12 @@ public class ExperimentMerger
 		// ----------------------------------------------------------------
 		// step 3: rename the formula in derived metrics
 		// ----------------------------------------------------------------
-		if (listDerivedMetrics.size()>0) {
+		if (!listDerivedMetrics.isEmpty()) {
 			for(AbstractMetricWithFormula m: listDerivedMetrics) {
-				m.renameExpression(mapOldIndex, mapOldOrder);
-				metricsMerged.add(m);
+				if (m.getMetricType() != MetricType.UNKNOWN) {
+					m.renameExpression(mapOldIndex, mapOldOrder);
+					metricsMerged.add(m);
+				}
 			}
 		}
 		

@@ -38,6 +38,8 @@ import edu.rice.cs.hpcdata.util.IUserData;
 
 public class ProcedureScope extends Scope  implements IMergedScope 
 {
+	public enum ProcedureType {REGULAR, INLINE_FUNCTION, INLINE_MACRO, ENTRY_POINT}
+	
 	public static final int FEATURE_PROCEDURE    = 0;
 	public static final int FEATURE_PLACE_HOLDER = 1;
 	public static final int FEATURE_ROOT 	     = 2;
@@ -49,19 +51,19 @@ public class ProcedureScope extends Scope  implements IMergedScope
 	public static final ProcedureScope NONE = new ProcedureScope(null, 
 			LoadModuleScope.NONE, SourceFile.NONE, 
 			0, 0, 
-			Constants.PROCEDURE_UNKNOWN, false, 
+			Constants.PROCEDURE_UNKNOWN, ProcedureType.REGULAR, 
 			Constants.FLAT_ID_PROC_UNKNOWN, Constants.FLAT_ID_PROC_UNKNOWN, 
 			null, FEATURE_ROOT);
 
 	private static final String PROCEDURE_NO_NAME = "-";
 	private static final String PROCEDURE_INLINE  = "<inline>";
 
-	
+	private final ProcedureType procedureType;
 	private final int procedureFeature;
 	
 	/** The name of the procedure. */
 	protected String procedureName;
-	protected boolean isalien;
+	
 	// we assume that all procedure scope has the information on load module it resides
 	protected LoadModuleScope objLoadModule;
 
@@ -87,8 +89,8 @@ public class ProcedureScope extends Scope  implements IMergedScope
  * 			last line number
  * @param proc
  * 			The name of the procedure
- * @param _isalien
- * 			boolean true if the procedure is inlined
+ * @param procedureType
+ * 			Type of the procedure (inline, regular, ...)
  * @param cct_id
  * 			unique id
  * @param flat_id
@@ -99,14 +101,18 @@ public class ProcedureScope extends Scope  implements IMergedScope
  * 			{@code int}
  * 			kind of procedure: FeatureProcedure, FeaturePlaceHolder, 
  * 			FeatureRoot, FeatureElided and FeatureTopDown
+ * 
+ * @apiNote procedureFeature is for backward compatibility only, used by the old database
+ * 
+ * @see ProcedureType
  */
 public ProcedureScope(RootScope root, LoadModuleScope loadModule, SourceFile file, 
-		int first, int last, String proc, boolean _isalien, int cct_id, int flat_id, 
+		int first, int last, String proc, ProcedureType procedureType, int cct_id, int flat_id, 
 		IUserData<String,String> userData, int procedureFeature)
 {
 	super(root, file, first, last, cct_id, flat_id);
 	
-	this.isalien = _isalien;
+	this.procedureType = procedureType;
 	this.procedureName = proc;
 
 	if (userData != null) {
@@ -114,9 +120,15 @@ public ProcedureScope(RootScope root, LoadModuleScope loadModule, SourceFile fil
 		if (newName != null) 
 			procedureName = newName;
 	}
-	if (isalien) {
-		if (procedureName.isEmpty() || procedureName.equals(PROCEDURE_NO_NAME)
-				|| procedureName.equals(PROCEDURE_INLINE)) {
+	// prefix the inline functions and macros with inline notation
+	// either "inlined from .. " or "[I]"  
+	if (procedureType == ProcedureType.INLINE_FUNCTION ||
+		procedureType == ProcedureType.INLINE_MACRO) {
+		
+		if (procedureName.isEmpty() || 
+			procedureName.equals(PROCEDURE_NO_NAME) || 
+			procedureName.equals(PROCEDURE_INLINE)) {
+			
 			procedureName =  "inlined from " + getSourceCitation();
 		}
 		if (!procedureName.startsWith(INLINE_NOTATION))
@@ -156,15 +168,37 @@ public Scope duplicate() {
 			this.firstLineNumber, 
 			this.lastLineNumber,
 			this.procedureName,
-			this.isalien,
+			this.procedureType,
 			getCCTIndex(), // Laks 2008.08.26: add the sequence ID
 			this.flat_node_index,
 			null,
 			this.procedureFeature);
 }
 
+
+/****
+ * Retrieve the procedure type of this scope.
+ * 
+ * @see ProcedureType
+ * 
+ * @return ProcedureType
+ */
+public ProcedureType getProcedureType() {
+	return procedureType;
+}
+
+
+/****
+ * Return true of the scope is an inlined function,
+ * false otherwise.
+ * 
+ * @apiNote Only to support for backward compatibility
+ * 
+ * @return boolean
+ */
 public boolean isAlien() {
-	return this.isalien;
+	return procedureType == ProcedureType.INLINE_FUNCTION ||
+		   procedureType == ProcedureType.INLINE_MACRO;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -226,12 +260,6 @@ public boolean toBeElided()
 public boolean hasScopeChildren() {
 	return node.hasChildren();
 }
-
-
-public void setAlien(boolean alien) {
-	this.isalien = alien;
-}
-
 }
 
 

@@ -1,7 +1,7 @@
 package edu.rice.cs.hpcviewer.ui.actions;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 
 import edu.rice.cs.hpcbase.ViewerDataEvent;
@@ -17,9 +17,9 @@ import edu.rice.cs.hpcmetric.dialog.ExtDerivedMetricDlg;
  ****************************************************/
 public class UserDerivedMetric 
 {
-	final private RootScope 	 root;
-	final private IEventBroker   eventBroker;
-	final private IMetricManager metricMgr;
+	private final RootScope 	 root;
+	private final IEventBroker   eventBroker;
+	private final IMetricManager metricMgr;
 
 	/****
 	 * Constructor to initialize a user derived metric action
@@ -44,7 +44,7 @@ public class UserDerivedMetric
 		
 		ExtDerivedMetricDlg dialog = new ExtDerivedMetricDlg(display.getActiveShell(), metricMgr, root);
 	
-		if (dialog.open() == Dialog.OK) {
+		if (dialog.open() == Window.OK) {
 			
 			final DerivedMetric metric = dialog.getMetric();
 			metricMgr.addDerivedMetric(metric);

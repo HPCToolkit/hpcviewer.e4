@@ -1,11 +1,46 @@
 package edu.rice.cs.hpcdata.experiment.extdata;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import edu.rice.cs.hpcdata.db.IdTuple;
+import edu.rice.cs.hpcdata.db.IdTupleType;
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
+import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
+import edu.rice.cs.hpcdata.experiment.scope.RootScope;
+import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 
 public abstract class AbstractThreadDataCollection implements
 		IThreadDataCollection {
 
+
+	@Override
+	public double getMetric(Scope scope, BaseMetric metric, IdTuple idtuple, int numMetrics) throws IOException {
+		int metricIndex = getMetricIndex(scope, metric);
+		return getMetric(scope.getCCTIndex(), metricIndex, idtuple, numMetrics);
+	}
+
+	@Override
+	public double[] getMetrics(Scope scope, BaseMetric metric, int numMetrics) throws Exception {
+		int metricIndex = getMetricIndex(scope, metric);
+		return getMetrics(scope.getCCTIndex(), metricIndex, numMetrics);
+	}
+
+	private int getMetricIndex(Scope scope, BaseMetric metric) {
+		int metricIndex = metric.getIndex();
+		if ( scope instanceof RootScope  && 
+			 metric instanceof MetricRaw && 
+			 metric.getMetricType().isExclusive()) {
+			
+			var partner = ((MetricRaw) metric).getMetricPartner();
+			if (partner != null)
+				metricIndex = partner.getRawID();
+		}
+		return metricIndex;
+	}
+	
 	public double[] getEvenlySparseRankLabels() throws IOException {
 		double []values = getRankLabels();
 		int parallelism = getParallelismLevel();
@@ -38,4 +73,23 @@ public abstract class AbstractThreadDataCollection implements
 		return values;
 	}
 
-}
+	
+	@Override
+	public List<IdTuple> getIdTupleListWithoutGPU(IdTupleType idtype) {
+		var idtuples = getIdTuples();			
+
+		return idtuples.stream()
+	 			 	   .filter(idt -> !idt.isGPU(idtype))
+	 			 	   .collect(Collectors.toList());
+	}
+	
+	
+	@Override
+	public Object[] getIdTupleLabelWithoutGPU(IdTupleType idtype) {
+		var idtuples = getIdTupleListWithoutGPU(idtype);
+		
+		return idtuples.stream()
+					   .map(idt -> idt.toString(idtype))
+					   .toArray();
+	}
+} 

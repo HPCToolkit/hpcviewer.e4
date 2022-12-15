@@ -46,7 +46,6 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
@@ -55,7 +54,7 @@ import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
-
+import edu.rice.cs.hpcbase.Theme;
 import edu.rice.cs.hpcfilter.internal.CheckBoxConfiguration;
 import edu.rice.cs.hpcfilter.internal.FilterConfigLabelAccumulator;
 import edu.rice.cs.hpcfilter.internal.FilterPainterConfiguration;
@@ -425,7 +424,7 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 			}
 		}); */
 
-        ThemeConfiguration themeConfig = Display.isSystemDarkTheme() ? 
+        ThemeConfiguration themeConfig = Theme.isDarkThemeActive() ? 
 				new DarkThemeConfiguration(this.natTable) :  new DayThemeConfiguration();
 		
 		natTable.setTheme(themeConfig);

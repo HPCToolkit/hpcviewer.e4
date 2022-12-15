@@ -1,19 +1,15 @@
 package edu.rice.cs.hpcviewer.ui.parts.thread;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.window.Window;
 import org.eclipse.swt.custom.CTabFolder;
-import org.eclipse.swt.widgets.Shell;
 import org.osgi.service.event.Event;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import edu.rice.cs.hpcbase.BaseConstants.ViewType;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
@@ -24,14 +20,25 @@ import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcfilter.FilterDataItem;
-import edu.rice.cs.hpcfilter.StringFilterDataItem;
-import edu.rice.cs.hpcfilter.dialog.ThreadFilterDialog;
 import edu.rice.cs.hpctree.IScopeTreeData;
 import edu.rice.cs.hpctree.ScopeTreeData;
-import edu.rice.cs.hpcviewer.ui.internal.AbstractView;
+import edu.rice.cs.hpctree.ScopeTreeTable;
 import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownPart;
 
+
+/****************************************************
+ * 
+ * Part for thread view. <br/>
+ * A thread view is a top-down view but the metrics are from
+ * a set of threads (or id-tuples) instead of the aggregate
+ * of all id-tuples.
+ * 
+ * <p>Requires to set the input by calling {@link setInput} 
+ * containing a {@code ThreadViewInput} object.
+ * 
+ *  @see ThreadViewInput
+ *
+ ****************************************************/
 public class ThreadPart extends TopDownPart 
 {
 	private static final int MAX_THREAD_INDEX = 2;
@@ -55,43 +62,28 @@ public class ThreadPart extends TopDownPart
 		// we'll ask the user to pick the threads
 		
 		viewInput = (ThreadViewInput) input;
-		var threads   = viewInput.getThreads();
-		if (threads == null) {
-			final Shell shell = getDisplay().getActiveShell();
-			try {
-				threads = getThreads(shell, viewInput.getThreadData());
-				if (threads == null)
-					return;
-				
-				viewInput.setThread(threads);
-				
-			} catch (Exception e) {
-				final String label = "Error while opening thread-level data";
-				Logger logger = LoggerFactory.getLogger(getClass());
-				logger.error(label, e);
-				MessageDialog.openError(shell, label, e.getClass().getName() +": " + e.getLocalizedMessage());
+		var threads = viewInput.getThreads();
+		if (threads == null)
 				return;
-			}
-		}
-		// set the table
-		RootScope root  = viewInput.getRootScope();
-		Experiment experiment = (Experiment) root.getExperiment();
+		
+		// create the table
+		RootScope root = viewInput.getRootScope();
+		var experiment = (Experiment) root.getExperiment();
 		List<BaseMetric> rawMetrics = experiment.getRawMetrics();
-		ThreadMetricManager metricManager = new ThreadMetricManager(rawMetrics, threads);
+		var id = experiment.getDirectory();
+		
+		ThreadMetricManager metricManager = new ThreadMetricManager(id, rawMetrics, threads);
 		
 		createTable(metricManager);
 		
-		try {
-			String title = TITLE_PREFIX + getLabel(viewInput).toString(); 
-			setText(title);
-			setToolTipText(getTooltipText(viewInput));
-		} catch (IOException e) {
-			e.printStackTrace();
-			setText(TITLE_PREFIX + " (Empty)");
-		}
+		// create the title and make sure it's closable.
+		String title = TITLE_PREFIX + getLabel(viewInput).toString(); 
+		setText(title);
+		setToolTipText(getTooltipText(viewInput));
 		setShowClose(true);
 	}
 
+	
 	@Override
 	public void handleEvent(Event event) {
 		super.handleEvent(event);
@@ -101,7 +93,8 @@ public class ThreadPart extends TopDownPart
 			Object obj = event.getProperty(IEventBroker.DATA);
 			if (obj instanceof ViewerDataEvent) {
 				ViewerDataEvent data = (ViewerDataEvent) obj;
-				if (data.metricManager instanceof Experiment) {
+				var thesameDatabase = getMetricManager().getID().equals(data.metricManager.getID());
+				if (thesameDatabase) {
 					// grab the new root of the refreshed database
 					var newRoot = ((Experiment) data.metricManager).getRootScope(RootScopeType.CallingContextTree);
 					
@@ -109,7 +102,7 @@ public class ThreadPart extends TopDownPart
 					// need to avoid duplication
 					viewInput.setRootScope(newRoot);
 					getActionManager().clear();
-					getTable().reset(newRoot);
+					((ScopeTreeTable)getTable()).reset(newRoot);
 					updateButtonStatus();
 				}
 			}
@@ -148,14 +141,7 @@ public class ThreadPart extends TopDownPart
 		var threads = input.getThreads();
 		int size = threads.size();
 		
-		IdTupleType idTypes;
-		
-		var exp = input.getRootScope().getExperiment();
-		if (exp instanceof Experiment) {
-			idTypes = ((Experiment)exp).getIdTupleType();
-		} else {
-			idTypes = IdTupleType.createTypeWithOldFormat();
-		}
+		IdTupleType idTypes = getIdTupleTypes(input);
 		
 		// for the column title: only list the first MAX_THREAD_INDEX of the set of threads
 		for(int i=0; i<size && i<=MAX_THREAD_INDEX; i++) {
@@ -177,10 +163,9 @@ public class ThreadPart extends TopDownPart
 	}
 	
 
-
 	@Override
 	protected IScopeTreeData getTreeData(RootScope root, IMetricManager metricManager) {
-		return new ScopeTreeData(root, metricManager, false);
+		return new ScopeTreeData(root, metricManager);
 	}
 
 	
@@ -193,7 +178,7 @@ public class ThreadPart extends TopDownPart
 	
 	@Override
 	public ViewType getViewType() {
-		return AbstractView.ViewType.INDIVIDUAL;
+		return ViewType.INDIVIDUAL;
 	}
 
 	@Override
@@ -202,61 +187,27 @@ public class ThreadPart extends TopDownPart
 	}
 
 	
-	private String getTooltipText(ThreadViewInput input) throws IOException {
+	private String getTooltipText(ThreadViewInput input) {
 		final String TOOLTIP_PREFIX = "Top down view for thread(s): ";
+		
+		IdTupleType idTypes = getIdTupleTypes(input);
 
 		var threads = input.getThreads();
-		int size = threads.size();
+		var labels = threads.stream().map(t -> t.toString(idTypes)).collect(Collectors.toList());
 
-		StringBuilder label = new StringBuilder(TOOLTIP_PREFIX);
-		
-		for(int i=0; i<size; i++) {
-			label.append(threads.get(i).toLabel());
-			
-			if (i+1 < size) {
-				label.append(", ");
-			}
-		}
-		return label.toString();
+		return TOOLTIP_PREFIX + Arrays.toString(labels.toArray());
 	}
 	
-	
-	/***
-	 * Get the list of threads to view in a thread view.
-	 * This method will display a dialog box asking users to choose threads to view.
-	 * If the users cancel, then it returns null.
-	 * 
-	 * @param shell Shell
-	 * @param threadData IThreadDataCollection
-	 * @return List<Integer>
-	 * 
-	 * @throws NumberFormatException
-	 */
-	private static List<IdTuple> getThreads(Shell shell, IThreadDataCollection threadData) 
-			throws NumberFormatException 
-	{
-		var idTuples = threadData.getIdTuples();
-		
-		final List<FilterDataItem<String>> items =  new ArrayList<>(idTuples.size());
-		
-		idTuples.stream().forEach(idt -> items.add(new StringFilterDataItem(idt.toLabel(), false, true) ));
 
-		ThreadFilterDialog dialog = new ThreadFilterDialog(shell, "Select rank/thread to view", items);
+	private static IdTupleType getIdTupleTypes(ThreadViewInput input) {
 		
-		if (dialog.open() == Window.OK) {
-			var result = dialog.getResult();
-			if (result == null)
-				return Collections.emptyList();
-			
-			final List<IdTuple> threads = new ArrayList<>();
-			for(int i=0; i<items.size(); i++) {
-				if (items.get(i).checked) {
-					threads.add(idTuples.get(i));
-				}
-			}
-			if (!threads.isEmpty())
-				return threads;
+		var exp = input.getRootScope().getExperiment();
+		IdTupleType idTypes;
+		if (exp instanceof Experiment) {
+			idTypes = ((Experiment)exp).getIdTupleType();
+		} else {
+			idTypes = IdTupleType.createTypeWithOldFormat();
 		}
-		return null;
+		return idTypes;
 	}
 }

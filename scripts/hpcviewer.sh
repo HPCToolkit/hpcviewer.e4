@@ -85,7 +85,6 @@ bindir=`dirname "$script"`
 bindir=`( cd "$bindir" && pwd )`
 viewer="${bindir}/../libexec/${name}/${name}"
 test -x "$viewer"  || die "executable $viewer not found"
-test -n "$DISPLAY" || die "DISPLAY variable is not set"
 
 #------------------------------------------------------------
 # Check the java version.
@@ -169,6 +168,11 @@ while (( "$#" )); do
 done
 # set positional arguments in their proper place
 eval set -- "$PARAMS"
+
+#
+# make sure we can display X on linux
+#
+test -n "$DISPLAY" || die "DISPLAY variable is not set"
 
 #------------------------------------------------------------
 # Prepare the environment.

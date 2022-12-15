@@ -193,4 +193,15 @@ public final class MetricValue
 		mv.flags = flags;
 		return mv;
 	}
+	
+	
+	@Override
+	public boolean equals(Object other) {
+		if (other instanceof MetricValue) {
+			MetricValue mv = (MetricValue) other;
+			return (this.flags == mv.flags &&
+					this.value == mv.value);
+		}
+		return false;
+	}
 }

@@ -6,8 +6,8 @@ import org.eclipse.nebula.widgets.nattable.util.GUIHelper;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 
+import edu.rice.cs.hpcbase.Theme;
 import edu.rice.cs.hpcsetting.color.ColorManager;
 
 
@@ -38,7 +38,7 @@ public class ViewerColorManager
 	@Deprecated
 	public static Color getActiveColor() {
 		Color clrActive = GUIHelper.COLOR_BLUE;
-		if (Display.isSystemDarkTheme()) {
+		if (Theme.isDarkThemeActive()) {
 			ColorRegistry registry = JFaceResources.getColorRegistry();
 			clrActive = registry.get(COLOR_ACTIVE);
 			if (clrActive == null) {

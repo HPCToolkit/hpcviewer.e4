@@ -9,12 +9,9 @@ import edu.rice.cs.hpcviewer.ui.base.IViewItem;
 
 public abstract class AbstractView extends CTabItem implements IViewItem, IFilterable 
 {
-	public static enum ViewType {COLLECTIVE, INDIVIDUAL};
-
-	public AbstractView(CTabFolder parent, int style) {
+	protected AbstractView(CTabFolder parent, int style) {
 		super(parent, style);
 	}
 
 	public abstract IMetricManager getMetricManager();
-	public abstract ViewType       getViewType();
 }

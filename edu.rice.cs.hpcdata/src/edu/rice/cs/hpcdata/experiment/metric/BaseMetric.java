@@ -64,6 +64,7 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 	
 	/** The index of this metric in its experiment's metric list. */
 	protected int index;
+	
 	// partner of the metric. If the metric is exclusive, then its partner is the inclusive one
 	protected int partnerIndex;
 
@@ -121,7 +122,7 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 
 	
 	protected BaseMetric(String sID, String sDisplayName) {
-		this(sID, sDisplayName, sID, VisibilityType.SHOW, null, null, 0, 0, MetricType.UNKNOWN);
+		this(sID, sDisplayName, sID, VisibilityType.SHOW, null, null, 0, -1, MetricType.UNKNOWN);
 	}
 	
 	//-------------------------------------------------------------------------------
@@ -137,6 +138,14 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 	@Override
 	public int compareTo(BaseMetric o) {
 		return this.getIndex() - o.getIndex();
+	}
+	
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof BaseMetric)
+			return compareTo((BaseMetric) obj) == 0;
+		return false;
 	}
 	
 	
@@ -493,5 +502,4 @@ public abstract class BaseMetric implements Comparable<BaseMetric>{
 		}
 		return period;
 	}
-
 }

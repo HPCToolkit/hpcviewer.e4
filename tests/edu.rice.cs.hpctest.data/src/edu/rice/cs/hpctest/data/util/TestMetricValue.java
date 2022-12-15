@@ -18,9 +18,12 @@ public class TestMetricValue
 			return true;
 		
 		var mvcParent = parent.getMetricValues();
-		var metrics = exp.getMetricList();
+		var metrics = exp.getVisibleMetrics();
 		
 		for(var metric: metrics) {
+			if (metric.getPartner() < 0)
+				continue;
+			
 			var partner = exp.getMetric(metric.getPartner());
 			var mv1 = mvc.getValue(context, metric);
 			var mv2 = mvc.getValue(context, partner);
@@ -29,7 +32,7 @@ public class TestMetricValue
 			if (metric.getMetricType() == MetricType.INCLUSIVE) {
 				int c = floatCompare(mv1.getValue(), mv2.getValue());
 				assertTrue(c>=0);
-			} else {
+			} else if (metric.getMetricType() == MetricType.EXCLUSIVE){
 				int c = floatCompare(mv1.getValue(), mv2.getValue());
 				assertTrue(c<=0);
 			}
