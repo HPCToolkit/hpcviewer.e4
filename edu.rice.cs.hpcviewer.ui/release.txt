@@ -1,1 +1,1 @@
-Release 2022.11. Commit fb2167eb
+Release 2022.12. Commit 57d2354
