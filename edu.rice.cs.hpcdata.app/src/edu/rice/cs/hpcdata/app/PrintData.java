@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import edu.rice.cs.hpcdata.db.DatabaseManager;
 import edu.rice.cs.hpcdata.experiment.Experiment;
@@ -30,19 +30,19 @@ import edu.rice.cs.hpcdata.util.Util;
 public class PrintData 
 {
 	private static final int MAX_METRIC_NAME = 32;
-	private static final int MAX_NAME_CHARS = 44;
+	private static final int MAX_NAME_CHARS  = 44;
 	
-	private final static int DISPLAY_TOPDOWN  = 1;
-	private final static int DISPLAY_BOTTOMUP = 2;
-	private final static int DISPLAY_FLAT     = 4;
-	private final static int DISPLAY_EXCLUSIVE = 8;
-	private final static int DISPLAY_INCLUSIVE = 16;
+	private static final int DISPLAY_TOPDOWN  = 1;
+	private static final int DISPLAY_BOTTOMUP = 2;
+	private static final int DISPLAY_FLAT     = 4;
+	private static final int DISPLAY_EXCLUSIVE = 8;
+	private static final int DISPLAY_INCLUSIVE = 16;
 	
-	private final static int DISPLAY_ALLVIEWS = DISPLAY_TOPDOWN   | DISPLAY_BOTTOMUP | DISPLAY_FLAT |
+	private static final int DISPLAY_ALLVIEWS = DISPLAY_TOPDOWN   | DISPLAY_BOTTOMUP | DISPLAY_FLAT |
 												DISPLAY_EXCLUSIVE | DISPLAY_INCLUSIVE;
 	
-	private final static int NODES_SUMMARY = 0;
-	private final static int NODES_ALL     = 16;
+	private static final int NODES_SUMMARY = 0;
+	private static final int NODES_ALL     = 16;
 	
 	private PrintData() {
 		// hide the constructor
@@ -97,14 +97,17 @@ public class PrintData
 				if (i<args.length-1) {
 					String sOutput = args[i+1];
 					File f = new File(sOutput);
-					if (!f.exists())
-						f.createNewFile();
+					if (!f.exists() && !f.createNewFile())
+						throw new IOException("Fail to create output file " + sOutput);
 					
 					FileOutputStream file = new FileOutputStream(sOutput);
-					objPrint = new PrintStream( file );
-					std_output = false;
-					i++;
-					file.close();
+					try (PrintStream out  = new PrintStream( file )){
+						std_output = false;
+						objPrint   = out;
+					} finally {
+						i++;
+						file.close();
+					}
 				}
 				break;
 				
@@ -142,19 +145,19 @@ public class PrintData
 		PrintData objApp = new PrintData();
 
 		if (objFile.isDirectory()) {
-			File files[] = Util.getListOfXMLFiles(sFilename);
+			File[] files = Util.getListOfXMLFiles(sFilename);
 			for (File file: files) 
 			{
 				// only experiment*.xml will be considered as database file
 				if (DatabaseManager.isDatabaseFile(file.getName())) {
-					experiment = objApp.openExperiment(print_msg, file);
+					experiment = objApp.openExperiment(file);
 					if (experiment != null)
 						break;
 					
 				}
 			}
 		} else {
-			experiment = objApp.openExperiment(objPrint, objFile);
+			experiment = objApp.openExperiment(objFile);
 		}
 		if (experiment == null) {
 			print_msg.println("Incorrect database: " + objFile.getAbsolutePath());
@@ -199,7 +202,7 @@ public class PrintData
 		
 		var roots = experiment.getRootScopeChildren();
 		
-		for(Object root: roots) {
+		for(var root: roots) {
 			RootScope aRoot = (RootScope) root;
 			boolean displayRoot = (aRoot.getType() == RootScopeType.CallingContextTree && 
 				    				(display_mode & DISPLAY_TOPDOWN) != 0)  ||
@@ -223,22 +226,21 @@ public class PrintData
 											  Experiment experiment,
 											  int display_mode) {
 		
-		List<BaseMetric> metrics = experiment.getVisibleMetrics();
+		List<Integer> nonEmptyIds = experiment.getNonEmptyMetricIDs(scope);	
+		
+		var nonEmptyMetrics = nonEmptyIds.stream().map(experiment::getMetric).collect(Collectors.toList());
 		
 		// print root CCT metrics
-		printRootMetrics(objPrint, scope, metrics);
+		printRootMetrics(objPrint, scope, nonEmptyMetrics);
 		if (!scope.hasChildren())
 			return;
 		
 		// sort the children from the highest value to the lowest based on the first metric
 		
 		var children = scope.getChildren();
-		List<Integer> nonEmptyIds = experiment.getNonEmptyMetricIDs(scope);		
-		BaseMetric sortMetric = metrics.get(0);
+		BaseMetric sortMetric = nonEmptyMetrics.get(0);
 		
-		for(int i=0; i<nonEmptyIds.size(); i++) {
-			int id = nonEmptyIds.get(i);
-			BaseMetric m = experiment.getMetric(id);
+		for(var m: nonEmptyMetrics) {
 			if (m.getMetricType() == MetricType.INCLUSIVE) {
 				sortMetric = m;
 				break;
@@ -251,20 +253,11 @@ public class PrintData
 
 		children.sort(comparator);
 		
-		List<Integer> nonEmptyIndex = new ArrayList<Integer>(nonEmptyIds.size());
-		for(int i=0; i<metrics.size(); i++) {
-			BaseMetric metric = metrics.get(i);
-			if (metric.getValue(scope) != MetricValue.NONE) {
-				nonEmptyIndex.add(i);
-			}
-		}
-		
 		// print the metric header
 		System.out.print(String.format("\n%" + (4+MAX_NAME_CHARS) + "s", " "));
-		for(Integer index: nonEmptyIndex) {
-			BaseMetric metric = metrics.get(index);
+		for(var metric: nonEmptyMetrics) {
 			String metricName = getTrimmedName(metric.getDisplayName(), 11);
-			System.out.print(String.format(" [%3d] %s ", index, metricName));
+			System.out.print(String.format(" [%3d] %s ", metric.getIndex(), metricName));
 		}
 		
 		// print the children
@@ -273,8 +266,8 @@ public class PrintData
 		for(int i=0; i<numChildren; i++) {
 			objPrint.println();
 			
-			Scope child = (Scope) children.get(i);
-			printMetrics(objPrint, child, metrics, nonEmptyIndex, "   ");
+			Scope child = children.get(i);
+			printMetrics(objPrint, child, nonEmptyMetrics, "   ");
 		}
 	}
 	
@@ -290,8 +283,7 @@ public class PrintData
 	
 	
 	private static String getScopeName(Scope scope) {
-		String name = getTrimmedName(scope.getName(), MAX_NAME_CHARS);
-		return name;
+		return getTrimmedName(scope.getName(), MAX_NAME_CHARS);
 	}
 	
 	
@@ -299,10 +291,9 @@ public class PrintData
 		String name = getScopeName(scope);
 		objPrint.println("- " + name);
 		
-		for(int i=0; i<metrics.size(); i++) {
-			BaseMetric metric = metrics.get(i);
+		for(var metric: metrics) {
 			String metricName = getTrimmedName(metric.getDisplayName(), MAX_METRIC_NAME);
-			objPrint.print(String.format("\t [%3d] %s", i, metricName));
+			objPrint.print(String.format("\t [%3d] %s", metric.getIndex(), metricName));
 			if (scope.getMetricValue(metric) == MetricValue.NONE) {
 				objPrint.println("            0.0");
 			} else  {
@@ -326,18 +317,18 @@ public class PrintData
 	private static void printMetrics(PrintStream objPrint, 
 									 Scope scope, 
 									 List<BaseMetric> metrics,
-									 List<Integer> nonEmptyIndex,
 									 String indent) {
 		String name = getScopeName(scope);
 		objPrint.print(indent + "- " + name);
 		
-		for(Integer index: nonEmptyIndex) {
-			BaseMetric metric = metrics.get(index);
+		for(var metric: metrics) {
 			objPrint.print(indent + " ");
 			if (scope.getMetricValue(metric) == MetricValue.NONE) {
 				objPrint.print("            0.0");
 			} else  {
-				String out = metric.getMetricTextValue(scope).substring(0, 15);
+				var text = metric.getMetricTextValue(scope);
+				int maxLen = Math.min(15, text.length());
+				String out = text.substring(0, maxLen);
 				objPrint.print(out);
 			}
 		}
@@ -349,7 +340,7 @@ public class PrintData
 	 * @param objFile   The XML file of the database
 	 * @return experiment file if exists, null if fails.
 	 */
-	private Experiment openExperiment(PrintStream objPrint, File objFile) {
+	private Experiment openExperiment(File objFile) {
 
 		try {
 			Experiment experiment = new Experiment();	// prepare the experiment

@@ -9,6 +9,14 @@ ROOT="../.."
 TEMP="jars"
 POSITIONAL=()
 
+# default release number: yyyy.mm
+RELEASE=`date +"%Y.%m"`
+VERBOSE=0
+
+show_version() {
+	echo "hpcdata $RELEASE"
+}
+
 show_help(){
 	echo "$0 [options] [commands]"
 	echo "-h,--help          Show this help"
@@ -26,10 +34,6 @@ distclean_up() {
 	rm -f hpcdata-*
 	clean_up
 }
-
-# default release number: yyyy.mm
-RELEASE=`date +"%Y.%m"`
-VERBOSE=0
 
 while [[ $# -gt 0 ]]
 do
@@ -63,6 +67,8 @@ done
 set -- "${POSITIONAL[@]}" # restore positional parameters
 
 FILES="edu.rice.cs.hpcviewer.product/target/repository/plugins/ca.odell.glazedlists*.jar \
+	edu.rice.cs.hpcviewer.product/target/repository/plugins/org.yaml.snakeyaml*.jar \
+	edu.rice.cs.hpcviewer.product/target/repository/plugins/org.apache.commons.math3*.jar \
 	edu.rice.cs.hpcviewer.product/target/repository/plugins/org.eclipse.collections*.jar \
 	externals/graphbuilder/target/com.graphbuilder-*.jar \
 	edu.rice.cs.hpcdata/target/edu.rice.cs.hpcdata-*.jar \
