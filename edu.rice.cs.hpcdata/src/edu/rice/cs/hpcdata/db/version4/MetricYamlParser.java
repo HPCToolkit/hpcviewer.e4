@@ -41,7 +41,9 @@ import edu.rice.cs.hpcdata.experiment.metric.format.MetricValuePredefinedFormat;
  *********************************************************/
 public class MetricYamlParser 
 {
-	private static final int MAX_ALIASES = 1000;
+	// fix issue #269: we may have more than 1000 metrics, 
+	// especially if we use both GPU and statistics
+	private static final int MAX_ALIASES = 10000;
 	
 	private static final String FILENAME_YAML = File.separator + "metrics" + File.separator + "default.yaml";
 	
