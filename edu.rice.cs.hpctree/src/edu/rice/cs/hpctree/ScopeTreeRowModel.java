@@ -1,12 +1,12 @@
 package edu.rice.cs.hpctree;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.nebula.widgets.nattable.layer.ILayerListener;
 import org.eclipse.nebula.widgets.nattable.layer.event.ILayerEvent;
-import org.eclipse.nebula.widgets.nattable.layer.event.StructuralRefreshEvent;
 import org.eclipse.nebula.widgets.nattable.sort.ISortModel;
 import org.eclipse.nebula.widgets.nattable.sort.SortDirectionEnum;
 import org.eclipse.nebula.widgets.nattable.tree.AbstractTreeRowModel;
@@ -25,7 +25,7 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
  ***********************************************************/
 public class ScopeTreeRowModel extends AbstractTreeRowModel<Scope> implements ISortModel, ILayerListener
 {
-	private final String ERR_MSG_NOTSUPPORTED = "NOT SUPPORTED";
+	private static final String ERR_MSG_NOTSUPPORTED = "NOT SUPPORTED";
 
 	
 	public ScopeTreeRowModel(IScopeTreeData treeData) {
@@ -72,7 +72,7 @@ public class ScopeTreeRowModel extends AbstractTreeRowModel<Scope> implements IS
 	
 	@Override
     public List<Integer> expandAll() {
-		throw new RuntimeException(ERR_MSG_NOTSUPPORTED);
+		throw new IllegalCallerException(ERR_MSG_NOTSUPPORTED);
 	}
 
 	@Override
@@ -103,7 +103,7 @@ public class ScopeTreeRowModel extends AbstractTreeRowModel<Scope> implements IS
 	@SuppressWarnings({ "rawtypes" })
 	@Override
 	public List<Comparator> getComparatorsForColumnIndex(int columnIndex) {
-		return null;
+		return Collections.emptyList();
 	}
 
 	@Override
@@ -126,10 +126,7 @@ public class ScopeTreeRowModel extends AbstractTreeRowModel<Scope> implements IS
 	
 	@Override
 	public void handleLayerEvent(ILayerEvent event) {
-		if (event instanceof StructuralRefreshEvent
-                && ((StructuralRefreshEvent) event).isHorizontalStructureChanged()) {
-			System.out.println("table layer event: " + event.toString());
-		}
+		// unused
 	}
 
 	public boolean isChildrenVisible(Scope scope) {
@@ -154,11 +151,11 @@ public class ScopeTreeRowModel extends AbstractTreeRowModel<Scope> implements IS
 
 	@Override
 	public List<Integer> expandToLevel(int parentIndex, int level) {
-		throw new RuntimeException(ERR_MSG_NOTSUPPORTED);
+		throw new IllegalCallerException(ERR_MSG_NOTSUPPORTED);
 	}
 
 	@Override
 	public List<Integer> expandToLevel(int level) {
-		throw new RuntimeException(ERR_MSG_NOTSUPPORTED);
+		throw new IllegalCallerException(ERR_MSG_NOTSUPPORTED);
 	}
 }

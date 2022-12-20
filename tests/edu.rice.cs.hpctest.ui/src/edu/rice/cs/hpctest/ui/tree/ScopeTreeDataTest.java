@@ -32,7 +32,7 @@ public class ScopeTreeDataTest
 		 
 		int i=0;
 
-		for (var path: database) {			
+		for (var path: database) {
 			assertNotNull(path);
 
 			experiments[i]= new Experiment();
