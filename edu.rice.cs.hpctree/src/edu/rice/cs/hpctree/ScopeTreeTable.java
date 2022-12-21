@@ -464,7 +464,9 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 			w = Math.max(treeColumnWidth, w);
 		}
 		if (w >= areaWidth) {
-			w = areaWidth - widthFirstMetricColumn;
+			// avoid setting to negative number if areaWidth is smaller than widthFirstMetricColumn
+			// This occurs during the unit test, but can also happen in the real world.
+			w = Math.max(TREE_COLUMN_WIDTH - 10, areaWidth - widthFirstMetricColumn);
 		}
 		bodyDataLayer.setColumnWidthByPosition(0, w);
 		

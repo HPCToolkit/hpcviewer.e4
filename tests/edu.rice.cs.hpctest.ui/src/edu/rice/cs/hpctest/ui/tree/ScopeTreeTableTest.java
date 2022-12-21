@@ -12,6 +12,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpctest.util.TestDatabase;
 import edu.rice.cs.hpctree.ScopeTreeData;
@@ -20,14 +21,18 @@ import edu.rice.cs.hpctree.ScopeTreeTable;
 public class ScopeTreeTableTest 
 {
 	private static List<ScopeTreeTable> treeTables;
+	private static List<ScopeTreeData>  listData;
 	private static Shell shell;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		var database = TestDatabase.getDatabases();
 		shell = new Shell(Display.getDefault());
+		shell.setSize(1000, 500);
 		
+		listData = new ArrayList<>();
 		treeTables = new ArrayList<>();
+		
 		for (var path: database) {
 			assertNotNull(path);
 
@@ -47,9 +52,17 @@ public class ScopeTreeTableTest
 
 			var treeData = new ScopeTreeData(root, experiment);			
 			ScopeTreeTable table = new ScopeTreeTable(shell, 0, treeData);
+			
+			var natTable = table.getTable();
+			natTable.setSize(900, 400);
+			var size = natTable.getSize();
+			
+			assertTrue(size.x >0 && size.y > 0);
+			
 			table.setRoot(root);
 			assertNotNull(table.getRoot());
 			
+			listData.add(treeData);
 			treeTables.add(table);
 		}
 	}
@@ -58,12 +71,17 @@ public class ScopeTreeTableTest
 	public static void tearDownAfterClass() {
 		treeTables.stream().close();
 		treeTables.clear();
+		
+		listData.stream().close();
+		listData.clear();
+		
 		shell.dispose();
 	}
 
 
 	@Test
 	public void testHideColumn() {
+		int i=0;
 		for(var table: treeTables) {
 			var tbl = table.getTable();
 			assertNotNull(tbl);
@@ -81,6 +99,23 @@ public class ScopeTreeTableTest
 			hiddenIndexes = table.getHiddenColumnIndexes();
 			assertNotNull(hiddenIndexes);
 			assertTrue(hiddenIndexes.length == origHiddenIndexes.length);
+			
+			var data = listData.get(i);
+			int numColumns = data.getMetricCount();
+			for(int j=1; j<=numColumns; j++) {
+				// tricky test: 
+				//  the table works with column 0 for the tree
+				//     and column 1 .. n for the metrics
+				//  the data works with column 0 for the first metric
+				//     and column n-1 for the last metric
+				var metric = table.getMetric(j);
+				var metric2 = data.getMetric(j-1);
+				assertEquals(metric, metric2);
+			}
+			
+			assertTrue(table.getSortedColumn() >= 0);
+			
+			i++;
 		}
 	}
 
@@ -100,6 +135,10 @@ public class ScopeTreeTableTest
 			table.clearSelection();
 			scope = table.getSelection();
 			assertNull(scope);
+			
+			root.setCounter(1);
+			table.reset((RootScope) root);
+			assertTrue(table.getRoot().getCounter() == 1);
 			
 			var children = table.traverseOrExpand(root);
 			if (children != null && !children.isEmpty()) {
