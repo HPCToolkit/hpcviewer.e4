@@ -47,6 +47,9 @@ public class ScopeTreeTableTest
 
 			var treeData = new ScopeTreeData(root, experiment);			
 			ScopeTreeTable table = new ScopeTreeTable(shell, 0, treeData);
+			table.setRoot(root);
+			assertNotNull(table.getRoot());
+			
 			treeTables.add(table);
 		}
 	}
@@ -98,6 +101,18 @@ public class ScopeTreeTableTest
 			scope = table.getSelection();
 			assertNull(scope);
 			
+			var children = table.traverseOrExpand(root);
+			if (children != null && !children.isEmpty()) {
+				int order = 0;
+				for(var child: children) {
+					var index = table.indexOf(child);
+					assertTrue(index > order);
+					
+					assertEquals(root, child.getParentScope());
+					
+					order++;
+				}
+			}
 			table.traverseOrExpand(0);
 		}
 	}
