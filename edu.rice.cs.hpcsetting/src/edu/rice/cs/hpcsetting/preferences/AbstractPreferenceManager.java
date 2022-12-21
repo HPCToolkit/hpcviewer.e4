@@ -1,7 +1,6 @@
 package edu.rice.cs.hpcsetting.preferences;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -37,8 +36,8 @@ public abstract class AbstractPreferenceManager
 		
 		if (preferenceStore == null) {
 			
-			String filename = getPreferenceStoreLocation();
 			try {
+				String filename = getPreferenceStoreLocation();
 				URL url = new URL("file", null, filename);
 				String path = url.getFile();
 				
@@ -58,29 +57,32 @@ public abstract class AbstractPreferenceManager
 				// has to set the default AFTER the loading
 				setDefaults();
 
-			} catch (FileNotFoundException e) {
-				File file = new File(filename);
-				try {
-					if (!file.createNewFile())
-						return null;
-				} catch (IOException e1) {
-					// not accessible error
-					// nothing we can do
-				}
 
 			} catch (MalformedURLException e) {
 				// this can't be right
 				var logger = LoggerFactory.getLogger(getClass());
 				logger.error("MalformedURLException: " + e.getMessage());
-			} catch (IOException e) {
+			} catch (Exception e) {
 				var logger = LoggerFactory.getLogger(getClass());
 				logger.error("Something wrong with the IO:" + e.getMessage());
+			}
+		}
+		if (preferenceStore == null) {
+			try {
+				var tmpFile = File.createTempFile("pref", "hpcviewer");
+				preferenceStore = new PreferenceStore(tmpFile.getAbsolutePath());
+			} catch (IOException e) {
+				// gives up
 			}
 		}
 		return preferenceStore;
 	}
 	
-	
+
+	/****
+	 * get the file path of the preference
+	 * @return String
+	 */
 	public String getPreferenceStoreLocation() {
 		Location location = Platform.getInstanceLocation();
 		

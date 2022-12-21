@@ -260,7 +260,7 @@ public class ScopeTreeLayer extends AbstractLayerTransform implements IUniqueInd
      */
     public void expandTreeRow(int parentIndex) {
     	List<Scope> children = this.treeRowModel.getDirectChildren(parentIndex);
-    	if (children == null || children.size() == 0)
+    	if (children == null || children.isEmpty())
     		return;
     	
     	// issue #189 need to clear selected row if it's within the expanded rows
