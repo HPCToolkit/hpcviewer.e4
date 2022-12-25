@@ -1,0 +1,102 @@
+package edu.rice.cs.hpctest.ui.tree;
+
+import static org.junit.Assert.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
+import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
+import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
+import edu.rice.cs.hpctest.util.TestDatabase;
+import edu.rice.cs.hpctree.BottomUpScopeTreeData;
+
+
+public class BottomUpScopeTreeDataTest 
+{
+	static List<BottomUpScopeTreeData> treeData;
+
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+		var database    = TestDatabase.getDatabases();
+		treeData = new ArrayList<>();
+		 
+		for (var path: database) {
+			assertNotNull(path);
+
+			var experiment = new Experiment();
+			try {
+				experiment.open(path, null, Experiment.ExperimentOpenFlag.TREE_ALL);
+			} catch (Exception e) {
+				assertFalse(e.getMessage(), true);
+			}			
+			assertNotNull(experiment.getRootScope());
+			
+			var cctRoot = experiment.getRootScope(RootScopeType.CallingContextTree);
+			assertNotNull(cctRoot);
+			
+			var buRoot = experiment.getRootScope(RootScopeType.CallerTree);
+			assertNotNull(buRoot);
+
+			buRoot = experiment.createCallersView(cctRoot, buRoot);
+			assertNotNull(buRoot);
+			
+			var data = new BottomUpScopeTreeData(buRoot, experiment);
+			treeData.add(data);
+		}
+	}
+
+	@AfterClass
+	public static void tearDownAfterClass() {
+		for(var data: treeData) {
+			data.clear();
+			data.getRoot().dispose();
+		}
+	}
+
+
+	@Test
+	public void testGetChildrenScope() {
+		for(var data: treeData) {
+			var root = data.getRoot();
+			assertNotNull(root);
+			
+			if (!data.hasChildren(root))
+				continue;
+			
+			var children = data.getChildren(root);
+			assertNotNull(children);
+			
+			if (!children.isEmpty()) {
+				var sortedColumn = data.getSortedColumn();
+				float rootVal = 0.0f;
+				float delta = 0.0f;
+				BaseMetric metric = null;
+				
+				if (sortedColumn > 0) {
+					metric = data.getMetric(sortedColumn-1);
+					rootVal = metric.getValue(root).getValue();
+					delta   = rootVal * 0.0001f;
+				}
+				
+				for(var child: children) {
+					assertNotNull(child);
+					assertTrue(child instanceof ProcedureScope);
+					assertEquals(root, child.getParentScope());
+					
+					if (sortedColumn > 0) {
+						var mv = metric.getValue(child).getValue();
+						assertTrue( mv <= delta + rootVal);
+					}						
+				}
+			}
+		}
+
+	}
+
+}
