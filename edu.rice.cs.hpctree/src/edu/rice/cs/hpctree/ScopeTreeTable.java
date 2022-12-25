@@ -573,8 +573,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		
 		if (currentNode != null) {
 			// preserve the selection
-			var selectedPath = (FastList<Scope>) treeData.getPath(currentNode);
-			reversePath  = selectedPath.reverseThis();
+			reversePath  = (FastList<Scope>) treeData.getPath(currentNode);
 			expandedNodes = new int[reversePath.size()];
 			
 			int i=0;

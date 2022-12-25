@@ -51,7 +51,7 @@ public class ScopeTreeDataTest
 
 
 	@Test
-	public void testMain() {		
+	public void testMain() {
 		for (ScopeTreeData tree: treeData) {
 			var root = tree.getRoot();
 			assertNotNull(root);

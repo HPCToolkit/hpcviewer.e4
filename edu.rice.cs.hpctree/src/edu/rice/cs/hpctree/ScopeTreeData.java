@@ -178,13 +178,13 @@ public class ScopeTreeData implements IScopeTreeData
 	
 	@Override
 	public List<Scope> getPath(Scope node) {
-		List<Scope> path = FastList.newList();
+		FastList<Scope> path = FastList.newList();
 		Scope current = node;
 		while(current != null  &&  !isRootScope(current)) {
 			path.add(current);
 			current = current.getParentScope();
 		}
-		return path;
+		return path.reverseThis();
 	}
 	
 	@Override
@@ -282,27 +282,6 @@ public class ScopeTreeData implements IScopeTreeData
 	}
 
 	
-	/***
-	 * Retrieve the ancestor of specific depth from a scope  
-	 * @param scope the current scope
-	 * @param currentDepth the depth of the current scope
-	 * @param targetDepth the depth of the ancestor
-	 * @return the ancestor if exists, {@code null} otherwise
-	 */
-	public static Scope getAncestor(Scope scope, int currentDepth, int targetDepth) {
-		if (scope == null)
-			return null;
-		
-		int depth=currentDepth-1;
-		var current = scope.getParentScope();
-		
-		for (;depth>targetDepth && current != null; depth--) {
-			current = current.getParentScope();
-		}
-		return current;		
-	}
-
-	
 	/********************************************************************
 	 * 
 	 * comparator for the table. 
@@ -314,9 +293,9 @@ public class ScopeTreeData implements IScopeTreeData
 	{
 		private final BaseMetric metric;
 		private final SortDirectionEnum dir;
-		private final IScopeTreeData treeData;
+		private final ScopeTreeData treeData;
 		
-		public ColumnComparator(IScopeTreeData treeData, int columnIndex, SortDirectionEnum dir) {
+		public ColumnComparator(ScopeTreeData treeData, int columnIndex, SortDirectionEnum dir) {
 			this.treeData = treeData;
 			this.dir = dir;
 			if (columnIndex == 0)
@@ -329,25 +308,21 @@ public class ScopeTreeData implements IScopeTreeData
 		public int compare(Scope o1, Scope o2) {
             int result = 0;
 			if (o1.getParentScope() != null && o2.getParentScope() != null) {
-				int d1 = this.treeData.getDepthOfData(o1);
-				int d2 = this.treeData.getDepthOfData(o2);
+				int d1 = treeData.getDepthOfData(o1);
+				int d2 = treeData.getDepthOfData(o2);
 				
-				if (d1 > d2) {
-					var ancestor1 = ScopeTreeData.getAncestor(o1, d1, d2);
-					result = ScopeTreeData.compareNodes(ancestor1, o2, metric, dir);
-					if (result == 0) {
-						return 1;
-					}
-				} else if (d1 < d2) {
-					var ancestor2 = ScopeTreeData.getAncestor(o2, d2, d1);
-					result = ScopeTreeData.compareNodes(o1, ancestor2, metric, dir);
-					if (result == 0) {
-						return -1;
-					}
+				var path1 = treeData.getPath(o1);
+				var path2 = treeData.getPath(o2);
+				
+				for(int d=0; d < d1 && d < d2; d++) {
+					var node1 = path1.get(d);
+					var node2 = path2.get(d);
 					
-				} else {
-					result = ScopeTreeData.compareNodes(o1, o2, metric, dir);
+					result = ScopeTreeData.compareNodes(node1, node2, metric, dir);
+					if (result != 0)
+						return result;
 				}
+				result = d1 - d2;
 			}
 			return result;
 		}		
@@ -421,7 +396,8 @@ public class ScopeTreeData implements IScopeTreeData
 				result = o1.getCCTIndex() - o2.getCCTIndex();
 			}
 			// if cct-id of o1 and cct-id of o2 are identical, it must be a bug
-			assert(result != 0);
+			// or we are at the bottom-up tree where we are allowed to merge two
+			// nodes into a single node
 			if (result == 0) {
 				// Issue #267 this is to make sure o1 and o2 are NOT identical.
 				result = System.identityHashCode(o1) - System.identityHashCode(o2);
