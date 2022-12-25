@@ -99,8 +99,8 @@ public class ScopeTreeDataTest
 				assertTrue(child == scope);
 				
 				var path = tree.getPath(scope);
-				assertEquals(path.get(0), scope);
-				assertEquals(path.get(path.size()-1).getParentScope(), root);
+				assertEquals(path.get(0).getParentScope(), root);
+				assertEquals(path.get(path.size()-1), scope);
 				
 				checkMetrics(list, tree);
 				
