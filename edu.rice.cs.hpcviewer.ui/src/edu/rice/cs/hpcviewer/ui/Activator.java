@@ -5,7 +5,6 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
 import edu.rice.cs.hpcdata.util.JavaValidator;
-import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 import edu.rice.cs.hpcviewer.ui.util.ApplicationProperty;
 
 
@@ -37,7 +36,6 @@ public class Activator implements BundleActivator
 				System.exit(0);
 			}
 		}
-		IconManager.getInstance().init();
 	}
 
 	public void stop(BundleContext bundleContext) throws Exception {
