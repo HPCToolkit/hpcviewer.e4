@@ -36,7 +36,7 @@ public class ZoomAction implements IUndoableActionListener
 	public ZoomAction (IUndoableActionManager actionManager, IScopeTreeAction treeAction) {
 		this.treeAction    = treeAction;
 		this.actionManager = actionManager;
-		this.stackRootTree = new Stack<Scope>();
+		this.stackRootTree = new Stack<>();
 
 		actionManager.addActionListener(ZoomAction.CONTEXT, this);
 	}
@@ -69,7 +69,7 @@ public class ZoomAction implements IUndoableActionListener
 			return;
 		
 		Scope parent; 
-		if(stackRootTree.size()>0) {
+		if(!stackRootTree.isEmpty()) {
 			// the tree has been zoomed
 			parent = stackRootTree.pop();
 			actionManager.undo();
@@ -79,7 +79,7 @@ public class ZoomAction implements IUndoableActionListener
 
 		} else {
 			// case where the tree hasn't been zoomed
-			// FIXME: there must be a bug if the code comes to here !
+			// there must be a bug if the code comes to here !
 			parent = treeAction.getRoot();
 			throw( new java.lang.RuntimeException("ScopeViewActions - illegal zoomout: "+parent));
 		}
@@ -95,7 +95,7 @@ public class ZoomAction implements IUndoableActionListener
 		
 		boolean bRet = (stackRootTree != null);
 		if (bRet) {
-			bRet = ( stackRootTree.size()>0 );
+			bRet = ( !stackRootTree.isEmpty() );
 		}
 		return bRet;
 	}

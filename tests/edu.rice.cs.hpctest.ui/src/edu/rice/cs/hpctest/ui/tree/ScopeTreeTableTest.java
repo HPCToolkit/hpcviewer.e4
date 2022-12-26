@@ -136,9 +136,20 @@ public class ScopeTreeTableTest
 			scope = table.getSelection();
 			assertNull(scope);
 			
+			// number of rows includes the row header
+			int numRows = table.getTable().getRowCount()-1;
+
+			// select the last row (zero-index based) 
+			table.setSelection(numRows-1);
+			scope = table.getSelection();
+			
+			// test for resetting the table
 			root.setCounter(1);
 			table.reset((RootScope) root);
 			assertTrue(table.getRoot().getCounter() == 1);
+			
+			// check if we preserve the selection
+			assertEquals(scope, table.getSelection());
 			
 			var children = table.traverseOrExpand(root);
 			if (children != null && !children.isEmpty()) {
