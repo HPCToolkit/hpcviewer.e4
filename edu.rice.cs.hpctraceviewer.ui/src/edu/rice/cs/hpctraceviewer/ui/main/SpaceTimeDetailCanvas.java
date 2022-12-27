@@ -1101,7 +1101,11 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		// -----------------------------------------------------------------------
 
 		final Rectangle view = getClientArea();
-		if (view.width <= 0 || view.height <= 0) 
+
+		// the refresh method is also called when we turn on or off the debugging mode
+		// it's possible that when this happens, the trace view is not yet created.
+		// hence, stData can be null or the view is not even set.
+		if (view.width <= 0 || view.height <= 0 || stData == null) 
 			return;
 		
 		final TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
