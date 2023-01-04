@@ -24,7 +24,12 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
  *
  ****************************************************************/
 public class HierarchicalMetric extends AbstractMetricWithFormula
-{	
+{
+	// fix issue #273: if the epsilon is too small, 
+	//   it will escape that the result of the reduce operation
+	//   can be zero. So far 0.00001 is not too small not too big.
+	static final float INSIGNIFICANT_NUMBER = 0.00001f;
+
 	private static final byte COMBINE_UNKNOWN = -1;
 	
 	private static final String []COMBINE_LABEL = {"Sum", "Min", "Max", "Mean", "StdDev", "CfVar"};
@@ -189,7 +194,6 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 		if (formula.equals("1"))
 			return MetricValue.NONE;
 		
-		final float INSIGNIFICANT_NUMBER = 0.000001f;
 		if (source == MetricValue.NONE)
 			return target;
 
