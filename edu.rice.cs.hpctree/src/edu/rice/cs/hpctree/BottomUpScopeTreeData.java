@@ -49,10 +49,6 @@ public class BottomUpScopeTreeData extends ScopeTreeData
 
 	@Override
 	public boolean hasChildren(Scope object) {
-		if (object instanceof IMergedScope) {
-			return ((IMergedScope)object).hasScopeChildren();
-		}
-			
 		return object.hasChildren();
 	}
 }

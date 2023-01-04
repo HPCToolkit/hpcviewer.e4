@@ -5,10 +5,19 @@ import java.util.LinkedList;
 import edu.rice.cs.hpcdata.experiment.metric.AbstractCombineMetric;
 import edu.rice.cs.hpcdata.experiment.scope.filters.MetricValuePropagationFilter;
 
-public class CallerScopeBuilder {
+public class CallerScopeBuilder 
+{
 	
 	// number of maximum "descendants" in callers tree
-	static private final int MAX_DESC = 2;
+	private static final int MAX_DESC = 2;
+
+	
+	/****
+	 * Private constructor to avoid calling implicit constructor
+	 */
+	private CallerScopeBuilder() {
+		// unused
+	}
 
 	
 	/******
@@ -21,7 +30,7 @@ public class CallerScopeBuilder {
 	 * 
 	 * @return list of call path
 	 */
-	static public LinkedList<CallSiteScopeCallerView> createCallChain(RootScope root_caller_tree,
+	public static LinkedList<CallSiteScopeCallerView> createCallChain(RootScope root_caller_tree,
 			Scope scope_cct, Scope scope_cost, AbstractCombineMetric combine, 
 			MetricValuePropagationFilter inclusiveOnly, MetricValuePropagationFilter exclusiveOnly ) {
 		//-----------------------------------------------------------------------
@@ -117,11 +126,11 @@ public class CallerScopeBuilder {
 	 * @param inclusiveOnly
 	 * @param exclusiveOnly
 	 */
-	static public void mergeCallerPath(IMergedScope.MergingStatus status, int counter_to_assign, Scope callee, 
+	public static void mergeCallerPath(IMergedScope.MergingStatus status, int counter_to_assign, Scope callee, 
 			LinkedList<CallSiteScopeCallerView> callerPathList, AbstractCombineMetric combineMetric,
 			MetricValuePropagationFilter inclusiveOnly, MetricValuePropagationFilter exclusiveOnly) 
 	{
-		if (callerPathList.size() == 0) return; // merging an empty path is trivial
+		if (callerPathList.isEmpty()) return; // merging an empty path is trivial
 
 		CallSiteScopeCallerView first = callerPathList.removeFirst();
 
@@ -183,7 +192,7 @@ public class CallerScopeBuilder {
 	 * @param first: the first child
 	 * @param callerPathList: list of children (excluding the first child)
 	 */
-	static public void addNewPathIntoTree(Scope callee, CallSiteScopeCallerView first,
+	public static void addNewPathIntoTree(Scope callee, CallSiteScopeCallerView first,
 			LinkedList<CallSiteScopeCallerView> callerPathList) {
 		
 		callee.addSubscope(first);
@@ -205,7 +214,7 @@ public class CallerScopeBuilder {
 	 * @param innerCS
 	 * @return
 	 */
-	static private boolean isCallSiteCandidate(Scope scope, Scope innerCS) {
+	private static boolean isCallSiteCandidate(Scope scope, Scope innerCS) {
 		return ( ((scope instanceof CallSiteScope)    || 
 			  	  (scope instanceof ProcedureScope)   ||
 				  (scope instanceof InstructionScope))

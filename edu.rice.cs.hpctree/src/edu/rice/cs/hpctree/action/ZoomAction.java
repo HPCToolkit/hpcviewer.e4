@@ -5,7 +5,6 @@ package edu.rice.cs.hpctree.action;
 
 import java.util.Stack;
 
-import edu.rice.cs.hpcdata.experiment.scope.CallSiteScopeCallerView;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpctree.IScopeTreeAction;
 import edu.rice.cs.hpctree.action.IUndoableActionManager.IUndoableActionListener;
@@ -112,12 +111,7 @@ public class ZoomAction implements IUndoableActionListener
 		Scope input = treeAction.getRoot();
 		if (input == node)
 			return false;
-		
-		if (node instanceof CallSiteScopeCallerView) {
-			// in caller view, we don't know exactly how many children a scope has
-			// the most reliable way is to retrieve the "mark" if the scope has a child or not
-			return ((CallSiteScopeCallerView)node).hasScopeChildren();
-		}
+
 		return ( node.hasChildren());
 	}
 

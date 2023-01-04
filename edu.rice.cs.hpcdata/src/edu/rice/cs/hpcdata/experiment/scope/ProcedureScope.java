@@ -255,11 +255,6 @@ public boolean toBeElided()
 {
 	return procedureFeature == FEATURE_ELIDED;
 }
-
-@Override
-public boolean hasScopeChildren() {
-	return node.hasChildren();
-}
 }
 
 
