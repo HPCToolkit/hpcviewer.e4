@@ -81,7 +81,8 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 			tracePart.getOperationHistory().addOperationHistoryListener(this);
 		}
 		this.stData = stData;
-		visibleDepths = stData.getMaxDepth();
+		// this is to ensure that visible depth is not zero
+		visibleDepths = Math.max(1, stData.getMaxDepth());
 	}
 	
 	@Override

@@ -54,7 +54,9 @@ public class TraceScopeVisitor implements IScopeVisitor
 	public TraceScopeVisitor() {
 		callpath = new CallPath();
 		currentDepth = 0;
-		maxDepth = 0;
+		// this is to fix the problem with "division by zero"
+		// we force the max depth to be 1 since it will be used elsewhere		
+		maxDepth = 1;
 	}
 
 	/***
