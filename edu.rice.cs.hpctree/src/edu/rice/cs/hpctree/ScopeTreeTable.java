@@ -464,7 +464,9 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 			w = Math.max(treeColumnWidth, w);
 		}
 		if (w >= areaWidth) {
-			w = areaWidth - widthFirstMetricColumn;
+			// avoid setting to negative number if areaWidth is smaller than widthFirstMetricColumn
+			// This occurs during the unit test, but can also happen in the real world.
+			w = Math.max(TREE_COLUMN_WIDTH - 10, areaWidth - widthFirstMetricColumn);
 		}
 		bodyDataLayer.setColumnWidthByPosition(0, w);
 		
@@ -571,8 +573,7 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		
 		if (currentNode != null) {
 			// preserve the selection
-			var selectedPath = (FastList<Scope>) treeData.getPath(currentNode);
-			reversePath  = selectedPath.reverseThis();
+			reversePath  = (FastList<Scope>) treeData.getPath(currentNode);
 			expandedNodes = new int[reversePath.size()];
 			
 			int i=0;

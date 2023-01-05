@@ -124,8 +124,8 @@ public class TableFontConfiguration implements IConfiguration, IPropertyChangeLi
 	}
 
 	@Override
-	public void configureUiBindings(UiBindingRegistry uiBindingRegistry) {}
+	public void configureUiBindings(UiBindingRegistry uiBindingRegistry) { /* not needed */ }
 
 	@Override
-	public void configureLayer(ILayer layer) {}
+	public void configureLayer(ILayer layer) { /* not needed */ }
 }

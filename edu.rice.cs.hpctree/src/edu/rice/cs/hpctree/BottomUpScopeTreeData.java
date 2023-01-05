@@ -11,6 +11,7 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.filters.ExclusiveOnlyMetricPropagationFilter;
 import edu.rice.cs.hpcdata.experiment.scope.filters.InclusiveOnlyMetricPropagationFilter;
+import java.util.Collections;
 
 public class BottomUpScopeTreeData extends ScopeTreeData 
 {
@@ -28,7 +29,7 @@ public class BottomUpScopeTreeData extends ScopeTreeData
 	@Override
 	public List<Scope> getChildren(Scope scope) {
 		if (scope == null)
-			return null;
+			return Collections.emptyList();
 		
 		if (scope instanceof IMergedScope) {
 			IMergedScope ms = (IMergedScope) scope;
@@ -36,18 +37,10 @@ public class BottomUpScopeTreeData extends ScopeTreeData
 			if (listChildren != null) {
 				
 				final BaseMetric metric = getSortedColumn() == 0 ? null : getMetric(getSortedColumn()-1);
-				var comparator = new Comparator<Scope>() {
-
-					@Override
-					public int compare(Scope o1, Scope o2) {
-						Scope s1 = (Scope) o1;
-						Scope s2 = (Scope) o2;				
-						return compareNodes(s1, s2, metric, getSortDirection());
-					}
-				};
+				Comparator<Scope> comparator = (s1, s2) -> compareNodes(s1, s2, metric, getSortDirection()); 
 				listChildren.sort(comparator);
 
-				return (List<Scope>) listChildren;
+				return listChildren;
 			}
 		}
 		return super.getChildren(scope);
@@ -60,6 +53,6 @@ public class BottomUpScopeTreeData extends ScopeTreeData
 			return ((IMergedScope)object).hasScopeChildren();
 		}
 			
-		return object.getSubscopeCount()>0;
+		return object.hasChildren();
 	}
 }

@@ -9,8 +9,6 @@ import edu.rice.cs.hpcbase.ui.BaseIconManager;
 
 /**
  * Singleton class containing global variables for icons 
- * @author laksono
- *
  */
 public class IconManager  extends BaseIconManager
 {
@@ -58,7 +56,7 @@ public class IconManager  extends BaseIconManager
 	 * 
 	 * @return
 	 ********/
-	static public IconManager getInstance() {
+	public static IconManager getInstance() {
 		if (IconManager.__singleton == null) {
 			IconManager.__singleton = new IconManager();
 		}
@@ -70,9 +68,8 @@ public class IconManager  extends BaseIconManager
 	 * window life span. Although calling this multiple times is theoretically
 	 * harmless (never tried).
 	 * 
-	 * @param registry
 	 *************/
-	public void init() {
+	IconManager() {
 		
 		if (isInitialized.compareAndSet(false,true)) {
 			ImageRegistry registry = JFaceResources.getImageRegistry();
@@ -99,6 +96,7 @@ public class IconManager  extends BaseIconManager
 	
 	
 	
+	@Override
 	public Image getImage(final String desc) { 
 		ImageRegistry registry = JFaceResources.getImageRegistry();
 

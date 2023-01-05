@@ -1,1 +1,1 @@
-Release 2022.12. Commit 6abc5c10
+Release 2022.12. Commit 5d599e5e
