@@ -27,8 +27,7 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.TraceScopeVisitor;
 import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpctest.util.TestDatabase;
-
-import edu.rice.cs.hpctest.data.util.TestMetricValue;
+import edu.rice.cs.hpctest.util.TestMetricValue;
 
 public class ExperimentTest 
 {

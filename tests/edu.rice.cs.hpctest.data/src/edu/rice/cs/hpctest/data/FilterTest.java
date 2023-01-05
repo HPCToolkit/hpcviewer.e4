@@ -10,8 +10,8 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.filter.FilterAttribute;
 import edu.rice.cs.hpcdata.filter.IFilterData;
-import edu.rice.cs.hpctest.data.util.TestMetricValue;
 import edu.rice.cs.hpctest.util.TestDatabase;
+import edu.rice.cs.hpctest.util.TestMetricValue;
 
 public class FilterTest 
 {

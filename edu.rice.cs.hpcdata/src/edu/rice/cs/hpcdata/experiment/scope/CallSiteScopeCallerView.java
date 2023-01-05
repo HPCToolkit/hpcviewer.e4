@@ -27,9 +27,6 @@ public class CallSiteScopeCallerView extends CallSiteScope implements IMergedSco
 	
 	private ArrayList<CallSiteScopeCallerView> listOfmerged;
 
-	private static final IncrementalCombineMetricUsingCopy combine_with_dupl = new IncrementalCombineMetricUsingCopy();
-	private static final CombineMetricUsingCopyNoCondition combine_without_cond = new CombineMetricUsingCopyNoCondition();
-	
 	
 	/**
 	 * 
@@ -126,9 +123,10 @@ public class CallSiteScopeCallerView extends CallSiteScope implements IMergedSco
 		//-------------------------------------------------------------------------
 		// construct my own child
 		//-------------------------------------------------------------------------
-		
+		final CombineMetricUsingCopyNoCondition combineWithoutCond = new CombineMetricUsingCopyNoCondition();
+
 		LinkedList<CallSiteScopeCallerView> listOfChain = CallerScopeBuilder.createCallChain
-			(root, scopeCCT, scopeCost, combine_without_cond, inclusiveOnly, exclusiveOnly);
+			(root, scopeCCT, scopeCost, combineWithoutCond, inclusiveOnly, exclusiveOnly);
 
 		if (!listOfChain.isEmpty())
 		{
@@ -146,13 +144,11 @@ public class CallSiteScopeCallerView extends CallSiteScope implements IMergedSco
 				CallSiteScopeCallerView scope = iter.next();
 
 				try {
-					Scope scope_cct = scope.scopeCCT;
-
 					//-------------------------------------------------------------------------
 					// construct the child of this merged scope
 					//-------------------------------------------------------------------------
 					listOfChain = CallerScopeBuilder.createCallChain
-						(root, scope_cct, scope, combine_without_cond, inclusiveOnly, exclusiveOnly);
+						(root, scope.scopeCCT, scope, combineWithoutCond, inclusiveOnly, exclusiveOnly);
 					
 					//-------------------------------------------------------------------------
 					// For recursive function where the counter is more than 1, the counter to 
@@ -166,8 +162,10 @@ public class CallSiteScopeCallerView extends CallSiteScope implements IMergedSco
 					//-------------------------------------------------------------------------
 					// merge (if possible) the path of this new created merged scope
 					//-------------------------------------------------------------------------
+					final IncrementalCombineMetricUsingCopy combineWithDupl = new IncrementalCombineMetricUsingCopy();
+					
 					CallerScopeBuilder.mergeCallerPath(IMergedScope.MergingStatus.INCREMENTAL, counter_to_assign,
-							this, listOfChain, combine_with_dupl, inclusiveOnly, exclusiveOnly);
+							this, listOfChain, combineWithDupl, inclusiveOnly, exclusiveOnly);
 
 				} catch (java.lang.ClassCastException e) {
 					
@@ -176,8 +174,7 @@ public class CallSiteScopeCallerView extends CallSiteScope implements IMergedSco
 					// however thanks to "partial call path", the CCT can have two main procedures !
 					//-------------------------------------------------------------------------
 
-					System.err.println("Warning: dynamically merging procedure scope: " + scope.scopeCCT +
-							" ["+scope.scopeCCT.flat_node_index+"]");
+					throw new IllegalStateException("Warning! dynamically merging procedure scope: " + scope.scopeCCT.getName());
 				}
 			}
 		}
@@ -241,7 +238,7 @@ public class CallSiteScopeCallerView extends CallSiteScope implements IMergedSco
 					target.combine(source, exclusiveOnly);
 				
 			} else {
-				System.err.println("ERROR-ICMUC: the target combine is incorrect: " + target + " -> " + target.getClass() );
+				throw new IllegalStateException("The class target combine is incorrect for " + target.getName() );
 			}
 			
 		}
@@ -275,7 +272,7 @@ public class CallSiteScopeCallerView extends CallSiteScope implements IMergedSco
 				target.setCounter(source.getCounter());
 				
 			} else {
-				System.err.println("ERROR-CMUCNC: the target combine is incorrect: " + target + " -> " + target.getClass() );
+				throw new IllegalStateException("The class target combine is incorrect for " + target.getName() );
 			}
 			
 		}

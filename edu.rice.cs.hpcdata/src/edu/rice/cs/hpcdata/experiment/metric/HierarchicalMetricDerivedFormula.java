@@ -77,9 +77,8 @@ public class HierarchicalMetricDerivedFormula extends HierarchicalMetric
 		var value = derivedFormula.eval(varMap, fctMap);
 		
 		// Usually we don't need to use apache's math to compare zero but in
-		// some cases, it's needed. Let's take the precaution using epsilon 
-		// next time.
-		if (Precision.equals(0.0d, value))
+		// some cases, it's needed.  
+		if (Precision.equals(0.0d, value, INSIGNIFICANT_NUMBER))
 			return MetricValue.NONE;
 		
 		return new MetricValue(value);
