@@ -6,6 +6,7 @@ import org.eclipse.collections.impl.multimap.list.FastListMultimap;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.scope.AlienScope;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
+import edu.rice.cs.hpcdata.experiment.scope.CallSiteScopeFlat;
 import edu.rice.cs.hpcdata.experiment.scope.EntryScope;
 import edu.rice.cs.hpcdata.experiment.scope.FileScope;
 import edu.rice.cs.hpcdata.experiment.scope.GroupScope;
@@ -90,6 +91,10 @@ public class FlatViewScopeVisitor4 extends FlaViewScopeBuilder implements IScope
 			combine(id, flatScope.flatFile, metricScope, exclusive);
 			combine(id, flatScope.flatScope, metricScope, true);
 
+			// for call sites and instruction scopes, we need to add its procedure
+			// to the file scope so that we have two flat nodes:
+			// - the callee scope 
+			// - the procedure scope
 			if (scope instanceof CallSiteScope || scope instanceof InstructionScope) {
 				ProcedureScope procScope;
 				if (scope instanceof CallSiteScope) {
@@ -102,6 +107,10 @@ public class FlatViewScopeVisitor4 extends FlaViewScopeBuilder implements IScope
 				combine(id, procFlatScope.flatLM, metricScope, true);
 				combine(id, procFlatScope.flatFile, metricScope, true);
 				combine(id, procFlatScope.flatScope, metricScope, true);
+				
+				if (flatScope.flatScope instanceof CallSiteScopeFlat) {
+					((CallSiteScopeFlat) flatScope.flatScope).setFlatProcedureScope((ProcedureScope) procFlatScope.flatScope);
+				}
 			}
 
 		} else {
@@ -174,6 +183,15 @@ public class FlatViewScopeVisitor4 extends FlaViewScopeBuilder implements IScope
 		}
 		target.incrementCounter();
 		mapIdToCombinedScopes.put(id, target);
+		
+		// special case for call site:
+		//  we need to store the children of the original cct nodes
+		//  just in case we need to flatten the call site.
+		//  If a CCT call site has a child, then its procedure counterpart
+		//  also has a child. In this case, we can flatten the flat call site.
+		if (target instanceof CallSiteScopeFlat) {
+			((CallSiteScopeFlat)target).combine(source);
+		}
 	}
 	
 	
@@ -205,7 +223,9 @@ public class FlatViewScopeVisitor4 extends FlaViewScopeBuilder implements IScope
 		
 		// create the flat scope
 		FlatScopeInfo flatInfo = new FlatScopeInfo();
-		flatInfo.flatScope = cctScope.duplicate();
+		flatInfo.flatScope = cctScope instanceof CallSiteScope ? 
+								new CallSiteScopeFlat((CallSiteScope) cctScope) : 
+								cctScope.duplicate();
 		flatInfo.flatScope.setRootScope(root);
 		
 		flatInfo.flatFile = (FileScope) flatFile;

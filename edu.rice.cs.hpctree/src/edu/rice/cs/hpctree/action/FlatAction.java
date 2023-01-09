@@ -2,6 +2,8 @@ package edu.rice.cs.hpctree.action;
 
 import java.util.Stack;
 
+import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
+import edu.rice.cs.hpcdata.experiment.scope.CallSiteScopeFlat;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpctree.FlatScopeTreeData;
@@ -53,11 +55,31 @@ public class FlatAction implements IUndoableActionListener
 			boolean addSelf = true;
 			
 			if(node.hasChildren()) {
+				addSelf = false;
 				
 				// this node has children, add the children
 				for (var child: node.getChildren()) {
-					addNode(objFlattenedNode, child);
-					addSelf = false;
+					if (child instanceof CallSiteScopeFlat) {
+						CallSiteScopeFlat csFlat = (CallSiteScopeFlat) child;
+						Scope parent = csFlat.getProcedureScope();
+						
+						// check if the tree has been zoomed-in or not.
+						// - if the tree has never been zoomed, it means they share the same ancestor
+						// - if the root zoom-in is not the ancestor of the procedure scope,
+						//     it means the child nodes of the procedure scope won't be visible if
+						//     we flatten this scope.
+						//     To make sure this scope is visible, we'll include it in the 
+						//     flattened tree.
+						for (; parent != null && parent.getCCTIndex() != 0; parent = parent.getParentScope());
+						
+						if (parent == null || !csFlat.cctHasChildren()) {
+							// it doesn't have the same ancestor between the call site and the procedure:
+							// 	add to the tree
+							addNode(objFlattenedNode, child);
+						}
+					} else if (!(child instanceof CallSiteScope))
+						// old xml database: no call site as a leaf
+						addNode(objFlattenedNode, child);
 				}
 				// we only update the table if there are one or more grand child nodes
 				// move to one level up.
@@ -71,20 +93,18 @@ public class FlatAction implements IUndoableActionListener
 			}
 		}
 		
-		if(updateTable) {
-			if (objFlattenedNode.hasChildren()) {
-				stackFlatNodes.push(root);
-				
-				int level = currentLevel.pop();
-				level++;
-				currentLevel.push(level);
-				
-				treeAction.setRoot(objFlattenedNode);
-				treeData.setCurrentLevel(level);
-				
-				treeAction.traverseOrExpand(0);
-				actionManager.push(CONTEXT);
-			}
+		if(updateTable && objFlattenedNode.hasChildren()) {
+			stackFlatNodes.push(root);
+			
+			int level = currentLevel.pop();
+			level++;
+			currentLevel.push(level);
+			
+			treeAction.setRoot(objFlattenedNode);
+			treeData.setCurrentLevel(level);
+			
+			treeAction.traverseOrExpand(0);
+			actionManager.push(CONTEXT);
 		}
 	}
 	
