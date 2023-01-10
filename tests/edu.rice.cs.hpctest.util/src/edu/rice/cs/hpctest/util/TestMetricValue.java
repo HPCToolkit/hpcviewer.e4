@@ -3,11 +3,18 @@ package edu.rice.cs.hpctest.util;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
+import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
+import edu.rice.cs.hpcdata.experiment.scope.InstructionScope;
+import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 public class TestMetricValue 
@@ -77,4 +84,56 @@ public class TestMetricValue
 		return true;
 	}
 
+	
+	public static void testTreMetriceCorrectnes(List<BaseMetric> metrics, Scope root) {
+		
+		var children = root.getChildren();
+		if (children.isEmpty())
+			return;
+		
+		Map<Integer, Float> totalValues = new HashMap<>();
+		
+		for (var child: children) {
+			testMetricCorrectness(metrics, child, totalValues);
+		}
+	}
+	
+	private static void testMetricCorrectness(List<BaseMetric> metrics, Scope scope, Map<Integer, Float> values) {
+		
+		for(var metric: metrics) {
+			var mv = metric.getValue(scope);
+			
+			var root = scope.getRootScope();
+			var rootMV = metric.getValue(root);
+			var rootValue = rootMV == MetricValue.NONE ? 0.0f : rootMV.getValue();
+
+			if (metric.getMetricType() == MetricType.EXCLUSIVE) {
+				var id = metric.getIndex();
+				float value = mv == MetricValue.NONE ? 0 : mv.getValue();
+				if (!scope.hasChildren() && 
+					!(scope instanceof CallSiteScope)   && 
+					!(scope instanceof InstructionScope) &&
+					!(scope instanceof ProcedureScope)) {
+					values.compute(id, (k, v) -> v == null ? value : value + v);
+				}
+				var currentValue = values.computeIfAbsent(id, v -> 0.0f);
+				assertTrue(rootValue >= currentValue);
+			} else if (rootValue > 0) {
+				// inclusive
+				var delta = floatCompare(rootValue, mv.getValue());
+				assertTrue(delta >= 0);
+			}
+		}
+		
+		if (!scope.hasChildren())
+			return;
+		
+		var children = scope.getChildren();
+		if (children.isEmpty())
+			return;
+		
+		for(var child: children) {
+			testMetricCorrectness(metrics, child, values);
+		}
+	}
 }
