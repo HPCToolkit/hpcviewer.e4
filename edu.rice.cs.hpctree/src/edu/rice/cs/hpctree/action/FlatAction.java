@@ -1,7 +1,7 @@
 package edu.rice.cs.hpctree.action;
 
-import java.util.Stack;
-
+import java.util.ArrayDeque;
+import java.util.Deque;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScopeFlat;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
@@ -15,16 +15,27 @@ public class FlatAction implements IUndoableActionListener
 	private static final String CONTEXT = "Flat";
 	
 	private final IUndoableActionManager actionManager;
-	private IScopeTreeAction treeAction;
-	private Stack<Scope> 	 stackFlatNodes;
-	private Stack<Integer>   currentLevel;
+	private final IScopeTreeAction treeAction;
+	
+	private Deque<Scope> 	  stackFlatNodes;
+	private Deque<Integer>    currentLevel;
 	private FlatScopeTreeData treeData;
 	
+	
+	/****
+	 * Create a flat action performed for a specific tree.
+	 * 
+	 * @param actionManager
+	 * 			{@code IUndoableActionManager} an action manager to store undo/redo actions
+	 * 
+	 * @param treeAction
+	 * 			{@code IScopeTreeAction} an object to allow actions on tree
+	 */
 	public FlatAction(IUndoableActionManager actionManager, IScopeTreeAction treeAction) {
-		this.actionManager = actionManager;
-		this.treeAction = treeAction;
-		this.stackFlatNodes = new Stack<>();
-		currentLevel = new Stack<>();
+		this.actionManager  = actionManager;
+		this.treeAction     = treeAction;
+		this.stackFlatNodes = new ArrayDeque<>();
+		this.currentLevel   = new ArrayDeque<>();
 		currentLevel.push(0);
 		
 		actionManager.addActionListener(ZoomAction.CONTEXT, this);
@@ -41,7 +52,10 @@ public class FlatAction implements IUndoableActionListener
 	 * </ul>
 	 * @param root
 	 */
-	public void flatten(Scope root) {		
+	public void flatten(Scope root) {
+		if (!canFlatten())
+			return;
+		
 		// -------------------------------------------------------------------
 		// copy the "root" of the current input
 		// -------------------------------------------------------------------
@@ -114,11 +128,14 @@ public class FlatAction implements IUndoableActionListener
 	}
 	
 	
+	/*****
+	 * Undo the flattened tree.
+	 * 
+	 * @return {@code boolean}
+	 * 			true if the action can be done sucessfully.
+	 */
 	public boolean unflatten() {
-		if (!actionManager.canUndo(CONTEXT))
-			return false;
-		
-		if (stackFlatNodes.isEmpty())
+		if (!canUnflatten())
 			return false;
 		
 		Scope objParentNode = stackFlatNodes.pop();
