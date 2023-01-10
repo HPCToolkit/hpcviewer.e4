@@ -6,6 +6,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -20,6 +21,7 @@ import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpctest.util.TestDatabase;
+import edu.rice.cs.hpctest.util.TestMetricValue;
 import edu.rice.cs.hpctree.FlatScopeTreeData;
 import edu.rice.cs.hpctree.IScopeTreeAction;
 import edu.rice.cs.hpctree.ScopeTreeTable;
@@ -128,6 +130,13 @@ public class FlatActionTest
 				
 				assertEquals(0, data.treeData.getDepthOfData(0));
 				assertTrue(attempt < 50);
+				
+				var flattenedRoot = data.treeAction.getRoot();
+				var metricManager = data.treeData.getMetricManager();
+				var metrics = metricManager.getNonEmptyMetricIDs(flattenedRoot);
+				var nonEmptyMetrics = metrics.stream().map(metricManager::getMetric).collect(Collectors.toList());
+				
+				TestMetricValue.testTreMetriceCorrectnes(nonEmptyMetrics, flattenedRoot);
 			}
 			// check for the leaf nodes
 			for(var child: data.treeAction.getRoot().getChildren()) {
