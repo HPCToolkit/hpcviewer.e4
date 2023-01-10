@@ -115,17 +115,15 @@ public class FlatActionTest
 			if (root == null)
 				continue;
 			
-			boolean canFlatten = data.action.canFlatten();
-			assertEquals(root.hasChildren(), canFlatten);
+			assertEquals(root.hasChildren(), data.action.canFlatten());
 			assertEquals(0, data.treeData.getDepthOfData(root));
 			
 			int attempt = 0;
-			while (canFlatten) {
+			while (data.action.canFlatten()) {
 				root = data.treeAction.getRoot();
 				
 				data.action.flatten(root);
-				canFlatten = data.action.canFlatten();
-				
+
 				attempt++;
 				
 				assertEquals(0, data.treeData.getDepthOfData(0));
