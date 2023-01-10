@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctest.data.util;
+package edu.rice.cs.hpctest.util;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -12,6 +12,8 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 public class TestMetricValue 
 {
+	private TestMetricValue() { /* not used */ }
+	
 	public static boolean testMetricValueCorrectness(Experiment exp, Scope parent, Scope context) {
 		var mvc = context.getMetricValues();
 		if (mvc == null)

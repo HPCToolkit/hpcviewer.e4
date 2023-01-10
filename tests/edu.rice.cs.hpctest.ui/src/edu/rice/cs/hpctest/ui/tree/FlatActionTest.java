@@ -64,8 +64,7 @@ public class FlatActionTest
 					}
 					
 					@Override
-					public void traverseOrExpand(int index) {
-					}
+					public void traverseOrExpand(int index) { /* not used */ }
 					
 					@Override
 					public void setRoot(Scope scope) {
@@ -73,12 +72,11 @@ public class FlatActionTest
 					}
 					
 					@Override
-					public void refresh() {
-					}
+					public void refresh() { /* not used */ }
 					
 					@Override
 					public int getSortedColumn() {
-						return 0;
+						return exp.getVisibleMetrics().size();
 					}
 					
 					@Override
@@ -92,8 +90,7 @@ public class FlatActionTest
 					}
 					
 					@Override
-					public void export() {
-					}
+					public void export() { /* not used */ }
 				};
 				fa = new FlatAction(new UndoableActionManager(), treeAction);
 				fa.setTreeData(td);
@@ -117,16 +114,19 @@ public class FlatActionTest
 				continue;
 			
 			boolean canFlatten = data.action.canFlatten();
-			assert(root.hasChildren() == canFlatten);
+			assertEquals(root.hasChildren(), canFlatten);
+			assertEquals(0, data.treeData.getDepthOfData(root));
 			
 			int attempt = 0;
 			while (canFlatten) {
 				root = data.treeAction.getRoot();
+				
 				data.action.flatten(root);
 				canFlatten = data.action.canFlatten();
 				
 				attempt++;
 				
+				assertEquals(0, data.treeData.getDepthOfData(0));
 				assertTrue(attempt < 50);
 			}
 			// check for the leaf nodes

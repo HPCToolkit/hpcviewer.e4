@@ -1,13 +1,16 @@
 package edu.rice.cs.hpcdata.experiment.scope;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.AbstractCombineMetric;
+import edu.rice.cs.hpcdata.experiment.scope.filters.ExclusiveOnlyMetricPropagationFilter;
+import edu.rice.cs.hpcdata.experiment.scope.filters.InclusiveOnlyMetricPropagationFilter;
 import edu.rice.cs.hpcdata.experiment.scope.filters.MetricValuePropagationFilter;
-import edu.rice.cs.hpcdata.experiment.scope.visitors.CallersViewScopeVisitor;
 
 
 /****************************************************************************
@@ -24,9 +27,6 @@ public class CallSiteScopeCallerView extends CallSiteScope implements IMergedSco
 	
 	private ArrayList<CallSiteScopeCallerView> listOfmerged;
 
-	static final private IncrementalCombineMetricUsingCopy combine_with_dupl = new IncrementalCombineMetricUsingCopy();
-	static final private CombineMetricUsingCopyNoCondition combine_without_cond = new CombineMetricUsingCopyNoCondition();
-	
 	
 	/**
 	 * 
@@ -62,7 +62,7 @@ public class CallSiteScopeCallerView extends CallSiteScope implements IMergedSco
 	 */
 	public void merge(IMergedScope.MergingStatus status, CallSiteScopeCallerView scope, int counter_to_assign) {
 		if (listOfmerged == null) 
-			listOfmerged = new ArrayList<CallSiteScopeCallerView>();
+			listOfmerged = new ArrayList<>();
 		
 		//-----------------------------------------
 		// During the initialization phase (the first time a caller tree is created,
@@ -94,17 +94,10 @@ public class CallSiteScopeCallerView extends CallSiteScope implements IMergedSco
 		this.flag_scope_has_child = true;
 	}
 	
-	/***
-	 * check if the scope has a child or not
-	 * @return
-	 */
-	public boolean hasScopeChildren() {
-		return this.flag_scope_has_child;
-	}
-
 	
+	@Override
 	public boolean hasChildren() {
-		return hasScopeChildren();
+		return this.flag_scope_has_child;
 	}
 	
 	/*****************
@@ -118,9 +111,9 @@ public class CallSiteScopeCallerView extends CallSiteScope implements IMergedSco
 			MetricValuePropagationFilter inclusiveOnly, 
 			MetricValuePropagationFilter exclusiveOnly ) {
 
-		var children = this.getChildren();
+		var children = node.getChildren();
 
-		if (children != null && children.size()>0) {
+		if (children != null && !children.isEmpty()) {
 			
 			//-------------------------------------------------------------------------
 			// this scope has already computed children, we do nothing, just return them
@@ -130,14 +123,15 @@ public class CallSiteScopeCallerView extends CallSiteScope implements IMergedSco
 		//-------------------------------------------------------------------------
 		// construct my own child
 		//-------------------------------------------------------------------------
-		
+		final CombineMetricUsingCopyNoCondition combineWithoutCond = new CombineMetricUsingCopyNoCondition();
+
 		LinkedList<CallSiteScopeCallerView> listOfChain = CallerScopeBuilder.createCallChain
-			(root, scopeCCT, scopeCost, combine_without_cond, inclusiveOnly, exclusiveOnly);
+			(root, scopeCCT, scopeCost, combineWithoutCond, inclusiveOnly, exclusiveOnly);
 
 		if (!listOfChain.isEmpty())
 		{
 			CallSiteScopeCallerView first = listOfChain.removeFirst();
-			CallersViewScopeVisitor.addNewPathIntoTree(this, first, listOfChain);
+			CallerScopeBuilder.addNewPathIntoTree(this, first, listOfChain);
 		}
 		
 		//----------------------------------------------------------------
@@ -150,13 +144,11 @@ public class CallSiteScopeCallerView extends CallSiteScope implements IMergedSco
 				CallSiteScopeCallerView scope = iter.next();
 
 				try {
-					Scope scope_cct = scope.scopeCCT;
-
 					//-------------------------------------------------------------------------
 					// construct the child of this merged scope
 					//-------------------------------------------------------------------------
-					listOfChain = CallersViewScopeVisitor.createCallChain
-						(root, scope_cct, scope, combine_without_cond, inclusiveOnly, exclusiveOnly);
+					listOfChain = CallerScopeBuilder.createCallChain
+						(root, scope.scopeCCT, scope, combineWithoutCond, inclusiveOnly, exclusiveOnly);
 					
 					//-------------------------------------------------------------------------
 					// For recursive function where the counter is more than 1, the counter to 
@@ -170,8 +162,10 @@ public class CallSiteScopeCallerView extends CallSiteScope implements IMergedSco
 					//-------------------------------------------------------------------------
 					// merge (if possible) the path of this new created merged scope
 					//-------------------------------------------------------------------------
-					CallersViewScopeVisitor.mergeCallerPath(IMergedScope.MergingStatus.INCREMENTAL, counter_to_assign,
-							this, listOfChain, combine_with_dupl, inclusiveOnly, exclusiveOnly);
+					final IncrementalCombineMetricUsingCopy combineWithDupl = new IncrementalCombineMetricUsingCopy();
+					
+					CallerScopeBuilder.mergeCallerPath(IMergedScope.MergingStatus.INCREMENTAL, counter_to_assign,
+							this, listOfChain, combineWithDupl, inclusiveOnly, exclusiveOnly);
 
 				} catch (java.lang.ClassCastException e) {
 					
@@ -180,14 +174,34 @@ public class CallSiteScopeCallerView extends CallSiteScope implements IMergedSco
 					// however thanks to "partial call path", the CCT can have two main procedures !
 					//-------------------------------------------------------------------------
 
-					System.err.println("Warning: dynamically merging procedure scope: " + scope.scopeCCT +
-							" ["+scope.scopeCCT.flat_node_index+"]");
+					throw new IllegalStateException("Warning! dynamically merging procedure scope: " + scope.scopeCCT.getName());
 				}
 			}
 		}
 		return this.getChildren();
 	}
 	
+	
+	@Override
+	public List<Scope> getChildren() {
+		var children = node.getChildren();
+
+		if (children != null && !children.isEmpty()) {
+			
+			//-------------------------------------------------------------------------
+			// this scope has already computed children, we do nothing, just return them
+			//-------------------------------------------------------------------------
+			return children;			
+		}
+		if (hasChildren()) {
+			
+			InclusiveOnlyMetricPropagationFilter inclusiveFilter = new InclusiveOnlyMetricPropagationFilter((Experiment) getRootScope().getExperiment());
+			ExclusiveOnlyMetricPropagationFilter exclusiveFilter = new ExclusiveOnlyMetricPropagationFilter((Experiment) getRootScope().getExperiment());
+			
+			return getAllChildren(inclusiveFilter, exclusiveFilter);
+		}
+		return Collections.emptyList();
+	}
 
 	public int getNumMergedScopes() {
 		if (listOfmerged == null) return 0;
@@ -199,7 +213,7 @@ public class CallSiteScopeCallerView extends CallSiteScope implements IMergedSco
 	 * combination class to combine two metrics
 	 * This class is specifically designed for combining merged nodes in incremental caller view
 	 *************************/
-	static private class IncrementalCombineMetricUsingCopy extends AbstractCombineMetric {
+	private static class IncrementalCombineMetricUsingCopy extends AbstractCombineMetric {
 
 		/*
 		 * (non-Javadoc)
@@ -224,7 +238,7 @@ public class CallSiteScopeCallerView extends CallSiteScope implements IMergedSco
 					target.combine(source, exclusiveOnly);
 				
 			} else {
-				System.err.println("ERROR-ICMUC: the target combine is incorrect: " + target + " -> " + target.getClass() );
+				throw new IllegalStateException("The class target combine is incorrect for " + target.getName() );
 			}
 			
 		}
@@ -235,7 +249,7 @@ public class CallSiteScopeCallerView extends CallSiteScope implements IMergedSco
 	 * combination class specific for the creation of incremental call site
 	 * in this phase, we need to store the information of counter from the source
 	 ************************/
-	static private class CombineMetricUsingCopyNoCondition extends AbstractCombineMetric {
+	private static class CombineMetricUsingCopyNoCondition extends AbstractCombineMetric {
 
 		/*
 		 * (non-Javadoc)
@@ -258,7 +272,7 @@ public class CallSiteScopeCallerView extends CallSiteScope implements IMergedSco
 				target.setCounter(source.getCounter());
 				
 			} else {
-				System.err.println("ERROR-CMUCNC: the target combine is incorrect: " + target + " -> " + target.getClass() );
+				throw new IllegalStateException("The class target combine is incorrect for " + target.getName() );
 			}
 			
 		}

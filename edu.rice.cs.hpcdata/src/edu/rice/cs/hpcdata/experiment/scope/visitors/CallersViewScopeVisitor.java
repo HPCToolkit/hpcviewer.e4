@@ -22,7 +22,7 @@ import edu.rice.cs.hpcdata.experiment.scope.filters.MetricValuePropagationFilter
  * seen in {@code CallSiteScopeCallerView} 
  *
  *************************************************************************/
-public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScopeVisitor 
+public class CallersViewScopeVisitor implements IScopeVisitor 
 {
 	private static final String SEPARATOR = ":";
 
@@ -60,7 +60,7 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 	//----------------------------------------------------
 	// visitor pattern instantiations for each Scope type
 	//----------------------------------------------------
-
+	@Override
 	public void visit(CallSiteScope scope, ScopeVisitType vt) {
 		
 		//--------------------------------------------------------------------------------
@@ -83,6 +83,7 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 	}
 	
 	
+	@Override
 	public void visit(ProcedureScope scope, ScopeVisitType vt) { 
 		
 		//--------------------------------------------------------------------------------
@@ -108,6 +109,7 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 		}
 	}
 	 
+	@Override
 	public void visit(Scope scope, ScopeVisitType vt) { 
 		// we are interested only in instruction scope
 		if (!(scope instanceof InstructionScope))
@@ -133,14 +135,13 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 		}
 	}
 	
-	public void visit(RootScope scope, ScopeVisitType vt) 			{ /* no action */ }
-	public void visit(LoadModuleScope scope, ScopeVisitType vt) 	{ /* no action */ }
-	public void visit(FileScope scope, ScopeVisitType vt) 			{ /* no action */ }
-	public void visit(AlienScope scope, ScopeVisitType vt) 			{ /* no action */ }
-	public void visit(LoopScope scope, ScopeVisitType vt) 			{ /* no action */ }
-	public void visit(StatementRangeScope scope, ScopeVisitType vt) { /* no action */ }
-	public void visit(LineScope scope, ScopeVisitType vt) 			{ /* no action */ }
-	public void visit(GroupScope scope, ScopeVisitType vt) 			{ /* no action */ }
+	@Override public void visit(RootScope scope, ScopeVisitType vt) 			{ /* no action */ }
+	@Override public void visit(LoadModuleScope scope, ScopeVisitType vt) 	    { /* no action */ }
+	@Override public void visit(FileScope scope, ScopeVisitType vt) 			{ /* no action */ }
+	@Override public void visit(LoopScope scope, ScopeVisitType vt) 			{ /* no action */ }
+	@Override public void visit(StatementRangeScope scope, ScopeVisitType vt)   { /* no action */ }
+	@Override public void visit(LineScope scope, ScopeVisitType vt) 			{ /* no action */ }
+	@Override public void visit(GroupScope scope, ScopeVisitType vt) 			{ /* no action */ }
 
 	
 	//----------------------------------------------------
@@ -155,14 +156,14 @@ public class CallersViewScopeVisitor extends CallerScopeBuilder implements IScop
 	 * @param callee: the callee node (the procedure scope of this call chain)
 	 */
 	private void prepareCallChain(Scope scope, ProcedureScope callee) {
-		LinkedList<CallSiteScopeCallerView> callPathList = createCallChain(callersViewRootScope,
+		LinkedList<CallSiteScopeCallerView> callPathList = CallerScopeBuilder.createCallChain(callersViewRootScope,
 				scope, scope, 
 				combinedMetrics, this.inclusiveOnly, this.exclusiveOnly);
 
 		//-------------------------------------------------------
 		// ensure my call path is represented among my children.
 		//-------------------------------------------------------
-		mergeCallerPath(IMergedScope.MergingStatus.INIT, 0, callee, callPathList, 
+		CallerScopeBuilder.mergeCallerPath(IMergedScope.MergingStatus.INIT, 0, callee, callPathList, 
 				combinedMetrics, this.inclusiveOnly, this.exclusiveOnly);
 	}
 	

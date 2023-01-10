@@ -6,19 +6,21 @@ import edu.rice.cs.hpcdata.experiment.scope.filters.MetricValuePropagationFilter
 
 
 /*************
+ * 
  * Interface for a scope class to merge with another scope
  * The implementer of this interface should carefully compute the children of the merged scope
  * 
- * @author laksonoadhianto
- *
  *************/
 public interface IMergedScope {
 	
 	/******
-	 * INIT: initialization phase
-	 * INCREMENTAL: one phase after initialization which incrementally create and merge scopes
+	 * Enumeration for the status of the scope 
+	 * <ul>
+	 *  <li>INIT: initialization phase
+	 * 	<li>INCREMENTAL: one phase after initialization which incrementally create and merge scopes
+	 * </ul>
 	 */
-	static public enum MergingStatus {INIT, INCREMENTAL}
+	public enum MergingStatus {INIT, INCREMENTAL}
 	
 	/******
 	 * Return the children of the current scope which can be merged previously.
@@ -29,6 +31,4 @@ public interface IMergedScope {
 	 */
 	public List<Scope> getAllChildren(MetricValuePropagationFilter inclusiveOnly, 
 										  MetricValuePropagationFilter exclusiveOnly );
-	
-	public boolean hasScopeChildren();
 }
