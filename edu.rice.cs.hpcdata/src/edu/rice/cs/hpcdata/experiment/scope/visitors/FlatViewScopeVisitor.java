@@ -86,21 +86,8 @@ public class FlatViewScopeVisitor extends FlaViewScopeBuilder implements IScopeV
 		//	to the file and load module scope.
 		// This is because we will add the exclusive cost of the line scope
 		//  and we don't want to compute the double cost.
-		//
-		// However, for meta.db this may not be the case since a call site
-		// 	can be a leaf, and it may have no children.
-		//  in this case, we can add its exclusive cost to the file or lm.
-		// 
-		// Corner case: a call site that has another call site, its exclusive
-		//	cost can be added to the file and load module scope.
-		// This is allowed only if it has no line scope
 		
 		boolean add_exclusive = !scope.hasChildren();
-		if (scope.hasChildren()) {
-			add_exclusive = !scope.getChildren().
-								  stream().
-								  anyMatch(child -> !(child instanceof CallSiteScope));
-		}
 		
 		add(scope,vt, true, add_exclusive); 
 	}
@@ -148,14 +135,14 @@ public class FlatViewScopeVisitor extends FlaViewScopeBuilder implements IScopeV
 			if (objFlat != null) {
 				addCostIfNecessary(id, objFlat.flatLM, scope, add_inclusive, add_exclusive);
 				addCostIfNecessary(id, objFlat.flatFile, scope, add_inclusive, add_exclusive);
+			}
 
-				//--------------------------------------------------------------------------
-				// For call site, we need also to create its procedure scope
-				//--------------------------------------------------------------------------
-				if (scope instanceof CallSiteScope) {
-					ProcedureScope proc_cct_s = ((CallSiteScope) scope).getProcedureScope();
-					getFlatCounterPart(proc_cct_s, scope, id);
-				}
+			//--------------------------------------------------------------------------
+			// For call site, we need also to create its procedure scope
+			//--------------------------------------------------------------------------
+			if (scope instanceof CallSiteScope) {
+				ProcedureScope proc_cct_s = ((CallSiteScope) scope).getProcedureScope();
+				getFlatCounterPart(proc_cct_s, scope, id);
 			}
 		} else {
 			

@@ -168,7 +168,7 @@ public class ScopeTreeData implements IScopeTreeData
 		
 
 	
-	private boolean isRootScope(Scope scope) {
+	protected boolean isRootScope(Scope scope) {
 		return (scope == null) || 
 			   (scope instanceof RootScope) || 
 			   (scope.getClass() == root.getClass() &&
@@ -293,9 +293,9 @@ public class ScopeTreeData implements IScopeTreeData
 	{
 		private final BaseMetric metric;
 		private final SortDirectionEnum dir;
-		private final ScopeTreeData treeData;
+		private final IScopeTreeData treeData;
 		
-		public ColumnComparator(ScopeTreeData treeData, int columnIndex, SortDirectionEnum dir) {
+		public ColumnComparator(IScopeTreeData treeData, int columnIndex, SortDirectionEnum dir) {
 			this.treeData = treeData;
 			this.dir = dir;
 			if (columnIndex == 0)
