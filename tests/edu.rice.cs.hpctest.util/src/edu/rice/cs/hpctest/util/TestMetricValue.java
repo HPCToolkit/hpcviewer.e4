@@ -21,7 +21,7 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 public class TestMetricValue 
 {
-	static final float EPSILON = 1f;
+	static final float EPSILON = 0.01f;
 
 	private TestMetricValue() { /* not used */ }
 	
@@ -75,7 +75,8 @@ public class TestMetricValue
 	}
 	
 	public static int floatCompare(float f1, float f2) {
-		return Precision.compareTo(f1, f2, EPSILON * Math.abs(f1-f2));
+		final float epsilon = Math.max(Math.max(f2, f1) * EPSILON, EPSILON);
+		return Precision.compareTo(f1, f2, epsilon);
 	}
 	
 	
