@@ -7,5 +7,6 @@ Bundle-Vendor: Rice University
 Automatic-Module-Name: edu.rice.cs.hpctest.util
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: org.junit,
- edu.rice.cs.hpcdata
+ edu.rice.cs.hpcdata,
+ org.apache.commons.math3
 Export-Package: edu.rice.cs.hpctest.util
