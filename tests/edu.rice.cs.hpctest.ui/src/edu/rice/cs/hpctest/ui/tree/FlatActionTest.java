@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.nebula.widgets.nattable.sort.SortDirectionEnum;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.junit.AfterClass;
@@ -135,6 +136,23 @@ public class FlatActionTest
 				var nonEmptyMetrics = metrics.stream().map(metricManager::getMetric).collect(Collectors.toList());
 				
 				TestMetricValue.testTreMetriceCorrectnes(nonEmptyMetrics, flattenedRoot);
+				
+				// test sorting after flattening
+				for(int sortedColumn = data.treeAction.getSortedColumn()+1; 
+						sortedColumn <= data.treeData.getMetricCount(); 
+						sortedColumn++) {
+					data.treeData.sort(sortedColumn, SortDirectionEnum.DESC, false);
+					var metric = data.treeData.getMetric(sortedColumn-1);
+					var children = data.treeData.getChildren(0);
+
+					TestMetricValue.testSortedMetricCorrectness(metric, flattenedRoot, children.get(0));
+
+					for(int i=0; i<children.size()-1; i+=2) {
+						var child1 = children.get(i);
+						var child2 = children.get(i+1);
+						TestMetricValue.testSortedMetricCorrectness(metric, child1, child2);
+					}
+				}
 			}
 			// check for the leaf nodes
 			for(var child: data.treeAction.getRoot().getChildren()) {
