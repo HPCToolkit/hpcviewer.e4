@@ -203,7 +203,7 @@ public class HierarchicalMetric extends AbstractMetricWithFormula
 
 		var v1 = target.getValue();
 		var v2 = source.getValue();
-		var epsilon = Math.max(Math.max(v1, v2) * INSIGNIFICANT_NUMBER, INSIGNIFICANT_NUMBER);
+		var epsilon = Math.max(v1, v2) * INSIGNIFICANT_NUMBER;
 		
 		if (Precision.equals(v1, v2, epsilon))
 			return MetricValue.NONE; 
