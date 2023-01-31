@@ -31,7 +31,6 @@
   </repository>
  </repositories>
 
-
 	<profiles>
 		<profile>
 			<id>jacoco</id>
@@ -73,7 +72,6 @@
 			</build>
 		</profile>
 	</profiles>
-
 
  <build>
   <pluginManagement>

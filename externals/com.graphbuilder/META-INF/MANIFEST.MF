@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Graphbuilder
+Bundle-SymbolicName: com.graphbuilder
+Bundle-Version: 1.0.0
+Bundle-ClassPath: graphbuilder-1.0.1-SNAPSHOT.jar
+Bundle-Vendor: Unknown
+Export-Package: com.graphbuilder.math,
+ com.graphbuilder.math.func,
+ com.graphbuilder.struc
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Automatic-Module-Name: com.graphbuilder
