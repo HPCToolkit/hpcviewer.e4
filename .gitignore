@@ -1,6 +1,7 @@
-edu.rice.cs.hpc.data/bin/
-edu.rice.cs.hpc.filter/bin/
-edu.rice.cs.hpc.remote/bin/
+edu.rice.cs.hpcdata/.settings
+edu.rice.cs.hpcdata/bin/
+edu.rice.cs.hpcfilter/bin/
+edu.rice.cs.hpcremote/bin/
 edu.rice.cs.hpcbase/bin/
 edu.rice.cs.hpctraceviewer.data/bin/
 edu.rice.cs.hpctraceviewer.ui/bin/
