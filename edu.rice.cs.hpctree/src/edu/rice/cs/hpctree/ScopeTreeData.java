@@ -156,6 +156,8 @@ public class ScopeTreeData implements IScopeTreeData
 	
 	@Override
 	public BaseMetric getMetric(int indexMetricColumn) {
+		// fix issue #277: use the root to get the metrics
+		// if we use the scope, some exclusive metrics will disappear
 		int id = indexesNonEmptyMetrics.get(indexMetricColumn);
 		return metricManager.getMetric(id);
 	}
@@ -163,6 +165,8 @@ public class ScopeTreeData implements IScopeTreeData
 			
 	@Override
 	public int getMetricCount() {
+		// fix issue #277: use the root to get the metrics
+		// if we use the scope, some exclusive metrics will disappear
 		return indexesNonEmptyMetrics.size();
 	}
 		
