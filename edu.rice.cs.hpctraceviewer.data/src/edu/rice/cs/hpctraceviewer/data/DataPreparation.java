@@ -177,7 +177,14 @@ public abstract class DataPreparation
 			// then we should extend the width of the pixel by decrementing the starting pixel
 			if (exposeGPU && currSampleMidpoint == succSampleMidpoint && !currScope.isIdle()) {
 				if (prevScope == null || prevScope.isIdle()) {
-					currSampleMidpoint--;
+					// Fix issue #278: need to take into account the first sample
+					// do not decrement the current pixel if it's the first sample
+					// instead, we sacrifice the next one
+					if (currSampleMidpoint > 0)
+						currSampleMidpoint--;
+					else
+						// This is the first sample: sacrifice the next one
+						succSampleMidpoint++;
 				}
 			}
 			finishLine(procName, currSampleMidpoint, succSampleMidpoint, currDepth, currColor, end - index + 1);

@@ -161,12 +161,41 @@ public class IdTuple
 	 * @return {@code int} 
 	 */
 	public int compareTo(IdTuple another) {
+		for(int i=0; i<kinds.length; i++) {
+			// hack - hack -hack
+			// Fix issue #254 no sort on host nodes and cores
+			if (skipIdTupleFromSorting(kinds[i]))
+				continue;
+
+			// search for the same id tuple type in "another"
+			// E.g: if current id-tuple has RANK, let's search this type
+			//      in "another". If we find the same type, check if 
+			//      the physical or logical index is different or not.
+			for(int j=0; j<another.kinds.length; j++) {
+				if (skipIdTupleFromSorting(another.kinds[j]))
+					continue;
+				
+				if (kinds[i] == another.kinds[j]) {
+					
+					int diff = (int) (physicalIndexes[i] - another.physicalIndexes[j]);
+					if (diff != 0)
+						return diff;
+					
+					diff = logicalIndexes[i] - another.logicalIndexes[j];
+					if (diff != 0)
+						return diff; 
+					
+					break;
+				}
+			}
+		}
+		
 		int minLength = Math.min(kinds.length, another.kinds.length);
 		
 		for(int i=0; i<minLength; i++) {
 			// hack - hack -hack
-			// Fix issue #254 no sort on host node 
-			if (kinds[i] == IdTupleType.KIND_NODE)
+			// Fix issue #254 no sort on host nodes and cores
+			if (skipIdTupleFromSorting(kinds[i]) || skipIdTupleFromSorting(another.kinds[i]))
 				continue;
 			
 			// compare the differences in kind. 
@@ -184,8 +213,14 @@ public class IdTuple
 			diff = logicalIndexes[i] - another.logicalIndexes[i];
 			if (diff != 0)
 				return diff;
-		}
+		} 
+
 		return kinds.length-another.kinds.length;
+	}
+	
+	private boolean skipIdTupleFromSorting(byte idTupleKind) {
+		return idTupleKind == IdTupleType.KIND_NODE ||
+			   idTupleKind == IdTupleType.KIND_CORE;
 	}
 		
 	

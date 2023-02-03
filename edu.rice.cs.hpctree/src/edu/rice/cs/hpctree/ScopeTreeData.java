@@ -44,6 +44,9 @@ public class ScopeTreeData implements IScopeTreeData
 		this.listScopes.add(root);
 		this.metricManager = metricManager;
 		this.root = root;
+		
+		// fix issue #277: use the root to get the metrics
+		// if we use the scope, some exclusive metrics will disappear
 		this.indexesNonEmptyMetrics = metricManager.getNonEmptyMetricIDs(root);
 		
 		clear();
@@ -53,7 +56,10 @@ public class ScopeTreeData implements IScopeTreeData
 	@Override
 	public void refreshAndShift(int shift) {
 		this.sortedColumn += 1;
-		this.indexesNonEmptyMetrics = metricManager.getNonEmptyMetricIDs(root);
+		
+		// fix issue #277: use the root to get the metrics
+		// if we use the scope, some exclusive metrics will disappear
+		this.indexesNonEmptyMetrics = metricManager.getNonEmptyMetricIDs(root.getRootScope());
 	}
 	
 	
@@ -91,7 +97,10 @@ public class ScopeTreeData implements IScopeTreeData
 		this.sortedColumn  = 0;
 		if (this.indexesNonEmptyMetrics != null && !this.indexesNonEmptyMetrics.isEmpty())
 			this.sortedColumn = 1;
-		this.indexesNonEmptyMetrics = metricManager.getNonEmptyMetricIDs(root);
+		
+		// fix issue #277: use the root to get the metrics
+		// if we use the scope, some exclusive metrics will disappear
+		this.indexesNonEmptyMetrics = metricManager.getNonEmptyMetricIDs(root.getRootScope());
 	}
 
 	
