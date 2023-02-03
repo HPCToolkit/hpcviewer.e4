@@ -197,6 +197,15 @@ public class DataTrace extends DataCommon
 		return tc.pStart;
 	}
 	
+	public long getEndOffset(int rank)
+	{
+		var tc = traceCtxs[rank];		
+		if (tc == null)
+			throw new RuntimeException("Invalid rank: " + rank);
+		return tc.pEnd;
+	}
+
+	
 	@Override
 	/*
 	 * (non-Javadoc)

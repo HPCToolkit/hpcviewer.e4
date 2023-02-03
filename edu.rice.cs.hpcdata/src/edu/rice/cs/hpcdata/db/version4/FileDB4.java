@@ -25,6 +25,15 @@ import edu.rice.cs.hpcdata.experiment.scope.visitors.TraceScopeVisitor;
  ********************************************************************/
 public class FileDB4 implements IFileDB 
 {
+	/** this constant is taken from prof-lean/formats/tracedb.h
+	 <pre>
+	  enum { FMT_TRACEDB_SZ_CtxSample = 0x0c }
+	  </pre>
+	 * 
+	 */
+	private static final int FMT_TRACEDB_SZ_CONTEXT_SAMPLE = 0x0c;
+	
+
 	private final DataTrace   dataTrace;
 	private final DataSummary dataSummary;
 	private final IExperiment experiment;
@@ -148,7 +157,8 @@ public class FileDB4 implements IFileDB
 		List<IdTuple> listId = dataSummary.getIdTuple();
 		int profile = listId.get(rank).getProfileIndex() - 1;
 		
-		return dataTrace.getOffset(profile) + dataTrace.getLength(profile) - dataTrace.getRecordSize();
+		// fix issue #275: last sample is missing
+		return dataTrace.getEndOffset(profile) - FMT_TRACEDB_SZ_CONTEXT_SAMPLE;
 	}
 
 	@Override
