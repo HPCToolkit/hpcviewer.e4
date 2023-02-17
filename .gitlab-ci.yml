@@ -83,7 +83,7 @@ secret_detection:
 test:
   extends: .maven-apt
   stage: test
-  image: docker.io/maven:3-ibm-semeru-$JDK-focal
+  image: docker.io/maven:3.8-ibm-semeru-$JDK-focal
   tags: [docker, linux/$ARCH]
   parallel:
     matrix:
@@ -128,7 +128,7 @@ test:
 build:
   extends: .maven-apt
   stage: build
-  image: docker.io/maven:3-eclipse-temurin-11-focal
+  image: docker.io/maven:3.8-eclipse-temurin-11-focal
   variables:
     GIT_STRATEGY: clone
     GIT_DEPTH: 0
@@ -154,7 +154,7 @@ build:
 pmd:
   extends: .maven-apt
   stage: lint
-  image: docker.io/maven:3-eclipse-temurin-11-focal
+  image: docker.io/maven:3.8-eclipse-temurin-11-focal
   tags: [docker, linux/amd64]
   needs: []
 
