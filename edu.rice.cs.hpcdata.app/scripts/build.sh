@@ -70,8 +70,8 @@ FILES="edu.rice.cs.hpcviewer.product/target/repository/plugins/ca.odell.glazedli
 	edu.rice.cs.hpcviewer.product/target/repository/plugins/org.yaml.snakeyaml*.jar \
 	edu.rice.cs.hpcviewer.product/target/repository/plugins/org.apache.commons.math3*.jar \
 	edu.rice.cs.hpcviewer.product/target/repository/plugins/org.eclipse.collections*.jar \
-	externals/graphbuilder/target/com.graphbuilder-*.jar \
-	edu.rice.cs.hpcdata/target/edu.rice.cs.hpcdata-*.jar \
+	externals/com.graphbuilder/graphbuilder-*.jar \
+	edu.rice.cs.hpcdata/hpcdata-*.jar \
 	edu.rice.cs.hpcdata.merge/target/edu.rice.cs.hpcdata.merge-*.jar \
 	edu.rice.cs.hpcdata.app/target/edu.rice.cs.hpcdata.app-*.jar"
 

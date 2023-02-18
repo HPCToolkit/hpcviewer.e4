@@ -19,7 +19,7 @@
  </properties>
 
  <modules>
-  <module>graphbuilder</module>
+  <module>com.graphbuilder</module>
   <module>org.swtchart</module>
   <module>org.swtchart.ext</module>
  </modules>

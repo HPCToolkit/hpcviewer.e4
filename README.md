@@ -17,20 +17,13 @@ For static linked program, the variable environment ```HPCRUN_TRACE``` has to be
 ## General Requirements
 
 * Java 11 or newer
-  Can be downloaded via Spack 
-  or from Oracle https://www.oracle.com/java/technologies/javase-downloads.html 
-  or AdoptJDK https://adoptopenjdk.net
+  Can be downloaded via [Spack](https://github.com/spack/spack) 
+  or from [Oracle](https://www.oracle.com/java/technologies/javase-downloads.html)
+  or [Adoptium](https://adoptium.net/temurin/releases)
 * Linux: GTK+ 3.20 or newer.
-To check installed GTK version on Red Hat distributions:
-```
-rpm -q gtk3
-```
-On Debian-based distributions:
-```
-dpkg -l  libgtk-3-0
-apt-cache policy libgtk-3-0
-```
+
 If there is no GTK+ 3.20 or newer installed in the system, you may install it via `spack`:
+
 ```
 spack install gtkplus
 spack load gtkplus
@@ -42,30 +35,43 @@ spack load gtkplus
   * Recommended: install via spack
   	`spack install maven; spack load maven`  
   	
-* On Posix-based platform with Bash shell (Linux and MacOS), type:
-    ```
+### On Posix-based platform with Bash shell (Linux and MacOS), 
+
+Run the build script from the project root:
+
+```
     ./build.sh
-    ``` 
-    The script generates five `hpcviewer-<release>-<platform>.[zip|tgz]` files:
+```
+   The script generates five `hpcviewer-<release>-<platform>.[zip|tgz]` files:
     Windows, Mac (x86_64 and Arm), and Linux (x86_64, ppcle64, and Arm).
   * `untar` or `unzip` the file based according to the platform. 
-  * For Linux platform: run 
-  ```./install.sh <directory>``` 
-  to install the viewer. 
   
-* On Windows type:
-   ```
-   mvn clean package
-   ```
+  * ONLY for Linux platform, need to run the installation script:
+
+```
+./install.sh <directory>
+```
+  where `<directory>` is the installation root for hpcviewer binary. 
+  
+  
+### On Windows 
+
+Build directly with the Maven script:
+
+```
+  mvn clean package
+```
   This will compile and create hpcviewer packages for 4 platforms: Linux x86_64 and ppcle64, Windows and Mac
   with Eclipse 4.19 (the default).
   Example of the output:
+
 ```
 ...
 [INFO] Building zip: <hpcviewer.e4>/edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-win32.win32.x86_64.zip
 ```
-  * Unzip `edu.rice.cs.hpcviewer-win32.win32.x86_64.zip` to another folder. 
-    It isn't recommended to overwrite the existing folder.
+  Unzip `edu.rice.cs.hpcviewer-win32.win32.x86_64.zip` to another folder. 
+  It isn't recommended to overwrite the existing folder.
+
 
 ## How to build and run via Eclipse IDE
 
@@ -73,6 +79,16 @@ Requirements:
 
 * Recommended: [Eclipse 2022.06 RCP](https://www.eclipse.org/downloads/packages/release/2022-06/r/eclipse-ide-rcp-and-rap-developers) or newer. 
 * Warning: May not work properly with older versions of Eclipse. 
+
+Recommended:
+* Source code for hpcdata https://gitlab.com/hpctoolkit/hpcdata
+* Source code for graphbuilder (math parser) https://gitlab.com/hpctoolkit/graphbuilder
+ 
+```
+  git clone https://gitlab.com/hpctoolkit/hpcdata
+  git clone https://gitlab.com/hpctoolkit/graphbuilder
+```
+
 
 ### Getting the source code into the Eclipse IDE
 

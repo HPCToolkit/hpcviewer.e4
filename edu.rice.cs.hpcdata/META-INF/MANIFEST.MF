@@ -3,6 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: hpcdata
 Bundle-SymbolicName: edu.rice.cs.hpcdata
 Bundle-Version: 6.0.0.qualifier
+Bundle-ClassPath: hpcdata-6.0.1.jar
 Bundle-Vendor: Rice University
 Export-Package: edu.rice.cs.hpcdata.db,
  edu.rice.cs.hpcdata.db.version2,
@@ -27,5 +28,5 @@ Require-Bundle: com.graphbuilder,
  ca.odell.glazedlists,
  org.yaml.snakeyaml,
  org.apache.commons.math3
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Automatic-Module-Name: edu.rice.cs.hpcdata
-Bundle-ClassPath: .
