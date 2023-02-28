@@ -3,8 +3,11 @@ package edu.rice.cs.hpcdata.merge;
 import java.util.Comparator;
 import java.util.List;
 
+import org.apache.commons.math3.util.Precision;
+
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.LoopScope;
@@ -15,6 +18,8 @@ import edu.rice.cs.hpcdata.experiment.scope.visitors.DuplicateScopeTreesVisitor;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.IScopeVisitor;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.ResetCounterVisitor;
 
+import java.util.Collections;
+
 /******************************************************
  * 
  * Check similarity of two trees
@@ -23,10 +28,11 @@ import edu.rice.cs.hpcdata.experiment.scope.visitors.ResetCounterVisitor;
  ******************************************************/
 public class TreeSimilarity 
 {
-	final static public String PROP_DEBUG = "merge.debug";
-	final static private boolean debug = Boolean.getBoolean(PROP_DEBUG);
-	final static private int METRIC_TARGET = 0;
-	final static private int METRIC_SOURCE = 1;
+	public static final String PROP_DEBUG = "merge.debug";
+	private static final boolean DEBUG_MODE = Boolean.getBoolean(PROP_DEBUG);
+	
+	private static final int METRIC_TARGET = 0;
+	private static final int METRIC_SOURCE = 1;
 	
 	int numNodes = 0;
 	int numMerges = 0;
@@ -67,7 +73,7 @@ public class TreeSimilarity
 		// merge the children of the root (tree)
 		mergeTree(target, source);
 		
-		if (debug) {
+		if (DEBUG_MODE) {
 			float mergePercent = (float) (numMerges * 100.0 / numNodes);
 			float unmergePercent = (float) (numUnmerges * 100.0 / numNodes);
 			
@@ -289,7 +295,7 @@ public class TreeSimilarity
 	{
 		var children = scope.getChildren();
 		if (children == null)
-			return null;
+			return Collections.emptyList();
 		
 		List<Scope> childrenScope = (List<Scope>) children;
 		childrenScope.sort(new CompareScope(metric));
@@ -316,7 +322,6 @@ public class TreeSimilarity
 	 * @param metric2 the metric of the source scope
 	 * @param offsetScope2 : offset of scope 2
 	 * @param siblingsScope2 : list of siblings of scope 2
-	 * @param metricOffset : the metric offset to be compared
 	 * 
 	 * @return {@code CoupleNodes}
 	 */
@@ -422,7 +427,7 @@ public class TreeSimilarity
 		final boolean same_type = areSameType( s1, s2 );
 		
 		// check the metrics
-		final float metric_distance = getMetricDistance( s1, s2, m1, m2 );
+		final var metric_distance = getMetricDistance( s1, s2, m1, m2 );
 
 		// check if it's the same name
 		final boolean same_name = areSameName( s1, s2 );
@@ -489,7 +494,7 @@ public class TreeSimilarity
 			result.type = SimilarityType.SIMILAR;
 		}
 		
-		if (debug)
+		if (DEBUG_MODE)
 		{
 			System.out.println("TS " + s1 + " [" + s1.getCCTIndex()+"] \tvs.\t " +s2  + " ["+ s2.getCCTIndex()
 					+"]\t s: " + result.score +"\t t: " + result.type);
@@ -517,16 +522,16 @@ public class TreeSimilarity
 		return (c1 == c2); 
 	}
 	
-	private float getMetricDistance( Scope s1, Scope s2, BaseMetric m1, BaseMetric m2 )
+	private double getMetricDistance( Scope s1, Scope s2, BaseMetric m1, BaseMetric m2 )
 	{
-		int MULTIPLIER = Constants.WEIGHT_METRIC;
+		int multiplier = Constants.WEIGHT_METRIC;
 		
-		final float v1 = getAnnotationValue(s1, m1);
-		final float v2 = getAnnotationValue(s2, m2);
+		final var v1 = getAnnotationValue(s1, m1);
+		final var v2 = getAnnotationValue(s2, m2);
 		if (v1 > .5 && v2 > .5)
-			MULTIPLIER *= 2;
-		float distance = 1 - Math.abs(v2-v1);
-		return (distance * MULTIPLIER);
+			multiplier *= 2;
+		var distance = 1 - Math.abs(v2-v1);
+		return (distance * multiplier);
 	}
 	
 
@@ -602,8 +607,7 @@ public class TreeSimilarity
 				}
 			}
 		}
-		boolean verdict = (finalScore >= Math.max(c1, c2));
-		return verdict;
+		return (finalScore >= Math.max(c1, c2));
 	}
 	
 	/***
@@ -648,19 +652,20 @@ public class TreeSimilarity
 	 * @param s
 	 * @return
 	 */
-	private float getAnnotationValue(Scope s, BaseMetric m)
+	private double getAnnotationValue(Scope s, BaseMetric m)
 	{
 		final MetricValue mv = s.getMetricValue(m);
-/*		if (MetricValue.isAnnotationAvailable(mv)) 
-		{
-			return MetricValue.getAnnotationValue(mv);
-		}
-		else */
-		{
-			float v 			= mv.getValue();
-			MetricValue root_mv = s.getRootScope().getMetricValue(m);
-			float rv 		    = root_mv.getValue();
-			if (Float.compare(rv, 0.0f)!=0) {
+
+		if (m.getAnnotationType() == AnnotationType.PERCENT ||
+			m.getAnnotationType() == AnnotationType.PERCENT_COLOR_BAR) {
+			
+			final MetricValue mvRoot = s.getRootScope().getMetricValue(m);
+			
+			final var rv = mvRoot.getValue();
+			final var epsilon = Math.ulp(rv);
+
+			if (!Precision.equals(rv, 0.0, epsilon)) {
+				var v = mv.getValue();
 				return v/rv;
 			}
 		}

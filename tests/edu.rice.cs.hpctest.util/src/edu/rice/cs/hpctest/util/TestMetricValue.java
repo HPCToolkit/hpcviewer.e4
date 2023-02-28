@@ -74,8 +74,8 @@ public class TestMetricValue
 		return true;
 	}
 	
-	public static int floatCompare(float f1, float f2) {
-		final float epsilon = Math.max(Math.max(f2, f1) * EPSILON, EPSILON);
+	public static int floatCompare(double f1, double f2) {
+		final var epsilon = Math.max(Math.max(f2, f1) * EPSILON, EPSILON);
 		return Precision.compareTo(f1, f2, epsilon);
 	}
 	
@@ -91,7 +91,7 @@ public class TestMetricValue
 	}
 
 	
-	private  static float getValue(BaseMetric metric, Scope scope) {
+	private  static double getValue(BaseMetric metric, Scope scope) {
 		var mv = metric.getValue(scope);
 		if (mv == MetricValue.NONE)
 			return 0.0f;
@@ -116,14 +116,14 @@ public class TestMetricValue
 		if (children.isEmpty())
 			return;
 		
-		Map<Integer, Float> totalValues = new HashMap<>();
+		Map<Integer, Double> totalValues = new HashMap<>();
 		
 		for (var child: children) {
 			testMetricCorrectness(metrics, child, totalValues);
 		}
 	}
 	
-	private static void testMetricCorrectness(List<BaseMetric> metrics, Scope scope, Map<Integer, Float> values) {
+	private static void testMetricCorrectness(List<BaseMetric> metrics, Scope scope, Map<Integer, Double> values) {
 		
 		for(var metric: metrics) {
 			var value = getValue(metric, scope);
@@ -140,7 +140,7 @@ public class TestMetricValue
 					!(scope instanceof ProcedureScope)) {
 					values.compute(id, (k, v) -> v == null ? value : value + v);
 				}
-				var currentValue = values.computeIfAbsent(id, v -> 0.0f);
+				var currentValue = values.computeIfAbsent(id, v -> 0.0);
 				assertTrue(rootValue >= currentValue);
 			} else if (rootValue > 0) {
 				// inclusive
