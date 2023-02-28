@@ -16,6 +16,6 @@ import edu.rice.cs.hpcdata.experiment.BaseExperiment;
  */
 public interface IBasePart 
 {
-	public BaseExperiment getExperiment();
-	public void setInput(MPart part, Object input);
+	BaseExperiment getExperiment();
+	void setInput(MPart part, Object input);
 }

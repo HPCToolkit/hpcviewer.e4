@@ -108,18 +108,15 @@ public abstract class AliasMap<K,V> implements IUserData<K, V>
 	 */
 	protected void checkData() {
 		if (data == null) {
-			data = new HashMap<K, V>();
+			data = new HashMap<>();
 			final String filename = getFilename();
 			File file = new File( filename );
 			
 			if (file.canRead()) {
-				if (! readData(file.getAbsolutePath()) ) {
-					// old format, we need to remove the file
-					if ( file.delete() ) {
-						// initialize the data
-						initDefault();
-						readData(file.getAbsolutePath());
-					}
+				// old format, we need to remove the file
+				if (! readData(file.getAbsolutePath()) && file.delete()) {
+					initDefault();
+					readData(file.getAbsolutePath());
 				}
 			} else if (!file.exists()) {
 				// file doesn't exist, but we can create
