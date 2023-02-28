@@ -8,6 +8,6 @@ import edu.rice.cs.hpcbase.BaseConstants.ViewType;
 
 public interface IFilterable 
 {
-	public abstract List<FilterDataItem<BaseMetric>> getFilterDataItems();
-	public abstract ViewType getViewType();
+	List<FilterDataItem<BaseMetric>> getFilterDataItems();
+	ViewType getViewType();
 }
