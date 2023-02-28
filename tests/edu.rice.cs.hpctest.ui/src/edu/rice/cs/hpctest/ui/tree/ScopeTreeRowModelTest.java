@@ -10,9 +10,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import edu.rice.cs.hpcdata.experiment.Experiment;
-import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
-import edu.rice.cs.hpctest.util.TestDatabase;
+import edu.rice.cs.hpctest.ui.util.DatabaseWalker;
 import edu.rice.cs.hpctree.ScopeTreeData;
 import edu.rice.cs.hpctree.ScopeTreeRowModel;
 
@@ -21,33 +19,10 @@ public class ScopeTreeRowModelTest
 	private static List<ScopeTreeRowModel> treeModels;
 
 	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		var database    = TestDatabase.getDatabases();
-		
+	public static void setUpBeforeClass() {
 		treeModels = new ArrayList<>();
-		for (var path: database) {
-			assertNotNull(path);
-
-			var experiment = new Experiment();
-			try {
-				experiment.open(path, null, Experiment.ExperimentOpenFlag.TREE_ALL);
-			} catch (Exception e) {
-				assertFalse(e.getMessage(), true);
-			}			
-			assertNotNull(experiment.getRootScope());
-			
-			var root = experiment.getRootScope(RootScopeType.CallingContextTree);
-			assertNotNull(root);
-			
-			if (!root.hasChildren())
-				continue;
-			
-			var treeData = new ScopeTreeData(root, experiment);			
-			var listRows = treeData.getList();
-			listRows.addAll(root.getChildren());
-			
-			treeModels.add(new ScopeTreeRowModel(treeData));
-		}
+		var listTreeData = DatabaseWalker.getScopeTreeData();
+		listTreeData.parallelStream().forEach(treeData -> treeModels.add(new ScopeTreeRowModel(treeData)));
 	}
 
 	

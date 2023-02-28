@@ -11,46 +11,28 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
-import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
-import edu.rice.cs.hpctest.util.TestDatabase;
-import edu.rice.cs.hpctree.ScopeTreeData;
+import edu.rice.cs.hpctest.ui.util.DatabaseWalker;
+import edu.rice.cs.hpctree.IScopeTreeData;
 import edu.rice.cs.hpctree.ScopeTreeTable;
 
 public class ScopeTreeTableTest 
 {
 	private static List<ScopeTreeTable> treeTables;
-	private static List<ScopeTreeData>  listData;
+	private static List<IScopeTreeData>  listData;
 	private static Shell shell;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		var database = TestDatabase.getDatabases();
+
 		shell = new Shell(Display.getDefault());
 		shell.setSize(1000, 500);
 		
-		listData = new ArrayList<>();
 		treeTables = new ArrayList<>();
-		
-		for (var path: database) {
-			assertNotNull(path);
 
-			var experiment = new Experiment();
-			try {
-				experiment.open(path, null, Experiment.ExperimentOpenFlag.TREE_ALL);
-			} catch (Exception e) {
-				assertFalse(e.getMessage(), true);
-			}			
-			assertNotNull(experiment.getRootScope());
-			
-			var root = experiment.getRootScope(RootScopeType.CallingContextTree);
-			assertNotNull(root);
-			
-			if (!root.hasChildren())
-				continue;
+		listData = DatabaseWalker.getScopeTreeData();
 
-			var treeData = new ScopeTreeData(root, experiment);			
+		for(var treeData: listData) {
 			ScopeTreeTable table = new ScopeTreeTable(shell, 0, treeData);
 			
 			var natTable = table.getTable();
@@ -59,10 +41,11 @@ public class ScopeTreeTableTest
 			
 			assertTrue(size.x >0 && size.y > 0);
 			
+			var root = treeData.getRoot();
 			table.setRoot(root);
+			
 			assertNotNull(table.getRoot());
 			
-			listData.add(treeData);
 			treeTables.add(table);
 		}
 	}
