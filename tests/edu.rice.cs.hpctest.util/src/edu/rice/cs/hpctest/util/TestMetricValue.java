@@ -42,7 +42,7 @@ public class TestMetricValue
 			
 			// test the exclusive vs inclusive
 			if (metric.getMetricType() == MetricType.INCLUSIVE) {
-				int c = floatCompare(mv1.getValue(), mv2.getValue());
+				int c = compareValues(mv1.getValue(), mv2.getValue());
 				assertTrue(c>=0);
 				
 				if (!(metric instanceof DerivedMetric)) {
@@ -51,13 +51,13 @@ public class TestMetricValue
 					var parentVal = getValue(metric, parent);
 					var childVal = getValue(metric, context);
 					
-					var delta = floatCompare(parentVal, childVal);
+					var delta = compareValues(parentVal, childVal);
 					
 					assertTrue(delta >= 0);
 				}
 
 			} else if (metric.getMetricType() == MetricType.EXCLUSIVE){
-				int c = floatCompare(mv1.getValue(), mv2.getValue());
+				int c = compareValues(mv1.getValue(), mv2.getValue());
 				assertTrue(c<=0);
 			}
 		}
@@ -74,7 +74,7 @@ public class TestMetricValue
 		return true;
 	}
 	
-	public static int floatCompare(double f1, double f2) {
+	public static int compareValues(double f1, double f2) {
 		final var epsilon = Math.max(Math.max(f2, f1) * EPSILON, EPSILON);
 		return Precision.compareTo(f1, f2, epsilon);
 	}
@@ -83,7 +83,7 @@ public class TestMetricValue
 	public static boolean checkChildValue(BaseMetric metric, MetricValue mv1, MetricValue mv2) {
 		if (!(metric instanceof DerivedMetric) && 
 			 (metric.getMetricType() == MetricType.INCLUSIVE)) { 
-			final int  c = floatCompare(mv1.getValue(), mv2.getValue());
+			final int  c = compareValues(mv1.getValue(), mv2.getValue());
 			return c>=0;
 		}
 		// exclusive metric: anything can happen
@@ -106,7 +106,7 @@ public class TestMetricValue
 		var val1 = getValue(metric, scope1);
 		var val2 = getValue(metric, scope2);
 		
-		var delta = floatCompare(val1, val2);
+		var delta = compareValues(val1, val2);
 		assertTrue(delta >= 0);
 	}
 	
@@ -141,10 +141,11 @@ public class TestMetricValue
 					values.compute(id, (k, v) -> v == null ? value : value + v);
 				}
 				var currentValue = values.computeIfAbsent(id, v -> 0.0);
-				assertTrue(rootValue >= currentValue);
+				var compare = compareValues(rootValue, currentValue.doubleValue());
+				assertTrue(compare >= 0);
 			} else if (rootValue > 0) {
 				// inclusive
-				var delta = floatCompare(rootValue, value);
+				var delta = compareValues(rootValue, value);
 				assertTrue(delta >= 0);
 			}
 		}
