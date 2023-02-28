@@ -216,7 +216,7 @@ public class PrintFileXML {
 				numRead = objFile.read(buf, 0, buf.length);
 			} catch (IOException e) {
 				// Sonar doesn't like we print stack trace
-				// System.err.println(e.getMessage());
+				e.printStackTrace();
 			}
             if (numRead <= 0) {
                 break;

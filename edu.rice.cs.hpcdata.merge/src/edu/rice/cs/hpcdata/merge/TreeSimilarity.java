@@ -307,7 +307,7 @@ public class TreeSimilarity
 	{
 		Scope target;
 		Scope source;
-		public CoupleNodes(Scope target, Scope source, Similarity similar) 
+		public CoupleNodes(Scope target, Scope source) 
 		{
 			this.target = target;
 			this.source = source;
@@ -339,7 +339,7 @@ public class TreeSimilarity
 		{
 			setMergedNodes(scope1, scope2, metricOffset);
 			
-			return new CoupleNodes(scope1, scope2, similar);
+			return new CoupleNodes(scope1, scope2);
 			
 		} else if (similar.type == SimilarityType.SIMILAR) 
 		{
@@ -368,24 +368,22 @@ public class TreeSimilarity
 					{
 						setMergedNodes(scope1, sibling, metricOffset);
 						
-						return new CoupleNodes(scope1, sibling, result);
+						return new CoupleNodes(scope1, sibling);
 						
-					} else if(result.type == SimilarityType.SIMILAR) {
+					} else if((result.type == SimilarityType.SIMILAR) &&
+							  (result.score > similar.score)) {
 						// -------------------------------------------------------------
-						// Looks similar, check if the sibling has a better score
+						// Looks similar, and the sibling has a better score
 						// -------------------------------------------------------------
-						if ( result.score > similar.score ) 
-						{
-							similar = result;
-							candidate = sibling;
-						}
+						similar = result;
+						candidate = sibling;
 					}
 				}
 			}
 			numSiblingMatches++;
 			setMergedNodes(scope1, candidate, metricOffset);
 			
-			return new CoupleNodes(scope1, candidate, similar);
+			return new CoupleNodes(scope1, candidate);
 		}
 		return null;
 	}
@@ -598,10 +596,9 @@ public class TreeSimilarity
 					} else
 					{						
 						final boolean areLoops = (cs1 instanceof LoopScope && cs2 instanceof LoopScope);
-						if (areLoops)
+						if (areLoops && areSameChildren( cs1, cs2, metric1, metric2, currDepth + 1))
 						{
-							if (areSameChildren( cs1, cs2, metric1, metric2, currDepth + 1))
-								finalScore++;
+							finalScore++;
 						}
 					}
 				}
