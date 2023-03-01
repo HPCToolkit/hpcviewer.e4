@@ -249,7 +249,8 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 			try {
 				keystroke = KeyStroke.getInstance(IKeyLookup.CTRL_NAME + "+" + IKeyLookup.SPACE_NAME);
 			} catch (ParseException e1) {
-				// keystroke is not 
+				// keystroke is not valid, no key at all
+				keystroke = KeyStroke.getInstance(KeyStroke.NO_KEY);
 			}
 
 			new ContentProposalAdapter(txtMetricFormula, new TextContentAdapter(), proposals, keystroke, new char[] {'$', '@'}) ;

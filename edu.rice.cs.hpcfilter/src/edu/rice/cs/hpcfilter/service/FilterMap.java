@@ -76,6 +76,12 @@ implements IFilterData
 		return false;
 	}
 	
+	
+	@Override
+	public int hashCode() {
+		return System.identityHashCode(this);
+	}
+	
 	@Override
 	public String getFilename() {
 		

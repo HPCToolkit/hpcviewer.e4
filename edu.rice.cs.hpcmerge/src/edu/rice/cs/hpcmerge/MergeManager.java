@@ -65,20 +65,20 @@ public class MergeManager
 	 * At the moment, no callback in case of cancel. 
 	 *
 	 */
-	public static interface IMergeCallback
+	public interface IMergeCallback
 	{
 		/***
 		 * Callback when the merging is successful. 
 		 * @param experiment 
 		 * 			the merged database
 		 */
-		public void mergeDone(Experiment experiment);
+		void mergeDone(Experiment experiment);
 		
 		/***
 		 * Callback when an error occurs
 		 * @param errorMsg
 		 * 			The reason of the error
 		 */
-		public void mergeError(String errorMsg);
+		void mergeError(String errorMsg);
 	}
 }

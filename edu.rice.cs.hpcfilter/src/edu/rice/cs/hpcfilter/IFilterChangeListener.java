@@ -9,5 +9,5 @@ public interface IFilterChangeListener
 	 * 
 	 * @param data can be either {@code List<FilterDataItem>} or {@code FilterDataItem}
 	 */
-	public abstract void changeEvent(Object data);	
+	void changeEvent(Object data);	
 }
