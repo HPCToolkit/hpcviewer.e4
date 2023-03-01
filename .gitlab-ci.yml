@@ -169,17 +169,17 @@ pmd:
   - python3 scripts/pmd2cq.py target/pmd.json > cq.json
 
   # Warn if CPD found any duplications, and refer to the HTML report if needed
-  - grep -q '<duplication' target/cpd.xml; STATUS=$?
   - |
-    case $STATUS in
-    0)
+    if grep -q '<duplication' target/cpd.xml; then
       echo "CPD found a duplication, see the HTML report for details:"
       echo "    ${CI_JOB_URL}/artifacts/file/target/site/cpd.html"
       exit 42
-      ;;
-    1) ;;
-    *) exit $STATUS; ;;
-    esac
+    else
+      STATUS=$?
+      if [ "$STATUS" -ne 1 ]; then
+        exit $STATUS
+      fi
+    fi
 
   artifacts:
     when: always
