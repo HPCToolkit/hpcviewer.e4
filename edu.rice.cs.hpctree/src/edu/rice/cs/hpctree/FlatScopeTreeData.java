@@ -47,7 +47,7 @@ public class FlatScopeTreeData extends ScopeTreeData
         if (!scope.hasChildren() && cdepth <= 0) {
         	return 1;
         }
-        return cdepth;		
+        return Math.max(0, cdepth);		
 	}
 
 	
