@@ -22,7 +22,10 @@ public class FlatScopeTreeData extends ScopeTreeData
 	@Override
 	public int getDepthOfData(Scope scope) {
 		int depth  = super.getDepthOfData(scope);
-		if (depth <= 1 || currentLevel == 0)
+		
+		// fix issue #280
+		// No further action needed if there it isn't flattened 
+		if (currentLevel == 0)
 			return depth;
 		
 		// special treatment when the tree is flattened:
