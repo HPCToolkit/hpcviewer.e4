@@ -227,7 +227,7 @@ public class DatabaseCollection
 		// is ready. This doesn't guarantee anything, but works in most cases :-(
 
 		sync.asyncExec(()-> {
-			showPart(experiment, application, modelService, service, message);
+			showPart(experiment, application, modelService,  message);
 		});
 	}
 	
@@ -238,14 +238,13 @@ public class DatabaseCollection
 	 * @param experiment
 	 * @param application
 	 * @param service
-	 * @param parentId
+	 * @param message
 	 * 
 	 * @return int
 	 */
 	private int showPart( IExperiment    experiment, 
 						  MApplication   application, 
 						  EModelService  modelService,
-						  EPartService   service,
 						  String         message) {
 
 		//----------------------------------------------------------------
@@ -256,23 +255,20 @@ public class DatabaseCollection
 		//----------------------------------------------------------------
 		
 		MWindow  window = application.getSelectedElement();
+		
 		if (window == null) {
 			// window is not active yet
 			
 			// using asyncExec we hope Eclipse will delay the processing until the UI 
 			// is ready. This doesn't guarantee anything, but works in most cases :-(
 			sync.asyncExec(()-> {
-				showPart(experiment, application, modelService, service, message);
+				showPart(experiment, application, modelService, message);
 			});
 			return -1;
 		}
 
-		List<MStackElement> list = null;
-
 		MPartStack stack  = (MPartStack)modelService.find(STACK_ID_BASE, window);
-		if (stack != null) {
-			list = stack.getChildren();
-		} else {
+		if (stack == null) {
 			//----------------------------------------------------------------
 			// create a new part stack if necessary
 			// We don't want this, since it makes the layout weird.
@@ -280,15 +276,28 @@ public class DatabaseCollection
 			stack = modelService.createModelElement(MPartStack.class);
 			stack.setElementId(STACK_ID_BASE);
 			stack.setToBeRendered(true);
-			
-			list = stack.getChildren();
 		}
+		var list = stack.getChildren();
 		
-		final MPart part = service.createPart(ProfilePart.ID);
+		// issue #284: use the context from the current window
+		EPartService partService = window.getContext().get(EPartService.class);
+		MPart part = null;
+		
+		try {
+			part = partService.createPart(ProfilePart.ID);
+		} catch (IllegalStateException e) {
+			// issue #284: exception due to "no active window"
+			// I don't know why, but perhaps it's because the rendereing is not ready?
+			// Recursively try to create again
+			sync.asyncExec(()-> {
+				showPart(experiment, application, modelService, message);
+			});
+			return -1;
+		}
 		if (list != null)
 			list.add(part);
 		
-		service.showPart(part, PartState.VISIBLE);
+		partService.showPart(part, PartState.VISIBLE);
 		IMainPart view = null;
 
 		int maxAttempt = 20;		
@@ -308,7 +317,7 @@ public class DatabaseCollection
 		if (view == null) {
 			MessageDialog.openError(Display.getDefault().getActiveShell(), 
 									"Fail to get the view", 
-									"hpcviewer is unable to retrieve the view. Please try again");
+									"hpcviewer is unable to render the profile view. Please try again");
 			return 0;
 		}
 		
@@ -337,7 +346,7 @@ public class DatabaseCollection
 		//----------------------------------------------------------------
 		// display the trace view if the information exists
 		//----------------------------------------------------------------
-		displayTraceView(experiment, service, list);
+		displayTraceView(experiment, partService, list);
 		
 		if (view instanceof ProfilePart) {
 			ProfilePart activeView = (ProfilePart) view;
