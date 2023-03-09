@@ -7,11 +7,11 @@ import org.eclipse.core.commands.operations.IUndoContext;
 import org.eclipse.core.commands.operations.IUndoableOperation;
 import org.eclipse.core.commands.operations.OperationHistoryEvent;
 import org.eclipse.e4.core.services.events.IEventBroker;
+
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewerColumn;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -58,7 +58,7 @@ public class CallStackViewer extends AbstractBaseTableViewer
 			   DisposeListener,
 			   EventHandler
 {	
-	private final static String EMPTY_FUNCTION = "--------------";
+	private static final String EMPTY_FUNCTION = "--------------";
 	
 	private final ProcessTimelineService ptlService;
 	private final IEventBroker eventBroker;
@@ -74,7 +74,6 @@ public class CallStackViewer extends AbstractBaseTableViewer
      * */
 	public CallStackViewer(final ITracePart   tracePart,
 						   final Composite    parent, 
-						   final HPCCallStackView csview, 
 						   final ProcessTimelineService ptlService,
 						   final IEventBroker eventBroker)
 	{
@@ -92,22 +91,7 @@ public class CallStackViewer extends AbstractBaseTableViewer
         //------------------------------------------------
         // add content provider
         //------------------------------------------------
-        this.setContentProvider( new IStructuredContentProvider(){
-
-			public void dispose() {}
-
-			public void inputChanged(Viewer viewer, Object oldInput,
-					Object newInput) { }
-
-			public Object[] getElements(Object inputElement) {
-				if (inputElement instanceof ArrayList<?>) {
-					Object o[] = ((ArrayList<?>) inputElement).toArray();
-					return o;
-				}
-				return null;
-			}
-        	
-        });
+        this.setContentProvider( ArrayContentProvider.getInstance());
         
         stack.setVisible(false);
         selectionListener = new Listener(){
@@ -211,7 +195,7 @@ public class CallStackViewer extends AbstractBaseTableViewer
     	int numDisplayedProcess = ptlService.getNumProcessTimeline();
     	
     	// case for num displayed processes is less than the number of processes
-    	estimatedProcess = (int) ((float)estimatedProcess* 
+    	estimatedProcess = (int) (estimatedProcess* 
     			((float)numDisplayedProcess/(attributes.getProcessInterval())));
     	
     	// case for single process
@@ -240,7 +224,7 @@ public class CallStackViewer extends AbstractBaseTableViewer
 			logger.error("CSV: Fail to get sample for time " + position.time, e);			
 			return;
 		}
-		final List<String> sampleVector = new ArrayList<String>();;
+		final List<String> sampleVector = new ArrayList<>();
 		if (sample >= 0) {
 			var ctxId = ptl.getContextId(sample);
 			if (ctxId >= 0) {
@@ -249,7 +233,7 @@ public class CallStackViewer extends AbstractBaseTableViewer
 				if (names != null)
 					sampleVector.addAll(names);
 			}
-			if (sampleVector != null && sampleVector.size()<=depth)
+			if (sampleVector.size()<=depth)
 			{
 				//-----------------------------------
 				// case of over depth
