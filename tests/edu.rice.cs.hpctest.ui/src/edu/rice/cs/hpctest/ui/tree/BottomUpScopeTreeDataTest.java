@@ -13,7 +13,6 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpctest.util.TestDatabase;
-import edu.rice.cs.hpctest.util.TestMetricValue;
 import edu.rice.cs.hpctree.BottomUpScopeTreeData;
 
 
@@ -23,7 +22,8 @@ public class BottomUpScopeTreeDataTest
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		var database    = TestDatabase.getMetaDatabases();
+		
+		var database    = TestDatabase.getDatabases();
 		treeData = new ArrayList<>();
 		 
 		for (var path: database) {

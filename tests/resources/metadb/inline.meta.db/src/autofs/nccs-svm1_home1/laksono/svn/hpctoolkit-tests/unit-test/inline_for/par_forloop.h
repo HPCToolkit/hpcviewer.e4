@@ -1,2 +1,0 @@
-
-#pragma omp parallel for

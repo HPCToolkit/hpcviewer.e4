@@ -17,7 +17,7 @@ import org.junit.runners.BlockJUnit4ClassRunner;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcmerge.DatabaseMergeWizard;
-import edu.rice.cs.hpctest.util.DataFactory;
+import edu.rice.cs.hpctest.util.TestDatabase;
 
 @RunWith(BlockJUnit4ClassRunner.class)
 class ViewerBotTestCase extends SWTBotTestCase {
@@ -38,7 +38,7 @@ class ViewerBotTestCase extends SWTBotTestCase {
 					try {	
 						while (true) {
 							// open and layout the shell
-							List<Experiment> list = DataFactory.createExperiments();
+							List<Experiment> list = TestDatabase.getExperiments();
 							DatabaseMergeWizard wz = new DatabaseMergeWizard(list);
 							WizardDialog window = new WizardDialog(shell, wz);
 							window.open();
