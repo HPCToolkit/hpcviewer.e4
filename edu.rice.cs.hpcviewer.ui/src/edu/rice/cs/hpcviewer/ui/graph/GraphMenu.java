@@ -70,7 +70,9 @@ public class GraphMenu
 		var rawMetrics = experiment.getRawMetrics();
 		for(var metric: rawMetrics) {
 			var metrics = threadData.getMetrics(scope, metric, rawMetrics.size());
-			if (metrics == null || metrics.length == 0 || !DoubleStream.of(metrics).anyMatch(d -> d != 0)) {
+			if (metrics == null     || 
+				metrics.length == 0 || 
+				!DoubleStream.of(metrics).anyMatch(d -> Double.compare(d, 0) != 0)) {
 				continue;
 			}
 			MenuManager subMenu = new MenuManager("Graph "+ metric.getDisplayName() );

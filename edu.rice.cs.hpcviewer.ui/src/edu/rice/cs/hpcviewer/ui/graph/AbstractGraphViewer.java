@@ -99,7 +99,8 @@ public abstract class AbstractGraphViewer extends AbstractUpperPart
 		// chart creation
 		//----------------------------------------------
 		chart = new GraphChart(parent, SWT.NONE);
-
+		((GraphChart) chart).setInput(input);
+		
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(chart);
 		
 		//----------------------------------------------
