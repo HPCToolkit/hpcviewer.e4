@@ -25,8 +25,6 @@ Require-Bundle: edu.rice.cs.hpcdata,
  org.eclipse.e4.core.services,
  org.eclipse.core.expressions,
  org.eclipse.e4.ui.model.workbench,
- org.swtchart,
- org.swtchart.ext,
  org.slf4j.api,
  org.eclipse.jface.text,
  edu.rice.cs.hpctraceviewer.config,
@@ -46,7 +44,9 @@ Require-Bundle: edu.rice.cs.hpcdata,
  edu.rice.cs.hpctree,
  org.eclipse.collections,
  edu.rice.cs.hpcmerge,
- edu.rice.cs.hpcdata.merge;bundle-version="1.0.0"
+ edu.rice.cs.hpcdata.merge,
+ org.eclipse.swtchart,
+ org.eclipse.swtchart.extensions
 Bundle-ActivationPolicy: lazy
 Provide-Capability: licensing.feature;licensing.feature="edu.rice.cs.hpcviewer.ui.product"
 Automatic-Module-Name: edu.rice.cs.hpcviewer.ui

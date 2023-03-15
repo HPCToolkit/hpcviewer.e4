@@ -5,9 +5,9 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import org.eclipse.swt.custom.CTabFolder;
-import org.swtchart.IAxisSet;
-import org.swtchart.IAxisTick;
-import org.swtchart.ILineSeries;
+import org.eclipse.swtchart.IAxisSet;
+import org.eclipse.swtchart.IAxisTick;
+import org.eclipse.swtchart.ILineSeries;
 
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;

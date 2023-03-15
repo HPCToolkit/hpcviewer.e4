@@ -8,12 +8,12 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.custom.CTabFolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.swtchart.Chart;
-import org.swtchart.IAxisSet;
-import org.swtchart.ILineSeries;
-import org.swtchart.ISeries.SeriesType;
-import org.swtchart.LineStyle;
-import org.swtchart.Range;
+import org.eclipse.swtchart.Chart;
+import org.eclipse.swtchart.IAxisSet;
+import org.eclipse.swtchart.ILineSeries;
+import org.eclipse.swtchart.ISeries.SeriesType;
+import org.eclipse.swtchart.LineStyle;
+import org.eclipse.swtchart.Range;
 
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
