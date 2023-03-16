@@ -131,23 +131,8 @@ public class ProfilePart implements IProfilePart, EventHandler
 		// a new view is activated. The metric part has to refresh
 		// its content to synchronize with the table in the active view
 		
-		if (metricView != null && !metricView.isDisposed()) {
-			Object o = view.getInput();
-			IMetricManager metricMgr;
-			if (o instanceof IMetricManager) {
-				metricMgr = (IMetricManager) o;
-			} else if (view instanceof ThreadPart) {
-				metricMgr = ((ThreadPart)view).getMetricManager();
-			} else {
-				throw new RuntimeException("Unknown view: " + view.getText());
-			}
-			boolean affectAll = view.getViewType() == ViewType.COLLECTIVE;
-			RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
-			
-			MetricFilterInput input  = new MetricFilterInput(root, 
-															 metricMgr, 
-															 view, 
-															 affectAll);								
+		if (metricView != null && !metricView.isDisposed()) {			
+			final MetricFilterInput input  = new MetricFilterInput(view);								
 			metricView.setInput(input);
 		}
 	}
@@ -193,25 +178,10 @@ public class ProfilePart implements IProfilePart, EventHandler
 		
 		} else if (input instanceof MetricFilterInput) {
 			viewer = new MetricView(tabFolderTop, SWT.NONE, eventBroker);
+						
+			metricView =  (MetricView) viewer;
+			metricView.addDisposeListener(event -> metricView = null);
 			
-			// if the metric view is created for the traditional views (top-down, bottom-up, flat)
-			// we should store the instance. This will be needed because each 3 views only has 1 metric view.
-			// However, each thread view has its own metric view. Hence no need to store the instance.
-			// to know if a view is thread view or not, we can check from isAffectAll() property.
-			
-			if ( ((MetricFilterInput)input).isAffectAll() ) {
-				// the metric view is generated for the 3 traditional views.
-				// we need to store the instance
-				
-				metricView =  (MetricView) viewer;
-				metricView.addDisposeListener(event -> metricView = null);
-			} else {
-				// for metric properties from thread view, we need to show as well the title of the thread view
-				// this is important to distinguish with other metric properties
-				
-				final String titleView = tabFolderBottom.getSelection().getText();
-				viewer.setText(MetricView.TITLE_DEFAULT + ": " + titleView);
-			}
 			
 		} else {
 			viewer = new Editor(tabFolderTop, SWT.NONE);

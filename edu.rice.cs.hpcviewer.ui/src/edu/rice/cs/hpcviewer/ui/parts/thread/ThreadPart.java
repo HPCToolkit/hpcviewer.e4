@@ -116,7 +116,7 @@ public class ThreadPart extends TopDownPart
 	
 	
 	@Override
-	protected RootScope getRoot() {
+	public RootScope getRoot() {
 		return viewInput.getRootScope();
 	}
 	

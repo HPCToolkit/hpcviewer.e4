@@ -12,8 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
-import edu.rice.cs.hpcdata.experiment.scope.RootScope;
-import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcmetric.MetricFilterInput;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
@@ -53,11 +51,8 @@ public class ShowMetrics
 			logger.debug("Database not found");
 			return;
 		}
-		AbstractView item = profilePart.getActiveView();
-		
-		RootScope root = experiment.getRootScope(RootScopeType.CallingContextTree);
-		MetricFilterInput input = new MetricFilterInput(root, experiment, 
-														item, true);
+		AbstractView item = profilePart.getActiveView();		
+		MetricFilterInput input = new MetricFilterInput(item);
 		
 		profilePart.addEditor(input);
 	}
