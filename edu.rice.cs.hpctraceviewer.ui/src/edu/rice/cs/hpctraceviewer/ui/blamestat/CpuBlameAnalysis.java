@@ -34,7 +34,7 @@ import edu.rice.cs.hpcdata.util.Constants;
  ************************************************************/
 public class CpuBlameAnalysis implements IPixelAnalysis 
 {
-	private final static String GPU_SYNC = "<gpu sync>";
+	private static final String GPU_SYNC = "<gpu sync>";
 	
 	private final TreeMap<Integer /* pixel */, Float /* percent */ >  cpuBlameMap;
 	private final IEventBroker eventBroker;
@@ -63,7 +63,7 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 			
 		}else {
 			
-			Map<Integer, Integer> entry = new HashMap<Integer, Integer>();
+			Map<Integer, Integer> entry = new HashMap<>();
 			entry.put(key_pixel, value);
 			dict.put(key_rank, entry);			
 		}
@@ -97,7 +97,7 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 	public CpuBlameAnalysis(IEventBroker eventBroker) {
 		this.eventBroker = eventBroker;
 		
-		cpuBlameMap = new TreeMap<Integer, Float>();
+		cpuBlameMap = new TreeMap<>();
 		cpuTotalBlame = 0;
 	}
 	
@@ -109,11 +109,11 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 		this.dataTraces = dataTraces;
 		this.ptlService = ptlService;
 				
-		cpu_active_routines = new HashMap<Integer, Map<Integer, Integer>>();
-		cpu_active_count    = new HashMap<Integer,Integer>();
+		cpu_active_routines = new HashMap<>();
+		cpu_active_count    = new HashMap<>();
 		
-		gpu_active_count = new HashMap<Integer,Integer>();
-		gpu_idle_count   = new HashMap<Integer,Integer>();
+		gpu_active_count = new HashMap<>();
+		gpu_idle_count   = new HashMap<>();
 		
 		cpuBlameMap.clear();		
 		cpuTotalBlame = (float) 0;
@@ -147,7 +147,7 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 			// and it isn't sync with the current process time line
 			return;
 		
-		int process =  ptl.getProcessNum(); //attributes.convertTraceLineToRank(y);				
+		int process =  ptl.getProcessNum(); 			
 		boolean isCpuThread = true;
 
 		// get the profile's id tuple and verify if the later is a cpu thread
@@ -163,10 +163,12 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 
 		RGB rgb = detailData.palette.getRGB(pixelValue);
 		ProcedureColor procColor = colorTable.getProcedureNameByColorHash(rgb.hashCode());
-		
-		assert(procColor != null);
 
-		String proc_name = procColor.getProcedure();
+		// special case issue #287
+		if (procColor == null)
+			return;
+		
+		String procName = procColor.getProcedure();
 		
 		if (isCpuThread) { // cpu thread
 			if (!procColor.getProcedure().contains(Constants.PROC_NO_ACTIVITY)) {
@@ -175,8 +177,8 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 			}
 
 		} else {		// gpu thread
-			if (proc_name.contains(Constants.PROC_NO_ACTIVITY) ||
-					proc_name.contains(GPU_SYNC)) {
+			if (procName.contains(Constants.PROC_NO_ACTIVITY) ||
+					procName.contains(GPU_SYNC)) {
 								
 				addDict(gpu_idle_count, rank, 1);
 			}else {				
