@@ -116,7 +116,7 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 		gpu_idle_count   = new HashMap<>();
 		
 		cpuBlameMap.clear();		
-		cpuTotalBlame = (float) 0;
+		cpuTotalBlame = 0;
 
 	}
 	
