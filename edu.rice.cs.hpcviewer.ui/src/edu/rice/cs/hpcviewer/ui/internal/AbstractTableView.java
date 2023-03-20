@@ -635,11 +635,7 @@ implements EventHandler, DisposeListener, IUserMessage
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				boolean affectOthers = AbstractTableView.this.getViewType() == ViewType.COLLECTIVE;
-				MetricFilterInput input = new MetricFilterInput(root, 
-																getMetricManager(), 
-																AbstractTableView.this, 
-																affectOthers);
+				MetricFilterInput input = new MetricFilterInput(AbstractTableView.this);
 				profilePart.addEditor(input);
 				updateButtonStatus();
 			}
@@ -734,7 +730,6 @@ implements EventHandler, DisposeListener, IUserMessage
 	
 	public abstract RootScopeType getRootType();
 	
-	protected abstract RootScope getRoot();
 	protected abstract RootScope buildTree(boolean reset);
     protected abstract void beginToolbar(CoolBar coolbar, ToolBar toolbar);
     protected abstract void endToolbar  (CoolBar coolbar, ToolBar toolbar);

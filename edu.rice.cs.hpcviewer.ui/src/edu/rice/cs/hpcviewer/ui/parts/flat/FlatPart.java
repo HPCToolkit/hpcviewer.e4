@@ -109,7 +109,7 @@ public class FlatPart extends AbstractTableView
 	}
 
 	@Override
-	protected RootScope getRoot() {
+	public RootScope getRoot() {
 		IMetricManager mm = getMetricManager();
 		Experiment experiment = (Experiment) mm;
 		return experiment.getRootScope(RootScopeType.Flat);

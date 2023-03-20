@@ -1,6 +1,6 @@
 package edu.rice.cs.hpctest;
 
-import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -12,11 +12,11 @@ import org.eclipse.swt.widgets.Shell;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.merge.DatabasesToMerge;
 import edu.rice.cs.hpcmerge.DatabaseMergeWizard;
-import edu.rice.cs.hpctest.util.DataFactory;
+import edu.rice.cs.hpctest.util.TestDatabase;
 
 public class DatabaseMergeTest {
 
-	public static void main(String[] args) throws NoSuchAlgorithmException {
+	public static void main(String[] args) throws Exception {
 		System.out.println("Test begin");
 		final Display display = new Display();
 		final Shell   shell   = new Shell(display);
@@ -25,7 +25,15 @@ public class DatabaseMergeTest {
 		shell.setText("Test wizard");
 		
 
-		List<Experiment> list = DataFactory.createExperiments();
+		var dirs = TestDatabase.getDatabases();
+		List<Experiment> list = new ArrayList<>(2);
+		var exp1 = new Experiment();
+		exp1.open(dirs[0], null, true);
+		list.add(exp1);
+		
+		var exp2 = new Experiment();
+		exp2.open(dirs[0], null, true);		
+		list.add(exp2);
 
 		DatabaseMergeWizard wz = new DatabaseMergeWizard(list);
 		WizardDialog wd = new WizardDialog(shell, wz);
