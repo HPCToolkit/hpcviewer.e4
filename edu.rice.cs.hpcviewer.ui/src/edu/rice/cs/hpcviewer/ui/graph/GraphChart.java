@@ -33,23 +33,25 @@ public class GraphChart extends InteractiveChart implements MouseMoveListener
 	public void mouseMove(MouseEvent e) {
 		
 		for(ISeries<?> series: getSeriesSet().getSeries()) {
-			for(int i=0; i<series.getYSeries().length; i++) {
-				Point p = series.getPixelCoordinates(i);
-				double distance = Math.sqrt(Math.pow(e.x - p.x, 2) + Math.pow(e.y - p.y, 2));
-				if(distance < ((ILineSeries<?>)series).getSymbolSize()) {
-					String xVal = "x-value";
-					
-					if (input != null) {
-						var idtype = input.getScope().getExperiment().getIdTupleType();
-						xVal = (String) input.getThreadData().getIdTupleLabelWithoutGPU(idtype)[i];
+			if (series instanceof ILineSeries<?>) {
+				for(int i=0; i<series.getYSeries().length; i++) {
+					Point p = series.getPixelCoordinates(i);
+					double distance = Math.sqrt(Math.pow(e.x - p.x, 2) + Math.pow(e.y - p.y, 2));
+					if(distance < ((ILineSeries<?>)series).getSymbolSize()) {
+						String xVal = "x-value";
+						
+						if (input != null) {
+							var idtype = input.getScope().getExperiment().getIdTupleType();
+							xVal = (String) input.getThreadData().getIdTupleLabelWithoutGPU(idtype)[i];
+						}
+						
+						var yVal = series.getYSeries()[i];
+						var format = getAxisSet().getYAxis(0).getTick().getFormat();
+						var yStr = format.format(yVal);
+						
+						getPlotArea().setToolTipText(xVal + " : " + yStr);
+						return;
 					}
-					
-					var yVal = series.getYSeries()[i];
-					var format = getAxisSet().getYAxis(0).getTick().getFormat();
-					var yStr = format.format(yVal);
-					
-					getPlotArea().setToolTipText(xVal + " : " + yStr);
-					return;
 				}
 			}
 		}

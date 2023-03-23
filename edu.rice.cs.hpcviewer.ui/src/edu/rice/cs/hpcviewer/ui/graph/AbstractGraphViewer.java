@@ -153,13 +153,7 @@ public abstract class AbstractGraphViewer extends AbstractUpperPart
 
 		// have to adjust the range separately on E4.
 		
-		display.asyncExec(new Runnable() {
-			
-			@Override
-			public void run() {
-				chart.getAxisSet().adjustRange();
-			}
-		});
+		display.asyncExec(() -> chart.getAxisSet().adjustRange());
 	}
 	
 	protected GraphEditorInput getInput() {
@@ -178,13 +172,11 @@ public abstract class AbstractGraphViewer extends AbstractUpperPart
 			scopeName = scope.getName().substring(0, MAX_TITLE_CHARS) + "...";
 		}
 		String type  = getGraphTypeLabel();
-		String title = "[" + type + "] " + scopeName +": " + metric.getDisplayName();
-		
-		return title;
+		return "[" + type + "] " + scopeName +": " + metric.getDisplayName();
 	}
 	
 
-	static public String getID(String descID, Scope scope, BaseMetric metric) {
+	public static String getID(String descID, Scope scope, BaseMetric metric) {
 		
 		String dbId  = ElementIdManager.getElementId(scope.getExperiment());
 		int scopeId  = scope.getCCTIndex();
