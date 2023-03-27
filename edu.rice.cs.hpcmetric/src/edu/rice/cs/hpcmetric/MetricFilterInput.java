@@ -32,40 +32,6 @@ public class MetricFilterInput extends FilterInputData<BaseMetric>
 	}
  	
 	
-	/****
-	 * Constructor for unit test only
-	 * 
-	 * @param root
-	 * @param metricManager
-	 * @param treeViewer
-	 * @param affectAll
-	 */
-	public MetricFilterInput(RootScope root, IMetricManager metricManager, TreeViewer treeViewer, boolean affectAll) {	
-		super(createFilterList(metricManager.getVisibleMetrics(), treeViewer));
-		this.view = new IFilterable() {
-			
-			@Override
-			public ViewType getViewType() {
-				return ViewType.COLLECTIVE;
-			}
-			
-			@Override
-			public RootScope getRoot() {
-				return root;
-			}
-			
-			@Override
-			public IMetricManager getMetricManager() {
-				return metricManager;
-			}
-			
-			@Override
-			public List<FilterDataItem<BaseMetric>> getFilterDataItems() {
-				return MetricFilterInput.this.getListItems();
-			}
-		};
-	}
-	
 	public IFilterable getView() {
 		return view;
 	}
