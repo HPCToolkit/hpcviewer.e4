@@ -37,11 +37,10 @@ public class CanvasAxisY extends AbstractAxisCanvas
 	private final int [][]listColorSWT = {
 											{ SWT.COLOR_CYAN,    SWT.COLOR_DARK_BLUE    },
 											{ SWT.COLOR_YELLOW,  SWT.COLOR_DARK_MAGENTA },
-											{ SWT.COLOR_MAGENTA, SWT.COLOR_DARK_GREEN   },
-											{ SWT.COLOR_WHITE,   SWT.COLOR_DARK_RED     },
-											{ SWT.COLOR_GRAY,    SWT.COLOR_DARK_YELLOW  }
+											{ SWT.COLOR_GREEN,   SWT.COLOR_DARK_YELLOW  },
+											{ SWT.COLOR_BLUE,    SWT.COLOR_DARK_GREEN   },
+											{ SWT.COLOR_WHITE,   SWT.COLOR_BLACK  }
 										};
-	private int columnWidth = HPCTraceView.Y_AXIS_WIDTH/4;
 	
 	private final Color [][]listColorObjects;
 	private final ProcessTimelineService timeLine;
@@ -83,7 +82,7 @@ public class CanvasAxisY extends AbstractAxisCanvas
         final IBaseData traceData = stdc.getBaseData();
         
         List<IdTuple> list   = traceData.getListOfIdTuples(IdTupleOption.BRIEF);
-        boolean isSequential = list==null || list.size()==0;
+        boolean isSequential = list==null || list.isEmpty();
         
         if (isSequential) {
         	// it's a sequential code. No need to display the y-axis
@@ -96,13 +95,7 @@ public class CanvasAxisY extends AbstractAxisCanvas
 			
 			mouseState = MouseState.ST_MOUSE_NONE;
 		}
-        
-        // for sequential code, we assume the number of parallelism is 1
-        // (just to avoid the zero division)
-        int partition = Math.max(traceData.getNumLevels(), 1);
-		columnWidth = HPCTraceView.Y_AXIS_WIDTH / partition;
-
-		tooltip.setData(stdc, columnWidth);
+		tooltip.setData(stdc);
 	}
 	
 	
@@ -123,7 +116,7 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		final TraceDisplayAttribute attribute = data.getTraceDisplayAttribute();
 		
 		List<IdTuple> listIdTuples = traceData.getListOfIdTuples(IdTupleOption.BRIEF);
-		if (listIdTuples == null || listIdTuples.size() == 0)
+		if (listIdTuples == null || listIdTuples.isEmpty())
 			return;
 		
 		// ------------------------------------------------------------------------------------------
@@ -167,8 +160,14 @@ public class CanvasAxisY extends AbstractAxisCanvas
 			
 			final int y_curr = attribute.convertRankToPixel(procNumber);
 			final int y_next = attribute.convertRankToPixel(procNumber+1);
-			
+			final int height = y_next - y_curr + 1;
+
 			IdTuple idtuple  = listIdTuples.get(procNumber);
+	        
+	        // for sequential code, we assume the number of parallelism is 1
+	        // (just to avoid the zero division)
+	        int partition   = Math.max(idtuple.getLength(), 1);
+	        int columnWidth = HPCTraceView.Y_AXIS_WIDTH / partition;
 
 			for(int j=0; j<idtuple.getLength(); j++) {
 
@@ -185,14 +184,11 @@ public class CanvasAxisY extends AbstractAxisCanvas
 				// draw the column for each id tuple
 				// -----------------------------------------------------
 
-				int x_start = j * columnWidth;
-				int x_end   = x_start + columnWidth - 1;
-
-				Color color  = listColorObjects[j%5][currentColor];
+				int x = j * columnWidth;
+				Color color = listColorObjects[j%5][currentColor];
 
 				gc.setBackground(color);
-				gc.fillRectangle(x_start, y_curr, x_end, y_next);
-				
+				gc.fillRectangle(x, y_curr, columnWidth, height);
 				oldColorIndex[j] = currentColor;
 			}
 			idtupleOld = idtuple;
@@ -251,18 +247,16 @@ public class CanvasAxisY extends AbstractAxisCanvas
 	 *  Caller needs to set data every time there is a new data
 	 *
 	 ********************************************************/
-	static private class AxisToolTip extends DefaultToolTip
+	private static class AxisToolTip extends DefaultToolTip
 	{
 		private SpaceTimeDataController data;
-		private int columnWidth;
 
 		public AxisToolTip(Control control) {
 			super(control);
 		}
 		
-		void setData(SpaceTimeDataController data, int columnWidth) {
+		void setData(SpaceTimeDataController data) {
 			this.data = data;
-			this.columnWidth = columnWidth;
 		}
 	
 		@Override
@@ -282,10 +276,14 @@ public class CanvasAxisY extends AbstractAxisCanvas
 			if (process < 0 && process >= listTuples.size())
 				return null;
 			
-			IdTuple id  = listTuples.get(process); 
-			int level   = Math.min(event.x / columnWidth, id.getLength()-1);
+			IdTuple idtuple  = listTuples.get(process);
 			
-			return id.toString(level, traceData.getIdTupleTypes());
+	        int partition = Math.max(idtuple.getLength(), 1);
+			var columnWidth = HPCTraceView.Y_AXIS_WIDTH / partition;
+
+			int level = Math.min(event.x / columnWidth, idtuple.getLength()-1);
+			
+			return idtuple.toString(level, traceData.getIdTupleTypes());
 		}
 		
 		

@@ -7,6 +7,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -227,7 +228,7 @@ public class DatabaseCollection
 		// is ready. This doesn't guarantee anything, but works in most cases :-(
 
 		sync.asyncExec(()-> {
-			showPart(experiment, application, modelService, service, message);
+			showPart(experiment, application, modelService,  message);
 		});
 	}
 	
@@ -238,14 +239,13 @@ public class DatabaseCollection
 	 * @param experiment
 	 * @param application
 	 * @param service
-	 * @param parentId
+	 * @param message
 	 * 
 	 * @return int
 	 */
 	private int showPart( IExperiment    experiment, 
 						  MApplication   application, 
 						  EModelService  modelService,
-						  EPartService   service,
 						  String         message) {
 
 		//----------------------------------------------------------------
@@ -256,23 +256,18 @@ public class DatabaseCollection
 		//----------------------------------------------------------------
 		
 		MWindow  window = application.getSelectedElement();
+		
 		if (window == null) {
 			// window is not active yet
 			
 			// using asyncExec we hope Eclipse will delay the processing until the UI 
 			// is ready. This doesn't guarantee anything, but works in most cases :-(
-			sync.asyncExec(()-> {
-				showPart(experiment, application, modelService, service, message);
-			});
+			sync.asyncExec(()-> showPart(experiment, application, modelService, message));
 			return -1;
 		}
 
-		List<MStackElement> list = null;
-
 		MPartStack stack  = (MPartStack)modelService.find(STACK_ID_BASE, window);
-		if (stack != null) {
-			list = stack.getChildren();
-		} else {
+		if (stack == null) {
 			//----------------------------------------------------------------
 			// create a new part stack if necessary
 			// We don't want this, since it makes the layout weird.
@@ -280,15 +275,26 @@ public class DatabaseCollection
 			stack = modelService.createModelElement(MPartStack.class);
 			stack.setElementId(STACK_ID_BASE);
 			stack.setToBeRendered(true);
-			
-			list = stack.getChildren();
 		}
+		var list = stack.getChildren();
 		
-		final MPart part = service.createPart(ProfilePart.ID);
+		// issue #284: use the context from the current window
+		EPartService partService = window.getContext().get(EPartService.class);
+		MPart part = null;
+		
+		try {
+			part = partService.createPart(ProfilePart.ID);
+		} catch (IllegalStateException e) {
+			// issue #284: exception due to "no active window"
+			// I don't know why, but perhaps it's because the rendering is not ready?
+			// Recursively try to create again
+			sync.asyncExec(()-> showPart(experiment, application, modelService, message));
+			return -1;
+		}
 		if (list != null)
 			list.add(part);
 		
-		service.showPart(part, PartState.VISIBLE);
+		partService.showPart(part, PartState.VISIBLE);
 		IMainPart view = null;
 
 		int maxAttempt = 20;		
@@ -308,7 +314,7 @@ public class DatabaseCollection
 		if (view == null) {
 			MessageDialog.openError(Display.getDefault().getActiveShell(), 
 									"Fail to get the view", 
-									"hpcviewer is unable to retrieve the view. Please try again");
+									"hpcviewer is unable to render the profile view. Please try again");
 			return 0;
 		}
 		
@@ -324,20 +330,18 @@ public class DatabaseCollection
 
 		//----------------------------------------------------------------
 		// part stack is ready, now we create all view parts and add it to the part stack
-		// TODO: We assume adding to the part stack is always successful
+		// We assume adding to the part stack is always successful
 		//----------------------------------------------------------------
 		stack.setVisible(true);
 		stack.setOnTop(true);
 		
 		List<IExperiment> listExperiments = getActiveListExperiments(application.getSelectedElement());
-		if (listExperiments != null) {
-			listExperiments.add(experiment);
-		}
+		listExperiments.add(experiment);
 
 		//----------------------------------------------------------------
 		// display the trace view if the information exists
 		//----------------------------------------------------------------
-		displayTraceView(experiment, service, list);
+		displayTraceView(experiment, partService, list);
 		
 		if (view instanceof ProfilePart) {
 			ProfilePart activeView = (ProfilePart) view;
@@ -405,8 +409,6 @@ public class DatabaseCollection
 	 */
 	public int getNumDatabase(MWindow window) {
 		var list = getActiveListExperiments(window);
-		if (list == null)
-			return 0;
 		return list.size();
 	}
 	
@@ -416,10 +418,7 @@ public class DatabaseCollection
 	 * @return true if the database is empty
 	 */
 	public boolean isEmpty(MWindow window) {
-		var list = getActiveListExperiments(window);
-		if (list == null)
-			return true;
-		
+		var list = getActiveListExperiments(window);		
 		return list.isEmpty();
 	}
 	
@@ -433,7 +432,7 @@ public class DatabaseCollection
 	public IExperiment getExperimentObject(MWindow window, String pathXML) {
 		var list = getActiveListExperiments(window);
 		
-		if (list == null || list.isEmpty())
+		if (list.isEmpty())
 			return null;
 		
 		for (var exp: list) {
@@ -541,8 +540,7 @@ public class DatabaseCollection
 		// some parts may need to check the database if the experiment really exits or not.
 		// If not, they will consider the experiment will be removed.
 		var list = getActiveListExperiments(application.getSelectedElement());
-		if (list != null)
-			list.remove(experiment);
+		list.remove(experiment);
 		
 		MWindow window = application.getSelectedElement();
 		List<MPart> listParts = modelService.findElements(window, null, MPart.class);
@@ -612,22 +610,16 @@ public class DatabaseCollection
 	 * Retrieve the list of experiments of the current window.
 	 * If Eclipse reports there is no active window, the list is null.
 	 * 
-	 * @return the list of experiments (if there's an active window). null otherwise.
+	 * @return the list of experiments (if there's an active window). 
+	 * 		   empty list otherwise.
 	 * 
 	 */
 	private List<IExperiment> getActiveListExperiments(MWindow window) {
 
 		if (window == null) {
-			statusReporter.error("No active window");
-			return null;
+			return Collections.emptyList();
 		}
-		List<IExperiment> list = mapWindowToExperiments.get(window);
-		
-		if (list == null) {
-			list = new ArrayList<>();
-			mapWindowToExperiments.put(window, list);
-		}
-		return list;
+		return mapWindowToExperiments.computeIfAbsent(window, key -> new ArrayList<>());
 	}
 	
 	

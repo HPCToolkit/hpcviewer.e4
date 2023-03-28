@@ -317,11 +317,12 @@ public class ScopeTreeData implements IScopeTreeData
 		public int compare(Scope o1, Scope o2) {
             int result = 0;
 			if (o1.getParentScope() != null && o2.getParentScope() != null) {
-				int d1 = treeData.getDepthOfData(o1);
-				int d2 = treeData.getDepthOfData(o2);
 				
 				var path1 = treeData.getPath(o1);
 				var path2 = treeData.getPath(o2);
+				
+				int d1 = path1.size();
+				int d2 = path2.size();
 				
 				for(int d=0; d < d1 && d < d2; d++) {
 					var node1 = path1.get(d);

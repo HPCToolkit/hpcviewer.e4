@@ -6,6 +6,7 @@ import java.util.List;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.TreeColumn;
 
+import edu.rice.cs.hpcbase.BaseConstants.ViewType;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
@@ -15,9 +16,6 @@ import edu.rice.cs.hpcmetric.internal.MetricFilterDataItem;
 
 public class MetricFilterInput extends FilterInputData<BaseMetric>
 {
-	private final RootScope root;
-	private final boolean affectAll;
-	private final IMetricManager metricManager;
 	private final IFilterable view;
 
 	/****
@@ -28,30 +26,11 @@ public class MetricFilterInput extends FilterInputData<BaseMetric>
 	 * @param listMetrics List of metric status
 	 * @param affectAll boolean true if the change affects all other views within the experiment database
 	 */
-	public MetricFilterInput(RootScope root, IMetricManager metricManager, IFilterable view, boolean affectAll) {
+	public MetricFilterInput(IFilterable view) {
 		super(view.getFilterDataItems());
-		this.root = root;
 		this.view = view;
-		this.metricManager = metricManager;
-		this.affectAll = affectAll;
 	}
  	
-	
-	/****
-	 * Constructor for unit test only
-	 * 
-	 * @param root
-	 * @param metricManager
-	 * @param treeViewer
-	 * @param affectAll
-	 */
-	public MetricFilterInput(RootScope root, IMetricManager metricManager, TreeViewer treeViewer, boolean affectAll) {	
-		super(createFilterList(metricManager.getVisibleMetrics(), treeViewer));
-		this.root = root;
-		this.view = null;
-		this.metricManager = metricManager;
-		this.affectAll = affectAll;
-	}
 	
 	public IFilterable getView() {
 		return view;
@@ -88,17 +67,17 @@ public class MetricFilterInput extends FilterInputData<BaseMetric>
 
 
 	public IMetricManager getMetricManager() {
-		return metricManager;
+		return view.getMetricManager();
 	}
 
 
 	public RootScope getRoot() {
-		return root;
+		return view.getRoot();
 	}
 
 
 	public boolean isAffectAll() {
-		return affectAll;
+		return view.getViewType() == ViewType.COLLECTIVE;
 	}
 
 	

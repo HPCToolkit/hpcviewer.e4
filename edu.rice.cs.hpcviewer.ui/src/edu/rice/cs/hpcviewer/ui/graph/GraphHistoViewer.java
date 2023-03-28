@@ -6,12 +6,12 @@ import java.util.ArrayList;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.Display;
-import org.swtchart.Chart;
-import org.swtchart.IAxis;
-import org.swtchart.IAxisSet;
-import org.swtchart.IAxisTick;
-import org.swtchart.IBarSeries;
-import org.swtchart.ISeries.SeriesType;
+import org.eclipse.swtchart.Chart;
+import org.eclipse.swtchart.IAxis;
+import org.eclipse.swtchart.IAxisSet;
+import org.eclipse.swtchart.IAxisTick;
+import org.eclipse.swtchart.IBarSeries;
+import org.eclipse.swtchart.ISeries.SeriesType;
 
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;

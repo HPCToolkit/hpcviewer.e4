@@ -2,85 +2,98 @@ package edu.rice.cs.hpctest.util;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.Test;
 
+import edu.rice.cs.hpcdata.experiment.Experiment;
+
 public class TestDatabase 
 {
-	private static final String DIR_XML    = "xml"; 
-	private static final String DIR_METADB = "metadb"; 
-	
-	private static String []xmlPaths = new String[] {DIR_XML + File.separator + "bug-no-gpu-trace", 
-													 DIR_XML + File.separator + "bug-empty", 
-													 DIR_XML + File.separator + "bug-nometric", 
-													 DIR_XML + File.separator + "inline.xml.db", 
-													 DIR_XML + File.separator + "vectorAdd"};
-	
-	private static String []metadbPaths = new String[] {
-												  DIR_METADB + File.separator + "loop-fork-cycles",
-												  DIR_METADB + File.separator + "lmp-openmp",
-												  DIR_METADB + File.separator + "inline.meta.db",
-												  DIR_METADB + File.separator + "vectorAdd",
-												  DIR_METADB + File.separator + "d.x",
-												  DIR_METADB + File.separator + "d.foo",
-												  DIR_METADB + File.separator + "out.of.memory",
-												  DIR_METADB + File.separator + "derived-metrics.db"};	
-	
-	public static File[] getXMLDatabases() {
-		return getDatabases(xmlPaths);
-	}
-
-	
-	public static File[] getMetaDatabases() {
-		return getDatabases(metadbPaths);
-	}
+	private static final String []FILES_EXPERIMENT  = {"experiment.xml", "meta.db"};	
 	
 	
 	public static File[] getDatabases() {
-		String []paths = Arrays.copyOf(xmlPaths, xmlPaths.length + metadbPaths.length);
-		for(int i=0; i<metadbPaths.length; i++) {
-			paths[i + xmlPaths.length] = metadbPaths[i];
-		}
-		return getDatabases(paths);
+		return getDatabases(getDatabasePath());
 	}
 	
-	private static File[] getDatabases(String []paths) {
-		File []dirs = new File[paths.length];
+	public static File[] getDatabases(String prefix) {
+		var dirs  = new File(prefix);
+		var paths = Stream.of(dirs.listFiles())
+			  .filter(File::isDirectory)
+			  .map(File::getAbsolutePath)
+			  .collect(Collectors.toSet());
+		
+		return getDatabases(paths);
+	}
+
+
+	public static File[] getDatabases(Set<String> paths) {
+		File []dirs = new File[paths.size()];
 		int i=0;
 		for(var path: paths) {
-			Path resource = Paths.get("..", "resources", path);
+			Path resource = Paths.get(path);
 			dirs[i] = resource.toFile();
+			assertTrue("Directory is not readable: " + resource.toString(), dirs[i].canRead());
 			i++;
 		}
 		return dirs;
 	}
+
 	
-	
+	public static List<Experiment> getExperiments() throws Exception {
+		File[]dirs = getDatabases();
+		List<Experiment> listExp = new ArrayList<>(dirs.length);
+		for(var dir: dirs) {
+			Experiment e = new Experiment();
+			e.open(dir, null, true);
+			listExp.add(e);
+		}
+		return listExp;
+	}
+
 	@Test
 	public void testAll() {
-		File []xmls = getXMLDatabases();
-		checkDirectory(xmls, xmlPaths.length);
-		
-		File []metadb = getMetaDatabases();
-		checkDirectory(metadb, metadbPaths.length);
-		
-		File []all = getDatabases();
-		checkDirectory(all, xmls.length + metadb.length);
+		File []all = getDatabases(getDatabasePath());
+		checkDirectory(all);
 	}
 	
-	private boolean checkDirectory(File[] dirs, int length) {
+
+	private boolean checkDirectory(File[] dirs) {
 		assertNotNull(dirs);
-		assertTrue(dirs.length == length);
-		
+		assertTrue(dirs.length > 0);
+
 		for(File d: dirs) {
-			if (!d.canRead() || !d.isDirectory())
-				return false;
+			assertTrue(d.canRead() && d.isDirectory());
+			var files = d.listFiles();
+			for(var file: files) {
+				final var name = file.getName();
+				var found = Stream.of(FILES_EXPERIMENT)
+								  .filter(fileName -> fileName.equals(name))
+								  .findAny();
+				if (found.isPresent())
+					return true;
+
+			}
+			fail("No database in " + d.getAbsolutePath());
 		}
-		return true;
+		fail("No database");
+		return false;
 	}
-} 
+	
+	
+	private static String getDatabasePath() {		
+		var dir = Paths.get("..", "resources", "metadb").toFile();
+		return dir.getAbsolutePath();
+	}
+
+}

@@ -32,7 +32,6 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
@@ -93,7 +92,6 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 	private Text   txtFormat;
 	private Button btnCustomFormat;
 	private Button btnPercentFormat;
-	private Button btnDefaultFormat;
 
 	// ------------ Metric and math variables
 
@@ -157,6 +155,7 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 	 * @param parent the parent composite
 	 * @return Control
 	 */
+	@Override
 	protected Control createContents(Composite parent) {
 		Control contents = super.createContents(parent);
 
@@ -173,10 +172,8 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 		return contents;
 	}
 
-	/*
-	 * {@docRoot org.eclipse.jface.dialogs.TitleAreaDialog}
-	 * @see {@link org.eclipse.jface.dialogs.TitleAreaDialog} 
-	 */
+
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite composite = (Composite) super.createDialogArea(parent);
 		Group grpBase = new Group(composite, SWT.NONE);
@@ -274,6 +271,7 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 			expression_position = new Point(0,0);
 			txtMetricFormula.addKeyListener( new KeyAdapter(){
 
+				@Override
 				public void keyReleased(KeyEvent e) {
 					expression_position = txtMetricFormula.getSelection();
 				}
@@ -312,12 +310,10 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 			btnMetric.setText("Point-wise");
 			btnMetric.setToolTipText("Insert the metric as point-wise variable in the formula by prepending with '$' sign");
 
-			btnMetric.addSelectionListener(new SelectionListener() {
+			btnMetric.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					insertMetricToFormula("$", cbMetric.getSelectionIndex());
-				}
-				public void widgetDefaultSelected(SelectionEvent e) {
-
 				}
 			});
 
@@ -325,15 +321,18 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 			btnAggregate.setText("Aggregate");
 			btnAggregate.setToolTipText("Insert the metric as aggregate variable in the formula by prepending with '@' sign");
 
-			btnAggregate.addSelectionListener(new SelectionListener() {
+			btnAggregate.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					insertMetricToFormula("@", cbMetric.getSelectionIndex());
 				}
-				public void widgetDefaultSelected(SelectionEvent e) {
-
-				}
 			});
 			GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(buttonArea);
+
+			var hasMetric = !metricManager.getNonEmptyMetricIDs(root).isEmpty();
+
+			btnMetric.setEnabled(hasMetric);
+			btnAggregate.setEnabled(hasMetric);
 
 			//---------------- inserting function
 			Label lblFunc = new Label(grpInsertion, SWT.NONE);
@@ -356,8 +355,9 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 
 			final Button btnFunc = new Button(grpInsertion, SWT.PUSH);
 			btnFunc.setText("Insert function");
-			btnFunc.addSelectionListener(new SelectionListener() {
+			btnFunc.addSelectionListener(new SelectionAdapter() {
 				// action to insert the name of the function into the formula text
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					Point p = expression_position;
 					String sFunc = arrFuncNames[cbFunc.getSelectionIndex()];
@@ -369,9 +369,6 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 					p.y = p.x;
 					txtMetricFormula.setText( sb.toString() );
 					txtMetricFormula.setSelection( p );
-				}
-				public void widgetDefaultSelected(SelectionEvent e) {
-
 				}
 			});
 
@@ -403,10 +400,9 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 			this.btnPercent.setToolTipText("For each metric value, display the annotation of percentage relative to aggregate metric value");
 
 			// format option
-			//final Composite cFormat = new Composite( cOptions, SWT.NONE );
 			final Composite cCustomFormat = new Composite( cOptions, SWT.NONE );
 
-			btnDefaultFormat = new Button(cCustomFormat, SWT.RADIO);
+			var btnDefaultFormat = new Button(cCustomFormat, SWT.RADIO);
 			btnDefaultFormat.setText("Default format");
 			new Label( cCustomFormat, SWT.NONE );
 
@@ -678,6 +674,7 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 	/**
 	 * Call back method when the OK button is pressed
 	 */
+	@Override
 	public void okPressed() {
 		if (cbMetricName.getText().isEmpty()) {
 			MessageDialog.openError(getShell(), "Error", "Metric's name cannot be empty");

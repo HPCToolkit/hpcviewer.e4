@@ -1,7 +1,7 @@
 package edu.rice.cs.hpcviewer.ui.graph;
 
 import org.eclipse.swt.events.MouseEvent;
-import org.swtchart.ISeries;
+import org.eclipse.swtchart.ISeries;
 
 public class UserSelectionData 
 {

@@ -3,26 +3,18 @@ package edu.rice.cs.hpctree;
 import java.util.Comparator;
 import java.util.List;
 
-import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.IMergedScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.experiment.scope.filters.ExclusiveOnlyMetricPropagationFilter;
-import edu.rice.cs.hpcdata.experiment.scope.filters.InclusiveOnlyMetricPropagationFilter;
 import java.util.Collections;
 
 public class BottomUpScopeTreeData extends ScopeTreeData 
 {
-	private final ExclusiveOnlyMetricPropagationFilter exclusiveOnly;
-	private final InclusiveOnlyMetricPropagationFilter inclusiveOnly;
 
 	public BottomUpScopeTreeData(RootScope root, IMetricManager metricManager) {
 		super(root, metricManager);
-
-		exclusiveOnly = new ExclusiveOnlyMetricPropagationFilter((Experiment) metricManager);
-    	inclusiveOnly = new InclusiveOnlyMetricPropagationFilter((Experiment) metricManager);
 	}
 
 
@@ -32,8 +24,7 @@ public class BottomUpScopeTreeData extends ScopeTreeData
 			return Collections.emptyList();
 		
 		if (scope instanceof IMergedScope) {
-			IMergedScope ms = (IMergedScope) scope;
-			var listChildren = ms.getAllChildren(inclusiveOnly, exclusiveOnly);
+			var listChildren = scope.getChildren();
 			if (listChildren != null) {
 				
 				final BaseMetric metric = getSortedColumn() == 0 ? null : getMetric(getSortedColumn()-1);

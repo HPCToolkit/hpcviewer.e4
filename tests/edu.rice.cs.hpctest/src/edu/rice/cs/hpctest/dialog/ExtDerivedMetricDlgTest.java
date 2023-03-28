@@ -1,23 +1,21 @@
 package edu.rice.cs.hpctest.dialog;
 
-import java.security.NoSuchAlgorithmException;
-
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcmetric.dialog.ExtDerivedMetricDlg;
-import edu.rice.cs.hpctest.util.DataFactory;
+import edu.rice.cs.hpctest.util.TestDatabase;
 
 public class ExtDerivedMetricDlgTest {
 
-	public static void main(String[] args) throws NoSuchAlgorithmException {
+	public static void main(String[] args) throws Exception {
 		Display display = new Display();
 		Shell shell = new Shell(display);
 		shell.setLayout(new FillLayout());
 
-		var exp = DataFactory.createExperiments(1);
+		var exp = TestDatabase.getExperiments();
 		
 		ExtDerivedMetricDlg dlg = new ExtDerivedMetricDlg(shell, exp.get(0), exp.get(0).getRootScope(RootScopeType.CallingContextTree));
 		int r = dlg.open();

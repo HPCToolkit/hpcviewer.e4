@@ -357,10 +357,7 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 			if (listChanges.getType() == ListEvent.INSERT) {
 				// new metric has been added
 				// need to refresh the underlying layer
-				MetricFilterInput input2 = new MetricFilterInput(input.getRoot(), 
-						 input.getMetricManager(), 
-						 input.getView(), 
-						 input.isAffectAll());
+				MetricFilterInput input2 = new MetricFilterInput(input.getView());
 				reset(input2);
 			}
 		}		
