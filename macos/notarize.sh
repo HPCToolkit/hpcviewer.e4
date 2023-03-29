@@ -1,11 +1,5 @@
 #!/bin/zsh
 
-if ! command -v gon &> /dev/null
-then 
-	echo "Error: gon is not installed. Unable to continue the script"
-	echo "Please install gon from https://github.com/mitchellh/gon" 
-	exit
-fi
 
 #
 # check if a file exists. If not, just quit
@@ -30,10 +24,15 @@ FILE_BASE="${FILE%.zip}"
 echo "File base: ${FILE_BASE}"
 
 DIR_CONFIG="macos"
-BASE_CONFIG="config.hcl"
 FILE_PLIST="${DIR_CONFIG}/p.plist"
 
 check_file $FILE_PLIST
+
+# check the AC_USER env
+if [[ -z "${AC_USERID}" ]] ; then
+	echo "AC_USERID env is not set. It's required to sign the application"
+	exit 1
+fi
 
 # check the AC_PASSWORD env
 if [[ -z "${AC_PASSWORD}" ]] ; then
@@ -43,7 +42,7 @@ fi
 
 ##############################
 # 
-# Prepare the configuration script
+# Prepare the folder and unzip the app
 #
 ##############################
 
@@ -57,32 +56,13 @@ fi
 rm -rf $DIR_PREP
 mkdir $DIR_PREP
 
-cat << EOF > $DIR_PREP/$BASE_CONFIG
-source = ["./hpcviewer.app"]
-bundle_id = "edu.rice.cs.hpcviewer"
-
-apple_id {
-  username = "la5@rice.edu"
-  password = "@env:AC_PASSWORD"
-}
-
-sign {
-  application_identity = "Developer ID Application: Laksono Adhianto"
-  entitlements_file = "p.plist"
-}
-
-dmg {
-  output_path = "${FILE_BASE}.dmg"
-  volume_name = "hpcviewer"
-}
-
-zip {
-  output_path = "${FILE_BASE}.zip"
-}
-
-EOF
-
 cp $FILE_PLIST  $DIR_PREP
+
+if [[ ! -e "share" ]]; then
+	mkdir -p share/create-dmg
+	echo ln -s "${DIR_CONFIG}/support" share/create-dmg/
+	cp -R "${DIR_CONFIG}/support" share/create-dmg/
+fi
 
 cd $DIR_PREP
 unzip -q ../$FILE
@@ -92,24 +72,28 @@ unzip -q ../$FILE
 # Notarize the viewer
 #
 ##############################
-gon $BASE_CONFIG
+notarize() {
+	FILENAME="$1"
+	echo ""
 
-##############################
-# 
-# Hack: create the zip file for notarized file
-# Somehow, gon doesn't create hpcviewer.app directory 
-# inside the zip file
-#
-##############################
+	echo "codesign hpcviewer.app"
+	codesign -f  -s "${AC_USERID}"  --options=runtime   --entitlements  "p.plist"  "hpcviewer.app"
 
-mkdir -p tmp/hpcviewer.app
-cd tmp/hpcviewer.app
-unzip -q ../../"${FILE_BASE}.zip"
-cd ..
-zip -q -r "${FILE_BASE}.zip" hpcviewer.app
-cd ..
-cp "tmp/${FILE_BASE}.zip" ..
-cp "${FILE_BASE}.dmg" ..
+	echo "Create and notarize ${FILENAME}"
+	../${DIR_CONFIG}/create-dmg \
+		   --no-internet-enable \
+		   --volname "hpcviewer" \
+		   --volicon hpcviewer.app/Contents/Resources/hpcviewer.icns \
+		   --notarize AC_PASSWORD \
+		   "${FILENAME}" \
+		   "hpcviewer.app/"
+
+	check_file "${FILENAME}"
+}
+
+notarize "${FILE_BASE}.dmg"
+
+
 
 ##############################
 #
@@ -117,5 +101,6 @@ cp "${FILE_BASE}.dmg" ..
 # 
 ##############################
 
-cd ../..
+cd ..
 ls -l "$DIR_PREP/${FILE_BASE}.*"
+
