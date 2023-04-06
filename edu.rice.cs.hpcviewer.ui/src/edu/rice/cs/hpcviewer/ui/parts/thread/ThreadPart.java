@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.custom.CTabFolder;
 import org.osgi.service.event.Event;
 
@@ -97,6 +98,13 @@ public class ThreadPart extends TopDownPart
 				if (thesameDatabase) {
 					// grab the new root of the refreshed database
 					var newRoot = ((Experiment) data.metricManager).getRootScope(RootScopeType.CallingContextTree);
+
+					try {
+						((Experiment) data.metricManager).getThreadData();
+					} catch (IOException e) {
+						MessageDialog.openError(super.getControl().getShell(), "Error", e.getMessage());
+						return;
+					}
 					
 					// duplicate codes from AbstractTableView to refresh the table
 					// need to avoid duplication

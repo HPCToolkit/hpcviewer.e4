@@ -8,6 +8,9 @@ import org.eclipse.swtchart.ILineSeries;
 import org.eclipse.swtchart.ISeries;
 import org.eclipse.swtchart.extensions.charts.*;
 
+import edu.rice.cs.hpcdata.db.IdTupleType;
+import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
+
 /********************************************************************************
  * 
  * A customized extension of InteractiveChart for intercepting and interpreting
@@ -16,7 +19,8 @@ import org.eclipse.swtchart.extensions.charts.*;
  ********************************************************************************/
 public class GraphChart extends InteractiveChart implements MouseMoveListener
 {
-	GraphEditorInput input;
+	private IdTupleType idTupleType;
+	private IThreadDataCollection threadData;
 	
     public GraphChart(Composite parent, int style) {
 		super(parent, style);
@@ -26,7 +30,8 @@ public class GraphChart extends InteractiveChart implements MouseMoveListener
 
     
     public void setInput(GraphEditorInput input) {
-    	this.input = input;
+    	idTupleType = input.getScope().getExperiment().getIdTupleType();
+    	threadData  = input.getThreadData();
     }
     
 	@Override
@@ -40,9 +45,8 @@ public class GraphChart extends InteractiveChart implements MouseMoveListener
 					if(distance < ((ILineSeries<?>)series).getSymbolSize()) {
 						String xVal = "x-value";
 						
-						if (input != null) {
-							var idtype = input.getScope().getExperiment().getIdTupleType();
-							xVal = (String) input.getThreadData().getIdTupleLabelWithoutGPU(idtype)[i];
+						if (idTupleType != null) {
+							xVal = (String) threadData.getIdTupleLabelWithoutGPU(idTupleType)[i];
 						}
 						
 						var yVal = series.getYSeries()[i];
