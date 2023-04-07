@@ -282,6 +282,16 @@ public class ProfilePart implements IProfilePart, EventHandler
 	@PreDestroy
 	public void preDestroy() {
 		eventBroker.unsubscribe(this);
+		
+		if (experiment != null)
+			experiment.dispose();
+
+		if (metricView != null)
+			metricView.dispose();
+
+		views.clear();
+		
+		experiment = null;
 	}
 	
 	

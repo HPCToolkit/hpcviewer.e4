@@ -345,7 +345,7 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 	
 	@Focus
 	public void onFocus() {
-		// bug on Windows: forcing the focus will cause flickering infinitly
+		// bug on Windows: forcing the focus will cause flickering infinitely
 		if (OSValidator.isWindows())
 			return;
 		
@@ -470,8 +470,8 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 			// refresh the content
 			eventBroker.post(IConstants.TOPIC_COLOR_MAPPING, data);
 			break;
-		case PreferenceConstants.ID_DEBUG_MODE:
-		case TracePreferenceConstants.PREF_GPU_TRACES:
+		case PreferenceConstants.ID_DEBUG_MODE, 
+			 TracePreferenceConstants.PREF_GPU_TRACES:
 			tbtmTraceView.redraw();
 			break;
 		}

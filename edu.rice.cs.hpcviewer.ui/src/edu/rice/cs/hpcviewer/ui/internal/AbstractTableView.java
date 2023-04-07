@@ -11,8 +11,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.CTabFolder;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
@@ -64,7 +62,7 @@ import edu.rice.cs.hpcviewer.ui.resources.IconManager;
  *
  ************************************************************************************************/
 public abstract class AbstractTableView extends AbstractView 
-implements EventHandler, DisposeListener, IUserMessage
+implements EventHandler, IUserMessage
 {
 	private static final String TOOLTIP_AUTOFIT = "Resize the width of metric columns. ";
 	private static final String AUTOFIT_EVENT   = "eventautofit";
@@ -321,8 +319,6 @@ implements EventHandler, DisposeListener, IUserMessage
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_FILTER_POST_PROCESSING, this);
 		
 		eventBroker.subscribe(AUTOFIT_EVENT, this);
-	
-		parent.addDisposeListener(this);
 	}
 	
 	
@@ -451,10 +447,9 @@ implements EventHandler, DisposeListener, IUserMessage
 			// we need to check if this one if the active or not
 			// if not, just leave it
 			
-			if (!dataEvent.isApplyToAll() && profilePart.getActiveView() != this) {
-				return;
+			if (dataEvent.isApplyToAll() || profilePart.getActiveView() == this) {
+				hideORShowColumns(dataEvent);
 			}
-			hideORShowColumns(dataEvent);
 			
 		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE)) {
 			// metric has changed. 
@@ -484,7 +479,21 @@ implements EventHandler, DisposeListener, IUserMessage
 	
 
 	@Override
-	public void widgetDisposed(DisposeEvent e) {
+	public void dispose() {
+		if (eventBroker != null)
+			eventBroker.unsubscribe(this);
+		
+		if (table != null)
+			table.dispose();
+		
+		metricManager = null;
+		profilePart = null;
+		root = null;
+		table = null;
+		treeData = null;
+		zoomAction = null;
+		
+		super.dispose();
 	}
 
 	

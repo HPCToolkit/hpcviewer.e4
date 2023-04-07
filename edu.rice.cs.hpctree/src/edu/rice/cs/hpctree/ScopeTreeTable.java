@@ -724,18 +724,27 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	
 	@Override
 	public void widgetDisposed(DisposeEvent e) {
+		dispose();
+	}
+	
+	
+	public void dispose() {
+		if (listeners == null || listeners.isEmpty())
+			return;
+		
 		natTable.getDisplay().removeFilter(SWT.MouseDown, resizeListener);
 		natTable.getDisplay().removeFilter(SWT.MouseUp, resizeListener);
 		natTable.removeControlListener(resizeListener);
 		
-		((IScopeTreeData)bodyLayerStack
-							.getTreeRowModel()
-							.getTreeData())
-								.getMetricManager()
-								.removeMetricListener(this);
+		IScopeTreeData treeData = (IScopeTreeData) bodyLayerStack.getTreeRowModel().getTreeData();	
+		treeData.getMetricManager().removeMetricListener(this);
+
         bodyLayerStack.getSelectionLayer().removeLayerListener(this);
+        
+        bodyLayerStack.dispose();
+        
+        listeners.clear();
 	}
-	
 	
 	@Override
 	public void traverseOrExpand(int index) {
