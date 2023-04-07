@@ -209,20 +209,21 @@ public class TopDownPart extends AbstractTableView
 			}
 		}
 		return threadData;
-	}
-	
+	}	
 
 
 	@Override
 	public void dispose() {
 		super.dispose();
 		
-		items = null;
-		if (threadData != null)
+		if (threadData != null) {
 			try {
 				threadData.close();
 			} catch (Exception e1) {
 				e1.printStackTrace();
 			}
+		}
+		threadData = null;
+		items = null;
 	}
 }
