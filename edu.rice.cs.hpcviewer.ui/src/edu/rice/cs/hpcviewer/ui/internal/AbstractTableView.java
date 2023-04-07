@@ -316,7 +316,10 @@ implements EventHandler, DisposeListener, IUserMessage
 
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_METRIC_UPDATE,  this);
 		eventBroker.subscribe(ViewerDataEvent.TOPIC_HIDE_SHOW_COLUMN,   this);
-		eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH, this);
+		
+		eventBroker.subscribe(ViewerDataEvent.TOPIC_FILTER_PRE_PROCESSING, this);
+		eventBroker.subscribe(ViewerDataEvent.TOPIC_FILTER_POST_PROCESSING, this);
+		
 		eventBroker.subscribe(AUTOFIT_EVENT, this);
 	
 		parent.addDisposeListener(this);
@@ -325,7 +328,7 @@ implements EventHandler, DisposeListener, IUserMessage
 	
 	@Override
 	public Object getInput() {
-		return metricManager;
+		return getMetricManager();
 	}
 
 	/****
@@ -411,6 +414,12 @@ implements EventHandler, DisposeListener, IUserMessage
 	}
 
 
+	/**
+	 * Temporary array to store the current expanded nodes.
+	 * Only computed before filtering, and use it after filtering.
+	 * After that, there is no use.
+	 */
+	private int []expandedNodes;
 	
 	@Override
 	public void handleEvent(Event event) {
@@ -452,11 +461,22 @@ implements EventHandler, DisposeListener, IUserMessage
 			// We don't know if the change will incur structural changes or just visual.
 			// it's better to refresh completely the table just in case. 
 			table.visualRefresh();
+
+		} else if (topic.equals(ViewerDataEvent.TOPIC_FILTER_PRE_PROCESSING)) {
+			expandedNodes = table.getPathOfSelectedNode();
 			
-		} else if (topic.equals(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH)) {
+		} else if (topic.equals(ViewerDataEvent.TOPIC_FILTER_POST_PROCESSING)) {
 			RootScope newRoot = this.buildTree(true);
 			actionManager.clear();
+			
 			table.reset(newRoot);
+			
+			// put back the expanded tree and the selected node
+			if (expandedNodes != null) {
+				table.expandAndSelectNode(expandedNodes);
+				expandedNodes = null;
+			}
+			
 			updateButtonStatus();
 		}
 	}

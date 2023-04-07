@@ -20,7 +20,10 @@ public class ViewerDataEvent
 	public static final String TOPIC_HPC_DATABASE_NEW     = "hpcviewer/database_add";
 
 	/** Event when a database (cct) has been changed such as filtered or name updates */
-	public static final String TOPIC_HPC_DATABASE_REFRESH = "hpcviewer/database_refresh";
+	public static final String TOPIC_FILTER_PRE_PROCESSING = "hpcviewer/filter_pre";
+
+	/** Event when a database (cct) has been changed such as filtered or name updates */
+	public static final String TOPIC_FILTER_POST_PROCESSING = "hpcviewer/filter_post";
 
 	/** Event when a database has to be removed from the application */
 	public static final String TOPIC_HPC_ADD_NEW_METRIC   = "hpcviewer/metric_add";

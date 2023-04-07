@@ -422,7 +422,7 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 			}
 			updateToolItem();
 
-			eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH, this);
+			eventBroker.subscribe(ViewerDataEvent.TOPIC_FILTER_POST_PROCESSING, this);
 
 		} catch (Exception e) {
 			Shell shell = Display.getDefault().getActiveShell();
@@ -497,7 +497,7 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 			// need to dispose resources
 			if (stdc != null)
 				stdc.dispose();
-		} else if (event.getTopic().equals(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH)) {
+		} else if (event.getTopic().equals(ViewerDataEvent.TOPIC_FILTER_POST_PROCESSING)) {
 			tbtmTraceView.refresh();
 		}
 	}
