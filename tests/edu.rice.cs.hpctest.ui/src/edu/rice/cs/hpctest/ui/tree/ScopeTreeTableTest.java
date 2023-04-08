@@ -128,7 +128,15 @@ public class ScopeTreeTableTest
 			
 			// test for resetting the table
 			root.setCounter(1);
+			
+			// need to preserve the path before resetting the root
+			var path = table.getPathOfSelectedNode();
+			
 			table.reset((RootScope) root);
+			
+			// expand the tree back to the original
+			table.expandAndSelectNode(path);
+			
 			assertTrue(table.getRoot().getCounter() == 1);
 			
 			// check if we preserve the selection
