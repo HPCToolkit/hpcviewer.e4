@@ -13,7 +13,7 @@ import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 public class BufferRefreshOperation extends AbstractTraceOperation {
 
 	/**image data that describes current image in detail canvas*/
-	final private ImageData detailData;
+	private final ImageData detailData;
 
 	public BufferRefreshOperation(SpaceTimeDataController data, 
 								  ImageData detailData,
