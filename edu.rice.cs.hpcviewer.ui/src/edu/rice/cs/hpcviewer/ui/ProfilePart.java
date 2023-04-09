@@ -282,6 +282,16 @@ public class ProfilePart implements IProfilePart, EventHandler
 	@PreDestroy
 	public void preDestroy() {
 		eventBroker.unsubscribe(this);
+		
+		if (experiment != null)
+			experiment.dispose();
+
+		if (metricView != null)
+			metricView.dispose();
+
+		views.clear();
+		
+		experiment = null;
 	}
 	
 	
@@ -352,6 +362,14 @@ public class ProfilePart implements IProfilePart, EventHandler
 	@Override
 	public void handleEvent(Event event) {
 		if (event.getTopic().equals(FilterMap.FILTER_REFRESH_PROVIDER)) {
+			
+			Object obj = event.getProperty(IEventBroker.DATA);
+			ViewerDataEvent data = new ViewerDataEvent(experiment, obj);
+
+			// announce to all views that a filtering process is on the way
+			// if needed, each view can preserve their current states			
+			eventBroker.send(ViewerDataEvent.TOPIC_FILTER_PRE_PROCESSING, data);
+			
 			// filter the current database
 			// warning: the filtering is not scalable. We should do this in the 
 			//          background job
@@ -364,9 +382,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 			// announce to all views to refresh the content.
 			// this may take time, and should be done asynchronously
 			// with a background task
-			Object obj = event.getProperty(IEventBroker.DATA);
-			ViewerDataEvent data = new ViewerDataEvent(experiment, obj);
-			eventBroker.post(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH, data);
+			eventBroker.post(ViewerDataEvent.TOPIC_FILTER_POST_PROCESSING, data);
 		}
 	}
 	

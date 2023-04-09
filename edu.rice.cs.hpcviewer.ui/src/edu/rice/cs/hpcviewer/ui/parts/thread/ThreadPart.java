@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.custom.CTabFolder;
 import org.osgi.service.event.Event;
 
@@ -83,29 +84,48 @@ public class ThreadPart extends TopDownPart
 		setShowClose(true);
 	}
 
+	private int []expandedNodes;
 	
 	@Override
 	public void handleEvent(Event event) {
 		super.handleEvent(event);
+		Object obj = event.getProperty(IEventBroker.DATA);
+		if (!(obj instanceof ViewerDataEvent)) 
+			return;
 		
 		String topic = event.getTopic();
-		if (topic.equals(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH)) {
-			Object obj = event.getProperty(IEventBroker.DATA);
-			if (obj instanceof ViewerDataEvent) {
-				ViewerDataEvent data = (ViewerDataEvent) obj;
-				var thesameDatabase = getMetricManager().getID().equals(data.metricManager.getID());
-				if (thesameDatabase) {
-					// grab the new root of the refreshed database
-					var newRoot = ((Experiment) data.metricManager).getRootScope(RootScopeType.CallingContextTree);
-					
-					// duplicate codes from AbstractTableView to refresh the table
-					// need to avoid duplication
-					viewInput.setRootScope(newRoot);
-					getActionManager().clear();
-					((ScopeTreeTable)getTable()).reset(newRoot);
-					updateButtonStatus();
+		if (topic.equals(ViewerDataEvent.TOPIC_FILTER_POST_PROCESSING)) {
+
+			ViewerDataEvent data = (ViewerDataEvent) obj;
+			var thesameDatabase = getMetricManager().getID().equals(data.metricManager.getID());
+			if (thesameDatabase) {
+				// grab the new root of the refreshed database
+				var newRoot = ((Experiment) data.metricManager).getRootScope(RootScopeType.CallingContextTree);
+
+				try {
+					((Experiment) data.metricManager).getThreadData();
+				} catch (IOException e) {
+					MessageDialog.openError(super.getControl().getShell(), "Error", e.getMessage());
+					return;
 				}
+				
+				// duplicate codes from AbstractTableView to refresh the table
+				// need to avoid duplication
+				viewInput.setRootScope(newRoot);
+				getActionManager().clear();
+				
+				ScopeTreeTable table = (ScopeTreeTable) getTable();
+				table.reset(newRoot);
+				
+				if (expandedNodes != null) {
+					table.expandAndSelectNode(expandedNodes);
+					expandedNodes = null;
+				}
+				updateButtonStatus();
 			}
+
+		} else if (topic.equals(ViewerDataEvent.TOPIC_FILTER_PRE_PROCESSING)) {
+			expandedNodes = ((ScopeTreeTable)getTable()).getPathOfSelectedNode();
 		}
 	}
 	
