@@ -592,7 +592,6 @@ implements EventHandler, IUserMessage
 			if (!isMetricToSkip(root, m))
 				index++;
 		}
-		assert(false);
 		return -1;
 	}
 	
@@ -614,7 +613,7 @@ implements EventHandler, IUserMessage
 
 		// empty metric is not visible (usually).
 		// the column index should be based on non-empty metrics
-		return (mv == MetricValue.NONE);
+		return mv == MetricValue.NONE;
 	}
 
 	

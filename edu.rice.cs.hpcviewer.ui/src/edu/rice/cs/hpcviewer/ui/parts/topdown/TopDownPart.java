@@ -157,7 +157,7 @@ public class TopDownPart extends AbstractTableView
 		items[ITEM_THREAD].setEnabled(enableItems);
 		
 		Scope selectedScope = super.getTable().getSelection();
-		boolean enableGraph = enableItems && (selectedScope != null);
+		boolean enableGraph = enableItems && selectedScope != null;
 		items[ITEM_GRAPH] .setEnabled(enableGraph);
 	}
 

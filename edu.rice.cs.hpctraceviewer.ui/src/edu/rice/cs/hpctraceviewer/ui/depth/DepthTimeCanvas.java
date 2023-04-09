@@ -19,6 +19,7 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpctraceviewer.ui.base.ISpaceTimeCanvas;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
@@ -317,8 +318,10 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 				try {
 					super.init();
 					rebuffer();
-				} catch (java.lang.NullPointerException e) {
-					// ignore exception when there's (possibly) multiple thread access  
+				} catch (NullPointerException e) {
+					// ignore exception when there's (possibly) multiple thread access
+					LoggerFactory.getLogger(getClass())
+						.error(String.format("%s: %s" ,  getClass().getCanonicalName(), e.getMessage()));
 				}
 				
 			} else if (operation.hasContext(positionContext)) {
