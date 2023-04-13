@@ -25,12 +25,11 @@ import edu.rice.cs.hpcsetting.preferences.AbstractPage;
  ********************************************************/
 public class TracePreferencePage extends AbstractPage 
 {
-	public final static String TITLE = "Traces";
+	public static final String TITLE = "Traces";
 	
-	private final static int TOOLTIP_DELAY_MAX_MS = 10000;
-	private final static int TOOLTIP_DELAY_INCREMENT_MS = 1000;
+	private static final int TOOLTIP_DELAY_MAX_MS = 10000;
+	private static final int TOOLTIP_DELAY_INCREMENT_MS = 1000;
 	
-	//private Button []btnRenders;
 	private Button []colorPolicies;
 	private Button gpuTrace;
 	
@@ -68,20 +67,8 @@ public class TracePreferencePage extends AbstractPage
 		boolean isGPU = gpuTrace.getSelection();
 		pref.setValue(TracePreferenceConstants.PREF_GPU_TRACES, isGPU);
 		
-		/*
-		int renderOld = pref.getInt(TracePreferenceConstants.PREF_RENDER_OPTION);
-		
-		for (int i=0; i<btnRenders.length; i++) {
-			Button btn = btnRenders[i];
-			boolean isSelected = btn.getSelection();
-			if (isSelected && (i != renderOld)) {
-				pref.setValue(TracePreferenceConstants.PREF_RENDER_OPTION, i);
-				break;
-			}
-		} */
-		
-		int max_threads = spMaxThreads.getSelection();
-		pref.setValue(TracePreferenceConstants.PREF_MAX_THREADS, max_threads);
+		int maxThreads = spMaxThreads.getSelection();
+		pref.setValue(TracePreferenceConstants.PREF_MAX_THREADS, maxThreads);
 		
 		int delay = tooltipDelay.getSelection();
 		pref.setValue(TracePreferenceConstants.PREF_TOOLTIP_DELAY, delay);
@@ -127,17 +114,6 @@ public class TracePreferencePage extends AbstractPage
 		gpuTrace.setSelection(isGPU);
 		
 		createLabelControl(groupGPU, "This will reveal GPU traces whenever possible. Enabling this option causes trace stratistics may not be reliable.");
-		
-		// ------------------------------------------------------------------------
-		// Rendering mode
-		// ------------------------------------------------------------------------
-		/*
-		Group groupFont = createGroupControl(parent, "Rendering mode", false);
-		btnRenders = createRadioButtonControl(groupFont, TracePreferenceConstants.renderingOptions);
-		
-		int renderOld = pref.getInt(TracePreferenceConstants.PREF_RENDER_OPTION);
-		btnRenders[renderOld].setSelection(true);
-		*/
 
 		// ------------------------------------------------------------------------
 		// maximum threads
