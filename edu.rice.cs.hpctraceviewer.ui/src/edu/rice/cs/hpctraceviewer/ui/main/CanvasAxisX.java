@@ -184,7 +184,7 @@ public class CanvasAxisX extends AbstractAxisCanvas
 		int logdt 	 = (int) Math.log10(dt);
 		long dtRound = (int) Math.pow(10, logdt);
 		
-		int maxTicks = (area.width/MINIMUM_PIXEL_BETWEEN_TICKS); 
+		int maxTicks = area.width/MINIMUM_PIXEL_BETWEEN_TICKS; 
 		int numAxisLabel;
 		do {
 			numAxisLabel = (int) (displayTimeUnit.convert(attribute.getTimeInterval(), dbTimeUnit) / dtRound);
@@ -265,7 +265,7 @@ public class CanvasAxisX extends AbstractAxisCanvas
 		final boolean isFitEnough = deltaTick > maxTextArea.x;
 
 		for(int i=0; i <= numAxisLabel; i++) {			
-			double time      = (timeBegin + dtRound * i);			
+			double time      = timeBegin + dtRound * i;			
 			int axis_x_pos	 = (int) convertTimeToPixel(displayTimeBegin, (long)time, deltaXPixels);
 			int axis_tick_mark_height = position_y+TICK_SMALL;
 

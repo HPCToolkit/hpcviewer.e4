@@ -293,7 +293,7 @@ public class TraceDisplayAttribute
 
 	public int getProcessInterval()
 	{
-		return (frame.endProcess - frame.begProcess);
+		return frame.endProcess - frame.begProcess;
 	}
 	
 	public void setTime(long t1, long t2)
@@ -317,16 +317,16 @@ public class TraceDisplayAttribute
 		long dt = frame.endTime - frame.begTime;
 		// make sure we have positive time interval, even if users selects 0 time
 		if (dt>0)
-			return (frame.endTime - frame.begTime);
+			return frame.endTime - frame.begTime;
 		else
 			return 1;
 	}
 	
 	public boolean sameTrace(TraceDisplayAttribute other)
 	{
-		return ( frame.begTime==other.frame.begTime && frame.endTime==other.frame.endTime &&
-				frame.begProcess==other.frame.begProcess && frame.endProcess==other.frame.endProcess &&
-				 numPixelsH==other.numPixelsH && numPixelsV==other.numPixelsV);
+		return frame.begTime==other.frame.begTime && frame.endTime==other.frame.endTime &&
+			   frame.begProcess==other.frame.begProcess && frame.endProcess==other.frame.endProcess &&
+			   numPixelsH==other.numPixelsH && numPixelsV==other.numPixelsV;
 	}
 	
 	public void setDepth(int depth)
@@ -427,8 +427,8 @@ public class TraceDisplayAttribute
 	 */
 	public boolean sameDepth(TraceDisplayAttribute other)
 	{
-		return ( frame.begTime==other.frame.begTime && frame.endTime==other.frame.endTime &&
-				 numPixelsH==other.numPixelsH && numPixelsDepthV==other.numPixelsDepthV);
+		return frame.begTime==other.frame.begTime && frame.endTime==other.frame.endTime &&
+			   numPixelsH==other.numPixelsH && numPixelsDepthV==other.numPixelsDepthV;
 	}
 	
 	/***
@@ -460,8 +460,8 @@ public class TraceDisplayAttribute
 	
 	public String toString()
 	{
-		return ("T [ " + frame.begTime + ","  + frame.endTime+ " ]" +
+		return  "T [ " + frame.begTime + ","  + frame.endTime+ " ]" +
 				"P [ " + frame.begProcess + "," + frame.endProcess + " ]" + 
-				" PH: " + numPixelsH + " , PV: " + numPixelsV );
+				" PH: " + numPixelsH + " , PV: " + numPixelsV;
 	}
 }
