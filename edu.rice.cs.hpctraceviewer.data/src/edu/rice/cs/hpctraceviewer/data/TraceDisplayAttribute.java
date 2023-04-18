@@ -171,11 +171,11 @@ public class TraceDisplayAttribute
 		// --------------------------------------------------------------------------
 		
 		do {
-			TimeUnit timeUnit = mapIntegerToUnit.get(unit);
+			TimeUnit currentUnit = mapIntegerToUnit.get(unit);
 			
 			long t1 = getTimeBegin();
 			long t2 = getTimeEnd();
-			long dt = timeUnit.convert(t2 - t1, unitInDatabase);
+			long dt = currentUnit.convert(t2 - t1, unitInDatabase);
 
 			if (dt < 5000) {
 				// distance between ticks is at least 2 if possible
