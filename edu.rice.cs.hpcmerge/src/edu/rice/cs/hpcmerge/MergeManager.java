@@ -6,6 +6,7 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.widgets.Shell;
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
@@ -53,6 +54,7 @@ public class MergeManager
 				Experiment mergedExp = ExperimentMerger.merge(dm);
 				callback.mergeDone(mergedExp);
 			} catch (Exception e) {
+				LoggerFactory.getLogger(MergeManager.class).error("Merging error: {0}", e);
 				callback.mergeError(e.getMessage());
 			}
 		});

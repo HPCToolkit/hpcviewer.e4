@@ -1,9 +1,9 @@
 package edu.rice.cs.hpcdata.merge;
 
-import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.math3.util.Precision;
+import org.eclipse.collections.impl.list.mutable.FastList;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
@@ -17,7 +17,8 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.DuplicateScopeTreesVisitor;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.IScopeVisitor;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.ResetCounterVisitor;
-
+import edu.rice.cs.hpcdata.tree.ScopeFlatComparator;
+import edu.rice.cs.hpcdata.tree.ScopeFlatComparator.SortDirectionEnum;
 import java.util.Collections;
 
 /******************************************************
@@ -262,27 +263,7 @@ public class TreeSimilarity
 			}
 		}
 	}
-	
-	/****
-	 * remove the cost of a kid attributed in its parent.
-	 * 
-	 * @param target
-	 * @param source
-	 * @param sourceOffset
-	 * @param metricCount
-	 */
-/*	private void disseminateMetric(Scope target, Scope source, int sourceOffset, int metricCount)
-	{
-		
-		for (int i=sourceOffset; i<metricCount; i++)
-		{
-			MetricValue mvTarget = target.getMetricValue(i);
-			MetricValue mvSource = source.getMetricValue(i);
-			MetricValue.setValue(mvTarget, mvTarget.getValue() - mvSource.getValue());
 
-			target.setMetricValue(i, mvTarget);
-		}
-	}*/
 	
 	/****
 	 * retrieve the sorted list of the children of a given scope
@@ -297,11 +278,13 @@ public class TreeSimilarity
 		if (children == null)
 			return Collections.emptyList();
 		
-		List<Scope> childrenScope = (List<Scope>) children;
-		childrenScope.sort(new CompareScope(metric));
+		List<Scope> copyChildren = FastList.newList(children);
 		
-		return childrenScope;
+		copyChildren.sort(new ScopeFlatComparator(metric, SortDirectionEnum.DESCENDING));
+		
+		return copyChildren;
 	}
+	
 	
 	private class CoupleNodes
 	{
@@ -313,6 +296,7 @@ public class TreeSimilarity
 			this.source = source;
 		}
 	}
+	
 	
 	/****
 	 * merge 2 nodes if they have similarity
@@ -688,25 +672,5 @@ public class TreeSimilarity
 	{
 		SimilarityType type;
 		int score;
-	}
-	
-	
-	/***
-	 * Reverse order comparison to sort array of scopes based on their first metric
-	 * this comparison has problem when the two first metrics are equal, but
-	 * it's closed enough to our needs. I don't think we need more sophisticated stuff
-	 */
-	private class CompareScope implements Comparator<Scope> 
-	{
-		final BaseMetric metric;
-		
-		CompareScope(BaseMetric metric) {
-			this.metric = metric;
-		}
-		
-		@Override
-		public int compare(Scope s1, Scope s2) {
-			return (int) (s2.getMetricValue(metric).getValue() - s1.getMetricValue(metric).getValue());
-		}
 	}
 }
