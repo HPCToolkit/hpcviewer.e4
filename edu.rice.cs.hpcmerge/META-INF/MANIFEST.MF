@@ -8,5 +8,6 @@ Automatic-Module-Name: edu.rice.cs.hpcmerge
 Require-Bundle: edu.rice.cs.hpcdata,
  edu.rice.cs.hpcdata.merge,
  org.eclipse.jface,
- org.eclipse.core.runtime
+ org.eclipse.core.runtime,
+ org.slf4j.api
 Export-Package: edu.rice.cs.hpcmerge
