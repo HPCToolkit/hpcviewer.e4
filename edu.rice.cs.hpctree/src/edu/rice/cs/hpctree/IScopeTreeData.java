@@ -8,8 +8,9 @@ import org.eclipse.nebula.widgets.nattable.tree.ITreeData;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.tree.ITreePath;
 
-public interface IScopeTreeData extends ITreeData<Scope> 
+public interface IScopeTreeData extends ITreeData<Scope>, ITreePath<Scope> 
 {
 	/***
 	 * Method to notify to sort the data based on certain column and direction
@@ -85,15 +86,6 @@ public interface IScopeTreeData extends ITreeData<Scope>
 	 * @return
 	 */
 	public int getMetricCount();
-
-	/****
-	 * Retrieve the path (list of nodes) from the current node to the current "root".
-	 * The current root can be the main root of the zoomed root.
-	 * 
-	 * @param node
-	 * @return
-	 */
-	List<Scope> getPath(Scope node);
 
 
 	/***
