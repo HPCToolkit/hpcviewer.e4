@@ -69,7 +69,7 @@ public class TreeSimilarity
 		source.dfsVisitScopeTree(visitor);
 				
 		// merge the root scope
-		source.copyMetrics(target, offset);
+		target.accumulateMetrics(source, offset);
 		
 		// merge the children of the root (tree)
 		mergeTree(target, source);
@@ -372,6 +372,7 @@ public class TreeSimilarity
 		return null;
 	}
 	
+	
 	private void setMergedNodes(Scope target, Scope source, int offset)
 	{
 		assert target.isCounterZero() : "target counter is not zero: " + target ;
@@ -380,12 +381,13 @@ public class TreeSimilarity
 		// -------------------------------------------------------------
 		// Found strong similarity in the sibling: merge the metric
 		// -------------------------------------------------------------
-		source.copyMetrics(target, offset);
+		target.accumulateMetrics(source, offset);
 		
 		// mark the nodes have been merged
 		source.incrementCounter();
 		target.incrementCounter();
 	}
+	
 	
 	/***
 	 * check similarity between two scopes without checking the children
@@ -635,7 +637,7 @@ public class TreeSimilarity
 	 */
 	private double getAnnotationValue(Scope s, BaseMetric m)
 	{
-		final MetricValue mv = s.getMetricValue(m);
+		final MetricValue mv = m.getValue(s);
 
 		if (m.getAnnotationType() == AnnotationType.PERCENT ||
 			m.getAnnotationType() == AnnotationType.PERCENT_COLOR_BAR) {
