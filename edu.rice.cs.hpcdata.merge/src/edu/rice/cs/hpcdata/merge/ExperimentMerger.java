@@ -26,12 +26,13 @@ import edu.rice.cs.hpcdata.experiment.scope.visitors.*;
  * Merging experiments
  *
  * Steps:
- * 
- * 1. create the new experiment 
- * 2. add metrics 		-->	add into metric list 
- * 3. add raw metrics 	-->	add into a list
- * 4. add trace data 	-->	add into a list
- * 5. merge the experiments
+ * <ul>
+ * 	<li>1. create the new experiment 
+ * 	<li>2. add metrics 		-->	add into metric list 
+ * 	<li>3. add raw metrics 	-->	add into a list
+ * 	<li>4. add trace data 	-->	add into a list
+ * 	<li>5. merge the experiments
+ * </ul>
  */
 public class ExperimentMerger 
 {
@@ -42,11 +43,14 @@ public class ExperimentMerger
 	/**
 	 * Merging two experiments, and return the new experiment
 	 * 
-	 * @param exp1 : first database 
-	 * @param exp2 : second database
-	 * @param type : root to merge (cct, bottom-up tree, or flat tree)
+	 * @param db
+	 * 			List of databases to be merged which includes metrics and
+	 * 			type of root scope (top-down or flat). Bottom-up is not 
+	 * 			supported at the moment.
 	 *  
 	 * @return merged experiment database
+	 * 
+	 * @see DatabasesToMerge
 	 */
 	public static Experiment merge(DatabasesToMerge db)  {
 		
@@ -58,13 +62,14 @@ public class ExperimentMerger
 	/******
 	 * Merging two experiments and specifying the output directory
 	 * 
-	 * @param exp1
-	 * @param exp2
-	 * @param type
-	 * @param parent_dir
+	 * @param db
+	 * 			List of databases to be merged 
+	 * @param parentDir
+	 * 			The parent directory of the new merged database
+	 * 
 	 * @return the new merged database
 	 */
-	public static Experiment merge(DatabasesToMerge db, String parent_dir) {
+	public static Experiment merge(DatabasesToMerge db, String parentDir) {
 		
 		Experiment exp1 = db.experiment[0];
 		Experiment exp2 = db.experiment[1];
@@ -104,7 +109,8 @@ public class ExperimentMerger
 		// step 3: mark the new experiment file
 		// -----------------------------------------------
 		
-		final File fileMerged  = new File( parent_dir + File.separator + DatabaseManager.getDatabaseFilename("xml")); 
+		final var dbName = DatabaseManager.getDatabaseFilename("xml");
+		final File fileMerged  = new File( parentDir + File.separator + dbName.orElse("unknown-database")); 
 		merged.setXMLExperimentFile( fileMerged );
 
 		// -----------------------------------------------
@@ -117,7 +123,7 @@ public class ExperimentMerger
 		}
 		createFlatTree(exp1, db.type, root1);
 		
-		root1.dfsVisitScopeTree(new DuplicateScopeTreesVisitor(rootScope, 0));
+		root1.dfsVisitScopeTree(new DuplicateScopeTreesVisitor(merged, rootScope, 0));
 		
 		RootScope rootMerged = (RootScope) merged.getRootScopeChildren().get(0);	
 
