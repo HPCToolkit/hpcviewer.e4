@@ -6,6 +6,7 @@ import org.apache.commons.math3.util.Precision;
 import org.eclipse.collections.impl.list.mutable.FastList;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
@@ -50,10 +51,15 @@ public class TreeSimilarity
 	/********
 	 * construct similarity class
 	 * 
-	 * @param offset: metric offset
-	 * @param target: the target root scope. the target scope has to be a tree,
-	 * 				  it cannot be empty
-	 * @param source: the source root scope
+	 * @param offset
+	 * 			 metric offset
+	 * @param target
+	 * 			 the target root scope. the target scope has to be a tree,
+	 * 			 it cannot be empty
+	 * @param source
+	 * 			 the source root scope
+	 * @param db
+	 * 			 The databases to be merged
 	 * 
 	 */
 	public TreeSimilarity(int offset, RootScope target, RootScope source, DatabasesToMerge db)
@@ -72,7 +78,7 @@ public class TreeSimilarity
 		target.accumulateMetrics(source, offset);
 		
 		// merge the children of the root (tree)
-		mergeTree(target, source);
+		mergeTree(target.getExperiment(), target, source);
 		
 		if (DEBUG_MODE) {
 			float mergePercent = (float) (numMerges * 100.0 / numNodes);
@@ -93,7 +99,7 @@ public class TreeSimilarity
 	 * @param target
 	 * @param source
 	 */
-	private void mergeTree( Scope target, Scope source)
+	private void mergeTree(IExperiment targetDatabase, Scope target, Scope source)
 	{
 		
 		// ------------------------------------------------------------
@@ -113,7 +119,7 @@ public class TreeSimilarity
 		{
 			for (Scope childSource: sortedSource)
 			{
-				addSubTree(target, childSource);
+				addSubTree(targetDatabase, target, childSource);
 			}
 			numUnmerges += sortedSource.size();
 			return;
@@ -152,7 +158,7 @@ public class TreeSimilarity
 							
 							// DFS: recursively, merge the children if they are similar
 							// the recursion will stop when all children are different
-							mergeTree( candidate.target, candidate.source );
+							mergeTree( targetDatabase, candidate.target, candidate.source );
 							break;
 						}
 					}
@@ -161,17 +167,25 @@ public class TreeSimilarity
 		}
 		
 		// 3.b: check for inlined codes on the source part
-		checkInlinedScope(sortedTarget, sortedSource, metricToCompare[METRIC_TARGET], metricToCompare[METRIC_SOURCE]);
+		checkInlinedScope(targetDatabase, 
+						  sortedTarget, 
+						  sortedSource, 
+						  metricToCompare[METRIC_TARGET], 
+						  metricToCompare[METRIC_SOURCE]);
 		
 		// 3.c: check for inlined codes on the target part
-		checkInlinedScope(sortedSource, sortedTarget, metricToCompare[METRIC_SOURCE], metricToCompare[METRIC_TARGET]);
+		checkInlinedScope(targetDatabase, 
+						  sortedSource, 
+						  sortedTarget, 
+						  metricToCompare[METRIC_SOURCE], 
+						  metricToCompare[METRIC_TARGET]);
 		
 		// 3.d: add the remainder scopes that are not merged
 		for (Scope childSource: sortedSource) 
 		{
 			if (childSource.isCounterZero())
 			{
-				addSubTree(target, childSource);
+				addSubTree(targetDatabase, target, childSource);
 				numUnmerges++;
 			}
 		}
@@ -193,7 +207,11 @@ public class TreeSimilarity
 	 * @param scope2 : a list of scopes which children are to be compared
 	 * @param metricOffset : the metric offset 
 	 */
-	private void checkInlinedScope(List<Scope> scope1, List<Scope> scope2, BaseMetric metric1, BaseMetric metric2)
+	private void checkInlinedScope(IExperiment targetDatabase,
+								   List<Scope> scope1, 
+								   List<Scope> scope2, 
+								   BaseMetric metric1, 
+								   BaseMetric metric2)
 	{
 		for (int j=0; j<scope1.size(); j++)
 		{
@@ -253,7 +271,7 @@ public class TreeSimilarity
 */									
 									// DFS: recursively, merge the children if they are similar
 									// the recursion will stop when all children are different
-									mergeTree( candidate.target, candidate.source );
+									mergeTree( targetDatabase, candidate.target, candidate.source );
 									break;
 								}
 							}
@@ -662,9 +680,9 @@ public class TreeSimilarity
 	 * @param node : source nodes to be copied
 	 * @param metricOffset : offset of the metric
 	 */
-	private void addSubTree(Scope parent, Scope node)
+	private void addSubTree(IExperiment targetDatabase, Scope parent, Scope node)
 	{
-		DuplicateScopeTreesVisitor visitor = new DuplicateScopeTreesVisitor(parent, metricOffset);
+		DuplicateScopeTreesVisitor visitor = new DuplicateScopeTreesVisitor(targetDatabase, parent, metricOffset);
 		node.dfsVisitScopeTree(visitor);
 	}
 	
