@@ -16,7 +16,7 @@ For static linked program, the variable environment ```HPCRUN_TRACE``` has to be
 
 ## General Requirements
 
-* Java 11 or newer
+* Java 11 or 17. Currently hpcviewer does not support Java 20.
   Can be downloaded via [Spack](https://github.com/spack/spack) 
   or from [Oracle](https://www.oracle.com/java/technologies/javase-downloads.html)
   or [Adoptium](https://adoptium.net/temurin/releases)
