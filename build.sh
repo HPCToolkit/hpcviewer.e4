@@ -49,10 +49,12 @@ JAVA_MAJOR_VERSION=`java -version 2>&1 \
 echo "Java version $JAVA_MAJOR_VERSION"
 
 # we need Java 11 at least
-jvm_required=11
+jvm_min=11
+jvm_max=17
 
-if [ "$JAVA_MAJOR_VERSION" -lt "$jvm_required" ]; then
-	die "$name requires Java $jvm_required"
+# issue #308: we don't support too new Java
+if [ "$JAVA_MAJOR_VERSION" -lt "$jvm_min" ] || [ "$JAVA_MAJOR_VERSION" -gt "$jvm_max" ]; then
+	die "$name requires Java between $jvm_min and $jvm_max"
 fi
 
 show_help(){
@@ -202,7 +204,10 @@ else
 fi
 
 # The result should be:
-#
+#   	edu.rice.cs.hpcviewer.product/target/products/*
+if [ ! -e "edu.rice.cs.hpcviewer.product/target/products" ]; then
+	die "Fail to build hpcviewer"
+fi
 
 echo "=================================="
 echo " Repackaging the viewer"
