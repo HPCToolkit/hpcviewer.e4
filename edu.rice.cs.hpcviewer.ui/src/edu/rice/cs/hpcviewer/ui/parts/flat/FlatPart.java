@@ -1,7 +1,6 @@
 package edu.rice.cs.hpcviewer.ui.parts.flat;
 
 import org.eclipse.swt.custom.CTabFolder;
-import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.CoolBar;
@@ -125,7 +124,7 @@ public class FlatPart extends AbstractTableView
 
 
 	@Override
-	public void widgetDisposed(DisposeEvent e) {
+	public void dispose() {
 		super.dispose();
 		
 		items = null;

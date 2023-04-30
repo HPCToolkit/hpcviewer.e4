@@ -8,7 +8,6 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
-import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
@@ -158,7 +157,7 @@ public class TopDownPart extends AbstractTableView
 		items[ITEM_THREAD].setEnabled(enableItems);
 		
 		Scope selectedScope = super.getTable().getSelection();
-		boolean enableGraph = enableItems && (selectedScope != null);
+		boolean enableGraph = enableItems && selectedScope != null;
 		items[ITEM_GRAPH] .setEnabled(enableGraph);
 	}
 
@@ -210,16 +209,21 @@ public class TopDownPart extends AbstractTableView
 			}
 		}
 		return threadData;
-	}
-	
+	}	
 
 
 	@Override
-	public void widgetDisposed(DisposeEvent e) {
+	public void dispose() {
 		super.dispose();
 		
+		if (threadData != null) {
+			try {
+				threadData.close();
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+		}
+		threadData = null;
 		items = null;
-		if (threadData != null)
-			threadData.dispose();
 	}
 }

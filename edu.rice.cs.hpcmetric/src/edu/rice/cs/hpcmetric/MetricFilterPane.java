@@ -90,7 +90,7 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 		if (style == STYLE_COMPOSITE) {
 			// Real application, not within a simple unit test
 			updateMetricManager(input.getMetricManager());
-			eventBroker.subscribe(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH, this);
+			eventBroker.subscribe(ViewerDataEvent.TOPIC_FILTER_POST_PROCESSING, this);
 		}
 	}
 
@@ -375,7 +375,7 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 		if (input.getMetricManager() != eventInfo.metricManager) 
 			return;
 
-		if (event.getTopic().equals(ViewerDataEvent.TOPIC_HPC_DATABASE_REFRESH)) {
+		if (event.getTopic().equals(ViewerDataEvent.TOPIC_FILTER_POST_PROCESSING)) {
 			updateMetricManager(eventInfo.metricManager);
 		}
 	}

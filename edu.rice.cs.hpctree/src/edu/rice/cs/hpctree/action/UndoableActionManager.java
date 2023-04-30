@@ -1,19 +1,21 @@
 package edu.rice.cs.hpctree.action;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
+
 
 public class UndoableActionManager implements IUndoableActionManager 
 {
-	private Stack<String> actions;
+	private Deque<String> actions;
 	private final Map<String, List<IUndoableActionListener>> listeners;
 
 	
 	public UndoableActionManager() {
-		actions = new Stack<>();
+		actions = new ArrayDeque<>();
 		listeners = new HashMap<>(1);
 	}
 	

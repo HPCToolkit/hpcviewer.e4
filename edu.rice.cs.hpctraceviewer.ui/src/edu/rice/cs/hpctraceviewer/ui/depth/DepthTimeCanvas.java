@@ -19,6 +19,7 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpctraceviewer.ui.base.ISpaceTimeCanvas;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
@@ -308,14 +309,19 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 			IUndoContext positionContext = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_POSITION);
 			
 			if (operation.hasContext(bufferContext)) {
+				// update the visible depth in case there's a change of max depth due to filtering
+				visibleDepths = Math.max(1, stData.getMaxDepth());
+
 				// this event includes if there's a change of colors definition, so everyone needs
 				// to refresh the content.
 				// in case of filter, the max depth may change too, 
 				try {
 					super.init();
 					rebuffer();
-				} catch (java.lang.NullPointerException e) {
-					// ignore exception when there's (possibly) multiple thread access  
+				} catch (NullPointerException e) {
+					// ignore exception when there's (possibly) multiple thread access
+					LoggerFactory.getLogger(getClass())
+						.error(String.format("%s: %s" ,  getClass().getCanonicalName(), e.getMessage()));
 				}
 				
 			} else if (operation.hasContext(positionContext)) {

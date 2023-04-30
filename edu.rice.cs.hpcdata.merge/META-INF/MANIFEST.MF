@@ -6,5 +6,6 @@ Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Rice University
 Automatic-Module-Name: edu.rice.cs.hpcdata.merge
 Require-Bundle: edu.rice.cs.hpcdata,
- org.apache.commons.math3
+ org.apache.commons.math3,
+ org.eclipse.collections
 Export-Package: edu.rice.cs.hpcdata.merge

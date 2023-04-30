@@ -554,48 +554,50 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	}
 
 	
-	/*****
-	 * The same as refresh, but this time it will reset the root of the tree
-	 * and reconstruct completely the tree.
+	/****
+	 * Return the list of the path of the selected node (if exist).
+	 * The path must contain the list of cct id from the root to the
+	 *  selected node.
+	 *  
+	 *  @see expandAndSelectNode
+	 *  
+	 * @return array of cct id if a node is selected, empty otherwise.
 	 */
-	public void reset(RootScope root) {
-		if (natTable == null)
-			return;
-		
-		// 1. Before updating the root: if the original tree has a selection,
-		// we need to preserve it first so that we can restore the selection
-		// after updating the root
-		//
+	public int[] getPathOfSelectedNode() {
 		Scope currentNode = getSelection();
+		if (currentNode == null)
+			return new int[0];
+		
 		IScopeTreeData treeData = (IScopeTreeData) this.bodyLayerStack.getTreeRowModel().getTreeData();	
 		FastList<Scope> reversePath = null;
 		int []expandedNodes = null;
+
+		// preserve the selection
+		reversePath  = (FastList<Scope>) treeData.getPath(currentNode);
+		expandedNodes = new int[reversePath.size()];
 		
-		if (currentNode != null) {
-			// preserve the selection
-			reversePath  = (FastList<Scope>) treeData.getPath(currentNode);
-			expandedNodes = new int[reversePath.size()];
-			
-			int i=0;
-			for(var scope: reversePath) {
-				expandedNodes[i] = scope.getCCTIndex();
-				i++;
-			}
+		int i=0;
+		for(var scope: reversePath) {
+			expandedNodes[i] = scope.getCCTIndex();
+			i++;
 		}
-		
-		// 2. reset the root node
-		// this will disruptively change the table structure and the metric as well
-		// the method setRoot should keep listen to the list of metrics
-		setRoot(root);
-		
-		// 3. expand and restore the selection
-		if (expandedNodes == null || expandedNodes.length == 0)
-			return;
-		
+		return expandedNodes;
+	}
+	
+	
+	/****
+	 * Expand the tree for a given path, and select the last row.
+	 *  
+	 * @param expandedNodes
+	 * 			Path from root to the last node. This argument is usually 
+	 * 			the result of {@code getPathOfSelectedNode}
+	 * 
+	 * @see getPathOfSelectedNode
+	 */
+	public void expandAndSelectNode(int []expandedNodes) {		
 		final ScopeTreeLayer treeLayer = bodyLayerStack.getTreeLayer();
 
 		int lastRow = 0;
-		
 		for(var cctId: expandedNodes) {
 			int row = bodyDataProvider.indexOfRowBasedOnCCT(cctId);
 			if (row < 0) {
@@ -606,8 +608,23 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		}
 		// select the latest common path
 		this.setSelection(lastRow);
+	}
+
+	
+	/*****
+	 * The same as refresh, but this time it will reset the root of the tree
+	 * and reconstruct completely the tree.
+	 */
+	public void reset(RootScope root) {
+		if (natTable == null)
+			return;
+
+		// this will disruptively change the table structure and the metric as well
+		// the method setRoot should keep listen to the list of metrics
+		setRoot(root);
 		
-		// 4. new data: need to add listener to the change in the metrics
+		// new data: need to add listener to the change in the metrics
+		IScopeTreeData treeData = (IScopeTreeData) this.bodyLayerStack.getTreeRowModel().getTreeData();	
 		treeData.getMetricManager().addMetricListener(this);
 	}
 	
@@ -707,18 +724,27 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	
 	@Override
 	public void widgetDisposed(DisposeEvent e) {
+		dispose();
+	}
+	
+	
+	public void dispose() {
+		if (listeners == null || listeners.isEmpty())
+			return;
+		
 		natTable.getDisplay().removeFilter(SWT.MouseDown, resizeListener);
 		natTable.getDisplay().removeFilter(SWT.MouseUp, resizeListener);
 		natTable.removeControlListener(resizeListener);
 		
-		((IScopeTreeData)bodyLayerStack
-							.getTreeRowModel()
-							.getTreeData())
-								.getMetricManager()
-								.removeMetricListener(this);
+		IScopeTreeData treeData = (IScopeTreeData) bodyLayerStack.getTreeRowModel().getTreeData();	
+		treeData.getMetricManager().removeMetricListener(this);
+
         bodyLayerStack.getSelectionLayer().removeLayerListener(this);
+        
+        bodyLayerStack.dispose();
+        
+        listeners.clear();
 	}
-	
 	
 	@Override
 	public void traverseOrExpand(int index) {

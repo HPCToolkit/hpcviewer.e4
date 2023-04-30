@@ -108,10 +108,6 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 
 	/**The SpaceTimeData corresponding to this canvas.*/
 	protected SpaceTimeDataController stData;
-		
-	/** The top-left and bottom-right point that you selected.*/
-	private final Point selectionTopLeft;
-	private final Point selectionBottomRight;
 	
 	private final IEclipseContext context;
 	private final ITracePart 	  tracePart;
@@ -150,12 +146,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		this.eventBroker = eventBroker;
 		this.context     = context;
 		oldAttributes    = new TraceDisplayAttribute();
-
-		selectionTopLeft     = new Point(0,0);
-		selectionBottomRight = new Point(0,0);
 		stData  = null;
-		
-		initSelectionRectangle();
 		
 		formatTime = new DecimalFormat("###,###,###.##");
 	}
@@ -180,9 +171,6 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 			eventBroker.subscribe(IConstants.TOPIC_FILTER_RANKS,  this);
 			eventBroker.subscribe(IConstants.TOPIC_COLOR_MAPPING, this);
 		}
-
-		// reinitialize the selection rectangle
-		initSelectionRectangle();
 
 		this.stData = stData;
 
@@ -290,17 +278,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		// ----------------------------------------------------------------------------
 		refresh(true);
 	}
-	
-	/*******************************************************************************
-	 * Initialize attributes of selection rectangle
-	 *******************************************************************************/
-	private void initSelectionRectangle() 
-	{
-		selectionTopLeft.x = 0;
-		selectionTopLeft.y = 0;
-		selectionBottomRight.x = 0;
-		selectionBottomRight.y = 0;
-	}
+
 	
 	/*******************************************************************************
 	 * Actually does the repainting of the canvas when a PaintEvent is sent to it
@@ -725,26 +703,22 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	
     /**************************************************************************
 	 * Updates what the position of the selected box is.
-	 **************************************************************************/
-    private void adjustSelection(Rectangle selection)
-	{
-    	selectionTopLeft.x = Math.max(selection.x, 0);
-        selectionTopLeft.y = Math.max(selection.y, 0);
-        
-        final Rectangle view = getClientArea();
-        
-        selectionBottomRight.x = Math.min(selection.width+selection.x, view.width-1);
-        selectionBottomRight.y = Math.min(selection.height+selection.y, view.height-1);
-        
-    }
-    
-	/**************************************************************************
+	 * 
 	 * create a new region of trace view, and check if the cross hair is inside
 	 * 	the new region or not. If this is not the case, we force the position
 	 * 	of crosshair to be inside the region 
 	 **************************************************************************/
-	private void setDetail()
-    {
+    private void adjustSelection(Rectangle selection)
+	{
+    	Point selectionTopLeft = new Point(0, 0);
+    	Point selectionBottomRight = new Point(0, 0);
+    	
+    	selectionTopLeft.x = Math.max(selection.x, 0);
+        selectionTopLeft.y = Math.max(selection.y, 0);
+        
+        selectionBottomRight.x = selection.width+selection.x;
+        selectionBottomRight.y = selection.height+selection.y;
+        
 		TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
 		int topLeftProcess = attributes.getProcessBegin() + (int) (selectionTopLeft.y / getScalePixelsPerRank());
 		long topLeftTime   = attributes.getTimeBegin() + (long)(selectionTopLeft.x / getScalePixelsPerTime());
@@ -1322,18 +1296,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	{
 		//If we're zoomed in all the way don't do anything
 		if(getNumTimeUnitDisplayed() == Constants.MIN_TIME_UNITS_DISP)
-		{
-			if(getNumTimeUnitDisplayed() > MIN_PROC_DISP)
-			{
-				adjustSelection(region);
-				setDetail();
-			}
-		}
-		else
-		{
-			adjustSelection(region);
-			setDetail();
-		}
+			return;
+
+		adjustSelection(region);
 	}
 
 

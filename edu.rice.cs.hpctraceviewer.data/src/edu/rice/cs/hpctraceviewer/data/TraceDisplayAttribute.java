@@ -30,6 +30,9 @@ public class TraceDisplayAttribute
 	
 	private int numPixelsH, numPixelsV;
 	private int numPixelsDepthV;
+	
+	// multiplier for unit time to be displayed 
+	private float multiplier;
 
 	private Frame frame;
 
@@ -37,7 +40,8 @@ public class TraceDisplayAttribute
 	// the reason is that the time unit can be in millisecond, but the displayed one is in second
 	// This is due to issue #20 which complicates a lot of stuff. It simplifies users, but painful to code.
 	
-	private TimeUnit displayTimeUnit, timeUnit;
+	private TimeUnit displayTimeUnit;
+	private TimeUnit timeUnit;
 	private PropertyChangeSupport support;
 
 	public TraceDisplayAttribute()
@@ -66,6 +70,8 @@ public class TraceDisplayAttribute
 		
 		displayTimeUnit = TimeUnit.SECONDS;
 		timeUnit = TimeUnit.SECONDS;
+		multiplier = 1.0f;
+		
 		support = new PropertyChangeSupport(displayTimeUnit);
 	}
 
@@ -122,8 +128,12 @@ public class TraceDisplayAttribute
     }
 	
     
+    public void setTimeUnitMultiplier(float multiplier) {
+    	this.multiplier = multiplier;
+    }
+    
     public float getTimeUnitMultiplier() {
-    	return displayTimeUnit.equals(timeUnit) ? 1.0f : 0.001f;
+    	return multiplier;
     }
     
 	/***
@@ -161,11 +171,11 @@ public class TraceDisplayAttribute
 		// --------------------------------------------------------------------------
 		
 		do {
-			TimeUnit timeUnit = mapIntegerToUnit.get(unit);
+			TimeUnit currentUnit = mapIntegerToUnit.get(unit);
 			
 			long t1 = getTimeBegin();
 			long t2 = getTimeEnd();
-			long dt = timeUnit.convert(t2 - t1, unitInDatabase);
+			long dt = currentUnit.convert(t2 - t1, unitInDatabase);
 
 			if (dt < 5000) {
 				// distance between ticks is at least 2 if possible
@@ -283,7 +293,7 @@ public class TraceDisplayAttribute
 
 	public int getProcessInterval()
 	{
-		return (frame.endProcess - frame.begProcess);
+		return frame.endProcess - frame.begProcess;
 	}
 	
 	public void setTime(long t1, long t2)
@@ -304,19 +314,15 @@ public class TraceDisplayAttribute
 	
 	public long getTimeInterval()
 	{
-		long dt = frame.endTime - frame.begTime;
 		// make sure we have positive time interval, even if users selects 0 time
-		if (dt>0)
-			return (frame.endTime - frame.begTime);
-		else
-			return 1;
+		return Math.max(1, frame.endTime - frame.begTime);
 	}
 	
 	public boolean sameTrace(TraceDisplayAttribute other)
 	{
-		return ( frame.begTime==other.frame.begTime && frame.endTime==other.frame.endTime &&
-				frame.begProcess==other.frame.begProcess && frame.endProcess==other.frame.endProcess &&
-				 numPixelsH==other.numPixelsH && numPixelsV==other.numPixelsV);
+		return frame.begTime==other.frame.begTime && frame.endTime==other.frame.endTime &&
+			   frame.begProcess==other.frame.begProcess && frame.endProcess==other.frame.endProcess &&
+			   numPixelsH==other.numPixelsH && numPixelsV==other.numPixelsV;
 	}
 	
 	public void setDepth(int depth)
@@ -417,8 +423,8 @@ public class TraceDisplayAttribute
 	 */
 	public boolean sameDepth(TraceDisplayAttribute other)
 	{
-		return ( frame.begTime==other.frame.begTime && frame.endTime==other.frame.endTime &&
-				 numPixelsH==other.numPixelsH && numPixelsDepthV==other.numPixelsDepthV);
+		return frame.begTime==other.frame.begTime && frame.endTime==other.frame.endTime &&
+			   numPixelsH==other.numPixelsH && numPixelsDepthV==other.numPixelsDepthV;
 	}
 	
 	/***
@@ -450,8 +456,8 @@ public class TraceDisplayAttribute
 	
 	public String toString()
 	{
-		return ("T [ " + frame.begTime + ","  + frame.endTime+ " ]" +
+		return  "T [ " + frame.begTime + ","  + frame.endTime+ " ]" +
 				"P [ " + frame.begProcess + "," + frame.endProcess + " ]" + 
-				" PH: " + numPixelsH + " , PV: " + numPixelsV );
+				" PH: " + numPixelsH + " , PV: " + numPixelsV;
 	}
 }

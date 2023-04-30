@@ -1,11 +1,12 @@
 package edu.rice.cs.hpcdata.merge;
 
-import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.math3.util.Precision;
+import org.eclipse.collections.impl.list.mutable.FastList;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
@@ -17,7 +18,8 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.DuplicateScopeTreesVisitor;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.IScopeVisitor;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.ResetCounterVisitor;
-
+import edu.rice.cs.hpcdata.tree.ScopeFlatComparator;
+import edu.rice.cs.hpcdata.tree.ScopeFlatComparator.SortDirectionEnum;
 import java.util.Collections;
 
 /******************************************************
@@ -49,10 +51,15 @@ public class TreeSimilarity
 	/********
 	 * construct similarity class
 	 * 
-	 * @param offset: metric offset
-	 * @param target: the target root scope. the target scope has to be a tree,
-	 * 				  it cannot be empty
-	 * @param source: the source root scope
+	 * @param offset
+	 * 			 metric offset
+	 * @param target
+	 * 			 the target root scope. the target scope has to be a tree,
+	 * 			 it cannot be empty
+	 * @param source
+	 * 			 the source root scope
+	 * @param db
+	 * 			 The databases to be merged
 	 * 
 	 */
 	public TreeSimilarity(int offset, RootScope target, RootScope source, DatabasesToMerge db)
@@ -68,10 +75,10 @@ public class TreeSimilarity
 		source.dfsVisitScopeTree(visitor);
 				
 		// merge the root scope
-		source.copyMetrics(target, offset);
+		target.accumulateMetrics(source, offset);
 		
 		// merge the children of the root (tree)
-		mergeTree(target, source);
+		mergeTree(target.getExperiment(), target, source);
 		
 		if (DEBUG_MODE) {
 			float mergePercent = (float) (numMerges * 100.0 / numNodes);
@@ -92,7 +99,7 @@ public class TreeSimilarity
 	 * @param target
 	 * @param source
 	 */
-	private void mergeTree( Scope target, Scope source)
+	private void mergeTree(IExperiment targetDatabase, Scope target, Scope source)
 	{
 		
 		// ------------------------------------------------------------
@@ -112,7 +119,7 @@ public class TreeSimilarity
 		{
 			for (Scope childSource: sortedSource)
 			{
-				addSubTree(target, childSource);
+				addSubTree(targetDatabase, target, childSource);
 			}
 			numUnmerges += sortedSource.size();
 			return;
@@ -151,7 +158,7 @@ public class TreeSimilarity
 							
 							// DFS: recursively, merge the children if they are similar
 							// the recursion will stop when all children are different
-							mergeTree( candidate.target, candidate.source );
+							mergeTree( targetDatabase, candidate.target, candidate.source );
 							break;
 						}
 					}
@@ -160,17 +167,25 @@ public class TreeSimilarity
 		}
 		
 		// 3.b: check for inlined codes on the source part
-		checkInlinedScope(sortedTarget, sortedSource, metricToCompare[METRIC_TARGET], metricToCompare[METRIC_SOURCE]);
+		checkInlinedScope(targetDatabase, 
+						  sortedTarget, 
+						  sortedSource, 
+						  metricToCompare[METRIC_TARGET], 
+						  metricToCompare[METRIC_SOURCE]);
 		
 		// 3.c: check for inlined codes on the target part
-		checkInlinedScope(sortedSource, sortedTarget, metricToCompare[METRIC_SOURCE], metricToCompare[METRIC_TARGET]);
+		checkInlinedScope(targetDatabase, 
+						  sortedSource, 
+						  sortedTarget, 
+						  metricToCompare[METRIC_SOURCE], 
+						  metricToCompare[METRIC_TARGET]);
 		
 		// 3.d: add the remainder scopes that are not merged
 		for (Scope childSource: sortedSource) 
 		{
 			if (childSource.isCounterZero())
 			{
-				addSubTree(target, childSource);
+				addSubTree(targetDatabase, target, childSource);
 				numUnmerges++;
 			}
 		}
@@ -192,7 +207,11 @@ public class TreeSimilarity
 	 * @param scope2 : a list of scopes which children are to be compared
 	 * @param metricOffset : the metric offset 
 	 */
-	private void checkInlinedScope(List<Scope> scope1, List<Scope> scope2, BaseMetric metric1, BaseMetric metric2)
+	private void checkInlinedScope(IExperiment targetDatabase,
+								   List<Scope> scope1, 
+								   List<Scope> scope2, 
+								   BaseMetric metric1, 
+								   BaseMetric metric2)
 	{
 		for (int j=0; j<scope1.size(); j++)
 		{
@@ -252,7 +271,7 @@ public class TreeSimilarity
 */									
 									// DFS: recursively, merge the children if they are similar
 									// the recursion will stop when all children are different
-									mergeTree( candidate.target, candidate.source );
+									mergeTree( targetDatabase, candidate.target, candidate.source );
 									break;
 								}
 							}
@@ -262,27 +281,7 @@ public class TreeSimilarity
 			}
 		}
 	}
-	
-	/****
-	 * remove the cost of a kid attributed in its parent.
-	 * 
-	 * @param target
-	 * @param source
-	 * @param sourceOffset
-	 * @param metricCount
-	 */
-/*	private void disseminateMetric(Scope target, Scope source, int sourceOffset, int metricCount)
-	{
-		
-		for (int i=sourceOffset; i<metricCount; i++)
-		{
-			MetricValue mvTarget = target.getMetricValue(i);
-			MetricValue mvSource = source.getMetricValue(i);
-			MetricValue.setValue(mvTarget, mvTarget.getValue() - mvSource.getValue());
 
-			target.setMetricValue(i, mvTarget);
-		}
-	}*/
 	
 	/****
 	 * retrieve the sorted list of the children of a given scope
@@ -297,11 +296,13 @@ public class TreeSimilarity
 		if (children == null)
 			return Collections.emptyList();
 		
-		List<Scope> childrenScope = (List<Scope>) children;
-		childrenScope.sort(new CompareScope(metric));
+		List<Scope> copyChildren = FastList.newList(children);
 		
-		return childrenScope;
+		copyChildren.sort(new ScopeFlatComparator(metric, SortDirectionEnum.DESCENDING));
+		
+		return copyChildren;
 	}
+	
 	
 	private class CoupleNodes
 	{
@@ -313,6 +314,7 @@ public class TreeSimilarity
 			this.source = source;
 		}
 	}
+	
 	
 	/****
 	 * merge 2 nodes if they have similarity
@@ -388,6 +390,7 @@ public class TreeSimilarity
 		return null;
 	}
 	
+	
 	private void setMergedNodes(Scope target, Scope source, int offset)
 	{
 		assert target.isCounterZero() : "target counter is not zero: " + target ;
@@ -396,12 +399,13 @@ public class TreeSimilarity
 		// -------------------------------------------------------------
 		// Found strong similarity in the sibling: merge the metric
 		// -------------------------------------------------------------
-		source.copyMetrics(target, offset);
+		target.accumulateMetrics(source, offset);
 		
 		// mark the nodes have been merged
 		source.incrementCounter();
 		target.incrementCounter();
 	}
+	
 	
 	/***
 	 * check similarity between two scopes without checking the children
@@ -651,7 +655,7 @@ public class TreeSimilarity
 	 */
 	private double getAnnotationValue(Scope s, BaseMetric m)
 	{
-		final MetricValue mv = s.getMetricValue(m);
+		final MetricValue mv = m.getValue(s);
 
 		if (m.getAnnotationType() == AnnotationType.PERCENT ||
 			m.getAnnotationType() == AnnotationType.PERCENT_COLOR_BAR) {
@@ -676,9 +680,9 @@ public class TreeSimilarity
 	 * @param node : source nodes to be copied
 	 * @param metricOffset : offset of the metric
 	 */
-	private void addSubTree(Scope parent, Scope node)
+	private void addSubTree(IExperiment targetDatabase, Scope parent, Scope node)
 	{
-		DuplicateScopeTreesVisitor visitor = new DuplicateScopeTreesVisitor(parent, metricOffset);
+		DuplicateScopeTreesVisitor visitor = new DuplicateScopeTreesVisitor(targetDatabase, parent, metricOffset);
 		node.dfsVisitScopeTree(visitor);
 	}
 	
@@ -688,25 +692,5 @@ public class TreeSimilarity
 	{
 		SimilarityType type;
 		int score;
-	}
-	
-	
-	/***
-	 * Reverse order comparison to sort array of scopes based on their first metric
-	 * this comparison has problem when the two first metrics are equal, but
-	 * it's closed enough to our needs. I don't think we need more sophisticated stuff
-	 */
-	private class CompareScope implements Comparator<Scope> 
-	{
-		final BaseMetric metric;
-		
-		CompareScope(BaseMetric metric) {
-			this.metric = metric;
-		}
-		
-		@Override
-		public int compare(Scope s1, Scope s2) {
-			return (int) (s2.getMetricValue(metric).getValue() - s1.getMetricValue(metric).getValue());
-		}
 	}
 }
