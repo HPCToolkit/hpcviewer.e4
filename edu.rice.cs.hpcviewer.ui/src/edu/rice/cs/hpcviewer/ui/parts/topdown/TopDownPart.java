@@ -2,6 +2,7 @@ package edu.rice.cs.hpcviewer.ui.parts.topdown;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jface.action.MenuManager;
@@ -21,6 +22,7 @@ import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
@@ -205,7 +207,7 @@ public class TopDownPart extends AbstractTableView
 			try {
 				threadData = experiment.getThreadData();
 			} catch (IOException e) {
-				e.printStackTrace();
+				threadData = new EmptyThreadDataCollection();
 			}
 		}
 		return threadData;
@@ -225,5 +227,85 @@ public class TopDownPart extends AbstractTableView
 		}
 		threadData = null;
 		items = null;
+	}
+	
+	static class EmptyThreadDataCollection implements IThreadDataCollection
+	{
+
+		@Override
+		public void close() throws Exception {  /* no-op */ }
+
+		@Override
+		public void open(RootScope root, String directory) throws IOException {  /* no-op */ }
+
+		@Override
+		public boolean isAvailable() {
+			return false;
+		}
+
+		@Override
+		public List<IdTuple> getIdTuples() {
+			return Collections.emptyList();
+		}
+
+		@Override
+		public double[] getRankLabels() throws IOException {
+			return new double[0];
+		}
+
+		@Override
+		public String[] getRankStringLabels() throws IOException {
+			return new String[0];
+		}
+
+		@Override
+		public double[] getEvenlySparseRankLabels() throws IOException {
+			return new double[0];
+		}
+
+		@Override
+		public int getParallelismLevel() throws IOException {
+			return 0;
+		}
+
+		@Override
+		public String getRankTitle() throws IOException {
+			return "";
+		}
+
+		@Override
+		public double getMetric(Scope scope, BaseMetric metric, IdTuple idtuple, int numMetrics) throws IOException {
+			return 0;
+		}
+
+		@Override
+		public double[] getMetrics(Scope scope, BaseMetric metric, int numMetrics) throws Exception {
+			return new double[0];
+		}
+
+		@Override
+		public double getMetric(long nodeIndex, int metricIndex, IdTuple idtuple, int numMetrics) throws IOException {
+			return 0;
+		}
+
+		@Override
+		public double[] getMetrics(long nodeIndex, int metricIndex, int numMetrics) throws Exception {
+			return new double[0];
+		}
+
+		@Override
+		public double[] getScopeMetrics(int thread_id, int MetricIndex, int numMetrics) throws IOException {
+			return new double[0];
+		}
+
+		@Override
+		public List<IdTuple> getIdTupleListWithoutGPU(IdTupleType idtype) {
+			return Collections.emptyList();
+		}
+
+		@Override
+		public Object[] getIdTupleLabelWithoutGPU(IdTupleType idtype) {
+			return new Object[0];
+		}		
 	}
 }
