@@ -77,6 +77,7 @@ public class GraphChart extends InteractiveChart implements MouseMoveListener
 			}
 			maxIndex++;
 		}
+		getPlotArea().setToolTipText("");
 	}
 	
 	
