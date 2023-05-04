@@ -108,7 +108,7 @@ public abstract class AbstractGraphViewer extends AbstractUpperPart
 		//----------------------------------------------
 		IAxisSet axisSet = chart.getAxisSet();
 		IAxisTick yTick = axisSet.getYAxis(0).getTick();
-		yTick.setFormat(new DecimalFormat("0.0##E0##"));
+		yTick.setFormat(GraphChart.METRIC_FORMAT);
 		
 		//----------------------------------------------
 		// tidy-up the chart
