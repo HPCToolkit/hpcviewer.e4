@@ -1,7 +1,5 @@
 package edu.rice.cs.hpcviewer.ui.graph;
 
-import java.util.stream.DoubleStream;
-
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
@@ -67,25 +65,23 @@ public class GraphMenu
 		// fix issue #221: do not show empty metrics
 		// get the list of indexes of non-empty metrics
 		// if the table is empty or has no metrics, do nothing
-		var rawMetrics = experiment.getRawMetrics();
-		for(var metric: rawMetrics) {
-			var metrics = threadData.getMetrics(scope, metric, rawMetrics.size());
-			if (metrics == null     || 
-				metrics.length == 0 || 
-				!DoubleStream.of(metrics).anyMatch(d -> Double.compare(d, 0) != 0)) {
-				continue;
-			}
-			MenuManager subMenu = new MenuManager("Graph "+ metric.getDisplayName() );
 
-			for (String type: graphTypes) {
-	        	GraphEditorInput objInput = new GraphEditorInput(threadData, scope, metric, type);
+		for(var idx: listOfIndexes) {
+			var metric = experiment.getMetric(idx);
+			var rawMetric = metric.getMetricRaw();
+			if (rawMetric.isPresent()) {
+				MenuManager subMenu = new MenuManager("Graph "+ rawMetric.get().getDisplayName() );
 
-				// display the menu
-				
-				Action action = new ScopeGraphAction(objInput, profilePart);
-				subMenu.add( action );
+				for (String type: graphTypes) {
+		        	GraphEditorInput objInput = new GraphEditorInput(threadData, scope, rawMetric.get(), type);
 
-				mgr.add(subMenu);
+					// display the menu
+					
+					Action action = new ScopeGraphAction(objInput, profilePart);
+					subMenu.add( action );
+
+					mgr.add(subMenu);
+				}
 			}
 		}
 	} 
