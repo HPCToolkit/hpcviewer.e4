@@ -93,5 +93,10 @@ public class GraphPlotRegularViewer extends AbstractGraphPlotViewer
 	protected String getGraphTypeLabel() {
 		return LABEL;
 	}
+
+	@Override
+	protected IGraphTranslator getGraphTranslator() {
+		return new IdentityGraphTranlator();
+	}
 	
 }

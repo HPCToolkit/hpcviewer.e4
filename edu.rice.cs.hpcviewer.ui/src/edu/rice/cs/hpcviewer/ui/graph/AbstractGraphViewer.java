@@ -3,7 +3,6 @@ package edu.rice.cs.hpcviewer.ui.graph;
 
 import javax.inject.Inject;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import org.eclipse.swt.SWT;
@@ -99,7 +98,7 @@ public abstract class AbstractGraphViewer extends AbstractUpperPart
 		// chart creation
 		//----------------------------------------------
 		chart = new GraphChart(parent, SWT.NONE);
-		((GraphChart) chart).setInput(input);
+		((GraphChart) chart).setInput(input, getGraphTranslator());
 		
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(chart);
 		
@@ -215,6 +214,7 @@ public abstract class AbstractGraphViewer extends AbstractUpperPart
 	 */
 	protected abstract ArrayList<Integer> translateUserSelection(ArrayList<Integer> selections); 
 
+	protected abstract IGraphTranslator getGraphTranslator();
 
 	protected abstract String getGraphTypeLabel();
 }
