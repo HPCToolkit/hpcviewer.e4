@@ -68,7 +68,7 @@ public class GraphHistoViewer extends AbstractGraphViewer
 		
 		IAxisSet axisSet = chart.getAxisSet();
 		IAxisTick xTick  = axisSet.getXAxis(0).getTick();
-		xTick.setFormat(new DecimalFormat("0.###E0##"));
+		xTick.setFormat(GraphChart.METRIC_FORMAT);
 		
 		IAxisTick yTick = axisSet.getYAxis(0).getTick();
 		yTick.setFormat(new DecimalFormat("#######"));
@@ -94,6 +94,11 @@ public class GraphHistoViewer extends AbstractGraphViewer
 		return selections;
 	}
 	
+
+	@Override
+	protected IGraphTranslator getGraphTranslator() {
+		return new IdentityGraphTranlator();
+	}
 
 
 	@Override

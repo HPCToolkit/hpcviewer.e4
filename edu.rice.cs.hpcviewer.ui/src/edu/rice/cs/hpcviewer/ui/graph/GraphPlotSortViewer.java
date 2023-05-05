@@ -83,11 +83,7 @@ public class GraphPlotSortViewer extends AbstractGraphPlotViewer
 
 		@Override
 		public int compareTo(PairThreadIndex o) {
-			if (value > o.value)
-				return 1;
-			else if (value < o.value)
-				return -1;
-			return 0;
+			return Double.compare(value, o.value);
 		}
 		
 		@Override
@@ -136,5 +132,16 @@ public class GraphPlotSortViewer extends AbstractGraphPlotViewer
 		}
 
 		return PLOT_OK;
+	}
+
+	@Override
+	protected IGraphTranslator getGraphTranslator() {
+		return new IGraphTranslator() {
+			
+			@Override
+			public int getIndexTranslator(int xIndex) {
+				return pairThreadIndex[xIndex].index;
+			}
+		};
 	}
 }

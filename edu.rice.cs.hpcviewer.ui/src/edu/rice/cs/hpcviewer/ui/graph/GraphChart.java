@@ -22,6 +22,7 @@ public class GraphChart extends InteractiveChart implements MouseMoveListener
 {
 	public static final DecimalFormat METRIC_FORMAT = new DecimalFormat("0.0##E0##");
 	
+	private IGraphTranslator translator;
 	private IdTupleType idTupleType;
 	private IThreadDataCollection threadData;
 	
@@ -32,10 +33,13 @@ public class GraphChart extends InteractiveChart implements MouseMoveListener
 	}
 
     
-    public void setInput(GraphEditorInput input) {
+    public void setInput(GraphEditorInput input, IGraphTranslator translator) {
+    	this.translator = translator;
+
     	idTupleType = input.getScope().getExperiment().getIdTupleType();
     	threadData  = input.getThreadData();
     }
+    
     
 	@Override
 	public void mouseMove(MouseEvent e) {
@@ -82,7 +86,8 @@ public class GraphChart extends InteractiveChart implements MouseMoveListener
 	
 	
 	private void setTooltip(int index, double[] ySeries) {
-		var idt = threadData.getIdTupleLabelWithoutGPU(idTupleType)[index];
+		var translatedIndex = translator.getIndexTranslator(index);
+		var idt = threadData.getIdTupleLabelWithoutGPU(idTupleType)[translatedIndex];
 
 		var formattedValue = METRIC_FORMAT.format(ySeries[index]);
 		var output = String.format("%s: %s", idt, formattedValue);
