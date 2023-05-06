@@ -27,7 +27,7 @@ public class GraphPlotSortViewer extends AbstractGraphPlotViewer
 
 	@Override
 	protected String getXAxisTitle() {
-		return "Rank in Sorted Order";
+		return "Profile sorted by metric value";
 	}
 
 	@Override

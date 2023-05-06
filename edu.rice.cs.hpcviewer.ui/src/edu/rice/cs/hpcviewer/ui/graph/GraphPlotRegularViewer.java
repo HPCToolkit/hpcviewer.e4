@@ -32,17 +32,10 @@ public class GraphPlotRegularViewer extends AbstractGraphPlotViewer
 	protected String getXAxisTitle() {
 		IAxisSet axisSet = this.getChart().getAxisSet();
 		IAxisTick xTick  = axisSet.getXAxis(0).getTick();
-		String title 	 = "Rank";
 
 		xTick.setFormat(new DecimalFormat("##########"));
-		IThreadDataCollection threadData = getInput().getThreadData();
-		
-		try {
-			title = threadData.getRankTitle();
-		} catch (IOException e) {
-			// nothing to do, not important
-		}
-		return title;
+
+		return "Profile sorted by index";
 	}
 
 	@Override
