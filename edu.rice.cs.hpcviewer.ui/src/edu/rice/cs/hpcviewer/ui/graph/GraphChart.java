@@ -52,6 +52,12 @@ public class GraphChart extends InteractiveChart implements MouseMoveListener
 			return;
 		
 		var series  = seriesSet.getSeries()[0];
+		
+		// at the moment tooltip on the historgram graph is not supported
+		// only plot graph has tooltip (temporarily)
+		if (!(series instanceof ILineSeries))
+			return;
+		
 		var xSeries = series.getXSeries();
 		
 		var symSize = ((ILineSeries<?>)series).getSymbolSize();
