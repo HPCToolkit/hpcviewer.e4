@@ -49,6 +49,8 @@ public class TopDownPart extends AbstractTableView
 	 * once we got the database experiment. */
 	private IThreadDataCollection threadData;
 
+	private ScopeTreeData treeData;
+	
 	private ToolItem []items;
 
 	public TopDownPart(CTabFolder parent, int style) {
@@ -188,7 +190,10 @@ public class TopDownPart extends AbstractTableView
 
 	@Override
 	protected IScopeTreeData getTreeData(RootScope root, IMetricManager metricManager) {
-		return new ScopeTreeData(root, metricManager);
+		if (treeData == null)
+			treeData = new ScopeTreeData(root, metricManager);
+		
+		return treeData;
 	}
 	
 	/***
@@ -225,8 +230,12 @@ public class TopDownPart extends AbstractTableView
 				e1.printStackTrace();
 			}
 		}
-		threadData = null;
+		if (treeData != null)
+			treeData.dispose();
+		
 		items = null;
+		treeData = null;
+		threadData = null;
 	}
 	
 	static class EmptyThreadDataCollection implements IThreadDataCollection

@@ -39,7 +39,7 @@ import edu.rice.cs.hpctraceviewer.data.util.Constants;
  *******************************************************************************************/
 public abstract class SpaceTimeDataController 
 {
-	final protected IExperiment  exp;
+	protected IExperiment  exp;
 
 	protected TraceDisplayAttribute attributes;
 	
@@ -106,6 +106,8 @@ public abstract class SpaceTimeDataController
 	 * @return
 	 *************************************************************************/
 	public boolean hasTraces() {
+		if (timelineService == null)
+			return false;
 		return timelineService.getNumProcessTimeline() > 0;
 	}
 	
@@ -339,7 +341,22 @@ public abstract class SpaceTimeDataController
 	 * All callers HAS TO call this methid when the resource is not needed anymore
 	 *************************************************************************/
 	public void dispose() {
-		colorTable.dispose();
+		if (colorTable != null)
+			colorTable.dispose();
+		
+		if (timelineService != null)
+			timelineService.dispose();
+		
+		if (dataTrace != null)
+			dataTrace.dispose();
+		
+		exp = null;
+		colorTable = null;
+		timelineService = null;
+		attributes = null;
+		context = null;
+		
+		closeDB();
 	}
 
 	/*************************************************************************

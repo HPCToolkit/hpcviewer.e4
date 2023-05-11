@@ -25,7 +25,7 @@ import edu.rice.cs.hpcdata.tree.ScopeTreePath;
 public class ScopeTreeData extends ScopeTreePath implements IScopeTreeData
 {
 	/** list of current data. The list is dynamic **/
-	private final MutableList<Scope>  listScopes;
+	private MutableList<Scope>  listScopes;
 
 	private List<Integer> indexesNonEmptyMetrics;
 	private IMetricManager metricManager;
@@ -53,6 +53,19 @@ public class ScopeTreeData extends ScopeTreePath implements IScopeTreeData
 		clear();
 	}
 	
+	
+	public void dispose() {
+		if (listScopes != null)
+			listScopes.clear();
+		
+		listScopes = null;
+		
+		if (indexesNonEmptyMetrics != null)
+			indexesNonEmptyMetrics.clear();
+		
+		indexesNonEmptyMetrics = null;
+		metricManager = null;
+	}
 	
 	@Override
 	public void refreshAndShift(int shift) {

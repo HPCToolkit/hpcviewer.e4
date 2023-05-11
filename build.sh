@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2002-2022, Rice University.
+# Copyright (c) 2002-2023, Rice University.
 # See the file edu.rice.cs.hpcviewer.ui/License.txt for details.
 #
 # Build hpcviewer and generate tar or zip files
@@ -64,7 +64,7 @@ show_help(){
 	echo " -n              	(Mac only) notarize the package"
 	echo " -r <release>    	specify the release number"
 	echo "Commands:"
-	echo " check            build and run the tests. No package is generated."
+	echo " check            build and run the tests."
 	echo " clean            remove objects and temporary files"
 	echo " distclean        remove the temporary and target files"
 	exit
@@ -198,7 +198,6 @@ if [ $CHECK_PACKAGE != "0" ]; then
 	if [ -d tests/edu.rice.cs.hpcviewer.test.report/target/site/jacoco-aggregate/ ]; then
 		echo "Code coverage result: tests/edu.rice.cs.hpcviewer.test.report/target/site/jacoco-aggregate/"
 	fi
-	exit
 else
 	mvn clean package
 fi

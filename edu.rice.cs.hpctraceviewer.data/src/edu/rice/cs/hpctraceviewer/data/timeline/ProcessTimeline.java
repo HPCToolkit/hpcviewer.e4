@@ -31,7 +31,7 @@ public class ProcessTimeline {
 	/** The amount of time that each pixel on the screen correlates to. */
 	private double pixelLength;
 
-	private final ITraceDataCollector data;
+	private ITraceDataCollector data;
 
 	/*************************************************************************
 	 * Reads in the call-stack trace data from the binary traceFile in the form:
@@ -184,6 +184,16 @@ public class ProcessTimeline {
 	public boolean isGPU() 
 	{
 		return data.isGPU();
+	}
+
+	public void dispose() {
+		if (scopeMap != null)
+			scopeMap.dispose();
+		if (data != null)
+			data.dispose();
+		
+		scopeMap = null;
+		data = null;
 	}
 
 }

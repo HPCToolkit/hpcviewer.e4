@@ -13,7 +13,7 @@ import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 public class BufferRefreshOperation extends AbstractTraceOperation {
 
 	/**image data that describes current image in detail canvas*/
-	private final ImageData detailData;
+	private ImageData detailData;
 
 	public BufferRefreshOperation(SpaceTimeDataController data, 
 								  ImageData detailData,
@@ -41,6 +41,13 @@ public class BufferRefreshOperation extends AbstractTraceOperation {
 		return Status.OK_STATUS;
 	}
 
+	@Override
+	public void dispose() {
+		detailData = null;
+		super.dispose();
+	}
+	
+	
 	public ImageData getImageData() {
 		return detailData;
 	}

@@ -489,14 +489,7 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 			return;
 
 		if (event.getTopic().equals(BaseConstants.TOPIC_HPC_REMOVE_DATABASE)) {
-			
-			// mark that this part will be close soon. Do not do any tasks
-			partService = null;
-			eventBroker = null;
-			
-			// need to dispose resources
-			if (stdc != null)
-				stdc.dispose();
+			dispose();
 		} else if (event.getTopic().equals(ViewerDataEvent.TOPIC_FILTER_POST_PROCESSING)) {
 			tbtmTraceView.refresh();
 		}
@@ -515,5 +508,27 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 	@Override
 	public void showWarning(String message) {
 		// unused		
+	}
+
+	@Override
+	public void dispose() {
+		// clean up the history to avoid memory spills
+		var history = getOperationHistory();
+		for(var strCtx: BaseTraceContext.CONTEXTS) {
+			var context = getContext(strCtx);
+			history.dispose(context, true, true, true);
+		}
+		
+		experiment = null;
+		
+		// mark that this part will be close soon. Do not do any tasks
+		partService = null;
+		eventBroker = null;
+		
+		// need to dispose resources
+		if (stdc != null)
+			stdc.dispose();
+		
+		stdc = null;
 	}
 }
