@@ -34,7 +34,7 @@ public class TraceDataByRank implements ITraceDataCollector
 	/** 
 	 * These must be initialized in local mode. 
 	 * They should be considered final unless the data is remote.*/
-	private final AbstractBaseData   data;
+	private AbstractBaseData   data;
 	
 	private final int numPixelH;
 	private final int rank;
@@ -481,5 +481,18 @@ public class TraceDataByRank implements ITraceDataCollector
 				len--;
 			}
 		}
+	}
+
+
+	@Override
+	public void dispose() {
+		if (data != null)
+			data.dispose();
+		
+		if (listcpid != null)
+			listcpid.clear();
+		
+		data = null;
+		listcpid = null;
 	}
 }

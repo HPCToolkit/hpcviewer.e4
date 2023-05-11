@@ -11,6 +11,12 @@ public class BaseTraceContext implements IUndoContext
 	public static final String CONTEXT_OPERATION_UNDOABLE = "undoableOp";
 	public static final String CONTEXT_OPERATION_RESIZE   = "winResizeOp";
 	
+	public static final String []CONTEXTS = new String[] {CONTEXT_OPERATION_BUFFER,
+														  CONTEXT_OPERATION_POSITION,
+														  CONTEXT_OPERATION_REFRESH,
+														  CONTEXT_OPERATION_TRACE,
+														  CONTEXT_OPERATION_UNDOABLE,
+														  CONTEXT_OPERATION_RESIZE} ;
 	private static final String BASE_LABEL = "trace";
 	
 	private final String label;

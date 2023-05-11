@@ -37,7 +37,7 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
     private final ColumnReorderLayer  reorderLayer;
 
     private final CompositeFreezeLayer compositeFreezeLayer ;
-    private final ScopeTreeRowModel    treeRowModel ;
+    private ScopeTreeRowModel    treeRowModel ;
 
 	public ScopeTreeBodyLayerStack(IScopeTreeData treeData, 
 								   ScopeTreeDataProvider  bodyDataProvider) {
@@ -79,6 +79,21 @@ public class ScopeTreeBodyLayerStack extends AbstractLayerTransform
         setUnderlyingLayer(compositeFreezeLayer);
     }
     
+	
+	@Override
+	public void dispose() {
+		selectionLayer.dispose();
+		freezeLayer.dispose();
+		viewportLayer.dispose();
+		bodyDataLayer.dispose();
+		treeLayer.dispose();
+		hideShowLayer.dispose();
+		reorderLayer.dispose();
+		compositeFreezeLayer.dispose();
+		
+		treeRowModel = null;
+	}
+	
 	public void expand(int parentIndex) {
     	treeLayer.expandTreeRow(parentIndex);
 	}

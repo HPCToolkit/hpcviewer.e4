@@ -561,12 +561,16 @@ public class DatabaseCollection
 			Object obj = part.getObject();
 			if (obj instanceof IMainPart) {
 				IMainPart mpart = (IMainPart) obj;
-				if (mpart.getExperiment() == experiment) {
+				if (mpart.getExperiment() == experiment ||
+					mpart.getExperiment() == null) {
 					partService.hidePart(part, true);
+					mpart.dispose();
 				}
 			}
 		}
 		experiment.dispose();
+		
+		System.gc();
 	}	
 	
 	

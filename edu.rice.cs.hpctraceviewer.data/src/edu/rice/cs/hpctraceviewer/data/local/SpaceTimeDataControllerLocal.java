@@ -118,13 +118,10 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 	
 	@Override
 	public void closeDB() {
-		dataTrace.dispose();
-	}
-	
-	@Override
-	public void dispose() {
-		closeDB();
-		super.dispose();
+		if (fileDB != null)
+			fileDB.dispose();
+		
+		fileDB = null;
 	}
 
 

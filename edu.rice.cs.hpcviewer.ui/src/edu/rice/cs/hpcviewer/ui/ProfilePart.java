@@ -432,4 +432,30 @@ public class ProfilePart implements IProfilePart, EventHandler
 		if (view != null)
 			view.showWarning(message);
 	}
+
+
+	@Override
+	public void dispose() {
+		if (experiment != null)
+			experiment.dispose();
+		
+		if (metricView != null)
+			metricView.dispose();
+		
+		if (tabFolderBottom != null)
+			tabFolderBottom.dispose();
+		
+		if (tabFolderTop != null)
+			tabFolderTop.dispose();
+		
+		if (views != null) {
+			views.parallelStream().forEach(v -> v.dispose());
+		}
+		views = null;
+		tabFolderTop = null;
+		tabFolderBottom = null;
+		
+		experiment = null;
+		metricView = null;
+	}
 }

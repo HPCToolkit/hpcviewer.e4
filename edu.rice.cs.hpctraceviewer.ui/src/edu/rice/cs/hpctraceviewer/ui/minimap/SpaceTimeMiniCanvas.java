@@ -332,11 +332,17 @@ public class SpaceTimeMiniCanvas extends SpaceTimeCanvas
 			
 			@Override
 			public void run() {
-				view.x = (int)Math.round(frame.begTime * getScalePixelsPerTime());
-				view.y = (int)Math.round(frame.begProcess * getScalePixelsPerRank());
+				if (SpaceTimeMiniCanvas.this.isDisposed())
+					return;
 				
-				int bottomRightPixelX = (int)Math.round(frame.endTime * getScalePixelsPerTime());
-				int bottomRightPixelY = (int)Math.round(frame.endProcess * getScalePixelsPerRank());
+				var pixelsPerTime = getScalePixelsPerTime();
+				var pixelsPerRank = getScalePixelsPerRank();
+				
+				view.x = (int)Math.round(frame.begTime * pixelsPerTime);
+				view.y = (int)Math.round(frame.begProcess * pixelsPerRank);
+				
+				int bottomRightPixelX = (int)Math.round(frame.endTime * pixelsPerTime);
+				int bottomRightPixelY = (int)Math.round(frame.endProcess * pixelsPerRank);
 				
 				view.width  = Math.max(1, bottomRightPixelX-view.x);
 				view.height = Math.max(1, bottomRightPixelY-view.y);
@@ -509,6 +515,9 @@ public class SpaceTimeMiniCanvas extends SpaceTimeCanvas
 	/**Gets the scale in the X-direction (pixels per time unit).*/
 	public double getScalePixelsPerTime()
 	{
+		if (isDisposed())
+			return 0;
+		
 		return (double)getClientArea().width / (double)stData.getTimeWidth();
 	}
 

@@ -42,4 +42,15 @@ public class ProcessTimelineService
 		}
 		return false;
 	}
+
+	
+	public void dispose() {
+		if (traces == null)
+			return;
+		
+		for(var trace: traces) {
+			trace.dispose();
+		}
+		traces = null;
+	}
 }

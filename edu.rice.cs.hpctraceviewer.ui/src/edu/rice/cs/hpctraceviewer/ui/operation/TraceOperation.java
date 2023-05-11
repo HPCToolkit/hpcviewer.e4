@@ -30,4 +30,9 @@ public abstract class TraceOperation extends AbstractTraceOperation
 	public Frame getFrame() {
 		return frame;
 	}
+	
+	@Override
+	public void dispose() {
+		frame = null;
+	}
 }
