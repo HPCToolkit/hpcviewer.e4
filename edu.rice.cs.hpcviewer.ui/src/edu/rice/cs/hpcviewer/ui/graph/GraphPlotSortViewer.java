@@ -27,7 +27,7 @@ public class GraphPlotSortViewer extends AbstractGraphPlotViewer
 
 	@Override
 	protected String getXAxisTitle() {
-		return "Profile sorted by metric value";
+		return "Execution context sorted by metric value";
 	}
 
 	@Override

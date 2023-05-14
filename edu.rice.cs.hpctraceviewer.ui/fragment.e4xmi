@@ -71,7 +71,7 @@
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_KYLVMNXSEeqsK-PEIuqpJw" featurename="menuContributions" parentElementId="xpath:/">
     <elements xsi:type="menu:MenuContribution" xmi:id="_NFFAUNXSEeqsK-PEIuqpJw" elementId="edu.rice.cs.hpctraceviewer.ui.menucontribution.view" parentId="edu.rice.cs.hpcviewer.ui.menu.filter">
-      <children xsi:type="menu:HandledMenuItem" xmi:id="_SZjKoNXSEeqsK-PEIuqpJw" elementId="edu.rice.cs.hpctraceviewer.menu.filter" label="Filter ranks" tooltip="Exclude or exclusively include some ranks or threads." mnemonics="F" command="_eM3AoNXSEeqsK-PEIuqpJw">
+      <children xsi:type="menu:HandledMenuItem" xmi:id="_SZjKoNXSEeqsK-PEIuqpJw" elementId="edu.rice.cs.hpctraceviewer.menu.filter" label="Filter execution contexts" tooltip="Exclude or exclusively include some profiles such as ranks, threads, GPU streams." mnemonics="F" command="_eM3AoNXSEeqsK-PEIuqpJw">
         <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_g7afgNX8EeqsK-PEIuqpJw" contributionURI="bundleclass://edu.rice.cs.hpctraceviewer.ui/edu.rice.cs.hpctraceviewer.ui.handlers.TraceDataExist"/>
       </children>
     </elements>

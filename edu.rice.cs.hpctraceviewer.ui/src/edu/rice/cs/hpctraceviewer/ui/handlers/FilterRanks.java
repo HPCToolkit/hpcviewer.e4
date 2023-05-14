@@ -78,7 +78,7 @@ public class FilterRanks
         	}
         }
         
-        List<FilterDataItem<String>> list = ThreadFilterDialog.filter(shell, "Select rank to display", items, checked);
+        List<FilterDataItem<String>> list = ThreadFilterDialog.filter(shell, "Select execution contexts to display", items, checked);
 		
 		if (list != null && !list.isEmpty()){
 			List<Integer> listChecked = new ArrayList<>();

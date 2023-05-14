@@ -76,7 +76,7 @@ public class ThreadFilterDialog extends Dialog
 
 			@Override
 			protected String[] getColumnHeaderLabels() {
-				return new String[] {"  ", "Ranks or threads"};
+				return new String[] {"  ", "Execution contexts"};
 			}
 			
 			@Override

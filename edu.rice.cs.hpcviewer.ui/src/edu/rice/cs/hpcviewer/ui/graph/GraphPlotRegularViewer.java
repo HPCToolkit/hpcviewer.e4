@@ -35,7 +35,7 @@ public class GraphPlotRegularViewer extends AbstractGraphPlotViewer
 
 		xTick.setFormat(new DecimalFormat("##########"));
 
-		return "Profile sorted by index";
+		return "Execution context sorted by index";
 	}
 
 	@Override

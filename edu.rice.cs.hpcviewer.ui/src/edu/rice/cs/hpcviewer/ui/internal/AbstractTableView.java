@@ -486,7 +486,8 @@ implements EventHandler, IUserMessage
 		if (table != null)
 			table.dispose();
 		
-		actionManager.clear();
+		if (actionManager != null)
+			actionManager.clear();
 		
 		actionManager = null;
 		metricManager = null;
