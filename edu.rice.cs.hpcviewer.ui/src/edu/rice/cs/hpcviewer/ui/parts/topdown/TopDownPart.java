@@ -130,7 +130,7 @@ public class TopDownPart extends AbstractTableView
 		}
 		var labels   = dataCollector.getIdTupleLabelWithoutGPU(idtype);
 		
-		List<FilterDataItem<String>> listItems = ThreadFilterDialog.filter(shell, "Select rank/thread to view", labels, null);
+		List<FilterDataItem<String>> listItems = ThreadFilterDialog.filter(shell, "Select execution context(s) to view", labels, null);
 		
 		if (listItems != null && !listItems.isEmpty()) {
 			List<IdTuple> selectedIdtuples = new ArrayList<>();

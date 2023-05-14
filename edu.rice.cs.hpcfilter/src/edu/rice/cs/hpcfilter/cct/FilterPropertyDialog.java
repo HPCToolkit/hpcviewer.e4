@@ -232,7 +232,7 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 	protected void createButtonsForButtonBar(Composite parent) {
 		createButton(parent, IDialogConstants.OK_ID,     "Apply && Close", true);
 		createButton(parent, IDialogConstants.HELP_ID,   "Apply",         false);
-		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+		createButton(parent, IDialogConstants.CANCEL_ID, "Close", false);
 	}
 
 	
