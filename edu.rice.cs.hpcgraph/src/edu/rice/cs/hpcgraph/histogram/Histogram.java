@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.graph;
+package edu.rice.cs.hpcgraph.histogram;
 
 import java.util.Arrays;
 
@@ -31,7 +31,7 @@ public class Histogram {
 		data_min = sorted_data[0];
 		data_max = sorted_data[data.length-1];
 		
-		data_width = ((data_max - data_min) / n_bins);
+		data_width = (data_max - data_min) / n_bins;
 		
 		freq = new double[n_bins];
 		axis_x = new double[n_bins];

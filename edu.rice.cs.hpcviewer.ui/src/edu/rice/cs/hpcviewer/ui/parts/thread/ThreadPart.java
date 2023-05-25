@@ -11,6 +11,7 @@ import org.eclipse.swt.custom.CTabFolder;
 import org.osgi.service.event.Event;
 
 import edu.rice.cs.hpcbase.BaseConstants.ViewType;
+import edu.rice.cs.hpcbase.ThreadViewInput;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;

@@ -1,7 +1,5 @@
 package edu.rice.cs.hpcbase.ui;
 
-import org.eclipse.e4.ui.model.application.ui.basic.MPart;
-
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 
 /****
@@ -17,5 +15,6 @@ import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 public interface IBasePart 
 {
 	BaseExperiment getExperiment();
-	void setInput(MPart part, Object input);
+	
+	void setInput(Object input);
 }

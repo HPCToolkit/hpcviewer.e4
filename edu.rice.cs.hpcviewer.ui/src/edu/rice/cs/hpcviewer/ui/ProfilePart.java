@@ -18,7 +18,6 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UISynchronize;
 import org.eclipse.e4.ui.model.application.MApplication;
-import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.services.EMenuService;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
@@ -32,7 +31,12 @@ import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 
+import edu.rice.cs.hpcbase.ThreadViewInput;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
+import edu.rice.cs.hpcbase.ui.AbstractUpperPart;
+import edu.rice.cs.hpcbase.ui.ILowerPart;
+import edu.rice.cs.hpcbase.ui.IProfilePart;
+import edu.rice.cs.hpcbase.ui.IUpperPart;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
@@ -40,13 +44,11 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcfilter.service.FilterMap;
 import edu.rice.cs.hpcmetric.MetricFilterInput;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
-import edu.rice.cs.hpcviewer.ui.base.IProfilePart;
-import edu.rice.cs.hpcviewer.ui.graph.GraphEditorInput;
-import edu.rice.cs.hpcviewer.ui.graph.GraphHistoViewer;
-import edu.rice.cs.hpcviewer.ui.graph.GraphPlotRegularViewer;
-import edu.rice.cs.hpcviewer.ui.graph.GraphPlotSortViewer;
+import edu.rice.cs.hpcgraph.GraphEditorInput;
+import edu.rice.cs.hpcgraph.histogram.GraphHistoViewer;
+import edu.rice.cs.hpcgraph.plot.GraphPlotRegularViewer;
+import edu.rice.cs.hpcgraph.plot.GraphPlotSortViewer;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractTableView;
-import edu.rice.cs.hpcviewer.ui.internal.AbstractUpperPart;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractView;
 import edu.rice.cs.hpcviewer.ui.metric.MetricView;
 import edu.rice.cs.hpcviewer.ui.parts.bottomup.BottomUpPart;
@@ -54,14 +56,13 @@ import edu.rice.cs.hpcviewer.ui.parts.datacentric.Datacentric;
 import edu.rice.cs.hpcviewer.ui.parts.editor.Editor;
 import edu.rice.cs.hpcviewer.ui.parts.flat.FlatPart;
 import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadPart;
-import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadViewInput;
 import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownPart;
 
 
 public class ProfilePart implements IProfilePart, EventHandler
 {
 	public static final String ID = "edu.rice.cs.hpcviewer.ui.partdescriptor.profile";
-	private static final String PREFIX_TITLE = "Profile: ";
+	public static final String PREFIX_TITLE = "Profile: ";
 	
 	@Inject	protected EPartService  partService;
 	@Inject protected EModelService modelService;
@@ -137,9 +138,14 @@ public class ProfilePart implements IProfilePart, EventHandler
 	/***
 	 * Display an editor in the top folder
 	 * 
-	 * @param input cannot be null
+	 * @param input 
+	 * 			The object input
+	 * 
+	 * @return {@code IUpperPart}
+	 * 			The editor object if successful. Null otherwise.
 	 */
-	public CTabItem addEditor(Object input) {
+	@Override
+	public IUpperPart addEditor(Object input) {
 		// search if the input is already displayed 
 		// if this is the case, we reuse the existing item
 		
@@ -218,7 +224,16 @@ public class ProfilePart implements IProfilePart, EventHandler
 		return (AbstractTableView) tabFolderBottom.getSelection();
 	}
 
-	
+
+
+	@Override
+	public ILowerPart addView(Object input) {
+		if (input instanceof ThreadViewInput) {
+			addThreadView((ThreadViewInput) input);
+		}
+		return null;
+	}
+
 	/*****
 	 * Specifically adding a new thread view
 	 * 
@@ -318,14 +333,11 @@ public class ProfilePart implements IProfilePart, EventHandler
 	}
 
 	@Override
-	public void setInput(MPart part, Object input) {
+	public void setInput(Object input) {
 		if (input == null ) return;
 		if (!(input instanceof Experiment)) return;
 		
 		this.experiment = (Experiment) input;
-		
-		part.setLabel(PREFIX_TITLE + experiment.getName());
-		part.setTooltip(experiment.getDefaultDirectory().getAbsolutePath());
 		
 		var roots = experiment.getRootScopeChildren();
 		views = FastList.newList(roots.size());		

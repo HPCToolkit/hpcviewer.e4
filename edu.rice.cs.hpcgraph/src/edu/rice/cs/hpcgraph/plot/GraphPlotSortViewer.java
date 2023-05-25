@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.graph;
+package edu.rice.cs.hpcgraph.plot;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -13,6 +13,8 @@ import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcgraph.GraphEditorInput;
+import edu.rice.cs.hpcgraph.internal.IGraphTranslator;
 
 
 public class GraphPlotSortViewer extends AbstractGraphPlotViewer 
@@ -21,7 +23,7 @@ public class GraphPlotSortViewer extends AbstractGraphPlotViewer
 		super(tabFolder, style);
 	}
 
-	static public final String LABEL = "Sorted plot graph";
+	public static final String LABEL = "Sorted plot graph";
 
     private PairThreadIndex []pairThreadIndex;
 
@@ -33,10 +35,10 @@ public class GraphPlotSortViewer extends AbstractGraphPlotViewer
 	@Override
 	protected double[] getValuesX(Scope scope, BaseMetric metric) throws NumberFormatException, IOException {
 		IThreadDataCollection threadData = getInput().getThreadData();
-		double x_values[] = threadData.getRankLabels();
-		double sequence_x[] = new double[x_values.length];
+		double[] x_values = threadData.getRankLabels();
+		double[] sequence_x = new double[x_values.length];
 		for (int i=0; i<x_values.length; i++) {
-			sequence_x[i] = (double) i;
+			sequence_x[i] = i;
 		}
 		return sequence_x;
 	}
@@ -53,7 +55,7 @@ public class GraphPlotSortViewer extends AbstractGraphPlotViewer
 		}
 		
 		IThreadDataCollection threadData = getInput().getThreadData();
-		double y_values[] = null;
+		double[] y_values = null;
 		y_values = threadData.getMetrics(scope.getCCTIndex(), id, size);
 		pairThreadIndex = new PairThreadIndex[y_values.length];
 
@@ -76,7 +78,7 @@ public class GraphPlotSortViewer extends AbstractGraphPlotViewer
 	 * Pair of thread and the sequential index for the sorting
 	 *
 	 *************/
-	static private class PairThreadIndex implements Comparable<PairThreadIndex>
+	private static class PairThreadIndex implements Comparable<PairThreadIndex>
 	{
 		int index;
 		double value;
@@ -103,7 +105,7 @@ public class GraphPlotSortViewer extends AbstractGraphPlotViewer
 			}
 			return list;
 		}
-		return null;
+		return new ArrayList<>();
 	}
 
 	@Override
@@ -112,7 +114,7 @@ public class GraphPlotSortViewer extends AbstractGraphPlotViewer
 	}
 
 	@Override
-	protected int setupXAxis(GraphEditorInput input, ILineSeries scatterSeries) {
+	protected int setupXAxis(GraphEditorInput input, ILineSeries<?> scatterSeries) {
 		IAxisSet axisSet = getChart().getAxisSet();
 
 		final IAxisTick xTick = axisSet.getXAxis(0).getTick();
@@ -136,12 +138,6 @@ public class GraphPlotSortViewer extends AbstractGraphPlotViewer
 
 	@Override
 	protected IGraphTranslator getGraphTranslator() {
-		return new IGraphTranslator() {
-			
-			@Override
-			public int getIndexTranslator(int xIndex) {
-				return pairThreadIndex[xIndex].index;
-			}
-		};
+		return index -> pairThreadIndex[index].index;
 	}
 }

@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.graph;
+package edu.rice.cs.hpcgraph.histogram;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -16,6 +16,11 @@ import org.eclipse.swtchart.ISeries.SeriesType;
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcgraph.GraphEditorInput;
+import edu.rice.cs.hpcgraph.internal.AbstractGraphViewer;
+import edu.rice.cs.hpcgraph.internal.GraphChart;
+import edu.rice.cs.hpcgraph.internal.IGraphTranslator;
+import edu.rice.cs.hpcgraph.internal.IdentityGraphTranlator;
 
 
 public class GraphHistoViewer extends AbstractGraphViewer 
@@ -24,7 +29,7 @@ public class GraphHistoViewer extends AbstractGraphViewer
 		super(tabFolder, style);
 	}
 
-	static public final String LABEL = "Histogram graph";
+	public static final String LABEL = "Histogram graph";
 
 	@Override
 	protected int plotData(GraphEditorInput input) {
@@ -78,7 +83,7 @@ public class GraphHistoViewer extends AbstractGraphViewer
 		axis.getRange().upper = max + single;
 		
 		// create scatter series
-		IBarSeries scatterSeries = (IBarSeries) chart.getSeriesSet()
+		var scatterSeries = (IBarSeries<?>) chart.getSeriesSet()
 				.createSeries(SeriesType.BAR, metric.getDisplayName() );
 		scatterSeries.setXSeries(x_values);
 		scatterSeries.setYSeries(y_values);

@@ -45,10 +45,10 @@ Require-Bundle: edu.rice.cs.hpcdata,
  org.eclipse.collections,
  edu.rice.cs.hpcmerge,
  edu.rice.cs.hpcdata.merge,
+ edu.rice.cs.hpcgraph,
  org.eclipse.swtchart,
  org.eclipse.swtchart.extensions
 Bundle-ActivationPolicy: lazy
 Provide-Capability: licensing.feature;licensing.feature="edu.rice.cs.hpcviewer.ui.product"
 Automatic-Module-Name: edu.rice.cs.hpcviewer.ui
-Export-Package: edu.rice.cs.hpcviewer.ui.dialogs,
- edu.rice.cs.hpcviewer.ui.graph
+Export-Package: edu.rice.cs.hpcviewer.ui.dialogs

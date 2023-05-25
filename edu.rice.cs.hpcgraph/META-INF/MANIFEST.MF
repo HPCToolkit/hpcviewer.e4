@@ -1,0 +1,25 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Hpcgraph
+Bundle-SymbolicName: edu.rice.cs.hpcgraph;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Rice University
+Require-Bundle: javax.inject,
+ org.eclipse.osgi,
+ org.eclipse.jface,
+ org.eclipse.e4.ui.model.workbench,
+ org.eclipse.e4.ui.di,
+ org.eclipse.e4.ui.services,
+ org.eclipse.e4.core.di.annotations,
+ edu.rice.cs.hpcdata,
+ org.eclipse.swtchart,
+ org.eclipse.swtchart.extensions,
+ edu.rice.cs.hpcbase,
+ org.slf4j.api
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Import-Package: edu.rice.cs.hpcbase.ui,
+ javax.annotation;version="1.2.0"
+Automatic-Module-Name: edu.rice.cs.hpcgraph
+Export-Package: edu.rice.cs.hpcgraph,
+ edu.rice.cs.hpcgraph.histogram,
+ edu.rice.cs.hpcgraph.plot

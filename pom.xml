@@ -23,6 +23,7 @@
   <module>edu.rice.cs.hpcdata.app</module>
   <module>edu.rice.cs.hpcfilter</module>
   <module>edu.rice.cs.hpcbase</module>
+  <module>edu.rice.cs.hpcgraph</module>
   <module>edu.rice.cs.hpclog</module>
   <module>edu.rice.cs.hpcsetting</module>
   <module>edu.rice.cs.hpcmerge</module>

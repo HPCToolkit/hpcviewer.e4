@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.parts.thread;
+package edu.rice.cs.hpcbase;
 
 import java.util.List;
 

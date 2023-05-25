@@ -1,9 +1,6 @@
-package edu.rice.cs.hpcviewer.ui.graph;
+package edu.rice.cs.hpcgraph.plot;
 
 import java.io.IOException;
-import javax.inject.Inject;
-
-import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.custom.CTabFolder;
 import org.slf4j.Logger;
@@ -17,14 +14,14 @@ import org.eclipse.swtchart.Range;
 
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
+import edu.rice.cs.hpcgraph.GraphEditorInput;
+import edu.rice.cs.hpcgraph.internal.AbstractGraphViewer;
+
 
 public abstract class AbstractGraphPlotViewer extends AbstractGraphViewer 
 {
 	private static final int DEFAULT_DIAMETER = 3;
 
-	@Inject EPartService partService;
-	@Inject DatabaseCollection database;
 	
 	protected AbstractGraphPlotViewer(CTabFolder tabFolder, int style) {
 		super(tabFolder, style);
@@ -55,7 +52,7 @@ public abstract class AbstractGraphPlotViewer extends AbstractGraphViewer
 		// -----------------------------------------------------------------
 		// create scatter series
 		// -----------------------------------------------------------------
-		ILineSeries scatterSeries = (ILineSeries) chart.getSeriesSet()
+		var scatterSeries = (ILineSeries<?>) chart.getSeriesSet()
 				.createSeries(SeriesType.LINE, input.toString() );
 		
 		scatterSeries.setLineStyle( LineStyle.NONE);
@@ -140,5 +137,5 @@ public abstract class AbstractGraphPlotViewer extends AbstractGraphViewer
 	 * @param scatterSeries
 	 * @return
 	 */
-	protected abstract int setupXAxis(GraphEditorInput input, ILineSeries scatterSeries);
+	protected abstract int setupXAxis(GraphEditorInput input, ILineSeries<?> scatterSeries);
 }
