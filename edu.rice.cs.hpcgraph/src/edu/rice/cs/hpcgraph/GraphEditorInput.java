@@ -1,5 +1,6 @@
-package edu.rice.cs.hpcviewer.ui.graph;
+package edu.rice.cs.hpcgraph;
 
+import edu.rice.cs.hpcbase.ui.IProfilePart;
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -7,8 +8,10 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 public class GraphEditorInput 
 {
-	static public final int MAX_TITLE_CHARS = 100; // maximum charaters for a title
+	public static final int MAX_TITLE_CHARS = 100; // maximum charaters for a title
 
+	private final IProfilePart profilePart;
+	
 	private final Scope      scope;
 	private final BaseMetric metric;
 	private final String     graphType;
@@ -23,10 +26,13 @@ public class GraphEditorInput
 	 * @param metric
 	 * @param type
 	 */
-	public GraphEditorInput(IThreadDataCollection threadData, 
+	public GraphEditorInput(IProfilePart profilePart, 
+						    IThreadDataCollection threadData, 
 							Scope scope, 
 							BaseMetric metric, 
 							String graphType) {
+		
+		this.profilePart = profilePart;
 		
 		this.threadData = threadData;
 		this.graphType  = graphType;
@@ -36,6 +42,14 @@ public class GraphEditorInput
 	}
 	
 	
+	/**
+	 * @return the profilePart
+	 */
+	public IProfilePart getProfilePart() {
+		return profilePart;
+	}
+
+
 	public Scope getScope() {
 		return scope;
 	}

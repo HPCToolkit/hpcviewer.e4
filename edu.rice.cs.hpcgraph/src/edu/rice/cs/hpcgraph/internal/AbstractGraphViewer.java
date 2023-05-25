@@ -1,5 +1,5 @@
  
-package edu.rice.cs.hpcviewer.ui.graph;
+package edu.rice.cs.hpcgraph.internal;
 
 import javax.inject.Inject;
 
@@ -16,39 +16,41 @@ import org.eclipse.swtchart.IAxisSet;
 import org.eclipse.swtchart.IAxisTick;
 
 import edu.rice.cs.hpcbase.BaseConstants;
+import edu.rice.cs.hpcbase.ElementIdManager;
+import edu.rice.cs.hpcbase.ui.AbstractUpperPart;
+import edu.rice.cs.hpcbase.ui.IUpperPart;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcviewer.ui.internal.AbstractUpperPart;
-import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
+import edu.rice.cs.hpcgraph.GraphEditorInput;
 
 import javax.annotation.PreDestroy;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 
-public abstract class AbstractGraphViewer extends AbstractUpperPart
+public abstract class AbstractGraphViewer extends AbstractUpperPart implements IUpperPart
 {
-	static public final int PLOT_OK          = 0;
-	static public final int PLOT_ERR_IO 	 = -1;
-	static public final int PLOT_ERR_UNKNOWN = -2;
+	public static final int PLOT_OK          = 0;
+	public static final int PLOT_ERR_IO 	 = -1;
+	public static final int PLOT_ERR_UNKNOWN = -2;
 	
-	static public final int MAX_TITLE_CHARS = 100; // maximum charaters for a title
+	public static final int MAX_TITLE_CHARS = 100; // maximum characters for a title
 	
     private Chart chart;
     private GraphEditorInput input;
-    private Composite parent;
+    private Composite container;
 
 	@Inject
-	public AbstractGraphViewer(CTabFolder tabFolder, int style) {
+	protected AbstractGraphViewer(CTabFolder tabFolder, int style) {
 		super(tabFolder, style);
 		setShowClose(true);
 		
-		parent = new Composite(tabFolder, SWT.NONE);
+		container = new Composite(tabFolder, SWT.NONE);
 		
-		GridDataFactory.fillDefaults().grab(true, true).applyTo(parent);
-		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(parent);
+		GridDataFactory.fillDefaults().grab(true, true).applyTo(container);
+		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(container);
 		
-		setControl(parent);
+		setControl(container);
 	}
 	
 	
@@ -59,10 +61,14 @@ public abstract class AbstractGraphViewer extends AbstractUpperPart
 	
 	@Focus
 	public void onFocus() {
-		chart.setFocus();
+		setFocus();
 	}
 
 
+	@Override
+	public void setFocus() {
+		chart.setFocus();
+	}
 
 	
 	@Override
@@ -97,7 +103,7 @@ public abstract class AbstractGraphViewer extends AbstractUpperPart
 		//----------------------------------------------
 		// chart creation
 		//----------------------------------------------
-		chart = new GraphChart(parent, SWT.NONE);
+		chart = new GraphChart(input.getProfilePart(), container, SWT.NONE);
 		((GraphChart) chart).setInput(input, getGraphTranslator());
 		
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(chart);

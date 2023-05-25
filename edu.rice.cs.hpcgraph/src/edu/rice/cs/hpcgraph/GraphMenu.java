@@ -1,22 +1,24 @@
-package edu.rice.cs.hpcviewer.ui.graph;
+package edu.rice.cs.hpcgraph;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.swt.custom.CTabItem;
-
+import edu.rice.cs.hpcbase.ui.IProfilePart;
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcviewer.ui.ProfilePart;
+import edu.rice.cs.hpcgraph.histogram.GraphHistoViewer;
+import edu.rice.cs.hpcgraph.plot.GraphPlotRegularViewer;
+import edu.rice.cs.hpcgraph.plot.GraphPlotSortViewer;
 
 
-/****
+
+/***********************************************************************************
  * 
- * Class to handle metric graph menus (plot, sorted and histo)
+ * Class to handle metric graph menus (plot, sorted and histogram)
  *
- */
+ **********************************************************************************/
 public class GraphMenu 
 {
 	private GraphMenu() {
@@ -38,14 +40,13 @@ public class GraphMenu
 	 * 			An interface to access the raw data
 	 * @param scope
 	 * 			The selected node 
-	 * @throws Exception 
 	 */
 	public static void createAdditionalContextMenu(
-			ProfilePart profilePart,
+			IProfilePart profilePart,
 			IMenuManager mgr, 
 			IMetricManager experiment, 
 			IThreadDataCollection threadData, 
-			Scope scope) throws Exception {
+			Scope scope) {
 		
 		if (scope == null || threadData == null || !threadData.isAvailable())
 			// no menus if there is no thread-level data
@@ -73,11 +74,11 @@ public class GraphMenu
 				MenuManager subMenu = new MenuManager("Graph "+ rawMetric.get().getDisplayName() );
 
 				for (String type: graphTypes) {
-		        	GraphEditorInput objInput = new GraphEditorInput(threadData, scope, rawMetric.get(), type);
+		        	GraphEditorInput objInput = new GraphEditorInput(profilePart, threadData, scope, rawMetric.get(), type);
 
 					// display the menu
 					
-					Action action = new ScopeGraphAction(objInput, profilePart);
+					Action action = new ScopeGraphAction(objInput);
 					subMenu.add( action );
 
 					mgr.add(subMenu);
@@ -93,25 +94,19 @@ public class GraphMenu
     private static class ScopeGraphAction extends Action 
     {
 		private final GraphEditorInput input;
-		private final ProfilePart profilePart;
 		
-		public ScopeGraphAction(
-				GraphEditorInput input, 
-				ProfilePart profilePart) {
+		public ScopeGraphAction(GraphEditorInput input) {
 			
 			super(input.getGraphType());
 			
-			this.input  	  = input;
-			this.profilePart  = profilePart;
+			this.input = input;
 		}
     	
 		@Override
 		public void run() {
-			final CTabItem editor = profilePart.addEditor(input);
-			editor.getDisplay().asyncExec(() -> {
-				editor.getParent().setFocus();
-				profilePart.onFocus();
-			});
+			final var profilePart = input.getProfilePart();
+			final var editor = profilePart.addEditor(input);
+			editor.setFocus();
 		}
     }
 }

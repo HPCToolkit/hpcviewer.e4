@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.graph;
+package edu.rice.cs.hpcgraph.internal;
 
 public interface IGraphTranslator 
 {

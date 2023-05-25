@@ -18,6 +18,8 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
+
+import edu.rice.cs.hpcbase.ThreadViewInput;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.experiment.Experiment;
@@ -29,13 +31,14 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcfilter.FilterDataItem;
 import edu.rice.cs.hpcfilter.dialog.ThreadFilterDialog;
+import edu.rice.cs.hpcgraph.GraphMenu;
 import edu.rice.cs.hpctree.IScopeTreeData;
 import edu.rice.cs.hpctree.ScopeTreeData;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
-import edu.rice.cs.hpcviewer.ui.graph.GraphMenu;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractTableView;
-import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadViewInput;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
+
+
 
 public class TopDownPart extends AbstractTableView 
 {	

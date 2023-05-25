@@ -46,6 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcbase.BaseConstants;
+import edu.rice.cs.hpcbase.ElementIdManager;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcbase.map.UserInputHistory;
 import edu.rice.cs.hpcbase.ui.IMainPart;
@@ -61,7 +62,6 @@ import edu.rice.cs.hpctraceviewer.ui.TracePart;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.experiment.ExperimentManager;
 import edu.rice.cs.hpcviewer.ui.handlers.RecentDatabase;
-import edu.rice.cs.hpcviewer.ui.util.ElementIdManager;
 
 
 /***
@@ -291,8 +291,10 @@ public class DatabaseCollection
 			sync.asyncExec(()-> showPart(experiment, application, modelService, message));
 			return -1;
 		}
-		if (list != null)
-			list.add(part);
+		if (list == null)
+			throw new IllegalStateException("No child window detected");
+		
+		list.add(part);
 		
 		partService.showPart(part, PartState.VISIBLE);
 		IMainPart view = null;
@@ -305,9 +307,10 @@ public class DatabaseCollection
 			
 			try {
 				Thread.sleep(300);					
-			} catch (Exception e) {
+			} catch ( InterruptedException e) {
 				// sleep is interrupted
-				// no op
+				LoggerFactory.getLogger(getClass()).warn(e.getMessage(), e);
+				Thread.currentThread().interrupt();
 			}
 			maxAttempt--;
 		}
@@ -326,7 +329,11 @@ public class DatabaseCollection
 		String elementID = "P." + ElementIdManager.getElementId(experiment);
 		part.setElementId(elementID);
 
-		view.setInput(part, experiment);
+		view.setInput(experiment);
+				
+		part.setLabel(ProfilePart.PREFIX_TITLE + experiment.getName());
+		part.setTooltip(experiment.getDirectory());
+
 
 		//----------------------------------------------------------------
 		// part stack is ready, now we create all view parts and add it to the part stack
@@ -359,8 +366,8 @@ public class DatabaseCollection
 	 * 
 	 * @param experiment
 	 * @param service
-	 * @param elementID
 	 * @param list
+	 * 
 	 * @return
 	 */
 	private int displayTraceView(IExperiment experiment, 
@@ -382,8 +389,12 @@ public class DatabaseCollection
 			list.add(createPart);
 			
 			Object objTracePart = createPart.getObject();
-			if (objTracePart != null) {
-				((TracePart)objTracePart).setInput(createPart, experiment);
+			if (objTracePart instanceof TracePart) {
+				TracePart part = (TracePart) objTracePart;
+				part.setInput(experiment);
+				
+				createPart.setLabel("Trace: " + experiment.getName());
+				createPart.setTooltip(experiment.getDirectory());
 			}
 		}
 		return 1;

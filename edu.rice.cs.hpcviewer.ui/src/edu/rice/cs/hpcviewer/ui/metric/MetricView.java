@@ -7,9 +7,10 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.Composite;
 
+import edu.rice.cs.hpcbase.ui.AbstractUpperPart;
 import edu.rice.cs.hpcmetric.MetricFilterInput;
 import edu.rice.cs.hpcmetric.MetricFilterPane;
-import edu.rice.cs.hpcviewer.ui.internal.AbstractUpperPart;
+
 
 
 /***************************************************************
@@ -30,7 +31,6 @@ public class MetricView extends AbstractUpperPart
 	public  static final String TITLE_DEFAULT = "Metric properties";
 	
 	private final IEventBroker eventBroker ;
-	private final CTabFolder   parent;
 	
 	private MetricFilterPane  pane;	
 	private MetricFilterInput inputFilter;
@@ -45,7 +45,6 @@ public class MetricView extends AbstractUpperPart
 	 */
 	public MetricView(CTabFolder parent, int style, IEventBroker eventBroker ) {
 		super(parent, style);
-		this.parent = parent;
 		this.eventBroker = eventBroker;
 		
 		setShowClose(true);
@@ -75,7 +74,7 @@ public class MetricView extends AbstractUpperPart
 		// the panel is not created yet
 		// we will create it from the scratch
 		
-		Composite container = new Composite(parent, SWT.BORDER);
+		Composite container = new Composite(getParent(), SWT.BORDER);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(container);
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(container);
 		
@@ -95,5 +94,12 @@ public class MetricView extends AbstractUpperPart
 	
 	
 	@Override
-	public void setMarker(int lineNumber) {}
+	public void setMarker(int lineNumber) { /* not needed */ }
+
+
+
+	@Override
+	public void setFocus() {
+		pane.setFocus();
+	}
 }

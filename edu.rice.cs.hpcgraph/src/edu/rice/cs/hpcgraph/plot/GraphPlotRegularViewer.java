@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.graph;
+package edu.rice.cs.hpcgraph.plot;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -13,6 +13,9 @@ import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcgraph.GraphEditorInput;
+import edu.rice.cs.hpcgraph.internal.IGraphTranslator;
+import edu.rice.cs.hpcgraph.internal.IdentityGraphTranlator;
 
 
 /********************************************************************
@@ -46,7 +49,7 @@ public class GraphPlotRegularViewer extends AbstractGraphPlotViewer
 	
 	
 	@Override
-	protected int setupXAxis(GraphEditorInput input, ILineSeries scatterSeries) {
+	protected int setupXAxis(GraphEditorInput input, ILineSeries<?> scatterSeries) {
 		try {
 			Scope scope = input.getScope();
 			BaseMetric metric = input.getMetric();

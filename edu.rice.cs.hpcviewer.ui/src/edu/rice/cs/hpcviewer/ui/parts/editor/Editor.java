@@ -8,16 +8,18 @@ import java.nio.file.Path;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
+import org.slf4j.LoggerFactory;
+
+import edu.rice.cs.hpcbase.ui.AbstractUpperPart;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.source.FileSystemSourceFile;
 import edu.rice.cs.hpcdata.util.Util;
+import edu.rice.cs.hpcgraph.GraphEditorInput;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpcviewer.ui.dialogs.SearchDialog;
-import edu.rice.cs.hpcviewer.ui.graph.GraphEditorInput;
-import edu.rice.cs.hpcviewer.ui.internal.AbstractUpperPart;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
@@ -140,7 +142,7 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 	
 	private void find() {
 		SearchDialog searchDialog = new SearchDialog(getControl().getShell(), SWT.NONE);
-		searchDialog.setInput(Editor.this, dialogSettings);
+		searchDialog.setInput(this, dialogSettings);
 		searchDialog.open();
 	}
 	
@@ -285,6 +287,7 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 			document.addPosition(new Position(region.getOffset()));
 		} catch (BadLocationException e) {
 			// no need to catch?
+			LoggerFactory.getLogger(getClass()).warn(e.getMessage(), e);
 		}
 		
 		TextSelection selection = new TextSelection(document, region.getOffset(), region.getLength());
@@ -331,7 +334,7 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 			String filename = file.getCompleteFilename();
 			int lineNumber  = scope.getFirstLineNumber();
 
-			displayFile(scope, filename, lineNumber);
+			displayFile(filename, lineNumber);
 			
 			setToolTipText(filename);
 			
@@ -340,7 +343,7 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 			BaseExperiment experiment = (BaseExperiment) input;
 			String filename = experiment.getExperimentFile().getAbsolutePath();
 			
-			displayFile(experiment, filename, 0);
+			displayFile(filename, 0);
 			
 			setToolTipText(filename);
 		}
@@ -357,7 +360,7 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 	 * @param filename the complete path of the file name
 	 * @param lineNumber the line number to be revealed
 	 */
-	private void displayFile(Object obj, String filename, int lineNumber) {
+	private void displayFile(String filename, int lineNumber) {
 		IDocument document = new Document();
 		
 		AnnotationModel annModel = new AnnotationModel();
@@ -405,5 +408,12 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 			
 			textViewer.refresh();
 		}
+	}
+
+
+	@Override
+	public void setFocus() {
+		if (textViewer != null)
+			textViewer.getControl().setFocus();
 	}
 }

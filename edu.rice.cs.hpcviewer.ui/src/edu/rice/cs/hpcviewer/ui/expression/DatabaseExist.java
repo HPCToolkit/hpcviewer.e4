@@ -10,8 +10,8 @@ import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.services.IServiceConstants;
 
+import edu.rice.cs.hpcbase.ui.IProfilePart;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
-import edu.rice.cs.hpcviewer.ui.base.IProfilePart;
 
 public class DatabaseExist 
 {
