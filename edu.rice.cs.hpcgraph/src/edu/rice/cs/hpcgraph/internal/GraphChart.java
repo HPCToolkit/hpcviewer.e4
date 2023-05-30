@@ -81,7 +81,7 @@ public class GraphChart extends InteractiveChart implements MouseMoveListener, D
 			setTooltip(index, ySeries);
 			tooltip.show( new Point(e.x + 1, e.y + 1));
 		} else {
-			tooltip.setText(null);
+			tooltip.setText("");
 			displayMenu.setEnabled(false);
 		}
 	}
@@ -142,7 +142,7 @@ public class GraphChart extends InteractiveChart implements MouseMoveListener, D
 		}
 		int xDistance = 0;
 		int maxIndex = xIndex;
-		while(xDistance <= symSize*2 && maxIndex < xSeries.length) {
+		while(xDistance <= symSize && maxIndex < xSeries.length) {
 			var p = series.getPixelCoordinates(maxIndex);
 			xDistance = Math.abs(p.x - e.x);
 			

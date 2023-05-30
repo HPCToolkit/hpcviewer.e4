@@ -89,7 +89,7 @@ public class TopDownPart extends AbstractTableView
 
 					final MenuManager mgr = new MenuManager("graph");
 					
-					mgr.removeAll();
+					mgr.dispose();
 					mgr.createContextMenu(toolbar);
 					
 					var table = getTable();

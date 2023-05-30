@@ -108,5 +108,14 @@ public class GraphMenu
 			final var editor = profilePart.addEditor(input);
 			editor.setFocus();
 		}
+		
+		
+		/***
+		 * Free allocated resources
+		 */
+		public void dispose() {
+			if (input != null)
+				input.dispose();
+		}
     }
 }

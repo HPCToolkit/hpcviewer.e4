@@ -16,7 +16,7 @@ public class GraphEditorInput
 	private final BaseMetric metric;
 	private final String     graphType;
 	
-	private final IThreadDataCollection threadData;
+	private IThreadDataCollection threadData;
 	
 
 	/***
@@ -41,6 +41,15 @@ public class GraphEditorInput
 		this.metric = metric;
 	}
 	
+	
+	/***
+	 * Free attributes to allow GC to reclaim memories
+	 */
+	public void dispose() {
+		// fix issue memory leaks:
+		// we need to set this threadData to null
+		threadData = null;
+	}
 	
 	/**
 	 * @return the profilePart
