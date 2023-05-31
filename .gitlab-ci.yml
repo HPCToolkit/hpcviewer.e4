@@ -26,9 +26,6 @@ default:
     - runner_system_failure
 
 .maven:
-  # Any runner will do, Java is mostly-portable like that
-  tags: [docker]
-
   # Settings to cache Maven downloads
   before_script:
   - mkdir -p .m2-repository/ && rm -rf ~/.m2/repository
@@ -57,47 +54,37 @@ default:
 # Check that the pre-commit hooks pass
 precommit:
   stage: lint
+  image: docker.io/python:3.10-bullseye
   needs: []
-  tags: [docker, linux/amd64]
-  image: registry.gitlab.com/hpctoolkit/ci-images/selfcheck:amd64
-  cache:
-    key: precommit
-    paths:
-    - .pc-cache/
+  before_script:
+  - python3 -m pip install pre-commit
   script:
-  - mkdir -p .pc-cache/ ~/.cache/
-  - ln -s $(realpath .pc-cache/) ~/.cache/pre-commit
-  - pre-commit run --all-files || { git diff | tee fixup.patch && exit 1; }
-  artifacts:
-    paths:
-    - fixup.patch
+  - pre-commit run --all-files --show-diff-on-failure
 
 secret_detection:
   stage: lint
   needs: []
-  tags: [docker, linux/amd64]
+  tags: [saas-linux-small-amd64]
   rules:
   - when: always
 
 # Run all the tests within the Viewer and make sure everything passes
-test:
+test amd64:
   extends: .maven-apt
   stage: test
   image: docker.io/maven:3.8-ibm-semeru-$JDK-focal
-  tags: [docker, linux/$ARCH]
+  tags: [saas-linux-small-amd64]
   parallel:
     matrix:
-    - ARCH: [amd64, arm64]
-      JDK: ['11', '17']
+    - JDK: ['11', '17']
       WM: [metacity]
   dependencies: []
 
   # A running X server is required for tests to complete, we use Xvfb
   services:
-  - name: registry.gitlab.com/hpctoolkit/ci-images/windowmanager:$ARCH
+  - name: registry.gitlab.com/hpctoolkit/x11-wm-docker:v1
     alias: wm
   variables:
-    ARCH: amd64
     DISPLAY: 'wm:99'
   script:
   - apt_install python3 libswt-gtk-4-jni
@@ -123,6 +110,9 @@ test:
       coverage_report:
         coverage_format: cobertura
         path: coverage.xml
+test arm64:
+  extends: test amd64
+  tags: [rice-linux-small-arm64]
 
 # Build the Viewer and package the results for usage by users
 build:
@@ -155,7 +145,6 @@ pmd:
   extends: .maven-apt
   stage: lint
   image: docker.io/maven:3.8-eclipse-temurin-11-focal
-  tags: [docker, linux/amd64]
   needs: []
 
   allow_failure:
@@ -193,7 +182,6 @@ pmd:
 check deploy:
   stage: lint
   image: docker.io/alpine
-  tags: [docker]
   needs: [build]
 
   script:
@@ -215,7 +203,6 @@ check deploy:
 deploy:
   stage: deploy
   image: docker.io/alpine
-  tags: [docker]
   dependencies: [build]
 
   variables:
