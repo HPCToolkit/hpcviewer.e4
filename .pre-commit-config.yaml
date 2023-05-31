@@ -43,6 +43,9 @@ repos:
   # - id: check-executables-have-shebangs
   # Ensure large files (>=500KB) are never added outside of LFS
   - id: check-added-large-files
+  # Reminder to always work in a branch separate from main
+  - id: no-commit-to-branch
+    args: [--branch, main]
 
 - repo: https://github.com/Yelp/detect-secrets
   rev: v1.3.0
