@@ -103,7 +103,12 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 	 */
 	public void setInput(FilterInputData<BaseMetric> inputData) { 
 		// first, remove the listener to the old metric manager
-		input.getMetricManager().removeMetricListener(this);
+		var metricManager = input.getMetricManager();
+		
+		// fix issue #321: some time the metric manager is null because it's the 
+		// thread view is closed by the user
+		if (metricManager != null)
+			metricManager.removeMetricListener(this);
 
 		// then register to listen to this manager
 		input = (MetricFilterInput) inputData;
@@ -231,7 +236,7 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 	 */
 	private void update(BaseMetric metric) {
 		Optional<FilterDataItem<BaseMetric>> mfdi = getEventList().stream()
-												.filter( item -> (item.data).getIndex() == metric.getIndex() )
+												.filter( item -> item.data.getIndex() == metric.getIndex() )
 												.findFirst();
 		if (mfdi.isEmpty())
 			return;
