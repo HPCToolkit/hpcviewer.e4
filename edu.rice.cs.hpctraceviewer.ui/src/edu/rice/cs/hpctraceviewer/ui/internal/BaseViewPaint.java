@@ -40,7 +40,7 @@ import edu.rice.cs.hpctraceviewer.ui.base.ISpaceTimeCanvas;
 public abstract class BaseViewPaint extends Job
 {
 
-	final protected ISpaceTimeCanvas canvas;
+	protected final ISpaceTimeCanvas canvas;
 	private Map<Future<Integer>, BaseTimelineThread> mapFutureToTask;
 
 	protected boolean changedBounds;

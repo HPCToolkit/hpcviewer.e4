@@ -3,7 +3,9 @@ edu.rice.cs.hpcdata/bin/
 edu.rice.cs.hpcfilter/bin/
 edu.rice.cs.hpcremote/bin/
 edu.rice.cs.hpcbase/bin/
+edu.rice.cs.hpctraceviewer.config/bin
 edu.rice.cs.hpctraceviewer.data/bin/
 edu.rice.cs.hpctraceviewer.ui/bin/
+edu.rice.cs.hpctree/bin
 edu.rice.cs.hpcviewer.ui/bin/
 externals/graphbuilder/bin/

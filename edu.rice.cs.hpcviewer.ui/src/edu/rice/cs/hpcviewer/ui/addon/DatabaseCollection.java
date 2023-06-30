@@ -125,14 +125,18 @@ public class DatabaseCollection
 			if (arg.charAt(0) != '-')
 				path = arg;
 		}
-		String filename = checkExistance(application.getSelectedElement(), shell, path);
-		if (filename == null)
-			return; 
-		
-		// On Linux TWM window manager, the window may not be ready yet.
-		sync.asyncExec(()-> {
-			openDatabaseAndCreateViews(application, modelService, partService, shell, filename);
-		});
+		try {
+			String filename = checkExistance(application.getSelectedElement(), shell, path);
+			if (filename == null)
+				return; 
+			
+			// On Linux TWM window manager, the window may not be ready yet.
+			sync.asyncExec(()-> {
+				openDatabaseAndCreateViews(application, modelService, partService, shell, filename);
+			});
+		} catch (Exception e) {
+			MessageDialog.openError(shell, "Error opening the database", path + ":\n\n" + e.getLocalizedMessage());
+		}
 	}
 	
 
@@ -483,7 +487,7 @@ public class DatabaseCollection
 		} else {
 			if (Files.isRegularFile(Paths.get(fileOrDirectory))) {
 				filename = fileOrDirectory;
-			} else {
+			} else if (ExperimentManager.checkDirectory(fileOrDirectory)) {
 				var filepath = DatabaseManager.getDatabaseFilePath(fileOrDirectory);
 				if (filepath.isEmpty()) {
 					String files = DatabaseManager.getDatabaseFilenames(java.util.Optional.empty());

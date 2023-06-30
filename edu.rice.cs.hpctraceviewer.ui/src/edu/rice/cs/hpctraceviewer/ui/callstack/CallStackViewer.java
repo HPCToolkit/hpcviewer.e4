@@ -127,6 +127,7 @@ public class CallStackViewer extends AbstractBaseTableViewer
 				return FontManager.getFontGeneric();
 			}
 			
+        	@Override
         	public String getText(Object element)
         	{
         		if (element instanceof String)
@@ -134,6 +135,7 @@ public class CallStackViewer extends AbstractBaseTableViewer
         		return null;
         	}
         	
+        	@Override
         	public String getToolTipText(Object element)
         	{
         		final String originalText = getText(element);
@@ -141,6 +143,7 @@ public class CallStackViewer extends AbstractBaseTableViewer
         		return StringUtil.wrapScopeName(originalText, 100);
         	}
         	
+        	@Override
         	public int getToolTipDisplayDelayTime(Object object)
         	{
         		return Constants.TOOLTIP_DELAY_MS;

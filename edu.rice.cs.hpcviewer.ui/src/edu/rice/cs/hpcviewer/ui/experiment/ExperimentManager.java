@@ -83,7 +83,7 @@ public class ExperimentManager
 	public String openFileExperiment(Shell shell) throws Exception {
 		File []files = getDatabaseFileList(shell, 
 				"Select a directory containing a profiling database.");
-		if(files != null) {
+		if(files != null && files.length > 0) {
 			return getFileExperimentFromListOfFiles(files);
 		}
 		return null;
@@ -111,10 +111,8 @@ public class ExperimentManager
 				// Since rel 5.x, the name of database is experiment.xml
 				// there is no need to maintain compatibility with hpctoolkit prior 5.x 
 				// 	where the name of database is config.xml
-				if (DatabaseManager.isDatabaseFile(objFile.getName())) {
-					if (objFile.canRead())
-						return objFile.getAbsolutePath();
-					
+				if (DatabaseManager.isDatabaseFile(objFile.getName()) &&  (objFile.canRead())) {
+					return objFile.getAbsolutePath();
 				}
 			}
 			throw new Exception("Cannot find experiment.xml in the directory");
@@ -125,7 +123,8 @@ public class ExperimentManager
 				"A database directory must contain at least one XML file which contains profiling information.");
 	}
 	
-	private boolean checkDirectory(String path) throws Exception {
+	
+	public static boolean checkDirectory(String path) throws IllegalArgumentException {
 		if (path == null) {
 			return false;
 		}
@@ -133,7 +132,7 @@ public class ExperimentManager
 		FilenameFilter filter = new Util.FileHpcrunFilter();
 		File []hpcrunFiles = dir.listFiles(filter);
 		if (hpcrunFiles != null && hpcrunFiles.length>0) {
-			throw new Exception( "The folder is a measurement direcory.\n" +
+			throw new IllegalArgumentException( "The folder is a measurement direcory.\n" +
 							     "You need to run hpcprof to generate a database");
 		}
 		return true;
@@ -148,7 +147,7 @@ public class ExperimentManager
 		// find XML files in this directory
 		File directory = new File(sPath);
 		// for debugging purpose, let have separate variable
-		File dbFiles[] = directory.listFiles(new DatabaseFileFilter());
+		File[] dbFiles = directory.listFiles(new DatabaseFileFilter());
 
 		// store the current path in the preference
 		ViewerPreferenceManager.setLastPath(sPath);
