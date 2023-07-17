@@ -31,19 +31,20 @@ import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 public abstract class BaseTimelineThread implements Callable<Integer> {
 
 	/**The minimum height the samples need to be in order to paint the white separator lines.*/
-	final static public byte MIN_HEIGHT_FOR_SEPARATOR_LINES = 15;
+	public static final byte MIN_HEIGHT_FOR_SEPARATOR_LINES = 15;
 
 	/**The SpaceTimeData that this thread gets its files from and adds it data and images to.*/
-	final protected SpaceTimeDataController stData;
+	protected final SpaceTimeDataController stData;
 	
 	/**The scale in the y-direction of pixels to processors (for the drawing of the images).*/
-	final private double scaleY;	
-	final private Queue<TimelineDataSet> queue;
-	final private AtomicInteger currentLine;
-	final protected IProgressMonitor monitor;
-	final protected Map<Integer, List<?>> mapInvalidData;
+	private final double scaleY;	
+	private final Queue<TimelineDataSet> queue;
+	private final AtomicInteger currentLine;
+	protected final IProgressMonitor monitor;
+	protected final Map<Integer, List<?>> mapInvalidData;
 
-	public BaseTimelineThread( SpaceTimeDataController stData,
+
+	protected BaseTimelineThread( SpaceTimeDataController stData,
 							   double scaleY, 
 							   Queue<TimelineDataSet> queue, 
 							   AtomicInteger currentLine, 
@@ -55,7 +56,7 @@ public abstract class BaseTimelineThread implements Callable<Integer> {
 		this.currentLine   = currentLine;
 		this.monitor 	   = monitor;
 		
-		mapInvalidData = new HashMap<Integer, List<?>>();
+		mapInvalidData = new HashMap<>();
 	}
 	
 	@Override
@@ -110,7 +111,6 @@ public abstract class BaseTimelineThread implements Callable<Integer> {
 				// empty trace, we need to notify the BasePaintThread class
 				// of this anomaly by adding NullTimeline
 				queue.add(TimelineDataSet.NULLTimeline);
-				//System.out.println("init incorrect at " + trace.line());
 			}
 			if (monitor.isCanceled())
 				return null;
@@ -122,7 +122,7 @@ public abstract class BaseTimelineThread implements Callable<Integer> {
 			// ---------------------------------
 			// finalize
 			// ---------------------------------
-			finalize();
+			finalizeTraceCollection();
 		}
 		return Integer.valueOf(num_invalid_samples);
 	}
@@ -141,7 +141,7 @@ public abstract class BaseTimelineThread implements Callable<Integer> {
 	 * 
 	 * @return the height of process 1
 	 */
-	static public int getRenderingHeight(double scaleY, int line1, int line2) {
+	public static int getRenderingHeight(double scaleY, int line1, int line2) {
 		
 		// this height computation causes inconsistency between different lines
 		// we need to find a better way, more deterministic and consistent
@@ -162,11 +162,11 @@ public abstract class BaseTimelineThread implements Callable<Integer> {
 	 * 
 	 * @return
 	 ****/
-	abstract protected ProcessTimeline getNextTrace(AtomicInteger currentLine);
+	protected abstract ProcessTimeline getNextTrace(AtomicInteger currentLine);
 	
-	abstract protected boolean init(ProcessTimeline trace) throws IOException;
+	protected abstract boolean init(ProcessTimeline trace) throws IOException;
 	
-	abstract protected void finalize();
+	protected abstract void finalizeTraceCollection();
 	
-	abstract protected DataPreparation getData( DataLinePainting data);
+	protected abstract DataPreparation getData( DataLinePainting data);
 }

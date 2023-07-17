@@ -26,15 +26,16 @@ import edu.rice.cs.hpctraceviewer.data.TimelineDataSet;
  *****************************************************************/
 public abstract class BasePaintThread implements Callable<List<ImagePosition>> 
 {
-	final protected int width;
-	final private IProgressMonitor monitor;
+	protected final int width;
+	private final IProgressMonitor monitor;
 
-	final private Queue<TimelineDataSet> list;
-	final private List<ImagePosition> listOfImages;
-	final private int numberOfTotalLines;
+	private final Queue<TimelineDataSet> list;
+	private final List<ImagePosition> listOfImages;
+	private final int numberOfTotalLines;
 	
-	final protected SpaceTimeDataController stData;
-	final private AtomicInteger numDataCollected, currentPaint;
+	protected final SpaceTimeDataController stData;
+	private final AtomicInteger numDataCollected;
+	private final AtomicInteger currentPaint;
 	
 	/****
 	 * constructor of the class, requiring a queue of list of data (per line) to be
@@ -52,7 +53,7 @@ public abstract class BasePaintThread implements Callable<List<ImagePosition>>
 	 * @param width : the width of the view
 	 * @param monitor progress monitor
 	 */
-	public BasePaintThread( SpaceTimeDataController stData, Queue<TimelineDataSet> list, 
+	protected BasePaintThread( SpaceTimeDataController stData, Queue<TimelineDataSet> list, 
 			int numberOfTotalLines, AtomicInteger dataCollected, AtomicInteger currentPaint,
 			int width, IProgressMonitor monitor) {
 		
@@ -65,7 +66,7 @@ public abstract class BasePaintThread implements Callable<List<ImagePosition>>
 		this.numberOfTotalLines = numberOfTotalLines;
 		this.numDataCollected 	= dataCollected;
 		this.currentPaint		= currentPaint;
-		listOfImages = new ArrayList<ImagePosition>(list.size());
+		listOfImages = new ArrayList<>(list.size());
 	}
 	
 	@Override
@@ -147,7 +148,7 @@ public abstract class BasePaintThread implements Callable<List<ImagePosition>>
 	 * @param width : the width of the image
 	 * @param height : the height of the image
 	 */
-	abstract protected void initPaint(/*Device device, */int width, int height);
+	protected abstract void initPaint(/*Device device, */int width, int height);
 	
 	/*****
 	 * the actual method to paint a trace image
@@ -156,7 +157,7 @@ public abstract class BasePaintThread implements Callable<List<ImagePosition>>
 	 * @param data : the data to be painted
 	 * @param height : the height of the image
 	 */
-	abstract protected void paint(int position, BaseDataVisualization data, int height);
+	protected abstract void paint(int position, BaseDataVisualization data, int height);
 	
 	/********
 	 * Finalizing the image. 
@@ -164,13 +165,13 @@ public abstract class BasePaintThread implements Callable<List<ImagePosition>>
 	 * @param linenum : the position of the line number of the image
 	 * @return
 	 */
-	abstract protected ImagePosition finalizePaint(int linenum);
+	protected abstract ImagePosition finalizePaint(int linenum);
 	
 	
 	/****
 	 * Free allocated resources. To be called by the end of the sessionS
 	 */
-	abstract public void dispose();
+	public abstract void dispose();
 	
 	/***
 	 * basic method to paint on a gc

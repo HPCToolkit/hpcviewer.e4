@@ -9,10 +9,10 @@ import org.eclipse.swt.graphics.Color;
  *
  *******************************************************/
 public class BaseDataVisualization {
-	final public int x_start;
-	final public int x_end;
-	final public Color color;
-	final public int depth;
+	public final int x_start;
+	public final int x_end;
+	public final Color color;
+	public final int depth;
 
 	public BaseDataVisualization(int x_start, int x_end, int depth, Color color) {
 		

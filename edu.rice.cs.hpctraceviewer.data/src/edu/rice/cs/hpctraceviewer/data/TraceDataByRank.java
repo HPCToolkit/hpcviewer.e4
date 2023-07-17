@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 
+import org.slf4j.LoggerFactory;
+
 import edu.rice.cs.hpcdata.db.version4.DataRecord;
 import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
@@ -171,6 +173,7 @@ public class TraceDataByRank implements ITraceDataCollector
 
 		final int last_index = listcpid.size() - 1;
 		if(sample>last_index) {
+			LoggerFactory.getLogger(getClass()).error("Invalid sample Index: %d", sample);
 			// laks 2015.05.19 : I think we should throw exception here 
 			// 					 instead of forcing ourself to give a result
 			return listcpid.get(last_index-1).timestamp;
@@ -198,7 +201,15 @@ public class TraceDataByRank implements ITraceDataCollector
 		for(int i = 0; i<listcpid.size(); i++)
 		{
 			DataRecord timecpid = listcpid.get(i);
+			if (timecpid.timestamp < lowestStartingTime) {
+				LoggerFactory.getLogger(getClass()).error(rank + ". Trace time " 
+															   + timecpid.timestamp 
+															   + " is smaller than the begin time" 
+															   + lowestStartingTime);
+				continue;
+			}
 			timecpid.timestamp = timecpid.timestamp - lowestStartingTime;
+			
 			listcpid.set(i,timecpid);
 		}
 	}
@@ -236,7 +247,7 @@ public class TraceDataByRank implements ITraceDataCollector
 		
 		while( low != mid )
 		{
-			final long time_current = (usingMidpoint ? getTimeMidPoint(mid,mid+1) : listcpid.get(mid).timestamp);
+			final long time_current = usingMidpoint ? getTimeMidPoint(mid,mid+1) : listcpid.get(mid).timestamp;
 			
 			if (time > time_current)
 				low = mid;
@@ -261,7 +272,7 @@ public class TraceDataByRank implements ITraceDataCollector
 			var last  = listcpid.get(listcpid.size()-1);
 			var first = listcpid.get(0);
 			var timePerPixel = (last.timestamp - first.timestamp)/numPixelH;
-			var dtime = (r.timestamp - l.timestamp);
+			var dtime = r.timestamp - l.timestamp;
 			float dFraction = (float) dtime/timePerPixel;
 			
 			if (dFraction < NUM_PIXELS_TOLERATED && !isIdle(r.cpId))
@@ -340,25 +351,24 @@ public class TraceDataByRank implements ITraceDataCollector
 		// we need to check if the current sample is an "idle" activity or not.
 		// if this is the case, we look at the right and if it isn't idle, we'll use
 		// this sample instead.
-		if (option == TraceOption.REVEAL_GPU_TRACE) {
-			if (isIdle(nextData.cpId)) {	
-				// if this sample is idle, check if the next sample is also idle or not
-				// (mostly not idle). If the next sample is NOT idle and within a range
-				// let's move to the next sample instead
-				long rightLoc = loc + data.getRecordSize();
-				final var rightData = getData(rightLoc);
-				if (!isIdle(rightData.cpId)) {
-					
-					// make sure the next non-idle samples are within the tolerated number of pixels
-					// if the next sample is too far, we just skip it and accept the "idle" sample.
-					var dTime = (rightData.timestamp - nextData.timestamp) / pixelLength < NUM_PIXELS_TOLERATED;
-					if (dTime) {
-						loc = rightLoc;
-						nextData.cpId = rightData.cpId;
-						nextData.timestamp = rightData.timestamp;
-					}
+		if (option == TraceOption.REVEAL_GPU_TRACE && isIdle(nextData.cpId)) {	
+			// if this sample is idle, check if the next sample is also idle or not
+			// (mostly not idle). If the next sample is NOT idle and within a range
+			// let's move to the next sample instead
+			long rightLoc = loc + data.getRecordSize();
+			final var rightData = getData(rightLoc);
+			if (!isIdle(rightData.cpId)) {
+
+				// make sure the next non-idle samples are within the tolerated number of pixels
+				// if the next sample is too far, we just skip it and accept the "idle" sample.
+				var dTime = (rightData.timestamp - nextData.timestamp) / pixelLength < NUM_PIXELS_TOLERATED;
+				if (dTime) {
+					loc = rightLoc;
+					nextData.cpId = rightData.cpId;
+					nextData.timestamp = rightData.timestamp;
 				}
 			}
+
 		}
 		
 		addSample(minIndex, nextData);
@@ -366,7 +376,7 @@ public class TraceDataByRank implements ITraceDataCollector
 		int addedLeft  = sampleTimeLine(minLoc, loc, startPixel, midPixel, minIndex, pixelLength, startingTime);
 		int addedRight = sampleTimeLine(loc, maxLoc, midPixel, endPixel, minIndex+addedLeft+1, pixelLength, startingTime);
 		
-		return (addedLeft+addedRight+1);
+		return addedLeft+addedRight+1;
 	}
 	
 	/*********************************************************************************
@@ -399,7 +409,7 @@ public class TraceDataByRank implements ITraceDataCollector
 			if (time <= mtime) {
 				predicted_index = Math.max((long) ((time - left_time) / rate) + left_index, left_index);
 			} else {
-				predicted_index = Math.min((right_index - (long) ((right_time - time) / rate)), right_index); 
+				predicted_index = Math.min(right_index - (long) ((right_time - time) / rate), right_index); 
 			}
 			
 			// adjust predicted_index so that it differs from the endpoints.
@@ -421,9 +431,7 @@ public class TraceDataByRank implements ITraceDataCollector
 			}
 		}
 
-		long left_offset = getAbsoluteLocation(left_index);
-
-		return left_offset;
+		return getAbsoluteLocation(left_index);
 	}
 	
 	private long getAbsoluteLocation(long relativePosition)
@@ -439,7 +447,7 @@ public class TraceDataByRank implements ITraceDataCollector
 	
 	/**Adds a sample to times and timeLine.*/
 	private void addSample( int index, DataRecord datacpid)
-	{		
+	{
 		if (index == listcpid.size())
 		{
 			this.listcpid.add(datacpid);
@@ -472,13 +480,11 @@ public class TraceDataByRank implements ITraceDataCollector
 	 ********************************************************************************************/
 	private void postProcess()
 	{
-		int len = listcpid.size();
-		for(int i = 0; i < len-2; i++)
+		for(int i = 0; i < listcpid.size()-2; i++)
 		{
-			while(i < len-1 && listcpid.get(i).timestamp==(listcpid.get(i+1).timestamp))
+			while(i < listcpid.size()-1 && listcpid.get(i).timestamp==(listcpid.get(i+1).timestamp))
 			{
 				listcpid.remove(i+1);
-				len--;
 			}
 		}
 	}

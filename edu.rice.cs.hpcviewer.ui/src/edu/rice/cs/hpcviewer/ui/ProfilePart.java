@@ -316,7 +316,9 @@ public class ProfilePart implements IProfilePart, EventHandler
 		// On Mac and Linux, we need to use asyncExec to delay the focus since
 		// the UI thread may not be ready when the focus arrives.
 		sync.asyncExec(() -> {
-			if (!tabFolderBottom.isDisposed()) {
+			// fix issue #329: sometimes tabFolderBottom can be null if the database
+			// has already been closed.
+			if (tabFolderBottom != null && !tabFolderBottom.isDisposed()) {
 				// setting the focus here will cause flickering when splitting the window
 				// if the part activation is done synchronously
 				// if it's done asynchronously, we're fine.

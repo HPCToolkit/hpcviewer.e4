@@ -5,15 +5,15 @@ import java.util.List;
 
 public class TimelineDataSet 
 {
-	final static public TimelineDataSet NULLTimeline = new TimelineDataSet(-1, 0, 0);
+	public static final TimelineDataSet NULLTimeline = new TimelineDataSet(-1, 0, 0);
 
-	final private List<BaseDataVisualization> list;
-	final private int height;
-	final private int linenum;
+	private final List<BaseDataVisualization> list;
+	private final int height;
+	private final int linenum;
 	
 	public TimelineDataSet( int linenum, int initSize, int height ) {
 	 	
-		list = new ArrayList<BaseDataVisualization>(initSize);
+		list = new ArrayList<>(initSize);
 	 	this.height = height; 
 	 	this.linenum = linenum;
 	}
@@ -35,7 +35,7 @@ public class TimelineDataSet
 	}
 	
 	public String toString() {
-		StringBuffer buffer = new StringBuffer();
+		var buffer = new StringBuilder();
 		for(BaseDataVisualization dv: list) {
 			buffer.append("(" + dv.x_start + "-" + dv.x_end + ", " + dv.color + ") ");
 		}

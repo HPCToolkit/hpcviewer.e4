@@ -83,7 +83,8 @@ public class TimelineDepthThread
 	}
 
 	@Override
-	protected void finalize() {
+	protected void finalizeTraceCollection() {
+		// no op
 	}
 
 	@Override
