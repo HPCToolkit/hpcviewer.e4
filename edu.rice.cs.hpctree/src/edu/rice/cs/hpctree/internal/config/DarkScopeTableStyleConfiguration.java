@@ -34,6 +34,7 @@ public class DarkScopeTableStyleConfiguration extends DarkThemeConfiguration
 		return separatorColor;
 	}
 	
+	@Override
 	protected Integer getFreezeSeparatorWidth() {
 		return 2;
 	}

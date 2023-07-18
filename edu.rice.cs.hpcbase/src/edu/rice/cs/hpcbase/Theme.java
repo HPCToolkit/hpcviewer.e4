@@ -1,9 +1,5 @@
 package edu.rice.cs.hpcbase;
 
-import org.eclipse.swt.widgets.Display;
-
-import edu.rice.cs.hpcdata.util.OSValidator;
-
 public class Theme 
 {
 	private Theme() {
@@ -11,9 +7,9 @@ public class Theme
 	}
 	
 	public static boolean isDarkThemeActive() {
-		if (OSValidator.isMac())
-			return false;
-		
-		return Display.isSystemDarkTheme();
+		// It's better to not support Dark theme at the moment
+		// until we have a better solution to have Eclipse/SWT
+		// for dark theme, especially on Linux
+		return false;
 	}
 }
