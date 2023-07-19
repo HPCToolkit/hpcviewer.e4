@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Hpcclient
+Bundle-SymbolicName: edu.rice.cs.hpcclient
+Bundle-Version: 1.0.0
+Bundle-ClassPath: hpcclient-1.0.0-SNAPSHOT-jar-with-dependencies.jar
+Bundle-Vendor: Rice University
+Export-Package: io.vavr,
+ io.vavr.collection,
+ io.vavr.concurrent,
+ io.vavr.control,
+ io.vavr.match.annotation,
+ org.hpctoolkit.hpcclient.v1_0,
+ org.hpctoolkit.hpcclient.v1_x,
+ org.json
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Automatic-Module-Name: hpcclient
