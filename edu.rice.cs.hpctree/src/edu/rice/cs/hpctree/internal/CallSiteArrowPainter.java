@@ -89,10 +89,8 @@ public class CallSiteArrowPainter extends BackgroundPainter
     	Color color = ColorManager.COLOR_ARROW_ACTIVE;
         Color originalBackground = gc.getBackground();
         final boolean isDisabled = isDisabled(cell);
-    	if (isDisabled) {
-    		color = ColorManager.getTextFg(originalBackground);
-    	}
-    	Font oldFont = gc.getFont();        
+
+        Font oldFont = gc.getFont();        
         Font font = FontManager.getFontGeneric();
         gc.setFont(font);
     	
@@ -102,6 +100,9 @@ public class CallSiteArrowPainter extends BackgroundPainter
         if (backgroundColor != null) {
             gc.setBackground(backgroundColor);
         }
+    	if (isDisabled) {
+    		color = ColorManager.getTextFg(backgroundColor);
+    	}
         
         int fontHeight = gc.getFontMetrics().getHeight();
         int deltaY = (bounds.height - fontHeight) / 2;
@@ -112,12 +113,12 @@ public class CallSiteArrowPainter extends BackgroundPainter
 
     	String lineNum = getCallsiteText(cell);
     	if (!lineNum.equals(EMPTY)) {
-    		var textColor = ColorManager.getTextFg(originalBackground);
+    		var textColor = ColorManager.getTextFg(backgroundColor);
         	var displayMode = cell.getDisplayMode();
 
         	// Fix issue #134: do not change the active color if we are in the select mode
         	if (!isDisabled && displayMode != DisplayMode.SELECT) {
-        		textColor = ViewerColorManager.getActiveColor(originalBackground);
+        		textColor = ViewerColorManager.getActiveColor(backgroundColor);
         	}
         	gc.setForeground(textColor);
         	gc.drawText(lineNum, bounds.x + PADDING, bounds.y + deltaY);
