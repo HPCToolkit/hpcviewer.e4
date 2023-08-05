@@ -49,7 +49,8 @@ public class ProcessTimelineService
 			return;
 		
 		for(var trace: traces) {
-			trace.dispose();
+			if (trace != null)
+				trace.dispose();
 		}
 		traces = null;
 	}
