@@ -139,7 +139,6 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 
 		if (!(r1.height == r2.height && r1.width == r2.width)) {
 			rebuffer(detailData);
-			return;
 		}
 	}
 
@@ -175,11 +174,11 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 		buffer.setBackground(ColorManager.COLOR_WHITE);
 		buffer.fillRectangle(0, 0, viewWidth, viewHeight);
 
-		float width  = detailData.width / zoomFactor;
-		float height = detailData.height / zoomFactor;
+		float width  = (float) detailData.width / zoomFactor;
+		float height = (float) detailData.height / zoomFactor;
 
-		float yScale = (float) viewHeight / height;
-		float xScale = ((float) viewWidth / width);
+		float yScale = viewHeight / height;
+		float xScale = viewWidth / width;
 
 		int xOffset = 0;
 		
@@ -201,7 +200,7 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 			// use tree map to sort the key of color map
 			// without sort, it can be confusing
 			// ---------------------------------------------------------------------------
-			TreeMap<Integer, Integer> mapPixelToCount  = new TreeMap<Integer, Integer>();
+			TreeMap<Integer, Integer> mapPixelToCount  = new TreeMap<>();
 			
 			// ------------------------------------------------------------------------
 			// Analysis plugin				
