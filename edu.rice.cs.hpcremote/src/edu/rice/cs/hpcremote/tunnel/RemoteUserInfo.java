@@ -1,13 +1,14 @@
 package edu.rice.cs.hpcremote.tunnel;
 
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -26,10 +27,11 @@ import edu.rice.cs.hpcremote.ui.PasswordDialog;
 public class RemoteUserInfo 
 implements UserInfo, UIKeyboardInteractive
 {
-	final private Shell shell;
+	private final Shell shell;
 
 	private String password;
-	private String user, hostname;
+	private String user;
+	private String hostname;
 	private int port;
 	
 	public RemoteUserInfo(Shell shell)
@@ -54,7 +56,7 @@ implements UserInfo, UIKeyboardInteractive
 		PasswordDialog dialog = new PasswordDialog(shell, "Input password for " + hostname + ":" + port,
 				"password for user " + user, null, null);
 		
-		boolean ret =  dialog.open() == Dialog.OK;
+		boolean ret =  dialog.open() == Window.OK;
 		
 		if (ret)
 			password = dialog.getValue();
@@ -69,12 +71,12 @@ implements UserInfo, UIKeyboardInteractive
 
 	@Override
 	public boolean promptPassphrase(String message) {
-		return false;
+		return promptPassword(message);
 	}
 
 	@Override
 	public String getPassphrase() {
-		return null;
+		return getPassword();
 	}
 
 	@Override
@@ -93,13 +95,28 @@ implements UserInfo, UIKeyboardInteractive
 			String instruction, String[] prompt, boolean[] echo) 
 	{
 		KeyboardInteractiveDialog dlg = new KeyboardInteractiveDialog(shell, destination, name, instruction, prompt);
-		if (dlg.open() == Dialog.OK)
+		if (dlg.open() == Window.OK)
 		{
 			return dlg.inputs;
 		}
-		return null;
+		return new String[0];
 	}			
 
+	
+	/********************************************************************
+	 * Unit test
+	 * 
+	 * @param argv
+	 ********************************************************************/
+	public static void main(String []argv) {
+		Shell shell = new Shell(Display.getDefault());
+		RemoteUserInfo rui = new RemoteUserInfo(shell);
+		rui.setInfo("user", "hostname", 0);
+		rui.promptPassword("message: ");
+		rui.promptPassphrase("passphrase: ");
+		rui.promptKeyboardInteractive("destination", "name", "instruction", new String[] {"user", "password"}, new boolean[] {true, false});
+	}
+	
 	/********************************************************************
 	 * 
 	 * dialog class for communicating with keyboard interactive style SSH
@@ -108,9 +125,11 @@ implements UserInfo, UIKeyboardInteractive
 	 * keyboard interactive SSH, it doesn't work with traditional SSH client.
 	 *
 	 ********************************************************************/
-	static private class KeyboardInteractiveDialog extends TitleAreaDialog
+	private static class KeyboardInteractiveDialog extends TitleAreaDialog
 	{
-		private final String destination, name, instruction;
+		private final String destination;
+		private final String name;
+		private final String instruction;
 		private final String []prompts;
 		private Text []answers;
 		
