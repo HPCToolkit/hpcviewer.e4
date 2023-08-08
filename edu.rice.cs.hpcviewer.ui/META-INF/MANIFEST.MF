@@ -47,7 +47,8 @@ Require-Bundle: edu.rice.cs.hpcdata,
  edu.rice.cs.hpcdata.merge,
  edu.rice.cs.hpcgraph,
  org.eclipse.swtchart,
- org.eclipse.swtchart.extensions
+ org.eclipse.swtchart.extensions,
+ edu.rice.cs.hpcclient
 Bundle-ActivationPolicy: lazy
 Provide-Capability: licensing.feature;licensing.feature="edu.rice.cs.hpcviewer.ui.product"
 Automatic-Module-Name: edu.rice.cs.hpcviewer.ui

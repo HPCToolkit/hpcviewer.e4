@@ -216,6 +216,7 @@ public class ScopeTreeData extends ScopeTreePath implements IScopeTreeData
 		
 
 	
+	@Override
 	protected boolean isRootScope(Scope scope) {
 		return (scope == null) || 
 			   (scope instanceof RootScope) || 
