@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Hpcclient
-Bundle-SymbolicName: edu.rice.cs.hpcclient
+Bundle-SymbolicName: edu.rice.cs.hpcclient;singleton:=true
 Bundle-Version: 1.0.0
 Bundle-ClassPath: hpcclient-1.0.0-SNAPSHOT-jar-with-dependencies.jar
 Bundle-Vendor: Rice University
@@ -13,5 +13,11 @@ Export-Package: io.vavr,
  org.hpctoolkit.hpcclient.v1_0,
  org.hpctoolkit.hpcclient.v1_x,
  org.json
+Require-Bundle: org.eclipse.e4.ui.model.workbench;bundle-version="2.1.1000.v20210111-0958",
+ org.eclipse.e4.core.di,
+ org.eclipse.e4.ui.services,
+ org.eclipse.swt,
+ org.eclipse.jface
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Automatic-Module-Name: hpcclient
+Import-Package: javax.inject;version="1.0.0"
