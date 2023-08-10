@@ -25,9 +25,14 @@ import org.eclipse.swt.widgets.Text;
 import org.hpctoolkit.hpcclient.v1_0.HpcClient;
 import org.hpctoolkit.hpcclient.v1_0.HpcClientJavaNetHttp;
 
+import edu.rice.cs.hpcbase.map.UserInputHistory;
+
 public class ConnectionDialog extends TitleAreaDialog 
 {
 	private static final String EMPTY = "";
+	
+	private static final String HISTORY_KEY_HOST = "hpcremote.host";
+	private static final String HISTORY_KEY_PORT = "hpcremote.port";
 	
 	private Button flagEnableTunnel;
 	
@@ -66,6 +71,10 @@ public class ConnectionDialog extends TitleAreaDialog
 		textHost.setText(EMPTY);
 		textHost.setToolTipText("Please enter the remote host name or its IP address as provided by hpcserver output");
 		
+		fillAndSetComboWithHistory(textHost, HISTORY_KEY_HOST);
+		
+		textHost.addModifyListener(e -> textPort.setEnabled(true));
+
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(textHost);
 		
 		var labelPort = new Label(container, SWT.LEFT);
@@ -74,9 +83,11 @@ public class ConnectionDialog extends TitleAreaDialog
 		textPort = new Combo(container, SWT.DROP_DOWN);
 		textPort.setText(EMPTY);
 		textPort.setToolTipText("Please enter the hpcserver's port number as provided by hpcserver's output");
-		textPort.addListener(SWT.KeyDown, event -> event.doit = Character.isDigit(event.character));
-		textPort.setEnabled(false);
-		
+
+		fillAndSetComboWithHistory(textPort, HISTORY_KEY_PORT);
+
+		textPort.setEnabled(!textPort.getText().isEmpty());
+
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(textPort);
 		
 		//------------------------------------------------------
@@ -139,10 +150,28 @@ public class ConnectionDialog extends TitleAreaDialog
 			MessageDialog.openError(getShell(), "Fail to connect", "Unable to connect to " + host + ":" + portString);
 			return;
 		}
+		addIntoHistory(textHost, HISTORY_KEY_HOST);
+		addIntoHistory(textPort, HISTORY_KEY_PORT);
 		
 		super.okPressed();
 	}
 	
+	
+	private void fillAndSetComboWithHistory(Combo combo, String key) {		
+		UserInputHistory history = new UserInputHistory(key);
+		var histories = history.getHistory();
+		for(var item: histories) {
+			combo.add(item);
+		}
+		if (!histories.isEmpty())
+			combo.select(0);
+	}
+	
+	
+	private void addIntoHistory(Combo combo, String key) {
+		UserInputHistory history = new UserInputHistory(key);
+		history.addLine(combo.getText());
+	}
 	
 	private void enableTunnel(boolean enable) {
 		flagEnableTunnel.setEnabled(true);
