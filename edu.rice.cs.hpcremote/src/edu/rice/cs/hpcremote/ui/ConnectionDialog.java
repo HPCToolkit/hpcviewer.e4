@@ -27,6 +27,21 @@ import org.hpctoolkit.hpcclient.v1_0.HpcClientJavaNetHttp;
 
 import edu.rice.cs.hpcbase.map.UserInputHistory;
 
+
+/*******************************************************
+ * 
+ * A window to ask the connection setup to the server/
+ * A typical usage of this class:
+ * <pre>
+ * 		var dialog = new ConnectionDialog(shell);
+ *		
+ *		if (dialog.open() == Window.OK) {
+ *			var client = dialog.getClientConnection();
+ * </pre>
+ * There is no guarantee if {@code client} is completely valid.
+ * Caller needs to check its validity.
+ * 
+ *******************************************************/
 public class ConnectionDialog extends TitleAreaDialog 
 {
 	private static final String EMPTY = "";
@@ -43,11 +58,27 @@ public class ConnectionDialog extends TitleAreaDialog
 	
 	private HpcClient client;
 	
+	/*****
+	 * Instantiate a connection window. User needs to call {@code open} 
+	 * method and then get the connection object with 
+	 * {@code getClientConnection} method. 
+	 * 
+	 * @param parentShell
+	 */
 	public ConnectionDialog(Shell parentShell) {
 		super(parentShell);
 	}
 
 	
+	/*****
+	 * Retrieve the {@code HpcClient} object if the user
+	 * confirm the connection. This doesn't mean the connection
+	 * is successful. The caller needs to check if the connection
+	 * is established and can communicate with hpcserver. 
+	 * 
+	 * @return {@code HpcClient} can be empty if user clicks cancel or
+	 * the instantiation is not successful.
+	 */
 	public Optional<HpcClient> getClientConnection() {
 		return Optional.of(client);
 	}
@@ -103,9 +134,10 @@ public class ConnectionDialog extends TitleAreaDialog
 		flagEnableTunnel.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				enableTunnel(flagEnableTunnel.getSelection());
+				enableTunnel(false /*flagEnableTunnel.getSelection()*/);
 			}			
 		});
+		flagEnableTunnel.setEnabled(false);
 		
 		GridDataFactory.fillDefaults().grab(true, true).span(2, 1).applyTo(flagEnableTunnel);
 		
