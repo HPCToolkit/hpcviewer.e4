@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ASCII"?>
 <fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:commands="http://www.eclipse.org/ui/2010/UIModel/application/commands" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmi:id="_lfRZIDYmEe6ewvG869-_Sw">
-  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_mkQrQDYmEe6ewvG869-_Sw" featurename="menuContributions" parentElementId="xpath:/">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_mkQrQDYmEe6ewvG869-_Sw" featurename="menuContributions" parentElementId="xpath:/" positionInList="index:1">
     <elements xsi:type="menu:MenuContribution" xmi:id="_sV7u8DYmEe6ewvG869-_Sw" elementId="edu.rice.cs.hpcremote.menucontribution.0" parentId="edu.rice.cs.hpcviewer.ui.menu.file">
       <children xsi:type="menu:HandledMenuItem" xmi:id="_vQteADYmEe6ewvG869-_Sw" elementId="edu.rice.cs.hpcremote.menu.open" label="Open a remote database" mnemonics="r" command="_2jr8YDYmEe6ewvG869-_Sw"/>
     </elements>
