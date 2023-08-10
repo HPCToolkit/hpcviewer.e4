@@ -64,6 +64,7 @@ public class ConnectionDialog extends TitleAreaDialog
 		
 		textHost = new Combo(container, SWT.NONE);
 		textHost.setText(EMPTY);
+		textHost.setToolTipText("Please enter the remote host name or its IP address as provided by hpcserver output");
 		
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(textHost);
 		
@@ -72,6 +73,9 @@ public class ConnectionDialog extends TitleAreaDialog
 		
 		textPort = new Combo(container, SWT.DROP_DOWN);
 		textPort.setText(EMPTY);
+		textPort.setToolTipText("Please enter the hpcserver's port number as provided by hpcserver's output");
+		textPort.addListener(SWT.KeyDown, event -> event.doit = Character.isDigit(event.character));
+		textPort.setEnabled(false);
 		
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(textPort);
 		
