@@ -27,15 +27,14 @@ public abstract class DatabaseShowMenu
 		while(iterator.hasNext()) {
 			Experiment exp = (Experiment) iterator.next();
 			
-			String path    = exp.getDefaultDirectory().getAbsolutePath();
-			String label   = path;
+			String label   = exp.toString();
 			
 			if (exp.isMergedDatabase()) {
 				label = "[Merged] " + label;
 			}
 			MDirectMenuItem menu = modelService.createModelElement(MDirectMenuItem.class);
 			
-			menu.setElementId(path);
+			menu.setElementId(label);
 			menu.setLabel(label);
 			menu.setContributionURI(getMenuURI());
 			menu.getTransientData().put(ID_DATA_EXP, exp);
