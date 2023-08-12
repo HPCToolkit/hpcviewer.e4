@@ -24,7 +24,6 @@ repos:
     exclude: |
       (?x)^(
         scripts/cover2cover.py |    # This file is from an external source, don't format it
-        edu.rice.cs.hpcdata.app/scripts/hpcread.py    # Not sure what this is used for yet
       )$
 
 - repo: https://github.com/pre-commit/pre-commit-hooks
