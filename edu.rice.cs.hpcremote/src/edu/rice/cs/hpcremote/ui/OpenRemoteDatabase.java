@@ -2,6 +2,8 @@
 package edu.rice.cs.hpcremote.ui;
 
 import java.io.IOException;
+import java.util.Collections;
+
 import javax.inject.Named;
 
 import org.eclipse.e4.core.di.annotations.Execute;
@@ -24,10 +26,15 @@ public class OpenRemoteDatabase {
 			return;
 		
 		var client = connection.get();
-		
 		try {
-			var maxSamples = client.getMaximumTraceSampleTimestamp();
-			MessageDialog.openInformation(shell, "Info", "max samples: " + maxSamples);
+			var metaDB = client.getMetaDbFileContents();
+			var idtuples = Collections.emptyList(); /// client.getHierarchicalIdentifierTuples();
+			var metrics  = client.getMetricsDefaultYamlContents();
+			var str = String.format("meta.db length: %d%nId-tuples: %d%nmetrics length: %d%n", 
+					metaDB.length,
+					idtuples.size(),
+					metrics.length);
+			MessageDialog.openInformation(shell, "Connection succeeds", str);
 
 		} catch (IOException | NumberFormatException | InterruptedException e) {
 			MessageDialog.openError(shell, 

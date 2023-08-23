@@ -11,7 +11,6 @@ Export-Package: io.vavr,
  io.vavr.control,
  io.vavr.match.annotation,
  org.hpctoolkit.hpcclient.v1_0,
- org.hpctoolkit.hpcclient.v1_x,
  org.json
 Require-Bundle: org.eclipse.e4.ui.model.workbench;bundle-version="2.1.1000.v20210111-0958",
  org.eclipse.e4.core.di,

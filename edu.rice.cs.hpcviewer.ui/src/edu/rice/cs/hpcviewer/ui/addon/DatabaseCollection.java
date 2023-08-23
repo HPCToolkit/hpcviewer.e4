@@ -405,7 +405,7 @@ public class DatabaseCollection
 	}
 		
 	/***
-	 * Retrieve the iterator of the database collection from a given windo
+	 * Retrieve the iterator of the database collection from a given window
 	 * 
 	 * @param window 
 	 * @return Iterator for the list of the given window
@@ -740,9 +740,8 @@ public class DatabaseCollection
 		// we need to ensure we only store the directory, not the xml file
 		// minor fix: only store the absolute path, not the relative one.
 		
-		String path = experiment.getDirectory();
 		UserInputHistory history = new UserInputHistory(RecentDatabase.HISTORY_DATABASE_RECENT);
-		history.addLine(path);
+		history.addLine(experiment.toString());
 	}
 
 	
