@@ -3,14 +3,14 @@ package edu.rice.cs.hpcremote.ui;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Optional;
-
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
@@ -22,10 +22,10 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.hpctoolkit.hpcclient.v1_0.HpcClient;
 import org.hpctoolkit.hpcclient.v1_0.HpcClientJavaNetHttp;
 
 import edu.rice.cs.hpcbase.map.UserInputHistory;
+import edu.rice.cs.hpcremote.data.RemoteInfo;
 
 
 /*******************************************************
@@ -56,7 +56,7 @@ public class ConnectionDialog extends TitleAreaDialog
 	private Combo  textUsername;
 	private Text   textPassword;
 	
-	private HpcClient client;
+	private RemoteInfo remoteInfo;
 	
 	/*****
 	 * Instantiate a connection window. User needs to call {@code open} 
@@ -71,17 +71,18 @@ public class ConnectionDialog extends TitleAreaDialog
 
 	
 	/*****
-	 * Retrieve the {@code HpcClient} object if the user
+	 * Retrieve the {@code RemoteInfo} object if the user
 	 * confirm the connection. This doesn't mean the connection
 	 * is successful. The caller needs to check if the connection
 	 * is established and can communicate with hpcserver. 
 	 * 
-	 * @return {@code HpcClient} can be empty if user clicks cancel or
+	 * @return {@code RemoteInfo} can be empty if user clicks cancel or
 	 * the instantiation is not successful.
-	 */
-	public Optional<HpcClient> getClientConnection() {
-		return Optional.of(client);
+	 */	
+	public RemoteInfo getRemoteInfo() {
+		return remoteInfo;
 	}
+	
 	
 	@Override
 	protected Control createDialogArea(Composite parent) {
@@ -105,6 +106,12 @@ public class ConnectionDialog extends TitleAreaDialog
 		fillAndSetComboWithHistory(textHost, HISTORY_KEY_HOST);
 		
 		textHost.addModifyListener(e -> textPort.setEnabled(true));
+		textHost.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				textPort.setEnabled(true);
+			}
+		});
 
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(textHost);
 		
@@ -134,7 +141,7 @@ public class ConnectionDialog extends TitleAreaDialog
 		flagEnableTunnel.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				enableTunnel(false /*flagEnableTunnel.getSelection()*/);
+				enableTunnel(true /*flagEnableTunnel.getSelection()*/);
 			}			
 		});
 		flagEnableTunnel.setEnabled(false);
@@ -177,7 +184,12 @@ public class ConnectionDialog extends TitleAreaDialog
 		
 		try {
 			var address = InetAddress.getByName(host);
-			client = new HpcClientJavaNetHttp( address, portNumber);
+			var client = new HpcClientJavaNetHttp( address, portNumber);
+
+			remoteInfo = new RemoteInfo();
+			remoteInfo.setClient(client);
+			remoteInfo.setHostAndPort(host, portNumber);
+			
 		} catch (UnknownHostException e) {
 			MessageDialog.openError(getShell(), "Fail to connect", "Unable to connect to " + host + ":" + portString);
 			return;
@@ -220,9 +232,12 @@ public class ConnectionDialog extends TitleAreaDialog
 		var dialog = new ConnectionDialog(shell);
 		
 		if (dialog.open() == Window.OK) {
-			var client = dialog.getClientConnection();
-			if (client.isPresent()) {
-				var connect = client.get();
+			var info = dialog.getRemoteInfo();
+			if (info != null) {
+				var connect = info.getClient();
+				if (connect == null)
+					return;
+				
 				try {
 					var max = connect.getMaximumTraceSampleTimestamp();
 					var min = connect.getMaximumTraceSampleTimestamp();
@@ -230,6 +245,7 @@ public class ConnectionDialog extends TitleAreaDialog
 					MessageDialog.openInformation(
 							shell, 
 							"Connection successful", 
+							info.getId() + "\n"  +
 							"max: " + max + "\n" +
 							"min: " + min );
 				} catch (IOException | InterruptedException e) {

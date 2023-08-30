@@ -54,9 +54,9 @@ public class RemoteDBOpener extends AbstractDBOpener
 	// 		 it isn't suitable for multiple instances of applications
 	// -----------------
 
-	static private Socket serverConnection = null;
-	static private LocalTunneling tunnelMain, tunnelXML;
-	static private RemoteUserInfo remoteUserInfo;
+	private static Socket serverConnection = null;
+	private static LocalTunneling tunnelMain, tunnelXML;
+	private static RemoteUserInfo remoteUserInfo;
 
 	// -----------------
 	// object variables
