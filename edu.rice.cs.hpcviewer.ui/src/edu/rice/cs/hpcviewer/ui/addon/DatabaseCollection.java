@@ -377,7 +377,7 @@ public class DatabaseCollection
 	private int displayTraceView(IExperiment experiment, 
 								 EPartService service,
 								 List<MStackElement> list) {
-		if (LocalDBOpener.directoryHasTraceData(experiment.getDirectory()) < 0) {
+		if (experiment.getTraceDataVersion() < 0) {
 			return 0;
 		}
 

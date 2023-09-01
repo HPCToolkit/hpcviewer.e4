@@ -69,8 +69,7 @@ public class RemoteDataProfile extends AbstractDataProfile implements IDataProfi
 		var profId = ProfileId.make(idtuple.getProfileIndex());
 		var nodeId = CallingContextId.make(cctId);
 		
-		Set<CallingContextId> setNodeId = HashSet.empty();
-		setNodeId.add(nodeId);
+		Set<CallingContextId> setNodeId = HashSet.of(nodeId);
 		
 		try {
 			var metrics = client.getMetrics(profId, setNodeId);
