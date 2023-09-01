@@ -141,10 +141,11 @@ public class ConnectionDialog extends TitleAreaDialog
 		flagEnableTunnel.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				enableTunnel(true /*flagEnableTunnel.getSelection()*/);
+				boolean state = flagEnableTunnel.getSelection();
+				enableTunnel(state);
 			}			
 		});
-		flagEnableTunnel.setEnabled(false);
+		flagEnableTunnel.setEnabled(true);
 		
 		GridDataFactory.fillDefaults().grab(true, true).span(2, 1).applyTo(flagEnableTunnel);
 		
@@ -218,8 +219,6 @@ public class ConnectionDialog extends TitleAreaDialog
 	}
 	
 	private void enableTunnel(boolean enable) {
-		flagEnableTunnel.setEnabled(true);
-		flagEnableTunnel.setSelection(enable);
 		textUsername.setEnabled(enable);
 		textPassword.setEditable(enable);
 	}
