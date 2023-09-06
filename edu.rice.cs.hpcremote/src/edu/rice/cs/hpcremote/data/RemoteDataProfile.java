@@ -2,6 +2,7 @@ package edu.rice.cs.hpcremote.data;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.hpctoolkit.client_server_common.calling_context.CallingContextId;
@@ -85,8 +86,12 @@ public class RemoteDataProfile extends AbstractDataProfile implements IDataProfi
 			}
 			return listMetrics;
 			
-		} catch (IOException | InterruptedException | UnknownProfileIdException e) {
+		} catch (UnknownProfileIdException e) {
 			throw new IllegalArgumentException("Unknown profile " + idtuple.toString() + " or cct " + cctId);
-		}		
+		} catch (InterruptedException e2) {
+		    // Restore interrupted state...
+		    Thread.currentThread().interrupt();
+		}
+		return Collections.emptyList();
 	}
 }

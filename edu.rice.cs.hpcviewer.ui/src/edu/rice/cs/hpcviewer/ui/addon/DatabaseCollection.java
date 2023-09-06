@@ -150,7 +150,8 @@ public class DatabaseCollection
 	 * @param modelService EModelService
 	 * @param database directory
 	 */
-	public void addDatabase(Shell shell, 
+	public void addDatabase(
+			Shell shell, 
 			MApplication 	application, 
 			MWindow         window,
 			EPartService    service,
