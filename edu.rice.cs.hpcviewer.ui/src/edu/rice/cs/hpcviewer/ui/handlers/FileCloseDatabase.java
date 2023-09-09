@@ -8,7 +8,7 @@ import org.eclipse.e4.ui.model.application.ui.menu.MDirectMenuItem;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 
-import edu.rice.cs.hpcdata.experiment.BaseExperiment;
+import edu.rice.cs.hpcbase.IDatabase;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 
 public class FileCloseDatabase extends DatabaseShowMenu
@@ -30,8 +30,8 @@ public class FileCloseDatabase extends DatabaseShowMenu
 		if (menu == null)
 			return;
 
-		BaseExperiment exp = (BaseExperiment) menu.getTransientData().get(ID_DATA_EXP);
-		database.removeDatabase(application, modelService, partService, exp);
+		IDatabase db = (IDatabase) menu.getTransientData().get(ID_DATA_EXP);
+		database.removeDatabase(application, modelService, partService, db);
 	}
 
 

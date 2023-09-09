@@ -4,11 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import javax.inject.Inject;
@@ -47,20 +42,21 @@ import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcbase.BaseConstants;
 import edu.rice.cs.hpcbase.ElementIdManager;
+import edu.rice.cs.hpcbase.IDatabase;
+import edu.rice.cs.hpcbase.IDatabase.DatabaseStatus;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcbase.map.UserInputHistory;
 import edu.rice.cs.hpcbase.ui.IMainPart;
-import edu.rice.cs.hpcdata.db.DatabaseManager;
-import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 import edu.rice.cs.hpcfilter.service.FilterMap;
+import edu.rice.cs.hpclocal.DatabaseLocal;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpctraceviewer.ui.TracePart;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
-import edu.rice.cs.hpcviewer.ui.experiment.ExperimentManager;
 import edu.rice.cs.hpcviewer.ui.handlers.RecentDatabase;
+import edu.rice.cs.hpcviewer.ui.internal.DatabaseWindowManager;
 
 
 /***
@@ -82,24 +78,33 @@ public class DatabaseCollection
 	private static final String STACK_ID_BASE = "edu.rice.cs.hpcviewer.ui.partstack.integrated";
 	private static final String PREFIX_ERROR  = "Database error ";
 	
-	private final HashMap<MWindow, List<IExperiment>>   mapWindowToExperiments;
-	
 	private @Inject IEventBroker eventBroker;
 	private @Inject UISynchronize sync;
 
-	private ExperimentManager    experimentManager;
 	private Logger statusReporter;
-		
+
+	private final DatabaseWindowManager databaseWindowManager;
+	
 	public DatabaseCollection() {
-		experimentManager = new ExperimentManager();
-		mapWindowToExperiments = new HashMap<>(1);
+		databaseWindowManager = new DatabaseWindowManager();
 	}
+	
 	
 	@Inject
 	@Optional
+	/*****
+	 * this method is executed once the viewer has completed the start up
+	 * 
+	 * @param application
+	 * @param partService
+	 * @param broker
+	 * @param modelService
+	 * @param myShell
+	 */
 	private void subscribeApplicationCompleted(
 			@UIEventTopic(UIEvents.UILifeCycle.APP_STARTUP_COMPLETE) 
 			final MApplication   application,
+			final MWindow        window,
 			final EPartService   partService,
 			final IEventBroker   broker,
 			final EModelService  modelService, 
@@ -120,57 +125,109 @@ public class DatabaseCollection
 		final Shell shell = myShell;
 		String path = null;
 		
+		// look for the path to the database in the command argument
 		for (String arg: args) {
 			if (arg.charAt(0) != '-')
 				path = arg;
 		}
-		try {
-			String filename = checkExistance(application.getSelectedElement(), shell, path);
-			if (filename == null)
-				return; 
-			
-			// On Linux TWM window manager, the window may not be ready yet.
-			sync.asyncExec(()-> {
-				openDatabaseAndCreateViews(application, modelService, partService, shell, filename);
-			});
-		} catch (Exception e) {
-			MessageDialog.openError(shell, "Error opening the database", path + ":\n\n" + e.getLocalizedMessage());
-		}
+		var convertedPath = convertPathToLocalFileSystem(path);
+		
+		addDatabase(shell, window, partService, modelService, convertedPath);
 	}
-	
 
+	
 	/****
 	 * One-stop API to open and add a database. 
 	 * This method shows a dialog box to pick a directory, check if the database already exists or not,
 	 * create views and add to the list of the database collection.
 	 * 
 	 * @param shell the current shell
-	 * @param application MApplication
+	 * @param window 
+	 * 			The handle of the target window (may not be the current active one)
 	 * @param service EPartService
 	 * @param modelService EModelService
-	 * @param database directory
+	 * @param database 
+	 * 			The database object to be opened. This can be local or remote database.
 	 */
 	public void addDatabase(
 			Shell shell, 
-			MApplication 	application, 
 			MWindow         window,
 			EPartService    service,
 			EModelService 	modelService,
-			String          database) {
-		
-		String filename = checkExistance(window, shell, database);
-		if (filename == null)
+			IDatabase       database) {
+
+		if ( database.getStatus() == DatabaseStatus.NOT_INITIALIZED &&
+		   ( database.open(shell) != IDatabase.DatabaseStatus.OK) ) {
+			
 			return;
-		
-		var exp = getExperimentObject(window, filename);
-		if (exp != null) {
-			removeDatabase(application, modelService, service, exp);
 		}
+
+		if (database.getExperimentObject() == null)
+			return;
+
+		// On Linux TWM window manager, the window may not be ready yet.
+		sync.asyncExec(()-> 
+			openDatabaseAndCreateViews(window, modelService, service, shell, database)
+		);
+	}
+
+
+	/*****
+	 * Add a new local database to the list
+	 * 
+	 * @param shell
+	 * @param window
+	 * @param service
+	 * @param modelService
+	 */
+	public void addDatabase(
+			Shell 			shell,
+			MWindow         window,
+			EPartService    service,
+			EModelService 	modelService) {
 		
-		openDatabaseAndCreateViews(application, modelService, service, shell, filename);
+		DatabaseLocal localDb = new DatabaseLocal();
+		if (localDb.open(shell) == DatabaseStatus.OK)
+			addDatabase(shell, window, service, modelService, localDb);
+		
+		if (localDb.getStatus() == DatabaseStatus.INEXISTENCE ||
+			localDb.getStatus() == DatabaseStatus.INVALID     ||
+			localDb.getStatus() == DatabaseStatus.UNKNOWN_ERROR )
+			MessageDialog.openError(shell, "Unable to open the datbaase", localDb.getErrorMessage());
 	}
 	
+	
+	/*****
+	 * Add a new database based from its Id. 
+	 * The Id can be a path or a remote Id (not supported at the moments)
+	 * 
+	 * @param shell
+	 * @param window
+	 * @param service
+	 * @param modelService
+	 * @param databaseId
+	 */
+	public void addDatabase(
+			Shell 			shell,
+			MWindow         window,
+			EPartService    service,
+			EModelService 	modelService,
+			String          databaseId) {
 
+		if (databaseId == null) {
+			addDatabase(shell, window, service, modelService);
+			return;
+		}
+		if (!checkAndConfirmDatabaseExistence(shell, window, databaseId))			
+			return;
+		
+		DatabaseLocal localDb = new DatabaseLocal();
+		DatabaseStatus status = localDb.setDirectory(databaseId);
+		
+		if (status == DatabaseStatus.OK)
+			addDatabase(shell, window, service, modelService, localDb);		
+	}
+	
 	
 	/****
 	 * One-stop API to open a database. 
@@ -178,27 +235,51 @@ public class DatabaseCollection
 	 * create views and remove the existing databases before adding it to the list of the database collection.
 	 * The removal is important to make sure there is only one database exist.
 	 * 
-	 * @param shell the current shell
-	 * @param application MApplication
+	 * @param shell 
+	 * 			the current shell
+	 * @param window
+	 * 			the current active hpcviewer window 
 	 * @param service EPartService
 	 * @param modelService EModelService
 	 * @param database
 	 */
-	public void switchDatabase(Shell shell, 
-			MApplication 	application, 
+	public void switchDatabase(
+			Shell shell, 
+			MWindow 	    window, 
 			EPartService    service,
 			EModelService 	modelService,
-			String          database) {
-		
-		String filename = checkExistance(application.getSelectedElement(), shell, database);
-		if (filename == null)
+			String          databaseId) {
+
+		if (!checkAndConfirmDatabaseExistence(shell, window, databaseId))
 			return;
-
-		removeAll(application, modelService, service);
 		
-		openDatabaseAndCreateViews(application, modelService, service, shell, filename);
+		// hack - hack -hack
+		// we should make sure the database id is correct before removing all databases of this window
+		removeWindow(window);
+		
+		addDatabase(shell, window, service, modelService, databaseId);		
 	}
+	
+	
+	/****
+	 * Verify if a given database is already opened or not for this window.
+	 * 
+	 * @param shell
+	 * @param window
+	 * @param databaseId
+	 * 
+	 * @return {@code boolean} true if the database has already been loaded in this window
+	 */
+	public boolean checkAndConfirmDatabaseExistence(Shell shell, MWindow window, String databaseId) {
 
+		var database = databaseWindowManager.getDatabase(window, databaseId); 
+		if (database == null)
+			return true;
+		
+		String msg = databaseId + ": The database already exists.\nDo you want to replace it?";
+		return MessageDialog.openQuestion(shell, "Database already exists", msg);
+	}
+	
 	
 	/****
 	 * Add a new database into the collection.
@@ -206,18 +287,18 @@ public class DatabaseCollection
 	 * or {@code removeAll}.
 	 * 
 	 * @param experiment cannot be null
-	 * @param application the main application
+	 * @param window the main application
 	 * @param service EPartService to create parts
 	 * @param modelService
 	 * @param parentId the parent EPartStack of the parts. If it's null, the new parts will be assigned to the current active
 	 */
-	public void createViewsAndAddDatabase(IExperiment experiment, 
-										  MApplication 	 application, 
+	private void createViewsAndAddDatabase(IDatabase     database, 
+										  MWindow 	     window, 
 										  EPartService   service,
 										  EModelService  modelService,
 										  String         message) {
 		
-		if (experiment == null || service == null) {
+		if (database == null || service == null) {
 			MessageDialog.openError( Display.getDefault().getActiveShell(), 
 									 "Error in opening the file", 
 									 "Database not found. " );
@@ -232,23 +313,49 @@ public class DatabaseCollection
 		// is ready. This doesn't guarantee anything, but works in most cases :-(
 
 		sync.asyncExec(()-> {
-			showPart(experiment, application, modelService,  message);
+			showPart(database, window, modelService,  message);
 		});
+	}
+	
+	
+	/****
+	 * The {@code Experiment} object version of {@link createViewsAndAddDatabase}
+	 * 
+	 * @param experiment
+	 * 			an experiment from a local database.
+	 * @param window
+	 * @param service
+	 * @param modelService
+	 * @param message
+	 */
+	public void createViewsAndAddDatabase(
+			IExperiment    experiment, 
+			MWindow        window, 
+			EPartService   service,
+			EModelService  modelService,
+			String         message) {
+		
+		var database = databaseWindowManager.getDatabase(window, experiment.getDirectory());
+		
+		createViewsAndAddDatabase(database, window, service, modelService, message);
 	}
 	
 
 	/***
-	 * Display a profile part 
+	 * The main method to display a profile part and prepare for the trace part 
 	 * 
-	 * @param experiment
-	 * @param application
+	 * @param database
+	 * 			The database to be displayed (either local or remote)
+	 * @param wj dkw[]
 	 * @param service
 	 * @param message
+	 * 			The message to be displayed on the table
 	 * 
 	 * @return int
+	 * 			positive if everything goes find. 
 	 */
-	private int showPart( IExperiment    experiment, 
-						  MApplication   application, 
+	private int showPart( IDatabase      database, 
+						  MWindow        window, 
 						  EModelService  modelService,
 						  String         message) {
 
@@ -259,14 +366,12 @@ public class DatabaseCollection
 		// system where to locate the part stack.
 		//----------------------------------------------------------------
 		
-		MWindow  window = application.getSelectedElement();
-		
 		if (window == null) {
 			// window is not active yet
 			
 			// using asyncExec we hope Eclipse will delay the processing until the UI 
 			// is ready. This doesn't guarantee anything, but works in most cases :-(
-			sync.asyncExec(()-> showPart(experiment, application, modelService, message));
+			sync.asyncExec(()-> showPart(database, window, modelService, message));
 			return -1;
 		}
 
@@ -292,7 +397,7 @@ public class DatabaseCollection
 			// issue #284: exception due to "no active window"
 			// I don't know why, but perhaps it's because the rendering is not ready?
 			// Recursively try to create again
-			sync.asyncExec(()-> showPart(experiment, application, modelService, message));
+			sync.asyncExec(()-> showPart(database, window, modelService, message));
 			return -1;
 		}
 		if (list == null)
@@ -330,13 +435,14 @@ public class DatabaseCollection
 		// If there are two parts have the same elementID, when one is moved to the same stack.
 		// it will remove the other part.
 		
-		String elementID = "P." + ElementIdManager.getElementId(experiment);
+		String elementID = "P." + ElementIdManager.getElementId(database);
 		part.setElementId(elementID);
 
+		var experiment = database.getExperimentObject();
 		view.setInput(experiment);
 				
 		part.setLabel(ProfilePart.PREFIX_TITLE + experiment.getName());
-		part.setTooltip(experiment.getDirectory());
+		part.setTooltip(database.getId());
 
 
 		//----------------------------------------------------------------
@@ -346,8 +452,7 @@ public class DatabaseCollection
 		stack.setVisible(true);
 		stack.setOnTop(true);
 		
-		List<IExperiment> listExperiments = getActiveListExperiments(application.getSelectedElement());
-		listExperiments.add(experiment);
+		databaseWindowManager.addDatabase(window, database);
 
 		//----------------------------------------------------------------
 		// display the trace view if the information exists
@@ -367,6 +472,7 @@ public class DatabaseCollection
 
 	
 	/****
+	 * Method to create the trace view if necessary.
 	 * 
 	 * @param experiment
 	 * @param service
@@ -403,161 +509,27 @@ public class DatabaseCollection
 		}
 		return 1;
 	}
-		
-	/***
-	 * Retrieve the iterator of the database collection from a given window
-	 * 
-	 * @param window 
-	 * @return Iterator for the list of the given window
-	 */
-	public Iterator<IExperiment> getIterator(MWindow window) {
-		 var list = mapWindowToExperiments.get(window);
-		if (list == null)
-			return null;
-		return list.iterator();
-	}
-	
-		
-	/***
-	 * Retrieve the current registered databases
-	 * @return
-	 */
-	public int getNumDatabase(MWindow window) {
-		var list = getActiveListExperiments(window);
-		return list.size();
-	}
-	
-	
-	/***
-	 * Check if the database is empty or not
-	 * @return true if the database is empty
-	 */
-	public boolean isEmpty(MWindow window) {
-		var list = getActiveListExperiments(window);		
-		return list.isEmpty();
-	}
-	
-	
-	/***
-	 * Retrieve the experiment object given a XML file path
-	 * 
-	 * @param pathXML the absolute path of the experiment XNK file path
-	 * @return BaseExperiment object if the database exist, null otherwise.
-	 */
-	public IExperiment getExperimentObject(MWindow window, String pathXML) {
-		var list = getActiveListExperiments(window);
-		
-		if (list.isEmpty())
-			return null;
-		
-		for (var exp: list) {
-			String directory = exp.getPath();
-			if (directory.equals(pathXML)) {
-				return exp;
-			}
-		}
-		return null;
-	}
-	
-	/***
-	 * Check if a database is good or already exist in the collection.
-	 * <ul>
-	 * <li>If it's empty: show a window to pick a database
-	 * <li>If it's a directory, add the database filename
-	 * <li>If it's a file: check if exist or not.
-	 * </ul>
-
-	 * @param shell
-	 * @param pathXML the absolute path to XML file
-	 * @return {@code String} database file path
-	 */
-	public String checkExistance(MWindow window, Shell shell, String fileOrDirectory) {
-		
-		// -------------------------------------------------------
-		// 1. convert the database path to experiment.xml file name
-		// -------------------------------------------------------
-		String filename = null;
-		if (fileOrDirectory == null) {
-			try {
-				filename = experimentManager.openFileExperiment(shell);
-			} catch (Exception e) {
-				MessageDialog.openError(shell, "File to open the database", e.getMessage());
-				return null;
-			}
-		} else {
-			if (Files.isRegularFile(Paths.get(fileOrDirectory))) {
-				filename = fileOrDirectory;
-			} else if (ExperimentManager.checkDirectory(fileOrDirectory)) {
-				var filepath = DatabaseManager.getDatabaseFilePath(fileOrDirectory);
-				if (filepath.isEmpty()) {
-					String files = DatabaseManager.getDatabaseFilenames(java.util.Optional.empty());
-					MessageDialog.openError(shell, 
-											"Error opening a database", 
-											"Directory has no database: " + fileOrDirectory +
-											"\nRecognized database files:\n" + files );
-					return null;				
-				}
-				filename = filepath.get();
-			}
-		}
-
-		// -------------------------------------------------------
-		// 2. check if the file exists
-		// -------------------------------------------------------
-		if (filename == null)
-			return null;
-		
-		File file = new File(filename);
-		if (!file.exists()) {
-			MessageDialog.openError(shell, 
-					"Fail to open a database", 
-					filename + ": file not found");
-			return null;
-		}
-
-		// -------------------------------------------------------
-		// 3. check if the database already opened or not
-		// -------------------------------------------------------
-		
-		var exp = getExperimentObject(window, filename);
-		if (exp == null)
-			// database is valid, fresh and not already opened
-			return filename;
-		
-		// we cannot have two exactly the same database in one window
-		if (MessageDialog.openQuestion(shell, 
-								   "Warning: database already exists", 
-								   exp.getDirectory() +
-								   ": the database is already opened.\nDo you want to replace the existing one?" ) )
-		
-			// user decides to replace the database
-			return filename;
-
-		// we give up
-		return null;
-	}
 	
 	
 	/***
 	 * Remove a database and all parts (views and editors) associated with it
 	 * 
-	 * @param experiment
+	 * @param application
+	 * @param modelService
+	 * @param partService
+	 * @param database 
+	 * 			The database to be removed. This can't be null.
 	 */
 	public void removeDatabase(MApplication application, 
 							   EModelService modelService, 
 							   EPartService partService, 
-							   final IExperiment experiment) {
+							   final IDatabase database) {
 		
-		if (experiment == null)
+		if (database == null)
 			return;
+
+		var window = application.getSelectedElement();
 		
-		// remove any database associated with this experiment
-		// some parts may need to check the database if the experiment really exits or not.
-		// If not, they will consider the experiment will be removed.
-		var list = getActiveListExperiments(application.getSelectedElement());
-		list.remove(experiment);
-		
-		MWindow window = application.getSelectedElement();
 		List<MPart> listParts = modelService.findElements(window, null, MPart.class);
 		
 		if (listParts == null)
@@ -565,7 +537,7 @@ public class DatabaseCollection
 
 		// first, notify all the parts that have experiment that they will be destroyed.
 		
-		ViewerDataEvent data = new ViewerDataEvent((Experiment) experiment, null);
+		ViewerDataEvent data = new ViewerDataEvent((Experiment) database.getExperimentObject(), null);
 		if (eventBroker != null)
 			eventBroker.send(BaseConstants.TOPIC_HPC_REMOVE_DATABASE, data);
 		
@@ -576,69 +548,32 @@ public class DatabaseCollection
 			Object obj = part.getObject();
 			if (obj instanceof IMainPart) {
 				IMainPart mpart = (IMainPart) obj;
-				if (mpart.getExperiment() == experiment ||
+				if (mpart.getExperiment() == database.getExperimentObject() ||
 					mpart.getExperiment() == null) {
 					partService.hidePart(part, true);
 					mpart.dispose();
 				}
 			}
 		}
-		experiment.dispose();
-		
-		System.gc();
+		// remove any database associated with this experiment
+		// some parts may need to check the database if the experiment really exits or not.
+		// If not, they will consider the experiment will be removed.
+		databaseWindowManager.removeDatabase(window, database);
 	}	
-	
-	
-	/****
-	 * Remove all databases
-	 * @return
-	 */
-	public int removeAll(MApplication application, EModelService modelService, EPartService partService) {
-		var list = getActiveListExperiments(application.getSelectedElement());		
-		int size = list.size();
-		
-		// TODO: ugly solution to avoid concurrency (java will not allow to remove a list while iterating).
-		// we need to copy the list to an array, and then remove the list
-		
-		BaseExperiment[] arrayExp = new BaseExperiment[size];
-		list.toArray(arrayExp);
-		
-		for(BaseExperiment exp: arrayExp) {
-			// inside this method, we remove the database AND hide the view parts
-			removeDatabase(application, modelService, partService, exp);
-		}
-		list.clear();
-		
-		return size;
-	}
-	
-	
-	
-	
-	/****
-	 * Remove a window 
-	 * @param window
-	 * @return
-	 */
-	public List<IExperiment> removeWindowExperiment(MWindow window) {
-		return mapWindowToExperiments.remove(window);
-	}
-	
-	
-	/***
-	 * Retrieve the list of experiments of the current window.
-	 * If Eclipse reports there is no active window, the list is null.
-	 * 
-	 * @return the list of experiments (if there's an active window). 
-	 * 		   empty list otherwise.
-	 * 
-	 */
-	private List<IExperiment> getActiveListExperiments(MWindow window) {
 
-		if (window == null) {
-			return Collections.emptyList();
-		}
-		return mapWindowToExperiments.computeIfAbsent(window, key -> new ArrayList<>());
+	
+	public void removeWindow(MWindow window) {
+		databaseWindowManager.removeWindow(window);
+	}
+	
+	
+	public int getNumDatabase(MWindow window) {
+		return databaseWindowManager.getNumDatabase(window);
+	}
+	
+	
+	public Iterator<IDatabase> getIterator(MWindow window) {
+		return databaseWindowManager.getIterator(window);
 	}
 	
 	
@@ -651,7 +586,10 @@ public class DatabaseCollection
 	 * @return
 	 * @throws Exception 
 	 */
-	private IExperiment openDatabase(Shell shell, String directoryOrXMLFile) throws Exception {
+	private String convertPathToLocalFileSystem(String directoryOrXMLFile)  {
+		if (directoryOrXMLFile == null || directoryOrXMLFile.isEmpty())
+			return null;
+		
     	IFileStore fileStore;
 
 		try {
@@ -668,37 +606,34 @@ public class DatabaseCollection
     	if (!objFileInfo.exists())
     		return null;
 
-    	IExperiment experiment = null;
     	
     	if (objFileInfo.isDirectory()) {
-    		experiment = experimentManager.openDatabaseFromDirectory(shell, directoryOrXMLFile);
-    	} else {
-			EFS.getLocalFileSystem().fromLocalFile(new File(directoryOrXMLFile));
-			experiment = experimentManager.loadExperiment(directoryOrXMLFile);
-    	}
-    	return experiment;
+    		return objFileInfo.getName();
+    	} 
+		fileStore = EFS.getLocalFileSystem().fromLocalFile(new File(directoryOrXMLFile));
+    	return fileStore.getName();
 	}
 	
 
 	/****
 	 * Open a database using background job, and then create views using UI thread
 	 *
-	 * @param application
+	 * @param window
 	 * @param modelService
 	 * @param partService
 	 * @param shell
 	 * @param xmlFileOrDirectory
 	 */
-	public void openDatabaseAndCreateViews(final MApplication application,
+	public void openDatabaseAndCreateViews( final MWindow window,
 											final EModelService modelService,
 											final EPartService partService,
 											final Shell shell, 
-											final String xmlFileOrDirectory) {
+											final IDatabase database) {
 		final Experiment experiment;
 		if (this.statusReporter == null)
 			this.statusReporter = LoggerFactory.getLogger(getClass());
 		try {
-			experiment = (Experiment) openDatabase(shell, xmlFileOrDirectory);
+			experiment = (Experiment) database.getExperimentObject();
 			if (experiment == null) {
 				return;
 			}
@@ -715,22 +650,22 @@ public class DatabaseCollection
 			}
 			
 			// Everything works just fine: create views
-			createViewsAndAddDatabase(experiment, application, partService, modelService, message);
+			createViewsAndAddDatabase(database, window, partService, modelService, message);
 
 		} catch (InvalExperimentException ei) {
-			final String msg = "Invalid database " + xmlFileOrDirectory + "\nError at line " + ei.getLineNumber();
+			final String msg = "Invalid database " + database.getId() + "\nError at line " + ei.getLineNumber();
 			statusReporter.error(msg, ei);
 			MessageDialog.openError(shell, PREFIX_ERROR + ei.getClass(), msg);
 			return;
 
 		} catch (NullPointerException enpe) {
-			final String msg = xmlFileOrDirectory + ": Empty or corrupt database";
+			final String msg = database.getId() + ": Empty or corrupt database";
 			statusReporter.error(msg, enpe);
 			MessageDialog.openError(shell, PREFIX_ERROR + enpe.getClass(), msg);
 			return;
 			
 		} catch (Exception e) {
-			final String msg = "Error opening the database " + xmlFileOrDirectory + ":\n  " + e.getMessage();
+			final String msg = "Error opening the database " + database.getId() + ":\n  " + e.getMessage();
 			statusReporter.error(msg, e);
 			MessageDialog.openError(shell, PREFIX_ERROR + e.getClass(), msg);
 			return;
@@ -741,7 +676,7 @@ public class DatabaseCollection
 		// minor fix: only store the absolute path, not the relative one.
 		
 		UserInputHistory history = new UserInputHistory(RecentDatabase.HISTORY_DATABASE_RECENT);
-		history.addLine(experiment.toString());
+		history.addLine(database.getId());
 	}
 
 	
@@ -769,5 +704,10 @@ public class DatabaseCollection
 		prefStore.save();
 		
 		return null;
+	}
+
+
+	public boolean isEmpty(MWindow window) {
+		return databaseWindowManager.isEmpty(window);
 	}
 }

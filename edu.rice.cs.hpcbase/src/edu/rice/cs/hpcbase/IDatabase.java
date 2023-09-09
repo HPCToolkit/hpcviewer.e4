@@ -6,7 +6,7 @@ import edu.rice.cs.hpcdata.experiment.IExperiment;
 
 public interface IDatabase 
 {
-	enum DatabaseStatus {OK, INVALID, INEXISTENCE, UNKNOWN_ERROR, CANCEL}
+	enum DatabaseStatus {NOT_INITIALIZED, OK, INVALID, INEXISTENCE, UNKNOWN_ERROR, CANCEL}
 	
 	/****
 	 * Get the unique ID of this database. 
@@ -29,6 +29,13 @@ public interface IDatabase
 	 */
 	DatabaseStatus open(Shell shell);
 	
+	
+	/****
+	 * Get the latest status of this database
+	 * 
+	 * @return {@code DatabaseStatus}
+	 */
+	DatabaseStatus getStatus();
 	
 	/****
 	 * Inform the class that the database is not needed anymore and we can

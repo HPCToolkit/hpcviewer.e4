@@ -68,8 +68,6 @@ public class WindowCloseListenerAddon
 	private void subscribeTopicChildrenChanged(@UIEventTopic(UIEvents.ElementContainer.TOPIC_CHILDREN) Event event) {
 		Object changedObj = event.getProperty(UIEvents.EventTags.ELEMENT);
 		
-		// TODO check for addition of window and perform action only on that window
-		
 		// only interested in changes to application
 		if (changedObj instanceof MApplication) {
 			MApplication application = (MApplication) changedObj;
@@ -88,7 +86,7 @@ public class WindowCloseListenerAddon
 
 				@Override
 				public boolean close(MWindow window) {
-					database.removeWindowExperiment(window);
+					database.removeWindow(window);
 					
 					return true;
 				}

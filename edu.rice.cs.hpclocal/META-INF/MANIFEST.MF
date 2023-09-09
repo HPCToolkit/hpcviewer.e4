@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Hpclocal
+Bundle-SymbolicName: edu.rice.cs.hpclocal
+Bundle-Version: 1.0.0.qualifier
+Export-Package: edu.rice.cs.hpclocal
+Require-Bundle: org.eclipse.swt,
+ org.eclipse.jface,
+ edu.rice.cs.hpcdata,
+ edu.rice.cs.hpcbase,
+ edu.rice.cs.hpcsetting
+Bundle-Vendor: Rice University
+Automatic-Module-Name: edu.rice.cs.hpclocal
+Bundle-RequiredExecutionEnvironment: JavaSE-11

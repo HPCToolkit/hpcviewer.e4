@@ -6,7 +6,6 @@ import javax.inject.Named;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.e4.ui.workbench.IWorkbench;
@@ -20,7 +19,6 @@ import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 
 public class OpenRemoteDatabase 
 {
-	@Inject MApplication application;
 	@Inject EModelService modelService;
 	
 	@Inject DatabaseCollection databaseCollection;
@@ -43,6 +41,6 @@ public class OpenRemoteDatabase
 		if (experiment == null)
 			return;
 		
-		databaseCollection.createViewsAndAddDatabase(experiment, application, partService, modelService, "Connection to the remote server succeeds");
+		databaseCollection.addDatabase(shell, window, partService, modelService, remoteDb);
 	}		
 }

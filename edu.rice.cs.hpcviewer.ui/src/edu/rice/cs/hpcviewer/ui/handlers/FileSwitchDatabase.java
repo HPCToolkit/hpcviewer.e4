@@ -4,7 +4,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.e4.ui.model.application.MApplication;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
@@ -17,12 +17,12 @@ public class FileSwitchDatabase
 	@Inject DatabaseCollection databaseCollection;
 	
 	@Execute
-	public void execute(MApplication application,
+	public void execute(MWindow window,
 						EPartService partService, 
 						EModelService modelService,
 						@Named(IServiceConstants.ACTIVE_SHELL) Shell shell) {
 		
-		databaseCollection.switchDatabase(shell, application, partService, modelService, null);
+		databaseCollection.switchDatabase(shell, window, partService, modelService, null);
 	}
 
 }

@@ -12,6 +12,11 @@ public class ElementIdManager
 {
 	public static final String ELEMENT_SEPARATOR = ":";
 	
+	
+	public static String getElementId(IDatabase database) {
+		return database.getId();
+	}
+	
 	public static String getElementId(IExperiment iExperiment) {
 		// has to set the element Id before populating the view
 		return iExperiment.getPath();

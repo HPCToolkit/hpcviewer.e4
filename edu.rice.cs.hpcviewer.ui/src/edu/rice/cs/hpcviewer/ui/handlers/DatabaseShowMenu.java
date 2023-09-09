@@ -25,9 +25,10 @@ public abstract class DatabaseShowMenu
 		var iterator = getDatabase().getIterator(window);
 
 		while(iterator.hasNext()) {
-			Experiment exp = (Experiment) iterator.next();
+			var database = iterator.next();
 			
-			String label   = exp.toString();
+			Experiment exp = (Experiment) database.getExperimentObject();
+			String label = database.getId();
 			
 			if (exp.isMergedDatabase()) {
 				label = "[Merged] " + label;
@@ -37,7 +38,7 @@ public abstract class DatabaseShowMenu
 			menu.setElementId(label);
 			menu.setLabel(label);
 			menu.setContributionURI(getMenuURI());
-			menu.getTransientData().put(ID_DATA_EXP, exp);
+			menu.getTransientData().put(ID_DATA_EXP, database);
 			
 			items.add(menu);
 		}		

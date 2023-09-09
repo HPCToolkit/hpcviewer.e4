@@ -24,6 +24,8 @@ public class RemoteDatabase implements IRemoteDatabase
 	private HpcClient client;
 	
 	private IExperiment experiment;
+	
+	private DatabaseStatus status = DatabaseStatus.NOT_INITIALIZED;
 
 	@Override
 	public String getId() {
@@ -65,7 +67,8 @@ public class RemoteDatabase implements IRemoteDatabase
 				
 			} catch (UnknownHostException e) {
 				MessageDialog.openError(shell, "Fail to connect", "Unable to connect to " + getId());
-				return DatabaseStatus.UNKNOWN_ERROR;
+				status = DatabaseStatus.UNKNOWN_ERROR;
+				return status;
 			}
 			
 			RemoteDatabaseParser parser = new RemoteDatabaseParser();
@@ -74,8 +77,10 @@ public class RemoteDatabase implements IRemoteDatabase
 				parser.parse(client);
 				experiment = parser.getExperiment();
 				
-				if (experiment != null)
-					return DatabaseStatus.OK;
+				if (experiment != null) {
+					status = DatabaseStatus.OK;
+					return status;
+				}
 	
 			} catch (IOException e) {
 				MessageDialog.openError(shell, 
@@ -106,5 +111,11 @@ public class RemoteDatabase implements IRemoteDatabase
 			experiment.dispose();
 		
 		// need to tell hpcserver to clean up
+	}
+
+	@Override
+	public DatabaseStatus getStatus() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

@@ -24,7 +24,7 @@ public class DatabaseSwitch extends RecentDatabase
 						   Shell shell,
 						   String database) {
 		
-		dbCollection.switchDatabase(shell, application, partService, modelService, database);
+		dbCollection.switchDatabase(shell, window, partService, modelService, database);
 	}
 
 	@Override

@@ -1,7 +1,7 @@
 /**
  * Experiment File to manage the database: open, edit, fusion, ...
  */
-package edu.rice.cs.hpcviewer.ui.experiment;
+package edu.rice.cs.hpclocal;
 
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Shell;
@@ -32,7 +32,7 @@ public class ExperimentManager
 	 * @param sTitle : the title of the window 
 	 * 
 	 * @return the list of XML files in the selected directory
-	 * null if the user click the "cancel" button
+	 * empty if the user click the "cancel" button
 	 * @throws Exception 
 	 */
 	private File[] getDatabaseFileList(Shell shell, String sTitle) throws Exception {
@@ -43,11 +43,12 @@ public class ExperimentManager
 		dirDlg.setMessage(sTitle);
 		
 		String sDir = dirDlg.open();	// ask the user to select a directory
-		if(sDir != null && checkDirectory(sDir)) {
+		if(sDir != null) {
+			checkDirectory(sDir);
 			return getListOfDatabaseFiles(sDir);
 		}
 		
-		return null;
+		return new File[0];
 	}
 	
 	/**
@@ -83,7 +84,7 @@ public class ExperimentManager
 	public String openFileExperiment(Shell shell) throws Exception {
 		File []files = getDatabaseFileList(shell, 
 				"Select a directory containing a profiling database.");
-		if(files != null && files.length > 0) {
+		if(files.length > 0) {
 			return getFileExperimentFromListOfFiles(files);
 		}
 		return null;
