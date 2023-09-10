@@ -29,6 +29,7 @@
   <module>edu.rice.cs.hpcsetting</module>
   <module>edu.rice.cs.hpcmerge</module>
   <module>edu.rice.cs.hpctoolcontrol</module>
+  <module>edu.rice.cs.hpclocal</module>
   <module>edu.rice.cs.hpcremote</module>
   <module>edu.rice.cs.hpctree</module>
   <module>edu.rice.cs.hpctraceviewer.config</module>

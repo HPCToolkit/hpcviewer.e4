@@ -139,7 +139,7 @@ public class DatabaseWindowManager
 	private Set<IDatabase> getActiveListExperiments(MWindow window) {
 
 		if (window == null) {
-			return Collections.emptySet();
+			return new HashSet<IDatabase>();
 		}
 		return mapWindowToExperiments.computeIfAbsent(window, key -> new HashSet<>());
 	}

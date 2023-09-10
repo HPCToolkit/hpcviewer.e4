@@ -104,11 +104,10 @@ public class DatabaseCollection
 	private void subscribeApplicationCompleted(
 			@UIEventTopic(UIEvents.UILifeCycle.APP_STARTUP_COMPLETE) 
 			final MApplication   application,
-			final MWindow        window,
 			final EPartService   partService,
 			final IEventBroker   broker,
 			final EModelService  modelService, 
-			@Named(IServiceConstants.ACTIVE_SHELL) Shell myShell) {
+			@Named(IServiceConstants.ACTIVE_SHELL) Shell myShell) throws InterruptedException {
 		
 		this.eventBroker    = broker;
 		this.statusReporter = LoggerFactory.getLogger(getClass());
@@ -132,7 +131,17 @@ public class DatabaseCollection
 		}
 		var convertedPath = convertPathToLocalFileSystem(path);
 		
-		addDatabase(shell, window, partService, modelService, convertedPath);
+		var window = application.getSelectedElement();
+		if (window == null) {
+			// Damn Eclipse sometimes gives us null window because the active window is not 
+			// created yet.
+			// In this case, we just try to delay opening the database for 50 ms to allow
+			// Eclipse creating the active window.
+			Thread.sleep(50);
+			sync.asyncExec(()-> addDatabase(shell, application.getSelectedElement(), partService, modelService, convertedPath));
+		} else {
+			addDatabase(shell, application.getSelectedElement(), partService, modelService, convertedPath);
+		}
 	}
 
 	
