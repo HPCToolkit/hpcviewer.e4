@@ -57,6 +57,7 @@ import edu.rice.cs.hpctraceviewer.ui.TracePart;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.handlers.RecentDatabase;
 import edu.rice.cs.hpcviewer.ui.internal.DatabaseWindowManager;
+import edu.rice.cs.hpcviewer.ui.internal.DatabaseWindowManager.DatabaseExistence;
 
 
 /***
@@ -140,7 +141,7 @@ public class DatabaseCollection
 			Thread.sleep(50);
 			sync.asyncExec(()-> addDatabase(shell, application.getSelectedElement(), partService, modelService, convertedPath));
 		} else {
-			addDatabase(shell, application.getSelectedElement(), partService, modelService, convertedPath);
+			addDatabase(shell, window, partService, modelService, convertedPath);
 		}
 	}
 
@@ -158,7 +159,7 @@ public class DatabaseCollection
 	 * @param database 
 	 * 			The database object to be opened. This can be local or remote database.
 	 */
-	public void addDatabase(
+	public DatabaseStatus addDatabase(
 			Shell shell, 
 			MWindow         window,
 			EPartService    service,
@@ -168,16 +169,16 @@ public class DatabaseCollection
 		if ( database.getStatus() == DatabaseStatus.NOT_INITIALIZED &&
 		   ( database.open(shell) != IDatabase.DatabaseStatus.OK) ) {
 			
-			return;
+			return database.getStatus();
 		}
 
 		if (database.getExperimentObject() == null)
-			return;
+			return DatabaseStatus.INEXISTENCE;
 
 		// On Linux TWM window manager, the window may not be ready yet.
-		sync.asyncExec(()-> 
-			openDatabaseAndCreateViews(window, modelService, service, shell, database)
-		);
+		openDatabaseAndCreateViews(window, modelService, service, shell, database);
+		
+		return DatabaseStatus.OK;
 	}
 
 
@@ -189,7 +190,7 @@ public class DatabaseCollection
 	 * @param service
 	 * @param modelService
 	 */
-	public void addDatabase(
+	public DatabaseStatus addDatabase(
 			Shell 			shell,
 			MWindow         window,
 			EPartService    service,
@@ -203,6 +204,8 @@ public class DatabaseCollection
 			localDb.getStatus() == DatabaseStatus.INVALID     ||
 			localDb.getStatus() == DatabaseStatus.UNKNOWN_ERROR )
 			MessageDialog.openError(shell, "Unable to open the datbaase", localDb.getErrorMessage());
+		
+		return localDb.getStatus();
 	}
 	
 	
@@ -216,7 +219,7 @@ public class DatabaseCollection
 	 * @param modelService
 	 * @param databaseId
 	 */
-	public void addDatabase(
+	public DatabaseStatus addDatabase(
 			Shell 			shell,
 			MWindow         window,
 			EPartService    service,
@@ -224,17 +227,30 @@ public class DatabaseCollection
 			String          databaseId) {
 
 		if (databaseId == null) {
-			addDatabase(shell, window, service, modelService);
-			return;
+			return addDatabase(shell, window, service, modelService);
 		}
-		if (!checkAndConfirmDatabaseExistence(shell, window, databaseId))			
-			return;
-		
+		var dbExistence = databaseWindowManager.checkAndConfirmDatabaseExistence(shell, window, databaseId);
+		if (dbExistence == DatabaseExistence.EXIST_CANCEL)		
+			return DatabaseStatus.CANCEL;
+
+		var currentDatabase   = databaseWindowManager.getDatabase(window, databaseId);
+
 		DatabaseLocal localDb = new DatabaseLocal();
 		DatabaseStatus status = localDb.setDirectory(databaseId);
-		
-		if (status == DatabaseStatus.OK)
-			addDatabase(shell, window, service, modelService, localDb);		
+
+		if (status == DatabaseStatus.OK) {
+			openDatabaseAndCreateViews(window, modelService, service, shell, localDb);
+			
+			if (dbExistence == DatabaseExistence.EXIST_REPLACE)
+				// Successfully loaded the database, and we need to replace the existing db
+				removeDatabase(window, modelService, service, currentDatabase);
+
+		} else if (status == DatabaseStatus.INEXISTENCE ||
+				   status == DatabaseStatus.INVALID     ||
+				   status == DatabaseStatus.UNKNOWN_ERROR) {
+			MessageDialog.openError(shell, "Unable to open the database", localDb.getErrorMessage());
+		}
+		return status;
 	}
 	
 	
@@ -259,34 +275,22 @@ public class DatabaseCollection
 			EModelService 	modelService,
 			String          databaseId) {
 
-		if (!checkAndConfirmDatabaseExistence(shell, window, databaseId))
+		if (databaseId != null && 
+			databaseWindowManager.checkAndConfirmDatabaseExistence(shell, window, databaseId) == DatabaseExistence.EXIST_CANCEL )
 			return;
 		
-		// hack - hack -hack
-		// we should make sure the database id is correct before removing all databases of this window
-		removeWindow(window);
+		DatabaseLocal localDb = new DatabaseLocal();
+		DatabaseStatus status = localDb.setDirectory(databaseId);
 		
-		addDatabase(shell, window, service, modelService, databaseId);		
-	}
-	
-	
-	/****
-	 * Verify if a given database is already opened or not for this window.
-	 * 
-	 * @param shell
-	 * @param window
-	 * @param databaseId
-	 * 
-	 * @return {@code boolean} true if the database has already been loaded in this window
-	 */
-	public boolean checkAndConfirmDatabaseExistence(Shell shell, MWindow window, String databaseId) {
+		if (status == DatabaseStatus.CANCEL) {
+			// should we notify the user?
+		} else if (status == DatabaseStatus.OK) {
+			removeAllDatabases(window, modelService, service);
+			openDatabaseAndCreateViews(window, modelService, service, shell, localDb);
 
-		var database = databaseWindowManager.getDatabase(window, databaseId); 
-		if (database == null)
-			return true;
-		
-		String msg = databaseId + ": The database already exists.\nDo you want to replace it?";
-		return MessageDialog.openQuestion(shell, "Database already exists", msg);
+		} else {
+			MessageDialog.openError(shell, "Unable to open the database", localDb.getErrorMessage());
+		}
 	}
 	
 	
@@ -523,13 +527,13 @@ public class DatabaseCollection
 	/***
 	 * Remove a database and all parts (views and editors) associated with it
 	 * 
-	 * @param application
+	 * @param window
 	 * @param modelService
 	 * @param partService
 	 * @param database 
 	 * 			The database to be removed. This can't be null.
 	 */
-	public void removeDatabase(MApplication application, 
+	public void removeDatabase(MWindow window, 
 							   EModelService modelService, 
 							   EPartService partService, 
 							   final IDatabase database) {
@@ -537,7 +541,27 @@ public class DatabaseCollection
 		if (database == null)
 			return;
 
-		var window = application.getSelectedElement();
+		closeParts(window, modelService, partService, database);
+		
+		// remove any database associated with this experiment
+		// some parts may need to check the database if the experiment really exits or not.
+		// If not, they will consider the experiment will be removed.
+		databaseWindowManager.removeDatabase(window, database);
+	}
+	
+	
+	/***
+	 * Close the views of a given database
+	 * 
+	 * @param window
+	 * @param modelService
+	 * @param partService
+	 * @param database
+	 */
+	private void closeParts(MWindow window, 
+			   EModelService modelService, 
+			   EPartService partService, 
+			   final IDatabase database) {
 		
 		List<MPart> listParts = modelService.findElements(window, null, MPart.class);
 		
@@ -564,23 +588,46 @@ public class DatabaseCollection
 				}
 			}
 		}
-		// remove any database associated with this experiment
-		// some parts may need to check the database if the experiment really exits or not.
-		// If not, they will consider the experiment will be removed.
-		databaseWindowManager.removeDatabase(window, database);
-	}	
-
-	
-	public void removeWindow(MWindow window) {
-		databaseWindowManager.removeWindow(window);
 	}
 	
 	
+	/****
+	 * Remove all of databases of a specified window
+	 * 
+	 * @param window
+	 * @param modelService
+	 * @param partService
+	 */
+	public void removeAllDatabases(
+			MWindow window, 
+			EModelService modelService, 
+			EPartService partService ) {
+
+		var iterator = databaseWindowManager.getIterator(window);
+		while (iterator.hasNext()) {
+			var database = iterator.next();
+			closeParts(window, modelService, partService, database);
+			iterator.remove();
+		}
+	}
+
+
+	/****
+	 * Get the number of databases of a given window
+	 * @param window
+	 * @return
+	 */
 	public int getNumDatabase(MWindow window) {
 		return databaseWindowManager.getNumDatabase(window);
 	}
 	
 	
+	/****
+	 * Get the iterator of the set of databases of a given window
+	 *  
+	 * @param window
+	 * @return
+	 */
 	public Iterator<IDatabase> getIterator(MWindow window) {
 		return databaseWindowManager.getIterator(window);
 	}
@@ -631,7 +678,7 @@ public class DatabaseCollection
 	 * @param modelService
 	 * @param partService
 	 * @param shell
-	 * @param xmlFileOrDirectory
+	 * @param database
 	 */
 	public void openDatabaseAndCreateViews( final MWindow window,
 											final EModelService modelService,

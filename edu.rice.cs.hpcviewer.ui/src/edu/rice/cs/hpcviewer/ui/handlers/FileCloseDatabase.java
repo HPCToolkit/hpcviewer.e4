@@ -31,7 +31,7 @@ public class FileCloseDatabase extends DatabaseShowMenu
 			return;
 
 		IDatabase db = (IDatabase) menu.getTransientData().get(ID_DATA_EXP);
-		database.removeDatabase(application, modelService, partService, db);
+		database.removeDatabase(application.getSelectedElement(), modelService, partService, db);
 	}
 
 

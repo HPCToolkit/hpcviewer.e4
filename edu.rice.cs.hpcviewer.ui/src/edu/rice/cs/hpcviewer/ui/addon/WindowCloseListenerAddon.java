@@ -10,6 +10,7 @@ import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.model.application.ui.basic.impl.BasicPackageImpl;
 import org.eclipse.e4.ui.workbench.IWorkbench;
 import org.eclipse.e4.ui.workbench.UIEvents;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.IWindowCloseHandler;
 import org.eclipse.emf.common.notify.Notification;
@@ -40,6 +41,9 @@ public class WindowCloseListenerAddon
 	
 	@Inject
 	EPartService partService;
+	
+	@Inject
+	EModelService modelService;
 	
 	@Inject
 	DatabaseCollection database;
@@ -86,7 +90,7 @@ public class WindowCloseListenerAddon
 
 				@Override
 				public boolean close(MWindow window) {
-					database.removeWindow(window);
+					database.removeAllDatabases(window, modelService, partService);
 					
 					return true;
 				}

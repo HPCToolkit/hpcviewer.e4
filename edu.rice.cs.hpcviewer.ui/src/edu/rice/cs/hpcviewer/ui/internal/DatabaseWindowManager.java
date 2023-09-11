@@ -7,11 +7,23 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpcbase.IDatabase;
 
 public class DatabaseWindowManager 
 {
+	/****
+	 * Status of the existence of a database in a given window
+	 * <ul>
+	 *   <li> {@code INEXIST}: the given database doesn't exist
+	 *   <li> {@code EXIST_CANCEL}: the given database already exists, but the user doesn't want to continue
+	 *   <li> {@code EXIST_REPLACE}: the database already exists and user confirms to replace it
+	 * </ul>
+	 */
+	public enum DatabaseExistence {INEXIST, EXIST_CANCEL, EXIST_REPLACE};
+	
 	/***
 	 * The map between an Eclipse window to the list of databases.
 	 * Note that each database is unique for each window. 
@@ -23,6 +35,29 @@ public class DatabaseWindowManager
 		mapWindowToExperiments = new HashMap<>(1);
 	}
 
+	
+	/***
+	 * Verify if a given database is already opened or not for this window.
+	 * 
+	 * @param shell
+	 * @param window
+	 * @param dbId
+	 * @return
+	 */
+	public DatabaseExistence checkAndConfirmDatabaseExistence(Shell shell, MWindow window, String dbId) {
+		if (dbId == null)
+			return DatabaseExistence.INEXIST;
+		
+		var db = getDatabase(window, dbId);
+		if (db == null)
+			return DatabaseExistence.INEXIST;
+				
+		String msg = dbId + ": The database already exists.\nDo you want to replace it?";
+		if ( MessageDialog.openQuestion(shell, "Database already exists", msg) )
+			return DatabaseExistence.EXIST_REPLACE;
+
+		return DatabaseExistence.EXIST_CANCEL;
+	}
 
 	/***
 	 * Retrieve the iterator of the database collection from a given window
@@ -83,6 +118,12 @@ public class DatabaseWindowManager
 	}
 	
 	
+	/****
+	 * Get the set of databases of a specific window
+	 * 
+	 * @param window
+	 * @return the set of databases or empty set. It doesn't return null
+	 */
 	public Set<IDatabase> getDatabaseSet(MWindow window) {
 		return getActiveListExperiments(window);
 	}
@@ -107,7 +148,7 @@ public class DatabaseWindowManager
 		}
 		list.add(database);
 	}
-
+	
 	
 	public void removeDatabase(MWindow window, IDatabase database) {
 		var list = getActiveListExperiments(window);
@@ -139,7 +180,7 @@ public class DatabaseWindowManager
 	private Set<IDatabase> getActiveListExperiments(MWindow window) {
 
 		if (window == null) {
-			return new HashSet<IDatabase>();
+			return new HashSet<>();
 		}
 		return mapWindowToExperiments.computeIfAbsent(window, key -> new HashSet<>());
 	}
