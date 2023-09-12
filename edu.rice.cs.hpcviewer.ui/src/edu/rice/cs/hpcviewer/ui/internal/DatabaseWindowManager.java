@@ -12,6 +12,12 @@ import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpcbase.IDatabase;
 
+/***********************************
+ * 
+ * Class to manage the database of hpcviewer windows
+ * and its associated experiment databases
+ *
+ */
 public class DatabaseWindowManager 
 {
 	/****

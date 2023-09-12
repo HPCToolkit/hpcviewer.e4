@@ -11,11 +11,15 @@ import org.hpctoolkit.hpcclient.v1_0.HpcClient;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.version4.DataMeta;
+import edu.rice.cs.hpcdata.db.version4.DataPlotEntry;
+import edu.rice.cs.hpcdata.db.version4.IDataCCT;
 import edu.rice.cs.hpcdata.db.version4.IDataProfile;
 import edu.rice.cs.hpcdata.db.version4.MetaDbFileParser;
 import edu.rice.cs.hpcdata.db.version4.MetricYamlParser;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
+import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
+import edu.rice.cs.hpcdata.tld.v4.ThreadDataCollection4;
 import edu.rice.cs.hpcdata.util.IUserData;
 import io.vavr.collection.Set;
 
@@ -32,7 +36,6 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 {
 	private DataMeta dataMeta;
 	private IDataProfile dataProfile;
-	private MetricYamlParser yamlParser;
 	private Experiment experiment;
 	
 	@Override
@@ -51,7 +54,8 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 	public void parse(HpcClient client) throws IOException, InterruptedException {
 		dataMeta    = collectMetaData(client);
 		dataProfile = collectProfileData(client, dataMeta);
-		yamlParser  = collectMetricYAML(client);
+		
+		var yamlParser  = collectMetricYAML(client);
 
 		// fix issue #17: decoupling DataMeta and DataSummary:
 		// post-processing data gathered in meta.db and profile.db is needed.
@@ -61,6 +65,11 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 
 		experiment = (Experiment) dataMeta.getExperiment();
 		
+		var dataPlot = collectCCTData(client);
+		IThreadDataCollection threadData = new ThreadDataCollection4(dataProfile, dataPlot);
+		
+		experiment.setThreadData(threadData);
+		
 		// Reset the new list of metric descriptors to the experiment database
 		// Note: Metrics are based on the yaml file, not meta.db
 		experiment.setMetrics(yamlParser.getListMetrics());
@@ -68,12 +77,28 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 	}
 	
 	
+	/***
+	 * Retrieve the experiment object.
+	 * User needs to call {@code parse} method first before calling this one.
+	 * 
+	 * @return
+	 */
 	public Experiment getExperiment() {
 		return experiment;
 	}
 	
 	
-	private DataMeta collectMetaData(HpcClient client) throws IOException, InterruptedException {
+	/****
+	 * Special method to get the remote meta.db file
+	 * 
+	 * @param client
+	 * 
+	 * @return {@code DataMeta}
+	 * 
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public DataMeta collectMetaData(HpcClient client) throws IOException, InterruptedException {
 		var metaDBbytes   = client.getMetaDbFileContents();
 		ByteBuffer buffer = ByteBuffer.wrap(metaDBbytes);
 		
@@ -101,5 +126,23 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 		var inputStream = new ByteArrayInputStream(yamlBytes);
 		
 		return new MetricYamlParser(inputStream, dataMeta, dataProfile);
-	}	
+	}
+	
+	
+	private IDataCCT collectCCTData(HpcClient client) {
+		return new IDataCCT() {
+			
+			@Override
+			public DataPlotEntry[] getPlotEntry(int cct, int metric) throws IOException {
+				// TODO Auto-generated method stub
+				return null;
+			}
+			
+			@Override
+			public void close() throws IOException {
+				// TODO Auto-generated method stub
+				
+			}
+		};
+	}
 }
