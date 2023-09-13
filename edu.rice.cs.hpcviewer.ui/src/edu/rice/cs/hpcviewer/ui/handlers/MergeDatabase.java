@@ -13,8 +13,11 @@ import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 
+import edu.rice.cs.hpcbase.IDatabase;
 import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
+import edu.rice.cs.hpclocal.DatabaseLocal;
 import edu.rice.cs.hpcmerge.MergeManager;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 
@@ -85,8 +88,8 @@ public class MergeDatabase
 			
 			@Override
 			public void mergeDone(Experiment experiment) {
-				String message = "The two databases have been merged";
-				database.createViewsAndAddDatabase(experiment, window, service, modelService, message);
+				var db = new DatabaseMerged(experiment);
+				database.addDatabase(shell, window, service, modelService, db);
 			}
 		});
 	}
@@ -105,6 +108,43 @@ public class MergeDatabase
 			}
 		}		
 		return numDb>=2;
+	}
+	
+	
+	static class DatabaseMerged implements IDatabase
+	{
+		final Experiment experiment;
+		
+		public DatabaseMerged(Experiment experiment) {
+			this.experiment = experiment;
+		}
+
+		@Override
+		public String getId() {
+			return experiment.getID();
+		}
+
+		@Override
+		public DatabaseStatus open(Shell shell) {
+			return DatabaseStatus.OK;
+		}
+
+		@Override
+		public DatabaseStatus getStatus() {
+			return DatabaseStatus.OK;
+		}
+
+		@Override
+		public void close() {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public IExperiment getExperimentObject() {
+			return experiment;
+		}
+		
 	}
 		
 }

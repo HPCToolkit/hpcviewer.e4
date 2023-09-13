@@ -10,6 +10,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
 import edu.rice.cs.hpcdata.merge.DatabasesToMerge;
 import edu.rice.cs.hpcmerge.DatabaseMergeWizard;
 import edu.rice.cs.hpctest.util.TestDatabase;
@@ -28,11 +29,13 @@ public class DatabaseMergeTest {
 		var dirs = TestDatabase.getDatabases();
 		List<Experiment> list = new ArrayList<>(2);
 		var exp1 = new Experiment();
-		exp1.open(dirs[0], null, true);
+		
+		var localDb = new LocalDatabaseRepresentation(dirs[0], null, true);
+		exp1.open(localDb);
 		list.add(exp1);
 		
 		var exp2 = new Experiment();
-		exp2.open(dirs[0], null, true);		
+		exp2.open(localDb);		
 		list.add(exp2);
 
 		DatabaseMergeWizard wz = new DatabaseMergeWizard(list);

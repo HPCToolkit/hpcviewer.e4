@@ -8,10 +8,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import edu.rice.cs.hpcbase.map.ProcedureAliasMap;
 import edu.rice.cs.hpcdata.db.DatabaseManager;
-import edu.rice.cs.hpcdata.experiment.Experiment;
-import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.util.Util;
 import edu.rice.cs.hpcdata.util.Util.DatabaseFileFilter;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
@@ -50,30 +47,7 @@ public class ExperimentManager
 		
 		return new File[0];
 	}
-	
-	/**
-	 * Open a database given a path to the database directory
-	 * @param sPath : absolute path of the database directory
-	 * @param flag : whether to show callers view or not
-	 * 
-	 * @return true if the database has been successfully opened
-	 * @throws Exception 
-	 */
-	public IExperiment openDatabaseFromDirectory(Shell shell, String sPath) throws Exception {
-		if (!checkDirectory(sPath))
-			return null;
 		
-		File []fileXML = getListOfDatabaseFiles(sPath);
-		if (fileXML == null)
-			return null;
-		
-		String filename = getFileExperimentFromListOfFiles(fileXML);
-		if (filename != null) {
-			return loadExperiment(filename);
-		}
-		return null;
-	}
-	
 	
 	/**
 	 * Attempt to open an experiment database if valid then
@@ -154,20 +128,5 @@ public class ExperimentManager
 		ViewerPreferenceManager.setLastPath(sPath);
 		
 		return dbFiles;
-	}
-	
-
-	/****
-	 * Open and load the experiment.xml file, then return an instance of experiment object 
-	 * @param shell
-	 * @param sFilename
-	 * @return
-	 * @throws Exception
-	 */
-	public IExperiment loadExperiment(final String sFilename) throws Exception {
-		Experiment experiment = new Experiment();
-		experiment.open( new File(sFilename), new ProcedureAliasMap(), true );
-
-		return experiment;
 	}
 }

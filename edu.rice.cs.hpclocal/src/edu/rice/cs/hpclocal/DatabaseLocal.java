@@ -7,9 +7,11 @@ import java.nio.file.Paths;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 
+import edu.rice.cs.hpcbase.map.ProcedureAliasMap;
 import edu.rice.cs.hpcdata.db.DatabaseManager;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
+import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
 
 public class DatabaseLocal implements IDatabaseLocal 
 {
@@ -83,8 +85,12 @@ public class DatabaseLocal implements IDatabaseLocal
 			return DatabaseStatus.INVALID;
 		}
 		experiment = new Experiment();
+		
+		ProcedureAliasMap map = new ProcedureAliasMap();		
+		var localDb = new LocalDatabaseRepresentation(file, map, true);
+		
 		try {
-			experiment.open(file, null, Experiment.ExperimentOpenFlag.TREE_ALL);
+			experiment.open(localDb, Experiment.ExperimentOpenFlag.TREE_ALL);
 		} catch (Exception e) {
 			errorMsg = e.getClass().getName() + ": " + e.getMessage();			
 			return status;

@@ -331,29 +331,6 @@ public class DatabaseCollection
 	}
 	
 	
-	/****
-	 * The {@code Experiment} object version of {@link createViewsAndAddDatabase}
-	 * 
-	 * @param experiment
-	 * 			an experiment from a local database.
-	 * @param window
-	 * @param service
-	 * @param modelService
-	 * @param message
-	 */
-	public void createViewsAndAddDatabase(
-			IExperiment    experiment, 
-			MWindow        window, 
-			EPartService   service,
-			EModelService  modelService,
-			String         message) {
-		
-		var database = databaseWindowManager.getDatabase(window, experiment.getDirectory());
-		
-		createViewsAndAddDatabase(database, window, service, modelService, message);
-	}
-	
-
 	/***
 	 * The main method to display a profile part and prepare for the trace part 
 	 * 

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Locale;
 import edu.rice.cs.hpcdata.db.version2.FileDB2;
 import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
 import edu.rice.cs.hpcdata.trace.TraceRecord;
 import edu.rice.cs.hpcdata.util.Constants;
@@ -39,8 +40,9 @@ public class TracePrinter
 		// ------------------------------------------------------------------------
 		
 		final Experiment experiment = new Experiment();
+		LocalDatabaseRepresentation localDb = new LocalDatabaseRepresentation(new File(args[0]), null, true);
 		try {
-			experiment.open(new File(args[0]), null, false);
+			experiment.open(localDb);
 		} catch (Exception e) {
 			return;
 		}

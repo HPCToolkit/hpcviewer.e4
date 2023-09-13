@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpctest.util.TestDatabase;
 import edu.rice.cs.hpctree.IScopeTreeData;
@@ -28,8 +29,9 @@ public class DatabaseWalker
 			assertNotNull(path);
 
 			var experiment = new Experiment();
+			var localDb = new LocalDatabaseRepresentation(path, null, true);
 			try {
-				experiment.open(path, null, Experiment.ExperimentOpenFlag.TREE_ALL);
+				experiment.open(localDb);
 			} catch (Exception e) {
 				assertFalse(e.getMessage(), true);
 			}			

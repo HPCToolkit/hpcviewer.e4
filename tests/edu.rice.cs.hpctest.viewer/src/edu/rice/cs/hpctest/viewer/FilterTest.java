@@ -8,6 +8,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
 import edu.rice.cs.hpcdata.filter.FilterAttribute;
 import edu.rice.cs.hpcfilter.service.FilterMap;
 import edu.rice.cs.hpctest.util.TestDatabase;
@@ -26,8 +27,9 @@ public class FilterTest {
 			assertNotNull(dbp);
 
 			experiments[i]= new Experiment();
+			LocalDatabaseRepresentation localDb = new LocalDatabaseRepresentation(dbp, null, true);
 			try {
-				experiments[i].open(dbp, null, Experiment.ExperimentOpenFlag.TREE_CCT_ONLY);
+				experiments[i].open(localDb);
 			} catch (Exception e) {
 				assertFalse(e.getMessage(), true);
 			}
