@@ -354,7 +354,7 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 	
 	
 	/***
-	 * Display the content of a file, and highligjt a specified line number (generic version).
+	 * Display the content of a file, and highlight a specified line number (generic version).
 	 * 
 	 * @param obj the object that identified this editor. It has to be either a scope or an experiment
 	 * @param filename the complete path of the file name

@@ -42,7 +42,7 @@ public class LocalDBOpener extends AbstractDBOpener
 		this.context   = context;
 		this.experiment = experiment2;
 		version = experiment2.getMajorVersion();
-		String directory = experiment2.getPath();
+		String directory = experiment2.getDirectory();
 		
 		if (directoryHasTraceData(directory)<=0) {
 			throw new IllegalArgumentException("The directory does not contain hpctoolkit database with trace data:"

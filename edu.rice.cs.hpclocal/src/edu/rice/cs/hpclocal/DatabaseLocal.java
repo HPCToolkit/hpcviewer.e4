@@ -53,7 +53,7 @@ public class DatabaseLocal implements IDatabaseLocal
 
 	@Override
 	public String getDirectory() {
-		return experiment.getDirectory();
+		return experiment.getID();
 	}
 
 	@Override

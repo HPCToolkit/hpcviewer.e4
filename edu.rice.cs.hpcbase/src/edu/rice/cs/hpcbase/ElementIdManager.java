@@ -19,7 +19,7 @@ public class ElementIdManager
 	
 	public static String getElementId(IExperiment iExperiment) {
 		// has to set the element Id before populating the view
-		return iExperiment.getPath();
+		return iExperiment.getDirectory();
 	}
 	
 	public static String getElementId(RootScope root) {

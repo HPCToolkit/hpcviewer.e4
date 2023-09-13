@@ -75,7 +75,7 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 		
 		final TraceAttribute trAttribute = (TraceAttribute) exp.getTraceAttribute();		
 		final int version = exp.getMajorVersion();
-		var location = Path.of(exp.getPath()).getParent().toFile();
+		var location = Path.of(exp.getDirectory()).toFile();
 		String traceFilePath = location.getAbsolutePath();
 		
 		if (version == 1 || version == Constants.EXPERIMENT_DENSED_VERSION)
@@ -90,7 +90,6 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 		fileDB.open(traceFilePath, trAttribute.dbHeaderSize, RECORD_SIZE);
 		this.fileDB = fileDB;
 		
-		// TODO: ugly code
 		dataTrace  = new BaseData(getFileDB());  
 	}
 
@@ -133,7 +132,7 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 
 	@Override
 	public String getName() {
-		return exp.getPath();
+		return exp.getDirectory();
 	}
 	
 	/*********************

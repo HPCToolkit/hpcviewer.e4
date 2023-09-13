@@ -18,7 +18,7 @@ import edu.rice.cs.hpcdata.merge.DatabasesToMerge;
 
 public class ChooseDatabasePage extends WizardPage 
 {
-	static private final String TITLE = "Databases to merge";
+	private static final String TITLE = "Databases to merge";
 
 	private CheckboxTableViewer tableViewer ;
 	private List<Experiment> listDb;
@@ -54,8 +54,7 @@ public class ChooseDatabasePage extends WizardPage
 			@Override
 			public String getText(Object element) {
 				Experiment exp = (Experiment) element;
-				String str = exp.getExperimentFile().getAbsolutePath(); 
-				return str; 				
+				return exp.getDirectory(); 				
 			}
 		});
 		tableViewer.addCheckStateListener(event -> {

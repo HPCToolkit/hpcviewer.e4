@@ -44,6 +44,8 @@ public class RemoteDatabase implements IRemoteDatabase, IDatabaseRepresentation
 			sb.append(':');
 			sb.append(port);
 		}
+		sb.append('/');
+		sb.append( experiment.getDirectory() );
 		
 		return sb.toString();
 	}
