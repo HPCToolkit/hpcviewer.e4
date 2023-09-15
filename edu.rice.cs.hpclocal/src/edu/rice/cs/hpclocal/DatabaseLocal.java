@@ -90,7 +90,7 @@ public class DatabaseLocal implements IDatabaseLocal
 		var localDb = new LocalDatabaseRepresentation(file, map, true);
 		
 		try {
-			experiment.open(localDb, Experiment.ExperimentOpenFlag.TREE_ALL);
+			experiment.open(localDb);
 		} catch (Exception e) {
 			errorMsg = e.getClass().getName() + ": " + e.getMessage();			
 			return status;

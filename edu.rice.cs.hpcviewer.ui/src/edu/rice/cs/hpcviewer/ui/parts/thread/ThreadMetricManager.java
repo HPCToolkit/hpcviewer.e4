@@ -1,12 +1,9 @@
 package edu.rice.cs.hpcviewer.ui.parts.thread;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.DoubleStream;
-
 import org.eclipse.collections.api.map.primitive.MutableIntObjectMap;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
@@ -15,12 +12,11 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.event.ListEventListener;
 import edu.rice.cs.hpcdata.db.IdTuple;
-import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
-import edu.rice.cs.hpcdata.experiment.scope.RootScope;
+import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 
@@ -115,19 +111,10 @@ public class ThreadMetricManager implements IMetricManager
 		List<BaseMetric> metrics = getVisibleMetrics();
 		List<Integer> listIDs = new ArrayList<>(metrics.size());
 
-		RootScope root = scope.getRootScope();
-		try {
-			IThreadDataCollection threadData = root.getExperiment().getThreadData();
-			for (var metric: metrics) {
-				var vals = threadData.getMetrics(scope, metric, getMetricCount());
-				var notEmpty = DoubleStream.of(vals).anyMatch(v -> v != 0.0d);
-				if (notEmpty)
-					listIDs.add(metric.getIndex());
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
+		for (var metric: metrics) {
+			var value = scope.getMetricValue(metric);
+			if (value != MetricValue.NONE)
+				listIDs.add(metric.getIndex());
 		}
 		return listIDs;
 	}

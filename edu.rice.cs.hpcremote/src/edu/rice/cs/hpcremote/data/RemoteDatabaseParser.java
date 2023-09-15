@@ -74,6 +74,8 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 		// Note: Metrics are based on the yaml file, not meta.db
 		experiment.setMetrics(yamlParser.getListMetrics());
 		experiment.setMetricRaw(yamlParser.getRawMetrics());
+		
+		experiment.postprocess();
 	}
 	
 	
@@ -109,6 +111,17 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 	}
 	
 	
+	public DataMeta collectMetaData(HpcClient client, IExperiment experiment) throws IOException, InterruptedException {
+		var metaDBbytes   = client.getMetaDbFileContents();
+		ByteBuffer buffer = ByteBuffer.wrap(metaDBbytes);
+		
+		DataMeta data = new DataMeta();
+		data.open(experiment, buffer);
+		
+		return data;
+	}
+	
+	
 	private IDataProfile collectProfileData(HpcClient client, DataMeta dataMeta) throws IOException, InterruptedException {
 		Set<IdTuple> idtuples = client.getHierarchicalIdentifierTuples();
 		List<IdTuple> list = new ArrayList<>(idtuples.size());
@@ -129,19 +142,17 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 	}
 	
 	
-	private IDataCCT collectCCTData(HpcClient client) {
+	private IDataCCT collectCCTData(final HpcClient client) {
 		return new IDataCCT() {
 			
 			@Override
 			public DataPlotEntry[] getPlotEntry(int cct, int metric) throws IOException {
-				// TODO Auto-generated method stub
-				return null;
+				return new DataPlotEntry[0];
 			}
 			
 			@Override
 			public void close() throws IOException {
-				// TODO Auto-generated method stub
-				
+				// nothing
 			}
 		};
 	}
