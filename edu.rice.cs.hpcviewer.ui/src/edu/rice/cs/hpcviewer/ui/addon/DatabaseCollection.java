@@ -83,6 +83,7 @@ public class DatabaseCollection
 	private @Inject UISynchronize sync;
 
 	private Logger statusReporter;
+	private MApplication application;
 
 	private final DatabaseWindowManager databaseWindowManager;
 	
@@ -111,6 +112,7 @@ public class DatabaseCollection
 			@Named(IServiceConstants.ACTIVE_SHELL) Shell myShell) throws InterruptedException {
 		
 		this.eventBroker    = broker;
+		this.application    = application;
 		this.statusReporter = LoggerFactory.getLogger(getClass());
 
 		// handling the command line arguments:
@@ -361,7 +363,7 @@ public class DatabaseCollection
 			
 			// using asyncExec we hope Eclipse will delay the processing until the UI 
 			// is ready. This doesn't guarantee anything, but works in most cases :-(
-			sync.asyncExec(()-> showPart(database, window, modelService, message));
+			sync.asyncExec(()-> showPart(database, application.getSelectedElement(), modelService, message));
 			return -1;
 		}
 
