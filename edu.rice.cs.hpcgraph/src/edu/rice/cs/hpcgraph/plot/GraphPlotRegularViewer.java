@@ -11,7 +11,6 @@ import org.eclipse.swtchart.ILineSeries;
 
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
-import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcgraph.GraphEditorInput;
 import edu.rice.cs.hpcgraph.internal.IGraphTranslator;
@@ -67,14 +66,8 @@ public class GraphPlotRegularViewer extends AbstractGraphPlotViewer
 	@Override
 	protected double[] getValuesY(Scope scope, BaseMetric metric) throws Exception {
 		
-		int size = 0;
-		
-		// in case of old database, the metric is from MetricRaw
-		if (metric instanceof MetricRaw) {
-			size = ((MetricRaw)metric).getSize();
-		}
 		IThreadDataCollection threadData = getInput().getThreadData();
-		return threadData.getMetrics(scope, metric, size);
+		return threadData.getMetrics(scope, metric);
 	}
 
 	@Override

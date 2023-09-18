@@ -286,29 +286,34 @@ public class TopDownPart extends AbstractTableView
 		}
 
 		@Override
-		public double getMetric(Scope scope, BaseMetric metric, IdTuple idtuple, int numMetrics) throws IOException {
+		public double getMetric(Scope scope, BaseMetric metric, IdTuple idtuple) throws IOException {
 			return 0;
 		}
 
 		@Override
-		public double[] getMetrics(Scope scope, BaseMetric metric, int numMetrics) throws Exception {
+		public double[] getMetrics(Scope scope, BaseMetric metric) throws Exception {
 			return new double[0];
 		}
 
 		@Override
-		public double getMetric(long nodeIndex, int metricIndex, IdTuple idtuple, int numMetrics) throws IOException {
+		public double getMetric(long nodeIndex, int metricIndex, IdTuple idtuple) throws IOException {
 			return 0;
 		}
 
 		@Override
-		public double[] getMetrics(long nodeIndex, int metricIndex, int numMetrics) throws Exception {
+		public double[] getMetrics(long nodeIndex, int metricIndex) throws Exception {
 			return new double[0];
 		}
 
 		@Override
-		public double[] getScopeMetrics(int thread_id, int MetricIndex, int numMetrics) throws IOException {
+		public double[] getMetrics(IdTuple idTuple, Scope scope) throws IOException {
 			return new double[0];
 		}
+
+		@Override
+		public double[] getScopeMetrics(IdTuple idTuple, int MetricIndex) throws IOException {
+			return new double[0];
+		}		
 
 		@Override
 		public List<IdTuple> getIdTupleListWithoutGPU(IdTupleType idtype) {
@@ -318,6 +323,6 @@ public class TopDownPart extends AbstractTableView
 		@Override
 		public Object[] getIdTupleLabelWithoutGPU(IdTupleType idtype) {
 			return new Object[0];
-		}		
+		}
 	}
 }

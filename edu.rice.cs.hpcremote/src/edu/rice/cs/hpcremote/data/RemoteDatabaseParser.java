@@ -35,7 +35,6 @@ import io.vavr.collection.Set;
 public class RemoteDatabaseParser extends MetaDbFileParser 
 {
 	private DataMeta dataMeta;
-	private IDataProfile dataProfile;
 	private Experiment experiment;
 	
 	@Override
@@ -53,9 +52,9 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 	 */
 	public void parse(HpcClient client) throws IOException, InterruptedException {
 		dataMeta    = collectMetaData(client);
-		dataProfile = collectProfileData(client, dataMeta);
+		var dataProfile = collectProfileData(client, dataMeta);
 		
-		var yamlParser  = collectMetricYAML(client);
+		var yamlParser  = collectMetricYAML(client, dataProfile);
 
 		// fix issue #17: decoupling DataMeta and DataSummary:
 		// post-processing data gathered in meta.db and profile.db is needed.
@@ -66,14 +65,16 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 		experiment = (Experiment) dataMeta.getExperiment();
 		
 		var dataPlot = collectCCTData(client);
-		IThreadDataCollection threadData = new ThreadDataCollection4(dataProfile, dataPlot);
+		var rawMetrics = yamlParser.getRawMetrics();
+		
+		IThreadDataCollection threadData = new ThreadDataCollection4(dataProfile, dataPlot, rawMetrics.size());
 		
 		experiment.setThreadData(threadData);
 		
 		// Reset the new list of metric descriptors to the experiment database
 		// Note: Metrics are based on the yaml file, not meta.db
 		experiment.setMetrics(yamlParser.getListMetrics());
-		experiment.setMetricRaw(yamlParser.getRawMetrics());
+		experiment.setMetricRaw(rawMetrics);
 		
 		experiment.postprocess();
 	}
@@ -134,7 +135,7 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 	}
 
 	
-	private MetricYamlParser collectMetricYAML(HpcClient client) throws IOException, InterruptedException {
+	private MetricYamlParser collectMetricYAML(HpcClient client, IDataProfile dataProfile) throws IOException, InterruptedException {
 		var yamlBytes = client.getMetricsDefaultYamlContents();
 		var inputStream = new ByteArrayInputStream(yamlBytes);
 		
