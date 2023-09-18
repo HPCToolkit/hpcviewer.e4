@@ -53,7 +53,7 @@ public class RemoteDatabaseRepresentation implements IDatabaseRepresentation
 	@Override
 	public int getTraceDataVersion() {
 		try {
-			if (client.getMinimumTraceSampleTimestamp().isPresent())
+			if (client.isTraceSampleDataAvailable())
 				return Constants.EXPERIMENT_SPARSE_VERSION;
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
