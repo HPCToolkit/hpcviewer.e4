@@ -23,7 +23,7 @@ public class DatabaseSwitch extends RecentDatabase
 						   EPartService partService, 
 						   Shell shell,
 						   String database) {
-		
+
 		dbCollection.switchDatabase(shell, window, partService, modelService, database);
 	}
 

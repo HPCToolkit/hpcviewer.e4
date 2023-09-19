@@ -524,11 +524,8 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 		// clean up the history to avoid memory spills
 		var history = getOperationHistory();
 		for(var strCtx: BaseTraceContext.CONTEXTS) {
-			var context = getContext(strCtx);
-			history.dispose(context, true, true, true);
+			history.dispose(getContext(strCtx), true, true, true);
 		}
-		if (database != null)
-			database.close();
 		database = null;
 		
 		// mark that this part will be close soon. Do not do any tasks

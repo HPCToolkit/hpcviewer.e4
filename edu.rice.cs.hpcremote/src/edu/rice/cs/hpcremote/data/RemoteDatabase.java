@@ -53,6 +53,11 @@ public class RemoteDatabase implements IRemoteDatabase
 		return client;
 	}
 
+	
+	public DatabaseStatus open(Shell shell, String databaseId) {
+		// not implemented yet
+		return open(shell);
+	}
 
 	@Override
 	public DatabaseStatus open(Shell shell) {

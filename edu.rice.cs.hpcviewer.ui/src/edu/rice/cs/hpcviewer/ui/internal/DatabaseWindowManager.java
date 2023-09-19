@@ -55,7 +55,7 @@ public class DatabaseWindowManager
 			return DatabaseExistence.INEXIST;
 		
 		var db = getDatabase(window, dbId);
-		if (db == null)
+		if (db == null || db.isEmpty())
 			return DatabaseExistence.INEXIST;
 				
 		String msg = dbId + ": The database already exists.\nDo you want to replace it?";
@@ -109,18 +109,20 @@ public class DatabaseWindowManager
 	 * 
 	 * @return IDatabase object if the database exist, null otherwise.
 	 */
-	public IDatabase getDatabase(MWindow window, String databaseId) {
+	public Set<IDatabase> getDatabase(MWindow window, String databaseId) {
 		var list = getActiveListExperiments(window);
 
 		if (list.isEmpty())
-			return null;
+			return Collections.emptySet();
 
+		var result = new HashSet<IDatabase>();
+		
 		for (var data: list) {
 			if (data.getId().equals(databaseId)) {
-				return data;
+				result.add(data);
 			}
 		}
-		return null;
+		return result;
 	}
 	
 	
@@ -146,12 +148,9 @@ public class DatabaseWindowManager
 	 */
 	public void addDatabase(MWindow window, IDatabase database) {
 		var list = getActiveListExperiments(window);
-		
-		// find the existing database if any
-		var existingDb = getDatabase(window, database.getId());
-		if (existingDb != null) {
-			list.remove(existingDb);
-		}
+
+		// naively add the database even if the list has the same 
+		// database id with different database object
 		list.add(database);
 	}
 	

@@ -11,6 +11,7 @@ import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.model.application.ui.menu.MDirectMenuItem;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenuElement;
+import org.eclipse.e4.ui.model.application.ui.menu.MMenuSeparator;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
@@ -50,8 +51,29 @@ public abstract class RecentDatabase
 			
 			items.add(menu);
 		}
+		addClearMenu(items, modelService);
 	}
-	
+
+	private void addClearMenu(
+			List<MMenuElement> items, 
+			EModelService modelService) {
+		
+		var separator = modelService.createModelElement(MMenuSeparator.class);
+		items.add(separator);
+		
+		MDirectMenuItem menu = modelService.createModelElement(MDirectMenuItem.class);
+		
+		final String label = "Clear history";
+		
+		menu.setElementId(label);
+		menu.setLabel(label);
+		menu.setContributionURI(getURI());
+		menu.getTransientData().put(ID_DATA_ECP, null);
+		
+		items.add(menu);
+
+	}
+
 	@Execute
 	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell shell,
 						MApplication application, 
@@ -61,8 +83,14 @@ public abstract class RecentDatabase
 						EPartService partService) {
 	
 		String db = (String) menu.getTransientData().get(ID_DATA_ECP);
-		execute(application, window, modelService, partService, shell, db);
+		if (db == null) {
+			UserInputHistory history = new UserInputHistory(HISTORY_DATABASE_RECENT, HISTORY_MAX);
+			history.clear();
+		} else {
+			execute(application, window, modelService, partService, shell, db);
+		}
 	}
+
 	
 	protected abstract String getURI();
 	

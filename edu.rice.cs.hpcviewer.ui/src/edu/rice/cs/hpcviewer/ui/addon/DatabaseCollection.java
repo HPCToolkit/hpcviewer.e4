@@ -50,6 +50,7 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 import edu.rice.cs.hpcfilter.service.FilterMap;
 import edu.rice.cs.hpclocal.DatabaseLocal;
+import edu.rice.cs.hpcremote.data.RemoteDatabase;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpctraceviewer.ui.TracePart;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
@@ -165,18 +166,33 @@ public class DatabaseCollection
 			EPartService    service,
 			EModelService 	modelService,
 			IDatabase       database) {
+		
+		var databaseId = database.getId();
+		var dbExistence = databaseWindowManager.checkAndConfirmDatabaseExistence(shell, window, databaseId);
+		if (dbExistence == DatabaseExistence.EXIST_CANCEL)		
+			return DatabaseStatus.CANCEL;
 
 		if ( database.getStatus() == DatabaseStatus.NOT_INITIALIZED &&
 		   ( database.open(shell) != IDatabase.DatabaseStatus.OK) ) {
-			
+			// cannot open the database
+			// should we log it?
 			return database.getStatus();
 		}
 
 		if (database.getExperimentObject() == null)
 			return DatabaseStatus.INEXISTENCE;
 
-		// On Linux TWM window manager, the window may not be ready yet.
-		openDatabaseAndCreateViews(window, modelService, service, shell, database);
+		var status = database.getStatus();
+		if (status == DatabaseStatus.OK) {
+			var currentDatabase   = databaseWindowManager.getDatabase(window, databaseId);
+
+			// On Linux TWM window manager, the window may not be ready yet.
+			openDatabaseAndCreateViews(window, modelService, service, shell, database);
+
+			if (!currentDatabase.isEmpty() && dbExistence == DatabaseExistence.EXIST_REPLACE)
+				for(var db: currentDatabase)
+					removeDatabase(window, modelService, service, db);
+		}
 		
 		return DatabaseStatus.OK;
 	}
@@ -229,28 +245,17 @@ public class DatabaseCollection
 		if (databaseId == null) {
 			return addDatabase(shell, window, service, modelService);
 		}
-		var dbExistence = databaseWindowManager.checkAndConfirmDatabaseExistence(shell, window, databaseId);
-		if (dbExistence == DatabaseExistence.EXIST_CANCEL)		
-			return DatabaseStatus.CANCEL;
 
-		var currentDatabase   = databaseWindowManager.getDatabase(window, databaseId);
-
-		DatabaseLocal localDb = new DatabaseLocal();
-		DatabaseStatus status = localDb.setDirectory(databaseId);
-
-		if (status == DatabaseStatus.OK) {
-			openDatabaseAndCreateViews(window, modelService, service, shell, localDb);
-			
-			if (dbExistence == DatabaseExistence.EXIST_REPLACE)
-				// Successfully loaded the database, and we need to replace the existing db
-				removeDatabase(window, modelService, service, currentDatabase);
-
-		} else if (status == DatabaseStatus.INEXISTENCE ||
-				   status == DatabaseStatus.INVALID     ||
-				   status == DatabaseStatus.UNKNOWN_ERROR) {
-			MessageDialog.openError(shell, "Unable to open the database", localDb.getErrorMessage());
+		IDatabase database;
+		
+		if (isRemote(databaseId)) {
+			database = new RemoteDatabase();
+			database.open(shell);
+		} else { 
+			database = new DatabaseLocal();
+			((DatabaseLocal) database).setDirectory(databaseId);
 		}
-		return status;
+		return addDatabase(shell, window, service, modelService, database);
 	}
 	
 	
@@ -279,21 +284,54 @@ public class DatabaseCollection
 			databaseWindowManager.checkAndConfirmDatabaseExistence(shell, window, databaseId) == DatabaseExistence.EXIST_CANCEL )
 			return;
 		
-		DatabaseLocal localDb = new DatabaseLocal();
-		DatabaseStatus status = localDb.setDirectory(databaseId);
+		IDatabase database;
+		DatabaseStatus status;
+		
+		if (isRemote(databaseId)) {
+			database = new RemoteDatabase();
+			status = database.open(shell);
+		} else {
+			database = new DatabaseLocal();
+			status = ((DatabaseLocal) database).setDirectory(databaseId);
+		}
 		
 		if (status == DatabaseStatus.CANCEL) {
 			// should we notify the user?
 		} else if (status == DatabaseStatus.OK) {
 			removeAllDatabases(window, modelService, service);
-			openDatabaseAndCreateViews(window, modelService, service, shell, localDb);
+			openDatabaseAndCreateViews(window, modelService, service, shell, database);
 
 		} else {
-			MessageDialog.openError(shell, "Unable to open the database", localDb.getErrorMessage());
+			MessageDialog.openError(shell, "Unable to open the database", databaseId + ": not a valid database");
 		}
 	}
 	
 	
+	/****
+	 * Check if the id is for remote or not
+	 * 
+	 * @param databaseId
+	 * 			The database id
+	 * 
+	 * @return {@code boolean} true if it's a remote database 
+	 * 
+	 */
+	private boolean isRemote(String databaseId) {
+		var colon = databaseId.indexOf(':');
+		var slash = databaseId.indexOf('/');
+		var port  = databaseId.substring(colon+1, slash);
+		
+		if (colon <= 0 && slash < 1)
+			return false;
+		
+		for(int i=0; i<port.length(); i++) {
+			char c = port.charAt(i);
+			if (c < '0' || c > '9')
+				return false;
+		}
+		return true;
+	}
+
 	/****
 	 * Add a new database into the collection.
 	 * This database can be remove later on by calling {@code removeLast}

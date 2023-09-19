@@ -43,7 +43,7 @@ public abstract class DatabaseShowMenu
 			items.add(menu);
 		}
 	}
-		
+
 	
 	@CanExecute
 	public boolean canExecute(MWindow window) {		
