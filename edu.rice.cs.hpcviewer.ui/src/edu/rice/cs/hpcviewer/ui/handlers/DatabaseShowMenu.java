@@ -41,7 +41,7 @@ public abstract class DatabaseShowMenu
 			menu.getTransientData().put(ID_DATA_EXP, database);
 			
 			items.add(menu);
-		}		
+		}
 	}
 		
 	

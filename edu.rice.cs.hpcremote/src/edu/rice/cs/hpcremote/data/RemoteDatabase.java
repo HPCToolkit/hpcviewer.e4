@@ -120,4 +120,14 @@ public class RemoteDatabase implements IRemoteDatabase
 	public DatabaseStatus getStatus() {
 		return status;
 	}
+
+	@Override
+	public boolean hasTraceData() {
+		try {
+			return client.isTraceSampleDataAvailable();
+		} catch (IOException | InterruptedException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
 }

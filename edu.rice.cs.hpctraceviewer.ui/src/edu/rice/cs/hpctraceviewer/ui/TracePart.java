@@ -24,6 +24,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
 import edu.rice.cs.hpcbase.BaseConstants;
+import edu.rice.cs.hpcbase.IDatabase;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceConstants;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
@@ -90,7 +91,7 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 
 	private final HashMap<String, IUndoContext> mapLabelToContext;
 	
-	private BaseExperiment experiment;
+	private IDatabase database;
 	
 	private CTabFolder tabFolderTopLeft;
 	private CTabFolder tabFolderBottomLeft;
@@ -356,12 +357,18 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 	
 	@Override
 	public BaseExperiment getExperiment() {
-		return experiment;
+		if (database != null)
+			return (BaseExperiment) database.getExperimentObject();
+		
+		return null;
 	}
 
 	@Override
 	public void setInput( Object input) {
-		this.experiment = (BaseExperiment) input;
+		if (input instanceof IDatabase)
+			this.database = (IDatabase) input;
+		else
+			throw new IllegalArgumentException("input must be an object of " + IDatabase.class.getName());
 	}
 
 	@Override
@@ -386,11 +393,11 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 		if (eventBroker == null || partService == null)
 			return;
 		
-		if (experiment == null || experiment.getRootScope() == null)
+		if (database == null || database.getExperimentObject().getRootScope() == null)
 			return;
 		
 		try {
-			AbstractDBOpener dbOpener = new LocalDBOpener(context, experiment);
+			AbstractDBOpener dbOpener = new LocalDBOpener(context, database.getExperimentObject());
 			stdc = dbOpener.openDBAndCreateSTDC(null);
 
 			// make sure all the tabs other than trace view has the stdc first
@@ -478,7 +485,11 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 	@Override
 	public void handleEvent(Event event) {
 		Object obj = event.getProperty(IEventBroker.DATA);
-		if (obj == null || experiment == null)
+		if (obj == null || database == null)
+			return;
+		
+		var experiment = database.getExperimentObject();
+		if (experiment == null)
 			return;
 		
 		// check if we have a generic event
@@ -516,8 +527,9 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 			var context = getContext(strCtx);
 			history.dispose(context, true, true, true);
 		}
-		
-		experiment = null;
+		if (database != null)
+			database.close();
+		database = null;
 		
 		// mark that this part will be close soon. Do not do any tasks
 		partService = null;

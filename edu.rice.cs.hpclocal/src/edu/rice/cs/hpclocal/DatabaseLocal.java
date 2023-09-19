@@ -112,4 +112,9 @@ public class DatabaseLocal implements IDatabaseLocal
 	public DatabaseStatus getStatus() {
 		return status;
 	}
+
+	@Override
+	public boolean hasTraceData() {
+		return experiment.getTraceDataVersion() > 0;
+	}
 }

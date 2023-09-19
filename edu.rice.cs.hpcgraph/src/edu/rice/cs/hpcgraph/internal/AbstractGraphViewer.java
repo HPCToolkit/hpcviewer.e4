@@ -16,7 +16,6 @@ import org.eclipse.swtchart.IAxisSet;
 import org.eclipse.swtchart.IAxisTick;
 
 import edu.rice.cs.hpcbase.BaseConstants;
-import edu.rice.cs.hpcbase.ElementIdManager;
 import edu.rice.cs.hpcbase.ui.AbstractUpperPart;
 import edu.rice.cs.hpcbase.ui.IUpperPart;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
@@ -182,15 +181,16 @@ public abstract class AbstractGraphViewer extends AbstractUpperPart implements I
 	
 
 	public static String getID(String descID, Scope scope, BaseMetric metric) {
+		final char ELEMENT_SEPARATOR = ':';
 		
-		String dbId  = ElementIdManager.getElementId(scope.getExperiment());
+		String dbId  = scope.getExperiment().getDirectory();
 		int scopeId  = scope.getCCTIndex();
 		int metricId = metric.getIndex();
 		int graphId  = descID.hashCode();
 		
-		return dbId 					+ ElementIdManager.ELEMENT_SEPARATOR + 
-			   String.valueOf(scopeId)  + ElementIdManager.ELEMENT_SEPARATOR +
-			   String.valueOf(metricId) + ElementIdManager.ELEMENT_SEPARATOR +
+		return dbId 					+ ELEMENT_SEPARATOR + 
+			   String.valueOf(scopeId)  + ELEMENT_SEPARATOR +
+			   String.valueOf(metricId) + ELEMENT_SEPARATOR +
 			   String.valueOf(graphId);
 	}
 	

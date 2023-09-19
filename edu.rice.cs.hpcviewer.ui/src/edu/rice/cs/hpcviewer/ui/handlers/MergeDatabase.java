@@ -17,7 +17,6 @@ import edu.rice.cs.hpcbase.IDatabase;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
-import edu.rice.cs.hpclocal.DatabaseLocal;
 import edu.rice.cs.hpcmerge.MergeManager;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 
@@ -136,13 +135,17 @@ public class MergeDatabase
 
 		@Override
 		public void close() {
-			// TODO Auto-generated method stub
-			
+			// nothing			
 		}
 
 		@Override
 		public IExperiment getExperimentObject() {
 			return experiment;
+		}
+
+		@Override
+		public boolean hasTraceData() {
+			return false;
 		}
 		
 	}

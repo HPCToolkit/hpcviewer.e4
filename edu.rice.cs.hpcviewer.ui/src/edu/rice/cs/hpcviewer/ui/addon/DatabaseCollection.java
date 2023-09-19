@@ -41,14 +41,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcbase.BaseConstants;
-import edu.rice.cs.hpcbase.ElementIdManager;
 import edu.rice.cs.hpcbase.IDatabase;
 import edu.rice.cs.hpcbase.IDatabase.DatabaseStatus;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcbase.map.UserInputHistory;
 import edu.rice.cs.hpcbase.ui.IMainPart;
 import edu.rice.cs.hpcdata.experiment.Experiment;
-import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 import edu.rice.cs.hpcfilter.service.FilterMap;
 import edu.rice.cs.hpclocal.DatabaseLocal;
@@ -427,7 +425,7 @@ public class DatabaseCollection
 		// If there are two parts have the same elementID, when one is moved to the same stack.
 		// it will remove the other part.
 		
-		String elementID = "P." + ElementIdManager.getElementId(database);
+		String elementID = "P." + database.getId();
 		part.setElementId(elementID);
 
 		var experiment = database.getExperimentObject();
@@ -449,7 +447,7 @@ public class DatabaseCollection
 		//----------------------------------------------------------------
 		// display the trace view if the information exists
 		//----------------------------------------------------------------
-		displayTraceView(experiment, partService, list);
+		displayTraceView(database, partService, list);
 		
 		if (view instanceof ProfilePart) {
 			ProfilePart activeView = (ProfilePart) view;
@@ -472,10 +470,10 @@ public class DatabaseCollection
 	 * 
 	 * @return
 	 */
-	private int displayTraceView(IExperiment experiment, 
+	private int displayTraceView(IDatabase database, 
 								 EPartService service,
 								 List<MStackElement> list) {
-		if (experiment.getTraceDataVersion() < 0) {
+		if (!database.hasTraceData()) {
 			return 0;
 		}
 
@@ -485,7 +483,7 @@ public class DatabaseCollection
 		if (createPart != null) {
 			// need to set the element id to avoid the same issue with the profile view
 			// (see the comment at line 320-323)
-			var id = "T." + ElementIdManager.getElementId(experiment);
+			var id = "T." + database.getId();
 			createPart.setElementId(id);
 
 			list.add(createPart);
@@ -493,7 +491,9 @@ public class DatabaseCollection
 			Object objTracePart = createPart.getObject();
 			if (objTracePart instanceof TracePart) {
 				TracePart part = (TracePart) objTracePart;
-				part.setInput(experiment);
+				part.setInput(database);
+				
+				var experiment = database.getExperimentObject();
 				
 				createPart.setLabel("Trace: " + experiment.getName());
 				createPart.setTooltip(experiment.getDirectory());
@@ -709,9 +709,11 @@ public class DatabaseCollection
 		// store the current loaded database to history
 		// we need to ensure we only store the directory, not the xml file
 		// minor fix: only store the absolute path, not the relative one.
-		
-		UserInputHistory history = new UserInputHistory(RecentDatabase.HISTORY_DATABASE_RECENT);
-		history.addLine(database.getId());
+		Experiment exp = (Experiment) database.getExperimentObject();
+		if (!exp.isMergedDatabase()) {
+			UserInputHistory history = new UserInputHistory(RecentDatabase.HISTORY_DATABASE_RECENT);
+			history.addLine(database.getId());
+		}
 	}
 
 	

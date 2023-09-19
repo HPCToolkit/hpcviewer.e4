@@ -51,4 +51,13 @@ public interface IDatabase
 	 * 			null if the initialization fails.
 	 */
 	IExperiment getExperimentObject();
+	
+	
+	/****
+	 * Check if the database has traces or not
+	 * 
+	 * @return {@code boolean}
+	 * 			{@code true} if it includes traces, {@code false} otherwise. 
+	 */
+	boolean hasTraceData();
 }

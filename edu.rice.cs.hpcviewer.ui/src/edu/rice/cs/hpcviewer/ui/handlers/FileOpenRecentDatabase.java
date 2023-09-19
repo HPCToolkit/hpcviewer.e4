@@ -31,6 +31,7 @@ public class FileOpenRecentDatabase extends RecentDatabase
 		File dbFile = new File(database);
 		if (!dbFile.canRead()) {
 			MessageDialog.openError(shell, "Error reading the database", database + " is not readable");
+			return;
 		}
 		
 		String directory = database;
