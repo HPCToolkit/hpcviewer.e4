@@ -12,12 +12,12 @@ import org.hpctoolkit.hpcclient.v1_0.HpcClientJavaNetHttp;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
-import edu.rice.cs.hpcremote.IRemoteDatabase;
+import edu.rice.cs.hpcremote.IDatabaseRemote;
 import edu.rice.cs.hpcremote.ui.ConnectionDialog;
 
 
 
-public class RemoteDatabase implements IRemoteDatabase
+public class DatabaseRemote implements IDatabaseRemote
 {
 	private String host;
 	private int port;

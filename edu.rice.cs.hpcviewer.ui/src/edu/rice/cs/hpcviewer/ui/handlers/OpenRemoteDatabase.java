@@ -14,7 +14,7 @@ import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpcbase.IDatabase;
-import edu.rice.cs.hpcremote.data.RemoteDatabase;
+import edu.rice.cs.hpcremote.data.DatabaseRemote;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 
 public class OpenRemoteDatabase 
@@ -32,7 +32,7 @@ public class OpenRemoteDatabase
 			MWindow window,
 			@Named(IServiceConstants.ACTIVE_SHELL) Shell shell) {
 		
-		var remoteDb   = new RemoteDatabase();
+		var remoteDb   = new DatabaseRemote();
 		if (remoteDb.open(shell) != IDatabase.DatabaseStatus.OK)
 			return;
 		

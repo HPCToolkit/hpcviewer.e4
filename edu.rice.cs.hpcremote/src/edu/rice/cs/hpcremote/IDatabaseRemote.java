@@ -4,7 +4,7 @@ import org.hpctoolkit.hpcclient.v1_0.HpcClient;
 
 import edu.rice.cs.hpcbase.IDatabase;
 
-public interface IRemoteDatabase extends IDatabase
+public interface IDatabaseRemote extends IDatabase
 {
 	HpcClient getClient();
 }

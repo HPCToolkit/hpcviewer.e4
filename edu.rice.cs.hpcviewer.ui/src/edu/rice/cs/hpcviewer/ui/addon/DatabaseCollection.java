@@ -50,7 +50,7 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 import edu.rice.cs.hpcfilter.service.FilterMap;
 import edu.rice.cs.hpclocal.DatabaseLocal;
-import edu.rice.cs.hpcremote.data.RemoteDatabase;
+import edu.rice.cs.hpcremote.data.DatabaseRemote;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpctraceviewer.ui.TracePart;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
@@ -249,7 +249,7 @@ public class DatabaseCollection
 		IDatabase database;
 		
 		if (isRemote(databaseId)) {
-			database = new RemoteDatabase();
+			database = new DatabaseRemote();
 			database.open(shell);
 		} else { 
 			database = new DatabaseLocal();
@@ -288,7 +288,7 @@ public class DatabaseCollection
 		DatabaseStatus status;
 		
 		if (isRemote(databaseId)) {
-			database = new RemoteDatabase();
+			database = new DatabaseRemote();
 			status = database.open(shell);
 		} else {
 			database = new DatabaseLocal();
