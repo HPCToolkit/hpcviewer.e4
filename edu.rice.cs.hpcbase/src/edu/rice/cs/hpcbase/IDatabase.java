@@ -60,4 +60,19 @@ public interface IDatabase
 	 * 			{@code true} if it includes traces, {@code false} otherwise. 
 	 */
 	boolean hasTraceData();
+	
+	/***
+	 * Set the trace access manager (if exist)
+	 * 
+	 * @param traceManager
+	 */
+	void setTraceManager(ITraceManager traceManager);
+	
+	/****
+	 * Retrieve the trace manager of this database (if exist)
+	 * 
+	 * @return {@code ITraceManager} 
+	 * 			null if there is no trace
+	 */
+	ITraceManager getORCreateTraceManager();
 }

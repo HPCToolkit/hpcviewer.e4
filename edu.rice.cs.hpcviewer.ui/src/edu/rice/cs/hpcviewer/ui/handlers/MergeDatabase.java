@@ -14,6 +14,7 @@ import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 
 import edu.rice.cs.hpcbase.IDatabase;
+import edu.rice.cs.hpcbase.ITraceManager;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
@@ -146,6 +147,18 @@ public class MergeDatabase
 		@Override
 		public boolean hasTraceData() {
 			return false;
+		}
+
+		@Override
+		public ITraceManager getORCreateTraceManager() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public void setTraceManager(ITraceManager traceManager) {
+			// TODO Auto-generated method stub
+			
 		}
 		
 	}

@@ -7,10 +7,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.e4.core.contexts.IEclipseContext;
-
-import edu.rice.cs.hpcdata.db.IFileDB;
-import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 import edu.rice.cs.hpcdata.experiment.extdata.IFilteredData;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
 import edu.rice.cs.hpcremote.data.DecompressionThread.DecompressionItemToDo;
@@ -18,7 +14,6 @@ import edu.rice.cs.hpcremote.filter.TraceName;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
-import edu.rice.cs.hpctraceviewer.data.util.Constants;
 
 
 
@@ -37,11 +32,10 @@ public class SpaceTimeDataControllerRemote extends SpaceTimeDataController
 	
 	private ConcurrentLinkedQueue<Integer> timelineToRender;
 
-	public SpaceTimeDataControllerRemote(IEclipseContext context, RemoteDataRetriever _dataRet, 
+	public SpaceTimeDataControllerRemote(RemoteDataRetriever _dataRet, 
 			InputStream expStream, String Name, int _numTraces, TraceName[] valuesX, DataOutputStream connectionToServer) 
-					throws InvalExperimentException, Exception 
 	{
-		super(context, expStream, Name);
+		super(expStream);
 		dataRetriever = _dataRet;
 
 		this.valuesX = valuesX;
@@ -70,7 +64,7 @@ public class SpaceTimeDataControllerRemote extends SpaceTimeDataController
 			final int ranksExpected = Math.min(attributes.getProcessInterval(), attributes.getPixelVertical());
 			
 			final AtomicInteger ranksRemainingToDecompress = new AtomicInteger(ranksExpected);
-			ProcessTimelineService ptlService = (ProcessTimelineService) context.get(Constants.CONTEXT_TIMELINE);
+			ProcessTimelineService ptlService = super.getProcessTimelineService();
 			ptlService.setProcessTimeline(new ProcessTimeline[ranksExpected]);
 			
 			// The variable workToDo needs to be accessible across different objects:
@@ -165,12 +159,5 @@ public class SpaceTimeDataControllerRemote extends SpaceTimeDataController
 	@Override
 	public String getName() {
 		return exp.getName();
-	}
-
-
-	@Override
-	protected IFileDB getFileDB() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 }

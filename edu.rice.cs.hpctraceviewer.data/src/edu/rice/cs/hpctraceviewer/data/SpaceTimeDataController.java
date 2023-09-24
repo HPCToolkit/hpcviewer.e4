@@ -4,22 +4,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.swt.widgets.Display;
 
-import edu.rice.cs.hpcdata.db.IFileDB;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
-import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
 import edu.rice.cs.hpcdata.experiment.extdata.IFilteredData;
+import edu.rice.cs.hpcdata.trace.BaseTraceAttribute;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
 import edu.rice.cs.hpcdata.util.ICallPath;
 import edu.rice.cs.hpctraceviewer.data.color.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
-import edu.rice.cs.hpctraceviewer.data.util.Constants;
 
 
 
@@ -46,8 +43,6 @@ public abstract class SpaceTimeDataController
 	protected ColorTable colorTable = null;
 	protected IBaseData  dataTrace  = null;
 	
-	protected IEclipseContext context;
-	
 	protected ProcessTimelineService timelineService;
 	
 	// nathan's data index variable
@@ -62,12 +57,10 @@ public abstract class SpaceTimeDataController
 	 * @param context : IEclipseContext
 	 * @param expStream : input stream
 	 * @param Name : the name of the file on the remote server
-	 * @throws InvalExperimentException 
 	 *****/
-	public SpaceTimeDataController(IEclipseContext context, InputStream expStream, String Name) 
-			throws InvalExperimentException, Exception 
+	public SpaceTimeDataController(InputStream expStream) 
 	{
-		this(context, new Experiment());
+		this(new Experiment());
 	}
 	
 	/*****
@@ -76,15 +69,11 @@ public abstract class SpaceTimeDataController
 	 * 
 	 * @param context IEclipseContext
 	 * @param experiment BaseExperiment
-
-	 * @throws InvalExperimentException
-	 * @throws Exception
 	 */
-	public SpaceTimeDataController(IEclipseContext context, IExperiment experiment) 			
-			throws InvalExperimentException, Exception 
+	public SpaceTimeDataController(IExperiment experiment) 
 	{
 		exp = experiment;		
-		init(context, exp);
+		init();
 	}
 
 	
@@ -94,8 +83,7 @@ public abstract class SpaceTimeDataController
 	 * @return ProcessTimelineService
 	 *************************************************************************/
 	public ProcessTimelineService getProcessTimelineService() {
-		ProcessTimelineService ptlService = (ProcessTimelineService) context.get(Constants.CONTEXT_TIMELINE);
-		return ptlService;
+		return timelineService;
 	}
 	
 	
@@ -118,11 +106,9 @@ public abstract class SpaceTimeDataController
 	 * @param _window
 	 * @throws Exception 
 	 *************************************************************************/
-	private void init(IEclipseContext context, IExperiment exp) 
-			throws InvalExperimentException 
+	private void init() 
 	{	
-		this.context = context;
-		timelineService = (ProcessTimelineService) context.get(Constants.CONTEXT_TIMELINE);
+		timelineService = new ProcessTimelineService();
 		
 		// attributes initialization
 		attributes = new TraceDisplayAttribute();
@@ -145,11 +131,8 @@ public abstract class SpaceTimeDataController
 	 *************************************************************************/
 	public boolean isHomeView() {
 		
-		if (attributes.getProcessBegin() == 0 && attributes.getProcessEnd() == getTotalTraceCount() &&
-				attributes.getTimeBegin() == (long) 0 && attributes.getTimeEnd() == getTimeWidth()) {
-			return true;
-		}
-		return false;
+		return (attributes.getProcessBegin() == 0 && attributes.getProcessEnd() == getTotalTraceCount() &&
+			    attributes.getTimeBegin()    == 0 && attributes.getTimeEnd()    == getTimeWidth());
 	}
 
 	
@@ -187,7 +170,6 @@ public abstract class SpaceTimeDataController
 	 *************************************************************************/
 	public ProcessTimeline getCurrentDepthTrace() {
 		int scaledDTProcess = computeScaledProcess();
-		// TODO
 		return  timelineService.getProcessTimeline(scaledDTProcess);
 	}
 
@@ -253,8 +235,7 @@ public abstract class SpaceTimeDataController
 	 * @return int
 	 *************************************************************************/
 	public int getHeaderSize() {
-		final int headerSize = ((TraceAttribute)exp.getTraceAttribute()).dbHeaderSize;
-		return headerSize;
+		return ((TraceAttribute)exp.getTraceAttribute()).dbHeaderSize;
 	}
 
 	/*************************************************************************
@@ -298,7 +279,7 @@ public abstract class SpaceTimeDataController
 			// - if the measurement is from old hpcrun: microsecond
 			// - if the measurement is from new hpcrun: nanosecond
 			
-			if (exp.getTraceAttribute().dbUnitTime == TraceAttribute.PER_NANO_SECOND) {
+			if (exp.getTraceAttribute().dbUnitTime == BaseTraceAttribute.PER_NANO_SECOND) {
 				return TimeUnit.NANOSECONDS;
 			}
 
@@ -337,8 +318,8 @@ public abstract class SpaceTimeDataController
 
 	
 	/*************************************************************************
-	 * Dispose allocated resoruces.
-	 * All callers HAS TO call this methid when the resource is not needed anymore
+	 * Dispose allocated resources.
+	 * All callers HAS TO call this method when the resource is not needed anymore
 	 *************************************************************************/
 	public void dispose() {
 		if (colorTable != null)
@@ -354,7 +335,6 @@ public abstract class SpaceTimeDataController
 		colorTable = null;
 		timelineService = null;
 		attributes = null;
-		context = null;
 		
 		closeDB();
 	}
@@ -395,8 +375,6 @@ public abstract class SpaceTimeDataController
 	public abstract String getName();
 
 	public abstract void closeDB();
-
-	protected abstract IFileDB getFileDB();
 	
 	public abstract IFilteredData createFilteredBaseData();
 

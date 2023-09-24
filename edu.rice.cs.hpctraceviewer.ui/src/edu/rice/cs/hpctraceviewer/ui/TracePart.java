@@ -29,7 +29,6 @@ import edu.rice.cs.hpctraceviewer.config.TracePreferenceConstants;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
-import edu.rice.cs.hpctraceviewer.data.local.LocalDBOpener;
 import edu.rice.cs.hpctraceviewer.ui.base.AbstractBaseItem;
 import edu.rice.cs.hpctraceviewer.ui.base.IPixelAnalysis;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
@@ -397,7 +396,7 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 			return;
 		
 		try {
-			AbstractDBOpener dbOpener = new LocalDBOpener(context, database.getExperimentObject());
+			AbstractDBOpener dbOpener = (AbstractDBOpener) database.getORCreateTraceManager(); //new LocalDBOpener(context, database.getExperimentObject());
 			stdc = dbOpener.openDBAndCreateSTDC(null);
 
 			// make sure all the tabs other than trace view has the stdc first

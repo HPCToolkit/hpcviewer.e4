@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import edu.rice.cs.hpcbase.BaseConstants;
 import edu.rice.cs.hpcbase.IDatabase;
 import edu.rice.cs.hpcbase.IDatabase.DatabaseStatus;
+import edu.rice.cs.hpcbase.ITraceManager;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcbase.map.UserInputHistory;
 import edu.rice.cs.hpcbase.ui.IMainPart;
@@ -51,7 +52,9 @@ import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 import edu.rice.cs.hpcfilter.service.FilterMap;
 import edu.rice.cs.hpclocal.DatabaseLocal;
 import edu.rice.cs.hpcremote.data.DatabaseRemote;
+import edu.rice.cs.hpcremote.data.RemoteDBOpener;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
+import edu.rice.cs.hpctraceviewer.data.local.LocalDBOpener;
 import edu.rice.cs.hpctraceviewer.ui.TracePart;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.handlers.RecentDatabase;
@@ -213,9 +216,9 @@ public class DatabaseCollection
 			EModelService 	modelService) {
 		
 		DatabaseLocal localDb = new DatabaseLocal();
-		if (localDb.open(shell) == DatabaseStatus.OK)
+		if (localDb.open(shell) == DatabaseStatus.OK) {
 			addDatabase(shell, window, service, modelService, localDb);
-		
+		}
 		if (localDb.getStatus() == DatabaseStatus.INEXISTENCE ||
 			localDb.getStatus() == DatabaseStatus.INVALID     ||
 			localDb.getStatus() == DatabaseStatus.UNKNOWN_ERROR )
@@ -321,7 +324,7 @@ public class DatabaseCollection
 		var slash = databaseId.indexOf('/');
 		var port  = databaseId.substring(colon+1, slash);
 		
-		if (colon <= 0 && slash < 1)
+		if (colon <= 0 && slash < 1 || port.isEmpty())
 			return false;
 		
 		for(int i=0; i<port.length(); i++) {
@@ -528,6 +531,15 @@ public class DatabaseCollection
 			
 			Object objTracePart = createPart.getObject();
 			if (objTracePart instanceof TracePart) {
+				// create the trace opener.
+				ITraceManager traceOpener;
+				if (isRemote(database.getId())) {
+					traceOpener = new RemoteDBOpener(null);
+				} else {
+					traceOpener = new LocalDBOpener(database.getExperimentObject());
+				}
+				database.setTraceManager(traceOpener);
+
 				TracePart part = (TracePart) objTracePart;
 				part.setInput(database);
 				

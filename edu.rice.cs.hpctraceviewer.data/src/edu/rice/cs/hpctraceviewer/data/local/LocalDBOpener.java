@@ -3,7 +3,6 @@ package edu.rice.cs.hpctraceviewer.data.local;
 import java.io.IOException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.e4.core.contexts.IEclipseContext;
 
 import edu.rice.cs.hpcdata.db.IFileDB;
 import edu.rice.cs.hpcdata.db.version2.FileDB2;
@@ -28,18 +27,13 @@ public class LocalDBOpener extends AbstractDBOpener
 {
 	private int version;
 	private IExperiment experiment;
-	private final IEclipseContext context;
-	
-
-	
 	/*****
 	 * Prepare opening a database
 	 * @param IEclipseContext context
 	 * @param experiment2
 	 * @throws Exception 
 	 */
-	public LocalDBOpener(IEclipseContext context, IExperiment experiment2) throws IllegalArgumentException {
-		this.context   = context;
+	public LocalDBOpener(IExperiment experiment2) throws IllegalArgumentException {
 		this.experiment = experiment2;
 		version = experiment2.getMajorVersion();
 		String directory = experiment2.getDirectory();
@@ -80,8 +74,8 @@ public class LocalDBOpener extends AbstractDBOpener
 	
 	
 	@Override
-	public SpaceTimeDataController openDBAndCreateSTDC(IProgressMonitor statusMgr)
-			throws Exception {
+	public SpaceTimeDataController openDBAndCreateSTDC(IProgressMonitor statusMgr) 
+			throws InvalExperimentException, IOException {
 
 		// ---------------------------------------------------------------------
 		// Try to open the database and refresh the data
@@ -92,7 +86,7 @@ public class LocalDBOpener extends AbstractDBOpener
 		IFileDB fileDB = getFileDB();
 		
 		// prepare the xml experiment and all extended data
-		return new SpaceTimeDataControllerLocal(context, statusMgr, experiment, fileDB);
+		return new SpaceTimeDataControllerLocal(statusMgr, experiment, fileDB);
 	}
 
 	

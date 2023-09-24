@@ -13,8 +13,6 @@ import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
-import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
-import edu.rice.cs.hpctraceviewer.data.util.Constants;
 import edu.rice.cs.hpctraceviewer.ui.base.AbstractBaseItem;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.base.ITraceViewAction;
@@ -34,19 +32,16 @@ public class HPCTraceView extends AbstractBaseItem
 	
 	public static final int Y_AXIS_WIDTH  = 12;
 	public static final int X_AXIS_HEIGHT = 20;
-	
-	private final ProcessTimelineService timelineService;
-	
-	private CanvasAxisX axisArea = null;
-	private CanvasAxisY processCanvas = null;
+		
+	private CanvasAxisX canvasAxisX = null;
+	private CanvasAxisY canvasAxisY = null;
 	
 	/** Paints and displays the detail view.*/
-	private SpaceTimeDetailCanvas detailCanvas;
+	private SpaceTimeDetailCanvas canvasMain;
 	
 	@Inject
 	public HPCTraceView(CTabFolder parent, int style) {
 		super(parent, style);
-		timelineService = new ProcessTimelineService();
 	}
 	
 	@Override
@@ -54,7 +49,6 @@ public class HPCTraceView extends AbstractBaseItem
 							  IEclipseContext context,
 							  IEventBroker eventBroker,
 							  Composite parent) {
-		context.set(Constants.CONTEXT_TIMELINE, timelineService);
 		
 		/**************************************************************************
          * Process and Time dimension labels
@@ -78,18 +72,18 @@ public class HPCTraceView extends AbstractBaseItem
 
 		Composite plotArea = new Composite(parent, SWT.NONE);
 		
-		processCanvas = new CanvasAxisY(parentPart, timelineService, plotArea, SWT.NONE);
+		canvasAxisY = new CanvasAxisY(parentPart, plotArea, SWT.NONE);
 		GridDataFactory.fillDefaults().grab(false, true).
-						hint(Y_AXIS_WIDTH, 500).applyTo(processCanvas);
+						hint(Y_AXIS_WIDTH, 500).applyTo(canvasAxisY);
 
 		
-		detailCanvas = new SpaceTimeDetailCanvas(parentPart, context, eventBroker, plotArea); 
+		canvasMain = new SpaceTimeDetailCanvas(parentPart, eventBroker, plotArea); 
 
-		detailCanvas.setLabels(labelGroup);
+		canvasMain.setLabels(labelGroup);
 		
-		GridDataFactory.fillDefaults().grab(true, true).applyTo(detailCanvas);
+		GridDataFactory.fillDefaults().grab(true, true).applyTo(canvasMain);
 
-		detailCanvas.setVisible(true);
+		canvasMain.setVisible(true);
 		
 		/*************************************************************************
 		 * Horizontal axis label 
@@ -100,9 +94,9 @@ public class HPCTraceView extends AbstractBaseItem
 						hint(Y_AXIS_WIDTH, X_AXIS_HEIGHT).applyTo(footerCanvas);
 
 
-		axisArea = new CanvasAxisX(parentPart, plotArea, SWT.NO_BACKGROUND);
+		canvasAxisX = new CanvasAxisX(parentPart, plotArea, SWT.NO_BACKGROUND);
 		GridDataFactory.fillDefaults().grab(true, false).
-						hint(500, X_AXIS_HEIGHT).applyTo(axisArea);
+						hint(500, X_AXIS_HEIGHT).applyTo(canvasAxisX);
 
 		GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(plotArea);
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(plotArea);
@@ -121,7 +115,7 @@ public class HPCTraceView extends AbstractBaseItem
 	 * @return
 	 */
 	public ITraceViewAction getActions() {
-		return detailCanvas;
+		return canvasMain;
 	}
 	
 
@@ -130,22 +124,22 @@ public class HPCTraceView extends AbstractBaseItem
 	 * (depth view, summary view, etc). 
 	 */
 	public void refresh() {
-		detailCanvas.refresh(true);
+		canvasMain.refresh(true);
 	}
 	
 	/****
 	 * Similar to refresh, without changing the structure
 	 */
 	public void redraw() {
-		detailCanvas.refresh(false);
+		canvasMain.refresh(false);
 	}
 
 	@Override
 	public void setInput(Object input) {
 		SpaceTimeDataController stdc = (SpaceTimeDataController) input;
 		
-		detailCanvas. setData(stdc);
-		axisArea.     setData(stdc);
-		processCanvas.setData(stdc);
+		canvasMain. setData(stdc);
+		canvasAxisX.setData(stdc);
+		canvasAxisY.setData(stdc);
 	}	
 }

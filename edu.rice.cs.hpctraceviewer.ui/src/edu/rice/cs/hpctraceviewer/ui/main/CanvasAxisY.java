@@ -43,7 +43,6 @@ public class CanvasAxisY extends AbstractAxisCanvas
 										};
 	
 	private final Color [][]listColorObjects;
-	private final ProcessTimelineService timeLine;
 
 	/** Relates to the condition that the mouse is in.*/
 	private ITraceCanvas.MouseState mouseState;
@@ -59,10 +58,8 @@ public class CanvasAxisY extends AbstractAxisCanvas
 	 * @param parent Composite
 	 * @param style int (see {@code SWT} constants for canvas)
 	 */
-	public CanvasAxisY(ITracePart tracePart, ProcessTimelineService timeLine, Composite parent, int style) {
+	public CanvasAxisY(ITracePart tracePart, Composite parent, int style) {
 		super(tracePart, parent, style);
-		
-		this.timeLine = timeLine;
 		
 		listColorObjects = new Color[5][2];
 		for(int i=0; i<5; i++) {
@@ -146,9 +143,10 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		// -----------------------------------------------------
 		IdTuple idtupleOld  = null;
 		int []oldColorIndex = new int[traceData.getNumLevels()];
+		final ProcessTimelineService timeLine = data.getProcessTimelineService();
 		
-		for (int i=0; i<getNumProcessTimeline(); i++) {
-			ProcessTimeline procTimeline = getProcessTimeline(i);
+		for (int i=0; i<timeLine.getNumProcessTimeline(); i++) {
+			ProcessTimeline procTimeline = timeLine.getProcessTimeline(i);
 			if (procTimeline == null)
 				continue;
 			
@@ -208,18 +206,7 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		super.dispose();
 	}
 	
-	
-	protected int getNumProcessTimeline() {
-		return timeLine.getNumProcessTimeline();
-	}
-	
-	
-	protected ProcessTimeline getProcessTimeline(int i) {
-		return timeLine.getProcessTimeline(i);
-	}
-
-	
-	
+		
 	@Override
 	public void historyNotification(final OperationHistoryEvent event) {
 

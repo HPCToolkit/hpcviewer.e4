@@ -47,7 +47,6 @@ import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
 import edu.rice.cs.hpctraceviewer.data.Position;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
-import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 
 
 /**************************************************
@@ -60,7 +59,6 @@ public class CallStackViewer extends AbstractBaseTableViewer
 {	
 	private static final String EMPTY_FUNCTION = "--------------";
 	
-	private final ProcessTimelineService ptlService;
 	private final IEventBroker eventBroker;
 	private final ITracePart   tracePart;
 	private final TableViewerColumn viewerColumn;
@@ -74,13 +72,11 @@ public class CallStackViewer extends AbstractBaseTableViewer
      * */
 	public CallStackViewer(final ITracePart   tracePart,
 						   final Composite    parent, 
-						   final ProcessTimelineService ptlService,
 						   final IEventBroker eventBroker)
 	{
 		super(parent, SWT.SINGLE | SWT.READ_ONLY | SWT.FULL_SELECTION);
 		
 		this.tracePart   = tracePart;
-		this.ptlService  = ptlService;
 		this.eventBroker = eventBroker;
 		
         final Table stack = this.getTable();
@@ -195,6 +191,7 @@ public class CallStackViewer extends AbstractBaseTableViewer
 		// general case
 		final TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
     	int estimatedProcess = (attributes.getPosition().process - attributes.getProcessBegin());
+    	var ptlService = stData.getProcessTimelineService();
     	int numDisplayedProcess = ptlService.getNumProcessTimeline();
     	
     	// case for num displayed processes is less than the number of processes

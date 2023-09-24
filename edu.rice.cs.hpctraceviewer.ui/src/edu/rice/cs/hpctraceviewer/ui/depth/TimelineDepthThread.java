@@ -65,16 +65,15 @@ public class TimelineDepthThread
 			// a ProcessTimeline with data=null and then copy the actual data to
 			// it.
 			ProcessTimeline toDonate = new ProcessTimeline(currentDepthLineNum,
-					stData.getScopeMap(), stData.getBaseData(), 
-					depthTrace.getProcessNum(), attributes.getPixelHorizontal(),
-					attributes.getTimeInterval(), 
-					stData.getMinBegTime() + attributes.getTimeBegin());
+														   depthTrace.getProcessNum(), 
+														   stData);
 
 			toDonate.copyDataFrom(depthTrace);
 
 			return toDonate;
-		} else
+		} else {
 			return null;
+		}
 	}
 
 	@Override

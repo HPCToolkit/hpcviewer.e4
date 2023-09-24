@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import edu.rice.cs.hpcbase.ITraceManager;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 
 
@@ -16,7 +17,7 @@ import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
  * @author Philip Taffet
  * 
  */
-public abstract class AbstractDBOpener {
+public abstract class AbstractDBOpener implements ITraceManager {
 
 	
 
@@ -30,11 +31,10 @@ public abstract class AbstractDBOpener {
 	 * @param statusMgr progress monitor
 	 * @return
 	 * @throws IOException 
-	 * @throws Exception 
 	 * @throws InvalExperimentException 
 	 */
 	public abstract SpaceTimeDataController openDBAndCreateSTDC(IProgressMonitor statusMgr)
-			throws IOException, InvalExperimentException, Exception;
+			throws IOException, InvalExperimentException;
 
 	
 	// Our current policy on closing: Except for back-to-back connections to the

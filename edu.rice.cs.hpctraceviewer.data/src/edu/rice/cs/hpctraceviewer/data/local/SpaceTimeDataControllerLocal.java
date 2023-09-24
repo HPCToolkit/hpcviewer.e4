@@ -1,18 +1,16 @@
 package edu.rice.cs.hpctraceviewer.data.local;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcdata.db.IFileDB;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
-import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 import edu.rice.cs.hpcdata.experiment.extdata.IFilteredData;
+import edu.rice.cs.hpcdata.trace.BaseTraceAttribute;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
 import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.IProgressReport;
@@ -29,11 +27,13 @@ import edu.rice.cs.hpctraceviewer.data.version2.FilteredBaseData;
  * 
  * @author Philip Taffet
  * 
+ * @author Refined, updated, refactored by other developers
+ * 
  */
 public class SpaceTimeDataControllerLocal extends SpaceTimeDataController 
 {	
-	private final static int MIN_TRACE_SIZE = TraceDataByRank.HeaderSzMin + TraceDataByRank.RecordSzMin * 2;
-	private final static int RECORD_SIZE    = Constants.SIZEOF_LONG + Constants.SIZEOF_INT;
+	private static final int MIN_TRACE_SIZE = TraceDataByRank.HeaderSzMin + TraceDataByRank.RecordSzMin * 2;
+	private static final int RECORD_SIZE    = Constants.SIZEOF_LONG + Constants.SIZEOF_INT;
 
 	private IFileDB fileDB;
 	
@@ -49,16 +49,14 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 	 * @param fileDB 
 	 * 			IFileDB
 	 * 
-	 * @throws InvalExperimentException
-	 * @throws Exception
+	 * @throws IOException
 	 */
 	public SpaceTimeDataControllerLocal(
-			IEclipseContext context, 
 			IProgressMonitor statusMgr, 
 			IExperiment experiment, 
 			IFileDB fileDB)
-					throws InvalExperimentException, Exception {
-		super(context, experiment);
+					throws IOException {
+		super(experiment);
 		init(statusMgr, fileDB);
 	}
 	
@@ -90,7 +88,7 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 		fileDB.open(traceFilePath, trAttribute.dbHeaderSize, RECORD_SIZE);
 		this.fileDB = fileDB;
 		
-		dataTrace  = new BaseData(getFileDB());  
+		dataTrace  = new BaseData(fileDB);  
 	}
 
 
@@ -99,7 +97,7 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 		try{
 			return new FilteredBaseData(fileDB, 
 										((TraceAttribute)exp.getTraceAttribute()).dbHeaderSize, 
-										TraceAttribute.DEFAULT_RECORD_SIZE);
+										BaseTraceAttribute.DEFAULT_RECORD_SIZE);
 		}
 		catch (Exception e){
 			var log = LoggerFactory.getLogger(getClass());
@@ -108,11 +106,6 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 		return null;
 	}
 
-
-	@Override
-	protected IFileDB getFileDB() {
-		return fileDB;
-	}
 
 	
 	@Override
@@ -144,10 +137,9 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 	 * @param statusMgr
 	 * @return
 	 * @throws IOException 
-	 * @throws FileNotFoundException 
 	 *********************/
-	static private String getTraceFile(String directory, final IProgressMonitor statusMgr) 
-			throws FileNotFoundException, IOException
+	private static String getTraceFile(String directory, final IProgressMonitor statusMgr) 
+			throws IOException
 	{
 		final ProgressReport traceReport = new ProgressReport();
 		final String outputFile = directory + File.separatorChar + "experiment.mt";
@@ -173,7 +165,7 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 	 * Progress bar
 	 *
 	 */
-	static private class ProgressReport implements IProgressReport 
+	private static class ProgressReport implements IProgressReport 
 	{
 
 		public ProgressReport()

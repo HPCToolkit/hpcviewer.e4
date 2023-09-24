@@ -4,11 +4,11 @@ import java.io.IOException;
 import org.eclipse.core.runtime.Assert;
 
 import edu.rice.cs.hpcdata.db.version4.DataRecord;
-import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.util.ICallPath;
 import edu.rice.cs.hpcdata.util.ICallPath.ICallPathInfo;
 import edu.rice.cs.hpctraceviewer.data.ITraceDataCollector;
+import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TraceDataByRank;
 import edu.rice.cs.hpctraceviewer.data.version2.AbstractBaseData;
 
@@ -20,7 +20,8 @@ public class ProcessTimeline {
 	private ICallPath scopeMap;
 
 	/** This ProcessTimeline's line number. */
-	private int lineNum, processNumber;
+	private int lineNum;
+	private int processNumber;
 
 	/** The initial time in view. */
 	private long startingTime;
@@ -42,58 +43,28 @@ public class ProcessTimeline {
 	 * @param _numPixelH The number of Horizontal pixels
 	 * @param _timeRange The difference between the start time and the end time
 	 */
-	public ProcessTimeline(int _lineNum, ICallPath _scopeMap, IBaseData dataTrace, 
-			int processNumber, int _numPixelH, long _timeRange, long _startingTime)
+	public ProcessTimeline(int lineNum, int numLines, SpaceTimeDataController stData)
 	{
 
-		lineNum 			= _lineNum;
-		scopeMap 			= _scopeMap;
+		this.lineNum 		= lineNum;
+		scopeMap 			= stData.getScopeMap();
+		var attributes      = stData.getTraceDisplayAttribute();
 
-		timeRange			= _timeRange;
-		startingTime 		= _startingTime;
-		this.processNumber  = processNumber;
+		timeRange			= attributes.getTimeInterval();
+		startingTime 		= stData.getMinBegTime() + attributes.getTimeBegin();
+		this.processNumber  = numLines;
 
-		pixelLength = timeRange / (double) _numPixelH;
+		pixelLength = timeRange / (double) stData.getPixelHorizontal();
 		
-		//TODO: Beautify
+		var dataTrace = stData.getBaseData();
+		
 		if (dataTrace instanceof AbstractBaseData)
-			data = new TraceDataByRank((AbstractBaseData) dataTrace, processNumber, _numPixelH);
+			data = new TraceDataByRank((AbstractBaseData) dataTrace, lineNum, stData.getPixelHorizontal());
 		else
 			data = new TraceDataByRank(new DataRecord[0], processNumber);
 	}
 
-	/**
-	 * Remote version for ProcessTimeline constructor
-	 * 
-	 * @param _data
-	 * @param _scopeMap
-	 * @param _processNumber
-	 * @param _numPixelH
-	 * @param _timeRange
-	 * @param _startingTime
-	 */
-	public ProcessTimeline(TraceDataByRank _data,
-			ICallPath _scopeMap, int _processNumber,
-			int _numPixelH, long _timeRange, long _startingTime) {
-		lineNum = _processNumber;
-		scopeMap = _scopeMap;
-		timeRange = _timeRange;
-		startingTime = _startingTime;
-
-		pixelLength = timeRange / (double) _numPixelH;
-		if (_data == null)
-			data = new TraceDataByRank(new DataRecord[0], processNumber);
-		else
-			data = _data;
-		
-		// laks 2016.06.23: hack for remote data: we don't have process number 
-		// information from the server, so we just assign the same as the line number
-		// for local data, the line number is different than the process number
-		//  if the screen resolution is smaller than the number of ranks
-		// at the moment, this fix works. not sure why.
-		this.processNumber = _processNumber;
-	}
-
+	
 	/**
 	 * Fills the ProcessTimeline with data from the file. If this is being
 	 * called, it must be on local, so the cast is fine

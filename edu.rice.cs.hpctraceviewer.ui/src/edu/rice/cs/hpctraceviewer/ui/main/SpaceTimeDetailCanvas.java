@@ -22,7 +22,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -109,7 +108,6 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	/**The SpaceTimeData corresponding to this canvas.*/
 	protected SpaceTimeDataController stData;
 	
-	private final IEclipseContext context;
 	private final ITracePart 	  tracePart;
 	
 	/**The Group containing the labels. labelGroup.redraw() is called from the Detail Canvas.*/
@@ -138,13 +136,12 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	private KeyListener keyListener;
 	
     /**Creates a SpaceTimeDetailCanvas with the given parameters*/
-	public SpaceTimeDetailCanvas(ITracePart tracePart, IEclipseContext context, IEventBroker eventBroker, Composite _composite)
+	public SpaceTimeDetailCanvas(ITracePart tracePart, IEventBroker eventBroker, Composite _composite)
 	{
 		super(_composite, SWT.NO_BACKGROUND | SWT.BORDER_DASH, RegionType.Rectangle );
 		
 		this.tracePart   = tracePart;
 		this.eventBroker = eventBroker;
-		this.context     = context;
 		oldAttributes    = new TraceDisplayAttribute();
 		stData  = null;
 		
@@ -1116,7 +1113,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		oldAttributes.copy(attributes);
 		if (changedBounds) {
 			ProcessTimeline []traces = new ProcessTimeline[ numLines ];
-			ProcessTimelineService ptlService = (ProcessTimelineService) context.get(Constants.CONTEXT_TIMELINE);
+			ProcessTimelineService ptlService = stData.getProcessTimelineService();
 
 			assert(ptlService != null);
 			

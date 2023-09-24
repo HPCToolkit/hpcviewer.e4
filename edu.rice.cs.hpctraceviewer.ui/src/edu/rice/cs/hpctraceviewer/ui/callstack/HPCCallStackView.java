@@ -8,8 +8,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
-import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
-import edu.rice.cs.hpctraceviewer.data.util.Constants;
 import edu.rice.cs.hpctraceviewer.ui.base.AbstractBaseItem;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 
@@ -36,8 +34,6 @@ public class HPCCallStackView extends AbstractBaseItem
 							  IEventBroker broker,
 							  Composite master) {
 		
-		ProcessTimelineService ptlService = (ProcessTimelineService) context.get(Constants.CONTEXT_TIMELINE);
-
 		/*************************************************************************
 		 * Master Composite
 		 ************************************************************************/
@@ -48,7 +44,7 @@ public class HPCCallStackView extends AbstractBaseItem
 		/*************************************************************************
 		 * CallStackViewer
 		 ************************************************************************/
-		csViewer = new CallStackViewer(parentPart, master, ptlService, broker);
+		csViewer = new CallStackViewer(parentPart, master, broker);
 
 		setToolTipText("The view to show the call-stack depth and the actual call path for the point selected by the Main View's crosshair");
 	}

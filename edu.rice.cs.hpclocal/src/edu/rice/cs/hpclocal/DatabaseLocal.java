@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 
+import edu.rice.cs.hpcbase.ITraceManager;
 import edu.rice.cs.hpcbase.map.ProcedureAliasMap;
 import edu.rice.cs.hpcdata.db.DatabaseManager;
 import edu.rice.cs.hpcdata.experiment.Experiment;
@@ -18,6 +19,7 @@ public class DatabaseLocal implements IDatabaseLocal
 	private Experiment experiment;
 	private String errorMsg;
 	private DatabaseStatus status = DatabaseStatus.NOT_INITIALIZED;
+	private ITraceManager traceManager;
 	
 	@Override
 	public String getId() {
@@ -116,5 +118,16 @@ public class DatabaseLocal implements IDatabaseLocal
 	@Override
 	public boolean hasTraceData() {
 		return experiment.getTraceDataVersion() > 0;
+	}
+
+	@Override
+	public ITraceManager getORCreateTraceManager() {
+		return traceManager;
+	}
+	
+	
+	@Override
+	public void setTraceManager(ITraceManager traceManager) {
+		this.traceManager = traceManager;
 	}
 }

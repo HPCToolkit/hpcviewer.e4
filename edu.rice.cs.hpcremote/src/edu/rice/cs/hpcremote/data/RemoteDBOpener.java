@@ -15,8 +15,6 @@ import java.net.UnknownHostException;
 import java.util.zip.GZIPInputStream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.e4.core.contexts.IEclipseContext;
-
 import com.jcraft.jsch.JSchException;
 
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
@@ -63,8 +61,6 @@ public class RemoteDBOpener extends AbstractDBOpener
 	// -----------------
 	
 	private final DatabaseAccessInfo connectionInfo;
-	private final IEclipseContext    context;
-
 	private DataOutputStream sender;
 	private DataInputStream receiver;
 
@@ -74,8 +70,7 @@ public class RemoteDBOpener extends AbstractDBOpener
 	 * 
 	 * @param connectionInfo
 	 */
-	public RemoteDBOpener(IEclipseContext context, DatabaseAccessInfo connectionInfo) {
-		this.context = context;
+	public RemoteDBOpener(DatabaseAccessInfo connectionInfo) {
 		this.connectionInfo = connectionInfo;
 	}
 
@@ -91,7 +86,7 @@ public class RemoteDBOpener extends AbstractDBOpener
 	 */
 	public SpaceTimeDataController openDBAndCreateSTDC(
 			IProgressMonitor statusMgr) 
-			throws InvalExperimentException, Exception 
+			throws InvalExperimentException, UnknownHostException, IOException 
 	{
 
 		// --------------------------------------------------------------
@@ -107,7 +102,11 @@ public class RemoteDBOpener extends AbstractDBOpener
 		{
 			if  (use_tunnel) {
 				// we need to setup the SSH tunnel
-				tunnelMain = createSSHTunnel(tunnelMain, port);
+				try {
+					tunnelMain = createSSHTunnel(tunnelMain, port);
+				} catch (JSchException e) {
+					e.printStackTrace();
+				}
 				host = LOCALHOST;
 			}
 			
@@ -171,7 +170,11 @@ public class RemoteDBOpener extends AbstractDBOpener
 				
 		if (use_tunnel &&  (port != xmlMessagePortNumber)) {
 			// only create SSH tunnel if the XML socket has different port number
-			tunnelXML = createSSHTunnel(tunnelXML, xmlMessagePortNumber);			
+			try {
+				tunnelXML = createSSHTunnel(tunnelXML, xmlMessagePortNumber);
+			} catch (JSchException e) {
+				e.printStackTrace();
+			}			
 		}
 		
 		statusMgr.setTaskName("Receiving XML stream");
@@ -190,7 +193,7 @@ public class RemoteDBOpener extends AbstractDBOpener
 		RemoteDataRetriever dataRetriever = new RemoteDataRetriever(serverConnection,
 				 null, compressionType);
 		
-		SpaceTimeDataControllerRemote stData = new SpaceTimeDataControllerRemote(context, dataRetriever, null, 
+		SpaceTimeDataControllerRemote stData = new SpaceTimeDataControllerRemote(dataRetriever, null, 
 				connectionInfo.getDatabasePath() + " on " + host, traceCount, valuesX, sender);
 
 		sendInfoPacket(sender, stData);

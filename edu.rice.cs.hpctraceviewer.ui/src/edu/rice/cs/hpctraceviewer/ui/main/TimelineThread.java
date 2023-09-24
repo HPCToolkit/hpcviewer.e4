@@ -21,7 +21,7 @@ import edu.rice.cs.hpctraceviewer.ui.internal.BaseTimelineThread;
 public class TimelineThread 
 	extends BaseTimelineThread
 {
-	final private int totalLines;
+	private final int totalLines;
 
 	/**Stores whether or not the bounds have been changed*/
 	private boolean changedBounds;
@@ -62,19 +62,12 @@ public class TimelineThread
 			return null;
 		
 		ProcessTimelineService traceService = stData.getProcessTimelineService();
-
-		if (traceService.getNumProcessTimeline() == 0)
-			traceService.setProcessTimeline(new ProcessTimeline[totalLines]);
 		
 		if (changedBounds) {
 			TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
 			ProcessTimeline currentTimeline = new ProcessTimeline(currentLineNum, 
-																  stData.getScopeMap(),
-																  stData.getBaseData(), 
-																  lineToPaint(currentLineNum, attributes),
-																  attributes.getPixelHorizontal(),
-																  attributes.getTimeInterval(), 
-																  stData.getMinBegTime() + attributes.getTimeBegin());
+																  getNumLinesToPaint(currentLineNum, attributes),
+																  stData);
 			
 			if (traceService.setProcessTimeline(currentLineNum, currentTimeline)) {
 				timeline = currentTimeline;
@@ -124,7 +117,7 @@ public class TimelineThread
 	
 	/** Returns the index of the file to which the line-th line corresponds. */
 
-	private int lineToPaint(int line, TraceDisplayAttribute attributes) {
+	private int getNumLinesToPaint(int line, TraceDisplayAttribute attributes) {
 
 		int numTimelinesToPaint = attributes.getProcessInterval();
 		if (numTimelinesToPaint > attributes.getPixelVertical())
@@ -132,4 +125,5 @@ public class TimelineThread
 					/ (attributes.getPixelVertical());
 		else
 			return attributes.getProcessBegin() + line;
-	}}
+	}
+}

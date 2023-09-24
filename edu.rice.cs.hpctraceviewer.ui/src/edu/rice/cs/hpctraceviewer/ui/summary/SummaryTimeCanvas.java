@@ -35,12 +35,10 @@ import edu.rice.cs.hpctraceviewer.ui.operation.ZoomOperation;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.color.ColorTable;
-import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 import edu.rice.cs.hpcsetting.color.ColorManager;
 import edu.rice.cs.hpctraceviewer.data.Frame;
 import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
 import edu.rice.cs.hpctraceviewer.data.Position;
-import edu.rice.cs.hpctraceviewer.data.util.Constants;
 
 /******************************************************************
  * 
@@ -53,7 +51,6 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 	private final ITracePart tracePart;
 
 	private final int zoomFactor;
-	private final ProcessTimelineService ptlService;
 	
 	private SpaceTimeDataController dataTraces = null;
 	private TreeMap<Integer /* pixel */, Integer /* percent */> mapPixelToPercent;	
@@ -79,8 +76,8 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 		analysisTool     = IPixelAnalysis.EMPTY;
 		
 		mapPixelToPercent = new TreeMap<Integer, Integer>();		
-		
-		ptlService = (ProcessTimelineService) context.get(Constants.CONTEXT_TIMELINE);
+				
+		SpaceTimeDataController stData = (SpaceTimeDataController) super.getData();
 
 		// It is critical to reconstruct the image data according to Device zoom
 		// On Mac with retina display, the hardware pixel has 4x pixels than
@@ -187,7 +184,7 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 		// ----------------------------------
 		// plugin initialization
 		// ----------------------------------
-		analysisTool.analysisInit(dataTraces, getColorTable(), ptlService);
+		analysisTool.analysisInit(dataTraces, getColorTable(), dataTraces.getProcessTimelineService());
 		
 		// ---------------------------------------------------------------------------
 		// needs to be optimized:
