@@ -4,9 +4,9 @@ import java.io.IOException;
 
 import org.hpctoolkit.hpcclient.v1_0.HpcClient;
 
+import edu.rice.cs.hpcbase.ITraceDataCollector;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.extdata.IFilteredData;
-import edu.rice.cs.hpctraceviewer.data.ITraceDataCollector;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 
 public class SpaceTimeDataControllerR extends SpaceTimeDataController 

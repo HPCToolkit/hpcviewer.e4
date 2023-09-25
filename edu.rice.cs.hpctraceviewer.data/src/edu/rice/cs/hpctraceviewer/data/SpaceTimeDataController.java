@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.swt.widgets.Display;
 
+import edu.rice.cs.hpcbase.ITraceDataCollector;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;

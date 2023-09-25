@@ -3,10 +3,10 @@ package edu.rice.cs.hpctraceviewer.data.timeline;
 import java.io.IOException;
 import org.eclipse.core.runtime.Assert;
 
+import edu.rice.cs.hpcbase.ITraceDataCollector;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.util.ICallPath;
 import edu.rice.cs.hpcdata.util.ICallPath.ICallPathInfo;
-import edu.rice.cs.hpctraceviewer.data.ITraceDataCollector;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 
 

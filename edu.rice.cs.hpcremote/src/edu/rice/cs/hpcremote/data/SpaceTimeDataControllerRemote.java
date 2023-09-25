@@ -7,11 +7,12 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import edu.rice.cs.hpcbase.ITraceDataCollector;
 import edu.rice.cs.hpcdata.experiment.extdata.IFilteredData;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
 import edu.rice.cs.hpcremote.data.DecompressionThread.DecompressionItemToDo;
 import edu.rice.cs.hpcremote.filter.TraceName;
-import edu.rice.cs.hpctraceviewer.data.ITraceDataCollector;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;

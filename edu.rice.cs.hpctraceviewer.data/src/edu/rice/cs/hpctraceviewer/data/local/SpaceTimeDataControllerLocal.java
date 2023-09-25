@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.slf4j.LoggerFactory;
 
+import edu.rice.cs.hpcbase.ITraceDataCollector;
 import edu.rice.cs.hpcdata.db.IFileDB;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.extdata.IFilteredData;
@@ -16,9 +17,8 @@ import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.IProgressReport;
 import edu.rice.cs.hpcdata.util.MergeDataFiles;
 import edu.rice.cs.hpcdata.util.MergeDataFiles.MergeDataAttribute;
-import edu.rice.cs.hpctraceviewer.data.ITraceDataCollector;
+import edu.rice.cs.hpctraceviewer.data.LocalTraceDataCollector;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
-import edu.rice.cs.hpctraceviewer.data.TraceDataByRank;
 import edu.rice.cs.hpctraceviewer.data.version2.AbstractBaseData;
 import edu.rice.cs.hpctraceviewer.data.version2.BaseData;
 import edu.rice.cs.hpctraceviewer.data.version2.FilteredBaseData;
@@ -34,7 +34,7 @@ import edu.rice.cs.hpctraceviewer.data.version2.FilteredBaseData;
  */
 public class SpaceTimeDataControllerLocal extends SpaceTimeDataController 
 {	
-	private static final int MIN_TRACE_SIZE = TraceDataByRank.HeaderSzMin + TraceDataByRank.RecordSzMin * 2;
+	private static final int MIN_TRACE_SIZE = LocalTraceDataCollector.HeaderSzMin + LocalTraceDataCollector.RecordSzMin * 2;
 	private static final int RECORD_SIZE    = Constants.SIZEOF_LONG + Constants.SIZEOF_INT;
 
 	private IFileDB fileDB;
@@ -189,6 +189,6 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 
 	@Override
 	public ITraceDataCollector getTraceDataCollector(int index) {
-		return new TraceDataByRank((AbstractBaseData) dataTrace, index, getPixelHorizontal());
+		return new LocalTraceDataCollector((AbstractBaseData) dataTrace, index, getPixelHorizontal());
 	}
 }

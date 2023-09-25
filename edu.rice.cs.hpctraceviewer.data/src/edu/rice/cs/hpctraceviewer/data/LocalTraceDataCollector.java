@@ -8,6 +8,7 @@ import java.util.Vector;
 
 import org.slf4j.LoggerFactory;
 
+import edu.rice.cs.hpcbase.ITraceDataCollector;
 import edu.rice.cs.hpcdata.db.version4.DataRecord;
 import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
@@ -22,7 +23,7 @@ import edu.rice.cs.hpctraceviewer.data.version2.AbstractBaseData;
  * since the first version of data is one file for each rank
  * 
  ***********************************************************/
-public class TraceDataByRank implements ITraceDataCollector 
+public class LocalTraceDataCollector implements ITraceDataCollector 
 {
 	//	tallent: safe to assume version 1.01 and greater here
 	public static final int HeaderSzMin = Header.MagicLen + Header.VersionLen + Header.EndianLen + Header.FlagsLen;
@@ -50,7 +51,7 @@ public class TraceDataByRank implements ITraceDataCollector
 	 * @param profileIndex
 	 * @param widthInPixels
 	 */
-	public TraceDataByRank(AbstractBaseData dataAccess, int profileIndex, int widthInPixels)
+	public LocalTraceDataCollector(AbstractBaseData dataAccess, int profileIndex, int widthInPixels)
 	{
 		//:'( This is a safe cast because this constructor is only
 		//called in local mode but it's so ugly....
@@ -71,7 +72,7 @@ public class TraceDataByRank implements ITraceDataCollector
 	 * @param data
 	 * @param profileIndex
 	 */
-	public TraceDataByRank(DataRecord[] data, int profileIndex) {
+	public LocalTraceDataCollector(DataRecord[] data, int profileIndex) {
 		listcpid = new Vector<>(Arrays.asList(data));
 		this.rank = profileIndex;
 		
@@ -291,7 +292,7 @@ public class TraceDataByRank implements ITraceDataCollector
 	@Override
 	public void duplicate(ITraceDataCollector traceData)
 	{
-		this.listcpid = ((TraceDataByRank)traceData).listcpid;
+		this.listcpid = ((LocalTraceDataCollector)traceData).listcpid;
 	}
 	
 	

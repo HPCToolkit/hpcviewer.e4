@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctraceviewer.data;
+package edu.rice.cs.hpcbase;
 
 import java.io.IOException;
 
