@@ -381,4 +381,14 @@ public abstract class SpaceTimeDataController
 	public abstract void fillTracesWithData(boolean changedBounds, int numThreadsToLaunch)
 			throws IOException;
 
+	/****
+	 * Get the trace data collector associated with this data.
+	 * 
+	 * @param index
+	 * 			A unique index, it can be a process number or thread number, or any sequence number
+	 * 
+	 * @return {@code ITraceDataCollector} 
+	 * 			An object to collect data from remote or local for this index
+	 */
+	public abstract ITraceDataCollector getTraceDataCollector(int index);
 }

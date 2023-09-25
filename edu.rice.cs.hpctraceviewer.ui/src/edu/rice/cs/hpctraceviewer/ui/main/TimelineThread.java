@@ -35,8 +35,9 @@ public class TimelineThread
 						   AtomicInteger currentLine, int totalLines, IProgressMonitor monitor)
 	{
 		super(stData, _scaleY, queue, currentLine, monitor);
+		
 		changedBounds = _changedBounds;		
-		this.totalLines	  = totalLines;
+		this.totalLines	= totalLines;
 	}
 	
 	
@@ -66,7 +67,7 @@ public class TimelineThread
 		if (changedBounds) {
 			TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
 			ProcessTimeline currentTimeline = new ProcessTimeline(currentLineNum, 
-																  getNumLinesToPaint(currentLineNum, attributes),
+																  getProfileIndexToPaint(currentLineNum, attributes),
 																  stData);
 			
 			if (traceService.setProcessTimeline(currentLineNum, currentTimeline)) {
@@ -117,7 +118,7 @@ public class TimelineThread
 	
 	/** Returns the index of the file to which the line-th line corresponds. */
 
-	private int getNumLinesToPaint(int line, TraceDisplayAttribute attributes) {
+	private int getProfileIndexToPaint(int line, TraceDisplayAttribute attributes) {
 
 		int numTimelinesToPaint = attributes.getProcessInterval();
 		if (numTimelinesToPaint > attributes.getPixelVertical())

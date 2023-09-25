@@ -16,8 +16,10 @@ import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.IProgressReport;
 import edu.rice.cs.hpcdata.util.MergeDataFiles;
 import edu.rice.cs.hpcdata.util.MergeDataFiles.MergeDataAttribute;
+import edu.rice.cs.hpctraceviewer.data.ITraceDataCollector;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TraceDataByRank;
+import edu.rice.cs.hpctraceviewer.data.version2.AbstractBaseData;
 import edu.rice.cs.hpctraceviewer.data.version2.BaseData;
 import edu.rice.cs.hpctraceviewer.data.version2.FilteredBaseData;
 
@@ -183,5 +185,10 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 		public void end() {
 			System.out.println();
 		}
+	}
+
+	@Override
+	public ITraceDataCollector getTraceDataCollector(int index) {
+		return new TraceDataByRank((AbstractBaseData) dataTrace, index, getPixelHorizontal());
 	}
 }

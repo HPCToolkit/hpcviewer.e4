@@ -3,14 +3,11 @@ package edu.rice.cs.hpctraceviewer.data.timeline;
 import java.io.IOException;
 import org.eclipse.core.runtime.Assert;
 
-import edu.rice.cs.hpcdata.db.version4.DataRecord;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.util.ICallPath;
 import edu.rice.cs.hpcdata.util.ICallPath.ICallPathInfo;
 import edu.rice.cs.hpctraceviewer.data.ITraceDataCollector;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
-import edu.rice.cs.hpctraceviewer.data.TraceDataByRank;
-import edu.rice.cs.hpctraceviewer.data.version2.AbstractBaseData;
 
 
 /** A data structure that stores one line of timestamp-cpid data. */
@@ -40,10 +37,14 @@ public class ProcessTimeline {
 	 ************************************************************************/
 
 	/** Creates a new ProcessTimeline with the given parameters. 
-	 * @param _numPixelH The number of Horizontal pixels
-	 * @param _timeRange The difference between the start time and the end time
+	 * @param lineNum 
+	 * 			a unique 0-based index
+	 * @param profileIndex
+	 * 			the index of id-tuple in the trace data
+	 * @param stData
+	 * 			The main data
 	 */
-	public ProcessTimeline(int lineNum, int numLines, SpaceTimeDataController stData)
+	public ProcessTimeline(int lineNum, int profileIndex, SpaceTimeDataController stData)
 	{
 
 		this.lineNum 		= lineNum;
@@ -52,16 +53,11 @@ public class ProcessTimeline {
 
 		timeRange			= attributes.getTimeInterval();
 		startingTime 		= stData.getMinBegTime() + attributes.getTimeBegin();
-		this.processNumber  = numLines;
+		this.processNumber  = profileIndex;
 
 		pixelLength = timeRange / (double) stData.getPixelHorizontal();
 		
-		var dataTrace = stData.getBaseData();
-		
-		if (dataTrace instanceof AbstractBaseData)
-			data = new TraceDataByRank((AbstractBaseData) dataTrace, lineNum, stData.getPixelHorizontal());
-		else
-			data = new TraceDataByRank(new DataRecord[0], processNumber);
+		data = stData.getTraceDataCollector(profileIndex);
 	}
 
 	

@@ -47,15 +47,15 @@ public class TraceDataByRank implements ITraceDataCollector
 	 * Create a new instance of trace data for a given rank of process or thread 
 	 * Used only for local
 	 * @param dataAccess
-	 * @param currentRank
+	 * @param profileIndex
 	 * @param widthInPixels
 	 */
-	public TraceDataByRank(AbstractBaseData dataAccess, int currentRank, int widthInPixels)
+	public TraceDataByRank(AbstractBaseData dataAccess, int profileIndex, int widthInPixels)
 	{
 		//:'( This is a safe cast because this constructor is only
 		//called in local mode but it's so ugly....
 		data = dataAccess;
-		rank = currentRank;
+		rank = profileIndex;
 		numPixelH = widthInPixels;
 		
 		option = isGPU() && TracePreferenceManager.getGPUTraceExposure() ?
@@ -69,11 +69,11 @@ public class TraceDataByRank implements ITraceDataCollector
 	/***
 	 * Special constructor for remote database
 	 * @param data
-	 * @param rank
+	 * @param profileIndex
 	 */
-	public TraceDataByRank(DataRecord[] data, int rank) {
+	public TraceDataByRank(DataRecord[] data, int profileIndex) {
 		listcpid = new Vector<>(Arrays.asList(data));
-		this.rank = rank;
+		this.rank = profileIndex;
 		
 		this.data = null;// unused
 		numPixelH = 0;	 // unused
