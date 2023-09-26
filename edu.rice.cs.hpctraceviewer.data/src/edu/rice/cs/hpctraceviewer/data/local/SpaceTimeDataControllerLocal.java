@@ -8,7 +8,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcbase.ITraceDataCollector;
+import edu.rice.cs.hpcbase.ITraceDataCollector.TraceOption;
 import edu.rice.cs.hpcdata.db.IFileDB;
+import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.extdata.IFilteredData;
 import edu.rice.cs.hpcdata.trace.BaseTraceAttribute;
@@ -17,6 +19,7 @@ import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.IProgressReport;
 import edu.rice.cs.hpcdata.util.MergeDataFiles;
 import edu.rice.cs.hpcdata.util.MergeDataFiles.MergeDataAttribute;
+import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.LocalTraceDataCollector;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.version2.AbstractBaseData;
@@ -188,7 +191,18 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 	}
 
 	@Override
-	public ITraceDataCollector getTraceDataCollector(int index) {
-		return new LocalTraceDataCollector((AbstractBaseData) dataTrace, index, getPixelHorizontal());
+	public ITraceDataCollector getTraceDataCollector(int lineNum, IdTuple idtuple) {
+		var idtupleType = getExperiment().getIdTupleType();
+		boolean isGpuTrace = idtuple.isGPU(idtupleType);
+
+		TraceOption traceOption = TraceOption.ORIGINAL_TRACE;
+
+		if (TracePreferenceManager.getGPUTraceExposure() && isGpuTrace)
+			traceOption = TraceOption.REVEAL_GPU_TRACE;
+		
+		var traceDataCollector = new LocalTraceDataCollector((AbstractBaseData) dataTrace, lineNum, idtuple, getPixelHorizontal());
+		traceDataCollector.setTraceOption(traceOption);
+		
+		return traceDataCollector;
 	}
 }

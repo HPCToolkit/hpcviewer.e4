@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.swt.widgets.Display;
 
 import edu.rice.cs.hpcbase.ITraceDataCollector;
+import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
@@ -385,11 +386,14 @@ public abstract class SpaceTimeDataController
 	/****
 	 * Get the trace data collector associated with this data.
 	 * 
-	 * @param index
+	 * @param lineNum
+	 * 			A sequence index of trace line to be collected and painted.
+	 * 
+	 * @param idTuple
 	 * 			A unique index, it can be a process number or thread number, or any sequence number
 	 * 
 	 * @return {@code ITraceDataCollector} 
 	 * 			An object to collect data from remote or local for this index
 	 */
-	public abstract ITraceDataCollector getTraceDataCollector(int index);
+	public abstract ITraceDataCollector getTraceDataCollector(int lineNum, IdTuple idTuple);
 }

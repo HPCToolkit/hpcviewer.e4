@@ -54,7 +54,7 @@ public abstract class AbstractTraceDataCollector implements ITraceDataCollector
 		listcpid = new ArrayList<>(numPixelH);
 	}
 
-	protected void setTraceOption(TraceOption option) {
+	public void setTraceOption(TraceOption option) {
 		this.option = option;
 	}
 	

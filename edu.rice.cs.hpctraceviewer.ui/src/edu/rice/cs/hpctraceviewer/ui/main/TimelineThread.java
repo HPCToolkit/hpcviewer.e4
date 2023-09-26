@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import edu.rice.cs.hpcdata.db.IdTuple;
 //import edu.rice.cs.hpcremote.data.SpaceTimeDataControllerRemote;
 import edu.rice.cs.hpctraceviewer.data.DataLinePainting;
 import edu.rice.cs.hpctraceviewer.data.DataPreparation;
@@ -66,9 +67,16 @@ public class TimelineThread
 		
 		if (changedBounds) {
 			TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
-			ProcessTimeline currentTimeline = new ProcessTimeline(currentLineNum, 
-																  getProfileIndexToPaint(currentLineNum, attributes),
-																  stData);
+			IdTuple idtuple;
+			try {
+				idtuple = getProfileIndexToPaint(currentLineNum, attributes);
+			} catch (IOException e) {
+				throw new IllegalAccessError(e.getMessage());
+			}
+			
+			ProcessTimeline currentTimeline = new ProcessTimeline(currentLineNum,
+					  											  stData, 
+																  idtuple);
 			
 			if (traceService.setProcessTimeline(currentLineNum, currentTimeline)) {
 				timeline = currentTimeline;
@@ -116,15 +124,21 @@ public class TimelineThread
 	}
 
 	
-	/** Returns the index of the file to which the line-th line corresponds. */
+	/** Returns the index of the file to which the line-th line corresponds. 
+	 * @throws IOException */
 
-	private int getProfileIndexToPaint(int line, TraceDisplayAttribute attributes) {
-
+	private IdTuple getProfileIndexToPaint(int line, TraceDisplayAttribute attributes) throws IOException {
+		var listIdTuples = stData.getExperiment().getThreadData().getIdTuples();
+		
 		int numTimelinesToPaint = attributes.getProcessInterval();
-		if (numTimelinesToPaint > attributes.getPixelVertical())
-			return attributes.getProcessBegin() + (line * numTimelinesToPaint)
+		int index = 0;
+		
+		if (numTimelinesToPaint > attributes.getPixelVertical()) {
+			index = attributes.getProcessBegin() + (line * numTimelinesToPaint)
 					/ (attributes.getPixelVertical());
-		else
-			return attributes.getProcessBegin() + line;
+		} else {
+			index = attributes.getProcessBegin() + line;
+		}
+		return listIdTuples.get(index);
 	}
 }

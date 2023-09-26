@@ -2,10 +2,9 @@ package edu.rice.cs.hpctraceviewer.data;
 
 import java.io.IOException;
 import edu.rice.cs.hpcbase.AbstractTraceDataCollector;
-import edu.rice.cs.hpcbase.ITraceDataCollector;
+import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.version4.DataRecord;
 import edu.rice.cs.hpcdata.util.Constants;
-import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.version2.AbstractBaseData;
 
 /***********************************************************
@@ -26,7 +25,9 @@ public class LocalTraceDataCollector extends AbstractTraceDataCollector
 	
 	public static final float NUM_PIXELS_TOLERATED = 1.0f;
 
-	private final int rank;
+	private final IdTuple idtuple;
+
+	private final int lineNum;
 	
 	/** 
 	 * These must be initialized in local mode. 
@@ -40,27 +41,16 @@ public class LocalTraceDataCollector extends AbstractTraceDataCollector
 	 * @param profileIndex
 	 * @param widthInPixels
 	 */
-	public LocalTraceDataCollector(AbstractBaseData dataAccess, int profileIndex, int widthInPixels)
+	public LocalTraceDataCollector(AbstractBaseData dataAccess, int lineNum, IdTuple idtuple, int widthInPixels)
 	{
 		super(widthInPixels);
 		
-		this.rank = profileIndex;
+		this.idtuple = idtuple;
+		this.lineNum = lineNum;
 		
 		//:'( This is a safe cast because this constructor is only
 		//called in local mode but it's so ugly....
 		data = dataAccess;
-		
-		var option = isGPU() && TracePreferenceManager.getGPUTraceExposure() ?
-				  	ITraceDataCollector.TraceOption.REVEAL_GPU_TRACE :
-					ITraceDataCollector.TraceOption.ORIGINAL_TRACE;
-
-		setTraceOption(option);
-	}
-
-	
-	@Override
-	public boolean isGPU() {
-		return data.isGPU(rank);
 	}
 
 	
@@ -77,6 +67,7 @@ public class LocalTraceDataCollector extends AbstractTraceDataCollector
 	@Override
 	public void readInData(long timeStart, long timeRange, double pixelLength) throws IOException
 	{
+		var rank = lineNum;
 		long minloc = data.getMinLoc(rank);
 		long maxloc = data.getMaxLoc(rank);
 		
@@ -255,11 +246,13 @@ public class LocalTraceDataCollector extends AbstractTraceDataCollector
 	
 	private long getAbsoluteLocation(long relativePosition)
 	{
+		var rank = lineNum;
 		return data.getMinLoc(rank) + (relativePosition * data.getRecordSize());
 	}
 	
 	private long getRelativeLocation(long absolutePosition)
 	{
+		var rank = lineNum;
 		return (absolutePosition-data.getMinLoc(rank)) / data.getRecordSize();
 	}
 

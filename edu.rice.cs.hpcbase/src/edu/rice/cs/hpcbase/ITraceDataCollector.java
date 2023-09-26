@@ -14,6 +14,5 @@ public interface ITraceDataCollector
 	public int size();
 	public void shiftTimeBy(long lowestStartingTime);
 	public void duplicate(ITraceDataCollector traceData);
-	boolean isGPU();
 	public void dispose();
 }

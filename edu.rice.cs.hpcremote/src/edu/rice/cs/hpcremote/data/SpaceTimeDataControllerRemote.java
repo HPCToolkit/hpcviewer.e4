@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import edu.rice.cs.hpcbase.ITraceDataCollector;
+import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.experiment.extdata.IFilteredData;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
 import edu.rice.cs.hpcremote.data.DecompressionThread.DecompressionItemToDo;
@@ -165,8 +166,8 @@ public class SpaceTimeDataControllerRemote extends SpaceTimeDataController
 
 
 	@Override
-	public ITraceDataCollector getTraceDataCollector(int index) {
-		// TODO Auto-generated method stub
-		return null;
+	public ITraceDataCollector getTraceDataCollector(int lineNum, IdTuple idtuple) {
+
+		return new RemoteTraceDataCollector(null, idtuple, getPixelHorizontal());
 	}
 }

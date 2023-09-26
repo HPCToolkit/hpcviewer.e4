@@ -7,7 +7,7 @@ import org.hpctoolkit.hpcclient.v1_0.HpcClient;
 
 import edu.rice.cs.hpcbase.AbstractTraceDataCollector;
 import edu.rice.cs.hpcbase.ITraceDataCollector;
-import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
+import edu.rice.cs.hpcdata.db.IdTuple;
 import io.vavr.collection.Set;
 import io.vavr.collection.HashSet;
 
@@ -16,20 +16,16 @@ public class RemoteTraceDataCollector extends AbstractTraceDataCollector
 
 	private final HpcClient hpcClient;
 	private final Set<TraceId> setOfTraceId;
+	private final IdTuple idtuple;
 
-	public RemoteTraceDataCollector(HpcClient hpcClient, int profileIndex, int numPixelH) {
+	public RemoteTraceDataCollector(HpcClient hpcClient, IdTuple idtuple, int numPixelH) {
 		super(numPixelH);
 		
 		this.hpcClient = hpcClient;
 
-		var traceId    = TraceId.make(profileIndex);
-		setOfTraceId   = HashSet.of(traceId);		
-		
-		var option = isGPU() && TracePreferenceManager.getGPUTraceExposure() ?
-				  	ITraceDataCollector.TraceOption.REVEAL_GPU_TRACE :
-					ITraceDataCollector.TraceOption.ORIGINAL_TRACE;
-		
-		setTraceOption(option);
+		this.idtuple   = idtuple;
+		var traceId    = TraceId.make(idtuple.getProfileIndex()-1);
+		setOfTraceId   = HashSet.of(traceId);
 	}
 	
 
@@ -44,14 +40,7 @@ public class RemoteTraceDataCollector extends AbstractTraceDataCollector
 
 	@Override
 	public void duplicate(ITraceDataCollector traceData) {
-		var obj = new RemoteTraceDataCollector(hpcClient, setOfTraceId.get().toInt(), getNumPixelHorizontal());
+		var obj = new RemoteTraceDataCollector(hpcClient, idtuple, getNumPixelHorizontal());
 		obj.setListOfCallpathId(getListOfCallpathId());
-	}
-
-
-	@Override
-	public boolean isGPU() {
-		// TODO Auto-generated method stub
-		return false;
 	}
 }

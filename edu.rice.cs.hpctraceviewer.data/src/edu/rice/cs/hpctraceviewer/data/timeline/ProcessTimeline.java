@@ -4,6 +4,8 @@ import java.io.IOException;
 import org.eclipse.core.runtime.Assert;
 
 import edu.rice.cs.hpcbase.ITraceDataCollector;
+import edu.rice.cs.hpcdata.db.IdTuple;
+import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.util.ICallPath;
 import edu.rice.cs.hpcdata.util.ICallPath.ICallPathInfo;
@@ -17,17 +19,19 @@ public class ProcessTimeline {
 	private ICallPath scopeMap;
 
 	/** This ProcessTimeline's line number. */
-	private int lineNum;
-	private int processNumber;
+	private final int lineNum;
+
+	private final IdTuple idTuple;
+	private final IdTupleType idTupletype;
 
 	/** The initial time in view. */
-	private long startingTime;
+	private final long startingTime;
 
 	/** The range of time in view. */
-	private long timeRange;
+	private final long timeRange;
 
 	/** The amount of time that each pixel on the screen correlates to. */
-	private double pixelLength;
+	private final double pixelLength;
 
 	private ITraceDataCollector data;
 
@@ -39,12 +43,12 @@ public class ProcessTimeline {
 	/** Creates a new ProcessTimeline with the given parameters. 
 	 * @param lineNum 
 	 * 			a unique 0-based index
-	 * @param profileIndex
+	 * @param IdTuple idTuple
 	 * 			the index of id-tuple in the trace data
 	 * @param stData
 	 * 			The main data
 	 */
-	public ProcessTimeline(int lineNum, int profileIndex, SpaceTimeDataController stData)
+	public ProcessTimeline(int lineNum, SpaceTimeDataController stData, IdTuple idTuple)
 	{
 
 		this.lineNum 		= lineNum;
@@ -53,11 +57,13 @@ public class ProcessTimeline {
 
 		timeRange			= attributes.getTimeInterval();
 		startingTime 		= stData.getMinBegTime() + attributes.getTimeBegin();
-		this.processNumber  = profileIndex;
+		this.idTuple  = idTuple;
 
 		pixelLength = timeRange / (double) stData.getPixelHorizontal();
 		
-		data = stData.getTraceDataCollector(profileIndex);
+		data = stData.getTraceDataCollector(lineNum, idTuple);
+		
+		idTupletype = stData.getExperiment().getIdTupleType();
 	}
 
 	
@@ -127,7 +133,12 @@ public class ProcessTimeline {
 	 * @return the process id
 	 */
 	public int getProcessNum() {
-		return processNumber;
+		return idTuple.getProfileIndex() - 1;
+	}
+	
+	
+	public IdTuple getProfileIdTuple() {
+		return idTuple;
 	}
 
 	/**
@@ -150,7 +161,7 @@ public class ProcessTimeline {
 	
 	public boolean isGPU() 
 	{
-		return data.isGPU();
+		return idTuple.isGPU(idTupletype);
 	}
 
 	public void dispose() {
@@ -162,5 +173,4 @@ public class ProcessTimeline {
 		scopeMap = null;
 		data = null;
 	}
-
 }

@@ -64,9 +64,8 @@ public class TimelineDepthThread
 			// I can't get the data from the ProcessTimeline directly, so create
 			// a ProcessTimeline with data=null and then copy the actual data to
 			// it.
-			ProcessTimeline toDonate = new ProcessTimeline(currentDepthLineNum,
-														   depthTrace.getProcessNum(), 
-														   stData);
+			ProcessTimeline toDonate = new ProcessTimeline(currentDepthLineNum, stData,
+														   depthTrace.getProfileIdTuple());
 
 			toDonate.copyDataFrom(depthTrace);
 

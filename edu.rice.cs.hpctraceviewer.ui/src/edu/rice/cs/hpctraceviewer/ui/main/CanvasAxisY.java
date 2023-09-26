@@ -150,7 +150,7 @@ public class CanvasAxisY extends AbstractAxisCanvas
 			if (procTimeline == null)
 				continue;
 			
-			final int procNumber  = procTimeline.getProcessNum();
+			final int procNumber  = procTimeline.line();
 			if (procNumber >= listIdTuples.size())
 				// inconsistency between the list of processes and the current timeline
 				// probably hpctraceviewer is in the middle of rebuffering
