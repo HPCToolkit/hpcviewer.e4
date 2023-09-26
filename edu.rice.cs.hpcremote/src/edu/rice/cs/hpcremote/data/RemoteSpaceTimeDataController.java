@@ -9,11 +9,11 @@ import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.extdata.IFilteredData;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 
-public class SpaceTimeDataControllerR extends SpaceTimeDataController 
+public class RemoteSpaceTimeDataController extends SpaceTimeDataController 
 {
 	private final HpcClient client;
 
-	public SpaceTimeDataControllerR(HpcClient client, IExperiment experiment) {
+	public RemoteSpaceTimeDataController(HpcClient client, IExperiment experiment) {
 		super(experiment);
 		
 		this.client = client;
@@ -43,8 +43,7 @@ public class SpaceTimeDataControllerR extends SpaceTimeDataController
 
 	@Override
 	public ITraceDataCollector getTraceDataCollector(int index) {
-		// TODO Auto-generated method stub
-		return null;
+		return new RemoteTraceDataCollector(client, index, getPixelHorizontal());
 	}
 
 }

@@ -1,13 +1,7 @@
 package edu.rice.cs.hpctraceviewer.data;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Vector;
-
-import org.slf4j.LoggerFactory;
-
+import edu.rice.cs.hpcbase.AbstractTraceDataCollector;
 import edu.rice.cs.hpcbase.ITraceDataCollector;
 import edu.rice.cs.hpcdata.db.version4.DataRecord;
 import edu.rice.cs.hpcdata.util.Constants;
@@ -23,7 +17,7 @@ import edu.rice.cs.hpctraceviewer.data.version2.AbstractBaseData;
  * since the first version of data is one file for each rank
  * 
  ***********************************************************/
-public class LocalTraceDataCollector implements ITraceDataCollector 
+public class LocalTraceDataCollector extends AbstractTraceDataCollector 
 {
 	//	tallent: safe to assume version 1.01 and greater here
 	public static final int HeaderSzMin = Header.MagicLen + Header.VersionLen + Header.EndianLen + Header.FlagsLen;
@@ -32,17 +26,12 @@ public class LocalTraceDataCollector implements ITraceDataCollector
 	
 	public static final float NUM_PIXELS_TOLERATED = 1.0f;
 
-	private final TraceOption option;
-
+	private final int rank;
+	
 	/** 
 	 * These must be initialized in local mode. 
 	 * They should be considered final unless the data is remote.*/
 	private AbstractBaseData   data;
-	
-	private final int numPixelH;
-	private final int rank;
-	
-	private List<DataRecord> listcpid;
 	
 	/***
 	 * Create a new instance of trace data for a given rank of process or thread 
@@ -53,46 +42,27 @@ public class LocalTraceDataCollector implements ITraceDataCollector
 	 */
 	public LocalTraceDataCollector(AbstractBaseData dataAccess, int profileIndex, int widthInPixels)
 	{
+		super(widthInPixels);
+		
+		this.rank = profileIndex;
+		
 		//:'( This is a safe cast because this constructor is only
 		//called in local mode but it's so ugly....
 		data = dataAccess;
-		rank = profileIndex;
-		numPixelH = widthInPixels;
 		
-		option = isGPU() && TracePreferenceManager.getGPUTraceExposure() ?
+		var option = isGPU() && TracePreferenceManager.getGPUTraceExposure() ?
 				  	ITraceDataCollector.TraceOption.REVEAL_GPU_TRACE :
 					ITraceDataCollector.TraceOption.ORIGINAL_TRACE;
-		
-		listcpid = new ArrayList<>(numPixelH);
+
+		setTraceOption(option);
 	}
 
 	
-	/***
-	 * Special constructor for remote database
-	 * @param data
-	 * @param profileIndex
-	 */
-	public LocalTraceDataCollector(DataRecord[] data, int profileIndex) {
-		listcpid = new Vector<>(Arrays.asList(data));
-		this.rank = profileIndex;
-		
-		this.data = null;// unused
-		numPixelH = 0;	 // unused
-		
-		option = isGPU() && TracePreferenceManager.getGPUTraceExposure() ?
-				  	ITraceDataCollector.TraceOption.REVEAL_GPU_TRACE :
-					ITraceDataCollector.TraceOption.ORIGINAL_TRACE;
-	}
-	
-	@Override
-	public boolean isEmpty() {
-		return listcpid == null || listcpid.isEmpty();
-	}
-
 	@Override
 	public boolean isGPU() {
 		return data.isGPU(rank);
 	}
+
 	
 	/***
 	 * Reading data from file. This method has to be called FIRST before calling other APIs.
@@ -124,6 +94,8 @@ public class LocalTraceDataCollector implements ITraceDataCollector
 		// get the number of records data to display
 		final long numRec = 1+this.getNumberOfRecords(startLoc, endLoc);
 		
+		var numPixelH = getNumPixelHorizontal();
+		
 		// --------------------------------------------------------------------------------------------------
 		// if the data-to-display is fit in the display zone, we don't need to use recursive binary search
 		//	we just simply display everything from the file
@@ -132,7 +104,7 @@ public class LocalTraceDataCollector implements ITraceDataCollector
 			// display all the records
 			// increment one record of data contains of an integer (cpid) and a long (time)
 			for(long i=startLoc;i<=endLoc; i+=data.getRecordSize()) {
-				listcpid.add(getData(i));
+				addSampleToLastIndex(getData(i));
 			}			
 		} else {
 			// the data is too big: try to fit the "big" data into the display			
@@ -146,7 +118,7 @@ public class LocalTraceDataCollector implements ITraceDataCollector
 		// --------------------------------------------------------------------------------------------------
 		if (endLoc < maxloc) {
 			final DataRecord dataLast = this.getData(endLoc);
-			this.addSample(listcpid.size(), dataLast);
+			addSampleToLastIndex(dataLast);
 		}
 		
 		// --------------------------------------------------------------------------------------------------
@@ -159,161 +131,7 @@ public class LocalTraceDataCollector implements ITraceDataCollector
 		}
 		postProcess();
 	}
-	
-	
-	/**
-	 * Gets the time that corresponds to the index sample in times.
-	 * @param sample 
-	 * 			the index sample
-	 * */
-	@Override
-	public long getTime(int sample)
-	{
-		if(sample<0 || listcpid == null || listcpid.isEmpty())
-			return 0;
 
-		final int last_index = listcpid.size() - 1;
-		if(sample>last_index) {
-			LoggerFactory.getLogger(getClass()).error("Invalid sample Index: %d", sample);
-			// laks 2015.05.19 : I think we should throw exception here 
-			// 					 instead of forcing ourself to give a result
-			return listcpid.get(last_index-1).timestamp;
-		}
-		return listcpid.get(sample).timestamp;
-	}
-	
-	/**Gets the cpid that corresponds to the index sample in timeLine.
-	 * @param sample the sample index (has to be bigger or equal to zero)
-	 * @return call path ID if the sample exist, <0 otherwise
-	 * */
-	@Override
-	public int getCpid(int sample)
-	{
-		if (sample < listcpid.size())
-			return listcpid.get(sample).cpId;
-		return -1;
-	}
-
-	
-	/**Shifts all the times in the ProcessTimeline to the left by lowestStartingTime.*/
-	@Override
-	public void shiftTimeBy(long lowestStartingTime)
-	{
-		for(int i = 0; i<listcpid.size(); i++)
-		{
-			DataRecord timecpid = listcpid.get(i);
-			if (timecpid.timestamp < lowestStartingTime) {
-				LoggerFactory.getLogger(getClass()).error(rank + ". Trace time " 
-															   + timecpid.timestamp 
-															   + " is smaller than the begin time" 
-															   + lowestStartingTime);
-				continue;
-			}
-			timecpid.timestamp = timecpid.timestamp - lowestStartingTime;
-			
-			listcpid.set(i,timecpid);
-		}
-	}
-	
-	
-	/**Returns the number of elements in this ProcessTimeline.*/
-	public int size()
-	{
-		return listcpid.size();
-	}
-
-	
-	/**Finds the sample to which 'time' most closely corresponds in the ProcessTimeline.
-	 * @param time  the requested time
-	 * @param usingMidpoint 
-	 * @return the index of the sample if the time is within the range, -1 otherwise 
-	 * */
-	@Override
-	public int findClosestSample(long time, boolean usingMidpoint) throws Exception
-	{
-		if (listcpid.isEmpty())
-			return 0;
-
-		int low = 0;
-		int high = listcpid.size() - 1;
-		
-		long timeMin = listcpid.get(low).timestamp;
-		long timeMax = listcpid.get(high).timestamp;
-		
-		// do not search the sample if the time is out of range
-		if (time<timeMin  || time>timeMax) 
-			return -1;
-		
-		int mid = ( low + high ) / 2;
-		
-		while( low != mid )
-		{
-			final long time_current = usingMidpoint ? getTimeMidPoint(mid,mid+1) : listcpid.get(mid).timestamp;
-			
-			if (time > time_current)
-				low = mid;
-			else
-				high = mid;
-			mid = ( low + high ) / 2;
-			
-		}
-		if (usingMidpoint)
-		{
-			if (time >= getTimeMidPoint(low,low+1))
-				return low+1;
-			else
-				return low;
-		}
-		// for gpu stream, if we need to force to reveal the gpu trace
-		// if the current sample is an idle activity, 
-		// we check if the next sample is within the range or not.
-		var l = listcpid.get(low);
-		if (option == TraceOption.REVEAL_GPU_TRACE && isIdle(l.cpId) && low < listcpid.size()) {			
-			var r = listcpid.get(low+1);
-			var last  = listcpid.get(listcpid.size()-1);
-			var first = listcpid.get(0);
-			var timePerPixel = (last.timestamp - first.timestamp)/numPixelH;
-			var dtime = r.timestamp - l.timestamp;
-			float dFraction = (float) dtime/timePerPixel;
-			
-			if (dFraction < NUM_PIXELS_TOLERATED && !isIdle(r.cpId))
-				return low+1;
-		}
-		// without using midpoint, we adopt the leftmost sample approach.
-		// this means whoever on the left side, it will be the painted
-		return low;
-	}
-
-	/***
-	 * duplicate data from other object
-	 * 
-	 * @param traceData: another object to be copied
-	 */
-	@Override
-	public void duplicate(ITraceDataCollector traceData)
-	{
-		this.listcpid = ((LocalTraceDataCollector)traceData).listcpid;
-	}
-	
-	
-	private long getTimeMidPoint(int left, int right) {
-		return (listcpid.get(left).timestamp + listcpid.get(right).timestamp) / 2;
-	}
-	
-	
-	/***
-	 * Check if the call-path id or context id is an idle activity.<br/>
-	 * On meta-db, the idle activity is represented by number zero.
-	 * On experiment.xml it can be different for each database.
-	 * 
-	 * @param contextId
-	 * 			The call-path id or context id.
-	 * 
-	 * @return true if the context id is an idle activity.
-	 */
-	private boolean isIdle(int contextId) {
-		return contextId == 0;
-	}
 	
 	/*******************************************************************************************
 	 * Recursive method that fills in times and timeLine with the correct data from the file.
@@ -352,7 +170,7 @@ public class LocalTraceDataCollector implements ITraceDataCollector
 		// we need to check if the current sample is an "idle" activity or not.
 		// if this is the case, we look at the right and if it isn't idle, we'll use
 		// this sample instead.
-		if (option == TraceOption.REVEAL_GPU_TRACE && isIdle(nextData.cpId)) {	
+		if (getTraceOption() == TraceOption.REVEAL_GPU_TRACE && isIdle(nextData.cpId)) {	
 			// if this sample is idle, check if the next sample is also idle or not
 			// (mostly not idle). If the next sample is NOT idle and within a range
 			// let's move to the next sample instead
@@ -444,20 +262,6 @@ public class LocalTraceDataCollector implements ITraceDataCollector
 	{
 		return (absolutePosition-data.getMinLoc(rank)) / data.getRecordSize();
 	}
-	
-	
-	/**Adds a sample to times and timeLine.*/
-	private void addSample( int index, DataRecord datacpid)
-	{
-		if (index == listcpid.size())
-		{
-			this.listcpid.add(datacpid);
-		}
-		else
-		{
-			this.listcpid.add(index, datacpid);
-		}
-	}
 
 	
 	private DataRecord getData(long location) throws IOException
@@ -474,32 +278,14 @@ public class LocalTraceDataCollector implements ITraceDataCollector
 		return (end-start) / (data.getRecordSize());
 	}
 
-	/*********************************************************************************************
-	 * Removes unnecessary samples:
-	 * i.e. if timeLine had three of the same cpid's in a row, the middle one would be superfluous,
-	 * as we would know when painting that it should be the same color all the way through.
-	 ********************************************************************************************/
-	private void postProcess()
-	{
-		for(int i = 0; i < listcpid.size()-2; i++)
-		{
-			while(i < listcpid.size()-1 && listcpid.get(i).timestamp==(listcpid.get(i+1).timestamp))
-			{
-				listcpid.remove(i+1);
-			}
-		}
-	}
-
 
 	@Override
 	public void dispose() {
 		if (data != null)
 			data.dispose();
 		
-		if (listcpid != null)
-			listcpid.clear();
-		
 		data = null;
-		listcpid = null;
+
+		super.dispose();
 	}
 }
