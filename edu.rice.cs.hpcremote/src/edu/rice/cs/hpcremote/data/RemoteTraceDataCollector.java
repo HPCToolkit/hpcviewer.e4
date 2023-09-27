@@ -18,8 +18,8 @@ public class RemoteTraceDataCollector extends AbstractTraceDataCollector
 	private final Set<TraceId> setOfTraceId;
 	private final IdTuple idtuple;
 
-	public RemoteTraceDataCollector(HpcClient hpcClient, IdTuple idtuple, int numPixelH) {
-		super(numPixelH);
+	public RemoteTraceDataCollector(HpcClient hpcClient, IdTuple idtuple, int numPixelH, TraceOption option) {
+		super(option, numPixelH);
 		
 		this.hpcClient = hpcClient;
 
@@ -40,7 +40,7 @@ public class RemoteTraceDataCollector extends AbstractTraceDataCollector
 
 	@Override
 	public void duplicate(ITraceDataCollector traceData) {
-		var obj = new RemoteTraceDataCollector(hpcClient, idtuple, getNumPixelHorizontal());
+		var obj = new RemoteTraceDataCollector(hpcClient, idtuple, getNumPixelHorizontal(), getTraceOption());
 		obj.setListOfCallpathId(getListOfCallpathId());
 	}
 }

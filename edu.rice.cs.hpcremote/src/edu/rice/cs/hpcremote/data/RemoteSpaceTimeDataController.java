@@ -53,8 +53,7 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 		if (TracePreferenceManager.getGPUTraceExposure() && idTuple.isGPU(idtupleType))
 			traceOption = TraceOption.REVEAL_GPU_TRACE;
 
-		var dataCollector = new RemoteTraceDataCollector(client, idTuple, getPixelHorizontal());
-		dataCollector.setTraceOption(traceOption);
+		var dataCollector = new RemoteTraceDataCollector(client, idTuple, getPixelHorizontal(), traceOption);
 		
 		return dataCollector;
 	}

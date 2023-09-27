@@ -2,7 +2,6 @@ package edu.rice.cs.hpctraceviewer.data;
 
 import java.io.IOException;
 import edu.rice.cs.hpcbase.AbstractTraceDataCollector;
-import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.version4.DataRecord;
 import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpctraceviewer.data.version2.AbstractBaseData;
@@ -25,8 +24,6 @@ public class LocalTraceDataCollector extends AbstractTraceDataCollector
 	
 	public static final float NUM_PIXELS_TOLERATED = 1.0f;
 
-	private final IdTuple idtuple;
-
 	private final int lineNum;
 	
 	/** 
@@ -41,11 +38,10 @@ public class LocalTraceDataCollector extends AbstractTraceDataCollector
 	 * @param profileIndex
 	 * @param widthInPixels
 	 */
-	public LocalTraceDataCollector(AbstractBaseData dataAccess, int lineNum, IdTuple idtuple, int widthInPixels)
+	public LocalTraceDataCollector(AbstractBaseData dataAccess, int lineNum, int widthInPixels, TraceOption option)
 	{
-		super(widthInPixels);
+		super(option, widthInPixels);
 		
-		this.idtuple = idtuple;
 		this.lineNum = lineNum;
 		
 		//:'( This is a safe cast because this constructor is only

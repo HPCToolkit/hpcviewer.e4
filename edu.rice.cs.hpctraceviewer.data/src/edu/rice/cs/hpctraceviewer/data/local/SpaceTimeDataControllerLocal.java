@@ -200,9 +200,6 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 		if (TracePreferenceManager.getGPUTraceExposure() && isGpuTrace)
 			traceOption = TraceOption.REVEAL_GPU_TRACE;
 		
-		var traceDataCollector = new LocalTraceDataCollector((AbstractBaseData) dataTrace, lineNum, idtuple, getPixelHorizontal());
-		traceDataCollector.setTraceOption(traceOption);
-		
-		return traceDataCollector;
+		return new LocalTraceDataCollector((AbstractBaseData) dataTrace, lineNum, getPixelHorizontal(), traceOption);
 	}
 }

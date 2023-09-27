@@ -24,7 +24,7 @@ public abstract class AbstractTraceDataCollector implements ITraceDataCollector
 	
 	private List<DataRecord> listcpid;
 
-	private TraceOption option = TraceOption.REVEAL_GPU_TRACE;
+	private final TraceOption option;
 	
 	
 	/****
@@ -34,7 +34,7 @@ public abstract class AbstractTraceDataCollector implements ITraceDataCollector
 	 * 			Number of pixels or samples horizontally
 	 */
 	protected AbstractTraceDataCollector(int numPixelH) {
-		this(TraceOption.REVEAL_GPU_TRACE, numPixelH);
+		this(TraceOption.ORIGINAL_TRACE, numPixelH);
 	}
 	
 	
@@ -52,10 +52,6 @@ public abstract class AbstractTraceDataCollector implements ITraceDataCollector
 		this.numPixelH = numPixelH;		
 		
 		listcpid = new ArrayList<>(numPixelH);
-	}
-
-	public void setTraceOption(TraceOption option) {
-		this.option = option;
 	}
 	
 	
