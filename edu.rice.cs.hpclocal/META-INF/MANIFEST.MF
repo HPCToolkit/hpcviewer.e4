@@ -8,7 +8,12 @@ Require-Bundle: org.eclipse.swt,
  org.eclipse.jface,
  edu.rice.cs.hpcdata,
  edu.rice.cs.hpcbase,
- edu.rice.cs.hpcsetting
+ edu.rice.cs.hpcsetting,
+ org.eclipse.equinox.registry,
+ edu.rice.cs.hpctraceviewer.data,
+ edu.rice.cs.hpctraceviewer.config,
+ org.slf4j.api
 Bundle-Vendor: Rice University
 Automatic-Module-Name: edu.rice.cs.hpclocal
 Bundle-RequiredExecutionEnvironment: JavaSE-11
+Import-Package: edu.rice.cs.hpctraceviewer.data

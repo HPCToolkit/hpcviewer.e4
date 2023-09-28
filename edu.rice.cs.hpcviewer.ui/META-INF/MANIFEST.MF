@@ -53,5 +53,6 @@ Require-Bundle: edu.rice.cs.hpcdata,
  edu.rice.cs.hpclocal
 Bundle-ActivationPolicy: lazy
 Provide-Capability: licensing.feature;licensing.feature="edu.rice.cs.hpcviewer.ui.product"
-Import-Package: javax.inject;version="1.0.0"
+Import-Package: javax.inject;version="1.0.0",
+ org.hpctoolkit.hpcclient.v1_0
 Automatic-Module-Name: edu.rice.cs.hpcviewer.ui

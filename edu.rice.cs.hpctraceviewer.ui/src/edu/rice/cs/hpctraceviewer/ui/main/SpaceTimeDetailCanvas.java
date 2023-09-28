@@ -666,7 +666,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
             crossHairLabel.setText("Select Sample For Cross Hair");
             return;
         }
-		ProcessTimeline ptl     = stData.getCurrentDepthTrace();
+		var ptl = stData.getCurrentSelectedTraceline();
 		if (ptl == null) 
 			return;
 		

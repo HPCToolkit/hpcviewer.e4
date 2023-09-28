@@ -2,6 +2,7 @@ package edu.rice.cs.hpcremote.data;
 
 import java.io.IOException;
 
+import org.hpctoolkit.client_server_common.time.Timestamp;
 import org.hpctoolkit.hpcclient.v1_0.HpcClient;
 
 import edu.rice.cs.hpcbase.ITraceDataCollector;
@@ -33,15 +34,19 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 
 	
 	@Override
-	public IFilteredData createFilteredBaseData() {
+	public IFilteredData getTraceData() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public void fillTracesWithData(boolean changedBounds, int numThreadsToLaunch) throws IOException {
-		// TODO Auto-generated method stub
-
+		var traceAttr = getTraceDisplayAttribute();
+		var frame = traceAttr.getFrame();
+		var time1 = Timestamp.ofEpochNano(frame.begTime);
+		var time2 = Timestamp.ofEpochNano(frame.endTime);
+		
+		var setFuture = client.sampleTracesAsync(traceAttr.getProcessInterval(), time1, time2, getPixelHorizontal());
 	}
 
 

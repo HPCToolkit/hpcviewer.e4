@@ -13,6 +13,7 @@ import org.hpctoolkit.hpcclient.v1_0.HpcClientJavaNetHttp;
 import edu.rice.cs.hpcbase.ITraceManager;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
+import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 import edu.rice.cs.hpcremote.IDatabaseRemote;
 import edu.rice.cs.hpcremote.ui.ConnectionDialog;
 
@@ -140,12 +141,11 @@ public class DatabaseRemote implements IDatabaseRemote
 	}
 
 	@Override
-	public ITraceManager getORCreateTraceManager() {
+	public ITraceManager getORCreateTraceManager() throws IOException, InvalExperimentException {
+		if (traceManager == null) {
+			var opener = new RemoteTraceOpener(client, experiment);			
+			traceManager = opener.openDBAndCreateSTDC(null);
+		}
 		return traceManager;
-	}
-
-	@Override
-	public void setTraceManager(ITraceManager traceManager) {
-		this.traceManager = traceManager;
 	}
 }

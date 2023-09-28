@@ -6,7 +6,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.swt.widgets.Display;
 
+import edu.rice.cs.hpcbase.IProcessTimeline;
 import edu.rice.cs.hpcbase.ITraceDataCollector;
+import edu.rice.cs.hpcbase.ITraceManager;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
@@ -17,7 +19,6 @@ import edu.rice.cs.hpcdata.trace.BaseTraceAttribute;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
 import edu.rice.cs.hpcdata.util.ICallPath;
 import edu.rice.cs.hpctraceviewer.data.color.ColorTable;
-import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 
 
@@ -36,7 +37,7 @@ import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
  * - 2014.2.1 Laksono: refactoring to make it as simple as possible and avoid code redundancy
  *
  *******************************************************************************************/
-public abstract class SpaceTimeDataController 
+public abstract class SpaceTimeDataController implements ITraceManager
 {
 	protected IExperiment  exp;
 
@@ -170,7 +171,7 @@ public abstract class SpaceTimeDataController
 	 *  
 	 * @return ProcessTimeline
 	 *************************************************************************/
-	public ProcessTimeline getCurrentDepthTrace() {
+	public IProcessTimeline getCurrentSelectedTraceline() {
 		int scaledDTProcess = computeScaledProcess();
 		return  timelineService.getProcessTimeline(scaledDTProcess);
 	}
@@ -378,8 +379,6 @@ public abstract class SpaceTimeDataController
 
 	public abstract void closeDB();
 	
-	public abstract IFilteredData createFilteredBaseData();
-
 	public abstract void fillTracesWithData(boolean changedBounds, int numThreadsToLaunch)
 			throws IOException;
 

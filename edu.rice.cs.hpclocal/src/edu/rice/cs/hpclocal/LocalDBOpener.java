@@ -1,9 +1,7 @@
-package edu.rice.cs.hpctraceviewer.data.local;
+package edu.rice.cs.hpclocal;
 
 import java.io.IOException;
-
 import org.eclipse.core.runtime.IProgressMonitor;
-
 import edu.rice.cs.hpcdata.db.IFileDB;
 import edu.rice.cs.hpcdata.db.version2.FileDB2;
 import edu.rice.cs.hpcdata.db.version4.FileDB4;

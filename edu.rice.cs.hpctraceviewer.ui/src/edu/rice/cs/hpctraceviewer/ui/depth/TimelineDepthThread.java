@@ -51,7 +51,7 @@ public class TimelineDepthThread
 
 	@Override
 	protected ProcessTimeline getNextTrace(AtomicInteger currentLine) {
-		ProcessTimeline depthTrace = stData.getCurrentDepthTrace();
+		var depthTrace = stData.getCurrentSelectedTraceline();
 		if (depthTrace == null) {
 			monitor.setCanceled(true);
 			monitor.done(); // forcing to reset the title bar

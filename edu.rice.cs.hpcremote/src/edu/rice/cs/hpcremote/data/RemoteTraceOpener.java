@@ -7,13 +7,20 @@ import org.hpctoolkit.hpcclient.v1_0.HpcClient;
 
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
+import edu.rice.cs.hpcremote.IDatabaseRemote;
 import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 
-public class RemoteTraceOpener extends AbstractDBOpener 
+
+public class RemoteTraceOpener extends AbstractDBOpener
 {
 	private final HpcClient client;
 	private final IExperiment experiment;
+	
+	
+	public RemoteTraceOpener(IDatabaseRemote database) {
+		this(database.getClient(), database.getExperimentObject());
+	}
 	
 	public RemoteTraceOpener(HpcClient client, IExperiment experiment) {
 		this.client = client;
@@ -23,12 +30,13 @@ public class RemoteTraceOpener extends AbstractDBOpener
 	@Override
 	public SpaceTimeDataController openDBAndCreateSTDC(IProgressMonitor statusMgr)
 			throws IOException, InvalExperimentException {
+		
 		return new RemoteSpaceTimeDataController(client, experiment);
 	}
 
 	@Override
 	public void end() {
-		// no action
+		// close experience object?
 	}
 
 }

@@ -1,6 +1,7 @@
 package edu.rice.cs.hpclocal;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -12,6 +13,7 @@ import edu.rice.cs.hpcbase.map.ProcedureAliasMap;
 import edu.rice.cs.hpcdata.db.DatabaseManager;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
+import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
 
 public class DatabaseLocal implements IDatabaseLocal 
@@ -121,13 +123,11 @@ public class DatabaseLocal implements IDatabaseLocal
 	}
 
 	@Override
-	public ITraceManager getORCreateTraceManager() {
+	public ITraceManager getORCreateTraceManager() throws InvalExperimentException, IOException {
+		if (traceManager == null) {
+			var opener = new LocalDBOpener(experiment);
+			traceManager = opener.openDBAndCreateSTDC(null);
+		}
 		return traceManager;
-	}
-	
-	
-	@Override
-	public void setTraceManager(ITraceManager traceManager) {
-		this.traceManager = traceManager;
 	}
 }

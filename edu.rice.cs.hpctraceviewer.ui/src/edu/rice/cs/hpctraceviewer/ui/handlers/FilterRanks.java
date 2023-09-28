@@ -54,7 +54,7 @@ public class FilterRanks
 		 */
         IBaseData filteredBaseData = data.getBaseData();
         if (!(filteredBaseData instanceof IFilteredData)) {
-        	filteredBaseData = data.createFilteredBaseData();
+        	filteredBaseData = data.getTraceData();
         }
         List<IdTuple> listDenseIds = ((IFilteredData)filteredBaseData).getDenseListIdTuple(IdTupleOption.BRIEF);
         List<IdTuple> listIds = filteredBaseData.getListOfIdTuples(IdTupleOption.BRIEF);

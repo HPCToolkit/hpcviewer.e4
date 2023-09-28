@@ -11,6 +11,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import edu.rice.cs.hpcbase.ITraceDataCollector;
 import edu.rice.cs.hpcbase.ITraceDataCollector.TraceOption;
 import edu.rice.cs.hpcdata.db.IdTuple;
+import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
 import edu.rice.cs.hpcdata.experiment.extdata.IFilteredData;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
 import edu.rice.cs.hpcremote.data.DecompressionThread.DecompressionItemToDo;
@@ -45,12 +46,12 @@ public class SpaceTimeDataControllerRemote extends SpaceTimeDataController
 		this.valuesX = valuesX;
 		server = connectionToServer;
 
-		super.dataTrace = createFilteredBaseData();
+		super.dataTrace = getTraceData();
 	}
 
 	
 	@Override
-	public IFilteredData createFilteredBaseData() {
+	public IBaseData getTraceData() {
 		final int headerSize = ((TraceAttribute)exp.getTraceAttribute()).dbHeaderSize;
 		return new RemoteFilteredBaseData(valuesX, headerSize, server);
 	}

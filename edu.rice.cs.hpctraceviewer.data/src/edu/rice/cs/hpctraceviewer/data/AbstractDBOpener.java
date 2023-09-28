@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import edu.rice.cs.hpcbase.ITraceManager;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 
 
@@ -17,9 +16,8 @@ import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
  * @author Philip Taffet
  * 
  */
-public abstract class AbstractDBOpener implements ITraceManager {
-
-	
+public abstract class AbstractDBOpener 
+{
 
 	/**
 	 * This prepares the database for retrieving data and creates a

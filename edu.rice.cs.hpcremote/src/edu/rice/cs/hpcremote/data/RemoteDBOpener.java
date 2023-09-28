@@ -36,6 +36,7 @@ import edu.rice.cs.hpctraceviewer.data.util.Constants;
  * @author Philip Taffet
  *
  */
+@Deprecated
 public class RemoteDBOpener extends AbstractDBOpener 
 {
 	// -----------------

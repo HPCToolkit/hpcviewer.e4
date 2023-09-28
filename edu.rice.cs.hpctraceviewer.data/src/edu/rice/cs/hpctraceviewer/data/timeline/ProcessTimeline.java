@@ -3,6 +3,7 @@ package edu.rice.cs.hpctraceviewer.data.timeline;
 import java.io.IOException;
 import org.eclipse.core.runtime.Assert;
 
+import edu.rice.cs.hpcbase.IProcessTimeline;
 import edu.rice.cs.hpcbase.ITraceDataCollector;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
@@ -13,7 +14,8 @@ import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 
 
 /** A data structure that stores one line of timestamp-cpid data. */
-public class ProcessTimeline {
+public class ProcessTimeline implements IProcessTimeline
+{
 
 	/** The mapping between the cpid's and the actual scopes. */
 	private ICallPath scopeMap;
@@ -113,8 +115,10 @@ public class ProcessTimeline {
 	 * Fills this one with the data from another
 	 * @param another
 	 */
-	public void copyDataFrom(ProcessTimeline another) {
-		data.duplicate(another.data);
+	public void copyDataFrom(IProcessTimeline another) {
+		if (another instanceof ProcessTimeline) {
+			data.duplicate(((ProcessTimeline)another).data);
+		}
 	}
 
 	/** Returns the number of elements in this ProcessTimeline. */
@@ -148,9 +152,13 @@ public class ProcessTimeline {
 	 * @param time : the requested time
 	 * @return the index of the sample if the time is within the range, -1  otherwise
 	 * */
-	public int findMidpointBefore(long time, boolean usingMidpoint)  throws Exception
+	public int findMidpointBefore(long time, boolean usingMidpoint)
 	{
-		return data.findClosestSample(time, usingMidpoint);
+		try {
+			return data.findClosestSample(time, usingMidpoint);
+		} catch (Exception e) {
+			throw new IllegalArgumentException("Invalid time: " + time);
+		}
 	}
 
 	

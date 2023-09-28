@@ -18,7 +18,6 @@ Require-Bundle: edu.rice.cs.hpcdata,
  edu.rice.cs.hpcclient
 Export-Package: edu.rice.cs.hpctraceviewer.data,
  edu.rice.cs.hpctraceviewer.data.color,
- edu.rice.cs.hpctraceviewer.data.local,
  edu.rice.cs.hpctraceviewer.data.timeline,
  edu.rice.cs.hpctraceviewer.data.util,
  edu.rice.cs.hpctraceviewer.data.version2

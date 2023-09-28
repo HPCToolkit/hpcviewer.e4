@@ -396,8 +396,8 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 			return;
 		
 		try {
-			AbstractDBOpener dbOpener = (AbstractDBOpener) database.getORCreateTraceManager(); //new LocalDBOpener(context, database.getExperimentObject());
-			stdc = dbOpener.openDBAndCreateSTDC(null);
+			//AbstractDBOpener dbOpener = (AbstractDBOpener) database.getORCreateTraceManager(); //new LocalDBOpener(context, database.getExperimentObject());
+			stdc = (SpaceTimeDataController) database.getORCreateTraceManager();
 
 			// make sure all the tabs other than trace view has the stdc first
 			tbtmDepthView.setInput(stdc);

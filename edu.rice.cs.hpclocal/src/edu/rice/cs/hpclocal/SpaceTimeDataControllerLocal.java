@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctraceviewer.data.local;
+package edu.rice.cs.hpclocal;
 
 import java.io.File;
 import java.io.IOException;
@@ -98,7 +98,7 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 
 
 	@Override
-	public IFilteredData createFilteredBaseData() {
+	public IFilteredData getTraceData() {
 		try{
 			return new FilteredBaseData(fileDB, 
 										((TraceAttribute)exp.getTraceAttribute()).dbHeaderSize, 

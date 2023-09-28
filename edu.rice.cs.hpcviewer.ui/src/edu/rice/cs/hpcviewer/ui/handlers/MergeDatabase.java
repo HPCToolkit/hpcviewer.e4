@@ -151,16 +151,8 @@ public class MergeDatabase
 
 		@Override
 		public ITraceManager getORCreateTraceManager() {
-			// TODO Auto-generated method stub
 			return null;
-		}
-
-		@Override
-		public void setTraceManager(ITraceManager traceManager) {
-			// TODO Auto-generated method stub
-			
-		}
-		
+		}		
 	}
 		
 }
