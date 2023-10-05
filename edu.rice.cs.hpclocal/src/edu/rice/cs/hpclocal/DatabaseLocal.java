@@ -17,9 +17,11 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
+import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.source.EmptySourceFile;
 import edu.rice.cs.hpcdata.experiment.source.FileSystemSourceFile;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
+import edu.rice.cs.hpcdata.util.Util;
 
 public class DatabaseLocal implements IDatabaseLocal 
 {
@@ -146,5 +148,10 @@ public class DatabaseLocal implements IDatabaseLocal
 		Path path = Path.of(filename);
 
 		return Files.readString(path, StandardCharsets.ISO_8859_1);
+	}
+
+	@Override
+	public boolean isSourceFileAvailable(Scope scope) {		
+		return Util.isFileReadable(scope);
 	}
 }

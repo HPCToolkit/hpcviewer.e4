@@ -194,7 +194,7 @@ public class TopDownPart extends AbstractTableView
 	@Override
 	protected IScopeTreeData getTreeData(RootScope root, IMetricManager metricManager) {
 		if (treeData == null)
-			treeData = new ScopeTreeData(root, metricManager);
+			treeData = new ScopeTreeData(getDatabase(), root, metricManager);
 		
 		return treeData;
 	}

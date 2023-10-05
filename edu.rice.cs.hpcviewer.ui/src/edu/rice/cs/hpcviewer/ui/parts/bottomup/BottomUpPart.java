@@ -58,7 +58,7 @@ public class BottomUpPart extends AbstractTableView
 
 	@Override
 	protected IScopeTreeData getTreeData(RootScope root, IMetricManager metricManager) {
-		return new BottomUpScopeTreeData(root, metricManager);
+		return new BottomUpScopeTreeData(getDatabase(), root, metricManager);
 	}
 
 	@Override

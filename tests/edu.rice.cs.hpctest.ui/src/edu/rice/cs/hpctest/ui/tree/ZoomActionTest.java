@@ -53,7 +53,7 @@ public class ZoomActionTest
 				continue;
 
 			RecordData data = new RecordData();
-			data.treeData = new ScopeTreeData(root, experiment);
+			data.treeData = new ScopeTreeData(null, root, experiment);
 			
 			ScopeTreeTable table = new ScopeTreeTable(shell, 0, data.treeData);
 			

@@ -10,7 +10,6 @@ import edu.rice.cs.hpcdata.experiment.scope.CallSiteScopeCallerView;
 import edu.rice.cs.hpcdata.experiment.scope.LoadModuleScope;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.util.Util;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpctree.IScopeTreeData;
 
@@ -147,7 +146,7 @@ public class ScopeTreeDataProvider implements IDataProvider, IRowDataProvider<Sc
 		return text;
 	}
 	
-	static private boolean needToAddLoadModuleSuffix(Scope node) {
+	private boolean needToAddLoadModuleSuffix(Scope node) {
 		if (node instanceof CallSiteScope ||
 				(node instanceof ProcedureScope && ((ProcedureScope)node).isAlien())) {
 
@@ -155,7 +154,7 @@ public class ScopeTreeDataProvider implements IDataProvider, IRowDataProvider<Sc
 			// - the file is NOT readable; and
 			// - doesn't have load module suffix
 
-			return (!Util.isFileReadable(node) && node.getName().lastIndexOf(']')<0);
+			return (!treeData.isSourceFileAvailable(node) && node.getName().lastIndexOf(']')<0);
 
 		}
 		return false;

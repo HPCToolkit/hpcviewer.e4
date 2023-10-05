@@ -16,6 +16,8 @@ import edu.rice.cs.hpcbase.ITraceManager;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
+import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.experiment.source.MetaFileSystemSourceFile;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
 import edu.rice.cs.hpcremote.IDatabaseRemote;
 import edu.rice.cs.hpcremote.ui.ConnectionDialog;
@@ -154,6 +156,9 @@ public class DatabaseRemote implements IDatabaseRemote
 
 	@Override
 	public String getSourceFileContent(SourceFile fileId) throws IOException {
+		if (fileId == null)
+			return null;
+		
 		try {
 			return client.getProfiledSource(ProfiledSourceFileId.make(fileId.getFileID()));
 		} catch (InterruptedException e) {
@@ -162,5 +167,15 @@ public class DatabaseRemote implements IDatabaseRemote
 			throw new IllegalArgumentException(e2.getMessage());
 		}
 		return null;
+	}
+
+	@Override
+	public boolean isSourceFileAvailable(Scope scope) {
+		var sourceFile = scope.getSourceFile();
+		if (sourceFile instanceof MetaFileSystemSourceFile) {
+			MetaFileSystemSourceFile metaFile = (MetaFileSystemSourceFile) sourceFile;
+			return metaFile.isCopied();
+		}
+		return false;
 	}
 }

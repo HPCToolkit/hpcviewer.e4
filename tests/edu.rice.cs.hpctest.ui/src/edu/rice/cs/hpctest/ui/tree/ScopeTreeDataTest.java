@@ -45,7 +45,7 @@ public class ScopeTreeDataTest
 			}			
 			assertNotNull(experiments[i].getRootScope());
 			
-			treeData[i] = new ScopeTreeData(experiments[i].getRootScope(RootScopeType.CallingContextTree), experiments[i]);
+			treeData[i] = new ScopeTreeData(null, experiments[i].getRootScope(RootScopeType.CallingContextTree), experiments[i]);
 			
 			i++;
 		}

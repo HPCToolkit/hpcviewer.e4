@@ -107,4 +107,12 @@ public interface IScopeTreeData extends ITreeData<Scope>, ITreePath<Scope>
 	 *     		sorted column. 
 	 */
 	void refreshAndShift(int shift);
+	
+	
+	/***
+	 * Check if the source file of this scope is available and readable or not.
+	 * @param scope
+	 * @return
+	 */
+	boolean isSourceFileAvailable(Scope scope);
 }

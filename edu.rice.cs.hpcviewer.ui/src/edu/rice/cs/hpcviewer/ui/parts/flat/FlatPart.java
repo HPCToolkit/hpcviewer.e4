@@ -119,7 +119,7 @@ public class FlatPart extends AbstractTableView
 	@Override
 	protected IScopeTreeData getTreeData(RootScope root, IMetricManager metricManager) {
 		if (treeData == null)
-			treeData = new FlatScopeTreeData(root, metricManager);
+			treeData = new FlatScopeTreeData(getDatabase(), root, metricManager);
 		return treeData;
 	}
 

@@ -89,6 +89,7 @@ implements EventHandler, IUserMessage
 	private ToolItem[]   toolItem;
 	private LabelMessage lblMessage;
 	
+	private IDatabase      database;
 	private IMetricManager metricManager;
 	private RootScope      root;
 	private ScopeTreeTable table ;
@@ -282,10 +283,7 @@ implements EventHandler, IUserMessage
 		if (!(input instanceof IMetricManager))
 			return;
 		
-		// -------------------------------------------
-		// table creation
-		// -------------------------------------------
-		
+		this.database = database;
 		this.metricManager = (IMetricManager) input;
 		
 		// -------------------------------------------
@@ -777,6 +775,10 @@ implements EventHandler, IUserMessage
 		return table;
 	}
 
+	
+	protected IDatabase getDatabase() {
+		return database;
+	}
 
 	protected void updateButtonStatus() {
 		updateStatus();

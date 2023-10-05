@@ -12,7 +12,6 @@ import edu.rice.cs.hpcbase.ui.AbstractUpperPart;
 import edu.rice.cs.hpcbase.ui.ILowerPart;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.experiment.source.FileSystemSourceFile;
 import edu.rice.cs.hpcgraph.GraphEditorInput;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
@@ -173,30 +172,6 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 				}
 			}
 		});
-	}
-	
-	/****
-	 * Find the file object of a given input.
-	 * If the input is a scope object, the file is the source file of the scope.
-	 * If the input is an experiment, the file is the database experiment.xml
-	 * @param input
-	 * @return
-	 */
-	private String getFileFromInput(Object input) {
-		if (input == null) return null;
-		
-		String file = null;
-		
-		if (input instanceof String) {
-			file = (String) input;
-		} else if (input instanceof Scope) {
-			var scope = (Scope) input;
-			var fileSource = (FileSystemSourceFile) scope.getSourceFile();
-			file = fileSource.getCompleteFilename();
-		} else if (input instanceof BaseExperiment) {
-			file = ((BaseExperiment)input).getExperimentFile().getAbsolutePath();
-		}
-		return file;
 	}
 	
 	/*****

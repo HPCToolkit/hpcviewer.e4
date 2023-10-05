@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.eclipse.collections.impl.list.mutable.FastList;
 
+import edu.rice.cs.hpcbase.IDatabase;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -12,8 +13,8 @@ public class FlatScopeTreeData extends ScopeTreeData
 {
 	private int currentLevel;
 
-	public FlatScopeTreeData(RootScope root, IMetricManager metricManager) {
-		super(root, metricManager);
+	public FlatScopeTreeData(IDatabase database, RootScope root, IMetricManager metricManager) {
+		super(database, root, metricManager);
 		currentLevel = 0;
 	}
 	

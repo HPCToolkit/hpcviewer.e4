@@ -49,7 +49,7 @@ public class BottomUpScopeTreeDataTest
 			buRoot = experiment.createCallersView(cctRoot, buRoot);
 			assertNotNull(buRoot);
 			
-			var data = new BottomUpScopeTreeData(buRoot, experiment);
+			var data = new BottomUpScopeTreeData(null, buRoot, experiment);
 			treeData.add(data);
 		}
 	}

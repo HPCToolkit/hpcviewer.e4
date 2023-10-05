@@ -43,7 +43,7 @@ public class DatabaseWalker
 			if (!root.hasChildren())
 				continue;
 			
-			var treeData = new ScopeTreeData(root, experiment);			
+			var treeData = new ScopeTreeData(null, root, experiment);			
 			var listRows = treeData.getList();
 			listRows.addAll(root.getChildren());
 			

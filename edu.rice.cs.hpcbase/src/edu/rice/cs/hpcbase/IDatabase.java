@@ -6,6 +6,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
+import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
 
 public interface IDatabase 
@@ -89,4 +90,7 @@ public interface IDatabase
 	 * @throws IOException
 	 */
 	String getSourceFileContent(SourceFile fileId) throws IOException;
+	
+	
+	boolean isSourceFileAvailable(Scope scope);
 }

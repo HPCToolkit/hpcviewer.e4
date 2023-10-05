@@ -49,7 +49,7 @@ public class FlatActionTest
 			var flatRoot = exp.getRootScope(RootScopeType.Flat);			
 			final var flaTreetRoot = exp.createFlatView(cctRoot, flatRoot);
 			
-			var td = new FlatScopeTreeData(flaTreetRoot, exp);
+			var td = new FlatScopeTreeData(null, flaTreetRoot, exp);
 			FlatAction fa = null;
 			IScopeTreeAction treeAction = null;
 			try {
