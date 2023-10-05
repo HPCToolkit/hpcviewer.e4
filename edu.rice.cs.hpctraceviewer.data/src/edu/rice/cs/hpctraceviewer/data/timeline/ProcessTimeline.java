@@ -35,7 +35,7 @@ public class ProcessTimeline implements IProcessTimeline
 	/** The amount of time that each pixel on the screen correlates to. */
 	private final double pixelLength;
 
-	private ITraceDataCollector data;
+	private ITraceDataCollector traceDataCollector;
 
 	/*************************************************************************
 	 * Reads in the call-stack trace data from the binary traceFile in the form:
@@ -63,7 +63,7 @@ public class ProcessTimeline implements IProcessTimeline
 
 		pixelLength = timeRange / (double) stData.getPixelHorizontal();
 		
-		data = stData.getTraceDataCollector(lineNum, idTuple);
+		traceDataCollector = stData.getTraceDataCollector(lineNum, idTuple);
 		
 		idTupletype = stData.getExperiment().getIdTupleType();
 	}
@@ -75,21 +75,21 @@ public class ProcessTimeline implements IProcessTimeline
 	 * @throws IOException 
 	 */
 	public void readInData() throws IOException {
-		data.readInData(startingTime, timeRange, pixelLength);
+		traceDataCollector.readInData(startingTime, timeRange, pixelLength);
 	}
 
 	/** Gets the time that corresponds to the index sample in times. */
 	public long getTime(int sample) {
-		return data.getTime(sample);
+		return traceDataCollector.getTime(sample);
 	}
 
 	/** Gets the cpid that corresponds to the index sample in timeLine. */
 	public int getContextId(int sample) {
-		return data.getCpid(sample);
+		return traceDataCollector.getCpid(sample);
 	}
 
 	public void shiftTimeBy(long lowestStartingTime) {
-		data.shiftTimeBy(lowestStartingTime);
+		traceDataCollector.shiftTimeBy(lowestStartingTime);
 	}
 
 	/** returns the call path corresponding to the sample and depth given */
@@ -117,13 +117,13 @@ public class ProcessTimeline implements IProcessTimeline
 	 */
 	public void copyDataFrom(IProcessTimeline another) {
 		if (another instanceof ProcessTimeline) {
-			data.duplicate(((ProcessTimeline)another).data);
+			traceDataCollector.duplicate(((ProcessTimeline)another).traceDataCollector);
 		}
 	}
 
 	/** Returns the number of elements in this ProcessTimeline. */
 	public int size() {
-		return data.size();
+		return traceDataCollector.size();
 	}
 
 	/** Returns this ProcessTimeline's line number. */
@@ -155,7 +155,7 @@ public class ProcessTimeline implements IProcessTimeline
 	public int findMidpointBefore(long time, boolean usingMidpoint)
 	{
 		try {
-			return data.findClosestSample(time, usingMidpoint);
+			return traceDataCollector.findClosestSample(time, usingMidpoint);
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Invalid time: " + time);
 		}
@@ -164,7 +164,7 @@ public class ProcessTimeline implements IProcessTimeline
 	
 	public boolean isEmpty()
 	{
-		return data.isEmpty();
+		return traceDataCollector.isEmpty();
 	}
 	
 	public boolean isGPU() 
@@ -175,10 +175,10 @@ public class ProcessTimeline implements IProcessTimeline
 	public void dispose() {
 		if (scopeMap != null)
 			scopeMap.dispose();
-		if (data != null)
-			data.dispose();
+		if (traceDataCollector != null)
+			traceDataCollector.dispose();
 		
 		scopeMap = null;
-		data = null;
+		traceDataCollector = null;
 	}
 }

@@ -466,9 +466,9 @@ public class DatabaseCollection
 		String elementID = "P." + database.getId();
 		part.setElementId(elementID);
 
-		var experiment = database.getExperimentObject();
-		view.setInput(experiment);
+		view.setInput(database);
 				
+		var experiment = database.getExperimentObject();
 		part.setLabel(ProfilePart.PREFIX_TITLE + experiment.getName());
 		part.setTooltip(database.getId());
 
@@ -599,8 +599,10 @@ public class DatabaseCollection
 			Object obj = part.getObject();
 			if (obj instanceof IMainPart) {
 				IMainPart mpart = (IMainPart) obj;
-				if (mpart.getExperiment() == database.getExperimentObject() ||
+				if (mpart.getInput() == database ||
+					mpart.getInput() == null     || 
 					mpart.getExperiment() == null) {
+					
 					partService.hidePart(part, true);
 					mpart.dispose();
 				}

@@ -1,20 +1,18 @@
  
 package edu.rice.cs.hpcviewer.ui.parts.editor;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.slf4j.LoggerFactory;
 
+import edu.rice.cs.hpcbase.IBaseInput;
+import edu.rice.cs.hpcbase.IEditorInput;
 import edu.rice.cs.hpcbase.ui.AbstractUpperPart;
+import edu.rice.cs.hpcbase.ui.ILowerPart;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.source.FileSystemSourceFile;
-import edu.rice.cs.hpcdata.util.Util;
 import edu.rice.cs.hpcgraph.GraphEditorInput;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
@@ -24,7 +22,6 @@ import edu.rice.cs.hpcviewer.ui.dialogs.SearchDialog;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.DialogSettings;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.text.BadLocationException;
@@ -127,16 +124,13 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 		super.dispose();
 	}
 	
-	public boolean hasEqualInput(Object input) {
+	public boolean hasEqualInput(IBaseInput input) {
 		if (input == null) return false;
 		
-		var fileNew = getFileFromInput(input);
-		var fileOld = getFileFromInput(textViewer.getData(PROPERTY_DATA));
+		var myId = textViewer.getData(PROPERTY_DATA);
+		var theirId = input.getId();
 		
-		if (fileNew != null && fileOld != null)
-			return fileNew.equals(fileOld);
-		
-		return false;
+		return myId.equals(theirId);
 	}
 	
 	
@@ -298,11 +292,11 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 	@Override
 	public String getTitle() {
 		Object input = textViewer.getData(PROPERTY_DATA);
-		return Editor.getTitle(input);
+		return getTitle(input);
 	}
 	
 	
-	public static String getTitle(Object input) {
+	String getTitle(Object input) {
 		String filename = null;
 		
 		if (input instanceof String) {
@@ -319,80 +313,41 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 
 
 	@Override
-	public void setInput(Object input) {
+	public void setInput(IBaseInput input) {
+		setText(input.getShortName());
 		
-		setText(getTitle(input));
+		setToolTipText(input.getLongName());
 		
-		if (input instanceof Scope) {
-			Scope scope = (Scope) input;
-			
-			if (!Util.isFileReadable(scope))
-				return;
-			
-			FileSystemSourceFile file = (FileSystemSourceFile) scope.getSourceFile();
-			
-			String filename = file.getCompleteFilename();
-			int lineNumber  = scope.getFirstLineNumber();
-
-			displayFile(filename, lineNumber);
-			
-			setToolTipText(filename);
-			
-		} else if (input instanceof BaseExperiment) {
-			
-			BaseExperiment experiment = (BaseExperiment) input;
-			String filename = experiment.getExperimentFile().getAbsolutePath();
-			
-			displayFile(filename, 0);
-			
-			setToolTipText(filename);
-		}
-		// add more condition for different type of objects here
-		// we should make this more flexible...
+		var name = input.getLongName();
+		var title = input.getShortName();
+		
+		setText(title);
+		setToolTipText(name);
+		
+		var id = input.getId();
+		
+		IEditorInput editorInput = (IEditorInput) input;
+		var data = editorInput.getContent();
+		var line = editorInput.getLine();
+		
+		displayContent(id, data, line);
 	}
 
-	
-	
-	/***
-	 * Display the content of a file, and highlight a specified line number (generic version).
-	 * 
-	 * @param obj the object that identified this editor. It has to be either a scope or an experiment
-	 * @param filename the complete path of the file name
-	 * @param lineNumber the line number to be revealed
-	 */
-	private void displayFile(String filename, int lineNumber) {
+
+	private void displayContent(String id, String text, int lineNumber) {
 		IDocument document = new Document();
 		
 		AnnotationModel annModel = new AnnotationModel();
 		annModel.connect(document);
-		
-		Path path = Path.of(filename);
-		String text = "";
-		try {
-			// Fix issue #143: malformed input exception due to special copyright character.
-			// this character is not recognized by standard UTF 8, but works well with iso 8859
-			//
-			text = Files.readString(path, StandardCharsets.ISO_8859_1);	
-
-			// TODO: The problem with Files.readString is that the file size is limited to 2GB
-			// bigger than that, it will cause an exception. Should we handle huge file?
-			// In theory we should, but it will cause the UI to be sluggish and other memory problems.
-			// It's better to not to visualize huge file (who has 2GB file to display anyway?)
-			
-		} catch (IOException e) {
-			MessageDialog.openError(getControl().getShell(), filename, e.getMessage());
-			e.printStackTrace();			
-		}
 		document.set(text);
 		textViewer.setDocument(document, annModel);
-		textViewer.setData(PROPERTY_DATA, filename);
+		textViewer.setData(PROPERTY_DATA, id);
 
 		finder = new FindReplaceDocumentAdapter(document);
 
 		setMarker(lineNumber);
 	}
-
-
+	
 	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		final String property = event.getProperty();
@@ -415,5 +370,11 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 	public void setFocus() {
 		if (textViewer != null)
 			textViewer.getControl().setFocus();
+	}
+
+
+	@Override
+	public void refresh(ILowerPart lowerPart) {
+		// no need to refresh the content
 	}
 }

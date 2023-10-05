@@ -11,6 +11,7 @@ import org.eclipse.swt.custom.CTabFolder;
 import org.osgi.service.event.Event;
 
 import edu.rice.cs.hpcbase.BaseConstants.ViewType;
+import edu.rice.cs.hpcbase.IDatabase;
 import edu.rice.cs.hpcbase.ThreadViewInput;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcdata.db.IdTuple;
@@ -55,7 +56,7 @@ public class ThreadPart extends TopDownPart
 	
 
 	@Override
-	public void setInput(Object input) {
+	public void setInput(IDatabase database, Object input) {
 		
 		if (!(input instanceof ThreadViewInput))
 			return;
@@ -76,7 +77,7 @@ public class ThreadPart extends TopDownPart
 		
 		ThreadMetricManager metricManager = new ThreadMetricManager(id, rawMetrics, threads);
 		
-		createTable(metricManager);
+		super.setInput(database, metricManager); 
 		
 		// create the title and make sure it's closable.
 		String title = TITLE_PREFIX + getLabel(viewInput).toString(); 

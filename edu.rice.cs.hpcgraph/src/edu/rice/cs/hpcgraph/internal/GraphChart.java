@@ -179,7 +179,7 @@ public class GraphChart extends InteractiveChart implements MouseMoveListener, D
 			ThreadViewInput viewInput = new ThreadViewInput(input.getScope().getRootScope(), 
 															input.getThreadData(), 
 															list);
-			profilePart.addView(viewInput);
+			profilePart.addThreadView(viewInput);
 		}
 	}
 

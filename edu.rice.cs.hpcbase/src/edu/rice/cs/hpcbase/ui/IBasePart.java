@@ -1,5 +1,6 @@
 package edu.rice.cs.hpcbase.ui;
 
+import edu.rice.cs.hpcbase.IDatabase;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 
 /****
@@ -14,7 +15,26 @@ import edu.rice.cs.hpcdata.experiment.BaseExperiment;
  */
 public interface IBasePart 
 {
-	BaseExperiment getExperiment();
+	/****
+	 * Set the database (local or remote) in this part
+	 * 
+	 * @param input
+	 * 			{@code IDatabase} input object for this main part
+	 */
+	void setInput(IDatabase input);
+
 	
-	void setInput(Object input);
+	/***
+	 * Get the database input of this part
+	 * @return
+	 */
+	IDatabase getInput();
+	
+	/****
+	 * Get the Experiment object of this part.
+	 * This method is deprecated, please use {@link getInput} method instead. 
+	 * @return
+	 */
+	@Deprecated
+	BaseExperiment getExperiment();
 }

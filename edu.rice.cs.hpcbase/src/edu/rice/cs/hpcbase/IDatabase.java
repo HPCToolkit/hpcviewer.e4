@@ -6,6 +6,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
+import edu.rice.cs.hpcdata.experiment.source.SourceFile;
 
 public interface IDatabase 
 {
@@ -74,4 +75,18 @@ public interface IDatabase
 	 * @throws IOException 
 	 */
 	ITraceManager getORCreateTraceManager() throws IOException, InvalExperimentException;
+	
+	
+	/***
+	 * Retrieve the content of a source file given its file id
+	 * 
+	 * @param fileId 
+	 * 			Object of {@code SourceFile}
+	 * 
+	 * @return {@code String} 
+	 * 			the content of the file
+	 * 
+	 * @throws IOException
+	 */
+	String getSourceFileContent(SourceFile fileId) throws IOException;
 }

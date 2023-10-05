@@ -28,6 +28,7 @@ import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
  * @author Philip Taffet
  * 
  *************************************************/
+@Deprecated
 public class SpaceTimeDataControllerRemote extends SpaceTimeDataController 
 {	
 	final RemoteDataRetriever dataRetriever;

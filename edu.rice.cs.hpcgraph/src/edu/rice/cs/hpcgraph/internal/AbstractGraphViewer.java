@@ -16,7 +16,9 @@ import org.eclipse.swtchart.IAxisSet;
 import org.eclipse.swtchart.IAxisTick;
 
 import edu.rice.cs.hpcbase.BaseConstants;
+import edu.rice.cs.hpcbase.IBaseInput;
 import edu.rice.cs.hpcbase.ui.AbstractUpperPart;
+import edu.rice.cs.hpcbase.ui.ILowerPart;
 import edu.rice.cs.hpcbase.ui.IUpperPart;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -71,7 +73,7 @@ public abstract class AbstractGraphViewer extends AbstractUpperPart implements I
 
 	
 	@Override
-	public boolean hasEqualInput(Object input) {
+	public boolean hasEqualInput(IBaseInput input) {
 		if (input == null) return false;
 		if (!(input instanceof GraphEditorInput)) return false;
 		
@@ -87,7 +89,7 @@ public abstract class AbstractGraphViewer extends AbstractUpperPart implements I
 	}
 
 	@Override
-	public void setInput(Object obj) {
+	public void setInput(IBaseInput obj) {
 
 		if (obj == null) return;
 
@@ -177,6 +179,12 @@ public abstract class AbstractGraphViewer extends AbstractUpperPart implements I
 		}
 		String type  = getGraphTypeLabel();
 		return "[" + type + "] " + scopeName +": " + metric.getDisplayName();
+	}
+	
+
+	@Override
+	public void refresh(ILowerPart lowerPart) {
+		// no need to refresh the content
 	}
 	
 

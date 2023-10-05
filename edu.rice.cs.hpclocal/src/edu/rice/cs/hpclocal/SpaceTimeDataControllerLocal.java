@@ -13,7 +13,6 @@ import edu.rice.cs.hpcdata.db.IFileDB;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.extdata.IFilteredData;
-import edu.rice.cs.hpcdata.trace.BaseTraceAttribute;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
 import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.IProgressReport;
@@ -100,9 +99,7 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 	@Override
 	public IFilteredData getTraceData() {
 		try{
-			return new FilteredBaseData(fileDB, 
-										((TraceAttribute)exp.getTraceAttribute()).dbHeaderSize, 
-										BaseTraceAttribute.DEFAULT_RECORD_SIZE);
+			return new FilteredBaseData(fileDB);
 		}
 		catch (Exception e){
 			var log = LoggerFactory.getLogger(getClass());

@@ -27,7 +27,6 @@ import edu.rice.cs.hpcbase.BaseConstants;
 import edu.rice.cs.hpcbase.IDatabase;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceConstants;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
-import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.ui.base.AbstractBaseItem;
 import edu.rice.cs.hpctraceviewer.ui.base.IPixelAnalysis;
@@ -363,11 +362,8 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 	}
 
 	@Override
-	public void setInput( Object input) {
-		if (input instanceof IDatabase)
-			this.database = (IDatabase) input;
-		else
-			throw new IllegalArgumentException("input must be an object of " + IDatabase.class.getName());
+	public void setInput(IDatabase input) {
+		this.database = input;
 	}
 
 	@Override
@@ -460,8 +456,8 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 
 
 	@Override
-	public Object getInput() {
-		return stdc;
+	public IDatabase getInput() {
+		return database;
 	}
 
 	@Override
@@ -536,5 +532,10 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 			stdc.dispose();
 		
 		stdc = null;
+	}
+
+	@Override
+	public SpaceTimeDataController getDataController() {
+		return stdc;
 	}
 }

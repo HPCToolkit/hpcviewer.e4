@@ -42,7 +42,7 @@ public class FilterRanks
 		
 		Object obj = part.getObject();		
 		ITracePart tracePart = (ITracePart) obj;
-		SpaceTimeDataController data = (SpaceTimeDataController) tracePart.getInput();
+		SpaceTimeDataController data = tracePart.getDataController();
 		
 		/*
 		 * This isn't the prettiest, but when we are local, we don't want to set

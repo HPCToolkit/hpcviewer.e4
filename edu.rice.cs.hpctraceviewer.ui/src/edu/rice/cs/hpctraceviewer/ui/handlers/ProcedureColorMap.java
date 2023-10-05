@@ -34,7 +34,7 @@ public class ProcedureColorMap
 		if ( dlg.open() == Dialog.OK ) {
 			classMap.save();
 			
-			SpaceTimeDataController data = (SpaceTimeDataController) tracePart.getInput();
+			SpaceTimeDataController data = tracePart.getDataController();
 			
 			TraceEventData eventData = new TraceEventData(data, tracePart, data);
 			eventBroker.post(IConstants.TOPIC_COLOR_MAPPING, eventData);

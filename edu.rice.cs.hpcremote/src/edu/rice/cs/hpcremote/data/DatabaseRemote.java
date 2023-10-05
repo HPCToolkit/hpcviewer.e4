@@ -7,6 +7,8 @@ import java.net.UnknownHostException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
+import org.hpctoolkit.client_server_common.profiled_source.ProfiledSourceFileId;
+import org.hpctoolkit.client_server_common.profiled_source.UnknownProfiledSourceFileId;
 import org.hpctoolkit.hpcclient.v1_0.HpcClient;
 import org.hpctoolkit.hpcclient.v1_0.HpcClientJavaNetHttp;
 
@@ -14,6 +16,7 @@ import edu.rice.cs.hpcbase.ITraceManager;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
+import edu.rice.cs.hpcdata.experiment.source.SourceFile;
 import edu.rice.cs.hpcremote.IDatabaseRemote;
 import edu.rice.cs.hpcremote.ui.ConnectionDialog;
 
@@ -147,5 +150,17 @@ public class DatabaseRemote implements IDatabaseRemote
 			traceManager = opener.openDBAndCreateSTDC(null);
 		}
 		return traceManager;
+	}
+
+	@Override
+	public String getSourceFileContent(SourceFile fileId) throws IOException {
+		try {
+			return client.getProfiledSource(ProfiledSourceFileId.make(fileId.getFileID()));
+		} catch (InterruptedException e) {
+		    Thread.currentThread().interrupt();
+		} catch (UnknownProfiledSourceFileId e2) {
+			throw new IllegalArgumentException(e2.getMessage());
+		}
+		return null;
 	}
 }

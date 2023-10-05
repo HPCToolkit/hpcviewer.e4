@@ -33,7 +33,7 @@ public class FilteredBaseData extends AbstractBaseData implements IFilteredData 
 	 * @param headerSize
 	 * @throws IOException
 	 */
-	public FilteredBaseData(IFileDB baseDataFile, int headerSize, int recordSz) throws IOException 
+	public FilteredBaseData(IFileDB baseDataFile) throws IOException 
 	{
 		super( baseDataFile);
 	}
@@ -50,7 +50,7 @@ public class FilteredBaseData extends AbstractBaseData implements IFilteredData 
 		if (listIdTuples != null) {
 			return listIdTuples;
 		}
-		listIdTuples = new ArrayList<IdTuple>();
+		listIdTuples = new ArrayList<>();
 		List<IdTuple> listDensed   = super.getListOfIdTuples(IdTupleOption.BRIEF);
 		
 		for (int i=0; i<indexes.size(); i++) {
@@ -100,7 +100,7 @@ public class FilteredBaseData extends AbstractBaseData implements IFilteredData 
 
 	@Override
 	public int getFirstIncluded() {
-		if (indexes == null || indexes.size()==0)
+		if (indexes == null || indexes.isEmpty())
 			return 0;
 		
 		return indexes.get(0);
@@ -108,7 +108,7 @@ public class FilteredBaseData extends AbstractBaseData implements IFilteredData 
 
 	@Override
 	public int getLastIncluded() {
-		if (indexes == null || indexes.size()==0)
+		if (indexes == null || indexes.isEmpty())
 			return 0;
 		
 		return indexes.get(indexes.size()-1);
@@ -116,7 +116,7 @@ public class FilteredBaseData extends AbstractBaseData implements IFilteredData 
 
 	@Override
 	public boolean isDenseBetweenFirstAndLast() {
-		if (indexes == null || indexes.size()==0)
+		if (indexes == null || indexes.isEmpty())
 			return true;
 		
 		int size = indexes.size();

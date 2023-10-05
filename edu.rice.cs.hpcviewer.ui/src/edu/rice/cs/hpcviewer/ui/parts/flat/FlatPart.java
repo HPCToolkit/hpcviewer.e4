@@ -7,6 +7,7 @@ import org.eclipse.swt.widgets.CoolBar;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
+import edu.rice.cs.hpcbase.IDatabase;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
@@ -66,8 +67,8 @@ public class FlatPart extends AbstractTableView
 
 	
 	@Override
-	public void setInput(Object input) {
-		super.setInput(input);
+	public void setInput(IDatabase database, Object input) {
+		super.setInput(database, input);
 		// we have to initialize flatAction here because we need the value of
 		// getTable() which is created after setInput
 		flatAction = new FlatAction(getActionManager(), getTable());
@@ -128,7 +129,7 @@ public class FlatPart extends AbstractTableView
 		super.dispose();
 		
 		items = null;
-		treeData.clear();
+		treeData = null;
 		flatAction = null;
 	}
 }

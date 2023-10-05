@@ -16,13 +16,15 @@ Require-Bundle: org.eclipse.core.runtime,
  edu.rice.cs.hpcclient,
  edu.rice.cs.hpclog,
  edu.rice.cs.hpctraceviewer.data,
- edu.rice.cs.hpctraceviewer.config
+ edu.rice.cs.hpctraceviewer.config,
+ org.eclipse.collections
 Import-Package: com.jcraft.jsch,
  javax.inject;version="1.0.0",
  org.eclipse.e4.core.contexts;version="1.7.0",
  org.hpctoolkit.client_server_common.calling_context,
  org.hpctoolkit.client_server_common.metric,
  org.hpctoolkit.client_server_common.profile,
+ org.hpctoolkit.client_server_common.profiled_source,
  org.hpctoolkit.client_server_common.time,
  org.hpctoolkit.client_server_common.trace,
  org.hpctoolkit.hpcclient.v1_0

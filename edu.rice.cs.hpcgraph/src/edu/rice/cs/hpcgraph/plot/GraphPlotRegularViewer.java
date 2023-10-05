@@ -87,5 +87,4 @@ public class GraphPlotRegularViewer extends AbstractGraphPlotViewer
 	protected IGraphTranslator getGraphTranslator() {
 		return new IdentityGraphTranlator();
 	}
-	
 }

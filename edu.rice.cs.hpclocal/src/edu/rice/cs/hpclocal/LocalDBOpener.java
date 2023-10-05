@@ -36,7 +36,7 @@ public class LocalDBOpener extends AbstractDBOpener
 		version = experiment2.getMajorVersion();
 		String directory = experiment2.getDirectory();
 		
-		if (directoryHasTraceData(directory)<=0) {
+		if (LocalDatabaseRepresentation.directoryHasTraceData(directory)<=0) {
 			throw new IllegalArgumentException("The directory does not contain hpctoolkit database with trace data:"
 					+ directory);
 		}
@@ -90,19 +90,4 @@ public class LocalDBOpener extends AbstractDBOpener
 	
 	@Override
 	public void end() { /* unused */ }
-
-
-	/**********************
-	 * static method to check if a directory contains hpctoolkit's trace data
-	 * 
-	 * @param directory 
-	 * 			the main database directory
-	 * @return int 
-	 * 			version of the database if the database is correct and valid
-	 * 			   return negative number otherwise
-	 */
-	public static int directoryHasTraceData(String directory)
-	{
-		return LocalDatabaseRepresentation.directoryHasTraceData(directory);
-	}
 }

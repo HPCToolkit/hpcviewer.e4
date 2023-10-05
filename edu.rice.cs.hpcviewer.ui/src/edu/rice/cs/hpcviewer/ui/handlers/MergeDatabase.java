@@ -18,9 +18,16 @@ import edu.rice.cs.hpcbase.ITraceManager;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
+import edu.rice.cs.hpcdata.experiment.source.EmptySourceFile;
+import edu.rice.cs.hpcdata.experiment.source.FileSystemSourceFile;
+import edu.rice.cs.hpcdata.experiment.source.SourceFile;
 import edu.rice.cs.hpcmerge.MergeManager;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -152,7 +159,18 @@ public class MergeDatabase
 		@Override
 		public ITraceManager getORCreateTraceManager() {
 			return null;
+		}
+
+		@Override
+		public String getSourceFileContent(SourceFile fileId) throws IOException {
+			if (fileId instanceof EmptySourceFile || !fileId.isAvailable())
+				return null;
+			
+			FileSystemSourceFile source = (FileSystemSourceFile) fileId;
+			var filename = source.getCompleteFilename();
+			Path path = Path.of(filename);
+
+			return Files.readString(path, StandardCharsets.ISO_8859_1);
 		}		
-	}
-		
+	}		
 }

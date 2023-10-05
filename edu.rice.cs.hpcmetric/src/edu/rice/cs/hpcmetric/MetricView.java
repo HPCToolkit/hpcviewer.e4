@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcviewer.ui.metric;
+package edu.rice.cs.hpcmetric;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -7,9 +7,9 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.Composite;
 
+import edu.rice.cs.hpcbase.IBaseInput;
 import edu.rice.cs.hpcbase.ui.AbstractUpperPart;
-import edu.rice.cs.hpcmetric.MetricFilterInput;
-import edu.rice.cs.hpcmetric.MetricFilterPane;
+import edu.rice.cs.hpcbase.ui.ILowerPart;
 
 
 
@@ -59,7 +59,7 @@ public class MetricView extends AbstractUpperPart
 	}
 
 	@Override
-	public void setInput(Object input) {
+	public void setInput(IBaseInput input) {
 		if (!(input instanceof MetricFilterInput))
 			return;
 		
@@ -84,7 +84,7 @@ public class MetricView extends AbstractUpperPart
 	
 	
 	@Override
-	public boolean hasEqualInput(Object input) {
+	public boolean hasEqualInput(IBaseInput input) {
 		if (input instanceof MetricFilterInput) {
 			MetricFilterInput metricInput = (MetricFilterInput) input;
 			return metricInput.getMetricManager() == this.inputFilter.getMetricManager();
@@ -101,5 +101,16 @@ public class MetricView extends AbstractUpperPart
 	@Override
 	public void setFocus() {
 		pane.setFocus();
+	}
+
+
+
+	@Override
+	public void refresh(ILowerPart lowerPart) {
+		if (!(lowerPart instanceof IFilterable))
+			return;
+		
+		MetricFilterInput input = new MetricFilterInput((IFilterable) lowerPart, eventBroker);
+		setInput(input);
 	}
 }

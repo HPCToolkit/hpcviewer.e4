@@ -2,7 +2,9 @@ package edu.rice.cs.hpclocal;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -15,6 +17,9 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
+import edu.rice.cs.hpcdata.experiment.source.EmptySourceFile;
+import edu.rice.cs.hpcdata.experiment.source.FileSystemSourceFile;
+import edu.rice.cs.hpcdata.experiment.source.SourceFile;
 
 public class DatabaseLocal implements IDatabaseLocal 
 {
@@ -129,5 +134,17 @@ public class DatabaseLocal implements IDatabaseLocal
 			traceManager = opener.openDBAndCreateSTDC(null);
 		}
 		return traceManager;
+	}
+
+	@Override
+	public String getSourceFileContent(SourceFile fileId) throws IOException {
+		if (fileId instanceof EmptySourceFile || !fileId.isAvailable())
+			return null;
+		
+		FileSystemSourceFile source = (FileSystemSourceFile) fileId;
+		var filename = source.getCompleteFilename();
+		Path path = Path.of(filename);
+
+		return Files.readString(path, StandardCharsets.ISO_8859_1);
 	}
 }

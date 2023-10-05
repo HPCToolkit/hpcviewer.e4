@@ -9,7 +9,7 @@ import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 
 /**
  * An interface for the DBOpeners. Specifically, it is implemented by
- * {@link RemoteDBOpener} and {@link LocalDBOpener}. Its main purpose is to
+ * {@link RemoteTraceOpener} and {@link LocalDBOpener}. Its main purpose is to
  * create a {@link SpaceTimeDataController} from the connection to the database
  * (be it local or remote), but it also partially handles closing that connection.
  * 
