@@ -3,6 +3,7 @@ package edu.rice.cs.hpcdata.app;
 import java.io.IOException;
 
 import edu.rice.cs.hpcdata.db.IFileDB;
+import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.trace.TraceRecord;
 import edu.rice.cs.hpcdata.util.Constants;
 
@@ -24,13 +25,13 @@ public class TraceReader
 		return new TraceRecord(time, cpId);
 	}
 	
-	public TraceRecord getData(int rank, long relativeIndex) throws IOException 
+	public TraceRecord getData(IdTuple rank, long relativeIndex) throws IOException 
 	{
 		long location = getAbsoluteLocation(rank, relativeIndex);
 		return getData(location);
 	}
 	
-	public long getNumberOfRecords(int rank)
+	public long getNumberOfRecords(IdTuple rank)
 	{
 		long start = data.getMinLoc(rank);
 		long end   = data.getMaxLoc(rank);
@@ -47,12 +48,12 @@ public class TraceReader
 		return Constants.SIZEOF_INT + Constants.SIZEOF_LONG;
 	}
 	
-	public long getAbsoluteLocation(int rank, long relativePosition)
+	public long getAbsoluteLocation(IdTuple rank, long relativePosition)
 	{
 		return data.getMinLoc(rank) + (relativePosition * getRecordSize());
 	}
 	
-	public long getRelativeLocation(int rank, long absolutePosition)
+	public long getRelativeLocation(IdTuple rank, long absolutePosition)
 	{
 		return (absolutePosition-data.getMinLoc(rank)) / getRecordSize();
 	}

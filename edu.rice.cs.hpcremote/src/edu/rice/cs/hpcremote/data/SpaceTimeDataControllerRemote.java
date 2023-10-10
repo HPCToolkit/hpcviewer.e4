@@ -54,7 +54,7 @@ public class SpaceTimeDataControllerRemote extends SpaceTimeDataController
 	@Override
 	public IBaseData getTraceData() {
 		final int headerSize = ((TraceAttribute)exp.getTraceAttribute()).dbHeaderSize;
-		return new RemoteFilteredBaseData(valuesX, headerSize, server);
+		return new RemoteFilteredBaseData(valuesX);
 	}
 
 	/**

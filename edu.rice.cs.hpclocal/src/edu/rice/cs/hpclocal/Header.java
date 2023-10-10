@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctraceviewer.data;
+package edu.rice.cs.hpclocal;
 
 import edu.rice.cs.hpcdata.util.Constants;
 

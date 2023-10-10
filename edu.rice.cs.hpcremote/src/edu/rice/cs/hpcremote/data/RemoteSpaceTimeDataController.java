@@ -176,31 +176,6 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 		}
 
 		@Override
-		public long getLong(long position) throws IOException {
-			throw new IllegalAccessError();
-		}
-
-		@Override
-		public int getInt(long position) throws IOException {
-			throw new IllegalAccessError();
-		}
-
-		@Override
-		public int getRecordSize() {
-			throw new IllegalAccessError();
-		}
-
-		@Override
-		public long getMinLoc(int rank) {
-			throw new IllegalAccessError();
-		}
-
-		@Override
-		public long getMaxLoc(int rank) {
-			throw new IllegalAccessError();
-		}
-
-		@Override
 		public boolean isGPU(int rank) {
 			if (indexes == null)
 				return false;

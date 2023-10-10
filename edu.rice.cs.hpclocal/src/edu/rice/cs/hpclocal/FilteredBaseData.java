@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctraceviewer.data.version2;
+package edu.rice.cs.hpclocal;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -79,18 +79,18 @@ public class FilteredBaseData extends AbstractBaseData implements IFilteredData 
 	 * (non-Javadoc)
 	 * @see edu.rice.cs.hpc.data.experiment.extdata.IBaseData#getMinLoc(int)
 	 */
-	public long getMinLoc(int rank) {
-		int filteredRank = indexes.get(rank);
-		return baseDataFile.getMinLoc(filteredRank);
+	@Override
+	public long getMinLoc(IdTuple profile) {
+		return baseDataFile.getMinLoc(profile);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * @see edu.rice.cs.hpc.data.experiment.extdata.IBaseData#getMaxLoc(int)
 	 */
-	public long getMaxLoc(int rank) {
-		int filteredRank = indexes.get(rank);
-		return baseDataFile.getMaxLoc(filteredRank);
+	@Override
+	public long getMaxLoc(IdTuple profile) {
+		return baseDataFile.getMaxLoc(profile);
 	}
 
 	@Override

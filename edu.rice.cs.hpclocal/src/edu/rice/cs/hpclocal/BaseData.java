@@ -1,6 +1,7 @@
-package edu.rice.cs.hpctraceviewer.data.version2;
+package edu.rice.cs.hpclocal;
 
 import edu.rice.cs.hpcdata.db.IFileDB;
+import edu.rice.cs.hpcdata.db.IdTuple;
 
 
 /*************************************
@@ -23,13 +24,13 @@ public class BaseData extends AbstractBaseData {
 	
 
 	@Override
-	public long getMinLoc(int rank) {
-		return baseDataFile.getMinLoc(rank);
+	public long getMinLoc(IdTuple profile) {
+		return baseDataFile.getMinLoc(profile);
 	}
 
 	@Override
-	public long getMaxLoc(int rank) {
-		return baseDataFile.getMaxLoc(rank);
+	public long getMaxLoc(IdTuple profile) {
+		return baseDataFile.getMaxLoc(profile);
 	}
 
 	@Override

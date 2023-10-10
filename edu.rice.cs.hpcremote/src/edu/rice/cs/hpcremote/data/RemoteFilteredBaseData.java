@@ -1,6 +1,5 @@
 package edu.rice.cs.hpcremote.data;
 
-import java.io.DataOutputStream;
 import java.util.List;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
@@ -18,7 +17,7 @@ public class RemoteFilteredBaseData implements IFilteredData {
 	private int[] indexes;
 	FilterSet filter;
 	
-	public RemoteFilteredBaseData(TraceName[] names, int _headerSz, DataOutputStream server) {
+	public RemoteFilteredBaseData(TraceName[] names) {
 		filter = new FilterSet();
 		indexes = new int[names.length];
 		for (int i = 0; i < indexes.length; i++) {
@@ -67,32 +66,6 @@ public class RemoteFilteredBaseData implements IFilteredData {
 		return 0;
 	}
 
-	
-	@Override
-	public long getLong(long position) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-	@Override
-	public int getInt(long position) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-	@Override
-	public int getRecordSize() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-	@Override
-	public long getMinLoc(int rank) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-	@Override
-	public long getMaxLoc(int rank) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
 	@Override
 	public List<IdTuple> getListOfIdTuples(IdTupleOption option) {
 		// TODO Auto-generated method stub

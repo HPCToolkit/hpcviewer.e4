@@ -19,11 +19,7 @@ import edu.rice.cs.hpcdata.util.IProgressReport;
 import edu.rice.cs.hpcdata.util.MergeDataFiles;
 import edu.rice.cs.hpcdata.util.MergeDataFiles.MergeDataAttribute;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
-import edu.rice.cs.hpctraceviewer.data.LocalTraceDataCollector;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
-import edu.rice.cs.hpctraceviewer.data.version2.AbstractBaseData;
-import edu.rice.cs.hpctraceviewer.data.version2.BaseData;
-import edu.rice.cs.hpctraceviewer.data.version2.FilteredBaseData;
 
 
 /**
@@ -197,6 +193,6 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 		if (TracePreferenceManager.getGPUTraceExposure() && isGpuTrace)
 			traceOption = TraceOption.REVEAL_GPU_TRACE;
 		
-		return new LocalTraceDataCollector((AbstractBaseData) dataTrace, lineNum, getPixelHorizontal(), traceOption);
+		return new LocalTraceDataCollector((AbstractBaseData) dataTrace, idtuple, getPixelHorizontal(), traceOption);
 	}
 }

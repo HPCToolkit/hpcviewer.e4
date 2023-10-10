@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctraceviewer.data.version2;
+package edu.rice.cs.hpclocal;
 
 import java.io.IOException;
 import java.util.List;
@@ -7,7 +7,6 @@ import edu.rice.cs.hpcdata.db.IFileDB;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
-import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
 import edu.rice.cs.hpcdata.util.Constants;
 
 /*********************************************************
@@ -16,7 +15,7 @@ import edu.rice.cs.hpcdata.util.Constants;
  * This class is the parent for all regular data and filtered data
  *
  *********************************************************/
-public abstract class AbstractBaseData implements IBaseData 
+public abstract class AbstractBaseData implements ILocalBaseData 
 {
 	protected final IFileDB baseDataFile;
 

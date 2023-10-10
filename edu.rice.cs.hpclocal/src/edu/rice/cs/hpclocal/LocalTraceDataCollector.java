@@ -1,10 +1,11 @@
-package edu.rice.cs.hpctraceviewer.data;
+package edu.rice.cs.hpclocal;
 
 import java.io.IOException;
 import edu.rice.cs.hpcbase.AbstractTraceDataCollector;
+import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.version4.DataRecord;
 import edu.rice.cs.hpcdata.util.Constants;
-import edu.rice.cs.hpctraceviewer.data.version2.AbstractBaseData;
+
 
 /***********************************************************
  * 
@@ -23,8 +24,8 @@ public class LocalTraceDataCollector extends AbstractTraceDataCollector
 										+ Constants.SIZEOF_INT; // call path id
 	
 	public static final float NUM_PIXELS_TOLERATED = 1.0f;
-
-	private final int lineNum;
+	
+	private final IdTuple profile;
 	
 	/** 
 	 * These must be initialized in local mode. 
@@ -38,11 +39,11 @@ public class LocalTraceDataCollector extends AbstractTraceDataCollector
 	 * @param profileIndex
 	 * @param widthInPixels
 	 */
-	public LocalTraceDataCollector(AbstractBaseData dataAccess, int lineNum, int widthInPixels, TraceOption option)
+	public LocalTraceDataCollector(AbstractBaseData dataAccess, IdTuple profile, int widthInPixels, TraceOption option)
 	{
 		super(option, widthInPixels);
 		
-		this.lineNum = lineNum;
+		this.profile = profile;
 		
 		//:'( This is a safe cast because this constructor is only
 		//called in local mode but it's so ugly....
@@ -63,9 +64,8 @@ public class LocalTraceDataCollector extends AbstractTraceDataCollector
 	@Override
 	public void readInData(long timeStart, long timeRange, double pixelLength) throws IOException
 	{
-		var rank = lineNum;
-		long minloc = data.getMinLoc(rank);
-		long maxloc = data.getMaxLoc(rank);
+		long minloc = data.getMinLoc(profile);
+		long maxloc = data.getMaxLoc(profile);
 		
 		// corner case: empty samples
 		if (minloc >= maxloc) 
@@ -242,14 +242,12 @@ public class LocalTraceDataCollector extends AbstractTraceDataCollector
 	
 	private long getAbsoluteLocation(long relativePosition)
 	{
-		var rank = lineNum;
-		return data.getMinLoc(rank) + (relativePosition * data.getRecordSize());
+		return data.getMinLoc(profile) + (relativePosition * data.getRecordSize());
 	}
 	
 	private long getRelativeLocation(long absolutePosition)
 	{
-		var rank = lineNum;
-		return (absolutePosition-data.getMinLoc(rank)) / data.getRecordSize();
+		return (absolutePosition-data.getMinLoc(profile)) / data.getRecordSize();
 	}
 
 	
