@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
+import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
 //import edu.rice.cs.hpcremote.data.SpaceTimeDataControllerRemote;
 import edu.rice.cs.hpctraceviewer.data.DataLinePainting;
 import edu.rice.cs.hpctraceviewer.data.DataPreparation;
@@ -127,9 +128,7 @@ public class TimelineThread
 	/** Returns the index of the file to which the line-th line corresponds. 
 	 * @throws IOException */
 
-	private IdTuple getProfileIndexToPaint(int line, TraceDisplayAttribute attributes) throws IOException {
-		var listIdTuples = stData.getExperiment().getThreadData().getIdTuples();
-		
+	private IdTuple getProfileIndexToPaint(int line, TraceDisplayAttribute attributes) throws IOException {		
 		int numTimelinesToPaint = attributes.getProcessInterval();
 		int index = 0;
 		
@@ -139,6 +138,7 @@ public class TimelineThread
 		} else {
 			index = attributes.getProcessBegin() + line;
 		}
-		return listIdTuples.get(index);
+		var list = stData.getBaseData().getListOfIdTuples(IdTupleOption.BRIEF);
+		return list.get(index);
 	}
 }

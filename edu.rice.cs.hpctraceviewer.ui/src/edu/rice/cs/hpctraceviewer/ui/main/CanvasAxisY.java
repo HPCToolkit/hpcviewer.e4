@@ -150,17 +150,12 @@ public class CanvasAxisY extends AbstractAxisCanvas
 			if (procTimeline == null)
 				continue;
 			
-			final int procNumber  = procTimeline.line();
-			if (procNumber >= listIdTuples.size())
-				// inconsistency between the list of processes and the current timeline
-				// probably hpctraceviewer is in the middle of rebuffering
-				return;
-			
-			final int y_curr = attribute.convertRankToPixel(procNumber);
-			final int y_next = attribute.convertRankToPixel(procNumber+1);
+			var rank = i;
+			final int y_curr = convertRankToPixel(rank,   attribute.getPixelVertical(), timeLine.getNumProcessTimeline());
+			final int y_next = convertRankToPixel(rank+1, attribute.getPixelVertical(), timeLine.getNumProcessTimeline());
 			final int height = y_next - y_curr + 1;
 
-			IdTuple idtuple  = listIdTuples.get(procNumber);
+			IdTuple idtuple  = procTimeline.getProfileIdTuple();
 	        
 	        // for sequential code, we assume the number of parallelism is 1
 	        // (just to avoid the zero division)
@@ -196,6 +191,14 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		redraw();
 	}
 	
+	private int convertRankToPixel(int line, int pixels, int interval) {
+		if (pixels > interval) {
+			float ratio = (float) pixels / interval;
+			return (int) (line * ratio);
+		}
+		float ratio = (float) pixels / interval;
+		return (int) (line * ratio); 
+	}
 	
 	@Override
 	public void dispose() {
@@ -245,6 +248,23 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		void setData(SpaceTimeDataController data) {
 			this.data = data;
 		}
+		
+		
+		
+		private int convertPixelToRank(int pixelY) {
+			final ProcessTimelineService timeLine = data.getProcessTimelineService();
+			
+			final var interval = timeLine.getNumProcessTimeline();
+			final var numPixels = data.getTraceDisplayAttribute().getPixelVertical();
+			
+			if (numPixels > interval) {
+				float ratio = (float) interval / numPixels;
+				return (int) (pixelY * ratio);
+			}
+			float ratio = (float) interval / numPixels;
+			return (int) (pixelY * ratio);
+		}
+
 	
 		@Override
 		/*
@@ -255,8 +275,7 @@ public class CanvasAxisY extends AbstractAxisCanvas
 			
 	        final IBaseData traceData = data.getBaseData();
 
-			final TraceDisplayAttribute attribute = data.getTraceDisplayAttribute();
-			int process = attribute.convertPixelToRank(event.y);
+			int process = data.getTraceDisplayAttribute().getProcessBegin() + convertPixelToRank(event.y);
 			
 			List<IdTuple> listTuples = traceData.getListOfIdTuples(IdTupleOption.BRIEF);
 						

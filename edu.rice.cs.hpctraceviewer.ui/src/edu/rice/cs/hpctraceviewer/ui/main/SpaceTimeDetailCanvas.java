@@ -674,18 +674,15 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		final TimeUnit dbTimeUnit = stData.getTimeUnit();
 		final TimeUnit displayTimeUnit = attributes.getTimeUnit();
 		final float selectedTime = displayTimeUnit.convert(position.time, dbTimeUnit) * attributes.getTimeUnitMultiplier();
-		
-		final int selectedProc  = ptl.getProcessNum();
 
         final IBaseData traceData = stData.getBaseData();
-        final List<IdTuple> listIdTuples = traceData.getListOfIdTuples(IdTupleOption.BRIEF);
 
 		String timeUnit = attributes.getTimeUnitName(attributes.getDisplayTimeUnit());
 		String label = "Cross Hair: ";
 
-		if ( selectedProc >= 0 && selectedProc < listIdTuples.size() && listIdTuples.size()>1 ) {
+		if (traceData.getNumberOfRanks() > 0) {
 			
-			IdTuple idtuple = listIdTuples.get(selectedProc);
+			IdTuple idtuple = ptl.getProfileIdTuple();
 			String procStr  = idtuple.toString(traceData.getIdTupleTypes());
 			String timeStr  = formatTime.format(selectedTime) + timeUnit;
 	        final String buffer = label + "(" + timeStr + ", " +  procStr + ")";
