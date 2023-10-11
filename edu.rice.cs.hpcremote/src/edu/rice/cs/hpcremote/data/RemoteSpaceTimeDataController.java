@@ -43,6 +43,7 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 		try {
 			var listIdTuples = exp.getThreadData().getIdTuples();
 			var idTupleType  = exp.getIdTupleType();
+			exp.getThreadData().getParallelismLevel();
 			
 			return new RemoteFilteredData(listIdTuples, idTupleType);
 		} catch (IOException e) {
@@ -56,11 +57,20 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 			return;
 		
 		var traceAttr = getTraceDisplayAttribute();
+		var pixelsV = traceAttr.getPixelVertical();
+		var numRanks = getBaseData().getNumberOfRanks();
+		if (numRanks > pixelsV) {
+			// in case the number of ranks is bigger than the number of pixels,
+			// we need to pick (or sample) which ranks need to be displayed.
+			// A lazy way is to rely on the server to pick which ranks to be displayed. 
+			numRanks = pixelsV;
+		}
+		
 		var frame = traceAttr.getFrame();
 		var time1 = Timestamp.ofEpochNano(frame.begTime);
 		var time2 = Timestamp.ofEpochNano(frame.endTime);
 		
-		samplingSet = client.sampleTracesAsync(traceAttr.getProcessInterval(), time1, time2, getPixelHorizontal());
+		samplingSet = client.sampleTracesAsync(numRanks, time1, time2, getPixelHorizontal());
 	}
 
 
@@ -158,12 +168,6 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 			var list = getListOfIdTuples(IdTupleOption.BRIEF);
 			var gpuIdTuple = list.stream().filter( idt -> idt.isGPU(idTupleType)).findAny();
 			return gpuIdTuple.isPresent();
-		}
-
-		@Override
-		public int getNumLevels() {
-			// TODO Auto-generated method stub
-			return 0;
 		}
 
 		@Override

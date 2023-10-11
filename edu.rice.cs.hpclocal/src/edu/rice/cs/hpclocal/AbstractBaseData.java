@@ -61,12 +61,6 @@ public abstract class AbstractBaseData implements ILocalBaseData
 		return baseDataFile.getInt(position);
 	}
 
-
-	@Override
-	public int getNumLevels() {
-		return baseDataFile.getParallelismLevel();
-	}
-
 	
 	/*
 	 * (non-Javadoc)
