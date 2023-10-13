@@ -16,6 +16,7 @@ import org.hpctoolkit.hpcclient.v1_0.FutureTraceSamplingSet;
 import org.hpctoolkit.hpcclient.v1_0.HpcClient;
 import org.hpctoolkit.hpcclient.v1_0.TraceSampling;
 
+import edu.rice.cs.hpcbase.IFilteredData;
 import edu.rice.cs.hpcbase.IProcessTimeline;
 import edu.rice.cs.hpcbase.ITraceDataCollector;
 import edu.rice.cs.hpcbase.ITraceDataCollector.TraceOption;
@@ -23,7 +24,6 @@ import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
-import edu.rice.cs.hpcdata.experiment.extdata.IFilteredData;
 import edu.rice.cs.hpcdata.util.ICallPath.ICallPathInfo;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;

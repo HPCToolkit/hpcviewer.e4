@@ -15,7 +15,6 @@ import org.eclipse.swt.graphics.Point;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
-import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
@@ -85,7 +84,7 @@ public class DetailViewPaint extends BaseViewPaint
 
 	@Override
 	protected boolean startPainting(int linesToPaint, int numThreads, boolean changedBounds) {
-		final IBaseData traceData = controller.getBaseData();
+		final var traceData = controller.getBaseData();
 		listIdTuples = traceData.getListOfIdTuples(IdTupleOption.BRIEF);
 
 		return true;

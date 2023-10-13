@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.swt.widgets.Display;
 
+import edu.rice.cs.hpcbase.IFilteredData;
 import edu.rice.cs.hpcbase.IProcessTimeline;
 import edu.rice.cs.hpcbase.ITraceDataCollector;
 import edu.rice.cs.hpcbase.ITraceManager;
@@ -13,7 +14,6 @@ import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
-import edu.rice.cs.hpcdata.experiment.extdata.IFilteredData;
 import edu.rice.cs.hpcdata.trace.BaseTraceAttribute;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
 import edu.rice.cs.hpcdata.util.ICallPath;

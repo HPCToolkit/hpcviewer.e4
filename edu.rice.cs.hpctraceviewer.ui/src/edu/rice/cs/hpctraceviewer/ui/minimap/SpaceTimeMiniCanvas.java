@@ -24,7 +24,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
-import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
 import edu.rice.cs.hpctraceviewer.data.Frame;
 import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
 import edu.rice.cs.hpctraceviewer.ui.base.ITraceCanvas;
@@ -53,17 +52,14 @@ public class SpaceTimeMiniCanvas extends SpaceTimeCanvas
 	/** The point at which the mouse was on.*/
 	private Point mousePrevious;
 	
-	/** The point at which the mouse was released.*/
-	private Point mouseUp;
-	
 	/**Determines whether the first mouse click was inside the box or not.*/
 	private boolean insideBox;
 	
 	private Rectangle view;
 	
-    final private Color COMPLETELY_FILTERED_OUT_COLOR;
-    final private Color NOT_FILTERED_OUT_COLOR;
-    final private Color COLOR_BLACK, COLOR_GRAY;
+    private final Color COMPLETELY_FILTERED_OUT_COLOR;
+    private final Color NOT_FILTERED_OUT_COLOR;
+    private final Color COLOR_BLACK, COLOR_GRAY;
     
     /**
      * The pattern that we draw when we want to show that some ranks in the
@@ -185,7 +181,7 @@ public class SpaceTimeMiniCanvas extends SpaceTimeCanvas
 	public void updateView() 
 	{
 		final Frame frame = stData.getTraceDisplayAttribute().getFrame();		
-		IBaseData baseData = stData.getBaseData();
+		var baseData = stData.getBaseData();
 
 		int p1 = (int) Math.round( (frame.begProcess+baseData.getFirstIncluded()) * getScalePixelsPerRank() );
 		int p2 = (int) Math.round( (frame.endProcess+baseData.getFirstIncluded()) * getScalePixelsPerRank() );
@@ -221,7 +217,7 @@ public class SpaceTimeMiniCanvas extends SpaceTimeCanvas
 		// paint the current view
 		
 		final Frame frame = stData.getTraceDisplayAttribute().getFrame();		
-		IBaseData baseData = stData.getBaseData();
+		var baseData = stData.getBaseData();
 
 		int p1 = (int) Math.round( (baseData.getFirstIncluded()) * getScalePixelsPerRank() );
 		int p2 = (int) Math.round( (baseData.getLastIncluded()+1) * getScalePixelsPerRank() );
@@ -384,7 +380,7 @@ public class SpaceTimeMiniCanvas extends SpaceTimeCanvas
 		Point miniTopLeft = new Point( view.x, view.y);
 		Point miniBottomRight = new Point( view.x+view.width, view.y+view.height);
 		
-		final IBaseData data = stData.getBaseData();
+		final var data = stData.getBaseData();
 		
 		long detailTopLeftTime = (long)(miniTopLeft.x/getScalePixelsPerTime());
 		int detailTopLeftProcess = (int) Math.round( miniTopLeft.y/getScalePixelsPerRank() - data.getFirstIncluded());
@@ -443,7 +439,7 @@ public class SpaceTimeMiniCanvas extends SpaceTimeCanvas
 	 */
 	private int getHighestY() {
 		
-		final IBaseData baseData = stData.getBaseData();
+		final var baseData = stData.getBaseData();
 		int highestRank = baseData.getLastIncluded()+1;
 		return (int) Math.round(highestRank * getScalePixelsPerRank());
 	}
@@ -455,7 +451,7 @@ public class SpaceTimeMiniCanvas extends SpaceTimeCanvas
 	 * @return
 	 */
 	private int getLowestY() {
-		final IBaseData baseData = stData.getBaseData();
+		final var baseData = stData.getBaseData();
 		final int lowestRank = baseData.getFirstIncluded();
 		return (int) Math.round(lowestRank * getScalePixelsPerRank());
 	}
@@ -524,7 +520,7 @@ public class SpaceTimeMiniCanvas extends SpaceTimeCanvas
 	/**Gets the scale in the Y-direction (pixels per process).*/
 	public double getScalePixelsPerRank()
 	{
-		final IBaseData data = stData.getBaseData();
+		final var data = stData.getBaseData();
 		final Rectangle area = getClientArea();
 		return (double)area.height / (data.getNumberOfRanks());
 	}
@@ -554,8 +550,9 @@ public class SpaceTimeMiniCanvas extends SpaceTimeCanvas
 	public void mouseUp(MouseEvent e)
 	{
 		if (mouseState == MouseState.ST_MOUSE_DOWN)
-		{
-			mouseUp = new Point(e.x,e.y);
+		{			
+			// The point at which the mouse was released.
+			final var mouseUp = new Point(e.x,e.y);
 			mouseState = MouseState.ST_MOUSE_NONE;
 			if (insideBox)
 			{

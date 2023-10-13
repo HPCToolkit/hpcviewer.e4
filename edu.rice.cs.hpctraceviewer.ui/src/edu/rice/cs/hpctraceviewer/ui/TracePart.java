@@ -47,7 +47,6 @@ import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 import edu.rice.cs.hpctraceviewer.ui.util.Utility;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
-import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
 import edu.rice.cs.hpcdata.util.OSValidator;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;

@@ -53,7 +53,6 @@ import org.slf4j.LoggerFactory;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
-import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
 import edu.rice.cs.hpcdata.util.OSValidator;
 import edu.rice.cs.hpcsetting.color.ColorManager;
 import edu.rice.cs.hpctraceviewer.ui.base.ISpaceTimeCanvas;
@@ -619,7 +618,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	 **************************************************************************/
 	private void showProcessRange(final TraceDisplayAttribute attributes) {
 
-        final IBaseData traceData = stData.getBaseData();
+        final var traceData = stData.getBaseData();
         if (traceData == null) {
         	// we don't want to throw an exception here, so just do nothing
         	return;
@@ -675,7 +674,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		final TimeUnit displayTimeUnit = attributes.getTimeUnit();
 		final float selectedTime = displayTimeUnit.convert(position.time, dbTimeUnit) * attributes.getTimeUnitMultiplier();
 
-        final IBaseData traceData = stData.getBaseData();
+        final var traceData = stData.getBaseData();
 
 		String timeUnit = attributes.getTimeUnitName(attributes.getDisplayTimeUnit());
 		String label = "Cross Hair: ";

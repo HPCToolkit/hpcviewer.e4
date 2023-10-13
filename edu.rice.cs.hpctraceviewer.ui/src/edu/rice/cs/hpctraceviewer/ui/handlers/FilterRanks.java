@@ -10,7 +10,6 @@ import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
-import edu.rice.cs.hpcdata.experiment.extdata.IFilteredData;
 import edu.rice.cs.hpcfilter.FilterDataItem;
 import edu.rice.cs.hpcfilter.dialog.ThreadFilterDialog;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
@@ -53,7 +52,7 @@ public class FilterRanks
 		 */
         var filteredBaseData = data.getBaseData();
 
-        List<IdTuple> listDenseIds = ((IFilteredData)filteredBaseData).getDenseListIdTuple(IdTupleOption.BRIEF);
+        List<IdTuple> listDenseIds = filteredBaseData.getDenseListIdTuple(IdTupleOption.BRIEF);
         List<IdTuple> listIds = filteredBaseData.getListOfIdTuples(IdTupleOption.BRIEF);
         
         String []items    = new String[listDenseIds.size()];
@@ -91,8 +90,8 @@ public class FilterRanks
 			// update the data and broadcast to everyone that we probably have new filtered ranks
 			// TODO: we need to check if the new one is the same with the old one or not.
 			
-			((IFilteredData)filteredBaseData).setIncludeIndex(listChecked);
-			data.setBaseData((IFilteredData) filteredBaseData);
+			filteredBaseData.setIncludeIndex(listChecked);
+			data.setBaseData(filteredBaseData);
 			TraceEventData eventData = new TraceEventData(data, tracePart, filteredBaseData);
 			eventBroker.post(IConstants.TOPIC_FILTER_RANKS, eventData);
 		}
