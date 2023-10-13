@@ -13,7 +13,6 @@ import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
-import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
 import edu.rice.cs.hpcdata.experiment.extdata.IFilteredData;
 import edu.rice.cs.hpcdata.trace.BaseTraceAttribute;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
@@ -44,7 +43,7 @@ public abstract class SpaceTimeDataController implements ITraceManager
 	protected TraceDisplayAttribute attributes;
 	
 	protected ColorTable colorTable = null;
-	protected IBaseData  dataTrace  = null;
+	protected IFilteredData dataTrace = null;
 	
 	protected ProcessTimelineService timelineService;
 	
@@ -181,7 +180,7 @@ public abstract class SpaceTimeDataController implements ITraceManager
 	 * Get the file base data of this trace
 	 * @return {@code IBaseData}
 	 *************************************************************************/
-	public IBaseData getBaseData(){
+	public IFilteredData getBaseData(){
 		return dataTrace;
 	}
 
@@ -395,4 +394,7 @@ public abstract class SpaceTimeDataController implements ITraceManager
 	 * 			An object to collect data from remote or local for this index
 	 */
 	public abstract ITraceDataCollector getTraceDataCollector(int lineNum, IdTuple idTuple);
+	
+	
+	public abstract IProcessTimeline getNextTrace() throws Exception;
 }

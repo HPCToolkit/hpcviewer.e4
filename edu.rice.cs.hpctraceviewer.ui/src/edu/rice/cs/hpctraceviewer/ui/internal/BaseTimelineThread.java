@@ -102,7 +102,8 @@ public abstract class BaseTimelineThread implements Callable<Integer> {
 				if (num > 0) {
 					num_invalid_samples += num;
 					List<Integer> listInvalid = dataTo.getInvalidData();
-					mapInvalidData.put(trace.getProcessNum(), listInvalid);
+					int proc = trace.getProfileIdTuple().getProfileIndex()-1;
+					mapInvalidData.put(proc, listInvalid);
 				}
 				
 				final TimelineDataSet dataSet = dataTo.getList();

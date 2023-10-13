@@ -3,10 +3,20 @@ package edu.rice.cs.hpcremote.data;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.stream.Collectors;
+
+import org.eclipse.collections.api.map.primitive.IntIntMap;
+import org.eclipse.collections.api.map.primitive.IntObjectMap;
 import org.hpctoolkit.client_server_common.time.Timestamp;
+import org.hpctoolkit.client_server_common.trace.TraceId;
 import org.hpctoolkit.hpcclient.v1_0.FutureTraceSamplingSet;
 import org.hpctoolkit.hpcclient.v1_0.HpcClient;
+import org.hpctoolkit.hpcclient.v1_0.TraceSampling;
 
+import edu.rice.cs.hpcbase.IProcessTimeline;
 import edu.rice.cs.hpcbase.ITraceDataCollector;
 import edu.rice.cs.hpcbase.ITraceDataCollector.TraceOption;
 import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
@@ -14,20 +24,42 @@ import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.extdata.IFilteredData;
+import edu.rice.cs.hpcdata.util.ICallPath.ICallPathInfo;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
+import io.vavr.collection.HashSet;
+import io.vavr.collection.Set;
 
 public class RemoteSpaceTimeDataController extends SpaceTimeDataController 
 {
 	private final HpcClient client;
+	private final IFilteredData remoteTraceData;
+	
 	private FutureTraceSamplingSet samplingSet;
-
+	private IntObjectMap<IdTuple> mapIntToIdTuple;
+	private IntIntMap mapIntToLine;
+	
+	
 	public RemoteSpaceTimeDataController(HpcClient client, IExperiment experiment) {
 		super(experiment);
 		
 		this.client = client;
+		remoteTraceData = createTraceData(experiment);
 	}
 
+	private IFilteredData createTraceData(IExperiment experiment) {		
+		var idTupleType  = exp.getIdTupleType();
+
+		try {
+			var listIdTuples = exp.getThreadData().getIdTuples();
+			exp.getThreadData().getParallelismLevel();
+			
+			return new RemoteFilteredData(listIdTuples, idTupleType);
+		} catch (IOException e) {
+			throw new IllegalAccessError(e.getMessage());
+		}
+	}
+	
 	@Override
 	public String getName() {
 		return "Remote: " + super.getExperiment().getName();
@@ -39,38 +71,32 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 
 	
 	@Override
-	public IFilteredData getTraceData() {
-		try {
-			var listIdTuples = exp.getThreadData().getIdTuples();
-			var idTupleType  = exp.getIdTupleType();
-			exp.getThreadData().getParallelismLevel();
-			
-			return new RemoteFilteredData(listIdTuples, idTupleType);
-		} catch (IOException e) {
-			throw new IllegalAccessError(e.getMessage());
-		}
-	}
-
-	@Override
 	public void fillTracesWithData(boolean changedBounds, int numThreadsToLaunch) throws IOException {
 		if (!changedBounds)
 			return;
 		
 		var traceAttr = getTraceDisplayAttribute();
 		var pixelsV = traceAttr.getPixelVertical();
-		var numRanks = getBaseData().getNumberOfRanks();
+
+		var listIdTuples = getBaseData().getListOfIdTuples(IdTupleOption.BRIEF);
+		Set<TraceId> setOfTraceId = null; 
+		
+		var numRanks = listIdTuples.size();
 		if (numRanks > pixelsV) {
 			// in case the number of ranks is bigger than the number of pixels,
 			// we need to pick (or sample) which ranks need to be displayed.
 			// A lazy way is to rely on the server to pick which ranks to be displayed. 
-			numRanks = pixelsV;
+			
+		} else {
+			var setTraces = listIdTuples.stream().map(idt -> TraceId.make(idt.getProfileIndex())).collect(Collectors.toSet());
+			setOfTraceId = HashSet.ofAll(setTraces);
 		}
 		
 		var frame = traceAttr.getFrame();
 		var time1 = Timestamp.ofEpochNano(frame.begTime);
 		var time2 = Timestamp.ofEpochNano(frame.endTime);
 		
-		samplingSet = client.sampleTracesAsync(numRanks, time1, time2, getPixelHorizontal());
+		samplingSet = client.sampleTracesAsync(setOfTraceId, time1, time2, getPixelHorizontal());
 	}
 
 
@@ -81,15 +107,128 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 
 		if (TracePreferenceManager.getGPUTraceExposure() && idTuple.isGPU(idtupleType))
 			traceOption = TraceOption.REVEAL_GPU_TRACE;
-
-		//samplingSet.getAnyDoneSampling
 		
-		var dataCollector = new RemoteTraceDataCollector(client, idTuple, getPixelHorizontal(), traceOption);
-		
-		return dataCollector;
+		return new RemoteTraceDataCollector(lineNum, idTuple, getPixelHorizontal(), traceOption);
 	}
+
+
+	@Override
+	public IProcessTimeline getNextTrace() throws Exception {
+		if (samplingSet.isDone())
+			return null;
+		
+		Optional<Future<TraceSampling>> sampling = samplingSet.getAnyDoneSampling();
+		if (sampling.isPresent()) {
+			return new RemoteProcessTimeline(this, sampling.get());
+		}
+		return null;
+	}
+
 	
-	
+	static class RemoteProcessTimeline implements IProcessTimeline
+	{
+		private final SpaceTimeDataController traceData;
+		private final Future<TraceSampling> traceSampling;
+
+		private TraceSampling trace;
+		private ITraceDataCollector traceDataCollector;
+		
+		RemoteProcessTimeline(SpaceTimeDataController traceData, Future<TraceSampling> traceSampling) {
+			this.traceData = traceData;
+			this.traceSampling = traceSampling;
+		}
+		
+		@Override
+		public void readInData() throws IOException {
+			try {
+				trace = traceSampling.get();
+				var traceId = trace.getTraceId();
+				var profile = traceId.toInt();
+				traceDataCollector = traceData.getTraceDataCollector(line(), getProfileIdTuple());
+			} catch (InterruptedException  | ExecutionException e) {
+			    // Restore interrupted state...
+			    Thread.currentThread().interrupt();
+			}
+		}
+
+		@Override
+		public long getTime(int sample) {
+			return trace.getSamplesChronologicallyNonDescending().get(sample).getTimestamp().toEpochNano();
+		}
+
+		@Override
+		public int getContextId(int sample) {
+			return trace.getSamplesChronologicallyNonDescending().get(sample).getCallingContext().toInt();
+		}
+
+		@Override
+		public void shiftTimeBy(long lowestStartingTime) {
+			traceDataCollector.shiftTimeBy(lowestStartingTime);
+		}
+
+		@Override
+		public ICallPathInfo getCallPathInfo(int sample) {
+			var cpid = getContextId(sample);
+			var map  = traceData.getScopeMap();
+			return map.getCallPathInfo(cpid);
+		}
+
+		@Override
+		public void copyDataFrom(IProcessTimeline other) {
+			traceDataCollector.duplicate( ((RemoteProcessTimeline) other).traceDataCollector );
+		}
+
+		@Override
+		public int size() {
+			return trace.getSamplesChronologicallyNonDescending().size();
+		}
+
+		@Override
+		public int line() {
+			// TODO Auto-generated method stub
+			return 0;
+		}
+
+		@Override
+		public IdTuple getProfileIdTuple() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public int findMidpointBefore(long time, boolean usingMidpoint) {
+			try {
+				return traceDataCollector.findClosestSample(time, usingMidpoint);
+			} catch (Exception e) {
+				throw new IllegalArgumentException("Invalid time: " + time);
+			}
+		}
+
+		@Override
+		public boolean isEmpty() {
+			return trace.getSamplesChronologicallyNonDescending().isEmpty();
+		}
+
+		@Override
+		public boolean isGPU() {			
+			return getProfileIdTuple().isGPU(traceData.getExperiment().getIdTupleType());
+		}
+
+		@Override
+		public void dispose() {
+			if (traceDataCollector != null)
+				traceDataCollector.dispose();
+			
+			traceDataCollector = null;
+		}
+		
+	}
+
+	/***************************************************************
+	 * 
+	 * Remote base data specifically for remote data
+	 *
+	 ***************************************************************/
 	public static class RemoteFilteredData implements IFilteredData
 	{
 		final IdTupleType idTupleType;
@@ -123,10 +262,6 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 			return listIdTuples;
 		}
 
-		@Override
-		public void setListOfIdTuples(List<IdTuple> listIdTuples) {
-			throw new IllegalAccessError();
-		}
 
 		@Override
 		public IdTupleType getIdTupleTypes() {

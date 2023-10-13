@@ -411,7 +411,7 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 			// start reading the database and draw it
 			tbtmTraceView.setInput(stdc);
 			
-			IBaseData data = stdc.getBaseData();
+			var data = stdc.getBaseData();
 
 			if (!data.hasGPU()) {
 				tbtmBlameView.dispose();

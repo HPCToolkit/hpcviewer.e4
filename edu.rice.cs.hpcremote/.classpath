@@ -9,6 +9,6 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="lib" path="/edu.rice.cs.hpcclient/hpcclient-1.0.0-SNAPSHOT.jar" sourcepath="/hpcclient/src/main/java"/>
 	<classpathentry kind="lib" path="/edu.rice.cs.hpcclient/jars/vavr-0.10.4.jar"/>
-	<classpathentry kind="lib" path="/edu.rice.cs.hpcclient/jars/hpcclientservercommon-1.0.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="/edu.rice.cs.hpcclient/jars/hpcclientservercommon-1.0.0-SNAPSHOT.jar" sourcepath="/hpcclientcommon/src/main/java"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

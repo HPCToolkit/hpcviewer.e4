@@ -10,7 +10,6 @@ import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
-import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
 import edu.rice.cs.hpcdata.experiment.extdata.IFilteredData;
 import edu.rice.cs.hpcfilter.FilterDataItem;
 import edu.rice.cs.hpcfilter.dialog.ThreadFilterDialog;
@@ -52,10 +51,8 @@ public class FilterRanks
 		 * call to set it redundant). If it's not, we wait to replace the
 		 * current filter with the new filter until we know we have to.
 		 */
-        IBaseData filteredBaseData = data.getBaseData();
-        if (!(filteredBaseData instanceof IFilteredData)) {
-        	filteredBaseData = data.getTraceData();
-        }
+        var filteredBaseData = data.getBaseData();
+
         List<IdTuple> listDenseIds = ((IFilteredData)filteredBaseData).getDenseListIdTuple(IdTupleOption.BRIEF);
         List<IdTuple> listIds = filteredBaseData.getListOfIdTuples(IdTupleOption.BRIEF);
         

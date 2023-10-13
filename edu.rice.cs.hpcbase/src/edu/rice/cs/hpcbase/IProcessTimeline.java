@@ -3,8 +3,6 @@ package edu.rice.cs.hpcbase;
 import java.io.IOException;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.util.ICallPath;
 import edu.rice.cs.hpcdata.util.ICallPath.ICallPathInfo;
 
 public interface IProcessTimeline 
@@ -28,35 +26,43 @@ public interface IProcessTimeline
 	void shiftTimeBy(long lowestStartingTime);
 	
 	
-	Scope getCallPath(int sample, int depth);
-	
-	
+	/***
+	 * Get the info of a callpath for a given sample
+	 * 
+	 * @param sample
+	 * 
+	 * @return {@code ICallPathInfo}
+	 */
 	ICallPathInfo getCallPathInfo(int sample);
 	
 	
-	ICallPath getCallPathInfo();
-	
 	/**
 	 * Fills this one with the data from another
+	 * 
 	 * @param another
 	 */
 	void copyDataFrom(IProcessTimeline other);
 	
-	/** Returns the number of elements in this ProcessTimeline. */
+	/** 
+	 * Returns the number of elements in this ProcessTimeline.
+	 * 
+	 * @return {@code size}
+	 * 			The number of samples or elements 
+	 **/
 	int size();
 	
-	/** Returns this ProcessTimeline's line number. */
+	/** Returns this ProcessTimeline's trace line number. 
+	 *
+	 *  @return {@code int}
+	 *  			The trace line number
+	 **/
 	int line();
 	
 	
 	/***
-	 * return the process ID number
-	 * 
-	 * @return the process id
+	 * Return the profile Id of this trace
+	 * @return
 	 */
-	int getProcessNum();
-	
-	
 	IdTuple getProfileIdTuple();
 	
 	/**

@@ -228,7 +228,8 @@ public class CallStackViewer extends AbstractBaseTableViewer
 		if (sample >= 0) {
 			var ctxId = ptl.getContextId(sample);
 			if (ctxId >= 0) {
-				var cpInfo = ptl.getCallPathInfo();
+				var exp = stData.getExperiment();
+				var cpInfo = exp.getScopeMap();
 				var names  = cpInfo.getFunctionNames(ctxId);
 				if (names != null)
 					sampleVector.addAll(names);

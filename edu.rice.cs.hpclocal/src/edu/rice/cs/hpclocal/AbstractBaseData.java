@@ -31,14 +31,6 @@ public abstract class AbstractBaseData implements ILocalBaseData
 
 
 	@Override
-	public void setListOfIdTuples(List<IdTuple> listIdTuples) {
-		// Should we update the list of id tuples here?
-		// this method is designed tp replace the existing id tuples
-		// which doesn't make any sense for the database to be
-		// modified.
-	}
-
-	@Override
 	public IdTupleType   getIdTupleTypes() {
 		return baseDataFile.getIdTupleTypes();
 	}

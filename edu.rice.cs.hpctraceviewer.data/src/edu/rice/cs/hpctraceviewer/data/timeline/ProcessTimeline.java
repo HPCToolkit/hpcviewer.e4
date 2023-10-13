@@ -1,13 +1,10 @@
 package edu.rice.cs.hpctraceviewer.data.timeline;
 
 import java.io.IOException;
-import org.eclipse.core.runtime.Assert;
-
 import edu.rice.cs.hpcbase.IProcessTimeline;
 import edu.rice.cs.hpcbase.ITraceDataCollector;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.util.ICallPath;
 import edu.rice.cs.hpcdata.util.ICallPath.ICallPathInfo;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
@@ -74,47 +71,41 @@ public class ProcessTimeline implements IProcessTimeline
 	 * called, it must be on local, so the cast is fine
 	 * @throws IOException 
 	 */
+	@Override
 	public void readInData() throws IOException {
 		traceDataCollector.readInData(startingTime, timeRange, pixelLength);
 	}
 
 	/** Gets the time that corresponds to the index sample in times. */
+	@Override
 	public long getTime(int sample) {
 		return traceDataCollector.getTime(sample);
 	}
 
 	/** Gets the cpid that corresponds to the index sample in timeLine. */
+	@Override
 	public int getContextId(int sample) {
 		return traceDataCollector.getCpid(sample);
 	}
 
+	@Override
 	public void shiftTimeBy(long lowestStartingTime) {
 		traceDataCollector.shiftTimeBy(lowestStartingTime);
 	}
-
-	/** returns the call path corresponding to the sample and depth given */
-	public Scope getCallPath(int sample, int depth) {
-		Assert.isTrue(sample>=0, "sample number is negative");
-		
-		int cpid = getContextId(sample);
-		return scopeMap.getCallPathScope(cpid);
-	}
 	
 	
+	@Override
 	public ICallPathInfo getCallPathInfo(int sample) {
 		int cpid = getContextId(sample);
 		return scopeMap.getCallPathInfo(cpid);
 	}
-	
-	
-	public ICallPath getCallPathInfo() {
-		return scopeMap;
-	}
+
 	
 	/**
 	 * Fills this one with the data from another
 	 * @param another
 	 */
+	@Override
 	public void copyDataFrom(IProcessTimeline another) {
 		if (another instanceof ProcessTimeline) {
 			traceDataCollector.duplicate(((ProcessTimeline)another).traceDataCollector);
@@ -122,25 +113,19 @@ public class ProcessTimeline implements IProcessTimeline
 	}
 
 	/** Returns the number of elements in this ProcessTimeline. */
+	@Override
 	public int size() {
 		return traceDataCollector.size();
 	}
 
 	/** Returns this ProcessTimeline's line number. */
+	@Override
 	public int line() {
 		return lineNum;
 	}
 	
-	/***
-	 * return the process ID number
-	 * 
-	 * @return the process id
-	 */
-	public int getProcessNum() {
-		return idTuple.getProfileIndex() - 1;
-	}
-	
-	
+
+	@Override
 	public IdTuple getProfileIdTuple() {
 		return idTuple;
 	}
@@ -152,6 +137,7 @@ public class ProcessTimeline implements IProcessTimeline
 	 * @param time : the requested time
 	 * @return the index of the sample if the time is within the range, -1  otherwise
 	 * */
+	@Override
 	public int findMidpointBefore(long time, boolean usingMidpoint)
 	{
 		try {

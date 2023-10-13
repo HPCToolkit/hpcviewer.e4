@@ -5,14 +5,12 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.slf4j.LoggerFactory;
-
+import edu.rice.cs.hpcbase.IProcessTimeline;
 import edu.rice.cs.hpcbase.ITraceDataCollector;
 import edu.rice.cs.hpcbase.ITraceDataCollector.TraceOption;
 import edu.rice.cs.hpcdata.db.IFileDB;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
-import edu.rice.cs.hpcdata.experiment.extdata.IFilteredData;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
 import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.IProgressReport;
@@ -88,21 +86,9 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 		fileDB.open(traceFilePath, trAttribute.dbHeaderSize, RECORD_SIZE);
 		this.fileDB = fileDB;
 		
-		dataTrace  = new BaseData(fileDB);  
+		dataTrace  = new FilteredBaseData(fileDB);  
 	}
 
-
-	@Override
-	public IFilteredData getTraceData() {
-		try{
-			return new FilteredBaseData(fileDB);
-		}
-		catch (Exception e){
-			var log = LoggerFactory.getLogger(getClass());
-			log.error(e.getMessage());
-		}
-		return null;
-	}
 
 
 	
@@ -194,5 +180,12 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 			traceOption = TraceOption.REVEAL_GPU_TRACE;
 		
 		return new LocalTraceDataCollector((AbstractBaseData) dataTrace, idtuple, getPixelHorizontal(), traceOption);
+	}
+
+
+	@Override
+	public IProcessTimeline getNextTrace() throws Exception {
+		var timelineService = getProcessTimelineService();
+		return timelineService.getProcessTimeline(MIN_TRACE_SIZE);
 	}
 }

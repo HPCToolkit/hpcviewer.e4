@@ -1,7 +1,6 @@
 package edu.rice.cs.hpctraceviewer.ui.blamestat;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -9,13 +8,8 @@ import java.util.TreeMap;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.RGB;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
-import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
-import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.color.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.color.ProcedureColor;
@@ -134,11 +128,6 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 	public void analysisPixelXY(ImageData detailData, int x, int y, int pixelValue) {
 
 		dataTraces.getTraceDisplayAttribute();
-		
-        final IBaseData traceData = dataTraces.getBaseData();
-        
-        // get the list of id tuples
-		List<IdTuple> listTuples = traceData.getListOfIdTuples(IdTupleOption.BRIEF);
 
 		// get the profile of the current pixel
 		final ProcessTimeline ptl = ptlService.getProcessTimeline(y);
@@ -147,16 +136,9 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 			// and it isn't sync with the current process time line
 			return;
 		
-		int process =  ptl.getProcessNum(); 			
 		boolean isCpuThread = true;
-
-		// get the profile's id tuple and verify if the later is a cpu thread
-		if (process >= listTuples.size()) {
-			Logger logger = LoggerFactory.getLogger(getClass());
-			logger.error("bug detected: access to " + process + " out of " + listTuples.size());
-		}
 		
-		IdTuple tag = listTuples.get(process);
+		IdTuple tag = ptl.getProfileIdTuple();
 		int rank = (int) Math.max(0, tag.getIndex(IdTupleType.KIND_RANK));
 				
 		isCpuThread = !tag.isGPU(dataTraces.getExperiment().getIdTupleType());

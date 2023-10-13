@@ -60,10 +60,6 @@ public class FilteredBaseData extends AbstractBaseData implements IFilteredData 
 		}
 		return listIdTuples;
 	}
-	
-	@Override
-	public void setListOfIdTuples(List<IdTuple> listIdTuples) {
-	}
 
 
 	/*
@@ -71,7 +67,7 @@ public class FilteredBaseData extends AbstractBaseData implements IFilteredData 
 	 * @see edu.rice.cs.hpc.data.experiment.extdata.IBaseData#getNumberOfRanks()
 	 */
 	public int getNumberOfRanks() {
-		return indexes.size();
+		return getListOfIdTuples(IdTupleOption.BRIEF).size();
 	}
 	
 

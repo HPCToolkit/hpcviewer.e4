@@ -81,7 +81,7 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		super.setData(data);
 		
 		SpaceTimeDataController stdc = (SpaceTimeDataController) data;
-        final IBaseData traceData = stdc.getBaseData();
+        final var traceData = stdc.getBaseData();
         
         List<IdTuple> list   = traceData.getListOfIdTuples(IdTupleOption.BRIEF);
         boolean isSequential = list==null || list.isEmpty();
@@ -118,7 +118,7 @@ public class CanvasAxisY extends AbstractAxisCanvas
 			return;
 		
 		final SpaceTimeDataController data   = (SpaceTimeDataController) getData();
-        final IBaseData traceData 		     = data.getBaseData();
+        final var traceData = data.getBaseData();
 
         if (traceData == null)
         	return;
@@ -286,7 +286,7 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		 */
 		protected String getText(Event event) {
 			
-	        final IBaseData traceData = data.getBaseData();
+	        final var traceData = data.getBaseData();
 
 			int process = data.getTraceDisplayAttribute().getProcessBegin() + convertPixelToRank(event.y);
 			
