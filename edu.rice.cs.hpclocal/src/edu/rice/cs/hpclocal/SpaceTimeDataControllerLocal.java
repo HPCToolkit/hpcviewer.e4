@@ -81,7 +81,7 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 		} 
 		else if (version != Constants.EXPERIMENT_SPARSE_VERSION) 
 		{
-			throw new RuntimeException("Unknown database version: " + version);
+			throw new IllegalAccessError("Unknown database version: " + version);
 		}
 		fileDB.open(traceFilePath, trAttribute.dbHeaderSize, RECORD_SIZE);
 		this.fileDB = fileDB;

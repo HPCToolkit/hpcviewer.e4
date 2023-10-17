@@ -91,7 +91,7 @@ public class FilterRanks
 			// TODO: we need to check if the new one is the same with the old one or not.
 			
 			filteredBaseData.setIncludeIndex(listChecked);
-			data.setBaseData(filteredBaseData);
+
 			TraceEventData eventData = new TraceEventData(data, tracePart, filteredBaseData);
 			eventBroker.post(IConstants.TOPIC_FILTER_RANKS, eventData);
 		}

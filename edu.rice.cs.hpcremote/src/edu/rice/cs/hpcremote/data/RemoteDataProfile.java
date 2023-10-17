@@ -8,7 +8,9 @@ import java.util.List;
 import org.hpctoolkit.client_server_common.calling_context.CallingContextId;
 import org.hpctoolkit.client_server_common.profile.ProfileId;
 import org.hpctoolkit.hpcclient.v1_0.HpcClient;
+import org.hpctoolkit.hpcclient.v1_0.UnknownCallingContextException;
 import org.hpctoolkit.hpcclient.v1_0.UnknownProfileIdException;
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
@@ -46,6 +48,26 @@ public class RemoteDataProfile extends AbstractDataProfile implements IDataProfi
 	public RemoteDataProfile(HpcClient client, IdTupleType idTupleTypes) {
 		super(idTupleTypes);
 		this.client = client;
+		
+		initIdTuples(client);
+	}
+	
+	
+	private void initIdTuples(HpcClient client) {
+		
+		Set<IdTuple> idtuples;
+		try {
+			idtuples = client.getHierarchicalIdentifierTuples();
+			
+			List<IdTuple> list = new ArrayList<>(idtuples.size());
+			idtuples.forEach(list::add);
+			
+			setIdTuple(list);
+		} catch (IOException | InterruptedException e) {
+			LoggerFactory.getLogger(getClass()).error("Fail to get remote id tuples", e);
+		    // Restore interrupted state...
+		    Thread.currentThread().interrupt();
+		}
 	}
 	
 	
@@ -73,24 +95,39 @@ public class RemoteDataProfile extends AbstractDataProfile implements IDataProfi
 		Set<CallingContextId> setNodeId = HashSet.of(nodeId);
 		
 		try {
-			var metrics = client.getMetrics(profId, setNodeId);
-			List<MetricValueSparse> listMetrics = new ArrayList<>(metrics.size());
+			var mapCCTIndexToMetrics = client.getMetrics(profId, setNodeId);
+			if (mapCCTIndexToMetrics.isEmpty())
+				return Collections.emptyList();
+			
+			List<MetricValueSparse> listMetrics = new ArrayList<>(mapCCTIndexToMetrics.size());
 
-			var iterator = metrics.iterator();
+			var iterator = mapCCTIndexToMetrics.iterator();
 			while(iterator.hasNext()) {
 				var item = iterator.next();
-				item._2.forEach((k, v) -> {
-					MetricValueSparse mvs = new MetricValueSparse(k.toShort(), v.getValue());
-					listMetrics.add(mvs);
-				});
+				var cct = item._1.toInt();
+				if (cct == cctId) {
+					var metricMeasurements = item._2;
+					var setMetrics = metricMeasurements.getMetrics();
+					
+					setMetrics.toStream().forEach(m -> {
+						var metId = m.toShort();
+						var value = metricMeasurements.getMeasurement(m);
+						if (value.isPresent()) {							
+							MetricValueSparse mvs = new MetricValueSparse(metId, value.get().getValue());
+							listMetrics.add(mvs);
+						}
+					});
+				}
 			}
 			return listMetrics;
 			
 		} catch (UnknownProfileIdException e) {
-			throw new IllegalArgumentException("Unknown profile " + idtuple.toString() + " or cct " + cctId);
+			throw new IllegalArgumentException("Unknown profile " + idtuple.toString());
 		} catch (InterruptedException e2) {
 		    // Restore interrupted state...
 		    Thread.currentThread().interrupt();
+		} catch (UnknownCallingContextException e) {
+			throw new IllegalArgumentException("Unknown CCT " + cctId);
 		}
 		return Collections.emptyList();
 	}

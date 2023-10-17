@@ -1,20 +1,19 @@
 package edu.rice.cs.hpcremote.data;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-import org.eclipse.collections.api.map.primitive.IntIntMap;
-import org.eclipse.collections.api.map.primitive.IntObjectMap;
+import org.eclipse.collections.impl.map.mutable.primitive.IntIntHashMap;
+import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
 import org.hpctoolkit.client_server_common.time.Timestamp;
 import org.hpctoolkit.client_server_common.trace.TraceId;
 import org.hpctoolkit.hpcclient.v1_0.FutureTraceSamplingSet;
 import org.hpctoolkit.hpcclient.v1_0.HpcClient;
+import org.hpctoolkit.hpcclient.v1_0.TraceDataNotAvailableException;
 import org.hpctoolkit.hpcclient.v1_0.TraceSampling;
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcbase.IFilteredData;
 import edu.rice.cs.hpcbase.IProcessTimeline;
@@ -22,9 +21,10 @@ import edu.rice.cs.hpcbase.ITraceDataCollector;
 import edu.rice.cs.hpcbase.ITraceDataCollector.TraceOption;
 import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
 import edu.rice.cs.hpcdata.db.IdTuple;
-import edu.rice.cs.hpcdata.db.IdTupleType;
+import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
-import edu.rice.cs.hpcdata.util.ICallPath.ICallPathInfo;
+import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
+import edu.rice.cs.hpcdata.experiment.scope.visitors.TraceScopeVisitor;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import io.vavr.collection.HashSet;
@@ -33,26 +33,37 @@ import io.vavr.collection.Set;
 public class RemoteSpaceTimeDataController extends SpaceTimeDataController 
 {
 	private final HpcClient client;
-	private final IFilteredData remoteTraceData;
 	
 	private FutureTraceSamplingSet samplingSet;
-	private IntObjectMap<IdTuple> mapIntToIdTuple;
-	private IntIntMap mapIntToLine;
+	
+	private IntObjectHashMap<IdTuple> mapIntToIdTuple;
+	private IntIntHashMap mapIntToLine;
 	
 	
 	public RemoteSpaceTimeDataController(HpcClient client, IExperiment experiment) {
 		super(experiment);
 		
+		createScopeMap((BaseExperiment) experiment);
+		
 		this.client = client;
-		remoteTraceData = createTraceData(experiment);
+		var remoteTraceData = createTraceData(experiment);
+		super.setBaseData(remoteTraceData);
 	}
 
 	private IFilteredData createTraceData(IExperiment experiment) {		
-		var idTupleType  = exp.getIdTupleType();
+		var idTupleType = experiment.getIdTupleType();
 
 		try {
-			var listIdTuples = exp.getThreadData().getIdTuples();
-			exp.getThreadData().getParallelismLevel();
+			var listIdTuples = experiment.getThreadData().getIdTuples();
+
+			mapIntToIdTuple = new IntObjectHashMap<>(listIdTuples.size());
+			mapIntToLine = new IntIntHashMap(listIdTuples.size());
+			
+			for(int i=0; i<listIdTuples.size(); i++) {
+				var idtuple = listIdTuples.get(i);
+				mapIntToIdTuple.put(idtuple.getProfileIndex(), idtuple);
+				mapIntToLine.put(idtuple.getProfileIndex(), i);
+			}
 			
 			return new RemoteFilteredData(listIdTuples, idTupleType);
 		} catch (IOException e) {
@@ -60,13 +71,52 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 		}
 	}
 	
+	
+	private void createScopeMap(BaseExperiment experiment) {
+
+		var rootCCT = experiment.getRootScope(RootScopeType.CallingContextTree);
+
+		// If we already computed the call-path map, we do not do it again.
+		// It's harmless to recompute but it such a waste of CPU resources.
+
+		if (rootCCT != null && experiment.getScopeMap() == null) {
+			// needs to gather info about cct id and its depth
+			// this is needed for traces
+			TraceScopeVisitor visitor = new TraceScopeVisitor();
+			rootCCT.dfsVisitScopeTree(visitor);
+
+			experiment.setMaxDepth(visitor.getMaxDepth());
+			experiment.setScopeMap(visitor.getCallPath());
+		}
+	}
+	
+	
+	public int getTraceLineFromProfile(int profileIndex) {
+		return mapIntToLine.get(profileIndex);
+	}
+	
+	
+	public IdTuple getIdTupleFromProfile(int profileIndex) {
+		return mapIntToIdTuple.get(profileIndex);
+	}
+	
 	@Override
 	public String getName() {
 		return "Remote: " + super.getExperiment().getName();
 	}
 
+	
 	@Override
 	public void closeDB() {
+		if (mapIntToIdTuple != null)
+			mapIntToIdTuple.clear();
+		
+		if (mapIntToLine != null)
+			mapIntToLine.clear();
+		
+		mapIntToIdTuple = null;
+		mapIntToLine = null;
+		samplingSet = null;
 	}
 
 	
@@ -93,8 +143,27 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 		}
 		
 		var frame = traceAttr.getFrame();
-		var time1 = Timestamp.ofEpochNano(frame.begTime);
-		var time2 = Timestamp.ofEpochNano(frame.endTime);
+		
+		Timestamp time1 = Timestamp.ofEpochNano(frame.begTime);
+		Timestamp time2 = Timestamp.ofEpochNano(frame.endTime);
+		
+		if (time1.isAfter(time2)) {
+			// the time range is not initialized yet
+			try {
+				var traceTimeMin = client.getMinimumTraceSampleTimestamp();
+				var traceTimeMax = client.getMaximumTraceSampleTimestamp();
+				if (traceTimeMin.isPresent()) {
+					time1 = traceTimeMin.get();
+				}
+				if (traceTimeMax.isPresent()) {
+					time2 = traceTimeMax.get();
+				}
+			} catch (InterruptedException | TraceDataNotAvailableException e) {
+				LoggerFactory.getLogger(getClass()).error("Cannot retrieve time min/max", e);
+			    // Restore interrupted state...
+			    Thread.currentThread().interrupt();
+			}
+		}
 		
 		samplingSet = client.sampleTracesAsync(setOfTraceId, time1, time2, getPixelHorizontal());
 	}
@@ -108,7 +177,7 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 		if (TracePreferenceManager.getGPUTraceExposure() && idTuple.isGPU(idtupleType))
 			traceOption = TraceOption.REVEAL_GPU_TRACE;
 		
-		return new RemoteTraceDataCollector(lineNum, idTuple, getPixelHorizontal(), traceOption);
+		return new RemoteTraceDataCollectorPerProfile(getPixelHorizontal(), traceOption);
 	}
 
 
@@ -122,224 +191,5 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 			return new RemoteProcessTimeline(this, sampling.get());
 		}
 		return null;
-	}
-
-	
-	static class RemoteProcessTimeline implements IProcessTimeline
-	{
-		private final SpaceTimeDataController traceData;
-		private final Future<TraceSampling> traceSampling;
-
-		private TraceSampling trace;
-		private ITraceDataCollector traceDataCollector;
-		
-		RemoteProcessTimeline(SpaceTimeDataController traceData, Future<TraceSampling> traceSampling) {
-			this.traceData = traceData;
-			this.traceSampling = traceSampling;
-		}
-		
-		@Override
-		public void readInData() throws IOException {
-			try {
-				trace = traceSampling.get();
-				var traceId = trace.getTraceId();
-				var profile = traceId.toInt();
-				traceDataCollector = traceData.getTraceDataCollector(line(), getProfileIdTuple());
-			} catch (InterruptedException  | ExecutionException e) {
-			    // Restore interrupted state...
-			    Thread.currentThread().interrupt();
-			}
-		}
-
-		@Override
-		public long getTime(int sample) {
-			return trace.getSamplesChronologicallyNonDescending().get(sample).getTimestamp().toEpochNano();
-		}
-
-		@Override
-		public int getContextId(int sample) {
-			return trace.getSamplesChronologicallyNonDescending().get(sample).getCallingContext().toInt();
-		}
-
-		@Override
-		public void shiftTimeBy(long lowestStartingTime) {
-			traceDataCollector.shiftTimeBy(lowestStartingTime);
-		}
-
-		@Override
-		public ICallPathInfo getCallPathInfo(int sample) {
-			var cpid = getContextId(sample);
-			var map  = traceData.getScopeMap();
-			return map.getCallPathInfo(cpid);
-		}
-
-		@Override
-		public void copyDataFrom(IProcessTimeline other) {
-			traceDataCollector.duplicate( ((RemoteProcessTimeline) other).traceDataCollector );
-		}
-
-		@Override
-		public int size() {
-			return trace.getSamplesChronologicallyNonDescending().size();
-		}
-
-		@Override
-		public int line() {
-			// TODO Auto-generated method stub
-			return 0;
-		}
-
-		@Override
-		public IdTuple getProfileIdTuple() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override
-		public int findMidpointBefore(long time, boolean usingMidpoint) {
-			try {
-				return traceDataCollector.findClosestSample(time, usingMidpoint);
-			} catch (Exception e) {
-				throw new IllegalArgumentException("Invalid time: " + time);
-			}
-		}
-
-		@Override
-		public boolean isEmpty() {
-			return trace.getSamplesChronologicallyNonDescending().isEmpty();
-		}
-
-		@Override
-		public boolean isGPU() {			
-			return getProfileIdTuple().isGPU(traceData.getExperiment().getIdTupleType());
-		}
-
-		@Override
-		public void dispose() {
-			if (traceDataCollector != null)
-				traceDataCollector.dispose();
-			
-			traceDataCollector = null;
-		}
-		
-	}
-
-	/***************************************************************
-	 * 
-	 * Remote base data specifically for remote data
-	 *
-	 ***************************************************************/
-	public static class RemoteFilteredData implements IFilteredData
-	{
-		final IdTupleType idTupleType;
-		final List<IdTuple> listOriginalIdTuples;
-		
-		List<IdTuple> listIdTuples;
-		List<Integer> indexes;
-
-		public RemoteFilteredData(List<IdTuple> listOriginalIdTuples, IdTupleType idTupleType) {
-			this.listOriginalIdTuples = listOriginalIdTuples;
-			this.idTupleType = idTupleType;
-		}
-		
-
-		@Override
-		public List<IdTuple> getListOfIdTuples(IdTupleOption option) {
-			if (indexes == null) {
-				// this can happen when we remove the filter and go back to the densed one.
-				return listOriginalIdTuples;
-			}
-			if (listIdTuples != null) {
-				return listIdTuples;
-			}
-			listIdTuples = new ArrayList<>();
-			
-			for (int i=0; i<indexes.size(); i++) {
-				Integer index = indexes.get(i);
-				IdTuple idTuple = listOriginalIdTuples.get(index);
-				listIdTuples.add(idTuple);
-			}
-			return listIdTuples;
-		}
-
-
-		@Override
-		public IdTupleType getIdTupleTypes() {
-			return idTupleType;
-		}
-
-		@Override
-		public int getNumberOfRanks() {
-			return indexes.size();
-		}
-
-		@Override
-		public int getFirstIncluded() {
-			if (indexes == null || indexes.isEmpty())
-				return 0;
-			
-			return indexes.get(0);
-		}
-
-		@Override
-		public int getLastIncluded() {
-			if (indexes == null || indexes.isEmpty())
-				return 0;
-			
-			return indexes.get(indexes.size()-1);
-		}
-
-		@Override
-		public boolean isDenseBetweenFirstAndLast() {
-			if (indexes == null || indexes.isEmpty())
-				return true;
-			
-			int size = indexes.size();
-			return indexes.get(size-1)-indexes.get(0) == size-1;
-		}
-
-		@Override
-		public boolean hasGPU() {
-			var list = getListOfIdTuples(IdTupleOption.BRIEF);
-			var gpuIdTuple = list.stream().filter( idt -> idt.isGPU(idTupleType)).findAny();
-			return gpuIdTuple.isPresent();
-		}
-
-		@Override
-		public void dispose() {
-			indexes = null;
-			
-			if (listIdTuples != null)
-				listIdTuples.clear();
-			listIdTuples = null;
-		}
-
-		@Override
-		public boolean isGPU(int rank) {
-			if (indexes == null)
-				return false;
-			
-			var index = indexes.get(rank);
-			var list  = getListOfIdTuples(IdTupleOption.BRIEF);
-			var idtuple = list.get(index);
-			
-			return idtuple.isGPU(idTupleType);
-		}
-
-		@Override
-		public boolean isGoodFilter() {
-			return getNumberOfRanks() > 0;
-		}
-
-		@Override
-		public void setIncludeIndex(List<Integer> listOfIncludedIndex) {
-			indexes = listOfIncludedIndex;
-			listIdTuples = null;			
-		}
-
-		@Override
-		public List<IdTuple> getDenseListIdTuple(IdTupleOption option) {
-			return listOriginalIdTuples;
-		}
 	}
 }

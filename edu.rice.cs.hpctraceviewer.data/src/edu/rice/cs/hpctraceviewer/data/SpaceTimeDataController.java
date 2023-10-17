@@ -1,7 +1,6 @@
 package edu.rice.cs.hpctraceviewer.data;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.swt.widgets.Display;
@@ -12,7 +11,6 @@ import edu.rice.cs.hpcbase.ITraceDataCollector;
 import edu.rice.cs.hpcbase.ITraceManager;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
-import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.trace.BaseTraceAttribute;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
@@ -45,25 +43,8 @@ public abstract class SpaceTimeDataController implements ITraceManager
 	protected ColorTable colorTable = null;
 	protected IFilteredData dataTrace = null;
 	
-	protected ProcessTimelineService timelineService;
-	
-	// nathan's data index variable
-	// TODO: we need to remove this and delegate to the inherited class instead !
-	//private int currentDataIdx;
+	private final ProcessTimelineService timelineService;
 
-
-	
-	/*****
-	 * Constructor to create a data based on input stream, which is convenient for remote database
-	 * 
-	 * @param context : IEclipseContext
-	 * @param expStream : input stream
-	 * @param Name : the name of the file on the remote server
-	 *****/
-	public SpaceTimeDataController(InputStream expStream) 
-	{
-		this(new Experiment());
-	}
 	
 	/*****
 	 * This constructor is used when an Experiment database is already opened, and we just
@@ -72,10 +53,21 @@ public abstract class SpaceTimeDataController implements ITraceManager
 	 * @param context IEclipseContext
 	 * @param experiment BaseExperiment
 	 */
-	public SpaceTimeDataController(IExperiment experiment) 
+	protected SpaceTimeDataController(IExperiment experiment) 
 	{
 		exp = experiment;		
-		init();
+		timelineService = new ProcessTimelineService();
+		
+		// attributes initialization
+		attributes = new TraceDisplayAttribute();
+		
+		final Display display = Display.getDefault();
+		display.syncExec( ()-> 
+			
+			// initialize color table
+			// has to be inside UI thread since we create colors
+			colorTable = new ColorTable()
+		);
 	}
 
 	
@@ -101,29 +93,6 @@ public abstract class SpaceTimeDataController implements ITraceManager
 		return timelineService.getNumProcessTimeline() > 0;
 	}
 	
-	
-	/*************************************************************************
-	 * Initialize the object
-	 * 
-	 * @param _window
-	 * @throws Exception 
-	 *************************************************************************/
-	private void init() 
-	{	
-		timelineService = new ProcessTimelineService();
-		
-		// attributes initialization
-		attributes = new TraceDisplayAttribute();
-		
-		final Display display = Display.getDefault();
-		display.syncExec( ()-> {
-			
-			// initialize color table
-			// has to be inside UI thread since we create colors
-			colorTable = new ColorTable();
-		});
-	}
-
 	
 	/*************************************************************************
 	 * Check if the current configuration is the home area.
@@ -335,7 +304,6 @@ public abstract class SpaceTimeDataController implements ITraceManager
 		
 		exp = null;
 		colorTable = null;
-		timelineService = null;
 		attributes = null;
 		
 		closeDB();

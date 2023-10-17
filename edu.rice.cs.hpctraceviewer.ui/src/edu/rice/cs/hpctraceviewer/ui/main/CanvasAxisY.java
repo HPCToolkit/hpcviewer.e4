@@ -1,6 +1,5 @@
 package edu.rice.cs.hpctraceviewer.ui.main;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.eclipse.core.commands.operations.IUndoableOperation;
@@ -14,11 +13,9 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
-import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
-import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
@@ -50,8 +47,7 @@ public class CanvasAxisY extends AbstractAxisCanvas
 	private ITraceCanvas.MouseState mouseState;
 	
 	private AxisToolTip tooltip = null;
-	
-	private int numLevels;
+
 
 	
 	/****
@@ -89,14 +85,6 @@ public class CanvasAxisY extends AbstractAxisCanvas
         	// it's a sequential code. No need to display the y-axis
         	return;
         }
-        var experiment = stdc.getExperiment();
-        IThreadDataCollection threadData;
-		try {
-			threadData = experiment.getThreadData();
-	        numLevels = threadData.getParallelismLevel();
-		} catch (IOException e) {
-			LoggerFactory.getLogger(getClass()).error("Fail to get the thread data", e);
-		}
         
 		if (mouseState == MouseState.ST_MOUSE_INIT) {
 			
@@ -154,7 +142,7 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		// collect the position and the length of each process
 		// -----------------------------------------------------
 		IdTuple idtupleOld  = null;
-		int []oldColorIndex = new int[numLevels];
+		int []oldColorIndex = new int[5];
 		final ProcessTimelineService timeLine = data.getProcessTimelineService();
 		
 		for (int i=0; i<timeLine.getNumProcessTimeline(); i++) {

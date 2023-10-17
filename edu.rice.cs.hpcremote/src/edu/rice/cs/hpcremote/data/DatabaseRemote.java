@@ -11,6 +11,7 @@ import org.hpctoolkit.client_server_common.profiled_source.ProfiledSourceFileId;
 import org.hpctoolkit.client_server_common.profiled_source.UnknownProfiledSourceFileId;
 import org.hpctoolkit.hpcclient.v1_0.HpcClient;
 import org.hpctoolkit.hpcclient.v1_0.HpcClientJavaNetHttp;
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcbase.ITraceManager;
 import edu.rice.cs.hpcdata.experiment.Experiment;
@@ -26,6 +27,7 @@ import edu.rice.cs.hpcremote.ui.ConnectionDialog;
 
 public class DatabaseRemote implements IDatabaseRemote
 {
+	private String path;
 	private String host;
 	private int port;
 	
@@ -54,8 +56,23 @@ public class DatabaseRemote implements IDatabaseRemote
 		}
 		sb.append('/');
 		
+		if (path == null) {
+			try {
+				path = client.getDatabasePath().toString();
+				sb.append(path);
+			} catch (IOException | InterruptedException e) {
+				path = "";
+				
+				LoggerFactory.getLogger(getClass()).error("Unable to get the database path", e);
+			    // Restore interrupted state...
+			    Thread.currentThread().interrupt();
+			}
+		} else {
+			sb.append(path);
+		}
 		return sb.toString();
 	}
+	
 
 	@Override
 	public HpcClient getClient() {
@@ -140,7 +157,9 @@ public class DatabaseRemote implements IDatabaseRemote
 		try {
 			return client.isTraceSampleDataAvailable();
 		} catch (IOException | InterruptedException e) {
-			e.printStackTrace();
+			LoggerFactory.getLogger(getClass()).error("Cannot check data availability", e);
+		    // Restore interrupted state...
+		    Thread.currentThread().interrupt();
 		}
 		return false;
 	}

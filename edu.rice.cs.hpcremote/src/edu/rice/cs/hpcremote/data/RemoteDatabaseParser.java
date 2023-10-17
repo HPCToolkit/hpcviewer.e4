@@ -155,6 +155,11 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 			public void close() throws IOException {
 				// nothing
 			}
+
+			@Override
+			public java.util.Set<Integer> getCallingContexts() {
+				return null;
+			}
 		};
 	}
 }

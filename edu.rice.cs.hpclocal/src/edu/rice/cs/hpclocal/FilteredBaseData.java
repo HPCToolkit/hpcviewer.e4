@@ -89,10 +89,6 @@ public class FilteredBaseData extends AbstractBaseData implements IFilteredData 
 		return baseDataFile.getMaxLoc(profile);
 	}
 
-	@Override
-	public boolean isGoodFilter() {
-		return getNumberOfRanks() > 0;
-	}
 
 	@Override
 	public int getFirstIncluded() {
