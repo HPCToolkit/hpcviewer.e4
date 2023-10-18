@@ -1,12 +1,13 @@
 package edu.rice.cs.hpcremote.data;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.eclipse.collections.impl.map.mutable.primitive.IntIntHashMap;
-import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
 import org.hpctoolkit.client_server_common.time.Timestamp;
 import org.hpctoolkit.client_server_common.trace.TraceId;
 import org.hpctoolkit.hpcclient.v1_0.FutureTraceSamplingSet;
@@ -36,9 +37,10 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 	
 	private FutureTraceSamplingSet samplingSet;
 	
-	private IntObjectHashMap<IdTuple> mapIntToIdTuple;
 	private IntIntHashMap mapIntToLine;
 	
+	private boolean changedBounds;
+	private AtomicInteger currentLine;
 	
 	public RemoteSpaceTimeDataController(HpcClient client, IExperiment experiment) {
 		super(experiment);
@@ -56,12 +58,10 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 		try {
 			var listIdTuples = experiment.getThreadData().getIdTuples();
 
-			mapIntToIdTuple = new IntObjectHashMap<>(listIdTuples.size());
 			mapIntToLine = new IntIntHashMap(listIdTuples.size());
 			
 			for(int i=0; i<listIdTuples.size(); i++) {
 				var idtuple = listIdTuples.get(i);
-				mapIntToIdTuple.put(idtuple.getProfileIndex(), idtuple);
 				mapIntToLine.put(idtuple.getProfileIndex(), i);
 			}
 			
@@ -97,7 +97,8 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 	
 	
 	public IdTuple getIdTupleFromProfile(int profileIndex) {
-		return mapIntToIdTuple.get(profileIndex);
+		var line = mapIntToLine.get(profileIndex);
+		return getProfileIndexToPaint(line);
 	}
 	
 	@Override
@@ -108,27 +109,29 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 	
 	@Override
 	public void closeDB() {
-		if (mapIntToIdTuple != null)
-			mapIntToIdTuple.clear();
-		
 		if (mapIntToLine != null)
 			mapIntToLine.clear();
 		
-		mapIntToIdTuple = null;
 		mapIntToLine = null;
 		samplingSet = null;
 	}
 
 	
 	@Override
-	public void fillTracesWithData(boolean changedBounds, int numThreadsToLaunch) throws IOException {
-		if (!changedBounds)
-			return;
+	public void startTrace(int numTraces, boolean changedBounds) {
+		this.changedBounds = changedBounds;
 		
+		if (!changedBounds) {
+			currentLine = new AtomicInteger(numTraces);
+			return;
+		}
+
 		var traceAttr = getTraceDisplayAttribute();
 		var pixelsV = traceAttr.getPixelVertical();
 
-		var listIdTuples = getBaseData().getListOfIdTuples(IdTupleOption.BRIEF);
+		var remoteTraceData = getBaseData();
+		var listIdTuples = remoteTraceData.getListOfIdTuples(IdTupleOption.BRIEF);
+		
 		Set<TraceId> setOfTraceId = null; 
 		
 		var numRanks = listIdTuples.size();
@@ -136,8 +139,21 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 			// in case the number of ranks is bigger than the number of pixels,
 			// we need to pick (or sample) which ranks need to be displayed.
 			// A lazy way is to rely on the server to pick which ranks to be displayed. 
+			setOfTraceId = HashSet.empty();
+			float fraction = (float) numRanks / pixelsV;
+			int line = 0;
+			
+			// collect id tuples to fit number of vertical pixels
+			for(int i=0; i<pixelsV; i++) {
+				var idt = listIdTuples.get(line);
+				TraceId traceId = TraceId.make(idt.getProfileIndex());
+				setOfTraceId.add(traceId);
+				
+				line += fraction;				
+			}
 			
 		} else {
+			// fast approach
 			var setTraces = listIdTuples.stream().map(idt -> TraceId.make(idt.getProfileIndex())).collect(Collectors.toSet());
 			setOfTraceId = HashSet.ofAll(setTraces);
 		}
@@ -162,9 +178,11 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 				LoggerFactory.getLogger(getClass()).error("Cannot retrieve time min/max", e);
 			    // Restore interrupted state...
 			    Thread.currentThread().interrupt();
+			} catch (IOException e) {
+				throw new IllegalAccessError(e.getMessage());
 			}
 		}
-		
+		System.out.printf("num traces: %d, time: %d, %d %n", setOfTraceId.size(), time1.toEpochNano(), time2.toEpochNano());
 		samplingSet = client.sampleTracesAsync(setOfTraceId, time1, time2, getPixelHorizontal());
 	}
 
@@ -183,10 +201,18 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 
 	@Override
 	public IProcessTimeline getNextTrace() throws Exception {
+		if (!changedBounds) {
+			var line = currentLine.decrementAndGet();
+			if (line < 0)
+				return null;
+			return getProcessTimelineService().getProcessTimeline(line);
+		}
+		
 		if (samplingSet.isDone())
 			return null;
 		
-		Optional<Future<TraceSampling>> sampling = samplingSet.getAnyDoneSampling();
+		Optional<Future<TraceSampling>> sampling = samplingSet.getAnyDoneSampling(Duration.ofMillis(3));
+		System.out.println("getNextTrace: " + sampling.isPresent());
 		if (sampling.isPresent()) {
 			return new RemoteProcessTimeline(this, sampling.get());
 		}

@@ -3,6 +3,7 @@ package edu.rice.cs.hpclocal;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import edu.rice.cs.hpcbase.IProcessTimeline;
@@ -18,6 +19,7 @@ import edu.rice.cs.hpcdata.util.MergeDataFiles;
 import edu.rice.cs.hpcdata.util.MergeDataFiles.MergeDataAttribute;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
+import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 
 
 /**
@@ -34,6 +36,9 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 	private static final int RECORD_SIZE    = Constants.SIZEOF_LONG + Constants.SIZEOF_INT;
 
 	private IFileDB fileDB;
+	
+	private AtomicInteger currentLine;
+	private boolean changedBounds;
 	
 	/***
 	 * Constructor to setup local database
@@ -90,6 +95,25 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 	}
 
 
+	@Override
+	public void startTrace(int numTraces, boolean changedBounds) {
+		this.changedBounds = changedBounds;				
+		currentLine = new AtomicInteger(numTraces);
+	}
+
+
+	@Override
+	public IProcessTimeline getNextTrace() throws Exception {
+		var line = currentLine.decrementAndGet();
+		if (line < 0)
+			return null;
+
+		if (changedBounds) {			
+			var profile = super.getProfileIndexToPaint(line);
+			return new ProcessTimeline(line, this, profile);
+		}
+		return getProcessTimelineService().getProcessTimeline(line);
+	}
 
 	
 	@Override
@@ -98,12 +122,6 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 			fileDB.dispose();
 		
 		fileDB = null;
-	}
-
-
-	public void fillTracesWithData(boolean changedBounds, int numThreadsToLaunch) {
-		//No need to do anything. The data for local is gotten from the file
-		//on demand on a per-timeline basis.
 	}
 
 
@@ -125,7 +143,7 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 	private static String getTraceFile(String directory, final IProgressMonitor statusMgr) 
 			throws IOException
 	{
-		final ProgressReport traceReport = new ProgressReport();
+		final ProgressReport traceReport = new ProgressReport(statusMgr);
 		final String outputFile = directory + File.separatorChar + "experiment.mt";
 		
 		File dirFile = new File(directory);
@@ -146,26 +164,28 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 	}
 
 	/*******************
-	 * Progress bar
-	 *
-	 */
+	 * Dummy Progress bar.
+	 * Should be supplied by the UI
+	 *******************/
 	private static class ProgressReport implements IProgressReport 
 	{
-
-		public ProgressReport()
+		private final IProgressMonitor statusMgr;
+		
+		public ProgressReport(IProgressMonitor statusMgr)
 		{
+			this.statusMgr = statusMgr;
 		}
 		
 		public void begin(String title, int num_tasks) {
-			System.out.println(title + " " + num_tasks);
+			statusMgr.subTask(title);
 		}
 
 		public void advance() {
-			System.out.print(".");
+			statusMgr.worked(1);
 		}
 
 		public void end() {
-			System.out.println();
+			statusMgr.done();
 		}
 	}
 
@@ -180,12 +200,5 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 			traceOption = TraceOption.REVEAL_GPU_TRACE;
 		
 		return new LocalTraceDataCollector((AbstractBaseData) dataTrace, idtuple, getPixelHorizontal(), traceOption);
-	}
-
-
-	@Override
-	public IProcessTimeline getNextTrace() throws Exception {
-		var timelineService = getProcessTimelineService();
-		return timelineService.getProcessTimeline(MIN_TRACE_SIZE);
 	}
 }

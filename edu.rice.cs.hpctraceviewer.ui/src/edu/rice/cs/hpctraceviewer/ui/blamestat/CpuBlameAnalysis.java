@@ -13,7 +13,6 @@ import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.color.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.color.ProcedureColor;
-import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 import edu.rice.cs.hpctraceviewer.ui.base.IPixelAnalysis;
 import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
@@ -130,7 +129,7 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 		dataTraces.getTraceDisplayAttribute();
 
 		// get the profile of the current pixel
-		final ProcessTimeline ptl = ptlService.getProcessTimeline(y);
+		final var ptl = ptlService.getProcessTimeline(y);
 		if (ptl == null)
 			// hack: sometimes the summary view is still have the old image
 			// and it isn't sync with the current process time line

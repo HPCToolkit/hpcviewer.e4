@@ -46,7 +46,7 @@ import edu.rice.cs.hpctraceviewer.data.color.ColorTable;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
 import edu.rice.cs.hpctraceviewer.data.Position;
-import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
+
 
 
 /**************************************************
@@ -201,7 +201,7 @@ public class CallStackViewer extends AbstractBaseTableViewer
     	// case for single process
     	estimatedProcess = Math.min(estimatedProcess, numDisplayedProcess-1);
 
-		ProcessTimeline ptl = ptlService.getProcessTimeline(estimatedProcess);
+		var ptl = ptlService.getProcessTimeline(estimatedProcess);
 		
 		// it's very unlikely if a timeline process cannot be found of a given process
 		// If this really happens, possible scenarios:

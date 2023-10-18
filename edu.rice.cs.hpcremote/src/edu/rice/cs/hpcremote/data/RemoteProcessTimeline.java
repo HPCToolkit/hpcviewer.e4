@@ -39,6 +39,8 @@ public class RemoteProcessTimeline implements IProcessTimeline
 			traceDataCollector = (RemoteTraceDataCollectorPerProfile) traceData.getTraceDataCollector(line(), getProfileIdTuple());
 			traceDataCollector.readInData(trace);
 			
+			System.out.printf("%3d %3d %s%n", line, profile, idTuple.toString());
+			
 		} catch (InterruptedException  | ExecutionException e) {
 		    // Restore interrupted state...
 		    Thread.currentThread().interrupt();

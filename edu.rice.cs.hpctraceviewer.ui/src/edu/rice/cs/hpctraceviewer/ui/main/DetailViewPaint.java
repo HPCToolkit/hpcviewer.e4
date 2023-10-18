@@ -99,14 +99,17 @@ public class DetailViewPaint extends BaseViewPaint
 	protected BaseTimelineThread getTimelineThread(ISpaceTimeCanvas canvas, double xscale,
 			double yscale, Queue<TimelineDataSet> queue, IProgressMonitor monitor) {
 
-		return new TimelineThread(controller, changedBounds,   
-				yscale, queue, numDataCollected, numLines, monitor);
+		return new TimelineThread(controller, 
+							      changedBounds,   
+							      yscale, 
+							      queue, 
+							      monitor);
 	}
 
 	@Override
 	protected void launchDataGettingThreads(boolean changedBounds,
 			int numThreads) throws IOException {
-		controller.fillTracesWithData( changedBounds, numThreads);
+		controller.startTrace(numLines, changedBounds);
 	}
 
 	@Override

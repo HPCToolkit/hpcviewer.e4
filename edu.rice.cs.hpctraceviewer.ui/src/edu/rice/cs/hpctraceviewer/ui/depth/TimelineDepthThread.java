@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
+import edu.rice.cs.hpcbase.IProcessTimeline;
 import edu.rice.cs.hpctraceviewer.data.DataLinePainting;
 import edu.rice.cs.hpctraceviewer.data.DataPreparation;
 import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
@@ -23,6 +24,8 @@ public class TimelineDepthThread
 	extends BaseTimelineThread
 {
 	private final int visibleDepths;
+	
+	private final AtomicInteger currentLine;
 
 	/*****
 	 * Thread initialization
@@ -44,13 +47,14 @@ public class TimelineDepthThread
 								IProgressMonitor monitor,
 								int visibleDepths)
 	{
-		super(data, scaleY, queue, timelineDone, monitor);
+		super(data, scaleY, queue, monitor);
 		this.visibleDepths = visibleDepths;
+		currentLine = timelineDone;
 	}
 
 
 	@Override
-	protected ProcessTimeline getNextTrace(AtomicInteger currentLine) {
+	protected IProcessTimeline getNextTrace() {
 		var depthTrace = stData.getCurrentSelectedTraceline();
 		if (depthTrace == null) {
 			monitor.setCanceled(true);
@@ -76,7 +80,7 @@ public class TimelineDepthThread
 	}
 
 	@Override
-	protected boolean init(ProcessTimeline trace) {
+	protected boolean init(IProcessTimeline trace) {
 		return true;
 	}
 

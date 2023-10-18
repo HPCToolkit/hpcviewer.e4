@@ -34,7 +34,6 @@ public abstract class BasePaintThread implements Callable<List<ImagePosition>>
 	private final int numberOfTotalLines;
 	
 	protected final SpaceTimeDataController stData;
-	private final AtomicInteger numDataCollected;
 	private final AtomicInteger currentPaint;
 	
 	/****
@@ -64,7 +63,6 @@ public abstract class BasePaintThread implements Callable<List<ImagePosition>>
 		this.monitor 			= monitor;
 		this.list 				= list;
 		this.numberOfTotalLines = numberOfTotalLines;
-		this.numDataCollected 	= dataCollected;
 		this.currentPaint		= currentPaint;
 		listOfImages = new ArrayList<>(list.size());
 	}
@@ -79,8 +77,7 @@ public abstract class BasePaintThread implements Callable<List<ImagePosition>>
 		while( /*! list.isEmpty() 				 		 // while there are tasks to do 
 				|| 						*/				 // or	
 				currentPaint.get() < numberOfTotalLines  // the current painting is not done yet
-				|| 											// or
-				numDataCollected.get()<numberOfTotalLines )  // the data preparation threads haven't finished the job
+			 )
 		{
 			if (monitor.isCanceled()) {
 				dispose();

@@ -1,6 +1,5 @@
 package edu.rice.cs.hpctraceviewer.data;
 
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.swt.widgets.Display;
@@ -10,6 +9,7 @@ import edu.rice.cs.hpcbase.IProcessTimeline;
 import edu.rice.cs.hpcbase.ITraceDataCollector;
 import edu.rice.cs.hpcbase.ITraceManager;
 import edu.rice.cs.hpcdata.db.IdTuple;
+import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.trace.BaseTraceAttribute;
@@ -328,7 +328,30 @@ public abstract class SpaceTimeDataController implements ITraceManager
 		
 		attributes.setProcess(begProcess, endProcess);
 	}
+
 	
+	/** 
+	 * Returns the profile id-tuple to which the line-th line corresponds. 
+	 * @param line
+	 * 			The trace line sequence
+	 * 
+	 * @return {@code IdTuple}
+	 * 			The profile id-tuple
+	 * */
+	protected IdTuple getProfileIndexToPaint(int line) {		
+		var listProfiles = getBaseData().getListOfIdTuples(IdTupleOption.BRIEF);
+		
+		int numProfiles = listProfiles.size();		
+		int index = 0;
+		
+		if (numProfiles > attributes.getPixelVertical()) {
+			index = attributes.getProcessBegin() + (line * numProfiles) / attributes.getPixelVertical();
+		} else {
+			index = attributes.getProcessBegin() + line;
+		}
+		return listProfiles.get(index);
+	}
+
 	
 	////////////////////////////////////////////////////////////////////////////////
 	// Abstract methods
@@ -345,9 +368,18 @@ public abstract class SpaceTimeDataController implements ITraceManager
 	public abstract String getName();
 
 	public abstract void closeDB();
-	
-	public abstract void fillTracesWithData(boolean changedBounds, int numThreadsToLaunch)
-			throws IOException;
+
+
+	/****
+	 * Initialize the trace collector and ready to read traces either 
+	 * remotely or locally
+	 * 
+	 * @param numTraces
+	 * 			Number of maximum trace lines
+	 * @param changedBounds
+	 * 			Whether the bound has changed or not
+	 */
+	public abstract void startTrace(int numTraces, boolean changedBounds);
 
 	/****
 	 * Get the trace data collector associated with this data.
@@ -364,5 +396,11 @@ public abstract class SpaceTimeDataController implements ITraceManager
 	public abstract ITraceDataCollector getTraceDataCollector(int lineNum, IdTuple idTuple);
 	
 	
+	/***
+	 * Get the next trace line
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
 	public abstract IProcessTimeline getNextTrace() throws Exception;
 }

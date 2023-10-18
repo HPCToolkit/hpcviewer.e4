@@ -18,7 +18,6 @@ import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
-import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 import edu.rice.cs.hpctraceviewer.ui.base.ITraceCanvas;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
@@ -146,7 +145,7 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		final ProcessTimelineService timeLine = data.getProcessTimelineService();
 		
 		for (int i=0; i<timeLine.getNumProcessTimeline(); i++) {
-			ProcessTimeline procTimeline = timeLine.getProcessTimeline(i);
+			var procTimeline = timeLine.getProcessTimeline(i);
 			if (procTimeline == null)
 				continue;
 			

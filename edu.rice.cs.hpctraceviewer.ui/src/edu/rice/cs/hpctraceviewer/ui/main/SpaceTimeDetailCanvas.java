@@ -1092,7 +1092,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		//	the number of ranks or the number of pixels
 		// -----------------------------------------------------------------------
 		
-		final int numLines = Math.min(view.height, attributes.getProcessInterval() );
+		final int numLines = Math.min(view.height, attributes.getProcessInterval());
 		final Image imageOrig = new Image(getDisplay(), view.width, numLines);
 		
 		final GC origGC = new GC(imageOrig);
@@ -1410,8 +1410,8 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 					// we don't need this "new image" since the paint fails
 					imageFinal.dispose();	
 				}
-
-				redraw();
+				if (!isDisposed())
+					redraw();
 				
 				// free resources 
 				bufferGC.dispose();
