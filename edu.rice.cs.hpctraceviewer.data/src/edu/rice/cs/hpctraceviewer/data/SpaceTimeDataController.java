@@ -36,12 +36,12 @@ import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
  *******************************************************************************************/
 public abstract class SpaceTimeDataController implements ITraceManager
 {
-	protected IExperiment  exp;
+	private IExperiment  exp;
 
-	protected TraceDisplayAttribute attributes;
+	private TraceDisplayAttribute attributes;
 	
-	protected ColorTable colorTable = null;
-	protected IFilteredData dataTrace = null;
+	private ColorTable colorTable = null;
+	private IFilteredData dataTrace = null;
 	
 	private final ProcessTimelineService timelineService;
 
@@ -338,7 +338,7 @@ public abstract class SpaceTimeDataController implements ITraceManager
 	 * @return {@code IdTuple}
 	 * 			The profile id-tuple
 	 * */
-	protected IdTuple getProfileIndexToPaint(int line) {		
+	public IdTuple getProfileFromPixel(int line) {		
 		var listProfiles = getBaseData().getListOfIdTuples(IdTupleOption.BRIEF);
 		
 		int numProfiles = listProfiles.size();		
@@ -349,7 +349,7 @@ public abstract class SpaceTimeDataController implements ITraceManager
 		} else {
 			index = attributes.getProcessBegin() + line;
 		}
-		return listProfiles.get(index);
+		return listProfiles.get(Math.min(numProfiles, index));
 	}
 
 	
@@ -357,16 +357,21 @@ public abstract class SpaceTimeDataController implements ITraceManager
 	// Abstract methods
 	////////////////////////////////////////////////////////////////////////////////
 	
-	/*************************************************************************
+	/***
 	 * Retrieve the name of the database. The name can be either the path of
 	 * the directory, or the name of the profiled application, or both.
 	 * <p>
 	 * Ideally the name should be unique to distinguish with other databases. 
 	 * 
 	 * @return String: the name of the database
-	 *************************************************************************/
+	 */
 	public abstract String getName();
 
+	
+	/****
+	 * Called when the database is closed.
+	 * Dispose resources if necessary.
+	 */
 	public abstract void closeDB();
 
 

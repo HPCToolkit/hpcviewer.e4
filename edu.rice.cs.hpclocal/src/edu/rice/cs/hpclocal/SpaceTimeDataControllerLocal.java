@@ -73,7 +73,7 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 	 * @throws IOException
 	 */
 	private void init(IProgressMonitor statusMgr, IFileDB fileDB) throws IOException {
-		
+		final var exp = getExperiment();
 		final TraceAttribute trAttribute = (TraceAttribute) exp.getTraceAttribute();		
 		final int version = exp.getMajorVersion();
 		var location = Path.of(exp.getDirectory()).toFile();
@@ -91,7 +91,8 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 		fileDB.open(traceFilePath, trAttribute.dbHeaderSize, RECORD_SIZE);
 		this.fileDB = fileDB;
 		
-		dataTrace  = new FilteredBaseData(fileDB);  
+		var dataTrace  = new FilteredBaseData(fileDB);
+		super.setBaseData(dataTrace);
 	}
 
 
@@ -109,7 +110,7 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 			return null;
 
 		if (changedBounds) {			
-			var profile = super.getProfileIndexToPaint(line);
+			var profile = super.getProfileFromPixel(line);
 			return new ProcessTimeline(line, this, profile);
 		}
 		return getProcessTimelineService().getProcessTimeline(line);
@@ -127,7 +128,7 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 
 	@Override
 	public String getName() {
-		return exp.getDirectory();
+		return getExperiment().getDirectory();
 	}
 	
 	/*********************
@@ -199,6 +200,6 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 		if (TracePreferenceManager.getGPUTraceExposure() && isGpuTrace)
 			traceOption = TraceOption.REVEAL_GPU_TRACE;
 		
-		return new LocalTraceDataCollector((AbstractBaseData) dataTrace, idtuple, getPixelHorizontal(), traceOption);
+		return new LocalTraceDataCollector(getBaseData(), idtuple, getPixelHorizontal(), traceOption);
 	}
 }

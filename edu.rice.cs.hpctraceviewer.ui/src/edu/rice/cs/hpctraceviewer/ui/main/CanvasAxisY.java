@@ -247,24 +247,27 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		void setData(SpaceTimeDataController data) {
 			this.data = data;
 		}
+
 		
-		
-		
-		private int convertPixelToRank(int pixelY) {
-			final ProcessTimelineService timeLine = data.getProcessTimelineService();
+		/** 
+		 * Returns the profile id-tuple to which the line-th line corresponds. 
+		 * @param line
+		 * 			The trace line sequence
+		 * 
+		 * @return {@code IdTuple}
+		 * 			The profile id-tuple
+		 * */
+		public IdTuple getProfileFromPixel(int line) {		
+			var listProfiles = data.getBaseData().getListOfIdTuples(IdTupleOption.BRIEF);
+			var attributes = data.getTraceDisplayAttribute();
+			int numProfiles = attributes.getProcessInterval();		
+			int index = 0;
 			
-			final var interval = timeLine.getNumProcessTimeline();
-			final var numPixels = data.getTraceDisplayAttribute().getPixelVertical();
-			
-			if (numPixels > interval) {
-				float ratio = (float) interval / numPixels;
-				return (int) (pixelY * ratio);
-			}
-			float ratio = (float) interval / numPixels;
-			return (int) (pixelY * ratio);
+			index = attributes.getProcessBegin() + line * numProfiles / attributes.getPixelVertical();
+
+			return listProfiles.get(Math.min(listProfiles.size()-1, index));
 		}
 
-	
 		@Override
 		/*
 		 * (non-Javadoc)
@@ -273,15 +276,7 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		protected String getText(Event event) {
 			
 	        final var traceData = data.getBaseData();
-
-			int process = data.getTraceDisplayAttribute().getProcessBegin() + convertPixelToRank(event.y);
-			
-			List<IdTuple> listTuples = traceData.getListOfIdTuples(IdTupleOption.BRIEF);
-						
-			if (process < 0 && process >= listTuples.size())
-				return null;
-			
-			IdTuple idtuple  = listTuples.get(process);
+			IdTuple idtuple  = getProfileFromPixel(event.y);
 			
 	        int partition = Math.max(idtuple.getLength(), 1);
 			var columnWidth = HPCTraceView.Y_AXIS_WIDTH / partition;

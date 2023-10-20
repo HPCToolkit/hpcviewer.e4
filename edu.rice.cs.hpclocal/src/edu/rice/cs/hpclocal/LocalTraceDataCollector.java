@@ -2,6 +2,7 @@ package edu.rice.cs.hpclocal;
 
 import java.io.IOException;
 import edu.rice.cs.hpcbase.AbstractTraceDataCollector;
+import edu.rice.cs.hpcbase.IFilteredData;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.version4.DataRecord;
 import edu.rice.cs.hpcdata.util.Constants;
@@ -35,11 +36,18 @@ public class LocalTraceDataCollector extends AbstractTraceDataCollector
 	/***
 	 * Create a new instance of trace data for a given rank of process or thread 
 	 * Used only for local
-	 * @param dataAccess
-	 * @param profileIndex
+	 * @param iFilteredData
+	 * 			Access to the local trace data file
+	 * @param profile
+	 * 			The execution context. It can be a process, thread, or GPU context
 	 * @param widthInPixels
+	 * 			The number of horizontal samples or pixels
+	 * @param option
+	 * 			The trace option. This can be whether to reveal small traces or not
+	 * 
+	 * @see TraceOption
 	 */
-	public LocalTraceDataCollector(AbstractBaseData dataAccess, IdTuple profile, int widthInPixels, TraceOption option)
+	public LocalTraceDataCollector(IFilteredData iFilteredData, IdTuple profile, int widthInPixels, TraceOption option)
 	{
 		super(option, widthInPixels);
 		
@@ -47,7 +55,7 @@ public class LocalTraceDataCollector extends AbstractTraceDataCollector
 		
 		//:'( This is a safe cast because this constructor is only
 		//called in local mode but it's so ugly....
-		data = dataAccess;
+		data = (AbstractBaseData) iFilteredData;
 	}
 
 	

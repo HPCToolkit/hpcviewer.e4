@@ -124,10 +124,11 @@ public class ToolControl
 
 		@Override
 		public void done() {
-			
 			sync.asyncExec(() -> {
-				progressBar.setSelection(0);
-				lblMessage.setText("");
+				if (!progressBar.isDisposed())
+					progressBar.setSelection(0);
+				if (!lblMessage.isDisposed())
+					lblMessage.setText("");
 			});
 		}
 		

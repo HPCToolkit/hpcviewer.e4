@@ -98,7 +98,7 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 	
 	public IdTuple getIdTupleFromProfile(int profileIndex) {
 		var line = mapIntToLine.get(profileIndex);
-		return getProfileIndexToPaint(line);
+		return getProfileFromPixel(line);
 	}
 	
 	@Override
@@ -132,24 +132,18 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 		var remoteTraceData = getBaseData();
 		var listIdTuples = remoteTraceData.getListOfIdTuples(IdTupleOption.BRIEF);
 		
-		Set<TraceId> setOfTraceId = null; 
+		Set<TraceId> setOfTraceId = HashSet.empty();
 		
-		var numRanks = listIdTuples.size();
-		if (numRanks > pixelsV) {
+		if (numTraces > pixelsV) {
 			// in case the number of ranks is bigger than the number of pixels,
 			// we need to pick (or sample) which ranks need to be displayed.
 			// A lazy way is to rely on the server to pick which ranks to be displayed. 
-			setOfTraceId = HashSet.empty();
-			float fraction = (float) numRanks / pixelsV;
-			int line = 0;
-			
+
 			// collect id tuples to fit number of vertical pixels
-			for(int i=0; i<pixelsV; i++) {
-				var idt = listIdTuples.get(line);
+			for(int i=0; i<numTraces; i++) {
+				var idt = getProfileFromPixel(i);
 				TraceId traceId = TraceId.make(idt.getProfileIndex());
 				setOfTraceId.add(traceId);
-				
-				line += fraction;				
 			}
 			
 		} else {
@@ -211,7 +205,7 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 		if (samplingSet.isDone())
 			return null;
 		
-		Optional<Future<TraceSampling>> sampling = samplingSet.getAnyDoneSampling(Duration.ofMillis(3));
+		Optional<Future<TraceSampling>> sampling = samplingSet.getAnyDoneSampling(Duration.ofMinutes(3));
 		System.out.println("getNextTrace: " + sampling.isPresent());
 		if (sampling.isPresent()) {
 			return new RemoteProcessTimeline(this, sampling.get());
