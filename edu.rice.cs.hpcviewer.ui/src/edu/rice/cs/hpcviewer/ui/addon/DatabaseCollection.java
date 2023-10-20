@@ -271,7 +271,8 @@ public class DatabaseCollection
 	 * 			the current active hpcviewer window 
 	 * @param service EPartService
 	 * @param modelService EModelService
-	 * @param database
+	 * @param databaseId
+	 * 			The database unique id, can be remote or local 
 	 */
 	public void switchDatabase(
 			Shell shell, 
@@ -280,19 +281,28 @@ public class DatabaseCollection
 			EModelService 	modelService,
 			String          databaseId) {
 
-		if (databaseId != null && 
-			databaseWindowManager.checkAndConfirmDatabaseExistence(shell, window, databaseId) == DatabaseExistence.EXIST_CANCEL )
-			return;
-		
 		IDatabase database;
 		DatabaseStatus status;
+		String dbId = databaseId;
+
+		if (dbId == null) {
+			// open a new database file
+			// at the moment only support local database
+			database = new DatabaseLocal();
+			status = ((DatabaseLocal) database).open(shell);
+			if (status == DatabaseStatus.CANCEL)
+				return;
+			dbId = database.getId();
+		}
+		if (databaseWindowManager.checkAndConfirmDatabaseExistence(shell, window, dbId) == DatabaseExistence.EXIST_CANCEL )
+			return;		
 		
-		if (isRemote(databaseId)) {
+		if (isRemote(dbId)) {
 			database = new DatabaseRemote();
 			status = database.open(shell);
 		} else {
 			database = new DatabaseLocal();
-			status = ((DatabaseLocal) database).setDirectory(databaseId);
+			status = ((DatabaseLocal) database).setDirectory(dbId);
 		}
 		
 		if (status == DatabaseStatus.CANCEL) {
@@ -302,7 +312,7 @@ public class DatabaseCollection
 			openDatabaseAndCreateViews(window, modelService, service, shell, database);
 
 		} else {
-			MessageDialog.openError(shell, "Unable to open the database", databaseId + ": not a valid database");
+			MessageDialog.openError(shell, "Unable to open the database", dbId + ": not a valid database");
 		}
 	}
 	
@@ -319,6 +329,8 @@ public class DatabaseCollection
 	private boolean isRemote(String databaseId) {
 		var colon = databaseId.indexOf(':');
 		var slash = databaseId.indexOf('/');
+		if (colon >= slash)
+			return false;
 		var port  = databaseId.substring(colon+1, slash);
 		
 		if (colon <= 0 && slash < 1 || port.isEmpty())

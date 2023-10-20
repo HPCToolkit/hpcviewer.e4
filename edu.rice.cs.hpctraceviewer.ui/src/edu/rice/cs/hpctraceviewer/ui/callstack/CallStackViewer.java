@@ -1,6 +1,7 @@
 package edu.rice.cs.hpctraceviewer.ui.callstack;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.eclipse.core.commands.operations.IOperationHistoryListener;
 import org.eclipse.core.commands.operations.IUndoContext;
@@ -44,7 +45,6 @@ import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.color.ColorTable;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
-import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
 import edu.rice.cs.hpctraceviewer.data.Position;
 
 
@@ -87,17 +87,14 @@ public class CallStackViewer extends AbstractBaseTableViewer
         //------------------------------------------------
         // add content provider
         //------------------------------------------------
-        this.setContentProvider( ArrayContentProvider.getInstance());
+        setContentProvider(ArrayContentProvider.getInstance());
         
         stack.setVisible(false);
-        selectionListener = new Listener(){
-			public void handleEvent(Event event)
-			{
-				int depth = stack.getSelectionIndex(); 
+        selectionListener = event -> {
+			int depth = stack.getSelectionIndex(); 
+			notifyChange(depth);
+        };
 
-				notifyChange(depth);
-			}
-		};
 		stack.addListener(SWT.Selection, selectionListener);
 		
         //------------------------------------------------
@@ -188,20 +185,7 @@ public class CallStackViewer extends AbstractBaseTableViewer
 		if (stData == null) {
 			return;
 		}
-		// general case
-		final TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
-    	int estimatedProcess = (attributes.getPosition().process - attributes.getProcessBegin());
-    	var ptlService = stData.getProcessTimelineService();
-    	int numDisplayedProcess = ptlService.getNumProcessTimeline();
-    	
-    	// case for num displayed processes is less than the number of processes
-    	estimatedProcess = (int) (estimatedProcess* 
-    			((float)numDisplayedProcess/(attributes.getProcessInterval())));
-    	
-    	// case for single process
-    	estimatedProcess = Math.min(estimatedProcess, numDisplayedProcess-1);
-
-		var ptl = ptlService.getProcessTimeline(estimatedProcess);
+		var ptl = stData.getCurrentSelectedTraceline();
 		
 		// it's very unlikely if a timeline process cannot be found of a given process
 		// If this really happens, possible scenarios:
@@ -214,50 +198,39 @@ public class CallStackViewer extends AbstractBaseTableViewer
 		
 		int sample = 0;
 		boolean isMidpointEnabled = TracePreferenceManager.isMidpointEnabled();
+		final List<String> listOfFunctions;
 		
-		try {
-			sample = ptl.findMidpointBefore(position.time, isMidpointEnabled);				
-		} catch (Exception e) {
-			// Error: data has changed (resize, zoom-in/out, ...) but we are not notified yet.
-			// let the new thread finish the job
-			Logger logger = LoggerFactory.getLogger(getClass());
-			logger.error("CSV: Fail to get sample for time " + position.time, e);			
-			return;
-		}
-		final List<String> sampleVector = new ArrayList<>();
+		sample = ptl.findMidpointBefore(position.time, isMidpointEnabled);				
 		if (sample >= 0) {
+			listOfFunctions = new ArrayList<>();
 			var ctxId = ptl.getContextId(sample);
 			if (ctxId >= 0) {
 				var exp = stData.getExperiment();
 				var cpInfo = exp.getScopeMap();
 				var names  = cpInfo.getFunctionNames(ctxId);
 				if (names != null)
-					sampleVector.addAll(names);
+					listOfFunctions.addAll(names);
 			}
-			if (sampleVector.size()<=depth)
+			if (listOfFunctions.size()<=depth)
 			{
 				//-----------------------------------
 				// case of over depth
 				//-----------------------------------
-				final int numOverDepth = depth-sampleVector.size()+1;
+				final int numOverDepth = depth-listOfFunctions.size()+1;
 				for(int l = 0; l<numOverDepth; l++)
-					sampleVector.add(EMPTY_FUNCTION);
+					listOfFunctions.add(EMPTY_FUNCTION);
 			}
-		} else {			
-			for(int l = 0; l<=depth; l++)
-				sampleVector.add(EMPTY_FUNCTION);
+		} else {
+			listOfFunctions = new ArrayList<>(depth);
+			Collections.fill(listOfFunctions, EMPTY_FUNCTION);
 		}
 		// fill the call stack and select the current depth
 		final Display display = Display.getDefault();
-		display.asyncExec( new Runnable() {
-			
-			@Override
-			public void run() {
-				setInput(sampleVector);
-				selectDepth(depth);
-				viewerColumn.getColumn().pack();
-			}
-		} );
+		display.asyncExec( () -> {
+			setInput(listOfFunctions);
+			selectDepth(depth);
+			viewerColumn.getColumn().pack();
+		});
 	}
 	
 	
@@ -312,7 +285,6 @@ public class CallStackViewer extends AbstractBaseTableViewer
 		if (operation.hasContext(bufferCtx) ||
 				operation.hasContext(positionCtx)) {
 			if (event.getEventType() == OperationHistoryEvent.DONE) {
-				//updateView();
 				setSample(stData.getTraceDisplayAttribute().getPosition(), stData.getTraceDisplayAttribute().getDepth());			}
 		}
 	}
@@ -323,7 +295,7 @@ public class CallStackViewer extends AbstractBaseTableViewer
 	 * Label provider for Color of the procedure
 	 *
 	 *************************************************************/
-	static private class ColorLabelProvider extends ColorColumnLabelProvider 
+	private static class ColorLabelProvider extends ColorColumnLabelProvider 
 	{
 		ColorTable colorTable;
 		
