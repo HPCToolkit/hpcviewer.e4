@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 
@@ -133,7 +134,8 @@ public class DatabaseLocal implements IDatabaseLocal
 	public ITraceManager getORCreateTraceManager() throws InvalExperimentException, IOException {
 		if (traceManager == null) {
 			var opener = new LocalDBOpener(experiment);
-			traceManager = opener.openDBAndCreateSTDC(null);
+			var progressGroup = Job.getJobManager().createProgressGroup();
+			traceManager = opener.openDBAndCreateSTDC(progressGroup);
 		}
 		return traceManager;
 	}

@@ -86,21 +86,7 @@ public class RemoteDataProfile extends AbstractDataProfile implements IDataProfi
 
 		return 0;
 	}
-	
-	private long totalTime = 0;
-	private int numRequest = 0;
-	private long  maxTime  = 0;
-	
-	public void printTime() {
-		var meanTime = totalTime / numRequest;
-		System.out.printf("Total time: %d%nAverage: %d%nNum request: %d%nMax time: %d%n", totalTime, meanTime, numRequest, maxTime);
-	}
-	
-	public void resetTime() {
-		totalTime = 0;
-		numRequest = 0;
-		maxTime  = 0;
-	}
+
 
 	@Override
 	public List<MetricValueSparse> getMetrics(IdTuple idtuple, int cctId) throws IOException {
@@ -110,18 +96,9 @@ public class RemoteDataProfile extends AbstractDataProfile implements IDataProfi
 		Set<CallingContextId> setNodeId = HashSet.of(nodeId);
 		
 		try {
-			var t0 = System.nanoTime();
 			var mapCCTIndexToMetrics = client.getMetrics(profId, setNodeId);
 			if (mapCCTIndexToMetrics.isEmpty())
 				return Collections.emptyList();
-			
-			var t1 = System.nanoTime();
-			long dt = t1-t0;
-			totalTime += dt;
-			numRequest++;
-			maxTime = Math.max(maxTime, dt);
-			if (numRequest % 200 == 0)
-				printTime();
 			
 			List<MetricValueSparse> listMetrics = new ArrayList<>(mapCCTIndexToMetrics.size());
 
