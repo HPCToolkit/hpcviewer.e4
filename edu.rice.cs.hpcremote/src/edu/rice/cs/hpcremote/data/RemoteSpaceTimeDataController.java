@@ -140,7 +140,7 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 			// A lazy way is to rely on the server to pick which ranks to be displayed. 
 
 			// collect id tuples to fit number of vertical pixels
-			for(int i=0; i<numTraces; i++) {
+			for(int i=0; i<pixelsV; i++) {
 				var idt = getProfileFromPixel(i);
 				TraceId traceId = TraceId.make(idt.getProfileIndex());
 				setOfTraceId.add(traceId);
@@ -178,6 +178,7 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 		}
 		System.out.printf("num traces: %d, time: %d, %d %n", setOfTraceId.size(), time1.toEpochNano(), time2.toEpochNano());
 		samplingSet = client.sampleTracesAsync(setOfTraceId, time1, time2, getPixelHorizontal());
+		System.out.println("\t" + samplingSet);
 	}
 
 

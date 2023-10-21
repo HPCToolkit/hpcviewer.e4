@@ -27,9 +27,7 @@ import org.osgi.service.event.EventHandler;
 import edu.rice.cs.hpcbase.BaseConstants;
 import edu.rice.cs.hpcbase.BaseConstants.ViewType;
 import edu.rice.cs.hpcbase.IDatabase;
-import edu.rice.cs.hpcbase.IEditorInput;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
-import edu.rice.cs.hpcbase.ui.IUpperPart;
 import edu.rice.cs.hpcbase.ui.IUserMessage;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
@@ -56,7 +54,7 @@ import edu.rice.cs.hpctree.action.ZoomAction;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.actions.UserDerivedMetric;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
-import edu.rice.cs.hpcviewer.ui.parts.editor.Editor;
+import edu.rice.cs.hpcviewer.ui.parts.editor.EditorInputScope;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 
 
@@ -297,7 +295,7 @@ implements EventHandler, IUserMessage
 		table.addSelectionListener(scope -> updateButtonStatus());
 		
 		table.addActionListener(scope -> {
-			profilePart.addEditor(getInput(database, scope));
+			profilePart.addEditor(new EditorInputScope(parent.getShell(), database, scope));
 		});
 		//
 		// fix issue #188: force the table to have a content so natTable can properly resize the columns
@@ -318,52 +316,6 @@ implements EventHandler, IUserMessage
 		eventBroker.subscribe(AUTOFIT_EVENT, this);
 	}
 	
-	
-	private IEditorInput getInput(IDatabase database, Scope scope) {
-		return new IEditorInput() {
-			
-			@Override
-			public String getShortName() {
-				return scope.getSourceFile().getName();
-			}
-			
-			@Override
-			public String getLongName() {
-				return scope.getSourceFile().getFilename().getAbsolutePath();
-			}
-			
-			@Override
-			public String getId() {
-				return getLongName();
-			}
-			
-			@Override
-			public boolean needToTrackActivatedView() {
-				return false;
-			}
-			
-			@Override
-			public IUpperPart createViewer(Composite parent) {
-				return new Editor((CTabFolder) parent, SWT.NONE);
-			}
-
-			@Override
-			public String getContent() {
-				var sourceFile = scope.getSourceFile();
-				try {
-					return database.getSourceFileContent(sourceFile);
-				} catch (IOException e) {
-					showErrorMessage(e.getMessage());
-				}
-				return null;
-			}
-
-			@Override
-			public int getLine() {
-				return scope.getFirstLineNumber();
-			}
-		};
-	}
 	
 	@Override
 	public Object getInput() {

@@ -6,20 +6,16 @@ import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
-import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
 
-import edu.rice.cs.hpcbase.IEditorInput;
 import edu.rice.cs.hpcbase.ui.IBasePart;
 import edu.rice.cs.hpcbase.ui.IProfilePart;
-import edu.rice.cs.hpcbase.ui.IUpperPart;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
+import edu.rice.cs.hpcviewer.ui.parts.editor.EditorInputFile;
+
 import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -33,7 +29,7 @@ public class ViewXML
 
 	
 	@Execute
-	public void execute(@Optional @Active MPart part, MWindow window) {
+	public void execute(@Optional @Active MPart part, Shell shell, MWindow window) {
 		if (part != null) {
 			Object obj = part.getObject();
 			
@@ -42,9 +38,10 @@ public class ViewXML
 			// sanity check: the file must exist
 			if (file == null || !file.canRead())
 				return;
-			
+
 			if (obj instanceof IProfilePart) {
-				displayXML((IProfilePart) obj, file);
+				ProfilePart profilePart = (ProfilePart) obj;
+				profilePart.addEditor(new EditorInputFile(shell, file));
 				return;
 			}
 			// The current active element is trace view. 
@@ -58,7 +55,7 @@ public class ViewXML
 				var experiment = database.getExperimentObject();
 				
 				if (profilePart.getExperiment() == experiment) {
-					displayXML(profilePart, file);
+					profilePart.addEditor(new EditorInputFile(shell, file));
 					
 					// sanity check: make sure the profile part is visible
 					element.setVisible(true);
@@ -77,54 +74,6 @@ public class ViewXML
 	public boolean canExecute(@Optional @Active MPart part) {
 		var expFile = getExperimentFile(part.getObject());
 		return expFile != null && expFile.canRead();
-	}
-
-	
-	private void displayXML(IProfilePart profilePart, File file) {
-		var input = new IEditorInput() {
-			
-			@Override
-			public String getShortName() {
-				return file.getName();
-			}
-			
-			@Override
-			public String getLongName() {
-				return file.getAbsolutePath();
-			}
-			
-			@Override
-			public String getId() {
-				return file.getPath();
-			}
-			
-			@Override
-			public boolean needToTrackActivatedView() {
-				return false;
-			}
-			
-			@Override
-			public IUpperPart createViewer(Composite parent) {
-				return null;
-			}
-			
-			@Override
-			public int getLine() {
-				return 1;
-			}
-			
-			@Override
-			public String getContent() {
-				Path path = Path.of(file.getAbsolutePath());
-				try {
-					return Files.readString(path, StandardCharsets.ISO_8859_1);
-				} catch (IOException e) {
-					profilePart.showErrorMessage(e.getMessage());
-				}
-				return null;
-			}
-		};
-		profilePart.addEditor(input);
 	}
 	
 	

@@ -289,9 +289,6 @@ public class Editor extends AbstractUpperPart implements IPropertyChangeListener
 
 	@Override
 	public void setInput(IBaseInput input) {
-		setText(input.getShortName());
-		
-		setToolTipText(input.getLongName());
 		
 		var name = input.getLongName();
 		var title = input.getShortName();
