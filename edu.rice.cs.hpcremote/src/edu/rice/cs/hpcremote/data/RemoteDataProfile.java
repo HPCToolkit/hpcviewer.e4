@@ -13,6 +13,7 @@ import org.hpctoolkit.hpcclient.v1_0.UnknownProfileIdException;
 import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
+import edu.rice.cs.hpcdata.db.IdTupleComparator;
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.db.version4.AbstractDataProfile;
 import edu.rice.cs.hpcdata.db.version4.IDataProfile;
@@ -61,7 +62,10 @@ public class RemoteDataProfile extends AbstractDataProfile implements IDataProfi
 			
 			List<IdTuple> list = new ArrayList<>(idtuples.size());
 			idtuples.forEach(list::add);
-			
+
+			var comparator = new IdTupleComparator(idTupleTypes);
+			list.sort( comparator );
+
 			setIdTuple(list);
 		} catch (IOException | InterruptedException e) {
 			LoggerFactory.getLogger(getClass()).error("Fail to get remote id tuples", e);

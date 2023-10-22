@@ -131,14 +131,7 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 	
 	
 	private IDataProfile collectProfileData(HpcClient client, DataMeta dataMeta) throws IOException, InterruptedException {
-		Set<IdTuple> idtuples = client.getHierarchicalIdentifierTuples();
-		List<IdTuple> list = new ArrayList<>(idtuples.size());
-		idtuples.forEach(list::add);
-		
-		var data = new RemoteDataProfile(client, dataMeta.getExperiment().getIdTupleType());
-		data.setIdTuple(list);
-		
-		return data;
+		return new RemoteDataProfile(client, dataMeta.getExperiment().getIdTupleType());
 	}
 
 	
