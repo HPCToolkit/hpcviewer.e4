@@ -7,7 +7,12 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hpctoolkit.client_server_common.calling_context.CallingContextId;
+import org.hpctoolkit.client_server_common.metric.MetricId;
+import org.hpctoolkit.client_server_common.profile.ProfileId;
+import org.hpctoolkit.hpcclient.v1_0.ContextMeasurementsMap;
 import org.hpctoolkit.hpcclient.v1_0.HpcClient;
+import org.hpctoolkit.hpcclient.v1_0.UnknownCallingContextException;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.version4.DataMeta;
@@ -21,6 +26,8 @@ import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.tld.v4.ThreadDataCollection4;
 import edu.rice.cs.hpcdata.util.IUserData;
+import io.vavr.collection.HashSet;
+import io.vavr.collection.Map;
 import io.vavr.collection.Set;
 
 
@@ -148,7 +155,44 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 			
 			@Override
 			public DataPlotEntry[] getPlotEntry(int cct, int metric) throws IOException {
+				var cctId = CallingContextId.make(cct);
+				var setCCT = HashSet.of(cctId);
+				
+				var metricId = MetricId.make((short) metric);
+				var setMetrics = HashSet.of(metricId);
+				try {
+					var mapValues =  client.getMetrics(setCCT, setMetrics);
+					if (!mapValues.isEmpty()) {
+						return generatePlotEntry(mapValues, cctId, metricId);
+					}
+					
+				} catch (UnknownCallingContextException e) {
+					e.printStackTrace();
+				} catch (InterruptedException e) {
+				    // Restore interrupted state...
+				    Thread.currentThread().interrupt();				}
 				return new DataPlotEntry[0];
+			}
+			
+			private DataPlotEntry[] generatePlotEntry(Map<ProfileId, ContextMeasurementsMap> mapValues, CallingContextId cctId, MetricId metricId) {
+				var size = mapValues.size();
+				var entries = new DataPlotEntry[size];
+				
+				int i=0;
+				var iterator = mapValues.iterator();
+				while(iterator.hasNext()) {
+					var item = iterator.next();
+					var profileId = item._1;
+					var mapMetric = item._2;
+					var metrics = mapMetric.get(cctId);
+					if (metrics.isEmpty())
+						return new DataPlotEntry[0];
+					var metric = metrics.get().getMeasurement(metricId);
+					var entry = new DataPlotEntry(profileId.toInt(), metric.get().getValue());
+					entries[i] = entry;
+					i++;
+				}
+				return entries;
 			}
 			
 			@Override
@@ -158,7 +202,7 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 
 			@Override
 			public java.util.Set<Integer> getCallingContexts() {
-				return null;
+				throw new IllegalAccessError("Not supported yet");
 			}
 		};
 	}
