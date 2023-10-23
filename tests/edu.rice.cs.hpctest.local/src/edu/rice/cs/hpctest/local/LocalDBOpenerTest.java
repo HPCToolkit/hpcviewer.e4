@@ -1,6 +1,8 @@
 package edu.rice.cs.hpctest.local;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
@@ -9,11 +11,14 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
 import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
 import edu.rice.cs.hpclocal.LocalDBOpener;
 import edu.rice.cs.hpctest.util.TestDatabase;
+import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 
 public class LocalDBOpenerTest 
 {
@@ -85,7 +90,22 @@ public class LocalDBOpenerTest
 				}
 			});
 			assertNotNull(stdc);
-			assertNotNull(stdc.getExperiment());
+			testInsideSTDC(stdc);
 		}
+	}
+	private void testInsideSTDC(SpaceTimeDataController stdc) {
+		assertFalse(stdc.hasTraces());
+		assertFalse(stdc.isHomeView());
+		
+		var baseData = stdc.getBaseData();
+		assertNotNull(baseData);
+		assertFalse( baseData.getDenseListIdTuple(IdTupleOption.BRIEF).isEmpty());
+		
+		assertNotNull(stdc.getExperiment());
+		testInsideExperiment(stdc.getExperiment());
+	}
+	
+	private void testInsideExperiment(IExperiment experiment) {
+		assertTrue("Empty database name", !experiment.getName().isEmpty());
 	}
 }

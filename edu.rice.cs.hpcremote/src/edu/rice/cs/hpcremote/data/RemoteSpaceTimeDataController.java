@@ -178,7 +178,6 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 		}
 		System.out.printf("num traces: %d, time: %d, %d %n", setOfTraceId.size(), time1.toEpochNano(), time2.toEpochNano());
 		samplingSet = client.sampleTracesAsync(setOfTraceId, time1, time2, getPixelHorizontal());
-		System.out.println("\t" + samplingSet);
 	}
 
 

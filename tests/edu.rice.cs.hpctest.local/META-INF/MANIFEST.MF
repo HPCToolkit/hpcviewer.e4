@@ -8,7 +8,8 @@ Require-Bundle: edu.rice.cs.hpclocal,
  edu.rice.cs.hpctest.util,
  edu.rice.cs.hpcdata,
  edu.rice.cs.hpctraceviewer.data,
- org.eclipse.core.runtime
+ org.eclipse.core.runtime,
+ edu.rice.cs.hpcbase
 Bundle-Vendor: Rice University
 Automatic-Module-Name: edu.rice.cs.hpctest.local
 Bundle-RequiredExecutionEnvironment: JavaSE-11
