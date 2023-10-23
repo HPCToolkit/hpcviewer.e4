@@ -30,7 +30,13 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 	private DataMeta dataMeta;
 	private Experiment experiment;
 	
+	/*****
+	 * @apiNote Use the other {@code parse(HpcClient} method for remote database
+	 * @deprecated not to be used for remote database
+	 * 
+	 */
 	@Override
+	@Deprecated(since="7.0", forRemoval = true)
 	public File parse(File location, IExperiment experiment, boolean need_metrics, IUserData<String, String> userData)
 			throws Exception {
 		throw new IllegalAccessError("Not allowed access: Use parse(HpcClient client) instead.");
