@@ -59,7 +59,7 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 	/**
 	 * A (future) description of sampled traces reflective of the most recent call to {@link #startTrace(int, boolean)}.
 	 * A {@code null} value for this fields indicates that either {@code startTrace(...)} has never been invoked, or, 
-	 * {@link #closeDB()} has been invoked more recently than the last invocatio of {@code startTrace(...)}.
+	 * {@link #closeDB()} has been invoked more recently than the last invocation of {@code startTrace(...)}.
 	 * <p>
 	 * Since {@code FutureTraceSamplingSet} is not contractually thread-safe, synchronize on {@link #controllerMonitor}
 	 * to ensure thread-safe operation.
@@ -297,7 +297,7 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 			 * to reflect that none have yet been returned by this method since the last `startTrace(...)`.
 			 *
 			 * See field documentation of `unYieldedSampledTraces` as to why this is done here and not when
-			 * `unYieldedSampledTraces` is updated.
+			 * `sampledTraces` is updated.
 			 */
 			if (unYieldedSampledTraces == null)
 				unYieldedSampledTraces = sampledTraces.get().toJavaSet();
