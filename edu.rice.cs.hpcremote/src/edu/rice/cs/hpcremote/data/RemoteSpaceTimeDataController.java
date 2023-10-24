@@ -2,7 +2,9 @@ package edu.rice.cs.hpcremote.data;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Iterator;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -31,24 +33,84 @@ import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import io.vavr.collection.HashSet;
 import io.vavr.collection.Set;
 
+/**
+ * TODO: document
+ * <p>
+ * This class is thread-safe.
+ */
 public class RemoteSpaceTimeDataController extends SpaceTimeDataController 
 {
+	/**
+	 * Protects multi-threaded access to this controller.
+	 * <p>
+	 * Controller instances are expected to be utilized by mutliple threads. This monitor should be used to
+	 * enforce thread-safe access to any fields that are not otherwise thread-safe and/or enforce any mutual exclusion
+	 * required to fulfill this class' contract.
+	 */
+	private final Object controllerMonitor = new Object();
+
+	/**
+	 * The client to use to contact the remote server that contains the source of truth for trace sampling information.
+	 * Since {@code HpcClient} is not contractually thread-safe, synchronize on {@link #controllerMonitor} to ensure
+	 * thread-safe operation. 
+	 */
 	private final HpcClient client;
-	
-	private FutureTraceSamplingSet samplingSet;
-	
+
+	/**
+	 * A (future) description of sampled traces reflective of the most recent call to {@link #startTrace(int, boolean)}.
+	 * A {@code null} value for this fields indicates that either {@code startTrace(...)} has never been invoked, or, 
+	 * {@link #closeDB()} has been invoked more recently than the last invocatio of {@code startTrace(...)}.
+	 * <p>
+	 * Since {@code FutureTraceSamplingSet} is not contractually thread-safe, synchronize on {@link #controllerMonitor}
+	 * to ensure thread-safe operation.
+	 */
+	private FutureTraceSamplingSet sampledTraces;
+
+	/**
+	 * Tracks the subset of the samplings within {@link #sampledTraces} that have not yet been returned by 
+	 * {@link #getNextTrace()} (in {@code IProcessTimeline} form). Note that this field eagerly transitions to
+	 * {@code null} when {@code sampledTraces} transitions to {@code null}, but when {@code sampledTraces} transitions
+	 * to {@code non-null} this field defers population until the next invocation of {@code getNextTrace()}.
+	 */
+	// n.b. the motivation for the lazy transition to non-null comes from the fact that the population of this field
+	// via `unYieldedSampledTraces = sampledTraces.get().toJavaSet();` can throw a checked exception, but the method 
+	// that populates `sampledTraces`, namely `startTrace(int numTraces, boolean changedBounds)`, is regulated by our
+	// super class not to throw a checked exception. As such we have to defer population of this field to a method that 
+	// can throw a checked exception, namely `getNextTrace()`.		
+	private java.util.Set<Future<TraceSampling>> unYieldedSampledTraces;
+
+	/**
+	 * TODO: document
+	 *
+	 * Since {@code mapIntToLine} is not contractually thread-safe, synchronize on {@link #controllerMonitor} to ensure
+	 * thread-safe operation.
+	 */
 	private IntIntHashMap mapIntToLine;
-	
+
+	/**
+	 * TODO: document
+	 *
+	 * Synchronize on {@link #controllerMonitor} to ensure thread-safe operation.
+	 */
 	private boolean changedBounds;
-	private AtomicInteger currentLine;
+
+	/**
+	 * TODO: document
+	 *
+	 * Synchronize on {@link #controllerMonitor} to ensure thread-safe operation.
+	 */
+	private int currentLine;
 	
 	public RemoteSpaceTimeDataController(HpcClient client, IExperiment experiment) {
 		super(experiment);
 		
 		createScopeMap((BaseExperiment) experiment);
-		
-		this.client = client;
-		var remoteTraceData = createTraceData(experiment);
+
+		synchronized (controllerMonitor) { // ensure safe publication of client
+			this.client = client;
+		}
+
+		IFilteredData remoteTraceData = createTraceData(experiment);
 		super.setBaseData(remoteTraceData);
 	}
 
@@ -58,13 +120,15 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 		try {
 			var listIdTuples = experiment.getThreadData().getIdTuples();
 
-			mapIntToLine = new IntIntHashMap(listIdTuples.size());
-			
-			for(int i=0; i<listIdTuples.size(); i++) {
-				var idtuple = listIdTuples.get(i);
-				mapIntToLine.put(idtuple.getProfileIndex(), i);
+			synchronized (controllerMonitor) { // ensure safe publication of mapIntToLine
+				this.mapIntToLine = new IntIntHashMap(listIdTuples.size());
+
+				for (int i = 0; i < listIdTuples.size(); i++)
+				{
+					var idtuple = listIdTuples.get(i);
+					mapIntToLine.put(idtuple.getProfileIndex(), i);
+				}
 			}
-			
 			return new RemoteFilteredData(listIdTuples, idTupleType);
 		} catch (IOException e) {
 			throw new IllegalAccessError(e.getMessage());
@@ -92,13 +156,17 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 	
 	
 	public int getTraceLineFromProfile(int profileIndex) {
-		return mapIntToLine.get(profileIndex);
+		synchronized (controllerMonitor) { // ensure all threads see the most recent `mapIntToLine` value
+			return mapIntToLine.get(profileIndex);
+		}
 	}
 	
 	
 	public IdTuple getIdTupleFromProfile(int profileIndex) {
-		var line = mapIntToLine.get(profileIndex);
-		return getProfileFromPixel(line);
+		synchronized (controllerMonitor) { // ensure all threads see the most recent `mapIntToLine` value
+			var line = mapIntToLine.get(profileIndex);
+			return getProfileFromPixel(line);
+		}
 	}
 	
 	@Override
@@ -109,75 +177,90 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 	
 	@Override
 	public void closeDB() {
-		if (mapIntToLine != null)
-			mapIntToLine.clear();
-		
-		mapIntToLine = null;
-		samplingSet = null;
+		synchronized (controllerMonitor) { // ensure safe publication of new values of class fields
+			if (mapIntToLine != null)
+				mapIntToLine.clear();
+
+			mapIntToLine = null;
+			sampledTraces = null;
+			unYieldedSampledTraces = null;
+		}
 	}
 
 	
 	@Override
 	public void startTrace(int numTraces, boolean changedBounds) {
-		this.changedBounds = changedBounds;
-		
-		if (!changedBounds) {
-			currentLine = new AtomicInteger(numTraces);
-			return;
-		}
+		synchronized (controllerMonitor) { // ensure all threads see the most recent values of all fields
+			this.changedBounds = changedBounds;
 
-		var traceAttr = getTraceDisplayAttribute();
-		var pixelsV = traceAttr.getPixelVertical();
-
-		var remoteTraceData = getBaseData();
-		var listIdTuples = remoteTraceData.getListOfIdTuples(IdTupleOption.BRIEF);
-		
-		Set<TraceId> setOfTraceId = HashSet.empty();
-		
-		if (numTraces > pixelsV) {
-			// in case the number of ranks is bigger than the number of pixels,
-			// we need to pick (or sample) which ranks need to be displayed.
-			// A lazy way is to rely on the server to pick which ranks to be displayed. 
-
-			// collect id tuples to fit number of vertical pixels
-			for(int i=0; i<pixelsV; i++) {
-				var idt = getProfileFromPixel(i);
-				TraceId traceId = TraceId.make(idt.getProfileIndex());
-				setOfTraceId.add(traceId);
+			if (!changedBounds) {
+				currentLine = numTraces;
+				return;
 			}
-			
-		} else {
-			// fast approach
-			var setTraces = listIdTuples.stream().map(idt -> TraceId.make(idt.getProfileIndex())).collect(Collectors.toSet());
-			setOfTraceId = HashSet.ofAll(setTraces);
-		}
-		
-		var frame = traceAttr.getFrame();
-		
-		Timestamp time1 = Timestamp.ofEpochNano(frame.begTime);
-		Timestamp time2 = Timestamp.ofEpochNano(frame.endTime);
-		
-		if (time1.isAfter(time2)) {
-			// the time range is not initialized yet
-			try {
-				var traceTimeMin = client.getMinimumTraceSampleTimestamp();
-				var traceTimeMax = client.getMaximumTraceSampleTimestamp();
-				if (traceTimeMin.isPresent()) {
-					time1 = traceTimeMin.get();
+
+			var traceAttr = getTraceDisplayAttribute();
+			var pixelsV = traceAttr.getPixelVertical();
+
+			var remoteTraceData = getBaseData();
+			var listIdTuples = remoteTraceData.getListOfIdTuples(IdTupleOption.BRIEF);
+
+			Set<TraceId> setOfTraceId = HashSet.empty();
+
+			if (numTraces > pixelsV) {
+				// in case the number of ranks is bigger than the number of pixels,
+				// we need to pick (or sample) which ranks need to be displayed.
+				// A lazy way is to rely on the server to pick which ranks to be displayed.
+
+				// collect id tuples to fit number of vertical pixels
+				for(int i=0; i<pixelsV; i++) {
+					var idt = getProfileFromPixel(i);
+					TraceId traceId = TraceId.make(idt.getProfileIndex());
+					setOfTraceId.add(traceId);
 				}
-				if (traceTimeMax.isPresent()) {
-					time2 = traceTimeMax.get();
-				}
-			} catch (InterruptedException | TraceDataNotAvailableException e) {
-				LoggerFactory.getLogger(getClass()).error("Cannot retrieve time min/max", e);
-			    // Restore interrupted state...
-			    Thread.currentThread().interrupt();
-			} catch (IOException e) {
-				throw new IllegalAccessError(e.getMessage());
+
+			} else {
+				// fast approach
+				var setTraces = listIdTuples.stream()
+						                    .map(idt -> TraceId.make(idt.getProfileIndex()))
+						                    .collect(Collectors.toSet());
+				setOfTraceId = HashSet.ofAll(setTraces);
 			}
+
+			var frame = traceAttr.getFrame();
+
+			Timestamp time1 = Timestamp.ofEpochNano(frame.begTime);
+			Timestamp time2 = Timestamp.ofEpochNano(frame.endTime);
+
+			if (time1.isAfter(time2)) {
+				// the time range is not initialized yet
+				try {
+					var traceTimeMin = client.getMinimumTraceSampleTimestamp();
+					var traceTimeMax = client.getMaximumTraceSampleTimestamp();
+					if (traceTimeMin.isPresent()) {
+						time1 = traceTimeMin.get();
+					}
+					if (traceTimeMax.isPresent()) {
+						time2 = traceTimeMax.get();
+					}
+				} catch (InterruptedException | TraceDataNotAvailableException e) {
+					LoggerFactory.getLogger(getClass()).error("Cannot retrieve time min/max", e);
+					// Restore interrupted state...
+					Thread.currentThread().interrupt();
+				} catch (IOException e) {
+					throw new IllegalAccessError(e.getMessage());
+				}
+			}
+			System.out.printf("num traces: %d, time: %d, %d %n", setOfTraceId.size(), time1.toEpochNano(),
+					          time2.toEpochNano());
+
+			/*
+			 * Collect the trace sampling information from the remote server that will be yieled by incremental
+			 * calls to `getNextTrace()`.
+			 */
+			sampledTraces = client.sampleTracesAsync(setOfTraceId, time1, time2, getPixelHorizontal());
+			unYieldedSampledTraces = null; // ensure any previous subset of `sampledTraces` is cleared.
+			                               // see field contract for details
 		}
-		System.out.printf("num traces: %d, time: %d, %d %n", setOfTraceId.size(), time1.toEpochNano(), time2.toEpochNano());
-		samplingSet = client.sampleTracesAsync(setOfTraceId, time1, time2, getPixelHorizontal());
 	}
 
 
@@ -195,21 +278,43 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 
 	@Override
 	public IProcessTimeline getNextTrace() throws Exception {
-		if (!changedBounds) {
-			var line = currentLine.decrementAndGet();
-			if (line < 0)
-				return null;
-			return getProcessTimelineService().getProcessTimeline(line);
-		}
-		
-		if (samplingSet.isDone())
+		synchronized (controllerMonitor)  { // ensure all threads see the most recent values of all fields
+
+			if(sampledTraces == null)
+				throw new IllegalStateException("getNextTrace() may not be invoked prior to startTrace(...) or after" +
+						                        " this controller is closed.");
+
+			if (!changedBounds) {
+				currentLine--;
+				if (currentLine < 0)
+					return null;
+				return getProcessTimelineService().getProcessTimeline(currentLine);
+			}
+
+			/*
+			 * If this is the first time `getNextTrace()` has been called since the most recent invocation of
+			 * `startTrace(...)`, set `unYieldedSampledTraces` to the entire set of trace samplings in `sampledTraces`
+			 * to reflect that none have yet been returned by this method since the last `startTrace(...)`.
+			 *
+			 * See field documentation of `unYieldedSampledTraces` as to why this is done here and not when
+			 * `unYieldedSampledTraces` is updated.
+			 */
+			if (unYieldedSampledTraces == null)
+				unYieldedSampledTraces = sampledTraces.get().toJavaSet();
+
+			/*
+			 * If there are traces within `sampledTraces` that have not yet been yieled by this method, pick one
+			 * arbitrarily and return it in `RemoteProcessTimeline` form. Otherwise, return `null`.
+			 */
+			Iterator<Future<TraceSampling>> unYieldedSampledTracesElements = unYieldedSampledTraces.iterator();
+			if (unYieldedSampledTracesElements.hasNext())
+			{
+				Future<TraceSampling> sampledTrace = unYieldedSampledTracesElements.next();
+				unYieldedSampledTracesElements.remove(); // `sampledTrace` is about to be yielded, so declare yielded
+				return new RemoteProcessTimeline(this, sampledTrace);
+			}
+
 			return null;
-		
-		Optional<Future<TraceSampling>> sampling = samplingSet.getAnyDoneSampling(Duration.ofMinutes(3));
-		System.out.println("getNextTrace: " + sampling.isPresent());
-		if (sampling.isPresent()) {
-			return new RemoteProcessTimeline(this, sampling.get());
 		}
-		return null;
 	}
 }
