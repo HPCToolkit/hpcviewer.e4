@@ -101,7 +101,7 @@ public class FilteredBaseData extends AbstractBaseData implements IFilteredData 
 	@Override
 	public int getLastIncluded() {
 		if (indexes == null || indexes.isEmpty())
-			return 0;
+			return super.getListOfIdTuples(IdTupleOption.BRIEF).size()-1;
 		
 		return indexes.get(indexes.size()-1);
 	}
@@ -132,7 +132,7 @@ public class FilteredBaseData extends AbstractBaseData implements IFilteredData 
 	@Override
 	public boolean isGPU(int rank) {
 		// Fix issue #62: make sure checking the GPU works for filtered ranks
-		int index = indexes.get(rank);
+		int index = indexes == null? rank : indexes.get(rank);
 		return baseDataFile.isGPU(index);
 	}
 }

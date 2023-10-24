@@ -23,8 +23,9 @@ import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
  ****************************************************/
 public class LocalDBOpener extends AbstractDBOpener 
 {
-	private int version;
 	private IExperiment experiment;
+	
+	
 	/*****
 	 * Prepare opening a database
 	 * @param IEclipseContext context
@@ -33,7 +34,6 @@ public class LocalDBOpener extends AbstractDBOpener
 	 */
 	public LocalDBOpener(IExperiment experiment2) throws IllegalArgumentException {
 		this.experiment = experiment2;
-		version = experiment2.getMajorVersion();
 		String directory = experiment2.getDirectory();
 		
 		if (LocalDatabaseRepresentation.directoryHasTraceData(directory)<=0) {
@@ -51,6 +51,8 @@ public class LocalDBOpener extends AbstractDBOpener
 	 */
 	private IFileDB getFileDB() throws InvalExperimentException, IOException {
 		IFileDB fileDB = null;
+		var version = experiment.getMajorVersion();
+		
 		switch (version)
 		{
 		case 1:
