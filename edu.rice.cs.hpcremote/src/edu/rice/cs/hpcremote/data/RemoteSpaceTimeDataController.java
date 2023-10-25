@@ -1,12 +1,8 @@
 package edu.rice.cs.hpcremote.data;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.Iterator;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.eclipse.collections.impl.map.mutable.primitive.IntIntHashMap;
@@ -18,7 +14,6 @@ import org.hpctoolkit.hpcclient.v1_0.TraceDataNotAvailableException;
 import org.hpctoolkit.hpcclient.v1_0.TraceSampling;
 import org.slf4j.LoggerFactory;
 
-import edu.rice.cs.hpcbase.IFilteredData;
 import edu.rice.cs.hpcbase.IProcessTimeline;
 import edu.rice.cs.hpcbase.ITraceDataCollector;
 import edu.rice.cs.hpcbase.ITraceDataCollector.TraceOption;
@@ -85,7 +80,7 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 	 * Since {@code mapIntToLine} is not contractually thread-safe, synchronize on {@link #controllerMonitor} to ensure
 	 * thread-safe operation.
 	 */
-	private IntIntHashMap mapIntToLine;
+	private final IntIntHashMap mapIntToLine;
 
 	/**
 	 * TODO: document
@@ -101,41 +96,38 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 	 */
 	private int currentLine;
 	
-	public RemoteSpaceTimeDataController(HpcClient client, IExperiment experiment) {
+	
+	
+	public RemoteSpaceTimeDataController(HpcClient client, IExperiment experiment) throws IOException {
 		super(experiment);
-		
+
 		createScopeMap((BaseExperiment) experiment);
 
-		synchronized (controllerMonitor) { // ensure safe publication of client
-			this.client = client;
+		this.client = client;
+
+		var listIdTuples  = experiment.getThreadData().getIdTuples();
+		this.mapIntToLine = new IntIntHashMap(listIdTuples.size());
+
+		// create a map from the trace's profile index to the sorted trace order.
+		// ideally this is done at the server level or the viewer can piggy-back the order 
+		// within TraceId object.
+		for (int i = 0; i < listIdTuples.size(); i++)
+		{
+			var idtuple = listIdTuples.get(i);
+			mapIntToLine.put(idtuple.getProfileIndex()-1, i);
 		}
-
-		IFilteredData remoteTraceData = createTraceData(experiment);
-		super.setBaseData(remoteTraceData);
-	}
-
-	private IFilteredData createTraceData(IExperiment experiment) {		
 		var idTupleType = experiment.getIdTupleType();
-
-		try {
-			var listIdTuples = experiment.getThreadData().getIdTuples();
-
-			synchronized (controllerMonitor) { // ensure safe publication of mapIntToLine
-				this.mapIntToLine = new IntIntHashMap(listIdTuples.size());
-
-				for (int i = 0; i < listIdTuples.size(); i++)
-				{
-					var idtuple = listIdTuples.get(i);
-					mapIntToLine.put(idtuple.getProfileIndex(), i);
-				}
-			}
-			return new RemoteFilteredData(listIdTuples, idTupleType);
-		} catch (IOException e) {
-			throw new IllegalAccessError(e.getMessage());
-		}
+		setBaseData(new RemoteFilteredData(listIdTuples, idTupleType));
 	}
 	
 	
+	/***
+	 * Create a map between trace's CCT id to the CCT tree node and store it inside experiment object
+	 * (yuck).
+	 * 
+	 * @param experiment 
+	 * 			Experiment object to be fed of the mapping between trace CCT node id and CCT tree node.
+	 */
 	private void createScopeMap(BaseExperiment experiment) {
 
 		var rootCCT = experiment.getRootScope(RootScopeType.CallingContextTree);
@@ -155,19 +147,22 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 	}
 	
 	
+	/***
+	 * Retrieve the trace line number given the trace profile index.
+	 * Note: A trace line is the order of trace to be painted.
+	 * 
+	 * @param profileIndex
+	 * 			The trace profile index in trace.db file
+	 * @return
+	 */
 	public int getTraceLineFromProfile(int profileIndex) {
+		// laks: I don't see the need to synchronize this.
+		// there is no harm to have concurrent reads
 		synchronized (controllerMonitor) { // ensure all threads see the most recent `mapIntToLine` value
 			return mapIntToLine.get(profileIndex);
 		}
 	}
-	
-	
-	public IdTuple getIdTupleFromProfile(int profileIndex) {
-		synchronized (controllerMonitor) { // ensure all threads see the most recent `mapIntToLine` value
-			var line = mapIntToLine.get(profileIndex);
-			return getProfileFromPixel(line);
-		}
-	}
+
 	
 	@Override
 	public String getName() {
@@ -177,11 +172,12 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 	
 	@Override
 	public void closeDB() {
+		// laks: do we need to sync this block?
+		// Other than that, there is no harm to concurrently setting null for sampledTraces and unYieldedSampledTraces
 		synchronized (controllerMonitor) { // ensure safe publication of new values of class fields
 			if (mapIntToLine != null)
 				mapIntToLine.clear();
 
-			mapIntToLine = null;
 			sampledTraces = null;
 			unYieldedSampledTraces = null;
 		}
@@ -197,7 +193,7 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 				currentLine = numTraces;
 				return;
 			}
-
+				
 			var traceAttr = getTraceDisplayAttribute();
 			var pixelsV = traceAttr.getPixelVertical();
 
@@ -214,15 +210,12 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 				// collect id tuples to fit number of vertical pixels
 				for(int i=0; i<pixelsV; i++) {
 					var idt = getProfileFromPixel(i);
-					TraceId traceId = TraceId.make(idt.getProfileIndex());
+					TraceId traceId = TraceId.make(idt.getProfileIndex()-1);
 					setOfTraceId.add(traceId);
 				}
-
 			} else {
 				// fast approach
-				var setTraces = listIdTuples.stream()
-						                    .map(idt -> TraceId.make(idt.getProfileIndex()))
-						                    .collect(Collectors.toSet());
+				var setTraces = listIdTuples.stream().map(idt -> TraceId.make(idt.getProfileIndex())).collect(Collectors.toSet());
 				setOfTraceId = HashSet.ofAll(setTraces);
 			}
 
@@ -250,8 +243,6 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 					throw new IllegalAccessError(e.getMessage());
 				}
 			}
-			System.out.printf("num traces: %d, time: %d, %d %n", setOfTraceId.size(), time1.toEpochNano(),
-					          time2.toEpochNano());
 
 			/*
 			 * Collect the trace sampling information from the remote server that will be yieled by incremental
@@ -307,11 +298,12 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 			 * arbitrarily and return it in `RemoteProcessTimeline` form. Otherwise, return `null`.
 			 */
 			Iterator<Future<TraceSampling>> unYieldedSampledTracesElements = unYieldedSampledTraces.iterator();
+			System.out.println("[getNextTrace] Number of traces: " + unYieldedSampledTraces.size());
 			if (unYieldedSampledTracesElements.hasNext())
 			{
 				Future<TraceSampling> sampledTrace = unYieldedSampledTracesElements.next();
 				unYieldedSampledTracesElements.remove(); // `sampledTrace` is about to be yielded, so declare yielded
-				return new RemoteProcessTimeline(this, sampledTrace);
+				return new RemoteProcessTimeline(this, sampledTrace.get());
 			}
 
 			return null;
