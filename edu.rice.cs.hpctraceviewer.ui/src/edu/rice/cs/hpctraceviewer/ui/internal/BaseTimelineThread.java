@@ -104,7 +104,8 @@ public abstract class BaseTimelineThread implements Callable<Integer> {
 				}
 				
 				final TimelineDataSet dataSet = dataTo.getList();
-				queue.add(dataSet);				
+				queue.add(dataSet);
+				System.out.println("\t  [BaseTimelineThread.call] " + dataSet.getLineNumber() + ": " + dataSet.getList().size());
 			} else {
 				// empty trace, we need to notify the BasePaintThread class
 				// of this anomaly by adding NullTimeline

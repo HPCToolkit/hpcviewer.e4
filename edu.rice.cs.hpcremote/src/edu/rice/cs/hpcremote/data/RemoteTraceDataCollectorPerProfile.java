@@ -30,9 +30,10 @@ public class RemoteTraceDataCollectorPerProfile extends AbstractTraceDataCollect
 			var cctId = sample.getCallingContext();
 			
 			var data = new DataRecord(time.toEpochNano(), cctId.toInt());
-			super.addSampleToLastIndex(data);
+			addSampleToLastIndex(data);
 		});
-		System.out.println( "num cpid: " + getListOfCallpathId().size());
+		var traceId = traceSampling.getTraceId().toInt();
+		System.out.printf( "    [readInData] %3d  num cpid: %3d%n", traceId, getListOfCallpathId().size());
 	}
 
 

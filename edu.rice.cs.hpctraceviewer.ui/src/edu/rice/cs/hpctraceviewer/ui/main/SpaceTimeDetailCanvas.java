@@ -77,8 +77,6 @@ import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.Frame;
 import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
 import edu.rice.cs.hpctraceviewer.data.Position;
-import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
-import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 import edu.rice.cs.hpctraceviewer.ui.util.MessageLabelManager;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
@@ -1108,12 +1106,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		
 		oldAttributes.copy(attributes);
 		if (changedBounds) {
-			ProcessTimeline []traces = new ProcessTimeline[ numLines ];
-			ProcessTimelineService ptlService = stData.getProcessTimelineService();
-
-			assert(ptlService != null);
-			
-			ptlService.setProcessTimeline(traces);
+			stData.resetProcessTimeline(numLines);
 		}
 
 		/*************************************************************************

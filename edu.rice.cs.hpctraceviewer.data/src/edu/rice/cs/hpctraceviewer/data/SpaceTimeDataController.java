@@ -81,6 +81,10 @@ public abstract class SpaceTimeDataController implements ITraceManager
 	}
 	
 	
+	public void resetProcessTimeline(int numTraces) {
+		timelineService.setProcessTimeline(new IProcessTimeline[numTraces]);
+	}
+	
 	/*************************************************************************
 	 * Check if traces have been painted out in the main trace view.
 	 * Other views (like depth view) will need to check this.
@@ -147,7 +151,7 @@ public abstract class SpaceTimeDataController implements ITraceManager
 	
 	/*************************************************************************
 	 * Get the file base data of this trace
-	 * @return {@code IBaseData}
+	 * @return {@code IFilteredData}
 	 *************************************************************************/
 	public IFilteredData getBaseData(){
 		return dataTrace;

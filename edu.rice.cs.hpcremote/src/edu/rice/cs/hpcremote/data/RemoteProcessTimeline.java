@@ -1,9 +1,6 @@
 package edu.rice.cs.hpcremote.data;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-
 import org.hpctoolkit.hpcclient.v1_0.TraceSampling;
 
 import edu.rice.cs.hpcbase.IProcessTimeline;
@@ -14,7 +11,7 @@ import edu.rice.cs.hpcdata.util.ICallPath.ICallPathInfo;
 public class RemoteProcessTimeline implements IProcessTimeline 
 {
 	private final RemoteSpaceTimeDataController traceData;
-	private final Future<TraceSampling> traceSampling;
+	private final TraceSampling traceSampling;
 
 	private RemoteTraceDataCollectorPerProfile traceDataCollector;
 	
@@ -22,29 +19,22 @@ public class RemoteProcessTimeline implements IProcessTimeline
 	private IdTuple idTuple;
 	
 	RemoteProcessTimeline(RemoteSpaceTimeDataController traceData, 
-						  Future<TraceSampling> traceSampling) {
+						  TraceSampling traceSampling) {
 		this.traceData = traceData;
 		this.traceSampling = traceSampling;
 	}
 	
 	@Override
 	public void readInData() throws IOException {
-		try {
-			TraceSampling trace = traceSampling.get();
-			var traceId = trace.getTraceId();
-			var profile = traceId.toInt();
-			line = traceData.getTraceLineFromProfile(profile);
-			idTuple = traceData.getIdTupleFromProfile(profile);
-					
-			traceDataCollector = (RemoteTraceDataCollectorPerProfile) traceData.getTraceDataCollector(line(), getProfileIdTuple());
-			traceDataCollector.readInData(trace);
-			
-			System.out.printf("%3d %3d %s%n", line, profile, idTuple.toString());
-			
-		} catch (InterruptedException  | ExecutionException e) {
-		    // Restore interrupted state...
-		    Thread.currentThread().interrupt();
-		}
+		var traceId = traceSampling.getTraceId();
+		var profile = traceId.toInt();
+		line = traceData.getTraceLineFromProfile(profile);
+		idTuple = traceData.getProfileFromPixel(line);
+		
+		System.out.printf("   RemoteProcessTimeline.readInData %3d %3d %s%n", line, profile, idTuple.toString());
+				
+		traceDataCollector = (RemoteTraceDataCollectorPerProfile) traceData.getTraceDataCollector(line(), getProfileIdTuple());
+		traceDataCollector.readInData(traceSampling);
 	}
 
 	@Override
@@ -100,6 +90,9 @@ public class RemoteProcessTimeline implements IProcessTimeline
 
 	@Override
 	public boolean isEmpty() {
+		if (traceDataCollector == null)
+			return true;
+		
 		return traceDataCollector.isEmpty();
 	}
 
