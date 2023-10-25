@@ -345,7 +345,7 @@ public abstract class SpaceTimeDataController implements ITraceManager
 	public IdTuple getProfileFromPixel(int line) {		
 		var listProfiles = getBaseData().getListOfIdTuples(IdTupleOption.BRIEF);
 		
-		int numProfiles = listProfiles.size();		
+		int numProfiles = attributes.getProcessInterval();		
 		int index = 0;
 		
 		if (numProfiles > attributes.getPixelVertical()) {
@@ -353,7 +353,7 @@ public abstract class SpaceTimeDataController implements ITraceManager
 		} else {
 			index = attributes.getProcessBegin() + line;
 		}
-		return listProfiles.get(Math.min(numProfiles, index));
+		return listProfiles.get(Math.min(listProfiles.size(), index));
 	}
 
 	
