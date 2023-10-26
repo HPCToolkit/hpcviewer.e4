@@ -676,10 +676,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 
 		String timeUnit = attributes.getTimeUnitName(attributes.getDisplayTimeUnit());
 		String label = "Cross Hair: ";
+		IdTuple idtuple = ptl.getProfileIdTuple();
 
-		if (traceData.getNumberOfRanks() > 0) {
-			
-			IdTuple idtuple = ptl.getProfileIdTuple();
+		if (traceData.getNumberOfRanks() > 0 && idtuple != null) {
 			String procStr  = idtuple.toString(traceData.getIdTupleTypes());
 			String timeStr  = formatTime.format(selectedTime) + timeUnit;
 	        final String buffer = label + "(" + timeStr + ", " +  procStr + ")";

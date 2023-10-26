@@ -298,12 +298,12 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 			 * arbitrarily and return it in `RemoteProcessTimeline` form. Otherwise, return `null`.
 			 */
 			Iterator<Future<TraceSampling>> unYieldedSampledTracesElements = unYieldedSampledTraces.iterator();
-			System.out.println("[getNextTrace] Number of traces: " + unYieldedSampledTraces.size());
+			System.out.printf("[getNextTrace-%d] Number of traces: %d%n", Thread.currentThread().getId(), unYieldedSampledTraces.size());
 			if (unYieldedSampledTracesElements.hasNext())
 			{
 				Future<TraceSampling> sampledTrace = unYieldedSampledTracesElements.next();
 				unYieldedSampledTracesElements.remove(); // `sampledTrace` is about to be yielded, so declare yielded
-				return new RemoteProcessTimeline(this, sampledTrace.get());
+				return new RemoteProcessTimeline(this, sampledTrace);
 			}
 
 			return null;

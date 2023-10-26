@@ -155,6 +155,8 @@ public class CanvasAxisY extends AbstractAxisCanvas
 			final int height = y_next - y_curr + 1;
 
 			IdTuple idtuple  = procTimeline.getProfileIdTuple();
+			if (idtuple == null)
+				continue;
 	        
 	        // for sequential code, we assume the number of parallelism is 1
 	        // (just to avoid the zero division)

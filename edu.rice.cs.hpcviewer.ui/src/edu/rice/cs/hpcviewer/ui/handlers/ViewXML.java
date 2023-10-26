@@ -72,6 +72,9 @@ public class ViewXML
 	
 	@CanExecute
 	public boolean canExecute(@Optional @Active MPart part) {
+		if (part == null)
+			return false;
+		
 		var expFile = getExperimentFile(part.getObject());
 		return expFile != null && expFile.canRead();
 	}
