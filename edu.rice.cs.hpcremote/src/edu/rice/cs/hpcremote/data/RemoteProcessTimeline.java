@@ -7,6 +7,7 @@ import java.util.concurrent.Future;
 import org.hpctoolkit.hpcclient.v1_0.TraceSampling;
 import org.slf4j.LoggerFactory;
 
+import edu.rice.cs.hpcbase.DebugUtil;
 import edu.rice.cs.hpcbase.IProcessTimeline;
 import edu.rice.cs.hpcbase.ITraceDataCollector;
 import edu.rice.cs.hpcdata.db.IdTuple;
@@ -38,15 +39,9 @@ public class RemoteProcessTimeline implements IProcessTimeline
 		
 		try {
 			TraceSampling samples = traceSampling.get();
-			var traceId = samples.getTraceId();
-			var profile = traceId.toInt();
-			line = traceData.getTraceLineFromProfile(profile);
-			idTuple = traceData.getProfileFromPixel(line);
-					
-			traceDataCollector = traceData.getTraceDataCollector(line(), getProfileIdTuple());
-			((RemoteTraceDataCollectorPerProfile)traceDataCollector).readInData(samples);
-			
+			readAndStoreDataFromServer(samples);
 			return;
+			
 		} catch (InterruptedException e) {
 		    // Restore interrupted state...
 		    Thread.currentThread().interrupt();
@@ -56,6 +51,27 @@ public class RemoteProcessTimeline implements IProcessTimeline
 		// TODO: need to be clean up
 		// in case of exception, we set an empty trace data collector
 		traceDataCollector = ITraceDataCollector.DUMMY;
+	}
+
+	
+	/****
+	 * Disassemble data from the server, grab the information of the trace line
+	 * and the execution context, and then store the sample in a ITraceDataCollector object.
+	 * 
+	 * @param samples
+	 * 			Trace samples from the server
+	 */
+	private void readAndStoreDataFromServer(TraceSampling samples) {
+		var traceId = samples.getTraceId();
+		var profile = traceId.toInt();
+		
+		line = traceData.getTraceLineFromProfile(profile);
+		idTuple = traceData.getProfileFromPixel(line);
+				
+		traceDataCollector = traceData.getTraceDataCollector(line, idTuple);
+		((RemoteTraceDataCollectorPerProfile)traceDataCollector).readInData(samples);
+		
+		DebugUtil.debugThread(getClass().getName(), String.format("\t\t%5d  %s size: %d", line, idTuple.toString(), traceDataCollector.size()));
 	}
 	
 

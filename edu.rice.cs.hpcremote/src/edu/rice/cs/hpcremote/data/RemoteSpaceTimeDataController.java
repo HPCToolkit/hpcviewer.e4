@@ -14,6 +14,7 @@ import org.hpctoolkit.hpcclient.v1_0.TraceDataNotAvailableException;
 import org.hpctoolkit.hpcclient.v1_0.TraceSampling;
 import org.slf4j.LoggerFactory;
 
+import edu.rice.cs.hpcbase.DebugUtil;
 import edu.rice.cs.hpcbase.IProcessTimeline;
 import edu.rice.cs.hpcbase.ITraceDataCollector;
 import edu.rice.cs.hpcbase.ITraceDataCollector.TraceOption;
@@ -186,10 +187,11 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 	 * @return
 	 */
 	public int getTraceLineFromProfile(int profileIndex) {
-		// laks: I don't see the need to synchronize this.
-		// there is no harm to have concurrent reads
-		synchronized (controllerMonitor) { // ensure all threads see the most recent `mapIntToLine` value
-			return mapIntToLine.get(profileIndex);
+		synchronized (controllerMonitor) {
+			// possible data concurrent here, but ...
+			// It's totally okay to concurrently reading a map index.
+			var originalLine  = mapIntToLine.get(profileIndex);
+			return originalLine - getTraceDisplayAttribute().getProcessBegin();
 		}
 	}
 
@@ -285,7 +287,8 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 			 * Collect the trace sampling information from the remote server that will be yieled by incremental
 			 * calls to `getNextTrace()`.
 			 */
-			System.out.printf("%n[START-TRACE] num-traces: %4d, num-samples: %d, time: %d - %d   %n", setOfTraceId.size(), getPixelHorizontal(), time1.toEpochNano(), time2.toEpochNano());
+			DebugUtil.debugThread(getClass().getName(), String.format("num-traces: %d, num-samples: %d, time: %d - %d   %n", setOfTraceId.size(), getPixelHorizontal(), time1.toEpochNano(), time2.toEpochNano()));
+
 			sampledTraces = client.sampleTracesAsync(setOfTraceId, time1, time2, getPixelHorizontal());
 			unYieldedSampledTraces = null; // ensure any previous subset of `sampledTraces` is cleared.
 			                               // see field contract for details

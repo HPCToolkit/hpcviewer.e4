@@ -65,7 +65,6 @@ public class TimelineThread
 			}
 			trace.shiftTimeBy(stData.getMinBegTime());
 		}
-		System.out.println("\t[TimelineThread.init] " + trace.line() + ": " + trace.size());
 		return (trace.size()>=2);
 	}
 

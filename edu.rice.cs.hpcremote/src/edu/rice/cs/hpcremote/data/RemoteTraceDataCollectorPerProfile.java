@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.hpctoolkit.hpcclient.v1_0.TraceSampling;
 
 import edu.rice.cs.hpcbase.AbstractTraceDataCollector;
+import edu.rice.cs.hpcbase.DebugUtil;
 import edu.rice.cs.hpcbase.ITraceDataCollector;
 import edu.rice.cs.hpcdata.db.version4.DataRecord;
 
@@ -32,13 +33,14 @@ public class RemoteTraceDataCollectorPerProfile extends AbstractTraceDataCollect
 			var data = new DataRecord(time.toEpochNano(), cctId.toInt());
 			addSampleToLastIndex(data);
 		});
+		DebugUtil.debugThread(getClass().getName(), String.format("\t\tSample size: %d", list.size()));
 	}
 
 
 	@Override
 	@Deprecated
 	public void readInData(long timeStart, long timeRange, double pixelLength) throws IOException {
-		// nothing to do
+		throw new IllegalAccessError("Use readInData(TraceSampling traceSampling) method instead");
 	}
 	
 
