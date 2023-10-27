@@ -3,7 +3,7 @@ package edu.rice.cs.hpcremote.data;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.concurrent.Future;
-import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.eclipse.collections.impl.map.mutable.primitive.IntIntHashMap;
 import org.hpctoolkit.client_server_common.time.Timestamp;
@@ -101,10 +101,12 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 	public RemoteSpaceTimeDataController(HpcClient client, IExperiment experiment) throws IOException {
 		super(experiment);
 
-		createScopeMap((BaseExperiment) experiment);
-
 		this.client = client;
 
+		createScopeMap((BaseExperiment) experiment);
+
+		setTraceBeginAndEndTime(client, experiment);
+		
 		var listIdTuples  = experiment.getThreadData().getIdTuples();
 		this.mapIntToLine = new IntIntHashMap(listIdTuples.size());
 
@@ -120,6 +122,34 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 		setBaseData(new RemoteFilteredData(listIdTuples, idTupleType));
 	}
 	
+	
+	/****
+	 * Initialize start and end time of the trace.
+	 * This is to mimic IFileDb behavior to initialize trace attributes.
+	 * 
+	 * @param client
+	 * @param experiment
+	 * @throws IOException
+	 */
+	private void setTraceBeginAndEndTime(HpcClient client, IExperiment experiment) throws IOException  {
+		var attributes = experiment.getTraceAttribute();
+		try {
+			var minTime = client.getMinimumTraceSampleTimestamp();
+			if (minTime.isPresent()) {
+				attributes.dbTimeMin = minTime.get().toEpochNano();
+			}
+			
+			var maxTime = client.getMaximumTraceSampleTimestamp();
+			if (maxTime.isPresent()) {
+				attributes.dbTimeMax = maxTime.get().toEpochNano();
+			}
+		} catch (InterruptedException e) {
+		    // Restore interrupted state...
+		    Thread.currentThread().interrupt();
+		} catch (TraceDataNotAvailableException e) {
+			// ignore
+		}
+	}
 	
 	/***
 	 * Create a map between trace's CCT id to the CCT tree node and store it inside experiment object
@@ -215,17 +245,24 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 				}
 			} else {
 				// fast approach
-				var setTraces = listIdTuples.stream().map(idt -> TraceId.make(idt.getProfileIndex())).collect(Collectors.toSet());
-				setOfTraceId = HashSet.ofAll(setTraces);
+				var t1 = traceAttr.getProcessBegin();
+				var t2 = traceAttr.getProcessEnd();
+				var stream = IntStream.range(t1, t2).mapToObj(i -> {
+					var idt = listIdTuples.get(i);
+					return TraceId.make(idt.getProfileIndex()-1);
+				});
+				setOfTraceId = HashSet.ofAll(stream);
 			}
 
+			var traceAttributes = getExperiment().getTraceAttribute();
 			var frame = traceAttr.getFrame();
 
-			Timestamp time1 = Timestamp.ofEpochNano(frame.begTime);
-			Timestamp time2 = Timestamp.ofEpochNano(frame.endTime);
+			Timestamp time1 = Timestamp.ofEpochNano(frame.begTime + traceAttributes.dbTimeMin);
+			Timestamp time2 = Timestamp.ofEpochNano(frame.endTime + traceAttributes.dbTimeMin);
 
 			if (time1.isAfter(time2)) {
 				// the time range is not initialized yet
+				// this shouldn't happen
 				try {
 					var traceTimeMin = client.getMinimumTraceSampleTimestamp();
 					var traceTimeMax = client.getMaximumTraceSampleTimestamp();
@@ -248,6 +285,7 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 			 * Collect the trace sampling information from the remote server that will be yieled by incremental
 			 * calls to `getNextTrace()`.
 			 */
+			System.out.printf("%n[START-TRACE] num-traces: %4d, num-samples: %d, time: %d - %d   %n", setOfTraceId.size(), getPixelHorizontal(), time1.toEpochNano(), time2.toEpochNano());
 			sampledTraces = client.sampleTracesAsync(setOfTraceId, time1, time2, getPixelHorizontal());
 			unYieldedSampledTraces = null; // ensure any previous subset of `sampledTraces` is cleared.
 			                               // see field contract for details
@@ -298,7 +336,6 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 			 * arbitrarily and return it in `RemoteProcessTimeline` form. Otherwise, return `null`.
 			 */
 			Iterator<Future<TraceSampling>> unYieldedSampledTracesElements = unYieldedSampledTraces.iterator();
-			System.out.printf("[getNextTrace-%d] Number of traces: %d%n", Thread.currentThread().getId(), unYieldedSampledTraces.size());
 			if (unYieldedSampledTracesElements.hasNext())
 			{
 				Future<TraceSampling> sampledTrace = unYieldedSampledTracesElements.next();

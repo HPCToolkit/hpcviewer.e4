@@ -31,11 +31,8 @@ public class RemoteProcessTimeline implements IProcessTimeline
 	
 	@Override
 	public void readInData() throws IOException {
-		System.out.printf("  [RemoteProcessTimeline.readInData-%d] starts...%n", Thread.currentThread().getId());
-		if (traceSampling.isCancelled() || traceSampling.isDone()) {
+		if (traceSampling.isCancelled()) {
 			traceDataCollector = ITraceDataCollector.DUMMY;
-			String status = traceSampling.isCancelled() ? "CANCEL" : "DONE";
-			System.out.printf("  [RemoteProcessTimeline.readInData-%d] fail to invoke get(). Status: %s %n", Thread.currentThread().getId(), status);
 			return;
 		}
 		
@@ -45,8 +42,6 @@ public class RemoteProcessTimeline implements IProcessTimeline
 			var profile = traceId.toInt();
 			line = traceData.getTraceLineFromProfile(profile);
 			idTuple = traceData.getProfileFromPixel(line);
-			
-			System.out.printf("    [RemoteProcessTimeline.readInData-%d] %3d %3d %s%n", Thread.currentThread().getId(), line, profile, idTuple.toString());
 					
 			traceDataCollector = traceData.getTraceDataCollector(line(), getProfileIdTuple());
 			((RemoteTraceDataCollectorPerProfile)traceDataCollector).readInData(samples);

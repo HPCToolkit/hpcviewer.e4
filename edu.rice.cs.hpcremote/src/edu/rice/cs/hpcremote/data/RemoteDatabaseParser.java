@@ -101,7 +101,7 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	public DataMeta collectMetaData(HpcClient client) throws IOException, InterruptedException {
+	private DataMeta collectMetaData(HpcClient client) throws IOException, InterruptedException {
 		var metaDBbytes   = client.getMetaDbFileContents();
 		ByteBuffer buffer = ByteBuffer.wrap(metaDBbytes);
 		
@@ -112,6 +112,15 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 	}
 	
 	
+	/****
+	 * Reading remote meta.db given the experiment object
+	 *  
+	 * @param client
+	 * @param experiment
+	 * @return
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
 	public DataMeta collectMetaData(HpcClient client, IExperiment experiment) throws IOException, InterruptedException {
 		var metaDBbytes   = client.getMetaDbFileContents();
 		ByteBuffer buffer = ByteBuffer.wrap(metaDBbytes);
