@@ -74,12 +74,34 @@ public interface IProcessTimeline
 	 * */
 	int findMidpointBefore(long time, boolean usingMidpoint);
 	
-	
+	/***
+	 * Check if the trace has samples or not
+	 * 
+	 * @return {@code boolean}
+	 * 			true if the trace has no samples
+	 */
 	boolean isEmpty();
 	
 	
+	/****
+	 * Check if this trace line is a GPU trace
+	 * @return
+	 */
 	boolean isGPU();
 	
 	
+	/***
+	 * Create a copy of this trace line, and reset value of 
+	 * the trace line and its id-tuple (execution context)
+	 * 
+	 * @param line
+	 * @param idTuple
+	 * @return
+	 */
+	IProcessTimeline duplicate(int line, IdTuple idTuple);
+	
+	/****
+	 * Free allocated resources
+	 */
 	void dispose();
 }

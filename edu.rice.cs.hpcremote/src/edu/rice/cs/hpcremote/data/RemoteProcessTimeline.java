@@ -145,5 +145,16 @@ public class RemoteProcessTimeline implements IProcessTimeline
 			traceDataCollector.dispose();
 		
 		traceDataCollector = null;
+	}
+
+	@Override
+	public IProcessTimeline duplicate(int line, IdTuple idTuple) {
+		var copy = new RemoteProcessTimeline(traceData, traceSampling);
+
+		copy.traceDataCollector = traceDataCollector;
+		copy.line = line;
+		copy.idTuple = idTuple;
+		
+		return copy;
 	}		
 }

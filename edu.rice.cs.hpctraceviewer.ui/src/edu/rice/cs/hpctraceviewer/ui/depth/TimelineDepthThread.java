@@ -11,7 +11,6 @@ import edu.rice.cs.hpctraceviewer.data.DataLinePainting;
 import edu.rice.cs.hpctraceviewer.data.DataPreparation;
 import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
 import edu.rice.cs.hpctraceviewer.data.TimelineDataSet;
-import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 import edu.rice.cs.hpctraceviewer.ui.internal.BaseTimelineThread;
 
 
@@ -68,12 +67,8 @@ public class TimelineDepthThread
 			// I can't get the data from the ProcessTimeline directly, so create
 			// a ProcessTimeline with data=null and then copy the actual data to
 			// it.
-			ProcessTimeline toDonate = new ProcessTimeline(currentDepthLineNum, stData,
-														   depthTrace.getProfileIdTuple());
 
-			toDonate.copyDataFrom(depthTrace);
-
-			return toDonate;
+			return depthTrace.duplicate(currentDepthLineNum, depthTrace.getProfileIdTuple());
 		} else {
 			return null;
 		}

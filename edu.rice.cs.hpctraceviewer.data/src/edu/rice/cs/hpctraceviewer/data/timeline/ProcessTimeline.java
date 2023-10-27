@@ -66,6 +66,17 @@ public class ProcessTimeline implements IProcessTimeline
 	}
 
 	
+	public ProcessTimeline(int lineNum, IdTuple idTuple, IdTupleType idTupleType) {
+		this.lineNum = lineNum;
+		this.idTuple = idTuple;
+		this.idTupletype = idTupleType;
+		
+		this.startingTime = 0;
+		this.timeRange = 0;
+		this.pixelLength = 0;
+		
+	}
+	
 	/**
 	 * Fills the ProcessTimeline with data from the file. If this is being
 	 * called, it must be on local, so the cast is fine
@@ -166,5 +177,14 @@ public class ProcessTimeline implements IProcessTimeline
 		
 		scopeMap = null;
 		traceDataCollector = null;
+	}
+
+
+	@Override
+	public IProcessTimeline duplicate(int line, IdTuple idTuple) {
+		ProcessTimeline toDonate = new ProcessTimeline(line, idTuple, idTupletype);
+		toDonate.copyDataFrom(this);
+
+		return null;
 	}
 }
