@@ -1,9 +1,10 @@
 package edu.rice.cs.hpcremote.data;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.Future;
-import java.util.stream.IntStream;
 
 import org.eclipse.collections.impl.map.mutable.primitive.IntIntHashMap;
 import org.hpctoolkit.client_server_common.time.Timestamp;
@@ -18,7 +19,6 @@ import edu.rice.cs.hpcbase.DebugUtil;
 import edu.rice.cs.hpcbase.IProcessTimeline;
 import edu.rice.cs.hpcbase.ITraceDataCollector;
 import edu.rice.cs.hpcbase.ITraceDataCollector.TraceOption;
-import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
@@ -28,6 +28,7 @@ import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import io.vavr.collection.HashSet;
 import io.vavr.collection.Set;
+
 
 /**
  * TODO: document
@@ -81,7 +82,7 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 	 * Since {@code mapIntToLine} is not contractually thread-safe, synchronize on {@link #controllerMonitor} to ensure
 	 * thread-safe operation.
 	 */
-	private final IntIntHashMap mapIntToLine;
+	private IntIntHashMap mapIntToLine;
 
 	/**
 	 * TODO: document
@@ -108,18 +109,9 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 
 		setTraceBeginAndEndTime(client, experiment);
 		
-		var listIdTuples  = experiment.getThreadData().getIdTuples();
-		this.mapIntToLine = new IntIntHashMap(listIdTuples.size());
-
-		// create a map from the trace's profile index to the sorted trace order.
-		// ideally this is done at the server level or the viewer can piggy-back the order 
-		// within TraceId object.
-		for (int i = 0; i < listIdTuples.size(); i++)
-		{
-			var idtuple = listIdTuples.get(i);
-			mapIntToLine.put(idtuple.getProfileIndex()-1, i);
-		}
-		var idTupleType = experiment.getIdTupleType();
+		var listIdTuples = experiment.getThreadData().getIdTuples();
+		var idTupleType  = experiment.getIdTupleType();
+		
 		setBaseData(new RemoteFilteredData(listIdTuples, idTupleType));
 	}
 	
@@ -191,7 +183,7 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 			// possible data concurrent here, but ...
 			// It's totally okay to concurrently reading a map index.
 			var originalLine  = mapIntToLine.get(profileIndex);
-			return originalLine - getTraceDisplayAttribute().getProcessBegin();
+			return originalLine;
 		}
 	}
 
@@ -229,32 +221,32 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 			var traceAttr = getTraceDisplayAttribute();
 			var pixelsV = traceAttr.getPixelVertical();
 
-			var remoteTraceData = getBaseData();
-			var listIdTuples = remoteTraceData.getListOfIdTuples(IdTupleOption.BRIEF);
+			// in case the number of ranks is bigger than the number of pixels,
+			// we need to pick (or sample) which ranks need to be displayed.
+			// A lazy way is to rely on the server to pick which ranks to be displayed.
 
-			Set<TraceId> setOfTraceId = HashSet.empty();
+			// collect id tuples to fit number of vertical pixels
+			var numTracesToCollect = Math.min(numTraces, pixelsV);
+			
+			// use iterable list because vavr set sometimes doesn't want to add items
+			List<TraceId> listTracesToCollect = new ArrayList<>(numTracesToCollect);
+			
+			// a map from a profile index to its trace line number
+			mapIntToLine = new IntIntHashMap(numTracesToCollect);
 
-			if (numTraces > pixelsV) {
-				// in case the number of ranks is bigger than the number of pixels,
-				// we need to pick (or sample) which ranks need to be displayed.
-				// A lazy way is to rely on the server to pick which ranks to be displayed.
-
-				// collect id tuples to fit number of vertical pixels
-				for(int i=0; i<pixelsV; i++) {
-					var idt = getProfileFromPixel(i);
-					TraceId traceId = TraceId.make(idt.getProfileIndex()-1);
-					setOfTraceId.add(traceId);
-				}
-			} else {
-				// fast approach
-				var t1 = traceAttr.getProcessBegin();
-				var t2 = traceAttr.getProcessEnd();
-				var stream = IntStream.range(t1, t2).mapToObj(i -> {
-					var idt = listIdTuples.get(i);
-					return TraceId.make(idt.getProfileIndex()-1);
-				});
-				setOfTraceId = HashSet.ofAll(stream);
+			for(int i=0; i<numTracesToCollect; i++) {
+				var idt = getProfileFromPixel(i);
+				var profileIndex = idt.getProfileIndex() - 1;
+				
+				TraceId traceId = TraceId.make(profileIndex);
+				listTracesToCollect.add(traceId);
+				
+				// create a map from the trace's profile index to the sorted trace order.
+				// ideally this is done at the server level or the viewer can piggy-back the order 
+				// within TraceId object.
+				mapIntToLine.put(profileIndex, i);
 			}
+			Set<TraceId> setOfTraceId = HashSet.ofAll(listTracesToCollect);
 
 			var traceAttributes = getExperiment().getTraceAttribute();
 			var frame = traceAttr.getFrame();

@@ -1,7 +1,7 @@
 package edu.rice.cs.hpcbase;
 
 public class DebugUtil {
-	private static final boolean debugOn = true;
+	private static final boolean debugOn = false;
 	
 	public static void debug(String message) {
 		if (debugOn)

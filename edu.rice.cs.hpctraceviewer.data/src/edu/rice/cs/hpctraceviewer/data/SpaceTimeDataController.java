@@ -353,7 +353,7 @@ public abstract class SpaceTimeDataController implements ITraceManager
 		} else {
 			index = attributes.getProcessBegin() + line;
 		}
-		return listProfiles.get(Math.min(listProfiles.size(), index));
+		return listProfiles.get(Math.min(listProfiles.size()-1, index));
 	}
 
 	

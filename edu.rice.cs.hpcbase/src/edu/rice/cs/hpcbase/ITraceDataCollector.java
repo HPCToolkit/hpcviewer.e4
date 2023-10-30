@@ -40,7 +40,7 @@ public interface ITraceDataCollector
 		}
 		
 		@Override
-		public void duplicate(ITraceDataCollector traceData) { /* nothing */ }
+		public void copyDataFrom(ITraceDataCollector traceData) { /* nothing */ }
 		
 		@Override
 		public void dispose() { /* nothing */ }
@@ -60,7 +60,7 @@ public interface ITraceDataCollector
 	
 	void shiftTimeBy(long lowestStartingTime);
 	
-	void duplicate(ITraceDataCollector traceData);
+	void copyDataFrom(ITraceDataCollector traceData);
 	
 	void dispose();
 }

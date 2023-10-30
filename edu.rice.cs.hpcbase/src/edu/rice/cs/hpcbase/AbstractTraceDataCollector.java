@@ -172,7 +172,7 @@ public abstract class AbstractTraceDataCollector implements ITraceDataCollector
 	 * @param traceData: another object to be copied
 	 */
 	@Override
-	public void duplicate(ITraceDataCollector traceData)
+	public void copyDataFrom(ITraceDataCollector traceData)
 	{
 		this.listcpid = ((AbstractTraceDataCollector)traceData).listcpid;
 	}

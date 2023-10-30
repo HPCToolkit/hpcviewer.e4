@@ -4,24 +4,20 @@ import java.io.IOException;
 import edu.rice.cs.hpcbase.IProcessTimeline;
 import edu.rice.cs.hpcbase.ITraceDataCollector;
 import edu.rice.cs.hpcdata.db.IdTuple;
-import edu.rice.cs.hpcdata.db.IdTupleType;
-import edu.rice.cs.hpcdata.util.ICallPath;
 import edu.rice.cs.hpcdata.util.ICallPath.ICallPathInfo;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 
 
-/** A data structure that stores one line of timestamp-cpid data. */
+/** 
+ * A class that interfaces and manages one trace line of timestamp-cpid data. 
+ * This class is designed for local trace, and cannot be used for remote database.
+ * */
 public class ProcessTimeline implements IProcessTimeline
 {
-
-	/** The mapping between the cpid's and the actual scopes. */
-	private ICallPath scopeMap;
-
 	/** This ProcessTimeline's line number. */
 	private final int lineNum;
 
 	private final IdTuple idTuple;
-	private final IdTupleType idTupletype;
 
 	/** The initial time in view. */
 	private final long startingTime;
@@ -32,12 +28,11 @@ public class ProcessTimeline implements IProcessTimeline
 	/** The amount of time that each pixel on the screen correlates to. */
 	private final double pixelLength;
 
-	private ITraceDataCollector traceDataCollector;
+	private final SpaceTimeDataController dataController;
+	
+	private final ITraceDataCollector traceDataCollector;
 
-	/*************************************************************************
-	 * Reads in the call-stack trace data from the binary traceFile in the form:
-	 * double time-stamp int Call-Path ID double time-stamp int Call-Path ID ...
-	 ************************************************************************/
+
 
 	/** Creates a new ProcessTimeline with the given parameters. 
 	 * @param lineNum 
@@ -49,33 +44,19 @@ public class ProcessTimeline implements IProcessTimeline
 	 */
 	public ProcessTimeline(int lineNum, SpaceTimeDataController stData, IdTuple idTuple)
 	{
-
 		this.lineNum 		= lineNum;
-		scopeMap 			= stData.getScopeMap();
-		var attributes      = stData.getTraceDisplayAttribute();
+		this.dataController = stData;
 
-		timeRange			= attributes.getTimeInterval();
-		startingTime 		= stData.getMinBegTime() + attributes.getTimeBegin();
-		this.idTuple  = idTuple;
+		var attributes  = stData.getTraceDisplayAttribute();
+		timeRange	 = attributes.getTimeInterval();
+		startingTime = stData.getMinBegTime() + attributes.getTimeBegin();
+		this.idTuple = idTuple;
 
 		pixelLength = timeRange / (double) stData.getPixelHorizontal();
 		
 		traceDataCollector = stData.getTraceDataCollector(lineNum, idTuple);
-		
-		idTupletype = stData.getExperiment().getIdTupleType();
 	}
 
-	
-	public ProcessTimeline(int lineNum, IdTuple idTuple, IdTupleType idTupleType) {
-		this.lineNum = lineNum;
-		this.idTuple = idTuple;
-		this.idTupletype = idTupleType;
-		
-		this.startingTime = 0;
-		this.timeRange = 0;
-		this.pixelLength = 0;
-		
-	}
 	
 	/**
 	 * Fills the ProcessTimeline with data from the file. If this is being
@@ -108,7 +89,7 @@ public class ProcessTimeline implements IProcessTimeline
 	@Override
 	public ICallPathInfo getCallPathInfo(int sample) {
 		int cpid = getContextId(sample);
-		return scopeMap.getCallPathInfo(cpid);
+		return dataController.getScopeMap().getCallPathInfo(cpid);
 	}
 
 	
@@ -119,7 +100,7 @@ public class ProcessTimeline implements IProcessTimeline
 	@Override
 	public void copyDataFrom(IProcessTimeline another) {
 		if (another instanceof ProcessTimeline) {
-			traceDataCollector.duplicate(((ProcessTimeline)another).traceDataCollector);
+			traceDataCollector.copyDataFrom(((ProcessTimeline)another).traceDataCollector);
 		}
 	}
 
@@ -166,25 +147,21 @@ public class ProcessTimeline implements IProcessTimeline
 	
 	public boolean isGPU() 
 	{
+		var idTupletype = dataController.getExperiment().getIdTupleType();
 		return idTuple.isGPU(idTupletype);
 	}
 
 	public void dispose() {
-		if (scopeMap != null)
-			scopeMap.dispose();
 		if (traceDataCollector != null)
 			traceDataCollector.dispose();
-		
-		scopeMap = null;
-		traceDataCollector = null;
 	}
 
 
 	@Override
 	public IProcessTimeline duplicate(int line, IdTuple idTuple) {
-		ProcessTimeline toDonate = new ProcessTimeline(line, idTuple, idTupletype);
+		ProcessTimeline toDonate = new ProcessTimeline(line, dataController, idTuple);
 		toDonate.copyDataFrom(this);
 
-		return null;
+		return toDonate;
 	}
 }

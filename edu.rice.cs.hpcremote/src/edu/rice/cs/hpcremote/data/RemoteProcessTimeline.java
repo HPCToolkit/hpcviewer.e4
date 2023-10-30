@@ -99,7 +99,7 @@ public class RemoteProcessTimeline implements IProcessTimeline
 
 	@Override
 	public void copyDataFrom(IProcessTimeline other) {
-		traceDataCollector.duplicate( ((RemoteProcessTimeline) other).traceDataCollector );
+		traceDataCollector.copyDataFrom( ((RemoteProcessTimeline) other).traceDataCollector );
 	}
 
 	@Override
