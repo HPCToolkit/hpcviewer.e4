@@ -6,6 +6,8 @@ import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import edu.rice.cs.hpcbase.BaseConstants;
 import edu.rice.cs.hpcbase.IProcessTimeline;
 import edu.rice.cs.hpcbase.ITraceDataCollector;
 import edu.rice.cs.hpcbase.ITraceDataCollector.TraceOption;
@@ -32,7 +34,7 @@ import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
  */
 public class SpaceTimeDataControllerLocal extends SpaceTimeDataController 
 {	
-	private static final int MIN_TRACE_SIZE = LocalTraceDataCollector.HeaderSzMin + LocalTraceDataCollector.RecordSzMin * 2;
+	private static final int MIN_TRACE_SIZE = LocalTraceDataCollector.HeaderSzMin + BaseConstants.TRACE_RECORD_SIZE * 2;
 	private static final int RECORD_SIZE    = Constants.SIZEOF_LONG + Constants.SIZEOF_INT;
 
 	private IFileDB fileDB;

@@ -1,6 +1,7 @@
 package edu.rice.cs.hpcbase;
 
 import java.util.List;
+import java.util.Map;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
@@ -25,6 +26,16 @@ public interface IBaseData
 	List<IdTuple> getListOfIdTuples(IdTupleOption option);
 
 
+	/****
+	 * Retrieve the map of execution context id-tuple to its number of trace samples
+	 * 
+	 * @return {@code Map<IdTuple, Integer>}
+	 * 
+	 * @apiNote It is advised to invoke this function one and 
+	 * 			store the map since the map can be huge.
+	 */
+	Map<IdTuple, Integer> getMapFromExecutionContextToNumberOfTraces();
+	
 	/**
 	 * Retrieve the list of types of id tuples
 	 * @return
