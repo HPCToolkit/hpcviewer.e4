@@ -125,6 +125,21 @@ public class FilteredBaseDataTest
 			fbd.setIncludeIndex(indexes);
 			
 			checkIndex(fbd, idt, idtypes, false);
+			
+			// check number of trace samples
+			var mapProfileToSamples = fbd.getMapFromExecutionContextToNumberOfTraces();
+			assertNotNull(mapProfileToSamples);
+			assertTrue(mapProfileToSamples.size() == idt.size());
+			
+			var first = idt.get(0);			
+			var samples = mapProfileToSamples.get(first);
+			assertTrue(samples >= 0);
+			
+			var l1 = fileDb.getMinLoc(first);
+			var l2 = fileDb.getMaxLoc(first);
+			var rec = (l2 - l1) / fbd.getRecordSize();
+			
+			assertEquals(rec, samples.intValue());
 		}
 	}
 	

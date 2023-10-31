@@ -102,7 +102,7 @@ public abstract class AbstractBaseData implements ILocalBaseData
 		
 		mapTraceToRecord  = new HashMap<>();
 
-		var listIdTuples = getListOfIdTuples(IdTupleOption.BRIEF);		
+		var listIdTuples = baseDataFile.getIdTuple(IdTupleOption.BRIEF);		
 		
 		for(var idt: listIdTuples) {
 			var min = baseDataFile.getMinLoc(idt);
