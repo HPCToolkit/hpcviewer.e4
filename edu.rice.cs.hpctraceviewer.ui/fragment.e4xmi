@@ -83,7 +83,9 @@
       </children>
     </elements>
     <elements xsi:type="menu:MenuContribution" xmi:id="_h5pAUHg_Ee6YMMta4iCLfg" elementId="edu.rice.cs.hpctraceviewer.ui.menucontribution.filterBasedOnSamples" parentId="edu.rice.cs.hpcviewer.ui.menu.filter">
-      <children xsi:type="menu:HandledMenuItem" xmi:id="_01EIgHg_Ee6YMMta4iCLfg" elementId="id.filteremptytracelines" label="Filter empty trace lines" tooltip="Exclude empty trace lines (less than 3 samples)" mnemonics="e" command="_tQJlkHg_Ee6YMMta4iCLfg"/>
+      <children xsi:type="menu:HandledMenuItem" xmi:id="_01EIgHg_Ee6YMMta4iCLfg" elementId="id.filteremptytracelines" label="Filter empty trace lines" tooltip="Exclude empty trace lines (less than 3 samples)" mnemonics="e" command="_tQJlkHg_Ee6YMMta4iCLfg">
+        <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_SBXRUHhFEe6AfezsSz8Q-A" contributionURI="bundleclass://edu.rice.cs.hpctraceviewer.ui/edu.rice.cs.hpctraceviewer.ui.handlers.TraceDataExist"/>
+      </children>
     </elements>
   </fragments>
 </fragment:ModelFragments>
