@@ -32,5 +32,6 @@ Require-Bundle: javax.inject,
 Automatic-Module-Name: edu.rice.cs.hpctraceviewer.ui
 Import-Package: edu.rice.cs.hpcfilter.dialog,
  edu.rice.cs.hpctraceviewer.data,
+ javax.inject;version="1.0.0",
  org.eclipse.e4.core.contexts
 Bundle-ActivationPolicy: lazy
