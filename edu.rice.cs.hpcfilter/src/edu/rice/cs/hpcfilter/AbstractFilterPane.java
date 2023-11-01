@@ -292,7 +292,7 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 	 * @param eventList
 	 * @return
 	 */
-	private FilterList<FilterDataItem<T>> createFilterList(EventList<FilterDataItem<T>> eventList) {
+	protected FilterList<FilterDataItem<T>> createFilterList(EventList<FilterDataItem<T>> eventList) {
 		FilterList<FilterDataItem<T>> fl = new FilterList<>(eventList);
  		
 		textMatcher = new TextMatcherEditor<>( (List<String> baseList, FilterDataItem<T> element) 

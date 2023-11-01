@@ -120,7 +120,6 @@ public class RemoteFilteredData implements IFilteredData
 
 	@Override
 	public Map<IdTuple, Integer> getMapFromExecutionContextToNumberOfTraces() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new IllegalAccessError("Not yet supported for remote database");
 	}
 }
