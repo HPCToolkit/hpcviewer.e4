@@ -10,6 +10,7 @@ import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.services.IServiceConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
@@ -29,16 +30,38 @@ public class FilterEmptyTraces {
 		SpaceTimeDataController data = tracePart.getDataController();
 		
 		var traceData  = data.getBaseData();
-		var listProfiles = traceData.getDenseListIdTuple(IdTupleOption.BRIEF);
+		var listProfiles = traceData.getListOfIdTuples(IdTupleOption.BRIEF);
+		var listOriginalProfiles = traceData.getDenseListIdTuple(IdTupleOption.BRIEF);
 		var mapSamples = traceData.getMapFromExecutionContextToNumberOfTraces();
-		List<Integer> indexesInclude = FastList.newList();
 		
-		for(int i=0; i<listProfiles.size(); i++) {
-			var idt = listProfiles.get(i);
+		List<Integer> indexesInclude = FastList.newList();
+		int excludeTraces = 0;
+		
+		for(int i=0; i<listOriginalProfiles.size(); i++) {
+			var idt = listOriginalProfiles.get(i);
 			var samples = mapSamples.get(idt).intValue();
 			if (samples >= 3) {
 				indexesInclude.add(i);
+			} else {
+				excludeTraces++;
 			}
+		}
+		final var title = "Filtering empty traces";
+		
+		if (indexesInclude.isEmpty()) {			
+			MessageDialog.openWarning(
+					shell, 
+					title, 
+					"Warning: all traces have no sample.");
+			return;
+		} else if (indexesInclude.size() == listProfiles.size()) {
+			var toContinue = MessageDialog.openQuestion(
+					shell, 
+					title, 
+					"All filtered traces have samples, the operation is useless.\nDo you still want to continue?");
+			
+			if (!toContinue)
+				return;
 		}
 		traceData.setIncludeIndex(indexesInclude);
 		
@@ -47,5 +70,7 @@ public class FilterEmptyTraces {
 
 		TraceEventData eventData = new TraceEventData(data, tracePart, traceData);
 		eventBroker.post(IConstants.TOPIC_FILTER_RANKS, eventData);
+		
+		tracePart.showInfo(excludeTraces + " trace(s) have been excluded.");
 	}
 }

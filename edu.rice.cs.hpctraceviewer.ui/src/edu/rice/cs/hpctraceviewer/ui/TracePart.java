@@ -499,18 +499,18 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 	}
 
 	@Override
-	public void showErrorMessage(String str) {
-		// unused		
+	public void showErrorMessage(String message) {
+		tbtmTraceView.showMessage(message);
 	}
 
 	@Override
 	public void showInfo(String message) {
-		// unused		
+		tbtmTraceView.showMessage(message);
 	}
 
 	@Override
 	public void showWarning(String message) {
-		// unused		
+		tbtmTraceView.showMessage(message);
 	}
 
 	@Override
