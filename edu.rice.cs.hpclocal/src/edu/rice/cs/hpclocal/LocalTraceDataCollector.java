@@ -21,8 +21,6 @@ public class LocalTraceDataCollector extends AbstractTraceDataCollector
 {
 	//	tallent: safe to assume version 1.01 and greater here
 	public static final int HeaderSzMin = Header.MagicLen + Header.VersionLen + Header.EndianLen + Header.FlagsLen;
-	public static final int RecordSzMin = Constants.SIZEOF_LONG // time stamp
-										+ Constants.SIZEOF_INT; // call path id
 	
 	public static final float NUM_PIXELS_TOLERATED = 1.0f;
 	

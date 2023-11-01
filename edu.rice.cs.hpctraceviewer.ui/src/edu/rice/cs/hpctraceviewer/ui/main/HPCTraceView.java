@@ -133,6 +133,18 @@ public class HPCTraceView extends AbstractBaseItem
 	public void redraw() {
 		canvasMain.refresh(false);
 	}
+	
+	
+	
+	/****
+	 * Display a message on top of the view.
+	 * The message will only appear for a couple of seconds, and then disappear.
+	 * 
+	 * @param message
+	 */
+	public void showMessage(String message) {
+		canvasMain.setMessage(message);
+	}
 
 	@Override
 	public void setInput(Object input) {

@@ -1,5 +1,7 @@
 package edu.rice.cs.hpcbase;
 
+import edu.rice.cs.hpcdata.util.Constants;
+
 public interface BaseConstants 
 {
 	enum ViewType {COLLECTIVE, INDIVIDUAL}
@@ -13,4 +15,8 @@ public interface BaseConstants
 	 * R, G, and B components is less than this number).*/
 	int DARKEST_COLOR_FOR_BLACK_TEXT = 384;
 	
+	
+	int TRACE_RECORD_SIZE = Constants.SIZEOF_LONG // time stamp
+					        + Constants.SIZEOF_INT; // call path id
+
 }

@@ -1,13 +1,16 @@
 package edu.rice.cs.hpclocal;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import edu.rice.cs.hpcbase.BaseConstants;
 import edu.rice.cs.hpcdata.db.IFileDB;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
-import edu.rice.cs.hpcdata.util.Constants;
+
 
 /*********************************************************
  * 
@@ -18,6 +21,7 @@ import edu.rice.cs.hpcdata.util.Constants;
 public abstract class AbstractBaseData implements ILocalBaseData 
 {
 	protected final IFileDB baseDataFile;
+	private Map<IdTuple, Integer> mapTraceToRecord;
 
 	protected AbstractBaseData(IFileDB baseDataFile){
 		this.baseDataFile = baseDataFile;
@@ -60,7 +64,13 @@ public abstract class AbstractBaseData implements ILocalBaseData
 	 */
 	@Override
 	public void dispose() {
-		this.baseDataFile.dispose();
+		if (baseDataFile != null)
+			baseDataFile.dispose();
+		
+		if (mapTraceToRecord != null)
+			mapTraceToRecord.clear();
+		
+		mapTraceToRecord = null;
 	}
 	
 
@@ -70,7 +80,7 @@ public abstract class AbstractBaseData implements ILocalBaseData
 	 */
 	@Override
 	public int getRecordSize() {
-		return Constants.SIZEOF_INT + Constants.SIZEOF_LONG;
+		return BaseConstants.TRACE_RECORD_SIZE;
 	}
 
 	@Override
@@ -81,5 +91,26 @@ public abstract class AbstractBaseData implements ILocalBaseData
 	@Override
 	public boolean isGPU(int rank) {
 		return baseDataFile.isGPU(rank);
+	}
+
+
+
+	@Override
+	public Map<IdTuple, Integer> getMapFromExecutionContextToNumberOfTraces() {
+		if (mapTraceToRecord != null)
+			return mapTraceToRecord;
+		
+		mapTraceToRecord  = new HashMap<>();
+
+		var listIdTuples = baseDataFile.getIdTuple(IdTupleOption.BRIEF);		
+		
+		for(var idt: listIdTuples) {
+			var min = baseDataFile.getMinLoc(idt);
+			var max = baseDataFile.getMaxLoc(idt);
+			int records = (int) ((max-min) / getRecordSize());
+			
+			mapTraceToRecord.put(idt, records);
+		}
+		return mapTraceToRecord;
 	}
 }

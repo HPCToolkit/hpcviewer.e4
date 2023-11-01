@@ -2,6 +2,8 @@ package edu.rice.cs.hpcremote.data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 import edu.rice.cs.hpcbase.IFilteredData;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
@@ -113,5 +115,12 @@ public class RemoteFilteredData implements IFilteredData
 	@Override
 	public List<IdTuple> getDenseListIdTuple(IdTupleOption option) {
 		return listOriginalIdTuples;
+	}
+
+
+	@Override
+	public Map<IdTuple, Integer> getMapFromExecutionContextToNumberOfTraces() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
