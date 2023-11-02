@@ -8,7 +8,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpcbase.ITraceManager;
@@ -46,9 +45,12 @@ public class DatabaseLocal implements IDatabaseLocal
 			var filename = experimentManager.openFileExperiment(shell);
 			if (filename != null && !filename.isEmpty()) {
 				status = setDirectory(filename);
+			} else {
+				errorMsg = filename + ": invalid directory.";
+				status = DatabaseStatus.INVALID;
 			}
 		} catch (Exception e) {
-			MessageDialog.openError(shell, "File to open the database", e.getMessage());
+			errorMsg = "File to open the database: " + e.getMessage();
 			status = DatabaseStatus.INVALID; 
 		}
 		return status;
@@ -113,10 +115,9 @@ public class DatabaseLocal implements IDatabaseLocal
 	
 	
 	public String getErrorMessage() {
-		if (errorMsg == null)
+		if (errorMsg != null)
 			return errorMsg;
 		
-		errorMsg = null;
 		return "Unknown error";
 	}
 

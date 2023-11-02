@@ -11,8 +11,8 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.eclipse.core.filesystem.EFS;
-import org.eclipse.core.filesystem.IFileInfo;
 import org.eclipse.core.filesystem.IFileStore;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.e4.core.di.annotations.Creatable;
@@ -108,7 +108,7 @@ public class DatabaseCollection
 			final EPartService   partService,
 			final IEventBroker   broker,
 			final EModelService  modelService, 
-			@Named(IServiceConstants.ACTIVE_SHELL) Shell myShell) throws InterruptedException {
+			@Named(IServiceConstants.ACTIVE_SHELL) Shell myShell) throws InterruptedException, CoreException, URISyntaxException {
 		
 		this.eventBroker    = broker;
 		this.application    = application;
@@ -132,6 +132,11 @@ public class DatabaseCollection
 				path = arg;
 		}
 		var convertedPath = convertPathToLocalFileSystem(path);
+		if (convertedPath == null && path != null)
+			MessageDialog.openError(
+					shell, 
+					"Fail top open the database", 
+					path + " is not found.\nTry to specify with the absolute full path.");
 		
 		var window = application.getSelectedElement();
 		if (window == null) {
@@ -672,34 +677,35 @@ public class DatabaseCollection
 	 * @param expManager the experiment manager
 	 * @param directoryOrXMLFile path to the database
 	 * @return
-	 * @throws Exception 
+	 * @throws CoreException 
+	 * @throws URISyntaxException 
 	 */
-	private String convertPathToLocalFileSystem(String directoryOrXMLFile)  {
+	private String convertPathToLocalFileSystem(String directoryOrXMLFile) {
 		if (directoryOrXMLFile == null || directoryOrXMLFile.isEmpty())
 			return null;
 		
-    	IFileStore fileStore;
-
-		try {
-			fileStore = EFS.getLocalFileSystem().getStore(new URI(directoryOrXMLFile));
-			
-		} catch (URISyntaxException e) {
-			// somehow, URI may throw an exception for certain schemes. 
-			// in this case, let's do it traditional way
-			fileStore = EFS.getLocalFileSystem().getStore(new Path(directoryOrXMLFile));
-			statusReporter.warn("Unable to locate " + directoryOrXMLFile, e);
-		}
-    	IFileInfo objFileInfo = fileStore.fetchInfo();
-
-    	if (!objFileInfo.exists())
-    		return null;
-
+    	var objFileInfo = new File(directoryOrXMLFile);
+    	if (!objFileInfo.exists()) {
+        	IFileStore fileStore = null;
+    		try {
+    			// first try with the URI format
+				var uri = new URI(directoryOrXMLFile);
+				fileStore = EFS.getLocalFileSystem().getStore(uri);
+			} catch (URISyntaxException e) {
+				// second, try with the Eclipse's path
+				var path = new Path(directoryOrXMLFile);
+				fileStore = EFS.getLocalFileSystem().getStore(path);
+			}
+    		if (fileStore == null || !fileStore.fetchInfo().exists())
+    			return null;
+    		
+			objFileInfo = new File(fileStore.fetchInfo().getName());
+    	}
     	
     	if (objFileInfo.isDirectory()) {
-    		return objFileInfo.getName();
+    		return objFileInfo.getAbsolutePath();
     	} 
-		fileStore = EFS.getLocalFileSystem().fromLocalFile(new File(directoryOrXMLFile));
-    	return fileStore.getName();
+    	return objFileInfo.getParent();
 	}
 	
 
