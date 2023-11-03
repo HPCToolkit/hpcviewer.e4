@@ -193,15 +193,6 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		redraw();
 	}
 	
-	private int convertRankToPixel(int line, int pixels, int interval) {
-		if (pixels > interval) {
-			float ratio = (float) pixels / interval;
-			return (int) (line * ratio);
-		}
-		float ratio = (float) pixels / interval;
-		return (int) (line * ratio); 
-	}
-	
 	@Override
 	public void dispose() {
 		if (tooltip != null) {

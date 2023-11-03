@@ -75,7 +75,19 @@
 		</dependency>
 		<dependency>
 			<groupId>edu.rice.cs.hpcviewer</groupId>
+			<artifactId>edu.rice.cs.hpctraceviewer.data</artifactId>
+			<version>6.0.0-SNAPSHOT</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>edu.rice.cs.hpcviewer</groupId>
 			<artifactId>edu.rice.cs.hpctest.local</artifactId>
+			<version>6.0.0-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>edu.rice.cs.hpcviewer</groupId>
+			<artifactId>edu.rice.cs.hpctest.trace</artifactId>
 			<version>6.0.0-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
