@@ -46,8 +46,7 @@ public class DatabaseLocal implements IDatabaseLocal
 			if (filename != null && !filename.isEmpty()) {
 				status = setDirectory(filename);
 			} else {
-				errorMsg = filename + ": invalid directory.";
-				status = DatabaseStatus.INVALID;
+				status = DatabaseStatus.CANCEL;
 			}
 		} catch (Exception e) {
 			errorMsg = "File to open the database: " + e.getMessage();

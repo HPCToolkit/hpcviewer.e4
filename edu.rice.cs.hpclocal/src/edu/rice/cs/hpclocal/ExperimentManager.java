@@ -52,7 +52,10 @@ public class ExperimentManager
 	/**
 	 * Attempt to open an experiment database if valid then
 	 * open the scope view  
-	 * @return true if everything is OK. false otherwise
+	 * 
+	 * @return {@code String} the directory of the database if everything is OK. 
+	 * 	{@code null} otherwise
+	 * 
 	 * @throws Exception 
 	 */
 	public String openFileExperiment(Shell shell) throws Exception {
