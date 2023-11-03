@@ -143,6 +143,7 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		IdTuple idtupleOld  = null;
 		int []oldColorIndex = new int[5];
 		final ProcessTimelineService timeLine = data.getProcessTimelineService();
+		final int firstProc = attribute.getProcessBegin();
 		
 		for (int i=0; i<timeLine.getNumProcessTimeline(); i++) {
 			var procTimeline = timeLine.getProcessTimeline(i);
@@ -150,8 +151,8 @@ public class CanvasAxisY extends AbstractAxisCanvas
 				continue;
 			
 			var rank = i;
-			final int y_curr = convertRankToPixel(rank,   attribute.getPixelVertical(), timeLine.getNumProcessTimeline());
-			final int y_next = convertRankToPixel(rank+1, attribute.getPixelVertical(), timeLine.getNumProcessTimeline());
+			final int y_curr = attribute.convertRankToPixel(firstProc + rank);
+			final int y_next = attribute.convertRankToPixel(firstProc + rank + 1);
 			final int height = y_next - y_curr + 1;
 
 			IdTuple idtuple  = procTimeline.getProfileIdTuple();
@@ -262,10 +263,7 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		public IdTuple getProfileFromPixel(int line) {		
 			var listProfiles = data.getBaseData().getListOfIdTuples(IdTupleOption.BRIEF);
 			var attributes = data.getTraceDisplayAttribute();
-			int numProfiles = attributes.getProcessInterval();		
-			int index = 0;
-			
-			index = attributes.getProcessBegin() + line * numProfiles / attributes.getPixelVertical();
+			var index = attributes.convertPixelToRank(line);
 
 			return listProfiles.get(Math.min(listProfiles.size()-1, index));
 		}

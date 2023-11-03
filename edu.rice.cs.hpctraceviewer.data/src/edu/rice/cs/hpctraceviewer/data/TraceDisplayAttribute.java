@@ -374,12 +374,7 @@ public class TraceDisplayAttribute
 		return (double)numPixelsV / getProcessInterval();
 	}
 
-	
-	public int convertTraceLineToRank(int traceLineY) 
-	{
-		return getProcessBegin()+ traceLineY;    	
-	}
-	
+		
 	public int convertPixelToRank(int pixelY) 
 	{
 		int process = 0;
@@ -391,7 +386,7 @@ public class TraceDisplayAttribute
     	}
     	else
     	{
-    		process = (int)(getProcessBegin()+(pixelY*(getProcessInterval()))/numPixelsV);
+    		process = (getProcessBegin()+(pixelY*(getProcessInterval()))/numPixelsV);
     	}
     	return process;
 	}
