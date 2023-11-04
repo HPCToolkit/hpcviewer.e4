@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -112,12 +113,45 @@ public class DisplayAttributeTest
 	}
 
 	@Test
-	public void testTraceDisplayAttribute() {
+	public void testTime() {
 		for(var stdc: listData) {
 			var attribute = stdc.getTraceDisplayAttribute();
 
 			var time = attribute.getDisplayTimeUnit();
 			assertNotNull(time);
+			
+			var timeUnit = attribute.computeDisplayTimeUnit(stdc);
+			assertNotNull(timeUnit);
+			
+			var tuIncr =  attribute.increment(timeUnit);
+			assertFalse(timeUnit == tuIncr);
+			
+			var cmp = tuIncr.compareTo(timeUnit);
+			assertTrue(cmp > 0);
+			
+			var tuDecr = attribute.decrement(tuIncr);
+			assertEquals(timeUnit, tuDecr);
+			
+			long t0 = attribute.convertPixelToTime(0);
+			assertEquals(t0, attribute.getTimeBegin());
+			
+			long t1 = attribute.convertPixelToTime(PIXELS_H);
+			assertEquals(t1, attribute.getTimeEnd());
+			
+			assertTrue(t1 >= t0);
+			
+			var ordNano = attribute.getTimeUnitOrdinal(TimeUnit.NANOSECONDS);
+			assertEquals(0, ordNano);
+			
+			var ordDay = attribute.getTimeUnitOrdinal(TimeUnit.DAYS);
+			assertEquals(6, ordDay);
+		}
+	}
+	
+	@Test
+	public void testRanks() {
+		for(var stdc: listData) {
+			var attribute = stdc.getTraceDisplayAttribute();
 			
 			assertEquals(PIXELS_H, attribute.getPixelHorizontal());			
 			assertEquals(PIXELS_V, attribute.getPixelVertical());			
@@ -150,4 +184,5 @@ public class DisplayAttributeTest
 			assertEquals(firstPixelRank, firstRankPixel);
 		}
 	}
+	
 }
