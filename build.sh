@@ -195,8 +195,8 @@ echo " Building the viewer"
 echo "=================================="
 if [ $CHECK_PACKAGE != "0" ]; then
 	mvn clean verify -Pjacoco
-	if [ -d tests/edu.rice.cs.hpcviewer.test.report/target/site/jacoco-aggregate/ ]; then
-		echo "Code coverage result: tests/edu.rice.cs.hpcviewer.test.report/target/site/jacoco-aggregate/"
+	if [ -d tests/edu.rice.cs.hpctest.report/target/site/jacoco-aggregate/ ]; then
+		echo "Code coverage result: tests/edu.rice.cs.hpctest.report/target/site/jacoco-aggregate/"
 	fi
 else
 	mvn clean package

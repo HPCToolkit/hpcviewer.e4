@@ -24,6 +24,6 @@
   <module>edu.rice.cs.hpctest.trace</module>
   <module>edu.rice.cs.hpctest.local</module>
   <module>edu.rice.cs.hpctest.viewer</module>
-  <module>edu.rice.cs.hpcviewer.test.report</module>
+  <module>edu.rice.cs.hpctest.report</module>
  </modules>
 </project>

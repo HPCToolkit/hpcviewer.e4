@@ -91,10 +91,10 @@ test amd64:
   # Run Maven to build and test everything, but delay the exit until the end
   - mvn --fail-at-end clean verify -Pjacoco || FAIL=1
   # Report the coverage % to the log
-  - ./scripts/extract-coverage.sh tests/edu.rice.cs.hpcviewer.test.report/target/site/jacoco-aggregate/jacoco.xml
+  - ./scripts/extract-coverage.sh tests/edu.rice.cs.hpctest.report/target/site/jacoco-aggregate/jacoco.xml
   # Convert the JaCoCo results into Cobertura for GitLab visualization
   - >-
-    python3 scripts/cover2cover.py tests/edu.rice.cs.hpcviewer.test.report/target/site/jacoco-aggregate/jacoco.xml
+    python3 scripts/cover2cover.py tests/edu.rice.cs.hpctest.report/target/site/jacoco-aggregate/jacoco.xml
     $CI_PROJECT_DIR/edu.rice.cs.*/src
     $CI_PROJECT_DIR/externals/*/src
     > coverage.xml
@@ -104,7 +104,7 @@ test amd64:
   artifacts:
     when: always
     paths:
-    - tests/edu.rice.cs.hpcviewer.test.report/target/site/jacoco-aggregate/
+    - tests/edu.rice.cs.hpctest.report/target/site/jacoco-aggregate/
     reports:
       junit: tests/*/target/surefire-reports/TEST-*.xml
       coverage_report:

@@ -1,0 +1,36 @@
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>edu.rice.cs.hpcviewer</groupId>
+		<artifactId>tests</artifactId>
+		<version>6.0.0-SNAPSHOT</version>
+	</parent>
+	<artifactId>edu.rice.cs.hpctest.trace</artifactId>
+	<packaging>eclipse-test-plugin</packaging>
+ 
+<profiles>
+    <profile>
+        <id>platform-mac</id>
+        <activation>
+            <os>
+                <family>mac</family>
+            </os>
+        </activation>
+        <build>
+            <plugins>
+                <plugin>
+                    <groupId>org.eclipse.tycho</groupId>
+                    <artifactId>tycho-surefire-plugin</artifactId>
+		   			<version>${tycho.version}</version>
+                    <configuration>
+                        <argLine>-XstartOnFirstThread</argLine>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </build>
+    </profile>
+</profiles>
+</project>
+

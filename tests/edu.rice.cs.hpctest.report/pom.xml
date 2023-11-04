@@ -10,7 +10,7 @@
   		<relativePath>..</relativePath>
 	</parent>
 
-	<artifactId>edu.rice.cs.hpcviewer.tests.report</artifactId>
+	<artifactId>edu.rice.cs.hpctest.report</artifactId>
 	<name>Aggregate Test Report</name>
 	
 	
