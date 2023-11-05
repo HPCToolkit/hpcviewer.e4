@@ -9,7 +9,10 @@ Require-Bundle: edu.rice.cs.hpcdata;bundle-version="8.2.0",
  edu.rice.cs.hpctraceviewer.data,
  edu.rice.cs.hpclocal;bundle-version="6.0.0",
  edu.rice.cs.hpctest.util;bundle-version="1.0.0",
- org.eclipse.core.runtime
+ org.eclipse.core.runtime,
+ edu.rice.cs.hpctraceviewer.ui;bundle-version="6.0.0",
+ org.eclipse.swt;bundle-version="3.116.100",
+ org.eclipse.equinox.registry
 Bundle-Vendor: Rice University
 Automatic-Module-Name: edu.rice.cs.hpctest.trace
 Bundle-RequiredExecutionEnvironment: JavaSE-11

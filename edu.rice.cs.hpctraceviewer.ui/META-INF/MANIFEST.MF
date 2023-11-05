@@ -5,7 +5,9 @@ Bundle-SymbolicName: edu.rice.cs.hpctraceviewer.ui;singleton:=true
 Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Rice University
 Export-Package: edu.rice.cs.hpctraceviewer.ui,
+ edu.rice.cs.hpctraceviewer.ui.base,
  edu.rice.cs.hpctraceviewer.ui.dialog,
+ edu.rice.cs.hpctraceviewer.ui.internal,
  edu.rice.cs.hpctraceviewer.ui.main
 Require-Bundle: javax.inject,
  javax.annotation,
