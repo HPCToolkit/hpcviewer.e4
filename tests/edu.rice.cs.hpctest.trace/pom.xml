@@ -10,27 +10,5 @@
 	<artifactId>edu.rice.cs.hpctest.trace</artifactId>
 	<packaging>eclipse-test-plugin</packaging>
  
-<profiles>
-    <profile>
-        <id>platform-mac</id>
-        <activation>
-            <os>
-                <family>mac</family>
-            </os>
-        </activation>
-        <build>
-            <plugins>
-                <plugin>
-                    <groupId>org.eclipse.tycho</groupId>
-                    <artifactId>tycho-surefire-plugin</artifactId>
-		   			<version>${tycho.version}</version>
-                    <configuration>
-                        <argLine>-XstartOnFirstThread</argLine>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </build>
-    </profile>
-</profiles>
 </project>
 
