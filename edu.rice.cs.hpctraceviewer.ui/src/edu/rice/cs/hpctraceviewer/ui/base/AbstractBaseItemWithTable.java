@@ -105,7 +105,7 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 	
 	private IEventBroker broker;
 
-	public AbstractBaseItemWithTable(CTabFolder parent, int style) {
+	protected AbstractBaseItemWithTable(CTabFolder parent, int style) {
 		super(parent, style);
 	}
 
@@ -122,7 +122,7 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 	@Override
 	public void setInput(Object input) {
 		this.input = (SpaceTimeDataController) input;
-		Display.getDefault().asyncExec(()-> createTable());
+		Display.getDefault().asyncExec(this::createTable);
 	}
 
 	
@@ -137,15 +137,15 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 		// body layer
 		rowDataProvider = getRowDataProvider(eventList);
 		dataLayer = new DataLayer(rowDataProvider);
-		GlazedListsEventLayer<StatisticItem> listEventLayer = new GlazedListsEventLayer<StatisticItem>(dataLayer, eventList);
+		GlazedListsEventLayer<StatisticItem> listEventLayer = new GlazedListsEventLayer<>(dataLayer, eventList);
 		DefaultBodyLayerStack bodyLayerStack = new DefaultBodyLayerStack(listEventLayer);
 		bodyLayerStack.setConfigLabelAccumulator(new TableLabelAccumulator());
 		
 		pack();
 		
 		// column layer
-		IColumnPropertyAccessor<StatisticItem> columnAccessor = getColumnAccessor();
-		IDataProvider columnHeaderDataProvider = getColumnDataProvider(columnAccessor);
+		IColumnPropertyAccessor<StatisticItem> colAccessor = getColumnAccessor();
+		IDataProvider columnHeaderDataProvider = getColumnDataProvider(colAccessor);
 		DataLayer columnHeaderDataLayer = new DefaultColumnHeaderDataLayer(columnHeaderDataProvider);
 		ColumnHeaderLayer columnHeaderLayer = new ColumnHeaderLayer(columnHeaderDataLayer, bodyLayerStack, bodyLayerStack.getSelectionLayer());
 		
@@ -154,7 +154,7 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
         ConfigRegistry configRegistry = new ConfigRegistry();
 		
 		ISortModel sortModel = new TableSortModel(eventList);
-		sortHeaderLayer = new SortHeaderLayer<StatisticItem>(columnHeaderLayer, sortModel);
+		sortHeaderLayer = new SortHeaderLayer<>(columnHeaderLayer, sortModel);
 		
 		// composite layer
         CompositeLayer compositeLayer = new CompositeLayer(1, 2);
@@ -281,10 +281,10 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 	 */
 	protected IDataProvider getColumnDataProvider(final IColumnPropertyAccessor<StatisticItem> accessor) {
 				
-		IDataProvider dataProvider = new IDataProvider() {
+		return new IDataProvider() {
 			
 			@Override
-			public void setDataValue(int columnIndex, int rowIndex, Object newValue) {}
+			public void setDataValue(int columnIndex, int rowIndex, Object newValue) { /* read-only table */ }
 			
 			@Override
 			public int getRowCount() {
@@ -301,7 +301,6 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 				return accessor.getColumnCount();
 			}
 		};
-		return dataProvider;
 	}
 	
 	
@@ -315,14 +314,14 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 		if (columnAccessor != null)
 			return columnAccessor;
 		
-		IColumnPropertyAccessor<StatisticItem> columnAccessor = new IColumnPropertyAccessor<StatisticItem>() {
+		return new IColumnPropertyAccessor<StatisticItem>() {
 			@Override
 			public Object getDataValue(StatisticItem rowObject, int columnIndex) {
 				return TITLE[columnIndex];
 			}
 
 			@Override
-			public void setDataValue(StatisticItem rowObject, int columnIndex, Object newValue) {}
+			public void setDataValue(StatisticItem rowObject, int columnIndex, Object newValue) { /* read-only table */ }
 
 			@Override
 			public int getColumnCount() {
@@ -342,8 +341,7 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 					return 1;
 				return 0;
 			}			
-		};		
-		return columnAccessor;
+		};
 	}
 	
 	
@@ -351,10 +349,10 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 	public void propertyChange(PropertyChangeEvent event) {
 
 		final String property   = event.getProperty();		
-		boolean need_to_refresh = (property.equals(PreferenceConstants.ID_FONT_GENERIC) || 
+		boolean toBeRefreshed = (property.equals(PreferenceConstants.ID_FONT_GENERIC) || 
 								   property.equals(PreferenceConstants.ID_FONT_METRIC)); 
 		
-		if (need_to_refresh) {
+		if (toBeRefreshed) {
 			tableConfiguration.configureRegistry(natTable.getConfigRegistry());
 			
 			// need to pack first, then refresh to ensure the rows and are well resized
@@ -402,7 +400,7 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 		
 		@Override
 		public List<Integer> getSortedColumnIndexes() {
-			List<Integer> indexes = new ArrayList<Integer>(1);
+			List<Integer> indexes = new ArrayList<>(1);
 			indexes.add(sortedColumn);
 			return indexes;
 		}
@@ -427,10 +425,7 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 		@SuppressWarnings("rawtypes")
 		@Override
 		public List<Comparator> getComparatorsForColumnIndex(int columnIndex) {
-			List<Comparator> list = new ArrayList<Comparator>(1);
-			list.add(getColumnComparator(columnIndex));
-			
-			return list;
+			return List.of(getColumnComparator(columnIndex));
 		}
 
 		@Override
@@ -449,7 +444,7 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 		}
 
 		@Override
-		public void clear() {}
+		public void clear() { /* read-only table */ }
 	}
 	
 	
@@ -493,6 +488,9 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 				else if (percent1 > percent2)
 					result = -1;
 				return factor * result;
+				
+			default:
+				// do nothing. It must be an error
 			}
 			return 0;
 		}
@@ -506,9 +504,9 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 	 ******************************************************************/
 	private static class TableLabelAccumulator implements IConfigLabelProvider 
 	{
-		public final static String LABEL_COLOR     = "color";
-		public final static String LABEL_PROCEDURE = "procedure";
-		public final static String LABEL_NUMBER    = "number";
+		public static final String LABEL_COLOR     = "color";
+		public static final String LABEL_PROCEDURE = "procedure";
+		public static final String LABEL_NUMBER    = "number";
 		
 		private final List<String> labels = Arrays.asList(LABEL_COLOR, LABEL_PROCEDURE, LABEL_NUMBER);
 		
@@ -538,7 +536,7 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 		}
 
 		@Override
-		public void configureLayer(ILayer layer) {}
+		public void configureLayer(ILayer layer) { /* read-only table */ }
 
 		@Override
 		public void configureRegistry(IConfigRegistry configRegistry) {
@@ -597,7 +595,7 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 		}
 
 		@Override
-		public void configureUiBindings(UiBindingRegistry uiBindingRegistry) {}		
+		public void configureUiBindings(UiBindingRegistry uiBindingRegistry) { /* read-only table */ }		
 	}
 	
 	
@@ -639,7 +637,7 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 	 ******************************************************************/
 	private static class BaseTooltip extends NatTableContentTooltip
 	{
-		private final static int MAX_CHARS_WRAP = 80;
+		private static final int MAX_CHARS_WRAP = 80;
 		
 		public BaseTooltip(NatTable natTable) {
 			super(natTable, GridRegion.BODY, GridRegion.COLUMN_HEADER);
@@ -689,7 +687,7 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 
 		
 		@Override
-		public void setDataValue(int columnIndex, int rowIndex, Object newValue) {}
+		public void setDataValue(int columnIndex, int rowIndex, Object newValue) { /* read-only table */ }
 
 		@Override
 		public int getColumnCount() {
@@ -719,7 +717,7 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 	 * Every time the event arrives, the table will be refreshed.
 	 * @return name of the event topic
 	 */
-	abstract protected String getTopicEvent();
+	protected abstract String getTopicEvent();
 	
 	/***
 	 * Get the list of items to be displayed in the table based on input from summary view.
@@ -727,5 +725,5 @@ implements EventHandler, DisposeListener, IPropertyChangeListener
 	 * @param input
 	 * @return
 	 */
-	abstract protected List<StatisticItem> getListItems(Object input);
+	protected abstract List<StatisticItem> getListItems(Object input);
 }
