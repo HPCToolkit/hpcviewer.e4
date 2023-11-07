@@ -36,12 +36,11 @@ import edu.rice.cs.hpctraceviewer.ui.blamestat.CpuBlameAnalysis;
 import edu.rice.cs.hpctraceviewer.ui.blamestat.HPCBlameView;
 import edu.rice.cs.hpctraceviewer.ui.callstack.HPCCallStackView;
 import edu.rice.cs.hpctraceviewer.ui.context.BaseTraceContext;
+import edu.rice.cs.hpctraceviewer.ui.debug.DebugView;
 import edu.rice.cs.hpctraceviewer.ui.depth.HPCDepthView;
 import edu.rice.cs.hpctraceviewer.ui.depthEditor.DepthEditor;
 import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
 import edu.rice.cs.hpctraceviewer.ui.main.HPCTraceView;
-import edu.rice.cs.hpctraceviewer.ui.main.DebugView;
-
 import edu.rice.cs.hpctraceviewer.ui.minimap.SpaceTimeMiniCanvas;
 import edu.rice.cs.hpctraceviewer.ui.statistic.HPCStatisticView;
 import edu.rice.cs.hpctraceviewer.ui.summary.HPCSummaryView;
@@ -146,11 +145,6 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 		
 		tbtmTraceView = new HPCTraceView(tabFolderTopLeft, SWT.NONE);
 		createTabItem(tbtmTraceView, "Main view", tabFolderTopLeft, eventBroker);
-		
-		if (ViewerPreferenceManager.INSTANCE.getDebugMode()) {
-			tbtmDebugView = new DebugView(tabFolderTopLeft, 0);
-			createTabItem(tbtmDebugView, "Debug view", tabFolderTopLeft, eventBroker);
-		}
 		
 		// ---------------
 		// depth view
@@ -286,6 +280,28 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 		eventBroker.subscribe(BaseConstants.TOPIC_HPC_REMOVE_DATABASE, this);
 	}
 	
+	
+	/***
+	 * Create a closable view to show debug information of the displayed traces
+	 */
+	public void createDebugView() {
+		if (tbtmDebugView == null || tbtmDebugView.isDisposed()) {
+			tbtmDebugView = new DebugView(tabFolderTopLeft, 0);
+			
+			createTabItem(tbtmDebugView, "Debug view", tabFolderTopLeft, eventBroker);
+			
+			tbtmDebugView.setInput(stdc);
+		}
+	}
+	
+	
+	/***
+	 * Check if the debug view is already shown or not
+	 * @return
+	 */
+	public boolean isDebugViewShown() {
+		return (tbtmDebugView != null && !tbtmDebugView.isDisposed() && stdc != null);
+	}
 	
 	private void updateToolItem() {
 		tiZoomIn.setEnabled(tbtmDepthView.canZoomIn());

@@ -16,6 +16,7 @@
     <elements xsi:type="commands:Command" xmi:id="_eM3AoNXSEeqsK-PEIuqpJw" elementId="edu.rice.cs.hpctraceviewer.ui.command.filter" commandName="Filter ranks"/>
     <elements xsi:type="commands:Command" xmi:id="_79jFkNX7EeqsK-PEIuqpJw" elementId="edu.rice.cs.hpctraceviewer.ui.command.colorMap" commandName="Procedure-color Map"/>
     <elements xsi:type="commands:Command" xmi:id="_tQJlkHg_Ee6YMMta4iCLfg" elementId="edu.rice.cs.hpctraceviewer.ui.command.filterEmptySamples" commandName="Filter empty trace lines"/>
+    <elements xsi:type="commands:Command" xmi:id="_zSQFwH2AEe6Kpv54joNljw" elementId="edu.rice.cs.hpctraceviewer.ui.command.showDebug" commandName="Show debug view"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_kGpPEM0tEeqj2OdGrGxV1w" featurename="handlers" parentElementId="xpath:/">
     <elements xsi:type="commands:Handler" xmi:id="_opJJ4M0tEeqj2OdGrGxV1w" elementId="edu.rice.cs.hpctraceviewer.ui.handler.home" contributionURI="bundleclass://edu.rice.cs.hpctraceviewer.ui/edu.rice.cs.hpctraceviewer.ui.handlers.Home" command="_gVae0Mb7EeqOfJ3pUwSuCg"/>
@@ -31,6 +32,7 @@
     <elements xsi:type="commands:Handler" xmi:id="_g55OoNXSEeqsK-PEIuqpJw" elementId="edu.rice.cs.hpctraceviewer.ui.handler.filter" contributionURI="bundleclass://edu.rice.cs.hpctraceviewer.ui/edu.rice.cs.hpctraceviewer.ui.handlers.FilterRanks" command="_eM3AoNXSEeqsK-PEIuqpJw"/>
     <elements xsi:type="commands:Handler" xmi:id="_ACHHMNX8EeqsK-PEIuqpJw" elementId="edu.rice.cs.hpctraceviewer.ui.handler.colorMap" contributionURI="bundleclass://edu.rice.cs.hpctraceviewer.ui/edu.rice.cs.hpctraceviewer.ui.handlers.ProcedureColorMap" command="_79jFkNX7EeqsK-PEIuqpJw"/>
     <elements xsi:type="commands:Handler" xmi:id="_Cn3xEHhAEe6YMMta4iCLfg" elementId="edu.rice.cs.hpctraceviewer.ui.handler.filterEmpty" contributionURI="bundleclass://edu.rice.cs.hpctraceviewer.ui/edu.rice.cs.hpctraceviewer.ui.handlers.FilterEmptyTraces" command="_tQJlkHg_Ee6YMMta4iCLfg"/>
+    <elements xsi:type="commands:Handler" xmi:id="_4BGagH2AEe6Kpv54joNljw" elementId="edu.rice.cs.hpctraceviewer.ui.handler.showDebug" contributionURI="bundleclass://edu.rice.cs.hpctraceviewer.ui/edu.rice.cs.hpctraceviewer.ui.handlers.ShowDebugView" command="_zSQFwH2AEe6Kpv54joNljw"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_JSls4MxgEeqnLcCrkreYSw" featurename="descriptors" parentElementId="xpath:/">
     <elements xsi:type="basic:PartDescriptor" xmi:id="_TGczoMxgEeqnLcCrkreYSw" elementId="edu.rice.cs.hpctraceviewer.ui.partdescriptor.trace" label="Trace data" iconURI="platform:/plugin/edu.rice.cs.hpctraceviewer.ui/resources/hpctraceviewer016.png" allowMultiple="true" contributionURI="bundleclass://edu.rice.cs.hpctraceviewer.ui/edu.rice.cs.hpctraceviewer.ui.TracePart">
@@ -85,6 +87,11 @@
     <elements xsi:type="menu:MenuContribution" xmi:id="_h5pAUHg_Ee6YMMta4iCLfg" elementId="edu.rice.cs.hpctraceviewer.ui.menucontribution.filterBasedOnSamples" parentId="edu.rice.cs.hpcviewer.ui.menu.filter">
       <children xsi:type="menu:HandledMenuItem" xmi:id="_01EIgHg_Ee6YMMta4iCLfg" elementId="id.filteremptytracelines" label="Filter execution contexts based on samples" tooltip="Exclude empty trace lines (trace lines that have less than 2 samples)" mnemonics="e" command="_tQJlkHg_Ee6YMMta4iCLfg">
         <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_SBXRUHhFEe6AfezsSz8Q-A" contributionURI="bundleclass://edu.rice.cs.hpctraceviewer.ui/edu.rice.cs.hpctraceviewer.ui.handlers.TraceDataExist"/>
+      </children>
+    </elements>
+    <elements xsi:type="menu:MenuContribution" xmi:id="_O3ctsH1hEe6Kpv54joNljw" elementId="edu.rice.cs.hpctraceviewer.ui.menucontribution.debug" parentId="edu.rice.cs.hpcviewer.ui.menu.view.debug">
+      <children xsi:type="menu:HandledMenuItem" xmi:id="_UrOqMH1hEe6Kpv54joNljw" elementId="edu.rice.cs.hpctraceviewer.menu.debug" label="Show trace debug view" tooltip="Show the view  to display raw information on traces" mnemonics="t" command="_zSQFwH2AEe6Kpv54joNljw">
+        <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_hljyoH1hEe6Kpv54joNljw" contributionURI="bundleclass://edu.rice.cs.hpctraceviewer.ui/edu.rice.cs.hpctraceviewer.ui.handlers.TraceDataExist"/>
       </children>
     </elements>
   </fragments>
