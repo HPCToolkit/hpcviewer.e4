@@ -1,5 +1,8 @@
 package edu.rice.cs.hpctraceviewer.data.timeline;
 
+import java.util.Objects;
+import java.util.stream.Stream;
+
 import edu.rice.cs.hpcbase.IProcessTimeline;
 
 public class ProcessTimelineService 
@@ -36,11 +39,8 @@ public class ProcessTimelineService
 	
 	public boolean isFilled() {
 		if (traces != null) {
-			for (var trace: traces) {
-				if (trace == null)
-					return false;
-			}
-			return true;
+			boolean hasNullTrace = Stream.of(traces).anyMatch(Objects::isNull);
+			return !hasNullTrace;
 		}
 		return false;
 	}

@@ -252,15 +252,19 @@ public class DatabaseCollection
 		}
 
 		IDatabase database;
+		DatabaseStatus status;
 		
 		if (isRemote(databaseId)) {
 			database = new DatabaseRemote();
-			database.open(shell);
+			status = database.open(shell);
 		} else { 
 			database = new DatabaseLocal();
-			((DatabaseLocal) database).setDirectory(databaseId);
+			status = ((DatabaseLocal) database).setDirectory(databaseId);
 		}
-		return addDatabase(shell, window, service, modelService, database);
+		if (status == DatabaseStatus.OK)
+			return addDatabase(shell, window, service, modelService, database);
+		
+		return status;
 	}
 	
 	
