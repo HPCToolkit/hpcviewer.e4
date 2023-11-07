@@ -40,6 +40,8 @@ import edu.rice.cs.hpctraceviewer.ui.depth.HPCDepthView;
 import edu.rice.cs.hpctraceviewer.ui.depthEditor.DepthEditor;
 import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
 import edu.rice.cs.hpctraceviewer.ui.main.HPCTraceView;
+import edu.rice.cs.hpctraceviewer.ui.main.DebugView;
+
 import edu.rice.cs.hpctraceviewer.ui.minimap.SpaceTimeMiniCanvas;
 import edu.rice.cs.hpctraceviewer.ui.statistic.HPCStatisticView;
 import edu.rice.cs.hpctraceviewer.ui.summary.HPCSummaryView;
@@ -98,6 +100,8 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 	private HPCCallStackView tbtmCallStack;
 	private HPCSummaryView   tbtmSummaryView;
 	
+	private DebugView tbtmDebugView;
+	
 	private DepthEditor     depthEditor;
 
 	private HPCStatisticView tbtmStatView;
@@ -142,6 +146,11 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 		
 		tbtmTraceView = new HPCTraceView(tabFolderTopLeft, SWT.NONE);
 		createTabItem(tbtmTraceView, "Main view", tabFolderTopLeft, eventBroker);
+		
+		if (ViewerPreferenceManager.INSTANCE.getDebugMode()) {
+			tbtmDebugView = new DebugView(tabFolderTopLeft, 0);
+			createTabItem(tbtmDebugView, "Debug view", tabFolderTopLeft, eventBroker);
+		}
 		
 		// ---------------
 		// depth view
@@ -423,6 +432,9 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 
 			eventBroker.subscribe(ViewerDataEvent.TOPIC_FILTER_POST_PROCESSING, this);
 
+			if (tbtmDebugView != null) {
+				tbtmDebugView.setInput(stdc);
+			}
 		} catch (Exception e) {
 			Shell shell = Display.getDefault().getActiveShell();
 			MessageDialog.openError(shell, "Error in opening the database", e.getClass().getSimpleName() + ":" + e.getMessage());
