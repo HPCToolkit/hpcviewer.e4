@@ -11,7 +11,7 @@ import org.eclipse.swt.widgets.Shell;
 import edu.rice.cs.hpcbase.ui.IBasePart;
 import edu.rice.cs.hpcbase.ui.IProfilePart;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
-import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
+import edu.rice.cs.hpclocal.IDatabaseLocal;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.parts.editor.EditorInputFile;
 
@@ -83,20 +83,26 @@ public class ViewXML
 	private File getExperimentFile(Object obj) {
 		if (obj instanceof IBasePart) {
 			var database = ((IBasePart)obj).getInput();
-			if (database == null || (database instanceof LocalDatabaseRepresentation))
-				return null;
 			
-			var experiment = database.getExperimentObject();
-			if (!(experiment instanceof BaseExperiment))
-				return null;
-			
-			File file = ((BaseExperiment) experiment).getExperimentFile();
-			
-			// we need to make sure the XML file really exist
-			// for a merged database, we have a fake xml file. Hence, we shouldn't 
-			// enable the menu if the current part is merged database.
-			
-			return file;
+			// remote database is not supported
+			if (database instanceof IDatabaseLocal) {
+				
+				var experiment = database.getExperimentObject();
+				if (!(experiment instanceof BaseExperiment))
+					return null;
+				
+				if (experiment.getMajorVersion() > 2)
+					// meta.db is not supported
+					return null;
+				
+				File file = ((BaseExperiment) experiment).getExperimentFile();
+				
+				// we need to make sure the XML file really exist
+				// for a merged database, we have a fake xml file. Hence, we shouldn't 
+				// enable the menu if the current part is merged database.
+				
+				return file;
+			}
 		}
 		return null;
 	}

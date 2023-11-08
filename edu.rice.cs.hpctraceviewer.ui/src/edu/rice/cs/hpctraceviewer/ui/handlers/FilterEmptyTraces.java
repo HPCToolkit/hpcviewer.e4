@@ -6,6 +6,7 @@ import java.util.List;
 import javax.inject.Named;
 
 import org.eclipse.collections.impl.list.mutable.FastList;
+import org.eclipse.e4.core.di.annotations.CanExecute;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
@@ -17,6 +18,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
+import edu.rice.cs.hpclocal.IDatabaseLocal;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
@@ -44,7 +46,7 @@ public class FilterEmptyTraces
 			}
 		};
 		
-		InputDialog inputDlg = new InputDialog(shell, "Exclude trace lines", "Please enter the minimum number of trace samples", "3", validator);
+		InputDialog inputDlg = new InputDialog(shell, "Exclude traces", "Please enter the minimum number of trace samples", "3", validator);
 		if (inputDlg.open() == Window.CANCEL)
 			return;
 		
@@ -83,7 +85,7 @@ public class FilterEmptyTraces
 			var toContinue = MessageDialog.openQuestion(
 					shell, 
 					title, 
-					"All filtered traces have samples, the operation is useless.\nDo you still want to continue?");
+					"The minimum criteria is too small and it does not exclude any traces.\nDo you still want to continue?");
 			
 			if (!toContinue)
 				return;
@@ -97,5 +99,16 @@ public class FilterEmptyTraces
 		eventBroker.post(IConstants.TOPIC_FILTER_RANKS, eventData);
 		
 		tracePart.showInfo(excludeTraces + " trace(s) have been excluded.");
+	}
+	
+	
+	@CanExecute
+	public boolean canExecute(MPart part) {		
+		Object obj = part.getObject();
+		if (!(obj instanceof ITracePart))
+			return false;
+		
+		var database = ((ITracePart) obj).getInput();
+		return (database instanceof IDatabaseLocal);
 	}
 }
