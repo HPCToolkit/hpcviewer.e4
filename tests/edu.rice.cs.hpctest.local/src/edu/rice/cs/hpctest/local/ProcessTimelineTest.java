@@ -124,7 +124,6 @@ public class ProcessTimelineTest
 			int index = ptl.findMidpointBefore(midTime, false);
 			assertTrue(index >= 0);
 		}
-		ptl.dispose();
 	}
 	
 	

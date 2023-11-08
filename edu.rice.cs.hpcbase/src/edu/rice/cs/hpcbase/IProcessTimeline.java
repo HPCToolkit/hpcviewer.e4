@@ -69,7 +69,12 @@ public interface IProcessTimeline
 	 * Finds the sample to which 'time' most closely corresponds in the
 	 * ProcessTimeline.
 	 * 
-	 * @param time : the requested time
+	 * @param time 
+	 * 			the requested time
+	 * @param usingMidpoint
+	 * 			{@code boolean} flag true to use the conventional mid-point strategy.
+	 *          {@code false} to use left sample strategy
+	 *          
 	 * @return the index of the sample if the time is within the range, -1  otherwise
 	 * */
 	int findMidpointBefore(long time, boolean usingMidpoint);
