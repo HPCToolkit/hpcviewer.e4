@@ -95,6 +95,7 @@ public class ProcessTimelineTest
 		}
 	}
 	
+	
 	private void testProcessTimeline(IProcessTimeline ptl, int line) throws IOException {
 		assertNotNull(ptl);
 		
@@ -107,6 +108,7 @@ public class ProcessTimelineTest
 		
 		var idt = ptl.getProfileIdTuple();
 		assertNotNull(idt);
+		assertFalse(idt.getProfileIndex() == 0);
 		
 		if (ptl.size() > 0) {
 			var cpi = ptl.getCallPathInfo(0);
@@ -123,6 +125,16 @@ public class ProcessTimelineTest
 			var midTime = (time2 + time1) / 2;
 			int index = ptl.findMidpointBefore(midTime, false);
 			assertTrue(index >= 0);
+			
+			ptl.shiftTimeBy(100);
+			var time1prime = ptl.getTime(0);
+			assertEquals(time1-100, time1prime);
+			
+			ptl.shiftTimeBy(-100);
+			time1prime = ptl.getTime(0);
+			assertEquals(time1, time1prime);
+			
+			assertFalse(ptl.isEmpty());
 		}
 	}
 	
