@@ -11,8 +11,9 @@ package edu.rice.cs.hpcfilter;
  */
 public abstract class FilterDataItem<T> implements Comparable<FilterDataItem<T>>
 {
-	public boolean checked = false;
-	public boolean enabled = true;
+	public boolean enabled;
+
+	public boolean checked;
 	
 	/** data associated with this item.
 	 *  it shouldn't be modified by any class except the owner (caller).
@@ -20,7 +21,7 @@ public abstract class FilterDataItem<T> implements Comparable<FilterDataItem<T>>
 	public T  data    = null;
 
 	
-	public FilterDataItem(T data, boolean checked, boolean enabled) {
+	protected FilterDataItem(T data, boolean checked, boolean enabled) {
 		this.data    = data;
 		this.checked = checked;
 		this.enabled = enabled;

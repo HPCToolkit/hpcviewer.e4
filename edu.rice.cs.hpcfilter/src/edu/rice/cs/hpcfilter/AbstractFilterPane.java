@@ -83,7 +83,9 @@ import edu.rice.cs.hpcsetting.table.DayThemeConfiguration;
  *     </ul>
  *   </li>
  * </ul>
- *
+ * The template type {@code T} is the unit type of a data item in a table row.
+ * It can be anything from a simple String or a complex class.
+ *  
  ***********************************************************************/
 public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, DisposeListener
 {
@@ -113,11 +115,13 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 	 * Constructor to create the item and its composite widgets.
 	 * 
 	 * @param parent 
-	 * @param style int
+	 * @param style 
+	 * 			{@code int} the style of the pane, either {@code STYLE_COMPOSITE} (application mode)
+	 * 			or {@code STYLE_INDEPENDENT} (unit test mode) 
 	 * @param inputData {@code FilterInputData}
 	 * @see STYLE_COMPOSITE, STYLE_INDEPENDENT
 	 */
-	public AbstractFilterPane(Composite parent, int style, FilterInputData<T> inputData) {
+	protected AbstractFilterPane(Composite parent, int style, FilterInputData<T> inputData) {
 		this.style = style;
 		createContentArea(parent, inputData);
 
@@ -412,8 +416,8 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 			}
 		}); */
 
-        ThemeConfiguration themeConfig = Theme.isDarkThemeActive() ? 
-				new DarkThemeConfiguration(this.natTable) :  new DayThemeConfiguration();
+        ThemeConfiguration themeConfig = /*Theme.isDarkThemeActive() ? 
+				new DarkThemeConfiguration(this.natTable) : */ new DayThemeConfiguration();
 		
 		natTable.setTheme(themeConfig);
 		pack();
