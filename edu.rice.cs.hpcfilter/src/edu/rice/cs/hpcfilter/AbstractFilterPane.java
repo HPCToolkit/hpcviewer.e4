@@ -51,7 +51,6 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
-import edu.rice.cs.hpcbase.Theme;
 import edu.rice.cs.hpcfilter.internal.CheckBoxConfiguration;
 import edu.rice.cs.hpcfilter.internal.FilterConfigLabelAccumulator;
 import edu.rice.cs.hpcfilter.internal.FilterPainterConfiguration;
@@ -60,7 +59,6 @@ import edu.rice.cs.hpcfilter.internal.IConstants;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
-import edu.rice.cs.hpcsetting.table.DarkThemeConfiguration;
 import edu.rice.cs.hpcsetting.table.DayThemeConfiguration;
 
 
@@ -522,20 +520,45 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 	}
 	
 	
-	
+	/***
+	 * return the table widget of the filter items
+	 * 
+	 * @return {@code NatTable} the table widget
+	 */
 	protected NatTable getNatTable() {
 		return natTable;
 	}
 
 	
+	/****
+	 * Return the current list modified by the user.
+	 * 
+	 * @apiNote The order can be different from the original order given by the caller. 
+	 * 
+	 * @return {@code EventList<FilterDataItem>}
+	 */
 	public EventList<FilterDataItem<T>> getEventList() {
 		return eventList;
 	}
 	
+	
+	/***
+	 * Get the current filtered list.
+	 * 
+	 * @return
+	 */
 	public FilterList<FilterDataItem<T>> getFilterList() {
 		return filterList;
 	}
 
+	
+	/***
+	 * Get the current pane's style.
+	 * 
+	 * @see STYLE_COMPOSITE
+	 * @see STYLE_INDEPENDENT
+	 * @return
+	 */
 	public int getStyle() {
 		return style;
 	}

@@ -3,11 +3,12 @@ package edu.rice.cs.hpctraceviewer.ui.filter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.nebula.widgets.nattable.NatTable;
-import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
@@ -16,17 +17,22 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
-import ca.odell.glazedlists.FilterList;
 import edu.rice.cs.hpcbase.IFilteredData;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
 import edu.rice.cs.hpcdata.util.OSValidator;
 import edu.rice.cs.hpcfilter.AbstractFilterPane;
 import edu.rice.cs.hpcfilter.FilterDataItem;
-import edu.rice.cs.hpcfilter.FilterDataProvider;
 import edu.rice.cs.hpcfilter.FilterInputData;
-import edu.rice.cs.hpcfilter.IFilterChangeListener;
 
+/**************************************************
+ * 
+ * Special window to filter trace lines.
+ * The filter is based on the execution contexts or id-tuples or profiles
+ * (whatever the name, they are interchanged).
+ * In addition, it is possible to filter based on the number of samples (to do).
+ *
+ **************************************************/
 public class TraceFilterDialog extends Dialog implements IEnableButtonOk
 {
 	private final IFilteredData traceData;
@@ -40,12 +46,25 @@ public class TraceFilterDialog extends Dialog implements IEnableButtonOk
 	}
 
 
-	public List<FilterDataItem<IExecutionContext>> getList() {
+	private List<FilterDataItem<IExecutionContext>> getList() {
 		if (filterPane == null)
 			return Collections.emptyList();
 		
 		return filterPane.getEventList();
 	}
+	
+	
+	public List<Integer> getCheckedIndexes() {
+		if (getReturnCode() != Window.OK)
+			return Collections.emptyList();
+		
+		var allList = getList();
+		return allList.stream()
+				      .filter(item -> item.checked)
+				      .map(elem -> ((TraceFilterDataItem)elem).getIndex())
+				      .collect(Collectors.toUnmodifiableList());
+	}
+
 
 	@Override
 	protected boolean isResizable() {
@@ -106,7 +125,13 @@ public class TraceFilterDialog extends Dialog implements IEnableButtonOk
 		 * call to set it redundant). If it's not, we wait to replace the
 		 * current filter with the new filter until we know we have to.
 		 */
-        var mapToSamples = traceData.getMapFromExecutionContextToNumberOfTraces();
+		Map<IdTuple, Integer> mapToSamples;
+		try {
+			mapToSamples = traceData.getMapFromExecutionContextToNumberOfTraces();
+		} catch (IllegalAccessError e) {
+			mapToSamples = null;
+		}
+		
         
         List<IdTuple> listDenseIds = traceData.getDenseListIdTuple(IdTupleOption.BRIEF);
         List<IdTuple> listIds = traceData.getListOfIdTuples(IdTupleOption.BRIEF);
@@ -118,24 +143,27 @@ public class TraceFilterDialog extends Dialog implements IEnableButtonOk
         // if the id tuple in the original list is the same as the one in filtered list, 
         // them the rank is already displayed.
         // This list needs to be optimized.
+        int j = 0;
         
-        for(int i=0, j=0; i<listDenseIds.size(); i++) {
-        	var idt = listDenseIds.get(i);
+        for(var idt: listDenseIds) {
 
         	int numSamples = 0;
-        	var samples = mapToSamples.get(idt);
+        	var samples = mapToSamples != null ? mapToSamples.get(idt) : null;
         	if (samples != null)
         		numSamples = samples.intValue();
 
         	var executionContext = new ExecutionContext(idt, numSamples);
         	
-        	var checked = (j<listIds.size() && listDenseIds.get(i) == listIds.get(j));
+        	var checked = (j<listIds.size() && idt == listIds.get(j));
         	if (checked)
         		j++;
 
-        	var item = new TraceFilterDataItem(executionContext, checked, true) {
+        	var item = new TraceFilterDataItem(items.size(), executionContext, checked, true) {
         		@Override
         		public String getLabel() {
+        			// special label for id-tuple: we need to get the label by using a id tuple type.
+        			// Unfortunately, this type only available from IFilteredBaseData
+        			//
         			return executionContext.getIdTuple().toString(traceData.getIdTupleTypes());
         		}
         	};
@@ -146,83 +174,5 @@ public class TraceFilterDialog extends Dialog implements IEnableButtonOk
 		var inputData = new FilterInputData<IExecutionContext>(items);
 		
 		return new TraceFilterPane(composite, AbstractFilterPane.STYLE_INDEPENDENT, inputData, this);
-	}
-	
-	
-	
-	static class TraceFilterPane extends AbstractFilterPane<IExecutionContext> implements IFilterChangeListener
-	{
-		private final IEnableButtonOk buttonEnabler;
-		private FilterDataProvider<IExecutionContext> dataProvider;
-
-		protected TraceFilterPane(Composite parent, int style, FilterInputData<IExecutionContext> inputData, final IEnableButtonOk buttonEnabler) {
-			super(parent, style, inputData);
-			this.buttonEnabler = buttonEnabler;
-		}
-
-		@Override
-		protected void setLayerConfiguration(DataLayer datalayer) {
-			datalayer.setColumnPercentageSizing(true);
-			datalayer.setColumnWidthPercentageByPosition(0, 10);
-			datalayer.setColumnWidthPercentageByPosition(1, 70);
-			datalayer.setColumnWidthPercentageByPosition(2, 20);
-		}
-
-		@Override
-		protected String[] getColumnHeaderLabels() {
-			return new String[] {"Visible", "Execution context", "Samples"};
-		}
-
-		@Override
-		protected FilterDataProvider<IExecutionContext> getDataProvider(
-				FilterList<FilterDataItem<IExecutionContext>> filterList) {
-			if (dataProvider == null) {
-				dataProvider = new FilterDataProvider<>(filterList, this) {
-					@Override
-					public int getColumnCount() {
-						return 3;
-					}
-					
-					@Override
-					public Object getDataValue(int columnIndex, int rowIndex) {
-						var item = filterList.get(rowIndex);
-						IExecutionContext context = (IExecutionContext) item.getData();
-
-						if (columnIndex == 2) {
-							return context.getNumSamples();
-						}
-						
-						return super.getDataValue(columnIndex, rowIndex);
-					}
-				};
-			}
-			return dataProvider;
-		}
-
-
-		@Override
-		public void changeEvent(Object data) {
-			var list = getEventList();
-			if (list == null || list.isEmpty())
-				return;
-			var enabled = (list.stream().anyMatch(item -> item.checked));
-			buttonEnabler.enableOkButton(enabled);
-		}
-
-		
-		@Override
-		protected int createAdditionalButton(Composite parent, FilterInputData<IExecutionContext> inputData) {
-			return 0;
-		}
-
-		@Override
-		protected void selectionEvent(FilterDataItem<IExecutionContext> item, int click) {
-			
-		}
-
-		@Override
-		protected void addConfiguration(NatTable table) {
-			
-		}		
 	}
 }

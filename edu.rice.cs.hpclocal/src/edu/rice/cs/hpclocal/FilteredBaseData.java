@@ -2,6 +2,7 @@ package edu.rice.cs.hpclocal;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import edu.rice.cs.hpcbase.IFilteredData;
@@ -119,7 +120,10 @@ public class FilteredBaseData extends AbstractBaseData implements IFilteredData 
 
 	@Override
 	public void setIncludeIndex(List<Integer> listOfIncludedIndex) {
-		indexes = listOfIncludedIndex;
+		indexes = new ArrayList<>(listOfIncludedIndex);
+		// make sure it's in order, otherwise we display the trace according to the new index
+		Collections.sort(indexes);
+		
 		listIdTuples = null;
 	}
 

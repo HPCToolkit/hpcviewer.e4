@@ -18,7 +18,6 @@ import edu.rice.cs.hpctraceviewer.ui.filter.TraceFilterDialog;
 import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -47,18 +46,9 @@ public class FilterRanks
 		if (dialog.open() == Window.CANCEL)
 			return;
         
-        var list = dialog.getList();
+		List<Integer> listChecked = dialog.getCheckedIndexes();
 		
-		if (list != null && !list.isEmpty()){
-			List<Integer> listChecked = new ArrayList<>();
-			for(int i=0; i<list.size(); i++) {
-				if (list.get(i).checked) {
-					listChecked.add(i);
-				}
-			}
-			if (listChecked.isEmpty()) {
-				return;
-			}
+		if (listChecked != null && !listChecked.isEmpty()){
 			
 			// update the data and broadcast to everyone that we probably have new filtered ranks
 			// TODO: we need to check if the new one is the same with the old one or not.

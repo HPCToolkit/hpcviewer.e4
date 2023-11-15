@@ -4,9 +4,11 @@ import edu.rice.cs.hpcfilter.FilterDataItem;
 
 public class TraceFilterDataItem extends FilterDataItem<IExecutionContext> 
 {
-
-	public TraceFilterDataItem(IExecutionContext data, boolean checked, boolean enabled) {
+	private final int index;
+	
+	public TraceFilterDataItem(int index, IExecutionContext data, boolean checked, boolean enabled) {
 		super(data, checked, enabled);
+		this.index = index;
 	}
 
 	@Override
@@ -22,5 +24,9 @@ public class TraceFilterDataItem extends FilterDataItem<IExecutionContext>
 	@Override
 	public String getLabel() {
 		return data.getIdTuple().toString();
+	}
+	
+	public int getIndex() {
+		return index;
 	}
 }
