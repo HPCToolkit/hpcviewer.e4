@@ -516,6 +516,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	public double getScalePixelsPerTime()
 	{
 		TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
+		if (attributes == null || getNumTimeUnitDisplayed() == 0)
+			return 0;
+		
 		return (double) attributes.getPixelHorizontal() / (double)this.getNumTimeUnitDisplayed();
 	}
 	
@@ -525,7 +528,11 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	@Override
 	public double getScalePixelsPerRank()
 	{
-		return stData.getTraceDisplayAttribute().getScalePixelsPerRank();
+		TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
+		if (attributes == null)
+			return 0;
+		
+		return attributes.getScalePixelsPerRank();
 	}
 	
 	/**************************************************************************
