@@ -53,8 +53,6 @@
      <targetJdk>11</targetJdk>
      <excludes>
       <exclude>com/graphbuilder/**/*.java</exclude>
-      <exclude>org/swtchart/**/*.java</exclude>
-      <exclude>org/swtchart/ext/**/*.java</exclude>
      </excludes>
     </configuration>
    </plugin>
