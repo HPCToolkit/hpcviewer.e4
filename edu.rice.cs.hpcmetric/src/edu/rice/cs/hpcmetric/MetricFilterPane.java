@@ -384,4 +384,11 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 			updateMetricManager(eventInfo.metricManager);
 		}
 	}
+
+
+	@Override
+	protected int createAdditionalFiler(Composite parent, FilterInputData<BaseMetric> inputData) {
+		// No need to add filters
+		return 0;
+	}
 }

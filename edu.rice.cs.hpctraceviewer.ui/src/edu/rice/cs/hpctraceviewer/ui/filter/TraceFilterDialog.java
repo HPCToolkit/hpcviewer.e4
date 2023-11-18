@@ -54,6 +54,11 @@ public class TraceFilterDialog extends Dialog implements IEnableButtonOk
 	}
 	
 	
+	/***
+	 * Get the list of indexes of checked items.
+	 * 
+	 * @return
+	 */
 	public List<Integer> getCheckedIndexes() {
 		if (getReturnCode() != Window.OK)
 			return Collections.emptyList();
@@ -171,7 +176,7 @@ public class TraceFilterDialog extends Dialog implements IEnableButtonOk
         	items.add(item);
         }
 		
-		var inputData = new FilterInputData<IExecutionContext>(items);
+		var inputData = new TraceFilterInputData(items, traceData.getIdTupleTypes());
 		
 		return new TraceFilterPane(composite, AbstractFilterPane.STYLE_INDEPENDENT, inputData, this);
 	}

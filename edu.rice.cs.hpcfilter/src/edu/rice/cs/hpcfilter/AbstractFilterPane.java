@@ -234,7 +234,6 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 		// set the layout for group filter
 		Composite groupFilter = new Composite(parentContainer, SWT.NONE);
 		groupFilter.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(groupFilter);
 		
 		// string to match
 		Label lblFilter = new Label (groupFilter, SWT.FLAT);
@@ -243,7 +242,7 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 		objSearchText = new Text (groupFilter, SWT.BORDER);
 		objSearchText.setToolTipText("Type text to filter the list");
 		
-		objSearchText.addModifyListener( event -> eventFilterText() );
+		objSearchText.addModifyListener( event -> eventFilterText(objSearchText.getText()) );
 
 		btnRegExpression.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -251,6 +250,9 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 				toggleRegularExpression();
 			}
 		});
+
+		int numAddFilters = 2 + createAdditionalFiler(groupFilter, inputData);
+		GridLayoutFactory.fillDefaults().numColumns(numAddFilters).applyTo(groupFilter);
 
 		// expand as much as possible horizontally
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(objSearchText);
@@ -455,9 +457,11 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 	
 	/*****
 	 * Event triggered when user type something in the filter text
+	 * 
+	 * @param text
+	 * 			{@code String} to filter in (text to be included)
 	 */
-	private void eventFilterText() {
-		String text = objSearchText.getText();
+	protected void eventFilterText(String text) {
 		if (text == null) {
 			textMatcher.setFilterText(new String [] {});
 		} else {
@@ -588,7 +592,21 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 	protected abstract String[] getColumnHeaderLabels();
 	protected abstract FilterDataProvider<T> getDataProvider(FilterList<FilterDataItem<T>> filterList);
 
-	protected abstract int createAdditionalButton(Composite parent, FilterInputData<T> inputData); 	
+	/****
+	 * Create additional widgets in the button group (check-all and uncheck-all).
+	 * Subclass can add any widgets and must return the number created widgets.
+	 * 
+	 * @param parent 
+	 * 			The container 
+	 * @param inputData
+	 * 			The input data
+	 * @return {@code int}
+	 * 			The number of created widgets
+	 */
+	protected abstract int createAdditionalButton(Composite parent, FilterInputData<T> inputData);
+	
+	protected abstract int createAdditionalFiler(Composite parent, FilterInputData<T> inputData);
+	
 	protected abstract void selectionEvent(FilterDataItem<T> item, int click);
 	protected abstract void addConfiguration(NatTable table);
 }
