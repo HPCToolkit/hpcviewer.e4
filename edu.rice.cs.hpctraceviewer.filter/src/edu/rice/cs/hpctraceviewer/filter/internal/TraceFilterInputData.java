@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctraceviewer.ui.filter;
+package edu.rice.cs.hpctraceviewer.filter.internal;
 
 import java.util.List;
 

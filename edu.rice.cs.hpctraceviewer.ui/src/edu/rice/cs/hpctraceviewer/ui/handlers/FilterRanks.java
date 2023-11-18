@@ -13,8 +13,8 @@ import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcbase.IFilteredData;
 import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
+import edu.rice.cs.hpctraceviewer.filter.TraceFilterDialog;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
-import edu.rice.cs.hpctraceviewer.ui.filter.TraceFilterDialog;
 import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 

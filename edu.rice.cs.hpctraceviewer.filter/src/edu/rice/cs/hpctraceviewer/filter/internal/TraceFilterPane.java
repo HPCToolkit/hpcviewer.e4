@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctraceviewer.ui.filter;
+package edu.rice.cs.hpctraceviewer.filter.internal;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.nebula.widgets.nattable.NatTable;
@@ -26,7 +26,7 @@ public class TraceFilterPane extends AbstractFilterPane<IExecutionContext> imple
 	
 	
 	
-	private TraceLineMatcherEditor matcherEditor;
+	private ExecutionContextMatcherEditor matcherEditor;
 
 	/****
 	 * Create a filter pane just for trace lines.
@@ -40,11 +40,11 @@ public class TraceFilterPane extends AbstractFilterPane<IExecutionContext> imple
 	 * @param buttonEnabler
 	 * 			A call back when to turn on or off the close (or ok) button.
 	 */
-	protected TraceFilterPane(Composite parent, int style, TraceFilterInputData inputData, final IEnableButtonOk buttonEnabler) {
+	public TraceFilterPane(Composite parent, int style, TraceFilterInputData inputData, final IEnableButtonOk buttonEnabler) {
 		super(parent, style, inputData);
 		this.buttonEnabler = buttonEnabler;
 		
-		matcherEditor = new TraceLineMatcherEditor(inputData.getIdTupleType());
+		matcherEditor = new ExecutionContextMatcherEditor(inputData.getIdTupleType());
 		var filterList = getFilterList();
 		filterList.setMatcherEditor(matcherEditor);
 	}

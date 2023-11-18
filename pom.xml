@@ -33,6 +33,7 @@
   <module>edu.rice.cs.hpcremote</module>
   <module>edu.rice.cs.hpctree</module>
   <module>edu.rice.cs.hpctraceviewer.config</module>
+  <module>edu.rice.cs.hpctraceviewer.filter</module>
   <module>edu.rice.cs.hpctraceviewer.data</module>
   <module>edu.rice.cs.hpctraceviewer.ui</module>
   <module>edu.rice.cs.hpcmetric</module>

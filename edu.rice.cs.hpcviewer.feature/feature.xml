@@ -335,4 +335,11 @@
          version="0.0.0"
          unpack="false"/>
 
+   <plugin
+         id="edu.rice.cs.hpctraceviewer.filter"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
 </feature>

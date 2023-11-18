@@ -31,7 +31,8 @@ Require-Bundle: javax.inject,
  ca.odell.glazedlists,
  org.eclipse.nebula.widgets.nattable.extension.glazedlists,
  org.eclipse.collections,
- edu.rice.cs.hpclocal
+ edu.rice.cs.hpclocal,
+ edu.rice.cs.hpctraceviewer.filter;bundle-version="6.0.0"
 Automatic-Module-Name: edu.rice.cs.hpctraceviewer.ui
 Import-Package: edu.rice.cs.hpcfilter.dialog,
  edu.rice.cs.hpctraceviewer.data,

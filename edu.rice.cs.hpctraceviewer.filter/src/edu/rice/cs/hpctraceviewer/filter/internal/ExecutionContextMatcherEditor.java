@@ -1,14 +1,14 @@
-package edu.rice.cs.hpctraceviewer.ui.filter;
+package edu.rice.cs.hpctraceviewer.filter.internal;
 
 import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcfilter.FilterDataItem;
 
-public class TraceLineMatcherEditor extends AbstractMatcherEditor<FilterDataItem<IExecutionContext>> 
+public class ExecutionContextMatcherEditor extends AbstractMatcherEditor<FilterDataItem<IExecutionContext>> 
 {
 	ExecutionContextMatcher matcher;
 	
-	public TraceLineMatcherEditor(IdTupleType idTupleType) {
+	public ExecutionContextMatcherEditor(IdTupleType idTupleType) {
 		matcher = new ExecutionContextMatcher(idTupleType);
 	}
 	

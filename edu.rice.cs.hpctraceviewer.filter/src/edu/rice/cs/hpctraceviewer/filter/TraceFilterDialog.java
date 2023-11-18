@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctraceviewer.ui.filter;
+package edu.rice.cs.hpctraceviewer.filter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,7 +23,12 @@ import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
 import edu.rice.cs.hpcdata.util.OSValidator;
 import edu.rice.cs.hpcfilter.AbstractFilterPane;
 import edu.rice.cs.hpcfilter.FilterDataItem;
-import edu.rice.cs.hpcfilter.FilterInputData;
+import edu.rice.cs.hpctraceviewer.filter.internal.ExecutionContext;
+import edu.rice.cs.hpctraceviewer.filter.internal.IEnableButtonOk;
+import edu.rice.cs.hpctraceviewer.filter.internal.IExecutionContext;
+import edu.rice.cs.hpctraceviewer.filter.internal.TraceFilterDataItem;
+import edu.rice.cs.hpctraceviewer.filter.internal.TraceFilterInputData;
+import edu.rice.cs.hpctraceviewer.filter.internal.TraceFilterPane;
 
 /**************************************************
  * 
