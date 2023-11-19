@@ -10,7 +10,8 @@ Require-Bundle: ca.odell.glazedlists,
  org.eclipse.nebula.widgets.nattable.core,
  edu.rice.cs.hpcdata,
  edu.rice.cs.hpcbase,
- edu.rice.cs.hpcfilter
+ edu.rice.cs.hpcfilter,
+ edu.rice.cs.hpctraceviewer.data
 Bundle-Vendor: Rice University
 Automatic-Module-Name: edu.rice.cs.hpctraceviewer.filter
 Bundle-RequiredExecutionEnvironment: JavaSE-11
