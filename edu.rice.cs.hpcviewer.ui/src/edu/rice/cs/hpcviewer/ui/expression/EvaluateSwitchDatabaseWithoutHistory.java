@@ -18,7 +18,7 @@ public class EvaluateSwitchDatabaseWithoutHistory
 	public boolean evaluate(MWindow window) {
 		UserInputHistory history = new UserInputHistory(RecentDatabase.HISTORY_DATABASE_RECENT, 
 														RecentDatabase.HISTORY_MAX);
-		if (history.getHistory().size() == 0) {
+		if (history.getHistory().isEmpty()) {
 			return database.getNumDatabase(window) > 0;
 		}
 		return false;

@@ -34,7 +34,7 @@ public abstract class RecentDatabase
 			MWindow window ) {
 		
 		UserInputHistory history = new UserInputHistory(HISTORY_DATABASE_RECENT, HISTORY_MAX);
-		if (history.getHistory().size() == 0)
+		if (history.getHistory().isEmpty())
 			return;
 		
 		int i = 0;
