@@ -13,6 +13,7 @@ import org.hpctoolkit.hpcclient.v1_0.HpcClient;
 import org.hpctoolkit.hpcclient.v1_0.HpcClientJavaNetHttp;
 import org.slf4j.LoggerFactory;
 
+import edu.rice.cs.hpcbase.IDatabaseIdentification;
 import edu.rice.cs.hpcbase.ITraceManager;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
@@ -21,18 +22,14 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.source.MetaFileSystemSourceFile;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
 import edu.rice.cs.hpcremote.IDatabaseRemote;
+import edu.rice.cs.hpcremote.RemoteDatabaseIdentification;
 import edu.rice.cs.hpcremote.ui.ConnectionDialog;
 
 
 
 public class DatabaseRemote implements IDatabaseRemote
 {
-	private String path;
-	private String host;
-	private int port;
-	
-	private String username;
-	
+	private RemoteDatabaseIdentification id;
 	private HpcClient client;
 	
 	private Experiment experiment;
@@ -42,35 +39,12 @@ public class DatabaseRemote implements IDatabaseRemote
 	private ITraceManager traceManager;
 
 	@Override
-	public String getId() {
-		StringBuilder sb = new StringBuilder();
-		if (username != null && !username.isEmpty()) {
-			sb.append(username);
-			sb.append("@");
-		}
-		if (host != null)
-			sb.append(host);
-		if (port > 1) {
-			sb.append(':');
-			sb.append(port);
-		}
-		sb.append('/');
+	public IDatabaseIdentification getId() {
+		if (id == null)
+			// dummy id
+			id = new RemoteDatabaseIdentification("localhost", 0);
 		
-		if (path == null) {
-			try {
-				path = client.getDatabasePath().toString();
-				sb.append(path);
-			} catch (IOException | InterruptedException e) {
-				path = "";
-				
-				LoggerFactory.getLogger(getClass()).error("Unable to get the database path", e);
-			    // Restore interrupted state...
-			    Thread.currentThread().interrupt();
-			}
-		} else {
-			sb.append(path);
-		}
-		return sb.toString();
+		return id;
 	}
 	
 
@@ -80,21 +54,22 @@ public class DatabaseRemote implements IDatabaseRemote
 	}
 
 	
-	public DatabaseStatus open(Shell shell, String databaseId) {
-		// not implemented yet
+	@Override
+	public DatabaseStatus reset(Shell shell, IDatabaseIdentification databaseId) {
+		id = (RemoteDatabaseIdentification) databaseId;
 		return open(shell);
 	}
 
 	@Override
 	public DatabaseStatus open(Shell shell) {
 		do {
-			var dialog = new ConnectionDialog(shell);
+			var dialog = new ConnectionDialog(shell, id);
 			
 			if (dialog.open() == Window.CANCEL)
 				return DatabaseStatus.CANCEL;
 			
-			host = dialog.getHost();
-			port = dialog.getPort();
+			var host = dialog.getHost();
+			var port = dialog.getPort();
 			
 			try {
 				var address = InetAddress.getByName(host);
@@ -113,9 +88,12 @@ public class DatabaseRemote implements IDatabaseRemote
 				experiment = parser.getExperiment();
 				
 				if (experiment != null) {
-					var remoteDb = new RemoteDatabaseRepresentation(client, getId());
+					var remoteDb = new RemoteDatabaseRepresentation(client, getId().id());
 					experiment.setDatabaseRepresentation(remoteDb);
+					id = new RemoteDatabaseIdentification(host, port, client.getDatabasePath().toString(), null);
+
 					status = DatabaseStatus.OK;
+					
 					return status;
 				}
 	

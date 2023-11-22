@@ -17,7 +17,9 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+
 import edu.rice.cs.hpcbase.map.UserInputHistory;
+import edu.rice.cs.hpcremote.RemoteDatabaseIdentification;
 
 
 /*******************************************************
@@ -62,8 +64,23 @@ public class ConnectionDialog extends TitleAreaDialog
 	 */
 	public ConnectionDialog(Shell parentShell) {
 		super(parentShell);
+		
+		host = EMPTY;
+		port = 8080;
+		username = EMPTY;
 	}
 
+	
+	public ConnectionDialog(Shell parentShell, RemoteDatabaseIdentification databaseId) {
+		super(parentShell);
+		
+		if (databaseId == null)
+			return;
+		
+		host = databaseId.getHost();
+		port = databaseId.getPort();
+		username = databaseId.getUsername();
+	}
 
 	@Override
 	protected Control createDialogArea(Composite parent) {
@@ -81,11 +98,11 @@ public class ConnectionDialog extends TitleAreaDialog
 		labelHost.setText("Hostname/IP address:");
 		
 		textHost = new Combo(container, SWT.NONE);
-		textHost.setText(EMPTY);
 		textHost.setToolTipText("Please enter the remote host name or its IP address as provided by hpcserver output");
 		
 		fillAndSetComboWithHistory(textHost, HISTORY_KEY_HOST);
-		
+		textHost.setText(host);
+
 		textHost.addModifyListener(e -> textPort.setEnabled(true));
 		textHost.addKeyListener(new KeyAdapter() {
 			@Override
@@ -100,10 +117,10 @@ public class ConnectionDialog extends TitleAreaDialog
 		labelPort.setText("Port:");
 		
 		textPort = new Combo(container, SWT.DROP_DOWN);
-		textPort.setText(EMPTY);
 		textPort.setToolTipText("Please enter the hpcserver's port number as provided by hpcserver's output");
 
 		fillAndSetComboWithHistory(textPort, HISTORY_KEY_PORT);
+		textPort.setText(String.valueOf(port));
 
 		textPort.setEnabled(!textPort.getText().isEmpty());
 
@@ -134,7 +151,7 @@ public class ConnectionDialog extends TitleAreaDialog
 		labelUsername.setText("Username:");
 		
 		textUsername = new Combo(groupTunnel, SWT.DROP_DOWN);
-		textUsername.setText(EMPTY);
+		textUsername.setText(username);
 		
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(textUsername);
 		

@@ -1,13 +1,20 @@
 package edu.rice.cs.hpcbase;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.eclipse.swt.widgets.Shell;
 
+import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.experiment.source.EmptySourceFile;
+import edu.rice.cs.hpcdata.experiment.source.FileSystemSourceFile;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
+import edu.rice.cs.hpcdata.util.Util;
 
 public interface IDatabase 
 {
@@ -20,7 +27,7 @@ public interface IDatabase
 	 * @return {@code String} 
 	 * 			The unique ID
 	 */
-	String getId();
+	IDatabaseIdentification getId();
 	
 	
 	/****
@@ -34,6 +41,18 @@ public interface IDatabase
 	 */
 	DatabaseStatus open(Shell shell);
 	
+	
+	/****
+	 * Reset or reopen the current database with the new id.
+	 * 
+	 * @param shell 
+	 * 			The parent shell, used to display windows or dialog boxes
+	 * @param id
+	 * 			The new Id
+	 * @return {@code DatabaseStatus}
+	 * 			The status of the new reset database
+	 */
+	DatabaseStatus reset(Shell shell, IDatabaseIdentification id);
 	
 	/****
 	 * Get the latest status of this database
@@ -92,5 +111,86 @@ public interface IDatabase
 	String getSourceFileContent(SourceFile fileId) throws IOException;
 	
 	
+	/***
+	 * Check if the source file of a given scope exists or not
+	 * 
+	 * @param scope
+	 * @return
+	 */
 	boolean isSourceFileAvailable(Scope scope);
+	
+	
+	/***
+	 * Create an empty database wrapper for a given Experiment object
+	 * @param experiment
+	 * @return
+	 */
+	static IDatabase getEmpty(final Experiment experiment) {
+		return new IDatabase() {
+
+			@Override
+			public IDatabaseIdentification getId() {
+				return new IDatabaseIdentification() {
+					
+					@Override
+					public String id() {
+						return experiment.getDirectory();
+					}
+				};
+			}
+
+			@Override
+			public DatabaseStatus open(Shell shell) {
+				return DatabaseStatus.OK;
+			}
+
+			@Override
+			public DatabaseStatus getStatus() {
+				return DatabaseStatus.OK;
+			}
+
+			@Override
+			public void close() {
+				// nothing			
+			}
+
+			@Override
+			public IExperiment getExperimentObject() {
+				return experiment;
+			}
+
+			@Override
+			public boolean hasTraceData() {
+				return false;
+			}
+
+			@Override
+			public ITraceManager getORCreateTraceManager() {
+				return null;
+			}
+
+			@Override
+			public String getSourceFileContent(SourceFile fileId) throws IOException {
+				if (fileId instanceof EmptySourceFile || !fileId.isAvailable())
+					return null;
+				
+				FileSystemSourceFile source = (FileSystemSourceFile) fileId;
+				var filename = source.getCompleteFilename();
+				Path path = Path.of(filename);
+
+				return Files.readString(path, StandardCharsets.ISO_8859_1);
+			}
+
+			@Override
+			public boolean isSourceFileAvailable(Scope scope) {
+				return Util.isFileReadable(scope);
+			}
+
+			@Override
+			public DatabaseStatus reset(Shell shell, IDatabaseIdentification id) {
+				return DatabaseStatus.OK;
+			}		
+
+		};
+	}
 }

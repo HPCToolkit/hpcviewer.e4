@@ -17,8 +17,10 @@ import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.widgets.Shell;
 
+import edu.rice.cs.hpcbase.IDatabaseIdentification;
 import edu.rice.cs.hpcbase.map.UserInputHistory;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
+import edu.rice.cs.hpcviewer.ui.internal.DatabaseFactory;
 
 public abstract class RecentDatabase 
 {
@@ -87,7 +89,8 @@ public abstract class RecentDatabase
 			UserInputHistory history = new UserInputHistory(HISTORY_DATABASE_RECENT, HISTORY_MAX);
 			history.clear();
 		} else {
-			execute(application, window, modelService, partService, shell, db);
+			var dbId = DatabaseFactory.createDatabaseIdentification(db);
+			execute(application, window, modelService, partService, shell, dbId);
 		}
 	}
 
@@ -99,5 +102,5 @@ public abstract class RecentDatabase
 									EModelService modelService, 
 									EPartService partService, 
 									Shell shell, 
-									String database);
+									IDatabaseIdentification database);
 }

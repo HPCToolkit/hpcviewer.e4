@@ -11,6 +11,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpcbase.IDatabase;
+import edu.rice.cs.hpcbase.IDatabaseIdentification;
 
 /***********************************
  * 
@@ -50,7 +51,7 @@ public class DatabaseWindowManager
 	 * @param dbId
 	 * @return
 	 */
-	public DatabaseExistence checkAndConfirmDatabaseExistence(Shell shell, MWindow window, String dbId) {
+	public DatabaseExistence checkAndConfirmDatabaseExistence(Shell shell, MWindow window, IDatabaseIdentification dbId) {
 		if (dbId == null)
 			return DatabaseExistence.INEXIST;
 		
@@ -109,7 +110,7 @@ public class DatabaseWindowManager
 	 * 
 	 * @return IDatabase object if the database exist, null otherwise.
 	 */
-	public Set<IDatabase> getDatabase(MWindow window, String databaseId) {
+	public Set<IDatabase> getDatabase(MWindow window, IDatabaseIdentification databaseId) {
 		var list = getActiveListExperiments(window);
 
 		if (list.isEmpty())

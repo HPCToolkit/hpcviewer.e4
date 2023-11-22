@@ -14,22 +14,11 @@ import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 
 import edu.rice.cs.hpcbase.IDatabase;
-import edu.rice.cs.hpcbase.ITraceManager;
 import edu.rice.cs.hpcdata.experiment.Experiment;
-import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.experiment.source.EmptySourceFile;
-import edu.rice.cs.hpcdata.experiment.source.FileSystemSourceFile;
-import edu.rice.cs.hpcdata.experiment.source.SourceFile;
-import edu.rice.cs.hpcdata.util.Util;
 import edu.rice.cs.hpcmerge.MergeManager;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -97,7 +86,7 @@ public class MergeDatabase
 			
 			@Override
 			public void mergeDone(Experiment experiment) {
-				var db = new DatabaseMerged(experiment);
+				var db = IDatabase.getEmpty(experiment);
 				database.addDatabase(shell, window, service, modelService, db);
 			}
 		});
@@ -118,66 +107,4 @@ public class MergeDatabase
 		}		
 		return numDb>=2;
 	}
-	
-	
-	static class DatabaseMerged implements IDatabase
-	{
-		final Experiment experiment;
-		
-		public DatabaseMerged(Experiment experiment) {
-			this.experiment = experiment;
-		}
-
-		@Override
-		public String getId() {
-			return experiment.getID();
-		}
-
-		@Override
-		public DatabaseStatus open(Shell shell) {
-			return DatabaseStatus.OK;
-		}
-
-		@Override
-		public DatabaseStatus getStatus() {
-			return DatabaseStatus.OK;
-		}
-
-		@Override
-		public void close() {
-			// nothing			
-		}
-
-		@Override
-		public IExperiment getExperimentObject() {
-			return experiment;
-		}
-
-		@Override
-		public boolean hasTraceData() {
-			return false;
-		}
-
-		@Override
-		public ITraceManager getORCreateTraceManager() {
-			return null;
-		}
-
-		@Override
-		public String getSourceFileContent(SourceFile fileId) throws IOException {
-			if (fileId instanceof EmptySourceFile || !fileId.isAvailable())
-				return null;
-			
-			FileSystemSourceFile source = (FileSystemSourceFile) fileId;
-			var filename = source.getCompleteFilename();
-			Path path = Path.of(filename);
-
-			return Files.readString(path, StandardCharsets.ISO_8859_1);
-		}
-
-		@Override
-		public boolean isSourceFileAvailable(Scope scope) {
-			return Util.isFileReadable(scope);
-		}		
-	}		
 }

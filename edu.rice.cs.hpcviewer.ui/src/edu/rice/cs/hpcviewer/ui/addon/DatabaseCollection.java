@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import edu.rice.cs.hpcbase.BaseConstants;
 import edu.rice.cs.hpcbase.IDatabase;
 import edu.rice.cs.hpcbase.IDatabase.DatabaseStatus;
+import edu.rice.cs.hpcbase.IDatabaseIdentification;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcbase.map.UserInputHistory;
 import edu.rice.cs.hpcbase.ui.IMainPart;
@@ -50,11 +51,11 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 import edu.rice.cs.hpcfilter.service.FilterMap;
 import edu.rice.cs.hpclocal.DatabaseLocal;
-import edu.rice.cs.hpcremote.data.DatabaseRemote;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpctraceviewer.ui.TracePart;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.handlers.RecentDatabase;
+import edu.rice.cs.hpcviewer.ui.internal.DatabaseFactory;
 import edu.rice.cs.hpcviewer.ui.internal.DatabaseWindowManager;
 import edu.rice.cs.hpcviewer.ui.internal.DatabaseWindowManager.DatabaseExistence;
 
@@ -108,7 +109,7 @@ public class DatabaseCollection
 			final EPartService   partService,
 			final IEventBroker   broker,
 			final EModelService  modelService, 
-			@Named(IServiceConstants.ACTIVE_SHELL) Shell myShell) throws InterruptedException, CoreException, URISyntaxException {
+			@Named(IServiceConstants.ACTIVE_SHELL) Shell myShell) throws InterruptedException {
 		
 		this.eventBroker    = broker;
 		this.application    = application;
@@ -124,19 +125,15 @@ public class DatabaseCollection
 			myShell = new Shell(SWT.TOOL | SWT.NO_TRIM);
 		}
 		final Shell shell = myShell;
-		String path = null;
+		String databaseName = null;
 		
 		// look for the path to the database in the command argument
 		for (String arg: args) {
 			if (arg.charAt(0) != '-')
-				path = arg;
+				databaseName = arg;
 		}
-		var convertedPath = convertPathToLocalFileSystem(path);
-		if (convertedPath == null && path != null)
-			MessageDialog.openError(
-					shell, 
-					"Fail top open the database", 
-					path + " is not found.\nTry to specify with the absolute full path.");
+		
+		var databaseId = DatabaseFactory.createDatabaseIdentification(databaseName);
 		
 		var window = application.getSelectedElement();
 		if (window == null) {
@@ -145,9 +142,9 @@ public class DatabaseCollection
 			// In this case, we just try to delay opening the database for 50 ms to allow
 			// Eclipse creating the active window.
 			Thread.sleep(50);
-			sync.asyncExec(()-> addDatabase(shell, application.getSelectedElement(), partService, modelService, convertedPath));
+			sync.asyncExec(()-> addDatabase(shell, application.getSelectedElement(), partService, modelService, databaseId));
 		} else {
-			addDatabase(shell, window, partService, modelService, convertedPath);
+			addDatabase(shell, window, partService, modelService, databaseId);
 		}
 	}
 
@@ -245,22 +242,15 @@ public class DatabaseCollection
 			MWindow         window,
 			EPartService    service,
 			EModelService 	modelService,
-			String          databaseId) {
+			IDatabaseIdentification  databaseId) {
 
 		if (databaseId == null) {
 			return addDatabase(shell, window, service, modelService);
 		}
 
-		IDatabase database;
-		DatabaseStatus status;
-		
-		if (isRemote(databaseId)) {
-			database = new DatabaseRemote();
-			status = database.open(shell);
-		} else { 
-			database = new DatabaseLocal();
-			status = ((DatabaseLocal) database).setDirectory(databaseId);
-		}
+		IDatabase database = DatabaseFactory.newInstance(databaseId);
+		DatabaseStatus status = database.reset(shell, databaseId);
+
 		if (status == DatabaseStatus.OK)
 			return addDatabase(shell, window, service, modelService, database);
 		
@@ -288,11 +278,11 @@ public class DatabaseCollection
 			MWindow 	    window, 
 			EPartService    service,
 			EModelService 	modelService,
-			String          databaseId) {
+			IDatabaseIdentification          databaseId) {
 
 		IDatabase database;
 		DatabaseStatus status;
-		String dbId = databaseId;
+		IDatabaseIdentification dbId = databaseId;
 
 		if (dbId == null) {
 			// open a new database file
@@ -305,14 +295,9 @@ public class DatabaseCollection
 		}
 		if (databaseWindowManager.checkAndConfirmDatabaseExistence(shell, window, dbId) == DatabaseExistence.EXIST_CANCEL )
 			return;		
-		
-		if (isRemote(dbId)) {
-			database = new DatabaseRemote();
-			status = database.open(shell);
-		} else {
-			database = new DatabaseLocal();
-			status = ((DatabaseLocal) database).setDirectory(dbId);
-		}
+
+		database = DatabaseFactory.newInstance(databaseId);
+		status = database.reset(shell, databaseId);
 		
 		if (status == DatabaseStatus.CANCEL) {
 			// should we notify the user?
@@ -325,33 +310,6 @@ public class DatabaseCollection
 		}
 	}
 	
-	
-	/****
-	 * Check if the id is for remote or not
-	 * 
-	 * @param databaseId
-	 * 			The database id
-	 * 
-	 * @return {@code boolean} true if it's a remote database 
-	 * 
-	 */
-	private boolean isRemote(String databaseId) {
-		var colon = databaseId.indexOf(':');
-		var slash = databaseId.indexOf('/');
-		if (colon >= slash)
-			return false;
-		var port  = databaseId.substring(colon+1, slash);
-		
-		if (colon <= 0 && slash < 1 || port.isEmpty())
-			return false;
-		
-		for(int i=0; i<port.length(); i++) {
-			char c = port.charAt(i);
-			if (c < '0' || c > '9')
-				return false;
-		}
-		return true;
-	}
 
 	/****
 	 * Add a new database into the collection.
@@ -384,9 +342,9 @@ public class DatabaseCollection
 		// using asyncExec we hope Eclipse will delay the processing until the UI 
 		// is ready. This doesn't guarantee anything, but works in most cases :-(
 
-		sync.asyncExec(()-> {
-			showPart(database, window, modelService,  message);
-		});
+		sync.asyncExec(()->
+			showPart(database, window, modelService,  message)
+		);
 	}
 	
 	
@@ -491,7 +449,7 @@ public class DatabaseCollection
 				
 		var experiment = database.getExperimentObject();
 		part.setLabel(ProfilePart.PREFIX_TITLE + experiment.getName());
-		part.setTooltip(database.getId());
+		part.setTooltip(database.getId().id());
 
 
 		//----------------------------------------------------------------
@@ -511,9 +469,9 @@ public class DatabaseCollection
 		if (view instanceof ProfilePart) {
 			ProfilePart activeView = (ProfilePart) view;
 			if (message != null && !message.isEmpty()) {
-				sync.asyncExec(()->{
-					activeView.showWarning(message);
-				});
+				sync.asyncExec(()->
+					activeView.showWarning(message)
+				);
 			}		
 		}
 		return 1;
@@ -556,7 +514,7 @@ public class DatabaseCollection
 				var experiment = database.getExperimentObject();
 				
 				createPart.setLabel("Trace: " + experiment.getName());
-				createPart.setTooltip(database.getId());
+				createPart.setTooltip(database.getId().id());
 			}
 		}
 		return 1;
@@ -775,7 +733,7 @@ public class DatabaseCollection
 		Experiment exp = (Experiment) database.getExperimentObject();
 		if (!exp.isMergedDatabase()) {
 			UserInputHistory history = new UserInputHistory(RecentDatabase.HISTORY_DATABASE_RECENT);
-			history.addLine(database.getId());
+			history.addLine(database.getId().id());
 		}
 	}
 

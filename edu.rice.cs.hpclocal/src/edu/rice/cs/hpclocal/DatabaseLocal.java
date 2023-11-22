@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Shell;
 
+import edu.rice.cs.hpcbase.IDatabaseIdentification;
 import edu.rice.cs.hpcbase.ITraceManager;
 import edu.rice.cs.hpcbase.map.ProcedureAliasMap;
 import edu.rice.cs.hpcdata.db.DatabaseManager;
@@ -29,13 +30,18 @@ public class DatabaseLocal implements IDatabaseLocal
 	private String errorMsg;
 	private DatabaseStatus status = DatabaseStatus.NOT_INITIALIZED;
 	private ITraceManager traceManager;
+	private LocalDatabaseIdentification databaseId;
 	
 	@Override
-	public String getId() {
-		if (experiment != null)
-			return experiment.getID();
+	public IDatabaseIdentification getId() {
+		if (databaseId == null) {
+			if (experiment != null)
+				databaseId = new LocalDatabaseIdentification(experiment.getID());
+			else
+				databaseId = new LocalDatabaseIdentification("local:" + System.currentTimeMillis());
+		}
 		
-		return getClass().getName();
+		return databaseId;
 	}
 
 	@Override
@@ -44,7 +50,7 @@ public class DatabaseLocal implements IDatabaseLocal
 		try {
 			var filename = experimentManager.openFileExperiment(shell);
 			if (filename != null && !filename.isEmpty()) {
-				status = setDirectory(filename);
+				status = reset( shell, () -> {return filename;} );
 			} else {
 				status = DatabaseStatus.CANCEL;
 			}
@@ -72,18 +78,18 @@ public class DatabaseLocal implements IDatabaseLocal
 	}
 
 	@Override
-	public DatabaseStatus setDirectory(String fileOrDirectory) {
+	public DatabaseStatus reset(Shell shell, IDatabaseIdentification id) {
 		status = DatabaseStatus.INVALID;
-		if (fileOrDirectory == null) {
+		if (id == null) {
 			return status;
 		}
 		
-		String filename = fileOrDirectory;
+		String filename = id.id();
 		
-		if (!Files.isRegularFile(Paths.get(fileOrDirectory)) && ExperimentManager.checkDirectory(fileOrDirectory)) {
-			var filepath = DatabaseManager.getDatabaseFilePath(fileOrDirectory);
+		if (!Files.isRegularFile(Paths.get(filename)) && ExperimentManager.checkDirectory(filename)) {
+			var filepath = DatabaseManager.getDatabaseFilePath(filename);
 			if (filepath.isEmpty()) {
-				errorMsg = fileOrDirectory + ": is not a HPCToolkit database";
+				errorMsg = id + ": is not a HPCToolkit database";
 				
 				status = DatabaseStatus.INEXISTENCE;
 				
@@ -94,7 +100,7 @@ public class DatabaseLocal implements IDatabaseLocal
 		var file = new File(filename);
 		
 		if (!file.canRead()) {
-			errorMsg = fileOrDirectory + ": is not accessible";
+			errorMsg = id + ": is not accessible";
 			return DatabaseStatus.INVALID;
 		}
 		experiment = new Experiment();
