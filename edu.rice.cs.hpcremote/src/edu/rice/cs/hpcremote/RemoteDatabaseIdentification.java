@@ -12,6 +12,15 @@ public class RemoteDatabaseIdentification implements IDatabaseIdentification
 	
 	private String username;
 
+	
+	public RemoteDatabaseIdentification() {
+		path = EMPTY;
+		host = EMPTY;
+		port = 8080;
+		username = EMPTY;
+	}
+	
+	
 	public RemoteDatabaseIdentification(String databaseId) {
 		username = EMPTY;
 		path = EMPTY;
@@ -87,4 +96,26 @@ public class RemoteDatabaseIdentification implements IDatabaseIdentification
 		
 		return sb.toString();
 	}		
+	
+	
+	@Override
+	public String toString() {
+		return id();
+	}
+	
+	
+	@Override
+	public int hashCode() {
+		return path.hashCode();
+	}
+	
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof IDatabaseIdentification) {
+			IDatabaseIdentification other = (IDatabaseIdentification) o;
+			return id().equals(other.id());
+		}
+		return false;
+	}
 }

@@ -8,8 +8,4 @@ public interface IDatabaseIdentification
 	 * @return {@code String}
 	 */
 	String id();
-	
-	default boolean equals(IDatabaseIdentification other) {
-		return id().equals(other.id());
-	}
 }

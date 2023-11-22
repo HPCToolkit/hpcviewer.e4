@@ -75,7 +75,7 @@ public class ConnectionDialog extends TitleAreaDialog
 		super(parentShell);
 		
 		if (databaseId == null)
-			return;
+			databaseId = new RemoteDatabaseIdentification();
 		
 		host = databaseId.getHost();
 		port = databaseId.getPort();
