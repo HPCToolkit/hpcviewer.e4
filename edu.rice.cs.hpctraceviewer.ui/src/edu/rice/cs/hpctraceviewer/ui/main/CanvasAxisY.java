@@ -23,6 +23,7 @@ import edu.rice.cs.hpctraceviewer.ui.base.ITraceCanvas;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.base.ITraceCanvas.MouseState;
 import edu.rice.cs.hpctraceviewer.ui.operation.AbstractTraceOperation;
+import edu.rice.cs.hpctraceviewer.ui.operation.BufferRefreshOperation;
 
 
 /*********************
@@ -215,7 +216,7 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		
 		if (event.getEventType() == OperationHistoryEvent.DONE) {
 			final IUndoableOperation operation = event.getOperation();
-			if (!(operation instanceof AbstractTraceOperation)) {
+			if (!(operation instanceof BufferRefreshOperation)) {
 				return;
 			}
 			final AbstractTraceOperation op = (AbstractTraceOperation) operation;
