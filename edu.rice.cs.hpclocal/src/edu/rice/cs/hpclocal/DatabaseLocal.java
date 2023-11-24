@@ -40,9 +40,9 @@ public class DatabaseLocal implements IDatabaseLocal
 			else
 				databaseId = new LocalDatabaseIdentification("local:" + System.currentTimeMillis());
 		}
-		
 		return databaseId;
 	}
+	
 
 	@Override
 	public DatabaseStatus open(Shell shell) {
@@ -50,7 +50,7 @@ public class DatabaseLocal implements IDatabaseLocal
 		try {
 			var filename = experimentManager.openFileExperiment(shell);
 			if (filename != null && !filename.isEmpty()) {
-				status = reset( shell, () -> {return filename;} );
+				status = open(filename);
 			} else {
 				status = DatabaseStatus.CANCEL;
 			}
@@ -60,6 +60,7 @@ public class DatabaseLocal implements IDatabaseLocal
 		}
 		return status;
 	}
+	
 
 	@Override
 	public void close() {
@@ -83,13 +84,18 @@ public class DatabaseLocal implements IDatabaseLocal
 		if (id == null) {
 			return status;
 		}
+				
+		status = open(id.id());
 		
-		String filename = id.id();
-		
+		return status;
+	}
+
+	
+	private DatabaseStatus open(String filename) {
 		if (!Files.isRegularFile(Paths.get(filename)) && ExperimentManager.checkDirectory(filename)) {
 			var filepath = DatabaseManager.getDatabaseFilePath(filename);
 			if (filepath.isEmpty()) {
-				errorMsg = id + ": is not a HPCToolkit database";
+				errorMsg = filename + ": is not a HPCToolkit database";
 				
 				status = DatabaseStatus.INEXISTENCE;
 				
@@ -100,7 +106,7 @@ public class DatabaseLocal implements IDatabaseLocal
 		var file = new File(filename);
 		
 		if (!file.canRead()) {
-			errorMsg = id + ": is not accessible";
+			errorMsg = filename + ": is not accessible";
 			return DatabaseStatus.INVALID;
 		}
 		experiment = new Experiment();
@@ -114,10 +120,8 @@ public class DatabaseLocal implements IDatabaseLocal
 			errorMsg = e.getClass().getName() + ": " + e.getMessage();			
 			return status;
 		}
-		status = DatabaseStatus.OK;
-		return status;
+		return DatabaseStatus.OK;
 	}
-	
 	
 	/***
 	 * Retrieve the last error message.

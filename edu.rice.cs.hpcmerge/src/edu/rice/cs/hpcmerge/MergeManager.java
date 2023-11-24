@@ -2,7 +2,7 @@ package edu.rice.cs.hpcmerge;
 
 import java.util.List;
 
-import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.widgets.Shell;
@@ -40,7 +40,7 @@ public class MergeManager
 		DatabaseMergeWizard dmw = new DatabaseMergeWizard(experiments);
 		WizardDialog dialog = new WizardDialog(shell, dmw);
 		
-		if (dialog.open() == Dialog.CANCEL) 
+		if (dialog.open() == Window.CANCEL) 
 			return;
 		
 		final DatabasesToMerge dm = dmw.getDatabaseToMerge();

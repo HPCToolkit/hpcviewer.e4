@@ -1,12 +1,9 @@
 package edu.rice.cs.hpcremote.ui;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
@@ -65,8 +62,8 @@ public class ConnectionDialog extends TitleAreaDialog
 	public ConnectionDialog(Shell parentShell) {
 		super(parentShell);
 		
-		host = EMPTY;
-		port = 8080;
+		host = null; // default: local host
+		port = 0;
 		username = EMPTY;
 	}
 
@@ -101,15 +98,14 @@ public class ConnectionDialog extends TitleAreaDialog
 		textHost.setToolTipText("Please enter the remote host name or its IP address as provided by hpcserver output");
 		
 		fillAndSetComboWithHistory(textHost, HISTORY_KEY_HOST);
-		textHost.setText(host);
-
-		textHost.addModifyListener(e -> textPort.setEnabled(true));
-		textHost.addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyPressed(KeyEvent e) {
-				textPort.setEnabled(true);
+		if (host == null || host.isBlank() || host.isEmpty()) {
+			if (textHost.getItemCount() > 0) {
+				host = textHost.getItem(0);
+			} else {
+				host = "127.0.0.1"; // default host is local
 			}
-		});
+		}
+		textHost.setText(host);
 
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(textHost);
 		
@@ -120,9 +116,15 @@ public class ConnectionDialog extends TitleAreaDialog
 		textPort.setToolTipText("Please enter the hpcserver's port number as provided by hpcserver's output");
 
 		fillAndSetComboWithHistory(textPort, HISTORY_KEY_PORT);
-		textPort.setText(String.valueOf(port));
-
-		textPort.setEnabled(!textPort.getText().isEmpty());
+		String strPort = String.valueOf(port);
+		if (port == 0) {
+			if (textPort.getItemCount() > 0) {
+				strPort = textPort.getItem(0);
+			} else {
+				strPort = "8080"; // default port
+			}			
+		}
+		textPort.setText(strPort);
 
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(textPort);
 		
@@ -180,7 +182,7 @@ public class ConnectionDialog extends TitleAreaDialog
 		try {
 			port = Integer.parseInt(portString);
 		} catch (NumberFormatException e) {
-			MessageDialog.openError(getShell(), "Invalid port number", portString + ": invalid port number");
+			setErrorMessage("Invalid port number: " + portString);
 			return;
 		}
 		addIntoHistory(textHost, HISTORY_KEY_HOST);
@@ -189,7 +191,7 @@ public class ConnectionDialog extends TitleAreaDialog
 		super.okPressed();
 	}
 	
-	
+				
 	public String getHost() {
 		return host;
 	}

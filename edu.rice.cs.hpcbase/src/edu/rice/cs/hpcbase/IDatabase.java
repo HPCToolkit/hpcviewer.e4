@@ -130,13 +130,7 @@ public interface IDatabase
 
 			@Override
 			public IDatabaseIdentification getId() {
-				return new IDatabaseIdentification() {
-					
-					@Override
-					public String id() {
-						return experiment.getDirectory();
-					}
-				};
+				return experiment::getDirectory;
 			}
 
 			@Override
