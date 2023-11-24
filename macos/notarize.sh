@@ -97,7 +97,6 @@ notarize_app() {
 	else
 		echo "$staple"
 		echo "The notarization failed with error $?"
-		exit 1
 	fi
 }
 
@@ -176,6 +175,7 @@ notarize_app "${FILE_BASE}.zip"  AC_PASSWORD
 # 
 ##############################
 
+echo cp hpcviewer-*.dmg  hpcviewer-*.zip ..
 cp hpcviewer-*.dmg  hpcviewer-*.zip ..
 
 cd ..
