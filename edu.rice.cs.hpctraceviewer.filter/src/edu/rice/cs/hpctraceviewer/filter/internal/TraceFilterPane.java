@@ -2,9 +2,19 @@ package edu.rice.cs.hpctraceviewer.filter.internal;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.nebula.widgets.nattable.NatTable;
+import org.eclipse.nebula.widgets.nattable.config.AbstractRegistryConfiguration;
+import org.eclipse.nebula.widgets.nattable.config.CellConfigAttributes;
+import org.eclipse.nebula.widgets.nattable.config.IConfigRegistry;
 import org.eclipse.nebula.widgets.nattable.layer.DataLayer;
+import org.eclipse.nebula.widgets.nattable.layer.cell.ColumnLabelAccumulator;
 import org.eclipse.nebula.widgets.nattable.sort.SortDirectionEnum;
+import org.eclipse.nebula.widgets.nattable.style.CellStyleAttributes;
+import org.eclipse.nebula.widgets.nattable.style.DisplayMode;
+import org.eclipse.nebula.widgets.nattable.style.HorizontalAlignmentEnum;
+import org.eclipse.nebula.widgets.nattable.style.Style;
+import org.eclipse.nebula.widgets.nattable.style.VerticalAlignmentEnum;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -17,6 +27,7 @@ import edu.rice.cs.hpcfilter.FilterDataItemSortModel;
 import edu.rice.cs.hpcfilter.FilterDataProvider;
 import edu.rice.cs.hpcfilter.FilterInputData;
 import edu.rice.cs.hpcfilter.IFilterChangeListener;
+import edu.rice.cs.hpcsetting.fonts.FontManager;
 
 public class TraceFilterPane extends AbstractFilterPane<IExecutionContext> implements IFilterChangeListener
 {
@@ -24,7 +35,7 @@ public class TraceFilterPane extends AbstractFilterPane<IExecutionContext> imple
 	
 	private FilterDataProvider<IExecutionContext> dataProvider;
 	
-	
+	private Label message;
 	
 	private ExecutionContextMatcherEditor matcherEditor;
 
@@ -133,7 +144,10 @@ public class TraceFilterPane extends AbstractFilterPane<IExecutionContext> imple
 	
 	@Override
 	protected int createAdditionalButton(Composite parent, FilterInputData<IExecutionContext> inputData) {
-		return 0;
+		message = new Label(parent, SWT.RIGHT);
+		GridDataFactory.fillDefaults().grab(true, false).applyTo(message);
+		
+		return 1;
 	}
 
 	@Override
@@ -143,23 +157,47 @@ public class TraceFilterPane extends AbstractFilterPane<IExecutionContext> imple
 
 	@Override
 	protected void addConfiguration(NatTable table) {
-		// no action is needed
+		var config = new AbstractRegistryConfiguration() {
+			
+			@Override
+			public void configureRegistry(IConfigRegistry configRegistry) {
+				Font font = FontManager.getMetricFont();
+
+				final Style style = new Style();
+				style.setAttributeValue(CellStyleAttributes.FONT, font);
+				style.setAttributeValue(CellStyleAttributes.HORIZONTAL_ALIGNMENT, HorizontalAlignmentEnum.RIGHT);
+				style.setAttributeValue(CellStyleAttributes.VERTICAL_ALIGNMENT, VerticalAlignmentEnum.MIDDLE);
+
+				configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
+													   style, 
+													   DisplayMode.NORMAL, 
+													   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + 2);
+				configRegistry.registerConfigAttribute(CellConfigAttributes.CELL_STYLE, 
+						   							   style, 
+						   							   DisplayMode.SELECT, 
+						   							   ColumnLabelAccumulator.COLUMN_LABEL_PREFIX + 2);
+			}
+		};
+		table.addConfiguration(config);
 	}
 
 	@Override
 	protected int createAdditionalFiler(Composite parent, FilterInputData<IExecutionContext> inputData) {
 		Label lblFilter = new Label(parent, SWT.NONE);
 		lblFilter.setText("Minimum samples:");
-		
+
 		var comboSampleFilter = new Combo(parent, SWT.DROP_DOWN);
 		comboSampleFilter.setSize(50, comboSampleFilter.getSize().y);
 		comboSampleFilter.addModifyListener(event -> {
 			var strSamples = comboSampleFilter.getText();
 			int numSamples = 0;
-			try {
-				numSamples = Integer.parseInt(strSamples);
-			} catch (NumberFormatException e) {
-				numSamples = 0;
+			if (!strSamples.isEmpty() && !strSamples.isBlank()) {
+				try {
+					numSamples = Integer.parseInt(strSamples);
+				} catch (NumberFormatException e) {
+					message.setText("Incorrect number");
+					numSamples = 0;
+				}
 			}
 			filterSamples(numSamples);
 		});
