@@ -251,7 +251,7 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 			}
 		});
 
-		int numAddFilters = 2 + createAdditionalFiler(groupFilter, inputData);
+		int numAddFilters = 2 + createAdditionalFilter(groupFilter, inputData);
 		GridLayoutFactory.fillDefaults().numColumns(numAddFilters).applyTo(groupFilter);
 
 		// expand as much as possible horizontally
@@ -605,7 +605,7 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 	 */
 	protected abstract int createAdditionalButton(Composite parent, FilterInputData<T> inputData);
 	
-	protected abstract int createAdditionalFiler(Composite parent, FilterInputData<T> inputData);
+	protected abstract int createAdditionalFilter(Composite parent, FilterInputData<T> inputData);
 	
 	protected abstract void selectionEvent(FilterDataItem<T> item, int click);
 	protected abstract void addConfiguration(NatTable table);

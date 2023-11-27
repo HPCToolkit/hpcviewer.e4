@@ -182,7 +182,7 @@ public class TraceFilterPane extends AbstractFilterPane<IExecutionContext> imple
 	}
 
 	@Override
-	protected int createAdditionalFiler(Composite parent, FilterInputData<IExecutionContext> inputData) {
+	protected int createAdditionalFilter(Composite parent, FilterInputData<IExecutionContext> inputData) {
 		Label lblFilter = new Label(parent, SWT.NONE);
 		lblFilter.setText("Minimum samples:");
 
@@ -191,6 +191,11 @@ public class TraceFilterPane extends AbstractFilterPane<IExecutionContext> imple
 		comboSampleFilter.addModifyListener(event -> {
 			var strSamples = comboSampleFilter.getText();
 			int numSamples = 0;
+			message.setText("");
+			
+			// if the text is empty, we assume including all profiles
+			// if the text is not a number, display an error message and show all profiles
+			// otherwise, filter based on the minimum number of samples
 			if (!strSamples.isEmpty() && !strSamples.isBlank()) {
 				try {
 					numSamples = Integer.parseInt(strSamples);

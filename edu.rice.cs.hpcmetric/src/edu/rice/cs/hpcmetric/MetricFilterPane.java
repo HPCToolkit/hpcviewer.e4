@@ -387,7 +387,7 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 
 
 	@Override
-	protected int createAdditionalFiler(Composite parent, FilterInputData<BaseMetric> inputData) {
+	protected int createAdditionalFilter(Composite parent, FilterInputData<BaseMetric> inputData) {
 		// No need to add filters
 		return 0;
 	}

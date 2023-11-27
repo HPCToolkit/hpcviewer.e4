@@ -63,7 +63,7 @@ public class BaseFilterPane<T> extends AbstractFilterPane<T>
 	protected void addConfiguration(NatTable table) {}
 
 	@Override
-	protected int createAdditionalFiler(Composite parent, FilterInputData<T> inputData) {
+	protected int createAdditionalFilter(Composite parent, FilterInputData<T> inputData) {
 		// no need to add filters
 		return 0;
 	}
