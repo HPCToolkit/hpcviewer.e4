@@ -60,7 +60,9 @@
       <children xsi:type="menu:MenuSeparator" xmi:id="_BI_D4C6JEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.menuseparator.3"/>
       <children xsi:type="menu:DynamicMenuContribution" xmi:id="_wFKL8C6HEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.menu.database.dynamic.openRecent" label="Open recent database..." contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.handlers.FileOpenRecentDatabase"/>
     </children>
-    <children xsi:type="menu:HandledMenuItem" xmi:id="_PdGS0Eg3Ee6UZfAcMjBMVQ" elementId="edu.rice.cs.hpcviewer.ui.menu.database.openRemote" label="Open remote database" tooltip="Open a remote database. The remote server (hpcserver) has to be already launched." mnemonics="r" command="_4sArMEg3Ee6UZfAcMjBMVQ"/>
+    <children xsi:type="menu:HandledMenuItem" xmi:id="_PdGS0Eg3Ee6UZfAcMjBMVQ" elementId="edu.rice.cs.hpcviewer.ui.menu.database.openRemote" label="Open remote database" tooltip="Open a remote database. The remote server (hpcserver) has to be already launched." mnemonics="r" command="_4sArMEg3Ee6UZfAcMjBMVQ">
+      <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_tbarII4cEe6xmc3N4SsLLg" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.EvaluateExperimentalFeature"/>
+    </children>
     <children xsi:type="menu:HandledMenuItem" xmi:id="_cD4kEC6JEeuNguglr3209Q" elementId="edu.rice.cs.hpcviewer.ui.menu.database.switch" label="Switch database" tooltip="Open a database and replace the existing ones." mnemonics="S" command="_cPW0II7vEeqBPbXbG7_Dzw">
       <visibleWhen xsi:type="ui:ImperativeExpression" xmi:id="_n04F4C6JEeuNguglr3209Q" contributionURI="bundleclass://edu.rice.cs.hpcviewer.ui/edu.rice.cs.hpcviewer.ui.expression.EvaluateSwitchDatabaseWithoutHistory"/>
     </children>

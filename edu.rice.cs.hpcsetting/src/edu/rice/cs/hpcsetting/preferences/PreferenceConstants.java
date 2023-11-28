@@ -19,18 +19,20 @@ public class PreferenceConstants
 
 	public static final float P_THRESHOLD_DEFAULT 	= 0.5f;
 	
-	public final static String ID_FONT_GENERIC     = "hpcviewer.font.generic"; 
-	public final static String ID_FONT_METRIC      = "hpcviewer.font.metric";
-	public final static String ID_FONT_TEXT        = "hpcviewer.font.source";
+	public static final String ID_FONT_GENERIC     = "hpcviewer.font.generic"; 
+	public static final String ID_FONT_METRIC      = "hpcviewer.font.metric";
+	public static final String ID_FONT_TEXT        = "hpcviewer.font.source";
 	
-	public final static String ID_FONT_CALLSITE    = "hpcviewer.font.callsite";
-	public final static String ID_CHAR_CALLTO      = "hpcviewer.char.callto";
-	public final static String ID_CHAR_CALLFROM    = "hpcviewer.char.callfrom";
+	public static final String ID_FONT_CALLSITE    = "hpcviewer.font.callsite";
+	public static final String ID_CHAR_CALLTO      = "hpcviewer.char.callto";
+	public static final String ID_CHAR_CALLFROM    = "hpcviewer.char.callfrom";
 	
-	public final static String ID_DEBUG_MODE	   = "hpcviewer.debug.mode";
-	public final static String ID_DEBUG_CCT_ID	   = "hpcviewer.debug.cct";
-	public final static String ID_DEBUG_FLAT_ID	   = "hpcviewer.debug.flat";
+	public static final String ID_DEBUG_MODE	   = "hpcviewer.debug.mode";
+	public static final String ID_DEBUG_CCT_ID	   = "hpcviewer.debug.cct";
+	public static final String ID_DEBUG_FLAT_ID	   = "hpcviewer.debug.flat";
 	
-	public final static String PREF_FILENAME       = "hpcviewer.prefs";
+	public static final String ID_FEATURE_EXPERIMENTAL = "hpcviewer.feature.experimental";
+	
+	public static final String PREF_FILENAME       = "hpcviewer.prefs";
 	
 }

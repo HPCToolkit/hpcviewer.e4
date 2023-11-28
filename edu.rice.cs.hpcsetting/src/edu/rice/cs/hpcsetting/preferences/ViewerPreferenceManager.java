@@ -77,7 +77,7 @@ public class ViewerPreferenceManager extends AbstractPreferenceManager
 	 * Get the last path of the opened directory
 	 * @return the last recorded path
 	 */
-	static public String getLastPath() {
+	public static String getLastPath() {
 
 		IEclipsePreferences prefViewer = getPreference();
 		
@@ -92,7 +92,7 @@ public class ViewerPreferenceManager extends AbstractPreferenceManager
 	 * Add the last used path into registry
 	 * @param path
 	 */
-	static public void setLastPath(String path) {
+	public static void setLastPath(String path) {
 
 		IEclipsePreferences prefViewer = getPreference();
 		if (prefViewer != null) {
@@ -141,5 +141,13 @@ public class ViewerPreferenceManager extends AbstractPreferenceManager
 		if (store == null)
 			return EMPTY;
 		return store.getString(PreferenceConstants.ID_CHAR_CALLFROM);
+	}
+	
+	
+	public boolean getExperimentalFeatureMode() {
+		var store = getPreferenceStore();
+		if (store == null)
+			return false;
+		return store.getBoolean(PreferenceConstants.ID_FEATURE_EXPERIMENTAL);
 	}
 }

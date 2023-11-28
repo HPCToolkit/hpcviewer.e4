@@ -23,7 +23,7 @@ import org.eclipse.swt.widgets.Text;
 public abstract class AbstractPage extends PreferencePage 
 {
 
-    public AbstractPage(String title) {
+    protected AbstractPage(String title) {
     	setTitle(title);
     }
     

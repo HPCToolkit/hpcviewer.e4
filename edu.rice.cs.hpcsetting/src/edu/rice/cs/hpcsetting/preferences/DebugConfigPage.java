@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -17,10 +17,12 @@ import edu.rice.cs.hpclog.LogProperty;
 
 public class DebugConfigPage extends AbstractPage 
 {	
-	public final static String TITLE = "Debugging";
+	public static final String TITLE = "Debugging";
 	
 	private Button debugMode;
-	private Button cctId, flatId;
+	private Button cctId;
+	private Button flatId;
+	private Button featureMode;
 	
 	public DebugConfigPage() {
 		super(TITLE);
@@ -35,23 +37,26 @@ public class DebugConfigPage extends AbstractPage
 	
 	@Override
 	public void apply() {
-		PreferenceStore prefDebug = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
+		PreferenceStore prefStore = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
 		
 		if (debugMode == null || cctId == null || flatId == null)
 			return;
 		
 		boolean debug = debugMode.getSelection();		
-		prefDebug.setValue(PreferenceConstants.ID_DEBUG_MODE, debug);
+		prefStore.setValue(PreferenceConstants.ID_DEBUG_MODE, debug);
 		
 		boolean debugCCT = cctId.getSelection();
-		prefDebug.setValue(PreferenceConstants.ID_DEBUG_CCT_ID, debugCCT);
+		prefStore.setValue(PreferenceConstants.ID_DEBUG_CCT_ID, debugCCT);
 		
 		boolean debugFlat = flatId.getSelection();
-		prefDebug.setValue(PreferenceConstants.ID_DEBUG_FLAT_ID, debugFlat);
+		prefStore.setValue(PreferenceConstants.ID_DEBUG_FLAT_ID, debugFlat);
+		
+		boolean featureExperimental = featureMode.getSelection();
+		prefStore.setValue(PreferenceConstants.ID_FEATURE_EXPERIMENTAL, featureExperimental);
 		
 		// save the preference in this page
 		try {
-			prefDebug.save();
+			prefStore.save();
 		} catch (IOException e) {
 			Logger logger = LoggerFactory.getLogger(getClass());
 			logger.error("Unable to save preferences", e);
@@ -63,6 +68,9 @@ public class DebugConfigPage extends AbstractPage
         // group of debug flags
         createDebugPanel(parent);
         
+        // panel for experimental features
+        createExperimentalFeaturePanel(parent);
+        
 		return parent;
 	}
 	
@@ -73,15 +81,12 @@ public class DebugConfigPage extends AbstractPage
 		groupDebug.setLayout(new GridLayout(1, false));
         
 		debugMode = createCheckBoxControl(groupDebug, "Enable debug mode");
-		debugMode.addSelectionListener(new SelectionListener() {
+		debugMode.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				setDebugMode(debugMode.getSelection());
 			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
         cctId  = createCheckBoxControl(groupDebug, "Show calling-context (CCT) Id");
         flatId = createCheckBoxControl(groupDebug, "Show structure (flat) Id");
@@ -89,14 +94,29 @@ public class DebugConfigPage extends AbstractPage
         // initialize the debugging mode
         
         PreferenceStore pref = (PreferenceStore) getPreferenceStore();
-        boolean debugMode = pref.getBoolean(PreferenceConstants.ID_DEBUG_MODE);
-        setDebugMode(debugMode);
+        boolean debug = pref.getBoolean(PreferenceConstants.ID_DEBUG_MODE);
+        setDebugMode(debug);
         
         boolean debugCCT = pref.getBoolean(PreferenceConstants.ID_DEBUG_CCT_ID);
         cctId.setSelection(debugCCT);
         
         boolean debugFlat = pref.getBoolean(PreferenceConstants.ID_DEBUG_FLAT_ID);
         flatId.setSelection(debugFlat);
+	}
+	
+	
+	private void createExperimentalFeaturePanel(Composite parent) {
+        
+        var groupFeature = createGroupControl(parent, "Feature", false);
+        groupFeature.setLayout(new GridLayout(1, false));
+
+        featureMode = createCheckBoxControl(groupFeature, "Enable experimental features");
+        featureMode.setToolTipText("Check the box to enable experimental features.");
+        
+        PreferenceStore pref = (PreferenceStore) getPreferenceStore();
+        var featureEnabled = pref.getBoolean(PreferenceConstants.ID_FEATURE_EXPERIMENTAL);
+        
+        featureMode.setSelection(featureEnabled);
 	}
 	
 	private void setDebugMode(boolean enabled) {
@@ -120,5 +140,7 @@ public class DebugConfigPage extends AbstractPage
 	@Override
 	protected void performDefaults() {
 		setDebugMode(false);
+		
+		featureMode.setSelection(false);
 	}
 }
