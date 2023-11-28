@@ -155,7 +155,11 @@ public class CanvasAxisY extends AbstractAxisCanvas
 			
 			final int y_curr = (int) (procTimeline.line() * pixelsPerRank);
 			
-			var nextline = i + 1 < numTraces ? timeLine.getProcessTimeline(i+1).line() : numTraces;  
+			var nextTrace = timeLine.getProcessTimeline(i+1);
+			if (nextTrace == null)
+				// something is not right. Should we return or throw an exception or just ignore?
+				continue;
+			var nextline = i + 1 < numTraces ? nextTrace.line() : numTraces;  
 			final int y_next = (int) (nextline * pixelsPerRank);
 			
 			final int height = y_next - y_curr + 1;

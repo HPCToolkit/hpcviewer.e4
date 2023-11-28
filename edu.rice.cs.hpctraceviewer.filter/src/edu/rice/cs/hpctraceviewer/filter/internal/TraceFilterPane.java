@@ -15,9 +15,9 @@ import org.eclipse.nebula.widgets.nattable.style.Style;
 import org.eclipse.nebula.widgets.nattable.style.VerticalAlignmentEnum;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
@@ -186,7 +186,7 @@ public class TraceFilterPane extends AbstractFilterPane<IExecutionContext> imple
 		Label lblFilter = new Label(parent, SWT.NONE);
 		lblFilter.setText("Minimum samples:");
 
-		var comboSampleFilter = new Combo(parent, SWT.DROP_DOWN);
+		var comboSampleFilter = new Text(parent, SWT.DROP_DOWN);
 		comboSampleFilter.setSize(50, comboSampleFilter.getSize().y);
 		comboSampleFilter.addModifyListener(event -> {
 			var strSamples = comboSampleFilter.getText();
