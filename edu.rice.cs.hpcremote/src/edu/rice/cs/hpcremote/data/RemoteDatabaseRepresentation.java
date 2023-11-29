@@ -34,7 +34,7 @@ public class RemoteDatabaseRepresentation implements IDatabaseRepresentation
 	@Override
 	public void open(IExperiment experiment) throws Exception {
 		RemoteDatabaseParser parser = new RemoteDatabaseParser();
-		parser.collectMetaData(client, experiment);
+		parser.parse(client, experiment);
 		
 		var dir = experiment == null ? "/" : experiment.getDirectory();
 		basicId += dir;

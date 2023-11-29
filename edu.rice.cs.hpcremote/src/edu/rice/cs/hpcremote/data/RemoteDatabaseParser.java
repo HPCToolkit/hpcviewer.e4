@@ -44,13 +44,46 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 	
 	
 	/****
-	 * 
+	 * Retrieve a remote database and set up everything needed to get metrics and traces
+	 *  
 	 * @param client
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
 	public void parse(HpcClient client) throws IOException, InterruptedException {
 		dataMeta = collectMetaData(client);
+		experiment = (Experiment) dataMeta.getExperiment();
+		collectOtherInformation(client, dataMeta, experiment);
+	}
+	
+	
+	/***
+	 * Retrieve a remote database and set the specified experiment object with the new remote data
+	 * @param client
+	 * @param experiment
+	 * 
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void parse(HpcClient client, IExperiment experiment) throws IOException, InterruptedException {
+		dataMeta = collectMetaData(client, experiment);
+		this.experiment = (Experiment) experiment;
+		collectOtherInformation(client, dataMeta, this.experiment);
+	}
+	
+	
+	/****
+	 * Post processing after downloading meta.db from remote.
+	 * This method will gather some info in profile.db and metric.yaml file.
+	 * 
+	 * @param client
+	 * @param dataMeta
+	 * @param experiment
+	 * 
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	private void collectOtherInformation(HpcClient client, DataMeta dataMeta, Experiment experiment) throws IOException, InterruptedException {
 		
 		var dataProfile = collectProfileData(client, dataMeta);
 		
@@ -62,8 +95,6 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 		// and the calling context reassignment is incorrect since the metric is incorrect.
 		dataPostProcessing(dataMeta, dataProfile);
 
-		experiment = (Experiment) dataMeta.getExperiment();
-		
 		var dataPlot = collectCCTData(client);
 		var rawMetrics = yamlParser.getRawMetrics();
 		
@@ -78,7 +109,6 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 		
 		experiment.postprocess();
 	}
-	
 	
 	/***
 	 * Retrieve the experiment object.
