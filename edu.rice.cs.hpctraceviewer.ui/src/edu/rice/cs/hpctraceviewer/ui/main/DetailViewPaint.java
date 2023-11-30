@@ -33,18 +33,19 @@ import edu.rice.cs.hpctraceviewer.ui.internal.ImagePosition;
 public class DetailViewPaint extends BaseViewPaint 
 {		
 	/** maximum number of records to display **/
-	static public final int MAX_RECORDS_DISPLAY = 99;
+	public static final int MAX_RECORDS_DISPLAY = 99;
 	/** text when we reach the maximum of records to display **/
-	static public final String TOO_MANY_RECORDS = ">" + String.valueOf(MAX_RECORDS_DISPLAY) ;
+	public static final String TOO_MANY_RECORDS = ">" + MAX_RECORDS_DISPLAY;
 	
-	final private Point maxTextSize;
+	private final Point maxTextSize;
 
 	private final GC masterGC;
 	private final GC origGC;
 	private final Device device;
 	
-	final private AtomicInteger currentLine, numDataCollected;
-	final private int numLines;
+	private final AtomicInteger currentLine;
+	private final AtomicInteger numDataCollected;
+	private final int numLines;
 
 	private boolean debug;
 	private List<IdTuple> listIdTuples; 
