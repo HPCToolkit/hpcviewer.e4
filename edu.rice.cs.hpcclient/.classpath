@@ -7,8 +7,6 @@
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="lib" path="hpcclient-1.0.0-SNAPSHOT.jar" sourcepath="/hpcclient/src/main/java"/>
-	<classpathentry kind="lib" path="jars/byte-buddy-1.12.16.jar"/>
-	<classpathentry kind="lib" path="jars/byte-buddy-agent-1.12.16.jar"/>
 	<classpathentry kind="lib" path="jars/hpcclientservercommon-1.0.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="jars/json-20220924.jar"/>
 	<classpathentry kind="lib" path="jars/vavr-0.10.4.jar"/>

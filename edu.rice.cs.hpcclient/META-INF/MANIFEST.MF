@@ -22,12 +22,6 @@ Export-Package: io.vavr,
  org.hpctoolkit.client_server_common.trace,
  org.hpctoolkit.hpcclient.v1_0,
  org.json
-Require-Bundle: org.eclipse.e4.ui.model.workbench;bundle-version="2.1.1000.v20210111-0958",
- org.eclipse.e4.core.di,
- org.eclipse.e4.ui.services,
- org.eclipse.swt,
- org.eclipse.jface,
- edu.rice.cs.hpcdata
+Require-Bundle: edu.rice.cs.hpcdata
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Automatic-Module-Name: hpcclient
-Import-Package: javax.inject;version="1.0.0"
