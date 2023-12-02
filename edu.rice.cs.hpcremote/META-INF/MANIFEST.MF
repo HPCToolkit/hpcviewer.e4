@@ -11,22 +11,18 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.e4.ui.model.workbench,
  org.eclipse.e4.core.di,
  org.eclipse.e4.ui.services,
+ org.json;bundle-version="1.0.0",
  edu.rice.cs.hpcdata,
  edu.rice.cs.hpcbase,
- edu.rice.cs.hpcclient,
  edu.rice.cs.hpclog,
  edu.rice.cs.hpctraceviewer.data,
  edu.rice.cs.hpctraceviewer.config,
  org.eclipse.collections,
- org.slf4j.api;bundle-version="1.7.30"
+ org.slf4j.api;bundle-version="1.7.30",
+ io.vavr;bundle-version="0.10.4",
+ edu.rice.cs.hpcremote.client;bundle-version="1.0.0",
+ edu.rice.cs.hpcremote.common;bundle-version="1.0.0"
 Import-Package: com.jcraft.jsch,
  javax.inject;version="1.0.0",
- org.eclipse.e4.core.contexts;version="1.7.0",
- org.hpctoolkit.client_server_common.calling_context,
- org.hpctoolkit.client_server_common.metric,
- org.hpctoolkit.client_server_common.profile,
- org.hpctoolkit.client_server_common.profiled_source,
- org.hpctoolkit.client_server_common.time,
- org.hpctoolkit.client_server_common.trace,
- org.hpctoolkit.hpcclient.v1_0
+ org.eclipse.e4.core.contexts;version="1.7.0"
 Automatic-Module-Name: edu.rice.cs.hpc.remote

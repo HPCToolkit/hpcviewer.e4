@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="hpcviewer" uid="edu.rice.cs.hpcviewer" id="edu.rice.cs.hpcviewer.ui.hpcviewer" application="org.eclipse.e4.ui.workbench.swt.E4Application" version="6.0.0.qualifier" useFeatures="true" includeLaunchers="true">
+<product name="hpcviewer" uid="edu.rice.cs.hpcviewer" id="edu.rice.cs.hpcviewer.ui.hpcviewer" application="org.eclipse.e4.ui.workbench.swt.E4Application" version="6.0.0.qualifier" useFeatures="true" includeLaunchers="true" autoIncludeRequirements="true">
 
    <aboutInfo>
       <image path="/edu.rice.cs.hpcviewer.ui/resources/hpcviewer64.gif"/>
@@ -48,7 +48,7 @@ hpcviewer is part of Rice University&apos;s HPCToolkit project. Development of H
    <license>
         <url>http://hpctoolkit.org</url>
         <text>
-   Copyright (c) 2002-2022, Rice University 
+   Copyright (c) 2002-2023, Rice University 
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

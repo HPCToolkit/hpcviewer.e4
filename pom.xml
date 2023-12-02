@@ -23,13 +23,14 @@
   <module>edu.rice.cs.hpcdata.app</module>
   <module>edu.rice.cs.hpcfilter</module>
   <module>edu.rice.cs.hpcbase</module>
-  <module>edu.rice.cs.hpcclient</module>
   <module>edu.rice.cs.hpcgraph</module>
   <module>edu.rice.cs.hpclog</module>
   <module>edu.rice.cs.hpcsetting</module>
   <module>edu.rice.cs.hpcmerge</module>
   <module>edu.rice.cs.hpctoolcontrol</module>
   <module>edu.rice.cs.hpclocal</module>
+  <module>edu.rice.cs.hpcremote.common</module>
+  <module>edu.rice.cs.hpcremote.client</module>
   <module>edu.rice.cs.hpcremote</module>
   <module>edu.rice.cs.hpctree</module>
   <module>edu.rice.cs.hpctraceviewer.config</module>
