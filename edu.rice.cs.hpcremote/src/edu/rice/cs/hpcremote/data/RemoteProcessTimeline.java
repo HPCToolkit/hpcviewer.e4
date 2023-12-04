@@ -135,8 +135,11 @@ public class RemoteProcessTimeline implements IProcessTimeline
 	}
 
 	@Override
-	public boolean isGPU() {			
-		return getProfileIdTuple().isGPU(traceData.getExperiment().getIdTupleType());
+	public boolean isGPU() {
+		if (idTuple == null)
+			return false;
+		
+		return idTuple.isGPU(traceData.getExperiment().getIdTupleType());
 	}
 
 	@Override

@@ -1,1 +1,1 @@
-Release 2023.11. Commit 195eb387
+Release 2023.12. Commit 4a281dea

@@ -25,8 +25,9 @@ public class RemoteTraceDataCollectorPerProfile extends AbstractTraceDataCollect
 	 */
 	public void readInData(TraceSampling traceSampling) {
 		var list = traceSampling.getSamplesChronologicallyNonDescending();
+		final boolean isFinal = traceSampling.isFinalSampleOfSamplingFinalSampleOfTrace();
 		list.toStream().forEach(sample -> {
-			var time  = sample.getOriginalObservationMoment();
+			var time  = isFinal ? sample.getOriginalObservationMoment() : sample.getTraceMoment();
 			var cctId = sample.getCallingContext();
 			
 			var data = new DataRecord(time.toEpochNano(), cctId.toInt());
