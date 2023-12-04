@@ -109,7 +109,7 @@ public class LocalTraceDataCollector extends AbstractTraceDataCollector
 		// get the last data if necessary: the rightmost time is still less then the upper limit
 		// 	I think we can add the rightmost data into the list of samples
 		// --------------------------------------------------------------------------------------------------
-		if (endLoc < maxloc) {
+		if (endLoc <= maxloc) {
 			final DataRecord dataLast = this.getData(endLoc);
 			addSampleToLastIndex(dataLast);
 		}
