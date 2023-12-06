@@ -94,7 +94,6 @@ public abstract class AbstractBaseData implements ILocalBaseData
 	}
 
 
-
 	@Override
 	public Map<IdTuple, Integer> getMapFromExecutionContextToNumberOfTraces() {
 		if (mapTraceToRecord != null)
@@ -106,8 +105,10 @@ public abstract class AbstractBaseData implements ILocalBaseData
 		
 		for(var idt: listIdTuples) {
 			var min = baseDataFile.getMinLoc(idt);
-			var max = baseDataFile.getMaxLoc(idt);
-			int records = (int) ((max-min) / getRecordSize());
+			var max = baseDataFile.getMaxLoc(idt) + getRecordSize();
+			
+			int delta   = (int) (max - min);
+			int records = delta/getRecordSize();
 			
 			mapTraceToRecord.put(idt, records);
 		}

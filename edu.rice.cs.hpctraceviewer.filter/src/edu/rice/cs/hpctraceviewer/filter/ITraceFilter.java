@@ -13,29 +13,26 @@ public interface ITraceFilter
 	IFilteredData filterTrace(SpaceTimeDataController stdc);
 
 	static IFilteredData filter(final Shell shell, final SpaceTimeDataController stdc) {
-		return new ITraceFilter() {
-			
-			@Override
-			public IFilteredData filterTrace(SpaceTimeDataController stdc) {
-				var dialog = new TraceFilterDialog(shell, stdc.getBaseData());
-				if (dialog.open() == Window.CANCEL)
-					return null;
-		        
-				List<Integer> listChecked = dialog.getCheckedIndexes();
-				
-				if (listChecked != null && !listChecked.isEmpty()){
-					
-					// update the data and broadcast to everyone that we probably have new filtered ranks
-					var filteredBaseData = stdc.getBaseData();
-					filteredBaseData.setIncludeIndex(listChecked);
-					
-					// hack: to update the process interval based on the new filtered ranks
-					stdc.setBaseData(filteredBaseData);
-
-					return filteredBaseData;
-				}
+		ITraceFilter traceFilter = data -> {
+			var dialog = new TraceFilterDialog(shell, stdc.getBaseData());
+			if (dialog.open() == Window.CANCEL)
 				return null;
+	        
+			List<Integer> listChecked = dialog.getCheckedIndexes();
+			
+			if (listChecked != null && !listChecked.isEmpty()){
+				
+				// update the data and broadcast to everyone that we probably have new filtered ranks
+				var filteredBaseData = stdc.getBaseData();
+				filteredBaseData.setIncludeIndex(listChecked);
+				
+				// hack: to update the process interval based on the new filtered ranks
+				stdc.setBaseData(filteredBaseData);
+
+				return filteredBaseData;
 			}
-		}.filterTrace(stdc);
+			return null;
+		};
+		return traceFilter.filterTrace(stdc);
 	}
 }

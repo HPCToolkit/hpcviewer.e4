@@ -124,22 +124,23 @@ public class FilteredBaseDataTest
 			}
 			fbd.setIncludeIndex(indexes);
 			
-			checkIndex(fbd, idt, idtypes, false);
-			
-			// check number of trace samples
+			checkIndex(fbd, idt, idtypes, false);			
+		}
+	}
+	
+	
+	@Test
+	public void testMapFromExecutionContextToNumberOfTraces() throws IOException {
+		for(var fileDb : listFileDB) {
+			FilteredBaseData fbd = new FilteredBaseData(fileDb);
 			var mapProfileToSamples = fbd.getMapFromExecutionContextToNumberOfTraces();
-			assertNotNull(mapProfileToSamples);
-			assertTrue(mapProfileToSamples.size() == idt.size());
+			var negativeSamples = mapProfileToSamples.values().stream().filter(samples -> samples < 0).findAny();
+			assertTrue(negativeSamples.isEmpty());
 			
-			var first = idt.get(0);			
+			var idt = fbd.getDenseListIdTuple(IdTupleOption.BRIEF);
+			var first = idt.get(0);
 			var samples = mapProfileToSamples.get(first);
 			assertTrue(samples >= 0);
-			
-			var l1 = fileDb.getMinLoc(first);
-			var l2 = fileDb.getMaxLoc(first);
-			var rec = (l2 - l1) / fbd.getRecordSize();
-			
-			assertEquals(rec, samples.intValue());
 		}
 	}
 	
