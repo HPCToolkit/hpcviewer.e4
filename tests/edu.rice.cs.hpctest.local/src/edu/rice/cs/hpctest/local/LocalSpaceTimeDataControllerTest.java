@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
+import edu.rice.cs.hpcdata.util.IProgressReport;
 import edu.rice.cs.hpclocal.LocalDBOpener;
 import edu.rice.cs.hpclocal.SpaceTimeDataControllerLocal;
 import edu.rice.cs.hpctest.util.TestDatabase;
@@ -30,7 +31,7 @@ public class LocalSpaceTimeDataControllerTest
 		for(var dir: directories) {
 			Experiment e = new Experiment();
 			
-			var localDb = new LocalDatabaseRepresentation(dir, null, true);
+			var localDb = new LocalDatabaseRepresentation(dir, null, IProgressReport.dummy());
 			e.open(localDb);
 			var opener = new LocalDBOpener(e);
 			

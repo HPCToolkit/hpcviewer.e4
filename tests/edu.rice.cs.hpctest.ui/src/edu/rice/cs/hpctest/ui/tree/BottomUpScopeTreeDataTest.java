@@ -13,6 +13,7 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
+import edu.rice.cs.hpcdata.util.IProgressReport;
 import edu.rice.cs.hpctest.util.TestDatabase;
 import edu.rice.cs.hpctree.BottomUpScopeTreeData;
 
@@ -31,7 +32,7 @@ public class BottomUpScopeTreeDataTest
 			assertNotNull(path);
 
 			var experiment = new Experiment();
-			var localDb = new LocalDatabaseRepresentation(path, null, true);
+			var localDb = new LocalDatabaseRepresentation(path, null, IProgressReport.dummy());
 
 			try {
 				experiment.open(localDb);

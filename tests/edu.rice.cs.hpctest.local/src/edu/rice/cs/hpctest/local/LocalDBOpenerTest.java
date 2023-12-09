@@ -14,6 +14,7 @@ import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
+import edu.rice.cs.hpcdata.util.IProgressReport;
 import edu.rice.cs.hpclocal.LocalDBOpener;
 import edu.rice.cs.hpctest.util.TestDatabase;
 import edu.rice.cs.hpctraceviewer.data.Frame;
@@ -31,7 +32,7 @@ public class LocalDBOpenerTest
 		
 		for(var dir: directories) {
 			Experiment exp = new Experiment();
-			exp.open(new LocalDatabaseRepresentation(dir, null, true));
+			exp.open(new LocalDatabaseRepresentation(dir, null, IProgressReport.dummy()));
 			
 			// Assume all test database should include traces
 			// In the future this assumption may not be correct

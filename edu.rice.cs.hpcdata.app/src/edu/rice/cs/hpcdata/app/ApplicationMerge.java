@@ -8,6 +8,7 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.merge.DatabasesToMerge;
 import edu.rice.cs.hpcdata.merge.ExperimentMerger;
 import edu.rice.cs.hpcdata.merge.TreeSimilarity;
+import edu.rice.cs.hpcdata.util.IProgressReport;
 
 public class ApplicationMerge {
 
@@ -18,7 +19,7 @@ public class ApplicationMerge {
 	 ***---------------------------------------------------------------------**/
 	private static Experiment openExperiment(File objFile) {
 		Experiment experiment = new Experiment();	// prepare the experiment;
-		var localDb = new LocalDatabaseRepresentation(objFile, null, true);
+		var localDb = new LocalDatabaseRepresentation(objFile, null, IProgressReport.dummy());
 		try {
 			experiment.open(localDb);	// parse the database
 

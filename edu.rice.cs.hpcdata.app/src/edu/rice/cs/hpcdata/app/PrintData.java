@@ -16,6 +16,7 @@ import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.util.IProgressReport;
 import edu.rice.cs.hpcdata.util.Util;
 
 
@@ -343,7 +344,7 @@ public class PrintData
 	 */
 	private Experiment openExperiment(File objFile) {
 		Experiment experiment = new Experiment();	// prepare the experiment;
-		var localDb = new LocalDatabaseRepresentation(objFile, null, true);
+		var localDb = new LocalDatabaseRepresentation(objFile, null, IProgressReport.dummy());
 
 		try {
 			experiment.open(localDb);	// parse the database

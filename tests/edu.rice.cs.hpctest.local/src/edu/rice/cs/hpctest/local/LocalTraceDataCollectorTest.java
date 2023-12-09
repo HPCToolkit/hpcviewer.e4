@@ -16,6 +16,7 @@ import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
+import edu.rice.cs.hpcdata.util.IProgressReport;
 import edu.rice.cs.hpclocal.ILocalBaseData;
 import edu.rice.cs.hpclocal.LocalDBOpener;
 import edu.rice.cs.hpclocal.LocalTraceDataCollector;
@@ -36,7 +37,7 @@ public class LocalTraceDataCollectorTest
 		for(var dir: directories) {
 			Experiment e = new Experiment();
 			
-			var localDb = new LocalDatabaseRepresentation(dir, null, true);
+			var localDb = new LocalDatabaseRepresentation(dir, null, IProgressReport.dummy());
 			e.open(localDb);
 			var opener = new LocalDBOpener(e);
 			

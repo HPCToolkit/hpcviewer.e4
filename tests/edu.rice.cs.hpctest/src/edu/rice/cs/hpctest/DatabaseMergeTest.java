@@ -12,6 +12,7 @@ import org.eclipse.swt.widgets.Shell;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
 import edu.rice.cs.hpcdata.merge.DatabasesToMerge;
+import edu.rice.cs.hpcdata.util.IProgressReport;
 import edu.rice.cs.hpcmerge.DatabaseMergeWizard;
 import edu.rice.cs.hpctest.util.TestDatabase;
 
@@ -30,7 +31,7 @@ public class DatabaseMergeTest {
 		List<Experiment> list = new ArrayList<>(2);
 		var exp1 = new Experiment();
 		
-		var localDb = new LocalDatabaseRepresentation(dirs[0], null, true);
+		var localDb = new LocalDatabaseRepresentation(dirs[0], null, IProgressReport.dummy());
 		exp1.open(localDb);
 		list.add(exp1);
 		

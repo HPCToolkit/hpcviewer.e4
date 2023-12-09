@@ -7,11 +7,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Shell;
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcbase.IDatabaseIdentification;
 import edu.rice.cs.hpcbase.ITraceManager;
+import edu.rice.cs.hpcbase.ProgressReport;
 import edu.rice.cs.hpcbase.map.ProcedureAliasMap;
 import edu.rice.cs.hpcdata.db.DatabaseManager;
 import edu.rice.cs.hpcdata.experiment.Experiment;
@@ -85,13 +90,17 @@ public class DatabaseLocal implements IDatabaseLocal
 			return status;
 		}
 				
-		status = open(id.id());
+		try {
+			status = open(id.id());
+		} catch (InterruptedException e) {
+			LoggerFactory.getLogger(getClass()).error(e.getMessage(), e);
+		}
 		
 		return status;
 	}
 
 	
-	private DatabaseStatus open(String filename) {
+	private DatabaseStatus open(String filename) throws InterruptedException {
 		if (!Files.isRegularFile(Paths.get(filename)) && ExperimentManager.checkDirectory(filename)) {
 			var filepath = DatabaseManager.getDatabaseFilePath(filename);
 			if (filepath.isEmpty()) {
@@ -109,17 +118,29 @@ public class DatabaseLocal implements IDatabaseLocal
 			errorMsg = filename + ": is not accessible";
 			return DatabaseStatus.INVALID;
 		}
-		experiment = new Experiment();
+		Job job = new Job("Opening the database") {
+			
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				
+				experiment = new Experiment();
+				
+				ProcedureAliasMap map = new ProcedureAliasMap();		
+				var localDb = new LocalDatabaseRepresentation(file, map, new ProgressReport(monitor));
+				
+				try {
+					experiment.open(localDb);
+				} catch (Exception e) {
+					errorMsg = e.getClass().getName() + ": " + e.getMessage();			
+					return Status.CANCEL_STATUS;
+				}
+				return Status.OK_STATUS;
+			}
+		};
 		
-		ProcedureAliasMap map = new ProcedureAliasMap();		
-		var localDb = new LocalDatabaseRepresentation(file, map, true);
+		job.schedule();
+		job.join();
 		
-		try {
-			experiment.open(localDb);
-		} catch (Exception e) {
-			errorMsg = e.getClass().getName() + ": " + e.getMessage();			
-			return status;
-		}
 		return DatabaseStatus.OK;
 	}
 	

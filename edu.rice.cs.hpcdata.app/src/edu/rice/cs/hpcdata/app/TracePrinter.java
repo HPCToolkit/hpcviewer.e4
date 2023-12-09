@@ -13,6 +13,7 @@ import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
 import edu.rice.cs.hpcdata.trace.TraceRecord;
 import edu.rice.cs.hpcdata.util.Constants;
+import edu.rice.cs.hpcdata.util.IProgressReport;
 import edu.rice.cs.hpcdata.util.MergeDataFiles;
 
 /*****
@@ -43,7 +44,7 @@ public class TracePrinter
 		// ------------------------------------------------------------------------
 		
 		final Experiment experiment = new Experiment();
-		LocalDatabaseRepresentation localDb = new LocalDatabaseRepresentation(new File(args[0]), null, true);
+		LocalDatabaseRepresentation localDb = new LocalDatabaseRepresentation(new File(args[0]), null, IProgressReport.dummy());
 		try {
 			experiment.open(localDb);
 		} catch (Exception e) {
