@@ -6,8 +6,21 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobChangeListener;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.hpctoolkit.hpcclient.v1_0.HpcClient;
 import org.hpctoolkit.hpcclient.v1_0.UnknownCallingContextException;
+
+import edu.rice.cs.hpcbase.ProgressReport;
 import edu.rice.cs.hpcdata.db.version4.DataMeta;
 import edu.rice.cs.hpcdata.db.version4.IDataCCT;
 import edu.rice.cs.hpcdata.db.version4.IDataProfile;
@@ -139,16 +152,61 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 	 */
 	protected void rearrangeCallingContext(HpcClient client, RootScope root, List<BaseMetric> metrics) 
 			throws UnknownCallingContextException, IOException, InterruptedException {
-
+		/*
 		// first, collect the scopes to be merged where we need their metric values
 		ScopeToReduceCollection reduceOp = new ScopeToReduceCollection();
 		root.dfsVisitScopeTree(reduceOp);
 		
 		// send query to the server to grab the metrics
 		reduceOp.postProcess(client, metrics);
-		
-		// finally call the default method to rearrange the cct.
-		super.rearrangeCallingContext(root, IProgressReport.dummy());
+		*/
+		Job task = new Job("Rearrange calling contexts") {
+			
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				// finally call the default method to rearrange the cct.
+				var progress = new ProgressReport(monitor);
+				progress.begin(getName(), (int) (dataMeta.getNumLineScope() * 0.1));
+				progress.advance();
+				
+				rearrangeCallingContext(root, progress);
+				
+				return Status.OK_STATUS;
+			}
+		};
+		task.schedule();
+		task.addJobChangeListener(new JobChangeAdapter() {
+			
+			@Override
+			public void running(IJobChangeEvent event) {
+				final Display display = Display.getDefault();
+				display.asyncExec(() -> {
+					Shell shell = Display.getDefault().getActiveShell();
+					Cursor cursorBusy = Display.getDefault().getSystemCursor(SWT.CURSOR_WAIT);
+					shell.setCursor(cursorBusy);
+				});
+			}
+			
+			@Override
+			public void done(IJobChangeEvent event) {
+				showDefaultCursor();
+			}
+			
+
+			@Override
+			public void sleeping(IJobChangeEvent event) {
+				showDefaultCursor();
+			}
+			
+			private void showDefaultCursor() {
+				final Display display = Display.getDefault();
+				display.asyncExec(() -> {
+					Shell shell = Display.getDefault().getActiveShell();
+					shell.setCursor(null);
+				});
+			}
+
+		});
 	}
 
 	

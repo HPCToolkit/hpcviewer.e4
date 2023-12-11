@@ -11,6 +11,7 @@ import edu.rice.cs.hpcbase.BaseConstants;
 import edu.rice.cs.hpcbase.IProcessTimeline;
 import edu.rice.cs.hpcbase.ITraceDataCollector;
 import edu.rice.cs.hpcbase.ITraceDataCollector.TraceOption;
+import edu.rice.cs.hpcbase.ProgressReport;
 import edu.rice.cs.hpcdata.db.IFileDB;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
@@ -146,7 +147,7 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 	private static String getTraceFile(String directory, final IProgressMonitor statusMgr) 
 			throws IOException
 	{
-		final ProgressReport traceReport = new ProgressReport(statusMgr);
+		final IProgressReport traceReport = new ProgressReport(statusMgr);
 		final String outputFile = directory + File.separatorChar + "experiment.mt";
 		
 		File dirFile = new File(directory);
@@ -161,36 +162,11 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 			}
 		}
 		if (att == MergeDataAttribute.FAIL_NOT_WRITABLE) 
-			throw new RuntimeException(directory + ": Directory is not writable");
+			throw new IOException(directory + ": Directory is not writable");
 		
-		throw new RuntimeException(directory + ": Directory has no trace data or trace files are invalid");
+		throw new IOException(directory + ": Directory has no trace data or trace files are invalid");
 	}
 
-	/*******************
-	 * Dummy Progress bar.
-	 * Should be supplied by the UI
-	 *******************/
-	private static class ProgressReport implements IProgressReport 
-	{
-		private final IProgressMonitor statusMgr;
-		
-		public ProgressReport(IProgressMonitor statusMgr)
-		{
-			this.statusMgr = statusMgr;
-		}
-		
-		public void begin(String title, int num_tasks) {
-			statusMgr.subTask(title);
-		}
-
-		public void advance() {
-			statusMgr.worked(1);
-		}
-
-		public void end() {
-			statusMgr.done();
-		}
-	}
 
 	@Override
 	public ITraceDataCollector getTraceDataCollector(int lineNum, IdTuple idtuple) {

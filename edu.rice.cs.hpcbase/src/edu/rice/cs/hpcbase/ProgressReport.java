@@ -50,4 +50,9 @@ public class ProgressReport implements IProgressReport
 		progressMonitor.done();
 	}
 
+
+	@Override
+	public int getNumTasks() {
+		return workStep;
+	}
 }
