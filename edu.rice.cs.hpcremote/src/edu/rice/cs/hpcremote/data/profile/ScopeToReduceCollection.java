@@ -6,68 +6,106 @@ import org.eclipse.collections.api.map.primitive.MutableIntObjectMap;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
 import org.hpctoolkit.client_server_common.calling_context.CallingContextId;
-import org.hpctoolkit.client_server_common.metric.MetricId;
+import org.hpctoolkit.client_server_common.profile.ProfileId;
 import org.hpctoolkit.hpcclient.v1_0.HpcClient;
 import org.hpctoolkit.hpcclient.v1_0.UnknownCallingContextException;
+import org.hpctoolkit.hpcclient.v1_0.UnknownProfileIdException;
 
+import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.ScopeVisitType;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.ScopeVisitorAdapter;
+import edu.rice.cs.hpcdata.util.IProgressReport;
 import io.vavr.collection.HashSet;
-import io.vavr.collection.Set;
 
+
+/*******************************************************
+ * 
+ * Collecting metric values to perform metric reduction in 
+ * calling context reassignment so that it runs faster.
+ * <br/>
+ * Caller is required to call {@code postProcess()} method to 
+ * retrieve and finalize the metrics from the remote server. 
+ *
+ *******************************************************/
 public class ScopeToReduceCollection extends ScopeVisitorAdapter 
 {
-	private Set<CallingContextId>  setOfCallingContextId;
-
 	private MutableIntObjectMap<Scope> mapToScope;
-	private final List<CallingContextId> listCCTId; 
 	
-	public ScopeToReduceCollection() {
+	private final List<CallingContextId> listCCTId;
+	private final IProgressReport progress;
+	
+	
+	/****
+	 * Constructor
+	 * 
+	 * @param progress
+	 * 			Non-null progress monitor
+	 */
+	public ScopeToReduceCollection(IProgressReport progress) {
+		this.progress = progress == null ? IProgressReport.dummy() : progress;
+		
 		mapToScope = new IntObjectHashMap<>();
 		listCCTId  = FastList.newList();
+		
+		this.progress.begin("Collecting metrics", 3);
+		this.progress.advance();
 	}
 		
 	
-	public void postProcess(HpcClient client, List<BaseMetric> metrics) throws UnknownCallingContextException, IOException, InterruptedException {
+	/****
+	 * A mandatory call after tree traversal.
+	 * Without calling this, everything is useless.
+	 * 
+	 * @param client
+	 * @param metrics
+	 * 
+	 * @throws UnknownCallingContextException
+	 * @throws IOException
+	 * @throws InterruptedException
+	 * @throws UnknownProfileIdException
+	 */
+	public void postProcess(HpcClient client, List<BaseMetric> metrics) 
+			throws UnknownCallingContextException, IOException, InterruptedException, UnknownProfileIdException {
 		if (listCCTId.isEmpty())
 			return;
 		
-		setOfCallingContextId = HashSet.ofAll(listCCTId);
+		var setOfCallingContextId = HashSet.ofAll(listCCTId);
+		progress.advance();
 		
 		// collect the metrics from remote server
-		Set<MetricId> setMetricId = HashSet.empty();
-		metrics.stream().forEach(metric -> {
-			setMetricId.add(MetricId.make((short) metric.getIndex()));
+		// Warning: this may take some time.
+		var mapToMetrics = client.getMetrics(ProfileId.make(IdTuple.PROFILE_SUMMARY.getProfileIndex()), setOfCallingContextId);
+		
+		mapToMetrics.forEach((cctId, metricMeasurements) -> {
+			var scope = mapToScope.get(cctId.toInt());
+			if (scope != null) {
+				var setOfMetricId = metricMeasurements.getMetrics();
+				setOfMetricId.toStream().forEach(mId -> {
+					var mv = metricMeasurements.getMeasurement(mId);
+					if (mv.isPresent()) {
+						scope.setMetricValue(mId.toShort(), mv.get());
+					}
+				});
+			}
 		});
 		
-		var mapToMetrics = client.getMetrics(setOfCallingContextId, setMetricId);
+		dispose();
 		
-		mapToMetrics.forEach((profile, setMetrics) -> {
-			var setCCTNodes = setMetrics.getCallingContexts();
-			setCCTNodes.forEach(node -> {
-				var metricMeasurements = setMetrics.get(node);
-				if (metricMeasurements.isPresent()) {
-					var metric = metricMeasurements.get();
-					var setMetricIndex = metric.getMetrics();
-					
-					setMetricIndex.forEach(m -> {
-						var value = metric.getMeasurement(m);
-						if (value.isPresent()) {
-							var scope = mapToScope.get(node.toInt());	
-							var index = m.toShort();
-							scope.setMetricValue(index, value.get());
-						}
-					});
-					
-				}				
-			});
-		});
+		progress.end();
 	}
 	
 	
+	private void dispose() {
+		mapToScope.clear();
+		mapToScope = null;
+		
+		listCCTId.clear();
+	}
+
+
 	@Override
 	public void visit(LineScope scope, ScopeVisitType vt) {
 		if (vt == ScopeVisitType.PreVisit) {
@@ -76,6 +114,7 @@ public class ScopeToReduceCollection extends ScopeVisitorAdapter
 			if (!list.isEmpty()) {
 				CallingContextId parentId = CallingContextId.make(scope.getCCTIndex());
 				listCCTId.add(parentId);
+				mapToScope.put(scope.getCCTIndex(), scope);
 				
 				list.stream().forEach(childScope -> {
 					var index = childScope.getCCTIndex();

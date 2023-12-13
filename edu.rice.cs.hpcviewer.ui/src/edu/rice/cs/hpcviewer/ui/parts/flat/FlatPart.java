@@ -1,13 +1,20 @@
 package edu.rice.cs.hpcviewer.ui.parts.flat;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.CoolBar;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcbase.IDatabase;
+import edu.rice.cs.hpcbase.ProgressReport;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
@@ -86,6 +93,7 @@ public class FlatPart extends AbstractTableView
 
 	
 	private boolean isInitialized = false;
+	
 	@Override
 	protected RootScope buildTree(boolean reset) {
 		Experiment experiment = (Experiment) getMetricManager();
@@ -98,10 +106,34 @@ public class FlatPart extends AbstractTableView
 		if (isInitialized && !reset)
 			return rootFlat;
 		
+		createTree(rootCCT, rootFlat);			
 		isInitialized = true;
-		return experiment.createFlatView(rootCCT, rootFlat);
+		return rootFlat;
 	}
 
+	
+	private RootScope createTree(RootScope rootCCT, RootScope rootFlat) {
+		Job task = new Job("Create the tree") {
+			
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				Experiment experiment = (Experiment) getMetricManager();
+				var progress = new ProgressReport(monitor);
+				
+				experiment.createFlatView(rootCCT, rootFlat, progress);
+
+				return Status.OK_STATUS;
+			}
+		};
+		task.schedule();
+		try {
+			task.join();
+		} catch (InterruptedException e) {
+			LoggerFactory.getLogger(getClass()).warn("Flat tree is interrupted", e);
+		}
+		return rootFlat;
+	}
+	
 
 	@Override
 	public RootScopeType getRootType() {

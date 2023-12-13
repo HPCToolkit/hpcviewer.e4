@@ -9,16 +9,10 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.core.runtime.jobs.JobChangeAdapter;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Cursor;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 import org.hpctoolkit.hpcclient.v1_0.HpcClient;
 import org.hpctoolkit.hpcclient.v1_0.UnknownCallingContextException;
+import org.hpctoolkit.hpcclient.v1_0.UnknownProfileIdException;
 
 import edu.rice.cs.hpcbase.ProgressReport;
 import edu.rice.cs.hpcdata.db.version4.DataMeta;
@@ -110,16 +104,7 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 
 		reassignMetrics(dataMeta.getRootCCT(), dataProfile, dataMeta.getMetrics());
 		
-		// fix issue #17: decoupling DataMeta and DataSummary:
-		// post-processing data gathered in meta.db and profile.db is needed.
-		// without this, the metrics are wrong since the root has no data summary
-		// and the calling context reassignment is incorrect since the metric is incorrect.
-		try {
-			rearrangeCallingContext(client, dataMeta.getRootCCT(), yamlParser.getListMetrics());
-		} catch (UnknownCallingContextException e) {
-			// this shouldn't happen, unless the database is corrupted
-			throw new IOException(e);
-		}
+		rearrangeCallingContext(client, dataMeta.getRootCCT(), yamlParser.getListMetrics());
 
 		var dataPlot = collectCCTData(client);
 		var rawMetrics = yamlParser.getRawMetrics();
@@ -146,27 +131,33 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 	 * @param root
 	 * @param metrics
 	 * 
-	 * @throws UnknownCallingContextException
-	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	protected void rearrangeCallingContext(HpcClient client, RootScope root, List<BaseMetric> metrics) 
-			throws UnknownCallingContextException, IOException, InterruptedException {
-		/*
-		// first, collect the scopes to be merged where we need their metric values
-		ScopeToReduceCollection reduceOp = new ScopeToReduceCollection();
-		root.dfsVisitScopeTree(reduceOp);
+	protected void rearrangeCallingContext(HpcClient client, RootScope root, List<BaseMetric> metrics) {
 		
-		// send query to the server to grab the metrics
-		reduceOp.postProcess(client, metrics);
-		*/
 		Job task = new Job("Rearrange calling contexts") {
 			
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				// finally call the default method to rearrange the cct.
+				
+				// first, collect the scopes to be merged where we need their metric values
 				var progress = new ProgressReport(monitor);
-				progress.begin(getName(), (int) (dataMeta.getNumLineScope() * 0.1));
+
+				ScopeToReduceCollection reduceOp = new ScopeToReduceCollection(progress);
+				root.dfsVisitScopeTree(reduceOp);
+				
+				// send query to the server to grab the metrics
+				try {
+					reduceOp.postProcess(client, metrics);
+				} catch (UnknownCallingContextException | IOException | InterruptedException
+						| UnknownProfileIdException e) {
+				    Thread.currentThread().interrupt();
+
+					return Status.CANCEL_STATUS;
+				}
+
+				// finally call the default method to rearrange the cct.
+				progress.begin(getName(), (int) (Math.max(20, dataMeta.getNumLineScope()) * 0.1));
 				progress.advance();
 				
 				rearrangeCallingContext(root, progress);
@@ -175,38 +166,6 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 			}
 		};
 		task.schedule();
-		task.addJobChangeListener(new JobChangeAdapter() {
-			
-			@Override
-			public void running(IJobChangeEvent event) {
-				final Display display = Display.getDefault();
-				display.asyncExec(() -> {
-					Shell shell = Display.getDefault().getActiveShell();
-					Cursor cursorBusy = Display.getDefault().getSystemCursor(SWT.CURSOR_WAIT);
-					shell.setCursor(cursorBusy);
-				});
-			}
-			
-			@Override
-			public void done(IJobChangeEvent event) {
-				showDefaultCursor();
-			}
-			
-
-			@Override
-			public void sleeping(IJobChangeEvent event) {
-				showDefaultCursor();
-			}
-			
-			private void showDefaultCursor() {
-				final Display display = Display.getDefault();
-				display.asyncExec(() -> {
-					Shell shell = Display.getDefault().getActiveShell();
-					shell.setCursor(null);
-				});
-			}
-
-		});
 	}
 
 	

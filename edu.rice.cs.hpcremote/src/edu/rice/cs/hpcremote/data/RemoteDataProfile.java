@@ -112,9 +112,9 @@ public class RemoteDataProfile extends AbstractDataProfile implements IDataProfi
 				var cct = item._1.toInt();
 				if (cct == cctId) {
 					var metricMeasurements = item._2;
-					var setMetrics = metricMeasurements.getMetrics();
+					var setOfMetrics = metricMeasurements.getMetrics();
 					
-					setMetrics.toStream().forEach(m -> {
+					setOfMetrics.toStream().forEach(m -> {
 						var metId = m.toShort();
 						var value = metricMeasurements.getMeasurement(m);
 						if (value.isPresent()) {							

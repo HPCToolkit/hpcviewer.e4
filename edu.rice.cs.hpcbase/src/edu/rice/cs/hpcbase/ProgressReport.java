@@ -35,7 +35,7 @@ public class ProgressReport implements IProgressReport
 		workDone = 0;
 		
 		int work = numTasks <= 2 ? 2 : numTasks;
-		workStep = work / NUM_STEPS;
+		workStep = Math.max(2, work / NUM_STEPS);
 	}
 
 	@Override
