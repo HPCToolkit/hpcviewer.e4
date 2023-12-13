@@ -23,6 +23,7 @@ import edu.rice.cs.hpcdata.experiment.source.MetaFileSystemSourceFile;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
 import edu.rice.cs.hpcremote.IDatabaseRemote;
 import edu.rice.cs.hpcremote.RemoteDatabaseIdentification;
+import edu.rice.cs.hpcremote.trace.RemoteTraceOpener;
 import edu.rice.cs.hpcremote.ui.ConnectionDialog;
 
 

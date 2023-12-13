@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcremote.data;
+package edu.rice.cs.hpcremote.trace;
 
 import java.util.ArrayList;
 import java.util.List;

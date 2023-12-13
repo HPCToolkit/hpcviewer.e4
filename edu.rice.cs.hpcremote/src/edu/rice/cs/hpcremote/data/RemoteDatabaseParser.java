@@ -28,6 +28,7 @@ import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.tld.v4.ThreadDataCollection4;
 import edu.rice.cs.hpcdata.util.IProgressReport;
 import edu.rice.cs.hpcdata.util.IUserData;
+import edu.rice.cs.hpcremote.data.profile.RemoteDataProfile;
 import edu.rice.cs.hpcremote.data.profile.ScopeToReduceCollection;
 
 

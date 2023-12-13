@@ -1,4 +1,4 @@
-package edu.rice.cs.hpcremote.data;
+package edu.rice.cs.hpcremote.data.profile;
 
 import java.io.IOException;
 import java.util.ArrayList;
