@@ -418,9 +418,6 @@ public class ProfilePart implements IProfilePart, EventHandler
 
 	@Override
 	public void dispose() {
-		if (database != null && database.getExperimentObject() != null)
-			database.getExperimentObject().dispose();
-		
 		if (tabFolderBottom != null)
 			tabFolderBottom.dispose();
 		

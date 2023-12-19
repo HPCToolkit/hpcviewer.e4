@@ -30,7 +30,7 @@ import io.vavr.collection.HashSet;
  * retrieve and finalize the metrics from the remote server. 
  *
  *******************************************************/
-public class ScopeToReduceCollection extends ScopeVisitorAdapter 
+public class CollectMetricsReduceScopeVisitor extends ScopeVisitorAdapter 
 {
 	private MutableIntObjectMap<Scope> mapToScope;
 	
@@ -44,7 +44,7 @@ public class ScopeToReduceCollection extends ScopeVisitorAdapter
 	 * @param progress
 	 * 			Non-null progress monitor
 	 */
-	public ScopeToReduceCollection(IProgressReport progress) {
+	public CollectMetricsReduceScopeVisitor(IProgressReport progress) {
 		this.progress = progress == null ? IProgressReport.dummy() : progress;
 		
 		mapToScope = new IntObjectHashMap<>();

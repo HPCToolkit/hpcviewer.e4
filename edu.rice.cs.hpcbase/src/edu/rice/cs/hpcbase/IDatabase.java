@@ -7,13 +7,14 @@ import java.nio.file.Path;
 
 import org.eclipse.swt.widgets.Shell;
 
-import edu.rice.cs.hpcdata.experiment.Experiment;
-import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
+import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
+import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.source.EmptySourceFile;
 import edu.rice.cs.hpcdata.experiment.source.FileSystemSourceFile;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
+import edu.rice.cs.hpcdata.util.IProgressReport;
 import edu.rice.cs.hpcdata.util.Util;
 
 public interface IDatabase 
@@ -74,7 +75,7 @@ public interface IDatabase
 	 * @return {@code IExperiment}
 	 * 			null if the initialization fails.
 	 */
-	IExperiment getExperimentObject();
+	IMetricManager getExperimentObject();
 	
 	
 	/****
@@ -120,17 +121,19 @@ public interface IDatabase
 	boolean isSourceFileAvailable(Scope scope);
 	
 	
+	RootScope createFlatTree(Scope rootCCT, RootScope rootFlat, IProgressReport progressMonitor);
+	
 	/***
 	 * Create an empty database wrapper for a given Experiment object
 	 * @param experiment
 	 * @return
 	 */
-	static IDatabase getEmpty(final Experiment experiment) {
+	static IDatabase getEmpty(final IMetricManager experiment) {
 		return new IDatabase() {
 
 			@Override
 			public IDatabaseIdentification getId() {
-				return experiment::getDirectory;
+				return experiment::getID;
 			}
 
 			@Override
@@ -149,7 +152,7 @@ public interface IDatabase
 			}
 
 			@Override
-			public IExperiment getExperimentObject() {
+			public IMetricManager getExperimentObject() {
 				return experiment;
 			}
 
@@ -183,6 +186,11 @@ public interface IDatabase
 			@Override
 			public DatabaseStatus reset(Shell shell, IDatabaseIdentification id) {
 				return DatabaseStatus.OK;
+			}
+
+			@Override
+			public RootScope createFlatTree(Scope rootCCT, RootScope rootFlat, IProgressReport progressMonitor) {
+				return rootFlat;
 			}		
 
 		};

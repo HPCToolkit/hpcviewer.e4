@@ -20,13 +20,15 @@ import edu.rice.cs.hpcbase.ProgressReport;
 import edu.rice.cs.hpcbase.map.ProcedureAliasMap;
 import edu.rice.cs.hpcdata.db.DatabaseManager;
 import edu.rice.cs.hpcdata.experiment.Experiment;
-import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
+import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
+import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.source.EmptySourceFile;
 import edu.rice.cs.hpcdata.experiment.source.FileSystemSourceFile;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
+import edu.rice.cs.hpcdata.util.IProgressReport;
 import edu.rice.cs.hpcdata.util.Util;
 
 public class DatabaseLocal implements IDatabaseLocal 
@@ -74,7 +76,7 @@ public class DatabaseLocal implements IDatabaseLocal
 	}
 
 	@Override
-	public IExperiment getExperimentObject() {
+	public IMetricManager getExperimentObject() {
 		return experiment;
 	}
 
@@ -196,5 +198,11 @@ public class DatabaseLocal implements IDatabaseLocal
 	@Override
 	public boolean isSourceFileAvailable(Scope scope) {		
 		return Util.isFileReadable(scope);
+	}
+
+
+	@Override
+	public RootScope createFlatTree(Scope rootCCT, RootScope rootFlat, IProgressReport progressMonitor) {
+		return experiment.createFlatView(rootCCT, rootFlat, progressMonitor);
 	}
 }

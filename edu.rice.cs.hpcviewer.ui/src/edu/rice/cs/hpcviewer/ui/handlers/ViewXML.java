@@ -90,18 +90,16 @@ public class ViewXML
 				var experiment = database.getExperimentObject();
 				if (!(experiment instanceof BaseExperiment))
 					return null;
-				
-				if (experiment.getMajorVersion() > 2)
+				var baseExp = (BaseExperiment) experiment;
+				if (baseExp.getMajorVersion() > 2)
 					// meta.db is not supported
 					return null;
-				
-				File file = ((BaseExperiment) experiment).getExperimentFile();
 				
 				// we need to make sure the XML file really exist
 				// for a merged database, we have a fake xml file. Hence, we shouldn't 
 				// enable the menu if the current part is merged database.
-				
-				return file;
+
+				return baseExp.getExperimentFile();
 			}
 		}
 		return null;

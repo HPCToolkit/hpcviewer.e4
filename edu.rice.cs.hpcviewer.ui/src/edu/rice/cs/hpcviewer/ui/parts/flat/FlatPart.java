@@ -4,7 +4,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -113,14 +112,18 @@ public class FlatPart extends AbstractTableView
 
 	
 	private RootScope createTree(RootScope rootCCT, RootScope rootFlat) {
+		
 		Job task = new Job("Create the tree") {
 			
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Experiment experiment = (Experiment) getMetricManager();
-				var progress = new ProgressReport(monitor);
+
+				var progress = new ProgressReport(monitor);				
+				final var db = getDatabase();
 				
-				experiment.createFlatView(rootCCT, rootFlat, progress);
+				// this may take some time.
+				// Especially for the remote database.
+				db.createFlatTree(rootCCT, rootFlat, progress);
 
 				return Status.OK_STATUS;
 			}
@@ -130,6 +133,8 @@ public class FlatPart extends AbstractTableView
 			task.join();
 		} catch (InterruptedException e) {
 			LoggerFactory.getLogger(getClass()).warn("Flat tree is interrupted", e);
+		    // Restore interrupted state...
+		    Thread.currentThread().interrupt();
 		}
 		return rootFlat;
 	}

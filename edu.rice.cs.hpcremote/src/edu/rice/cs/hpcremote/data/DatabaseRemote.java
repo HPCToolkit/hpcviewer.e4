@@ -6,21 +6,26 @@ import java.net.UnknownHostException;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hpctoolkit.client_server_common.profiled_source.ProfiledSourceFileId;
 import org.hpctoolkit.client_server_common.profiled_source.UnknownProfiledSourceFileId;
 import org.hpctoolkit.hpcclient.v1_0.HpcClient;
 import org.hpctoolkit.hpcclient.v1_0.HpcClientJavaNetHttp;
+import org.hpctoolkit.hpcclient.v1_0.UnknownCallingContextException;
+import org.hpctoolkit.hpcclient.v1_0.UnknownProfileIdException;
 import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcbase.IDatabaseIdentification;
 import edu.rice.cs.hpcbase.ITraceManager;
 import edu.rice.cs.hpcdata.experiment.Experiment;
-import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
+import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
+import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.source.MetaFileSystemSourceFile;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
+import edu.rice.cs.hpcdata.util.IProgressReport;
 import edu.rice.cs.hpcremote.IDatabaseRemote;
 import edu.rice.cs.hpcremote.RemoteDatabaseIdentification;
 import edu.rice.cs.hpcremote.trace.RemoteTraceOpener;
@@ -116,7 +121,7 @@ public class DatabaseRemote implements IDatabaseRemote
 
 	
 	@Override
-	public IExperiment getExperimentObject() {
+	public IMetricManager getExperimentObject() {
 		return experiment;
 	}
 
@@ -162,7 +167,7 @@ public class DatabaseRemote implements IDatabaseRemote
 		} catch (InterruptedException e) {
 		    Thread.currentThread().interrupt();
 		} catch (UnknownProfiledSourceFileId e2) {
-			throw new IllegalArgumentException(e2.getMessage());
+			throw new IllegalArgumentException(e2);
 		}
 		return null;
 	}
@@ -175,5 +180,28 @@ public class DatabaseRemote implements IDatabaseRemote
 			return metaFile.isCopied();
 		}
 		return false;
+	}
+
+
+	@Override
+	public RootScope createFlatTree(Scope rootCCT, RootScope rootFlat, IProgressReport progressMonitor) {
+		var collectMetricsCCT = new CollectAllMetricsVisitor(progressMonitor);
+		rootCCT.dfsVisitScopeTree(collectMetricsCCT);
+		try {
+			collectMetricsCCT.postProcess(client);			 
+			return experiment.createFlatView(rootCCT, rootFlat, progressMonitor);
+			
+		} catch (UnknownProfileIdException | UnknownCallingContextException e) {
+			// something wrong with the profile or the database or the tree.
+			// Let the caller knows about this/
+			throw new IllegalArgumentException(e);
+		} catch (IOException e) {
+			// It's either the network or the security or perhaps the file systems?
+			MessageDialog.openError(Display.getDefault().getActiveShell(), "I/O Error", e.getMessage());
+		} catch (InterruptedException e) {
+		    // Restore interrupted state...
+		    Thread.currentThread().interrupt();
+		}
+		return null;
 	}
 }

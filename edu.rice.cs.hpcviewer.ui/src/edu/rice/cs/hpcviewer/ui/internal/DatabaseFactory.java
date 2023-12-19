@@ -1,5 +1,7 @@
 package edu.rice.cs.hpcviewer.ui.internal;
 
+import java.nio.file.Paths;
+
 import edu.rice.cs.hpcbase.IDatabase;
 import edu.rice.cs.hpcbase.IDatabaseIdentification;
 import edu.rice.cs.hpclocal.DatabaseLocal;
@@ -28,7 +30,12 @@ public class DatabaseFactory
 		if (isRemote(databaseId)) {			
 			return new RemoteDatabaseIdentification(databaseId);
 		}
-		return new LocalDatabaseIdentification(databaseId);
+		
+		var path = Paths.get(databaseId).toAbsolutePath();
+		if (path.toFile().exists())
+			return new LocalDatabaseIdentification(databaseId);
+		
+		return null;
 	}
 	
 	private static boolean isRemote(String databaseId) {
@@ -62,5 +69,4 @@ public class DatabaseFactory
 	private static boolean isRemote(IDatabaseIdentification databaseId) {
 		return (databaseId instanceof RemoteDatabaseIdentification);
 	}
-
 }

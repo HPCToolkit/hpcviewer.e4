@@ -7,6 +7,7 @@ import org.hpctoolkit.hpcclient.v1_0.HpcClient;
 
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
+import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcremote.IDatabaseRemote;
 import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
@@ -22,9 +23,9 @@ public class RemoteTraceOpener extends AbstractDBOpener
 		this(database.getClient(), database.getExperimentObject());
 	}
 	
-	public RemoteTraceOpener(HpcClient client, IExperiment experiment) {
+	public RemoteTraceOpener(HpcClient client, IMetricManager experiment) {
 		this.client = client;
-		this.experiment = experiment;
+		this.experiment = (IExperiment) experiment;
 	}
 
 	@Override

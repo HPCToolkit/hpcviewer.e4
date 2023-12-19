@@ -1,19 +1,12 @@
 package edu.rice.cs.hpcviewer.ui.addon;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import org.eclipse.core.filesystem.EFS;
-import org.eclipse.core.filesystem.IFileStore;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.e4.core.di.annotations.Creatable;
 import org.eclipse.e4.core.di.annotations.Optional;
@@ -48,6 +41,7 @@ import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcbase.map.UserInputHistory;
 import edu.rice.cs.hpcbase.ui.IMainPart;
 import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 import edu.rice.cs.hpcfilter.service.FilterMap;
 import edu.rice.cs.hpclocal.DatabaseLocal;
@@ -447,7 +441,7 @@ public class DatabaseCollection
 
 		view.setInput(database);
 				
-		var experiment = database.getExperimentObject();
+		var experiment = (IExperiment) database.getExperimentObject();
 		part.setLabel(ProfilePart.PREFIX_TITLE + experiment.getName());
 		part.setTooltip(database.getId().id());
 
@@ -511,7 +505,7 @@ public class DatabaseCollection
 				TracePart part = (TracePart) objTracePart;
 				part.setInput(database);
 				
-				var experiment = database.getExperimentObject();
+				var experiment = (IExperiment) database.getExperimentObject();
 				
 				createPart.setLabel("Trace: " + experiment.getName());
 				createPart.setTooltip(database.getId().id());
@@ -567,7 +561,7 @@ public class DatabaseCollection
 
 		// first, notify all the parts that have experiment that they will be destroyed.
 		
-		ViewerDataEvent data = new ViewerDataEvent((Experiment) database.getExperimentObject(), null);
+		ViewerDataEvent data = new ViewerDataEvent(database.getExperimentObject(), null);
 		if (eventBroker != null)
 			eventBroker.send(BaseConstants.TOPIC_HPC_REMOVE_DATABASE, data);
 		
@@ -579,8 +573,7 @@ public class DatabaseCollection
 			if (obj instanceof IMainPart) {
 				IMainPart mpart = (IMainPart) obj;
 				if (mpart.getInput() == database ||
-					mpart.getInput() == null     || 
-					mpart.getExperiment() == null) {
+					mpart.getInput() == null) {
 					
 					partService.hidePart(part, true);
 					mpart.dispose();
@@ -629,45 +622,6 @@ public class DatabaseCollection
 	 */
 	public Iterator<IDatabase> getIterator(MWindow window) {
 		return databaseWindowManager.getIterator(window);
-	}
-	
-	
-	/****
-	 * Find a database for a given path
-	 * 
-	 * @param shell the active shell
-	 * @param expManager the experiment manager
-	 * @param directoryOrXMLFile path to the database
-	 * @return
-	 * @throws CoreException 
-	 * @throws URISyntaxException 
-	 */
-	private String convertPathToLocalFileSystem(String directoryOrXMLFile) {
-		if (directoryOrXMLFile == null || directoryOrXMLFile.isEmpty())
-			return null;
-		
-    	var objFileInfo = new File(directoryOrXMLFile);
-    	if (!objFileInfo.exists()) {
-        	IFileStore fileStore = null;
-    		try {
-    			// first try with the URI format
-				var uri = new URI(directoryOrXMLFile);
-				fileStore = EFS.getLocalFileSystem().getStore(uri);
-			} catch (URISyntaxException e) {
-				// second, try with the Eclipse's path
-				var path = new Path(directoryOrXMLFile);
-				fileStore = EFS.getLocalFileSystem().getStore(path);
-			}
-    		if (fileStore == null || !fileStore.fetchInfo().exists())
-    			return null;
-    		
-			objFileInfo = new File(fileStore.fetchInfo().getName());
-    	}
-    	
-    	if (objFileInfo.isDirectory()) {
-    		return objFileInfo.getAbsolutePath();
-    	} 
-    	return objFileInfo.getParent();
 	}
 	
 

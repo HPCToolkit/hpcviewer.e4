@@ -412,7 +412,7 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 		if (eventBroker == null || partService == null)
 			return;
 		
-		if (database == null || database.getExperimentObject().getRootScope() == null)
+		if (database == null || database.getExperimentObject() == null)
 			return;
 		
 		try {
@@ -425,7 +425,7 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 			miniCanvas.   updateView(stdc);
 			tbtmStatView .setInput(stdc);
 			
-			//       since the stat view requires info from summary view 
+			// put this later since the stat view requires info from summary view 
 			tbtmSummaryView.setInput(stdc);
 
 			// enable action

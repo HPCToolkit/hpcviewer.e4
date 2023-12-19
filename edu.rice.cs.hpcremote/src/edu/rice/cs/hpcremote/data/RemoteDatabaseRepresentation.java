@@ -6,7 +6,7 @@ import java.io.IOException;
 import org.hpctoolkit.hpcclient.v1_0.HpcClient;
 
 import edu.rice.cs.hpcdata.experiment.IDatabaseRepresentation;
-import edu.rice.cs.hpcdata.experiment.IExperiment;
+import edu.rice.cs.hpcdata.experiment.IExperimentWithMetrics;
 import edu.rice.cs.hpcdata.util.Constants;
 
 
@@ -32,7 +32,7 @@ public class RemoteDatabaseRepresentation implements IDatabaseRepresentation
 	}
 
 	@Override
-	public void open(IExperiment experiment) throws Exception {
+	public void open(IExperimentWithMetrics experiment) throws Exception {
 		RemoteDatabaseParser parser = new RemoteDatabaseParser();
 		parser.parse(client, experiment);
 		
@@ -41,7 +41,7 @@ public class RemoteDatabaseRepresentation implements IDatabaseRepresentation
 	}
 
 	@Override
-	public void reopen(IExperiment experiment) throws Exception {
+	public void reopen(IExperimentWithMetrics experiment) throws Exception {
 		open(experiment);
 	}
 
