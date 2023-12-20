@@ -33,7 +33,7 @@ public class ToolControl
 	private ProgressBar progressBar;
 	private GobalProgressMonitor monitor;
 	private Label lblMessage;
-	private Composite container;
+	
 
 	@Inject
 	public ToolControl(UISynchronize sync) {
@@ -46,7 +46,7 @@ public class ToolControl
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(parent);
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(parent);
 
-		container = new Composite(parent, SWT.BORDER);
+		var container = new Composite(parent, SWT.BORDER);
 		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(container);
 
 		lblMessage = new Label(container, SWT.RIGHT);
@@ -71,7 +71,7 @@ public class ToolControl
 	}
 	
 	@PreDestroy
-	public void PreDestroy() {
+	public void preDestroy() {
 		Job.getJobManager().setProgressProvider(null);
 	}
 
@@ -84,41 +84,32 @@ public class ToolControl
 		@Override
 		public void beginTask(final String name, final int totalWork) {
 			
-			sync.asyncExec(new Runnable() {
+			sync.asyncExec(() -> {
+				if (progressBar.isDisposed()) return;
+				
+				lblMessage.setText(name);
 
-				@Override
-				public void run() {
-					if (progressBar.isDisposed()) return;
-					
-					lblMessage.setText(name);
+				if( runningTasks <= 0 ) {
+					// --- no task is running at the moment ---
+					progressBar.setSelection(0);
+					progressBar.setMaximum(totalWork);
 
-					if( runningTasks <= 0 ) {
-						// --- no task is running at the moment ---
-						progressBar.setSelection(0);
-						progressBar.setMaximum(totalWork);
-
-					} else {
-						// --- other tasks are running ---
-						progressBar.setMaximum(progressBar.getMaximum() + totalWork);
-					}
-
-					runningTasks++;
-					progressBar.setToolTipText("Currently running: " + runningTasks +
-							"\nLast task: " + name);
+				} else {
+					// --- other tasks are running ---
+					progressBar.setMaximum(progressBar.getMaximum() + totalWork);
 				}
+
+				runningTasks++;
+				progressBar.setToolTipText("Currently running: " + runningTasks +
+						"\nLast task: " + name);
 			});
 		}
 
 		@Override
 		public void worked(final int work) {
-			sync.asyncExec(new Runnable() {
-
-				@Override
-				public void run() {
-					if (progressBar.isDisposed()) return;
-					
-					progressBar.setSelection(progressBar.getSelection() + work);
-				}
+			sync.asyncExec( () -> {
+				if (progressBar.isDisposed()) return;				
+				progressBar.setSelection(progressBar.getSelection() + work);
 			});
 		}
 
@@ -137,19 +128,15 @@ public class ToolControl
 				job.addJobChangeListener(new JobChangeAdapter() {
 					@Override
 					public void done(IJobChangeEvent event) {
-						sync.syncExec(new Runnable() {
+						sync.asyncExec(() -> {
+							runningTasks--;
+							if (runningTasks > 0 ){
+								// --- some tasks are still running ---
+								progressBar.setToolTipText("Currently running: " + runningTasks);
 
-							@Override
-							public void run() {
-								runningTasks--;
-								if (runningTasks > 0 ){
-									// --- some tasks are still running ---
-									progressBar.setToolTipText("Currently running: " + runningTasks);
-
-								} else {
-									// --- all tasks are done (a reset of selection could also be done) ---
-									progressBar.setToolTipText("No background progress running.");
-								}
+							} else {
+								// --- all tasks are done (a reset of selection could also be done) ---
+								progressBar.setToolTipText("No background progress running.");
 							}
 						});
 
