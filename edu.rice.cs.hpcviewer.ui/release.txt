@@ -1,1 +1,1 @@
-Release 2023.12. Commit d7d55730
+Release 2023.12. Commit 1d943976

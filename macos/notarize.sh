@@ -127,6 +127,11 @@ create_dmg() {
 	../${DIR_CONFIG}/create-dmg \
 		   --no-internet-enable \
 		   --volname "hpcviewer" \
+		   --window-pos 200 120 \
+		   --window-size 600 300 \
+		   --icon-size 100 \
+		   --icon "hpcviewer.app" 175 120 \
+		   --app-drop-link 425 120 \
 		   --volicon hpcviewer.app/Contents/Resources/hpcviewer.icns \
 		   "${FILENAME}" \
 		   "${SOURCE_FOLDER}"

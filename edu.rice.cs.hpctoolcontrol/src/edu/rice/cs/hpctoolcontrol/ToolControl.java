@@ -23,8 +23,11 @@ import org.eclipse.swt.widgets.ProgressBar;
 
 /*****************************************
  * 
- * Main class to display progress bar and anything in the status bar
- *
+ * Main class to display progress bar and anything in the status bar.
+ * <p>
+ * This class is inspired from Eclipse Vogella blog at
+ * https://www.vogella.com/tutorials/EclipseJobs/article.html
+ * </p>
  *****************************************/
 public class ToolControl 
 {
@@ -84,7 +87,7 @@ public class ToolControl
 		@Override
 		public void beginTask(final String name, final int totalWork) {
 			
-			sync.asyncExec(() -> {
+			sync.syncExec(() -> {
 				if (progressBar.isDisposed()) return;
 				
 				lblMessage.setText(name);
@@ -107,7 +110,7 @@ public class ToolControl
 
 		@Override
 		public void worked(final int work) {
-			sync.asyncExec( () -> {
+			sync.syncExec( () -> {
 				if (progressBar.isDisposed()) return;				
 				progressBar.setSelection(progressBar.getSelection() + work);
 			});
@@ -128,7 +131,7 @@ public class ToolControl
 				job.addJobChangeListener(new JobChangeAdapter() {
 					@Override
 					public void done(IJobChangeEvent event) {
-						sync.asyncExec(() -> {
+						sync.syncExec(() -> {
 							runningTasks--;
 							if (runningTasks > 0 ){
 								// --- some tasks are still running ---
