@@ -197,7 +197,7 @@ public class DatabaseRemote implements IDatabaseRemote
 			throw new IllegalArgumentException(e);
 		} catch (IOException e) {
 			// It's either the network or the security or perhaps the file systems?
-			MessageDialog.openError(Display.getDefault().getActiveShell(), "I/O Error", e.getMessage());
+			throw new IllegalStateException("I/O Error", e);
 		} catch (InterruptedException e) {
 		    // Restore interrupted state...
 		    Thread.currentThread().interrupt();
