@@ -6,7 +6,6 @@ import java.net.UnknownHostException;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hpctoolkit.client_server_common.profiled_source.ProfiledSourceFileId;
 import org.hpctoolkit.client_server_common.profiled_source.UnknownProfiledSourceFileId;

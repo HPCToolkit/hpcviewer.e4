@@ -87,7 +87,7 @@ public class ToolControl
 		@Override
 		public void beginTask(final String name, final int totalWork) {
 			
-			sync.syncExec(() -> {
+			sync.asyncExec(() -> {
 				if (progressBar.isDisposed()) return;
 				
 				lblMessage.setText(name);
@@ -110,7 +110,7 @@ public class ToolControl
 
 		@Override
 		public void worked(final int work) {
-			sync.syncExec( () -> {
+			sync.asyncExec( () -> {
 				if (progressBar.isDisposed()) return;				
 				progressBar.setSelection(progressBar.getSelection() + work);
 			});
@@ -131,7 +131,7 @@ public class ToolControl
 				job.addJobChangeListener(new JobChangeAdapter() {
 					@Override
 					public void done(IJobChangeEvent event) {
-						sync.syncExec(() -> {
+						sync.asyncExec(() -> {
 							runningTasks--;
 							if (runningTasks > 0 ){
 								// --- some tasks are still running ---
