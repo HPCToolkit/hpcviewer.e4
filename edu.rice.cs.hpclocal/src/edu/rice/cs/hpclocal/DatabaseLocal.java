@@ -153,6 +153,7 @@ public class DatabaseLocal implements IDatabaseLocal
 	 * @return {@code String} 
 	 * 			the last error message if the last status is not {@code DatabaseStatus.OK}
 	 */
+	@Override
 	public String getErrorMessage() {
 		if (status == DatabaseStatus.OK)
 			return null;

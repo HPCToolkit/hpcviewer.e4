@@ -191,8 +191,23 @@ public interface IDatabase
 			@Override
 			public RootScope createFlatTree(Scope rootCCT, RootScope rootFlat, IProgressReport progressMonitor) {
 				return rootFlat;
+			}
+
+			@Override
+			public String getErrorMessage() {
+				return "";
 			}		
 
 		};
 	}
+
+
+	/***
+	 * Retrieve the last error message.
+	 * If the last status is {@code DatabaseStatus.OK}, it returns {@code null}.
+	 * 
+	 * @return {@code String} 
+	 * 			the last error message if the last status is not {@code DatabaseStatus.OK}
+	 */
+	String getErrorMessage();
 }

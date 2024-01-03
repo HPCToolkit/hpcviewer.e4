@@ -245,9 +245,13 @@ public class DatabaseCollection
 		IDatabase database = DatabaseFactory.newInstance(databaseId);
 		DatabaseStatus status = database.reset(shell, databaseId);
 
-		if (status == DatabaseStatus.OK)
+		if (status == DatabaseStatus.OK) {
 			return addDatabase(shell, window, service, modelService, database);
-		
+		} else if (status == DatabaseStatus.INEXISTENCE || 
+				   status == DatabaseStatus.INVALID ||
+				   status == DatabaseStatus.UNKNOWN_ERROR) {
+			MessageDialog.openError(shell, "Error opening the database", database.getErrorMessage());
+		}
 		return status;
 	}
 	

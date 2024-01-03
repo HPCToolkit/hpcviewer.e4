@@ -7,6 +7,7 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Shell;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import edu.rice.cs.hpcdata.db.DatabaseManager;
 import edu.rice.cs.hpcdata.util.Util;
@@ -30,9 +31,9 @@ public class ExperimentManager
 	 * 
 	 * @return the list of XML files in the selected directory
 	 * empty if the user click the "cancel" button
-	 * @throws Exception 
+	 * @throws FileNotFoundException 
 	 */
-	private File[] getDatabaseFileList(Shell shell, String sTitle) throws Exception {
+	private File[] getDatabaseFileList(Shell shell, String sTitle) throws FileNotFoundException {
 		// preparing the dialog for selecting a directory
 		DirectoryDialog dirDlg = new DirectoryDialog(shell);
 		dirDlg.setText("hpcviewer");
@@ -42,7 +43,9 @@ public class ExperimentManager
 		String sDir = dirDlg.open();	// ask the user to select a directory
 		if(sDir != null) {
 			checkDirectory(sDir);
-			return getListOfDatabaseFiles(sDir);
+			var files = getListOfDatabaseFiles(sDir);
+			if (files == null || files.length == 0)
+				throw new FileNotFoundException(sDir + " is not a valid database directory");
 		}
 		
 		return new File[0];
@@ -55,10 +58,9 @@ public class ExperimentManager
 	 * 
 	 * @return {@code String} the directory of the database if everything is OK. 
 	 * 	{@code null} otherwise
-	 * 
-	 * @throws Exception 
+	 * @throws FileNotFoundException 
 	 */
-	public String openFileExperiment(Shell shell) throws Exception {
+	public String openFileExperiment(Shell shell) throws FileNotFoundException {
 		File []files = getDatabaseFileList(shell, 
 				"Select a directory containing a profiling database.");
 		if(files.length > 0) {
@@ -75,16 +77,15 @@ public class ExperimentManager
 	 * Open an experiment database based on given an array of java.lang.File
 	 * @param filesXML: list of files
 	 * @return true if the opening is successful
-	 * @throws Exception 
 	 */
-	private String getFileExperimentFromListOfFiles(File []filesXML) throws Exception {
-		if((filesXML != null) && (filesXML.length>0)) {
+	private String getFileExperimentFromListOfFiles(File []files) {
+		if((files != null) && (files.length>0)) {
 			// let's make it complicated: assuming there are more than 1 XML file in this directory,
 			// we need to test one by one if it is a valid database file.
 			// Problem: if in the directory it has two XML files, then the second one will NEVER be opened !
-			for(int i=0;i<(filesXML.length);i++) 
+			for(int i=0;i<(files.length);i++) 
 			{
-				File objFile = filesXML[i];
+				File objFile = files[i];
 
 				// Since rel 5.x, the name of database is experiment.xml
 				// there is no need to maintain compatibility with hpctoolkit prior 5.x 
@@ -93,16 +94,15 @@ public class ExperimentManager
 					return objFile.getAbsolutePath();
 				}
 			}
-			throw new Exception("Cannot find experiment.xml in the directory");
+			throw new IllegalAccessError("Cannot find database in the directory");
 		}
 		// no experiment.xml in the directory
 		// either the user mistakenly open a measurement directory, or it's just a mistake
-		throw new Exception("Either the selected directory is not a database or the file is corrupted.\n"+
-				"A database directory must contain at least one XML file which contains profiling information.");
+		throw new IllegalAccessError("Either the selected directory is not a database or the file is corrupted.");
 	}
 	
 	
-	public static boolean checkDirectory(String path) throws IllegalArgumentException {
+	public static boolean checkDirectory(String path) {
 		if (path == null) {
 			return false;
 		}

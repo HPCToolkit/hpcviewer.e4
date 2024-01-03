@@ -40,7 +40,8 @@ public class DatabaseRemote implements IDatabaseRemote
 	private Experiment experiment;
 	
 	private DatabaseStatus status = DatabaseStatus.NOT_INITIALIZED;
-
+	private String errorMessage = "";
+	
 	private ITraceManager traceManager;
 
 	@Override
@@ -81,7 +82,7 @@ public class DatabaseRemote implements IDatabaseRemote
 				client = new HpcClientJavaNetHttp( address, port);
 				
 			} catch (UnknownHostException e) {
-				MessageDialog.openError(shell, "Fail to connect", "Unable to connect to " + getId());
+				errorMessage = "Unable to connect to " + getId();
 				status = DatabaseStatus.UNKNOWN_ERROR;
 				return status;
 			}
@@ -98,6 +99,7 @@ public class DatabaseRemote implements IDatabaseRemote
 					id = new RemoteDatabaseIdentification(host, port, client.getDatabasePath().toString(), null);
 
 					status = DatabaseStatus.OK;
+					errorMessage = "";
 					
 					return status;
 				}
@@ -202,5 +204,11 @@ public class DatabaseRemote implements IDatabaseRemote
 		    Thread.currentThread().interrupt();
 		}
 		return null;
+	}
+
+
+	@Override
+	public String getErrorMessage() {
+		return errorMessage;
 	}
 }
