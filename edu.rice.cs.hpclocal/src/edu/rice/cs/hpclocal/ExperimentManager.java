@@ -46,8 +46,9 @@ public class ExperimentManager
 			var files = getListOfDatabaseFiles(sDir);
 			if (files == null || files.length == 0)
 				throw new FileNotFoundException(sDir + " is not a valid database directory");
+			
+			return files;
 		}
-		
 		return new File[0];
 	}
 		
