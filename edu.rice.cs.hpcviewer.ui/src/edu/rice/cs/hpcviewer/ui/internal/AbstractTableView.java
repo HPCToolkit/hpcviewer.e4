@@ -26,6 +26,7 @@ import org.osgi.service.event.EventHandler;
 
 import edu.rice.cs.hpcbase.BaseConstants;
 import edu.rice.cs.hpcbase.BaseConstants.ViewType;
+import edu.rice.cs.hpcbase.IDatabase;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcbase.ui.IUserMessage;
 
@@ -53,6 +54,7 @@ import edu.rice.cs.hpctree.action.ZoomAction;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.actions.UserDerivedMetric;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
+import edu.rice.cs.hpcviewer.ui.parts.editor.EditorInputScope;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 
 
@@ -85,6 +87,7 @@ implements EventHandler, IUserMessage
 	private ToolItem[]   toolItem;
 	private LabelMessage lblMessage;
 	
+	private IDatabase      database;
 	private IMetricManager metricManager;
 	private RootScope      root;
 	private ScopeTreeTable table ;
@@ -273,21 +276,13 @@ implements EventHandler, IUserMessage
 	}
 
 	@Override
-	public void setInput(Object input) {
+	public void setInput(IDatabase database, Object input) {
+
 		if (!(input instanceof IMetricManager))
 			return;
 		
-		createTable((IMetricManager) input);
-	}
-
-	
-	protected void createTable(IMetricManager input) {
-		
-		// -------------------------------------------
-		// table creation
-		// -------------------------------------------
-		
-		metricManager = input;
+		this.database = database;
+		this.metricManager = (IMetricManager) input;
 		
 		// -------------------------------------------
 		// Create the main table
@@ -300,7 +295,7 @@ implements EventHandler, IUserMessage
 		table.addSelectionListener(scope -> updateButtonStatus());
 		
 		table.addActionListener(scope -> {
-			profilePart.addEditor(scope);
+			profilePart.addEditor(new EditorInputScope(parent.getShell(), database, scope));
 		});
 		//
 		// fix issue #188: force the table to have a content so natTable can properly resize the columns
@@ -667,7 +662,7 @@ implements EventHandler, IUserMessage
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				MetricFilterInput input = new MetricFilterInput(AbstractTableView.this);
+				MetricFilterInput input = new MetricFilterInput(AbstractTableView.this, eventBroker);
 				profilePart.addEditor(input);
 				updateButtonStatus();
 			}
@@ -732,6 +727,10 @@ implements EventHandler, IUserMessage
 		return table;
 	}
 
+	
+	protected IDatabase getDatabase() {
+		return database;
+	}
 
 	protected void updateButtonStatus() {
 		updateStatus();

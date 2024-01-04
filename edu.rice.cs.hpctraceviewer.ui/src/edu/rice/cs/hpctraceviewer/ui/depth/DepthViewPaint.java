@@ -51,7 +51,7 @@ public class DepthViewPaint extends BaseViewPaint {
 		
 		if (process >= attributes.getProcessBegin() && process <= attributes.getProcessEnd()) {
 			// TODO warning: data races for accessing the current process timeline 
-			if ( controller.getCurrentDepthTrace() != null) {
+			if ( controller.getCurrentSelectedTraceline() != null) {
 				numPixels = attributes.getDepthPixelVertical()/(float)visibleDepth;
 				return changedBounds;
 			}

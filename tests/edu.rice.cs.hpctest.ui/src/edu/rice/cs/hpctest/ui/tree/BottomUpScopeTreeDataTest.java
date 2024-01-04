@@ -10,8 +10,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
+import edu.rice.cs.hpcdata.util.IProgressReport;
 import edu.rice.cs.hpctest.util.TestDatabase;
 import edu.rice.cs.hpctree.BottomUpScopeTreeData;
 
@@ -30,8 +32,10 @@ public class BottomUpScopeTreeDataTest
 			assertNotNull(path);
 
 			var experiment = new Experiment();
+			var localDb = new LocalDatabaseRepresentation(path, null, IProgressReport.dummy());
+
 			try {
-				experiment.open(path, null, Experiment.ExperimentOpenFlag.TREE_ALL);
+				experiment.open(localDb);
 			} catch (Exception e) {
 				assertFalse(e.getMessage(), true);
 			}			
@@ -46,7 +50,7 @@ public class BottomUpScopeTreeDataTest
 			buRoot = experiment.createCallersView(cctRoot, buRoot);
 			assertNotNull(buRoot);
 			
-			var data = new BottomUpScopeTreeData(buRoot, experiment);
+			var data = new BottomUpScopeTreeData(null, buRoot, experiment);
 			treeData.add(data);
 		}
 	}

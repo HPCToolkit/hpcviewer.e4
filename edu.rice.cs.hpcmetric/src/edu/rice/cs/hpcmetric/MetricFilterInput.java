@@ -3,10 +3,16 @@ package edu.rice.cs.hpcmetric;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TreeColumn;
 
 import edu.rice.cs.hpcbase.BaseConstants.ViewType;
+import edu.rice.cs.hpcbase.IEditorViewerInput;
+import edu.rice.cs.hpcbase.ui.IUpperPart;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
@@ -14,9 +20,10 @@ import edu.rice.cs.hpcfilter.FilterDataItem;
 import edu.rice.cs.hpcfilter.FilterInputData;
 import edu.rice.cs.hpcmetric.internal.MetricFilterDataItem;
 
-public class MetricFilterInput extends FilterInputData<BaseMetric>
+public class MetricFilterInput extends FilterInputData<BaseMetric> implements IEditorViewerInput
 {
 	private final IFilterable view;
+	private final IEventBroker eventBroker;
 
 	/****
 	 * Constructor for the metric filter input
@@ -26,9 +33,11 @@ public class MetricFilterInput extends FilterInputData<BaseMetric>
 	 * @param listMetrics List of metric status
 	 * @param affectAll boolean true if the change affects all other views within the experiment database
 	 */
-	public MetricFilterInput(IFilterable view) {
+	public MetricFilterInput(IFilterable view, IEventBroker eventBroker) {
 		super(view.getFilterDataItems());
+		
 		this.view = view;
+		this.eventBroker = eventBroker;
 	}
  	
 	
@@ -78,6 +87,37 @@ public class MetricFilterInput extends FilterInputData<BaseMetric>
 
 	public boolean isAffectAll() {
 		return view.getViewType() == ViewType.COLLECTIVE;
+	}
+
+
+	@Override
+	public String getId() {
+		return view.getMetricManager().getID();
+	}
+
+
+	@Override
+	public String getShortName() {
+		return "Metric view";
+	}
+
+
+	@Override
+	public String getLongName() {
+		return getShortName() + ": " + getId();
+	}
+
+
+	@Override
+	public IUpperPart createViewer(Composite parent) {
+
+		return new MetricView((CTabFolder) parent, SWT.NONE, eventBroker);
+	}
+
+
+	@Override
+	public boolean needToTrackActivatedView() {
+		return true;
 	}
 
 	

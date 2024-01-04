@@ -9,16 +9,15 @@ import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 
 /**
  * An interface for the DBOpeners. Specifically, it is implemented by
- * {@link RemoteDBOpener} and {@link LocalDBOpener}. Its main purpose is to
+ * {@link RemoteTraceOpener} and {@link LocalDBOpener}. Its main purpose is to
  * create a {@link SpaceTimeDataController} from the connection to the database
  * (be it local or remote), but it also partially handles closing that connection.
  * 
  * @author Philip Taffet
  * 
  */
-public abstract class AbstractDBOpener {
-
-	
+public abstract class AbstractDBOpener 
+{
 
 	/**
 	 * This prepares the database for retrieving data and creates a
@@ -30,11 +29,10 @@ public abstract class AbstractDBOpener {
 	 * @param statusMgr progress monitor
 	 * @return
 	 * @throws IOException 
-	 * @throws Exception 
 	 * @throws InvalExperimentException 
 	 */
 	public abstract SpaceTimeDataController openDBAndCreateSTDC(IProgressMonitor statusMgr)
-			throws IOException, InvalExperimentException, Exception;
+			throws IOException, InvalExperimentException;
 
 	
 	// Our current policy on closing: Except for back-to-back connections to the

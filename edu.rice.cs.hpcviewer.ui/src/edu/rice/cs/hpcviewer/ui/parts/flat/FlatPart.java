@@ -1,12 +1,21 @@
 package edu.rice.cs.hpcviewer.ui.parts.flat;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.CoolBar;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
+import org.slf4j.LoggerFactory;
 
+import edu.rice.cs.hpcbase.IDatabase;
+import edu.rice.cs.hpcbase.ProgressReport;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
@@ -66,8 +75,8 @@ public class FlatPart extends AbstractTableView
 
 	
 	@Override
-	public void setInput(Object input) {
-		super.setInput(input);
+	public void setInput(IDatabase database, Object input) {
+		super.setInput(database, input);
 		// we have to initialize flatAction here because we need the value of
 		// getTable() which is created after setInput
 		flatAction = new FlatAction(getActionManager(), getTable());
@@ -85,6 +94,7 @@ public class FlatPart extends AbstractTableView
 
 	
 	private boolean isInitialized = false;
+	
 	@Override
 	protected RootScope buildTree(boolean reset) {
 		Experiment experiment = (Experiment) getMetricManager();
@@ -97,10 +107,50 @@ public class FlatPart extends AbstractTableView
 		if (isInitialized && !reset)
 			return rootFlat;
 		
+		createTree(rootCCT, rootFlat);			
 		isInitialized = true;
-		return experiment.createFlatView(rootCCT, rootFlat);
+		return rootFlat;
 	}
 
+	
+	private RootScope createTree(RootScope rootCCT, RootScope rootFlat) {
+		
+		Job task = new Job("Create the tree") {
+			
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+
+				var progress = new ProgressReport(monitor);				
+				final var db = getDatabase();
+				
+				// this may take some time.
+				// Especially for the remote database.
+				try {
+					db.createFlatTree(rootCCT, rootFlat, progress);
+				} catch (Exception e) {
+					var display = Display.getDefault();
+					if (display != null && !display.isDisposed()) {
+						display.syncExec(() -> {
+							var shell = getDisplay().getActiveShell();
+							MessageDialog.openError(shell, "Error while creating the tree", e.getMessage());
+						});
+					}
+					return Status.CANCEL_STATUS;
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		task.schedule();
+		try {
+			task.join();
+		} catch (InterruptedException e) {
+			LoggerFactory.getLogger(getClass()).warn("Flat tree is interrupted", e);
+		    // Restore interrupted state...
+		    Thread.currentThread().interrupt();
+		}
+		return rootFlat;
+	}
+	
 
 	@Override
 	public RootScopeType getRootType() {
@@ -109,8 +159,7 @@ public class FlatPart extends AbstractTableView
 
 	@Override
 	public RootScope getRoot() {
-		IMetricManager mm = getMetricManager();
-		Experiment experiment = (Experiment) mm;
+		Experiment experiment = (Experiment) getMetricManager();
 		return experiment.getRootScope(RootScopeType.Flat);
 	}
 
@@ -118,7 +167,7 @@ public class FlatPart extends AbstractTableView
 	@Override
 	protected IScopeTreeData getTreeData(RootScope root, IMetricManager metricManager) {
 		if (treeData == null)
-			treeData = new FlatScopeTreeData(root, metricManager);
+			treeData = new FlatScopeTreeData(getDatabase(), root, metricManager);
 		return treeData;
 	}
 
@@ -128,7 +177,7 @@ public class FlatPart extends AbstractTableView
 		super.dispose();
 		
 		items = null;
-		treeData.clear();
+		treeData = null;
 		flatAction = null;
 	}
 }

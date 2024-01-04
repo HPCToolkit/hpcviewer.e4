@@ -9,9 +9,11 @@ import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.eclipse.e4.ui.model.application.MApplication;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 
+import edu.rice.cs.hpcbase.IDatabase;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcmerge.MergeManager;
@@ -28,16 +30,16 @@ import org.eclipse.e4.core.di.annotations.CanExecute;
 
 public class MergeDatabase 
 {
-	static final private String PARAM_ID = "edu.rice.cs.hpcviewer.ui.commandparameter.merge";
+	private static final String PARAM_ID = "edu.rice.cs.hpcviewer.ui.commandparameter.merge";
 	
-	static final private String PARAM_VALUE_TOPDOWN = "topdown";
-	static final private String PARAM_VALUE_FLAT    = "flat";
+	private static final String PARAM_VALUE_TOPDOWN = "topdown";
+	private static final String PARAM_VALUE_FLAT    = "flat";
 	
 	@Inject DatabaseCollection database;
 	
 	@Execute
 	public void execute(@Active Shell shell, @Optional @Named(PARAM_ID) String param,
-			MApplication application,
+			MWindow window,
 			EPartService service,
 			IEventBroker broker,
 			EModelService modelService) {
@@ -46,18 +48,19 @@ public class MergeDatabase
 		// gather 2 databases to be merged.
 		// we don't want to merge an already merged database. Skip it.
 		// ---------------------------------------------------------------
-		List<Experiment> db = new ArrayList<Experiment>(2);
+		List<Experiment> listDatabase = new ArrayList<>(2);
 		
-		var iterator = database.getIterator(application.getSelectedElement());
+		var iterator = database.getIterator(window);
 		while(iterator.hasNext()) {
-			Experiment exp = (Experiment) iterator.next();
+			var db = iterator.next();
+			Experiment exp = (Experiment) db.getExperimentObject();
 			if (!exp.isMergedDatabase()) {
-				db.add(exp);
+				listDatabase.add(exp);
 			}
 		}
 
-		if (db.size() < 2) {
-			throw new RuntimeException("Can't merge one database");
+		if (listDatabase.size() < 2) {
+			throw new IllegalArgumentException("Can't merge one database");
 		}
 		
 		// check the type of merging: top-down or flat. 
@@ -75,7 +78,7 @@ public class MergeDatabase
 		}
 		
 		// everything looks fine: do the merging
-		MergeManager.merge(shell, db, type, new MergeManager.IMergeCallback() {			
+		MergeManager.merge(shell, listDatabase, type, new MergeManager.IMergeCallback() {			
 			@Override
 			public void mergeError(String errorMsg) {
 				MessageDialog.openError(shell, "Error merging database", errorMsg);
@@ -83,8 +86,8 @@ public class MergeDatabase
 			
 			@Override
 			public void mergeDone(Experiment experiment) {
-				String message = "The two databases have been merged";
-				database.createViewsAndAddDatabase(experiment, application, service, modelService, message);
+				var db = IDatabase.getEmpty(experiment);
+				database.addDatabase(shell, window, service, modelService, db);
 			}
 		});
 	}
@@ -96,12 +99,12 @@ public class MergeDatabase
 		
 		int numDb = 0;		
 		while(iterator.hasNext()) {
-			Experiment exp = (Experiment) iterator.next();
+			var db = iterator.next();
+			Experiment exp = (Experiment) db.getExperimentObject();
 			if (!exp.isMergedDatabase()) {
 				numDb++;
 			}
 		}		
 		return numDb>=2;
 	}
-		
 }

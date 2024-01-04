@@ -2,7 +2,6 @@ package edu.rice.cs.hpctest.ui.tree;
 
 import static org.junit.Assert.*;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -16,7 +15,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
-import edu.rice.cs.hpcdata.experiment.Experiment.ExperimentOpenFlag;
+import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
 import edu.rice.cs.hpcdata.experiment.scope.LoopScope;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
@@ -41,15 +40,16 @@ public class FlatActionTest
 		Shell shell = new Shell(display);
 		
 		for(var dir: directories) {
-			var pathname = dir.getAbsolutePath();
 			var exp = new Experiment();
-			exp.open(new File(pathname), null, ExperimentOpenFlag.TREE_CCT_ONLY);
+			
+			var localDb = new LocalDatabaseRepresentation(dir, null, true);
+			exp.open(localDb);
 
 			var cctRoot = exp.getRootScope(RootScopeType.CallingContextTree);
 			var flatRoot = exp.getRootScope(RootScopeType.Flat);			
 			final var flaTreetRoot = exp.createFlatView(cctRoot, flatRoot);
 			
-			var td = new FlatScopeTreeData(flaTreetRoot, exp);
+			var td = new FlatScopeTreeData(null, flaTreetRoot, exp);
 			FlatAction fa = null;
 			IScopeTreeAction treeAction = null;
 			try {

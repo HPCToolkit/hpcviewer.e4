@@ -15,7 +15,6 @@ import org.eclipse.swt.graphics.Point;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
-import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
@@ -34,18 +33,19 @@ import edu.rice.cs.hpctraceviewer.ui.internal.ImagePosition;
 public class DetailViewPaint extends BaseViewPaint 
 {		
 	/** maximum number of records to display **/
-	static public final int MAX_RECORDS_DISPLAY = 99;
+	public static final int MAX_RECORDS_DISPLAY = 99;
 	/** text when we reach the maximum of records to display **/
-	static public final String TOO_MANY_RECORDS = ">" + String.valueOf(MAX_RECORDS_DISPLAY) ;
+	public static final String TOO_MANY_RECORDS = ">" + MAX_RECORDS_DISPLAY;
 	
-	final private Point maxTextSize;
+	private final Point maxTextSize;
 
 	private final GC masterGC;
 	private final GC origGC;
 	private final Device device;
 	
-	final private AtomicInteger currentLine, numDataCollected;
-	final private int numLines;
+	private final AtomicInteger currentLine;
+	private final AtomicInteger numDataCollected;
+	private final int numLines;
 
 	private boolean debug;
 	private List<IdTuple> listIdTuples; 
@@ -85,7 +85,7 @@ public class DetailViewPaint extends BaseViewPaint
 
 	@Override
 	protected boolean startPainting(int linesToPaint, int numThreads, boolean changedBounds) {
-		final IBaseData traceData = controller.getBaseData();
+		final var traceData = controller.getBaseData();
 		listIdTuples = traceData.getListOfIdTuples(IdTupleOption.BRIEF);
 
 		return true;
@@ -100,14 +100,17 @@ public class DetailViewPaint extends BaseViewPaint
 	protected BaseTimelineThread getTimelineThread(ISpaceTimeCanvas canvas, double xscale,
 			double yscale, Queue<TimelineDataSet> queue, IProgressMonitor monitor) {
 
-		return new TimelineThread(controller, changedBounds,   
-				yscale, queue, numDataCollected, numLines, monitor);
+		return new TimelineThread(controller, 
+							      changedBounds,   
+							      yscale, 
+							      queue, 
+							      monitor);
 	}
 
 	@Override
 	protected void launchDataGettingThreads(boolean changedBounds,
 			int numThreads) throws IOException {
-		controller.fillTracesWithData( changedBounds, numThreads);
+		controller.startTrace(numLines, changedBounds);
 	}
 
 	@Override

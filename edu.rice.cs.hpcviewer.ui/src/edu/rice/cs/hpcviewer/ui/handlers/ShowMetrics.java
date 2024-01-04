@@ -52,7 +52,7 @@ public class ShowMetrics
 			return;
 		}
 		AbstractView item = profilePart.getActiveView();		
-		MetricFilterInput input = new MetricFilterInput(item);
+		MetricFilterInput input = new MetricFilterInput(item, eventBroker);
 		
 		profilePart.addEditor(input);
 	}

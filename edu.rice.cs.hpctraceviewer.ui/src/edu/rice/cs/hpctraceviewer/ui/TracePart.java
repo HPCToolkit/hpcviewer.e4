@@ -24,11 +24,10 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
 import edu.rice.cs.hpcbase.BaseConstants;
+import edu.rice.cs.hpcbase.IDatabase;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceConstants;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
-import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
-import edu.rice.cs.hpctraceviewer.data.local.LocalDBOpener;
 import edu.rice.cs.hpctraceviewer.ui.base.AbstractBaseItem;
 import edu.rice.cs.hpctraceviewer.ui.base.IPixelAnalysis;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
@@ -37,6 +36,7 @@ import edu.rice.cs.hpctraceviewer.ui.blamestat.CpuBlameAnalysis;
 import edu.rice.cs.hpctraceviewer.ui.blamestat.HPCBlameView;
 import edu.rice.cs.hpctraceviewer.ui.callstack.HPCCallStackView;
 import edu.rice.cs.hpctraceviewer.ui.context.BaseTraceContext;
+import edu.rice.cs.hpctraceviewer.ui.debug.DebugView;
 import edu.rice.cs.hpctraceviewer.ui.depth.HPCDepthView;
 import edu.rice.cs.hpctraceviewer.ui.depthEditor.DepthEditor;
 import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
@@ -48,7 +48,6 @@ import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 import edu.rice.cs.hpctraceviewer.ui.util.Utility;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
-import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
 import edu.rice.cs.hpcdata.util.OSValidator;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
@@ -90,7 +89,7 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 
 	private final HashMap<String, IUndoContext> mapLabelToContext;
 	
-	private BaseExperiment experiment;
+	private IDatabase database;
 	
 	private CTabFolder tabFolderTopLeft;
 	private CTabFolder tabFolderBottomLeft;
@@ -99,6 +98,8 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 	private HPCDepthView     tbtmDepthView;
 	private HPCCallStackView tbtmCallStack;
 	private HPCSummaryView   tbtmSummaryView;
+	
+	private DebugView tbtmDebugView;
 	
 	private DepthEditor     depthEditor;
 
@@ -280,6 +281,28 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 	}
 	
 	
+	/***
+	 * Create a closable view to show debug information of the displayed traces
+	 */
+	public void createDebugView() {
+		if (tbtmDebugView == null || tbtmDebugView.isDisposed()) {
+			tbtmDebugView = new DebugView(tabFolderTopLeft, 0);
+			
+			createTabItem(tbtmDebugView, "Debug view", tabFolderTopLeft, eventBroker);
+			
+			tbtmDebugView.setInput(stdc);
+		}
+	}
+	
+	
+	/***
+	 * Check if the debug view is already shown or not
+	 * @return
+	 */
+	public boolean isDebugViewShown() {
+		return (tbtmDebugView != null && !tbtmDebugView.isDisposed() && stdc != null);
+	}
+	
 	private void updateToolItem() {
 		tiZoomIn.setEnabled(tbtmDepthView.canZoomIn());
 		tiZoomOut.setEnabled(tbtmDepthView.canZoomOut());
@@ -356,12 +379,15 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 	
 	@Override
 	public BaseExperiment getExperiment() {
-		return experiment;
+		if (database != null)
+			return (BaseExperiment) database.getExperimentObject();
+		
+		return null;
 	}
 
 	@Override
-	public void setInput( Object input) {
-		this.experiment = (BaseExperiment) input;
+	public void setInput(IDatabase input) {
+		this.database = input;
 	}
 
 	@Override
@@ -386,12 +412,12 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 		if (eventBroker == null || partService == null)
 			return;
 		
-		if (experiment == null || experiment.getRootScope() == null)
+		if (database == null || database.getExperimentObject() == null)
 			return;
 		
 		try {
-			AbstractDBOpener dbOpener = new LocalDBOpener(context, experiment);
-			stdc = dbOpener.openDBAndCreateSTDC(null);
+			//AbstractDBOpener dbOpener = (AbstractDBOpener) database.getORCreateTraceManager(); //new LocalDBOpener(context, database.getExperimentObject());
+			stdc = (SpaceTimeDataController) database.getORCreateTraceManager();
 
 			// make sure all the tabs other than trace view has the stdc first
 			tbtmDepthView.setInput(stdc);
@@ -399,7 +425,7 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 			miniCanvas.   updateView(stdc);
 			tbtmStatView .setInput(stdc);
 			
-			//       since the stat view requires info from summary view 
+			// put this later since the stat view requires info from summary view 
 			tbtmSummaryView.setInput(stdc);
 
 			// enable action
@@ -409,7 +435,7 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 			// start reading the database and draw it
 			tbtmTraceView.setInput(stdc);
 			
-			IBaseData data = stdc.getBaseData();
+			var data = stdc.getBaseData();
 
 			if (!data.hasGPU()) {
 				tbtmBlameView.dispose();
@@ -422,6 +448,9 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 
 			eventBroker.subscribe(ViewerDataEvent.TOPIC_FILTER_POST_PROCESSING, this);
 
+			if (tbtmDebugView != null) {
+				tbtmDebugView.setInput(stdc);
+			}
 		} catch (Exception e) {
 			Shell shell = Display.getDefault().getActiveShell();
 			MessageDialog.openError(shell, "Error in opening the database", e.getClass().getSimpleName() + ":" + e.getMessage());
@@ -454,8 +483,8 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 
 
 	@Override
-	public Object getInput() {
-		return stdc;
+	public IDatabase getInput() {
+		return database;
 	}
 
 	@Override
@@ -478,7 +507,11 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 	@Override
 	public void handleEvent(Event event) {
 		Object obj = event.getProperty(IEventBroker.DATA);
-		if (obj == null || experiment == null)
+		if (obj == null || database == null)
+			return;
+		
+		var experiment = database.getExperimentObject();
+		if (experiment == null)
 			return;
 		
 		// check if we have a generic event
@@ -494,18 +527,18 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 	}
 
 	@Override
-	public void showErrorMessage(String str) {
-		// unused		
+	public void showErrorMessage(String message) {
+		tbtmTraceView.showMessage(message);
 	}
 
 	@Override
 	public void showInfo(String message) {
-		// unused		
+		tbtmTraceView.showMessage(message);
 	}
 
 	@Override
 	public void showWarning(String message) {
-		// unused		
+		tbtmTraceView.showMessage(message);
 	}
 
 	@Override
@@ -513,11 +546,9 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 		// clean up the history to avoid memory spills
 		var history = getOperationHistory();
 		for(var strCtx: BaseTraceContext.CONTEXTS) {
-			var context = getContext(strCtx);
-			history.dispose(context, true, true, true);
+			history.dispose(getContext(strCtx), true, true, true);
 		}
-		
-		experiment = null;
+		database = null;
 		
 		// mark that this part will be close soon. Do not do any tasks
 		partService = null;
@@ -528,5 +559,10 @@ public class TracePart implements ITracePart, IPartListener, IPropertyChangeList
 			stdc.dispose();
 		
 		stdc = null;
+	}
+
+	@Override
+	public SpaceTimeDataController getDataController() {
+		return stdc;
 	}
 }

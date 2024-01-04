@@ -1,5 +1,7 @@
 package edu.rice.cs.hpcbase.ui;
 
+import edu.rice.cs.hpcbase.IEditorViewerInput;
+import edu.rice.cs.hpcbase.ThreadViewInput;
 
 public interface IProfilePart extends IMainPart 
 {
@@ -13,17 +15,13 @@ public interface IProfilePart extends IMainPart
 	 * @return {@code IUpperPart}
 	 * 			The editor object if successful, {@code null} otherwise.
 	 */
-	IUpperPart addEditor(Object input);
+	IUpperPart addEditor(IEditorViewerInput input);
 	
-		
-	/***
-	 * Create a new view part in the lower part of the program.
-	 *  
+	
+	/**
+	 * Special adding a view
+	 * 
 	 * @param input
-	 * 			The object input. Warning: its value can be anything.
-	 * 		
-	 * @return {@code ILowerPart}
-	 * 			The view object if successful, {@code null} otherwise
 	 */
-	ILowerPart addView(Object input); 
+	void addThreadView(ThreadViewInput input);
 }

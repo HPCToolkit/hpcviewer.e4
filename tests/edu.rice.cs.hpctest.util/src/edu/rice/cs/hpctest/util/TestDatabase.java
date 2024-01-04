@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 import org.junit.Test;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
 
 public class TestDatabase 
 {
@@ -55,7 +56,8 @@ public class TestDatabase
 		List<Experiment> listExp = new ArrayList<>(dirs.length);
 		for(var dir: dirs) {
 			Experiment e = new Experiment();
-			e.open(dir, null, true);
+			var localDb = new LocalDatabaseRepresentation(dir, null, true);
+			e.open(localDb);
 			listExp.add(e);
 		}
 		return listExp;

@@ -10,6 +10,7 @@ import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.model.application.ui.basic.impl.BasicPackageImpl;
 import org.eclipse.e4.ui.workbench.IWorkbench;
 import org.eclipse.e4.ui.workbench.UIEvents;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.IWindowCloseHandler;
 import org.eclipse.emf.common.notify.Notification;
@@ -42,6 +43,9 @@ public class WindowCloseListenerAddon
 	EPartService partService;
 	
 	@Inject
+	EModelService modelService;
+	
+	@Inject
 	DatabaseCollection database;
 	
 	// as the IWorkbench is not available at creation time, we need to annotate it with
@@ -68,8 +72,6 @@ public class WindowCloseListenerAddon
 	private void subscribeTopicChildrenChanged(@UIEventTopic(UIEvents.ElementContainer.TOPIC_CHILDREN) Event event) {
 		Object changedObj = event.getProperty(UIEvents.EventTags.ELEMENT);
 		
-		// TODO check for addition of window and perform action only on that window
-		
 		// only interested in changes to application
 		if (changedObj instanceof MApplication) {
 			MApplication application = (MApplication) changedObj;
@@ -88,7 +90,7 @@ public class WindowCloseListenerAddon
 
 				@Override
 				public boolean close(MWindow window) {
-					database.removeWindowExperiment(window);
+					database.removeAllDatabases(window, modelService, partService);
 					
 					return true;
 				}

@@ -1,12 +1,21 @@
 package edu.rice.cs.hpcgraph;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.widgets.Composite;
+
+import edu.rice.cs.hpcbase.IEditorViewerInput;
 import edu.rice.cs.hpcbase.ui.IProfilePart;
+import edu.rice.cs.hpcbase.ui.IUpperPart;
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcgraph.histogram.GraphHistoViewer;
+import edu.rice.cs.hpcgraph.plot.GraphPlotRegularViewer;
+import edu.rice.cs.hpcgraph.plot.GraphPlotSortViewer;
 
 
-public class GraphEditorInput 
+public class GraphEditorInput implements IEditorViewerInput
 {
 	public static final int MAX_TITLE_CHARS = 100; // maximum charaters for a title
 
@@ -75,14 +84,57 @@ public class GraphEditorInput
 		return threadData;
 	}
 	
+	
+	@Override
 	public String toString() {
-		
+		return getLongName();
+	}
+
+
+	@Override
+	public String getId() {
+		return getLongName();
+	}
+
+
+	@Override
+	public String getShortName() {		
 		String scopeName = scope.getName();
 		if (scopeName.length() > MAX_TITLE_CHARS) {
 			scopeName = scope.getName().substring(0, MAX_TITLE_CHARS) + "...";
 		}
-		String title = "[" + graphType + "] " + scopeName +": " + metric.getDisplayName();
+		return getGenericName(scopeName);
+	}
 
-		return title;
+
+	@Override
+	public String getLongName() {
+		return getGenericName(scope.getName());
+	}
+
+
+	@Override
+	public IUpperPart createViewer(Composite parent) {
+		IUpperPart viewer = null;
+		
+		if (graphType == GraphPlotRegularViewer.LABEL) {
+			viewer = new GraphPlotRegularViewer((CTabFolder) parent, SWT.NONE);
+		} else if (graphType == GraphPlotSortViewer.LABEL) {
+			viewer = new GraphPlotSortViewer((CTabFolder) parent, SWT.NONE);
+		} else if (graphType == GraphHistoViewer.LABEL) {
+			viewer = new GraphHistoViewer((CTabFolder) parent, SWT.NONE);
+		}
+		return viewer;
+	}
+
+
+	@Override
+	public boolean needToTrackActivatedView() {
+		return false;
+	}
+	
+	
+	private String getGenericName(String scopeName) {
+		return "[" + graphType + "] " + scopeName +": " + metric.getDisplayName();
 	}
 }

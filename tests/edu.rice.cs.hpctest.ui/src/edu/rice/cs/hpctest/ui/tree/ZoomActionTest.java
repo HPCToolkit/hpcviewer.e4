@@ -12,6 +12,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpctest.util.TestDatabase;
 import edu.rice.cs.hpctree.ScopeTreeData;
@@ -37,8 +38,9 @@ public class ZoomActionTest
 			assertNotNull(path);
 
 			var experiment = new Experiment();
+			var localDb = new LocalDatabaseRepresentation(path, null, true);
 			try {
-				experiment.open(path, null, Experiment.ExperimentOpenFlag.TREE_ALL);
+				experiment.open(localDb);
 			} catch (Exception e) {
 				assertFalse(e.getMessage(), true);
 			}			
@@ -51,7 +53,7 @@ public class ZoomActionTest
 				continue;
 
 			RecordData data = new RecordData();
-			data.treeData = new ScopeTreeData(root, experiment);
+			data.treeData = new ScopeTreeData(null, root, experiment);
 			
 			ScopeTreeTable table = new ScopeTreeTable(shell, 0, data.treeData);
 			

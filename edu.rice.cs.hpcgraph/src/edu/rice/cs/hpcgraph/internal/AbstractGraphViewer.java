@@ -16,8 +16,9 @@ import org.eclipse.swtchart.IAxisSet;
 import org.eclipse.swtchart.IAxisTick;
 
 import edu.rice.cs.hpcbase.BaseConstants;
-import edu.rice.cs.hpcbase.ElementIdManager;
+import edu.rice.cs.hpcbase.IBaseInput;
 import edu.rice.cs.hpcbase.ui.AbstractUpperPart;
+import edu.rice.cs.hpcbase.ui.ILowerPart;
 import edu.rice.cs.hpcbase.ui.IUpperPart;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -72,7 +73,7 @@ public abstract class AbstractGraphViewer extends AbstractUpperPart implements I
 
 	
 	@Override
-	public boolean hasEqualInput(Object input) {
+	public boolean hasEqualInput(IBaseInput input) {
 		if (input == null) return false;
 		if (!(input instanceof GraphEditorInput)) return false;
 		
@@ -88,7 +89,7 @@ public abstract class AbstractGraphViewer extends AbstractUpperPart implements I
 	}
 
 	@Override
-	public void setInput(Object obj) {
+	public void setInput(IBaseInput obj) {
 
 		if (obj == null) return;
 
@@ -181,16 +182,23 @@ public abstract class AbstractGraphViewer extends AbstractUpperPart implements I
 	}
 	
 
+	@Override
+	public void refresh(ILowerPart lowerPart) {
+		// no need to refresh the content
+	}
+	
+
 	public static String getID(String descID, Scope scope, BaseMetric metric) {
+		final char ELEMENT_SEPARATOR = ':';
 		
-		String dbId  = ElementIdManager.getElementId(scope.getExperiment());
+		String dbId  = scope.getExperiment().getDirectory();
 		int scopeId  = scope.getCCTIndex();
 		int metricId = metric.getIndex();
 		int graphId  = descID.hashCode();
 		
-		return dbId 					+ ElementIdManager.ELEMENT_SEPARATOR + 
-			   String.valueOf(scopeId)  + ElementIdManager.ELEMENT_SEPARATOR +
-			   String.valueOf(metricId) + ElementIdManager.ELEMENT_SEPARATOR +
+		return dbId 					+ ELEMENT_SEPARATOR + 
+			   String.valueOf(scopeId)  + ELEMENT_SEPARATOR +
+			   String.valueOf(metricId) + ELEMENT_SEPARATOR +
 			   String.valueOf(graphId);
 	}
 	

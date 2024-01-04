@@ -7,7 +7,6 @@ import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
 import edu.rice.cs.hpcdata.experiment.scope.CallSiteScopeCallerView;
 import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.util.Util;
 import edu.rice.cs.hpctree.IScopeTreeData;
 
 
@@ -49,20 +48,20 @@ public class ScopeTreeLabelAccumulator implements IConfigLabelAccumulator
 		
 		if (scope instanceof CallSiteScopeCallerView) {
 			LineScope ls = ((CallSiteScopeCallerView)scope).getLineScope();
-			if (Util.isFileReadable(ls))
+			if (treeData.isSourceFileAvailable(ls))
 				configLabels.add(LABEL_CALLER);
 			else
 				configLabels.add(LABEL_CALLER_DISABLED);
 			
 		} else if (scope instanceof CallSiteScope) {
 			LineScope ls = ((CallSiteScope)scope).getLineScope();
-			if (Util.isFileReadable(ls)) {
+			if (treeData.isSourceFileAvailable(ls)) {
 				configLabels.add(LABEL_CALLSITE);				
 			} else {
 				configLabels.add(LABEL_CALLSITE_DISABLED);
 			}
 		}
-		if (Util.isFileReadable(scope)) {
+		if (treeData.isSourceFileAvailable(scope)) {
 			configLabels.add(LABEL_SOURCE_AVAILABLE);
 		}
 	}

@@ -31,10 +31,11 @@ import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 
+import edu.rice.cs.hpcbase.IDatabase;
+import edu.rice.cs.hpcbase.IEditorViewerInput;
 import edu.rice.cs.hpcbase.ThreadViewInput;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcbase.ui.AbstractUpperPart;
-import edu.rice.cs.hpcbase.ui.ILowerPart;
 import edu.rice.cs.hpcbase.ui.IProfilePart;
 import edu.rice.cs.hpcbase.ui.IUpperPart;
 import edu.rice.cs.hpcdata.experiment.BaseExperiment;
@@ -42,23 +43,21 @@ import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcfilter.service.FilterMap;
-import edu.rice.cs.hpcmetric.MetricFilterInput;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
-import edu.rice.cs.hpcgraph.GraphEditorInput;
-import edu.rice.cs.hpcgraph.histogram.GraphHistoViewer;
-import edu.rice.cs.hpcgraph.plot.GraphPlotRegularViewer;
-import edu.rice.cs.hpcgraph.plot.GraphPlotSortViewer;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractTableView;
 import edu.rice.cs.hpcviewer.ui.internal.AbstractView;
-import edu.rice.cs.hpcviewer.ui.metric.MetricView;
 import edu.rice.cs.hpcviewer.ui.parts.bottomup.BottomUpPart;
 import edu.rice.cs.hpcviewer.ui.parts.datacentric.Datacentric;
-import edu.rice.cs.hpcviewer.ui.parts.editor.Editor;
 import edu.rice.cs.hpcviewer.ui.parts.flat.FlatPart;
 import edu.rice.cs.hpcviewer.ui.parts.thread.ThreadPart;
 import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownPart;
 
 
+/*************
+ * 
+ * Main class to manage the profile view
+ *
+ *************/
 public class ProfilePart implements IProfilePart, EventHandler
 {
 	public static final String ID = "edu.rice.cs.hpcviewer.ui.partdescriptor.profile";
@@ -79,10 +78,10 @@ public class ProfilePart implements IProfilePart, EventHandler
 	/** Each view needs to store the experiment database.
 	 * In case it needs to populate the table, we know which database 
 	 * to be loaded. */
-	private Experiment  experiment;
+	private IDatabase database;
 	
 	private List<AbstractView> views;
-	private MetricView metricView;
+	private List<AbstractUpperPart> trackedViews;
 	
 	private CTabFolder tabFolderTop;
 	private CTabFolder tabFolderBottom;
@@ -113,7 +112,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 						
 						sync.asyncExec(()->{
 							view.activate();
-							refreshMetricView(view);
+							refreshUpperView(view);
 						});
 					}
 				}
@@ -123,16 +122,26 @@ public class ProfilePart implements IProfilePart, EventHandler
 	}
 	
 	
-	private void refreshMetricView(AbstractView view) {
+	/***
+	 * Notify the upper view (editors, metric view or graph)
+	 * that we have activated another view.
+	 * 
+	 * @param view
+	 * 			The activated view
+	 */
+	private void refreshUpperView(AbstractView view) {
 		
 		// if the metric part is active, we need to inform it that
 		// a new view is activated. The metric part has to refresh
 		// its content to synchronize with the table in the active view
+		if (trackedViews == null || trackedViews.isEmpty())
+			return;
 		
-		if (metricView != null && !metricView.isDisposed()) {			
-			final MetricFilterInput input  = new MetricFilterInput(view);								
-			metricView.setInput(input);
-		}
+		trackedViews.stream().forEach(v -> {
+			if (!v.isDisposed()) {				
+				v.refresh(view);
+			}
+		});
 	}
 	
 	/***
@@ -145,7 +154,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 	 * 			The editor object if successful. Null otherwise.
 	 */
 	@Override
-	public IUpperPart addEditor(Object input) {
+	public IUpperPart addEditor(IEditorViewerInput input) {
 		// search if the input is already displayed 
 		// if this is the case, we reuse the existing item
 		
@@ -165,30 +174,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 		}
 		// the input is not yet displayed
 		// create a new item for this input
-		AbstractUpperPart viewer = null;
-		
-		if (input instanceof GraphEditorInput) {
-			GraphEditorInput graphInput = (GraphEditorInput) input;
-			if (graphInput.getGraphType() == GraphPlotRegularViewer.LABEL) {
-				viewer = new GraphPlotRegularViewer(tabFolderTop, SWT.NONE);
-				
-			} else if (graphInput.getGraphType() == GraphPlotSortViewer.LABEL) {
-				viewer = new GraphPlotSortViewer(tabFolderTop, SWT.NONE);
-			
-			} else if (graphInput.getGraphType() == GraphHistoViewer.LABEL) {
-				viewer = new GraphHistoViewer(tabFolderTop, SWT.NONE);
-			}			
-		
-		} else if (input instanceof MetricFilterInput) {
-			viewer = new MetricView(tabFolderTop, SWT.NONE, eventBroker);
-						
-			metricView =  (MetricView) viewer;
-			metricView.addDisposeListener(event -> metricView = null);
-			
-			
-		} else {
-			viewer = new Editor(tabFolderTop, SWT.NONE);
-		}
+		AbstractUpperPart viewer = (AbstractUpperPart) input.createViewer(tabFolderTop);
 		
 		if (viewer != null) {
 			viewer.setInput(input);
@@ -197,21 +183,14 @@ public class ProfilePart implements IProfilePart, EventHandler
 			// otherwise it will display empty item
 			
 			tabFolderTop.setSelection(viewer);
+			
+			if (input.needToTrackActivatedView()) {
+				trackedViews.add(viewer);
+			}
 		}
 		return viewer;
 	}
-	
-	
-	public Editor getActiveEditor() {
-		if (tabFolderTop == null) return null;
 		
-		CTabItem item = tabFolderTop.getSelection();
-		if (item instanceof Editor) {
-			return (Editor) item;
-		}
-		return null;
-	}
-	
 	
 	/****
 	 * Retrieve the current "selected" view.
@@ -224,16 +203,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 		return (AbstractTableView) tabFolderBottom.getSelection();
 	}
 
-
-
-	@Override
-	public ILowerPart addView(Object input) {
-		if (input instanceof ThreadViewInput) {
-			addThreadView((ThreadViewInput) input);
-		}
-		return null;
-	}
-
+	
 	/*****
 	 * Specifically adding a new thread view
 	 * 
@@ -257,7 +227,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 
 		// the metric view has to be updated according to the current active view
 		// since we have just created the thread view, the metric view should be updated too
-		refreshMetricView(threadView);
+		refreshUpperView(threadView);
 		
 		// make sure the new view is visible and get the focus
 		tabFolderBottom.setSelection(threadView);
@@ -282,13 +252,13 @@ public class ProfilePart implements IProfilePart, EventHandler
 		views.add(view);
 		
 		if (sync) {
-			RunViewCreation createView = new RunViewCreation(view, composite, input);
+			RunViewCreation createView = new RunViewCreation(database, view, composite, input);
 			BusyIndicator.showWhile(composite.getDisplay(), createView);
 		} else {
 			// background task
 			this.sync.asyncExec(()-> {
 				view.createContent(composite);
-				view.setInput(input);
+				view.setInput(database, input);
 			});
 		}
 	}
@@ -298,15 +268,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 	public void preDestroy() {
 		eventBroker.unsubscribe(this);
 		
-		if (experiment != null)
-			experiment.dispose();
-
-		if (metricView != null)
-			metricView.dispose();
-
-		views.clear();
-		
-		experiment = null;
+		dispose();
 	}
 	
 	
@@ -331,18 +293,21 @@ public class ProfilePart implements IProfilePart, EventHandler
 
 	@Override
 	public BaseExperiment getExperiment() {
-		return experiment;
+		return (BaseExperiment) database.getExperimentObject();
 	}
 
 	@Override
-	public void setInput(Object input) {
-		if (input == null ) return;
-		if (!(input instanceof Experiment)) return;
+	public void setInput(IDatabase database) {
+		if (database == null ) return;
 		
-		this.experiment = (Experiment) input;
+		this.database = database;
+		
+		var experiment = (Experiment) database.getExperimentObject();
 		
 		var roots = experiment.getRootScopeChildren();
-		views = FastList.newList(roots.size());		
+		views = FastList.newList(roots.size());
+		trackedViews = FastList.newList();
+		
 		boolean active = true;
 		
 		for(var rootNode: roots) {
@@ -365,7 +330,7 @@ public class ProfilePart implements IProfilePart, EventHandler
 				LoggerFactory.getLogger(getClass()).error("Not supported root: {}", root.getType());
 				break;
 			}
-			addView(view, input, active);
+			addView(view, database.getExperimentObject(), active);
 			active = false; // only the first view will be activated first
 		}
 		// subscribe to filter events
@@ -378,6 +343,8 @@ public class ProfilePart implements IProfilePart, EventHandler
 		if (event.getTopic().equals(FilterMap.FILTER_REFRESH_PROVIDER)) {
 			
 			Object obj = event.getProperty(IEventBroker.DATA);
+			Experiment experiment = (Experiment) database.getExperimentObject();
+			
 			ViewerDataEvent data = new ViewerDataEvent(experiment, obj);
 
 			// announce to all views that a filtering process is on the way
@@ -407,21 +374,22 @@ public class ProfilePart implements IProfilePart, EventHandler
 	 **********************************************/
 	private static class RunViewCreation implements Runnable 
 	{
+		private final IDatabase database;
 		private final AbstractView view;
 		private final Composite parent;
 		private final Object input;
 		
-		RunViewCreation(AbstractView view, Composite parent, Object input) {
+		RunViewCreation(IDatabase database, AbstractView view, Composite parent, Object input) {
 			this.view   = view;
 			this.parent = parent;
 			this.input  = input;
-			
+			this.database = database;
 		}
 		
 		@Override
 		public void run() {
 			view.createContent(parent);
-			view.setInput(input);
+			view.setInput(database, input);
 			view.activate();
 		}
 	}
@@ -450,12 +418,6 @@ public class ProfilePart implements IProfilePart, EventHandler
 
 	@Override
 	public void dispose() {
-		if (experiment != null)
-			experiment.dispose();
-		
-		if (metricView != null)
-			metricView.dispose();
-		
 		if (tabFolderBottom != null)
 			tabFolderBottom.dispose();
 		
@@ -463,13 +425,26 @@ public class ProfilePart implements IProfilePart, EventHandler
 			tabFolderTop.dispose();
 		
 		if (views != null) {
-			views.parallelStream().forEach(v -> v.dispose());
+			views.parallelStream().forEach(AbstractView::dispose);
 		}
+
+		if (trackedViews != null && !trackedViews.isEmpty()) {
+			trackedViews.stream().forEach(v -> v.dispose());
+			trackedViews.clear();
+			trackedViews = null;
+		}
+
 		views = null;
 		tabFolderTop = null;
 		tabFolderBottom = null;
 		
-		experiment = null;
-		metricView = null;
+		database = null;
+	}
+
+	
+
+	@Override
+	public IDatabase getInput() {
+		return database;
 	}
 }

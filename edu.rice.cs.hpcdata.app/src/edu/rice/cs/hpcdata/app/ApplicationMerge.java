@@ -3,10 +3,12 @@ package edu.rice.cs.hpcdata.app;
 import java.io.File;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.merge.DatabasesToMerge;
 import edu.rice.cs.hpcdata.merge.ExperimentMerger;
 import edu.rice.cs.hpcdata.merge.TreeSimilarity;
+import edu.rice.cs.hpcdata.util.IProgressReport;
 
 public class ApplicationMerge {
 
@@ -16,11 +18,10 @@ public class ApplicationMerge {
 	 * @return
 	 ***---------------------------------------------------------------------**/
 	private static Experiment openExperiment(File objFile) {
-		Experiment experiment;
-
+		Experiment experiment = new Experiment();	// prepare the experiment;
+		var localDb = new LocalDatabaseRepresentation(objFile, null, IProgressReport.dummy());
 		try {
-			experiment = new Experiment();	// prepare the experiment
-			experiment.open(objFile, null, false);						// parse the database
+			experiment.open(localDb);	// parse the database
 
 			return experiment;
 		} catch (Exception e) {

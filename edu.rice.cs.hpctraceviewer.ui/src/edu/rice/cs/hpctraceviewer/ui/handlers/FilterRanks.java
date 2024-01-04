@@ -8,19 +8,11 @@ import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.swt.widgets.Shell;
 
-import edu.rice.cs.hpcdata.db.IdTuple;
-import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
-import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
-import edu.rice.cs.hpcdata.experiment.extdata.IFilteredData;
-import edu.rice.cs.hpcfilter.FilterDataItem;
-import edu.rice.cs.hpcfilter.dialog.ThreadFilterDialog;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
+import edu.rice.cs.hpctraceviewer.filter.ITraceFilter;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -42,60 +34,11 @@ public class FilterRanks
 		
 		Object obj = part.getObject();		
 		ITracePart tracePart = (ITracePart) obj;
-		SpaceTimeDataController data = (SpaceTimeDataController) tracePart.getInput();
+		SpaceTimeDataController data = tracePart.getDataController();
+
+		var filteredBaseData = ITraceFilter.filter(shell, data);
 		
-		/*
-		 * This isn't the prettiest, but when we are local, we don't want to set
-		 * it to filtered unless we have to (i.e. unless the user actually
-		 * applies a filter). If the data is already filtered, we don't care and
-		 * we just return the filtered data we have been using (which makes the
-		 * call to set it redundant). If it's not, we wait to replace the
-		 * current filter with the new filter until we know we have to.
-		 */
-        IBaseData filteredBaseData = data.getBaseData();
-        if (!(filteredBaseData instanceof IFilteredData)) {
-        	filteredBaseData = data.createFilteredBaseData();
-        }
-        List<IdTuple> listDenseIds = ((IFilteredData)filteredBaseData).getDenseListIdTuple(IdTupleOption.BRIEF);
-        List<IdTuple> listIds = filteredBaseData.getListOfIdTuples(IdTupleOption.BRIEF);
-        
-        String []items    = new String[listDenseIds.size()];
-        boolean []checked = new boolean[listDenseIds.size()];
-        
-        // initialize the ranks to be displayed in the dialog box
-        // to know which ranks are already shown, we need to compare with the filtered ranks.
-        // if the id tuple in the original list is the same as the one in filtered list, 
-        // them the rank is already displayed.
-        // This list needs to be optimized.
-        
-        for(int i=0, j=0; i<listDenseIds.size(); i++) {
-        	items[i] = listDenseIds.get(i).toString(filteredBaseData.getIdTupleTypes());
-        	if (j<listIds.size() && listDenseIds.get(i) == listIds.get(j)) {
-        		checked[i] = true;
-        		j++;
-        	} else {
-        		checked[i] = false;
-        	}
-        }
-        
-        List<FilterDataItem<String>> list = ThreadFilterDialog.filter(shell, "Select execution contexts to display", items, checked);
-		
-		if (list != null && !list.isEmpty()){
-			List<Integer> listChecked = new ArrayList<>();
-			for(int i=0; i<list.size(); i++) {
-				if (list.get(i).checked) {
-					listChecked.add(i);
-				}
-			}
-			if (listChecked.isEmpty()) {
-				return;
-			}
-			
-			// update the data and broadcast to everyone that we probably have new filtered ranks
-			// TODO: we need to check if the new one is the same with the old one or not.
-			
-			((IFilteredData)filteredBaseData).setIncludeIndex(listChecked);
-			data.setBaseData((IFilteredData) filteredBaseData);
+		if (filteredBaseData != null){
 			TraceEventData eventData = new TraceEventData(data, tracePart, filteredBaseData);
 			eventBroker.post(IConstants.TOPIC_FILTER_RANKS, eventData);
 		}
@@ -115,5 +58,4 @@ public class FilterRanks
 
 		return ((ITracePart)obj).getInput() != null;
 	}
-		
 }

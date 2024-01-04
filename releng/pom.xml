@@ -12,9 +12,11 @@
   <eclipse-repo.url>http://download.eclipse.org/releases/2022-09</eclipse-repo.url>
   <sonar.organization>hpctoolkit</sonar.organization>
   <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-  <jacoco.version>0.8.8</jacoco.version>
-  <aggregate.report.dir>tests/edu.rice.cs.hpcviewer.test.report/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.dir>
+  <jacoco.version>0.8.11</jacoco.version>
+  <aggregate.report.dir>tests/edu.rice.cs.hpctest.report/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.dir>
   <tycho.testArgLine.local></tycho.testArgLine.local>
+  <maven.compiler.target>11</maven.compiler.target>
+  <maven.compiler.source>11</maven.compiler.source>
  </properties>
 
  <repositories>
@@ -169,6 +171,6 @@
  	<url>http://hpctoolkit.org</url>
  </organization>
  <scm>
- 	<url>https://github.com/HPCToolkit/hpcviewer.e4</url>
+ 	<url>https://gitlab.com/HPCToolkit/hpcviewer</url>
  </scm>
 </project>

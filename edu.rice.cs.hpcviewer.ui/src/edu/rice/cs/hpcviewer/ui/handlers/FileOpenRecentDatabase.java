@@ -7,6 +7,7 @@ import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.widgets.Shell;
 
+import edu.rice.cs.hpcbase.IDatabaseIdentification;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 
 public class FileOpenRecentDatabase extends RecentDatabase 
@@ -23,9 +24,9 @@ public class FileOpenRecentDatabase extends RecentDatabase
 							EModelService modelService, 
 							EPartService partService, 
 							Shell shell,
-							String database) {
+							IDatabaseIdentification database) {
 		
-		databaseCollection.addDatabase(shell, application, window, partService, modelService, database);
+		databaseCollection.addDatabase(shell, window, partService, modelService, database);
 	}
 
 

@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: hpctest.trace
+Bundle-SymbolicName: edu.rice.cs.hpctest.trace
+Bundle-Version: 6.0.0.qualifier
+Import-Package: org.junit
+Require-Bundle: edu.rice.cs.hpcdata;bundle-version="8.2.0",
+ edu.rice.cs.hpcbase,
+ edu.rice.cs.hpctraceviewer.data,
+ edu.rice.cs.hpclocal;bundle-version="6.0.0",
+ edu.rice.cs.hpctest.util;bundle-version="1.0.0",
+ org.eclipse.core.runtime,
+ edu.rice.cs.hpctraceviewer.ui;bundle-version="6.0.0",
+ org.eclipse.swt;bundle-version="3.116.100",
+ org.eclipse.equinox.registry
+Bundle-Vendor: Rice University
+Automatic-Module-Name: edu.rice.cs.hpctest.trace
+Bundle-RequiredExecutionEnvironment: JavaSE-11

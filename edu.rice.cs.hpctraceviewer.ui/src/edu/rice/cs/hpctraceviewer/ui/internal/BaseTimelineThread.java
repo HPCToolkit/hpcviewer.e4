@@ -6,17 +6,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import edu.rice.cs.hpcbase.IProcessTimeline;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.DataLinePainting;
 import edu.rice.cs.hpctraceviewer.data.DataPreparation;
 import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TimelineDataSet;
-import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
+
 
 
 /*****************************************************************************
@@ -39,7 +39,6 @@ public abstract class BaseTimelineThread implements Callable<Integer> {
 	/**The scale in the y-direction of pixels to processors (for the drawing of the images).*/
 	private final double scaleY;	
 	private final Queue<TimelineDataSet> queue;
-	private final AtomicInteger currentLine;
 	protected final IProgressMonitor monitor;
 	protected final Map<Integer, List<?>> mapInvalidData;
 
@@ -47,13 +46,11 @@ public abstract class BaseTimelineThread implements Callable<Integer> {
 	protected BaseTimelineThread( SpaceTimeDataController stData,
 							   double scaleY, 
 							   Queue<TimelineDataSet> queue, 
-							   AtomicInteger currentLine, 
 							   IProgressMonitor monitor)
 	{
 		this.stData 	   = stData;
 		this.scaleY 	   = scaleY;
 		this.queue 		   = queue;
-		this.currentLine   = currentLine;
 		this.monitor 	   = monitor;
 		
 		mapInvalidData = new HashMap<>();
@@ -66,7 +63,7 @@ public abstract class BaseTimelineThread implements Callable<Integer> {
 	 */
 	public Integer call() throws Exception {
 
-		ProcessTimeline trace = getNextTrace(currentLine);
+		var trace = getNextTrace();
 		TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
 		
 		final double pixelLength = (attributes.getTimeInterval())/(double)attributes.getPixelHorizontal();
@@ -102,11 +99,12 @@ public abstract class BaseTimelineThread implements Callable<Integer> {
 				if (num > 0) {
 					num_invalid_samples += num;
 					List<Integer> listInvalid = dataTo.getInvalidData();
-					mapInvalidData.put(trace.getProcessNum(), listInvalid);
+					int proc = trace.getProfileIdTuple().getProfileIndex()-1;
+					mapInvalidData.put(proc, listInvalid);
 				}
 				
 				final TimelineDataSet dataSet = dataTo.getList();
-				queue.add(dataSet);				
+				queue.add(dataSet);
 			} else {
 				// empty trace, we need to notify the BasePaintThread class
 				// of this anomaly by adding NullTimeline
@@ -117,7 +115,7 @@ public abstract class BaseTimelineThread implements Callable<Integer> {
 			
 			monitor.worked(1);
 			
-			trace = getNextTrace(currentLine);
+			trace = getNextTrace();
 			
 			// ---------------------------------
 			// finalize
@@ -162,9 +160,9 @@ public abstract class BaseTimelineThread implements Callable<Integer> {
 	 * 
 	 * @return
 	 ****/
-	protected abstract ProcessTimeline getNextTrace(AtomicInteger currentLine);
+	protected abstract IProcessTimeline getNextTrace();
 	
-	protected abstract boolean init(ProcessTimeline trace) throws IOException;
+	protected abstract boolean init(IProcessTimeline trace) throws IOException;
 	
 	protected abstract void finalizeTraceCollection();
 	

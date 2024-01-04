@@ -4,11 +4,16 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Locale;
+
+import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
+import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.version2.FileDB2;
 import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
 import edu.rice.cs.hpcdata.trace.TraceAttribute;
 import edu.rice.cs.hpcdata.trace.TraceRecord;
 import edu.rice.cs.hpcdata.util.Constants;
+import edu.rice.cs.hpcdata.util.IProgressReport;
 import edu.rice.cs.hpcdata.util.MergeDataFiles;
 
 /*****
@@ -39,8 +44,9 @@ public class TracePrinter
 		// ------------------------------------------------------------------------
 		
 		final Experiment experiment = new Experiment();
+		LocalDatabaseRepresentation localDb = new LocalDatabaseRepresentation(new File(args[0]), null, IProgressReport.dummy());
 		try {
-			experiment.open(new File(args[0]), null, false);
+			experiment.open(localDb);
 		} catch (Exception e) {
 			return;
 		}
@@ -64,11 +70,12 @@ public class TracePrinter
 			return;
 		}
 		for(int i=1; i<args.length; i++) {
-			final String []ranks = fileDB.getRankLabels();
-			for(int j=0; j<ranks.length; j++) {
-				if (args[i].compareTo(ranks[j]) == 0) {
+			final var ranks = fileDB.getIdTuple(IdTupleOption.BRIEF);
+			int j=0;
+			for(var profile: ranks) {
+				if (Integer.valueOf(args[i]) == j) {
 					try {
-						printTrace(experiment, j, fileDB);
+						printTrace(experiment, profile, fileDB);
 						System.out.println("------------------------");
 					} catch (IOException e) {
 						System.err.println(args[i] + "Unknown rank");
@@ -80,7 +87,7 @@ public class TracePrinter
 	}
 
 	
-	private static void printTrace(Experiment experiment, int rank, FileDB2 fileDB) throws IOException {
+	private static void printTrace(Experiment experiment, IdTuple rank, FileDB2 fileDB) throws IOException {
 		
 		final int MAX_NAME = 16;
 		
@@ -117,13 +124,14 @@ public class TracePrinter
 		
 		System.out.println("\nParallelism level: " + fileDB.getParallelismLevel());
 		System.out.println("Rank: ");
-		int i = 0;
-		for(String rank : ranks) {
-			long minLoc = fileDB.getMinLoc(i);
-			long maxLoc = fileDB.getMaxLoc(i);
+
+		var list = fileDB.getIdTuple(IdTupleOption.BRIEF);
+		
+		for(var profile: list) {
+			long minLoc = fileDB.getMinLoc(profile);
+			long maxLoc = fileDB.getMaxLoc(profile);
 			long numBytes = maxLoc - minLoc;
-			System.out.printf(Locale.US, "  %8s (%,d - %,d) : %,d bytes\n", rank, minLoc, maxLoc, numBytes);
-			i++;
+			System.out.printf(Locale.US, "  %8s (%,d - %,d) : %,d bytes\n", profile.toString(), minLoc, maxLoc, numBytes);
 		}
 	}
 	

@@ -6,11 +6,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
+import edu.rice.cs.hpcbase.IProcessTimeline;
 import edu.rice.cs.hpctraceviewer.data.DataLinePainting;
 import edu.rice.cs.hpctraceviewer.data.DataPreparation;
 import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
 import edu.rice.cs.hpctraceviewer.data.TimelineDataSet;
-import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 import edu.rice.cs.hpctraceviewer.ui.internal.BaseTimelineThread;
 
 
@@ -23,6 +23,8 @@ public class TimelineDepthThread
 	extends BaseTimelineThread
 {
 	private final int visibleDepths;
+	
+	private final AtomicInteger currentLine;
 
 	/*****
 	 * Thread initialization
@@ -44,14 +46,15 @@ public class TimelineDepthThread
 								IProgressMonitor monitor,
 								int visibleDepths)
 	{
-		super(data, scaleY, queue, timelineDone, monitor);
+		super(data, scaleY, queue, monitor);
 		this.visibleDepths = visibleDepths;
+		currentLine = timelineDone;
 	}
 
 
 	@Override
-	protected ProcessTimeline getNextTrace(AtomicInteger currentLine) {
-		ProcessTimeline depthTrace = stData.getCurrentDepthTrace();
+	protected IProcessTimeline getNextTrace() {
+		var depthTrace = stData.getCurrentSelectedTraceline();
 		if (depthTrace == null) {
 			monitor.setCanceled(true);
 			monitor.done(); // forcing to reset the title bar
@@ -64,21 +67,15 @@ public class TimelineDepthThread
 			// I can't get the data from the ProcessTimeline directly, so create
 			// a ProcessTimeline with data=null and then copy the actual data to
 			// it.
-			ProcessTimeline toDonate = new ProcessTimeline(currentDepthLineNum,
-					stData.getScopeMap(), stData.getBaseData(), 
-					depthTrace.getProcessNum(), attributes.getPixelHorizontal(),
-					attributes.getTimeInterval(), 
-					stData.getMinBegTime() + attributes.getTimeBegin());
 
-			toDonate.copyDataFrom(depthTrace);
-
-			return toDonate;
-		} else
+			return depthTrace.duplicate(currentDepthLineNum, depthTrace.getProfileIdTuple());
+		} else {
 			return null;
+		}
 	}
 
 	@Override
-	protected boolean init(ProcessTimeline trace) {
+	protected boolean init(IProcessTimeline trace) {
 		return true;
 	}
 

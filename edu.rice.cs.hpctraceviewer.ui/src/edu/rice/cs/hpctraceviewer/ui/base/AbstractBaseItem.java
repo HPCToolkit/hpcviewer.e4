@@ -12,7 +12,7 @@ import org.eclipse.swt.custom.CTabItem;
 public abstract class AbstractBaseItem extends CTabItem implements ITraceItem 
 {
 
-	public AbstractBaseItem(CTabFolder parent, int style) {
+	protected AbstractBaseItem(CTabFolder parent, int style) {
 		super(parent, style);
 	}
 }

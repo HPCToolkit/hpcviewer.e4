@@ -7,6 +7,7 @@ import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.widgets.Shell;
 
+import edu.rice.cs.hpcbase.IDatabaseIdentification;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 
 public class DatabaseSwitch extends RecentDatabase 
@@ -22,9 +23,9 @@ public class DatabaseSwitch extends RecentDatabase
 						   EModelService modelService, 
 						   EPartService partService, 
 						   Shell shell,
-						   String database) {
-		
-		dbCollection.switchDatabase(shell, application, partService, modelService, database);
+						   IDatabaseIdentification database) {
+
+		dbCollection.switchDatabase(shell, window, partService, modelService, database);
 	}
 
 	@Override

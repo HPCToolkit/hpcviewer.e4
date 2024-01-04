@@ -22,7 +22,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -54,7 +53,6 @@ import org.slf4j.LoggerFactory;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
-import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
 import edu.rice.cs.hpcdata.util.OSValidator;
 import edu.rice.cs.hpcsetting.color.ColorManager;
 import edu.rice.cs.hpctraceviewer.ui.base.ISpaceTimeCanvas;
@@ -79,8 +77,6 @@ import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.Frame;
 import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
 import edu.rice.cs.hpctraceviewer.data.Position;
-import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
-import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 import edu.rice.cs.hpctraceviewer.ui.util.MessageLabelManager;
 import edu.rice.cs.hpctraceviewer.data.util.Constants;
@@ -109,7 +105,6 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	/**The SpaceTimeData corresponding to this canvas.*/
 	protected SpaceTimeDataController stData;
 	
-	private final IEclipseContext context;
 	private final ITracePart 	  tracePart;
 	
 	/**The Group containing the labels. labelGroup.redraw() is called from the Detail Canvas.*/
@@ -138,13 +133,12 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	private KeyListener keyListener;
 	
     /**Creates a SpaceTimeDetailCanvas with the given parameters*/
-	public SpaceTimeDetailCanvas(ITracePart tracePart, IEclipseContext context, IEventBroker eventBroker, Composite _composite)
+	public SpaceTimeDetailCanvas(ITracePart tracePart, IEventBroker eventBroker, Composite _composite)
 	{
 		super(_composite, SWT.NO_BACKGROUND | SWT.BORDER_DASH, RegionType.Rectangle );
 		
 		this.tracePart   = tracePart;
 		this.eventBroker = eventBroker;
-		this.context     = context;
 		oldAttributes    = new TraceDisplayAttribute();
 		stData  = null;
 		
@@ -522,6 +516,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	public double getScalePixelsPerTime()
 	{
 		TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
+		if (attributes == null || getNumTimeUnitDisplayed() == 0)
+			return 0;
+		
 		return (double) attributes.getPixelHorizontal() / (double)this.getNumTimeUnitDisplayed();
 	}
 	
@@ -531,7 +528,11 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	@Override
 	public double getScalePixelsPerRank()
 	{
-		return stData.getTraceDisplayAttribute().getScalePixelsPerRank();
+		TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
+		if (attributes == null)
+			return 0;
+		
+		return attributes.getScalePixelsPerRank();
 	}
 	
 	/**************************************************************************
@@ -622,7 +623,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	 **************************************************************************/
 	private void showProcessRange(final TraceDisplayAttribute attributes) {
 
-        final IBaseData traceData = stData.getBaseData();
+        final var traceData = stData.getBaseData();
         if (traceData == null) {
         	// we don't want to throw an exception here, so just do nothing
         	return;
@@ -669,7 +670,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
             crossHairLabel.setText("Select Sample For Cross Hair");
             return;
         }
-		ProcessTimeline ptl     = stData.getCurrentDepthTrace();
+		var ptl = stData.getCurrentSelectedTraceline();
 		if (ptl == null) 
 			return;
 		
@@ -677,18 +678,14 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		final TimeUnit dbTimeUnit = stData.getTimeUnit();
 		final TimeUnit displayTimeUnit = attributes.getTimeUnit();
 		final float selectedTime = displayTimeUnit.convert(position.time, dbTimeUnit) * attributes.getTimeUnitMultiplier();
-		
-		final int selectedProc  = ptl.getProcessNum();
 
-        final IBaseData traceData = stData.getBaseData();
-        final List<IdTuple> listIdTuples = traceData.getListOfIdTuples(IdTupleOption.BRIEF);
+        final var traceData = stData.getBaseData();
 
 		String timeUnit = attributes.getTimeUnitName(attributes.getDisplayTimeUnit());
 		String label = "Cross Hair: ";
+		IdTuple idtuple = ptl.getProfileIdTuple();
 
-		if ( selectedProc >= 0 && selectedProc < listIdTuples.size() && listIdTuples.size()>1 ) {
-			
-			IdTuple idtuple = listIdTuples.get(selectedProc);
+		if (traceData.getNumberOfRanks() > 0 && idtuple != null) {
 			String procStr  = idtuple.toString(traceData.getIdTupleTypes());
 			String timeStr  = formatTime.format(selectedTime) + timeUnit;
 	        final String buffer = label + "(" + timeStr + ", " +  procStr + ")";
@@ -961,7 +958,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		
 		FileDialog openDialog = new FileDialog(getShell(), SWT.OPEN);
 		openDialog.setText("Open View Configuration");
-		openDialog.setFilterPath(stData.getExperiment().getPath());
+		openDialog.setFilterPath(stData.getExperiment().getDirectory());
 		String fileName = "";
 		boolean validFrameFound = false;
 		while(!validFrameFound)
@@ -1099,7 +1096,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		//	the number of ranks or the number of pixels
 		// -----------------------------------------------------------------------
 		
-		final int numLines = Math.min(view.height, attributes.getProcessInterval() );
+		final int numLines = Math.min(view.height, attributes.getProcessInterval());
 		final Image imageOrig = new Image(getDisplay(), view.width, numLines);
 		
 		final GC origGC = new GC(imageOrig);
@@ -1115,12 +1112,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		
 		oldAttributes.copy(attributes);
 		if (changedBounds) {
-			ProcessTimeline []traces = new ProcessTimeline[ numLines ];
-			ProcessTimelineService ptlService = (ProcessTimelineService) context.get(Constants.CONTEXT_TIMELINE);
-
-			assert(ptlService != null);
-			
-			ptlService.setProcessTimeline(traces);
+			stData.resetProcessTimeline(numLines);
 		}
 
 		/*************************************************************************
@@ -1417,8 +1409,8 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 					// we don't need this "new image" since the paint fails
 					imageFinal.dispose();	
 				}
-
-				redraw();
+				if (!isDisposed())
+					redraw();
 				
 				// free resources 
 				bufferGC.dispose();

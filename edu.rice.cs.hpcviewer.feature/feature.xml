@@ -322,4 +322,42 @@
          version="0.0.0"
          unpack="false"/>
 
+   <plugin
+         id="edu.rice.cs.hpcremote"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="edu.rice.cs.hpctraceviewer.filter"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="io.vavr"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.json"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="edu.rice.cs.hpcremote.client"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="edu.rice.cs.hpcremote.common"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
 </feature>

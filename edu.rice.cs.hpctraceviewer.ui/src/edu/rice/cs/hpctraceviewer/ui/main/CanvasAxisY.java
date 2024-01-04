@@ -16,15 +16,14 @@ import org.eclipse.swt.widgets.Event;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
-import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
-import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 import edu.rice.cs.hpctraceviewer.ui.base.ITraceCanvas;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.base.ITraceCanvas.MouseState;
 import edu.rice.cs.hpctraceviewer.ui.operation.AbstractTraceOperation;
+import edu.rice.cs.hpctraceviewer.ui.operation.BufferRefreshOperation;
 
 
 /*********************
@@ -43,12 +42,12 @@ public class CanvasAxisY extends AbstractAxisCanvas
 										};
 	
 	private final Color [][]listColorObjects;
-	private final ProcessTimelineService timeLine;
 
 	/** Relates to the condition that the mouse is in.*/
 	private ITraceCanvas.MouseState mouseState;
 	
 	private AxisToolTip tooltip = null;
+
 
 	
 	/****
@@ -59,10 +58,8 @@ public class CanvasAxisY extends AbstractAxisCanvas
 	 * @param parent Composite
 	 * @param style int (see {@code SWT} constants for canvas)
 	 */
-	public CanvasAxisY(ITracePart tracePart, ProcessTimelineService timeLine, Composite parent, int style) {
+	public CanvasAxisY(ITracePart tracePart, Composite parent, int style) {
 		super(tracePart, parent, style);
-		
-		this.timeLine = timeLine;
 		
 		listColorObjects = new Color[5][2];
 		for(int i=0; i<5; i++) {
@@ -79,7 +76,7 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		super.setData(data);
 		
 		SpaceTimeDataController stdc = (SpaceTimeDataController) data;
-        final IBaseData traceData = stdc.getBaseData();
+        final var traceData = stdc.getBaseData();
         
         List<IdTuple> list   = traceData.getListOfIdTuples(IdTupleOption.BRIEF);
         boolean isSequential = list==null || list.isEmpty();
@@ -108,7 +105,7 @@ public class CanvasAxisY extends AbstractAxisCanvas
 			return;
 		
 		final SpaceTimeDataController data   = (SpaceTimeDataController) getData();
-        final IBaseData traceData 		     = data.getBaseData();
+        final var traceData = data.getBaseData();
 
         if (traceData == null)
         	return;
@@ -145,24 +142,36 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		// collect the position and the length of each process
 		// -----------------------------------------------------
 		IdTuple idtupleOld  = null;
-		int []oldColorIndex = new int[traceData.getNumLevels()];
+		int []oldColorIndex = new int[5];
+		final ProcessTimelineService timeLine = data.getProcessTimelineService();
 		
-		for (int i=0; i<getNumProcessTimeline(); i++) {
-			ProcessTimeline procTimeline = getProcessTimeline(i);
+		final int numTraces = timeLine.getNumProcessTimeline();
+		float pixelsPerRank = (float) attribute.getPixelVertical() / numTraces;
+		
+		for (int i=0; i<numTraces; i++) {
+			var procTimeline = timeLine.getProcessTimeline(i);
 			if (procTimeline == null)
 				continue;
 			
-			final int procNumber  = procTimeline.getProcessNum();
-			if (procNumber >= listIdTuples.size())
-				// inconsistency between the list of processes and the current timeline
-				// probably hpctraceviewer is in the middle of rebuffering
-				return;
+			final int y_curr = (int) (procTimeline.line() * pixelsPerRank);
 			
-			final int y_curr = attribute.convertRankToPixel(procNumber);
-			final int y_next = attribute.convertRankToPixel(procNumber+1);
+			// if it's the last trace, the next line by default is the end of the canvas
+			var nextline = numTraces;  
+
+			var nextTrace = timeLine.getProcessTimeline(i+1);
+			if (nextTrace != null) {
+				// theoretically, nextTrace cannot be null if i < numTraces.
+				// for unknown reason, sometimes nextTrace is null even when i < numTraces.
+				//
+				nextline = nextTrace.line(); 
+			}
+			final int y_next = (int) (nextline * pixelsPerRank);
+			
 			final int height = y_next - y_curr + 1;
 
-			IdTuple idtuple  = listIdTuples.get(procNumber);
+			IdTuple idtuple  = procTimeline.getProfileIdTuple();
+			if (idtuple == null)
+				continue;
 	        
 	        // for sequential code, we assume the number of parallelism is 1
 	        // (just to avoid the zero division)
@@ -198,7 +207,6 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		redraw();
 	}
 	
-	
 	@Override
 	public void dispose() {
 		if (tooltip != null) {
@@ -208,18 +216,7 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		super.dispose();
 	}
 	
-	
-	protected int getNumProcessTimeline() {
-		return timeLine.getNumProcessTimeline();
-	}
-	
-	
-	protected ProcessTimeline getProcessTimeline(int i) {
-		return timeLine.getProcessTimeline(i);
-	}
-
-	
-	
+		
 	@Override
 	public void historyNotification(final OperationHistoryEvent event) {
 
@@ -228,7 +225,7 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		
 		if (event.getEventType() == OperationHistoryEvent.DONE) {
 			final IUndoableOperation operation = event.getOperation();
-			if (!(operation instanceof AbstractTraceOperation)) {
+			if (!(operation instanceof BufferRefreshOperation)) {
 				return;
 			}
 			final AbstractTraceOperation op = (AbstractTraceOperation) operation;
@@ -258,7 +255,24 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		void setData(SpaceTimeDataController data) {
 			this.data = data;
 		}
-	
+
+		
+		/** 
+		 * Returns the profile id-tuple to which the line-th line corresponds. 
+		 * @param line
+		 * 			The trace line sequence
+		 * 
+		 * @return {@code IdTuple}
+		 * 			The profile id-tuple
+		 * */
+		public IdTuple getProfileFromPixel(int line) {		
+			var listProfiles = data.getBaseData().getListOfIdTuples(IdTupleOption.BRIEF);
+			var attributes = data.getTraceDisplayAttribute();
+			var index = attributes.convertPixelToRank(line);
+
+			return listProfiles.get(Math.min(listProfiles.size()-1, index));
+		}
+
 		@Override
 		/*
 		 * (non-Javadoc)
@@ -266,17 +280,8 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		 */
 		protected String getText(Event event) {
 			
-	        final IBaseData traceData = data.getBaseData();
-
-			final TraceDisplayAttribute attribute = data.getTraceDisplayAttribute();
-			int process = attribute.convertPixelToRank(event.y);
-			
-			List<IdTuple> listTuples = traceData.getListOfIdTuples(IdTupleOption.BRIEF);
-						
-			if (process < 0 && process >= listTuples.size())
-				return null;
-			
-			IdTuple idtuple  = listTuples.get(process);
+	        final var traceData = data.getBaseData();
+			IdTuple idtuple  = getProfileFromPixel(event.y);
 			
 	        int partition = Math.max(idtuple.getLength(), 1);
 			var columnWidth = HPCTraceView.Y_AXIS_WIDTH / partition;

@@ -2,8 +2,8 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: hpcdata
 Bundle-SymbolicName: edu.rice.cs.hpcdata
-Bundle-Version: 8.0.8.qualifier
-Bundle-ClassPath: hpcdata-8.0.8.jar
+Bundle-Version: 8.3.0.qualifier
+Bundle-ClassPath: hpcdata-8.3.0.jar
 Bundle-Vendor: Rice University
 Export-Package: edu.rice.cs.hpcdata.db,
  edu.rice.cs.hpcdata.db.version2,
@@ -19,6 +19,7 @@ Export-Package: edu.rice.cs.hpcdata.db,
  edu.rice.cs.hpcdata.experiment.xml,
  edu.rice.cs.hpcdata.filter,
  edu.rice.cs.hpcdata.tld,
+ edu.rice.cs.hpcdata.tld.v4,
  edu.rice.cs.hpcdata.trace,
  edu.rice.cs.hpcdata.tree,
  edu.rice.cs.hpcdata.util,

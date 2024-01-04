@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.eclipse.nebula.widgets.nattable.sort.SortDirectionEnum;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpctest.util.TestDatabase;
@@ -36,14 +37,15 @@ public class ScopeTreeDataTest
 			assertNotNull(path);
 
 			experiments[i]= new Experiment();
+			var localDb = new LocalDatabaseRepresentation(path, null, true);
 			try {
-				experiments[i].open(path, null, Experiment.ExperimentOpenFlag.TREE_ALL);
+				experiments[i].open(localDb);
 			} catch (Exception e) {
 				assertFalse(e.getMessage(), true);
 			}			
 			assertNotNull(experiments[i].getRootScope());
 			
-			treeData[i] = new ScopeTreeData(experiments[i].getRootScope(RootScopeType.CallingContextTree), experiments[i]);
+			treeData[i] = new ScopeTreeData(null, experiments[i].getRootScope(RootScopeType.CallingContextTree), experiments[i]);
 			
 			i++;
 		}

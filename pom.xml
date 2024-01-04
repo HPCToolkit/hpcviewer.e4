@@ -28,9 +28,13 @@
   <module>edu.rice.cs.hpcsetting</module>
   <module>edu.rice.cs.hpcmerge</module>
   <module>edu.rice.cs.hpctoolcontrol</module>
+  <module>edu.rice.cs.hpclocal</module>
+  <module>edu.rice.cs.hpcremote.common</module>
+  <module>edu.rice.cs.hpcremote.client</module>
   <module>edu.rice.cs.hpcremote</module>
   <module>edu.rice.cs.hpctree</module>
   <module>edu.rice.cs.hpctraceviewer.config</module>
+  <module>edu.rice.cs.hpctraceviewer.filter</module>
   <module>edu.rice.cs.hpctraceviewer.data</module>
   <module>edu.rice.cs.hpctraceviewer.ui</module>
   <module>edu.rice.cs.hpcmetric</module>
@@ -50,8 +54,6 @@
      <targetJdk>11</targetJdk>
      <excludes>
       <exclude>com/graphbuilder/**/*.java</exclude>
-      <exclude>org/swtchart/**/*.java</exclude>
-      <exclude>org/swtchart/ext/**/*.java</exclude>
      </excludes>
     </configuration>
    </plugin>

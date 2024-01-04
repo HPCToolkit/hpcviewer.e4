@@ -21,7 +21,33 @@
  <modules>
   <module>edu.rice.cs.hpctest.util</module>
   <module>edu.rice.cs.hpctest.ui</module>
+  <module>edu.rice.cs.hpctest.trace</module>
+  <module>edu.rice.cs.hpctest.local</module>
   <module>edu.rice.cs.hpctest.viewer</module>
-  <module>edu.rice.cs.hpcviewer.test.report</module>
+  <module>edu.rice.cs.hpctest.report</module>
  </modules>
+
+ <profiles>
+    <profile>
+        <id>platform-mac</id>
+        <activation>
+            <os>
+                <family>mac</family>
+            </os>
+        </activation>
+        <build>
+            <plugins>
+                <plugin>
+                    <groupId>org.eclipse.tycho</groupId>
+                    <artifactId>tycho-surefire-plugin</artifactId>
+		   			<version>${tycho.version}</version>
+                    <configuration>
+                        <argLine>-XstartOnFirstThread</argLine>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </build>
+    </profile>
+ </profiles>
+
 </project>

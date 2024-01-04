@@ -8,6 +8,7 @@ import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.nebula.widgets.nattable.sort.SortDirectionEnum;
 import org.slf4j.LoggerFactory;
 
+import edu.rice.cs.hpcbase.IDatabase;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
@@ -24,6 +25,8 @@ import edu.rice.cs.hpcdata.tree.ScopeTreePath;
  ******************************************************/
 public class ScopeTreeData extends ScopeTreePath implements IScopeTreeData
 {
+	private final IDatabase database;
+	
 	/** list of current data. The list is dynamic **/
 	private MutableList<Scope>  listScopes;
 
@@ -40,8 +43,10 @@ public class ScopeTreeData extends ScopeTreePath implements IScopeTreeData
 	 * @param root the root scope
 	 * @param metricManager the metric manager of the experiment or database
 	 */
-	public ScopeTreeData(RootScope root, IMetricManager metricManager) {
+	public ScopeTreeData(IDatabase database, RootScope root, IMetricManager metricManager) {
 		super(root);
+		
+		this.database = database;		
 		this.listScopes = FastList.newList();
 		this.listScopes.add(root);
 		this.metricManager = metricManager;
@@ -216,6 +221,7 @@ public class ScopeTreeData extends ScopeTreePath implements IScopeTreeData
 		
 
 	
+	@Override
 	protected boolean isRootScope(Scope scope) {
 		return (scope == null) || 
 			   (scope instanceof RootScope) || 
@@ -332,5 +338,11 @@ public class ScopeTreeData extends ScopeTreePath implements IScopeTreeData
 	@Override
 	public boolean isValidIndex(int index) {
 		return (index >= 0) && (index < listScopes.size());
+	}
+	
+	
+	@Override
+	public boolean isSourceFileAvailable(Scope scope) {
+		return database.isSourceFileAvailable(scope);
 	}
 }

@@ -1,166 +1,125 @@
 package edu.rice.cs.hpctraceviewer.data.timeline;
 
 import java.io.IOException;
-import org.eclipse.core.runtime.Assert;
-
-import edu.rice.cs.hpcdata.db.version4.DataRecord;
-import edu.rice.cs.hpcdata.experiment.extdata.IBaseData;
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.util.ICallPath;
+import edu.rice.cs.hpcbase.IProcessTimeline;
+import edu.rice.cs.hpcbase.ITraceDataCollector;
+import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.util.ICallPath.ICallPathInfo;
-import edu.rice.cs.hpctraceviewer.data.ITraceDataCollector;
-import edu.rice.cs.hpctraceviewer.data.TraceDataByRank;
-import edu.rice.cs.hpctraceviewer.data.version2.AbstractBaseData;
+import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 
 
-/** A data structure that stores one line of timestamp-cpid data. */
-public class ProcessTimeline {
-
-	/** The mapping between the cpid's and the actual scopes. */
-	private ICallPath scopeMap;
-
+/** 
+ * A class that interfaces and manages one trace line of timestamp-cpid data. 
+ * This class is designed for local trace, and cannot be used for remote database.
+ * */
+public class ProcessTimeline implements IProcessTimeline
+{
 	/** This ProcessTimeline's line number. */
-	private int lineNum, processNumber;
+	private final int lineNum;
+
+	private final IdTuple idTuple;
 
 	/** The initial time in view. */
-	private long startingTime;
+	private final long startingTime;
 
 	/** The range of time in view. */
-	private long timeRange;
+	private final long timeRange;
 
 	/** The amount of time that each pixel on the screen correlates to. */
-	private double pixelLength;
+	private final double pixelLength;
 
-	private ITraceDataCollector data;
+	private final SpaceTimeDataController dataController;
+	
+	private final ITraceDataCollector traceDataCollector;
 
-	/*************************************************************************
-	 * Reads in the call-stack trace data from the binary traceFile in the form:
-	 * double time-stamp int Call-Path ID double time-stamp int Call-Path ID ...
-	 ************************************************************************/
+
 
 	/** Creates a new ProcessTimeline with the given parameters. 
-	 * @param _numPixelH The number of Horizontal pixels
-	 * @param _timeRange The difference between the start time and the end time
+	 * @param lineNum 
+	 * 			a unique 0-based index
+	 * @param IdTuple idTuple
+	 * 			the index of id-tuple in the trace data
+	 * @param stData
+	 * 			The main data
 	 */
-	public ProcessTimeline(int _lineNum, ICallPath _scopeMap, IBaseData dataTrace, 
-			int processNumber, int _numPixelH, long _timeRange, long _startingTime)
+	public ProcessTimeline(int lineNum, SpaceTimeDataController stData, IdTuple idTuple)
 	{
+		this.lineNum 		= lineNum;
+		this.dataController = stData;
 
-		lineNum 			= _lineNum;
-		scopeMap 			= _scopeMap;
+		var attributes  = stData.getTraceDisplayAttribute();
+		timeRange	 = attributes.getTimeInterval();
+		startingTime = stData.getMinBegTime() + attributes.getTimeBegin();
+		this.idTuple = idTuple;
 
-		timeRange			= _timeRange;
-		startingTime 		= _startingTime;
-		this.processNumber  = processNumber;
-
-		pixelLength = timeRange / (double) _numPixelH;
+		pixelLength = timeRange / (double) stData.getPixelHorizontal();
 		
-		//TODO: Beautify
-		if (dataTrace instanceof AbstractBaseData)
-			data = new TraceDataByRank((AbstractBaseData) dataTrace, processNumber, _numPixelH);
-		else
-			data = new TraceDataByRank(new DataRecord[0], processNumber);
+		traceDataCollector = stData.getTraceDataCollector(lineNum, idTuple);
 	}
 
-	/**
-	 * Remote version for ProcessTimeline constructor
-	 * 
-	 * @param _data
-	 * @param _scopeMap
-	 * @param _processNumber
-	 * @param _numPixelH
-	 * @param _timeRange
-	 * @param _startingTime
-	 */
-	public ProcessTimeline(TraceDataByRank _data,
-			ICallPath _scopeMap, int _processNumber,
-			int _numPixelH, long _timeRange, long _startingTime) {
-		lineNum = _processNumber;
-		scopeMap = _scopeMap;
-		timeRange = _timeRange;
-		startingTime = _startingTime;
-
-		pixelLength = timeRange / (double) _numPixelH;
-		if (_data == null)
-			data = new TraceDataByRank(new DataRecord[0], processNumber);
-		else
-			data = _data;
-		
-		// laks 2016.06.23: hack for remote data: we don't have process number 
-		// information from the server, so we just assign the same as the line number
-		// for local data, the line number is different than the process number
-		//  if the screen resolution is smaller than the number of ranks
-		// at the moment, this fix works. not sure why.
-		this.processNumber = _processNumber;
-	}
-
+	
 	/**
 	 * Fills the ProcessTimeline with data from the file. If this is being
 	 * called, it must be on local, so the cast is fine
 	 * @throws IOException 
 	 */
+	@Override
 	public void readInData() throws IOException {
-		data.readInData(startingTime, timeRange, pixelLength);
+		traceDataCollector.readInData(startingTime, timeRange, pixelLength);
 	}
 
 	/** Gets the time that corresponds to the index sample in times. */
+	@Override
 	public long getTime(int sample) {
-		return data.getTime(sample);
+		return traceDataCollector.getTime(sample);
 	}
 
 	/** Gets the cpid that corresponds to the index sample in timeLine. */
+	@Override
 	public int getContextId(int sample) {
-		return data.getCpid(sample);
+		return traceDataCollector.getCpid(sample);
 	}
 
+	@Override
 	public void shiftTimeBy(long lowestStartingTime) {
-		data.shiftTimeBy(lowestStartingTime);
-	}
-
-	/** returns the call path corresponding to the sample and depth given */
-	public Scope getCallPath(int sample, int depth) {
-		Assert.isTrue(sample>=0, "sample number is negative");
-		
-		int cpid = getContextId(sample);
-		return scopeMap.getCallPathScope(cpid);
+		traceDataCollector.shiftTimeBy(lowestStartingTime);
 	}
 	
 	
+	@Override
 	public ICallPathInfo getCallPathInfo(int sample) {
 		int cpid = getContextId(sample);
-		return scopeMap.getCallPathInfo(cpid);
+		return dataController.getScopeMap().getCallPathInfo(cpid);
 	}
-	
-	
-	public ICallPath getCallPathInfo() {
-		return scopeMap;
-	}
+
 	
 	/**
 	 * Fills this one with the data from another
 	 * @param another
 	 */
-	public void copyDataFrom(ProcessTimeline another) {
-		data.duplicate(another.data);
+	@Override
+	public void copyDataFrom(IProcessTimeline another) {
+		if (another instanceof ProcessTimeline) {
+			traceDataCollector.copyDataFrom(((ProcessTimeline)another).traceDataCollector);
+		}
 	}
 
 	/** Returns the number of elements in this ProcessTimeline. */
+	@Override
 	public int size() {
-		return data.size();
+		return traceDataCollector.size();
 	}
 
 	/** Returns this ProcessTimeline's line number. */
+	@Override
 	public int line() {
 		return lineNum;
 	}
 	
-	/***
-	 * return the process ID number
-	 * 
-	 * @return the process id
-	 */
-	public int getProcessNum() {
-		return processNumber;
+
+	@Override
+	public IdTuple getProfileIdTuple() {
+		return idTuple;
 	}
 
 	/**
@@ -170,30 +129,39 @@ public class ProcessTimeline {
 	 * @param time : the requested time
 	 * @return the index of the sample if the time is within the range, -1  otherwise
 	 * */
-	public int findMidpointBefore(long time, boolean usingMidpoint)  throws Exception
+	@Override
+	public int findMidpointBefore(long time, boolean usingMidpoint)
 	{
-		return data.findClosestSample(time, usingMidpoint);
+		try {
+			return traceDataCollector.findClosestSample(time, usingMidpoint);
+		} catch (Exception e) {
+			throw new IllegalArgumentException("Invalid time: " + time);
+		}
 	}
 
 	
 	public boolean isEmpty()
 	{
-		return data.isEmpty();
+		return traceDataCollector.isEmpty();
 	}
 	
 	public boolean isGPU() 
 	{
-		return data.isGPU();
+		var idTupletype = dataController.getExperiment().getIdTupleType();
+		return idTuple.isGPU(idTupletype);
 	}
 
 	public void dispose() {
-		if (scopeMap != null)
-			scopeMap.dispose();
-		if (data != null)
-			data.dispose();
-		
-		scopeMap = null;
-		data = null;
+		if (traceDataCollector != null)
+			traceDataCollector.dispose();
 	}
 
+
+	@Override
+	public IProcessTimeline duplicate(int line, IdTuple idTuple) {
+		ProcessTimeline toDonate = new ProcessTimeline(line, dataController, idTuple);
+		toDonate.copyDataFrom(this);
+
+		return toDonate;
+	}
 }

@@ -9,12 +9,14 @@ import java.util.stream.Collectors;
 
 import edu.rice.cs.hpcdata.db.DatabaseManager;
 import edu.rice.cs.hpcdata.experiment.Experiment;
+import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.MetricType;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import edu.rice.cs.hpcdata.util.IProgressReport;
 import edu.rice.cs.hpcdata.util.Util;
 
 
@@ -341,10 +343,11 @@ public class PrintData
 	 * @return experiment file if exists, null if fails.
 	 */
 	private Experiment openExperiment(File objFile) {
+		Experiment experiment = new Experiment();	// prepare the experiment;
+		var localDb = new LocalDatabaseRepresentation(objFile, null, IProgressReport.dummy());
 
 		try {
-			Experiment experiment = new Experiment();	// prepare the experiment
-			experiment.open(objFile, null, Experiment.ExperimentOpenFlag.TREE_ALL);	// parse the database
+			experiment.open(localDb);	// parse the database
 
 			return experiment;
 		} catch (Exception e) {

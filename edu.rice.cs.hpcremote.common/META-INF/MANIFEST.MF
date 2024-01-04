@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: hpcremote.common
+Bundle-SymbolicName: edu.rice.cs.hpcremote.common
+Bundle-Version: 1.0.0
+Bundle-ClassPath: hpcclientservercommon-1.0.0-SNAPSHOT.jar
+Bundle-Vendor: Rice University
+Export-Package: org.hpctoolkit.client_server_common.calling_context,
+ org.hpctoolkit.client_server_common.metric,
+ org.hpctoolkit.client_server_common.profile,
+ org.hpctoolkit.client_server_common.profiled_source,
+ org.hpctoolkit.client_server_common.time,
+ org.hpctoolkit.client_server_common.trace
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Automatic-Module-Name: edu.rice.cs.hpcremote.common

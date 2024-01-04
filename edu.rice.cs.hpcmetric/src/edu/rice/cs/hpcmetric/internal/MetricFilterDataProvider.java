@@ -23,6 +23,7 @@ public class MetricFilterDataProvider extends FilterDataProvider<BaseMetric>
 	}
 
 	
+	@Override
 	public Object getDataValue(int columnIndex, int rowIndex) {
 		FilterDataItem<BaseMetric> item = getList().get(rowIndex);
 		Object data = item.getData();
@@ -40,9 +41,8 @@ public class MetricFilterDataProvider extends FilterDataProvider<BaseMetric>
 
 			metric = (BaseMetric) data;
 			if (metric instanceof DerivedMetric) {
-				String desc = metric.getDescription().isEmpty() ? METRIC_DERIVED :
+				return metric.getDescription().isEmpty() ? METRIC_DERIVED :
 								metric.getDescription();
-				return desc;
 			}
 			return metric.getDescription();
 

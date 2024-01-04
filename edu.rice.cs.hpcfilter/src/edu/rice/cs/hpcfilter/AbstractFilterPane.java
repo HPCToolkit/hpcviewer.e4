@@ -51,7 +51,6 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
-import edu.rice.cs.hpcbase.Theme;
 import edu.rice.cs.hpcfilter.internal.CheckBoxConfiguration;
 import edu.rice.cs.hpcfilter.internal.FilterConfigLabelAccumulator;
 import edu.rice.cs.hpcfilter.internal.FilterPainterConfiguration;
@@ -60,7 +59,6 @@ import edu.rice.cs.hpcfilter.internal.IConstants;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
-import edu.rice.cs.hpcsetting.table.DarkThemeConfiguration;
 import edu.rice.cs.hpcsetting.table.DayThemeConfiguration;
 
 
@@ -83,7 +81,9 @@ import edu.rice.cs.hpcsetting.table.DayThemeConfiguration;
  *     </ul>
  *   </li>
  * </ul>
- *
+ * The template type {@code T} is the unit type of a data item in a table row.
+ * It can be anything from a simple String or a complex class.
+ *  
  ***********************************************************************/
 public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, DisposeListener
 {
@@ -113,11 +113,13 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 	 * Constructor to create the item and its composite widgets.
 	 * 
 	 * @param parent 
-	 * @param style int
+	 * @param style 
+	 * 			{@code int} the style of the pane, either {@code STYLE_COMPOSITE} (application mode)
+	 * 			or {@code STYLE_INDEPENDENT} (unit test mode) 
 	 * @param inputData {@code FilterInputData}
 	 * @see STYLE_COMPOSITE, STYLE_INDEPENDENT
 	 */
-	public AbstractFilterPane(Composite parent, int style, FilterInputData<T> inputData) {
+	protected AbstractFilterPane(Composite parent, int style, FilterInputData<T> inputData) {
 		this.style = style;
 		createContentArea(parent, inputData);
 
@@ -232,7 +234,6 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 		// set the layout for group filter
 		Composite groupFilter = new Composite(parentContainer, SWT.NONE);
 		groupFilter.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(groupFilter);
 		
 		// string to match
 		Label lblFilter = new Label (groupFilter, SWT.FLAT);
@@ -241,7 +242,7 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 		objSearchText = new Text (groupFilter, SWT.BORDER);
 		objSearchText.setToolTipText("Type text to filter the list");
 		
-		objSearchText.addModifyListener( event -> eventFilterText() );
+		objSearchText.addModifyListener( event -> eventFilterText(objSearchText.getText()) );
 
 		btnRegExpression.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -249,6 +250,9 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 				toggleRegularExpression();
 			}
 		});
+
+		int numAddFilters = 2 + createAdditionalFilter(groupFilter, inputData);
+		GridLayoutFactory.fillDefaults().numColumns(numAddFilters).applyTo(groupFilter);
 
 		// expand as much as possible horizontally
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(objSearchText);
@@ -292,7 +296,7 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 	 * @param eventList
 	 * @return
 	 */
-	private FilterList<FilterDataItem<T>> createFilterList(EventList<FilterDataItem<T>> eventList) {
+	protected FilterList<FilterDataItem<T>> createFilterList(EventList<FilterDataItem<T>> eventList) {
 		FilterList<FilterDataItem<T>> fl = new FilterList<>(eventList);
  		
 		textMatcher = new TextMatcherEditor<>( (List<String> baseList, FilterDataItem<T> element) 
@@ -412,8 +416,8 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 			}
 		}); */
 
-        ThemeConfiguration themeConfig = Theme.isDarkThemeActive() ? 
-				new DarkThemeConfiguration(this.natTable) :  new DayThemeConfiguration();
+        ThemeConfiguration themeConfig = /*Theme.isDarkThemeActive() ? 
+				new DarkThemeConfiguration(this.natTable) : */ new DayThemeConfiguration();
 		
 		natTable.setTheme(themeConfig);
 		pack();
@@ -453,9 +457,11 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 	
 	/*****
 	 * Event triggered when user type something in the filter text
+	 * 
+	 * @param text
+	 * 			{@code String} to filter in (text to be included)
 	 */
-	private void eventFilterText() {
-		String text = objSearchText.getText();
+	protected void eventFilterText(String text) {
 		if (text == null) {
 			textMatcher.setFilterText(new String [] {});
 		} else {
@@ -518,20 +524,45 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 	}
 	
 	
-	
+	/***
+	 * return the table widget of the filter items
+	 * 
+	 * @return {@code NatTable} the table widget
+	 */
 	protected NatTable getNatTable() {
 		return natTable;
 	}
 
 	
+	/****
+	 * Return the current list modified by the user.
+	 * 
+	 * @apiNote The order can be different from the original order given by the caller. 
+	 * 
+	 * @return {@code EventList<FilterDataItem>}
+	 */
 	public EventList<FilterDataItem<T>> getEventList() {
 		return eventList;
 	}
 	
+	
+	/***
+	 * Get the current filtered list.
+	 * 
+	 * @return
+	 */
 	public FilterList<FilterDataItem<T>> getFilterList() {
 		return filterList;
 	}
 
+	
+	/***
+	 * Get the current pane's style.
+	 * 
+	 * @see STYLE_COMPOSITE
+	 * @see STYLE_INDEPENDENT
+	 * @return
+	 */
 	public int getStyle() {
 		return style;
 	}
@@ -561,7 +592,21 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 	protected abstract String[] getColumnHeaderLabels();
 	protected abstract FilterDataProvider<T> getDataProvider(FilterList<FilterDataItem<T>> filterList);
 
-	protected abstract int createAdditionalButton(Composite parent, FilterInputData<T> inputData); 	
+	/****
+	 * Create additional widgets in the button group (check-all and uncheck-all).
+	 * Subclass can add any widgets and must return the number created widgets.
+	 * 
+	 * @param parent 
+	 * 			The container 
+	 * @param inputData
+	 * 			The input data
+	 * @return {@code int}
+	 * 			The number of created widgets
+	 */
+	protected abstract int createAdditionalButton(Composite parent, FilterInputData<T> inputData);
+	
+	protected abstract int createAdditionalFilter(Composite parent, FilterInputData<T> inputData);
+	
 	protected abstract void selectionEvent(FilterDataItem<T> item, int click);
 	protected abstract void addConfiguration(NatTable table);
 }

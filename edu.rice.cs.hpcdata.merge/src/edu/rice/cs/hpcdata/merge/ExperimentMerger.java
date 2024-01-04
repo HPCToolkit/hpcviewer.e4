@@ -81,7 +81,7 @@ public class ExperimentMerger
 		
 		final ExperimentConfiguration configuration = new ExperimentConfiguration();
 		configuration.setName( ExperimentConfiguration.NAME_EXPERIMENT, exp1.getName() + " & " + exp2.getName() );
-		configuration.searchPaths = exp1.getConfiguration().searchPaths;
+		//configuration.searchPaths = exp1.getConfiguration().searchPaths;
 		
 		merged.setConfiguration( configuration );
 

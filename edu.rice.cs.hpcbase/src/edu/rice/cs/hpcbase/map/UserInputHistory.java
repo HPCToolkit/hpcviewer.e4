@@ -1,6 +1,6 @@
 package edu.rice.cs.hpcbase.map;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -24,8 +24,7 @@ public class UserInputHistory
 	private static final int MAX_HISTORY_DEPTH = 30;
 	
 	private static final String HISTORY_NAME_BASE = "history."; //$NON-NLS-1$
-	private static final String ENCODING = "UTF-8";    
-    private static final String NODE_HPC = "edu.rice.cs.hpc";
+	private static final String NODE_HPC = "edu.rice.cs.hpc";
     
     private static final Preferences CONFIGURATION = InstanceScope.INSTANCE.getNode(NODE_HPC);
     
@@ -79,7 +78,7 @@ public class UserInputHistory
      * @param node
      * @return
      */
-    static public Preferences getPreference(String node) {
+    public static Preferences getPreference(String node) {
     	return CONFIGURATION.node(node);
     }
     
@@ -87,7 +86,7 @@ public class UserInputHistory
      * force to store a preference
      * @param pref
      */
-    static public void setPreference( Preferences pref ) {
+    public static void setPreference( Preferences pref ) {
 		// Forces the application to save the preferences
 		try {
 			pref.flush();
@@ -99,17 +98,13 @@ public class UserInputHistory
     }
     
     protected void loadHistoryLines() {
-        this.history = new ArrayList<String>();
+        this.history = new ArrayList<>();
         String historyData = getPreference(HISTORY_NAME_BASE).get(this.name, ""); 
 
         if (historyData != null && historyData.length() > 0) {
             String []historyArray = historyData.split(";"); //$NON-NLS-1$
             for (int i = 0; i < historyArray.length; i++) {
-            	try {
-            		historyArray[i] = new String(historyArray[i].getBytes(UserInputHistory.ENCODING), UserInputHistory.ENCODING);
-                } catch (UnsupportedEncodingException e) {
-                	historyArray[i] = new String(historyArray[i].getBytes());
-                }
+            	historyArray[i] = new String(historyArray[i].getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
             }
             this.history.addAll(Arrays.asList(historyArray));
         }
@@ -118,12 +113,8 @@ public class UserInputHistory
     protected void saveHistoryLines() {
         String result = ""; //$NON-NLS-1$
         for (Iterator<String> it = this.history.iterator(); it.hasNext(); ) {
-            String str = (String)it.next();
-            try {
-				str = new String(str.getBytes(UserInputHistory.ENCODING), UserInputHistory.ENCODING);
-			} catch (UnsupportedEncodingException e) {
-				str = new String(str.getBytes());
-			}
+            String str = it.next();
+            str = new String(str.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
             result += result.length() == 0 ? str : (";" + str); //$NON-NLS-1$
         }
         Preferences pref = getPreference(HISTORY_NAME_BASE);

@@ -362,7 +362,7 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 			if (listChanges.getType() == ListEvent.INSERT) {
 				// new metric has been added
 				// need to refresh the underlying layer
-				MetricFilterInput input2 = new MetricFilterInput(input.getView());
+				MetricFilterInput input2 = new MetricFilterInput(input.getView(), eventBroker);
 				reset(input2);
 			}
 		}		
@@ -383,5 +383,12 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 		if (event.getTopic().equals(ViewerDataEvent.TOPIC_FILTER_POST_PROCESSING)) {
 			updateMetricManager(eventInfo.metricManager);
 		}
+	}
+
+
+	@Override
+	protected int createAdditionalFilter(Composite parent, FilterInputData<BaseMetric> inputData) {
+		// No need to add filters
+		return 0;
 	}
 }

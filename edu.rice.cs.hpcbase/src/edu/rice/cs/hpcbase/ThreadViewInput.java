@@ -38,9 +38,11 @@ public class ThreadViewInput
 		this.threads = threads;
 	}
 	
+	
+	@Override
 	public String toString() {
 		var exp = rootScope.getExperiment();
-		int dbId = exp.getPath().hashCode();
+		int dbId = exp.getDirectory().hashCode();
 		return exp.toString() + ":" + String.valueOf(dbId);
 	}
 }

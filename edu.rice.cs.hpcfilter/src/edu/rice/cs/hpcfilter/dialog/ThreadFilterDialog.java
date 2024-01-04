@@ -31,14 +31,15 @@ import edu.rice.cs.hpcfilter.StringFilterDataItem;
 public class ThreadFilterDialog extends Dialog 
 {
 	private final FilterInputData<String> data;
+	private final String title;
+
 	private BaseFilterPane<String> filterPane;
-	final String TITLE;
 	
 	public ThreadFilterDialog(Shell parentShell, String title,
 							  List<FilterDataItem<String>> items) {
 		super(parentShell);		
-		data = new FilterInputData<String>(items);
-		this.TITLE = title;
+		data = new FilterInputData<>(items);
+		this.title = title;
 	}
 	
 
@@ -54,13 +55,13 @@ public class ThreadFilterDialog extends Dialog
 	
 	@Override
 	protected Control createDialogArea(Composite parent) {
-		getShell().setText( TITLE);
+		getShell().setText( title);
 		
 		Composite composite = new Composite(parent, SWT.BORDER);
 
 		GridLayout grid = new GridLayout();
 		grid.numColumns=1;
-		// TODO: bad hack: Have to add a "pad" margin on the top
+		// bad hack: Have to add a "pad" margin on the top
 		// This may be a SWT bug that the position of the composite is negative on Mac
 		int padding = 0;
 		if (OSValidator.isMac()) 
@@ -71,8 +72,22 @@ public class ThreadFilterDialog extends Dialog
 		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		composite.setLayout(grid);
 
+		filterPane = getFilterPane(composite);
 		
-		filterPane = new BaseFilterPane<String>(composite, AbstractFilterPane.STYLE_INDEPENDENT, data) {
+		return composite;
+	}
+	
+	
+	/****
+	 * Method to get the main filter pane.
+	 * It can be override by a subclass
+	 *  
+	 * @param composite
+	 * 			The container of the filter
+	 * @return
+	 */
+	protected BaseFilterPane<String> getFilterPane(Composite composite) {
+		return new BaseFilterPane<String>(composite, AbstractFilterPane.STYLE_INDEPENDENT, data) {
 
 			@Override
 			protected String[] getColumnHeaderLabels() {
@@ -94,10 +109,7 @@ public class ThreadFilterDialog extends Dialog
 					}
 				getButton(IDialogConstants.OK_ID).setEnabled(false);
 			}
-			
 		};
-
-		return composite;
 	}
 
 	

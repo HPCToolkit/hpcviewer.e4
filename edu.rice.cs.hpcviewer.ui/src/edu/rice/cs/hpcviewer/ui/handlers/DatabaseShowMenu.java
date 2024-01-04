@@ -25,25 +25,25 @@ public abstract class DatabaseShowMenu
 		var iterator = getDatabase().getIterator(window);
 
 		while(iterator.hasNext()) {
-			Experiment exp = (Experiment) iterator.next();
+			var database = iterator.next();
 			
-			String path    = exp.getDefaultDirectory().getAbsolutePath();
-			String label   = path;
+			Experiment exp = (Experiment) database.getExperimentObject();
+			String label = database.getId().id();
 			
 			if (exp.isMergedDatabase()) {
 				label = "[Merged] " + label;
 			}
 			MDirectMenuItem menu = modelService.createModelElement(MDirectMenuItem.class);
 			
-			menu.setElementId(path);
+			menu.setElementId(label);
 			menu.setLabel(label);
 			menu.setContributionURI(getMenuURI());
-			menu.getTransientData().put(ID_DATA_EXP, exp);
+			menu.getTransientData().put(ID_DATA_EXP, database);
 			
 			items.add(menu);
-		}		
+		}
 	}
-		
+
 	
 	@CanExecute
 	public boolean canExecute(MWindow window) {		

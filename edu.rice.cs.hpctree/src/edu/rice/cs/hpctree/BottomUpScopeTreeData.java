@@ -3,6 +3,7 @@ package edu.rice.cs.hpctree;
 import java.util.Comparator;
 import java.util.List;
 
+import edu.rice.cs.hpcbase.IDatabase;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.scope.IMergedScope;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
@@ -19,8 +20,8 @@ import java.util.Collections;
 public class BottomUpScopeTreeData extends ScopeTreeData 
 {
 
-	public BottomUpScopeTreeData(RootScope root, IMetricManager metricManager) {
-		super(root, metricManager);
+	public BottomUpScopeTreeData(IDatabase database, RootScope root, IMetricManager metricManager) {
+		super(database, root, metricManager);
 	}
 
 

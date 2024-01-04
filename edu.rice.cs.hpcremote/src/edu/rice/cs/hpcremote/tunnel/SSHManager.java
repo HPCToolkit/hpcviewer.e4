@@ -158,7 +158,7 @@ public class SSHManager
 	}
 
 
-	static public void main(String []args)
+	public static void main(String []args)
 	{
 		if (args.length != 4) {
 			System.out.println("Syntax: java SSHManager username password hostname command");
@@ -177,7 +177,7 @@ public class SSHManager
 
 		if(errorMessage != null)
 		{
-			System.out.println(errorMessage);
+			System.err.println(errorMessage);
 		}
 
 		// call sendCommand for each command and the output 

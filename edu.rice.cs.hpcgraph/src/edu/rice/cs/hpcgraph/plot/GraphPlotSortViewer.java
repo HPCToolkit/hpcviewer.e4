@@ -47,16 +47,13 @@ public class GraphPlotSortViewer extends AbstractGraphPlotViewer
 	protected double[] getValuesY(Scope scope, BaseMetric metric) throws Exception {
 
 		int id = metric.getIndex();
-		int size = 0;
-		
 		if (metric instanceof MetricRaw) {
 			id = ((MetricRaw) metric).getRawID();
-			size = ((MetricRaw) metric).getSize();
 		}
 		
 		IThreadDataCollection threadData = getInput().getThreadData();
 		double[] y_values = null;
-		y_values = threadData.getMetrics(scope.getCCTIndex(), id, size);
+		y_values = threadData.getMetrics(scope.getCCTIndex(), id);
 		pairThreadIndex = new PairThreadIndex[y_values.length];
 
 		for(int i=0; i<y_values.length; i++)
