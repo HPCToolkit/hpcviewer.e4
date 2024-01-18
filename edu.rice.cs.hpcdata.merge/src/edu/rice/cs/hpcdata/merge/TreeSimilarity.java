@@ -6,7 +6,7 @@ import org.apache.commons.math3.util.Precision;
 import org.eclipse.collections.impl.list.mutable.FastList;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
-import edu.rice.cs.hpcdata.experiment.IExperimentWithMetrics;
+import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
@@ -99,7 +99,7 @@ public class TreeSimilarity
 	 * @param target
 	 * @param source
 	 */
-	private void mergeTree(IExperimentWithMetrics targetDatabase, Scope target, Scope source)
+	private void mergeTree(IExperiment targetDatabase, Scope target, Scope source)
 	{
 		
 		// ------------------------------------------------------------
@@ -207,7 +207,7 @@ public class TreeSimilarity
 	 * @param scope2 : a list of scopes which children are to be compared
 	 * @param metricOffset : the metric offset 
 	 */
-	private void checkInlinedScope(IExperimentWithMetrics targetDatabase,
+	private void checkInlinedScope(IExperiment targetDatabase,
 								   List<Scope> scope1, 
 								   List<Scope> scope2, 
 								   BaseMetric metric1, 
@@ -680,7 +680,7 @@ public class TreeSimilarity
 	 * @param node : source nodes to be copied
 	 * @param metricOffset : offset of the metric
 	 */
-	private void addSubTree(IExperimentWithMetrics targetDatabase, Scope parent, Scope node)
+	private void addSubTree(IExperiment targetDatabase, Scope parent, Scope node)
 	{
 		DuplicateScopeTreesVisitor visitor = new DuplicateScopeTreesVisitor(targetDatabase, parent, metricOffset);
 		node.dfsVisitScopeTree(visitor);
