@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2002-2023, Rice University.
+# Copyright (c) 2002-2024, Rice University.
 # See the file edu.rice.cs.hpcviewer.ui/License.txt for details.
 #
 # Build hpcviewer and generate tar or zip files
