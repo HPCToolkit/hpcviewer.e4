@@ -29,6 +29,7 @@
   <module>edu.rice.cs.hpcmerge</module>
   <module>edu.rice.cs.hpctoolcontrol</module>
   <module>edu.rice.cs.hpclocal</module>
+  <module>edu.rice.cs.hpcremote.jsch</module>
   <module>edu.rice.cs.hpcremote.common</module>
   <module>edu.rice.cs.hpcremote.client</module>
   <module>edu.rice.cs.hpcremote</module>
