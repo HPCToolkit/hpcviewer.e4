@@ -67,6 +67,8 @@ rm -rf $DIR_PREP
 mkdir $DIR_PREP
 
 cp $FILE_PLIST  $DIR_PREP
+cp "${DIR_CONFIG}/arrow.png" $DIR_PREP
+
 
 if [[ ! -e "share" ]]; then
 	mkdir -p share/create-dmg
@@ -126,6 +128,7 @@ create_dmg() {
 
 	../${DIR_CONFIG}/create-dmg \
 		   --no-internet-enable \
+		   --background "arrow.png" \
 		   --volname "hpcviewer" \
 		   --window-pos 200 120 \
 		   --window-size 600 300 \
@@ -165,13 +168,13 @@ sign_app "hpcviewer.app"
 # create *.dmg file and notarize
 ######
 create_dmg  "${FILE_BASE}.dmg"  "hpcviewer.app/"
-notarize_app "${FILE_BASE}.dmg"  AC_PASSWORD
+#notarize_app "${FILE_BASE}.dmg"  AC_PASSWORD
 
 ######
 # create *.zip file and notarize
 ######
-create_zip  "${FILE_BASE}.zip"  "hpcviewer.app/"
-notarize_app "${FILE_BASE}.zip"  AC_PASSWORD
+#create_zip  "${FILE_BASE}.zip"  "hpcviewer.app/"
+#notarize_app "${FILE_BASE}.zip"  AC_PASSWORD
 
 
 ##############################
