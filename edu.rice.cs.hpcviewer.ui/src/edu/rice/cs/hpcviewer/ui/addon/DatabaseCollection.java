@@ -276,7 +276,7 @@ public class DatabaseCollection
 			MWindow 	    window, 
 			EPartService    service,
 			EModelService 	modelService,
-			IDatabaseIdentification          databaseId) {
+			IDatabaseIdentification databaseId) {
 
 		IDatabase database;
 		DatabaseStatus status;
@@ -294,8 +294,8 @@ public class DatabaseCollection
 		if (databaseWindowManager.checkAndConfirmDatabaseExistence(shell, window, dbId) == DatabaseExistence.EXIST_CANCEL )
 			return;		
 
-		database = DatabaseFactory.newInstance(databaseId);
-		status = database.reset(shell, databaseId);
+		database = DatabaseFactory.newInstance(dbId);
+		status = database.reset(shell, dbId);
 		
 		if (status == DatabaseStatus.CANCEL) {
 			// should we notify the user?
