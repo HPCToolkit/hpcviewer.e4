@@ -2,7 +2,6 @@ package edu.rice.cs.hpcviewer.ui.parts.editor;
 
 import java.io.IOException;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.Composite;
@@ -17,10 +16,8 @@ public class EditorInputScope implements IEditorInput
 {
 	private final IDatabase database;
 	private final Scope scope;
-	private final Shell shell;
 	
 	public EditorInputScope(Shell shell,IDatabase database, Scope scope) {
-		this.shell = shell;
 		this.scope = scope;
 		this.database = database;
 	}
@@ -58,9 +55,8 @@ public class EditorInputScope implements IEditorInput
 		try {
 			return database.getSourceFileContent(sourceFile);
 		} catch (IOException e) {
-			MessageDialog.openError(shell, "Fail to get the content", getLongName() + ": " + e.getMessage());
+			throw new IllegalAccessError(getLongName() + ": " + e.getMessage());
 		}
-		return null;
 	}
 
 	@Override
