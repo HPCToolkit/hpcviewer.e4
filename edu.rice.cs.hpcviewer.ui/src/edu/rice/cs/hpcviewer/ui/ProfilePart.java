@@ -21,6 +21,7 @@ import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.services.EMenuService;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -177,7 +178,14 @@ public class ProfilePart implements IProfilePart, EventHandler
 		AbstractUpperPart viewer = (AbstractUpperPart) input.createViewer(tabFolderTop);
 		
 		if (viewer != null) {
-			viewer.setInput(input);
+			try {
+				viewer.setInput(input);
+			} catch (Exception e) {
+				var shell = tabFolderTop.getShell();
+				MessageDialog.openError(shell, "Error", "Fail to open " + input.getLongName());
+				viewer.dispose();
+				return null;
+			}
 			
 			// need to select the input to refresh the viewer
 			// otherwise it will display empty item
