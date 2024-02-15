@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2002-2023, Rice University.
+# Copyright (c) 2002-2024, Rice University.
 # See the file edu.rice.cs.hpcviewer.ui/License.txt for details.
 #
 # Build hpcviewer and generate tar or zip files
@@ -62,6 +62,7 @@ show_help(){
 	echo "Options: "
 	echo " -c              	create a package and generate the release number"
 	echo " -n              	(Mac only) notarize the package"
+	echo " -i              	(Mac only) create a disk image file"
 	echo " -r <release>    	specify the release number"
 	echo "Commands:"
 	echo " check            build and run the tests."
@@ -95,6 +96,7 @@ VERBOSE=0
 #------------------------------------------------------------
 NOTARIZE=0
 RELEASE=`date +"%Y.%m"`
+IMAGE_ONLY=0
 
 POSITIONAL=()
 while [[ $# -gt 0 ]]
@@ -123,6 +125,10 @@ case $key in
     ;;
     -h|--help)
     show_help
+    shift # past argument
+    ;;
+    -i|--image)
+    IMAGE_ONLY=1
     shift # past argument
     ;;
     -n|--notarize)
@@ -320,6 +326,10 @@ if [[ "$OS" == "Darwin" && "$NOTARIZE" == "1" ]]; then
 	
         macPkgs="hpcviewer-${RELEASE}-macosx.cocoa.aarch64.zip"
 	macos/notarize.sh $macPkgs
+
+elif [[ "$OS" == "Darwin" && "$IMAGE_ONLY" == "1" ]]; then 
+        macPkgs="hpcviewer-${RELEASE}-macosx.cocoa.aarch64.zip"
+	macos/notarize.sh -i $macPkgs
 fi
 
 

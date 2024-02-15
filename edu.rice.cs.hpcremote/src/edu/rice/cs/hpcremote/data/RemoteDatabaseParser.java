@@ -21,7 +21,7 @@ import edu.rice.cs.hpcdata.db.version4.IDataProfile;
 import edu.rice.cs.hpcdata.db.version4.MetaDbFileParser;
 import edu.rice.cs.hpcdata.db.version4.MetricYamlParser;
 import edu.rice.cs.hpcdata.experiment.Experiment;
-import edu.rice.cs.hpcdata.experiment.IExperimentWithMetrics;
+import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
@@ -52,7 +52,7 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 	 */
 	@Override
 	@Deprecated(since="7.0", forRemoval = true)
-	public File parse(File location, IExperimentWithMetrics experiment, IProgressReport progress, IUserData<String, String> userData)
+	public File parse(File location, IExperiment experiment, IProgressReport progress, IUserData<String, String> userData)
 			throws Exception {
 		throw new IllegalAccessError("Not allowed access: Use parse(HpcClient client) instead.");
 	}
@@ -80,7 +80,7 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	public void parse(HpcClient client, IExperimentWithMetrics experiment) throws IOException, InterruptedException {
+	public void parse(HpcClient client, IExperiment experiment) throws IOException, InterruptedException {
 		dataMeta = collectMetaData(client, experiment);
 		this.experiment = (Experiment) experiment;
 		collectOtherInformation(client, dataMeta, this.experiment);
@@ -211,7 +211,7 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	public DataMeta collectMetaData(HpcClient client, IExperimentWithMetrics experiment) throws IOException, InterruptedException {
+	public DataMeta collectMetaData(HpcClient client, IExperiment experiment) throws IOException, InterruptedException {
 		var metaDBbytes   = client.getMetaDbFileContents();
 		ByteBuffer buffer = ByteBuffer.wrap(metaDBbytes);
 		

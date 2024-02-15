@@ -13,22 +13,35 @@
 #   AC_PASSWORD: Apple specific application password
 ##############################
 
+show_help(){
+	echo "Syntax: $0 [-options] <hpcviewer_zip_file>"
+	echo "Options: "
+	echo "   -i  --image    Just create image file, no notarization"
+	exit 1
+}
+
+
 die() {
 	echo "$1"
 	exit 1
 }
 
+
 check_file() {
-if [ ! -f $1 ]; then
-	die "Error: hpcviewer mac file doesn't exist: $1"
-fi
+	if [ ! -f $1 ]; then
+		die "Error: hpcviewer mac file doesn't exist: $1"
+	fi
 }
 
+NOTARIZATION=1
 FILE=$1
 if [[ "$1" == ""  ]]; then
-#	FILE=`ls hpcviewer-*-macosx.cocoa.x86_64.zip | tail -n 1`
- 	die "Syntax: $0 <file_to_notarize>"
+ 	show_help
+elif [[ "$1" == "-i" || "$1" == "--image" ]]; then
+	NOTARIZATION=0
+	FILE="$2"
 fi
+
 echo "Notarize: $FILE"
 check_file $FILE
 
@@ -39,16 +52,6 @@ DIR_CONFIG="macos"
 FILE_PLIST="${DIR_CONFIG}/p.plist"
 
 check_file $FILE_PLIST
-
-# check the AC_USER env
-if [[ -z "${AC_USERID}" ]] ; then
-	die "AC_USERID env is not set. It's required to sign the application"
-fi
-
-# check the AC_PASSWORD env
-if [[ -z "${AC_PASSWORD}" ]] ; then
-	die "AC_PASSWORD env is not set"
-fi
 
 ##############################
 # 
@@ -67,6 +70,8 @@ rm -rf $DIR_PREP
 mkdir $DIR_PREP
 
 cp $FILE_PLIST  $DIR_PREP
+cp "${DIR_CONFIG}/arrow.png" $DIR_PREP
+
 
 if [[ ! -e "share" ]]; then
 	mkdir -p share/create-dmg
@@ -126,6 +131,7 @@ create_dmg() {
 
 	../${DIR_CONFIG}/create-dmg \
 		   --no-internet-enable \
+		   --background "arrow.png" \
 		   --volname "hpcviewer" \
 		   --window-pos 200 120 \
 		   --window-size 600 300 \
@@ -156,9 +162,31 @@ create_zip() {
 
 [[ -d "hpcviewer.app" ]] || die "Not found: hpcviewer.app"
 
+
+######
+# Case for -i or --image
+#  no need to sign and notarize. Just create an image file
+######
+if [[ "$NOTARIZATION" == "0" ]]; then
+	create_dmg  "${FILE_BASE}.dmg"  "hpcviewer.app/"
+	ls -l *.dmg
+	exit 0
+fi
+
+
 ######
 # code signature of hpcviewer for both *.dmg and *.zip
 #####
+# check the AC_USER env
+if [[ -z "${AC_USERID}" ]] ; then
+	die "AC_USERID env is not set. It's required to sign the application"
+fi
+
+# check the AC_PASSWORD env
+if [[ -z "${AC_PASSWORD}" ]] ; then
+	die "AC_PASSWORD env is not set"
+fi
+
 sign_app "hpcviewer.app"
 
 ######
