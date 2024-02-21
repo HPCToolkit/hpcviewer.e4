@@ -28,6 +28,15 @@ public class ExecutionContextMatcher implements Matcher<FilterDataItem<IExecutio
 		return isMatched;
 	}
 
+	
+	/****
+	 * Return the matcher editor for the text part.
+	 * 
+	 * @return {@code TextMatcherEditor}
+	 */
+	public TextMatcherEditor<FilterDataItem<IExecutionContext>> getTextMatcherEditor() {
+		return textMatcherEditor;
+	}
 
 	/**
 	 * Set the new text to filter in (included)

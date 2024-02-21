@@ -91,6 +91,8 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 	public static final int STYLE_INDEPENDENT = 1;
 	
 	private final int style;
+	private final FilterInputData<T> inputData;
+	
 	private NatTable  natTable ;
 	private DataLayer dataLayer ;
 	
@@ -108,7 +110,7 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 	private Text objSearchText;
 	private Button btnRegExpression;
 	private TextMatcherEditor<FilterDataItem<T>> textMatcher;
-	
+
 	/***
 	 * Constructor to create the item and its composite widgets.
 	 * 
@@ -120,7 +122,9 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 	 * @see STYLE_COMPOSITE, STYLE_INDEPENDENT
 	 */
 	protected AbstractFilterPane(Composite parent, int style, FilterInputData<T> inputData) {
+		this.inputData = inputData;
 		this.style = style;
+		
 		createContentArea(parent, inputData);
 
 		this.eventList  = createEventList(inputData.getListItems());
@@ -278,6 +282,16 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 	}
 	
 	
+	/**
+	 * Retrieve the input data of this filter pane
+	 * 
+	 * @return {@code FilterInputData}
+	 * 			The base class of filter input data
+	 */
+	protected FilterInputData<T> getInputData() {
+		return inputData;
+	}
+	
 	/****
 	 * Create an event list for this table. 
 	 * 
@@ -299,11 +313,9 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 	protected FilterList<FilterDataItem<T>> createFilterList(EventList<FilterDataItem<T>> eventList) {
 		FilterList<FilterDataItem<T>> fl = new FilterList<>(eventList);
  		
-		textMatcher = new TextMatcherEditor<>( (List<String> baseList, FilterDataItem<T> element) 
-													-> baseList.add(element.getLabel())
-											 );
-		textMatcher.setMode(TextMatcherEditor.CONTAINS);
-		fl.setMatcherEditor(textMatcher);
+		var currentTextMatcher = getTextMatcher();
+		
+		fl.setMatcherEditor(currentTextMatcher);
 		
 		return fl;
 	}
@@ -462,8 +474,10 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 	 * 			{@code String} to filter in (text to be included)
 	 */
 	protected void eventFilterText(String text) {
+		var currentTextMatcher = getTextMatcher();
+		
 		if (text == null) {
-			textMatcher.setFilterText(new String [] {});
+			currentTextMatcher.setFilterText(new String [] {});
 		} else {
 			if (btnRegExpression.getSelection()) {
 				// check if the regular expression is correct
@@ -476,7 +490,7 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 				}
 				objSearchText.setBackground(GUIHelper.COLOR_LIST_BACKGROUND);
 			}
-			textMatcher.setFilterText(new String [] {text});
+			currentTextMatcher.setFilterText(new String [] {text});
 		}
 		if (natTable != null)
 			natTable.refresh(false);
@@ -484,13 +498,34 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 	
 	
 	/***
+	 * Default implementation to create the text matcher editor.
+	 * Inherited class can override this method to have their
+	 * customized text matcher.
+	 * 
+	 * @return {@code TextMatcherEditor} 
+	 * 			The matcher editor of {@code FilterDataItem<T>} type.
+	 */
+	protected TextMatcherEditor<FilterDataItem<T>> getTextMatcher() {
+		if (textMatcher == null) {
+			textMatcher = new TextMatcherEditor<>( (List<String> baseList, FilterDataItem<T> element) 
+					-> baseList.add(element.getLabel())
+			 );
+			textMatcher.setMode(TextMatcherEditor.CONTAINS);
+
+		}
+		return textMatcher;
+	}
+	
+	/***
 	 * Event when users toggle the regular expression on/off
 	 */
 	private void toggleRegularExpression() {
+		var currentTextMatcher = getTextMatcher();
+		
 		boolean regExp = btnRegExpression.getSelection();
 		if (regExp) {
 			try {
-				textMatcher.setMode(TextMatcherEditor.REGULAR_EXPRESSION);
+				currentTextMatcher.setMode(TextMatcherEditor.REGULAR_EXPRESSION);
 			} catch(Exception err) {
 				Color c = GUIHelper.COLOR_YELLOW;
 				objSearchText.setBackground(c);
@@ -498,8 +533,10 @@ public abstract class AbstractFilterPane<T> implements IPropertyChangeListener, 
 			}
 			objSearchText.setBackground(GUIHelper.COLOR_LIST_BACKGROUND);
 		} else {
-			textMatcher.setMode(TextMatcherEditor.CONTAINS);
+			currentTextMatcher.setMode(TextMatcherEditor.CONTAINS);
 		}
+		eventFilterText(objSearchText.getText());
+		
 		if (natTable != null)
 			natTable.refresh(false);
 	}

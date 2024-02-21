@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.Text;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import edu.rice.cs.hpcfilter.AbstractFilterPane;
 import edu.rice.cs.hpcfilter.FilterDataItem;
 import edu.rice.cs.hpcfilter.FilterDataItemSortModel;
@@ -55,24 +56,19 @@ public class TraceFilterPane extends AbstractFilterPane<IExecutionContext> imple
 		super(parent, style, inputData);
 		this.buttonEnabler = buttonEnabler;
 		
-		matcherEditor = new ExecutionContextMatcherEditor(inputData.getIdTupleType());
 		var filterList = getFilterList();
 		filterList.setMatcherEditor(matcherEditor);
 	}
 	
 	
-	/****
-	 * Create the filter list for the table.
-	 * This method will set the text matcher to the new filter list automatically.
-	 * 
-	 * @param eventList
-	 * @return
-	 */
 	@Override
-	protected FilterList<FilterDataItem<IExecutionContext>> createFilterList(EventList<FilterDataItem<IExecutionContext>> eventList) {
-		return new FilterList<>(eventList);
+	protected TextMatcherEditor<FilterDataItem<IExecutionContext>> getTextMatcher() {
+		if (matcherEditor == null) {
+			TraceFilterInputData inputData = (TraceFilterInputData) getInputData();
+			matcherEditor = new ExecutionContextMatcherEditor(inputData.getIdTupleType());
+		}
+		return matcherEditor.getTextMatcherEditor();
 	}
-	
 	
 	@Override
 	protected void setLayerConfiguration(DataLayer datalayer) {
@@ -219,9 +215,12 @@ public class TraceFilterPane extends AbstractFilterPane<IExecutionContext> imple
 		if (matcherEditor == null)
 			// matcher is not set yet
 			return;
+
+		// Fix issue #347: use the parent filter text
+		// to handle regular expression filtering
+		super.eventFilterText(text);
 		
-		matcherEditor.filterText(text);
-		getNatTable().refresh();
+		matcherEditor.fireChanged();
 	}
 	
 	private void filterSamples(final int minSamples) {
