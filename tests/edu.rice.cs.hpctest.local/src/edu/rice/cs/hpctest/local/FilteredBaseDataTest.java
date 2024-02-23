@@ -14,7 +14,7 @@ import edu.rice.cs.hpcdata.db.IFileDB;
 import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
-import edu.rice.cs.hpcdata.db.version2.FileDB2;
+import edu.rice.cs.hpcdata.db.version2.TraceDB2;
 import edu.rice.cs.hpcdata.db.version4.FileDB4;
 import edu.rice.cs.hpcdata.db.version4.MetricValueCollection4;
 import edu.rice.cs.hpcdata.experiment.Experiment;
@@ -52,13 +52,14 @@ public class FilteredBaseDataTest
 				var dataSummary = mvc.getDataSummary();
 				fileDb = new FileDB4(exp, dataSummary);
 			} else if (exp.getMajorVersion() == Constants.EXPERIMENT_DENSED_VERSION) {
-				fileDb = new FileDB2();
+				fileDb = new TraceDB2(exp);
 			} else {
 				fail();
+				continue; // just to avoid warning 
 			}
 			assertNotNull(fileDb);
 			
-			fileDb.open(dir.getAbsolutePath(), 4, 16);
+			fileDb.open(dir.getAbsolutePath());
 			
 			listFileDB.add(fileDb);
 		}

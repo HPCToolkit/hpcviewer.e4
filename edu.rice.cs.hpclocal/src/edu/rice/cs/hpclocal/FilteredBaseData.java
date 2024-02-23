@@ -9,8 +9,6 @@ import edu.rice.cs.hpcbase.IFilteredData;
 import edu.rice.cs.hpcdata.db.IFileDB;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
-import edu.rice.cs.hpcdata.db.version2.FileDB2;
-
 
 
 /******************************************************************
