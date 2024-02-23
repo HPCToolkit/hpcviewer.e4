@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: hpcremote.Jsch
 Bundle-SymbolicName: edu.rice.cs.hpcremote.jsch
 Bundle-Version: 1.0.0
-Bundle-ClassPath: jsch-0.2.16.jar
+Bundle-ClassPath: jsch-0.2.17.jar
 Bundle-Vendor: Jcraft jsch
 Export-Package: com.jcraft.jsch,
  com.jcraft.jsch.annotations,
