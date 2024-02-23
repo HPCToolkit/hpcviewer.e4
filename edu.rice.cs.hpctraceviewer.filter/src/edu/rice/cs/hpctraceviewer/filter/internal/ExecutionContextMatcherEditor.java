@@ -1,6 +1,7 @@
 package edu.rice.cs.hpctraceviewer.filter.internal;
 
 import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
+import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpcfilter.FilterDataItem;
 
@@ -15,12 +16,20 @@ public class ExecutionContextMatcherEditor extends AbstractMatcherEditor<FilterD
 	
 	public void filterText(String text) {
 		matcher.setTextToFilter(text);
-		fireChanged(matcher);
+		fireChanged();
 	}
 	
 	
 	public void filterMinSamples(int minSamples) {
 		matcher.setMinSamplesToFilter(minSamples);
+		fireChanged();
+	}
+	
+	public TextMatcherEditor<FilterDataItem<IExecutionContext>> getTextMatcherEditor() {
+		return matcher.getTextMatcherEditor();
+	}
+	
+	public void fireChanged() {
 		fireChanged(matcher);
 	}
 }
