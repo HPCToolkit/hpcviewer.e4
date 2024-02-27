@@ -1,9 +1,17 @@
 package edu.rice.cs.hpcremote.tunnel;
 
+import java.io.IOException;
+import java.net.ServerSocket;
+
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.UserInfo;
+
+import edu.rice.cs.hpcremote.ui.RemoteUserInfoDialog;
 
 /***************************************************
  * 
@@ -12,9 +20,9 @@ import com.jcraft.jsch.UserInfo;
  ***************************************************/
 public class LocalTunneling 
 {
-	final private int TIMEOUT_DEFAULT = 10 * 1000;
-	final private JSch  jsch;
-	final private UserInfo userInfo;
+	private static final int TIMEOUT_DEFAULT = 10 * 1000;
+	private final JSch  jsch;
+	private final UserInfo userInfo;
 	
 	private Session session;
 	private int port;
@@ -23,9 +31,12 @@ public class LocalTunneling
 	
 	public LocalTunneling(UserInfo userInfo)
 	{
-		jsch 		  = new JSch();
+		port = 0;
+		jsch = new JSch();
 		this.userInfo = userInfo;
+		
 	}
+	
 	
 	/*******
 	 * Build SSH port local forwarding connection 
@@ -33,43 +44,55 @@ public class LocalTunneling
 	 * @param login_user : username at login host
 	 * @param login_host : the login host
 	 * @param remote_host : the remote host where a server listens
-	 * @param port : the port number (the same as the port that
-	 * 				 the server listens)
+	 * @param remote_socket the remote UNIX socket	 
 	 * 
 	 * @return the assigned port
 	 * 
 	 * @throws JSchException
+	 * @throws IOException 
 	 */
-	public int connect(String login_user, String login_host, 
-			String remote_host, int port)
-			throws JSchException
+	public int connect(String login_user, 
+					   String login_host, 
+					   String remote_host, 
+					   String remote_socket)
+			throws JSchException, IOException
 	{
-		String id = getSessionID(login_user, login_host, remote_host, port);
+		String id = getSessionID(login_user, login_host, remote_host, remote_socket);
 
-		if (session_id != null) {
-			// check whether this connection is the same as the previous one
-			if (id.equals(session_id)) {
-				return this.port;
-			}
+		if (session_id != null &&  (id.equals(session_id))) {
+				return this.port;			
 		}
+		
 		session = jsch.getSession(login_user, login_host, 22);
 		session.setUserInfo(userInfo);
-		// prepare the connection with timeout in mili seconds
-		// FIXME: we should use the preference for the value of timeout
+		
+		// prepare the connection with timeout in mili-seconds
+
 		session.connect(TIMEOUT_DEFAULT);
 		
-		int assigned_port = session.setPortForwardingL(port, remote_host, port);
-		this.port = assigned_port;
+		this.port = session.setSocketForwardingL(null, 0, remote_socket, null, TIMEOUT_DEFAULT);
 
 		session_id = id;
+		
 		return this.port;
 	}
 	
 	
 	private String getSessionID(String login_user, String login_host, 
-			String remote_host, int port)
+			String remote_host, String remote_socket)
 	{
-		return login_user + "@" + login_host + ":" + remote_host + ":" + port;
+		return login_user + "@" + login_host + ":" + remote_host + ":" + remote_socket;
+	}
+	
+	
+	/*****
+	 * Retrieve the local port of this tunnel if the connection has been established.
+	 * If not, it return 0;
+	 * 
+	 * @return
+	 */
+	public int getLocalPort() {
+		return port;
 	}
 	
 	/*******
@@ -102,53 +125,22 @@ public class LocalTunneling
 	{
 		if (args.length != 4)
 		{
-			System.out.println("Required arguments: user password login_host remote_host");
+			System.out.println("Required arguments: user login_host remote_host remote_socket");
 			return;
 		}
-		LocalTunneling tunnel = new LocalTunneling( new UserInfo() {
-
-			@Override
-			public boolean promptPassword(String message) {
-				System.out.println(message);
-				return true;
-			}
-
-			@Override
-			public String getPassword() {
-				return args[1];
-			}
-
-			@Override
-			public boolean promptPassphrase(String message) {
-				System.out.println(message);
-				return true;
-			}
-
-			@Override
-			public String getPassphrase() {
-				return null;
-			}
-
-			@Override
-			public boolean promptYesNo(String message) {
-				System.out.println(message);
-				return true;
-			}
-
-			@Override
-			public void showMessage(String message) {
-				System.out.println(message);				
-			}
-			
-		});
+		var display = Display.getDefault();
+		var shell = new Shell(display);
+		
+		RemoteUserInfoDialog ruiDlg = new RemoteUserInfoDialog(shell);
+		LocalTunneling tunnel = new LocalTunneling( ruiDlg);
 		
 		try {
-			int port = tunnel.connect(args[0], args[2], args[3], 21590 );
+			int port = tunnel.connect(args[0], args[1], args[2], args[3]);
 			System.out.println("Assigned port: " + port);
 			
 			tunnel.disconnect();
 			
-		} catch (JSchException e) {
+		} catch (JSchException | IOException e) {
 			e.printStackTrace();
 		}
 	}

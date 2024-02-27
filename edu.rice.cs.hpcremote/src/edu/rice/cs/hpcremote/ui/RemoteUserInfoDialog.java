@@ -16,13 +16,16 @@ import org.eclipse.swt.widgets.Text;
 import com.jcraft.jsch.UIKeyboardInteractive;
 import com.jcraft.jsch.UserInfo;
 
-public class RemoteConnectionDialog implements UserInfo, UIKeyboardInteractive 
+public class RemoteUserInfoDialog implements UserInfo, UIKeyboardInteractive 
 {
 	private static final String TITLE = "Remote connection";
 	
 	private final Shell shell;
 	
-	public RemoteConnectionDialog(Shell parentShell) {
+	private String password;
+	private String passphrase;
+	
+	public RemoteUserInfoDialog(Shell parentShell) {
 		this.shell = parentShell;
 	}
 
@@ -39,36 +42,36 @@ public class RemoteConnectionDialog implements UserInfo, UIKeyboardInteractive
 
 	@Override
 	public String getPassphrase() {
-		var inputDialog = new InputDialog(shell, TITLE, "Pass phrase", "", null);
-		if (inputDialog.open() == Window.OK)
-			return inputDialog.getValue();
-		
-		return null;
+		return passphrase;
 	}
 
 	@Override
 	public String getPassword() {
-		var inputDialog = new InputDialog(shell, TITLE, "Password", "", null) {
+		return password;
+	}
+
+	@Override
+	public boolean promptPassword(String message) {
+		var inputDialog = new InputDialog(shell, TITLE, message, "", null) {
 			
 			@Override
 			protected int getInputTextStyle() {
 				return super.getInputTextStyle() | SWT.PASSWORD;
 			}
-		};
-		if (inputDialog.open() == Window.OK)
-			return inputDialog.getValue();
-		
-		return null;
-	}
-
-	@Override
-	public boolean promptPassword(String message) {
-		return MessageDialog.openConfirm(shell, TITLE, message);
+		};		
+		if (inputDialog.open() == Window.OK) {
+			password = inputDialog.getValue();
+			return true;
+		}
+		return false;
 	}
 
 	@Override
 	public boolean promptPassphrase(String message) {
-		return promptPassword(message);
+		var inputDialog = new InputDialog(shell, TITLE, message, "", null);
+		passphrase = inputDialog.getValue();
+		
+		return  (inputDialog.open() == Window.OK);
 	}
 
 	@Override

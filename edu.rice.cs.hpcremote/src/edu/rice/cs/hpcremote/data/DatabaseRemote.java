@@ -3,6 +3,7 @@ package edu.rice.cs.hpcremote.data;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.StringTokenizer;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
@@ -15,6 +16,8 @@ import org.hpctoolkit.hpcclient.v1_0.UnknownCallingContextException;
 import org.hpctoolkit.hpcclient.v1_0.UnknownProfileIdException;
 import org.slf4j.LoggerFactory;
 
+import com.jcraft.jsch.JSchException;
+
 import edu.rice.cs.hpcbase.IDatabaseIdentification;
 import edu.rice.cs.hpcbase.ITraceManager;
 import edu.rice.cs.hpcdata.experiment.Experiment;
@@ -25,10 +28,15 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.source.MetaFileSystemSourceFile;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
 import edu.rice.cs.hpcdata.util.IProgressReport;
+import edu.rice.cs.hpcremote.IConnection;
 import edu.rice.cs.hpcremote.IDatabaseRemote;
+import edu.rice.cs.hpcremote.ISecuredConnection;
 import edu.rice.cs.hpcremote.RemoteDatabaseIdentification;
 import edu.rice.cs.hpcremote.trace.RemoteTraceOpener;
+import edu.rice.cs.hpcremote.tunnel.LocalTunneling;
+import edu.rice.cs.hpcremote.tunnel.SecuredConnectionSSH;
 import edu.rice.cs.hpcremote.ui.ConnectionDialog;
+import edu.rice.cs.hpcremote.ui.RemoteUserInfoDialog;
 
 
 
@@ -44,6 +52,9 @@ public class DatabaseRemote implements IDatabaseRemote
 	
 	private ITraceManager traceManager;
 
+	private String remoteIP;
+	private String remoteSocket;
+	
 	@Override
 	public IDatabaseIdentification getId() {
 		if (id == null)
@@ -65,21 +76,112 @@ public class DatabaseRemote implements IDatabaseRemote
 		id = (RemoteDatabaseIdentification) databaseId;
 		return open(shell);
 	}
+	
+	private LocalTunneling setLocalTunnel(Shell shell, IConnection connection) {
+		RemoteUserInfoDialog ruiDialog = new RemoteUserInfoDialog(shell);
+		LocalTunneling tunnel = new LocalTunneling(ruiDialog);
+		try {
+			tunnel.connect(
+					connection.getUsername(), 
+					connection.getHost(), 
+					connection.getHost(), 
+					remoteSocket);
+		} catch (JSchException | IOException e) {
+			MessageDialog.openError(shell, "Unable to create SSH tunnel", e.getMessage());
+			return null;
+		}
+		return tunnel;
+	}
 
+	private boolean connectRemoteHost(Shell shell, IConnection connection) {
+		SecuredConnectionSSH connectionSSH = new SecuredConnectionSSH(shell);
+		
+		if (connectionSSH.connect(connection.getUsername(), connection.getHost())) {
+			String command = connection.getInstallationDirectory() + "/bin/hpcserver.sh" ;
+			
+			var result = connectionSSH.executeRemoteCommand(command);
+			if (result != null) {
+				try {
+					return handleRemoteCommandOutput(shell, result);
+					
+				} catch (IOException e) {
+					MessageDialog.openError(shell, "Fail to connect", "Unable to get the remote standard output");
+				}
+			}
+		}
+		return false;
+	}
+	
+	
+	private boolean handleRemoteCommandOutput(Shell shell, ISecuredConnection.ISessionRemoteCommand session ) 
+			throws IOException {
+
+		int maxAttempt = 10;
+
+		remoteIP = "";
+		remoteSocket = "";
+
+		while (remoteIP.isEmpty() && remoteSocket.isEmpty()) {
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+			    // Restore interrupted state...
+			    Thread.currentThread().interrupt();
+			}
+			
+			var output = session.getCurrentStandardOutput();
+			if (output.isEmpty()) {
+				maxAttempt--;
+				if (maxAttempt == 0)
+					return false;
+				
+				continue;
+			}
+			
+			StringTokenizer tokenizer = new StringTokenizer(output, "\n");
+			while (tokenizer.hasMoreTokens()) {
+				var pair = tokenizer.nextToken();
+				var key = pair.substring(0, 4);
+				if (key.compareToIgnoreCase("HOST") == 0) {
+					remoteIP = pair.substring(5); 
+				} else if (key.compareToIgnoreCase("SOCK") == 0) {
+					remoteSocket = pair.substring(5);
+				} else {
+					MessageDialog.openError(shell, "Unknown command output", "Unknown output: " + pair);
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+	
 	@Override
 	public DatabaseStatus open(Shell shell) {
+		
 		do {
 			var dialog = new ConnectionDialog(shell, id);
 			
-			if (dialog.open() == Window.CANCEL)
-				return DatabaseStatus.CANCEL;
+			if (dialog.open() == Window.CANCEL) {
+				status = DatabaseStatus.CANCEL;
+				return status;
+			}
 			
+			if (!connectRemoteHost(shell, dialog)) {
+				status = DatabaseStatus.INVALID;
+				return status;
+			}
+			
+			var tunnel = setLocalTunnel(shell, dialog);
+			if (tunnel == null) {
+				status = DatabaseStatus.INVALID;
+				errorMessage = "Fail to create SSH tunnel";
+				return status;
+			}
 			var host = dialog.getHost();
-			var port = dialog.getPort();
-			
+			int port = tunnel.getLocalPort();
 			try {
 				var address = InetAddress.getByName(host);
-				client = new HpcClientJavaNetHttp( address, port);
+				client = new HpcClientJavaNetHttp(address, port);
 				
 			} catch (UnknownHostException e) {
 				errorMessage = "Unable to connect to " + getId();
@@ -96,7 +198,7 @@ public class DatabaseRemote implements IDatabaseRemote
 				if (experiment != null) {
 					var remoteDb = new RemoteDatabaseRepresentation(client, getId().id());
 					experiment.setDatabaseRepresentation(remoteDb);
-					id = new RemoteDatabaseIdentification(host, port, client.getDatabasePath().toString(), null);
+					id = new RemoteDatabaseIdentification(host, port, client.getDatabasePath().toString(), dialog.getUsername());
 
 					status = DatabaseStatus.OK;
 					errorMessage = "";

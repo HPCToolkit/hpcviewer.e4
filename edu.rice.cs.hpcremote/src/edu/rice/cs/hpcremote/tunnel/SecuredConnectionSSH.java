@@ -3,10 +3,6 @@ package edu.rice.cs.hpcremote.tunnel;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 
@@ -16,7 +12,8 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 
 import edu.rice.cs.hpcremote.ISecuredConnection;
-import edu.rice.cs.hpcremote.ui.RemoteConnectionDialog;
+import edu.rice.cs.hpcremote.ui.RemoteUserInfoDialog;
+
 
 public class SecuredConnectionSSH implements ISecuredConnection 
 {
@@ -27,13 +24,13 @@ public class SecuredConnectionSSH implements ISecuredConnection
 		this.shell = shell;
 	}
 	
-	public void connect(String username, String hostName) {
-		var userInfo = new RemoteConnectionDialog(shell);
+	public boolean connect(String username, String hostName) {
+		var userInfo = new RemoteUserInfoDialog(shell);
 		
 		JSch jsch = new JSch();
 		try {
 			// may throw an exception
-			session = jsch.getSession(username, hostName);
+			session = jsch.getSession(username, hostName, 22);
 			
 			session.setUserInfo(userInfo);
 			
@@ -42,7 +39,9 @@ public class SecuredConnectionSSH implements ISecuredConnection
 			
 		} catch (JSchException e) {
 			MessageDialog.openError(shell, "Error to connect " + hostName, e.getLocalizedMessage());
+			return false;
 		}
+		return true;
 	}
 
 	
@@ -68,43 +67,57 @@ public class SecuredConnectionSSH implements ISecuredConnection
 	}
 
 	
-	private ISessionRemoteCommand executeCommand(ChannelExec channel, String command) throws IOException, JSchException {
+	private ISessionRemoteCommand executeCommand(ChannelExec channel, String command) throws JSchException, IOException {
+		channel.setCommand(command);
+		
 		channel.setInputStream(null);
 		
 		ByteArrayOutputStream errStream = new ByteArrayOutputStream();		
 		channel.setErrStream(errStream);
+	
+		final var inStream = channel.getInputStream();
 		
-		
+		// need to call connect to execute the command
 		channel.connect();
-	
-		readInput(channel);
 		
-		return null;
-	}
-	
-	
-	private List<String> readInput(ChannelExec channel) throws IOException {
-		var inStream = channel.getInputStream();
-
-		List<String> inputs = new ArrayList<>();
-		
-		final int MAX_BYTES = 1024;
-		
-		byte[] tmp = new byte[MAX_BYTES];
-		
-		while (true) {
-			while (inStream.available() > 0) {
-				int i = inStream.read(tmp, 0, MAX_BYTES);
-				if (i < 0)
-					break;
-				System.out.print(new String(tmp, 0, i));
+		return new ISessionRemoteCommand() {
+			
+			@Override
+			public Session getSession() throws JSchException {
+				return channel.getSession();
 			}
-			if (channel.isClosed()) {
-				if (inStream.available() > 0)
-					continue;
-				break;
+			
+			@Override
+			public void disconnect() {
+				channel.disconnect();
 			}
-		}
-		return inputs;
+			
+			@Override
+			public InputStream getInputStream() throws IOException {
+				return inStream;
+			}
+			
+			@Override
+			public String getCurrentStandardOutput() throws IOException {
+				return readInput();
+			}			
+			
+			private String readInput() throws IOException {
+				StringBuilder inputs = new StringBuilder();
+				
+				final int MAX_BYTES = 1024;
+				
+				byte[] tmp = new byte[MAX_BYTES];
+				
+				while (inStream.available() > 0) {
+					int i = inStream.read(tmp, 0, MAX_BYTES);
+					if (i < 0)
+						break;
+					var s = new String(tmp, 0, i);
+					inputs.append(s);
+				}
+				return inputs.toString();
+			}
+		};
 	}
 }

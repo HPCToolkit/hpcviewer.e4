@@ -4,18 +4,14 @@ import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
-
 import edu.rice.cs.hpcbase.map.UserInputHistory;
+import edu.rice.cs.hpcremote.IConnection;
 import edu.rice.cs.hpcremote.RemoteDatabaseIdentification;
 
 
@@ -33,24 +29,25 @@ import edu.rice.cs.hpcremote.RemoteDatabaseIdentification;
  * Caller needs to check its validity.
  * 
  *******************************************************/
-public class ConnectionDialog extends TitleAreaDialog 
+public class ConnectionDialog extends TitleAreaDialog implements IConnection
 {
 	private static final String EMPTY = "";
 	
+	private static final String HISTORY_KEY_USER = "hpcremote.user";
 	private static final String HISTORY_KEY_HOST = "hpcremote.host";
-	private static final String HISTORY_KEY_PORT = "hpcremote.port";
-	
-	private Button flagEnableTunnel;
+	private static final String HISTORY_KEY_RDIR = "hpcremote.rdir";
+	private static final String HISTORY_KEY_PRIV = "hpcremote.priv";
 	
 	private Combo  textHost;
-	private Combo  textPort;
 	private Combo  textUsername;
-	private Text   textPassword;
+	private Combo  textDirectory;
+	private Combo  textPrivateKey;
 	
 	private String host;
-	private int    port;
 	private String username;
-	private String password;
+	private String directory;
+	private String privateKey;
+
 	
 	/*****
 	 * Instantiate a connection window. User needs to call {@code open} 
@@ -63,7 +60,6 @@ public class ConnectionDialog extends TitleAreaDialog
 		super(parentShell);
 		
 		host = null; // default: local host
-		port = 0;
 		username = EMPTY;
 	}
 
@@ -75,7 +71,6 @@ public class ConnectionDialog extends TitleAreaDialog
 			databaseId = new RemoteDatabaseIdentification();
 		
 		host = databaseId.getHost();
-		port = databaseId.getPort();
 		username = databaseId.getUsername();
 	}
 
@@ -90,82 +85,48 @@ public class ConnectionDialog extends TitleAreaDialog
 		
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(container);
 		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(container);
+		
+		//------------------------------------------------------
 
-		var labelHost = new Label(container, SWT.LEFT);
+		var labelHost = new Label(container, SWT.RIGHT);
 		labelHost.setText("Hostname/IP address:");
 		
 		textHost = new Combo(container, SWT.NONE);
 		textHost.setToolTipText("Please enter the remote host name or its IP address as provided by hpcserver output");
 		
 		fillAndSetComboWithHistory(textHost, HISTORY_KEY_HOST);
-		if (host == null || host.isBlank() || host.isEmpty()) {
-			if (textHost.getItemCount() > 0) {
-				host = textHost.getItem(0);
-			} else {
-				host = "127.0.0.1"; // default host is local
-			}
-		}
-		textHost.setText(host);
 
-		GridDataFactory.fillDefaults().grab(true, true).applyTo(textHost);
-		
-		var labelPort = new Label(container, SWT.LEFT);
-		labelPort.setText("Port:");
-		
-		textPort = new Combo(container, SWT.DROP_DOWN);
-		textPort.setToolTipText("Please enter the hpcserver's port number as provided by hpcserver's output");
-
-		fillAndSetComboWithHistory(textPort, HISTORY_KEY_PORT);
-		String strPort = String.valueOf(port);
-		if (port == 0) {
-			if (textPort.getItemCount() > 0) {
-				strPort = textPort.getItem(0);
-			} else {
-				strPort = "8080"; // default port
-			}			
-		}
-		textPort.setText(strPort);
-
-		GridDataFactory.fillDefaults().grab(true, true).applyTo(textPort);
-		
+		GridDataFactory.fillDefaults().grab(true, false).applyTo(textHost);
+				
 		//------------------------------------------------------
-		//------------------------------------------------------
-		var groupTunnel = new Group(area, SWT.BORDER_SOLID);
-		groupTunnel.setText(EMPTY);
 		
-		GridDataFactory.fillDefaults().grab(true, true).applyTo(groupTunnel);
-		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(groupTunnel);
-
-		flagEnableTunnel = new Button(groupTunnel, SWT.CHECK);
-		flagEnableTunnel.setText("Enable SSH tunneling");
-		flagEnableTunnel.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				boolean state = flagEnableTunnel.getSelection();
-				enableTunnel(state);
-			}			
-		});
-		flagEnableTunnel.setEnabled(true);
-		
-		GridDataFactory.fillDefaults().grab(true, true).span(2, 1).applyTo(flagEnableTunnel);
-		
-		var labelUsername = new Label(groupTunnel, SWT.LEFT);
+		var labelUsername = new Label(container, SWT.RIGHT);
 		labelUsername.setText("Username:");
 		
-		textUsername = new Combo(groupTunnel, SWT.DROP_DOWN);
-		textUsername.setText(username);
+		textUsername = new Combo(container, SWT.DROP_DOWN);
+		fillAndSetComboWithHistory(textUsername, HISTORY_KEY_USER);
 		
-		GridDataFactory.fillDefaults().grab(true, true).applyTo(textUsername);
+		GridDataFactory.fillDefaults().grab(true, false).applyTo(textUsername);
 		
-		var labelPassword = new Label(groupTunnel, SWT.LEFT);
-		labelPassword.setText("Password");
+		//------------------------------------------------------
+
+		var labelDirectory = new Label(container, SWT.RIGHT);
+		labelDirectory.setText("Remote installation directory:");
 		
-		textPassword = new Text(groupTunnel, SWT.PASSWORD);
-		textPassword.setText(EMPTY);
+		textDirectory = new Combo(container, SWT.DROP_DOWN);
+		fillAndSetComboWithHistory(textDirectory, HISTORY_KEY_RDIR);
 		
-		GridDataFactory.fillDefaults().grab(true, true).applyTo(textPassword);
+		GridDataFactory.fillDefaults().grab(true, false).applyTo(textDirectory);
+				
+		//------------------------------------------------------
+
+		var labelPrivateKey = new Label(container, SWT.RIGHT);
+		labelPrivateKey.setText("Private key (optional):");
 		
-		enableTunnel(false);
+		textPrivateKey = new Combo(container, SWT.DROP_DOWN);
+		fillAndSetComboWithHistory(textPrivateKey, HISTORY_KEY_PRIV);
+		
+		GridDataFactory.fillDefaults().grab(true, false).applyTo(textPrivateKey);
 		
 		return area;
 	}
@@ -174,44 +135,43 @@ public class ConnectionDialog extends TitleAreaDialog
 	@Override
 	protected void okPressed() {
 		host = textHost.getText();
-		username = textUsername.getText();
-		password = textPassword.getText();
+		username = textUsername.getText();		
+		directory = textDirectory.getText();
+		privateKey = textPrivateKey.getText();
 		
-		var portString = textPort.getText();
-		
-		try {
-			port = Integer.parseInt(portString);
-		} catch (NumberFormatException e) {
-			setErrorMessage("Invalid port number: " + portString);
-			return;
-		}
 		addIntoHistory(textHost, HISTORY_KEY_HOST);
-		addIntoHistory(textPort, HISTORY_KEY_PORT);
+		addIntoHistory(textUsername, HISTORY_KEY_USER);
+		addIntoHistory(textDirectory, HISTORY_KEY_RDIR);
+		addIntoHistory(textPrivateKey, HISTORY_KEY_PRIV);
 
 		super.okPressed();
 	}
-	
-				
+
+
+	@Override
 	public String getHost() {
 		return host;
 	}
 
 
-	public int getPort() {
-		return port;
-	}
-
-
+	@Override
 	public String getUsername() {
 		return username;
 	}
 
 
-	public String getPassword() {
-		return password;
+	@Override
+	public String getPrivateKey() {
+		return privateKey;
 	}
 
 
+	@Override
+	public String getInstallationDirectory() {
+		return directory;
+	}
+
+	
 	private void fillAndSetComboWithHistory(Combo combo, String key) {		
 		UserInputHistory history = new UserInputHistory(key);
 		var histories = history.getHistory();
@@ -228,8 +188,12 @@ public class ConnectionDialog extends TitleAreaDialog
 		history.addLine(combo.getText());
 	}
 	
-	private void enableTunnel(boolean enable) {
-		textUsername.setEnabled(enable);
-		textPassword.setEditable(enable);
+	
+	public static void main(String []argv) {
+		var display = Display.getDefault();
+		Shell shell = new Shell(display);
+		
+		var dlg = new ConnectionDialog(shell);
+		dlg.open();
 	}
 }
