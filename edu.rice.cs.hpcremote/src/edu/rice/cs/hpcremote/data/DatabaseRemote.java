@@ -16,8 +16,6 @@ import org.hpctoolkit.hpcclient.v1_0.UnknownCallingContextException;
 import org.hpctoolkit.hpcclient.v1_0.UnknownProfileIdException;
 import org.slf4j.LoggerFactory;
 
-import com.jcraft.jsch.JSchException;
-
 import edu.rice.cs.hpcbase.IDatabaseIdentification;
 import edu.rice.cs.hpcbase.ITraceManager;
 import edu.rice.cs.hpcdata.experiment.Experiment;
@@ -33,10 +31,8 @@ import edu.rice.cs.hpcremote.IDatabaseRemote;
 import edu.rice.cs.hpcremote.ISecuredConnection;
 import edu.rice.cs.hpcremote.RemoteDatabaseIdentification;
 import edu.rice.cs.hpcremote.trace.RemoteTraceOpener;
-import edu.rice.cs.hpcremote.tunnel.LocalTunneling;
 import edu.rice.cs.hpcremote.tunnel.SecuredConnectionSSH;
 import edu.rice.cs.hpcremote.ui.ConnectionDialog;
-import edu.rice.cs.hpcremote.ui.RemoteUserInfoDialog;
 
 
 
@@ -52,6 +48,8 @@ public class DatabaseRemote implements IDatabaseRemote
 	
 	private ITraceManager traceManager;
 
+	private SecuredConnectionSSH connectionSSH;
+	
 	private String remoteIP;
 	private String remoteSocket;
 	
@@ -77,24 +75,8 @@ public class DatabaseRemote implements IDatabaseRemote
 		return open(shell);
 	}
 	
-	private LocalTunneling setLocalTunnel(Shell shell, IConnection connection) {
-		RemoteUserInfoDialog ruiDialog = new RemoteUserInfoDialog(shell);
-		LocalTunneling tunnel = new LocalTunneling(ruiDialog);
-		try {
-			tunnel.connect(
-					connection.getUsername(), 
-					connection.getHost(), 
-					connection.getHost(), 
-					remoteSocket);
-		} catch (JSchException | IOException e) {
-			MessageDialog.openError(shell, "Unable to create SSH tunnel", e.getMessage());
-			return null;
-		}
-		return tunnel;
-	}
-
 	private boolean connectRemoteHost(Shell shell, IConnection connection) {
-		SecuredConnectionSSH connectionSSH = new SecuredConnectionSSH(shell);
+		connectionSSH = new SecuredConnectionSSH(shell);
 		
 		if (connectionSSH.connect(connection.getUsername(), connection.getHost())) {
 			String command = connection.getInstallationDirectory() + "/bin/hpcserver.sh" ;
@@ -155,6 +137,7 @@ public class DatabaseRemote implements IDatabaseRemote
 		return true;
 	}
 	
+	
 	@Override
 	public DatabaseStatus open(Shell shell) {
 		
@@ -171,14 +154,15 @@ public class DatabaseRemote implements IDatabaseRemote
 				return status;
 			}
 			
-			var tunnel = setLocalTunnel(shell, dialog);
-			if (tunnel == null) {
+			var socketSession = connectionSSH.socketForwarding(remoteSocket);
+			if (socketSession == null) {
 				status = DatabaseStatus.INVALID;
 				errorMessage = "Fail to create SSH tunnel";
 				return status;
 			}
+
 			var host = dialog.getHost();
-			int port = tunnel.getLocalPort();
+			int port = socketSession.getLocalPort();
 			try {
 				var address = InetAddress.getByName(host);
 				client = new HpcClientJavaNetHttp(address, port);

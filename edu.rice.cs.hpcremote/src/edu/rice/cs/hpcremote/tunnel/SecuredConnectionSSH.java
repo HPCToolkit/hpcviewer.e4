@@ -17,6 +17,8 @@ import edu.rice.cs.hpcremote.ui.RemoteUserInfoDialog;
 
 public class SecuredConnectionSSH implements ISecuredConnection 
 {
+	private static final int TIMEOUT_DEFAULT = 10 * 1000;
+
 	private final Shell shell;
 	private Session session;
 	
@@ -63,6 +65,37 @@ public class SecuredConnectionSSH implements ISecuredConnection
 	
 	@Override
 	public ISocketSession socketForwarding(String socketPath) {
+		if (session == null)
+			throw new IllegalAccessError("Not connected. Need to call connect() first");
+
+		try {
+			final int localPort = session.setSocketForwardingL(null, 0, socketPath, null, TIMEOUT_DEFAULT);
+			
+			return new ISocketSession() {
+				
+				@Override
+				public Session getSession() throws JSchException {
+					return session;
+				}
+				
+				@Override
+				public void disconnect() {
+					session.disconnect();
+				}
+				
+				@Override
+				public int getLocalPort() {
+					return localPort;
+				}
+			};
+			
+		} catch (JSchException e) {
+			MessageDialog.openError(
+					shell, 
+					"Fail to create SSH tunnel", 
+					socketPath + ": " +  e.getLocalizedMessage());
+		}
+		
 		return null;
 	}
 

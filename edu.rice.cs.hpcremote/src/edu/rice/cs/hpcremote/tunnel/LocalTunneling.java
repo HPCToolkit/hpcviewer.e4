@@ -89,11 +89,24 @@ public class LocalTunneling
 	 * Retrieve the local port of this tunnel if the connection has been established.
 	 * If not, it return 0;
 	 * 
-	 * @return
+	 * @return {@code int}
+	 * 			The reserved local port
 	 */
 	public int getLocalPort() {
 		return port;
 	}
+	
+	
+	/***
+	 * Retrieve the current session.
+	 * If the connection fails, it returns null.
+	 * 
+	 * @return {@code Session}
+	 */
+	public Session getSession() {
+		return session;
+	}
+	
 	
 	/*******
 	 * disconnect tunneling
