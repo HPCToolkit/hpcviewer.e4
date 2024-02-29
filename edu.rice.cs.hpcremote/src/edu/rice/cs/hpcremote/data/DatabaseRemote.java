@@ -33,6 +33,7 @@ import edu.rice.cs.hpcremote.RemoteDatabaseIdentification;
 import edu.rice.cs.hpcremote.trace.RemoteTraceOpener;
 import edu.rice.cs.hpcremote.tunnel.SecuredConnectionSSH;
 import edu.rice.cs.hpcremote.ui.ConnectionDialog;
+import edu.rice.cs.hpcremote.ui.DatabaseBrowserDialog;
 
 
 
@@ -111,8 +112,8 @@ public class DatabaseRemote implements IDatabaseRemote
 			    Thread.currentThread().interrupt();
 			}
 			
-			var output = session.getCurrentStandardOutput();
-			if (output.isEmpty()) {
+			var output = session.getCurrentLocalInput();
+			if (output == null || output.length == 0) {
 				maxAttempt--;
 				if (maxAttempt == 0)
 					return false;
@@ -120,9 +121,8 @@ public class DatabaseRemote implements IDatabaseRemote
 				continue;
 			}
 			
-			StringTokenizer tokenizer = new StringTokenizer(output, "\n");
-			while (tokenizer.hasMoreTokens()) {
-				var pair = tokenizer.nextToken();
+			for (int i=0; i<output.length; i++) {
+				var pair = output[i];
 				var key = pair.substring(0, 4);
 				if (key.compareToIgnoreCase("HOST") == 0) {
 					remoteIP = pair.substring(5); 
@@ -135,6 +135,15 @@ public class DatabaseRemote implements IDatabaseRemote
 			}
 		}
 		return true;
+	}
+	
+	
+	private String browseDirectory(Shell shell, ISecuredConnection.ISocketSession session) {
+		var dialog = new DatabaseBrowserDialog(shell, session);
+		if (dialog.open() == Window.OK) {
+			return dialog.getCurrentDirectory();
+		}		
+		return null;
 	}
 	
 	
@@ -161,6 +170,12 @@ public class DatabaseRemote implements IDatabaseRemote
 				return status;
 			}
 
+			var directory = browseDirectory(shell, socketSession);
+			if (directory == null) {
+				status = DatabaseStatus.CANCEL;
+				return status;
+			}
+			
 			var host = dialog.getHost();
 			int port = socketSession.getLocalPort();
 			try {

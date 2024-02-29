@@ -3,6 +3,8 @@ package edu.rice.cs.hpcremote.tunnel;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 
@@ -17,15 +19,16 @@ import edu.rice.cs.hpcremote.ui.RemoteUserInfoDialog;
 
 public class SecuredConnectionSSH implements ISecuredConnection 
 {
-	private static final int TIMEOUT_DEFAULT = 10 * 1000;
-
 	private final Shell shell;
 	private Session session;
+	private ChannelExec channelExec;
 	
 	public SecuredConnectionSSH(Shell shell) {
 		this.shell = shell;
 	}
+
 	
+	@Override
 	public boolean connect(String username, String hostName) {
 		var userInfo = new RemoteUserInfoDialog(shell);
 		
@@ -53,8 +56,8 @@ public class SecuredConnectionSSH implements ISecuredConnection
 			throw new IllegalAccessError("Not connected. Need to call connect() first");
 		
 		try {
-			ChannelExec channel = (ChannelExec) session.openChannel("exec");
-			return executeCommand(channel, command);
+			channelExec = (ChannelExec) session.openChannel("exec");
+			return executeCommand(channelExec, command);
 			
 		} catch (JSchException | IOException e) {
 			MessageDialog.openError(shell, "Fail to execute remote command", e.getLocalizedMessage());
@@ -65,31 +68,13 @@ public class SecuredConnectionSSH implements ISecuredConnection
 	
 	@Override
 	public ISocketSession socketForwarding(String socketPath) {
-		if (session == null)
+		if (session == null || channelExec == null)
 			throw new IllegalAccessError("Not connected. Need to call connect() first");
 
 		try {
-			final int localPort = session.setSocketForwardingL(null, 0, socketPath, null, TIMEOUT_DEFAULT);
-			
-			return new ISocketSession() {
-				
-				@Override
-				public Session getSession() throws JSchException {
-					return session;
-				}
-				
-				@Override
-				public void disconnect() {
-					session.disconnect();
-				}
-				
-				@Override
-				public int getLocalPort() {
-					return localPort;
-				}
-			};
-			
-		} catch (JSchException e) {
+			return new SocketForwardingSession(session, socketPath);
+
+		} catch (JSchException | IOException e) {
 			MessageDialog.openError(
 					shell, 
 					"Fail to create SSH tunnel", 
@@ -126,30 +111,13 @@ public class SecuredConnectionSSH implements ISecuredConnection
 			}
 			
 			@Override
-			public InputStream getInputStream() throws IOException {
+			public InputStream getLocalInputStream() throws IOException {
 				return inStream;
 			}
-			
+
 			@Override
-			public String getCurrentStandardOutput() throws IOException {
-				return readInput();
-			}			
-			
-			private String readInput() throws IOException {
-				StringBuilder inputs = new StringBuilder();
-				
-				final int MAX_BYTES = 1024;
-				
-				byte[] tmp = new byte[MAX_BYTES];
-				
-				while (inStream.available() > 0) {
-					int i = inStream.read(tmp, 0, MAX_BYTES);
-					if (i < 0)
-						break;
-					var s = new String(tmp, 0, i);
-					inputs.append(s);
-				}
-				return inputs.toString();
+			public OutputStream getLocalOutputStream() throws IOException {
+				return channel.getOutputStream();
 			}
 		};
 	}
