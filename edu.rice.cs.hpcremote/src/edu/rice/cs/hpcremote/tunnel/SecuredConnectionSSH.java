@@ -21,7 +21,6 @@ public class SecuredConnectionSSH implements ISecuredConnection
 {
 	private final Shell shell;
 	private Session session;
-	private ChannelExec channelExec;
 	
 	public SecuredConnectionSSH(Shell shell) {
 		this.shell = shell;
@@ -56,7 +55,7 @@ public class SecuredConnectionSSH implements ISecuredConnection
 			throw new IllegalAccessError("Not connected. Need to call connect() first");
 		
 		try {
-			channelExec = (ChannelExec) session.openChannel("exec");
+			ChannelExec channelExec = (ChannelExec) session.openChannel("exec");
 			return executeCommand(channelExec, command);
 			
 		} catch (JSchException | IOException e) {
@@ -68,7 +67,7 @@ public class SecuredConnectionSSH implements ISecuredConnection
 	
 	@Override
 	public ISocketSession socketForwarding(String socketPath) {
-		if (session == null || channelExec == null)
+		if (session == null)
 			throw new IllegalAccessError("Not connected. Need to call connect() first");
 
 		try {

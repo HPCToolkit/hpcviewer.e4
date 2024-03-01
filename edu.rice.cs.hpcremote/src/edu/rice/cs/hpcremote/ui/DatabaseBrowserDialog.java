@@ -66,6 +66,15 @@ public class DatabaseBrowserDialog extends Dialog
 	}
 	
 	
+	@Override
+	protected void okPressed() {
+		if (list.getSelectionCount() > 0)
+			currentDir += "/" + list.getSelection()[0];
+		
+		super.okPressed();
+	}
+	
+	
 	private boolean sendRequestToRemoteServer(String directory) {
 		try {
 			session.writeLocalOutput("@LIST " + directory);

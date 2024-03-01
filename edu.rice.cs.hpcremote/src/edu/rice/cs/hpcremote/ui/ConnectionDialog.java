@@ -78,7 +78,7 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 	protected Control createDialogArea(Composite parent) {
 		getShell().setText("Remote connection");
 		setTitle("Remote connection setup");
-		setMessage("Please enter the host name and the port number provided by hpcserver");
+		setMessage("Enter the information needed to connect to the remote server");
 		
 		Composite area = (Composite) super.createDialogArea(parent);
 		Composite container = new Composite(area, SWT.NONE);
@@ -92,7 +92,7 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 		labelHost.setText("Hostname/IP address:");
 		
 		textHost = new Combo(container, SWT.NONE);
-		textHost.setToolTipText("Please enter the remote host name or its IP address as provided by hpcserver output");
+		textHost.setToolTipText("Please enter the remote host name or its IP address.");
 		
 		fillAndSetComboWithHistory(textHost, HISTORY_KEY_HOST);
 

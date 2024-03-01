@@ -3,8 +3,6 @@ package edu.rice.cs.hpcremote.data;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.StringTokenizer;
-
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
@@ -50,6 +48,7 @@ public class DatabaseRemote implements IDatabaseRemote
 	private ITraceManager traceManager;
 
 	private SecuredConnectionSSH connectionSSH;
+	private SecuredConnectionSSH brokerSSH;
 	
 	private String remoteIP;
 	private String remoteSocket;
@@ -147,6 +146,29 @@ public class DatabaseRemote implements IDatabaseRemote
 	}
 	
 	
+	private ISecuredConnection.ISocketSession runServer(
+			Shell shell,
+			IConnection connection,
+			ISecuredConnection.ISocketSession session, 
+			String database) {
+		
+		try {
+			session.writeLocalOutput("@DATA " + database);
+			var inputs = session.getCurrentLocalInput();
+			if (inputs != null && inputs.length > 0 && inputs[0].startsWith("@SOCK")) {
+				var brokerSocket = inputs[0].substring(6);
+
+				brokerSSH = new SecuredConnectionSSH(shell);
+				if (brokerSSH.connect(connection.getUsername(), connection.getHost())) {
+					return brokerSSH.socketForwarding(brokerSocket);
+				}
+			}			
+		} catch (IOException e) {
+			LoggerFactory.getLogger(getClass()).error("Fail to run hpcserver", e);
+		}
+		return null;
+	}
+	
 	@Override
 	public DatabaseStatus open(Shell shell) {
 		
@@ -176,10 +198,17 @@ public class DatabaseRemote implements IDatabaseRemote
 				return status;
 			}
 			
+			var brokerSession = runServer(shell, dialog, socketSession, directory);
+			if (brokerSession == null) {
+				status = DatabaseStatus.INVALID;
+				errorMessage = "Fail to launch hpcserver";
+				return status;
+			}
+						
 			var host = dialog.getHost();
-			int port = socketSession.getLocalPort();
+			int port = brokerSession.getLocalPort();
 			try {
-				var address = InetAddress.getByName(host);
+				var address = InetAddress.getByName("localhost");
 				client = new HpcClientJavaNetHttp(address, port);
 				
 			} catch (UnknownHostException e) {
