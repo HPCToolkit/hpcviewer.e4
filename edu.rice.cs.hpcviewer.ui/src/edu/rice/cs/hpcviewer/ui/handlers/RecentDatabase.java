@@ -15,6 +15,7 @@ import org.eclipse.e4.ui.model.application.ui.menu.MMenuSeparator;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpcbase.IDatabaseIdentification;
@@ -90,6 +91,16 @@ public abstract class RecentDatabase
 			history.clear();
 		} else {
 			var dbId = DatabaseFactory.createDatabaseIdentification(db);
+			
+			// if the database is removed or moved to somewhere else, we have
+			// to notify the user
+			if (dbId == null) {
+				MessageDialog.openError(
+						shell, 
+						"Error opening the database",
+						db + ": Database is not accessible.");
+			}
+			
 			execute(application, window, modelService, partService, shell, dbId);
 		}
 	}
