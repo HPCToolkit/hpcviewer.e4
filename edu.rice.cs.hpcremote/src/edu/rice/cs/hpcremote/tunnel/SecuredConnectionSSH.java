@@ -50,7 +50,7 @@ public class SecuredConnectionSSH implements ISecuredConnection
 
 	
 	@Override
-	public ISessionRemoteCommand executeRemoteCommand(String command) {
+	public ISessionRemote executeRemoteCommand(String command) {
 		if (session == null)
 			throw new IllegalAccessError("Not connected. Need to call connect() first");
 		
@@ -66,7 +66,7 @@ public class SecuredConnectionSSH implements ISecuredConnection
 
 	
 	@Override
-	public ISocketSession socketForwarding(String socketPath) {
+	public ISessionRemoteSocket socketForwarding(String socketPath) {
 		if (session == null)
 			throw new IllegalAccessError("Not connected. Need to call connect() first");
 
@@ -84,7 +84,7 @@ public class SecuredConnectionSSH implements ISecuredConnection
 	}
 
 	
-	private ISessionRemoteCommand executeCommand(ChannelExec channel, String command) throws JSchException, IOException {
+	private ISessionRemote executeCommand(ChannelExec channel, String command) throws JSchException, IOException {
 		channel.setCommand(command);
 		
 		channel.setInputStream(null);
@@ -97,7 +97,7 @@ public class SecuredConnectionSSH implements ISecuredConnection
 		// need to call connect to execute the command
 		channel.connect();
 		
-		return new ISessionRemoteCommand() {
+		return new ISessionRemote() {
 			
 			@Override
 			public Session getSession() throws JSchException {

@@ -14,9 +14,9 @@ import org.slf4j.LoggerFactory;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 
-import edu.rice.cs.hpcremote.ISecuredConnection.ISocketSession;
+import edu.rice.cs.hpcremote.ISecuredConnection.ISessionRemoteSocket;
 
-public class SocketForwardingSession implements ISocketSession 
+public class SocketForwardingSession implements ISessionRemoteSocket 
 {
 	private static final int TIMEOUT_DEFAULT = 10 * 1000;
 

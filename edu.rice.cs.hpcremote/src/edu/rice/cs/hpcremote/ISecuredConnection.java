@@ -12,9 +12,9 @@ public interface ISecuredConnection
 {
 	boolean connect(String username, String hostName);
 	
-	ISessionRemoteCommand executeRemoteCommand(String command);
+	ISessionRemote executeRemoteCommand(String command);
 	
-	ISocketSession socketForwarding(String socketPath);
+	ISessionRemoteSocket socketForwarding(String socketPath);
 	
 	
 	/***
@@ -44,7 +44,7 @@ public interface ISecuredConnection
 	 * Interface to start the remote command execution
 	 *
 	 */
-	interface ISessionRemoteCommand extends ISession
+	interface ISessionRemote extends ISession
 	{
 		OutputStream getLocalOutputStream() throws IOException;
 		
@@ -58,8 +58,11 @@ public interface ISecuredConnection
 		InputStream getLocalInputStream() throws IOException;
 		
 		/***
-		 * Get the standard output of the execution
-		 * @return
+		 * Get the array of text messages from the remote host
+		 * 
+		 * @return {@code String[]}
+		 * 			array of text messages
+		 * 
 		 * @throws IOException 
 		 */
 		default String[] getCurrentLocalInput() throws IOException {
@@ -84,23 +87,54 @@ public interface ISecuredConnection
 			for(int i=0; tokenizer.hasMoreTokens(); i++) {
 				listTexts[i] = tokenizer.nextToken();
 			}
-			System.err.println("\t RECV: " + listTexts[0] + " out of " + listTexts.length);
+			writeLog("\t RECV: " + listTexts[0] + " out of " + listTexts.length);
 			
 			return listTexts;
 		}
 
+		
+		/****
+		 * send a text message to the remote host
+		 * 
+		 * @param message 
+		 * 			Text to be sent
+		 * 
+		 * @throws IOException
+		 */
 		default void writeLocalOutput(String message) throws IOException {
 			var stream = getLocalOutputStream();
 			byte []msgBytes = message.getBytes();
 			
-			System.err.println("SEND " + message);
+			writeLog("SEND " + message);
 			
 			stream.write(msgBytes);
 		}
+		
+		
+		/***
+		 * Default implementation to write a log
+		 * @param text
+		 */
+		default void writeLog(String text) {
+			System.err.println(text);
+		}
 	}
 	
-	interface ISocketSession extends ISessionRemoteCommand 
+	
+	/****
+	 * 
+	 * Interface to communicate with the remote UNIX socket
+	 *
+	 */
+	interface ISessionRemoteSocket extends ISessionRemote 
 	{
+		/****
+		 * Get the SSH tunneled of the local port that connects
+		 * with the remote UNIX socket.
+		 * 
+		 * @return {@code int}
+		 * 			The local port, or negative number if it fails.
+		 */
 		int getLocalPort();
 	}
 }

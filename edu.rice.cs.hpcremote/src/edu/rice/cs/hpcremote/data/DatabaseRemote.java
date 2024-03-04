@@ -95,7 +95,7 @@ public class DatabaseRemote implements IDatabaseRemote
 	}
 	
 	
-	private boolean handleRemoteCommandOutput(Shell shell, ISecuredConnection.ISessionRemoteCommand session ) 
+	private boolean handleRemoteCommandOutput(Shell shell, ISecuredConnection.ISessionRemote session ) 
 			throws IOException {
 
 		int maxAttempt = 10;
@@ -122,11 +122,10 @@ public class DatabaseRemote implements IDatabaseRemote
 			
 			for (int i=0; i<output.length; i++) {
 				var pair = output[i];
-				var key = pair.substring(0, 4);
-				if (key.compareToIgnoreCase("HOST") == 0) {
-					remoteIP = pair.substring(5); 
-				} else if (key.compareToIgnoreCase("SOCK") == 0) {
-					remoteSocket = pair.substring(5);
+				if (pair.startsWith("@HOST")) {
+					remoteIP = pair.substring(6); 
+				} else if (pair.startsWith("@SOCK")) {
+					remoteSocket = pair.substring(6);
 				} else {
 					MessageDialog.openError(shell, "Unknown command output", "Unknown output: " + pair);
 					return false;
@@ -137,7 +136,7 @@ public class DatabaseRemote implements IDatabaseRemote
 	}
 	
 	
-	private String browseDirectory(Shell shell, ISecuredConnection.ISocketSession session) {
+	private String browseDirectory(Shell shell, ISecuredConnection.ISessionRemoteSocket session) {
 		var dialog = new DatabaseBrowserDialog(shell, session);
 		if (dialog.open() == Window.OK) {
 			return dialog.getCurrentDirectory();
@@ -146,10 +145,10 @@ public class DatabaseRemote implements IDatabaseRemote
 	}
 	
 	
-	private ISecuredConnection.ISocketSession runServer(
+	private ISecuredConnection.ISessionRemoteSocket runServer(
 			Shell shell,
 			IConnection connection,
-			ISecuredConnection.ISocketSession session, 
+			ISecuredConnection.ISessionRemoteSocket session, 
 			String database) {
 		
 		try {
