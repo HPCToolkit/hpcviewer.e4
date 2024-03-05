@@ -12,6 +12,8 @@ public interface ISecuredConnection
 {
 	boolean connect(String username, String hostName);
 	
+	void close();
+	
 	ISessionRemote executeRemoteCommand(String command);
 	
 	ISessionRemoteSocket socketForwarding(String socketPath);

@@ -79,10 +79,24 @@ public class SecuredConnectionSSH implements ISecuredConnection
 					"Fail to create SSH tunnel", 
 					socketPath + ": " +  e.getLocalizedMessage());
 		}
-		
 		return null;
 	}
 
+	
+	public String getHost() {
+		if (session == null)
+			throw new IllegalAccessError("Host is not connected");
+		
+		return session.getHost();
+	}
+	
+	
+	public String getUsername() {
+		if (session == null)
+			throw new IllegalAccessError("Host is not connected");
+
+		return session.getUserName();
+	}
 	
 	private ISessionRemote executeCommand(ChannelExec channel, String command) throws JSchException, IOException {
 		channel.setCommand(command);
@@ -119,5 +133,12 @@ public class SecuredConnectionSSH implements ISecuredConnection
 				return channel.getOutputStream();
 			}
 		};
+	}
+
+
+	@Override
+	public void close() {
+		if (session != null)
+			session.disconnect();
 	}
 }
