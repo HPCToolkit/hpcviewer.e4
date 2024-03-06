@@ -43,8 +43,8 @@ public class SocketForwardingSession implements ISessionRemoteSocket
 
 	
 	@Override
-	public void writeLocalOutput(String message) throws IOException {
-		System.err.println("SEND " + message);
+	public void write(String message) throws IOException {
+		log("SEND " + message);
 		
 		out.println(message);
 	}
@@ -55,15 +55,16 @@ public class SocketForwardingSession implements ISessionRemoteSocket
 	}
 	
 	@Override
-	public String[] getCurrentLocalInput() throws IOException {
+	public String[] read() throws IOException {
 		var list = new ArrayList<String>();
         while(true) {
         	var line = in.readLine();
-        	if (line.endsWith("@END") || line.isEmpty())
+        	if (line.startsWith("@END") || line.isEmpty())
         		break;
         	list.add(line);
         }
-		System.err.println("\t RECV " + list.get(0) + " / " + list.size());
+		log("\t RECV " + list.get(0) + " / " + list.size());
+		
         String []texts = new String[list.size()];
 		return list.toArray(texts);
 	}
@@ -87,4 +88,8 @@ public class SocketForwardingSession implements ISessionRemoteSocket
 		return localPort;
 	}
 
+	
+	private void log(String message) {
+		System.err.println(message);
+	}
 }

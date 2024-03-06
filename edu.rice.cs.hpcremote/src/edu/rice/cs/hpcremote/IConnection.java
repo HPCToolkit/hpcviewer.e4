@@ -9,4 +9,6 @@ public interface IConnection
 	String getPrivateKey();
 	
 	String getInstallationDirectory();
+	
+	String getId();
 }

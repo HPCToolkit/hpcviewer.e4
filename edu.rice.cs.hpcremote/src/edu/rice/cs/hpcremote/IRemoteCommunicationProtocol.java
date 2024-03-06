@@ -71,4 +71,13 @@ public interface IRemoteCommunicationProtocol
 	 * @throws IOException
 	 */
 	HpcClient openDatabaseConnection(Shell shell, String database) throws IOException;
+
+
+	/****
+	 * Disconnect all sessions associated with the given shell
+	 * 
+	 * @param shell
+	 * @throws IOException
+	 */
+	void disconnect(Shell shell) throws IOException;
 }

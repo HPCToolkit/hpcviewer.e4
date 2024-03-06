@@ -67,7 +67,7 @@ public interface ISecuredConnection
 		 * 
 		 * @throws IOException 
 		 */
-		default String[] getCurrentLocalInput() throws IOException {
+		default String[] read() throws IOException {
 			StringBuilder inputs = new StringBuilder();
 			final var  inStream  = getLocalInputStream();
 			
@@ -103,7 +103,7 @@ public interface ISecuredConnection
 		 * 
 		 * @throws IOException
 		 */
-		default void writeLocalOutput(String message) throws IOException {
+		default void write(String message) throws IOException {
 			var stream = getLocalOutputStream();
 			byte []msgBytes = message.getBytes();
 			

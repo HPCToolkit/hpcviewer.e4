@@ -42,14 +42,15 @@ public class DatabaseRemote implements IDatabaseRemote
 	
 	private RemoteCommunicationProtocol remoteComm;
 	
+	private RemoteDatabaseIdentification id;
+	
 	@Override
 	public IDatabaseIdentification getId() {
-		if (experiment == null)
+		if (id == null)
 			// dummy id
-			return new RemoteDatabaseIdentification("localhost", 0);
+			id = new RemoteDatabaseIdentification("localhost", 0);
 		
-		var path = experiment.getDirectory();
-		return new RemoteDatabaseIdentification(remoteComm.getRemoteHost(), 0, path, remoteComm.getUsername());
+		return id;
 	}
 	
 
@@ -80,7 +81,7 @@ public class DatabaseRemote implements IDatabaseRemote
 				}
 				client = remoteComm.openDatabaseConnection(shell, database);
 				
-				var id = new RemoteDatabaseIdentification(remoteComm.getRemoteHost(), 0, database, remoteComm.getUsername());
+				id = new RemoteDatabaseIdentification(remoteComm.getRemoteHost(), 0, database, remoteComm.getUsername());
 
 				experiment = openDatabase(client, id);
 				if (experiment != null) {

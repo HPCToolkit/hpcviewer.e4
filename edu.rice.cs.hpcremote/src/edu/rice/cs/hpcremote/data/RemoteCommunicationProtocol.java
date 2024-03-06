@@ -2,6 +2,8 @@ package edu.rice.cs.hpcremote.data;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
@@ -17,7 +19,8 @@ import edu.rice.cs.hpcremote.ui.RemoteDatabaseDialog;
 
 public class RemoteCommunicationProtocol implements IRemoteDirectoryBrowser, IRemoteCommunicationProtocol
 {	
-	private SecuredConnectionSSH connectionSSH;
+	private static final String KEY_COMMUNICATION = "hpcviewer.comm";
+	
 	private ISecuredConnection.ISessionRemoteSocket serverMainSession;
 	
 	private String remoteIP;
@@ -34,7 +37,7 @@ public class RemoteCommunicationProtocol implements IRemoteDirectoryBrowser, IRe
 	
 	@Override
 	public String getUsername() {
-		return connectionSSH.getUsername();
+		return connection.getUsername();
 	}
 	
 	/*****
@@ -53,10 +56,30 @@ public class RemoteCommunicationProtocol implements IRemoteDirectoryBrowser, IRe
 		if (connectionDialog.open() == Window.CANCEL) {
 			return ConnectionStatus.NOT_CONNECTED;
 		}
+
+		// check if we already have exactly the same connection as the 
+		// requested host, user id and installation
 		
-		if (connectionSSH == null)
-			connectionSSH = new SecuredConnectionSSH(shell);
+		var setOfConnections = CollectionOfConnections.getShellSessions(shell);
+		if (setOfConnections.containsKey(connectionDialog.getId())) {
+			var matchedConnection = setOfConnections.get(connectionDialog.getId());
+			
+			if (matchedConnection != null) {
+				// copy and then reuse the existing session which has exactly the same
+				// remote host, user and installation
+				serverMainSession = matchedConnection.serverMainSession;
+				connection = matchedConnection.connection;
+				remoteIP = matchedConnection.remoteIP;
+				remoteSocket = matchedConnection.remoteSocket;
+				
+				return ConnectionStatus.CONNECTED;
+			}
+		}
 		
+		//
+		// launching hpcserver on the remote host
+		//
+		var connectionSSH = new SecuredConnectionSSH(shell);		
 		if (!connectionSSH.connect(connectionDialog.getUsername(), connectionDialog.getHost()))
 			return ConnectionStatus.ERROR;
 		
@@ -66,18 +89,33 @@ public class RemoteCommunicationProtocol implements IRemoteDirectoryBrowser, IRe
 		if (remoteSession == null) 
 			return ConnectionStatus.ERROR;
 		
-		if (!handleRemoteCommandOutput(remoteSession))
+		if (!handleOutputAndSetConfiguration(remoteSession))
 			return ConnectionStatus.ERROR;
 	
+		//
+		// create the SSH tunnel to communicate securely with the remote host
+		//
 		serverMainSession = connectionSSH.socketForwarding(remoteSocket);
 		if (serverMainSession == null)
 			return ConnectionStatus.ERROR;
 		
 		this.connection = connectionDialog;
 		
+		CollectionOfConnections.putShellSession(shell, connection.getId(), this);
+		
 		return ConnectionStatus.CONNECTED;
 	}
 
+	
+	@Override
+	public void disconnect(Shell shell) throws IOException {
+		if (serverMainSession == null)
+			return;
+		
+		serverMainSession.write("@QUIT");
+		serverMainSession.disconnect();
+	}
+	
 	
 	@Override
 	public String selectDatabase(Shell shell) {
@@ -94,8 +132,8 @@ public class RemoteCommunicationProtocol implements IRemoteDirectoryBrowser, IRe
 
 	@Override
 	public IRemoteDirectoryContent getContentRemoteDirectory(String directory) throws IOException {
-		serverMainSession.writeLocalOutput("@LIST " + directory);
-		var listDir = serverMainSession.getCurrentLocalInput();
+		serverMainSession.write("@LIST " + directory);
+		var listDir = serverMainSession.read();
 		if (listDir == null || listDir.length == 0)
 			return null;
 		
@@ -129,9 +167,9 @@ public class RemoteCommunicationProtocol implements IRemoteDirectoryBrowser, IRe
 		if (serverMainSession == null || connection == null)
 			return null;
 		
-		serverMainSession.writeLocalOutput("@DATA " + database);
+		serverMainSession.write("@DATA " + database);
 		
-		var inputs = serverMainSession.getCurrentLocalInput();
+		var inputs = serverMainSession.read();
 		if (inputs == null || inputs.length == 0)
 			return null;
 		
@@ -157,7 +195,8 @@ public class RemoteCommunicationProtocol implements IRemoteDirectoryBrowser, IRe
 		return null;
 	}
 	
-	private boolean handleRemoteCommandOutput(ISecuredConnection.ISessionRemote session ) 
+		
+	private boolean handleOutputAndSetConfiguration(ISecuredConnection.ISessionRemote session ) 
 			throws IOException {
 
 		int maxAttempt = 10;
@@ -173,7 +212,7 @@ public class RemoteCommunicationProtocol implements IRemoteDirectoryBrowser, IRe
 			    Thread.currentThread().interrupt();
 			}
 			
-			var output = session.getCurrentLocalInput();
+			var output = session.read();
 			if (output == null || output.length == 0) {
 				maxAttempt--;
 				if (maxAttempt == 0)
@@ -196,4 +235,49 @@ public class RemoteCommunicationProtocol implements IRemoteDirectoryBrowser, IRe
 		return true;
 	}
 
+	
+	/*****
+	 * Collection of connections API stored in a shell widget. 
+	 */
+	public static class CollectionOfConnections
+	{
+		private CollectionOfConnections() {
+			// nothing
+		}
+		
+		/***
+		 * Get the remote sessions of the given shell
+		 * 
+		 * @param shell
+		 * 
+		 * @return {@code Map} of remote sessions
+		 */
+		static Map<String, RemoteCommunicationProtocol> getShellSessions(Shell shell) {
+			var setOfSessions = shell.getData(KEY_COMMUNICATION);
+			if (setOfSessions instanceof Map<?, ?>) {
+				return (Map<String, RemoteCommunicationProtocol>) setOfSessions;
+			}
+			return new HashMap<>();
+		}
+		
+		
+		/***
+		 * Store the communication session to this shell
+		 * 
+		 * @param shell
+		 * @param id
+		 * @param commConnection
+		 */
+		static void putShellSession(Shell shell, String id, RemoteCommunicationProtocol commConnection) {
+			Map<String, RemoteCommunicationProtocol> mapOfSessions;
+			var setOfSessions = shell.getData(KEY_COMMUNICATION);
+			if (setOfSessions == null) {
+				mapOfSessions = new HashMap<>();
+			} else {
+				mapOfSessions = (Map<String, RemoteCommunicationProtocol>) setOfSessions;
+			}
+			mapOfSessions.put(id, commConnection);
+			shell.setData(KEY_COMMUNICATION, mapOfSessions);
+		}
+	}
 }

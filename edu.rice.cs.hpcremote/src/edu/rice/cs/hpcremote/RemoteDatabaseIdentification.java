@@ -84,12 +84,18 @@ public class RemoteDatabaseIdentification implements IDatabaseIdentification
 			sb.append("@");
 		}
 		if (host != null)
-			sb.append(host);
+			sb.append(host.trim());
+
+		if (port < 1 && databasePath == null)
+			// the database has no information about the port number and the path
+			// it should be invalid, but let's just stop here at the moment.
+			return sb.toString();
+		
+		sb.append(':');
+
 		if (port > 1) {
-			sb.append(':');
 			sb.append(port);
 		}
-		sb.append('/');
 		
 		if (databasePath != null)
 			sb.append(databasePath);

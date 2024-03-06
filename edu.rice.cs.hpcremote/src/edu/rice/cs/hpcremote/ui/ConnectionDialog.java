@@ -150,25 +150,39 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 
 	@Override
 	public String getHost() {
-		return host;
+		return checkVariable(host);
 	}
 
 
 	@Override
 	public String getUsername() {
-		return username;
+		return checkVariable(username);
 	}
 
 
 	@Override
 	public String getPrivateKey() {
-		return privateKey;
+		return checkVariable(privateKey);
 	}
 
 
 	@Override
 	public String getInstallationDirectory() {
-		return directory;
+		return checkVariable(directory);
+	}
+
+	
+	private String checkVariable(String varString) {
+		if (varString == null)
+			throw new IllegalAccessError("Not connected");
+
+		return varString;
+	}
+	
+
+	@Override
+	public String getId() {
+		return getUsername() + "@" + getHost() + ":" + getInstallationDirectory();
 	}
 
 	
