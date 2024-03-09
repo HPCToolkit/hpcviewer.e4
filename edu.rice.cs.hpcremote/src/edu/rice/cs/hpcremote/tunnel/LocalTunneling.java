@@ -1,8 +1,6 @@
 package edu.rice.cs.hpcremote.tunnel;
 
 import java.io.IOException;
-import java.net.ServerSocket;
-
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
