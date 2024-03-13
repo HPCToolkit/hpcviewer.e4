@@ -72,7 +72,7 @@ show_help(){
 }
 
 clean_up() {
-	mvn clean
+	./mvnw clean
 	rm -f scripts/hpcviewer_launcher.sh
 	cd edu.rice.cs.hpcdata.app/scripts/
 	./build.sh  clean
@@ -200,12 +200,12 @@ echo "=================================="
 echo " Building the viewer"
 echo "=================================="
 if [ $CHECK_PACKAGE != "0" ]; then
-	mvn clean verify -Pjacoco
+	./mvnw clean verify -Pjacoco
 	if [ -d tests/edu.rice.cs.hpctest.report/target/site/jacoco-aggregate/ ]; then
 		echo "Code coverage result: tests/edu.rice.cs.hpctest.report/target/site/jacoco-aggregate/"
 	fi
 else
-	mvn clean package
+	./mvnw clean package
 fi
 
 # The result should be:
@@ -233,7 +233,9 @@ repackage_linux(){
 	mkdir -p tmp/hpcviewer
 	cd tmp/hpcviewer
 
-	tar xzf  ../../$package
+	#tar xzf  ../../$package | grep -v 'LIBARCHIVE.creationtime'
+	unzip -qq ../../$package
+
 	cp ../../$launcher .
 	cp ../../scripts/install.sh .
 	cp ../../scripts/README .

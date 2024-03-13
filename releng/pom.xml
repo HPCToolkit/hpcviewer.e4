@@ -7,7 +7,7 @@
 
 
  <properties>
-  <tycho.version>2.7.5</tycho.version>
+  <tycho.version>4.0.5</tycho.version>
   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   <eclipse-repo.url>http://download.eclipse.org/releases/2022-09</eclipse-repo.url>
   <sonar.organization>hpctoolkit</sonar.organization>
@@ -15,8 +15,8 @@
   <jacoco.version>0.8.11</jacoco.version>
   <aggregate.report.dir>tests/edu.rice.cs.hpctest.report/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.dir>
   <tycho.testArgLine.local></tycho.testArgLine.local>
-  <maven.compiler.target>11</maven.compiler.target>
-  <maven.compiler.source>11</maven.compiler.source>
+  <maven.compiler.target>17</maven.compiler.target>
+  <maven.compiler.source>17</maven.compiler.source>
  </properties>
 
  <repositories>
@@ -28,7 +28,7 @@
 
   <repository>
    <id>nattable</id>
-   <url>http://download.eclipse.org/nattable/releases/2.0.2/repository/</url>
+   <url>http://download.eclipse.org/nattable/releases/2.2.1/repository/</url>
    <layout>p2</layout>
   </repository>
  </repositories>
@@ -85,7 +85,7 @@
         <configuration>
         <formats>
             <win32>zip</win32>
-            <linux>tar.gz</linux>
+            <linux>zip</linux>
             <macosx>zip</macosx>
         </formats>
         <products>
