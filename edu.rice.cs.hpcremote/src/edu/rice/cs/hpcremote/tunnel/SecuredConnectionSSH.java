@@ -53,7 +53,7 @@ public class SecuredConnectionSSH implements ISecuredConnection
 			session.connect();
 			
 		} catch (JSchException e) {
-			MessageDialog.openError(shell, "Error to connect " + hostName, e.getLocalizedMessage());
+			MessageDialog.openError(shell, "Unabe to connect " + hostName, e.getLocalizedMessage());
 			return false;
 		}
 		return true;

@@ -1,6 +1,7 @@
 package edu.rice.cs.hpcremote.ui;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -49,6 +50,7 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 	private Combo  textUsername;
 	private Combo  textDirectory;
 	private Combo  textPrivateKey;
+	private Button labelPrivateKey;
 	
 	private String host;
 	private String username;
@@ -127,8 +129,9 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 				
 		//------------------------------------------------------
 		
-		var labelPrivateKey = new Label(container, SWT.RIGHT);
+		labelPrivateKey = new Button(container, SWT.CHECK);
 		labelPrivateKey.setText("Private key (optional):");
+		labelPrivateKey.setSelection(false);
 		
 		var privateKeyArea  = new Composite(container, SWT.NONE);
 		
@@ -145,22 +148,41 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 			public void widgetSelected(SelectionEvent e) {
 				var browseDlg = new FileDialog(getShell(), SWT.OPEN);
 				var keyFilename = browseDlg.open();
+				if (keyFilename == null)
+					keyFilename = "";
 				textPrivateKey.setText(keyFilename);
 			}
 		});
 		
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(textPrivateKey);
-		
+
+		labelPrivateKey.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				var selected = labelPrivateKey.getSelection();
+				textPrivateKey.setEnabled(selected);
+				browserButton.setEnabled(selected);
+			}
+		});
+		var privateKeyEnabled = textPrivateKey.getText() != null && !textPrivateKey.getText().isEmpty();
+		textPrivateKey.setEnabled(privateKeyEnabled);
+		browserButton.setEnabled(privateKeyEnabled);
+		labelPrivateKey.setSelection(privateKeyEnabled);
+
 		return area;
 	}
 	
 	
 	@Override
 	protected void okPressed() {
+		if (labelPrivateKey.getSelection() && (textPrivateKey.getText() == null || textPrivateKey.getText().isEmpty()) ) {
+			MessageDialog.openError(getShell(), "Invalid private key", "Invalid Private key: the option is selected but the field is empty.");
+		}
+		
 		host = textHost.getText();
 		username = textUsername.getText();		
 		directory = textDirectory.getText();
-		privateKey = textPrivateKey.getText();
+		privateKey = labelPrivateKey.getSelection() ? textPrivateKey.getText() : null;
 		
 		addIntoHistory(textHost, HISTORY_KEY_HOST);
 		addIntoHistory(textUsername, HISTORY_KEY_USER);
@@ -185,7 +207,7 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 
 	@Override
 	public String getPrivateKey() {
-		return checkVariable(privateKey);
+		return privateKey;
 	}
 
 
