@@ -60,6 +60,10 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 	 */
 	@Override
 	protected Control createDialogArea(Composite parent) {
+		getShell().setText("Remote database browser");
+		setTitle("Browsing " + remoteBrowser.getRemoteHost());
+		setMessage("Select a HPCToolkit database directory");
+		
 		Composite area = (Composite) super.createDialogArea(parent);
 		Composite container = new Composite(area, SWT.NONE);
 		container.setLayout(new GridLayout(1, false));

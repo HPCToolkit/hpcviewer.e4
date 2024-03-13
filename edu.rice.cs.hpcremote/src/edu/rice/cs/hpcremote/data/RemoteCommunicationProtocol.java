@@ -80,7 +80,10 @@ public class RemoteCommunicationProtocol implements IRemoteDirectoryBrowser, IRe
 		// launching hpcserver on the remote host
 		//
 		var connectionSSH = new SecuredConnectionSSH(shell);		
-		if (!connectionSSH.connect(connectionDialog.getUsername(), connectionDialog.getHost()))
+		if (!connectionSSH.connect(
+				connectionDialog.getUsername(), 
+				connectionDialog.getHost(), 
+				connectionDialog.getPrivateKey()))
 			return ConnectionStatus.ERROR;
 		
 		String command = connectionDialog.getInstallationDirectory() + "/bin/hpcserver.sh" ;
@@ -174,14 +177,14 @@ public class RemoteCommunicationProtocol implements IRemoteDirectoryBrowser, IRe
 			return null;
 		
 		var response = inputs[0];
-		if (response.startsWith("@ERR")) 
+		if (response.startsWith("@ERR")) {
 			throw new IOException("Error reading database " + database + ": " + response.substring(5));
 		
-		if (response.startsWith("@SOCK")) {
+		} else if (response.startsWith("@SOCK")) {
 			var brokerSocket = response.substring(6);
 			
 			var brokerSSH = new SecuredConnectionSSH(shell);
-			if (brokerSSH.connect(connection.getUsername(), connection.getHost())) {
+			if (brokerSSH.connect(connection.getUsername(), connection.getHost(), connection.getPrivateKey())) {
 				var brokerSession = brokerSSH.socketForwarding(brokerSocket);
 				if (brokerSession == null)
 					return null;
@@ -191,6 +194,8 @@ public class RemoteCommunicationProtocol implements IRemoteDirectoryBrowser, IRe
 				
 				return new HpcClientJavaNetHttp(addr, port);
 			}
+		} else {
+			throw new UnknownError("Unknown response from the remote host: " + response);
 		}
 		return null;
 	}

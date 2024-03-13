@@ -29,10 +29,21 @@ public class SecuredConnectionSSH implements ISecuredConnection
 	
 	@Override
 	public boolean connect(String username, String hostName) {
+		return connect(username, hostName, null);
+	}
+
+	
+	@Override
+	public boolean connect(String username, String hostName, String privateKey) {
 		var userInfo = new RemoteUserInfoDialog(shell);
 		
 		JSch jsch = new JSch();
 		try {
+			jsch.setKnownHosts("~/.ssh/known_hosts");
+
+			if (privateKey != null && !privateKey.isEmpty())
+				jsch.addIdentity(privateKey);
+			
 			// may throw an exception
 			session = jsch.getSession(username, hostName, 22);
 			
@@ -47,7 +58,6 @@ public class SecuredConnectionSSH implements ISecuredConnection
 		}
 		return true;
 	}
-
 	
 	@Override
 	public ISessionRemote executeRemoteCommand(String command) {

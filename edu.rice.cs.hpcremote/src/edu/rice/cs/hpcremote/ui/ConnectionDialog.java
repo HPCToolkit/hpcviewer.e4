@@ -1,13 +1,20 @@
 package edu.rice.cs.hpcremote.ui;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import edu.rice.cs.hpcbase.map.UserInputHistory;
@@ -119,12 +126,28 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(textDirectory);
 				
 		//------------------------------------------------------
-
+		
 		var labelPrivateKey = new Label(container, SWT.RIGHT);
 		labelPrivateKey.setText("Private key (optional):");
 		
-		textPrivateKey = new Combo(container, SWT.DROP_DOWN);
+		var privateKeyArea  = new Composite(container, SWT.NONE);
+		
+		GridDataFactory.fillDefaults().grab(true, false).applyTo(privateKeyArea);
+		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(privateKeyArea);
+
+		textPrivateKey = new Combo(privateKeyArea, SWT.DROP_DOWN);
 		fillAndSetComboWithHistory(textPrivateKey, HISTORY_KEY_PRIV);
+		
+		var browserButton = new Button(privateKeyArea, SWT.PUSH);
+		browserButton.setText("...");
+		browserButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				var browseDlg = new FileDialog(getShell(), SWT.OPEN);
+				var keyFilename = browseDlg.open();
+				textPrivateKey.setText(keyFilename);
+			}
+		});
 		
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(textPrivateKey);
 		
@@ -186,6 +209,13 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 	}
 
 	
+	private void checkFields() {
+		boolean notEmpty = !textHost.getText().isEmpty() && !textUsername.getText().isEmpty();
+		var btnOk = getButton(IDialogConstants.OK_ID);
+		if (btnOk != null) 
+			btnOk.setEnabled(notEmpty);
+	}
+	
 	private void fillAndSetComboWithHistory(Combo combo, String key) {		
 		UserInputHistory history = new UserInputHistory(key);
 		var histories = history.getHistory();
@@ -194,6 +224,13 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 		}
 		if (!histories.isEmpty())
 			combo.select(0);
+		
+		combo.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				checkFields();
+			}
+		});
 	}
 	
 	
