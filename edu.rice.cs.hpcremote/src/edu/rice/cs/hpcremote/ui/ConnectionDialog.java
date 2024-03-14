@@ -1,5 +1,7 @@
 package edu.rice.cs.hpcremote.ui;
 
+import java.io.File;
+
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -141,6 +143,12 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 		textPrivateKey = new Combo(privateKeyArea, SWT.DROP_DOWN);
 		fillAndSetComboWithHistory(textPrivateKey, HISTORY_KEY_PRIV);
 		
+		if (textPrivateKey.getSelectionIndex() < 0) {
+			var home = System.getProperty("user.home");
+			var key  = home + File.separator + ".ssh" + File.separator + "id_rsa";
+			textPrivateKey.setText(key);
+		}
+		
 		var browserButton = new Button(privateKeyArea, SWT.PUSH);
 		browserButton.setText("...");
 		browserButton.addSelectionListener(new SelectionAdapter() {
@@ -148,9 +156,8 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 			public void widgetSelected(SelectionEvent e) {
 				var browseDlg = new FileDialog(getShell(), SWT.OPEN);
 				var keyFilename = browseDlg.open();
-				if (keyFilename == null)
-					keyFilename = "";
-				textPrivateKey.setText(keyFilename);
+				if (keyFilename != null)
+					textPrivateKey.setText(keyFilename);
 			}
 		});
 		
@@ -187,7 +194,9 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 		addIntoHistory(textHost, HISTORY_KEY_HOST);
 		addIntoHistory(textUsername, HISTORY_KEY_USER);
 		addIntoHistory(textDirectory, HISTORY_KEY_RDIR);
-		addIntoHistory(textPrivateKey, HISTORY_KEY_PRIV);
+		
+		if (privateKey != null && !privateKey.isEmpty() && !privateKey.isBlank())
+			addIntoHistory(textPrivateKey, HISTORY_KEY_PRIV);
 
 		super.okPressed();
 	}
