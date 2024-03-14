@@ -68,10 +68,17 @@ public class RemoteUserInfoDialog implements UserInfo, UIKeyboardInteractive
 
 	@Override
 	public boolean promptPassphrase(String message) {
-		var inputDialog = new InputDialog(shell, TITLE, message, "", null);
+		var inputDialog = new InputDialog(shell, TITLE, message, "", null) {
+			
+			@Override
+			protected int getInputTextStyle() {
+				return super.getInputTextStyle() | SWT.PASSWORD;
+			}
+		};
+		var result = (inputDialog.open() == Window.OK);
 		passphrase = inputDialog.getValue();
-		
-		return  (inputDialog.open() == Window.OK);
+
+		return result;
 	}
 
 	@Override
