@@ -81,6 +81,12 @@ public class DatabaseRemote implements IDatabaseRemote
 				}
 				client = remoteComm.openDatabaseConnection(shell, database);
 				
+				if (!checkServerReadiness(client)) {
+					errorMessage = "Server is not responsive";
+					status = DatabaseStatus.INVALID;
+					return status;
+				}
+					
 				id = new RemoteDatabaseIdentification(remoteComm.getRemoteHost(), 0, database, remoteComm.getUsername());
 
 				experiment = openDatabase(client, id);
@@ -101,6 +107,30 @@ public class DatabaseRemote implements IDatabaseRemote
 		return status;
 	}
 
+	
+	private boolean checkServerReadiness(HpcClient client) {
+		// maximum we wait for 5 seconds
+		int numAttempt = 50;
+		while(numAttempt > 0) {
+			try {
+				var path = client.getDatabasePath();
+				if (path != null)
+					return true;
+			} catch (IOException e) {
+				// the server may not ready
+				numAttempt--;
+				Thread.yield();
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e1) {
+					// nothing
+				}
+			} catch (InterruptedException e) {
+				// nothing
+			}
+		}
+		return false;
+	}
 	
 	private Experiment openDatabase(HpcClient client, IDatabaseIdentification id) throws IOException {
 		RemoteDatabaseParser parser = new RemoteDatabaseParser();
