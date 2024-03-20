@@ -65,8 +65,8 @@ public interface IRemoteCommunicationProtocol
 	 * @param database
 	 * 				The remote directory
 	 * 
-	 * @return {@code Experiment} 
-	 * 			the remote database if the opening is successful, {@code null} otherwise
+	 * @return {@code HpcClient} 
+	 * 			the client interface if the opening is successful, {@code null} otherwise
 	 * 
 	 * @throws IOException
 	 */

@@ -80,6 +80,8 @@ public class DatabaseRemote implements IDatabaseRemote
 					return status;
 				}
 				client = remoteComm.openDatabaseConnection(shell, database);
+				if (client == null)
+					return DatabaseStatus.CANCEL;
 				
 				id = new RemoteDatabaseIdentification(remoteComm.getRemoteHost(), 0, database, remoteComm.getUsername());
 
