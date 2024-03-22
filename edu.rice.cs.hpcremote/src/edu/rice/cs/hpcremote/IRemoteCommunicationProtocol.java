@@ -3,7 +3,8 @@ package edu.rice.cs.hpcremote;
 import java.io.IOException;
 
 import org.eclipse.swt.widgets.Shell;
-import org.hpctoolkit.hpcclient.v1_0.HpcClient;
+
+import edu.rice.cs.hpcremote.data.IRemoteDatabaseConnection;
 
 
 /***********
@@ -70,7 +71,7 @@ public interface IRemoteCommunicationProtocol
 	 * 
 	 * @throws IOException
 	 */
-	HpcClient openDatabaseConnection(Shell shell, String database) throws IOException;
+	IRemoteDatabaseConnection openDatabaseConnection(Shell shell, String database) throws IOException;
 
 
 	/****

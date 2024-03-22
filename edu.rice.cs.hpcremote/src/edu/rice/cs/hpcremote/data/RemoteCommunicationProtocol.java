@@ -169,7 +169,7 @@ public class RemoteCommunicationProtocol implements IRemoteDirectoryBrowser, IRe
 	
 	
 	@Override
-	public HpcClient openDatabaseConnection(Shell shell, String database) throws IOException {
+	public IRemoteDatabaseConnection openDatabaseConnection(Shell shell, String database) throws IOException {
 		if (serverMainSession == null || connection == null)
 			return null;
 		
@@ -194,8 +194,25 @@ public class RemoteCommunicationProtocol implements IRemoteDirectoryBrowser, IRe
 				
 				int port = brokerSession.getLocalPort();
 				var addr = InetAddress.getByName("localhost");
+				final var hpcclient = new HpcClientJavaNetHttp(addr, port);
 				
-				return new HpcClientJavaNetHttp(addr, port);
+				return new IRemoteDatabaseConnection() {
+					
+					@Override
+					public HpcClient getHpcClient() {
+						return hpcclient;
+					}
+					
+					@Override
+					public ISecuredConnection getConnection() {
+						return brokerSSH;
+					}
+					
+					@Override
+					public ISecuredConnection.ISessionRemoteSocket getRemoteSocket() {
+						return brokerSession;
+					}
+				};
 			}
 		} else {
 			throw new UnknownError("Unknown response from the remote host: " + response);

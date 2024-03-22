@@ -1,6 +1,5 @@
 package edu.rice.cs.hpcremote.tunnel;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -58,6 +57,7 @@ public class SecuredConnectionSSH implements ISecuredConnection
 		}
 		return true;
 	}
+	
 	
 	@Override
 	public ISessionRemote executeRemoteCommand(String command) {

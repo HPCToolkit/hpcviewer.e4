@@ -122,7 +122,17 @@ public interface IDatabase
 	
 	
 	RootScope createFlatTree(Scope rootCCT, RootScope rootFlat, IProgressReport progressMonitor);
-	
+
+
+	/***
+	 * Retrieve the last error message.
+	 * If the last status is {@code DatabaseStatus.OK}, it returns {@code null}.
+	 * 
+	 * @return {@code String} 
+	 * 			the last error message if the last status is not {@code DatabaseStatus.OK}
+	 */
+	String getErrorMessage();
+
 	/***
 	 * Create an empty database wrapper for a given Experiment object
 	 * @param experiment
@@ -200,14 +210,4 @@ public interface IDatabase
 
 		};
 	}
-
-
-	/***
-	 * Retrieve the last error message.
-	 * If the last status is {@code DatabaseStatus.OK}, it returns {@code null}.
-	 * 
-	 * @return {@code String} 
-	 * 			the last error message if the last status is not {@code DatabaseStatus.OK}
-	 */
-	String getErrorMessage();
 }

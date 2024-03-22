@@ -23,14 +23,11 @@ import edu.rice.cs.hpcremote.IDatabaseRemote;
 import edu.rice.cs.hpcremote.IRemoteCommunicationProtocol;
 import edu.rice.cs.hpcremote.RemoteDatabaseIdentification;
 import edu.rice.cs.hpcremote.trace.RemoteTraceOpener;
-import edu.rice.cs.hpcremote.tunnel.SecuredConnectionSSH;
 
 
 
 public class DatabaseRemote implements IDatabaseRemote
-{
-	private HpcClient client;
-	
+{	
 	private Experiment experiment;
 	
 	private DatabaseStatus status = DatabaseStatus.NOT_INITIALIZED;
@@ -38,9 +35,8 @@ public class DatabaseRemote implements IDatabaseRemote
 	
 	private ITraceManager traceManager;
 
-	private SecuredConnectionSSH brokerSSH;
-	
-	private RemoteCommunicationProtocol remoteComm;
+	private RemoteCommunicationProtocol remoteHostConnection;
+	private IRemoteDatabaseConnection remoteDatabaseConnection;
 	
 	private RemoteDatabaseIdentification id;
 	
@@ -56,7 +52,7 @@ public class DatabaseRemote implements IDatabaseRemote
 
 	@Override
 	public HpcClient getClient() {
-		return client;
+		return remoteDatabaseConnection.getHpcClient();
 	}
 
 	
@@ -68,30 +64,30 @@ public class DatabaseRemote implements IDatabaseRemote
 	
 	@Override
 	public DatabaseStatus open(Shell shell) {
-		if (remoteComm == null) {
-			remoteComm = new RemoteCommunicationProtocol();
+		if (remoteHostConnection == null) {
+			remoteHostConnection = new RemoteCommunicationProtocol();
 		}
 		try {
-			var connectStatus = remoteComm.connect(shell);
+			var connectStatus = remoteHostConnection.connect(shell);
 			if (connectStatus == IRemoteCommunicationProtocol.ConnectionStatus.CONNECTED) {
-				var database = remoteComm.selectDatabase(shell);
+				var database = remoteHostConnection.selectDatabase(shell);
 				if (database == null) {
 					status = DatabaseStatus.CANCEL;
 					return status;
 				}
-				client = remoteComm.openDatabaseConnection(shell, database);
-				if (client == null)
+				remoteDatabaseConnection = remoteHostConnection.openDatabaseConnection(shell, database);
+				if (remoteDatabaseConnection == null)
 					return DatabaseStatus.CANCEL;
 				
-				if (!checkServerReadiness(client)) {
+				if (!checkServerReadiness(remoteDatabaseConnection.getHpcClient())) {
 					errorMessage = "Server is not responsive";
 					status = DatabaseStatus.INVALID;
 					return status;
 				}
 					
-				id = new RemoteDatabaseIdentification(remoteComm.getRemoteHost(), 0, database, remoteComm.getUsername());
+				id = new RemoteDatabaseIdentification(remoteHostConnection.getRemoteHost(), 0, database, remoteHostConnection.getUsername());
 
-				experiment = openDatabase(client, id);
+				experiment = openDatabase(remoteDatabaseConnection.getHpcClient(), id);
 				if (experiment != null) {
 					status = DatabaseStatus.OK;
 					return status;
@@ -161,10 +157,11 @@ public class DatabaseRemote implements IDatabaseRemote
 
 
 	@Override
-	public void close() {
-		// need to tell hpcserver to clean up
-		if (brokerSSH != null)
-			brokerSSH.close();
+	public void close() {		
+		if (remoteDatabaseConnection != null) {
+			remoteDatabaseConnection.getRemoteSocket().disconnect();
+			remoteDatabaseConnection.getConnection().close();
+		}
 	}
 
 	@Override
@@ -175,7 +172,7 @@ public class DatabaseRemote implements IDatabaseRemote
 	@Override
 	public boolean hasTraceData() {
 		try {
-			return client.isTraceSampleDataAvailable();
+			return remoteDatabaseConnection.getHpcClient().isTraceSampleDataAvailable();
 		} catch (IOException | InterruptedException e) {
 			LoggerFactory.getLogger(getClass()).error("Cannot check data availability", e);
 		    // Restore interrupted state...
@@ -187,7 +184,7 @@ public class DatabaseRemote implements IDatabaseRemote
 	@Override
 	public ITraceManager getORCreateTraceManager() throws IOException, InvalExperimentException {
 		if (traceManager == null) {
-			var opener = new RemoteTraceOpener(client, experiment);			
+			var opener = new RemoteTraceOpener(remoteDatabaseConnection.getHpcClient(), experiment);			
 			traceManager = opener.openDBAndCreateSTDC(null);
 		}
 		return traceManager;
@@ -199,7 +196,7 @@ public class DatabaseRemote implements IDatabaseRemote
 			return null;
 		
 		try {
-			return client.getProfiledSource(ProfiledSourceFileId.make(fileId.getFileID()));
+			return remoteDatabaseConnection.getHpcClient().getProfiledSource(ProfiledSourceFileId.make(fileId.getFileID()));
 		} catch (InterruptedException e) {
 		    Thread.currentThread().interrupt();
 		} catch (UnknownProfiledSourceFileId e2) {
@@ -224,7 +221,7 @@ public class DatabaseRemote implements IDatabaseRemote
 		var collectMetricsCCT = new CollectAllMetricsVisitor(progressMonitor);
 		rootCCT.dfsVisitScopeTree(collectMetricsCCT);
 		try {
-			collectMetricsCCT.postProcess(client);			 
+			collectMetricsCCT.postProcess(remoteDatabaseConnection.getHpcClient());			 
 			return experiment.createFlatView(rootCCT, rootFlat, progressMonitor);
 			
 		} catch (UnknownProfileIdException | UnknownCallingContextException e) {
