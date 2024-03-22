@@ -35,7 +35,7 @@ public class DatabaseRemote implements IDatabaseRemote
 	
 	private ITraceManager traceManager;
 
-	private RemoteCommunicationProtocol remoteHostConnection;
+	private IRemoteCommunicationProtocol remoteHostConnection;
 	private IRemoteDatabaseConnection remoteDatabaseConnection;
 	
 	private RemoteDatabaseIdentification id;

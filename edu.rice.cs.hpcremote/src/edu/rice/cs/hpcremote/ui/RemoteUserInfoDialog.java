@@ -19,14 +19,18 @@ import com.jcraft.jsch.UserInfo;
 public class RemoteUserInfoDialog implements UserInfo, UIKeyboardInteractive 
 {
 	private static final String TITLE = "Remote connection";
+	private static final String PASS_KEY = "remote.pass.key";
 	
 	private final Shell shell;
 	
 	private String password;
 	private String passphrase;
 	
-	public RemoteUserInfoDialog(Shell parentShell) {
+	public RemoteUserInfoDialog(Shell parentShell, String host) {
 		this.shell = parentShell;
+		var pass = parentShell.getData(PASS_KEY);
+		if (pass != null)
+			passphrase = (String) pass;
 	}
 
 	@Override
@@ -68,6 +72,9 @@ public class RemoteUserInfoDialog implements UserInfo, UIKeyboardInteractive
 
 	@Override
 	public boolean promptPassphrase(String message) {
+		if (passphrase != null)
+			return true;
+		
 		var inputDialog = new InputDialog(shell, TITLE, message, "", null) {
 			
 			@Override
@@ -77,6 +84,8 @@ public class RemoteUserInfoDialog implements UserInfo, UIKeyboardInteractive
 		};
 		var result = (inputDialog.open() == Window.OK);
 		passphrase = inputDialog.getValue();
+		
+		shell.setData(PASS_KEY, passphrase);
 
 		return result;
 	}

@@ -33,8 +33,8 @@ public class SecuredConnectionSSH implements ISecuredConnection
 
 	
 	@Override
-	public boolean connect(String username, String hostName, String privateKey) {
-		var userInfo = new RemoteUserInfoDialog(shell);
+	public boolean connect(String username, String hostname, String privateKey) {
+		var userInfo = new RemoteUserInfoDialog(shell, hostname);
 		
 		JSch jsch = new JSch();
 		try {
@@ -44,7 +44,7 @@ public class SecuredConnectionSSH implements ISecuredConnection
 				jsch.addIdentity(privateKey);
 			
 			// may throw an exception
-			session = jsch.getSession(username, hostName, 22);
+			session = jsch.getSession(username, hostname, 22);
 			
 			session.setUserInfo(userInfo);
 			
@@ -52,7 +52,7 @@ public class SecuredConnectionSSH implements ISecuredConnection
 			session.connect();
 			
 		} catch (JSchException e) {
-			MessageDialog.openError(shell, "Unabe to connect " + hostName, e.getLocalizedMessage());
+			MessageDialog.openError(shell, "Unabe to connect " + hostname, e.getLocalizedMessage());
 			return false;
 		}
 		return true;

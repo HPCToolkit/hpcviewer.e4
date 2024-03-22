@@ -1,6 +1,8 @@
 package edu.rice.cs.hpcremote.ui;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -174,7 +176,14 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 		var privateKeyEnabled = textPrivateKey.getText() != null && !textPrivateKey.getText().isEmpty();
 		textPrivateKey.setEnabled(privateKeyEnabled);
 		browserButton.setEnabled(privateKeyEnabled);
-		labelPrivateKey.setSelection(privateKeyEnabled);
+		
+		boolean privateKeyChecked = privateKeyEnabled;
+		if (privateKeyEnabled) {
+			// if rsa file is not accessible, do not check the private key label
+			String rsaFile = textPrivateKey.getText();
+			privateKeyChecked = Files.exists(Paths.get(rsaFile));
+		}
+		labelPrivateKey.setSelection(privateKeyChecked);
 
 		return area;
 	}
