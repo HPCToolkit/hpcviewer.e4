@@ -113,8 +113,8 @@ public class SecuredConnectionSSH implements ISecuredConnection
 		
 		channel.setInputStream(null);
 		
-		ByteArrayOutputStream errStream = new ByteArrayOutputStream();		
-		channel.setErrStream(errStream);
+		//ByteArrayOutputStream errStream = new ByteArrayOutputStream();		
+		channel.setErrStream(System.err);
 	
 		final var inStream = channel.getInputStream();
 		

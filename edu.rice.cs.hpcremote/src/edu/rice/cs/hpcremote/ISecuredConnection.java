@@ -86,6 +86,10 @@ public interface ISecuredConnection
 			}
 			var text = inputs.toString();
 			StringTokenizer tokenizer = new StringTokenizer(text, "\n");
+			if (tokenizer.countTokens() == 0) {
+				writeLog("\t RECV: " + text);
+				return new String[0];
+			}
 			String []listTexts = new String[tokenizer.countTokens()];
 			
 			for(int i=0; tokenizer.hasMoreTokens(); i++) {

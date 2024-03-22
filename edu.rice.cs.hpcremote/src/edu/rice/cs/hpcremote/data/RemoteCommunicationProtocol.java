@@ -9,6 +9,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
 import org.hpctoolkit.hpcclient.v1_0.HpcClient;
 import org.hpctoolkit.hpcclient.v1_0.HpcClientJavaNetHttp;
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcremote.IConnection;
 import edu.rice.cs.hpcremote.IRemoteCommunicationProtocol;
@@ -135,7 +136,9 @@ public class RemoteCommunicationProtocol implements IRemoteDirectoryBrowser, IRe
 
 	@Override
 	public IRemoteDirectoryContent getContentRemoteDirectory(String directory) throws IOException {
-		serverMainSession.write("@LIST " + directory);
+		String message = directory.isEmpty() ? "@LIST" : "@LIST " + directory;
+		serverMainSession.write(message.trim());
+		
 		var listDir = serverMainSession.read();
 		if (listDir == null || listDir.length == 0)
 			return null;
@@ -233,7 +236,7 @@ public class RemoteCommunicationProtocol implements IRemoteDirectoryBrowser, IRe
 				} else if (pair.startsWith("@SOCK")) {
 					remoteSocket = pair.substring(6);
 				} else {
-					return false;
+					LoggerFactory.getLogger(getClass()).debug("Unknown remote command: " + pair);
 				}
 			}
 		}
