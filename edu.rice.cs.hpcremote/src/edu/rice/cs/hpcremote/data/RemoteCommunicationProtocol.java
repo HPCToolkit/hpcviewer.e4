@@ -2,15 +2,13 @@ package edu.rice.cs.hpcremote.data;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
 import org.hpctoolkit.hpcclient.v1_0.HpcClient;
 import org.hpctoolkit.hpcclient.v1_0.HpcClientJavaNetHttp;
 import org.slf4j.LoggerFactory;
 
+import edu.rice.cs.hpcremote.ICollectionOfConnections;
 import edu.rice.cs.hpcremote.IConnection;
 import edu.rice.cs.hpcremote.IRemoteCommunicationProtocol;
 import edu.rice.cs.hpcremote.ISecuredConnection;
@@ -20,8 +18,6 @@ import edu.rice.cs.hpcremote.ui.RemoteDatabaseDialog;
 
 public class RemoteCommunicationProtocol implements IRemoteDirectoryBrowser, IRemoteCommunicationProtocol
 {	
-	private static final String KEY_COMMUNICATION = "hpcviewer.comm";
-	
 	private ISecuredConnection.ISessionRemoteSocket serverMainSession;
 	
 	private String remoteIP;
@@ -61,7 +57,7 @@ public class RemoteCommunicationProtocol implements IRemoteDirectoryBrowser, IRe
 		// check if we already have exactly the same connection as the 
 		// requested host, user id and installation
 		
-		var setOfConnections = CollectionOfConnections.getShellSessions(shell);
+		var setOfConnections = ICollectionOfConnections.getShellSessions(shell);
 		if (setOfConnections.containsKey(connectionDialog.getId())) {
 			var matchedConnection = setOfConnections.get(connectionDialog.getId());
 			
@@ -105,7 +101,7 @@ public class RemoteCommunicationProtocol implements IRemoteDirectoryBrowser, IRe
 		
 		this.connection = connectionDialog;
 		
-		CollectionOfConnections.putShellSession(shell, connection.getId(), this);
+		ICollectionOfConnections.putShellSession(shell, connection.getId(), this);
 		
 		return ConnectionStatus.CONNECTED;
 	}
@@ -258,51 +254,5 @@ public class RemoteCommunicationProtocol implements IRemoteDirectoryBrowser, IRe
 			}
 		}
 		return true;
-	}
-
-	
-	/*****
-	 * Collection of connections API stored in a shell widget. 
-	 */
-	public static class CollectionOfConnections
-	{
-		private CollectionOfConnections() {
-			// nothing
-		}
-		
-		/***
-		 * Get the remote sessions of the given shell
-		 * 
-		 * @param shell
-		 * 
-		 * @return {@code Map} of remote sessions
-		 */
-		static Map<String, RemoteCommunicationProtocol> getShellSessions(Shell shell) {
-			var setOfSessions = shell.getData(KEY_COMMUNICATION);
-			if (setOfSessions instanceof Map<?, ?>) {
-				return (Map<String, RemoteCommunicationProtocol>) setOfSessions;
-			}
-			return new HashMap<>();
-		}
-		
-		
-		/***
-		 * Store the communication session to this shell
-		 * 
-		 * @param shell
-		 * @param id
-		 * @param commConnection
-		 */
-		static void putShellSession(Shell shell, String id, RemoteCommunicationProtocol commConnection) {
-			Map<String, RemoteCommunicationProtocol> mapOfSessions;
-			var setOfSessions = shell.getData(KEY_COMMUNICATION);
-			if (setOfSessions == null) {
-				mapOfSessions = new HashMap<>();
-			} else {
-				mapOfSessions = (Map<String, RemoteCommunicationProtocol>) setOfSessions;
-			}
-			mapOfSessions.put(id, commConnection);
-			shell.setData(KEY_COMMUNICATION, mapOfSessions);
-		}
 	}
 }
