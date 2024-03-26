@@ -4,16 +4,25 @@ import java.io.IOException;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.resource.LocalResourceManager;
+import org.eclipse.jface.resource.ResourceManager;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
@@ -22,9 +31,11 @@ import edu.rice.cs.hpcremote.data.IRemoteDirectoryBrowser;
 public class RemoteDatabaseDialog extends TitleAreaDialog 
 {
 	private final IRemoteDirectoryBrowser remoteBrowser;
+	private final Image imgFolderReg;
+	private final Image imgFolderDb;
 	
 	private Text textDirectory;
-	private List listDirectory;
+	private TableViewer directoryViewer;
 
 	private String selectedDirectory;
 
@@ -39,6 +50,14 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 			throw new IllegalArgumentException("Null argument: remote browser");
 		
 		this.remoteBrowser = remoteBrowser;
+		
+		ResourceManager resourceManager = new LocalResourceManager(JFaceResources.getResources());
+		
+		var descFolderReg = ImageDescriptor.createFromFile(getClass(), "folder-16.png");
+		imgFolderReg = resourceManager.createImage(descFolderReg);
+
+		var descFolderDb = ImageDescriptor.createFromFile(getClass(), "folder-16-blue.png");
+		imgFolderDb = resourceManager.createImage(descFolderDb);
 	}
 
 
@@ -87,22 +106,67 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 		textDirectory.setLayoutData(gdTextDirectory);
 		textDirectory.setBounds(0, 0, 64, 19);
 		
-		listDirectory = new List(container, SWT.BORDER | SWT.V_SCROLL);
-		GridData gd_listDirectory = new GridData(SWT.LEFT, SWT.CENTER, true, true, 1, 1);
-		gd_listDirectory.heightHint = 362;
-		gd_listDirectory.widthHint = 440;
-		listDirectory.setLayoutData(gd_listDirectory);
+		directoryViewer = new TableViewer(container, SWT.BORDER | SWT.V_SCROLL | SWT.FULL_SELECTION);
+		TableViewerColumn iconColViewer = new TableViewerColumn(directoryViewer, SWT.NONE);
+		iconColViewer.getColumn().setWidth(20);
+		
+		iconColViewer.setLabelProvider(new ColumnLabelProvider() {
+			
+			@Override
+		    public String getText(Object element) {
+				return null;
+			}
+			
+			@Override
+		    public Image getImage(Object element) {
+				if (element instanceof String) {
+					String text = (String) element;
+					if (isDirectory(text)) {
+						return imgFolderReg;
+					}
+				}
+				return null;
+			}
+		});
+		
+		TableViewerColumn nameColViewer = new TableViewerColumn(directoryViewer, SWT.NONE);
+		nameColViewer.getColumn().setWidth(220);
+		
+		nameColViewer.setLabelProvider(new ColumnLabelProvider() {
+			
+			@Override
+		    public String getText(Object element) {
+				if (element instanceof String)
+					return (String) element;
+				return null;
+			}
+		});
+		
+		directoryViewer.setContentProvider(ArrayContentProvider.getInstance());
+		
+		GridData gdListDirectory = new GridData(SWT.LEFT, SWT.CENTER, true, true, 1, 1);
+		gdListDirectory.heightHint = 362;
+		gdListDirectory.widthHint = 440;
+		
+		var tableDir = directoryViewer.getTable();
+		tableDir.setLayoutData(gdListDirectory);
 
-
-		listDirectory.addSelectionListener(new SelectionAdapter() {
+		tableDir.addSelectionListener(new SelectionAdapter() {
         	
         	@Override
         	public void widgetDefaultSelected(SelectionEvent e) {
-        		if (listDirectory.getSelectionCount() == 0)
+        		StructuredSelection dirSelect = (StructuredSelection) directoryViewer.getSelection();
+        		if (dirSelect == null || dirSelect.isEmpty())
         			return;
         		
-        		String directory = textDirectory.getText() + "/" + listDirectory.getSelection()[0];
-        		fillDirectory(directory);
+        		var elem = dirSelect.toList().get(0);
+        		if (elem == null)
+        			return;
+        		if (!isDirectory((String) elem))
+        			return;
+        		
+    			var absoluteDir = textDirectory.getText() + "/" + elem;
+    			fillDirectory(absoluteDir);
         	}
 		});
 		
@@ -113,6 +177,11 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 		return area;
 	}
 
+	
+	private boolean isDirectory(String name) {
+		return name.endsWith("/");
+	}
+	
 	/**
 	 * Create contents of the button bar.
 	 * @param parent
@@ -135,8 +204,16 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 	@Override
 	protected void okPressed() {
 		selectedDirectory = textDirectory.getText();
-		if (listDirectory.getSelectionCount() > 0)
-			selectedDirectory += "/" + listDirectory.getSelection()[0];
+		
+		StructuredSelection dirSelect = (StructuredSelection) directoryViewer.getSelection();
+
+		if (dirSelect != null && !dirSelect.isEmpty()) {
+			String selectedElem = (String) dirSelect.getFirstElement();
+			if (isDirectory(selectedElem))
+				selectedDirectory += "/" + selectedElem;
+		}
+		imgFolderReg.dispose();
+		imgFolderDb.dispose();
 		
 		super.okPressed();
 	}
@@ -146,13 +223,9 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 			var content = remoteBrowser.getContentRemoteDirectory(directory);
 			if (content != null) {
 				textDirectory.setText(content.getDirectory());
-				var files = content.getContent();
 				
-				listDirectory.removeAll();
-				
-				for(int i=0; i<files.length; i++) {
-					listDirectory.add(files[i]);
-				}
+				var files = content.getContent();				
+				directoryViewer.setInput(files);
 			}
 		} catch (IOException e1) {
 			MessageDialog.openError(getShell(), "Error accessomg the remote directory", e1.getMessage());
