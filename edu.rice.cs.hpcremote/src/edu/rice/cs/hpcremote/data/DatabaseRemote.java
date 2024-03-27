@@ -99,7 +99,7 @@ public class DatabaseRemote implements IDatabaseRemote
 				return status;
 			}
 		} catch (IOException e) {
-			errorMessage = "Unknown error\n" + e.getLocalizedMessage();
+			errorMessage = e.getLocalizedMessage();
 		}
 		status = DatabaseStatus.INVALID;
 		return status;

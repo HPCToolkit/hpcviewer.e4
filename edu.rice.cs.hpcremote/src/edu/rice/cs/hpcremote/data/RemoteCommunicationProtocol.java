@@ -132,6 +132,9 @@ public class RemoteCommunicationProtocol implements IRemoteDirectoryBrowser, IRe
 
 	@Override
 	public IRemoteDirectoryContent getContentRemoteDirectory(String directory) throws IOException {
+		if (serverMainSession == null)
+			throw new IllegalAccessError("SSH tunnel not created yet.");
+		
 		String message = directory.isEmpty() ? "@LIST" : "@LIST " + directory;
 		serverMainSession.write(message.trim());
 		
@@ -181,39 +184,50 @@ public class RemoteCommunicationProtocol implements IRemoteDirectoryBrowser, IRe
 		
 		} else if (response.startsWith("@SOCK")) {
 			var brokerSocket = response.substring(6);
+			return createTunnelAndRequestDatabase(shell, brokerSocket);
 			
-			var brokerSSH = new SecuredConnectionSSH(shell);
-			if (brokerSSH.connect(connection.getUsername(), connection.getHost(), connection.getPrivateKey())) {
-				var brokerSession = brokerSSH.socketForwarding(brokerSocket);
-				if (brokerSession == null)
-					return null;
-				
-				int port = brokerSession.getLocalPort();
-				var addr = InetAddress.getByName("localhost");
-				final var hpcclient = new HpcClientJavaNetHttp(addr, port);
-				
-				return new IRemoteDatabaseConnection() {
-					
-					@Override
-					public HpcClient getHpcClient() {
-						return hpcclient;
-					}
-					
-					@Override
-					public ISecuredConnection getConnection() {
-						return brokerSSH;
-					}
-					
-					@Override
-					public ISecuredConnection.ISessionRemoteSocket getRemoteSocket() {
-						return brokerSession;
-					}
-				};
-			}
 		} else {
 			throw new UnknownError("Unknown response from the remote host: " + response);
 		}
-		return null;
+	}
+
+	
+	private IRemoteDatabaseConnection createTunnelAndRequestDatabase(Shell shell, String brokerSocket) throws IOException {
+		var brokerSSH = new SecuredConnectionSSH(shell);
+		
+		if (!brokerSSH.connect(connection.getUsername(), connection.getHost(), connection.getPrivateKey()))
+			return null;
+		
+		var brokerSession = brokerSSH.socketForwarding(brokerSocket);
+		if (brokerSession == null)
+			return null;
+		
+		var inputs = serverMainSession.read();
+		if (inputs != null && inputs.length > 0 &&  (inputs[0].startsWith("@ERR"))) {
+				throw new IOException(inputs[0].substring(5));
+		}
+		
+		int port = brokerSession.getLocalPort();
+		var addr = InetAddress.getByName("localhost");
+		final var hpcclient = new HpcClientJavaNetHttp(addr, port);
+		
+		return new IRemoteDatabaseConnection() {
+			
+			@Override
+			public HpcClient getHpcClient() {
+				return hpcclient;
+			}
+			
+			@Override
+			public ISecuredConnection getConnection() {
+				return brokerSSH;
+			}
+			
+			@Override
+			public ISecuredConnection.ISessionRemoteSocket getRemoteSocket() {
+				return brokerSession;
+			}
+		};
 	}
 	
 		
