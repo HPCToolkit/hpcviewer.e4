@@ -106,8 +106,19 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 		textDirectory.setLayoutData(gdTextDirectory);
 		textDirectory.setBounds(0, 0, 64, 19);
 		
-		directoryViewer = new TableViewer(container, SWT.BORDER | SWT.V_SCROLL | SWT.FULL_SELECTION);
-		TableViewerColumn iconColViewer = new TableViewerColumn(directoryViewer, SWT.NONE);
+		directoryViewer = createTableDirectory(container);
+		
+		// ask the content of the default remote directory.
+		// usually it's the home directory, but the server can give anything
+		fillDirectory("");
+
+		return area;
+	}
+
+	
+	private TableViewer createTableDirectory(Composite container) {
+		var viewer = new TableViewer(container, SWT.BORDER | SWT.V_SCROLL | SWT.FULL_SELECTION);
+		TableViewerColumn iconColViewer = new TableViewerColumn(viewer, SWT.NONE);
 		iconColViewer.getColumn().setWidth(20);
 		
 		iconColViewer.setLabelProvider(new ColumnLabelProvider() {
@@ -129,8 +140,9 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 			}
 		});
 		
-		TableViewerColumn nameColViewer = new TableViewerColumn(directoryViewer, SWT.NONE);
-		nameColViewer.getColumn().setWidth(220);
+		TableViewerColumn nameColViewer = new TableViewerColumn(viewer, SWT.NONE);
+		nameColViewer.getColumn().setText("Contents");
+		nameColViewer.getColumn().setWidth(420);
 		
 		nameColViewer.setLabelProvider(new ColumnLabelProvider() {
 			
@@ -142,20 +154,21 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 			}
 		});
 		
-		directoryViewer.setContentProvider(ArrayContentProvider.getInstance());
+		viewer.setContentProvider(ArrayContentProvider.getInstance());
 		
 		GridData gdListDirectory = new GridData(SWT.LEFT, SWT.CENTER, true, true, 1, 1);
 		gdListDirectory.heightHint = 362;
 		gdListDirectory.widthHint = 440;
 		
-		var tableDir = directoryViewer.getTable();
+		var tableDir = viewer.getTable();
 		tableDir.setLayoutData(gdListDirectory);
-
+		tableDir.setHeaderVisible(true);
+		
 		tableDir.addSelectionListener(new SelectionAdapter() {
         	
         	@Override
         	public void widgetDefaultSelected(SelectionEvent e) {
-        		StructuredSelection dirSelect = (StructuredSelection) directoryViewer.getSelection();
+        		StructuredSelection dirSelect = (StructuredSelection) viewer.getSelection();
         		if (dirSelect == null || dirSelect.isEmpty())
         			return;
         		
@@ -169,15 +182,15 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
     			fillDirectory(absoluteDir);
         	}
 		});
-		
-		// ask the content of the default remote directory.
-		// usually it's the home directory, but the server can give anything
-		fillDirectory("");
-
-		return area;
+		return viewer;
 	}
 
-	
+	/***
+	 * Check if it's a directory name
+	 * 
+	 * @param name
+	 * @return
+	 */
 	private boolean isDirectory(String name) {
 		return name.endsWith("/");
 	}
@@ -206,15 +219,17 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 		selectedDirectory = textDirectory.getText();
 		
 		StructuredSelection dirSelect = (StructuredSelection) directoryViewer.getSelection();
-
+		// case for selection:
+		// - if no selection, we use the directory at the textDirectory text
+		// - if one is selected:
+		//   - check if it's a directory. 
+		//     - if it isn't, do not use it
+		//     - if it's a directory, append it with the base directory
 		if (dirSelect != null && !dirSelect.isEmpty()) {
 			String selectedElem = (String) dirSelect.getFirstElement();
 			if (isDirectory(selectedElem))
 				selectedDirectory += "/" + selectedElem;
-		}
-		imgFolderReg.dispose();
-		imgFolderDb.dispose();
-		
+		}		
 		super.okPressed();
 	}
 	
