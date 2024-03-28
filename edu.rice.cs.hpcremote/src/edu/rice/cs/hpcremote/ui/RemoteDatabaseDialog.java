@@ -233,6 +233,13 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 		super.okPressed();
 	}
 	
+	
+	@Override
+	protected boolean isResizable() {
+	    return true;
+	}
+	
+	
 	private void fillDirectory(String directory) {
 		try {
 			var content = remoteBrowser.getContentRemoteDirectory(directory);

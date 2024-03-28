@@ -8,7 +8,6 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Creatable;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -20,16 +19,11 @@ import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
 import org.eclipse.e4.ui.model.application.ui.basic.MStackElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
-import org.eclipse.e4.ui.model.application.ui.basic.impl.BasicPackageImpl;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
-import org.eclipse.e4.ui.workbench.modeling.IWindowCloseHandler;
 import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
-import org.eclipse.emf.common.notify.Notification;
-import org.eclipse.emf.common.notify.impl.AdapterImpl;
-import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.swt.SWT;
@@ -51,7 +45,6 @@ import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
 import edu.rice.cs.hpcfilter.service.FilterMap;
 import edu.rice.cs.hpclocal.DatabaseLocal;
-import edu.rice.cs.hpcremote.ICollectionOfConnections;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpctraceviewer.ui.TracePart;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
@@ -147,47 +140,8 @@ public class DatabaseCollection
 		} else {
 			addDatabase(shell, window, partService, modelService, databaseId);
 		}
-		
-		registerCloseHandler(myShell, application, modelService, partService);
 	}
 
-	private void registerCloseHandler(
-			Shell myShell,
-			MApplication application,
-			EModelService modelService,
-			EPartService partService) {
-		
-		// each window gets its own close handler as we want to add a modal confirm dialog
-		for (MWindow window : application.getChildren()) {
-			
-			IWindowCloseHandler closeHandler = w -> {
-				removeAllDatabases(w, modelService, partService);
-				ICollectionOfConnections.disconnectAll((Shell) w.getWidget());
-				
-				return true;
-			};
-			
-			// Mostly MWindow contexts are lazily created by renderers
-			// therefore it does not need to be set already at this point
-			if (window.getContext() != null) {
-				window.getContext().set(IWindowCloseHandler.class, closeHandler);
-			}
-			else {
-				((EObject) window).eAdapters().add(new AdapterImpl() {
-					@Override
-					public void notifyChanged(Notification notification) {
-						if (notification.getFeatureID(MWindow.class) != BasicPackageImpl.WINDOW__CONTEXT) {
-							return;
-						}
-						IEclipseContext windowContext = (IEclipseContext) notification.getNewValue();
-						if (windowContext != null) {
-							windowContext.set(IWindowCloseHandler.class, closeHandler);
-						}
-					}
-				});
-			}
-		}
-	}
 
 	/****
 	 * One-stop API to open and add a database. 
