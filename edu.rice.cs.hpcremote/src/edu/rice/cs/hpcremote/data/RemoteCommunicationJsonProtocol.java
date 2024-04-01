@@ -68,7 +68,8 @@ public class RemoteCommunicationJsonProtocol extends RemoteCommunicationProtocol
 			String database) throws IOException {
 		
 		JSONObject json = new JSONObject();
-		json.put("data", database);		
+		json.put("command", "data");		
+		json.put("arg", database);		
 		serverMainSession.write(json.toString());
 
 		var reply = serverMainSession.read();
@@ -121,11 +122,9 @@ public class RemoteCommunicationJsonProtocol extends RemoteCommunicationProtocol
 		
 		JSONObject json = new JSONObject();
 		json.put("command", "list");
-		json.put("arg", "");
+		json.put("arg", directory);
 		
 		serverMainSession.write(json.toString());
-		
-		System.out.println("WAITING.....");
 		
 		var response = serverMainSession.read();
 		if (response == null || response.length == 0)
@@ -172,14 +171,18 @@ public class RemoteCommunicationJsonProtocol extends RemoteCommunicationProtocol
 		
 		while(iterator.hasNext()) {
 			JSONObject elem = (JSONObject) iterator.next();
-			contents[i] = elem.getString("name");
+			String type = elem.getString("type");
+			String suffix = type.equals("f") ? "" : "/";
+			contents[i] = elem.getString("name") + suffix;
 			i++;
 		}
 		return new IRemoteDirectoryContent() {
 			
 			@Override
 			public String getDirectory() {
-				return json.getString("path");
+				if (json.has("path"))
+					return json.getString("path");
+				return "";
 			}
 			
 			@Override
@@ -193,7 +196,8 @@ public class RemoteCommunicationJsonProtocol extends RemoteCommunicationProtocol
 	private String convertFromArrayToString(String []array) {
 		var buffer = new StringBuilder();
 		for(var r: array) {
-			buffer.append(r);
+			if (!r.startsWith("@"))
+				buffer.append(r);
 		}
 		return buffer.toString();
 	}
@@ -203,15 +207,19 @@ public class RemoteCommunicationJsonProtocol extends RemoteCommunicationProtocol
 	public ServerResponseConnectionInit getServerResponseInit(String[] messageFromServer) {
 		// looking for json message
 		// sometimes the server outputs rubbish
-		String message = "";
-		for(var m: messageFromServer) {
-			if (m.startsWith("{") && m.endsWith("}")) {
-				message = m;
+		int i=0;
+		for(; i<messageFromServer.length; i++) {
+			// looking for the start of JSON message (prefixed with "{")
+			if (messageFromServer[i].trim().startsWith("{"))
 				break;
-			}
+		}
+		StringBuilder message = new StringBuilder();
+
+		for(; i<messageFromServer.length; i++) {
+			message.append(messageFromServer[i]);
 		}
 
-		JSONObject json = new JSONObject(message);
+		JSONObject json = new JSONObject(message.toString());
 		
 		if (isSuccess(json)) {
 			var remoteIp = json.getString("host");

@@ -3,7 +3,7 @@
  <modelVersion>4.0.0</modelVersion>
  <artifactId>tests</artifactId>
  <packaging>pom</packaging>
- <version>6.0.0-SNAPSHOT</version>
+ 
  <parent>
    <groupId>edu.rice.cs.hpcviewer</groupId>
    <artifactId>root</artifactId>
@@ -23,6 +23,7 @@
   <module>edu.rice.cs.hpctest.ui</module>
   <module>edu.rice.cs.hpctest.trace</module>
   <module>edu.rice.cs.hpctest.local</module>
+  <!--module>edu.rice.cs.hpctest.remote</module-->
   <module>edu.rice.cs.hpctest.viewer</module>
   <module>edu.rice.cs.hpctest.report</module>
  </modules>

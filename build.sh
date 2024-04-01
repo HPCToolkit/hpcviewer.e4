@@ -48,9 +48,9 @@ JAVA_MAJOR_VERSION=`java -version 2>&1 \
 
 echo "Java version $JAVA_MAJOR_VERSION"
 
-# we need Java 11 at least
-jvm_min=11
-jvm_max=17
+# we need Java 17 at least
+jvm_min=17
+jvm_max=22
 
 # issue #308: we don't support too new Java
 if [ "$JAVA_MAJOR_VERSION" -lt "$jvm_min" ] || [ "$JAVA_MAJOR_VERSION" -gt "$jvm_max" ]; then

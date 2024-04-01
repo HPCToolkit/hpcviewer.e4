@@ -18,6 +18,8 @@ import edu.rice.cs.hpcremote.ISecuredConnection.ISessionRemoteSocket;
 
 public class SocketForwardingSession implements ISessionRemoteSocket 
 {
+	private static final String END_OF_MESSAGE_SIGN = "@EOM";
+
 	private static final int TIMEOUT_DEFAULT = 10 * 1000;
 
 	private final Session session;
@@ -60,7 +62,7 @@ public class SocketForwardingSession implements ISessionRemoteSocket
 		var list = new ArrayList<String>();
         while(true) {
         	var line = in.readLine();
-        	if (line.startsWith("@END") || line.isEmpty())
+        	if (line.startsWith(END_OF_MESSAGE_SIGN) || line.isEmpty())
         		break;
         	list.add(line);
         }

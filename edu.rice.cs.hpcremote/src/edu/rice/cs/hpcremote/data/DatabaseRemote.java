@@ -65,7 +65,7 @@ public class DatabaseRemote implements IDatabaseRemote
 	@Override
 	public DatabaseStatus open(Shell shell) {
 		if (remoteHostConnection == null) {
-	        var usingJson = System.getenv("HPCSERVER_JSON_PROTOCOL");
+	        var usingJson = System.getenv("HPCSERVER_TEXT_PROTOCOL");
 			remoteHostConnection = usingJson == null ? new RemoteCommunicationProtocol() : new RemoteCommunicationJsonProtocol();
 		}
 		try {
