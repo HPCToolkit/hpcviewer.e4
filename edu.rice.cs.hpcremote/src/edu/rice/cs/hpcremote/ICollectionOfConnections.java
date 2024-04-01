@@ -7,6 +7,7 @@ import java.util.Map;
 import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpcremote.data.RemoteCommunicationProtocol;
+import edu.rice.cs.hpcremote.data.RemoteCommunicationProtocolBase;
 
 public interface ICollectionOfConnections 
 {
@@ -33,10 +34,10 @@ public interface ICollectionOfConnections
 	 * 
 	 * @return {@code Map} of remote sessions
 	 */
-	static Map<String, RemoteCommunicationProtocol> getShellSessions(Shell shell) {
+	static Map<String, RemoteCommunicationProtocolBase> getShellSessions(Shell shell) {
 		var setOfSessions = shell.getData(KEY_COMMUNICATION);
 		if (setOfSessions instanceof Map<?, ?>) {
-			return (Map<String, RemoteCommunicationProtocol>) setOfSessions;
+			return (Map<String, RemoteCommunicationProtocolBase>) setOfSessions;
 		}
 		return new HashMap<>();
 	}
@@ -49,13 +50,13 @@ public interface ICollectionOfConnections
 	 * @param id
 	 * @param commConnection
 	 */
-	static void putShellSession(Shell shell, String id, RemoteCommunicationProtocol commConnection) {
-		Map<String, RemoteCommunicationProtocol> mapOfSessions;
+	static void putShellSession(Shell shell, String id, RemoteCommunicationProtocolBase commConnection) {
+		Map<String, RemoteCommunicationProtocolBase> mapOfSessions;
 		var setOfSessions = shell.getData(KEY_COMMUNICATION);
 		if (setOfSessions == null) {
 			mapOfSessions = new HashMap<>();
 		} else {
-			mapOfSessions = (Map<String, RemoteCommunicationProtocol>) setOfSessions;
+			mapOfSessions = (Map<String, RemoteCommunicationProtocolBase>) setOfSessions;
 		}
 		mapOfSessions.put(id, commConnection);
 		shell.setData(KEY_COMMUNICATION, mapOfSessions);

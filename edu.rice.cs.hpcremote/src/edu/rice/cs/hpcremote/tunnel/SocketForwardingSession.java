@@ -46,7 +46,8 @@ public class SocketForwardingSession implements ISessionRemoteSocket
 	public void write(String message) throws IOException {
 		log("SEND " + message);
 		
-		out.println(message);
+		out.println(message + "\n");
+		out.flush();
 	}
 	
 	@Override
