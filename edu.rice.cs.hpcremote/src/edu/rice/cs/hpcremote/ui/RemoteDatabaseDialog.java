@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import edu.rice.cs.hpcremote.data.IRemoteDirectoryBrowser;
+import edu.rice.cs.hpcremote.data.IRemoteDirectoryContent;
 
 public class RemoteDatabaseDialog extends TitleAreaDialog 
 {
@@ -111,7 +112,7 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 		// ask the content of the default remote directory.
 		// usually it's the home directory, but the server can give anything
 		fillDirectory("");
-
+		
 		return area;
 	}
 
@@ -130,11 +131,11 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 			
 			@Override
 		    public Image getImage(Object element) {
-				if (element instanceof String) {
-					String text = (String) element;
-					if (isDirectory(text)) {
-						return imgFolderReg;
-					}
+				if (element instanceof IRemoteDirectoryContent.IFileContent file) {
+					if (file.isDatabase())
+						return imgFolderDb;
+					else if (file.isDirectory())
+						return imgFolderReg;					
 				}
 				return null;
 			}
@@ -148,8 +149,8 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 			
 			@Override
 		    public String getText(Object element) {
-				if (element instanceof String)
-					return (String) element;
+				if (element instanceof IRemoteDirectoryContent.IFileContent file)
+					return file.getName();
 				return null;
 			}
 		});
@@ -165,7 +166,22 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 		tableDir.setHeaderVisible(true);
 		
 		tableDir.addSelectionListener(new SelectionAdapter() {
-        	
+			private boolean isDatabase(SelectionEvent e) {
+        		StructuredSelection dirSelect = (StructuredSelection) viewer.getSelection();
+        		if (dirSelect == null || dirSelect.isEmpty())
+        			return false;
+        		
+        		var elem = dirSelect.toList().get(0);
+        		return (elem instanceof IRemoteDirectoryContent.IFileContent file && 
+        				file.isDatabase());
+			}
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				var isValid = isDatabase(e);
+				getButton(IDialogConstants.OK_ID).setEnabled(isValid);
+			}
+			
         	@Override
         	public void widgetDefaultSelected(SelectionEvent e) {
         		StructuredSelection dirSelect = (StructuredSelection) viewer.getSelection();
@@ -173,38 +189,27 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
         			return;
         		
         		var elem = dirSelect.toList().get(0);
-        		if (elem == null)
-        			return;
-        		if (!isDirectory((String) elem))
-        			return;
-        		
-    			var absoluteDir = textDirectory.getText() + "/" + elem;
-    			fillDirectory(absoluteDir);
+        		if (elem instanceof IRemoteDirectoryContent.IFileContent file && 
+        				(file.isDirectory() || file.isDatabase())) {
+            		var absoluteDir = textDirectory.getText() + "/" + file.getName();
+            		fillDirectory(absoluteDir);
+        		}
         	}
 		});
 		return viewer;
 	}
 
-	/***
-	 * Check if it's a directory name
-	 * 
-	 * @param name
-	 * @return
-	 */
-	private boolean isDirectory(String name) {
-		return name.endsWith("/");
-	}
-	
 	/**
 	 * Create contents of the button bar.
 	 * @param parent
 	 */
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
-		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+		super.createButtonsForButtonBar(parent);
+		getButton(IDialogConstants.OK_ID).setEnabled(false);
 	}
 
+	
 	/**
 	 * Return the initial size of the dialog.
 	 */
@@ -226,11 +231,14 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 		//     - if it isn't, do not use it
 		//     - if it's a directory, append it with the base directory
 		if (dirSelect != null && !dirSelect.isEmpty()) {
-			String selectedElem = (String) dirSelect.getFirstElement();
-			if (isDirectory(selectedElem))
-				selectedDirectory += "/" + selectedElem;
-		}		
-		super.okPressed();
+			var selectedElem = dirSelect.getFirstElement();
+			if (selectedElem instanceof IRemoteDirectoryContent.IFileContent dir && dir.isDatabase()) {
+				selectedDirectory += "/" + dir.getName();
+				super.okPressed();
+				return; // do we need this?
+			}
+		}
+		MessageDialog.openError(getShell(), "Not a database", selectedDirectory + ": is not a database directory");
 	}
 	
 	

@@ -8,6 +8,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import edu.rice.cs.hpcremote.ISecuredConnection;
+import edu.rice.cs.hpcremote.data.IRemoteDirectoryContent.IFileContent;
 
 
 
@@ -164,30 +165,54 @@ public class RemoteCommunicationJsonProtocol extends RemoteCommunicationProtocol
 		if (array == null)
 			return null;
 		
-		String []contents = new String[array.length()];
+		IFileContent []contents = new IFileContent[array.length()];
 		
 		int i = 0;
 		Iterator<Object> iterator = array.iterator();
 		
 		while(iterator.hasNext()) {
 			JSONObject elem = (JSONObject) iterator.next();
-			String type = elem.getString("type");
-			String suffix = type.equals("f") ? "" : "/";
-			contents[i] = elem.getString("name") + suffix;
+			contents[i] = createFileContent(elem);
+			
 			i++;
 		}
+		final String currentPathDir = json.has("path") ? json.getString("path") : "";
+		
 		return new IRemoteDirectoryContent() {
 			
 			@Override
 			public String getDirectory() {
-				if (json.has("path"))
-					return json.getString("path");
-				return "";
+				return currentPathDir;
 			}
 			
 			@Override
-			public String[] getContent() {
+			public IFileContent[] getContent() {
 				return contents;
+			}
+		};
+	}
+	
+	
+	private IFileContent createFileContent(JSONObject elem) {
+		String type = elem.getString("type");
+		String suffix = type.equals("f") ? "" : "/";			
+		String name = elem.getString("name") + suffix;
+		
+		return new IFileContent() {
+			
+			@Override
+			public boolean isDirectory() {
+				return type.equals("d");
+			}
+			
+			@Override
+			public boolean isDatabase() {
+				return type.equals("h");
+			}
+			
+			@Override
+			public String getName() {
+				return name;
 			}
 		};
 	}

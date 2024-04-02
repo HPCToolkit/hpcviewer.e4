@@ -5,6 +5,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcremote.ISecuredConnection;
+import edu.rice.cs.hpcremote.data.IRemoteDirectoryContent.IFileContent;
 
 public class RemoteCommunicationProtocol extends RemoteCommunicationProtocolBase
 {	
@@ -96,9 +97,27 @@ public class RemoteCommunicationProtocol extends RemoteCommunicationProtocolBase
 			String[] responseFromServer) {
 		
 		var currentDir = responseFromServer[0].substring(6);
-		String []content = new String[responseFromServer.length-1];
+		IFileContent []content = new IFileContent[responseFromServer.length-1];
+		
 		for(int i=0; i<content.length; i++) {
-			content[i] = responseFromServer[i+1];
+			final int index = i + 1;
+			content[i] = new IFileContent() {
+				
+				@Override
+				public boolean isDirectory() {
+					return responseFromServer[index].endsWith("/");
+				}
+				
+				@Override
+				public boolean isDatabase() {
+					return isDirectory();
+				}
+				
+				@Override
+				public String getName() {
+					return responseFromServer[index];
+				}
+			}; 
 		}
 		return new IRemoteDirectoryContent() {
 			
@@ -108,7 +127,7 @@ public class RemoteCommunicationProtocol extends RemoteCommunicationProtocolBase
 			}
 			
 			@Override
-			public String[] getContent() {
+			public IFileContent[] getContent() {
 				return content;
 			}
 		};
