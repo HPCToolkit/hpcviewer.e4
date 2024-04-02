@@ -66,7 +66,10 @@ public class SocketForwardingSession implements ISessionRemoteSocket
         		break;
         	list.add(line);
         }
-		log("\t RECV " + list.get(0) + " / " + list.size());
+        if (list.isEmpty())
+        	log("\t RECV empty");
+        else
+        	log("\t RECV " + list.get(0) + " / " + list.size());
 		
         String []texts = new String[list.size()];
 		return list.toArray(texts);
