@@ -26,7 +26,7 @@ public interface IRemoteDirectoryContent
 	 * Interface representation of the content of this directory.
 	 * 
 	 */
-	interface IFileContent
+	public interface IFileContent
 	{
 		/**
 		 * Get the name of the file or directory

@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.eclipse.swt.widgets.Shell;
 
-import edu.rice.cs.hpcremote.data.RemoteCommunicationProtocol;
 import edu.rice.cs.hpcremote.data.RemoteCommunicationProtocolBase;
 
 public interface ICollectionOfConnections 

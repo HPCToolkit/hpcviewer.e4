@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Text;
 
 import edu.rice.cs.hpcremote.data.IRemoteDirectoryBrowser;
 import edu.rice.cs.hpcremote.data.IRemoteDirectoryContent;
+import edu.rice.cs.hpcremote.data.IRemoteDirectoryContent.IFileContent;
 
 public class RemoteDatabaseDialog extends TitleAreaDialog 
 {
@@ -238,9 +239,33 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 				return; // do we need this?
 			}
 		}
+		if (isDatabaseDirectory()) {
+			super.okPressed();
+			return;
+		}
+			
 		MessageDialog.openError(getShell(), "Not a database", selectedDirectory + ": is not a database directory");
 	}
 	
+	
+	private boolean isDatabaseDirectory() {
+		var inputs = directoryViewer.getInput();
+		if (inputs == null)
+			return false;
+		
+		int numFiledb = 0;
+		IFileContent []contents = (IFileContent[]) inputs;
+		
+		for(var content: contents) {
+			var name = content.getName();
+			var fileDb = name.equals("meta.db") || name.equals("cct.db") ||  name.equals("profile.db");
+			if (fileDb)
+				numFiledb++;
+			if (numFiledb >= 3)
+				return true;
+		}
+		return false;
+	}
 	
 	@Override
 	protected boolean isResizable() {
