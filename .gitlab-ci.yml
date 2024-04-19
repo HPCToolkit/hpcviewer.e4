@@ -74,7 +74,7 @@ test amd64:
   tags: [saas-linux-small-amd64]
   parallel:
     matrix:
-    - JDK: ['11', '17']
+    - JDK: ['17']
       WM: [metacity]
   dependencies: []
 

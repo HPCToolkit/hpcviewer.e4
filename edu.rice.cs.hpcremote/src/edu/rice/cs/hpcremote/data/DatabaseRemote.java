@@ -160,6 +160,17 @@ public class DatabaseRemote implements IDatabaseRemote
 	@Override
 	public void close() {		
 		if (remoteDatabaseConnection != null) {
+			// notify the server to close this connection
+			if (remoteDatabaseConnection.getHpcClient() != null) {
+				try {
+					remoteDatabaseConnection.getHpcClient().close();
+				} catch (IOException e) {
+					throw new IllegalStateException(e);
+				} catch (InterruptedException e) {
+				    Thread.currentThread().interrupt();
+				}
+			}
+			// close the socket
 			remoteDatabaseConnection.getRemoteSocket().disconnect();
 			remoteDatabaseConnection.getConnection().close();
 		}
