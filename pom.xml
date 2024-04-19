@@ -52,7 +52,7 @@
     <version>3.19.0</version>
     <configuration>
      <linkXref>false</linkXref>
-     <targetJdk>11</targetJdk>
+     <targetJdk>17</targetJdk>
      <excludes>
       <exclude>com/graphbuilder/**/*.java</exclude>
      </excludes>
