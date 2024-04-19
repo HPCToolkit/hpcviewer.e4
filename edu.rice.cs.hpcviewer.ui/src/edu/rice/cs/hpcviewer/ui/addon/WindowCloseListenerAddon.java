@@ -16,7 +16,10 @@ import org.eclipse.e4.ui.workbench.modeling.IWindowCloseHandler;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.notify.impl.AdapterImpl;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.swt.widgets.Shell;
 import org.osgi.service.event.Event;
+
+import edu.rice.cs.hpcremote.ICollectionOfConnections;
 
 /***
  * 
@@ -74,9 +77,9 @@ public class WindowCloseListenerAddon
 		
 		// only interested in changes to application
 		if (changedObj instanceof MApplication) {
-			MApplication application = (MApplication) changedObj;
+			MApplication app = (MApplication) changedObj;
 			if (workbench != null ) {
-				registerCloseHandler(application);
+				registerCloseHandler(app);
 			}
 		}
 	}
@@ -86,14 +89,11 @@ public class WindowCloseListenerAddon
 		// each window gets its own close handler as we want to add a modal confirm dialog
 		for (MWindow window : application.getChildren()) {
 			
-			IWindowCloseHandler closeHandler = new IWindowCloseHandler() {
+			IWindowCloseHandler closeHandler = win -> {
+				database.removeAllDatabases(win, modelService, partService);
+				ICollectionOfConnections.disconnectAll((Shell) win.getWidget());
 
-				@Override
-				public boolean close(MWindow window) {
-					database.removeAllDatabases(window, modelService, partService);
-					
-					return true;
-				}
+				return true;
 			};
 			
 			// Mostly MWindow contexts are lazily created by renderers

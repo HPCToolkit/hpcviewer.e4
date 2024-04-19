@@ -6,7 +6,7 @@ public class RemoteDatabaseIdentification implements IDatabaseIdentification
 {
 	private static final String EMPTY = "";
 
-	private String path;
+	private String databasePath;
 	private String host;
 	private int port;
 	
@@ -14,7 +14,7 @@ public class RemoteDatabaseIdentification implements IDatabaseIdentification
 
 	
 	public RemoteDatabaseIdentification() {
-		path = EMPTY;
+		databasePath = EMPTY;
 		host = EMPTY;
 		port = 8080;
 		username = EMPTY;
@@ -23,7 +23,7 @@ public class RemoteDatabaseIdentification implements IDatabaseIdentification
 	
 	public RemoteDatabaseIdentification(String databaseId) {
 		username = EMPTY;
-		path = EMPTY;
+		databasePath = EMPTY;
 		
 		var colon = databaseId.indexOf(':');
 		var slash = databaseId.indexOf('/');
@@ -52,7 +52,7 @@ public class RemoteDatabaseIdentification implements IDatabaseIdentification
 		this.host = host;
 		this.port = port;
 		
-		this.path = path;
+		this.databasePath = path;
 		this.username = username;
 	}
 	
@@ -68,7 +68,7 @@ public class RemoteDatabaseIdentification implements IDatabaseIdentification
 	
 	
 	public String getPath() {
-		return path;
+		return databasePath;
 	}
 	
 	
@@ -84,15 +84,21 @@ public class RemoteDatabaseIdentification implements IDatabaseIdentification
 			sb.append("@");
 		}
 		if (host != null)
-			sb.append(host);
+			sb.append(host.trim());
+
+		if (port < 1 && databasePath == null)
+			// the database has no information about the port number and the path
+			// it should be invalid, but let's just stop here at the moment.
+			return sb.toString();
+		
+		sb.append(':');
+
 		if (port > 1) {
-			sb.append(':');
 			sb.append(port);
 		}
-		sb.append('/');
 		
-		if (path != null)
-			sb.append(path);
+		if (databasePath != null)
+			sb.append(databasePath);
 		
 		return sb.toString();
 	}		
@@ -106,7 +112,7 @@ public class RemoteDatabaseIdentification implements IDatabaseIdentification
 	
 	@Override
 	public int hashCode() {
-		return path.hashCode();
+		return databasePath.hashCode();
 	}
 	
 	

@@ -3,7 +3,7 @@ package edu.rice.cs.hpclocal;
 import java.io.IOException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import edu.rice.cs.hpcdata.db.IFileDB;
-import edu.rice.cs.hpcdata.db.version2.FileDB2;
+import edu.rice.cs.hpcdata.db.version2.TraceDB2;
 import edu.rice.cs.hpcdata.db.version4.FileDB4;
 import edu.rice.cs.hpcdata.db.version4.MetricValueCollection4;
 import edu.rice.cs.hpcdata.experiment.Experiment;
@@ -52,16 +52,16 @@ public class LocalDBOpener extends AbstractDBOpener
 	private IFileDB getFileDB() throws InvalExperimentException, IOException {
 		IFileDB fileDB = null;
 		var version = experiment.getMajorVersion();
+		Experiment exp = (Experiment) experiment;
 		
 		switch (version)
 		{
 		case 1:
 		case Constants.EXPERIMENT_DENSED_VERSION:
-			fileDB = new FileDB2();
+			fileDB = new TraceDB2(exp);
 			break;
 		case 3:
 		case Constants.EXPERIMENT_SPARSE_VERSION:
-			Experiment exp = (Experiment) experiment;
 			var root = exp.getRootScope(RootScopeType.CallingContextTree);
 			MetricValueCollection4 mvc = (MetricValueCollection4) root.getMetricValueCollection();
 			fileDB = new FileDB4(experiment, mvc.getDataSummary());

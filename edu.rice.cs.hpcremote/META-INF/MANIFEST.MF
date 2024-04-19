@@ -1,6 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: hpcremote
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-SymbolicName: edu.rice.cs.hpcremote;singleton:=true
 Bundle-Version: 7.0.0.qualifier
 Bundle-Vendor: Rice University
@@ -21,8 +22,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.slf4j.api;bundle-version="1.7.30",
  io.vavr;bundle-version="0.10.4",
  edu.rice.cs.hpcremote.client;bundle-version="1.0.0",
- edu.rice.cs.hpcremote.common;bundle-version="1.0.0"
-Import-Package: com.jcraft.jsch,
- javax.inject;version="1.0.0",
+ edu.rice.cs.hpcremote.common;bundle-version="1.0.0",
+ edu.rice.cs.hpcremote.jsch;bundle-version="1.0.0"
+Import-Package: javax.inject;version="1.0.0",
  org.eclipse.e4.core.contexts;version="1.7.0"
 Automatic-Module-Name: edu.rice.cs.hpc.remote

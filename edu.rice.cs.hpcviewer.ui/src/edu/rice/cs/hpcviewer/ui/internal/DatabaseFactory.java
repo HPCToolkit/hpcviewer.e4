@@ -39,21 +39,11 @@ public class DatabaseFactory
 	}
 	
 	private static boolean isRemote(String databaseId) {
+		var user  = databaseId.indexOf('@');
 		var colon = databaseId.indexOf(':');
 		var slash = databaseId.indexOf('/');
-		if (colon >= slash)
-			return false;
-		var port  = databaseId.substring(colon+1, slash);
 		
-		if (colon <= 0 && slash < 1 || port.isEmpty())
-			return false;
-		
-		for(int i=0; i<port.length(); i++) {
-			char c = port.charAt(i);
-			if (c < '0' || c > '9')
-				return false;
-		}
-		return true;
+		return (colon > 0 && slash > 1 && user > 0);
 	}
 	
 	

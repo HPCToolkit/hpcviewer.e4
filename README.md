@@ -1,11 +1,3 @@
-
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=HPCToolkit_hpcviewer.e4&metric=alert_status)](https://sonarcloud.io/dashboard?id=HPCToolkit_hpcviewer.e4)
-[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=HPCToolkit_hpcviewer.e4&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=HPCToolkit_hpcviewer.e4)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=HPCToolkit_hpcviewer.e4&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=HPCToolkit_hpcviewer.e4)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=HPCToolkit_hpcviewer.e4&metric=security_rating)](https://sonarcloud.io/dashboard?id=HPCToolkit_hpcviewer.e4)
-
-
-
 # hpcviewer
 
 hpcviewer is the presentation layer of HPCToolkit which is a suite of tools
@@ -16,7 +8,7 @@ For static linked program, the variable environment ```HPCRUN_TRACE``` has to be
 
 ## General Requirements
 
-* Java 11 or 17. Currently hpcviewer does not support Java 20.
+* Java 17 or newer.
   Can be downloaded via [Spack](https://github.com/spack/spack) 
   or from [Oracle](https://www.oracle.com/java/technologies/javase-downloads.html)
   or [Adoptium](https://adoptium.net/temurin/releases)
@@ -59,10 +51,10 @@ Run the build script from the project root:
 Build directly with the Maven script:
 
 ```
-  mvn clean package
+  mvnw.cmd clean package
 ```
   This will compile and create hpcviewer packages for 4 platforms: Linux x86_64 and ppcle64, Windows and Mac
-  with Eclipse 4.19 (the default).
+  with Eclipse 4.30 (the default).
   Example of the output:
 
 ```
@@ -77,12 +69,15 @@ Build directly with the Maven script:
 
 Requirements:
 
-* Recommended: [Eclipse 2022.06 RCP](https://www.eclipse.org/downloads/packages/release/2022-06/r/eclipse-ide-rcp-and-rap-developers) or newer. 
+* Recommended: [Eclipse 2023.12 RCP](https://www.eclipse.org/downloads/packages/release/2023-12/r/eclipse-ide-rcp-and-rap-developers) or newer. 
 * Warning: May not work properly with older versions of Eclipse. 
 
 Recommended:
-* Source code for hpcdata https://gitlab.com/hpctoolkit/hpcdata
-* Source code for graphbuilder (math parser) https://gitlab.com/hpctoolkit/graphbuilder
+* Source code for [hpcdata](https://gitlab.com/hpctoolkit/hpcdata)
+* Source code for [graphbuilder (math parser)](https://gitlab.com/hpctoolkit/graphbuilder)
+* Source code for remote database:
+  * [hpcclient-java](https://gitlab.com/hpctoolkit/hpcclient-java)
+  * [hpcclient common](https://gitlab.com/hpctoolkit/hpcclientservercommon/)
  
 ```
   git clone https://gitlab.com/hpctoolkit/hpcdata

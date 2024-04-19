@@ -1,20 +1,21 @@
 package edu.rice.cs.hpcdata.app;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Locale;
 
 import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
+import edu.rice.cs.hpcdata.db.IFileDB;
 import edu.rice.cs.hpcdata.db.IdTuple;
-import edu.rice.cs.hpcdata.db.version2.FileDB2;
+import edu.rice.cs.hpcdata.db.version2.TraceDB2;
+import edu.rice.cs.hpcdata.db.version4.FileDB4;
+import edu.rice.cs.hpcdata.db.version4.MetricValueCollection4;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
-import edu.rice.cs.hpcdata.trace.TraceAttribute;
+import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.trace.TraceRecord;
 import edu.rice.cs.hpcdata.util.Constants;
 import edu.rice.cs.hpcdata.util.IProgressReport;
-import edu.rice.cs.hpcdata.util.MergeDataFiles;
 
 /*****
  * 
@@ -28,9 +29,7 @@ import edu.rice.cs.hpcdata.util.MergeDataFiles;
  ****/
 public class TracePrinter 
 {
-	private static final int RECORD_SIZE    = Constants.SIZEOF_LONG + Constants.SIZEOF_INT;
-
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		
 		if (args == null || args.length < 1) {
 			System.out.println("Syntax: java TracePrinter <database_directory>  [thread_to_print]");
@@ -50,22 +49,33 @@ public class TracePrinter
 		} catch (Exception e) {
 			return;
 		}
-		
-		final TraceAttribute trAttribute = (TraceAttribute) experiment.getTraceAttribute();		
 
 		// ------------------------------------------------------------------------
 		// open, read and merge (if necessary) hpctrace files
 		// ------------------------------------------------------------------------
 
-		final FileDB2 fileDB = new FileDB2();
+		IFileDB fileDB;
+		if (experiment.getMajorVersion() == Constants.EXPERIMENT_DENSED_VERSION) {
+			fileDB = new TraceDB2(experiment);
+		} else if (experiment.getMajorVersion() == Constants.EXPERIMENT_SPARSE_VERSION) {
+			var root = experiment.getRootScope(RootScopeType.CallingContextTree);
+			MetricValueCollection4 mvc = (MetricValueCollection4) root.getMetricValueCollection();
+			fileDB = new FileDB4(experiment, mvc.getDataSummary());
+		} else {
+			System.err.println("Unknown database version: " + localDb.getId());
+			return;
+		}
+		
+		 
 		try {
-			String filename = getTraceFile(args[0]);
-			fileDB.open(filename, trAttribute.dbHeaderSize, RECORD_SIZE);
+			fileDB.open(args[0]);
 		} catch (IOException e) {
+			e.printStackTrace();
 			return;
 		}
 		
 		if (args.length == 1) {
+			System.out.println("File: " + args[0]);
 			printSummary(fileDB);
 			return;
 		}
@@ -74,6 +84,7 @@ public class TracePrinter
 			int j=0;
 			for(var profile: ranks) {
 				if (Integer.valueOf(args[i]) == j) {
+					System.out.println("File: " + args[i]);
 					try {
 						printTrace(experiment, profile, fileDB);
 						System.out.println("------------------------");
@@ -87,7 +98,7 @@ public class TracePrinter
 	}
 
 	
-	private static void printTrace(Experiment experiment, IdTuple rank, FileDB2 fileDB) throws IOException {
+	private static void printTrace(Experiment experiment, IdTuple rank, IFileDB fileDB) throws IOException {
 		
 		final int MAX_NAME = 16;
 		
@@ -118,7 +129,7 @@ public class TracePrinter
 		}
 	}
 	
-	private static void printSummary(FileDB2 fileDB) {
+	private static void printSummary(IFileDB fileDB) {
 		final String []ranks = fileDB.getRankLabels();
 		if (ranks == null) return;
 		
@@ -133,28 +144,5 @@ public class TracePrinter
 			long numBytes = maxLoc - minLoc;
 			System.out.printf(Locale.US, "  %8s (%,d - %,d) : %,d bytes\n", profile.toString(), minLoc, maxLoc, numBytes);
 		}
-	}
-	
-	
-	private static String getTraceFile(String directory) throws FileNotFoundException, IOException {
-
-		final String outputFile = directory
-				+ File.separatorChar + "experiment.mt";
-		
-		File dirFile = new File(directory);
-		final MergeDataFiles.MergeDataAttribute att = MergeDataFiles
-				.merge(dirFile, "*.hpctrace", outputFile,
-						null);
-		
-		if (att != MergeDataFiles.MergeDataAttribute.FAIL_NO_DATA) {
-			File fileTrace = new File(outputFile);
-			if (fileTrace.length() > 56) {
-				return fileTrace.getAbsolutePath();
-			}
-		}
-		System.err
-				.println("Error: trace file(s) does not exist or fail to open "
-						+ outputFile);
-		return null;
 	}
 }

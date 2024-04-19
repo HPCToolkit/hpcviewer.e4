@@ -142,7 +142,7 @@ public class DatabaseCollection
 		}
 	}
 
-	
+
 	/****
 	 * One-stop API to open and add a database. 
 	 * This method shows a dialog box to pick a directory, check if the database already exists or not,
@@ -542,6 +542,8 @@ public class DatabaseCollection
 		// some parts may need to check the database if the experiment really exits or not.
 		// If not, they will consider the experiment will be removed.
 		databaseWindowManager.removeDatabase(window, database);
+		
+		database.close();
 	}
 	
 	

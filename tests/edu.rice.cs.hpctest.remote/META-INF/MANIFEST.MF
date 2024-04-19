@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: hpctest.remote
+Bundle-SymbolicName: edu.rice.cs.hpctest.remote
+Bundle-Version: 6.0.0.qualifier
+Require-Bundle: edu.rice.cs.hpcremote,
+ org.junit,
+ org.mockito;bundle-version="2.23.0",
+ net.bytebuddy.byte-buddy,
+ net.bytebuddy.byte-buddy-agent,
+ org.objenesis,
+ org.json
+Bundle-Vendor: Rice University
+Automatic-Module-Name: edu.rice.cs.hpctest.remote
+Bundle-RequiredExecutionEnvironment: JavaSE-17

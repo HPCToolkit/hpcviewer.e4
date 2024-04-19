@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.hpctoolkit.hpcclient.v1_0.HpcClient;
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcdata.experiment.IDatabaseRepresentation;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
@@ -14,6 +15,12 @@ public class RemoteDatabaseRepresentation implements IDatabaseRepresentation
 {
 	private final HpcClient client;
 	private String basicId;
+	
+	/**
+	 * Caching the trace version so we can avoid sending request to the host
+	 * all the time which reduce the performance significantly
+	 */
+	private int traceVersion = Integer.MIN_VALUE;
 	
 	public RemoteDatabaseRepresentation(HpcClient hpcclient, String id) {
 		this.client = hpcclient;
@@ -52,13 +59,17 @@ public class RemoteDatabaseRepresentation implements IDatabaseRepresentation
 
 	@Override
 	public int getTraceDataVersion() {
+		if (traceVersion < -1)
+			return traceVersion;
+		
+		traceVersion = -1;
 		try {
 			if (client.isTraceSampleDataAvailable())
-				return Constants.EXPERIMENT_SPARSE_VERSION;
+				traceVersion = Constants.EXPERIMENT_SPARSE_VERSION;
 		} catch (IOException | InterruptedException e) {
-			e.printStackTrace();
+			LoggerFactory.getLogger(getClass()).error("Fail to get trace version", e);
 		}
-		return -1;
+		return traceVersion;
 	}
 
 	@Override

@@ -75,9 +75,7 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 		this.tracePart   = tracePart;
 		analysisTool     = IPixelAnalysis.EMPTY;
 		
-		mapPixelToPercent = new TreeMap<Integer, Integer>();		
-				
-		SpaceTimeDataController stData = (SpaceTimeDataController) super.getData();
+		mapPixelToPercent = new TreeMap<>();		
 
 		// It is critical to reconstruct the image data according to Device zoom
 		// On Mac with retina display, the hardware pixel has 4x pixels than
