@@ -7,6 +7,8 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
 import org.hpctoolkit.hpcclient.v1_0.HpcClient;
 import org.hpctoolkit.hpcclient.v1_0.HpcClientJavaNetHttp;
+import org.slf4j.LoggerFactory;
+
 import edu.rice.cs.hpcremote.ICollectionOfConnections;
 import edu.rice.cs.hpcremote.IConnection;
 import edu.rice.cs.hpcremote.IRemoteCommunicationProtocol;
@@ -20,6 +22,8 @@ public abstract class RemoteCommunicationProtocolBase
 {
 	enum ServerResponseType {SUCCESS, ERROR, INVALID}
 	
+	private static final String HPCSERVER_LOCATION = "/libexec/hpcserver/hpcserver.sh";
+	
 	private final IllegalAccessError errorNotConnected = new IllegalAccessError("SSH tunnel not created yet.");
 	
 	private ISecuredConnection.ISessionRemoteSocket serverMainSession;
@@ -28,6 +32,8 @@ public abstract class RemoteCommunicationProtocolBase
 	private String remoteSocket;
 	
 	private IConnection connection;
+	
+	private String errorMessage;
 
 	
 	@Override
@@ -95,7 +101,11 @@ public abstract class RemoteCommunicationProtocolBase
 		if (!connectionSSH.connect(connectionDialog))
 			return ConnectionStatus.ERROR;
 		
-		String command = connectionDialog.getInstallationDirectory() + "/libexec/hpcserver/hpcserver.sh" ;
+		connectionSSH.addErrorMessageHandler( message -> {
+			LoggerFactory.getLogger(getClass()).error(message);
+			errorMessage = message;
+		});
+		String command = connectionDialog.getInstallationDirectory() +  HPCSERVER_LOCATION;
 		
 		var remoteSession = connectionSSH.executeRemoteCommand(command);
 		if (remoteSession == null) 
@@ -120,6 +130,12 @@ public abstract class RemoteCommunicationProtocolBase
 	
 	
 	@Override
+	public String getStandardErrorMessage() {
+		return errorMessage;
+	}
+	
+	
+	@Override
 	public String selectDatabase(Shell shell) {
 		if (serverMainSession == null)
 			throw errorNotConnected;
@@ -130,7 +146,6 @@ public abstract class RemoteCommunicationProtocolBase
 		}		
 		return null;
 	}
-
 	
 
 	@Override

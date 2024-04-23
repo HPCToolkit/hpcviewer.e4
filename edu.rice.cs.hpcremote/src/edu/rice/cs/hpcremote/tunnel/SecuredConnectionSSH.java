@@ -1,5 +1,6 @@
 package edu.rice.cs.hpcremote.tunnel;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -29,10 +30,21 @@ import edu.rice.cs.hpcremote.ISecuredConnection;
 import edu.rice.cs.hpcremote.ui.RemoteUserInfoDialog;
 
 
+/*************************************************
+ * 
+ * Class to manage the connection via SSH
+ * 
+ *************************************************/
 public class SecuredConnectionSSH implements ISecuredConnection 
 {
+	private static final int SSH_PORT = 22;
+	
+	private record ProxyConfig(String host, Config config) {}
+
 	private final Shell shell;
 	private List<Session> sessions;
+	
+	private IErrorMessageHandler handler;
 	
 	public SecuredConnectionSSH(Shell shell) {
 		this.shell = shell;
@@ -57,61 +69,11 @@ public class SecuredConnectionSSH implements ISecuredConnection
 			if (privateKey != null && !privateKey.isEmpty())
 				jsch.addIdentity(privateKey);
 			
-			var configFile = connectionInfo.getConfig();
-			var port = 22;
-
-			if (configFile != null && Files.isReadable(Path.of(configFile))) {
-		        ConfigRepository configRepository = OpenSSHConfig.parseFile(configFile);
-		        jsch.setConfigRepository(configRepository);
-		        
-		        var listOfProxies = new ArrayList<Config>();
-		        
-		        // check if the hostname is in the config
-		        var hostConfig = configRepository.getConfig(hostname);
-		        while (hostConfig != null) {
-		        	listOfProxies.add(hostConfig);
-
-			        String proxy = hostConfig.getValue("ProxyJump");
-		        	if (proxy != null) {
-			        	hostConfig = configRepository.getConfig(proxy);
-			        } else {
-			        	break;
-			        }
-		        }
-		        if (!listOfProxies.isEmpty()) {
-			        Collections.reverse(listOfProxies);
-			        
-			        var configProxy = listOfProxies.remove(0);
-			        var sessionProxy = jsch.getSession(username, configProxy.getHostname(), 22);
-			        sessionProxy.setUserInfo(userInfo);
-			        sessionProxy.connect();
-			        
-			        sessions = new ArrayList<>();
-			        sessions.add(sessionProxy);
-			        
-			        for(var proxy: listOfProxies) {				        
-						// may throw an exception
-			        	var proxyName = proxy.getHostname();
-			        	int assignedPort = sessionProxy.setPortForwardingL(0, proxyName, 22);
-			        	
-						sessionProxy = jsch.getSession(username, "127.0.0.1", assignedPort);
-
-						Properties config = new Properties();
-					    config.put("StrictHostKeyChecking", "no");
-					    sessionProxy.setConfig(config);
-					    
-					    sessionProxy.setUserInfo(userInfo);
-					    sessionProxy.setHostKeyAlias(proxyName);
-					    
-					    sessionProxy.connect();
-					    
-					    sessions.add(sessionProxy);
-			        }
-			        return true;
-		        }
-			}
+			if (canConnectUsingConfigRepo(jsch, connectionInfo, userInfo))
+				return true;
+			
 			// may throw an exception
-			var session = jsch.getSession(username, hostname, port);
+			var session = jsch.getSession(username, hostname, SSH_PORT);
 			
 			session.setUserInfo(userInfo);
 			
@@ -132,6 +94,103 @@ public class SecuredConnectionSSH implements ISecuredConnection
 			return false;
 		}
 		return true;
+	}
+	
+	
+	/****
+	 * Given a connection object, try to connect to remote host using SSH Configuration Repo, usually located
+	 * at `~/.ssh/config`.
+	 * 
+	 * The connection can be using an alias or proxy jump. If the connection is successful, it returns true.
+	 * 
+	 * @param jsch
+	 * @param connectionInfo
+	 * @param userInfo
+	 * 
+	 * @return {@code boolean} true if the connection succeeds, false otherwise.
+	 * 
+	 * @throws JSchException
+	 * @throws IOException
+	 */
+	private boolean canConnectUsingConfigRepo(JSch jsch, IConnection  connectionInfo, RemoteUserInfoDialog userInfo) 
+			throws JSchException, IOException {
+		
+		var configFile = connectionInfo.getConfig();
+
+		if (configFile != null && Files.isReadable(Path.of(configFile))) {
+	        ConfigRepository configRepository = OpenSSHConfig.parseFile(configFile);
+	        jsch.setConfigRepository(configRepository);
+	        
+	        var listOfProxies = new ArrayList<ProxyConfig>();
+	        var hostname = connectionInfo.getHost();
+	        
+	        // check if the hostname is in the config
+	        var hostConfig = configRepository.getConfig(hostname);
+	        while (hostConfig != null) {
+	        	listOfProxies.add(new ProxyConfig(hostname, hostConfig));
+
+	        	hostname = hostConfig.getValue("ProxyJump");
+	        	if (hostname != null) {
+		        	hostConfig = configRepository.getConfig(hostname);
+		        } else {
+		        	break;
+		        }
+	        }
+	        if (!listOfProxies.isEmpty()) {
+	        	// need to reverse the order of the list so that the first host to connect is the one 
+	        	// in the last host of the config repo
+	        	// 
+	        	// if we have the SSH config:
+	        	// Host hostA
+	        	// 		HostName hostA.rice.edu
+	        	// 
+	        	// Host hostB
+	        	//		HostName hostB.rice.edu
+	        	//		ProxyJump hostA
+	        	//
+	        	// Then when we want to connect to hostB, the initial order is:
+	        	//		hostB, hostA
+	        	//
+	        	// But the order of connection should be:
+	        	//		hostA, hostB
+	        	
+		        Collections.reverse(listOfProxies);
+		        
+		        var configProxy = listOfProxies.remove(0);
+		        
+		        var username = connectionInfo.getUsername();
+		        
+		        String remoteHost = configProxy.config.getHostname() == null ? configProxy.host : configProxy.config.getHostname();
+		        
+		        var sessionProxy = jsch.getSession(username, remoteHost, SSH_PORT);
+		        sessionProxy.setUserInfo(userInfo);
+		        sessionProxy.connect();
+		        
+		        sessions = new ArrayList<>();
+		        sessions.add(sessionProxy);
+		        
+		        for(var proxy: listOfProxies) {
+					// may throw an exception
+		        	var proxyName = proxy.config.getHostname() == null ? proxy.host : proxy.config.getHostname();
+		        	int assignedPort = sessionProxy.setPortForwardingL(0, proxyName, SSH_PORT);
+		        	
+					sessionProxy = jsch.getSession(username, "127.0.0.1", assignedPort);
+
+					Properties config = new Properties();
+				    config.put("StrictHostKeyChecking", "no");
+				    
+				    sessionProxy.setConfig(config);
+				    sessionProxy.setUserInfo(userInfo);
+				    sessionProxy.setHostKeyAlias(proxyName);
+				    
+				    sessionProxy.connect();
+				    
+				    sessions.add(sessionProxy);
+		        }
+		        return true;
+	        }
+		}
+		return false;
 	}
 	
 	
@@ -172,18 +231,6 @@ public class SecuredConnectionSSH implements ISecuredConnection
 		}
 		return null;
 	}
-
-	
-	public String getHost() {
-		var session = getSession();
-		return session.getHost();
-	}
-	
-	
-	public String getUsername() {
-		var session = getSession();
-		return session.getUserName();
-	}
 	
 	
 	private ISessionRemote executeCommand(ChannelExec channel, String command) throws JSchException, IOException {
@@ -191,8 +238,17 @@ public class SecuredConnectionSSH implements ISecuredConnection
 		
 		channel.setInputStream(null);
 		
-		//ByteArrayOutputStream errStream = new ByteArrayOutputStream();		
-		channel.setErrStream(System.err);
+		var errStream = new ByteArrayOutputStream() {
+			@Override
+			public void flush() throws IOException {
+				// notify the caller we have new error message from the remote host
+				if (handler != null) {
+					String str = new String(buf);
+					handler.message(str);
+				}
+		    }
+		};
+		channel.setErrStream(errStream);
 	
 		final var inStream = channel.getInputStream();
 		
@@ -231,4 +287,11 @@ public class SecuredConnectionSSH implements ISecuredConnection
 
 		sessions.forEach(Session::disconnect);
 	}
+	
+	
+	@Override
+	public void addErrorMessageHandler(IErrorMessageHandler handler) {
+		this.handler = handler;
+	}
+	
 }

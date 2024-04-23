@@ -15,11 +15,15 @@ public interface IRemoteConnection
 				return null;
 			
 			var message = database.getErrorMessage();
+			if (message == null || message.isEmpty()) {
+				message = "Fail to connect or launch hpcserver.\nPlease make sure hpcserver is installed correctly.";
+			} else {
+				message = "Error message from the remote host:\n" + message;
+			}
 			MessageDialog.openError(
 					shell, 
 					"Unable to open the database", 
-					"Error message from the remote host:\n"
-					+ message);
+					message);
 			return null;
 		}
 		

@@ -81,4 +81,7 @@ public interface IRemoteCommunicationProtocol
 	 * @throws IOException
 	 */
 	void disconnect(Shell shell) throws IOException;
+
+
+	String getStandardErrorMessage();
 }

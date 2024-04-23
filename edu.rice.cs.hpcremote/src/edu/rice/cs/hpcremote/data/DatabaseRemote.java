@@ -99,6 +99,7 @@ public class DatabaseRemote implements IDatabaseRemote
 				status = DatabaseStatus.CANCEL;
 				return status;
 			}
+			errorMessage = remoteHostConnection.getStandardErrorMessage();
 		} catch (IOException e) {
 			errorMessage = e.getLocalizedMessage();
 		}
