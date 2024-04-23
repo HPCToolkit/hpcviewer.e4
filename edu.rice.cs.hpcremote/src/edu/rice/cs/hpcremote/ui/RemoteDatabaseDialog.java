@@ -58,7 +58,7 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 		var descFolderReg = ImageDescriptor.createFromFile(getClass(), "folder-16.png");
 		imgFolderReg = resourceManager.createImage(descFolderReg);
 
-		var descFolderDb = ImageDescriptor.createFromFile(getClass(), "folder-16-blue.png");
+		var descFolderDb = ImageDescriptor.createFromFile(getClass(), "folder-16-green.png");
 		imgFolderDb = resourceManager.createImage(descFolderDb);
 	}
 

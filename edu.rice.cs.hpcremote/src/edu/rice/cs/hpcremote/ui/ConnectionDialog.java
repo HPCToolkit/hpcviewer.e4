@@ -2,7 +2,9 @@ package edu.rice.cs.hpcremote.ui;
 
 import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.StringTokenizer;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -20,6 +22,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import edu.rice.cs.hpcbase.map.UserInputHistory;
@@ -44,23 +47,30 @@ import edu.rice.cs.hpcremote.RemoteDatabaseIdentification;
 public class ConnectionDialog extends TitleAreaDialog implements IConnection
 {
 	private static final String EMPTY = "";
-	
-	private static final String HISTORY_KEY_USER = "hpcremote.user";
-	private static final String HISTORY_KEY_HOST = "hpcremote.host";
-	private static final String HISTORY_KEY_RDIR = "hpcremote.rdir";
+	private static final String HISTORY_SEPARATOR = "|";
+
+	private static final String HISTORY_KEY_PROFILE = "hpcremote.profile";
+
 	private static final String HISTORY_KEY_PRIV = "hpcremote.priv";
 	
 	private Combo  textHost;
 	private Combo  textUsername;
 	private Combo  textDirectory;
 	private Combo  textPrivateKey;
+	private Combo  textProxyAgent;
+	private Combo  textConfig;
+	
 	private Button labelPrivateKey;
+	private Button labelProxyAgent;
+	private Button labelUsePassword;
+	private Button labelConfiguration;
 	
 	private String host;
 	private String username;
 	private String directory;
 	private String privateKey;
-
+	private String proxyAgent;
+	private String configRepo;
 	
 	/*****
 	 * Instantiate a connection window. User needs to call {@code open} 
@@ -106,8 +116,6 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 		
 		textHost = new Combo(container, SWT.NONE);
 		textHost.setToolTipText("Please enter the remote host name or its IP address.");
-		
-		fillAndSetComboWithHistory(textHost, HISTORY_KEY_HOST);
 
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(textHost);
 				
@@ -117,7 +125,6 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 		labelUsername.setText("Username:");
 		
 		textUsername = new Combo(container, SWT.DROP_DOWN);
-		fillAndSetComboWithHistory(textUsername, HISTORY_KEY_USER);
 		
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(textUsername);
 		
@@ -127,23 +134,89 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 		labelDirectory.setText("Remote installation directory:");
 		
 		textDirectory = new Combo(container, SWT.DROP_DOWN);
-		fillAndSetComboWithHistory(textDirectory, HISTORY_KEY_RDIR);
 		
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(textDirectory);
 				
 		//------------------------------------------------------
+		createOptionArea(container);
+
+		//------------------------------------------------------
+		// fill up the form for the default
+		//------------------------------------------------------
+
+		initFields();
 		
-		labelPrivateKey = new Button(container, SWT.CHECK);
-		labelPrivateKey.setText("Private key (optional):");
+		return area;
+	}
+	
+	
+	private void createOptionArea(Composite container) {
+		var optionsArea = new Group(container, SWT.BORDER_SOLID);
+		
+		GridDataFactory.fillDefaults().span(2, 1).grab(true, true).applyTo(optionsArea);
+		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(optionsArea);
+
+		createPrivateKeyOption(optionsArea);
+		createProxyAgentOption(optionsArea);
+		createPasswordOption(optionsArea);
+		
+		createConfigRepo(optionsArea);
+	}
+	
+	
+	private void createConfigRepo(Composite optionsArea) {		
+		labelConfiguration = new Button(optionsArea, SWT.CHECK);
+		labelConfiguration.setText("SSH configuration:");
+		
+		textConfig = new Combo(optionsArea, SWT.DROP_DOWN);
+		var configFile = System.getProperty("user.home") + "/.ssh/config";
+
+		if (Files.isReadable(Path.of(configFile))) {
+			textConfig.add(configFile);
+			textConfig.select(0);
+			textConfig.setEnabled(true);
+			
+			labelConfiguration.setSelection(true);
+		} else {
+			textConfig.setEnabled(false);
+			labelConfiguration.setSelection(false);
+		}
+		labelConfiguration.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				var selected = labelConfiguration.getSelection();
+				textConfig.setEnabled(selected);
+			}
+		});
+	}
+	
+	
+	private void createPasswordOption(Composite optionsArea) {
+		labelUsePassword = new Button(optionsArea, SWT.RADIO);
+		labelUsePassword.setText("Use password");
+		GridDataFactory.fillDefaults().span(2, 1).grab(true, true).applyTo(labelUsePassword);
+	}
+	
+	private void createProxyAgentOption(Composite optionsArea) {
+		labelProxyAgent = new Button(optionsArea, SWT.RADIO);
+		labelProxyAgent.setText("Use identity");
+		
+		textProxyAgent = new Combo(optionsArea, SWT.DROP_DOWN | SWT.READ_ONLY);
+		textProxyAgent.add("Proxy agent");
+		textProxyAgent.select(0);
+	}
+	
+	private void createPrivateKeyOption(Composite optionsArea) {
+		labelPrivateKey = new Button(optionsArea, SWT.RADIO);
+		labelPrivateKey.setText("Use private key:");
 		labelPrivateKey.setSelection(false);
 		
-		var privateKeyArea  = new Composite(container, SWT.NONE);
+		var privateKeyArea  = new Composite(optionsArea, SWT.NONE);
 		
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(privateKeyArea);
 		GridLayoutFactory.fillDefaults().numColumns(2).applyTo(privateKeyArea);
 
 		textPrivateKey = new Combo(privateKeyArea, SWT.DROP_DOWN);
-		fillAndSetComboWithHistory(textPrivateKey, HISTORY_KEY_PRIV);
 		
 		if (textPrivateKey.getSelectionIndex() < 0) {
 			var home = System.getProperty("user.home");
@@ -184,8 +257,32 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 			privateKeyChecked = Files.exists(Paths.get(rsaFile));
 		}
 		labelPrivateKey.setSelection(privateKeyChecked);
+	}
+	
+	
+	private void initFields() {
+		var histories = initHistory();
 
-		return area;
+		if (histories.length > 0) {
+			for(var h: histories) {
+				if (h == null)
+					continue;
+				
+				textHost.add(h.host);
+				textUsername.add(h.username);
+				textDirectory.add(h.remoteDirectory);
+			}
+			textHost.select(0);
+			textUsername.select(0);
+			textDirectory.select(0);
+			
+			textHost.addModifyListener(event -> {
+				int selection = textHost.getSelectionIndex();
+				textUsername.select(selection);
+				textDirectory.select(selection);
+			});
+		}
+		fillAndSetComboWithHistory(textPrivateKey, HISTORY_KEY_PRIV);
 	}
 	
 	
@@ -199,18 +296,33 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 		username = textUsername.getText();		
 		directory = textDirectory.getText();
 		privateKey = labelPrivateKey.getSelection() ? textPrivateKey.getText() : null;
+		proxyAgent = labelProxyAgent.getSelection() ? textProxyAgent.getText() : null;
+		configRepo = labelConfiguration.getSelection() ? textConfig.getText()  : null;
 		
-		addIntoHistory(textHost, HISTORY_KEY_HOST);
-		addIntoHistory(textUsername, HISTORY_KEY_USER);
-		addIntoHistory(textDirectory, HISTORY_KEY_RDIR);
+		var history = new UserInputHistory(HISTORY_KEY_PROFILE);
+		var line = host + HISTORY_SEPARATOR + username + HISTORY_SEPARATOR + directory;
+		history.addLine(line);
 		
-		if (privateKey != null && !privateKey.isEmpty() && !privateKey.isBlank())
-			addIntoHistory(textPrivateKey, HISTORY_KEY_PRIV);
+		if (privateKey != null && !privateKey.isEmpty() && !privateKey.isBlank()) {
+			history = new UserInputHistory(HISTORY_KEY_PRIV);
+			history.addLine(privateKey);
+		}
 
 		super.okPressed();
 	}
 
 
+	@Override
+	public String getConfig() {
+		return checkVariable(configRepo);
+	}
+
+	
+	@Override
+	public String getProxyAgent() {
+		return checkVariable(proxyAgent);
+	}
+	
 	@Override
 	public String getHost() {
 		return checkVariable(host);
@@ -236,9 +348,6 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 
 	
 	private String checkVariable(String varString) {
-		if (varString == null)
-			throw new IllegalAccessError("Not connected");
-
 		return varString;
 	}
 	
@@ -256,7 +365,7 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 			btnOk.setEnabled(notEmpty);
 	}
 	
-	private void fillAndSetComboWithHistory(Combo combo, String key) {		
+	private void fillAndSetComboWithHistory(Combo combo, String key) {	
 		UserInputHistory history = new UserInputHistory(key);
 		var histories = history.getHistory();
 		for(var item: histories) {
@@ -274,12 +383,6 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 	}
 	
 	
-	private void addIntoHistory(Combo combo, String key) {
-		UserInputHistory history = new UserInputHistory(key);
-		history.addLine(combo.getText());
-	}
-	
-	
 	public static void main(String []argv) {
 		var display = Display.getDefault();
 		Shell shell = new Shell(display);
@@ -287,4 +390,29 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 		var dlg = new ConnectionDialog(shell);
 		dlg.open();
 	}
+	
+	
+	private History[] initHistory() {
+		var history = new UserInputHistory(HISTORY_KEY_PROFILE);
+		var listOfHistories = history.getHistory();
+		if (listOfHistories == null || listOfHistories.isEmpty()) {
+			return new History[] {new History("localhost", username, "")};
+		}
+		History []histories = new History[listOfHistories.size()];
+		int i=0;
+		for(var line: listOfHistories) {
+			StringTokenizer tokenizer = new StringTokenizer(line, HISTORY_SEPARATOR);
+			if (tokenizer.countTokens() == 3) {
+				var prof = tokenizer.nextToken();
+				var user = tokenizer.nextToken();
+				var dir  = tokenizer.nextToken();
+				histories[i] = new History(prof, user, dir);
+				i++;
+			}
+		}
+		return histories;
+	}
+	
+	private record History (String host, String username, String remoteDirectory)
+	{}
 }

@@ -92,13 +92,10 @@ public abstract class RemoteCommunicationProtocolBase
 		// launching hpcserver on the remote host
 		//
 		var connectionSSH = new SecuredConnectionSSH(shell);		
-		if (!connectionSSH.connect(
-				connectionDialog.getUsername(), 
-				connectionDialog.getHost(), 
-				connectionDialog.getPrivateKey()))
+		if (!connectionSSH.connect(connectionDialog))
 			return ConnectionStatus.ERROR;
 		
-		String command = connectionDialog.getInstallationDirectory() + "/bin/hpcserver.sh" ;
+		String command = connectionDialog.getInstallationDirectory() + "/libexec/hpcserver/hpcserver.sh" ;
 		
 		var remoteSession = connectionSSH.executeRemoteCommand(command);
 		if (remoteSession == null) 
@@ -179,7 +176,7 @@ public abstract class RemoteCommunicationProtocolBase
 	IRemoteDatabaseConnection createTunnelAndRequestDatabase(Shell shell, String brokerSocket) throws IOException {
 		var brokerSSH = new SecuredConnectionSSH(shell);
 		
-		if (!brokerSSH.connect(connection.getUsername(), connection.getHost(), connection.getPrivateKey()))
+		if (!brokerSSH.connect(connection))
 			return null;
 		
 		var brokerSession = brokerSSH.socketForwarding(brokerSocket);

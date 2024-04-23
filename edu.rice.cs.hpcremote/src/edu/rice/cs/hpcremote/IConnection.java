@@ -11,4 +11,8 @@ public interface IConnection
 	String getInstallationDirectory();
 	
 	String getId();
+
+	String getConfig();
+
+	String getProxyAgent();
 }

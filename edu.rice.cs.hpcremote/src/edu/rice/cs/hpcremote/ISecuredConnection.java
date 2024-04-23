@@ -10,9 +10,8 @@ import com.jcraft.jsch.Session;
 
 public interface ISecuredConnection 
 {
-	boolean connect(String username, String hostName);
 
-	boolean connect(String username, String hostName, String privateKey);
+	boolean connect(IConnection connectionInfo);
 
 	void close();
 	
