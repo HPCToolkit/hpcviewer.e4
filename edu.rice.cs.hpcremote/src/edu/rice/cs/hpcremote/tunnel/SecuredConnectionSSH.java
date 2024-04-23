@@ -143,11 +143,9 @@ public class SecuredConnectionSSH implements ISecuredConnection
 		return sessions.get(numSessions-1);
 	}
 	
+	
 	@Override
 	public ISessionRemote executeRemoteCommand(String command) {
-		if (sessions == null)
-			throw new IllegalAccessError("Not connected. Need to call connect() first");
-		
 		try {
 			var session = getSession();
 			ChannelExec channelExec = (ChannelExec) session.openChannel("exec");
@@ -162,9 +160,6 @@ public class SecuredConnectionSSH implements ISecuredConnection
 	
 	@Override
 	public ISessionRemoteSocket socketForwarding(String socketPath) {
-		if (sessions == null)
-			throw new IllegalAccessError("Not connected. Need to call connect() first");
-
 		try {
 			var session = getSession();
 			return new SocketForwardingSession(session, socketPath);
@@ -181,20 +176,15 @@ public class SecuredConnectionSSH implements ISecuredConnection
 	
 	public String getHost() {
 		var session = getSession();
-		if (session == null)
-			throw new IllegalAccessError("Host is not connected");
-		
 		return session.getHost();
 	}
 	
 	
 	public String getUsername() {
 		var session = getSession();
-		if (session == null)
-			throw new IllegalAccessError("Host is not connected");
-
 		return session.getUserName();
 	}
+	
 	
 	private ISessionRemote executeCommand(ChannelExec channel, String command) throws JSchException, IOException {
 		channel.setCommand(command);
