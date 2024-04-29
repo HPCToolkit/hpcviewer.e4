@@ -17,18 +17,12 @@ public class Activator implements BundleActivator
 	private static final String OPTION_VERSION_SHORT = "-v";
 	private static final String OPTION_VERSION_LONG  = "--version";
 
-	private static BundleContext context;
-
-	static BundleContext getContext() {
-		return context;
-	}
-
 	public void start(BundleContext bundleContext) throws Exception {
-		if (!JavaValidator.isCorrectJavaVersion())
+		if (!JavaValidator.isCorrectJavaVersion()) {
 			System.exit(0);
+		}
 		
-		Activator.context = bundleContext;
-		String args[] = Platform.getApplicationArgs();
+		String[] args = Platform.getApplicationArgs();
 		for (String arg: args) {
 			if (arg.equals(OPTION_VERSION_SHORT) || arg.equals(OPTION_VERSION_LONG)) {
 				String release = ApplicationProperty.getVersion();
@@ -39,7 +33,7 @@ public class Activator implements BundleActivator
 	}
 
 	public void stop(BundleContext bundleContext) throws Exception {
-		Activator.context = null;
+		// free resources and stop the remote connection here?
 	}
 
 }
