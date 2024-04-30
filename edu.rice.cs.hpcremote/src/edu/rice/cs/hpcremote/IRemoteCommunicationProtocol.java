@@ -28,7 +28,16 @@ public interface IRemoteCommunicationProtocol
 	 * @return {@code String} the IP address of the remote host
 	 */
 	String getRemoteHost();
-	
+
+
+	/****
+	 * Get the human readable of the remote host
+	 * 
+	 * @return {@code String} The name of the remote host.
+	 * 			If not connection, it returns empty string or default host name.
+	 */
+	String getRemoteHostname();
+
 	
 	/***
 	 * The user name used to connect to the remote host.

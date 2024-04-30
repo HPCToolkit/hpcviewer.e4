@@ -43,6 +43,15 @@ public abstract class RemoteCommunicationProtocolBase
 	
 	
 	@Override
+	public String getRemoteHostname() {
+		if (connection == null)
+			return "unknown";
+		
+		return connection.getHost();
+	}
+	
+	
+	@Override
 	public String getUsername() {
 		return connection.getUsername();
 	}

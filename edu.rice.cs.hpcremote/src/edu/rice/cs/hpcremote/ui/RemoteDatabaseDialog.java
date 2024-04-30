@@ -4,6 +4,8 @@ import java.io.IOException;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.resource.LocalResourceManager;
@@ -82,7 +84,7 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		getShell().setText("Remote database browser");
-		setTitle("Browsing " + remoteBrowser.getRemoteHost());
+		setTitle("Browsing " + remoteBrowser.getRemoteHostname());
 		setMessage("Select a HPCToolkit database directory");
 		
 		Composite area = (Composite) super.createDialogArea(parent);
@@ -95,7 +97,7 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 		glDirectoryArea.marginHeight = 1;
 		glDirectoryArea.marginWidth = 0;
 		directoryArea.setLayout(glDirectoryArea);
-		GridData gdDirectoryArea = new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1);
+		GridData gdDirectoryArea = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
 		gdDirectoryArea.widthHint = 441;
 		directoryArea.setLayoutData(gdDirectoryArea);
 		
@@ -103,7 +105,7 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 		lblDirectory.setText("Directory:");
 		
 		textDirectory = new Text(directoryArea, SWT.BORDER);
-		GridData gdTextDirectory = new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1);
+		GridData gdTextDirectory = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
 		gdTextDirectory.widthHint = 378;
 		textDirectory.setLayoutData(gdTextDirectory);
 		textDirectory.setBounds(0, 0, 64, 19);
@@ -157,14 +159,12 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 		});
 		
 		viewer.setContentProvider(ArrayContentProvider.getInstance());
-		
-		GridData gdListDirectory = new GridData(SWT.LEFT, SWT.CENTER, true, true, 1, 1);
-		gdListDirectory.heightHint = 362;
-		gdListDirectory.widthHint = 440;
-		
+				
 		var tableDir = viewer.getTable();
-		tableDir.setLayoutData(gdListDirectory);
 		tableDir.setHeaderVisible(true);
+		
+		GridDataFactory.fillDefaults().grab(true, true).hint(366, 446).applyTo(tableDir);
+		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(tableDir);
 		
 		tableDir.addSelectionListener(new SelectionAdapter() {
 			private boolean isDatabase(SelectionEvent e) {
