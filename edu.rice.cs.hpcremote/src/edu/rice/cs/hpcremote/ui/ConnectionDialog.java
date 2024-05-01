@@ -62,7 +62,7 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 	
 	private Button labelPrivateKey;
 	private Button labelProxyAgent;
-	private Button labelUsePassword;
+	
 	private Button labelConfiguration;
 	
 	private String host;
@@ -192,10 +192,11 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 	
 	
 	private void createPasswordOption(Composite optionsArea) {
-		labelUsePassword = new Button(optionsArea, SWT.RADIO);
+		Button labelUsePassword = new Button(optionsArea, SWT.RADIO);
 		labelUsePassword.setText("Use password");
 		GridDataFactory.fillDefaults().span(2, 1).grab(true, true).applyTo(labelUsePassword);
 	}
+	
 	
 	private void createProxyAgentOption(Composite optionsArea) {
 		labelProxyAgent = new Button(optionsArea, SWT.RADIO);
@@ -205,6 +206,7 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 		textProxyAgent.add("Proxy agent");
 		textProxyAgent.select(0);
 	}
+	
 	
 	private void createPrivateKeyOption(Composite optionsArea) {
 		labelPrivateKey = new Button(optionsArea, SWT.RADIO);

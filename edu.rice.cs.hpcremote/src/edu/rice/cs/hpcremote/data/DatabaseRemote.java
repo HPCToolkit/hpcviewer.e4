@@ -109,8 +109,8 @@ public class DatabaseRemote implements IDatabaseRemote
 
 	
 	private boolean checkServerReadiness(HpcClient client) {
-		// maximum we wait for 5 seconds
-		int numAttempt = 50;
+		// maximum we wait for 10 seconds max
+		int numAttempt = 100;
 		while(numAttempt > 0) {
 			try {
 				var path = client.getDatabasePath();

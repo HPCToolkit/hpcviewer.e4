@@ -17,7 +17,7 @@ public interface IRemoteCommunicationProtocol
 	/**
 	 * Status of the remote connection: successful, fails, or not done
 	 */
-	enum ConnectionStatus {NOT_CONNECTED, CONNECTED, ERROR}
+	enum ConnectionStatus {NOT_CONNECTED, CONNECTED, ERROR, CANCEL}
 	
 	
 	/***
