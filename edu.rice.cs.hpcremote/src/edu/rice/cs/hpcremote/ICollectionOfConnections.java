@@ -5,7 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.swt.widgets.Shell;
+import org.slf4j.LoggerFactory;
 
+import edu.rice.cs.hpcremote.data.RemoteCommunicationJsonProtocol;
 import edu.rice.cs.hpcremote.data.RemoteCommunicationProtocolBase;
 
 public interface ICollectionOfConnections 
@@ -21,7 +23,8 @@ public interface ICollectionOfConnections
 			try {
 				val.disconnect(shell);
 			} catch (IOException e) {
-				// nothing to do
+				// nothing to do, just log
+				LoggerFactory.getLogger("ICollectionOfConnections").error("Fail to disconnect", e);
 			}
 		});
 	}
@@ -41,6 +44,25 @@ public interface ICollectionOfConnections
 		return new HashMap<>();
 	}
 	
+	
+	/***
+	 * Get the remote connection of a given shell and connection info
+	 * 
+	 * @param shell
+	 * @param connection
+	 * @return
+	 */
+	static RemoteCommunicationProtocolBase getRemoteConnection(Shell shell, IConnection connection) {
+
+		// check if we already have exactly the same connection as the 
+		// requested host, user id and installation
+		
+		var setOfConnections = ICollectionOfConnections.getShellSessions(shell);
+		if (setOfConnections.containsKey(connection.getId())) {
+			return setOfConnections.get(connection.getId());			
+		}
+		return new RemoteCommunicationJsonProtocol();
+	}
 	
 	/***
 	 * Store the communication session to this shell

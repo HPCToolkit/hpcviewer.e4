@@ -19,7 +19,7 @@ import edu.rice.cs.hpcdata.util.Util;
 
 public interface IDatabase 
 {
-	enum DatabaseStatus {NOT_INITIALIZED, OK, INVALID, INEXISTENCE, UNKNOWN_ERROR, CANCEL}
+	enum DatabaseStatus {NOT_INITIALIZED, OK, INVALID, INEXISTENCE, UNKNOWN_ERROR, CANCEL, NOT_RESPONSIVE}
 	
 	/****
 	 * Get the unique ID of this database. 

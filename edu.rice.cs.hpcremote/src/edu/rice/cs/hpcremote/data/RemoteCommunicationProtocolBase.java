@@ -11,14 +11,13 @@ import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcremote.ICollectionOfConnections;
 import edu.rice.cs.hpcremote.IConnection;
-import edu.rice.cs.hpcremote.IRemoteCommunicationProtocol;
 import edu.rice.cs.hpcremote.ISecuredConnection;
+import edu.rice.cs.hpcremote.tunnel.IRemoteCommunication;
 import edu.rice.cs.hpcremote.tunnel.SecuredConnectionSSH;
-import edu.rice.cs.hpcremote.ui.ConnectionDialog;
 import edu.rice.cs.hpcremote.ui.RemoteDatabaseDialog;
 
 public abstract class RemoteCommunicationProtocolBase 
-	implements IRemoteCommunicationProtocol, IRemoteDirectoryBrowser
+	implements IRemoteCommunication
 {
 	enum ServerResponseType {SUCCESS, ERROR, INVALID}
 	
@@ -27,6 +26,7 @@ public abstract class RemoteCommunicationProtocolBase
 	private final IllegalAccessError errorNotConnected = new IllegalAccessError("SSH tunnel not created yet.");
 	
 	private ISecuredConnection.ISessionRemoteSocket serverMainSession;
+	private SecuredConnectionSSH connectionSSH;
 	
 	private String remoteIP;
 	private String remoteSocket;
@@ -75,46 +75,24 @@ public abstract class RemoteCommunicationProtocolBase
 	 * @throws IOException
 	 */
 	@Override
-	public ConnectionStatus connect(Shell shell) throws IOException {
-		if (serverMainSession != null)
+	public ConnectionStatus connect(Shell shell, IConnection connectionInfo) throws IOException {
+		if (connectionSSH != null)
 			return ConnectionStatus.CONNECTED;
-		
-		var connectionDialog = new ConnectionDialog(shell);
-		if (connectionDialog.open() == Window.CANCEL) {
-			return ConnectionStatus.NOT_CONNECTED;
-		}
 
-		// check if we already have exactly the same connection as the 
-		// requested host, user id and installation
-		
-		var setOfConnections = ICollectionOfConnections.getShellSessions(shell);
-		if (setOfConnections.containsKey(connectionDialog.getId())) {
-			var matchedConnection = setOfConnections.get(connectionDialog.getId());
-			
-			if (matchedConnection != null) {
-				// copy and then reuse the existing session which has exactly the same
-				// remote host, user and installation
-				serverMainSession = matchedConnection.serverMainSession;
-				connection = matchedConnection.connection;
-				remoteIP = matchedConnection.remoteIP;
-				remoteSocket = matchedConnection.remoteSocket;
-				
-				return ConnectionStatus.CONNECTED;
-			}
-		}
-		
+		// New connection:
+		// - launching hpcserver on the remote host
+		// - create SSH tunnel to communicate with hpcserver
 		//
-		// launching hpcserver on the remote host
-		//
-		var connectionSSH = new SecuredConnectionSSH(shell);		
-		if (!connectionSSH.connect(connectionDialog))
+		connectionSSH = new SecuredConnectionSSH(shell);
+
+		if (!connectionSSH.connect(connectionInfo))
 			return ConnectionStatus.ERROR;
 		
 		connectionSSH.addErrorMessageHandler( message -> {
 			LoggerFactory.getLogger(getClass()).error(message);
 			errorMessage = message;
 		});
-		String command = connectionDialog.getInstallationDirectory() +  HPCSERVER_LOCATION;
+		String command = connectionInfo.getInstallationDirectory() +  HPCSERVER_LOCATION;
 		
 		var remoteSession = connectionSSH.executeRemoteCommand(command);
 		if (remoteSession == null) 
@@ -130,7 +108,7 @@ public abstract class RemoteCommunicationProtocolBase
 		if (serverMainSession == null)
 			return ConnectionStatus.ERROR;
 		
-		this.connection = connectionDialog;
+		this.connection = connectionInfo;
 		
 		ICollectionOfConnections.putShellSession(shell, connection.getId(), this);
 		
@@ -171,7 +149,9 @@ public abstract class RemoteCommunicationProtocolBase
 			throw new UnknownError("Fail to connect to the server.");
 		case SUCCESS:
 			var socket = reply.getResponseArgument()[0];
-			return createTunnelAndRequestDatabase(shell, socket);
+			System.out.println("openDatabaseConnection w/ socket: " + socket);
+			
+			return createTunnelAndRequestDatabase(socket);
 		}
 		return null;
 	}
@@ -197,19 +177,19 @@ public abstract class RemoteCommunicationProtocolBase
 	}
 	
 	
-	IRemoteDatabaseConnection createTunnelAndRequestDatabase(Shell shell, String brokerSocket) throws IOException {
-		var brokerSSH = new SecuredConnectionSSH(shell);
-		
-		if (!brokerSSH.connect(connection))
+	IRemoteDatabaseConnection createTunnelAndRequestDatabase(String brokerSocket) throws IOException {		
+		if (connectionSSH == null)
 			return null;
 		
-		var brokerSession = brokerSSH.socketForwarding(brokerSocket);
+		var brokerSession = connectionSSH.socketForwarding(brokerSocket);
 		if (brokerSession == null)
 			return null;
 		
 		int port = brokerSession.getLocalPort();
 		var addr = InetAddress.getByName("localhost");
 		final var hpcclient = new HpcClientJavaNetHttp(addr, port);
+		
+		System.out.println("createTunnelAndRequestDatabase. " + addr + ":" + port + " sock: " + brokerSocket);
 		
 		return new IRemoteDatabaseConnection() {
 			
@@ -220,7 +200,7 @@ public abstract class RemoteCommunicationProtocolBase
 			
 			@Override
 			public ISecuredConnection getConnection() {
-				return brokerSSH;
+				return connectionSSH;
 			}
 			
 			@Override

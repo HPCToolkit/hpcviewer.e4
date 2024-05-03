@@ -1,6 +1,8 @@
 package edu.rice.cs.hpcremote.data;
 
 import java.io.IOException;
+
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
 import org.hpctoolkit.client_server_common.profiled_source.ProfiledSourceFileId;
 import org.hpctoolkit.client_server_common.profiled_source.UnknownProfiledSourceFileId;
@@ -19,10 +21,12 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.source.MetaFileSystemSourceFile;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
 import edu.rice.cs.hpcdata.util.IProgressReport;
+import edu.rice.cs.hpcremote.ICollectionOfConnections;
 import edu.rice.cs.hpcremote.IDatabaseRemote;
 import edu.rice.cs.hpcremote.IRemoteCommunicationProtocol;
 import edu.rice.cs.hpcremote.RemoteDatabaseIdentification;
 import edu.rice.cs.hpcremote.trace.RemoteTraceOpener;
+import edu.rice.cs.hpcremote.ui.ConnectionDialog;
 
 
 
@@ -60,16 +64,19 @@ public class DatabaseRemote implements IDatabaseRemote
 	public DatabaseStatus reset(Shell shell, IDatabaseIdentification databaseId) {
 		return open(shell);
 	}
-	
+
 	
 	@Override
 	public DatabaseStatus open(Shell shell) {
-		if (remoteHostConnection == null) {
-	        var usingJson = System.getenv("HPCSERVER_TEXT_PROTOCOL");
-			remoteHostConnection = usingJson != null ? new RemoteCommunicationProtocol() : new RemoteCommunicationJsonProtocol();
+		
+		var connectionDialog = new ConnectionDialog(shell);
+		if (connectionDialog.open() == Window.CANCEL) {
+			return DatabaseStatus.CANCEL;
 		}
+		remoteHostConnection = ICollectionOfConnections.getRemoteConnection(shell, connectionDialog);
+
 		try {
-			var connectStatus = remoteHostConnection.connect(shell);
+			var connectStatus = remoteHostConnection.connect(shell, connectionDialog);
 			if (connectStatus == IRemoteCommunicationProtocol.ConnectionStatus.CONNECTED) {
 				var database = remoteHostConnection.selectDatabase(shell);
 				if (database == null) {
@@ -82,7 +89,7 @@ public class DatabaseRemote implements IDatabaseRemote
 				
 				if (!checkServerReadiness(remoteDatabaseConnection.getHpcClient())) {
 					errorMessage = "Server is not responsive";
-					status = DatabaseStatus.INVALID;
+					status = DatabaseStatus.NOT_RESPONSIVE;
 					return status;
 				}
 					
@@ -173,7 +180,6 @@ public class DatabaseRemote implements IDatabaseRemote
 			}
 			// close the socket
 			remoteDatabaseConnection.getRemoteSocket().disconnect();
-			remoteDatabaseConnection.getConnection().close();
 		}
 	}
 

@@ -84,7 +84,7 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		getShell().setText("Remote database browser");
-		setTitle("Browsing " + remoteBrowser.getRemoteHostname());
+		setTitle("Browsing " + remoteBrowser.getRemoteHostname() + " (" + remoteBrowser.getRemoteHost() + ")");
 		setMessage("Select a HPCToolkit database directory");
 		
 		Composite area = (Composite) super.createDialogArea(parent);

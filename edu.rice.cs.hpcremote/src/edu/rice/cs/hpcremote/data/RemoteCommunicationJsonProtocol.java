@@ -137,7 +137,7 @@ public class RemoteCommunicationJsonProtocol extends RemoteCommunicationProtocol
 
 			@Override
 			public ServerResponseType getResponseType() {
-				var status = new JSONObject(buffer).getString("status");
+				var status = new JSONObject(buffer).getString(KEY_STATUS);
 				
 				return switch(status) {
 				case "success" -> ServerResponseType.SUCCESS;

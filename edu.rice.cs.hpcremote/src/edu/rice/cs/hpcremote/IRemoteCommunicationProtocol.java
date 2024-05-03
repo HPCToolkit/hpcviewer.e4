@@ -53,7 +53,7 @@ public interface IRemoteCommunicationProtocol
 	 * @return
 	 * @throws IOException
 	 */
-	ConnectionStatus connect(Shell shell) throws IOException;
+	ConnectionStatus connect(Shell shell, IConnection connectionInfo) throws IOException;
 	
 	
 	/*****
