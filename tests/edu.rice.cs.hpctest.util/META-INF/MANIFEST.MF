@@ -10,3 +10,4 @@ Require-Bundle: org.junit,
 Bundle-Vendor: Rice University
 Automatic-Module-Name: edu.rice.cs.hpctest.util
 Bundle-RequiredExecutionEnvironment: JavaSE-11
+Import-Package: edu.rice.cs.hpcbase

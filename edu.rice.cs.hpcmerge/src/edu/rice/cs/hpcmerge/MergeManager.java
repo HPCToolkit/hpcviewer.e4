@@ -8,6 +8,7 @@ import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.widgets.Shell;
 import org.slf4j.LoggerFactory;
 
+import edu.rice.cs.hpcbase.IDatabase;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcdata.merge.DatabasesToMerge;
@@ -31,7 +32,7 @@ public class MergeManager
 	 * 			The callback object when the merging is done (or error).
 	 */
 	public static void merge(Shell shell, 
-							 List<Experiment> experiments, 
+							 List<IDatabase> experiments, 
 							 RootScopeType type, 
 							 IMergeCallback callback) {
 		

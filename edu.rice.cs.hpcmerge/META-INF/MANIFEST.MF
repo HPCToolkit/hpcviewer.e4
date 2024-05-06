@@ -11,3 +11,4 @@ Require-Bundle: edu.rice.cs.hpcdata,
  org.eclipse.core.runtime,
  org.slf4j.api
 Export-Package: edu.rice.cs.hpcmerge
+Import-Package: edu.rice.cs.hpcbase
