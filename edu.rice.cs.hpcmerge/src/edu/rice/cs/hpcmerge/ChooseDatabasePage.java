@@ -13,6 +13,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
 
+import edu.rice.cs.hpcbase.IDatabase;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.merge.DatabasesToMerge;
 
@@ -21,10 +22,10 @@ public class ChooseDatabasePage extends WizardPage
 	private static final String TITLE = "Databases to merge";
 
 	private CheckboxTableViewer tableViewer ;
-	private List<Experiment> listDb;
+	private List<IDatabase> listDb;
 	private DatabasesToMerge database;
 	
-	protected ChooseDatabasePage( List<Experiment> listExperiments, DatabasesToMerge database) {
+	protected ChooseDatabasePage( List<IDatabase> listExperiments, DatabasesToMerge database) {
 		super(TITLE);
 		setTitle(TITLE);
 		setDescription("Choose two databases to be merged");
@@ -52,9 +53,9 @@ public class ChooseDatabasePage extends WizardPage
 		
 		colViewer.setLabelProvider(new ColumnLabelProvider() {
 			@Override
-			public String getText(Object element) {
-				Experiment exp = (Experiment) element;
-				return exp.getDirectory(); 				
+			public String getText(Object element) {				
+				var db = (IDatabase) element;
+				return db.getId().id(); 				
 			}
 		});
 		tableViewer.addCheckStateListener(event -> {
@@ -78,8 +79,8 @@ public class ChooseDatabasePage extends WizardPage
 		boolean canFlip = isDone();
 		if (canFlip) {
 			Object []elems  = tableViewer.getCheckedElements();
-			database.experiment[0] = (Experiment) elems[0];
-			database.experiment[1] = (Experiment) elems[1];
+			database.experiment[0] = (Experiment) ((IDatabase) elems[0]).getExperimentObject();
+			database.experiment[1] = (Experiment) ((IDatabase) elems[1]).getExperimentObject();
 		}
 		return canFlip;
 	}
