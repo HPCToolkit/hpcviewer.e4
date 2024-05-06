@@ -50,7 +50,9 @@ import edu.rice.cs.hpcremote.data.IRemoteDirectoryContent.IFileContent;
  */
 public class RemoteCommunicationJsonProtocol extends RemoteCommunicationProtocolBase
 {
-	private static final String KEY_STATUS = "status";
+	private static final String KEY_STATUS   = "status";
+	private static final String KEY_COMMAND  = "command";
+	private static final String KEY_ARGUMENT = "arg";
 	
 	@Override
 	public void disconnect(
@@ -58,7 +60,7 @@ public class RemoteCommunicationJsonProtocol extends RemoteCommunicationProtocol
 			Shell shell) throws IOException {
 
 		JSONObject json = new JSONObject();
-		json.put("command", "quit");		
+		json.put(KEY_COMMAND, "quit");		
 		serverMainSession.write(json.toString());
 	}
 
@@ -69,8 +71,8 @@ public class RemoteCommunicationJsonProtocol extends RemoteCommunicationProtocol
 			String database) throws IOException {
 		
 		JSONObject json = new JSONObject();
-		json.put("command", "data");		
-		json.put("arg", database);		
+		json.put(KEY_COMMAND, "data");		
+		json.put(KEY_ARGUMENT, database);		
 		serverMainSession.write(json.toString());
 
 		var reply = serverMainSession.read();
@@ -78,7 +80,7 @@ public class RemoteCommunicationJsonProtocol extends RemoteCommunicationProtocol
 		final var jsonReply = new JSONObject(buffer);
 		
 		if (isSuccess(jsonReply)) {
-			String brokerSocket = (String) jsonReply.get("socket");
+			String brokerSocket = jsonReply.getString("socket");
 			return new ServerResponse() {
 
 				@Override
@@ -108,11 +110,11 @@ public class RemoteCommunicationJsonProtocol extends RemoteCommunicationProtocol
 	
 	
 	private boolean isSuccess(JSONObject json) {
-		var status = json.get(KEY_STATUS);
-		if (status instanceof String strStatus) {
-			return strStatus.equalsIgnoreCase("success");
-		}
-		return false;
+		var status = json.getString(KEY_STATUS);
+		if (status == null)
+			return false;
+		
+		return status.equalsIgnoreCase("success");
 	}
 
 	
@@ -122,8 +124,8 @@ public class RemoteCommunicationJsonProtocol extends RemoteCommunicationProtocol
 			String directory) throws IOException {
 		
 		JSONObject json = new JSONObject();
-		json.put("command", "list");
-		json.put("arg", directory);
+		json.put(KEY_COMMAND, "list");
+		json.put(KEY_ARGUMENT, directory);
 		
 		serverMainSession.write(json.toString());
 		
@@ -221,6 +223,10 @@ public class RemoteCommunicationJsonProtocol extends RemoteCommunicationProtocol
 	private String convertFromArrayToString(String []array) {
 		var buffer = new StringBuilder();
 		for(var r: array) {
+			// the sign '@' is an annotation in the message
+			// for example, the server can send
+			//  @EOM
+			// which mean the end of message.
 			if (!r.startsWith("@"))
 				buffer.append(r);
 		}
@@ -243,7 +249,30 @@ public class RemoteCommunicationJsonProtocol extends RemoteCommunicationProtocol
 		for(; i<messageFromServer.length; i++) {
 			message.append(messageFromServer[i]);
 		}
-
+		if (message.isEmpty())
+			return new ServerResponseConnectionInit() {
+				
+				@Override
+				public ServerResponseType getResponseType() {
+					return ServerResponseType.INVALID;
+				}
+				
+				@Override
+				public String[] getResponseArgument() {
+					return null;
+				}
+				
+				@Override
+				public String getSocket() {
+					return null;
+				}
+				
+				@Override
+				public String getHost() {
+					return null;
+				}
+			};
+		
 		JSONObject json = new JSONObject(message.toString());
 		
 		if (isSuccess(json)) {

@@ -13,6 +13,15 @@ public class RemoteDatabaseManager
 	}
 	
 	
+	/***
+	 * Try to open a database by asking the connection information,
+	 * the user pass-phrase or password and browsing on remote host.
+	 * 
+	 * @param shell
+	 * 			The current shell widget
+	 * @return {@link IDatabase}
+	 * 			The remote database object if the opening successful, {@code null} otherwise. 
+	 */
 	public static IDatabase connect(Shell shell) {
 		DatabaseRemote database = new DatabaseRemote();
 		if (database.open(shell) != IDatabase.DatabaseStatus.OK) {
@@ -20,6 +29,7 @@ public class RemoteDatabaseManager
 				return null;
 			
 			if (database.getStatus() == IDatabase.DatabaseStatus.NOT_RESPONSIVE) {
+				// it looks like the connection is slow and can be very not-responsive
 				if (MessageDialog.openConfirm(
 						shell, 
 						"Remote host " + database.getId(), 

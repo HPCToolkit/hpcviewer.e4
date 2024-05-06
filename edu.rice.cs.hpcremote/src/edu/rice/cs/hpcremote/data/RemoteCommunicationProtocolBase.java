@@ -19,6 +19,14 @@ import edu.rice.cs.hpcremote.ui.RemoteDatabaseDialog;
 public abstract class RemoteCommunicationProtocolBase 
 	implements IRemoteCommunication
 {
+	/**
+	 * Types of server responses:
+	 * <ul>
+	 *   <li>SUCCESS : everything works fine
+	 *   <li>ERROR : something doesn't work right. Need to abandon the process.
+	 *   <li>INVALID: something strange happens, perhaps empty string. Need to continue the process carefully.
+	 * </ul>
+	 */
 	enum ServerResponseType {SUCCESS, ERROR, INVALID}
 	
 	private static final String HPCSERVER_LOCATION = "/libexec/hpcserver/hpcserver.sh";
@@ -148,9 +156,7 @@ public abstract class RemoteCommunicationProtocolBase
 		case INVALID:
 			throw new UnknownError("Fail to connect to the server.");
 		case SUCCESS:
-			var socket = reply.getResponseArgument()[0];
-			System.out.println("openDatabaseConnection w/ socket: " + socket);
-			
+			var socket = reply.getResponseArgument()[0];			
 			return createTunnelAndRequestDatabase(socket);
 		}
 		return null;
@@ -188,8 +194,6 @@ public abstract class RemoteCommunicationProtocolBase
 		int port = brokerSession.getLocalPort();
 		var addr = InetAddress.getByName("localhost");
 		final var hpcclient = new HpcClientJavaNetHttp(addr, port);
-		
-		System.out.println("createTunnelAndRequestDatabase. " + addr + ":" + port + " sock: " + brokerSocket);
 		
 		return new IRemoteDatabaseConnection() {
 			
@@ -236,7 +240,7 @@ public abstract class RemoteCommunicationProtocolBase
 				continue;
 			}
 			var response = getServerResponseInit(output);
-			if (response == null || response.getResponseType() != ServerResponseType.SUCCESS)
+			if (response == null || response.getResponseType() == ServerResponseType.ERROR)
 				return false;
 			
 			remoteIP = response.getHost();
