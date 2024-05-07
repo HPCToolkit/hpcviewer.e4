@@ -13,6 +13,7 @@ stages:
 
 include:
 - template: Security/Secret-Detection.gitlab-ci.yml
+- component: gitlab.com/blue42u/ci.pre-commit/lite@0.2
 - component: gitlab.com/blue42u/ci.predeps/buildah@0.4.1
   inputs:
     name: xvfb-metacity-amd64
@@ -57,16 +58,6 @@ default:
     paths:
     - .apt-cache/
     when: always
-
-# Check that the pre-commit hooks pass
-precommit:
-  stage: lint
-  image: docker.io/python:3.10-bullseye
-  needs: []
-  before_script:
-  - python3 -m pip install pre-commit
-  script:
-  - pre-commit run --all-files --show-diff-on-failure
 
 secret_detection:
   stage: lint
