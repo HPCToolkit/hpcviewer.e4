@@ -10,13 +10,13 @@ repos:
   - id: check-useless-excludes
 
 - repo: https://github.com/pre-commit/mirrors-clang-format
-  rev: v14.0.6
+  rev: v18.1.5
   hooks: []
   # Format all C/C++ code with Clang-format
   # - id: clang-format
 
 - repo: https://github.com/psf/black
-  rev: '22.6.0'
+  rev: '24.4.2'
   hooks:
   # Blacken all Python code, except allow slightly longer line lengths
   - id: black
@@ -27,7 +27,7 @@ repos:
       )$
 
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.3.0
+  rev: v4.6.0
   hooks:
   # Remove any trailing whitespace
   # - id: trailing-whitespace
@@ -47,25 +47,25 @@ repos:
     args: [--branch, main]
 
 - repo: https://github.com/Yelp/detect-secrets
-  rev: v1.3.0
+  rev: v1.5.0
   hooks: []
   # Scan for secrets that should never appear in the repo itself
   # - id: detect-secrets
 
 - repo: https://github.com/shellcheck-py/shellcheck-py
-  rev: v0.8.0.4
+  rev: v0.10.0.1
   hooks: []
   # Find common errors in shell scripts using shellcheck
   # - id: shellcheck
 
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: '0.17.1'
+  rev: '0.28.3'
   hooks:
   # Validate the GitLab CI scripts against the schema. Doesn't catch everything but helps
   - id: check-gitlab-ci
 
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.1.0
+  rev: v2.2.6
   hooks: []
   # Identify common spelling mistakes in code and comments
   # - id: codespell
