@@ -206,4 +206,10 @@ public class DatabaseLocal implements IDatabaseLocal
 	public RootScope createFlatTree(Scope rootCCT, RootScope rootFlat, IProgressReport progressMonitor) {
 		return experiment.createFlatView(rootCCT, rootFlat, progressMonitor);
 	}
+
+
+	@Override
+	public RootScope createCallersView(Scope rootCCT, RootScope rootBottomUp, IProgressReport progress) {
+		return experiment.createCallersView(rootCCT, rootBottomUp, progress);
+	}
 }

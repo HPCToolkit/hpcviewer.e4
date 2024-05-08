@@ -121,12 +121,16 @@ public class DatabaseMergeTest {
 
 		@Override
 		public RootScope createFlatTree(Scope rootCCT, RootScope rootFlat, IProgressReport progressMonitor) {
-			return null;
+			return rootFlat;
 		}
 
 		@Override
 		public String getErrorMessage() {
 			return null;
+		}
+		@Override
+		public RootScope createCallersView(Scope rootCCT, RootScope rootBottomUp, IProgressReport progress) {
+			return rootBottomUp;
 		}
 		
 	}

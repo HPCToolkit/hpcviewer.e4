@@ -121,8 +121,28 @@ public interface IDatabase
 	boolean isSourceFileAvailable(Scope scope);
 	
 	
+	/***
+	 * Wrapper method to create a flat tree.
+	 * For local database, it can call directly the flat tree method in Experiment class,
+	 * but for the remote one, we need to collect which nodes need metric values.
+	 * 
+	 * @param rootCCT
+	 * @param rootFlat
+	 * @param progressMonitor
+	 * @return
+	 */
 	RootScope createFlatTree(Scope rootCCT, RootScope rootFlat, IProgressReport progressMonitor);
 
+	
+	/***
+	 * Wrapper method to create a bottom-up tree.
+	 * 
+	 * @param rootCCT
+	 * @param rootBottomUp
+	 * @param progress
+	 * @return
+	 */
+	public RootScope createCallersView(Scope rootCCT, RootScope rootBottomUp, IProgressReport progress);
 
 	/***
 	 * Retrieve the last error message.
@@ -206,6 +226,12 @@ public interface IDatabase
 			@Override
 			public String getErrorMessage() {
 				return "";
+			}
+
+			@Override
+			public RootScope createCallersView(Scope callingContextViewRootScope, RootScope callersViewRootScope,
+					IProgressReport progress) {
+				return callersViewRootScope;
 			}		
 
 		};

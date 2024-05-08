@@ -40,7 +40,7 @@ class ViewerBotTestCase extends SWTBotTestCase {
 
 
 	@BeforeClass
-	static void setUpBeforeClass() throws Exception {
+	static void setUpBeforeClass() {
 		if (uiThread == null) {
 			uiThread = new Thread(new Runnable() {
 
@@ -70,6 +70,7 @@ class ViewerBotTestCase extends SWTBotTestCase {
 		}
 	}
 
+	@Override
 	@Before
 	protected
 	void setUp() throws Exception {
@@ -78,6 +79,7 @@ class ViewerBotTestCase extends SWTBotTestCase {
 		bot = new SWTBot(shell);
 	}
 
+	@Override
 	@After
 	protected
 	void tearDown() throws Exception {
@@ -169,12 +171,16 @@ class ViewerBotTestCase extends SWTBotTestCase {
 
 		@Override
 		public RootScope createFlatTree(Scope rootCCT, RootScope rootFlat, IProgressReport progressMonitor) {
-			return null;
+			return rootFlat;
 		}
 
 		@Override
 		public String getErrorMessage() {
 			return null;
+		}
+		@Override
+		public RootScope createCallersView(Scope rootCCT, RootScope rootBottomUp, IProgressReport progress) {
+			return rootBottomUp;
 		}
 		
 	}
