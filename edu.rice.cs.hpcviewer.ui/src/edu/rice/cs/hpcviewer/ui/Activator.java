@@ -18,7 +18,7 @@ public class Activator implements BundleActivator
 	private static final String OPTION_VERSION_LONG  = "--version";
 
 	public void start(BundleContext bundleContext) throws Exception {
-		if (!JavaValidator.isCorrectJavaVersion()) {
+		if (JavaValidator.getJavaVersionInt() < JavaValidator.JAVA_SUPPORTED_17) {
 			System.exit(0);
 		}
 		

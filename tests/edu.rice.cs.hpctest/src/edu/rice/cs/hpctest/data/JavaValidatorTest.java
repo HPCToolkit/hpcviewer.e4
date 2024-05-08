@@ -4,7 +4,7 @@ import edu.rice.cs.hpcdata.util.JavaValidator;
 
 public class JavaValidatorTest 
 {
-	static public void main(String []args) {
+	public static void main(String []args) {
 		System.out.println();
 		
 		if (JavaValidator.isGCJ()) {
@@ -14,7 +14,7 @@ public class JavaValidatorTest
 				System.out.println("Valid JVM: " + JavaValidator.getJavaVendor() + " " + JavaValidator.getJavaVersion());
 			else
 				System.out.println("Invalid JVM: Needs to be higher or equal than " 
-						+ JavaValidator.JAVA_SUPPORTED);
+						+ JavaValidator.JAVA_SUPPORTED_17);
 		}
 	}
 	
