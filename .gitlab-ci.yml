@@ -110,7 +110,7 @@ test amd64:
         path: coverage.xml
 test arm64:
   extends: test amd64
-  tags: [rice-linux-small-arm64]
+  tags: [saas-linux-medium-arm64]
 
 # Build the Viewer and package the results for usage by users
 build:
