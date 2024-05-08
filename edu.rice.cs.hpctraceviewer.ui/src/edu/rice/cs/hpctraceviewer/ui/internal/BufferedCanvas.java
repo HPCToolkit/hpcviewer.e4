@@ -31,12 +31,12 @@ public abstract class BufferedCanvas extends Canvas
 	/*** buffer image for displaying the canvas ****/
 	protected Image imageBuffer;
 
-	public BufferedCanvas(Composite parent) 
+	protected BufferedCanvas(Composite parent) 
 	{
 		this(parent, true);
 	}
 	
-	public BufferedCanvas(Composite parent, boolean withMenu)
+	protected BufferedCanvas(Composite parent, boolean withMenu)
 	{
 		super(parent, SWT.NO_BACKGROUND);
 		addPaintListener(this);
