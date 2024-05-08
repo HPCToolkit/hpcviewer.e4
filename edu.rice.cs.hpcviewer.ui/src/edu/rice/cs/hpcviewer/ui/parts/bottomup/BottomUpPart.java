@@ -70,6 +70,8 @@ public class BottomUpPart extends AbstractTableView
 				
 				db.createCallersView(rootCCT, rootCall, progress);
 
+				progress.end();
+				
 				return Status.OK_STATUS;
 			}
 		};
