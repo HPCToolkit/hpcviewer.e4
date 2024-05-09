@@ -6,64 +6,16 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
-import edu.rice.cs.hpclocal.LocalDBOpener;
-import edu.rice.cs.hpctest.util.TestDatabase;
-import edu.rice.cs.hpctraceviewer.data.Frame;
-import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
+import edu.rice.cs.hpctest.util.BaseTestAllTraceDatabases;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 
-public class DisplayAttributeTest 
+public class DisplayAttributeTest extends BaseTestAllTraceDatabases
 {
-	private static final int PIXELS_H = 1000;
-	private static final int PIXELS_V = 500;
-
-	private static List<SpaceTimeDataController> listData;
-
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		var experiments = TestDatabase.getExperiments();
-		listData = new ArrayList<>();
-		
-		for(var exp: experiments) {
-			if (exp.getTraceDataVersion() < 0)
-				// no trace? skip it
-				continue;
-			
-			var opener = new LocalDBOpener(exp);
-			SpaceTimeDataController stdc = opener.openDBAndCreateSTDC(null);
-			assertNotNull(stdc);
-			
-			home(stdc, new Frame());
-
-			var attribute = stdc.getTraceDisplayAttribute();
-			assertNotNull(attribute);
-
-			attribute.setPixelHorizontal(PIXELS_H);
-			attribute.setPixelVertical(PIXELS_V);
-			
-			listData.add(stdc);
-		}
-	}
-
-	private static void home(SpaceTimeDataController stData, Frame frame) {
-		frame.begProcess = 0;
-		frame.endProcess = stData.getTotalTraceCount();
-		
-		frame.begTime = 0;
-		frame.endTime = stData.getTimeWidth();
-		
-		stData.getTraceDisplayAttribute().setFrame(frame);
-	}
-	
-	
 	@Test
 	public void testSpaceTimeDataController() {
 		for(var stdc: listData) {
