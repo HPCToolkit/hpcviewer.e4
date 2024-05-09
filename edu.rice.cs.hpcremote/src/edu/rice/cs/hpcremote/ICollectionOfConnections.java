@@ -12,7 +12,7 @@ import edu.rice.cs.hpcremote.data.RemoteCommunicationProtocolBase;
 
 public interface ICollectionOfConnections 
 {
-	static final String KEY_COMMUNICATION = "hpcviewer.comm";
+	String KEY_COMMUNICATION = "hpcviewer.comm";
 
 	static void disconnectAll(Shell shell) {
 		var setOfSessions = getShellSessions(shell);

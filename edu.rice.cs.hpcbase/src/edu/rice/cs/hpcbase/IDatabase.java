@@ -142,7 +142,7 @@ public interface IDatabase
 	 * @param progress
 	 * @return
 	 */
-	public RootScope createCallersView(Scope rootCCT, RootScope rootBottomUp, IProgressReport progress);
+	RootScope createCallersView(Scope rootCCT, RootScope rootBottomUp, IProgressReport progress);
 
 	/***
 	 * Retrieve the last error message.

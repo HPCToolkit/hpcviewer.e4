@@ -192,7 +192,7 @@ public interface ISecuredConnection
 	/****
 	 * Interface to handle remote host's error message
 	 */
-	public interface IErrorMessageHandler 
+	interface IErrorMessageHandler 
 	{
 		void message(String errMsg);
 	}
