@@ -17,7 +17,7 @@ public interface IRemoteCommunicationProtocol
 	/**
 	 * Status of the remote connection: successful, fails, or not done
 	 */
-	enum ConnectionStatus {NOT_CONNECTED, CONNECTED, ERROR}
+	enum ConnectionStatus {NOT_CONNECTED, CONNECTED, ERROR, CANCEL}
 	
 	
 	/***
@@ -28,7 +28,16 @@ public interface IRemoteCommunicationProtocol
 	 * @return {@code String} the IP address of the remote host
 	 */
 	String getRemoteHost();
-	
+
+
+	/****
+	 * Get the human readable of the remote host
+	 * 
+	 * @return {@code String} The name of the remote host.
+	 * 			If not connection, it returns empty string or default host name.
+	 */
+	String getRemoteHostname();
+
 	
 	/***
 	 * The user name used to connect to the remote host.
@@ -44,7 +53,7 @@ public interface IRemoteCommunicationProtocol
 	 * @return
 	 * @throws IOException
 	 */
-	ConnectionStatus connect(Shell shell) throws IOException;
+	ConnectionStatus connect(Shell shell, IConnection connectionInfo) throws IOException;
 	
 	
 	/*****
@@ -81,4 +90,7 @@ public interface IRemoteCommunicationProtocol
 	 * @throws IOException
 	 */
 	void disconnect(Shell shell) throws IOException;
+
+
+	String getStandardErrorMessage();
 }

@@ -542,8 +542,6 @@ public class DatabaseCollection
 		// some parts may need to check the database if the experiment really exits or not.
 		// If not, they will consider the experiment will be removed.
 		databaseWindowManager.removeDatabase(window, database);
-		
-		database.close();
 	}
 	
 	

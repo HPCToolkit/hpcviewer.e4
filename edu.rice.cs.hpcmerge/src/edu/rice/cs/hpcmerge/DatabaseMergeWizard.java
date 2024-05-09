@@ -5,16 +5,17 @@ import java.util.List;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
+import edu.rice.cs.hpcbase.IDatabase;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.merge.DatabasesToMerge;
 
 public class DatabaseMergeWizard extends Wizard 
 {
 	private WizardPage []pages;
-	private List<Experiment> listDb;
+	private List<IDatabase> listDb;
 	private DatabasesToMerge database;
 	
-	public DatabaseMergeWizard(List<Experiment> list) {
+	public DatabaseMergeWizard(List<IDatabase> list) {
 		setNeedsProgressMonitor(true);
 		this.listDb = list;
 		this.database = new DatabasesToMerge();
@@ -43,8 +44,8 @@ public class DatabaseMergeWizard extends Wizard
     	if (listDb.size() == 2) {
     		// no need to select databases
     		// initialize the two databases to merge here. 
-    		database.experiment[0] = listDb.get(0);
-    		database.experiment[1] = listDb.get(1);
+    		database.experiment[0] = (Experiment) listDb.get(0).getExperimentObject();
+    		database.experiment[1] = (Experiment) listDb.get(1).getExperimentObject();
     		
     		ChooseMetricPage page = new ChooseMetricPage(database);
     		pages = new WizardPage[] {page};

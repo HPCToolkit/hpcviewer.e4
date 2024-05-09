@@ -48,14 +48,14 @@ public class MergeDatabase
 		// gather 2 databases to be merged.
 		// we don't want to merge an already merged database. Skip it.
 		// ---------------------------------------------------------------
-		List<Experiment> listDatabase = new ArrayList<>(2);
+		List<IDatabase> listDatabase = new ArrayList<>(2);
 		
 		var iterator = database.getIterator(window);
 		while(iterator.hasNext()) {
 			var db = iterator.next();
 			Experiment exp = (Experiment) db.getExperimentObject();
 			if (!exp.isMergedDatabase()) {
-				listDatabase.add(exp);
+				listDatabase.add(db);
 			}
 		}
 

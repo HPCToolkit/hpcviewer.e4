@@ -179,12 +179,11 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 	 * @return
 	 */
 	public int getTraceLineFromProfile(int profileIndex) {
-		synchronized (controllerMonitor) {
+		// synchronized (controllerMonitor) {
 			// possible data concurrent here, but ...
 			// It's totally okay to concurrently reading a map index.
-			var originalLine  = mapIntToLine.get(profileIndex);
-			return originalLine;
-		}
+			return mapIntToLine.get(profileIndex);
+		//}
 	}
 
 	
@@ -198,19 +197,19 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 	public void closeDB() {
 		// laks: do we need to sync this block?
 		// Other than that, there is no harm to concurrently setting null for sampledTraces and unYieldedSampledTraces
-		synchronized (controllerMonitor) { // ensure safe publication of new values of class fields
+		//synchronized (controllerMonitor) { // ensure safe publication of new values of class fields
 			if (mapIntToLine != null)
 				mapIntToLine.clear();
 
 			sampledTraces = null;
 			unYieldedSampledTraces = null;
-		}
+		//}
 	}
 
 	
 	@Override
 	public void startTrace(int numTraces, boolean changedBounds) {
-		synchronized (controllerMonitor) { // ensure all threads see the most recent values of all fields
+		//synchronized (controllerMonitor) { // ensure all threads see the most recent values of all fields
 			this.changedBounds = changedBounds;
 
 			if (!changedBounds) {
@@ -284,7 +283,7 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 			sampledTraces = client.sampleTracesAsync(setOfTraceId, time1, time2, getPixelHorizontal());
 			unYieldedSampledTraces = null; // ensure any previous subset of `sampledTraces` is cleared.
 			                               // see field contract for details
-		}
+		//}
 	}
 
 

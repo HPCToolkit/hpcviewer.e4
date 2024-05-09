@@ -147,7 +147,7 @@ public class RemoteUserInfoDialog implements UserInfo, UIKeyboardInteractive
 			lblDestination.setText(destination);
 			
 			Composite promptArea = new Composite(container, SWT.NONE);
-			GridLayoutFactory.fillDefaults().numColumns(2).applyTo(promptArea);
+			GridLayoutFactory.fillDefaults().numColumns(1).applyTo(promptArea);
 			GridDataFactory.fillDefaults().grab(true, true).applyTo(promptArea);
 			
 			textPrompt = new Text[prompt.length];
@@ -159,6 +159,7 @@ public class RemoteUserInfoDialog implements UserInfo, UIKeyboardInteractive
 				int style = echo[i] ? SWT.NONE : SWT.PASSWORD;
 				textPrompt[i] = new Text(promptArea, style);
 				textPrompt[i].setText("");
+				GridDataFactory.fillDefaults().grab(true, false).applyTo(textPrompt[i]);
 			}
 			
 			return container;

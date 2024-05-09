@@ -65,11 +65,13 @@ public class BottomUpPart extends AbstractTableView
 			
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				Experiment experiment = (Experiment) getMetricManager();
-				var progress = new ProgressReport(monitor);
+				var progress = new ProgressReport(monitor);				
+				final var db = getDatabase();
 				
-				experiment.createCallersView(rootCCT, rootCall, progress);
+				db.createCallersView(rootCCT, rootCall, progress);
 
+				progress.end();
+				
 				return Status.OK_STATUS;
 			}
 		};

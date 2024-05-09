@@ -13,7 +13,7 @@ import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.widgets.Shell;
 
-import edu.rice.cs.hpcremote.IRemoteConnection;
+import edu.rice.cs.hpcremote.RemoteDatabaseManager;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 
 public class OpenRemoteDatabase 
@@ -31,7 +31,7 @@ public class OpenRemoteDatabase
 			MWindow window,
 			@Named(IServiceConstants.ACTIVE_SHELL) Shell shell) {
 		
-		var remoteDb = IRemoteConnection.connect(shell);
+		var remoteDb = RemoteDatabaseManager.connect(shell);
 		if (remoteDb != null)
 			databaseCollection.addDatabase(shell, window, partService, modelService, remoteDb);
 	}		

@@ -1,6 +1,7 @@
 package edu.rice.cs.hpctoolcontrol;
 
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -82,7 +83,7 @@ public class ToolControl
 
 		// thread-Safe via thread confinement of the UI-Thread
 		// (means access only via UI-Thread)
-		private long runningTasks = 0L;
+		private AtomicInteger runningTasks = new AtomicInteger(0);
 
 		@Override
 		public void beginTask(final String name, final int totalWork) {
@@ -92,7 +93,7 @@ public class ToolControl
 				
 				lblMessage.setText(name);
 
-				if( runningTasks <= 0 ) {
+				if( runningTasks.get() <= 0 ) {
 					// --- no task is running at the moment ---
 					progressBar.setSelection(0);
 					progressBar.setMaximum(totalWork);
@@ -102,8 +103,8 @@ public class ToolControl
 					progressBar.setMaximum(progressBar.getMaximum() + totalWork);
 				}
 
-				runningTasks++;
-				progressBar.setToolTipText("Currently running: " + runningTasks +
+				var tasks = runningTasks.incrementAndGet();
+				progressBar.setToolTipText("Currently running: " + tasks +
 						"\nLast task: " + name);
 			});
 		}
@@ -132,10 +133,10 @@ public class ToolControl
 					@Override
 					public void done(IJobChangeEvent event) {
 						sync.asyncExec(() -> {
-							runningTasks--;
-							if (runningTasks > 0 ){
+							var tasks = runningTasks.decrementAndGet();
+							if (tasks > 0 ){
 								// --- some tasks are still running ---
-								progressBar.setToolTipText("Currently running: " + runningTasks);
+								progressBar.setToolTipText("Currently running: " + tasks);
 
 							} else {
 								// --- all tasks are done (a reset of selection could also be done) ---

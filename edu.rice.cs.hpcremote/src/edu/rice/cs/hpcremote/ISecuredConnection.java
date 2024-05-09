@@ -8,18 +8,60 @@ import java.util.StringTokenizer;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 
+
 public interface ISecuredConnection 
 {
-	boolean connect(String username, String hostName);
+	/***
+	 * For a given connection object, tries to connect to the remote host
+	 * either using SSH or other means.
+	 * 
+	 * @param connectionInfo
+	 * 
+	 * @return {@code boolean}
+	 * 			true if the connection succeeds, false otherwise.
+	 */
+	boolean connect(IConnection connectionInfo);
 
-	boolean connect(String username, String hostName, String privateKey);
-
+	/***
+	 * Disconnect the existing connection.
+	 */
 	void close();
 	
+	
+	/***
+	 * Execute a command to the remote host.
+	 * 
+	 * @param command
+	 * 
+	 * @return {@code ISessionRemote}
+	 * 			The new session if the execution is successful, null otherwise.
+	 */
 	ISessionRemote executeRemoteCommand(String command);
 	
+	
+	/***
+	 * Create a new session to manage UNIX domain socket forwarding.
+	 *  
+	 * @param socketPath
+	 * 			A non-existing UNIX socket (will be created by the server).
+	 * 
+	 * @return {@code ISessionRemoteSocket}
+	 * 			A new remote session
+	 */
 	ISessionRemoteSocket socketForwarding(String socketPath);
 	
+
+	/***
+	 * Add listener to error message from the remote host.
+	 * This method is called when the remote flush a new error message.
+	 * 
+	 * This is optional, client can decide to ignore error messages
+	 * (not recommended though)
+	 * 
+	 * @param handler
+	 */
+	void addErrorMessageHandler(IErrorMessageHandler handler);
+
 	
 	/***
 	 * 
@@ -144,5 +186,14 @@ public interface ISecuredConnection
 		 * 			The local port, or negative number if it fails.
 		 */
 		int getLocalPort();
+	}
+
+	
+	/****
+	 * Interface to handle remote host's error message
+	 */
+	interface IErrorMessageHandler 
+	{
+		void message(String errMsg);
 	}
 }

@@ -4,12 +4,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.CoolBar;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.slf4j.LoggerFactory;
@@ -125,18 +123,8 @@ public class FlatPart extends AbstractTableView
 				
 				// this may take some time.
 				// Especially for the remote database.
-				try {
-					db.createFlatTree(rootCCT, rootFlat, progress);
-				} catch (Exception e) {
-					var display = Display.getDefault();
-					if (display != null && !display.isDisposed()) {
-						display.syncExec(() -> {
-							var shell = getDisplay().getActiveShell();
-							MessageDialog.openError(shell, "Error while creating the tree", e.getMessage());
-						});
-					}
-					return Status.CANCEL_STATUS;
-				}
+				db.createFlatTree(rootCCT, rootFlat, progress);
+
 				return Status.OK_STATUS;
 			}
 		};
