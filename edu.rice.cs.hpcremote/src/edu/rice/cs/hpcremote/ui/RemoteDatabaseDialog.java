@@ -25,20 +25,30 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
-
 import edu.rice.cs.hpcremote.data.IRemoteDirectoryBrowser;
 import edu.rice.cs.hpcremote.data.IRemoteDirectoryContent;
 import edu.rice.cs.hpcremote.data.IRemoteDirectoryContent.IFileContent;
 
+/**********************************************************
+ * 
+ * Dialog box to browse at the remote host.
+ * 
+ * Once the user click the button {@code OK}, the caller needs
+ * to grab the value of the remote directory by calling
+ * {@code getSelectedDirectory()} as follows:
+ * <pre>
+ *  if (dialog.open() == Window.OK)
+ *     directory = dialog.getSelectedDirectory();
+ * </pre>
+ * 
+ **********************************************************/
 public class RemoteDatabaseDialog extends TitleAreaDialog 
 {
 	private final IRemoteDirectoryBrowser remoteBrowser;
 	private final Image imgFolderReg;
 	private final Image imgFolderDb;
 	
-	private Text textDirectory;
+	private RemoteDirectoryCombo textDirectory;
 	private TableViewer directoryViewer;
 
 	private String selectedDirectory;
@@ -92,24 +102,8 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 		container.setLayout(new GridLayout(1, false));
 		container.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
-		Composite directoryArea = new Composite(container, SWT.NONE);
-		GridLayout glDirectoryArea = new GridLayout(2, false);
-		glDirectoryArea.marginHeight = 1;
-		glDirectoryArea.marginWidth = 0;
-		directoryArea.setLayout(glDirectoryArea);
-		GridData gdDirectoryArea = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
-		gdDirectoryArea.widthHint = 441;
-		directoryArea.setLayoutData(gdDirectoryArea);
-		
-		Label lblDirectory = new Label(directoryArea, SWT.NONE);
-		lblDirectory.setText("Directory:");
-		
-		textDirectory = new Text(directoryArea, SWT.BORDER);
-		GridData gdTextDirectory = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
-		gdTextDirectory.widthHint = 378;
-		textDirectory.setLayoutData(gdTextDirectory);
-		textDirectory.setBounds(0, 0, 64, 19);
-		
+		textDirectory = new RemoteDirectoryCombo(container, remoteBrowser.getRemoteHostname(), this::fillDirectory);
+
 		directoryViewer = createTableDirectory(container);
 		
 		// ask the content of the default remote directory.
@@ -118,7 +112,8 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 		
 		return area;
 	}
-
+	
+	
 	
 	private TableViewer createTableDirectory(Composite container) {
 		var viewer = new TableViewer(container, SWT.BORDER | SWT.V_SCROLL | SWT.FULL_SELECTION);
@@ -169,8 +164,9 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 		tableDir.addSelectionListener(new SelectionAdapter() {
 			private boolean isDatabase(SelectionEvent e) {
         		StructuredSelection dirSelect = (StructuredSelection) viewer.getSelection();
-        		if (dirSelect == null || dirSelect.isEmpty())
+        		if (dirSelect == null || dirSelect.isEmpty()) {
         			return false;
+        		}
         		
         		var elem = dirSelect.toList().get(0);
         		return (elem instanceof IRemoteDirectoryContent.IFileContent file && 
@@ -273,7 +269,7 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 	}
 	
 	
-	private void fillDirectory(String directory) {
+	private boolean fillDirectory(String directory) {
 		try {
 			var content = remoteBrowser.getContentRemoteDirectory(directory);
 			if (content != null) {
@@ -281,9 +277,29 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 				
 				var files = content.getContent();				
 				directoryViewer.setInput(files);
+				
+				var isDatabase = checkIfTheCurrentDirectoryADatabase(files);
+				getButton(IDialogConstants.OK_ID).setEnabled(isDatabase);
+
+				return true;
 			}
 		} catch (IOException e1) {
 			MessageDialog.openError(getShell(), "Error accessomg the remote directory", e1.getMessage());
 		}
+		return false;
+	}
+	
+	private boolean checkIfTheCurrentDirectoryADatabase(IFileContent []content) {
+		int numRecognizedFiles = 0;
+		for(var file: content) {
+			if ( file.getName().equals("meta.db") ||
+				 file.getName().equals("cct.db") || 
+				 file.getName().equals("profile.db")) {
+					numRecognizedFiles++;
+					if (numRecognizedFiles >= 3)
+						return true;
+				}
+		}
+		return false;
 	}
 }
