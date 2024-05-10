@@ -447,7 +447,7 @@ public class DatabaseCollection
 				
 		var experiment = (IExperiment) database.getExperimentObject();
 		part.setLabel(ProfilePart.PREFIX_TITLE + experiment.getName());
-		part.setTooltip(database.getId().id());
+		part.setTooltip(database.getId().toString());
 
 
 		//----------------------------------------------------------------
@@ -512,7 +512,7 @@ public class DatabaseCollection
 				var experiment = (IExperiment) database.getExperimentObject();
 				
 				createPart.setLabel("Trace: " + experiment.getName());
-				createPart.setTooltip(database.getId().id());
+				createPart.setTooltip(database.getId().toString());
 			}
 		}
 		return 1;

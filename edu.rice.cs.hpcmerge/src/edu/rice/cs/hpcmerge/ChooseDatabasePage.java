@@ -55,7 +55,7 @@ public class ChooseDatabasePage extends WizardPage
 			@Override
 			public String getText(Object element) {				
 				var db = (IDatabase) element;
-				return db.getId().id(); 				
+				return db.getId().toString(); 				
 			}
 		});
 		tableViewer.addCheckStateListener(event -> {

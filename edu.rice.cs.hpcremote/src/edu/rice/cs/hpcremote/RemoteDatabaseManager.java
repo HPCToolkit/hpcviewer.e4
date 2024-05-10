@@ -25,7 +25,8 @@ public class RemoteDatabaseManager
 	public static IDatabase connect(Shell shell) {
 		DatabaseRemote database = new DatabaseRemote();
 		if (database.open(shell) != IDatabase.DatabaseStatus.OK) {
-			if (database.getStatus() == IDatabase.DatabaseStatus.CANCEL)
+			if (database.getStatus() == IDatabase.DatabaseStatus.CANCEL ||
+				database.getStatus() == IDatabase.DatabaseStatus.NOT_INITIALIZED)
 				return null;
 			
 			if (database.getStatus() == IDatabase.DatabaseStatus.NOT_RESPONSIVE) {
