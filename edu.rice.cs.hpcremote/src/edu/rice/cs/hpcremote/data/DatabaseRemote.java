@@ -21,7 +21,9 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.source.MetaFileSystemSourceFile;
 import edu.rice.cs.hpcdata.experiment.source.SourceFile;
 import edu.rice.cs.hpcdata.util.IProgressReport;
+import edu.rice.cs.hpcremote.DefaultConnection;
 import edu.rice.cs.hpcremote.ICollectionOfConnections;
+import edu.rice.cs.hpcremote.IConnection;
 import edu.rice.cs.hpcremote.IDatabaseRemote;
 import edu.rice.cs.hpcremote.IRemoteCommunicationProtocol;
 import edu.rice.cs.hpcremote.RemoteDatabaseIdentification;
@@ -39,7 +41,6 @@ public class DatabaseRemote implements IDatabaseRemote
 	
 	private ITraceManager traceManager;
 
-	private IRemoteCommunicationProtocol remoteHostConnection;
 	private IRemoteDatabaseConnection remoteDatabaseConnection;
 	
 	private RemoteDatabaseIdentification id;
@@ -47,9 +48,7 @@ public class DatabaseRemote implements IDatabaseRemote
 	@Override
 	public IDatabaseIdentification getId() {
 		if (id == null)
-			// dummy id
-			id = new RemoteDatabaseIdentification("localhost", 0);
-		
+			throw new IllegalAccessError("Not connected or the remote database is invalid");
 		return id;
 	}
 	
@@ -62,58 +61,82 @@ public class DatabaseRemote implements IDatabaseRemote
 	
 	@Override
 	public DatabaseStatus reset(Shell shell, IDatabaseIdentification databaseId) {
-		return open(shell);
+		RemoteDatabaseIdentification remoteId = (RemoteDatabaseIdentification) databaseId;
+		
+		var connectionInfo = new DefaultConnection(remoteId);
+		return tryOpen(shell, connectionInfo, remoteId);
 	}
 
 	
 	@Override
 	public DatabaseStatus open(Shell shell) {
-		
 		var connectionDialog = new ConnectionDialog(shell);
+		
 		if (connectionDialog.open() == Window.CANCEL) {
 			return DatabaseStatus.CANCEL;
 		}
-		remoteHostConnection = ICollectionOfConnections.getRemoteConnection(shell, connectionDialog);
-
-		try {
-			var connectStatus = remoteHostConnection.connect(shell, connectionDialog);
-			if (connectStatus == IRemoteCommunicationProtocol.ConnectionStatus.CONNECTED) {
-				var database = remoteHostConnection.selectDatabase(shell);
-				if (database == null) {
-					status = DatabaseStatus.CANCEL;
-					return status;
-				}
-				remoteDatabaseConnection = remoteHostConnection.openDatabaseConnection(shell, database);
-				if (remoteDatabaseConnection == null)
-					return DatabaseStatus.CANCEL;
-				
-				if (!checkServerReadiness(remoteDatabaseConnection.getHpcClient())) {
-					errorMessage = "Server is not responsive";
-					status = DatabaseStatus.NOT_RESPONSIVE;
-					return status;
-				}
-					
-				id = new RemoteDatabaseIdentification(remoteHostConnection.getRemoteHost(), 0, database, remoteHostConnection.getUsername());
-
-				experiment = openDatabase(remoteDatabaseConnection.getHpcClient(), id);
-				if (experiment != null) {
-					status = DatabaseStatus.OK;
-					return status;
-				}
-				errorMessage = "Fail to access the database: " + database;
-				
-			} else if (connectStatus == IRemoteCommunicationProtocol.ConnectionStatus.NOT_CONNECTED) {
-				status = DatabaseStatus.CANCEL;
-				return status;
-			}
-			errorMessage = remoteHostConnection.getStandardErrorMessage();
-		} catch (IOException e) {
-			errorMessage = e.getLocalizedMessage();
-		}
-		status = DatabaseStatus.INVALID;
-		return status;
+		return tryOpen(shell, connectionDialog, null);
 	}
 
+	
+	private DatabaseStatus tryOpen(Shell shell, IConnection connectionInfo, RemoteDatabaseIdentification remoteId) {
+		try {
+			status = doOpen(shell, connectionInfo, remoteId);
+		} catch (IOException e) {
+			errorMessage = e.getLocalizedMessage();
+			status = DatabaseStatus.INVALID;
+		}
+		return status;
+	}
+	
+	
+	private DatabaseStatus doOpen(Shell shell, IConnection connectionInfo, RemoteDatabaseIdentification remoteId) 
+			throws IOException {
+		var remoteHostConnection = ICollectionOfConnections.getRemoteConnection(shell, connectionInfo);
+		var connectStatus = remoteHostConnection.connect(shell, connectionInfo);
+
+		if (connectStatus == IRemoteCommunicationProtocol.ConnectionStatus.CONNECTED) {
+			String database;
+			if (remoteId == null) 
+				database = remoteHostConnection.selectDatabase(shell);
+			else 
+				database = remoteId.getPath();
+
+			remoteDatabaseConnection = remoteHostConnection.openDatabaseConnection(shell, database);
+			if (remoteDatabaseConnection == null)
+				return DatabaseStatus.CANCEL;
+			
+			if (!checkServerReadiness(remoteDatabaseConnection.getHpcClient())) {
+				errorMessage = "Server is not responsive";
+				status = DatabaseStatus.NOT_RESPONSIVE;
+				return status;
+			}
+			if (remoteId == null) {
+				id = new RemoteDatabaseIdentification(
+						remoteHostConnection.getRemoteHostname(), 
+						database, 
+						remoteHostConnection.getUsername());
+			
+				id.setRemoteInstallation(connectionInfo.getInstallationDirectory());
+			} else {
+				id = remoteId;
+			}
+
+			experiment = openDatabase(remoteDatabaseConnection.getHpcClient(), id);
+			if (experiment != null) {
+				status = DatabaseStatus.OK;
+				return status;
+			}
+			errorMessage = "Fail to access the database: " + database;
+			
+		} else if (connectStatus == IRemoteCommunicationProtocol.ConnectionStatus.NOT_CONNECTED) {
+			status = DatabaseStatus.CANCEL;
+			return status;
+		}
+		errorMessage = remoteHostConnection.getStandardErrorMessage();
+		return status;
+	}
+	
 	
 	private boolean checkServerReadiness(HpcClient client) {
 		// maximum we wait for 10 seconds max

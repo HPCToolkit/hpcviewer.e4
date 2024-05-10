@@ -6,52 +6,60 @@ public class RemoteDatabaseIdentification implements IDatabaseIdentification
 {
 	private static final String EMPTY = "";
 
-	private String databasePath;
-	private String host;
-	private int port;
+	private static final char SIGN_REMOTE_INSTALLATION = '*';
+	private static final char SIGN_USERNAME = '@';
+	private static final char SIGN_HOST = ':';
 	
-	private String username;
-
+	private final String databasePath;
+	private final String host;	
+	private final String username;
+	
+	private String remoteInstallation;
 	
 	public RemoteDatabaseIdentification() {
 		databasePath = EMPTY;
 		host = EMPTY;
-		port = 8080;
 		username = EMPTY;
 	}
 	
 	
-	public RemoteDatabaseIdentification(String databaseId) {
-		username = EMPTY;
-		databasePath = EMPTY;
+	/***
+	 * Initialize with the existing remote database id.
+	 * Example remote id format:
+	 * <pre>
+	 * user@hostname:/home/user/data/hpctoolkit-database/
+	 * </pre>
+	 * @param databaseId
+	 */
+	public RemoteDatabaseIdentification(String databaseId) throws InvalidRemoteIdentficationException{		
+		// partition the id into:
+		//    installation / user @ hostName : database
+		// installation 0 .. /
+		// userName: / .. @
+		// hostName: @ .. :
+		// database: : ..
 		
-		var colon = databaseId.indexOf(':');
-		var slash = databaseId.indexOf('/');
-		if (colon >= slash)
-			return;
+		var slash = databaseId.indexOf(SIGN_REMOTE_INSTALLATION);
+		if (slash < 0)
+			throw new InvalidRemoteIdentficationException(databaseId);
 		
-		host = databaseId.substring(0, colon); 
-		var portStr  = databaseId.substring(colon+1, slash);
+		remoteInstallation = databaseId.substring(0, slash);
 		
-		if (colon <= 0 && slash < 1 || portStr.isEmpty())
-			return;
+		var atSign = databaseId.indexOf(SIGN_USERNAME, slash);
+		var colon = databaseId.indexOf(SIGN_HOST, atSign);
 		
-		try {
-			port = Integer.parseInt(portStr);
-		} catch (NumberFormatException e) {
-			// it is not a remote or invalid port number
-			throw new IllegalArgumentException("Invalid port number: " + portStr);
+		if (atSign < 0 || colon < 0) {
+			throw new InvalidRemoteIdentficationException("Not a remote ID: " + databaseId);
 		}
-	}
-	
-	public RemoteDatabaseIdentification(String host, int port) {
-		this(host, port, EMPTY, EMPTY);
-	}
-	
-	public RemoteDatabaseIdentification(String host, int port, String path, String username) {
-		this.host = host;
-		this.port = port;
 		
+		username = databaseId.substring(slash+1, atSign);
+		host = databaseId.substring(atSign+1, colon);
+		databasePath = databaseId.substring(colon+1);
+	}
+
+	
+	public RemoteDatabaseIdentification(String host, String path, String username) {
+		this.host = host;		
 		this.databasePath = path;
 		this.username = username;
 	}
@@ -59,11 +67,6 @@ public class RemoteDatabaseIdentification implements IDatabaseIdentification
 	
 	public String getHost() {
 		return host;
-	}
-	
-	
-	public int getPort() {
-		return port;
 	}
 	
 	
@@ -76,29 +79,43 @@ public class RemoteDatabaseIdentification implements IDatabaseIdentification
 		return username;
 	}
 	
-	@Override
-	public String id() {
+	
+	public void setRemoteInstallation(String remoteInstallation) {
+		this.remoteInstallation = remoteInstallation;
+	}
+	
+	
+	public String getRemoteInstallation() {
+		return remoteInstallation;
+	}
+	
+	
+	private String getBaseId() {
 		StringBuilder sb = new StringBuilder();
 		if (username != null && !username.isEmpty()) {
 			sb.append(username);
-			sb.append("@");
+			sb.append(SIGN_USERNAME);
 		}
 		if (host != null)
 			sb.append(host.trim());
-
-		if (port < 1 && databasePath == null)
-			// the database has no information about the port number and the path
-			// it should be invalid, but let's just stop here at the moment.
-			return sb.toString();
 		
-		sb.append(':');
-
-		if (port > 1) {
-			sb.append(port);
+		if (databasePath != null) {
+			sb.append(SIGN_HOST);
+			sb.append(databasePath);
 		}
 		
-		if (databasePath != null)
-			sb.append(databasePath);
+		return sb.toString();
+	}
+	
+	
+	@Override
+	public String id() {
+		StringBuilder sb = new StringBuilder();
+		if (remoteInstallation != null) {
+			sb.append(remoteInstallation);
+			sb.append(SIGN_REMOTE_INSTALLATION);
+		}
+		sb.append(getBaseId());
 		
 		return sb.toString();
 	}		
@@ -106,7 +123,7 @@ public class RemoteDatabaseIdentification implements IDatabaseIdentification
 	
 	@Override
 	public String toString() {
-		return id();
+		return getBaseId();
 	}
 	
 	
@@ -118,8 +135,7 @@ public class RemoteDatabaseIdentification implements IDatabaseIdentification
 	
 	@Override
 	public boolean equals(Object o) {
-		if (o instanceof IDatabaseIdentification) {
-			IDatabaseIdentification other = (IDatabaseIdentification) o;
+		if (o instanceof IDatabaseIdentification other) {
 			return id().equals(other.id());
 		}
 		return false;

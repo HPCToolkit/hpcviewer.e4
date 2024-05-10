@@ -6,6 +6,7 @@ import edu.rice.cs.hpcbase.IDatabase;
 import edu.rice.cs.hpcbase.IDatabaseIdentification;
 import edu.rice.cs.hpclocal.DatabaseLocal;
 import edu.rice.cs.hpclocal.LocalDatabaseIdentification;
+import edu.rice.cs.hpcremote.InvalidRemoteIdentficationException;
 import edu.rice.cs.hpcremote.RemoteDatabaseIdentification;
 import edu.rice.cs.hpcremote.data.DatabaseRemote;
 
@@ -26,9 +27,11 @@ public class DatabaseFactory
 	public static IDatabaseIdentification createDatabaseIdentification(String databaseId) {
 		if (databaseId == null)
 			return null;
-		
-		if (isRemote(databaseId)) {			
+
+		try {
 			return new RemoteDatabaseIdentification(databaseId);
+		} catch (InvalidRemoteIdentficationException e) {
+			// it is NOT a remote id
 		}
 		
 		var path = Paths.get(databaseId).toAbsolutePath();
@@ -37,15 +40,6 @@ public class DatabaseFactory
 		
 		return null;
 	}
-	
-	private static boolean isRemote(String databaseId) {
-		var user  = databaseId.indexOf('@');
-		var colon = databaseId.indexOf(':');
-		var slash = databaseId.indexOf('/');
-		
-		return (colon > 0 && slash > 1 && user > 0);
-	}
-	
 	
 	/****
 	 * Check if the id is for remote or not

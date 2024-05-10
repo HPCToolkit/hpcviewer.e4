@@ -87,6 +87,20 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 		return selectedDirectory;
 	}
 
+	
+	@Override
+	protected Control createContents(Composite parent) {
+		// make sure we have done all the content before populate the table
+		var control = super.createContents(parent);
+		
+		// ask the content of the default remote directory.
+		// usually it's the home directory, but the server can give anything
+		fillDirectory("");
+		
+		return control;
+	}
+	
+	
 	/**
 	 * Create contents of the dialog.
 	 * @param parent
@@ -105,10 +119,6 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 		textDirectory = new RemoteDirectoryCombo(container, remoteBrowser.getRemoteHostname(), this::fillDirectory);
 
 		directoryViewer = createTableDirectory(container);
-		
-		// ask the content of the default remote directory.
-		// usually it's the home directory, but the server can give anything
-		fillDirectory("");
 		
 		return area;
 	}

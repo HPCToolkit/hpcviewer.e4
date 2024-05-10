@@ -71,7 +71,7 @@ public interface ICollectionOfConnections
 	 * @param id
 	 * @param commConnection
 	 */
-	static void putShellSession(Shell shell, String id, RemoteCommunicationProtocolBase commConnection) {
+	static void putShellSession(Shell shell, RemoteCommunicationProtocolBase commConnection) {
 		Map<String, RemoteCommunicationProtocolBase> mapOfSessions;
 		var setOfSessions = shell.getData(KEY_COMMUNICATION);
 		if (setOfSessions == null) {
@@ -79,7 +79,7 @@ public interface ICollectionOfConnections
 		} else {
 			mapOfSessions = (Map<String, RemoteCommunicationProtocolBase>) setOfSessions;
 		}
-		mapOfSessions.put(id, commConnection);
+		mapOfSessions.put(commConnection.getConnection().getId(), commConnection);
 		shell.setData(KEY_COMMUNICATION, mapOfSessions);
 	}
 }
