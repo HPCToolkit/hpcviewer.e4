@@ -244,3 +244,53 @@ upload:
     > reponse.log
   after_script:
   - jq -C . < reponse.log
+
+
+# Make a release for the tag, and add links to all the assets
+create release:
+  stage: deploy
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  needs: [upload]
+  tags: [saas-linux-small-amd64]
+  rules:
+  - if: $CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_TAG
+  script:
+  - echo "Creating release for tag $CI_COMMIT_TAG"
+  release:
+    tag_name: $CI_COMMIT_TAG
+    name: Release $CI_COMMIT_TAG
+    description: Release $CI_COMMIT_TAG
+    assets:
+      links:
+      - name: for Windows x86_64
+        link_type: package
+        url: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/hpcviewer/${CI_COMMIT_TAG}/hpcviewer-win32.win32.x86_64.zip
+        filepath: /hpcviewer-win32.win32.x86_64.zip
+      - name: for MacOS aarch64 (zip)
+        link_type: package
+        url: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/hpcviewer/${CI_COMMIT_TAG}/hpcviewer-macosx.cocoa.aarch64.zip
+        filepath: /hpcviewer-macosx.cocoa.aarch64.zip
+      # - name: for MacOS aarch64
+      #   link_type: package
+      #   url: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/hpcviewer/${CI_COMMIT_TAG}/hpcviewer-macosx.cocoa.aarch64.dmg
+      #   filepath: /hpcviewer-macosx.cocoa.aarch64.dmg
+      - name: for MacOS x86_64 (zip)
+        link_type: package
+        url: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/hpcviewer/${CI_COMMIT_TAG}/hpcviewer-macosx.cocoa.x86_64.zip
+        filepath: /hpcviewer-macosx.cocoa.x86_64.zip
+      # - name: for MacOS x86_64
+      #   link_type: package
+      #   url: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/hpcviewer/${CI_COMMIT_TAG}/hpcviewer-macosx.cocoa.x86_64.dmg
+      #   filepath: /hpcviewer-macosx.cocoa.x86_64.dmg
+      - name: for Linux ppc64le
+        link_type: package
+        url: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/hpcviewer/${CI_COMMIT_TAG}/hpcviewer-linux.gtk.ppc64le.tgz
+        filepath: /hpcviewer-linux.gtk.ppc64le.tgz
+      - name: for Linux aarch64
+        link_type: package
+        url: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/hpcviewer/${CI_COMMIT_TAG}/hpcviewer-linux.gtk.aarch64.tgz
+        filepath: /hpcviewer-linux.gtk.aarch64.tgz
+      - name: for Linux x86_64
+        link_type: package
+        url: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/hpcviewer/${CI_COMMIT_TAG}/hpcviewer-linux.gtk.x86_64.tgz
+        filepath: /hpcviewer-linux.gtk.x86_64.tgz
