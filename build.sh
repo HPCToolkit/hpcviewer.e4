@@ -242,7 +242,7 @@ repackage_linux(){
 
 	cd ..
 
-	output="hpcviewer-${RELEASE}-${prefix}.${platform}.$extension"
+	output="hpcviewer-${prefix}.${platform}.$extension"
 	if [[ "$VERBOSE" == 1 ]]; then
 		echo "Packaging $output from $package"
 	fi
@@ -304,17 +304,17 @@ repackage_linux linux.gtk aarch64
 repackage_linux linux.gtk ppc64le 
 
 # copy and rename windows package
-output="hpcviewer-${RELEASE}-win32.win32.x86_64.zip"
+output="hpcviewer-win32.win32.x86_64.zip"
 input=edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-win32.win32.x86_64.zip
 repackage_windows $input $output 
 
 # copy and rename mac x86_64 package
-output="hpcviewer-${RELEASE}-macosx.cocoa.x86_64.zip"
+output="hpcviewer-macosx.cocoa.x86_64.zip"
 input=edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-macosx.cocoa.x86_64.zip 
 repackage_mac $input $output
 
 # copy and rename mac aarch64 package
-output="hpcviewer-${RELEASE}-macosx.cocoa.aarch64.zip"
+output="hpcviewer-macosx.cocoa.aarch64.zip"
 input=edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-macosx.cocoa.aarch64.zip 
 repackage_mac $input $output
 
@@ -323,14 +323,14 @@ repackage_mac $input $output
 # special treatement for mac OS
 ###################################################################
 if [[ "$OS" == "Darwin" && "$NOTARIZE" == "1" ]]; then 
-        macPkgs="hpcviewer-${RELEASE}-macosx.cocoa.x86_64.zip"
+        macPkgs="hpcviewer-macosx.cocoa.x86_64.zip"
 	macos/notarize.sh $macPkgs
 	
-        macPkgs="hpcviewer-${RELEASE}-macosx.cocoa.aarch64.zip"
+        macPkgs="hpcviewer-macosx.cocoa.aarch64.zip"
 	macos/notarize.sh $macPkgs
 
 elif [[ "$OS" == "Darwin" && "$IMAGE_ONLY" == "1" ]]; then 
-        macPkgs="hpcviewer-${RELEASE}-macosx.cocoa.aarch64.zip"
+        macPkgs="hpcviewer-macosx.cocoa.aarch64.zip"
 	macos/notarize.sh -i $macPkgs
 fi
 
@@ -349,8 +349,8 @@ if [[ "$VERBOSE" == "1" ]]; then
 fi
 ./build.sh ${OPTION} --release "$RELEASE"
 
-if [  -f hpcdata-${RELEASE}.tgz ]; then
-	cp hpcdata*.tgz ../..
+if [  -f hpcdata.tgz ]; then
+	cp hpcdata.tgz ../..
 else
 	echo "Fail to build hpcdata"
 fi
@@ -365,7 +365,7 @@ echo "=================================="
 echo " Done" 
 echo "=================================="
 
-ls -l hpcviewer-${RELEASE}-*
-if [  -f hpcdata-${RELEASE}.tgz ]; then
-	ls -l hpcdata*
+ls -l hpcviewer-*
+if [  -f hpcdata.tgz ]; then
+	ls -l hpcdata.tgz
 fi
