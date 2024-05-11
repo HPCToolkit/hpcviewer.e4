@@ -1,8 +1,12 @@
-FROM docker.io/alpine:3.16
+ARG JDK_OS=17
+FROM docker.io/maven:3.9.6-eclipse-temurin-${JDK_OS}
 
-RUN apk --no-cache add xvfb metacity
-
-COPY --chmod=0755 .ci.predeps/entrypoint.sh /entrypoint.sh
-
-CMD ["/entrypoint.sh"]
-EXPOSE 6099/tcp
+RUN \
+  apt-get update \
+  && apt-get install -y \
+    gzip \
+    libswt-gtk-4-jni \
+    python3 \
+    tar \
+    zip \
+  && : # END

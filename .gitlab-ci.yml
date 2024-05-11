@@ -1,31 +1,64 @@
 # Only spawn workflows for MRs or branches without MRs
 workflow:
+  auto_cancel:
+    on_job_failure: all
+    on_new_commit: interruptible
   rules:
+  - if: $CI_COMMIT_REF_PROTECTED == "true"
+    auto_cancel:
+      on_job_failure: none
+      on_new_commit: none
+    when: always
   - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_REF_PROTECTED != "true"
     when: never
   - when: always
 
 stages:
-- test
-- build
 - lint
+- test
+- package
+- predeploy
 - deploy
 
 include:
+# Scan for common secrets
 - template: Security/Secret-Detection.gitlab-ci.yml
+# Ensure pre-commit linters pass
 - component: gitlab.com/blue42u/ci.pre-commit/lite@0.2
-- component: gitlab.com/blue42u/ci.predeps/buildah@0.4.1
+
+# Main image for building and testing
+- component: &ci_predeps gitlab.com/blue42u/ci.predeps/buildah@0.4.1
   inputs:
-    name: xvfb-metacity-amd64
-- component: gitlab.com/blue42u/ci.predeps/buildah@0.4.1
+    <<: &ci_predeps_shared
+      fallback_registry: registry.gitlab.com/hpctoolkit/hpcviewer/ci.predeps
+    name: main-jdk17-amd64
+    build_args: JDK_OS=17-focal
+- component: *ci_predeps
   inputs:
-    name: xvfb-metacity-arm64
+    <<: *ci_predeps_shared
+    name: main-jdk17-arm64
     platform: linux/arm64
     job_tag: saas-linux-medium-arm64
+    build_args: JDK_OS=17-focal
+
+# Pre-build lightweight images to emulate an X11 server for testing
+- component: *ci_predeps
+  inputs:
+    <<: *ci_predeps_shared
+    name: xvfb-amd64
+    containerfile: .ci.predeps/Containerfile.xvfb
+    ignorefile: .ci.predeps/ignore.xvfb
+- component: *ci_predeps
+  inputs:
+    <<: *ci_predeps_shared
+    name: xvfb-arm64
+    platform: linux/arm64
+    job_tag: saas-linux-medium-arm64
+    containerfile: .ci.predeps/Containerfile.xvfb
+    ignorefile: .ci.predeps/ignore.xvfb
 
 
 default:
-  interruptible: true
   retry:
     max: 2
     when:
@@ -34,6 +67,9 @@ default:
     - runner_system_failure
 
 .maven:
+  image: $PREDEPS_IMAGE_MAIN_JDK17_AMD64
+  needs: ['predeps: [main-jdk17-amd64]']
+
   # Settings to cache Maven downloads
   before_script:
   - mkdir -p .m2-repository/ && rm -rf ~/.m2/repository
@@ -44,48 +80,75 @@ default:
     - .m2-repository
     when: always
 
-.maven-apt:
-  extends: .maven
-  before_script:
-  - !reference [.maven, before_script]
-  - rm -f /etc/apt/apt.conf.d/docker-clean
-  - mkdir -pv .apt-cache/
-  - apt-get update -yq
-  - apt_install() { DEBIAN_FRONTEND=noninteractive apt-get -o Dir::Cache::Archives="$CI_PROJECT_DIR/.apt-cache/" install -y "$@"; }
-  cache:
-  - !reference [.maven, cache]
-  - key: apt-$CI_JOB_IMAGE
-    paths:
-    - .apt-cache/
-    when: always
 
+# Detect any secrets and report if there are problems
 secret_detection:
   stage: lint
+  interruptible: true
   needs: []
   tags: [saas-linux-small-amd64]
   rules:
   - when: always
 
+
+# Lint the code with PMD and CMD
+pmd:
+  extends: .maven
+  interruptible: true
+  stage: lint
+  image: $PREDEPS_IMAGE_MAIN_JDK17_AMD64
+  tags: [saas-linux-small-amd64]
+  needs: ['predeps: [main-jdk17-amd64]']
+
+  allow_failure:
+    exit_codes: 42
+  script:
+  - mvn package pmd:aggregate-pmd -Dformat=net.sourceforge.pmd.renderers.CodeClimateRenderer
+  - mvn package pmd:aggregate-cpd -Dformat=xml
+  # Convert from PMD's null-terminated list to a proper Code Climate report
+  - python3 scripts/pmd2cq.py target/pmd.json > cq.json
+  # Warn if CPD found any duplications, and refer to the HTML report if needed
+  - |
+    if grep -q '<duplication' target/cpd.xml; then
+      echo "CPD found a duplication, see the HTML report for details:"
+      echo "    ${CI_JOB_URL}/artifacts/file/target/site/cpd.html"
+      exit 42
+    else
+      STATUS=$?
+      if [ "$STATUS" -ne 1 ]; then
+        exit $STATUS
+      fi
+    fi
+  artifacts:
+    when: always
+    reports:
+      codequality:
+      - cq.json
+    paths:
+    - target/site
+
+
 # Run all the tests within the Viewer and make sure everything passes
-test amd64:
-  extends: .maven-apt
+test jdk17 amd64:
+  extends: .maven
+  interruptible: true
   stage: test
-  image: docker.io/maven:3.9.6-eclipse-temurin-17-focal
+  image: $PREDEPS_IMAGE_MAIN_JDK17_AMD64
   tags: [saas-linux-small-amd64]
   parallel:
     matrix:
-    - JDK: ['17']
-      WM: [metacity]
-  dependencies: ['predeps: [xvfb-metacity-amd64]']
+    - WM: [metacity]
+  needs:
+  - 'predeps: [main-jdk17-amd64]'
+  - 'predeps: [xvfb-amd64]'
 
   # A running X server is required for tests to complete, we use Xvfb
   services:
-  - name: $PREDEPS_IMAGE_XVFB_METACITY_AMD64
+  - name: $PREDEPS_IMAGE_XVFB_AMD64
     alias: wm
   variables:
     DISPLAY: 'wm:99'
   script:
-  - apt_install python3 libswt-gtk-4-jni
   # Run Maven to build and test everything, but delay the exit until the end
   - mvn --fail-at-end clean verify -Pjacoco || FAIL=1
   # Report the coverage % to the log
@@ -108,19 +171,26 @@ test amd64:
       coverage_report:
         coverage_format: cobertura
         path: coverage.xml
-test arm64:
-  extends: test amd64
-  dependencies: ['predeps: [xvfb-metacity-arm64]']
+test jdk17 arm64:
+  extends: test jdk17 amd64
+  image: $PREDEPS_IMAGE_MAIN_JDK17_ARM64
+  needs:
+  - 'predeps: [main-jdk17-arm64]'
+  - 'predeps: [xvfb-arm64]'
   services:
-  - name: $PREDEPS_IMAGE_XVFB_METACITY_ARM64
+  - name: $PREDEPS_IMAGE_XVFB_ARM64
     alias: wm
   tags: [saas-linux-medium-arm64]
 
+
 # Build the Viewer and package the results for usage by users
-build:
-  extends: .maven-apt
-  stage: build
-  image: docker.io/maven:3.9.6-eclipse-temurin-17-focal
+package:
+  extends: .maven
+  interruptible: true
+  stage: package
+  image: $PREDEPS_IMAGE_MAIN_JDK17_AMD64
+  tags: [saas-linux-small-amd64]
+  needs: ['predeps: [main-jdk17-amd64]']
   variables:
     GIT_STRATEGY: clone
     GIT_DEPTH: 0
@@ -129,62 +199,25 @@ build:
   - VERSION=$(cat ver.txt)
   - rm ver.txt
   - echo "Building version $VERSION"
-
   # For tag pipelines the VERSION should always (always!) be the tag itself
   - test -z "$CI_COMMIT_TAG" || test "$VERSION" = "$CI_COMMIT_TAG"
-
-  # zip, tar and gzip are required for the repackaging steps
-  - apt_install zip tar gzip
   - ./build.sh --create --release "$VERSION"
   artifacts:
     paths:
-    - hpcviewer-*.tgz
-    - hpcviewer-*.zip
+    - hpcviewer-*-linux.gtk.x86_64.tgz
+    - hpcviewer-*-linux.gtk.aarch64.tgz
+    - hpcviewer-*-linux.gtk.ppc64le.tgz
+    - hpcviewer-*-macosx.cocoa.x86_64.zip
+    - hpcviewer-*-macosx.cocoa.aarch64.zip
+    - hpcviewer-*-win32.win32.x86_64.zip
     - hpcdata-*.tgz
 
-# Lint the code with PMD and CMD
-pmd:
-  extends: .maven-apt
-  stage: lint
-  image: docker.io/maven:3.9.6-eclipse-temurin-17-focal
-  needs: []
-
-  allow_failure:
-    exit_codes: 42
-  script:
-  - mvn package pmd:aggregate-pmd -Dformat=net.sourceforge.pmd.renderers.CodeClimateRenderer
-  - mvn package pmd:aggregate-cpd -Dformat=xml
-
-  # Convert from PMD's null-terminated list to a proper Code Climate report
-  - apt_install python3
-  - python3 scripts/pmd2cq.py target/pmd.json > cq.json
-
-  # Warn if CPD found any duplications, and refer to the HTML report if needed
-  - |
-    if grep -q '<duplication' target/cpd.xml; then
-      echo "CPD found a duplication, see the HTML report for details:"
-      echo "    ${CI_JOB_URL}/artifacts/file/target/site/cpd.html"
-      exit 42
-    else
-      STATUS=$?
-      if [ "$STATUS" -ne 1 ]; then
-        exit $STATUS
-      fi
-    fi
-
-  artifacts:
-    when: always
-    reports:
-      codequality:
-      - cq.json
-    paths:
-    - target/site
 
 # Lint job to check that all the to-deploy artifacts were indeed build
 check deploy:
-  stage: lint
+  stage: predeploy
   image: docker.io/alpine
-  needs: [build]
+  needs: [package]
 
   script:
   - |
@@ -205,7 +238,7 @@ check deploy:
 deploy:
   stage: deploy
   image: docker.io/alpine
-  dependencies: [build]
+  dependencies: [package]
 
   variables:
     PHASE: development
