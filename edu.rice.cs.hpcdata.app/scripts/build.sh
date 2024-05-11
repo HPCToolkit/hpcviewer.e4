@@ -96,4 +96,4 @@ if [[ "$VERBOSE" == "1" ]]; then
 	echo "tar the script and jar files..."
 fi
 cp ../../LICENSE .
-tar czf hpcdata-${RELEASE}.tgz  hpcdata.sh ${TEMP} LICENSE
+tar czf hpcdata.tgz  hpcdata.sh ${TEMP} LICENSE
