@@ -203,6 +203,7 @@ package:
   - ./build.sh --create --release "$VERSION"
   artifacts:
     expose_as: Packages
+    expire_in: 3 days
     paths:
     - hpcviewer-linux.gtk.x86_64.tgz
     - hpcviewer-linux.gtk.aarch64.tgz
@@ -223,6 +224,7 @@ package dmg:
   - macos/notarize.sh --image hpcviewer-macosx.cocoa.aarch64.zip
   artifacts:
     expose_as: MacOS Packages
+    expire_in: 3 days
     paths:
     - hpcviewer-macosx.cocoa.x86_64.dmg
     - hpcviewer-macosx.cocoa.aarch64.dmg
