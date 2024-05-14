@@ -76,21 +76,35 @@ public class RemoteCommunicationJsonProtocol extends RemoteCommunicationProtocol
 		serverMainSession.write(json.toString());
 
 		var reply = serverMainSession.read();
-		var buffer = convertFromArrayToString(reply);
-		final var jsonReply = new JSONObject(buffer);
-		
-		if (isSuccess(jsonReply)) {
-			String brokerSocket = jsonReply.getString("socket");
+		if (reply != null && reply.length > 0) {
+			var buffer = convertFromArrayToString(reply);
+			final var jsonReply = new JSONObject(buffer);
+			
+			if (isSuccess(jsonReply)) {
+				String brokerSocket = jsonReply.getString("socket");
+				return new ServerResponse() {
+
+					@Override
+					public ServerResponseType getResponseType() {
+						return ServerResponseType.SUCCESS;
+					}
+
+					@Override
+					public String[] getResponseArgument() {
+						return new String[] {brokerSocket};
+					}
+				};
+			}
 			return new ServerResponse() {
 
 				@Override
 				public ServerResponseType getResponseType() {
-					return ServerResponseType.SUCCESS;
+					return ServerResponseType.ERROR;
 				}
 
 				@Override
 				public String[] getResponseArgument() {
-					return new String[] {brokerSocket};
+					return new String[] {jsonReply.getString("message")};
 				}
 			};
 		}
@@ -103,7 +117,7 @@ public class RemoteCommunicationJsonProtocol extends RemoteCommunicationProtocol
 
 			@Override
 			public String[] getResponseArgument() {
-				return new String[] {jsonReply.getString("message")};
+				return new String[] {"No reply from the server"};
 			}
 		};
 	}

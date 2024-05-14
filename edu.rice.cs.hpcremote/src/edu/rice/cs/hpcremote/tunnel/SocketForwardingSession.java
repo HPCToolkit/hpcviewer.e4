@@ -1,14 +1,10 @@
 package edu.rice.cs.hpcremote.tunnel;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.ArrayList;
-
 import org.slf4j.LoggerFactory;
 
 import com.jcraft.jsch.JSchException;
@@ -18,8 +14,6 @@ import edu.rice.cs.hpcremote.ISecuredConnection.ISessionRemoteSocket;
 
 public class SocketForwardingSession implements ISessionRemoteSocket 
 {
-	private static final String END_OF_MESSAGE_SIGN = "@EOM";
-
 	private static final int TIMEOUT_DEFAULT = 10 * 1000;
 
 	private final Session session;
@@ -27,7 +21,7 @@ public class SocketForwardingSession implements ISessionRemoteSocket
 	
 	private final Socket socket;
 	private PrintWriter out;
-	private BufferedReader in;
+
 	
 	public SocketForwardingSession(Session session, String socketPath) throws JSchException, IOException {
 		this.session = session;
@@ -35,7 +29,6 @@ public class SocketForwardingSession implements ISessionRemoteSocket
 		
 		socket = new Socket("localhost", localPort);
 		out = new PrintWriter(socket.getOutputStream(), true);
-		in  = new BufferedReader( new InputStreamReader(socket.getInputStream()));
 	}
 
 	@Override
@@ -57,24 +50,30 @@ public class SocketForwardingSession implements ISessionRemoteSocket
 		return socket.getInputStream();
 	}
 	
+	/***
+	 * Wrapper implementation of {@code read} to try to read the input from the server:
+	 * <br/>
+	 * 
+	 * {@inheritDoc}
+	 */
 	@Override
 	public String[] read() throws IOException {
-		var list = new ArrayList<String>();
-        while(true) {
-        	var line = in.readLine();
-        	if (line.startsWith(END_OF_MESSAGE_SIGN) || line.isEmpty())
-        		break;
-        	list.add(line);
-        }
-        if (list.isEmpty()) {
-        	log(localPort + ".\t RECV empty");
-        } else {
-        	String str = list.toString();
-        	int len = str.length();
-        	log(localPort + ".\t RECV " + str.substring(0, Math.min(100, len)) + " / " + list.size());
-        }
-        String []texts = new String[list.size()];
-		return list.toArray(texts);
+		String []lines = null;
+		int numAttempts = 50;
+		while (numAttempts > 0) {
+			lines = ISessionRemoteSocket.super.read();
+			if (lines != null && lines.length > 0)
+				break;
+			
+			numAttempts--;
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// ignore it ?
+			    Thread.currentThread().interrupt();
+			}
+		}
+		return lines;
 	}
 	
 	@Override

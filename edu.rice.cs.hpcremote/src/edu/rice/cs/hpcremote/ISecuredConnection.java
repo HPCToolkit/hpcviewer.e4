@@ -126,18 +126,20 @@ public interface ISecuredConnection
 				var s = new String(tmp, 0, i);
 				inputs.append(s);
 			}
+			if (inputs.length() == 0)
+				return new String[0];
+			
 			var text = inputs.toString();
 			StringTokenizer tokenizer = new StringTokenizer(text, "\n");
-			if (tokenizer.countTokens() == 0) {
-				writeLog("\t RECV: " + text);
-				return new String[0];
-			}
+			if (tokenizer.countTokens() == 0)
+				return new String[] {text};
+
 			String []listTexts = new String[tokenizer.countTokens()];
 			
 			for(int i=0; tokenizer.hasMoreTokens(); i++) {
 				listTexts[i] = tokenizer.nextToken();
 			}
-			writeLog("\t RECV: " + listTexts[0] + " out of " + listTexts.length);
+			writeLog("\t RECV: " + inputs.substring(0, Math.min(100, inputs.length())).replace('\n', ' ') + " / " + listTexts.length);
 			
 			return listTexts;
 		}
