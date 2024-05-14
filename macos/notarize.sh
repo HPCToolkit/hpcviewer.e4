@@ -123,13 +123,20 @@ sign_app() {
 # params:
 #   full path of the dmg filename to be created
 #   full path of the folder of the source to be packed into an image
+#   mode: 1 for batch mode (no jenkins). Default: 0
 ######
 create_dmg() {
 	FILENAME="$1"
 	SOURCE_FOLDER="$2"
-	echo "Create ${FILENAME} from ${SOURCE_FOLDER}"
+	MODE="--hdiutil-quiet"
 
-	../${DIR_CONFIG}/create-dmg \
+	if [ "$3" != "" ]; then
+		MODE="--skip-jenkins"
+	fi
+
+	echo "Create ${FILENAME} from ${SOURCE_FOLDER} with mode:$MODE"
+
+	../${DIR_CONFIG}/create-dmg "$MODE"  \
 		   --no-internet-enable \
 		   --background "arrow.png" \
 		   --volname "hpcviewer" \
@@ -168,7 +175,9 @@ create_zip() {
 #  no need to sign and notarize. Just create an image file
 ######
 if [[ "$NOTARIZATION" == "0" ]]; then
-	create_dmg  "${FILE_BASE}.dmg"  "hpcviewer.app/"
+	create_dmg  "${FILE_BASE}.dmg"  "hpcviewer.app/"  1
+	cp "${FILE_BASE}.dmg"  ..
+	cd ..
 	ls -l *.dmg
 	exit 0
 fi
