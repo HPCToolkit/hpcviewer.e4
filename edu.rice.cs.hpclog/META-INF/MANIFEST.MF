@@ -5,7 +5,8 @@ Bundle-SymbolicName: edu.rice.cs.hpclog
 Bundle-Version: 6.0.0.qualifier
 Bundle-Activator: edu.rice.cs.hpclog.Activator
 Bundle-Vendor: Rice University
-Require-Bundle: org.eclipse.core.runtime,
+Require-Bundle: javax.inject,
+ org.eclipse.core.runtime,
  org.eclipse.osgi,
  ch.qos.logback.classic,
  ch.qos.logback.core

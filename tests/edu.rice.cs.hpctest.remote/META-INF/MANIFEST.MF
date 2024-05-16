@@ -5,8 +5,8 @@ Bundle-SymbolicName: edu.rice.cs.hpctest.remote
 Bundle-Version: 6.0.0.qualifier
 Require-Bundle: edu.rice.cs.hpcremote,
  org.junit,
- org.mockito,
- org.json
+ org.json,
+ org.mockito.mockito-core
 Bundle-Vendor: Rice University
 Automatic-Module-Name: edu.rice.cs.hpctest.remote
 Bundle-RequiredExecutionEnvironment: JavaSE-17

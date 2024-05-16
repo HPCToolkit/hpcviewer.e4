@@ -30,6 +30,7 @@ public class Activator implements BundleActivator
 
 	@Override
 	public void stop(BundleContext bundleContext) throws Exception {
+		// remove temporary log here?
 	}
 
 	private void configureLogbackInBundle(Bundle bundle) throws JoranException, IOException {
@@ -37,18 +38,21 @@ public class Activator implements BundleActivator
 		final String workDir = getWorkspaceDirectory();
 		System.setProperty("log.dir", workDir);
 		
-		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-		JoranConfigurator jc = new JoranConfigurator();
-		jc.setContext(context);
-		context.reset();
-
-		// this assumes that the logback.xml file is in the root of the bundle.
-		URL logbackConfigFileUrl = FileLocator.find(bundle, new Path("logback.xml"),null);
-		if (logbackConfigFileUrl == null) {
-			System.err.println("file logback.xml does not exist");
-			return;
+		var context = LoggerFactory.getILoggerFactory();
+		if (context instanceof LoggerContext logContext) {
+			JoranConfigurator jc = new JoranConfigurator();
+			jc.setContext(logContext);
+			
+			logContext.reset();
+			
+			// this assumes that the logback.xml file is in the root of the bundle.
+			URL logbackConfigFileUrl = FileLocator.find(bundle, new Path("logback.xml"),null);
+			if (logbackConfigFileUrl == null) {
+				LoggerFactory.getLogger(getClass()).warn("file `logback.xml` does not exist");
+				return;
+			}
+			jc.doConfigure(logbackConfigFileUrl.openStream());
 		}
-		jc.doConfigure(logbackConfigFileUrl.openStream());
 	}
     
     
