@@ -92,6 +92,8 @@ public interface ISecuredConnection
 	 */
 	interface ISessionRemote extends ISession
 	{
+		final boolean DEBUG_MODE = false;
+		
 		OutputStream getLocalOutputStream() throws IOException;
 		
 		/**
@@ -168,7 +170,8 @@ public interface ISecuredConnection
 		 * @param text
 		 */
 		default void writeLog(String text) {
-			System.err.println(text);
+			if (DEBUG_MODE)
+				System.err.println(text);
 		}
 	}
 	

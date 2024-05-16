@@ -3,7 +3,6 @@ package edu.rice.cs.hpcremote.tunnel;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.net.Socket;
 import org.slf4j.LoggerFactory;
 
@@ -20,30 +19,19 @@ public class SocketForwardingSession implements ISessionRemoteSocket
 	private final int localPort;
 	
 	private final Socket socket;
-	private PrintWriter out;
 
 	
 	public SocketForwardingSession(Session session, String socketPath) throws JSchException, IOException {
 		this.session = session;
 		localPort = session.setSocketForwardingL(null, 0, socketPath, null, TIMEOUT_DEFAULT);
-		
 		socket = new Socket("localhost", localPort);
-		out = new PrintWriter(socket.getOutputStream(), true);
 	}
 
 	@Override
 	public OutputStream getLocalOutputStream() throws IOException {
 		return socket.getOutputStream();
 	}
-
 	
-	@Override
-	public void write(String message) throws IOException {
-		log(localPort + ". SEND " + message);
-		
-		out.println(message + "\n");
-		out.flush();
-	}
 	
 	@Override
 	public InputStream getLocalInputStream() throws IOException {
@@ -94,9 +82,9 @@ public class SocketForwardingSession implements ISessionRemoteSocket
 	public int getLocalPort() {
 		return localPort;
 	}
-
 	
-	private void log(String message) {
-		System.err.println(message);
+	@Override
+	public void writeLog(String text) {
+		ISessionRemoteSocket.super.writeLog(localPort + ": " + text);
 	}
 }
