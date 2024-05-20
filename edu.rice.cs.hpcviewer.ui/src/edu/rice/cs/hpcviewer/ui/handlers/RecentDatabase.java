@@ -48,6 +48,9 @@ public abstract class RecentDatabase
 			MDirectMenuItem menu = modelService.createModelElement(MDirectMenuItem.class);
 			
 			var dbId = DatabaseFactory.createDatabaseIdentification(db);
+			if (dbId == null)
+				continue;
+			
 			var dbIdStr = dbId.toString();
 			
 			menu.setElementId(db);
