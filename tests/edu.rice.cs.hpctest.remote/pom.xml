@@ -10,5 +10,21 @@
 	<artifactId>edu.rice.cs.hpctest.remote</artifactId>
 	<packaging>eclipse-test-plugin</packaging>
  
+ <build>
+  <pluginManagement>
+  <plugins>
+   <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>target-platform-configuration</artifactId>
+        <version>${tycho.version}</version>
+        <configuration>
+            <target>
+              <file>${project.basedir}/../../target-platform/target-platform.target</file>
+            </target>
+        </configuration>
+   </plugin>
+  </plugins>
+  </pluginManagement>
+ </build>
 </project>
 

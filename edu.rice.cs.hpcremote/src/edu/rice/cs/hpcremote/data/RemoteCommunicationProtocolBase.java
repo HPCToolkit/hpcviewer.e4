@@ -118,7 +118,7 @@ public abstract class RemoteCommunicationProtocolBase
 		
 		this.connection = connectionInfo;
 		
-		ICollectionOfConnections.putShellSession(shell, connection.getId(), this);
+		ICollectionOfConnections.putShellSession(shell, this);
 		
 		return ConnectionStatus.CONNECTED;
 	}
@@ -144,7 +144,11 @@ public abstract class RemoteCommunicationProtocolBase
 	
 
 	@Override
-	public IRemoteDatabaseConnection openDatabaseConnection(Shell shell, String database) throws IOException {
+	public IRemoteDatabaseConnection openDatabaseConnection(Shell shell, String database) 
+			throws IOException {
+		if (database == null)
+			return null;
+		
 		if (serverMainSession == null || getConnection() == null)
 			throw errorNotConnected;
 
@@ -250,7 +254,7 @@ public abstract class RemoteCommunicationProtocolBase
 	}
 
 	
-	IConnection getConnection() {
+	public IConnection getConnection() {
 		return connection;
 	}
 

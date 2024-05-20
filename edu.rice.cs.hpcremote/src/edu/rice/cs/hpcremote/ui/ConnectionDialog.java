@@ -1,8 +1,6 @@
 package edu.rice.cs.hpcremote.ui;
 
-import java.io.File;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.StringTokenizer;
 
@@ -46,7 +44,6 @@ import edu.rice.cs.hpcremote.RemoteDatabaseIdentification;
  *******************************************************/
 public class ConnectionDialog extends TitleAreaDialog implements IConnection
 {
-	private static final String EMPTY = "";
 	private static final String HISTORY_SEPARATOR = "|";
 
 	private static final String HISTORY_KEY_PROFILE = "hpcremote.profile";
@@ -83,15 +80,12 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 		super(parentShell);
 		
 		host = null; // default: local host
-		username = EMPTY;
+		username = System.getProperty("user.name");
 	}
 
 	
 	public ConnectionDialog(Shell parentShell, RemoteDatabaseIdentification databaseId) {
 		super(parentShell);
-		
-		if (databaseId == null)
-			databaseId = new RemoteDatabaseIdentification();
 		
 		host = databaseId.getHost();
 		username = databaseId.getUsername();
@@ -169,9 +163,9 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 		labelConfiguration.setText("SSH configuration:");
 		
 		textConfig = new Combo(optionsArea, SWT.DROP_DOWN);
-		var configFile = System.getProperty("user.home") + "/.ssh/config";
+		var configFile = IConnection.super.getConfig();
 
-		if (Files.isReadable(Path.of(configFile))) {
+		if (configFile != null) {
 			textConfig.add(configFile);
 			textConfig.select(0);
 			textConfig.setEnabled(true);
@@ -221,8 +215,7 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 		textPrivateKey = new Combo(privateKeyArea, SWT.DROP_DOWN);
 		
 		if (textPrivateKey.getSelectionIndex() < 0) {
-			var home = System.getProperty("user.home");
-			var key  = home + File.separator + ".ssh" + File.separator + "id_rsa";
+			var key  = IConnection.super.getPrivateKey();
 			textPrivateKey.setText(key);
 		}
 		
@@ -351,12 +344,6 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 	
 	private String checkVariable(String varString) {
 		return varString;
-	}
-	
-
-	@Override
-	public String getId() {
-		return getUsername() + "@" + getHost() + ":" + getInstallationDirectory();
 	}
 
 	

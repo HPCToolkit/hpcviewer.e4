@@ -28,7 +28,7 @@ public abstract class DatabaseShowMenu
 			var database = iterator.next();
 			
 			Experiment exp = (Experiment) database.getExperimentObject();
-			String label = database.getId().id();
+			String label = database.getId().toString();
 			
 			if (exp.isMergedDatabase()) {
 				label = "[Merged] " + label;

@@ -23,7 +23,7 @@
   <module>edu.rice.cs.hpctest.ui</module>
   <module>edu.rice.cs.hpctest.trace</module>
   <module>edu.rice.cs.hpctest.local</module>
-  <!--module>edu.rice.cs.hpctest.remote</module-->
+  <module>edu.rice.cs.hpctest.remote</module>
   <module>edu.rice.cs.hpctest.viewer</module>
   <module>edu.rice.cs.hpctest.report</module>
  </modules>

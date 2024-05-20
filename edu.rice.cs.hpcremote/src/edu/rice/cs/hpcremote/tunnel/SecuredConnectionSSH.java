@@ -61,13 +61,14 @@ public class SecuredConnectionSSH implements ISecuredConnection
 		
 		JSch jsch = new JSch();
 		try {
-		    var irepo = new AgentIdentityRepository(new SSHAgentConnector());
-		    jsch.setIdentityRepository(irepo);
-
 		    jsch.setKnownHosts("~/.ssh/known_hosts");
 
-			if (privateKey != null && !privateKey.isEmpty())
+			if (privateKey != null && !privateKey.isEmpty()) {
+			    var irepo = new AgentIdentityRepository(new SSHAgentConnector());
+			    
+			    jsch.setIdentityRepository(irepo);
 				jsch.addIdentity(privateKey);
+			}
 			
 			if (canConnectUsingConfigRepo(jsch, connectionInfo, userInfo))
 				return true;
