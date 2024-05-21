@@ -18,15 +18,7 @@
          </property>
          <property
                name="aboutText"
-               value="hpcviewer is a user interface for analyzing a database of performance metrics in conjunction with an application’s source code.
-&#x0A;&#x0A;
-hpcviewer is a tool of the HPCToolkit Project (hpctoolkit.org). HPCToolkit is a project of the High Performance Software Foundation (HPSF) and the Linux Foundation.\n
-Research and development of hpcviewer is currently supported by &#x0A;
-* Department of Energy, Software Tools Ecosystem Project (STEP), UT-Battelle, LLC, Subcontract CW54422;&#x0A;
-* Lawrence Livermore National Laboratory, Subcontract B645220;&#x0A;
-* Argonne National Laboratory, Subcontract 4F-60094;&#x0A;
-* Total E&amp;&amp;P Research and Technology USA, LLC;&#x0A;
-* Advanced Micro Devices.">
+               value="hpcviewer is a user interface for analyzing a database of performance metrics in conjunction with an application’s source code.&#x0A;&#x0A;hpcviewer is a tool of the HPCToolkit Project (hpctoolkit.org). HPCToolkit is a project of the High Performance Software Foundation (HPSF) and the Linux Foundation.&#x0A;Research and development of hpcviewer is currently supported by&#x0A;* Department of Energy, Software Tools Ecosystem Project (STEP), UT-Battelle, LLC, Subcontract CW54422&#x0A;* Lawrence Livermore National Laboratory, Subcontract B645220&#x0A;* Argonne National Laboratory, Subcontract 4F-60094&#x0A;* Total E&amp;P Research and Technology USA, LLC&#x0A;* Advanced Micro Devices">
          </property>
          <property
                name="windowImages"

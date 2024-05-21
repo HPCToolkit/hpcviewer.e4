@@ -224,4 +224,8 @@
          id="edu.rice.cs.hpcremote.common"
          version="0.0.0"/>
 
+   <plugin
+         id="ch.qos.logback.slf4j"
+         version="0.0.0"/>
+
 </feature>
