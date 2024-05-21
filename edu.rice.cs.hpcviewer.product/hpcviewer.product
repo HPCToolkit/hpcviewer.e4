@@ -1,14 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="hpcviewer" uid="edu.rice.cs.hpcviewer" id="edu.rice.cs.hpcviewer.ui.hpcviewer" application="org.eclipse.e4.ui.workbench.swt.E4Application" version="6.0.0.qualifier" useFeatures="true" includeLaunchers="true" autoIncludeRequirements="true">
+<product name="hpcviewer" uid="edu.rice.cs.hpcviewer" id="edu.rice.cs.hpcviewer.ui.hpcviewer" application="org.eclipse.e4.ui.workbench.swt.E4Application" version="6.0.0.qualifier" type="features" includeLaunchers="true" autoIncludeRequirements="true">
 
    <aboutInfo>
       <image path="/edu.rice.cs.hpcviewer.ui/resources/hpcviewer64.gif"/>
       <text>
-         hpcviewer is a user interface for analyzing a database of performance metrics in conjunction with an application&apos;s source code.
+         hpcviewer is a user interface for analyzing a database of performance metrics in conjunction with an application’s source code.
 
-hpcviewer is part of Rice University&apos;s HPCToolkit project. Development of HPCToolkit is principally funded by the Department of Energy&apos;s Office of Science, Lawrence Livermore National Laboratory and National Science Foundation.
+hpcviewer is a tool of the HPCToolkit Project (hpctoolkit.org). HPCToolkit is a project of the High Performance Software Foundation (HPSF) and the Linux Foundation.
+Research and development of hpcviewer is currently supported by
+* Department of Energy, Software Tools Ecosystem Project (STEP), UT-Battelle, LLC, Subcontract CW54422
+* Lawrence Livermore National Laboratory, Subcontract B645220
+* Argonne National Laboratory, Subcontract 4F-60094
+* Total E&amp;P Research and Technology USA, LLC
+* Advanced Micro Devices
       </text>
    </aboutInfo>
 
@@ -41,6 +47,7 @@ hpcviewer is part of Rice University&apos;s HPCToolkit project. Development of H
             winLargeHigh="/edu.rice.cs.hpcviewer.ui/resources/hpcviewer-icon-48x48-32bit.bmp"/>
       </win>
    </launcher>
+
 
    <vm>
    </vm>

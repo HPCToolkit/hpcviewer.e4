@@ -138,10 +138,13 @@ public class About
 		@Override
 		protected Control createMessageArea(Composite composite) {
 			Composite parent = (Composite) super.createMessageArea(composite);
-			Label lbl = new Label(parent, SWT.NONE);
-			lbl.setText("");
+
+			// dummy space
+			var dummy = new Label(parent, SWT.NONE);
+			dummy.setText("");
+			
 			Link link = new Link(parent, SWT.LEFT);
-			link.setText("See <a href=\"http://hpctoolkit.org\">http://hpctoolkit.org</a> for more information.");
+			link.setText("<a href=\"http://hpctoolkit.org\">http://hpctoolkit.org</a>");
 			link.addListener(SWT.Selection, event -> {
 				boolean result = Program.launch("http://hpctoolkit.org");
 				if (!result) {
