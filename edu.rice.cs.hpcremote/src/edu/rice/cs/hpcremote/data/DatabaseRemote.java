@@ -132,6 +132,8 @@ public class DatabaseRemote implements IDatabaseRemote
 		} else if (connectStatus == IRemoteCommunicationProtocol.ConnectionStatus.NOT_CONNECTED) {
 			status = DatabaseStatus.CANCEL;
 			return status;
+		} else if (connectStatus == IRemoteCommunicationProtocol.ConnectionStatus.ERROR) {
+			status = DatabaseStatus.UNKNOWN_ERROR;
 		}
 		errorMessage = remoteHostConnection.getStandardErrorMessage();
 		return status;
