@@ -1,8 +1,12 @@
 package edu.rice.cs.hpcremote.trace;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.hpctoolkit.hpcclient.v1_0.HpcClient;
 
 import edu.rice.cs.hpcbase.IFilteredData;
 import edu.rice.cs.hpcdata.db.IdTuple;
@@ -11,13 +15,16 @@ import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
 
 public class RemoteFilteredData implements IFilteredData 
 {
-	final IdTupleType idTupleType;
-	final List<IdTuple> listOriginalIdTuples;
+	private final IdTupleType idTupleType;
+	private final List<IdTuple> listOriginalIdTuples;
+	private final HpcClient hpcClient;
 	
-	List<IdTuple> listIdTuples;
-	List<Integer> indexes;
+	private Map<IdTuple, Integer> mapIdTupleToSamples;
+	private List<IdTuple> listIdTuples;
+	private List<Integer> indexes;
 
-	public RemoteFilteredData(List<IdTuple> listOriginalIdTuples, IdTupleType idTupleType) {
+	public RemoteFilteredData(HpcClient hpcClient, List<IdTuple> listOriginalIdTuples, IdTupleType idTupleType) {
+		this.hpcClient = hpcClient;
 		this.listOriginalIdTuples = listOriginalIdTuples;
 		this.idTupleType = idTupleType;
 	}
@@ -120,6 +127,22 @@ public class RemoteFilteredData implements IFilteredData
 
 	@Override
 	public Map<IdTuple, Integer> getMapFromExecutionContextToNumberOfTraces() {
+		if (mapIdTupleToSamples != null)
+			return mapIdTupleToSamples;
+		
+		try {
+			var samplesPerProfile = hpcClient.getNumberOfSamplesPerTrace();
+			mapIdTupleToSamples = new HashMap<>(samplesPerProfile.length);
+			
+			for(var idTuple: listOriginalIdTuples) {
+				mapIdTupleToSamples.put(idTuple, samplesPerProfile[idTuple.getProfileIndex()-1]);
+			}
+			return mapIdTupleToSamples;
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}		
 		throw new IllegalAccessError("Not yet supported for remote database");
 	}
 }
