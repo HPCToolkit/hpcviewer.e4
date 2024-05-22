@@ -8,6 +8,8 @@ import java.util.StringTokenizer;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 
+import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
+
 
 public interface ISecuredConnection 
 {
@@ -92,7 +94,7 @@ public interface ISecuredConnection
 	 */
 	interface ISessionRemote extends ISession
 	{
-		final boolean DEBUG_MODE = false;
+		final boolean DEBUG_MODE = ViewerPreferenceManager.INSTANCE.getDebugMode();
 		
 		OutputStream getLocalOutputStream() throws IOException;
 		

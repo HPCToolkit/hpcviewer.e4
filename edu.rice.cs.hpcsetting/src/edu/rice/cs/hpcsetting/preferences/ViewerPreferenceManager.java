@@ -52,6 +52,9 @@ public class ViewerPreferenceManager extends AbstractPreferenceManager
 		store.setDefault(PreferenceConstants.ID_DEBUG_CCT_ID,  Boolean.FALSE);
 		store.setDefault(PreferenceConstants.ID_DEBUG_FLAT_ID, Boolean.FALSE);
 		
+		// temporary solution: enable experiment feature by default
+		store.setDefault(PreferenceConstants.ID_FEATURE_EXPERIMENTAL, true);
+
 		PreferenceConverter.setDefault(store, 
 									   PreferenceConstants.ID_FONT_GENERIC, 
 									   JFaceResources.getDefaultFont().getFontData());

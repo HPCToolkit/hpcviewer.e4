@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
@@ -47,19 +48,18 @@ public class ApplicationProperty
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 */
-	public static String getFileContent(String urlPathToFile) throws MalformedURLException, IOException {
+	public static String getFileContent(String urlPathToFile) throws IOException {
 		
 		URL url = FileLocator.toFileURL(new URL(urlPathToFile));
 		String filePath = url.getFile();
 		File file = new File(filePath);
-		FileInputStream fis = new FileInputStream(file);
-		byte[] data = new byte[(int) file.length()];
-		fis.read(data);
-		
-		String content = new String(data, "UTF-8");				
-		fis.close();
-		
-		return content;
+		try (FileInputStream fis = new FileInputStream(file)) {
+			byte[] data = new byte[(int) file.length()];
+			if (fis.read(data) > 0) {
+				return new String(data, StandardCharsets.UTF_8);
+			}
+		}
+		return "";
 	}
 	
 	

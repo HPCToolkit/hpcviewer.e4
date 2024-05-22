@@ -49,11 +49,12 @@ public class LogProperty
 	 * @param debug boolean true if we need to set to the debug level
 	 */
 	public static void setDebug(boolean debug) {
-		Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-		if (debug)
-			root.setLevel(Level.DEBUG);
-		else
-			root.setLevel(Level.ERROR);
-
+		var logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+		if (logger instanceof Logger root) {
+			if (debug)
+				root.setLevel(Level.DEBUG);
+			else
+				root.setLevel(Level.ERROR);
+		}
 	}
 }
