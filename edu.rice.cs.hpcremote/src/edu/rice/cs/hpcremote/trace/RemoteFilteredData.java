@@ -2,11 +2,13 @@ package edu.rice.cs.hpcremote.trace;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.hpctoolkit.hpcclient.v1_0.HpcClient;
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcbase.IFilteredData;
 import edu.rice.cs.hpcdata.db.IdTuple;
@@ -132,17 +134,20 @@ public class RemoteFilteredData implements IFilteredData
 		
 		try {
 			var samplesPerProfile = hpcClient.getNumberOfSamplesPerTrace();
-			mapIdTupleToSamples = new HashMap<>(samplesPerProfile.length);
+			var mapToSamples = new HashMap<IdTuple, Integer>(samplesPerProfile.length());
 			
 			for(var idTuple: listOriginalIdTuples) {
-				mapIdTupleToSamples.put(idTuple, samplesPerProfile[idTuple.getProfileIndex()-1]);
+				mapToSamples.put(idTuple, samplesPerProfile.getOrElse(idTuple.getProfileIndex()-1, 0));
 			}
+			mapIdTupleToSamples = Collections.unmodifiableMap(mapToSamples);
 			return mapIdTupleToSamples;
+			
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			LoggerFactory.getLogger(getClass()).error("Getting trace map is interrupted", e);
+		    Thread.currentThread().interrupt();
 		} catch (IOException e) {
-			e.printStackTrace();
-		}		
-		throw new IllegalAccessError("Not yet supported for remote database");
+			LoggerFactory.getLogger(getClass()).error("Error from the remote server", e);
+		}
+		return Map.of();
 	}
 }

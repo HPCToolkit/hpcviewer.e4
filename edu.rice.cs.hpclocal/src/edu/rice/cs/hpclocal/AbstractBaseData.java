@@ -1,6 +1,7 @@
 package edu.rice.cs.hpclocal;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -98,10 +99,10 @@ public abstract class AbstractBaseData implements ILocalBaseData
 	public Map<IdTuple, Integer> getMapFromExecutionContextToNumberOfTraces() {
 		if (mapTraceToRecord != null)
 			return mapTraceToRecord;
-		
-		mapTraceToRecord  = new HashMap<>();
 
 		var listIdTuples = baseDataFile.getIdTuple(IdTupleOption.BRIEF);		
+		
+		var mapTrace  = new HashMap<IdTuple, Integer>(listIdTuples.size());
 		
 		for(var idt: listIdTuples) {
 			var min = baseDataFile.getMinLoc(idt);
@@ -110,8 +111,9 @@ public abstract class AbstractBaseData implements ILocalBaseData
 			int delta   = (int) (max - min);
 			int records = delta/getRecordSize();
 			
-			mapTraceToRecord.put(idt, records);
+			mapTrace.put(idt, records);
 		}
+		mapTraceToRecord = Collections.unmodifiableMap(mapTrace);
 		return mapTraceToRecord;
 	}
 }
