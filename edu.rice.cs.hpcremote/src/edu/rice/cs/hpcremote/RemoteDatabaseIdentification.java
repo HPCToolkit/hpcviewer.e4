@@ -16,10 +16,14 @@ public class RemoteDatabaseIdentification implements IDatabaseIdentification
 	
 	private String remoteInstallation;
 	
+	/***
+	 * Create an empty remote ID
+	 */
 	public RemoteDatabaseIdentification() {
 		databasePath = EMPTY;
 		host = EMPTY;
 		username = EMPTY;
+		remoteInstallation = EMPTY;
 	}
 	
 	
@@ -27,15 +31,15 @@ public class RemoteDatabaseIdentification implements IDatabaseIdentification
 	 * Initialize with the existing remote database id.
 	 * Example remote id format:
 	 * <pre>
-	 * user@hostname:/home/user/data/hpctoolkit-database/
+	 * installation_path*user@hostname:/home/user/data/hpctoolkit-database/
 	 * </pre>
 	 * @param databaseId
 	 */
 	public RemoteDatabaseIdentification(String databaseId) throws InvalidRemoteIdentficationException{		
 		// partition the id into:
-		//    installation / user @ hostName : database
-		// installation 0 .. /
-		// userName: / .. @
+		//    installation * user @ hostName : database
+		// installation 0 .. *
+		// userName: * .. @
 		// hostName: @ .. :
 		// database: : ..
 		
@@ -58,23 +62,48 @@ public class RemoteDatabaseIdentification implements IDatabaseIdentification
 	}
 
 	
+	/***
+	 * Create an instance of remote ID.
+	 * 
+	 * @param host
+	 * @param path
+	 * @param username
+	 */
 	public RemoteDatabaseIdentification(String host, String path, String username) {
 		this.host = host;		
 		this.databasePath = path;
 		this.username = username;
+		remoteInstallation = EMPTY;
 	}
 	
-	
+	/***
+	 * Return the remote host.
+	 * 
+	 * @return {@code String} 
+	 * @apiNote can be {@code null}
+	 */
 	public String getHost() {
 		return host;
 	}
 	
 	
+	/***
+	 * Return the database path.
+	 * 
+	 * @return {@code String}
+	 * @apiNote can be {@code null}
+	 */
 	public String getPath() {
 		return databasePath;
 	}
 	
 	
+	/***
+	 * Return the user name.
+	 * 
+	 * @return {@code String}
+	 * @apiNote can be {@code null}
+	 */
 	public String getUsername() {
 		return username;
 	}
@@ -85,6 +114,12 @@ public class RemoteDatabaseIdentification implements IDatabaseIdentification
 	}
 	
 	
+	/***
+	 * Return the remote installation.
+	 * 
+	 * @return {@code String}
+	 * @apiNote can be {@code null}
+	 */
 	public String getRemoteInstallation() {
 		return remoteInstallation;
 	}
