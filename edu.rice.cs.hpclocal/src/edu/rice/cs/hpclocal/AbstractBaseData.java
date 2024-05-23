@@ -68,9 +68,6 @@ public abstract class AbstractBaseData implements ILocalBaseData
 		if (baseDataFile != null)
 			baseDataFile.dispose();
 		
-		if (mapTraceToRecord != null)
-			mapTraceToRecord.clear();
-		
 		mapTraceToRecord = null;
 	}
 	
