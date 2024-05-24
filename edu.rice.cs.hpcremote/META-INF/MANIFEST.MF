@@ -6,7 +6,8 @@ Bundle-SymbolicName: edu.rice.cs.hpcremote;singleton:=true
 Bundle-Version: 7.0.0.qualifier
 Bundle-Vendor: Rice University
 Export-Package: edu.rice.cs.hpcremote,
- edu.rice.cs.hpcremote.data
+ edu.rice.cs.hpcremote.data,
+ edu.rice.cs.hpcremote.trace
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jface,
  org.eclipse.e4.ui.model.workbench,

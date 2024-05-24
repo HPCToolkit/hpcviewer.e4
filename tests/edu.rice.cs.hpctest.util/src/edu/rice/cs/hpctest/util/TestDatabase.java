@@ -15,8 +15,15 @@ import java.util.stream.Stream;
 
 import org.junit.Test;
 
+import edu.rice.cs.hpcdata.db.IFileDB;
+import edu.rice.cs.hpcdata.db.version2.TraceDB2;
+import edu.rice.cs.hpcdata.db.version4.FileDB4;
+import edu.rice.cs.hpcdata.db.version4.MetricValueCollection4;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
+import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
+import edu.rice.cs.hpcdata.util.Constants;
+import edu.rice.cs.hpcdata.util.IProgressReport;
 
 public class TestDatabase 
 {
@@ -56,11 +63,47 @@ public class TestDatabase
 		List<Experiment> listExp = new ArrayList<>(dirs.length);
 		for(var dir: dirs) {
 			Experiment e = new Experiment();
-			var localDb = new LocalDatabaseRepresentation(dir, null, true);
+			var localDb = new LocalDatabaseRepresentation(dir, null, IProgressReport.dummy());
 			e.open(localDb);
 			listExp.add(e);
 		}
 		return listExp;
+	}
+	
+	
+	public static List<IFileDB> getFileDbs() throws Exception {
+		var directories = TestDatabase.getDatabases();
+		
+		var listFileDB = new ArrayList<IFileDB>(directories.length);
+		
+		for(var dir: directories) {
+			Experiment exp = new Experiment();
+			exp.open(new LocalDatabaseRepresentation(dir, null, IProgressReport.dummy()));
+			
+			// Assume all test database should include traces
+			// In the future this assumption may not be correct
+			assertTrue(exp.getTraceDataVersion() >= 0);
+
+			IFileDB fileDb = null;
+			
+			if (exp.getMajorVersion() == Constants.EXPERIMENT_SPARSE_VERSION) {
+				var root = exp.getRootScope(RootScopeType.CallingContextTree);
+				MetricValueCollection4 mvc = (MetricValueCollection4) root.getMetricValueCollection();
+				var dataSummary = mvc.getDataSummary();
+				fileDb = new FileDB4(exp, dataSummary);
+			} else if (exp.getMajorVersion() == Constants.EXPERIMENT_DENSED_VERSION) {
+				fileDb = new TraceDB2(exp);
+			} else {
+				fail();
+				continue; // just to avoid warning 
+			}
+			assertNotNull(fileDb);
+			
+			fileDb.open(dir.getAbsolutePath());
+			
+			listFileDB.add(fileDb);
+		}
+		return listFileDB;
 	}
 
 	@Test
