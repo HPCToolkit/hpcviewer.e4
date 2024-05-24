@@ -136,13 +136,12 @@ public class FilteredBaseDataTest
 		for(var fileDb : listFileDB) {
 			FilteredBaseData fbd = new FilteredBaseData(fileDb);
 			var mapProfileToSamples = fbd.getMapFromExecutionContextToNumberOfTraces();
-			var negativeSamples = mapProfileToSamples.values().stream().filter(samples -> samples < 0).findAny();
-			assertTrue(negativeSamples.isEmpty());
+			assertNotNull(mapProfileToSamples);
 			
-			var idt = fbd.getDenseListIdTuple(IdTupleOption.BRIEF);
-			var first = idt.get(0);
-			var samples = mapProfileToSamples.get(first);
-			assertTrue(samples >= 0);
+			var listProfiles = fileDb.getIdTuple(IdTupleOption.BRIEF);
+			
+			var negativeSamples = listProfiles.stream().filter(idt -> mapProfileToSamples.getNumberOfSamples(idt) < 0).findAny();
+			assertTrue(negativeSamples.isEmpty());
 		}
 	}
 	

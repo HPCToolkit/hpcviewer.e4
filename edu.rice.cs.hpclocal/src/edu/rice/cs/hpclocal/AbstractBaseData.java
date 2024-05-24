@@ -1,12 +1,11 @@
 package edu.rice.cs.hpclocal;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import org.eclipse.collections.impl.map.mutable.primitive.ObjectIntHashMap;
 
 import edu.rice.cs.hpcbase.BaseConstants;
+import edu.rice.cs.hpcbase.IExecutionContextToNumberTracesMap;
 import edu.rice.cs.hpcdata.db.IFileDB;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
@@ -22,7 +21,7 @@ import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
 public abstract class AbstractBaseData implements ILocalBaseData 
 {
 	protected final IFileDB baseDataFile;
-	private Map<IdTuple, Integer> mapTraceToRecord;
+	private IExecutionContextToNumberTracesMap mapTraceToRecord;
 
 	protected AbstractBaseData(IFileDB baseDataFile){
 		this.baseDataFile = baseDataFile;
@@ -93,13 +92,13 @@ public abstract class AbstractBaseData implements ILocalBaseData
 
 
 	@Override
-	public Map<IdTuple, Integer> getMapFromExecutionContextToNumberOfTraces() {
+	public IExecutionContextToNumberTracesMap getMapFromExecutionContextToNumberOfTraces() {
 		if (mapTraceToRecord != null)
 			return mapTraceToRecord;
 
 		var listIdTuples = baseDataFile.getIdTuple(IdTupleOption.BRIEF);		
 		
-		var mapTrace  = new HashMap<IdTuple, Integer>(listIdTuples.size());
+		var mapTrace = new ObjectIntHashMap<>(listIdTuples.size());
 		
 		for(var idt: listIdTuples) {
 			var min = baseDataFile.getMinLoc(idt);
@@ -110,7 +109,7 @@ public abstract class AbstractBaseData implements ILocalBaseData
 			
 			mapTrace.put(idt, records);
 		}
-		mapTraceToRecord = Collections.unmodifiableMap(mapTrace);
+		mapTraceToRecord = mapTrace::get;
 		return mapTraceToRecord;
 	}
 }

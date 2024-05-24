@@ -2,14 +2,12 @@ package edu.rice.cs.hpcremote.trace;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
+import org.eclipse.collections.impl.map.mutable.primitive.ObjectIntHashMap;
 import org.hpctoolkit.hpcclient.v1_0.HpcClient;
 import org.slf4j.LoggerFactory;
 
+import edu.rice.cs.hpcbase.IExecutionContextToNumberTracesMap;
 import edu.rice.cs.hpcbase.IFilteredData;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
@@ -21,7 +19,7 @@ public class RemoteFilteredData implements IFilteredData
 	private final List<IdTuple> listOriginalIdTuples;
 	private final HpcClient hpcClient;
 	
-	private Map<IdTuple, Integer> mapIdTupleToSamples;
+	private IExecutionContextToNumberTracesMap mapIdTupleToSamples;
 	private List<IdTuple> listIdTuples;
 	private List<Integer> indexes;
 
@@ -128,18 +126,18 @@ public class RemoteFilteredData implements IFilteredData
 
 
 	@Override
-	public Map<IdTuple, Integer> getMapFromExecutionContextToNumberOfTraces() {
+	public IExecutionContextToNumberTracesMap getMapFromExecutionContextToNumberOfTraces() {
 		if (mapIdTupleToSamples != null)
 			return mapIdTupleToSamples;
 		
 		try {
 			var samplesPerProfile = hpcClient.getNumberOfSamplesPerTrace();
-			var mapToSamples = new HashMap<IdTuple, Integer>(samplesPerProfile.length());
+			var mapToSamples = new ObjectIntHashMap<>(getNumberOfRanks());
 			
 			for(var idTuple: listOriginalIdTuples) {
 				mapToSamples.put(idTuple, samplesPerProfile.getOrElse(idTuple.getProfileIndex()-1, 0));
 			}
-			mapIdTupleToSamples = Collections.unmodifiableMap(mapToSamples);
+			mapIdTupleToSamples = mapToSamples::get;
 			return mapIdTupleToSamples;
 			
 		} catch (InterruptedException e) {
@@ -148,6 +146,6 @@ public class RemoteFilteredData implements IFilteredData
 		} catch (IOException e) {
 			LoggerFactory.getLogger(getClass()).error("Error from the remote server", e);
 		}
-		return Map.of();
+		return IExecutionContextToNumberTracesMap.EMPTY;
 	}
 }
