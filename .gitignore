@@ -1,4 +1,5 @@
 target/
+tests/edu.rice.cs.hpctest.report/target
 edu.rice.cs.hpcdata/.settings
 edu.rice.cs.hpcdata/bin/
 edu.rice.cs.hpcfilter/bin/

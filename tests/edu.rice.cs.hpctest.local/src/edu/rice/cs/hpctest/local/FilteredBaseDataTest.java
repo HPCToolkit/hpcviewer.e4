@@ -14,14 +14,6 @@ import edu.rice.cs.hpcdata.db.IFileDB;
 import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
-import edu.rice.cs.hpcdata.db.version2.TraceDB2;
-import edu.rice.cs.hpcdata.db.version4.FileDB4;
-import edu.rice.cs.hpcdata.db.version4.MetricValueCollection4;
-import edu.rice.cs.hpcdata.experiment.Experiment;
-import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
-import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
-import edu.rice.cs.hpcdata.util.Constants;
-import edu.rice.cs.hpcdata.util.IProgressReport;
 import edu.rice.cs.hpclocal.FilteredBaseData;
 import edu.rice.cs.hpctest.util.TestDatabase;
 
@@ -32,41 +24,11 @@ public class FilteredBaseDataTest
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		var directories = TestDatabase.getDatabases();
-		
-		listFileDB = new ArrayList<>(directories.length);
-		
-		for(var dir: directories) {
-			Experiment exp = new Experiment();
-			exp.open(new LocalDatabaseRepresentation(dir, null, IProgressReport.dummy()));
-			
-			// Assume all test database should include traces
-			// In the future this assumption may not be correct
-			assertTrue(exp.getTraceDataVersion() >= 0);
-
-			IFileDB fileDb = null;
-			
-			if (exp.getMajorVersion() == Constants.EXPERIMENT_SPARSE_VERSION) {
-				var root = exp.getRootScope(RootScopeType.CallingContextTree);
-				MetricValueCollection4 mvc = (MetricValueCollection4) root.getMetricValueCollection();
-				var dataSummary = mvc.getDataSummary();
-				fileDb = new FileDB4(exp, dataSummary);
-			} else if (exp.getMajorVersion() == Constants.EXPERIMENT_DENSED_VERSION) {
-				fileDb = new TraceDB2(exp);
-			} else {
-				fail();
-				continue; // just to avoid warning 
-			}
-			assertNotNull(fileDb);
-			
-			fileDb.open(dir.getAbsolutePath());
-			
-			listFileDB.add(fileDb);
-		}
+		listFileDB = TestDatabase.getFileDbs();
 	}
 
 	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
+	public static void tearDownAfterClass() {
 		listFileDB.stream().forEach(IFileDB::dispose);
 	}
 
@@ -136,13 +98,12 @@ public class FilteredBaseDataTest
 		for(var fileDb : listFileDB) {
 			FilteredBaseData fbd = new FilteredBaseData(fileDb);
 			var mapProfileToSamples = fbd.getMapFromExecutionContextToNumberOfTraces();
-			var negativeSamples = mapProfileToSamples.values().stream().filter(samples -> samples < 0).findAny();
-			assertTrue(negativeSamples.isEmpty());
+			assertNotNull(mapProfileToSamples);
 			
-			var idt = fbd.getDenseListIdTuple(IdTupleOption.BRIEF);
-			var first = idt.get(0);
-			var samples = mapProfileToSamples.get(first);
-			assertTrue(samples >= 0);
+			var listProfiles = fileDb.getIdTuple(IdTupleOption.BRIEF);
+			
+			var negativeSamples = listProfiles.stream().filter(idt -> mapProfileToSamples.getNumberOfSamples(idt) < 0).findAny();
+			assertTrue(negativeSamples.isEmpty());
 		}
 	}
 	

@@ -3,7 +3,6 @@ package edu.rice.cs.hpctraceviewer.filter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -17,6 +16,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
+import edu.rice.cs.hpcbase.IExecutionContextToNumberTracesMap;
 import edu.rice.cs.hpcbase.IFilteredData;
 import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
@@ -135,7 +135,7 @@ public class TraceFilterDialog extends Dialog implements IEnableButtonOk
 		 * call to set it redundant). If it's not, we wait to replace the
 		 * current filter with the new filter until we know we have to.
 		 */
-		Map<IdTuple, Integer> mapToSamples;
+		IExecutionContextToNumberTracesMap mapToSamples;
 		try {
 			mapToSamples = traceData.getMapFromExecutionContextToNumberOfTraces();
 		} catch (IllegalAccessError e) {
@@ -158,7 +158,7 @@ public class TraceFilterDialog extends Dialog implements IEnableButtonOk
         for(var idt: listDenseIds) {
 
         	int numSamples = 0;
-        	var samples = mapToSamples != null ? mapToSamples.get(idt) : null;
+        	var samples = mapToSamples != null ? mapToSamples.getNumberOfSamples(idt) : null;
         	if (samples != null)
         		numSamples = samples.intValue();
 

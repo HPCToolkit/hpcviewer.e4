@@ -112,7 +112,7 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 		var listIdTuples = experiment.getThreadData().getIdTuples();
 		var idTupleType  = experiment.getIdTupleType();
 		
-		setBaseData(new RemoteFilteredData(listIdTuples, idTupleType));
+		setBaseData(new RemoteFilteredData(client, listIdTuples, idTupleType));
 	}
 	
 	
