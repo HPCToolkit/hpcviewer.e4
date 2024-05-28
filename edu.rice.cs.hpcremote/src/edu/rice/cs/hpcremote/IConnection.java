@@ -36,10 +36,10 @@ public interface IConnection
 	default String getPrivateKey() {
 		var home = System.getProperty("user.home");
 		var key  = home + File.separator + ".ssh" + File.separator + "id_rsa";
-		if ( Files.isReadable(Path.of(key)))
+		if (Files.isReadable(Path.of(key)))
 			return key;
 		
-		return null;
+		return "";
 	}
 
 	

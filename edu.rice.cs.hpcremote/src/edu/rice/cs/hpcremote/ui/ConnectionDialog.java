@@ -1,7 +1,5 @@
 package edu.rice.cs.hpcremote.ui;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.StringTokenizer;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -44,6 +42,8 @@ import edu.rice.cs.hpcremote.RemoteDatabaseIdentification;
  *******************************************************/
 public class ConnectionDialog extends TitleAreaDialog implements IConnection
 {
+	private enum OptionSelection {NONE, PASSWORD, PRIVATE, AGENT}
+	
 	private static final String HISTORY_SEPARATOR = "|";
 
 	private static final String HISTORY_KEY_PROFILE = "hpcremote.profile";
@@ -59,6 +59,7 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 	
 	private Button labelPrivateKey;
 	private Button labelProxyAgent;
+	private Button labelUsePassword;
 	
 	private Button labelConfiguration;
 	
@@ -68,6 +69,7 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 	private String privateKey;
 	private String proxyAgent;
 	private String configRepo;
+	
 	
 	/*****
 	 * Instantiate a connection window. User needs to call {@code open} 
@@ -186,7 +188,7 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 	
 	
 	private void createPasswordOption(Composite optionsArea) {
-		Button labelUsePassword = new Button(optionsArea, SWT.RADIO);
+		labelUsePassword = new Button(optionsArea, SWT.RADIO);
 		labelUsePassword.setText("Use password");
 		GridDataFactory.fillDefaults().span(2, 1).grab(true, true).applyTo(labelUsePassword);
 	}
@@ -216,7 +218,8 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 		
 		if (textPrivateKey.getSelectionIndex() < 0) {
 			var key  = IConnection.super.getPrivateKey();
-			textPrivateKey.setText(key);
+			if (key != null)
+				textPrivateKey.setText(key);
 		}
 		
 		var browserButton = new Button(privateKeyArea, SWT.PUSH);
@@ -244,14 +247,6 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 		var privateKeyEnabled = textPrivateKey.getText() != null && !textPrivateKey.getText().isEmpty();
 		textPrivateKey.setEnabled(privateKeyEnabled);
 		browserButton.setEnabled(privateKeyEnabled);
-		
-		boolean privateKeyChecked = privateKeyEnabled;
-		if (privateKeyEnabled) {
-			// if rsa file is not accessible, do not check the private key label
-			String rsaFile = textPrivateKey.getText();
-			privateKeyChecked = Files.exists(Paths.get(rsaFile));
-		}
-		labelPrivateKey.setSelection(privateKeyChecked);
 	}
 	
 	
@@ -276,10 +271,29 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 				textUsername.select(selection);
 				textDirectory.select(selection);
 			});
+			
+			var h = histories[0];
+			var option = h.option.isEmpty() ? OptionSelection.PASSWORD : OptionSelection.valueOf(h.option);
+			
+			switch(option) {
+			case AGENT: 
+				labelProxyAgent.setSelection(true);
+				break;
+			case PRIVATE:
+				if (textPrivateKey.getText() != null && !textPrivateKey.getText().isEmpty()) {
+					labelPrivateKey.setSelection(true);
+				}
+				break;
+			case PASSWORD:
+			default:
+				labelUsePassword.setSelection(true);
+				break;
+			}
 		}
 		fillAndSetComboWithHistory(textPrivateKey, HISTORY_KEY_PRIV);
 	}
 	
+
 	
 	@Override
 	protected void okPressed() {
@@ -293,9 +307,10 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 		privateKey = labelPrivateKey.getSelection() ? textPrivateKey.getText() : null;
 		proxyAgent = labelProxyAgent.getSelection() ? textProxyAgent.getText() : null;
 		configRepo = labelConfiguration.getSelection() ? textConfig.getText()  : null;
+		var option = getSelectedOption();
 		
 		var history = new UserInputHistory(HISTORY_KEY_PROFILE);
-		var line = host + HISTORY_SEPARATOR + username + HISTORY_SEPARATOR + directory;
+		var line = host + HISTORY_SEPARATOR + username + HISTORY_SEPARATOR + directory + HISTORY_SEPARATOR + option.toString();
 		history.addLine(line);
 		
 		if (privateKey != null && !privateKey.isEmpty() && !privateKey.isBlank()) {
@@ -306,6 +321,17 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 		super.okPressed();
 	}
 
+	
+	private OptionSelection getSelectedOption() {
+		if (labelPrivateKey.getSelection())
+			return OptionSelection.PRIVATE;
+		
+		if (labelProxyAgent.getSelection())
+			return OptionSelection.AGENT;
+		
+		// default: using password
+		return OptionSelection.PASSWORD;
+	}
 
 	@Override
 	public String getConfig() {
@@ -372,6 +398,45 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 	}
 	
 	
+	private History[] initHistory() {
+		var history = new UserInputHistory(HISTORY_KEY_PROFILE);
+		var listOfHistories = history.getHistory();
+		
+		if (listOfHistories == null || listOfHistories.isEmpty()) {
+			// first time running remote database
+			// return the default configuration
+			return new History[] {new History("localhost", username, "", "")};
+		}
+		History []histories = new History[listOfHistories.size()];
+		int i=0;
+		for(var line: listOfHistories) {
+			StringTokenizer tokenizer = new StringTokenizer(line, HISTORY_SEPARATOR);
+			if (tokenizer.countTokens() >= 3) {
+				// old history
+				var prof = tokenizer.nextToken();
+				var user = tokenizer.nextToken();
+				var dir  = tokenizer.nextToken();
+				String option = "";
+				if (tokenizer.hasMoreTokens()) {
+					// new history: include the connection option
+					option = tokenizer.nextToken();
+				}
+				histories[i] = new History(prof, user, dir, option);
+				i++;
+			}
+		}
+		return histories;
+	}
+
+	private record History (String host, String username, String remoteDirectory, String option)
+	{}
+	
+
+	/***
+	 * Unit test
+	 * 
+	 * @param argv
+	 */
 	public static void main(String []argv) {
 		var display = Display.getDefault();
 		Shell shell = new Shell(display);
@@ -379,29 +444,4 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 		var dlg = new ConnectionDialog(shell);
 		dlg.open();
 	}
-	
-	
-	private History[] initHistory() {
-		var history = new UserInputHistory(HISTORY_KEY_PROFILE);
-		var listOfHistories = history.getHistory();
-		if (listOfHistories == null || listOfHistories.isEmpty()) {
-			return new History[] {new History("localhost", username, "")};
-		}
-		History []histories = new History[listOfHistories.size()];
-		int i=0;
-		for(var line: listOfHistories) {
-			StringTokenizer tokenizer = new StringTokenizer(line, HISTORY_SEPARATOR);
-			if (tokenizer.countTokens() == 3) {
-				var prof = tokenizer.nextToken();
-				var user = tokenizer.nextToken();
-				var dir  = tokenizer.nextToken();
-				histories[i] = new History(prof, user, dir);
-				i++;
-			}
-		}
-		return histories;
-	}
-	
-	private record History (String host, String username, String remoteDirectory)
-	{}
 }
