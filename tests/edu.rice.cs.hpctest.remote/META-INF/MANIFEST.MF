@@ -3,8 +3,9 @@ Bundle-ManifestVersion: 2
 Bundle-Name: hpctest.remote
 Bundle-SymbolicName: edu.rice.cs.hpctest.remote
 Bundle-Version: 6.0.0.qualifier
+Fragment-Host: edu.rice.cs.hpcremote
+Automatic-Module-Name: edu.rice.cs.hpctest.remote
 Require-Bundle: edu.rice.cs.hpcdata,
- edu.rice.cs.hpcremote,
  org.junit,
  org.json,
  org.mockito.mockito-core,
@@ -18,5 +19,4 @@ Require-Bundle: edu.rice.cs.hpcdata,
  edu.rice.cs.hpcbase,
  edu.rice.cs.hpclocal
 Bundle-Vendor: Rice University
-Automatic-Module-Name: edu.rice.cs.hpctest.remote
 Bundle-RequiredExecutionEnvironment: JavaSE-17
