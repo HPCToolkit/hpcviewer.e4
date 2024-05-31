@@ -132,10 +132,16 @@ public class RemoteFilteredData implements IFilteredData
 		
 		try {
 			var samplesPerProfile = hpcClient.getNumberOfSamplesPerTrace();
+			if (samplesPerProfile == null)
+				// if the server fails to send the map, we return an empty map
+				// this may happen if the database is corrupted or something wrong with the server
+				return IExecutionContextToNumberTracesMap.EMPTY;
+			
 			var mapToSamples = new ObjectIntHashMap<>(getNumberOfRanks());
 			
 			for(var idTuple: listOriginalIdTuples) {
-				mapToSamples.put(idTuple, samplesPerProfile.getOrElse(idTuple.getProfileIndex()-1, 0));
+				if (idTuple != null)
+					mapToSamples.put(idTuple, samplesPerProfile.getOrElse(idTuple.getProfileIndex()-1, 0));
 			}
 			mapIdTupleToSamples = mapToSamples::get;
 			return mapIdTupleToSamples;
