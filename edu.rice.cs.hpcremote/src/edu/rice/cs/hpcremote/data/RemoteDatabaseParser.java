@@ -4,8 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.List;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -23,7 +21,6 @@ import edu.rice.cs.hpcdata.db.version4.MetricYamlParser;
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.tld.v4.ThreadDataCollection4;
 import edu.rice.cs.hpcdata.util.IProgressReport;
@@ -105,7 +102,7 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 
 		reassignMetrics(dataMeta.getRootCCT(), dataProfile, dataMeta.getMetrics());
 		
-		rearrangeCallingContext(client, dataMeta.getRootCCT(), yamlParser.getListMetrics());
+		rearrangeCallingContext(client, dataMeta.getRootCCT());
 
 		var dataPlot = collectCCTData(client);
 		var rawMetrics = yamlParser.getRawMetrics();
@@ -134,7 +131,7 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 	 * 
 	 * @throws InterruptedException
 	 */
-	protected void rearrangeCallingContext(HpcClient client, RootScope root, List<BaseMetric> metrics) {
+	protected void rearrangeCallingContext(HpcClient client, RootScope root) {
 		
 		Job task = new Job("Rearrange calling contexts") {
 			
@@ -149,7 +146,7 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 				
 				// send query to the server to grab the metrics
 				try {
-					reduceOp.postProcess(client, metrics);
+					reduceOp.postProcess(client);
 				} catch (UnknownCallingContextException | IOException | InterruptedException
 						| UnknownProfileIdException e) {
 				    Thread.currentThread().interrupt();

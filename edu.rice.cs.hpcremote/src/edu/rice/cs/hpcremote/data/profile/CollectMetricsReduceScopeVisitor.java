@@ -12,8 +12,8 @@ import org.hpctoolkit.hpcclient.v1_0.UnknownCallingContextException;
 import org.hpctoolkit.hpcclient.v1_0.UnknownProfileIdException;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.scope.LineScope;
+import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.ScopeVisitType;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.ScopeVisitorAdapter;
@@ -32,7 +32,7 @@ import io.vavr.collection.HashSet;
  *******************************************************/
 public class CollectMetricsReduceScopeVisitor extends ScopeVisitorAdapter 
 {
-	private MutableIntObjectMap<Scope> mapToScope;
+	private final MutableIntObjectMap<Scope> mapToScope;
 	
 	private final List<CallingContextId> listCCTId;
 	private final IProgressReport progress;
@@ -60,14 +60,13 @@ public class CollectMetricsReduceScopeVisitor extends ScopeVisitorAdapter
 	 * Without calling this, everything is useless.
 	 * 
 	 * @param client
-	 * @param metrics
 	 * 
 	 * @throws UnknownCallingContextException
 	 * @throws IOException
 	 * @throws InterruptedException
 	 * @throws UnknownProfileIdException
 	 */
-	public void postProcess(HpcClient client, List<BaseMetric> metrics) 
+	public void postProcess(HpcClient client) 
 			throws UnknownCallingContextException, IOException, InterruptedException, UnknownProfileIdException {
 		if (listCCTId.isEmpty())
 			return;
@@ -100,29 +99,38 @@ public class CollectMetricsReduceScopeVisitor extends ScopeVisitorAdapter
 	
 	private void dispose() {
 		mapToScope.clear();
-		mapToScope = null;
-		
 		listCCTId.clear();
 	}
 
 
 	@Override
 	public void visit(LineScope scope, ScopeVisitType vt) {
-		if (vt == ScopeVisitType.PreVisit) {
+		collectScope(scope, vt);
+	}
 
-			var list = scope.getScopeReduce();
-			if (!list.isEmpty()) {
+
+	@Override
+	public void visit(ProcedureScope scope, ScopeVisitType vt) {
+		collectScope(scope, vt);
+	}
+	
+	
+	private void collectScope(Scope scope, ScopeVisitType vt) {
+		if (vt == ScopeVisitType.PreVisit) {
+			var iterator = scope.getScopeReduceIterator();
+			if (iterator != null && iterator.hasNext()) {
 				CallingContextId parentId = CallingContextId.make(scope.getCCTIndex());
 				listCCTId.add(parentId);
 				mapToScope.put(scope.getCCTIndex(), scope);
 				
-				list.stream().forEach(childScope -> {
+				while (iterator.hasNext()) {
+					var childScope = iterator.next();
 					var index = childScope.getCCTIndex();
 					var cctId = CallingContextId.make(index);
 					
 					listCCTId.add(cctId);
 					mapToScope.put(index, childScope);
-				});
+				}
 			}
 		}
 	}
