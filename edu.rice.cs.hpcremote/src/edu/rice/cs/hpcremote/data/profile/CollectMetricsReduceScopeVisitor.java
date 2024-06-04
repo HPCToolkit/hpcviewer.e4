@@ -12,6 +12,7 @@ import org.hpctoolkit.hpcclient.v1_0.UnknownCallingContextException;
 import org.hpctoolkit.hpcclient.v1_0.UnknownProfileIdException;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
+import edu.rice.cs.hpcdata.experiment.scope.InstructionScope;
 import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
@@ -113,6 +114,17 @@ public class CollectMetricsReduceScopeVisitor extends ScopeVisitorAdapter
 	public void visit(ProcedureScope scope, ScopeVisitType vt) {
 		collectScope(scope, vt);
 	}
+
+	@Override
+	public void visit(Scope scope, ScopeVisitType vt) {
+		// issue #364: make sure the instruction scope that has a procedure scope
+		//             also part of the set to be requested since we can merge
+		//             an instruction scope with procedure scope
+		if (scope instanceof InstructionScope insScope && insScope.hasChildren()) {
+			collectScope(scope, vt);
+		}
+	}
+
 	
 	
 	private void collectScope(Scope scope, ScopeVisitType vt) {
@@ -125,13 +137,20 @@ public class CollectMetricsReduceScopeVisitor extends ScopeVisitorAdapter
 				
 				while (iterator.hasNext()) {
 					var childScope = iterator.next();
-					var index = childScope.getCCTIndex();
-					var cctId = CallingContextId.make(index);
-					
-					listCCTId.add(cctId);
-					mapToScope.put(index, childScope);
+					addToList(childScope);
 				}
 			}
+			// issue #364: make sure all the line scopes are included in the request.
+			// 
+			addToList(scope);
 		}
+	}
+	
+	private void addToList(Scope scope) {
+		var index = scope.getCCTIndex();
+		var cctId = CallingContextId.make(index);
+
+		listCCTId.add(cctId);
+		mapToScope.put(index, scope);
 	}
 }
