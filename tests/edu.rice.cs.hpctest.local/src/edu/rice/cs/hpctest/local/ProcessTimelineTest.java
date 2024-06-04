@@ -92,6 +92,10 @@ public class ProcessTimelineTest extends BaseTestAllTraceDatabases
 	
 	
 	private void testCallPathInfo(ICallPathInfo cpi) {
+		// for issue #233 database, cpi can be null
+		if (cpi == null)
+			return;
+		
 		assertNotNull(cpi);
 		
 		assertTrue( cpi.getMaxDepth() > 0);
