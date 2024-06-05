@@ -132,7 +132,7 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 	 * 
 	 * @throws InterruptedException
 	 */
-	protected void rearrangeCallingContext(HpcClient client, RootScope root) {
+	protected void rearrangeCallingContext(HpcClient client, RootScope root) throws InterruptedException {
 		
 		Job task = new Job("Rearrange calling contexts") {
 			
@@ -169,6 +169,9 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 			}
 		};
 		task.schedule();
+		
+		// make sure it's blocking
+		task.join();
 	}
 
 	
