@@ -11,6 +11,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.hpctoolkit.hpcclient.v1_0.HpcClient;
 import org.hpctoolkit.hpcclient.v1_0.UnknownCallingContextException;
 import org.hpctoolkit.hpcclient.v1_0.UnknownProfileIdException;
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcbase.ProgressReport;
 import edu.rice.cs.hpcdata.db.version4.DataMeta;
@@ -147,10 +148,14 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 				// send query to the server to grab the metrics
 				try {
 					reduceOp.postProcess(client);
-				} catch (UnknownCallingContextException | IOException | InterruptedException
-						| UnknownProfileIdException e) {
-				    Thread.currentThread().interrupt();
+				} catch (UnknownCallingContextException | IOException | UnknownProfileIdException e) {
+					progress.end();					
+					LoggerFactory.getLogger(getClass()).error("Fail to collect metrics", e);
+					return Status.CANCEL_STATUS;
 
+				} catch (InterruptedException e) {
+					progress.end();					
+				    Thread.currentThread().interrupt();
 					return Status.CANCEL_STATUS;
 				}
 

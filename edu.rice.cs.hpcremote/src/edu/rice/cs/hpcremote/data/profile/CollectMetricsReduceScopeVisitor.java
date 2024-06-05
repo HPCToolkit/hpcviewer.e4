@@ -10,11 +10,11 @@ import org.hpctoolkit.client_server_common.profile.ProfileId;
 import org.hpctoolkit.hpcclient.v1_0.HpcClient;
 import org.hpctoolkit.hpcclient.v1_0.UnknownCallingContextException;
 import org.hpctoolkit.hpcclient.v1_0.UnknownProfileIdException;
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
-import edu.rice.cs.hpcdata.experiment.scope.InstructionScope;
+import edu.rice.cs.hpcdata.experiment.metric.EmptyMetricValueCollection;
 import edu.rice.cs.hpcdata.experiment.scope.LineScope;
-import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.ScopeVisitType;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.ScopeVisitorAdapter;
@@ -80,9 +80,12 @@ public class CollectMetricsReduceScopeVisitor extends ScopeVisitorAdapter
 		var mapToMetrics = client.getMetrics(ProfileId.make(IdTuple.PROFILE_SUMMARY.getProfileIndex()), setOfCallingContextId);
 		
 		mapToMetrics.forEach((cctId, metricMeasurements) -> {
-			var scope = mapToScope.get(cctId.toInt());
-			if (scope != null) {
+			var scope = mapToScope.remove(cctId.toInt());
+			if (scope == null) {
+				LoggerFactory.getLogger(getClass()).warn("Node {} not exist in CCT", cctId.toInt());
+			} else {
 				var setOfMetricId = metricMeasurements.getMetrics();
+				
 				setOfMetricId.toStream().forEach(mId -> {
 					var mv = metricMeasurements.getMeasurement(mId);
 					if (mv.isPresent()) {
@@ -91,6 +94,12 @@ public class CollectMetricsReduceScopeVisitor extends ScopeVisitorAdapter
 				});
 			}
 		});
+		// set empty metrics if necessary
+		var iterator = mapToScope.iterator();
+		while(iterator.hasNext()) {
+			var scope = iterator.next();
+			scope.setMetricValues(EmptyMetricValueCollection.getInstance());
+		}
 		
 		dispose();
 		
@@ -106,28 +115,6 @@ public class CollectMetricsReduceScopeVisitor extends ScopeVisitorAdapter
 
 	@Override
 	public void visit(LineScope scope, ScopeVisitType vt) {
-		collectScope(scope, vt);
-	}
-
-
-	@Override
-	public void visit(ProcedureScope scope, ScopeVisitType vt) {
-		collectScope(scope, vt);
-	}
-
-	@Override
-	public void visit(Scope scope, ScopeVisitType vt) {
-		// issue #364: make sure the instruction scope that has a procedure scope
-		//             also part of the set to be requested since we can merge
-		//             an instruction scope with procedure scope
-		if (scope instanceof InstructionScope insScope && insScope.hasChildren()) {
-			collectScope(scope, vt);
-		}
-	}
-
-	
-	
-	private void collectScope(Scope scope, ScopeVisitType vt) {
 		if (vt == ScopeVisitType.PreVisit) {
 			var iterator = scope.getScopeReduceIterator();
 			if (iterator != null && iterator.hasNext()) {
