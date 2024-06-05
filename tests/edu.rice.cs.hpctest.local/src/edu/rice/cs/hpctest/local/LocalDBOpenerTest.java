@@ -150,13 +150,14 @@ public class LocalDBOpenerTest
 		assertFalse(traceLine.isEmpty());
 
 		var cpi = traceLine.getCallPathInfo(0);
-		assertNotNull(cpi);
-		
-		var maxDepth = cpi.getMaxDepth();
-		assertTrue(maxDepth > 0);
-		assertNotNull(cpi.getScope());
-		assertNotNull(cpi.getScopeAt(0));
-		assertTrue(cpi.getScope() == cpi.getScopeAt(maxDepth));
+		// for invalid databases like issue-233 (see issue #233), the cpi can be null
+		if (cpi != null) {
+			var maxDepth = cpi.getMaxDepth();
+			assertTrue(maxDepth > 0);
+			assertNotNull(cpi.getScope());
+			assertNotNull(cpi.getScopeAt(0));
+			assertTrue(cpi.getScope() == cpi.getScopeAt(maxDepth));
+		}
 		
 		long oldTime = minTime;
 		

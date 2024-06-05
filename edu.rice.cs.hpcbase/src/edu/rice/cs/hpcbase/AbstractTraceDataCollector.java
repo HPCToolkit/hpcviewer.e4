@@ -188,14 +188,6 @@ public abstract class AbstractTraceDataCollector implements ITraceDataCollector
 	protected int getNumPixelHorizontal() {
 		return numPixelH;
 	}
-
-	protected List<DataRecord> getListOfCallpathId() {
-		return listcpid;
-	}
-	
-	protected void setListOfCallpathId(List<DataRecord> listCpid) {
-		this.listcpid = listCpid;
-	}
 	
 	
 	/**Adds a sample to times and timeLine.*/

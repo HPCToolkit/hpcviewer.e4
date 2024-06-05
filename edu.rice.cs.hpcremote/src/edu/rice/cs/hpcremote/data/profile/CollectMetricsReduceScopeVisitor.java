@@ -10,9 +10,10 @@ import org.hpctoolkit.client_server_common.profile.ProfileId;
 import org.hpctoolkit.hpcclient.v1_0.HpcClient;
 import org.hpctoolkit.hpcclient.v1_0.UnknownCallingContextException;
 import org.hpctoolkit.hpcclient.v1_0.UnknownProfileIdException;
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
+import edu.rice.cs.hpcdata.experiment.metric.EmptyMetricValueCollection;
 import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.ScopeVisitType;
@@ -32,7 +33,7 @@ import io.vavr.collection.HashSet;
  *******************************************************/
 public class CollectMetricsReduceScopeVisitor extends ScopeVisitorAdapter 
 {
-	private MutableIntObjectMap<Scope> mapToScope;
+	private final MutableIntObjectMap<Scope> mapToScope;
 	
 	private final List<CallingContextId> listCCTId;
 	private final IProgressReport progress;
@@ -60,14 +61,13 @@ public class CollectMetricsReduceScopeVisitor extends ScopeVisitorAdapter
 	 * Without calling this, everything is useless.
 	 * 
 	 * @param client
-	 * @param metrics
 	 * 
 	 * @throws UnknownCallingContextException
 	 * @throws IOException
 	 * @throws InterruptedException
 	 * @throws UnknownProfileIdException
 	 */
-	public void postProcess(HpcClient client, List<BaseMetric> metrics) 
+	public void postProcess(HpcClient client) 
 			throws UnknownCallingContextException, IOException, InterruptedException, UnknownProfileIdException {
 		if (listCCTId.isEmpty())
 			return;
@@ -80,9 +80,12 @@ public class CollectMetricsReduceScopeVisitor extends ScopeVisitorAdapter
 		var mapToMetrics = client.getMetrics(ProfileId.make(IdTuple.PROFILE_SUMMARY.getProfileIndex()), setOfCallingContextId);
 		
 		mapToMetrics.forEach((cctId, metricMeasurements) -> {
-			var scope = mapToScope.get(cctId.toInt());
-			if (scope != null) {
+			var scope = mapToScope.remove(cctId.toInt());
+			if (scope == null) {
+				LoggerFactory.getLogger(getClass()).warn("Node {} not exist in CCT", cctId.toInt());
+			} else {
 				var setOfMetricId = metricMeasurements.getMetrics();
+				
 				setOfMetricId.toStream().forEach(mId -> {
 					var mv = metricMeasurements.getMeasurement(mId);
 					if (mv.isPresent()) {
@@ -91,6 +94,12 @@ public class CollectMetricsReduceScopeVisitor extends ScopeVisitorAdapter
 				});
 			}
 		});
+		// set empty metrics if necessary
+		var iterator = mapToScope.iterator();
+		while(iterator.hasNext()) {
+			var scope = iterator.next();
+			scope.setMetricValues(EmptyMetricValueCollection.getInstance());
+		}
 		
 		dispose();
 		
@@ -100,8 +109,6 @@ public class CollectMetricsReduceScopeVisitor extends ScopeVisitorAdapter
 	
 	private void dispose() {
 		mapToScope.clear();
-		mapToScope = null;
-		
 		listCCTId.clear();
 	}
 
@@ -109,21 +116,28 @@ public class CollectMetricsReduceScopeVisitor extends ScopeVisitorAdapter
 	@Override
 	public void visit(LineScope scope, ScopeVisitType vt) {
 		if (vt == ScopeVisitType.PreVisit) {
-
-			var list = scope.getScopeReduce();
-			if (!list.isEmpty()) {
+			var iterator = scope.getScopeReduceIterator();
+			if (iterator != null && iterator.hasNext()) {
 				CallingContextId parentId = CallingContextId.make(scope.getCCTIndex());
 				listCCTId.add(parentId);
 				mapToScope.put(scope.getCCTIndex(), scope);
 				
-				list.stream().forEach(childScope -> {
-					var index = childScope.getCCTIndex();
-					var cctId = CallingContextId.make(index);
-					
-					listCCTId.add(cctId);
-					mapToScope.put(index, childScope);
-				});
+				while (iterator.hasNext()) {
+					var childScope = iterator.next();
+					addToList(childScope);
+				}
 			}
+			// issue #364: make sure all the line scopes are included in the request.
+			// 
+			addToList(scope);
 		}
+	}
+	
+	private void addToList(Scope scope) {
+		var index = scope.getCCTIndex();
+		var cctId = CallingContextId.make(index);
+
+		listCCTId.add(cctId);
+		mapToScope.put(index, scope);
 	}
 }

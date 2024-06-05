@@ -273,7 +273,7 @@ public class RemoteCommunicationJsonProtocol extends RemoteCommunicationProtocol
 				
 				@Override
 				public String[] getResponseArgument() {
-					return null;
+					return new String[0];
 				}
 				
 				@Override
