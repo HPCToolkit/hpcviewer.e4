@@ -14,4 +14,8 @@ Require-Bundle: org.eclipse.swt,
  edu.rice.cs.hpcsetting,
  org.eclipse.nebula.widgets.nattable.core,
  ca.odell.glazedlists,
- edu.rice.cs.hpctest.util
+ edu.rice.cs.hpctest.util,
+ org.mockito.mockito-core,
+ net.bytebuddy.byte-buddy;bundle-version="1.12.18",
+ net.bytebuddy.byte-buddy-agent;bundle-version="1.12.18",
+ org.objenesis;bundle-version="3.3.0"
