@@ -1,1 +1,1 @@
-Release 2024.05-rc.2. Commit 2086ff77
+Release 2024.06-rc.3. Commit a7bccced

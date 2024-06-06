@@ -3,8 +3,8 @@ Bundle-ManifestVersion: 2
 Bundle-Name: hpctest.local
 Bundle-SymbolicName: edu.rice.cs.hpctest.local
 Bundle-Version: 6.0.0.qualifier
-Require-Bundle: edu.rice.cs.hpclocal,
- org.junit,
+Fragment-Host: edu.rice.cs.hpclocal
+Require-Bundle: org.junit,
  edu.rice.cs.hpctest.util,
  edu.rice.cs.hpcdata,
  edu.rice.cs.hpctraceviewer.data,
