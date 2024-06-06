@@ -13,12 +13,12 @@ import org.hpctoolkit.hpcclient.v1_0.UnknownProfileIdException;
 import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcdata.db.IdTuple;
-import edu.rice.cs.hpcdata.experiment.metric.EmptyMetricValueCollection;
 import edu.rice.cs.hpcdata.experiment.scope.LineScope;
 import edu.rice.cs.hpcdata.experiment.scope.Scope;
 import edu.rice.cs.hpcdata.experiment.scope.ScopeVisitType;
 import edu.rice.cs.hpcdata.experiment.scope.visitors.ScopeVisitorAdapter;
 import edu.rice.cs.hpcdata.util.IProgressReport;
+import edu.rice.cs.hpcremote.data.EmptyMetricValueCollection;
 import io.vavr.collection.HashSet;
 
 

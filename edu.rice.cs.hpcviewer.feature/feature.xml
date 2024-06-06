@@ -224,4 +224,8 @@
          id="edu.rice.cs.hpcremote.common"
          version="0.0.0"/>
 
+   <plugin
+         id="org.eclipse.collections"
+         version="0.0.0"/>
+
 </feature>

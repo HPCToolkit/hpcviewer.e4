@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctest.ui;
+package edu.rice.cs.hpctest.trace;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.widgets.Display;
