@@ -11,7 +11,6 @@ import edu.rice.cs.hpctraceviewer.data.DataLinePainting;
 import edu.rice.cs.hpctraceviewer.data.DataPreparation;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TimelineDataSet;
-import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 import edu.rice.cs.hpctraceviewer.ui.internal.BaseTimelineThread;
 
 
@@ -56,8 +55,7 @@ public class TimelineThread
 			if (trace.isEmpty()) {
 				trace.readInData();
 			}
-			ProcessTimelineService traceService = stData.getProcessTimelineService();
-			if (!traceService.setProcessTimeline(trace.line(), trace)) {
+			if (!stData.setProcessTimeline(trace.line(), trace)) {
 				// something wrong happens, perhaps data races ?
 				monitor.setCanceled(true);
 				monitor.done();

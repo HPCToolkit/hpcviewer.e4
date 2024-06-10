@@ -76,13 +76,46 @@ public abstract class SpaceTimeDataController implements ITraceManager
 	 * This service is useful to get the next process time line
 	 * @return ProcessTimelineService
 	 *************************************************************************/
-	public ProcessTimelineService getProcessTimelineService() {
+	protected ProcessTimelineService getProcessTimelineService() {
 		return timelineService;
 	}
 	
 	
+	/***
+	 * Set a new trace line into the storage
+	 * 
+	 * @param line
+	 * 			The number of sequence order of the trace
+	 * @param trace
+	 * 
+	 * @return {@code boolean} true if the set is correct, false otherwise.
+	 * 
+	 */
+	public boolean setProcessTimeline(int line, IProcessTimeline trace) {
+		if (timelineService != null) {
+			return timelineService.setProcessTimeline(line, trace);
+		}
+		return false;
+	}
+	
+	
+	public IProcessTimeline getTraceline(int line) {
+		if (timelineService != null) {
+			return timelineService.getProcessTimeline(line);
+		}
+		return null;
+	}
+	
 	public void resetProcessTimeline(int numTraces) {
 		timelineService.setProcessTimeline(new IProcessTimeline[numTraces]);
+	}
+	
+	
+	public int getNumTracelines() {
+		if (timelineService != null) {
+			return timelineService.getNumProcessTimeline();
+		}
+		return 0;
 	}
 	
 	/*************************************************************************

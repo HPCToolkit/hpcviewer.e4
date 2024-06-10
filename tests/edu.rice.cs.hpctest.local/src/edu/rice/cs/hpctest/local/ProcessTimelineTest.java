@@ -31,19 +31,20 @@ public class ProcessTimelineTest extends BaseTestAllTraceDatabases
 			var rankData = stdc.getBaseData();
 			var idtuples = rankData.getListOfIdTuples(IdTupleOption.BRIEF);
 
-			var service = stdc.getProcessTimelineService();
-			assertNotNull(service);
+			var numTraces = stdc.getNumTracelines();
+			assertTrue(numTraces <= ranks);
+			
 			for(int i=0; i<ranks; i++) {
-				service.setProcessTimeline(i, new ProcessTimeline(i, stdc, idtuples.get(i)));
+				stdc.setProcessTimeline(i, new ProcessTimeline(i, stdc, idtuples.get(i)));
 			}
 
 			// first rank
-			var ptl = service.getProcessTimeline(0);
+			var ptl = stdc.getTraceline(0);
 			testProcessTimeline(ptl, 0);
 			
 			// last rank
-			ptl = service.getProcessTimeline(service.getNumProcessTimeline()-1);
-			testProcessTimeline(ptl, service.getNumProcessTimeline()-1);
+			ptl = stdc.getTraceline(stdc.getNumTracelines()-1);
+			testProcessTimeline(ptl, stdc.getNumTracelines()-1);
 		}
 	}
 	

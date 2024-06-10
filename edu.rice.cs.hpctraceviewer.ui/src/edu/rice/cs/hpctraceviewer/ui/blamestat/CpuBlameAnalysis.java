@@ -13,7 +13,6 @@ import edu.rice.cs.hpcdata.db.IdTupleType;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.color.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.color.ProcedureColor;
-import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 import edu.rice.cs.hpctraceviewer.ui.base.IPixelAnalysis;
 import edu.rice.cs.hpctraceviewer.ui.internal.TraceEventData;
 import edu.rice.cs.hpctraceviewer.ui.summary.SummaryData;
@@ -42,7 +41,6 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 	private Map<Integer, Integer> gpu_active_count;
 	private Map<Integer, Integer> gpu_idle_count;
 
-	private ProcessTimelineService ptlService;
 	
 	private void addDict(Map<Integer, Map<Integer, Integer>> dict, int key_rank, int key_pixel, int value) {
 		
@@ -96,11 +94,9 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 	
 	@Override
 	public void analysisInit(SpaceTimeDataController dataTraces, 
-							 ColorTable colorTable, 
-							 ProcessTimelineService ptlService) {
+							 ColorTable colorTable) {
 		this.colorTable = colorTable;
 		this.dataTraces = dataTraces;
-		this.ptlService = ptlService;
 				
 		cpu_active_routines = new HashMap<>();
 		cpu_active_count    = new HashMap<>();
@@ -129,7 +125,7 @@ public class CpuBlameAnalysis implements IPixelAnalysis
 		dataTraces.getTraceDisplayAttribute();
 
 		// get the profile of the current pixel
-		final var ptl = ptlService.getProcessTimeline(y);
+		final var ptl = dataTraces.getTraceline(y);
 		if (ptl == null)
 			// hack: sometimes the summary view is still have the old image
 			// and it isn't sync with the current process time line

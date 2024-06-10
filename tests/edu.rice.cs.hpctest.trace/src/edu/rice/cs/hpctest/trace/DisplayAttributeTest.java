@@ -42,10 +42,11 @@ public class DisplayAttributeTest extends BaseTestAllTraceDatabases
 			
 			stdc.resetProcessTimeline(ranks);
 			
-			var service = stdc.getProcessTimelineService();
-			assertNotNull(service);
+			var numTraces = stdc.getNumTracelines();
+			assertTrue(numTraces <= ranks);
+			
 			for(int i=0; i<ranks; i++) {
-				service.setProcessTimeline(i, new ProcessTimeline(i, stdc, idtuples.get(i)));
+				stdc.setProcessTimeline(i, new ProcessTimeline(i, stdc, idtuples.get(i)));
 			}
 			
 			// after setting the traces
