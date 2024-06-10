@@ -45,7 +45,6 @@ public class RemoteSpaceTimeDataControllerTest
 
 	@Test
 	public void testGetTraceDataCollector() throws Exception {
-
 		for(var exp: experiments) {
 			HpcClient client = Mockito.mock(HpcClient.class);
 			var timeMin = exp.getTraceAttribute().dbTimeMin;			
@@ -57,13 +56,18 @@ public class RemoteSpaceTimeDataControllerTest
 			when(client.getMaximumTraceSampleTimestamp()).thenReturn(timestampMax);
 
 			ExecutorService executor = Executors.newSingleThreadExecutor();
+			
+			var maxNodeId = exp.getMaxCCTID();
+			assertTrue(maxNodeId >= 0);
 
 			Set<Future<TraceSampling>> setOfTraces = HashSet.of(executor.submit(() -> {
 				List<CallingContextAtTimes> list = new ArrayList<>(20);
 				
 				for(int i=0; i<20; i++) {
-					Timestamp time = Timestamp.ofEpochNano(timeMin + i * 10000);
-					CallingContextAtTimes cctAtTimes = CallingContextAtTimes.make(CallingContextId.make(i), time, time);
+					Timestamp time = Timestamp.ofEpochNano(getTime(timeMin, i));
+					int nodeId = Math.min(i, maxNodeId);
+					
+					CallingContextAtTimes cctAtTimes = CallingContextAtTimes.make(CallingContextId.make(nodeId), time, time);
 					list.add(cctAtTimes);
 				}
 				io.vavr.collection.List<CallingContextAtTimes> setCCT = io.vavr.collection.List.ofAll(list);
@@ -120,10 +124,10 @@ public class RemoteSpaceTimeDataControllerTest
 				var size = ptl.size();
 				for(int i=0; i<size; i++) {
 					var nodeId = ptl.getContextId(i);
-					assertTrue(nodeId >= 0);
+					assertTrue(nodeId >= 0 && nodeId <= maxNodeId);
 					
 					var time = ptl.getTime(i);
-					assertTrue(time >= timeMin);
+					assertEquals(getTime(timeMin, i), time);
 				}
 				
 				ptl = (RemoteProcessTimeline) rstdc.getNextTrace();
@@ -139,5 +143,10 @@ public class RemoteSpaceTimeDataControllerTest
 		Timestamp timestamp = () -> time;
 		return Optional.of(timestamp);
 	}
-	
+
+	private long getTime(long minTime, int step) {
+		final long TIMESTEP = 10000;
+		
+		return minTime + step * TIMESTEP;
+	}
 }

@@ -10,7 +10,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -20,6 +19,7 @@ import org.eclipse.swt.widgets.Composite;
 import edu.rice.cs.hpcsetting.color.ColorManager;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
+import edu.rice.cs.hpctraceviewer.ui.internal.TextUtilities;
 import edu.rice.cs.hpctraceviewer.ui.operation.AbstractTraceOperation;
 import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
 
@@ -44,6 +44,9 @@ public class CanvasAxisX extends AbstractAxisCanvas
 	
 	private final DecimalFormat formatTime;
 	
+	/**
+	 * Ugly variable here to make sure we dispose it at the end
+	 */
 	private Font fontX;
 	
 	/***
@@ -98,32 +101,21 @@ public class CanvasAxisX extends AbstractAxisCanvas
 		setBuffer(imageBuffer);
 
 		final GC buffer = new GC(imageBuffer);
-
-		FontData []fd = buffer.getFont().getFontData();
-		
-		final String text = "1,";
-		int height = buffer.stringExtent(text).y;
 		
 		// the height of the font must be bigger than the height of the canvas minus ticks and empty spaces
 		final int space = TICK_BIG + 3;
-		
-		while (viewHeight > 0 && height > viewHeight-space) {
-			// the font is too big
-
-			int fontHeight = fd[0].getHeight() - 1;
-			if (fontHeight < 0)
-				return;
+		int idealFontSize = TextUtilities.getTheRightFontSize(imageBuffer.getDevice(), viewHeight - space);
+		if (idealFontSize > 0) {
+			var fontData = buffer.getFont().getFontData();
+			fontData[0].setHeight(idealFontSize);
 			
-			fd[0].setHeight(fontHeight);
-			if (fontX != null && !fontX.isDisposed()) {
+			if (fontX != null && !fontX.isDisposed())
 				fontX.dispose();
-			}
-			fontX = new Font(getDisplay(), fd);
-			buffer.setFont(fontX);
 			
-			height = buffer.stringExtent(text).y;
+			fontX = new Font(getDisplay(), fontData);
+			buffer.setFont(fontX);
 		}
-
+		
 		final TraceDisplayAttribute attribute = data.getTraceDisplayAttribute();
 		final Rectangle area = getClientArea();
 		
@@ -264,8 +256,8 @@ public class CanvasAxisX extends AbstractAxisCanvas
 		final int deltaTick     = convertTimeToPixel(displayTimeBegin, (long)timeBegin + dtRound, deltaXPixels);
 		final boolean isFitEnough = deltaTick > maxTextArea.x;
 
-		for(int i=0; i <= numAxisLabel; i++) {			
-			double time      = timeBegin + dtRound * i;			
+		for(int i=0; i <= numAxisLabel; i++) {
+			double time      = timeBegin + dtRound * i;
 			int axis_x_pos	 = (int) convertTimeToPixel(displayTimeBegin, (long)time, deltaXPixels);
 			int axis_tick_mark_height = position_y+TICK_SMALL;
 
