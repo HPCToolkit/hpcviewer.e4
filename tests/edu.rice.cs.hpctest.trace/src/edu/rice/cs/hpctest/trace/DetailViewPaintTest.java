@@ -64,6 +64,19 @@ public class DetailViewPaintTest  extends BaseTestAllTraceDatabases
 			var result = dvp.paint(new NullProgressMonitor());
 			assertTrue(result);
 			
+			// no change bounds
+			dvp = new DetailViewPaint(
+					shell.getDisplay(), 
+					gcMaster, 
+					gcOrigin, 
+					data, 
+					numLines, 
+					false, 
+					stdc);
+			
+			result = dvp.paint(new NullProgressMonitor());
+			assertTrue(result);
+			
 			gcOrigin.dispose();
 			gcMaster.dispose();
 			imgOrigin.dispose();

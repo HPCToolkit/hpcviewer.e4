@@ -140,6 +140,10 @@ public class LocalDBOpenerTest
 			}
 			traceLine = stdc.getNextTrace();
 		}
+		// no change bound
+		stdc.startTrace(1, false);
+		traceLine = stdc.getNextTrace();
+		
 		assertNotNull(stdc.getExperiment());
 		testInsideExperiment(stdc.getExperiment());
 	}

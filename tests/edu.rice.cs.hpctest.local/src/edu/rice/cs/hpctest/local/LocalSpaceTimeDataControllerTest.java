@@ -27,6 +27,11 @@ public class LocalSpaceTimeDataControllerTest extends BaseLocalTest
 			
 			var trace = controller.getCurrentSelectedTraceline();
 			assertNull(trace);
+			
+			var hsize = controller.getHeaderSize();
+			assertTrue(hsize >= 0);
+			
+			assertFalse(controller.hasTraces());
 		}
 	}
 }
