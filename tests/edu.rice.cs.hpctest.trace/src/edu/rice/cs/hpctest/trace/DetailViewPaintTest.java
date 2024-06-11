@@ -30,7 +30,7 @@ public class DetailViewPaintTest  extends BaseTestAllTraceDatabases
 			var numProcs = attribute.getProcessInterval();
 			var numLines = Math.min(numProcs, PIXELS_V);
 			
-			data.resetProcessTimeline(numLines);
+			data.resetTracelines(numLines);
 			
 			ISpaceTimeCanvas stdc = new ISpaceTimeCanvas() {
 				

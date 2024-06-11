@@ -13,6 +13,7 @@ import org.hpctoolkit.hpcclient.v1_0.UnknownCallingContextException;
 import org.hpctoolkit.hpcclient.v1_0.UnknownProfileIdException;
 import org.slf4j.LoggerFactory;
 
+import edu.rice.cs.hpcbase.IDatabaseIdentification;
 import edu.rice.cs.hpcbase.ProgressReport;
 import edu.rice.cs.hpcdata.db.version4.DataMeta;
 import edu.rice.cs.hpcdata.db.version4.IDataCCT;
@@ -24,6 +25,7 @@ import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
 import edu.rice.cs.hpcdata.tld.v4.ThreadDataCollection4;
+import edu.rice.cs.hpcdata.util.ICallPath;
 import edu.rice.cs.hpcdata.util.IProgressReport;
 import edu.rice.cs.hpcdata.util.IUserData;
 import edu.rice.cs.hpcremote.data.profile.RemoteDataProfile;
@@ -63,8 +65,8 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	public void parse(HpcClient client) throws IOException, InterruptedException {
-		dataMeta = collectMetaData(client);
+	public void parse(HpcClient client, IDatabaseIdentification id) throws IOException, InterruptedException {
+		dataMeta = collectMetaData(client, id);
 		experiment = (Experiment) dataMeta.getExperiment();
 		collectOtherInformation(client, dataMeta, experiment);
 	}
@@ -103,7 +105,7 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 
 		reassignMetrics(dataMeta.getRootCCT(), dataProfile, dataMeta.getMetrics());
 		
-		rearrangeCallingContext(client, dataMeta.getRootCCT());
+		rearrangeCallingContext(client, experiment.getScopeMap(), dataMeta.getRootCCT());
 
 		var dataPlot = collectCCTData(client);
 		var rawMetrics = yamlParser.getRawMetrics();
@@ -132,7 +134,7 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 	 * 
 	 * @throws InterruptedException
 	 */
-	protected void rearrangeCallingContext(HpcClient client, RootScope root) throws InterruptedException {
+	protected void rearrangeCallingContext(HpcClient client, ICallPath callpath, RootScope root) throws InterruptedException {
 		
 		Job task = new Job("Rearrange calling contexts") {
 			
@@ -163,7 +165,7 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 				progress.begin(getName(), (int) (Math.max(20, dataMeta.getNumLineScope()) * 0.1));
 				progress.advance();
 				
-				rearrangeCallingContext(root, progress);
+				rearrangeCallingContext(root, callpath, progress);
 				
 				return Status.OK_STATUS;
 			}
@@ -196,14 +198,16 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	private DataMeta collectMetaData(HpcClient client) throws IOException, InterruptedException {
-		var metaDBbytes   = client.getMetaDbFileContents();
-		ByteBuffer buffer = ByteBuffer.wrap(metaDBbytes);
+	private DataMeta collectMetaData(HpcClient client, IDatabaseIdentification id) throws IOException, InterruptedException {
+		// this is a candidate of "hack of the year" award:
+		//
+		// create the experiment object, and then set the database representation
+		// if we don't initialize the database representation, it will "crash" later
 		
-		DataMeta data = new DataMeta(IProgressReport.dummy());
-		data.open(buffer);
+		Experiment experiment = new Experiment();
+		experiment.setDatabaseRepresentation(new RemoteDatabaseRepresentation(client, id.id()));
 		
-		return data;
+		return collectMetaData(client, experiment);
 	}
 	
 	

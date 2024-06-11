@@ -91,7 +91,7 @@ public abstract class SpaceTimeDataController implements ITraceManager
 	 * @return {@code boolean} true if the set is correct, false otherwise.
 	 * 
 	 */
-	public boolean setProcessTimeline(int line, IProcessTimeline trace) {
+	public boolean setTraceline(int line, IProcessTimeline trace) {
 		if (timelineService != null) {
 			return timelineService.setProcessTimeline(line, trace);
 		}
@@ -99,6 +99,12 @@ public abstract class SpaceTimeDataController implements ITraceManager
 	}
 	
 	
+	/***
+	 * Retrieve a specific trace line
+	 * 
+	 * @param line
+	 * @return {@code IProcessTineline} the trace line if the line is correct, {@code null} otherwise.
+	 */
 	public IProcessTimeline getTraceline(int line) {
 		if (timelineService != null) {
 			return timelineService.getProcessTimeline(line);
@@ -106,11 +112,24 @@ public abstract class SpaceTimeDataController implements ITraceManager
 		return null;
 	}
 	
-	public void resetProcessTimeline(int numTraces) {
+	
+	/***
+	 * Remove the current trace lines, and allocate a new ones
+	 * 
+	 * @param numTraces
+	 * 			The number of the new trace lines
+	 */
+	public void resetTracelines(int numTraces) {
 		timelineService.setProcessTimeline(new IProcessTimeline[numTraces]);
 	}
 	
 	
+	/***
+	 * Get the number of stored trace lines.
+	 * If no trace line has been stored via {@link setTraceline} method, then it returns zero.
+	 * 
+	 * @return {@code int}
+	 */
 	public int getNumTracelines() {
 		if (timelineService != null) {
 			return timelineService.getNumProcessTimeline();
@@ -125,9 +144,7 @@ public abstract class SpaceTimeDataController implements ITraceManager
 	 * @return
 	 *************************************************************************/
 	public boolean hasTraces() {
-		if (timelineService == null)
-			return false;
-		return timelineService.getNumProcessTimeline() > 0;
+		return getNumTracelines() > 0;
 	}
 	
 	

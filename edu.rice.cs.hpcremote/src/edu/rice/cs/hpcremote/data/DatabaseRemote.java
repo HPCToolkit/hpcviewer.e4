@@ -167,15 +167,8 @@ public class DatabaseRemote implements IDatabaseRemote
 	private Experiment openDatabase(HpcClient client, IDatabaseIdentification id) throws IOException {
 		RemoteDatabaseParser parser = new RemoteDatabaseParser();
 		try {
-			parser.parse(client);
-			var exp = parser.getExperiment();
-			
-			if (exp == null)
-				return null;
-			var remoteDb = new RemoteDatabaseRepresentation(client, id.id());
-			exp.setDatabaseRepresentation(remoteDb);
-			
-			return exp;
+			parser.parse(client, id);
+			return parser.getExperiment();
 
 		} catch (InterruptedException e) {
 		    // Restore interrupted state...

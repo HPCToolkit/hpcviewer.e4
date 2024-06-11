@@ -79,7 +79,7 @@ public abstract class DataPreparation
 		Scope  prevScope = null;
 		String succFunction = scope.getName(); 
 		
-		Color succColor    = data.colorTable.getColor(succFunction);
+		Color succColor  = data.colorTable.getColor(succFunction);
 		int lastIndexPTL = data.ptl.size() - 1;
 		int numInvalidCP = 0;
 

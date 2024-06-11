@@ -55,7 +55,7 @@ public class TimelineThread
 			if (trace.isEmpty()) {
 				trace.readInData();
 			}
-			if (!stData.setProcessTimeline(trace.line(), trace)) {
+			if (!stData.setTraceline(trace.line(), trace)) {
 				// something wrong happens, perhaps data races ?
 				monitor.setCanceled(true);
 				monitor.done();

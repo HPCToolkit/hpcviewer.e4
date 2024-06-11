@@ -40,13 +40,13 @@ public class DisplayAttributeTest extends BaseTestAllTraceDatabases
 			var ranks = stdc.getBaseData().getNumberOfRanks();
 			assertTrue(ranks > 0);			
 			
-			stdc.resetProcessTimeline(ranks);
+			stdc.resetTracelines(ranks);
 			
 			var numTraces = stdc.getNumTracelines();
 			assertTrue(numTraces <= ranks);
 			
 			for(int i=0; i<ranks; i++) {
-				stdc.setProcessTimeline(i, new ProcessTimeline(i, stdc, idtuples.get(i)));
+				stdc.setTraceline(i, new ProcessTimeline(i, stdc, idtuples.get(i)));
 			}
 			
 			// after setting the traces
