@@ -20,10 +20,7 @@ import edu.rice.cs.hpcbase.IProcessTimeline;
 import edu.rice.cs.hpcbase.ITraceDataCollector;
 import edu.rice.cs.hpcbase.ITraceDataCollector.TraceOption;
 import edu.rice.cs.hpcdata.db.IdTuple;
-import edu.rice.cs.hpcdata.experiment.BaseExperiment;
 import edu.rice.cs.hpcdata.experiment.IExperiment;
-import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
-import edu.rice.cs.hpcdata.experiment.scope.visitors.TraceScopeVisitor;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import io.vavr.collection.HashSet;
@@ -97,15 +94,12 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 	 * Synchronize on {@link #controllerMonitor} to ensure thread-safe operation.
 	 */
 	private int currentLine;
-	
-	
+
 	
 	public RemoteSpaceTimeDataController(HpcClient client, IExperiment experiment) throws IOException {
 		super(experiment);
 
 		this.client = client;
-
-		createScopeMap((BaseExperiment) experiment);
 
 		setTraceBeginAndEndTime(client, experiment);
 		
@@ -141,31 +135,6 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 		    Thread.currentThread().interrupt();
 		} catch (TraceDataNotAvailableException e) {
 			// ignore
-		}
-	}
-	
-	/***
-	 * Create a map between trace's CCT id to the CCT tree node and store it inside experiment object
-	 * (yuck).
-	 * 
-	 * @param experiment 
-	 * 			Experiment object to be fed of the mapping between trace CCT node id and CCT tree node.
-	 */
-	private void createScopeMap(BaseExperiment experiment) {
-
-		var rootCCT = experiment.getRootScope(RootScopeType.CallingContextTree);
-
-		// If we already computed the call-path map, we do not do it again.
-		// It's harmless to recompute but it such a waste of CPU resources.
-
-		if (rootCCT != null && experiment.getScopeMap() == null) {
-			// needs to gather info about cct id and its depth
-			// this is needed for traces
-			TraceScopeVisitor visitor = new TraceScopeVisitor();
-			rootCCT.dfsVisitScopeTree(visitor);
-
-			experiment.setMaxDepth(visitor.getMaxDepth());
-			experiment.setScopeMap(visitor.getCallPath());
 		}
 	}
 	

@@ -48,7 +48,7 @@ public abstract class BaseLocalTest
 	@AfterClass
 	public static void tearDownAfterClass() {
 		for(var stdc: list) {
-			stdc.closeDB();
+			stdc.dispose();
 		}
 	}
 

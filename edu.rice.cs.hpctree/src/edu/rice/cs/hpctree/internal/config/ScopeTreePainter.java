@@ -35,8 +35,7 @@ public class ScopeTreePainter
 	
     
     public static ICellPainter getSelectedSortHeaderCellPainter() {
-    	BackgroundPainter selectedSortHeaderCellPainter =
-                new BackgroundPainter(
+    	return new BackgroundPainter(
                         new PaddingDecorator(
                                 new SortableHeaderTextPainter(
                                         new TextPainter(false, false),
@@ -46,8 +45,6 @@ public class ScopeTreePainter
                                         0,
                                         false),
                                 0, 2, 0, 5, false));
-    	
-    	return selectedSortHeaderCellPainter;
     }
 
     
@@ -130,8 +127,7 @@ public class ScopeTreePainter
         // combining tree and call site info
         CellPainterDecorator decorator = new CellPainterDecorator(treeImagePainter, CellEdgeEnum.RIGHT, csArrowPainter);
 
-        BackgroundPainter treePainter =
-                new BackgroundPainter(
+        return new BackgroundPainter(
                         new PaddingDecorator(
                                 new IndentedTreeImagePainter(
                                         10,
@@ -142,7 +138,5 @@ public class ScopeTreePainter
                                         2,
                                         true),
                                 0, 0, 0, 0, false));
-        
-        return treePainter;
     }
 }

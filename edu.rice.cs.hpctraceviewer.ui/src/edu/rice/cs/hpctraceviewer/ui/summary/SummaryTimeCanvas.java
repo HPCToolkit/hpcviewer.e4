@@ -182,7 +182,7 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 		// ----------------------------------
 		// plugin initialization
 		// ----------------------------------
-		analysisTool.analysisInit(dataTraces, getColorTable(), dataTraces.getProcessTimelineService());
+		analysisTool.analysisInit(dataTraces, getColorTable());
 		
 		// ---------------------------------------------------------------------------
 		// needs to be optimized:

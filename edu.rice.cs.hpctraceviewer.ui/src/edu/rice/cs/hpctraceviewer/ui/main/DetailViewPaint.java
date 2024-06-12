@@ -1,8 +1,6 @@
 package edu.rice.cs.hpctraceviewer.ui.main;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -12,9 +10,7 @@ import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 
-import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IdTupleType;
-import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
@@ -48,7 +44,7 @@ public class DetailViewPaint extends BaseViewPaint
 	private final int numLines;
 
 	private boolean debug;
-	private List<IdTuple> listIdTuples; 
+
 	
 	/***
 	 * Create a job to paint the main canvas view
@@ -85,9 +81,6 @@ public class DetailViewPaint extends BaseViewPaint
 
 	@Override
 	protected boolean startPainting(int linesToPaint, int numThreads, boolean changedBounds) {
-		final var traceData = controller.getBaseData();
-		listIdTuples = traceData.getListOfIdTuples(IdTupleOption.BRIEF);
-
 		return true;
 	}
 
@@ -152,15 +145,14 @@ public class DetailViewPaint extends BaseViewPaint
 		if (!debug)
 			return;
 		
-		Map<Integer, List<?>> m = thread.getInvalidData();
+		var m = thread.getInvalidData();
 		if (m == null || m.size()==0)
 			return;
 		
 		final IdTupleType idTupleType = controller.getBaseData().getIdTupleTypes();
 		
 		m.forEach((k,v) -> {
-			IdTuple idt = listIdTuples.get(k);			
-			System.out.println(idt.toString(idTupleType) + " has invalid cpid: " + v);
+			System.out.println(k.toString(idTupleType) + " has invalid cpid: " + v);
 		});
 
 	}

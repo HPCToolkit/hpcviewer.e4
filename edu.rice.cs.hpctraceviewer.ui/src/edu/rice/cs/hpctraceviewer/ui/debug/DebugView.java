@@ -212,14 +212,14 @@ public class DebugView extends AbstractBaseItem implements IOperationHistoryList
 	 * Re-populate the combo and the table
 	 */
 	private void refresh() {
-		var ptlService = stdc.getProcessTimelineService();
-		if (!ptlService.isFilled())
+		var numTraces = stdc.getNumTracelines();
+		if (numTraces == 0)
 			return;
 		
 		final List<IdTuple> rows = new ArrayList<>();
 		
-		for(int i=0; i<ptlService.getNumProcessTimeline(); i++) {
-			var ptl = ptlService.getProcessTimeline(i);
+		for(int i=0; i<numTraces; i++) {
+			var ptl = stdc.getTraceline(i);
 			if (ptl != null)
 				rows.add(ptl.getProfileIdTuple());
 		}
@@ -288,14 +288,13 @@ public class DebugView extends AbstractBaseItem implements IOperationHistoryList
 
 	@Override
 	public IProcessTimeline getCurrentProcessTimeline() {
-		if (stdc == null || stdc.getProcessTimelineService() == null || stdc.getProcessTimelineService().getNumProcessTimeline() == 0)
+		if (stdc == null || stdc.getNumTracelines() == 0)
 			return null;
 		
 		if (listExecutionContexts == null || listExecutionContexts.getCombo().isDisposed())
 			return null;
 		
 		int index = listExecutionContexts.getCombo().getSelectionIndex();
-		var ptlService = stdc.getProcessTimelineService();
-		return ptlService.getProcessTimeline(index);		
+		return stdc.getTraceline(index);		
 	}
 }

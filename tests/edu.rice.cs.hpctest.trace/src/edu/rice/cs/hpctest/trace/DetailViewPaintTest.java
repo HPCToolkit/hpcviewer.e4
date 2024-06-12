@@ -30,7 +30,7 @@ public class DetailViewPaintTest  extends BaseTestAllTraceDatabases
 			var numProcs = attribute.getProcessInterval();
 			var numLines = Math.min(numProcs, PIXELS_V);
 			
-			data.resetProcessTimeline(numLines);
+			data.resetTracelines(numLines);
 			
 			ISpaceTimeCanvas stdc = new ISpaceTimeCanvas() {
 				
@@ -62,6 +62,19 @@ public class DetailViewPaintTest  extends BaseTestAllTraceDatabases
 			assertEquals(numLines, dvp.getNumberOfLines());
 			
 			var result = dvp.paint(new NullProgressMonitor());
+			assertTrue(result);
+			
+			// no change bounds
+			dvp = new DetailViewPaint(
+					shell.getDisplay(), 
+					gcMaster, 
+					gcOrigin, 
+					data, 
+					numLines, 
+					false, 
+					stdc);
+			
+			result = dvp.paint(new NullProgressMonitor());
 			assertTrue(result);
 			
 			gcOrigin.dispose();

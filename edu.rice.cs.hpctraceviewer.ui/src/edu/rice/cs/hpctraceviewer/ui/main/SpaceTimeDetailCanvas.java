@@ -1112,7 +1112,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		
 		oldAttributes.copy(attributes);
 		if (changedBounds) {
-			stData.resetProcessTimeline(numLines);
+			stData.resetTracelines(numLines);
 		}
 
 		/*************************************************************************

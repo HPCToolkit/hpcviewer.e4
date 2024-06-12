@@ -18,7 +18,6 @@ import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
-import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 import edu.rice.cs.hpctraceviewer.ui.base.ITraceCanvas;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.base.ITraceCanvas.MouseState;
@@ -143,13 +142,12 @@ public class CanvasAxisY extends AbstractAxisCanvas
 		// -----------------------------------------------------
 		IdTuple idtupleOld  = null;
 		int []oldColorIndex = new int[5];
-		final ProcessTimelineService timeLine = data.getProcessTimelineService();
 		
-		final int numTraces = timeLine.getNumProcessTimeline();
+		final int numTraces = data.getNumTracelines();
 		float pixelsPerRank = (float) attribute.getPixelVertical() / numTraces;
 		
 		for (int i=0; i<numTraces; i++) {
-			var procTimeline = timeLine.getProcessTimeline(i);
+			var procTimeline = data.getTraceline(i);
 			if (procTimeline == null)
 				continue;
 			
@@ -158,7 +156,7 @@ public class CanvasAxisY extends AbstractAxisCanvas
 			// if it's the last trace, the next line by default is the end of the canvas
 			var nextline = numTraces;  
 
-			var nextTrace = timeLine.getProcessTimeline(i+1);
+			var nextTrace = data.getTraceline(i+1);
 			if (nextTrace != null) {
 				// theoretically, nextTrace cannot be null if i < numTraces.
 				// for unknown reason, sometimes nextTrace is null even when i < numTraces.

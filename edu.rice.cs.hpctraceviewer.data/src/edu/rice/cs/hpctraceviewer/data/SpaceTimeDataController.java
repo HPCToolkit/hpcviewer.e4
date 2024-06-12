@@ -76,13 +76,65 @@ public abstract class SpaceTimeDataController implements ITraceManager
 	 * This service is useful to get the next process time line
 	 * @return ProcessTimelineService
 	 *************************************************************************/
-	public ProcessTimelineService getProcessTimelineService() {
+	protected ProcessTimelineService getProcessTimelineService() {
 		return timelineService;
 	}
 	
 	
-	public void resetProcessTimeline(int numTraces) {
+	/***
+	 * Set a new trace line into the storage
+	 * 
+	 * @param line
+	 * 			The number of sequence order of the trace
+	 * @param trace
+	 * 
+	 * @return {@code boolean} true if the set is correct, false otherwise.
+	 * 
+	 */
+	public boolean setTraceline(int line, IProcessTimeline trace) {
+		if (timelineService != null) {
+			return timelineService.setProcessTimeline(line, trace);
+		}
+		return false;
+	}
+	
+	
+	/***
+	 * Retrieve a specific trace line
+	 * 
+	 * @param line
+	 * @return {@code IProcessTineline} the trace line if the line is correct, {@code null} otherwise.
+	 */
+	public IProcessTimeline getTraceline(int line) {
+		if (timelineService != null) {
+			return timelineService.getProcessTimeline(line);
+		}
+		return null;
+	}
+	
+	
+	/***
+	 * Remove the current trace lines, and allocate a new ones
+	 * 
+	 * @param numTraces
+	 * 			The number of the new trace lines
+	 */
+	public void resetTracelines(int numTraces) {
 		timelineService.setProcessTimeline(new IProcessTimeline[numTraces]);
+	}
+	
+	
+	/***
+	 * Get the number of stored trace lines.
+	 * If no trace line has been stored via {@link setTraceline} method, then it returns zero.
+	 * 
+	 * @return {@code int}
+	 */
+	public int getNumTracelines() {
+		if (timelineService != null) {
+			return timelineService.getNumProcessTimeline();
+		}
+		return 0;
 	}
 	
 	/*************************************************************************
@@ -92,9 +144,7 @@ public abstract class SpaceTimeDataController implements ITraceManager
 	 * @return
 	 *************************************************************************/
 	public boolean hasTraces() {
-		if (timelineService == null)
-			return false;
-		return timelineService.getNumProcessTimeline() > 0;
+		return getNumTracelines() > 0;
 	}
 	
 	

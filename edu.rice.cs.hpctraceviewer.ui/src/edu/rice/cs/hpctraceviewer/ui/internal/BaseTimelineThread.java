@@ -10,6 +10,7 @@ import java.util.concurrent.Callable;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import edu.rice.cs.hpcbase.IProcessTimeline;
+import edu.rice.cs.hpcdata.db.IdTuple;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.DataLinePainting;
 import edu.rice.cs.hpctraceviewer.data.DataPreparation;
@@ -40,7 +41,7 @@ public abstract class BaseTimelineThread implements Callable<Integer> {
 	private final double scaleY;	
 	private final Queue<TimelineDataSet> queue;
 	protected final IProgressMonitor monitor;
-	protected final Map<Integer, List<?>> mapInvalidData;
+	protected final Map<IdTuple, List<?>> mapInvalidData;
 
 
 	protected BaseTimelineThread( SpaceTimeDataController stData,
@@ -99,8 +100,7 @@ public abstract class BaseTimelineThread implements Callable<Integer> {
 				if (num > 0) {
 					num_invalid_samples += num;
 					List<Integer> listInvalid = dataTo.getInvalidData();
-					int proc = trace.getProfileIdTuple().getProfileIndex()-1;
-					mapInvalidData.put(proc, listInvalid);
+					mapInvalidData.put(trace.getProfileIdTuple(), listInvalid);
 				}
 				
 				final TimelineDataSet dataSet = dataTo.getList();
@@ -126,7 +126,7 @@ public abstract class BaseTimelineThread implements Callable<Integer> {
 	}
 	
 
-	public Map<Integer, List<?>> getInvalidData() {
+	public Map<IdTuple, List<?>> getInvalidData() {
 		return mapInvalidData;
 	}
 	
