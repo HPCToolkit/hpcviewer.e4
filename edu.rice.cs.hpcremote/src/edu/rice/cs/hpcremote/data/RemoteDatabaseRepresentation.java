@@ -59,10 +59,10 @@ public class RemoteDatabaseRepresentation implements IDatabaseRepresentation
 
 	@Override
 	public int getTraceDataVersion() {
-		if (traceVersion < -1)
+		if (traceVersion >= 0)
 			return traceVersion;
 		
-		traceVersion = -1;
+		traceVersion = 0;
 		try {
 			if (client.isTraceSampleDataAvailable())
 				traceVersion = Constants.EXPERIMENT_SPARSE_VERSION;
