@@ -79,8 +79,11 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 	 * @param parent
 	 * 			The composite parent for the table
 	 * @param style
+	 * 			Supported style (or mode): {@link AbstractFilterPane.STYPE_COMPOSITE} and {@link AbstractFilterPane.STYLE_INDEPENDENT}
 	 * @param eventBroker
+	 * 			Eclipse event manager to broadcast any changes in the metric
 	 * @param inputData
+	 * 			{@code MetricFilterInput} the input data (possible modification)
 	 */
 	public MetricFilterPane(Composite parent, int style, IEventBroker eventBroker, MetricFilterInput inputData) {
 		super(parent, style, inputData);
