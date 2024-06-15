@@ -123,8 +123,8 @@ public class CallStackViewer extends AbstractBaseTableViewer
         	@Override
         	public String getText(Object element)
         	{
-        		if (element instanceof String)
-        			return (String) element;
+        		if (element instanceof String strElement)
+        			return strElement;
         		return null;
         	}
         	
@@ -283,9 +283,9 @@ public class CallStackViewer extends AbstractBaseTableViewer
 		IUndoContext positionCtx = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_POSITION);
 		
 		if (operation.hasContext(bufferCtx) ||
-				operation.hasContext(positionCtx)) {
-			if (event.getEventType() == OperationHistoryEvent.DONE) {
-				setSample(stData.getTraceDisplayAttribute().getPosition(), stData.getTraceDisplayAttribute().getDepth());			}
+			operation.hasContext(positionCtx) &&  
+			(event.getEventType() == OperationHistoryEvent.DONE)) {
+			setSample(stData.getTraceDisplayAttribute().getPosition(), stData.getTraceDisplayAttribute().getDepth());			
 		}
 	}
 	
@@ -303,9 +303,9 @@ public class CallStackViewer extends AbstractBaseTableViewer
 		protected Color getColor(Event event, Object element) {
 			if (element != EMPTY_FUNCTION && 
 				element != null && 
-				element instanceof String) {
+				element instanceof String strElement) {
 				
-				return colorTable.getColor((String) element);
+				return colorTable.getColor(strElement);
 			}
 			return event.display.getSystemColor(SWT.COLOR_WHITE);
 		}

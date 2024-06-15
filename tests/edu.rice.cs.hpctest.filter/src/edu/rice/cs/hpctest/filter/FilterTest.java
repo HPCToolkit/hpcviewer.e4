@@ -1,4 +1,4 @@
-package edu.rice.cs.hpctest.viewer;
+package edu.rice.cs.hpctest.filter;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;

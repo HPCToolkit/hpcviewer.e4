@@ -14,4 +14,9 @@ Require-Bundle: edu.rice.cs.hpcdata,
  ca.odell.glazedlists,
  org.eclipse.nebula.widgets.nattable.core,
  org.eclipse.jface,
- edu.rice.cs.hpctest.util
+ edu.rice.cs.hpctest.util,
+ edu.rice.cs.hpcmetric,
+ org.mockito.mockito-core,
+ net.bytebuddy.byte-buddy,
+ net.bytebuddy.byte-buddy-agent,
+ org.objenesis
