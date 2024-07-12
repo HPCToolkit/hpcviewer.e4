@@ -10,7 +10,6 @@
 #------------------------------------------------------------
 # Error messages
 #------------------------------------------------------------
-
 die()
 {
     echo "$0: error: $*" 1>&2
@@ -19,44 +18,55 @@ die()
 
 
 #------------------------------------------------------------
-# Check maven
+# Check maven existence: exit if it doesn't exist
 #------------------------------------------------------------
-if ! command -v mvn &> /dev/null
-then
-	die "Apache Maven (mvn) command is not found"
-fi
+check_maven()
+{
+    if ! command -v mvn &> /dev/null
+    then
+        die "Apache Maven (mvn) command is not found"
+    fi
+}
+
 
 #------------------------------------------------------------
 # Check the java version.
 #------------------------------------------------------------
-JAVA=`type -p java`
+check_java()
+{
+	JAVA=`type -p java`
+	
+	if [ "$JAVA"x != "x" ]; then
+	    JAVA=java
+	elif [[ -n "$JAVA_HOME" ]] && [[ -x "$JAVA_HOME/bin/java" ]];  then
+	    echo found java executable in JAVA_HOME     
+	    JAVA="$JAVA_HOME/bin/java"
+	else
+	    die "unable to find program 'java' on your PATH"
+	fi
+	
+	JAVA_MAJOR_VERSION=`java -version 2>&1 \
+		  | head -1 \
+		  | cut -d'"' -f2 \
+		  | sed 's/^1\.//' \
+		  | cut -d'.' -f1`
+	
+	echo "Java version $JAVA_MAJOR_VERSION"
+	
+	# we need Java 17 at least
+	jvm_min=17
+	jvm_max=22
 
-if [ "$JAVA"x != "x" ]; then
-    JAVA=java
-elif [[ -n "$JAVA_HOME" ]] && [[ -x "$JAVA_HOME/bin/java" ]];  then
-    echo found java executable in JAVA_HOME     
-    JAVA="$JAVA_HOME/bin/java"
-else
-    die "unable to find program 'java' on your PATH"
-fi
+	# issue #308: we don't support too new Java
+	if [ "$JAVA_MAJOR_VERSION" -lt "$jvm_min" ] || [ "$JAVA_MAJOR_VERSION" -gt "$jvm_max" ]; then
+		die "$name requires Java between $jvm_min and $jvm_max"
+	fi
+}
 
-JAVA_MAJOR_VERSION=`java -version 2>&1 \
-	  | head -1 \
-	  | cut -d'"' -f2 \
-	  | sed 's/^1\.//' \
-	  | cut -d'.' -f1`
 
-echo "Java version $JAVA_MAJOR_VERSION"
-
-# we need Java 17 at least
-jvm_min=17
-jvm_max=22
-
-# issue #308: we don't support too new Java
-if [ "$JAVA_MAJOR_VERSION" -lt "$jvm_min" ] || [ "$JAVA_MAJOR_VERSION" -gt "$jvm_max" ]; then
-	die "$name requires Java between $jvm_min and $jvm_max"
-fi
-
+#------------------------------------------------------------
+# Show all the options and then exit
+#------------------------------------------------------------
 show_help(){
 	echo "Syntax: $0 [-options] [commands]"
 	echo "Options: "
@@ -71,6 +81,10 @@ show_help(){
 	exit
 }
 
+
+#------------------------------------------------------------
+# remove all the temporary files
+#------------------------------------------------------------
 clean_up() {
 	./mvnw clean
 	rm -f scripts/hpcviewer_launcher.sh
@@ -79,6 +93,10 @@ clean_up() {
 	cd ../..
 }
 
+
+#------------------------------------------------------------
+# remove all the temporary AND product files 
+#------------------------------------------------------------
 distclean_up() {
 	clean_up
 	rm -rf hpcviewer-* hpcdata-* prepare_sign*
@@ -87,13 +105,146 @@ distclean_up() {
 	cd ../..
 }
 
+
+#------------------------------------------------------------
+# Generate a hpcviewer for Linux package inside
+# `edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-${prefix}.${platform}*``
+# @param prefix 
+# @param machine_platform 
+#------------------------------------------------------------
+repackage_linux(){
+	prefix=$1
+	platform=$2
+	package=`ls edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-${prefix}.${platform}*`
+	extension="tgz"
+
+	[[ -z $package ]] && { echo "$package doesn't exist"; exit 1;  }
+
+	mkdir -p tmp/hpcviewer
+	cd tmp/hpcviewer
+
+	#tar xzf  ../../$package | grep -v 'LIBARCHIVE.creationtime'
+	unzip -qq ../../$package
+
+	cp ../../$launcher .
+	cp ../../scripts/install.sh .
+	cp ../../scripts/README .
+
+	cd ..
+
+	output="hpcviewer-${prefix}.${platform}.$extension"
+	if [[ "$VERBOSE" == 1 ]]; then
+		echo "Packaging $output from $package"
+	fi
+	tar czf ../$output hpcviewer/
+	chmod 664 ../$output
+
+	cd ..
+	#ls -l $output
+	rm -rf tmp
+}
+
+
+#------------------------------------------------------------
+# Generate a hpcviewer package for mac 
+#------------------------------------------------------------
+repackage_mac() {
+      input=$1
+      output=$2
+      if [[ "$VERBOSE" == 1 ]]; then
+	      echo "Packaging $output from $input"
+      fi
+      cp $input $output
+      chmod 664 $output
+}
+
+
+#------------------------------------------------------------
+# Generate a hpcviewer package for Windows
+#------------------------------------------------------------
+repackage_windows() {
+      input=$1
+      output=$2
+      if [[ "$VERBOSE" == 1 ]]; then
+		echo "Packaging $output from $input"
+      fi
+      
+      # for windows, we need to create a special hpcviewer directory
+      if [ -e hpcviewer ]; then
+         echo "File or directory hpcviewer already exist. Do you want to remove it? (y/n) "
+         read tobecontinue
+         if [ $tobecontinue != "y" ]; then
+	         exit
+	     fi
+      fi
+      rm -rf hpcviewer
+      mkdir hpcviewer
+      cd hpcviewer
+      unzip -q ../$input
+      cd ..
+      zip -q -r -y $output hpcviewer/
+      rm -rf hpcviewer
+      
+      chmod 664 $output
+}
+
+
+#------------------------------------------------------------
+# Generate hpcdata stand alone application
+#------------------------------------------------------------
+repackage_hpcdata(){
+	echo "=================================="
+	echo " Building hpcdata" 
+	echo "=================================="
+	
+	cd edu.rice.cs.hpcdata.app/scripts
+	if [[ "$VERBOSE" == "1" ]]; then
+		OPTION="-v"
+	fi
+	./build.sh ${OPTION} --release "$RELEASE"
+	
+	if [  -f hpcdata.tgz ]; then
+		cp hpcdata.tgz ../..
+	else
+		echo "Fail to build hpcdata"
+	fi
+	
+	cd ../..
+}
+
+
+#------------------------------------------------------------
+# generate HTML documents and make a package of them 
+#------------------------------------------------------------
+generate_documents()
+{
+    cd doc
+    ../mvnw site
+    if [ ! -f target/site/index.html ]; then
+        die "Unable to generate the documentation"
+    fi
+    
+    tar cf manual.tar target/site/*
+    cd ..
+}
+
+
+###################################################################
+# packaging the hpcdata
+###################################################################
+
+#
+# checking dependencies
+#
+check_maven
+check_java
+
+#
+# parse the arguments
+#
 CHECK_PACKAGE=0
 CREATE_PACKAGE=1
 VERBOSE=0
-
-#------------------------------------------------------------
-# start to build
-#------------------------------------------------------------
 NOTARIZE=0
 RELEASE=`date +"%Y.%m"`
 IMAGE_ONLY=0
@@ -101,59 +252,59 @@ IMAGE_ONLY=0
 POSITIONAL=()
 while [[ $# -gt 0 ]]
 do
-key="$1"
-
-case $key in
-    check)
-    CHECK_PACKAGE=1
-    shift # past argument
-    ;;
-    clean)
-    clean_up
-    shift # past argument
-    exit
-    ;;
-    distclean)
-    distclean_up
-    shift # past argument
-    exit
-    ;;
-
-    -c|--create)
-    CREATE_PACKAGE=0
-    shift # past argument
-    ;;
-    -h|--help)
-    show_help
-    shift # past argument
-    ;;
-    -i|--image)
-    IMAGE_ONLY=1
-    shift # past argument
-    ;;
-    -n|--notarize)
-    NOTARIZE=1
-    shift # past argument
-    ;;
-    -r|--release)
-    RELEASE="$2"
-    CREATE_PACKAGE=0
-    shift # past argument
-    shift # past value
-    ;;
-    -v|--verbose)
-    VERBOSE=1
-    shift # past argument
-    ;;
-    --default)
-    DEFAULT=YES
-    shift # past argument
-    ;;
-    *)    # unknown option
-    POSITIONAL+=("$1") # save it in an array for later
-    shift # past argument
-    ;;
-esac
+	key="$1"
+	
+	case $key in
+	    check)
+	    CHECK_PACKAGE=1
+	    shift # past argument
+	    ;;
+	    clean)
+	    clean_up
+	    shift # past argument
+	    exit
+	    ;;
+	    distclean)
+	    distclean_up
+	    shift # past argument
+	    exit
+	    ;;
+	
+	    -c|--create)
+	    CREATE_PACKAGE=0
+	    shift # past argument
+	    ;;
+	    -h|--help)
+	    show_help
+	    shift # past argument
+	    ;;
+	    -i|--image)
+	    IMAGE_ONLY=1
+	    shift # past argument
+	    ;;
+	    -n|--notarize)
+	    NOTARIZE=1
+	    shift # past argument
+	    ;;
+	    -r|--release)
+	    RELEASE="$2"
+	    CREATE_PACKAGE=0
+	    shift # past argument
+	    shift # past value
+	    ;;
+	    -v|--verbose)
+	    VERBOSE=1
+	    shift # past argument
+	    ;;
+	    --default)
+	    DEFAULT=YES
+	    shift # past argument
+	    ;;
+	    *)    # unknown option
+	    POSITIONAL+=("$1") # save it in an array for later
+	    shift # past argument
+	    ;;
+	esac
 done
 set -- "${POSITIONAL[@]}" # restore positional parameters
 
@@ -190,8 +341,6 @@ else
     sed -i "s/__VERSION__/\"$VERSION\"/g" $launcher
 fi
 
-# This is not necessary: removing old release files
-rm -rf hpcviewer-${RELEASE}*
 
 #
 # build the viewer
@@ -214,90 +363,19 @@ if [ ! -e "edu.rice.cs.hpcviewer.product/target/products" ]; then
 	die "Fail to build hpcviewer"
 fi
 
+
+#
+# Generate the user manual
+#
+generate_documents
+
 echo "=================================="
 echo " Repackaging the viewer"
 echo "=================================="
 
+#
 # wrap the generated files into standard hpcviewer product
 #
-
-# repackage 
-repackage_linux(){
-	prefix=$1
-	platform=$2
-	package=`ls edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-${prefix}.${platform}*`
-	extension="tgz"
-
-	[[ -z $package ]] && { echo "$package doesn't exist"; exit 1;  }
-
-	mkdir -p tmp/hpcviewer
-	cd tmp/hpcviewer
-
-	#tar xzf  ../../$package | grep -v 'LIBARCHIVE.creationtime'
-	unzip -qq ../../$package
-
-	cp ../../$launcher .
-	cp ../../scripts/install.sh .
-	cp ../../scripts/README .
-
-	cd ..
-
-	output="hpcviewer-${prefix}.${platform}.$extension"
-	if [[ "$VERBOSE" == 1 ]]; then
-		echo "Packaging $output from $package"
-	fi
-	tar czf ../$output hpcviewer/
-	chmod 664 ../$output
-
-	cd ..
-	#ls -l $output
-	rm -rf tmp
-}
-
-
-repackage_mac() {
-      input=$1
-      output=$2
-      if [[ "$VERBOSE" == 1 ]]; then
-	      echo "Packaging $output from $input"
-      fi
-      cp $input $output
-      chmod 664 $output
-}
-
-
-repackage_windows() {
-      input=$1
-      output=$2
-      if [[ "$VERBOSE" == 1 ]]; then
-		echo "Packaging $output from $input"
-      fi
-      
-      # for windows, we need to create a special hpcviewer directory
-      if [ -e hpcviewer ]; then
-         echo "File or directory hpcviewer already exist. Do you want to remove it? (y/n) "
-         read tobecontinue
-         if [ $tobecontinue != "y" ]; then
-	    exit
-	 fi
-      fi
-      rm -rf hpcviewer
-      mkdir hpcviewer
-      cd hpcviewer
-      unzip -q ../$input
-      cd ..
-      zip -q -r -y $output hpcviewer/
-      rm -rf hpcviewer
-      
-      chmod 664 $output
-}
-
-# The result should be:
-#
-# Building zip: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-win32.win32.x86_64.zip
-# Building zip: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-macosx.cocoa.x86_64.zip
-# Building tar: edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-linux.gtk.aarch64.tar.gz
-# ...
 
 repackage_linux linux.gtk x86_64
 repackage_linux linux.gtk aarch64
@@ -318,12 +396,9 @@ output="hpcviewer-macosx.cocoa.aarch64.zip"
 input=edu.rice.cs.hpcviewer.product/target/products/edu.rice.cs.hpcviewer-macosx.cocoa.aarch64.zip 
 repackage_mac $input $output
 
-
-###################################################################
-# special treatement for mac OS
-###################################################################
+# special treatment for mac OS to notarize if needed
 if [[ "$OS" == "Darwin" && "$NOTARIZE" == "1" ]]; then 
-        macPkgs="hpcviewer-macosx.cocoa.x86_64.zip"
+    macPkgs="hpcviewer-macosx.cocoa.x86_64.zip"
 	macos/notarize.sh $macPkgs
 	
         macPkgs="hpcviewer-macosx.cocoa.aarch64.zip"
@@ -335,29 +410,6 @@ elif [[ "$OS" == "Darwin" && "$IMAGE_ONLY" == "1" ]]; then
 fi
 
 
-###################################################################
-# packaging the hpcdata
-###################################################################
-
-repackage_hpcdata(){
-echo "=================================="
-echo " Building hpcdata" 
-echo "=================================="
-
-cd edu.rice.cs.hpcdata.app/scripts
-if [[ "$VERBOSE" == "1" ]]; then
-	OPTION="-v"
-fi
-./build.sh ${OPTION} --release "$RELEASE"
-
-if [  -f hpcdata.tgz ]; then
-	cp hpcdata.tgz ../..
-else
-	echo "Fail to build hpcdata"
-fi
-
-cd ../..
-}
 
 ###################################################################
 # End

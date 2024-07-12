@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Contributors to the HPCToolkit Project
+//
+// SPDX-License-Identifier: BSD-3-Clause
+
 package edu.rice.cs.hpctraceviewer.ui.callstack;
 
 import java.util.ArrayList;
@@ -182,7 +186,7 @@ public class CallStackViewer extends AbstractBaseTableViewer
 		// 	then we keep the selected process
 		//-------------------------------------------------------------------------------------------
 		
-		if (stData == null) {
+		if (stData == null || stData.getExperiment() == null) {
 			return;
 		}
 		var ptl = stData.getCurrentSelectedTraceline();
@@ -227,9 +231,13 @@ public class CallStackViewer extends AbstractBaseTableViewer
 		// fill the call stack and select the current depth
 		final Display display = Display.getDefault();
 		display.asyncExec( () -> {
-			setInput(listOfFunctions);
-			selectDepth(depth);
-			viewerColumn.getColumn().pack();
+			try {
+				setInput(listOfFunctions);
+				selectDepth(depth);
+				viewerColumn.getColumn().pack();
+			} catch (Exception e) {
+				LoggerFactory.getLogger(getClass()).error("Error in updating trace call stack", e);
+			}
 		});
 	}
 	

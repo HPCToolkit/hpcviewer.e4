@@ -1,0 +1,29 @@
+<project name="hpcviewer User Manual" xmlns="http://maven.apache.org/DECORATION/1.6.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/DECORATION/1.6.0 http://maven.apache.org/xsd/decoration-1.6.0.xsd">
+
+	<bannerLeft>
+		<name>HPCViewer User Manual</name>	 
+	</bannerLeft>
+	
+	<poweredBy>
+        <logo name="HPCToolkit" href="https://hpctoolkit.org" 
+         img="images/hpctoolkit.png" />
+    </poweredBy>
+  
+	<body>
+		<menu name="Table of contents">
+			<item name="Overview" href="index.html"/>
+			<item name="Profile view" href="profile.html"/>
+			<item name="Trace view" href="trace.html"/>
+		</menu>
+		
+        <links>
+            <item name="HPCToolkit" href="http://hpctoolkit.org"/>
+            <item name="HPSF" href="https://hpsf.io"/>
+        </links>
+        
+        <footer><![CDATA[Contributors to the HPCToolkit Project.]]></footer>
+	</body>
+
+</project>

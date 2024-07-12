@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Hpcgraph
+Bundle-Name: hpcgraph
 Bundle-SymbolicName: edu.rice.cs.hpcgraph;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: Rice University
