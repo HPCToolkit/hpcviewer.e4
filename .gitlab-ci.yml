@@ -317,3 +317,34 @@ create release:
         link_type: package
         url: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/hpcviewer/${CI_COMMIT_TAG}/hpcviewer-linux.gtk.x86_64.tgz
         filepath: /hpcviewer-linux.gtk.x86_64.tgz
+
+
+# Render the documentation in HTML
+documentation:
+  extends: .maven
+  stage: package
+  script:
+  - (cd doc/ && mvn site site:stage) || exit $?
+  - mkdir -p target/
+  - mv -T doc/target/staging/ target/staging/
+  artifacts:
+    expose_as: 'Rendered documentation'
+    paths:
+    - target/staging/
+
+
+# Publish the rendered documentation to GitLab Pages for easy browsing from the web.
+# FIXME: Currently this only happens for the default branch. Eventually we should extend this to
+# include protected tags (releases) as well, once multiple deployments are easy.
+# See https://gitlab.com/gitlab-org/gitlab/-/issues/422145 and https://gitlab.com/groups/gitlab-org/-/epics/10914.
+pages:
+  stage: deploy
+  image: docker.io/alpine
+  needs: [documentation]
+  rules:
+  - if: $CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  script:
+  - mv -T target/staging/ public/
+  - echo "Deploying documentation to ${CI_PAGES_URL}"
+  artifacts:
+    paths: [public/]

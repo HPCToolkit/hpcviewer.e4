@@ -27,10 +27,6 @@
 			<unit id="org.eclipse.nebula.widgets.nattable.extension.poi.source.feature.feature.group" version="2.2.1.202311151329"/>
 		</location>
 		<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-			<repository location="http://download.eclipse.org/releases/2022-12/"/>
-			<unit id="org.eclipse.sdk.feature.group" version="4.26.0.v20221123-2302"/>
-		</location>
-		<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 			<repository location="https://download.eclipse.org/tools/orbit/downloads/2022-12/"/>
 			<unit id="ch.qos.logback.core" version="1.2.3.v20221112-0806"/>
 			<unit id="ch.qos.logback.slf4j" version="1.2.3.v20221112-0806"/>
@@ -43,6 +39,10 @@
 			<unit id="org.yaml.snakeyaml" version="1.27.0.v20221112-0806"/>
 			<unit id="org.yaml.snakeyaml.source" version="1.27.0.v20221112-0806"/>
 			<unit id="ch.qos.logback.classic" version="1.2.3.v20221112-0806"/>
+		</location>
+		<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+			<repository location="http://download.eclipse.org/releases/2022-12/"/>
+			<unit id="org.eclipse.sdk.feature.group" version="4.26.0.v20221123-2302"/>
 		</location>
 	</locations>
 </target>

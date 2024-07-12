@@ -1,13 +1,8 @@
-//////////////////////////////////////////////////////////////////////////
-//																		//
-//	ExperimentMerger.java												//
-//																		//
-//	ExperimentMerger -- class to merge two Experiments					//
-//	Created: May 7, 2007 												//
-//																		//
-//	(c) Copyright 2002-2022 Rice University. All rights reserved.		//
-//																		//
-//////////////////////////////////////////////////////////////////////////
+// Copyright 2002-2022 Rice University. All rights reserved.		//
+// SPDX-FileCopyrightText: 2024 Contributors to the HPCToolkit Project
+//
+// SPDX-License-Identifier: BSD-3-Clause
+
 package edu.rice.cs.hpcdata.merge;
 
 import java.io.File;

@@ -1,11 +1,10 @@
 package edu.rice.cs.hpcbase.sleak;
 
-/*
- * Copyright (c) 2000, 2002 IBM Corp.  All rights reserved.
- * This file is made available under the terms of the Common Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/cpl-v10.html
- */
+// Copyright (c) 2000, 2002 IBM Corp.  All rights reserved.
+// SPDX-FileCopyrightText: 2024 Contributors to the HPCToolkit Project
+//
+// SPDX-License-Identifier: BSD-3-Clause
+
 import org.eclipse.swt.*;
 import org.eclipse.swt.graphics.*;
 import org.eclipse.swt.widgets.*;
