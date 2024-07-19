@@ -40,6 +40,21 @@ include:
     job_tag: saas-linux-medium-arm64
     build_args: JDK_OS=17-focal
 
+# Secondary images for different versions of the JDK
+- component: &ci_predeps gitlab.com/blue42u/ci.predeps/buildah@0.4.1
+  inputs:
+    <<: &ci_predeps_shared
+      fallback_registry: registry.gitlab.com/hpctoolkit/hpcviewer/ci.predeps
+    name: main-jdk21-amd64
+    build_args: JDK_OS=21-jammy
+- component: *ci_predeps
+  inputs:
+    <<: *ci_predeps_shared
+    name: main-jdk21-arm64
+    platform: linux/arm64
+    job_tag: saas-linux-medium-arm64
+    build_args: JDK_OS=21-jammy
+
 # Pre-build lightweight images to emulate an X11 server for testing
 - component: *ci_predeps
   inputs:
@@ -170,6 +185,12 @@ test jdk17 amd64:
       coverage_report:
         coverage_format: cobertura
         path: coverage.xml
+test jdk21 amd64:
+  extends: test jdk17 amd64
+  image: $PREDEPS_IMAGE_MAIN_JDK21_AMD64
+  needs:
+  - 'predeps: [main-jdk21-amd64]'
+  - 'predeps: [xvfb-amd64]'
 test jdk17 arm64:
   extends: test jdk17 amd64
   image: $PREDEPS_IMAGE_MAIN_JDK17_ARM64
@@ -180,6 +201,12 @@ test jdk17 arm64:
   - name: $PREDEPS_IMAGE_XVFB_ARM64
     alias: wm
   tags: [saas-linux-medium-arm64]
+test jdk21 arm64:
+  extends: test jdk17 arm64
+  image: $PREDEPS_IMAGE_MAIN_JDK21_ARM64
+  needs:
+  - 'predeps: [main-jdk21-arm64]'
+  - 'predeps: [xvfb-arm64]'
 
 
 # Build the Viewer and package the results for usage by users
