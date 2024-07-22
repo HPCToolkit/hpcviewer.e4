@@ -1,5 +1,5 @@
-ARG JDK_OS=17
-FROM docker.io/maven:3.9.6-eclipse-temurin-${JDK_OS}
+ARG JDK_OS=17-focal
+FROM docker.io/maven:3-eclipse-temurin-${JDK_OS}
 
 RUN \
   apt-get update \

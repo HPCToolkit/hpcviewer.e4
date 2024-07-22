@@ -26,7 +26,7 @@ include:
 - component: gitlab.com/blue42u/ci.pre-commit/lite@0.2
 
 # Main image for building and testing
-- component: &ci_predeps gitlab.com/blue42u/ci.predeps/buildah@0.4.1
+- component: &ci_predeps gitlab.com/blue42u/ci.predeps/buildah@1
   inputs:
     <<: &ci_predeps_shared
       fallback_registry: registry.gitlab.com/hpctoolkit/hpcviewer/ci.predeps
@@ -37,14 +37,13 @@ include:
     <<: *ci_predeps_shared
     name: main-jdk17-arm64
     platform: linux/arm64
-    job_tag: saas-linux-medium-arm64
+    job_tags: [saas-linux-medium-arm64]
     build_args: JDK_OS=17-focal
 
 # Secondary images for different versions of the JDK
-- component: &ci_predeps gitlab.com/blue42u/ci.predeps/buildah@0.4.1
+- component: *ci_predeps
   inputs:
-    <<: &ci_predeps_shared
-      fallback_registry: registry.gitlab.com/hpctoolkit/hpcviewer/ci.predeps
+    <<: *ci_predeps_shared
     name: main-jdk21-amd64
     build_args: JDK_OS=21-jammy
 - component: *ci_predeps
@@ -52,7 +51,7 @@ include:
     <<: *ci_predeps_shared
     name: main-jdk21-arm64
     platform: linux/arm64
-    job_tag: saas-linux-medium-arm64
+    job_tags: [saas-linux-medium-arm64]
     build_args: JDK_OS=21-jammy
 
 # Pre-build lightweight images to emulate an X11 server for testing
@@ -67,7 +66,7 @@ include:
     <<: *ci_predeps_shared
     name: xvfb-arm64
     platform: linux/arm64
-    job_tag: saas-linux-medium-arm64
+    job_tags: [saas-linux-medium-arm64]
     containerfile: .ci.predeps/Containerfile.xvfb
     ignorefile: .ci.predeps/ignore.xvfb
 
