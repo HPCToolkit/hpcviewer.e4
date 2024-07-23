@@ -184,3 +184,6 @@ dt {
     padding: 10px 20px;
     text-align: center;
 }
+.large-text {
+  font-size: large;
+}
