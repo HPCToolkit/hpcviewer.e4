@@ -108,8 +108,8 @@ JAVA_MAJOR_VERSION=`java -version 2>&1 \
 
 echo "Java version $JAVA_MAJOR_VERSION"
 
-# we need Java 11 at least
-jvm_required=11
+# we need Java 17 at least
+jvm_required=17
 
 if [ "$JAVA_MAJOR_VERSION" -lt "$jvm_required" ]; then
 	die "$name requires Java $jvm_required"
