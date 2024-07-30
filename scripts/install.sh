@@ -114,16 +114,19 @@ do
     fi
 done
 
-# Check that version is 11 or later.
+# Check that version is 17 or later.
 
 echo "Java version $java_version"
+jvm_required=17
 
 if test "$force" = no ; then
     if test "x$java_version" = x ; then
-	  echo "unable to find program 'java' on your PATH"
-    fi
-    if test $java_version -lt 11 ; then
-	  echo "$java_version is too old, use Java 11 or later"
+	  echo "Warning: unable to find program 'java' on your PATH"
+	  echo "Please install java before launching hpcviewer"
+	  echo "Enter to continue ..."
+	  read keysomething
+    elif test $java_version -lt "${jvm_required}" ; then
+	  echo "$java_version is too old, use Java ${jvm_required} or later"
 	  echo "Enter to continue ..."
 	  read keysomething
     fi
