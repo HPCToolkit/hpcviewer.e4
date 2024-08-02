@@ -7,7 +7,7 @@ package edu.rice.cs.hpcremote.data;
 import java.io.File;
 import java.io.IOException;
 
-import org.hpctoolkit.hpcclient.v1_0.HpcClient;
+import org.hpctoolkit.hpcclient.v1_0.BrokerClient;
 import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcdata.experiment.IDatabaseRepresentation;
@@ -17,7 +17,7 @@ import edu.rice.cs.hpcdata.util.Constants;
 
 public class RemoteDatabaseRepresentation implements IDatabaseRepresentation 
 {
-	private final HpcClient client;
+	private final BrokerClient client;
 	private String basicId;
 	
 	/**
@@ -26,7 +26,7 @@ public class RemoteDatabaseRepresentation implements IDatabaseRepresentation
 	 */
 	private int traceVersion = Integer.MIN_VALUE;
 	
-	public RemoteDatabaseRepresentation(HpcClient hpcclient, String id) {
+	public RemoteDatabaseRepresentation(BrokerClient hpcclient, String id) {
 		this.client = hpcclient;
 		this.basicId = id;
 	}

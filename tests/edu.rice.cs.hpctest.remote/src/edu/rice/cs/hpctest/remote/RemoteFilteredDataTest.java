@@ -10,7 +10,8 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.hpctoolkit.hpcclient.v1_0.HpcClient;
+
+import org.hpctoolkit.hpcclient.v1_0.BrokerClient;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -46,7 +47,7 @@ public class RemoteFilteredDataTest
 			idTuples.forEach(idt -> mapSamples.put(idt.getProfileIndex(), idt.getProfileIndex()));
 			var mapProfileToSamples = HashMap.ofAll(mapSamples);
 			
-			var hpcClient = Mockito.mock(HpcClient.class);
+			var hpcClient = Mockito.mock(BrokerClient.class);
 			when(hpcClient.getNumberOfSamplesPerTrace()).thenReturn(mapProfileToSamples);
 			
 			RemoteFilteredData data = new RemoteFilteredData(hpcClient, idTuples, fileDb.getIdTupleTypes());

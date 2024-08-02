@@ -6,11 +6,18 @@ package edu.rice.cs.hpcremote.data;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.nio.channels.NotYetConnectedException;
 
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
-import org.hpctoolkit.hpcclient.v1_0.HpcClient;
-import org.hpctoolkit.hpcclient.v1_0.HpcClientJavaNetHttp;
+import org.hpctoolkit.hpcclient.v1_0.BrokerClient;
+import org.hpctoolkit.hpcclient.v1_0.BrokerClientJavaNetHttp;
+import org.hpctoolkit.hpcclient.v1_0.DbManagerClient;
+import org.hpctoolkit.hpcclient.v1_0.DbManagerClientJavaNetHttp;
+import org.hpctoolkit.hpcclient.v1_0.DirectoryContentsNotAvailableException;
+import org.hpctoolkit.hpcclient.v1_0.RemoteDirectory;
+import org.json.JSONObject;
 import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcremote.ICollectionOfConnections;
@@ -20,7 +27,7 @@ import edu.rice.cs.hpcremote.tunnel.IRemoteCommunication;
 import edu.rice.cs.hpcremote.tunnel.SecuredConnectionSSH;
 import edu.rice.cs.hpcremote.ui.RemoteDatabaseDialog;
 
-public abstract class RemoteCommunicationProtocolBase 
+public class RemoteCommunicationProtocolBase 
 	implements IRemoteCommunication
 {
 	/**
@@ -33,24 +40,33 @@ public abstract class RemoteCommunicationProtocolBase
 	 */
 	enum ServerResponseType {SUCCESS, ERROR, INVALID}
 	
+	record RemoteHostAndSocket(String host, String socket) {}
+	
 	private static final String HPCSERVER_LOCATION = "/libexec/hpcserver/hpcserver.sh";
-	
-	private final IllegalAccessError errorNotConnected = new IllegalAccessError("SSH tunnel not created yet.");
-	
+		
 	private ISecuredConnection.ISessionRemoteSocket serverMainSession;
 	private SecuredConnectionSSH connectionSSH;
-	
-	private String remoteIP;
-	private String remoteSocket;
+	private String remoteHostIP;
 	
 	private IConnection connection;
 	
 	private String errorMessage;
 
+	/**
+	 * dbManager is the main communication channel to the server: 
+	 * get the remote directory, open a database and shutdown the server
+	 */
+	private DbManagerClient dbManager;
 	
 	@Override
 	public String getRemoteHost() {
-		return remoteIP;
+		if (remoteHostIP != null)
+			return remoteHostIP;
+		
+		if (connection != null)
+			return connection.getHost();
+		
+		return "";
 	}
 	
 	
@@ -72,10 +88,15 @@ public abstract class RemoteCommunicationProtocolBase
 	
 	@Override
 	public void disconnect(Shell shell) throws IOException {
-		if (serverMainSession == null)
-			throw errorNotConnected;
+		if (!isConnected())
+			throw new NotYetConnectedException();
 		
-		disconnect(serverMainSession, shell);
+		try {
+			dbManager.shutdownRemoteServer();
+		} catch (InterruptedException e) {
+		    /* Clean up whatever needs to be handled before interrupting  */
+		    Thread.currentThread().interrupt();
+		}
 		serverMainSession.disconnect();
 	}
 	
@@ -110,18 +131,23 @@ public abstract class RemoteCommunicationProtocolBase
 		if (remoteSession == null) 
 			return ConnectionStatus.ERROR;
 		
-		if (!handleOutputAndSetConfiguration(remoteSession))
+		var remoteConnectionRecord = handleOutputAndSetConfiguration(remoteSession);
+		if (remoteConnectionRecord == null)
 			return ConnectionStatus.ERROR;
 	
 		//
 		// create the SSH tunnel to communicate securely with the remote host
 		//
-		serverMainSession = connectionSSH.socketForwarding(remoteSocket);
+		serverMainSession = connectionSSH.socketForwarding(remoteConnectionRecord.socket);
 		if (serverMainSession == null)
 			return ConnectionStatus.ERROR;
 		
-		this.connection = connectionInfo;
-		
+		remoteHostIP  = remoteConnectionRecord.host;
+		connection    = connectionInfo;
+		var localAddr = InetAddress.getByName("localhost");
+
+		dbManager = new DbManagerClientJavaNetHttp(localAddr, serverMainSession.getLocalPort());
+
 		ICollectionOfConnections.putShellSession(shell, this);
 		
 		return ConnectionStatus.CONNECTED;
@@ -137,7 +163,7 @@ public abstract class RemoteCommunicationProtocolBase
 	@Override
 	public String selectDatabase(Shell shell) {
 		if (serverMainSession == null)
-			throw errorNotConnected;
+			throw new NotYetConnectedException();
 		
 		var dialog = new RemoteDatabaseDialog(shell, this);
 		if (dialog.open() == Window.OK) {
@@ -153,45 +179,39 @@ public abstract class RemoteCommunicationProtocolBase
 		if (database == null)
 			return null;
 		
-		if (serverMainSession == null || getConnection() == null)
-			throw errorNotConnected;
-
-		var reply = sendCommandToOpenDatabaseAndWaitForReply(serverMainSession, database);
+		if (!isConnected())
+			throw new NotYetConnectedException();
 		
-		switch (reply.getResponseType()) {
-		case ERROR: 
-			throw new IOException("Error reading the database: " + database);
-		case INVALID:
-			throw new UnknownError("Fail to connect to the server.");
-		case SUCCESS:
-			var socket = reply.getResponseArgument()[0];			
+		try {
+			var remoteFile = dbManager.openDatabase(database);
+			if (remoteFile == null)
+				return null;
+			
+			var socket = remoteFile.getAbsolutePathOnRemoteFilesystem();
+			if (socket == null || socket.isEmpty())
+				return null;
+			
 			return createTunnelAndRequestDatabase(socket);
+			
+		} catch (InterruptedException e) {
+		    /* Clean up whatever needs to be handled before interrupting  */
+		    Thread.currentThread().interrupt();
 		}
 		return null;
 	}
 	
 	
 	@Override
-	public IRemoteDirectoryContent getContentRemoteDirectory(String directory) throws IOException {
-		if (serverMainSession == null)
-			throw errorNotConnected;
+	public RemoteDirectory getContentRemoteDirectory(String directory) 
+			throws IOException, InterruptedException, DirectoryContentsNotAvailableException {
+		if (!isConnected())
+			throw new NotYetConnectedException();
 		
-		var response = sendCommandToGetDirectoryContent(serverMainSession, directory);
-		
-		switch (response.getResponseType()) {
-		case ERROR:
-			throw new IOException("Fail reading directory: " + directory);
-		case INVALID:
-			throw new UnknownError("Fail to connect to the server.");
-		case SUCCESS:
-			var list = response.getResponseArgument();
-			return createDirectoryContent(serverMainSession, list);
-		}
-		return null;
+		return dbManager.getDirectoryContents(directory);
 	}
 	
 	
-	IRemoteDatabaseConnection createTunnelAndRequestDatabase(String brokerSocket) throws IOException {		
+	IRemoteDatabaseConnection createTunnelAndRequestDatabase(String brokerSocket) {		
 		if (connectionSSH == null)
 			return null;
 		
@@ -199,15 +219,17 @@ public abstract class RemoteCommunicationProtocolBase
 		if (brokerSession == null)
 			return null;
 		
-		int port = brokerSession.getLocalPort();
-		var addr = InetAddress.getByName("localhost");
-		final var hpcclient = new HpcClientJavaNetHttp(addr, port);
-		
 		return new IRemoteDatabaseConnection() {
 			
 			@Override
-			public HpcClient getHpcClient() {
-				return hpcclient;
+			public BrokerClient getHpcClient() {
+				try {
+					InetAddress localHost = InetAddress.getByName("localhost");
+					BrokerClient dbManagerClient = new BrokerClientJavaNetHttp(localHost, brokerSession.getLocalPort());
+					return dbManagerClient;
+				} catch (UnknownHostException e) {
+					throw new NotYetConnectedException();
+				}
 			}
 			
 			@Override
@@ -223,13 +245,13 @@ public abstract class RemoteCommunicationProtocolBase
 	}
 
 	
-	private boolean handleOutputAndSetConfiguration(ISecuredConnection.ISessionRemote session ) 
+	private RemoteHostAndSocket handleOutputAndSetConfiguration(ISecuredConnection.ISessionRemote session ) 
 			throws IOException {
 
 		int maxAttempt = 10;
 
-		remoteIP = "";
-		remoteSocket = "";
+		String remoteIP = "";
+		String remoteSocket = "";
 
 		while (remoteIP.isEmpty() && remoteSocket.isEmpty()) {
 			try {
@@ -243,84 +265,107 @@ public abstract class RemoteCommunicationProtocolBase
 			if (output == null || output.length == 0) {
 				maxAttempt--;
 				if (maxAttempt == 0)
-					return false;
+					return null;
 				
 				continue;
 			}
 			var response = getServerResponseInit(output);
-			if (response == null || response.getResponseType() == ServerResponseType.ERROR)
-				return false;
+			if (response == null || response.getResponseType() != ServerResponseType.SUCCESS)
+				return null;
 			
 			remoteIP = response.getHost();
 			remoteSocket = response.getSocket();
 		}
-		return true;
+		return new RemoteHostAndSocket(remoteIP, remoteSocket);
 	}
 
 	
 	public IConnection getConnection() {
 		return connection;
 	}
+	
+	
+	private boolean isConnected() {
+		return connection != null && dbManager != null && serverMainSession != null;
+	}
+	
+	public interface ServerResponseConnectionInit extends ServerResponse
+	{
+		String getSocket();
+		
+		String getHost();
+	}
+	
+	public ServerResponseConnectionInit getServerResponseInit(String[] messageFromServer) {
+		// looking for json message
+		// sometimes the server outputs rubbish
+		int i=0;
+		for(; i<messageFromServer.length; i++) {
+			// looking for the start of JSON message (prefixed with "{")
+			if (messageFromServer[i].trim().startsWith("{"))
+				break;
+		}
+		StringBuilder message = new StringBuilder();
 
+		for(; i<messageFromServer.length; i++) {
+			message.append(messageFromServer[i]);
+		}
+		if (message.isEmpty())
+			return new ServerResponseConnectionInit() {
+				
+				@Override
+				public ServerResponseType getResponseType() {
+					return ServerResponseType.INVALID;
+				}
+				
+				@Override
+				public String[] getResponseArgument() {
+					return new String[0];
+				}
+				
+				@Override
+				public String getSocket() {
+					return null;
+				}
+				
+				@Override
+				public String getHost() {
+					return null;
+				}
+			};
+		
+		JSONObject json = new JSONObject(message.toString());
+		
+		if (isSuccess(json)) {
+			var remoteIp = json.getString("host");
+			var socket = json.getString("sock");
+			
+			return new ServerResponseConnectionInit() {
+				
+				@Override
+				public ServerResponseType getResponseType() {
+					return ServerResponseType.SUCCESS;
+				}
+				
+				@Override
+				public String[] getResponseArgument() {
+					return new String[0];
+				}
+				
+				@Override
+				public String getSocket() {
+					return socket;
+				}
+				
+				@Override
+				public String getHost() {
+					return remoteIp;
+				}
+			};
+		}		
+		return null;
+	}
 	
-	/***
-	 * Handle the message from the server initial connection
-	 * 
-	 * @param messageFromServer
-	 * 
-	 * @return {@code ServerResponseConnectionInit} 
-	 */
-	public abstract ServerResponseConnectionInit getServerResponseInit(String []messageFromServer);
-	
-	/****
-	 * Ask the server to open a database and wait for its reply.
-	 * 
-	 * @param serverMainSession
-	 * @param database
-	 * @return
-	 * @throws IOException
-	 */
-	public abstract ServerResponse sendCommandToOpenDatabaseAndWaitForReply(
-			ISecuredConnection.ISessionRemoteSocket serverMainSession, 
-			String database) 
-					throws IOException;
-	
-	
-	/***
-	 * Ask the server to get the content of a directory and wait for its reply.
-	 * 
-	 * @param directory
-	 * @return
-	 * @throws IOException
-	 */
-	public abstract ServerResponse sendCommandToGetDirectoryContent(
-			ISecuredConnection.ISessionRemoteSocket serverMainSession, 
-			String directory) 
-					throws IOException;
-	
-	
-	/***
-	 * Convert the response from the server to a {@code IRemoteDirectoryContent}
-	 * 
-	 * @param responseFromServer
-	 * 			{@code String[]} array of String from the server
-	 * @return
-	 */
-	public abstract IRemoteDirectoryContent createDirectoryContent(
-			ISecuredConnection.ISessionRemoteSocket serverMainSession, 
-			String[] responseFromServer);
-	
-	
-	/***
-	 * Send a command to close the connection to the server
-	 * 
-	 * @param serverMainSession
-	 * @param shell
-	 * @throws IOException
-	 */
-	public abstract void disconnect(
-			ISecuredConnection.ISessionRemoteSocket serverMainSession, 
-			Shell shell) throws IOException;
 	
 	public interface ServerResponse 
 	{
@@ -343,10 +388,12 @@ public abstract class RemoteCommunicationProtocolBase
 		};
 	}
 	
-	public interface ServerResponseConnectionInit extends ServerResponse
-	{
-		String getSocket();
+	
+	private boolean isSuccess(JSONObject json) {
+		var status = json.getString("status");
+		if (status == null)
+			return false;
 		
-		String getHost();
+		return status.equalsIgnoreCase("success");
 	}
 }

@@ -11,7 +11,7 @@ import java.util.List;
 
 import org.hpctoolkit.client_server_common.calling_context.CallingContextId;
 import org.hpctoolkit.client_server_common.profile.ProfileId;
-import org.hpctoolkit.hpcclient.v1_0.HpcClient;
+import org.hpctoolkit.hpcclient.v1_0.BrokerClient;
 import org.hpctoolkit.hpcclient.v1_0.UnknownCallingContextException;
 import org.hpctoolkit.hpcclient.v1_0.UnknownProfileIdException;
 import org.slf4j.LoggerFactory;
@@ -39,7 +39,7 @@ import io.vavr.collection.Set;
  *************************************************************/
 public class RemoteDataProfile extends AbstractDataProfile implements IDataProfile
 {
-	private final HpcClient client;
+	private final BrokerClient client;
 
 	
 	/*****
@@ -50,7 +50,7 @@ public class RemoteDataProfile extends AbstractDataProfile implements IDataProfi
 	 * @param idTupleTypes
 	 * 			DataMeta's types of id tuples
 	 */
-	public RemoteDataProfile(HpcClient client, IdTupleType idTupleTypes) {
+	public RemoteDataProfile(BrokerClient client, IdTupleType idTupleTypes) {
 		super(idTupleTypes);
 		this.client = client;
 		
@@ -58,7 +58,7 @@ public class RemoteDataProfile extends AbstractDataProfile implements IDataProfi
 	}
 	
 	
-	private void initIdTuples(HpcClient client) {
+	private void initIdTuples(BrokerClient client) {
 		
 		Set<IdTuple> idtuples;
 		try {

@@ -9,8 +9,8 @@ import java.io.IOException;
 import org.hpctoolkit.client_server_common.calling_context.CallingContextId;
 import org.hpctoolkit.client_server_common.metric.MetricId;
 import org.hpctoolkit.client_server_common.profile.ProfileId;
+import org.hpctoolkit.hpcclient.v1_0.BrokerClient;
 import org.hpctoolkit.hpcclient.v1_0.ContextMeasurementsMap;
-import org.hpctoolkit.hpcclient.v1_0.HpcClient;
 import org.hpctoolkit.hpcclient.v1_0.UnknownCallingContextException;
 
 import edu.rice.cs.hpcdata.db.version4.DataPlotEntry;
@@ -21,9 +21,9 @@ import io.vavr.collection.Map;
 
 public class RemoteDataCCT implements IDataCCT 
 {
-	private final HpcClient client;
+	private final BrokerClient client;
 	
-	public RemoteDataCCT(HpcClient client) {
+	public RemoteDataCCT(BrokerClient client) {
 		this.client = client;
 	}
 	

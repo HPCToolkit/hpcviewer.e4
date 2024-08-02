@@ -12,7 +12,7 @@ import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
 import org.hpctoolkit.client_server_common.calling_context.CallingContextId;
 import org.hpctoolkit.client_server_common.profile.ProfileId;
-import org.hpctoolkit.hpcclient.v1_0.HpcClient;
+import org.hpctoolkit.hpcclient.v1_0.BrokerClient;
 import org.hpctoolkit.hpcclient.v1_0.UnknownCallingContextException;
 import org.hpctoolkit.hpcclient.v1_0.UnknownProfileIdException;
 
@@ -40,7 +40,7 @@ public abstract class CollectMetricsVisitor extends ScopeVisitorAdapter
 	}
 	
 	
-	public void postProcess(HpcClient client) throws UnknownProfileIdException, UnknownCallingContextException, IOException, InterruptedException {
+	public void postProcess(BrokerClient client) throws UnknownProfileIdException, UnknownCallingContextException, IOException, InterruptedException {
 		if (listCCTId.isEmpty())
 			return;
 		

@@ -12,7 +12,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.hpctoolkit.hpcclient.v1_0.HpcClient;
+import org.hpctoolkit.hpcclient.v1_0.BrokerClient;
 import org.hpctoolkit.hpcclient.v1_0.UnknownCallingContextException;
 import org.hpctoolkit.hpcclient.v1_0.UnknownProfileIdException;
 import org.slf4j.LoggerFactory;
@@ -69,7 +69,7 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	public void parse(HpcClient client, IDatabaseIdentification id) throws IOException, InterruptedException {
+	public void parse(BrokerClient client, IDatabaseIdentification id) throws IOException, InterruptedException {
 		dataMeta = collectMetaData(client, id);
 		experiment = (Experiment) dataMeta.getExperiment();
 		collectOtherInformation(client, dataMeta, experiment);
@@ -84,7 +84,7 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	public void parse(HpcClient client, IExperiment experiment) throws IOException, InterruptedException {
+	public void parse(BrokerClient client, IExperiment experiment) throws IOException, InterruptedException {
 		dataMeta = collectMetaData(client, experiment);
 		this.experiment = (Experiment) experiment;
 		collectOtherInformation(client, dataMeta, this.experiment);
@@ -102,7 +102,7 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	private void collectOtherInformation(HpcClient client, DataMeta dataMeta, Experiment experiment) throws IOException, InterruptedException {
+	private void collectOtherInformation(BrokerClient client, DataMeta dataMeta, Experiment experiment) throws IOException, InterruptedException {
 		
 		var dataProfile = collectProfileData(client, dataMeta);		
 		var yamlParser  = collectMetricYAML(client, dataProfile);
@@ -138,7 +138,7 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 	 * 
 	 * @throws InterruptedException
 	 */
-	protected void rearrangeCallingContext(HpcClient client, ICallPath callpath, RootScope root) throws InterruptedException {
+	protected void rearrangeCallingContext(BrokerClient client, ICallPath callpath, RootScope root) throws InterruptedException {
 		
 		Job task = new Job("Rearrange calling contexts") {
 			
@@ -202,7 +202,7 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	private DataMeta collectMetaData(HpcClient client, IDatabaseIdentification id) throws IOException, InterruptedException {
+	private DataMeta collectMetaData(BrokerClient client, IDatabaseIdentification id) throws IOException, InterruptedException {
 		// this is a candidate of "hack of the year" award:
 		//
 		// create the experiment object, and then set the database representation
@@ -224,7 +224,7 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	public DataMeta collectMetaData(HpcClient client, IExperiment experiment) throws IOException, InterruptedException {
+	public DataMeta collectMetaData(BrokerClient client, IExperiment experiment) throws IOException, InterruptedException {
 		var metaDBbytes   = client.getMetaDbFileContents();
 		ByteBuffer buffer = ByteBuffer.wrap(metaDBbytes);
 		
@@ -235,12 +235,12 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 	}
 	
 	
-	private IDataProfile collectProfileData(HpcClient client, DataMeta dataMeta) throws IOException, InterruptedException {
+	private IDataProfile collectProfileData(BrokerClient client, DataMeta dataMeta) throws IOException, InterruptedException {
 		return new RemoteDataProfile(client, dataMeta.getExperiment().getIdTupleType());
 	}
 
 	
-	private MetricYamlParser collectMetricYAML(HpcClient client, IDataProfile dataProfile) throws IOException, InterruptedException {
+	private MetricYamlParser collectMetricYAML(BrokerClient client, IDataProfile dataProfile) throws IOException, InterruptedException {
 		var yamlBytes = client.getMetricsDefaultYamlContents();
 		var inputStream = new ByteArrayInputStream(yamlBytes);
 		
@@ -248,7 +248,7 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 	}
 	
 	
-	private IDataCCT collectCCTData(final HpcClient client) {
+	private IDataCCT collectCCTData(final BrokerClient client) {
 		return new RemoteDataCCT(client);
 	}
 }

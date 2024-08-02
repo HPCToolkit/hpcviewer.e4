@@ -11,7 +11,7 @@ import static org.mockito.Mockito.when;
 import org.hpctoolkit.client_server_common.calling_context.CallingContextId;
 import org.hpctoolkit.client_server_common.metric.MetricId;
 import org.hpctoolkit.client_server_common.profile.ProfileId;
-import org.hpctoolkit.hpcclient.v1_0.HpcClient;
+import org.hpctoolkit.hpcclient.v1_0.BrokerClient;
 import org.hpctoolkit.hpcclient.v1_0.MetricsMeasurements;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -35,7 +35,7 @@ public class CollectAllMetricsVisitorTest {
 			
 			MetricValue mv = new MetricValue(1.1);
 			
-			var hpcClient = Mockito.mock(HpcClient.class);
+			var hpcClient = Mockito.mock(BrokerClient.class);
 			when(hpcClient.getMetrics(any(ProfileId.class), any()))
 						  .thenReturn(HashMap.of(CallingContextId.make(1), 
 								  				 MetricsMeasurements.make(HashMap.of(MetricId.make((short) 0), mv))));
