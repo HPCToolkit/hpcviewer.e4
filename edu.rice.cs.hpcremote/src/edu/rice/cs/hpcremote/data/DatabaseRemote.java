@@ -10,7 +10,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
 import org.hpctoolkit.client_server_common.profiled_source.ProfiledSourceFileId;
 import org.hpctoolkit.client_server_common.profiled_source.UnknownProfiledSourceFileId;
-import org.hpctoolkit.hpcclient.v1_0.HpcClient;
+import org.hpctoolkit.hpcclient.v1_0.BrokerClient;
 import org.hpctoolkit.hpcclient.v1_0.UnknownCallingContextException;
 import org.hpctoolkit.hpcclient.v1_0.UnknownProfileIdException;
 import org.slf4j.LoggerFactory;
@@ -58,7 +58,7 @@ public class DatabaseRemote implements IDatabaseRemote
 	
 
 	@Override
-	public HpcClient getClient() {
+	public BrokerClient getClient() {
 		return remoteDatabaseConnection.getHpcClient();
 	}
 
@@ -144,7 +144,7 @@ public class DatabaseRemote implements IDatabaseRemote
 	}
 	
 	
-	private boolean checkServerReadiness(HpcClient client) {
+	private boolean checkServerReadiness(BrokerClient client) {
 		// maximum we wait for 10 seconds max
 		int numAttempt = 100;
 		while(numAttempt > 0) {
@@ -168,7 +168,7 @@ public class DatabaseRemote implements IDatabaseRemote
 		return false;
 	}
 	
-	private Experiment openDatabase(HpcClient client, IDatabaseIdentification id) throws IOException {
+	private Experiment openDatabase(BrokerClient client, IDatabaseIdentification id) throws IOException {
 		RemoteDatabaseParser parser = new RemoteDatabaseParser();
 		try {
 			parser.parse(client, id);

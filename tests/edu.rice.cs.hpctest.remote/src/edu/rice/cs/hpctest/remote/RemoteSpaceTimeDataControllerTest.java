@@ -19,9 +19,9 @@ import java.util.concurrent.Future;
 import org.hpctoolkit.client_server_common.calling_context.CallingContextId;
 import org.hpctoolkit.client_server_common.time.Timestamp;
 import org.hpctoolkit.client_server_common.trace.TraceId;
+import org.hpctoolkit.hpcclient.v1_0.BrokerClient;
 import org.hpctoolkit.hpcclient.v1_0.CallingContextAtTimes;
 import org.hpctoolkit.hpcclient.v1_0.FutureTraceSamplingSet;
-import org.hpctoolkit.hpcclient.v1_0.HpcClient;
 import org.hpctoolkit.hpcclient.v1_0.TraceSampling;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -50,7 +50,7 @@ public class RemoteSpaceTimeDataControllerTest
 	@Test
 	public void testGetTraceDataCollector() throws Exception {
 		for(var exp: experiments) {
-			HpcClient client = Mockito.mock(HpcClient.class);
+			var client = Mockito.mock(BrokerClient.class);
 			var timeMin = exp.getTraceAttribute().dbTimeMin;			
 			
 			var timestampMin = createTimeStampOptionalFrom(timeMin);			

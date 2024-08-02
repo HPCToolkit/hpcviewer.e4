@@ -7,7 +7,7 @@ package edu.rice.cs.hpcremote.trace;
 import java.io.IOException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.hpctoolkit.hpcclient.v1_0.HpcClient;
+import org.hpctoolkit.hpcclient.v1_0.BrokerClient;
 
 import edu.rice.cs.hpcdata.experiment.IExperiment;
 import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
@@ -19,7 +19,7 @@ import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 
 public class RemoteTraceOpener extends AbstractDBOpener
 {
-	private final HpcClient client;
+	private final BrokerClient client;
 	private final IExperiment experiment;
 	
 	
@@ -27,7 +27,7 @@ public class RemoteTraceOpener extends AbstractDBOpener
 		this(database.getClient(), database.getExperimentObject());
 	}
 	
-	public RemoteTraceOpener(HpcClient client, IMetricManager experiment) {
+	public RemoteTraceOpener(BrokerClient client, IMetricManager experiment) {
 		this.client = client;
 		this.experiment = (IExperiment) experiment;
 	}

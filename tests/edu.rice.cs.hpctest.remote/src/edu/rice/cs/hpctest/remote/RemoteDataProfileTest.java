@@ -14,7 +14,7 @@ import java.io.IOException;
 import org.hpctoolkit.client_server_common.calling_context.CallingContextId;
 import org.hpctoolkit.client_server_common.metric.MetricId;
 import org.hpctoolkit.client_server_common.profile.ProfileId;
-import org.hpctoolkit.hpcclient.v1_0.HpcClient;
+import org.hpctoolkit.hpcclient.v1_0.BrokerClient;
 import org.hpctoolkit.hpcclient.v1_0.MetricsMeasurements;
 import org.hpctoolkit.hpcclient.v1_0.UnknownCallingContextException;
 import org.hpctoolkit.hpcclient.v1_0.UnknownProfileIdException;
@@ -44,7 +44,7 @@ public class RemoteDataProfileTest {
 	@Test
 	public void testParseHpcClient() throws IOException, InterruptedException, UnknownProfileIdException, UnknownCallingContextException {
 		for(var fileDb : files) {
-			HpcClient client = Mockito.mock(HpcClient.class);
+			BrokerClient client = Mockito.mock(BrokerClient.class);
 			
 			when(client.getHierarchicalIdentifierTuples()).thenReturn(HashSet.of(new IdTuple(0, 0)));
 			

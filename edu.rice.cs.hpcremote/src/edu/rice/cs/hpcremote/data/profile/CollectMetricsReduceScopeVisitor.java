@@ -11,7 +11,7 @@ import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
 import org.hpctoolkit.client_server_common.calling_context.CallingContextId;
 import org.hpctoolkit.client_server_common.profile.ProfileId;
-import org.hpctoolkit.hpcclient.v1_0.HpcClient;
+import org.hpctoolkit.hpcclient.v1_0.BrokerClient;
 import org.hpctoolkit.hpcclient.v1_0.UnknownCallingContextException;
 import org.hpctoolkit.hpcclient.v1_0.UnknownProfileIdException;
 import org.slf4j.LoggerFactory;
@@ -71,7 +71,7 @@ public class CollectMetricsReduceScopeVisitor extends ScopeVisitorAdapter
 	 * @throws InterruptedException
 	 * @throws UnknownProfileIdException
 	 */
-	public void postProcess(HpcClient client) 
+	public void postProcess(BrokerClient client) 
 			throws UnknownCallingContextException, IOException, InterruptedException, UnknownProfileIdException {
 		if (listCCTId.isEmpty())
 			return;

@@ -13,8 +13,8 @@ import java.util.concurrent.Future;
 import org.eclipse.collections.impl.map.mutable.primitive.IntIntHashMap;
 import org.hpctoolkit.client_server_common.time.Timestamp;
 import org.hpctoolkit.client_server_common.trace.TraceId;
+import org.hpctoolkit.hpcclient.v1_0.BrokerClient;
 import org.hpctoolkit.hpcclient.v1_0.FutureTraceSamplingSet;
-import org.hpctoolkit.hpcclient.v1_0.HpcClient;
 import org.hpctoolkit.hpcclient.v1_0.TraceDataNotAvailableException;
 import org.hpctoolkit.hpcclient.v1_0.TraceSampling;
 import org.slf4j.LoggerFactory;
@@ -52,7 +52,7 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 	 * Since {@code HpcClient} is not contractually thread-safe, synchronize on {@link #controllerMonitor} to ensure
 	 * thread-safe operation. 
 	 */
-	private final HpcClient client;
+	private final BrokerClient client;
 
 	/**
 	 * A (future) description of sampled traces reflective of the most recent call to {@link #startTrace(int, boolean)}.
@@ -100,7 +100,7 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 	private int currentLine;
 
 	
-	public RemoteSpaceTimeDataController(HpcClient client, IExperiment experiment) throws IOException {
+	public RemoteSpaceTimeDataController(BrokerClient client, IExperiment experiment) throws IOException {
 		super(experiment);
 
 		this.client = client;
@@ -122,7 +122,7 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 	 * @param experiment
 	 * @throws IOException
 	 */
-	private void setTraceBeginAndEndTime(HpcClient client, IExperiment experiment) throws IOException  {
+	private void setTraceBeginAndEndTime(BrokerClient client, IExperiment experiment) throws IOException  {
 		var attributes = experiment.getTraceAttribute();
 		try {
 			var minTime = client.getMinimumTraceSampleTimestamp();

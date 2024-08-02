@@ -6,9 +6,13 @@ package edu.rice.cs.hpcremote.data;
 
 import java.io.IOException;
 
+import org.hpctoolkit.hpcclient.v1_0.DirectoryContentsNotAvailableException;
+import org.hpctoolkit.hpcclient.v1_0.RemoteDirectory;
+
 public interface IRemoteDirectoryBrowser 
 {
-	IRemoteDirectoryContent getContentRemoteDirectory( String directory) throws IOException;
+	RemoteDirectory getContentRemoteDirectory( String directory) 
+			throws IOException, InterruptedException, DirectoryContentsNotAvailableException;
 	
 	/**
 	 * Get the unique IP address of the remote host

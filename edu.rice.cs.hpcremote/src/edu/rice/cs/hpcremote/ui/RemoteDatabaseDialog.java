@@ -4,7 +4,13 @@
 
 package edu.rice.cs.hpcremote.ui;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.channels.NotYetConnectedException;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.function.Function;
+
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -28,10 +34,13 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.hpctoolkit.hpcclient.v1_0.DirectoryContentsNotAvailableException;
+import org.hpctoolkit.hpcclient.v1_0.RemoteDirectory;
+import org.hpctoolkit.hpcclient.v1_0.RemotePath;
+import org.slf4j.LoggerFactory;
 import org.eclipse.swt.layout.GridLayout;
 import edu.rice.cs.hpcremote.data.IRemoteDirectoryBrowser;
-import edu.rice.cs.hpcremote.data.IRemoteDirectoryContent;
-import edu.rice.cs.hpcremote.data.IRemoteDirectoryContent.IFileContent;
+
 
 /**********************************************************
  * 
@@ -56,6 +65,7 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 	private TableViewer directoryViewer;
 
 	private String selectedDirectory;
+	private RemoteDirectory currentDirectory;
 
 	/**
 	 * Create the dialog.
@@ -143,11 +153,11 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 			
 			@Override
 		    public Image getImage(Object element) {
-				if (element instanceof IRemoteDirectoryContent.IFileContent file) {
-					if (file.isDatabase())
+				if (element instanceof RemotePath path) { 
+					if (path.isHpcToolkitDbDirectory())
 						return imgFolderDb;
-					else if (file.isDirectory())
-						return imgFolderReg;					
+					else if (path.isDirectory())
+						return imgFolderReg;
 				}
 				return null;
 			}
@@ -161,8 +171,12 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 			
 			@Override
 		    public String getText(Object element) {
-				if (element instanceof IRemoteDirectoryContent.IFileContent file)
-					return file.getName();
+				if (element instanceof RemotePath file) {
+					String name = file.getName();
+					if (file.isDirectory())
+						name += "/";
+					return name;
+				}
 				return null;
 			}
 		});
@@ -176,21 +190,20 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 		GridLayoutFactory.fillDefaults().numColumns(1).applyTo(tableDir);
 		
 		tableDir.addSelectionListener(new SelectionAdapter() {
-			private boolean isDatabase(SelectionEvent e) {
+			private boolean isSelectedItemADatabase() {
         		StructuredSelection dirSelect = (StructuredSelection) viewer.getSelection();
         		if (dirSelect == null || dirSelect.isEmpty()) {
         			return false;
         		}
         		
         		var elem = dirSelect.toList().get(0);
-        		return (elem instanceof IRemoteDirectoryContent.IFileContent file && 
-        				file.isDatabase());
+        		return elem instanceof RemotePath dir && dir.isHpcToolkitDbDirectory();
 			}
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				var isValid = isDatabase(e);
-				getButton(IDialogConstants.OK_ID).setEnabled(isValid);
+				var isADatabase = isSelectedItemADatabase();
+				getButton(IDialogConstants.OK_ID).setEnabled(isADatabase);
 			}
 			
         	@Override
@@ -200,9 +213,8 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
         			return;
         		
         		var elem = dirSelect.toList().get(0);
-        		if (elem instanceof IRemoteDirectoryContent.IFileContent file && 
-        				(file.isDirectory() || file.isDatabase())) {
-            		var absoluteDir = textDirectory.getText() + "/" + file.getName();
+        		if ( elem instanceof RemotePath dir && dir.isDirectory() ) {
+            		String absoluteDir = dir.getAbsolutePathOnRemoteFilesystem();
             		fillDirectory(absoluteDir);
         		}
         	}
@@ -243,39 +255,22 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 		//     - if it's a directory, append it with the base directory
 		if (dirSelect != null && !dirSelect.isEmpty()) {
 			var selectedElem = dirSelect.getFirstElement();
-			if (selectedElem instanceof IRemoteDirectoryContent.IFileContent dir && dir.isDatabase()) {
-				selectedDirectory += "/" + dir.getName();
+			if (selectedElem instanceof RemotePath dir && dir.isHpcToolkitDbDirectory()) {
+				selectedDirectory = dir.getAbsolutePathOnRemoteFilesystem();
 				super.okPressed();
 				return; // do we need this?
 			}
 		}
-		if (isDatabaseDirectory()) {
+		if (currentDirectory.isHpcToolkitDbDirectory()) {
 			super.okPressed();
 			return;
 		}
-			
+		// shouldn't happen here, or we may have a bug
+		LoggerFactory.getLogger(getClass()).debug("{}: Not a database", selectedDirectory);
+		
 		MessageDialog.openError(getShell(), "Not a database", selectedDirectory + ": is not a database directory");
 	}
 	
-	
-	private boolean isDatabaseDirectory() {
-		var inputs = directoryViewer.getInput();
-		if (inputs == null)
-			return false;
-		
-		int numFiledb = 0;
-		IFileContent []contents = (IFileContent[]) inputs;
-		
-		for(var content: contents) {
-			var name = content.getName();
-			var fileDb = name.equals("meta.db") || name.equals("cct.db") ||  name.equals("profile.db");
-			if (fileDb)
-				numFiledb++;
-			if (numFiledb >= 3)
-				return true;
-		}
-		return false;
-	}
 	
 	@Override
 	protected boolean isResizable() {
@@ -284,35 +279,69 @@ public class RemoteDatabaseDialog extends TitleAreaDialog
 	
 	
 	private boolean fillDirectory(String directory) {
+		Shell shell = getShell() != null ? getShell() : getParentShell();
+
 		try {
 			var content = remoteBrowser.getContentRemoteDirectory(directory);
-			if (content != null) {
-				textDirectory.setText(content.getDirectory());
-				
-				var files = content.getContent();				
-				directoryViewer.setInput(files);
-				
-				var isDatabase = checkIfTheCurrentDirectoryADatabase(files);
-				getButton(IDialogConstants.OK_ID).setEnabled(isDatabase);
-
-				return true;
+			if (content == null || content.getChildren() == null || content.getChildren().size() == 0) {
+				MessageDialog.openWarning(
+						shell, 
+						"Empty remote directory", 
+						directory + ": the directory is empty.\nPlease type a new directory or choose another remote host.");
+				return false;
 			}
-		} catch (IOException e1) {
-			MessageDialog.openError(getShell(), "Error accessomg the remote directory", e1.getMessage());
-		}
-		return false;
-	}
-	
-	private boolean checkIfTheCurrentDirectoryADatabase(IFileContent []content) {
-		int numRecognizedFiles = 0;
-		for(var file: content) {
-			if ( file.getName().equals("meta.db") ||
-				 file.getName().equals("cct.db") || 
-				 file.getName().equals("profile.db")) {
-					numRecognizedFiles++;
-					if (numRecognizedFiles >= 3)
-						return true;
+			var parent = content.getAbsolutePathOnRemoteFilesystem();
+			textDirectory.setText(parent);
+			
+			var files = content.getChildren();
+			RemotePath []paths = new RemotePath[files.size() + 1];
+			
+			int i=1;
+			var iterator = files.iterator();
+			
+			File dotDot = new File(parent, "..");
+			String strDotDot = dotDot.getAbsolutePath();			
+			var grandParent = new File(parent).getParent();
+			
+			paths[0] = RemotePath.make(strDotDot, grandParent, "directory");
+			
+			while(iterator.hasNext()) {
+				paths[i] = iterator.next();
+				i++;
+			}
+			Arrays.sort(paths, new Comparator<RemotePath>() {
+				Function<RemotePath, String> getName = (RemotePath path) -> {
+					var prefix = path.isDirectory() ? "d." : "f.";
+					return prefix + path.toString();
+				};
+
+				@Override
+				public int compare(RemotePath path1, RemotePath path2) {
+					var name1 = getName.apply(path1);
+					var name2 = getName.apply(path2);
+					
+					return name1.compareTo(name2);
 				}
+			});
+
+			directoryViewer.setInput(paths);
+			
+			var isDatabase = content.isHpcToolkitDbDirectory();
+			getButton(IDialogConstants.OK_ID).setEnabled(isDatabase);
+
+			this.currentDirectory = content;
+			
+			return true;
+				
+		} catch (IOException | DirectoryContentsNotAvailableException e) {
+			LoggerFactory.getLogger(getClass()).error(directory, e);
+			MessageDialog.openError(shell, "Error accessing the remote directory " + directory, e.getMessage());
+		} catch (InterruptedException e) {
+			LoggerFactory.getLogger(getClass()).error(directory + " is interrupted", e);
+		    /* Clean up whatever needs to be handled before interrupting  */
+		    Thread.currentThread().interrupt();		
+		} catch (NotYetConnectedException e) {
+			MessageDialog.openError(shell, "Remote host not connected", e.getMessage());
 		}
 		return false;
 	}

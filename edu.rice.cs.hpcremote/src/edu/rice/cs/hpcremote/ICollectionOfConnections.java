@@ -11,7 +11,6 @@ import java.util.Map;
 import org.eclipse.swt.widgets.Shell;
 import org.slf4j.LoggerFactory;
 
-import edu.rice.cs.hpcremote.data.RemoteCommunicationJsonProtocol;
 import edu.rice.cs.hpcremote.data.RemoteCommunicationProtocolBase;
 
 public interface ICollectionOfConnections 
@@ -65,7 +64,7 @@ public interface ICollectionOfConnections
 		if (setOfConnections.containsKey(connection.getId())) {
 			return setOfConnections.get(connection.getId());			
 		}
-		return new RemoteCommunicationJsonProtocol();
+		return new RemoteCommunicationProtocolBase();
 	}
 	
 	/***

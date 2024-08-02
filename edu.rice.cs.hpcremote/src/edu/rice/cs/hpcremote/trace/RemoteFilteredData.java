@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectIntHashMap;
-import org.hpctoolkit.hpcclient.v1_0.HpcClient;
+import org.hpctoolkit.hpcclient.v1_0.BrokerClient;
 import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcbase.IExecutionContextToNumberTracesMap;
@@ -21,13 +21,13 @@ public class RemoteFilteredData implements IFilteredData
 {
 	private final IdTupleType idTupleType;
 	private final List<IdTuple> listOriginalIdTuples;
-	private final HpcClient hpcClient;
+	private final BrokerClient hpcClient;
 	
 	private IExecutionContextToNumberTracesMap mapIdTupleToSamples;
 	private List<IdTuple> listIdTuples;
 	private List<Integer> indexes;
 
-	public RemoteFilteredData(HpcClient hpcClient, List<IdTuple> listOriginalIdTuples, IdTupleType idTupleType) {
+	public RemoteFilteredData(BrokerClient hpcClient, List<IdTuple> listOriginalIdTuples, IdTupleType idTupleType) {
 		this.hpcClient = hpcClient;
 		this.listOriginalIdTuples = listOriginalIdTuples;
 		this.idTupleType = idTupleType;
