@@ -16,6 +16,7 @@
 			<item name="Overview" href="index.html"/>
 			<item name="Profile view" href="profile.html"/>
 			<item name="Trace view" href="trace.html"/>
+            <item name="Remote database" href="remote.html"/>
 		</menu>
 		
         <links>

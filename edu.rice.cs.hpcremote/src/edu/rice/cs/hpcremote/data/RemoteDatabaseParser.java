@@ -122,10 +122,10 @@ public class RemoteDatabaseParser extends MetaDbFileParser
 		// Note: Metrics are based on the yaml file, not meta.db
 		experiment.setMetrics(yamlParser.getListMetrics());
 		experiment.setMetricRaw(rawMetrics);
-		
+		experiment.setMinMaxCCTID(0, dataMeta.getMaxNodeId());
+
 		experiment.postprocess();
 	}
-	
 	
 	
 	/***
