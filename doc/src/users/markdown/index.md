@@ -86,6 +86,7 @@ This menu includes several menu items for controlling basic viewer operations.
   Open a database without replacing the existing one. This menu can be used to compare two databases.
 - **Open remote database** *(experimental feature)* \
   Open a database located at the remote host via a secured SSH tunnel. One can use the private key option to connect without typing a password.
+  See [Remote database](remote.html) page for further details.
 - **Switch database** \
   Load a performance database into the current `hpcviewer` window replacing the existing opened databases.
 - **Close database** \
