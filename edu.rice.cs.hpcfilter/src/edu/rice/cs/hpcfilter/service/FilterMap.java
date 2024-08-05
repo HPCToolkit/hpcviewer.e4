@@ -11,6 +11,8 @@ import org.eclipse.core.runtime.AssertionFailedException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.slf4j.LoggerFactory;
+
 import edu.rice.cs.hpcbase.map.AliasMap;
 import edu.rice.cs.hpcdata.filter.FilterAttribute;
 import edu.rice.cs.hpcdata.filter.IFilterData;
@@ -210,5 +212,18 @@ implements IFilterData
 		}
 		
 		return enabled;
+	}
+	
+	@Override
+	protected boolean checkData(Entry<String, FilterAttribute> entry) {
+		try {
+			// issue #371 force to cast with the known type to make sure each data is correct
+			var key = entry.getKey();
+			var val = entry.getValue();
+			return !key.isEmpty() && val.getFilterType() != null;
+		} catch (Exception e) {
+			LoggerFactory.getLogger(getClass()).error("Invalid filter map file", e);
+			return false;
+		}
 	}
 }

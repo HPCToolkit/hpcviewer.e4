@@ -12,6 +12,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
+import org.slf4j.LoggerFactory;
+
 import edu.rice.cs.hpcbase.map.AliasMap;
 import edu.rice.cs.hpcbase.map.ProcedureClassData;
 import edu.rice.cs.hpcdata.util.Util;
@@ -26,8 +28,8 @@ import edu.rice.cs.hpcdata.util.Constants;
  */
 public class ProcedureClassMap extends AliasMap<String,ProcedureClassData> {
 
-	static public final String CLASS_IDLE = "idle";
-	static private final String FILENAME = "proc-class.map";
+	public static final String CLASS_IDLE = "idle";
+	private static final String FILENAME = "proc-class.map";
 	private final Display display;
 	
 	public ProcedureClassMap(Display display) {
@@ -57,12 +59,12 @@ public class ProcedureClassMap extends AliasMap<String,ProcedureClassData> {
 		if (display == null)
 			return;
 		
-		final Color COLOR_WHITE = display.getSystemColor(SWT.COLOR_WHITE); 
+		final Color white = display.getSystemColor(SWT.COLOR_WHITE); 
 
 		clear();
 		
-		put(Constants.PROC_NO_THREAD, 	CLASS_IDLE, COLOR_WHITE); // backward compatibility
-		put(Constants.PROC_NO_ACTIVITY, CLASS_IDLE, COLOR_WHITE);
+		put(Constants.PROC_NO_THREAD, 	CLASS_IDLE, white); // backward compatibility
+		put(Constants.PROC_NO_ACTIVITY, CLASS_IDLE, white);
 	}
 	
 	public Object[] getEntrySet() {
@@ -70,6 +72,7 @@ public class ProcedureClassMap extends AliasMap<String,ProcedureClassData> {
 		return data.entrySet().toArray();
 	}
 
+	@Override
 	public ProcedureClassData get(String key) {
 		Entry<String, ProcedureClassData> entry = getEntry(key);
 		if (entry != null) {
@@ -93,7 +96,6 @@ public class ProcedureClassMap extends AliasMap<String,ProcedureClassData> {
 			Entry<String, ProcedureClassData> entry = iterator.next();
 			
 			// convert glob pattern into regular expression
-			//entry.getKey().replace("*", ".*").replace("?", ".?");
 			String glob = Util.convertGlobToRegex(entry.getKey()); 
 			if (key.equals(glob) || key.matches(glob)) {
 				return entry;
@@ -104,16 +106,36 @@ public class ProcedureClassMap extends AliasMap<String,ProcedureClassData> {
 	
 	public void put(String key, String val, Color image) {
 		if (image != null)
-		put(key,new ProcedureClassData(val,image));
+			put(key,new ProcedureClassData(val,image));
 	}
 
 	public void put(String key, String val, RGB rgb) {
 		put(key,new ProcedureClassData(val,rgb));
 	}
 
+	@Override
 	public ProcedureClassData remove(String key) {
 		return data.remove(key);
 	}
+	
+	
+	@Override
+	protected boolean checkData(Entry<String, ProcedureClassData> entry) {
+		// fix issue hpcviewer#371 to force to known type and then throw exception if
+		// the data is corrupted
+		//
+		// ugly code, until we find a better solution
+		try {
+			String key = entry.getKey();
+			ProcedureClassData val = entry.getValue();
+			
+			return !key.isEmpty() && val.getRGB() != null;
+		} catch (Exception e) {
+			LoggerFactory.getLogger(getClass()).error("Invalid data in " + FILENAME, e);
+		}
+		return false;
+	}
+	
 	
 	public void refresh() {
 		super.dispose();

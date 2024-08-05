@@ -147,7 +147,7 @@ public class About
 			dummy.setText("");
 			
 			Link link = new Link(parent, SWT.LEFT);
-			link.setText("<a href=\"http://hpctoolkit.org\">http://hpctoolkit.org</a>");
+			link.setText("<a href=\"https://hpctoolkit.org\">https://hpctoolkit.org</a>");
 			link.addListener(SWT.Selection, event -> {
 				boolean result = Program.launch("http://hpctoolkit.org");
 				if (!result) {
