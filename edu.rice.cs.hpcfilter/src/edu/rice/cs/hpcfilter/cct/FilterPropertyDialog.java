@@ -479,9 +479,14 @@ public class FilterPropertyDialog extends TitleAreaDialog implements IDoubleClic
 	{
 		@Override
 		public void update(ViewerCell cell) {
-			@SuppressWarnings("unchecked")
-			Entry<String, FilterAttribute> item = (Entry<String, FilterAttribute>) cell.getElement();
-			cell.setText(item.getValue().getFilterType());
+			var element = cell.getElement();
+
+			// issue #371 : check the correctness of the data 
+			if (element instanceof Entry<?, ?> item) {
+				var value = item.getValue();
+				if (value instanceof FilterAttribute attr)
+					cell.setText(attr.getFilterType());
+			}
 		}
 		
 		@Override

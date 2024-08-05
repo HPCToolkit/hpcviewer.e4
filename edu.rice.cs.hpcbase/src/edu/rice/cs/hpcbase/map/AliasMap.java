@@ -11,7 +11,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.Map.Entry;
+
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcdata.util.IUserData;
 
@@ -88,21 +93,12 @@ public abstract class AliasMap<K,V> implements IUserData<K, V>
 		
 		final String filename = getFilename();
 		final File file = new File(filename);
-		ObjectOutputStream out = null;
-		try {
-			out = new ObjectOutputStream( new FileOutputStream(file.getAbsoluteFile()) );
+
+		try (var out = new ObjectOutputStream( new FileOutputStream(file.getAbsoluteFile()) )) {			
 			out.writeObject(data);
-		} catch (FileNotFoundException e) {
-			System.err.println(e.getMessage());
 		} catch (IOException e) {
-			System.err.println(e.getMessage());
-		} finally {
-			try {
-				if (out != null) out.close();
-			} catch (IOException e) {
-				System.err.println(e.getMessage());
-			}
-		}
+			LoggerFactory.getLogger(getClass()).error(filename + ": fail to write the file", e);
+		} 
 	}	
 	
 	/***
@@ -118,14 +114,15 @@ public abstract class AliasMap<K,V> implements IUserData<K, V>
 			
 			if (file.canRead()) {
 				// old format, we need to remove the file
-				if (! readData(file.getAbsolutePath()) && file.delete()) {
+				if (! readData(file.getAbsolutePath())) {
+					deleteFile(filename);
 					initDefault();
 					readData(file.getAbsolutePath());
 				}
 			} else if (!file.exists()) {
 				// file doesn't exist, but we can create
-				
-				// init data
+				//
+				// fill the data with the default values
 				initDefault();
 				
 				save();
@@ -144,31 +141,53 @@ public abstract class AliasMap<K,V> implements IUserData<K, V>
 	@SuppressWarnings("unchecked")
 	private boolean readData(String filename) {
 		boolean result = false;
-		ObjectInputStream in = null;
-		try {
-			in = new ObjectInputStream(new FileInputStream(filename));
+
+		try (var in = new ObjectInputStream(new FileInputStream(filename))) {
 			Object o = in.readObject();
-			if (o instanceof HashMap<?,?>) {
-				data = (HashMap<K, V>) o;
+			if (o instanceof HashMap<?,?> map) {
+				// issue #117: check the correctness of the data				
+				for(var entry: map.entrySet()) {
+					if (!checkData((Entry<K, V>) entry))
+						return false;
+				}
+				data = (HashMap<K, V>) map;
 				result =  true;
 			}
 		} catch (FileNotFoundException e) {
-			System.err.println(e.getMessage());
-		} catch (IOException e) {
-			System.err.println(e.getMessage());
-		} catch (ClassNotFoundException e) {
-			System.err.println(e.getMessage());
-		} finally {
-			try {
-				in.close();
-			} catch (IOException e) {
-				System.err.println(e.getMessage());
-			}
-		}
+			LoggerFactory.getLogger(getClass()).error(filename + ": file doesn't exist.", e);
+		} catch (IOException | ClassNotFoundException e) {
+			LoggerFactory.getLogger(getClass()).error(filename + ": corrupt or incompatible file. It will be removed.", e);
+			deleteFile(filename);
+		} 
 		return result;
 	}
 	
-	abstract public String getFilename();
-	abstract public void initDefault();
+
+	/***
+	 * Check if the entry from the file is correct or not.
+	 * 
+	 * @apiNote I don't know why using instance of is always correct in this case
+	 * 
+	 * @param entry
+	 * @return
+	 */
+	protected boolean checkData(Entry<K, V> entry) {
+		// damn Java, this will always return true
+		// ask the implementer to correct this
+		return (entry.getKey() instanceof K &&
+				entry.getValue() instanceof V);
+	}
+
+	
+	private void deleteFile(String filename) {
+		try {
+			Files.delete(Path.of(filename));
+		} catch (IOException e) {
+			LoggerFactory.getLogger(getClass()).error("Fail to remove the file: "+ filename, e);
+		}
+	}
+	
+	public abstract String getFilename();
+	public abstract void initDefault();
 
 }
