@@ -44,31 +44,32 @@ Steps to opening a remote database:
 1. Click the menu `File` - `Open remote database`
 
 2. On **Remote connection** window, type the required fields:
+
    | Remote connection window |
    | :----------------------: |
    |<img alt="Remote setup" src="images/hpcviewer-remote-setup.png"/>|
 
-   - `Hostname`: the name of the remote host where `hpcserver` is installed
-   - `Username`: the username at the remote host
-   - `Remote installation directory`: the absolute path of `hpcserver` installation. In the above case, it's `/path/hpctoolkit`
+   - **Hostname/IP address**: the name of the remote host where `hpcserver` is installed
+   - **Username**: the username at the remote host
+   - **Remote installation directory**: the absolute path of `hpcserver` installation. In the above case, it's `/path/hpctoolkit`
 
    To facilitate the connection, `hpcviewer` allows to connect via three options:
-   - `Use private key`: this is the recommended way to avoid typing the password all the time. One needs to provide the location of the private key file.
-   - `Use identity`: this is an experimental feature to connect via user's SSH identity.
-   - `Use password`: use the option if private key is not available.
-
-   If available, it is recommended to enable `SSH configuration` to simplify the connection to a remote host that requires multiple hops or *proxy jump*. Usually the configuration file is located at `$HOME/.ssh/config` on most POSIX platforms.
+   - **Use private key**: use SSH private key whenever possible. This is the recommended way to avoid typing the password all the time.
+   - **Use identity**: use SSH identity. This is an experimental feature to connect via user's SSH identity.
+   - **Use password**: use a password to connect. One can check this option if using a private key is problematic.
+   - **SSH configuration**: use the user's SSH configuration to simplify the connection to a remote host that requires multiple hops or *proxy jump*. Usually the configuration file is located at `$HOME/.ssh/config` on most POSIX platforms.
 
    Once the configuration is set, one needs to click the `OK` button to start the connection.
    
 3. If the connection succeeds, one has to choose an HPCToolkit database from the **Remote database browser** window. 
    The window shows the current remote directory at the top, and the list of its content:
+
    | Remote database browser window |
    | :----------------------------: |
    |<img alt="Remote browser" src="images/hpcviewer-remote-browser.png"/>|
    
-   - A yellow folder icon represents a regular directory, and one can access it via double-click at the icon or the name of the folder.
-   - A green folder icon represents an HPCToolkit database. Selecting this item will enable the `OK` button.
+   - <img alt="yellow folder" src="images/folder-16.png" /> icon represents a regular directory, and one can access it via double-click at the icon or the name of the folder.
+   - <img alt="yellow folder" src="images/folder-16-green.png" /> icon represents an HPCToolkit database. Selecting this item will enable the `OK` button.
    - A no icon item represents a regular file.
    
    Note: the `OK` button will remain disabled until one selects an HPCToolkit database.
