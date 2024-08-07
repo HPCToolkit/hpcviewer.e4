@@ -15,7 +15,9 @@
                 <configuration>
                     <inputEncoding>UTF-8</inputEncoding>
                     <outputEncoding>UTF-8</outputEncoding>
-		    		<siteDirectory>src/users</siteDirectory>
+		    <siteDirectory>src/users</siteDirectory>
+                    <generateProjectInfo>false</generateProjectInfo>
+                    <generateReports>false</generateReports>
                 </configuration>
                 <executions>
                     <execution>
