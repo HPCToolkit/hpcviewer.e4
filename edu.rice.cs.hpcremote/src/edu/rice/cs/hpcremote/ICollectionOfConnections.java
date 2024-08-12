@@ -5,20 +5,33 @@
 package edu.rice.cs.hpcremote;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 import org.eclipse.swt.widgets.Shell;
 import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcremote.data.RemoteCommunicationProtocolBase;
 
+
+/*****
+ * Interface to manage a collection of remote connections.
+ * <br/>
+ * This will handle all connections from all hpcviewer instances or windows.
+ */
 public interface ICollectionOfConnections 
 {
-	String KEY_COMMUNICATION = "hpcviewer.comm";
+	static final ConcurrentHashMap<String, RemoteCommunicationProtocolBase> map = ConcurrentHashMap.newMap();
 
+
+	/***
+	 * Disconnect all opened connections
+	 * 
+	 * @param shell
+	 * 			Current active shell
+	 */
 	static void disconnectAll(Shell shell) {
-		var setOfSessions = getShellSessions(shell);
+		var setOfSessions = getAllCommunicationSessions();
 		if (setOfSessions.isEmpty())
 			return;
 		
@@ -32,6 +45,7 @@ public interface ICollectionOfConnections
 		});
 	}
 	
+	
 	/***
 	 * Get the remote sessions of the given shell
 	 * 
@@ -39,50 +53,48 @@ public interface ICollectionOfConnections
 	 * 
 	 * @return {@code Map} of remote sessions
 	 */
-	static Map<String, RemoteCommunicationProtocolBase> getShellSessions(Shell shell) {
-		var setOfSessions = shell.getData(KEY_COMMUNICATION);
-		if (setOfSessions instanceof Map<?, ?>) {
-			return (Map<String, RemoteCommunicationProtocolBase>) setOfSessions;
-		}
-		return new HashMap<>();
+	static Map<String, RemoteCommunicationProtocolBase> getAllCommunicationSessions() {
+		return map;
 	}
 	
 	
 	/***
 	 * Get the remote connection of a given shell and connection info
 	 * 
-	 * @param shell
 	 * @param connection
 	 * @return
 	 */
-	static RemoteCommunicationProtocolBase getRemoteConnection(Shell shell, IConnection connection) {
+	static RemoteCommunicationProtocolBase getRemoteConnection(IConnection connection) {
 
 		// check if we already have exactly the same connection as the 
 		// requested host, user id and installation
 		
-		var setOfConnections = ICollectionOfConnections.getShellSessions(shell);
+		var setOfConnections = ICollectionOfConnections.getAllCommunicationSessions();
 		if (setOfConnections.containsKey(connection.getId())) {
 			return setOfConnections.get(connection.getId());			
 		}
 		return new RemoteCommunicationProtocolBase();
 	}
 	
+	
 	/***
-	 * Store the communication session to this shell
+	 * Store the new remote communication session.
+	 * If the remote connection already exists, it will be replaced.
 	 * 
-	 * @param shell
-	 * @param id
 	 * @param commConnection
+	 * 			The new remote communication
+	 * 
+	 * @return the old connection if already exist
 	 */
-	static void putShellSession(Shell shell, RemoteCommunicationProtocolBase commConnection) {
-		Map<String, RemoteCommunicationProtocolBase> mapOfSessions;
-		var setOfSessions = shell.getData(KEY_COMMUNICATION);
-		if (setOfSessions == null) {
-			mapOfSessions = new HashMap<>();
-		} else {
-			mapOfSessions = (Map<String, RemoteCommunicationProtocolBase>) setOfSessions;
-		}
-		mapOfSessions.put(commConnection.getConnection().getId(), commConnection);
-		shell.setData(KEY_COMMUNICATION, mapOfSessions);
+	static RemoteCommunicationProtocolBase putShellSession(RemoteCommunicationProtocolBase commConnection) {
+		var setOfSessions = getAllCommunicationSessions();
+		var id = commConnection.getConnection().getId();
+		var oldConnection = setOfSessions.get(id);
+		
+		assert oldConnection == null;
+		
+		setOfSessions.put(id, commConnection);
+		
+		return oldConnection;
 	}
 }

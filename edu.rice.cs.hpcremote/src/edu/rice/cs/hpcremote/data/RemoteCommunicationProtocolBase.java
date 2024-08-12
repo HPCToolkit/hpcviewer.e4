@@ -148,7 +148,7 @@ public class RemoteCommunicationProtocolBase
 
 		dbManager = new DbManagerClientJavaNetHttp(localAddr, serverMainSession.getLocalPort());
 
-		ICollectionOfConnections.putShellSession(shell, this);
+		ICollectionOfConnections.putShellSession(this);
 		
 		return ConnectionStatus.CONNECTED;
 	}

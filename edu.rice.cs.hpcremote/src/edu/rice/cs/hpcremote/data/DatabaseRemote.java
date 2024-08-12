@@ -96,7 +96,7 @@ public class DatabaseRemote implements IDatabaseRemote
 	
 	private DatabaseStatus doOpen(Shell shell, IConnection connectionInfo, RemoteDatabaseIdentification remoteId) 
 			throws IOException {
-		var remoteHostConnection = ICollectionOfConnections.getRemoteConnection(shell, connectionInfo);
+		var remoteHostConnection = ICollectionOfConnections.getRemoteConnection(connectionInfo);
 		var connectStatus = remoteHostConnection.connect(shell, connectionInfo);
 
 		if (connectStatus == IRemoteCommunicationProtocol.ConnectionStatus.CONNECTED) {
