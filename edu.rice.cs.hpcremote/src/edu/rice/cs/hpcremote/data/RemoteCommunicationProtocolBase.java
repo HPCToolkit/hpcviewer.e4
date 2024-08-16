@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import edu.rice.cs.hpcremote.ICollectionOfConnections;
 import edu.rice.cs.hpcremote.IConnection;
 import edu.rice.cs.hpcremote.ISecuredConnection;
+import edu.rice.cs.hpcremote.data.IServerResponse.ServerResponseType;
 import edu.rice.cs.hpcremote.tunnel.IRemoteCommunication;
 import edu.rice.cs.hpcremote.tunnel.SecuredConnectionSSH;
 import edu.rice.cs.hpcremote.ui.RemoteDatabaseDialog;
@@ -30,21 +31,13 @@ import edu.rice.cs.hpcremote.ui.RemoteDatabaseDialog;
 public class RemoteCommunicationProtocolBase 
 	implements IRemoteCommunication
 {
-	/**
-	 * Types of server responses:
-	 * <ul>
-	 *   <li>SUCCESS : everything works fine
-	 *   <li>ERROR : something doesn't work right. Need to abandon the process.
-	 *   <li>INVALID: something strange happens, perhaps empty string. Need to continue the process carefully.
-	 * </ul>
-	 */
-	enum ServerResponseType {SUCCESS, ERROR, INVALID}
-	
-	record RemoteHostAndSocket(String host, String socket) {}
+	record RemoteHostAndSocket(String host, String mainSocket, String commSocket) {}
 	
 	private static final String HPCSERVER_LOCATION = "/libexec/hpcserver/hpcserver.sh";
 		
 	private ISecuredConnection.ISessionRemoteSocket serverMainSession;
+	private ISecuredConnection.ISessionRemoteSocket serverCommSession;
+	
 	private SecuredConnectionSSH connectionSSH;
 	private String remoteHostIP;
 	
@@ -98,6 +91,9 @@ public class RemoteCommunicationProtocolBase
 		    Thread.currentThread().interrupt();
 		}
 		serverMainSession.disconnect();
+		
+		if (serverCommSession != null)
+			serverCommSession.disconnect();
 	}
 	
 	/*****
@@ -138,10 +134,17 @@ public class RemoteCommunicationProtocolBase
 		//
 		// create the SSH tunnel to communicate securely with the remote host
 		//
-		serverMainSession = connectionSSH.socketForwarding(remoteConnectionRecord.socket);
+		serverMainSession = connectionSSH.socketForwarding(remoteConnectionRecord.mainSocket);
 		if (serverMainSession == null)
 			return ConnectionStatus.ERROR;
+
+		// Try to create a channel for communication tunnel session
+		// this tunnel will be used to notify if the client shuts down suddenly
 		
+		serverCommSession = connectionSSH.socketForwarding(remoteConnectionRecord.commSocket);
+		if (serverCommSession == null)
+			LoggerFactory.getLogger(getClass()).warn("The communication tunnel fails");
+
 		remoteHostIP  = remoteConnectionRecord.host;
 		connection    = connectionInfo;
 		var localAddr = InetAddress.getByName("localhost");
@@ -191,7 +194,7 @@ public class RemoteCommunicationProtocolBase
 			if (socket == null || socket.isEmpty())
 				return null;
 			
-			return createTunnelAndRequestDatabase(socket);
+			return createTunnelAndBrokerClient(socket);
 			
 		} catch (InterruptedException e) {
 		    /* Clean up whatever needs to be handled before interrupting  */
@@ -211,7 +214,7 @@ public class RemoteCommunicationProtocolBase
 	}
 	
 	
-	IRemoteDatabaseConnection createTunnelAndRequestDatabase(String brokerSocket) {		
+	private IRemoteDatabaseConnection createTunnelAndBrokerClient(String brokerSocket) {		
 		if (connectionSSH == null)
 			return null;
 		
@@ -225,8 +228,7 @@ public class RemoteCommunicationProtocolBase
 			public BrokerClient getHpcClient() {
 				try {
 					InetAddress localHost = InetAddress.getByName("localhost");
-					BrokerClient dbManagerClient = new BrokerClientJavaNetHttp(localHost, brokerSession.getLocalPort());
-					return dbManagerClient;
+					return new BrokerClientJavaNetHttp(localHost, brokerSession.getLocalPort());
 				} catch (UnknownHostException e) {
 					throw new NotYetConnectedException();
 				}
@@ -253,6 +255,10 @@ public class RemoteCommunicationProtocolBase
 		String remoteIP = "";
 		String remoteSocket = "";
 
+		// handle the output from the server.
+		// Sometimes the server outputs rubbish like debugging output which we don't care.
+		// Skip all rubbish outputs, and just grab what we need
+		
 		while (remoteIP.isEmpty() && remoteSocket.isEmpty()) {
 			try {
 				Thread.sleep(1000);
@@ -270,13 +276,19 @@ public class RemoteCommunicationProtocolBase
 				continue;
 			}
 			var response = getServerResponseInit(output);
-			if (response == null || response.getResponseType() != ServerResponseType.SUCCESS)
-				return null;
-			
-			remoteIP = response.getHost();
-			remoteSocket = response.getSocket();
+			if (response == null ||
+				response.getResponseType() != IServerResponse.ServerResponseType.SUCCESS)
+				continue;
+						
+			if (response instanceof IServerConnectionConfig responseConfig) {
+				remoteIP = responseConfig.getHost();
+				remoteSocket = responseConfig.getMainSocket();
+				var commSocket = responseConfig.getCommSocket();
+
+				return new RemoteHostAndSocket(remoteIP, remoteSocket, commSocket);
+			}
 		}
-		return new RemoteHostAndSocket(remoteIP, remoteSocket);
+		return null;
 	}
 
 	
@@ -289,14 +301,9 @@ public class RemoteCommunicationProtocolBase
 		return connection != null && dbManager != null && serverMainSession != null;
 	}
 	
-	public interface ServerResponseConnectionInit extends ServerResponse
-	{
-		String getSocket();
-		
-		String getHost();
-	}
+
 	
-	public ServerResponseConnectionInit getServerResponseInit(String[] messageFromServer) {
+	public IServerResponse getServerResponseInit(String[] messageFromServer) {
 		// looking for json message
 		// sometimes the server outputs rubbish
 		int i=0;
@@ -311,49 +318,25 @@ public class RemoteCommunicationProtocolBase
 			message.append(messageFromServer[i]);
 		}
 		if (message.isEmpty())
-			return new ServerResponseConnectionInit() {
-				
-				@Override
-				public ServerResponseType getResponseType() {
-					return ServerResponseType.INVALID;
-				}
-				
-				@Override
-				public String[] getResponseArgument() {
-					return new String[0];
-				}
-				
-				@Override
-				public String getSocket() {
-					return null;
-				}
-				
-				@Override
-				public String getHost() {
-					return null;
-				}
-			};
+			return () -> ServerResponseType.INVALID;
 		
 		JSONObject json = new JSONObject(message.toString());
 		
 		if (isSuccess(json)) {
 			var remoteIp = json.getString("host");
 			var socket = json.getString("sock");
+			var commSocket = json.getString("comm");
 			
-			return new ServerResponseConnectionInit() {
+			return new IServerConnectionConfig() {
 				
 				@Override
 				public ServerResponseType getResponseType() {
 					return ServerResponseType.SUCCESS;
 				}
+
 				
 				@Override
-				public String[] getResponseArgument() {
-					return new String[0];
-				}
-				
-				@Override
-				public String getSocket() {
+				public String getMainSocket() {
 					return socket;
 				}
 				
@@ -361,31 +344,15 @@ public class RemoteCommunicationProtocolBase
 				public String getHost() {
 					return remoteIp;
 				}
+
+
+				@Override
+				public String getCommSocket() {
+					return commSocket;
+				}
 			};
 		}		
 		return null;
-	}
-	
-	
-	public interface ServerResponse 
-	{
-		ServerResponseType getResponseType();
-		
-		String[] getResponseArgument();
-		
-		ServerResponse INVALID = new ServerResponse() {
-
-			@Override
-			public ServerResponseType getResponseType() {
-				return ServerResponseType.INVALID;
-			}
-
-			@Override
-			public String[] getResponseArgument() {
-				return new String[0];
-			}
-			
-		};
 	}
 	
 	
