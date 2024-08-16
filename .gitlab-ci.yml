@@ -239,28 +239,11 @@ package:
     - hpcviewer-win32.win32.x86_64.zip
     - hpcdata.tgz
 
-package dmg:
-  interruptible: true
-  stage: package
-  image: macos-14-xcode-15
-  tags: [saas-macos-medium-m1]
-  needs: [package]
-  script:
-  - macos/notarize.sh --image hpcviewer-macosx.cocoa.x86_64.zip
-  - macos/notarize.sh --image hpcviewer-macosx.cocoa.aarch64.zip
-  artifacts:
-    expose_as: MacOS Packages
-    expire_in: 3 days
-    paths:
-    - hpcviewer-macosx.cocoa.x86_64.dmg
-    - hpcviewer-macosx.cocoa.aarch64.dmg
-
-
 # Upload the built artifacts to the package registry
 upload:
   stage: deploy
   image: docker.io/alpine
-  dependencies: [package, package dmg]
+  dependencies: [package]
   rules:
   - if: $CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_TAG
   script:
@@ -275,18 +258,6 @@ upload:
     --next
     --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file hpcviewer-linux.gtk.ppc64le.tgz --fail-with-body --retry 7
     "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/hpcviewer/${CI_COMMIT_TAG}/hpcviewer-linux.gtk.ppc64le.tgz"
-    --next
-    --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file hpcviewer-macosx.cocoa.x86_64.dmg --fail-with-body --retry 7
-    "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/hpcviewer/${CI_COMMIT_TAG}/hpcviewer-macosx.cocoa.x86_64.dmg"
-    --next
-    --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file hpcviewer-macosx.cocoa.x86_64.zip --fail-with-body --retry 7
-    "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/hpcviewer/${CI_COMMIT_TAG}/hpcviewer-macosx.cocoa.x86_64.zip"
-    --next
-    --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file hpcviewer-macosx.cocoa.aarch64.dmg --fail-with-body --retry 7
-    "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/hpcviewer/${CI_COMMIT_TAG}/hpcviewer-macosx.cocoa.aarch64.dmg"
-    --next
-    --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file hpcviewer-macosx.cocoa.aarch64.zip --fail-with-body --retry 7
-    "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/hpcviewer/${CI_COMMIT_TAG}/hpcviewer-macosx.cocoa.aarch64.zip"
     --next
     --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file hpcviewer-win32.win32.x86_64.zip --fail-with-body --retry 7
     "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/hpcviewer/${CI_COMMIT_TAG}/hpcviewer-win32.win32.x86_64.zip"
@@ -315,22 +286,6 @@ create release:
         link_type: package
         url: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/hpcviewer/${CI_COMMIT_TAG}/hpcviewer-win32.win32.x86_64.zip
         filepath: /hpcviewer-win32.win32.x86_64.zip
-      - name: for MacOS aarch64 (zip)
-        link_type: package
-        url: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/hpcviewer/${CI_COMMIT_TAG}/hpcviewer-macosx.cocoa.aarch64.zip
-        filepath: /hpcviewer-macosx.cocoa.aarch64.zip
-      - name: for MacOS aarch64
-        link_type: package
-        url: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/hpcviewer/${CI_COMMIT_TAG}/hpcviewer-macosx.cocoa.aarch64.dmg
-        filepath: /hpcviewer-macosx.cocoa.aarch64.dmg
-      - name: for MacOS x86_64 (zip)
-        link_type: package
-        url: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/hpcviewer/${CI_COMMIT_TAG}/hpcviewer-macosx.cocoa.x86_64.zip
-        filepath: /hpcviewer-macosx.cocoa.x86_64.zip
-      - name: for MacOS x86_64
-        link_type: package
-        url: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/hpcviewer/${CI_COMMIT_TAG}/hpcviewer-macosx.cocoa.x86_64.dmg
-        filepath: /hpcviewer-macosx.cocoa.x86_64.dmg
       - name: for Linux ppc64le
         link_type: package
         url: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/hpcviewer/${CI_COMMIT_TAG}/hpcviewer-linux.gtk.ppc64le.tgz
