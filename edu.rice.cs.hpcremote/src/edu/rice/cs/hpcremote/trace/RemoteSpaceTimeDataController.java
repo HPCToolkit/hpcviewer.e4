@@ -32,9 +32,14 @@ import io.vavr.collection.Set;
 
 
 /**
- * TODO: document
+ * A remote version of trace data
  * <p>
- * This class is thread-safe.
+ * This class is NOT thread-safe.
+ * <ul>
+ *   <li> It only handles one database at a time, not multiple database (just like other classes)</li>
+ *   <li> No support for concurrent request. Only one request at a time. </li>
+ *   <li> If a previous request is still in process, it will wait until it's done</li>
+ * </ul>
  */
 public class RemoteSpaceTimeDataController extends SpaceTimeDataController 
 {
@@ -103,6 +108,7 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 	public RemoteSpaceTimeDataController(BrokerClient client, IExperiment experiment) throws IOException {
 		super(experiment);
 
+		sampledTraces = null;
 		this.client = client;
 
 		setTraceBeginAndEndTime(client, experiment);
@@ -182,6 +188,17 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 	
 	@Override
 	public void startTrace(int numTraces, boolean changedBounds) {
+		while(sampledTraces != null) {
+			// dry out the old process
+			try {
+				var process = getNextTrace();
+				if (process == null)
+					break;
+				Thread.sleep(50);
+			} catch (Exception e) {
+				// do nothing
+			}
+		}
 		//synchronized (controllerMonitor) { // ensure all threads see the most recent values of all fields
 			this.changedBounds = changedBounds;
 
@@ -282,8 +299,10 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 
 			if (!changedBounds) {
 				currentLine--;
-				if (currentLine < 0)
+				if (currentLine < 0) {
+					done();
 					return null;
+				}
 				return getProcessTimelineService().getProcessTimeline(currentLine);
 			}
 
@@ -309,8 +328,15 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 				unYieldedSampledTracesElements.remove(); // `sampledTrace` is about to be yielded, so declare yielded
 				return new RemoteProcessTimeline(this, sampledTrace);
 			}
-
+			done();
+			
 			return null;
 		}
+	}
+	
+	private void done() {
+		sampledTraces = null;
+		unYieldedSampledTraces = null;
+		currentLine = 0;
 	}
 }
