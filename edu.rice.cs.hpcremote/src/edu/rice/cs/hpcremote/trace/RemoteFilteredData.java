@@ -75,7 +75,7 @@ public class RemoteFilteredData implements IFilteredData
 	@Override
 	public int getLastIncluded() {
 		if (indexes == null || indexes.isEmpty())
-			return 0;
+			return listOriginalIdTuples.size()-1;
 		
 		return indexes.get(indexes.size()-1);
 	}
