@@ -16,12 +16,14 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcdata.util.OSValidator;
 import edu.rice.cs.hpcdata.util.ThreadManager;
@@ -61,7 +63,7 @@ public abstract class BaseViewPaint extends Job
 	 * @param threadExecutor executor
 	 */
 
-	public BaseViewPaint(String title, SpaceTimeDataController _data, boolean _changeBound, 
+	protected BaseViewPaint(String title, SpaceTimeDataController _data, boolean _changeBound, 
 						 ISpaceTimeCanvas canvas) 
 	{
 		super(title);
@@ -115,13 +117,13 @@ public abstract class BaseViewPaint extends Job
 			return false;
 		
 		final int max_threads = TracePreferenceManager.getMaxThreads();
-		int num_threads = Math.min(linesToPaint, ThreadManager.getNumThreads(max_threads));
+		int numThreads = Math.min(linesToPaint, ThreadManager.getNumThreads(max_threads));
 		
 		// -------------------------------------------------------------------
 		// initialize the painting (to be implemented by the instance)
 		// -------------------------------------------------------------------
 
-		if (!startPainting(linesToPaint, num_threads, changedBounds))
+		if (!startPainting(linesToPaint, numThreads, changedBounds))
 			return false;
 
 		if (monitor.isCanceled())
@@ -137,7 +139,7 @@ public abstract class BaseViewPaint extends Job
 		// It looks like there's no major performance effect though
 
 		try {
-			launchDataGettingThreads(changedBounds, num_threads);
+			launchDataGettingThreads(changedBounds, numThreads);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -151,7 +153,7 @@ public abstract class BaseViewPaint extends Job
 		// instantiate queue based on whether we need multi-threading or not.
 		// in case of multithreading, we want a thread-safe queue
 		// -------------------------------------------------------------------
-		final Queue<TimelineDataSet> queue = new ConcurrentLinkedQueue<TimelineDataSet>();
+		final Queue<TimelineDataSet> queue = new ConcurrentLinkedQueue<>();
 
 		// -------------------------------------------------------------------
 		// case where everything works fine, and all the data has been read,
@@ -161,12 +163,12 @@ public abstract class BaseViewPaint extends Job
 		final double xscale = canvas.getScalePixelsPerTime();
 		final double yscale = Math.max(canvas.getScalePixelsPerRank(), 1);
 		
-		mapFutureToTask = new HashMap<Future<Integer>, BaseTimelineThread>(num_threads);
+		mapFutureToTask = new HashMap<>(numThreads);
 		
 		ExecutorService threadExecutor = Executors.newCachedThreadPool();
-		ExecutorCompletionService<Integer> ecs = new ExecutorCompletionService<Integer>(threadExecutor);
+		ExecutorCompletionService<Integer> ecs = new ExecutorCompletionService<>(threadExecutor);
 						
-		for (int i=0; i< num_threads; i++ ) {
+		for (int i=0; i< numThreads; i++ ) {
 			final BaseTimelineThread thread = getTimelineThread(canvas, xscale, yscale, queue, monitor);
 			
 			try {
@@ -191,13 +193,13 @@ public abstract class BaseViewPaint extends Job
 		if (monitor.isCanceled())
 			return false;
 
-		int num_paint_threads = OSValidator.isUnix() ? 1 : num_threads;
+		int numPaintThreads = OSValidator.isUnix() ? 1 : numThreads;
 		if (OSValidator.isUnix()) {
 			// linux need UI thread to paint
 			Display.getDefault().syncExec(() -> {
 				executePaint( ecs, 
-						  	  num_threads, 
-						  	  num_paint_threads, 
+						  	  numThreads, 
+						  	  numPaintThreads, 
 						  	  queue, 
 						  	  linesToPaint, 
 						  	  monitor, 
@@ -205,8 +207,8 @@ public abstract class BaseViewPaint extends Job
 			});
 		} else {
 			executePaint( ecs, 
-					  	  num_threads, 
-					  	  num_paint_threads, 
+					  	  numThreads, 
+					  	  numPaintThreads, 
 					  	  queue, 
 					  	  linesToPaint, 
 					  	  monitor, 
@@ -225,21 +227,22 @@ public abstract class BaseViewPaint extends Job
 	 * run jobs for collecting data and painting the image
 	 * 
 	 * @param ecs : completion service from data collection job
-	 * @param num_threads : number of threads for collecting data (see ecs)
-	 * @param num_paint_threads : number of threads for paiting
+	 * @param numCollectThreads : number of threads for collecting data (see {@code ecs}})
+	 * @param numPaintThreads : number of threads for painting
 	 * @param queue : the data to be collected
 	 * @param linesToPaint : number of lines to paint
 	 * @param timelineDone : atomic integer for number of lines collected
 	 * @param monitor : UI progress monitor 
+	 * @param threadExecutor
 	 */
 	private void executePaint(ExecutorCompletionService<Integer> ecs,
-			int num_threads, int num_paint_threads, Queue<TimelineDataSet> queue, 
+			int numCollectThreads, int numPaintThreads, Queue<TimelineDataSet> queue, 
 			int linesToPaint, IProgressMonitor monitor, ExecutorService threadExecutor) 
 	{
-		final List<Future<List<ImagePosition>>> threadsPaint = new ArrayList<Future<List<ImagePosition>>>();
+		final List<Future<List<ImagePosition>>> threadsPaint = new ArrayList<>();
 		
 		// for threads as many as the number of paint threads (specified by the caller)
-		for (int threadNum=0; threadNum < num_paint_threads; threadNum++) 
+		for (int threadNum=0; threadNum < numPaintThreads; threadNum++) 
 		{
 
 			final BasePaintThread paintThread = getPaintThread(queue, linesToPaint,
@@ -253,8 +256,8 @@ public abstract class BaseViewPaint extends Job
 		// -------------------------------------------------------------------
 		// Finalize the painting (to be implemented by the instance)
 		// -------------------------------------------------------------------
-		ArrayList<Integer> result = new ArrayList<Integer>();
-		if (waitDataPreparationThreads(ecs, result, num_threads, monitor))
+		ArrayList<Integer> result = new ArrayList<>();
+		if (waitDataPreparationThreads(ecs, result, numCollectThreads, monitor))
 		{
 			endPainting(threadsPaint, monitor);
 		} else {
@@ -283,14 +286,15 @@ public abstract class BaseViewPaint extends Job
 	 * 
 	 * @param ecs : executor service
 	 * @param result : the list of the result
-	 * @param launch_threads : number of launched threads
+	 * @param numCollectThreads : number of launched threads
+	 * @param monitor
 	 */
 	private boolean waitDataPreparationThreads(ExecutorCompletionService<Integer> ecs, 
-			ArrayList<Integer> result, int launch_threads, IProgressMonitor monitor)
+			ArrayList<Integer> result, int numCollectThreads, IProgressMonitor monitor)
 	{
-		int num_invalid_samples = 0;		
+		int numInvalidSamples = 0;		
 		
-		for (int i=0; i<launch_threads; i++)
+		for (int i=0; i<numCollectThreads; i++)
 		{
 			if (monitor.isCanceled())
 				return false;
@@ -301,7 +305,7 @@ public abstract class BaseViewPaint extends Job
 				if (linenum == null)
 					return false;
 				
-				num_invalid_samples += linenum.intValue();				
+				numInvalidSamples += linenum.intValue();				
 				result.add(linenum);
 
 				BaseTimelineThread t = mapFutureToTask.get(f);
@@ -313,7 +317,7 @@ public abstract class BaseViewPaint extends Job
 				return false;
 			}
 		}
-		endDataPreparation(num_invalid_samples);
+		endDataPreparation(numInvalidSamples);
 		return true;
 	}
 
@@ -332,7 +336,7 @@ public abstract class BaseViewPaint extends Job
 				return false;
 			
 			try {
-				List<ImagePosition> listImages = listFutures.get();
+				List<ImagePosition> listImages = listFutures.get(10, TimeUnit.SECONDS);
 				if (listImages == null)
 					continue;
 
@@ -344,7 +348,7 @@ public abstract class BaseViewPaint extends Job
 					drawPainting(canvas, image);
 				}				
 			} catch (Exception e) {
-				e.printStackTrace();
+				LoggerFactory.getLogger(getClass()).error("Fail to wait the trace view's paint threads", e);
 			}
 		}
 		// notify user that we have finished painting
@@ -368,14 +372,14 @@ public abstract class BaseViewPaint extends Job
 	 * @param changedBounds
 	 * @return false will exit the painting
 	 */
-	abstract protected boolean startPainting(int linesToPaint, int numThreads, boolean changedBounds);
+	protected abstract boolean startPainting(int linesToPaint, int numThreads, boolean changedBounds);
 	
 	/*****
 	 * notification for the termination of painting
 	 * 
 	 * @param isCanceled : flag if the process has been canceled or not
 	 */
-	abstract protected void endPainting(boolean isCanceled);
+	protected abstract void endPainting(boolean isCanceled);
 	
 	/***
 	 * start painting an image to the canvas
@@ -383,7 +387,7 @@ public abstract class BaseViewPaint extends Job
 	 * @param canvas: canvas to be painted
 	 * @param imagePosition : a pair of image and position
 	 */
-	abstract protected void drawPainting(ISpaceTimeCanvas canvas, ImagePosition imagePosition);
+	protected abstract void drawPainting(ISpaceTimeCanvas canvas, ImagePosition imagePosition);
 	
 	/**
 	 * Retrieve the number of lines to paint 
@@ -398,7 +402,7 @@ public abstract class BaseViewPaint extends Job
 	 * @param numThreads
 	 * @throws IOException
 	 */
-	abstract protected void launchDataGettingThreads(boolean changedBounds, int numThreads) 
+	protected abstract void launchDataGettingThreads(boolean changedBounds, int numThreads) 
 			throws IOException;
 
 	/****
@@ -410,7 +414,7 @@ public abstract class BaseViewPaint extends Job
 	 * @param timelineDone
 	 * @return
 	 */
-	abstract protected BaseTimelineThread  getTimelineThread(ISpaceTimeCanvas canvas, double xscale, double yscale,
+	protected abstract BaseTimelineThread  getTimelineThread(ISpaceTimeCanvas canvas, double xscale, double yscale,
 			Queue<TimelineDataSet> queue, IProgressMonitor monitor);
 	
 	/***
@@ -422,10 +426,10 @@ public abstract class BaseViewPaint extends Job
 	 * @param width
 	 * @return
 	 */
-	abstract protected BasePaintThread getPaintThread( Queue<TimelineDataSet> queue, int numLines, 
+	protected abstract BasePaintThread getPaintThread( Queue<TimelineDataSet> queue, int numLines, 
 													   int width, IProgressMonitor monitor);
 
-	abstract protected void endPreparationThread(BaseTimelineThread thread, int result);
+	protected abstract void endPreparationThread(BaseTimelineThread thread, int result);
 	
-	abstract protected void endDataPreparation(int numInvalidData);
+	protected abstract void endDataPreparation(int numInvalidData);
 }
