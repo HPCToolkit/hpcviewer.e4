@@ -89,11 +89,14 @@ unzip -q ../$FILE
 ##############################
 notarize_app() {
 	FILENAME="$1"
-	NOTARIZE="$2"
+	#NOTARIZE="$2"
+	NOTARIZE="notarytool-password"
 
 	echo ""
 	echo "Notarization started: ${FILENAME}"	
-	xcrun notarytool submit "${FILENAME}" --keychain-profile "${NOTARIZE}" --wait
+	#xcrun notarytool submit "${FILENAME}" --keychain-profile "${NOTARIZE}" --wait
+	echo xcrun notarytool submit "${FILENAME}" --apple-id "AC_APPLEID"  --team-id "AC_USERID"  --password "AC_PASSWORD"  --wait
+	xcrun notarytool submit "${FILENAME}" --apple-id "${AC_APPLEID}"  --team-id "${AC_USERID}"  --password "${AC_PASSWORD}"  --wait
 
 	echo "Stapling the notarization ticket"
 	staple="$(xcrun stapler staple "${FILENAME}")"
@@ -114,7 +117,14 @@ notarize_app() {
 sign_app() {
 	SOURCE_FOLDER="$1"
 	echo "codesign ${SOURCE_FOLDER}"
-	codesign -f  -s "${AC_USERID}"  --options=runtime   --entitlements  "p.plist"  "${SOURCE_FOLDER}"
+	codesign -f  -s "${AC_USERID}"  --options=runtime   --entitlements  "p.plist" --timestamp  "${SOURCE_FOLDER}"
+        dmgsignaturecheck="$(codesign --verify --deep --verbose=2 --timestamp  --strict "${SOURCE_FOLDER}" 2>&1 >/dev/null)"
+        if [ $? -eq 0 ]; then
+                echo "The disk image is now codesigned"
+        else            
+                echo "The signature seems invalid"
+                exit 1
+        fi
 }
 
 

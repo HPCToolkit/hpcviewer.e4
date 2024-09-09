@@ -140,10 +140,11 @@ public class RemoteCommunicationProtocolBase
 
 		// Try to create a channel for communication tunnel session
 		// this tunnel will be used to notify if the client shuts down suddenly
-		
-		serverCommSession = connectionSSH.socketForwarding(remoteConnectionRecord.commSocket);
-		if (serverCommSession == null)
-			LoggerFactory.getLogger(getClass()).warn("The communication tunnel fails");
+		if (remoteConnectionRecord.commSocket != null) {
+			serverCommSession = connectionSSH.socketForwarding(remoteConnectionRecord.commSocket);
+			if (serverCommSession == null)
+				LoggerFactory.getLogger(getClass()).warn("The communication tunnel fails");
+		}
 
 		remoteHostIP  = remoteConnectionRecord.host;
 		connection    = connectionInfo;
@@ -325,7 +326,7 @@ public class RemoteCommunicationProtocolBase
 		if (isSuccess(json)) {
 			var remoteIp = json.getString("host");
 			var socket = json.getString("sock");
-			var commSocket = json.getString("comm");
+			String commSocket = json.has("comm") ? json.getString("comm") : null;
 			
 			return new IServerConnectionConfig() {
 				
