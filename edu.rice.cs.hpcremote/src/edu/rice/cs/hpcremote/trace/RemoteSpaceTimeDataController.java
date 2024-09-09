@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.collections.impl.map.mutable.primitive.IntIntHashMap;
 import org.hpctoolkit.client_server_common.time.Timestamp;
@@ -103,6 +104,8 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 	 * Synchronize on {@link #controllerMonitor} to ensure thread-safe operation.
 	 */
 	private int currentLine;
+	
+	private AtomicInteger numCurrentQueries = new AtomicInteger(0);
 
 	
 	public RemoteSpaceTimeDataController(BrokerClient client, IExperiment experiment) throws IOException {
@@ -158,11 +161,11 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 	 * @return
 	 */
 	public int getTraceLineFromProfile(int profileIndex) {
-		// synchronized (controllerMonitor) {
+		synchronized (controllerMonitor) {
 			// possible data concurrent here, but ...
 			// It's totally okay to concurrently reading a map index.
 			return mapIntToLine.get(profileIndex);
-		//}
+		}
 	}
 
 	
@@ -176,20 +179,23 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 	public void closeDB() {
 		// laks: do we need to sync this block?
 		// Other than that, there is no harm to concurrently setting null for sampledTraces and unYieldedSampledTraces
-		//synchronized (controllerMonitor) { // ensure safe publication of new values of class fields
+		synchronized (controllerMonitor) { // ensure safe publication of new values of class fields
 			if (mapIntToLine != null)
 				mapIntToLine.clear();
 
 			sampledTraces = null;
 			unYieldedSampledTraces = null;
-		//}
+		}
 	}
 
 	
 	@Override
 	public void startTrace(int numTraces, boolean changedBounds) {
-		while(sampledTraces != null) {
-			// dry out the old process
+
+		// if we are in the middle of query, we need to wait until all previous queries are done.
+		// Another solution is to fix hpcserver#92 issue by allowing the client to abort previous queries
+		while(numCurrentQueries.get() > 0) {
+			// dry out the old processes
 			try {
 				var process = getNextTrace();
 				if (process == null)
@@ -199,14 +205,14 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 				// do nothing
 			}
 		}
-		//synchronized (controllerMonitor) { // ensure all threads see the most recent values of all fields
+		synchronized (controllerMonitor) { // ensure all threads see the most recent values of all fields
 			this.changedBounds = changedBounds;
-
+			
 			if (!changedBounds) {
 				currentLine = numTraces;
 				return;
 			}
-				
+
 			var traceAttr = getTraceDisplayAttribute();
 			var pixelsV = traceAttr.getPixelVertical();
 
@@ -269,11 +275,13 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 			 * calls to `getNextTrace()`.
 			 */
 			DebugUtil.debugThread(getClass().getName(), String.format("num-traces: %d, num-samples: %d, time: %d - %d   %n", setOfTraceId.size(), getPixelHorizontal(), time1.toEpochNano(), time2.toEpochNano()));
-
+			
 			sampledTraces = client.sampleTracesAsync(setOfTraceId, time1, time2, getPixelHorizontal());
 			unYieldedSampledTraces = null; // ensure any previous subset of `sampledTraces` is cleared.
 			                               // see field contract for details
-		//}
+		}
+		// mark that we add a new query.
+		numCurrentQueries.incrementAndGet();
 	}
 
 
@@ -293,10 +301,8 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 	public IProcessTimeline getNextTrace() throws Exception {
 		synchronized (controllerMonitor)  { // ensure all threads see the most recent values of all fields
 
-			if(sampledTraces == null)
-				throw new IllegalStateException("getNextTrace() may not be invoked prior to startTrace(...) or after" +
-						                        " this controller is closed.");
-
+			// if we just want to reuse the existing trace data, there is no need to check the sampled traces
+			// or any un-yield traces
 			if (!changedBounds) {
 				currentLine--;
 				if (currentLine < 0) {
@@ -304,6 +310,12 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 					return null;
 				}
 				return getProcessTimelineService().getProcessTimeline(currentLine);
+			}
+
+			if(sampledTraces == null) {
+				done();
+				throw new IllegalStateException("getNextTrace() may not be invoked prior to startTrace(...) or after" +
+						                        " this controller is closed.");
 			}
 
 			/*
@@ -335,7 +347,7 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 	}
 	
 	private void done() {
-		sampledTraces = null;
+		numCurrentQueries.decrementAndGet();
 		unYieldedSampledTraces = null;
 		currentLine = 0;
 	}

@@ -566,6 +566,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
         processLabel   = new Label(labelGroup, SWT.CENTER);
         crossHairLabel = new Label(labelGroup, SWT.RIGHT);
         messageLabel   = new Label(labelGroup, SWT.LEFT);
+
+		restoreMessage = new MessageLabelManager(getDisplay(), messageLabel);
+		
     }
    
 	/*
@@ -575,11 +578,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	@Override
 	public void setMessage(String message)
 	{
-		if (restoreMessage == null)
-			restoreMessage = new MessageLabelManager(getDisplay(), messageLabel);
-		
 		restoreMessage.showWarning(message);
 	}
+	
 	
 	/**************************************************************************
 	 * Updates what the labels display to the viewer's current state.
@@ -1133,8 +1134,6 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 														bufferGC,    origGC, 
 														changedBounds);
 		detailPaint.addJobChangeListener(listener);
-
-		setMessage("Processing ...");
 		
 		// this part of the code causes deadlock on VirtualBox Ubuntu
 		// if we don't clear the queue
@@ -1383,6 +1382,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		private final boolean changedBounds;
 		private final GC bufferGC;
 		private final GC origGC;
+		
 		public DetailPaintJobChangeListener( DetailViewPaint detailPaint, 
 											 Image imageOrig, 
 											 Image imageFinal,
@@ -1398,6 +1398,10 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 			this.changedBounds = changedBounds;
 		}
 
+		@Override
+		public void aboutToRun(IJobChangeEvent event) {
+			showProcessingMessage("Processing ...");
+		}
 		
 		@Override
 		public void done(IJobChangeEvent event) {
@@ -1467,7 +1471,8 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 			updateButtonStates();
 			clearMessage();
 		}
-		
+
+
 		/***********************************************************************************
 		 * Notify other views (especially summary view) that we have changed the buffer.
 		 * The other views need to refresh the display if needed.
@@ -1490,9 +1495,15 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		}
 		
 		private void clearMessage() {
-	  		if (restoreMessage != null)
-	  			restoreMessage.clear();
+			restoreMessage.clear();
 		}
+		
+				
+		private void showProcessingMessage(String message)
+		{
+			restoreMessage.showProcessingMessage(message);
+		}
+
 	}
 	
 

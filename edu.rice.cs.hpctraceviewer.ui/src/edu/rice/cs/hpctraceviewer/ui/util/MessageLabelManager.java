@@ -75,6 +75,9 @@ public class MessageLabelManager
 		showMessage(SWT.COLOR_WHITE, SWT.COLOR_RED, message);
 	}
 
+	public void showProcessingMessage(String message) {
+		initLabel(SWT.COLOR_BLACK, SWT.COLOR_YELLOW, message);
+	}
 	
 	private void showMessage(final int foreground, final int background, String message) {
 		

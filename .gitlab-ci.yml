@@ -246,8 +246,8 @@ package dmg:
   tags: [saas-macos-medium-m1]
   needs: [package]
   script:
-  - macos/notarize.sh --image hpcviewer-macosx.cocoa.x86_64.zip
-  - macos/notarize.sh --image hpcviewer-macosx.cocoa.aarch64.zip
+  - macos/notarize.sh -i hpcviewer-macosx.cocoa.x86_64.zip
+  - macos/notarize.sh -i  hpcviewer-macosx.cocoa.aarch64.zip
   artifacts:
     expose_as: MacOS Packages
     expire_in: 3 days
