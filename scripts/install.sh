@@ -18,7 +18,7 @@
 #
 
 name=hpcviewer
-install_subdirs='configuration plugins'
+install_subdirs='configuration plugins p2 features'
 
 #------------------------------------------------------------
 # Error messages
