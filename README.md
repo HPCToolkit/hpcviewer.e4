@@ -31,16 +31,16 @@ Another key advantage is the integration between the performance data and source
 1. Go to the [hpcviewer latest release]
 2. Select the appropriate binary to download in **Packages** Section
 
-See [`INSTALL.md`](INSTALL.md) for further details.
+See [`INSTALL.md`] for specific installation and building hpcviewer from source.
 
 ## Documentation
 
-See the [online manual](https://hpctoolkit.gitlab.io/hpcviewer/).
+See the [manual](https://hpctoolkit.gitlab.io/hpcviewer/).
 
 
 # Contributing
 
-See [contributing](CONTRIBUTING.md) file for details.
+See [`CONTRIBUTING.md`] for details.
 
 
 # License
@@ -48,4 +48,6 @@ See [contributing](CONTRIBUTING.md) file for details.
 This source distribution as a whole is licensed under the [`LICENSE`](./LICENSE). This source distribution follows [REUSE Specification] Version 3 to declare copyright and licensing at file granularity.
 
 [reuse specification]: https://reuse.software/spec/
-[hpcviewer latest release]: [https://gitlab.com/hpctoolkit/hpcviewer/-/releases/permalink/latest]
+[hpcviewer latest release]: https://gitlab.com/hpctoolkit/hpcviewer/-/releases/permalink/latest
+[`CONTRIBUTING.md`]:CONTRIBUTING.md
+[`INSTALL.md`]:INSTALL.md
