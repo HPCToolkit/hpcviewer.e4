@@ -47,7 +47,7 @@ If you are still seeing unexpected behavior, please [open a new issue](https://g
 ### Tips and tricks for writing a good bug report
 
 1. Check if the issue still exists in the latest *development* version of hpcviewer.
-   See the [README.md](/README.md) for additional install options and instructions.
+   See the [INSTALL.md](/INSTALL.md) for additional install options and instructions.
 
 1. Provide any relevant context. Your OS, distribution, CPU architecture and Java version. Your hostname, shell, loaded modules or sysadmin's email address are not.
 
@@ -61,7 +61,7 @@ If you are still seeing unexpected behavior, please [open a new issue](https://g
 
 ## Suggesting an enhancement or feature
 
-Need some extra features for HPCToolkit to work for you? Before you make a request, we ask that you:
+Need some extra features for HPCViewer to work for you? Before you make a request, we ask that you:
 
 1. Read through [the documentation]. We may already have the feature in a different form than you were initially expecting.
 
@@ -116,7 +116,7 @@ Thanks for your efforts to improve HPCToolkit, and welcome to the community of C
    > git rebase -x 'git commit --amend -s --no-edit' develop
    > ```
 
-1. Read over the [LICENSE.md](/LICENSE.md) for information on how your contribution will be licensed when distributed as part of HPCToolkit.
+1. Read over the [LICENSE](/LICENSE) for information on how your contribution will be licensed when distributed as part of HPCToolkit.
 
 ### Before you push your changes
 
@@ -149,7 +149,7 @@ Thanks for your efforts to improve HPCToolkit, and welcome to the community of C
 
 ### Tips and tricks for a successful MR
 
-1. Follow best practices for the programming language. While we don't have a rigid coding style, consider reading and following the [C++ Core Guidelines](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines) and the [LLVM Coding Standards](https://llvm.org/docs/CodingStandards.html).
+1. Follow best practices for the programming language. While we don't have a rigid coding style, consider reading and following the [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html) and the [JetBrain Code Style](https://www.jetbrains.com/help/idea/code-style-java.html).
 
 1. Run [`pre-commit`](https://pre-commit.com/#install) locally before submitting the MR, either manually with `pre-commit run -a` or as part of the Git hooks installed by `pre-commit install`. CI will run the same linters/formatters and thus this (may) fail CI before your code even has a chance to run.
 
@@ -159,7 +159,7 @@ Thanks for your efforts to improve HPCToolkit, and welcome to the community of C
 
 1. Update the Sphinx documentation (`doc/src/`) with your new changes. This is what makes your changes usable by users.
 
-1. [Squash](https://stackoverflow.com/questions/5189560/how-do-i-squash-my-last-n-commits-together) your changes into a small and clean set of Git commits. Using multiple commits for related but separate changes is encouraged, e.g. a common CLI flag implemented in `hpcstruct` vs. `hpcprof`. Using multiple commits for entirely intermediate changes (e.g. multiple iterations of an API) is discouraged.
+1. [Squash](https://stackoverflow.com/questions/5189560/how-do-i-squash-my-last-n-commits-together) your changes into a small and clean set of Git commits. Using multiple commits for related but separate changes is encouraged. Using multiple commits for entirely intermediate changes (e.g. multiple iterations of an API) is discouraged.
 
    > You may instead opt to enable the "squash commits when merge request is approved" checkbox. This is allowed, but we discourage this since any details in the commit messages are lost when inspecting the Git history (e.g. `git blame`).
 
@@ -167,3 +167,4 @@ Thanks for your efforts to improve HPCToolkit, and welcome to the community of C
 
 [gitlab issues]: https://gitlab.com/hpctoolkit/hpcviewer/-/issues
 [the documentation]: https://hpctoolkit.gitlab.io/hpcviewer
+
