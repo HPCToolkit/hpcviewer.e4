@@ -8,7 +8,8 @@ SPDX-License-Identifier: CC-BY-4.0
 
 All types of contributions are valued. See the list below for instructions and information about different ways to contribute. Please make sure to read the relevant section and any linked information in their entirety before making your contribution, it makes it at lot easier for us maintainers and smooths out the experience for everyone involved.
 
-This project and everyone participating in it are governed by the [Linux Foundation Projects Code of Conduct](https://lfprojects.org/policies/code-of-conduct/). By participating, you are expected to uphold this code.
+This project and everyone participating in it are governed by the [Linux Foundation Projects Code of Conduct](https://lfprojects.org/policies/code-of-conduct/).
+By participating, you are expected to uphold this code.
 
 We look forward to your involvement as a Contributor to the HPCToolkit Project.
 
@@ -27,7 +28,7 @@ We're happy to answer! But before you ask, we ask that you:
 
 1. Read or search the documentation from your sysadmins or for any involved tools/applications. There may be details that are causing your confusion.
 
-If you are still confused or have unanswered questions, feel free to [open an issue](https://gitlab.com/hpctoolkit/hpcviewer/-/issues/new?). Once your question is answered, we may ask you to [contribute an update the documentation](#contributing-changes) for others.
+If you are still confused or have unanswered questions, feel free to [open an issue](https://gitlab.com/hpctoolkit/hpcviewer/-/issues/new). Once your question is answered, we may ask you to [contribute an update the documentation](#contributing-changes) for others.
 
 ## I want to report a bug!
 
@@ -47,7 +48,7 @@ If you are still seeing unexpected behavior, please [open a new issue](https://g
 
 1. Check if the issue still exists in the latest *development* version of hpcviewer. See the [INSTALL.md](/INSTALL.md) for additional install options and instructions.
 
-1. Provide any relevant context. Your OS, distribution, CPU architecture and Java version. Your hostname, shell, loaded modules or sysadmin's email address are not.
+1. Provide any relevant context. Your OS, distribution, CPU architecture and Java version are useful information. Your hostname, shell, loaded modules or sysadmin's email address are not.
 
 1. Try to reduce your example to the minimum reproducer and steps needed to trigger the issue. We cannot efficiently help if we don't have a way to easily recreate the failing scenario. Please avoid external code (e.g. `git clone my.cool/project`) so that we can adapt your reproducer into a regression test.
 
@@ -81,11 +82,11 @@ If you can't find any similar feature requests, feel free to [open a new issue](
 
 1. Wait a little before trying to implement your feature yourself. There may be design or other high-level issues that may drastically change how the code is implemented.
 
-   > However, if you do implement it yourself, we ask that you assign yourself to the issue and [contribute your changes](#contributing-changes) back to HPCToolkit.
+   > However, if you do implement it yourself, we ask that you assign yourself to the issue and [contribute your changes](#contributing-changes) back to HPCViewer.
 
 ## Contributing Changes
 
-Thanks for your efforts to improve HPCToolkit, and welcome to the community of Contributors to the HPCToolkit Project! There's a few things to keep in mind before and while contributing your changes, please read the sections below for details.
+Thanks for your efforts to improve HPCViewer, and welcome to the community of Contributors to the HPCToolkit Project! There's a few things to keep in mind before and while contributing your changes, please read the sections below for details.
 
 ### The Legal Stuff
 
@@ -111,10 +112,10 @@ Thanks for your efforts to improve HPCToolkit, and welcome to the community of C
    > For many commits, try:
    >
    > ```
-   > git rebase -x 'git commit --amend -s --no-edit' develop
+   > git rebase -x 'git commit --amend -s --no-edit' main
    > ```
 
-1. Read over the [LICENSE](/LICENSE) for information on how your contribution will be licensed when distributed as part of HPCToolkit.
+1. Read over the [LICENSE](/LICENSE) for information on how your contribution will be licensed when distributed as part of HPCViewer.
 
 ### Before you push your changes
 
