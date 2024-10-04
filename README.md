@@ -7,47 +7,37 @@ SPDX-License-Identifier: CC-BY-4.0
 
 # Overview
 
-`hpcviewer` is the presentation layer of [HPCToolkit](https://gitlab.com/hpctoolkit/hpctoolkit) which is a suite of tools
-for measurement and analysis of program performance.
+HPCViewer is the presentation layer of [HPCToolkit](https://gitlab.com/hpctoolkit/hpctoolkit), a suite of tools for measurement of program performance. HPCViewer allows you to open HPCToolkit performance databases and visualize the performance of an application.
 
-One of the main advantages of `hpcviewer` is its ability to handle massive amounts of performance data, a necessity for modern HPC applications that run on thousands of cores or GPUs. The GUI is designed to efficiently process and present this data, allowing users to focus on analyzing performance without being overwhelmed by the sheer volume of information. Its hierarchical visualization techniques make it easier to manage complexity, especially when dealing with deeply nested function calls or multi-threaded programs.
+## Features
 
-Another key advantage is the integration between the performance data and source code. This seamless connection allows developers to not only see where inefficiencies occur but also immediately access the code responsible for the performance issues. 
-
-`hpcviewer` can run on multiple operating systems including Linux (x86-64, IBM Power 64 and ARM 64), macOS (Intel and Silicon), and Windows (x86-64). 
-
-
+- Hierarchical "top-down" and "bottom-up" performance analysis based on application calling context.
+- Source code pane for viewing the application source code for function or line.
+- Trace view for analyzing time-oriented performance.
+- Runs well even when viewing TBs of performance data.
+- Portable across Linux, MacOS, and Windows platforms.
 
 ## Requirements
 
-* Java 17 or newer.
-  Can be downloaded via [Spack](https://github.com/spack/spack) 
-  or from [Oracle](https://www.oracle.com/java/technologies/javase-downloads.html)
-  or [Adoptium](https://adoptium.net/temurin/releases)
-* Linux: GTK+ 3.20 or newer.
+- Java 17 or newer. Java can be downloaded from [Adoptium](https://adoptium.net/temurin/releases) or [Oracle](https://www.oracle.com/java/technologies/javase-downloads.html), or installed via [Spack](https://spack.io).
+- Linux: GTK+ 3.20 or newer.
 
 ## Installation
 
-1. Go to the [hpcviewer latest release]
-2. Select the appropriate binary to download in **Packages** Section
-
-See [`INSTALL.md`] for specific installation and building hpcviewer from source.
+See [`INSTALL.md`] for platform-specific installation instructions and building from source.
 
 ## Documentation
 
 See the [manual](https://hpctoolkit.gitlab.io/hpcviewer/).
 
-
 # Contributing
 
 See [`CONTRIBUTING.md`] for details.
 
-
 # License
 
-This source distribution as a whole is licensed under the [`LICENSE`](./LICENSE). This source distribution follows [REUSE Specification] Version 3 to declare copyright and licensing at file granularity.
+This source distribution as a whole is licensed under the [`LICENSE`](./LICENSE). This source distribution follows [REUSE Specification] Version 3 to declare copyright and licensing at file granularity, the individual license texts are provided in the `LICENSES/` subdirectory.
 
 [reuse specification]: https://reuse.software/spec/
-[hpcviewer latest release]: https://gitlab.com/hpctoolkit/hpcviewer/-/releases/permalink/latest
-[`CONTRIBUTING.md`]:CONTRIBUTING.md
-[`INSTALL.md`]:INSTALL.md
+[`contributing.md`]: CONTRIBUTING.md
+[`install.md`]: INSTALL.md

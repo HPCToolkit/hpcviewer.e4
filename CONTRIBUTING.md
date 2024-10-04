@@ -28,7 +28,7 @@ We're happy to answer! But before you ask, we ask that you:
 
 1. Read or search the documentation from your sysadmins or for any involved tools/applications. There may be details that are causing your confusion.
 
-If you are still confused or have unanswered questions, feel free to [open an issue](https://gitlab.com/hpctoolkit/hpcviewer/-/issues/new?). Once your question is answered, we may ask you to [contribute an update the documentation](#contributing-changes) for others.
+If you are still confused or have unanswered questions, feel free to [open an issue](https://gitlab.com/hpctoolkit/hpcviewer/-/issues/new). Once your question is answered, we may ask you to [contribute an update the documentation](#contributing-changes) for others.
 
 ## I want to report a bug!
 
@@ -36,7 +36,7 @@ Something not working right? Before filing a bug, we ask that you:
 
 1. Confirm you are running the latest released or development version of HPCViewer. Given the project's limited manpower, we don't prioritize support of older releases.
 
-1. Read any documentation from your Java runtime and ensure your environment is sane. 
+1. Read any documentation from your Java runtime and ensure your environment is sane.
 
 1. Read through [the documentation]. If the bug is intended behavior, consider [asking a question](#i-have-a-question) about it or [suggesting an enhancement](#suggesting-an-enhancement-or-feature) to change it first.
 
@@ -46,16 +46,15 @@ If you are still seeing unexpected behavior, please [open a new issue](https://g
 
 ### Tips and tricks for writing a good bug report
 
-1. Check if the issue still exists in the latest *development* version of hpcviewer.
-   See the [INSTALL.md](/INSTALL.md) for additional install options and instructions.
+1. Check if the issue still exists in the latest *development* version of hpcviewer. See the [INSTALL.md](/INSTALL.md) for additional install options and instructions.
 
-1. Provide any relevant context. Your OS, distribution, CPU architecture and Java version. Your hostname, shell, loaded modules or sysadmin's email address are not.
+1. Provide any relevant context. Your OS, distribution, CPU architecture and Java version are useful information. Your hostname, shell, loaded modules or sysadmin's email address are not.
 
 1. Try to reduce your example to the minimum reproducer and steps needed to trigger the issue. We cannot efficiently help if we don't have a way to easily recreate the failing scenario. Please avoid external code (e.g. `git clone my.cool/project`) so that we can adapt your reproducer into a regression test.
 
 1. Give details for what happened that you didn't expect. If the output is unexpected, show the erroneous output and explain why you are certain it is wrong. If a tool crashed, provide a stack trace from the log files.
 
-1. Upload any relevant log output you have. `hpcviewer` generates `*.log` files in the home directory. 
+1. Upload any relevant log output you have. `hpcviewer` generates `*.log` files in the home directory.
 
 1. Wait patiently for a response. It may take a while before we can get back to you.
 
@@ -83,11 +82,11 @@ If you can't find any similar feature requests, feel free to [open a new issue](
 
 1. Wait a little before trying to implement your feature yourself. There may be design or other high-level issues that may drastically change how the code is implemented.
 
-   > However, if you do implement it yourself, we ask that you assign yourself to the issue and [contribute your changes](#contributing-changes) back to HPCToolkit.
+   > However, if you do implement it yourself, we ask that you assign yourself to the issue and [contribute your changes](#contributing-changes) back to HPCViewer.
 
 ## Contributing Changes
 
-Thanks for your efforts to improve HPCToolkit, and welcome to the community of Contributors to the HPCToolkit Project! There's a few things to keep in mind before and while contributing your changes, please read the sections below for details.
+Thanks for your efforts to improve HPCViewer, and welcome to the community of Contributors to the HPCToolkit Project! There's a few things to keep in mind before and while contributing your changes, please read the sections below for details.
 
 ### The Legal Stuff
 
@@ -113,10 +112,10 @@ Thanks for your efforts to improve HPCToolkit, and welcome to the community of C
    > For many commits, try:
    >
    > ```
-   > git rebase -x 'git commit --amend -s --no-edit' develop
+   > git rebase -x 'git commit --amend -s --no-edit' main
    > ```
 
-1. Read over the [LICENSE](/LICENSE) for information on how your contribution will be licensed when distributed as part of HPCToolkit.
+1. Read over the [LICENSE](/LICENSE) for information on how your contribution will be licensed when distributed as part of HPCViewer.
 
 ### Before you push your changes
 
@@ -167,4 +166,3 @@ Thanks for your efforts to improve HPCToolkit, and welcome to the community of C
 
 [gitlab issues]: https://gitlab.com/hpctoolkit/hpcviewer/-/issues
 [the documentation]: https://hpctoolkit.gitlab.io/hpcviewer
-
