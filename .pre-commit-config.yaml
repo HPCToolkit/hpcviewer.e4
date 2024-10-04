@@ -66,6 +66,16 @@ repos:
 
 - repo: https://github.com/codespell-project/codespell
   rev: v2.3.0
-  hooks: []
+  hooks:
   # Identify common spelling mistakes in code and comments
-  # - id: codespell
+  - id: codespell
+    files: '^[^/]+\.md$'  # TODO: Currently only limited to frontmatter
+
+- repo: https://github.com/executablebooks/mdformat
+  rev: 0.7.17
+  hooks:
+  # Format CommonMark (Markdown) files to have a consistent style.
+  - id: mdformat
+    files: '^[^/]+\.md$'  # TODO: Currently only limited to frontmatter
+    additional_dependencies:
+    - mdformat-tables ==1.0.0

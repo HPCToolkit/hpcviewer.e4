@@ -8,8 +8,7 @@ SPDX-License-Identifier: CC-BY-4.0
 
 All types of contributions are valued. See the list below for instructions and information about different ways to contribute. Please make sure to read the relevant section and any linked information in their entirety before making your contribution, it makes it at lot easier for us maintainers and smooths out the experience for everyone involved.
 
-This project and everyone participating in it are governed by the [Linux Foundation Projects Code of Conduct](https://lfprojects.org/policies/code-of-conduct/).
-By participating, you are expected to uphold this code.
+This project and everyone participating in it are governed by the [Linux Foundation Projects Code of Conduct](https://lfprojects.org/policies/code-of-conduct/). By participating, you are expected to uphold this code.
 
 We look forward to your involvement as a Contributor to the HPCToolkit Project.
 
@@ -36,7 +35,7 @@ Something not working right? Before filing a bug, we ask that you:
 
 1. Confirm you are running the latest released or development version of HPCViewer. Given the project's limited manpower, we don't prioritize support of older releases.
 
-1. Read any documentation from your Java runtime and ensure your environment is sane. 
+1. Read any documentation from your Java runtime and ensure your environment is sane.
 
 1. Read through [the documentation]. If the bug is intended behavior, consider [asking a question](#i-have-a-question) about it or [suggesting an enhancement](#suggesting-an-enhancement-or-feature) to change it first.
 
@@ -46,8 +45,7 @@ If you are still seeing unexpected behavior, please [open a new issue](https://g
 
 ### Tips and tricks for writing a good bug report
 
-1. Check if the issue still exists in the latest *development* version of hpcviewer.
-   See the [INSTALL.md](/INSTALL.md) for additional install options and instructions.
+1. Check if the issue still exists in the latest *development* version of hpcviewer. See the [INSTALL.md](/INSTALL.md) for additional install options and instructions.
 
 1. Provide any relevant context. Your OS, distribution, CPU architecture and Java version. Your hostname, shell, loaded modules or sysadmin's email address are not.
 
@@ -55,7 +53,7 @@ If you are still seeing unexpected behavior, please [open a new issue](https://g
 
 1. Give details for what happened that you didn't expect. If the output is unexpected, show the erroneous output and explain why you are certain it is wrong. If a tool crashed, provide a stack trace from the log files.
 
-1. Upload any relevant log output you have. `hpcviewer` generates `*.log` files in the home directory. 
+1. Upload any relevant log output you have. `hpcviewer` generates `*.log` files in the home directory.
 
 1. Wait patiently for a response. It may take a while before we can get back to you.
 
@@ -167,4 +165,3 @@ Thanks for your efforts to improve HPCToolkit, and welcome to the community of C
 
 [gitlab issues]: https://gitlab.com/hpctoolkit/hpcviewer/-/issues
 [the documentation]: https://hpctoolkit.gitlab.io/hpcviewer
-
