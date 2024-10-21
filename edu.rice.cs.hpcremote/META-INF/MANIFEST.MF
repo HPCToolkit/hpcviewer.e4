@@ -14,7 +14,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.e4.core.di,
  org.eclipse.e4.ui.services,
  org.eclipse.collections,
- org.json,
  edu.rice.cs.hpcdata,
  edu.rice.cs.hpcbase,
  edu.rice.cs.hpclog,
@@ -25,7 +24,8 @@ Require-Bundle: org.eclipse.core.runtime,
  edu.rice.cs.hpcremote.client,
  edu.rice.cs.hpcremote.common,
  edu.rice.cs.hpcremote.jsch,
- edu.rice.cs.hpcsetting
+ edu.rice.cs.hpcsetting,
+ com.google.gson
 Import-Package: javax.inject,
  org.eclipse.e4.core.contexts
 Automatic-Module-Name: edu.rice.cs.hpc.remote
