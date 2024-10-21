@@ -21,6 +21,5 @@
  <modules>
   <module>com.graphbuilder</module>
   <module>io.vavr</module>
-  <module>org.json</module>
  </modules>
 </project>

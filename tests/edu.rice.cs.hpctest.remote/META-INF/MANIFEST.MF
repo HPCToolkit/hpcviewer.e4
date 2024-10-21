@@ -7,7 +7,6 @@ Fragment-Host: edu.rice.cs.hpcremote
 Automatic-Module-Name: edu.rice.cs.hpctest.remote
 Require-Bundle: edu.rice.cs.hpcdata,
  org.junit,
- org.json,
  org.mockito.mockito-core,
  edu.rice.cs.hpctest.util;bundle-version="1.0.0",
  edu.rice.cs.hpcremote.client,

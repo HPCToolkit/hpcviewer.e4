@@ -17,8 +17,11 @@ import org.hpctoolkit.hpcclient.v1_0.DbManagerClient;
 import org.hpctoolkit.hpcclient.v1_0.DbManagerClientJavaNetHttp;
 import org.hpctoolkit.hpcclient.v1_0.DirectoryContentsNotAvailableException;
 import org.hpctoolkit.hpcclient.v1_0.RemoteDirectory;
-import org.json.JSONObject;
 import org.slf4j.LoggerFactory;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 
 import edu.rice.cs.hpcremote.ICollectionOfConnections;
 import edu.rice.cs.hpcremote.IConnection;
@@ -213,6 +216,16 @@ public class RemoteCommunicationProtocolBase
 		
 		return dbManager.getDirectoryContents(directory);
 	}
+
+	
+	public IConnection getConnection() {
+		return connection;
+	}
+	
+	
+	private boolean isConnected() {
+		return connection != null && dbManager != null && serverMainSession != null;
+	}
 	
 	
 	private IRemoteDatabaseConnection createTunnelAndBrokerClient(String brokerSocket) {		
@@ -290,21 +303,10 @@ public class RemoteCommunicationProtocolBase
 			}
 		}
 		return null;
-	}
+	}	
 
 	
-	public IConnection getConnection() {
-		return connection;
-	}
-	
-	
-	private boolean isConnected() {
-		return connection != null && dbManager != null && serverMainSession != null;
-	}
-	
-
-	
-	public IServerResponse getServerResponseInit(String[] messageFromServer) {
+	private IServerResponse getServerResponseInit(String[] messageFromServer) {
 		// looking for json message
 		// sometimes the server outputs rubbish
 		int i=0;
@@ -318,15 +320,26 @@ public class RemoteCommunicationProtocolBase
 		for(; i<messageFromServer.length; i++) {
 			message.append(messageFromServer[i]);
 		}
+		// in case the output from the server is not in JSON format 
 		if (message.isEmpty())
 			return () -> ServerResponseType.INVALID;
 		
-		JSONObject json = new JSONObject(message.toString());
-		
-		if (isSuccess(json)) {
-			var remoteIp = json.getString("host");
-			var socket = json.getString("sock");
-			String commSocket = json.has("comm") ? json.getString("comm") : null;
+		try {
+			JsonElement mapper = JsonParser.parseString(message.toString());
+			var data = mapper.getAsJsonObject();
+			
+			if (!data.has("status"))
+				throw new JsonParseException("'status' field does not exist");
+			
+			var status = data.get("status").getAsString();
+			
+			if (!status.equalsIgnoreCase("success")) {
+				return () -> ServerResponseType.ERROR;
+			}
+			
+			if (!data.has("sock") || !data.has("host") || !data.has("comm")) {
+				throw new JsonParseException("Invalid server response: " + data.toString());				
+			}
 			
 			return new IServerConnectionConfig() {
 				
@@ -334,34 +347,26 @@ public class RemoteCommunicationProtocolBase
 				public ServerResponseType getResponseType() {
 					return ServerResponseType.SUCCESS;
 				}
-
 				
 				@Override
 				public String getMainSocket() {
-					return socket;
+					return data.get("sock").getAsString();
 				}
 				
 				@Override
 				public String getHost() {
-					return remoteIp;
+					return data.get("host").getAsString();
 				}
-
-
+				
 				@Override
 				public String getCommSocket() {
-					return commSocket;
+					return data.get("comm").getAsString();
 				}
 			};
-		}		
-		return null;
-	}
-	
-	
-	private boolean isSuccess(JSONObject json) {
-		var status = json.getString("status");
-		if (status == null)
-			return false;
-		
-		return status.equalsIgnoreCase("success");
+
+		} catch (JsonParseException e) {
+			LoggerFactory.getLogger(getClass()).error("Error parsing server response init", e);
+			return () -> ServerResponseType.ERROR;
+		}
 	}
 }
