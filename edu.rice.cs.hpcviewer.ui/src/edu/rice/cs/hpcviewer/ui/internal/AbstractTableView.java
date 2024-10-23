@@ -36,6 +36,7 @@ import edu.rice.cs.hpcbase.ui.IUserMessage;
 
 import edu.rice.cs.hpcdata.experiment.Experiment;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
 import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
@@ -306,6 +307,8 @@ implements EventHandler, IUserMessage
 		// this doesn't really slow the UI so it's okay to do this to all tables. 
 		// 
 		table.setRoot(root);
+		
+		initHideOrShowColumns(metricManager.getVisibleMetrics());
 		
 		updateButtonStatus();
 
@@ -578,6 +581,24 @@ implements EventHandler, IUserMessage
 			table.hideColumn(columnIndex);
 		}
 	}
+	
+	
+	/**
+	 * Hide or show columns based on the metrics initial visibility type.
+	 * If the type is HIDE, then it will not be shown.
+	 * 
+	 * @param metrics list of "displayable" metrics
+	 */
+	private void initHideOrShowColumns(List<BaseMetric> metrics) {
+		int i=1;
+		for(var metric: metrics) {
+			if (metric.getVisibility() == VisibilityType.HIDE)
+				table.hideColumn(i);
+			
+			if (!isMetricToSkip(root, metric))
+				i++;
+		}
+	}	
 	
 	
 	private int getColumnIndexByMetric(MetricFilterDataItem item, List<BaseMetric> metrics) {
