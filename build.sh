@@ -1,7 +1,10 @@
 #!/bin/bash
-#
+
 # Copyright (c) 2002-2024, Rice University.
-# See the file edu.rice.cs.hpcviewer.ui/License.txt for details.
+# SPDX-FileCopyrightText: 2024 Contributors to the HPCToolkit Project
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
 #
 # Build hpcviewer and generate tar or zip files
 # This script is only for Unix and X windows.

@@ -1,7 +1,10 @@
 #!/bin/sh
+
+# SPDX-FileCopyrightText: 2024 Contributors to the HPCToolkit Project
 #
-# Copyright (c) 2002-2022, Rice University.
-# See the file README.License for details.
+# SPDX-License-Identifier: BSD-3-Clause
+
+#------------------------------------------------------------
 #
 # Install hpcviewer into hpctoolkit directory.
 # This script is only for Unix and X windows.
@@ -14,8 +17,7 @@
 #
 # Run this script from its own directory as ./install.
 #
-# $Id$
-#
+#------------------------------------------------------------
 
 name=hpcviewer
 install_subdirs='configuration plugins p2 features'

@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2024 Contributors to the HPCToolkit Project
+
+SPDX-License-Identifier: CC-BY-4.0
+-->
+
 = Unit test directory for hpcviewer
 
 The directory contains several unit test projects:

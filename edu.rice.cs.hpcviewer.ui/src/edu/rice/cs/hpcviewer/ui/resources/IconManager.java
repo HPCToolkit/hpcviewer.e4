@@ -16,39 +16,39 @@ import edu.rice.cs.hpcbase.ui.BaseIconManager;
  */
 public class IconManager  extends BaseIconManager
 {
-	final static public String Image_ZoomIn = "ZoomIn.gif";
-	final static public String Image_ZoomOut = "ZoomOut.gif";
-	final static public String Image_Flatten = "Flatten.png";
-	final static public String Image_Unflatten = "Unflatten.png";
+	public static final String Image_ZoomIn = "ZoomIn.gif";
+	public static final String Image_ZoomOut = "ZoomOut.gif";
+	public static final String Image_Flatten = "Flatten.png";
+	public static final String Image_Unflatten = "Unflatten.png";
 	
-	final static public String Image_CheckColumns = "checkColumns.gif";
-	final static public String Image_FlameIcon = "flameIcon.gif";
-	final static public String Image_TableFitBoth  = "TableFitBoth.png";
-	final static public String Image_TableFitData  = "TableFitData.png";
+	public static final String Image_CheckColumns = "checkColumns.gif";
+	public static final String Image_FlameIcon = "flameIcon.gif";
+	public static final String Image_TableFitBoth  = "TableFitBoth.png";
+	public static final String Image_TableFitData  = "TableFitData.png";
 
-	final static public String Image_FnMetric = "FnMetric.png";
-	final static public String Image_FontBigger = "FontBigger.png";
-	final static public String Image_FontSmaller = "FontSmaller.png";
-	final static public String Image_SaveCSV = "savecsv.png";
-	final static public String Image_Graph = "Graph.png";
-	final static public String Image_ThreadView = "cct-thread.png";
-	final static public String Image_ThreadMap = "cct-thread-map.png";
+	public static final String Image_FnMetric = "FnMetric.png";
+	public static final String Image_FontBigger = "FontBigger.png";
+	public static final String Image_FontSmaller = "FontSmaller.png";
+	public static final String Image_SaveCSV = "savecsv.png";
+	public static final String Image_Graph = "Graph.png";
+	public static final String Image_ThreadView = "cct-thread.png";
+	public static final String Image_ThreadMap = "cct-thread-map.png";
 	
-	final static public String Image_Viewer_256 = "platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpcviewerEclipse256.gif";
-	final static public String Image_Viewer_128 = "platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpcviewerEclipse128.gif";
-	final static public String Image_Viewer_64  = "platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpcviewerEclipse64.gif";
-	final static public String Image_Viewer_48  = "platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpcviewerEclipse48.gif";
-	final static public String Image_Viewer_32  = "platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpcviewerEclipse32.gif";
-	final static public String Image_Viewer_16  = "platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpcviewerEclipse16.gif";
+	public static final String Image_Viewer_256 = "platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpcviewerEclipse256.gif";
+	public static final String Image_Viewer_128 = "platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpcviewerEclipse128.gif";
+	public static final String Image_Viewer_64  = "platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpcviewerEclipse64.gif";
+	public static final String Image_Viewer_48  = "platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpcviewerEclipse48.gif";
+	public static final String Image_Viewer_32  = "platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpcviewerEclipse32.gif";
+	public static final String Image_Viewer_16  = "platform:/plugin/edu.rice.cs.hpcviewer.ui/resources/hpcviewerEclipse16.gif";
 	
-	final static public String []Image_Viewer = {
+	public static final String []Image_Viewer = {
 			Image_Viewer_16,  Image_Viewer_32,
 			Image_Viewer_48,  Image_Viewer_64,
 			Image_Viewer_128, Image_Viewer_256
 	};
 	
-	static private IconManager __singleton=null;
-	static private final AtomicBoolean isInitialized = new AtomicBoolean(false);
+	private static IconManager __singleton=null;
+	private static final AtomicBoolean isInitialized = new AtomicBoolean(false);
 	
 	/********
 	 * get the instance of the current icons class

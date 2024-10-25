@@ -1,13 +1,8 @@
 #!/bin/bash
+
+# SPDX-FileCopyrightText: 2024 Contributors to the HPCToolkit Project
 #
-# Copyright (c) 2002-2022, Rice University.
-# See the file README.License for details.
-#
-# Launch the viewer binary and set the workspace directory.
-# This script is only for Unix and X windows.
-#
-# $Id$
-#
+# SPDX-License-Identifier: BSD-3-Clause
 
 name=hpcviewer
 arch=`uname -m`

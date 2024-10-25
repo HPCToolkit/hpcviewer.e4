@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2024 Contributors to the HPCToolkit Project
+
+SPDX-License-Identifier: CC-BY-4.0
+-->
+
 # hpcdata project
 
 hpcdata is an independent project part of hpcviewer written purely in Java to ensure portability across platforms.
