@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# SPDX-FileCopyrightText: 2024 Contributors to the HPCToolkit Project
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
 DIR=`dirname $(readlink -f $0)`
 JAR_DIR="${DIR}/jars/*.jar"
 MAIN_CLASS="edu.rice.cs.hpcdata.app.PrintData"

@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# SPDX-FileCopyrightText: 2024 Contributors to the HPCToolkit Project
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
 # Runs a command using a background Xvfb server with a running window manager (metacity)
 
 # Check if Xvfb and metacity are installed; if not, prompt user whether to install.

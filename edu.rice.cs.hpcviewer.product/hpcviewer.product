@@ -4,7 +4,7 @@
 <product name="hpcviewer" uid="edu.rice.cs.hpcviewer" id="edu.rice.cs.hpcviewer.ui.hpcviewer" application="org.eclipse.e4.ui.workbench.swt.E4Application" version="6.0.0.qualifier" type="features" includeLaunchers="true" autoIncludeRequirements="true">
 
    <aboutInfo>
-      <image path="/edu.rice.cs.hpcviewer.ui/resources/hpcviewer64.gif"/>
+      <image path="/edu.rice.cs.hpcviewer.ui/resources/hpcviewerEclipse64.gif"/>
       <text>
          hpcviewer is a user interface for analyzing a database of performance metrics in conjunction with an application’s source code.
 

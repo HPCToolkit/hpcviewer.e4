@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# SPDX-FileCopyrightText: 2024 Contributors to the HPCToolkit Project
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
 # libraries and jar needed to run hpcdata program
 # if hpcdata requires more jar, need to include in this variable manually
 # Notes: Please do not specify the version number of the jar file to keep portability

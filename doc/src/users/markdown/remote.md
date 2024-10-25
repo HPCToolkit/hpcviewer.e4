@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2024 Contributors to the HPCToolkit Project
+
+SPDX-License-Identifier: CC-BY-4.0
+-->
+
 # Overview
 
 HPCViewer now supports opening databases located on remote hosts. This capability allows users to access and analyze performance data from remote locations seamlessly. The communication between `hpcviewer` and the remote host is highly secure, ensuring that all data transfers are protected.
