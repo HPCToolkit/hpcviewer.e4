@@ -1,6 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: hpctest
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-SymbolicName: edu.rice.cs.hpctest
 Bundle-Version: 1.0.0.qualifier
 Automatic-Module-Name: edu.rice.cs.hpctest
@@ -20,4 +21,5 @@ Require-Bundle: edu.rice.cs.hpcdata,
  edu.rice.cs.hpcviewer.ui,
  org.junit,
  org.eclipse.swtbot.swt.finder,
- edu.rice.cs.hpctest.util
+ edu.rice.cs.hpctest.util,
+ edu.rice.cs.hpcremote

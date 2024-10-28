@@ -12,15 +12,12 @@ import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
@@ -47,7 +44,10 @@ import edu.rice.cs.hpcremote.RemoteDatabaseIdentification;
 public class ConnectionDialog extends TitleAreaDialog implements IConnection
 {
 	private enum OptionSelection {NONE, PASSWORD, PRIVATE, AGENT}
-	
+
+	private record History (String host, String username, String remoteDirectory, String option)
+	{}
+
 	private static final String HISTORY_SEPARATOR = "|";
 
 	private static final String HISTORY_KEY_PROFILE = "hpcremote.profile";
@@ -115,7 +115,7 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 		labelHost.setText("Hostname/IP address:");
 		
 		textHost = new Combo(container, SWT.NONE);
-		textHost.setToolTipText("Please enter the remote host name or its IP address.");
+		textHost.setToolTipText("Required: the remote host name or its IP address.");
 
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(textHost);
 				
@@ -125,6 +125,7 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 		labelUsername.setText("Username:");
 		
 		textUsername = new Combo(container, SWT.DROP_DOWN);
+		textUsername.setToolTipText("Required: the user name at the remote host");
 		
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(textUsername);
 		
@@ -134,11 +135,20 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 		labelDirectory.setText("Remote installation directory:");
 		
 		textDirectory = new Combo(container, SWT.DROP_DOWN);
+		textDirectory.setToolTipText("Required: the absolute path of hpcserver installation at the remote host");
 		
 		GridDataFactory.fillDefaults().grab(true, false).applyTo(textDirectory);
 				
 		//------------------------------------------------------
 		createOptionArea(container);
+		
+		return area;
+	}
+	
+	@Override
+	protected Control createButtonBar(Composite parent) {
+		// make sure the parent already create the buttons
+		var composite = super.createButtonBar(parent);
 
 		//------------------------------------------------------
 		// fill up the form for the default
@@ -146,9 +156,8 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 
 		initFields();
 		
-		return area;
+		return composite;
 	}
-	
 	
 	private void createOptionArea(Composite container) {
 		var optionsArea = new Group(container, SWT.BORDER_SOLID);
@@ -294,23 +303,53 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 				break;
 			}
 		}
+		initRequiredField(textHost);
+		initRequiredField(textUsername);
+		initRequiredField(textDirectory);
+		
 		fillAndSetComboWithHistory(textPrivateKey, HISTORY_KEY_PRIV);
+		
+		checkAllRequiredFields();
 	}
 	
+	
+	private void initRequiredField(Combo field) {
+		field.addModifyListener(event -> checkAllRequiredFields());
+	}
+		
+	
+	private boolean checkAllRequiredFields() {
+		var isHostEmpty = textHost.getText().trim().isEmpty();
+		var isUserEmpty = textUsername.getText().trim().isEmpty();
+		var isDirEmpty  = textDirectory.getText().trim().isEmpty();
+		
+		var somethingIsEmpty = isHostEmpty || isUserEmpty || isDirEmpty;
+		
+		var btnOk = getButton(IDialogConstants.OK_ID);
+		btnOk.setEnabled(!somethingIsEmpty);
+		
+		return somethingIsEmpty;
+	}
 
 	
 	@Override
 	protected void okPressed() {
 		if (labelPrivateKey.getSelection() && (textPrivateKey.getText() == null || textPrivateKey.getText().isEmpty()) ) {
-			MessageDialog.openError(getShell(), "Invalid private key", "Invalid Private key: the option is selected but the field is empty.");
+			MessageDialog.openError(
+					getShell(), 
+					"Invalid private key", 
+					"Invalid Private key: the option is selected but the field is empty.");
+			return;
 		}
 		
-		host = textHost.getText();
-		username = textUsername.getText();		
-		directory = textDirectory.getText();
-		privateKey = labelPrivateKey.getSelection() ? textPrivateKey.getText() : null;
-		proxyAgent = labelProxyAgent.getSelection() ? textProxyAgent.getText() : null;
-		configRepo = labelConfiguration.getSelection() ? textConfig.getText()  : null;
+		host = textHost.getText().trim();
+		username = textUsername.getText().trim();
+		directory = textDirectory.getText().trim();
+		
+		privateKey = labelPrivateKey.getSelection() ? textPrivateKey.getText().trim() : null;
+		proxyAgent = labelProxyAgent.getSelection() ? textProxyAgent.getText().trim() : null;
+		configRepo = labelConfiguration.getSelection() ? textConfig.getText().trim()  : null;
+		
 		var option = getSelectedOption();
 		
 		var history = new UserInputHistory(HISTORY_KEY_PROFILE);
@@ -377,13 +416,6 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 	}
 
 	
-	private void checkFields() {
-		boolean notEmpty = !textHost.getText().isEmpty() && !textUsername.getText().isEmpty();
-		var btnOk = getButton(IDialogConstants.OK_ID);
-		if (btnOk != null) 
-			btnOk.setEnabled(notEmpty);
-	}
-	
 	private void fillAndSetComboWithHistory(Combo combo, String key) {	
 		UserInputHistory history = new UserInputHistory(key);
 		var histories = history.getHistory();
@@ -392,13 +424,6 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 		}
 		if (!histories.isEmpty())
 			combo.select(0);
-		
-		combo.addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyReleased(KeyEvent e) {
-				checkFields();
-			}
-		});
 	}
 	
 	
@@ -430,22 +455,5 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 			}
 		}
 		return histories;
-	}
-
-	private record History (String host, String username, String remoteDirectory, String option)
-	{}
-	
-
-	/***
-	 * Unit test
-	 * 
-	 * @param argv
-	 */
-	public static void main(String []argv) {
-		var display = Display.getDefault();
-		Shell shell = new Shell(display);
-		
-		var dlg = new ConnectionDialog(shell);
-		dlg.open();
 	}
 }
