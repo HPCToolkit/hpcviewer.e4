@@ -18,6 +18,15 @@ SPDX-License-Identifier: CC-BY-4.0
 1. Drag the `hpcviewer.app` icon to the "Applications" icon.
 1. Run `hpcviewer.app` from the Applications menu.
 
+### Notes
+
+- If Java JDK (development kit) or JRE (runtime) is installed with `homebrew`, you need to add a soft link the installed java to `/Library/Java` location:
+
+```
+sudo ln -sfn /usr/local/opt/openjdk/libexec/openjdk.jdk \
+     /Library/Java/JavaVirtualMachines/openjdk.jdk
+```
+
 ## Installing on Windows
 
 1. If Java 17 or newer (Java 21 recommended) is not installed, install a recent Java from [Adoptium](https://adoptium.net/temurin/releases/?version=21&os=windows) (recommended):
