@@ -51,14 +51,17 @@ public abstract class BasePaintThread implements Callable<List<ImagePosition>>
 	 * @param stData SpaceTimeDataController
 	 * @param list : the queue of TimelineDataSet data. Use a thread-safe queue for multi-threads
 	 * @param numberOfTotalLines : number of total images or lines
-	 * @param dataCollected AtomicInteger Number of collected data by BaseTimelineThread
 	 * @param currentPaint AtomicInteger Counter of number of consumed data for painting
 	 * @param width : the width of the view
 	 * @param monitor progress monitor
 	 */
-	protected BasePaintThread( SpaceTimeDataController stData, Queue<TimelineDataSet> list, 
-			int numberOfTotalLines, AtomicInteger dataCollected, AtomicInteger currentPaint,
-			int width, IProgressMonitor monitor) {
+	protected BasePaintThread(
+			SpaceTimeDataController stData, 
+			Queue<TimelineDataSet> list, 
+			int numberOfTotalLines, 
+			AtomicInteger currentPaint,
+			int width, 
+			IProgressMonitor monitor) {
 		
 		Assert.isNotNull(list);
 		

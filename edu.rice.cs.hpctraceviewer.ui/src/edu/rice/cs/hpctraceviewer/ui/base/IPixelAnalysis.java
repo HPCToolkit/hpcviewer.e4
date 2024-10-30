@@ -20,22 +20,22 @@ public interface IPixelAnalysis
 	/****
 	 * Default implementation of {@code IPixelAnalysis}
 	 */
-	public static IPixelAnalysis EMPTY = new IPixelAnalysis() {
+	IPixelAnalysis EMPTY = new IPixelAnalysis() {
 		
 		@Override
-		public void analysisPixelXY(ImageData detailData, int x, int y, int pixelValue) {}
+		public void analysisPixelXY(ImageData detailData, int x, int y, int pixelValue) { /* no-op */ }
 		
 		@Override
-		public void analysisPixelInit(int x) {}
+		public void analysisPixelInit(int x) { /* no-op */ }
 		
 		@Override
-		public void analysisPixelFinal(int pixel) {}
+		public void analysisPixelFinal(int pixel) { /* no-op */ }
 		
 		@Override
-		public void analysisInit(SpaceTimeDataController dataTraces, ColorTable colorTable) {}
+		public void analysisInit(SpaceTimeDataController dataTraces, ColorTable colorTable) { /* no-op */ }
 		
 		@Override
-		public void analysisFinal(ImageData detailData) {}
+		public void analysisFinal(ImageData detailData) { /* no-op */ }
 	};
 	
 	/***
@@ -45,14 +45,14 @@ public interface IPixelAnalysis
 	 * @param colorTable {@code ColorTable} table of colors
 	 * @param ptlService ({@code ProcessTimelineService} a service to get the information of the process timeline
 	 */
-	public void analysisInit(SpaceTimeDataController dataTraces, 
+	void analysisInit(SpaceTimeDataController dataTraces, 
 							 ColorTable colorTable);
 	
 	/***
 	 * Initialization phase of the analysis for x-axis pixel
 	 * @param x the coordinate of x-axis pixel
 	 */
-	public void analysisPixelInit(int x);
+	void analysisPixelInit(int x);
 	
 	/**
 	 * Analyze the pixel
@@ -62,7 +62,7 @@ public interface IPixelAnalysis
 	 * @param y {@code int} y-coordinate of the pixel
 	 * @param pixelValue {@code int} the value of the pixel in coordinate x and y
 	 */
-	public void analysisPixelXY(ImageData detailData, int x, int y, int pixelValue);
+	void analysisPixelXY(ImageData detailData, int x, int y, int pixelValue);
 	
 	/***
 	 * Finalize the current x-axis analysis. 
@@ -70,11 +70,11 @@ public interface IPixelAnalysis
 	 * 
 	 * @param pixel {@code int} the value of the pixel
 	 */
-	public void analysisPixelFinal(int pixel);
+	void analysisPixelFinal(int pixel);
 	
 	/***
 	 * Finalize the analysis
 	 * @param detailData
 	 */
-	public void analysisFinal(ImageData detailData);
+	void analysisFinal(ImageData detailData);
 }

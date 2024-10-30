@@ -57,12 +57,11 @@ public class CanvasAxisY extends AbstractAxisCanvas
 	 * Constructor CanvasAxisY
 	 * 
 	 * @param tracePart ITracePart the parent of the view
-	 * @param timeLine ProcessTimelineService
 	 * @param parent Composite
 	 * @param style int (see {@code SWT} constants for canvas)
 	 */
 	public CanvasAxisY(ITracePart tracePart, Composite parent, int style) {
-		super(tracePart, parent, style);
+		super(tracePart, parent);
 		
 		listColorObjects = new Color[5][2];
 		for(int i=0; i<5; i++) {

@@ -179,8 +179,10 @@ public abstract class DataPreparation
 			// AND the current pixel it NOT a "idle context"
 			// AND the previous pixel is a "idle context"
 			// then we should extend the width of the pixel by decrementing the starting pixel
-			if (exposeGPU && currSampleMidpoint == succSampleMidpoint && !currScope.isIdle()) {
-				if (prevScope == null || prevScope.isIdle()) {
+			if (exposeGPU && 
+				currSampleMidpoint == succSampleMidpoint && 
+				!currScope.isIdle() &&  
+				(prevScope == null || prevScope.isIdle())) {
 					// Fix issue #278: need to take into account the first sample
 					// do not decrement the current pixel if it's the first sample
 					// instead, we sacrifice the next one
@@ -189,7 +191,7 @@ public abstract class DataPreparation
 					else
 						// This is the first sample: sacrifice the next one
 						succSampleMidpoint++;
-				}
+				
 			}
 			finishLine(procName, currSampleMidpoint, succSampleMidpoint, currDepth, currColor, end - index + 1);
 			index = end;

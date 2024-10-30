@@ -28,5 +28,5 @@ public interface IExecutionContextToNumberTracesMap
 	/***
 	 * Dummy implementation of the interface
 	 */
-	final IExecutionContextToNumberTracesMap EMPTY = idTupleProfile ->  0;
+	IExecutionContextToNumberTracesMap EMPTY = idTupleProfile ->  0;
 }

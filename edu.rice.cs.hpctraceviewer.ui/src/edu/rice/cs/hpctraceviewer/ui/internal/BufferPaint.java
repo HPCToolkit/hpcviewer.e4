@@ -5,6 +5,7 @@
 package edu.rice.cs.hpctraceviewer.ui.internal;
 
 
-public interface BufferPaint {
-	public void rebuffering();
+public interface BufferPaint 
+{
+	void rebuffering();
 }

@@ -10,6 +10,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.slf4j.LoggerFactory;
 
 /***
  * 
@@ -20,8 +21,8 @@ import org.eclipse.swt.widgets.Shell;
  */
 public class MessageLabelManager 
 {
-	final private Label   messageLabel;
-	final private Display display;
+	private final Label   messageLabel;
+	private final Display display;
 
 	private Color colorBackground;
 	private Color colorForeground;
@@ -35,24 +36,19 @@ public class MessageLabelManager
 		// we need to make sure the background color is initialized
 		// before we use it.
 		
-		display.syncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				// sometimes the application exits without cleaning up
-				// the message
-				// we need to be careful not to use disposed display
-				
-				if (display != null && !display.isDisposed()) {
-					Shell shell = display.getActiveShell();
-					if (shell != null && !shell.isDisposed()) {
-						colorBackground = display.getActiveShell().getBackground();	
-						colorForeground = display.getActiveShell().getForeground();
-					}
+		display.syncExec( () -> {
+			// sometimes the application exits without cleaning up
+			// the message
+			// we need to be careful not to use disposed display
+			
+			if (display != null && !display.isDisposed()) {
+				Shell shell = display.getActiveShell();
+				if (shell != null && !shell.isDisposed()) {
+					colorBackground = display.getActiveShell().getBackground();	
+					colorForeground = display.getActiveShell().getForeground();
 				}
 			}
-			
-		});
+		} );
 	}
 	
 	public void clear() {
@@ -88,22 +84,18 @@ public class MessageLabelManager
 	}
 	
 	private void initLabel(final int foreground, final int background, final String message) {
-		display.syncExec(new Runnable() {
+		display.syncExec( () -> {
+			Color colorFont = display.getSystemColor(foreground);
+			Color colorBack = display.getSystemColor(background);
 
-			@Override
-			public void run() {
-				Color colorFont = display.getSystemColor(foreground);
-				Color colorBack = display.getSystemColor(background);
-
-				messageLabel.setForeground(colorFont);
-				messageLabel.setBackground(colorBack);
-				messageLabel.setText(message);
-				messageLabel.setSize(messageLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-				
-				// force the composite parent to adapt the size of the message
-				Composite parent = messageLabel.getParent();
-				parent.setSize(parent.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-			}
+			messageLabel.setForeground(colorFont);
+			messageLabel.setBackground(colorBack);
+			messageLabel.setText(message);
+			messageLabel.setSize(messageLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+			
+			// force the composite parent to adapt the size of the message
+			Composite parent = messageLabel.getParent();
+			parent.setSize(parent.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		});		
 	}
 	
@@ -128,39 +120,36 @@ public class MessageLabelManager
 		 * (non-Javadoc)
 		 * @see java.lang.Thread#run()
 		 */
+		@Override
 		public void run() {
 			try {
 				// wait for a couple of seconds
 				sleep(WAIT_TIME);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+			    /* Clean up whatever needs to be handled before interrupting  */
+			    Thread.currentThread().interrupt();
 			}
 			restoreLabel();
 		}
 		
 		private void restoreLabel() {
-			display.asyncExec(new Runnable() {
-
-				@Override
-				public void run() {
-					if (messageLabel == null || messageLabel.isDisposed()) {
-						return;
-					}
-					// possible data race:
-					//
-					// When there is a message and suddenly the application exits,
-					// this thread may still exist and try to access disposed messageLabel
-					// 
-					try {
-						messageLabel.setText("");
-						// if color background is null we are doom
-						messageLabel.setBackground(colorBackground);
-					} catch (Exception e) {
-						System.err.println(e.getMessage());
-					}
+			display.asyncExec( () -> {
+				if (messageLabel == null || messageLabel.isDisposed()) {
+					return;
 				}
-				
+				// possible data race:
+				//
+				// When there is a message and suddenly the application exits,
+				// this thread may still exist and try to access disposed messageLabel
+				// 
+				try {
+					messageLabel.setText("");
+					// if color background is null we are doom
+					messageLabel.setBackground(colorBackground);
+				} catch (Exception e) {
+					LoggerFactory.getLogger(getClass()).warn("Interrupted", e);
+				}
 			});
 		}
-	};
+	}
 }

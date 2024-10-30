@@ -65,10 +65,10 @@ public abstract class AbstractPreferenceManager
 			} catch (MalformedURLException e) {
 				// this can't be right
 				var logger = LoggerFactory.getLogger(getClass());
-				logger.error("MalformedURLException: " + e.getMessage());
+				logger.error("MalformedURLException", e);
 			} catch (Exception e) {
 				var logger = LoggerFactory.getLogger(getClass());
-				logger.error("Something wrong with the IO:" + e.getMessage());
+				logger.error("Something wrong with the IO", e);
 			}
 		}
 		if (preferenceStore == null) {
@@ -77,6 +77,7 @@ public abstract class AbstractPreferenceManager
 				preferenceStore = new PreferenceStore(tmpFile.getAbsolutePath());
 			} catch (IOException e) {
 				// gives up
+				LoggerFactory.getLogger(getClass()).error("Fail to create a temporary preference file", e);
 			}
 		}
 		return preferenceStore;

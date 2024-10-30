@@ -9,6 +9,6 @@ import org.eclipse.core.commands.operations.IUndoContext;
 
 public interface ITraceContext 
 {
-	public IUndoContext getContext(final String label);
-	public IOperationHistory getOperationHistory();
+	IUndoContext getContext(final String label);
+	IOperationHistory getOperationHistory();
 }

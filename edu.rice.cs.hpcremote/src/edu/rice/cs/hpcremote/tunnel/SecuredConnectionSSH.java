@@ -61,7 +61,7 @@ public class SecuredConnectionSSH implements ISecuredConnection
 		String hostname = connectionInfo.getHost();
 		String privateKey = connectionInfo.getPrivateKey();
 		
-		var userInfo = new RemoteUserInfoDialog(shell, hostname);
+		var userInfo = new RemoteUserInfoDialog(shell);
 		
 		JSch jsch = new JSch();
 		try {

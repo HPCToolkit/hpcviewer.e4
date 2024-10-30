@@ -60,16 +60,16 @@ public class LocalDBOpener extends AbstractDBOpener
 		
 		switch (version)
 		{
-		case 1:
-		case Constants.EXPERIMENT_DENSED_VERSION:
+		case 1, Constants.EXPERIMENT_DENSED_VERSION:
 			fileDB = new TraceDB2(exp);
 			break;
-		case 3:
-		case Constants.EXPERIMENT_SPARSE_VERSION:
+		
+		case 3,	Constants.EXPERIMENT_SPARSE_VERSION:
 			var root = exp.getRootScope(RootScopeType.CallingContextTree);
 			MetricValueCollection4 mvc = (MetricValueCollection4) root.getMetricValueCollection();
 			fileDB = new FileDB4(experiment, mvc.getDataSummary());
 			break;
+		
 		default:
 			throw new InvalExperimentException("Trace data version is not unknown: " + version);
 		}

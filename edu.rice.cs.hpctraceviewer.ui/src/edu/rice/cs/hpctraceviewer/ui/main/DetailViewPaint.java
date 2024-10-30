@@ -35,7 +35,7 @@ public class DetailViewPaint extends BaseViewPaint
 	/** maximum number of records to display **/
 	public static final int MAX_RECORDS_DISPLAY = 99;
 	/** text when we reach the maximum of records to display **/
-	public static final String TOO_MANY_RECORDS = ">" + MAX_RECORDS_DISPLAY;
+	public static final String TOO_MANY_RECORDS = MAX_RECORDS_DISPLAY + "+";
 	
 	private final Point maxTextSize;
 
@@ -44,7 +44,6 @@ public class DetailViewPaint extends BaseViewPaint
 	private final Device device;
 	
 	private final AtomicInteger currentLine;
-	private final AtomicInteger numDataCollected;
 	private final int numLines;
 
 	private boolean debug;
@@ -77,7 +76,6 @@ public class DetailViewPaint extends BaseViewPaint
 		maxTextSize = masterGC.textExtent(TOO_MANY_RECORDS + "(" + TOO_MANY_RECORDS + ")");
 		
 		currentLine = new AtomicInteger(0);
-		numDataCollected = new AtomicInteger(0);
 		
 		PreferenceStore pref = ViewerPreferenceManager.INSTANCE.getPreferenceStore();
 		debug = pref.getBoolean(PreferenceConstants.ID_DEBUG_MODE);
@@ -117,9 +115,16 @@ public class DetailViewPaint extends BaseViewPaint
 			int width, 
 			IProgressMonitor monitor) {
 
-		return new DetailPaintThread(device, controller, queue, numLines, 
-				numDataCollected, currentLine, 
-				width, maxTextSize, debug, monitor);
+		return new DetailPaintThread(
+				device, 
+				controller, 
+				queue, 
+				numLines, 
+				currentLine, 
+				width, 
+				maxTextSize, 
+				debug, 
+				monitor);
 	}
 
 	@Override
@@ -142,7 +147,7 @@ public class DetailViewPaint extends BaseViewPaint
 	}
 
 	@Override
-	protected void endPainting(boolean isCanceled) {}
+	protected void endPainting(boolean isCanceled) { /* print log ? */ }
 
 	@Override
 	protected void endPreparationThread(BaseTimelineThread thread, int result) {

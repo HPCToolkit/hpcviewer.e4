@@ -123,7 +123,7 @@ public class RemoteSpaceTimeDataControllerTest
 				ptl.readInData();
 
 				var profileIdt =  ptl.getProfileIdTuple();
-				assertNotNull(profileIdt);;
+				assertNotNull(profileIdt);
 				
 				var size = ptl.size();
 				for(int i=0; i<size; i++) {

@@ -28,7 +28,7 @@ public class DepthPaintThread extends BasePaintThread {
 			AtomicInteger numDataCollected, AtomicInteger paintDone,
 			int width, IProgressMonitor monitor) {
 
-		super(stData, list, linesToPaint, numDataCollected, paintDone, width, monitor);
+		super(stData, list, linesToPaint, paintDone, width, monitor);
 	}
 
 	@Override

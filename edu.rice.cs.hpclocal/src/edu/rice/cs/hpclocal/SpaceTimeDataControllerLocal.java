@@ -31,16 +31,12 @@ import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
  */
 public class SpaceTimeDataControllerLocal extends SpaceTimeDataController 
 {	
-	private IFileDB fileDB;
-	
 	private AtomicInteger currentLine;
 	private boolean changedBounds;
 	
 	/***
 	 * Constructor to setup local database
 	 * 
-	 * @param context 
-	 * 			IEclipseContext
 	 * @param statusMgr 
 	 * 			IProgressMonitor
 	 * @param experiment 
@@ -56,25 +52,12 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 			IFileDB fileDB)
 					throws IOException {
 		super(experiment);
-		init(statusMgr, fileDB);
-	}
-	
-	
-	/****
-	 * Initialize the trace view by opening the trace file according to the version of the database
-	 * 
-	 * @param statusMgr IProgressMonitor
-	 * @param fileDB IFileDB
-	 * 
-	 * @throws IOException
-	 */
-	private void init(IProgressMonitor statusMgr, IFileDB fileDB) throws IOException {
+
 		final var exp = getExperiment();
 		var location = Path.of(exp.getDirectory()).toFile();
 		String traceFilePath = location.getAbsolutePath();
 		
 		fileDB.open(traceFilePath);
-		this.fileDB = fileDB;
 		
 		var dataTrace  = new FilteredBaseData(fileDB);
 		super.setBaseData(dataTrace);
@@ -104,10 +87,7 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 	
 	@Override
 	public void closeDB() {
-		if (fileDB != null)
-			fileDB.dispose();
-		
-		fileDB = null;
+		// nothing
 	}
 
 

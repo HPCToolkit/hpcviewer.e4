@@ -148,6 +148,7 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 		    Thread.currentThread().interrupt();
 		} catch (TraceDataNotAvailableException e) {
 			// ignore
+			LoggerFactory.getLogger(getClass()).error("Begin and end trace time: No data available from the server", e);
 		}
 	}
 	
@@ -201,8 +202,11 @@ public class RemoteSpaceTimeDataController extends SpaceTimeDataController
 				if (process == null)
 					break;
 				Thread.sleep(50);
+			} catch (InterruptedException e) {
+			    // Restore interrupted state...
+			    Thread.currentThread().interrupt();
 			} catch (Exception e) {
-				// do nothing
+				LoggerFactory.getLogger(getClass()).error("Fail to start trace ", e);
 			}
 		}
 		synchronized (controllerMonitor) { // ensure all threads see the most recent values of all fields

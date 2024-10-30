@@ -67,7 +67,7 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 	 */
 	public DepthTimeCanvas(ITracePart tracePart, Composite composite)
     {
-		super(composite, SWT.NONE);
+		super(composite);
 		
 		this.tracePart = tracePart;
 	}
@@ -276,7 +276,6 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 								
 				BaseViewPaint depthPaint = new DepthViewPaint( 	bufferGC, 
 																stData, 
-																attributes, 
 																true, 
 																DepthTimeCanvas.this,
 																visibleDepths);

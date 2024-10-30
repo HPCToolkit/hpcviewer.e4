@@ -14,13 +14,12 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -45,8 +44,16 @@ import edu.rice.cs.hpctraceviewer.data.util.ProcedureClassMap;
  */
 public class ProcedureClassDialog extends Dialog 
 {
-	private final static String EMPTY = "\u2588";
-	private final static String UnknownData = "unknown";
+	/***
+	 * enumeration type to determine the sorting: ascending or descending 
+	 *
+	 */
+	private enum Direction {ASC, DESC}
+	
+	private enum COLUMN_ID {CLASS, PROCEDURE}
+
+	private static final String EMPTY = "\u2588";
+	private static final String UnknownData = "unknown";
 
 	private final ProcedureClassMap data;
 	
@@ -70,7 +77,7 @@ public class ProcedureClassDialog extends Dialog
 		super(parentShell);
 		this.data = data;
 		
-		mapColor = new HashMap<Integer, Color>();
+		mapColor = new HashMap<>();
 	}
 
 	/***
@@ -102,6 +109,7 @@ public class ProcedureClassDialog extends Dialog
 	 * (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.TitleAreaDialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	protected Control createDialogArea(Composite composite) {
 		
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(composite);
@@ -118,6 +126,7 @@ public class ProcedureClassDialog extends Dialog
 		btnAdd.setToolTipText("Add a procedure-color pair");
 		btnAdd.addSelectionListener( new SelectionAdapter() {
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				ProcedureMapDetailDialog dlg = new ProcedureMapDetailDialog(getShell(), 
 													"Add a new procedure-color map", 
@@ -125,7 +134,7 @@ public class ProcedureClassDialog extends Dialog
 													"", 
 													null);
 				
-				if (dlg.open() == Dialog.OK) {
+				if (dlg.open() == Window.OK) {
 					// update the map and the table
 					updateData(dlg.getProcedure(), dlg.getDescription(), dlg.getRGB());
 				}
@@ -138,8 +147,9 @@ public class ProcedureClassDialog extends Dialog
 		btnRemove.setEnabled(false);
 		btnRemove.addSelectionListener(new SelectionAdapter() {
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				remove(e);
+				remove();
 			}
 		});
 		
@@ -149,6 +159,7 @@ public class ProcedureClassDialog extends Dialog
 		btnEdit.setEnabled(false);
 		btnEdit.addSelectionListener( new SelectionAdapter() {
 
+			@Override
 			public void widgetSelected(SelectionEvent e) 
 			{
 				IStructuredSelection selection = (IStructuredSelection) tableViewer.getSelection();
@@ -162,7 +173,7 @@ public class ProcedureClassDialog extends Dialog
 					ProcedureMapDetailDialog dlg = new ProcedureMapDetailDialog(getShell(), 
 							"Edit procedure-color map", proc, pclass.getProcedureClass(), pclass.getRGB());
 					
-					if (dlg.open() == Dialog.OK) {
+					if (dlg.open() == Window.OK) {
 						// update: remove the old data, and then insert a new one
 						// Attention: these two actions have to be atomic !
 						data.remove(proc);
@@ -177,6 +188,7 @@ public class ProcedureClassDialog extends Dialog
 		btnReset.setText("Reset");
 		btnReset.setToolTipText("Reset to the default configuration");
 		btnReset.addSelectionListener( new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 
 				ProcedureClassDialog.this.data.initDefault();
@@ -253,6 +265,7 @@ public class ProcedureClassDialog extends Dialog
 		col.setWidth(250);
 		
 		colClass.setLabelProvider( new ColumnLabelProvider(){
+			@Override
 			public String getText(Object element) {
 				return ProcedureClassDialog.this.getClassName(element);
 			}
@@ -270,17 +283,14 @@ public class ProcedureClassDialog extends Dialog
 		
 		tableViewer.setInput(data.getEntrySet());
 		tableViewer.getTable().addSelectionListener(new SelectionAdapter(){
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				checkButton();
 			}
 		});
-		tableViewer.addDoubleClickListener(new IDoubleClickListener() {
-			
-			@Override
-			public void doubleClick(DoubleClickEvent event) {
-				btnEdit.notifyListeners(SWT.Selection, new Event());
-			}
-		});
+		tableViewer.addDoubleClickListener(event ->
+				btnEdit.notifyListeners(SWT.Selection, new Event())
+		);
 		
 		sortColClass.setSorter(sortColClass, Direction.ASC);
 
@@ -349,16 +359,15 @@ public class ProcedureClassDialog extends Dialog
 	 * removing selected element in the table
 	 * @param event
 	 */
-	private void remove(SelectionEvent event) {
+	private void remove() {
 		IStructuredSelection selection = (IStructuredSelection) this.tableViewer.getSelection();
-		Object sels[] = selection.toArray();
+		Object[] sels = selection.toArray();
 		
 		boolean cont = false;
 		if (sels != null) {
 			String text = "";
 			for (Object o: sels) {
-				if (o instanceof Entry<?,?>) {
-					Entry<?,?> elem = (Entry<?,?>) o;
+				if (o instanceof Entry<?,?> elem) {
 					text += elem.getKey() + "\n"; 
 				}
 			}
@@ -375,8 +384,7 @@ public class ProcedureClassDialog extends Dialog
 		
 		// remove the data
 		for (Object o: sels) {
-			if (o instanceof Entry<?,?>) {
-				Entry<?,?> elem = (Entry<?,?>) o;
+			if (o instanceof Entry<?,?> elem) {
 				data.remove((String) elem.getKey());
 
 				isModified = true;
@@ -393,8 +401,7 @@ public class ProcedureClassDialog extends Dialog
 	 * @return
 	 */
 	private String getClassName(Object element) {
-		if (element instanceof Entry<?,?>) {
-			final Entry<?,?> oLine = (Entry<?, ?>) element;
+		if (element instanceof Entry<?,?> oLine) {
 			final Object o = oLine.getValue();
 			if (o instanceof ProcedureClassData) {
 				final ProcedureClassData objValue = (ProcedureClassData) oLine.getValue();
@@ -410,21 +417,13 @@ public class ProcedureClassDialog extends Dialog
 	 * @return
 	 */
 	private String getProcedureName(Object element) {
-		if (element instanceof Entry<?,?>) {
-			final Entry<?,?> oLine = (Entry<?, ?>) element;
+		if (element instanceof Entry<?,?> oLine) {
 			return (String) oLine.getKey();
 		}
 		return UnknownData;
 	}
 	
 	
-	
-	/***
-	 * enumeration type to determine the sorting: ascending or descending 
-	 *
-	 */
-	static private enum Direction {ASC, DESC};
-	static private enum COLUMN_ID {CLASS, PROCEDURE};
 	
 	/******************************************************************************
 	 * 
@@ -451,15 +450,15 @@ public class ProcedureClassDialog extends Dialog
 			
 			column.getColumn().addSelectionListener( new SelectionAdapter() {
 
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					ViewerComparator comparator = ColumnViewerSorter.this.viewer.getComparator();
-					if ( comparator != null ) {
-						if (comparator == ColumnViewerSorter.this) {
+					if ( comparator != null  &&  (comparator == ColumnViewerSorter.this)) {
 							Direction dir = ColumnViewerSorter.this.direction;
 							dir = (dir==Direction.ASC? Direction.DESC : Direction.ASC);
 							setSorter (ColumnViewerSorter.this, dir);
 							return;
-						}
+						
 					}
 					setSorter (ColumnViewerSorter.this, Direction.ASC);
 				}
@@ -470,6 +469,7 @@ public class ProcedureClassDialog extends Dialog
 		 * (non-Javadoc)
 		 * @see org.eclipse.jface.viewers.ViewerComparator#compare(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 		 */
+		@Override
 		public int compare(Viewer viewer, Object e1, Object e2) {
 			final String elem1 = (colid == COLUMN_ID.CLASS ? 
 									getClassName(e1) : 
@@ -479,8 +479,7 @@ public class ProcedureClassDialog extends Dialog
 									getProcedureName(e2));
 			
 			int k = (direction == Direction.ASC ? 1 : -1 );
-			int res = k * super.compare(viewer, elem1, elem2);
-			return res;
+			return k * super.compare(viewer, elem1, elem2);
 		}
 
 		/****

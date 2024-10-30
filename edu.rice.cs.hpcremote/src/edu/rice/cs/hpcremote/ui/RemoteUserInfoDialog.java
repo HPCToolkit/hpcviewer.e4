@@ -30,7 +30,7 @@ public class RemoteUserInfoDialog implements UserInfo, UIKeyboardInteractive
 	private String password;
 	private String passphrase;
 	
-	public RemoteUserInfoDialog(Shell parentShell, String host) {
+	public RemoteUserInfoDialog(Shell parentShell) {
 		this.shell = parentShell;
 		var pass = parentShell.getData(PASS_KEY);
 		if (pass != null)

@@ -21,7 +21,7 @@ import edu.rice.cs.hpcremote.data.RemoteCommunicationProtocolBase;
  */
 public interface ICollectionOfConnections 
 {
-	static final ConcurrentHashMap<String, RemoteCommunicationProtocolBase> map = ConcurrentHashMap.newMap();
+	ConcurrentHashMap<String, RemoteCommunicationProtocolBase> map = ConcurrentHashMap.newMap();
 
 
 	/***

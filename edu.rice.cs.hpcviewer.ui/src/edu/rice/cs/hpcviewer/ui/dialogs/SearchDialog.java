@@ -1,6 +1,21 @@
-// SPDX-FileCopyrightText: 2024 Contributors to the HPCToolkit Project
-//
-// SPDX-License-Identifier: BSD-3-Clause
+/*******************************************************************************
+ * Copyright (c) 2012, 2020 Original authors and others.
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *     Original authors and others - initial API and implementation
+ *     Dirk Fauth <dirk.fauth@googlemail.com> - Bug 453914
+ ******************************************************************************/
+
+// this code is mainly taken from org.eclipse.nebula.widgets.nattable.search.gui
+// with some adjustment to avoid dependency to org.eclipse.nebula.widgets.nattable.*
+// see the original code at:
+//   https://github.com/eclipse-nattable/nattable/blob/master/org.eclipse.nebula.widgets.nattable.core/src/org/eclipse/nebula/widgets/nattable/search/gui/SearchDialog.java
 
 package edu.rice.cs.hpcviewer.ui.dialogs;
 

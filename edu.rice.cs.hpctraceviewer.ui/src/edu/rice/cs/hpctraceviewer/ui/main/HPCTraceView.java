@@ -97,7 +97,7 @@ public class HPCTraceView extends AbstractBaseItem
 						hint(Y_AXIS_WIDTH, X_AXIS_HEIGHT).applyTo(footerCanvas);
 
 
-		canvasAxisX = new CanvasAxisX(parentPart, plotArea, SWT.NO_BACKGROUND);
+		canvasAxisX = new CanvasAxisX(parentPart, plotArea);
 		GridDataFactory.fillDefaults().grab(true, false).
 						hint(500, X_AXIS_HEIGHT).applyTo(canvasAxisX);
 

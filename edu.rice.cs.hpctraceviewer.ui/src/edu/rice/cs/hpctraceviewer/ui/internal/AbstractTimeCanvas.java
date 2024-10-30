@@ -52,22 +52,23 @@ implements ITraceCanvas, PaintListener
 	
 	private BufferedCanvasToolTip tooltip;
 	
-	protected enum RegionType {Vertical, Rectangle};
+	protected enum RegionType {Vertical, Rectangle}
 	
-	final private RegionType regionType;
+	private final RegionType regionType;
 	
 	/****************
 	 * Constructs a new instance of this class given its parent and a style value describing its behavior and appearance.
 	 *
 	 * @param composite
-	 * @param style
 	 ****************/
-	public AbstractTimeCanvas(Composite composite, int style) {
-		this(composite, style, RegionType.Vertical);
+	protected AbstractTimeCanvas(Composite composite) {
+		this(composite, RegionType.Vertical);
 	}
+
 	
-	public AbstractTimeCanvas(Composite composite, int style, RegionType regionType) {
+	protected AbstractTimeCanvas(Composite composite, RegionType regionType) {
 		super(composite);
+		
 		mouseState = ITraceCanvas.MouseState.ST_MOUSE_INIT;
 		this.regionType = regionType;
 	}
@@ -87,6 +88,7 @@ implements ITraceCanvas, PaintListener
 				 * (non-Javadoc)
 				 * @see org.eclipse.swt.events.FocusAdapter#focusLost(org.eclipse.swt.events.FocusEvent)
 				 */
+				@Override
 				public void focusLost(FocusEvent e) {
 					AbstractTimeCanvas.this.initMouseSelection();
 				}
@@ -218,7 +220,7 @@ implements ITraceCanvas, PaintListener
 	 ******************************************************************/
 
 	
-	static private class BufferedCanvasToolTip extends DefaultToolTip
+	private static class BufferedCanvasToolTip extends DefaultToolTip
 	{
 		private final AbstractTimeCanvas canvas;
 		private final int deviceZoom;
