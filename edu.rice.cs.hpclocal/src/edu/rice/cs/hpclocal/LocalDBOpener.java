@@ -90,7 +90,7 @@ public class LocalDBOpener extends AbstractDBOpener
 		IFileDB fileDB = getFileDB();
 		
 		// prepare the xml experiment and all extended data
-		return new SpaceTimeDataControllerLocal(statusMgr, experiment, fileDB);
+		return new SpaceTimeDataControllerLocal(experiment, fileDB);
 	}
 
 	

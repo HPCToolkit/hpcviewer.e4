@@ -8,8 +8,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-
 import edu.rice.cs.hpcbase.IProcessTimeline;
 import edu.rice.cs.hpcbase.ITraceDataCollector;
 import edu.rice.cs.hpcbase.ITraceDataCollector.TraceOption;
@@ -37,8 +35,6 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 	/***
 	 * Constructor to setup local database
 	 * 
-	 * @param statusMgr 
-	 * 			IProgressMonitor
 	 * @param experiment 
 	 * 			IExperiment
 	 * @param fileDB 
@@ -47,7 +43,6 @@ public class SpaceTimeDataControllerLocal extends SpaceTimeDataController
 	 * @throws IOException
 	 */
 	public SpaceTimeDataControllerLocal(
-			IProgressMonitor statusMgr, 
 			IExperiment experiment, 
 			IFileDB fileDB)
 					throws IOException {

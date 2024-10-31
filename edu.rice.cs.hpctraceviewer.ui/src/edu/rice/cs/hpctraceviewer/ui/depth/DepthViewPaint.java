@@ -111,9 +111,8 @@ public class DepthViewPaint extends BaseViewPaint
 	protected BasePaintThread getPaintThread(Queue<TimelineDataSet> queue, int numLines, 
 			   int width, IProgressMonitor monitor) {
 
-		return new DepthPaintThread(controller, queue, numLines, 
-									numDataCollected, timelineDone, 
-									width, monitor);
+		return new DepthPaintThread(controller,  queue,  numLines, 
+									timelineDone, width, monitor);
 	}
 
 	@Override
