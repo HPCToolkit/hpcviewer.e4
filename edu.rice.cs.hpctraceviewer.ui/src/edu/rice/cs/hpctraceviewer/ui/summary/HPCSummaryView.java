@@ -59,7 +59,7 @@ public class HPCSummaryView extends AbstractBaseItem
 		 * Summary View Canvas
 		 *************************************************************************/
 		
-		summaryCanvas = new SummaryTimeCanvas(parentPart, plotArea, context, broker);
+		summaryCanvas = new SummaryTimeCanvas(parentPart, plotArea, broker);
 		summaryCanvas.setLayout(new GridLayout());
 		summaryCanvas.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		summaryCanvas.setVisible(false);

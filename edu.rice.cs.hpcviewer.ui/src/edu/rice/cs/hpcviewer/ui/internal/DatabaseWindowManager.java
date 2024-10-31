@@ -33,7 +33,7 @@ public class DatabaseWindowManager
 	 *   <li> {@code EXIST_REPLACE}: the database already exists and user confirms to replace it
 	 * </ul>
 	 */
-	public enum DatabaseExistence {INEXIST, EXIST_CANCEL, EXIST_REPLACE};
+	public enum DatabaseExistence {INEXIST, EXIST_CANCEL, EXIST_REPLACE}
 	
 	/***
 	 * The map between an Eclipse window to the list of databases.

@@ -30,6 +30,8 @@ import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
+import org.slf4j.LoggerFactory;
+
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 import edu.rice.cs.hpcviewer.ui.util.ApplicationProperty;
 import edu.rice.cs.hpcviewer.ui.util.IConstants;
@@ -45,7 +47,7 @@ public class LifeCycle
 
 	@Inject DatabaseCollection databaseCollection;
 
-	private Image listImages[];
+	private Image[] listImages;
 
 	@PostContextCreate
 	public void startup() {
@@ -64,6 +66,7 @@ public class LifeCycle
 				listImages[i] = new Image(display, url.getFile());
 				i++;
 			} catch (IOException e) {
+				LoggerFactory.getLogger(getClass()).warn("Fail to allocate image " + imageName, e);
 			}
 		}
 		Window.setDefaultImages(listImages);
@@ -105,6 +108,7 @@ public class LifeCycle
 
 	@PreSave
 	void preSave(IEclipseContext workbenchContext) {
+		// no need to pre-save
 	}
 
 	@ProcessAdditions
@@ -126,7 +130,9 @@ public class LifeCycle
 	}
 
 	@ProcessRemovals
-	void processRemovals(IEclipseContext workbenchContext) {}
+	void processRemovals(IEclipseContext workbenchContext) {
+		// no need to process removal. 
+	}
 
 	
 	private void setUserLog() {

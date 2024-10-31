@@ -19,16 +19,20 @@ import edu.rice.cs.hpctraceviewer.ui.internal.BasePaintThread;
 import edu.rice.cs.hpctraceviewer.ui.internal.ImagePosition;
 
 
-public class DepthPaintThread extends BasePaintThread {
-
+public class DepthPaintThread extends BasePaintThread 
+{
 	private Image image;
 	private GC gc;
 
-	public DepthPaintThread(SpaceTimeDataController stData, Queue<TimelineDataSet> list, int linesToPaint, 
-			AtomicInteger numDataCollected, AtomicInteger paintDone,
-			int width, IProgressMonitor monitor) {
+	public DepthPaintThread(
+			SpaceTimeDataController stData, 
+			Queue<TimelineDataSet> list, 
+			int linesToPaint, 
+			AtomicInteger paintDone,
+			int width, 
+			IProgressMonitor monitor) {
 
-		super(stData, list, linesToPaint, numDataCollected, paintDone, width, monitor);
+		super(stData, list, linesToPaint, paintDone, width, monitor);
 	}
 
 	@Override

@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpclog.LogProperty;
 import edu.rice.cs.hpcviewer.ui.util.FileUtility;
@@ -80,6 +81,7 @@ public class InfoLogDialog extends Dialog
 				try {
 					FileUtility.clearFileContent(log);
 				} catch (IOException e) {
+					LoggerFactory.getLogger(getClass()).error("Unable to clear the log file " + log, e);
 				}
 			}
 			Activator activator = Activator.getDefault();
@@ -88,6 +90,7 @@ public class InfoLogDialog extends Dialog
 				try {
 					FileUtility.clearFileContent(locUser);
 				} catch (IOException e) {
+					LoggerFactory.getLogger(getClass()).error("Unable to clear the log file " + locUser, e);
 				}
 			}
 			fillText();
@@ -110,20 +113,20 @@ public class InfoLogDialog extends Dialog
 			try {
 				text += FileUtility.getFileContent(log);
 			} catch (IOException e) {
-				// do nothing
+				LoggerFactory.getLogger(getClass()).error("Unable to read " + log, e);
 			}
 		}
 		text += "\n\n";
 		
-		try {
-			Activator activator = Activator.getDefault();
-			if (activator != null) {
-				String locUser = Platform.getLogFileLocation().toOSString(); 
-				text += "File: " + locUser + "\n";
-				text += FileUtility.getFileContent(locUser);				
-			}
-		} catch (IOException e) {
-			// do nothing
+		Activator activator = Activator.getDefault();
+		if (activator != null) {
+			String locUser = Platform.getLogFileLocation().toOSString(); 
+			text += "File: " + locUser + "\n";
+			try {
+				text += FileUtility.getFileContent(locUser);
+			} catch (IOException e) {
+				LoggerFactory.getLogger(getClass()).error("Unable to read " + locUser, e);
+			}				
 		}
 		text += "\n";
 		wText.setText(text);

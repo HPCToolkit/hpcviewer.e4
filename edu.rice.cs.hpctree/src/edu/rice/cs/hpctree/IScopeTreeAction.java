@@ -10,13 +10,13 @@ import edu.rice.cs.hpcdata.experiment.scope.Scope;
 
 public interface IScopeTreeAction 
 {
-	public void refresh();
+	void refresh();
 	
 	/***
 	 * Expand one level the node (if it's collapsed) of index  
 	 * @param index the index of the node to expand 
 	 */
-	public void traverseOrExpand(int index);
+	void traverseOrExpand(int index);
 	
 	/***
 	 * Expand one level a scope node (if it's collapsed) and return the list
@@ -24,32 +24,32 @@ public interface IScopeTreeAction
 	 * @param scope the parent scope
 	 * @return
 	 */
-	public List<Scope> traverseOrExpand(Scope scope);
+	List<Scope> traverseOrExpand(Scope scope);
 	
 	/****
 	 * Reset the root of the table
 	 * @param scope
 	 */
-	public void setRoot(Scope scope);
+	void setRoot(Scope scope);
 	
 	
 	/****
 	 * Get the current root of the table
 	 * @return
 	 */
-	public Scope getRoot();
+	Scope getRoot();
 	
 	/***
 	 * Get the selected node (if it's selected)
 	 * @return the selected node, null if none is selected
 	 */
-	public Scope getSelection();
+	Scope getSelection();
 	
 	/****
 	 * Get the current sorted column (zero-based number) 
 	 * @return
 	 */
-	public int getSortedColumn();
+	int getSortedColumn();
 
 	
 	/****

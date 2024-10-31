@@ -21,19 +21,42 @@ import edu.rice.cs.hpctraceviewer.ui.internal.ImagePosition;
 
 /******************************************************
  * 
- * Painting class for depth view
+ * Painting class for depth view.
+ * 
+ * Instantiate this class every time we want to paint the depth view
+ * Even though there is no new data needs to be fetched
  *
  ******************************************************/
-public class DepthViewPaint extends BaseViewPaint {
-
+public class DepthViewPaint extends BaseViewPaint 
+{
 	private final GC masterGC;
-	private final AtomicInteger timelineDone, numDataCollected;
+	private final AtomicInteger timelineDone;
+	private final AtomicInteger numDataCollected;
 	private float numPixels;
 	private final int visibleDepth;
 
-	public DepthViewPaint(final GC masterGC, SpaceTimeDataController data,
-			TraceDisplayAttribute attributes, boolean changeBound, 
-			ISpaceTimeCanvas canvas, int visibleDepth) {
+	
+	/**
+	 * Create a painting job to replace the current depth view with a 
+	 * new paint whether with a new data or not.
+	 *  
+	 * @param masterGC
+	 * 			The graphic context of the depth view
+	 * @param data
+	 * 			The trace data
+	 * @param changeBound
+	 * 			Flag whether it requires to fetch new data
+	 * @param canvas
+	 * 			The canvas to be painted
+	 * @param visibleDepth
+	 * 			The vertical depth (in pixels)
+	 */
+	public DepthViewPaint(
+			final GC masterGC, 
+			SpaceTimeDataController data,
+			boolean changeBound, 
+			ISpaceTimeCanvas canvas, 
+			int visibleDepth) {
 		
 		super("Depth view", data, changeBound,  canvas);
 		this.masterGC = masterGC;
@@ -53,12 +76,12 @@ public class DepthViewPaint extends BaseViewPaint {
 		//  - a process has been selected for the depth view (within the range)
 		//  - and the main view has finished generated the timelines
 		
-		if (process >= attributes.getProcessBegin() && process <= attributes.getProcessEnd()) {
-			// TODO warning: data races for accessing the current process timeline 
-			if ( controller.getCurrentSelectedTraceline() != null) {
+		if (process >= attributes.getProcessBegin() && 
+			process <= attributes.getProcessEnd()   &&  
+		   (controller.getCurrentSelectedTraceline() != null)) {
 				numPixels = attributes.getDepthPixelVertical()/(float)visibleDepth;
 				return changedBounds;
-			}
+			
 		}
 		return false;
 	}
@@ -88,9 +111,8 @@ public class DepthViewPaint extends BaseViewPaint {
 	protected BasePaintThread getPaintThread(Queue<TimelineDataSet> queue, int numLines, 
 			   int width, IProgressMonitor monitor) {
 
-		return new DepthPaintThread(controller, queue, numLines, 
-									numDataCollected, timelineDone, 
-									width, monitor);
+		return new DepthPaintThread(controller,  queue,  numLines, 
+									timelineDone, width, monitor);
 	}
 
 	@Override
@@ -117,8 +139,8 @@ public class DepthViewPaint extends BaseViewPaint {
 	}
 
 	@Override
-	protected void endPreparationThread(BaseTimelineThread thread, int result) {}
+	protected void endPreparationThread(BaseTimelineThread thread, int result) { /* no op */ }
 
 	@Override
-	protected void endDataPreparation(int numInvalidData) {}
+	protected void endDataPreparation(int numInvalidData) { /* no op */ }
 }

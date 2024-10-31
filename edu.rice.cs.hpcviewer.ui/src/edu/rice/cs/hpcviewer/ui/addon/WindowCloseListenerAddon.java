@@ -80,11 +80,8 @@ public class WindowCloseListenerAddon
 		Object changedObj = event.getProperty(UIEvents.EventTags.ELEMENT);
 		
 		// only interested in changes to application
-		if (changedObj instanceof MApplication) {
-			MApplication app = (MApplication) changedObj;
-			if (workbench != null ) {
-				registerCloseHandler(app);
-			}
+		if (changedObj instanceof MApplication app && workbench != null) {
+			registerCloseHandler(app);			
 		}
 	}
 

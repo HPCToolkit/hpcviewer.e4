@@ -33,10 +33,10 @@ import edu.rice.cs.hpctraceviewer.ui.internal.ImagePosition;
 public class DetailPaintThread 
 	extends BasePaintThread
 {
-	final private boolean debugMode;
+	private final boolean debugMode;
 
-	final private Point  maxTextSize;
-	final private Device device;
+	private final Point  maxTextSize;
+	private final Device device;
 	
 	private Image lineFinal;
 	private Image lineOriginal;
@@ -50,19 +50,20 @@ public class DetailPaintThread
 	 * 
 	 * The class will return a list of images.
 	 * 
+	 * @param device : the display device used to create images. Cannot be null
+	 * @param stData : main trace data
 	 * @param list : the queue of TimelineDataSet data
 	 * @param numLines
-	 * @param device : the display device used to create images. Cannot be null
 	 * @param width : the width of the view
 	 * @param maxTextSize : the maximum size of a letter for a given device
 	 * @param debugMode : flag whether we need to show text information
 	 */
 	public DetailPaintThread(Device device, SpaceTimeDataController stData, Queue<TimelineDataSet> list, int numLines,
-			AtomicInteger numDataCollected, AtomicInteger paintDone, int width, 
+			AtomicInteger paintDone, int width, 
 			Point maxTextSize, boolean debugMode,
 			IProgressMonitor monitor) {
 		
-		super(stData, list, numLines, numDataCollected, paintDone, width, monitor);
+		super(stData, list, numLines, paintDone, width, monitor);
 		this.device      = device;
 		this.maxTextSize = maxTextSize;
 		this.debugMode   = debugMode;
@@ -80,26 +81,24 @@ public class DetailPaintThread
 		String count = String.valueOf(sampleCount);
 		if (sampleCount>DetailViewPaint.MAX_RECORDS_DISPLAY)
 			count = DetailViewPaint.TOO_MANY_RECORDS;
+		
 		decoration +=  "(" + count + ")";
 
 		// want 2 pixels on either side
-		if((box_width - maxTextSize.x) >= 4) {
+		if( (box_width  - maxTextSize.x) >= 4 && 
+		    (box_height - maxTextSize.y) >= 4 ) {
 
-			// want 2 pixels on above and below
-			if ((box_height - maxTextSize.y) >= 4) {
+			gc.setBackground(color);
 
-				gc.setBackground(color);
-
-				// Pick the color of the text indicating sample depth. 
-				// If the background is suffciently light, pick black, otherwise white
-				if (color.getRed()+color.getBlue()+color.getGreen()>BaseConstants.DARKEST_COLOR_FOR_BLACK_TEXT)
-					gc.setForeground(ColorManager.COLOR_BLACK);
-				else
-					gc.setForeground(ColorManager.COLOR_WHITE);
-				
-				Point textSize = gc.textExtent(decoration);
-				gc.drawText(decoration, odInitPixel+((box_width - textSize.x)/2), ((box_height - textSize.y)/2));
-			}
+			// Pick the color of the text indicating sample depth. 
+			// If the background is suffciently light, pick black, otherwise white
+			if (color.getRed()+color.getBlue()+color.getGreen()>BaseConstants.DARKEST_COLOR_FOR_BLACK_TEXT)
+				gc.setForeground(ColorManager.COLOR_BLACK);
+			else
+				gc.setForeground(ColorManager.COLOR_WHITE);
+			
+			Point textSize = gc.textExtent(decoration);
+			gc.drawText(decoration, odInitPixel+((box_width - textSize.x)/2), ((box_height - textSize.y)/2));
 		}
 	}
 	

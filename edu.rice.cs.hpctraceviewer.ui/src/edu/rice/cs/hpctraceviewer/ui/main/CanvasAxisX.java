@@ -10,7 +10,6 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.core.commands.operations.IOperationHistoryListener;
 import org.eclipse.core.commands.operations.IUndoableOperation;
 import org.eclipse.core.commands.operations.OperationHistoryEvent;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
@@ -59,8 +58,8 @@ public class CanvasAxisX extends AbstractAxisCanvas
 	 * @param parent
 	 * @param style
 	 */
-	public CanvasAxisX(ITracePart tracePart, Composite parent, int style) {
-		super(tracePart, parent, SWT.NO_BACKGROUND | style);
+	public CanvasAxisX(ITracePart tracePart, Composite parent) {
+		super(tracePart, parent);
 
 		formatTime = new DecimalFormat("###,###,###,###,###.##");
 		

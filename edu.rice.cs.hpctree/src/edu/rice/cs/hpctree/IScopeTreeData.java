@@ -22,13 +22,13 @@ public interface IScopeTreeData extends ITreeData<Scope>, ITreePath<Scope>
 	 * @param sortDirection {@code SortDirectionEnum}
 	 * @param accumulate
 	 */
-	public void sort(int columnIndex, SortDirectionEnum sortDirection, boolean accumulate);
+	void sort(int columnIndex, SortDirectionEnum sortDirection, boolean accumulate);
 
 	
 	/** 
 	 * Reset the data
 	 */
-	public void clear();
+	void clear();
 	
 	
 	/*****
@@ -36,20 +36,20 @@ public interface IScopeTreeData extends ITreeData<Scope>, ITreePath<Scope>
 	 * 
 	 * @return
 	 */
-	public List<Scope> getList();
+	List<Scope> getList();
 	
 	
 	/*****
 	 * Set the new root to the table. This will generate new list of nodes.
 	 * @param root
 	 */
-	public void setRoot(Scope root);
+	void setRoot(Scope root);
 	
 	/****
 	 * Get the root of this tree data
 	 * @return RootScope
 	 */
-	public Scope getRoot();
+	Scope getRoot();
 	
 	
 	/****
@@ -57,14 +57,14 @@ public interface IScopeTreeData extends ITreeData<Scope>, ITreePath<Scope>
 	 * 
 	 * @return
 	 */
-	public int getSortedColumn();
+	int getSortedColumn();
 
 	
 	/****
 	 * Get the current sort direction
 	 * @return
 	 */
-	public SortDirectionEnum getSortDirection();
+	SortDirectionEnum getSortDirection();
 	
 	
 	
@@ -72,7 +72,7 @@ public interface IScopeTreeData extends ITreeData<Scope>, ITreePath<Scope>
 	 * Retrieve the metric manager of this tree
 	 * @return
 	 */
-	public IMetricManager getMetricManager();
+	IMetricManager getMetricManager();
 	
 	/****
 	 * Retrieve the metric of the current metric index (the index is based on table column index,
@@ -81,7 +81,7 @@ public interface IScopeTreeData extends ITreeData<Scope>, ITreePath<Scope>
 	 * @param indexMetricColumn
 	 * @return
 	 */
-	public BaseMetric getMetric(int indexMetricColumn);
+	BaseMetric getMetric(int indexMetricColumn);
 
 	
 	/****
@@ -89,7 +89,7 @@ public interface IScopeTreeData extends ITreeData<Scope>, ITreePath<Scope>
 	 * 
 	 * @return
 	 */
-	public int getMetricCount();
+	int getMetricCount();
 
 
 	/***

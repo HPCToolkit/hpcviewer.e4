@@ -12,6 +12,6 @@ import edu.rice.cs.hpcbase.ui.IBaseItem;
 
 public interface ITraceItem extends IBaseItem 
 {
-	public void createContent(ITracePart parentPart, IEclipseContext context, IEventBroker broker, Composite parentComposite);
+	void createContent(ITracePart parentPart, IEclipseContext context, IEventBroker broker, Composite parentComposite);
 
 }

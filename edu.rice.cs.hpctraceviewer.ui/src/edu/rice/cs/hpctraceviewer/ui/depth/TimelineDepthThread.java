@@ -96,7 +96,7 @@ public class TimelineDepthThread
 		
 		// the current depth is the current line to be painted		
 		data.depth = minDepth + data.ptl.line();
-		return new DepthDataPreparation(data, minDepth, visibleDepths);
+		return new DepthDataPreparation(data, minDepth);
 	}
 	
 	
@@ -114,7 +114,7 @@ public class TimelineDepthThread
 			return 0;
 		
 		if (currentDepth+mid >= maxDepth)
-			return (int) (maxDepth-visibleDepths);
+			return (maxDepth-visibleDepths);
 		
 		int mx = (int) (currentDepth + mid);
 		return mx-visibleDepths;

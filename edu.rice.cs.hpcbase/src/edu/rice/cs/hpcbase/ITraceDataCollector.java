@@ -8,9 +8,9 @@ import java.io.IOException;
 
 public interface ITraceDataCollector 
 {
-	enum TraceOption {ORIGINAL_TRACE, REVEAL_GPU_TRACE, REVEAL_CPU_TRACE, REVEAL_ALL_TRACES};
+	enum TraceOption {ORIGINAL_TRACE, REVEAL_GPU_TRACE, REVEAL_CPU_TRACE, REVEAL_ALL_TRACES}
 	
-	static ITraceDataCollector DUMMY = new ITraceDataCollector() {
+	ITraceDataCollector DUMMY = new ITraceDataCollector() {
 		
 		@Override
 		public int size() {

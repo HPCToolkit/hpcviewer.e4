@@ -12,6 +12,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.e4.core.di.annotations.CanExecute;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.context.BaseTraceContext;
@@ -40,16 +41,10 @@ public class UndoOperationAction
 		
 		IUndoableOperation[] redos = tracePart.getOperationHistory().getRedoHistory(context);
 		
-		if (redos.length == 0) {
-			// hack: when there's no redo, we need to remove the current
-			// history into the redo's stack. To do this properly, we
-			// should perform an extra undo before the real undo
-
-			//doUndo();
-			if (len-2>=0) {
-				execute(tracePart.getOperationHistory(), operations[len-2]);
-				return;
-			}
+		if (redos.length == 0 &&  (len-2>=0)) {
+			execute(tracePart.getOperationHistory(), operations[len-2]);
+			return;
+			
 		}
 		doUndo(tracePart.getOperationHistory(), context);
 	}
@@ -60,9 +55,8 @@ public class UndoOperationAction
 		ITracePart tracePart = (ITracePart) part.getObject();
 		IUndoContext context = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_TRACE);
 		final IUndoableOperation []ops = tracePart.getOperationHistory().getUndoHistory(context);
-		boolean status = (ops != null) && (ops.length>0);
-
-		return status;
+		
+		return (ops != null) && (ops.length>0);
 	}
 
 	/***
@@ -73,10 +67,10 @@ public class UndoOperationAction
 		try {
 			IStatus status = opHistory.undo(context, null, null);
 			if (!status.isOK()) {
-				System.err.println("Cannot undo: " + status.getMessage());
+				LoggerFactory.getLogger(getClass()).error("Cannot undo: {}", status.getMessage());
 			}
 		} catch (ExecutionException e) {
-			e.printStackTrace();
+			LoggerFactory.getLogger(getClass()).error("Fail to undo an operation", e);
 		}
 	}
 	

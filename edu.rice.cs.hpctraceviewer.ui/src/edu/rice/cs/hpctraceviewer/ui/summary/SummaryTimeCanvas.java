@@ -13,9 +13,7 @@ import org.eclipse.core.commands.operations.IOperationHistoryListener;
 import org.eclipse.core.commands.operations.IUndoContext;
 import org.eclipse.core.commands.operations.IUndoableOperation;
 import org.eclipse.core.commands.operations.OperationHistoryEvent;
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.graphics.Color;
@@ -71,9 +69,8 @@ public class SummaryTimeCanvas extends AbstractTimeCanvas implements IOperationH
 	 **********************************/
 	public SummaryTimeCanvas(ITracePart tracePart, 
 							 Composite composite, 
-							 IEclipseContext context, 
 							 IEventBroker eventBroker) {
-		super(composite, SWT.NO_BACKGROUND);
+		super(composite);
 
 		this.eventBroker = eventBroker;
 		this.tracePart   = tracePart;

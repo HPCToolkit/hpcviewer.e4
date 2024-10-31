@@ -36,11 +36,11 @@ public class DatabaseFactory
 			return new RemoteDatabaseIdentification(databaseId);
 		} catch (InvalidRemoteIdentficationException e) {
 			// it is NOT a remote id
+			// check if it is a local database id
+			var path = Paths.get(databaseId).toAbsolutePath();
+			if (path.toFile().exists())
+				return new LocalDatabaseIdentification(databaseId);
 		}
-		
-		var path = Paths.get(databaseId).toAbsolutePath();
-		if (path.toFile().exists())
-			return new LocalDatabaseIdentification(databaseId);
 		
 		return null;
 	}

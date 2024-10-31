@@ -29,7 +29,7 @@ public class ProcessZoomIn {
 		TracePart traceView   = (TracePart) part.getObject();
 		ITraceViewAction actions = traceView.getActions();
 		
-		return (actions != null ? actions.canProcessZoomIn() : false);
+		return (actions != null && actions.canProcessZoomIn());
 	}
 		
 }

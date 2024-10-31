@@ -6,30 +6,30 @@ package edu.rice.cs.hpctraceviewer.ui.base;
 
 public interface ITraceViewAction {
 
-	public void home();
+	void home();
 
-	public void timeZoomIn();
-	public void timeZoomOut();
+	void timeZoomIn();
+	void timeZoomOut();
 	
-	public void processZoomIn();
-	public void processZoomOut();
+	void processZoomIn();
+	void processZoomOut();
 
-	public void saveConfiguration();
-	public void openConfiguration();
+	void saveConfiguration();
+	void openConfiguration();
 	
-	public void goUp();
-	public void goDown();
-	public void goRight();
-	public void goLeft();
+	void goUp();
+	void goDown();
+	void goRight();
+	void goLeft();
 	
-	public boolean canProcessZoomIn();
-	public boolean canProcessZoomOut();
+	boolean canProcessZoomIn();
+	boolean canProcessZoomOut();
 
-	public boolean canTimeZoomIn();
-	public boolean canTimeZoomOut();
+	boolean canTimeZoomIn();
+	boolean canTimeZoomOut();
 	
-    public boolean canGoRight();    
-    public boolean canGoLeft();
-    public boolean canGoUp();
-    public boolean canGoDown();
+    boolean canGoRight();    
+    boolean canGoLeft();
+    boolean canGoUp();
+    boolean canGoDown();
 }

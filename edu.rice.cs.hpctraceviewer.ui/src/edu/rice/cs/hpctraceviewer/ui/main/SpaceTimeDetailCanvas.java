@@ -139,7 +139,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
     /**Creates a SpaceTimeDetailCanvas with the given parameters*/
 	public SpaceTimeDetailCanvas(ITracePart tracePart, IEventBroker eventBroker, Composite _composite)
 	{
-		super(_composite, SWT.NO_BACKGROUND | SWT.BORDER_DASH, RegionType.Rectangle );
+		super(_composite, RegionType.Rectangle );
 		
 		this.tracePart   = tracePart;
 		this.eventBroker = eventBroker;

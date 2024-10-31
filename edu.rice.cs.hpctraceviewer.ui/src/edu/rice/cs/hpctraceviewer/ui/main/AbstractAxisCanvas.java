@@ -18,12 +18,12 @@ import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
 import edu.rice.cs.hpctraceviewer.ui.context.BaseTraceContext;
 import edu.rice.cs.hpctraceviewer.ui.internal.BufferedCanvas;
 
-abstract public class AbstractAxisCanvas extends BufferedCanvas 
+public abstract class AbstractAxisCanvas extends BufferedCanvas 
 				implements PaintListener, IOperationHistoryListener, DisposeListener
 {
 	final ITracePart tracePart;
 	
-	public AbstractAxisCanvas(ITracePart tracePart, Composite parent, int style) {
+	protected AbstractAxisCanvas(ITracePart tracePart, Composite parent) {
 		super(parent, false);
 		
 		this.tracePart = tracePart;
@@ -60,16 +60,12 @@ abstract public class AbstractAxisCanvas extends BufferedCanvas
 	 */
 	protected void syncRedraw() {
 		
-		Display.getDefault().syncExec(new Runnable() {
+		Display.getDefault().syncExec( () -> {
+			if (getData() == null)
+				return;
 			
-			@Override
-			public void run() {
-				if (getData() == null)
-					return;
-				
-				redraw();
-			}
-		});
+			redraw();
+		} );
 	}
 
 
