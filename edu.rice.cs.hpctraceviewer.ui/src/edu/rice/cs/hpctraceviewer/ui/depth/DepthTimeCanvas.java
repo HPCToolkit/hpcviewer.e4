@@ -312,8 +312,11 @@ public class DepthTimeCanvas extends AbstractTimeCanvas
 			IUndoContext positionContext = tracePart.getContext(BaseTraceContext.CONTEXT_OPERATION_POSITION);
 			
 			if (operation.hasContext(bufferContext)) {
+				// Fix issue #348: keep the current visibleDepths unless 
+				//   the new max depth is smaller than the current visible depth
+				//
 				// update the visible depth in case there's a change of max depth due to filtering
-				visibleDepths = Math.max(1, stData.getMaxDepth());
+				visibleDepths = Math.min(visibleDepths, stData.getMaxDepth());
 
 				// this event includes if there's a change of colors definition, so everyone needs
 				// to refresh the content.
