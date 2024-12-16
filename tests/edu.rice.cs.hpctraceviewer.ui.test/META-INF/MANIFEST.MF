@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: hpctraceviewer.ui.test
+Bundle-SymbolicName: edu.rice.cs.hpctraceviewer.ui.test
+Bundle-Version: 6.0.0.qualifier
+Fragment-Host: edu.rice.cs.hpctraceviewer.ui
+Import-Package: org.junit,
+ org.junit.runner;version="4.13.2"
+Require-Bundle: edu.rice.cs.hpcdata,
+ edu.rice.cs.hpcbase,
+ edu.rice.cs.hpctraceviewer.data,
+ edu.rice.cs.hpclocal,
+ edu.rice.cs.hpctest.util,
+ org.eclipse.core.runtime,
+ org.eclipse.swt,
+ org.eclipse.equinox.registry,
+ org.mockito.mockito-core;bundle-version="4.8.1",
+ net.bytebuddy.byte-buddy;bundle-version="1.12.18",
+ org.objenesis;bundle-version="3.3.0",
+ org.eclipse.swtbot.junit4_x;bundle-version="4.2.1",
+ org.eclipse.swtbot.swt.finder;bundle-version="4.2.1"
+Bundle-Vendor: Rice University
+Automatic-Module-Name: edu.rice.cs.hpctest.trace

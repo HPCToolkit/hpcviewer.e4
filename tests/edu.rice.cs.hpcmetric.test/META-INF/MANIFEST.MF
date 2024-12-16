@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: hpcmetric.test
+Bundle-SymbolicName: edu.rice.cs.hpcmetric.test
+Bundle-Version: 6.0.0.qualifier
+Bundle-Vendor: HPCToolkit
+Fragment-Host: edu.rice.cs.hpcmetric;bundle-version="6.0.0"
+Require-Bundle: org.junit,
+ edu.rice.cs.hpctest.util;bundle-version="1.0.0",
+ org.eclipse.swtbot.swt.finder;bundle-version="4.2.1",
+ org.eclipse.swtbot.go;bundle-version="4.2.1",
+ org.mockito.mockito-core,
+ net.bytebuddy.byte-buddy;bundle-version="1.12.18",
+ net.bytebuddy.byte-buddy-agent;bundle-version="1.12.18",
+ org.objenesis;bundle-version="3.3.0"
+Automatic-Module-Name: edu.rice.cs.hpctest.metric
+Bundle-RequiredExecutionEnvironment: JavaSE-17

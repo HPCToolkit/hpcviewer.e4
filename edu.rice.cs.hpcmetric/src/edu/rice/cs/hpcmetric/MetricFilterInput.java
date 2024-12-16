@@ -32,10 +32,8 @@ public class MetricFilterInput extends FilterInputData<BaseMetric> implements IE
 	/****
 	 * Constructor for the metric filter input
 	 * 
-	 * @param root The root scope used to display the metric values of the root. It can be any root, but the preference is the cct root. 
-	 * @param metricManager Current metric manager. Usually it's the experiment class
-	 * @param listMetrics List of metric status
-	 * @param affectAll boolean true if the change affects all other views within the experiment database
+	 *  @param view The table of {@code IFilterable} to be filtered
+	 *  @param eventBroker event broadcaster when the filter is executed
 	 */
 	public MetricFilterInput(IFilterable view, IEventBroker eventBroker) {
 		super(view.getFilterDataItems());

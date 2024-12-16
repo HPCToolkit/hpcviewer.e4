@@ -41,6 +41,7 @@ public class CanvasAxisY extends AbstractAxisCanvas
 											{ SWT.COLOR_YELLOW,  SWT.COLOR_DARK_MAGENTA },
 											{ SWT.COLOR_GREEN,   SWT.COLOR_DARK_YELLOW  },
 											{ SWT.COLOR_BLUE,    SWT.COLOR_DARK_GREEN   },
+											{ SWT.COLOR_RED,     SWT.COLOR_DARK_CYAN    },
 											{ SWT.COLOR_WHITE,   SWT.COLOR_BLACK  }
 										};
 	
@@ -58,9 +59,8 @@ public class CanvasAxisY extends AbstractAxisCanvas
 	 * 
 	 * @param tracePart ITracePart the parent of the view
 	 * @param parent Composite
-	 * @param style int (see {@code SWT} constants for canvas)
 	 */
-	public CanvasAxisY(ITracePart tracePart, Composite parent, int style) {
+	public CanvasAxisY(ITracePart tracePart, Composite parent) {
 		super(tracePart, parent);
 		
 		listColorObjects = new Color[5][2];
@@ -177,7 +177,7 @@ public class CanvasAxisY extends AbstractAxisCanvas
 	        // for sequential code, we assume the number of parallelism is 1
 	        // (just to avoid the zero division)
 	        int partition   = Math.max(idtuple.getLength(), 1);
-	        int columnWidth = HPCTraceView.Y_AXIS_WIDTH / partition;
+	        int columnWidth = viewWidth / partition;
 
 			for(int j=0; j<idtuple.getLength(); j++) {
 
