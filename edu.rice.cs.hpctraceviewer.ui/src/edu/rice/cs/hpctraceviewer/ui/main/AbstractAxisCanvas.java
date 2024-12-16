@@ -50,6 +50,8 @@ public abstract class AbstractAxisCanvas extends BufferedCanvas
 	
 	@Override
 	public void widgetDisposed(DisposeEvent e) {
+		super.widgetDisposed(e);
+		
 		tracePart.getOperationHistory().removeOperationHistoryListener(this);
 	}
 

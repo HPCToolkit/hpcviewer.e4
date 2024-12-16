@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: hpctest.Util
+Bundle-Name: hpctest.util
 Bundle-SymbolicName: edu.rice.cs.hpctest.util
 Bundle-Version: 1.0.0.qualifier
 Export-Package: edu.rice.cs.hpctest.util
@@ -9,7 +9,8 @@ Require-Bundle: org.junit,
  edu.rice.cs.hpcdata,
  edu.rice.cs.hpclocal,
  edu.rice.cs.hpctraceviewer.data,
- org.eclipse.core.runtime
+ org.eclipse.core.runtime,
+ org.eclipse.swt
 Bundle-Vendor: Rice University
 Automatic-Module-Name: edu.rice.cs.hpctest.util
 Bundle-RequiredExecutionEnvironment: JavaSE-11

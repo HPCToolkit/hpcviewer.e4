@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: hpclocal.test
+Bundle-SymbolicName: edu.rice.cs.hpclocal.test
+Bundle-Version: 6.0.0.qualifier
+Fragment-Host: edu.rice.cs.hpclocal
+Require-Bundle: org.junit,
+ edu.rice.cs.hpctest.util,
+ edu.rice.cs.hpcdata,
+ edu.rice.cs.hpctraceviewer.data,
+ org.eclipse.core.runtime,
+ edu.rice.cs.hpcbase,
+ org.eclipse.swt
+Bundle-Vendor: Rice University
+Automatic-Module-Name: edu.rice.cs.hpctest.local
+Bundle-RequiredExecutionEnvironment: JavaSE-11

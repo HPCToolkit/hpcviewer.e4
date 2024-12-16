@@ -20,11 +20,12 @@
  </properties>
  <modules>
   <module>edu.rice.cs.hpctest.util</module>
-  <module>edu.rice.cs.hpctest.tree</module>
-  <module>edu.rice.cs.hpctest.trace</module>
-  <module>edu.rice.cs.hpctest.local</module>
-  <module>edu.rice.cs.hpctest.remote</module>
-  <module>edu.rice.cs.hpctest.filter</module>
+  <module>edu.rice.cs.hpctree.test</module>
+  <module>edu.rice.cs.hpctraceviewer.ui.test</module>
+  <module>edu.rice.cs.hpclocal.test</module>
+  <module>edu.rice.cs.hpcremote.test</module>
+  <module>edu.rice.cs.hpcfilter.test</module>
+  <module>edu.rice.cs.hpcmetric.test</module>
   <module>edu.rice.cs.hpctest.report</module>
  </modules>
 
@@ -50,5 +51,22 @@
         </build>
     </profile>
  </profiles>
+
+ <build>
+  <pluginManagement>
+  <plugins>
+   <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>target-platform-configuration</artifactId>
+        <version>${tycho.version}</version>
+        <configuration>
+            <target>
+              <file>${project.basedir}/../../target-platform/target-platform.target</file>
+            </target>
+        </configuration>
+   </plugin>
+  </plugins>
+  </pluginManagement>
+ </build>
 
 </project>

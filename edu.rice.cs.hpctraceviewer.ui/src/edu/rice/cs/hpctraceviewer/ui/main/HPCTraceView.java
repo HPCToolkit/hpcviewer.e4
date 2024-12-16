@@ -75,7 +75,7 @@ public class HPCTraceView extends AbstractBaseItem
 
 		Composite plotArea = new Composite(parent, SWT.NONE);
 		
-		canvasAxisY = new CanvasAxisY(parentPart, plotArea, SWT.NONE);
+		canvasAxisY = new CanvasAxisY(parentPart, plotArea);
 		GridDataFactory.fillDefaults().grab(false, true).
 						hint(Y_AXIS_WIDTH, 500).applyTo(canvasAxisY);
 

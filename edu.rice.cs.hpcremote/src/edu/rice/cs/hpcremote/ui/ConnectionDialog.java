@@ -87,14 +87,23 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 		
 		host = null; // default: local host
 		username = System.getProperty("user.name");
+		directory = null;
 	}
 
 	
+	/***
+	 * Create a connection dialog initialized with a specific remote ID.
+	 * 
+	 * @param parentShell
+	 * @param databaseId
+	 * 			The ID of the Remote database 
+	 */
 	public ConnectionDialog(Shell parentShell, RemoteDatabaseIdentification databaseId) {
 		super(parentShell);
 		
 		host = databaseId.getHost();
 		username = databaseId.getUsername();
+		directory = databaseId.getRemoteInstallation();
 	}
 
 	@Override
@@ -264,6 +273,11 @@ public class ConnectionDialog extends TitleAreaDialog implements IConnection
 	
 	
 	private void initFields() {
+		
+		if (host != null) textHost.setText(host);
+		if (username != null) textUsername.setText(username);
+		if (directory != null) textDirectory.setText(directory);
+		
 		var histories = initHistory();
 
 		if (histories.length > 0) {
