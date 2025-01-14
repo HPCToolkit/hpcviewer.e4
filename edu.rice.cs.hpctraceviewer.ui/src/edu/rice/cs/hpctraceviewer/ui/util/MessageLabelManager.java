@@ -88,6 +88,9 @@ public class MessageLabelManager
 			Color colorFont = display.getSystemColor(foreground);
 			Color colorBack = display.getSystemColor(background);
 
+			if (messageLabel.isDisposed())
+				return;
+			
 			messageLabel.setForeground(colorFont);
 			messageLabel.setBackground(colorBack);
 			messageLabel.setText(message);

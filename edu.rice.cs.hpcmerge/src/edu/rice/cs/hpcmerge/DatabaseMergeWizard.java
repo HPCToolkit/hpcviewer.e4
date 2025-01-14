@@ -15,7 +15,6 @@ import edu.rice.cs.hpcdata.merge.DatabasesToMerge;
 
 public class DatabaseMergeWizard extends Wizard 
 {
-	private WizardPage []pages;
 	private List<IDatabase> listDb;
 	private DatabasesToMerge database;
 	
@@ -43,6 +42,7 @@ public class DatabaseMergeWizard extends Wizard
     
     @Override
     public void addPages() {
+     WizardPage []pages;
     	// if we only have 2 database, we directly pick the metric to compare.
     	// otherwise we have to chose the databases, and then select the metric.
     	if (listDb.size() == 2) {
@@ -66,8 +66,7 @@ public class DatabaseMergeWizard extends Wizard
     public IWizardPage getNextPage(IWizardPage currentPage) {
     	
     	IWizardPage page = super.getNextPage(currentPage);
-    	if (page instanceof ChooseMetricPage) {
-    		ChooseMetricPage cmp = (ChooseMetricPage) page;
+    	if (page instanceof ChooseMetricPage cmp) {
     		cmp.setDatabasesToMerge(database);
     	}
     	return page;

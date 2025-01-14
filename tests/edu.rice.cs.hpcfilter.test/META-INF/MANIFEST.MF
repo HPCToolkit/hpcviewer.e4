@@ -19,4 +19,5 @@ Require-Bundle: edu.rice.cs.hpcdata,
  org.mockito.mockito-core,
  net.bytebuddy.byte-buddy,
  net.bytebuddy.byte-buddy-agent,
- org.objenesis
+ org.objenesis,
+ org.eclipse.swtbot.swt.finder
