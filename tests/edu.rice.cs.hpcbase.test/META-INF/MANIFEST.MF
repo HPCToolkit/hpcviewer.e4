@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: hpcbase.test
+Bundle-SymbolicName: edu.rice.cs.hpcbase.test
+Bundle-Version: 6.0.0.qualifier
+Bundle-Vendor: HPCToolkit project
+Fragment-Host: edu.rice.cs.hpcbase;bundle-version="6.0.0"
+Require-Bundle: org.junit
+Automatic-Module-Name: edu.rice.cs.hpcbase.test
+Bundle-RequiredExecutionEnvironment: JavaSE-17

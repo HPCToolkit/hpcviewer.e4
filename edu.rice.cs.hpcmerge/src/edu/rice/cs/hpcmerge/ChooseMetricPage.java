@@ -28,8 +28,9 @@ public class ChooseMetricPage extends WizardPage
 	private static final String TITLE = "Choose a metric to compare";
 	private static final String DEFAULT_LABEL = "Please select a metric from the list above";
 	
-	private Label labelDatabase[], labelMetric[];
-	private List  listMetrics[];
+	private Label []labelDatabase;
+	private Label []labelMetric;
+	private List  []listMetrics;
 	private DatabasesToMerge database;
 	
 	public ChooseMetricPage(DatabasesToMerge database) {

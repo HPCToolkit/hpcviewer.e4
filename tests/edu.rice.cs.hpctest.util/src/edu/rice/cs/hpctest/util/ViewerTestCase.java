@@ -31,13 +31,26 @@ public class ViewerTestCase
 			shell.dispose();
 	}
 	
+	
+	/***
+	 * Show the window for a short duration
+	 */
 	protected void showWindow() {
+		showWindow(WINDOW_DURATION);
+	}
+	
+	
+	/***
+	 * Show the window for a specified duration
+	 * @param duration window wait time in milisecond
+	 */
+	protected void showWindow(long duration) {
 		long time = System.currentTimeMillis();
-		while(!shell.isDisposed() && System.currentTimeMillis() - time < WINDOW_DURATION) {
+		while(!shell.isDisposed() && System.currentTimeMillis() - time < duration) {
 			Display.getDefault().readAndDispatch();
 		}
-
 	}
+	
 	
 	private static Shell createShell(String title) {
 		Display display = Display.getDefault();
@@ -48,6 +61,7 @@ public class ViewerTestCase
 		shell.setLocation(0, 0);
 		shell.setText(title);
 		shell.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY));
+		
 		return shell;
 	}
 }

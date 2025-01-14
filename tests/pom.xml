@@ -19,14 +19,17 @@
   	<sonar.coverage.jacoco.xmlReportPaths>${basedir}/../../${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
  </properties>
  <modules>
-  <module>edu.rice.cs.hpctest.util</module>
-  <module>edu.rice.cs.hpctree.test</module>
-  <module>edu.rice.cs.hpctraceviewer.ui.test</module>
-  <module>edu.rice.cs.hpclocal.test</module>
-  <module>edu.rice.cs.hpcremote.test</module>
-  <module>edu.rice.cs.hpcfilter.test</module>
-  <module>edu.rice.cs.hpcmetric.test</module>
-  <module>edu.rice.cs.hpctest.report</module>
+    <module>edu.rice.cs.hpctest.util</module>
+    <module>edu.rice.cs.hpcbase.test</module>
+    <module>edu.rice.cs.hpcsetting.test</module>
+    <module>edu.rice.cs.hpctree.test</module>
+    <module>edu.rice.cs.hpctraceviewer.ui.test</module>
+    <module>edu.rice.cs.hpclocal.test</module>
+    <module>edu.rice.cs.hpcremote.test</module>
+    <module>edu.rice.cs.hpcfilter.test</module>
+    <module>edu.rice.cs.hpcmetric.test</module>
+    <module>edu.rice.cs.hpcmerge.test</module>
+    <module>edu.rice.cs.hpctest.report</module>
  </modules>
 
  <profiles>
