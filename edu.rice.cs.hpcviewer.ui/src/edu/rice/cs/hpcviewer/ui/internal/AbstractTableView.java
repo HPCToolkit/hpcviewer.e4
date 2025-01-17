@@ -307,8 +307,7 @@ implements EventHandler, IUserMessage
 		// this doesn't really slow the UI so it's okay to do this to all tables. 
 		// 
 		table.setRoot(root);
-		
-		initHideOrShowColumns(metricManager.getVisibleMetrics());
+		table.initializeHideShowMetricColumns();
 		
 		updateButtonStatus();
 
@@ -581,25 +580,7 @@ implements EventHandler, IUserMessage
 			table.hideColumn(columnIndex);
 		}
 	}
-	
-	
-	/**
-	 * Hide or show columns based on the metrics initial visibility type.
-	 * If the type is HIDE, then it will not be shown.
-	 * 
-	 * @param metrics list of "displayable" metrics
-	 */
-	private void initHideOrShowColumns(List<BaseMetric> metrics) {
-		int i=1;
-		for(var metric: metrics) {
-			if (metric.getVisibility() == VisibilityType.HIDE)
-				table.hideColumn(i);
-			
-			if (!isMetricToSkip(root, metric))
-				i++;
-		}
-	}	
-	
+		
 	
 	private int getColumnIndexByMetric(MetricFilterDataItem item, List<BaseMetric> metrics) {
 		// index 0 is reserved for the tree column, and it's always shown
