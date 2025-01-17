@@ -51,6 +51,7 @@ import ca.odell.glazedlists.event.ListEventListener;
 import edu.rice.cs.hpcbase.Theme;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
 import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
+import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
 import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
 import edu.rice.cs.hpcdata.experiment.metric.format.MetricValuePredefinedFormat;
 import edu.rice.cs.hpcdata.experiment.scope.RootScope;
@@ -258,6 +259,25 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
     	FreezeHelper.freeze(bodyLayerStack.getFreezeLayer(), bodyLayerStack.getViewportLayer(), pc, pc);
 	}
 	
+	
+	/***
+	 * Hide or show metric columns based on the visibility type.
+	 * 
+	 * @apiNote This method will force to hide metrics that should be hidden
+	 *          as specified by metric's YAML file. 
+	 */
+	public void initializeHideShowMetricColumns() {
+    	var hideShowLayer  = bodyLayerStack.getColumnHideShowLayer();
+		var visibleColumns = hideShowLayer.getColumnCount();
+		
+		for(int i=1; i<visibleColumns; i++) {
+        	
+    		var metric = bodyDataProvider.getMetric(i);
+    		
+    		if (metric.getVisibility() == VisibilityType.HIDE)
+    			hideColumn(i);
+		}
+	}
 	
 	/****
 	 * Hide one or more columns
