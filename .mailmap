@@ -1,0 +1,53 @@
+# SPDX-FileCopyrightText: 2025 Contributors to the HPCToolkit Project
+#
+# SPDX-License-Identifier: CC0-1.0
+
+# This file maps commit authors (name + email) to more up-to-date (or otherwise more
+# "canonical") author information. The main intention is for patching up situations
+# where a Git commit was merged with invalid author information (e.g. `user@localhost`).
+# It can also be thought of as a record of past contributors. Most Git commands use the
+# mappings listed in this file, see man gitmailmap for more details.
+#
+# To keep management simple, we ask that any new entries are grouped by individual and
+# added in sorted order, where each group starts with the "canonical" name/email pair.
+# Please include a link to an affected commit for each mapping, and if possible to the
+# GitLab account for the individual at the very top of the group.
+
+# https://gitlab.com/dejangrubisic
+Dejan Grubisic <grubisic.dejan@yahoo.com>
+# https://gitlab.com/hpctoolkit/hpcviewer/-/commit/58406f76df92b2c13811f608cf1acaa96251014f
+Dejan Grubisic <grubisic.dejan@yahoo.com> dejangrubisic <grubisic.dejan@yahoo.com>
+
+# https://gitlab.com/jmellorcrummey
+John Mellor-Crummey <johnmc@rice.edu>
+
+# https://gitlab.com/blue42u
+Jonathon Anderson <anderson.jonathonm@gmail.com>
+# https://gitlab.com/hpctoolkit/hpcviewer/-/commit/d30d4ab963939413d59a78ddcf513f909ae733f2
+Jonathon Anderson <anderson.jonathonm@gmail.com> Jonathon Anderson <janderson@rice.edu>
+
+# https://gitlab.com/adhianto
+Laksono Adhianto <laksono@gmail.com>
+# https://gitlab.com/hpctoolkit/hpcviewer/-/commit/39a1251bacafb7a3b75bd5a431be07f7da8ebd99
+Laksono Adhianto <laksono@gmail.com> Firstname Lastname <firstname.lastname@example.com>
+# https://gitlab.com/hpctoolkit/hpcviewer/-/commit/d8c5eb9ef9f3e158dbfc6cc322daf406cfe64d2b
+Laksono Adhianto <laksono@gmail.com> Laksono <Laksono@10.0.2.15>
+# https://gitlab.com/hpctoolkit/hpcviewer/-/commit/a8b8d6285c3e03ddde970b689649589307f56ed5
+Laksono Adhianto <laksono@gmail.com> Laksono Adhianto <firstname.lastname@example.com>
+# https://gitlab.com/hpctoolkit/hpcviewer/-/commit/f449fac631a6bbaa7606a44b4e2fcf3fd5a3148f
+Laksono Adhianto <laksono@gmail.com> Laksono Adhianto <la5@iris.cs.rice.edu>
+# https://gitlab.com/hpctoolkit/hpcviewer/-/commit/4e3dccbe353e37976456e5938c44923a8283df2e
+Laksono Adhianto <laksono@gmail.com> Laksono Adhianto <la5@m5xkqnqgqt.attlocal.net>
+# https://gitlab.com/hpctoolkit/hpcviewer/-/commit/7455a3bcd947810d76541d25069689e78d887652
+Laksono Adhianto <laksono@gmail.com> Laksono Adhianto <la5@ufront.cs.rice.edu>
+# https://gitlab.com/hpctoolkit/hpcviewer/-/commit/dbd259f40ccdf6cbc336562b0a6ba533809cf61c
+Laksono Adhianto <laksono@gmail.com> la5 <la5@hpctoolkit-m17.attlocal.net>
+# https://gitlab.com/hpctoolkit/hpcviewer/-/commit/28fa5dc6af2520428a2303b645835f2e2d632bf3
+Laksono Adhianto <laksono@gmail.com> la5 <la5@iris.cs.rice.edu>
+# https://gitlab.com/hpctoolkit/hpcviewer/-/commit/0499ce3fa82be730dd7257fba18b5eb2a183cc50
+Laksono Adhianto <laksono@gmail.com> la5 <la5@iris>
+
+# https://gitlab.com/rmbarnett-rice
+R. Matt Barnett <rmbarnett@gmail.com>
+# https://gitlab.com/hpctoolkit/hpcviewer/-/commit/8d7932c7e422047458522cbc565908837ea803ed
+R. Matt Barnett <rmbarnett@gmail.com> R. Matt Barnett <barnett@rice.edu>
