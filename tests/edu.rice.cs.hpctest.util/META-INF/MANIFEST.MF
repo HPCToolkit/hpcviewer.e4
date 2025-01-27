@@ -6,7 +6,7 @@ Bundle-Version: 1.0.0.qualifier
 Export-Package: edu.rice.cs.hpctest.util
 Require-Bundle: org.junit,
  org.apache.commons.math3,
- edu.rice.cs.hpcdata,
+ org.hpctoolkit.db.local,
  edu.rice.cs.hpclocal,
  edu.rice.cs.hpctraceviewer.data,
  org.eclipse.core.runtime,

@@ -5,5 +5,5 @@ Bundle-SymbolicName: edu.rice.cs.hpcdata.app
 Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Rice University
 Automatic-Module-Name: edu.rice.cs.hpcdata.app
-Require-Bundle: edu.rice.cs.hpcdata,
+Require-Bundle: org.hpctoolkit.db.local,
  edu.rice.cs.hpcdata.merge

@@ -6,7 +6,7 @@ Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Rice University
 Export-Package: edu.rice.cs.hpctree,
  edu.rice.cs.hpctree.action
-Require-Bundle: edu.rice.cs.hpcdata,
+Require-Bundle: org.hpctoolkit.db.local,
  org.eclipse.osgi.services,
  org.eclipse.swt,
  org.eclipse.nebula.widgets.nattable.core,

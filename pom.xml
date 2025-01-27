@@ -17,8 +17,6 @@
   	<sonar.coverage.jacoco.xmlReportPaths>${basedir}/../${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
  </properties>
  <modules>
-  <module>externals</module>
-  <module>edu.rice.cs.hpcdata</module>
   <module>edu.rice.cs.hpcdata.merge</module>
   <module>edu.rice.cs.hpcdata.app</module>
   <module>edu.rice.cs.hpcfilter</module>
@@ -29,9 +27,6 @@
   <module>edu.rice.cs.hpcmerge</module>
   <module>edu.rice.cs.hpctoolcontrol</module>
   <module>edu.rice.cs.hpclocal</module>
-  <module>edu.rice.cs.hpcremote.jsch</module>
-  <module>edu.rice.cs.hpcremote.common</module>
-  <module>edu.rice.cs.hpcremote.client</module>
   <module>edu.rice.cs.hpcremote</module>
   <module>edu.rice.cs.hpctree</module>
   <module>edu.rice.cs.hpctraceviewer.config</module>
@@ -60,4 +55,36 @@
    </plugin>
   </plugins>
  </build>
+ <dependencies>
+  <dependency>
+    <groupId>org.hpctoolkit.db</groupId>
+    <artifactId>local</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+  </dependency>
+  <dependency>
+    <groupId>org.hpctoolkit.db</groupId>
+    <artifactId>client</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+  </dependency>
+  <dependency>
+    <groupId>com.graphbuilder</groupId>
+    <artifactId>graphbuilder</artifactId>
+    <version>1.0.1-SNAPSHOT</version>
+  </dependency>
+  <dependency>
+    <groupId>com.github.mwiede</groupId>
+    <artifactId>jsch</artifactId>
+    <version>0.2.17</version>
+  </dependency>
+  <dependency>
+    <groupId>io.vavr</groupId>
+    <artifactId>vavr</artifactId>
+    <version>0.10.4</version>
+  </dependency>
+  <dependency>
+    <groupId>io.vavr</groupId>
+    <artifactId>vavr-match</artifactId>
+    <version>0.10.4</version>
+  </dependency>
+ </dependencies>
 </project>
