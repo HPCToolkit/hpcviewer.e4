@@ -6,7 +6,6 @@ Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Rice University
 Automatic-Module-Name: edu.rice.cs.hpcmerge
 Require-Bundle: org.hpctoolkit.db.local,
- edu.rice.cs.hpcdata.merge,
  org.eclipse.jface,
  org.eclipse.core.runtime,
  org.slf4j.api

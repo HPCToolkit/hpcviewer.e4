@@ -173,10 +173,6 @@
          version="0.0.0"/>
 
    <plugin
-         id="edu.rice.cs.hpcdata.merge"
-         version="0.0.0"/>
-
-   <plugin
          id="edu.rice.cs.hpcfilter"
          version="0.0.0"/>
 
