@@ -5,10 +5,8 @@ Bundle-SymbolicName: edu.rice.cs.hpcsetting
 Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Rice University
 Require-Bundle: org.eclipse.core.runtime,
- org.eclipse.swt,
  org.eclipse.jface,
  org.slf4j.api,
- ch.qos.logback.classic,
  edu.rice.cs.hpclog,
  edu.rice.cs.hpcbase,
  org.eclipse.nebula.widgets.nattable.core

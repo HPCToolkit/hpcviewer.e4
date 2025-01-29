@@ -7,7 +7,6 @@ Bundle-Vendor: Rice University
 Automatic-Module-Name: edu.rice.cs.hpcmerge
 Require-Bundle: org.hpctoolkit.db.local,
  org.eclipse.jface,
- org.eclipse.core.runtime,
  org.slf4j.api
 Export-Package: edu.rice.cs.hpcmerge
 Import-Package: edu.rice.cs.hpcbase

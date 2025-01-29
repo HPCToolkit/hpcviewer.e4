@@ -14,7 +14,6 @@ Require-Bundle: org.hpctoolkit.db.local,
  org.eclipse.jface,
  org.eclipse.collections,
  org.slf4j.api,
- org.eclipse.core.runtime,
  edu.rice.cs.hpcsetting,
  edu.rice.cs.hpcbase
 Automatic-Module-Name: edu.rice.cs.hpctree

@@ -5,7 +5,6 @@ Bundle-SymbolicName: edu.rice.cs.hpctraceviewer.filter
 Bundle-Version: 6.0.0.qualifier
 Export-Package: edu.rice.cs.hpctraceviewer.filter
 Require-Bundle: ca.odell.glazedlists,
- org.eclipse.swt,
  org.eclipse.jface,
  org.eclipse.nebula.widgets.nattable.core,
  org.hpctoolkit.db.local,

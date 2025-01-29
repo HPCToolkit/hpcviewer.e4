@@ -4,8 +4,7 @@ Bundle-Name: hpctoolcontrol
 Bundle-SymbolicName: edu.rice.cs.hpctoolcontrol;singleton:=true
 Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Rice University
-Require-Bundle: org.eclipse.e4.ui.model.workbench,
- javax.inject,
+Require-Bundle: javax.inject,
  org.eclipse.core.runtime,
  org.eclipse.e4.ui.di,
  org.eclipse.jface,
