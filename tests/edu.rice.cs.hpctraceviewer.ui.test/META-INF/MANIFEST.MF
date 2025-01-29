@@ -13,10 +13,7 @@ Require-Bundle: org.hpctoolkit.db.local,
  edu.rice.cs.hpctest.util,
  org.eclipse.core.runtime,
  org.eclipse.swt,
- org.eclipse.equinox.registry,
  org.mockito.mockito-core;bundle-version="4.8.1",
- net.bytebuddy.byte-buddy;bundle-version="1.12.18",
- org.objenesis;bundle-version="3.3.0",
  org.eclipse.swtbot.junit4_x;bundle-version="4.2.1",
  org.eclipse.swtbot.swt.finder;bundle-version="4.2.1"
 Bundle-Vendor: Rice University

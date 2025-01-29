@@ -7,13 +7,9 @@ Bundle-Vendor: Rice University
 Automatic-Module-Name: edu.rice.cs.hpcmetric
 Require-Bundle: org.hpctoolkit.db.local,
  org.eclipse.core.runtime,
- org.eclipse.swt,
  org.eclipse.jface,
- org.eclipse.collections,
- org.slf4j.api,
  org.eclipse.nebula.widgets.nattable.core,
  ca.odell.glazedlists,
- org.eclipse.nebula.widgets.nattable.extension.glazedlists,
  edu.rice.cs.hpcsetting,
  edu.rice.cs.hpcbase,
  com.graphbuilder,

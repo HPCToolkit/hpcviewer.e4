@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: hpcremote
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-SymbolicName: edu.rice.cs.hpcremote;singleton:=true
-Bundle-Version: 7.0.0.qualifier
+Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Rice University
 Export-Package: edu.rice.cs.hpcremote,
  edu.rice.cs.hpcremote.data,
@@ -11,13 +11,9 @@ Export-Package: edu.rice.cs.hpcremote,
  edu.rice.cs.hpcremote.ui
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jface,
- org.eclipse.e4.ui.model.workbench,
- org.eclipse.e4.core.di,
- org.eclipse.e4.ui.services,
  org.eclipse.collections,
  org.hpctoolkit.db.local,
  edu.rice.cs.hpcbase,
- edu.rice.cs.hpclog,
  edu.rice.cs.hpctraceviewer.data,
  edu.rice.cs.hpctraceviewer.config,
  org.slf4j.api,
@@ -27,6 +23,4 @@ Require-Bundle: org.eclipse.core.runtime,
  com.github.mwiede.jsch,
  edu.rice.cs.hpcsetting,
  com.google.gson
-Import-Package: javax.inject,
- org.eclipse.e4.core.contexts
 Automatic-Module-Name: edu.rice.cs.hpc.remote

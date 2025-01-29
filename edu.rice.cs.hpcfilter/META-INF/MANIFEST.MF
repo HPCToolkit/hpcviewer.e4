@@ -18,15 +18,11 @@ Require-Bundle: org.hpctoolkit.db.local,
  org.eclipse.e4.ui.services,
  org.eclipse.e4.core.services,
  org.eclipse.e4.core.di,
- org.eclipse.e4.ui.workbench,
- org.eclipse.e4.ui.di,
  org.eclipse.e4.ui.model.workbench,
  org.slf4j.api,
- org.eclipse.swt,
  org.eclipse.nebula.widgets.nattable.core,
  edu.rice.cs.hpcsetting,
  ca.odell.glazedlists,
- org.eclipse.nebula.widgets.nattable.extension.glazedlists,
- org.eclipse.collections
+ org.eclipse.nebula.widgets.nattable.extension.glazedlists
 Bundle-ActivationPolicy: lazy
 Automatic-Module-Name: edu.rice.cs.hpcfilter

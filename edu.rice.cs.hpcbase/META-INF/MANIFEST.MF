@@ -8,10 +8,7 @@ Automatic-Module-Name: edu.rice.cs.hpcbase
 Require-Bundle: org.hpctoolkit.db.local,
  org.slf4j.api,
  org.eclipse.jface,
- org.eclipse.core.runtime,
- org.eclipse.e4.ui.model.workbench,
- org.eclipse.e4.core.contexts,
- org.eclipse.e4.core.services
+ org.eclipse.core.runtime
 Export-Package: edu.rice.cs.hpcbase,
  edu.rice.cs.hpcbase.map,
  edu.rice.cs.hpcbase.ui

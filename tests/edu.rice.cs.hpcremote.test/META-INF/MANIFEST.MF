@@ -14,8 +14,6 @@ Require-Bundle: org.hpctoolkit.db.local,
  io.vavr,
  net.bytebuddy.byte-buddy;bundle-version="1.12.18",
  net.bytebuddy.byte-buddy-agent;bundle-version="1.12.18",
- org.objenesis;bundle-version="3.3.0",
- edu.rice.cs.hpcbase,
- edu.rice.cs.hpclocal
+ org.objenesis;bundle-version="3.3.0"
 Bundle-Vendor: Rice University
 Bundle-RequiredExecutionEnvironment: JavaSE-17
