@@ -6,7 +6,7 @@ Bundle-Version: 6.0.0.qualifier
 Fragment-Host: edu.rice.cs.hpctraceviewer.ui
 Import-Package: org.junit,
  org.junit.runner;version="4.13.2"
-Require-Bundle: edu.rice.cs.hpcdata,
+Require-Bundle: org.hpctoolkit.db.local,
  edu.rice.cs.hpcbase,
  edu.rice.cs.hpctraceviewer.data,
  edu.rice.cs.hpclocal,

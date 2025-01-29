@@ -91,9 +91,6 @@ show_help(){
 clean_up() {
 	./mvnw clean
 	rm -f scripts/hpcviewer_launcher.sh
-	cd edu.rice.cs.hpcdata.app/scripts/
-	./build.sh  clean
-	cd ../..
 }
 
 
@@ -103,9 +100,6 @@ clean_up() {
 distclean_up() {
 	clean_up
 	rm -rf hpcviewer-* hpcdata-* prepare_sign*
-	cd edu.rice.cs.hpcdata.app/scripts/
-	./build.sh  distclean
-	cd ../..
 }
 
 
@@ -191,29 +185,6 @@ repackage_windows() {
       chmod 664 $output
 }
 
-
-#------------------------------------------------------------
-# Generate hpcdata stand alone application
-#------------------------------------------------------------
-repackage_hpcdata(){
-	echo "=================================="
-	echo " Building hpcdata" 
-	echo "=================================="
-	
-	cd edu.rice.cs.hpcdata.app/scripts
-	if [[ "$VERBOSE" == "1" ]]; then
-		OPTION="-v"
-	fi
-	./build.sh ${OPTION} --release "$RELEASE"
-	
-	if [  -f hpcdata.tgz ]; then
-		cp hpcdata.tgz ../..
-	else
-		echo "Fail to build hpcdata"
-	fi
-	
-	cd ../..
-}
 
 
 #------------------------------------------------------------

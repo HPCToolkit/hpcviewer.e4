@@ -6,7 +6,7 @@ Bundle-Version: 6.0.0.qualifier
 Bundle-Activator: edu.rice.cs.hpcviewer.ui.Activator
 Bundle-Vendor: Rice University
 Export-Package: edu.rice.cs.hpcviewer.ui.dialogs
-Require-Bundle: edu.rice.cs.hpcdata,
+Require-Bundle: org.hpctoolkit.db.local,
  edu.rice.cs.hpcbase,
  edu.rice.cs.hpcfilter,
  org.eclipse.core.runtime,
@@ -45,7 +45,6 @@ Require-Bundle: edu.rice.cs.hpcdata,
  edu.rice.cs.hpctree,
  org.eclipse.collections,
  edu.rice.cs.hpcmerge,
- edu.rice.cs.hpcdata.merge,
  edu.rice.cs.hpcgraph,
  org.eclipse.swtchart,
  org.eclipse.swtchart.extensions,

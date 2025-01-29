@@ -6,7 +6,7 @@ Bundle-Version: 6.0.0.qualifier
 Fragment-Host: edu.rice.cs.hpclocal
 Require-Bundle: org.junit,
  edu.rice.cs.hpctest.util,
- edu.rice.cs.hpcdata,
+ org.hpctoolkit.db.local,
  edu.rice.cs.hpctraceviewer.data,
  org.eclipse.core.runtime,
  edu.rice.cs.hpcbase,

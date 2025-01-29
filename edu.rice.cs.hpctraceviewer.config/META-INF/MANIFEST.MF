@@ -5,7 +5,7 @@ Bundle-SymbolicName: edu.rice.cs.hpctraceviewer.config
 Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Rice University
 Automatic-Module-Name: edu.rice.cs.hpctraceviewer.config
-Require-Bundle: edu.rice.cs.hpcdata,
+Require-Bundle: org.hpctoolkit.db.local,
  edu.rice.cs.hpcsetting,
  org.eclipse.jface,
  org.slf4j.api

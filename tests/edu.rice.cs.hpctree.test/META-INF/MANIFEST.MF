@@ -9,7 +9,7 @@ Automatic-Module-Name: edu.rice.cs.hpctest.ui
 Require-Bundle: org.eclipse.swt,
  org.eclipse.jface,
  edu.rice.cs.hpcbase,
- edu.rice.cs.hpcdata,
+ org.hpctoolkit.db.local,
  org.junit,
  edu.rice.cs.hpcsetting,
  org.eclipse.nebula.widgets.nattable.core,

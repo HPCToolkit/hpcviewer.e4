@@ -10,7 +10,7 @@ Export-Package: edu.rice.cs.hpcfilter,
  edu.rice.cs.hpcfilter.dialog,
  edu.rice.cs.hpcfilter.internal,
  edu.rice.cs.hpcfilter.service
-Require-Bundle: edu.rice.cs.hpcdata,
+Require-Bundle: org.hpctoolkit.db.local,
  edu.rice.cs.hpcbase,
  javax.inject,
  org.eclipse.core.runtime,

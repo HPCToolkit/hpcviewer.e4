@@ -85,7 +85,7 @@
          version="0.0.0"/>
 
    <plugin
-         id="edu.rice.cs.hpcdata"
+         id="org.hpctoolkit.db.local"
          version="0.0.0"/>
 
    <plugin
@@ -173,10 +173,6 @@
          version="0.0.0"/>
 
    <plugin
-         id="edu.rice.cs.hpcdata.merge"
-         version="0.0.0"/>
-
-   <plugin
          id="edu.rice.cs.hpcfilter"
          version="0.0.0"/>
 
@@ -213,11 +209,11 @@
          version="0.0.0"/>
 
    <plugin
-         id="edu.rice.cs.hpcremote.client"
+         id="org.hpctoolkit.db.client"
          version="0.0.0"/>
 
    <plugin
-         id="edu.rice.cs.hpcremote.common"
+         id="org.hpctoolkit.db.local"
          version="0.0.0"/>
 
    <plugin
