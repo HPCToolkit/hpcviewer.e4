@@ -90,14 +90,14 @@ Thanks for your efforts to improve HPCViewer, and welcome to the community of Co
 
 ### The Legal Stuff
 
-1. We require that all technical changes are made under the [BSD 3-Clause license](https://opensources.org/licenses/BSD-3-Clause) or under the [MIT license](https://opensource.org/license/mit). Documentation changes must be under the [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0). Data must be under the [CDLA-Permissive 2.0 license](https://cdla.dev/permissive-2.0).
+1. We require that all technical changes are made under the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0) or under the [MIT license](https://opensource.org/license/mit). Documentation changes must be under the [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0). Data must be under the [CDLA-Permissive 2.0 license](https://cdla.dev/permissive-2.0).
 
 1. The copyright and license must be specified by headers compatible with the [REUSE Specification](https://reuse.software). In most cases this is in a comment at the top of the file, for example:
 
    ```c
    // SPDX-FileCopyrightText: 2024 Contributors to the HPCToolkit Project
    //
-   // SPDX-License-Identifier: BSD-3-Clause
+   // SPDX-License-Identifier: Apache-2.0
    ```
 
 1. Copyrights should be made out to "Contributors to the HPCToolkit Project," meaning you! We do not require that you hand over your copyright rights to contribute.
