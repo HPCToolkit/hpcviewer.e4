@@ -23,6 +23,8 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #SOFTWARE.
 #
+# SPDX-License-Identifier: MIT
+#
 # Original source: https://github.com/create-dmg/create-dmg
 # 
 # Create a read-only disk image of the contents of a folder

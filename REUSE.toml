@@ -1,0 +1,10 @@
+version = 1
+
+# Certain files/directories are managed by maven-wrapper-plugin.
+[[annotations]]
+path = [
+    "mvnw*",
+    ".mvn/wrapper/**",
+]
+SPDX-FileCopyrightText = "2013-2022 The Apache Software Foundation"
+SPDX-License-Identifier = "Apache-2.0"
