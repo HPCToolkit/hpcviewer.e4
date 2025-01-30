@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 Contributors to the HPCToolkit Project
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 <project name="hpcviewer User Manual" xmlns="http://maven.apache.org/DECORATION/1.6.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/DECORATION/1.6.0 http://maven.apache.org/xsd/decoration-1.6.0.xsd">

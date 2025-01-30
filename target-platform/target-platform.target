@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
+
+<!--
+SPDX-FileCopyrightText: 2025 Contributors to the HPCToolkit Project
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 <target name="target-platform">
 	<locations>
 		<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
