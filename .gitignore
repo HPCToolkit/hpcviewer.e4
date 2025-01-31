@@ -12,3 +12,6 @@ edu.rice.cs.hpctraceviewer.ui/bin/
 edu.rice.cs.hpctree/bin
 edu.rice.cs.hpcviewer.ui/bin/
 externals/graphbuilder/bin/
+
+# Eclipse IDE local configuration
+.settings/
