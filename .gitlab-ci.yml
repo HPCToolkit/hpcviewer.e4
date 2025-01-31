@@ -87,16 +87,6 @@ default:
   image: $PREDEPS_IMAGE_MAIN_JDK17_AMD64
   needs: ['predeps: [main-jdk17-amd64]']
 
-  # Settings to cache Maven downloads
-  before_script:
-  - mkdir -p .m2-repository/ && rm -rf ~/.m2/repository
-  - ln -s "`realpath .m2-repository/`" ~/.m2/repository
-  cache:
-    key: maven
-    paths:
-    - .m2-repository
-    when: always
-
 
 # Detect any secrets and report if there are problems
 secret_detection:
