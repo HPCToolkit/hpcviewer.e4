@@ -2,7 +2,7 @@
 
 # SPDX-FileCopyrightText: 2024 Contributors to the HPCToolkit Project
 #
-# SPDX-License-Identifier: BSD-3-Clause
+# SPDX-License-Identifier: Apache-2.0
 
 for COUNTER in INSTRUCTION BRANCH LINE COMPLEXITY METHOD CLASS; do
   grep -o "<counter type=\"$COUNTER\" missed=\"[[:digit:]]*\" covered=\"[[:digit:]]*\"/>" "$1" > tmp.coverage

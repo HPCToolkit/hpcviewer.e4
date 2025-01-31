@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+# SPDX-FileCopyrightText: 2025 Contributors to the HPCToolkit Project
+#
+# SPDX-License-Identifier: Apache-2.0
+
 import json
 import sys
 from pathlib import Path

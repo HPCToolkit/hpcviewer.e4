@@ -1,0 +1,8 @@
+version = 1
+
+# This subdirectory contains stripped HPCToolkit databases used for testing purposes.
+# The files contained are considered "data" and are marked as such.
+[[annotations]]
+path = "*/**"
+SPDX-FileCopyrightText = "2024-2025 Contributors to the HPCToolkit Project"
+SPDX-License-Identifier = "CDLA-Permissive-2.0"

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Contributors to the HPCToolkit Project
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Only spawn workflows for MRs or branches without MRs
 workflow:
   auto_cancel:

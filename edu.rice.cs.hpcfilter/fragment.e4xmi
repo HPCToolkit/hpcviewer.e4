@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="ASCII"?>
+
+<!--
+SPDX-FileCopyrightText: 2025 Contributors to the HPCToolkit Project
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 <fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:commands="http://www.eclipse.org/ui/2010/UIModel/application/commands" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmi:id="_3NYY4LgEEeqKXeCFC-fF9Q">
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_E1AFILgFEeqKXeCFC-fF9Q" featurename="handlers" parentElementId="xpath:/">
     <elements xsi:type="commands:Handler" xmi:id="_U973kLgFEeqKXeCFC-fF9Q" elementId="edu.rice.cs.hpcfilter.handler.show" contributionURI="bundleclass://edu.rice.cs.hpcfilter/edu.rice.cs.hpcfilter.action.ShowFilterView" command="_efcDALgFEeqKXeCFC-fF9Q"/>

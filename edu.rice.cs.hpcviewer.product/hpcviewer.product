@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
+<!--
+SPDX-FileCopyrightText: 2025 Contributors to the HPCToolkit Project
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 <product name="hpcviewer" uid="edu.rice.cs.hpcviewer" id="edu.rice.cs.hpcviewer.ui.hpcviewer" application="org.eclipse.e4.ui.workbench.swt.E4Application" version="6.0.0.qualifier" type="features" includeLaunchers="true" autoIncludeRequirements="true">
 
    <aboutInfo>
@@ -54,37 +60,17 @@ Research and development of hpcviewer is currently supported by
 
    <license>
         <url>http://hpctoolkit.org</url>
-        <text>
-   Copyright (c) 2002-2024, Rice University 
-All rights reserved.
+        <text>This project is licensed under the Apache License, Version 2.0 (the "License");
+you may not use this project except in compliance with the License.
+You may obtain a copy of the License at
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
+http://www.apache.org/licenses/LICENSE-2.0
 
-* Redistributions of source code must retain the above copyright
-  notice, this list of conditions and the following disclaimer.
-
-* Redistributions in binary form must reproduce the above copyright
-  notice, this list of conditions and the following disclaimer in the
-  documentation and/or other materials provided with the distribution.
-
-* Neither the name of Rice University (RICE) nor the names of its
-  contributors may be used to endorse or promote products derived from
-  this software without specific prior written permission.
-
-This software is provided by RICE and contributors &quot;as is&quot; and any
-express or implied warranties, including, but not limited to, the
-implied warranties of merchantability and fitness for a particular
-purpose are disclaimed. In no event shall RICE or contributors be
-liable for any direct, indirect, incidental, special, exemplary, or
-consequential damages (including, but not limited to, procurement of
-substitute goods or services; loss of use, data, or profits; or
-business interruption) however caused and on any theory of liability,
-whether in contract, strict liability, or tort (including negligence
-or otherwise) arising in any way out of the use of this software, even
-if advised of the possibility of such damage.
-         </text>
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.</text>
    </license>
 
    <plugins>

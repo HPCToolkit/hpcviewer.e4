@@ -1,3 +1,8 @@
+-- SPDX-FileCopyrightText: 2008-2014 Andrew Janke
+-- SPDX-FileCopyrightText: 2020 Andry Tarantsov
+--
+-- SPDX-License-Identifier: MIT
+
 on run (volumeName)
 	tell application "Finder"
 		tell disk (volumeName as string)

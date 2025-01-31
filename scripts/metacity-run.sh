@@ -2,7 +2,7 @@
 
 # SPDX-FileCopyrightText: 2024 Contributors to the HPCToolkit Project
 #
-# SPDX-License-Identifier: BSD-3-Clause
+# SPDX-License-Identifier: Apache-2.0
 
 # Runs a command using a background Xvfb server with a running window manager (metacity)
 

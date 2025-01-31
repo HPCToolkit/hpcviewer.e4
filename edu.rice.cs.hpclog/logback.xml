@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+SPDX-FileCopyrightText: 2025 Contributors to the HPCToolkit Project
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 <configuration>
 
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
