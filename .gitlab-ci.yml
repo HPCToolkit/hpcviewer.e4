@@ -86,6 +86,9 @@ default:
 .maven:
   image: $PREDEPS_IMAGE_MAIN_JDK17_AMD64
   needs: ['predeps: [main-jdk17-amd64]']
+  variables:
+    MAVEN_ARGS: >-
+      --batch-mode -Dstyle.color=always
 
 
 # Detect any secrets and report if there are problems
