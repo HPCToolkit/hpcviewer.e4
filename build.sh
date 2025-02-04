@@ -125,7 +125,7 @@ repackage_linux(){
 
 	cp ../../$launcher .
 	cp ../../scripts/install.sh .
-	cp ../../scripts/README .
+	cp ../../scripts/README.md .
 
 	cd ..
 

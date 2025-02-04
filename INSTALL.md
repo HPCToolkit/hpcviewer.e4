@@ -51,7 +51,7 @@ sudo ln -sfn /usr/local/opt/openjdk/libexec/openjdk.jdk \
 1. Run the install script:
    ```console
    $ cd hpcviewer/
-   $ ./install /my/install/dir/  # e.g. ~/hpcviewer/
+   $ ./install.sh /my/install/dir/  # e.g. ~/hpcviewer/
    ```
 1. Run `/my/install/dir/hpcviewer`, or add `/my/install/dir` to your `PATH`.
 
