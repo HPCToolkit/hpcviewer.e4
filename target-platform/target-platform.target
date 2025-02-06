@@ -52,5 +52,69 @@ SPDX-License-Identifier: Apache-2.0
 			<repository location="http://download.eclipse.org/releases/2022-06/"/>
 			<unit id="org.eclipse.sdk.feature.group" version="4.24.0.v20220607-0700"/>
 		</location>
+		<location includeDependencyDepth="none" includeDependencyScopes="compile" includeSource="true" missingManifest="generate" type="Maven">
+			<dependencies>
+				<dependency>
+					<groupId>io.vavr</groupId>
+					<artifactId>vavr</artifactId>
+					<version>0.10.4</version>
+					<type>jar</type>
+				</dependency>
+			</dependencies>
+		</location>
+		<location includeDependencyDepth="none" includeDependencyScopes="compile" includeSource="true" missingManifest="generate" type="Maven">
+			<dependencies>
+				<dependency>
+					<groupId>com.github.mwiede</groupId>
+					<artifactId>jsch</artifactId>
+					<version>0.2.17</version>
+					<type>jar</type>
+				</dependency>
+			</dependencies>
+		</location>
+		<location includeDependencyDepth="none" includeDependencyScopes="compile" includeSource="true" missingManifest="generate" type="Maven">
+			<dependencies>
+				<dependency>
+					<groupId>com.graphbuilder</groupId>
+					<artifactId>graphbuilder</artifactId>
+					<version>1.0.1-SNAPSHOT</version>
+					<type>jar</type>
+				</dependency>
+			</dependencies>
+			<repositories>
+				<repository>
+					<id>hpctoolkit-graphbuilder</id>
+					<url>https://gitlab.com/api/v4/projects/41839949/packages/maven</url>
+				</repository>
+			</repositories>
+		</location>
+		<location includeDependencyDepth="none" includeDependencyScopes="compile" includeSource="true" label="org.hpctoolkit.db" missingManifest="generate" type="Maven">
+			<dependencies>
+				<dependency>
+					<groupId>org.hpctoolkit.db</groupId>
+					<artifactId>client</artifactId>
+					<version>1.0.0-SNAPSHOT</version>
+					<type>jar</type>
+				</dependency>
+				<dependency>
+					<groupId>org.hpctoolkit.db</groupId>
+					<artifactId>local</artifactId>
+					<version>1.0.0-SNAPSHOT</version>
+					<type>jar</type>
+				</dependency>
+				<dependency>
+					<groupId>org.hpctoolkit.db</groupId>
+					<artifactId>protocol</artifactId>
+					<version>1.0.0-SNAPSHOT</version>
+					<type>jar</type>
+				</dependency>
+			</dependencies>
+			<repositories>
+				<repository>
+					<id>hpctoolkit-database</id>
+					<url>https://gitlab.com/api/v4/projects/64370952/packages/maven</url>
+				</repository>
+			</repositories>
+		</location>
 	</locations>
 </target>
