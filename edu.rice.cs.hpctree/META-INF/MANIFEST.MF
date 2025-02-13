@@ -13,7 +13,7 @@ Require-Bundle: org.hpctoolkit.db.local,
  ca.odell.glazedlists,
  org.eclipse.jface,
  org.eclipse.collections,
- org.slf4j.api,
+ slf4j.api,
  edu.rice.cs.hpcsetting,
  edu.rice.cs.hpcbase
 Automatic-Module-Name: edu.rice.cs.hpctree

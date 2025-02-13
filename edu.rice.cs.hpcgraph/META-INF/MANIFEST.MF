@@ -13,8 +13,7 @@ Require-Bundle: javax.inject,
  org.eclipse.swtchart,
  org.eclipse.swtchart.extensions,
  edu.rice.cs.hpcbase,
- org.slf4j.api
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+ slf4j.api
 Import-Package: edu.rice.cs.hpcbase.ui,
  javax.annotation;version="1.2.0"
 Automatic-Module-Name: edu.rice.cs.hpcgraph

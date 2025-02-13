@@ -23,6 +23,7 @@ SPDX-License-Identifier: Apache-2.0
   	<sonar.coverage.jacoco.xmlReportPaths>${basedir}/../${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
  </properties>
  <modules>
+  <module>target-platform</module>
   <module>edu.rice.cs.hpcfilter</module>
   <module>edu.rice.cs.hpcbase</module>
   <module>edu.rice.cs.hpcgraph</module>
@@ -52,38 +53,8 @@ SPDX-License-Identifier: Apache-2.0
     <configuration>
      <linkXref>false</linkXref>
      <targetJdk>17</targetJdk>
-     <excludes>
-      <exclude>com/graphbuilder/**/*.java</exclude>
-     </excludes>
     </configuration>
    </plugin>
   </plugins>
  </build>
- <dependencies>
-  <dependency>
-    <groupId>org.hpctoolkit.db</groupId>
-    <artifactId>local</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
-  </dependency>
-  <dependency>
-    <groupId>org.hpctoolkit.db</groupId>
-    <artifactId>client</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
-  </dependency>
-  <dependency>
-    <groupId>com.graphbuilder</groupId>
-    <artifactId>graphbuilder</artifactId>
-    <version>1.0.1</version>
-  </dependency>
-  <dependency>
-    <groupId>com.github.mwiede</groupId>
-    <artifactId>jsch</artifactId>
-    <version>0.2.17</version>
-  </dependency>
-  <dependency>
-    <groupId>io.vavr</groupId>
-    <artifactId>vavr</artifactId>
-    <version>0.10.4</version>
-  </dependency>
- </dependencies>
 </project>

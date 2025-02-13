@@ -6,9 +6,9 @@ Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Rice University
 Automatic-Module-Name: edu.rice.cs.hpcbase
 Require-Bundle: org.hpctoolkit.db.local,
- org.slf4j.api,
  org.eclipse.jface,
- org.eclipse.core.runtime
+ org.eclipse.core.runtime,
+ slf4j.api
 Export-Package: edu.rice.cs.hpcbase,
  edu.rice.cs.hpcbase.map,
  edu.rice.cs.hpcbase.ui

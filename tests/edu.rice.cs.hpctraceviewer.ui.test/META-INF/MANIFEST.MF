@@ -7,14 +7,13 @@ Fragment-Host: edu.rice.cs.hpctraceviewer.ui
 Import-Package: org.junit,
  org.junit.runner;version="4.13.2"
 Require-Bundle: org.hpctoolkit.db.local,
- edu.rice.cs.hpcbase,
  edu.rice.cs.hpctraceviewer.data,
  edu.rice.cs.hpclocal,
  edu.rice.cs.hpctest.util,
  org.eclipse.core.runtime,
  org.eclipse.swt,
- org.mockito.mockito-core;bundle-version="4.8.1",
- org.eclipse.swtbot.junit4_x;bundle-version="4.2.1",
- org.eclipse.swtbot.swt.finder;bundle-version="4.2.1"
+ org.mockito.mockito-core,
+ org.eclipse.swtbot.junit4_x,
+ org.eclipse.swtbot.swt.finder
 Bundle-Vendor: Rice University
 Automatic-Module-Name: edu.rice.cs.hpctest.trace

@@ -5,7 +5,7 @@ Bundle-SymbolicName: edu.rice.cs.hpcmerge.test
 Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: HPCToolkit
 Fragment-Host: edu.rice.cs.hpcmerge;bundle-version="6.0.0"
-Require-Bundle: edu.rice.cs.hpctest.util;bundle-version="1.0.0",
+Require-Bundle: edu.rice.cs.hpctest.util,
  org.eclipse.swtbot.swt.finder,
  org.junit
 Automatic-Module-Name: edu.rice.cs.hpcmerge.test
