@@ -9,7 +9,7 @@ Require-Bundle: org.hpctoolkit.db.local,
  edu.rice.cs.hpctraceviewer.config,
  edu.rice.cs.hpcbase,
  org.eclipse.core.runtime,
- org.slf4j.api,
+ slf4j.api,
  org.eclipse.jface,
  org.apache.commons.codec
 Export-Package: edu.rice.cs.hpctraceviewer.data,

@@ -8,5 +8,5 @@ Automatic-Module-Name: edu.rice.cs.hpctraceviewer.config
 Require-Bundle: org.hpctoolkit.db.local,
  edu.rice.cs.hpcsetting,
  org.eclipse.jface,
- org.slf4j.api
+ slf4j.api
 Export-Package: edu.rice.cs.hpctraceviewer.config

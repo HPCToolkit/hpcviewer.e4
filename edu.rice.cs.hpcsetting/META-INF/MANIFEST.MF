@@ -6,7 +6,7 @@ Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Rice University
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jface,
- org.slf4j.api,
+ slf4j.api,
  edu.rice.cs.hpclog,
  edu.rice.cs.hpcbase,
  org.eclipse.nebula.widgets.nattable.core

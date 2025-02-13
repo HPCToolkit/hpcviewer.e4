@@ -5,8 +5,8 @@ Bundle-SymbolicName: edu.rice.cs.hpcmetric.test
 Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: HPCToolkit
 Fragment-Host: edu.rice.cs.hpcmetric;bundle-version="6.0.0"
-Require-Bundle: edu.rice.cs.hpctest.util;bundle-version="1.0.0",
- org.eclipse.swtbot.go;bundle-version="4.2.1",
+Require-Bundle: edu.rice.cs.hpctest.util,
+ org.eclipse.swtbot.go,
  org.mockito.mockito-core
 Automatic-Module-Name: edu.rice.cs.hpctest.metric
 Bundle-RequiredExecutionEnvironment: JavaSE-17
