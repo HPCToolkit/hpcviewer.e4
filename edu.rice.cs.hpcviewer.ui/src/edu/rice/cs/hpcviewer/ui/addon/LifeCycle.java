@@ -33,7 +33,6 @@ import org.eclipse.swt.widgets.Display;
 import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
-import edu.rice.cs.hpcviewer.ui.util.ApplicationProperty;
 import edu.rice.cs.hpcviewer.ui.util.IConstants;
 import edu.rice.cs.hpcviewer.ui.util.Utilities;
 
@@ -46,6 +45,8 @@ public class LifeCycle
 	@Inject EModelService modelService;
 
 	@Inject DatabaseCollection databaseCollection;
+
+	private static final String FILE_LOG_NAME = "hpcviewer.log";
 
 	private Image[] listImages;
 
@@ -133,10 +134,9 @@ public class LifeCycle
 	void processRemovals(IEclipseContext workbenchContext) {
 		// no need to process removal. 
 	}
-
 	
 	private void setUserLog() {
-		String logFile = ApplicationProperty.getFileLogLocation();
+		String logFile = Platform.getInstanceLocation().getURL().getFile() + File.separator + FILE_LOG_NAME;
 		System.setProperty("log.name", logFile);
 	}
 }
