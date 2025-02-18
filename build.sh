@@ -1,7 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2002-2024, Rice University.
-# SPDX-FileCopyrightText: 2024 Contributors to the HPCToolkit Project
+# SPDX-FileCopyrightText: Contributors to the HPCToolkit Project
 #
 # SPDX-License-Identifier: Apache-2.0
 

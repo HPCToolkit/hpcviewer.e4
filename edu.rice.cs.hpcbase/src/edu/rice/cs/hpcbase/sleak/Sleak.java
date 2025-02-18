@@ -1,7 +1,7 @@
 package edu.rice.cs.hpcbase.sleak;
 
 // Copyright (c) 2000, 2002 IBM Corp.  All rights reserved.
-// SPDX-FileCopyrightText: 2024 Contributors to the HPCToolkit Project
+// SPDX-FileCopyrightText: Contributors to the HPCToolkit Project
 //
 // SPDX-License-Identifier: Apache-2.0
 
