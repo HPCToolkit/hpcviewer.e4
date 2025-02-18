@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 
+import edu.rice.cs.hpcviewer.ui.BuildInfo;
 import edu.rice.cs.hpcviewer.ui.dialogs.InfoDialog;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
 import edu.rice.cs.hpcviewer.ui.util.ApplicationProperty;
@@ -70,14 +71,9 @@ public class About
 			super(parentShell);
 
 			IProduct product = Platform.getProduct();
-			this.message     = product.getProperty(ABOUT_TEXT);
-			
-			try {
-				this.message += "\n\n" + ApplicationProperty.getVersion();
-			} catch (IOException e) {
-
-				e.printStackTrace();
-			}
+			this.message = String.format(
+					"%s\n\nVersion: %s", product.getProperty(ABOUT_TEXT),
+					BuildInfo.VERSION);
 		}
 
 		@Override

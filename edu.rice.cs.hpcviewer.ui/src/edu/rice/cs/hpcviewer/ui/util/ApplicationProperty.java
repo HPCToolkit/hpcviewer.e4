@@ -17,20 +17,9 @@ import org.eclipse.core.runtime.Platform;
 
 public class ApplicationProperty 
 {
-	private static final String FILE_VERSION = "platform:/plugin/edu.rice.cs.hpcviewer.ui/release.txt";
 	private static final String FILE_LICENSE = "platform:/plugin/edu.rice.cs.hpcviewer.ui/License.txt";
 	
 	private static final String FILE_LOG_NAME = "hpcviewer.log";
-
-	/***
-	 * Get the application version 
-	 * @return
-	 * @throws MalformedURLException
-	 * @throws IOException
-	 */
-	public static String getVersion() throws IOException {
-		return getFileContent(FILE_VERSION);
-	}
 	
 
 	/***

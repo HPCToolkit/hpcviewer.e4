@@ -33,7 +33,7 @@ import org.eclipse.swt.widgets.TableItem;
 
 import edu.rice.cs.hpclog.LogProperty;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
-import edu.rice.cs.hpcviewer.ui.util.ApplicationProperty;
+import edu.rice.cs.hpcviewer.ui.BuildInfo;
 
 
 /************************************************************************
@@ -200,7 +200,7 @@ public class InfoDialog extends Dialog
 		Map<String, String>  mapTableItems = new LinkedHashMap<String, String>();
 
 		try {
-			String version = ApplicationProperty.getVersion();
+			String version = BuildInfo.VERSION;
 			mapTableItems.put("Version: ", version.trim());
 
 			String location = ViewerPreferenceManager.INSTANCE.getPreferenceStoreLocation();
