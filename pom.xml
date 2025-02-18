@@ -7,12 +7,11 @@ SPDX-License-Identifier: Apache-2.0
 <project>
  <modelVersion>4.0.0</modelVersion>
  <artifactId>root</artifactId>
- <version>6.0.0-SNAPSHOT</version>
  <packaging>pom</packaging>
  <parent>
    <groupId>edu.rice.cs.hpcviewer</groupId>
    <artifactId>edu.rice.cs.hpcviewer.configuration</artifactId>
-   <version>6.0.0-SNAPSHOT</version>
+   <version>2025.1.0-SNAPSHOT</version>
   <relativePath>./releng</relativePath>
  </parent>
  <properties>

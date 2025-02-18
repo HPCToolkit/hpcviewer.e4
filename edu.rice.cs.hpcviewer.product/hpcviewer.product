@@ -7,7 +7,7 @@ SPDX-FileCopyrightText: Contributors to the HPCToolkit Project
 SPDX-License-Identifier: Apache-2.0
 -->
 
-<product name="hpcviewer" uid="edu.rice.cs.hpcviewer" id="edu.rice.cs.hpcviewer.ui.hpcviewer" application="org.eclipse.e4.ui.workbench.swt.E4Application" version="6.0.0.qualifier" type="features" includeLaunchers="true" autoIncludeRequirements="true">
+<product name="hpcviewer" uid="edu.rice.cs.hpcviewer" id="edu.rice.cs.hpcviewer.ui.hpcviewer" application="org.eclipse.e4.ui.workbench.swt.E4Application" version="2025.1.0.qualifier" type="features" includeLaunchers="true" autoIncludeRequirements="true">
 
    <aboutInfo>
       <image path="/edu.rice.cs.hpcviewer.ui/resources/hpcviewerEclipse64.gif"/>

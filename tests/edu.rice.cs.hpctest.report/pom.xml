@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
 	<parent>
 		<groupId>edu.rice.cs.hpcviewer</groupId>
 		<artifactId>tests</artifactId>
-		<version>6.0.0-SNAPSHOT</version>
+		<version>2025.1.0-SNAPSHOT</version>
   		<relativePath>..</relativePath>
 	</parent>
 
@@ -52,104 +52,104 @@ SPDX-License-Identifier: Apache-2.0
 		<dependency>
 			<groupId>edu.rice.cs.hpcviewer</groupId>
 			<artifactId>edu.rice.cs.hpcbase</artifactId>
-			<version>6.0.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>edu.rice.cs.hpcviewer</groupId>
 			<artifactId>edu.rice.cs.hpcsetting</artifactId>
-			<version>6.0.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>edu.rice.cs.hpcviewer</groupId>
 			<artifactId>edu.rice.cs.hpcfilter</artifactId>
-			<version>6.0.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>edu.rice.cs.hpcviewer</groupId>
 			<artifactId>edu.rice.cs.hpctree</artifactId>
-			<version>6.0.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>edu.rice.cs.hpcviewer</groupId>
 			<artifactId>edu.rice.cs.hpclocal</artifactId>
-			<version>6.0.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>edu.rice.cs.hpcviewer</groupId>
 			<artifactId>edu.rice.cs.hpcremote</artifactId>
-			<version>6.0.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>edu.rice.cs.hpcviewer</groupId>
 			<artifactId>edu.rice.cs.hpctraceviewer.data</artifactId>
-			<version>6.0.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>edu.rice.cs.hpcviewer</groupId>
 			<artifactId>edu.rice.cs.hpctraceviewer.ui</artifactId>
-			<version>6.0.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>edu.rice.cs.hpcviewer</groupId>
 			<artifactId>edu.rice.cs.hpcmetric</artifactId>
-			<version>6.0.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>edu.rice.cs.hpcviewer</groupId>
 			<artifactId>edu.rice.cs.hpcmerge</artifactId>
-			<version>6.0.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<scope>compile</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>edu.rice.cs.hpcviewer</groupId>
 			<artifactId>edu.rice.cs.hpclocal.test</artifactId>
-			<version>6.0.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>edu.rice.cs.hpcviewer</groupId>
 			<artifactId>edu.rice.cs.hpcmetric.test</artifactId>
-			<version>6.0.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>edu.rice.cs.hpcviewer</groupId>
 			<artifactId>edu.rice.cs.hpcmerge.test</artifactId>
-			<version>6.0.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>edu.rice.cs.hpcviewer</groupId>
 			<artifactId>edu.rice.cs.hpcremote.test</artifactId>
-			<version>6.0.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>edu.rice.cs.hpcviewer</groupId>
 			<artifactId>edu.rice.cs.hpctraceviewer.ui.test</artifactId>
-			<version>6.0.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>edu.rice.cs.hpcviewer</groupId>
 			<artifactId>edu.rice.cs.hpctree.test</artifactId>
-			<version>6.0.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>edu.rice.cs.hpcviewer</groupId>
 			<artifactId>edu.rice.cs.hpcfilter.test</artifactId>
-			<version>6.0.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: hpcsetting.test
 Bundle-SymbolicName: edu.rice.cs.hpcsetting.test
-Bundle-Version: 61.0.0.qualifier
+Bundle-Version: 2025.1.0.qualifier
 Bundle-Vendor: HPCToolkit Project
 Fragment-Host: edu.rice.cs.hpcsetting;bundle-version="6.0.0"
 Require-Bundle: org.junit;bundle-version="4.13.2"

@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: hpcremote
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-SymbolicName: edu.rice.cs.hpcremote;singleton:=true
-Bundle-Version: 6.0.0.qualifier
+Bundle-Version: 2025.1.0.qualifier
 Bundle-Vendor: Rice University
 Export-Package: edu.rice.cs.hpcremote,
  edu.rice.cs.hpcremote.data,

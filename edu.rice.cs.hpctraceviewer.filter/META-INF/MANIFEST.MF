@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: hpctraceviewer.filter
 Bundle-SymbolicName: edu.rice.cs.hpctraceviewer.filter
-Bundle-Version: 6.0.0.qualifier
+Bundle-Version: 2025.1.0.qualifier
 Export-Package: edu.rice.cs.hpctraceviewer.filter
 Require-Bundle: ca.odell.glazedlists,
  org.eclipse.jface,

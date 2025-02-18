@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: hpcmerge.test
 Bundle-SymbolicName: edu.rice.cs.hpcmerge.test
-Bundle-Version: 6.0.0.qualifier
+Bundle-Version: 2025.1.0.qualifier
 Bundle-Vendor: HPCToolkit
 Fragment-Host: edu.rice.cs.hpcmerge;bundle-version="6.0.0"
 Require-Bundle: edu.rice.cs.hpctest.util,
