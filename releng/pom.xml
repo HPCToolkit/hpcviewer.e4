@@ -12,13 +12,14 @@ SPDX-License-Identifier: Apache-2.0
  <packaging>pom</packaging>
 
 <organization>
-    <name>HPCToolkit Project, a Series of LF Projects, LLC</name>
-    <url>https://gitlab.com/hpctoolkit/hpcviewer</url>
+    <name>HPCToolkit Project</name>
+    <url>https://hpctoolkit.org</url>
 </organization>
 <licenses>
     <license>
-        <name>Apache-2.0</name>
-        <url>https://www.apache.org/licenses/LICENSE-2.0.html</url>
+        <name>${license.spdx}</name>
+        <comments>${license.name}</comments>
+        <url>${license.url}</url>
     </license>
 </licenses>
 
@@ -33,6 +34,9 @@ SPDX-License-Identifier: Apache-2.0
   <tycho.testArgLine.local></tycho.testArgLine.local>
   <maven.compiler.target>17</maven.compiler.target>
   <maven.compiler.source>17</maven.compiler.source>
+  <license.spdx>Apache-2.0</license.spdx>
+  <license.name>Apache License 2.0</license.name>
+  <license.url>https://www.apache.org/licenses/LICENSE-2.0.html</license.url>
  </properties>
 
  <profiles>
