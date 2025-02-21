@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: hpcfilter.test
 Bundle-SymbolicName: edu.rice.cs.hpcfilter.test
-Bundle-Version: 6.0.0.qualifier
+Bundle-Version: 2025.1.0.qualifier
 Bundle-Vendor: Rice University
 Fragment-Host: edu.rice.cs.hpcfilter
 Automatic-Module-Name: edu.rice.cs.hpctest.viewer

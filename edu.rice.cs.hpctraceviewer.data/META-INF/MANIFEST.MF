@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: hpctraceviewer.data
 Bundle-SymbolicName: edu.rice.cs.hpctraceviewer.data
-Bundle-Version: 6.0.0.qualifier
+Bundle-Version: 2025.1.0.qualifier
 Bundle-Vendor: Rice University
 Automatic-Module-Name: edu.rice.cs.hpctraceviewer.data
 Require-Bundle: org.hpctoolkit.db.local,

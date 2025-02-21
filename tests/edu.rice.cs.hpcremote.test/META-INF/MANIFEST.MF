@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: hpcremote.test
 Bundle-SymbolicName: edu.rice.cs.hpcremote.test
-Bundle-Version: 6.0.0.qualifier
+Bundle-Version: 2025.1.0.qualifier
 Fragment-Host: edu.rice.cs.hpcremote
 Automatic-Module-Name: edu.rice.cs.hpctest.remote
 Require-Bundle: org.hpctoolkit.db.local,

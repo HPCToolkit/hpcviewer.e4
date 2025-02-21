@@ -17,6 +17,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -28,9 +30,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 
+import edu.rice.cs.hpcviewer.ui.BuildInfo;
 import edu.rice.cs.hpcviewer.ui.dialogs.InfoDialog;
 import edu.rice.cs.hpcviewer.ui.resources.IconManager;
-import edu.rice.cs.hpcviewer.ui.util.ApplicationProperty;
 
 
 /****
@@ -70,14 +72,9 @@ public class About
 			super(parentShell);
 
 			IProduct product = Platform.getProduct();
-			this.message     = product.getProperty(ABOUT_TEXT);
-			
-			try {
-				this.message += "\n\n" + ApplicationProperty.getVersion();
-			} catch (IOException e) {
-
-				e.printStackTrace();
-			}
+			this.message = String.format(
+					"%s\n\nVersion: %s", product.getProperty(ABOUT_TEXT),
+					BuildInfo.VERSION);
 		}
 
 		@Override
@@ -105,16 +102,13 @@ public class About
 		@Override
 		protected void createButtonsForButtonBar(Composite parent) {
 			createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
-			createButton(parent, IDialogConstants.DETAILS_ID, "License", false);
 			createButton(parent, IDialogConstants.HELP_ID, "Info", false);
 		}
 		
 		
 		@Override
 		protected void buttonPressed(int buttonId) {
-			if (buttonId == IDialogConstants.DETAILS_ID) {
-				showLicense();
-			} else if (buttonId == IDialogConstants.HELP_ID) {
+			if (buttonId == IDialogConstants.HELP_ID) {
 				InfoDialog infoDlg = new InfoDialog(getShell());
 				infoDlg.open();
 			}
@@ -147,15 +141,16 @@ public class About
 			dummy.setText("");
 			
 			Link link = new Link(parent, SWT.LEFT);
-			link.setText("<a href=\"https://hpctoolkit.org\">https://hpctoolkit.org</a>");
-			link.addListener(SWT.Selection, event -> {
-				boolean result = Program.launch("http://hpctoolkit.org");
+			link.setText("Part of " + BuildInfo.ORGANIZATION_HTML + ".\n"
+					+ "Licensed under " + BuildInfo.LICENSE_HTML + ".");
+			link.addSelectionListener(SelectionListener.widgetSelectedAdapter((SelectionEvent event) -> {
+				boolean result = Program.launch(event.text);
 				if (!result) {
 					MessageDialog.openError(getShell(), 
 											"Cannot launch browser", 
 											"Unable to launch the system browser.");
 				}
-			});
+			}));
 			return parent;
 		}
 
@@ -168,17 +163,6 @@ public class About
 
 			if (title != null) {
 				shell.setText(title);
-			}
-		}
-
-
-		private void showLicense() {
-			try {				
-				String license = ApplicationProperty.getLicense();								
-				MessageDialog.openInformation(getShell(), "License", license);
-			} catch (IOException e) {
-
-				e.printStackTrace();
 			}
 		}
 	}

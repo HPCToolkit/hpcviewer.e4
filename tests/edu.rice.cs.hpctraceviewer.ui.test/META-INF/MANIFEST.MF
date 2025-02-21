@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: hpctraceviewer.ui.test
 Bundle-SymbolicName: edu.rice.cs.hpctraceviewer.ui.test
-Bundle-Version: 6.0.0.qualifier
+Bundle-Version: 2025.1.0.qualifier
 Fragment-Host: edu.rice.cs.hpctraceviewer.ui
 Import-Package: org.junit,
  org.junit.runner;version="4.13.2"

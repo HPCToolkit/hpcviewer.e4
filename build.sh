@@ -72,10 +72,8 @@ check_java()
 show_help(){
 	echo "Syntax: $0 [-options] [commands]"
 	echo "Options: "
-	echo " -c              	create a package and generate the release number"
 	echo " -n              	(Mac only) notarize the package"
 	echo " -i              	(Mac only) create a disk image file"
-	echo " -r <release>    	specify the release number"
 	echo "Commands:"
 	echo " check            build and run the tests."
 	echo " clean            remove objects and temporary files"
@@ -216,10 +214,8 @@ check_java
 # parse the arguments
 #
 CHECK_PACKAGE=0
-CREATE_PACKAGE=1
 VERBOSE=0
 NOTARIZE=0
-RELEASE=`date +"%Y.%m"`
 IMAGE_ONLY=0
 
 POSITIONAL=()
@@ -243,10 +239,6 @@ do
 	    exit
 	    ;;
 	
-	    -c|--create)
-	    CREATE_PACKAGE=0
-	    shift # past argument
-	    ;;
 	    -h|--help)
 	    show_help
 	    shift # past argument
@@ -258,12 +250,6 @@ do
 	    -n|--notarize)
 	    NOTARIZE=1
 	    shift # past argument
-	    ;;
-	    -r|--release)
-	    RELEASE="$2"
-	    CREATE_PACKAGE=0
-	    shift # past argument
-	    shift # past value
 	    ;;
 	    -v|--verbose)
 	    VERBOSE=1
@@ -281,32 +267,20 @@ do
 done
 set -- "${POSITIONAL[@]}" # restore positional parameters
 
-# 
-# Update the release file 
-#
-GITC=`git rev-parse --short HEAD`
 name="hpcviewer"
 sh_file="scripts/${name}.sh"
 launcher_name="${name}_launcher.sh"
 launcher="scripts/${launcher_name}"
-RELEASE_FILE="edu.rice.cs.hpcviewer.ui/release.txt"
 OS=`uname`
 
-# insert the release number to the launcher script:
+# insert the version number to the launcher script:
 # first, copy the launcher script
-# second, replace the release variable with the current version
+# second, replace the version variable with the current version
 
 cp -f "$sh_file" "$launcher" \
        || die "unable to copy files"
 
-if [ "$CREATE_PACKAGE" == "0" ]; then
-    # create the release number: the current month and the commit hash
-    # users may don't care with the hash, but it's important for debugging
-    VERSION="Release ${RELEASE}. Commit $GITC" 
-    echo "$VERSION" > ${RELEASE_FILE}
-else
-    VERSION=`cat $RELEASE_FILE`   	    
-fi
+VERSION=`./mvnw org.apache.maven.plugins:maven-help-plugin:evaluate -Dexpression=project.version -DforceStdout -q`
 
 if [[ "$OS" == "Darwin" ]]; then 
     sed -i '' "s/__VERSION__/\"$VERSION\"/g" $launcher

@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 <feature
       id="edu.rice.cs.hpcviewer.feature"
       label="hpcviewer.Feature"
-      version="6.0.0.qualifier">
+      version="2025.1.0.qualifier">
 
    <includes
          id="org.eclipse.nebula.widgets.nattable.core.feature"

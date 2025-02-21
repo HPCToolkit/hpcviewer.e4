@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: hpctree.test
 Bundle-SymbolicName: edu.rice.cs.hpctree.test
-Bundle-Version: 6.0.0.qualifier
+Bundle-Version: 2025.1.0.qualifier
 Bundle-Vendor: Rice University
 Fragment-Host: edu.rice.cs.hpctree
 Automatic-Module-Name: edu.rice.cs.hpctest.ui
