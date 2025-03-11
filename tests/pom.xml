@@ -29,6 +29,7 @@ SPDX-License-Identifier: Apache-2.0
     <module>edu.rice.cs.hpcbase.test</module>
     <module>edu.rice.cs.hpcsetting.test</module>
     <module>edu.rice.cs.hpctree.test</module>
+    <module>edu.rice.cs.hpctraceviewer.data.test</module>
     <module>edu.rice.cs.hpctraceviewer.ui.test</module>
     <module>edu.rice.cs.hpclocal.test</module>
     <module>edu.rice.cs.hpcremote.test</module>
