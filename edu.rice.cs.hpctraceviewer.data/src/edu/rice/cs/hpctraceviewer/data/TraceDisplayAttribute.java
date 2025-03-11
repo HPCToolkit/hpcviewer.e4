@@ -70,7 +70,7 @@ public class TraceDisplayAttribute
 		mapUnitToString.put(TimeUnit.SECONDS, "s");
 		mapUnitToString.put(TimeUnit.MINUTES, "min");
 		mapUnitToString.put(TimeUnit.HOURS, "hr");
-		mapUnitToString.put(TimeUnit.HOURS, "day");
+		mapUnitToString.put(TimeUnit.DAYS, "day");
 		
 		displayTimeUnit = TimeUnit.SECONDS;
 		timeUnit = TimeUnit.SECONDS;
@@ -201,11 +201,11 @@ public class TraceDisplayAttribute
 	}
 	
 	/*****
-	 * Retrieve the higher resolution of the specific time unit.
-	 * If the input is Millisecond, it returns Microsecond.
+	 * Retrieve the next higher resolution of the specific time unit
+	 * For instance, if the input is Millisecond, it returns Microsecond.
 	 * 
 	 * @param unit the current unit time (unmodified) 
-	 * @return The higher resolution of the time unit
+	 * @return The next higher resolution of the time unit if succeeds, no change otherwise
 	 */
 	public TimeUnit decrement(TimeUnit unit) {
 		Optional<Integer> key = getOrdinal(unit).findFirst();
@@ -213,16 +213,57 @@ public class TraceDisplayAttribute
 			throw new IndexOutOfBoundsException("Incorrect time unit: " + unit);
 		
 		Integer ordinal = key.get();
+		if (ordinal == 0)
+			// already at the lowest time unit. Can't go further
+			return unit;
+		
 		ordinal--;
 		return mapIntegerToUnit.get(ordinal);
 	}
+	
+	
+	/*****
+	 * Check if we can increase the granularity of time unit.
+	 * 
+	 * @param unit the current unit time (unmodified) 
+	 * @return {@code boolean} true if the current time unit can be decremented to 
+	 *         the next lower level unit, false otherwise.
+	 */
+	public boolean canDecrement(TimeUnit unit) {
+		Optional<Integer> key = getOrdinal(unit).findFirst();
+		if (key.isEmpty())
+			return false;
+		
+		return key.get()>0;
+	}
+
+	
+	/****
+	 * Check if we can increment the level of time unit.
+	 * For instance, the next level of Millisecond is second.
+	 * 
+	 * If the current time unit is already the highest one, then we can't change 
+	 * the granularity.
+	 * 
+	 * @param unit
+	 * @return {@code boolean} true if we can change the granularity, false otherwise
+	 */
+	public boolean canIncrement(TimeUnit unit) {
+		var currentOrd = getOrdinal(unit).findFirst();
+		if (currentOrd.isEmpty())
+			return false;
+		
+		return currentOrd.get() < mapIntegerToUnit.size()-1;
+	}
+	
 	
 	/****
 	 * Get the lower resolution of the given time unit.
 	 * If the input is Millisecond, it returns Second.
 	 * 
 	 * @param unit
-	 * @return
+	 * @return The next higher level of time unit if success, 
+	 *         the unit itself if it reaches the maximum granularity
 	 */
 	public TimeUnit increment(TimeUnit unit) {
 		Optional<Integer> key = getOrdinal(unit).findFirst();
@@ -230,6 +271,11 @@ public class TraceDisplayAttribute
 			throw new IndexOutOfBoundsException("Incorrect time unit: " + unit);
 		
 		Integer ordinal = key.get();
+		if (ordinal == mapIntegerToUnit.size()-1)
+			// If we have the highest time unit, either throw an exception or return the maximum unit
+			// At the moment returning itself is better for the caller to avoid too much try-catch
+			return unit;			
+
 		ordinal++;
 		return mapIntegerToUnit.get(ordinal);
 	}

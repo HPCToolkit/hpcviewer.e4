@@ -195,7 +195,8 @@ public class CanvasAxisX extends AbstractAxisCanvas
 		// this doesn't change the real unit time. It's just for the display
 		String userUnitTime = attribute.getTimeUnitName(displayTimeUnit);
 
-		if (dtRound >= 100) {
+		if (dtRound >= 100 && attribute.canIncrement(displayTimeUnit)) {
+			
 			final TimeUnit tu = attribute.increment(displayTimeUnit);
 			userUnitTime      = attribute.getTimeUnitName(tu);
 			

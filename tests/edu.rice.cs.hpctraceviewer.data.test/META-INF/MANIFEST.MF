@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: hpctraceviewer.data.test
+Bundle-SymbolicName: edu.rice.cs.hpctraceviewer.data.test
+Bundle-Version: 2025.1.0.qualifier
+Fragment-Host: edu.rice.cs.hpctraceviewer.data;bundle-version="2025.1.0"
+Require-Bundle: org.junit,
+ org.mockito.mockito-core
+Automatic-Module-Name: edu.rice.cs.hpctraceviewer.data.test
+Bundle-RequiredExecutionEnvironment: JavaSE-17

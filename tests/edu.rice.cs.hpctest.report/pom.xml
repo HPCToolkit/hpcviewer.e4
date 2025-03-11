@@ -136,6 +136,12 @@ SPDX-License-Identifier: Apache-2.0
 		</dependency>
 		<dependency>
 			<groupId>edu.rice.cs.hpcviewer</groupId>
+			<artifactId>edu.rice.cs.hpctraceviewer.data.test</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>edu.rice.cs.hpcviewer</groupId>
 			<artifactId>edu.rice.cs.hpctraceviewer.ui.test</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
