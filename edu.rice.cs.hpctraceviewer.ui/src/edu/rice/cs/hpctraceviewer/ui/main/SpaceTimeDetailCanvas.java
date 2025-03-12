@@ -682,7 +682,9 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
     	final Position position = stData.getTraceDisplayAttribute().getPosition();    			
 		final TimeUnit dbTimeUnit = stData.getTimeUnit();
 		final TimeUnit displayTimeUnit = attributes.getTimeUnit();
-		final float selectedTime = displayTimeUnit.convert(position.time, dbTimeUnit) * attributes.getTimeUnitMultiplier();
+		
+		// fix issue #400: convert to double to ensure we don't lose the precision 
+		final double selectedTime = displayTimeUnit.convert(position.time, dbTimeUnit) * (double)attributes.getTimeUnitMultiplier();
 
         final var traceData = stData.getBaseData();
 
