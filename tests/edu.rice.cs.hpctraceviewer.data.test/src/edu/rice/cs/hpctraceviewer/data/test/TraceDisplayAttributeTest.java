@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: Contributors to the HPCToolkit Project
+//
+// SPDX-License-Identifier: Apache-2.0
+
 package edu.rice.cs.hpctraceviewer.data.test;
 
 import static org.junit.Assert.*;
