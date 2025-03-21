@@ -2,20 +2,12 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-.polyglot.META-INF
+# Generated during a typical Maven build
+.polyglot.*
 target/
-tests/edu.rice.cs.hpctest.report/target
-edu.rice.cs.hpcdata/.settings
-edu.rice.cs.hpcdata/bin/
-edu.rice.cs.hpcfilter/bin/
-edu.rice.cs.hpcremote/bin/
-edu.rice.cs.hpcbase/bin/
-edu.rice.cs.hpctraceviewer.config/bin
-edu.rice.cs.hpctraceviewer.data/bin/
-edu.rice.cs.hpctraceviewer.ui/bin/
-edu.rice.cs.hpctree/bin
-edu.rice.cs.hpcviewer.ui/bin/
-externals/graphbuilder/bin/
+
+# Build directory used by Eclipse IDE
+bin/
 
 # Eclipse IDE local configuration
 .settings/
