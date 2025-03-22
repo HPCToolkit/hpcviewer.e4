@@ -15,7 +15,6 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 
@@ -40,8 +39,6 @@ import edu.rice.cs.hpctraceviewer.data.TraceDisplayAttribute;
 public class CanvasAxisX extends AbstractAxisCanvas 
 	implements PaintListener, IOperationHistoryListener
 {		
-	private static final int TICK_X_PIXEL = 110;
-	private static final int MINIMUM_PIXEL_BETWEEN_TICKS = 10;
 	private static final int TICK_BIG   = 4;
 	private static final int TICK_SMALL = 2;
 	
@@ -94,8 +91,9 @@ public class CanvasAxisX extends AbstractAxisCanvas
 		// ------------------------------------------------------------------------------------------
 		initBuffer();
 
-		final int viewWidth = getBounds().width;
-		final int viewHeight = getBounds().height;
+		final Rectangle area = getClientArea();
+		final int viewWidth = area.width;
+		final int viewHeight = area.height;
 
 		if (viewWidth == 0 || viewHeight == 0)
 			return;
@@ -120,9 +118,10 @@ public class CanvasAxisX extends AbstractAxisCanvas
 		}
 		
 		final TraceDisplayAttribute attribute = data.getTraceDisplayAttribute();
-		final Rectangle area = getClientArea();
 		
 		TimeUnit dbTimeUnit = data.getTimeUnit();
+		
+		AxisXTicks xTicks = new AxisXTicks(viewWidth, dbTimeUnit);
 		
 		// --------------------------------------------------------------------------
 		// find the right unit time (s, ms, us, ns) 
@@ -131,99 +130,11 @@ public class CanvasAxisX extends AbstractAxisCanvas
 		// 
 		// --------------------------------------------------------------------------
 		
-		TimeUnit displayTimeUnit = attribute.computeDisplayTimeUnit(data);
-		
-		// --------------------------------------------------------------------------
-		// finding some HINTs of number of ticks, and distance between ticks 	
-		// --------------------------------------------------------------------------
-		
-		double numTicks  = (double)area.width / TICK_X_PIXEL;
-		double fraction  = attribute.getTimeInterval() / numTicks;
-
-		// --------------------------------------------------------------------------
-		// find the nice rounded number
-		// if dt < 10:  1, 2, 3, 4...
-		// if dt < 100: 10, 20, 30, 40, ..
-		// ...
-		// --------------------------------------------------------------------------
-		
-		long t1 = attribute.getTimeBegin();
-		long t2 = (long) (t1 + fraction);
-		long dt = displayTimeUnit.convert(t2 - t1, dbTimeUnit);
-		
-		// there is nothing we can do if the difference between the ticks is less than 1 ns.
-		if (dt<1) {
-			int ordinal = attribute.getTimeUnitOrdinal(displayTimeUnit);
-			if (ordinal>0 && (t1 != t2)) {
-				ordinal--;
-				displayTimeUnit = attribute.getTimeUnit(ordinal);
-				
-				// recompute dt with the new time unit
-				dt = displayTimeUnit.convert(t2-t1, dbTimeUnit);
-			} else {
-				dt = 1;
-			}
-		}
-
-		// the time unit displayed for users
-		// sometime the time unit is millisecond, but user can see it as second like:
-		// 2.1s, 2.2s instead of 2100ms and 2200ms
-		TimeUnit userDisplayTimeUnit = displayTimeUnit;
-
-		// find rounded delta_time to log 10:
-		// if delta_time is 12 --> rounded to 10
-		// 					3  --> rounded to 1
-		// 					32 --> rounded to 10
-		// 					312 --> rounded to 100
-		
-		int logdt 	 = (int) Math.log10(dt);
-		long dtRound = (int) Math.pow(10, logdt);
-		
-		int maxTicks = area.width/MINIMUM_PIXEL_BETWEEN_TICKS; 
-		int numAxisLabel;
-		do {
-			numAxisLabel = (int) (displayTimeUnit.convert(attribute.getTimeInterval(), dbTimeUnit) / dtRound);
-			if (numAxisLabel > maxTicks) {
-				dtRound *= 10;
-			}
-		} while (numAxisLabel > maxTicks);
-		
-		float multiplier = 1; 
-		
-		// Issue #20 : avoid displaying big numbers.
-		// if the time is 1200ms we should display it as 1.2s
-		// this doesn't change the real unit time. It's just for the display
-		String userUnitTime = attribute.getTimeUnitName(displayTimeUnit);
-
-		if (dtRound >= 100 && attribute.canIncrement(displayTimeUnit)) {
-			
-			final TimeUnit tu = attribute.increment(displayTimeUnit);
-			userUnitTime      = attribute.getTimeUnitName(tu);
-			
-			// temporary fix for issue #304
-			// need to use Java time unit conversion from to coarser grain time unit.
-			// who know we need to convert to minutes or hours 
-			var conversion    =  userDisplayTimeUnit.convert(1, tu);
-			multiplier = (float) 1/conversion;
-			
-			// if the delta time is not multiple of 1000 (like from micro to mili),
-			// we need to adjust the distance between ticks so that the label is 
-			// nicely even (not a multiple of .67, ...)
-			if (1000 % conversion != 0) {
-				dtRound = conversion;
-				numAxisLabel = (int) (displayTimeUnit.convert(attribute.getTimeInterval(), dbTimeUnit) / dtRound);
-			}
-			userDisplayTimeUnit = tu;
-		}
-
-		double timeBegin    = displayTimeUnit.convert(attribute.getTimeBegin(), dbTimeUnit);
-		
-		// round the time to the upper bound
-		// if the time is 22, we round it to 30
-		
-		long remainder = (long) timeBegin % dtRound;
-		if (remainder > 0)
-			timeBegin = timeBegin + (dtRound - remainder);
+		var ticksInfo = xTicks.computeTicks(attribute, str -> {
+			if (!buffer.isDisposed())
+				return buffer.stringExtent(str).x;
+			return 10; // something wrong: the GC has been disposed. Should we throw an exception?
+		});
 		
 		// --------------------------------------------------------------------------
         // Manually fill the client area with the default background color
@@ -240,69 +151,67 @@ public class CanvasAxisX extends AbstractAxisCanvas
 		// draw the x-axis
 		// --------------------------------------------------------------------------
 		
-		// it is possible in some cases that the height is so small that we cannot
-		// display axis
-		
 		final int position_y = 0;
 		buffer.drawLine(area.x, position_y, area.width, position_y);
+
+		int tick_y_height = position_y + TICK_SMALL;
+
+		var numTicks = ticksInfo.ticks().length;
 		
-		Point prevTextArea  = new Point(0, 0);
-		int   prevPositionX = 0;
-		long  displayTimeBegin = displayTimeUnit.convert(attribute.getTimeBegin(), dbTimeUnit);
-		double deltaXPixels    = (double)attribute.getPixelHorizontal() / 
-								 displayTimeUnit.convert(attribute.getTimeInterval(), dbTimeUnit);
+		for(int i=0; i < numTicks; i++) {			
+			var axis_x_pos = ticksInfo.ticks()[i];
 
-		// --------------------------------------------------------------------------
-		// draw the ticks and the labels if there's enough space
-		// --------------------------------------------------------------------------
-		final String maxText    = formatTime.format(timeBegin) + "XX";
-		final Point maxTextArea = buffer.stringExtent(maxText);
-		final int deltaTick     = convertTimeToPixel(displayTimeBegin, (long)timeBegin + dtRound, deltaXPixels);
-		final boolean isFitEnough = deltaTick > maxTextArea.x;
+			// draw the X tick
+			buffer.drawLine(axis_x_pos, position_y, axis_x_pos, tick_y_height);
+		}
+		
+		final var userDisplayTimeUnit = ticksInfo.displayTimeUnit();
+		final var strTimeUnit = attribute.getTimeUnitName(userDisplayTimeUnit);
 
-		for(int i=0; i <= numAxisLabel; i++) {
-			double time      = timeBegin + dtRound * i;
-			int axis_x_pos	 = (int) convertTimeToPixel(displayTimeBegin, (long)time, deltaXPixels);
-			int axis_tick_mark_height = position_y+TICK_SMALL;
-
-			// we want to draw the label if the number is nicely readable
-			// nice numbers: 1, 2, 4, ...
-			// not nice numbers: 1.1, 2.3, ...
-			double timeToAppear = time * multiplier;
-			boolean toDrawLabel = isFitEnough        ||
-								  (time % 200 == 0)  ||
-								  (timeToAppear % 2 == 0) ;
+		// draw the tick's label 		
+		for (int i=0; i<ticksInfo.tick_labels().size(); i++) {
+			var tickLabel = ticksInfo.tick_labels().get(i);
 			
-			if (i==0 || toDrawLabel) {
-				String strTime   = formatTime.format(timeToAppear) + userUnitTime;			
-				Point textArea   = buffer.stringExtent(strTime);
+			var index = tickLabel.tickIndex();
+			var axis_x_pos = ticksInfo.ticks()[index];
+			var time = tickLabel.tickLabel();
 
-				// by default x position is in the middle of the tick
-				int position_x   = axis_x_pos - (textArea.x/2);
-				
-				// make sure we don't trim the text in the beginning of the axis
-				if (position_x<0) {
-					position_x = 0;
-				}
-				// make sure x position is not beyond the view's width
-				else if (position_x + textArea.x > area.width) {
-					position_x = axis_x_pos - textArea.x;
-				}
-				// draw the label only if we have space
-				if (i==0 || prevPositionX+prevTextArea.x + 10 < position_x) {
-					buffer.drawText(strTime, position_x, position_y + TICK_BIG+1);
+			// convert tick time from database unit time to the current unit time
+			
+			// in case we can simplify the unit time, convert the time to the display time
+			// multiplier is the constant to convert to the display unit time.
+			// for instance if the unit time is seconds and display time is minutes,
+			// then the multiplier is 1/60
+			String strTime = formatTime.format(time) + strTimeUnit;			
 
-					prevTextArea.x = textArea.x;
-					prevPositionX  = position_x;
+			var textSize = buffer.stringExtent(strTime);
+			
+			// make sure the label is in the middle of the tick, unless for the first tick
+			// the first tick is tricky because we usually have no space to draw the text 
+			int x_pos = axis_x_pos - (textSize.x / 2);
+			
+			if (x_pos >= 0 && x_pos+textSize.x < viewWidth) {
+				drawTickLabel(buffer, strTime, axis_x_pos, x_pos, position_y);
+			} else if (i == 0){
+				// exception for the first tick, we can squeeze to the left if we have space
+				if (i + 1 < ticksInfo.tick_labels().size()) {
+					var nextTick = ticksInfo.tick_labels().get(i+1);
+					var nextTickPos = ticksInfo.ticks()[nextTick.tickIndex()];
+					var nextLabelPos = nextTickPos - (textSize.x / 2);
 					
-					axis_tick_mark_height+=TICK_BIG;
+					if (nextLabelPos > textSize.x + 2) {
+						drawTickLabel(buffer, strTime, axis_x_pos, 0, position_y);
+					}
+				} else {
+					// no next tick, it's safe to draw the first label
+					drawTickLabel(buffer, strTime, axis_x_pos, 0, position_y);
 				}
 			}
-			// always draw the ticks
-			buffer.drawLine(axis_x_pos, position_y, axis_x_pos, axis_tick_mark_height);
 		}
+		var multiplier = ticksInfo.conversionFactor();
+		
 		attribute.setTimeUnitMultiplier(multiplier);
-		attribute.setTimeUnit(displayTimeUnit);
+		attribute.setTimeUnit(ticksInfo.dataTimeUnit());
 		attribute.setDisplayTimeUnit(userDisplayTimeUnit);
 		
 		buffer.dispose();
@@ -310,25 +219,11 @@ public class CanvasAxisX extends AbstractAxisCanvas
 		redraw();
 	}
 	
-	/*****
-	 * convert from time to pixel
-	 * 
-	 * @param displayTimeBegin current attribute time configuration
-	 * @param time the time to convert
-	 * @param deltaXPixels the distance for two different time (in pixel)
-	 * 
-	 * @return pixel (x-axis)
-	 */
-	private int convertTimeToPixel(long displayTimeBegin,
-								   long time, 
-								   double deltaXPixels)
-	{
-		// define pixel : (time - TimeBegin) x number_of_pixel_per_time 
-		//				  (time - TimeBegin) x (numPixelsH/timeInterval)
-		long dTime = time-displayTimeBegin;
-		return(int) (deltaXPixels * dTime);
-	}
 	
+	private void drawTickLabel(GC gc, String label, int x_tick, int x, int y) {
+		gc.drawText(label, x, y + TICK_BIG);
+		gc.drawLine(x_tick, y + TICK_SMALL, x_tick, y + TICK_BIG);
+	}
 	
 	@Override
 	public void historyNotification(final OperationHistoryEvent event) {

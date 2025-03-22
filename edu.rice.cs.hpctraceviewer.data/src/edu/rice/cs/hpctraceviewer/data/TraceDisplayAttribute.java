@@ -36,7 +36,7 @@ public class TraceDisplayAttribute
 	private int numPixelsDepthV;
 	
 	// multiplier for unit time to be displayed 
-	private float multiplier;
+	private double multiplier;
 
 	private Frame frame;
 
@@ -132,11 +132,11 @@ public class TraceDisplayAttribute
     }
 	
     
-    public void setTimeUnitMultiplier(float multiplier) {
+    public void setTimeUnitMultiplier(double multiplier) {
     	this.multiplier = multiplier;
     }
     
-    public float getTimeUnitMultiplier() {
+    public double getTimeUnitMultiplier() {
     	return multiplier;
     }
     
@@ -154,12 +154,12 @@ public class TraceDisplayAttribute
 	/****
 	 * Compute the suggested time unit for a give space time data
 	 * 
-	 * @param data
+	 * @param unitInDatabase 
+	 * 			the original time unit in the database. Usually equivalent to 
+	 * 			{@link TraceDisplayAttribute.getTimeUnit} method
 	 * @return
 	 */
-	public TimeUnit computeDisplayTimeUnit(SpaceTimeDataController data) {
-				
-		TimeUnit unitInDatabase = data.getTimeUnit();
+	public TimeUnit computeDisplayTimeUnit(TimeUnit unitInDatabase) {
 		
 		int unit = 0;
 		
@@ -456,9 +456,17 @@ public class TraceDisplayAttribute
 	
 	public long convertPixelToTime(int pixelX)
 	{
-		double pixelsPerTime = numPixelsH / (double) getTimeInterval();
-		return (long) (getTimeBegin() + (long) pixelX / pixelsPerTime);
+		double pixelsPerTime = (double)numPixelsH / (double) getTimeInterval();
+		return (long) (getTimeBegin() + (double) pixelX / pixelsPerTime);
 	}
+	
+	
+	public int convertTimeToPixel(long time)
+	{
+		double pixelsPerTime = (double) numPixelsH / getTimeInterval();
+		return (int) ((time - getTimeBegin()) * pixelsPerTime);
+	}
+	
 	
 	/***
 	 * Check if two attribute instances have the same depth attribute

@@ -7,7 +7,9 @@ package edu.rice.cs.hpctraceviewer.ui.test;
 import static org.junit.Assert.*;
 
 import org.eclipse.core.commands.operations.OperationHistoryEvent;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -19,22 +21,34 @@ import edu.rice.cs.hpctraceviewer.ui.test.internal.TraceTestCase;
 @RunWith(SWTBotJunit4ClassRunner.class)
 public class CanvasAxisXTest extends TraceTestCase
 {
+	
+	@Before
+	@Override
+	public void setUp() {
+		super.setUp();
+
+		final var title = "test-x-axis";
+		shell.setText(title);
+		
+		shell.setLayout(new FillLayout());
+		shell.layout();
+		
+		shell.open();
+	}
 
 	@Test
 	public void testSetDataObject() throws Exception {
-		final var title = "test-canvas";
-		shell.setText(title);
-		shell.open();
 
 		var tracePart = getTracePart();
 		CanvasAxisX canvas = new CanvasAxisX(tracePart, shell);
+		canvas.setLayout(new FillLayout());
 		
-		var bounds = shell.getBounds();
-		canvas.setBounds(bounds);
-		shell.pack();
-
-		var rec = canvas.getBounds();
-		assertNotNull(rec);
+		var bounds = shell.getClientArea();
+		assertTrue(bounds.height > 0 && bounds.width > 0);
+		
+		canvas.setSize(bounds.width, bounds.height);
+		var rec = canvas.getClientArea();
+		assertTrue(rec.width > 0 && rec.height > 0);
 		
 		var experiments = TestDatabase.getExperiments();
 		assertNotNull(experiments);
@@ -43,27 +57,35 @@ public class CanvasAxisXTest extends TraceTestCase
 		for(var exp: experiments) {
 			var stdc = createSTDC(exp, rec.height, rec.width);
 			
+			System.out.println("Testing " + exp.getDirectory());
+			
 			canvas.setData(stdc);
-			canvas.setFocus();
-			canvas.redraw();
+			
+			showWindow(1000);
 
 			var attributes = stdc.getTraceDisplayAttribute();
-			var deltaTime  = stdc.getMaxEndTime() - stdc.getMinBegTime();
+			var deltaTime  = attributes.getTimeInterval();
+			var timeBegin  = attributes.getTimeBegin();
 			var timeChunk  = deltaTime / 10;
 			
-			for(int i=1; i<5; i++) {
+			for(int i=0; i<8; i++) {
 				// simulate notifying canvas axis y to refresh
 				BufferRefreshOperation op = new BufferRefreshOperation(stdc, null, null);
 				
 				var history = getOperationHistory();
 				OperationHistoryEvent event = new OperationHistoryEvent(OperationHistoryEvent.DONE, history, op);
 				
+				// hack to simulate zoom-in
+				var timeStart  = timeBegin + timeChunk * i;
+				var timeEnd    = timeBegin + deltaTime - (timeChunk * i);
+				attributes.setTime(timeStart, timeEnd);
+				
+				assertEquals(timeStart, attributes.getTimeBegin());
+				assertEquals(timeEnd, attributes.getTimeEnd());
+				
 				canvas.historyNotification(event);
 				
-				// hack to simulate zoom-in
-				var timeStart  = timeChunk * i;
-				var timeEnd    = deltaTime - (timeChunk * i);
-				attributes.setTime(timeStart, timeEnd);
+				showWindow();
 			}
 		}
 	}

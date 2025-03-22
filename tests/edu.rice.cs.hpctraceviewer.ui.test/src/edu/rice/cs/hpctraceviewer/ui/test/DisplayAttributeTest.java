@@ -77,7 +77,7 @@ public class DisplayAttributeTest extends BaseTestAllTraceDatabases
 			var time = attribute.getDisplayTimeUnit();
 			assertNotNull(time);
 			
-			var timeUnit = attribute.computeDisplayTimeUnit(stdc);
+			var timeUnit = attribute.computeDisplayTimeUnit(stdc.getTimeUnit());
 			assertNotNull(timeUnit);
 			
 			var tuIncr =  attribute.increment(timeUnit);
