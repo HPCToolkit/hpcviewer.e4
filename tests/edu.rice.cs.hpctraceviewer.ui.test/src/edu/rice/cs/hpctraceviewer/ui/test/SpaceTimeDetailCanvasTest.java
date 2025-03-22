@@ -273,7 +273,6 @@ public class SpaceTimeDetailCanvasTest extends TraceTestCase
 	 * 			main data for the trace
 	 */
 	private void emulateOperation(IUndoableOperation operation, SpaceTimeDetailCanvas stdc) {
-		System.out.println(" - Emulate " + operation.getLabel());
 		
 		// about to execute an asynchronous operation
 		OperationHistoryEvent eventAbout = new OperationHistoryEvent(
@@ -299,7 +298,7 @@ public class SpaceTimeDetailCanvasTest extends TraceTestCase
 			fail(e.getMessage());
 		}
 		
-		showWindow(500);
+		showWindow(200);
 		
 		// execution has done
 		OperationHistoryEvent eventDone = new OperationHistoryEvent(
@@ -314,7 +313,7 @@ public class SpaceTimeDetailCanvasTest extends TraceTestCase
 		assertNotNull(label);
 		assertTrue(label.length() > 1);
 		
-		showWindow(500);
+		showWindow(200);
 
 		progressMonitor.setCanceled(true);
 	}

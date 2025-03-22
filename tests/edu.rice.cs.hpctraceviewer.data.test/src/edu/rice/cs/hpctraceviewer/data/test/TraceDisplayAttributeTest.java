@@ -25,13 +25,13 @@ public class TraceDisplayAttributeTest
 		when(stdc.getTimeUnit()).thenReturn(TimeUnit.MILLISECONDS);
 		
 		attr.setTime(10, 20);
-		var unit = attr.computeDisplayTimeUnit(stdc);
+		var unit = attr.computeDisplayTimeUnit(stdc.getTimeUnit());
 		
 		assertNotNull(unit);
 		assertEquals(TimeUnit.MILLISECONDS, unit);
 		
 		attr.setTime(10, 10 * 1000); // make sure the time end is bigger than 1000
-		unit = attr.computeDisplayTimeUnit(stdc);
+		unit = attr.computeDisplayTimeUnit(stdc.getTimeUnit());
 		
 		assertNotNull(unit);
 		assertEquals(TimeUnit.SECONDS, unit);

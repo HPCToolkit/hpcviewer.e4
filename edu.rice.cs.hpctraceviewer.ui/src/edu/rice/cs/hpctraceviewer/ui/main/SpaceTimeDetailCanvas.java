@@ -12,7 +12,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.text.DecimalFormat;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
@@ -130,11 +129,10 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	private MessageLabelManager restoreMessage;
 	
 	private final TraceDisplayAttribute oldAttributes;
-	
-	private final DecimalFormat formatTime;
 
 	private ResizeListener resizeListener;
 	private KeyListener keyListener;
+
 	
     /**Creates a SpaceTimeDetailCanvas with the given parameters*/
 	public SpaceTimeDetailCanvas(ITracePart tracePart, IEventBroker eventBroker, Composite _composite)
@@ -145,8 +143,6 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		this.eventBroker = eventBroker;
 		oldAttributes    = new TraceDisplayAttribute();
 		stData  = null;
-		
-		formatTime = new DecimalFormat("###,###,###.##");
 	}
 
 	
@@ -253,7 +249,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		attributes.setProcess(topLeftProcess, bottomRightProcess);
 		attributes.assertProcessBounds(stData.getTotalTraceCount());
 		
-		final long numTimeDisplayed = this.getNumTimeUnitDisplayed();
+		final long numTimeDisplayed = attributes.getTimeInterval();
 		if (numTimeDisplayed < Constants.MIN_TIME_UNITS_DISP)
 		{
 			long begTime = topLeftTime + (numTimeDisplayed - Constants.MIN_TIME_UNITS_DISP) / 2;
@@ -482,11 +478,13 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		//zoom out works as follows: find mid point of times (xMid).
 		//Add/Subtract 1/2 of the scaled numTimeUnitsDisp to xMid to get new endTime and begTime
 
-		double xMid = attributes.getTimeBegin() + (attributes.getTimeInterval() * 0.5);
+		var numTimeUnitDisplayed = attributes.getTimeInterval();
+
+		double xMid = attributes.getTimeBegin() + (numTimeUnitDisplayed * 0.5);
 		
-		final double td2 = (this.getNumTimeUnitDisplayed() * SCALE); 
+		final double td2 = numTimeUnitDisplayed * SCALE; 
 		long t2 = (long) Math.ceil( Math.min( stData.getTimeWidth(), xMid + td2) );
-		final double td1 = (long)(this.getNumTimeUnitDisplayed() * SCALE);
+		final double td1 = numTimeUnitDisplayed * SCALE;
 		long t1 = (long) Math.floor( Math.max(0, xMid - td1) );
 
 		final Frame frame = new Frame(stData.getTraceDisplayAttribute().getFrame());
@@ -501,7 +499,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	public boolean canTimeZoomIn() {
 		if (stData == null)
 			return false;
-		return getNumTimeUnitDisplayed() > Constants.MIN_TIME_UNITS_DISP;
+		return stData.getTraceDisplayAttribute().getTimeInterval() > Constants.MIN_TIME_UNITS_DISP;
 	}
 	
 	@Override
@@ -520,10 +518,10 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	public double getScalePixelsPerTime()
 	{
 		TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
-		if (attributes == null || getNumTimeUnitDisplayed() == 0)
+		if (attributes == null || attributes.getTimeInterval() == 0)
 			return 0;
 		
-		return (double) attributes.getPixelHorizontal() / (double)this.getNumTimeUnitDisplayed();
+		return (double) attributes.getPixelHorizontal() / (double)attributes.getTimeInterval();
 	}
 	
 	/**************************************************************************
@@ -608,6 +606,8 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		final TimeUnit displayTimeUnit = attributes.getTimeUnit();
 		
 		double timeInTimeUnit  = attributes.getTimeUnitMultiplier() * displayTimeUnit.convert(attributes.getTimeBegin(), dbTimeUnit);
+		
+		var formatTime = AxisXTicks.getLabelFormat();		
 		final String timeStart = formatTime.format(timeInTimeUnit);
 		
 		timeInTimeUnit = attributes.getTimeUnitMultiplier() * displayTimeUnit.convert(attributes.getTimeEnd(), dbTimeUnit);
@@ -679,12 +679,13 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		if (ptl == null) 
 			return;
 		
-    	final Position position = stData.getTraceDisplayAttribute().getPosition();    			
+    	final Position position = attributes.getPosition();    			
 		final TimeUnit dbTimeUnit = stData.getTimeUnit();
 		final TimeUnit displayTimeUnit = attributes.getTimeUnit();
 		
 		// fix issue #400: convert to double to ensure we don't lose the precision 
-		final double selectedTime = displayTimeUnit.convert(position.time, dbTimeUnit) * (double)attributes.getTimeUnitMultiplier();
+		final double selectedTime = displayTimeUnit.convert(position.time, dbTimeUnit);
+		final double convertedTime = selectedTime * (double)attributes.getTimeUnitMultiplier();
 
         final var traceData = stData.getBaseData();
 
@@ -692,9 +693,11 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		String label = "Cross Hair: ";
 		IdTuple idtuple = ptl.getProfileIdTuple();
 
+		var formatTime = AxisXTicks.getLabelFormat();		
+
 		if (traceData.getNumberOfRanks() > 0 && idtuple != null) {
 			String procStr  = idtuple.toString(traceData.getIdTupleTypes());
-			String timeStr  = formatTime.format(selectedTime) + timeUnit;
+			String timeStr  = formatTime.format(convertedTime) + timeUnit;
 	        final String buffer = label + "(" + timeStr + ", " +  procStr + ")";
 
 	        crossHairLabel.setText(buffer);
@@ -1030,7 +1033,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
     	
     	int selectedProcess = attributes.convertPixelToRank(mouseDown.y);
 
-    	long closeTime = attributes.getTimeBegin() + (long)(mouseDown.x / getScalePixelsPerTime());
+    	long closeTime = attributes.convertPixelToTime(mouseDown.x);
     	
     	if (closeTime > attributes.getTimeEnd()) {
     		// impossible to happen unless there's a data race issue
@@ -1040,11 +1043,6 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
     	return new Position(closeTime, selectedProcess);
 	}
 	
-	
-	private long getNumTimeUnitDisplayed()
-	{
-		return (stData.getTraceDisplayAttribute().getTimeInterval());
-	}
 	
 	private double getNumProcessesDisplayed()
 	{
@@ -1291,8 +1289,10 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 	@Override
 	protected void changeRegion(Rectangle region) 
 	{
+		var numTimeUnitDisplayed = stData.getTraceDisplayAttribute().getTimeInterval();
+		
 		//If we're zoomed in all the way don't do anything
-		if(getNumTimeUnitDisplayed() == Constants.MIN_TIME_UNITS_DISP)
+		if(numTimeUnitDisplayed == Constants.MIN_TIME_UNITS_DISP)
 			return;
 
 		adjustSelection(region);
