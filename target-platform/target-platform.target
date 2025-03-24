@@ -48,7 +48,7 @@ SPDX-License-Identifier: Apache-2.0
                 <dependency>
                     <groupId>com.graphbuilder</groupId>
                     <artifactId>graphbuilder</artifactId>
-                    <version>1.0.1-SNAPSHOT</version>
+                    <version>1.0.1</version>
                     <type>jar</type>
                 </dependency>
                 <dependency>
@@ -60,19 +60,19 @@ SPDX-License-Identifier: Apache-2.0
                 <dependency>
                     <groupId>org.hpctoolkit.db</groupId>
                     <artifactId>protocol</artifactId>
-                    <version>1.0.0-SNAPSHOT</version>
+                    <version>1.0.0-20250323.144530-9</version>
                     <type>jar</type>
                 </dependency>
             	<dependency>
                 	<groupId>org.hpctoolkit.db</groupId>
                 	<artifactId>client</artifactId>
-                	<version>1.0.0-SNAPSHOT</version>
+                	<version>1.0.0-20250323.144530-9</version>
                 	<type>jar</type>
             	</dependency>
             	<dependency>
                 	<groupId>org.hpctoolkit.db</groupId>
                 	<artifactId>local</artifactId>
-                	<version>1.0.0-SNAPSHOT</version>
+                	<version>1.0.0-20250323.144530-9</version>
                 	<type>jar</type>
             	</dependency>
             	<dependency>
