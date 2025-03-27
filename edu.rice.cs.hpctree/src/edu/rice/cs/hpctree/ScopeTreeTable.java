@@ -4,6 +4,8 @@
 
 package edu.rice.cs.hpctree;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -46,16 +48,15 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
+
 import edu.rice.cs.hpcbase.Theme;
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.VisibilityType;
-import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
-import edu.rice.cs.hpcdata.experiment.metric.format.MetricValuePredefinedFormat;
-import edu.rice.cs.hpcdata.experiment.scope.RootScope;
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import org.hpctoolkit.db.local.experiment.metric.BaseMetric;
+import org.hpctoolkit.db.local.experiment.metric.BaseMetric.AnnotationType;
+import org.hpctoolkit.db.local.experiment.metric.BaseMetric.VisibilityType;
+import org.hpctoolkit.db.local.experiment.metric.DerivedMetric;
+import org.hpctoolkit.db.local.experiment.metric.format.MetricValuePredefinedFormat;
+import org.hpctoolkit.db.local.experiment.scope.RootScope;
+import org.hpctoolkit.db.local.experiment.scope.Scope;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpctree.action.IActionListener;
 import edu.rice.cs.hpctree.internal.ColumnHeaderDataProvider;
@@ -84,7 +85,7 @@ import edu.rice.cs.hpctree.internal.config.TableFontConfiguration;
  * like a composite for the layout.
  *
  ********************************************************************/
-public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayerListener, ListEventListener<BaseMetric>
+public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayerListener, PropertyChangeListener
 {
 	private static final String TEXT_METRIC_COLUMN = "8x88+88xx888x8%";
 	private static final String STRING_PADDING  = "X"; 
@@ -675,47 +676,6 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 		}
 	}
 
-
-	/*****
-	 * {@inheritDoc}
-	 * <p>
-	 * Called when there is an update in the list of metrics (like a new metric).
-	 * We want the listener for metric changes to be here so that we can be sure
-	 * to make some adaptation AFTER refreshing the tree data. 
-	 */
-	@Override
-	public void listChanged(ListEvent<BaseMetric> listChanges) {
-		/**
-		 * How far the index to be shifted.
-		 * Since in our case we only add ONE metric on the left,
-		 * we only shift the existing columns ONE to the right.
-		 */
-		final int SHIFTED_INDEX = 1;
-		
-		// there is a change in the list of metrics
-		IScopeTreeData treeData = (IScopeTreeData) bodyLayerStack.getTreeRowModel().getTreeData();
-		treeData.refreshAndShift(SHIFTED_INDEX);		
-
-		int []hiddenIndexes = getHiddenColumnIndexes();
-		int []shiftedIndexes = Arrays.copyOf(hiddenIndexes, hiddenIndexes.length);
-		
-		ColumnHideShowLayer hideShowLayer = bodyLayerStack.getColumnHideShowLayer();
-
-		refresh();
-		
-		while(listChanges.next()) {
-			if (listChanges.getType() == ListEvent.INSERT) {				
-				int index = listChanges.getIndex();	
-				for(int i=0; i<hiddenIndexes.length; i++)
-					shiftedIndexes[i] = shiftedIndexes[i] + index + SHIFTED_INDEX;
-				
-				hideShowLayer.showAllColumns();
-				hideShowLayer.hideColumnIndexes(shiftedIndexes);
-			}
-		}
-		pack();
-	}
-
 	
 	@Override
 	public void setRoot(Scope root) {
@@ -814,5 +774,47 @@ public class ScopeTreeTable implements IScopeTreeAction, DisposeListener, ILayer
 	
 	public BaseMetric getMetric(int columnIndex) {
 		return bodyDataProvider.getMetric(columnIndex);
-	}	
+	}
+
+
+	@Override
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Called when there is an update in the list of metrics (like a new metric).
+	 * We want the listener for metric changes to be here so that we can be sure
+	 * to make some adaptation AFTER refreshing the tree data. 
+	 */
+	public void propertyChange(PropertyChangeEvent evt) {
+		/**
+		 * How far the index to be shifted.
+		 * Since in our case we only add ONE metric on the left,
+		 * we only shift the existing columns ONE to the right.
+		 */
+		final int SHIFTED_INDEX = 1;
+		
+		// there is a change in the list of metrics
+		IScopeTreeData treeData = (IScopeTreeData) bodyLayerStack.getTreeRowModel().getTreeData();
+		treeData.refreshAndShift(SHIFTED_INDEX);		
+
+		int []hiddenIndexes = getHiddenColumnIndexes();
+		int []shiftedIndexes = Arrays.copyOf(hiddenIndexes, hiddenIndexes.length);
+		
+		ColumnHideShowLayer hideShowLayer = bodyLayerStack.getColumnHideShowLayer();
+
+		refresh();
+
+		if (evt.getPropertyName().equals(org.hpctoolkit.db.local.event.EventList.PROPERTY_INSERT)) {
+			var newValue = evt.getNewValue();
+			if (newValue instanceof BaseMetric metric) {
+				int index = metric.getIndex();
+				for(int i=0; i<hiddenIndexes.length; i++)
+					shiftedIndexes[i] = shiftedIndexes[i] + index + SHIFTED_INDEX;
+				
+				hideShowLayer.showAllColumns();
+				hideShowLayer.hideColumnIndexes(shiftedIndexes);
+			}
+		}
+		pack();
+	}
 }

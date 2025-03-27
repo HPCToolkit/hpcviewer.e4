@@ -23,8 +23,8 @@ import edu.rice.cs.hpcbase.IBaseInput;
 import edu.rice.cs.hpcbase.ui.AbstractUpperPart;
 import edu.rice.cs.hpcbase.ui.ILowerPart;
 import edu.rice.cs.hpcbase.ui.IUpperPart;
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import org.hpctoolkit.db.local.experiment.metric.BaseMetric;
+import org.hpctoolkit.db.local.experiment.scope.Scope;
 import edu.rice.cs.hpcgraph.GraphEditorInput;
 
 import javax.annotation.PreDestroy;

@@ -4,7 +4,7 @@
 
 package edu.rice.cs.hpcbase;
 
-import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
+import org.hpctoolkit.db.local.experiment.metric.IMetricManager;
 
 /***************************************************************
  * 

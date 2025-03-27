@@ -13,10 +13,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
-import edu.rice.cs.hpcdata.experiment.metric.MetricType;
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
-import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
+import org.hpctoolkit.db.local.experiment.metric.DerivedMetric;
+import org.hpctoolkit.db.local.experiment.metric.MetricType;
+import org.hpctoolkit.db.local.experiment.metric.BaseMetric.AnnotationType;
+import org.hpctoolkit.db.local.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcmetric.dialog.ExtDerivedMetricDlg;
 import edu.rice.cs.hpctest.util.TestDatabase;
 import edu.rice.cs.hpctest.util.ViewerTestCase;
@@ -79,7 +79,7 @@ public class ExtDerivedMetricDlgTest extends ViewerTestCase
 			for(var exp: experiments) {
 				var root = exp.getRootScope(RootScopeType.CallingContextTree);
 				
-				var metrics = exp.getMetricList();
+				var metrics = exp.getMetrics();
 				String expression = "$0 + 10";
 				int id = metrics.size() + 1;
 				String newId = String.valueOf(id);

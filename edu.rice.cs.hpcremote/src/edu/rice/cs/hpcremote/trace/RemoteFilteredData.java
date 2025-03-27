@@ -8,14 +8,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectIntHashMap;
-import org.hpctoolkit.hpcclient.v1_0.BrokerClient;
+import org.hpctoolkit.db.client.BrokerClient;
 import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcbase.IExecutionContextToNumberTracesMap;
 import edu.rice.cs.hpcbase.IFilteredData;
-import edu.rice.cs.hpcdata.db.IdTuple;
-import edu.rice.cs.hpcdata.db.IdTupleType;
-import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
+import org.hpctoolkit.db.local.db.IdTuple;
+import org.hpctoolkit.db.local.db.IdTupleType;
+import org.hpctoolkit.db.local.db.IFileDB.IdTupleOption;
 
 public class RemoteFilteredData implements IFilteredData 
 {

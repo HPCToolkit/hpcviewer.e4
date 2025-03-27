@@ -9,9 +9,9 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 
 import edu.rice.cs.hpcbase.ViewerDataEvent;
-import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
-import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
-import edu.rice.cs.hpcdata.experiment.scope.RootScope;
+import org.hpctoolkit.db.local.experiment.metric.DerivedMetric;
+import org.hpctoolkit.db.local.experiment.metric.IMetricManager;
+import org.hpctoolkit.db.local.experiment.scope.RootScope;
 import edu.rice.cs.hpcmetric.dialog.ExtDerivedMetricDlg;
 
 /****************************************************

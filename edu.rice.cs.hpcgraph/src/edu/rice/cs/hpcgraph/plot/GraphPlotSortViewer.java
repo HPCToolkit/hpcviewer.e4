@@ -13,10 +13,10 @@ import org.eclipse.swtchart.IAxisSet;
 import org.eclipse.swtchart.IAxisTick;
 import org.eclipse.swtchart.ILineSeries;
 
-import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
-import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import org.hpctoolkit.db.local.experiment.extdata.IThreadDataCollection;
+import org.hpctoolkit.db.local.experiment.metric.BaseMetric;
+import org.hpctoolkit.db.local.experiment.metric.MetricRaw;
+import org.hpctoolkit.db.local.experiment.scope.Scope;
 import edu.rice.cs.hpcgraph.GraphEditorInput;
 import edu.rice.cs.hpcgraph.internal.IGraphTranslator;
 

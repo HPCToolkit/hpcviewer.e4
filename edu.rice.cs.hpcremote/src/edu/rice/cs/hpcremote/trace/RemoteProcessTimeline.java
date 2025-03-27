@@ -8,14 +8,14 @@ import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import org.hpctoolkit.hpcclient.v1_0.TraceSampling;
+import org.hpctoolkit.db.client.TraceSampling;
 import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcbase.DebugUtil;
 import edu.rice.cs.hpcbase.IProcessTimeline;
 import edu.rice.cs.hpcbase.ITraceDataCollector;
-import edu.rice.cs.hpcdata.db.IdTuple;
-import edu.rice.cs.hpcdata.util.ICallPath.ICallPathInfo;
+import org.hpctoolkit.db.local.db.IdTuple;
+import org.hpctoolkit.db.local.util.ICallPath.ICallPathInfo;
 
 
 public class RemoteProcessTimeline implements IProcessTimeline 

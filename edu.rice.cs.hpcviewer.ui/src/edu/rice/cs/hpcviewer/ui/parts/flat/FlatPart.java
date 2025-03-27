@@ -18,10 +18,10 @@ import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcbase.IDatabase;
 import edu.rice.cs.hpcbase.ProgressReport;
-import edu.rice.cs.hpcdata.experiment.Experiment;
-import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
-import edu.rice.cs.hpcdata.experiment.scope.RootScope;
-import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
+import org.hpctoolkit.db.local.experiment.Experiment;
+import org.hpctoolkit.db.local.experiment.metric.IMetricManager;
+import org.hpctoolkit.db.local.experiment.scope.RootScope;
+import org.hpctoolkit.db.local.experiment.scope.RootScopeType;
 import edu.rice.cs.hpctree.FlatScopeTreeData;
 import edu.rice.cs.hpctree.IScopeTreeData;
 import edu.rice.cs.hpctree.action.FlatAction;

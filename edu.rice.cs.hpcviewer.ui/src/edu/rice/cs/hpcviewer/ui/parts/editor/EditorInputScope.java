@@ -14,7 +14,7 @@ import org.eclipse.swt.widgets.Shell;
 import edu.rice.cs.hpcbase.IDatabase;
 import edu.rice.cs.hpcbase.IEditorInput;
 import edu.rice.cs.hpcbase.ui.IUpperPart;
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import org.hpctoolkit.db.local.experiment.scope.Scope;
 
 public class EditorInputScope implements IEditorInput 
 {

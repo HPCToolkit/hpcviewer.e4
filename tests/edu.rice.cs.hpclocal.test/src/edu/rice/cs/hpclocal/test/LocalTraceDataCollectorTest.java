@@ -11,8 +11,8 @@ import org.junit.Test;
 
 import edu.rice.cs.hpcbase.IFilteredData;
 import edu.rice.cs.hpcbase.ITraceDataCollector.TraceOption;
-import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
-import edu.rice.cs.hpcdata.db.IdTuple;
+import org.hpctoolkit.db.local.db.IFileDB.IdTupleOption;
+import org.hpctoolkit.db.local.db.IdTuple;
 import edu.rice.cs.hpclocal.ILocalBaseData;
 import edu.rice.cs.hpclocal.LocalTraceDataCollector;
 

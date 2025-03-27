@@ -11,12 +11,12 @@ import java.nio.channels.NotYetConnectedException;
 
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
-import org.hpctoolkit.hpcclient.v1_0.BrokerClient;
-import org.hpctoolkit.hpcclient.v1_0.BrokerClientJavaNetHttp;
-import org.hpctoolkit.hpcclient.v1_0.DbManagerClient;
-import org.hpctoolkit.hpcclient.v1_0.DbManagerClientJavaNetHttp;
-import org.hpctoolkit.hpcclient.v1_0.DirectoryContentsNotAvailableException;
-import org.hpctoolkit.hpcclient.v1_0.RemoteDirectory;
+import org.hpctoolkit.db.client.BrokerClient;
+import org.hpctoolkit.db.client.BrokerClientJavaNetHttp;
+import org.hpctoolkit.db.client.DbManagerClient;
+import org.hpctoolkit.db.client.DbManagerClientJavaNetHttp;
+import org.hpctoolkit.db.client.DirectoryContentsNotAvailableException;
+import org.hpctoolkit.db.client.RemoteDirectory;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.JsonElement;

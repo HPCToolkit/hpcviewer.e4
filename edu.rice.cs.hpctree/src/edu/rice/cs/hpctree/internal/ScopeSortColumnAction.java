@@ -8,7 +8,7 @@ import org.eclipse.nebula.widgets.nattable.NatTable;
 import org.eclipse.nebula.widgets.nattable.sort.action.SortColumnAction;
 import org.eclipse.swt.events.MouseEvent;
 
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import org.hpctoolkit.db.local.experiment.scope.Scope;
 import edu.rice.cs.hpctree.ScopeTreeTable;
 
 /*******************************************************

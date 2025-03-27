@@ -17,11 +17,11 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import edu.rice.cs.hpcbase.BaseConstants.ViewType;
-import edu.rice.cs.hpcdata.experiment.Experiment;
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
-import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
-import edu.rice.cs.hpcdata.experiment.scope.RootScope;
-import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
+import org.hpctoolkit.db.local.experiment.Experiment;
+import org.hpctoolkit.db.local.experiment.metric.BaseMetric;
+import org.hpctoolkit.db.local.experiment.metric.IMetricManager;
+import org.hpctoolkit.db.local.experiment.scope.RootScope;
+import org.hpctoolkit.db.local.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcfilter.FilterDataItem;
 import edu.rice.cs.hpcmetric.IFilterable;
 import edu.rice.cs.hpcmetric.MetricFilterInput;
@@ -107,7 +107,7 @@ public class MetricFilterPaneTest extends ViewerTestCase
 	
 	
 	private MetricFilterInput createFilterInput(Experiment exp, IEventBroker eventBroker) {
-		var listMetrics = exp.getMetricList();
+		var listMetrics = exp.getMetrics();
 		
 		List<FilterDataItem<BaseMetric>> listData = new ArrayList<>(listMetrics.size());
 		for(var metric: listMetrics) {

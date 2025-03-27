@@ -8,7 +8,7 @@ import javax.inject.Inject;
 import org.eclipse.e4.core.di.annotations.Evaluate;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 
-import edu.rice.cs.hpcdata.experiment.Experiment;
+import org.hpctoolkit.db.local.experiment.Experiment;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 
 public class DatabaseMergeExpression 

@@ -7,7 +7,7 @@ package edu.rice.cs.hpcbase;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.rice.cs.hpcdata.db.version4.DataRecord;
+import org.hpctoolkit.db.local.db.version4.DataRecord;
 
 
 /***********************************************************************************

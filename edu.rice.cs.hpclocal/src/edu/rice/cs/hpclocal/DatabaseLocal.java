@@ -22,18 +22,18 @@ import edu.rice.cs.hpcbase.IDatabaseIdentification;
 import edu.rice.cs.hpcbase.ITraceManager;
 import edu.rice.cs.hpcbase.ProgressReport;
 import edu.rice.cs.hpcbase.map.ProcedureAliasMap;
-import edu.rice.cs.hpcdata.db.DatabaseManager;
-import edu.rice.cs.hpcdata.experiment.Experiment;
-import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
-import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
-import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
-import edu.rice.cs.hpcdata.experiment.scope.RootScope;
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.experiment.source.EmptySourceFile;
-import edu.rice.cs.hpcdata.experiment.source.FileSystemSourceFile;
-import edu.rice.cs.hpcdata.experiment.source.SourceFile;
-import edu.rice.cs.hpcdata.util.IProgressReport;
-import edu.rice.cs.hpcdata.util.Util;
+import org.hpctoolkit.db.local.db.DatabaseManager;
+import org.hpctoolkit.db.local.experiment.Experiment;
+import org.hpctoolkit.db.local.experiment.InvalExperimentException;
+import org.hpctoolkit.db.local.experiment.LocalDatabaseRepresentation;
+import org.hpctoolkit.db.local.experiment.metric.IMetricManager;
+import org.hpctoolkit.db.local.experiment.scope.RootScope;
+import org.hpctoolkit.db.local.experiment.scope.Scope;
+import org.hpctoolkit.db.local.experiment.source.EmptySourceFile;
+import org.hpctoolkit.db.local.experiment.source.FileSystemSourceFile;
+import org.hpctoolkit.db.local.experiment.source.SourceFile;
+import org.hpctoolkit.db.local.util.IProgressReport;
+import org.hpctoolkit.db.local.util.Util;
 
 public class DatabaseLocal implements IDatabaseLocal 
 {

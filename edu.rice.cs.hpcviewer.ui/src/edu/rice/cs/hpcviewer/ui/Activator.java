@@ -8,7 +8,7 @@ import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
-import edu.rice.cs.hpcdata.util.JavaValidator;
+import org.hpctoolkit.db.local.util.JavaValidator;
 
 
 /**

@@ -7,9 +7,9 @@ package edu.rice.cs.hpcmetric.internal;
 import java.util.List;
 import java.util.Optional;
 
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
-import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
-import edu.rice.cs.hpcdata.experiment.scope.RootScope;
+import org.hpctoolkit.db.local.experiment.metric.BaseMetric;
+import org.hpctoolkit.db.local.experiment.metric.DerivedMetric;
+import org.hpctoolkit.db.local.experiment.scope.RootScope;
 import edu.rice.cs.hpcfilter.FilterDataItem;
 import edu.rice.cs.hpcfilter.FilterDataProvider;
 import edu.rice.cs.hpcfilter.IFilterChangeListener;

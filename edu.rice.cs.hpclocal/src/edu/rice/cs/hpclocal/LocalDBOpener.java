@@ -6,16 +6,16 @@ package edu.rice.cs.hpclocal;
 
 import java.io.IOException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import edu.rice.cs.hpcdata.db.IFileDB;
-import edu.rice.cs.hpcdata.db.version2.TraceDB2;
-import edu.rice.cs.hpcdata.db.version4.FileDB4;
-import edu.rice.cs.hpcdata.db.version4.MetricValueCollection4;
-import edu.rice.cs.hpcdata.experiment.Experiment;
-import edu.rice.cs.hpcdata.experiment.IExperiment;
-import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
-import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
-import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
-import edu.rice.cs.hpcdata.util.Constants;
+import org.hpctoolkit.db.local.db.IFileDB;
+import org.hpctoolkit.db.local.db.version2.TraceDB2;
+import org.hpctoolkit.db.local.db.version4.FileDB4;
+import org.hpctoolkit.db.local.db.version4.MetricValueCollection4;
+import org.hpctoolkit.db.local.experiment.Experiment;
+import org.hpctoolkit.db.local.experiment.IExperiment;
+import org.hpctoolkit.db.local.experiment.InvalExperimentException;
+import org.hpctoolkit.db.local.experiment.LocalDatabaseRepresentation;
+import org.hpctoolkit.db.local.experiment.scope.RootScopeType;
+import org.hpctoolkit.db.local.util.Constants;
 import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 

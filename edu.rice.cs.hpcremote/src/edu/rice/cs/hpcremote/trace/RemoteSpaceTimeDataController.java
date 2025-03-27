@@ -12,20 +12,20 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.collections.impl.map.mutable.primitive.IntIntHashMap;
-import org.hpctoolkit.client_server_common.time.Timestamp;
-import org.hpctoolkit.client_server_common.trace.TraceId;
-import org.hpctoolkit.hpcclient.v1_0.BrokerClient;
-import org.hpctoolkit.hpcclient.v1_0.FutureTraceSamplingSet;
-import org.hpctoolkit.hpcclient.v1_0.TraceDataNotAvailableException;
-import org.hpctoolkit.hpcclient.v1_0.TraceSampling;
+import org.hpctoolkit.db.protocol.time.Timestamp;
+import org.hpctoolkit.db.protocol.trace.TraceId;
+import org.hpctoolkit.db.client.BrokerClient;
+import org.hpctoolkit.db.client.FutureTraceSamplingSet;
+import org.hpctoolkit.db.client.TraceDataNotAvailableException;
+import org.hpctoolkit.db.client.TraceSampling;
 import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcbase.DebugUtil;
 import edu.rice.cs.hpcbase.IProcessTimeline;
 import edu.rice.cs.hpcbase.ITraceDataCollector;
 import edu.rice.cs.hpcbase.ITraceDataCollector.TraceOption;
-import edu.rice.cs.hpcdata.db.IdTuple;
-import edu.rice.cs.hpcdata.experiment.IExperiment;
+import org.hpctoolkit.db.local.db.IdTuple;
+import org.hpctoolkit.db.local.experiment.IExperiment;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import io.vavr.collection.HashSet;

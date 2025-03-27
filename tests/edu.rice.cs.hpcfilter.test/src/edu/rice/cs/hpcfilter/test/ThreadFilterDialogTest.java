@@ -14,7 +14,7 @@ import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.junit.Before;
 import org.junit.Test;
 
-import edu.rice.cs.hpcdata.db.IdTupleType;
+import org.hpctoolkit.db.local.db.IdTupleType;
 import edu.rice.cs.hpcfilter.FilterDataItem;
 import edu.rice.cs.hpcfilter.StringFilterDataItem;
 import edu.rice.cs.hpcfilter.dialog.ThreadFilterDialog;

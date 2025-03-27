@@ -7,8 +7,8 @@ package edu.rice.cs.hpctraceviewer.data.timeline;
 import java.io.IOException;
 import edu.rice.cs.hpcbase.IProcessTimeline;
 import edu.rice.cs.hpcbase.ITraceDataCollector;
-import edu.rice.cs.hpcdata.db.IdTuple;
-import edu.rice.cs.hpcdata.util.ICallPath.ICallPathInfo;
+import org.hpctoolkit.db.local.db.IdTuple;
+import org.hpctoolkit.db.local.util.ICallPath.ICallPathInfo;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 
 

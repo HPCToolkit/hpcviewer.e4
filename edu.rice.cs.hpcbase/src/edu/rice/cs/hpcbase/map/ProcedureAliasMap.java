@@ -19,7 +19,7 @@ public class ProcedureAliasMap extends AliasMap<String,String> {
 
 	/*
 	 * (non-Javadoc)
-	 * @see edu.rice.cs.hpcdata.util.IUserData#getFilename()
+	 * @see org.hpctoolkit.db.local.util.IUserData#getFilename()
 	 */
 	public String getFilename() {
 		
@@ -29,7 +29,7 @@ public class ProcedureAliasMap extends AliasMap<String,String> {
 
 	/*
 	 * (non-Javadoc)
-	 * @see edu.rice.cs.hpcdata.util.IUserData#initDefault()
+	 * @see org.hpctoolkit.db.local.util.IUserData#initDefault()
 	 */
 	public void initDefault() {
 		data.put("hpcrun_special_IDLE", "... IDLE ...");

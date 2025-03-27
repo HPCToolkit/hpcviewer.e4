@@ -14,7 +14,7 @@ import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.junit.Before;
 import org.junit.Test;
 
-import edu.rice.cs.hpcdata.filter.FilterAttribute;
+import org.hpctoolkit.db.local.filter.FilterAttribute;
 import edu.rice.cs.hpcfilter.cct.FilterPropertyDialog;
 import edu.rice.cs.hpcfilter.service.FilterMap;
 import edu.rice.cs.hpctest.util.ViewerTestCase;

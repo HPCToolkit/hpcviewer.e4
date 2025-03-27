@@ -9,10 +9,10 @@ import java.util.List;
 import org.eclipse.nebula.widgets.nattable.sort.SortDirectionEnum;
 import org.eclipse.nebula.widgets.nattable.tree.ITreeData;
 
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
-import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.tree.ITreePath;
+import org.hpctoolkit.db.local.experiment.metric.BaseMetric;
+import org.hpctoolkit.db.local.experiment.metric.IMetricManager;
+import org.hpctoolkit.db.local.experiment.scope.Scope;
+import org.hpctoolkit.db.local.tree.ITreePath;
 
 public interface IScopeTreeData extends ITreeData<Scope>, ITreePath<Scope> 
 {

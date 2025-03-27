@@ -25,8 +25,8 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.LoggerFactory;
 
-import edu.rice.cs.hpcdata.util.OSValidator;
-import edu.rice.cs.hpcdata.util.ThreadManager;
+import org.hpctoolkit.db.local.util.OSValidator;
+import org.hpctoolkit.db.local.util.ThreadManager;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;
 import edu.rice.cs.hpctraceviewer.data.TimelineDataSet;

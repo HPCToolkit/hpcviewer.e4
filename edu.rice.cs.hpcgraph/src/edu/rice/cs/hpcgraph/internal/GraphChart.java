@@ -25,7 +25,7 @@ import org.eclipse.swtchart.extensions.charts.*;
 
 import edu.rice.cs.hpcbase.ThreadViewInput;
 import edu.rice.cs.hpcbase.ui.IProfilePart;
-import edu.rice.cs.hpcdata.db.IdTuple;
+import org.hpctoolkit.db.local.db.IdTuple;
 import edu.rice.cs.hpcgraph.GraphEditorInput;
 
 /********************************************************************************

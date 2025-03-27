@@ -7,12 +7,12 @@ package edu.rice.cs.hpcremote.data;
 import java.io.File;
 import java.io.IOException;
 
-import org.hpctoolkit.hpcclient.v1_0.BrokerClient;
+import org.hpctoolkit.db.client.BrokerClient;
 import org.slf4j.LoggerFactory;
 
-import edu.rice.cs.hpcdata.experiment.IDatabaseRepresentation;
-import edu.rice.cs.hpcdata.experiment.IExperiment;
-import edu.rice.cs.hpcdata.util.Constants;
+import org.hpctoolkit.db.local.experiment.IDatabaseRepresentation;
+import org.hpctoolkit.db.local.experiment.IExperiment;
+import org.hpctoolkit.db.local.util.Constants;
 
 
 public class RemoteDatabaseRepresentation implements IDatabaseRepresentation 

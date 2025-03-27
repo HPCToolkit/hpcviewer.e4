@@ -13,11 +13,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.mockito.Mockito;
 
-import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
-import edu.rice.cs.hpcdata.db.version4.FileDB4;
-import edu.rice.cs.hpcdata.db.version4.MetricValueCollection4;
-import edu.rice.cs.hpcdata.experiment.Experiment;
-import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
+import org.hpctoolkit.db.local.db.IFileDB.IdTupleOption;
+import org.hpctoolkit.db.local.db.version4.FileDB4;
+import org.hpctoolkit.db.local.db.version4.MetricValueCollection4;
+import org.hpctoolkit.db.local.experiment.Experiment;
+import org.hpctoolkit.db.local.experiment.scope.RootScopeType;
 import edu.rice.cs.hpclocal.SpaceTimeDataControllerLocal;
 import edu.rice.cs.hpctest.util.ViewerTestCase;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;

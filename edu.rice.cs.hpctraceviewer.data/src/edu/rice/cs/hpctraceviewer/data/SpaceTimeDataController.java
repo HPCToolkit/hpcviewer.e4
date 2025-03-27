@@ -12,13 +12,13 @@ import edu.rice.cs.hpcbase.IFilteredData;
 import edu.rice.cs.hpcbase.IProcessTimeline;
 import edu.rice.cs.hpcbase.ITraceDataCollector;
 import edu.rice.cs.hpcbase.ITraceManager;
-import edu.rice.cs.hpcdata.db.IdTuple;
-import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
-import edu.rice.cs.hpcdata.experiment.BaseExperiment;
-import edu.rice.cs.hpcdata.experiment.IExperiment;
-import edu.rice.cs.hpcdata.trace.BaseTraceAttribute;
-import edu.rice.cs.hpcdata.trace.TraceAttribute;
-import edu.rice.cs.hpcdata.util.ICallPath;
+import org.hpctoolkit.db.local.db.IdTuple;
+import org.hpctoolkit.db.local.db.IFileDB.IdTupleOption;
+import org.hpctoolkit.db.local.experiment.BaseExperiment;
+import org.hpctoolkit.db.local.experiment.IExperiment;
+import org.hpctoolkit.db.local.trace.BaseTraceAttribute;
+import org.hpctoolkit.db.local.trace.TraceAttribute;
+import org.hpctoolkit.db.local.util.ICallPath;
 import edu.rice.cs.hpctraceviewer.data.color.ColorTable;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimelineService;
 
@@ -299,7 +299,7 @@ public abstract class SpaceTimeDataController implements ITraceManager
 	public TimeUnit getTimeUnit() {
 		int version = exp.getMajorVersion();
 		
-		if (version == edu.rice.cs.hpcdata.util.Constants.EXPERIMENT_DENSED_VERSION) {
+		if (version == org.hpctoolkit.db.local.util.Constants.EXPERIMENT_DENSED_VERSION) {
 			if (((BaseExperiment)exp).getMinorVersion() < 2) {
 				// old version of database: always microsecond
 				return TimeUnit.MICROSECONDS;
@@ -312,7 +312,7 @@ public abstract class SpaceTimeDataController implements ITraceManager
 				return TimeUnit.NANOSECONDS;
 			}
 
-		} else if (version == edu.rice.cs.hpcdata.util.Constants.EXPERIMENT_SPARSE_VERSION) {
+		} else if (version == org.hpctoolkit.db.local.util.Constants.EXPERIMENT_SPARSE_VERSION) {
 			// newer database: sparse database always uses nanoseconds
 			
 			return TimeUnit.NANOSECONDS;

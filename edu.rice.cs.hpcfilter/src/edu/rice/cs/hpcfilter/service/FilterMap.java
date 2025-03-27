@@ -14,9 +14,9 @@ import org.eclipse.core.runtime.Platform;
 import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcbase.map.AliasMap;
-import edu.rice.cs.hpcdata.filter.FilterAttribute;
-import edu.rice.cs.hpcdata.filter.IFilterData;
-import edu.rice.cs.hpcdata.util.*;
+import org.hpctoolkit.db.local.filter.FilterAttribute;
+import org.hpctoolkit.db.local.filter.IFilterData;
+import org.hpctoolkit.db.local.util.*;
 
 /******************************************************************
  * 
@@ -132,7 +132,7 @@ implements IFilterData
 	 * If the string match a filter, returns the filter attribute
 	 * Otherwise returns null;
 	 * 
-	 * <p>See {@link edu.rice.cs.hpcdata.filter.FilterAttribute}
+	 * <p>See {@link org.hpctoolkit.db.local.filter.FilterAttribute}
 	 * </p>
 	 * 
 	 * @param element

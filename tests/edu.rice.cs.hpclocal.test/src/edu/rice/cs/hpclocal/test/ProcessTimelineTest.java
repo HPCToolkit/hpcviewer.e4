@@ -11,8 +11,8 @@ import org.junit.AfterClass;
 import org.junit.Test;
 
 import edu.rice.cs.hpcbase.IProcessTimeline;
-import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
-import edu.rice.cs.hpcdata.util.ICallPath.ICallPathInfo;
+import org.hpctoolkit.db.local.db.IFileDB.IdTupleOption;
+import org.hpctoolkit.db.local.util.ICallPath.ICallPathInfo;
 import edu.rice.cs.hpctest.util.BaseTestAllTraceDatabases;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 

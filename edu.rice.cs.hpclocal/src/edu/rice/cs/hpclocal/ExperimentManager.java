@@ -13,9 +13,9 @@ import org.eclipse.swt.widgets.Shell;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
-import edu.rice.cs.hpcdata.db.DatabaseManager;
-import edu.rice.cs.hpcdata.util.Util;
-import edu.rice.cs.hpcdata.util.Util.DatabaseFileFilter;
+import org.hpctoolkit.db.local.db.DatabaseManager;
+import org.hpctoolkit.db.local.util.Util;
+import org.hpctoolkit.db.local.util.Util.DatabaseFileFilter;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 
 

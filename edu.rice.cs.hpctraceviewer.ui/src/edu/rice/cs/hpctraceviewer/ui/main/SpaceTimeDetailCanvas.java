@@ -53,10 +53,10 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.LoggerFactory;
 
-import edu.rice.cs.hpcdata.db.IdTuple;
-import edu.rice.cs.hpcdata.db.IdTupleType;
-import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
-import edu.rice.cs.hpcdata.util.OSValidator;
+import org.hpctoolkit.db.local.db.IdTuple;
+import org.hpctoolkit.db.local.db.IdTupleType;
+import org.hpctoolkit.db.local.db.IFileDB.IdTupleOption;
+import org.hpctoolkit.db.local.util.OSValidator;
 import edu.rice.cs.hpcsetting.color.ColorManager;
 import edu.rice.cs.hpctraceviewer.ui.base.ISpaceTimeCanvas;
 import edu.rice.cs.hpctraceviewer.ui.base.ITracePart;
@@ -588,7 +588,7 @@ public class SpaceTimeDetailCanvas extends AbstractTimeCanvas
 		final TraceDisplayAttribute attributes = stData.getTraceDisplayAttribute();
         
 		showTimeRange(attributes);
-		if (stData.getExperiment().getMajorVersion() == edu.rice.cs.hpcdata.util.Constants.EXPERIMENT_DENSED_VERSION)
+		if (stData.getExperiment().getMajorVersion() == org.hpctoolkit.db.local.util.Constants.EXPERIMENT_DENSED_VERSION)
 			showProcessRange(attributes);
         showCrossHair(attributes);
         

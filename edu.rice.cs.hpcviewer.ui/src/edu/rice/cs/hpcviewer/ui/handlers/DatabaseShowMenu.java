@@ -12,7 +12,7 @@ import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.model.application.ui.menu.MDirectMenuItem;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenuElement;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
-import edu.rice.cs.hpcdata.experiment.Experiment;
+import org.hpctoolkit.db.local.experiment.Experiment;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;
 
 public abstract class DatabaseShowMenu 

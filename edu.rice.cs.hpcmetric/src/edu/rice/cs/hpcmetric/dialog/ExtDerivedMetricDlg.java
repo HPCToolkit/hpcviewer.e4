@@ -54,18 +54,18 @@ import com.graphbuilder.math.ExpressionTree;
 
 // hpcviewer
 import edu.rice.cs.hpcbase.map.UserInputHistory;
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric.AnnotationType;
-import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
-import edu.rice.cs.hpcdata.experiment.metric.ExtFuncMap;
-import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
-import edu.rice.cs.hpcdata.experiment.metric.MetricFormulaExpression;
-import edu.rice.cs.hpcdata.experiment.metric.MetricType;
-import edu.rice.cs.hpcdata.experiment.metric.MetricVarMap;
-import edu.rice.cs.hpcdata.experiment.metric.format.IMetricValueFormat;
-import edu.rice.cs.hpcdata.experiment.metric.format.MetricValuePredefinedFormat;
-import edu.rice.cs.hpcdata.experiment.scope.RootScope;
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import org.hpctoolkit.db.local.experiment.metric.BaseMetric;
+import org.hpctoolkit.db.local.experiment.metric.BaseMetric.AnnotationType;
+import org.hpctoolkit.db.local.experiment.metric.DerivedMetric;
+import org.hpctoolkit.db.local.experiment.metric.ExtFuncMap;
+import org.hpctoolkit.db.local.experiment.metric.IMetricManager;
+import org.hpctoolkit.db.local.experiment.metric.MetricFormulaExpression;
+import org.hpctoolkit.db.local.experiment.metric.MetricType;
+import org.hpctoolkit.db.local.experiment.metric.MetricVarMap;
+import org.hpctoolkit.db.local.experiment.metric.format.IMetricValueFormat;
+import org.hpctoolkit.db.local.experiment.metric.format.MetricValuePredefinedFormat;
+import org.hpctoolkit.db.local.experiment.scope.RootScope;
+import org.hpctoolkit.db.local.experiment.scope.Scope;
 
 
 /**
@@ -602,7 +602,7 @@ public class ExtDerivedMetricDlg extends TitleAreaDialog {
 
 			// create a new metric
 
-			List<BaseMetric> list = metricManager.getMetricList();
+			List<BaseMetric> list = metricManager.getMetrics();
 			int maxIndex = 0;
 			for (BaseMetric metric: list) {
 				int index = metric.getIndex();

@@ -8,7 +8,7 @@ import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
 
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
+import org.hpctoolkit.db.local.experiment.metric.BaseMetric;
 
 public class ColumnHeaderDataProvider implements IDataProvider, ListEventListener<BaseMetric> 
 {

@@ -36,8 +36,8 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.rice.cs.hpcdata.util.Constants;
-import edu.rice.cs.hpcdata.util.string.StringUtil;
+import org.hpctoolkit.db.local.util.Constants;
+import org.hpctoolkit.db.local.util.string.StringUtil;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpctraceviewer.ui.base.AbstractBaseTableViewer;
 import edu.rice.cs.hpctraceviewer.ui.base.ColorColumnLabelProvider;

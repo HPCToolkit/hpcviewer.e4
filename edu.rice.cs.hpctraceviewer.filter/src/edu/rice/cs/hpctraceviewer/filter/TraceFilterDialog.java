@@ -22,9 +22,9 @@ import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpcbase.IExecutionContextToNumberTracesMap;
 import edu.rice.cs.hpcbase.IFilteredData;
-import edu.rice.cs.hpcdata.db.IdTuple;
-import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
-import edu.rice.cs.hpcdata.util.OSValidator;
+import org.hpctoolkit.db.local.db.IdTuple;
+import org.hpctoolkit.db.local.db.IFileDB.IdTupleOption;
+import org.hpctoolkit.db.local.util.OSValidator;
 import edu.rice.cs.hpcfilter.AbstractFilterPane;
 import edu.rice.cs.hpcfilter.FilterDataItem;
 import edu.rice.cs.hpctraceviewer.filter.internal.ExecutionContext;

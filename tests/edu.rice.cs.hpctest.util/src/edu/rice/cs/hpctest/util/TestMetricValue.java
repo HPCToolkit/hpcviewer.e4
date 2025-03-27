@@ -13,15 +13,15 @@ import java.util.Map;
 
 import org.apache.commons.numbers.core.Precision;
 
-import edu.rice.cs.hpcdata.experiment.Experiment;
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
-import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
-import edu.rice.cs.hpcdata.experiment.metric.MetricType;
-import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
-import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
-import edu.rice.cs.hpcdata.experiment.scope.InstructionScope;
-import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import org.hpctoolkit.db.local.experiment.Experiment;
+import org.hpctoolkit.db.local.experiment.metric.BaseMetric;
+import org.hpctoolkit.db.local.experiment.metric.DerivedMetric;
+import org.hpctoolkit.db.local.experiment.metric.MetricType;
+import org.hpctoolkit.db.local.experiment.metric.MetricValue;
+import org.hpctoolkit.db.local.experiment.scope.CallSiteScope;
+import org.hpctoolkit.db.local.experiment.scope.InstructionScope;
+import org.hpctoolkit.db.local.experiment.scope.ProcedureScope;
+import org.hpctoolkit.db.local.experiment.scope.Scope;
 
 public class TestMetricValue
 {

@@ -9,19 +9,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.hpctoolkit.client_server_common.calling_context.CallingContextId;
-import org.hpctoolkit.client_server_common.profile.ProfileId;
-import org.hpctoolkit.hpcclient.v1_0.BrokerClient;
-import org.hpctoolkit.hpcclient.v1_0.UnknownCallingContextException;
-import org.hpctoolkit.hpcclient.v1_0.UnknownProfileIdException;
+import org.hpctoolkit.db.protocol.calling_context.CallingContextId;
+import org.hpctoolkit.db.protocol.profile.ProfileId;
+import org.hpctoolkit.db.client.BrokerClient;
+import org.hpctoolkit.db.client.UnknownCallingContextException;
+import org.hpctoolkit.db.client.UnknownProfileIdException;
 import org.slf4j.LoggerFactory;
 
-import edu.rice.cs.hpcdata.db.IdTuple;
-import edu.rice.cs.hpcdata.db.IdTupleComparator;
-import edu.rice.cs.hpcdata.db.IdTupleType;
-import edu.rice.cs.hpcdata.db.version4.AbstractDataProfile;
-import edu.rice.cs.hpcdata.db.version4.IDataProfile;
-import edu.rice.cs.hpcdata.experiment.metric.MetricValueSparse;
+import org.hpctoolkit.db.local.db.IdTuple;
+import org.hpctoolkit.db.local.db.IdTupleComparator;
+import org.hpctoolkit.db.local.db.IdTupleType;
+import org.hpctoolkit.db.local.db.version4.AbstractDataProfile;
+import org.hpctoolkit.db.local.db.version4.IDataProfile;
+import org.hpctoolkit.db.local.experiment.metric.MetricValueSparse;
 import io.vavr.collection.HashSet;
 import io.vavr.collection.Set;
 
@@ -34,7 +34,7 @@ import io.vavr.collection.Set;
  * the implementation for local database but can remotely access remote
  * {@code profile.db} file and grab the metrics on the fly.
  * </p>
- * @see edu.rice.cs.hpcdata.db.version4.DataSummary
+ * @see org.hpctoolkit.db.local.db.version4.DataSummary
  * 
  *************************************************************/
 public class RemoteDataProfile extends AbstractDataProfile implements IDataProfile

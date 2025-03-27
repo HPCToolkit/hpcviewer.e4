@@ -14,7 +14,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edu.rice.cs.hpcbase.IDatabase.DatabaseStatus;
-import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
+import org.hpctoolkit.db.local.experiment.InvalExperimentException;
 import edu.rice.cs.hpclocal.DatabaseLocal;
 import edu.rice.cs.hpclocal.LocalDatabaseIdentification;
 import edu.rice.cs.hpctest.util.TestDatabase;

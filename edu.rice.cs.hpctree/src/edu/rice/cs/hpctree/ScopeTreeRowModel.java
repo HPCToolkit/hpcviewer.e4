@@ -16,7 +16,7 @@ import org.eclipse.nebula.widgets.nattable.sort.SortDirectionEnum;
 import org.eclipse.nebula.widgets.nattable.tree.AbstractTreeRowModel;
 import org.eclipse.nebula.widgets.nattable.tree.TreeRowModel;
 
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import org.hpctoolkit.db.local.experiment.scope.Scope;
 
 
 /***********************************************************

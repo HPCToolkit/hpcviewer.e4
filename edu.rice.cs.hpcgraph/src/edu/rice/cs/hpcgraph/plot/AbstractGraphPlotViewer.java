@@ -16,8 +16,8 @@ import org.eclipse.swtchart.ISeries.SeriesType;
 import org.eclipse.swtchart.LineStyle;
 import org.eclipse.swtchart.Range;
 
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import org.hpctoolkit.db.local.experiment.metric.BaseMetric;
+import org.hpctoolkit.db.local.experiment.scope.Scope;
 import edu.rice.cs.hpcgraph.GraphEditorInput;
 import edu.rice.cs.hpcgraph.internal.AbstractGraphViewer;
 

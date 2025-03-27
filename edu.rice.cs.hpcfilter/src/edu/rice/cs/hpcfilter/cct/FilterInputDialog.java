@@ -17,7 +17,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
-import edu.rice.cs.hpcdata.filter.FilterAttribute;
+import org.hpctoolkit.db.local.filter.FilterAttribute;
 
 /*********************************************************************
  * 

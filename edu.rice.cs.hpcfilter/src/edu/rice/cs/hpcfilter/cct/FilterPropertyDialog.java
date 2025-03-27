@@ -42,7 +42,7 @@ import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.jface.viewers.TableViewerColumn;
 
-import edu.rice.cs.hpcdata.filter.FilterAttribute;
+import org.hpctoolkit.db.local.filter.FilterAttribute;
 import edu.rice.cs.hpcfilter.service.FilterMap;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;

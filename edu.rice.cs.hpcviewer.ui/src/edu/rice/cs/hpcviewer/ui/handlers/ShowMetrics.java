@@ -14,7 +14,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.rice.cs.hpcdata.experiment.Experiment;
+import org.hpctoolkit.db.local.experiment.Experiment;
 import edu.rice.cs.hpcmetric.MetricFilterInput;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.addon.DatabaseCollection;

@@ -50,8 +50,8 @@ import edu.rice.cs.hpctraceviewer.ui.summary.HPCSummaryView;
 import edu.rice.cs.hpctraceviewer.ui.util.IConstants;
 import edu.rice.cs.hpctraceviewer.ui.util.Utility;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
-import edu.rice.cs.hpcdata.experiment.BaseExperiment;
-import edu.rice.cs.hpcdata.util.OSValidator;
+import org.hpctoolkit.db.local.experiment.BaseExperiment;
+import org.hpctoolkit.db.local.util.OSValidator;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 

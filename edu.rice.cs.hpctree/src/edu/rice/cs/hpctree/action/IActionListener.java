@@ -4,7 +4,7 @@
 
 package edu.rice.cs.hpctree.action;
 
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import org.hpctoolkit.db.local.experiment.scope.Scope;
 
 public interface IActionListener 
 {

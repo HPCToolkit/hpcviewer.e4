@@ -6,7 +6,7 @@ package edu.rice.cs.hpctree;
 
 import java.util.List;
 
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import org.hpctoolkit.db.local.experiment.scope.Scope;
 
 public interface IScopeTreeAction 
 {

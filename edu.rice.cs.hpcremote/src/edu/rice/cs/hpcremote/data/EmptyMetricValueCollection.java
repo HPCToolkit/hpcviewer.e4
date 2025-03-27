@@ -9,10 +9,10 @@ import java.io.IOException;
 import org.eclipse.collections.impl.factory.primitive.IntObjectMaps;
 import org.eclipse.collections.api.map.primitive.IntObjectMap;
 
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
-import edu.rice.cs.hpcdata.experiment.metric.IMetricValueCollection;
-import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import org.hpctoolkit.db.local.experiment.metric.BaseMetric;
+import org.hpctoolkit.db.local.experiment.metric.IMetricValueCollection;
+import org.hpctoolkit.db.local.experiment.metric.MetricValue;
+import org.hpctoolkit.db.local.experiment.scope.Scope;
 
 public class EmptyMetricValueCollection implements IMetricValueCollection
 {

@@ -10,10 +10,10 @@ import org.eclipse.collections.impl.map.mutable.primitive.ObjectIntHashMap;
 
 import edu.rice.cs.hpcbase.BaseConstants;
 import edu.rice.cs.hpcbase.IExecutionContextToNumberTracesMap;
-import edu.rice.cs.hpcdata.db.IFileDB;
-import edu.rice.cs.hpcdata.db.IdTuple;
-import edu.rice.cs.hpcdata.db.IdTupleType;
-import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
+import org.hpctoolkit.db.local.db.IFileDB;
+import org.hpctoolkit.db.local.db.IdTuple;
+import org.hpctoolkit.db.local.db.IdTupleType;
+import org.hpctoolkit.db.local.db.IFileDB.IdTupleOption;
 
 
 /*********************************************************

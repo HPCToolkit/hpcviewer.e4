@@ -19,7 +19,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
-import edu.rice.cs.hpcdata.util.OSValidator;
+import org.hpctoolkit.db.local.util.OSValidator;
 import edu.rice.cs.hpcfilter.AbstractFilterPane;
 import edu.rice.cs.hpcfilter.BaseFilterPane;
 import edu.rice.cs.hpcfilter.FilterDataItem;

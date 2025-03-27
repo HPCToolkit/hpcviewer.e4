@@ -16,7 +16,7 @@ import org.eclipse.swt.layout.FillLayout;
 import org.junit.Before;
 import org.junit.Test;
 
-import edu.rice.cs.hpcdata.db.IdTupleType;
+import org.hpctoolkit.db.local.db.IdTupleType;
 import edu.rice.cs.hpcfilter.AbstractFilterPane;
 import edu.rice.cs.hpcfilter.BaseFilterPane;
 import edu.rice.cs.hpcfilter.FilterDataItem;

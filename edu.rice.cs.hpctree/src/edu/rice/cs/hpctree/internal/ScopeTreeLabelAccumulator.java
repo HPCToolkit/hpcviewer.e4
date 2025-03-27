@@ -7,10 +7,10 @@ package edu.rice.cs.hpctree.internal;
 import org.eclipse.nebula.widgets.nattable.layer.LabelStack;
 import org.eclipse.nebula.widgets.nattable.layer.cell.IConfigLabelAccumulator;
 
-import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
-import edu.rice.cs.hpcdata.experiment.scope.CallSiteScopeCallerView;
-import edu.rice.cs.hpcdata.experiment.scope.LineScope;
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import org.hpctoolkit.db.local.experiment.scope.CallSiteScope;
+import org.hpctoolkit.db.local.experiment.scope.CallSiteScopeCallerView;
+import org.hpctoolkit.db.local.experiment.scope.LineScope;
+import org.hpctoolkit.db.local.experiment.scope.Scope;
 import edu.rice.cs.hpctree.IScopeTreeData;
 
 

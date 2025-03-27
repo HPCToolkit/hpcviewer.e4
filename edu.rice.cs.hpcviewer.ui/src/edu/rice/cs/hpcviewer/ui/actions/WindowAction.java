@@ -15,7 +15,7 @@ import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.widgets.Display;
 
 import edu.rice.cs.hpcbase.ui.IBasePart;
-import edu.rice.cs.hpcdata.experiment.BaseExperiment;
+import org.hpctoolkit.db.local.experiment.BaseExperiment;
 
 public class WindowAction 
 {

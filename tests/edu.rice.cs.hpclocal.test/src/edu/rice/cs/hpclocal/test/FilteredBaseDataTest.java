@@ -14,10 +14,10 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import edu.rice.cs.hpcdata.db.IFileDB;
-import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
-import edu.rice.cs.hpcdata.db.IdTuple;
-import edu.rice.cs.hpcdata.db.IdTupleType;
+import org.hpctoolkit.db.local.db.IFileDB;
+import org.hpctoolkit.db.local.db.IFileDB.IdTupleOption;
+import org.hpctoolkit.db.local.db.IdTuple;
+import org.hpctoolkit.db.local.db.IdTupleType;
 import edu.rice.cs.hpclocal.FilteredBaseData;
 import edu.rice.cs.hpctest.util.TestDatabase;
 

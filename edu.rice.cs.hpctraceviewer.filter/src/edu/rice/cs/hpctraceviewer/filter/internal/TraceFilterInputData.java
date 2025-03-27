@@ -6,7 +6,7 @@ package edu.rice.cs.hpctraceviewer.filter.internal;
 
 import java.util.List;
 
-import edu.rice.cs.hpcdata.db.IdTupleType;
+import org.hpctoolkit.db.local.db.IdTupleType;
 import edu.rice.cs.hpcfilter.FilterDataItem;
 import edu.rice.cs.hpcfilter.FilterInputData;
 

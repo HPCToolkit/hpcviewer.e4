@@ -6,8 +6,8 @@ package edu.rice.cs.hpcbase;
 
 import java.io.IOException;
 
-import edu.rice.cs.hpcdata.db.IdTuple;
-import edu.rice.cs.hpcdata.util.ICallPath.ICallPathInfo;
+import org.hpctoolkit.db.local.db.IdTuple;
+import org.hpctoolkit.db.local.util.ICallPath.ICallPathInfo;
 
 public interface IProcessTimeline 
 {

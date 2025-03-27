@@ -6,9 +6,9 @@ package edu.rice.cs.hpcmetric;
 
 import java.util.List;
 
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
-import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
-import edu.rice.cs.hpcdata.experiment.scope.RootScope;
+import org.hpctoolkit.db.local.experiment.metric.BaseMetric;
+import org.hpctoolkit.db.local.experiment.metric.IMetricManager;
+import org.hpctoolkit.db.local.experiment.scope.RootScope;
 import edu.rice.cs.hpcfilter.FilterDataItem;
 import edu.rice.cs.hpcbase.BaseConstants.ViewType;
 
