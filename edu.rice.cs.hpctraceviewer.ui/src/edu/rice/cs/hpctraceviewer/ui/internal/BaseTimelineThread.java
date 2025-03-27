@@ -14,7 +14,7 @@ import java.util.concurrent.Callable;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import edu.rice.cs.hpcbase.IProcessTimeline;
-import edu.rice.cs.hpcdata.db.IdTuple;
+import org.hpctoolkit.db.local.db.IdTuple;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
 import edu.rice.cs.hpctraceviewer.data.DataLinePainting;
 import edu.rice.cs.hpctraceviewer.data.DataPreparation;

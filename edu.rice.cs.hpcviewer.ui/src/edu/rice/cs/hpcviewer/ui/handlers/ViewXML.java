@@ -13,7 +13,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import edu.rice.cs.hpcbase.ui.IBasePart;
 import edu.rice.cs.hpcbase.ui.IProfilePart;
-import edu.rice.cs.hpcdata.experiment.BaseExperiment;
+import org.hpctoolkit.db.local.experiment.BaseExperiment;
 import edu.rice.cs.hpclocal.IDatabaseLocal;
 import edu.rice.cs.hpcviewer.ui.ProfilePart;
 import edu.rice.cs.hpcviewer.ui.parts.editor.EditorInputFile;

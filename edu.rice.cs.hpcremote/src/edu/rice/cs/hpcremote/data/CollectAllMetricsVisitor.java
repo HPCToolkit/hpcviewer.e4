@@ -4,14 +4,14 @@
 
 package edu.rice.cs.hpcremote.data;
 
-import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
-import edu.rice.cs.hpcdata.experiment.scope.LineScope;
-import edu.rice.cs.hpcdata.experiment.scope.LoopScope;
-import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
-import edu.rice.cs.hpcdata.experiment.scope.RootScope;
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.experiment.scope.ScopeVisitType;
-import edu.rice.cs.hpcdata.util.IProgressReport;
+import org.hpctoolkit.db.local.experiment.scope.CallSiteScope;
+import org.hpctoolkit.db.local.experiment.scope.LineScope;
+import org.hpctoolkit.db.local.experiment.scope.LoopScope;
+import org.hpctoolkit.db.local.experiment.scope.ProcedureScope;
+import org.hpctoolkit.db.local.experiment.scope.RootScope;
+import org.hpctoolkit.db.local.experiment.scope.Scope;
+import org.hpctoolkit.db.local.experiment.scope.ScopeVisitType;
+import org.hpctoolkit.db.local.util.IProgressReport;
 
 public class CollectAllMetricsVisitor extends CollectMetricsVisitor 
 {

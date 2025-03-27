@@ -10,8 +10,8 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
 import edu.rice.cs.hpcbase.IDatabase;
-import edu.rice.cs.hpcdata.experiment.Experiment;
-import edu.rice.cs.hpcdata.merge.DatabasesToMerge;
+import org.hpctoolkit.db.local.experiment.Experiment;
+import org.hpctoolkit.db.local.merge.DatabasesToMerge;
 
 public class DatabaseMergeWizard extends Wizard 
 {

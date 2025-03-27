@@ -9,9 +9,9 @@ import java.util.List;
 import org.eclipse.collections.impl.list.mutable.FastList;
 
 import edu.rice.cs.hpcbase.IDatabase;
-import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
-import edu.rice.cs.hpcdata.experiment.scope.RootScope;
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import org.hpctoolkit.db.local.experiment.metric.IMetricManager;
+import org.hpctoolkit.db.local.experiment.scope.RootScope;
+import org.hpctoolkit.db.local.experiment.scope.Scope;
 
 public class FlatScopeTreeData extends ScopeTreeData 
 {

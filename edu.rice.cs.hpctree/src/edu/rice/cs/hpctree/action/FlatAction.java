@@ -6,10 +6,10 @@ package edu.rice.cs.hpctree.action;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
-import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
-import edu.rice.cs.hpcdata.experiment.scope.CallSiteScopeFlat;
-import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import org.hpctoolkit.db.local.experiment.scope.CallSiteScope;
+import org.hpctoolkit.db.local.experiment.scope.CallSiteScopeFlat;
+import org.hpctoolkit.db.local.experiment.scope.ProcedureScope;
+import org.hpctoolkit.db.local.experiment.scope.Scope;
 import edu.rice.cs.hpctree.FlatScopeTreeData;
 import edu.rice.cs.hpctree.IScopeTreeAction;
 import edu.rice.cs.hpctree.action.IUndoableActionManager.IUndoableActionListener;

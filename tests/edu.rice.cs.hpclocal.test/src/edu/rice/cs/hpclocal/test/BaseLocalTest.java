@@ -10,9 +10,9 @@ import java.util.List;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
-import edu.rice.cs.hpcdata.experiment.Experiment;
-import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
-import edu.rice.cs.hpcdata.util.IProgressReport;
+import org.hpctoolkit.db.local.experiment.Experiment;
+import org.hpctoolkit.db.local.experiment.LocalDatabaseRepresentation;
+import org.hpctoolkit.db.local.util.IProgressReport;
 import edu.rice.cs.hpclocal.LocalDBOpener;
 import edu.rice.cs.hpclocal.SpaceTimeDataControllerLocal;
 import edu.rice.cs.hpctest.util.TestDatabase;

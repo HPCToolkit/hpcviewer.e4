@@ -4,7 +4,7 @@
 
 package edu.rice.cs.hpclocal;
 
-import edu.rice.cs.hpcdata.util.Constants;
+import org.hpctoolkit.db.local.util.Constants;
 
 class Header 
 {

@@ -16,8 +16,8 @@ import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcbase.map.AliasMap;
 import edu.rice.cs.hpcbase.map.ProcedureClassData;
-import edu.rice.cs.hpcdata.util.Util;
-import edu.rice.cs.hpcdata.util.Constants;
+import org.hpctoolkit.db.local.util.Util;
+import org.hpctoolkit.db.local.util.Constants;
 
 /***
  * 

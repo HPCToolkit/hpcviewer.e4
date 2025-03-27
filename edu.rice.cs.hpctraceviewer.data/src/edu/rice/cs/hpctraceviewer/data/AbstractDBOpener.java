@@ -8,7 +8,7 @@ import java.io.IOException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
+import org.hpctoolkit.db.local.experiment.InvalExperimentException;
 
 
 /**

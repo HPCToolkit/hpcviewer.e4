@@ -9,7 +9,7 @@ package edu.rice.cs.hpctree.action;
 
 import java.util.Stack;
 
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import org.hpctoolkit.db.local.experiment.scope.Scope;
 import edu.rice.cs.hpctree.IScopeTreeAction;
 import edu.rice.cs.hpctree.action.IUndoableActionManager.IUndoableActionListener;
 

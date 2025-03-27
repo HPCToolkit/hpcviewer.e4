@@ -15,9 +15,9 @@ import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 
-import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
-import edu.rice.cs.hpcdata.experiment.scope.LineScope;
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import org.hpctoolkit.db.local.experiment.scope.CallSiteScope;
+import org.hpctoolkit.db.local.experiment.scope.LineScope;
+import org.hpctoolkit.db.local.experiment.scope.Scope;
 import edu.rice.cs.hpcsetting.color.ColorManager;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;

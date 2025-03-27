@@ -7,7 +7,7 @@ package edu.rice.cs.hpclocal;
 import java.io.IOException;
 
 import edu.rice.cs.hpcbase.IBaseData;
-import edu.rice.cs.hpcdata.db.IdTuple;
+import org.hpctoolkit.db.local.db.IdTuple;
 
 
 public interface ILocalBaseData extends IBaseData 

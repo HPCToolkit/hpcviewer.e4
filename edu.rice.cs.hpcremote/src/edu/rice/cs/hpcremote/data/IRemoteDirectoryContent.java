@@ -4,7 +4,7 @@
 
 package edu.rice.cs.hpcremote.data;
 
-import org.hpctoolkit.hpcclient.v1_0.RemoteDirectory;
+import org.hpctoolkit.db.client.RemoteDirectory;
 
 /****
  * Interface to store the content of a remote directory.

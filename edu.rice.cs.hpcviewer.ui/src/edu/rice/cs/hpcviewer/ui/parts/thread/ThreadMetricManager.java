@@ -4,6 +4,7 @@
 
 package edu.rice.cs.hpcviewer.ui.parts.thread;
 
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,16 +13,14 @@ import org.eclipse.collections.api.map.primitive.MutableIntObjectMap;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
 
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.event.ListEventListener;
-import edu.rice.cs.hpcdata.db.IdTuple;
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
-import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
-import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
-import edu.rice.cs.hpcdata.experiment.metric.MetricRaw;
-import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import org.hpctoolkit.db.local.db.IdTuple;
+import org.hpctoolkit.db.local.event.EventList;
+import org.hpctoolkit.db.local.experiment.metric.BaseMetric;
+import org.hpctoolkit.db.local.experiment.metric.DerivedMetric;
+import org.hpctoolkit.db.local.experiment.metric.IMetricManager;
+import org.hpctoolkit.db.local.experiment.metric.MetricRaw;
+import org.hpctoolkit.db.local.experiment.metric.MetricValue;
+import org.hpctoolkit.db.local.experiment.scope.Scope;
 
 
 
@@ -64,7 +63,7 @@ public class ThreadMetricManager implements IMetricManager
 				}
 			}
 		}
-		rawMetrics = GlazedLists.eventList(listMetrics);
+		rawMetrics = EventList.create(listMetrics);
 	}
 
 	@Override
@@ -90,7 +89,7 @@ public class ThreadMetricManager implements IMetricManager
 	}
 
 	@Override
-	public List<BaseMetric> getMetricList() {
+	public List<BaseMetric> getMetrics() {
 		return getRawMetrics();
 	}
 
@@ -123,18 +122,19 @@ public class ThreadMetricManager implements IMetricManager
 		return listIDs;
 	}
 
-	@Override
-	public void addMetricListener(ListEventListener<BaseMetric> listener) {
-		rawMetrics.addListEventListener(listener);
-	}
-
-	@Override
-	public void removeMetricListener(ListEventListener<BaseMetric> listener) {
-		rawMetrics.removeListEventListener(listener);
-	}
 
 	@Override
 	public String getID() {
 		return id;
+	}
+
+	@Override
+	public void addMetricListener(PropertyChangeListener listener) {
+		rawMetrics.addListEventListener(listener);
+	}
+
+	@Override
+	public void removeMetricListener(PropertyChangeListener listener) {
+		rawMetrics.removeListEventListener(listener);
 	}
 }

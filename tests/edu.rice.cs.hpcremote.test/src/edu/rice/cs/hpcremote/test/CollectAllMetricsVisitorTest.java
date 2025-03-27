@@ -8,17 +8,17 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import org.hpctoolkit.client_server_common.calling_context.CallingContextId;
-import org.hpctoolkit.client_server_common.metric.MetricId;
-import org.hpctoolkit.client_server_common.profile.ProfileId;
-import org.hpctoolkit.hpcclient.v1_0.BrokerClient;
-import org.hpctoolkit.hpcclient.v1_0.MetricsMeasurements;
+import org.hpctoolkit.db.protocol.calling_context.CallingContextId;
+import org.hpctoolkit.db.protocol.metric.MetricId;
+import org.hpctoolkit.db.protocol.profile.ProfileId;
+import org.hpctoolkit.db.client.BrokerClient;
+import org.hpctoolkit.db.client.MetricsMeasurements;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
-import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
-import edu.rice.cs.hpcdata.util.IProgressReport;
+import org.hpctoolkit.db.local.experiment.metric.MetricValue;
+import org.hpctoolkit.db.local.experiment.scope.RootScopeType;
+import org.hpctoolkit.db.local.util.IProgressReport;
 import edu.rice.cs.hpcremote.data.CollectAllMetricsVisitor;
 import edu.rice.cs.hpctest.util.TestDatabase;
 import io.vavr.collection.HashMap;

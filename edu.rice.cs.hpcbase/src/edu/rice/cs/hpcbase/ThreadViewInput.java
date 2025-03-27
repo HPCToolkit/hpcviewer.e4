@@ -6,9 +6,9 @@ package edu.rice.cs.hpcbase;
 
 import java.util.List;
 
-import edu.rice.cs.hpcdata.db.IdTuple;
-import edu.rice.cs.hpcdata.experiment.extdata.IThreadDataCollection;
-import edu.rice.cs.hpcdata.experiment.scope.RootScope;
+import org.hpctoolkit.db.local.db.IdTuple;
+import org.hpctoolkit.db.local.experiment.extdata.IThreadDataCollection;
+import org.hpctoolkit.db.local.experiment.scope.RootScope;
 
 public class ThreadViewInput 
 {

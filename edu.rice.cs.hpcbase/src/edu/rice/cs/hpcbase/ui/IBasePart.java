@@ -5,7 +5,7 @@
 package edu.rice.cs.hpcbase.ui;
 
 import edu.rice.cs.hpcbase.IDatabase;
-import edu.rice.cs.hpcdata.experiment.BaseExperiment;
+import org.hpctoolkit.db.local.experiment.BaseExperiment;
 
 /****
  * 

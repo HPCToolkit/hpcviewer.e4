@@ -6,7 +6,7 @@ package edu.rice.cs.hpcbase;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import edu.rice.cs.hpcdata.util.IProgressReport;
+import org.hpctoolkit.db.local.util.IProgressReport;
 
 
 /**************************

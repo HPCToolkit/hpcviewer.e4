@@ -6,7 +6,7 @@ package edu.rice.cs.hpcviewer.ui.parts.datacentric;
 
 import javax.inject.Inject;
 import org.eclipse.swt.custom.CTabFolder;
-import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
+import org.hpctoolkit.db.local.experiment.scope.RootScopeType;
 import edu.rice.cs.hpcviewer.ui.parts.topdown.TopDownPart;
 
 

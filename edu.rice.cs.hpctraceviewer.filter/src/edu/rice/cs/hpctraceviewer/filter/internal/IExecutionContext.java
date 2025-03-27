@@ -4,7 +4,7 @@
 
 package edu.rice.cs.hpctraceviewer.filter.internal;
 
-import edu.rice.cs.hpcdata.db.IdTuple;
+import org.hpctoolkit.db.local.db.IdTuple;
 
 public interface IExecutionContext 
 {

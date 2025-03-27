@@ -13,10 +13,10 @@ import org.eclipse.swt.widgets.Shell;
 import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcbase.IDatabase;
-import edu.rice.cs.hpcdata.experiment.Experiment;
-import edu.rice.cs.hpcdata.experiment.scope.RootScopeType;
-import edu.rice.cs.hpcdata.merge.DatabasesToMerge;
-import edu.rice.cs.hpcdata.merge.ExperimentMerger;
+import org.hpctoolkit.db.local.experiment.Experiment;
+import org.hpctoolkit.db.local.experiment.scope.RootScopeType;
+import org.hpctoolkit.db.local.merge.DatabasesToMerge;
+import org.hpctoolkit.db.local.merge.ExperimentMerger;
 
 public class MergeManager 
 {

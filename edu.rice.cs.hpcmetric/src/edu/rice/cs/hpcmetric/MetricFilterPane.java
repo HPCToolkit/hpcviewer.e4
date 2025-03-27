@@ -4,6 +4,7 @@
 
 package edu.rice.cs.hpcmetric;
 
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -32,14 +33,12 @@ import org.osgi.service.prefs.Preferences;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
 import edu.rice.cs.hpcbase.BaseConstants.ViewType;
 import edu.rice.cs.hpcbase.ViewerDataEvent;
 import edu.rice.cs.hpcbase.map.UserInputHistory;
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
-import edu.rice.cs.hpcdata.experiment.metric.DerivedMetric;
-import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
+import org.hpctoolkit.db.local.experiment.metric.BaseMetric;
+import org.hpctoolkit.db.local.experiment.metric.DerivedMetric;
+import org.hpctoolkit.db.local.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcfilter.AbstractFilterPane;
 import edu.rice.cs.hpcfilter.FilterDataItem;
 import edu.rice.cs.hpcfilter.FilterDataItemSortModel;
@@ -62,7 +61,7 @@ import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
  *
  ************************************************************************/
 public class MetricFilterPane extends AbstractFilterPane<BaseMetric> 
-	implements IFilterChangeListener, ListEventListener<BaseMetric>, EventHandler
+	implements IFilterChangeListener, EventHandler, PropertyChangeListener
 {	
 	private static final String HISTORY_COLUMN_PROPERTY = "column_property";
 	private static final String HISTORY_APPLY_ALL = "apply-all";
@@ -132,6 +131,8 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 		dataProvider = null;
 		super.reset(inputData);
 		getNatTable().refresh();
+		
+		metricManager.addMetricListener(this);
 	}
 	
 	
@@ -362,20 +363,6 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 	}
 
 
-
-	@Override
-	public void listChanged(ListEvent<BaseMetric> listChanges) {
-		while (listChanges.next()) {
-			if (listChanges.getType() == ListEvent.INSERT) {
-				// new metric has been added
-				// need to refresh the underlying layer
-				MetricFilterInput input2 = new MetricFilterInput(input.getView(), eventBroker);
-				reset(input2);
-			}
-		}		
-	}
-
-
 	@Override
 	public void handleEvent(Event event) {
 		Object obj = event.getProperty(IEventBroker.DATA);
@@ -397,5 +384,17 @@ public class MetricFilterPane extends AbstractFilterPane<BaseMetric>
 	protected int createAdditionalFilter(Composite parent, FilterInputData<BaseMetric> inputData) {
 		// No need to add filters
 		return 0;
+	}
+
+
+	@Override
+	public void propertyChange(java.beans.PropertyChangeEvent evt) {
+		// something has changed in the list of metrics
+		if (evt.getPropertyName().equals(org.hpctoolkit.db.local.event.EventList.PROPERTY_INSERT)) {
+			// new metric has been added
+			// need to refresh the underlying layer
+			MetricFilterInput input2 = new MetricFilterInput(input.getView(), eventBroker);
+			reset(input2);
+		}
 	}
 }

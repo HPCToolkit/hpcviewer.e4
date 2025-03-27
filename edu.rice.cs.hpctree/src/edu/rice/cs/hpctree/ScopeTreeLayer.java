@@ -30,7 +30,7 @@ import org.eclipse.nebula.widgets.nattable.tree.config.DefaultTreeLayerConfigura
 import org.eclipse.nebula.widgets.nattable.tree.config.TreeConfigAttributes;
 import org.eclipse.nebula.widgets.nattable.tree.painter.IndentedTreeImagePainter;
 
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import org.hpctoolkit.db.local.experiment.scope.Scope;
 import edu.rice.cs.hpctree.internal.ScopeTreeExpandCollapseCommandHandler;
 import edu.rice.cs.hpctree.internal.ScopeTreeExpandToLevelCommandHandler;
 import edu.rice.cs.hpctree.internal.config.ScopeTreeLayerConfiguration;

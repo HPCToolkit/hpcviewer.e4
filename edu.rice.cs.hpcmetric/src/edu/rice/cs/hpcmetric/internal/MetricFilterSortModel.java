@@ -8,9 +8,9 @@ import java.util.List;
 
 import org.eclipse.nebula.widgets.nattable.sort.SortDirectionEnum;
 
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
-import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
-import edu.rice.cs.hpcdata.experiment.scope.RootScope;
+import org.hpctoolkit.db.local.experiment.metric.BaseMetric;
+import org.hpctoolkit.db.local.experiment.metric.MetricValue;
+import org.hpctoolkit.db.local.experiment.scope.RootScope;
 import edu.rice.cs.hpcfilter.FilterDataItem;
 import edu.rice.cs.hpcfilter.FilterDataItemSortModel;
 

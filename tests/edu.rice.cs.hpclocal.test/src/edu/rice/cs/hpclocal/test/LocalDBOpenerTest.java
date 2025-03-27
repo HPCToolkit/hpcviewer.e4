@@ -14,11 +14,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edu.rice.cs.hpcbase.IProcessTimeline;
-import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
-import edu.rice.cs.hpcdata.experiment.Experiment;
-import edu.rice.cs.hpcdata.experiment.IExperiment;
-import edu.rice.cs.hpcdata.experiment.LocalDatabaseRepresentation;
-import edu.rice.cs.hpcdata.util.IProgressReport;
+import org.hpctoolkit.db.local.db.IFileDB.IdTupleOption;
+import org.hpctoolkit.db.local.experiment.Experiment;
+import org.hpctoolkit.db.local.experiment.IExperiment;
+import org.hpctoolkit.db.local.experiment.LocalDatabaseRepresentation;
+import org.hpctoolkit.db.local.util.IProgressReport;
 import edu.rice.cs.hpclocal.LocalDBOpener;
 import edu.rice.cs.hpctest.util.TestDatabase;
 import edu.rice.cs.hpctraceviewer.data.Frame;

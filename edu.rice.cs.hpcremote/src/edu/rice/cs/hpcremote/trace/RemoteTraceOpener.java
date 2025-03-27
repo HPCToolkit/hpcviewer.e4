@@ -7,11 +7,11 @@ package edu.rice.cs.hpcremote.trace;
 import java.io.IOException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.hpctoolkit.hpcclient.v1_0.BrokerClient;
+import org.hpctoolkit.db.client.BrokerClient;
 
-import edu.rice.cs.hpcdata.experiment.IExperiment;
-import edu.rice.cs.hpcdata.experiment.InvalExperimentException;
-import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
+import org.hpctoolkit.db.local.experiment.IExperiment;
+import org.hpctoolkit.db.local.experiment.InvalExperimentException;
+import org.hpctoolkit.db.local.experiment.metric.IMetricManager;
 import edu.rice.cs.hpcremote.IDatabaseRemote;
 import edu.rice.cs.hpctraceviewer.data.AbstractDBOpener;
 import edu.rice.cs.hpctraceviewer.data.SpaceTimeDataController;

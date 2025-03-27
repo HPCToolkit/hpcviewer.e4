@@ -19,7 +19,7 @@ import org.eclipse.swt.widgets.Spinner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.rice.cs.hpcdata.util.ThreadManager;
+import org.hpctoolkit.db.local.util.ThreadManager;
 import edu.rice.cs.hpcsetting.preferences.AbstractPage;
 
 /********************************************************

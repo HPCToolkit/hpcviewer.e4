@@ -6,11 +6,11 @@ package edu.rice.cs.hpcremote.trace;
 
 import java.io.IOException;
 
-import org.hpctoolkit.hpcclient.v1_0.TraceSampling;
+import org.hpctoolkit.db.client.TraceSampling;
 
 import edu.rice.cs.hpcbase.AbstractTraceDataCollector;
 import edu.rice.cs.hpcbase.DebugUtil;
-import edu.rice.cs.hpcdata.db.version4.DataRecord;
+import org.hpctoolkit.db.local.db.version4.DataRecord;
 
 public class RemoteTraceDataCollectorPerProfile extends AbstractTraceDataCollector 
 {

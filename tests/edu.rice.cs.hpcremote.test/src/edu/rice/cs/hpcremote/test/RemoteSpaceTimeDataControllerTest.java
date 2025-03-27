@@ -16,19 +16,19 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.hpctoolkit.client_server_common.calling_context.CallingContextId;
-import org.hpctoolkit.client_server_common.time.Timestamp;
-import org.hpctoolkit.client_server_common.trace.TraceId;
-import org.hpctoolkit.hpcclient.v1_0.BrokerClient;
-import org.hpctoolkit.hpcclient.v1_0.CallingContextAtTimes;
-import org.hpctoolkit.hpcclient.v1_0.FutureTraceSamplingSet;
-import org.hpctoolkit.hpcclient.v1_0.TraceSampling;
+import org.hpctoolkit.db.protocol.calling_context.CallingContextId;
+import org.hpctoolkit.db.protocol.time.Timestamp;
+import org.hpctoolkit.db.protocol.trace.TraceId;
+import org.hpctoolkit.db.client.BrokerClient;
+import org.hpctoolkit.db.client.CallingContextAtTimes;
+import org.hpctoolkit.db.client.FutureTraceSamplingSet;
+import org.hpctoolkit.db.client.TraceSampling;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
-import edu.rice.cs.hpcdata.experiment.Experiment;
+import org.hpctoolkit.db.local.db.IFileDB.IdTupleOption;
+import org.hpctoolkit.db.local.experiment.Experiment;
 import edu.rice.cs.hpcremote.trace.RemoteProcessTimeline;
 import edu.rice.cs.hpcremote.trace.RemoteSpaceTimeDataController;
 import edu.rice.cs.hpctest.util.TestDatabase;

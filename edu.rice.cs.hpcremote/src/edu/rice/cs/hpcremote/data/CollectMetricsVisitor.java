@@ -10,16 +10,16 @@ import java.util.List;
 import org.eclipse.collections.api.map.primitive.MutableIntObjectMap;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.map.mutable.primitive.IntObjectHashMap;
-import org.hpctoolkit.client_server_common.calling_context.CallingContextId;
-import org.hpctoolkit.client_server_common.profile.ProfileId;
-import org.hpctoolkit.hpcclient.v1_0.BrokerClient;
-import org.hpctoolkit.hpcclient.v1_0.UnknownCallingContextException;
-import org.hpctoolkit.hpcclient.v1_0.UnknownProfileIdException;
+import org.hpctoolkit.db.protocol.calling_context.CallingContextId;
+import org.hpctoolkit.db.protocol.profile.ProfileId;
+import org.hpctoolkit.db.client.BrokerClient;
+import org.hpctoolkit.db.client.UnknownCallingContextException;
+import org.hpctoolkit.db.client.UnknownProfileIdException;
 
-import edu.rice.cs.hpcdata.db.IdTuple;
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.experiment.scope.visitors.ScopeVisitorAdapter;
-import edu.rice.cs.hpcdata.util.IProgressReport;
+import org.hpctoolkit.db.local.db.IdTuple;
+import org.hpctoolkit.db.local.experiment.scope.Scope;
+import org.hpctoolkit.db.local.experiment.scope.visitors.ScopeVisitorAdapter;
+import org.hpctoolkit.db.local.util.IProgressReport;
 import io.vavr.collection.HashSet;
 
 public abstract class CollectMetricsVisitor extends ScopeVisitorAdapter

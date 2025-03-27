@@ -13,13 +13,13 @@ import org.eclipse.nebula.widgets.nattable.sort.SortDirectionEnum;
 import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcbase.IDatabase;
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
-import edu.rice.cs.hpcdata.experiment.metric.IMetricManager;
-import edu.rice.cs.hpcdata.experiment.scope.RootScope;
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
-import edu.rice.cs.hpcdata.tree.ScopeFlatComparator;
-import edu.rice.cs.hpcdata.tree.ScopeTreeComparator;
-import edu.rice.cs.hpcdata.tree.ScopeTreePath;
+import org.hpctoolkit.db.local.experiment.metric.BaseMetric;
+import org.hpctoolkit.db.local.experiment.metric.IMetricManager;
+import org.hpctoolkit.db.local.experiment.scope.RootScope;
+import org.hpctoolkit.db.local.experiment.scope.Scope;
+import org.hpctoolkit.db.local.tree.ScopeFlatComparator;
+import org.hpctoolkit.db.local.tree.ScopeTreeComparator;
+import org.hpctoolkit.db.local.tree.ScopeTreePath;
 
 
 /******************************************************

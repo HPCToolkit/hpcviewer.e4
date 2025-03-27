@@ -18,7 +18,7 @@ import java.util.Map.Entry;
 
 import org.slf4j.LoggerFactory;
 
-import edu.rice.cs.hpcdata.util.IUserData;
+import org.hpctoolkit.db.local.util.IUserData;
 
 /***
  * 
@@ -41,7 +41,7 @@ public abstract class AliasMap<K,V> implements IUserData<K, V>
 		
 	/*
 	 * (non-Javadoc)
-	 * @see edu.rice.cs.hpcdata.util.IUserData#get(java.lang.String)
+	 * @see org.hpctoolkit.db.local.util.IUserData#get(java.lang.String)
 	 */
 	public V get(K key) {
 		
@@ -51,7 +51,7 @@ public abstract class AliasMap<K,V> implements IUserData<K, V>
 
 	/*
 	 * (non-Javadoc)
-	 * @see edu.rice.cs.hpcdata.util.IUserData#put(java.lang.String, java.lang.String)
+	 * @see org.hpctoolkit.db.local.util.IUserData#put(java.lang.String, java.lang.String)
 	 */
 	public void put(K key, V val) {
 		

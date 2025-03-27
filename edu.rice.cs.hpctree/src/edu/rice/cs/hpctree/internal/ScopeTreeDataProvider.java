@@ -7,13 +7,13 @@ package edu.rice.cs.hpctree.internal;
 import org.eclipse.nebula.widgets.nattable.data.IDataProvider;
 import org.eclipse.nebula.widgets.nattable.data.IRowDataProvider;
 
-import edu.rice.cs.hpcdata.experiment.metric.BaseMetric;
-import edu.rice.cs.hpcdata.experiment.metric.MetricValue;
-import edu.rice.cs.hpcdata.experiment.scope.CallSiteScope;
-import edu.rice.cs.hpcdata.experiment.scope.CallSiteScopeCallerView;
-import edu.rice.cs.hpcdata.experiment.scope.LoadModuleScope;
-import edu.rice.cs.hpcdata.experiment.scope.ProcedureScope;
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import org.hpctoolkit.db.local.experiment.metric.BaseMetric;
+import org.hpctoolkit.db.local.experiment.metric.MetricValue;
+import org.hpctoolkit.db.local.experiment.scope.CallSiteScope;
+import org.hpctoolkit.db.local.experiment.scope.CallSiteScopeCallerView;
+import org.hpctoolkit.db.local.experiment.scope.LoadModuleScope;
+import org.hpctoolkit.db.local.experiment.scope.ProcedureScope;
+import org.hpctoolkit.db.local.experiment.scope.Scope;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;
 import edu.rice.cs.hpctree.IScopeTreeData;
 

@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
-import edu.rice.cs.hpcdata.db.IFileDB.IdTupleOption;
+import org.hpctoolkit.db.local.db.IFileDB.IdTupleOption;
 import edu.rice.cs.hpctest.util.BaseTestAllTraceDatabases;
 import edu.rice.cs.hpctraceviewer.data.timeline.ProcessTimeline;
 

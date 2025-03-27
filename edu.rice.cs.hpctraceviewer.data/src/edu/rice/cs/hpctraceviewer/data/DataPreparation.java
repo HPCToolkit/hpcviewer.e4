@@ -10,9 +10,9 @@ import java.util.List;
 
 import org.eclipse.swt.graphics.Color;
 
-import edu.rice.cs.hpcdata.util.ICallPath.ICallPathInfo;
+import org.hpctoolkit.db.local.util.ICallPath.ICallPathInfo;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
-import edu.rice.cs.hpcdata.experiment.scope.Scope;
+import org.hpctoolkit.db.local.experiment.scope.Scope;
 
 
 /***********************************************************************

@@ -4,7 +4,7 @@
 
 package edu.rice.cs.hpcbase;
 
-import edu.rice.cs.hpcdata.db.IdTuple;
+import org.hpctoolkit.db.local.db.IdTuple;
 
 /****
  * Interface to map from an trace or profile to its number of samples.

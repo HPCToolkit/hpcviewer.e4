@@ -67,7 +67,7 @@ import org.osgi.service.event.EventHandler;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import edu.rice.cs.hpcbase.Theme;
-import edu.rice.cs.hpcdata.util.string.StringUtil;
+import org.hpctoolkit.db.local.util.string.StringUtil;
 import edu.rice.cs.hpcsetting.fonts.FontManager;
 import edu.rice.cs.hpcsetting.preferences.PreferenceConstants;
 import edu.rice.cs.hpcsetting.preferences.ViewerPreferenceManager;

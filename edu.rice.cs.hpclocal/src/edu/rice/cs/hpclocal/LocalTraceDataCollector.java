@@ -7,9 +7,9 @@ package edu.rice.cs.hpclocal;
 import java.io.IOException;
 import edu.rice.cs.hpcbase.AbstractTraceDataCollector;
 import edu.rice.cs.hpcbase.IFilteredData;
-import edu.rice.cs.hpcdata.db.IdTuple;
-import edu.rice.cs.hpcdata.db.version4.DataRecord;
-import edu.rice.cs.hpcdata.util.Constants;
+import org.hpctoolkit.db.local.db.IdTuple;
+import org.hpctoolkit.db.local.db.version4.DataRecord;
+import org.hpctoolkit.db.local.util.Constants;
 
 
 /***********************************************************

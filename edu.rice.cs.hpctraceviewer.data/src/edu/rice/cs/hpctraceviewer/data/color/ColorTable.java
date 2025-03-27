@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import edu.rice.cs.hpcbase.map.ProcedureClassData;
 import edu.rice.cs.hpctraceviewer.config.TracePreferenceManager;
-import edu.rice.cs.hpcdata.util.Constants;
+import org.hpctoolkit.db.local.util.Constants;
 import edu.rice.cs.hpctraceviewer.data.util.ProcedureClassMap;
 
 /**************************************************************

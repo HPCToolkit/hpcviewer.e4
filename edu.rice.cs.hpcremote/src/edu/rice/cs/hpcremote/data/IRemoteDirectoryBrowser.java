@@ -6,8 +6,8 @@ package edu.rice.cs.hpcremote.data;
 
 import java.io.IOException;
 
-import org.hpctoolkit.hpcclient.v1_0.DirectoryContentsNotAvailableException;
-import org.hpctoolkit.hpcclient.v1_0.RemoteDirectory;
+import org.hpctoolkit.db.client.DirectoryContentsNotAvailableException;
+import org.hpctoolkit.db.client.RemoteDirectory;
 
 public interface IRemoteDirectoryBrowser 
 {

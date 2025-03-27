@@ -18,8 +18,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
 
 import edu.rice.cs.hpcbase.IDatabase;
-import edu.rice.cs.hpcdata.experiment.Experiment;
-import edu.rice.cs.hpcdata.merge.DatabasesToMerge;
+import org.hpctoolkit.db.local.experiment.Experiment;
+import org.hpctoolkit.db.local.merge.DatabasesToMerge;
 
 public class ChooseDatabasePage extends WizardPage 
 {
